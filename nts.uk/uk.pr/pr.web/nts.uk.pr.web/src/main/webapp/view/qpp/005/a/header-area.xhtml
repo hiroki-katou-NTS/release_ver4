@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition>
+		<div id="header-are">
+			<div id="h-left">
+				<div class="h-item" style="margin: 3px 0px !important;"
+					data-bind="with: paymentDataResult().paymentHeader">
+					<div class="i-left">
+						<label>対象年月</label>
+					</div>
+					<div class="i-right">
+						<label
+							data-bind="text: nts.uk.time.formatYearMonth(processingYM())"></label>
+					</div>
+				</div>
+				<div class="clear"></div>
+				<div class="h-item">
+					<div class="i-left">
+						<button data-bind="click: openEmployeeList">対象者</button>
+						<button id="prev" data-bind="click: prevEmployee">⇦</button>
+						<button id="next" data-bind="click: nextEmployee">⇨</button>
+					</div>
+					<div class="i-right" data-bind="with: employee">
+						<input id="employeeCode" data-name="employeeCode"
+							data-bind="value: code" disabled="disabled" /> <span
+							data-bind="text: name"></span>
+					</div>
+					<div class="i-left">
+						<label>部門</label>
+					</div>
+					<div class="i-right">
+						<label>1234567890 第三八開発部</label>
+					</div>
+				</div>
+				<div class="clear"></div>
+				<div class="h-item" style="border-top: none;">
+					<div class="i-left">
+						<label>雇用</label>
+					</div>
+					<div class="i-right">
+						<label>01 正社員○○○</label>
+					</div>
+					<div class="i-left">
+						<label>分類</label>
+					</div>
+					<div class="i-right">
+						<label>1234567890 分類○○○○</label>
+					</div>
+					<div class="i-left">
+						<label>職位</label>
+					</div>
+					<div class="i-right">
+						<label>00001 正社員○○○</label>
+					</div>
+				</div>
+
+				<div class="clear"></div>
+				<div class="h-item" style="margin: 3px 0px 0px 0px !important;">
+					<div class="i-left">
+						<label>健康保険</label>
+					</div>
+					<div class="i-right">
+						<label>01等級（介護保険：対象）</label>
+					</div>
+					<div class="i-left">
+						<label>雇用保険</label>
+					</div>
+					<div class="i-right">
+						<label>加入</label>
+					</div>
+					<div class="i-left">
+						<label>税区分</label>
+					</div>
+					<div class="i-right">
+						<label>甲（機械計算）</label>
+					</div>
+				</div>
+
+				<div class="clear"></div>
+				<div class="h-item" style="border-top: none;"
+					data-bind="with: paymentDataResult().paymentHeader">
+					<div class="i-left">
+						<label>厚生年金</label>
+					</div>
+					<div class="i-right">
+						<label>01等級</label>
+					</div>
+					<div class="i-left">
+						<label>雇用保険率</label>
+					</div>
+					<div class="i-right">
+						<label>A</label>
+					</div>
+					<div class="i-left">
+						<label>扶養人数（所得税）</label>
+					</div>
+					<div class="i-right">
+						<span data-bind="text: dependentNumber"></span>
+						<span>人</span>
+					</div>
+				</div>
+
+				<div class="clear"></div>
+				<div class="h-item" style="margin: 3px 0px 0px 0px !important;"
+					data-bind="with: paymentDataResult().paymentHeader">
+					<div class="i-left">
+						<label>明細書レイアウト</label>
+					</div>
+					<div class="i-right">
+						<span data-bind="text: specificationCode"></span>
+						<span data-bind="text: specificationName"></span>
+					</div>
+					<div class="i-left">
+						<label>明細書作成方法</label>
+					</div>
+					<div class="i-right">
+						<label>勤怠システム連動</label>
+					</div>
+				</div>
+			</div>
+
+			<div id="h-right" data-bind="with: paymentDataResult().paymentHeader">
+				<div data-bind="ntsFormLabel: {constraint: 'Comment', inline: true}">メモ</div>
+				<textarea id="txt-header-comment"
+					data-bind="ntsMultilineEditor: {value: comment, constraint: 'Comment', option: new nts.uk.ui.option.MultilineEditorOption({placeholder: '今月より資格手当に「システム監査技術者（30,000円）が支給されます。'})}">
+			</textarea>
+			</div>
+		</div>
+	</ui:composition>
+</body>
+</html>

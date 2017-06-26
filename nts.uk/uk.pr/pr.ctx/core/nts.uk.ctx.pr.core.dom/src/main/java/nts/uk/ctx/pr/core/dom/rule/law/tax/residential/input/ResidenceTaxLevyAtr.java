@@ -1,0 +1,24 @@
+package nts.uk.ctx.pr.core.dom.rule.law.tax.residential.input;
+/**
+ * 
+ * @author sonnh1
+ *
+ */
+public enum ResidenceTaxLevyAtr {
+	/**
+	 * 
+	 * 0 - ì¡ï í•é˚
+	 */
+	SPECIALCOLLECTION(0),
+	/**
+	 * 
+	 * 1 - ïÅí í•é˚
+	 */
+	NORMALCOLLECTION(1);
+	
+	public final int value;
+	
+	ResidenceTaxLevyAtr(int value) {
+		this.value = value;
+	}
+}

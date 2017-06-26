@@ -1,0 +1,89 @@
+.functions-area {
+	text-align: center;
+	border-top: 1px solid #ccc;
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	background-color: #fff;
+	padding: 10px 0;
+}
+
+.functions-area .x-large {
+	background-color: #a4eeb0;
+}
+
+.contents-area {
+	padding: 15px;
+	margin-bottom: 71px;
+}
+
+.contents-area #J_LBL_001 {
+	display: block;
+	padding-bottom: 15px;
+}
+
+.contents-area #J_LBL_001+div {
+	padding-left: 10px;
+}
+
+.contents-area #J_LBL_003>span:first-child {
+	display: inline-block;
+	width: 30px;
+	text-align: center;
+}
+
+.contents-area #J_LBL_002, 
+.contents-area  #J_LBL_004,
+.contents-area  #J_LBL_006 {
+	width: 120px;
+}
+
+.contents-area #J_INP_001,
+.contents-area  #J_INP_002,
+.contents-area  #J_INP_003 {
+	width: 100px;
+}
+
+.contents-area .form-group-radio {
+	padding-top: 10px;
+}
+
+.contents-area .form-group-radio:after {
+	display: block;
+	clear: both;
+	content: '';
+}
+
+.contents-area .form-group-radio>#J_LBL_004,
+.contents-area .form-group-radio>#J_LBL_004+div {
+	float: left;
+}
+
+.contents-area .form-group-radio .ntsControl {
+	display: block;
+	padding-bottom: 10px;
+}
+
+.contents-area .form-group-radio #J_LBL_004+div {
+	padding-top: 8px;
+}
+
+.contents-area .form-group-radio #J_LBL_005 {
+	color: #c22;
+	width: 287px;
+	padding: 5px;
+	padding-left: 15px;
+	margin-bottom: 10px;
+	background-color: #f8f0d5;
+}
+
+.contents-area .form-group-radio #J_LBL_005>.caution:nth-child(2) {
+	text-indent: 10px;
+}
+
+#func-notifier-errors.shown {
+	display: inline-block;
+	position: absolute;
+	bottom: 60px;
+	left: 10px;
+}

@@ -1,0 +1,240 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>
+				var dialogSize = {
+					width : 1200,
+					height : 600
+				};
+			</script>
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.core.dom.insurance.CommonAmount
+  			</com:ValidatorScript>
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qmm008.i.service.js" />
+			<com:scriptfile path="qmm008.i.vm.js" />
+			<com:scriptfile path="qmm008.i.start.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<!-- BEGIN FUNCTION AREA-->
+			<div id="functions-area">
+				<button class="large proceed" data-bind="click: save">登録</button>
+				<button class="large">印刷</button>
+				<button class="large" data-bind="click: reCalculate">再計算</button>
+				<button class="large btn-close"
+					data-bind="click: closeDialogWithDirtyCheck">閉じる</button>
+			</div>
+			<!-- END FUNCTION AREA-->
+
+			<!-- BEGIN CONTENT AREA-->
+			<div id="contents-area" data-bind="visible: true"
+				style="display: none">
+				<div data-bind="ntsFormLabel: {required: true}">事業所 :</div>
+				<com:ko tag="with" bind="pensionRateModel">
+					<span id="lblCode" data-bind="text: officeCode"></span>
+					<span id="lblName" data-bind="text: officeName"></span>
+				</com:ko>
+				<div style="margin-left: 200px"
+					data-bind="ntsFormLabel: {required: true}">期間 :</div>
+				<span id="startMonth" data-bind="text:pensionRateModel.startMonth"></span>
+				<span style="padding-left: 10px; padding-right: 10px">~</span> <span
+					id="endMonth" data-bind="text:pensionRateModel.endMonth"></span>
+				<div style="padding-top: 30px;">
+					<table id="health_insurance_per_month">
+						<tbody>
+							<tr class="bg-green">
+								<th class="halign-center" rowspan="4">等級</th>
+								<th class="halign-center" rowspan="4">標準月額</th>
+								<th class="halign-center" colspan="2" rowspan="2">報酬月額</th>
+								<th class="border_none"><button class="small"
+										data-bind="click: leftToggle">
+										<span data-bind="text: leftBtnText"></span>
+									</button></th>
+								<th data-bind="css: { hidden: !leftShow() }"
+									class="border-left-none halign-center" colspan="5">厚生年金</th>
+								<com:ko tag="if" bind="pensionRateModel.fundInputApply == 1">
+									<th class="border_none"><button class="small"
+											data-bind="click: rightToggle">
+											<span data-bind="text: rightBtnText"></span>
+										</button></th>
+									<th data-bind="css: { hidden: !rightShow() }"
+										class="border-left-none halign-center" colspan="5">免除保険料</th>
+								</com:ko>
+								<th class="halign-center" rowspan="3">子ども子育 て拠出金</th>
+							</tr>
+							<tr class="bg-green">
+								<th data-bind="css: { hidden: leftShow() }" class="border_none"></th>
+								<th data-bind="css: { hidden: !leftShow() }"
+									class="halign-center" colspan="3">被保険者負担</th>
+								<th data-bind="css: { hidden: !leftShow() }"
+									class="halign-center" colspan="3">事業主負担</th>
+								<com:ko tag="if" bind="pensionRateModel.fundInputApply == 1">
+									<th data-bind="css: { hidden: rightShow() }"
+										class="border_none"></th>
+									<th data-bind="css: { hidden: !rightShow() }"
+										class="halign-center" colspan="3">被保険者負担</th>
+									<th data-bind="css: { hidden: !rightShow() }"
+										class="halign-center" colspan="3">事業主負担</th>
+								</com:ko>
+							</tr>
+							<tr class="bg-green">
+								<th class="halign-center" rowspan="2">以上</th>
+								<th class="halign-center" rowspan="2">末満</th>
+
+								<th data-bind="css: { hidden: leftShow() }" class="border_none"></th>
+								<com:ko tag="if" bind="leftShow">
+									<th class="halign-center">男子</th>
+									<th class="halign-center">女子</th>
+									<th class="halign-center">坑内員</th>
+									<th class="halign-center">男子</th>
+									<th class="halign-center">女子</th>
+									<th class="halign-center">坑内員</th>
+								</com:ko>
+
+								<com:ko tag="if" bind="pensionRateModel.fundInputApply == 1">
+									<th data-bind="css: { hidden: rightShow() }"
+										class="border_none"></th>
+									<com:ko tag="if" bind="rightShow">
+										<th class="halign-center">男子</th>
+										<th class="halign-center">女子</th>
+										<th class="halign-center">坑内員</th>
+										<th class="halign-center">男子</th>
+										<th class="halign-center">女子</th>
+										<th class="halign-center">坑内員</th>
+									</com:ko>
+								</com:ko>
+							</tr>
+							<tr class="bg-green">
+								<th data-bind="css: { hidden: leftShow() }" class="border_none"></th>
+								<com:ko tag="if" bind="leftShow()">
+									<com:ko tag="if" bind="pensionRateModel.fundInputApply == 0">
+										<com:ko tag="with" bind="pensionRateModel.rateItems">
+											<th class="halign-center"
+												data-bind="text: pensionSalaryPersonalSon()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: pensionSalaryPersonalDaughter()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: pensionSalaryPersonalUnknown()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: pensionSalaryCompanySon()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: pensionSalaryCompanyDaughter()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: pensionSalaryCompanyUnknown()+'/1000'"></th>
+										</com:ko>
+									</com:ko>
+									<com:ko tag="if" bind="pensionRateModel.fundInputApply == 1">
+										<com:ko tag="with" bind="pensionRateModel.fundRateItems">
+											<th class="halign-center"
+												data-bind="text: salaryPersonalSonBurden()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: salaryPersonalDaughterBurden()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: salaryPersonalUnknownBurden()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: salaryCompanySonBurden()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: salaryCompanyDaughterBurden()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: salaryCompanyUnknownBurden()+'/1000'"></th>
+										</com:ko>
+									</com:ko>
+								</com:ko>
+								<com:ko tag="if" bind="pensionRateModel.fundInputApply == 1">
+									<th data-bind="css: { hidden: rightShow() }"
+										class="border_none"></th>
+									<com:ko tag="if" bind="rightShow()">
+										<com:ko tag="with" bind="pensionRateModel.fundRateItems">
+											<th class="halign-center"
+												data-bind="text: salaryPersonalSonExemption()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: salaryPersonalDaughterExemption()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: salaryPersonalUnknownExemption()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: salaryCompanySonExemption()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: salaryCompanyDaughterExemption()+'/1000'"></th>
+											<th class="halign-center"
+												data-bind="text: salaryCompanyUnknownExemption()+'/1000'"></th>
+										</com:ko>
+									</com:ko>
+								</com:ko>
+								<th class="halign-center"
+									data-bind="text: pensionRateModel.childContributionRate"></th>
+							</tr>
+							<com:ko-foreach bind="listPensionAvgearnModel">
+								<tr class="inp-money">
+									<td class="bg-green"><span data-bind="text: grade"></span></td>
+									<td class="bg-green"><span data-bind="text: avgEarn"></span></td>
+									<td class="bg-green"><span data-bind="text: lowerLimit"></span></td>
+									<td class="bg-green"><span data-bind="text: upperLimit"></span></td>
+									<com:ko tag="if"
+										bind="$parent.pensionRateModel.fundInputApply == 0">
+										<th data-bind="css: { hidden: $parent.leftShow() }"
+											class="bg-green border_none"></th>
+										<com:ko tag="with" bind="personalPension">
+											<com:ko-if bind="$parents[1].leftShow()">
+												<com:ko tag="template" bind="{name: 'inpAvgEarn'}"></com:ko>
+											</com:ko-if>
+										</com:ko>
+										<com:ko tag="with" bind="companyPension">
+											<com:ko-if bind="$parents[1].leftShow()">
+												<com:ko tag="template" bind="{name: 'inpAvgEarn'}"></com:ko>
+											</com:ko-if>
+										</com:ko>
+									</com:ko>
+									<com:ko tag="if"
+										bind="$parent.pensionRateModel.fundInputApply == 1">
+										<th data-bind="css: { hidden: $parent.leftShow() }"
+											class="bg-green border_none"></th>
+										<com:ko tag="with" bind="personalFund">
+											<com:ko-if bind="$parents[1].leftShow()">
+												<com:ko tag="template" bind="{name: 'inpAvgEarn'}"></com:ko>
+											</com:ko-if>
+										</com:ko>
+										<com:ko tag="with" bind="companyFund">
+											<com:ko-if bind="$parents[1].leftShow()">
+												<com:ko tag="template" bind="{name: 'inpAvgEarn'}"></com:ko>
+											</com:ko-if>
+										</com:ko>
+										<th data-bind="css: { hidden: $parent.rightShow() }"
+											class="bg-green border_none"></th>
+										<com:ko tag="with" bind="personalFundExemption">
+											<com:ko-if bind="$parents[1].rightShow()">
+												<com:ko tag="template" bind="{name: 'inpAvgEarn'}"></com:ko>
+											</com:ko-if>
+										</com:ko>
+										<com:ko tag="with" bind="companyFundExemption">
+											<com:ko-if bind="$parents[1].rightShow()">
+												<com:ko tag="template" bind="{name: 'inpAvgEarn'}"></com:ko>
+											</com:ko-if>
+										</com:ko>
+									</com:ko>
+									<td><input
+										data-bind="ntsNumberEditor: {value: childContributionAmount, constraint:'CommonAmount', option: new nts.uk.ui.option.NumberEditorOption({grouplength: 3})}"></input></td>
+								</tr>
+							</com:ko-foreach>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<!-- END CONTENT AREA-->
+			<!-- Template -->
+			<script type="text/html" id="inpAvgEarn">
+			<td><input class="has-error" data-bind="ntsNumberEditor: {value: maleAmount, constraint:'CommonAmount', option: $parents[1].numberEditorCommonOption}"></input></td>
+			<td><input class="has-error" data-bind="ntsNumberEditor: {value: femaleAmount, constraint:'CommonAmount', option: $parents[1].numberEditorCommonOption}"></input></td>
+			<td><input class="has-error" data-bind="ntsNumberEditor: {value: unknownAmount, constraint:'CommonAmount', option: $parents[1].numberEditorCommonOption}"></input></td>
+			</script>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

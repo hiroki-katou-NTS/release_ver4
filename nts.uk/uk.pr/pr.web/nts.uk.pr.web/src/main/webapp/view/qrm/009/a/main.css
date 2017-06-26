@@ -1,0 +1,59 @@
+@CHARSET "UTF-8";
+
+.right-content {
+	float: left;
+	margin-left: 90px;
+	width: 850px;
+	height: 500px;
+}
+
+.wrap-border {
+	border: 1px solid #808080;
+	border-radius: 4px;
+}
+
+#btn-export {
+	padding: 0px 10px;
+	margin-top: 4px;
+	margin-left: 100px
+}
+
+#range-date {
+	height: 40px;
+	width: 100%;
+}
+
+.select-year-month {
+	padding: 4px 4px;
+	display: inline-block;
+}
+
+.select-year-month img {
+	float: left;
+}
+
+.select-year-month .lbl-year-month {
+	padding: 6px;
+	width: 125px;
+}
+
+.select-year-month .lbl-year-month .lbl-1 {
+	background-color: #E2F79F;
+	padding: 6px;
+}
+
+.select-year-month .lbl-year-month .lbl-2 {
+	margin-left: 12px;
+}
+
+#list-person {
+	margin-top: 20px;
+	min-height: 375px;
+	width: 100%;
+	padding: 20px 0 0 20px;
+}
+
+#A_BTN_002 {
+	padding: 0px 10px;
+	margin-left: 5px
+}

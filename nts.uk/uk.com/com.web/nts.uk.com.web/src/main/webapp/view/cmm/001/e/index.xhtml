@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="cmm001.e.start.js" />
+			<com:scriptfile path="cmm001.e.service.js" />
+			<com:scriptfile path="cmm001.e.vm.js" />
+			<com:stylefile path="cmm001.e.style.css" />
+		</ui:define>
+
+		<ui:define name="content">
+		<div style="margin-top: 15px;">
+			<label class="labelfirst">郵便番号に該当する住所が複数存在します。</label>
+			<br/>
+			<label class="labelfirst"> 対象の住所を選択してください。</label>
+		</div>
+
+			<div id="contents-area" >
+			<div >
+				<table id='dataAddress' 
+					data-bind="ntsGridList: {
+					width: 500,
+					height: 200,
+					options: postCodeList,
+					primaryKey: 'postcode',
+					columns: columns,
+					multiple: false,
+					value: zipCode,
+					enable: true
+					}">
+				</table>
+			</div>
+			</div>
+			<hr />
+			<div id="this-functions-area" class="control-group halign-center">
+				<button class="btn-default proceed x-large" id="btn_chooseZipCode"
+					data-bind="click: chooseZipCode">決定</button>
+				<button id="btn_close" onclick="nts.uk.ui.windows.close()">キャンセル</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

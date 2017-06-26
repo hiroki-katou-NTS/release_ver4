@@ -1,0 +1,54 @@
+@import url('../qpp020.css');
+
+#functions-area #A_BTN_001 {
+	margin-left: 30px;
+	background-color: rgb(164, 238, 176);
+}
+
+#A_LBL_002 {
+	display: block;
+    font-size: 1.3em;
+	line-height: 40px;
+	margin-bottom: 15px;
+}
+
+.block-inline>*:not(.clear-fix ){
+	float: left;
+}
+
+.block-inline>.block-left {
+	width: 400px;
+}
+
+.block-inline>.block-right {
+	width: 500px;
+}
+
+label.label-date {
+	display: block;
+	font-size: 1.1em;
+	line-height: 60px;
+}
+
+label.label-date>span {
+	font-size: 2em;
+	padding-left: 5px;
+	padding-right: 5px;
+	display: inline-block;
+}
+
+#contents-area table.table th:nth-child(1) {
+	min-width: 180px;
+}
+
+#contents-area table.table th:nth-child(2) {
+	min-width: 140px;
+}
+
+#contents-area table.table th:nth-child(3) {
+	min-width: 160px;
+}
+
+#contents-area table#A_LST_001 th {
+	background-color: #C7F391;
+}

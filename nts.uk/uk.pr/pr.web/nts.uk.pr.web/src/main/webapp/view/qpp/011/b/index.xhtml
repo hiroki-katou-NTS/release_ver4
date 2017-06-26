@@ -1,0 +1,288 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/sidebar.xhtml">
+		<ui:define name="sidebar-head">
+			<script>var dialogSize = { width: 900, height: 700 };</script>
+			<com:scriptfile path="qpp011.b.vm.js" />
+			<com:scriptfile path="qpp011.b.service.js" />
+			<com:scriptfile path="qpp011.b.start.js" />
+			<com:stylefile path="qpp011.b.main.css" />
+			<com:scriptfile set="IGNITE" />
+		</ui:define>
+		<ui:define name="sidebar">
+			<ul class="navigator">
+				<li><a href="#tabpanel-1" class="active" data-bind="click: eventTabB">納付書の印刷</a></li>
+				<li><a href="#tabpanel-2"  data-bind="click: eventTabC">納付データの出力</a></li>
+			</ul>
+		</ui:define>
+		<ui:define name="sidebar-content">
+		
+			<div id="tabpanel-1" role="tabpanel">
+			<div id="functions-area">
+				<div class="sidebar-content-header">
+					<span class="title">納付書の印刷</span>
+					<button class="proceed" id="B_BTN_001" data-bind="click: exportPdf">印刷（PDF)</button>
+					<button id="B_BTN_002" data-bind="click: openFDialog">住民税チェックリスト</button>
+					<button id="B_BTN_003">印刷実行ログ</button>
+				</div>
+				</div>
+				<div class="contents-area">
+					<div id="content">
+						<div style="float: left; margin-right: 60px;">
+							<div id="B_LBL_003" data-bind="ntsFormLabel: {  required: true }">会社選択</div>
+							<div id="B_SEL_001"
+								data-bind="ntsRadioBoxGroup: {
+														options: B_SEL_001_RadioItemList,
+														optionsValue: 'id',
+														optionsText: 'name',
+														value: B_SEL_001_selectedId,
+														enable: true}">
+							</div>
+							<div id="B_SEL_002"
+								data-bind="ntsComboBox: {
+														options: B_SEL_002_ComboBoxItemList,
+														optionsValue: 'reganDocCompanyCode',
+														value: B_SEL_002_selectedCode,
+														optionsText: 'reganDocCompanyName',
+														editable: false,
+														enable: B_SEL_002_Enable,
+														columns: [
+														{ prop: 'reganDocCompanyName', length: 4 },
+														]}">
+							</div>
+							<div style="clear: both;">
+								<div id="B_LBL_004"
+									data-bind="ntsFormLabel: {  required: true }">対象年月</div>
+								<div id="B_INP_001" data-name="対象年月" 	 							
+									data-bind="ntsDatePicker: {
+														value: B_INP_001_yearMonth, 
+														dateFormat: 'YYYY/MM', 
+														valueFormat: 'YYYY/MM',
+														required: true, 
+														startDate: '1900/01' , 
+														endDate:'9999/12'}">
+								</div>
+								<span data-bind="text:yearInJapanEmpire_B_LBL_005"
+									id="B_LBL_005" style="margin-bottom: 15px; float: left">対象年月和暦
+								</span> <span id="B_LBL_006" style="float: left">納付書印刷の設定 </span>
+								<hr class="hrLabel"></hr>
+							</div>
+							<div style="clear: both;">
+								<div id="B_LBL_007"
+									data-bind="ntsFormLabel: {  required: true }">指定年月</div>
+								<div id="B_INP_002" data-name="指定年月"
+									data-bind="ntsDatePicker: {
+														value: B_INP_002_yearMonth, 
+														dateFormat: 'YYYY/MM', 
+														valueFormat: 'YYYY/MM',
+														required: true, 
+														startDate: '1900/01' , 
+														endDate:'9999/12'}">
+								</div>
+								<span id="B_LBL_008"
+									data-bind="text:yearInJapanEmpire_B_LBL_008"
+									style="float: left">指定年月和暦 </span>
+							</div>
+							<div style="clear: both;">
+								<div class="floatLeft" id="B_LBL_009"
+									data-bind="ntsFormLabel: {  required: true }">納付期限</div>
+								<div id="B_INP_003" data-name="納付期限"
+									data-bind="ntsDatePicker: {
+														value: B_INP_003_yearMonth, 
+														dateFormat: 'YYYY/MM/DD', 
+														valueFormat: 'YYYY/MM/DD',
+														required: true, 
+														startDate: '1900/01/01' , 
+														endDate:'9999/12/31'}">
+								</div>
+								<span id="B_LBL_010"
+									data-bind="text:yearInJapanEmpire_B_LBL_010"
+									style="float: left">指定年月和暦 </span> <span id="B_LBL_011"
+									style="float: left">納付先ごとの設定 </span>
+								<hr class="hrLabel"></hr>
+							</div>
+							<div style="clear: both;">
+								<div id="B_LBL_012" data-bind="ntsFormLabel: {  }">詳細設定</div>
+								<button id="B_BTN_004" class="large"
+									data-bind="click: openDDialog">納付書詳細設定</button>
+							</div>
+						</div>
+						<div style="float: left;">
+							<div id="B_LBL_013" data-bind="ntsFormLabel: { required: true }">住民税納付先</div>
+							<div class="LST_001">
+								<div style="width: 700px" id="B_SCH_001"
+									data-bind="ntsSearchBox: {
+														comId: 'B_LST_001', 
+														items: B_LST_001_Data, 
+														selected: selectedValue_B_LST_001, 
+														selectedKey: 'position', 
+														fields: ['position'], 
+														childField: 'childs'}" />
+								<table id="B_LST_001">
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="tabpanel-2" role="tabpanel">
+				<div class="sidebar-content-header">
+					<span class="title">納付データの出力</span>
+					<button class="proceed" id="C_BTN_001" data-bind="click: exportText">テキスト出力</button>
+					<button id="C_BTN_002" data-bind="click: openEDialog">出力の設定
+					</button>
+					<button id="C_BTN_003" data-bind="click: openFDialog">住民税チェックリスト
+					</button>
+					<button id="C_BTN_004">出力実行ログ</button>
+				</div>
+				<div class="contents-area">
+					<div id="content2">
+						<div style="float: left; margin-right: 30px;">
+							<div id="C_LBL_003" data-bind="ntsFormLabel: {  required: true }">会社選択</div>
+							<div id="C_SEL_001" 
+								data-bind="ntsRadioBoxGroup: {
+														options: B_SEL_001_RadioItemList,
+														optionsValue: 'id',
+														optionsText: 'name',
+														value: C_SEL_001_selectedId,
+														enable: true }">
+							</div>
+							<div id="C_SEL_002" 
+								data-bind="ntsComboBox: {
+														options: B_SEL_002_ComboBoxItemList,
+														optionsValue: 'reganDocCompanyCode',
+														value: C_SEL_002_selectedCode,
+														optionsText: 'reganDocCompanyName',
+														editable: false,
+														enable: C_SEL_002_Enable,
+														columns: [
+															{ prop: 'reganDocCompanyName', length: 10 },
+														]}">
+							</div>
+							<div style="clear: both;">
+								<div id="C_LBL_004"
+									data-bind="ntsFormLabel: {  required: true }">対象年月</div>
+								<div id="C_INP_001" data-name="対象年月"
+									data-bind="ntsDatePicker: {
+														value: C_INP_001_yearMonth, 
+														dateFormat: 'YYYY/MM', 
+														valueFormat: 'YYYY/MM',
+														required: true, 
+														startDate: '1900/01' , 
+														endDate:'9999/12'}">
+								</div>
+								<span data-bind="text:yearInJapanEmpire_C_LBL_005"
+									id="C_LBL_005" style="margin-bottom: 15px; float: left">対象年月和暦
+								</span> <span id="C_LBL_006" style="float: left">振込の指定 </span>
+								<hr class="hrLabel"></hr>
+							</div>
+							<div style="clear: both;">
+								<div id="C_LBL_007"
+									data-bind="ntsFormLabel: {  required: true }">指定年月</div>
+								<div id="C_INP_002" data-name="指定年月"
+									data-bind="ntsDatePicker: {
+														value: C_INP_002_yearMonth, 
+														dateFormat: 'YYYY/MM', 
+														valueFormat: 'YYYY/MM',
+														required: true, 
+														startDate: '1900/01' , 
+														endDate:'9999/12'}">
+								</div>
+								<span id="C_LBL_008"
+									data-bind="text:yearInJapanEmpire_C_LBL_008"
+									style="float: left">指定年月和暦 </span>
+
+							</div>
+							<div style="clear: both;">
+								<div class="floatLeft" id="C_LBL_009"
+									data-bind="ntsFormLabel: {  required: true }">納付期限</div>
+								<div id="C_INP_003" data-name="納付期限"
+									data-bind="ntsDatePicker: {
+														value: C_INP_003_yearMonth, 
+														dateFormat: 'YYYY/MM/DD',
+														valueFormat: 'YYYY/MM/DD',
+														required: true, 
+														startDate: '1900/01/01' , 
+														endDate:'9999/12/31'}">
+								</div>
+								<span id="C_LBL_010"
+									data-bind="text:yearInJapanEmpire_C_LBL_010"
+									style="float: left">指定年月和暦 </span>
+
+							</div>
+							<div style="clear: both;">
+								<div class="floatLeft" id="C_LBL_011"
+									data-bind="ntsFormLabel: {  required: true }">振込元銀行名</div>
+								<div id="C_SEL_003"
+									data-bind="ntsComboBox: {
+														options: C_SEL_003_ComboBoxItemList,
+														optionsValue: 'lineBankCode',
+														value: C_SEL_003_selectedCode,
+														optionsText: 'label',
+														editable: false,
+														enable: true, 
+														columns: [
+																{ prop: 'label', length:  10},
+															]}">
+								</div>
+							</div>
+							<div style="clear: both;">
+								<div class="floatLeft" id="C_LBL_012"
+									data-bind="ntsFormLabel: {  required: true }">委託者コード</div>
+								<div id="C_SEL_004"
+									data-bind="ntsComboBox: {
+														options: C_SEL_004_ComboBoxItemList,
+														optionsValue: 'code',
+														value: C_SEL_004_selectedCode,
+														optionsText: 'code',
+														editable: false,
+														enable: true,
+														columns: [
+															{ prop: 'code', length: 10 },
+														]}">
+								</div>
+							</div>
+							<div style="clear: both;">
+								<div class="floatLeft" id="C_LBL_013"
+									data-bind="ntsFormLabel: { required: true }">種別コード</div>
+								<div id="C_INP_004"  data-bind="with: numbereditor" >
+									<input id="C_INP_004-input" data-name="種別コード"
+										data-bind="ntsNumberEditor: {
+														value: $parent.C_INP_004_Value,
+														constraint:constraint ,
+														option: option,
+														required: required,
+														enable: enable,
+														readonly: readonly
+														}" />
+								</div>
+							</div>
+						</div>
+						<div style="float: left;">
+							<div id="C_LBL_014"
+								data-bind="ntsFormLabel: { required: true   }">住民税納付先</div>
+							<div class="LST_001">
+								<div style="width: 700px" id="C_SCH_001"
+									data-bind="ntsSearchBox: {
+														comId: 'C_LST_001', 
+														items: B_LST_001_Data, 
+														selected: selectedValue_C_LST_001, 
+														selectedKey: 'position', 
+														fields: ['position'], 
+														childField: 'childs'}" />
+								<table id="C_LST_001">
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

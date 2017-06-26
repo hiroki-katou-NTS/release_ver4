@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="E_Lbl_TimeNumberClassification"
+				data-bind="ntsFormLabel: {  required: true }">時間/回数区分</div>
+		</div>
+		<div class="divLineCol2">
+			<div id="E_Sel_TimeNumberClassification" class="cf switchNomalSize"
+				data-bind="ntsSwitchButton: {
+										options: Roundingrules_TimeNumberClassification,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: CurrentItemAtr }"></div>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="E_Lbl_WorkingDaysPerYear"
+				data-bind="ntsFormLabel: {  required: true }">年間所定労働日数</div>
+		</div>
+		<div class="divLineCol2">
+			<div id="E_Sel_WorkingDaysPerYear" class="cf switchNomalSize"
+				data-bind="ntsSwitchButton: {
+										options: Roundingrules_WorkingDaysPerYear,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: CurrentWorkDaysScopeAtr
+										 }"></div>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="E_Lbl_AverageWage"
+				data-bind="ntsFormLabel: {  required: true }">平均賃金</div>
+		</div>
+		<div class="divLineCol2">
+			<div id="E_Sel_AverageWage" class="cf switchNomalSize"
+				data-bind="ntsSwitchButton: {
+										options: Roundingrules_WorkingDaysPerYear,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: CurrentAvePayAtr }"></div>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="E_Lbl_ZeroDisplay"
+				data-bind="ntsFormLabel: {  required: false }">ゼロ表示区分</div>
+		</div>
+		<div class="divLineCol2">
+			<div id="E_Sel_ZeroDisplay" class="cf switchNomalSize"
+				data-bind="ntsSwitchButton: {
+										options:Roundingrules_ZeroDisplay,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: CurrentZeroDisplaySet}"></div>
+			<div id="E_Sel_NoDisplay"
+				data-bind="ntsCheckBox: { checked: Checked_NoDisplay, text: '項目名も表示しない'  , enable: noDisplayNames_Enable}"></div>
+
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="E_Lbl_ErrorRange"
+				data-bind="ntsFormLabel: {  required: false }">エラー範囲</div>
+		</div>
+		<div class="divLineCol2">
+			<div id="E_Sel_ErrorUpper"
+				data-bind="ntsCheckBox: { checked: Checked_ErrorUpper, text: '' }"></div>
+			<div data-bind="with: Currencyeditor_ErrorUpper">
+				<input id="E_Inp_ErrorUpper" data-name="エラー範囲" class="save-error"
+					data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable: enable
+										}" />
+			</div>
+			<label id="E_Lbl_ExceedsError">を超える場合にエラーとする</label>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1"></div>
+		<div class="divLineCol2">
+			<div id="E_Sel_AlarmHigh"
+				data-bind="ntsCheckBox: { checked: Checked_AlarmHigh, text: '' }"></div>
+			<div data-bind="with: Currencyeditor_AlarmUpper">
+				<input id="E_Inp_AlarmUpper" data-name="エラー範囲" class="save-error"
+					data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable: enable}" />
+			</div>
+			<label id="E_Lbl_ErrorLess">未満の場合にエラーとする</label>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="E_Lbl_AlarmRange"
+				data-bind="ntsFormLabel: {  required: false }">アラーム範囲</div>
+		</div>
+		<div class="divLineCol2 verticalAlignBottom">
+			<div id="E_Sel_ErrorLower"
+				data-bind="ntsCheckBox: { checked: Checked_ErrorLower, text: '' }"></div>
+			<div data-bind="with: Currencyeditor_ErrorLower">
+				<input id="E_Inp_ErrorLower" data-name="アラーム範囲" class="save-error"
+					data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable: enable}" />
+			</div>
+			<label id="E_Lbl_ExceedsAlarm">を超える場合にアラームとする</label>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1"></div>
+		<div class="divLineCol2">
+			<div id="E_Sel_AlarmLower"
+				data-bind="ntsCheckBox: { checked: Checked_AlarmLower, text: '' }"></div>
+			<div data-bind="with: Currencyeditor_AlarmLower">
+				<input id="E_Inp_AlarmLower" data-name="アラーム範囲" class="save-error"
+					data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable: enable}" />
+			</div>
+			<label id="E_Lbl_AlarmLess">未満の場合にアラームとする</label>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1"></div>
+		<div class="divLineCol2">
+			<label id="E_Lbl_NavigationMessage1">※エラーの場合は、データが登録されません。 <br />
+				アラームの場合は、メッセージが表示されます。（データが登録されます)
+			</label>
+
+		</div>
+
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1 verticalAlignTop">
+			<div id="E_Lbl_Remarks"
+				data-bind="ntsFormLabel: {  required: false }">備考</div>
+		</div>
+		<div class="divLineCol2">
+			<textarea id="E_Inp_Remarks" data-name="備考" class="save-error"
+				data-bind="ntsMultilineEditor: { value: CurrentMemo , constraint: 'Memo' }" />
+		</div>
+
+	</div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+.separate-1 {
+	margin-top: 5px;
+	margin-right: 10px;
+	margin-bottom: 5px;
+}
+
+#btn-001 {
+	width: 200px;
+	margin-left: 75px;
+}
+
+#left-content {
+	margin-left: 65px;
+	padding: 10px;
+	float: left;
+	border: 1px solid #a79c9c;
+	border-radius: 4px;
+	min-height: 600px;
+}
+
+#lbl-001 {
+	float: right;
+	margin-right: 30px;
+}
+
+#lbl-002 {
+	margin-bottom: 20px;
+	display: inline-block;
+}
+
+.ntsRadioBox {
+	width: 100%;
+}
+
+#sel-001 {
+	float:left;
+	margin: 8px 0px 0px 35px;
+}
+
+#right-content {
+	margin-left: 20px;
+	padding: 10px;
+	float: left;
+	border: 1px solid #a79c9c;
+	border-radius: 4px;
+	min-height: 600px;
+	width: 38%;
+}

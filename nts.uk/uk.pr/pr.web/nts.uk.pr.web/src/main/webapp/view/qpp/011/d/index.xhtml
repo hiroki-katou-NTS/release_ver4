@@ -1,0 +1,273 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile path="qpp011.d.vm.js" />
+			<com:scriptfile path="qpp011.d.service.js" />
+			<com:scriptfile path="qpp011.d.start.js" />
+			<com:stylefile path="qpp011.d.main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:ValidatorScript>
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.output.ResidentTaxMoney
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.output.StaffNo
+ 			</com:ValidatorScript>
+		</ui:define>
+		<ui:define name="content">
+
+			<div id="functions-area">
+				<button class="proceed" data-bind="click: submitDialog"
+					id="D_BTN_001">登録</button>
+				<button id="D_BTN_002" data-bind="click: closeDialog">閉じる</button>
+			</div>
+
+			<div id="contents-area">
+				<div class="floatLeft fullHeight">
+					<div id="SearchBackGround">
+						<div class="clearBoth">
+							<div id="D_LBL_001" data-bind="ntsFormLabel: { }">コード/名称</div>
+							<div id="D_SCH_001" style="width: 100px; hight: 100%"
+								data-bind="ntsSearchBox: {
+															comId: 'D_LST_001',
+															items: D_LST_001_Data, 
+															selected: D_LST_001_selectedValue, 
+															selectedKey: 'position', 
+															fields: ['position'], 
+															childField: 'childs'}" />
+						</div>
+						<div class="D_LST_001_class">
+							<table id="D_LST_001"></table>
+						</div>
+					</div>
+				</div>
+				<div class="floatLeft fullHeight " style="margin-left: 40px;"
+					data-bind="with: currentTax">
+					<div class="clearBoth floatLeft" style="margin-left: -10px;">
+						<!-- <label id="D_LBL_002"
+							data-bind="text: D_LST_001_selectedResiTaxCode">コード </label> -->
+						<label id="D_LBL_003"
+							data-bind="text: $parent.D_LST_001_selectedRegisteredName">納付先名
+						</label>
+					</div>
+					<div class=" clearBoth floatLeft">
+						<div style="margin-top: 21px;" data-bind="ntsFormLabel: { }">済通知書</div>
+						<label id="D_LBL_018"
+							data-bind="text:$parent.D_LBL_018_Year_Month"></label> <label
+							id="D_LBL_019"
+							data-bind="text:$parent.D_LBL_019_yearInJapanEmpire"></label>
+					</div>
+					<div class="clearBoth">
+						<div class=" floatLeft " style="margin-top: 30px; width: 200px;">
+							<label id="D_LBL_004">領収書、納入書、納入済通知書 </label>
+							<hr style="margin-left: -10px;"></hr>
+							<div class="clearBoth floatLeft">
+								<div id="D_LBL_006" class="floatLeft"
+									data-bind="ntsFormLabel: {  }">
+									給与分 <br /> <span>（数値10桁）</span>
+								</div>
+								<div id="D_INP_002">
+									<input data-name="給与分" id="salary_portion"
+										data-bind="ntsNumberEditor: {
+																value: $parent.taxPayRollMoney,
+																constraint:  'ResidentTaxMoney',
+																option: {
+												                    grouplength: 3,
+												                    decimallength: 0,
+												                    currencyformat: 'JPY',
+												                    currencyposition: 'right'
+												                },
+																required: true,
+																enable: true}" />
+								</div>
+							</div>
+							<div class="clearBoth floatLeft" style="margin-top: 10px;">
+								<div id="D_LBL_007" class="floatLeft"
+									data-bind="ntsFormLabel: { }">
+									退職所得分<br /> <span>（数値10桁）</span>
+								</div>
+								<div id="D_INP_003">
+									<input data-name="退職所得分" id="retirement_income"
+										data-bind="ntsNumberEditor: {
+																value: $parent.taxBonusMoney,
+																constraint:  'ResidentTaxMoney',
+																option: {
+												                    grouplength: 3,
+												                    decimallength: 0,
+												                    currencyformat: 'JPY',
+												                    currencyposition: 'right'
+												                },
+																required: false,
+																enable: true,
+																readonly: false}" />
+								</div>
+							</div>
+							<div class="clearBoth floatLeft" style="margin-top: 10px;">
+								<div id="D_LBL_008" class="floatLeft"
+									data-bind="ntsFormLabel: { }">
+									遅延金<br /> <span>（数値10桁）</span>
+								</div>
+								<div id="D_INP_004">
+									<input data-name="遅延金" id="tax_over_due_money"
+										data-bind="ntsNumberEditor: {
+																value: $parent.taxOverDueMoney,
+																constraint:  'ResidentTaxMoney',
+																option: {
+												                    grouplength: 3,
+												                    decimallength: 0,
+												                    currencyformat: 'JPY',
+												                    currencyposition: 'right'
+												                },
+																required: false,
+																enable: true,
+																readonly: false}" />
+								</div>
+							</div>
+							<div class="clearBoth floatLeft" style="margin-top: 10px;">
+								<div id="D_LBL_009" class="floatLeft"
+									data-bind="ntsFormLabel: { }">
+									督促手数料<br /> <span>（数値10桁）</span>
+								</div>
+								<div id="D_INP_005">
+									<input data-name="督促手数料" id="tax_demand_charge_moyney"
+										data-bind="ntsNumberEditor: {
+																value: $parent.taxDemandChargeMoyney,
+																constraint:  'ResidentTaxMoney',
+																option: {
+												                    grouplength: 3,
+												                    decimallength: 0,
+												                    currencyformat: 'JPY',
+												                    currencyposition: 'right'
+												                },
+																required: false,
+																enable: true,
+																readonly: false}" />
+								</div>
+							</div>
+						</div>
+						<div class=" floatLeft "
+							style="margin: 29px 0px 0px 30px; width: 370px;">
+							<label id="D_LBL_005" style="margin-left: -10px">納入申告書 </label>
+							<hr style="margin-left: -10px;"></hr>
+							<div class="clearBoth floatLeft" style="margin-top: 3px;">
+								<div id="D_LBL_010" data-bind="ntsFormLabel: { }">あて先</div>
+								<input id="D_INP_006" data-name="あて先"
+									data-bind="ntsTextEditor:{
+																value: $parent.address,
+																constraint:  '',
+																option: {
+													            	textmode: 'text',
+													            	textalign: 'left'
+												                },
+																required: false,
+																enable: true,
+																readonly: false}" />
+
+							</div>
+							<div class="clearBoth floatLeft" style="margin-top: 10px;">
+								<div id="D_LBL_011" data-bind="ntsFormLabel: { }">納付期限</div>
+								<div id="D_INP_007" data-name="納付期限"
+									data-bind="ntsDatePicker: {
+																value: $parent.date_D_INP_007, 
+																dateFormat: 'YYYY/MM/DD', 
+																valueFormat: 'YYYYMMDD', 
+																startDate: '1900/01/01' , 
+																endDate:'9999/12/31'}">
+								</div>
+								<label id="D_LBL_012"
+									data-bind="text:$parent.yearInJapanEmpire_LBL_012">納付期限和暦
+								</label>
+							</div>
+							<div class="clearBoth floatLeft" style="margin-top: 10px;">
+								<div id="D_LBL_013" data-bind="ntsFormLabel: { }">人員</div>
+								<div id="D_INP_008">
+									<input data-name="人員" id="head_count"
+										data-bind="ntsNumberEditor: {
+																value: $parent.headcount,
+																constraint:  'StaffNo',
+																option: {
+												                    grouplength: 3,
+												                    decimallength: 0,
+												                    symbolChar: '人',
+												                    currencyposition: 'right'
+												                },
+																required: false,
+																enable: true,
+																readonly: false}" />
+								</div>
+							</div>
+							<div class="clearBoth floatLeft" style="margin-top: 10px;">
+								<div id="D_LBL_014" class="floatLeft"
+									data-bind="ntsFormLabel: {  }">
+									退職手当等支払金額<br /> <span>（数値10桁）</span>
+								</div>
+								<div id="D_INP_009" class="floatLeft">
+									<input data-name="退職手当等支払金額" id="retirement_bonus_amout"
+										data-bind="ntsNumberEditor: {
+																value: $parent.retirementBonusAmout,
+																constraint:  'ResidentTaxMoney',
+																option: {
+												                    grouplength: 3,
+												                    decimallength: 0,
+												                    currencyformat: 'JPY',
+												                    currencyposition: 'right'
+												                },
+																required: false,
+																enable: true,
+																readonly: false}" />
+								</div>
+							</div>
+							<div class="clearBoth floatLeft" style="margin-top: 10px;">
+								<div id="D_LBL_015" class="floatLeft"
+									data-bind="ntsFormLabel: {  }">
+									特別徴収税額 市民税<br /> <span>（数値10桁）</span>
+								</div>
+								<div id="D_INP_010" class="floatLeft">
+									<input data-name="特別徴収税額 市民税" id="city_tax_money"
+										data-bind="ntsNumberEditor: {
+																value: $parent.cityTaxMoney,
+																constraint:  'ResidentTaxMoney',
+																option: {
+												                    grouplength: 3,
+												                    decimallength: 0,
+												                    currencyformat: 'JPY',
+												                    currencyposition: 'right'
+												                },
+																required: false,
+																enable: true,
+																readonly: false}" />
+								</div>
+							</div>
+							<div class="clearBoth floatLeft" style="margin-top: 10px;">
+								<div class="floatLeft" id="D_LBL_016"
+									data-bind="ntsFormLabel: {  }">
+									特別徴収税額 県民税<br /> <span>（数値10桁）</span>
+
+								</div>
+								<div class="floatLeft" id="D_INP_011">
+									<input data-name="特別徴収税額 県民税" id="prefecture_tax_money"
+										data-bind="ntsNumberEditor: {
+																value: $parent.prefectureTaxMoney,
+																constraint:  'ResidentTaxMoney',
+																option: {
+												                    grouplength: 3,
+												                    decimallength: 0,
+												                    currencyformat: 'JPY',
+												                    currencyposition: 'right'
+												                },
+																required: false,
+																enable: true,
+																readonly: false}" />
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

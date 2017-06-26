@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 600, height: 485 };</script>
+			<com:ValidatorScript>
+				nts.uk.shr.com.primitive.PersonId
+ 			</com:ValidatorScript>
+			<link rel="stylesheet" type="text/css" href="main.css" />
+			<script src="../../../../lib/generic/igniteui/js/infragistics.core.js"></script>
+			<script src="../../../../lib/generic/igniteui/js/infragistics.lob.js"></script>
+			<script src="../../../../lib/nittsu/ui/textbox-options.js"></script>
+			<script src="../../../../lib/generic/igniteui/js/extensions/infragistics.ui.combo.knockout-extensions.js"></script>
+			<script src="start.js"></script>
+			<script src="viewmodel.js"></script>
+			<script src="service.js"></script>
+			
+		</ui:define>
+
+		<ui:define name="content">
+			<div class="floatLeft divMargin">
+				<label id="LBL_001" data-bind="text: itemCode">001</label>
+				<label id="LBL_002" data-bind="text: itemName">Vu Dinh Dung</label>
+			</div>
+			
+			<div class="floatLeft seperator"></div>
+			
+			<div class="floatLeft checkBoxHead">
+				<div class="textCheckBox outline" id="SEL_001" data-bind="ntsCheckBox: { checked: totalCommuteCheck.isChecked}">
+					通勤費　合計
+				</div>
+			</div>
+			
+			<div class="floatLeft divMargin divPadding">
+				<div data-bind="with: totalCommuteEditor" style="display:inline-block;">
+					<input id="INP_001" data-bind="ntsNumberEditor: {value: value, option: option, enable: isEnable}" />
+				</div>
+				
+				<label id="LBL_003"> 内 </label>
+				
+				<div id="SEL_002" data-bind="ntsCheckBox: { checked: taxCommuteCheck.isChecked, enable: totalCommuteCheck.isChecked}">
+					課税通勤費
+				</div>
+				
+				<div class="taxCommuteEditor" data-bind="with: taxCommuteEditor" >
+					<input id="INP_002"  data-bind="ntsNumberEditor: {value: value, option: option, enable: isEnable}" />
+				</div>
+			</div>
+			
+			<div class="floatLeft divLbl">			
+				<label id="LBL_004">※課税通勤費が０円の場合、全額非課税通勤費</label>
+			</div>
+			
+			<div class="floatLeft divLbl">			
+				<label id="LBL_005">※設定されている限度額</label>
+			</div>
+			
+			<div class="floatLeft divLbl" data-bind="with: commuteNotaxLimitItem">			
+				<label id="LBL_006" data-bind="text: code"></label>
+				<label id="LBL_007" data-bind="text: name"></label>
+				<label id="LBL_008" data-bind="text: value"></label>
+			</div>
+			
+			
+			<div class="floatLeft checkBoxHead">
+				<div class="textCheckBox outline" id="SEL_003" data-bind="ntsCheckBox: { checked: oneMonthCheck.isChecked}">
+					１ヵ月分通勤費
+				</div>
+			</div>
+			
+			<div class="floatLeft divMargin" style="padding-left:60px;width:85%;">
+				<div data-bind="with: oneMonthCommuteEditor" style="display:inline-block;">
+					<input id="INP_003" data-bind="ntsNumberEditor: {value: value, option: option, enable: isEnable}" />
+				</div>
+				
+				<label id="LBL_010" >通勤費 合計 ÷</label>
+				
+				<div data-bind="with: commuteDividedByMonth" style="display:inline-block;vertical-align: middle;">
+					<div id="SEL_004" style="width:100px; heigth:27px;"
+						data-bind="ntsComboBox: {options: commuteItems,
+										optionsValue: 'code',
+										value: selectedCode,
+										optionsText: 'name',
+										enable: isEnable(),
+										columns: [
+											{ prop: 'name', length: 6 },
+										]}">
+					</div>
+				</div>
+
+				<label id="LBL_011">の金額を</label>
+			</div>
+			
+			<div class="floatLeft divLBL_009">
+				<label id="LBL_009" >余り<br/>（端数）</label>
+				
+				<div data-bind="with: oneMonthRemainderEditor" class="divINP_004">
+					<input id="INP_004" data-bind="ntsNumberEditor: {value: value, option: option, enable: isEnable}" />
+				</div>
+				
+				<label id="LBL_012">「１ヵ月分通勤費」「余り（端数）」に設定します。</label>
+			</div>
+			
+			<div class="floatLeft seperator spextend"></div>
+			
+			<div class="floatLeft divMargin">
+				<button id="BTN_001" class="x-large" data-bind="click: settingButtonClick">設定</button>
+				<button id="BTN_002" class="large" data-bind="click: cancelButtonClick">キャンセル</button>
+			</div>
+			
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

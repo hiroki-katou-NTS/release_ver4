@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:stylefile path="qet001.a.main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qet001.a.service.js" />
+			<com:scriptfile path="qet001.a.vm.js" />
+			<com:scriptfile path="qet001.a.start.js" />
+			<script type="text/javascript">
+				// TODO: Code validate.
+				__viewContext.primitiveValueConstraints.TargetYear = {
+					valueType : 'Integer',
+					min: 1900,
+					max: 9999
+				};
+			</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area" class="divHeader">
+				<div class="function-class">
+					<button id="select-employee-button" class="proceed" data-bind="click: print">選択した社員を印刷</button>
+					<button id="aggregate-setting-button" data-bind="click: goToAggregateItemPage">明細書項目の集約設定</button>
+					<button id="unknow-function-button">印刷実行ログ</button>
+				</div>
+			</div>
+			<div id="contents-area" data-bind="visible: true" style="display: none;">
+				<table>
+					<tr>
+						<td id="contents-left">
+							<div class="select-target-year">
+								<div class="label" id="target-year-label">対象年度</div>
+								<input id="target-year-input" for="target-year-label" data-bind="ntsNumberEditor: {
+										value: targetYear,
+										constraint: 'TargetYear',
+										option: {
+											decimallength: 0,
+											width: '80px'
+										},
+										required: true,
+										enable: true}"></input>
+								<span id="japan-year" data-bind="text: '（' + japanTargetYear() + '）'"></span>
+								<span id="year-label">年度</span>
+								<div id="preliminary-month-checkbox" data-bind="ntsCheckBox: { checked: isAggreatePreliminaryMonth }">予備月</div>
+							</div>
+							<div class="search-employee"></div>
+						</td>
+						<td id="contents-right">
+							<div id="aggregate-condition">
+								<div class="label" id="detail-process-label">処理の詳細設定</div>
+
+								<div id="output-layout-select">
+									<div id="ouput-layout-label">
+										<div data-bind="ntsFormLabel: {}">出力するレイアウト</div>
+										<button class="help-button">?</button>
+									</div>
+									<div id="output-layout-selects">
+										<div class="ntsControl"> <label class="ntsRadioBox">
+												<input type="radio" name="layoutOutput" id="wage-ledger-layout"
+												data-bind="checkedValue: 'OnePage', checked: layoutSelected" /> <span
+												class="box"></span><span class="label">賃金台帳（A4横1ページ）を出力する</span>
+											</label>
+										</div> 
+										<div id="wage-list-layout">
+											<span class="ntsControl"> <label class="ntsRadioBox">
+													<input type="radio" name="layoutOutput"
+													data-bind="checkedValue: 'NewLayout', checked: layoutSelected" /> <span
+													class="box"></span><span class="label">賃金一覧表を出力する</span>
+											</label>
+											</span>
+											<div id="page-break-indicator-checkbox"
+												data-bind="ntsCheckBox: {
+													checked: isPageBreakIndicator,
+													enable: layoutSelected() == 'NewLayout'
+													}">支給控除項目単位で改ページする</div>
+										</div>
+									</div>
+								</div>
+								<div>
+									<div id="output-items-label"
+										data-bind="ntsFormLabel: {}">出力する項目の選択</div>
+									<div id="output-items">
+										<div class="ntsControl">
+											<label class="ntsRadioBox"> <input type="radio"
+												name="outputType" id="detail-item"
+												data-bind="checkedValue: 'MasterItems', checked: outputTypeSelected" />
+												<span class="box"></span><span class="label">明細書項目を出力する</span>
+											</label>
+										</div>
+										<div id="summary-detail-items">
+											<div class="ntsControl">
+												<label class="ntsRadioBox"> <input type="radio"
+													name="outputType"
+													data-bind="checkedValue: 'OutputSettingItems', checked: outputTypeSelected" />
+													<span class="box"></span><span class="label">明細書の集約項目を出力する</span>
+												</label>
+											</div>
+											<div id="output-settings-selection"
+												data-bind="ntsComboBox: {
+												options: outputSettings,
+												optionsValue: 'code',
+												value: outputSettingSelectedCode,
+												optionsText: 'name',
+												editable: false,
+												enable: outputTypeSelected() == 'OutputSettingItems' }"></div>
+											
+											<div id="output-settings-button"><button data-bind="click: goToOutputSetting">設定</button></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

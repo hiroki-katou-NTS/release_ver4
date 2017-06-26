@@ -1,0 +1,107 @@
+@CHARSET "UTF-8";
+
+@import url("../a/base.css");
+
+#C_Inp_Remarks {
+	width: 340px;
+	height: 90px;
+}
+
+#C_Sel_ZeroDisplayIndicator button {
+	height: 30px;
+	font-size: 0.8rem;
+	width: 130px;
+}
+
+.switchNomalSize button {
+	height: 30px;
+	font-size: 0.8rem;
+	padding: 0px 15px;
+}
+
+#C_Sel_DiscriminationSocial button, #C_Sel_DistinguishBetween button,
+	#C_Sel_AlwaysFixed button, #C_Sel_MonthFixed button,
+	#C_Sel_DayToMonthFixed button, #C_Sel_DayFixed button,
+	#C_Sel_DonorFixed button, #C_Sel_AverageWage button {
+	width: 80px;
+}
+
+#right-content-bottom-right {
+	margin-left: 40px;
+	margin-top: 4px;
+}
+
+#C_Sel_AlwaysFixed {
+	margin-left: 25px;
+}
+
+#C_Lbl_MonthlyPerson {
+	margin-left: 55px;
+}
+
+#C_Sel_MonthFixed, #C_Sel_DayFixed, #C_Sel_DonorFixed {
+	margin-left: 80px;
+}
+
+#C_Sel_DayToMonthFixed {
+	margin-left: 52px;
+}
+
+#C_Lbl_MonthlySalaryPerDay, #C_Lbl_ADayPayee, #C_Lbl_HourlyPay {
+	margin-left: 244px;
+}
+
+#C_Sel_NoItemNames {
+	margin-left: 10px;
+}
+
+#C_Lbl_ExceedsAndError {
+	margin-left: 20px;
+}
+
+#C_Lbl_ExceedsAlarm {
+	margin-left: 20px;
+}
+
+#C_Lbl_ErrorLess {
+	margin-left: 20px;
+}
+
+#C_Lbl_AlarmLess {
+	margin-left: 20px;
+}
+
+#C_Inp_LimitAmount, #C_Inp_ErrorUpper, #C_Inp_AlarmUpper,
+	#C_Inp_ErrorLower, #C_Inp_AlarmLower {
+	width: 100px;
+}
+
+#C_Btn_PeriodSetting, #C_Btn_BreakdownSetting {
+	width: 120px;
+	margin-top: 5px;
+}
+
+#C_Lbl_SettingClassification, #C_Lbl_BreakdownClassification {
+	margin-left: 5px;
+}
+
+#C_Sel_FixedGold .ntsRadioBox:NTH-CHILD(2) {
+	margin-left: 165px;
+}
+
+#C_Sel_LimitAmount button {
+	height: 55px;
+	border-radius: 5px;
+}
+
+#C_LBL_019 label {
+	line-height: 25px;
+}
+
+#C_Lbl_ValidityPeriodAndCycle>label {
+	line-height: 23px !important;
+}
+
+#LimitAmountDiv {
+	display: none;
+}

@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+					nts.uk.shr.com.primitive.Memo
+			</com:ValidatorScript>
+			<com:stylefile path="cmm009.c.main.css" />
+			<com:scriptfile
+				path="../../../../lib/generic/igniteui/js/infragistics.core.js" />
+			<com:scriptfile
+				path="../../../../lib/generic/igniteui/js/infragistics.lob.js" />
+			<com:scriptfile
+				path="../../../../lib/generic/igniteui/js/extensions/infragistics.ui.combo.knockout-extensions.js" />
+			<com:scriptfile path="../../../../lib/nittsu/ui/textbox-options.js" />
+			<com:scriptfile path="cmm009.c.start.js" />
+			<com:scriptfile path="cmm009.c.vm.js" />
+			<com:scriptfile path="cmm009.c.service.js" />
+			<script>var dialogSize = { width: 550, height: 580 };</script>
+			<style>
+.nts-list-box * {
+	box-sizing: border-box
+}
+</style>
+		</ui:define>
+
+		<ui:define name="content">
+			<!--             	<div id="functions-area"></div> -->
+			<div id="contents-area">
+				<div class="cf">
+					<div>
+						<label id="C_LBL_TITLE">新たに作成する履歴の、作成情報を入力してください。</label>
+					</div>
+					<br /> <br /> <br />
+					<div class="timeInput">
+						<div data-bind="ntsFormLabel: { required: true }">期間</div>
+						<div class="C_INP_STARTYMD">
+							<input id="INP_STARTYMD" style="ime-mode: inactive"
+								maxlength="10"
+								data-bind="ntsTimeEditor: {value: selectStartYm, inputFormat: 'date'}" />
+						</div>
+						<div id="C_LBL_ENDYMD">
+							<label > ～ 9999/12/31</label>
+						</div>
+					</div>
+					<br />
+					<div class="inlineInfor">
+						<div data-bind="ntsFormLabel: { required: true }">レイアウトの引継ぎ</div>
+
+						<div id="SEL_001" data-bind="foreach: itemsRadio">
+							<span class="ntsControl"
+								style="width: 330px; margin-bottom: 10px;"> <label
+								class="ntsRadioBox"> <input type="radio"
+									name="textRadio"
+									data-bind="checkedValue: value,
+											   checked: $parent.isRadioCheck,
+											   enable: $parent.enable" />
+									<span class="box"></span><span class="label"
+									data-bind="text: text"></span>
+							</label>
+							</span>
+						</div>
+					</div>
+					<br />
+
+					<div class="timeInput2">
+
+						<div data-bind="ntsFormLabel: {constraint: 'Memo'}">メモ</div>
+						<br /> <br />
+						<div>
+							<textarea style="width: 420px; height: 100px"
+								data-bind="ntsMultilineEditor: { value: C_INP_MEMO, constraint: 'Memo' }" />
+						</div>
+
+					</div>
+
+				</div>
+				<br />
+				<hr></hr>
+				<div class="bottomStype">
+					<button class="x-large proceed" id="BTN_DECIDE"
+						data-bind="click: createHistory">決定</button>
+					<button class="large" id="BTN_CANCEL"
+						data-bind="click: closeDialog">キャンセル</button>
+					<br />
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

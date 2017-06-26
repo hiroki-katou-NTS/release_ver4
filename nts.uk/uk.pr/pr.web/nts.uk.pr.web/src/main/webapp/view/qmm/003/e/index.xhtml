@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.ResiTaxCode
+				</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qmm003.e.vm.js" />
+			<com:scriptfile path="qmm003.e.start.js" />
+			<com:scriptfile path="qmm003.e.service.js" />
+			<com:stylefile path="main.css" />
+			<script>
+				var dialogSize = {
+					width : 710,
+					height : 630
+				};
+			</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<div class="flex valign-center" style="margin-top: 5px">
+				<label id="E_LBL_001">個人情報で登録した納付先を置換えます。</label>
+			</div>
+			<div>
+				<div style="margin-left: 25px; height: 30px; margin-top:5px"
+					data-bind="ntsFormLabel: { required: true }" class="form-label flex">
+					<label id="E_LBL_004">対象年度</label>
+					<input id="E_INP_003" data-bind="ntsTextEditor: {value:year}" />
+				    <label id="E_LBL_005" data-bind="text: yearJapan()">対象年度</label>
+				</div>
+			</div>
+
+			<div id="contents-area" class="cf">
+
+				<div class="nts-left-content">
+					<div>
+						<label id="E_LBL_002">【統合元情報】</label>
+					</div>
+					<div class="caret-right caret-background">
+						<i class="icon icon-searchbox"></i>
+
+						<div style="margin-top: -11px; margin-left: 50px;" data-bind="ntsSearchBox: {items: treeLeft, selected: resiTaxCodeLeft, selectedKey: 'code', childField: 'childs', filteredItems: filteredData, fields: ['name', 'code']}" />
+						<div>
+							<table id="treegrid21"
+								data-bind="ntsTreeGridView:{
+								   	width: 310,
+									height: 360,
+									options: treeLeft,
+									selectedValues: resiTaxCodeLeft,
+									optionsValue: 'code',
+									optionsChild: 'childs',
+									optionsText: 'nodeText',
+									multiple: true,
+									enable: true,
+									showCheckBox: true}"
+								class="cf"></table>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="nts-right-content">
+					<div>
+						<label id="E_LBL_003">【統合先情報】</label>
+					</div>
+
+					<div>
+						<i style="margin-left: 15px" class="icon icon-searchbox"></i>
+						<div style="margin-left: 80px; margin-top: -10px;"
+							data-bind="ntsSearchBox: {items: treeRight, selected: resiTaxCodeRight, selectedKey: 'code', childField: 'childs', filteredItems: filteredData, fields: ['name', 'code']}" />
+						<div>
+							<table id="treegrid2"
+								data-bind="ntsTreeGridView:{
+								   	width: 300,
+									height: 360,
+									options: treeRight,
+									value: resiTaxCodeRight,
+									optionsValue: 'code',
+									optionsChild: 'childs',
+									optionsText: 'nodeText',
+									multiple: false,
+									enable: false,
+									showCheckBox: false}"
+								class="cf"></table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<hr />
+			<div>
+				<button id="E_BTN_001" style="margin-left: 250px;" class="proceed"
+					data-bind="click: clickButton">実行</button>
+				<button id="E_BTN_002" data-bind="click: cancelButton">キャンセル</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>
+
+
+
+

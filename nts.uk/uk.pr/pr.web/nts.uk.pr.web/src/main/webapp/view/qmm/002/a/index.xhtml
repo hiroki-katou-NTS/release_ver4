@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+		<com:ValidatorScript>
+					 nts.uk.ctx.basic.dom.system.bank.branch.BankBranchCode
+					 nts.uk.ctx.basic.dom.system.bank.branch.BankBranchName
+					 nts.uk.ctx.basic.dom.system.bank.branch.BankBranchNameKana
+					 nts.uk.shr.com.primitive.Memo
+   		</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qmm002.a.start.js" />
+			<com:scriptfile path="qmm002.a.vm.js" />
+			<com:scriptfile path="qmm002.a.service.js" />
+			<com:stylefile path="main.css" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area">
+				<button id="A_BTN_001" data-bind="click: cleanBranch" >新規</button>
+				<button id="A_BTN_002" class="proceed" data-bind="enable: displayButtonSave,click: addBranch" >登録</button>
+				<button id="A_BTN_005" data-bind="enable: checkPrint">印刷 (PDF)</button>
+				<button id="A_BTN_009" data-bind="click: OpenDdialog">銀行の追加</button>
+				<button id="A_BTN_006" data-bind="enable: checkCountNode,click: OpenCdialog">銀行の統合</button>
+				<button id="A_BTN_008" >マスタ修正ログ</button>
+				<button id="A_BTN_003" class="danger" data-bind="enable: !isCreated(),click: removeBranch">削除</button>
+				<button id="A_BTN_004" class="danger" data-bind="click: OpenBdialog" >一括削除</button>
+				<a href="#"
+					data-bind="click: jumpToQmm006A,ntsLinkButton: {}">振込元銀行の登録へ</a>
+			</div>
+			<div id="contents-area">
+				<div id="left-content" class="bg-green caret-right caret-background cf">
+					<div id="A_LST_001">
+						<div style="width: 440px;margin-bottom: 10px;" data-bind="ntsSearchBox: {
+							comId: 'treegrid1',
+							items: lst_001,  
+							filteredItems: filteredData, 
+							selected: singleSelectedCode, 
+							selectedKey: 'treeCode', 
+							childField: 'childs', 
+							fields: ['name', 'code']}" />	
+							
+							<table id="treegrid1"
+								data-bind="ntsTreeGridView:{
+									width: 440,
+									height: 470,
+									options: lst_001,
+									value: singleSelectedCode,								
+									optionsValue: 'treeCode',
+									optionsChild: 'childs',
+									optionsText: 'displayName',
+									multiple: false,
+									enable: true,										
+									showCheckBox: false}"
+								class="cf">
+							</table>		
+					</div>
+
+				</div>
+				<div id="right-content" data-bind="with: nodeParent">
+					<table >
+						<tr>
+							<td>
+								<div id="A_LBL_002" data-bind="ntsFormLabel: {}">銀行コード/名称</div>
+							</td>
+							<td style="width: 300px;">
+							    <span id="A_LBL_009" data-bind="text: code"></span>
+							    <span id="A_LBL_010" data-bind="text: name"></span>
+							</td>
+							<td rowspan="2">
+							    <div >
+									<textarea id="A_INP_002" style="height: 65px;width: 240px;" data-bind="ntsMultilineEditor: {
+										value: ko.observable(memo),
+										constraint: 'Memo',
+										enable: true,
+										readonly: true}" />
+								</div>
+							</td>								
+						</tr>
+						<tr>
+							<td>
+								<div id="A_LBL_003" data-bind="ntsFormLabel: {}">銀行名称（カナ）</div>
+							</td>
+							<td>
+							    <div id="A_LBL_011" data-bind="text: nameKata"></div>
+							</td>		            
+						</tr>
+					</table>
+				</div>
+				<hr style="width: 55%;margin-top: 15px"/>	
+				<div id="right-content">
+					<table>
+						<tr>
+							<td>
+								<div id="A_LBL_004" style="margin: 8px 0px 20px 40px;" data-bind="ntsFormLabel: { constraint: ['BankBranchCode','BankBranchName'], inline: false, required: true, enable: true}">支店コード/名称</div>
+							</td>
+							<td>
+							   <div style="margin: 8px 0px 20px 30px;">
+							    <span data-bind="with: A_INP_003" >
+								<input data-name="支店コード" id="A_INP_003" class="text-editor1" style="height: 25px;" data-bind="ntsTextEditor: {
+									value: value,
+									constraint: constraint,
+									option: option,
+									required: required,
+									enable: $parent.isCreated,
+									readonly: readonly}" /></span>
+									
+								<span style="margin-left: 5px" data-bind="with: A_INP_004" >
+								<input data-name="名称" id="A_INP_004" class="text-editor2" style="height: 25px;" data-bind="ntsTextEditor: {
+									value: value,
+									constraint: constraint,
+									option: option,
+									required: required,
+									enable: $parent.checkDisabled,
+									readonly: readonly}" /></span>
+							   </div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div id="A_LBL_005" data-bind="ntsFormLabel: {constraint: 'BankBranchNameKana'}">支店名称（カナ）</div>
+							</td>
+							<td>
+							<div style="margin: 0px 0px 20px 24px;">
+							    <span style="margin-left: 5px" data-bind="with: A_INP_005" >
+								<input id="A_INP_005" class="text-editor3" style="height: 25px;" data-bind="ntsTextEditor: {
+									value: value,
+									constraint: constraint,
+									option: option,
+									required: required,
+									enable: $parent.checkDisabled,
+									readonly: readonly}" /></span>
+						    </div>
+							</td>
+							
+						</tr>
+					</table>
+				</div>
+				<hr style="width: 55%;margin-top: 15px"/>
+				<div id="right-content">
+					<table>
+						<tr>
+							<td  style="vertical-align: top;" >
+								<div id="A_LBL_006" data-bind="ntsFormLabel: {constraint: 'Memo'}">メモ</div>
+							</td>
+							<td>
+						　　　　　　　<span  style="margin-bottom: 15px" data-bind="with: A_INP_006">
+								<textarea id="A_INP_006" style="height:130px; margin: 15px 0px 0px 35px;"
+								class="text-editor1" data-bind="ntsMultilineEditor: {
+									value: value,
+									constraint: constraint,
+									option: option,
+									enable: $parent.checkDisabled,
+									readonly: readonly}" />
+							</span>
+							</td>
+						</tr>					
+					</table>					
+				</div>			
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

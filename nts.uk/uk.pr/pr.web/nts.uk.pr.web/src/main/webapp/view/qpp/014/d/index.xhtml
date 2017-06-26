@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition>
+		<script
+			src="http://www.igniteui.com/js/external/knockout.mapping-latest.js"
+			type="text/javascript"></script>
+		<script
+			src="http://cdn-na.infragistics.com/igniteui/2016.2/latest/js/extensions/infragistics.datasource.knockoutjs.js"></script>
+		<script
+			src="http://cdn-na.infragistics.com/igniteui/2016.2/latest/js/extensions/infragistics.ui.grid.knockout-extensions.js"></script>
+		<com:scriptfile path="../d/qpp014.d.viewmodel.js" />
+		<com:stylefile path="../d/qpp014.d.main.css" />
+		<div class="cf">
+			<div id="D-label-area">
+				<div>
+					<img id="icon"
+						src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACIAAAAiCAYAAAA6RwvCAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAbNSURBVFhHvVdZbJRVGD2zL90pXWjZWiiU3QKyyKKIxojhgQSiCRoEYgwJangRBU180kRDosYHo0YTRWNEpCBGESwIFEIRytKydqPLlK6zdDrtdDbPdztDp3QYCohnMu3Xe7//3vN/ezX1vU2hHY3FOOWqht3vhT8UggZ3R4jfO+nF24tAdKw6HTINRqxIGwHNmzVfhH5pOweT1gidZjgUAF8owINCMGh0vHDwM4FQEAEEoeW6nvvxIGTkxQ28V3vceQVmnWlYJORynUaLp1Nn4vmRi5CmT0SQB0Ug8lhzBtZlPYFHEycq/XiQG4VEH8lrO3x9ZD98JOjM2DJ6Jd4dtwZTrWP47sHwDonwszRlCraOWYUNo5Yrq8Sn0g95F20sRXkTP80vLoj++oU5P0JGLGOhO8UVkf0gnzNzTdyVqk/gSZo7nNPv2mjow79vQQ5Lp8kfScxTF0XUxWrNPgcaetvV5YIQtQusozDNOpZrAZx119zak8sSSXhW4nik6CzU7Ie4w+5341x3HTwBryItGEJEGC9LmYHt41Yz2AY7rcRRgQ8b9lDqp+cN+rE4ud8VPcE+bKn+hms+tSfnpOit2JK7EhMt2WotAru/G1trvsUx12UYNf0UhoRHiA7LMCQNISFI48GSCfs7zuAvxwU0eDuQY0xXezoeNdqUjsruepx0XcUfnWeVe8SqtyOZFko3JKu7IogZp+LBWJiRMA4vZi3FQZL43HYAC5Im4bkRRWrPqNVjbeZSZBnTsKNxH2p6WrExezlyTCPUfjQkPsSt0dBMKtscMmsN4T+BXpp2c86zeC13RXhlKGx9nUovz5wV9vAAxF11vW3INCbTghKwQyHx807dDyhuL2P9MvCZYHwi1zw27Gw9qtYkFRX4SxUy5r+flwZvM55Oq6GbdHzfIPcH3lpyagSTYH32MlotFW/X7hw+kcP2Crxe8xU8DMRbRO4Tkvo5dNuXBZswNWEM3qr9bvhErvfY8GNrKbwhH2k8GBGpuhK8L2U9TrelYNu9WORhIVaMxMyau6GPsdHI1G322VX9aGLw3uxzoCcQkcPr3k40UxbXSoDLV0jEsu6QgjYcVHoa8Eb11xjFoNuY/RQ+afpVNcCXs57ER417WSfMeDXnGXxwYzeS9BZaeAU+po6exWtH/jpMuK3ACe7LIvJWdp8bLn8PreODw+9BV6BHxZKTVdPJv70Bn6qgrvB6v45HZU8sxI0R6RtiYskYKViRNBZTl3VdV1VzsjUHFe4GmHR6FFhycMF9g37Xo9Cai/PuOui1OkxjllSw4krDXJBUoBrj9rrvB8VIXNec40Hv1+9GNl2wJuMxfNr0m+ofG1gxf2I2SRaszliIn9tPIJnyqpE67GovhVVrwguZi/F96zGumxXhXa0nYCDBArpljGlk+IYBxHWNm2at9bag3ttGE3ejztuKmt4WtPu6UN5dgys9TZRdqPDU46qnUcmV3Q3q7dsoi84ltd6Fi9SRve6ojhuNuK5p6XOi1HWF7dyEKZbRKHNXcc40Yjrb/j/uamXi6RyOyt21ysRTraNxhqOAiUE5PYE6XdXKCrPYo0RHZpglHJxkPNhWO9g1cS3S7nfhqPMSylxVuMlZ5JjzMkodl1VK/u2oxCnnNSUf57rEjKStyCfYfZuZzkecFTjpFHlgvcvfG9Mi8YnQvIfs53Gcc4PUAJGPOCuVfJCyzBNSK0qcF1HK2dfGC0vsF5VOE+vM753lak90DrFjlzgu0sWemER06a/Mey962paeMI+RPT+5QGVKNvvDouRCzOSklct5Y0nKNBRxehtrysDClMkoSsjjHDISC5MnqWksx5zOYakQRUn5DMp0rhdibtIE5HJumU+d2XzWSHfIPHPF06TmmwDL/12CtZfKjahmgEptuMwHr7H/yFvJepWnWQXxVa5X9dxUOte6bSpYZdxcz+xam7kE+RwXpMeInKom/6G1JC4RMeme9lM4YC/HDWZOMeX9Hac59LRgd/tJTmHlzKJW7OPan45zag7Z11mG4o4yVeDuBTFdM5+umUfXyChnYZbMTZzAYXq8KtdzkyZiTmI+64MVc2j+2WF5Nl00KymPskWtzeP0Fp2N0ZAB/TDjJdo1MdNXUldS+GFiK+eRvfHGAH8wgEUphdjEpmVhhYxABrFIrA9XjvyMhmRMm8/JJrifBdHG0q6NTUQghUeKjox8sQ57EAgRaYJSYSP/ZCkiU05vDhk0g4moGTtq1H8YkJeNQFXWDDYlCZZoCGtRfJjfaIg7tUtSC8nI9x87YPgQI5h1/K/A5m0NfWbby5pQSUL/P51soxGr0jPwL8Wbzy0ehvc+AAAAAElFTkSuQmCC" />
+					<label id="D_LBL_001">処理する明細書の年月</label>
+				</div>
+				<label id="D_LBL_002" data-bind="text: viewmodeld.processingYM"></label>
+				<span>( <label id="D_LBL_015"
+					data-bind="text: viewmodeld.d_lbl_015"></label> : <label
+					id="D_LBL_016" data-bind="text: viewmodeld.d_lbl_016"></label> )
+				</span>
+			</div>
+			<div class="divLine">
+				<label id="D_LBL_003">以下の設定で処理を行います。</label>
+			</div>
+			<div class="divLine">
+				<div class="D-divLine-col-1">
+					<div id="D_LBL_004" data-bind="ntsFormLabel: {required: true}">処理対象</div>
+				</div>
+				<div>
+					<div class="cf" id="D_SEL_001"
+						data-bind="ntsSwitchButton: {
+									options: ko.observableArray([
+							            { code: '1', name: '給与' },
+							            { code: '2', name: '給与予備' },
+							            { code: '3', name: '給与・給与予備' }
+							        ]),
+									optionsValue: 'code',
+									optionsText: 'name',
+									value: viewmodeld.sparePayAtr,
+									enable: true }">
+					</div>
+				</div>
+			</div>
+			<div class="divLine" id="D-divLine4">
+				<button id="D_BTN_001">この条件で対象者を絞込み</button>
+				<span class="caret-bottom"></span>
+			</div>
+			<div class="divLine" id="D-divLine5">
+				<div id="D_LBL_006" data-bind="ntsFormLabel: {required: true}">対象人数</div>
+				<div id="D_LBL_007">
+					<label data-bind='text: viewmodeld.countItems'></label> <label
+						class="unit">人</label>
+				</div>
+				<div>
+					<table id="D_LST_001"
+						data-bind="igGrid: {
+						dataSource: viewmodeld.d_LST_001_items,
+		                primaryKey: 'code',
+		                width: '740px',
+		                height: '280px',
+		                autoCommit: false,
+		                dataSourceType: 'json',
+		                autoGenerateColumns: false,
+		                features: [
+		                    {
+		                        name: 'Selection',
+		                        mode: 'row'
+		                    },
+		                    {
+		                        name: 'MultiColumnHeaders'
+		                    }
+		                ],
+		                columns: [
+		                    { headerText: 'コード', key: 'code', dataType: 'string', columnCssClass: 'text_align', width: '15%' },
+		                    { headerText: '名称', key: 'name', dataType: 'string', width: '15%' },
+		                    {
+		                        headerText: '振込元設定', width: '70%',
+		                        group: [
+		                            { headerText: '支払1', key: 'code', dataType: 'string', width: '14%' },
+		                            { headerText: '支払2', key: 'name', dataType: 'string', width: '14%' },
+		                            { headerText: '支払3', key: 'description', dataType: 'string', width: '14%' },
+		                            { headerText: '支払4', key: 'description', dataType: 'string', width: '14%' },
+		                            { headerText: '支払5', key: 'description', dataType: 'string', width: '14%' }
+		                        ]
+		                    }
+		                ]
+				}"></table>
+				</div>
+			</div>
+			<div class="divLine">
+				<div class="D-divLine-col-1">
+					<div id="D_LBL_005" data-bind="ntsFormLabel: {required: true}">振込日</div>
+				</div>
+				<div class="D-divLine-col-2">
+					<div data-name="振込日"
+						data-bind="ntsDatePicker: {value: viewmodeld.dateOfPayment, dateFormat: 'YYYY/MM/DD', valueFormat: 'YYYYMMDD', required: true, startDate: '1900/01/01', endDate: '9999/12/31'}"></div>
+				</div>
+				<div class="D-divLine-col-3">
+					<div id="D_LBL_017" data-bind="ntsFormLabel: {required: true}">出力方法</div>
+				</div>
+				<div>
+					<div class="cf" id="D_SEL_002"
+						data-bind="ntsSwitchButton: {
+									options: ko.observableArray([
+							            { code: '1', name: '振込依頼書' },
+							            { code: '2', name: 'テキストデータ' }
+							        ]),
+									optionsValue: 'code',
+									optionsText: 'name',
+									value: viewmodeld.d_SEL_002_selectedCode,
+									enable: true }">
+					</div>
+				</div>
+			</div>
+			<div class="divLine">
+				<button id="D_BTN_002" class="proceed x-large"
+					data-bind="click: viewmodeld.openEDialog.bind(viewmodeld) ">作成を実行</button>
+			</div>
+		</div>
+	</ui:composition>
+</body>
+</html>

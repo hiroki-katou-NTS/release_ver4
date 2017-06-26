@@ -1,0 +1,14 @@
+
+#contents-left, #contents-right {
+	padding: 20px;
+	vertical-align: top !important;
+}
+
+.control-group {
+	margin-top: 30px;
+}
+
+.labelfirst{
+	margin-left: 10px;
+	margin-top: 10px;
+}

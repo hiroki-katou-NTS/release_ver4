@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <body>
+        <ui:composition template="../../../../master/dialog.xhtml">
+            <ui:define name="htmlHead">
+            	<com:stylefile path="main.css" />
+				<com:scriptfile path="../../../../lib/generic/igniteui/js/infragistics.core.js"/>
+				<com:scriptfile path="../../../../lib/generic/igniteui/js/infragistics.lob.js"/>
+            	<com:scriptfile path="../../../../lib/generic/igniteui/js/extensions/infragistics.ui.combo.knockout-extensions.js"/>
+				<com:scriptfile path="../../../../lib/nittsu/ui/textbox-options.js"/>
+				<com:ValidatorScript>
+					nts.uk.ctx.pr.core.dom.rule.employment.layout.LayoutCode
+					nts.uk.ctx.pr.core.dom.rule.employment.layout.LayoutName
+   				</com:ValidatorScript>
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="viewmodel.js" />
+				<com:scriptfile path="service.js" />
+			    <script>var dialogSize = { width: 900, height: 610 };</script>
+			    <style>.nts-list-box *{box-sizing: border-box} </style>
+            </ui:define>
+            
+            <ui:define name="content">
+<!--             <div id="functions-area"></div> -->
+            	<div id="contents-area">
+					<div class="cf">
+						<div data-bind="ntsFormLabel: {required: true}" class="form-label"><label id="LBL_001">作成方法の選択</label></div><br />
+						<div class = "layoutSelect">
+							<div id="SEL_001" data-bind="foreach: itemsRadio">
+				  				<span class="ntsControl">
+									<label class="ntsRadioBox">
+										<input type="radio" name="textRadio" data-bind="checkedValue: value, 
+																			checked: $parent.isRadioCheck,
+																			enable: true" />
+										<span class="box"></span><span class="label" data-bind="text: text"></span>
+									</label>
+								</span>
+							</div>
+							<div id="SEL_002"
+							data-bind="ntsComboBox: {options: comboboxList,
+ 											optionsValue: 'layoutCode',
+ 											value: selectLayoutCode,
+ 											optionsText: 'layoutName',
+ 											enable: isEnableCombox(),
+ 											columns: [
+ 												{ prop: 'layoutCode', length: 3 },
+ 												{ prop: 'layoutName', length: 10 }
+ 											]}" 
+							class="cf"></div>
+							<!-- 明細書マスタ一覧で選択した項目のレイアウトパターンを表記 (レイアウト区分)-->
+							<div class = "selectDrop"><label id = "LBL_002" data-bind="text: layoutAtrStr"></label></div>
+						</div>
+						<div class="clsDiv"><label id = "LBL_003">※選択した明細レイアウトの最新の履歴からコピーします。</label></div>
+						<div>
+							<div class ="inline clsDiv">
+								<div id="LBL_004" data-bind="ntsFormLabel: {required: true,constraint: 'LayoutCode'}">
+									<label>コード/名称<br /></label>
+								</div>
+								<!-- <label id = "LBL_004" >コード/名称</label> -->
+								<input id="INP_001" data-name="コード" data-bind="ntsTextEditor: {value: layoutCode, 
+																					constraint: 'LayoutCode, LayoutName', 
+																					option: textEditorOption, 
+																					enable: true}" />
+								<input id="INP_002" data-name="名称" data-bind="ntsTextEditor: {value: layoutName, 
+																					constraint: 'LayoutName', 
+																					option: textEditorOption, 
+																					enable: true}" />
+							</div>
+							<div class ="timeLayout clsDiv">
+								<div data-bind="ntsFormLabel: {required: true}"><label id = "LBL_005">開始年月</label></div>
+								<div><input id = "INP_003" style="ime-mode: inactive" data-bind="ntsTimeEditor: {value: selectStartYm, option: timeEditorOption}"></input></div>
+								<!-- 入力した開始年月を和暦で表記 -->
+								<div><label id = "LBL_006" data-bind="text: yearMonthEra"></label></div>
+							</div>
+							<div class="clsDiv" data-bind="ntsFormLabel: {required: true}">
+								<label id = "LBL_007">レイアウトパターンの選択</label>
+								<label id = "LBL_008">※コピーして作成する場合、コピー元のレイアウトより表示項目が少ない項目は選択できません。</label>
+							</div>
+						</div>
+						<div class = "lstBox">						
+						<div id = "LST_001"
+							data-bind="ntsListBox: {options: itemList,
+										optionsValue: 'stt',
+										optionsText: 'numberDisplayItems',
+										multiple: false,
+										value: selectedCodes,
+										enable: isEnable(),
+										columns: [
+											{ prop: 'printType', length: 7 },
+											{ prop: 'paperType', length: 4 },
+											{ prop: 'direction', length: 3 },
+											{ prop: 'numberPeople', length: 3 },
+											{ prop: 'numberDisplayItems', length: 13 },
+											{ prop: 'reference', length: 6 }
+										]}"
+						class="cf"></div>
+						</div>
+						<br/>
+						<hr></hr>
+						<div class = "bottomStype">
+							<button class="x-large proceed" id = "BTN_001" data-bind="click: createNewLayout, enable: $root.errors.isEmpty">作成</button>
+							<button class="large" id="BTN_002" data-bind="click: closeDialog">キャンセル</button><br />
+						</div>
+					</div>
+	           	</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

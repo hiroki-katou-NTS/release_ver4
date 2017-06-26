@@ -1,0 +1,59 @@
+.wrap-sel-006 {
+	height: 203px;
+}
+
+.d-col-1 {
+	height: 100%;
+	float: left;
+}
+
+#listBox_itemType_d_screen {
+	margin-top: 39px;
+}
+
+#listBox_items_d_screen {
+	width: 282px;
+	margin-left: 20px;
+}
+
+#listBox_itemType_d_screen.caret-right:after {
+	border-width: 37px 19px;
+	top: 38px;
+	color: #E0F59E;
+}
+
+#insert_in_calculation_btn_d_screen {
+	width: 283px;
+	height: 28px;
+}
+
+#insert_in_calculation_btn_d_screen.caret-bottom:after {
+	border-width: 25px 75px;
+	color: #E0F59E;
+	top: 30px;
+	left: 87px;
+}
+
+.list-box-1 {
+	width: 239px;
+}
+
+#listBox_items_d_screen .ntsSearchBox {
+	width: 225px !important;
+}
+
+.block-detail {
+	width: 258px;
+	height: 212px;
+	background-color: whitesmoke;
+	vertical-align: top;
+	color: gray;
+	padding: 0 8px 0 8px;
+	margin-left: 10px;
+	overflow: auto;
+}
+
+.block-detail .item_description_lbl {
+	margin: 10px 0 5px 12px;
+	display: inline-block;
+}

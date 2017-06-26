@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:stylefile path="newhistory.css" />
+			<com:scriptfile path="../dialogbase/base.js" />
+			<com:scriptfile path="viewmodel.js" />
+			<com:scriptfile path="start.js" />
+			
+			<script type="text/javascript">
+				var dialogSize = {
+					width : 580,
+					height : 350
+				};
+			</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<!-- BEGIN CONTENT AREA-->
+			<div id="this-contents-area">
+				<label>新たに作成する履歴の、作成情報を入力してください。</label>
+				<table class="form-default">
+					<ui:include src="../dialogbase/namepart.xhtml"/>
+					<tr>
+						<td>
+							<div style="min-width: 130px" data-bind="ntsFormLabel: { required: true }">期間</div>
+						</td>
+						<td>
+							<span id="startYearMonth" data-name="期間"
+							data-bind="ntsDatePicker: {value: startYearMonth, dateFormat: 'yyyy/MM', disabled: false, required: true}"/>
+							<label data-bind="text: '(' + nts.uk.time.yearmonthInJapanEmpire(startYearMonth()) + ') ~ 9999/12'"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="vertical-align: top">
+							<div data-bind="ntsFormLabel: { required: true }">履歴の引継ぎ</div>
+						</td>
+						<td>
+							<com:ko tag="if" bind="dialogOptions.lastest != undefined">
+								<div style="padding-top: 5px">
+									<label class="ntsRadioBox">
+										<input type="radio"
+											name="createType"
+											id="createTypeCopy"
+											data-bind="checkedValue: 'COPY', checked: createType, enable: dialogOptions.lastest != undefined" />
+										<span class="box"/>
+										<label for="createTypeCopy" class="label" data-bind="text: '最新の履歴 (' + lastYearMonth + ') から引き継ぐ'"/>
+									</label>
+								</div>
+							</com:ko>
+							<div>
+								<label class="ntsRadioBox" style="padding-top: 10px; padding-bottom: 20px;">
+									<input type="radio"
+										name="createType"
+										id="createTypeInit"
+										data-bind="checkedValue: 'INIT', checked: createType" />
+									<span class="box"/>
+									<label for="createTypeInit" class="label" data-bind="text: '初めから作成する'"/>
+								</label>
+							</div>
+						</td>
+					</tr>
+				</table>
+				<com:ko tag="if" bind="dialogOptions.lastest == undefined">
+					<div style="height: 25px; line-height: 25px;"/>
+				</com:ko>
+			</div>
+			<hr />
+			<!-- END CONTENT AREA-->
+
+			<!-- BEGIN FUNCTION AREA-->
+			<ui:include src="../dialogaction.xhtml"/>
+			<!-- END FUNCTION AREA-->
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

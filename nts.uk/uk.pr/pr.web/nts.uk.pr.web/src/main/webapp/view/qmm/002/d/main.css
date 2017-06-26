@@ -1,0 +1,57 @@
+@CHARSET "UTF-8";
+
+#contents-area {
+	width: 1040px;
+	margin-top: 10px;
+}
+
+#functions-area {
+	margin-top: 10px;
+}
+
+.control-group {
+	margin-bottom: 15px;
+}
+
+.left-content {
+	float: left;
+	width: 32%;
+}
+
+.right-content {
+	float: left;
+	width: 68%;
+}
+
+.right-content-left {
+	float: left;
+	width: 30%
+}
+
+.right-content-right {
+	float: left;
+	width: 70%
+}
+
+#LBL_001, #LBL_002 {
+	margin-bottom: 10px;
+}
+
+
+.text-editor1 {
+	border: 1px solid #4F4F4F;
+	border-radius: 5px;
+	height: 25px;
+}
+
+.text-editor2 {
+	border: 1px solid #4F4F4F;
+	border-radius: 5px;
+	height: 25px;
+}
+
+.text-editor3 {
+	border: 1px solid #4F4F4F;
+	border-radius: 5px;
+	height: 25px;
+}

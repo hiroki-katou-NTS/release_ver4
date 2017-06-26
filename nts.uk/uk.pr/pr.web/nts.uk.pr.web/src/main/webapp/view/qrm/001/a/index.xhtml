@@ -1,0 +1,533 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.core.dom.retirement.payment.PaymentMoney
+				nts.uk.ctx.pr.core.dom.retirement.payment.PaymentYear
+				nts.uk.shr.com.primitive.Memo
+			</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="qrm001.a.main.css" />
+			<com:scriptfile path="qrm001.a.start.js" />
+			<com:scriptfile path="qrm001.a.vm.js" />
+			<com:scriptfile path="qrm001.a.service.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area">
+				<button class="proceed" data-bind="click: function(){saveData(isUpdate());},enable: $root.errors.isEmpty">計算/登録</button>
+				<button class="danger" data-bind="click: deleteData, enable: (isUpdate()&#38;Boolean($root.errors.isEmpty()))">削除</button>
+			</div>
+			<div id="contents-area" class="table">
+				<div class="cell column1">
+					<img src="data:image/png;base64,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"/>
+				</div>
+				<div class="cell">
+					<div id="profile-div" class="table">
+						<div id="find-group-btn" class="cell">
+							<button>対象者</button>
+							<button data-bind="click: previous_emp, enable: previous">&#9664;</button>
+							<button data-bind="click: next_emp, enable: next">&#9654;</button>
+						</div>
+						<div class="cell">
+							<span> 
+								<input data-bind="ntsTextEditor: {
+									value: currentEmployee().employeeCode,
+									constraint: '',
+									option: { textmode: 'text', textalign: 'left' },
+									required: true,
+									enable: false }" />
+							</span>
+							<span id="symbol">&#8629;</span>
+						</div>
+						<div class="cell">
+							<span data-bind="text: currentEmployee().name"></span>
+						</div>
+						<div class="cell">
+							<img id="person-img" src="data:image/png;base64,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" />
+						</div>
+						<div class="cell">
+							<span>対象データ</span>
+						</div>
+						<div class="cell">
+							<div>
+								<div id="combo-box7" data-bind="ntsComboBox: {
+											options: retirementPaymentKeyList,
+											optionsValue: 'payDate',
+											value: date,
+											optionsText: 'payDate',
+											enable: isUpdate }"></div>
+							</div>
+						</div>
+					</div>
+					<div>
+						<button id="note-btn" data-bind="click: openDialog">入力欄の背景色について</button>
+					</div>
+					<hr id="division" align="left"/>
+					<div>
+						<div>
+							<p class="title-label">支払日</p>
+							<hr id="hr-14" class="table-division" align="left" />
+							<table id="table-14">
+								<thead>
+									<tr>
+										<th>退職金支払日</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<input id="inp-14" data-bind="ntsTextEditor: {
+														value: retirementPaymentCurrent().payDate,
+														option: { textmode: 'text' },
+														required: true, 
+														enable: !isUpdate() }" />
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<div class="cell column4">
+								<p class="title-label">勤続年数</p>
+								<hr id="hr-1" class="table-division" align="left" />
+								<table id="table-1">
+									<thead>
+										<tr>
+											<th>入社年月日</th>
+											<th>退職年月日</th>
+											<th>試用期間</th>
+											<th>除外年数</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td class="const" data-bind="text: personCom().startDate"></td>
+											<td class="const" data-bind="text: personCom().endDate"></td>
+											<td>
+												<div id="combo-box1" data-bind="ntsComboBox: {
+													options: ko.observableArray([
+										                { code: 0, name: '試用期間なし' },
+										                { code: 1, name: '試用期間あり' }
+										            ]),
+													optionsValue: 'code',
+													value: retirementPaymentCurrent().trialPeriodSet,
+													optionsText: 'name',
+													enable: true }"></div>	
+											</td>
+											<td>
+												<div>
+													<input id="inp-2" data-bind="ntsNumberEditor: {
+														value: retirementPaymentCurrent().exclusionYears,
+														constraint: 'PaymentYear',
+														option: { textmode: 'text' },
+														required: true,
+														readonly: true }" />
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="cell">
+								<p class="title-label">役員の期間</p>
+								<hr id="hr-2" class="table-division" align="left" />
+								<table id="table-2">
+									<thead>
+										<tr>
+											<th>兼任年数</th>
+											<th>役員年数</th>
+											<th>雇用区分</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>
+												<div>
+													<input id="inp-3" data-bind="ntsNumberEditor: {
+														value: retirementPaymentCurrent().additionalBoardYears,
+														constraint: 'PaymentYear',
+														option: { textmode: 'text' },
+														required: true,
+														readonly: true  }" />
+												</div>
+											</td>
+											<td>
+												<div>
+													<input id="inp-4" data-bind="ntsNumberEditor: {
+														value: retirementPaymentCurrent().boardYears,
+														constraint: 'PaymentYear',
+														option: { textmode: 'text' },
+														required: true ,
+														readonly: true }" />
+												</div>
+											</td>
+											<td class="const" data-bind="text : personCom().adoptType"></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div>
+							<p class="title-label">退職理由</p>
+							<hr id="hr-3" class="table-division" align="left" />
+							<table id="table-3">
+								<thead>
+									<tr>
+										<th>退職区分</th>
+										<th>退職理由区分</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td class="const" data-bind="text: personCom().quitFiringAtr"></td>
+										<td class="const" data-bind="text: personCom().quitFiringReason_atr"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div>
+							<div class="cell column2">
+								<img id="arrow-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF0AAADCCAIAAACkI1kCAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAOLSURBVHhe7dw/S1tRGIDxfkQT7TUVEatDcBB00BoQZxUcBVERhIB+CQdrI+4udoggCA4iHQxS/8W+cINo+5ROt/eIzzMEkjPk9ee5OXG4fngyShdOF04XThdOF04XThcuCZdOp/Mjscp36Xa76+vrk5OTU8kUwyThsri4WKlUPiZTtVpNwmV5eTmm+ZRMWZYl5xIz9ZddX19fWi6Bsrq62m63v5fayclJci67u7u9hVJLyyUed3Z2egulpgunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwuXhMvS0lLukmVZs9mMV25LLaYq3+Xh4WF2djZEwqVWq9Xr9bm5uS+lFlOV73J/fz81NTU4OBguOU0YlVtMlYTL9PT0s0sUNOUWU6XoUnoxVVousYcbjUar1fpaajFVWi5xKq2srPQWSi0tl4GBAV166cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cLpwunC6cK9SZdut3t9ff34+Nh7XkBvz+X8/LzZbE5MTARN76UCejMusUcuLy+3trZCpFKpDA8Pdzqd3loBvQ2Xs7Oz7e3tsbGxGDHLslqtNjIy8q5dLi4uNjY26vV6tVoNjpgyyl2urq7u7u5+FtDt7W2gP9/Hl5bL6enp5ubm6OhovkdykZfF0uciGxoayt8oIZe1tbXx8fH+/v7nPfJnsVRovbdJyqXRaAQKbpP/X0IuNzc3+/v7MzMzQRNjvfzt/f+Su48vDoXQmZ+fj8+//Nb3vGCKc3pvb6/Van0rvoODg3a7nY9Ubq/O6Tga4uePKyt08r0TFX1Op9nv31+i2DuHh4cLCwuBEjq6vCo+d46OjuLKiuuo0L8D0uyvLnnxde74+Dj/Fxfvqn+4vNt04XThdOF04XThdOF04XThdOF04XShnp5+AUJlfju/eMtyAAAAAElFTkSuQmCC" />
+								<p class="title-label">退職金 支給額</p>
+								<hr id="hr-4" class="table-division" align="left" />
+								<table id="table-4">
+									<thead>
+										<tr>
+											<th>退職金支給合計</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>
+												<div>
+													<input id="inp-5" data-bind="ntsNumberEditor: {
+														value: retirementPaymentCurrent().totalPaymentMoney,
+														constraint: 'PaymentMoney',
+														option: { textmode: 'text' },
+														required: true }" />
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<p class="title-label">退職金 控除合計</p>
+								<hr id="hr-5" class="table-division" align="left" />
+								<table id="table-5">
+									<thead>
+										<tr>
+											<th>控除合計金額</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td class="caculator" data-bind="text: retirementPaymentCurrent().totalDeclarationMoney"></td>
+										</tr>
+									</tbody>
+								</table>
+								<p class="title-label">退職金 差引支給額</p>
+								<hr id="hr-6" class="table-division" align="left" />
+								<table id="table-6">
+									<thead>
+										<tr>
+											<th>退職金差引支給額</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td class="caculator" data-bind="text: retirementPaymentCurrent().actualRecieveMoney"></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="cell column3">
+								<p class="title-label">退職金控除額</p>
+								<hr id="hr-7" class="table-division" align="left" />
+								<table id="table-7">
+									<thead>
+										<tr>
+											<th>退職金控除1</th>
+											<th>退職金控除2</th>
+											<th>退職金控除3</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>
+												<div>
+													<input id="inp-6" data-bind="ntsNumberEditor: {
+														value: retirementPaymentCurrent().deduction1Money,
+														constraint: 'PaymentMoney',
+														option: { textmode: 'text' },
+														required: true }" />
+												</div>
+											</td>
+											<td>
+												<div>
+													<input id="inp-7" data-bind="ntsNumberEditor: {
+														value: retirementPaymentCurrent().deduction2Money,
+														constraint: 'PaymentMoney',
+														option: { textmode: 'text' },
+														required: true }" />
+												</div>
+											</td>
+											<td>
+												<div>
+													<input id="inp-8" data-bind="ntsNumberEditor: {
+														value: retirementPaymentCurrent().deduction3Money,
+														constraint: 'PaymentMoney',
+														option: { textmode: 'text' },
+														required: true }" />
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<p class="title-label">退職金税計算</p>
+								<hr id="hr-8" class="table-division" align="left" />
+								<table id="table-8">
+									<thead>
+										<tr>
+											<th>退職所得の受給に関する申告書</th>
+											<th>税計算方法</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>
+												<span id="combo-box4" data-bind="ntsComboBox: {
+													options: ko.observableArray([
+										                { code: 0, name: '有り（他から退職金の支払い無し）' },
+										                { code: 1, name: '有り（他から退職金支払い有り）' },
+										                { code: 2, name: '申告書無し（税率　一律20.42%）' }
+										            ]),
+													optionsValue: 'code',
+													value: retirementPaymentCurrent().retirementPayOption,
+													optionsText: 'name',
+													enable: true
+													}"></span>	
+											</td>
+											<td>
+												<div id="combo-box5" data-bind="ntsComboBox: {
+													options: ko.observableArray([
+										                { code: 0, name: '自動計算' },
+										                { code: 1, name: '手入力' }
+										            ]),
+													optionsValue: 'code',
+													value: retirementPaymentCurrent().taxCalculationMethod,
+													optionsText: 'name',
+													enable: true }"></div>	
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<table id="table-9">
+									<thead>
+										<tr>
+											<th>所得税金額</th>
+											<th>市区町村民税</th>
+											<th>都道府県民税</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>
+												<div>
+													<input id="inp-9" data-bind="ntsNumberEditor: {
+														value: retirementPaymentCurrent().incomeTaxMoney,
+														constraint: 'PaymentMoney',
+														option: { textmode: 'text' },
+														required: true,
+														enable: Boolean(retirementPaymentCurrent().taxCalculationMethod()) }" />
+												</div>
+											</td>
+											<td>
+												<div>
+													<input id="inp-10" data-bind="ntsNumberEditor: {
+														value: retirementPaymentCurrent().cityTaxMoney,
+														constraint: 'PaymentMoney',
+														option: { textmode: 'text' },
+														required: true,
+														enable: Boolean(retirementPaymentCurrent().taxCalculationMethod()) }" />
+												</div>
+											</td>
+											<td>
+												<div>
+													<input id="inp-11" data-bind="ntsNumberEditor: {
+														value: retirementPaymentCurrent().prefectureTaxMoney,
+														constraint: 'PaymentMoney',
+														option: { textmode: 'text' },
+														required: true,
+														enable: Boolean(retirementPaymentCurrent().taxCalculationMethod()) }" />
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<button id="btn-2" data-bind="click: function(){manualCaculateEvent(retirementPaymentCurrent());}, enable: Boolean(retirementPaymentCurrent().taxCalculationMethod())">計算結果の確認</button>
+							</div>
+						</div>
+						<div>
+							<p class="title-label">退職金振込設定</p>
+							<hr id="hr-10" class="table-division" align="left" />
+							<table id="table-10">
+								<thead>
+									<tr>
+										<th>支払選択</th>
+										<th>銀行</th>
+										<th>支店</th>
+										<th>口座番号</th>
+										<th>振込金額</th>
+									</tr>
+								</thead>
+								
+								<tbody>
+									<tr>
+										<td>
+											<span class="combo-box10" data-bind="ntsComboBox: {
+													options: select6List()[0],
+													optionsValue: 'code',
+													value: select6Code()[0],
+													optionsText: 'name',
+													enable: true }"></span>	
+										</td>
+										<td><span data-bind="text: select6Code()[0]()?bankTransferList()[select6Code()[0]()-1].bankName:null"></span></td>
+										<td><span data-bind="text: select6Code()[0]()?bankTransferList()[select6Code()[0]()-1].branchName:null"></span></td>
+										<td><span data-bind="text: select6Code()[0]()?bankTransferList()[select6Code()[0]()-1].accountNumber:null"></span></td>
+										<td>
+											<span>
+												<input data-bind="ntsNumberEditor: {
+													value: retirementPaymentCurrent().option1Money,
+													constraint: 'PaymentMoney',
+													option: { textmode: 'text' },
+													required: true,
+													enable: Boolean(select6Code()[0]()) }" />
+											</span>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<span class="combo-box10" data-bind="ntsComboBox: {
+													options: select6List()[1],
+													optionsValue: 'code',
+													value: select6Code()[1],
+													optionsText: 'name',
+													enable: true }"></span>	
+										</td>
+										<td><span data-bind="text: select6Code()[1]()?bankTransferList()[select6Code()[1]()-1].bankName:null"></span></td>
+										<td><span data-bind="text: select6Code()[1]()?bankTransferList()[select6Code()[1]()-1].branchName:null"></span></td>
+										<td><span data-bind="text: select6Code()[1]()?bankTransferList()[select6Code()[1]()-1].accountNumber:null"></span></td>
+										<td>
+											<span>
+												<input data-bind="ntsNumberEditor: {
+													value: retirementPaymentCurrent().option2Money,
+													constraint: 'PaymentMoney',
+													option: { textmode: 'text' },
+													required: true,
+													enable: Boolean(select6Code()[1]()) }" />
+											</span>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<span class="combo-box10" data-bind="ntsComboBox: {
+													options: select6List()[2],
+													optionsValue: 'code',
+													value: select6Code()[2],
+													optionsText: 'name',
+													enable: true }"></span>	
+										</td>
+										<td><span data-bind="text: select6Code()[2]()?bankTransferList()[select6Code()[2]()-1].bankName:null"></span></td>
+										<td><span data-bind="text: select6Code()[2]()?bankTransferList()[select6Code()[2]()-1].branchName:null"></span></td>
+										<td><span data-bind="text: select6Code()[2]()?bankTransferList()[select6Code()[2]()-1].accountNumber:null"></span></td>
+										<td>
+											<span>
+												<input data-bind="ntsNumberEditor: {
+													value: retirementPaymentCurrent().option3Money,
+													constraint: 'PaymentMoney',
+													option: { textmode: 'text' },
+													required: true,
+													enable: Boolean(select6Code()[2]()) }" />
+											</span>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<span class="combo-box10" data-bind="ntsComboBox: {
+													options: select6List()[3],
+													optionsValue: 'code',
+													value: select6Code()[3],
+													optionsText: 'name',
+													enable: true }"></span>	
+										</td>
+										<td><span data-bind="text: select6Code()[3]()?bankTransferList()[select6Code()[3]()-1].bankName:null"></span></td>
+										<td><span data-bind="text: select6Code()[3]()?bankTransferList()[select6Code()[3]()-1].branchName:null"></span></td>
+										<td><span data-bind="text: select6Code()[3]()?bankTransferList()[select6Code()[3]()-1].accountNumber:null"></span></td>
+										<td>
+											<span>
+												<input data-bind="ntsNumberEditor: {
+													value: retirementPaymentCurrent().option4Money,
+													constraint: 'PaymentMoney',
+													option: { textmode: 'text' },
+													required: true,
+													enable: Boolean(select6Code()[3]()) }" />
+											</span>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<span class="combo-box10" data-bind="ntsComboBox: {
+													options: select6List()[4],
+													optionsValue: 'code',
+													value: select6Code()[4],
+													optionsText: 'name',
+													enable: true }"></span>	
+										</td>
+										<td><span data-bind="text: select6Code()[4]()?bankTransferList()[select6Code()[4]()-1].bankName:null"></span></td>
+										<td><span data-bind="text: select6Code()[4]()?bankTransferList()[select6Code()[4]()-1].branchName:null"></span></td>
+										<td><span data-bind="text: select6Code()[4]()?bankTransferList()[select6Code()[4]()-1].accountNumber:null"></span></td>
+										<td>
+											<span>
+												<input data-bind="ntsNumberEditor: {
+													value: retirementPaymentCurrent().option5Money,
+													constraint: 'PaymentMoney',
+													option: { textmode: 'text' },
+													required: true,
+													enable: Boolean(select6Code()[4]()) }" />
+											</span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div>
+							<p class="title-label">退職金明細書備考</p>
+							<hr id="hr-11" class="table-division" align="left" />
+							<div>
+								<textarea
+									data-bind="ntsMultilineEditor: {
+									value: retirementPaymentCurrent().withholdingMeno,
+									constraint: 'Memo',
+									option: { resizeable: true, textalign: 'left' }}" />
+							</div>
+							<p class="title-label">退職所得の源泉徴収票、摘要欄記載事項</p>
+							<hr id="hr-11" class="table-division" align="left" />
+							<div>
+								<textarea
+									data-bind="ntsMultilineEditor: {
+									value: retirementPaymentCurrent().statementMemo,
+									constraint: 'Memo',
+									option: { resizeable: true, textalign: 'left' }}" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

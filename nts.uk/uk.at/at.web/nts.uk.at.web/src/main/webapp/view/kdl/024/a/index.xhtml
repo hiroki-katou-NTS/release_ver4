@@ -1,0 +1,110 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<head>
+</head>
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="kdl024.a.main.css" />
+			<com:scriptfile path="kdl024.a.start.js" />
+			<com:scriptfile path="kdl024.a.service.js" />
+			<com:scriptfile path="kdl024.a.vm.js" />
+			<com:ValidatorScript>
+				nts.uk.ctx.at.schedule.dom.budget.external.ExternalBudgetCd
+				nts.uk.ctx.at.schedule.dom.budget.external.ExternalBudgetName
+			</com:ValidatorScript>
+		</ui:define>
+		<ui:define name="content">
+			<div id="functions-area">
+				<button id="btnNew" class="btnMenu" data-bind="click: addNew" tabindex="1">#{i18n.getText('KDL024_1')}</button>
+				<button id="btnSave" class="btnMenu proceed" data-bind="click: register, enable: $root.errors.isEmpty" tabindex="2">#{i18n.getText('KDL024_2')}</button>
+				<button id="btnDel" class="btnMenu delete_btn btn_width danger"
+					data-bind="click: del, enable: !isNew()" style="margin-left: 60px;" tabindex="3">#{i18n.getText('KDL024_3')}</button>
+				<button id="btnClose" class="btnMenu" data-bind="click: close" tabindex="4">#{i18n.getText('KDL024_4')}</button>
+			</div>
+			<div id="content-area" class="cf">
+				<div class="left-content">
+					<div id="lstBudget" class="bg-green caret-right caret-background" >
+						<table id="single-list"
+							data-bind="ntsGridList: {								
+								height: 255,
+								dataSource: listBudget,
+								primaryKey: 'externalBudgetCode',
+								columns: columns,
+								multiple: false,
+								required: true,
+								value: selectedBudgetCode
+							}">
+						</table>
+					</div>
+				</div>
+				<div class="right-content">
+					<table id="tblContent" data-bind="with: currentItem">
+						<tr>
+							<td>
+								<div id="divInfo" data-bind="ntsFormLabel: {
+									constraint: ['ExternalBudgetCd','ExternalBudgetName'] ,
+									required: true}">#{i18n.getText('KDL024_7')}</div>
+							</td>
+							<td>
+								<input id="inpCode" class="nts-checkvalue" data-bind="ntsTextEditor: {
+									value: externalBudgetCode,
+									constraint: 'ExternalBudgetCd',
+									required: true,
+									enable: $parent.isNew}" 
+									data-name="BudgetCode"
+									tabindex="5"/>
+								<input id="inpName" class="nts-checkvalue" data-bind="ntsTextEditor: {
+									value: externalBudgetName,
+									required: true,
+									constraint: 'ExternalBudgetName'}"
+									tabindex="6"/>
+								<BR />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div id="divAttribute" data-bind="ntsFormLabel:{required: true }">#{i18n.getText('KDL024_8')}</div>
+							</td>
+							<td>
+								<div id="cmbAttribute"
+									data-bind="ntsComboBox: {
+										options: $parent.itemListCbb,
+										optionsValue: 'codeCbb',
+										value: budgetAtr,
+										optionsText: 'nameCbb',
+										enable: true,
+										columns: [
+											{ prop: 'nameCbb', length: 2 }
+										]}"
+									tabindex="7">
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div id="divAttribute" data-bind="ntsFormLabel:{required: true}">#{i18n.getText('KDL024_9')}</div>
+							</td>
+							<td>
+								<div class="cf"
+									data-bind="ntsSwitchButton: {
+										options: $parent.roundingRules,
+										optionsValue: 'unitId',
+										optionsText: 'unitName',
+										value: unitAtr}" tabindex="8">
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</ui:define>
+
+	</ui:composition>
+</body>
+</html>

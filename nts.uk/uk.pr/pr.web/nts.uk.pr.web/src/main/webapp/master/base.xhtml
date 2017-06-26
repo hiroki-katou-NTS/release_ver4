@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:com="http://xmlns.jcp.org/jsf/component">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        
+        <com:stylefile set="BASIC" />
+        
+        <com:viewcontext />
+        
+        <com:scriptfile set="BASIC" />
+        
+
+        <ui:insert name="htmlHead" />
+    </h:head>
+
+    <h:body>
+    
+    	<div id="master-wrapper" data-bind="with: content">
+    		<ui:insert name="base-content" >
+	    		<div id="header">ゆーけー！</div>
+		        <div id="master-content">
+		        	<ui:insert name="content" />
+		        </div>
+	    	</ui:insert>
+    	</div>
+        <div data-bind="with: kiban.errorDialogViewModel">
+			<div data-bind="ntsErrorDialog: {title: title, errors: errors, option: option}"></div>
+ 			<div id="func-notifier-errors" data-bind="css: { shown: occurs }, click: open">エラーがあります</div>
+        </div>
+    </h:body>
+
+</html>

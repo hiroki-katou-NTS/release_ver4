@@ -1,0 +1,62 @@
+#help-button{
+	width: 31px; 
+	margin-bottom: 10px;
+}
+.margin-bottom{
+	margin-bottom: 10px;
+}
+#contents-right-table >td{
+	margin-bottom: 10px;
+}
+.function-button-style{
+	margin-right: 10px;
+	font-size: 18px;
+	height:35px;
+	width: 119px;
+}
+.date-picker{
+	margin-left: 8px;
+	margin-right: 8px;
+}
+#select-employee-button{
+	font-size: 18px;
+	height: 35px;
+	width: 260px;
+	margin-right: 10px;
+}
+#functions-area .function-class {
+	margin-left: 60px;
+	margin-top: 6px;
+}
+td#contents-left {
+	width: 700px;
+}
+.select-target-year {
+	width: 650px;
+	height: 50px;
+	border: solid 2px #B1B1B1;
+	border-radius: 5px;
+	padding-top: 5px;
+	padding-left: 5px;
+	
+}
+.search-employee {
+    border: solid 2px #B1B1B1;
+    width: 655px;
+    min-height: 500px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+div#detail-process {
+    border: solid 2px #b1b1b1;
+    width: 475px;
+    height: 550px;
+    border-radius: 5px;
+    padding: 10px 10px 10px 18px;    
+}
+.nts-switch-button {
+	min-width: 80px;
+}
+#output-language button {
+	width: 120px;
+}

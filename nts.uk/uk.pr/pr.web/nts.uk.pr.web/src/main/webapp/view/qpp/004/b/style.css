@@ -1,0 +1,55 @@
+@CHARSET "UTF-8";
+
+.separate-1 {
+	margin-top: 5px;
+	margin-right: 10px;
+	margin-bottom: 5px;
+}
+
+.separate-bottom {
+	margin-bottom: 15px;
+	display: inline-block;
+}
+
+#functions-area a.backqpp004a {
+	text-decoration: none;
+	color: #000000;
+}
+
+.fit-space {
+	height: 100%;
+	width: 100%;
+	white-space: nowrap;
+}
+
+.green-div {
+	display: inline-block;
+    padding: 5px 15px;
+	background-color: #edf496;
+    margin-left: 10px;
+}
+
+.round-border {
+	border: 1px solid #a79c9c;
+	border-radius: 5px;
+}
+
+.icon {
+	margin-left: 6px;
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAfCAYAAACGVs+MAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAANSSURBVFhH1VdZTxNRFO4vcntXEY1LNNFoojFRH3wxcYsrGhVQkEWFiMYtsqgohghuARcERBAhhlY6bWmBFmgp0JbSlkJbSil83nNDSUumhbFQ4km+ZDLn3nO+s9xzZ2TBmSnkm0uQLFzGKvnZhGCj8iIyjDno8z2DjJyLLUoEsk05kEmNvGCgCuXDzVivvCpJJ4ZkIQUyMUUsWCddIDmgzZekiwZRAqvl57BWcT4CaxhIN9/JQroIG8wuvQ+HKIH3I7/hDvrgmvJweIITaBszIEmZisFJB3dyUHcXz63fEZgJRtV5gv45G2SvfbwPm4X0CF+iBEKRhIvJb8cudTYnp/aY2HMW6lxCmC6L61QeI3aqb87p5sv88iyaAEnVSBv2a/Owr+M28swfEZyZntXE1oVLXARI7AE3hiadmBZxEEsXEkkEjuufYpOQhq2qG3PYrsrEDnVmxLuFdFuE65wciSQC8xfHg2g2YxKwBUbR7x+BeQkQ6om4eyBeiZtAz4QV21QZOMH645tTyS6WVNwxf0CxpQ4blNdQaW/Flb4yft6b3Toc1t3jx9ceGOP74yag9Zr5mt2aHLxlzug5pbeUk6DnYks9jnY94M81znZOKtymJAI02Qw+C59oJv8wjBPDcE6N44vjD49uwO9AtUMOgQ2fTt8gnwW9EzY2GfX8vYXZaXBpOBH/dIDblEQgtDgUCc1zMkjvEpIBMkznusXdyYw+5JspOnJ+xlCCepeKn3O6hmn2U91pHKcbyyP27WXTceRfeuCzQ4ESFhGlv8Legte2Jn6kXlgbeLqpPEWs+X6OaiEfN6DQUguNtx+1TiFiX6n1B7zTfm7z/ypBGYs4p/8duliDPRmqYamu5seQnFEW6FbMMlXiE8tU42gHMk0VvESvbI1IY2XQeQf4Hlozxq5jEkkEcplzikYx3oNLvS9x2lDEr9tj3Y+RYXrDa3yk8z5PN2WDzjyRiSXLXoJHg1/53mgiiQBF28QajDqYUtvq7uJz4BebAfR1Q3dFE0t9t2+IzwgqA90dsWRRBKiTl0Po044yF+5LlMAeTS5O6gvZvF86nNIX4ZCuAOsUFyJ8iRJIJGRJyhRRRSJAv2iyW/1FospEgP4PV/7ndLZBV0iAvzy5lRVZyzEMAAAAAElFTkSuQmCC');
+	background-position: left center;
+	background-repeat: no-repeat;
+	height: 23px;
+	padding-left: 38px; /* Or size of icon + spacing */
+}
+
+.fix-button {
+    text-align: left;
+    padding: 0 12px !important;
+    width: 300px;
+    font-size: 14px !important;
+}
+
+.steps {
+   	height: 488px;
+}

@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="qmm017.a.style.css" />
+			<com:scriptfile path="qmm017.a.start.js" />
+			<com:scriptfile path="qmm017.a.vm.js" />
+			<com:scriptfile path="qmm017.a.service.js" />
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.formula.dom.primitive.Money
+			</com:ValidatorScript>
+			
+			<com:stylefile path="../../../../view/qmm/017/b/qmm017.b.style.css" />
+			<com:scriptfile path="../../../../view/qmm/017/b/qmm017.b.vm.js" />
+			
+			<com:stylefile path="../../../../view/qmm/017/c/qmm017.c.style.css" />
+			<com:scriptfile path="../../../../view/qmm/017/c/qmm017.c.vm.js" />
+			
+			<com:stylefile path="../../../../view/qmm/017/d/qmm017.d.style.css" />
+			<com:scriptfile path="../../../../view/qmm/017/d/qmm017.d.vm.js" />
+			
+			<com:stylefile path="../../../../view/qmm/017/e/qmm017.e.style.css" />
+			<com:scriptfile path="../../../../view/qmm/017/e/qmm017.e.vm.js" />
+			
+			<com:stylefile path="../../../../view/qmm/017/f/qmm017.f.style.css" />
+			<com:scriptfile path="../../../../view/qmm/017/f/qmm017.f.vm.js" />
+			
+			<com:stylefile path="../../../../view/qmm/017/g/qmm017.g.style.css" />
+			<com:scriptfile path="../../../../view/qmm/017/g/qmm017.g.vm.js" />
+			
+			<com:stylefile path="../../../../view/qmm/017/h/qmm017.h.style.css" />
+			<com:scriptfile path="../../../../view/qmm/017/h/qmm017.h.vm.js" />
+			
+			<com:stylefile path="../../../../view/qmm/017/i/qmm017.i.style.css" />
+			<com:scriptfile path="../../../../view/qmm/017/i/qmm017.i.vm.js" />
+			
+			<com:stylefile path="../../../../view/qmm/017/r/qmm017.r.style.css" />
+			<com:scriptfile path="../../../../view/qmm/017/r/qmm017.r.vm.js" />
+		</ui:define>
+
+		<ui:define name="content">
+				<div id="functions-area" style="padding-top: 5px;" class="cf">
+				<button class="button separate-button fix-button" data-bind="click: resetToNewMode,enable: !isNewMode()">新規</button>
+				<button class="button proceed separate-button fix-button" data-bind="click: registerFormulaMaster, enable: $root.errors.isEmpty">登録</button>
+				<button id="copy_btn" class="button separate-button fix-button" data-bind="enable: false">コピー</button>
+				<button class="button separate-button fix-button" data-bind="enable: false">Excel出力</button>
+				<button class="button separate-button fix-button">マスタ修正ログ</button>
+				</div>
+				<div id="contents-area" style="width: 1366px;" class="cf">
+					<div id="left-content" class="bg-green caret-right caret-background">
+						<div id="code_name_lbl" data-bind="ntsFormLabel: {}">コード/名称</div>
+						<div style="width: 200px; display: inline-block" data-bind="ntsSearchBox: {
+							comId: 'treeGrid',
+							items: treeGridHistory().items, 		
+							selected: treeGridHistory().singleSelectedCode, 
+							selectedKey: 'code', 
+							childField: 'childs', 
+							fields: ['name', 'nodeText']}" />	
+						<br />
+						<button data-bind="click: openDialogJ, enable: !isNewMode()">履歴追加</button>
+						<button id="edit_history_btn" data-bind="click: openDialogK, enable: !isNewMode()">履歴編集</button>
+						<br />
+						<div id="tree_history" data-bind="with: treeGridHistory">
+							<table id="treeGrid"
+								data-bind="ntsTreeGridView:{
+										width: 288,
+										height: 400,
+										options: items,
+										value: singleSelectedCode,
+										optionsValue: 'code',
+										optionsChild: 'childs',
+										optionsText: 'nodeText',
+										multiple: false,
+										enable: true,
+										showCheckBox: false}"
+								class="cf"></table>
+						</div>
+					</div>
+					<div id="right-content">
+						<div id="tabFormula"
+							data-bind="ntsTabPanel: { dataSource: a_sel_001, active: selectedTabASel001}">
+							<div class="tab-content-1" data-bind="with: viewModel017b">
+								<ui:include src="../b/index.xhtml" />
+							</div>
+							<div class="tab-content-2" data-bind="with: viewModel017c">
+								<ui:include src="../c/index.xhtml" />
+							</div>
+						</div>
+					</div>
+				</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

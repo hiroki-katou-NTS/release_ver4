@@ -1,0 +1,67 @@
+/* 
+	common css
+*/
+.divLine {
+	margin-top: 10px;
+	float: left;
+	clear: both;
+}
+
+.divLine>* {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+@CHARSET "UTF-8";
+
+#content {
+	width: 1360px;
+	padding: 20px 0px 0px 30px;
+}
+
+#functions-area {
+	padding: 10px 0px 5px 10px;
+}
+
+#contents-area {
+	padding-left: 40px;
+}
+
+#A_BTN_001 {
+	margin-left: 20px;
+	width: 400px;
+	height: 355px;
+}
+
+#A_BTN_002 {
+	vertical-align: top;
+	width: 380px;
+	height: 125px;
+	margin-left: 30px;
+}
+
+#A_SEL_001 {
+	margin-left: 18px;
+	vertical-align: middle;
+	min-width: 200px !important;
+	width: 200px;
+}
+
+#A_LBL_002 {
+	font-size: large;
+}
+
+#divLine2 {
+	margin-top: 20px;
+	margin-left: 20px;
+	margin-bottom: 20px;
+}
+
+#contents-area>div:NTH-LAST-CHILD(2) {
+	margin-top: 10px;
+	margin-bottom: 15px;
+}
+
+.func-btn {
+	display: inline-block;
+}

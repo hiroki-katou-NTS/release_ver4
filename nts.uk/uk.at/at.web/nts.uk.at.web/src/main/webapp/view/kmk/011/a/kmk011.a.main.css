@@ -1,0 +1,85 @@
+@CHARSET "UTF-8";
+
+.separate-button {
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+.fix-button {
+	min-width: 75px;
+}
+
+#btn_001 {
+	margin-bottom: 20px;
+	margin-left: 30px;
+}
+
+#left-content {
+	margin-left: 30px;
+	margin-top: 20px;
+	padding: 25px;
+	float: left;
+	max-height: 300px;
+}
+
+#right-content {
+	margin-left: 40px;
+	float: left;
+	min-height: 550px;
+	margin-top: 20px;
+}
+
+.ntsRadioBox {
+	width: 100%;
+	margin-top: 10px;
+}
+
+#inp_002 {
+	width: 100px;
+	float: left;
+}
+
+#inp_006 {
+	float: left;
+}
+
+#inp_003 {
+	float: center;
+	margin-left: 30px;
+}
+
+.inp_004 {
+	padding-bottom: 20px;
+	padding-top: 20px;
+}
+
+.lst_003 {
+	margin-top: 10px;
+	display: inline-block;
+	height: 190px;
+	overflow-y: scroll;
+}
+
+.line {
+	display: inline-block;
+}
+
+.left-line {
+	width: 120px;
+}
+
+.row {
+	padding: 5px;
+	height: 50px;
+}
+
+#single-list-dataSource tr td {
+	white-space: nowrap;
+}
+#div-time-name{
+	width: 150px !important;
+}
+#func-notifier-errors.shown {
+    display: inline-block;
+    margin-left: -1100px;
+}

@@ -1,0 +1,120 @@
+#contents-area {
+	padding: 20px;
+}
+.function-class > div {
+    float: left;
+    margin-left: 30px;
+    padding-top: 4px;
+}
+#contents-left {
+    width: 280px;
+    height: 500px;
+    border-radius: 5px;
+    padding-top: 10px;
+}
+
+#contents-left > div {
+    margin-left: 15px;
+}
+#contents-left.caret-background.caret-right:after {
+    display: none;
+}
+div#search-grid {
+    margin-bottom: 20px;
+    width: 250px;
+    margin-top: 10px;
+}
+input#search-input {
+    width: 190px;
+}
+.function-middle {
+    margin-left: 175px !important;
+}
+td#contents-center {
+    width: 750px;
+    height: 500px;
+    padding: 5px;
+}
+div#aggregate-category-tab > div {
+    min-height: 400px;
+}
+
+div#print-one-page-checkbox {
+    margin-left: 181px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+button.help-button {
+    margin-left: 10px;
+}
+.head-end {
+    width: 100%;
+    height: 1px;
+    background: #B1B1B1;
+    margin-top: 4px;
+    margin-bottom: 6px;
+}
+div#report-item-list {
+    margin-top: 10px;
+}
+
+.caret-background.caret-right:after {
+    top: 30%;
+    border-width: 65px 18px;
+    color: #92D050;
+}
+.caret-right.caret-background {
+    margin-right: 15px;
+}
+#search-input > .ntsSearchBox {
+	width: 190px !important;
+}
+.name-input input {
+    width: 280px !important;
+}
+.name-input {
+	margin-left: 5px;
+}
+
+i.icon.icon-dot {
+    display: table;
+    margin: 0 auto;
+}
+.left-table {
+	margin-bottom: 20px;
+	width: 250px;
+    float: left;
+}
+td.tab-contents-left {
+    width: 340px;
+}
+.ntsMoveDataArea.ntsSwapComponent {
+    height: 250px;
+}
+button.move-button.move-forward {
+    margin-left: 10px;
+}
+td#contents-right {
+    vertical-align: top;
+}
+td.tab-contents-right {
+    vertical-align: top;
+}
+#grid-up-down {
+	width: 8px;
+}
+.output-items-table {
+    float: left;
+}
+.ntsUpDownButton {
+	width: 50px;
+	margin-left: 4px;
+}
+.delete-button {
+	margin-left: 7px;
+	width: 20px !important;
+	height: 20px !important;;
+}
+span.category-name {
+	font-size: 1.5rem;
+}

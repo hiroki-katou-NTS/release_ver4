@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:stylefile path="qmm020.j.main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qmm020.j.start.js" />
+			<com:scriptfile path="qmm020.j.viewmodel.js" />
+			<com:scriptfile path="qmm020.j.service.js" />
+			<script>
+				var dialogSize = {
+					width : 560,
+					height : 500
+				};
+			</script>
+		</ui:define>
+		<ui:define name="content">
+			<div class="contents-area">
+				<div id="J_LBL_001">新たに作成する履歴の、作成情報を入力してください。</div>
+				<div>
+					<div id="J_LBL_002" data-bind="ntsFormLabel: { required: true }">期間</div>
+					<input id="J_INP_001"
+						data-bind="ntsTextEditor: {
+								value: startDate,
+								required: true,
+								enable: true,
+								readonly: false }" />
+					<label id="J_LBL_003"><span>～</span><span data-bind="style: {display: displayMode() == 3 ? 'none' : ''}">9999/12</span></label>
+					<input id="J_INP_003"
+						data-bind="style: { 
+									display: displayMode() == 3 ? 'block' : 'none'
+								}, 
+								ntsTextEditor: {
+									value: endDate,
+									required: displayMode() == 2,
+									enable: displayMode() == 3,
+									readonly: false }" />
+					<div class="form-group-radio">
+						<div id="J_LBL_004" data-bind="ntsFormLabel: { required: true }">履歴の引継ぎ</div>
+						<div>
+							<div class="ntsControl">
+								<label class="ntsRadioBox"> <input type="radio"
+									name="textRadio"
+									data-bind="checkedValue: 1, checked: selectedMode" /> <span
+									class="box"></span><span class="label"
+									data-bind="text: txtCopyHistory"></span>
+								</label>
+							</div>
+							<div id="J_LBL_005"
+								data-bind="style: {display: displayMode() == 2 ? 'block' : 'none'}">
+								<div class='caution'>引継ぎは部門名ではなく部門コードで行われます</div>
+								<div class='caution'>(名が同じでもコードが変更されている場合は引き継がれません。)</div>
+							</div>
+							<div class="ntsControl">
+								<label class="ntsRadioBox"> <input type="radio"
+									name="textRadio"
+									data-bind="checkedValue: 2, checked: selectedMode" /> <span
+									class="box"></span><span class="label"
+									data-bind="text: '初めから作成する'"></span>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div
+						data-bind="style: {display: displayMode() == 2 ? 'block' : 'none' }">
+						<div id="J_LBL_006" data-bind="ntsFormLabel: { required: true }">マスタ基準日</div>
+						<input id="J_INP_002"
+							data-bind="ntsTextEditor: {
+								value: baseDate,
+								required: displayMode() == 2,
+								enable: displayMode() == 2,
+								readonly: false }" />
+					</div>
+				</div>
+			</div>
+			<div class="functions-area">
+				<button class="x-large" id="J_BTN_001"
+					data-bind="click: createHistoryDocument, enable: $root.errors.isEmpty">決定</button>
+				<button class="large" id="J_BTN_002" data-bind="click: closeDialog">キャンセル</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

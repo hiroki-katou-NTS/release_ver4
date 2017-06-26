@@ -1,0 +1,31 @@
+.separate-vertical {
+	margin-bottom: 10px;
+}
+
+#editing_method_sel_k_screen {
+	margin-left: 20px;
+	width: 350px;
+	vertical-align: text-top;
+	display: inline-block;
+}
+
+#formula_code_lbl_k_screen{
+	margin-left: 50px;
+}
+
+#editing_method_lbl {
+	margin-top: 10px;
+}
+
+#description_editing_method_lbl {
+	margin-top: 10px;
+	margin-left: 28px;
+	width: 326px;
+}
+
+#footer {
+	position: fixed;
+    bottom: 11px;
+    width: 498px;
+    text-align: center;
+}

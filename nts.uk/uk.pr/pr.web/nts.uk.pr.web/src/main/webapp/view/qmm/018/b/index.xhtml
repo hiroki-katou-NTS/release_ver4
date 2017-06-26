@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../../master/dialog.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 735, height: 480 };</script>
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="qmm018.b.start.js" />
+				<com:scriptfile path="qmm018.b.viewmodel.js" />
+				<com:scriptfile path="../shr/qmm018.shr.viewmodelbase.js" />
+				<com:scriptfile path="qmm018.b.service.js" />
+				<com:stylefile path="qmm018.b.main.css" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="center-top">
+						<span id="label-span">対象労働日数項目を選択してください。</span>
+					</div>
+					<div id="center-middle">
+						<div id="swap-list" data-bind="ntsSwapList: {
+							showSearchBox: { showLeft : true, showRight: true},
+							height: 300,
+							dataSource: items,
+							primaryKey: 'itemCode',
+							columns: ko.observableArray([
+				                { headerText: 'コード', prop: 'itemCode', width: 50 },
+				                { headerText: '名称', prop: 'itemAbName', width: 180 },
+				            ]),
+							value: currentCodeListSwap }"></div>
+					</div>
+					<hr id="division"/>
+					<div id="center-bottom" class="valign-center control-group">
+						<button class="x-large proceed center-e" data-bind="click: submitData, enable: $root.errors.isEmpty">決定</button>
+						<button class="ui-dialog-titlebar-close" data-bind="click: closeWindow">キャンセル</button>
+					</div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

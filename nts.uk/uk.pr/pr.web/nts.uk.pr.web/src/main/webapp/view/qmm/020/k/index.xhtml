@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:stylefile path="qmm020.k.main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="../../../../lib/nittsu/ui/textbox-options.js" />
+			<com:scriptfile path="qmm020.k.start.js" />
+			<com:scriptfile path="qmm020.k.viewmodel.js" />
+			<com:scriptfile path="qmm020.k.service.js" />
+			<script>var dialogSize = { width: 500, height: 360};</script>
+			<style>
+.nts-list-box * {
+	box-sizing: border-box
+}
+</style>
+		</ui:define>
+		<ui:define name="content">
+			<div id="contents-area" style="margin-left: 10px; margin-top: 10px">
+				<div class="cf">
+					<div>
+						<label id="F_LBL_001">履歴情報を確認し、削除または修正を行ってください。</label>
+					</div>
+					<br />
+					<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+					<!-- EDIT HISTORY  -->
+					<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+					<table>
+						<tr valign="top">
+							<td style="width: 150px; float: left;">
+								<div class="form-label inline required">
+									<label id="LBL_005">編集方法の選択</label>
+								</div>
+							</td>
+							<td>
+								<div class="selectStyle">
+									<div id="SEL_001" data-bind="foreach: itemsRadio">
+										<span class="ntsControl"> <label class="ntsRadioBox">
+											<input type="radio" name="textRadio" data-bind="checkedValue: value, 
+															checked: $parent.isRadioCheck,
+															enable: true" />
+										<span class="box"></span> 
+										<span class="label" data-bind="text: text"></span>
+										</label>
+										</span>
+									</div>
+									<div>
+										<div style="display: flex; margin-top: 10px">
+											<div class="form-label inline required">
+												<label id="K_LBL_003">期間</label>
+											</div>
+											<div>
+												<input id="K_INP_001" maxlength="7"
+													style="ime-mode: inactive"
+													data-bind="ntsTimeEditor: {
+															value: selectStartYm, 
+															option: timeEditorOption, 
+															enable: enableYm}">
+												</input>
+											</div>
+											<div>
+												<label> ~ </label>
+												<label id="K_LBL_004" style="display: inline-block;" data-bind="text: endYM"></label>
+											</div>	
+										</div>
+									</div>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div class="form-label inline required">
+									<label id="K_LBL_005">部門基準日</label>
+								</div>
+							</td>
+							<td><label id="K_LBL_006">2016/04</label></td>
+						</tr>
+					</table>
+					<br />
+					<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+					<!-- THEM LICH SU  -->
+					<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+				</div>
+				<hr></hr>
+				<div>
+					<button class="x-large proceed" id="K_BTN_001"
+						data-bind="click: historyProcess, enable: $root.errors.isEmpty">決定</button>
+					<button class="large" id="K_BTN_002" data-bind="click: closeDialog">キャンセル</button>
+					<br />
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

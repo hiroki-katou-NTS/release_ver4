@@ -1,0 +1,120 @@
+@import url("../a/base.css");
+
+#functions-area {
+	position: relative;
+	padding: 10px;
+	border-bottom: solid 1px #B1B1B1;
+}
+
+.divLineCol1 {
+	width: 150px;
+	min-height: 1px;
+}
+
+#functions-area-top {
+	border-bottom: solid 1px #B1B1B1;
+	display: inline-block;
+	padding-bottom: 15px;
+}
+
+#functions-area-bottom {
+	padding: 15px 0px;
+}
+
+.checkboxLightGreen, .checkboxBrightGreen {
+	width: 70px;
+	height: 30px;
+	text-align: center;
+	line-height: 25px;
+	margin-right: 5px;
+}
+
+.checkboxLightGreen {
+	background-color: #edfac2;
+}
+
+.checkboxBrightGreen {
+	background-color: #c7f391;
+}
+
+.switchLongSize button {
+	height: 30px;
+	width: 120px;
+	font-size: 0.8rem;
+}
+
+.divLine>*, .divLineCol2>*, .divLineCol1>* {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.nts-left-content {
+	float: left;
+	border-radius: 5px;
+	width: 325px;
+	margin-left: 20px;
+	background-color: #E2F79F;
+	margin-top: 10px;
+	padding: 0px 0px 20px 20px;
+}
+
+#I_Sch_SearchButton input {
+	width: 160px;
+	height: 30px;
+	float: left;
+}
+
+.nts-right-content {
+	float: left;
+	margin: 10px 0px 0px 40px;
+}
+
+#right-content-top {
+	border-bottom: solid thin #B1B1B1;
+	padding-bottom: 10px;
+	height: 185px;
+}
+
+#I_Inp_ErrorUpper , #I_Inp_AlarmUpper , #I_Inp_ErrorLower , #I_Inp_AlarmLower  {
+	width: 100px;
+}
+
+#I_Inp_AbbreviatedName {
+	width: 230px;
+}
+
+#I_Inp_AbbreviatedName, #I_Inp_Code, #I_Inp_Name {
+	height: 17px;
+}
+
+#I_Inp_Code {
+	width: 33px;
+}
+
+#I_Inp_Name {
+	width: 270px;
+}
+
+#contents-area {
+	width: 1040px;
+}
+
+#I_Sch_SearchButton  button {
+	width: 60px;
+	height: 60px;
+	margin-top: -33px;
+	float: left;
+}
+
+#I_Sch_SearchButton {
+	height: 30px;
+}
+
+#I_Btn_DeleteButton {
+	margin-left: 340px;
+}
+
+
+#I_Btn_CloseUp {
+	margin-left: 130px;
+}

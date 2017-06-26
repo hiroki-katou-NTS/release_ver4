@@ -1,0 +1,93 @@
+#LBL_007 {
+	padding-right: 20px;
+}
+
+#LBL_005 {
+	padding-right: 97px;
+}
+/* #INP_003, #INP_001{
+	width: 65px !important;
+	padding-left: 0px !important;
+} */
+#LBL_004 {
+	padding-right: 93px;
+}
+
+.layoutSelect {
+	display: flex;
+	height: 45px;
+	margin-left: 15px;
+	margin-bottom: 5px;
+}
+.form-label {
+	margin-bottom: 10px;
+}
+#SEL_002 {
+	margin-left: 50px;
+	margin-top: 15px;
+}
+
+#LBL_002 {
+	margin-left: 10px;
+}
+
+.selectDrop {
+	margin-top: 20px;
+	margin-left: 10px;
+}
+
+.bottomStype {
+	margin-top: 20px;
+	margin-left: 350px;
+}
+
+#BTN_001 {
+	margin-right: 20px;
+}
+
+.lstBox {
+	border: 2px solid gray;
+	margin-left: 150px;
+/* 	margin-top: 5px;
+	padding-top: 5px; */
+	width: 650px;
+	height: 205px;
+}
+
+#LST_001 {
+	width: 650px  !important;
+	height: 202px !important;
+}
+
+#LBL_003 {
+	padding-left: 50px;
+}
+
+#header {
+	display: none;
+}
+
+.timeLayout {
+	display: flex;
+}
+
+#SEL_001 {
+	width: 250px;
+}
+
+.clsDiv {
+	margin-bottom: 5px;
+}
+
+#INP_001 {
+	width: 100px !important;
+}
+
+#INP_002 {
+	width: 150px !important;
+}
+
+#INP_003 {
+	width: 120px !important;
+	margin-left: 25px;
+}

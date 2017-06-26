@@ -1,0 +1,240 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="../qmm005.js" />
+			<com:ValidatorScript>
+				nts.arc.time.YearMonth
+				nts.uk.ctx.pr.core.dom.rule.employment.processing.yearmonth.paydayprocessing.ProcessingName
+			</com:ValidatorScript>
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area">
+				<div class="form-group no-margin-bottom">
+					<div id="C_LBL_001"
+						data-bind="ntsFormLabel: { required: true, constraint: 'ProcessingName' }"><span data-bind="text: '支払日区分' + index()"></span></div>
+					<input type="text" id="C_INP_001"
+						data-bind="ntsTextEditor: { value: inp001, constraint: 'ProcessingName', required: true, immediate: true }" />
+				</div>
+			</div>
+			<div id="contents-area">
+				<div class="form-group">
+					<div id="C_LBL_002" data-bind="ntsFormLabel: { required: true }">毎月の支払日</div>
+					<label id="C_LBL_003" class="label">支払月の</label>
+					<div>
+						<div id="C_SEL_001"
+							data-bind="ntsComboBox: {
+						options: sel001Data,
+						optionsValue: 'index',
+						value: sel001,
+						optionsText: 'label',
+						editable: false,
+						enable: true,
+						columns: [{ prop: 'label', length: 4 }]}"></div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div id="C_LBL_004"
+						data-bind="ntsFormLabel: { required: true }">
+						個人情報の履歴参照日
+						<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right top', enable: true }">?</button>
+					</div>
+					<label id="C_LBL_005" class="label">支払月の</label>
+					<div>
+						<div id="C_SEL_002"
+							data-bind="ntsComboBox: {
+						options: sel002Data,
+						optionsValue: 'index',
+						value: sel002,
+						optionsText: 'label',
+						editable: false,
+						enable: true,
+						columns: [{ prop: 'label', length: 4 }]}"></div>
+					</div>
+					<label id="C_LBL_006">の</label>
+					<div>
+						<div id="C_SEL_003"
+							data-bind="ntsComboBox: {
+						options: sel003Data,
+						optionsValue: 'index',
+						value: sel003,
+						optionsText: 'label',
+						editable: false,
+						enable: true,
+						columns: [{ prop: 'label', length: 4 }]}"></div>
+					</div>
+					<label id="C_LBL_007">を基準にします</label>
+				</div>
+				<div class="form-group">
+					<div id="C_LBL_008" data-bind="ntsFormLabel: { required: true }">
+						経理締め日
+						<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right top', enable: true }">?</button>
+					</div>
+					<label id="C_LBL_009" class="label">処理月の</label>
+					<div id="C_SEL_004"
+						data-bind="ntsComboBox: {
+						options: sel004Data,
+						optionsValue: 'index',
+						value: sel004,
+						optionsText: 'label',
+						editable: false,
+						enable: true,
+						columns: [{ prop: 'label', length: 4 }]}"></div>
+					<label id="C_LBL_010" class="label">の</label>
+					<div id="C_SEL_005"
+						data-bind="ntsComboBox: {
+						options: sel005Data,
+						optionsValue: 'index',
+						value: sel005,
+						optionsText: 'label',
+						editable: false,
+						enable: true,
+						columns: [{ prop: 'label', length: 4 }]}"></div>
+					<label id="C_LBL_011" class="label">にします</label>
+				</div>
+				<a id="C_BTN_001" data-bind="click: toggleView">より高度な設定
+					※原則変更の必要がないシステムパラメータです。</a>
+				<div class="form-extent hidden">
+					<div class="form-group">
+						<div id="C_LBL_012" data-bind="ntsFormLabel: { required: true }">給与明細書の印字月</div>
+						<label id="C_LBL_013" class="label">処理月の</label>
+						<div id="C_SEL_006"
+							data-bind="ntsComboBox: {
+						options: sel006Data,
+						optionsValue: 'index',
+						value: sel006,
+						optionsText: 'label',
+						editable: false,
+						enable: true,
+						columns: [{ prop: 'label', length: 4 }]}"></div>
+						<label id="C_LBL_014">を印字する</label>
+					</div>
+					<div class="form-group">
+						<div id="C_LBL_015" data-bind="ntsFormLabel: { required: true }">給与社会保険徴収月</div>
+						<label id="C_LBL_016" class="label">処理月の</label>
+						<div id="C_SEL_007"
+							data-bind="ntsComboBox: {
+						options: sel007Data,
+						optionsValue: 'index',
+						value: sel007,
+						optionsText: 'label',
+						editable: false,
+						enable: true,
+						columns: [{ prop: 'label', length: 4 }]}"></div>
+						<label id="C_LBL_017">を徴収対象にします</label>
+					</div>
+					<label id="C_LBL_018" class="label">※賞与は常に支払月分を徴収となります</label>
+					<div class="form-group">
+						<div id="C_LBL_019" data-bind="ntsFormLabel: { required: true }">社会保険基準年月日</div>
+						<label id="C_LBL_020" class="label">処理年月の</label>
+						<div class="inline" style="width: 400px">
+							<div id="C_SEL_008"
+								data-bind="ntsComboBox: {
+									options: sel008Data,
+									optionsValue: 'index',
+									value: sel008,
+									optionsText: 'label',
+									editable: false,
+									enable: true,
+									columns: [{ prop: 'label', length: 4 }]}"></div>
+							<div id="C_SEL_009"
+								data-bind="ntsComboBox: {
+									options: sel009Data,
+									optionsValue: 'index',
+									value: sel009,
+									optionsText: 'label',
+									editable: false,
+									enable: true,
+									columns: [{ prop: 'label', length: 4 }]}"></div>
+							<div id="C_SEL_010"
+								data-bind="ntsComboBox: {
+									options: sel010Data,
+									optionsValue: 'index',
+									value: sel010,
+									optionsText: 'label',
+									editable: false,
+									enable: true,
+									columns: [{ prop: 'label', length: 4 }]}"></div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div id="C_LBL_021" data-bind="ntsFormLabel: { required: true }">雇用保険基準日</div>
+						<label id="C_LBL_022" class="label">処理年月の直前の</label>
+						<div class="inline" style="width: 400px">
+							<div id="C_SEL_011"
+								data-bind="ntsComboBox: {
+									options: sel011Data,
+									optionsValue: 'index',
+									value: sel011,
+									optionsText: 'label',
+									editable: false,
+									enable: true,
+									columns: [{ prop: 'label', length: 4 }]}"></div>
+							<div id="C_SEL_012"
+								data-bind="ntsComboBox: {
+									options: sel012Data,
+									optionsValue: 'index',
+									value: sel012,
+									optionsText: 'label',
+									editable: false,
+									enable: true,
+									columns: [{ prop: 'label', length: 4 }]}"></div>
+						</div>
+					</div>
+					<div>
+						<label id="C_LBL_023" class="label">※処理年月が同月の場合は、同じ年月の指定日を基準とします。</label>
+						<label id="C_LBL_024" class="label">例）処理年月の直前の4月1日と指定した場合<br />2017年4月給与（賞与）の基準日→2017年4月1日
+						</label>
+					</div>
+					<div class="form-group">
+						<div id="C_LBL_025" data-bind="ntsFormLabel: { required: true }">所得税基準年月日</div>
+						<label id="C_LBL_026" class="label">処理年月の</label>
+						<div class="inline" style="width: 400px">
+							<div id="C_SEL_013"
+								data-bind="ntsComboBox: {
+									options: sel013Data,
+									optionsValue: 'index',
+									value: sel013,
+									optionsText: 'label',
+									editable: false,
+									enable: true,
+									columns: [{ prop: 'label', length: 4 }]}"></div>
+							<div id="C_SEL_014"
+								data-bind="ntsComboBox: {
+									options: sel014Data,
+									optionsValue: 'index',
+									value: sel014,
+									optionsText: 'label',
+									editable: false,
+									enable: true,
+									columns: [{ prop: 'label', length: 4 }]}"></div>
+							<div id="C_SEL_015"
+								data-bind="ntsComboBox: {
+									options: sel015Data,
+									optionsValue: 'index',
+									value: sel015,
+									optionsText: 'label',
+									editable: false,
+									enable: true,
+									columns: [{ prop: 'label', length: 4 }]}"></div>
+						</div>
+					</div>
+				</div>
+
+				<div class="text-center dialog-button-group">
+					<button id="C_BTN_002"
+						data-bind="click: saveData, enable: validate($root)">登録</button>
+					<button id="C_BTN_003" data-bind="click: closeDialog">キャンセル</button>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

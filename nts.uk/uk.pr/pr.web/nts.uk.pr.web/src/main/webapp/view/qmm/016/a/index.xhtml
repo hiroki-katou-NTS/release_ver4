@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../base/simplehistory/base.xhtml">
+		<ui:define name="extendedHead">
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.core.dom.wagetable.WtCode
+				nts.uk.ctx.pr.core.dom.wagetable.WtName
+				nts.uk.ctx.pr.core.dom.rule.employment.unitprice.Money
+				nts.uk.shr.com.primitive.Memo
+				nts.uk.ctx.pr.core.dom.wagetable.history.element.RangeLimit
+				nts.uk.ctx.pr.core.dom.wagetable.WtValue
+			</com:ValidatorScript>
+			<script>
+				__viewContext.primitiveValueConstraints.Interval = {
+					valueType: 'Decimal',
+					max: 999.99,
+					min: -999.99,
+					notEqual: 0.00,
+				};
+			</script>
+			<com:scriptfile path="/lib/generic/igniteui/js/extensions/infragistics.datasource.knockoutjs.js" of="/nts.uk.com.js.web" />
+			<com:scriptfile path="/lib/generic/igniteui/js/extensions/infragistics.ui.grid.knockout-extensions.js" of="/nts.uk.com.js.web" />
+			<com:stylefile path="qmm016.a.style.css" />
+			<com:scriptfile path="qmm016.a.start.js" />
+			<com:scriptfile path="qmm016.a.service.js" />
+			<com:scriptfile path="qmm016.a.vm.js" />
+			<com:scriptfile path="grid.editor.js" />
+			<com:scriptfile path="history/qmm016.a.history.base.js" />
+			<com:scriptfile path="history/qmm016.a.history.onedemension.js" />
+			<com:scriptfile path="history/qmm016.a.history.twodemension.js" />
+			<com:scriptfile path="history/qmm016.a.history.threedemension.js" />
+			<com:scriptfile path="history/qmm016.a.history.certificate.js" />
+			
+		</ui:define>
+
+		<!-- EXTENDED ACTION -->
+		<ui:define name="extendedAction">
+			<button id="btn_003" data-bind="enable: false"
+				class="large btn-default">コピー</button>
+			<button id="btn_004" data-bind="enable: false"
+				class="large btn-default">Excel出力</button>
+			<button id="btn_setupEntitlementGroup" class="large btn-default"
+				data-bind="click: btnGroupSettingClick">資格グループの設定</button>
+			<button id="btn_007" class="large btn-default"
+				data-bind="enable: false">マスタ修正ログ</button>
+		</ui:define>
+
+		<!-- PAGE CONTENT -->
+		<ui:define name="pageContent">
+			<div id="sel_001"
+				data-bind="ntsTabPanel: { dataSource: tabs, active: selectedTab}">
+					<ui:include src="tab.base.xhtml"/>
+					<ui:include src="tab.history.xhtml"/>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

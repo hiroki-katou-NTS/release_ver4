@@ -1,0 +1,451 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+					nts.uk.ctx.pr.core.dom.layout.LayoutName
+				</com:ValidatorScript>
+			<com:scriptfile path="/lib/generic/igniteui/js/infragistics.core.js" />
+			<com:scriptfile path="/lib/generic/igniteui/js/infragistics.lob.js" />
+			<com:scriptfile path="viewmodel.js" />
+            <com:scriptfile path="start.js" />
+            <com:scriptfile path="service.js" />
+			<com:stylefile path="main.css" />
+
+		</ui:define>
+
+		<ui:define name="content">
+
+			<div id="functions-area">
+				<button id="A_BTN_001" data-bind="click: resetData">新規</button>
+				<button id="A_BTN_002" class="proceed">登録</button>
+				<button id="A_BTN_003">会社初期パラメータの設定</button>
+				<button id="A_BTN_004">マスタ修正ログ</button>
+			</div>
+
+			<div id="contents-area" class="cf">
+
+				<div class="nts-left-content">
+					<div id="tree" class="bg-green caret-right caret-background">
+						<div style= "margin-left: 355px; margin-top:10px" data-bind="ntsCheckBox: { text: '廃止も表示する'}" class="cf minimalist">
+						
+						</div>
+						<div style="margin-left: 20px; margin-top:5px" class="flex valign-center fixed-height" >
+						<div
+							data-bind="ntsFormLabel: {}">
+							<label id="A_LBL_002">コード/名称</label>
+						</div>
+						 <div data-bind="ntsSearchBox: {items: items, selectedKey: 'code', filteredItems: items, fields: ['name', 'code']}"/>						
+						</div>
+						<div style="margin-top: 20px; margin-left: 40px">
+							<table id="single-list" data-bind="ntsGridList: {								
+								height: 450,
+								options: items,
+								optionsValue: 'code',
+								columns: columns2,
+								multiple: false,
+								value: currentCode
+							}"
+							class="cf"></table>
+					
+						</div>
+					</div>
+				</div>
+				<div class="nts-right-content">
+					<div class="line-height flex">
+					   <div data-bind="ntsFormLabel: { required: true }">
+							<label id="A_LBL_002">会社コード</label>
+						</div>
+						<input id="A_INP_002" data-bind="value:currentCode()"  class="input-table"/>
+						<div class="bg-yellow" style="width: 200px; height: 25px;">
+						<div style="margin-left: 5px;" data-bind="ntsCheckBox: {text: 'この会社を廃止する' }" class="cf minimalist"></div>
+						<button style="width: 25px; height: 25px; margin-left: 20px;">?</button>
+						</div>
+					</div> 
+					<!-- table  -->
+					<div class="table fixed-height">
+					<table id="expand-example1">
+						<tbody>
+							<!--  1  -->
+<!-- 						<tr style="margin-top: 10px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"	data-bind="ntsFormLabel:{required: true}">
+										<label id="A_LBL_002">会社コード</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="A_INP_002" data-bind="value:currentCode()"  class="input-table"/>
+								</th>
+								<th colspan="1" >
+									<div class="bg-yellow" style="height: 30px; width: 250px;">
+									<div style="margin-left: 5px;" data-bind="ntsCheckBox: {text: 'この会社を廃止する' }" class="cf minimalist"></div>
+									     <button style="width: 25px; height: 25px; margin-left: 20px;">?</button>
+								    </div>
+								</th>
+								
+							</tr>  -->
+							<tr style="margin-top: 10px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{constraint: 'LayoutName', required: true}"
+										style="margin-top: 5px;">
+										<label id="A_LBL_005">会社名 </label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="A_INP_004" type="text" data-bind="value: currentNode().name" class="input-table"/>
+								</th>
+							</tr>
+							<!--  2  -->
+							<tr style="margin-top: 10px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{constraint: 'LayoutName', required: true}" >
+										<label id="A_LBL_006">半角ｶﾅ</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="A_INP_005" value="ﾕｰｹｰｼｽﾃﾑｶﾌﾞｼｷｶﾞｲｼｬ" class="input-table"/>
+								</th>
+							</tr>
+							<!--  3  -->
+							
+							<tr style="margin-top: 20px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{constraint: 'LayoutName', required: true}">
+										<label id="A_LBL_006">　略名</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="A_INP_006" value="UKシステム（株）" class="input-table" />
+								</th>
+							</tr>	
+												
+						</tbody>
+					</table>
+					<hr />
+					</div>
+					
+					<!-- <Tabpanel> -->
+					<div class="cf flex">
+							<div style="width: 100%; height:100%;">
+								<div id="tab-panel" class="cf" data-bind="ntsTabPanel: { dataSource: tabs, active: selectedTab, direction: 'vertical' }">
+									<div class="tab-content-1">
+					<!-- table  -->
+					
+					<table id="expand-example1">
+						<tbody>
+						 <!-- 1 -->
+							<tr style="margin-top: 10px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{required: true}"
+										style="margin-top: 5px;">
+										<label id="B_LBL_001">法人番号 </label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="B_INP_001" value="1234567890123" class="input-table"/>
+								</th>
+							</tr>
+							<!--  2  -->
+							<tr style="margin-top: 10px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{required: true}" >
+										<label id="B_LBL_002">会社代表者名</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="B_INP_002" value="代表者名" class="input-table"/>
+								</th>
+							</tr>
+							<!--  3  -->
+							
+							<tr style="margin-top: 20px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"	data-bind="ntsFormLabel:{required: true}">
+										<label id="B_LBL_003">会社代表者職位</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="B_INP_003" value="会社代表者職位" class="input-table"/>
+								</th>
+							</tr>	
+												
+						</tbody>
+					</table>
+				 </div>
+				<div class="tab-content-2">
+					<table id="expand-example1">
+						<tbody>
+						 <!--  1  -->
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+									<div data-bind="ntsFormLabel:{required: true}" >
+										<label id="C_LBL_001">郵便番号</label>
+									</div>
+								</th>
+
+								<th colspan="1" class="th-col-sub">
+								<input id="C_INP_001" class="input-table" value="420-0008"/>
+								</th>
+
+								<th colspan="1">
+								<button id="C_BTN_001" class="small">参照</button>
+								</th>
+							</tr>						
+	
+							<!--  2  display district specific-->
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+									<div data-bind="ntsFormLabel:{required: true}" >
+										<label id="C_LBL_002">都道府県</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+									<div class="control-group valign-center">
+											<div id="combo-box"
+											 data-bind="ntsComboBox: {
+											 options: itemList,
+											 optionsValue: 'code',
+											 value: selectedCode,
+											 optionsText: 'name',
+											 editable: isEditable,
+											 enable: isEnable,
+											 columns: [
+													{ prop: 'name', length: 5 },
+											   ]}">
+											</div>	
+											</div>
+								 </th>
+							</tr>
+							<!-- 3 -->
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{required: true}">
+										<label id="C_LBL_006">住所ｶﾅ</label>
+									</div>
+								</th>
+							</tr>	
+							<!--  4 -->	
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+										<label id="C_LBL_007">市区町村・番地</label>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="C_INP_004" value="UKシステム（株）"  class="input-table"/>
+								</th>
+							</tr>	
+							<!--  5 -->	
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+										<label id="C_LBL_008">建物名など</label>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="C_INP_005" value="UKシステム（株）" class="input-table"/>
+								</th>
+							</tr>		
+							<!--  6 -->	
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{required: true}">
+										<label id="C_LBL_006">住所ｶﾅ</label>
+									</div>
+								</th>
+							</tr>	
+							<!--  7 -->	
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+										<label id="C_LBL_007">市区町村・番地</label>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="C_INP_004" value="UKシステム（株）"  class="input-table"/>
+								</th>
+							</tr>	
+							<!--  8 -->	
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+										<label id="C_LBL_008">建物名など</label>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="C_INP_005" value="UKシステム（株）" class="input-table"/>
+								</th>
+							</tr>	
+							<!-- 9 -->	
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{required: true}">
+										<label id="C_LBL_009">電話番号</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="C_INP_006" value="052-249-9200" class="input-table" />
+								</th>
+							</tr>	
+							<!--  10  -->	
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+										<label id="C_LBL_010">FAX</label>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="C_INP_007" value="052-249-9100" class="input-table" />
+								</th>
+							</tr>	
+																									
+						</tbody>
+					</table>
+				 </div>
+				<div class="tab-content-3">
+				<div>
+					<table id="expand-example1">
+						<tbody>
+							<!--  1  -->
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{required: true}"
+										style="margin-top: 5px;">
+										<label id="D_LBL_001">人事システム</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<div>
+									<div class="cf" data-bind="ntsSwitchButton: {
+										options: roundingRule1s,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: selectedRuleCode1 }">
+									</div>	
+								</div>
+								</th>
+							</tr>
+							<!--  2  -->
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{required: true}" >
+										<label id="D_LBL_002">就業システム</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<div>
+									<div class="cf" data-bind="ntsSwitchButton: {
+										options: roundingRule1s,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: selectedRuleCode1 }">
+									</div>	
+								</div>								
+								</th>
+							</tr>
+							<!--  3  -->
+							
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{required: true}">
+										<label id="D_LBL_003">給与システム</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<div>
+									<div class="cf" data-bind="ntsSwitchButton: {
+										options: roundingRule1s,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: selectedRuleCode1 }">
+									</div>	
+								</div>
+								</th>
+							</tr>	
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{required: true}">
+										<label id="D_LBL_004">職場と部門</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<div class="flex">
+									<div class="cf" data-bind="ntsSwitchButton: {
+										options: roundingRules,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: selectedRuleCode }">
+									</div>
+									<button id="D_BTN_001">?</button>
+								</div>	
+								</th>
+							</tr>
+							<tr style="margin-top: 5px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"  data-bind="ntsFormLabel:{required: true}">
+										<label id="Ds_LBL_005">期首月</label>
+									</div>
+								 </th>
+
+								<th colspan="2" class="th-col2">
+									<div class="control-group valign-center">
+											<div id="combo-box"
+											 data-bind="ntsComboBox: {
+											 options: itemList,
+											 optionsValue: 'code',
+											 value: selectedCode,
+											 optionsText: 'name',
+											 editable: isEditable,
+											 enable: isEnable,
+											 columns: [
+													{ prop: 'name', length: 5 },
+											   ]}">
+											</div>	
+											</div>
+								</th>
+							</tr>																			
+						</tbody>
+					</table>
+					
+					</div>		
+				</div>
+      </div>
+	</div>					
+	</div>
+
+
+
+
+					<!--             			 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

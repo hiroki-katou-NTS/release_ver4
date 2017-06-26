@@ -1,0 +1,144 @@
+.divHeader {
+	margin: 5px;
+}
+
+.trFull5 {
+	width: 50px;
+}
+
+.trFull10 {
+	width: 50px;
+}
+
+.trFull15 {
+	width: 100px;
+}
+
+.trFull25 {
+	width: 25%;
+}
+
+.trFull30 {
+	width: 30%;
+}
+
+.trFull35 {
+	width: 35%;
+}
+
+.trFull45 {
+	width: 180px;
+}
+
+.left20 {
+	margin-left: 20px;
+}
+
+.labelRed {
+	font-weight: bold;
+	color: red;
+}
+
+#btn_delete {
+	margin-left: 200px;
+}
+
+#lbl_registrationOfLaborInsurancePlant {
+	float: right;
+}
+
+#contents-left, #contents-right {
+	padding: 20px;
+	vertical-align: top !important;
+}
+
+#contents-right {
+	padding-left: 40px !important;
+}
+
+.leftTop {
+	display: inline;
+	width: 100%;
+}
+
+#SCH_001 {
+	width: 100%;
+}
+
+.spanSearch {
+	float: right;
+	width: 20%;
+}
+
+.contentsRL {
+	width: 100%;
+	padding-bottom: 5px;
+}
+
+.contentsRR {
+	width: 70%;
+}
+
+#tableRight {
+	width: 100%;
+}
+
+button.nts-switch-button {
+	min-width: 80px;
+}
+
+#SEL-002, #SEL-004 {
+	min-width: 0px !important;
+	max-width: 160px !important;
+}
+
+#search_data {
+	margin-top: 20px;
+}
+
+.border_none {
+	border: none !important;
+}
+
+.tr240 {
+	width: 240px !important;
+}
+
+.tr110 {
+	width: 110px !important;
+}
+
+.tr180 {
+	width: 180px !important;
+}
+
+.tr50 {
+	width: 50px !important;
+}
+
+.border {
+	border: 2px solid #B1B1B1;
+	border-radius: 7px;
+	padding: 20px;
+	margin-top: 10px;
+	height: 400px;
+	width: 800px;
+}
+
+.div50 {
+	width: 37%;
+	float: left;
+	margin-left: 20px;
+	padding-bottom: 5px;
+}
+
+.left50 {
+	margin-left: 80px;
+}
+
+.div100 {
+	width: 98%;
+	float: left;
+	margin-left: 10px;
+	padding-bottom: 5px;
+}

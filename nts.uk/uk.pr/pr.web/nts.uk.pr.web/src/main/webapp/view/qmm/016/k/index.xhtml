@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile path="qmm016.k.start.js" />
+			<com:scriptfile path="/view/base/simplehistory/service.js" />
+			<com:scriptfile path="../a/qmm016.a.service.js" />
+			<com:scriptfile path="qmm016.k.service.js" />
+			<com:scriptfile path="qmm016.k.vm.js" />
+			<script type="text/javascript">
+				var dialogSize = {
+					width : 300,
+					height : 450
+				};
+			</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<!-- BEGIN CONTENT AREA-->
+			<div id="this-contents-area" class="halign-center">
+				<br/>
+				<select
+					style="width: 200px"
+					data-bind="options: demensionItemList,
+						optionsText: 'name',
+						value: selectedDemension"
+						size="15"></select>
+				<br/>
+				<br/>
+			</div>
+			<hr />
+			<!-- END CONTENT AREA-->
+
+			<!-- BEGIN FUNCTION AREA-->
+			<div id="this-functions-area" class="halign-center">
+				<button class="proceed x-large" data-bind="click: btnApplyClicked"
+					style="margin-right: 10px">決定</button>
+				<button data-bind="click: btnCancelClicked">キャンセル</button>
+			</div>
+			<!-- END FUNCTION AREA-->
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

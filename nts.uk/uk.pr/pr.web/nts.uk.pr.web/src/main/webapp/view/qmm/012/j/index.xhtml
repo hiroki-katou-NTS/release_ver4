@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/sidebar.xhtml">
+		<ui:define name="sidebar-head">
+			<com:scriptfile path="qmm012.j.start.js" />
+			<com:scriptfile path="qmm012.j.vm.js" />
+			<com:scriptfile path="qmm012.j.service.js" />
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+		</ui:define>
+		<ui:define name="sidebar">
+			<ul class="navigator">
+				<li><a href="#tabpanel-1"
+					data-bind="click:ChangeGroup.bind($data, 0)" class="active">支給項目</a></li>
+				<li><a href="#tabpanel-1"
+					data-bind="click:ChangeGroup.bind($data, 1)">控除項目</a></li>
+				<li><a href="#tabpanel-1"
+					data-bind="click:ChangeGroup.bind($data, 2)">勤怠項目</a></li>
+				<li><a href="#tabpanel-1"
+					data-bind="click:ChangeGroup.bind($data, 3)">記事項目</a></li>
+				<li><a href="#tabpanel-1"
+					data-bind="click:ChangeGroup.bind($data, 9)">その他</a></li>
+			</ul>
+		</ui:define>
+		<ui:define name="sidebar-content">
+			<div id="tabpanel-1" role="tabpanel">
+				<div id="functions-area" class="sidebar-content-header">
+					<span class="title">支給項目</span>
+					<button class="proceed" id="J_Btn_RegisterButton"
+						data-bind="click:updateData">登録</button>
+					<button id="J_Btn_CloseUp" data-bind="click:CloseDialog">閉じる</button>
+				</div>
+
+				<div class="contents-area">
+					<div id="content">
+						<table id="J_Lst_ItemList" data-name="名称"></table>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

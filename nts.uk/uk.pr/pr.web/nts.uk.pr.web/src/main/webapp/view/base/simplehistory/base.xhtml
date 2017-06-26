@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="/view/base/simplehistory/simplehistory.css" />
+			<com:scriptfile path="/view/base/simplehistory/service.js" />
+			<com:scriptfile path="/view/base/simplehistory/viewmodel.js" />
+			<ui:insert name="extendedHead" />
+		</ui:define>
+
+		<ui:define name="content">
+			<!-- BEGIN FUNCTION AREA-->
+			<div id="functions-area">
+				<button id="btnNew"
+					data-bind="click: registBtnClick"
+					class="large btn-default">新規</button>
+				<button id="btnUpdate" class="large proceed btn-default"
+					data-bind="click: saveBtnClick">登録</button>
+				<ui:insert name="extendedAction" />
+			</div>
+			<!-- END FUNCTION AREA-->
+
+			<!-- BEGIN CONTENT AREA-->
+			<div id="contents-area"  data-bind="visible: true" style="display: none">
+				<ui:include src="historylist.xhtml"/>
+
+				<!-- BEGIN RIGHT CONTENT-->
+				<div id="right-content">
+					<ui:insert name="pageContent" />
+				</div>
+				<!-- END RIGHT CONTENT-->
+				<div class="cf"/>
+			</div>
+			<!-- END CONTENT AREA-->
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

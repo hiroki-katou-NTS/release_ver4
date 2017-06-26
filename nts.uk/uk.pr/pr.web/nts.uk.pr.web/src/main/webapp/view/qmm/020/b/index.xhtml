@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html>
+<body>
+	<div class="contents-area">
+		<div style="margin-left: 10px;" class="left-content">
+			<div class="bg-green caret-right caret-background"
+				style="float: left; width: 300px; height: 300px; margin: 20px 50px;">
+				<button id="B_BTN_003" style="margin: 20px 20px"
+					data-bind="click: openJDialog">履歴追加</button>
+				<button id="B_BTN_004" style="margin: 20px 20px"
+					data-bind="click: openKDialog">履歴編集</button>
+				<div style="margin: 10px 20px;" data-bind="with: currentItem">
+					<div style="width: 200px;" id="B_LST_001"
+						data-bind="ntsListBox: {
+												options: $parent.itemList,
+												optionsValue: 'id',
+												optionsText: 'startEnd',
+												multiple: false,
+												value: historyId,
+												enable: true,
+												rows:7,
+												required: true,
+												columns: [
+													{ prop: 'startEnd', length: 8 }
+												]}">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div style="margin-left: 50px;" class="right-content">
+			<table id="B_TBL_RIGHT">
+				<!--line 1 -->
+				<tr>
+					<td colspan="2"><label id="B_LBL_001">全社に対して設定できる明細書は、</label>
+					</td>
+				</tr>
+				<!--line 2 -->
+				<tr>
+					<td><label id="B_LBL_002">給与明細書</label> <BR /> <label
+						id="B_LBL_003">賞与 明細書</label></td>
+					<!-- note -->
+					<td><label id="B_LBL_004">それぞれ、一種類です。</label></td>
+				</tr>
+				<!--line 3 -->
+				<!--line 4 -->
+				<tr>
+					<td colspan="3">
+						<div class="form-label">
+							<label id="B_LBL_005">給与明細書</label>
+						</div>
+						<button id="B_BTN_001" data-bind="click: openPaymentMDialog">選択</button>
+						<label id="B_LBL_006" data-bind="text: currentItem().payCode"></label>
+						<label id="B_LBL_007" data-bind="text: currentItem().payName"></label>
+					</td>
+				</tr>
+				<!--line 5 -->
+				<tr>
+					<td colspan="3">
+						<div class="form-label">
+							<label id="B_LBL_008">賞与明細書</label>
+						</div>
+						<button id="B_BTN_002" data-bind="click: openBonusMDialog">選択</button>
+						<label id="B_LBL_009" data-bind="text: currentItem().bonusCode"></label>
+						<label id="B_LBL_010" data-bind="text: currentItem().bonusName"></label>
+					</td>
+				</tr>
+				<!-- end -->
+			</table>
+		</div>
+	</div>
+</body>
+</html>

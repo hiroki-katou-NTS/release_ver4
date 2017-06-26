@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<head>
+</head>
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="kdl021.a.main.css" />
+			<com:scriptfile path="kdl021.a.start.js" />
+			<com:scriptfile path="kdl021.a.service.js" />
+			<com:scriptfile path="kdl021.a.vm.js" />
+			<script>var dialogSize = { width: 420 , height: 630};</script>
+		</ui:define>
+		<ui:define name="content">
+			<div id="total">
+				<div id="label">
+					<label>#{i18n.getText('KDL021_2')}</label>
+				</div>
+				<div style="float: left; margin-bottom: 20px;">
+					<div id="boxSearch">
+						<div style="width: 370px; margin-bottom: 15px;" tabindex="1"
+							data-bind="ntsSearchBox: {
+									searchMode: 'filter',
+									targetKey: 'code',
+									comId: 'multi-list', 
+									items: items, 
+									selected: currentCodeList, 
+									selectedKey: 'code', 
+									fields: ['name', 'code'],
+									mode: 'igGrid'}" />
+					</div>
+					<div>
+						<table id="multi-list" tabindex="2"
+							data-bind="ntsGridList: {
+										height: 390,
+										options: items,
+										optionsValue: 'code',
+										columns: columns,
+										multiple: isMulti,
+										value: currentCodeList
+									}">
+						</table>
+					</div>
+					<hr />
+				</div>
+				
+				
+				<div id="process">
+					<button id="btnSetting" class="x-large proceed"
+						data-bind="click: register" tabindex="3">#{i18n.getText('KDL021_5')}</button>
+					<button id="btnCancel" class="large" data-bind="click: close"
+						tabindex="4">#{i18n.getText('KDL021_6')}</button>
+				</div>
+
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

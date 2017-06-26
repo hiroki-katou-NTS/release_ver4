@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile path="/lib/generic/igniteui/js/infragistics.core.js" />
+			<com:scriptfile path="/lib/generic/igniteui/js/infragistics.lob.js" />
+			<com:scriptfile
+				path="/lib/generic/igniteui/js/extensions/infragistics.ui.combo.knockout-extensions.js" />
+
+			<com:stylefile path="style.css" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="viewmodel.js" />
+			<com:scriptfile path="service.js" />
+			<com:scriptfile path="/lib/nittsu/ui/file.js" />
+		</ui:define>
+
+		<ui:define name="content">
+
+			<div id="functions-area">
+				<button id="btn-001" data-bind="click: print, enable: listBox.isEmpty()" class="separate-1 proceed">選択した社員を印刷</button>
+				<button id="btn-002" class="separate-1">印刷の設定</button>
+				<a id="lbl-001" class="separate-1">給与明細書</a>
+			</div>
+
+			<div id="contents-area"  class="cf">
+				<div id="left-content">
+					<div data-bind="with: listBox">
+						<div id="list-box"
+							data-bind="ntsListBox: {options: itemList,
+											   optionsText: 'name',
+											   multiple: true,
+											   value: selectedCodes,
+											   enable: true,
+											   rows: 21,
+											   columns: [
+													{ prop: 'code', length: 12 },
+													{ prop: 'name', length: 12 }
+											   ]}"
+							class="cf"></div>
+					</div>
+				</div>
+				<div id="right-content">
+					<span id="lbl-002">処理の詳細設定</span> <br />
+					<div id="lbl-003" style="float: left;" data-bind="ntsFormLabel: {required: true }">
+						帳票の選択
+					</div>
+					<div id="sel-001" data-bind="with: radioBox">
+						<div data-bind="ntsRadioBoxGroup: {
+									options: items,
+									optionsValue: 'value',
+									optionsText: 'text',
+									value: selectedValue}"></div>
+					</div>
+				</div>
+			</div>
+
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

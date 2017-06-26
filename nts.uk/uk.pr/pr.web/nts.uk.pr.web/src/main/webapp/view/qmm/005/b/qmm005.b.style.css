@@ -1,0 +1,300 @@
+@import url("../qmm005.css");
+
+#functions-area {
+	position: fixed;
+	width: 100%;
+	top: 0;
+	z-index: 100;
+	background-color: #fff;
+}
+
+#functions-area #B_BTN_002 {
+	background-color: rgb(164, 238, 176);
+}
+
+#functions-area #B_BTN_003 {
+	margin-left: 35px;
+	visibility: hidden;
+	background-color: rgb(254, 211, 198);
+}
+
+#contents-area {
+	padding-bottom: 0;
+	margin-top: 50px;
+}
+
+#contents-area .blst001-container {
+	padding: 10px;
+	border-radius: 3px;
+	background-color: rgb(224, 245, 158);
+}
+
+#contents-area .blst001-container>div {
+	position: relative;
+	padding-top: 27px;
+	border: 1px solid rgb(128, 128, 128);
+	display: block;
+	width: 200px;
+	background-color: #d1f2a6;
+}
+
+#contents-area #B_INP_001 {
+	width: 60px;
+	text-align: center;
+}
+
+#contents-area .blst001-container>div .divider {
+	position: absolute;
+	width: 28px;
+	top: 0;
+	bottom: 0;
+	z-index: 99;
+	border-right: 1px solid rgb(128, 128, 128);
+}
+
+#contents-area .blst001-container>div #B_LST_001 {
+	border-top: 1px solid #808080;
+}
+
+#contents-area .blst001-container>div [id^=B_LST_001_grid_] {
+	height: 304px !important;
+}
+
+#contents-area .blst001-container .ntsListBox, #contents-area .blst001-container .ntsListBox tbody,
+	#contents-area .blst001-container .ntsListBox tbody tr, #contents-area .blst001-container .ntsListBox tbody tr td
+	{
+	background-color: transparent !important;
+}
+
+#contents-area .blst001-container .ntsListBox tbody tr td {
+	border-bottom: 1px solid #808080 !important;
+}
+
+#contents-area .blst001-container .ntsListBox tbody tr td.ui-iggrid-selectedcell,
+	#contents-area .blst001-container .ntsListBox tbody tr td.ui-state-active
+	{
+	color: #000 !important;
+}
+
+#contents-area .blst001-container .ntsListBox tbody tr td:last-child.ui-iggrid-selectedcell,
+	#contents-area .blst001-container .ntsListBox tbody tr td:last-child.ui-state-active
+	{
+	color: #000 !important;
+	background-color: #F39814 !important;
+}
+
+#contents-area .blst001-container .ntsListBox .nts-column:first-child {
+	text-align: center;
+	width: 28px !important;
+}
+
+#contents-area .blst001-container .ntsListBox .nts-column:last-child {
+	width: 154px !important;
+}
+
+#contents-area .blst001-container .ntsListBox .nts-column {
+	border-bottom: 1px solid #808080;
+}
+
+#contents-area .blst001-container>div #B_LST_001_grid_displayContainer {
+	background: rgb(117, 255, 131); /* Old browsers */
+	background: -moz-linear-gradient(left, #d1f2a6 0%, #d1f2a6 27px, #fff 27px, #fff
+		100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(left, #d1f2a6 0%, #d1f2a6 27px, #fff 27px, #fff
+		100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to right, #d1f2a6 0%, #d1f2a6 27px, #fff 27px, #fff 100%
+		); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d1f2a6',
+		endColorstr='#ffffff', GradientType=1); /* IE6-9 */
+}
+
+#contents-area .blst001-container .ui-iggrid-layout-helper {
+	width: 100%;
+}
+
+#contents-area .blst001-container .ui-iggrid-layout-helper>tbody>tr>td:first-child
+	{
+	width: 100%;
+}
+
+#contents-area .right-panel, #contents-area .blst001-container {
+	float: left;
+}
+
+#contents-area .right-panel {
+	float: right;
+}
+
+#contents-area .right-panel-bottom {
+	margin-top: -35px;
+}
+
+#contents-area table.table th {
+	height: 37px;
+	background-color: rgb(226, 247, 159);
+}
+
+#contents-area table.table th.text-left {
+	text-align: left;
+}
+
+#contents-area table.table button.btn-collapse {
+	width: 25px;
+	min-width: 25px;
+	max-height: 18px;
+}
+
+#contents-area table.table .double-border {
+	border-right: 3px double #999;
+}
+
+#contents-area table.table .checkbox-cols {
+	width: 40px;
+	max-width: 40px;
+	min-width: 40px;
+	text-align: center;
+}
+
+#contents-area table.table th.checkbox-cols {
+	white-space: pre-wrap;
+}
+
+#contents-area table.table div.form-group {
+	margin: 0;
+	max-width: 150px;
+	min-height: initial;
+}
+
+.ntsControl>label {
+	width: initial;
+}
+
+td>.ntsControl span.label {
+	display: none;
+}
+
+#contents-area .right-panel .form-label, #contents-area .right-panel .table
+	{
+	margin-top: 0;
+}
+
+.ntsListBox .nts-list-box .ui-selected {
+	background: #CBF4F9;
+}
+
+.ntsListBox .nts-list-box li {
+	border-bottom: 1px solid #808080;
+}
+
+.ntsListBox .nts-list-box li:nth-child(n + 10):last-child {
+	border-bottom: none;
+}
+
+.relative {
+	position: relative;
+}
+
+#B_SEL_002 {
+	width: 130px;
+}
+
+#B_SEL_002+div {
+	position: absolute;
+	top: 10px;
+	right: 3px;
+}
+
+#B_SEL_002+div:before {
+	content: '(';
+}
+
+#B_SEL_002+div:after {
+	content: ')';
+}
+
+#B_INP_003-input {
+	width: 105px !important;
+}
+
+#B_INP_004-input {
+	width: 80px !important;
+}
+
+#B_INP_005-input {
+	padding-left: 12px;
+	padding-right: 12px;
+	width: 85px !important;
+}
+
+#B_INP_006-input, #B_INP_007-input, #B_INP_008-input, #B_INP_009-input {
+	display: inline-table;
+	width: 105px !important;
+}
+
+#B_INP_010 {
+	width: 65px !important;
+}
+
+#B_LST_002 tbody th:nth-child(2) {
+	min-width: 80px;
+	max-width: 80px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#B_LBL_005 {
+	padding-left: 5px;
+	padding-right: 25px;
+	min-width: 130px;
+}
+
+#contents-area table.table td span.ntsControl {
+	width: auto !important;
+	width: initial !important;
+}
+
+#contents-area table.table td span.ntsControl, #contents-area table.table td span.ntsControl+span
+	{
+	display: inline-table;
+}
+
+#contents-area  #B_INP_004+div {
+	margin-right: 5px;
+}
+
+#contents-area  #B_INP_004, #contents-area  #B_INP_004+div {
+	display: inline-table;
+}
+
+#contents-area table.table th {
+	width: initial;
+}
+
+#contents-area #B_LST_002.table>thead>tr:nth-child(2) th:first-child {
+	width: 105px;
+}
+
+#contents-area #B_LST_002.table>thead>tr:nth-child(2) th:nth-child(2) {
+	width: 605px;
+}
+
+#contents-area #B_LST_002.table>thead>tr:nth-child(3) th:nth-child(1) {
+	width: 170px;
+}
+
+#contents-area #B_LST_002.table>thead>tr:nth-child(3) th:nth-child(2) {
+	width: 110px;
+}
+
+#contents-area #B_LST_002.table>thead>tr:nth-child(3) th:nth-child(3) {
+	width: 145px;
+}
+
+#contents-area #B_LST_002.table>thead>tr:nth-child(3) th:nth-child(4),
+	#contents-area #B_LST_002.table>thead>tr:nth-child(3) th:nth-child(5) {
+	width: 90px;
+}
+
+#contents-area #B_LST_002.table>tbody th:first-child {
+	width: 25px;
+}

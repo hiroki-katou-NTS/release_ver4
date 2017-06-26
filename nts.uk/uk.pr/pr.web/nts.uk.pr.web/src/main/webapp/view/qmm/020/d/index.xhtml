@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html>
+<body>
+	<div class="contents-area" data-bind="with: model">
+		<div class="left-content">
+			<div class="bg-green caret-right caret-background">
+				<button id="D_BTN_003" data-bind="click: $parent.openJDialog">履歴追加</button>
+				<button id="D_BTN_004" data-bind="click: $parent.openKDialog">履歴編集</button>
+				<div id="D_LST_001"
+					data-bind="ntsListBox: {
+					options: ItemLists,
+					optionsValue: 'code',
+					optionsText: 'name',
+					value: ItemListSelected,
+					rows: 5,
+					required: true,
+					enable: true,
+					columns: [{ prop: 'name', length: 10 }]
+				}"></div>
+			</div>
+		</div>
+		<div class="right-content">
+			<div class="form-label">
+				<label id="LBL_004">部門に明細書を紐ずける</label>
+			</div>
+			<hr />
+			<div class="date-label">
+				<label id="D_LBL_002">部門基準日</label> <label id="D_LBL_003">2016/04/01</label>
+			</div>
+			<div class="content-box">
+				<div
+					data-bind="ntsSearchBox: {
+								comId: 'D_LST_002', 
+								items: ItemTrees, 
+								selected: ItemTreeSelected, 
+								selectedKey: 'code', 
+								fields: ['name', 'code'], 
+								childField: 'childs'}" />
+
+				<table id="D_LST_002"
+					data-bind="ntsTreeGridView:{
+						width: 1010,
+						height: 550,
+						enable: true,
+						multiple: false,
+						showCheckBox: false,
+						primaryKey: 'code',
+						primaryText: 'name',
+						childDataKey: 'childs',
+						columns: $parent.listTreeColumns,
+						dataSource: ItemTrees,
+						value: ItemTreeSelected }"></table>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

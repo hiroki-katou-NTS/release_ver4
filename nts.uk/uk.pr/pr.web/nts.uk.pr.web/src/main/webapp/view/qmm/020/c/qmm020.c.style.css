@@ -1,0 +1,58 @@
+.screen-c .caret-left {border-width: 15px 20px; margin-top: -15px; color:#D90000;}
+.screen-c .bg-green {
+	background-color: #E0F59E;
+}
+.screen-c .nts-list-box .ui-selected {
+	background-color: 	#ccffff;
+	color : #000000;
+}
+.screen-c .nts-list-box .ui-selecting {
+  background: #ccffff;
+}
+.screen-c .#B_LST_001, .screen-c .#C_LST_002{
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  height: 130px;
+  border: 1px solid #CCC;
+  background: #FCFCFC;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 200px;
+}
+.screen-c .ui-widget-header {
+  color: #000;
+  background-color: #CFF1A5;
+}
+.screen-c .table tr td {
+  padding: 0 2px;
+  border: 1px solid #cccccc;
+}
+.screen-c .#C_INP_001{
+	margin-top: 20px;
+}
+.screen-c .#B_TBL_RIGHT td{
+	border: solid 1px white;
+	padding :10px;	
+}
+.screen-c .#B_TBL_RIGHT{
+	margin-top: 40px;
+}
+.screen-c .left-content {
+	width: 290px;
+}
+
+.screen-c .right-content {
+	padding-left: 35px;
+}
+.screen-c .C_BTN_34{
+	margin-bottom: 20px;
+}
+.screen-c .searchBox {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+.screen-c .c-btn-001,
+.screen-c .c-btn-002 {
+	margin-right: 5px;
+}

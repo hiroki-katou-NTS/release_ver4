@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../../master/dialog.xhtml">
+			<ui:define name="htmlHead">
+				<com:scriptfile set="IGNITE" />
+				<com:stylefile path="qmm017.p.style.css" />
+				<com:scriptfile path="qmm017.p.start.js" />
+				<com:scriptfile path="qmm017.p.vm.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<span style="font-size: large; margin-left: 20px" data-bind="text: subject"></span>
+					<br/>
+					<span style="font-size: large; margin-left: 20px">選択してください。         （複数選択可）</span>
+					<br />
+					<div style="margin: 10px 0 0 20px; display: inline-block;">
+						<table id="p_lbl_001" data-bind="ntsGridList: {
+									width: 293,
+									height: 290,
+									options: items,
+									optionsValue: 'code',
+									columns: columns,
+									multiple: true,
+									value: currentCodeList
+								}"
+								class="cf"></table>
+					</div>
+					<br />
+					<div id="footer">
+						<hr/>
+						<button class="x-large proceed" data-bind="click: closeAndReturnData">設定</button>
+						<button data-bind="click: closeDialog">キャンセル</button>
+					</div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

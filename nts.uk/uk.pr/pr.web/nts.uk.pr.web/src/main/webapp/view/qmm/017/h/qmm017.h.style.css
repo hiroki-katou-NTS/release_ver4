@@ -1,0 +1,33 @@
+.wrap-sel-006 {
+	height: 203px;
+}
+.h-col-1 {
+	height: 100%;
+	float:left;
+}
+#listBox_itemType_h_screen{
+	margin-top: 39px;
+}
+#listBox_items_h_screen {
+	width: 282px; 
+	margin-left: 20px;
+}
+#listBox_itemType_h_screen.caret-right:after {
+    border-width: 37px 19px;
+    top:38px;
+    color: #E0F59E;
+}
+
+#insert_in_calculation_btn_h_screen {
+	width: 283px;
+    height: 28px;
+}
+#insert_in_calculation_btn_h_screen.caret-bottom:after {
+	border-width: 25px 75px;
+    color: #E0F59E;
+    top: 30px;
+    left: 87px;
+}
+#listBox_items_h_screen .ntsSearchBox {
+	width: 225px !important;
+}

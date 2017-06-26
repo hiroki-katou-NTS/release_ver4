@@ -1,0 +1,110 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 400, height: 450 };</script>
+
+			<link rel="stylesheet" type="text/css" href="main.css" />
+			<script src="start.js"></script>
+			<script src="viewmodel.js"></script>
+			<script src="service.js"></script>
+		</ui:define>
+
+		<ui:define name="content">
+			<div class="header">
+				<p>入力欄の背景色は、以下のとおりです。</p>
+			</div>
+			
+			<table class="frameColor">
+				<tr>
+					<td>
+						<div class="divColor color_1">
+						</div>
+					</td>
+					
+					<td class="textNote">
+						<p> 自動計算による変更 </p>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+						<div class="divColor color_2">
+						</div>
+					</td>
+					
+					<td class="textNote">
+						<label> 手入力による変更 </label>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+						<div class="divColor color_3">
+						</div>
+					</td>
+					
+					<td class="textNote">
+						<label> 勤怠システム連動 </label>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+						<div class="divColor color_4">
+						</div>
+					</td>
+					
+					<td class="textNote">
+						<label> 外部データ(CSV)取込み値 </label>
+					</td>
+				</tr>
+				
+				<tr>
+					<td >
+						<div class="divColor color_5">
+						</div>
+					</td>
+					
+					<td class="textNote">
+						<label> 未計算 </label>
+					</td>
+				</tr>
+				
+				<tr>
+					<td class="tdMaxContent">
+						<div class="divColor color_6">
+						</div>
+					</td>
+					
+					<td class="textNote divMaxContent">
+						<span> 範囲外 … 指定した範囲を外れる </span>
+						<br />
+						<span> 単位誤り … 指定した単位（10円単位、100円単位）<br />などから外れる </span>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+						<div class="divColor divColorLast color_7">
+						</div>
+					</td>
+					
+					<td class="textNote">
+						<label> 入力不可  </label>
+					</td>
+				</tr>
+			</table>
+			<div class="seperator"></div>
+			<div class="footer">
+				<button data-bind="click: close">閉じる</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

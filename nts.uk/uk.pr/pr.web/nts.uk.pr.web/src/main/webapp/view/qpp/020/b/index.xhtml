@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="main.css" />
+			<com:scriptfile path="qpp020.b.start.js" />
+			<com:scriptfile path="qpp020.b.vm.js" />
+			<com:scriptfile path="qpp020.b.service.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area"></div>
+			<div id="contents-area">
+				<label id="B_LBL_001">給与処理月を翌月へ更新</label>
+				<table class="table" id="B_LST_001">
+					<tbody>
+						<tr>
+							<th>経過時間</th>
+							<td>00:09:12.123</td>
+						</tr>
+						<tr>
+							<th>処理状態</th>
+							<td>完了</td>
+						</tr>
+						<tr>
+							<th>エラー件数</th>
+							<td>0えっろ</td>
+						</tr>
+					</tbody>
+				</table>
+				<label id="B_LBL_002">処理情報</label>
+				<table class="table no-margin" id="B_LST_002">
+					<tbody>
+						<tr>
+							<th>終了年月</th>
+							<td>平成27年12月</td>
+						</tr>
+						<tr>
+							<th>開始年月</th>
+							<td>平成28年  2月</td>
+						</tr>
+					</tbody>
+				</table>
+				<div class="text-right">
+					<button>エラー出力</button>
+				</div>
+				<div class="table-container">
+					<table class="table" id="B_LST_003" data-bind="ntsTable: {rows : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}">
+						<thead class="fixed">
+							<tr>
+								<th data-width="25">No</th>
+								<th data-width="160">処理状態</th>
+								<th data-width="115">区分</th>
+								<th data-width="260">内容</th>							
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="text-center dialog-button-group">
+					<button id="B_BTN_002"
+						data-bind="click: () => { nts.uk.ui.windows.close();}">閉じる</button>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

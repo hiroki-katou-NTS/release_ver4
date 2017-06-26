@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition>
+		<!-- tab-content-2 -->
+		<div id="tab-content-2" class="tab-content">
+			<com:ko tag="ifnot" bind="isNewMode">
+				<div id="masterInfo">
+					<div class="lblData">
+						<div data-bind="ntsFormLabel: { required: false }">コード/名称</div>
+						<div data-bind="text: head().code() + '   ' + head().name()"/>
+					</div>
+					<div class="lblData">
+						<div data-bind="ntsFormLabel: { required: false }">有効期間</div>
+						<div data-bind="text: history().startYearMonthText() + ' ~ ' + history().endYearMonthText()"/>
+					</div>
+					<div class="cf"/>
+					<hr/>
+				</div>
+				<div id="elementSetting">
+					<div data-bind="ntsFormLabel: { required: true }" style="float: left; width: 80px">要素指定</div>
+					<div style="float: left; width: 600px">
+						<table id="demension-tbl">
+							<thead>
+								<tr class="bgIgCol">
+									<td width="50px" class="halign-center">
+									</td>
+									<td width="200px" class="halign-center">
+										要素
+									</td>
+									<td width="250px" class="halign-center">
+										上限下限
+									</td>
+									<td width="100px" class="halign-center">
+										きざみ単位
+									</td>
+								</tr>
+							</thead>
+							<tbody data-bind="with: history">
+								<com:ko tag="foreach" bind="elements">
+									<tr>
+										<td class="bgIgCol halign-center" data-bind="text: $root.content.demensionBullet[$index()]"/>
+										<td>
+											<com:ko tag="ifnot" bind="$root.content.head().demensionType().isAttendance || $root.content.head().demensionType().isCertification">
+											</com:ko>
+											<span data-bind="text: elementName"/>
+										</td>
+										<td>
+											<com:ko tag="if" bind="type.isRangeMode">
+												<div style="width: 100px; display: inline-block;">
+													<input class="inp-default save-error"
+														style="width: 80px;"
+														data-bind="ntsNumberEditor: {
+															value: lowerLimit,
+															constraint: 'RangeLimit',
+															option: {placeholder: '0',
+																grouplength: 3,
+																decimallength: 2},
+																required: true}" />
+												</div>
+												<span>~</span>
+												<div style="width: 100px; display: inline-block;">
+													<input class="inp-default save-error"
+														style="width: 80px;"
+														data-bind="ntsNumberEditor: {
+															value: upperLimit,
+															constraint: 'RangeLimit',
+															option: {placeholder: '0',
+																grouplength: 3,
+																decimallength: 2},
+															required: true}" />
+												</div>
+											</com:ko>
+											<com:ko tag="ifnot" bind="type.isRangeMode">
+												<div class="halign-center" style="width: 100%">
+												-
+												</div>
+											</com:ko>
+										</td>
+										<td>
+											<com:ko tag="if" bind="type.isRangeMode">
+												<input class="inp-default save-error"
+													style="width: 80px;"
+													data-bind="ntsNumberEditor: {
+														value: interval,
+														constraint: 'Interval',
+														option: {placeholder: '0',
+															grouplength: 3,
+															decimallength: 2},
+														required: true}" />
+											</com:ko>
+											<com:ko tag="ifnot" bind="type.isRangeMode">
+												<div class="halign-center" style="width: 100%">
+												-
+												</div>
+											</com:ko>
+										</td>
+									</tr>
+								</com:ko>
+							</tbody>
+						</table>
+						<div class="halign-center" style="margin-top: 10px;" data-bind="with: history">
+							<button class="caret-bottom wage-table-create-button" data-bind="click: generateItem">賃金テーブル作成</button>
+							<div class="cf"/>
+						</div>
+					</div>
+					<div class="cf"/>
+				</div>
+				<div style="padding-top: 30px;">
+					<div>
+						<div data-bind="ntsFormLabel: { required: false }">賃金テーブル</div>
+						<button data-bind="click: btnInputFileDownload">入力内容をダウンロード</button>
+					</div>
+					<hr/>
+					<div id="detailContainer"/>
+				</div>
+			</com:ko>
+		</div>
+	</ui:composition>
+</body>
+</html>

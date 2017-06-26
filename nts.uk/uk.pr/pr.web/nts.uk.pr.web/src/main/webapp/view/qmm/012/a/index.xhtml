@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile path="qmm012.a.start.js" />
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qmm012.a.vm.js" />
+			<com:scriptfile path="qmm012.a.service.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="content-header">
+				<label id="A_LBL_Guide" class="displayBlock">新たに作成する項目名の、項目区分を選択してください。</label>
+				<div style="margin-top: 20px;">
+					<div class="floatLeft">
+						<label id="A_LBL_MainlyUsedItems" class="displayBlock">▼おもに使用する項目</label>
+						<div id="A_SEL_TypeItem" class="cf"
+							data-bind="ntsSwitchButton: {
+							options: roundingRules,
+							optionsValue: 'code',
+							optionsText: 'name',
+							value: selectedRuleCode,
+							enable: enable }"></div>
+						<!-- <button id="A_BTN_001" class="proceed displayBlock">支給項目ボタン</button>
+						<button id="A_BTN_002" class="displayBlock">支給項目ボタン</button>
+						<button id="A_BTN_003" class="displayBlock">支給項目ボタン</button> -->
+					</div>
+					<div
+						style="margin-left: 20px; background-color: #f2f2f2; border-radius: 5px; height: 290px; width: 350px;"
+						class="floatLeft">
+						<label id="A_LBL_ItemDescription">項目説明 </label>
+						<hr style="margin-left: 15px;"></hr>
+						<label id="A_LBL_NavigationMessage"
+							data-bind="text:NavigationMessage">ナビゲーションメッセージ１</label>
+					</div>
+				</div>
+			</div>
+			<div id="contents-area">
+				<button id="A_BTN_Submit" class="x-large proceed"
+					data-bind="click: submitInfo">選択</button>
+				<button id="A_BTN_Close" class="large"
+					data-bind="click: closeDialog">キャンセル</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

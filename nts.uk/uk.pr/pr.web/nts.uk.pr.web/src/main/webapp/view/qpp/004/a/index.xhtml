@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<com:scriptfile path="/lib/generic/igniteui/js/infragistics.core.js" />
+				<com:scriptfile path="/lib/generic/igniteui/js/infragistics.lob.js" />
+				<com:scriptfile path="/lib/generic/igniteui/js/extensions/infragistics.ui.combo.knockout-extensions.js" />
+            	
+            	<com:stylefile path="style.css"/>
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="viewmodel.js" />
+				<com:scriptfile path="service.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	
+            	<div id="functions-area">
+	            	<button class="separate-1" style="margin-left: 101px;">移送項目設定</button>
+            	</div>
+            	
+            	<div id="contents-area">
+            		<div>
+            			<label>行いたい操作を選んでください。</label>
+            		</div>
+            		
+            		<div class="payment-date-processing">
+	            		<div class="form-label inline required lbl-1">
+	            			<label>対象となる処理区分を選択</label>
+	            		</div>
+	            		<div id="combo-box"
+								data-bind="ntsComboBox: {options: paymentDateProcessingList,
+												optionsValue: 'processingNo',
+												optionsText: 'processingName',
+												value: selectedPaymetnProcessing,
+												editable: false,
+												enable: true,
+												columns: [
+													{ prop: 'processingNo', length: 4 },
+													{ prop: 'processingName', length: 10 },
+												],
+												validatorOptions: {
+											        required: true
+											    }}"
+								class="cf"></div>
+            		</div>
+            		
+            		<div class="current-year-month">
+            			<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAfCAYAAACGVs+MAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAANSSURBVFhH1VdZTxNRFO4vcntXEY1LNNFoojFRH3wxcYsrGhVQkEWFiMYtsqgohghuARcERBAhhlY6bWmBFmgp0JbSlkJbSil83nNDSUumhbFQ4km+ZDLn3nO+s9xzZ2TBmSnkm0uQLFzGKvnZhGCj8iIyjDno8z2DjJyLLUoEsk05kEmNvGCgCuXDzVivvCpJJ4ZkIQUyMUUsWCddIDmgzZekiwZRAqvl57BWcT4CaxhIN9/JQroIG8wuvQ+HKIH3I7/hDvrgmvJweIITaBszIEmZisFJB3dyUHcXz63fEZgJRtV5gv45G2SvfbwPm4X0CF+iBEKRhIvJb8cudTYnp/aY2HMW6lxCmC6L61QeI3aqb87p5sv88iyaAEnVSBv2a/Owr+M28swfEZyZntXE1oVLXARI7AE3hiadmBZxEEsXEkkEjuufYpOQhq2qG3PYrsrEDnVmxLuFdFuE65wciSQC8xfHg2g2YxKwBUbR7x+BeQkQ6om4eyBeiZtAz4QV21QZOMH645tTyS6WVNwxf0CxpQ4blNdQaW/Flb4yft6b3Toc1t3jx9ceGOP74yag9Zr5mt2aHLxlzug5pbeUk6DnYks9jnY94M81znZOKtymJAI02Qw+C59oJv8wjBPDcE6N44vjD49uwO9AtUMOgQ2fTt8gnwW9EzY2GfX8vYXZaXBpOBH/dIDblEQgtDgUCc1zMkjvEpIBMkznusXdyYw+5JspOnJ+xlCCepeKn3O6hmn2U91pHKcbyyP27WXTceRfeuCzQ4ESFhGlv8Legte2Jn6kXlgbeLqpPEWs+X6OaiEfN6DQUguNtx+1TiFiX6n1B7zTfm7z/ypBGYs4p/8duliDPRmqYamu5seQnFEW6FbMMlXiE8tU42gHMk0VvESvbI1IY2XQeQf4Hlozxq5jEkkEcplzikYx3oNLvS9x2lDEr9tj3Y+RYXrDa3yk8z5PN2WDzjyRiSXLXoJHg1/53mgiiQBF28QajDqYUtvq7uJz4BebAfR1Q3dFE0t9t2+IzwgqA90dsWRRBKiTl0Po044yF+5LlMAeTS5O6gvZvF86nNIX4ZCuAOsUFyJ8iRJIJGRJyhRRRSJAv2iyW/1FospEgP4PV/7ndLZBV0iAvzy5lRVZyzEMAAAAAElFTkSuQmCC" />
+            			<div class="lbl-year-month">
+	            			<label class="lbl-1">処理する給与明細書の年月</label>
+	            			<label class="lbl-2" data-bind="text: displayCurrentYearMonthProcessing"></label>
+            			</div>
+            		</div>
+            		
+            		<div class="action-btn">
+            			<button class="btn-1" data-bind="click: redirectToCreateData">
+           				</button>
+            			<button class="btn-2" >
+            			</button>
+            			<a class="btn-3" >再集計はどんな時にやるのか。<br/>
+							やる際の注意点とかを記載する。
+            			</a>
+            		</div>
+            		
+            	</div>
+            	
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

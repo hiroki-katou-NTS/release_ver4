@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 1030, height: 750 };</script>
+			<com:ValidatorScript>
+					nts.uk.shr.com.primitive.PersonId
+   				</com:ValidatorScript>
+			<com:stylefile path="qmm006.c.main.css" />
+			<com:scriptfile path="qmm006.c.start.js" />
+			<com:scriptfile path="qmm006.c.viewmodel.js" />
+			<com:scriptfile path="qmm006.c.service.js" />
+			<com:scriptfile set="IGNITE" />
+
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div class="content-1">
+					<div>
+						<label id="lbl_navigationMessage1">個人情報の振込元銀行を置換えます。</label>
+					</div>
+					<br />
+					<div class="cf">
+						<div class="content-left">
+							<div>
+								<label id="lbl_navigationMessage2">【置換元情報】</label>
+							</div>
+							<br />
+							<div class="cf">
+								<div class="content-left">
+									<i id="icon1" class="icon icon-searchbox"></i>
+									<div class="searchBox"
+										data-bind="ntsSearchBox: {
+											comId: 'single-list',
+											items: items, 
+											selected: currentCode, 
+											selectedKey: 'lineBankCode', 
+											fields: ['lineBankName', 'lineBankCode']}" />
+									<table id="single-list"
+										data-bind="ntsGridList: {
+											width: 440,
+											height: 500,
+											dataSource: items,
+											primaryKey: 'lineBankCode',
+											columns: columns,
+											multiple: false,
+											value: currentCode
+									}"></table>
+								</div>
+							</div>
+						</div>
+						<hr id="hr-vertical" />
+						<span class="caret-right"></span>
+						<div class="content-right">
+							<div>
+								<label>【置換先情報】</label>
+							</div>
+							<br />
+							<div class="cf">
+								<div class="content-left">
+									<i id="icon2" class="icon icon-searchbox"></i>
+									<div class="searchBox"
+										data-bind="ntsSearchBox: {
+											comId: 'single-list',
+											items: items1, 		
+											selected: currentCode1, 
+											selectedKey: 'lineBankCode', 
+											fields: ['lineBankName', 'lineBankCode']}" />
+									<table id="single-list"
+										data-bind="ntsGridList: {
+											width: 440,
+											height: 500,
+											dataSource: items1,
+											primaryKey: 'lineBankCode',
+											columns: columns,
+											multiple: false,
+											value: currentCode1
+									}"></table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr id="hr-horizontal" />
+				<div>
+					<button class="x-large proceed" id="btn_execute"
+						data-bind="click: transfer">実行</button>
+					<button class="large" id="btn_close" data-bind="click: closeDialog">閉じる</button>
+					<br />
+				</div>
+
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

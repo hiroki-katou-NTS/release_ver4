@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+		<script>var dialogSize = { width: 600, height: 540 };</script>
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qpp018.c.viewmodel.js" />
+			<com:scriptfile path="qpp018.c.start.js" />
+			<com:scriptfile path="qpp018.c.service.js" />
+		</ui:define>
+
+		<ui:define name="content">	
+					<div class="end-title"></div>
+					<div id="details" data-bind="with: checklistPrintSettingModel, visible: true" style="display: none;">
+						<div id="label-details">
+							<div>
+								<div data-bind="ntsFormLabel: {}">健康保険料の内訳表示選択</div>
+								<div style="padding-left: 13px">健康保険内訳項目（一般健康料 介護保険料 特定保険料 基本情報）を</div>
+								<div class="switch-button" data-bind="ntsSwitchButton: {
+																		options: healthInsuranceItems,
+																		optionsValue: 'code',
+																		optionsText: 'name',
+																		value: selectedHealthInsuranceItem,
+																		enable: true }">
+								</div>
+							</div>
+							<div style="padding-top: 20px">
+								<div style="float:left">
+									<div data-bind="ntsFormLabel: {}">
+										<label>出力設定</label>
+								</div>	
+								<button >?</button>
+								</div>
+								<div id="require-least-item" data-name ="入力項目"></div>
+								<div id="output-setting">
+		 							<div class="check-output" data-bind="ntsCheckBox: { checked: showDetail , text:'明細'}"></div>
+									<div class="check-output" data-bind="ntsCheckBox: { checked: showOffice , text:'事務所月計'}"></div>
+									<div class="check-output" data-bind="ntsCheckBox: { checked: showTotal , text:'総合月計'}"></div>
+									<div class="check-output" data-bind="ntsCheckBox: { checked: showDeliveryNoticeAmount , text:'納入告知額'}"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="end-title"></div>
+					<div id="function-buttons">
+						<table id="tbl-function-buttons">
+							<tbody>
+								<tr>
+									<td> 
+										<button class="x-large proceed" data-bind="click: saveConfigSetting" >設定</button>
+									</td>
+									<td>
+										<button class="large" data-bind="click: closeDialog">キャンセル</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+		</ui:define>
+		
+	</ui:composition>
+</body>
+</html>

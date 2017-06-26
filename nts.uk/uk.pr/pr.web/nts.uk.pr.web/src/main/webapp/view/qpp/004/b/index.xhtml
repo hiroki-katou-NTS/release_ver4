@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+					nts.uk.ctx.pr.proto.dom.layout.LayoutCode
+					nts.uk.ctx.pr.proto.dom.paymentdata.ProcessingNo
+					nts.uk.ctx.pr.proto.dom.paymentdata.DependentNumber
+			</com:ValidatorScript>
+			<link rel="stylesheet" type="text/css" href="style.css" />
+			<script src="../../../../lib/generic/jquery/jquery.steps.js"></script>
+			<script src="start.js"></script>
+			<script src="viewmodel.js"></script>
+		</ui:define>
+
+		<ui:define name="content">
+
+			<div id="functions-area">
+				<div class="separate-1 green-div"><a class="backqpp004a" href="javascript:void(0);" data-bind="click: backqpp004a">操作選択に戻る</a></div>
+				<button class="separate-1">移送項目設定</button>
+				<button class="separate-1">実行ログ</button>
+			</div>
+			<div id="contents-area">
+				<div id="program-body" style="top: 140px; min-width: 431px;"
+					data-bind="with: wizard">
+					<div id="wizard" data-bind="ntsWizard: {steps: stepList}" class="cf">
+						<div class="header">
+							<div class="image" data-icon="../../../../lib/nittsu/ui/style/images/ntsWizard/start-images.jpg"></div>
+							<div class="content">データ作成</div>
+						</div>
+						<div class="steps">
+							<div class="step-1">
+								<div class="fit-space">
+									<span>処理方法を選ぶ</span><br /> └詳細設定をする
+								</div>
+							</div>
+							<div class="step-2">対象社員を選ぶ</div>
+							<div class="end step-3">実行</div>
+						</div>
+						<div class="contents">
+							<div class="step-1">
+								<div class="round-border">
+									<span class="icon separate-1 green-div">処理する給与明細書の年月</span>
+									<span data-bind="text: $parent.currentProcessingYearMonth"></span>
+								</div>
+								<br /> <span class="separate-bottom">処理方法を選んでください</span><br />
+								<span class="separate-bottom">
+									<button class="x-large fix-button">就業の月別実績を連動する。</button>
+								</span>
+								<br />
+								<span class="separate-bottom">
+									<button class="large fix-button" data-bind="click: next">初期値データの作成</button>
+								</span>
+								<br />
+								<span class="separate-bottom">
+									<button class="large fix-button">外部（CSV）データの実績を取り込む。</button>
+								</span>
+								<br />
+							</div>
+							<div class="step-2">
+								<div class="round-border">
+									<span class="icon separate-1 green-div">処理する給与明細書の年月</span>
+									<a data-bind="text: $parent.currentProcessingYearMonth"></a>
+								</div>
+								<br />
+								<div data-bind="with: $parent.listbox">
+									<div id="list-box"
+										data-bind="ntsListBox: {options: itemList,
+											   optionsValue: 'id',
+											   optionsText: 'name',
+											   multiple: true,
+											   value: selectedCodes,
+											   enable: true,
+											   required: true,
+											   rows: 10,
+											   columns: [
+													{ prop: 'code', length: 12 },
+													{ prop: 'name', length: 20 }
+											   ]}"
+										class="cf"></div>
+								</div>
+								<br />
+								<button data-bind="click: previous">← 処理方法へ戻る</button>
+								<button data-bind="click: next, enable: $root.errors.isEmpty()" class="proceed x-large">次
+									へ →</button>
+							</div>
+							<div class="step-3">
+								<div class="round-border">
+									<span class="icon separate-1 green-div">処理する給与明細書の年月</span>
+									<a data-bind="text: $parent.currentProcessingYearMonth"></a>
+								</div>
+								<br /> <span class="separate-bottom">以下の設定で処理を行います。</span> 
+								<br /> 
+								<div style="font-size: 11px;" class="form-label separate-bottom">処理方法</div>
+								<a style="margin-left:58px; font-size: 11px;">初期値データの作成</a> 
+								<br /> 
+								<div style="font-size: 11px;" class="form-label separate-bottom">対象人数</div>
+								<a style="margin-left:58px; font-size:23px;" data-bind="text: $parent.listbox.selectedCodes().length"></a><a style="margin-left:9px; font-size: 11px;">人</a>
+								<br />
+								<div data-bind="with: $root.content" style="float: left; margin-top: 10px;">
+									<button data-bind="click: wizard.previous">← 対象社員へ戻る</button>
+									<button data-bind="click: processCreateData"
+										class="proceed x-large">実行する</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<br />
+				</div>
+			</div>
+			<hr />
+			<hr />
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

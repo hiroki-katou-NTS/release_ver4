@@ -1,0 +1,367 @@
+import org.gradle.api.Project
+
+apply plugin: 'java'
+
+buildscript {
+	repositories {
+		maven {
+			name 'nsvnmk'
+			url 'http://192.168.50.6:8081/artifactory/plugins-release'
+		}
+	}
+	dependencies {
+		//http://mvnrepository.com/artifact/de.aaschmid.gradle.plugins/gradle-cpd-plugin
+		classpath "de.aaschmid.gradle.plugins:gradle-cpd-plugin:0.5"
+
+		//http://mvnrepository.com/artifact/com.bmuschko/gradle-cargo-plugin
+		classpath "com.bmuschko:gradle-cargo-plugin:2.2.1"
+
+		//http://mvnrepository.com/artifact/com.eriwen/gradle-js-plugin
+		classpath 'com.eriwen:gradle-js-plugin:1.12.0'
+		
+		//Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+		classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+		
+		classpath 'de.richsource.gradle.plugins:typescript-gradle-plugin:1.8.0'
+	}
+}
+
+//すべてのプロジェクトに適応すべき内容はここに追記する
+allprojects {
+	apply from: "$rootDir/gradle/properties.gradle"
+	apply from: "$rootDir/gradle/library_properties.gradle"
+	apply plugin: "com.jfrog.artifactory"
+
+	//ビルド及び実行は、Java8を対象とする
+	sourceCompatibility = "$javaVersion"
+	targetCompatibility = "$javaVersion" 
+
+	task cleanandbuildallproject (dependsOn: ['clean', 'build'])<< {
+	}
+}
+
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'eclipse'
+	apply plugin: 'eclipse-wtp'
+	repositories {
+		maven {
+			name 'aspose'
+			url 'http://maven.aspose.com/artifactory/simple/ext-release-local/'
+		}
+	}
+	
+	//compileJavaとcompileTestJavaの実行時の文字コードをunicodeで指定
+	[compileJava, compileTestJava]*.options*.encoding = "$defaultEncoding"
+	
+	dependencies {
+	   // Apache commons lang
+		compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
+		
+		// Lombok
+		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.10'
+		
+		// JUnit
+		testCompile group: 'junit', name: 'junit', version: '4.12'
+		testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
+		
+		// JMockit
+		testCompile group: 'org.jmockit', name: 'jmockit', version: '1.28'
+		
+		// CDI
+		compileOnly group: 'javax.enterprise', name: 'cdi-api', version: '1.2'
+
+		// EJB
+		compileOnly group: 'javax.ejb', name: 'javax.ejb-api', version: '3.2'
+		
+		// Concurrency Utilities for Java EE
+		compile group: 'javax.enterprise.concurrent', name: 'javax.enterprise.concurrent-api', version: '1.0'
+		
+		// JPA
+		compile group: 'org.eclipse.persistence', name: 'javax.persistence', version: '2.1.1'
+		compile group: 'org.eclipse.persistence', name: 'eclipselink', version: '2.6.4'
+		
+		// JAX-RS
+		compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
+		
+		// Jackson
+		compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.4'
+		compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.4'
+
+		// servlet
+		compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+		
+		// Log4J
+		compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.7'
+		compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
+		
+		// SLF4J
+		compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.22'
+		compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.22'
+		
+		compile group: 'nts.gul', name: 'nts.gul', version: '0.21'
+		compile group: 'nts.arc', name: 'nts.arc', version: '0.34.5.1'
+		
+	}
+}
+
+//========================shr　↓=====================================
+project (':shr:nts.uk.shr.com') {
+	dependencies {
+		compile group: 'com.sun.faces', name: 'jsf-api', version: '2.2.13'
+		compile group: 'aspose', name: 'cells', version: '9.0.0'
+		// Mime Detection Utility
+		compile group: 'eu.medsea.mimeutil', name: 'mime-util', version: '2.1.3'
+		// https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-multipart-provider
+		compileOnly group: 'org.jboss.resteasy', name: 'resteasy-multipart-provider', version: '3.1.2.Final'
+		// https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs
+		compileOnly group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.1.2.Final'
+		
+		// https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
+		testCompile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.4.0'
+	}
+}
+
+project (':shr:nts.uk.shr.ws') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':shr:nts.uk.shr.find')
+	}
+}
+
+project (':shr:nts.uk.shr.find') {
+	dependencies {
+	}
+}
+//========================shr ↑=====================================
+
+//========================basic↓=====================================
+project (':com.ctx:basic:nts.uk.ctx.basic.ws') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':com.ctx:basic:nts.uk.ctx.basic.app')
+	}
+}
+project (':com.ctx:basic:nts.uk.ctx.basic.dom') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+	}
+}
+project (':com.ctx:basic:nts.uk.ctx.basic.app') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':shr:nts.uk.shr.find')
+		compile project(':com.ctx:basic:nts.uk.ctx.basic.dom')
+	}
+}
+project (':com.ctx:basic:nts.uk.ctx.basic.infra') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':com.ctx:basic:nts.uk.ctx.basic.dom')
+	}
+}
+project (':com.ctx:basic:nts.uk.ctx.basic.ac') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':com.ctx:basic:nts.uk.ctx.basic.dom')
+	}
+}
+project (':com.ctx:basic:nts.uk.ctx.basic.pub') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+	}
+}
+project (':com.ctx:basic:nts.uk.ctx.basic.pubimp') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':com.ctx:basic:nts.uk.ctx.basic.pub')
+		compile project(':com.ctx:basic:nts.uk.ctx.basic.dom')
+		compile project(':com.ctx:basic:nts.uk.ctx.basic.infra')
+	}
+}
+//========================basic ↑=====================================
+
+//========================sys:portal　↓=====================================
+
+project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.ws') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':com.ctx:sys:portal:nts.uk.ctx.sys.portal.app')
+	}
+}
+project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.dom') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+	}
+}
+project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.app') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':shr:nts.uk.shr.find')
+		compile project(':com.ctx:sys:portal:nts.uk.ctx.sys.portal.dom')
+	}
+}
+project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.infra') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':com.ctx:sys:portal:nts.uk.ctx.sys.portal.dom')
+	}
+}
+project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.ac') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':com.ctx:sys:portal:nts.uk.ctx.sys.portal.dom')
+	}
+}
+project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.pub') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+	}
+}
+project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.pubimp') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':com.ctx:sys:portal:nts.uk.ctx.sys.portal.pub')
+		compile project(':com.ctx:sys:portal:nts.uk.ctx.sys.portal.dom')
+		compile project(':com.ctx:sys:portal:nts.uk.ctx.sys.portal.infra')
+	}
+}
+//========================sys:portal ↑=====================================
+
+//=====================nts.uk.com.web↓============================
+project (':com.web:nts.uk.com.web') {
+	apply plugin: 'war'
+	apply plugin: "de.richsource.gradle.plugins.typescript"
+	war {
+		baseName= "nts.uk.com.web"
+		into("view") {
+			from compileTypeScript.outputs
+		}
+	}
+	compileTypeScript {
+		sourcemap = true
+		charset="utf8"
+		target = "ES5"
+		source=  file("src/main/webapp/view")
+		
+	}
+	
+	def explodedWarPath = "${buildDir}/exploded/${war.baseName}.war"
+	def explodedWarDeployFile = new File("${explodedWarPath}.dodeploy");
+	
+	
+	task explodedWar(type: Copy) {  
+		into explodedWarPath
+		with war
+		doLast {
+			explodedWarDeployFile.write ''
+		}
+	}
+	
+	war.dependsOn explodedWar
+	
+	task copyStaticResource(type: Sync) {
+		from "${rootDir}/${war.baseName}/src/main/webapp"
+		into explodedWarPath
+	}
+	
+	dependencies {
+		runtime project(':shr:nts.uk.shr.com')
+		runtime project(':shr:nts.uk.shr.find')
+		runtime project(':shr:nts.uk.shr.ws')
+		providedCompile group: 'com.sun.faces', name: 'jsf-api', version: '2.2.13'
+		compile group: 'aspose', name: 'cells', version: '9.0.0'
+
+		runtime project (':com.ctx:basic:nts.uk.ctx.basic.ac')
+		runtime project (':com.ctx:basic:nts.uk.ctx.basic.app')
+		runtime project (':com.ctx:basic:nts.uk.ctx.basic.dom')
+		runtime project (':com.ctx:basic:nts.uk.ctx.basic.infra')
+		runtime project (':com.ctx:basic:nts.uk.ctx.basic.pub')
+		runtime project (':com.ctx:basic:nts.uk.ctx.basic.pubimp')
+		runtime project (':com.ctx:basic:nts.uk.ctx.basic.ws')
+		
+		runtime project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.ac')
+		runtime project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.app')
+		runtime project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.dom')
+		runtime project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.infra')
+		runtime project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.pub')
+		runtime project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.pubimp')
+		runtime project (':com.ctx:sys:portal:nts.uk.ctx.sys.portal.ws')
+		
+		// shr find implement
+		runtime group: 'pr.core', name: 'nts.uk.ctx.pr.core.ws', version: '0.1'
+		runtime group: 'pr.core', name: 'nts.uk.ctx.pr.core.app', version: '0.1'
+		runtime group: 'pr.core', name: 'nts.uk.ctx.pr.core.dom', version: '0.1'
+		runtime group: 'pr.core', name: 'nts.uk.ctx.pr.core.infra', version: '0.1'
+		runtime group: 'pr.core', name: 'nts.uk.ctx.pr.core.pub', version: '0.1'
+		runtime group: 'pr.core', name: 'nts.uk.ctx.pr.core.pubimp', version: '0.1'
+		runtime group: 'pr.core', name: 'nts.uk.ctx.pr.core.ac', version: '0.1'
+		
+		runtime group: 'pr.report', name: 'nts.uk.ctx.pr.report.ws', version: '0.1'
+		runtime group: 'pr.report', name: 'nts.uk.ctx.pr.report.app', version: '0.1'
+		runtime group: 'pr.report', name: 'nts.uk.ctx.pr.report.dom', version: '0.1'
+		runtime group: 'pr.report', name: 'nts.uk.ctx.pr.report.infra', version: '0.1'
+		runtime group: 'pr.report', name: 'nts.uk.ctx.pr.report.pub', version: '0.1'
+		runtime group: 'pr.report', name: 'nts.uk.ctx.pr.report.pubimp', version: '0.1'
+		runtime group: 'pr.report', name: 'nts.uk.ctx.pr.report.ac', version: '0.1'
+		
+		runtime group: 'pr.formula', name: 'nts.uk.ctx.pr.formula.ws', version: '0.1'
+		runtime group: 'pr.formula', name: 'nts.uk.ctx.pr.formula.app', version: '0.1'
+		runtime group: 'pr.formula', name: 'nts.uk.ctx.pr.formula.dom', version: '0.1'
+		runtime group: 'pr.formula', name: 'nts.uk.ctx.pr.formula.infra', version: '0.1'
+		runtime group: 'pr.formula', name: 'nts.uk.ctx.pr.formula.pub', version: '0.1'
+		runtime group: 'pr.formula', name: 'nts.uk.ctx.pr.formula.pubimp', version: '0.1'
+		runtime group: 'pr.formula', name: 'nts.uk.ctx.pr.formula.ac', version: '0.1'
+		
+
+	}
+}
+//========================nts.uk.com.web↑=====================================
+
+project (':wk.ctx:nts.uk.ctx.workflow.ws') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':wk.ctx:nts.uk.ctx.workflow.app')
+	}
+}
+project (':wk.ctx:nts.uk.ctx.workflow.dom') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+	}
+}
+project (':wk.ctx:nts.uk.ctx.workflow.app') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':shr:nts.uk.shr.find')
+		
+		compile project(':wk.ctx:nts.uk.ctx.workflow.dom')
+	}
+}
+project (':wk.ctx:nts.uk.ctx.workflow.infra') {
+	dependencies {
+		compile project(':shr:nts.uk.shr.com')
+		compile project(':wk.ctx:nts.uk.ctx.workflow.dom')
+	}
+}
+
+artifactory {
+	contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+	publish {
+		repository {
+			repoKey = 'libs-release-local'
+			username = "${artifactory_user}"
+			password = "${artifactory_password}"
+			maven = true
+			
+		}
+	}
+	resolve {
+		repository {
+			repoKey = 'plugins-release'
+			username = "${artifactory_user}"
+			password = "${artifactory_password}"
+			maven = true
+			
+		}
+	}
+}

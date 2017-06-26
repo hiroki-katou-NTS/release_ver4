@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 600, height: 1000 };</script>
+						
+			<com:ValidatorScript>
+				nts.uk.shr.com.primitive.PersonId
+				
+				</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="qmm020.i.style.css" />
+			<com:scriptfile path="qmm020.i.start.js" />
+			<com:scriptfile path="qmm020.i.viewmodel.js" />
+			<com:scriptfile path="qmm020.i.service.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div class="cf">
+					<div id="I_LBL_001" data-bind="ntsFormLabel: {}">個人に紐付いている明細書</div>
+					<div id="I_LBL_003"></div>
+					<label id="I_LBL_004" data-bind="">：明細書未設定</label> <label
+						id="I_LBL_002" data-bind="">優先順位について</label>
+					<button
+						data-bind="ntsHelpButton: {image: 'img/lamthong.PNG', position: 'right top' }">?</button>
+					<br /> <br />
+					<hr />
+				</div>
+			</div>
+			<div id="I_LBL_001">
+				<table id="single-list"
+					data-bind="ntsGridList: {								
+							height: 350,
+							dataSource: items,
+							primaryKey: 'code',
+							columns: columns2,
+							multiple: false,
+							value: currentCode
+		}"
+					class="cf"></table>
+				<br />
+				<hr />
+			</div>
+			<br />
+			<br />
+
+			<br />
+			<div id="I_BTN_001" >
+				<button class="x-large" onclick="nts.uk.ui.windows.close()">閉じる</button>
+			</div>
+
+
+		</ui:define>
+
+	</ui:composition>
+</body>
+</html>

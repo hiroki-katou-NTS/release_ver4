@@ -1,0 +1,147 @@
+#detail-label{
+	margin-left: 30px;
+}
+#time-input{
+	float: left;	
+}
+
+#detail-process-label{
+	font-size: 21px;
+}
+#select-employee-button{
+	font-size: 19px;
+	height: 35px;
+	width: 240px;
+	margin-right: 10px;
+}
+#print-excution-log-button{
+	font-size: 19px;
+	height: 35px;	
+}
+#functions-area .function-class {
+	margin-left: 60px;
+	margin-top: 6px;
+}
+
+td#contents-left {
+	width: 700px;
+	height: 70px;
+}
+div#target-year-label {
+	background-color: #E2F79F;
+	width: 100px;
+	height: 26px;
+	text-align: right;
+	padding-top: 3px;
+	padding-right: 8px;
+	margin-bottom: 5px;
+	border-radius: 3px;
+}
+span#japan-year {
+    margin-left: 10px;
+    padding-top: 2px;
+}
+.select-target-year {
+	width: 600px;
+	height: 48px;
+	border: solid 2px #B1B1B1;
+	border-radius: 5px;
+	padding-top: 5px;
+	padding-left: 5px;
+	margin-left: 50px;
+}
+
+
+span#year-label {
+    padding-top: 2px;
+    margin-left: 10px;
+    width: 100px;
+}
+
+
+.search-employee {
+    border: solid 2px #B1B1B1;
+    width: 655px;
+    min-height: 500px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+div#detail-process {
+    border: solid 2px #b1b1b1;
+    width: 475px;
+    height: 530px;
+    border-radius: 5px;
+    padding: 10px;
+}
+div#output-division {
+	float: right;
+	margin-right: 100px;
+	margin-top: 7px;
+}
+
+div#output-division > .nts-switch-button {
+	height: 25.6px;
+}
+
+div#detail-items-setting {
+    margin-left: 25px;
+}
+div#detail-items-setting > div {
+    margin-top: 15px;
+}
+label#navigation-message-2 {
+    margin-left: 27px;
+}
+label#navigation-message-1 {
+    margin-left: 25px;
+}
+div#print-department-hierarchy-checkbox > .help-button {
+    margin-left: 8px;
+    width: 31px;
+}
+#department-hierarchy{
+	width: 400px;
+	margin-left: 15px;
+	padding-left: 5px;	
+	padding-bottom: 8px;
+	padding-top: 8px;
+	border: solid 2px #B1B1B1;
+}
+#department-hierarchy .ntsCheckBox{
+	padding-right: 10px;
+}
+#hierarchy-content{
+	padding-left: 15px;
+	margin-top: 10px;
+	margin-bottom: 8px;
+	line-height: 30px;
+}
+.head-end {
+    width: 100%;
+    height: 1px;
+    background: #B1B1B1;
+    margin-top: 4px;
+    margin-bottom: 5px;
+}
+div#print-setting {
+    margin-top: 35px;
+}
+div#specify-break-page-select {
+    width: 100px;
+   	margin-left: 42px;
+}
+div#specify-break-page-hierarchy-select {
+    width: 70px;
+}
+label#hierarchy-design-label {
+    margin-left: 20px;
+}
+div#specify-break-page-hierarchy-select {
+    margin-left: 10px;
+}
+div#use-2000-yen-select {
+    margin-left: 42px;    
+}
+.use-2000-yen {
+    margin-top: 20px;
+}

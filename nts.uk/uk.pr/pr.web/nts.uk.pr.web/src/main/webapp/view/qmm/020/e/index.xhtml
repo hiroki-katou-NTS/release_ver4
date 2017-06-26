@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:stylefile path="qmm.020.e.style.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qmm.020.e.viewmodel.js" />
+			<com:scriptfile path="qmm.020.e.start.js" />
+			<com:scriptfile path="qmm.020.e.service.js" />
+		</ui:define>
+		<ui:define name="content">
+			<div class="contents-area">
+				<!-- ~~~~~~~~~~~~~~~~~~~~~~ -->
+				<!-- LEFT -->
+				<!-- ~~~~~~~~~~~~~~~~~~~~~~ -->
+				<div style="margin-left: 10px;" class="left-content">
+					<div class="bg-green caret-right caret-background"
+						style="float: left; width: 250px; height: 300px; margin: 20px 50px;">
+						<button id="E_BTN_003" style="margin: 20px 20px" data-bind="click:openJDialog">履歴追加</button>
+						<button id="E_BTN_004" style="margin: 20px 20px" data-bind="click:openKDialog">履歴編集</button>
+						<div id="E_LST_002"
+						data-bind="ntsListBox: {
+										options: itemList,
+										optionsValue: 'historyId',
+										optionsText: 'displayDate',
+										multiple: false,	
+										value: selectedCode,
+										enable: isEnable(),
+										rows: 5,
+										columns: [
+											{ key: 'displayDate', length: 10 }
+										]}"></div>
+						<div style="margin: 10px 20px;"></div>
+						<span data-bind="text: selectedCode"></span>
+					</div>
+				</div>
+				<!-- ~~~~~~~~~~~~~~~~~~~~~~ -->
+				<!-- RIGHT -->
+				<!-- ~~~~~~~~~~~~~~~~~~~~~~ -->
+				<div style="margin: 10px 20px;" class="right-content">
+					<div class="form-label">
+						<label id="E_LBL_001">雇用に明細書を紐ずける</label>
+						<HR
+							style="display: block; margin-top: 1.2em; margin-left: -1em; width: 800px;" />
+						<br></br>
+					</div>
+					<div id="E_LST_001">
+						<div style="width: 700px"
+							data-bind="ntsSearchBox: {
+							comId: 'single-list',
+							items: items, 		
+							selected: companyCode, 
+							selectedKey: 'code', 
+							fields: ['name', 'code']}" />
+
+						<table id="single-list"
+							data-bind="ntsGridList: {								
+								height: 350,
+								dataSource: items,
+								primaryKey: 'classificationCode',
+								columns: columns2,
+								multiple: false,
+								value: companyCode
+								
+								
+							}"
+							class="cf"></table>
+					</div>
+
+				</div>
+			</div>
+
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

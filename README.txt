@@ -1,2 +1,2 @@
-this is NtsCommons.
+this is UniversalK.
 

@@ -1,0 +1,308 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.ResiTaxCode
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.PrefectureCode
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.ResiTaxReportCode
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.ResiTaxAutonomy
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.ResiTaxAutonomyKana
+					nts.uk.shr.com.primitive.Memo
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.CompanyAccountNo
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.CompanySpecifiedNo
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.RegisteredName
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.CordinatePostOffice
+					nts.uk.ctx.pr.core.dom.rule.law.tax.residential.CordinatePostalCode
+				</com:ValidatorScript>
+           	<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qmm003.a.vm.js" />
+			<com:scriptfile path="qmm003.a.start.js" />
+			<com:scriptfile path="qmm003.a.service.js" />
+			<com:stylefile path="qmm003.a.main.css" />
+
+		</ui:define>
+
+		<ui:define name="content">
+		<div id="functions-area">
+<!-- 		data-bind="click: resetData" -->
+				<button id="RESET_DATA" class="group-button-1 " data-bind="click: resetData">新規</button>
+				<button id="REGISTER" class="proceed group-button-1" data-bind="click: clickRegister, enable: $root.errors.isEmpty">登録</button>
+				<button id="PDF" class="group-button-1">印刷（PDF）</button>
+				<button id="CHOSSE_RESITAX" class="group-button-1" data-bind="click: openEDialog">納付先の統合</button>
+				<button id="MASTER_LOG" class="group-button-1">マスタ修正ログ</button>
+			<!-- 	 data-bind="click: Confirm" -->
+				<button id="DELETE_ONE" class="group-button-2 " data-bind="click: deleteAResidential, enable: enableBTN005 ">削除</button>
+				<button id="DELELE_MORE" class="group-button-2" data-bind="click: openDDialog, enable: enableBTN006">一括削除</button>
+		
+		</div>
+
+			<div id="contents-area" class="cf">
+
+				<div class="nts-left-content">
+					<div class="relative bg-green caret-right caret-background"
+						style="float: left; width: 400px; height: 610px; margin-top: 2px">
+						<i class="icon icon-searchbox"></i>
+						<!-- , click: search -->
+						<div id="search" style="width: 400px"
+							data-bind="ntsSearchBox: {items: redensitalTaxNodeList, selected: singleSelectedCode, selectedKey: 'code', childField: 'childs', filteredItems: filteredData, fields: ['name', 'code']}" />
+						<div>
+							<table id="A_LST_001"
+								data-bind="ntsTreeGridView:{
+								   	width: 350,
+									height: 500,
+									options: redensitalTaxNodeList,
+									value: singleSelectedCode,
+									optionsValue: 'code',
+									optionsChild: 'childs',
+									optionsText: 'nodeText',
+									multiple: false,
+									enable: false,
+									showCheckBox: false}"
+								class="cf"></table>
+						</div>
+				
+					 <label id="A_LBL_011" data-bind="text: numberOfResidentialTax()"> 【登録件数】 0件</label>
+				
+							
+						
+					</div>
+				</div>
+				<div class="nts-right-content"  data-bind="with: currentResidential">
+
+					<div>
+						<!-- table  -->
+						<table id="expand-example2">
+							<tbody>
+								<tr class ="flex">
+									<th colspan="1" class="th flex">
+										<div data-bind="ntsFormLabel: {constraint: ['ResiTaxCode','ResiTaxAutonomy'], required: true ,readonly: true}" class="form-label">
+											<label id="A_LBL_002">コード/名称</label>
+										</div>
+									</th>
+									<th colspan="1" >
+									
+		                           <div >
+										<input  data-name="ResiTaxCode" id="A_INP_002"  class="save-error"  data-bind="ntsTextEditor: {
+												value: resiTaxCode,
+												constraint: 'ResiTaxCode',
+												required: true,
+												enable: $parent.isNew ,
+												readonly: false }" />
+								  </div>
+									</th>
+									<th colspan="2" >
+		                           <div >
+										<input data-name="ResiTaxAutonomy" id="A_INP_003"  class="save-error"  data-bind="ntsTextEditor: {
+												value: resiTaxAutonomy,
+												constraint: 'ResiTaxAutonomy',
+												required: true,
+												enable: true,
+												readonly: false }" />
+								  </div>										
+									</th>								
+									<th colspan="3" >
+										<button id="A_BTN_007" data-bind="click: openBDialog,enable: $parent.isNew"  style="margin-left: 5px;height: inherit;">参照</button>													 		
+									</th>								
+								</tr>
+								<!-- update UI -->	
+								<tr class ="flex">
+								 <th colspan="1" class="th flex">
+										<div data-bind="ntsFormLabel: {constraint: 'ResiTaxAutonomyKana'}" class="form-label ">
+											<label id="A_LBL_013">カナ名</label>
+										</div>
+								 </th>
+								 <th>
+								 <div >
+										<input  data-name="ResiTaxAutonomyKana" id="A_INP_010"  class="save-error"  data-bind="ntsTextEditor: {
+												value: resiTaxAutonomyKana,
+												constraint: 'ResiTaxAutonomyKana',
+												enable: true,
+												readonly: false }" style="margin-top: 5px;"/>					
+									</div>
+								 </th>
+								</tr>						
+
+								<!--  3  -->
+								<tr class= "flex">
+									<th colspan="1" class="th flex">
+										<div data-bind="ntsFormLabel: {required: true}" class="form-label ">
+											<label id="A_LBL_003">都道府県</label>
+										</div>
+									</th>
+									<th colspan="2" class="th">
+										<div id="A_SEL_001"
+											data-bind="ntsComboBox: {
+						                        options: $parent.itemPrefecture,
+												optionsValue: 'code',
+												value: prefectureCode,
+												optionsText: 'name',
+												editable: true,
+												enable: true,
+												columns: [{ prop: 'name', length: 10 }]}">
+										</div>
+									</th>								
+								</tr>
+							</tbody>
+						</table>
+						<hr />
+					</div>
+					<!-- table  -->
+					<div>
+						<table id="expand-example1">
+							<tbody>
+								<tr class= "flex">
+									<th colspan="1" class="th">
+										<div data-bind="ntsFormLabel: {}">
+											<label id="A_LBL_004"> 住民税報告先 </label>
+										</div>
+									</th>
+									<th colspan="2">
+										<button id="A_BTN_009" data-bind="click: openCDialog, enable: enableBTN009" style="height: inherit;">参照</button>													 		
+									
+ 			 							 <label id="A_LBL_012"   class="save-error"  data-bind="text: resiTaxReportCode"></label>					
+									</th>							
+								</tr>							
+								<!--  2  -->
+								<tr class= "flex">
+									<th colspan="1" class="th">
+										<div class="form-label"
+											data-bind="ntsFormLabel:{constraint: 'CompanyAccountNo', required: false}"
+											style="margin-top: 5px;">
+											<label id="A_LBL_005">口座番号 </label>
+										</div>
+									</th>
+
+									<th colspan="2" class="th">
+									<div >
+										<input  data-name="CompanyAccountNo" id="A_INP_004"  class="save-error"  data-bind="ntsTextEditor: {
+												value: companyAccountNo,
+												constraint: 'CompanyAccountNo',
+												enable: true,
+												readonly: false }" style="margin-top: 5px;"/>					
+									</div>
+									</th>
+								</tr>
+								<!--  3  -->
+								<tr class= "flex">
+									<th colspan="1" class="th">
+										<div class="form-label" data-bind="ntsFormLabel:{constraint:'RegisteredName'}"
+											style="margin-top: 5px;">
+											<label id="A_LBL_006">加入者名</label>
+										</div>
+									</th>
+
+									<th colspan="2" class="th">
+									<div >
+										<input data-name="RegisteredName" id="A_INP_005"   class="save-error"  data-bind="ntsTextEditor: {
+												value: registeredName,
+												constraint: 'RegisteredName',
+												enable: true,
+												readonly: false }" style="margin-top: 5px;"/>			
+									</div>
+									</th>
+								</tr>
+							</tbody>
+						</table>
+						<hr />
+					</div>
+					<!-- p3 -->
+					<!-- table -->
+					<table id="expand-example">
+						<tbody>
+							<!-- 1  -->
+							<tr class= "flex">
+								<th colspan="1" class="th">
+									<div class="form-label" data-bind="ntsFormLabel:{constraint: 'CompanySpecifiedNo'}"
+										style="margin-top: 5px; width: 200px">
+										<label id="A_LBL_007">指定番号</label>
+									</div>
+								</th>
+
+								<th colspan="2" class='th' >
+								<div >
+										<input  data-name="CompanySpecifiedNo" id="A_INP_006"  class="save-error"  data-bind="ntsTextEditor: {
+												value: companySpecifiedNo,
+												constraint: 'CompanySpecifiedNo',
+												enable: true,
+												readonly: false }"  style="margin-top: 5px;"/>
+								
+								</div>
+								</th>
+							</tr>
+
+							<!-- 2  -->
+							<tr class= "flex">
+								<th colspan="1" class="th">
+									<div class="form-label" data-bind="ntsFormLabel:{constraint: 'CordinatePostalCode'}"
+										style="margin-top: 5px;">
+										<label id="A_LBL_008">とりまとめ局　郵便番号</label>
+									</div>
+								</th>
+
+								<th colspan="2" class='th'>
+								<div >
+										<input data-name="CordinatePostalCode" id="A_INP_007"   class="save-error"  data-bind="ntsTextEditor: {
+												value: cordinatePostalCode,
+												constraint: 'CordinatePostalCode',
+												enable: true,
+												readonly: false }"  style="margin-top: 5px;"/>			
+									
+								</div>
+								</th>
+							</tr>
+							<!-- 3  -->
+							<tr class= "flex">
+								<th colspan="1" class="th">
+									<div class="form-label" data-bind="ntsFormLabel:{constraint:'CordinatePostOffice'}"
+										style="margin-top: 5px;">
+										<label id="A_LBL_009">とりまとめ局　名</label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th">
+								<div >
+										<input data-name="CordinatePostOffice" id="A_INP_008"  class="save-error"  data-bind="ntsTextEditor: {
+												value: cordinatePostOffice,
+												constraint: 'CordinatePostOffice',
+												enable: true,
+												readonly: false }"  style="margin-top: 5px;"/>				
+								</div>
+								</th>
+							</tr>
+							<!-- 4  -->
+ 							<tr class= "flex">
+								<th colspan="1" class="th" style="vertical-align: top;">
+									<div class="flex">
+									<div class="form-label" data-bind="ntsFormLabel:{constraint: 'Memo'}">
+										<label id="A_LBL_010">メモ</label>
+									</div>
+									</div>
+								</th>
+
+								<th colspan="2" class="th">
+								<div >
+										<textarea  data-name="Memo" id="A_INP_009"  class="save-error"  data-bind="ntsMultilineEditor:{
+												value: memo,
+												constraint: 'Memo',
+												enable: true,
+												readonly: false }" />									
+								</div>
+								</th>
+							</tr>
+						</tbody>
+					</table>
+				
+	<!--             			 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

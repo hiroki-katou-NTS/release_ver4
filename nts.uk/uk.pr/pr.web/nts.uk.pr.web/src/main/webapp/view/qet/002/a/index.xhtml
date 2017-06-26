@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qet002.a.vm.js" />
+			<com:scriptfile path="qet002.a.start.js" /> 			
+			<com:scriptfile path="qet002.a.service.js" /> 
+			<script type="text/javascript">
+				// TODO: Code validate.
+				__viewContext.primitiveValueConstraints.TargetYear = {
+					valueType : 'Integer',
+					min: 1900,
+					max: 9999
+				};
+				__viewContext.primitiveValueConstraints.LowerLimit = {
+					valueType : 'Integer',
+					min : 0,
+					max : 9999999999
+				};
+				__viewContext.primitiveValueConstraints.UpperLimit = {
+					valueType : 'Integer',
+					min : 0,
+					max : 9999999999
+				};
+			</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area" class="divHeader">
+				<div class="function-class">
+					<button id="select-employee-button" class="proceed" data-bind="click: printData">選択した社員を印刷 （Excel)</button>
+					<button id="print-excution-log-button">印刷実行ログ</button>
+				<!-- 	<label>累計支給額チェックリスト</label> -->
+				</div>
+			</div>
+			<div id="contents-area">
+				<table>
+					<tr>
+						<td id="contents-left">
+							<div class="select-target-year">
+								<div id="time-input">
+									<span class="label with-image"> <i
+										class="image image-calendar" /> <span>対象年度</span>
+									</span> <input id="target-year-input" for="target-year-label"
+										class="save-error"
+										data-bind="ntsNumberEditor: {
+										value: targetYear,
+										constraint: 'TargetYear',
+										option: {
+											decimallength: 0,
+											width: '60px'
+										},
+										enable: true}"></input>
+										
+									<span id="japan-year" data-bind="text: japanYear"></span>
+								</div>
+
+								<!-- 	<div id="target-year-input" data-bind="ntsDatePicker: {value: targetYear, startDate: '1900/01/01', endDate: '1999/12/30', dateFormat: 'yyyy/MM'}"></div>	 -->	
+								
+							</div>
+							<div class="search-employee"></div>
+						</td>
+						<td id="contents-right">
+							<div id="detail-process">
+								<div class="label" id="detail-process-label">処理の詳細設定</div>
+								<div id="payment-range">
+									<div id="payment-range-label" data-bind="ntsFormLabel: {required: true}">課税対象支給額の範囲指定</div>
+									<div id="payment-range-input">
+										<div id="lower-limit-checkbox" data-bind="ntsCheckBox: { checked: isLowerLimit }"></div>
+										<input class="save-error" id="lower-limit-input"
+											data-bind="ntsNumberEditor: {
+												value: lowerLimitValue,
+												option: {
+													decimallength: 0,
+													currencyformat: 'JPY',
+													currencyposition: 'right',
+													width: '120px'
+												},
+												constraint: 'LowerLimit',
+												enable: isLowerLimit()}" />
+										<label>以上 ～</label>
+										<div id="upper-limit-checkbox" data-bind="ntsCheckBox: { checked: isUpperLimit }"></div>
+										<input class="save-error" id="upper-limit-input" data-bind="ntsNumberEditor: {
+												value: upperLimitValue,
+												option: {
+													decimallength: 0,
+													currencyformat: 'JPY',
+													currencyposition: 'right',
+													width: '120px'
+												},
+												constraint: 'UpperLimit',
+												enable: isUpperLimit()}" />
+										<label>以下</label>
+									</div>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

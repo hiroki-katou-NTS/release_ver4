@@ -1,0 +1,30 @@
+.form-label.inline {
+  border-color: #FAC002;
+}
+
+.x-large {
+	margin-left: 152px;
+	margin-top: 15px;
+}
+
+.large {
+	margin-left: 10px;
+}
+
+hr { 
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 0.5em;
+    margin-left: auto;
+    margin-right: auto;
+    border-style: inset;
+    border-width: 1px;
+}
+
+.radiobox {
+	margin-left: 25px;
+}
+
+.ntsRadioBox{
+	width: 100%;
+}

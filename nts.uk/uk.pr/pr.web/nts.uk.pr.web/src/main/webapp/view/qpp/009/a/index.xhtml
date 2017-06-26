@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qpp009.a.start.js" />
+ 			<com:scriptfile path="qpp009.a.service.js" /> 
+			<com:scriptfile path="qpp009.a.vm.js" />
+			<script type="text/javascript">
+				// TODO: Code validate.
+				__viewContext.primitiveValueConstraints.TargetYear = {
+					valueType : 'Integer',
+					min: 190001,
+					max: 999912
+				};
+			</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area" class="divHeader">
+				<div class="function-class">
+					<button id="select-employee-button" class="proceed" data-bind="click: printData">選択社員印刷ボタン</button>
+					<button id="print-excution-log-button">印刷実行ログボタン</button>
+				</div>
+			</div>
+			<div id="contents-area">
+				<table>
+					<tr>
+						<td id="contents-left">
+							<div class="select-target-year">
+								<div id="time-input">
+									<span class="label with-image">
+										<i class="image image-calendar" /> <span>対象年度</span>
+									</span> 
+									<span id="date-picker" for="target-year-label"
+										data-bind="ntsDatePicker: {
+										value: yearMonth, 
+										constraint: 'TargetYear', 
+										required: true, 
+										dateFormat: 'yyyy/MM', 
+										startDate: '1900/01', 
+										endDate:'9999/12'}"></span>
+
+									<span id="japan-year" data-bind="text: japanYearmonth()"></span>
+								</div>
+								<div id="output-division" data-bind="ntsSwitchButton: {
+										options: outputDivisions,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: selectedDivision }"></div>
+							</div>
+							<div class="search-employee"></div>
+						</td>
+						<td id="contents-right">
+							<div id="detail-process">
+								<div class="label header-label" id="detail-process-label">処理の詳細設定</div>
+								<div class="head-end"></div>
+								<div id="detail-items-setting-label" data-bind="ntsFormLabel: {}">明細・合計の出力指定 </div> 
+								<label id="detail-label" data-bind="text: detailLabel()"></label>
+								<div id="detail-items-setting" data-bind="with: detailItemsSetting">
+									<div id="print-detail-item-checkbox" data-bind="ntsCheckBox: { checked: isPrintDetailItem }">明細  （支給した給与）を出力する</div>
+									<div id="print-total-department-checkbox">
+										<div data-bind="ntsCheckBox: {checked: isPrintTotalOfDepartment}">部門計</div>
+										<label id="navigation-message-1"> （部門ごとの対象期間合計）を出力する</label>
+									</div>
+									<div id="print-department-hierarchy-checkbox">
+										<div data-bind="ntsCheckBox: {checked: isPrintDepHierarchy}">部門解消累計を出力する。</div>
+										<button class="help-button" >?</button><br></br>
+									</div>
+									<div id="department-hierarchy">
+										<div>累計したい部門の階層を指定</div>
+										<div id="hierarchy-content" data-bind="ntsMultiCheckBox: {
+																				options: AccumulatedLevelList,
+																				optionsValue: 'code',
+																				optionsText: 'name',
+																				value: selectedLevels,
+																				enable: isPrintDepHierarchy()} ">
+										</div>
+										<div style="margin-left: 15px">※10階層は部門計で確認できます。</div>
+									</div>
+									<div id="calculate-total-checkbox" data-bind="ntsCheckBox: {checked: isCalculateTotal}">総合計  （選択した個人の対象期間合計）を出力する。</div>
+								</div>
+								<div id="print-setting" data-bind="with: printSetting">
+									
+									<div id="print-setting-label">印刷の設定</div>
+									<div class="head-end"></div>
+									<div class="print-setting flex valign-center">
+											<div id="specify-break-page-label" data-bind="ntsFormLabel:{}">改ページの指定</div>
+											<div id="specify-break-page-select" data-bind="ntsComboBox: {
+												options: specifyBreakPageList,
+												optionsValue: 'code',
+												value: selectedBreakPageCode,
+												optionsText: 'name',
+												enable: true}"></div>
+										<label id="hierarchy-design-label">階層指定</label>
+										<div id="specify-break-page-hierarchy-select" data-bind="ntsComboBox: {
+												options: specifyBreakPageHierarchyList,
+												optionsValue: 'code',
+												value: selectedBreakPageHierarchyCode,
+												optionsText: 'name',
+												enable: isBreakPageByAccumulated}"></div>
+									</div>
+									<div class="use-2000-yen flex valign-center">
+										<div id="use-2000-yen-label" data-bind="ntsFormLabel: {}">2000円の指定</div>
+										<div id="use-2000-yen-select" data-bind="ntsSwitchButton: {
+												options: use2000yenSelection,
+												optionsValue: 'code',
+												optionsText: 'name',
+												value: selectedUse2000yen }"></div>
+									</div>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

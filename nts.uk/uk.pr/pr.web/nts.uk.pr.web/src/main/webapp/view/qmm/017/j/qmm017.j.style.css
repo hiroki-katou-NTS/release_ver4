@@ -1,0 +1,28 @@
+.separate-vertical {
+	margin-bottom: 10px;
+}
+#footer {
+	position: fixed;
+    bottom: 11px;
+    width: 498px;
+    text-align: center;
+}
+#editing_method_sel_j_screen{
+	margin-left: 20px;
+	width: 350px;
+	vertical-align: text-top;
+	display: inline-block;
+}
+#start_date_inp{
+	margin-left: 60px;
+}
+#formula_code_lbl{
+	margin-left: 50px;
+}
+#master_item_sel, #condition_attribute_lbl{
+	margin-left: 170px;
+}
+#setting_formula_lbl_j_screen{
+	    margin-top: 10px;
+    margin-left: 145px;
+}

@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 650, height: 500 };</script>
+
+			<link rel="stylesheet" type="text/css" href="style.css" />
+			<script src="../../../../lib/nittsu/ui/dialog-options.js"></script>
+			<com:scriptfile path="/lib/nittsu/ui/sharedvm/timer.js"/>
+			<script src="start.js"></script>
+			<script src="viewmodel.js"></script>
+			<script src="service.js"></script>
+		</ui:define>
+
+		<ui:define name="content">
+
+			<div id="contents-area">
+				<div class="container">
+					<div class="dlg-body">
+						<div class="info-create">
+							<label>データ作成</label>
+							<table id="tbl-info-create">
+								<tbody>
+									<tr>
+										<th>経過時間</th>
+										<td id="timer"></td>
+									</tr>
+									<tr>
+										<th>処理状態</th>
+										<td><span data-bind="text: processingState()==0 ? 'データの作成中': '完了'"></span>　<span data-bind="text: nts.uk.text.format('{0}/{1}人', completeList().length, numberOfPerson())"></span> </td>
+									</tr>
+									<tr>
+										<th>エラー件数</th>
+										<td><span data-bind="text: countError"></span>件</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+
+						<div class="info-setting">
+							<label>設定情報</label>
+							<table id="tbl-info-setting">
+								<tbody>
+									<tr>
+										<th>処理方法</th>
+										<td>初期データ作成</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+
+						<div class="error-list" data-bind="if: visibleErrorList">
+							<table id="tbl-error">
+								<thead>
+									<tr>
+										<th style="width: 5%;">No</th>
+										<th style="width: 20%;">処理状態</th>
+										<th style="width: 10%;">区分</th>
+										<th style="width: 65%;">内容</th>
+									</tr>
+								</thead>
+								<tbody data-bind="foreach: errorList">
+									<tr>
+										<td data-bind="text: index"></td>
+										<td data-bind="text: 'データの作成中'"></td>
+										<td data-bind="text: 'エラー'"></td>
+										<td data-bind="text: contenError"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					
+					<div class="dlg-footer">
+						<button data-bind="click: stopProcess, text: buttonText"></button>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

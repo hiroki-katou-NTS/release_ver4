@@ -1,0 +1,32 @@
+#boxSearch {
+	display: flex;
+	vertical-align: middle;
+}
+
+.btnMenu {
+	width: 70px;
+}
+
+#btnSelectedClear {
+	margin-bottom: 15px;
+	margin-top: 5px;
+}
+
+#total {
+	margin-left: 10px;
+	width: 400px;
+}
+
+#process {
+	text-align: center;
+	vertical-align:middle;
+}
+
+#label {
+	line-height: 40px;
+	text-align: left;
+}
+hr { 
+	margin-top: 15px;
+	width : 400px; 
+}

@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+			nts.uk.ctx.basic.dom.organization.position.JobCode
+			nts.uk.ctx.basic.dom.organization.position.JobName	
+			nts.uk.shr.com.primitive.Memo	
+			</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="cmm013.a.main.css" />
+			<com:scriptfile path="cmm013.a.start.js" />
+			<com:scriptfile path="cmm013.a.vm.js" />
+			<com:scriptfile path="cmm013.a.service.js" />
+		</ui:define>
+		<ui:define name="content">
+			<div id="function_area">
+				<button id="BTN_001_INIT" data-bind="click: initPosition"
+					class="button fix-button">新規</button>
+				<button id="BTN_002_ADD" data-bind="click: registerPosition"
+					class="button proceed fix-button">登録</button>
+				<button id="BTN_004" class="button">マスタ修正ログ</button>
+				<button id="BTN_005_DEL" data-bind="click: deletePosition , enable : isDeleteEnable"
+					class="button danger fix-button">削除</button>
+			</div>
+
+			<div id="content-area">
+				<div id="left-content" class="bg-green caret-right caret-background">
+					<div>
+						<button id="BTN_006_C" class="button separate-button"
+							data-bind="click: openCDialog">履歴追加</button>
+						<button id="BTN_007_D" class="button danger separate-button"
+							data-bind="click: openDDialog">履歴編集</button>
+					</div>
+					<br></br>
+					<!--LST_001-->
+					<div id="list-box"
+						data-bind="ntsListBox: {
+								options: listbox,
+								primaryKey: 'historyId',
+								primaryText: 'endDate',
+								multiple: false,
+								value: selectedCode,
+								enable: isEnable(),
+								rows: 3,
+								required: true,
+								columns: [
+									{ key: 'startDate', length: 8, inputFormat: 'date' },
+									{ key: 'endDate', length: 8,inputFormat: 'date'}
+								]}">
+					</div>
+					<div>
+						<span style="margin-left: 100px"
+							class="caret caret-bottom caret-inline"></span>
+					</div>
+
+					<!--INP_001-->
+					<div class="cf">
+						<div style="float: left">
+							<div style="width: 320px"
+								data-bind="ntsSearchBox: {
+										comId: 'single-list',
+										items: dataSource, 		
+										selected: currentCode, 
+										selectedKey: 'jobCode', 
+										fields: ['jobCode', 'jobName']}">
+							</div>
+							<br></br>
+
+							<!--LST_002-->
+							<table id="single-list"
+								data-bind="ntsGridList:{
+									width: 300,
+									height: 450,
+									options: dataSource,								
+									optionsValue: 'jobCode',
+									columns: columns,
+									multiple: false,
+									value: currentCode,
+									enable: true}"
+								class="cf">
+							</table>
+						</div>
+					</div>
+				</div>
+				<div id="right-content">
+					<table>
+						<colgroup>
+							<col width="200px" />
+							<col width="*" />
+						</colgroup>
+						<tr>
+							<td class="row_1">
+								<div
+									data-bind="ntsFormLabel: { constraint: ['JobCode', 'JobName'], required: true }">
+									コード/名称</div>
+							</td>
+							<td class = "column_data">
+								<input id="inp_002" data-bind="ntsTextEditor: {
+						                                           value: inp_002_code,
+						                                           constraint: 'JobCode',
+						                                           enable: inp_002_enable}" />
+
+								<input id="inp_003" data-bind="ntsTextEditor: {
+						                                           value: inp_003_name,
+						                                           constraint: 'JobName' }" />
+
+							</td>
+						</tr>
+						<tr>
+							<td class=" row_02" data-bind="with: label_003">
+								<!--LBL_003 -->
+								<div
+									data-bind="ntsFormLabel: {constraint: 'JobCode', required: true}">在籍照会で参照可能な範囲</div>
+							</td>
+							<td>
+								<!-- SEL_001 -->
+								<div
+									data-bind="ntsRadioBoxGroup: {
+									options: itemList,
+									optionsValue: 'id',
+									optionsText: 'name',
+									value: selectedId,
+									enable: enable}">
+								</div>
+							</td>
+						</tr>
+						<tr class="trLst003" data-bind="visible: dataRef().length > 0">
+							<td></td>
+							<td>
+								<div id="lst_003" data-bind="if: dataRef" style="width: 225px">
+									<div data-bind="foreach: dataRef ">
+										<div class="row">
+											<div class="line left-line" data-bind="text: authName "></div>
+											<div class="line"
+												data-bind="ntsSwitchButton: {
+												options: $parent.roundingRules,
+												optionsValue: 'code',
+												optionsText: 'name',
+												value: referenceSettings,
+												enable: $parent.enableListBoxAuth}">
+											</div>
+											<br />
+										</div>
+									</div>
+								</div>
+							</td>
+
+						</tr>
+						<tr>
+							<td class=" row_05" data-bind="label_005">
+								<div data-bind="ntsFormLabel: {}">序列</div>
+
+								<button data-bind="">?</button>
+
+							</td>
+							<td class="inp_004">
+								<button id="btn_008" style="width: 50px">決定</button> <label
+								style="display: inline-block;"> 99 一般</label>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div data-bind="ntsFormLabel: {constraint: 'Memo'}">
+									<label id="A_LBL_003">メモ</label>
+								</div>
+							</td>
+							<td class="valign-center" style="padding-top: 10px"><textarea
+									rows="6" cols="30"
+									data-bind="ntsMultilineEditor: {
+											value: inp_005_memo,
+											constraint: 'Memo'
+											}" />
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

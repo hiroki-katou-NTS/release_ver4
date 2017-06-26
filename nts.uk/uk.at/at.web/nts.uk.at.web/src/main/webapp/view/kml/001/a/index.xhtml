@@ -1,0 +1,159 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<com:ValidatorScript>
+					nts.uk.ctx.at.schedule.dom.budget.premium.PremiumRate
+					nts.uk.shr.com.primitive.Memo
+   				</com:ValidatorScript>
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="../shr/kml001.shr.servicebase.js" />
+				<com:scriptfile path="../shr/kml001.shr.vmbase.js" />
+				<com:scriptfile path="kml001.a.vm.js" />
+				<com:scriptfile path="kml001.a.start.js" />
+				<com:stylefile path="kml001.a.main.css" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="functions-area" class="valign-center control-group">
+					<button class="proceed short-button" data-bind="click: saveData,  enable: $root.errors.isEmpty">#{i18n.getText('KML001_2')}</button>
+					<button data-bind="click: premiumDialog">#{i18n.getText('KML001_3')}</button>
+				</div>
+				<div id="contents-area">
+						<div class="pull-left">
+							<div class="caret-right caret-background bg-green">
+								<div>
+									<button class="dateControlBtn" data-bind="click: createDialog">#{i18n.getText('KML001_41')}</button>
+									<button class="dateControlBtn" data-bind="click: editDialog, enable: !isInsert()">#{i18n.getText('KML001_42')}</button>
+								</div>
+								<div id="dateRange-list-container">
+									<table id="dateRange-list" data-bind="ntsGridList: {
+										width: 220, height: 290,
+										options: gridPersonCostList,
+										optionsValue: 'dateRange',
+										columns: ko.observableArray([
+							                { headerText: 'コード', prop: 'dateRange', width: 150 }]),
+										value: currentGridPersonCost }">
+									</table>
+								</div>
+								
+							</div>
+						</div>
+						<div>
+							<div class="table">
+								<div id="formula">
+									<div class="table">
+										<div class="label">#{i18n.getText('KML001_6')}</div>
+									</div>
+									<hr align="left"/>
+									<div class="table">
+										<div class="cell">
+											<div id="formula-child-1" class="label"></div><br/>
+										</div>	
+										<div class="cell">
+											<img src="data:image/png;base64,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"/>
+										</div>
+										<div class="cell">
+											<div class="cell"></div>
+											<div class="label">#{i18n.getText('KML001_8')}</div>
+										</div>
+									</div>
+									
+								</div>
+							</div>
+							<div class="table">
+								<div class="cell column1">
+									<div data-bind="ntsFormLabel: { required: true }">#{i18n.getText('KML001_9')}</div>
+								</div>
+								<div class="cell valign-center">
+									<div>
+										<input id="startDateInput" data-name="有効開始日" class="data-required" data-bind="ntsTimeEditor: {
+											value: newStartDate,
+											option: { width: '90px', inputFormat: 'date' },
+											required: true, 
+											enable: isInsert}" />
+									</div>
+								</div>
+							</div>
+							<div class="table">
+								<div class="cell column1">
+									<div data-bind="ntsFormLabel: { required: true }">#{i18n.getText('KML001_2')}</div>
+								</div>
+								<div class="cell valign-center">
+									<div id="combo-box" data-name="単価" data-bind="ntsComboBox: {
+															options: ko.observableArray([
+												                { code: 0, name: '#{i18n.getText('KML001_22')}' },
+												                { code: 1, name: '#{i18n.getText('KML001_23')}' },
+												                { code: 2, name: '#{i18n.getText('KML001_24')}' },
+												                { code: 3, name: '#{i18n.getText('KML001_25')}' },
+												                { code: 4, name: '#{i18n.getText('KML001_26')}' }
+												            ]),
+															optionsValue: 'code',
+															value: currentPersonCost().unitPrice,
+															optionsText: 'name',
+															enable: true }">
+									</div>
+								</div>
+							</div>
+							<div class="table">
+								<div class="item-valign-top" data-bind="ntsFormLabel: { constraint: 'Memo' }">#{i18n.getText('KML001_11')}</div>
+								<textarea id="memo" data-name="備考" data-bind="ntsMultilineEditor: {
+									value: currentPersonCost().memo,
+									constraint: 'Memo'}" />
+							</div>
+							<div class="table" id="premium-set-div">
+								<table id="premium-set-tbl">
+									<thead>
+										<tr>
+											<th>#{i18n.getText('KML001_12')}</th>
+											<th>#{i18n.getText('KML001_13')}</th>
+											<th>#{i18n.getText('KML001_14')}</th>
+										</tr>
+									</thead>
+									<tbody data-bind="foreach: currentPersonCost().premiumSets">
+										<tr data-bind="css: { notUse: useAtr() == 0 }">
+											<td data-bind="text: (name()=='')?'ITEM'+($index()+1):name()"></td>
+											<td>
+												<span>
+													<input class="premiumInput premiumPercent" data-bind="ntsNumberEditor: {
+															value: rate,
+															constraint: 'PremiumRate',
+															option: { width: '35px' },
+															required: true, 
+															enable: true }" />
+												</span>
+												<div class="percenSymbol">%</div>
+											</td>
+											<td class="control-group valign-center">
+												<div class="cell">
+													<button class="small" data-bind="click: function(){ $parent.selectDialog($data, $index())}">#{i18n.getText('KML001_15')}</button>
+												</div>
+												<div class="cell">
+													<input class="premiumInput premiumItems" data-bind="ntsTextEditor: {
+													value: ko.pureComputed(function () {
+														let s;
+														ko.utils.arrayForEach($parent.currentPersonCost().premiumSets()[$index()].attendanceItems(), function(item) { if (!s) { s = item.name; } else {s+=' + '+item.name; } });
+														return s;
+													}),
+													constraint: 'Memo',
+													option: { width: '450px' },
+													required: true, 
+													enable: true,
+													readonly: true }" />	
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

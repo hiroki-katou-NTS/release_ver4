@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../master/sidebar.xhtml">
+		<ui:define name="sidebar-head">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="/view/base/simplehistory/simplehistory.css" />
+			<com:scriptfile path="/view/base/simplehistory/service.js" />
+			<com:scriptfile path="/view/base/simplehistory/viewmodel.js" />
+			<ui:insert name="extendedHead" />
+		</ui:define>
+
+		<ui:define name="sidebar-content">
+			<div id="tabpanel-1" role="tabpanel">
+				<div class="sidebar-content-header">
+					<span class="title" data-bind="text: $root.content.options.functionName"/>
+					<button id="btnUpdate" class="large proceed btn-default"
+						data-bind="enable: canUpdateHistory, click: saveBtnClick">登録</button>
+					<ui:insert name="extendedAction" />
+				</div>
+			</div>
+			<div id="contents-area"  data-bind="visible: true" style="display: none">
+				<ui:include src="historylist.xhtml"/>
+
+				<!-- BEGIN RIGHT CONTENT-->
+				<div id="right-content">
+					<ui:insert name="pageContent" />
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

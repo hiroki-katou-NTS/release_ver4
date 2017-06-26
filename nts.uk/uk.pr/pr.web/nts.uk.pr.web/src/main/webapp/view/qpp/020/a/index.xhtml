@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="main.css" />
+			<com:scriptfile path="qpp020.a.start.js" />
+			<com:scriptfile path="qpp020.a.vm.js" />
+			<com:scriptfile path="qpp020.a.service.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area">
+				<button id="A_BTN_001">給与処理月を翌月へ更新する</button>
+				<button id="A_BTN_002" data-bind="click: showModalDialogB">賞与の場合 *</button>
+			</div>
+			<div id="contents-area">
+				<label id="A_LBL_002">1：25日支払 の処理月を更新します。</label>
+				<div class="block-inline">
+					<div class="block-left">
+						<label id="A_LBL_003" class="label-date">平成<span>12</span>年<span>27</span>月度の作業を<span>終了</span>し、
+						</label> <label id="A_LBL_004" class="label-date">平成<span>28</span>年<span>01</span>月度の作業を<span>開始</span>ます。</label>
+					</div>
+					<div class="block-right">
+						<table id="A_LST_001" class="table no-margin">
+							<thead>
+								<tr>
+									<th>処理内容</th>
+									<th>実施者</th>
+									<th>実施日時</th>
+								</tr>
+							</thead>
+							<tbody data-bind="foreach: [1, 2, 3, 4, 5, 6]">
+								<tr>
+									<td>2016年10月→2016年11月</td>
+									<td>00000001　日通　一郎</td>
+									<td>10/1/2016  12:10:00 AM</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="clear-fix"></div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

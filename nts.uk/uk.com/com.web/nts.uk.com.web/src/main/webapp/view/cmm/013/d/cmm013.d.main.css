@@ -1,0 +1,98 @@
+@CHARSET "UTF-8";
+/**dudt**/
+#tblContent{
+	margin: 35px !important;
+}
+#LBL_002{
+	margin-left: 15px;
+}
+
+.bottom{
+	text-align: center;
+	padding-top: 20px;
+}
+/**dudt**/
+
+
+.separate-button {
+	margin-left: 10px;
+	margin-top:	10px;
+}
+.fix-button {
+	min-width: 75px;
+}
+#btn_005 {
+	margin-left: 150px;
+}
+#btn_004 {
+	margin-left: 150px;
+}
+
+#right-content {
+	margin-left: 40px;
+	float: left;
+	min-height: 550px;
+	margin-top: 20px;
+	
+}
+
+
+.lst_003 {
+	margin-top:10px;
+	display: inline-block;
+	height: 185px;
+	overflow-y: scroll;
+}
+.ntsRadioBox {
+    width: 100%;
+    margin-top:10px;
+}
+#inp_002{
+
+	float: left;
+}
+#inp_003 {
+	float: right;
+	margin-right: 130px;
+	
+}
+.inp_004 {
+	padding-bottom: 20px;
+	padding-top: 20px;
+
+}
+.line {
+	display: inline-block;
+}
+
+.left-line {
+	width: 150px;
+}
+/**dudt**/
+/**.row {
+	border: 1px solid #aaa;
+	padding: 2px;
+	padding-top: 20px
+}**/
+#row{
+	padding-top: 20px;
+}
+/**dudt**/
+/**dudt**/
+/**#btn_001 {
+	margin-left: 150px;
+}**/
+/**dudt**/
+#btn_002 {
+	margin-left: 10px;
+}
+#btn_007 {
+	margin-left: 50px;
+}
+#left-content {
+	margin-left: 20px;
+	margin-top:	20px;
+	padding: 20px;
+	float: left;
+	min-height: 550px;
+}

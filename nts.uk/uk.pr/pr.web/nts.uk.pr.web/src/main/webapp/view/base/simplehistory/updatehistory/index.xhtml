@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:stylefile path="newhistory.css" />
+			<com:scriptfile path="../dialogbase/base.js" />
+			<com:scriptfile path="viewmodel.js" />
+			<com:scriptfile path="start.js" />
+			<script type="text/javascript">
+				var dialogSize = {
+					width : 600,
+					height : 420
+				};
+			</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<!-- BEGIN CONTENT AREA-->
+			<div id="this-contents-area">
+				<label>履歴情報を確認し、削除または修正を行ってださい。</label>
+				<table class="form-default">
+					<ui:include src="../dialogbase/namepart.xhtml"/>
+					<tr>
+						<td style="vertical-align: top">
+							<div style="min-width: 140px" data-bind="ntsFormLabel: { required: true }">編集方法の選択</div>
+						</td>
+						<td>
+						<label class="ntsRadioBox">
+							<input type="radio"
+								name="createType"
+								id="actionDelete"
+								data-bind="checkedValue: 'DELETE', checked: actionType, enable: endYearMonth == '9999/12'" />
+							<span class="box"/>
+							<label for="actionDelete" class="label">履歴を削除する</label>
+						</label>
+						</td>
+					</tr>
+					<com:ko tag="if" bind="dialogOptions.removeMasterOnLastHistoryRemove">
+					<tr>
+						<td></td>
+						<td style="padding-top: 0px">
+							<div class="bg-yellow color-danger" style="padding: 15px; margin-left: 20px;"
+								data-bind="text: '全ての履歴を削除すると、' + dialogOptions.name + 'のデータも削除します。'"/>
+							
+						</td>
+					</tr>
+					</com:ko>
+					<tr>
+						<td></td>
+						<td><label class="ntsRadioBox">
+							<input type="radio"
+								name="createType"
+								id="actionUpdate"
+								data-bind="checkedValue: 'UPDATE', checked: actionType" />
+							<span class="box"/>
+							<label for="actionUpdate" class="label">履歴を修正する</label>
+						</label></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>
+							<div>
+								<div style="margin-right: 20px; margin-left: 20px" data-bind="ntsFormLabel: { required: true }">期間</div>
+								<span id="startYearMonth" data-name="期間" style="margin-bottom: 30px"
+								data-bind="ntsDatePicker: {
+									value: startYearMonth, 
+									dateFormat: 'yyyy/MM', 
+									disabled: actionType() == 'DELETE', required: true}"/>
+								<label data-bind="text: ' ~ '　+ endYearMonth"/>
+							</div>
+						</td>
+					</tr>
+				</table>
+				<com:ko tag="ifnot" bind="dialogOptions.removeMasterOnLastHistoryRemove">
+					<div style="height: 40px; line-height: 40px; margin: 10px;"/>
+				</com:ko>
+			</div>
+			<hr />
+			<!-- END CONTENT AREA-->
+
+			<!-- BEGIN FUNCTION AREA-->
+			<ui:include src="../dialogaction.xhtml"/>
+			<!-- END FUNCTION AREA-->
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

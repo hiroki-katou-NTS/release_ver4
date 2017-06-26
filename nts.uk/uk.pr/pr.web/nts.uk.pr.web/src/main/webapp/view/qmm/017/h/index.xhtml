@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+	<ui:composition>
+		<div class="wrap-sel-006">
+			<div class="ib h-col-1">
+				<div id="listBox_itemType_h_screen" class="ib va-middle caret-right caret-background" data-bind="with: listBoxItemType">
+					<div id="list-box-h" class="list-box-1" data-bind="ntsListBox: {
+						options: itemList,
+						optionsValue: 'code',
+						optionsText: 'name',
+						multiple: false,
+						value: selectedCode,
+						enable: isEnable(),
+						rows: 5}"></div>
+				</div>
+			</div>
+			<div id="listBox_items_h_screen" class="ib va-middle" data-bind="with: listBoxItems">
+				<div style="width: 282px" data-bind="ntsSearchBox: {comId: 'list-box', items: itemList, selected: selectedCode, selectedKey: 'code', fields: ['name', 'code']}" />
+					<div id="list-box-h2" data-bind="ntsListBox: {
+						options: itemList,
+						optionsValue: 'code',
+						optionsText: 'name',
+						multiple: false,
+						value: selectedCode,
+						enable: isEnable(),
+						columns: [
+							{ prop: 'code', length: 4 },
+							{ prop: 'name', length: 10 }
+						],
+						rows: 5}"></div>
+				<button id="insert_in_calculation_btn_h_screen" class="caret-bottom" data-bind="click: $root.content.placeItemNameToTextArea.bind($data, 4, $root.content)">計算式に挿入する</button>
+			</div>
+		</div>
+	</ui:composition>
+</body>
+</html>
+	

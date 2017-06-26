@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition>
+		<div>
+			<div class="divLine">
+				<label id="H_LBL_007">給与 振込データを「全銀協フォーマット」にてテキスト出力します。</label>
+			</div>
+			<div class="divLine">
+				<label id="H_LBL_008">振込依頼書の印刷指定</label>
+			</div>
+			<hr id="H_HR_001" />
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div id="H_LBL_001" data-bind="ntsFormLabel: {required: false}">処理年月</div>
+				</div>
+				<div class="divLine-col-2">
+					<label id="H_LBL_002" data-bind="text: viewmodelh.processingDate"></label>
+					<label id="H_LBL_003"
+						data-bind="text: viewmodelh.processingDateInJapanEmprire"></label>
+					<label id="H_LBL_009">(対象となる処理区分</label> <label id="H_LBL_010"
+						data-bind="text: viewmodelh.processingNo"></label> <span> :
+					</span> <label id="H_LBL_011" data-bind="text: viewmodelh.processingName"></label>
+				</div>
+			</div>
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div id="H_LBL_004" data-bind="ntsFormLabel: {required: true}">振込指定日</div>
+				</div>
+				<div class="divLine-col-2">
+					<div id="H_INP_001" data-name="振込指定日"
+						data-bind="ntsDatePicker: { value: viewmodelh.h_INP_001, dateFormat: 'YYYY/MM/DD', required : true, startDate: '1900/01/01', endDate: '9999/12/31'}"></div>
+					<label id="H_LBL_005"
+						data-bind="text: viewmodelh.yearMonthDateInJapanEmpire"></label>
+				</div>
+			</div>
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div id="H_LBL_006" data-bind="ntsFormLabel: {required: true}">振込元銀行</div>
+				</div>
+			</div>
+			<div class="divLine" id="data_TBL">
+				<table id="H_LST_001" data-bind="ntsGridList: {
+						width: 750,
+						height: 320,
+						dataSource: viewmodelh.h_LST_001_items ,
+						primaryKey: 'label',
+						columns: ko.observableArray([
+			                { headerText: 'コード' , key: 'label', width: 100 },
+			                { headerText: '振込元銀行' , key: 'lineBankName', width: 150 },
+			                { headerText: '支店' , key: 'branchName', width: 150 },
+			                { headerText: '口座区分' , key: 'accountAtr', width: 100 },				                
+			                { headerText: '口座番号' , key: 'accountNo', width: 100 }
+			            ]),
+						multiple: true,
+						value: viewmodelh.h_LST_001_itemsSelected }">
+				</table>
+			</div>
+			<div class="divLine">
+				<button id="H_BTN_001" class="x-large proceed"
+					data-bind="click: viewmodelh.saveAsPdf.bind(viewmodelh)">印刷(PDF)</button>
+			</div>
+		</div>
+	</ui:composition>
+</body>
+</html>

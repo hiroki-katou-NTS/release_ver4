@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="F_Lbl_ZeroDisplay"
+				data-bind="ntsFormLabel: {  required: false }">ゼロ表示区分</div>
+		</div>
+		<div class="divLineCol2">
+			<div id="F_Sel_ZeroDisplay" class="cf switchNomalSize"
+				data-bind="ntsSwitchButton: {
+										options: roundingRules_ZeroDisplay,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: CurrentZeroDisplaySet }"></div>
+			<div id="F_Sel_NoDisplay"
+				data-bind="ntsCheckBox: { checked: checked_NoDisplay, text: '項目名も表示しない' ,enable:noDisplayNames_Enable }"></div>
+
+		</div>
+	</div>
+</body>
+</html>

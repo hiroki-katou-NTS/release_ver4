@@ -1,0 +1,77 @@
+#contents-area {
+	width: 630px;
+}
+
+#contents-area>.divLine {
+	margin-left: 20px;
+}
+
+#I_LBL_001 {
+	margin-left: -5px;
+	font-size: x-large;
+}
+
+#I_LBL_002 {
+	font-size: large;
+}
+
+#I_BTN_001 {
+	margin-left: 490px;
+	width: 100px;
+	margin-bottom: 10px;
+}
+
+#I_BTN_002 {
+	width: 200px;
+	margin-left: 20px;
+}
+
+#I_BTN_003 {
+	width: 100px;
+	margin-left: 260px;
+}
+
+#I_BTN_004 {
+	margin-left: 265px;
+	width: 100px;
+}
+
+#I_LST_001, #I_LST_002 {
+	border: 1px solid #CCC;
+	width: 565px;
+}
+
+#I_LST_001 {
+	margin-top: 15px;
+	margin-bottom: 15px
+}
+
+#I_LST_002 {
+	margin-top: 2px;
+	margin-bottom: 20px;
+}
+
+#I_LST_001 tr, #I_LST_001 td, #I_LST_002 tr, #I_LST_002 td {
+	border: 1px solid #CCC;
+	height: 24px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+#I_LST_001 tr td:FIRST-CHILD, #I_LST_002 tr td:FIRST-CHILD {
+	width: 200px;
+	background-color: #CFF1A5;
+}
+
+#list3-div {
+	margin-left: 20px;
+	margin-bottom: 25px;
+}
+
+#I_division {
+	margin-bottom: 15px;
+}
+
+#processing {
+	margin-left: 20px
+}

@@ -1,0 +1,35 @@
+@CHARSET "UTF-8";
+
+.icon.icon-searchbox {
+	position: relative;
+	top: 28px;
+	left: 25px;
+}
+
+#treegrid2_container {
+	margin-top: 10px;
+	margin-left: 10px;
+	margin-right: 40px;
+}
+
+#contents-area {
+	padding-bottom: 0px !important;
+}
+
+input.ntsSearchBox {
+	width: 195px !important;
+	margin-top: -15px !important;
+	margin-left: 30x;
+}
+
+#B_BTN_001 {
+	width: 80px;
+	height: 40px;
+	margin-left: 80px;
+}
+
+#B_BTN_002 {
+	width: 80px;
+	margin-left: 10px;
+	height: 30px;
+}

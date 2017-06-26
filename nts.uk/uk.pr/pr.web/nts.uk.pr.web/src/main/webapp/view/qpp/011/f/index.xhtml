@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile path="qpp011.f.vm.js" />
+			<com:scriptfile path="qpp011.f.service.js" />
+			<com:scriptfile path="qpp011.f.start.js" />
+			<com:stylefile path="qpp011.f.main.css" />
+			<com:scriptfile set="IGNITE" />
+		</ui:define>
+		<ui:define name="content">
+			<div id="content-header">
+				<button class="proceed" data-bind="click: exportPdf"
+					id="F_BTN_001">印刷（PDF)</button>
+				<button id="F_BTN_002" data-bind="click: closeDialog">閉じる</button>
+			</div>
+			<div id="contents-area">
+				<div class="floatLeft" style="width: 310px;">
+					<div class="clearBoth" style="margin: 10px 0px 0px 25px;">
+						<div id="F_LBL_001" data-bind="ntsFormLabel: {  }">対象年月</div>
+						<label id="F_LBL_002" data-bind="text:F_LBL_002_Year_Month">LBL_002</label>
+						<label id="F_LBL_003" data-bind="text:F_LBL_003_yearInJapanEmpire">LBL_003</label>
+					</div>
+					<div class="clearBoth" style="margin: 10px 0px 0px 25px;">
+						<div id="F_LBL_004" data-bind="ntsFormLabel: {   }">出力形式</div>
+						<div id="F_SEL_001" class="cf"
+							data-bind="ntsSwitchButton: {
+													options: roundingRules,
+													optionsValue: 'code',
+													optionsText: 'name',
+													value: selectedRuleCode,
+													enable: enable }">
+						</div>
+					</div>
+				</div>
+				<div class="floatLeft"
+					style="width: 300px; margin: 10px 0px 0px 100px;">
+					<div id="F_LBL_005"
+						data-bind="ntsFormLabel: {  required: true    }">住民税納付先</div>
+					<div class="F_LST_001">
+						<div class="clearBoth">
+							<div id="F_INP_001"
+								data-bind="ntsSearchBox: {
+													comId: 'F_LST_001',
+													items: F_LST_001_Data, 
+													selected: F_LST_001_selectedValue, 
+													selectedKey: 'position', 
+													fields: ['position'], 
+													childField: 'childs'}" />
+						</div>
+						<table id="F_LST_001"></table>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

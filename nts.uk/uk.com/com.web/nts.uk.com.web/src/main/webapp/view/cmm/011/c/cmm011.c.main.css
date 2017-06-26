@@ -1,0 +1,61 @@
+#C_LBL_ENDYMD{
+	padding-right: 20px;
+	margin-left: 18px;
+	margin-top: 5px;
+}
+#C_LBL_002{
+	padding-right: 100px;
+}
+#LBL_002{
+	margin-right: 65px;
+}
+#LBL_003{
+	padding-right: 20px;
+}
+#INP_STARTYMD{
+	width: 102px !important;	
+	padding-left: 0px !important;
+}
+
+.C_INP_STARTYMD{
+	padding-left: 96px;
+}
+.inlineInfor{
+	display: flex;
+}
+
+#SEL_001{
+	margin-left: 20px;
+	margin-top: 5px;
+	width: 270px;
+}
+.label009{
+	margin-left: 150px;
+}
+
+#BTN_DECIDE{
+	margin-right: 20px;
+}
+
+.bottomStype{
+	margin-top: 20px;
+	text-align: center;
+}
+
+
+.lstBox{
+	border: 2px solid gray;
+    margin-left: 150px;
+    padding-top: 5px;
+    width: 750px;
+    height: 205px;
+    margin-top: 10px;
+}
+#header{
+	display: none;
+}
+.timeInput{
+	display: flex;
+	width: 500px;
+}
+

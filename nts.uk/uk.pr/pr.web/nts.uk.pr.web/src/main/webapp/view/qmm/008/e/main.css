@@ -1,0 +1,90 @@
+.ntsRadioBox {
+	display: block;
+}
+
+.sidebar-content-header {
+	background-size: 0%;
+}
+
+.border_none {
+	border: none;
+}
+
+.no_left_border {
+	border-left: none;
+}
+
+.no_right_border {
+	border-right: none;
+}
+
+.no_top_border {
+	border-top: none;
+}
+
+.no_bottom_border {
+	border-bottom: none;
+}
+
+.padding_top {
+	padding-top: 20px;
+}
+
+.padding_left {
+	padding-left: 10px;
+}
+
+.margin_bottom {
+	margin_bottom: 10px;
+}
+
+.border_bottom {
+	border-bottom: solid 1px;
+}
+
+.kana_address {
+	padding-left: 20px;
+	margin-top: 20px;
+}
+
+.delete_btn {
+	margin-left: 100px;
+}
+
+.new_btn {
+	margin-left: 20px;
+}
+
+.btn_width {
+	width: 100px;
+}
+
+.border_bottom {
+	border-left: none;
+	border-right: none;
+	border-top: none;
+}
+
+.text_head {
+	padding-top: 15px;
+	padding-bottom: 5px;
+}
+
+.margin_top_10 {
+	margin-top: 10px;
+}
+
+.line_basic_info {
+	width: 150px;
+}
+
+#input-text {
+	width: 450px;
+}
+#contents-area{
+	width: 1200px;
+}
+.labelRed {
+	font-weight: bold;
+	color: red;
+}

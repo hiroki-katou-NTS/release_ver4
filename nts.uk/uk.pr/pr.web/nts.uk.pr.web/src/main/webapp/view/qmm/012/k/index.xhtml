@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile path="qmm012.k.start.js" />
+			<com:scriptfile path="qmm012.k.vm.js" />
+			<com:scriptfile path="qmm012.k.service.js" />
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+		</ui:define>
+		<ui:define name="content">
+			<div id="content-header">
+				<label id="K_Lbl_MessageGuide"> 利用する非課税限度額を選択してください。 </label>
+				<div class="K_Lst_TaxLimitList">
+					<table id="K_Lst_TaxLimitList"
+						data-bind="ntsGridList: {
+							width: 330,
+							height: 370,
+							options: taxLimitListItems,
+							optionsValue: 'commuNoTaxLimitCode',
+							columns: taxLimitGridColumns,
+							multiple: false,
+							value: taxLimitGridCurrentCode
+						}"></table>
+				</div>
+			</div>
+			<div id="contents-area">
+				<button id="K_Btn_Setting" class="x-large proceed"
+					data-bind="click:SubmitDialog">設定</button>
+				<button id="K_Btn_Cancel" class="large"
+					data-bind="click:CloseDialog">キャンセル</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

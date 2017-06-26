@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 550, height: 565 };</script>
+			<com:ValidatorScript>
+					nts.uk.ctx.at.schedule.dom.budget.premium.PremiumName
+   			</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="../shr/kml001.shr.servicebase.js" />
+			<com:scriptfile path="../shr/kml001.shr.vmbase.js" />
+			<com:scriptfile path="kml001.b.vm.js" />
+			<com:scriptfile path="kml001.b.start.js" />
+			<com:stylefile path="kml001.b.main.css" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div>
+					<div class="label">#{i18n.getText('KML001_16')}</div>
+				</div>
+				<table id="premium-set-tbl">
+					<thead>
+						<tr>
+							<th>#{i18n.getText('KML001_21')}</th>
+							<th>#{i18n.getText('KML001_17')}</th>
+							<th data-bind="text: textKML001_18">
+								<!-- <div data-bind="ntsFormLabel: { constraint: 'PremiumName' }">#{i18n.getText('KML001_18','__viewContext.primitiveValueConstraints.PremiumName.maxLength/2')}</div> -->
+							</th>
+						</tr>
+					</thead>
+					<tbody data-bind="foreach: premiumItemList">
+						<tr>
+							<td data-bind="text: '#{i18n.getText('KML001_30')}'+($index()+1)"></td>
+							<td>
+								<div class="cf" data-bind="ntsSwitchButton: {
+										options: ko.observableArray([
+											{ code: '1', name: '#{i18n.getText('Enum_UseAtr_Use')}' },
+								            { code: '0', name: '#{i18n.getText('Enum_UseAtr_NotUse')}' }
+								        ]),
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: useAtr,
+										enable: true }"></div>	
+							</td>
+							<td>
+								<input class="premiumName" data-name="表示名称" data-bind="ntsTextEditor: {
+										value: name,
+										constraint: 'PremiumName',
+										option: { width: '180px' },
+										required: true, 
+										enable: Boolean(useAtr()==1) }" />
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<hr />
+				<div id="center-bottom" class="valign-center control-group">
+					<button class="x-large proceed center-e" data-bind="click: submitAndCloseDialog, enable: $root.errors.isEmpty">#{i18n.getText('KML001_19')}</button>
+					<button class="ui-dialog-titlebar-close" data-bind="click: closeDialog">#{i18n.getText('KML001_20')}</button>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 960, height: 500 };</script>
+			<com:ValidatorScript>
+				nts.uk.ctx.at.record.dom.divergencetime.DivergenceReasonContent
+				nts.uk.ctx.at.record.dom.divergencetime.DiverdenceReasonCode
+			</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="kmk011.b.main.css" />
+			<com:scriptfile path="kmk011.b.start.js" />
+			<com:scriptfile path="kmk011.b.vm.js" />
+			<com:scriptfile path="kmk011.b.service.js" />
+		</ui:define>
+		<ui:define name="content">
+			<div id="function_area">
+				<!-- B1_1: Button New -->
+				<button tabindex="1" id="btn_001"
+					class="button separate-button fix-button"
+					data-bind="click: refreshData">#{i18n.getText('KMK011_19')}</button>
+				<!-- B1_2: Button Registration -->
+				<button tabindex="2" id="btn_002"
+					class="button proceed separate-button fix-button"
+					data-bind="click: RegistrationDivReason">#{i18n.getText('KMK011_3')}</button>
+				<!-- B1_3: Button Delete -->
+				<button tabindex="3" id="btn_005"
+					class="button danger separate-button fix-button"
+					data-bind="click: deleteDivReason, enable: enableDel">#{i18n.getText('KMK011_20')}</button>
+				<!-- B1_4: Button Close -->
+				<button tabindex="4" id="btn_004"
+					class="button separate-button fix-button"
+					data-bind="click: closeDialog">#{i18n.getText('KMK011_21')}</button>
+				<hr />
+			</div>
+			<div id="content-area">
+				<div id="left-content" style="float: left"
+					class="bg-green caret-right caret-background">
+					<div style="float: left; margin: 20px">
+						<table tabindex="5" id="single-list"
+							data-bind="ntsGridList:{
+								width: 330,
+								height: 250,
+								options: dataSource,								
+								optionsValue: 'divReasonCode',
+								columns: columns,
+								multiple: false,
+								value: currentCode,
+								enable: true}">
+						</table>
+					</div>
+				</div>
+				<div id="right-content" style="float: left;">
+					<table>
+						<colgroup>
+							<col width="180px" />
+							<col width="*" />
+						</colgroup>
+						<tr class="row">
+							<td>
+								<!-- B3_1: Label -->
+								<div data-bind="ntsFormLabel: {required: true }">#{i18n.getText('KMK011_22')}</div>
+							</td>
+							<td>
+							<!-- B3_2: Divergence Reason Code -->
+							<input tabindex="6" class="nts-input" id="inpCode"
+								style="width: 20px"
+								data-bind="ntsTextEditor: {
+                                          value: divReasonCode,
+                                          constraint: 'DiverdenceReasonCode', 
+                                          enable: enableCode, 
+                                          required: true}"
+								data-name="Code" /> 
+								<!-- B3_3: Divergence Reason Content --> 
+								<input tabindex="7" class="nts-input" id="inpReason"
+								data-bind="ntsTextEditor: {
+                                          value: divReasonContent,
+                                          constraint: 'DivergenceReasonContent',
+                                          required: true}" />
+							</td>
+						</tr>
+						<tr class="row">
+							<td>
+								<!-- B3_4 -->
+								<div data-bind="ntsFormLabel: {}">#{i18n.getText('KMK011_22')}</div>
+							</td>
+							<td>
+								<!-- B3_5 -->
+								<div tabindex="8" class="cf"
+									data-bind="ntsSwitchButton: {
+									options: switchUSe3,
+									optionsValue: 'code',
+									optionsText: 'name',
+									value: requiredAtr,
+									enable: true }">
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td>
+								<!-- B3_6 --> 
+								<label id="A_LBL_003">※#{i18n.getText('KMK011_27')}</label>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

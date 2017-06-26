@@ -1,0 +1,172 @@
+.valign-center {
+	vertical-align: middle !important;
+}
+
+.divHeader {
+	margin: 5px;
+}
+
+#A_BTN_REGISTER {
+	margin-left: 19px;
+	width: 75px;
+}
+
+#A_BTN_PRINT_CHART {
+	margin-left: 10px;
+	width: 110px;
+}
+
+#A_BTN_LOG {
+	margin-left: 15px;
+	width: 110px;
+}
+
+#A_BTN_DELETE {
+	margin-left: 40px;
+	width: 80px;
+}
+
+#A_BTN_OPENDDIALOG {
+	margin-left: 66px;
+}
+
+#A_LBL_002 {
+	margin-left: 15px;
+}
+
+.multi {
+	margin-left: 15px;
+}
+
+button.search-btn {
+	/* margin: 5px; */
+	margin-left: 23px;
+	width: 77px;
+}
+
+.nts-editor .nts-input {
+	height: 73px;
+}
+
+#left-content {
+	margin-left: 10px;
+	margin-top: 12px;
+	padding: 20px;
+	float: left;
+	min-height: 600px;
+}
+
+#right-content {
+	margin-left: 30px;
+	margin-top: 14px;
+	float: left;
+	min-height: 600px;
+	width: 40%;
+}
+
+
+.ntsListBox .nts-list-box .ui-selected {
+	background: #F39814;
+	color: white;
+}
+
+.caret-bottom.outline {
+	font-size: 2.2rem;
+	margin-left: 93px;
+	margin-top: 4px;
+}
+
+.caret-right:after {
+	border-left-width: 0.5em;
+}
+
+.second-line {
+	margin-top: 6px;
+}
+
+.in-second-line {
+	display: inline-block;
+}
+
+#treegrid1_container {
+	    border: 1px solid #ccc;
+}
+
+.input_002 {
+	display: inline-block;
+}
+
+.input_code {
+	
+}
+
+.input_name {
+	
+}
+
+.table_content td {
+	border: 10px solid transparent;
+	border-top: none;
+	border-left: none;
+	border-right: none;
+}
+
+.A_INP_005 {
+	width: 352px;
+}
+
+.A_INP_006 {
+	width: 352px;
+	height: 80px;
+}
+
+.A_INP_MEMO {
+	width: 400px;
+	height: 73px;
+}
+
+.sub_table {
+    width: 97px;
+    height: 376px;
+    background: #F3F3F3;
+    margin-top: 62px;
+    border: 5px solid white;
+    border-left: none;
+}
+
+.bt_insert_up {
+	margin-top: 15px;
+	margin-left: 8px;
+	width: 76px;
+}
+
+.bt_insert_down {
+	margin-top: 10px;
+	margin-left: 8px;
+	width: 76px;
+}
+
+.bt_insert_end {
+	margin-top: 10px;
+	margin-left: 8px;
+	height: auto;
+	width: 76px;
+}
+
+.btup {
+	margin-top: 10px;
+	margin-left: 35px;
+}
+
+.btdown {
+	margin-top: 6px;
+	margin-left: 35px;
+}
+
+div.upDown-container {
+	height: 145px !important;
+}
+
+#A_INP_DEPNAME{
+	width: 242px !important;
+}

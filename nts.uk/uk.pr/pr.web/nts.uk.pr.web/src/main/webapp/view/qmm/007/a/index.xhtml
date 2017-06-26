@@ -1,0 +1,163 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../base/simplehistory/base.xhtml">
+		<ui:define name="extendedHead">
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.core.dom.rule.employment.unitprice.UnitPriceCode
+				nts.uk.ctx.pr.core.dom.rule.employment.unitprice.UnitPriceName
+				nts.uk.ctx.pr.core.dom.rule.employment.unitprice.Money
+				nts.uk.shr.com.primitive.Memo
+  			</com:ValidatorScript>
+
+			<com:stylefile path="style.css" />
+			<com:scriptfile path="qmm007.a.service.js" />
+			<com:scriptfile path="qmm007.a.vm.js" />
+			<com:scriptfile path="qmm007.a.start.js" />
+		</ui:define>
+
+		<!-- EXTENDED ACTION -->
+		<ui:define name="extendedAction">
+				<button id="btn_003" class="large btn-default" data-bind="">印刷
+					(PDF)</button>
+				<button id="btn_006" class="large btn-default" data-bind="">マスタ修正ログ</button>
+		</ui:define>
+
+		<!-- PAGE CONTENT -->
+		<ui:define name="pageContent">
+			<table class="form-default">
+						<tr>
+							<td><div id="lblName"
+									data-bind="ntsFormLabel: {constraint: ['UnitPriceCode','UnitPriceName'], required: true }">コード/名称</div></td>
+							<td colspan="2"><input id="inpCode" data-name="コード"
+								class="inp-default"
+								data-bind="ntsTextEditor: {
+									value: unitPriceHistoryModel().unitPriceCode,
+									constraint: 'UnitPriceCode',
+									option: textEditorOption,
+									required: true,
+									enable: isNewMode()}" />
+								<input id="inpName" class="inp-default" data-name="名称"
+								data-bind="ntsTextEditor: {
+									value: unitPriceHistoryModel().unitPriceName,
+									constraint: 'UnitPriceName',
+									option: textEditorOption,
+									required: true}" />
+							</td>
+						</tr>
+						<tr>
+							<td><div id="lblDatePicker"
+									data-bind="ntsFormLabel: { required: true }">開始年月</div></td>
+							<td style="min-width: 265px"><span id="inpStartMonth" data-name="開始年月"
+								data-bind="ntsDatePicker: {value: unitPriceHistoryModel().startMonth, dateFormat: 'yyyy/MM', disabled: !isNewMode(), required: true}"></span>
+								<label id="lblJapanenseYearMonth"
+								data-bind="text: '(' + nts.uk.time.yearmonthInJapanEmpire(unitPriceHistoryModel().startMonth()) + ') ~ '"></label></td>
+						</tr>
+						<tr>
+							<td><div id="lblBudget"
+									data-bind="ntsFormLabel: { constraint: 'Money', required: true }">金額</div></td>
+							<td><input id="inpBudget" class="inp-default" data-name="金額"
+								data-bind="ntsNumberEditor: {
+									value: unitPriceHistoryModel().budget,
+									constraint: 'Money',
+									option: new nts.uk.ui.option.NumberEditorOption({ decimallength: 2, currencyformat: 'JPY',currencyposition: 'right'}), 
+									required: true}" />
+							</td>
+						</tr>
+						<tr>
+							<td><div id="lblContractSetting" data-bind="ntsFormLabel: {}">固定的賃金</div></td>
+							<td><label class="ntsRadioBox"> <input type="radio"
+									name="textRadio"
+									data-bind="checkedValue: 'Company', checked: unitPriceHistoryModel().fixPaySettingType" />
+									<span class="box"></span><span class="label"
+									data-bind="text: '全員一律で指定する'"></span>
+							</label></td>
+							<td colspan="2"><label class="ntsRadioBox"><input
+									type="radio" name="textRadio"
+									data-bind="checkedValue: 'Contract', checked: unitPriceHistoryModel().fixPaySettingType" />
+									<span class="box"></span><span class="label"
+									data-bind="text: '給与契約形態ごとに指定する'"></span></label></td>
+						</tr>
+						<tr>
+							<td> </td>
+							<td style="vertical-align: top" class="valign-top" rowspan="4">
+								<div class="lbl-switch" data-bind="ntsSwitchButton: {
+									options: switchButtonDataSource,
+									optionsValue: 'code',
+									optionsText: 'name',
+									enable: !isContractSettingEnabled(),
+									value: unitPriceHistoryModel().fixPayAtr}">
+								</div>
+							</td>
+							<td><label class="lbl-switch">月給者</label></td>
+							<td><div class="btn-switch" data-bind="ntsSwitchButton: {
+									options: switchButtonDataSource,
+									optionsValue: 'code',
+									optionsText: 'name',
+									enable: isContractSettingEnabled(),
+									value: unitPriceHistoryModel().fixPayAtrMonthly}"></div>
+							</td>
+						</tr>
+						<tr>
+							<td> </td>
+							<td><label class="lbl-switch">日給月給者</label></td>
+							<td><div class="btn-switch" data-bind="ntsSwitchButton: {
+									options: switchButtonDataSource,
+									optionsValue: 'code',
+									optionsText: 'name',
+									enable: isContractSettingEnabled(),
+									value: unitPriceHistoryModel().fixPayAtrDayMonth}"></div>
+							</td>
+						</tr>
+						<tr>
+							<td> </td>
+							<td><label class="lbl-switch">日給者</label></td>
+							<td><div class="btn-switch" data-bind="ntsSwitchButton: {
+									options: switchButtonDataSource,
+									optionsValue: 'code',
+									optionsText: 'name',
+									enable: isContractSettingEnabled(),
+									value: unitPriceHistoryModel().fixPayAtrDaily}"></div>
+							</td>
+						</tr>
+						<tr>
+							<td> </td>
+							<td><label class="lbl-switch">時給者</label></td>
+							<td><div class="btn-switch" data-bind="ntsSwitchButton: {
+									options: switchButtonDataSource,
+									optionsValue: 'code',
+									optionsText: 'name',
+									enable: isContractSettingEnabled(),
+									value: unitPriceHistoryModel().fixPayAtrHourly}"></div>
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+						</tr>
+						<tr>
+							<td colspan="4"><hr /></td>
+						</tr>
+						<tr>
+							<td style="vertical-align: top"><div id="lblMemo"
+									data-bind="ntsFormLabel: {constraint: 'Memo'}">メモ</div></td>
+							<td colspan="3"><div id="inpMemo">
+									<textarea placeholder=""
+										data-bind="ntsMultilineEditor: {
+										value: unitPriceHistoryModel().memo,
+										constraint: 'Memo',
+										option: { resizeable: false,
+											placeholder: '',
+											width: '400',
+											textalign: 'left'}
+										}"/>
+								</div></td>
+						</tr>
+					</table>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

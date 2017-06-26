@@ -1,0 +1,27 @@
+#lbl_001 {
+	padding: 10px;
+}
+
+#contents-area #ft {
+	width: 500px;
+	border: 1px black;
+	text-align: center;
+}
+
+#treegrid1_container {
+	margin-top: 10px;
+	margin-left: 10px;
+}
+
+.search-wrap{
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+.ntsSearchBox {
+	width: 442px !important;
+}
+
+.search-btn caret-bottom {
+	width: 90px;
+}

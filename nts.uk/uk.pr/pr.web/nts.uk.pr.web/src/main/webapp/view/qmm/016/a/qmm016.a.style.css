@@ -1,0 +1,79 @@
+@CHARSET "UTF-8";
+
+.nts-switch-button {
+	min-width: 80px;
+	font-size: 13px !important;
+	height: 30px !important;
+	padding: 3px 7px !important;
+	margin-bottom: 3px !important;
+}
+
+.valign-top {
+	vertical-align: top;
+}
+
+.control-group>td {
+	padding-bottom: 8px
+}
+
+.v-align-top {
+	vertical-align: top;
+}
+
+.wage-table-create-button {
+	padding: 0 160px;
+}
+
+#copyFromExcel {
+	
+}
+
+.wage-table-create-button.caret-bottom:after {
+	border-top-width: 1.8em;
+	border-right-width: 7.5em;
+	border-left-width: 7.5em;
+	margin-left: -7.5em;
+	margin-top: 4px;
+	color: #92D050;
+}
+
+.tab-content {
+	width: 850px;
+}
+
+.tab-inline {
+	padding-left: 20px;
+}
+
+#demension-tbl td {
+	border: black solid 1px;
+}
+
+#demension-tbl tr {
+	height: 35px;
+}
+
+#demension-tbl td span {
+	padding-left: 10px;
+}
+
+#masterInfo .lblData {
+	width: 50%;
+	float: left;
+}
+
+#masterInfo .lblData div {
+	display: inline-block;
+}
+
+#masterInfo .lblData div:first-child {
+	width: 40%;
+}
+
+#masterInfo .lblData div:nth-child(2) {
+	width: 50%;
+}
+
+.bgIgCol {
+	background-color: #CFF1A5;
+}

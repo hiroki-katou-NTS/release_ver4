@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 650, height: 345 };</script>
+			<com:scriptfile path="qpp014.i.start.js" />
+			<com:scriptfile path="qpp014.i.viewmodel.js" />
+			<com:stylefile path="qpp014.i.main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="/lib/nittsu/ui/sharedvm/timer.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div id="processing">
+					<div class="divLine">
+						<label id="I_LBL_001">振込データの出力</label>
+					</div>
+					<div class="divLine">
+						<table id="I_LST_001">
+							<tbody>
+								<tr>
+									<td>経過時間</td>
+									<td id="timer"></td>
+								</tr>
+								<tr>
+									<td>処理状態</td>
+									<td>
+										<!-- <span
+										data-bind="text: processingState()==0 ? 'データの作成中': '完了'"></span>
+										<span
+										data-bind="text:nts.uk.text.format('{0}/{1}人', completeList().length, numberOfPerson())">
+									</span> -->
+									</td>
+								</tr>
+								<tr>
+									<td>エラー件数</td>
+									<td>
+										<!-- <span data-bind="text: countError()"></span> --> 件
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="divLine">
+						<label id="I_LBL_002">設定情報</label>
+					</div>
+					<div class="divLine">
+						<table id="I_LST_002">
+							<tbody>
+								<tr>
+									<td>振込元銀行</td>
+									<td data-bind="text: transferBank"></td>
+								</tr>
+								<tr>
+									<td>処理する年月</td>
+									<td data-bind="text: processingDateInJapanEmprire"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div id="stop">
+					<hr id="I_division" />
+					<button id="I_BTN_004" data-bind="click: stopProcessing">中断</button>
+				</div>
+
+				<div id="successful">
+					<hr id="I_division" />
+					<button class="large" id="I_BTN_002">ファイルダウンロード</button>
+					<button id="I_BTN_003" data-bind="click: closeDialog">閉じる</button>
+				</div>
+
+				<div id="error">
+					<div id="list3-div">
+						<div class="divLine">
+							<button id="I_BTN_001">エラー出力</button>
+						</div>
+						<div class="divLine">
+							<table id="I_LST_003"
+								data-bind="ntsGridList: {
+							width: 590,
+							height: 150,
+							dataSource: items_I_LST_003,
+							primaryKey: 'code',
+							columns: ko.observableArray([
+				                { headerText: '処理状態', prop: 'code', width: 120 },
+				                { headerText: '区分', prop: 'name', width: 50 },
+				                { headerText: '内容', prop: 'description', width: 150 }
+				            ]),
+							multiple: false,
+							value: currentCode_I_LST_003
+						}">
+							</table>
+						</div>
+					</div>
+					<hr id="I_division" />
+					<button class="large" id="I_BTN_002">ファイルダウンロード</button>
+					<button id="I_BTN_003" data-bind="click: closeDialog">閉じる</button>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,78 @@
+.header{
+	position:absolute;
+	left:20px;
+	top:20px;
+}
+
+.frameColor{
+	position:absolute;
+	left: 15px;
+	top: 50px;
+}
+
+.divColor{
+	width:25px;
+	height:25px;
+	margin-top: 10px;
+}
+
+
+.color_1{
+	background-color: #FFD8B2;
+}
+
+.color_2{
+	background-color: #CEE6FF;
+}
+
+.color_3{
+	background-color: #92F29B;
+}
+
+.color_4{
+	background-color: #E4C9FF;
+}
+
+.color_5{
+	background-color: #E3F385;
+}
+
+.color_6{
+	background-color: #FEC6C6;
+}
+
+.color_7{
+	background-color: #D9D9D9;
+}
+
+.textNote{
+	vertical-align: bottom;
+	padding-left: 15px;
+}
+
+.divColorLast{
+	margin-top: 10px;
+}
+
+.divMaxContent{
+	height: 60px;
+}
+
+.tdMaxContent{
+	vertical-align: top;
+}
+
+
+.seperator{
+	position:absolute;
+	top: 340px;
+	border-top:1px solid gray; 
+	width:100%; 
+}
+
+
+.footer{
+	position:absolute;
+	top: 350px;
+	left: 180px;
+}

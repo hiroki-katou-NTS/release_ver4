@@ -1,0 +1,48 @@
+@CHARSET "UTF-8";
+
+#A_BTN_003 {
+	margin-left: 165px;
+}
+
+.aligntLeft {
+	float: left;
+}
+
+.alignRight {
+	float: right;
+}
+#contents-area{
+	padding-top: 30px;
+}
+.nts-left-content {
+	float: left;
+	width: 290px;
+    height: 440px;
+    padding: 20px 15px;
+}
+
+.nts-right-content {
+	float: left;
+	padding: 20px;
+	width: 450px;
+	margin-left:20px;
+}
+
+.tableRange {
+	width: 100%;
+	}
+
+.tableRange tr {
+	height: 45px;
+}
+
+.gridList {
+	margin-top: 30px;
+}
+.nts-left-content .caret-background.caret-right:after {
+    left: 105% !important;
+}
+.empriseLabel div{
+	display: inline-block;
+	vertical-align: middle;
+}

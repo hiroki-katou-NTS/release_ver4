@@ -1,0 +1,178 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+<head>
+</head>
+    <body>
+		
+        <ui:composition template="../../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<com:ValidatorScript>
+            		nts.uk.ctx.pr.core.dom.rule.employment.layout.LayoutName
+				</com:ValidatorScript> 
+            	<com:scriptfile set="IGNITE" />
+                <com:scriptfile path="viewmodel.js" />
+            	<com:scriptfile path="start.js" />
+            	<com:scriptfile path="service.js" />
+                <com:stylefile path="main.css" />
+            </ui:define>
+
+            <ui:define name="content">
+            	
+            	<div id="functions-area">
+            		<button data-bind="click: openGDialog">新規レイアウト</button>
+            		<button id="A_BTN_001" class="proceed" data-bind="click : registerLayout, enable: allowClick()">登録</button>
+            		<button id="A_BTN_003" data-bind="enable: allowClick()">Excel出力</button>
+            		<button id="A_BTN_004"  data-bind="enable: allowClick()">マスタ修正ログ</button>
+            		<a id="A_BTN_005" href="#">計算式の登録へ</a>
+            		<a href="#">明細書の紐付けへ</a>
+            	</div>
+            	
+            	<div id="contents-area" class="cf">
+            		<div class="nts-left-content bg-green caret-right caret-background">
+						<div style="margin-top:5px" class="flex valign-center" >
+						<div style="margin-left: 10px"
+							data-bind="ntsFormLabel: {}">
+							<label >コード/名称</label>
+						</div>
+						<div style="width: 200px" data-bind="ntsSearchBox: {
+							comId: 'treegrid2',
+							items: itemList, 		
+							selected: singleSelectedCode, 
+							selectedKey: 'code', 
+							childField: 'childs', 
+							fields: ['name', 'code']}" />
+						</div>
+						<div>
+							<button style="margin-left: 10px" id="A_BTN_007" data-bind="click: openADialog, enable: allowClick()">履歴追加</button>
+							<button id="A_BTN_008" data-bind="click: openEDialog, enable: allowClick()">履歴編集</button>
+						</div>
+						<div  style="margin-left: 13px">
+							<table id="treegrid2"
+								data-bind="ntsTreeGridView:{
+								   	width: 303,
+									height: 500,
+									options: itemList,
+									value: singleSelectedCode,
+									optionsValue: 'code',
+									optionsChild: 'childs',
+									optionsText: 'nodeText',
+									multiple: false,
+									enable: true,
+									showCheckBox: false}"
+								class="cf">
+							</table>
+						</div>
+					</div>
+            		<div class="nts-right-content">
+<!--             		<table id="expand-example1">
+						<tbody>
+							<tr style="margin-top: 10px;">
+								<th colspan="1" class="th-col1">
+									<div class="form-label"
+										data-bind="ntsFormLabel:{required: true}"
+										style="margin-top: 5px;">
+										<label id="A_LBL_004">会社名 </label>
+									</div>
+								</th>
+
+								<th colspan="2" class="th-col2">
+								<input id="A_INP_003" type="text" data-bind="value: currentNode().name" class="input-table"/>
+								</th>
+							</tr>
+							</tbody>
+							</table> -->
+            			<div class="flex valign-center">
+            				<div data-bind="ntsFormLabel: { constraint: 'LayoutName', required: true }">
+	            				<label id="A_LBL_002">コード/名称</label>
+	           				</div>
+	           				<label style="width: 150px" id="A_LBL_003" data-bind="text: singleSelectedCode() === null ? '' : singleSelectedCode().split(';')[0]">01</label>
+							<input id="A_INP_002" data-bind="ntsTextEditor: {
+										value: layoutHead().stmtName ,
+										constraint: 'LayoutName',
+										required: true,
+										enable: allowClick()}" />
+	           				<label id="A_LBL_004">（　レーザープリンター　A4　縦向き　最大３人　）</label>
+            			</div>
+            			<div class="flex valign-center">
+	           				<div data-bind="ntsFormLabel: {}" class="form-label">
+	           					<label id="A_LBL_005">有効期間</label>
+							</div>
+	           				<label id="A_LBL_006" data-bind="text: startYm">2016/04</label>
+	           				<label > ~ </label>
+	           				<label id="A_LBL_007" data-bind="text: endYm">9999/12</label>
+            			</div>
+            			<div class="flex valign-center">
+	           				<div data-bind="ntsFormLabel: {}" class="form-label">
+	           					<label id="A_LBL_008">現在使用行数 / 最大行数　　</label>
+							</div>
+	           				<label id="A_LBL_009" data-bind="text: totalNormalLine">5行</label>
+	           				<label id="A_LBL_010" data-bind="text: totalGrayLine">（+非表示1行）</label>
+	           				<label >  /  </label>
+	           				<label id="A_LBL_011">10行</label>
+            			</div>
+            			<div class="flex valign-center">
+            				<div data-bind="ntsFormLabel: { required: true }" class="form-label">
+	            				<label id="A_LBL_012">明細書レイアウト</label>
+	           				</div>
+	           				<button id="A_BTN_009" data-bind="enable: allowClick()">印刷プレビュー</button>
+            			</div>
+<!--             			 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+						
+						<div data-bind="foreach: categories, visible: allowClick()">
+							<div data-bind="attr: {id: 'group-' + categoryAtr}" class="group-root">
+								<div id="group-title">
+									<a class="button-setting" data-bind="visible: hasSetting, click: categoryClick"></a>
+									<span data-bind="text: categoryName"></span>
+								</div>
+								<div class="all-line" data-bind="attr: {id: categoryAtr}">
+									<div data-bind="foreach: lines">
+										<div class="row" data-bind="attr: {
+																	id: rowId, 
+																	class: isDisplayOnPrint ? 'categoryAtr' + categoryAtr + ' row' : 'categoryAtr' + categoryAtr + ' row ground-gray'}">
+											<div><input type="button" class="button-setting" data-bind="enable: !hasRequiredItem, click: lineClick" /></div>
+											<div data-bind="foreach: details, attr: {class: 'one-line'}">
+												<span data-bind="click: itemClick, 
+									            			text: itemAbName,
+									            			attr: {
+									            				id: itemCode,
+									            				'data-itemcode': itemCode,
+									            				class: isRequired() 
+									            					? 'fixed-button ui-state-disabled li-on-row ' 
+									            					: itemAbName() !== '+' 
+									            						? 'button-with-text li-on-row ' 
+									            						: 'li-on-row ' }">
+									            </span>
+<!-- 									            <span data-bind="click: itemClick,  -->
+<!-- 									            			text: itemAbName, -->
+<!-- 									            			attr: { -->
+<!-- 									            				id: itemCode, -->
+<!-- 									            				'data-itemcode': itemCode, -->
+<!-- 									            				class: isRequired()  -->
+<!-- 									            					? 'fixed-button ui-state-disabled li-on-row ' + contextMenuClassId  -->
+<!-- 									            					: itemAbName() !== '+'  -->
+<!-- 									            						? 'button-with-text li-on-row ' + contextMenuClassId -->
+<!-- 									            						: 'li-on-row ' + contextMenuClassId}"> -->
+<!-- 									            </span> -->
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="group-footer">
+									<button data-bind="click: addLine">+行追加</button>
+								</div>
+							</div>
+						</div>
+						<button id="btnKintai" class="addCategoryButton" data-bind="click: addKintaiCategory, visible: notHasKintai">+ 勤怠エリアを追加する</button>
+						<br/>
+						<button id="btnKiji" class="addCategoryButton" data-bind="click: addKijiCategory, visible: notHasKiji">+ 記事エリアを追加する</button>
+<!--             			 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+            		</div>
+            	</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

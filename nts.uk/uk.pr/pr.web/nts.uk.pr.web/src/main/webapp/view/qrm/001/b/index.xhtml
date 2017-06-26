@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../../master/dialog.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 430, height: 280 };</script>
+				<com:stylefile path="qrm001.b.main.css" />
+				<com:scriptfile path="qrm001.b.start.js" />
+				<com:scriptfile path="qrm001.b.vm.js" />
+			</ui:define>
+			<ui:define name="content">
+				<div id="contents-area">
+					<div class="table">
+						<span>退職金の入力の入力欄の背景色は、以下のとおりです。</span>
+					</div>
+					<div class="table valign-center">
+						<div class="cell">
+							<div style="width: 20px; height: 20px; background-color: #ffc000; border: 1px solid black"></div>
+						</div>
+						<span>自動計算による変更</span>
+					</div>
+					<div class="table valign-center">
+						<div class="cell">
+							<div style="width: 20px; height: 20px; background-color: #cee6ff; border: 1px solid black"></div>
+						</div>
+						<span>手入力による変更</span>
+					</div>
+					<div class="table valign-center">
+						<div class="cell">
+							<div style="width: 20px; height: 20px; background-color: #d9d9d9; border: 1px solid black"></div>
+						</div>
+						<span>入力不可</span>
+					</div>
+					<hr />
+					<button data-bind="click: closeDialog">閉じる</button>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

@@ -1,0 +1,31 @@
+@CHARSET "UTF-8";
+
+#E_SEL_011 button {
+	height: 30px;
+	font-size: 0.8rem;
+	width: 130px;
+}
+
+#E_Sel_WorkingDaysPerYear button, #E_Sel_TimeNumberClassification button, #E_Sel_AverageWage button {
+	height: 30px;
+	width: 70px;
+	font-size: 0.8rem;
+}
+
+#right-content-bottom-right {
+	margin-left: 40px;
+	margin-top: 4px;
+}
+
+#E_Inp_ErrorUpper, #E_Inp_AlarmUpper, #E_Inp_ErrorLower, #E_Inp_AlarmLower, #E_Inp_Remarks {
+	width: 100px;
+}
+
+#contents-area {
+	width: 1235px;
+}
+
+#E_Inp_Remarks {
+	width: 340px;
+	height: 90px;
+}

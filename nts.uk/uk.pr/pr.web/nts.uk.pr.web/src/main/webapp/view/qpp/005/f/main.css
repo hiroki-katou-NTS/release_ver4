@@ -1,0 +1,112 @@
+.seperator{
+	border-top:1px solid gray; 
+	width:95%; 
+	margin-top:10px;
+	margin-left: 10px;
+}
+
+.divMargin{
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+.checkBoxHead{
+	margin-left: 10px;
+	margin-top: 10px;
+	background-color:#00B050; 
+	width:90%; 
+	height:30px; 
+	padding-left:4%; 
+	padding-top:8px;
+}
+
+.floatLeft{
+	float:left;
+}
+
+.textCheckBox{
+	color:white;
+}
+
+.divPadding{
+	padding-left:10%;
+	width:85%;
+}
+
+.verticalTop{
+	vertical-align: top;
+}
+
+#LBL_003{
+	margin-left: 5%;
+}
+
+#SEL_002{
+	margin-left: 5%; 
+	display:inline-block;
+	font-size:8pt;
+}
+
+.taxCommuteEditor{
+	display:inline-block;
+	margin-left: 2%;
+}
+
+.divLbl{
+	margin-top:10px; 
+	margin-left:182px;
+}
+
+#LBL_006{
+	margin-left:35px;
+}
+
+#LBL_008{
+	margin-left:15px;
+	width:100%;
+}
+
+.spextend{
+	width:100%; 
+	margin-left: 0px;
+}
+
+#BTN_001{
+	margin-left: 190px; 
+	background-color: #A4EEB0
+}
+
+#BTN_002{
+	margin-left: 20px;
+}
+
+.divINP_004{
+	width:80px;
+	display:table-cell; 
+}
+
+#LBL_012{
+	padding-left: 29px;
+	display: table-cell;
+}
+
+#LBL_011{
+	margin-left: 2%;
+	width:80px;
+}
+
+.divLBL_009{
+	width:85%; 
+	display:table; 
+	margin-top:10px;
+}
+
+#LBL_009{
+	 width:70px; 
+	 display:table-cell; 
+	 text-align: center;
+}
+
+#LBL_010{
+	margin-left: 5%;
+}

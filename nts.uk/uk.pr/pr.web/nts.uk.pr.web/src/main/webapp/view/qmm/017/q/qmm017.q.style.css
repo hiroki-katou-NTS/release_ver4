@@ -1,0 +1,64 @@
+#q_lbl_002 {
+	height: 50px;
+	font-size: 20px;
+	vertical-align: top;
+}
+
+#q_btn_001 {
+	margin-left: 20px;
+	margin-right: 10px;
+	width: 135px;
+	height: 126px;
+	font-size: 32px;
+	white-space: normal !important;
+	height: 126px;
+	border-radius: 20px;
+}
+
+.result-block {
+	padding: 10px;
+	width: 240px;
+	height: 113px;
+	background-color: #e8f1b6;
+}
+
+.ui-iggrid-modifiedrecord>td {
+	font-style: normal !important;
+}
+
+#result-value {
+	font-size: 25px;
+	font-size: 25px;
+	display: inline-block;
+	float: right;
+	margin-top: 20px;
+	margin-right: 10px;
+}
+
+#btnClose {
+	font-size: 32px;
+	width: 145px;
+	height: 55px;
+}
+
+#q_inp_002 {
+	width: 786px;
+	height: 145px;
+	border: 1px solid gray;
+	border-radius: 3px;
+	color: gray;
+	padding: 10px;
+	overflow: scroll;
+	word-wrap: break-word;
+}
+
+.ui-state-disabled, .ui-widget-content .ui-state-disabled, .ui-widget-header .ui-state-disabled {
+    opacity: initial !important;
+}
+
+#footer {
+	position: fixed;
+	bottom: 11px;
+	width: 810px;
+	text-align: center;
+}

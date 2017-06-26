@@ -1,0 +1,154 @@
+@CHARSET "UTF-8";
+#functions-area {
+	border-bottom: none;
+}
+#tabpanel-1 #B_BTN_001 {
+	margin-left: 30px;
+}
+
+#B_LBL_001 {
+	float: right;
+	padding: 25px 10px 0px 0px;
+}
+
+#B_BTN_004 {
+	margin: 20px 0px 0px 30px;
+	width: 170px;
+}
+
+#content, #content2 {
+	padding: 20px 0px 20px 30px;
+}
+
+#B_SEL_001 .ntsRadioBox, #C_SEL_001 .ntsRadioBox {
+	display: block;
+}
+
+#B_SEL_001, #C_SEL_001 {
+	padding-top: 10px;
+}
+
+#B_SEL_001, #B_LBL_003, #C_SEL_001, #C_LBL_003 {
+	float: left;
+}
+
+.floatLeft {
+	float: left !important;
+}
+
+#B_SEL_002, #C_SEL_002 {
+	float: left;
+	margin-top: 31px;
+	margin-left: 20px;
+	width: 146px !important;
+	height: 30px;
+}
+
+#B_LBL_004, #B_LBL_007, #C_LBL_007, #B_LBL_009, #C_LBL_009, #B_LBL_013,
+	#content2 #C_LBL_011, #C_LBL_012, #C_LBL_013, #C_LBL_014, #C_LBL_004 {
+	float: left;
+	margin-top: 20px;
+}
+
+#C_INP_003 input, #C_INP_002 input, #C_INP_001 input, #B_INP_001 input,
+	#B_INP_002 input, #B_INP_003 input  {
+	height: 20px;
+}
+
+#C_INP_002, #C_INP_003 {
+	margin-left: 30px;
+}
+
+#B_INP_001, #B_INP_002, #B_INP_003, #B_INP_004, #C_INP_001, #C_INP_002,
+	#C_INP_003, #C_INP_004 {
+	margin-top: 25px;
+	float: left;
+}
+
+input {
+	border-radius: 5px;
+	border: solid thin gray;
+	height: 25px;
+	padding: 2px 8px;
+}
+
+#B_LBL_005, #B_LBL_008, #B_LBL_010, #C_LBL_005, #C_LBL_008, #C_LBL_010 {
+	margin: 30px 0px 0px 9px;
+}
+
+#B_LBL_006, #C_LBL_006, #content #B_LBL_011 {
+	clear: both;
+	margin-top: 30px;
+	margin-left: 5px;
+	font-size: 1.3rem;
+}
+
+#C_INP_004 input {
+	padding: 2px 9px !important;
+	width: 38px;
+	height: 30px;
+	margin-left: 26px;
+}
+
+.hrLabel {
+	clear: both;
+	width: 400px;
+	float: left;
+	margin-top: 10px;
+}
+
+.LST_001 {
+	clear: both;
+	float: inherit;
+	margin-top: 10px;
+}
+
+#content2 #C_SEL_003, #content2 #C_SEL_004 {
+	margin-top: 24px;
+}
+
+#C_SEL_003 {
+	margin-left: 2px;
+}
+
+#C_SEL_004 {
+	margin-left: 13px;
+}
+
+#B_LBL_013 {
+	clear: both;
+}
+
+#C_BTN_001 {
+	margin-left: 20px;
+}
+
+#C_BTN_002, #C_BTN_003 {
+	margin-left: 10px;
+}
+
+#C_BTN_004 {
+	margin-left: 15px;
+}
+
+#B_BTN_002 {
+	margin-left: 100px;
+}
+
+#B_LST_001_container, #C_LST_001_container {
+	margin-top: 10px;
+}
+
+#B_SCH_001 .ntsSearchBox, #C_SCH_001 .ntsSearchBox {
+	height: 27px;
+	width: 190px !important;
+}
+
+#B_SCH_001 .search-btn, #C_SCH_001 .search-btn {
+	height: 25px;
+	width: 60px;
+}
+
+#sidebar-area {
+	width: 130px;
+}

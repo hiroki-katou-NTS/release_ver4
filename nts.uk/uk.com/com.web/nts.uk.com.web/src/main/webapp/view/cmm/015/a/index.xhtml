@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+				nts.uk.ctx.basic.dom.organization.payclassification.PayClassificationCode
+				nts.uk.ctx.basic.dom.organization.payclassification.PayClassificationName
+				nts.uk.ctx.basic.dom.organization.payclassification.Memo
+			</com:ValidatorScript>
+			<com:stylefile path="cmm015.a.main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="cmm015.a.start.js" />
+			<com:scriptfile path="cmm015.a.vm.js" />
+			<com:scriptfile path="cmm015.a.service.js" />
+			<script type="text/javascript">
+			</script>
+		</ui:define>
+		<ui:define name="content">
+			<div id="functions-area" class="divHeader">
+				<button id="A_BTN_001"
+					data-bind="click: initRegisterPayClassification" class="btnStyle">新規</button>
+				<button id="A_BTN_002" data-bind="click: addPayClassification"
+					class="proceed btnStyle">登録</button>
+				<button id="A_BTN_003">マスタ修正ログ</button>
+				<button id="A_BTN_004"
+					data-bind="click: deletePayClassification, enable : isDeleteEnable"
+					class="danger btnStyle">削除</button>
+			</div>
+			<div id="contents-area">
+				<div id="left-content" class="bg-green caret-right caret-background">
+					<i class="icon icon-searchbox"></i>
+					<div class="cf">
+						<div style="float: left">
+							<div id="test"
+								data-bind="ntsSearchBox: {
+                                    comId: 'single-list',
+                                    items: dataSource,         
+                                    selected: currentCode, 
+                                    selectedKey: 'payClassificationCode', 
+                                    childField: 'childs', 
+                                    fields: ['payClassificationName', 'payClassificationCode']}" />
+							<br />
+							<table id="single-list"
+								data-bind="ntsGridList: {
+                                            width: 400,
+                                            height: 680,
+                                            options: dataSource,
+                                            optionsValue: 'payClassificationCode',
+                                            columns: columns,
+                                            multiple: false,
+                                            value: currentCode}"
+								class="cf">
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div id="right-content">
+					<table class="table_content" data-bind="with: currentItem">
+						<colgroup>
+							<col width="230px" />
+							<col width="*" />
+						</colgroup>
+						<tr>
+							<td class="row_1">
+								<div
+									data-bind="ntsFormLabel: { constraint: ['PayClassificationCode', 'PayClassificationName'], required: true }">
+									コード/名称</div>
+							</td>
+							<td class="valign-center">
+								<div>
+									<div class="input_002">
+										<input id="code"
+											data-bind="ntsTextEditor: {
+                                            value: INP_002_code,
+                                            constraint: 'PayClassificationCode',
+                                            enable: INP_002_enable}" />
+									</div>
+
+									<div class="input_002">
+										<input id="name"
+											data-bind="ntsTextEditor: {
+                                            value: INP_003_name,
+                                            constraint: 'PayClassificationName'                                          
+                                            }" />
+									</div>
+
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div data-bind="ntsFormLabel: {constraint: 'Memo'}">
+									<label id="A_LBL_003">メモ</label>
+								</div>
+							</td>
+							<td class="valign-center">
+								<div>
+									<textarea id="memo"
+										data-bind="ntsMultilineEditor: {
+											value: INP_004_notes,
+											constraint: 'Memo'
+											}" />
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

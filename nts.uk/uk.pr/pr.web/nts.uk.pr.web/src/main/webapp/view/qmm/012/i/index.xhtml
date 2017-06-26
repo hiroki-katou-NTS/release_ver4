@@ -1,0 +1,234 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile path="qmm012.i.start.js" />
+			<com:scriptfile path="qmm012.i.service.js" />
+			<com:scriptfile path="qmm012.i.vm.js" />
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:ValidatorScript>
+			nts.uk.ctx.pr.core.dom.itemmaster.ItemCode
+			nts.uk.ctx.pr.core.dom.itemmaster.ItemName
+			nts.uk.ctx.pr.core.dom.itemmaster.ItemAbName
+			nts.uk.ctx.pr.core.dom.itemmaster.itemsalary.AlRangeHigh
+			nts.uk.ctx.pr.core.dom.itemmaster.itemsalary.AlRangeLow
+			nts.uk.ctx.pr.core.dom.itemmaster.itemsalary.ErrRangeHigh
+			nts.uk.ctx.pr.core.dom.itemmaster.itemsalary.ErrRangeLow
+			</com:ValidatorScript>
+		</ui:define>
+		<ui:define name="content">
+			<div id="functions-area">
+				<button id="I_Btn_NewButton" class="inputNomalSize"
+					data-bind="click:addNewItem">新規</button>
+				<button id="I_Btn_RegisterButton"
+					data-bind="click:saveItem,enable: $root.errors.isEmpty"
+					class="proceed inputNomalSize">登録</button>
+				<button id="I_Btn_DeleteButton"
+					data-bind="click:deleteItem,enable: I_Btn_DeleteButton_enable"
+					class=" danger inputNomalSize">削除</button>
+				<button id="I_Btn_CloseUp" data-bind="click:closeDialog"
+					class="inputNomalSize">閉じる</button>
+			</div>
+			<div id="contents-area">
+				<div class="nts-left-content caret-right caret-background ">
+					<i class="icon icon-searchbox"></i>
+					<div class="divLine">
+						<div id="I_Lbl_ItemCategoryTitle"
+							data-bind="ntsFormLabel: {  required: false }">項目区分</div>
+						<label id="I_Lbl_ItemCategoryValue"
+							data-bind="text: ItemCategoryName">項目 </label>
+					</div>
+					<div class="divLine">
+						<div id="I_Lbl_CodeNameSearch"
+							data-bind="ntsFormLabel: {  required: false }">コード/名称</div>
+						<div id="I_Sch_SearchButton"
+							data-bind="ntsSearchBox: {
+								comId: 'I_Lst_BreakdownList',
+								items: ItemBDList, 
+								selected: gridListCurrentCode ,
+								selectedKey: 'itemBreakdownCode', 
+								filteredItems: filteredData, 
+								placeHolder:'',
+								fields: ['itemBreakdownCode']}" />
+					</div>
+					<div class="divLine">
+						<table id="I_Lst_BreakdownList"
+							data-bind="ntsGridList: {
+								width: 290,
+								height: 365,
+								options: ItemBDList,
+								optionsValue: 'itemBreakdownCode',
+								columns: columns,
+								value: gridListCurrentCode
+							}"></table>
+					</div>
+				</div>
+				<div class="nts-right-content">
+					<div id="right-content-top">
+						<div class="divLine">
+							<div class="divLineCol1">
+								<div id="I_Lbl_CodeName" class="haveSmallSpan save-error"
+									data-bind="ntsFormLabel: {   required: true, constraint : ['ItemCode','ItemName'] }">
+									コード/名称</div>
+							</div>
+							<div class="divLineCol2">
+								<input id="I_Inp_Code" data-name="コード" class="save-error"
+									data-bind="ntsTextEditor: {  required: true, value: CurrentItemBreakdownCode , enable:enable_I_Inp_Code , constraint :['ItemCode','ItemName'] }"></input>
+								<input id="I_Inp_Name" data-name="名称" class="save-error"
+									data-bind="ntsTextEditor: {  required: true, value: CurrentItemBreakdownName  , constraint : 'ItemName'}"></input>
+							</div>
+						</div>
+						<div class="divLine">
+							<div class="divLineCol1">
+								<div id="I_Lbl_AbbreviatedName"
+									data-bind="ntsFormLabel: {  required: true, constraint : 'ItemAbName' }">略名</div>
+							</div>
+							<div class="divLineCol2">
+								<input id="I_Inp_AbbreviatedName" data-name="略名"
+									class="save-error"
+									data-bind="ntsTextEditor: {required: true, value: CurrentItemBreakdownAbName  , constraint : 'ItemAbName'}"></input>
+							</div>
+						</div>
+						<div class="divLine">
+							<div class="divLineCol1">
+
+								<div id="I_Lbl_ItemCategoryTitle"
+									data-bind="ntsFormLabel: {  required: true }">項目区分</div>
+							</div>
+							<div class="divLineCol2">
+								<label id="I_Lbl_ItemCategoryValue"
+									data-bind="text: ItemCategoryName"> 項目区分 </label>
+							</div>
+						</div>
+						<div class="divLine">
+							<div class="divLineCol1">
+
+								<div id="I_Lbl_IntegrationCodeTitle"
+									data-bind="ntsFormLabel: {  required: false }">統合コード</div>
+							</div>
+							<div class="divLineCol2">
+								<button id="I_Btn_ReferenceButton" class="small">参照</button>
+								<label id="I_Lbl_IntegrationCodeValue"
+									data-bind="text:( CurrentItemBreakdownCode() + '  ' +  CurrentItemBreakdownName() )">統合コード</label>
+							</div>
+						</div>
+					</div>
+					<div id="right-content-bottom">
+						<div class="divLine">
+							<div class="divLineCol1">
+								<div id="I_Lbl_ZeroDisplay"
+									data-bind="ntsFormLabel: {  required: false }">ゼロ表示区分</div>
+							</div>
+							<div class="divLineCol2">
+								<div id="I_Sel_ZeroDisplayIndicator" class="cf switchLongSize"
+									data-bind="ntsSwitchButton: {
+										options: roundingRules_ZeroDisplayIndicator ,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: CurrentZeroDispSet }"></div>
+								<div id="I_Sel_NoDisplay"
+									data-bind="ntsCheckBox: { checked: Checked_NoDisplay, enable: noDisplay_Enable, text: '項目名も表示しない' }"></div>
+
+							</div>
+						</div>
+						<div class="divLine">
+							<div class="divLineCol1">
+								<div id="I_Lbl_ErrorRange"
+									data-bind="ntsFormLabel: {  required: false }">エラー範囲</div>
+							</div>
+							<div class="divLineCol2">
+								<div id="I_Sel_ErrorUpper"
+									data-bind="ntsCheckBox: { checked: Checked_ErrorUpper}"></div>
+								<div data-bind="with: currencyeditor_I_Inp_ErrorUpper">
+									<input data-name="エラー範囲" id="I_Inp_ErrorUpper"
+										class="save-error"
+										data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable:enable}" />
+								</div>
+								<label id="I_Lbl_ExceedsError">を超える場合にエラーとする</label>
+							</div>
+						</div>
+						<div class="divLine">
+							<div class="divLineCol1"></div>
+							<div class="divLineCol2">
+								<div id="I_Sel_ErrorLower"
+									data-bind="ntsCheckBox: { checked: Checked_ErrorLower}"></div>
+								<div data-bind="with: currencyeditor_I_Inp_ErrorLower">
+									<input data-name="エラー範囲" id="I_Inp_ErrorLower"
+										class="save-error"
+										data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable:enable}" />
+								</div>
+								<label id="I_Lbl_ErrorLess">未満の場合にエラーとする</label>
+							</div>
+						</div>
+						<div class="divLine">
+							<div class="divLineCol1">
+								<div id="I_Lbl_AlarmRange"
+									data-bind="ntsFormLabel: {  required: false }">アラーム範囲</div>
+							</div>
+							<div class="divLineCol2 verticalAlignBottom">
+								<div id="I_Sel_AlarmUpper"
+									data-bind="ntsCheckBox: { checked: Checked_AlarmUpper }"></div>
+								<div data-bind="with: currencyeditor_I_Inp_AlarmUpper">
+									<input data-name="アラーム範囲" class="save-error"
+										id="I_Inp_AlarmUpper"
+										data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable:enable}" />
+								</div>
+								<label id="I_Lbl_ExceedsAlarm">を超える場合にアラームとする</label>
+							</div>
+						</div>
+						<div class="divLine">
+							<div class="divLineCol1"></div>
+							<div class="divLineCol2">
+								<div id="I_Sel_AlarmLower"
+									data-bind="ntsCheckBox: { checked: Checked_AlarmLower}"></div>
+								<div data-bind="with: currencyeditor_I_Inp_AlarmLower">
+									<input data-name="アラーム範囲" id="I_Inp_AlarmLower"
+										class="save-error"
+										data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable:enable
+										}" />
+								</div>
+								<label id="I_Lbl_AlarmLess">未満の場合にアラームとする</label>
+							</div>
+						</div>
+						<div class="divLine">
+							<div class="divLineCol1"></div>
+							<div class="divLineCol2">
+								<label id="I_Lbl_NavigationMessage1">※エラーの場合は、データが登録されません。<br />
+									アラームの場合は、メッセージが表示されます。（データが登録されます)
+								</label>
+
+							</div>
+
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

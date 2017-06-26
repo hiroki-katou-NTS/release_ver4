@@ -1,0 +1,22 @@
+table, th, td {
+    padding : 5px;
+}
+#K_INP_001, #K_INP_003{
+	width: 70px !important;	
+	padding-left: 0px !important;
+}
+#K_BTN_001{
+	margin-left: 130px;
+}
+#K_BTN_002{
+	margin-left: 30px;
+}
+.caution{
+	padding : 15px;
+}
+.selectStyle>*>.ntsControl{
+	display : block;
+}
+.ntsRadioBox span.label {
+  padding: 10px;
+}

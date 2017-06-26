@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html>
+<body>
+	<div class="contents-area">
+		<div class="left-content">
+			<div class="bg-green caret-right caret-background">
+				<div class= "C_BTN_34">
+					<button id="C_BTN_003" data-bind="click:openJDialog">履歴追加ボタン</button>
+					<button id="C_BTN_004" data-bind="click:openKDialog">履歴編集ボタン</button>
+				</div>
+				<div id="C_LST_002"
+					data-bind="ntsListBox: {
+						options: itemHeaderList,
+						optionsValue: 'id',
+						optionsText: 'startEnd',
+						value: selectedCode,
+						enable: isEnable(),
+						rows:5,
+						required: true,
+						columns: [
+							{ prop: 'startEnd', length: 12 }
+						]}">
+				</div>
+			</div>
+		</div>
+		<div class="right-content">
+			<div class="form-label">
+				<label id="LBL_004">鬮ｮ�ｿｽ騾包ｽｨ邵ｺ�ｽｫ隴丞ｮ茨ｽｴ�ｽｰ隴厄ｽｸ郢ｧ蝣､�ｽｴ闊娯�邵ｺ莉｣�ｽ�</label>
+				<hr />
+			</div>
+			<div>
+				<div class="searchBox"
+					data-bind="ntsSearchBox: {
+											mode: 'igGrid', 
+											comId: 'C_LST_001', 
+											items: dataSource, 
+											selected: selectedList, 
+											selectedKey: 'ID', 
+											fields: ['Name', 'ID']}" />
+				<table id="C_LST_001" class="cf"></table>
+				<br />
+			</div>
+		</div>
+	</div>
+</body>
+</html>

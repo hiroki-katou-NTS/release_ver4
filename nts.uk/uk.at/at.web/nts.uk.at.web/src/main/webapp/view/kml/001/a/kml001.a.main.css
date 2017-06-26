@@ -1,0 +1,184 @@
+.control-group.valign-center > * { vertical-align: middle; }
+.control-group.valign-top > * { vertical-align: top; }
+.control-group.valign-bottom > * { vertical-align: bottom; }
+.control-group { margin: 10px; }
+.item-valign-top { vertical-align: top; }
+.halign-left { text-align: left; }
+.halign-right { text-align: right; }
+.halign-center { text-align: center; }
+.bg-green {background-color: #E0F59E;}
+
+#contents-area {
+	width: 1300px;
+}
+
+.table {
+	margin: 10px;
+}
+
+button {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.short-button {
+	width: 70px;
+}
+
+input, textarea {
+	border-radius: 5px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.pull-left {
+	width: 330px;
+	height: 680px;
+}
+
+.caret-background {
+	width: 240px; 
+	height: auto;
+	margin-left: 10px;
+	margin-top: 10px;
+	padding: 15px;
+}
+
+.dateControlBtn { width: 80px; }
+.dateControlBtn:FIRST-CHILD{ margin-left: 10px; }
+.dateControlBtn:LAST-CHILD{ margin-left: 50px; }
+
+#dateRange-list-container { 
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+.table:FIRST-CHILD {margin-top: 0px;}
+
+.column1 {
+	width: 250px;
+}
+
+#name-span {
+	margin-left: 15px;
+}
+
+#memo {
+	width: 390px;
+	height: 100px;
+}
+#dateRange-list_dateRange {
+	display: none;
+}
+#premium-set-div {
+	outline-style: solid;
+	outline-color: #999999;
+	outline-width: 1px;
+	width: 792px;
+	height: 360px;
+}
+#premium-set-tbl {
+	outline-style: solid;
+	outline-color: #999999;
+	outline-width: 1px;
+}
+#premium-set-tbl th:NTH-CHILD(2), #premium-set-tbl td:NTH-CHILD(2) {
+	border-left: 1px solid #999999;
+	border-right: 1px solid #999999;
+}
+#premium-set-tbl thead tr {
+	height: 30px;
+}
+#premium-set-tbl tbody tr {
+	height: 33px;
+	border-top: 1px solid #999999;
+}
+#premium-set-tbl td, th { 
+	padding-left: 5px;
+	padding-right: 5px;
+}
+#premium-set-tbl td:NTH-CHILD(2) {
+	padding-left: 10px;
+	padding-right: 0px;
+}
+#premium-set-tbl th { 
+	background-color: #C7F391;
+}
+#premium-set-tbl tbody tr td:FIRST-CHILD { 
+	background-color: #EDFAC2;
+}
+#premium-set-tbl th:FIRST-CHILD {
+	width: 180px;
+}
+#premium-set-tbl th:NTH-CHILD(2) {
+	width: 80px;
+}
+#premium-set-tbl th:LAST-CHILD {
+	width: 500px;
+}
+.notUse {
+	display: none;
+}
+#formula {
+	width: 600px;
+	height: 140px;
+	background-color: #F2F2F2;
+	border-radius: 5px;
+}
+#formula {
+	width: 515px;
+	height: 140px;
+	background-color: #F2F2F2;
+}
+#formula >.table >.label:NTH-CHILD(1) {
+	margin-top: 10px;
+}
+#formula > hr { 
+	margin-top: -5px;
+	margin-left: 10px;
+	margin-bottom: -5px;
+	width: 450px;
+}
+#formula > .table:NTH-CHILD(3) > .cell:NTH-CHILD(1){
+	width: 300px;
+	vertical-align: top;
+}
+#formula > .table:NTH-CHILD(3) > .cell:NTH-CHILD(1) > .label{
+	margin-left: 20px;
+	margin-bottom:5px;
+}
+#formula > .table:NTH-CHILD(3) > .cell:NTH-CHILD(1) > .label:NTH-CHILD(3){
+	margin-left: 40px;
+}
+#formula > .table:NTH-CHILD(3) > .cell:NTH-CHILD(1) > .label:NTH-CHILD(5){
+	margin-left: 40px;
+}
+#formula > .table:NTH-CHILD(3) > .cell:NTH-CHILD(2) {
+	width: 40px;
+}
+#formula > .table:NTH-CHILD(3) > .cell:NTH-CHILD(3) > .cell{
+	height: 40px;
+}
+img {
+	margin-top: 5px; 
+	position: absolute;
+    height: 90px;
+}
+#contents-area input.ui-igcombo-field {
+	padding-left: 10px;
+}
+.ui-igcombo-listitemholder .ui-igcombo-listitem {
+	padding-left: 10px;
+}
+#combo-box {
+	width: 112px;
+}
+.percenSymbol {
+	margin-left: -25px;
+    display: inline-block;
+}
+.premiumPercent { height: 30px; }
+.premiumPercent.nts-editor.nts-input{
+	padding-right: 20px;
+}
+.premiumItems.nts-editor.nts-input { height: 18px; }

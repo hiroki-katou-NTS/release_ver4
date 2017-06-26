@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>
+				var dialogSize = {
+					width : 1200,
+					height : 600
+				};
+			</script>
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.core.dom.insurance.CommonAmount
+  			</com:ValidatorScript>
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qmm008.h.service.js" />
+			<com:scriptfile path="qmm008.h.vm.js" />
+			<com:scriptfile path="qmm008.h.start.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<!-- BEGIN FUNCTION AREA-->
+			<div id="functions-area">
+				<button class="large proceed" data-bind="click: save">登録</button>
+				<button class="large">印刷</button>
+				<button class="large" data-bind="click: reCalculate">再計算</button>
+				<button class="large btn-close"
+					data-bind="click: closeDialogWithDirtyCheck">閉じる</button>
+			</div>
+			<!-- END FUNCTION AREA-->
+
+			<!-- BEGIN CONTENT AREA-->
+			<div id="contents-area" data-bind="visible: true"
+				style="display: none">
+				<div data-bind="ntsFormLabel: {required: true}">事業所 :</div>
+				<span id="lblCode"
+					data-bind="text: healthInsuranceRateModel.officeCode"></span> <span
+					id="lblName" data-bind="text: healthInsuranceRateModel.officeName"></span>
+				<div style="margin-left: 200px;"
+					data-bind="ntsFormLabel: {required: true}">期間 :</div>
+				<span id="startMonth"
+					data-bind="text:healthInsuranceRateModel.startMonth"></span> <span
+					style="padding-left: 10px; padding-right: 10px">~</span> <span
+					id="endMonth" data-bind="text:healthInsuranceRateModel.endMonth"></span>
+				<div style="padding-top: 30px;">
+					<table id="tbl-health-insuarance">
+						<tbody>
+							<tr class="bg-green">
+								<th class="halign-center" rowspan="4">等級</th>
+								<th class="halign-center" rowspan="4">標準月額</th>
+								<th class="halign-center" colspan="2" rowspan="2">報酬月額</th>
+								<th class="halign-center" colspan="8">健康保険料</th>
+							</tr>
+							<tr class="bg-green">
+								<th class="halign-center" colspan="4">被保険者負担</th>
+								<th class="halign-center" colspan="4">事業主負担</th>
+							</tr>
+							<tr class="bg-green">
+								<th class="halign-center" rowspan="2">以上</th>
+								<th class="halign-center" rowspan="2">末満</th>
+
+								<th class="halign-center">健康保険</th>
+								<th class="halign-center">介護※1</th>
+								<th class="halign-center">内（特定）※2</th>
+								<th class="halign-center">内（基本）※2</th>
+								<th class="halign-center">健康保険</th>
+								<th class="halign-center">介護※1</th>
+								<th class="halign-center">内（特定）※2</th>
+								<th class="halign-center">内（基本）※2</th>
+							</tr>
+							<tr class="bg-green">
+								<com:ko tag="with" bind="healthInsuranceRateModel.rateItems">
+									<th class="halign-center"><span
+										data-bind="text: healthSalaryPersonalGeneral()+'/1000'"></span></th>
+									<th class="halign-center"><span
+										data-bind="text: healthSalaryPersonalNursing()+'/1000'"></span></th>
+									<th class="halign-center"><span
+										data-bind="text: healthSalaryPersonalSpecific()+'/1000'"></span></th>
+									<th class="halign-center"><span
+										data-bind="text: healthSalaryPersonalBasic()+'/1000'"></span></th>
+									<th class="halign-center"><span
+										data-bind="text: healthSalaryCompanyGeneral()+'/1000'"></span></th>
+									<th class="halign-center"><span
+										data-bind="text: healthSalaryCompanyNursing()+'/1000'"></span></th>
+									<th class="halign-center"><span
+										data-bind="text: healthSalaryCompanySpecific()+'/1000'"></span></th>
+									<th class="halign-center"><span
+										data-bind="text: healthSalaryCompanyBasic()+'/1000'"></span></th>
+								</com:ko>
+							</tr>
+							<com:ko-foreach bind="listHealthInsuranceAvgearn">
+								<tr class="inp-money">
+									<td class="bg-green"><span data-bind="text: grade"></span></td>
+									<td class="bg-green"><span data-bind="text: avgEarn"></span></td>
+									<td class="bg-green"><span data-bind="text: lowerLimit"></span></td>
+									<td class="bg-green"><span data-bind="text: upperLimit"></span></td>
+									<com:ko tag="with" bind="personalAvg">
+										<com:ko tag="template" bind="{name: 'inpAvgEarn'}"></com:ko>
+									</com:ko>
+									<com:ko tag="with" bind="companyAvg">
+										<com:ko tag="template" bind="{name: 'inpAvgEarn'}"></com:ko>
+									</com:ko>
+								</tr>
+							</com:ko-foreach>
+						</tbody>
+						<tfoot class="footer">
+							<tr>
+								<td colspan="13">※1 介護保険を含む健康保険</td>
+							</tr>
+							<tr>
+								<td colspan="13">※2 小数点以上第３位で端数処理をしています。(政府管掌)</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+			</div>
+			<!-- END CONTENT AREA-->
+			<!-- Template -->
+			<script type="text/html" id="inpAvgEarn">
+			<td><input class="has-error" data-bind="ntsNumberEditor: {value: healthGeneralMny, constraint:'CommonAmount', option: $parents[2].numberEditorCommonOption}"></input></td>
+			<td><input class="has-error" data-bind="ntsNumberEditor: {value: healthNursingMny, constraint:'CommonAmount', option: $parents[2].numberEditorCommonOption}"></input></td>
+			<td><input class="has-error" data-bind="ntsNumberEditor: {value: healthSpecificMny, constraint:'CommonAmount', option: new nts.uk.ui.option.NumberEditorOption({grouplength: 3, decimallength: 2})}"></input></td>
+			<td><input class="has-error" data-bind="ntsNumberEditor: {value: healthBasicMny, constraint:'CommonAmount', option: new nts.uk.ui.option.NumberEditorOption({grouplength: 3, decimallength: 2})}"></input></td>
+			</script>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

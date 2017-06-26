@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+<head>
+</head>
+    <body>
+		
+        <ui:composition template="../../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<com:ValidatorScript>
+					nts.uk.ctx.pr.core.dom.rule.employment.layout.LayoutName
+				</com:ValidatorScript>
+            	<com:scriptfile set="IGNITE" />
+                <com:scriptfile path="viewmodel.js" />
+            	<com:scriptfile path="start.js" />
+            	<com:scriptfile path="service.js" />
+                <com:stylefile path="main.css" />
+            </ui:define>
+
+            <ui:define name="content">
+            	<div id="functions-area">
+            	</div>
+            	<div id="contents-area" class="cf" data-bind="with: survey">
+            		<h3 data-bind="text: question"></h3>
+            		<p>Bạn có tối đa <i data-bind="text: pointsBudget"></i> điểm để bình chọn.</p>
+            		<table id="grid">
+            			<thead><tr>
+            					<th>Option</th>
+            					<th>Importance</th>
+            				</tr></thead>
+           				<tbody data-bind="foreach: answers">
+           					<tr>
+           						<td data-bind="text: text"></td>
+           						<td><select data-bind="options: [1,2,3,4,5], value: points"></select></td>
+           					</tr>
+           				</tbody>
+            		</table>
+            		<h3 data-bind="fadeVisible: pointsUsed() > pointsBudget">Bạn dùng quá nhiều điểm rồi, bầu lại đê</h3>
+            		<p>Bạn còn <i data-bind="text: pointsBudget - pointsUsed()"></i> điểm để sử dụng. </p>
+            		<button data-bind="enable: enableSave, click: save">Finished</button>
+            	</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

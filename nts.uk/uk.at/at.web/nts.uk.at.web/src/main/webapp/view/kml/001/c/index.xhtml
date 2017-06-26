@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 480, height: 295 };</script>
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="../shr/kml001.shr.servicebase.js" />
+			<com:scriptfile path="../shr/kml001.shr.vmbase.js" />
+			<com:scriptfile path="kml001.c.vm.js" />
+			<com:scriptfile path="kml001.c.start.js" />
+			<com:stylefile path="kml001.c.main.css" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div>
+					<div class="label">#{i18n.getText('KML001_43')}</div>
+				</div>
+				<div class="table">
+					<div class="cell column1">
+						<div data-bind="ntsFormLabel: { required: true }">#{i18n.getText('KML001_44')}</div>	
+					</div>
+					<div class="cell">
+						<div class="dateTime-input">
+							<div>
+								<input id="startDateInput" data-name="期間" data-bind="ntsTimeEditor: {
+									value: newStartDate,
+									option: { width: '90px', inputFormat: 'date' },
+									required: true,
+									enable: true }" />
+							</div>
+						</div>
+						<label>#{i18n.getText('KML001_40')}</label>
+						<label>#{i18n.getText('KML001_45')}</label>
+					</div>
+				</div>
+				<div class="table" data-bind="style: { visibility: (size()==0)?'hidden':'visible' }">
+					<div class="cell column1">
+						<div data-bind="ntsFormLabel: { required: true }">#{i18n.getText('KML001_46')}</div>
+					</div>
+					<div class="cell">
+						<div data-name="履歴の引継ぎ" data-bind="ntsRadioBoxGroup: {
+									options: ko.observableArray([
+							            { value: true, name: textKML001_47 },
+							            { value: false, name: '#{i18n.getText('KML001_48')}'}
+							        ]),
+									optionsValue: 'value',
+									optionsText: 'name',
+									value: copyDataFlag,
+									enable: true }"></div>
+					</div>
+				</div>
+				<hr />
+				<div id="center-bottom" class="valign-center control-group">
+					<button class="x-large proceed center-e" data-bind="click: submitAndCloseDialog, enable: $root.errors.isEmpty">#{i18n.getText('KML001_19')}</button>
+					<button class="ui-dialog-titlebar-close" data-bind="click: closeDialog">#{i18n.getText('KML001_20')}</button>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

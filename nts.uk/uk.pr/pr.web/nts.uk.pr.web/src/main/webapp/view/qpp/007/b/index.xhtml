@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+		<script>
+				var dialogSize = {
+					width : 600,
+					height : 720
+				};
+			</script>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="main.css" />
+			<com:scriptfile path="qpp007.b.service.js" />
+			<com:scriptfile path="qpp007.b.vm.js" />
+			<com:scriptfile path="qpp007.b.start.js" />
+		</ui:define>
+
+		<ui:define name="content">
+		<div class="wrapper" data-bind="visible: true" style="display: none">
+			<div id="this-header-area">
+				<label id="lbl_header_left">明細・合計出力設定</label> <label id="lbl_header_right">※2016/04/01
+					の部門構成で集計します。</label>
+				<hr />
+			</div>
+			<!-- BEGIN CONTENT AREA-->
+			<div id="this-contents-area" class="margin-top-bot-20">
+			<com:ko tag="with" bind="salaryPrintSettingModel">
+				<table class="margin-left-20">
+					<tr>
+						<td class="padding-bot-20"><div data-bind="ntsCheckBox: { checked: showPayment }">明細（支給した給与）
+								を出力する</div></td>
+					</tr>
+					<tr>
+						<td></td>
+					</tr>
+					<tr>
+						<td><div data-bind="ntsCheckBox: { checked: sumPersonSet }">個人計（個人ごとの対象期間合計）を出力する</div></td>
+					</tr>
+					<tr>
+						<td class="padding-bot-20"><div
+								data-bind="ntsCheckBox: { checked: sumMonthPersonSet }">ひと月に2回以上給与の支払いが発生した個人に対して、
+								個人のつき合計を出力する</div></td>
+					</tr>
+					<tr>
+						<td></td>
+					</tr>
+					<tr>
+						<td><div data-bind="ntsCheckBox: { checked: sumEachDeprtSet }">部門計（部門ごとの対象期間合計）を出力する</div></td>
+					</tr>
+					<tr>
+						<td class="padding-bot-20"><div
+								data-bind="ntsCheckBox: { checked: sumMonthDeprtSet }">対象期間を複数月指定した場合、月ごとの部門計を出力する。</div></td>
+					</tr>
+					<tr>
+						<td></td>
+					</tr>
+					<tr>
+						<td><div data-bind="ntsCheckBox: { checked: sumDepHrchyIndexSet }">部門階層累計を出力する。</div>
+							<button class="btn-help"
+								data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right top'}">?</button></td>
+					</tr>
+					<tr>
+						<td class="padding-bot-20"><div
+								data-bind="ntsCheckBox: { checked: sumMonthDepHrchySet }">対象期間を複数月指定した場合、月ごとの部門階層累計を出力する。</div></td>
+					</tr>
+					<tr>
+						<td><div class="rectangle-wrapper">
+								<label>累計したい部門の階層を指定(最大５つ)</label>
+								<div class="margin-left-20">
+								<div data-bind="ntsCheckBox: { checked: hrchyIndex1,enable:sumDepHrchyIndexSet()||sumMonthDepHrchySet() }">1階層</div>
+								<div data-bind="ntsCheckBox: { checked: hrchyIndex2,enable:sumDepHrchyIndexSet()||sumMonthDepHrchySet() }">2階層</div>
+								<div data-bind="ntsCheckBox: { checked: hrchyIndex3,enable:sumDepHrchyIndexSet()||sumMonthDepHrchySet() }">3階層</div>
+								<div data-bind="ntsCheckBox: { checked: hrchyIndex4,enable:sumDepHrchyIndexSet()||sumMonthDepHrchySet() }">4階層</div>
+								<div data-bind="ntsCheckBox: { checked: hrchyIndex5,enable:sumDepHrchyIndexSet()||sumMonthDepHrchySet() }">5階層</div>
+								<br />
+								<div data-bind="ntsCheckBox: { checked: hrchyIndex6,enable:sumDepHrchyIndexSet()||sumMonthDepHrchySet() }">6階層</div>
+								<div data-bind="ntsCheckBox: { checked: hrchyIndex7,enable:sumDepHrchyIndexSet()||sumMonthDepHrchySet() }">7階層</div>
+								<div data-bind="ntsCheckBox: { checked: hrchyIndex8,enable:sumDepHrchyIndexSet()||sumMonthDepHrchySet() }">8階層</div>
+								<div data-bind="ntsCheckBox: { checked: hrchyIndex9,enable:sumDepHrchyIndexSet()||sumMonthDepHrchySet() }">9階層</div>
+								<label>※10階層計は部門計で確認できます。</label>
+								</div>
+							</div></td>
+					</tr>
+					<tr>
+						<td><br /></td>
+					</tr>
+					<tr>
+						<td><div data-bind="ntsCheckBox: { checked: totalSet }">総合計（選択した個人の対象期間合計）を出力する。</div></td>
+					</tr>
+					<tr>
+						<td><div data-bind="ntsCheckBox: { checked: monthTotalSet }">対象期間を複数月指定した場合、月ごとの総合計を出力する。</div></td>
+					</tr>
+				</table>
+				</com:ko>
+			</div>
+			<hr />
+			<!-- END CONTENT AREA-->
+			<!-- BEGIN FUNCTION AREA-->
+			<div id="this-functions-area" class="halign-center">
+				<button class="proceed x-large" id="btn_apply" data-bind="click: saveSetting">設定</button>
+				<button id="btn_cancel" data-bind="click: cancel">キャンセル</button>
+			</div>
+			<!-- END FUNCTION AREA-->
+		</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

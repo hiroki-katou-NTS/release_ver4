@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <body>
+        <ui:composition template="../../../../master/dialog.xhtml">
+            <ui:define name="htmlHead">
+            	<com:stylefile path="main.css" />
+				<com:scriptfile path="../../../../lib/generic/igniteui/js/infragistics.core.js" />
+				<com:scriptfile path="../../../../lib/generic/igniteui/js/infragistics.lob.js" />
+            	<com:scriptfile path="../../../../lib/generic/igniteui/js/extensions/infragistics.ui.combo.knockout-extensions.js" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="viewmodel.js" />
+				<com:scriptfile path="service.js" />
+			    <script>var dialogSize = { width: 570, height: 310 };</script>
+			    <style>.nts-list-box *{box-sizing: border-box} </style>
+            </ui:define>
+            
+            <ui:define name="content">
+<!--             	<div id="functions-area"></div> -->
+            	
+            	<div id="contents-area">
+					<div class="cf">
+						<div class="form-label inline required">
+							<label id="LBL_001">対象データ</label>
+							<label id="LBL_002" data-bind="text: selectLayoutCode">01</label>
+							<label id="LBL_003" data-bind="text: selectLayoutName">正社員用明細書</label>
+							<label id="">（</label>
+							<label id="LBL_004" data-bind="text: layoutStartYm">2016/04</label>
+							<label id="">　　～　　</label>
+							<label id="LBL_005" data-bind="text: selectLayoutEndYm"></label>
+							<label id="">）</label>
+						</div><br />
+						<br />
+						<div class = "form-label inline required">
+							<label id="LBL_006">編集方法の選択</label>
+						</div>
+						<br/><br/>
+						<div class = "selectStyle">
+							<div id="SEL_001" data-bind="foreach: itemsRadio">
+				  				<span class="ntsControl">
+									<label class="ntsRadioBox">
+										<input type="radio" name="textRadio" data-bind="checkedValue: value, 
+																			checked: $parent.isRadioCheck,
+																			enable: true" />
+										<span class="box"></span><span class="label" data-bind="text: text"></span>
+									</label>
+								</span>
+							</div>							
+							<div>
+								<label class = "caution" id="LBL_007">※全ての履歴を削除すると、明細書のデータも削除します。</label><br/>
+								<div style="display: flex; margin-top: 10px">
+									<div style="margin-right: 10px"><label id="LBL_008">開始年月</label></div>
+									<div><input  id = "INP_001" maxlength="7" style="ime-mode: inactive" 
+									 data-bind="ntsTimeEditor: {value: selectLayoutStartYm, option: timeEditorOption, enable: enableYm}"></input></div>
+									<div><label id="">　　～　　</label></div>
+									<div><label id = "LBL_009" data-bind="text: selectLayoutEndYm"></label></div>
+								</div>
+							</div>
+						</div>
+						<br />
+						<hr></hr>
+						<div class = "bottomStype">
+							<button class="x-large proceed" id = "BTN_001" data-bind = "click: layoutProcess, enable: $root.errors.isEmpty">決定</button>
+							<button class="large" id="BTN_002" data-bind = "click: closeDialog">キャンセル</button><br />
+						</div>
+					</div>
+	           	</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qpp018.a.start.js" />
+			<com:scriptfile path="qpp018.a.service.js" />
+			<com:scriptfile path="qpp018.a.vm.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area" class="divHeader">
+				<div class="function-class">
+					<button id="export-PDF" class="proceed" style="width:350px" data-bind="click: exportData">給与社会保険料チェックリストを印刷 (PDF)</button>
+					<button data-bind="click: showDialogChecklistPrintSetting" id="print-setting-button">印刷の設定</button>
+					<button id="print-excution-log-button">印刷実行ログ</button>					
+				</div>
+			</div>
+			<div id="contents-area" data-bind="visible: true" style="display: none;">
+				<div id="detail-contents" style="margin-left: 20px">
+				<table id="tblDetail-contents">
+					<tbody>
+						<tr>
+							<td class="lblDetail-contents">
+								<div data-bind="ntsFormLabel: {required: true}" style="margin-top: 20px">
+									<label id="target-year-label">対象年月</label>
+								</div>
+							</td>
+							<td style="width: 100px">
+								<div style="margin-top: 20px">
+									<span id="date-picker" for="target-year-label"  data-bind="ntsDatePicker: {value: yearMonth, dateFormat: 'yyyy/MM'}" ></span>
+								</div>
+							</td>
+							<td colspan="2">
+								<div style="margin-top: 20px">
+									<label id="lblJapan-year" style="padding-left: 5px;" data-bind="text: japanYearmonth() + ' 月度'"></label>
+								</div>
+							</td>
+						</tr>							
+						<tr>
+							<td class="lbl-detail-contents">
+								<div data-bind="ntsFormLabel: {required: true}" style="margin-top: 20px">
+									<label>出力条件	</label>
+								</div>
+							</td>
+							<td colspan="3" style="width: 370px ">
+								<div style="margin-top: 20px">
+										<label style="padding-left: 5px;">算定月額と対象月控除の被保険者の社会保険料を比較し
+											対象月控除が算定月額に対して</label>
+									</div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+							</td>
+							<td colspan="3">
+							<div class="extract-condition-error" data-name="出力条件"></div>
+								<div style="margin-top: 20px" >
+									<div data-bind="ntsCheckBox: { checked: isEqual , text: '全て同じ' }" style="width: 100px;"></div>
+									<div data-bind="ntsCheckBox: { checked: isDeficient, text: '不足'  }" style="width: 100px;">	</div>
+									<div data-bind="ntsCheckBox: { checked: isRedundant, text: '超過' }" style="width: 100px;">	</div>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="4" class="lblDetail-contents">
+								<div data-bind="ntsFormLabel: {required: true}" style="margin-top: 20px; margin-bottom:4px">
+									<label>社会保険事業所</label>
+								</div>
+								<div class="grid-error" ></div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				</div>
+				<div id="lst-insurrance-office" style="margin-left:20px" data-bind="with: insuranceOffice">
+					<table id="multi-list" data-bind="ntsGridList: {
+													height: 500,
+													width: 600,
+													options: items,
+													optionsValue: 'code',
+													columns: columns,
+													multiple: true,
+													value: selectedOfficeCodeList
+												}">
+				</table>					
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

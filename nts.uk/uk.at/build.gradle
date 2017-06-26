@@ -1,0 +1,305 @@
+import org.gradle.api.Project
+
+apply plugin: 'java'
+
+buildscript {
+	repositories {
+		maven {
+			name 'nsvnmk'
+			url 'http://192.168.50.6:8081/artifactory/plugins-release'
+		}
+	}
+	dependencies {
+		//http://mvnrepository.com/artifact/de.aaschmid.gradle.plugins/gradle-cpd-plugin
+		classpath "de.aaschmid.gradle.plugins:gradle-cpd-plugin:0.5"
+
+		//http://mvnrepository.com/artifact/com.bmuschko/gradle-cargo-plugin
+		classpath "com.bmuschko:gradle-cargo-plugin:2.2.1"
+
+		//http://mvnrepository.com/artifact/com.eriwen/gradle-js-plugin
+		classpath 'com.eriwen:gradle-js-plugin:1.12.0'
+		
+		//Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+		classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+		
+		classpath 'de.richsource.gradle.plugins:typescript-gradle-plugin:1.8.0'
+	}
+}
+
+//すべてのプロジェクトに適応すべき内容はここに追記する
+allprojects {
+	apply from: "$rootDir/gradle/properties.gradle"
+	apply from: "$rootDir/gradle/library_properties.gradle"
+	apply plugin: "com.jfrog.artifactory"
+
+	//ビルド及び実行は、Java8を対象とする
+	sourceCompatibility = "$javaVersion"
+	targetCompatibility = "$javaVersion" 
+
+	task cleanandbuildallproject (dependsOn: ['clean', 'build'])<< {
+	}
+}
+
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'eclipse'
+	apply plugin: 'eclipse-wtp'
+	repositories {
+		maven {
+			name 'aspose'
+			url 'http://maven.aspose.com/artifactory/simple/ext-release-local/'
+		}
+	}
+	
+	//compileJavaとcompileTestJavaの実行時の文字コードをunicodeで指定
+	[compileJava, compileTestJava]*.options*.encoding = "$defaultEncoding"
+	
+	dependencies {
+	   // Apache commons lang
+		compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
+		
+		// Lombok
+		compile group: 'org.projectlombok', name: 'lombok', version: '1.16.10'
+		
+		// JUnit
+		testCompile group: 'junit', name: 'junit', version: '4.12'
+		testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
+		
+		// JMockit
+		testCompile group: 'org.jmockit', name: 'jmockit', version: '1.28'
+		
+		// CDI
+		compileOnly group: 'javax.enterprise', name: 'cdi-api', version: '1.2'
+
+		// EJB
+		compileOnly group: 'javax.ejb', name: 'javax.ejb-api', version: '3.2'
+		
+		// Concurrency Utilities for Java EE
+		compile group: 'javax.enterprise.concurrent', name: 'javax.enterprise.concurrent-api', version: '1.0'
+		
+		// JPA
+		compile group: 'org.eclipse.persistence', name: 'javax.persistence', version: '2.1.1'
+		compile group: 'org.eclipse.persistence', name: 'eclipselink', version: '2.6.4'
+		
+		// JAX-RS
+		compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
+		
+		// Jackson
+		compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.4'
+		compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.4'
+
+		// servlet
+		compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+		
+		// Log4J
+		compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.7'
+		compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
+		
+		// SLF4J
+		compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.22'
+		compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.22'
+		
+		compile group: 'nts.gul', name: 'nts.gul', version: '0.21'
+		compile group: 'nts.arc', name: 'nts.arc', version: '0.34.5.1'
+		
+		compile group: 'com.shr', name: 'nts.uk.shr.com', version: '0.2.3'
+	}
+}
+
+
+//=========================at:shared===================================
+project (':at.ctx:shared:nts.uk.ctx.at.shared.app') {
+	dependencies {
+		compile group: 'com.shr', name: 'nts.uk.shr.find', version: '0.1.1'
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.dom')
+	}
+}
+project (':at.ctx:shared:nts.uk.ctx.at.shared.dom') {
+	dependencies {
+	}
+}
+project (':at.ctx:shared:nts.uk.ctx.at.shared.infra') {
+	dependencies {
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.dom')
+	}
+}
+project (':at.ctx:shared:nts.uk.ctx.at.shared.ws') {
+	dependencies {
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.app')
+	}
+}
+
+//=========================at:schedule↓===================================
+project (':at.ctx:schedule:nts.uk.ctx.at.schedule.ws') {
+	dependencies {
+		compile project(':at.ctx:schedule:nts.uk.ctx.at.schedule.app')
+	}
+}
+project (':at.ctx:schedule:nts.uk.ctx.at.schedule.dom') {
+	dependencies {
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.dom')
+	}
+}
+project (':at.ctx:schedule:nts.uk.ctx.at.schedule.app') {
+	dependencies {
+		compile group: 'com.shr', name: 'nts.uk.shr.find', version: '0.1.1'
+		compile project(':at.ctx:schedule:nts.uk.ctx.at.schedule.dom')
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.dom')
+	}
+}
+project (':at.ctx:schedule:nts.uk.ctx.at.schedule.infra') {
+	dependencies {
+		compile project(':at.ctx:schedule:nts.uk.ctx.at.schedule.dom')
+	}
+}
+project (':at.ctx:schedule:nts.uk.ctx.at.schedule.ac') {
+	dependencies {
+		compile project(':at.ctx:schedule:nts.uk.ctx.at.schedule.dom')
+	}
+}
+project (':at.ctx:schedule:nts.uk.ctx.at.schedule.pub') {
+	dependencies {
+	}
+}
+project (':at.ctx:schedule:nts.uk.ctx.at.schedule.pubimp') {
+	dependencies {
+		compile project(':at.ctx:schedule:nts.uk.ctx.at.schedule.pub')
+		compile project(':at.ctx:schedule:nts.uk.ctx.at.schedule.dom')
+		compile project(':at.ctx:schedule:nts.uk.ctx.at.schedule.infra')
+	}
+}
+//=========================at:schedule↑=====================================
+
+//=========================at:record↓===================================
+project (':at.ctx:record:nts.uk.ctx.at.record.ws') {
+	dependencies {
+		compile project(':at.ctx:record:nts.uk.ctx.at.record.app')
+	}
+}
+project (':at.ctx:record:nts.uk.ctx.at.record.dom') {
+	dependencies {
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.dom')
+	}
+}
+project (':at.ctx:record:nts.uk.ctx.at.record.app') {
+	dependencies {
+		compile group: 'com.shr', name: 'nts.uk.shr.find', version: '0.1.1'
+		compile project(':at.ctx:record:nts.uk.ctx.at.record.dom')
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.dom')
+	}
+}
+project (':at.ctx:record:nts.uk.ctx.at.record.infra') {
+	dependencies {
+		compile project(':at.ctx:record:nts.uk.ctx.at.record.dom')
+	}
+}
+project (':at.ctx:record:nts.uk.ctx.at.record.ac') {
+	dependencies {
+		compile project(':at.ctx:record:nts.uk.ctx.at.record.dom')
+	}
+}
+project (':at.ctx:record:nts.uk.ctx.at.record.pub') {
+	dependencies {
+	}
+}
+project (':at.ctx:record:nts.uk.ctx.at.record.pubimp') {
+	dependencies {
+		compile project(':at.ctx:record:nts.uk.ctx.at.record.pub')
+		compile project(':at.ctx:record:nts.uk.ctx.at.record.dom')
+		compile project(':at.ctx:record:nts.uk.ctx.at.record.infra')
+	}
+}
+//=========================at:record↑=====================================
+
+//=====================nts.uk.at.web↓==============================
+project (':at.web:nts.uk.at.web') {
+	apply plugin: 'war'
+	apply plugin: "de.richsource.gradle.plugins.typescript"
+	war {
+		baseName= "nts.uk.at.web"
+		into("view") {
+			from compileTypeScript.outputs
+		}
+	}
+	compileTypeScript {
+		sourcemap = true
+		charset="utf8"
+		target = "ES5"
+		source=  file("src/main/webapp/view")
+		
+	}
+	
+	def explodedWarPath = "${buildDir}/exploded/${war.baseName}.war"
+	def explodedWarDeployFile = new File("${explodedWarPath}.dodeploy");
+
+	task explodedWar(type: Copy) {  
+		into explodedWarPath
+		with war
+		doLast {
+			explodedWarDeployFile.write ''
+		}
+	}
+	
+	war.dependsOn explodedWar
+	
+	task copyStaticResource(type: Sync) {
+		from "${rootDir}/${war.baseName}/src/main/webapp"
+		into explodedWarPath
+	}
+	
+	dependencies {
+		compile group: 'com.shr', name: 'nts.uk.shr.com', version: '0.2.3'
+		compile group: 'com.shr', name: 'nts.uk.shr.find', version: '0.1.1'
+		providedCompile group: 'com.sun.faces', name: 'jsf-api', version: '2.2.13'
+		compile group: 'aspose', name: 'cells', version: '9.0.0'
+		
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.app')
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.dom')
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.infra')
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.ws')
+		
+		runtime project (':at.ctx:schedule:nts.uk.ctx.at.schedule.ac')
+		runtime project (':at.ctx:schedule:nts.uk.ctx.at.schedule.app')
+		runtime project (':at.ctx:schedule:nts.uk.ctx.at.schedule.dom')
+		runtime project (':at.ctx:schedule:nts.uk.ctx.at.schedule.infra')
+		runtime project (':at.ctx:schedule:nts.uk.ctx.at.schedule.pub')
+		runtime project (':at.ctx:schedule:nts.uk.ctx.at.schedule.pubimp')
+		runtime project (':at.ctx:schedule:nts.uk.ctx.at.schedule.ws')
+		
+		runtime project (':at.ctx:record:nts.uk.ctx.at.record.ac')
+		runtime project (':at.ctx:record:nts.uk.ctx.at.record.app')
+		runtime project (':at.ctx:record:nts.uk.ctx.at.record.dom')
+		runtime project (':at.ctx:record:nts.uk.ctx.at.record.infra')
+		runtime project (':at.ctx:record:nts.uk.ctx.at.record.pub')
+		runtime project (':at.ctx:record:nts.uk.ctx.at.record.pubimp')
+		runtime project (':at.ctx:record:nts.uk.ctx.at.record.ws')
+
+		// implement eraAdapter
+		compile group: 'com', name: 'nts.uk.ctx.basic.app', version: '0.1'
+		compile group: 'com', name: 'nts.uk.ctx.basic.infra', version: '0.1'
+		compile group: 'com', name: 'nts.uk.ctx.basic.dom', version: '0.1'
+	}
+}
+//=====================nts.uk.at.web↑==============================
+
+artifactory {
+	contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+	publish {
+		repository {
+			repoKey = 'libs-release-local'
+			username = "${artifactory_user}"
+			password = "${artifactory_password}"
+			maven = true
+			
+		}
+	}
+	resolve {
+		repository {
+			repoKey = 'plugins-release'
+			username = "${artifactory_user}"
+			password = "${artifactory_password}"
+			maven = true
+			
+		}
+	}
+}

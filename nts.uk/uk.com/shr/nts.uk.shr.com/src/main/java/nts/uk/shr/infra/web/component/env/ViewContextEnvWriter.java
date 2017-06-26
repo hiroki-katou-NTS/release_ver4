@@ -12,7 +12,7 @@ import nts.uk.shr.com.time.japanese.JapaneseErasProvider;
 import nts.uk.shr.infra.web.component.util.ObjectWriter;
 
 @Stateless
-public class  ViewContextEnvWriter{
+public class ViewContextEnvWriter {
 	
 	@Inject
 	private JapaneseErasProvider japaneseErasProvider;

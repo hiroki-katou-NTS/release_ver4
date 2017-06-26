@@ -1,0 +1,175 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:stylefile path="cmm008.a.main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="cmm008.a.start.js" />
+			<com:scriptfile path="cmm008.a.vm.js" />
+			<com:scriptfile path="cmm008.a.service.js" />
+			<com:ValidatorScript>
+					nts.uk.ctx.basic.dom.organization.employment.EmploymentCode
+					nts.uk.ctx.basic.dom.organization.employment.EmploymentName
+					nts.uk.shr.com.primitive.Memo
+			</com:ValidatorScript>
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area" class="divHeader">
+				<button id="btnCreate" class="btnStyle" data-bind = "click: newCreateEmployment">新規</button>
+				<button class="proceed btnStyle" id="btnRegistry" data-bind="click: createEmployment, enable: $root.errors.isEmpty">登録</button>
+				<button id="btnLog">マスタ修正ログ</button>
+				<button class="danger btnStyle" id="btnDelete" data-bind = "click: deleteEmployment, enable: isDelete">削除</button>
+				<label id="lblTitle">雇用区分の登録</label>
+			</div>
+			<div id="contents-area" style="padding-top: 20px">
+				<table>
+					<tr>
+						<td id="contents-left" class="bg-green caret-right caret-background">
+							<i class="icon icon-searchbox"></i>
+							<div  class="leftTop" data-bind="ntsSearchBox: {
+								comId: 'lstDataEmployment',
+								items: dataSource, 		
+								selected: currentCode, 
+								selectedKey: 'employmentCode', 
+								fields: ['employmentName', 'employmentCode']}" />
+							<table id="lstDataEmployment" style="" data-bind="ntsGridList: {								
+								height: 650,
+								width: '100%',
+								options: dataSource,
+								optionsValue: 'employmentCode',
+								columns: columns,
+								multiple: false,
+								value: currentCode
+							}"
+							class="cf"></table>
+						</td>
+						<td id="contents-right">
+							<table id="tableRight">
+								<tr>
+									<td class="contentsRL">
+										<div id="lblCodeName" data-bind="ntsFormLabel: {required: true, constraint: ['EmploymentCode', 'EmploymentName']}">
+											<label>コード/名称<br /></label>
+										</div>
+									</td>
+									<td class="contentsRR"><input id="inpCode"
+										data-name="employmentCode"
+										data-bind="ntsTextEditor: {value: employmentCode, 
+																	constraint: 'EmploymentCode', 
+																	option: textEditorOption, 
+																	enable: isEnable}" />
+										<input id="inpName" data-name="name"
+										data-bind="ntsTextEditor: {value: employmentName, 
+																	constraint: 'EmploymentName',
+																	option: textEditorOption,
+																	enable: true}" />
+										<div id="selDisplay"
+											data-bind="ntsCheckBox: { checked: isCheckbox, enable: true, text: 'この項目を初期表示する' }"></div>
+									</td>
+								</tr>
+								<tr class = "UseKtSet">
+									<td class="contentsRL">
+										<div id="lblCloseDate" data-bind="ntsFormLabel: {required: true}">
+											<label>締め日</label>
+										</div>
+									</td>
+									<td class="contentsRR">
+										<div id="selCloseDate"
+											data-bind="ntsComboBox: {options: closeDateList,
+																			optionsValue: 'closeDateCode',
+																			value: selectedCloseCode,
+																			optionsText: 'closeDatename',
+																			editable: false,
+																			enable: true,
+																			columns: [
+																				{ prop: 'closeDateCode', length: 1 },
+																				{ prop: 'closeDatename', length: 10 },
+																			]}"></div>
+									</td>
+								</tr>
+								<tr class = "UseKtSet">
+									<td class="contentsRL">
+										<div id="lblManagementHoliday" data-bind="ntsFormLabel: {required: true}">
+											<label>公休の管理</label>
+										</div>
+									</td>
+									<td class="contentsRR">
+										<div id="selManagementHoloday"
+											data-bind="ntsSwitchButton: {
+												options: managementHolidays,
+												optionsValue: 'code',
+												optionsText: 'name',
+												value: holidayCode }"
+											class="cf"></div>
+									</td>
+								</tr>
+								<tr class = "UseKtSet">
+									<td class="contentsRL">
+										<div id="lblProcessingDate" data-bind="ntsFormLabel: {required: true}">
+											<label>処理日区分</label>
+										</div>
+									</td>
+									<td class="contentsRR">
+										<div id="selProcessingDate"
+											data-bind="ntsComboBox: {options: processingDateList,
+																			optionsValue: 'processingNo',
+																			value: selectedProcessNo,
+																			optionsText: 'processingName',
+																			editable: false,
+																			enable: true,
+																			columns: [
+																				{ prop: 'processingNo', length: 1 },
+																				{ prop: 'processingName', length: 10 },
+																			]}"></div>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="2"><hr /></td>
+								</tr>
+								<tr>
+									<td class="contentsRL">
+										<div id="lblOutCode" data-bind="ntsFormLabel: {required: false, constraint: 'EmploymentCode'}">
+											<label>外部コード</label>
+										</div>
+									</td>
+									<td class="contentsRR"><input id="INP_004"
+										data-name="code"
+										data-bind="ntsTextEditor: {value: employmentOutCode, 
+																					constraint: 'EmploymentCode', 
+																					option: textEditorOption, 
+																					enable: true}" />
+									</td>
+								</tr>
+								<tr>
+									<td class="contentsRL">
+										<div id="lblMemo" data-bind="ntsFormLabel: {required: false, constraint: 'Memo'}">
+											<label>メモ</label>
+										</div>
+									</td>
+									<td class="contentsRR">
+										<div data-bind="with: multilineeditor">
+											<textarea id="inpMemo"
+												data-bind="ntsMultilineEditor: {
+													value: memoValue,
+													constraint: 'Memo',
+													option: option,
+													enable: true,
+													readonly: false}" />
+										</div>
+									</td>
+								</tr>
+							</table>
+
+						</td>
+					</tr>
+				</table>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

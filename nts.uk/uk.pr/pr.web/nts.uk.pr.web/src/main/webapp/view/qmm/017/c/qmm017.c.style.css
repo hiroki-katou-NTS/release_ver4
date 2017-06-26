@@ -1,0 +1,240 @@
+#c_btn_openDialogQ {
+	margin-left: 50px;
+}
+
+.c-table {
+	width: 875px;
+	border-collapse: collapse;
+}
+
+.c-table .td-left {
+	padding: 0px 25px 0px 0px;
+}
+
+.c-table td {
+	vertical-align: top;
+}
+
+.c-table .td-left-1 {
+	width: 92px;
+}
+
+.c-table .td-left-2 {
+	width: 590px;
+}
+
+textarea {
+	resize: none;
+	background: transparent;
+	/* color: transparent; */
+}
+
+#input-containner {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+#input-content-area {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 99%;
+	height: 99%;
+	padding: 3px;
+	/* padding-top: 0px; */
+	word-wrap: break-word;
+	white-space: pre-wrap;
+	word-break: normal;
+	color: transparent;
+}
+
+#input-area {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+#cursor-key {
+	visibility: hidden;
+	position: relative;
+	z-index: 10;
+}
+
+#input-cursor {
+	position: absolute;
+	pointer-events: none;
+	border-left: 1px solid black;
+	border-right: none;
+	width: 0;
+	cursor: text;
+	height: 18px;
+}
+
+.editor-line {
+	display: block;
+}
+
+.error-char {
+	border-bottom: 1px red dotted;
+}
+
+#auto-complete {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+#auto-complete-containner {
+	position: absolute;
+	z-index: 1000;
+}
+
+#error-containner {
+	position: absolute;
+	z-index: 1000;
+	/* width: 100px; */
+	/* height: 32px; */
+	color: #595959;
+	background-color: #fcf1c8;
+	border: 1px solid gray;
+	padding: 2px;
+	border-radius: 3px;
+}
+
+.list001 {
+	display: table;
+	margin-bottom: 25px;
+}
+
+.list001 .col {
+	display: table-cell;
+	border: 1px solid #ccc;
+	border-right: none;
+	vertical-align: middle;
+	padding: 4px 1px;
+}
+
+.list001 .col:last-child {
+	border-right: 1px solid #ccc;
+	width: 290px;
+	padding-left: 5px
+}
+
+.list001 .col-1 {
+	width: 250px
+}
+
+.list001 .nts-switch-button {
+	margin-bottom: 0px;
+}
+
+.list002 {
+	float: left;
+}
+
+.list002 .col {
+	float: left;
+	border: 1px solid #ccc;
+	border-right: none;
+	min-height: 40px;
+	margin-top: -1px;
+}
+
+.list002 .col:last-child {
+	border-right: 1px solid #ccc;
+}
+
+.list002 .col-1 {
+	width: 30px;
+}
+
+.list002 .col-2 {
+	width: 253px;
+	background: #E0F59E;
+}
+
+.col-2 span {
+	margin-top: 10px;
+	display: inline-block;
+}
+
+.list002 .header {
+	
+}
+
+.list002 .header .col {
+	background: #CFF1A5;
+}
+
+.list002 .header .col-3 {
+	width: 469px;
+}
+
+.list002 .body {
+	height: 300px;
+	overflow-y: scroll;
+	border: 1px solid #ccc;
+}
+
+.list002 .body .row {
+	margin-top: -1px;
+	margin-left: -1px;
+	display: flex;
+}
+
+.list002 .body .col-3 {
+	width: 235px;
+	padding-top: 4px;
+}
+
+.list002 .body .col-4 {
+	width: 210px;
+	padding: 6px 0 0 5px;
+}
+
+.ui-igcombo-wrapper {
+	width: 136px;
+}
+
+#list-error {
+	margin-top: 15px;
+	width: 564px;
+	height: 187px;
+	border: 2px solid darkgray;
+	border-radius: 6px;
+	width: 564px;
+}
+
+#list-error table {
+	margin: 9px 0 0 30px;
+	border: 1px solid gray;
+}
+
+#list-error table th {
+	width: 500px;
+	height: 26px;
+	background-color: #CFF1A5;
+	border-bottom: 1px solid gray;
+}
+
+#list-error table td {
+	width: 500px;
+	height: 26px;
+	border-bottom: 1px solid gray;
+}
+
+#list-error table thead {
+	display: block;
+	background-color: #CFF1A5;
+}
+
+#list-error table tbody {
+	display: block;
+}
+
+#list-error table tbody {
+	height: 107px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}

@@ -1,0 +1,99 @@
+#functions-area .function-class {
+	margin-left: 60px;
+	margin-top: 6px;
+}
+
+td#contents-left {
+	width: 700px;
+	height: 70px;
+}
+
+div#target-year-label {
+	background-color: #E2F79F;
+	width: 100px;
+	height: 26px;
+	text-align: right;
+	padding-top: 3px;
+	padding-right: 8px;
+	border-radius: 3px;
+}
+span#japan-year {
+    margin-left: 10px;
+    padding-top: 2px;
+}
+.select-target-year {
+	width: 600px;
+	height: 30px;
+	border: solid 1px #B1B1B1;
+	border-radius: 5px;
+	padding: 3px 0px 3px 5px;
+	margin-left: 50px;
+}
+
+span#year-label {
+    padding-top: 2px;
+    margin-left: 10px;
+    width: 100px;
+}
+
+div#preliminary-month-checkbox {
+    margin-left: 50px;
+    margin-top: 3px;
+}
+
+.search-employee {
+    border: solid 1px #B1B1B1;
+    width: 655px;
+    min-height: 500px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+div#aggregate-condition {
+    border: solid 1px #b1b1b1;
+    width: 550px;
+    height: 530px;
+    border-radius: 5px;
+    padding: 10px;
+}
+div#aggregate-condition > div{
+    margin-bottom: 20px;
+}
+.help-button {
+	margin-left: 10px;
+}
+div#output-layout-selects {
+    margin-left: 20px;
+}
+
+div#output-layout-selects > div {
+    margin-top: 10px;
+}
+
+div#page-break-indicator-checkbox {
+    margin-left: 40px;
+}
+
+div#output-items > div {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+div#summary-detail-items {
+    height: 34px;
+}
+
+div#summary-detail-items > div {
+    float: left;
+}
+
+div#summary-detail-items .ntsControl {
+    margin-top: 5px;
+}
+
+div#output-settings-selection {
+    margin-left: 30px;
+}
+
+div#output-settings-button {
+    margin-left: 10px;
+}

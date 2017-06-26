@@ -1,0 +1,85 @@
+@CHARSET "UTF-8";
+
+#contents-area {
+	width: 1300px;
+	margin-top: 10px;
+}
+
+.right-content {
+	float: left;
+	margin-left: 100px;
+}
+
+#A_BTN_001 {
+	margin: 4px 8px 0px 110px;
+	padding: 0px 20px
+}
+
+#A_BTN_002 {
+	margin-right: 850px;
+	padding: 0px 20px
+}
+
+#A_BTN_003 {
+	padding: 0px 20px;
+	margin: 0px 20px;
+}
+
+#A_BTN_004 {
+	padding: 0px 20px
+}
+
+#A_LBL_002, #A_INP_001 {
+	margin: 0px 5px
+}
+
+.config {
+	width: 180px;
+	height: 30px;
+	padding: 12px;
+	border-radius: 5px;
+	margin-bottom: -42px;
+}
+
+.control-group {
+	padding: 8px;
+	border: 2px solid rgba(79, 79, 79, 0.5);
+	width: 1100px
+}
+
+.ui-widget-header {
+	border: none;
+	background: none;
+}
+
+.ui-iggrid .ui-iggrid-toolbar .ui-iggrid-results {
+	margin-right: 85px;
+	padding-right: 0px;
+}
+
+.ui-iggrid table tr td, .ui-iggrid table tr td.ui-iggrid-header,
+	.ui-iggrid table tr td.ui-state-hover, .ui-iggrid table tr td.ui-state-active,
+	.ui-iggrid table tr td.ui-state-focus, .ui-iggrid table tr td.ui-state-active.ui-state-focus,
+	.ui-iggrid table tr th, .ui-iggrid table tr th.ui-iggrid-header,
+	.ui-iggrid table tr th.ui-state-hover, .ui-iggrid table tr th.ui-state-active,
+	.ui-iggrid table tr th.ui-state-focus, .ui-iggrid table tr th.ui-state-active.ui-state-focus
+	{
+	border: 1px solid rgba(25, 24, 24, 0.26);
+}
+
+#grid_residenceTax01, #grid_residenceTax02, #grid_residenceTax03,
+	#grid_residenceTax04, #grid_residenceTax05, #grid_residenceTax06,
+	#grid_residenceTax07, #grid_residenceTax08, #grid_residenceTax09,
+	#grid_residenceTax10, #grid_residenceTax11, #grid_residenceTax12 {
+	text-align: center;
+	padding-right: 0px !important;
+}
+
+.align_right {
+	text-align: right;
+	padding-right: 5px !important;
+}
+
+.columnCss {
+	background-color: grey
+}

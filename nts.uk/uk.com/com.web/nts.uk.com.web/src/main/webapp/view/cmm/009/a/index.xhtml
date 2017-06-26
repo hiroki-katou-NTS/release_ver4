@@ -1,0 +1,216 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+					nts.uk.ctx.basic.dom.organization.department.DepartmentCode
+					nts.uk.ctx.basic.dom.organization.department.DepartmentName
+					nts.uk.ctx.basic.dom.organization.department.DepartmentGenericName
+					nts.uk.shr.com.primitive.Memo
+			</com:ValidatorScript>
+			<com:stylefile path="cmm009.a.main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="cmm009.a.start.js" />
+			<com:scriptfile path="cmm009.a.vm.js" />
+			<com:scriptfile path="cmm009.a.service.js" />
+		</ui:define>
+		<ui:define name="content">
+			<div id="functions-area" class="divHeader">
+				<button id="A_BTN_REGISTER" class="proceed btnStyle"
+					data-bind="click: register , enable: $root.errors.isEmpty" >登録</button>
+				<button id="A_BTN_PRINT_CHART" class=" btnStyle">組織図印刷</button>
+				<button id="A_BTN_LOG">マスタ修正ログ</button>
+				<button id="A_BTN_DELETE" class="danger btnStyle"
+					data-bind="click: deletebtn , enable: enablebtnDelete">削除</button>
+			</div>
+			<div id="contents-area">
+				<div id="left-content"
+					class="relative bg-green caret-right caret-background">
+					<i class="icon icon-searchbox"></i>
+					<div class="first-line">
+						<button id="A_BTN_OPENCDIALOG"
+							data-bind="click: openCDialog, enable: allowClick()">履歴追加</button>
+						<button id="A_BTN_OPENDDIALOG"
+							data-bind="click: openDDialog, enable: enableDDialog">履歴編集</button>
+						<div id="A_LBL_002" data-bind="ntsFormLabel: {}">メモ</div>
+					</div>
+					<div class="second-line">
+
+						<!-- LST_001 -->
+						
+						<div id="list-box" class="in-second-line"
+							data-bind="ntsListBox: {
+							options: itemHistId,
+							optionsValue: 'startDate',
+							optionsText: 'endDate',
+							multiple: false,
+							enable : true,
+							value: selectedCodes_His,
+							rows: 3,
+							columns: [
+								{ key: 'startDate', length:6},
+								{ key: 'endDate', length:6.5}
+								
+							]}"></div>
+						<!-- INP_008 -->
+						<div class="in-second-line multi">
+							<textarea class="A_INP_MEMO"
+								data-bind="ntsMultilineEditor: { 
+											value: A_INP_MEMO, 
+											constraint:  'Memo',
+											}" />
+						</div>
+
+					</div>
+					<div>
+						<span class="caret-bottom outline"></span>
+					</div>
+					<div class="third-line">
+						<!--SINGLESELECT EXAMPLE-->
+						<div class="cf">
+							<div style="float: left">
+								<div style="width: 600px; padding-bottom: 8px;"
+									data-bind="ntsSearchBox: {
+										comId: 'treegrid1',
+										items: dataSource, 		
+										selected: singleSelectedCode, 
+										selectedKey: 'departmentCode', 
+										childField: 'children', 
+										fields: ['departmentCode','name']}" />
+								<table id="treegrid1"
+									data-bind="ntsTreeGridView:{
+										width: 600,
+										height: 400,
+										options: dataSource,
+										value: singleSelectedCode,								
+										optionsValue: 'departmentCode',
+										optionsChild: 'children',
+										optionsText: 'display',
+										multiple: false,
+										enable: true,										
+										showCheckBox: false}"
+									class="cf">
+								</table>
+							</div>
+							<div style="float: left" class="sub_table">
+								<div>
+									<button class="bt_insert_up" data-bind="click: insertItemUp">上に挿入</button>
+								</div>
+								<div>
+									<button class="bt_insert_down"
+										data-bind="click: insertItemDown">下に挿入</button>
+								</div>
+								<div>
+									<button class="bt_insert_end" data-bind="click: insertItemEnd">
+										下位部門<br />の作成<br />
+									</button>
+								</div>
+								<hr style="width: 80px;"></hr>
+								
+								<div style="height: 145px; padding-left: 32px;"
+									id="tree-up-down"
+									data-bind="ntsUpDown: {
+									targetSource: dataSource,
+									primaryKey: 'departmentCode',
+									comId: '#treegrid1',
+									type: 'tree',
+									enable : enablebtnupdown, 
+									childDataKey: 'children',
+								}"
+									class=""></div>
+							</div>
+						</div>
+					</div>
+
+
+				</div>
+
+				<div id="right-content">
+					<table class="table_content">
+						<colgroup>
+							<col width="150px" />
+							<col width="*" />
+						</colgroup>
+
+						<tr>
+							<td class="row_1">
+								<div
+									data-bind="ntsFormLabel: { constraint: ['DepartmentCode','DepartmentName'], required: true }">
+									コード/名称</div>
+							</td>
+							<td class="valign-center">
+								<div>
+									<div class="input_002 input_code">
+										<input id="A_INP_CODE" style="width: 120px"
+											data-bind="ntsTextEditor: {
+											value: A_INP_CODE,
+											constraint: 'DepartmentCode',
+											enable: A_INP_CODE_ENABLE}" />
+									</div>
+
+									<div class="input_002 input_name">
+										<input id="A_INP_DEPNAME" style="width: 242px"
+											data-bind="ntsTextEditor: {
+											constraint: 'DepartmentName',
+											value: A_INP_DEPNAME
+											
+											}" />
+									</div>
+
+								</div>
+							</td>
+						</tr>
+						<tr style="width: 100%">
+							<td colspan="2"><hr /></td>
+						</tr>
+						<tr>
+							<td>
+								<div class="row_2"
+									data-bind="ntsFormLabel: {constraint: 'DepartmentGenericName'}">
+									表示名称</div>
+							</td>
+							<td class="valign-center">
+								<div>
+									<div>
+										<input id="A_INP_FULLNAME" style="width: 330px"
+											data-bind="ntsTextEditor: {
+											value: A_INP_FULLNAME,
+											constraint: 'DepartmentGenericName'
+											}" />
+									</div>
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td>
+								<div class="row_5"
+									data-bind="ntsFormLabel: {constraint: 'DepartmentCode'}">
+									外部コード</div>
+							</td>
+							<td class="valign-center">
+								<div>
+									<div>
+										<input class="A_INP_OUTCODE"
+											data-bind="ntsTextEditor: {
+											value: A_INP_OUTCODE,
+											constraint: 'DepartmentCode'
+											}" />
+									</div>
+								</div>
+							</td>
+						</tr>
+
+					</table>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

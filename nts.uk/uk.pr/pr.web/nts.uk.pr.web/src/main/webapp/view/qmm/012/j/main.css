@@ -1,0 +1,26 @@
+@CHARSET "UTF-8";
+
+@import url("../a/base.css");
+
+#J_Btn_RegisterButton {
+	margin-left: 80px;
+	width: 80px;
+}
+
+#J_Btn_CloseUp {
+	margin-left: 20px;
+	width: 80px;
+}
+
+#content {
+	padding: 40px 0px 0px 50px;
+}
+
+.ui-state-disabled, .ui-widget-content .ui-state-disabled,
+	.ui-widget-header .ui-state-disabled {
+	opacity: 0;
+}
+
+.errorValidate {
+	border-color: red !important;
+}

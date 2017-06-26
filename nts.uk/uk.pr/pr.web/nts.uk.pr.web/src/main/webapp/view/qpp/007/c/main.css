@@ -1,0 +1,46 @@
+#contents-area {
+	margin-top: 15px;
+	min-width: 1321px;
+}
+#delete-button{
+	margin-left: 50px;
+	margin-right: 20px;
+}
+#contents-left{
+	margin-left: 20px;
+	padding: 20px;
+	min-height: 450px;
+	width: 240px;
+}
+#contents-center{
+	margin-left: 40px;
+	margin-right: 40px;
+	min-width: 652.78px;
+	min-height: 400px;
+}
+#inpCode{
+	width: 40px;
+	margin-left: 50px;
+	margin-right: 3px;
+}
+#inpName{
+	width: 300px;
+}
+#inpSearch input{
+	width: 200px;
+	margin-bottom:20px;
+}
+#contents-right-grid-list{
+	margin-top: 20px;
+}
+.margin-left-10 {
+	margin-left: 10px;
+}
+#contents-center.caret-background.caret-right:after {
+    top: 40%;
+    border-width: 65px 18px;
+    color: #92D050;
+}
+span.big-text {
+	font-size: 1.3rem;
+}

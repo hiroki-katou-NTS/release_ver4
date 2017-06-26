@@ -1,0 +1,146 @@
+#D_BTN_002 {
+	vertical-align: bottom;
+	margin-left: 35px;
+	width: 160px;
+	margin-top: 5px;
+}
+
+.D-divLine-col-1 {
+	float: left;
+	width: 150px;
+	margin-left: 20px;
+	display: inline-block;
+	width: 150px;
+}
+
+.D-divLine-col-2 {
+	width: 300px;
+	float: left;
+}
+
+.D-divLine-col-3 {
+	width: 100px;
+	float: left;
+}
+
+#D_SEL_001 button {
+	width: 130px;
+	height: 30px;
+}
+
+#D_SEL_002 button {
+	width: 130px;
+	height: 30px;
+	float: left;
+}
+
+#D_LBL_017 {
+	float: left;
+}
+
+#D_BTN_001 {
+	display: block;
+	width: 270px;
+	height: 30px;
+	margin-left: 120px;
+	margin-bottom: 10px;
+}
+
+.caret-bottom:after {
+	border-top: 1.5em solid;
+	border-right: 7em solid transparent;
+	border-left: 7em solid transparent;
+	color: #E0F59E;
+	margin-left: 155px;
+}
+
+#D_LBL_006 {
+	float: left;
+}
+
+#D_LBL_007 {
+	float: left;
+	width: 155px;
+	margin: 3px 4px 0px 5px;
+	margin-left: 5px;
+	font-size: x-large;
+	text-align: center;
+}
+
+.unit {
+	vertical-align: -webkit-baseline-middle
+}
+
+#D_LBL_007>label:FIRST-CHILD {
+	font-size: xx-large;
+	vertical-align: top;
+	margin-top: -3px;
+}
+
+#D_LBL_007>label:LAST-CHILD {
+	margin-top: 10px;
+}
+
+#D_LBL_003 {
+	font-size: large;
+	margin-left: 15px;
+	margin-top: 10px;
+}
+
+#D-label-area {
+	padding: 3px 5px 3px 3px;
+	border: 2px solid #a8a8a8;
+	border-radius: 5px;
+	width: 500px;
+	margin-left: 10px;
+}
+
+#D-label-area * {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+#D-label-area div {
+	display: inline-block;
+	background-color: #E0F59E;
+	height: 34px;
+	border-radius: 2px;
+}
+
+#icon {
+	border-radius: 5px;
+}
+
+#D_LBL_001 {
+	margin-left: 5px;
+	margin-right: 15px;
+	font-size: 16px;
+}
+
+#D_LBL_002 {
+	margin-left: 15px;
+	margin-right: 15px;
+	font-size: x-large;
+}
+
+#D-divLine4 {
+	margin-left: 50px;
+}
+
+#D-divLine5 {
+	height: 290px;
+	margin-left: 20px;
+	margin-top: 10px;
+}
+
+#D-divLine5>* {
+	vertical-align: top;
+}
+
+.text_align {
+	text-align: right;
+}
+
+.nts-wizard>.content>.body label {
+	margin-bottom: 0px;
+}

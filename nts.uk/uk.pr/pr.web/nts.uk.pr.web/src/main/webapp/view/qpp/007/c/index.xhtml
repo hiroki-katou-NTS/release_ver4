@@ -1,0 +1,283 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.report.dom.salarydetail.outputsetting.SalaryOutputSettingCode
+				nts.uk.ctx.pr.report.dom.salarydetail.outputsetting.SalaryOutputSettingName
+  			</com:ValidatorScript>
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="../j/qpp007.j.service.js" />
+			<com:scriptfile path="qpp007.c.vm.js" />
+			<com:scriptfile path="qpp007.c.service.js" />
+			<com:scriptfile path="qpp007.c.start.js" />
+			<script type="text/javascript">
+				var dialogSize = {
+					width : 1350,
+					height : 750
+				};
+			</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<!-- BEGIN FUNCTION AREA -->
+			<div id="functions-area">
+				<button id="new-button" data-bind="click: onNewModeBtnClicked">新規</button>
+				<button id="register-button" class="proceed" data-bind="click: onSaveBtnClicked">登録</button>
+				<button id="setting-button" data-bind="click: onCommonSettingBtnClicked">集計項目の設定</button>
+				<button id="delete-button" class="danger" data-bind="disable: isNewMode, click: onRemoveBtnClicked">削除</button>
+				<button id="close-button" data-bind="click: onCloseBtnClicked">閉じる</button>
+			</div>
+
+			<!-- END FUNCTION AREA -->
+
+			<!-- BEGIN CONTENT AREA -->
+			<div id="contents-area" data-bind="visible: true" style="display: none">
+				<!-- BEGIN CONTENT LEFT -->
+				<div id="contents-left" class="bg-green caret-right caret-background pull-left">
+					<i class="icon icon-searchbox"></i>
+					<div id="inpSearch" class="ntsSearchBox"
+						data-bind="ntsSearchBox: {
+										comId: 'outputSettings',
+										items: outputSettings, 
+										selected: temporarySelectedCode, 
+										selectedKey: 'code', 
+										fields: ['name', 'code']}"></div>
+					<div id="left-grid-list">
+						<table id="outputSettings"
+							data-bind="ntsGridList: {
+							height: 350,
+							width: 230,
+							dataSource: outputSettings,
+							primaryKey: 'code',
+							columns: ko.observableArray([
+			                    { headerText: 'コード', key: 'code', width: 50 },
+			                    { headerText: '名称', key: 'name', width: 100 }
+			                ]),
+							value: temporarySelectedCode
+						}"
+							class="cf"></table>
+					</div>
+				</div>
+				<!-- END CONTENT LEFT -->
+
+				<!-- BEGIN CONTENT CENTER-->
+				<div id="contents-center" class="caret-right caret-background pull-left" data-bind="with: outputSettingDetailModel">
+					<div class="flex valign-center">
+						<div id="lblCodeName" data-bind="ntsFormLabel: {constraint: ['SalaryOutputSettingCode', 'SalaryOutputSettingName'], required: true}">コード/名称</div>
+						<input id="inpCode" data-name="コード"
+							data-bind="ntsTextEditor: {constraint: 'SalaryOutputSettingCode', value: settingCode, required: true, enable: $parent.isNewMode()}">
+						</input>
+						<input id="inpName" data-name="名称"
+							data-bind="ntsTextEditor: {constraint: 'SalaryOutputSettingName', value: settingName, required: true}"></input>
+					</div>
+
+					<!-- BEGIN TAB PANEL -->
+					<div id="tab-panel"
+						data-bind="ntsTabPanel: { dataSource: categorySettingTabs, active: selectedCategory}">
+						<!-- Salary payment Tab -->
+						<div id="payment" data-bind="if: selectedCategory() == 'Payment'">
+							<com:ko tag="with" bind="categorySettings()[0]">
+							<table>
+							    <tr>
+							        <td>
+							            <div data-bind="ntsFormLabel: {required: false}">表に追加できる<span class="big-text">支給</span>項目</div>
+							            <hr />
+							            <com:ko tag="template" bind="{name: 'masterlist'}"></com:ko>
+							        </td>
+							        <td>
+							            <button style="margin-top: 40px" class="margin-left-10" data-bind="click: moveMasterItem">
+							                <i class="icon icon-button-arrow-right"></i>
+							            </button>
+							        </td>
+							        <td rowspan="2" style="vertical-align: top">
+							            <com:ko tag="template" bind="{name: 'outputlist'}"></com:ko>
+							        </td>
+							    </tr>
+							    <tr>
+							        <td>
+							            <com:ko tag="template" bind="{name: 'aggregatelist'}"></com:ko>
+							        </td>
+							        <td>
+							            <button style="margin-top: 80px" class="margin-left-10" data-bind="click: moveAggregateItem">
+							                <i class="icon icon-button-arrow-right"></i>
+							            </button>
+							        </td>
+							    </tr>
+							</table>
+							</com:ko>
+						</div>
+						<!-- Salary deduction Tab -->
+						<div id="deduction" data-bind="if: selectedCategory() == 'Deduction'">
+							<com:ko tag="with" bind="categorySettings()[1]">
+							<table>
+							    <tr>
+							        <td>
+							            <div data-bind="ntsFormLabel: {required: false}">表に追加できる<span class="big-text">控除</span>項目</div>
+							            <hr />
+							            <com:ko tag="template" bind="{name: 'masterlist'}"></com:ko>
+							        </td>
+							        <td>
+							            <button style="margin-top: 40px" class="margin-left-10" data-bind="click: moveMasterItem">
+							                <i class="icon icon-button-arrow-right"></i>
+							            </button>
+							        </td>
+							        <td rowspan="2" style="vertical-align: top">
+							            <com:ko tag="template" bind="{name: 'outputlist'}"></com:ko>
+							        </td>
+							    </tr>
+							    <tr>
+							        <td>
+							           <com:ko tag="template" bind="{name: 'aggregatelist'}"></com:ko>
+							        </td>
+							        <td>
+							            <button style="margin-top: 80px" class="margin-left-10" data-bind="click: moveAggregateItem">
+							                <i class="icon icon-button-arrow-right"></i>
+							            </button>
+							        </td>
+							    </tr>
+							</table>
+							</com:ko>
+						</div>
+						<!-- Salary attendance Tab -->
+						<div id="attendance" data-bind="if: selectedCategory() == 'Attendance'">
+							<com:ko tag="with" bind="categorySettings()[2]">
+							<table>
+								<tr>
+								<td><div data-bind="ntsFormLabel: {required: false}">表に追加できる<span class="big-text">勤怠</span>項目</div></td>
+								<td style="padding-left: 75px"><div data-bind="ntsFormLabel: {required: false}">表に追加した項目</div></td>
+								</tr>
+								<tr>
+								<td style="width: 240px"><hr /></td>
+								<td style="width: 280px; padding-left: 75px"><hr /></td>
+								</tr>
+								</table>
+								<com:ko tag="template" bind="{name: 'swaplist'}"></com:ko>
+							</com:ko>
+						</div>
+						<!-- Article-Others Tab -->
+						<div id="article-others" data-bind="if: selectedCategory() == 'ArticleOthers'">
+							<com:ko tag="with" bind="categorySettings()[3]">
+							<table>
+								<tr>
+								<td><div data-bind="ntsFormLabel: {required: false}">表に追加できる<span class="big-text">記事・その他</span>項目</div></td>
+								<td style="padding-left: 75px"><div data-bind="ntsFormLabel: {required: false}">表に追加した項目</div></td>
+								</tr>
+								<tr>
+								<td style="width: 240px"><hr /></td>
+								<td style="width: 280px; padding-left: 75px"><hr /></td>
+								</tr>
+								</table>
+								<com:ko tag="template" bind="{name: 'swaplist'}"></com:ko>
+							</com:ko>
+						</div>
+					</div>
+					<!-- END TAB PANEL -->
+				</div>
+				<!-- END CONTENT CENTER -->
+
+				<!-- BEGIN CONTENT RIGHT -->
+				<div id="contents-right" class="pull-left">
+					<div id="lblCodeName" data-bind="ntsFormLabel: {required: true}">帳票出力項目の一覧</div>
+					<button class="btn-help"
+						data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right top', enable: true }">?</button>
+					<div id="contents-right-grid-list">
+						<table id="aggregateOutputItems"
+							data-bind="ntsGridList: {
+							height: 500,
+							width: 280,
+							options: aggregateOutputItems,
+							primaryKey: 'itemKey',
+							columns: aggregateOutputItemColumns,
+							value: aggregateOutputItemSelected}"
+							class="cf"></table>
+					</div>
+					<div id="aggregateOutputItemCounter" style="margin-left: 30px; margin-top: 20px;" 
+						data-bind="text: '(' + aggregateOutputItems().length + '件)'">
+					</div>
+				</div>
+				<!-- END CONTENT RIGHT-->
+			</div>
+			<!-- END CONTENT AREA-->
+			<script type="text/html" id="masterlist">
+				<table id="master-items" data-bind="ntsGridList: {
+				width: 230,
+				height: 180,
+				options: masterItems,
+				optionsValue: 'code',
+				columns: ko.observableArray([
+				{headerText: 'コード', prop: 'code', width: 50},
+				{headerText: '名称', prop: 'name', width: 70}
+				]),
+				value: masterItemsSelected, multiple: true}"></table>
+				</script>
+				<script type="text/html" id="aggregatelist">
+				<div style="margin-top: 40px" data-bind="ntsFormLabel: {required: false}">表に追加できる<span class="big-text">集約</span>項目</div>
+				<hr />
+				<table id="aggregate-items" data-bind="ntsGridList: {
+				width: 230,
+				height: 180,
+				options: aggregateItems,
+				optionsValue: 'code',
+				columns: ko.observableArray([
+				{headerText: 'コード', prop: 'code', width: 50},
+				{headerText: '名称', prop: 'name', width: 70}
+				]),
+				value: aggregateItemsSelected, multiple: true}"></table>
+				</script>
+				<script type="text/html" id="outputlist">
+				<div class="margin-left-10">
+				<div data-bind="ntsFormLabel: {required: false}">表に追加した項目</div>
+				<hr />
+				<div class="panel-content-table-right">
+				<div style="display: inline-block;">
+				<table id="grid-test" data-bind="ntsGridList: {
+				height: 450,
+				width: 260,
+				options: outputItems,
+				optionsValue: 'code',
+				columns: outputItemColumns,
+				value: outputItemSelected,
+				}, delete: outputItemSelected"></table>
+				</div>
+				<div id="up-down" data-bind="ntsUpDown: {
+				targetSource: outputItems,
+				primaryKey: 'code',
+				comId: '#grid-test',
+				type: 'grid'}"></div>
+				</div>
+				</div>
+				</script>
+				<script type="text/html" id="swaplist">
+				<div style="display: inline-block;">
+				<div id="swap-list" data-bind="ntsSwapList: {
+				showSearchBox: { showLeft : false, showRight: false},
+				height: 450,
+				dataSource: masterItems,
+				primaryKey: 'code',
+				columns: ko.observableArray([
+				{headerText: 'コード', prop: 'code', width: 50},
+				{headerText: '名称', prop: 'name', width: 120}
+				]),
+				value: outputItems}">
+				</div>
+				</div>
+				<div id="up-down" data-bind="ntsUpDown: {
+				targetSource: outputItems,
+				primaryKey: 'code',
+				comId: '#swap-list',
+				type: 'swap',
+				swapTarget: 'right'}">
+				</div>
+				</script>
+			
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

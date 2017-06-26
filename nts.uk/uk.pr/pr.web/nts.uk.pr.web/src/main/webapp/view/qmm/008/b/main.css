@@ -1,0 +1,106 @@
+.empty-col {
+	width: 170px;
+}
+
+.health_empty_col {
+	width: 70px;
+}
+
+.tbl_health_insurance_rate {
+	width: 85px;
+}
+
+.text_center {
+	text-align: center;
+}
+
+.hr_width {
+	width: 760px;
+}
+
+.pad_top_10 {
+	padding-top: 10px;
+}
+
+table, td, th {
+	border: 1px solid black;
+}
+
+th, td {
+	padding: 2px;
+}
+
+.no_left_border {
+	border-left: none;
+}
+
+.no_right_border {
+	border-right: none;
+}
+
+.no_top_border {
+	border-top: none;
+}
+
+.no_bottom_border {
+	border-bottom: none;
+}
+
+.pad_left_10 {
+	padding-left: 10px;
+}
+
+.pad_right_10 {
+	padding-right: 10px;
+}
+
+.pad_top_10 {
+	padding-top: 10px;
+}
+
+.border_none {
+	border: none;
+}
+
+.right {
+	width: 62%;
+	float: left;
+}
+
+.float_left {
+	float: left;
+}
+
+.float_right {
+	float: right;
+}
+
+.rounding_width {
+	width: 141px;
+}
+
+.margin_left {
+	margin-left: 23px;
+}
+
+.padding_top_20 {
+	padding-top: 20px;
+}
+.nts-input{
+	width: 85px;
+}
+.tbl_head{
+	width: 141px;
+}
+.tbl_health_child{
+	width: 100px;	
+}
+.contents-area{
+	width: 1300px;
+}
+#health_insurance_rate_table{
+	width: 760px;	
+}
+#health_insurance_round{
+	width: 760px;	
+}

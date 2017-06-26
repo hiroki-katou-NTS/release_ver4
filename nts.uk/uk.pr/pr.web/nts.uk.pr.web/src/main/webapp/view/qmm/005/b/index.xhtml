@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="../qmm005.js" />
+			<com:ValidatorScript>
+				nts.uk.ctx.core.dom.company.CompanyCode
+				nts.uk.ctx.pr.core.dom.rule.employment.processing.yearmonth.ProcessingNo
+				nts.uk.ctx.pr.core.dom.rule.employment.processing.yearmonth.payday.SocialInsLevyMon				
+			</com:ValidatorScript>
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area">
+				<div class="btn-group-left">
+					<button id="B_BTN_001" data-bind="click: newData">新規</button>
+					<button id="B_BTN_002" data-bind="click: saveData, enable: inp001() != null">登録</button>
+					<button id="B_BTN_003" data-bind="click: deleteData">削除</button>
+					<button id="B_BTN_004" data-bind="click: closeDialog">閉じる</button>
+				</div>
+				<div class="clear-fix"></div>
+			</div>
+			<div id="contents-area">
+				<div class="blst001-container caret-right caret-background">
+					<div>
+						<span class="divider"></span>
+						<div id="B_LST_001"
+							data-bind="ntsListBox: {
+										options: lst001Data,
+										optionsValue: 'index',
+										optionsText: 'label',
+										value: lst001,
+										enable: true,
+										rows: 10,
+										multiple: false,
+										columns: [{ key: 'index' }, {key: 'label'}]}"></div>
+					</div>
+				</div>
+				<div class="right-panel">
+					<div class="right-panel-top">
+						<div class="form-group">
+							<div id="B_LBL_001" data-bind="ntsFormLabel: { required: true }">処理区分</div>
+							<label id="B_LBL_002" data-bind="text: lbl002">1</label>
+							<label>.</label>
+							<label id="B_LBL_003" data-bind="text: lbl003">25日払い</label>
+						</div>
+						<div class="form-group">
+							<div id="B_LBL_004" data-bind="ntsFormLabel: { required: true }">処理年</div>
+							<input class="form-control" id="B_INP_001" type="text"
+								data-bind="ntsNumberEditor: {value: inp001, required: true, enable: !enabled(), constraint: 'processingYear'}" /> <label id="B_LBL_005"
+								data-bind="text: lbl005">（平成28年）</label>
+							<button id="B_BTN_005" data-bind="click: showModalDialogE, enable: inp001() != null">システム基準日の情報を反映する</button>
+						</div>
+					</div>
+					<div class="right-panel-bottom">
+						<table id="B_LST_002" class="table">
+							<thead>
+								<tr>
+									<th class="hide" colspan="7"></th>
+									<td class="checkbox-cols text-left no-border"><button
+											class="btn-collapse" data-bind="text: toggle() ? '+' : '-', click: toggleColumns"></button></td>
+								</tr>
+								<tr>
+									<th colspan="2" rowspan="2" class="index-cols"></th>
+									<th colspan="5" class="double-border text-left">処理年</th>
+									<th colspan="4" data-bind="css: {'hidden' : toggle}"></th>
+									<th class='checkbox-cols' rowspan="2">賞与支給指定</th>
+								</tr>
+								<tr>
+									<th>支払年月日</th>
+									<th>社員抽出基準日</th>
+									<th>社会保険徴収月</th>
+									<th>明細書印字年月</th>
+									<th class="double-border">要勤務日数</th>
+									<th class="hidden" data-bind="css: {'hidden' : toggle}">社会保険基準日</th>
+									<th class="hidden" data-bind="css: {'hidden' : toggle}">雇用保険基準日</th>
+									<th class="hidden" data-bind="css: {'hidden' : toggle}">所得税基準日</th>
+									<th class="hidden" data-bind="css: {'hidden' : toggle}">経理締め日</th>
+								</tr>
+							</thead>
+							<tbody data-bind="foreach: lst002Data">
+								<tr>
+									<th data-bind="text: month"></th>
+									<th data-bind="text: month() + '月の設定'"></th>
+									<td class="relative">
+										<div id="B_SEL_002"
+											data-bind="ntsComboBox: {
+											options: sel002Data,
+											optionsValue: 'index',
+											value:  sel002,
+											optionsText: 'label',
+											editable: false,
+											enable: true,
+											columns: [{ prop: 'label', length: 4 }]}">
+										</div>
+										<div data-bind="text: sel002L"></div>
+									</td>
+									<td>
+										<div id="B_INP_003"
+											data-bind="ntsDatePicker: { value: inp003, dateFormat: 'YYYY/MM/DD', required: true}"></div>
+									</td>
+									<td>
+										<div id="B_INP_004"
+											data-bind="ntsDatePicker: { value: inp004, dateFormat: 'YYYY/MM', required: true }"></div>
+										<div>分を徴収</div>
+									</td>
+									<td>
+										<div id="B_INP_005"
+											data-bind="ntsDatePicker: { value: inp005, dateFormat: 'YYYY/MM', required: true }"></div>
+									</td>
+									<td class="double-border"><input id="B_INP_010"
+										data-bind="ntsNumberEditor: {
+											value: inp010,
+											constraint: '',
+											option: {
+												decimallength: 2
+											},
+											required: true,
+											enable: true,
+											readonly: false}" />
+										<span>日</span></td>
+									<td data-bind="css: {'hidden' : $parent.toggle}">
+										<div id="B_INP_006"
+											data-bind="ntsDatePicker: { value: inp006, dateFormat: 'YYYY/MM/DD', required: true}"></div>
+									</td>
+									<td data-bind="css: {'hidden' : $parent.toggle}">
+										<div id="B_INP_007"
+											data-bind="ntsDatePicker: { value: inp007, dateFormat: 'YYYY/MM/DD', required: true}"></div>
+									</td>
+									<td data-bind="css: {'hidden' : $parent.toggle}">
+										<div id="B_INP_008"
+											data-bind="ntsDatePicker: { value: inp008, dateFormat: 'YYYY/MM/DD', required: true}"></div>
+									</td>
+									<td data-bind="css: {'hidden' : $parent.toggle}">
+										<div id="B_INP_009"
+											data-bind="ntsDatePicker: { value: inp009, dateFormat: 'YYYY/MM/DD', required: true}"></div>
+									</td>
+									<td class="checkbox-cols"><span id="B_SEL_001"
+										data-bind="ntsCheckBox: { checked: sel001, enable: true, text: '' }"></span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="clear-fix"></div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="qmm011.e.style.css" />
+			<com:scriptfile path="qmm011.e.start.js" />
+			<com:scriptfile path="../a/qmm011.a.service.js" />
+			<com:scriptfile path="qmm011.e.service.js" />
+			<com:scriptfile path="qmm011.e.vm.js" />
+			<com:ValidatorScript>
+			    nts.uk.ctx.pr.core.dom.insurance.BusinessName
+			</com:ValidatorScript>
+			
+		</ui:define>
+		<ui:define name="content">
+			<div class="nameaction">
+				<label>事業種類を登録してください。</label>
+			</div>
+			<div class="nameaction">
+				<label>※全角10文字</label>
+			</div>
+			<br />
+			<center>
+				<table data-bind="with: insuranceBusinessTypeUpdateModel">
+					<tbody>
+						<tr>
+							<td class="bg-green">1</td>
+							<td><input class="rate-input"
+								data-bind="ntsTextEditor: {value: bizNameBiz1St, 
+									option: $root.textEditorOption, 
+									constraint: 'BusinessName',
+									enable: true}"></input></td>
+						</tr>
+						<tr>
+							<td class="bg-green">2</td>
+							<td><input class="rate-input"
+								data-bind="ntsTextEditor: {value: bizNameBiz2Nd, 
+									option: $root.textEditorOption,
+									constraint: 'BusinessName',
+									enable: true}"></input></td>
+						</tr>
+						<tr>
+							<td class="bg-green ">3</td>
+							<td><input class="rate-input"
+								data-bind="ntsTextEditor: {value: bizNameBiz3Rd,  
+									option: $root.textEditorOption, 
+									constraint: 'BusinessName',
+									enable: true}"></input></td>
+						</tr>
+						<tr>
+							<td class="bg-green">4</td>
+							<td><input class="rate-input"
+								data-bind="ntsTextEditor: {value: bizNameBiz4Th,  
+									option: $root.textEditorOption, 
+									enable: true}"></input></td>
+						</tr>
+						<tr>
+							<td class="bg-green ">5</td>
+							<td><input class="rate-input"
+								data-bind="ntsTextEditor: {value: bizNameBiz5Th,  
+									option: $root.textEditorOption, 
+									constraint: 'BusinessName',
+									enable: true}"></input></td>
+						</tr>
+						<tr>
+							<td class="bg-green ">6</td>
+							<td><input class="rate-input"
+								data-bind="ntsTextEditor: {value: bizNameBiz6Th,  
+									option: $root.textEditorOption, 
+									constraint: 'BusinessName',
+									enable: true}"></input></td>
+						</tr>
+						<tr>
+							<td class="bg-green ">7</td>
+							<td><input class="rate-input"
+								data-bind="ntsTextEditor: {value: bizNameBiz7Th,  
+									option: $root.textEditorOption, 
+									enable: true}"></input></td>
+						</tr>
+						<tr>
+							<td class="bg-green ">8</td>
+							<td><input class="rate-input"
+								data-bind="ntsTextEditor: {value: bizNameBiz8Th,  
+									option: $root.textEditorOption, 
+									constraint: 'BusinessName',
+									enable: true}"></input></td>
+						</tr>
+						<tr>
+							<td class="bg-green ">9</td>
+							<td><input class="rate-input"
+								data-bind="ntsTextEditor: {value: bizNameBiz9Th,  
+									option: $root.textEditorOption, 
+									constraint: 'BusinessName',
+									enable: true}"></input></td>
+						</tr>
+						<tr>
+							<td class="bg-green">10</td>
+							<td><input class="rate-input"
+								data-bind="ntsTextEditor: {value: bizNameBiz10Th,  
+									option: $root.textEditorOption, 
+									constraint: 'BusinessName',
+									enable: true}"></input></td>
+						</tr>
+					</tbody>
+				</table>
+			</center>
+			<br />
+			<hr />
+			<div id="this-functions-area" class="control-group halign-center">
+				<button class="btn-default proceed x-large"
+					id="btn_updateInsuranceBusinessType"
+					data-bind="click: updateInsuranceBusinessType">決定</button>
+				<button onclick="nts.uk.ui.windows.close()">キャンセル</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

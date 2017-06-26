@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<com:ValidatorScript>
+					nts.uk.ctx.pr.core.dom.rule.employment.averagepay.ExceptionPayRate
+   				</com:ValidatorScript>
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="qmm018.a.start.js" />
+				<com:scriptfile path="qmm018.a.viewmodel.js" />
+				<com:scriptfile path="../shr/qmm018.shr.viewmodelbase.js" />
+				<com:scriptfile path="qmm018.a.service.js" />
+				<com:stylefile path="qmm018.a.main.css" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="functions-area" class="valign-center control-group">
+					<button class="proceed short-button" data-bind="click: function () { saveData(isUpdate); }, enable: $root.errors.isEmpty">登録</button>
+					<button>マスタ修正ログ</button>
+				</div>
+				<div id="contents-area">
+					<div id="head-label">下記の＜基本計算式＞結果と＜例外計算式＞結果を比較して高い方の金額が平均賃金です。</div>
+					<div class="table">
+						<div class="cell column1">
+							<div data-bind="ntsFormLabel: { required: true } ">平均賃金の端数処理</div>
+						</div>
+						<div class="cell">
+							<div id="checkbox" data-bind="ntsCheckBox: { checked: averagePay().roundTimingSet }">平均賃金の小数第3位以下を切り捨てる</div>
+						</div>
+					</div>
+					<hr class="division"/>
+					<div class="table formula">
+						<div class="cell column1">
+							<div data-bind="ntsFormLabel: { required: false } ">基本計算式</div>
+						</div>
+						<div class="cell valign-center halign-center">
+							<span class="formula-text">A:直近3か月間に支払われた賃金総額</span>
+							<hr class="formula-division" />
+							<span class="formula-text">直近3か月間の暦日数</span>
+						</div>
+					</div>
+					<div class="table formula">
+						<div class="cell column1">
+							<div data-bind="ntsFormLabel: { required: false } ">例外計算式</div>
+						</div>
+						<div class="cell valign-center halign-center">
+							<span class="formula-text">A:直近3か月間に支払われた賃金総額</span>
+							<hr class="formula-division" />
+							<span class="formula-text">直近3か月間の    B：出勤日数</span>
+						</div>
+						<div class="cell valign-center halign-center">
+							<span style="margin-left: 5px;" class="formula-text">× C: <span class="formula-text" data-bind="text: averagePay().oldExceptionPayRate "></span>%</span>
+						</div>
+					</div>
+					<div class="table">
+						<div class="cell column1">
+						</div>
+						<div class="cell">
+							<div class="valign-center control-group">
+								<div data-bind="ntsFormLabel: { required: true } ">A：対象賃金項目</div>
+								<button class="short-button" data-bind="click: function () { openSubWindow(0); }">設定</button>
+								<span id="item-inp" data-bind="with: texteditor3">
+									<input id="inp-3" data-name="対象賃金項目" data-bind="ntsTextEditor: {
+										value: value,
+										constraint: 'ResidenceCode',
+										option: { width: '500px' },
+										required: true, 
+										readonly: true }" />
+								</span>
+							</div>
+							<div class="valign-center control-group">
+								<div data-bind="ntsFormLabel: { required: true } ">B：出勤日数の取得方法</div>
+								<span data-bind="ntsSwitchButton: {
+												options: ko.observableArray([
+									                { code: 0, name: '就業からの連携' },
+									                { code: 1, name: '明細書項目から選択' }
+									            ]),
+												optionsValue: 'code',
+												optionsText: 'name',
+												value: averagePay().attendDayGettingSet }"></span>
+							</div>
+							<div class="valign-center control-group sub">
+								<span>給与の項目を</span>
+								<div id="combo-box" data-bind="ntsComboBox: {
+															options: ko.observableArray([
+												                { code: 0, name: '足す前' },
+												                { code: 1, name: '足した後' }
+												            ]),
+															optionsValue: 'code',
+															value: averagePay().roundDigitSet,
+															optionsText: 'name',
+															enable: averagePay().attendDayGettingSet }"></div>
+								<span>に日数端数処理</span>
+							</div>
+							<div class="valign-center control-group sub">
+								<span>対象労働日数項目</span>
+								<button class="short-button" data-bind="click: function () { openSubWindow(1); }, enable: averagePay().attendDayGettingSet">設定</button>
+								<span id="item-inp" data-bind="with: texteditor1">
+									<input id="inp-1" data-name="対象労働日数項目" data-bind="ntsTextEditor: {
+										value: value,
+										constraint: 'ResidenceCode',
+										option: { width: '500px' },
+										required: true,
+										readonly: true }" />
+								</span>
+							</div>
+							<div class="valign-center control-group">
+								<div data-bind="ntsFormLabel: { required: true } ">C：一日当たりに支払われた賃金の</div>
+								<span>
+									<input id="inp-2" data-name="例外処理計算率" data-bind="ntsNumberEditor: {
+										value: averagePay().exceptionPayRate,
+										constraint: 'ExceptionPayRate',
+										option: { width: '47px', textalign: 'right' },
+										required: true }" />
+								</span>
+								<span>％で計算する</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

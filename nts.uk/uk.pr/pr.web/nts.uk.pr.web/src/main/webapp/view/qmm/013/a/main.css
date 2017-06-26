@@ -1,0 +1,132 @@
+@CHARSET "UTF-8";
+
+#contents-area {
+	width: 1300px;
+	margin-top: 10px;
+}
+
+hr {
+	width: 750px !important;
+	float: left;
+	margin-bottom: 15px
+}
+
+.control-group {
+	margin-bottom: 15px;
+}
+
+.left-content {
+	float: left;
+	width: 40%;
+}
+
+.right-content {
+	float: left;
+	width: 60%;
+}
+
+.right-content-left {
+	float: left;
+	width: 28%
+}
+
+.right-content-right {
+	float: left;
+	width: 72%
+}
+
+.text-editor1 {
+	border: 1px solid rgba(79, 79, 79, 0.42);
+	border-radius: 3px;
+	padding: 5px 0px
+}
+
+.text-editor2 {
+	border: 1px solid rgba(79, 79, 79, 0.42);
+	border-radius: 3px;
+	padding: 6px 0px 4px 5px
+}
+
+#LST_001 {
+	border-radius: 5px;
+	padding: 15px;
+	width: 85%;
+	height: 520px
+}
+
+#LBL_002, #LBL_003, #LBL_004 {
+	margin-bottom: 10px;
+}
+
+#INP_002, #INP_003, #INP_004 {
+	margin-left: 5px
+}
+
+#LBL_012 {
+	margin: 0px 5px
+}
+
+#LBL_013 {
+	margin: 0px 5px 0px 0px
+}
+
+#BTN_006 {
+	margin-left: 5px;
+}
+
+hr {
+	width: 640px;
+	float: left;
+	margin-bottom: 15px;
+	margin-top: 10px
+}
+
+.SEL_003 .ntsRadioBox {
+	color: black;
+	width: 200px;
+	margin-top: 20px;
+}
+
+.nts-switch-button {
+	min-width: 80px;
+}
+
+#BTN_001 {
+	margin: 4px 0px 0px 10px;
+	padding: 0px 20px;
+}
+
+#BTN_002 {
+	margin-left: 10px;
+	padding: 0px 20px;
+}
+
+#BTN_003, #BTN_005 {
+	margin-left: 10px;
+	padding: 0px 10px;
+}
+
+#BTN_004 {
+	margin: 0px 280px 0px 100px;
+	padding: 0px 20px;
+}
+
+.ntsSearchBox {
+	width: 390px !important;
+}
+
+.icon.icon-searchbox {
+	top: 115px;
+	left: 20px;
+}
+
+.control-group-left {
+	margin-left: 30px;
+}
+
+.bg-yellow {
+	width: 200px;
+	height: 28px;
+	display: inline-block;
+	margin-left: 30px
+}

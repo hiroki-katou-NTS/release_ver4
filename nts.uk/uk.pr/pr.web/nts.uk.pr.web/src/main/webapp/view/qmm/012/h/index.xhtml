@@ -1,0 +1,154 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile path="qmm012.h.start.js" />
+			<com:scriptfile path="qmm012.h.service.js" />
+			<com:scriptfile path="qmm012.h.vm.js" />
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.core.dom.itemmaster.itemsalary.Year
+				</com:ValidatorScript>
+		</ui:define>
+		<ui:define name="content">
+			<div id="content-header">
+				<div id="content-header-top">
+					<div class="divLine">
+						<div id="NavigationMessage1Title">
+							<label id="H_Lbl_NavigationMessage1">項目名に有効期間を設定したい場合に使用します。<br />
+								有効期間を設定した場合、支給入力画面や帳表には、入力した有効期間だけ表示されます。
+							</label>
+						</div>
+					</div>
+					<div class="divLine">
+						<div class="divLineCol1">
+							<div id="H_Lbl_ItemClassificationTitle"
+								data-bind="ntsFormLabel: {  required: true }">項目区分</div>
+						</div>
+						<div class="divLineCol2">
+							<label id="H_Lbl_ItemClassificationValue"
+								data-bind="text:CurrentCategoryAtrName">項目 </label>
+						</div>
+
+					</div>
+					<div class="divLine">
+						<div class="divLineCol1">
+							<div id="H_Lbl_CodeTitle"
+								data-bind="ntsFormLabel: {  required: true }">コード・名称</div>
+						</div>
+						<div class="divLineCol2">
+							<label id="H_Lbl_CodeAndNameText" data-bind="text:CurrentCodeAndNameText">項目
+							</label>
+						</div>
+
+					</div>
+				</div>
+				<div id="content-header-bottom">
+					<div class="divLine">
+						<div class="divLineCol1">
+							<div id="H_Lbl_ValidityPeriod"
+								data-bind="ntsFormLabel: {  required: true }">有効期間</div>
+						</div>
+						<div class="divLineCol2">
+							<div id="H_Sel_ValidityPeriod" class="cf switchMediumSize"
+								data-bind="ntsSwitchButton: {
+										options: Roundingrules_ValidityPeriod ,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: CurrentPeriodAtr,
+										enable: enable }"></div>
+						</div>
+					</div>
+					<div class="divLine">
+						<div class="divLineCol1"></div>
+						<div class="divLineCol2">
+							<input id="H_Inp_StartYear" data-name="有効期間開始年"
+								data-bind="ntsNumberEditor: { value: CurrentStrY, constraint: 'Year' ,required: true }" />
+							<label id="H_Lbl_StartYearJapaneseCalendar"
+								data-bind="text:nts.uk.time.yearInJapanEmpire(CurrentStrY()) + ' ~ '">項目
+								~ </label> <input id="H_Inp_EndYear" data-name="有効期間終了年"
+								data-bind="ntsNumberEditor: { value: CurrentEndY , constraint: 'Year' ,required: true }" />
+
+							<label id="H_Lbl_EndYearJapaneseCalendar"
+								data-bind="text:nts.uk.time.yearInJapanEmpire(CurrentEndY())">項目
+							</label>
+						</div>
+					</div>
+					<div class="divLine">
+						<div class="divLineCol1">
+							<div id="H_Lbl_CycleSetting"
+								data-bind="ntsFormLabel: {  required: false }">サイクル設定</div>
+						</div>
+						<div class="divLineCol2">
+							<div id="H_Sel_CycleSetting" class="cf switchMediumSize"
+								data-bind="ntsSwitchButton: {
+										options: Roundingrules_CycleSetting ,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: CurrentCycleAtr,
+										enable: enable }"></div>
+						</div>
+					</div>
+					<div class="divLine">
+						<div class="divLineCol1"></div>
+						<div class="divLineCol2">
+							<div id="H_Text_002">
+								<label id="H_Lbl_NavigationMessage2">※する場合…有効期間内で、以下でチェックした月のみ、項目を表示します。
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="divLine">
+						<div class="divLineCol1"></div>
+						<div class="divLineCol2">
+							<div id="H_Sel_January" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_January , text: '1月' , enable:CycleSetting }"></div>
+							<div id="H_Sel_February" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_February , text: '2月'  , enable:CycleSetting}"></div>
+							<div id="H_Sel_InMarch" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_InMarch , text: '3月'  , enable:CycleSetting }"></div>
+							<div id="H_Sel_April" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_April , text: '4月'  , enable:CycleSetting }"></div>
+							<div id="H_Sel_May" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_May , text: '5月'  , enable:CycleSetting }"></div>
+							<div id="H_Sel_June" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_June , text: '6月'  , enable:CycleSetting }"></div>
+						</div>
+					</div>
+					<div class="divLine">
+						<div class="divLineCol1"></div>
+						<div class="divLineCol2">
+							<div id="H_Sel_July" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_July , text: '7月'   , enable:CycleSetting}"></div>
+							<div id="H_Sel_August" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: {checked: H_Sel_August ,text: '8月'  , enable:CycleSetting }"></div>
+							<div id="H_Sel_September" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_September , text: '9月' , enable:CycleSetting  }"></div>
+							<div id="H_Sel_October" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_October ,text: '10月' , enable:CycleSetting }"></div>
+							<div id="H_Sel_November" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_November ,text: '11月'  , enable:CycleSetting}"></div>
+							<div id="H_Sel_December" class="checkboxLightGreen"
+								data-bind="ntsCheckBox: { checked: H_Sel_December ,text: '12月'   , enable:CycleSetting}"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="contents-area">
+				<button id="H_Btn_SettingButton" class="x-large proceed"
+					data-bind="click:SubmitDialog,enable: $root.errors.isEmpty">設定</button>
+				<button id="H_Btn_CancelButton" class="large"
+					data-bind="click:CloseDialog">キャンセル</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

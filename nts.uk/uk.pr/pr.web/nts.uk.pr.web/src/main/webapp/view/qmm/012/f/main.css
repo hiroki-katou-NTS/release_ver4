@@ -1,0 +1,54 @@
+@CHARSET "UTF-8";
+
+@import url("../a/base.css");
+
+#contents-area {
+	width: 1300px;
+}
+
+#functions-area {
+	height: 55px;
+}
+
+.nts-left-content {
+	float: left;
+	border-radius: 5px;
+	padding: 20px;
+	width: 375px;
+	margin-left: 20px;
+	background-color: #E2F79F;
+	margin-top: 10px;
+}
+
+.nts-right-content {
+	float: left;
+	margin-left: 40px;
+}
+
+#right-content-top {
+	overflow: auto;
+	padding-bottom: 10px;
+	border-bottom: solid 2px #B1B1B1;
+	width: 740px;
+}
+
+#F_Sel_NoDisplay button {
+	height: 30px;
+	width: 120px;
+	font-size: 0.8rem;
+}
+
+#right-content-bottom-right {
+	margin-left: 40px;
+	margin-top: 4px;
+}
+
+.divLineCol1 {
+	width: 130px;
+	min-height: 1px;
+}
+
+.divLineCol2>* {
+	display: inline-block;
+	vertical-align: middle;
+}

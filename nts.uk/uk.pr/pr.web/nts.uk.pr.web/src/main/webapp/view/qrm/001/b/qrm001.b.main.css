@@ -1,0 +1,27 @@
+.table {
+	margin-left: 25px;
+	margin-top: 5px;
+	margin-bottom: 5px; 
+}
+
+.table:NTH-CHILD(1) {
+	margin-top: 15px;
+	margin-bottom: 20px;
+	margin-left: 0px;
+}
+
+.table span {
+	margin-left: 15px;
+}
+
+.valign-center > * { 
+	vertical-align: middle; 
+}
+
+hr {
+	margin-top: 50px;
+}
+
+button {
+	margin-left: 150px;
+}

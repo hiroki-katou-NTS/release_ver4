@@ -1,0 +1,39 @@
+@CHARSET "UTF-8";
+/* .icon.icon-searchbox {
+	position: relative;
+    top: 37px;
+    left: 45px;
+} */
+.icon.icon-searchbox {
+	position: relative;
+	top: 28px;
+	left: 25px;
+}
+
+#contents-area {
+	padding-bottom: 0px !important;
+}
+
+#treegrid2_container {
+	margin-top: 10px;
+	margin-left: 10px;
+	margin-right: 40px;
+}
+
+input.ntsSearchBox {
+	width: 195px !important;
+	margin-top: -15px !important;
+	margin-left: 30x;
+}
+
+#C_BTN_001 {
+	width: 80px;
+	height: 40px;
+	margin-left: 80px;
+}
+
+#C_BTN_002 {
+	width: 80px;
+	margin-left: 10px;
+	height: 30px;
+}

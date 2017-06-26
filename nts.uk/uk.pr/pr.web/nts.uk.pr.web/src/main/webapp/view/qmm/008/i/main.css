@@ -1,0 +1,35 @@
+#functions-area {
+	padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    padding-right: 10px;
+    margin-bottom: 20px;
+}
+#contents-area {
+    padding-left: 20px;
+}
+#lblCode {
+	padding-right: 20px;
+}
+.border_none {
+	border: none;
+}
+table, td, th {
+	border: 1px solid black;
+}
+td.bg-green {
+	text-align: right;
+	min-width: 30px;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+.inp-money input {
+	max-width: 100px;
+	border: none;
+}
+.border-left-none {
+	border-left: none;
+}
+.btn-close {
+	margin-left: 100px;
+}

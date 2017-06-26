@@ -1,0 +1,109 @@
+@CHARSET "UTF-8";
+
+#contents-area {
+	width: 1300px;
+	margin-top: 10px;
+}
+
+hr {
+	width: 680px;
+	float: left;
+	margin-bottom: 15px
+}
+
+.control-group {
+	margin-bottom: 15px;
+}
+
+.left-content {
+	float: left;
+	width: 40%;
+}
+
+.right-content {
+	float: left;
+	width: 60%;
+}
+
+.right-content-left {
+	float: left;
+	width: 28%
+}
+
+.right-content-right {
+	float: left;
+	width: 72%
+}
+
+.consignor {
+	margin-left: 5px
+}
+
+#lbl_codeName, #lbl_bankBranch, #lbl_accountClassification,
+	#lbl_accountNumber, #lbl_transferRequestName, #lbl_memo,
+	#lbl_consignorCodeUsage {
+	margin-bottom: 10px;
+	display: block
+}
+
+#btn_clearForm {
+	margin: 4px 0px 0px 10px;
+	padding: 0px 20px;
+}
+
+#btn_saveData {
+	margin-left: 10px;
+	padding: 0px 20px;
+}
+
+#btn_openCDialog, #btn_masterCorrectionLog {
+	margin-left: 10px;
+	padding: 0px 10px;
+}
+
+#btn_remove {
+	margin: 0px 330px 0px 100px;
+	padding: 0px 20px;
+}
+
+#lst_listOfBanks {
+	border-radius: 5px;
+	padding: 15px;
+	width: 85%;
+	height: 580px
+}
+
+#inp_transferRequestName {
+	margin-bottom: 10px
+}
+
+#lbl_bankCode, #lbl_branchCode {
+	margin: 0px 5px
+}
+
+#lbl_bankName {
+	margin: 0px 5px 0px 0px
+}
+
+#lbl_hyphen {
+	margin: 0px 15px
+}
+
+#inp_lineBankName {
+	margin-left: 5px
+}
+
+#sel_classification .nts-switch-button {
+	width: 90px;
+	height: 33px
+}
+
+#link_icon {
+	width: 30px;
+	vertical-align: middle;
+}
+
+#link_text {
+	margin-left: 2px;
+	vertical-align: middle;
+}

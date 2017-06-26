@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../../master/dialog.xhtml">
+			<ui:define name="htmlHead">
+				<com:scriptfile set="IGNITE" />
+				<com:stylefile path="qmm017.q.style.css" />
+				<com:scriptfile path="qmm017.q.start.js" />
+				<com:scriptfile path="qmm017.q.vm.js" />
+				<com:scriptfile path="qmm017.q.service.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area" style="padding: 10px 15px 0 15px">
+					<div id="q_lbl_001" class="separate-vertical" data-bind="ntsFormLabel: {required: true }">お試しの値</div>
+					<br />
+					<table style="margin-top: 10px">
+						<tbody>
+							<tr>
+								<td>
+									<table id="lstItemValue"></table>
+								</td>
+								<td>
+									<button id="q_btn_001" data-bind="click: calculationTrial">お試し計算</button>
+									<span class="caret-right outline" style="height: 35px; font-size: 3.2rem;"></span>	
+								</td>
+								<td>
+									<div class="result-block">
+										<span>結果</span>
+										<hr/>
+										<span id="result-value" data-bind="text: result"></span>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>					
+					<br />
+					<div id="q_lbl_003" class="separate-vertical" data-bind="ntsFormLabel: {}">計算式</div>
+					<hr/>
+					<div id="q_inp_002">
+						<span data-bind="text: formulaContent"></span>
+					</div>
+					<br />
+					<div id="footer">
+						<hr/>
+						<button id="btnClose" data-bind="click: close">閉じる</button>
+					</div>
+					
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 1200, height: 670 };</script>
+			<com:ValidatorScript>
+					nts.uk.shr.com.primitive.PersonId
+   				</com:ValidatorScript>
+			<com:stylefile path="main.css" />
+			<com:scriptfile path="qmm002.c.start.js" />
+			<com:scriptfile path="qmm002.c.vm.js" />
+			<com:scriptfile path="qmm002.c.service.js" />
+			<com:scriptfile set="IGNITE" />
+
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+			    <div>
+					<button class="large" id="C_BTN_001" data-bind="click: tranferBranch">実行</button>
+					<button class="large" id="C_BTN_002" data-bind="click: closeDialog">閉じる</button>
+					<br />
+				</div>
+				<hr id ="hr-horizontal"/>
+				<div class="content-1">
+					<div>
+						<label id="C_LBL_001">以下の情報を置換えます。</label><br />
+						<label id="C_LBL_002">-振込元銀行:取引銀行、個人情報</label><br />
+						<label id="C_LBL_003">-振込元銀行:個人情報</label>
+					</div>
+					<br />
+					<div class="cf">
+						<div class="content-left">
+							<div>
+								<label id="C_LBL_002">【統合元情報】</label>
+							</div>
+							<br />
+							<div class="cf">
+								<div style="float: left">
+									<div style="width: 515px"
+										data-bind="ntsSearchBox: {
+											comId: 'treegrid1',
+											items: lst_001, 
+											selected: selectedCodes, 
+											selectedKey: 'treeCode', 
+											childField: 'childs', 
+											fields: ['name', 'code']}" />
+									<br />
+									<table id="treegrid1"
+										data-bind="ntsTreeGridView:{
+											width: 515,
+											height: 385,
+											options: lst_001,
+											selectedValues: selectedCodes,								
+											optionsValue: 'treeCode',
+											optionsChild: 'childs',
+											optionsText: 'displayName',
+											multiple: true,
+											enable: true,										
+											showCheckBox: true}"
+										class="cf">
+									</table>
+								</div>
+							</div>
+						</div>
+						<hr id="hr-vertical" />
+						<span class="caret-right"></span>
+						<div class="content-right">
+							<div>
+								<label id="C_LBL_002">【統合先情報】</label>
+							</div>
+							<br />
+								<div class="cf">
+								<div style="float: left">
+									<div style="width: 515px"
+										data-bind="ntsSearchBox: {
+											comId: 'treegrid2',
+											items: lst_002, 
+											selected: singleSelectedCode, 
+											selectedKey: 'treeCode', 
+											childField: 'childs', 
+											fields: ['name', 'code']}" />
+									<br />
+									<table id="treegrid2"
+										data-bind="ntsTreeGridView:{
+											width: 515,
+											height: 385,
+											options: lst_001,
+											value: singleSelectedCode,								
+											optionsValue: 'treeCode',
+											optionsChild: 'childs',
+											optionsText: 'displayName',
+											multiple: false,
+											enable: true,										
+											showCheckBox: false}"
+										class="cf">
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

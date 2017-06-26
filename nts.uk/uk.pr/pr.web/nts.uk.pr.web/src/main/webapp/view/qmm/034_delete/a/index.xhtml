@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>
+				var dialogSize = {
+					width : 300,
+					height : 200
+				};
+			</script>
+			
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="viewmodel.js" />
+			<com:scriptfile path="service.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area" class="cf">
+				<div class="aligntLeft">
+					<button id="A_BTN_001" data-bind="click: refreshLayout">新規</button>
+					<button id="A_BTN_002" class="proceed" data-bind="click: register">登録</button>
+					<button id="A_BTN_004">マスタ修正ログ</button>
+					<button id="A_BTN_003" class="danger" data-bind="click: alertDelete">削除</button>
+				</div>
+				<div class="alignRight">
+					<label id="A_LBL_001">元号の登録</label>
+				</div>
+			</div>
+			<div id="contents-area" class="cf">
+				<div class="nts-left-content bg-green relative">
+					<div class="caret-right caret-background"></div>
+					<table id="single-list" data-bind="ntsGridList: {
+						width: 280,
+						height: 410,
+						options: items,
+						optionsValue: 'code',
+						columns: columns,
+						multiple: false,
+						value: currentCode
+					}"></table>
+				</div>
+				<div class="nts-right-content">
+					<table class="tableRange">
+						<tr>
+							<td>
+								<div id="A_LBL_002" data-bind="ntsFormLabel: {required: true}">元号</div>
+							</td>
+							<td><input id="A_INP_001" type="text" data-bind="value : currentEra().code" /></td>
+						</tr>
+						<tr>
+							<td>
+								<div id="A_LBL_003" data-bind="ntsFormLabel: { required: true }">記号</div>
+							</td>
+							<td><input id="A_INP_002" type="text" data-bind="value: currentEra().name" /></td>
+						</tr>
+						<tr>
+							<td>
+								<div id="A_LBL_004" data-bind="ntsFormLabel: { required: true }">開始年月日</div>
+							</td>
+							<td><input id="date-picker"
+								data-bind="ntsDatePicker: {value: currentEra().startDate}"></input></td>
+						</tr>
+					</table>
+
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

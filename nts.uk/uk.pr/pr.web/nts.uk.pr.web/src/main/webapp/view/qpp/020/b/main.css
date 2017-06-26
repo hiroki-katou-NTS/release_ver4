@@ -1,0 +1,63 @@
+@import url('../qpp020.css');
+
+#functions-area {
+	display: none;
+}
+
+#contents-area {
+	width: 598px;
+}
+ #contents-area #B_LST_002 {
+ 	margin-bottom: 10px !important;
+ }
+#contents-area #B_LST_001 th, #contents-area #B_LST_002 th {
+	text-align: left;
+	min-width: 140px;
+	background-color: #C7F391;
+}
+
+#contents-area #B_LST_001 td, #contents-area #B_LST_002 td {
+	min-width: 300px;
+}
+
+#contents-area .table-container{
+	border: 1px solid #999;
+	margin-top: 10px;
+	height: 175px;
+    padding: 0;
+    overflow: hidden;
+    overflow-y: scroll; 
+}
+
+#contents-area .table-container #B_LST_003{
+	margin-top: 0;
+}
+
+#contents-area .table-container #B_LST_003 thead.fixed{
+	position: fixed;
+	display: block;
+}
+
+#contents-area .table-container #B_LST_003 thead.fixed + tbody {
+	display: block;
+	padding-top: 22px;
+}
+
+#contents-area .table-container #B_LST_003 th:first-child {
+	border-left: none;
+}
+
+
+#contents-area .table-container #B_LST_003 tr:first-child *{
+	border-top: none;
+}
+
+#contents-area .table-container #B_LST_003 tbody tr:not(:last-child) *,
+#contents-area .table-container #B_LST_003 tbody tr:nth-child(n + 7):last-child * {
+	border-bottom: none;
+}
+
+#contents-area .table-container #B_LST_003 th:last-child,
+#contents-area .table-container #B_LST_003 td:last-child {
+	border-right: none;
+}

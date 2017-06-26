@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition>
+		<div>
+			<div>
+				<label id="G_LBL_001">給与 振込データを「全銀協フォーマット」にてテキスト出力します。</label>
+			</div>
+			<div class="divLine">
+				<label id="G_LBL_002">振込データ出力の指定</label>
+			</div>
+			<hr id="G_HR_001" />
+
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div id="G_LBL_003" data-bind="ntsFormLabel: {required: false}">処理年月</div>
+				</div>
+				<div class="divLine-col-2">
+					<label id="G_LBL_004" data-bind="text: viewmodelg.processingDate"></label>
+					<span>(<label id="G_LBL_005"
+						data-bind="text: viewmodelg.processingDateInJapanEmprire"></label>)
+					</span> <label id="G_LBL_016">(対象となる処理区分 </label> <label id="G_LBL_017"
+						data-bind="text: viewmodelg.processingNo"></label><label
+						id="G_LBL_018" data-bind="text: viewmodelg.processingName"></label>
+				</div>
+			</div>
+
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div data-name="振込指定日" id="G_LBL_006" data-bind="ntsFormLabel: {required: true}">振込指定日</div>
+				</div>
+				<div class="divLine-col-2">
+					<div id="G_INP_001" data-name="振込指定日"
+						data-bind="ntsDatePicker: { value: viewmodelg.g_INP_001, dateFormat: 'YYYY/MM/DD', required: true, startDate: '1900/01/01', endDate: '9999/12/31'}"></div>
+					<label id="G_LBL_007"
+						data-bind="text: viewmodelg.yearMonthDateInJapanEmpire"></label>
+				</div>
+			</div>
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div id="G_LBL_008" data-bind="ntsFormLabel: {required: true}">振込元銀行名</div>
+				</div>
+				<div class="divLine-col-2">
+					<div id="G_SEL_001"
+						data-bind="ntsComboBox: {
+									options: viewmodelg.g_SEL_001_items,
+									optionsValue: 'code',
+									value: viewmodelg.g_SEL_001_itemSelected,
+									editable: false,
+									enable: true,
+									columns: [
+										{ prop: 'label', length: 30 }
+									]}">
+					</div>
+				</div>
+			</div>
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div id="G_LBL_009" data-bind="ntsFormLabel: {required: false}">預金種目</div>
+				</div>
+				<div class="divLine-col-2">
+					<label id="G_LBL_010" data-bind="text:viewmodelg.accountAtr"></label>
+				</div>
+			</div>
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div id="G_LBL_011" data-bind="ntsFormLabel: {required: false}">口座番号</div>
+				</div>
+				<div class="divLine-col-2">
+					<label id="G_LBL_012" data-bind="text:viewmodelg.accountNo"></label>
+				</div>
+			</div>
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div id="G_LBL_013" data-bind="ntsFormLabel: {required: true}">委託者コード</div>
+				</div>
+				<div class="divLine-col-2">
+					<div id="G_SEL_002"
+						data-bind="ntsComboBox: {
+								options: viewmodelg.g_SEL_002_items,
+								optionsValue: 'code',
+								value: viewmodelg.g_SEL_002_itemSelected,
+								editable: false,
+								enable: true,
+								columns: [
+									{ prop: 'code', length: 10 },
+								]}">
+					</div>
+				</div>
+			</div>
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div id="G_LBL_014" data-bind="ntsFormLabel: {required: true}">種別コード</div>
+				</div>
+				<div class="divLine-col-2">
+					<div data-bind="with: viewmodelg.g_INP_002">
+						<input data-name="種別コード" id="G_INP_002"
+							data-bind="ntsNumberEditor: { 
+								value: value, 
+								required: true,
+								enable: true }" />
+					</div>
+				</div>
+			</div>
+			<div class="divLine">
+				<div class="divLine-col-1">
+					<div id="G_LBL_015" data-bind="ntsFormLabel: {required: true}">改行コード</div>
+				</div>
+				<div class="divLine-col-2">
+					<div class="cf" id="G_SEL_003"
+						data-bind="ntsSwitchButton: {
+									options: ko.observableArray([
+							            { code: '1', name: '付加する' },
+							            { code: '2', name: '付加しない' }
+							        ]),
+									optionsValue: 'code',
+									optionsText: 'name',
+									value: viewmodelg.g_SEL_003_itemSelected,
+									enable: true }">
+					</div>
+				</div>
+			</div>
+			<div class="divLine" style="width: 100%;">
+				<button id="G_BTN_001" class="x-large proceed"
+					data-bind="click: viewmodelg.openIDialog.bind(viewmodelg)">テキスト出力</button>
+			</div>
+		</div>
+	</ui:composition>
+</body>
+</html>

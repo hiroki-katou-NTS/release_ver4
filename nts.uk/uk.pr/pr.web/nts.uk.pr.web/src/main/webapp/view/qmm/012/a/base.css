@@ -1,0 +1,58 @@
+.floatLeft {
+	float: left !important;
+}
+
+.displayBlock {
+	display: block;
+}
+
+.haveSmallSpan {
+	height: 35px !important;
+	padding-top: 0px !important;
+}
+
+.haveSmallSpan span {
+	font-size: 0.8rem;
+	color: gray;
+}
+
+div>span>input, input {
+	border-radius: 3px;
+	border: solid thin gray;
+}
+
+div>span>input {
+	height: 30px;
+}
+
+input {
+	height: 25px;
+}
+
+.divLine {
+	margin-top: 10px;
+	float: left;
+	clear: both;
+}
+
+.divLine>* {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.inputNomalSize {
+	width: 85px;
+}
+
+.clearBoth {
+	clear: both;
+}
+
+.verticalAlignTop {
+	vertical-align: top;
+}
+
+.verticalAlignBottom {
+	vertical-align: bottom;
+}
+

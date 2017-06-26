@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 520, height: 600 };</script>
+			<com:ValidatorScript>
+					nts.uk.shr.com.primitive.PersonId
+   				</com:ValidatorScript>
+			<com:stylefile path="qmm006.b.main.css" />
+			<com:scriptfile path="qmm006.b.start.js" />
+			<com:scriptfile path="qmm006.b.viewmodel.js" />
+			<com:scriptfile path="qmm006.b.service.js" />
+			<com:scriptfile set="IGNITE" />
+
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div class="content-1">
+					<div>
+						<label>支店情報を選択してください。</label>
+					</div>
+					<br />
+					<div class="cf">
+						<div style="float: left">
+							<i class="icon icon-searchbox"
+								style="margin-top: 50px; margin-left: 38px"></i>
+							<div style="width: 400px; margin-left: 42px; margin-bottom: 10px"
+								data-bind="ntsSearchBox: {
+									comId: 'treegrid1',
+									items: dataSource, 
+									selected: singleSelectedCode, 
+									selectedKey: 'treeCode', 
+									childField: 'childs', 
+									fields: ['name', 'code']}" />
+							<table id="treegrid1"
+								data-bind="ntsTreeGridView:{
+									width: 450,
+									height: 390,
+									options: dataSource,
+									value: singleSelectedCode,								
+									optionsValue: 'treeCode',
+									optionsChild: 'childs',
+									optionsText: 'nodeText',
+									multiple: false,
+									enable: true,										
+									showCheckBox: false}"
+								class="cf">
+							</table>
+						</div>
+					</div>
+				</div>
+				<hr></hr>
+				<div>
+					<button class="x-large proceed" data-bind="click: transferData"
+						id="btn_decide">決定</button>
+					<button class="large" id="btn_cancel" data-bind="click: closeDialog">キャンセル</button>
+					<br />
+				</div>
+
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

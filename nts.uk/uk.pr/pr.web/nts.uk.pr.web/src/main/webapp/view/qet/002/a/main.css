@@ -1,0 +1,78 @@
+#functions-area .function-class {
+	margin-left: 60px;
+	margin-top: 6px;
+}
+
+td#contents-left {
+	width: 700px;
+	height: 70px;
+}
+#select-target-year *{
+	float: left;
+}
+div#target-year-label {
+	background-color: #E2F79F;
+	width: 100px;
+	height: 26px;
+	text-align: right;
+	padding-top: 3px;
+	padding-right: 8px;
+	border-radius: 3px;
+}
+span#japan-year {
+    margin-left: 10px;
+    padding-top: 2px;
+}
+.select-target-year {
+	width: 600px;
+	height: 48px;
+	border: solid 2px #B1B1B1;
+	border-radius: 5px;
+	padding-top: 5px;
+	padding-left: 5px;
+	margin-left: 50px;
+}
+#time-input{
+	float: left;	
+}
+
+span#year-label {
+    padding-top: 2px;
+    margin-left: 10px;
+    width: 100px;
+}
+
+
+.search-employee {
+    border: solid 2px #B1B1B1;
+    width: 655px;
+    min-height: 500px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+div#detail-process {
+    border: solid 2px #b1b1b1;
+    width: 500px;
+    height: 530px;
+    border-radius: 5px;
+    padding: 10px;
+}
+div#payment-range-input {
+    margin: 15px 0 0 35px;
+}
+#payment-range-input > div > .ntsCheckBox > .label {
+	padding: 0px;
+}
+div#upper-limit-checkbox {
+    margin-left: 15px;
+}
+
+div#payment-range {
+    margin-top: 20px;
+}
+#detail-process-label{
+	font-size: 21px;
+}
+#payment-range-label{
+	font-size: 18px;
+}

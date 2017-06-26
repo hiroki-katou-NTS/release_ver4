@@ -1,0 +1,84 @@
+.rate-input {
+	width: 200px !important;
+	border-radius: 2px;
+	font-size: 120%;
+}
+
+.empty-col {
+	width: 30px;
+}
+
+.select_round {
+	width: 175px;
+}
+
+.tbl_health_insurance_rate {
+	width: 150px;
+}
+
+.text_center {
+	text-align: center;
+}
+
+.hr_width {
+	width: 99%
+}
+
+.pad_top_10 {
+	padding-top: 10px;
+}
+
+table, td, th {
+	border: 1px solid black;
+}
+
+th, td {
+	padding: 2px;
+	min-width: 30px;
+}
+
+.no_left_border {
+	border-left: none;
+}
+
+.no_right_border {
+	border-right: none;
+}
+
+.no_top_border {
+	border-top: none;
+}
+
+.no_bottom_border {
+	border-bottom: none;
+}
+
+.pad_left_10 {
+	padding-left: 10px;
+}
+
+.pad_right_10 {
+	padding-right: 10px;
+}
+
+.border_none {
+	border: none;
+}
+
+.right {
+	width: 62%;
+	float: left;
+}
+
+table {
+	width: 250px;
+}
+
+.control-group {
+	margin-top: 30px;
+}
+
+.nameaction {
+	margin-left: 77px;
+	margin-top: 10px;
+}

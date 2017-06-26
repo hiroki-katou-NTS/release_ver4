@@ -1,0 +1,272 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition
+		template="../../../base/simplehistory/basesidebar.xhtml">
+		<ui:define name="extendedHead">
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.core.dom.insurance.Ins3Rate
+				nts.uk.ctx.pr.core.dom.insurance.Ins2Rate
+				nts.uk.ctx.pr.core.dom.insurance.OfficeCode
+				nts.uk.ctx.pr.core.dom.insurance.OfficeName
+				nts.uk.ctx.pr.core.dom.insurance.CommonAmount
+  			</com:ValidatorScript>
+			<com:scriptfile path="../h/qmm008.h.service.js" />
+			<com:scriptfile path="qmm008.b.service.js" />
+			<com:scriptfile path="qmm008.b.vm.js" />
+			<com:scriptfile path="qmm008.b.start.js" />
+			<com:stylefile path="main.css" />
+		</ui:define>
+		<ui:define name="extendedAction">
+			<button>印刷(PDF)</button>
+			<button
+				data-bind="enable: canUpdateHistory, click: OpenModalStandardMonthlyPriceHealthWithDirtyCheck">標準報酬月額保険料額表</button>
+			<button data-bind="click: OpenModalOfficeRegisterWithDirtyCheck">事業所登録</button>
+			<button>マスタ修正登録</button>
+		</ui:define>
+
+		<ui:define name="sidebar">
+			<ul class="navigator">
+				<li><a id="healthInsuranceTabPanel" href="#tabpanel-1"
+					role="tab-navigator" class="active">健康保険</a></li>
+				<li><a data-bind="click: goToPension">厚生年金</a></li>
+			</ul>
+		</ui:define>
+
+
+		<ui:define name="pageContent">
+			<div data-bind="with: healthModel,visible: true"
+				style="display: none;" class="right">
+				<table class="border_none">
+					<tr>
+						<td class="border_none"><div style="margin-top: 20px;"
+								data-bind="ntsFormLabel: {}">期間</div></td>
+						<td class="border_none padding_top_20">
+							<p data-bind="text:startMonth" class="float_left"></p>
+							<p data-bind="text:$parent.japanYear" class="float_left"></p>
+						</td>
+						<td class="border_none padding_top_20">~
+							<p class="float_right" data-bind="text:endMonth"></p> <br />
+						</td>
+					</tr>
+					<tr>
+						<td class="border_none"><div id="autoCalculate"
+								style="margin-top: 20px; float: left;"
+								data-bind="ntsFormLabel: {}">自動計算</div></td>
+						<td class="border_none"><div
+								style="margin-top: 20px; float: left;" class="cf"
+								data-bind="ntsSwitchButton: {
+									enable: $parent.canUpdateHistory,
+									options: $parent.healthAutoCalculateOptions,
+									optionsValue: 'code',
+									optionsText: 'name',
+									value: autoCalculate }"></div></td>
+						<td class="border_none"><button
+								style="margin-left: 20px; margin-top: 20px; float: left;">?</button>
+						</td>
+					</tr>
+				</table>
+				<div class="hr_width">
+					<hr />
+				</div>
+				<div>健康保険料率</div>
+				<span data-bind="text: $parent.officeSelectedCode"></span>
+				<div class="hr_width">
+					<hr />
+				</div>
+				<table id="health_insurance_rate_table" class="table_border_black">
+					<tbody>
+						<tr class="bg-green">
+							<th colspan="2" rowspan="2"></th>
+							<th class="text_center" colspan="2">給与</th>
+							<th class="text_center" colspan="2">賞与</th>
+						</tr>
+						<tr class="bg-green">
+							<th class="text_center tbl_head">個人負担率</th>
+							<th class="text_center tbl_head">事業主負担率</th>
+							<th class="text_center tbl_head">個人負担率</th>
+							<th class="text_center tbl_head">事業主負担率</th>
+						</tr>
+						<tr>
+							<td class="bg-green tbl_health_insurance_rate text_center"
+								colspan="2">健康保険率(介護なし)</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthSalaryPersonalGeneral"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthSalaryPersonalGeneral, option: $parent.Rate3, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthSalaryCompanyGeneral"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthSalaryCompanyGeneral, option: $parent.Rate3, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthBonusPersonalGeneral"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthBonusPersonalGeneral, option: $parent.Rate3, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthBonusCompanyGeneral"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthBonusCompanyGeneral, option: $parent.Rate3, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+						</tr>
+						<tr>
+							<td class="bg-green tbl_health_insurance_rate text_center"
+								colspan="2">健康保険率(介護ある)</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthSalaryPersonalNursing"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthSalaryPersonalNursing, option: $parent.Rate3, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthSalaryCompanyNursing"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthSalaryCompanyNursing, option: $parent.Rate3, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthBonusPersonalNursing"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthBonusPersonalNursing, option: $parent.Rate3, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthBonusCompanyNursing"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthBonusCompanyNursing, option: $parent.Rate3, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+						</tr>
+						<tr>
+							<td colspan="2"
+								class="empty-col bg-green no_right_border no_bottom_border">健康保険の内訳</td>
+							<!-- <td class="bg-green text_center no_left_border no_right_border"></td> -->
+							<td colspan="4" class="bg-green no_left_border"></td>
+						</tr>
+						<tr>
+							<td
+								class="health_empty_col bg-green no_top_border no_bottom_border "></td>
+							<td class="bg-green text_center tbl_health_child">特定保険率</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthSalaryPersonalBasic"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthSalaryPersonalBasic, option: $parent.Rate5, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthSalaryCompanyBasic"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthSalaryCompanyBasic, option: $parent.Rate5, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthBonusPersonalBasic"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthBonusPersonalBasic, option: $parent.Rate5, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthBonusCompanyBasic"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthBonusCompanyBasic, option: $parent.Rate5, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+						</tr>
+						<tr>
+							<td
+								class="health_empty_col bg-green no_top_border no_bottom_border"></td>
+							<td class="bg-green text_center tbl_health_child">基本保険率</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthSalaryPersonalSpecific"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthSalaryPersonalSpecific, option: $parent.Rate5, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthSalaryCompanySpecific"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthSalaryCompanySpecific, option: $parent.Rate5, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthBonusPersonalSpecific"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthBonusPersonalSpecific, option: $parent.Rate5, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+							<td><div class="float_left">
+									<input class="save-error" id="healthBonusCompanySpecific"
+										data-bind="ntsNumberEditor: {enable: $parent.canUpdateHistory, value: rateItems().healthBonusCompanySpecific, option: $parent.Rate5, constraint: 'Ins3Rate'}" />
+								</div>/1000</td>
+						</tr>
+					</tbody>
+				</table>
+				<div class="pad_top_10">健康保険端数区分</div>
+				<div class="hr_width">
+					<hr />
+				</div>
+				<table id="health_insurance_round" class="table_border_black">
+					<tbody>
+						<tr class="bg-green">
+							<th class="empty-col" rowspan="3"></th>
+							<th class="text_center" colspan="2">給与</th>
+							<th class="text_center" colspan="2">賞与</th>
+						</tr>
+						<tr class="bg-green">
+							<th class="text_center tbl_head">個人負担率</th>
+							<th class="text_center tbl_head">事業主負担率</th>
+							<th class="text_center tbl_head">個人負担率</th>
+							<th class="text_center tbl_head">事業主負担率</th>
+						</tr>
+						<tr>
+							<td><div class="rounding_width"
+									id="healthSalaryPersonalComboBox"
+									data-bind="ntsComboBox: {
+											options: roundingMethods().healthSalaryPersonalComboBox,
+											optionsValue: 'code',
+											value: roundingMethods().healthSalaryPersonalComboBoxSelectedCode,
+											optionsText: 'name',
+											enable: $parent.canUpdateHistory,
+											columns: [
+												{ prop: 'name', length: 5 },
+											]}"></div>
+							</td>
+							<td><div class="rounding_width"
+									id="healthSalaryCompanyComboBox"
+									data-bind="ntsComboBox: {
+											options: roundingMethods().healthSalaryCompanyComboBox,
+											optionsValue: 'code',
+											value: roundingMethods().healthSalaryCompanyComboBoxSelectedCode,
+											optionsText: 'name',
+											enable: $parent.canUpdateHistory,
+											columns: [
+												{ prop: 'name', length: 5 },
+											]}"></div></td>
+							<td><div class="rounding_width"
+									id="healthBonusPersonalComboBox"
+									data-bind="ntsComboBox: {
+											options: roundingMethods().healthBonusPersonalComboBox,
+											optionsValue: 'code',
+											value: roundingMethods().healthBonusPersonalComboBoxSelectedCode,
+											optionsText: 'name',
+											enable: $parent.canUpdateHistory,
+											columns: [
+												{ prop: 'name', length: 5 },
+											]}"></div></td>
+							<td><div class="rounding_width"
+									id="healthBonusCompanyComboBox"
+									data-bind="ntsComboBox: {
+											options: roundingMethods().healthBonusCompanyComboBox,
+											optionsValue: 'code',
+											value: roundingMethods().healthBonusCompanyComboBoxSelectedCode,
+											optionsText: 'name',
+											enable: $parent.canUpdateHistory,
+											columns: [
+												{ prop: 'name', length: 5 },
+											]}"></div></td>
+						</tr>
+					</tbody>
+				</table>
+				<div class="pad_top_10">賞与限度額</div>
+				<div class="hr_width">
+					<hr />
+				</div>
+				<div style="float: left;" data-bind="ntsFormLabel: {}">健康保険累計限度額</div>
+				<div class="pad_top_10">
+					<input class="save-error" id="maxAmount"
+						data-bind="ntsNumberEditor: {
+							enable: $parent.canUpdateHistory,
+							value: maxAmount, 
+							constraint: 'CommonAmount', 
+							option: new nts.uk.ui.option.NumberEditorOption({grouplength: 3,currencyformat: 'JPY',currencyposition: 'right'}), 
+							required: true, 
+							readonly: false}" />
+				</div>
+			</div>
+
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

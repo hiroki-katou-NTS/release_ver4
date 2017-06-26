@@ -1,0 +1,167 @@
+@CHARSET "UTF-8";
+
+.outer {
+	outline: 1px solid #FF6138;
+}
+
+.fixed-height {
+	height: 45px;
+}
+
+.control-group.valign-center>* {
+	vertical-align: middle;
+}
+
+#header {
+	height: 40px;
+}
+
+#functions-area {
+	height: 50px;
+}
+
+#contents-area {
+	width: 1300px;
+	height: 620px;
+}
+
+.group-button-1 {
+	margin-top: 10px;
+	margin-left: 10px;
+}
+
+.group-button-2 {
+	width: 100px;
+	margin-top: 10px;
+	margin-left: 10px;
+}
+
+.th {
+	width: 200px;
+	border: none;
+}
+
+.input-table {
+	height: 25px;
+	border-radius: 3px;
+	border: 1px solid #cdd0c9;
+	margin-top: 5px;
+}
+
+.icon.icon-searchbox {
+	margin-left: -6px;
+}
+
+#DELETE_ONE {
+	margin-left: 150px;
+	background-color: #fed3c6;
+}
+
+#DELELE_MORE {
+	width: 85px;
+	height: 30px;
+	background-color: #fed3c6;
+}
+
+.nts-left-content {
+	margin-top: 10px;
+	width: 700px;
+	'
+}
+
+.form-label {
+	margin-bottom: 10px;
+}
+
+.nts-right-content {
+	float: left;
+	padding: 20px;
+	width: 800px;
+	margin-top: -15px;
+	margin-left: 20px;
+}
+
+#A_LBL_002 {
+	width: 200px;
+}
+
+#A_INP_003 {
+	margin-left: 5px;
+}
+
+#A_BTN_010 {
+	width: 40px;
+	height: 25px;
+	padding: 1px;
+}
+
+#A_LBL_012 {
+	margin-left: 15px;
+}
+
+#A_LBL_011 {
+	margin-left: 250px;
+	margin-top: 15px;
+}
+
+#A_LBL_010 {
+	margin-top: 5px;
+}
+
+#A_INP_009 {
+	margin-top: 5px;
+	width: 400px !important;
+	height: 150px;
+	text-align: start !important;
+}
+
+#contents-area>div.nts-left-content>div>div:nth-child(3) {
+	margin-left: 25px;
+	margin-top: 10px;
+	margin-bottom: 10px !important;
+}
+
+#group-title {
+	border-bottom: 1px solid gray;
+	padding: 5px;
+}
+
+.ntsSearchBox {
+	margin-bottom: 10px;
+}
+
+input.ntsSearchBox {
+	width: 260px !important;
+	margin-top: 15px;
+	margin-left: 25px;
+}
+
+button.search-btn {
+	width: 80px;
+}
+
+.pseudo {
+	
+}
+
+.pseudo:before {
+	content: '';
+	display: inline-block;
+	height: 100%;
+	vertical-align: middle;
+	margin-right: -0.25em;
+}
+
+#A_SEL_001 {
+	width: 100px;
+}
+
+.pseudo>* {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.flex-box {
+	display: flex;
+	align-items: center;
+}

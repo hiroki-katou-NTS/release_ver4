@@ -1,0 +1,24 @@
+.content-1 {
+	margin-left: 25px
+}
+
+#btn_decide {
+	margin-left: 120px;
+	margin-top: 6px;
+}
+
+#btn_cancel {
+	margin-left: 80px;
+}
+
+.search-btn {
+	width: 90px;
+	padding-top: 7px;
+	margin: 0px !important;
+}
+
+.ntsSearchBox {
+	width: 300px !important;
+	margin-right: 10px;
+	margin-top: 3px;
+}

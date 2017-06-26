@@ -1,0 +1,295 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+					nts.uk.ctx.pr.core.dom.rule.employment.layout.LayoutName
+			</com:ValidatorScript>
+			
+				<com:scriptfile path="/lib/nittsu/ui/file.js" />
+				<com:scriptfile path="/lib/nittsu/ui/textbox-options.js" />
+			<com:scriptfile path="/lib/generic/igniteui/js/infragistics.core.js" />
+			<com:scriptfile path="/lib/generic/igniteui/js/infragistics.lob.js" />
+			<com:scriptfile path="viewmodel.js" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="service.js" />
+			<com:stylefile path="main.css" />
+			<script>var dialogSize = { width: 1100, height: 690 };</script>
+			<script>
+					__viewContext.primitiveValueConstraints = {
+						range: {
+							valueType: "String",
+							charType: "Numeric",
+							maxLength: 7
+						}
+					};
+				</script>	
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div style="margin-left: 20px; padding: 5px 0px 5px 10px;" class="left-content bg-green caret-right caret-background">
+					<div class="form-label">
+						<label id="LBL_001">項目区分</label>
+						<label id ="LBL_002" data-bind="text: itemAtr" style ="margin-left: 30px">支給項目</label>
+					</div>
+					<br />
+					<div class="form-label" style="margin-top: 5px;">
+						<label id="LBL_003">コード/名称</label>
+					</div>
+					<input id="INP_001" style="margin-left: 10px; margin-top: 5px; width: 125px" type="text" maxlength="20" />
+					<button id="SCH_001" style="width: 68px; margin-left: 5px" data-bind="click: searchItem">検索</button>
+					<br /> <br />
+					<div data-bind="with: listBox">
+						<div id="list-box"
+							data-bind="ntsListBox: {options: itemList,
+											   optionsValue: 'id',
+											   optionsText: 'name',
+											   multiple: false,
+											   value: selectedCode,
+											   enable: true,
+											   rows: 14,
+											   columns: [
+													{ prop: 'id', length: 3 },
+													{ prop: 'name', length: 12 }
+											   ]}"
+							class="cf"></div>
+					</div>
+					<br />
+					<button style="width: 300px;" class="disabled">↑項目名の登録を行う</button>
+				</div>
+				<com:ko-if bind="listBox().itemDtoSelected() != null">
+					<div class="right-content">
+					<div style="margin-bottom: 5px;" class="form-label" data-bind="with: listBox">
+						<label id="LBL_004">コード/名称</label> <a data-bind="text: selectedCode">コード</a><a
+							data-bind="text: selectedName">名称</a>
+					</div>
+					<br />
+					<div data-bind="if: checkDisplayComboBoxCalcMethod()">
+						<!-- 内訳区分 -->
+						<div style="margin-bottom: 5px; margin-top: 5px" id="uchiWakeKubun" class="form-label required">
+							<label id="LBL_007">内訳区分</label>
+						</div>
+						<div data-bind="with: comboBoxSumScopeAtr" style="display:inline-block" >
+							<div style="margin: 0 0 0 15px; float: right" id="SEL_001"
+								data-bind="ntsComboBox: {
+							options: itemList,
+							optionsValue: 'id',
+							value: selectedCode,
+							optionsText: 'name',
+							editable: false,
+							enable: true}"
+								class="cf"></div>
+						</div>
+						<br />
+						<!-- 計算方法 -->
+						<div style="margin-bottom: 5px;" class="form-label required">
+							<label id="LBL_008">計算方法</label>
+						</div>
+						<div data-bind="with: comboBoxCalcMethod" style="display: inline-block">
+							<div style="margin: 0 0 0 15px; float: right" id="SEL_002"
+								data-bind="ntsComboBox: {
+							options: itemList,
+							optionsValue: 'id',
+							value: selectedCode,
+							optionsText: 'name',
+							editable: false,
+							enable: true}"
+								class="cf"></div>
+						</div>
+						<hr />
+
+						<!-- CategoryAtr = 0||1 and select 個人情報参照-->
+							<div class="form-label required" style="margin-bottom: 20px"
+								data-bind="visible: checkPersonalInformationReference()">
+								<label>コード/名称</label>
+								<button data-bind="click: openHDialog"
+									style="margin-left: 17px; width: 71px;">参照</button>
+								<label id="f_lbl_020" data-bind="text: wageCode"></label>  <label id="f_lbl_021" data-bind="text: wageName"></label> 
+							</div>
+						<!-- CategoryAtr = 0 and select 手入力 -->
+						<div>
+							<!-- 通勤区分 -->
+							<com:ko-if bind="paramCategoryAtr() == 0">
+								<com:ko-if bind="comboBoxCalcMethod().selectedCode() == 0">
+									<com:ko-if bind="listBox().itemDtoSelected().taxAtr() == 3 || listBox().itemDtoSelected().taxAtr() == 4">
+										<div style="margin-bottom: 5px;" id="calcMethod" class="form-label">
+											<label style="float: left" id="LBL_018">通勤区分</label>
+										</div>
+										<div data-bind="with: $root.content.comboBoxCommutingClassification" style="display:inline-block">
+											<div style="margin: 0 0 0 15px; float: left" id="SEL_009"
+												data-bind="ntsComboBox: {
+															options: itemList,
+															optionsValue: 'id',
+															value: selectedCode,
+															optionsText: 'name',
+															editable: false,
+															enable: enable}"
+												class="cf"></div>
+										</div>
+									</com:ko-if>
+								</com:ko-if>
+							</com:ko-if>
+						</div>
+						<!-- 按分設定 -->
+						<div id = "LBL_009" class="form-label">
+							按分設定
+						</div>
+						<div style="display: inline-block; margin-left: 16px;" data-bind="with: switchButton">
+								<div id="SEL_003"
+									data-bind="ntsSwitchButton: {
+									options: distributeSet,
+									optionsValue: 'code',
+									optionsText: 'name',
+									value: selectedRuleCode }"
+									class="cf"></div>
+							</div>
+						<br />
+						<!-- 按分方法 -->
+						<div style="margin-left: 100px;"
+							data-bind="with: comboBoxDistributeWay">
+							<div id="SEL_004"
+								data-bind="ntsComboBox: {
+							options: itemList,
+							optionsValue: 'id',
+							value: selectedCode,
+							optionsText: 'name',
+							editable: false,
+							enable: enable()}"
+								class="cf"></div>
+						</div>
+						<br />
+					</div>
+					<hr data-bind="visible: paramCategoryAtr() === 2 ? true : false"/>
+					<div data-bind="ifnot: isCategoryAtrEqual3()">
+						<!-- 上限チェック -->
+						<div style="display: block; margin-bottom: 10px;">
+							<div style="margin-bottom: 3px" class="form-label">
+								<label id="LBL_010" class="clsLbl_010">上限チェック</label>
+							</div>
+							<div style="margin-left: 8px" id="checkBoxErrRangeHigh"
+											data-bind="ntsCheckBox: { checked: listBox().checkUseHighError, text: 'エラー'}"
+											class="cf clsCheckbox"></div>
+							<com:ko-if bind="$root.content.checkDisplayComboBoxCalcMethod()">
+								<input style="margin-left: 9px;"  id="INP_002" data-bind="ntsNumberEditor: {
+												value: listBox().itemDtoSelected().errRangeHigh,
+												constraint: '',
+												enable: listBox().checkUseHighError(),
+												option: (new nts.uk.ui.option.CurrencyEditorOption({grouplength: 4, decimallength: 2, currencyformat: 'USD', currencyposition: 'left'})),
+											}"
+											type="text" />
+							</com:ko-if>
+							<com:ko-if bind="!$root.content.checkDisplayComboBoxCalcMethod()">
+								<input id="INP_002" data-bind="ntsTimeEditor: {
+											value: listBox().itemDtoSelected().errRangeHigh, 
+											option: timeEditorOption, required: true, 
+											enable: listBox().checkUseHighError(), 
+											readonly: false}" />
+							</com:ko-if>
+							<span id="LBL_011">　　　 を超える場合</span>
+							<br/>
+							<div style="margin-left: 101px;" id="checkBoxAlRangeHigh"
+											data-bind="ntsCheckBox: { checked: listBox().checkUseHighAlam, text: 'アラーム'}"
+											class="cf clsCheckbox"></div>
+							<com:ko-if bind="$root.content.checkDisplayComboBoxCalcMethod()">
+								<input style="margin-left: 9px;"  id="INP_003" data-bind="ntsNumberEditor: {
+												value: listBox().itemDtoSelected().alamRangeHigh,
+												constraint: '',
+												enable: listBox().checkUseHighAlam(),
+												option: (new nts.uk.ui.option.CurrencyEditorOption({grouplength: 4, decimallength: 2, currencyformat: 'USD', currencyposition: 'left'})),
+											}"
+											type="text" />
+							</com:ko-if>
+							<com:ko-if bind="!$root.content.checkDisplayComboBoxCalcMethod()">
+								<input id="INP_003" data-bind="ntsTimeEditor: {
+											value: listBox().itemDtoSelected().alamRangeHigh, 
+											option: timeEditorOption, 
+											required: true, 
+											enable: listBox().checkUseHighAlam(),
+											readonly: false}" />
+							</com:ko-if>
+							<span id = "LBL_012">　　　 を超える場合</span>
+							<br />
+						</div>
+						<!-- 下限チェック -->
+						<div class="form-label">
+							<label id="LBL_013" class="clsLbl_010">下限チェック</label>
+						</div>
+						<div style="margin-left: 8px" id="checkBoxErrRangeLowAtr"
+									data-bind="ntsCheckBox: { checked: listBox().checkUseLowError, text: 'エラー'}"
+									class="cf clsCheckbox"></div>
+						<com:ko-if bind="$root.content.checkDisplayComboBoxCalcMethod()">
+							<input style="margin-left: 9px;"  id="INP_004" data-bind="ntsNumberEditor: {
+											value: listBox().itemDtoSelected().errRangeLow,
+											constraint: '',
+											enable: listBox().checkUseLowError(),
+											option: (new nts.uk.ui.option.CurrencyEditorOption({grouplength: 4, decimallength: 2, currencyformat: 'USD', currencyposition: 'left'})),
+										}"
+										type="text" />
+						</com:ko-if>
+						<com:ko-if bind="!$root.content.checkDisplayComboBoxCalcMethod()">
+							<input id="INP_004" data-bind="ntsTimeEditor: {
+										value: listBox().itemDtoSelected().errRangeLow, 
+										option: timeEditorOption, required: true, 
+										enable: listBox().checkUseLowError(),
+										readonly: false}" />
+						</com:ko-if>
+						<span id="LBL_014">　　　 未満の場合</span>
+						<br />
+						<div style="margin-left: 101px;" id="checkBoxAlRangeHigh"
+									data-bind="ntsCheckBox: { checked: listBox().checkUseLowAlam, text: 'アラーム'}"
+									class="cf clsCheckbox"></div>
+						<com:ko-if bind="$root.content.checkDisplayComboBoxCalcMethod()">
+							<input style="margin-left: 9px;"  id="INP_005" data-bind="ntsNumberEditor: {
+											value: listBox().itemDtoSelected().alamRangeLow,
+											constraint: '',
+											enable: listBox().checkUseLowAlam(),
+											option: (new nts.uk.ui.option.CurrencyEditorOption({grouplength: 4, decimallength: 2, currencyformat: 'USD', currencyposition: 'left'})),
+										}"
+										type="text" />
+						</com:ko-if>
+						<com:ko-if bind="!$root.content.checkDisplayComboBoxCalcMethod()">
+							<input id="INP_005" data-bind="ntsTimeEditor: {
+										value: listBox().itemDtoSelected().alamRangeLow, 
+										option: timeEditorOption, required: true, 
+										enable: listBox().checkUseLowAlam(),
+										readonly: false}" />
+						</com:ko-if>
+						<span id="LBL_015">　　　 未満の場合</span>
+						<br/>
+						<span style="margin-top: 20px; display: inline-block;">※エラーの場合は、データ登録されません。</span>
+						<br />
+						<span style="margin-left: 15px;">アラームの場合は、メッセージが表示されます。（データは登録されます）</span>
+						<br/>
+						<com:ko-if bind="checkDisplayComboBoxCalcMethod()">
+							<div style="margin-top: 20px; display:inline-block" id="f_lbl_022">
+								<span>値は「　－999.59　～　999.59　」の範囲で入力してください。</span>
+							</div>
+						</com:ko-if>
+						<com:ko-if bind="!checkDisplayComboBoxCalcMethod()">
+							<div style="margin-top: 20px; display:inline-block" id="f_lbl_022">
+								<span>値は「　－999:59　～　999:59　」の範囲で入力してください。</span>
+							</div>
+						</com:ko-if>
+					</div>
+				</div>
+				</com:ko-if>
+				
+				<div style="width: 100%; height: 30px; float: left; text-align: center;">
+					<hr />
+					<button data-bind="click: returnBackData, enable: $root.errors.isEmpty" style="margin-left: 50px"
+						class="x-large proceed">設定</button>
+					<button data-bind="click: close" style="margin-left: 15px">キャンセル</button>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

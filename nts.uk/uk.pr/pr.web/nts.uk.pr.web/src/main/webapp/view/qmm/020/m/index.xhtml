@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="qmm020.m.style.css" />
+			<com:scriptfile path="qmm020.m.viewmodel.js" />
+			<com:scriptfile path="qmm020.m.service.js" />
+			<com:scriptfile path="qmm020.m.start.js" />
+			<script>var dialogSize = { width: 440, height: 450};</script>
+		</ui:define>
+		<ui:define name="content">
+			<div class="contents-area">
+				<label id="M_LBL_001">紐ずける明細書を選択してください。</label>
+				<div class="form-group">
+					<div id="M_INP_001"
+						data-bind="ntsSearchBox: {
+										comId: 'M_LST_001', 
+										selectedKey: 'code', 
+										items: listItemDataSources, 
+										selected: listItemSelected,
+										fields: ['name', 'code']}" />
+					<table id="M_LST_001"
+						data-bind="ntsGridList: {
+										height: 300,
+										multiple: false,
+										optionsValue: 'code',
+										value: listItemSelected,
+										columns: listItemColumns,
+										options: listItemDataSources }">
+					</table>
+				</div>
+			</div>
+			<div class="dialog-button-group">
+				<button class="x-large" id="M_BTN_001"
+					data-bind="click: selectStmtCode, enable: $root.errors.isEmpty">選択</button>
+				<button class="large" id="M_BTN_002" data-bind="click: closeDialog">キャンセル</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

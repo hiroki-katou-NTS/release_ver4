@@ -1,0 +1,91 @@
+@CHARSET "UTF-8";
+
+/* general */
+body{
+	overflow-x: auto;
+}
+#left-content {
+	margin-left: 30px;
+	padding: 20px;
+	display: inline-block;
+	vertical-align: top;
+}
+#right-content {
+	margin-left: 20px;
+	display: inline-block;
+	min-height: 600px;
+	width: 930px;
+	vertical-align: top;
+}
+
+.ntsSearchBox{
+	width: 202px;
+}
+.fix-button-operation {
+	width: 30px;
+    height: 26px;
+}
+
+.separate-vertical {
+	margin-bottom: 10px;
+}
+
+.wrap-tab {
+	min-height: 530px;
+}
+
+.separate-span{
+	margin-left: 30px;
+}
+
+.separate-button {
+	margin-left: 10px;
+}
+
+.fix-button {
+	min-width: 75px;
+}
+
+.fix-input {
+	width: 150px;
+}
+
+.ib {
+	display: inline-block;
+}
+
+.if {
+	display: inline-flex;
+}
+
+.va-middle {
+	vertical-align: -webkit-baseline-middle;
+}
+
+/* screen a */
+
+#copy_btn {
+	margin-left: 110px;
+}
+
+#code_name_lbl {
+	margin-bottom: 10px;
+}
+
+#edit_history_btn {
+	margin-left: 128px;
+}
+
+#tree_history {
+	margin-top: 10px;
+}
+
+#title_span {
+	margin-right: 20px;
+}
+
+/* screen b */
+
+/* screen c */
+ 
+/* screen d */

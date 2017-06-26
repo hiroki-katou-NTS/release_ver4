@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 350, height: 177};</script>
+			<com:scriptfile path="qpp011.e.vm.js" />
+			<com:scriptfile path="qpp011.e.start.js" />
+			<com:stylefile path="qpp011.e.main.css" />
+			<com:scriptfile set="IGNITE" />
+		</ui:define>
+		<ui:define name="content">
+			<div id="content-header">
+				<div class="floatLeft" id="E_LBL_001" data-bind="ntsFormLabel: { }">改行コード
+				</div>
+				<div id="E_SEL_001" class="cf"
+					data-bind="ntsSwitchButton: {
+												options: roundingRules,
+												optionsValue: 'code',
+												optionsText: 'name',
+												value: selectedRuleCode,
+												enable: enable }">
+				</div>
+			</div>
+			<div id="contents-area">
+				<button class="proceed" data-bind="click: submitDialog"
+					id="E_BTN_001">設定</button>
+				<button id="E_BTN_002" data-bind="click: closeDialog">キャンセル</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

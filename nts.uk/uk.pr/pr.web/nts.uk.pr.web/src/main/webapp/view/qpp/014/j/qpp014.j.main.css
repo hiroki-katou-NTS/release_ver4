@@ -1,0 +1,77 @@
+#functions-area { height: 50px; }
+#functions-area button {
+	width: 100px;
+	margin-top: 10px;
+	margin-left: 10px;
+}
+#functions-area button:FIRST-CHILD{
+	margin-left: 30px;
+}
+#contents-area {
+	clear: both;
+}
+
+#contents-area-left {
+	float: left;
+	padding-left: 20px;
+}
+
+#contents-area-right {
+	float: left;
+	padding-left: 50px;
+	
+}
+.divLine-col-1 {
+	width: 150px;
+	margin-left: 20px; 
+	display: inline-block;
+}
+.divLine-col-2 {
+	display: inline-block;
+	vertical-align: middle;
+}
+#J_LBL_003 {
+	margin-top: 10px;
+	margin-bottom: 20px;
+}
+#J_LBL_005 {
+    font-size: large;
+    padding-left: 20px;
+}
+#J_HR_001 {
+	clear: both;
+	margin-left: 20px;
+}
+#J_SEL_001 { margin-left: 20px; }
+
+#J_SEL_001 label {
+	display: block;
+}
+
+#J_SEL_001 label:not(first-child ) {
+	margin-top: 10px;
+}
+
+#J_SEL_002, #J_SEL_003 {
+	min-width: 0px !important;
+	width: 180px;
+}
+
+#J_BTN_002 {
+	margin-left: 40px;
+}
+#J_LBL_006 { margin-top: 10px; }
+#J_LBL_007 { margin-top: 10px; }
+#J_LBL_008 { margin-bottom: 10px; }
+#J_LBL_009 {
+	margin-top: 10px;
+    margin-left: 20px;
+}
+#J_SEL_004 { 
+	margin-left: 100px;
+	margin-top: 10px;	
+}
+#J_SEL_004 button {
+	width: 130px;
+	height: 30px;
+}

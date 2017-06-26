@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition>
+		<table class="contentFrame">
+			<tr>
+				<td style="border: none !important;">
+					<div class="form-label">
+						<label>カーソル移動</label>
+					</div>
+				</td>
+
+				<td style="border: none !important;">
+					<div data-bind="with: switchButton" class="switchButton">
+						<div id="switchButtonTest"
+							data-bind="ntsSwitchButton: {
+								options: roundingRules,
+								optionsValue: 'code',
+								optionsText: 'name',
+								value: selectedRuleCode }">
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+
+		<div class="seperator"></div>
+		<div style="position: relative;">
+			<button id="btn001" class="buttonFrame" data-bind="visible: visible">グリッドの高さを広くする</button>
+			<button id="btn002" class="buttonFrame"
+				data-bind="visible: !visible()">グリッドの高さを標準に戻す</button>
+		</div>
+	</ui:composition>
+</body>
+</html>

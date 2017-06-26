@@ -1,0 +1,50 @@
+@CHARSET "UTF-8";
+.separate-button {
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+.fix-button {
+	min-width: 75px;
+}
+
+#btn_001 {
+	border: 1px solid #aaa;
+	padding-bottom: 20px;
+}
+
+#left-content {
+	margin: 5px 0px 0 20px !important;
+	float: left;
+}
+
+#right-content {
+	margin-left: 40px;
+	float: left;
+	height: 350px;
+}
+
+#inp_002 {
+	float: left;
+}
+
+#inp_003 {
+	float: right;
+	margin-left: 30px;
+}
+
+#nts-input-name {
+	width: 0px !important;
+}
+
+.row {
+	padding: 5px;
+	height: 50px;
+}
+
+#inpReason {
+	width: 170px !important;
+}
+#func-notifier-errors{
+    margin-left: -888px;
+}

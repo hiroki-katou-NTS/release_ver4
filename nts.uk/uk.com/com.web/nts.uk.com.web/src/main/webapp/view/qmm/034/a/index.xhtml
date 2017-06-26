@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>
+				var dialogSize = {
+					width : 300,
+					height : 200
+				};
+			</script>
+
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="main.css" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="viewmodel.js" />
+			<com:scriptfile path="service.js" />
+			<com:ValidatorScript>
+				nts.uk.ctx.basic.dom.system.era.EraName
+				nts.uk.ctx.basic.dom.system.era.EraMark
+			</com:ValidatorScript>
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area" class="cf">
+				<div class="aligntLeft">
+					<button id="btnCreateNew" data-bind="click: refreshLayout">新規</button>
+					<button id="btnRegister" class="proceed" data-bind="click: insertData, enable: $root.errors.isEmpty" >登録</button>
+					<button id="btnLog">マスタ修正ログ</button>
+					<button id="btnDelete" class="danger"
+						data-bind="click: alertDelete, enable: isDeleteEnable ">削除</button>
+				</div>
+				
+			</div>
+			<div id="contents-area" class="cf">
+				<div class="nts-left-content bg-green relative">
+					<div class="caret-right caret-background"></div>
+					<table id="single-list"
+						data-bind="ntsGridList: {
+						width: 280,
+						height: 450,
+						options: items,
+						primaryKey: 'eraHist',
+						columns: columns,
+						multiple: false,
+						value: currentCode
+					}"></table>
+				</div>
+				<div class="nts-right-content" data-bind = "with: currentEra">
+					<table class="tableRange">
+						<colgroup>
+							<col width="150" />
+							<col width="*" />
+						</colgroup>
+						<tr>
+							<td>
+								<div id="lblEraName" data-bind="ntsFormLabel: {required: true, constraint: 'EraName' }">元号</div>
+							</td>
+							<td>
+								<input id="txtEraName"  data-bind="ntsTextEditor: { required: true, value: eraName, constraint: 'EraName', 
+											enable: $parent.isEnableCode, immediate: true}, hasFocus: true" /> 
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div id="lblEraMark" data-bind="ntsFormLabel: {required: true, constraint: 'EraMark' }">記号</div>
+							</td>
+							<td>
+								<input id="txtEraMark"  data-bind="ntsTextEditor: { required: true, value: eraMark, 
+											constraint: 'EraMark', immediate: true}"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div id="lblStartDate" data-bind="ntsFormLabel: { required: true}">開始年月日</div>
+							</td>
+							<td>
+								<div class="empriseLabel">
+									<div id="txtStartDate" 
+										data-bind="ntsDatePicker: {button: true, value: $parent.startDate, dateFormat: 'YYYY/MM/DD'}"></div>
+									<div data-bind="text:$parent.dateTime"></div>
+								</div>
+							</td>
+						</tr>
+					</table>
+
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.report.dom.salarydetail.aggregate.SalaryAggregateItemName
+  			</com:ValidatorScript>
+			<com:stylefile path="qpp007.j.style.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="qpp007.j.service.js" />
+			<com:scriptfile path="../c/qpp007.c.vm.js" />
+			<com:scriptfile path="qpp007.j.vm.js" />
+			<com:scriptfile path="qpp007.j.start.js" />
+			<script type="text/javascript">
+				var dialogSize = {
+					width : 900,
+					height : 750
+				};
+			</script>
+		</ui:define>
+		<ui:define name="content">
+			<!-- BEGIN FUNCTION AREA -->
+			<div id="functions-area">
+				<button id="register-button" class="proceed"
+					data-bind="click: saveSalaryAggregateItem">登録</button>
+				<button id="close-button" data-bind="click: closeDialogBtnClicked">閉じる</button>
+			</div>
+			<!-- END FUNCTION AREA -->
+
+			<!-- BEGIN CONTENT AREA -->
+			<div id="contents-area">
+				<div id="tab-panel-tax-division"
+					data-bind="ntsTabPanel: { dataSource: taxDivisionTab, active: selectedDivision}">
+					<div id="tab-payment" data-bind="if: selectedDivision() == 'Payment'" >
+						<div id="tab-panel-aggregate-item1" class="cf"
+							data-bind="ntsTabPanel: { dataSource: aggregateItemTab, active: selectedAggregateItem, direction: 'vertical' }">
+							<div id="aggregate1"
+								data-bind="if: selectedAggregateItem() == '001'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate2"
+								data-bind="if: selectedAggregateItem() == '002'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate3" data-bind="if: selectedAggregateItem() == '003'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate4" data-bind="if: selectedAggregateItem() == '004'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate5" data-bind="if: selectedAggregateItem() == '005'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate6" data-bind="if: selectedAggregateItem() == '006'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate7" data-bind="if: selectedAggregateItem() == '007'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate8" data-bind="if: selectedAggregateItem() == '008'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate9" data-bind="if: selectedAggregateItem() == '009'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate10" data-bind="if: selectedAggregateItem() == '010'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+						</div>
+					</div>
+					<div id="tab-deduction" data-bind="if: selectedDivision() == 'Deduction'">
+						<div id="tab-panel-aggregate-item2" class="cf"
+							data-bind="ntsTabPanel: { dataSource: aggregateItemTab, active: selectedAggregateItem, direction: 'vertical' }">
+							
+							<div id="aggregate1" data-bind="if: selectedAggregateItem() == '001'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate2" data-bind="if: selectedAggregateItem() == '002'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate3" data-bind="if: selectedAggregateItem() == '003'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate4" data-bind="if: selectedAggregateItem() == '004'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate5" data-bind="if: selectedAggregateItem() == '005'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate6" data-bind="if: selectedAggregateItem() == '006'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate7" data-bind="if: selectedAggregateItem() == '007'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate8" data-bind="if: selectedAggregateItem() == '008'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate9" data-bind="if: selectedAggregateItem() == '009'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+							<div id="aggregate10" data-bind="if: selectedAggregateItem() == '010'">
+								<com:ko tag="template"
+									bind="{name: 'aggregateItem', data: salaryAggregateItemModel()}"></com:ko>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<script type="text/html" id="aggregateItem">
+								<div class="control-group">
+									<div id="lblDisplayName"
+										data-bind="ntsFormLabel: {constraint: 'SalaryAggregateItemName', required: true}">表示名</div>
+									<input id="inpDisplayName" data-name="表示名"
+										data-bind="ntsTextEditor: {constraint: 'SalaryAggregateItemName', value: salaryAggregateItemName, required: true}"></input>
+								</div>
+								<div class="control-group">
+									<table>
+										<tr>
+											<td><div data-bind="ntsFormLabel: {required: false}">集計対象に追加できる項目</div></td>
+											<td style="padding-left: 75px"><div
+													data-bind="ntsFormLabel: {required: false}">集計対象に追加した項目</div></td>
+										</tr>
+										<tr>
+											<td style="width: 270px"><hr /></td>
+											<td style="width: 270px; padding-left: 75px"><hr /></td>
+										</tr>
+									</table>
+								</div>
+								<div id="swap-list"
+									data-bind="ntsSwapList: {
+										showSearchBox: { showLeft : true, showRight: false},
+										height: 400,
+										dataSource: fullItemCodes,
+										primaryKey: 'salaryItemCode',
+										columns: $parent.columns,
+										value: subItemCodes
+										}"></div>
+			</script>
+			<!-- END CONTENT AREA-->
+
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

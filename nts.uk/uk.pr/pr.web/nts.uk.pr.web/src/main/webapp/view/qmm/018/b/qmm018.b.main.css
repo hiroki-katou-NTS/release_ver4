@@ -1,0 +1,40 @@
+.control-group.valign-center > * { vertical-align: middle; }
+.control-group.valign-top > * { vertical-align: top; }
+.control-group.valign-bottom > * { vertical-align: bottom; }
+.control-group { margin: 10px; }
+.halign-left { text-align: left; }
+.halign-right { text-align: right; }
+.halign-center { text-align: center; }
+
+body {
+	overflow: hidden;
+}
+#contents-area {
+	width: 715px;
+}
+
+#center-top {
+	margin-left: 20px;
+	margin-top: 15px;
+	margin-bottom: 10px;
+}
+
+#center-middle {
+	margin-left: 20px;
+	margin-top: 10px;
+	margin-bottom: 20px;
+}
+
+#division {
+	width: 700px;
+	margin-left: 5px;
+}
+
+#center-bottom {
+	margin-left: 260px;
+	margin-bottom: 0px;
+}
+
+#center-bottom > button {
+	margin-right: 10px;
+}

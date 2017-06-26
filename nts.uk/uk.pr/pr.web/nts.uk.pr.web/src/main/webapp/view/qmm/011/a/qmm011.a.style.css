@@ -1,0 +1,181 @@
+.trFull60B {
+	min-width: 60px;
+	padding-bottom: 5px;
+}
+
+.trFull60 {
+	width: 60%;
+	padding-bottom: 5px;
+}
+
+.trFull5C {
+	width: 10%;
+	padding-bottom: 5px;
+}
+
+.trFull25 {
+	width: 25%;
+}
+
+.trFull45 {
+	width: 80px;
+}
+
+.trFull30 {
+	width: 30%;
+}
+
+.left20 {
+	margin-left: 20px;
+}
+
+.labelRed {
+	font-weight: bold;
+	color: red;
+}
+
+.trFull15 {
+	width: 15%;
+}
+
+.floatRight {
+	float: right;
+}
+
+.floatLeft {
+	float: left;
+}
+
+#contents-left, #contents-right {
+	padding: 20px;
+	vertical-align: top !important;
+}
+
+#contents-right {
+	padding-left: 40px !important;
+}
+
+
+.spanSearch {
+	float: right;
+	width: 20%;
+}
+
+.contentsRL {
+	width: 20%;
+	padding-bottom: 5px;
+}
+
+.contentsRR {
+	width: 70%;
+}
+
+#tableRight {
+	width: 100%;
+}
+
+button.nts-switch-button {
+	min-width: 80px;
+}
+
+.contentvalue {
+	margin-top: 40px;
+	margin-left: 40px;
+}
+
+.list-box {
+	width: 150px;
+	margin-top: 10px;
+	min-height: 450px;
+}
+
+.backgroundGreen {
+	background-color: #7CFC00;
+}
+
+.rate-input {
+	width: 100px !important;
+	border-radius: 4px !important;
+}
+
+.empty-col {
+	width: 30px;
+}
+
+.select_round {
+	width: 175px;
+}
+
+.tbl_health_insurance_rate {
+	width: 150px;
+}
+
+.text_center {
+	text-align: center;
+	height: 30px;
+}
+
+.text_right {
+	text-align: right;
+}
+
+.hr_width {
+	width: 99%
+}
+
+.pad_top_10 {
+	padding-top: 10px;
+}
+
+.table_border_black td, th {
+	border: 1px solid black;
+}
+
+.table_border_black {
+	width: 100%;
+}
+
+th, td {
+	padding: 2px;
+}
+
+.no_left_border {
+	border-left: none;
+}
+
+.no_right_border {
+	border-right: none;
+}
+
+.no_top_border {
+	border-top: none;
+}
+
+.no_bottom_border {
+	border-bottom: none;
+}
+
+.pad_left_10 {
+	padding-left: 10px;
+}
+
+.pad_right_10 {
+	padding-right: 10px;
+}
+
+.border_none {
+	border: none;
+}
+
+.right {
+	width: 62%;
+	float: left;
+}
+
+#tabpanel-1 {
+	min-width: 1360px;
+}
+
+#tabpanel-2 {
+	min-width: 1360px;
+}

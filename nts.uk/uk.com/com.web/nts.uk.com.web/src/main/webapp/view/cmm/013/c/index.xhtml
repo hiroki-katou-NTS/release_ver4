@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<!--dudt -->
+			<!-- 			<script>var dialogSize = { width: 550, height: 450 };</script> -->
+			<script>var dialogSize = { width: 550, height: 450 };</script>
+			<!--dudt -->
+			<com:ValidatorScript>
+			nts.uk.ctx.basic.dom.organization.position.JobCode
+			</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="cmm013.c.main.css" />
+			<com:scriptfile path="cmm013.c.start.js" />
+			<com:scriptfile path="cmm013.c.vm.js" />
+			<com:scriptfile path="cmm013.c.service.js" />
+		</ui:define>
+		<ui:define name="content">
+			<div id="content-area" class="body">
+				<table id="tblContent">
+					<colgroup>
+						<col width="200px" />
+						<col width="*" />
+					</colgroup>
+					<!--dudt add-->
+					<tr>
+						<td colspan="2" style="padding-bottom: 15px"><label
+							id="LBL_001">新たに作成する履歴の、作成情報を入力してください。</label></td>
+					</tr>
+					<!--dudt -->
+					<tr>
+						<td class="row" data-bind="with: label_002">
+							<!-- C_LBL_002 -->
+							<div
+								data-bind="ntsFormLabel:{
+									constraint: 'JobCode', 
+									required: true
+									}">期間</div>
+						</td>
+					<!-- 	<td><input id="inp_001"
+							data-bind="ntsTimeEditor: {
+						 					value: inp_003,
+						 					inputFormat: 'date'}" />
+							<label id="lbl_003"> ~ 9999/12/31</label></td> -->
+						<td><input id="inp_001"
+							data-bind="ntsTextEditor: {
+						 					value: inp_003,
+						 					constraint: '', 
+						 					enable: true}" />
+							<label id="lbl_003"> ~ 9999/12/31</label></td>
+					</tr>
+					<tr>
+						<td class="row" data-bind="with: label_002">
+							<!--C_LBL_004 -->
+							<div
+								data-bind="ntsFormLabel: {
+									constraint: 'JobCode', 	
+									required: true
+									}">履歴の引継ぎ</div>
+						</td>
+						<td>
+							<!-- C_SEL_001 -->
+							<div id = "radio"
+								data-bind="ntsRadioBoxGroup: {
+								options: itemList,
+								optionsValue: 'id',
+								optionsText: 'name',
+								value: selectedId,
+								enable: enable}">
+							</div>
+						</td>
+					</tr>
+				</table>
+				<!--dudt add-->
+				<hr />
+				<!--dudt add-->
+				<div class="div">
+					<button id="btn_001" class="x-large proceed "
+						data-bind="click: add, enable: $root.errors.isEmpty">決定</button>
+					<button id="btn_002" class="large" data-bind="click: closeDialog">キャンセル</button>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

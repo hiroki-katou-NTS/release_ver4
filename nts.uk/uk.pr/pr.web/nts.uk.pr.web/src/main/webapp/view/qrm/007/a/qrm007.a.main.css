@@ -1,0 +1,61 @@
+.control-group.valign-center > * { vertical-align: middle; }
+.control-group.valign-top > * { vertical-align: top; }
+.control-group.valign-bottom > * { vertical-align: bottom; }
+.control-group { margin: 10px; }
+.halign-left { text-align: left; }
+.halign-right { text-align: right; }
+.halign-center { text-align: center; }
+.bg-green {background-color: #E0F59E;}
+
+#contents-area {
+	width: 1300px;
+}
+
+.table {
+	margin: 10px;
+}
+
+button {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.short-button {
+	width: 70px;
+}
+
+input, textarea {
+	border-radius: 5px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.pull-left {
+	width: 633px;
+}
+
+.caret-background {
+	width: 550px; 
+	height: auto;
+	margin-left: 10px;
+	padding: 15px;
+}
+
+.column1 {
+	width: 140px;
+}
+
+#name-span {
+	margin-left: 15px;
+}
+
+#inp-2 {
+	width: 440px;
+	height: 190px;
+}
+
+#division {
+	width: 600px;
+	margin-left: 0px;
+}
+

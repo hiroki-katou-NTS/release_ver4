@@ -1,0 +1,84 @@
+.divHeader {
+	margin: 5px;
+}
+
+.btnStyle {
+	width: 70px;
+	margin-right: 5px;
+}
+
+#btnDelete {
+	margin-left: 200px;
+}
+
+#lblTitle {
+	float: right;
+}
+
+#contents-left, #contents-right {
+	padding: 20px;
+	vertical-align: top !important;
+}
+
+#contents-right {
+	padding-left: 40px !important;
+}
+
+.leftTop {
+	display: inline;
+	width: 100%;
+}
+
+#SCH_001 {
+	width: 100%;
+}
+
+.spanSearch {
+	float: right;
+	width: 20%;
+}
+
+.contentsRL {
+	width: 20%;
+	padding-bottom: 15px;
+}
+
+.contentsRR {
+	width: 70%;
+}
+
+#tableRight {
+	width: 100%;
+}
+
+#inpCode, #INP_004 {
+	width: 80px;
+}
+
+#inpName {
+	width: 240px !important;
+}
+#selDisplay{
+	padding-left: 5%;
+}
+
+button.nts-switch-button {
+	min-width: 100px;
+}
+
+#selCloseDate, #selProcessingDate {
+	min-width: 0px !important;
+	max-width: 220px !important;
+}
+#INP_005{
+	width: 350px; 
+	height: 150px; 
+	margin-top: 5px;
+}
+#lstDataEmployment_container{
+	padding-top: 20px !important;
+}
+
+table tr{
+	padding: 10px !important;
+}

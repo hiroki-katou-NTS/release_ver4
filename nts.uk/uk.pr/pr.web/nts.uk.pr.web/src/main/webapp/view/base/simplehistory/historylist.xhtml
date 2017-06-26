@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition>
+		<!-- BEGIN LEFT CONTENT-->
+		<div id="left-content" class="bg-green caret-right caret-background" style="width: 410px">
+			<div>
+				<i class="icon icon-searchbox"></i>
+				<div data-bind="ntsFormLabel: {}">コード/名称</div>
+				<span id="historyTreeSearchBox"
+					data-bind="ntsSearchBox: {comId:'historyTree',
+					items: masterHistoryDatasource, 
+					selected: igGridSelectedHistoryUuid,
+					selectedKey: 'id', 
+					childField: 'childs', 
+					fields: ['searchText']}"></span>
+			</div>
+			<div style="margin-top: 15px; padding-right: 30px">
+				<div style="padding-bottom: 10px">
+					<button class="pull-left" id="addHistory"
+						data-bind="enable: canAddNewHistory, click: addNewHistoryBtnClick">履歴追加</button>
+					<button class="pull-right" id="editHistory"
+						data-bind="enable: canUpdateHistory, click: updateHistoryBtnClick">履歴編集</button>
+					<div class="cf"/>
+				</div>
+				<div class="pull-left cf">
+					<table id="historyTree"
+						data-bind="ntsTreeGridView:{
+								height: 370,
+								options: masterHistoryDatasource,
+								value: igGridSelectedHistoryUuid,
+								optionsValue: 'id',
+								optionsChild: 'childs',
+								optionsText: 'nodeText',
+								multiple: false,
+								enable: true,
+								showCheckBox: false}"
+						class="cf">
+					</table>
+				</div>
+			</div>
+		</div>
+		<!-- END LEFT CONTENT-->
+	</ui:composition>
+</body>
+</html>

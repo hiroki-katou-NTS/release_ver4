@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+		<!--dudt -->
+<!-- 		<script>var dialogSize = { width: 650, height: 450 };</script> -->
+		<script>var dialogSize = { width: 650, height: 400 };</script>
+		<!--dudt -->
+		<com:ValidatorScript>
+			nts.uk.ctx.basic.dom.organization.position.JobCode			
+			</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="cmm013.d.main.css" />
+			<com:scriptfile path="cmm013.d.start.js" />
+			<com:scriptfile path="cmm013.d.vm.js" />
+			<com:scriptfile path="cmm013.d.service.js" />
+		</ui:define>
+		<ui:define name="content">
+			<div id="content-area" class="body">
+				<!--dudt -->
+<!-- 				<div> -->
+<!-- 				D_LBL_001  -->
+<!-- 					<p>履歴情報を確認し、削除または修正を行ってください。</p> -->
+<!-- 					<br></br> -->
+<!-- 				</div> -->
+<!-- 				<table> -->
+				<table id="tblContent">
+				<!--dudt -->
+					<colgroup>
+						<col width="180px" />
+						<col width="*" />
+					</colgroup>
+					<!--dudt add-->
+					<tr>
+						<td colspan="2" style="padding-bottom: 15px">
+							<label id = "LBL_001">履歴情報を確認し、削除または修正を行ってください。</label>
+						</td>
+					</tr>
+					<!--dudt -->
+					<tr>
+						<td>
+						<!--dudt upd-->
+						<!-- D_LBL_002 -->
+<!-- 						<div class="lbl"  -->
+<!-- 								data-bind="ntsFormLabel: { -->
+<!-- 									constraint: 'JobCode',  -->
+<!-- 									required: true -->
+<!-- 									}">編集方法の選択</div> -->
+							<div id="LBL_002" data-bind="ntsFormLabel: {required: true}">
+								<label>編集方法の選択</label>
+							</div>
+						<!--dudt upd-->
+						</td>
+						<td>
+							<!-- D_SEL_001 -->
+							<div  style="width: 150px" data-bind="ntsRadioBoxGroup: {
+								options: itemList,
+								optionsValue: 'id',
+								optionsText: 'name',
+								value: selectedId,
+								enable: enable}">
+							</div>
+						</td>
+					</tr>	
+					<tr>
+					<td>
+					</td>
+					<td id="row">
+						<!-- LBL_003 -->
+						<div class="line" data-bind="ntsFormLabel: {}">期間</div>
+						<div  class="line" >
+						<!-- C_INP_003 -->
+							<!--dudt can phai sua lai input nay-->
+							<input data-bind="ntsTextEditor: {
+								value: inp_003,
+                                constraint: 'constraint',
+                                required: true,
+                                enable: inp_003_enable}" />
+							
+						</div>
+
+ 						<!-- D_LBL_004 -->
+ 						<div class="line" id="lbl_004">
+							<div><label id="">　　～　　</label>
+								<label id = "D_LBL_004" data-bind="text: oldEndDate"></label>
+							</div>
+						</div> 
+					</td>
+					</tr>	
+				</table>
+				<br />
+				<!--dudt add-->
+				<hr />
+				<!--dudt add-->
+				<div class="bottom">
+					<button id="btn_001"  class="x-large proceed "
+							data-bind="click: positionHis">決定</button>
+					<button id="btn_002" class="large" data-bind="click: closeDialog" >キャンセル</button>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

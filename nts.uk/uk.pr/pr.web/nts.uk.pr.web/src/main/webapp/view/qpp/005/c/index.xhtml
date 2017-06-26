@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>
+				var dialogSize = { width: 370, height: 400 };
+			</script>
+			<com:stylefile path="main.css" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="viewmodel.js" />
+			<com:scriptfile path="service.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area" data-bind="with: employeeList">
+				<div id="list-box" style="margin: 0px auto;"
+					data-bind="ntsListBox: {options: items,
+							optionsText: 'name',
+							multiple: false,
+							rows: 10,
+							value: selected,
+							enable: true,
+							columns: [
+								{ prop: 'code', length: 8 },
+								{ prop: 'name', length: 8 }
+							]}"
+					class="cf"></div>
+			</div>
+			<div style="margin: 0px auto; margin: 10px auto; text-align: center">
+				<button class="proceed" data-bind="click: chooseEmployee">設定</button>
+				<button data-bind="click: close">キャンセル</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

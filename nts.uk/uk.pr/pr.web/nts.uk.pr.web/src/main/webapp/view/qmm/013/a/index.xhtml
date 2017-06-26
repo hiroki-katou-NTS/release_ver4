@@ -1,0 +1,241 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+					nts.uk.ctx.pr.core.dom.rule.employment.unitprice.personal.PersonalUnitPriceCode
+					nts.uk.ctx.pr.core.dom.rule.employment.unitprice.personal.PersonalUnitPriceName
+					nts.uk.ctx.pr.core.dom.rule.employment.unitprice.personal.PersonalUnitPriceShortName
+					nts.uk.shr.com.primitive.Memo
+   				</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="main.css" />
+			<com:scriptfile path="qmm013.a.start.js" />
+			<com:scriptfile path="qmm013.a.vm.js" />
+			<com:scriptfile path="qmm013.a.service.js" />
+		</ui:define>
+		<ui:define name="content">
+			<div id="functions-area">
+				<button id="BTN_001" data-bind="click: btn_001">新規</button>
+				<button id="BTN_002" class="proceed"
+					data-bind="click: btn_002, enable: $root.errors.isEmpty">登録</button>
+				<button id="BTN_003">印刷 (PDF)</button>
+				<button id="BTN_005">マスタ修正ログ</button>
+				<button id="BTN_004" class="danger"
+					data-bind="click: btn_004, enable: isEnableDelete">削除</button>
+			</div>
+			<div id="contents-area">
+				<div class="left-content">
+
+					<div class="cf">
+						<div style="float: left; width: 480px"
+							class="caret-right caret-background bg-green">
+							<div style="margin: 20px 24px 24px 0px; float: right;">
+								<div style="margin-left: 5px;"
+									data-bind="ntsCheckBox: {checked: displayAll, text: '廃止も表示する' }"
+									class="cf minimalist"></div>
+							</div>
+							<div style="margin: 20px 0px -10px 14px"
+								data-bind="ntsSearchBox: {
+									comId: 'single-list',
+									items: items, 
+									selected: currentCode, 
+									selectedKey: 'code', 
+									fields: ['name', 'code']}" />
+							<br />
+							<div id="LST_001">
+								<table id="single-list"
+									data-bind="ntsGridList: {
+										width: 440,
+										height: 500,
+										options: items,
+										optionsValue: 'code',
+										columns: columns,
+										multiple: false,
+										value: currentCode
+									}"></table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="right-content" data-bind="with: currentItem">
+					<div class="right-content-left">
+						<div id="LBL_002"
+							data-bind="ntsFormLabel:{constraint: ['PersonalUnitPriceCode', 'PersonalUnitPriceName'],required: true}">コード/名称</div>
+						<div id="LBL_003"
+							data-bind="ntsFormLabel:{constraint: 'PersonalUnitPriceShortName'}">略名</div>
+						<br />
+						<div id="LBL_004" data-bind="ntsFormLabel:{}">統合コード</div>
+					</div>
+					<div class="right-content-right">
+						<div class="control-group">
+							<span> <input data-name="コード" id="INP_002"
+								data-bind="ntsTextEditor: {
+									value: personalUnitPriceCode,
+									constraint: 'PersonalUnitPriceCode',
+									option: {
+										textmode: 'text',
+						                placeholder: '',
+						                width: '45px',
+						                textalign: 'center'},
+									required: true,
+									enable: $parent.isCreated}" /></span>
+							<span> <input data-name="名称" id="INP_003"
+								data-bind="ntsTextEditor: {
+									value: personalUnitPriceName,
+									constraint: 'PersonalUnitPriceName',
+									option: {
+										textmode: 'text',
+					                    placeholder: '',
+					                    width: '180px',
+					                    textalign: 'left'},
+									required: true,
+									enable: true}" /></span>
+							<div class="bg-yellow">
+								<div style="margin-left: 5px;"
+									data-bind="ntsCheckBox: {checked: displaySet, text: 'この会社を廃止する' }"
+									class="cf minimalist"></div>
+								<button style="width: 25px; height: 25px; margin-left: 20px;">?</button>
+							</div>
+						</div>
+						<div class="control-group">
+							<span> <input id="INP_004" data-name="略名"
+								data-bind="ntsTextEditor: {
+									value: personalUnitPriceShortName,
+									constraint: 'PersonalUnitPriceShortName',
+									option: {
+										textmode: 'text',
+					                    placeholder: '',
+					                    width: '120px',
+					                    textalign: 'left'
+									},
+									required: false,
+									enable: true}" /></span>
+						</div>
+						<div class="control-group">
+							<button id="BTN_006">参照</button>
+							<!-- Stage 2
+							<label id="LBL_012" data-bind="text: uniteCode">002</label> <label
+								id="LBL_013">支店名称</label> -->
+						</div>
+					</div>
+					<hr />
+					<div class="right-content-left">
+						<div id="LBL_004" data-bind="ntsFormLabel:{}">固定的賃金</div>
+					</div>
+					<div class="right-content-right">
+						<div class="control-group">
+							<div id="SEL_003" class="SEL_003"
+								data-bind="ntsRadioBoxGroup: {
+								options: $parent.itemList,
+								optionsValue: 'id',
+								optionsText: 'name',
+								value: paymentSettingType,
+								enable: true}">
+							</div>
+						</div>
+						<div class="control-group-left" style="float: left; width: 30%">
+							<div id="SEL_005" class="cf"
+								data-bind="ntsSwitchButton: {
+								options: $parent.roundingRules,
+								optionsValue: 'code',
+								optionsText: 'name',
+								value: fixPaymentAtr,
+								enable: !$parent.isCompany() }">
+							</div>
+						</div>
+						<div class="control-group-right" style="float: left">
+							<div class="cf">
+								<span id="LBL_008"
+									style="float: left; margin: 8px 0px 0px 21px; width: 110px">月給者</span>
+								<div id="SEL_006" style="float: left"
+									data-bind="ntsSwitchButton: {
+								options: $parent.roundingRules,
+								optionsValue: 'code',
+								optionsText: 'name',
+								value: fixPaymentMonthly,
+								enable: $parent.isCompany()}">
+								</div>
+							</div>
+							<div class="cf">
+								<span id="LBL_009"
+									style="float: left; margin: 8px 0px 0px 21px; width: 110px">日給月給者</span>
+								<div id="SEL_007" style="float: left"
+									data-bind="ntsSwitchButton: {
+								options: $parent.roundingRules,
+								optionsValue: 'code',
+								optionsText: 'name',
+								value: fixPaymentDayMonth,
+								enable: $parent.isCompany() }">
+								</div>
+							</div>
+							<div class="cf">
+								<span id="LBL_010"
+									style="float: left; margin: 8px 0px 0px 21px; width: 110px">日給者</span>
+								<div id="SEL_008" style="float: left"
+									data-bind="ntsSwitchButton: {
+								options: $parent.roundingRules,
+								optionsValue: 'code',
+								optionsText: 'name',
+								value: fixPaymentDaily,
+								enable: $parent.isCompany() }">
+								</div>
+							</div>
+							<div class="cf">
+								<span id="LBL_011"
+									style="float: left; margin: 8px 0px 0px 21px; width: 110px">時給者</span>
+								<div id="SEL_009" style="float: left"
+									data-bind="ntsSwitchButton: {
+								options: $parent.roundingRules,
+								optionsValue: 'code',
+								optionsText: 'name',
+								value: fixPaymentHoursly,
+								enable: $parent.isCompany() }">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="right-content-left">
+						<div id="LBL_006" data-bind="ntsFormLabel:{}">単価種類</div>
+					</div>
+					<div class="right-content-right">
+						<div id="SEL_004" class="cf"
+							data-bind="ntsSwitchButton: {
+								options: $parent.SEL_004,
+								optionsValue: 'code',
+								optionsText: 'name',
+								value: unitPriceAtr,
+								enable: true }">
+						</div>
+					</div>
+					<hr />
+					<div class="right-content-left">
+						<div id="LBL_007" data-bind="ntsFormLabel:{constraint: 'Memo'}">メモ</div>
+					</div>
+					<div class="right-content-right">
+						<div class="control-group">
+							<span> <textarea id="INP_005" data-name="メモ"
+									style="height: 200px; width: 500px"
+									data-bind="ntsMultilineEditor: {
+									value: memo,
+									constraint: 'Memo',
+									option: new nts.uk.ui.option.MultilineEditorOption({
+						                    placeholder: '',
+						                    textalign: 'left'
+									}),
+									enable: true,
+									readonly: false}" />
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

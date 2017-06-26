@@ -1,0 +1,19 @@
+@CHARSET "UTF-8";
+
+#D_Inp_ErrorUpper, #D_Inp_AlarmUpper, #D_Inp_ErrorLower,
+	#D_Inp_AlarmLower {
+	width: 100px;
+}
+
+#D_Btn_PeriodSetting, #D_Btn_BreakdownSetting {
+	width: 120px;
+}
+
+#D_Inp_Remarks {
+	width: 340px;
+	height: 90px;
+}
+
+#D_Lbl_PeriodAndCycle>label {
+	line-height: 23px !important;
+}

@@ -1,0 +1,15 @@
+@CHARSET "UTF-8";
+
+#this-contents-area {
+	margin-top: 20px;
+	margin-left: 20px;
+	min-width: 560px;
+}
+
+#this-functions-area {
+	margin-top: 15px;
+}
+
+.form-default td {
+	padding-top: 10px;
+}

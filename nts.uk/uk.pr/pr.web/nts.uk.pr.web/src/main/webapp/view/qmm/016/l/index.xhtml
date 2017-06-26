@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="qmm016.l.style.css" />
+			<com:scriptfile path="qmm016.l.start.js" />
+			<com:scriptfile path="qmm016.l.service.js" />
+			<com:scriptfile path="qmm016.l.vm.js" />
+			<com:ValidatorScript>
+			    nts.uk.ctx.pr.core.dom.wagetable.certification.CertifyGroupCode
+			    nts.uk.ctx.pr.core.dom.wagetable.certification.CertifyGroupName
+			 </com:ValidatorScript>
+			<script type="text/javascript">
+				var dialogSize = {
+					width : 1260,
+					height : 730
+				};
+			</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area" class="divHeader">
+				<button id="btn_new" class="btnStyle"
+					data-bind="click: resetValueCertifyGroup">新規</button>
+				<button class="proceed btnStyle" id="btn_saveCertifyGroup"
+					data-bind="click: saveCertifyGroup">登録</button>
+				<button class="danger btnStyle" id="btn_delete"
+					data-bind="click: deleteCertifyGroup, enable: showDelete">削除</button>
+				<button id="btn_close" data-bind="click: closeCertifyGroup">閉じる</button>
+			</div>
+			<div id="contents-area">
+				<table>
+					<tr>
+						<td id="contents-left"
+							class="bg-green caret-right caret-background"><i
+							class="icon icon-searchbox"></i>
+							<div
+								data-bind="ntsSearchBox: {comId: 'certifyGroupList', items: lstCertifyGroup, selected: selectCodeLstLstCertifyGroup, selectedKey: 'code', fields: ['code','name']}" />
+							<div id="search_data">
+								<table id="certifyGroupList"
+									data-bind="ntsGridList: {
+									width: 300,
+									height: 400,
+									options: lstCertifyGroup,
+									optionsValue: 'code',
+									columns: columnsLstCertifyGroup,
+									multiple: false,
+									value: selectCodeLstLstCertifyGroup,
+									enable: true
+							}"></table>
+							</div></td>
+						<td id="contents-right" data-bind="with: certifyGroupModel">
+							<div class="contentsRL">
+								<div id="lbl_code_name"
+									data-bind="ntsFormLabel: { required: true }">
+									<label>コード/名称<br /></label>
+								</div>
+								<input id="inp_code" class="tr50 save-error" data-name="コード"
+									data-bind="ntsTextEditor: {value: code,
+									constraint: 'CertifyGroupCode', 
+									option: $root.textEditorOption, 
+									enable: isEnable,
+									required:true}" />
+								<input class="tr180 save-error" id="inp_name" data-name="名称"
+									data-bind="ntsTextEditor: {value: name,
+									constraint: 'CertifyGroupName', 
+									option: $root.textEditorOption, 
+									enable: true,
+									required:true}" />
+							</div> <br />
+							<table>
+								<tr>
+									<td class="contentsRL">
+										<div data-bind="ntsFormLabel: {required: true}">
+											<label>同一グループ内で複数の資格を取得している場合の支給方法</label>
+										</div>
+									</td>
+									<td>
+										<button id="btn_help">?</button>
+									</td>
+									<td>
+										<div style="margin-left: 20px;"
+											data-bind="ntsComboBox: {
+											options: selectionMultipleTargetSetting,
+											optionsValue: 'code',
+											value: multiApplySet,
+											optionsText: 'name',
+											editable: true,
+											enable: true,
+											columns: [{ prop: 'name', length: 10 }]
+											}"></div>
+									</td>
+								</tr>
+							</table>
+							<div class="border">
+								<div class="div50">
+									<div id="lbl_code_name"
+										data-bind="ntsFormLabel: { required: false }">
+										<label>表に追加できる資格<br /></label>
+									</div>
+									<hr />
+									<br />
+								</div>
+								<div class="div50 left50">
+									<div id="lbl_code_name"
+										data-bind="ntsFormLabel: { required: false }">
+										<label>表に追加した資格<br /></label>
+									</div>
+									<hr />
+									<br />
+								</div>
+								<div class="div100">
+									<div id="swap-list"
+										data-bind="ntsSwapList: {
+										showSearchBox: { showLeft : true, showRight: false},
+										height: 300,
+										dataSource: lstCertification,
+										primaryKey: 'code',
+										columns: columnsCertification,
+										searchCriterion: ['code', 'name'],
+										value: certifies
+									}"></div>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+	<ui:composition>
+	
+		<com:ValidatorScript>
+			nts.arc.time.YearMonth
+			nts.uk.ctx.pr.formula.dom.primitive.FormulaCode
+			nts.uk.ctx.pr.formula.dom.primitive.FormulaName
+		</com:ValidatorScript>
+		<div class="wrap-tab">
+			<com:ko-if bind="$root.content.isNewMode">
+				<div class="label warning separate-vertical">計算式を新規で作成する場合、基本情報を入力後、一度登録ボタンを押してください。</div>
+			</com:ko-if>
+			<br />
+			<div class="separate-vertical" data-bind="ntsFormLabel: {required: true, constraint:['FormulaCode', 'FormulaName']}">コード/名称</div>
+			<input id="inp-formulaCode" data-name="コード" class="check-error" data-bind="ntsTextEditor: { value: formulaCode, constraint: 'FormulaCode', enable: isNewMode, required: true}" />
+			<input id="inp-formulaName" data-name="名称" class="check-error" data-bind="ntsTextEditor: { value: formulaName, constraint: 'FormulaName', enable: true, required: true}" />
+			<br/>
+			<div class="separate-vertical" data-bind="ntsFormLabel: {required: true }">開始年月</div>
+			<div id="start-date-inp" class="check-error" data-name="開始年月" data-bind="ntsDatePicker: {value: startYearMonth, dateFormat: 'YYYY/MM', disabled: !isNewMode(), valueFormat: 'YYYYMM', required: true }"></div>
+			<span data-bind="text: startYearMonthFormated"></span>
+			<br/>
+			<div class="separate-vertical" data-bind="ntsFormLabel: {required: true }">計算式の設定方法</div>
+			<div id="difficulty_attribute_sel" class="cf" data-bind="ntsSwitchButton: {
+						options: roundingRules,
+						optionsValue: 'code',
+						optionsText: 'name',
+						value: selectedDifficultyAtr,
+						enable: isNewMode }"></div>
+			<br/>
+			<div id="description_lbl">
+				<span >説明</span>
+				<hr/>
+			</div>
+			<br/>
+			<com:ko-if bind="selectedDifficultyAtr() == 0">
+				<div id="easy_setting_description">
+					<span>雇用、部門、職場、分類、職位、給与携帯など、マスタの値を条件に使用して、</span><br/>
+					<span style="margin-bottom:20px; display: inline-block;">計算式を簡単に設定することができます。</span><br/>
+					<span>マスタを使用しない、一律の設定をすることも可能です。</span>
+				</div>
+			</com:ko-if>
+			<com:ko-if bind="selectedDifficultyAtr() == 1">
+				<div id="advanced_setting_description">
+					<span>詳細な計算条件、計算式を設定することができます。</span>
+				</div>
+			</com:ko-if>
+			<br/>
+			<com:ko-if bind="selectedDifficultyAtr() == 0">
+				<div id="conditional_lbl" class="separate-vertical" data-bind="ntsFormLabel: {required: true }, disable: false">かんたん計算式でマスタによる条件分岐を利用する</div>
+				<div id="conditional_attribute_sel"  class="cf" data-bind="disable: false, ntsSwitchButton: {
+								options: roundingRules2,
+								optionsValue: 'code',
+								optionsText: 'name',
+								value: selectedConditionAtr,
+								enable: isNewMode }"></div>
+				<com:ko-if bind="selectedConditionAtr() == 0">
+					<div id="master_item_lbl" class="separate-vertical" data-bind="ntsFormLabel: {required: true }, enable: false">使用するマスタ</div>
+					<div id="combo-box" style="vertical-align: middle;" data-bind="ntsComboBox: {
+						options: comboBoxUseMaster().itemList,
+						optionsValue: 'code',
+						value: comboBoxUseMaster().selectedCode,
+						optionsText: 'name',
+						editable: false,
+						enable: false}"></div>
+				</com:ko-if>
+				<com:ko-if bind="selectedConditionAtr() == 1">
+					<div id="master_item_lbl" class="separate-vertical" data-bind="ntsFormLabel: {required: true }">使用するマスタ</div>
+					<div id="combo-box" style="vertical-align: middle;" data-bind="ntsComboBox: {
+						options: comboBoxUseMaster().itemList,
+						optionsValue: 'code',
+						value: comboBoxUseMaster().selectedCode,
+						optionsText: 'name',
+						editable: false,
+						enable: isNewMode}"></div>
+				</com:ko-if>
+			</com:ko-if>
+		</div>
+	</ui:composition>
+</body>
+</html>

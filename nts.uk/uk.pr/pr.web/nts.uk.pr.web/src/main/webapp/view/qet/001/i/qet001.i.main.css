@@ -1,0 +1,65 @@
+#sidebar-area {
+	width: 110px
+}
+.proceed {
+	margin-right: 200px;
+}
+.contents-area {
+	padding-top: 20px;
+	padding-left: 20px;
+}
+.left-content {
+	width: 280px;
+	border-radius: 5px;
+	height: 500px;
+	margin: 10px;
+	margin-right: 20px;
+	padding-left: 10px;
+	float: left;
+}
+.left-content.caret-background.caret-right:after {
+    display: none;
+}
+.search-grid > .ntsSearchBox > input.ntsSearchBox {
+	width: 200px;
+	margin: 10px 0 10px 10px;
+}
+.aggregate-table {
+	margin: 10px;
+}
+
+.right-content>div {
+	margin: 10px;
+}
+.name-input {
+    margin-left: 5px;
+}
+.name-input input {
+    width: 280px !important;
+}
+.code-input {
+    margin-left: 30px;
+}
+.head-end {
+    width: 100%;
+    height: 1px;
+    background: #B1B1B1;
+    margin-top: 4px;
+    margin-bottom: 6px;
+}
+.master-table-label {
+    float: left;
+}
+.sub-table-label {
+    float: left;
+    margin-left: 76px;
+}
+.switch-button-class {
+    margin-left: 75px;
+}
+#search-input > .ntsSearchBox {
+	width: 192px !important;
+}
+span.category-name {
+	font-size: 1.5rem;
+}

@@ -1,0 +1,16 @@
+@CHARSET "UTF-8";
+
+.placement-container {float:left; width: 960px; height: 640px; overflow:auto;}
+.placement-container.overflow {width: 977px; height: 657px;}
+.placement-row {overflow:visible; white-space:nowrap; font-size:0;}
+.placement-item {font-size:14px;font-size:1rem;display:inline-block; position:relative; background-color:#e0e0e0; width:150px; height:150px; margin: 0 10px 10px 0; border-radius: 10px; cursor: pointer; transition: background 0.1s, box-shadow 0.05s;}
+.placement-item:hover {background-color:#eaeaea;}
+.placement-item:active {box-shadow: 0 0 10px 0 rgba(0,0,0,0.4) inset; }
+.placement-item:before {content: ''; position: absolute; display: inline-block; top: 50%; left: 50%; width: 36px; height: 6px; margin: -3px 0 0 -18px; background-color: #aaa; border-radius: 1px; }
+.placement-item:after {content: ''; position: absolute; display: inline-block; top: 50%; left: 50%; width: 6px; height: 36px; margin: -18px 0 0 -3px; background-color: #aaa; border-radius: 1px; }
+.placement-item:hover:before,
+.placement-item:hover:after {background-color: #a0a0a0;}
+
+.btn-addcolumn {height: 630px;}
+.btn-addrow {width: 950px;}
+.btn-close {margin-left: 50px;}

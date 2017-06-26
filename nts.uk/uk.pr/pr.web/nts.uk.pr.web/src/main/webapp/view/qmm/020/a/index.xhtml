@@ -1,0 +1,244 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/sidebar.xhtml">
+		<ui:define name="sidebar-head">
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="qmm020.style.css" />
+			<com:scriptfile path="qmm020.a.start.js" />
+			<com:scriptfile path="qmm020.a.viewmodel.js" />
+			<com:scriptfile path="qmm020.a.service.js" />
+			<com:scriptfile path="../b/qmm020.b.viewmodel.js" />
+			<com:scriptfile path="../b/qmm020.b.service.js" />
+			<com:scriptfile path="../c/qmm020.c.viewmodel.js" />
+			<com:scriptfile path="../c/qmm020.c.service.js" />
+			<com:scriptfile path="../d/qmm020.d.viewmodel.js" />
+			<com:scriptfile path="../d/qmm020.d.service.js" />
+		</ui:define>
+
+		<ui:define name="sidebar">
+			<ul class="navigator">
+				<li><a href="#tabpanel-1">会社</a></li>
+				<li><a href="#tabpanel-2" class="active">雇用</a></li>
+				<li><a href="#tabpanel-3">部門</a></li>
+				<li><a href="#tabpanel-4">分類</a></li>
+				<li><a href="#tabpanel-5">職位</a></li>
+				<li><a href="#tabpanel-6">給与分類</a></li>
+				<li><a href="#tabpanel-7">個人</a></li>
+			</ul>
+			<div class="divider"></div>
+			<span>ログインをしなおしてください</span>
+			<button>?</button>
+		</ui:define>
+		<ui:define name="sidebar-content">
+			<div id="tabpanel-1" role="tabpanel" data-bind="with: viewmodelB" style="display: none;">
+				<div class="sidebar-content-header">
+					<span class="title">会社</span>
+					<button class="proceed" data-bind="click : register">登録</button>
+					<button>個人の設定状況確認</button>
+					<button id="A_BTN_003"
+						data-bind="click : $parent.viewmodelA.openMainLDialog">利用単位の設定</button>
+					<button>マスタ修正ログ</button>
+				</div>
+				<div class="screen-b">
+					<ui:include src="../b/index.xhtml" />
+				</div>
+			</div>
+			<div id="tabpanel-2" role="tabpanel" data-bind="with : viewmodelC" style="display: none;">
+				<div class="sidebar-content-header">
+					<span class="title">雇用</span>
+					<button class="proceed">登録</button>
+					<button>個人の設定状況確認</button>
+					<button id="A_BTN_003"
+						data-bind="click : $parent.viewmodelA.openMainLDialog">利用単位の設定</button>
+					<button>マスタ修正ログ</button>
+				</div>
+				<div class="screen-c">
+					<ui:include src="../c/index.xhtml" />
+				</div>
+			</div>
+			<div id="tabpanel-3" role="tabpanel" data-bind="with: viewmodelD" style="display: none;">
+				<div class="sidebar-content-header">
+					<span class="title">部門</span>
+					<button class="proceed">登録</button>
+					<button>個人の設定状況確認</button>
+					<button id="A_BTN_003"
+						data-bind="click : $parent.viewmodelA.openMainLDialog">利用単位の設定</button>
+					<button>マスタ修正ログ</button>
+				</div>
+				<div class="screen-d">
+					<ui:include src="../d/index.xhtml" />
+				</div>
+			</div>
+			<div id="tabpanel-4" role="tabpanel" style="display: none;"> 
+				<!--<div class="sidebar-content-header" data-bind="with: modelA">
+					<span class="title">分類</span>
+					<button class="proceed">登録</button>
+					<button>個人の設定状況確認</button>
+					<button id="A_BTN_003" data-bind="click:openLDialog">利用単位の設定</button>
+					<button>マスタ修正ログ</button>
+				</div>
+				<div class="contents-area">
+					<div style="margin-left: 10px;" class="left-content">
+						<div class="bg-green caret-right caret-background"
+							style="float: left; width: 250px; height: 300px; margin: 20px 50px;">
+							<button id="E_BTN_003" style="margin: 20px 20px" data-bind="">履歴追加</button>
+							<button id="E_BTN_004" style="margin: 20px 20px" data-bind="">履歴編集</button>
+							<div style="margin: 10px 20px;">
+								<div style="width: 250px;" id="C_LST_002"
+									data-bind="ntsListBox: {
+															options: itemList,
+															optionsValue: 'code',
+															optionsText: 'name',
+															multiple: false,	
+															value: selectedCode,
+															enable: isEnable(),
+															rows:4,
+															required: true,
+															columns: [
+																{ prop: 'name', length: 10 }
+															]}">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div style="margin: 10px 20px;" class="right-content">
+						<div class="form-label">
+							<label id="LBL_004">分類に明細書を紐ずける</label>
+							<HR
+								style="display: block; margin-top: 1.2em; margin-left: -1em; width: 800px;" />
+						</div>
+						<div style="margin-top: 20px;">
+							<input id="E_INP_001" class='ntsSearchBox' type='text'
+								placeholder="コード.名称で詮索" />
+							<button class='search-btn' data-bind="click: searchEmployment">詮索</button>
+						</div>
+						<div class="cf"
+							style="float: left; width: 700px; height: 100px; margin-top: 20px;">
+							<table id="E_LST_001" class="ui-iggrid-headertable"></table>
+						</div>
+					</div>
+				</div> -->
+			</div>
+			<div id="tabpanel-5" role="tabpanel" style="display: none;">
+			<!-- <div class="sidebar-content-header" data-bind="with: modelA">
+					<span class="title">職位</span>
+					<button class="proceed">登録</button>
+					<button>個人の設定状況確認</button>
+					<button id="A_BTN_003" data-bind="click:openLDialog">利用単位の設定</button>
+					<button>マスタ修正ログ</button>
+				</div>
+				<div class="contents-area">
+					<div style="margin-left: 10px;" class="left-content">
+						<div class="bg-green caret-right caret-background"
+							style="float: left; width: 250px; height: 300px; margin: 20px 50px;">
+							<button id="F_BTN_003" style="margin: 20px 20px"
+								data-bind="">履歴追加</button>
+							<button id="F_BTN_004" style="margin: 20px 20px"
+								data-bind="">履歴編集</button>
+							<div style="margin: 10px 20px;">
+								<div style="width: 250px;" id="F_LST_002"
+									data-bind="ntsListBox: {
+											options: itemList,
+											optionsValue: 'code',
+											optionsText: 'name',
+											multiple: false,	
+											value: selectedCode,
+											enable: isEnable(),
+											rows:5,
+											required: true,
+											columns: [
+												{ prop: 'name', length: 10 }
+											]}">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div style="margin: 10px 20px;" class="right-content">
+						<div class="form-label">
+							<label id="F_LBL_004">職位に明細書を紐ずける</label>
+							<HR
+								style="display: block; margin-top: 1.2em; margin-left: -1em; width: 800px;" />
+						</div>
+						<div style="margin-top: 20px;">
+							<input id="F_INP_001" class='ntsSearchBox' type='text'
+								placeholder="コード.名称で詮索" />
+							<button class='search-btn' data-bind="click: searchEmployment">詮索</button>
+						</div>
+						<div class="cf">
+							<div style="float: left; width: 700px; margin: 20px 10px;">
+								<table id="F_LST_001" class="ui-iggrid-headertable"></table>
+							</div>
+						</div>
+					</div>
+				</div> -->
+			</div>
+			<div id="tabpanel-6" role="tabpanel" style="display: none;">
+				<!--<div class="sidebar-content-header" data-bind="with: modelA">
+					<span class="title">給与分類</span>
+					<button class="proceed">登録</button>
+					<button>個人の設定状況確認</button>
+					<button id="A_BTN_003" data-bind="click:openLDialog">利用単位の設定</button>
+					<button>マスタ修正ログ</button>
+				</div>
+				<div class="contents-area">
+					<div style="margin-left: 10px;" class="left-content">
+						<div class="bg-green caret-right caret-background"
+							style="float: left; width: 250px; height: 300px; margin: 20px 50px;">
+							<button id="G_BTN_003" style="margin: 20px 20px" data-bind="">履歴追加</button>
+							<button id="G_BTN_004" style="margin: 20px 20px" data-bind="">履歴編集</button>
+							<div style="margin: 10px 20px;">
+								<div style="width: 250px;" id="G_LST_002"
+									data-bind="ntsListBox: {
+															options: itemList,
+															optionsValue: 'code',
+															optionsText: 'name',
+															multiple: false,	
+															value: selectedCode,
+															enable: isEnable(),
+															rows:5,
+															required: true,
+															columns: [
+																{ prop: 'name', length: 10 }
+															]}">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div style="margin: 10px 20px;" class="right-content">
+						<div class="form-label">
+							<label id="G_LBL_004">給与分類に明細書を紐ずける</label>
+							<HR
+								style="display: block; margin-top: 1.2em; margin-left: -1em; width: 800px;" />
+						</div>
+						<div style="margin-top: 20px;">
+							<input id="G_INP_001" class='ntsSearchBox' type='text'
+								placeholder="コード.名称で詮索" />
+							<button class='search-btn' data-bind="click: searchEmployment">詮索</button>
+						</div>
+						<div class="cf">
+							<div style="float: left; width: 700px; margin: 20px 10px;">
+								<table id="G_LST_001" class="ui-iggrid-headertable"></table>
+							</div>
+						</div>
+					</div>
+				</div>-->
+			</div>
+			<div id="tabpanel-7" role="tabpanel" style="display: none;">
+				<div class="sidebar-content-header">
+					<span class="title">個人</span>
+					<button class="proceed">登録</button>
+					<button>個人の設定状況確認</button>
+					<button id="A_BTN_003" data-bind="click: viewmodelA.openMainLDialog">利用単位の設定</button>
+					<button>マスタ修正ログ</button>
+				</div>
+				<div class="contents-area">Content 7</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,16 @@
+@import url("../a/base.css");
+
+#contents-area {
+	text-align: center;
+}
+
+#content-header {
+	position: relative;
+	padding: 10px;
+	border-bottom: solid 1px #B1B1B1;
+	display: inline-block;
+}
+
+.K_Lst_TaxLimitList {
+	margin-top: 10px;
+}

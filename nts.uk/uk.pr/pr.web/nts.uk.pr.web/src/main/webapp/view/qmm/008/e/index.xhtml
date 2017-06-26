@@ -1,0 +1,393 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>
+				var dialogSize = {
+					width : 1300,
+					height : 850
+				};
+			</script>
+
+			<com:ValidatorScript>
+				nts.uk.ctx.pr.core.dom.insurance.OfficeCode
+				nts.uk.ctx.pr.core.dom.insurance.OfficeName
+				nts.uk.ctx.pr.core.dom.insurance.ShortName
+				nts.uk.ctx.pr.core.dom.insurance.PicName
+				nts.uk.ctx.pr.core.dom.insurance.PicPosition
+				nts.uk.ctx.pr.core.dom.insurance.PotalCode
+				nts.uk.ctx.pr.core.dom.insurance.PhoneNumber
+				<!-- province address -->
+				nts.uk.shr.com.primitive.Memo
+				nts.uk.ctx.pr.core.dom.insurance.Address1
+				nts.uk.ctx.pr.core.dom.insurance.Address2
+				nts.uk.ctx.pr.core.dom.insurance.AddressKana1
+				nts.uk.ctx.pr.core.dom.insurance.AddressKana2
+				
+				<!-- add new primitive -->
+				nts.uk.ctx.pr.core.dom.insurance.OfficeRefCode1
+				nts.uk.ctx.pr.core.dom.insurance.OfficeRefCode2
+				nts.uk.ctx.pr.core.dom.insurance.WelfarePensionFundCode
+				nts.uk.ctx.pr.core.dom.insurance.OfficePensionFundCode
+				nts.uk.ctx.pr.core.dom.insurance.CityCode
+				nts.uk.ctx.pr.core.dom.insurance.OfficeSign
+				nts.uk.ctx.pr.core.dom.insurance.HealthInsuOfficeCode
+				nts.uk.ctx.pr.core.dom.insurance.HealthInsuAssoCode
+				
+  			</com:ValidatorScript>
+
+			<com:stylefile path="main.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="../../../base/simplehistory/service.js" />
+			<com:scriptfile path="../../../base/postcode/service.js" />
+			<com:scriptfile path="../b/qmm008.b.service.js" />
+			<com:scriptfile path="qmm008.e.service.js" />
+			<com:scriptfile path="qmm008.e.vm.js" />
+			<com:scriptfile path="qmm008.e.start.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area">
+				<button class="btn_width new_btn" data-bind="click: addNewWithDirtyCheck">新規</button>
+				<button data-bind="click: save,enable: $root.errors.isEmpty" class="proceed btn_width">登録</button>
+				<button class="btn_width">印刷</button>
+				<button data-bind="click: removeWithDirtyCheck, enable: deleteButtonControll()"
+					class="delete_btn btn_width danger">削除</button>
+				<button class="btn_width" data-bind="click: closeDialogWithDirtyCheck">閉じる</button>
+			</div>
+			<div id="contents-area">
+				<!-- left -->
+				<div style="float: left;">
+					<div class="bg-green caret-right caret-background"
+						style="float: left; width: 340px; height: 580px; padding: 20px 20px; margin: 15px 15px;">
+						<i class="icon icon-searchbox"></i>
+						<div
+							data-bind="ntsSearchBox: {comId: 'multi-list', items: officeItems, selected: selectedOfficeCode, selectedKey: 'code', fields: ['name', 'code']}" />
+						<div style="padding-top: 10px;">
+							<table id="single-list"
+								data-bind="ntsGridList: {
+												height: 530,
+												width: 330,
+												options: officeItems,
+												optionsValue: 'code',
+												columns: columns2,
+												multiple: false,
+												value: selectedOfficeCode
+																}"
+								class="cf"></table>
+						</div>
+					</div>
+				</div>
+				<!-- right -->
+				<div style="margin: 10px 10px; float: left;">
+					<div style="padding-right: 10px;">
+						<div id="tab-panel"
+							data-bind="ntsTabPanel: { dataSource: tabs, active: selectedTab }">
+							<div data-bind="with: officeModel" class="tab-content-1">
+								<table class="border_none">
+									<tr>
+										<td class="border_none"><div style="margin-top: 20px;"
+												data-bind="ntsFormLabel: {required: true,constraint:['OfficeCode','OfficeName'] }">コード/名称</div></td>
+										<td class="border_none padding_top"><div>
+												<input id="officeCode" class ="save-error" data-name="コード"
+													data-bind="ntsTextEditor: {
+														value: officeCode ,
+														constraint: 'OfficeCode',
+														required: true, 
+														option: $parent.textInputOption,
+														enable : $parent.enabled()}" />
+											</div></td>
+										<td colspan="2" class="border_none padding_top padding_left"><div>
+												<input id ="officeName" class ="save-error" data-name="名称"
+													data-bind="ntsTextEditor: {
+ 														value: officeName ,
+ 														constraint: 'OfficeName',
+ 														required: true,  
+														option: {textmode: 'text',width: '200',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td class="border_none"><div style="margin-top: 20px;"
+												data-bind="ntsFormLabel: {constraint:'ShortName'}">略名</div></td>
+										<td colspan="3" class="border_none padding_top">
+											<div>
+												<input
+												class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: shortName ,
+														constraint: 'ShortName',
+														option: {textmode: 'text',width: '150',textalign: 'left'}}" />
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="border_none"><div style="margin-top: 20px;"
+												data-bind="ntsFormLabel: {constraint:'PicName'}">代表者名</div></td>
+										<td colspan="3" class="border_none padding_top">
+											<div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: PicName ,
+														constraint: 'PicName',
+														option: {textmode: 'text',width: '150',textalign: 'left'}}" />
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td
+											class="no_left_border no_right_border no_top_border border_bottom "><div
+												style="margin-top: 20px; margin-bottom: 10px;"
+												data-bind="ntsFormLabel: {required: true,constraint:'PicPosition'}">代表者職位</div></td>
+										<td colspan="3"
+											class="no_left_border no_right_border no_top_border border_bottom padding_top ">
+											<div>
+												<input id = "picPosition" class ="save-error" data-name = "代表者職位"
+													data-bind="ntsTextEditor: {
+														value: PicPosition ,
+														constraint: 'PicPosition',
+														required: true, 
+														option: {textmode: 'text',width: '150',textalign: 'left'}}" />
+											</div>
+										</td>
+										<td
+											class="no_left_border no_right_border no_top_border border_bottom padding_top line_basic_info"></td>
+									</tr>
+									<tr>
+										<td class="border_none"><div style="margin-top: 20px;"
+												data-bind="ntsFormLabel: {constraint:'PotalCode'}">郵便番号</div></td>
+										<td class="border_none padding_top"><div>
+												<input class="save-error" id="inp_postCode" data-name="郵便番号"
+													data-bind="ntsTextEditor: {
+														value: potalCode ,
+														constraint: 'PotalCode', 
+														option: {textmode: 'text',width: '80',textalign: 'left'}}" />
+											</div></td>
+										<td class="padding_top">
+											<button data-bind="click: searchPostCode"><label class="labelRed">〒</label>検索</button>
+										</td>
+									</tr>
+									<tr>
+										<td class="border_none"><div style="margin-top: 20px;"
+												data-bind="ntsFormLabel: {constraint:'Address1'}">住所 １</div></td>
+										<td colspan="3" class="border_none padding_top"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: address1st ,
+														constraint: 'Address1', 
+														option: {textmode: 'text',width: '300',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td class="border_none kana_address" ><div style="border: none !important" data-bind="ntsFormLabel: {constraint:'AddressKana1'}">カナ１</div></td>
+										<td colspan="3" class="border_none padding_top"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: kanaAddress1st ,
+														constraint: 'AddressKana1', 
+														option: {textmode: 'text',width: '300',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td class="border_none"><div style="margin-top: 20px;"
+												data-bind="ntsFormLabel: {constraint:'Address2'}">住所 ２</div></td>
+										<td colspan="3" class="border_none padding_top"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: address2nd ,
+														constraint: 'Address2', 
+														option: {textmode: 'text',width: '300',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td class="border_none kana_address"> <div style="border: none !important" data-bind="ntsFormLabel: {constraint:'AddressKana2'}">カナ ２</div></td>
+										<td colspan="3" class="border_none padding_top"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: kanaAddress2nd ,
+														constraint: 'AddressKana2', 
+														option: {textmode: 'text',width: '300',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td class="border_none"><div style="margin-top: 20px;"
+												data-bind="ntsFormLabel: {constraint:'PhoneNumber'}">電話番号</div></td>
+										<td colspan="3" class="border_none padding_top"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: phoneNumber ,
+														constraint: 'PhoneNumber', 
+														option: {textmode: 'text',width: '150',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+
+								</table>
+							</div>
+							<div data-bind="with: officeModel" class="tab-content-2">
+								<table class="border_none">
+									<tr>
+										<td colspan="6" class="border_bottom text_head">事業所整理番号</td>
+									</tr>
+									<tr>
+										<td colspan="2" class="border_none"><div
+												class="margin_top_10" data-bind="ntsFormLabel: {}">健康保険事務所整理番号</div></td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: healthInsuOfficeRefCode1st ,
+														constraint:  'OfficeRefCode1',
+														option: {textmode: 'text',width: '50',textalign: 'left'}}" />
+											</div></td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: healthInsuOfficeRefCode2nd ,
+														constraint: 'OfficeRefCode2', 
+														option: {textmode: 'text',width: '70',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td colspan="2" class="border_none"><div
+												class="margin_top_10" data-bind="ntsFormLabel: {}">厚生年金事務所整理番号</div></td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: pensionOfficeRefCode1st ,
+														constraint:  'OfficeRefCode1', 
+														option: {textmode: 'text',width: '50',textalign: 'left'}}" />
+											</div></td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: pensionOfficeRefCode2nd ,
+														constraint: 'OfficeRefCode2', 
+														option: {textmode: 'text',width: '70',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td colspan="6" class="border_bottom text_head">厚生年金基金</td>
+									</tr>
+
+									<tr>
+										<td colspan="2" class="border_none"><div
+												class="margin_top_10" data-bind="ntsFormLabel: {}">厚生年金基金番号</div></td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsNumberEditor: {
+														value: welfarePensionFundCode ,
+														constraint: 'WelfarePensionFundCode', 
+														option: {textmode: 'text',width: '60',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td colspan="2" class="border_none"><div
+												class="margin_top_10" data-bind="ntsFormLabel: {}">厚生年金基金事務所番号</div></td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: officePensionFundCode ,
+														constraint : 'OfficePensionFundCode', 
+														option: {textmode: 'text',width: '80',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td colspan="6" class="border_bottom text_head">磁気媒体用</td>
+									</tr>
+									<tr>
+										<td colspan="" class="border_none"><div
+												class="margin_top_10" data-bind="ntsFormLabel: {}">健康保険</div></td>
+										<td>郡市区府号:</td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: healthInsuCityCode , 
+														constraint : 'CityCode',
+														option: {textmode: 'text',width: '40',textalign: 'left'}}" />
+											</div></td>
+										<td>事業所記号:</td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: healthInsuOfficeSign ,
+														constraint: 'OfficeSign', 
+														option: {textmode: 'text',width: '60',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td colspan="" class="border_none"><div
+												class="margin_top_10" data-bind="ntsFormLabel: {}">厚生年金</div></td>
+										<td>郡市区府号:</td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: pensionCityCode ,
+														constraint : 'CityCode', 
+														option: {textmode: 'text',width: '40',textalign: 'left'}}" />
+											</div></td>
+										<td>事業所記号:</td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: pensionOfficeSign ,
+														constraint: 'OfficeSign', 
+														option: {textmode: 'text',width: '60',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td colspan="6" class="border_bottom text_head"></td>
+									</tr>
+									<tr>
+										<td colspan="2" class="border_none"><div
+												class="margin_top_10" data-bind="ntsFormLabel: {}">健康保険事業所番号</div></td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsNumberEditor: {
+														value: healthInsuOfficeCode ,
+														constraint: 'HealthInsuOfficeCode', 
+														option: {textmode: 'text',width: '70',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td colspan="2" class="border_none"><div
+												class="margin_top_10" data-bind="ntsFormLabel: {}">健康具合事業所番号</div></td>
+										<td class="border_none"><div>
+												<input class ="save-error"
+													data-bind="ntsTextEditor: {
+														value: healthInsuAssoCode ,
+														constraint: 'HealthInsuAssoCode', 
+														option: {textmode: 'text',width: '60',textalign: 'left'}}" />
+											</div></td>
+									</tr>
+									<tr>
+										<td colspan="2" class="border_none"><div
+												class="margin_top_10" data-bind="ntsFormLabel: {}">メモ</div></td>
+										<td colspan="4" class="border_none"><TEXTAREA class ="save-error"
+												id="input-text" rows="4" cols="60"
+												data-bind="ntsMultilineEditor: {
+													value: memo,
+													constraint: 'Memo',
+													option: {
+														resizeable: false,
+														placeholder: '',
+														width: '350',
+														textalign: 'left'
+														}
+													}"></TEXTAREA>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -48,7 +48,6 @@ public class JpaEraRepository extends JpaRepository implements EraRepository, Ja
 
 	@Override
 	public List<Era> getEras() {
-		// TODO Auto-generated method stub
 		return this.queryProxy().query(SEL_ALL_LIST_ERA, CmnmtEra.class).getList(c -> toDomain(c));
 	}
 

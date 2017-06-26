@@ -1,0 +1,77 @@
+.content-1 {
+	margin-left: 25px;
+	margin-bottom: -14px
+}
+
+.content-left {
+	float: left;
+}
+
+.content-right {
+	float: left;
+	margin-left: 10px;
+}
+
+#lbl_navigationMessage1, #lbl_navigationMessage2 {
+	margin: 5px 0px
+}
+
+#btn_execute {
+	margin-left: 370px;
+	margin-top: 1px;
+}
+
+#btn_close {
+	margin-left: 80px
+}
+
+.caret-right {
+	float: left;
+	margin-left: -1px;
+	margin-top: 210px;
+	font-size: 5rem;
+	color: #97d44a
+}
+
+.caret-right:after {
+	border-width: 1.4em 0.5em;
+}
+
+#hr-vertical {
+	float: left;
+	margin-left: 30px;
+	height: 590px;
+}
+
+#hr-horizontal {
+	float: left;
+	width: 100%;
+}
+
+#icon1 {
+	margin-top: 87px;
+	margin-left: 35px
+}
+
+#icon2 {
+	margin-top: 87px;
+	margin-left: 553px
+}
+
+.searchBox {
+	width: 400px;
+	margin-left: 42px;
+	margin-bottom: 10px
+}
+
+.search-btn {
+	width: 90px;
+	padding-top: 7px;
+	margin: 0px !important;
+}
+
+.ntsSearchBox {
+	width: 300px !important;
+	margin-right: 10px;
+	margin-top: 3px;
+}

@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script
+				src="../../../../lib/generic/igniteui/js/infragistics.core.js"></script>
+			<script src="../../../../lib/generic/igniteui/js/infragistics.lob.js"></script>
+
+			<link rel="stylesheet" type="text/css" href="style.css" />
+			<script src="start.js" />
+			<script src="viewmodel.js" />
+			<script src="service.js" />
+			<script>var dialogSize = { width: 570, height: 300 };</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div class="form-label required " data-bind="ntsFormLabel: {}">追加する行の種類を選択</div>
+				<br />
+			</div>
+			<form>
+				<div>
+					<fieldset>
+						<div class="radiobox"
+							data-bind="ntsRadioBoxGroup: {
+								options: itemList,
+								optionsValue: 'id',
+								optionsText: 'name',
+								value: selectedCode,
+								enable: enable}"></div>
+					</fieldset>
+				</div>
+			</form>
+			<hr></hr>
+			<div>
+				<button class="x-large proceed" data-bind="click: chooseItem">設定</button>
+				<button class="large" data-bind="click: closeDialog">キャンセル</button>
+			</div>
+		</ui:define>
+
+	</ui:composition>
+</body>
+</html>

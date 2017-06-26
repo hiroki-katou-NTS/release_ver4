@@ -1,0 +1,163 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="D_Lbl_DeductionItem"
+				data-bind="ntsFormLabel: {  required: true }">控除項目</div>
+		</div>
+		<div class="divLineCol2">
+			<div id="D_Sel_DeductionItem" data-name="控除項目"
+				data-bind="ntsComboBox: {
+										options: D_Sel_DeductionItem,
+										optionsValue: 'code',
+										value: CurrentDeductAtr,
+										optionsText: 'name',
+										editable: isEditable,
+										enable: isEnable,
+										columns: [
+											{ prop: 'name', length: 10 },
+										]}">
+			</div>
+		</div>
+	</div>
+
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="D_Lbl_ZeroDisplay"
+				data-bind="ntsFormLabel: {  required: false }">ゼロ表示区分</div>
+		</div>
+		<div class="divLineCol2">
+			<div id="D_Sel_ZeroDisplayIndicator" class="cf switchNomalSize"
+				data-bind="ntsSwitchButton: {
+										options: roundingRules_ZeroDisplayIndicator,
+										optionsValue: 'code',
+										optionsText: 'name',
+										value: CurrentZeroDisplaySet,
+										enable: enable }"></div>
+			<div id="D_Sel_NoDisplayNames"
+				data-bind="ntsCheckBox: { checked: Checked_NoDisplayNames, enable: enable, text: '項目名も表示しない' , enable:noDisplayNames_Enable }"></div>
+
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="D_Lbl_ErrorRange"
+				data-bind="ntsFormLabel: {  required: false }">エラー範囲</div>
+		</div>
+		<div class="divLineCol2">
+			<div id="D_Sel_ErrorUpper"
+				data-bind="ntsCheckBox: { checked: Checked_ErrorUpper, enable: enable, text: '' }"></div>
+			<div data-bind="with: currencyeditor_ErrorUpper">
+				<input id="D_Inp_ErrorUpper" data-name="社会保険区分" class="save-error"
+					data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable:enable }" />
+			</div>
+			<label id="D_Lbl_ExceedsError">を超える場合にエラーとする</label>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1"></div>
+		<div class="divLineCol2">
+			<div id="D_Sel_AlarmHigh"
+				data-bind="ntsCheckBox: { checked: Checked_AlarmHigh, enable: enable, text: '' }"></div>
+			<div data-bind="with: currencyeditor_AlarmUpper">
+				<input id="D_Inp_AlarmUpper" data-name="社会保険区分" class="save-error"
+					data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable:enable }" />
+			</div>
+			<label id="D_Lbl_ErrorLess">未満の場合にエラーとする</label>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="D_Lbl_AlarmRange"
+				data-bind="ntsFormLabel: {  required: false }">アラーム範囲</div>
+		</div>
+		<div class="divLineCol2 verticalAlignBottom">
+			<div id="D_Sel_ErrorLower"
+				data-bind="ntsCheckBox: { checked: Checked_ErrorLower, enable: enable, text: '' }"></div>
+			<div data-bind="with: currencyeditor_ErrorLower">
+				<input id="D_Inp_ErrorLower" data-name="固定的賃金" class="save-error"
+					data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable:enable }" />
+			</div>
+			<label id="D_Lbl_ExceedsAlarm">を超える場合にアラームとする</label>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1"></div>
+		<div class="divLineCol2">
+			<div id="D_Sel_AlarmLower"
+				data-bind="ntsCheckBox: { checked: Checked_AlarmLower, enable: enable, text: '' }"></div>
+			<div data-bind="with: currencyeditor_AlarmLower">
+				<input id="D_Inp_AlarmLower" data-name="固定的賃金" class="save-error"
+					data-bind="ntsNumberEditor: {
+										value: value,
+										constraint: constraint,
+										option: option,
+										enable:enable }" />
+			</div>
+			<label id="D_Lbl_AlarmLess">未満の場合にアラームとする</label>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1"></div>
+		<div class="divLineCol2">
+			<label id="D_Lbl_NavigationMessage1">※エラーの場合は、データが登録されません。 <br />
+				アラームの場合は、メッセージが表示されます。（データが登録されます）
+			</label>
+		</div>
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="D_Lbl_PeriodAndCycle"
+				data-bind="ntsFormLabel: {  required: false }">項目の有効期間とサイクルの設定
+			</div>
+		</div>
+		<div class="divLineCol2">
+			<button id="D_Btn_PeriodSetting" class="small"
+				data-bind="click:openHDialog,enable: D_Btn_PeriodSetting_enable">有効期間設定</button>
+			<label id="D_Lbl_SettingClassification"
+				data-bind="text:D_Lbl_SettingClassification_Text">設定区分 </label>
+
+		</div>
+
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1">
+			<div id="D_Lbl_Breakdown"
+				data-bind="ntsFormLabel: {  required: false }">内訳</div>
+		</div>
+		<div class="divLineCol2">
+			<button id="D_Btn_BreakdownSetting" class="small"
+				data-bind="click:openIDialog,enable: D_Btn_BreakdownSetting_enable">内訳項目設定</button>
+			<label id="D_Lbl_BreakdownItem"
+				data-bind="text:D_Lbl_BreakdownItem_Text">サイクル設定区分</label>
+		</div>
+
+	</div>
+	<div class="divLine">
+		<div class="divLineCol1 verticalAlignTop">
+			<div id="D_Lbl_Remarks"
+				data-bind="ntsFormLabel: {  required: false }">備考</div>
+		</div>
+		<div class="divLineCol2">
+			<textarea id="D_Inp_Remarks" data-name="備考" class="save-error"
+				data-bind="ntsMultilineEditor: { value: CurrentMemo , constraint: 'Memo' }" />
+		</div>
+	</div>
+</body>
+</html>
