@@ -19,6 +19,7 @@ import nts.uk.shr.com.time.japanese.JapaneseErasAdapter;
 @Stateless
 public class JpaEraRepository extends JpaRepository implements EraRepository, JapaneseErasAdapter {
 	private static final String SEL_1 = "SELECT e FROM CmnmtEra e";
+	private static final String SEL_ALL_LIST_ERA = "SELECT e FROM CmnmtEra e ORDER BY e.startDate ";
 	private static final String SEL_LIST_ERA = "SELECT e.era_Name, e.era_Mark, e.startDate, e.end_D FROM CmnmtEra e ORDER BY e.startDate ";
 	private static final String SEL_LATEST_ERA = SEL_1 + " WHERE e.end_D = :endDate";
 	private static final String SEL_STARTDATE_ERAMASTER = SEL_1 + " WHERE e.startDate > :startDate";
@@ -47,8 +48,7 @@ public class JpaEraRepository extends JpaRepository implements EraRepository, Ja
 
 	@Override
 	public List<Era> getEras() {
-		// TODO Auto-generated method stub
-		return this.queryProxy().query(SEL_LIST_ERA, CmnmtEra.class).getList(c -> toDomain(c));
+		return this.queryProxy().query(SEL_ALL_LIST_ERA, CmnmtEra.class).getList(c -> toDomain(c));
 	}
 
 	// @Override
