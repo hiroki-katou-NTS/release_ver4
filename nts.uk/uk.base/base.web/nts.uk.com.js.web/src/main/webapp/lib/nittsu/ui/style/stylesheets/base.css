@@ -1884,6 +1884,7 @@ button.nts-switch-button[disabled]:hover {
   cursor: default;
   user-select: none;
   opacity: 0.8;
+  color: gray;
 }
 /* line 67, ../sass/components/_radiobox.scss */
 .ntsRadioBox input[type="radio"][disabled] + span {
