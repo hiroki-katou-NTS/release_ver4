@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="catalog.js" />
+			</ui:define>
+			<ui:define name="content">				
+				<div id="contents-area" class="cf">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Overview Utility</h1>
+						<article>
+							<h2>What is a utility?</h2>
+							<p>Utilities is available functions that often used to serve for a special task. Because it is often used by everyone, it is created for Consistent and easy for maintenance</p>
+							<note style="width: 50%;">Utilities created by Kiban team and still in process. If you have any requirement for utilities, please contact Kiban team. If you change or fix it on your own it'll break Consistent</note>
+							<pre><![CDATA[//Try to paste this to console
+nts.uk.text.removeFromStart("0000000011", "000");
+Result: "0011"]]></pre>
+						</article>
+						<article>
+							<h2>List of main utility modules</h2>
+							<ul>
+								<li><b>Common utility:</b> utilities not in below list.</li>
+								<li><b>Text utility:</b> utilities for work with string, text</li>
+								<li><b>Number utility:</b> utilities for work with number</li>
+								<li><b>Time utility:</b> utilities for work with time, date</li>
+								<li><b>Request utility:</b> utilities for work request to server</li>
+							</ul>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Knock out tags</h1>
+						<h2>In this group have custom tags for knock out extension tag</h2>
+						<div class="feature-box"><div class="header"><h3>ko</h3></div><div class="content">
+						<p>for bind a knock out tag.</p>
+						<pre><![CDATA[//Usage
+<com:ko bind="items" tag ="foreach"><div data-bind="text: $data"></div></com:ko>]]></pre></div></div>
+						<div class="feature-box"><div class="header"><h3>ko-foreach</h3></div><div class="content">
+						<p>For bind with foreach.</p>
+						<pre><![CDATA[//Usage
+<com:ko-foreach bind="items">
+	<div data-bind="text: $data"></div>
+</com:ko-foreach>]]></pre></div></div>
+						<div class="feature-box"><div class="header"><h3>ko-if</h3></div><div class="content">
+						<p>For bind with condition.</p>
+						<pre><![CDATA[//Usage
+<com:ko-if bind="visible">
+	<div>Visibled</div>
+</com:ko-if>
+<com:ko-if bind="selectedCode() === 1">
+	<div>Visibled</div>
+</com:ko-if>]]></pre></div></div>
+<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binded</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+									<h3>ko tag</h3>
+<com:ko bind="items" tag ="foreach"><div data-bind="text: $data"></div></com:ko>
+<hr/>
+<h3>ko-foreach tag</h3>
+<com:ko-foreach bind="items">
+	<div data-bind="text: $data"></div>
+</com:ko-foreach>
+<hr/>
+<h3>ko-if tag</h3>
+<com:ko-if bind="visible">
+	<div>Visibled</div>
+</com:ko-if>
+<hr/>
+<h3>ko-if tag version 2</h3>
+<com:ko-if bind="selectedCode() === 1">
+	<div>Visibled</div>
+</com:ko-if>
+<hr/>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[__viewContext.ready(function () {
+    var x = {
+        items: [ko.observable(1234), ko.observable("test")],
+        visible: ko.observable(true),
+        selectedCode: ko.observable(2)
+    };
+    
+    this.bind(x);
+    
+});]]></pre>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

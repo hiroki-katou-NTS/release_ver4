@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:stylefile path="layout.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				
+            </ui:define>
+            
+            <ui:define name="content">
+				<div id="functions-area">
+				</div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Layout</h1>
+						<article class="cf">
+							<div class="control-group">
+								<span class="label larger-font">職業性ストレス簡易調査票 簡略版(23項目)</span>
+							</div>
+							<div class="table">
+								<div class="cell left-col">
+									<div data-bind="ntsFormLabel: {}">共通オプション機能</div>
+								</div>
+								<div class="cell">
+									<div data-bind="ntsCheckBox: { checked: true }">Enable</div>
+								</div>
+							</div>
+							<hr/>
+							<div class="table">
+								<div class="cell left-col">
+									<div data-bind="ntsFormLabel: {}">共通オプション機能</div>
+								</div>
+								<div class="cell halign-center">
+									<span class="larger-font">ストレスチェック種類(任意)</span>
+									<hr/>
+									<span class="larger-font">新職業性ストレス簡易調査票 標準版(120項目)</span>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

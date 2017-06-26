@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="catalog/catalog.css" />
+				<com:scriptfile path="catalog/start.js" />
+				<com:scriptfile path="catalog/catalog.js" />
+				<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+				
+			</ui:define>
+			<ui:define name="content">				
+				<div id="contents-area" class="cf">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Get start!</h1>
+						<h2>Create your first page</h2>
+						<p>Create a new .xhtml page. We'll use .xhtml instead of .html because our page must be "well-formed" (<a target="_blank" href="http://www.w3schools.com/html/html_xhtml.asp">more</a>).<br/>
+						In short, just copy/paste following code to your new page:</p>
+						<pre><![CDATA[<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:ValidatorScript>
+					nts.uk.shr.com.primitive.PersonId
+				</com:ValidatorScript>
+				<com:stylefile path="qpp044.a.css" />
+				<com:scriptfile path="qpp044.a.js" />
+				<com:scriptfile path="qpp044.a.js" />
+				<com:scriptfile path="qpp044.a.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="functions-area">
+				</div>
+				<div id="contents-area">
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>]]></pre>
+						<h2>Explain code</h2>
+						<h3>Base page (Master page)</h3>
+						<pre><![CDATA[<ui:composition template="../../../../master/base.xhtml">]]></pre>
+						<p>We'll use a master, which delare common javascipt and css files for us (and do some more but I won't say it here, talk with Kiban team if you need any other information).</p>
+						<ul>
+							<li><b>base.xhtml:</b> if your page is a page or subwindow</li>
+							<li><b>dialog.xhtml:</b> if your page is a subwindow only</li>
+						</ul>
+						<h3>Header</h3>
+						<p>Whatever you defined inside the following code will get in head</p>
+						<pre><![CDATA[<ui:define name="htmlHead">
+	<script>var dialogSize = { width: 300, height: 200 };</script>
+	<com:ValidatorScript>
+		nts.uk.shr.com.primitive.PersonId
+	</com:ValidatorScript>
+	<com:stylefile path="qpp044.a.css" />
+	<com:scriptfile path="qpp044.a.js" />
+	<com:scriptfile path="qpp044.a.js" />
+	<com:scriptfile path="qpp044.a.js" />
+</ui:define>]]></pre>
+						<ul>
+							<li><b>&lt;com:ValidatorScript&gt;:</b> auto create constraint base on your primitiveValue. This will be used to validate your input</li>
+							<li><b>&lt;com:stylefile path="abc.css"/&gt;:</b> use this to add CSS file to your page. DON'T use &lt;link rel="stylesheet" type="text/css" href="abc.css" /&gt;</li>
+							<li><b>&lt;com:scriptfile path="abc.js"/&gt;:</b> use this to add JS file to your page. DON'T use &lt;script src="abc.js" /&gt;</li>
+						</ul>
+						<h3>Body</h3>
+						<p>Whatever you defined inside the following code will get in body</p>
+						<pre><![CDATA[<ui:define name="content">
+	<div id="functions-area">
+	</div>
+	<div id="contents-area">
+	</div>
+</ui:define>]]></pre>
+						<ul>
+							<li><b>functions-area:</b> Usually is where you add your page common button like: New, Save, Delete, Excel Export...</li>
+							<li><b>contents-area:</b> Write your page content here</li>
+						</ul>
+						<div class="footer cf">
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

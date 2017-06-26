@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 800, height: 800 };</script>
+
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>SubWindow</h1>
+						<h2>Overview</h2>
+						<p>A SubWindow is a control which open another page with given URL. Basically it's a dialog with &lt;iframe&gt; inside.</p>
+						<br/>
+						<button onclick="OpenModalSubWindow()">Modal Window</button>
+						<button onclick="OpenModelessSubWindow()">Modeless Window</button>
+						<br/><br/>
+						<button onclick="openDialog()">Functions Area on Top</button>
+						<button onclick="openDialogB()">Functions Area on Bottom</button>
+						<br/><br/>
+						<div class="cf">
+							<note class="pull-left" style="width:400px;"><b>Don't style functions-area on your own</b><br/>
+							- Use id="functions-area" for function area on top<br/>
+							- Use id="functions-area-bottom" for function area on bottom
+							</note>
+							<note class="pull-left" style="width:400px;"><b>Close button and Title!</b><br/>
+							- Hide or show close button is decided by Kiban team so don't try to change it. Please ignore design document if there is any different<br/> 
+							- Dialog title will be auto display by Kiban team so don't mind about that too 
+							</note>
+						</div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-call">Usage</a></li>
+									<li><a href="#tabs-api">API</a></li>
+								</ol>
+								<div id="tabs-call" class="cf">
+									<h3>Modal</h3>
+<pre><![CDATA[nts.uk.ui.windows.sub.modal("/view/sample/subwindow/subwindow.xhtml");
+nts.uk.ui.windows.sub.modal("/view/sample/subwindow/subwindow.xhtml").onClosed(() => {
+	alert("OK");
+});]]></pre>
+									<h3>Modeless</h3>
+<pre><![CDATA[nts.uk.ui.windows.sub.modeless("/view/sample/subwindow/subwindow.xhtml");
+nts.uk.ui.windows.sub.modeless("/view/sample/subwindow/subwindow.xhtml").onClosed(() => {
+	alert("OK");
+});]]></pre>
+								</div>
+								<div id="tabs-api" class="cf">
+									<article>
+										<h2>Information</h2>
+										<b>Module:</b> nts.uk.ui.windows.sub<br/>
+										<b>File:</b> /lib/nittsu/ui/ui.ts<br/>
+									</article>
+									<article>
+										<h2>Methods</h2>
+										<table class="table">
+											<colgroup>
+												<col width="200px" />
+											</colgroup>
+											<thead>
+												<tr>
+													<th><h4>Name</h4></th>
+													<th><h4>Description</h4></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>modal(url, option?)</td>
+													<td>
+														Open a modal sub-window, which you can't interact with parent window.<br/>
+														<b>Return:</b> ScreenWindow<br/>
+														<b>Agruments:</b><br/>
+														<i>url: string</i> Relative URL usually start with "/view"<br/>
+														<i>option: object (optional)</i> Dialog option extend from <a class="color" href="http://api.jqueryui.com/dialog">JqueryUI Dialog option</a><br/>
+													</td>
+												</tr>
+												<tr>
+													<td>modeless(url, option?)</td>
+													<td>
+														Open a modal sub-window, which you can interact with parent window.<br/>
+														<b>Return:</b> ScreenWindow<br/>
+														<b>Agruments:</b><br/>
+														<i>url: string</i> Relative URL usually start with "/view"<br/>
+														<i>option: object (optional)</i> Dialog option extend from <a class="color" href="http://api.jqueryui.com/dialog">JqueryUI Dialog option</a><br/>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</article>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

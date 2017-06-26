@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KO jQuery UI MultiSortable</title>
+<link rel="stylesheet" type="text/css" href="../../../lib/generic/jqueryui/jquery-ui.css" />
+<link rel="stylesheet" href="css/style.css">
+<script src="../../../lib/generic/jquery/jquery-3.1.1.js"></script>
+<script type="text/javascript" src="../../../lib/generic/jqueryui/jquery-ui.min.js"></script>
+<script src="../../../lib/generic/knockoutjs/knockout-3.4.0.js"></script>
+<script type="text/javascript" src="js/knockout-sortable.js"></script>
+</head>
+<body>
+	<div id="main">
+	    <h3>High Priority</h3>
+	
+	    <div class="high container bordered"
+	         data-bind="sortable: { template: 'taskTmpl', data: highPriorityTasks, afterMove: myDropCallback }"></div>
+		<a href="#" data-bind="click: addPriorityTask">Add Prioritied Task</a>
+	    <h3>Normal Priority</h3>
+	
+	    <div class="container bordered" data-bind="sortable: { template: 'taskTmpl', data: normalPriorityTasks, afterMove: myDropCallback }"></div>
+	
+	    <a href="#" data-bind="click: addNormalTask">Add Normal Task</a>
+	    <hr/>
+	    <!-- <h3>Trash</h3>
+	
+	    <div class="trash" data-bind="sortable: trash"></div><!-- -->
+		<!-- template area
+			You can choose your own prefer way: 
+			1/ Use template like this
+			2/ Manually add the block into each div
+		-->
+	    <script id="taskTmpl" type="text/html">
+			<div class="item">
+            	<span data-bind="visible: !$root.isTaskSelected($data)">
+                	<a href="#" data-bind="text: name, click: $root.selectedTask"></a>
+            	</span>
+            	<span data-bind="visibleAndSelect: $root.isTaskSelected($data)">
+                	<input data-bind="value: name, event: { blur: $root.clearTask }" />
+            	</span>  
+        	</div>
+		</script>
+	</div>
+
+	<div id="results">
+	    <h3>High Priority</h3>
+	    <ul data-bind="foreach: highPriorityTasks">
+	        <li data-bind="text: name"></li>
+	    </ul>
+	    <h3>Normal Priority</h3>
+	    <ul data-bind="foreach: normalPriorityTasks">
+	        <li data-bind="text: name"></li>
+	    </ul>
+	</div>
+<script>
+	//control visibility, give element focus, and select the contents (in order)
+	ko.bindingHandlers.visibleAndSelect = {
+	    update:function (element, valueAccessor) {
+	        ko.bindingHandlers.visible.update(element, valueAccessor);
+	        if (valueAccessor()) {
+	            setTimeout(function () {
+	                $(element).find("input").focus().select();
+	            }, 0); //new tasks are not in DOM yet
+	        }
+	    }
+	};
+	//task item model class
+	var Task = function (name) {
+	    this.name = ko.observable(name);
+	}
+
+	var ViewModel = function () {
+	    var self = this;
+	
+	    self.highPriorityTasks = ko.observableArray([
+	    	new Task("朝の朝食"),
+            new Task("旅行"),
+            new Task("ワーキング"),
+            new Task("+"),//ランチ
+            new Task("+"),
+            new Task("+"),
+            new Task("+"),
+            new Task("+"),
+            new Task("+"),
+            new Task("料理")
+	    ]);
+	    self.highPriorityTasks.id = "high";
+	
+	    self.normalPriorityTasks = ko.observableArray([
+	        new Task("Breakfast"),
+	        new Task("Coding"),
+	        new Task("Read book")
+	    ]);
+	    self.normalPriorityTasks.id = "normal";
+	
+	    self.selectedTask = ko.observable();
+	    self.clearTask = function(data, event) {
+	        if (data === self.selectedTask()) {
+	            self.selectedTask(null);                
+	        }
+	        
+	        if (data.name() === "") {
+	           self.highPriorityTasks.remove(data);   
+	           self.normalPriorityTasks.remove(data);
+	        }
+	    };
+	
+	    self.isTaskSelected = function(task) {
+	       return task === self.selectedTask();  
+	    };
+	
+	    self.addNormalTask = function () {
+	        var task = new Task("+");
+	        self.selectedTask(task);
+	        self.normalPriorityTasks.push(task);
+	    };
+	    self.addPriorityTask = function () {
+	        var task = new Task("+");
+	        self.selectedTask(task);
+	        self.highPriorityTasks.push(task);
+	    };
+	    //self.trash = ko.observableArray([]);
+	    //self.trash.id = "trash";
+	
+	    self.myDropCallback = function (arg) {
+	        if (console) {
+	            console.log("Moved '" + arg.item.name() + "' from " + arg.sourceParent.id + " (index: " + arg.sourceIndex + ") to " + arg.targetParent.id + " (index " + arg.targetIndex + ")");
+	        }
+	    };
+	};
+
+	ko.applyBindings(new ViewModel());
+</script>
+</body>
+</html>

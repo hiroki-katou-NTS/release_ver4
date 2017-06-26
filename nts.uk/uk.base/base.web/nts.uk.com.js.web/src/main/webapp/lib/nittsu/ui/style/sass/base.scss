@@ -1,0 +1,48 @@
+@import "compass-for-vs2013-master/compass";
+@import "compass-for-vs2013-master/compass/_reset.scss";
+@import "base/_base_def.scss";
+@import "base/_clearfix.scss";
+@import "components/_color.scss";
+@import "components/_commons.scss";
+@import "components/_ignitecommons.scss";
+@import "components/_accordion.scss";
+@import "components/_editor.scss";
+@import "components/_button.scss";
+@import "components/_caret.scss";
+@import "components/_switchbutton.scss";
+@import "components/_checkbox.scss";
+@import "components/_panel.scss";
+@import "components/_radiobox.scss";
+@import "components/_listbox.scss";
+@import "components/_gridlist.scss";
+@import "components/_tabpanel.scss";
+@import "components/_treegridview.scss";
+@import "components/_combobox.scss";
+@import "components/_dialog.scss";
+@import "components/_wizard.scss";
+@import "components/_swaplist.scss";
+@import "components/_updown.scss";
+@import "components/_searchbox.scss";
+@import "components/_datepicker.scss";
+@import "components/_contextmenu.scss";
+@import "components/_userguide.scss";
+@import "components/_helpbutton.scss";
+@import "components/_images.scss";
+@import "components/_functionpanel.scss";
+@import "frame/_header.scss";
+@import "frame/_functions.scss";
+@import "frame/_contents.scss";
+@import "frame/_sidebar.scss";
+@import "components/_monthdays.scss";
+
+
+html { 
+	font-size: $normal_font_size;
+}
+
+body * {
+    font: {
+        size: 1rem;
+        family: $font_family;
+    }
+}

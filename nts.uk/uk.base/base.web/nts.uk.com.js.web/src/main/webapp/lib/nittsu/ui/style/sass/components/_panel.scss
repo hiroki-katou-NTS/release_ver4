@@ -1,0 +1,16 @@
+.panel {
+	padding: 10px;
+	position: relative;
+	
+	&.panel-frame {
+		border: 2px solid $frame_border_color;
+		border-radius: 7px;
+	}
+	&.panel-gray-bg {
+		background-color: #E7E6E6;
+	}
+	&.ntsPanel {
+		background-color: $green_background_color;
+		border-radius: 7px;
+	}
+}

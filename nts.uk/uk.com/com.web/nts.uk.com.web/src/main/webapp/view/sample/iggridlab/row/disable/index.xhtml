@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<com:stylefile path="../../../catalog/catalog.css" />
+				<com:scriptfile path="../../../catalog/catalog.js" />		
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="/lib/generic/igniteui/js/extensions/infragistics.datasource.knockoutjs.js"  of="/nts.uk.com.js.web"/>
+				<com:scriptfile path="/lib/generic/igniteui/js/extensions/infragistics.ui.grid.knockout-extensions.js"  of="/nts.uk.com.js.web"/>
+				<com:scriptfile path="../../com/testdata.js" />
+				<com:scriptfile path="start.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Row - Disable</h1>
+						
+						<div>
+						The row code=2 is disabled.
+						
+						<table id="grid" data-bind="igGrid: {
+                               	dataSource: items,
+                               	primaryKey: 'code',
+                               	autoCommit: true,
+                               	width: '400px',
+                               	height: '300px',
+                               	autoGenerateColumns: false,
+                               	features: [
+                               		{
+                               			name: 'Updating',
+                               			editMode: 'cell',
+                               			columnSettings: [
+                               				{ columnKey: 'code', readOnly: true }
+                               			]
+                               		},
+                               		{
+					                    name: 'Selection',
+					                    activeRowChanging: activeRowChanging,
+					                    rowSelectionChanging: rowSelectionChanging
+					                }
+                               	],
+                               	columns: [
+                               	    {headerText: 'Code', key: 'code', dataType: 'string', width: 100},
+                                    {headerText: 'Name', key: 'name', dataType: 'string', width: 200},
+                                    {headerText: 'Flag', key: 'flag', dataType: 'bool', width: 50},
+                               	]
+                        }"></table>
+						</div>
+						
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

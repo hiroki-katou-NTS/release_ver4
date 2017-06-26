@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<com:scriptfile path="/lib/nittsu/ui/textbox-options.js" of="/nts.uk.com.js.web"/>
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Dirty checker</h1>
+						<h2>Check is have in process data changed?</h2>
+						<!-- <div data-bind="with: numbereditor"> -->
+						<div>
+							<input id="dirty-input" data-bind="ntsNumberEditor: {value: value, constraint: constraint, option: option, enable: enable, readonly: readonly}" />
+							<button data-bind="click: reset">Reset</button>
+							<button data-bind="click: checkDirty">Check dirty</button>
+							<button data-bind="click: reload">Load page</button>
+						</div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML Code</h2>
+									<pre><![CDATA[div>
+	<input data-bind="ntsNumberEditor: {value: value, constraint: constraint, option: option, enable: enable, readonly: readonly}" />
+	<button data-bind="click: reset">Reset</button>
+	<button data-bind="click: checkDirty">Check dirty</button>
+	<button data-bind="click: reload">Load page</button>
+</div>]]></pre>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>Javascript Code</h2>
+									<pre><![CDATA[class ScreenModel {
+	value: KnockoutObservable<any>;
+	constraint: any;
+	option: editorOption.NumberEditorOption;
+	enable: KnockoutObservable<Boolean>;
+	readonly: KnockoutObservable<Boolean>;
+	dirty: nts.uk.ui.DirtyChecker;
+	
+	constructor() {
+	    var self = this;
+	    self.value = ko.observable(12);
+	    self.constraint = '';
+	    self.option = ko.mapping.fromJS(new editorOption.NumberEditorOption({ grouplength: 3, decimallength: 2 }));
+	    self.enable = ko.observable(true);
+	    self.readonly = ko.observable(false);
+	    self.dirty = new nts.uk.ui.DirtyChecker(self.value)
+	}
+	reset() {
+	    var self = this;
+	    self.dirty.reset();
+	};
+	checkDirty() {
+	    var self = this;
+	    if (self.dirty.isDirty()) {
+	        alert("Data is changed.");
+	    } else {
+	        alert("Data isn't changed.");
+	    }
+	};
+	reload() {
+	    var self = this;
+	    location.reload(true);
+	}
+}
+
+var viewmodel = new ScreenModel();
+nts.uk.ui.confirmSave(viewmodel.dirty);
+this.bind(viewmodel);
+]]></pre>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

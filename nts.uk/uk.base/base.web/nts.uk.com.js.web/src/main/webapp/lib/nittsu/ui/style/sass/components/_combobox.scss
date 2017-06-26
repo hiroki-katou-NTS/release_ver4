@@ -1,0 +1,26 @@
+#contents-area {
+	input.ui-igcombo-field {
+		font-family: $font_family_monospace;
+		font-size: $normal_font_size;
+		color: $font_color;
+	}
+}
+.nts-combo-item{
+  	height: 20px;
+}
+.nts-column{
+	height: 20px;
+	overflow: hidden; 
+	margin-right: 5px;
+	
+}
+
+.ui-state-active{
+	border-color: #0096f2;
+		
+	&:focus {
+	  	border-color: #0096f2;
+	}
+}
+
+		

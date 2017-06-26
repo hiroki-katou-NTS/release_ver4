@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+			</ui:define>
+			<ui:define name="content">				
+				<div id="contents-area" class="cf">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Rule is absolute!</h1>
+						<p>Whatever is writen in <b>Implement Rules</b> mean you MUST implement it in your page.</p>
+						<h1>Disable save button when error</h1>
+						<article>
+							<p>Not allow user click "save", "registry"... button when there is any error</p>
+							<h2>Implement</h2>
+							<button class="proceed" data-bind="enable: $root.errors.isEmpty">登録</button>
+							<pre><![CDATA[<button class="proceed" data-bind="enable: $root.errors.isEmpty">登録</button>]]></pre>
+							<p>More explain in <a href="/nts.uk.com.web/view/sample/error/error.xhtml">Errors page</a></p>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

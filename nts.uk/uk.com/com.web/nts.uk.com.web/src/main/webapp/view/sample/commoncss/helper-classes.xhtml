@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				
+            </ui:define>
+            
+            <ui:define name="content">
+				<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Helper Classes</h1>
+						<article id="container">
+							<h2>Container</h2>
+							<p class="container">Create a fixed width container. Use this to wrap around your layout</p>
+							<pre><![CDATA[<div class="container"></div>]]></pre>
+						</article>
+						<article id="quickfloat">
+							<h2>Quick Float</h2>
+							<p>Float element to left or right with class</p>
+<pre><![CDATA[<div class="pull-left"></div>
+<div class="pull-right"></div>]]></pre>
+						</article>
+						<article>
+							<h2>Quick Hiding</h2>
+							<p>Quickly hide element</p>
+<pre><![CDATA[<div class="hidden"></div>
+<div class="invisible"></div>]]></pre>
+<pre><![CDATA[.hidden {display: none;}
+.invisible {visibility: hidden;}]]></pre>
+						</article>
+						<article>
+							<h2>Quick set position</h2>
+							<p>Set position of element as relative or absolute</p>
+<pre><![CDATA[<div class="relative"></div>
+<div class="absolute"></div>]]></pre>
+<pre><![CDATA[.relative {position: relative;}
+.absolute {position: absolute;}]]></pre>
+						</article>
+						<article>
+							<h2>HyperLink style</h2>
+							<p>A demo hyperlink</p>
+							<span class="hyperlink">しばらくの間、操作がなかったためサーバとの接続を切断しました。</span>
+							<pre><![CDATA[<div class="hyperlink"></div>]]></pre>
+<pre><![CDATA[.hyperlink { 
+	color: $hyperlink_color;
+	text-decoration: underline;
+	cursor: pointer;
+}]]></pre>
+						</article>
+						<article id="icon">
+							<h2>Icon</h2>
+							<div class="relative" style="background:#eee; padding: 10px;">
+								<i class="icon icon-close"></i>
+								<i class="icon icon-dot"></i>
+								<i class="icon icon-search"></i>
+							</div>
+							<span class="relative label bg-green" style="height: 75px; width: 150px; margin: 25px 25px 0;">
+								<i class="icon icon-searchbox"></i>
+							</span>
+<pre><![CDATA[<i class="icon icon-close"></i>
+<i class="icon icon-dot"></i>
+<i class="icon icon-search"></i>
+<i class="icon icon-searchbox"></i>]]></pre>
+						</article>
+						<article>
+							<h2>Quick horizontal align</h2>
+							<p class="halign-left">Demo text align left</p>
+							<p class="halign-center">Demo text align center</p>
+							<p class="halign-right">Demo text align right</p>
+<pre><![CDATA[<p class="halign-left">Demo text align left</p>
+<p class="halign-center">Demo text align center</p>
+<p class="halign-right">Demo text align right</p>]]></pre>
+<pre><![CDATA[.halign-left { text-align: left; }
+.halign-right { text-align: right; }
+.halign-center { text-align: center; }]]></pre>
+						</article>
+						<article>
+							<h2>Group controls</h2>
+							<p>You can overwrite CSS for margin as desire</p>
+							<div class="control-group">
+								<div data-bind="ntsFormLabel: {}">レイアウトコード</div>
+								<button>Button</button>
+							</div>
+							<div class="control-group">
+								<div data-bind="ntsFormLabel: {}">レイアウトコード</div>
+								<span>Text must inside &lt;span&gt;</span>
+							</div>
+							<div class="control-group">
+								<div data-bind="ntsFormLabel: {}">レイアウトコード</div>
+								<div data-bind="ntsCheckBox: { checked: false }">Check Box</div>
+							</div>
+							<div class="control-group">
+								<div data-bind="ntsFormLabel: {}">レイアウトコード</div>
+								<input data-bind="ntsTextEditor: {value: ko.observable('') }" />
+							</div>
+							<pre><![CDATA[<div class="control-group">Put group of controls inside</div>]]></pre>
+							<pre><![CDATA[.control-group { margin-bottom: 10px; }]]></pre>
+						</article>
+						<article>
+							<h2>Quick vertical align Group controls</h2>
+							<div class="valign-center control-group">
+								<div data-bind="ntsFormLabel: {}">レイアウトコード</div>
+								<span>Text must inside &lt;span&gt;</span>
+								<button>Button</button>
+								<div data-bind="ntsCheckBox: { checked: false }">Check Box</div>
+								<span class="ntsControl">
+									<label class="ntsRadioBox">
+										<input type="radio" name="textRadio" value="2" data-bind="checked: 1" />
+										<span class="box"></span><span class="label" data-bind="text: 'Radio Box'"></span>
+									</label>
+								</span>
+								<input data-bind="ntsTextEditor: {value: ko.observable('') }" />
+							</div>
+<pre><![CDATA[<div class="valign-top control-group"><span>Any text inside must place in <span> tag</span></div>
+<div class="valign-center control-group"><span>Any text inside must place in <span> tag</span></div>
+<div class="valign-bottom control-group"><span>Any text inside must place in <span> tag</span></div>]]></pre>
+<pre><![CDATA[.control-group.valign-center > * { vertical-align: middle; }
+.control-group.valign-top > * { vertical-align: top; }
+.control-group.valign-bottom > * { vertical-align: bottom; }]]></pre>
+							<note>This <b>only</b> vertical-align elements put in a row. If you want more complex vertical-align solution please check <a href="/nts.uk.com.web/view/sample/commoncss/vertical-align.xhtml"><b>vertical-align article</b></a></note>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

@@ -1,0 +1,24 @@
+.ntsUserGuide {
+	display:none;
+	
+	.userguide-box {
+		position: absolute;
+		background: #fff;
+		border-radius: 5px;
+		padding: 10px;
+		max-width: 600px;
+		box-shadow: 0 0 1px 1px rgba(0,0,0,0.35);
+		z-index: 1000;	
+	}
+}
+
+.userguide-overlay {
+	position: fixed;
+	background: #000;
+	opacity: 0.3;
+	z-index: 999;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+}

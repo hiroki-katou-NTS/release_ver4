@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>File tags</h1>
+						<h2>In this group have custom tags for get js and css files for import into master page.</h2>
+						<div class="feature-box"><div class="header"><h3>scriptfile</h3></div><div class="content">
+						<p>To import a Javascript file into page. Use attribute 'path' for import a specific javascript file. You can use 'set' attribute for import a set of defined javascript files. Currently, there are two set are 'IGNITE' and 'BASIC'.</p>
+						<pre><![CDATA[//Usage
+<com:scriptfile path="start.js" />
+<com:scriptfile set="IGNITE" />
+<com:scriptfile set="BASIC" />]]></pre>
+<pre><![CDATA[//Result (at head)
+<script type="text/javascript" src="start.js?"></script>
+]]></pre></div></div>
+						<div class="feature-box"><div class="header"><h3>stylefile</h3></div><div class="content">
+						<p>To import a css file into page. Use attribute 'path' for import a specific javascript file. You can use 'set' attribute for import a set of defined javascript files. Currently, there is only a set 'BASIC'.</p>
+						<pre><![CDATA[//Usage
+<com:stylefile path="../catalog/catalog.css" />
+<com:stylefile set="BASIC" />]]></pre>
+<pre><![CDATA[//Result (at head)
+<link rel="stylesheet" type="text/css" href="../catalog/catalog.css?">
+]]></pre></div></div>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

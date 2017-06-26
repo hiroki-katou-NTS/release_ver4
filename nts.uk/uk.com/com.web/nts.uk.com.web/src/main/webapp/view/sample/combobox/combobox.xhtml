@@ -1,0 +1,295 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+            	
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>ComboBox</h1>
+						<h2>Overview</h2>
+						<div>
+							<input data-bind="value: itemName"></input>
+							<button data-bind="click: addOptions">Add Item</button>
+						</div>
+						<br />
+						<div>
+							<input data-bind="ntsTextEditor: { value: defaultValue }"></input>
+							<button data-bind="click: setDefault">Reset</button>
+						</div>
+						<br />
+						<div class="control-group valign-center">
+							<div id="combo-box" data-bind="ntsComboBox: {options: itemListCbb1,
+												optionsValue: 'codeCbb1',
+												value: selectedCode,
+												optionsText: 'nameCbb1',
+												editable: isEditable,
+												enable: isEnable,
+												columns: [
+														{ prop: 'codeCbb1', length: 4 },
+														{ prop: 'nameCbb1', length: 10 },
+													]}"></div>
+							<button data-bind="click: removeByCode">Remove Item</button>
+						</div>
+						<div class="status">
+							<span data-bind="ntsCheckBox: { checked: isEnable }">Enable</span>
+							<span data-bind="ntsCheckBox: { checked: isEditable }">Editable</span>
+						</div>
+						<div>
+							Your selected code: <span data-bind="text:selectedCode"></span>
+						</div>
+						<div>
+						<table class="tableRight">
+							<tr>
+								<td>
+									<div id="A_LBL_008" data-bind="ntsFormLabel: { required: true }">必須項目見出し
+									</div>
+								</td>
+								<td><button>設定</button></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td><div id="A_SEL_001"
+											data-bind="ntsComboBox: {
+													options: itemListCbb1,
+													optionsValue: 'codeCbb1',
+													value: selectedCodeCbb1,
+													optionsText: 'nameCbb1',
+													editable: isEditableCbb1,
+													enable: isEnableCbb1,
+													columns: [
+														{ prop: 'codeCbb1', length: 4 },
+														{ prop: 'nameCbb1', length: 10 },
+													]}">
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div id="A_LBL_009"
+										data-bind="ntsFormLabel: { required: true }">改ページ
+									</div>
+								</td>
+								<td class="flex valign-center">
+									<div id="A_SEL_002"
+											data-bind="ntsComboBox: {
+													options: itemListCbb2,
+													optionsValue: 'nameCbb2',
+													value: selectedCodeCbb2,
+													optionsText: 'nameCbb2',
+													editable: isEditableCbb2,
+													enable: isEnableCbb2,
+													columns: [
+														{ prop: 'nameCbb2', length: 4 }
+													]}">
+									</div>
+									<div>
+										<span id="A_LBL_010" class="label" style="margin-bottom: 5px;">階層指定
+										</span>
+									</div> 
+								<div id="A_SEL_003"
+											data-bind="ntsComboBox: {
+													options: itemListCbb3,
+													optionsValue: 'codeCbb3',
+													value: selectedCodeCbb3,
+													optionsText: 'nameCbb3',
+													editable: isEditableCbb3,
+													enable: isEnableCbb3,
+													columns: [
+														{ prop: 'codeCbb3', length: 4 },
+														{ prop: 'nameCbb3', length: 10 }
+													]}">
+								</div>
+								</td>
+							</tr>
+						</table>
+					</div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+									<p>Using Ignite library so you must include following line in <i>&lt;ui:define name="htmlHead"&gt;</i></p>
+<pre><![CDATA[<ui:define name="htmlHead">
+	<com:scriptfile set="IGNITE" />
+</ui:define>]]></pre>
+<pre><![CDATA[<div id="combo-box" data-bind="ntsComboBox: {
+	options: itemListCbb1,
+	optionsValue: 'code',
+	value: selectedCode,
+	optionsText: 'name',
+	editable: isEditable,
+	enable: isEnable,
+	columns: [
+		{ prop: 'code', length: 4 },
+		{ prop: 'name', length: 10 },
+	]}"></div>]]></pre>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>options</td>
+												<td>
+													<b>Type:</b> array&lt;any&gt;<br/>
+													List data to generate ComboBox
+												</td>
+											</tr>
+											<tr>
+												<td>optionsValue</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as ComboBox value
+												</td>
+											</tr>
+											<tr>
+												<td>optionsText</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as ComboBox text
+												</td>
+											</tr>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> any<br/>
+													Current selected value
+												</td>
+											</tr>
+											<tr>
+												<td>editable</td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> false<br/>
+													True is ComboBox. Can enter value for this control.<br/>
+													False is DropDownList. Can select item only.
+												</td>
+											</tr>											
+											<tr>
+												<td>enable</td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> true<br/>
+													Set enable/disable for MultiCheckBox control
+												</td>
+											</tr>
+											<tr>
+												<td>columns<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> array&lt;column&gt;<br/>
+													Array of column object will be displayed in drop down part.<br/>
+													<i>prop:</i> field name of data<br/>
+													<i>length:</i> length of character for this field 
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[class ScreenModel {
+    itemList: KnockoutObservableArray<ItemModel>;
+    itemName: KnockoutObservable<string>;
+    currentCode: KnockoutObservable<number>
+    selectedCode: KnockoutObservable<string>;
+    isEnable: KnockoutObservable<boolean>;
+    isEditable: KnockoutObservable<boolean>;
+    /**
+     * Constructor.
+     */
+    constructor() {
+        var self = this;
+        self.itemList = ko.observableArray([
+            new ItemModel('基本給1', '基本給'),
+            new ItemModel('基本給2', '役職手当'),
+            new ItemModel('0003', '基本給')
+        ]);
+        self.itemName = ko.observable('');
+        self.currentCode = ko.observable(3);
+        self.selectedCode = ko.observable('0002')
+        self.isEnable = ko.observable(true);
+        self.isEditable = ko.observable(true);
+    }
+
+    /**
+     * Add options.
+     */
+    addOptions() {
+        var self = this;
+        var newCode = self.currentCode() + 1;
+        var itemCode = newCode.toString();
+        var codeLength = itemCode.length;
+        while (codeLength < 4) {
+            itemCode = '0' + itemCode;
+            codeLength++;
+        }
+        self.itemList.push(new ItemModel(itemCode, self.itemName()));
+        self.currentCode(newCode);
+    }
+    
+    /**
+     * Clear options.
+     */
+    clearOptions() {
+        this.itemList([]);
+    }
+    
+    /**
+     * Remove item by code;
+     */
+    removeByCode() {
+        var self = this;
+        var selected: ItemModel = self.itemList().filter(item => item.code == self.selectedCode())[0];
+        self.itemList.remove(selected);
+    }
+};
+
+class ItemModel {
+    code: string;
+    name: string;
+    label: string;
+    
+    constructor(code: string, name: string) {
+        this.code = code;
+        this.name = name;
+    }
+}]]></pre>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

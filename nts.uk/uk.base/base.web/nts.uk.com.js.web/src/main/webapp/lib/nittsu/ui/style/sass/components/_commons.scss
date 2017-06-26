@@ -1,0 +1,396 @@
+/*****************************
+  Overwrite JQueryUI
+*****************************/
+.ui-widget,
+.ui-widget input,
+.ui-widget select,
+.ui-widget textarea,
+.ui-widget button {
+	font-family: $font_family;
+}
+
+/*****************************
+  Helper Class
+*****************************/
+.hidden {display: none !important;}
+.invisible {visibility: hidden !important;}
+.relative {position: relative !important;}
+.absolute {position: absolute !important;}
+.pull-left {float: left;}
+.pull-right {float: right;}
+.hyperlink { color: $hyperlink_color; text-decoration: underline; cursor: pointer; }
+.control-group.valign-center > * { vertical-align: middle; }
+.control-group.valign-top > * { vertical-align: top; }
+.control-group.valign-bottom > * { vertical-align: bottom; }
+.halign-left { text-align: left; }
+.halign-right { text-align: right; }
+.halign-center { text-align: center; }
+.container {
+	width: 1200px;
+	&:before, &:after {content: " "; display: table;}
+	&:after {clear:both;}
+}
+.flex {
+	display:flex;
+	.item{ flex:1; }
+	&.valign-center{ align-items: center; }
+}
+.table {
+	display: table;
+	.cell {
+		display: table-cell;
+		&.valign-center { vertical-align: middle; }
+		&.valign-bottom { vertical-align: bottom; }
+		&.valign-top { vertical-align: top; }
+	}
+}
+
+/*****************************
+  ntsControl
+*****************************/
+.control-group { margin-bottom: 10px; }
+.ntsControl { display: inline-block; }
+
+/*****************************
+  NtsFormLabel
+*****************************/
+div.form-label {
+	$_label_height: 37px;
+	$_label_height_inline: 23px;
+	
+	$_label_ribbon_width: 5px;
+	$_label_ribbon_color_normal: $green_formlabel_color;
+	$_label_ribbon_color_required: $yellow_formlabel_color;
+	$_label_ribbon_color_disabled: #AAA;
+	
+	$_label_font_size: $bfs * 1.4;
+	$_constraint_font_size: $bfs * 1.2;
+	$_constraint_font_color: #777777;
+		
+	display: inline-block;
+	box-sizing: border-box;
+	height: $_label_height;
+	border-style: solid;
+	border-color: $_label_ribbon_color_normal;
+	border-width: 0 0 0 $_label_ribbon_width;
+	padding: 0 10px 0 8px;
+	
+	&.broken {
+		label {line-height: inherit;}
+	}
+	
+	&.inline {
+		height: $_label_height_inline;
+		line-height: $_label_height_inline;
+		label {line-height: $_label_height_inline;}
+	}
+	
+	&.required {
+		border-color: $_label_ribbon_color_required;
+	}
+	
+	&.disabled {
+		border-color: $_label_ribbon_color_disabled;
+	}
+	
+	> label {
+		max-height: 100%;
+		font-size: $_label_font_size;
+		line-height: $_label_height;
+	}
+	
+	> i {
+		display: block;
+		margin-top: 1px;
+		font-size: $_constraint_font_size;
+		font-weight: normal;
+		color: $_constraint_font_color;
+		
+		&:before {
+			content: '(';
+		}
+		
+		&:after {
+			content: ')';
+		}
+	}
+	
+	&.inline > i {
+		display: inline-block;
+		margin-left: 5px;
+	}
+}
+
+
+/*****************************
+  NtsLinkButton
+*****************************/
+.link-button {
+	display: inline-block;
+	padding: 3px 12px;
+	background-color: $green_background_color;
+	color: #0D86D1;
+	text-decoration: underline;
+	cursor: pointer;
+	user-select: none;
+}
+
+
+/*****************************
+  NtsPopupPanel
+*****************************/
+div.popup-panel {
+	position: absolute;
+	background-color: #fff;
+	border: solid 1px #aaa;
+	@include box-shadow(1px 1px 5px 1px #888);
+	padding: 5px;
+}
+
+/*****************************
+  NtsEditor
+*****************************/
+.ntsControl.error {
+	.nts-editor, .ntsDatepicker {
+		border-color:#ff6666;
+	}
+}
+
+.ui-igcombo.error {
+	border-color:#ff6666;
+}
+
+/*****************************
+  ErrorNotifier
+*****************************/
+#func-notifier-errors {
+	position: absolute;
+	display: none;
+
+	@include border-radius(5px);
+	padding: 1px 17px 3px 17px;
+	font-weight: bold;
+	border: solid 1px #eaa;
+	
+	background-color: #ffdddd;
+	color: #dd3a3a;
+	cursor: pointer;
+
+	&:hover {
+		background-color: #ffcccc;
+		color: #cc2222;
+		border-color: #cc2222;
+	}
+	
+	&.shown {
+		display: inline-block;
+	}
+}
+
+
+/*****************************
+  Label
+*****************************/
+.label {
+	display: inline-block;
+	box-sizing: border-box;
+	
+	&.warning {
+		padding: 15px 10px;
+		font-size: 1.2rem;
+		background-color: $yellow_background_color;
+		color: $red_warning_color;
+	}
+	
+	&.with-image {
+		padding: 5px 10px 5px 5px;
+		border-radius: 5px;
+		background-color: $green_background_color;
+		color: $activated_color;
+		
+		.image {
+			vertical-align: middle;
+			margin-right: 10px;
+		}
+	}
+}
+div.label {
+	width: 100%;
+}
+
+/*****************************
+  Icon
+*****************************/
+.icon {
+	position: relative;
+	display: inline-block;
+	
+	&::before, &::after {
+	    content: '';
+	    position: absolute;
+	    display: block;
+	}
+	
+	&.icon-close {
+		width: 16px;
+		height: 16px;
+		&::before, &::after {
+		    height: 3px;
+		    width: 100%;
+		    top: 50%;
+		    left: 0;
+		    margin-top: -1px;
+		    background: $button_font_color;
+		}
+		&::before {
+			@include transform(rotate(45deg));
+		}
+		&::after {
+			@include transform(rotate(-45deg));
+		}
+	}
+	
+	&.icon-dot {
+		width: 16px;
+		height: 16px;
+	    border: 2px solid #fff;
+	    border-radius: 50%;
+	    background: $activated_color;
+	    box-sizing: border-box;
+	}
+	
+	&.icon-search {
+	    width: 12px;
+	    height: 12px;
+	    border: solid 2px #333333;
+	    border-radius: 100%;
+	    transform: rotate(-45deg);
+	    &::after {
+		    top: 12px;
+		    left: 5px;
+		    height: 10px;
+		    width: 2px;
+		    background-color: #333333;
+	    }
+	}
+	&.icon-searchbox {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 32px;
+		height: 32px;
+		margin: -16px 0 0 -16px;
+		background: $activated_color;
+		border-radius: 5px;
+	    
+		&:before {
+		    width: 12px;
+		    height: 12px;
+		    border: solid 2px #FFF;
+		    border-radius: 100%;
+		    top: 6px;
+		    left: 7px;
+		}
+	    &::after {
+		    top: 18px;
+		    left: 22px;
+		    height: 8px;
+		    width: 2px;
+		    border-radius: 0 0 5px 5px;
+		    background-color: #FFF;
+		    transform: rotate(-45deg);
+	    }
+	}
+	&.icon-button-arrow-left {
+	    margin: 10px 0 10px 3px;
+	    width: 40px;
+	    height: 4px;
+	    background-color: $activated_color;
+	    
+	    &:before {
+	        width: 16px;
+		    border-top: solid 4px $activated_color;
+		    border-radius: 0 2px 2px 0;
+		    transform: rotate(-40deg);
+		    left: -3px;
+		    top: -4px;
+	    }
+	    &:after {
+	        width: 16px;
+		    border-top: solid 4px $activated_color;
+		    border-radius: 2px 0 0 2px;
+		    transform: rotate(-140deg);
+		    left: -3px;
+		    top: 4px;
+	    }
+	}
+	&.icon-button-arrow-right {
+	    margin: 10px 3px 10px 0;
+	    width: 40px;
+	    height: 4px;
+	    background-color: $activated_color;
+	    
+	    &:before {
+	        width: 16px;
+		    border-top: solid 4px $activated_color;
+		    border-radius: 2px 0 0 2px;
+		    transform: rotate(40deg);
+		    right: -3px;
+		    top: -4px;
+	    }
+	    &:after {
+	        width: 16px;
+		    border-top: solid 4px $activated_color;
+		    border-radius: 0 2px 2px 0;
+		    transform: rotate(140deg);
+		    right: -3px;
+		    top: 4px;
+	    }
+	}
+	&.icon-button-arrow-top {
+	    margin: 8px 5px 0 5px;
+	    width: 4px;
+	    height: 30px;
+	    background-color: $activated_color;
+	    
+	    &:before {
+	        width: 16px;
+		    border-top: solid 4px $activated_color;
+		    border-radius: 0 2px 2px 0;
+		    transform: rotate(50deg);
+		    left: -2px;
+		    top: 2px;
+	    }
+	    &:after {
+	        width: 16px;
+		    border-top: solid 4px $activated_color;
+		    border-radius: 0 2px 2px 0;
+		    transform: rotate(130deg);
+		    left: -10px;
+		    top: 2px;
+	    }
+	}
+	&.icon-button-arrow-bottom {
+	    margin: 5px 5px 3px 5px;
+	    width: 4px;
+	    height: 30px;
+	    background-color: $activated_color;
+	    
+	    &:before {
+	        width: 16px;
+		    border-top: solid 4px $activated_color;
+		    border-radius: 0 2px 2px 0;
+		    transform: rotate(-50deg);
+		    left: -2px;
+		    bottom: 2px;
+	    }
+	    &:after {
+	        width: 16px;
+		    border-top: solid 4px $activated_color;
+		    border-radius: 0 2px 2px 0;
+		    transform: rotate(-130deg);
+		    left: -10px;
+		    bottom: 2px;
+	    }
+	}
+}

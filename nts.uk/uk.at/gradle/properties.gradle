@@ -1,0 +1,15 @@
+ext {
+    //規定のエンコーディングをUnicodeで指定するためのプロパティ
+    defaultEncoding = 'UTF-8'
+
+    //javaのバージョンは、1.8固定にする
+    javaVersion = '1.8'
+
+    //testの実行有無を制御するリスト
+    test_skip = [:]
+    
+    // Artifactory設定
+    artifactory_contextUrl = 'http://192.168.50.6:8081/artifactory'
+    artifactory_user = 'buildscript'
+    artifactory_password = 'AP8qH3heYhsucE8oPrQv3xrwn1m'
+}

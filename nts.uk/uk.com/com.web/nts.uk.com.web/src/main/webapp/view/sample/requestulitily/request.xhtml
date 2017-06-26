@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<com:scriptfile path="/lib/nittsu/ui/textbox-options.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Request ulitily </h1>
+						<h2>In this module have functions for work with request of client. Below is main functions of it.</h2>
+						
+						<div class="feature-box">
+							<div class="header"><h3>ajax</h3></div>
+							<div class="content">
+								<p>Call a webservice from client and return a Deferred. Ajax method receive 3 parameters are path, data, options. Data and options parameters are optional.</p>
+								<pre><![CDATA[//Try to paste this to console
+nts.uk.request.ajax("pr/proto/paymentdatemaster/processing/findall", {data: "12"}).done({function (){ alert("tested")}});
+
+// request to other web app
+// ex) the screen in nts.uk.pr.web to webservice in nts.uk.com.web
+nts.uk.request.ajax("pr", "pr/proto/paymentdatemaster/processing/findall", {data: "12"})]]></pre>
+							</div>
+						</div>
+						
+						<div class="feature-box">
+							<div class="header"><h3>jump</h3></div>
+							<div class="content">
+							<p>Jump to another page. Jump method receive 2 parameters are path and datas.</p>
+							<pre><![CDATA[//Try to paste this to console
+nts.uk.request.jump("view/sample/requestulitily/request.xhtml", {})]]></pre>
+							</div>
+						</div>
+						
+						<div class="feature-box">
+							<div class="header"><h3>resolvePath</h3></div>
+							<div class="content">
+								<p>Convert from relative path to full path</p>
+								<pre><![CDATA[//Try to paste this to console
+nts.uk.request.resolvePath("/view/sample/requestulitily/request.xhtml");
+Result: "http://localhost:8080/nts.uk.com.web/view/sample/requestulitily/request.xhtml"]]></pre>
+							</div>
+						</div>
+						
+						<div class="feature-box">
+							<div class="header"><h3>exportFile</h3></div>
+							<div class="content">
+								<button data-bind="click: exportFile">report: /sample/report/generate</button>
+								<pre><![CDATA[nts.uk.request.exportFile('/sample/report/generate').done(() => {
+    console.log('DONE!!');
+});]]></pre>
+							</div>
+						</div>
+
+
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

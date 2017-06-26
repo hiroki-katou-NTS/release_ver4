@@ -1,0 +1,70 @@
+@CHARSET "UTF-8";
+textarea {
+	resize: none;
+	background: transparent;
+	/* color: transparent; */
+}
+#input-containner{
+	width: 803px;
+	height: 365px;
+	position: relative;
+}
+#input-content-area{
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 99%;
+	height: 99%;
+	padding: 3px;
+	/* padding-top: 0px; */
+	word-wrap: break-word;
+	white-space: pre-wrap;
+	word-break: normal;
+	color: transparent;
+}
+#input-area{
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+}
+#cursor-key{
+	visibility: hidden;
+    position: relative;
+    z-index: 10;
+}
+#input-cursor{
+	position: absolute;
+    pointer-events: none;
+   	border-left: 1px solid black;
+    border-right: none;
+    width: 0;
+    cursor: text;
+    height: 18px;
+}
+.editor-line{
+	display: block;
+}
+.error-char{
+	border-bottom: 1px red dotted; 
+}
+#auto-complete{
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+#auto-complete-containner{
+	position: absolute;
+	z-index: 1000;
+}
+#error-containner{
+		position: absolute;
+	z-index: 1000;
+	/* width: 100px; */
+	/* height: 32px; */
+	color: red;
+	background-color: white;
+	border: 1px solid black;
+	padding: 5px;
+}

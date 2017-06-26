@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:stylefile path="caret.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				
+            </ui:define>
+            
+            <ui:define name="content">
+				<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Caret</h1>
+						<article>
+							<h2>caret class <span class="caret caret-bottom"></span></h2>
+							<p>
+								Create a convenience and beautiful caret <span class="caret-top"></span><br/>
+								It'll take color of
+								<span style="color:#af0890;">current <span class="caret-bottom"></span></span>
+								<span style="color:#D90000;">parent <span class="caret-left"></span></span>
+								<span style="color:#FF2D00;">element <span class="caret-right"></span></span>
+								<span style="color:#FF8C00;">as <span class="caret-top"></span></span>
+								<span style="color:#04756F;">color <span class="caret-bottom"></span></span>
+							</p>
+<pre><![CDATA[<span class="caret-top"></span>
+<span class="caret-bottom"></span>
+<span class="caret-left"></span>
+<span class="caret-right"></span>]]></pre>
+						</article>
+						<article>
+							<h2>Styling</h2>
+							<div class="feature-box">
+								<div class="header"><h3>Inline</h3></div>
+								<div class="content">
+<pre><![CDATA[<span class="caret-right caret-inline"></span>
+<span class="caret-left caret-inline"></span>
+<span class="caret-top caret-inline"></span>
+<span class="caret-bottom caret-inline"></span>]]></pre>
+									<div class="control-group valign-center">
+										<button>Button</button><span class="caret-right caret-inline"></span>
+										<input data-bind="ntsTextEditor: {value: ko.observable('')}" /><span class="caret-right caret-inline"></span>
+										<button class="small">Button</button><span class="caret-right caret-inline"></span>
+										<span class="caret-left caret-inline"></span>
+										<span class="caret-top caret-inline"></span>
+										<span class="caret-bottom caret-inline"></span>
+									</div>
+								</div>
+							</div>
+							<div class="feature-box">
+								<div class="header"><h3>Outline</h3></div>
+								<div class="content">
+<pre><![CDATA[<span class="caret-right outline"></span>
+<span class="caret-left outline"></span>
+<span class="caret-top outline"></span>
+<span class="caret-bottom outline"></span>]]></pre>
+									<div class="control-group valign-center" style="height: 150px; padding: 10px 15px; background: #97d155;">
+										<span class="caret-right outline"></span>
+										<span class="caret-left outline"></span>
+										<span class="caret-top outline"></span>
+										<span class="caret-bottom outline"></span>
+										<span class="caret-right outline" style="font-size: 3rem"></span>
+										<span class="caret-left outline" style="font-size: 3rem"></span>
+										<span class="caret-top outline" style="font-size: 3rem"></span>
+										<span class="caret-bottom outline" style="font-size: 3rem"></span>
+										<span class="caret-right outline" style="font-size: 5rem"></span>
+										<span class="caret-left outline" style="font-size: 5rem"></span>
+										<span class="caret-top outline" style="font-size: 5rem"></span>
+										<span class="caret-bottom outline" style="font-size: 5rem"></span>
+									</div>
+								</div>
+							</div>
+							<div class="feature-box">
+								<div class="header"><h3>Button</h3></div>
+								<div class="content">
+<pre><![CDATA[<button class="caret-bottom">Button</button>
+<button class="caret-top">Button</button>
+<button class="caret-right">Button</button>
+<button class="caret-left">Button</button>]]></pre>
+									<div class="control-group valign-center">
+										<button class="caret-bottom">Button</button>
+										<button class="caret-top">Button</button>
+										<button class="caret-right">Button</button>
+										<span class="label" style="width: 30px;"></span>
+										<button class="caret-left">Button</button>
+									</div>
+								</div>
+							</div>
+							<div class="feature-box">
+								<div class="header"><h3>Background Caret</h3></div>
+								<div class="content">
+<pre><![CDATA[<div class="caret-right caret-background"></div>
+<div class="caret-left caret-background"></div>]]></pre>
+									<div class="bg-green caret-right caret-background" style="float:left; width:250px; height: 300px; margin:20px 50px;"></div>
+									<div class="bg-green caret-left caret-background" style="float:left; width:250px; height: 300px; margin:20px 50px;"></div>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

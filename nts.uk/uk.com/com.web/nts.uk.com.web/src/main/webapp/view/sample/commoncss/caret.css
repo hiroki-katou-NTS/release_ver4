@@ -1,0 +1,6 @@
+.draggable {padding-right: 50px;}
+
+#demo-caret-bottom .caret-bottom {border-width: 20px 40px; margin-left: -40px; color:#97d155;}
+#demo-caret-top .caret-top {border-width: 15px 30px; margin-left: -30px; color:#af0890;}
+#demo-caret-left .caret-left {border-width: 15px 20px; margin-top: -15px; color:#D90000;}
+#demo-caret-right .caret-right {border-width: 10px 10px; margin-top: -10px; color:#FF8C00;}

@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>           	
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="viewmodel.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+				<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>DatePicker</h1>
+						<h2>Overview</h2>
+						<h3>Datepicker</h3>
+						<div data-bind="ntsDatePicker: { name: '#[FND_L_SEARCH_RELEASE]', value: dateString, dateFormat: 'YYYY/MM/DD', required: true}"></div>
+						<input data-bind="ntsTimeEditor: {value: dateString}"/>
+						<br/>
+						<b>Return ISO String:</b> <span data-bind="text: dateString"/>
+						<hr/>
+						<h3>Datepicker with Day of Week</h3>
+						<div data-bind="ntsDatePicker: {value: date, dateFormat: 'YYYY/MM/DD ddd'}"></div>
+						<div data-bind="ntsDatePicker: {value: date, dateFormat: 'YYYY/MM/DD dddd'}"></div>
+						<br/>
+						<b>Return Date:</b> <span data-bind="text: date"/>						
+						<hr/>
+						<h3>YearMonth picker</h3>
+						<div id="test" data-bind="ntsDatePicker: {value: yearMonth, dateFormat: 'yearmonth', valueFormat: 'YYYYMM', enable: enable}"></div>
+						<span data-bind="ntsCheckBox: {checked: enable}">Enable</span>
+						<br/>
+						<b>Return Number:</b> <span data-bind="text: yearMonth"/>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-usage">Usage</a></li>
+									<li><a href="#tabs-api">API</a></li>
+								</ol>
+								<div id="tabs-usage" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<!-- Datepicker -->
+<div data-bind="ntsDatePicker: {value: date, dateFormat: 'YYYY/MM/DD'}"></div>
+<!-- YearMonth Picker -->
+<div data-bind="ntsDatePicker: {value: yearMonth, dateFormat: 'yearmonth'}"></div>]]></pre>
+									<h2>ViewModel</h2>
+<pre><![CDATA[<!-- Recommend use 'string' and momentjs for date type -->
+class ScreenModel {
+    date: KnockoutObservable<string>;
+    yearMonth: KnockoutObservable<number>;
+    constructor() {
+        var self = this;            
+        self.date = ko.observable('20000101');
+        self.yearMonth = ko.observable(200001);
+    }
+}]]></pre>
+								</div>
+								<div id="tabs-api" class="cf">
+									<h2>Properties</h2>
+									<table class="table">
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Name</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;string&gt;<br/>
+													The date value for datepicker
+												</td>
+											</tr>
+											<tr>
+												<td>dateFormat<br/><i>(Optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													<b>Default:</b> 'YYYY/MM/DD'<br/>
+													<b>Members:</b><br/>
+													<i>date:</i> the date pattern (YYYY/MM/DD) member of regional option is used<br/>
+													<i>yearmonth:</i> the time pattern (YYYY/MM) member of regional option is used<br/>
+													<i>ISO 8601 Formats</i><br/>
+													"YY": year field without century and with leading zero<br/>
+													"YYYY": year field with leading zeros<br/>
+													"M": month field as digit without leading zero<br/>
+													"MM": month field as digit with leading zero<br/>
+													"D": day of month field without leading zero<br/>
+													"DD": day of month field with leading zero<br/>
+													"ddd": short day of week<br/>
+													"dddd": long day of week<br/><br/>
+													The display format in datepicker
+												</td>
+											</tr>
+											<tr>
+												<td>valueFormat<br/><i>(Optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													<b>Default:</b> <i>Empty</i><br/>
+													<b>Members:</b><br/>
+													<i>Empty:</i> the ISO format<br/>
+													<i>ISO 8601 Formats</i><br/>
+													"YY": year field without century and with leading zero<br/>
+													"YYYY": year field with leading zeros<br/>
+													"M": month field as digit without leading zero<br/>
+													"MM": month field as digit with leading zero<br/>
+													"D": day of month field without leading zero<br/>
+													"DD": day of month field with leading zero<br/><br/>
+													The return value format for observable value. Only work with <b>string</b> and <b>number</b> type
+												</td>
+											</tr>
+											<tr>
+												<td>enable<br/><i>(Optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> true<br/>
+													Enable/disable date picker
+												</td>
+											</tr>
+											<tr>
+												<td>disabled<br/><i>(Optional)</i></td>
+												<td>
+													<b>Obsoleted: using enable!</b><br/>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> false<br/>
+													Disable date picker
+												</td>
+											</tr>
+											<tr>
+												<td>button<br/><i>(Optional)</i></td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> false<br/>
+													Show a calendar icon
+												</td>
+											</tr>
+											<tr>
+												<td>startDate<br/><i>(Optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+													<b>Default:</b> null<br/>
+													Min date datepicker can pick
+												</td>
+											</tr>
+											<tr>
+												<td>endDate<br/><i>(Optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+													<b>Default:</b> null<br/>
+													Max date datepicker can pick
+												</td>
+											</tr>
+											<tr>
+												<td>autoHide<br/><i>(Optional)</i></td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> true<br/>
+													Datepicker auto hide when picked
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

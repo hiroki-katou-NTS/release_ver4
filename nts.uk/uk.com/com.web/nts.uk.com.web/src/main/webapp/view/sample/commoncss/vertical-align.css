@@ -1,0 +1,22 @@
+.outer {outline:1px solid #FF6138;}
+.inner {outline:1px solid #3af;}
+.pull-left {float:left;}
+.pull-right {float:right;}
+.fixed-height {height: 45px;}
+
+
+.line-height {line-height: 45px;}
+
+.table {width: 100%;}
+
+.pseudo {}
+.pseudo:before {
+	content: '';
+	display: inline-block;
+	height: 100%;
+	vertical-align: middle;
+	margin-right: -0.25em;
+}
+.pseudo > * {display: inline-block;vertical-align: middle;}
+
+.flex-box {display:flex; align-items:center;}

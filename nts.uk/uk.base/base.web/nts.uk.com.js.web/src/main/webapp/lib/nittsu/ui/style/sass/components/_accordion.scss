@@ -1,0 +1,43 @@
+.ui-accordion {
+	.ui-accordion-header {
+		border-color: #999;
+		background: #FFF;
+		color: $button_font_color;
+		font-size: 1.2rem;
+		outline: none;
+		padding: 0.4rem 2rem 0.4rem 0.4rem;
+		margin-top: 10px;
+		
+		&.ui-state-active { 
+			.ui-icon {
+				background-image: url("../../../../generic/jqueryui/images/ui-icons_444444_256x240.png");
+			}
+		}
+	}
+ 
+	
+	.status {
+		display: inline-block;
+		float: right;
+		background: $green_background_color;
+		padding: 0 0.6rem;
+		margin-top: -0.4rem;
+		border-radius: 3px;
+		line-height: 32px;
+		min-width: 60px;
+		text-align: center;
+	}
+	
+	.close-button {
+		position: absolute;
+		top: 50%;
+		right: 5px;
+		margin-top: -8px;
+		float: right;
+	}
+	
+	.ui-accordion-content {
+		border-top-width: 1px;
+		border-color: #999;
+	}
+}

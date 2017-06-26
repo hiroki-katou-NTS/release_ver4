@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+				<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Button</h1>
+						<h2>Demo</h2>
+						<h3>Color</h3>
+						<button>Normal</button>
+						<button class="proceed">Proceed</button>
+						<button class="danger">Danger</button>
+						<h3>Size</h3>
+						<button class="small">Small</button>
+						<button>Normal</button>
+						<button class="large">Large</button>
+						<button class="x-large">X-large</button>
+						<h3>Disabled</h3>
+						<button data-bind="enable: false">Disabled</button>
+						<h3>Auto height</h3>
+						<button class="auto-height">lorem<br/>ipsum</button>
+						<button class="auto-height">lorem<br/>ipsum<br/>dolor<br/>sit amet</button>
+						<h3>Arrow Button</h3>
+						<button><i class="icon icon-button-arrow-left"/></button>
+						<button><i class="icon icon-button-arrow-right"/></button>
+						<button class="auto-height"><i class="icon icon-button-arrow-top"/></button>
+						<button class="auto-height"><i class="icon icon-button-arrow-bottom"/></button>
+						<h2>Usage</h2>
+						<p>You just need to add class to your button:</p>
+<pre><![CDATA[<!-- Color -->
+<button>Normal</button>
+<button class="proceed">Proceed</button>
+<button class="danger">Danger</button>
+<!-- Size -->
+<button class="small">Small</button>
+<button>Normal</button>
+<button class="large">Large</button>
+<button class="x-large">X-large</button>
+<!-- Disabled -->
+<button data-bind="enable: false">Disabled</button>
+<!-- Auto height -->
+<button class="auto-height">lorem<br/>ipsum</button>
+<!-- Arrow button -->
+<button><i class="icon icon-button-arrow-left"></i></button>
+<button><i class="icon icon-button-arrow-right"></i></button>
+<button class="auto-height"><i class="icon icon-button-arrow-top"/></button>
+<button class="auto-height"><i class="icon icon-button-arrow-bottom"/></button>
+]]></pre>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

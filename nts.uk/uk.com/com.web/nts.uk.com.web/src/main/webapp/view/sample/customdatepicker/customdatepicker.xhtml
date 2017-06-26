@@ -1,0 +1,147 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>           	
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="viewmodel.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<style>
+					.round-green {
+						background-color: green !important;
+						border-radius: 20px;
+					}
+					.round-orange {
+						background-color: orange !important;
+						border-radius: 20px;
+						font-weight: bold;
+					}
+					.rect-pink {
+						background-color: pink !important;
+					}
+					.round-yellow {
+						background-color: yellow !important;
+						border-radius: 20px;
+					}
+					.round-gray {
+						background-color: gray !important;
+						border-radius: 20px;
+					}
+					.round-purple {
+						background-color: purple !important;
+						border-radius: 20px;
+						font-style: italic;
+						text-decoration: underline;
+					}
+					.round-red {
+						background-color: red !important;
+						border-radius: 20px;
+					}
+				</style>
+            </ui:define>
+            
+            <ui:define name="content">
+				<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Colored DatePicker with fiscal months</h1>
+						<h2>Overview</h2>
+						<h3>Datepicker</h3>
+						<div data-bind="ntsDatePicker: {value: dateString, dateFormat: 'YYYY/MM/DD', required: true, fiscalMonthsMode: true, cssRanger: cssRangerYMD, defaultClass: 'round-orange' }"></div>
+						<input data-bind="ntsTimeEditor: {value: dateString}"/>
+						<br/>
+						<b>Return ISO String:</b> <span data-bind="text: dateString"/>
+						<br/>						
+						<hr/>
+						<h3>YearMonth picker</h3>
+						<div data-bind="ntsDatePicker: {value: yearMonth, dateFormat: 'yearmonth', valueFormat: 'YYYYMM', cssRanger: cssRangerYM, fiscalMonthsMode: true, defaultClass: 'round-orange' }"></div>
+						<br/>
+						<b>Return Number:</b> <span data-bind="text: yearMonth"/>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-usage">Usage</a></li>
+									<li><a href="#tabs-api">API</a></li>
+								</ol>
+								<div id="tabs-usage" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<!-- Datepicker -->
+<div data-bind="ntsDatePicker: { value: date, dateFormat: 'YYYY/MM/DD', required: true, fiscalMonthsMode: true, cssRanger: cssRangerYMD, defaultClass: 'round-orange' }"></div>
+<!-- YearMonth Picker -->
+<div data-bind="ntsDatePicker: { value: yearMonth, dateFormat: 'yearmonth', , valueFormat: 'YYYYMM', cssRanger: cssRangerYM, fiscalMonthsMode: true, defaultClass: 'round-orange' }"></div>]]></pre>
+									<h2>ViewModel</h2>
+<pre><![CDATA[<!-- Recommend use 'string' and momentjs for date type -->
+class ScreenModel {
+    date: KnockoutObservable<string>;
+    yearMonth: KnockoutObservable<number>;
+    constructor() {
+        var self = this;            
+        self.date = ko.observable('20000101');
+        self.yearMonth = ko.observable(200002);
+        self.cssRangerYM = { 2000: [{ 1: "round-green" }, { 5: "round-yellow" }],
+                               2002: [ 1, { 5: "round-gray" }]};
+        self.cssRangerYMD = {
+            2000: {1: [{ 11: "round-green" }, { 12: "round-orange" }, { 15: "rect-pink" }], 3: [{ 1: "round-green" }, { 2: "round-purple" }, 3 ]},
+            2002: {1: [{ 11: "round-green" }, { 12: "round-green" }, { 15: "round-green" }], 3: [{ 1: "round-green" }, { 2: "round-green" }, { 3: "round-green" }]} 
+        }
+    }
+}]]></pre>
+								</div>
+								<div id="tabs-api" class="cf">
+									<h2>Properties</h2>
+									<table class="table">
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Name</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>fiscalMonthsMode</td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													Setup fiscal months mode.
+												</td>
+											</tr>
+											<tr>
+												<td>cssRanger</td>
+												<td>
+													<b>Type:</b> object<br/>
+													CSS ranges for specified dates.
+												</td>
+											</tr>
+											<tr>
+												<td>defaultClass<br/><i>(Optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													Default CSS class for dates whose CSS class hasn't been specified in cssRanger.
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

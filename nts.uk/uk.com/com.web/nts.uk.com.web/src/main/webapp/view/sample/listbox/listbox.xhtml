@@ -1,0 +1,260 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+            	<com:scriptfile set="IGNITE" />
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>ListBox </h1>
+						<h2>Overview</h2>
+						<div>
+							<input data-bind="value: itemName"></input>
+							<button data-bind="click: addOptions">Add Item</button>
+						</div>
+						<button data-bind="click: remove">Remove Item</button>
+						<button data-bind="click: selectAll">Select All</button>
+						<button data-bind="click: deselectAll">Deselect All</button>
+						<span data-bind="ntsCheckBox: { checked: isEnable }">Enable</span>
+						<span data-bind="ntsCheckBox: { checked: isMulti }">Multiple for list 1</span>
+						<br />
+						<!-- Multiple is false -->
+						<b>Single Selected:</b><span data-bind="text: selectedCode()"></span>
+						<i><span data-bind="text: selectedCode().code"></span></i><br/>
+						<!-- Multiple is true -->
+						<b>Multi Selected:</b><span data-bind="text: selectedCodes()"></span><br />
+						<b>Selected:</b><span data-bind="text: selectedCodes().length"></span><br />
+						<br />
+						<div id="list-box" data-bind="ntsListBox: {
+											options: itemList,
+											optionsValue: 'code',
+											optionsText: 'name',
+											multiple: isMulti(),
+											value: selectedCodes,
+											enable: isEnable(),
+											rows: 10,
+											columns: [
+												{ key: 'code', length: 4 },
+												{ key: 'name', length: 10 },
+												{ key: 'description', length: 10 }
+											]}"></div>
+											
+						<div id="list-box2" data-bind="ntsListBox: {
+											options: itemList,
+											optionsValue: 'code',
+											optionsText: 'name',
+											multiple: false,
+											value: selectedCode,
+											enable: isEnable(),
+											rows: 5 }"></div>						
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+									<li><a href="#tabs-methods">Methods</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<div id="list-box" data-bind="ntsListBox: {
+	options: itemList,
+	optionsValue: 'code',
+	optionsText: 'name',
+	multiple: true,
+	value: selectedCodes,
+	enable: isEnable(),
+	rows: 3,
+	columns: [
+		{ key: 'code', length: 4 },
+		{ key: 'name', length: 10 },
+		{ key: 'description', length: 10 }
+	]}"></div>]]></pre>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>options</td>
+												<td>
+													<b>Type:</b> array&lt;any&gt;<br/>
+													List data to generate ListBox
+												</td>
+											</tr>
+											<tr>
+												<td>optionsValue<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as ListBox value. If null object will be set as value
+												</td>
+											</tr>
+											<tr>
+												<td>optionsText</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as ListBox text
+												</td>
+											</tr>
+											<tr>
+												<td>multiple</td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> true<br/>
+													Set enable/disable for ListBox control
+												</td>
+											</tr>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> array&lt;any&gt;<br/>
+													List selected value
+												</td>
+											</tr>
+											<tr>
+												<td>enable<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> true<br/>
+													Set enable/disable for ListBox control
+												</td>
+											</tr>
+											<tr>
+												<td>rows</td>
+												<td>
+													<b>Type:</b> number<br/>
+													Set number of rows will be show
+												</td>
+											</tr>
+											<tr>
+												<td>columns<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> array&lt;column&gt;<br/>
+													Array of column object will be displayed in drop down part.<br/>
+													<i>prop / key:</i> field name of data<br/>
+													<i>length:</i> length of character for this field 
+												</td>
+											</tr>
+											<tr>
+												<td>required<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> false<br/>
+													Set required for ListBox
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[class ScreenModel {
+    itemList: KnockoutObservableArray<ItemModel>;
+    itemName: KnockoutObservable<string>;
+    currentCode: KnockoutObservable<number>
+    selectedCode: KnockoutObservable<string>;
+    selectedCodes: KnockoutObservableArray<string>;
+    isEnable: KnockoutObservable<boolean>;
+    
+    constructor() {
+        var self = this;
+        self.itemList = ko.observableArray([
+            new ItemModel('基本給2', '基本給', "description 1"),
+            new ItemModel('基本給1', '役職手当', "description 2"),
+            new ItemModel('基本給3', '基本給', "description 3")
+        ]);
+        self.itemName = ko.observable('');
+        self.currentCode = ko.observable(3);
+        self.selectedCode = ko.observable(null)
+        self.isEnable = ko.observable(true);
+        self.selectedCodes = ko.observableArray([]);
+        
+        $('#list-box').on('selectionChanging', function(event) {
+            console.log('Selecting value:' + (<any>event.originalEvent).detail);
+        })
+        $('#list-box').on('selectionChanged', function(event: any) {
+            console.log('Selected value:' + (<any>event.originalEvent).detail)
+        })
+    }
+    
+    deselectAll() {
+        $('#list-box').ntsListBox('deselectAll');
+    }
+    
+    selectAll() {
+        $('#list-box').ntsListBox('selectAll');
+    }
+}
+
+class ItemModel {
+    code: string;
+    name: string;
+    description: string;
+    
+    constructor(code: string, name: string, description: string) {
+        this.code = code;
+        this.name = name;
+        this.description = description;
+    }
+}]]></pre>
+								</div>
+								<div id="tabs-methods" class="cf">
+									<table>
+										<colgroup>
+											<col width="350px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Methods</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>$("#list-box").ntsListBox('selectAll');</td>
+												<td>
+													Select all values
+												</td>
+											</tr>
+											<tr>
+												<td>$("#list-box").ntsListBox('deselectAll');</td>
+												<td>
+													Deselect all values
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

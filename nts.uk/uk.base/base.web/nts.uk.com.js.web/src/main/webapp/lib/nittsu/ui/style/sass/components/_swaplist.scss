@@ -1,0 +1,30 @@
+.ntsSwapArea{
+	display: table;
+}
+.ntsSwapList-container{
+	display: inline-block;
+}
+.ntsSwapList{
+	overflow: hidden;
+}
+.ntsSearchButton{
+	margin-left: 10px;
+}
+.move-button{ 
+	width: 75px;
+}
+.move-forward{
+	margin-bottom: 5px;
+}
+.ntsSwapComponent{
+	display: table-cell;
+}
+.ntsMoveDataArea{
+	height: 100%; 
+	vertical-align: middle;
+	width: 75px;
+	text-align: center; 
+}
+.ntsSearchArea div{
+	display: inline-block;
+}

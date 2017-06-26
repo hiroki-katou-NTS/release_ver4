@@ -1,0 +1,216 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="viewmodel.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>TabPanel</h1>
+						<h2>Overview</h2>
+						<div class="cf flex">
+							<div style="width: 50%; padding-right: 10px; border-right: 1px solid #ccc;">
+								<div id="tab-panel" data-bind="ntsTabPanel: { dataSource: tabs, active: selectedTab }">
+									<div class="tab-content-1">
+										<span>Tab Content 1</span><br/>
+									</div>
+									<div class="tab-content-2">
+										<span>Tab Content 2</span><br/>
+									</div>
+									<div class="tab-content-3">
+										<span>Tab Content 3</span><br/>
+									</div>
+									<div class="tab-content-4">
+										<p>Fusce vitae libero non sem blandit pharetra a vel mi. Integer euismod pellentesque hendrerit. Nam interdum maximus lacus. Mauris dapibus pulvinar quam vitae maximus. Morbi dapibus vitae ligula at facilisis. Quisque rhoncus magna ut enim scelerisque, venenatis tempus lacus volutpat. Sed ut tellus erat. Morbi sollicitudin luctus condimentum. Sed malesuada hendrerit dignissim.</p>
+										<p>Vestibulum sodales nisl tellus, a bibendum ligula eleifend vitae. Proin dictum eget mi ac mattis. Integer ex lectus, dapibus vitae nibh sit amet, bibendum porta urna. Suspendisse quis iaculis mauris. Integer efficitur bibendum dolor nec posuere. Integer blandit ante eu dolor ullamcorper accumsan. Fusce imperdiet mattis augue sed finibus. Nunc condimentum mollis magna, a euismod risus dapibus ut. Sed dolor nisl, iaculis quis ante sed, pretium tincidunt augue. Fusce sed sapien sapien. Cras suscipit, urna vitae maximus scelerisque, est dolor rutrum elit, id luctus est metus quis nunc. Pellentesque facilisis nibh ut libero scelerisque, non dapibus velit aliquet.</p>
+										<p>Aliquam pharetra tempor neque sed feugiat. Morbi velit quam, porttitor ac metus quis, sodales efficitur dui. Praesent convallis ligula dui. Duis placerat dignissim egestas. Fusce fermentum eleifend risus quis fermentum. Nullam vel dolor arcu. Vivamus id varius arcu. Ut commodo risus erat, quis tincidunt nisl tristique vitae. Maecenas in pulvinar odio. Sed feugiat viverra congue.</p>
+									</div>
+								</div>
+							</div>
+							<div style="width: 50%; padding-left: 10px;">
+								<div id="tab-panel" class="cf" data-bind="ntsTabPanel: { dataSource: tabs, active: selectedTab, direction: 'vertical' }">
+									<div class="tab-content-1">
+										<span>Tab Content 1</span><br/>
+									</div>
+									<div class="tab-content-2">
+										<span>Tab Content 2</span><br/>
+									</div>
+									<div class="tab-content-3">
+										<span>Tab Content 3</span><br/>
+									</div>
+									<div class="tab-content-4">
+										<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus laoreet magna sed massa feugiat, non accumsan nunc sollicitudin. Curabitur ligula nisl, rhoncus vitae feugiat nec, consequat posuere ex. Aenean accumsan a orci non vulputate. Sed fermentum metus vitae ex tristique, id cursus ex vehicula. Donec gravida felis lectus, sed iaculis sapien rutrum eget. Aliquam dui augue, ultricies non consequat ac, commodo vel mauris. Pellentesque molestie placerat justo sed ullamcorper. Quisque at suscipit mi, in mollis erat. Nulla congue ex eu ornare aliquet. Cras laoreet, odio vel tempor interdum, diam mi placerat nisl, in vehicula nisl mauris a sapien. Aenean id ex eros. Maecenas volutpat arcu at dolor mattis tincidunt. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
+										<p>Curabitur pulvinar molestie libero, non rutrum quam pharetra sed. Sed vel congue ex. Maecenas interdum lacus enim, in laoreet metus blandit in. Etiam sem elit, ornare nec pulvinar a, pellentesque sed dui. Pellentesque dignissim tortor id erat eleifend congue. Suspendisse vitae dapibus sapien. Suspendisse tristique risus in leo luctus sagittis. Nulla sodales, nisi ut viverra pretium, diam libero pulvinar risus, id gravida orci dolor gravida nisl. Praesent at consequat leo, et mattis ex.</p>
+										<p>Aliquam pharetra tempor neque sed feugiat. Morbi velit quam, porttitor ac metus quis, sodales efficitur dui. Praesent convallis ligula dui. Duis placerat dignissim egestas. Fusce fermentum eleifend risus quis fermentum. Nullam vel dolor arcu. Vivamus id varius arcu. Ut commodo risus erat, quis tincidunt nisl tristique vitae. Maecenas in pulvinar odio. Sed feugiat viverra congue.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<br/>
+						<div data-bind="foreach: tabs">
+							<span data-bind="text: title + ':'"></span>
+							<span data-bind="ntsCheckBox: { checked: enable }">Enable</span>
+							<span data-bind="ntsCheckBox: { checked: visible }">Visible</span>
+							<br/>
+						</div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<div id="tab-panel" data-bind="ntsTabPanel: { dataSource: tabs, active: selectedTab}">
+	<div class="tab-content-1">
+		<span>Tab Content 1</span><br/>
+	</div>
+	<div class="tab-content-2">
+		<span>Tab Content 2</span><br/>
+	</div>
+	<div class="tab-content-3">
+		<span>Tab Content 3</span><br/>
+	</div>
+	<div class="tab-content-4">
+		<span>Tab Content 4</span><br/>
+	</div>
+</div>]]></pre>
+									<div class="pull-left">
+										<h2>API</h2>
+										<table>
+											<colgroup>
+												<col width="200px" />
+											</colgroup>
+											<thead>
+												<tr>
+													<th><h4>Binding</h4></th>
+													<th><h4>Description</h4></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>dataSource</td>
+													<td>
+														<b>Type:</b> array&lt;<a href="#TabModel"><span class="color">TabModel</span></a>&gt;<br/>
+														Set checked value for CheckBox
+													</td>
+												</tr>
+												<tr>
+													<td>active</td>
+													<td>
+														<b>Type:</b> string<br/>
+														ID string of active tab
+													</td>
+												</tr>
+												<tr>
+													<td>direction<br/><i>(optional)</i></td>
+													<td>
+														<b>Type:</b> string<br/>
+														<b>Default:</b> "horizontal"<br/>
+														<b>Members:</b><br/>
+														<i>horizontal</i> Tabpanel display horizontal<br/>
+														<i>vertical</i> Tabpanel display vertical
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<div id="TabModel" class="feature-box pull-right" style="width:50%;">
+										<div class="header"><h3 >TabModel</h3></div>
+										<div class="content">
+											<table style="width:100%;">
+												<colgroup>
+													<col width="200px" />
+												</colgroup>
+												<thead>
+													<tr>
+														<th><h4>Properties</h4></th>
+														<th><h4>Description</h4></th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td>id</td>
+														<td>
+															<b>Type:</b> string<br/>
+															Id for tab panel navagator
+														</td>
+													</tr>
+													<tr>
+														<td>title</td>
+														<td>
+															<b>Type:</b> string<br/>
+															Title for tab panel navagator
+														</td>
+													</tr>
+													<tr>
+														<td>content</td>
+														<td>
+															<b>Type:</b> string<br/>
+															Jquery selector for tab panel content
+														</td>
+													</tr>
+													<tr>
+														<td>enable</td>
+														<td>
+															<b>Type:</b> KnockoutObservable&lt;boolean&gt;<br/>
+															Enable/disable tab panel. When disable tab panel content will be hide
+														</td>
+													</tr>
+													<tr>
+														<td>visible</td>
+														<td>
+															<b>Type:</b> KnockoutObservable&lt;boolean&gt;<br/>
+															Show/hide tab panel navagator
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[export class ScreenModel {
+	tabs: KnockoutObservableArray<nts.uk.ui.NtsTabPanelModel>;
+	selectedTab: KnockoutObservable<string>;
+
+	constructor() {
+		var self = this;
+		self.tabs = ko.observableArray([
+			{id: 'tab-1', title: 'Tab Title 1', content: '.tab-content-1', enable: ko.observable(true), visible: ko.observable(true)},
+			{id: 'tab-2', title: 'Tab Title 2', content: '.tab-content-2', enable: ko.observable(true), visible: ko.observable(true)},
+			{id: 'tab-3', title: 'Tab Title 3', content: '.tab-content-3', enable: ko.observable(true), visible: ko.observable(true)},
+			{id: 'tab-4', title: 'Tab Title 4', content: '.tab-content-4', enable: ko.observable(true), visible: ko.observable(true)}
+		]);
+		self.selectedTab = ko.observable('tab-2');
+	}
+}]]></pre>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

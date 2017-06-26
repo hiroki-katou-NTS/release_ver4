@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="catalog.js" />
+			</ui:define>
+			<ui:define name="content">				
+				<div id="contents-area" class="cf">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Overview Function Wrap</h1>
+						<article>
+							<h2>What is a function wrap?</h2>
+							<p>A function wrap is a common control which be used often. But it usually be called in code instead of rendered in HTML. Not like a Component which has HTML binding + ViewModel, Function Wrap only need to call javascript function to use.</p>
+							<pre><![CDATA[//Try to paste this to console
+nts.uk.ui.dialog.alert("Hello World!")]]></pre>
+						</article>
+						<article>
+							<h2>List of components</h2>
+							<ul>
+								<li><b>SubWindow:</b> open dialog with an embed &lt;iframe&gt;</li>
+								<li><b>Dialog:</b> open dialog with message only</li>
+								<li><b>Popup:</b> show a popup with content inside</li>
+								<li><b>Errors:</b> allow you push and clear error for control</li>
+								<li><b>DirtyChecker:</b> check if user make any change to a specify value</li>
+							</ul>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

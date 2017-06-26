@@ -1,0 +1,156 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>User Guide</h1>
+						<h2>Overview</h2>
+						<b>Must not empty</b>
+						<button id="button-top" data-bind="click: showOverlayTop">Top &amp; Bottom</button>
+						<button id="button-bottom" data-bind="click: showOverlayBottom">Bottom</button>
+						<!-- UserGuide Top & Bottom -->
+						<div class="userguide-top" data-toggle="userguide" data-target="#button-top" data-direction="top" >
+							<div data-target="#button-top" data-direction="top">
+								Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean a nibh vel ligula pulvinar eleifend. Aenean finibus turpis eu suscipit mollis. In ipsum nibh, finibus at luctus et, venenatis non neque. Mauris volutpat leo ut consequat vulputate. Morbi vitae massa nec ligula congue pretium. Morbi tristique erat sed lacinia ornare. Fusce ut iaculis nulla, nec fringilla neque. Sed vehicula lorem neque, vel laoreet quam accumsan in.
+							</div>
+						</div>
+						<div class="userguide-top" data-toggle="userguide" data-target="#button-top" data-direction="bottom" >
+							<div data-target="#button-prev" data-direction="top">North</div>
+							<div data-target="#button-prev" data-direction="bottom">South</div>
+							<div data-target="#button-prev" data-direction="left">West</div>
+							<div data-target="#button-prev" data-direction="right">East</div>
+						</div>
+						<!-- UserGuide Bottom -->
+						<div class="userguide-bottom" data-toggle="userguide" data-target="#button-bottom" data-direction="bottom" >
+							<div data-target="#button-bottom" data-direction="bottom">
+								Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean a nibh vel ligula pulvinar eleifend. Aenean finibus turpis eu suscipit mollis. In ipsum nibh, finibus at luctus et, venenatis non neque. Mauris volutpat leo ut consequat vulputate. Morbi vitae massa nec ligula congue pretium. Morbi tristique erat sed lacinia ornare. Fusce ut iaculis nulla, nec fringilla neque. Sed vehicula lorem neque, vel laoreet quam accumsan in.
+							</div>
+						</div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-setup">HTML Setup</a></li>
+									<li><a href="#tabs-method">Methods</a></li>
+								</ol>
+								<div id="tabs-setup" class="cf">
+								<b>HTML Setup</b>
+<pre><![CDATA[<div class="userguide-right" data-toggle="userguide" data-target="#input-1" data-direction="right">
+	<div data-target="#input-1" data-direction="right" data-margin="50">
+		Must not be empty!
+	</div>
+</div>]]></pre>
+								<b>UserGuide container will have following configurations:</b>
+								<pre><![CDATA[<div class="userguide-right" data-toggle="userguide" data-target="#input-1" data-direction="right"></div>]]></pre>
+								<i>data-toggle:</i> Use this for common init setup.<br/>
+								<i>data-target:</i> Target for overlay mask. Using JQuery selector<br/>
+								<i>data-direction:</i> Direction for overlay mask. Can be: "top", "bottom, "left", "right".<br/>
+								<br/>
+								<b>Any element inside will became guide-box. It'll have following configurations:</b>
+								<pre><![CDATA[<div data-target="#input-1" data-direction="right" data-margin="50">Must not be empty!</div>]]></pre>
+								<i>data-target:</i> Target for guide-box mask. Using JQuery selector<br/>
+								<i>data-direction:</i> Direction for guide-box mask. Can be: "top", "bottom, "left", "right".<br/>
+								<i>data-margin:</i> Margin amount from guide-box to target element.<br/>
+								<br/>
+								<b>Javascript call</b>
+<pre><![CDATA[// Init every Userguide
+$("[data-toggle='userguide']").ntsUserGuide();
+// Show
+$(".userguide-right").ntsUserGuide("show");]]></pre>
+								</div>
+								<div id="tabs-method" class="cf">
+									<article>
+										<h2>Information</h2>
+										<b>Type:</b> Jquery extension<br />
+										<b>File:</b> /lib/nittsu/ui/jquery-ext.ts<br />
+									</article>
+									<br />
+									<article>
+										<h2>Methods</h2>
+										<table>
+											<colgroup>
+												<col width="400px" />
+											</colgroup>
+											<thead>
+												<tr>
+													<th><h4>Method</h4></th>
+													<th><h4>Description</h4></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>
+														$.fn.ntsUserGuide()<br/>
+														$.fn.ntsUserGuide("init")
+													</td>
+													<td>
+														<b>Return: </b>JQuery<br/>
+														Init UserGuide
+													</td>
+												</tr>
+												<tr>
+													<td>$.fn.ntsUserGuide("destroy")</td>
+													<td>
+														<b>Return: </b>JQuery<br/>
+														Destroy UserGuide
+													</td>
+												</tr>
+												<tr>
+													<td>$.fn.ntsUserGuide("show")</td>
+													<td>
+														<b>Return: </b>JQuery<br/>
+														Show UserGuide
+													</td>
+												</tr>
+												<tr>
+													<td>$.fn.ntsUserGuide("hide")</td>
+													<td>
+														<b>Return: </b>JQuery<br/>
+														Hide UserGuide
+													</td>
+												</tr>
+												<tr>
+													<td>$.fn.ntsUserGuide("toggle")</td>
+													<td>
+														<b>Return: </b>JQuery<br/>
+														Toggle show/hide UserGuide
+													</td>
+												</tr>
+												<tr>
+													<td>$.fn.ntsUserGuide("isShow")</td>
+													<td>
+														<b>Return: </b>boolean<br/>
+														Check UserGuide is show or not
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</article>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button id="button-prev" class="previous large">Previous</button>
+							<button id="button-next" class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

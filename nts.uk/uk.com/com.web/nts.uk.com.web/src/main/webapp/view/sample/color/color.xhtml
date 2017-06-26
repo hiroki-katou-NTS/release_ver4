@@ -1,0 +1,420 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:stylefile path="color.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				
+            </ui:define>
+            
+            <ui:define name="content">
+				<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Color</h1>
+						<article>
+							<h2>Common color</h2>
+							<table class="table">
+								<colgroup>
+									<col width="210px" />
+									<col width="245px" />
+									<col width="180px" />
+									<col width="160px" />
+									<col width="*" />
+								</colgroup>
+								<thead>
+									<tr>
+										<th><h4>Name</h4></th>
+										<th><h4>CSS Class</h4></th>
+										<th><h4>Code</h4></th>
+										<th><h4>Type</h4></th>
+										<th><h4>Demo</h4></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>Background green color</td>
+										<td>.bg-green</td>
+										<td class="color-info">#E0F59E</td>
+										<td>Background color</td>
+										<td class="bg-green">しばらくの間、操作がなかったためサーバとの接続を切断しました。</td>
+									</tr>
+									<tr>
+										<td>Background yellow color</td>
+										<td>.bg-yellow</td>
+										<td class="color-info">#F7EFD4</td>
+										<td>Background color</td>
+										<td class="bg-yellow">しばらくの間、操作がなかったためサーバとの接続を切断しました。</td>
+									</tr>
+									<tr>
+										<td>Proceed color</td>
+										<td>.color-proceed</td>
+										<td class="color-info">#00B050</td>
+										<td>Text color</td>
+										<td class="color-proceed">しばらくの間、操作がなかったためサーバとの接続を切断しました。</td>
+									</tr>
+									<tr>
+										<td>Danger color</td>
+										<td>.color-danger</td>
+										<td class="color-info">#C12017</td>
+										<td>Text color</td>
+										<td class="color-danger">しばらくの間、操作がなかったためサーバとの接続を切断しました。</td>
+									</tr>
+								</tbody>
+							</table>
+						</article>
+						<article>
+							<h2>Component color</h2>
+							<table class="table">
+								<colgroup>
+									<col width="210px" />
+									<col width="245px" />
+									<col width="180px" />
+									<col width="160px" />
+									<col width="*" />
+								</colgroup>
+								<thead>
+									<tr>
+										<th><h4>Component</h4></th>
+										<th><h4>Description</h4></th>
+										<th><h4>Code</h4></th>
+										<th><h4>Type</h4></th>
+										<th><h4>Demo</h4></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>FormLabel</td>
+										<td>Active border color</td>
+										<td class="color-info">#97D155</td>
+										<td>Border color</td>
+										<td><div data-bind="ntsFormLabel: {}">レイアウトコード</div></td>
+									</tr>
+									<tr>
+										<td>FormLabel</td>
+										<td>Required border color</td>
+										<td class="color-info">#FAC002</td>
+										<td>Border color</td>
+										<td><div data-bind="ntsFormLabel: {required: true}">レイアウトコード</div></td>
+									</tr>
+									<tr>
+										<td>FormLabel</td>
+										<td>Disabled border color</td>
+										<td class="color-info">#AAAAAA</td>
+										<td>Border color</td>
+										<td><div data-bind="ntsFormLabel: {enable: false}">レイアウトコード</div></td>
+									</tr>
+									<tr>
+										<td>LinkButton</td>
+										<td>LinkButton background color</td>
+										<td class="color-info">#E0F59E</td>
+										<td>Background color</td>
+										<td><a data-bind="ntsLinkButton: { jump: 'linkbutton.xhtml' }">Link Buton</a></td>
+									</tr>
+									<tr>
+										<td>LinkButton</td>
+										<td>LinkButton text color</td>
+										<td class="color-info">#0D86D1</td>
+										<td>Text color</td>
+										<td><a data-bind="ntsLinkButton: { jump: 'linkbutton.xhtml' }">Link Buton</a></td>
+									</tr>
+									<tr>
+										<td>CheckBox</td>
+										<td>Checkbox background color</td>
+										<td class="color-info">#2FCC71</td>
+										<td>Background color</td>
+										<td><div data-bind="ntsCheckBox: { checked: true }">Check Box</div></td>
+									</tr>
+									<tr>
+										<td>RadioBox</td>
+										<td>RadioBox background color</td>
+										<td class="color-info">#97D155</td>
+										<td>Background color</td>
+										<td>
+										<span class="ntsControl">
+											<label class="ntsRadioBox">
+												<input type="radio" name="textRadio" data-bind="checked: true" />
+												<span class="box"></span><span class="label">Radio Box</span>
+											</label>
+										</span>
+										</td>
+									</tr>
+									<tr>
+										<td>Button</td>
+										<td>Hover background color</td>
+										<td class="color-info">#F2F2F2</td>
+										<td>Background color</td>
+										<td><button>Button</button></td>
+									</tr>
+									<tr>
+										<td>Button</td>
+										<td>Danger background color</td>
+										<td class="color-info">#FED3C6</td>
+										<td>Background color</td>
+										<td><button class="danger">Button</button></td>
+									</tr>
+									<tr>
+										<td>Button</td>
+										<td>Danger hover background color</td>
+										<td class="color-info">#fec0ad</td>
+										<td>Background color</td>
+										<td><button class="danger">Button</button></td>
+									</tr>
+									<tr>
+										<td>Button</td>
+										<td>Proceed background color</td>
+										<td class="color-info">#A4EEB0</td>
+										<td>Background color</td>
+										<td><button class="proceed">Button</button></td>
+									</tr>
+									<tr>
+										<td>Button</td>
+										<td>Proceed hover background color</td>
+										<td class="color-info">#79e68b</td>
+										<td>Background color</td>
+										<td><button class="proceed">Button</button></td>
+									</tr>
+									<tr>
+										<td>Button</td>
+										<td>Disable background color</td>
+										<td class="color-info">#d9d9d9</td>
+										<td>Background color</td>
+										<td><button data-bind="enable: false">Button</button></td>
+									</tr>
+									<tr>
+										<td>Button</td>
+										<td>Border color</td>
+										<td class="color-info">#999999</td>
+										<td>Border color</td>
+										<td><button>Button</button></td>
+									</tr>
+									<tr>
+										<td>Button</td>
+										<td>Focus border color</td>
+										<td class="color-info">#0096f2</td>
+										<td>Border color</td>
+										<td><button>Button</button></td>
+									</tr>
+									<tr>
+										<td>SwitchButton</td>
+										<td>Active background color</td>
+										<td class="color-info">#00B050</td>
+										<td>Background color</td>
+										<td><div class="cf" data-bind="ntsSwitchButton: { options: [{code:1, name:'Button 1'}, {code:2, name:'Button 2'}],
+										optionsValue: 'code', optionsText: 'name',
+										value: ko.observable(1) }"></div></td>
+									</tr>
+									<tr>
+										<td>SwitchButton</td>
+										<td>Disabled background color</td>
+										<td class="color-info">#D9D9D9</td>
+										<td>Background color</td>
+										<td><div class="cf" data-bind="ntsSwitchButton: { options: [{code:1, name:'Button 1'}, {code:2, name:'Button 2'}],
+										optionsValue: 'code', optionsText: 'name',
+										value: ko.observable(1), enable: false }"></div></td>
+									</tr>
+									<tr>
+										<td>SwitchButton</td>
+										<td>Border color</td>
+										<td class="color-info">#999999</td>
+										<td>Border color</td>
+										<td><div class="cf" data-bind="ntsSwitchButton: { options: [{code:1, name:'Button 1'}, {code:2, name:'Button 2'}],
+										optionsValue: 'code', optionsText: 'name',
+										value: ko.observable(1) }"></div></td>
+									</tr>
+								</tbody>
+							</table>
+						</article>
+						<article>
+							<h2>Daily Schedule Color</h2>
+							<table class="table">
+								<colgroup>
+									<col width="210px" />
+									<col width="245px" />
+									<col width="180px" />
+									<col width="160px" />
+									<col width="*" />
+								</colgroup>
+								<thead>
+									<tr>
+										<th><h4>Name</h4></th>
+										<th><h4>CSS Class</h4></th>
+										<th><h4>Code</h4></th>
+										<th><h4>Type</h4></th>
+										<th><h4>Demo</h4></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>法定休日</td>
+										<td>.color-daily-holiday</td>
+										<td class="color-info">#FF2D2D</td>
+										<td>Text color</td>
+										<td class="color-daily-holiday">17/5/28(日)</td>
+									</tr>
+									<tr>
+										<td>法定外休日</td>
+										<td>.color-daily-extra-holiday</td>
+										<td class="color-info">#0086EA</td>
+										<td>Text color</td>
+										<td class="color-daily-extra-holiday">17/5/27(土)</td>
+									</tr>
+									<tr>
+										<td>本人の手修正</td>
+										<td>.bg-daily-alter-self</td>
+										<td class="color-info">#94B7FE</td>
+										<td>Background color</td>
+										<td class="bg-daily-alter-self">050　<span class="color-daily-extra-holiday">年休</span></td>
+									</tr>
+									<tr>
+										<td>本人以外の手修正</td>
+										<td>.bg-daily-alter-other</td>
+										<td class="color-info">#CEE6FF</td>
+										<td>Background color</td>
+										<td class="bg-daily-alter-other">17:50</td>
+									</tr>
+									<tr>
+										<td>申請反映</td>
+										<td>.bg-daily-reflect-application</td>
+										<td class="color-info">#92F29B</td>
+										<td>Background color</td>
+										<td class="bg-daily-reflect-application">050　<span class="color-daily-extra-holiday">年休</span></td>
+									</tr>
+									<tr>
+										<td>エラー</td>
+										<td>.bg-daily-error</td>
+										<td class="color-info">#FEC6C6</td>
+										<td>Background color</td>
+										<td class="bg-daily-error">3:00</td>
+									</tr>
+									<tr>
+										<td>アラーム</td>
+										<td>.bg-daily-alarm</td>
+										<td class="color-info">#E3F385</td>
+										<td>Background color</td>
+										<td class="bg-daily-alarm">3:00</td>
+									</tr>
+									<tr>
+										<td>計算値</td>
+										<td>.bg-daily-calculated</td>
+										<td class="color-info">#E4C9FF</td>
+										<td>Background color</td>
+										<td class="bg-daily-calculated">3:00</td>
+									</tr>
+								</tbody>
+							</table>
+						</article>
+						<article>
+							<h2>Schedule Correction (By Workplace) Color</h2>
+							<table class="table">
+								<colgroup>
+									<col width="210px" />
+									<col width="245px" />
+									<col width="180px" />
+									<col width="160px" />
+									<col width="*" />
+								</colgroup>
+								<thead>
+									<tr>
+										<th><h4>Name</h4></th>
+										<th><h4>CSS Class</h4></th>
+										<th><h4>Code</h4></th>
+										<th><h4>Type</h4></th>
+										<th><h4>Demo</h4></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>実績</td>
+										<td>.color-schedule-performance</td>
+										<td class="color-info">#92D050</td>
+										<td>Text color</td>
+										<td class="color-schedule-performance">ABCDEF</td>
+									</tr>
+									<tr>
+										<td>エラー</td>
+										<td>.color-schedule-error</td>
+										<td class="color-info">#FF0000</td>
+										<td>Text color</td>
+										<td class="color-schedule-error">ABCDEF</td>
+									</tr>
+									<tr>
+										<td>応援</td>
+										<td>.bg-schedule-support</td>
+										<td class="color-info">#FEDFE6</td>
+										<td>Background color</td>
+										<td class="bg-schedule-support">ABCDEF</td>
+									</tr>
+									<tr>
+										<td>雇用保険未加入</td>
+										<td>.bg-schedule-no-empl-insurance</td>
+										<td class="color-info">#EF7F7F</td>
+										<td>Background color</td>
+										<td class="bg-schedule-no-empl-insurance">ABCDEF</td>
+									</tr>
+									<tr>
+										<td>健康保険未加入</td>
+										<td>.bg-schedule-no-health-insurance</td>
+										<td class="color-info">#ACFE2F</td>
+										<td>Background color</td>
+										<td class="bg-schedule-no-health-insurance">ABCDEF</td>
+									</tr>
+									<tr>
+										<td>雇用保険・健康保険未加入</td>
+										<td>.bg-schedule-no-empl-health-insurance</td>
+										<td class="color-info">#FEA400</td>
+										<td>Background color</td>
+										<td class="bg-schedule-no-empl-health-insurance">ABCDEF</td>
+									</tr>
+									<tr>
+										<td>スケジュール確定</td>
+										<td>.bg-schedule-fixed</td>
+										<td class="color-info">#ECCEFB</td>
+										<td>Background color</td>
+										<td class="bg-schedule-fixed">ABCDEF</td>
+									</tr>
+									<tr>
+										<td>修正不可</td>
+										<td>.bg-schedule-uncorrectable</td>
+										<td class="color-info">#DDDDD2</td>
+										<td>Background color</td>
+										<td class="bg-schedule-uncorrectable">ABCDEF</td>
+									</tr>
+									<tr>
+										<td>曜日別勤務</td>
+										<td>.bg-schedule-work-by-dow</td>
+										<td class="color-info">#FFFF69</td>
+										<td>Background color</td>
+										<td class="bg-schedule-work-by-dow">ABCDEF</td>
+									</tr>
+									<tr>
+										<td>シフト勤務</td>
+										<td>.bg-schedule-shift-work</td>
+										<td class="color-info">#FFE699</td>
+										<td>Background color</td>
+										<td class="bg-schedule-shift-work">ABCDEF</td>
+									</tr>
+								</tbody>
+							</table>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

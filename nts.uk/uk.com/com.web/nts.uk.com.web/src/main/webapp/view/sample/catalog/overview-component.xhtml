@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="catalog.js" />
+			</ui:define>
+			<ui:define name="content">				
+				<div id="contents-area" class="cf">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Overview Component</h1>
+						<article>
+							<h2>What is a component?</h2>
+							<p>A component is a common control which be used often. So that will be created to:</p>
+							<ol>
+								<li>1. Consistent overall application</li>
+								<li>2. Provide various option for easier setting</li>
+							</ol>
+							<note style="width: 50%;">Components created by Kiban team and still in process. If you have any requirement that component can't do it, please contact Kiban team. If you change or fix it on your own it'll break 1st statement</note>
+						</article>
+						<article>
+							<h2>Component structure</h2>
+							<h3>HTML</h3>
+							<p>The backbone of component. Usually component will use custom binding with "nts" prefix:</p>
+							<pre><![CDATA[<input data-name="Employee Code" data-bind="ntsTextEditor: {value: value, constraint: constraint, option: option, enable: enable, readonly: readonly}" />]]></pre>
+							<h3>ViewModel</h3>
+							<p>Hold data and setting for component</p>
+							<pre><![CDATA[employeeeditor: {
+    value: ko.observable('19'),
+    constraint: 'EmployeeCode',
+    option: ko.mapping.fromJS(new editorOption.TextEditorOption()),
+    enable: ko.observable(true),
+    readonly: ko.observable(false)
+},]]></pre>
+							<h3>Option</h3>
+							<p>If a component has many complex setting. It'll have an Option for easier setting and using default setting (for now only Editor has Option). Option can be observable or not, if you going to change Option value then use <i>ko.mapping.fromJS</i> to change it to observable.</p>
+							<pre><![CDATA[option: ko.mapping.fromJS(new editorOption.TextEditorOption({
+    textmode: "text",
+    placeholder: "Enter Employee Code",
+    width: "200px",
+    textalign: "right",
+    filldirection: "right",
+    fillcharacter: "0"
+})),]]></pre>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

@@ -1,0 +1,266 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 300, height: 200 };</script>
+
+			<com:stylefile path="../catalog/catalog.css" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="../catalog/catalog.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div id="side-menu" class="cf"></div>
+				<div id="content" class="cf">
+					<h1>Dialog</h1>
+					<h2>Overview</h2>
+					<button data-bind="click: Alert">Alert</button>
+					<button data-bind="click: AlertInfor">Alert Information</button>
+					<button data-bind="click: AlertError">Alert Error</button>
+					<button data-bind="click: Confirm">Confirm</button>
+					<article class="cf">
+						<div class="tabs">
+							<ol>
+								<li><a href="#tabs-call">Javascript Call</a></li>
+								<li><a href="#tabs-api">API</a></li>
+							</ol>
+							<div id="tabs-call" class="cf">
+								<h2>Alert</h2>
+								<pre><![CDATA[// Alert normal message
+nts.uk.ui.dialog.alert({ messageId: "Msg_3" });
+nts.uk.ui.dialog.alert({ messageId: "Msg_3", messageParams: ["1", "2"]});
+nts.uk.ui.dialog.alert({ messageId: "Msg_3" }).then(() => { 
+	alert("OK");
+});]]></pre>
+								<h2>Alert Information</h2>
+								<pre><![CDATA[// Alert information message
+nts.uk.ui.dialog.info({ messageId: "Msg_3" });
+nts.uk.ui.dialog.info({ messageId: "Msg_3", messageParams: ["1", "2"]});
+nts.uk.ui.dialog.info({ messageId: "Msg_3" }).then(() => { 
+	alert("OK");
+});]]></pre>
+								<h2>Alert Error</h2>
+								<pre><![CDATA[// Alert error message
+nts.uk.ui.dialog.alertError({ messageId: "Msg_3" });
+nts.uk.ui.dialog.alertError({ messageId: "Msg_3", messageParams: ["1", "2"]});
+nts.uk.ui.dialog.alertError({ messageId: "Msg_3" }).then(() => { 
+	alert("OK");
+});]]></pre>
+								<h2>Confirm</h2>
+								<pre><![CDATA[// Confirm dialog
+nts.uk.ui.dialog.confirm({ messageId: "Msg_3" });
+nts.uk.ui.dialog.confirm({ messageId: "Msg_3", messageParams: ["1", "2"]});
+nts.uk.ui.dialog.confirm({ messageId: "Msg_3" }).ifYes(() => { 
+	alert("Yes");
+}).ifNo(() => { 
+	alert("No");
+}).ifCancel(() => { 
+	alert("Cancel");
+}).then(() => { 
+	alert("Done");
+});]]></pre>
+							</div>
+							<div id="tabs-api" class="cf">
+								<article>
+									<h2>Information</h2>
+									<b>Module:</b> nts.uk.ui.dialog<br /> <b>File:</b>
+									/lib/nittsu/ui/ui.ts<br />
+								</article>
+								<br />
+								<article>
+									<h2>Methods</h2>
+									<table class="table">
+										<colgroup>
+											<col width="350px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Name</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>alert({ messageId, messageParams })</td>
+												<td>
+													<b>Return:</b> Alert handler<br/>
+													<b>Agruments:</b><br />
+													<i>messageId: string</i> Id of the message<br />
+													<i>messageParams: string[] (optinal)</i> List params for the messge. Ex: "This {0} is {1}"<br />
+													Alert for normal message
+													<div class="catalog-accordion">
+														<a href="#"> Alert handler</a>
+														<table class="table">
+															<colgroup>
+																<col width="150px" />
+															</colgroup>
+															<thead>
+																<tr>
+																	<th><h4>Name</h4></th>
+																	<th><h4>Description</h4></th>
+																</tr>
+															</thead>
+															<tbody>
+																<tr>
+																	<td>then</td>
+																	<td>
+																		<b>Type:</b> function()<br/>
+																		<b>Return:</b> void<br/>
+																		Handler after user close dialog
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td>info({ messageId, messageParams })</td>
+												<td>
+													<b>Return:</b> Alert handler<br/>
+													<b>Agruments:</b><br />
+													<i>messageId: string</i> Id of the message<br />
+													<i>messageParams: string[] (optinal)</i> List params for the messge. Ex: "This {0} is {1}"<br />
+													Alert for information message
+													<div class="catalog-accordion">
+														<a href="#"> Alert handler</a>
+														<table class="table">
+															<colgroup>
+																<col width="150px" />
+															</colgroup>
+															<thead>
+																<tr>
+																	<th><h4>Name</h4></th>
+																	<th><h4>Description</h4></th>
+																</tr>
+															</thead>
+															<tbody>
+																<tr>
+																	<td>then</td>
+																	<td>
+																		<b>Type:</b> function()<br/>
+																		<b>Return:</b> void<br/>
+																		Handler after user close dialog
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td>alertError({ messageId, messageParams })</td>
+												<td>
+													<b>Return:</b> Alert handler<br/>
+													<b>Agruments:</b><br />
+													<i>messageId: string</i> Id of the message<br />
+													<i>messageParams: string[] (optinal)</i> List params for the messge. Ex: "This {0} is {1}"<br />
+													Alert for error message
+													<div class="catalog-accordion">
+														<a href="#"> Alert handler</a>
+														<table class="table">
+															<colgroup>
+																<col width="150px" />
+															</colgroup>
+															<thead>
+																<tr>
+																	<th><h4>Name</h4></th>
+																	<th><h4>Description</h4></th>
+																</tr>
+															</thead>
+															<tbody>
+																<tr>
+																	<td>then</td>
+																	<td>
+																		<b>Type:</b> function()<br/>
+																		<b>Return:</b> void<br/>
+																		Handler after user close dialog
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td>confirm({ messageId, messageParams })</td>
+												<td>
+													<b>Return:</b> Confirm handler<br/>
+													<b>Agruments:</b><br />
+													<i>messageId: string</i> Id of the message<br />
+													<i>messageParams: string[] (optinal)</i> List params for the messge. Ex: "This {0} is {1}"<br />
+													Confirm an action of user
+													<div class="catalog-accordion">
+														<a href="#"> Confirm handler</a>
+														<table class="table">
+															<colgroup>
+																<col width="150px" />
+															</colgroup>
+															<thead>
+																<tr>
+																	<th><h4>Name</h4></th>
+																	<th><h4>Description</h4></th>
+																</tr>
+															</thead>
+															<tbody>
+																<tr>
+																	<td>ifYes</td>
+																	<td>
+																		<b>Type:</b> function()<br/>
+																		<b>Return:</b> Confirm handler<br/>
+																		Handler after user press Yes button
+																	</td>
+																</tr>
+																<tr>
+																	<td>ifNo</td>
+																	<td>
+																		<b>Type:</b> function()<br/>
+																		<b>Return:</b> Confirm handler<br/>
+																		Handler after user press No button
+																	</td>
+																</tr>
+																<tr>
+																	<td>ifCancel</td>
+																	<td>
+																		<b>Type:</b> function()<br/>
+																		<b>Return:</b> Confirm handler<br/>
+																		Handler after user press Cancel button
+																	</td>
+																</tr>
+																<tr>
+																	<td>then</td>
+																	<td>
+																		<b>Type:</b> function()<br/>
+																		<b>Return:</b> Confirm handler<br/>
+																		Handler after user close dialog
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+												</td>
+											</tr>									
+										</tbody>
+									</table>
+								</article>
+							</div>
+						</div>
+					</article>
+					<div class="footer cf">
+						<button class="previous large">Previous</button>
+						<button class="next proceed large">Next</button>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../../catalog/catalog.css" />
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="/lib/generic/igniteui/js/extensions/infragistics.datasource.knockoutjs.js"  of="/nts.uk.com.js.web"/>
+				<com:scriptfile path="/lib/generic/igniteui/js/extensions/infragistics.ui.grid.knockout-extensions.js"  of="/nts.uk.com.js.web"/>
+				<com:scriptfile path="../../catalog/catalog.js" />		
+				<com:scriptfile path="start.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Custom NtsComponents on igGrid</h1>
+						<h2>Overview</h2>
+						<br />
+						
+						<!--<table id="grid1" data-bind="igGrid: {
+					        width: '600px',
+					        height: '400px',
+					        dataSource: items,
+					        primaryKey: 'id',
+					        virtualization: true,
+					        virtualizationMode: 'continuous',
+					        columns: [
+					        	{ headerText: 'ID', key: 'id', dataType: 'number', width: '200px' },
+					        	{ headerText: 'FLAG', key: 'flag', dataType: 'boolean', width: '200px', template: flagTemplate },
+					        	{ headerText: 'RULECODE', key: 'ruleCode', dataType: 'string', width: '200px' }
+					        ],
+					        rowsRendered: rowsRendered
+						}"></table>-->
+						
+						<table id="grid2"></table>
+						<input type="button" id="run" value="Run"/>
+						<input type="button" id="update-row" value="updateRow"/>
+						<input type="button" id="enable-ctrl" value="Enable"/>
+						<input type="button" id="disable-ctrl" value="Disable"/>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+									<li><a href="#tabs-method">Methods</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+									<p>Using Ignite library so you must include following line in <i>&lt;ui:define name="htmlHead"&gt;</i></p>
+<pre><![CDATA[<ui:define name="htmlHead">
+	<com:scriptfile set="IGNITE" />
+</ui:define>]]></pre>
+<pre><![CDATA[<table id="grid2"></table>]]></pre>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>width</td>
+												<td>
+													<b>Type:</b> null | string | number<br/>
+													<b>Members:</b><br/>
+													<i>null:</i> Will stretch to fit the sum of the columns widths.<br/>
+													<i>number:</i> The widget width can be set in pixels as a number. Example values: 800, 700.<br/>
+													<i>string:</i> The widget width can be set in pixels (px) or percentage (%). Example values: "800px", "800" (defaults to pixels), "100%".
+												</td>
+											</tr>
+											<tr>
+												<td>height</td>
+												<td>
+													<b>Type:</b> null | string | number<br/>
+													<b>Members:</b><br/>
+													<i>null:</i> Will stretch vertically to fit data.<br/>
+													<i>string:</i> The widget height can be set in pixels (px) and percentage (%).<br/>
+													<i>number:</i> The height can be set as a number in pixels.
+												</td>
+											</tr>
+											<tr>
+												<td>dataSource</td>
+												<td>
+													<b>Type:</b> array&lt;any&gt;<br/>
+													Data list to fill in ntsGrid.
+												</td>
+											</tr>
+											<tr>
+												<td>primaryKey</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Data field that is set as primary key.
+												</td>
+											</tr>
+											<tr>
+												<td>columns</td>
+												<td>
+													<b>Type:</b> array&lt;column&gt;<br/>
+													An array of column objects:<br/>
+													<i>headerText:</i> Text for header<br/>
+													<i>ntsControl:</i> Control type<br/>
+													<i>width:</i> Width for column
+												</td>
+											</tr>
+											<tr>
+												<td>ntsControls</td>
+												<td>
+													<b>Type:</b> array&lt;control&gt;<br/>
+													An array of ntsControls used in ntsGrid.
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[class ScreenModel {
+    items = (function () {
+        var list = [];
+        for (var i = 0; i < 500; i++) {
+            list.push(new GridItem(i));
+        }
+        return list;
+    })();
+}
+class GridItem {
+    id: number;
+    flag: boolean;
+    ruleCode: string;
+    combo: string;
+    constructor(index: number) {
+        this.id = index;
+        this.flag = index % 2 == 0;
+        this.ruleCode = String(index % 3 + 1);
+        this.combo = String(index % 3 + 1);
+    }
+}
+var model = new ScreenModel();
+        
+class ItemModel {
+    code: string;
+    name: string;
+
+    constructor(code: string, name: string) {
+        this.code = code;
+        this.name = name;
+    }
+}
+
+var comboItems = [ new ItemModel('1', '基本給'),
+                    new ItemModel('2', '役職手当'),
+                    new ItemModel('3', '基本給2') ];
+var comboColumns = [{ prop: 'code', length: 4 },
+                    { prop: 'name', length: 8 }];
+$("#grid2").ntsGrid({ 
+                    width: '970px',
+                    height: '400px',
+                    dataSource: model.items,
+                    primaryKey: 'id',
+                    virtualization: true,
+                    virtualizationMode: 'continuous',
+                    columns: [
+                        { headerText: 'ID', key: 'id', dataType: 'number', width: '50px' },
+                        { headerText: 'FLAG', key: 'flag', dataType: 'boolean', width: '200px', ntsControl: 'Checkbox' },
+                        { headerText: 'RULECODE', key: 'ruleCode', dataType: 'string', width: '290px', ntsControl: 'SwitchButtons' },
+                        { headerText: 'Combobox', key: 'combo', dataType: 'string', width: '230px', ntsControl: 'Combobox' },
+                        { headerText: 'Button', key: 'open', dataType: 'string', width: '80px', unbound: true, ntsControl: 'Button' },
+                        { headerText: 'Delete', key: 'delete', dataType: 'string', width: '80px', unbound: true, ntsControl: 'DeleteButton' }
+                    ], 
+                    features: [{ name: 'Sorting', type: 'local' }],
+                    ntsControls: [{ name: 'Checkbox', options: { value: 1, text: 'Custom Check' }, optionsValue: 'value', optionsText: 'text', controlType: 'CheckBox', enable: true },
+                                    { name: 'SwitchButtons', options: [{ value: '1', text: 'Option 1' }, { value: '2', text: 'Option 2' }, { value: '3', text: 'Option 3' }], 
+                                        optionsValue: 'value', optionsText: 'text', controlType: 'SwitchButtons', enable: true },
+                                    { name: 'Combobox', options: comboItems, optionsValue: 'code', optionsText: 'name', columns: comboColumns, controlType: 'ComboBox', enable: true },
+                                    { name: 'Button', text: 'Open', click: function() { alert("Button!!"); }, controlType: 'Button' },
+                                    { name: 'DeleteButton', text: 'Delete', controlType: 'DeleteButton', enable: true }]
+                    });]]></pre>
+								</div>
+								<div id="tabs-method" class="cf">
+									<table>
+										<colgroup>
+											<col width="400px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Methods</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>$(".selector").ntsGrid("updateRow", rowId, newObject);</td>
+												<td>
+													Update row of rowId with data from newObject.
+												</td>
+											</tr>
+											<tr>
+												<td>$(".selector").ntsGrid("enableNtsControlAt", rowId, columnKey, controlType);</td>
+												<td>
+													Enable control in the cell corresponding to rowId and columnKey.
+												</td>
+											</tr>											
+											<tr>
+												<td>$(".selector").ntsGrid("disableNtsControlAt", rowId, columnKey, controlType);</td>
+												<td>
+													Disable control in the cell corresponding to rowId and columnKey.
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

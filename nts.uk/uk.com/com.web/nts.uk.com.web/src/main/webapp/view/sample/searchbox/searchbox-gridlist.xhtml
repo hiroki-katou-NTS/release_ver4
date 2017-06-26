@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="start-gridlist.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<style>
+					.links {
+						color: green !important;
+						font-weight: bold;
+					}
+				</style>
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>SearchBox Sample</h1>						
+						<h2>Overview</h2>
+						<div class="cf">
+							<div style="float:left">	
+								<div id="functions-area"></div>
+								<button data-bind="click : addItem">add</button>
+								<button data-bind="click : updateItem">update</button>
+								<h3>Search mode: filter mode</h3>																				
+								<div style="width: 700px" data-bind="ntsSearchBox: {searchMode: 'filter',targetKey: 'code', comId: 'multi-list', 
+									items: items, selected: currentCodeList, selectedKey: 'code', fields: ['name', 'code'], mode: 'igGrid'}" />																																														
+								<h3>Multi Selection</h3>
+								<table id="multi-list" data-bind="ntsGridList: {
+										height: 320,
+										options: items,
+										optionsValue: 'code',
+										columns: columns,
+										multiple: true,
+										value: currentCodeList
+									}"></table>
+								<br />
+							</div>
+							<div style="float:left">
+								<br/><br/><br/><br/>
+								<h4>Your multiple selected code:</h4>
+								<span data-bind="text: currentCodeList"></span>
+							</div>
+						</div>
+						
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									For HTML, ViewModel and API, view <a class="links" href="searchbox.xhtml">SEARCHBOX document page</a>
+									<h2>HTML</h2>
+<pre><![CDATA[
+]]></pre>
+									<h2>API</h2>
+									
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									For HTML, ViewModel and API, view <a class="links" href="searchbox.xhtml">SEARCHBOX document page</a>
+<pre><![CDATA[
+]]></pre>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

@@ -1,0 +1,313 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+            	
+				<com:ValidatorScript>
+					nts.uk.shr.com.primitive.sample.ResidenceCode
+					nts.uk.shr.com.primitive.sample.ProcessingNo
+					nts.uk.shr.com.primitive.sample.PersonalWageCode
+					nts.uk.shr.com.primitive.sample.CommonAmount
+					nts.uk.shr.com.primitive.sample.SampleKana
+					nts.uk.ctx.pr.report.dom.wageledger.aggregate.WLAggregateItemCode
+					nts.arc.time.YearMonth
+   				</com:ValidatorScript>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<com:scriptfile path="text-editor.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="functions-area">
+          		</div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>TextEditor</h1>
+						<h2>Overview</h2>
+						<div data-bind="with: texteditor">
+							<h3>TextEditor</h3>
+							<br/>
+							<div class="valign-center">
+								<input data-bind="value: defaultValue"></input>
+								<button id="reset" data-bind="click: setDefault">Reset</button>
+							</div>
+							<br/>
+							<input id="text-1" data-name="text-1" data-bind="ntsTextEditor: {name: '#[FND_L_SEARCH_RELEASE]', value: value, constraint: constraint, option: option, required: true, enable: enable, readonly: readonly}" />
+							<span data-bind="ntsCheckBox: {checked: enable}">Enable</span>
+							<span data-bind="ntsCheckBox: {checked: readonly}">Readonly</span>
+							<button data-bind="click: clear">Clear Error</button>
+							<br/>
+							<h3>Kana</h3>
+							<input id="kana-txt" data-bind="ntsTextEditor: { name: '#[FND_N_SPAN_YM_END, FND_L_SEARCH_RELEASE]', value: valueKana, constraint: 'SampleKana', option: option }"/>
+							<h3>Upper case alpha numeric</h3>
+							<input id="an-txt" data-bind="ntsTextEditor: { name: 'Uppercase', value: valueUan, constraint: 'PersonalWageCode', option: option }"/>
+						</div>
+						<h3>Update Immediate</h3>
+						<input id="text-simple" data-name="text-simple" data-bind="ntsTextEditor: {value: value, constraint: 'ResidenceCode', immediate: true}" />
+						<span data-bind="text: value"></span>
+						<hr/>
+						<div data-bind="with: employeeeditor">
+							<h3>Employee Code</h3>
+							<note style="width:390px;"><b>EmployeeCode</b> is a special case of TextEditor.<br/>If TextEditor has <b>contraint = "EmployeeCode"</b> it'll automatic format inputted value</note>
+							<input id="employee-code-input" data-name="Employee Code" data-bind="ntsTextEditor: {value: value, constraint: constraint, option: option, required: required, enable: enable, readonly: readonly, valueUpdate: 'afterkeydown'}" />
+							<span data-bind="ntsCheckBox: {checked: enable}">Enable</span>
+							<span data-bind="ntsCheckBox: {checked: readonly}">Readonly</span>
+						</div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html-text">TextEditor Binding</a></li>
+									<li><a href="#tabs-html-employee">EmployeeEditor Binding</a></li>
+									<li><a href="#tabs-api">API</a></li>
+								</ol>
+								<div id="tabs-html-text" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<!-- Simple -->
+<input data-bind="ntsTextEditor: {value: simpleValue}" />
+
+<!-- Full Options -->
+<div data-bind="with: texteditor">
+	<input data-bind="ntsTextEditor: {
+		value: value,
+		constraint: constraint,
+		option: option,
+		required: required,
+		enable: enable,
+		readonly: readonly,
+		immediate: false}" />
+</div>]]></pre>
+									<h2>ViewModel</h2>
+<pre><![CDATA[class ScreenModel {
+	texteditor: any;
+	simpleValue: KnockoutObservable<string>;
+    
+    constructor() {
+        var self = this;              
+        self.simpleValue = ko.observable("123");    
+        self.texteditor = {
+            value: ko.observable(''),
+            constraint: 'ResidenceCode',
+            option: ko.mapping.fromJS(new nts.uk.ui.option.TextEditorOption({
+            	textmode: "text",
+            	placeholder: "Placeholder for text editor",
+            	width: "100px",
+            	textalign: "left"
+            })),
+            required: ko.observable(true),
+            enable: ko.observable(true),
+            readonly: ko.observable(false)
+        };
+    }
+}]]></pre>
+								</div>
+								<div id="tabs-html-employee" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<!-- Simple -->
+<input data-bind="ntsTextEditor: {value: simpleValue}" />
+
+<!-- Full Options -->
+<div data-bind="with: employeeeditor">
+	<input data-bind="ntsTextEditor: {
+	value: value,
+	constraint: 'EmployeeCode',
+	option: option,
+	required: required,
+	enable: enable,
+	readonly: readonly}" />
+</div>]]></pre>
+									<h2>ViewModel</h2>
+<pre><![CDATA[class ScreenModel {
+    employeeeditor: any;
+    simpleValue: KnockoutObservable<string>;
+    
+    constructor() {
+        var self = this;            
+        self.simpleValue = ko.observable("123");      
+        self.employeeeditor = {
+            value: ko.observable(''),
+            constraint: 'ResidenceCode',
+            option: ko.mapping.fromJS(new nts.uk.ui.option.TextEditorOption({
+            	filldirection: "right",
+            	fillcharacter: "0",
+            	textmode: "text",
+            	placeholder: "Placeholder for text editor",
+            	width: "100px",
+            	textalign: "left"
+            })),
+            required: ko.observable(true),
+            enable: ko.observable(true),
+            readonly: ko.observable(false)
+        };
+    }
+}]]></pre>
+								</div>
+								<div id="tabs-api" class="cf">
+									<h2>Properties</h2>
+									<table class="table">
+										<colgroup>
+											<col width="150px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Name</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;string&gt;<br/>
+												</td>
+											</tr>
+											<tr>
+												<td>constraint<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													Validate constraint for editor
+												</td>
+											</tr>
+											<tr>
+												<td>required<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> false<br/>
+													Set required for editor
+												</td>
+											</tr>
+											<tr>
+												<td>enable<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> true<br/>
+													Set enable/disable for editor
+												</td>
+											</tr>
+											<tr>
+												<td>readonly<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> false<br/>
+													Set readonly for editor
+												</td>
+											</tr>
+											<tr>
+												<td>immediate<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> false<br/>
+													Set update event trigger immediate for editor.<br/>
+													Can't change after init.
+												</td>
+											</tr>
+											<tr>
+												<td>option<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> TextEditorOption<br/>
+													<b>Default:</b> TextEditorOption<br/>
+													<b>Members:</b><br/>
+													<div class="catalog-accordion">
+														<a href="#texteditoroption">TextEditorOption</a>
+														<table class="table">
+															<colgroup>
+																<col width="150px" />
+															</colgroup>
+															<thead>
+																<tr>
+																	<th><h4>Name</h4></th>
+																	<th><h4>Description</h4></th>
+																</tr>
+															</thead>
+															<tbody>
+																<tr>
+																	<td>autofill<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;boolean&gt; | string<br/>
+																		<b>Default:</b>false<br/>
+																		Turn on the auto-fill for textbox
+																	</td>
+																</tr>
+																<tr>
+																	<td>filldirection<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b>right<br/>
+																		<b>Members:</b><br/>
+																		<i>left</i>: Blank fill to left side<br/>
+																		<i>right</i>: Blank fill to right side
+																	</td>
+																</tr>
+																<tr>
+																	<td>fillcharacter<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b> "0"<br/>
+																		Fill blank space with charater(s)
+																	</td>
+																</tr>
+																<tr>
+																	<td>textmode<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b> "text"<br/>
+																		<b>Members:</b><br/>
+																		<i>text</i>: Single line text editor type text<br/>
+																		<i>password</i>: Single line text editor type password
+																	</td>
+																</tr>
+																<tr>
+																	<td>placeholder<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; |string<br/>
+																		<b>Default:</b> ""<br/>
+																		Hint text for the control
+																	</td>
+																</tr>
+																<tr>
+																	<td>width<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b> ""<br/>
+																		Set width for the control
+																	</td>
+																</tr>
+																<tr>
+																	<td>textalign<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b> "left"<br/>
+																		<b>Members:</b><br/>
+																		<i>left</i>: Align text to left<br/>
+																		<i>right</i>: Align text to right<br/>
+																		<i>center</i>: Align text to center
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

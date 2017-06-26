@@ -1,0 +1,25 @@
+.color-proceed { color:$activated_color; }
+.color-danger { color:$red_warning_color; }
+
+.bg-green { background-color: $green_background_color; }
+.bg-yellow { background-color: $yellow_background_color; }
+
+.color-daily-holiday {color: #FF2D2D;}
+.color-daily-extra-holiday {color: #0086EA;}
+.bg-daily-alter-self {background-color:#94B7FE;}
+.bg-daily-alter-other {background-color:#CEE6FF;}
+.bg-daily-reflect-application {background-color:#92F29B;}
+.bg-daily-error {background-color:#FEC6C6;}
+.bg-daily-alarm {background-color:#E3F385;}
+.bg-daily-calculated {background-color:#E4C9FF;}
+
+.color-schedule-performance {color: #92D050;}
+.color-schedule-error {color: #FF0000;}
+.bg-schedule-support {background-color:#fedfe6;}
+.bg-schedule-no-empl-insurance {background-color:#ef7f7f;}
+.bg-schedule-no-health-insurance {background-color:#acfe2f;}
+.bg-schedule-no-empl-health-insurance {background-color:#fea400;}
+.bg-schedule-fixed {background-color:#eccefb;}
+.bg-schedule-uncorrectable {background-color:#ddddd2;}
+.bg-schedule-work-by-dow {background-color:#FFFF69;}
+.bg-schedule-shift-work {background-color:#FFE699;}

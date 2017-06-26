@@ -1,0 +1,156 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+	
+	<ui:composition template="../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 300, height: 200 };</script>
+			<style>
+				.popup-parent {
+					min-height: 160px;
+				}				
+			</style>
+
+			<com:stylefile path="../catalog/catalog.css" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="../catalog/catalog.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div id="side-menu" class="cf"></div>
+				<div id="content" class="cf">
+					<h1>Popup</h1>
+					<h2>Overview</h2>
+					<div class="popup-parent">
+						<h3>Popup 1</h3>
+						<button id="show-popup" class="show-popup">Show Popup</button>
+						<button id="toggle-popup" class="toggle-popup">Toggle the popup</button>
+						<button id="reset-popup" class="reset-popup">Reset Popup</button>
+						<div id="popup-area" class="popup-area" style="display: none;">
+							<h2>Popup 1!</h2>
+							<input
+								data-bind="ntsTextEditor:{value: ko.observable('DEEP BLUE')}" /><br />
+							<br />
+							<button class="proceed close-popup">Save</button>
+							<button class="close-popup">Cancel</button>
+							<button id="destroy-popup" class="destroy-popup">Destroy This Popup!</button>
+						</div>
+					</div>
+					<div class="popup-parent">
+						<h3>Popup 2</h3>
+						<button id="show-popup2" class="show-popup">Show Popup</button>
+						<button id="toggle-popup2" class="toggle-popup">Toggle the popup</button>
+						<button id="reset-popup2" class="reset-popup">Reset Popup</button>
+						<div id="popup-area2" class="popup-area" style="display: none;">
+							<h2>Popup 2!</h2>
+							<input
+								data-bind="ntsTextEditor:{value: ko.observable('ALPHA GO')}" /><br />
+							<br />
+							<button class="proceed close-popup">Save</button>
+							<button class="close-popup">Cancel</button>
+							<button id="destroy-popup2" class="destroy-popup">Destroy This Popup!</button>
+						</div>
+					</div>
+					<article class="cf">
+						<div class="tabs">
+							<ol>
+								<li><a href="#tabs-call">Javascript Call</a></li>
+								<li><a href="#tabs-api">API</a></li>
+							</ol>
+							<div id="tabs-call" class="cf">
+								<pre>
+									<![CDATA[// Setting up
+$('#popup-area').ntsPopup({
+    position: {
+        my: 'left top',
+        at: 'left bottom',
+        of: $('#show-popup')
+    },
+    //optional: put false to force click button to dismiss
+    dismissible: false
+});
+
+// Show
+$('#show-popup').click(function () {
+    $('#popup-area').ntsPopup('show');
+});
+
+// Hide
+$('.close-popup').click(function(){
+    $('#popup-area').ntsPopup('hide');
+});
+]]>
+								</pre>
+							</div>
+							<div id="tabs-api" class="cf">
+								<article>
+									<h2>Information</h2>
+									<b>Type:</b> Jquery extension<br /> <b>File:</b>
+									/lib/nittsu/ui/jquery-ext.ts<br />
+								</article>
+								<br />
+								<article>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Function</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>$.ntsError({position})</td>
+												<td><b>Return:</b> $popupPanel<br /> <b class="color">position:
+														object</b> Set position for popup, using <a target="_blank"
+													href="http://api.jqueryui.com/position/">JqueryUI
+														Position</a><br /> Init a popup with given position<br /></td>
+											</tr>
+											<tr>
+												<td>$.ntsError('show')</td>
+												<td><b>Return:</b> void<br /> Show popup<br /></td>
+											</tr>
+											<tr>
+												<td>$.ntsError('hide')</td>
+												<td><b>Return:</b> void<br /> Hide popup<br /></td>
+											</tr>
+											<tr>
+												<td>$.ntsError('toggle')</td>
+												<td>
+													<h3>Not implement yet!</h3> <b>Return:</b> void<br />
+													Toggle show/hide popup<br />
+												</td>
+											</tr>
+											<tr>
+												<td>$.ntsError('destroy')</td>
+												<td>
+													<h3>Not implement yet!</h3> <b>Return:</b> void<br /> Hide
+													and remove popup<br />
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</article>
+								<br />
+							</div>
+						</div>
+					</article>
+					<div class="footer cf">
+						<button class="previous large">Previous</button>
+						<button class="next proceed large">Next</button>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

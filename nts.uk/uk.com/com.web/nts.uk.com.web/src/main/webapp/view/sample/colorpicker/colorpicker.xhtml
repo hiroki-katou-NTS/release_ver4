@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+            	<com:scriptfile set="IGNITE" />
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Color Picker</h1>
+						<h2>Overview</h2>
+						<span data-bind="ntsCheckBox: { checked: enable }">Enable</span>
+						<input data-bind="ntsTextEditor: {value: value}"/>
+						<div id="colorpicker" data-bind="ntsColorPicker: {value: value, enable: enable, width: 200}"/>
+						<br />					
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+									<li><a href="#tabs-methods">Methods</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<div id="colorpicker" data-bind="ntsColorPicker: {value: value, enable: enable, width: 200}"/>]]></pre>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> string<br/>
+													color value (example: '#000000')
+												</td>
+											</tr>
+											<tr>
+												<td>width<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													width of color picker
+												</td>
+											</tr>
+											<tr>
+												<td>enable</td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													enable for color picker
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[class ScreenModel {
+        value: KnockoutObservable<string>;
+        enable: KnockoutObservable<boolean>;
+        
+        constructor() {
+            var self = this;
+            
+            self.value = ko.observable('');
+            self.enable = ko.observable(true);
+        }
+    }]]></pre>
+								</div>
+								<div id="tabs-methods" class="cf">
+									<table>
+										<colgroup>
+											<col width="350px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Methods</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

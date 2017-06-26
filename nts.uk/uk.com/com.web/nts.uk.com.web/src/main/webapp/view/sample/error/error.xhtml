@@ -1,0 +1,245 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 300, height: 200 };</script>
+
+			<com:ValidatorScript>
+					nts.uk.shr.com.primitive.sample.ResidenceCode
+					nts.uk.shr.com.primitive.sample.ProcessingNo
+					nts.uk.shr.com.primitive.sample.PersonalWageCode
+					nts.uk.shr.com.primitive.sample.CommonAmount
+					nts.arc.time.YearMonth
+   				</com:ValidatorScript>
+			<com:stylefile path="../catalog/catalog.css" />
+			<com:scriptfile path="../catalog/catalog.js" />
+			<com:scriptfile path="start.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area"></div>
+			<div id="contents-area">
+				<div id="side-menu" class="cf"></div>
+				<div id="content" class="cf">
+					<h1>Error</h1>
+					<h2>Overview</h2>
+					<button class="proceed" data-bind="enable: $root.errors.isEmpty">登録</button>
+					<h3>ResidenceCode (CharType: number, Maxlegth: 6)</h3>
+					<input id="residence-code" class="save-error"
+						data-name="ResidentCode"
+						data-bind="ntsTextEditor: {value: ResidentCode, constraint: 'ResidenceCode'}" />
+					<button data-bind="click: setErrorToResidenceCode">setError</button>
+					<button data-bind="click: clearErrorToResidenceCode">clearError</button>
+					<h3>Number</h3>
+					<input id="number" class="save-error" data-name="Number"
+						data-bind="ntsNumberEditor: {value: NumberValue}" />
+					<button data-bind="click: clearSaveErrors">Clear by class</button>
+					<article class="cf">
+						<div class="tabs">
+							<ol>
+								<li><a href="#tabs-call">Usage</a></li>
+								<li><a href="#tabs-api">API</a></li>
+							</ol>
+							<div id="tabs-call" class="cf">
+								<h3>Set error for a control</h3>
+								<pre><![CDATA[$('#residence-code').ntsError('set', 'えらーです');]]></pre>
+								<h3>Set error for a control by message id</h3>
+								<pre><![CDATA[$('#residence-code').ntsError('set', {messageId:"Msg_001"});
+// Set message parameters
+$('#residence-code').ntsError('set', {messageId:'Msg_175',messageParams:['param']});
+// Show business exception
+nts.uk.request.ajax('').fail(function(err){
+	$('#residence-code').ntsError('set', err);
+})]]></pre>
+								<h3>Clear errors of a control</h3>
+								<pre><![CDATA[$('#residence-code').ntsError('clear');]]></pre>
+								<h3>Clear grouping errors</h3>
+								<pre><![CDATA[<input id="residence-code" class="save-error" ... />
+<input id="number" class="save-error" ... />]]></pre>
+								<pre><![CDATA[// clear all errors of controls have class 'save-error'
+$('.save-error').ntsError('clear');]]></pre>
+								<h3>Clear all errors</h3>
+								<pre><![CDATA[nts.uk.ui.errors.clearAll()]]></pre>
+								<h3>Check if has any error</h3>
+								<pre><![CDATA[nts.uk.ui.errors.hasError()]]></pre>
+								<h3>Get viewmodel</h3>
+								<pre><![CDATA[nts.uk.ui.errors.errorsViewModel()]]></pre>
+								<h3>Binding in HTML</h3>
+								<pre><![CDATA[<button class="proceed" data-bind="enable: $root.errors.isEmpty">登録</button>]]></pre>
+							</div>
+							<div id="tabs-api" class="cf">
+								<article>
+									<h2>Information</h2>
+									<b>Module:</b> nts.uk.ui.errors<br /> <b>File:</b>
+									/lib/nittsu/ui/errors.ts<br />
+								</article>
+								<h2>Methods</h2>
+								<table class="table">
+									<colgroup>
+										<col width="200px" />
+									</colgroup>
+									<thead>
+										<tr>
+											<th><h4>Name</h4></th>
+											<th><h4>Description</h4></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>show()</td>
+											<td><b>Return:</b> void<br /> Show Error Dialog</td>
+										</tr>
+										<tr>
+											<td>hide()</td>
+											<td><b>Return:</b> void<br /> Hide Error Dialog</td>
+										</tr>
+										<tr>
+											<td>hasError()</td>
+											<td><b>Return:</b> boolean<br /> Return true if
+												viewmodel has error</td>
+										</tr>
+										<tr>
+											<td>clearAll()</td>
+											<td><b>Return:</b> void<br /> Clear all errors</td>
+										</tr>
+										<tr>
+											<td>errorsViewModel()</td>
+											<td><b>Return:</b> ErrorsViewModel<br /> Get current
+												ErrorsViewModel<br />
+												<div class="catalog-accordion">
+													<a href="#">ErrorsViewModel</a>
+													<table class="table">
+														<colgroup>
+															<col width="150px" />
+														</colgroup>
+														<thead>
+															<tr>
+																<th><h4>Name</h4></th>
+																<th><h4>Description</h4></th>
+															</tr>
+														</thead>
+														<tbody>
+															<tr>
+																<td>title</td>
+																<td><b>Type:</b> string<br /> <b>Default:</b>
+																	"エラー一覧"<br /> Error Dialog title</td>
+															</tr>
+															<tr>
+																<td>errors</td>
+																<td><b>Type:</b>
+																	KnockoutObservable&lt;ErrorListItem&gt;<br /> <b>Default:</b>
+																	[]<br /> List errors in ViewModel<br /></td>
+															</tr>
+															<tr>
+																<td>occurs</td>
+																<td><b>Type:</b> KnockoutComputed&lt;boolean&gt;<br />
+																	Return <b>true</b> if <b>errors</b> greater than 0</td>
+															</tr>
+															<tr>
+																<td>option</td>
+																<td><b>Type:</b>
+																	ko.mapping.fromJS&lt;ErrorDialogOption&gt;<br /> <b>Default:</b>
+																	ko.mapping.fromJS&lt;ErrorDialogOption&gt;<br /> Option
+																	for Error Dialog
+																	<div class="catalog-accordion">
+																		<a href="#">ErrorDialogOption</a>
+																		<table class="table">
+																			<colgroup>
+																				<col width="150px" />
+																			</colgroup>
+																			<thead>
+																				<tr>
+																					<th><h4>Name</h4></th>
+																					<th><h4>Description</h4></th>
+																				</tr>
+																			</thead>
+																			<tbody>
+																				<tr>
+																					<td>headers</td>
+																					<td><b>Type:</b> Array&lt;ErrorHeader&gt;<br />
+																						Error Dialog table headers</td>
+																				</tr>
+																				<tr>
+																					<td>displayrows</td>
+																					<td><b>Type:</b> number<br /> <b>Default:</b>
+																						10<br /> Number of display errors</td>
+																				</tr>
+																				<tr>
+																					<td>modal</td>
+																					<td><b>Type:</b> boolean<br /> <b>Default:</b>
+																						false<br /> Display Error Dialog in modal mode</td>
+																				</tr>
+																				<tr>
+																					<td>show</td>
+																					<td><b>Type:</b> boolean<br /> <b>Default:</b>
+																						false<br /> Show or hide Error Dialog</td>
+																				</tr>
+																				<tr>
+																					<td>autoclose</td>
+																					<td><b>Type:</b> boolean<br /> <b>Default:</b>
+																						true<br /> Auto hide Error Dialog if error is 0</td>
+																				</tr>
+																			</tbody>
+																		</table>
+																	</div>
+																</td>
+															</tr>
+														</tbody>
+													</table>
+												</div></td>
+										</tr>
+									</tbody>
+								</table>
+								<h2>Jquery Extensions</h2>
+								<table class="table">
+									<colgroup>
+										<col width="300px" />
+									</colgroup>
+									<thead>
+										<tr>
+											<th><h4>Name</h4></th>
+											<th><h4>Description</h4></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>$(selector).ntsError("set", message)</td>
+											<td><b>Return:</b> JQuery<br /> <b>Agruments:</b><br />
+												<i>selector: string</i> Jquery selector<br /> <i>message:
+													string</i> Message for error<br /> Set error for Jquery
+												element(s)</td>
+										</tr>
+										<tr>
+											<td>$(selector).ntsError("clear")</td>
+											<td><b>Return:</b> JQuery<br /> <b>Agruments:</b><br />
+												<i>selector: string</i> Jquery selector<br /> Clear all
+												errors for Jquery element(s)</td>
+										</tr>
+										<tr>
+											<td>$(selector).ntsError("hasError")</td>
+											<td><b>Return:</b> boolean<br /> <b>Agruments:</b><br />
+												<i>selector: string</i> Jquery selector<br /> Return <b>true</b>
+												if Jquery element(s) has errors</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</article>
+					<div class="footer cf">
+						<button class="previous large">Previous</button>
+						<button class="next proceed large">Next</button>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

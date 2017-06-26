@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+            	
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Switch</h1>
+						<h2>Overview</h2>
+						<p>A group of buttons. Behave like a RadioBoxGroup, always select one button</p>
+						<br/>
+						<div class="valign-center">
+							<input data-bind="ntsTextEditor: { value: defaultValue }"></input>
+							<button data-bind="click: setDefault">Reset</button>
+						</div>
+						<br/>
+						<div id="switch-buttons" data-bind="ntsSwitchButton: {
+							options: roundingRules,
+							optionsValue: 'code',
+							optionsText: 'name',
+							value: selectedRuleCode,
+							enable: enable }"></div>
+						<div data-bind="ntsCheckBox: {checked: enable, text: 'Enable'}"></div>
+						<div>Selected code: <span data-bind="text: selectedRuleCode"></span></div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<div class="cf" data-bind="ntsSwitchButton: {
+	options: roundingRules,
+	optionsValue: 'code',
+	optionsText: 'name',
+	value: selectedRuleCode,
+	enable: enable }"></div>]]></pre>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>options</td>
+												<td>
+													<b>Type:</b> array&lt;any&gt;<br/>
+													List data to generate Switch
+												</td>
+											</tr>
+											<tr>
+												<td>optionsValue</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as Switch value. If null object will be set as value
+												</td>
+											</tr>
+											<tr>
+												<td>optionsText</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as Switch text
+												</td>
+											</tr>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> any<br/>
+													Value of selected Switch
+												</td>
+											</tr>
+											<tr>
+												<td>enable<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> true<br/>
+													Set enable/disable for Switch control
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[class ScreenModel {
+    roundingRules: KnockoutObservableArray<any>;
+    selectedRuleCode: any;
+
+    constructor() {
+        var self = this;
+        self.roundingRules = ko.observableArray([
+            { code: '1', name: '四捨五入' },
+            { code: '2', name: '切り上げ' },
+            { code: '3', name: '切り捨て' }
+        ]);
+        self.selectedRuleCode = ko.observable(1);
+    }
+}]]></pre>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

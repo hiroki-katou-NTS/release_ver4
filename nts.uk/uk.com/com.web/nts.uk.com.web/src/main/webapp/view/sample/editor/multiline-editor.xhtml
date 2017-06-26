@@ -1,0 +1,225 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				
+				<com:ValidatorScript>
+					nts.uk.shr.com.primitive.sample.ResidenceCode
+					nts.uk.shr.com.primitive.sample.ProcessingNo
+					nts.uk.shr.com.primitive.sample.PersonalWageCode
+					nts.uk.shr.com.primitive.sample.CommonAmount
+					nts.arc.time.YearMonth
+   				</com:ValidatorScript>
+   				<!-- Because there isn't any EmployeeCode domain entity yet. I'll create it manual -->
+				<script>
+				__viewContext.primitiveValueConstraints.EmployeeCode = {
+						valueType: 'String',
+						charType: 'Numeric',
+						maxLength: 10,
+					};
+				</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<com:scriptfile path="multiline-editor.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="functions-area"></div>
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>MultilineEditor</h1>
+						<h2>Overview</h2>
+						<div data-bind="with: multilineeditor">
+							<h3>MultilineEditor</h3>
+							<textarea data-name="テスト" data-bind="ntsMultilineEditor: {value: value, constraint: constraint, option: option, enable: enable, readonly: readonly}" />
+							<br/>
+							<span data-bind="ntsCheckBox: {checked: enable}">Enable</span>
+							<span data-bind="ntsCheckBox: {checked: readonly}">Readonly</span>
+						</div>
+						<br/>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-usage">Usage</a></li>
+									<li><a href="#tabs-api">API</a></li>
+								</ol>
+								<div id="tabs-usage" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<!-- Simple -->
+<textarea data-bind="ntsMultilineEditor: { value: value, constraint: constraint }" />
+
+<!-- Full Options -->
+<div data-bind="with: multilineeditor">
+	<textarea data-bind="ntsMultilineEditor: {
+		value: value,
+		constraint: constraint,
+		option: option,
+		enable: enable,
+		readonly: readonly,
+		immediate: false}" />
+</div>]]></pre>
+									<h2>ViewModel</h2>
+<pre><![CDATA[class ScreenModel {
+	simpleValue: KnockoutObservable<string>;
+	multilineeditor: any;
+	
+	constructor() {
+		var self = this;
+		self.simpleValue = ko.observable("123");
+		self.multilineeditor = {
+			value: ko.observable(''),
+			constraint: 'ResidenceCode',
+			option: ko.mapping.fromJS(new nts.uk.ui.option.MultilineEditorOption({
+				resizeable: true,
+				placeholder: "Placeholder for text editor",
+				width: "",
+				textalign: "left"
+			})),
+			required: ko.observable(true),
+			enable: ko.observable(true),
+			readonly: ko.observable(false)
+		};
+	}
+}]]></pre>
+								</div>
+								<div id="tabs-api" class="cf">
+									<table class="table">
+										<colgroup>
+											<col width="150px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>ViewModel</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;string&gt;<br/>
+												</td>
+											</tr>
+											<tr>
+												<td>constraint<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													Validate constraint for editor
+												</td>
+											</tr>
+											<tr>
+												<td>required<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> false<br/>
+													Set required for editor
+												</td>
+											</tr>
+											<tr>
+												<td>enable<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> true<br/>
+													Set enable/disable for editor
+												</td>
+											</tr>
+											<tr>
+												<td>readonly<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> false<br/>
+													Set readonly for editor
+												</td>
+											</tr>
+											<tr>
+												<td>immediate<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> false<br/>
+													Set update event trigger immediate for editor.<br/>
+													Can't change after init.
+												</td>
+											</tr>
+											<tr>
+												<td>option<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> MultilineEditorOption<br/>
+													<b>Default:</b> MultilineEditorOption<br/>
+													<b>Members:</b><br/>
+													<div class="catalog-accordion">
+														<a href="#multilineeditoroption">MultilineEditorOption</a>
+														<table class="table">
+															<colgroup>
+																<col width="150px" />
+															</colgroup>
+															<thead>
+																<tr>
+																	<th><h4>Name</h4></th>
+																	<th><h4>Description</h4></th>
+																</tr>
+															</thead>
+															<tbody>
+																<tr>
+																	<td>resizeable<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+																		<b>Default:</b> false<br/>
+																		Set resizeable for textarea ()
+																	</td>
+																</tr>
+																<tr>
+																	<td>placeholder<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b> ""<br/>
+																		Hint text for the control
+																	</td>
+																</tr>
+																<tr>
+																	<td>width<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b> ""<br/>
+																		Set width for the control
+																	</td>
+																</tr>
+																<tr>
+																	<td>textalign<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b> "left"<br/>
+																		<b>Members:</b><br/>
+																		<i>left</i>: Align text to left<br/>
+																		<i>right</i>: Align text to right<br/>
+																		<i>center</i>: Align text to center
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

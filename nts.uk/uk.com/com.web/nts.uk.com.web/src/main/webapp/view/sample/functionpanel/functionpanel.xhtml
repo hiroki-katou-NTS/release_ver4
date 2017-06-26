@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>
+				var dialogSize = {
+					width : 300,
+					height : 200
+				};
+			</script>
+			<com:stylefile path="../catalog/catalog.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="../catalog/catalog.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div id="side-menu" class="cf"></div>
+				<div id="content" class="cf">
+					<h1>Function Panel</h1>
+					<div data-bind="ntsFunctionPanel: {width: 200, headerText: 'test super', dataSource: functionItems}"></div>
+					<br/>
+					<button data-bind="click: remove">Remove Item</button>
+					<div>
+					<article class="cf">
+								<div class="tabs">
+									<ol>
+										<li><a href="#tabs-html">HTML Binding</a></li>
+										<li><a href="#tabs-viewmodel">ViewModel</a></li>
+									</ol>
+									<div id="tabs-html" class="cf">
+										<h2>HTML</h2>
+	<pre><![CDATA[<div data-bind="ntsFunctionPanel: {width: 200, headerText: 'test super', dataSource: functionItems}"></div>]]></pre>
+									</div>
+									<div id="tabs-viewmodel" class="cf">
+										<h2>TypeScript</h2>
+	<pre><![CDATA[
+	class ScreenModel {
+        functionItems: KnockoutObservableArray<any>;
+        
+        constructor() {
+
+			this.functionItems = ko.observableArray([]);
+            var functionItems = [];
+            for (var i = 0; i < 10; i++) {
+                let x = i;
+                functionItems.push({icon: "19209343.png", text: 'item-' + i, action: function(evt, ui){ 
+                    alert(x); 
+                }});
+            }
+            this.functionItems(functionItems);
+        }
+        
+        remove(){
+            this.functionItems.shift();            
+        }
+    }
+	]]></pre>
+									</div>
+								</div>
+							</article>
+					</div>
+					<div>
+						<h2>API</h2>
+						<table>
+							<colgroup>
+								<col width="200px" />
+							</colgroup>
+							<thead>
+								<tr>
+									<th><h4>Binding</h4></th>
+									<th><h4>Description</h4></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>width</td>
+									<td><b>Type:</b> number. <br/>Width for component</td>
+								</tr>
+								<tr>
+									<td>headerText</td>
+									<td><b>Type:</b> string. <br />Header text</td>
+								</tr>
+								<tr>
+									<td>dataSource</td>
+									<td><b>Type:</b> array. <br /> Source for item in panel. <br/>
+										Each item in source will have 3 properties are: <br/>
+										<i>text: text to display</i><br/>
+										<i>action: action for binding with click event</i><br/>
+										<i>icon: icon to display</i>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="footer cf">
+						<button class="previous large">Previous</button>
+						<button class="next proceed large">Next</button>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

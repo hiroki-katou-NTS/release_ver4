@@ -1,0 +1,296 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+            	
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<style>
+					.col-1 .ntsCheckBox{width:100%;}
+					.col-2 .ntsCheckBox{width:50%;}
+					.col-3 .ntsCheckBox{width:33%;}
+					.col-100px .ntsCheckBox{width:100px;}
+				</style>
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>MultiCheckBox</h1>
+						<h2>Overview</h2>
+						<div class="table">
+							<div class="cell valign-center">
+								<button data-bind="click: addBoxes">Add Box</button>
+								<button data-bind="click: removeBoxes">Remove Box</button>
+								<input id="number-1" data-bind="ntsNumberEditor: {value: value}"/>
+								<button data-bind="click: enableCheckBox">Enable CheckBox</button>
+								<span class="label" data-bind="ntsCheckBox: { checked: enable }">Enable</span>
+							</div>
+						</div>
+						<br/>
+						<div class="valign-center">
+							<input data-bind="ntsTextEditor: { value: defaultValue }"></input>
+							<button id="reset" data-bind="click: setDefault">Reset</button>
+						</div>
+						<br/>
+						<h3>Selected Values as objects</h3>
+						<div class="col-100px" data-bind="ntsMultiCheckBox: {options: itemList,
+											optionsText: 'name',
+											value: selectedValues,
+											enable: enable}"></div>
+						<h4>Selected values:</h4>
+						<div data-bind="text: ko.toJSON(selectedValues)"></div>
+						<br/>
+						<h3>Selected Values as value</h3>
+						<div id="check-box" class="col-100px" data-bind="ntsMultiCheckBox: {options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedIds,
+											enable: enable}"></div>
+						<h4>Selected values:</h4>
+						<div data-bind="text: ko.toJSON(selectedIds)"></div>
+						<br/>
+						<h3>Item list:</h3>
+						<div data-bind="text: ko.toJSON(itemList)"></div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+									<li><a href="#tabs-css">CSS</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<div data-bind="ntsMultiCheckBox: {
+	options: itemList,
+	optionsValue: 'id',
+	optionsText: 'name',
+	value: selectedIds,
+	enable: enable}"></div>]]></pre>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>options</td>
+												<td>
+													<b>Type:</b> array&lt;any&gt;<br/>
+													List data to generate CheckBox
+												</td>
+											</tr>
+											<tr>
+												<td>optionsValue<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as CheckBox value. If null object will be set as value
+												</td>
+											</tr>
+											<tr>
+												<td>optionsText</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as CheckBox text
+												</td>
+											</tr>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> array&lt;any&gt;<br/>
+													List selected value
+												</td>
+											</tr>
+											<tr>
+												<td>enable<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> true<br/>
+													Set enable/disable for MultiCheckBox control
+												</td>
+											</tr>
+											<tr>
+												<td>To enable / disable for each item seperate<br/><i>(optional)</i></td>
+												<td>
+													<b>Create property "enable" (KnockoutObservable -> boolean) in each item</b> 
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[class ScreenModel {
+    itemList: KnockoutObservableArray<any>;
+    selectedIds: KnockoutObservableArray<number>;
+    enable: KnockoutObservable<boolean>;
+    
+    constructor() {
+        var self = this;
+        self.itemList = ko.observableArray([
+            new BoxModel(1, 'box 1'),
+            new BoxModel(2, 'box 2'),
+            new BoxModel(3, 'box 3')
+        ]);
+        self.selectedIds = ko.observableArray([1,2]);
+        self.enable = ko.observable(true);
+    }
+}
+
+class BoxModel {
+    id: number;
+    name: string;
+    constructor(id, name){
+        var self = this;
+        self.id = id;
+        self.name = name;
+    }
+}]]></pre>
+								</div>
+								<div id="tabs-css" class="cf">
+									<article class="cf">
+										<h3>Outline</h3>
+										<p>Style CheckBox for better appearance on colored background</p>
+<pre><![CDATA[<div class="outline" data-bind="ntsMultiCheckBox: {
+	options: itemList,
+	optionsValue: 'id',
+	optionsText: 'name',
+	value: selectedIds,
+	enable: enable}"></div>]]></pre>
+										<div class="cf" style="background:#450003; padding:10px 5px; margin: 10px 0;">
+											<div class="outline col-100px" data-bind="ntsMultiCheckBox: {options: itemList,
+												optionsValue: 'id',
+												optionsText: 'name',
+												value: selectedIds,
+												enable: enable}"></div>
+										</div>
+										<div class="cf" style="background:#5C0002; padding:10px 5px; margin: 10px 0;">
+											<div class="outline col-100px" data-bind="ntsMultiCheckBox: {options: itemList,
+												optionsValue: 'id',
+												optionsText: 'name',
+												value: selectedIds,
+												enable: enable}"></div>
+										</div>
+										<div class="cf" style="background:#94090D; padding:10px 5px; margin: 10px 0;">
+											<div class="outline col-100px" data-bind="ntsMultiCheckBox: {options: itemList,
+												optionsValue: 'id',
+												optionsText: 'name',
+												value: selectedIds,
+												enable: enable}"></div>
+										</div>
+										<div class="cf" style="background:#D40D12; padding:10px 5px; margin: 10px 0;">
+											<div class="outline col-100px" data-bind="ntsMultiCheckBox: {options: itemList,
+												optionsValue: 'id',
+												optionsText: 'name',
+												value: selectedIds,
+												enable: enable}"></div>
+										</div>
+										<div class="cf" style="background:#FF1D23; padding:10px 5px; margin: 10px 0;">
+											<div class="outline col-100px" data-bind="ntsMultiCheckBox: {options: itemList,
+												optionsValue: 'id',
+												optionsText: 'name',
+												value: selectedIds,
+												enable: enable}"></div>
+										</div>
+										<br/>
+										<h3>Minimalist</h3>
+<pre><![CDATA[<div class="minimalist" data-bind="ntsMultiCheckBox: {
+	options: itemList,
+	optionsValue: 'id',
+	optionsText: 'name',
+	value: selectedIds,
+	enable: enable}"></div>]]></pre>
+										<div class="cf bg-yellow" style="padding:10px 5px; margin: 10px 0;">
+											<div class="minimalist col-100px" data-bind="ntsMultiCheckBox: {options: itemList,
+												optionsValue: 'id',
+												optionsText: 'name',
+												value: selectedIds,
+												enable: enable}"></div>
+										</div>
+										<div class="cf bg-green" style="padding:10px 5px; margin: 10px 0;">
+											<div class="minimalist col-100px" data-bind="ntsMultiCheckBox: {options: itemList,
+												optionsValue: 'id',
+												optionsText: 'name',
+												value: selectedIds,
+												enable: enable}"></div>
+										</div>
+									</article>
+									<article class="cf">
+										<h3>Layout</h3>
+										<p>How to display CheckBox in rows, columns or whatever you want</p>
+<pre><![CDATA[<style>
+	.col-1 .ntsCheckBox{width:100%;}
+	.col-2 .ntsCheckBox{width:50%;}
+	.col-3 .ntsCheckBox{width:33%;}
+	.col-100px .ntsCheckBox{width:100px;}
+</style>
+
+<div class="col-1" data-bind="ntsMultiCheckBox...
+<div class="col-2" data-bind="ntsMultiCheckBox...
+<div class="col-3" data-bind="ntsMultiCheckBox...
+<div class="col-100px" data-bind="ntsMultiCheckBox...
+<div data-bind="ntsMultiCheckBox...]]></pre>
+										<h4>1 column</h4>
+										<div class="col-1" data-bind="ntsMultiCheckBox: {options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedIds,
+											enable: enable}"></div>
+										<hr/>
+										<h4>2 columns</h4>
+										<div class="col-2" data-bind="ntsMultiCheckBox: {options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedIds,
+											enable: enable}"></div>
+										<hr/>
+										<h4>3 columns</h4>
+										<div class="col-3" data-bind="ntsMultiCheckBox: {options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedIds,
+											enable: enable}"></div>
+										<hr/>
+										<h4>Fixed width</h4>
+										<div class="col-100px" data-bind="ntsMultiCheckBox: {options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedIds,
+											enable: enable}"></div>
+										<hr/>
+										<h4>Auto width</h4>
+										<div data-bind="ntsMultiCheckBox: {options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedIds,
+											enable: enable}"></div>
+									</article>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

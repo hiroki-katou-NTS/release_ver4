@@ -1,0 +1,46 @@
+$editor-border-color: #999999;
+
+.ntsControl {
+	
+	.nts-input {
+		border: 1px solid $editor-border-color;
+		padding: 5px 10px;
+		font-family: $font_family_monospace;
+		border-radius: 3px;
+		overflow: visible;
+		&:focus{
+			outline: none;
+			box-shadow: 0 0 1px 1px $focused_color;
+		}
+	}
+	
+	/* Extra Symbol */
+	&.symbol {
+		position: relative;
+		
+		&:after {
+			position: absolute;
+			content: attr(data-content);
+			top: 6px;
+			color:#999;
+		}
+		
+		&.symbol-left {
+			.nts-input { padding-left: 20px; }
+			
+			&:after {
+				left: 5px;
+				text-align: left;
+			}
+		}
+		
+		&.symbol-right {
+			.nts-input { padding-right: 20px; }
+		
+			&:after {
+				right: 5px;
+				text-align: right;
+			}		
+		}
+	}
+}

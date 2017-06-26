@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="igTree.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<style>
+					.links {
+						color: green !important;
+						font-weight: bold;
+					}
+					#tree ul {
+						list-style-type: none !important;
+					}
+				</style>
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>SearchBox Sample</h1>
+						Version: with igTree					
+						<h2>Overview</h2>
+						<div class="cf">
+							<div>	
+								<h3>Multi Selection</h3>																				
+								<div style="width: 700px" data-bind="ntsSearchBox: {targetKey: 'value', mode: 'igTree', comId: 'tree', items: dataSource, selected: selectedValue, selectedKey: 'value', fields: ['text'], childField: 'childs'}" />							
+								<div id="tree"></div>
+								<br />
+							</div>	
+
+							<div>
+								selectedValue: <span data-bind="text: selectedValue"></span>
+								<br/><br/>
+								checkedValues: <span data-bind="text: checkedValues"></span><br/><br/>
+								If use checkedValues (multi mode), let replace above 'selected' options of SearchBox to 'checkedValues'
+							</div>			
+						</div>					
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

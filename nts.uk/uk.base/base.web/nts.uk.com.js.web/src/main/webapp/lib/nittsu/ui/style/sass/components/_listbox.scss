@@ -1,0 +1,57 @@
+.ntsListBox {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	/* height: 130px; */
+	border: 1px solid #CCC;
+	background: #FCFCFC;
+	overflow-x: hidden;
+	overflow-y: auto;
+	/* width: 300px; */
+	
+	.ui-selecting {
+		background: #FECA40;
+	}
+	
+	.ui-selected {
+		background: #F39814;
+		color: white;
+	}
+	
+	tbody {
+		tr{
+			td {
+				height: 28px;
+				overflow: hidden;
+				user-select: none;
+				cursor: default;
+				box-sizing: border-box;
+				border: 0px transparent !important;
+				background-color: #FCFCFC !important; 
+			} 
+			
+			.ui-iggrid-selectedcell{ 
+				background: #F39814 !important;
+			}
+		}
+	}
+	
+	
+	.nts-column {
+		/* float: left; */
+		padding: 0 2px;
+		height: 28px;
+		line-height: 28px;
+		overflow: hidden;
+		box-sizing: border-box;
+	}
+	
+	&.disabled {
+		color: graytext;
+	}
+}
+
+.listbox-wrapper{
+	border: 1px solid grey;
+	display: inline-block;
+}

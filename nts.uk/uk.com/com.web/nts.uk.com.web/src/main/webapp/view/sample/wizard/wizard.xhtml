@@ -1,0 +1,267 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+            	
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="/lib/generic/jquery/jquery.steps.js" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="viewmodel.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Wizard</h1>
+						<h2>Overview</h2>
+						<div class="cf">
+							<div>
+								<select data-bind="options: stepList, optionsText: 'content', value: stepSelected" style="width: 200px"></select>
+								<button data-bind="click: goto">Go to Step</button>
+							</div>
+							<br/>
+							<div id="wizard" data-bind="ntsWizard: {steps: stepList, theme: 'yellow'}" class="cf">
+								<div class="header">
+									<div class="image" data-icon="../../../lib/nittsu/ui/style/images/ntsWizard/start-images.jpg"></div>
+									<div class="content">再集計</div>
+								</div>
+								<div class="steps">
+									<div class="step-1">再集計</div>
+									<div class="step-2"><span>処理方法を選ぶ</span><br /> └詳細設定をする</div>
+									<div class="step-3">対象社員を選ぶ</div>
+									<div class="step-4">対象社員を選ぶ</div>
+									<div class="step-5">対象社員を選ぶ</div>
+									<div class="end step-6">実行</div>
+								</div>
+								<div class="contents">
+									<div class="step-1">contents step1</div>
+									<div class="step-2">contents step2</div>
+									<div class="step-3">contents step3</div>
+									<div class="step-4">contents step4</div>
+									<div class="step-5">contents step5</div>
+									<div class="step-6">contents step6</div>
+								</div>
+							</div>
+							
+							<button data-bind="click: begin">Begin</button>
+							<button data-bind="click: end">End</button>
+							<button data-bind="click: previous">Previous</button>
+							<button data-bind="click: next">Next</button>
+							<button data-bind="click: getCurrentStep">Current Step Index</button>
+						</div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+									<li><a href="#tabs-method">Methods</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<article>
+										<h2>HTML</h2>
+<pre><![CDATA[<div id="wizard" data-bind="ntsWizard: {steps: stepList, theme: 'yellow'}" class="cf">
+	<div class="header">
+		<div class="image" data-icon="../../../lib/nittsu/ui/style/images/ntsWizard/start-images.jpg"></div>
+		<div class="content">再集計</div>
+	</div>
+	<div class="steps">
+		<div class="step-1">再集計</div>
+		<div class="step-2"><span>処理方法を選ぶ</span><br /> └詳細設定をする</div>
+		<div class="step-3">対象社員を選ぶ</div>
+		<div class="step-4">対象社員を選ぶ</div>
+		<div class="step-5">対象社員を選ぶ</div>
+		<div class="end step-6">実行</div>
+	</div>
+	<div class="contents">
+		<div class="step-1">contents step1</div>
+		<div class="step-2">contents step2</div>
+		<div class="step-3">contents step3</div>
+		<div class="step-4">contents step4</div>
+		<div class="step-5">contents step5</div>
+		<div class="step-6">contents step6</div>
+	</div>
+</div>]]></pre>
+										<b>Header</b>
+										<p>Setup Wizard's <b>image</b> and <b>text</b> in header.</p>
+<pre><![CDATA[<div class="header">
+	<div class="image" data-icon="../../../lib/nittsu/ui/style/images/ntsWizard/start-images.jpg"></div>
+	<div class="content">再集計</div>
+</div>]]></pre>
+										<b>Steps</b>
+										<p>Wizard text for each step. Class name must match with ViewModel data.</p>
+<pre><![CDATA[<div class="steps">
+	<div class="step-1">再集計</div>
+	<div class="step-2"><span>処理方法を選ぶ</span><br /> └詳細設定をする</div>
+	<div class="step-3">対象社員を選ぶ</div>
+	<div class="step-4">対象社員を選ぶ</div>
+	<div class="step-5">対象社員を選ぶ</div>
+	<div class="end step-6">実行</div>
+</div>]]></pre>
+										<b>Contents</b>
+										<p>Wizard content for each step. Class name must match with ViewModel data.</p>
+<pre><![CDATA[<div class="contents">
+	<div class="step-1">contents step1</div>
+	<div class="step-2">contents step2</div>
+	<div class="step-3">contents step3</div>
+	<div class="step-4">
+		<div data-bind="with: user">
+			Code: <input type="text" data-bind="value: code" /><br/>
+			Name: <input type="text" data-bind="value: name" />
+		</div>
+	</div>
+	<div class="step-5">contents step5</div>
+	<div class="step-6">contents step6</div>
+</div>]]></pre>
+									</article>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>steps</td>
+												<td>
+													<b>Type:</b> <a href="#NtsWizardStep" class="color">nts.uk.ui.NtsWizardStep</a><br/>
+													<b>NtsWizardStep Properties:</b><br/>
+													<i>content: String</i> The JQuery selector for each wizard step
+												</td>
+											</tr>
+											<tr>
+												<td>theme<br/><i>(Optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													<b>Default:</b> "green"<br/>
+													<b>Members:</b><br/>
+													<i>green:</i> The green theme for wizard<br/>
+													<i>blue:</i> The blue theme for wizard
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+<pre><![CDATA[export class ScreenModel {
+    stepList: Array<NtsWizardStep>;
+    stepSelected: KnockoutObservable<NtsWizardStep>;
+    
+    constructor() {
+        var self = this;
+        self.stepList = [
+            {content: '.step-1'},
+            {content: '.step-2'},
+            {content: '.step-3'},
+            {content: '.step-4'},
+            {content: '.step-5'},
+            {content: '.step-6'}
+        ];
+        self.stepSelected = ko.observable({id: 'step-1', content: '.step-1'});
+    }
+    
+    begin() {
+        $('#wizard').ntsWizard("begin");
+    }
+    end() {
+        $('#wizard').ntsWizard("end");
+    }
+    next() {
+        $('#wizard').ntsWizard("next");
+    }
+    previous() {
+        $('#wizard').ntsWizard("prev");
+    }
+    getCurrentStep() {
+        alert($('#wizard').ntsWizard("getCurrentStep"));
+    }
+    goto() {
+        var index = this.stepList.indexOf(this.stepSelected());
+        $('#wizard').ntsWizard("goto", index);
+    }
+}]]></pre>
+								</div>
+								<div id="tabs-method" class="cf">
+									<table>
+										<colgroup>
+											<col width="300px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Methods</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>$.fn.ntsWizard("begin")</td>
+												<td>
+													<b>Return:</b> JQuery<br/>
+													Go to first step
+												</td>
+											</tr>
+											<tr>
+												<td>$.fn.ntsWizard("end")</td>
+												<td>
+													<b>Return:</b> JQuery<br/>
+													Go to last step
+												</td>
+											</tr>
+											<tr>
+												<td>$.fn.ntsWizard("goto", index: number)</td>
+												<td>
+													<b>Agruments:</b><br/>
+													<i>index: number</i> Index of navigated step<br/>
+													Go to step with given index
+												</td>
+											</tr>
+											<tr>
+												<td>$.fn.ntsWizard("next")</td>
+												<td>
+													<b>Return:</b> JQuery<br/>
+													Go to next step
+												</td>
+											</tr>
+											<tr>
+												<td>$.fn.ntsWizard("prev")</td>
+												<td>
+													<b>Return:</b> JQuery<br/>
+													Go to previous step
+												</td>
+											</tr>
+											<tr>
+												<td>$.fn.ntsWizard("getCurrentStep")</td>
+												<td>
+													<b>Return:</b> number<br/>
+													Get current step index
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

@@ -1,0 +1,22 @@
+input.ntsSearchBox {
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    background-image: url('enter mark.png');
+    background-position: right; 
+    background-repeat: no-repeat;
+    padding: 6px 30px 6px 15px;
+    -webkit-transition: width 0.4s ease-in-out;
+    transition: width 0.4s ease-in-out; 
+}
+
+/* When the input field gets focus, change its width to 100% */
+input.ntsSearchBox:focus {
+    border: 2px solid #00BFFF;
+    outline: none;
+}
+button.search-btn {
+	margin: 5px;
+}

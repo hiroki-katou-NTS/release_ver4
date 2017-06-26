@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<com:scriptfile path="/lib/nittsu/ui/textbox-options.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Time ulitily </h1>
+						<h2>In this module have functions for work with time, date in javascript. Below is main functions of it.</h2>
+						<div class="feature-box"><div class="header"><h3>formatYearMonth</h3></div><div class="content">
+						<p>Parameter: (seconds: number, formatOption: string)</p>
+						<p>This method will receive a number as parameter. And convert it into year month formay (yyyy/MM).</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.time.formatYearMonth(199901);
+Result: "1999/01"]]></pre></div></div><div class="feature-box"><div class="header">
+						<h3>formatSeconds</h3></div><div class="content">
+						<p>Parameter: (seconds: number, formatOption: string)</p>
+						<p>Convert input number according to format</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.time.formatSeconds(1600);
+Result: "0:26:40"]]></pre></div></div><div class="feature-box"><div class="header">
+						<h3>parseTime</h3></div><div class="content">
+						<p>Parameter: (time: string or number, isMinutes: boolean (optional))</p>
+						<p>Parse input value into time format (h:mm). Parameters consist input value and is input value minute?
+						Return value is ResultParseTime</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.time.parseTime(123.1243, false);
+Result: result.format() ->"1:23"
+nts.uk.time.parseTime(1123.1243);
+Result: result.format() ->"11:23"
+nts.uk.time.parseTime("11:2");
+Result: result.format() ->"11:02"
+nts.uk.time.parseTime(90, true);
+Result: result.format() ->"1:30"]]></pre></div></div><div class="feature-box"><div class="header">
+						<h3>parseYearMonth</h3></div><div class="content">
+						<p>Parameter: (value: string or number)</p>
+						<p>Parse input value into year month format (yyyy/MM). Return value is ResultParseYearMonth</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.time.parseYearMonth(199902);
+Result: result.format() ->"1999/02"
+nts.uk.time.parseYearMonth("1999/02");
+Result: result.format() ->"1999/02"]]></pre></div></div><div class="feature-box"><div class="header">
+						<h3>parseTimeOfTheDay</h3></div><div class="content">
+						<p>Parameter: (value: string or number)</p>
+						<p>Parse input value into time of day format (hh:mm). Return value is ResultParseTimeOfTheDay</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.time.parseTimeOfTheDay(199902);
+Result: result.format() -> fail
+nts.uk.time.parseTimeOfTheDay(1902);
+Result: result.format() -> "19:02"
+nts.uk.time.parseTimeOfTheDay(9902);
+Result: result.format() -> fail
+nts.uk.time.parseTimeOfTheDay("19:02");
+Result: result.format() -> "19:02"]]></pre></div></div><div class="feature-box"><div class="header">
+						<h3>parseYearMonthDate</h3></div><div class="content">
+						<p>Parameter: (value: string or number)</p>
+						<p>Parse input value into date format (yyyy/MM/dd). Return value is ResultParseYearMonthDate</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.time.parseYearMonthDate(19990211);
+Result: result.format() -> "1999/02/11"
+nts.uk.time.parseYearMonthDate("1999/02/11");
+Result: result.format() -> "1999/02/11"]]></pre></div></div><div class="feature-box"><div class="header">
+						<h3>formatDate</h3></div><div class="content">
+						<p>Parameter: (date: Date, format: any)</p>
+						<p>Format date value according to format inputed.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.time.formatDate(new Date("1999/02/11"), "yyyy-MM-dd hh:mm:ss.SSS");
+Result: result.format() -> "1999-02-11 00:00:00/000"]]></pre></div></div>
+						<div class="feature-box"><div class="header">
+						<h3>yearInJapanEmpire</h3></div><div class="content">
+						<p>Parameter: value (string or number)</p>
+						<p>Format year value according to japan calendar format. Method return a object is JapanYearMonth. In JapanYearMonth have properties are empire, year, month which can use method get to get data or can use toString method.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.time.yearInJapanEmpire(2017).toString();
+Result: "平成  29 年 "]]></pre></div></div>
+						<div class="feature-box"><div class="header">
+						<h3>yearmonthInJapanEmpire</h3></div><div class="content">
+						<p>Parameter: value (string or number)</p>
+						<p>Format year value according to japan calendar format. Method return a object is JapanYearMonth.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.time.yearInJapanEmpire(2017).toString();
+Result: "平成  29 年 "]]></pre></div></div>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

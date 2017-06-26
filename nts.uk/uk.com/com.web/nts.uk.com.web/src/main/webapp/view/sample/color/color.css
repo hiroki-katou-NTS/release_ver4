@@ -1,0 +1,4 @@
+.color-info {position: relative; text-transform: uppercase;}
+.expand-color {position: absolute; top:2px; right:5px; font-size:9px; line-height:13px; color:#333; text-align:right; text-transform: none;}
+
+.table td:first-child {vertical-align: middle;}

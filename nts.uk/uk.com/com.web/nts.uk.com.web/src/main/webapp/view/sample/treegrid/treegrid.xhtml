@@ -1,0 +1,272 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>
+				var dialogSize = {
+					width : 300,
+					height : 200
+				};
+			</script>
+
+			<com:stylefile path="../catalog/catalog.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="../catalog/catalog.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div id="side-menu" class="cf"></div>
+				<div id="content" class="cf">
+					<h1>TreeGrid</h1>
+					<h2>Overview</h2>
+					<button data-bind="click: resetSelection">Reset</button>
+					<button data-bind="click: changeDataSource">Next
+						Datasource</button>
+					<div class="cf">
+						<div style="float: left">
+							<h3>Single Selection</h3>
+							<table id="treegrid2"
+								data-bind="ntsTreeGridView:{
+										width: 1000,
+										height: 250,
+										dataSource: items2,
+										value: singleSelectedCode,
+										columns: columns,
+										primaryKey: 'code',
+										childDataKey: 'childs',
+										primaryText: 'nodeText',
+										multiple: false,
+										enable: true,
+										showCheckBox: false}">
+							</table>
+						</div>
+						<div style="float: left">
+							<br />
+							<br />
+							<h4>Your single selected code:</h4>
+							<span data-bind="text: singleSelectedCode"></span>
+						</div>
+					</div>
+					<div class="cf">
+						<div style="float: left;">
+							<h3>Multi Selection</h3>
+							<div>
+								<div style="display: inline-block;">
+									<table id="treegrid"
+										data-bind="ntsTreeGridView:{
+										width: 1000, 
+										height: 250,
+										options: items1,
+										selectedValues: selectedCode,
+										optionsValue: 'code',
+										optionsChild: 'childs',
+										optionsText: 'nodeText',
+										multiple: true,
+										enable: true,
+										columns: columns2,
+										showCheckBox: true}">
+									</table>
+								</div>
+								<div id="up-down"
+									data-bind="ntsUpDown: {
+									targetSource: items1,
+									primaryKey: 'code',
+									comId: '#treegrid',
+									type: 'tree', 
+									childDataKey: 'childs'
+								}"></div>
+							</div>
+						</div>
+						<div style="float: left">
+							<br />
+							<br />
+							<h4>Your multiple selected code:</h4>
+							<com:ko-foreach bind="selectedCode">
+								<div data-bind="text: $data"></div>
+							</com:ko-foreach>
+						</div>
+					</div>
+					<article class="cf">
+						<div class="tabs">
+							<ol>
+								<li><a href="#tabs-html">HTML Binding</a></li>
+								<li><a href="#tabs-viewmodel">ViewModel</a></li>
+							</ol>
+							<div id="tabs-html" class="cf">
+								<h2>HTML</h2>
+								<p>
+									Using Ignite library so you must include following line in <i>&lt;ui:define
+										name="htmlHead"&gt;</i>
+								</p>
+								<pre>
+									<![CDATA[<ui:define name="htmlHead">
+	<com:scriptfile set="IGNITE" />
+</ui:define>]]>
+								</pre>
+								<pre>
+									<![CDATA[<!-- Single -->
+<table id="treegrid2"
+	data-bind="ntsTreeGridView:{
+		width: 700,
+		height: 250,
+		dataSource: items2,
+		value: singleSelectedCode,
+		headers: headers,
+		primaryKey: 'code',
+		childDataKey: 'childs',
+		primaryText: 'nodeText',
+		multiple: false,
+		enable: true,
+		extColumns: [{headerText: headers()[2], key: 'custom', width: '150px', dataType: 'string'}],
+		showCheckBox: false}"></table>
+
+<!--  Multi -->
+<table id="treegrid"
+	data-bind="ntsTreeGridView:{
+		width: 500,
+		height: 250,
+		options: items1,
+		selectedValues: selectedCode,
+		optionsValue: 'code',
+		optionsChild: 'childs',
+		optionsText: 'nodeText',
+		multiple: true,
+		enable: true,
+		extColumns: [{headerText: headers()[2], key: 'custom', width: '150px', dataType: 'string'}],
+		showCheckBox: true}"></table>
+]]>
+								</pre>
+								<h2>API</h2>
+								<table>
+									<colgroup>
+										<col width="200px" />
+									</colgroup>
+									<thead>
+										<tr>
+											<th><h4>Binding</h4></th>
+											<th><h4>Description</h4></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>width<br />
+											<i>(optional)</i></td>
+											<td><b>Type:</b> null | string | number<br /> <b>Default:</b>
+												"100%"<br /> <b>Members:</b><br /> <i>null:</i> Will stretch
+												to fit the sum of the columns widths.<br /> <i>number:</i>
+												The widget width can be set in pixels as a number. Example
+												values: 800, 700.<br /> <i>string:</i> The widget width can
+												be set in pixels (px) or percentage (%). Example values:
+												"800px", "800" (defaults to pixels), "100%".</td>
+										</tr>
+										<tr>
+											<td>optionsChild / childDataKey<br /></td>
+											<td><b>Type:</b>string<br /> <b>Default:</b>
+												"childDataKey"<br /> <i>The property to determine data
+													sources for children.</i></td>
+										</tr>
+										<tr>
+											<td>height</td>
+											<td><b>Type:</b> null | string | number<br /> <b>Members:</b><br />
+												<i>null:</i> Will stretch vertically to fit data.<br /> <i>string:</i>
+												The widget height can be set in pixels (px) and percentage
+												(%).<br /> <i>number:</i> The height can be set as a number
+												in pixels.</td>
+										</tr>
+										<tr>
+											<td>options / dataSource</td>
+											<td><b>Type:</b> array&lt;any&gt;<br /> List data to
+												generate GridList</td>
+										</tr>
+										<tr>
+											<td>optionsValue / primaryKey</td>
+											<td><b>Type:</b> string<br /> Field in data will be set
+												as primaryKey</td>
+										</tr>
+										<tr>
+											<td>optionsText / primaryText</td>
+											<td><b>Type:</b> string<br /> Field in data will be set
+												as primary text (for not determine columns).</td>
+										</tr>
+										<tr>
+											<td>columns</td>
+											<td><b>Type:</b> array&lt;column&gt;<br /> An array of
+												column objects:<br /> <i>headerText:</i> Text for header<br />
+												<i>prop / key:</i> Property in data array for column<br /> <i>width:</i>
+												Width for column<br /> <b><i>(*): Can use other
+														properties of columns of tree</i></b></td>
+										</tr>
+										<tr>
+											<td>multiple</td>
+											<td><b>Type:</b> boolean<br /> Enables/disables multiple
+												selection</td>
+										</tr>
+										<tr>
+											<td>value</td>
+											<td><b>Type:</b> array&lt;any&gt;<br /> List selected
+												value</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div id="tabs-viewmodel" class="cf">
+								<pre>
+									<![CDATA[class ScreenModel {
+	index: number;
+	items1: any;
+	selectedCode: any;
+	singleSelectedCode: any;
+	headers: any;
+
+	constructor() {
+		var self = this;
+		self.items1 = ko.observableArray([new Node('0001', 'サービス部', [
+			new Node('0001-1', 'サービス部1', []),
+			new Node('0001-2', 'サービス部2', []),
+			new Node('0001-3', 'サービス部3', [])
+		]), new Node('0002', '開発部', [])]);
+		self.selectedCode = ko.observableArray([]);
+		self.singleSelectedCode = ko.observable(null);
+		self.index = 0;
+		self.headers = ko.observableArray(["Item Value Header","Item Text Header", "Auto generated Field"]);
+	}
+}
+
+class Node {
+	code: string;
+	name: string;
+	nodeText: string;
+	custom: string;
+	childs: any;
+	constructor(code: string, name: string, childs: Array<Node>) {
+		var self = this;
+		self.code = code;
+		self.name = name;
+		self.nodeText = self.code + ' ' + self.name;
+		self.childs = childs;
+		self.custom = 'Random' + new Date().getTime();
+	}
+}]]>
+								</pre>
+							</div>
+						</div>
+					</article>
+					<div class="footer cf">
+						<button class="previous large">Previous</button>
+						<button class="next proceed large">Next</button>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

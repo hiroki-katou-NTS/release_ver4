@@ -1,0 +1,167 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:stylefile path="help-button.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Help Button</h1>
+						<h2>Overview</h2>
+						<div class="cf">
+							<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'bottom center', enable: enable }">?</button>
+							<button data-bind="ntsHelpButton: {image: 'test-image2.jpg', position: 'right+200 top-50', enable: enable }">?</button>
+						</div>
+						<div data-bind="ntsCheckBox: { checked: enable }">Enable</div>
+						<br/>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+									<pre><![CDATA[<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right top', enable: enable }">?</button>]]></pre>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>image</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Path to tooltip image
+												</td>
+											</tr>
+											<tr>
+												<td>position</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Set position for popover. See below demo for detail options
+												</td>
+											</tr>
+											<tr>
+												<td>enable<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> true<br/>
+													Set enable/disable for help button
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<br/>
+									<h3>Position demo:</h3>
+									<div class="cf">
+										<div class="col-3">
+											<p>"right top"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right top', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"right center"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right center', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"right bottom"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right bottom', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"left top"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'left top', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"left center"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'left center', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"left bottom"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'left bottom', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"top right"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'top right', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"top center"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'top center', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"top left"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'top left', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"bottom right"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'bottom right', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"bottom center"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'bottom center', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"bottom left"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'bottom left', enable: enable }">?</button>
+										</div>
+									</div>
+									<b>You can add or subtract from it</b>
+									<div class="cf">
+										<div class="col-3">
+											<p>"right+50 top"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right+50 top', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"right center-50"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right center-50', enable: enable }">?</button>
+										</div>
+										<div class="col-3">
+											<p>"right+50 bottom+50"</p>
+											<button data-bind="ntsHelpButton: {image: 'test-image.png', position: 'right+50 bottom+50', enable: enable }">?</button>
+										</div>
+									</div>								
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[export class ScreenModel {
+    enable: KnockoutObservable<boolean>;
+	
+    constructor() {
+        var self = this;
+        self.enable = ko.observable(true);
+    }
+}]]></pre>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

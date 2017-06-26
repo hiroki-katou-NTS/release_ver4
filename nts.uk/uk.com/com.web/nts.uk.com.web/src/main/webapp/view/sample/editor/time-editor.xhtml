@@ -1,0 +1,248 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				
+				<com:ValidatorScript>
+					nts.uk.shr.com.primitive.sample.ResidenceCode
+					nts.uk.shr.com.primitive.sample.ProcessingNo
+					nts.uk.shr.com.primitive.sample.PersonalWageCode
+					nts.uk.shr.com.primitive.sample.CommonAmount
+					nts.arc.time.YearMonth
+					nts.uk.shr.com.primitive.sample.SampleTimeDuration
+					nts.uk.shr.com.primitive.sample.SampleTimeClock
+   				</com:ValidatorScript>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<com:scriptfile path="time-editor.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="functions-area"></div>
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>TimeEditor</h1>
+						<h2>Overview</h2>
+						<!-- Binding with Value -->
+						<span data-bind="ntsCheckBox: {checked: enable}">Enable</span>
+						<span data-bind="ntsCheckBox: {checked: readonly}">Readonly</span>
+						<h3>Date (YYYY/MM/DD)</h3>
+						<input data-name="Date Editor" data-bind="ntsTimeEditor: { name: 'dateEditor', value: date, inputFormat: 'date', enable: enable, readonly: readonly, required: true }" />
+						<h3>Time Of Day(HH:mm)</h3>
+						<input data-name="Time Of Days Editor" data-bind="ntsTimeEditor: {name: 'Clock', constraint:'SampleTimeClock', value: timeOfDay, inputFormat: 'time', enable: enable, readonly: readonly, required: true}" />
+						<h3>Time (HH:mm)</h3>
+						<input data-name="Time Editor" data-bind="ntsTimeEditor: {name: 'Duration', constraint: 'SampleTimeDuration', value: time, inputFormat: 'time', mode: 'time', enable: enable, readonly: readonly, required: true}" />
+						<hr/>
+						<!-- Binding with Object -->
+						<div data-bind="with: yearmontheditor">
+							<h3>YearMonth (YYYY/MM)</h3>
+							<span data-bind="ntsCheckBox: {checked: enable}">Enable</span>
+							<span data-bind="ntsCheckBox: {checked: readonly}">Readonly</span>
+							<br/><br/>
+							<input data-name="YearMonth Editor" data-bind="ntsTimeEditor: {value: value, constraint: constraint, option: option, required: required, enable: enable, readonly: readonly}" />
+						</div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-usage">Usage</a></li>
+									<li><a href="#tabs-api">API</a></li>
+								</ol>
+								<div id="tabs-usage" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<!-- Simple -->
+<input data-bind="ntsTimeEditor: {value: date, inputFormat: 'date'}" />
+
+<!-- Full Options -->
+<div data-bind="with: timeeditor">
+	<input data-bind="ntsTimeEditor: {
+		value: value,
+		constraint: constraint,
+		option: option,
+		required: required,
+		enable: enable,
+		readonly: readonly,
+		immediate: false}" />
+</div>]]></pre>
+									<h2>TypeScript</h2>
+<pre><![CDATA[class ScreenModel {
+    enable: KnockoutObservable<boolean>;
+    readonly: KnockoutObservable<boolean>;
+    date: KnockoutObservable<string>;
+    time: KnockoutObservable<string>;
+    yearmontheditor: any;
+    constructor() {
+        var self = this;
+        self.enable = ko.observable(true);
+        self.readonly = ko.observable(false);
+        
+        self.date = ko.observable("1990/01/01");
+        self.time = ko.observable("12:00");
+        // YearMonth Editor
+        self.yearmontheditor = {
+            value: ko.observable(200001),
+            constraint: 'LayoutCode',
+            option: ko.mapping.fromJS(new nts.uk.ui.option.TimeEditorOption({
+                inputFormat: 'yearmonth'
+            })),
+            required: ko.observable(false),
+            enable: ko.observable(true),
+            readonly: ko.observable(false)
+        };
+    }
+}]]></pre>
+								</div>
+								<div id="tabs-api" class="cf">
+									<h2>Properties</h2>
+									<table class="table">
+										<colgroup>
+											<col width="150px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Name</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;string|number|Date|Moment&gt;<br/>
+												</td>
+											</tr>
+											<tr>
+												<td>constraint<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													Validate constraint for editor
+												</td>
+											</tr>
+											<tr>
+												<td>inputFormat<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													<b>Default:</b> "date"<br/>
+													<b>Members:</b><br/>
+													<i>date</i>: the date pattern (YYYY/MM/DD) member of regional option is used<br/>
+													<i>yearmonth</i>: the time pattern (YYYY/MM) member of regional option is used<br/>
+													<i>time</i>: the time pattern (HH:mm) member of regional option is used<br/>
+													<i>datetime</i>: the datetime pattern (YYYY/MM/DD HH:mm) member of regional option is used<br/>
+													<i>ISO 8601 Formats</i><br/>
+													"YY": year field without century and with leading zero<br/>
+													"YYYY": year field with leading zeros<br/>
+													"M": month field as digit without leading zero<br/>
+													"MM": month field as digit with leading zero<br/>
+													"D": day of month field without leading zero<br/>
+													"DD": day of month field with leading zero<br/>
+													"ddd": short day of week<br/>
+													"dddd": long day of week<br/><br/>
+													The display format in timeeditor
+												</td>
+											</tr>
+											<tr>
+												<td>required<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> false<br/>
+													Set required for editor
+												</td>
+											</tr>
+											<tr>
+												<td>enable<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> true<br/>
+													Set enable/disable for editor
+												</td>
+											</tr>
+											<tr>
+												<td>readonly<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> KnockoutObservable&lt;boolean&gt; | boolean<br/>
+													<b>Default:</b> false<br/>
+													Set readonly for editor
+												</td>
+											</tr>
+											<tr>
+												<td>mode<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													<b>Default:</b> none<br/>
+													If not set this property, default for time is time of days. Set mode is 'time' for use time duration.
+												</td>
+											</tr>
+											<tr>
+												<td>option<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> TimeEditorOption<br/>
+													<b>Default:</b> TimeEditorOption<br/>
+													<b>Members:</b><br/>
+													<div class="catalog-accordion">
+														<a href="#timeeditoroption">TimeEditorOption</a>
+														<table class="table">
+															<colgroup>
+																<col width="150px" />
+															</colgroup>
+															<thead>
+																<tr>
+																	<th><h4>Name</h4></th>
+																	<th><h4>Description</h4></th>
+																</tr>
+															</thead>
+															<tbody>
+																<tr>
+																	<td>placeholder<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b> ""<br/>
+																		Hint text for the control
+																	</td>
+																</tr>
+																<tr>
+																	<td>width<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b> ""<br/>
+																		Set width for the control
+																	</td>
+																</tr>
+																<tr>
+																	<td>textalign<br/><i>(optional)</i></td>
+																	<td>
+																		<b>Type:</b> KnockoutObservable&lt;string&gt; | string<br/>
+																		<b>Default:</b> "right"<br/>
+																		<b>Members:</b><br/>
+																		<i>left</i>: Align text to left<br/>
+																		<i>right</i>: Align text to right<br/>
+																		<i>center</i>: Align text to center
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

@@ -1,0 +1,221 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+            	
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<style>
+					.ntsRadioBox{width:100px;}
+					#first-list .ntsRadioBox{width: 33%;}
+				</style>
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>RadioBoxGroup</h1>
+						<h2>Overview</h2>
+						<button data-bind="click: addBoxes">Add Box</button>
+						<button data-bind="click: removeBoxes">Remove Box</button>
+						<input id="number-1" data-bind="ntsNumberEditor: {value: value}"/>
+						<button data-bind="click: enableCheckBox">Enable CheckBox</button>
+						<span data-bind="ntsCheckBox: { checked: enable }">Enable</span>
+						<br/><br/>
+						<div>
+							<input data-bind="ntsTextEditor: { value: defaultValue }"></input>
+							<button data-bind="click: setDefault">Reset</button>
+						</div>
+						<br/>
+						<h3>Selected Values as objects</h3>
+						<div id="first-list" data-bind="ntsRadioBoxGroup: {options: itemList,
+											optionsText: 'name',
+											value: selectedValue,
+											enable: enable}"></div>
+						<h4>Selected values:</h4>
+						<div data-bind="text: ko.toJSON(selectedValue)"></div>
+						<br/>
+						<h3>Selected Values as value</h3>
+						<div id="second-list" data-bind="ntsRadioBoxGroup: {options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedId,
+											enable: enable}"></div>
+						<h4>Selected values:</h4>
+						<div data-bind="text: ko.toJSON(selectedId)"></div>
+						<br/>
+						<h3>Item list:</h3>
+						<div data-bind="text: ko.toJSON(itemList)"></div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+									<li><a href="#tabs-css">CSS</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<div data-bind="ntsRadioBoxGroup: {
+	options: itemList,
+	optionsValue: 'id',
+	optionsText: 'name',
+	value: selectedId,
+	enable: enable}"></div>]]></pre>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>options</td>
+												<td>
+													<b>Type:</b> array&lt;any&gt;<br/>
+													List data to generate RadioBox
+												</td>
+											</tr>
+											<tr>
+												<td>optionsValue<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as RadioBox value. If null object will be set as value
+												</td>
+											</tr>
+											<tr>
+												<td>optionsText</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as RadioBox text
+												</td>
+											</tr>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> any<br/>
+													Value of selected RadioBox
+												</td>
+											</tr>
+											<tr>
+												<td>enable<br/><i>(optional)</i></td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<b>Default:</b> true<br/>
+													Set enable/disable for RadioBoxGroup control
+												</td>
+											</tr>
+											<tr>
+												<td>To enable / disable for each item seperate<br/><i>(optional)</i></td>
+												<td>
+													<b>Create property "enable" (KnockoutObservable -> boolean) in each item</b> 
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[class ScreenModel {
+    itemList: KnockoutObservableArray<any>;
+    selectedId: KnockoutObservable<number>;
+    enable: KnockoutObservable<boolean>;
+    
+    constructor() {
+        var self = this;
+        self.itemList = ko.observableArray([
+            new BoxModel(1, 'box 1'),
+            new BoxModel(2, 'box 2'),
+            new BoxModel(3, 'box 3')
+        ]);
+        self.selectedId = ko.observable(1);
+        self.enable = ko.observable(true);
+    }
+}
+
+class BoxModel {
+    id: number;
+    name: string;
+    constructor(id, name){
+        var self = this;
+        self.id = id;
+        self.name = name;
+    }
+}]]></pre>
+								</div>
+								<div id="tabs-css" class="cf">
+									<h3>Outline</h3>
+									<p>Style RadioBox for better appearance on colored background</p>
+<pre><![CDATA[<div class="outline" data-bind="ntsRadioBoxGroup: {
+	options: itemList,
+	optionsValue: 'id',
+	optionsText: 'name',
+	value: selectedId,
+	enable: enable}"></div>]]></pre>
+									<div class="cf" style="background:#0D1C33; padding:10px 5px; margin: 10px 0;">
+										<div class="outline" data-bind="ntsRadioBoxGroup: {
+											options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedId,
+											enable: enable}"></div>
+									</div>
+									<div class="cf" style="background:#17373C; padding:10px 5px; margin: 10px 0;">
+										<div class="outline" data-bind="ntsRadioBoxGroup: {
+											options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedId,
+											enable: enable}"></div>
+									</div>
+									<div class="cf" style="background:#2B6832; padding:10px 5px; margin: 10px 0;">
+										<div class="outline" data-bind="ntsRadioBoxGroup: {
+											options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedId,
+											enable: enable}"></div>
+									</div>
+									<div class="cf" style="background:#4F9300; padding:10px 5px; margin: 10px 0;">
+										<div class="outline" data-bind="ntsRadioBoxGroup: {
+											options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedId,
+											enable: enable}"></div>
+									</div>
+									<div class="cf" style="background:#A1D700; padding:10px 5px; margin: 10px 0;">
+										<div class="outline" data-bind="ntsRadioBoxGroup: {
+											options: itemList,
+											optionsValue: 'id',
+											optionsText: 'name',
+											value: selectedId,
+											enable: enable}"></div>
+									</div>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

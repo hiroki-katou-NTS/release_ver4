@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				<com:ValidatorScript>
+					nts.uk.shr.com.primitive.sample.ResidenceCode
+					nts.uk.shr.com.primitive.sample.ProcessingNo
+					nts.uk.shr.com.primitive.sample.PersonalWageCode
+					nts.uk.shr.com.primitive.sample.CommonAmount
+					nts.uk.ctx.pr.report.dom.wageledger.aggregate.WLAggregateItemCode
+					nts.arc.time.YearMonth
+				</com:ValidatorScript>
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Validator tags</h1>
+						<h2>In this group have custom tags for create, get constraints and validate data.</h2>
+						<div class="feature-box"><div class="header"><h3>ValidatorScript</h3></div><div class="content">
+						<p>Get constraints of primitive values from server and use for validation in Javascript</p>
+						<pre><![CDATA[//Test
+<com:ValidatorScript>
+	nts.uk.shr.com.primitive.sample.ResidenceCode
+	nts.uk.shr.com.primitive.sample.ProcessingNo
+	nts.uk.shr.com.primitive.sample.PersonalWageCode
+	nts.uk.shr.com.primitive.sample.CommonAmount
+	nts.arc.time.YearMonth
+</com:ValidatorScript>]]></pre>
+<pre><![CDATA[//Result (at head)
+	__viewContext.primitiveValueConstraints = __viewContext.primitiveValueConstraints || {};
+	__viewContext.primitiveValueConstraints.ResidenceCode = {
+		valueType: 'String',
+		charType: 'Numeric',
+		maxLength: 6,
+	};
+	__viewContext.primitiveValueConstraints.ProcessingNo = {
+		valueType: 'Integer',
+		min: 1,
+		max: 5,
+	};
+	__viewContext.primitiveValueConstraints.PersonalWageCode = {
+		valueType: 'String',
+		maxLength: 2,
+	};
+	__viewContext.primitiveValueConstraints.CommonAmount = {
+		valueType: 'Decimal',
+		max: 9999999999.9,
+		min: 0,
+	};
+	__viewContext.primitiveValueConstraints.YearMonth = {
+		valueType: 'Integer',
+	};]]></pre></div></div>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

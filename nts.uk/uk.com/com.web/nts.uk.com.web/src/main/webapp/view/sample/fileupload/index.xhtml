@@ -1,0 +1,163 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<head>
+<STYLE type="text/css">
+</STYLE>
+</head>
+<body>
+
+	<ui:composition template="../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 300, height: 200 };</script>
+
+			<com:stylefile path="../catalog/catalog.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="../catalog/catalog.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div id="side-menu" class="cf"></div>
+				<div id="content" class="cf">
+
+					<h1>file uploading</h1>
+					<h2>binding file upload by knockout</h2>
+					<div id="fileupload1"
+						data-bind="ntsFileUpload:{filename: filename,accept: accept,text :textId, onfilenameclick: function(filename){alert(filename);}}"></div>
+					<input type="button" id="button1" value="upload1" />
+					<pre>
+					<![CDATA[
+//index.html
+<div id="fileupload1" data-bind="ntsFileUpload:{
+						filename: filename, //optional
+						accept: accept, //optional
+						text: textId,//optional
+						onchange: function(filename){
+							//optional
+							//this function will be called when you select other file in file browser dialog
+							//change file name in viewmodel does not trigger this event
+							console.log(filename);
+							
+						},
+						onfilenameclick: function(filename){
+							//optional
+							//will be called when click on filename
+						}
+					}">
+</div>
+
+//viewmodel.ts
+class ScreenModel {
+	filename: KnockoutObservable<string>;
+	textId: KnockoutObservable<string>;
+	accept: KnockoutObservableArray<string>;
+	
+	constructor(){
+		filename = ko.observable(""); //file name
+		accept = ko.observableArray([".txt",'.xlsx']); //supported extension
+		textId = ko.observable(""); // file browser button text id
+	}
+}
+    
+this.bind(new ScreenModel());
+					]]>
+					</pre>
+					<h2>in html file do not use knockout</h2>
+					<input type="file" id="file_upload" name="aaa" /> <input
+						type="button" id="button" value="upload" />
+					<pre>
+					<![CDATA[
+<input type="file" id="file_upload" />
+//if you want limmit file format in file selecting dialog
+<input type="file" id="file_upload" accept=".xls,.xlsx" /> 
+					]]>
+					</pre>
+					<h2>file uploading service</h2>
+					<pre>
+					<![CDATA[
+//specify file stereo if it has, for example: flowmenu, this name is defined in java code for check authorization
+// and limit file size
+//if upload sucessfully it will return array of file infor object
+$("#file_upload").ntsFileUpload({stereoType:"any"}).done(function(res) {
+	console.log(res);
+}).fail(function(err) {
+	console.log(err);
+});   
+			        
+//execute function when upload sucessfully for fail
+var option = {
+	stereoType:"flowmenu",//required
+	onSuccess: function(){},//optional
+	onFail: function(){}//optional
+}
+$("#file_upload").ntsFileUpload(option).done(function(res) {
+	console.log(res);
+}).fail(function(err) {
+	console.log(err);
+});   
+			                        
+					]]>
+					</pre>
+					<h2>create own file stereo</h2>
+					step1: create class implements
+					nts.arc.layer.infra.file.constraint.FileStereo<br /> step2: add
+					stereo type name into
+					nts.uk.shr.infra.file.constraint.FileStereoFactory
+					<pre>
+					<![CDATA[
+@Getter
+public class ExampleStereoType implements FileStereo {
+	private long limitedSize = 5000; //unit byte
+	private List<String> supportedExtension = new ArrayList<>();
+	private List<String> downloadRights = new ArrayList<>();
+	private List<String> uploadRights = new ArrayList<>();
+	private List<String> deleteRights = new ArrayList<>();
+
+}
+
+
+public class FileStereoFactory {
+	private static Map<String, Class<? extends FileStereo>> fileStereos;
+	static {
+		fileStereos = new HashMap<>();
+
+		fileStereos.put("flowmenu", ExampleStereoType.class);
+
+	}
+}
+						]]>
+					</pre>
+
+					<h1>download file service</h1>
+					nts.uk.request.specials.donwloadFile(fileid); <br></br> <input
+						id="fileid" type="text" /> <input id="download" type="button"
+						value="download" />
+					<h1>live view uploaded file</h1>
+					<pre>
+						<![CDATA[
+//in html file
+<div id="liveview"></div>
+
+//in ts file
+ var liveviewcontainer = $("#liveview");
+ //view image
+ liveviewcontainer.append($("<img/>").attr("src",nts.uk.request.resolvePath("/webapi/shr/infra/file/storage/liveview/"+FILEID)));
+ //view html file
+liveviewcontainer.append($("<iframe/>").attr("src",nts.uk.request.resolvePath("/webapi/shr/infra/file/storage/liveview/"+FILEID)));
+
+					]]>
+					</pre>
+					<div id="liveview"></div>
+
+				</div>
+
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

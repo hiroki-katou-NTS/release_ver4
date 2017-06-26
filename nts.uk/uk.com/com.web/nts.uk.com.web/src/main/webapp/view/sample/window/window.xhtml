@@ -1,0 +1,313 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 800, height: 800 };</script>
+
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Window</h1>
+						<h2>Overview</h2>
+						<p>It's the current window you're working with. It has some useful API to share data between screen or close the current SubWindow.</p>
+						<br/>
+						<div class="control-input valign-middle">
+							<input data-bind="ntsTextEditor: {value: value}"/>
+							<div data-bind="ntsCheckBox: { checked: isTransistReturnData }">IsPersist</div>
+							<button data-bind="click: OpenModalSubWindow">Modal Window</button>
+						</div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-usage">Usage</a></li>
+									<li><a href="#tabs-api">API</a></li>
+								</ol>
+								<div id="tabs-usage" class="cf">
+									<h3>Main Window</h3>
+<pre><![CDATA[// Properties
+nts.uk.ui.windows.selfId //"MAIN_WINDOW"
+nts.uk.ui.windows.container //ScreenWindowContainer instance
+
+// Methods
+nts.uk.ui.windows.setShare("companyId", "000000000000-0001"); //Set a global key "companyId" with value "000000000000-0001"
+nts.uk.ui.windows.getShare("companyId"); //Get value from global key "companyId"
+nts.uk.ui.windows.getSelf(); //ScreenWindow instance of "MAIN_WINDOW"
+nts.uk.ui.windows.close(); //Close current window]]></pre>
+									<h3>ScreenWindow class</h3>
+<pre><![CDATA[// Get a ScreenWindow
+var currentScreen = nts.uk.ui.windows.getSelf();
+var currentScreen = nts.uk.ui.windows.sub.modal("/view/sample/window/subwindow.xhtml");
+var currentScreen = nts.uk.ui.windows.sub.modeless("/view/sample/window/subwindow.xhtml");
+
+// Properties
+currentScreen.id //"MAIN_WINDOW" or UUID
+currentScreen.isRoot //true | false base on current window is "MAIN_WINDOW"
+currentScreen.parent //null | ScreenWindow instance
+
+// Methods
+currentScreen.setTitle("Abc Title"); //Set title for ScreenWindow, don't change this yourself
+currentScreen.setHeight(400); //Set height for ScreenWindow, only work in SubWindow
+currentScreen.setWidth(500); //Set width for ScreenWindow, only work in SubWindow
+currentScreen.setSize(400, 500); //Set size for ScreenWindow, only work in SubWindow
+currentScreen.onClosed(() => {
+	alert("Closed");
+}); //Alert after current window is closed
+currentScreen.close(); //Close current window]]></pre>
+
+								</div>
+								<div id="tabs-api" class="cf">
+									<article>
+										<h2>Information</h2>
+										<b>Module:</b> nts.uk.ui.windows<br/>
+										<b>File:</b> /lib/nittsu/ui/ui.ts<br/>
+									</article>
+									<article>
+										<h2>Properties</h2>
+										<table class="table">
+											<colgroup>
+												<col width="200px" />
+											</colgroup>
+											<thead>
+												<tr>
+													<th><h4>Name</h4></th>
+													<th><h4>Description</h4></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>selfId</td>
+													<td>
+														<b>Type:</b> string<br/>
+														Current windows Id. Return "MAIN_WINDOW" if current windows is not subwindow
+													</td>
+												</tr>
+												<tr>
+													<td>container</td>
+													<td>
+														<b>Type:</b> ScreenWindowContainer<br/>
+														Get container of current window<br/>
+														<div class="catalog-accordion">
+															<a href="#">ScreenWindowContainer</a>
+															<table class="table">
+																<colgroup>
+																	<col width="150px" />
+																</colgroup>
+																<thead>
+																	<tr>
+																		<th><h4>Properties</h4></th>
+																		<th><h4>Description</h4></th>
+																	</tr>
+																</thead>
+																<tbody>
+																	<tr>
+																		<td>localShared</td>
+																		<td><b>Type:</b> { [key: string]: any }<br />
+																			List local shared values in this window (when set isPersist=false)
+																		</td>
+																	</tr>
+																	<tr>
+																		<td>shared</td>
+																		<td><b>Type:</b>{ [key: string]: any }<br />
+																			List global shared values in this window (when set isPersist=true)
+																		</td>
+																	</tr>
+																	<tr>
+																		<td>windows</td>
+																		<td><b>Type:</b> { [key: string]: ScreenWindow }<br />
+																			List of all windows in this screen include main window
+																		</td>
+																	</tr>
+																</tbody>
+															</table>
+														</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+										<h2>Methods</h2>
+										<table class="table">
+											<colgroup>
+												<col width="250px" />
+											</colgroup>
+											<thead>
+												<tr>
+													<th><h4>Name</h4></th>
+													<th><h4>Description</h4></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>setShared(key, data, isPersist)</td>
+													<td>
+														Store a share pair &lt;key,value&gt; to ScreenWindowContainer<br/>
+														<b>Return:</b> void<br/>
+														<b>Agruments:</b><br/>
+														<i>key: string</i> Set the key for stored share value<br/>
+														<i>data: any</i> Set data for stored share value<br/>
+														<i>isPersist: boolean (optional)</i>
+															If true, data will be stored for this screen and all of dialog can use until screen is closed or jump to other screen.
+															If false, data will be removed after that dialog is closed.<br/>
+															If current screen is "MAIN_WINDOW", isPersist is always true.<br/>
+															If current screen is "Sub Window", isPersist default value is false.<br/>
+													</td>
+												</tr>
+												<tr>
+													<td>getShared(key)</td>
+													<td>
+														Get stored share value with given key from ScreenWindowContainer<br/>
+														<b>Return:</b> any<br/>
+														<b>Agruments:</b><br/>
+														<i>key: string</i> Get value by this key<br/>
+													</td>
+												</tr>
+												<tr>
+													<td>getSelf()</td>
+													<td>
+														Get current window class<br/>
+														<b>Return:</b> ScreenWindow<br/>
+														<div class="catalog-accordion">
+															<a href="#">ScreenWindow</a>
+															<table style="border:0">
+																<tr><td style="border:0">
+																<table class="table">
+																	<colgroup>
+																		<col width="150px" />
+																	</colgroup>
+																	<thead>
+																		<tr>
+																			<th><h4>Properties</h4></th>
+																			<th><h4>Description</h4></th>
+																		</tr>
+																	</thead>
+																	<tbody>
+																		<tr>
+																			<td>id</td>
+																			<td><b>Type:</b> string<br />
+																				Id of ScreenWindow
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>isRoot</td>
+																			<td><b>Type:</b>boolean<br />
+																				Check ScreenWindow is "MAIN_WINDOW"
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>parent</td>
+																			<td><b>Type:</b> ScreenWindow<br />
+																				Return parent ScreenWindow or null if is "MAIN_WINDOW"
+																			</td>
+																		</tr>
+																	</tbody>
+																</table>
+																<br/>
+																<table class="table">
+																	<colgroup>
+																		<col width="150px" />
+																	</colgroup>
+																	<thead>
+																		<tr>
+																			<th><h4>Methods</h4></th>
+																			<th><h4>Description</h4></th>
+																		</tr>
+																	</thead>
+																	<tbody>
+																		<tr>
+																			<td>setTitle(newTitle)</td>
+																			<td>
+																				Set title for ScreenWindow. Don't change title by yourself, should ask Kiban team first<br/>
+																				<b>Return:</b> void<br/>
+																				<b>Agruments:</b><br/>
+																				<i>newTitle: string</i> New title for ScreenWindow<br/>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>setHeight(height)</td>
+																			<td>
+																				Set height for ScreenWindow<br/>
+																				<b>Return:</b> void<br/>
+																				<b>Agruments:</b><br/>
+																				<i>height: any</i> New height for ScreenWindow<br/>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>setWidth(width)</td>
+																			<td>
+																				Set width for ScreenWindow<br/>
+																				<b>Return:</b> void<br/>
+																				<b>Agruments:</b><br/>
+																				<i>width: any</i> New width for ScreenWindow<br/>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>setSize(height, width)</td>
+																			<td>
+																				Set size for ScreenWindow<br/>
+																				<b>Return:</b> void<br/>
+																				<b>Agruments:</b><br/>
+																				<i>height: any</i> New height for ScreenWindow<br/>
+																				<i>width: any</i> New width for ScreenWindow<br/>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>onClosed(callback)</td>
+																			<td>
+																				Set function which will be executed after ScreenWindow is closed<br/>
+																				<b>Return:</b> void<br/>
+																				<b>Agruments:</b><br/>
+																				<i>callback: () => void</i> Function to execute<br/>
+																			</td>
+																		</tr>
+																		<tr>
+																			<td>close()</td>
+																			<td>
+																				Close current ScreenWindow<br/>
+																				<b>Return:</b> void<br/>
+																			</td>
+																		</tr>
+																	</tbody>
+																</table>
+																</td></tr>
+															</table>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>close(windowId)</td>
+													<td>
+														Close a window with specify ID or current window if <i>windowId</i> is blank<br/>
+														<b>Return:</b> void<br/>
+														<b>Agruments:</b><br/>
+														<i>windowId: string (optional)</i> Id of target window<br/>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</article>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

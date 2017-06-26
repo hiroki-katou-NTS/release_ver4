@@ -1,0 +1,165 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+            	<com:scriptfile set="IGNITE" />
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Color Picker</h1>
+						<h2>Overview</h2>
+						<span data-bind="ntsCheckBox: { checked: enable }">Enable</span>
+						<span data-bind="ntsCheckBox: { checked: required }">Required</span>
+						
+						<div>
+							<h2>Value</h2>
+							<label data-bind="text: dateValue"></label>
+							<div>Start date: <label data-bind="text: dateValue().startDate"></label> <input data-bind="ntsTimeEditor: {value: startDateString}"/></div>
+							<div>End date: <label data-bind="text: dateValue().endDate"></label> <input data-bind="ntsTimeEditor: {value: endDateString}"/></div>
+						</div>
+						<div id="daterangepicker" data-bind="ntsDateRangePicker: { required: required, enable: enable, showNextPrevious: true, value: dateValue, maxRange: 'oneMonth'}"/>
+						<br />					
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+									<li><a href="#tabs-methods">Methods</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<div id="daterangepicker" data-bind="ntsDateRangePicker: { required: required, enable: enable, showNextPrevious: true, value: dateValue, maxRange: 'oneMonth'}"/>]]></pre>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> object<br/>
+													object value for start date and end date. Format {startDate: string, endDate: string} (example: {startDate: '2017/02/02', endDate: '2018/02/02'})
+												</td>
+											</tr>
+											<tr>
+												<td>type<br/></td>
+												<td>
+													<b>Type:</b> string<br/>
+													format of date range picker. Currently, there are fullDate and yearmonth
+												</td>
+											</tr>
+											<tr>
+												<td>enable</td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													enable for date range picker
+												</td>
+											</tr>
+											<tr>
+												<td>maxRange</td>
+												<td>
+													<b>Type:</b> string<br/>
+													range validate for date range picker. Currently, therer are mode: none / oneMonth / oneYear
+												</td>
+											</tr>
+											<tr>
+												<td>name</td>
+												<td>
+													<b>Type:</b> string<br/>
+													name for date range picker
+												</td>
+											</tr>
+											<tr>
+												<td>required</td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													set required for date range picker
+												</td>
+											</tr>
+											<tr>
+												<td>showNextPrevious</td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													show button next or previous of date range picker
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[class ScreenModel {
+        enable: KnockoutObservable<boolean>;
+        required: KnockoutObservable<boolean>;
+        dateValue: KnockoutObservable<any>;
+        startDateString: KnockoutObservable<string>;
+        endDateString: KnockoutObservable<string>;
+        
+        constructor() {
+            var self = this;
+            self.enable = ko.observable(true);
+            self.required = ko.observable(true);
+            
+            self.startDateString = ko.observable("");
+            self.endDateString = ko.observable("");
+            self.dateValue = ko.observable({});
+            
+            self.startDateString.subscribe(function(value){
+                self.dateValue().startDate = value;
+                self.dateValue.valueHasMutated();        
+            });
+            
+            self.endDateString.subscribe(function(value){
+                self.dateValue().endDate = value;   
+                self.dateValue.valueHasMutated();      
+            });
+        }
+    }]]></pre>
+								</div>
+								<div id="tabs-methods" class="cf">
+									<table>
+										<colgroup>
+											<col width="350px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Methods</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

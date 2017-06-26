@@ -1,0 +1,66 @@
+/************************
+  Font
+************************/
+$basic_font_size: 10px;
+$bfs: $basic_font_size; // arias
+$normal_font_size: $bfs * 1.4;
+$font_family: 'Meiryo UI';
+$font_family_monospace: 'DroidSansMono', 'Meiryo';
+
+$font_color: #000;
+$button_font_color: #404040;
+$hyperlink_color: #0066CC;
+$green_background_color: #E0F59E;
+$green_formlabel_color: #97D155;
+$green_button_color: #A4EEB0;
+$green_checkbox_color: #2FCC71;
+$activated_color: #00B050;
+$yellow_background_color: #F7EFD4;
+$yellow_formlabel_color: #FAC002;
+$red_warning_color: #C12017;
+
+$focused_color: #0096f2;
+
+/* IE */
+@font-face {
+    font-family: 'DroidSansMono';
+    src: url('font/DroidSansMono.eot') format('truetype');
+}
+
+/* Others */
+@font-face {
+    font-family: 'DroidSansMono';
+    src: url('font/DroidSansMono.ttf') format('truetype');
+}
+
+/************************
+  Frame
+************************/
+$frame_border_color: #B1B1B1;
+
+$header_height: 50px;
+$functions_area_height: 40px;
+$bottom_functions_area_height: 65px;
+
+
+$set_prefix: '' , -moz- , -webkit-, -ms-;
+
+@mixin mix-propertySetPrefix($name, $value) {
+     @each $prefix in $set_prefix {
+         #{$prefix}#{$name}: $value;
+    }
+}
+@mixin mix-valueSetPrefix($name, $value) {
+     @each $prefix in $set_prefix {
+        #{$name}: unquote("#{$prefix}$value");
+    }
+}
+@mixin icon-button-image{
+    background-position: 5px center; 
+    background-repeat: no-repeat;
+    @include mix-propertySetPrefix(background-size, (22px 22px));
+
+    span{
+        padding-left: 25px;
+    }
+}

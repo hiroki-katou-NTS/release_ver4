@@ -1,0 +1,257 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Text ulitily </h1>
+						<h2>In this module have functions for work with text, string. Below is main functions of it.</h2>
+						<div class="feature-box">
+							<div class="header"><h3>countHalf</h3></div>
+							<div class="content">
+								<p>This function will receive a string as parameter and count size of that string according to Nittsu rule.</p>
+<pre><![CDATA[//Try to paste this to console
+nts.uk.text.countHalf("abc123");
+Result: 6
+nts.uk.text.countHalf("abc123感じ");
+Result: 10]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>allHalfNumeric</h3></div>
+							<div class="content">
+							<p>This function will receive a string as parameter and check that string's character is only contain number.</p>
+<pre><![CDATA[//Try to paste this to console
+nts.uk.text.allHalfNumeric("abc123");
+Result: false
+nts.uk.text.allHalfNumeric("1234");
+Result: true]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>allHalfAlphabet</h3></div>
+							<div class="content">
+							<p>This function will receive a string as parameter and check that string's character is only contain Alphabet.</p>
+<pre><![CDATA[//Try to paste this to console
+nts.uk.text.allHalfAlphabet("abc123");
+Result: false
+nts.uk.text.allHalfAlphabet("aaaa");
+Result: true]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>allHalfAlphanumeric</h3></div>
+							<div class="content"><p>This function will receive a string as parameter and check that string's character is only contain Alphabet and number.</p>
+<pre><![CDATA[//Try to paste this to console
+nts.uk.text.allHalfAlphanumeric("abc123..");
+Result: false
+nts.uk.text.allHalfAlphanumeric("abc123");
+Result: true]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>allHalfKatakana</h3></div>
+							<div class="content"><p>This function will receive a string as parameter and check that string's character is only contain small Katakana characters of japanese.</p>
+<pre><![CDATA[//Try to paste this to console
+nts.uk.text.allHalfKatakana("abc123");
+Result: false
+nts.uk.text.allHalfKatakana("ｶﾅ");
+Result: true]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>allFullKatakana</h3></div>
+							<div class="content"><p>This function will receive a string as parameter and check that string's character is only contain Big Katakana characters of japanese.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.allFullKatakana("abc123");
+Result: false
+nts.uk.text.allFullKatakana("ｶﾅ");
+Result: False
+nts.uk.text.allFullKatakana("カナ");
+Result: true]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>allHalf</h3></div>
+							<div class="content"><p>This function will receive a string as parameter and check that string's character is only contain alphabet character, numberic, special character.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.allHalf("abc123");
+Result: true
+nts.uk.text.allHalf("abc123.@#$");
+Result: true
+nts.uk.text.allHalf("カナ");
+Result: false]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>allHiragana</h3></div>
+							<div class="content"><p>This function will receive a string as parameter and check that string's character is only contain Hiragana character of japanese.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.allHiragana("abc123");
+Result: false
+nts.uk.text.allHiragana("カナ");
+Result: false
+nts.uk.text.allHiragana("ひら");
+Result: true]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>allKatakana</h3></div>
+							<div class="content"><p>This function will receive a string as parameter and check that string's character is only contain Katakana character of japanese.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.allKatakana("abc123");
+Result: false
+nts.uk.text.allKatakana("ｶﾅ");
+Result: true
+nts.uk.text.allKatakana("カナ");
+Result: true
+nts.uk.text.allKatakana("ひら");
+Result: false]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>htmlEncode</h3></div>
+							<div class="content"><p>This function will receive a string as parameter and convert special character to html code</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.htmlEncode("<tag>");
+Result: "&lt;tag&gt;"]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>toLowerCaseFirst</h3></div>
+							<div class="content"><p>This function will receive a string as parameter and convert first character into lower case</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.toLowerCaseFirst("AAA AAA");
+Result: "aAA AAA"]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>toUpperCaseFirst</h3></div>
+							<div class="content"><p>This function will receive a string as parameter and convert first character into upper case</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.toUpperCaseFirst("aaa aaa");
+Result: "Aaa aaa"]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>isNullOrEmpty</h3></div>
+							<div class="content"><p>This function will receive a string as parameter and check that string is null or empty or undefined</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.isNullOrEmpty("aaa aaa");
+Result: false
+nts.uk.text.isNullOrEmpty("");
+Result: true
+nts.uk.text.isNullOrEmpty(null);
+Result: true
+nts.uk.text.isNullOrEmpty(undefined);
+Result: true]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>format</h3></div>
+							<div class="content"><p>This function will receive a string that need format and parameter of it and format that parameters into original string</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.format('入力文字数：{0}文字', 123);
+Result: '入力文字数：123文字']]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>padLeft</h3></div>
+							<div class="content"><p>This function will receive a string that need pad, pad character and return string max length. Then return a string that with pad character in left of original.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.padLeft('123', '0', 5);
+Result: '00123']]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>padRight</h3></div>
+							<div class="content"><p>Same with padLeft but pad character will be add into right of original string.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.padRight('123', '0', 5);
+Result: '12300']]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>charPadding</h3></div>
+							<div class="content"><p>Same with padLeft but we can set pad into left or right. Set True is pad into left of original string.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.charPadding('123', '0', false, 5);
+Result: '12300']]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>replaceAll</h3></div>
+							<div class="content"><p>Replace all equals string in original string with new string</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.replaceAll('2321242123', '2', 'a');
+Result: 'a3a1a4a1a3']]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>removeFromStart</h3></div>
+							<div class="content"><p>Remove equals string from original string at start, if meet other string and it will end.</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.removeFromStart('22223333', '2');
+Result: '3333'
+nts.uk.text.removeFromStart('2223333', '22');
+Result: '23333']]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>getCharType</h3></div>
+							<div class="content"><p>Get character type of a primitive value</p>
+						<pre><![CDATA[__viewContext.primitiveValueConstraints = {
+						range: {
+							valueType: "String",
+							charType: "Numeric",
+							maxLength: 7
+						}
+					};
+//Try to paste this to console
+nts.uk.text.getCharType('range');
+Result: CharType('半角数字', 0.5, nts.uk.text.allHalfNumeric)]]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>formatEmployeeCode</h3></div>
+							<div class="content"><p>Format input string according to employee code</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.formatEmployeeCode('1111', 'left', '0', 10);
+Result: '0000001111']]></pre>
+							</div>
+						</div>
+						<div class="feature-box">
+							<div class="header"><h3>splitOrPadRight</h3></div>
+							<div class="content"><p>split original string according to input length, if input length  larger than original string length, pad right with character</p>
+						<pre><![CDATA[//Try to paste this to console
+nts.uk.text.splitOrPadRight('1234567', '4', '0');
+Result: '1234'
+nts.uk.text.splitOrPadRight('1234567', '9', '0');
+Result: '123456700']]></pre>
+							</div>
+						</div>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

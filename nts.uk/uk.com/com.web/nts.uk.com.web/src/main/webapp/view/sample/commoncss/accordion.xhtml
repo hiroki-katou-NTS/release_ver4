@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="accordion.js" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+				<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Accordion</h1>
+						<h2>Demo</h2>
+						<h3>Single</h3>
+						<div class="accordion">
+							<h3>
+								詳細検索
+								<span class="status">全選択</span>
+								<span class="close-button ui-icon ui-icon-closethick"></span>
+							</h3>
+							<div>First content panel</div>
+						</div>
+						<div class="accordion">
+							<h3>
+								サブ画面
+								<span class="status">4</span>
+								<span class="close-button ui-icon ui-icon-closethick"></span>
+							</h3>
+							<div>Second content panel</div>
+						</div>
+						<div class="accordion">
+							<h3>
+								画面ID
+								<span class="close-button ui-icon ui-icon-trash"></span>
+							</h3>
+							<div>Third content panel</div>
+						</div>
+						<hr/>
+						<h3>Group</h3>
+						<div class="accordion">
+							<h3>詳細検索</h3>
+							<div>First content panel</div>
+							<h3>サブ画面</h3>
+							<div>Second content panel</div>
+							<h3>画面ID</h3>
+							<div>Third content panel</div>
+						</div>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML</a></li>
+									<li><a href="#tabs-viewmodel">Javascript</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+<pre><![CDATA[<!-- Single Accordion -->
+<div class="accordion">
+	<h3>
+		詳細検索
+		<span class="status">全選択</span>
+		<span class="close-button ui-icon ui-icon-closethick"></span>
+	</h3>
+	<div>First content panel</div>
+</div>
+
+<!-- Group Accordion -->
+<div class="accordion">
+	<h3>詳細検索</h3>
+	<div>First content panel</div>
+	<h3>サブ画面</h3>
+	<div>Second content panel</div>
+</div>]]></pre>
+									
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>Javascript</h2>
+									<p>Using <a target="_blank" href="http://api.jqueryui.com/accordion/"><i class="color">Jquery Accordion Widgets</i></a></p>
+<pre><![CDATA[$(function(){
+	$(".accordion").accordion({
+		active: false,
+		collapsible: true,
+		icons: { "header": "ui-icon-caret-1-s", "activeHeader": "ui-icon-caret-1-n" }
+	});
+})]]></pre>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

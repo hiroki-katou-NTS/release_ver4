@@ -1,0 +1,231 @@
+@import "../compass-for-vs2013-master/compass";
+@import "../compass-for-vs2013-master/compass/_reset.scss";
+@import "../base/_base_def.scss";
+@import "../base/_clearfix.scss";
+
+$button-border-color: #999999;
+$button-boxshadow-base-color: rgba(0,0,0,0.4);
+
+$button-normal-base-color: #fff;
+$button-proceed-base-color: #A4EEB0;
+$button-danger-base-color: #FED3C6;
+$button-disabled-base-color: #888888;
+
+// extend =======================================
+%ext-button-style
+{
+    display: inline-block;
+    background: $button-normal-base-color;
+    border: 1px solid $button-border-color;
+    outline: none;
+    text-align: center;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    position: relative;
+    cursor: pointer;
+    @include mix-propertySetPrefix(user-select, none);
+    @include mix-propertySetPrefix(border-radius, 3px);
+    
+    &:hover {
+        background-color: darken($button-normal-base-color, 5%);
+    }
+
+    &[disabled] {
+        background-color: darken($button-normal-base-color, 15%);
+        cursor: default;
+        color: $button-disabled-base-color;
+    }
+
+    &:active {
+		
+        &[disabled] {
+			
+        }
+    }
+
+    &.proceed {
+        background-color: $button-proceed-base-color;
+
+        &:hover {
+            background-color: darken($button-proceed-base-color, 10%);
+        }
+
+        &[disabled] {
+            background-color: darken(desaturate($button-proceed-base-color, 40%), 3%);
+        }
+    }
+    &.danger {
+        background-color: $button-danger-base-color;
+
+        &:hover {
+            background-color: darken($button-danger-base-color, 5%);
+        }
+
+        &[disabled] {
+            background-color: darken(desaturate($button-danger-base-color, 55%), 3%);
+        }
+    }
+
+    &.with-icon {
+        background-repeat: no-repeat;
+
+        background-position: 3px;
+        background-size: 16px;
+        padding-left: 21px;
+
+        &.small {
+            background-position: 2px 1px;
+            background-size: 14px;
+            padding-left: 17px;
+        }
+
+        &.large {
+            background-position: 4px;
+            background-size: 20px;
+            padding-left: 28px;
+        }
+
+        &.x-large {
+            background-position: 7px 5px;
+            background-size: 30px;
+            padding-left: 38px;
+        }
+    }
+    
+}
+
+button {
+    $_base_top: 0;
+    $_base_height: $bfs * 3;
+    
+    $_base_border_bottom: 1px;
+    $_base_margin_bottom: 0;
+    $_base_active_margin_bottom: 2px;
+    
+    $_base_padding_v: 3px;
+    $_base_padding_h: 7px;
+    $_base_thickness: 2px;
+    $_base_font_size_ratio: 1.3;
+    
+    $_base_border_bottom_width: $_base_thickness + $_base_border_bottom;
+    
+    @extend %ext-button-style;
+    
+    color: $button_font_color;
+    font-size: $bfs * $_base_font_size_ratio;
+    font-family: $font_family;
+    
+    top: $_base_top;
+    height: $_base_height;
+    padding: $_base_padding_v $_base_padding_h;
+    margin-bottom: $_base_border_bottom_width;
+   	box-shadow: 0 $_base_border_bottom_width $button-boxshadow-base-color;
+	overflow: visible;
+	
+    &:focus {
+		border-color: $focused_color;
+		box-shadow: 0 2px 2px 0 $focused_color;
+	  	&.small {
+	    	/* END: SAME ALL SIZES */
+	    }
+	    
+	    &.large {
+    		$_thickness_gap: 1px;
+	    	$_border_bottom_width: $_base_border_bottom_width + $_thickness_gap;
+	 	    box-shadow: 0 $_border_bottom_width #0096f2;
+	    	
+	    	/* END: SAME ALL SIZES */
+	    }
+	    
+	    &.x-large {
+    		$_thickness_gap: 2px;
+	    	$_border_bottom_width: $_base_border_bottom_width + $_thickness_gap;
+	    	
+	  	 	box-shadow: 0 $_border_bottom_width #0096f2;
+	    	/* END: SAME ALL SIZES */
+		}
+	}
+	
+    &:active {
+        top: $_base_border_bottom_width;
+        border-color: $button-boxshadow-base-color;
+		box-shadow: 0 0 #999;
+    }
+    
+    &.small {
+    	$_font_size_gap: -0.1;
+    	$_padding_gap_v: -2px;
+    	$_padding_gap_h: -3px;
+    	$_thickness_gap: 0;
+    	
+    	/* START: SAME ALL SIZES */
+    	$_height: $_base_height + $_padding_gap_v * 2 + $bfs * $_font_size_gap;
+    	$_border_bottom_width: $_base_border_bottom_width + $_thickness_gap;
+    	
+    	font-size: $bfs * ($_base_font_size_ratio + $_font_size_gap);
+    	padding: ($_base_padding_v + $_padding_gap_v) ($_base_padding_h + $_padding_gap_h);
+    	margin-bottom: $_border_bottom_width;
+    	height: $_height;
+    	box-shadow: 0 $_border_bottom_width $button-boxshadow-base-color;
+    	
+    	&:active {
+    		top: $_border_bottom_width;
+    		border-color: $button-boxshadow-base-color;
+			box-shadow: 0 0 $button-boxshadow-base-color;
+    	}
+    	/* END: SAME ALL SIZES */
+    }
+    
+    &.large {
+    	$_font_size_gap: 0.2;
+    	$_padding_gap_v: 1px;
+    	$_padding_gap_h: 3px;
+    	$_thickness_gap: 1px;
+    	
+    	/* START: SAME ALL SIZES */
+    	$_height: $_base_height + $_padding_gap_v * 2 + $bfs * $_font_size_gap;
+    	$_border_bottom_width: $_base_border_bottom_width + $_thickness_gap;
+    	
+    	font-size: $bfs * ($_base_font_size_ratio + $_font_size_gap);
+    	padding: ($_base_padding_v + $_padding_gap_v) ($_base_padding_h + $_padding_gap_h);
+    	margin-bottom: $_border_bottom_width;
+    	height: $_height;
+ 	    box-shadow: 0 $_border_bottom_width $button-boxshadow-base-color;
+    	
+    	&:active {
+    		top: $_border_bottom_width;
+    		border-color: $button-boxshadow-base-color;
+			box-shadow: 0 0 $button-boxshadow-base-color !important;
+    	}
+    	/* END: SAME ALL SIZES */
+    }
+    
+    &.x-large {
+    	$_font_size_gap: 0.9;
+    	$_padding_gap_v: 3px;
+    	$_padding_gap_h: 13px;
+    	$_thickness_gap: 2px;
+    	
+    	/* START: SAME ALL SIZES */
+    	$_height: $_base_height + $_padding_gap_v * 2 + $bfs * $_font_size_gap;
+    	$_border_bottom_width: $_base_border_bottom_width + $_thickness_gap;
+    	
+    	font-size: $bfs * ($_base_font_size_ratio + $_font_size_gap);
+    	padding: ($_base_padding_v + $_padding_gap_v) ($_base_padding_h + $_padding_gap_h);
+    	margin-bottom: $_border_bottom_width;
+    	height: $_height;
+  	 	box-shadow: 0 $_border_bottom_width #999;
+    	
+    	&:active {
+    		top: $_border_bottom_width;
+    		border-color: $button-boxshadow-base-color;
+			box-shadow: 0 0 $button-boxshadow-base-color !important;
+    	}
+    	/* END: SAME ALL SIZES */
+	}
+	
+    &.auto-height{
+    	height: auto;
+    }
+	
+}

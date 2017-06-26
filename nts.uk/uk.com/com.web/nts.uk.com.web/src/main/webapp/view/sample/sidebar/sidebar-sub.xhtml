@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../master/sidebar.xhtml">
+		<ui:define name="sidebar-head">
+			<script>var dialogSize = { width: 900, height: 700 };</script>
+			<com:scriptfile path="start.js" />
+		</ui:define>
+
+		<ui:define name="sidebar">
+			<ul class="navigator">
+				<li><a href="#tabpanel-1" role="tab-navigator" class="active">の間</a></li>
+				<li><a href="#tabpanel-2" role="tab-navigator">操作</a></li>
+				<li><a href="#tabpanel-3" role="tab-navigator">切断</a></li>
+				<li><a href="#tabpanel-4" role="tab-navigator">接続</a></li>
+				<li><a data-bind="click: testSideMenu">Do something</a></li>
+			</ul>
+			<div class="divider"></div>
+			<span>ログインをしなおしてください</span>
+			<button>?</button>
+		</ui:define>
+
+		<ui:define name="sidebar-content">
+			<div id="tabpanel-1" role="tabpanel">
+				<div class="sidebar-content-header">
+					<span class="title">の間</span>
+					<button class="proceed">操作</button>
+					<button>の間</button>
+					<button>操作がなかったため</button>
+					<button>接続を切断しました</button>
+				</div>
+				<div class="contents-area">
+					Content 1<br />
+					<div data-bind="ntsCheckBox: { checked: show }">Show Item
+						"操作"</div>
+					<br />
+					<div data-bind="ntsCheckBox: { checked: enable }">Enable Item
+						"1 &amp; 2"</div>
+				</div>
+			</div>
+			<div id="tabpanel-2" role="tabpanel">
+				<div class="sidebar-content-header">
+					<span class="title">操作</span>
+					<button class="proceed">操作</button>
+					<button>の間</button>
+					<button>操作がなかったため</button>
+					<button>接続を切断しました</button>
+				</div>
+				<div class="contents-area">Content 2</div>
+			</div>
+			<div id="tabpanel-3" role="tabpanel">
+				<div class="sidebar-content-header">
+					<span class="title">切断</span>
+					<button class="proceed">操作</button>
+					<button>の間</button>
+					<button>操作がなかったため</button>
+					<button>接続を切断しました</button>
+				</div>
+				<div class="contents-area">Content 3</div>
+			</div>
+			<div id="tabpanel-4" role="tabpanel">
+				<div class="sidebar-content-header">
+					<span class="title">接続</span>
+					<button class="proceed">操作</button>
+					<button>の間</button>
+					<button>操作がなかったため</button>
+					<button>接続を切断しました</button>
+				</div>
+				<div class="contents-area">Content 4</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

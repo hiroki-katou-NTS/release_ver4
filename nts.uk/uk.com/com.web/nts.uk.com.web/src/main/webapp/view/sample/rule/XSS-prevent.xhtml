@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+			</ui:define>
+			<ui:define name="content">				
+				<div id="contents-area" class="cf">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Prevent XSS attack</h1>
+						<p>XSS (Cross-site scripting) enables attackers to inject client-side scripts into web pages viewed by other users (<a href="https://en.wikipedia.org/wiki/Cross-site_scripting">more info</a>)</p>
+						<article>
+							<h2>Risk with $.fn.html(data)</h2>
+							<p>When you display server data with JQuery <b>html()</b> function, there is a risk attacker will inject a harmful script like below demo:</p>
+							<br/>
+							<input style="width: 450px;" data-bind="ntsTextEditor: { value: htmlString }" />
+							<button data-bind="click: XSSattack">XSS Attack!</button>
+							<button data-bind="click: PreventXSSattack">Prevent XSS Attack!</button>
+							<div id="display-message"></div>
+							<br/>
+							<p>So we will escape html character with lodash <b>_.escape</b> function before showing like this:</p>
+<pre><![CDATA[$("#display-message").html(self.htmlString()); // Not good, can be attacked
+$("#display-message").html(_.escape(self.htmlString())); // Good, can't be attacked]]></pre>
+						</article>
+						<hr/>
+						<article>
+							<h2>Risk in Ignite UI component</h2>
+							<p>When you display server data with Ignite UI component, there is a risk attacker will inject a harmful script. Try to edit grid data with following content:</p>
+							<pre><![CDATA[<script>alert("hacked!")</script>]]></pre>
+							<h3>Normal Grid</h3>
+							<table id="grid"></table>
+							<h3>Prevent XSS Grid</h3>
+							<table id="grid-xss"></table>
+							<br/>
+							<p>To prevent this, when define column for Grid using <b>formatter</b> with <b>_.escapse</b> function</p>
+<pre><![CDATA[var xssColumns = [
+    { headerText: "Product ID", key: "ProductID", dataType: "number" },
+    { headerText: "Product Name", key: "Name", dataType: "string", formatter: _.escape },
+    { headerText: "Product Number", key: "ProductNumber", dataType: "string", formatter: _.escape }
+];]]></pre>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

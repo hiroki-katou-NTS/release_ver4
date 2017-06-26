@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KO jQuery UI Sortable</title>
+<link rel="stylesheet" type="text/css" href="../../../lib/generic/jqueryui/jquery-ui.css" />
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" type="text/css" href="../../../lib/generic/jqueryui/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="../../../lib/generic/igniteui/css/themes/infragistics/infragistics.theme.css" />
+<link rel="stylesheet" type="text/css" href="../../../lib/generic/igniteui/css/structure/infragistics.css" />
+<link rel="stylesheet" type="text/css" href="../../../lib/nittsu/ui/style/stylesheets/base.css" />
+<script src="../../../lib/generic/jquery/jquery-3.1.1.js"></script>
+<script type="text/javascript" src="../../../lib/generic/jqueryui/jquery-ui.min.js"></script>
+<script src="../../../lib/generic/knockoutjs/knockout-3.4.0.js"></script>
+<script type="text/javascript" src="js/knockout-sortable.js"></script>
+</head>
+<body>
+	<div id="main">
+		<h3>Tasks</h3>
+		<div class="container bordered" data-bind="sortable: items">
+			<div class="item">
+				<span data-bind="visible: !$root.isItemSelected($data)"> <a
+					href="#" data-bind="text: label, click: $root.selectItem"></a>
+				</span> 
+			</div>
+		</div>
+		<div id="add-button" >
+			<a href="#" data-bind="click: addItem">Add new Task</a>
+		</div>
+
+	</div>
+	<div id="item-dialog" data-bind="with: itemForEditing">
+	    <form class="form-horizontal">
+	      <div class="control-group">
+	        <label class="control-label" for="itemName">Name</label>
+	        <div class="controls">
+	            <input type="text" id="itemName" data-bind="value: name" />
+	        </div>
+	      </div>
+	      <div class="control-group">
+	        <label class="control-label" for="itemCode">Code</label>
+	        <div class="controls">
+	            <input type="text" id="itemCode" data-bind="value: code" />
+	        </div>
+	      </div>
+	      <div class="control-group">
+	        <div class="controls">
+	          <button class="btn" data-bind="click: $parent.acceptItem">Accept</button>
+	          <button class="btn" data-bind="click: $parent.revertItem">Cancel</button>
+	        </div>
+	      </div>
+	    </form>
+	</div>
+	<div id="results">
+		<h3>Tasks List rank</h3>
+		<ul data-bind="foreach: items">
+			<li data-bind="text: name"></li>
+		</ul>
+	</div>
+
+
+	<script>
+	var Item = function(data) {
+	    this.name = ko.observable();
+	    this.code = ko.observable();
+	    this.label = ko.observable();
+	    //populate our model with the initial data
+	    this.update(data);
+	};
+
+	//can pass fresh data to this function at anytime to apply updates or revert to a prior version
+	Item.prototype.update = function(data) { 
+	    this.name(data.name || "default name");
+	    this.code(data.code || "default code");
+	    this.label(data.name || "+");
+	};
+
+    var ViewModel = function(items) {
+        var self = this;
+        self.items = ko.observableArray([
+            new Item({
+                name: "朝の朝食",
+                code: "朝の朝食"                
+            }),
+            new Item({
+                name: "旅行",
+                code: "旅行"
+            }),
+            new Item({
+                name: "ワーキング",
+                code: "ワーキング"
+            }),
+            new Item({    
+            }),
+            new Item({
+            }),
+            new Item({               
+            })
+        ]);
+
+        self.selectedItem = ko.observable();
+        
+        //make edits to a copy
+        self.itemForEditing = ko.observable();
+        
+        self.selectItem = self.selectItem.bind(this);
+        self.acceptItem = self.acceptItem.bind(this);
+        self.revertItem = self.revertItem.bind(this);
+        self.clearItem = function(data, event) {
+            if (data === self.selectedItem()) {
+                self.selectedItem(null);
+            }
+
+            if (data.name() === "") {
+                self.items.remove(data);
+            }
+        };
+        self.addItem = function(data) {
+            var _name = data.name || "default name";
+            var _code = data.code || "default code";
+            var item = new Item(_name,_code);
+            self.selectedItem(item);
+            self.items.push(item);
+        };
+
+        self.isItemSelected = function(item) {
+            return item === self.selectedItem();
+        };
+    };
+	
+    ko.utils.extend(ViewModel.prototype, {
+        //select an item and make a copy of it for editing
+        selectItem: function(item) {
+            this.selectedItem(item);
+            this.itemForEditing(new Item(ko.toJS(item)));
+            $('#item-dialog').dialog({modal: true});
+        },
+        
+        acceptItem: function(item) {
+            var selected = this.selectedItem(),
+                edited = ko.toJS(this.itemForEditing()); //clean copy of edited
+            
+            //apply updates from the edited item to the selected item
+            selected.update(edited);
+            
+            //clear selected item
+            this.selectedItem(null);
+            this.itemForEditing(null);
+            $('#item-dialog').dialog('close');
+        },
+        
+        //just throw away the edited item and clear the selected observables
+        revertItem: function() {
+            this.selectedItem(null);
+            this.itemForEditing(null);
+            $('#item-dialog').dialog('close');
+        }
+    });
+    
+    ko.applyBindings(new ViewModel());
+</script>
+</body>
+</html>

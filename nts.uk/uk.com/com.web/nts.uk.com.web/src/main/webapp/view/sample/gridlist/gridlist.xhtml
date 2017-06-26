@@ -1,0 +1,360 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />				
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>GridList </h1>
+						<h2>Overview</h2>
+						<br />
+						<button data-bind="click: selectSomeItems">Select some items</button>
+						<button data-bind="click: deselectAll">Deselect all</button>
+						<button data-bind="click: addItem">Add</button>
+						<button data-bind="click: removeItem">Remove</button>
+						<span data-bind="ntsCheckBox: {checked: enable}">Enable</span>
+						<hr />
+						Single selecting mode
+						<table id="single-list" data-bind="ntsGridList: {								
+								height: 350,
+								dataSource: items,
+								primaryKey: 'code',
+								columns: columns2,
+								enable: enable,
+								deleteOptions : {visible : true, deleteField: 'deletable'},
+								multiple: false,
+								features: [{name: 'Switch', options: switchOptions, optionsValue: 'code', optionsText: 'name'}],
+								value: currentCode
+							}"></table>
+						<br/>
+						currentCode: <span data-bind="text: currentCode"></span>
+						<hr />
+						Multiple selectng mode
+						<table id="multi-list" data-bind="ntsGridList: {
+								height: 350,
+								options: items,
+								optionsValue: 'code',
+								columns: columns,
+								enable: enable,
+								multiple: true,
+								value: currentCodeList
+							}"></table>
+						<br />
+						<button data-bind="click: addDeleteButton">Add Delete Button</button>
+						currentCodeList: <span data-bind="text: currentCodeList"></span>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+									<li><a href="#tabs-method">Methods</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+									<h2>HTML</h2>
+									<p>Using Ignite library so you must include following line in <i>&lt;ui:define name="htmlHead"&gt;</i></p>
+<pre><![CDATA[<ui:define name="htmlHead">
+	<com:scriptfile set="IGNITE" />
+</ui:define>]]></pre>
+<pre><![CDATA[<!--SINGLE SELECTION EXAMPLE-->
+<table id="single-list" data-bind="ntsGridList: {								
+	height: 350,
+	dataSource: items,
+	primaryKey: 'code',
+	columns: columns2,
+	deleteOptions : {visible : true, deleteField: 'deletable'},
+	features: [{name: 'Switch', options: switchOptions, optionsValue: 'code', optionsText: 'name'}],
+	multiple: false,
+	value: currentCode
+}"></table>
+<!--MULTI SELECTION EXAMPLE-->
+Multiple selectng mode
+<table id="multi-list" data-bind="ntsGridList: {
+		height: 350,
+		options: items,
+		optionsValue: 'code',
+		columns: columns,
+		multiple: true,
+		value: currentCodeList
+	}"></table>
+<br />
+currentCodeList: <span data-bind="text: currentCodeList"></span>]]></pre>
+									<h2>API</h2>
+									<table>
+										<colgroup>
+											<col width="200px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Binding</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>width</td>
+												<td>
+													<b>Type:</b> null | string | number<br/>
+													<b>Members:</b><br/>
+													<i>null:</i> Will stretch to fit the sum of the columns widths.<br/>
+													<i>number:</i> The widget width can be set in pixels as a number. Example values: 800, 700.<br/>
+													<i>string:</i> The widget width can be set in pixels (px) or percentage (%). Example values: "800px", "800" (defaults to pixels), "100%".
+												</td>
+											</tr>
+											<tr>
+												<td>showNumbering</td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													<i>number:</i> Show index number for each row.
+												</td>
+											</tr>
+											<tr>
+												<td>height</td>
+												<td>
+													<b>Type:</b> null | string | number<br/>
+													<b>Members:</b><br/>
+													<i>null:</i> Will stretch vertically to fit data.<br/>
+													<i>string:</i> The widget height can be set in pixels (px) and percentage (%).<br/>
+													<i>number:</i> The height can be set as a number in pixels.
+												</td>
+											</tr>
+											<tr>
+												<td>options / data.dataSource</td>
+												<td>
+													<b>Type:</b> array&lt;any&gt;<br/>
+													List data to generate GridList
+												</td>
+											</tr>
+											<tr>
+												<td>optionsValue</td>
+												<td>
+													<b>Type:</b> string<br/>
+													Field in data will be set as primaryKey
+												</td>
+											</tr>
+											<tr>
+												<td>columns</td>
+												<td>
+													<b>Type:</b> array&lt;column&gt;<br/>
+													An array of column objects:<br/>
+													<i>headerText:</i> Text for header<br/>
+													<i>prop / key:</i> Property in data array for column<br/>
+													<i>width:</i> Width for column<br/>
+													<b><i>(*): Can use other properties of columns of iggrid</i></b>
+												</td>
+											</tr>
+											<tr>
+												<td>multiple</td>
+												<td>
+													<b>Type:</b> boolean<br/>
+													Enables/disables multiple selection
+												</td>
+											</tr>
+											<tr>
+												<td>value</td>
+												<td>
+													<b>Type:</b> array&lt;any&gt;<br/>
+													List selected value
+												</td>
+											</tr>
+											<tr>
+												<td>deleteOptions</td>
+												<td>
+													<b>Type:</b> Object. <br/>
+													Show delete button for each row.<br/>
+													<b>Options:</b> {<br/> visible : boolean --> is show delete button for each row<br/>
+																	deleteField: string --> field for setting disable/ enable delete button<br/>}<br/>
+													Can use with $grid.ntsGridList("setupDeleteButton", {
+										                   deleteField: deleteField,
+										                   sourceTarget: sources
+										               });<br/>
+										               <b>$grid</b> is jquery object of grid element.<br/>
+										               <b>deleteField</b> field for setting disable/ enable delete button.
+										               <b>sourceTarget</b> observable variable for data sources (For binding after with grid list.). 
+										               This variable can be undefined for only delete in igGrid sources (not delete in model).
+												</td>
+											</tr>
+											<tr>
+												<td>features: []</td>
+												<td>
+													<b>Type:</b> Array. <br/>
+													Setting some feature for gridlist.<br/>
+													<b>Current: only support switch button</b> {<br/> 	name : string --> type of feature (switch >> current)<br/>
+															options: array --> options for bind button of switch<br/>
+															optionsValue: string --> property for determinate value button of switch<br/>
+															optionsText: string --> property for show text of button of switch<br/>}
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+									<h2>TypeScript</h2>
+<pre><![CDATA[class ScreenModel {
+        items: KnockoutObservableArray<ItemModel>;
+        columns: KnockoutObservableArray<NtsGridListColumn>;
+        columns2: KnockoutObservableArray<NtsGridListColumn>;
+        currentCode: KnockoutObservable<any>;
+        currentCodeList: KnockoutObservableArray<any>;
+        count: number = 100;
+        switchOptions: KnockoutObservableArray<any>;
+        
+        constructor() {
+            
+            this.items = ko.observableArray([]);
+            
+            for(let i = 1; i < 100; i++) {
+                this.items.push(new ItemModel('00' + i, '基本給', "description " + i, i%3 === 0, "2010/1/1"));
+            }
+            
+            this.columns = ko.observableArray([
+                { headerText: 'コード', key: 'code', width: 100, hidden: true },
+                { headerText: '名称', key: 'name', width: 150, hidden: true }, 
+                { headerText: '説明', key: 'description', width: 150 }, 
+                { headerText: '説明1', key: 'other1', width: 150},
+                { headerText: '説明2', key: 'other2', width: 150, isDateColumn: true, format: 'YYYY/MM/DD' } 
+            ]); 
+            this.columns2 = ko.observableArray([
+                { headerText: 'コード', key: 'code', width: 100, hidden: true },
+                { headerText: '名称', key: 'name', width: 150 },
+                { headerText: '説明', key: 'description', width: 150 },
+                { headerText: '説明1', key: 'other1', width: 150 }, 
+                { headerText: '説明2', key: 'other2', width: 150 },
+                { headerText: 'Switch', key: 'switchValue', width: 300, controlType: 'switch' }
+            ]);
+            
+            this.switchOptions = ko.observableArray([
+                { code: "1", name: '四捨五入' },
+                { code: "2", name: '切り上げ' },
+                { code: "3", name: '切り捨て' }
+            ]);
+            this.currentCode = ko.observable();
+            this.currentCodeList = ko.observableArray([]);
+            // Fire event.
+            $("#multi-list").on('itemDeleted', (function(e: Event) {
+                alert("Item is deleted in multi grid is " + e["detail"]["target"]);
+            }));
+            
+            $("#single-list").on('itemDeleted', (function(e: Event) {
+                alert("Item is deleted in single grid is " + e["detail"]["target"]);
+            }));   
+        }
+        
+        selectSomeItems() {
+            this.currentCode('0010');
+            this.currentCodeList.removeAll();
+            this.currentCodeList.push('001');
+            this.currentCodeList.push('002');
+        }
+        
+        deselectAll() {
+            this.currentCode(null);
+            this.currentCodeList.removeAll();
+        }
+        
+        addItem() {
+            this.items.push(new ItemModel(this.count.toString(), '基本給', "description " + this.count, true, "other " + this.count));
+            this.count++;
+        }
+        
+        removeItem() {
+            this.items.shift();
+        }
+        
+        addDeleteButton() {
+            $("#multi-list").ntsGridList("setupDeleteButton", {deleteField: "deletable", sourceTarget: this.items});
+        }
+
+    }
+    
+    class ItemModel {
+        code: string;
+        name: string;
+        description: string;
+        other1: string;
+        other2: string;
+        deletable: boolean;
+        switchValue: boolean;
+        constructor(code: string, name: string, description: string, deletable: boolean, other1?: string, other2?: string) {
+            this.code = code;
+            this.name = name;
+            this.description = description;
+            this.other1 = other1;
+            this.other2 = other2 || other1;    
+            this.deletable = deletable;    
+            this.switchValue = ((code % 3) + 1).toString(); 
+        }
+    }]]></pre>
+								</div>
+								<div id="tabs-method" class="cf">
+									<table>
+										<colgroup>
+											<col width="400px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Methods</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>$("#multi-list").ntsGridList('getSelected');</td>
+												<td>
+													Get selected values
+												</td>
+											</tr>
+											<tr>
+												<td>$("#multi-list").ntsGridList('setSelected', ids);</td>
+												<td>
+													<b>ids: array&lt;number&gt;</b> List selected id for select<br/>
+													Set selected values by ids
+												</td>
+											</tr>											
+											<tr>
+												<td>$("#multi-list").ntsGridList('deselectAll');</td>
+												<td>
+													Deselect all values
+												</td>
+											</tr>										
+											<tr>
+												<td>$("#multi-list").ntsGridList("setupDeleteButton", {deleteField: "deletable", sourceTarget: this.items});</td>
+												<td>
+													Add delete button column for multi grid
+												</td>
+											</tr>									
+											<tr>
+												<td>$("#single-list").ntsGridListFeature('switch', 'setValue', rowId, columnKey, selectedValue);</td>
+												<td>
+													set value for switch button in grid
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

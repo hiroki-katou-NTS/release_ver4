@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:stylefile path="main.css" />
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />				
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Textarea </h1>
+							<br/>
+							<hr/>
+							<div id="input-containner">
+								<div id="auto-complete">
+									<select size="5" id="auto-complete-containner" data-bind="visible: showAutoComplete, options: autoComplete, optionsText: 'text', value: autoSelected">
+									</select>
+									<div id="error-content">
+										<div id="error-containner"><span id="error-messege"></span></div>
+									</div>
+								</div>
+								<div id="input-content-area" data-bind="html: divValue"></div>
+								<div id="input-area">
+									<TEXTAREA id="input-text" rows="20" cols="100" data-bind="value: textArea"></TEXTAREA>
+								</div>
+							</div>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

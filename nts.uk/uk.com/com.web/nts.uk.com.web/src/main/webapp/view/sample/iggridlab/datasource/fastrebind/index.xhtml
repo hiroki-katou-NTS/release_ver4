@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<com:stylefile path="../../../catalog/catalog.css" />
+				<com:scriptfile path="../../../catalog/catalog.js" />		
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="/lib/generic/igniteui/js/extensions/infragistics.datasource.knockoutjs.js"  of="/nts.uk.com.js.web"/>
+				<com:scriptfile path="/lib/generic/igniteui/js/extensions/infragistics.ui.grid.knockout-extensions.js"  of="/nts.uk.com.js.web"/>
+				<com:scriptfile path="../../com/testdata.js" />
+				<com:scriptfile path="start.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Data source - Fast Re-bind</h1>
+						
+						<div>
+						
+						<div data-bind="with: first">
+							Name of first row: <span data-bind="text: name"></span>
+						</div>
+						
+						<hr />
+						
+						<button data-bind="click: rebind">rebind</button>
+						
+						<table id="grid"></table>
+						</div>
+						
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

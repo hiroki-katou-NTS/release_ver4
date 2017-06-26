@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile set="IGNITE" />
+				<script type="text/javascript" src="/nts.uk.com.web/lib/generic/igniteui/js/extensions/infragistics.datasource.knockoutjs.js"></script>
+				<script type="text/javascript" src="/nts.uk.com.web/lib/generic/igniteui/js/extensions/infragistics.ui.grid.knockout-extensions.js"></script>
+				<com:scriptfile path="start-ko.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>GridList </h1>
+						<h2>Overview</h2>
+						<h3>Normal Grid</h3>
+						<table id="grid"></table>
+						<hr/>
+						<h3>KO Binding</h3>
+						<div id="error-message" style="color: #FF0000; font-weight: bold;"></div>
+<!-- 						<table id="gridKO" data-bind="igGrid: { -->
+<!-- 							dataSource: dataSourceObs, -->
+<!-- 							primaryKey: 'ID', -->
+<!-- 							width: '100%', -->
+<!-- 							height: '350px', -->
+<!-- 							autoCommit: true,							 -->
+<!-- 							features: igConfig.features, -->
+<!-- 							autoGenerateColumns: false, -->
+<!-- 							columns: igConfig.columns, -->
+<!-- 			                virtualization: true, -->
+<!-- 			                virtualizationMode: 'continuous', -->
+<!-- 					        rendered: function(evt, ui) { -->
+<!-- 					            ko.applyBindingsToDescendants($data, $('#gridKO')[0]); -->
+<!-- 					        } -->
+<!-- 						}"></table> -->
+						<br/><br/>
+						<div data-bind="with: selectedItem">
+							<input data-bind="ntsTextEditor: { value: City }" />
+						</div>					
+						<div data-bind="text: 'Selected: ' + ko.toJSON(selectedItem)"></div>
+						<hr/>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-html">HTML Binding</a></li>
+									<li><a href="#tabs-viewmodel">ViewModel</a></li>
+									<li><a href="#tabs-method">Methods</a></li>
+								</ol>
+								<div id="tabs-html" class="cf">
+	
+								</div>
+								<div id="tabs-viewmodel" class="cf">
+	
+								</div>
+								<div id="tabs-method" class="cf">
+	
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

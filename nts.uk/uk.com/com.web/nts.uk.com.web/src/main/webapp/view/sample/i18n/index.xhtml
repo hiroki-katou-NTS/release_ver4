@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 300, height: 200 };</script>
+
+			<com:stylefile path="../catalog/catalog.css" />
+			<com:scriptfile set="IGNITE" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="../catalog/catalog.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="contents-area">
+				<div id="side-menu" class="cf"></div>
+				<div id="content" class="cf">
+					<h1>Internationalization</h1>
+					<h2>Use in java</h2>
+					<pre>
+					//scope annotation
+					//param can be plain text or resource id
+					public class A{
+						@Inject
+						IInternationalization internationalization;
+						
+						public void greeting(){
+							System.out.println(internationalization.getItemName("code"));
+							System.out.println(internationalization.getItemName("code","param1","param2",......));
+							System.out.println(internationalization.getItemName("code","#resource_id1","#resource_id2",......));
+							System.out.println(internationalization.getItemName("code",new String[]{"a","b"}));
+						}
+					}
+					</pre>
+					<h2>Use in xhtml file</h2>
+					<pre>
+					<![CDATA[
+					//remove space character after #
+					<h:inputText value="# {i18n.getText('QPP015_1')}"></h:inputText>
+					<div># {i18n.getText('KMF004_106')}</div>      
+					                   
+					//get text with params
+					<h:inputText value="# {i18n.getText('QPP015_1',["param1","param2",.....])}"></h:inputText>
+					<h:inputText value="# {i18n.getText('QPP015_1',["#reourceId_1","plain text",.....])}"></h:inputText>
+					<div># {i18n.getText('KMF004_106',['a','b'])}</div>   
+					]]>
+					</pre>
+					<h2>Use in js</h2>
+					<pre>
+						<![CDATA[
+							nts.uk.resource.getText("code")
+							//get text with params
+							nts.uk.resource.getText("code",[param1,param2])
+							
+							
+							nts.uk.resource.getMessage("message id",[ param1, param2,...,paramX]);
+											
+							//because Enum is considered as text so we use getText to get enum'name 
+							nts.uk.resource.getText("Enum_Color_RED")
+						]]>
+					</pre>
+
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

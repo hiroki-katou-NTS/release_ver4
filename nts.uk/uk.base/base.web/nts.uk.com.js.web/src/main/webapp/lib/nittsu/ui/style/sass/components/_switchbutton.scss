@@ -1,0 +1,60 @@
+@import "../compass-for-vs2013-master/compass";
+@import "../compass-for-vs2013-master/compass/_reset.scss";
+@import "../base/_base_def.scss";
+@import "../base/_clearfix.scss";
+
+button.nts-switch-button {
+	$sbfs: $bfs * 1.4;
+    
+    $_base_border_bottom: 1px;
+    
+    $_base_padding_v: 2px;
+    $_base_padding_h: 7px;
+    $_base_thickness: 2px;    
+    $_base_border_bottom_width: $_base_thickness + $_base_border_bottom;
+    
+   	$_border_bottom_width: $_base_border_bottom_width;
+   	
+   	font-size: $sbfs;
+   	padding: $_base_padding_v $_base_padding_h;
+   	/* margin-bottom: $_border_bottom_width; */
+  	box-shadow: 0 0 $button-boxshadow-base-color;
+   	margin-left: 0px;
+   	margin-right: 0px;
+   	margin-bottom: 0px;
+   	&:active {
+   		top: 0;
+   		box-shadow: 0 0 $button-boxshadow-base-color;
+   	}
+   	
+   	&.selected {
+   		box-shadow: 0 0 $button-boxshadow-base-color;
+       	
+       	top: 0;
+       	
+        color: #fff;
+        background-color: $activated_color;
+
+        &:hover {
+            color: #fff;
+            background-color: $activated_color;
+        }
+   	}
+   	
+   	&[disabled] {
+   		background-color: darken($button-normal-base-color, 15%);
+   		&:hover {
+   			background-color: darken($button-normal-base-color, 15%);
+   		}
+   	}
+}
+
+.switchButton-wrapper{
+	display: inline-block;  
+	padding: 0;
+	
+	&:focus {
+	  	box-shadow: 0 0 1px 1px $focused_color;
+	  	border-radius: 2px;
+	}
+}

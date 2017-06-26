@@ -1,0 +1,251 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+            </ui:define>
+            
+            <ui:define name="content">
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Context Menu</h1>
+						<h2>Overview</h2>
+						<button data-bind="click: addItem">Add Item</button>
+						<button data-bind="click: removeItem">Remove Item</button>
+						<div data-bind="ntsCheckBox: { checked: enable }">Enable Menu</div>
+						<div data-bind="ntsCheckBox: { checked: enableCut }">Enable Cut/Copy</div>
+						<div data-bind="ntsCheckBox: { checked: visibleCopy }">Visible Copy</div>
+						<br/><br/>
+						<h3>Right click to show ContextMenu</h3>
+						<com:ko-foreach bind="dataList">
+							<button class="context-menu" data-bind="text: $data.name, attr: {'data-test': $data.id}"></button>
+						</com:ko-foreach>
+						<br/><br/>
+						<button class="context-menu2" data-test="メニュー 2">メニュー</button>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-class">Class</a></li>
+									<li><a href="#tabs-method">Methods</a></li>
+								</ol>
+								<div id="tabs-class" class="cf">
+									<article>
+										<h2>Information</h2>
+										<b>Module:</b> nts.uk.ui.contextmenu<br/>
+										<b>File:</b> /lib/nittsu/ui/ui.ts<br/>
+									</article>
+									<br/>
+									<article>
+										<h2>ContextMenu Class</h2>
+										<table>
+											<colgroup>
+												<col width="200px" />
+											</colgroup>
+											<thead>
+												<tr>
+													<th><h4>Properties</h4></th>
+													<th><h4>Description</h4></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>selector</td>
+													<td>
+														<b>Type:</b> string<br/>
+														Jquery selector for associate elements
+													</td>
+												</tr>
+												<tr>
+													<td>items</td>
+													<td>
+														<b>type:</b> Array&lt;<a class="color" href="#ContextMenuItem">ContextMenuItem</a>&gt;<br/>
+														List menu item
+													</td>
+												</tr>
+												<tr>
+													<td>enable<br/><i>(optional)</i></td>
+													<td>
+														<b>Type:</b> boolean<br/>
+														<b>Default:</b> true<br/>
+														Set enable right click show ContextMenu
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</article>
+									<article id="ContextMenuItem">
+										<h2>ContextMenuItem Class</h2>
+										<table>
+											<colgroup>
+												<col width="200px" />
+											</colgroup>
+											<thead>
+												<tr>
+													<th><h4>Properties</h4></th>
+													<th><h4>Description</h4></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>key</td>
+													<td>
+														<b>Type:</b> string<br/>
+														Unique key for item. If key is "divider" it will auto create a divider
+													</td>
+												</tr>
+												<tr>
+													<td>text<br/><i>(optional)</i></td>
+													<td>
+														<b>Type:</b> string<br/>
+														<b>Default:</b> ""<br/>
+														Display text for item
+													</td>
+												</tr>
+												<tr>
+													<td>handler<br/><i>(optional)</i></td>
+													<td>
+														<b>Type:</b> (ui: any) => void<br/>
+														<b>Default:</b> $.noop<br/>
+														Function when user click item. <b>"ui"</b> is the current target trigger show ContextMenu
+													</td>
+												</tr>
+												<tr>
+													<td>icon<br/><i>(optional)</i></td>
+													<td>
+														<b>Type:</b> string<br/>
+														<b>Default:</b> ""<br/>
+														Icon classes for icon. Can be <a href="http://api.jqueryui.com/theming/icons/" class="color">JqueryUI Icon</a> or <a href="/nts.uk.com.web/view/sample/commoncss/helper-classes.xhtml#icon" class="color">ntsIcon</a>
+													</td>
+												</tr>
+												<tr>
+													<td>visible<br/><i>(optional)</i></td>
+													<td>
+														<b>Type:</b> boolean<br/>
+														<b>Default:</b> true<br/>
+														Set visible/hidden for item
+													</td>
+												</tr>
+												<tr>
+													<td>enable<br/><i>(optional)</i></td>
+													<td>
+														<b>Type:</b> boolean<br/>
+														<b>Default:</b> true<br/>
+														Set enable/disable for item
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</article>
+									<article>
+										<h2>Demo</h2>
+<pre><![CDATA[menu1 = new nts.uk.ui.contextmenu.ContextMenu(".context-menu", [
+    new nts.uk.ui.contextmenu.ContextMenuItem("cut", "Cut", (ui) => { alert("Cut: " + $(ui).data("test")) }, "ui-icon ui-icon-scissors", true, true),
+    new nts.uk.ui.contextmenu.ContextMenuItem("copy", "Copy", (ui) => {alert("Copy");}, "ui-icon ui-icon-copy"),
+    new nts.uk.ui.contextmenu.ContextMenuItem("paste", "Paste", (ui) => {alert("Paste");}, "ui-icon ui-icon-clipboard"),
+    new nts.uk.ui.contextmenu.ContextMenuItem("divider"),
+    new nts.uk.ui.contextmenu.ContextMenuItem("delete", "Delete", (ui) => {alert("Delete");}, "ui-icon ui-icon-trash")
+]);]]></pre>
+									</article>
+								</div>
+								<div id="tabs-method" class="cf">
+									<article>
+										<h2>Methods</h2>
+										<table>
+											<colgroup>
+												<col width="400px" />
+											</colgroup>
+											<thead>
+												<tr>
+													<th><h4>Methods</h4></th>
+													<th><h4>Description</h4></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>init()</td>
+													<td>
+														Init ContextMenu. Auto call when created
+													</td>
+												</tr>
+												<tr>
+													<td>destroy()</td>
+													<td>
+														Destroy ContextMenu
+													</td>
+												</tr>
+												<tr>
+													<td>refresh()</td>
+													<td>
+														Refresh ContextMenu with new data
+													</td>
+												</tr>
+												<tr>
+													<td>getItem(item: ContextMenuItem)</td>
+													<td>
+														<b>Return:</b> ContextMenuItem object<br/>
+														<b>Arguments:</b><br/>
+														<i>item: ContextMenuItem</i> Instance of ContextMenuItem class<br/>
+														Add an item to menu list items
+													</td>
+												</tr>
+												<tr>
+													<td>removeItem(target: any)</td>
+													<td>
+														<b>Arguments:</b><br/>
+														<i>target: any</i> Can be item key or index<br/>
+														Remove an item with given "key" or index
+													</td>
+												</tr>
+												<tr>
+													<td>setEnable(enable: boolean)</td>
+													<td>
+														<b>Arguments:</b><br/>
+														<i>enable: boolean</i> Enable value<br/>
+														Enable/Disable ContextMenu showing
+													</td>
+												</tr>
+												<tr>
+													<td>setEnableItem(enable: boolean, target: any)</td>
+													<td>
+														<b>Arguments:</b><br/>
+														<i>enable: boolean</i> Enable value<br/>
+														<i>target: any</i> Can be item key or index<br/>
+														Enable/Disable item with given "key" or index
+													</td>
+												</tr>
+												<tr>
+													<td>setVisibleItem(visible: boolean, target: any)</td>
+													<td>
+														<b>Arguments:</b><br/>
+														<i>visible: boolean</i> Visible value<br/>
+														<i>target: any</i> Can be item key or index<br/>
+														Show/hidden item with given "key" or index
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</article>
+								</div>
+							</div>
+						</article>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>

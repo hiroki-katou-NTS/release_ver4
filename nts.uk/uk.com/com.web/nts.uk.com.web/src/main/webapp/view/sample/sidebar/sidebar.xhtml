@@ -1,0 +1,235 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+
+	<ui:composition template="../../../master/base.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 300, height: 200 };</script>
+			<com:stylefile path="../catalog/catalog.css" />
+			<com:scriptfile path="start.js" />
+			<com:scriptfile path="../catalog/catalog.js" />
+			<script>
+					function openSubWindow (){
+						nts.uk.ui.windows.sub.modeless("/view/sample/sidebar/sidebar-sub.xhtml");
+					}
+					function openNewTab (){
+						window.open("/nts.uk.com.web/view/sample/sidebar/sidebar-sub.xhtml", "_blank").focus();
+					}
+				</script>
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area"></div>
+			<div id="contents-area">
+				<div id="side-menu" class="cf"></div>
+				<div id="content" class="cf">
+					<h1>Sidebar</h1>
+					<article class="cf">
+						<button data-bind="click: openSubWindow">Dialog with
+							Sidebar</button>
+						<button data-bind="click: openNewTab">Page with Sidebar</button>
+					</article>
+					<article class="cf">
+						<div class="tabs">
+							<ol>
+								<li><a href="#tabs-html">HTML Setup</a></li>
+								<li><a href="#tabs-methods">API</a></li>
+							</ol>
+							<div id="tabs-html" class="cf">
+								<h2>HTML</h2>
+								<pre><![CDATA[<ui:define name="sidebar">
+	<ul class="navigator">
+		<li><a href="#tabpanel-1" role="tab-navigator" class="active" >の間</a></li>
+		<li><a href="#tabpanel-2" role="tab-navigator">操作</a></li>
+		<li><a data-bind="click: testSideMenu">Do something</a></li>
+	</ul>
+	<div class="divider"></div>
+	<span>ログインをしなおしてください</span>
+	<button>?</button>
+</ui:define>
+
+<ui:define name="sidebar-content">
+	<div id="tabpanel-1" role="tabpanel">
+		<div class="sidebar-content-header">
+			<span class="title">の間</span>
+			<button class="proceed">操作</button>
+			<button>の間</button>
+			<button>操作がなかったため</button>
+			<button>接続を切断しました</button>
+		</div>
+		<div class="contents-area">
+			Content 1<br />
+			<div data-bind="ntsCheckBox: { checked: show }">Show Item
+				"操作"</div>
+			<br />
+			<div data-bind="ntsCheckBox: { checked: enable }">Enable Item
+				"1 &amp; 2"</div>
+		</div>
+	</div>
+	<div id="tabpanel-2" role="tabpanel">
+		<div class="sidebar-content-header">
+			<span class="title">操作</span>
+			<button class="proceed">操作</button>
+			<button>の間</button>
+			<button>操作がなかったため</button>
+			<button>接続を切断しました</button>
+		</div>
+		<div class="contents-area">Content 2</div>
+	</div>
+</ui:define>]]>
+								</pre>
+								<article>
+									<h3>Sidebar Area</h3>
+									<p>Put Tabpanel navigator here. Navigator must follow below
+										layout</p>
+									<pre><![CDATA[<ui:define name="sidebar">
+	<ul class="navigator">
+		<li><a href="#tabpanel-1" class="active">の間</a></li>
+		<li><a href="#tabpanel-2">操作</a></li>
+	</ul>
+	<div class="divider"></div>
+	<span>ログインをしなおしてください</span>
+	<button>?</button>
+</ui:define>]]></pre>
+									<p>
+										Navigator link will auto find Tabpanel with specify ID to
+										show. <b>divider</b> is a helper class for quickly create a
+										seperator line.
+									</p>
+								</article>
+								<article>
+									<h3>Content Area</h3>
+									<p>
+										Put Tabpanel here. Tabpanel must have <b>role="tabpanel"</b>
+										and Id match with <b>Navigator's</b> link.
+									</p>
+									<pre><![CDATA[<ui:define name="sidebar-content">
+	<div id="tabpanel-1" role="tabpanel">
+		<div class="sidebar-content-header">
+   			<span class="title">の間</span>
+			<button class="proceed">操作</button>
+			<button>の間</button>
+			<button>操作がなかったため</button>
+			<button>接続を切断しました</button>
+		</div>
+		<div class="contents-area">
+			Content 1
+   		</div>
+	</div>
+  	<div id="tabpanel-2" role="tabpanel">
+		<div class="sidebar-content-header">
+   			<span class="title">操作</span>
+			<button class="proceed">操作</button>
+			<button>の間</button>
+			<button>操作がなかったため</button>
+			<button>接続を切断しました</button>
+		</div>
+		<div class="contents-area">
+			Content 2
+   		</div>
+  	</div>
+</ui:define>]]></pre>
+								</article>
+							</div>
+							<div id="tabs-methods" class="cf">
+								<article>
+									<h2>Information</h2>
+									<b>Module:</b> nts.uk.ui.jqueryExtentions.ntsSideBar<br /> <b>File:</b>
+									/lib/nittsu/ui/jquery-ext.ts<br />
+								</article>
+								<article>
+									<h2>Jquery Extensions</h2>
+									<table class="table">
+										<colgroup>
+											<col width="400px" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th><h4>Name</h4></th>
+												<th><h4>Description</h4></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>$("#sidebar").ntsSideBar()<br/>
+												$("#sidebar").ntsSideBar("init")
+												</td>
+												<td>
+													<b>Return:</b> <i>void</i><br/>
+													Init SideBar. Auto call in sidebar master page
+												</td>
+											</tr>
+											<tr>
+												<td>$("#sidebar").ntsSideBar("active", index)</td>
+												<td>
+													<b>Agruments:</b><br/>
+													<i>index: number</i> index of sidebar (zero base count)<br/>
+													<b>Return:</b> <i>void</i><br/>
+													Active sidebar tab with given index
+												</td>
+											</tr>
+											<tr>
+												<td>$("#sidebar").ntsSideBar("enable", index)</td>
+												<td>
+													<b>Agruments:</b><br/>
+													<i>index: number</i> index of sidebar (zero base count)<br/>
+													<b>Return:</b> <i>void</i><br/>
+													Enable sidebar tab with given index
+												</td>
+											</tr>
+											<tr>
+												<td>$("#sidebar").ntsSideBar("disable", index)</td>
+												<td>
+													<b>Agruments:</b><br/>
+													<i>index: number</i> index of sidebar (zero base count)<br/>
+													<b>Return:</b> <i>void</i><br/>
+													Disable sidebar tab with given index
+												</td>
+											</tr>
+											<tr>
+												<td>$("#sidebar").ntsSideBar("show", index)</td>
+												<td>
+													<b>Agruments:</b><br/>
+													<i>index: number</i> index of sidebar (zero base count)<br/>
+													<b>Return:</b> <i>void</i><br/>
+													Show sidebar tab with given index
+												</td>
+											</tr>
+											<tr>
+												<td>$("#sidebar").ntsSideBar("hide", index: number)</td>
+												<td>
+													<b>Agruments:</b><br/>
+													<i>index: number</i> index of sidebar (zero base count)<br/>
+													<b>Return:</b> <i>void</i><br/>
+													Hide sidebar tab with given index. If hidden current tab will auto active first tab item
+												</td>
+											</tr>
+											<tr>
+												<td>$("#sidebar").ntsSideBar("getCurrent")</td>
+												<td>
+													<b>Return:</b> <i>number</i> Index of current active tab<br />
+													Get current active tab
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</article>
+							</div>
+						</div>
+					</article>
+					<div class="footer cf">
+						<button class="previous large">Previous</button>
+						<button class="next proceed large">Next</button>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

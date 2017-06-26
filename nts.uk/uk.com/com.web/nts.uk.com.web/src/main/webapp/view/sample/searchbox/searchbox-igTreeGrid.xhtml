@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:com="http://xmlns.jcp.org/jsf/component"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<body>
+		
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<script>var dialogSize = { width: 300, height: 200 };</script>
+				
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:scriptfile set="IGNITE" />
+				<com:scriptfile path="igTreeGrid.js" />
+				<com:scriptfile path="../catalog/catalog.js" />				
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>SearchBox Sample</h1>
+						Version: with igTreeGrid					
+						<h2>Overview</h2>
+						<div class="cf">
+							<div>	
+								<h3>Multi Selection</h3>																				
+								<div style="width: 700px" data-bind="ntsSearchBox: {targetKey: 'code', mode: 'igTree', comId: 'treegrid', items: dataSource, selected: selectedValue, selectedKey: 'code', fields: ['name', 'code'], childField: 'childs'}" />
+								<br/>							
+								<table id="treegrid"></table>
+								<br />
+							</div>	
+
+							<div>
+								selectedValue: <span data-bind="text: selectedValue"></span>
+								<br/><br/>							
+							</div>			
+						</div>					
+					</div>
+		   		</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

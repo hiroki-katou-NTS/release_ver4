@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:com="http://xmlns.jcp.org/jsf/component"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <body>
+		
+        <ui:composition template="../../../master/base.xhtml">
+            <ui:define name="htmlHead">
+            	<script>var dialogSize = { width: 300, height: 200 };</script>
+				<com:stylefile path="../catalog/catalog.css" />
+				<com:stylefile path="vertical-align.css" />
+				<com:scriptfile path="start.js" />
+				<com:scriptfile path="../catalog/catalog.js" />
+				
+            </ui:define>
+            
+            <ui:define name="content">
+				<div id="functions-area"></div>
+            	<div id="contents-area">
+					<div id="side-menu" class="cf"></div>
+					<div id="content" class="cf">
+						<h1>Vertical Align</h1>
+						<h2>Overview</h2>
+						<p>Vertical-align is <b>not easy</b> and have various ways to do it. Let take a look at some common ways:</p>
+						<h2>Demo</h2>
+						<article class="cf">
+							<div class="tabs">
+								<ol>
+									<li><a href="#tabs-simple">Simple Example</a></li>
+									<li><a href="#tabs-complex">Complex Example</a></li>
+								</ol>
+								<div id="tabs-simple" class="cf">
+									<div class="cf">
+										<h3>Line-height:</h3>
+										<div class="line-height fixed-height outer">
+											Hello! This is a demo for vertical-align
+											<button>Button</button> or
+											<span data-bind="ntsCheckBox: { checked: true }">手入力項目のみ移動</span> or
+											"Can't have ntsFormLabel" or
+											<input data-bind="ntsTextEditor: {value: ko.observable('text editor')}" />
+										</div>
+									</div>
+									<br/>
+									<div class="cf">
+										<h3>Table:</h3>
+										<div class="table fixed-height outer">
+											<div class="cell valign-center">
+												<span>Hello! This is a demo for vertical-align</span>
+												<button>Button</button> or
+												<span data-bind="ntsCheckBox: { checked: true }">手入力項目のみ移動</span> or
+												<div data-bind="ntsFormLabel: {}">レイアウトコード</div> or
+												<input data-bind="ntsTextEditor: {value: ko.observable('text editor')}" />
+											</div>
+										</div>
+									</div>
+									<br/>
+									<div class="cf">
+										<h3>Pseudo:</h3>
+										<div class="pseudo fixed-height outer">
+											Hello! This is a demo for vertical-align
+											<button>Button</button> or
+											<span data-bind="ntsCheckBox: { checked: true }">手入力項目のみ移動</span> or
+											<div data-bind="ntsFormLabel: {}">レイアウトコード</div> or
+											<input data-bind="ntsTextEditor: {value: ko.observable('text editor')}" />
+										</div>
+									</div>
+									<br/>
+									<div class="cf">
+										<h3>Flexbox:</h3>
+										<div class="flex valign-center fixed-height outer">
+											Hello! This is a demo for vertical-align
+											<button>Button</button> or
+											<span data-bind="ntsCheckBox: { checked: true }">手入力項目のみ移動</span> or
+											<div data-bind="ntsFormLabel: {}">レイアウトコード</div> or
+											<input data-bind="ntsTextEditor: {value: ko.observable('text editor')}" />
+										</div>
+									</div>
+								</div>
+								<div id="tabs-complex" class="cf">
+									<button data-bind="click: resize">Resize</button>
+									<br/>
+									<div class="cf">
+										<h3>Line-height:</h3>
+										<div class="line-height fixed-height outer">
+											<div class="inner pull-left">
+												Hello! This is a demo for vertical-align
+												<button>Button</button> or
+												<span data-bind="ntsCheckBox: { checked: true }">手入力項目のみ移動</span> or
+												"Can't have ntsFormLabel" or
+											</div>
+											<div class="inner pull-right">
+												<input data-bind="ntsTextEditor: {value: ko.observable('text editor')}" />
+											</div>
+										</div>
+									</div>
+									<br/>
+									<div class="cf">
+										<h3>Table:</h3>
+										<div class="table fixed-height outer" style="height: 150px;">
+											<div class="cell valign-center">
+												<div class="inner pull-left">
+													Hello! This is a demo for vertical-align
+													<button>Button</button> or
+													<span data-bind="ntsCheckBox: { checked: true }">手入力項目のみ移動</span> or
+													<div data-bind="ntsFormLabel: {}">レイアウトコード</div> or
+												</div>
+											</div>
+											<div class="cell valign-center">
+												<div class="inner pull-right">
+													<input data-bind="ntsTextEditor: {value: ko.observable('text editor')}" />
+												</div>
+											</div>
+										</div>
+									</div>
+									<br/>
+									<div class="cf">
+										<h3>Pseudo:</h3>
+										<div class="outer cf">
+											<div class="pseudo inner pull-left" style="height: 150px;">
+												Hello! This is a demo for vertical-align
+												<button>Button</button> or
+												<span data-bind="ntsCheckBox: { checked: true }">手入力項目のみ移動</span> or
+												<div data-bind="ntsFormLabel: {}">レイアウトコード</div> or
+											</div>
+											<div class="pseudo inner pull-right" style="height: 150px;">
+												<input data-bind="ntsTextEditor: {value: ko.observable('text editor')}" />
+											</div>
+										</div>
+									</div>
+									<br/>
+									<div class="cf">
+										<h3>Flexbox:</h3>
+										<div class="flex valign-center fixed-height outer" style="height: 150px;">
+											<div class="inner">
+												Hello! This is a demo for vertical-align
+												<button>Button</button> or
+												<span data-bind="ntsCheckBox: { checked: true }">手入力項目のみ移動</span> or
+												<div data-bind="ntsFormLabel: {}">レイアウトコード</div> or
+											</div>
+											<div class="inner" style="margin-left:auto;">
+												<input data-bind="ntsTextEditor: {value: ko.observable('text editor')}" />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</article>
+						<ul>
+							<li><b>Line-height:</b> useful if there is only text in 1-line</li>
+							<li><b>Table:</b> nice but element is not "block" anymore so maybe cause an unexpected result. And we need an extra wrapper</li>
+							<li><b>Pseudo:</b> useful when align a group elements. Must set heigth if elements in other group</li>
+							<li><b>Flexbox:</b> the most powerful but require you some learning</li>
+						</ul>
+						<h2>Usage</h2>
+						<h3>Table</h3>
+						User table for safely with almost browser
+<pre><![CDATA[<div class="table">
+	<div class="cell valign-center">
+		Elements inside will vertical-align center
+	</div>
+	<div class="cell valign-top">
+		Elements inside will vertical-align top
+	</div>
+	<div class="cell valign-bottom">
+		Elements inside will vertical-align top
+	</div>
+</div>]]></pre>
+						<h3>Flexbox</h3>
+						We will use flexbox for maximum flexible (<a target="_blank" href="https://css-tricks.com/snippets/css/a-guide-to-flexbox/">learn more</a>). Just add classes <b class="color">"flex valign-center"</b> to your container
+<pre><![CDATA[<div class="flex valign-center">
+	Elements outside wrap behave as flex-item. It won't have space between 
+</div>]]></pre>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+            		</div>
+           		</div>
+            </ui:define>
+    	</ui:composition>
+   	</body>
+</html>
