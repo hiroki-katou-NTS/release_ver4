@@ -39,6 +39,8 @@ public class CalcAttachTimeDto {
 	}
 	
 	public TimeWithCalculation createTimeWithCalc() {
-		return TimeWithCalculation.sameTime(time == null ? null : new AttendanceTime(time));
+		return TimeWithCalculation.createTimeWithCalculation(
+										time == null ? null : new AttendanceTime(time), 
+										calcTime == null ? null : new AttendanceTime(calcTime));
 	}
 }

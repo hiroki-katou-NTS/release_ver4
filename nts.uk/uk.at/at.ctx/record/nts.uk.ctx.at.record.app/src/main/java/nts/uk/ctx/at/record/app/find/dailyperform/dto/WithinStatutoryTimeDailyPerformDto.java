@@ -64,8 +64,8 @@ public class WithinStatutoryTimeDailyPerformDto {
 				toAttendanceTime(workTime),
 				toAttendanceTime(workTimeIncludeVacationTime), 
 				toAttendanceTime(withinPrescribedPremiumTime),
-				withinStatutoryMidNightTime == null ? null : new WithinStatutoryMidNightTime(
-					TimeWithCalculation.sameTime(toAttendanceTime(withinStatutoryMidNightTime.getTime()))),
+				withinStatutoryMidNightTime == null ? null 
+						: new WithinStatutoryMidNightTime(withinStatutoryMidNightTime.createTimeWithCalc()),
 				toAttendanceTime(vacationAddTime));
 	}
 	

@@ -55,10 +55,6 @@ public class HolidayMidnightWorkDto {
 	}
 
 	public HolidayWorkMidNightTime newMidNightTime(CalcAttachTimeDto time, StaturoryAtrOfHolidayWork attr) {
-		return new HolidayWorkMidNightTime(TimeWithCalculation.sameTime(toAttendanceTime(time.getTime())), attr);
-	}
-	
-	private AttendanceTime toAttendanceTime(Integer time) {
-		return time == null ? null : new AttendanceTime(time);
+		return new HolidayWorkMidNightTime(time.createTimeWithCalc(), attr);
 	}
 }

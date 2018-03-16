@@ -51,7 +51,7 @@ public class ExcessOfStatutoryTimeDailyPerformDto {
 
 	private ExcessOfStatutoryMidNightTime toExcessOfStatutory() {
 		return excessOfStatutoryMidNightTime == null ? null : new ExcessOfStatutoryMidNightTime(
-				TimeWithCalculation.sameTime(toAttendanceTime(excessOfStatutoryMidNightTime.getTime().getTime())),
+				excessOfStatutoryMidNightTime.getTime().createTimeWithCalc(),
 				toAttendanceTime(excessOfStatutoryMidNightTime.getBeforeApplicationTime()));
 	}
 	

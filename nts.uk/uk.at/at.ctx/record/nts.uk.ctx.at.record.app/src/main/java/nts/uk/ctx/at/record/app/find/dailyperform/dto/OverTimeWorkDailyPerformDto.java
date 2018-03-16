@@ -113,7 +113,7 @@ public class OverTimeWorkDailyPerformDto {
 	}
 
 	private TimeWithCalculation createTimeWithCalc(CalcAttachTimeDto c) {
-		return c == null ? null : TimeWithCalculation.sameTime(toAttendanceTime(c.getTime()));
+		return c == null ? null : c.createTimeWithCalc();
 	}
 
 	private AttendanceTime toAttendanceTime(Integer time) {
