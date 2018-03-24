@@ -56,7 +56,7 @@ public class KshstGrantHdTbl extends UkJpaEntity {
 	}
 
 	public KshstGrantHdTbl(KshstGrantHdTblPK kshstGrantHdTblPK, BigDecimal grantDays, 
-							int limitTimeHd, int limitDayYear) {
+			Integer limitTimeHd, Integer limitDayYear) {
 		super();
 		this.kshstGrantHdTblPK = kshstGrantHdTblPK;
 		this.grantDay = grantDays;

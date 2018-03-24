@@ -1,11 +1,15 @@
 @CHARSET "UTF-8";
 
-thead {
-	background-color: #c7f391;
+.ui-widget-header {
+	background: #c7f391 !important;
 }
 
-tr {
+.top-tbl tr {
 	height: 10px;
+}
+
+.nts-fixed-table {
+	padding-top: 25px;
 }
 
 #contents-area {

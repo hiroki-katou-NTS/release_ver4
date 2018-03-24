@@ -235,7 +235,7 @@ module nts.uk.at.view.kmf003.b.viewmodel {
                 }
                 
                 _.forEach(grantHolidayTblList, function(item) {
-                    if(item.month != null && item.year != null && (item.grantDays == null || item.grantDays == "")) {
+                    if(checkErr && item.month != null && item.year != null && (item.grantDays == null || item.grantDays == "")) {
                         checkErr = false;
                         nts.uk.ui.dialog.alert({ messageId: "Msg_270" }).then(() => {
                             $('#b2_1').focus();
@@ -332,6 +332,7 @@ module nts.uk.at.view.kmf003.b.viewmodel {
             if(checkErr){
                 service.addYearHolidayGrant(grantHolidayTblList).done(function(){
                     nts.uk.ui.windows.setShared("KMF003_HAVE_DATA", true);
+                    self.checkDataExisted(true);
                     nts.uk.ui.dialog.info({ messageId: "Msg_15" });
                 }).fail(function(error){
                     nts.uk.ui.dialog.alertError({ messageId: error.messageId }).then(() => {

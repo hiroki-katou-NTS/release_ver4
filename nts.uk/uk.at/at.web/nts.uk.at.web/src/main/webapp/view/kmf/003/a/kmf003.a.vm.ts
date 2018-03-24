@@ -1205,13 +1205,13 @@ module nts.uk.at.view.kmf003.a.viewmodel {
             var result = value - 1;
             
             if(position == 2) {
-                self.limitedValue02(result <= 0 ? "" : (result.toString() === "NaN" ? "" : result.toString()));
+                self.limitedValue02(result < 0 ? "" : (result.toString() === "NaN" ? "" : result.toString()));
             } else if (position == 3) {
-                self.limitedValue03(result <= 0 ? "" : (result.toString() === "NaN" ? "" : result.toString()));
+                self.limitedValue03(result < 0 ? "" : (result.toString() === "NaN" ? "" : result.toString()));
             } else if (position == 4) {
-                self.limitedValue04(result <= 0 ? "" : (result.toString() === "NaN" ? "" : result.toString()));
+                self.limitedValue04(result < 0 ? "" : (result.toString() === "NaN" ? "" : result.toString()));
             } else if (position == 5) {
-                self.limitedValue05(result <= 0 ? "" : (result.toString() === "NaN" ? "" : result.toString()));
+                self.limitedValue05(result < 0 ? "" : (result.toString() === "NaN" ? "" : result.toString()));
             }
         }
         
