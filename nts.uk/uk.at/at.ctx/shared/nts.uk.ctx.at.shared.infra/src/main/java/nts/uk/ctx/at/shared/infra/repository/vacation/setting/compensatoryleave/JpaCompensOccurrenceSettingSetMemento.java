@@ -58,7 +58,7 @@ public class JpaCompensOccurrenceSettingSetMemento implements CompensatoryOccurr
     @Override
     public void setTransferSetting(SubHolTransferSet transferSetting) {
         JpaTransferSettingSetMemento memento = new JpaTransferSettingSetMemento(this.entity);
-//        transferSetting.saveToMemento(memento);
+        transferSetting.saveToMemento(memento);
     }
 
 }
