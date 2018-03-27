@@ -55,10 +55,13 @@ module cmm045.a.viewmodel {
             let urlParam: number = url.split("=")[1];
             let characterData = null;
             let appCHeck = null;
+            if (urlParam !== undefined) {
+                character.save('AppListExtractCondition', null);
+            }
             character.restore("AppListExtractCondition").done((obj) => {
-                console.log(obj);
+//                console.log(obj);
                 characterData = obj;
-                if (obj !== undefined) {
+                if (obj !== undefined && obj !== null) {
                     let date: vmbase.Date = { startDate: obj.startDate, endDate: obj.endDate }
                     self.dateValue(date);
                     self.selectedIds([]);
@@ -111,7 +114,7 @@ module cmm045.a.viewmodel {
                             self.selectedCode(), self.findcheck(self.selectedIds(), 1), self.findcheck(self.selectedIds(), 2), self.findcheck(self.selectedIds(), 3),
                             self.findcheck(self.selectedIds(), 4), self.findcheck(self.selectedIds(), 5), self.findcheck(self.selectedIds(), 6), self.selectedRuleCode(), [], '');
                         character.save('AppListExtractCondition', paramSave);
-                        console.log(data);
+//                        console.log(data);
                         let lstGoBack: Array<vmbase.AppGoBackInfoFull> = [];
                         let lstAppGroup: Array<vmbase.AppPrePostGroup> = [];
                         self.displaySet(new vmbase.ApprovalListDisplaySetDto(data.displaySet.advanceExcessMessDisAtr,
@@ -253,9 +256,7 @@ module cmm045.a.viewmodel {
             $("#grid2").on("click", ".ntsButton", function(evt, ui) {
                 let _this = $(this);
                 let id = _this.parents('tr').data('id');
-                nts.uk.sessionStorage.removeItem(request.STORAGE_KEY_TRANSFER_DATA);
-                nts.uk.sessionStorage.setItemAsJson(request.STORAGE_KEY_TRANSFER_DATA, { appID: id });
-                window.location.href = "../../../kaf/000/b/index.xhtml";
+                nts.uk.request.jump("/view/kaf/000/b/index.xhtml", { appID: id });
             });
         }
 
@@ -373,9 +374,7 @@ module cmm045.a.viewmodel {
             $("#grid1").on("click", ".ntsButton", function(evt, ui) {
                 let _this = $(this);
                 let id = _this.parents('tr').data('id');
-                nts.uk.sessionStorage.removeItem(request.STORAGE_KEY_TRANSFER_DATA);
-                nts.uk.sessionStorage.setItemAsJson(request.STORAGE_KEY_TRANSFER_DATA, { appID: id });
-                window.location.href = "../../../kaf/000/b/index.xhtml";
+                nts.uk.request.jump("/view/kaf/000/b/index.xhtml", { appID: id });
             });
 
             $("#grid1").setupSearchScroll("igGrid", true);
@@ -910,7 +909,7 @@ module cmm045.a.viewmodel {
                 self.selectedCode(), self.findcheck(self.selectedIds(), 1), self.findcheck(self.selectedIds(), 2), self.findcheck(self.selectedIds(), 3),
                 self.findcheck(self.selectedIds(), 4), self.findcheck(self.selectedIds(), 5), self.findcheck(self.selectedIds(), 6), self.selectedRuleCode(), [], '');
             service.getApplicationList(param).done(function(data) {
-                console.log(data);
+//                console.log(data);
                 //reset data
                 self.lstAppCommon([]);
                 self.lstAppMaster([]);

@@ -79,9 +79,9 @@ module cmm044.a.viewmodel {
             self.currentItem = ko.observable(null);
             self.tabs = ko.observableArray([
                 { id: 'tab-1', title: nts.uk.resource.getText("CMM044_11"), content: '.tab-content-1', enable: ko.observable(true), visible: ko.observable(true) },
-                { id: 'tab-2', title: nts.uk.resource.getText("CMM044_12"), content: '.tab-content-2', enable: ko.observable(true), visible: ko.observable(true) },
-                { id: 'tab-3', title: nts.uk.resource.getText("CMM044_37"), content: '.tab-content-3', enable: ko.observable(true), visible: ko.observable(true) },
-                { id: 'tab-4', title: nts.uk.resource.getText("CMM044_13"), content: '.tab-content-4', enable: ko.observable(true), visible: ko.observable(true) }
+                { id: 'tab-2', title: nts.uk.resource.getText("CMM044_12"), content: '.tab-content-2', enable: ko.observable(true), visible: ko.observable(false) },
+                { id: 'tab-3', title: nts.uk.resource.getText("CMM044_37"), content: '.tab-content-3', enable: ko.observable(true), visible: ko.observable(false) },
+                { id: 'tab-4', title: nts.uk.resource.getText("CMM044_13"), content: '.tab-content-4', enable: ko.observable(true), visible: ko.observable(false) }
             ]);
 
             self.dateValue = ko.observable({});
@@ -95,9 +95,9 @@ module cmm044.a.viewmodel {
             self.isEnableAdd = ko.observable(true);
 
             self.agentAppType1 = ko.observable(0);
-            self.agentAppType2 = ko.observable(0);
-            self.agentAppType3 = ko.observable(0);
-            self.agentAppType4 = ko.observable(0);
+            self.agentAppType2 = ko.observable(2);
+            self.agentAppType3 = ko.observable(2);
+            self.agentAppType4 = ko.observable(2);
 
             self.agentSid1 = ko.observable('');
             self.agentSid2 = ko.observable('');
@@ -337,10 +337,10 @@ module cmm044.a.viewmodel {
             if (existsItem) {
                 service.updateAgent(agent).done(function() {
                     self.getAllAgen(self.selectedItem());
-                    nts.uk.ui.dialog.info(nts.uk.resource.getMessage("Msg_15"));
+                    nts.uk.ui.dialog.info({messageId: "Msg_15"});
                     $("#daterangepicker").find(".ntsStartDatePicker").focus();
                 }).fail(function(res) {
-                    nts.uk.ui.dialog.alertError(res.message);
+                    nts.uk.ui.dialog.alertError({messageId: res.messageId});
                 }).always(function() {
                     nts.uk.ui.block.clear();
                 })
@@ -350,13 +350,13 @@ module cmm044.a.viewmodel {
                     if (self.histSelectedItem) {
                         self.getAllAgen(self.selectedItem());
                         self.histSelectedItem(res);
-                        nts.uk.ui.dialog.info(nts.uk.resource.getMessage("Msg_15"));
+                        nts.uk.ui.dialog.info({messageId: "Msg_15"});
                         $("#daterangepicker").find(".ntsStartDatePicker").focus();
 
                     }
 
                 }).fail(function(res) {
-                    nts.uk.ui.dialog.alertError(res.message);
+                    nts.uk.ui.dialog.alertError({messageId: res.messageId});
                 }).always(function() {
                     nts.uk.ui.block.clear();
                 })
@@ -383,7 +383,7 @@ module cmm044.a.viewmodel {
                         } else {
                             requestId = self.histItems()[index_of_itemDelete].requestId;
                         }
-                        nts.uk.ui.dialog.info(nts.uk.resource.getMessage("Msg_16")).then(() => {
+                        nts.uk.ui.dialog.info({messageId:"Msg_16"}).then(() => {
                             nts.uk.ui.errors.clearAll();
                             self.histSelectedItem(requestId);
                             $("#daterangepicker").find(".ntsStartDatePicker").focus();
@@ -408,13 +408,17 @@ module cmm044.a.viewmodel {
                 self.isEnableAdd(true);
                 nts.uk.ui.errors.clearAll();
                 self.agentAppType1(0);
-                self.agentAppType2(0);
-                self.agentAppType3(0);
-                self.agentAppType4(0);
+                self.agentAppType2(2);
+                self.agentAppType3(2);
+                self.agentAppType4(2);
                 self.employeeNameScreen1("");
                 self.employeeNameScreen2("");
                 self.employeeNameScreen3("");
                 self.employeeNameScreen4("");
+				self.agentSid1("");
+				self.agentSid2("");
+				self.agentSid3("");
+				self.agentSid4("");
 
                 self.selectedTab('tab-1');
                 self.histSelectedItem("");

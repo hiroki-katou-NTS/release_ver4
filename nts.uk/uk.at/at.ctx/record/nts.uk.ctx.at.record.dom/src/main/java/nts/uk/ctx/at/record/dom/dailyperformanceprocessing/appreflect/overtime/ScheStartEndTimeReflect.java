@@ -14,14 +14,14 @@ public interface ScheStartEndTimeReflect {
 	 * @param timeTypeData
 	 * @return
 	 */
-	public ScheStartEndTimeReflectOutput reflectScheStartEndTime(PreOvertimeParameter para, WorkTimeTypeOutput timeTypeData);
+	public ScheStartEndTimeReflectOutput reflectScheStartEndTime(OvertimeParameter para, WorkTimeTypeOutput timeTypeData);
 	/**
 	 * 反映する開始終了時刻を求める
 	 * @param para
 	 * @param timeTypeData
 	 * @return
 	 */
-	public ScheStartEndTimeReflectOutput findStartEndTime(PreOvertimeParameter para, WorkTimeTypeOutput timeTypeData);
+	public ScheStartEndTimeReflectOutput findStartEndTime(OvertimeParameter para, WorkTimeTypeOutput timeTypeData);
 	/**
 	 * 予定開始時刻を反映できるかチェックする
 	 * @param employeeId

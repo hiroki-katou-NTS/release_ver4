@@ -66,8 +66,8 @@ public class UpdateOvertimeCommandHandler extends CommandHandlerWithResult<Updat
 		appOverTime.setWorkClockTo2(command.getWorkClockTo2());
 		appOverTime.setWorkTypeCode(command.getWorkTypeCode() == null? null : new WorkTypeCode(command.getWorkTypeCode()));
 		appOverTime.getApplication().setAppReason(new AppReason(applicationReason));
-		appOverTime.setVersion(command.getVersion());
-		appOverTime.getApplication().setVersion(appOverTime.getVersion());
+		appOverTime.setVersion(appOverTime.getVersion());
+		appOverTime.getApplication().setVersion(command.getVersion());
 		
 		detailBeforeUpdate.processBeforeDetailScreenRegistration(
 				companyID, 
@@ -75,7 +75,7 @@ public class UpdateOvertimeCommandHandler extends CommandHandlerWithResult<Updat
 				appOverTime.getApplication().getAppDate(), 
 				1, 
 				appOverTime.getAppID(), 
-				appOverTime.getApplication().getPrePostAtr(), appOverTime.getVersion());
+				appOverTime.getApplication().getPrePostAtr(), command.getVersion());
 		overtimeRepository.update(appOverTime);
 		applicationRepository.updateWithVersion(appOverTime.getApplication());
 		return detailAfterUpdate.processAfterDetailScreenRegistration(appOverTime.getApplication());

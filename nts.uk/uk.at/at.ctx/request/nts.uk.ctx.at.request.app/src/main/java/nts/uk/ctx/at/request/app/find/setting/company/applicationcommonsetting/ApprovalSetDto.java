@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.applicationcommonsetting.ApprovalSet;
+import nts.uk.ctx.at.request.dom.setting.company.request.approvallistsetting.AppReflectAfterConfirm;
 
 /**
  * 
@@ -14,14 +15,12 @@ import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.appl
 @Data
 @NoArgsConstructor
 public class ApprovalSetDto {
-	public String companyId;
 	/**　スケジュールが確定されている場合 */
 	public int scheduleCon;
 	/**　実績が確定されている場合 */
 	public int achiveCon; 
 	
-	public static ApprovalSetDto convertToDto(ApprovalSet domain){
-		return new ApprovalSetDto(domain.getCompanyId(), 
-				domain.getScheduleCon().value, domain.getAchiveCon().value);
+	public static ApprovalSetDto convertToDto(AppReflectAfterConfirm domain){
+		return new ApprovalSetDto(domain.getScheduleConfirmedAtr().value, domain.getAchievementConfirmedAtr().value);
 	}
 }

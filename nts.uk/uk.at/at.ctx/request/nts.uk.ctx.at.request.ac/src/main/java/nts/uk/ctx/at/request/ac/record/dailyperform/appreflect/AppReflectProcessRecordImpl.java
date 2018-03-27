@@ -73,7 +73,7 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 	}
 
 	@Override
-	public WorkReflectedStatesInfo overtimeReflectRecord(OvertimeReflectPara para) {
+	public WorkReflectedStatesInfo overtimeReflectRecord(OvertimeReflectPara para, boolean isPre) {
 		OvertimeAppPubParameter overtimePara = new OvertimeAppPubParameter(EnumAdaptor.valueOf(para.getOvertimePara().getReflectedState().value, ReflectedStatePubRecord.class),
 				EnumAdaptor.valueOf(para.getOvertimePara().getReasonNotReflect() == null ? 0 : para.getOvertimePara().getReasonNotReflect().value, ReasonNotReflectPubRecord.class),
 				para.getOvertimePara().getWorkTypeCode(),
@@ -94,7 +94,13 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				EnumAdaptor.valueOf(para.getScheAndRecordSameChangeFlg().value, ScheAndRecordSameChangePubFlg.class), 
 				para.isScheTimeOutFlg(), 
 				overtimePara);
-		AppReflectPubOutput appReflect = recordPub.preOvertimeReflect(preOvertimePara);
+		AppReflectPubOutput appReflect;
+		if(isPre) {
+			appReflect = recordPub.preOvertimeReflect(preOvertimePara);	
+		} else {
+			appReflect = recordPub.afterOvertimeReflect(preOvertimePara);
+		}
+		
 		WorkReflectedStatesInfo overtimeReflect = new WorkReflectedStatesInfo(EnumAdaptor.valueOf(appReflect.getReflectedState().value, ReflectedState_New.class), 
 				EnumAdaptor.valueOf(appReflect.getReasonNotReflect().value, ReasonNotReflectDaily_New.class));
 		return overtimeReflect;

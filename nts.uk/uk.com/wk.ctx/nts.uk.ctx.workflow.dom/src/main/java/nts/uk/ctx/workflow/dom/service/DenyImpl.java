@@ -71,6 +71,7 @@ public class DenyImpl implements DenyService {
 							approvalFrame.setApprovalDate(GeneralDate.today());
 							approvalFrame.setApprovalReason(memo);
 							approvalPhaseState.setApprovalAtr(ApprovalBehaviorAtr.DENIAL);
+							executedFlag = true;
 							continue;
 						} else {
 							continue;

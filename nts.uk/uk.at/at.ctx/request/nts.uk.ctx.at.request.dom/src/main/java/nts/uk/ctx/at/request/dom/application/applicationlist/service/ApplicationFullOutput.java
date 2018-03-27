@@ -22,4 +22,5 @@ public class ApplicationFullOutput {
 	//-: 0
 	private Integer	status;
 	private String agentId;
+	private String apprId;
 }

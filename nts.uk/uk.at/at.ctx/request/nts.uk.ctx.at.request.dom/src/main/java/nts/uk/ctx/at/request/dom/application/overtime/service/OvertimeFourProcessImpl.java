@@ -35,9 +35,9 @@ public class OvertimeFourProcessImpl implements OvertimeFourProcess{
 						if(overtimeInput.getApplicationTime() != null && overtimeInput.getApplicationTime() != overtimeInputCaculation.getResultCaculation()){
 							overtimeInput.setErrorCode(3); // 色定義名：計算値
 						}
-						if(overtimeInputCaculation.getResultCaculation() == 0){
+						if(overtimeInputCaculation.getResultCaculation() != null && overtimeInputCaculation.getResultCaculation() == 0){
 							continue;
-						}else if(overtimeInputCaculation.getResultCaculation() > 0){
+						}else if(overtimeInputCaculation.getResultCaculation() != null && overtimeInputCaculation.getResultCaculation() > 0){
 							// 03-01_事前申請超過チェック
 							OvertimeCheckResult overtimeCheckResult = this.IErrorCheckBeforeRegister.preApplicationExceededCheck(overtimeInput.getCompanyID(),appDate, inputDate, EnumAdaptor.valueOf(prePostAtr, PrePostAtr.class), overtimeInputCaculation.getAttendanceID(), convert(overtimeInput));
 							if(overtimeCheckResult.getErrorCode() != 0){
@@ -72,10 +72,12 @@ public class OvertimeFourProcessImpl implements OvertimeFourProcess{
 	private CaculationTime printColor(CaculationTime overtimeHour,List<OvertimeInputCaculation> overtimeInputCaculations){
 			for(OvertimeInputCaculation overtimeInput :overtimeInputCaculations){
 				if(overtimeHour.getFrameNo() == overtimeInput.getFrameNo()){
-					if(overtimeHour.getApplicationTime()!= null && overtimeHour.getApplicationTime() > overtimeInput.getResultCaculation()){
+					if(overtimeHour.getApplicationTime()!= null && overtimeInput.getResultCaculation() != null && overtimeHour.getApplicationTime() > overtimeInput.getResultCaculation()){
 						overtimeHour.setFrameNo(overtimeHour.getFrameNo());
 						overtimeHour.setErrorCode(2);
 						overtimeHour.setCaculationTime(Integer.toString(overtimeInput.getResultCaculation()));
+					}else{
+						overtimeHour.setCaculationTime(overtimeInput.getResultCaculation() == null ? null : Integer.toString(overtimeInput.getResultCaculation()));
 					}
 				}
 			}

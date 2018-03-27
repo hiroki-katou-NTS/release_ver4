@@ -13,7 +13,7 @@ public interface StartEndTimeOffReflect {
 	 * 開始終了時刻の反映(事前申請)
 	 * @param param
 	 */
-	public void startEndTimeOffReflect(PreOvertimeParameter param, WorkInfoOfDailyPerformance workInfo);
+	public void startEndTimeOffReflect(OvertimeParameter param, WorkInfoOfDailyPerformance workInfo);
 	/**
 	 * 自動打刻をクリアする
 	 * @param employeeId
@@ -28,7 +28,7 @@ public interface StartEndTimeOffReflect {
 	 * @param workInfo
 	 * @return
 	 */
-	public void startEndTimeOutput(PreOvertimeParameter param, WorkInfoOfDailyPerformance workInfo);
+	public void startEndTimeOutput(OvertimeParameter param, WorkInfoOfDailyPerformance workInfo);
 	/**
 	 * ジャスト遅刻早退により時刻を編集する
 	 * @param startEndTime

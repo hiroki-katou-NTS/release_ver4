@@ -33,4 +33,10 @@ public interface AppReflectProcessRecordPub {
 	 * @return
 	 */
 	public AppReflectPubOutput preOvertimeReflect(PreOvertimePubParameter param);
+	/**
+	 * 勤務実績に反映: 事後残業申請処理
+	 * @param param
+	 * @return
+	 */
+	public AppReflectPubOutput afterOvertimeReflect(PreOvertimePubParameter param);
 }

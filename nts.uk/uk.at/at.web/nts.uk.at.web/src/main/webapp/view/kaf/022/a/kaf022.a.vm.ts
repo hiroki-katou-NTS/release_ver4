@@ -899,8 +899,8 @@ module nts.uk.at.view.kmf022 {
                 ]);
 
                 self.itemListA9_9 = ko.observableArray([
-                    new ItemModel(1, nts.uk.resource.getText('KAF022_84')),
-                    new ItemModel(0, nts.uk.resource.getText('KAF022_85'))
+                    new ItemModel(0, nts.uk.resource.getText('KAF022_84')),
+                    new ItemModel(1, nts.uk.resource.getText('KAF022_85'))
                 ]);
 
                 self.selectedIdA9_5 = ko.observable(0);
@@ -1656,6 +1656,7 @@ module nts.uk.at.view.kmf022 {
                 service.findAllData().done((data: any)=> {
                     self.initDataA4(data);
                     self.initDataA5(data);
+                    self.initDataA5_24(data);
                     self.initDataA6(data);
                     self.initDataA7AndA8(data);
                     self.initDataA10(data);
@@ -1729,11 +1730,19 @@ module nts.uk.at.view.kmf022 {
                     self.selectedIdA5_22(data.hwActualDispAtr);
                     // msgExceeded
                     self.selectedIdA5_23(data.actualExcessMessDispAtr);
-                    // scheduleCon
-//                    self.selectedIdA5_24(data.scheduleCon);
-//                    self.selectedIdA5_25(data.achiveCon);
                 }
             }
+            
+            initDataA5_24(allData: any): void{
+                let self = this;
+                let data = allData.appSet;
+                if(data){
+                    // scheduleCon
+                    self.selectedIdA5_24(data.scheduleCon);
+                    self.selectedIdA5_25(data.achiveCon);
+                }
+            }
+            
             initDataA6(allData:any): void {
                 let self = this;
                 let listAppType = __viewContext.enums.ApplicationType;

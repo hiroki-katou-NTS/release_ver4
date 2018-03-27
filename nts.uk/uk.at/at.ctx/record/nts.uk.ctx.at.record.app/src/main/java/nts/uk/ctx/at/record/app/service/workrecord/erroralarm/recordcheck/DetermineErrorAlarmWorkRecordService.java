@@ -33,7 +33,7 @@ public class DetermineErrorAlarmWorkRecordService implements ErAlCheckService {
 	@Override
 	public void checkAndInsert(String employeeID, GeneralDate date) {
 		String companyID = AppContexts.user().companyId();
-		Map<ErrorAlarmWorkRecord, Map<String, Boolean>> lstErrorAlarm = checkError(employeeID, date);
+		Map<ErrorAlarmWorkRecord, Map<String, Boolean>> lstErrorAlarm = checkError(employeeID, date, companyID);
 		if (!lstErrorAlarm.isEmpty()) {
 			lstErrorAlarm.entrySet().forEach(erAl -> {
 				if (!erAl.getValue().isEmpty() && isError(erAl.getValue().get(employeeID) && erAl.getKey().getErrorDisplayItem() != null)) {
@@ -59,12 +59,6 @@ public class DetermineErrorAlarmWorkRecordService implements ErAlCheckService {
 
 	private Boolean isError(Boolean erAl) {
 		return erAl != null && erAl;
-	}
-
-	private Map<ErrorAlarmWorkRecord, Map<String, Boolean>> checkError(String employeeID, GeneralDate date) {
-		String companyID = AppContexts.user().companyId();
-
-		return checkError(employeeID, date, companyID);
 	}
 
 	private Map<ErrorAlarmWorkRecord, Map<String, Boolean>> checkError(String employeeID, GeneralDate date,

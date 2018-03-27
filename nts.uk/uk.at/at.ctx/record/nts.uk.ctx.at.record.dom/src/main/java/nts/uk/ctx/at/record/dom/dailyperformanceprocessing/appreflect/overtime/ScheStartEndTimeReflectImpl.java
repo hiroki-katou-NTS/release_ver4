@@ -42,7 +42,7 @@ public class ScheStartEndTimeReflectImpl implements ScheStartEndTimeReflect {
 	@Inject
 	private WorkInformationRepository workInforRepository;
 	@Override
-	public ScheStartEndTimeReflectOutput reflectScheStartEndTime(PreOvertimeParameter para,
+	public ScheStartEndTimeReflectOutput reflectScheStartEndTime(OvertimeParameter para,
 			WorkTimeTypeOutput timeTypeData) {
 		//反映する開始終了時刻を求める
 		ScheStartEndTimeReflectOutput findStartEndTime = this.findStartEndTime(para, timeTypeData);
@@ -138,7 +138,7 @@ public class ScheStartEndTimeReflectImpl implements ScheStartEndTimeReflect {
 	}
 
 	@Override
-	public ScheStartEndTimeReflectOutput findStartEndTime(PreOvertimeParameter para, WorkTimeTypeOutput timeTypeData) {
+	public ScheStartEndTimeReflectOutput findStartEndTime(OvertimeParameter para, WorkTimeTypeOutput timeTypeData) {
 		ScheStartEndTimeReflectOutput findDataOut = new ScheStartEndTimeReflectOutput(null, null, true, null, null, true);
 		//ドメインモデル「就業時間帯の設定」を取得する
 		String companyId = AppContexts.user().companyId();

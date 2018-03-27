@@ -14,6 +14,7 @@ module nts.uk.at.view.kmf003.b.viewmodel {
         lengthOfServiceData: any;
         grantHdData: any;
         checkDataExisted: KnockoutObservable<boolean>;
+        flag: KnockoutObservable<boolean>;
         
         constructor() {
             var self = this;
@@ -33,6 +34,7 @@ module nts.uk.at.view.kmf003.b.viewmodel {
             }
             
             self.checkDataExisted = ko.observable(false);
+            self.flag = ko.observable(true);
             
             if(self.conditionData.useCondition == true){
                 var style = $('<style>table td.allow-pay { display: table-cell; }</style>');
@@ -417,15 +419,24 @@ module nts.uk.at.view.kmf003.b.viewmodel {
         //Set check or uncheck checkbox list
         checkAllowPayBelow(index: number, value: boolean): void {
             var self = this;
-            
             var checkMonths = self.checkTotalMonths(index);
+            
             if (!checkMonths && value) {
-                self.count(1);
-                self.items()[index].grantSimultaneity(false);   
-                nts.uk.ui.dialog.alert({ messageId: "Msg_267" }).then(() => {
-                    $('.year-input' + index).focus();
-                });
-                return;
+                if(self.flag()) {
+                    self.count(1);
+                    self.flag(false);
+                    self.items()[index].grantSimultaneity(false);   
+                    nts.uk.ui.dialog.alert({ messageId: "Msg_267" }).then(() => {
+                        for (let i = 0; i < self.items().length; i++) {
+                            self.items()[i].grantReferenceDate(self.lengthOfServiceData[i] != null ? self.lengthOfServiceData[i].standGrantDay : 0);
+                            self.items()[i].grantSimultaneity(false);
+                        }
+                        
+                        $('.year-input' + index).focus();
+                        self.flag(true);
+                    });
+                    return;
+                }
             }
             
             if (value) {
@@ -438,12 +449,13 @@ module nts.uk.at.view.kmf003.b.viewmodel {
                 if(index == 0) {
                     self.items()[index].grantReferenceDateEnable(true);
                     self.items()[index].grantSimultaneity(value);
+                } else {
+                    for (let i = 0; i < index; i++) {
+                        self.items()[i].grantReferenceDateEnable(true);
+                        self.items()[i + 1].grantReferenceDateEnable(true);
+                        self.items()[i].grantSimultaneity(value);
+                    }
                 }
-                for (let i = 0; i < index; i++) {
-                    self.items()[i].grantReferenceDateEnable(true);
-                    self.items()[i + 1].grantReferenceDateEnable(true);
-                    self.items()[i].grantSimultaneity(value);
-                }    
             }
             
             self.items.valueHasMutated();
@@ -458,15 +470,15 @@ module nts.uk.at.view.kmf003.b.viewmodel {
                 return true;
             }
             
-            if(Number(self.items()[0].lengthOfServiceYears()) == 0 && Number(self.items()[0].lengthOfServiceMonths()) == 0 && Number(self.items()[0].grantDays()) == 0 
-                        && Number(self.items()[0].limitedHalfHdCnt()) == 0 && Number(self.items()[0].limitedTimeHdDays()) == 0) {
+            if(Number(self.items()[0].lengthOfServiceYears()) <= 0 && Number(self.items()[0].lengthOfServiceMonths()) <= 0 && Number(self.items()[0].grantDays()) <= 0 
+                        && Number(self.items()[0].limitedHalfHdCnt()) <= 0 && Number(self.items()[0].limitedTimeHdDays()) <= 0) {
                 return false;
             }
             
-            if(self.items()[index].lengthOfServiceYears() != null || self.items()[index].lengthOfServiceMonths() != null) {
+            if(self.items()[index].grantDays() != null || self.items()[index].lengthOfServiceMonths() != null) {
                 var totalMonths = Number(self.items()[index].lengthOfServiceMonths()) + Number(self.items()[index].grantDays());
                 
-                if (Number(self.items()[index].lengthOfServiceYears()) == 0 && totalMonths < 12) {            
+                if (Number(self.items()[index].lengthOfServiceYears()) <= 0 && totalMonths < 12) {            
                     return false;
                 }
             }

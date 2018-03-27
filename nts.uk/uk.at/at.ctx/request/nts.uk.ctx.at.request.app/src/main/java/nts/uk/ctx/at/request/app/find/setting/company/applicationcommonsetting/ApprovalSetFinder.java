@@ -12,12 +12,14 @@ import javax.inject.Inject;
 
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.applicationcommonsetting.ApprovalSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.applicationcommonsetting.ApprovalSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.request.approvallistsetting.AppReflectAfterConfirm;
+import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSettingRepository;
 @Stateless
 public class ApprovalSetFinder {
 	@Inject
-	private ApprovalSetRepository approRep;
+	private ApplicationSettingRepository approRep;
 	public ApprovalSetDto findByComId(){
-		Optional<ApprovalSet> appSet = approRep.getApproval();
+		Optional<AppReflectAfterConfirm> appSet = approRep.getAppRef();
 		if(appSet.isPresent()){
 			return ApprovalSetDto.convertToDto(appSet.get());
 		}

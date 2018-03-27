@@ -209,7 +209,38 @@
 			<!--A5_8 計算ボタン--> 			
 			<button data-bind="click: CaculationTime" tabindex="14" style="margin: 15px 0px 10px 290px;" class="caret-bottom">#{i18n.getText('KAF005_43')}</button>
 		</div>
-		<div class="cf valign-top control-group cell">
+		<div class="cf valign-top control-group cell" data-bind ="if: prePostSelected() == 0">
+			<!--A6_1 残業時間ラベル--> 	
+			<div class="cm-column" style="display: inline-block;">
+				<div class="lblTitle pull-left" data-bind="ntsFormLabel: {required: true}">#{i18n.getText('KAF005_50')}</div>
+			</div>	
+			<div class ="table-time">
+				<table id="fixed-overtime-hour-table-pre">
+					<colgroup>
+						<col width="110px" />
+						<col width="110px" />
+						
+					</colgroup>
+					<thead>
+						<tr>
+							<th class="ui-widget-header" rowspan="2"></th>
+							<!--A6_3 申請時間ラベル--> 					
+							<th class="ui-widget-header" rowspan="2">#{i18n.getText('KAF005_51')}</th>
+						</tr>
+					</thead>
+					<tbody data-bind="foreach: overtimeHours">
+						<tr>
+							<!--A6_7 残業時間名称--> 						
+							<td class="header" data-bind="attr: { id: 'overtimeHoursHeader_'+attendanceID()+'_'+frameNo()}, text: frameName"></td>
+							<!--A6_8 残業申請時間入力--> 						
+							<td data-bind="attr: { id: 'overtimeHoursCheck_'+attendanceID()+'_'+frameNo()}, style: { 'background-color' : color }"><input tabindex="15" class="right-content"
+								data-bind="attr: { id: 'overtimeHoursCheck_'+attendanceID()+'_'+frameNo()}, style: { 'background-color' : color }, ntsTimeEditor: {name: nameID ,value: applicationTime, option: {width: '80px'}, inputFormat: 'time', mode: 'time',constraint:'OvertimeAppPrimitiveTime'}" /></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="cf valign-top control-group cell" data-bind ="if: prePostSelected() == 1">
 			<!--A6_1 残業時間ラベル--> 	
 			<div class="cm-column" style="display: inline-block;">
 				<div class="lblTitle pull-left" data-bind="ntsFormLabel: {required: true}">#{i18n.getText('KAF005_50')}</div>
@@ -285,45 +316,85 @@
 				</table>
 			</div>
 		</div>
-		<div class="cf valign-top control-group"
-			data-bind="if: displayBonusTime">
-			<!--A8_1 加給時間ラベル--> 			
-			<div class="cm-column" style="display: inline-block;">
-				<div class="lblTitle pull-left cm-column" data-bind="ntsFormLabel: {}">#{i18n.getText('KAF005_81')}</div>
+		<div data-bind ="if: prePostSelected() == 1">
+			<div class="cf valign-top control-group"
+				data-bind="if: displayBonusTime">
+				<!--A8_1 加給時間ラベル--> 			
+				<div class="cm-column" style="display: inline-block;">
+					<div class="lblTitle pull-left cm-column" data-bind="ntsFormLabel: {}">#{i18n.getText('KAF005_81')}</div>
+				</div>
+				<div class ="table-time">
+					<table id="fixed-bonus_time-table">
+						<colgroup>
+							<col width="110px" />
+							<col width="110px" />
+							<col width="110px" />
+						</colgroup>
+						<thead>
+							<tr>
+								<!--A8_2 加給時間入力テーブル--> 						
+								<th class="ui-widget-header" rowspan="2"></th>
+								<!--A8_3 申請時間ラベル--> 						
+								<th class="ui-widget-header" rowspan="2">#{i18n.getText('KAF005_82')}</th>
+								<!--A8_4 事前申請ラベル--> 						
+								<th class="ui-widget-header" rowspan="2">#{i18n.getText('KAF005_83')}</th>
+							</tr>
+						</thead>
+						<tbody data-bind="foreach: bonusTimes">
+							<tr>
+								<!--A8_6 加給時間名称ラベル--> 												
+								<td class="header" data-bind="text: frameName"></td>
+								<!--A8_7 加給時間入力--> 
+								<td>
+								<!-- <div>#{i18n.getText('KAF005_85',[frameName])}</div>    -->
+								<input tabindex="17" class="right-content"
+									data-bind="ntsTimeEditor: {
+									name:itemName,
+									value: applicationTime, option: {width: '80px'}, inputFormat: 'time', mode: 'time',constraint:'OvertimeAppPrimitiveTime'}" /></td>
+								<!--A8_8 事前申請時間--> 
+								<td class="right-content" data-bind="text: preAppTime"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
-			<div class ="table-time">
-				<table id="fixed-bonus_time-table">
-					<colgroup>
-						<col width="110px" />
-						<col width="110px" />
-						<col width="110px" />
-					</colgroup>
-					<thead>
-						<tr>
-							<!--A8_2 加給時間入力テーブル--> 						
-							<th class="ui-widget-header" rowspan="2"></th>
-							<!--A8_3 申請時間ラベル--> 						
-							<th class="ui-widget-header" rowspan="2">#{i18n.getText('KAF005_82')}</th>
-							<!--A8_4 事前申請ラベル--> 						
-							<th class="ui-widget-header" rowspan="2">#{i18n.getText('KAF005_83')}</th>
-						</tr>
-					</thead>
-					<tbody data-bind="foreach: bonusTimes">
-						<tr>
-							<!--A8_6 加給時間名称ラベル--> 												
-							<td class="header" data-bind="text: frameName"></td>
-							<!--A8_7 加給時間入力--> 
-							<td>
-							<!-- <div>#{i18n.getText('KAF005_85',[frameName])}</div>    -->
-							<input tabindex="17" class="right-content"
-								data-bind="ntsTimeEditor: {
-								name:itemName,
-								value: applicationTime, option: {width: '80px'}, inputFormat: 'time', mode: 'time',constraint:'OvertimeAppPrimitiveTime'}" /></td>
-							<!--A8_8 事前申請時間--> 
-							<td class="right-content" data-bind="text: preAppTime"></td>
-						</tr>
-					</tbody>
-				</table>
+		</div>
+		<div data-bind ="if: prePostSelected() == 0">
+			<div class="cf valign-top control-group"
+				data-bind="if: displayBonusTime">
+				<!--A8_1 加給時間ラベル--> 			
+				<div class="cm-column" style="display: inline-block;">
+					<div class="lblTitle pull-left cm-column" data-bind="ntsFormLabel: {}">#{i18n.getText('KAF005_81')}</div>
+				</div>
+				<div class ="table-time">
+					<table id="fixed-bonus_time-table-pre">
+						<colgroup>
+							<col width="110px" />
+							<col width="110px" />
+						</colgroup>
+						<thead>
+							<tr>
+								<!--A8_2 加給時間入力テーブル--> 						
+								<th class="ui-widget-header" rowspan="2"></th>
+								<!--A8_3 申請時間ラベル--> 						
+								<th class="ui-widget-header" rowspan="2">#{i18n.getText('KAF005_82')}</th>
+							</tr>
+						</thead>
+						<tbody data-bind="foreach: bonusTimes">
+							<tr>
+								<!--A8_6 加給時間名称ラベル--> 												
+								<td class="header" data-bind="text: frameName"></td>
+								<!--A8_7 加給時間入力--> 
+								<td>
+								<!-- <div>#{i18n.getText('KAF005_85',[frameName])}</div>    -->
+								<input tabindex="17" class="right-content"
+									data-bind="ntsTimeEditor: {
+									name:itemName,
+									value: applicationTime, option: {width: '80px'}, inputFormat: 'time', mode: 'time',constraint:'OvertimeAppPrimitiveTime'}" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 		<!--定型理由 -->

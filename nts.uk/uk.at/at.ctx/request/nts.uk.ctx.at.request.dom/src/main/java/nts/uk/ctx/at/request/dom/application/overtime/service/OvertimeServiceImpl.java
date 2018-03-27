@@ -26,6 +26,8 @@ import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmpl
 import nts.uk.ctx.at.request.dom.setting.workplace.ApprovalFunctionSetting;
 import nts.uk.ctx.at.shared.dom.personallaborcondition.PersonalLaborCondition;
 import nts.uk.ctx.at.shared.dom.personallaborcondition.PersonalLaborConditionRepository;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
@@ -48,7 +50,7 @@ public class OvertimeServiceImpl implements OvertimeService {
 	ApplicationApprovalService_New appRepository;
 	
 	@Inject
-	private PersonalLaborConditionRepository personalLaborConditionRepository;
+	private WorkingConditionItemRepository workingConditionItemRepository;
 	@Override
 	public int checkOvertime(String url) {
 		if(url == null){
@@ -61,7 +63,7 @@ public class OvertimeServiceImpl implements OvertimeService {
 			}else if(url.equals("2")){
 				return OverTimeAtr.ALL.value;
 			}
-		return 3;
+		return 2;
 	}
 
 	/* (non-Javadoc)
@@ -185,7 +187,7 @@ public class OvertimeServiceImpl implements OvertimeService {
 		WorkTypeOvertime workTypeOvertime = new  WorkTypeOvertime();
 		SiftType siftType = new SiftType();
 		//ドメインモデル「個人労働条件」を取得する(lay dieu kien lao dong ca nhan(個人労働条件))
-		Optional<PersonalLaborCondition> personalLablorCodition = personalLaborConditionRepository.findById(employeeID,baseDate);
+		Optional<WorkingConditionItem> personalLablorCodition = workingConditionItemRepository.getBySidAndStandardDate(employeeID,baseDate);
 		
 		if(!personalLablorCodition.isPresent() || personalLablorCodition.get().getWorkCategory().getWeekdayTime() == null){
 			if(!CollectionUtil.isEmpty(workTypes)){

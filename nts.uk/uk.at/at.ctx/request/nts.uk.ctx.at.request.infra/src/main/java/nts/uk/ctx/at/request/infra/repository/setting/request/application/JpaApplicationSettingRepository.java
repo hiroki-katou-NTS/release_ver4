@@ -85,7 +85,7 @@ public class JpaApplicationSettingRepository extends JpaRepository implements Ap
 	 * @param domain
 	 * @return
 	 */
-	private KrqstApplicationSetting toEntity(ApplicationSetting domain) {
+	private KrqstApplicationSetting toEntity(ApplicationSetting domain, AppReflectAfterConfirm domainRef) {
 		val entity = new KrqstApplicationSetting();
 		entity.krqstApplicationSettingPK = new KrqstApplicationSettingPK();
 		entity.krqstApplicationSettingPK.companyID = domain.getCompanyID();
@@ -101,7 +101,8 @@ public class JpaApplicationSettingRepository extends JpaRepository implements Ap
 		/*承認*/
 		entity.baseDateFlg = domain.getBaseDateFlg().value;
 		entity.advanceExcessMessDispAtr = domain.getAdvanceExcessMessDispAtr().value;
-		entity.hwAdvanceDispAtr = domain.getHwActualDispAtr().value;
+		entity.hwAdvanceDispAtr = domain.getHwAdvanceDispAtr().value;
+		entity.hwActualDispAtr = domain.getHwActualDispAtr().value;
 		entity.actualExcessMessDispAtr = domain.getActualExcessMessDispAtr().value;
 		entity.otAdvanceDispAtr = domain.getOtAdvanceDispAtr().value;
 		entity.otActualDispAtr = domain.getOtActualDispAtr().value;
@@ -111,8 +112,8 @@ public class JpaApplicationSettingRepository extends JpaRepository implements Ap
 		entity.scheReflectFlg = domain.getScheReflectFlg().value;
 		entity.priorityTimeReflectFlg = domain.getPriorityTimeReflectFlg().value;
 		entity.attendentTimeReflectFlg = domain.getAttendentTimeReflectFlg().value;
-		entity.achievementConfirmedAtr = 0;
-		entity.scheduleConfirmedAtr = 0;
+		entity.achievementConfirmedAtr = domainRef.getAchievementConfirmedAtr().value;
+		entity.scheduleConfirmedAtr = domainRef.getScheduleConfirmedAtr().value;
 		return entity;
 	}
 	
@@ -125,8 +126,8 @@ public class JpaApplicationSettingRepository extends JpaRepository implements Ap
 
 
 	@Override
-	public void updateSingle(ApplicationSetting applicationSetting) {
-		this.commandProxy().update(toEntity(applicationSetting));
+	public void updateSingle(ApplicationSetting applicationSetting, AppReflectAfterConfirm appReflectAfterConfirm) {
+		this.commandProxy().update(toEntity(applicationSetting, appReflectAfterConfirm));
 	}
 	
 	/*
@@ -136,10 +137,10 @@ public class JpaApplicationSettingRepository extends JpaRepository implements Ap
 	 * ApplicationSettingRepository#updateList(java.util.List)
 	 */
 	@Override
-	public void updateList(List<ApplicationSetting> lstApplicationSetting) {
+	public void updateList(List<ApplicationSetting> lstApplicationSetting, AppReflectAfterConfirm appReflectAfterConfirm) {
 		List<KrqstApplicationSetting> lstEntity = new ArrayList<>();
 		for (ApplicationSetting applicationSetting : lstApplicationSetting) {
-			lstEntity.add(toEntity(applicationSetting));
+			lstEntity.add(toEntity(applicationSetting, appReflectAfterConfirm));
 		}
 		;
 		this.commandProxy().updateAll(lstEntity);
@@ -155,8 +156,8 @@ public class JpaApplicationSettingRepository extends JpaRepository implements Ap
 	 * @author yennth
 	 */
 	@Override
-	public void insert(ApplicationSetting applicationSetting) {
-		KrqstApplicationSetting appSet = toEntity(applicationSetting);
+	public void insert(ApplicationSetting applicationSetting, AppReflectAfterConfirm appReflectAfterConfirm) {
+		KrqstApplicationSetting appSet = toEntity(applicationSetting, appReflectAfterConfirm);
 		this.commandProxy().insert(appSet);
 	}
 

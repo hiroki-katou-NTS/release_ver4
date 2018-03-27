@@ -36,7 +36,7 @@ public class WorkTimeTypeScheReflectImpl implements WorkTimeTypeScheReflect {
 		ReflectParameter reflectInfo = new ReflectParameter(para.getEmployeeId(), para.getDateData(), 
 				para.getGobackData().getWorkTimeCode(), 
 				para.getGobackData().getWorkTypeCode()); 
-		workUpdate.updateWorkTimeType(reflectInfo, commonService.lstItemRecord(), true);
+		workUpdate.updateWorkTimeType(reflectInfo, true);
 		return true;
 	}
 

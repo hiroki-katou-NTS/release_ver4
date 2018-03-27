@@ -33,7 +33,7 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 			scheTimeReflect.reflectScheTime(para, chkTimeTypeSche);
 			//時刻の反映
 			scheTimeReflect.reflectTime(para, this.workTypetimeReflect(para));
-			return new ApplicationReflectOutput(ReflectedStateRecord.REFLECTED, ReasonNotReflectRecord.WORK_FIXED);
+			return new ApplicationReflectOutput(ReflectedStateRecord.REFLECTED, ReasonNotReflectRecord.ACTUAL_CONFIRMED);
 		} catch(Exception ex) {
 			return new ApplicationReflectOutput(para.getGobackData().getReflectState(), para.getGobackData().getReasoNotReflect());
 		}
@@ -48,7 +48,7 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 			afterScheTime.reflectScheTime(para, chkTimeTypeChe);
 			//勤種・就時の反映
 			scheTimeReflect.reflectTime(para, this.workTypetimeReflect(para));
-			return new ApplicationReflectOutput(ReflectedStateRecord.REFLECTED, ReasonNotReflectRecord.WORK_FIXED);
+			return new ApplicationReflectOutput(ReflectedStateRecord.REFLECTED, ReasonNotReflectRecord.ACTUAL_CONFIRMED);
 		} catch (Exception ex) {
 			return new ApplicationReflectOutput(para.getGobackData().getReflectState(), para.getGobackData().getReasoNotReflect());
 		}
@@ -65,7 +65,7 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 			ReflectParameter reflectData = new ReflectParameter(para.getEmployeeId(), 
 					para.getDateData(), para.getGobackData().getWorkTimeCode(), 
 					para.getGobackData().getWorkTypeCode()); 
-			workTimeUpdate.updateWorkTimeType(reflectData, commonService.lstScheWorkItem(), false);
+			workTimeUpdate.updateWorkTimeType(reflectData, false);
 			workTypeTimeReflect = true;
 		} else {
 			workTypeTimeReflect = false;			

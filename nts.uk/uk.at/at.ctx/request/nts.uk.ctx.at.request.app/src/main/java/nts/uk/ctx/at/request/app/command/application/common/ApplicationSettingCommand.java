@@ -34,4 +34,6 @@ public class ApplicationSettingCommand {
 	public Integer scheReflectFlg;
 	public Integer priorityTimeReflectFlg;
 	public Integer attendentTimeReflectFlg;
+	public Integer scheduleConfirmedAtr;
+	public Integer achievementConfirmedAtr;
 }

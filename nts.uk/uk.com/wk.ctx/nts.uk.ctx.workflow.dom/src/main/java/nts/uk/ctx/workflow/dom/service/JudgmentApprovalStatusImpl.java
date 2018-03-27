@@ -208,9 +208,9 @@ public class JudgmentApprovalStatusImpl implements JudgmentApprovalStatusService
 	public Boolean judgmentAgentListByEmployee(String companyID, String employeeID, List<String> listApprover) {
 		ApprovalRepresenterOutput approvalRepresenterOutput = collectApprovalAgentInforService.getApprovalAgentInfor(companyID, listApprover);
 		if(approvalRepresenterOutput.getListAgent().contains(employeeID)){
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	@Override

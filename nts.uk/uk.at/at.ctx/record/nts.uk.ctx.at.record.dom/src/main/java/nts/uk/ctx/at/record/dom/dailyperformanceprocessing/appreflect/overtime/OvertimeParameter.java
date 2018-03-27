@@ -8,7 +8,7 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.ScheAndRec
 @AllArgsConstructor
 @Getter
 @Setter
-public class PreOvertimeParameter {
+public class OvertimeParameter {
 	/**社員ID	 */
 	private String employeeId;
 	/** 年月日	 */

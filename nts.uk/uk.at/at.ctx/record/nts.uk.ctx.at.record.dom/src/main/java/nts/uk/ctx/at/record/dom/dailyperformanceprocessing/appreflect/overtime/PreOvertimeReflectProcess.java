@@ -13,14 +13,14 @@ public interface PreOvertimeReflectProcess {
 	 * 予定勤種・就時の反映
 	 * @param para
 	 */
-	public void workTimeWorkTimeUpdate(PreOvertimeParameter para);
+	public void workTimeWorkTimeUpdate(OvertimeParameter para);
 	/**
 	 * 勤種・就時の反映
 	 * @param para
 	 * @return True: 反映前後勤就の変更する
 	 * False: 反映前後勤就の変更したい
 	 */
-	public boolean changeFlg(PreOvertimeParameter para);
+	public boolean changeFlg(OvertimeParameter para);
 	/**
 	 * 予定勤種・就時反映後の予定勤種・就時を取得する
 	 * @param employeeId
@@ -42,7 +42,7 @@ public interface PreOvertimeReflectProcess {
 	 * @param dailyData
 	 * @return
 	 */
-	public void startAndEndTimeReflectSche(PreOvertimeParameter para,
+	public void startAndEndTimeReflectSche(OvertimeParameter para,
 			boolean changeFlg,
 			WorkInfoOfDailyPerformance dailyData);
 	/**
@@ -52,7 +52,7 @@ public interface PreOvertimeReflectProcess {
 	 * @param dailyData: 日別実績の勤務情報
 	 * @return
 	 */
-	public boolean timeReflectCheck(PreOvertimeParameter para,
+	public boolean timeReflectCheck(OvertimeParameter para,
 			boolean changeFlg,
 			WorkInfoOfDailyPerformance dailyData);
 	/**
@@ -60,7 +60,7 @@ public interface PreOvertimeReflectProcess {
 	 * @param para
 	 * @return
 	 */
-	public void getReflectOfOvertime(PreOvertimeParameter para);
+	public void getReflectOfOvertime(OvertimeParameter para);
 	/**
 	 * 所定外深夜時間の反映
 	 * @param employeeId

@@ -13,27 +13,12 @@ public interface CommonProcessCheckService {
 	 * @param para
 	 * @return false: 反映しない, true: 反映する
 	 */
-	public boolean commonProcessCheck(CommonCheckParameter para);
-	/**
-	 * 予定勤務種類の項目ID
-	 * @return
-	 */
-	public List<Integer> lstScheWorkTimeType();
-	/**
-	 * 勤務種類の項目ID
-	 * 就業時間帯の項目ID
-	 * @return
-	 */
-	public  List<Integer> lstItemRecord();
+	public boolean commonProcessCheck(CommonCheckParameter para);	
 	/**
 	 * 予定勤務種類の項目ID
 	 * @return
 	 */
 	public List<Integer> lstScheWorkItem();
-	/**
-	 * 出勤の項目ID
-	 * @return
-	 */
-	public List<Integer> lstWorkItem();
+	
 
 }

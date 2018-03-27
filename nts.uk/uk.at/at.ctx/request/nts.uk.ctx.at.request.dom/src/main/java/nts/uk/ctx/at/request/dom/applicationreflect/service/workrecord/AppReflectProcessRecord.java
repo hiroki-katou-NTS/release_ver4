@@ -23,5 +23,5 @@ public interface AppReflectProcessRecord {
 	 * 残業申請：　 事前申請の処理   
 	 * @return
 	 */
-	public WorkReflectedStatesInfo overtimeReflectRecord(OvertimeReflectPara para);
+	public WorkReflectedStatesInfo overtimeReflectRecord(OvertimeReflectPara para, boolean isPre);
 }

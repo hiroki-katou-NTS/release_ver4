@@ -4164,7 +4164,7 @@ button.nts-switch-button[disabled]:hover {
 .nts-grid tr.ui-ig-altrecord td.ntsgrid-calc.ntsgrid-disable,
 .nts-grid tr td.ntsgrid-calc.ui-state-hover,
 .nts-grid tr.ui-ig-altrecord td.ntsgrid-calc.ui-state-hover {
-  background-color: purple;
+  background-color: #F69164;
 }
 
 /* line 66, ../sass/components/_ntsgrid.scss */
@@ -4184,7 +4184,7 @@ button.nts-switch-button[disabled]:hover {
 .nts-grid tr.ui-ig-altrecord td.ntsgrid-reflect.ntsgrid-disable,
 .nts-grid tr td.ntsgrid-reflect.ui-state-hover,
 .nts-grid tr.ui-ig-altrecord td.ntsgrid-reflect.ui-state-hover {
-  background-color: green;
+  background-color: #BFEA60;
 }
 
 /* line 85, ../sass/components/_ntsgrid.scss */
@@ -4268,7 +4268,7 @@ button.nts-switch-button[disabled]:hover {
 .nts-grid tr.ui-ig-altrecord td.ntsgrid-alarm.ntsgrid-disable,
 .nts-grid tr td.ntsgrid-alarm.ui-state-hover,
 .nts-grid tr.ui-ig-altrecord td.ntsgrid-alarm.ui-state-hover {
-  background-color: yellow;
+  background-color: #F6F636;
 }
 
 /* line 166, ../sass/components/_ntsgrid.scss */
@@ -4304,7 +4304,7 @@ button.nts-switch-button[disabled]:hover {
 .nts-grid tr.ui-ig-altrecord td.ntsgrid-error.ntsgrid-disable,
 .nts-grid tr td.ntsgrid-error.ui-state-hover,
 .nts-grid tr.ui-ig-altrecord td.ntsgrid-error.ui-state-hover {
-  background-color: red;
+  background-color: #FD4D4D;
 }
 
 /* line 201, ../sass/components/_ntsgrid.scss */

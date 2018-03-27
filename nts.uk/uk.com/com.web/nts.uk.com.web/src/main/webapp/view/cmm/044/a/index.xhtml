@@ -85,13 +85,8 @@
 									</tr>
 									<tr>
 										<td data-bind="with: currentItem">
-											<div class="radio"
-												data-bind="ntsRadioBoxGroup: {
-														options: $parent.itemList,
-														optionsValue: 'id',
-														optionsText: 'name',
-														value: $parent.agentAppType1,
-														enable: true}">
+											<div class="radio" style="margin-left:55px;">
+												<label>#{i18n.getText('CMM044_16')}</label>
 											</div>
 										</td>
 										<td>
@@ -106,7 +101,7 @@
 									</tr>
 								</table>
 							</div>
-							<div class="tab-content-2">
+							<div class="tab-content-2" style= "display: none">
 								<table>
 									<colgroup>
 										<col width="200px" />
@@ -141,7 +136,7 @@
 									</tr>
 								</table>
 							</div>
-							<div class="tab-content-3">
+							<div class="tab-content-3" style= "display: none">
 								<table>
 									<colgroup>
 										<col width="200px" />
@@ -176,7 +171,7 @@
 									</tr>
 								</table>
 							</div>
-							<div class="tab-content-4">
+							<div class="tab-content-4" style= "display: none">
 								<table>
 									<colgroup>
 										<col width="200px" />
@@ -198,6 +193,7 @@
 														value: $parent.agentAppType4,
 														enable: true}">
 											</div>
+											
 										</td>
 										<td>
 											<div class="radio-right">

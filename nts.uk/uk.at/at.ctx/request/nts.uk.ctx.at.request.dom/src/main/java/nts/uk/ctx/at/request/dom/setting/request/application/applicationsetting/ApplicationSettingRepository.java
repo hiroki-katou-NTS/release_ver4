@@ -22,18 +22,18 @@ public interface ApplicationSettingRepository {
 	/**
 	 * @param applicationSetting
 	 */
-	void updateSingle(ApplicationSetting applicationSetting);
+	void updateSingle(ApplicationSetting applicationSetting, AppReflectAfterConfirm appReflectAfterConfirm);
 
 	/**
 	 * insert application setting
 	 * @param applicationSetting
 	 * @author yennth
 	 */
-	void insert(ApplicationSetting applicationSetting);
+	void insert(ApplicationSetting applicationSetting, AppReflectAfterConfirm appReflectAfterConfirm);
 
 	/**
 	 * @param lstApplicationSetting
 	 */
-	void updateList(List<ApplicationSetting> lstApplicationSetting);
+	void updateList(List<ApplicationSetting> lstApplicationSetting, AppReflectAfterConfirm appReflectAfterConfirm);
 
 }

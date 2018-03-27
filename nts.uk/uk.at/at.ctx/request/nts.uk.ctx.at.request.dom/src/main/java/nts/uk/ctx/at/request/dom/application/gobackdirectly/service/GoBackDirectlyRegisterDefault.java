@@ -150,6 +150,7 @@ public class GoBackDirectlyRegisterDefault implements GoBackDirectlyRegisterServ
 		} else {//チェックしない
 			output.lateOrLeaveAppSettingFlg = SettingFlg.NOTSETTING;
 		}
+		output.isError = false; // đối ứng ngày 24/03/2018 để tránh lỗi setting
 		return output;
 	}
 

@@ -153,7 +153,12 @@ module nts.uk.at.view.kaf000.b.viewmodel {
 
             self.displayDenyButton((userTypeValue == UserType.APPLICANT_APPROVER || userTypeValue == UserType.APPROVER)
                 && (approvalAtrValue != ApprovalAtr.DENIAL));
-            self.enableDenyButton(
+            self.enableDenyButton((state == Status.DENIAL || state == Status.WAITREFLECTION || state == Status.NOTREFLECTED || state == Status.REMAND)
+                && canApprove
+                && !expired);
+
+            self.displayRemandButton((userTypeValue == UserType.APPLICANT_APPROVER || userTypeValue == UserType.APPROVER));
+            self.enableRemandButton(
                 ((state == Status.DENIAL || state == Status.NOTREFLECTED || state == Status.REMAND)
                 && canApprove
                 && !expired) ||
@@ -163,16 +168,10 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                 && !expired)
             );
 
-            self.displayRemandButton((userTypeValue == UserType.APPLICANT_APPROVER || userTypeValue == UserType.APPROVER));
-            self.enableRemandButton((state == Status.DENIAL || state == Status.WAITREFLECTION || state == Status.NOTREFLECTED || state == Status.REMAND)
-                && canApprove
-                && !expired);
-
             self.displayReleaseButton((userTypeValue == UserType.APPLICANT_APPROVER || userTypeValue == UserType.APPROVER));
             self.enableReleaseButton((state == Status.DENIAL || state == Status.WAITREFLECTION || state == Status.NOTREFLECTED || state == Status.REMAND)
                 && canApprove
-                && (approvalAtrValue == ApprovalAtr.APPROVED || approvalAtrValue == ApprovalAtr.DENIAL)
-                && !expired);
+                && (approvalAtrValue == ApprovalAtr.APPROVED || approvalAtrValue == ApprovalAtr.DENIAL));
 
             self.displayUpdateButton((userTypeValue == UserType.APPLICANT_APPROVER || userTypeValue == UserType.APPLICANT || userTypeValue == UserType.OTHER));
             self.enableUpdateButton(state == Status.NOTREFLECTED || state == Status.REMAND);

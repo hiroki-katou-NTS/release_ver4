@@ -230,7 +230,7 @@ public class OvertimeSixProcessImpl implements OvertimeSixProcess{
 	public List<CaculationTime> checkOutSideTimeTheDay(String companyID, String employeeID, String appDate,
 			ApprovalFunctionSetting approvalFunctionSetting, String siftCD,List<CaculationTime> overtimeHours,RecordWorkInfoImport recordWorkInfoImport,List<OvertimeInputCaculation> overtimeInputCaculations) {
 		
-		CaculationTime overtimeCheckResult = new CaculationTime();
+		
 		List<OvertimeInputCaculation> overtimeCal = new ArrayList<>();
 		if(recordWorkInfoImport.getAttendanceStampTimeFirst() != null && recordWorkInfoImport.getLeaveStampTimeFirst() != null){
 			// 打刻あり
@@ -251,9 +251,7 @@ public class OvertimeSixProcessImpl implements OvertimeSixProcess{
 			// 出勤または退勤打刻なし
 			for(CaculationTime caculationTime : overtimeHours){
 				if(caculationTime.getApplicationTime()!= null && caculationTime.getApplicationTime() >= 0){
-					overtimeCheckResult.setFrameNo(caculationTime.getFrameNo());
-					overtimeCheckResult.setErrorCode(2);
-					overtimeHours.add(overtimeCheckResult);
+					caculationTime.setErrorCode(2);
 				}
 			}
 		}

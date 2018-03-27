@@ -138,11 +138,11 @@ public class KrqstApplicationSetting extends UkJpaEntity {
 	@Column(name = "ATTENDENT_TIME_REFLECT_FLG")
 	public int attendentTimeReflectFlg;
 
-	/**スケジュールが確定されている場合*/
+	/** 実績が確定されている場合*/
 	@Column(name = "ACHIEVEMENT_CONFIRM_ATR")
 	public int achievementConfirmedAtr;
 	
-	/**実績が確定されている場合*/
+	/** スケジュールが確定されている場合  */
 	@Column(name = "SCHEDULE_CONFIRM_ATR")
 	public int scheduleConfirmedAtr;
 	

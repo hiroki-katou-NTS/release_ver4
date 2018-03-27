@@ -82,7 +82,7 @@ public class KrqdtAppOvertime extends UkJpaEntity implements Serializable {
 	}
 
 	public KrqdtAppOvertime fromDomainValue(AppOverTime appOverTime){
-		this.version = appOverTime.getVersion();
+		this.setVersion(appOverTime.getVersion());
 		this.setWorkTypeCode(appOverTime.getWorkTypeCode() == null ? null : appOverTime.getWorkTypeCode().v());
 		this.setSiftCode(appOverTime.getSiftCode() == null ? null : appOverTime.getSiftCode().v());
 		this.setWorkClockFrom1(appOverTime.getWorkClockFrom1());

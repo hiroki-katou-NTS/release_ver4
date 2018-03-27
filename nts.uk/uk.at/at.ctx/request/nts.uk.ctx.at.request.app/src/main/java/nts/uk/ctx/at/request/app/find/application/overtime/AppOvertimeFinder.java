@@ -55,6 +55,8 @@ import nts.uk.ctx.at.request.dom.application.overtime.service.WorkTypeAndSiftTyp
 import nts.uk.ctx.at.request.dom.application.overtime.service.WorkTypeOvertime;
 import nts.uk.ctx.at.request.dom.application.overtime.service.output.RecordWorkOutput;
 import nts.uk.ctx.at.request.dom.setting.applicationreason.ApplicationReason;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.appovertime.AppOvertimeSettingRepository;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.appovertime.FlexExcessUseSetAtr;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.OvertimeRestAppCommonSetRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.OvertimeRestAppCommonSetting;
 import nts.uk.ctx.at.request.dom.setting.company.divergencereason.DivergenceReason;
@@ -124,6 +126,8 @@ public class AppOvertimeFinder {
 	private OtherCommonAlgorithm otherCommonAlgorithm;
 	@Inject
 	private DailyAttendanceTimeCaculation dailyAttendanceTimeCaculation;
+	@Inject
+	private AppOvertimeSettingRepository appOvertimeSettingRepository;
 	
 	/**
 	 * @param url
@@ -462,6 +466,16 @@ public class AppOvertimeFinder {
 				}
 			}
 		}
+		// display flex
+		if (appOvertimeSettingRepository.getAppOver().isPresent()) {
+			if (appOvertimeSettingRepository.getAppOver().get().getFlexJExcessUseSetAtr()
+					.equals(FlexExcessUseSetAtr.NOTDISPLAY)) {
+				overTimeDto.setFlexFLag(false);
+			} else {
+				overTimeDto.setFlexFLag(true);
+			}
+
+		}
 		return overTimeDto;
 	} 
 	public List<OvertimeInputDto> checkColorCaculationForUIB(List<OvertimeInputDto> overtimeHours,int prePostAtr,String appDate,String inputDate,String siftCD,
@@ -656,6 +670,7 @@ public class AppOvertimeFinder {
 		result.setDisplayPrePostFlg(displayPrePost.getDisplayPrePostFlg());
 		applicationDto.setPrePostAtr(displayPrePost.getPrePostAtr());
 		result.setApplication(applicationDto);
+		result.setPrePostCanChangeFlg(displayPrePost.isPrePostCanChangeFlg());
 				
 		//String workplaceID = employeeAdapter.getWorkplaceId(companyID, employeeID, GeneralDate.today());
 		ApprovalFunctionSetting approvalFunctionSetting = appCommonSettingOutput.approvalFunctionSetting;
@@ -811,6 +826,16 @@ public class AppOvertimeFinder {
 				}			
 			}
 		}
+		// display flex
+		if(appOvertimeSettingRepository.getAppOver().isPresent()){
+			if(appOvertimeSettingRepository.getAppOver().get().getFlexJExcessUseSetAtr().equals(FlexExcessUseSetAtr.NOTDISPLAY)){
+				result.setFlexFLag(false);
+			}else{
+				result.setFlexFLag(true);
+			}
+			
+		}
+		
 		
 	}
 

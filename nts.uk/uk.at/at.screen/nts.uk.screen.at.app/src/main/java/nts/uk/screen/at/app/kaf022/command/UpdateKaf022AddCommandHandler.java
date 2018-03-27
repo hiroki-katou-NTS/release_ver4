@@ -166,6 +166,8 @@ public class UpdateKaf022AddCommandHandler extends CommandHandler<Kaf022AddComma
 		applicationSettingCommand.setHwActualDispAtr(appSet.getHdPerform());
 		applicationSettingCommand.setHwAdvanceDispAtr(appSet.getHdPre());
 		applicationSettingCommand.setAdvanceExcessMessDispAtr(appSet.getMsgAdvance());
+		applicationSettingCommand.setAchievementConfirmedAtr(appSet.getAchiveCon());
+		applicationSettingCommand.setScheduleConfirmedAtr(appSet.getScheduleCon());
 		return applicationSettingCommand;
 	}
 }

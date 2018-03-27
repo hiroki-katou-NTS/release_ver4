@@ -13,4 +13,9 @@ public class DisplayPrePost {
 	 * prePostAtr
 	 */
 	private int prePostAtr;
+	
+	/**
+	 * prePostCanChangeFlg
+	 */
+	private boolean prePostCanChangeFlg;
 }

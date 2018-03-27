@@ -75,7 +75,7 @@
 															readonly: false}" />
 					</div>
 					<div class="cell valign-center row-cell-margin"
-						style="display: inline-block">
+						style="display: none">
 						<!--選択場所　Button-->
 						<button id="btnLocation1" class="location-button-009"
 							data-bind="click: function(){openLocationDialog(1)}, enable: isNewScreen">#{i18n.getText('KAF009_15')}</button>
@@ -137,7 +137,7 @@
 		</div>
 
 		<!--勤務時間 2-->
-		<div class="valign-center control-group" data-bind="if: useMulti()">
+		<div class="valign-center control-group" data-bind="if: useMulti()" style="display: none">
 			<div class="table">
 				<div class="cell valign-center">
 					<div class="lblTitleKAF009"
@@ -281,7 +281,7 @@
 	</div>
 	<!--RIGHT CONTENT -->
 	<div class="right-contents">
-		<div class="panel panel-gray-bg panel-frame">
+		<div class="panel panel-gray-bg panel-frame kaf009-panel">
 			<label>#{i18n.getText('KAF009_30')} :</label> <BR /> <BR /> <label>#{i18n.getText('KAF009_31')}
 				:</label> <BR /> <BR /> <label>#{i18n.getText('KAF009_32')} :</label> <BR />
 			<label>#{i18n.getText('KAF009_33')} :</label> <BR /> <BR /> <label>#{i18n.getText('KAF009_34')}

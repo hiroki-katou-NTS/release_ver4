@@ -27,8 +27,8 @@
 			<div id="functions-area" data-bind="">
 				<div style ="display: flex;">
 					<button class="proceed" data-bind="click: insert,enable: $root.errors.isEmpty">#{i18n.getText('KAF009_3')}</button>
-					<button id="btnSpecSetting" data-bind="">#{i18n.getText('KAF009_4')}</button>
-					<button id="btnOpenCmm018" data-bind="click: openCMM018">#{i18n.getText('KAF009_5')}</button>
+					<button id="btnSpecSetting" style="display: none" data-bind="">#{i18n.getText('KAF009_4')}</button>
+					<button id="btnOpenCmm018" style="display: none" data-bind="click: openCMM018">#{i18n.getText('KAF009_5')}</button>
 					<div class="btnSendMail"
 						data-bind="visible: enableSendMail, ntsCheckBox: { checked: true, enable: true, text: '#{i18n.getText('KAF009_6')}' }">
 					</div>

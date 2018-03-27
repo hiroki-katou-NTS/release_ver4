@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess;
 
-import java.util.List;
 import java.util.Map;
 
 import nts.arc.time.GeneralDate;
@@ -14,10 +13,9 @@ public interface ScheWorkUpdateService {
 	/**
 	 * 予定勤種・就時の反映
 	 * @param para
+	 * scheUpdate: true: 予定勤種就時を反映, false: 勤種就時を反映
 	 */
-	public void updateWorkTimeType(ReflectParameter para, 
-			List<Integer> lstItem,
-			boolean scheUpdate);
+	public void updateWorkTimeType(ReflectParameter para, boolean scheUpdate);
 	/**
 	 * 予定時刻の反映
 	 * @param data

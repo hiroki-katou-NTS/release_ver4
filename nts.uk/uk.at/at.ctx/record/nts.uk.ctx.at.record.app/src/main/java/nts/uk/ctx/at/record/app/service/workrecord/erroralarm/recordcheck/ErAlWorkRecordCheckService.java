@@ -143,9 +143,8 @@ public class ErAlWorkRecordCheckService {
 	private void processCheckContinuous(GeneralDate endMark, DatePeriod range, Map<GeneralDate, Integer> result,
 			ContinuousHolCheckSet setting, String employeeId, GeneralDate markDate, int count,
 			boolean markPreviousDate) {
-
-		List<WorkInfoOfDailyPerformance> workInfos = workInfo.findByPeriodOrderByYmd(employeeId, range).stream()
-				.sorted((w1, w2) -> w2.getYmd().compareTo(w1.getYmd())).collect(Collectors.toList());
+		boolean finishing = false;
+		List<WorkInfoOfDailyPerformance> workInfos = workInfo.findByPeriodOrderByYmdDesc(employeeId, range);
 
 		if (workInfos.isEmpty()) { return; }
 		
@@ -162,12 +161,14 @@ public class ErAlWorkRecordCheckService {
 					result.put(markDate, count);
 				}
 				if (endMark.afterOrEquals(info.getYmd())) {
+					finishing = true;
 					break;
 				}
 				markPreviousDate = true;
 				count = 0;
 			}
 		}
+		if(finishing) { return; }
 
 		DatePeriod perviousRange = new DatePeriod(range.start().addDays(-16), range.start().addDays(-1));
 		processCheckContinuous(endMark, perviousRange, result, setting, employeeId, markDate, count, markPreviousDate);

@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import lombok.val;
 import nts.arc.layer.app.command.AsyncCommandHandlerContext;
@@ -23,6 +25,7 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDail
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.raisesalarytime.repo.SpecificDateAttrOfDailyPerforRepo;
 import nts.uk.ctx.at.record.dom.shorttimework.repo.ShortTimeOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
@@ -42,7 +45,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	private CalculateDailyRecordService calculateDailtRecordService;
 	
 	//*****（未）　以下、日別実績の勤怠情報など、日別計算のデータ更新に必要なリポジトリを列記。
-	/** リポジトリ：日別実績の勤怠情報 */
+	/** リポジトリ：日別実績の勤怠時間 */
 	@Inject
 	private AttendanceTimeRepository attendanceTimeRepository;
 	
@@ -189,18 +192,19 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		val employeeId = attendanceTime.getEmployeeId();
 		val ymd = attendanceTime.getYmd();
 		org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-		if (this.attendanceTimeRepository.find(employeeId, ymd).isPresent()){
+		//if (this.attendanceTimeRepository.find(employeeId, ymd).isPresent()){
+//		if(attendanceTime != null)
 			
 			log.info("更新され始めます");
 			// 更新
 			this.attendanceTimeRepository.update(attendanceTime);
-		}
-		else {
-			//log.info("更新なんてされずにスルーされます");
-			// 追加
-			//*****（未）　親のフローにより、読み込めないデータは計算しないはずなので、この処理は不要かもしれない。find確認自体不要かも。
-			//this.attendanceTimeRepository.add(attendanceTime);
-		}
+//		}
+//		else {
+//			//log.info("更新なんてされずにスルーされます");
+//			// 追加
+//			//*****（未）　親のフローにより、読み込めないデータは計算しないはずなので、この処理は不要かもしれない。find確認自体不要かも。
+//			//this.attendanceTimeRepository.add(attendanceTime);
+//		}
 	}
 	
 	/**
@@ -210,11 +214,11 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	 * @return
 	 */
 	private List<IntegrationOfDaily> createIntegrationOfDaily(String employeeId, DatePeriod datePeriod) {
-		val attendanceTimeList= attendanceTimeRepository.findByPeriodOrderByYmd(employeeId, datePeriod);
+		val attendanceTimeList= workInformationRepository.findByPeriodOrderByYmd(employeeId, datePeriod);
 		
 		List<IntegrationOfDaily> returnList = new ArrayList<>();
 		
-		for(AttendanceTimeOfDailyPerformance attendanceTime : attendanceTimeList) {
+		for(WorkInfoOfDailyPerformance attendanceTime : attendanceTimeList) {
 			/** リポジトリ：日別実績の勤務情報 */
 			val workInf = workInformationRepository.find(employeeId, attendanceTime.getYmd());  
 			/** リポジトリ：日別実績の計算区分 */
