@@ -169,37 +169,6 @@ module a11 {
                 }
             });
         }  
-        
-        /**
-         * Handle when using tab button
-         */
-        public changeTab(data: any, e: any) {
-            let _self = this;
-            if (e.which == 9) {
-                if (_self.isDetailMode()) {
-                    let tabindex = e.target.attributes.tabindex.value;
-                    if (nts.uk.util.isNullOrUndefined(tabindex)) {
-                        return;    
-                    } 
-                    
-                    if (tabindex === '145' && !_self.fromOverTimeUseDivision()) {
-                        _self.selectedTab('tab-12');  
-                    } else if (tabindex === '147' && _self.fromOverTimeUseDivision() && _self.fromOverTimeSubHolTransferSetAtr() === 0) {
-                        _self.selectedTab('tab-12');  
-                    } else if (tabindex === '148' && _self.fromOverTimeUseDivision() && _self.fromOverTimeSubHolTransferSetAtr() === 1) {
-                        _self.selectedTab('tab-12');  
-                    } else {      
-                        if (_self.fromOverTimeSubHolTransferSetAtr() === 1) {
-                            $("[tabindex='148']").focus();
-                        } else {
-                            $("[tabindex='" + (Number(tabindex) + 1).toString() + "']").focus();
-                        }                                         
-                    }  
-                } else {
-                    _self.selectedTab('tab-12');  
-                }              
-            }
-        }
     }     
    
     /**

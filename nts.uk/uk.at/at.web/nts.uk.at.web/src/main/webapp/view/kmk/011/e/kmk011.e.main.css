@@ -1,0 +1,12 @@
+@CHARSET "UTF-8";
+
+.background-for-list {
+	padding: 20px;
+    width: 267px;
+    height: 255px;
+}
+.caret-background.caret-bottom:after {
+    left: 115px;
+    top: 100%;
+    border-width: 20px 35px;
+}

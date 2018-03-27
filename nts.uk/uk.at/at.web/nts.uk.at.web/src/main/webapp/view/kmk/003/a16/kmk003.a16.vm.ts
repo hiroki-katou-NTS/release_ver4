@@ -81,21 +81,7 @@ module a16 {
             let _self = this;
             _self.zeroHStraddCalculateSetting = _self.model.commonSetting.zeroHStraddCalculateSet;   
         }
-        
-        /**
-         * Handle when using tab button
-         */
-        public changeTab(data: any, e: any) {
-            let _self = this;
-            if (e.which == 9) {
-                if (_self.isDetailMode()) {
-                    //TODO switch to tab 17
-                    _self.selectedTab('tab-1');  
-                } else {
-                    _self.selectedTab('tab-1');  
-                }            
-            }
-        }
+       
     }
     
     /**

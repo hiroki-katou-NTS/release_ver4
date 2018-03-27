@@ -1,9 +1,7 @@
-module kmk011.a {
+module nts.uk.at.view.kmk011.a {
     __viewContext.ready(function() {
-        var screenModel = new kmk011.a.viewmodel.ScreenModel();
-        screenModel.startPage().done(function() {
-            __viewContext.bind(screenModel);
-            $("#itemname").focus();
-        }); 
+        var screenModel = new viewmodel.ScreenModel();
+        __viewContext.bind(screenModel);    
+        $("#btn_openB").focus();
     });
 }

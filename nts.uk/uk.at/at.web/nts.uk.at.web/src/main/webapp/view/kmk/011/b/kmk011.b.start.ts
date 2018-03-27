@@ -1,13 +1,12 @@
-module kmk011.b {
-    __viewContext.ready(function(){
-        var screenModel = new viewmodel.ScreenModel();
-        screenModel.startPage().done(function() {
-            __viewContext.bind(screenModel);
-            if(screenModel.checkModel()){  
-                $("#inpReason").focus();
-            }else{
-                $("#inpCode").focus();
-            }
+module nts.uk.at.view.kmk011.b {
+    import blockUI = nts.uk.ui.block;
+    
+    __viewContext.ready(function() {
+        let mainTab = new viewmodel.ScreenModel();
+
+        
+        mainTab.start_page().done(function(screenModel){
+            __viewContext.bind(mainTab); 
         });
     });
 }

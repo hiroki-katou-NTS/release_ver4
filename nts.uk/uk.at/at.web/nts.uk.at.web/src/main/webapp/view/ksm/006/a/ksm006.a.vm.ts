@@ -572,6 +572,9 @@ module nts.uk.at.view.ksm006.a {
                         .done(function() {
                             // Selected Item subscribe
                             self.selectedWorkplaceId.subscribe(function(data: string) {
+                                // clear errors
+                                self.clearError();
+                                
                                 blockUI.invisible();
                                 if (data) {
                                     // Find WorkplaceBasicWork by WorkplaceId
@@ -622,6 +625,9 @@ module nts.uk.at.view.ksm006.a {
                             });
                         // SelectedClassification Subscribe
                         self.selectedClassifi.subscribe(function(data: string) {
+                            // clear errors
+                            self.clearError();
+                            
                             blockUI.invisible();
                             if (data) {
                                 // Find ClassificationBasicWork

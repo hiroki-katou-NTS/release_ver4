@@ -58,12 +58,10 @@ module kdl003.parent.viewmodel {
                     self.childSelectWorkTypeName(childData.selectedWorkTypeName);
                     self.childSelectSiftCode(childData.selectedWorkTimeCode);
                     self.childSelectSiftName(childData.selectedWorkTimeName);
-                    self.firstStartTime(childData.firstStartTime);
-                    self.firstEndTime(childData.firstEndTime);
-                    self.secondStartTime(childData.secondStartTime);
-                    self.secondEndTime(childData.secondEndTime);
-                    self.first(childData.first);
-                    self.second(childData.second);
+                    self.firstStartTime(childData.first.start);
+                    self.firstEndTime(childData.first.end);
+                    self.secondStartTime(childData.second.start);
+                    self.secondEndTime(childData.second.end);
                 }
             })
         }

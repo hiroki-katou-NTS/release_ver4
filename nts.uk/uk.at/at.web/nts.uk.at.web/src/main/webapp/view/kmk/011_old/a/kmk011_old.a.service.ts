@@ -1,4 +1,4 @@
-module kmk011.a.service {
+module kmk011_old.a.service {
     var paths = {
         getAllDivTime: "at/record/divergencetime/getalldivtime",
         updateDivTime: "at/record/divergencetime/updatedivtime",

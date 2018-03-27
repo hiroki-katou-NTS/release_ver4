@@ -84,20 +84,6 @@ module a13 {
             _self.temporaryWorkTimeSettingRoundingTime = _self.model.commonSetting.extraordTimeSet.timeRoundingSet.roundingTime;
             _self.temporaryWorkTimeSettingRounding = _self.model.commonSetting.extraordTimeSet.timeRoundingSet.rounding;
         }                    
-        
-        /**
-         * Handle when using tab button
-         */
-        public changeTab(data: any, e: any) {
-            let _self = this;
-            if (e.which == 9) {
-                if (_self.isDetailMode()) {
-                    _self.selectedTab('tab-14');  
-                } else {
-                    _self.selectedTab('tab-1');  
-                }            
-            }
-        }
     }
     
     /**

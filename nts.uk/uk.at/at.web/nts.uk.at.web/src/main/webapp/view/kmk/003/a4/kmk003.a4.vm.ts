@@ -103,15 +103,6 @@ module a4 {
             //check mode screen
         }
 
-        /**
-         * Handle when using tab button
-         */
-        public changeTab(data: any, e: any) {
-            let _self = this;
-            if (e.which == 9) {
-                _self.selectedTab('tab-5');            
-            }
-        }
     }
     export class Item {
         code: number;

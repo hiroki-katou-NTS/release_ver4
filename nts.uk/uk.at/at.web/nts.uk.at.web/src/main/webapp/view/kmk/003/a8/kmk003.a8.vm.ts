@@ -174,27 +174,7 @@ module a8 {
                 }                          
             }
         }
-        
-        /**
-         * Handle when using tab button
-         */
-        public changeTab(parent: any, data: any, e: any) {
-            let _self = this;
-            if (e.which == 9) {
-                let tabindex = e.target.attributes.tabindex.value;
-                if (nts.uk.util.isNullOrUndefined(tabindex)) {
-                    return;    
-                } 
-                
-                if (tabindex === '127' && parent.pubHolWorkTimePublicApproTimeSetting.timeRoundingMethod() === 0) {
-                    parent.selectedTab('tab-9'); 
-                } else if (tabindex === '129') {
-                    parent.selectedTab('tab-9'); 
-                } else {      
-                    $("[tabindex='" + (Number(tabindex) + 1).toString() + "']").focus();                                        
-                } 
-            }
-        }
+
     }
     
     class TimeRoundingSetting {

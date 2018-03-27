@@ -96,20 +96,6 @@ module a15 {
             _self.nightShiftSettingRoundingTime = _self.model.commonSetting.getMedicalNightShift().roundingSet.roundingTime;
             _self.nightShiftSettingRounding = _self.model.commonSetting.getMedicalNightShift().roundingSet.rounding;          
         }
-        
-        /**
-         * Handle when using tab button
-         */
-        public changeTab(data: any, e: any) {
-            let _self = this;
-            if (e.which == 9) {
-                if (_self.isDetailMode()) {
-                    _self.selectedTab('tab-16');  
-                } else {
-                    _self.selectedTab('tab-1');  
-                }            
-            }
-        }
     }
     
     /**

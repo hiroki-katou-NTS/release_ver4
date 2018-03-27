@@ -102,16 +102,6 @@ module a1 {
             let self = this;
             oldData.startDateClock = self.dayStartTime();
         }
-        
-        /**
-         * Handle when using tab button
-         */
-        public changeTab(data: any, e: any) {
-            let _self = this;
-            if (e.which == 9) {
-                _self.selectedTab('tab-2');        
-            }
-        }
 
     }
     export class Item {

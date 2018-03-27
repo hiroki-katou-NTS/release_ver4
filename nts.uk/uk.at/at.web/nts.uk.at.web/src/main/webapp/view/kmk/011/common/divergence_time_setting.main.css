@@ -1,0 +1,22 @@
+@CHARSET "UTF-8";
+
+.divergence_time_settting {
+	margin-left: 50px;
+}
+
+.divergence_time_settting > table th {
+	padding: 5px 2px;
+    border: 1px solid #000000;
+    color: #000;
+    background-color: #97D155;
+}
+
+.divergence_time_settting > table td {
+	padding: 5px 20px;
+    border: 1px solid #000000;
+    color: #000;
+}
+
+.disable_table_row {
+	background: #cccccc;
+}

@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<com:ValidatorScript>
+			nts.uk.ctx.at.record.dom.divergence.time.message.ErrorAlarmMessage
+		</com:ValidatorScript>
+			<script>
+				var dialogSize = {
+					width : 950,
+					height : 500
+				};
+			</script>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="kmk011.i.main.css" />
+			<com:scriptfile path="kmk011.i.service.js" />
+			<com:scriptfile path="kmk011.i.vm.js" />
+			<com:scriptfile path="kmk011.i.start.js" />
+		</ui:define>
+
+		<ui:define name="content">
+			<div id="functions-area">
+				<!-- I1_1: Button Registration -->
+				<button style="margin-left: 45px;" tabindex="2" id="btn_001"
+					class="button proceed separate-button fix-button"
+					data-bind="click: registrationErrMsg, enable: $root.errors.isEmpty">#{i18n.getText('KMK011_3')}</button>
+				<!-- I1_2: Button Close -->
+				<button tabindex="3" id="btn_005"
+					class="button separate-button fix-button"
+					data-bind="click: closeDialog">閉じる</button>
+			</div>
+			<div class="contents-area fixed-flex-layout"
+				style="padding-top: 50px; padding-left: 50px;">
+				<div class="fixed-flex-layout-left">
+					<table id="single-list"
+						data-bind="ntsGridList: {								
+							height: 255,
+							options: dataSource,
+							optionsValue: 'divergenceTimeNo',
+							columns: columns,
+							multiple: false,
+							value: currentCode}">
+					</table>
+				</div>
+
+				<div class="fixed-flex-layout-right">
+					<table>
+						<colgroup>
+							<col width="135px" />
+							<col width="*" />
+						</colgroup>
+
+						<tr class="row" data-bind="if: settingMode">
+							<td style="padding-bottom: 35px">
+								<!--I3-1 -->
+								<div data-bind="ntsFormLabel: {}">#{i18n.getText('KMK011_72')}</div>
+							</td>
+							<td style="padding-bottom: 35px"><span
+								style="padding-left: 35px" data-bind="text: wkTypeCode"></span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
+								<span data-bind="text: wkTypeName"></span></td>
+						</tr>
+						<tr class="row">
+							<td style="padding-bottom: 35px">
+								<!--I4-1 -->
+								<div data-bind="ntsFormLabel: {}">#{i18n.getText('KMK011_76')}</div>
+							</td>
+							<td style="padding-left: 5px">
+								<!-- I4_2 -->
+								<div data-bind="with: multilineeditorErr">
+									<textarea
+										data-bind="ntsMultilineEditor: {
+											value: errorMessage,
+											option: option,
+											enable: true,
+											constraint: 'ErrorAlarmMessage',									
+											readonly: false,
+											immediate: false}" />
+								</div>
+							</td>
+						</tr>
+
+						<tr class="row">
+							<td style="padding-bottom: 35px">
+								<!--I5-1 -->
+								<div data-bind="ntsFormLabel: {}">#{i18n.getText('KMK011_77')}</div>
+							</td>
+							<td style="padding-left: 5px">
+								<!-- I5_2 -->
+								<div data-bind="with: multilineeditorAlarm">
+									<textarea
+										data-bind="ntsMultilineEditor: {
+											value: alarmMessage,
+											option: option,
+											enable: true,
+											constraint: 'ErrorAlarmMessage',
+											readonly: false,
+											immediate: false}" />
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

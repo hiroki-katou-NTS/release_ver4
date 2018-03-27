@@ -1,0 +1,7 @@
+@CHARSET "UTF-8";
+
+#daterangepicker{
+	display: inline-block;
+    float: left;
+    margin-left: 85px
+}

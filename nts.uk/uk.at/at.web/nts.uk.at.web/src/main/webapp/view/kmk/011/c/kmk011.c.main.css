@@ -1,0 +1,43 @@
+@CHARSET "UTF-8";
+
+
+#left-content {
+	margin: 10px 0px 0 20px !important;
+	float: left;
+}
+
+#right-content {
+	margin-left: 40px;
+	margin-top: 10px;
+	float: left;
+	height: 350px;
+}
+
+#nts-input-name {
+	width: 0px !important;
+}
+
+.row {
+	padding: 5px;
+	height: 70px;
+}
+
+#inpReason {
+	width: 170px !important;
+}
+#single-list tr td {
+	white-space: nowrap;
+	nowrap: nowrap;
+}
+#inpCode{
+	width: 25px !important;
+	text-align: center;
+}
+
+p span {
+	word-wrap: break-word;
+}
+
+button#btn_005{
+	    margin-right: 0px !important;
+}

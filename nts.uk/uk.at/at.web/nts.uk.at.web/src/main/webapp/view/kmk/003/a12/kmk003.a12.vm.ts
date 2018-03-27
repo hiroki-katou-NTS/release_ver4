@@ -85,20 +85,6 @@ module a12 {
             _self.lateNightSettingRoundingTime = _self.model.commonSetting.lateNightTimeSet.roundingSetting.roundingTime;
             _self.lateNightSettingRounding = _self.model.commonSetting.lateNightTimeSet.roundingSetting.rounding;
         }                
-        
-        /**
-         * Handle when using tab button
-         */
-        public changeTab(data: any, e: any) {
-            let _self = this;
-            if (e.which == 9) {
-                if (_self.isDetailMode()) {
-                    _self.selectedTab('tab-13');  
-                } else {
-                    _self.selectedTab('tab-1');  
-                }            
-            }
-        }
     }
       
     /**

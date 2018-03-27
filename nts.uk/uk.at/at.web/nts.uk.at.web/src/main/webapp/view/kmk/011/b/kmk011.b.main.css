@@ -1,35 +1,75 @@
 @CHARSET "UTF-8";
-
-
 #left-content {
-	margin: 10px 0px 0 20px !important;
+	margin-left: 30px;
+	margin-top: 20px;
+	padding: 25px;
 	float: left;
+	max-height: 300px;
 }
 
 #right-content {
 	margin-left: 40px;
-	margin-top: 10px;
 	float: left;
-	height: 350px;
+	margin-top: 20px;
 }
 
-#nts-input-name {
-	width: 0px !important;
+.ntsRadioBox {
+	width: 100%;
+	margin-top: 10px;
+}
+
+#inp_002 {
+	width: 100px;
+	float: left;
+}
+
+#inp_006 {
+	float: left;
+}
+
+#inp_003 {
+	float: center;
+	margin-left: 30px;
+}
+
+.inp_004 {
+	padding-bottom: 20px;
+	padding-top: 20px;
+}
+
+.lst_003 {
+	margin-top: 10px;
+	display: inline-block;
+	height: 190px;
+	overflow-y: scroll;
+}
+
+.line {
+	display: inline-block;
+}
+
+.left-line {
+	width: 120px;
 }
 
 .row {
-	padding: 5px;
 	height: 50px;
 }
 
-#inpReason {
-	width: 170px !important;
-}
-#single-list tr td {
+#single-list-dataSource tr td {
 	white-space: nowrap;
-	nowrap: nowrap;
 }
-#inpCode{
-	width: 25px !important;
-	text-align: center;
+#div-time-name{
+	width: 150px !important;
 }
+#content-area{
+	width: 1260px;
+}
+#inpDialog{
+	margin-left: 30px;
+}
+
+#itemname{
+	width: 180px !important;
+}
+

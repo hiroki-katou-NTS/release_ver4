@@ -279,6 +279,21 @@ public class ProgramsManager {
 	public static final Program KMK011B = new Program(WebAppId.AT, ProgramIdConsts.KMK011B, "KMK011_2",
 			"/view/kmk/011/b/index.xhtml");
 	/**
+	 * KMK011C
+	 */
+	public static final Program KMK011C = new Program(WebAppId.AT, ProgramIdConsts.KMK011C, "KMK011_2",
+			"/view/kmk/011/c/index.xhtml");
+	/**
+	 * KMK011H
+	 */
+	public static final Program KMK011H = new Program(WebAppId.AT, ProgramIdConsts.KMK011H, "KMK011_44",
+			"/view/kmk/011/h/index.xhtml");
+	/**
+	 * KMK011I
+	 */
+	public static final Program KMK011I = new Program(WebAppId.AT, ProgramIdConsts.KMK011I, "KMK011_75",
+			"/view/kmk/011/i/index.xhtml");
+	/**
 	 * KML001A
 	 */
 	public static final Program KML001A = new Program(WebAppId.AT, ProgramIdConsts.KML001A, "KML001_29",

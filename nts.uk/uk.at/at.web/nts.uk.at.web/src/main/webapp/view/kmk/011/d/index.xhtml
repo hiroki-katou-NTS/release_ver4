@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<body>
+	<ui:composition template="../../../../master/sidebar.xhtml">
+		<ui:define name="sidebar-head">
+			<com:ValidatorScript>
+				nts.uk.ctx.at.record.dom.divergence.time.history.DivergenceReferenceTime
+			</com:ValidatorScript>
+			
+			<com:scriptfile set="IGNITE" />
+			
+			<com:stylefile path="../common/divergence_time_setting.main.css" />
+			<com:stylefile path="../common/history.main.css" />
+			
+			<com:stylefile path="../e/kmk011.e.main.css" />
+			<com:scriptfile path="../e/kmk011.e.service.js" />
+			<com:scriptfile path="../e/kmk011.e.vm.js" />
+			
+			<com:stylefile path="kmk011.d.main.css" />
+			<com:scriptfile path="kmk011.d.service.js" />
+			<com:scriptfile path="kmk011.d.vm.js" />
+			<com:scriptfile path="kmk011.d.start.js" />
+			
+		</ui:define>
+		<ui:define name="sidebar">
+			<ul tabindex="1" class="navigator">
+				<li data-bind="click: onSelectTabOne"><a tabindex="-1"
+					href="#tabpanel-1" role="tab-navigator" class="active">#{i18n.getText('Com_Company')}</a></li>
+				<li data-bind="click: onSelectTabTwo, visible: isVisableTab()"><a tabindex="-1"
+					href="#tabpanel-2" role="tab-navigator">#{i18n.getText('KMK011_72')}</a></li>
+			</ul>
+		</ui:define>
+		<ui:define name="sidebar-content">
+			<div id="tabpanel-1" role="tabpanel" data-bind="">
+				<ui:include src="d_index.xhtml" />
+			</div>
+			<div id="tabpanel-2" role="tabpanel" data-bind="with: screenE(), visible: isVisableTab()">			
+				<ui:include src="../e/index.xhtml" />
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

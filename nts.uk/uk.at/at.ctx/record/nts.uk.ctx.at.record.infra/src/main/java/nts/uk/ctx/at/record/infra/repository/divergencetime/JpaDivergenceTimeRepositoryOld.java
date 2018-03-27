@@ -18,7 +18,7 @@ import nts.uk.ctx.at.record.infra.entity.divergencetime.KmkmtDivergenceTime;
 import nts.uk.ctx.at.record.infra.entity.divergencetime.KmkmtDivergenceTimePK;
 
 @Stateless
-public class JpaDivergenceTimeRepository extends JpaRepository implements DivergenceTimeRepository {
+public class JpaDivergenceTimeRepositoryOld extends JpaRepository implements DivergenceTimeRepository {
 
 	private final String SELECT_FROM_DIVTIME = "SELECT c FROM KmkmtDivergenceTime c";
 	private final String SELECT_ALL_DIVTIME = SELECT_FROM_DIVTIME

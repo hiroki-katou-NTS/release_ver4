@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>var dialogSize = { width: 960, height: 520 };</script>
+			<com:ValidatorScript>
+				nts.uk.ctx.at.record.dom.divergencetime.DivergenceReasonContent
+				nts.uk.ctx.at.record.dom.divergencetime.DiverdenceReasonCode
+			</com:ValidatorScript>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="kmk011.c.main.css" />
+			<com:scriptfile path="kmk011.c.start.js" />
+			<com:scriptfile path="kmk011.c.vm.js" />
+			<com:scriptfile path="kmk011.c.service.js" />
+		</ui:define>
+		<ui:define name="content">
+			<div id="functions-area">
+				<!-- C1_1: Button New -->
+				<button tabindex="1" id="btn_001"
+					class="button separate-button fix-button"
+					data-bind="click: refreshData">#{i18n.getText('KMK011_19')}</button>
+				<!-- C1_2: Button Registration -->
+				<button tabindex="2" id="btn_002"
+					class="button proceed separate-button fix-button"
+					data-bind="click: RegistrationDivReason">#{i18n.getText('KMK011_3')}</button>
+				<!-- C1_3: Button Delete -->
+				<button tabindex="3" id="btn_005"
+					class="button danger separate-button fix-button"
+					data-bind="click: deleteDivReason, enable: enableDel">#{i18n.getText('KMK011_20')}</button>
+				<!-- C1_4: Button Close -->
+				<button tabindex="4" id="btn_004"
+					class="button separate-button fix-button"
+					data-bind="click: closeDialog">#{i18n.getText('KMK011_21')}</button>
+			</div>
+			<div id="content-area">
+				<div id="left-content" style="float: left"
+					class="bg-green caret-right caret-background">
+					<div style="float: left; margin: 20px">
+						<!-- C2_2: List Divergence Reason -->
+						<table tabindex="5" id="single-list"
+							data-bind="ntsGridList:{
+								width: 330,
+								height: 255,
+								options: dataSource,								
+								optionsValue: 'divergenceReasonCode',
+								columns: columns,
+								multiple: false,
+								value: currentCode,
+								enable: true}">
+						</table>
+					</div>
+				</div>
+				<div id="right-content" style="float: left;">
+					<table>
+						<colgroup>
+							<col width="213px" />
+							<col width="*" />
+						</colgroup>
+						<tr class="row">
+							<td>
+								<!-- C3_1: Label -->
+								<div data-bind="ntsFormLabel: {required: true,constraint:['DiverdenceReasonCode','DivergenceReasonContent'] }">#{i18n.getText('KMK011_37')}</div>
+							</td>
+							<td>
+							<!-- C3_2: Divergence Reason Code -->
+							<input tabindex="6" class="nts-input" id="inpCode"
+								data-bind="ntsTextEditor: {
+										  name: '#[KMK011_22]',
+                                          value: divReasonCode,
+                                          constraint: 'DiverdenceReasonCode', 
+                                          enable: enableCode, 
+                                          required: true}"/> 
+								<!-- C3_3: Divergence Reason Content --> 
+								<input tabindex="7" class="nts-input" id="inpReason"
+								data-bind="ntsTextEditor: {
+										  name: '#[KMK011_23]',
+                                          value: divReasonContent,
+                                          constraint: 'DivergenceReasonContent',
+                                          required: true}" />
+							</td>
+						</tr>
+						<tr class="row">
+							<td>
+								<!-- C3_4: Label -->
+								<div data-bind="ntsFormLabel: {}">#{i18n.getText('KMK011_38')}</div>
+							</td>
+							<td>
+								<!-- C3_5: SwitchButton Required-->
+								<div tabindex="8"
+									data-bind="ntsSwitchButton: {
+									options: switchUSe3,
+									optionsValue: 'code',
+									optionsText: 'name',
+									value: requiredAtr,
+									enable: mode}">
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td>
+							<p><span data-bind="text: textNotice01"></span></p>
+							<p><span data-bind="text: textNotice02"></span></p> 
+								<!-- B3_6: Text --> 
+								<!-- <p><span>#{i18n.getText('KMK011_78')}</span></p> -->
+							</td>
+						</tr>
+
+					</table>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

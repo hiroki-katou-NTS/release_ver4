@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<body>
+	<ui:composition template="../../../../master/dialog.xhtml">
+		<ui:define name="htmlHead">
+			<script>
+				var dialogSize = {
+					width : 450,
+					height : 350
+				};
+			</script>
+			<com:scriptfile set="IGNITE" />
+			<com:stylefile path="kmk011.h.main.css" />
+			<com:scriptfile path="kmk011.h.service.js" />
+			<com:scriptfile path="kmk011.h.vm.js" />
+			<com:scriptfile path="kmk011.h.start.js" />
+		</ui:define>
+		<ui:define name="content">
+			<div tabindex="-1" id="contents-area" class="scrH">
+
+				<div class="title-content"
+					style="margin-bottom: 20px; padding-left: 25px; margin-top: 20px; padding-right: 25px;">
+					<!-- H1_1 -->
+					<pre tabindex="-1">#{i18n.getText('KMK011_70')}</pre>
+				</div>
+
+				<div class="title-content"
+					style="margin-bottom: 20px; padding-left: 25px; padding-right: 25px;">
+					<!-- H1_7 -->
+					<span>#{i18n.getText('KMK011_8')}</span>
+				</div>
+
+				<div class="title-content"
+					style="margin-bottom: 20px; padding-left: 60px; padding-right: 25px;">
+					<!-- H1_2 -->
+					<span>#{i18n.getText('Com_Company')}</span>
+				</div>
+
+				<div style="display: flex; flex-direction: row"
+					class="option-select-content">
+					<div id="manage_unit"
+						style="padding-left: 25px; padding-right: 25px;">
+						<!--H1-3-->
+						<div tabindex="-1" id="selectWorkTypeCheck,"
+							data-bind="ntsCheckBox: { checked: selectWorkTypeCheck, 
+														enable: true, 
+														text: '#{i18n.getText('KMK011_49')}'}">
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="functions-area-bottom">
+				<!-- H1_5 -->
+				<button tabindex="-1" data-bind="click: closeSaveDialog"
+					class="x-large proceed">#{i18n.getText('KMK011_65')}</button>
+				<!-- H1_6 -->
+				<button tabindex="-1" data-bind="click: closeDialog">#{i18n.getText('KMK011_63')}</button>
+			</div>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

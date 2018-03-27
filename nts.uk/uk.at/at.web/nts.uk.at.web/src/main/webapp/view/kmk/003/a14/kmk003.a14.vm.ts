@@ -91,19 +91,6 @@ module a14 {
             _self.nursingTimeWorkUse = _self.model.commonSetting.shortTimeWorkSet.nursTimezoneWorkUse;
         }         
         
-        /**
-         * Handle when using tab button
-         */
-        public changeTab(data: any, e: any) {
-            let _self = this;
-            if (e.which == 9) {
-                if (_self.isDetailMode()) {
-                    _self.selectedTab('tab-15');  
-                } else {
-                    _self.selectedTab('tab-1');  
-                }            
-            }
-        }
     }
     
     /**
