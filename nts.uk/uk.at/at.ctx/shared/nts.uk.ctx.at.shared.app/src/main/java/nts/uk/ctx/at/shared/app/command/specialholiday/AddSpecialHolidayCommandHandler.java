@@ -68,10 +68,7 @@ public class AddSpecialHolidayCommandHandler extends CommandHandlerWithResult<Ad
 
 			specialHolidayRepository.add(specialHoliday);
 
-			SpecialHolidayEvent event = new SpecialHolidayEvent(true,
-					new SpecialHolidayCode(addSpecialHolidayCommand.getSpecialHolidayCode()),
-					new SpecialHolidayName(addSpecialHolidayCommand.getSpecialHolidayName()));
-			event.toBePublished();
+			specialHoliday.publishEvent(true);
 		}
 
 		return errList;

@@ -47,10 +47,6 @@ public class LengthOfServiceAddCommandHandler extends CommandHandler<List<GrantH
 			LengthServiceTbl lengthService = LengthServiceTbl.createFromJavaType(companyId, data.getYearHolidayCode(), data.getGrantNum(), 
 					data.getAllowStatus(), data.getStandGrantDay(), data.getYear(), data.getMonth());
 			
-			if(data.getGrantDays() != null && lengthService.getYear() == null) {
-				throw new BusinessException("Msg_270");
-			}
-			
 			if(lengthService.getMonth() != null || lengthService.getYear() != null) {
 				lengthServiceData.add(lengthService);
 			}

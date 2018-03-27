@@ -6,7 +6,8 @@ module nts.uk.at.view.kmf003.b.service {
         findByCode: "at/share/lengthofservice/findByCode/{0}",
         findGrantByCode: "at/share/grantholidaytbl/findByCode/{0}/{1}",
         addGrantHdTbl: "at/share/lengthofservice/add",
-        calculateGrantDate: "at/share/grantholidaytbl/calculateGrantDate"
+        calculateGrantDate: "at/share/grantholidaytbl/calculateGrantDate",
+        checkData: "ctx/at/share/vacation/setting/annualpaidleave/find/checkkmf003"
     }  
     
     /**
@@ -40,6 +41,13 @@ module nts.uk.at.view.kmf003.b.service {
         var path = nts.uk.text.format(servicePath.calculateGrantDate);
         return nts.uk.request.ajax("at", path, param);
     } 
+    
+    /**
+     *  Check data before load
+     */
+    export function checkData(): JQueryPromise<any> {
+        return nts.uk.request.ajax(servicePath.checkData);
+    }
     
     export interface GrantHolidayTblDto {
         grantYearHolidayNo: number,

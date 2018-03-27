@@ -3,7 +3,6 @@ package nts.uk.ctx.at.function.infra.entity.alarm.mailsettings;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -80,13 +79,13 @@ public class KfnmtMailSettingNormal extends UkJpaEntity implements Serializable 
 	@Column(name = "ADMIN_MAIL_REPLY", nullable = true)
 	public String adminMailRely;
 
-	public MailSettingNormal toDomain(){
-		MailSettings mailSet = new MailSettings(this.subject, this.text, this.mailSettingListCC.stream().map(c ->c.mailAddress).collect(Collectors.toList()), this.mailSettingListBCC.stream().map(c -> c.mailAddress).collect(Collectors.toList()), this.mailRely);
-		MailSettings adminMailSet = new MailSettings(this.adminSubject, this.adminText, this.mailSettingListAdminCC.stream().map(c ->c.mailAddress).collect(Collectors.toList()), this.mailSettingListAdminBCC.stream().map(c -> c.mailAddress).collect(Collectors.toList()), this.adminMailRely);
+	public MailSettingNormal toDomain(List<String> mailSettingListCC, List<String> mailSettingListBCC, List<String> mailSettingListAdminCC, List<String> mailSettingListAdminBCC){
+		
+		MailSettings mailSet = new MailSettings(this.subject, this.text, mailSettingListCC, mailSettingListBCC, this.mailRely);
+		MailSettings adminMailSet = new MailSettings(this.adminSubject, this.adminText, mailSettingListAdminCC, mailSettingListAdminBCC, this.adminMailRely);
 		 
 		return new MailSettingNormal(this.companyID, mailSet, adminMailSet);
 	}
-
 	
 	public static KfnmtMailSettingNormal toEntity(String IdCC, String IdBCC , String IdAdCC, String IdAdBCC, MailSettingNormal domain) {
 		

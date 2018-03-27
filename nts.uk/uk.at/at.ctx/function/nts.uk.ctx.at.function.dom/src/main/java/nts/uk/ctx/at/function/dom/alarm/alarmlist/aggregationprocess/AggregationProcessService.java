@@ -69,7 +69,7 @@ public class AggregationProcessService {
 		//Convert from ValueExtractAlarm to AlarmExtraValueWkReDto
 		for(ValueExtractAlarm value: valueList) {
 			AlarmExtraValueWkReDto itemResult = new AlarmExtraValueWkReDto(value.getWorkplaceID().orElse(null),
-					!value.getWorkplaceID().isPresent()? null: hierarchyWPMap.get(value.getWorkplaceID().get()).getHierarchyCd(),
+					value.getWorkplaceID().isPresent()  && hierarchyWPMap.get(value.getWorkplaceID().get()) !=null ? hierarchyWPMap.get(value.getWorkplaceID().get()).getHierarchyCd(): "",
 					mapEmployeeId.get(value.getEmployeeID()).getWorkplaceName(), 
 					value.getEmployeeID(),
 					mapEmployeeId.get(value.getEmployeeID()).getCode(),

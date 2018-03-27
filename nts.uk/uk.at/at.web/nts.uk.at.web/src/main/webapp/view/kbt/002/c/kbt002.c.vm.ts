@@ -354,9 +354,19 @@ module nts.uk.at.view.kbt002.c {
                     self.companyId(param.companyId || '');
                     self.execItemCd(param.execItemCd||'');
                     self.startDate(param.startDate || curDate);
-                    self.startTime(param.startTime || curTime);
+                   if (param.startTime == 0) {
+                        self.startTime(param.startTime);
+                    } else {
+                        self.startTime(param.startTime
+                            || curTime);
+                    }
                     self.endTimeCls(param.endTimeCls);
-                    self.endTime(param.endTime || curTime);
+                    if (param.endTime == 0) {
+                        self.endTime(param.endTime);
+                    } else {
+                        self.endTime(param.endTime
+                            || curTime);
+                    } 
                     self.oneDayRepCls(param.oneDayRepCls);
                     self.oneDayRepInterval(param.oneDayRepInterval || 60);
                     self.repeatCls(param.repeatCls || false);

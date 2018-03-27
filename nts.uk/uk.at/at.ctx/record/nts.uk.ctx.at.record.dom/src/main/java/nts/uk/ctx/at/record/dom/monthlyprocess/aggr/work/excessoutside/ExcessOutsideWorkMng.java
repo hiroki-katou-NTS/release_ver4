@@ -39,6 +39,7 @@ import nts.uk.ctx.at.shared.dom.outsideot.OutsideOTSetting;
 import nts.uk.ctx.at.shared.dom.outsideot.UseClassification;
 import nts.uk.ctx.at.shared.dom.outsideot.breakdown.OutsideOTBRDItem;
 import nts.uk.ctx.at.shared.dom.outsideot.overtime.Overtime;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureDate;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
@@ -72,6 +73,8 @@ public class ExcessOutsideWorkMng {
 	private final ClosureDate closureDate;
 	/** 期間 */
 	private final DatePeriod procPeriod;
+	/** 労働条件項目 */
+	private final WorkingConditionItem workingConditionItem;
 	/** 労働制 */
 	private final WorkingSystem workingSystem;
 	/** 職場ID */
@@ -133,6 +136,7 @@ public class ExcessOutsideWorkMng {
 		this.closureId = monthlyCalculation.getClosureId();
 		this.closureDate = monthlyCalculation.getClosureDate();
 		this.procPeriod = monthlyCalculation.getProcPeriod();
+		this.workingConditionItem = monthlyCalculation.getWorkingConditionItem();
 		this.workingSystem = monthlyCalculation.getWorkingSystem();
 		this.workplaceId = monthlyCalculation.getWorkplaceId();
 		this.employmentCd = monthlyCalculation.getEmploymentCd();
@@ -269,8 +273,8 @@ public class ExcessOutsideWorkMng {
 			
 			// フレックス勤務の月単位の時間を集計する
 			flexTime.aggregateMonthlyHours(this.companyId, this.employeeId, this.yearMonth, this.procPeriod,
-					flexAggregateMethod, this.workplaceId, this.employmentCd, aggrSetOfFlex, this.holidayAdditionOpt,
-					aggrValue.getAggregateTotalWorkingTime(),
+					flexAggregateMethod, this.workingConditionItem, this.workplaceId, this.employmentCd,
+					aggrSetOfFlex, this.holidayAdditionOpt, aggrValue.getAggregateTotalWorkingTime(),
 					this.prescribedWorkingTimeMonth, this.statutoryWorkingTimeMonth, repositories);
 		}
 		
@@ -346,8 +350,8 @@ public class ExcessOutsideWorkMng {
 			
 			// フレックス勤務の月単位の時間を集計する
 			flexTime.aggregateMonthlyHours(this.companyId, this.employeeId, this.yearMonth, this.procPeriod,
-					flexAggregateMethod, this.workplaceId, this.employmentCd, aggrSetOfFlex, this.holidayAdditionOpt,
-					aggrValue.getAggregateTotalWorkingTime(),
+					flexAggregateMethod, this.workingConditionItem, this.workplaceId, this.employmentCd,
+					aggrSetOfFlex, this.holidayAdditionOpt, aggrValue.getAggregateTotalWorkingTime(),
 					this.prescribedWorkingTimeMonth, this.statutoryWorkingTimeMonth, repositories);
 			
 			// フレックス時間勤務の逆時系列割り当て

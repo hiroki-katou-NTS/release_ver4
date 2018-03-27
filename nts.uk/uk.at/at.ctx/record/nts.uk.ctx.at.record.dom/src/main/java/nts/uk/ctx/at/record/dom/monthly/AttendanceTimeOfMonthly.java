@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.record.dom.monthly;
 
+import java.util.Optional;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
@@ -9,7 +11,7 @@ import nts.uk.ctx.at.record.dom.monthly.calc.MonthlyCalculation;
 import nts.uk.ctx.at.record.dom.monthly.excessoutside.ExcessOutsideWorkOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.verticaltotal.VerticalTotalOfMonthly;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.RepositoriesRequiredByMonthlyAggr;
-import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureDate;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -33,13 +35,16 @@ public class AttendanceTimeOfMonthly extends AggregateRoot {
 	/** 期間 */
 	private DatePeriod datePeriod;
 	/** 月の計算 */
+	@Setter
 	private MonthlyCalculation monthlyCalculation;
 	/** 時間外超過 */
 	@Setter
 	private ExcessOutsideWorkOfMonthly excessOutsideWork;
 	/** 縦計 */
+	@Setter
 	private VerticalTotalOfMonthly verticalTotal;
 	/** 集計日数 */
+	@Setter
 	private AttendanceDaysMonth aggregateDays;
 	/** 回数集計 */
 	//aggregateTimes
@@ -107,14 +112,13 @@ public class AttendanceTimeOfMonthly extends AggregateRoot {
 	 * 集計準備
 	 * @param companyId 会社ID
 	 * @param datePeriod 期間
-	 * @param workingSystem 労働制
-	 * @param isRetireMonth 退職月度かどうか
+	 * @param workingConditionItem 労働制
 	 * @param repositories 月次集計が必要とするリポジトリ
 	 */
-	public void prepareAggregation(String companyId, DatePeriod datePeriod, WorkingSystem workingSystem,
-			boolean isRetireMonth, RepositoriesRequiredByMonthlyAggr repositories){
+	public void prepareAggregation(String companyId, DatePeriod datePeriod, WorkingConditionItem workingConditionItem,
+			RepositoriesRequiredByMonthlyAggr repositories){
 		
 		this.monthlyCalculation.prepareAggregation(companyId, this.employeeId, this.yearMonth,
-				this.closureId, this.closureDate, datePeriod, workingSystem, isRetireMonth, repositories);
+				this.closureId, this.closureDate, datePeriod, workingConditionItem, Optional.empty(), repositories);
 	}
 }

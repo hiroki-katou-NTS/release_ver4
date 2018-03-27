@@ -1,9 +1,9 @@
 package nts.uk.ctx.at.record.dom.daily.holidayworktime;
 
 import lombok.Getter;
-import lombok.Value;
 import nts.gul.util.value.Finally;
 import nts.uk.ctx.at.record.dom.daily.TimeWithCalculation;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTime;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.holidaywork.HolidayWorkFrameNo;
 
@@ -47,5 +47,26 @@ public class HolidayWorkFrameTime {
 	}
 
 
+	/**
+	 * 残業時間を入れ替えて作り直す
+	 * @return
+	 */
+	public HolidayWorkFrameTime changeOverTime(TimeWithCalculation holidayWorkTime) {
+		return new HolidayWorkFrameTime(this.holidayFrameNo,
+				 						Finally.of(holidayWorkTime),
+				 						this.transferTime,
+				 						this.getBeforeApplicationTime());
+	}
+
+	/**
+	 * 振替時間を入れ替えて作り直す
+	 * @return
+	 */
+	public HolidayWorkFrameTime changeTransTime(TimeWithCalculation transTime) {
+		return new HolidayWorkFrameTime(this.holidayFrameNo,
+									 this.holidayWorkTime,
+									 Finally.of(transTime),
+									 this.getBeforeApplicationTime());
+	}
 	
 }

@@ -122,8 +122,26 @@ public class JpaGrantYearHolidayRepository extends JpaRepository implements Gran
 		}
 		kshstGrantHdTbl.kshstGrantHdTblPK  =  new KshstGrantHdTblPK(holidayGrant.getCompanyId(), holidayGrant.getGrantNum().v(), holidayGrant.getConditionNo(), holidayGrant.getYearHolidayCode().v());
 		kshstGrantHdTbl.grantDay =	holidayGrant.getGrantDays().v();
-		kshstGrantHdTbl.limitTimeHd = holidayGrant.getLimitTimeHd().isPresent() ? holidayGrant.getLimitTimeHd().get().v() : 0;
-		kshstGrantHdTbl.limitDayYear = holidayGrant.getLimitDayYear().isPresent() ? holidayGrant.getLimitDayYear().get().v() : 0;
+		
+		if(holidayGrant.getLimitTimeHd() != null) {
+			if(holidayGrant.getLimitTimeHd().isPresent()) {
+				kshstGrantHdTbl.limitTimeHd = holidayGrant.getLimitTimeHd().get().v();
+			} else {
+				kshstGrantHdTbl.limitTimeHd = 0;
+			}			
+		} else {
+			kshstGrantHdTbl.limitTimeHd = 0;
+		}
+		
+		if(holidayGrant.getLimitDayYear() != null) {
+			if(holidayGrant.getLimitDayYear().isPresent()) {
+				kshstGrantHdTbl.limitDayYear = holidayGrant.getLimitDayYear().get().v();
+			} else {
+				kshstGrantHdTbl.limitDayYear = 0;
+			}			
+		} else {
+			kshstGrantHdTbl.limitDayYear = 0;
+		}
 		
 		return kshstGrantHdTbl;
 	}

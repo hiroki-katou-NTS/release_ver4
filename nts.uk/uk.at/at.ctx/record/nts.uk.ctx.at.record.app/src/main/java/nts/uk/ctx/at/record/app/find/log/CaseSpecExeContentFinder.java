@@ -9,8 +9,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.app.find.log.dto.CaseSpecExeContentDto;
-import nts.uk.ctx.at.record.dom.workrecord.log.CaseSpecExeContent;
-import nts.uk.ctx.at.record.dom.workrecord.log.CaseSpecExeContentRepository;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.CaseSpecExeContent;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.CaseSpecExeContentRepository;
 
 @Stateless
 public class CaseSpecExeContentFinder {

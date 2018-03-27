@@ -12,8 +12,8 @@ import nts.uk.ctx.at.function.dom.processexecution.executionlog.OverallErrorDeta
 import nts.uk.ctx.at.function.dom.processexecution.executionlog.ProcessExecutionLog;
 import nts.uk.ctx.at.function.dom.processexecution.executionlog.ProcessExecutionTask;
 import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionLogRepository;
-import nts.uk.ctx.at.record.dom.workrecord.log.EmpCalAndSumExeLogRepository;
-import nts.uk.ctx.at.record.dom.workrecord.log.enums.ExeStateOfCalAndSum;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExeStateOfCalAndSum;
 
 @Stateless
 public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler<TerminateProcessExecutionCommand> {

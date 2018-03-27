@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.shared.dom.employment.statutory.worktime.employment;
 
 import lombok.Value;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
 
 /**
  * 労働契約履歴

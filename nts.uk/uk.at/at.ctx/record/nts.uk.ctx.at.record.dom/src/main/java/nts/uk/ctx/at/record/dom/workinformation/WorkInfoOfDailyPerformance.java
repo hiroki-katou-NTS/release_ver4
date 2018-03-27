@@ -10,8 +10,9 @@ import nts.arc.layer.dom.AggregateRoot;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.workinformation.enums.CalculationState;
 import nts.uk.ctx.at.record.dom.workinformation.enums.NotUseAttribute;
-import nts.uk.ctx.at.record.dom.worktime.primitivevalue.WorkNo;
 import nts.uk.ctx.at.shared.dom.WorkInformation;
+import nts.uk.ctx.at.shared.dom.holidaymanagement.publicholiday.configuration.DayOfWeek;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
 
 /**
  * 
@@ -39,6 +40,8 @@ public class WorkInfoOfDailyPerformance extends AggregateRoot {
 	private NotUseAttribute backStraightAtr;
 
 	private GeneralDate ymd;
+	
+	private DayOfWeek dayOfWeek;
 
 	private List<ScheduleTimeSheet> scheduleTimeSheets;
 
@@ -88,5 +91,21 @@ public class WorkInfoOfDailyPerformance extends AggregateRoot {
 			throw new RuntimeException("Exist duplicate workNo : " + workNo);
 		}	
 		return scheduleTimeSheetList.get(0);	
+	}
+
+	public WorkInfoOfDailyPerformance(String employeeId, WorkInformation recordWorkInformation,
+			WorkInformation scheduleWorkInformation, CalculationState calculationState, NotUseAttribute goStraightAtr,
+			NotUseAttribute backStraightAtr, GeneralDate ymd, DayOfWeek dayOfWeek,
+			List<ScheduleTimeSheet> scheduleTimeSheets) {
+		super();
+		this.employeeId = employeeId;
+		this.recordWorkInformation = recordWorkInformation;
+		this.scheduleWorkInformation = scheduleWorkInformation;
+		this.calculationState = calculationState;
+		this.goStraightAtr = goStraightAtr;
+		this.backStraightAtr = backStraightAtr;
+		this.ymd = ymd;
+		this.dayOfWeek = dayOfWeek;
+		this.scheduleTimeSheets = scheduleTimeSheets;
 	}
 }

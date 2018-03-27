@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.shared.dom;
 
+import java.util.Optional;
+
 import lombok.Value;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;

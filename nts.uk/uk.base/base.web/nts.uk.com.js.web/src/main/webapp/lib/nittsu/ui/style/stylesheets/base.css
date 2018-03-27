@@ -837,22 +837,20 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
 .disappear {
   position: absolute !important;
   visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  top: -99999px !important;
+  left: -99999px !important;
   overflow: hidden !important;
 }
 
 /*****************************
   ntsControl
 *****************************/
-/* line 63, ../sass/components/_commons.scss */
+/* line 61, ../sass/components/_commons.scss */
 .control-group {
   margin-bottom: 10px;
 }
 
-/* line 64, ../sass/components/_commons.scss */
+/* line 62, ../sass/components/_commons.scss */
 .ntsControl {
   display: inline-block;
 }
@@ -860,7 +858,7 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
 /*****************************
   NtsFormLabel
 *****************************/
-/* line 69, ../sass/components/_commons.scss */
+/* line 67, ../sass/components/_commons.scss */
 div.form-label {
   display: inline-block;
   box-sizing: border-box;
@@ -870,35 +868,37 @@ div.form-label {
   border-width: 0 0 0 5px;
   padding: 0 10px 0 8px;
 }
-/* line 91, ../sass/components/_commons.scss */
+/* line 89, ../sass/components/_commons.scss */
 div.form-label.broken label {
   line-height: inherit;
 }
-/* line 94, ../sass/components/_commons.scss */
+/* line 92, ../sass/components/_commons.scss */
 div.form-label.inline {
   height: 23px;
   line-height: 23px;
 }
-/* line 97, ../sass/components/_commons.scss */
+/* line 95, ../sass/components/_commons.scss */
 div.form-label.inline label {
   line-height: 23px;
 }
-/* line 100, ../sass/components/_commons.scss */
+/* line 98, ../sass/components/_commons.scss */
 div.form-label.required {
   border-color: #FAC002;
 }
-/* line 104, ../sass/components/_commons.scss */
+/* line 102, ../sass/components/_commons.scss */
 div.form-label.disabled {
   border-color: #AAA;
 }
-/* line 108, ../sass/components/_commons.scss */
+/* line 106, ../sass/components/_commons.scss */
 div.form-label > label {
+  white-space: nowrap;
   max-height: 100%;
   font-size: 14px;
   line-height: 37px;
 }
-/* line 114, ../sass/components/_commons.scss */
+/* line 113, ../sass/components/_commons.scss */
 div.form-label > i {
+  white-space: nowrap;
   display: block;
   margin-top: 1px;
   font-size: 12px;
@@ -4798,9 +4798,10 @@ div .ex-area-line.x-stay {
   border-bottom: solid 1px #B1B1B1;
   padding-top: 8px;
   padding-left: 5px;
+  white-space: nowrap;
 }
 
-/* line 8, ../sass/frame/_functions.scss */
+/* line 9, ../sass/frame/_functions.scss */
 #functions-area-bottom {
   position: absolute;
   bottom: 0px;
@@ -4809,6 +4810,7 @@ div .ex-area-line.x-stay {
   border-top: solid 1px #B1B1B1;
   text-align: center;
   padding-top: 8px;
+  white-space: nowrap;
 }
 
 /* line 1, ../sass/frame/_contents.scss */

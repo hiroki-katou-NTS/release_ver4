@@ -59,10 +59,7 @@ public class UpdateSpecialHolidayCommandHandler
 			// add Special Holiday
 			specialHolidayRepository.update(specialHoliday);
 
-			SpecialHolidayEvent event = new SpecialHolidayEvent(true,
-					new SpecialHolidayCode(addSpecialHolidayCommand.getSpecialHolidayCode()),
-					new SpecialHolidayName(addSpecialHolidayCommand.getSpecialHolidayName()));
-			event.toBePublished();
+			specialHoliday.publishEvent(true);
 		}
 
 		return errList;

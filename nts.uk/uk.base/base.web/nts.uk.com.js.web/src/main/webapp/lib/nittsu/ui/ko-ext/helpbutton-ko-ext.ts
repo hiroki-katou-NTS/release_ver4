@@ -13,8 +13,11 @@ module nts.uk.ui.koExtentions {
             // Get data
             var data = valueAccessor();
             var image: string = ko.unwrap(data.image);
+            var textId: string = ko.unwrap(data.textId);
             var enable: boolean = (data.enable !== undefined) ? ko.unwrap(data.enable) : true;
             var position: string = ko.unwrap(data.position);
+            
+            var isImage = !util.isNullOrUndefined(image);
 
             //Position
             var myPositions: Array<string> = position.replace(/[^a-zA-Z ]/gmi, "").split(" ");
@@ -58,11 +61,19 @@ module nts.uk.ui.koExtentions {
                     $caret.css(caretPosition, parseFloat($popup.css(caretPosition)) * -1);
                 }
             }).wrap($("<div class='ntsControl ntsHelpButton'></div>"));
+            
+            var $content;
+            if (isImage) {
+                $content = $("<img src='" + request.resolvePath(image) + "' />");
+            } else {
+                $content = $("<span>").text(resource.getText(textId));
+            }
+            
             var $container = $(element).closest(".ntsHelpButton");
             var $caret = $("<span class='caret-helpbutton caret-" + caretDirection + "'></span>");
             var $popup = $("<div class='nts-help-button-image'></div>")
                 .append($caret)
-                .append($("<img src='" + request.resolvePath(image) + "' />"))
+                .append($content)
                 .appendTo($container).hide();
             // Click outside event
             $("html").on("click", function(event) {

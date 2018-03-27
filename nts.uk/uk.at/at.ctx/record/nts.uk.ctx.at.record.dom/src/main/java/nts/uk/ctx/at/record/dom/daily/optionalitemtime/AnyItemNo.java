@@ -1,7 +1,7 @@
 package nts.uk.ctx.at.record.dom.daily.optionalitemtime;
 
 import nts.arc.primitive.IntegerPrimitiveValue;
-import nts.uk.ctx.at.record.dom.worktime.primitivevalue.WorkNo;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
 
 public class AnyItemNo extends IntegerPrimitiveValue<WorkNo>{
 

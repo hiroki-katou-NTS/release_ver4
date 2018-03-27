@@ -33,26 +33,29 @@ public class KrcdtDaiBreakTime extends UkJpaEntity implements Serializable {
 	@Column(name = "STR_STAMP_TIME")
 	public Integer startStampTime;
 
-//	@Column(name = "STR_STAMP_ROUDING_TIME_DAY")
-//	public Integer startStampRoundingTimeDay;
-//
-//	@Column(name = "STR_STAMP_PLACE_CODE")
-//	public String startStampPlaceCode;
-//
-//	@Column(name = "STR_STAMP_SOURCE_INFO")
-//	public Integer startStampSourceInfo;
+	// @Column(name = "STR_STAMP_ROUDING_TIME_DAY")
+	// public Integer startStampRoundingTimeDay;
+	//
+	// @Column(name = "STR_STAMP_PLACE_CODE")
+	// public String startStampPlaceCode;
+	//
+	// @Column(name = "STR_STAMP_SOURCE_INFO")
+	// public Integer startStampSourceInfo;
 
 	@Column(name = "END_STAMP_TIME")
 	public Integer endStampTime;
 
-//	@Column(name = "END_STAMP_ROUDING_TIME_DAY")
-//	public Integer endStampRoundingTimeDay;
-//
-//	@Column(name = "END_STAMP_PLACE_CODE")
-//	public String endStampPlaceCode;
-//
-//	@Column(name = "END_STAMP_SOURCE_INFO")
-//	public Integer endStampSourceInfo;
+	// @Column(name = "END_STAMP_ROUDING_TIME_DAY")
+	// public Integer endStampRoundingTimeDay;
+	//
+	// @Column(name = "END_STAMP_PLACE_CODE")
+	// public String endStampPlaceCode;
+	//
+	// @Column(name = "END_STAMP_SOURCE_INFO")
+	// public Integer endStampSourceInfo;
+
+	@Column(name = "BREAK_TIME")
+	public Integer breakTime;
 
 	@Override
 	protected Object getKey() {
@@ -60,9 +63,13 @@ public class KrcdtDaiBreakTime extends UkJpaEntity implements Serializable {
 	}
 
 	public static List<KrcdtDaiBreakTime> toEntity(BreakTimeOfDailyPerformance breakTime) {
-		return breakTime.getBreakTimeSheets().stream().map(c -> new KrcdtDaiBreakTime(
-				new KrcdtDaiBreakTimePK(breakTime.getEmployeeId(), breakTime.getYmd(), breakTime.getBreakType().value, c.getBreakFrameNo().v()),
-					c.getStartTime() == null ? 0: c.getStartTime().valueAsMinutes(),
-					c.getEndTime() == null ? 0 : c.getEndTime().valueAsMinutes())).collect(Collectors.toList());
+		return breakTime.getBreakTimeSheets().stream()
+				.map(c -> new KrcdtDaiBreakTime(
+						new KrcdtDaiBreakTimePK(breakTime.getEmployeeId(), breakTime.getYmd(),
+								breakTime.getBreakType().value, c.getBreakFrameNo().v()),
+						c.getStartTime() == null ? 0 : c.getStartTime().valueAsMinutes(),
+						c.getEndTime() == null ? 0 : c.getEndTime().valueAsMinutes(),
+						c.getBreakTime() == null ? 0 : c.getBreakTime().valueAsMinutes()))
+				.collect(Collectors.toList());
 	}
 }

@@ -4,6 +4,7 @@
  *****************************************************************/
 package nts.uk.ctx.at.schedule.pubimp.schedule.basicschedule;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicScheduleRepository
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.workscheduletimezone.WorkScheduleTimeZone;
 import nts.uk.ctx.at.schedule.pub.schedule.basicschedule.ScBasicScheduleExport;
 import nts.uk.ctx.at.schedule.pub.schedule.basicschedule.ScBasicSchedulePub;
+import nts.uk.ctx.at.schedule.pub.schedule.basicschedule.ScWorkBreakTimeExport;
 import nts.uk.ctx.at.schedule.pub.schedule.basicschedule.WorkScheduleTimeZoneExport;
 
 /**
@@ -38,6 +40,16 @@ public class ScBasicSchedulePubImpl implements ScBasicSchedulePub{
 	@Override
 	public Optional<ScBasicScheduleExport> findById(String employeeId, GeneralDate baseDate) {
 		return this.repository.find(employeeId, baseDate).map(domain -> this.convertExport(domain));
+	}
+
+	@Override
+	public List<ScWorkBreakTimeExport> findWorkBreakTime(String employeeId, GeneralDate baseDate) {
+		return this.repository.findWorkBreakTime(employeeId, baseDate)
+				.stream().map(x -> new ScWorkBreakTimeExport(
+						x.getScheduleBreakCnt().v(), 
+						x.getScheduledStartClock(), 
+						x.getScheduledEndClock()))
+				.collect(Collectors.toList());
 	}
 	
 	/**

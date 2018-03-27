@@ -92,7 +92,10 @@ module nts.uk.ui.jqueryExtentions {
                     _.defer(() => { 
                         let selected = getSelectRow($grid);
                         if(!nts.uk.util.isNullOrEmpty(selected)){
-                            let $scrollContainer: any = $grid.igGrid("scrollContainer");
+                            selected = oldSelected;    
+                        } 
+                        let $scrollContainer: any = $grid.igGrid("scrollContainer");
+                        _.defer(() => {
                             if ($scrollContainer.length > 0){
                                 let firstRowOffset = $($("#single-list").igGrid("rowAt", 0)).offset().top;
                                 let selectRowOffset = $($("#single-list").igGrid("rowAt", index)).offset().top;
@@ -100,8 +103,8 @@ module nts.uk.ui.jqueryExtentions {
                             } else { 
                                 let index = $(selected["element"]).attr("data-row-idx");
                                 $grid.igGrid("virtualScrollTo", nts.uk.util.isNullOrEmpty(index) ? oldSelected.index : parseInt(index)); //.scrollTop(scrollTop);    
-                            }     
-                        }   
+                            }   
+                        });
                     });    
                 }
             });

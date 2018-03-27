@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.dom.breakorgoout.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
@@ -23,4 +24,6 @@ public interface BreakTimeOfDailyPerformanceRepository {
 	void update(BreakTimeOfDailyPerformance breakTimes);
 	
 	void update(List<BreakTimeOfDailyPerformance> breakTimes);
+	
+	Optional<BreakTimeOfDailyPerformance> find(String employeeId, GeneralDate ymd, int breakType);
 }

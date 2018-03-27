@@ -50,10 +50,8 @@
 .disappear {
 	position: absolute !important;
 	visibility: hidden !important;
-	width: 0 !important;
-	height: 0 !important;
-	margin: 0 !important;
-	padding: 0 !important;
+	top: -99999px !important;
+	left: -99999px !important;
 	overflow: hidden !important;
 }
 
@@ -106,12 +104,14 @@ div.form-label {
 	}
 	
 	> label {
+		white-space: nowrap;
 		max-height: 100%;
 		font-size: $_label_font_size;
 		line-height: $_label_height;
 	}
 	
 	> i {
+		white-space: nowrap;
 		display: block;
 		margin-top: 1px;
 		font-size: $_constraint_font_size;

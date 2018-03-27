@@ -9,12 +9,12 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import nts.uk.ctx.at.record.dom.MidNightTimeSheetForCalc;
 import nts.uk.ctx.at.record.dom.daily.TimeWithCalculation;
-import nts.uk.ctx.at.record.dom.daily.overtimework.enums.StatutoryAtr;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.BonusPayTimesheet;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.SpecBonusPayTimesheet;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
-import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.AutoCalculationOfOverTimeWork;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalOvertimeSetting;
+import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.StatutoryAtr;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.overtime.overtimeframe.OverTimeFrameNo;
 import nts.uk.ctx.at.shared.dom.worktime.common.OverTimeOfTimeZoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.TimeZoneRounding;
@@ -100,7 +100,7 @@ public class OverTimeWorkFrameTimeSheet extends CalculationTimeSheet{
 	 * @param autoCalcSet 時間外の自動計算区分
 	 * @return 残業時間枠時間帯クラス
 	 */
-	public OverTimeFrameTime calcOverTimeWorkTime(AutoCalculationOfOverTimeWork autoCalcSet) {
+	public OverTimeFrameTime calcOverTimeWorkTime(AutoCalOvertimeSetting autoCalcSet) {
 		AttendanceTime overTimeWorkTime;
 //		if(getExcessTimeAutoCalcAtr(autoCalcSet).isCalculateEmbossing()) {
 //			overTimeWorkTime = new AttendanceTime(0);

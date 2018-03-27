@@ -16,10 +16,13 @@ import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationReposi
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
+import nts.uk.ctx.at.shared.dom.adapter.employee.EmpEmployeeAdapter;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.HolidayAddtionRepository;
 import nts.uk.ctx.at.shared.dom.outsideot.OutsideOTSettingRepository;
 import nts.uk.ctx.at.shared.dom.vacation.setting.annualpaidleave.AnnualPaidLeaveSettingRepository;
 import nts.uk.ctx.at.shared.dom.vacation.setting.retentionyearly.RetentionYearlySettingRepository;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionRepository;
 import nts.uk.ctx.at.shared.dom.workrule.statutoryworktime.GetOfStatutoryWorkTime;
 import nts.uk.ctx.at.shared.dom.workrule.statutoryworktime.GetWeekStart;
 import nts.uk.ctx.at.shared.dom.worktime.algorithm.getcommonset.GetCommonSet;
@@ -34,8 +37,16 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
  */
 public interface RepositoriesRequiredByMonthlyAggr {
 
+	/** 社員の取得 */
+	EmpEmployeeAdapter getEmpEmployee();
+
+	/** 労働条件項目の取得 */
+	WorkingConditionItemRepository getWorkingConditionItem();
+	/** 労働条件の取得 */
+	WorkingConditionRepository getWorkingCondition();
+	
 	/** 所属職場履歴の取得 */
-	AffWorkplaceAdapter getAffWorkplaceAdapter();
+	AffWorkplaceAdapter getAffWorkplace();
 
 	/** 所属雇用履歴の取得 */
 	SyEmploymentAdapter getSyEmployment(); 

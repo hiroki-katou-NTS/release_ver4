@@ -61,6 +61,9 @@ public class KrcdtDaiPerWorkInfo extends UkJpaEntity implements Serializable {
 
 	@Column(name = "BACK_STRAIGHT_ATR")
 	public Integer backStraightAttribute;
+	
+	@Column(name = "DAY_OF_WEEK")
+	public Integer dayOfWeek;
 
 	@OneToMany(mappedBy = "daiPerWorkInfo", cascade = CascadeType.ALL)
 	@JoinColumn(nullable = true)
@@ -98,6 +101,7 @@ public class KrcdtDaiPerWorkInfo extends UkJpaEntity implements Serializable {
 				workInfoOfDailyPerformance.getCalculationState() != null ? workInfoOfDailyPerformance.getCalculationState().value : null,
 				workInfoOfDailyPerformance.getGoStraightAtr() != null ? workInfoOfDailyPerformance.getGoStraightAtr().value : null,
 				workInfoOfDailyPerformance.getBackStraightAtr() != null ? workInfoOfDailyPerformance.getBackStraightAtr().value : null,
+				workInfoOfDailyPerformance.getDayOfWeek() != null ? workInfoOfDailyPerformance.getDayOfWeek().value : null,
 				workInfoOfDailyPerformance.getScheduleTimeSheets() != null ? 
 				workInfoOfDailyPerformance.getScheduleTimeSheets().stream().map(f -> KrcdtWorkScheduleTime
 						.toEntity(workInfoOfDailyPerformance.getEmployeeId(), workInfoOfDailyPerformance.getYmd(), f))

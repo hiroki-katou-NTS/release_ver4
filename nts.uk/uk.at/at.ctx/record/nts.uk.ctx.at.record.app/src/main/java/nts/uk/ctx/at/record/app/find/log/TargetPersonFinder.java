@@ -9,7 +9,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.app.find.log.dto.TargetPersonDto;
-import nts.uk.ctx.at.record.dom.workrecord.log.TargetPersonRepository;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.TargetPersonRepository;
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless

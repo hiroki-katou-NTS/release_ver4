@@ -13,8 +13,8 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.ControlOverFrameTime;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTime;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTimeSheet;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalOvertimeSetting;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.AutoCalcSet;
-import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.AutoCalculationOfOverTimeWork;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
 /**
@@ -88,7 +88,7 @@ public class OverTimeWorkOfDaily {
 	 * 残業時間が含んでいる深夜時間の算出
 	 * @return 日別実績の深夜時間帯クラス
 	 */
-	public ExcessOfStatutoryMidNightTime calcMidNightTimeIncludeOverTimeWork(AutoCalculationOfOverTimeWork autoCalcSet) {
+	public ExcessOfStatutoryMidNightTime calcMidNightTimeIncludeOverTimeWork(AutoCalOvertimeSetting autoCalcSet) {
 		int totalTime = 0;
 		for(OverTimeFrameTimeSheet frameTime : OverTimeFrameTimeSheet) {
 			/*↓分岐の条件が明確になったら記述*/

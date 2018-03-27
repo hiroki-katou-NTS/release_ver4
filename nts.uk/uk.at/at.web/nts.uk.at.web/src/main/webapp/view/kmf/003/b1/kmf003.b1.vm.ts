@@ -1,4 +1,6 @@
 module nts.uk.at.view.kmf003.b1.viewmodel {
+    import blockUI = nts.uk.ui.block;
+    
     export class ScreenModel {
         code: KnockoutObservable<string>;
         name: KnockoutObservable<string>;
@@ -18,7 +20,7 @@ module nts.uk.at.view.kmf003.b1.viewmodel {
         constructor() {
             var self = this;
             
-            $("#fixed-table").ntsFixedTable({ height: 275, width: 390 });
+            $("#fixed-table").ntsFixedTable({ height: 275, width: 380 });
             
             self.conditionData = nts.uk.ui.windows.getShared("KMF003_CONDITION_NO");
             self.code = ko.observable(self.conditionData.code);
@@ -194,12 +196,17 @@ module nts.uk.at.view.kmf003.b1.viewmodel {
         submit() {
             var self = this;
             
+            blockUI.invisible();
+            
             $('#reference-date').ntsError('clear');
             
             if (nts.uk.ui.errors.hasError()) {
+                blockUI.clear();
                 return;    
             }
 
+            
+            
             var grantHolidayTblList = [];
             _.forEach(self.items(), function(item) {
                 if(item.lengthOfServiceYears() != null || item.lengthOfServiceMonths() != null) {
@@ -219,6 +226,7 @@ module nts.uk.at.view.kmf003.b1.viewmodel {
             // if no data then return
             if (grantHolidayTblList == null || grantHolidayTblList.length == 0) {
                 nts.uk.ui.windows.setShared("KMF003_HAVE_DATA", false);
+                blockUI.clear();
                 return;
             }
             
@@ -245,6 +253,8 @@ module nts.uk.at.view.kmf003.b1.viewmodel {
                         $('#b2_1').focus();
                     }
                 }); 
+            }).always(function() {
+                blockUI.clear();
             });
         }
         

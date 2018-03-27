@@ -10,13 +10,12 @@ import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonth;
  * @author shuichu_ishida
  */
 @Getter
+@Setter
 public class FlexShortDeductTime {
 
 	/** 年休控除日数 */
-	@Setter
 	private AttendanceDaysMonth annualLeaveDeductDays;
 	/** 欠勤控除時間 */
-	@Setter
 	private AttendanceTimeMonth absenceDeductTime;
 	/** 控除前のフレックス不足時間 */
 	private AttendanceTimeMonth flexShortTimeBeforeDeduct;

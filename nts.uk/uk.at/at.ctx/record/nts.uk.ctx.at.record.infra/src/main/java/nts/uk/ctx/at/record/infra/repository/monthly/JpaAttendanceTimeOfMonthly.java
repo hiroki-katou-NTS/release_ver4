@@ -140,6 +140,12 @@ public class JpaAttendanceTimeOfMonthly extends JpaRepository implements Attenda
 			+ "AND a.PK.yearMonth = :yearMonth "
 			+ "ORDER BY a.startYmd ";
 
+	private static final String FIND_BY_YM_AND_CLOSURE_ID = "SELECT a FROM KrcdtMonAttendanceTime a "
+			+ "WHERE a.PK.employeeId = :employeeId "
+			+ "AND a.PK.yearMonth = :yearMonth "
+			+ "AND a.PK.closureId = :closureId "
+			+ "ORDER BY a.startYmd ";
+
 	private static final String DELETE_BY_YEAR_MONTH = "DELETE FROM KrcdtMonAttendanceTime a "
 			+ "WHERE a.PK.employeeId = :employeeId "
 			+ "AND a.PK.yearMonth = :yearMonth ";
@@ -170,6 +176,18 @@ public class JpaAttendanceTimeOfMonthly extends JpaRepository implements Attenda
 				.getList(c -> toDomain(c));
 	}
 
+	/** 検索　（年月と締めID） */
+	@Override
+	public List<AttendanceTimeOfMonthly> findByYMAndClosureIdOrderByStartYmd(String employeeId, YearMonth yearMonth,
+			ClosureId closureId) {
+		
+		return this.queryProxy().query(FIND_BY_YM_AND_CLOSURE_ID, KrcdtMonAttendanceTime.class)
+				.setParameter("employeeId", employeeId)
+				.setParameter("yearMonth", yearMonth.v())
+				.setParameter("closureId", closureId.value)
+				.getList(c -> toDomain(c));
+	}
+	
 	/**
 	 * エンティティ→ドメイン
 	 * @param entity エンティティ：月別実績の勤怠時間

@@ -9,7 +9,7 @@ import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.app.find.log.dto.ErrMessageInfoDto;
 import nts.uk.ctx.at.record.app.find.log.dto.InputErrMessageInfoByID;
-import nts.uk.ctx.at.record.dom.workrecord.log.ErrMessageInfoRepository;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfoRepository;
 
 @Stateless
 public class ErrMessageInfoFinder {

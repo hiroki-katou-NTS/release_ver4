@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.record.dom.standardtime;
 
+import java.util.Optional;
+
 import lombok.Getter;
 import lombok.val;
 import nts.uk.ctx.at.record.dom.standardtime.enums.ClosingDateType;
@@ -10,6 +12,7 @@ import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.standardtime.enums.ClosingDateAtr;
 import nts.uk.ctx.at.record.dom.standardtime.enums.TimeOverLimitType;
 import nts.uk.ctx.at.shared.dom.common.Year;
+import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.ctx.at.record.dom.standardtime.enums.StartingMonthType;
 import nts.uk.ctx.at.record.dom.standardtime.enums.TargetSettingAtr;
@@ -116,5 +119,55 @@ public class AgreementOperationSetting extends AggregateRoot {
 		aggrPeriod.setYear(new Year(year));
 		
 		return aggrPeriod;
+	}
+	
+	/**
+	 * 年月から集計期間を取得
+	 * @param yearMonth 年月
+	 * @param closure 締め
+	 * @return 集計期間
+	 */
+	// 2018.3.25 add shuichu_ishida
+	public Optional<AggregatePeriod> getAggregatePeriodByYearMonth(YearMonth yearMonth, Closure closure){
+
+		AggregatePeriod aggrPeriod = new AggregatePeriod();
+		aggrPeriod.setYearMonth(yearMonth);
+		aggrPeriod.setYear(new Year(yearMonth.year()));	// 期首月　未配慮
+		
+		// 「締め日区分」を取得
+		if (this.closingDateAtr == ClosingDateAtr.SAMEDATE){
+			
+			// 締め期間と同じ集計期間を取得
+			val datePeriods = closure.getPeriodByYearMonth(yearMonth);
+			if (datePeriods.size() <= 0) return Optional.empty();
+			aggrPeriod.setPeriod(datePeriods.get(0));
+			return Optional.of(aggrPeriod);
+		}
+		if (this.closingDateAtr == ClosingDateAtr.DESIGNATEDATE){
+			
+			// 締め日を指定する場合の集計期間を取得
+			val currentStart = GeneralDate.ymd(yearMonth.year(), yearMonth.month(), 1);
+			val currentEnd = GeneralDate.ymd(yearMonth.year(), yearMonth.month(), 1).addMonths(1).addDays(-1);
+			val prevEnd = currentStart.addDays(-1);
+			if (this.closingDateType == ClosingDateType.LASTDAY){
+				// 年月の末締め
+				aggrPeriod.setPeriod(new DatePeriod(currentStart, currentEnd));
+			}
+			else {
+				// 年月の締め開始日～締め終了日
+				int closureDay = this.closingDateType.value + 1;
+				GeneralDate closingStart = currentStart;
+				if (closureDay + 1 <= prevEnd.day()){
+					closingStart = GeneralDate.ymd(prevEnd.year(), prevEnd.month(), closureDay + 1);
+				}
+				GeneralDate closingEnd = currentEnd;
+				if (closureDay <= currentEnd.day()){
+					closingEnd = GeneralDate.ymd(currentEnd.year(), currentEnd.month(), closureDay);
+				}
+				aggrPeriod.setPeriod(new DatePeriod(closingStart, closingEnd));
+			}
+			return Optional.of(aggrPeriod);
+		}
+		return Optional.empty();
 	}
 }

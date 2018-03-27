@@ -7,7 +7,6 @@ import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.monthly.calc.MonthlyAggregateAtr;
 import nts.uk.ctx.at.record.dom.monthly.calc.MonthlyCalculation;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.RepositoriesRequiredByMonthlyAggr;
-import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.excessoutside.TotalTime;
 import nts.uk.ctx.at.shared.dom.common.Year;
 
 /**
@@ -73,7 +72,6 @@ public class AgreementTimeOfManagePeriod extends AggregateRoot {
 	 * @param criteriaDate 基準日
 	 * @param aggregateAtr 集計区分
 	 * @param monthlyCalculation 月の計算
-	 * @param totalTime 時間外超過の丸め後合計時間
 	 * @param repositories 月次集計が必要とするリポジトリ
 	 */
 	public void aggregate(
@@ -82,11 +80,10 @@ public class AgreementTimeOfManagePeriod extends AggregateRoot {
 			GeneralDate criteriaDate,
 			MonthlyAggregateAtr aggregateAtr,
 			MonthlyCalculation monthlyCalculation,
-			TotalTime totalTime,
 			RepositoriesRequiredByMonthlyAggr repositories){
 		
 		// 36協定時間の対象を取得
-		this.breakdown.getTargetItemOfAgreement(aggregateAtr, monthlyCalculation, totalTime, repositories);
+		this.breakdown.getTargetItemOfAgreement(aggregateAtr, monthlyCalculation, repositories);
 		
 		// 36協定時間内訳の合計時間を36協定時間とする
 		this.agreementTime.setAgreementTime(this.breakdown.getTotalTime());

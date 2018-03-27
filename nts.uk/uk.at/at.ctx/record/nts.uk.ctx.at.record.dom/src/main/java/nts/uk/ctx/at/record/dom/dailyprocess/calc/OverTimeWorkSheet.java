@@ -9,7 +9,7 @@ import nts.gul.util.value.Finally;
 import nts.uk.ctx.at.record.dom.daily.ExcessOverTimeWorkMidNightTime;
 import nts.uk.ctx.at.record.dom.daily.overtimework.OverTimeOfDaily;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
-import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.AutoCalculationOfOverTimeWork;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalOvertimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.flowset.FlowOTTimezone;
 import nts.uk.ctx.at.shared.dom.worktime.flowset.FlowWorkTimezoneSetting;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
@@ -46,7 +46,7 @@ public class OverTimeWorkSheet {
 	 * 残業時間の計算(残業時間帯の合計の時間を取得し1日の範囲に返す)
 	 * @return
 	 */
-	public static OverTimeOfDaily calcOverTimeWork(AutoCalculationOfOverTimeWork autoCalcSet) {
+	public static OverTimeOfDaily calcOverTimeWork(AutoCalOvertimeSetting autoCalcSet) {
 		//ControlOverFrameTime returnClass = new ControlOverFrameTime(overWorkTimeOfDaily.collectOverTimeWorkTime(autoCalcSet));
 		
 		//overWorkTimeOfDaily.addToList(returnClass);
@@ -71,7 +71,7 @@ public class OverTimeWorkSheet {
 	 * 深夜時間計算後の時間帯再作成
 	 * @return
 	 */
-	public OverTimeWorkSheet reCreateToCalcExcessWork(OverTimeWorkSheet overTimeWorkSheet,AutoCalculationOfOverTimeWork autoCalcSet) {
+	public OverTimeWorkSheet reCreateToCalcExcessWork(OverTimeWorkSheet overTimeWorkSheet,AutoCalOvertimeSetting autoCalcSet) {
 		ExcessOverTimeWorkMidNightTime midNightTime = overTimeWorkSheet.overWorkTimeOfDaily.calcMidNightTimeIncludeOverTimeWork(autoCalcSet);
 		OverTimeOfDaily overTimeWorkOfDaily = new OverTimeOfDaily(overTimeWorkSheet.overWorkTimeOfDaily.getOverTimeWorkFrameTimeSheet(),
 																		  overTimeWorkSheet.overWorkTimeOfDaily.getOverTimeWorkFrameTime(),

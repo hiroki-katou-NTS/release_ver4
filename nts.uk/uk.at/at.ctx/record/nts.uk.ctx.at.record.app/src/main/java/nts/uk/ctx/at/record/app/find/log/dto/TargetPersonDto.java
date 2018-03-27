@@ -3,7 +3,7 @@ package nts.uk.ctx.at.record.app.find.log.dto;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Value;
-import nts.uk.ctx.at.record.dom.workrecord.log.TargetPerson;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.TargetPerson;
 
 @Value
 public class TargetPersonDto {

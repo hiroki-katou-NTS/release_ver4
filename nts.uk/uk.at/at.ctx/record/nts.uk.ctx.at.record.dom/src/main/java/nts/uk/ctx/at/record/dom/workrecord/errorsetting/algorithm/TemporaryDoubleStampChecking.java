@@ -11,8 +11,8 @@ import nts.uk.ctx.at.record.dom.workrecord.erroralarm.algorithm.CreateEmployeeDa
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.primitivevalue.ErrorAlarmWorkRecordCode;
 import nts.uk.ctx.at.record.dom.worktime.TemporaryTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
-import nts.uk.ctx.at.record.dom.worktime.primitivevalue.WorkNo;
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
 
 /*
  * 臨時系二重打刻をチェックする

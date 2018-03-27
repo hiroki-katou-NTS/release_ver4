@@ -35,7 +35,7 @@ import nts.uk.ctx.at.record.dom.workrecord.errorsetting.algorithm.PClogOnOffLack
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.algorithm.StampIncorrectOrderAlgorithm;
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.algorithm.TemporaryDoubleStampChecking;
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.algorithm.TemporaryStampOrderChecking;
-import nts.uk.ctx.at.record.dom.workrecord.log.enums.ExecutionType;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
 import nts.uk.ctx.at.record.dom.worktime.TemporaryTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.shared.dom.personallaborcondition.UseAtr;
@@ -527,12 +527,12 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 		// timeLeavingOfDailyPerformance, temporaryTimeOfDailyPerformance);
 
 		// 休憩系打刻漏れをチェックする
-		// breakTimeStampLeakageChecking.breakTimeStampLeakageChecking(companyID,
-		// employeeID, processingDate, breakTimeOfDailyPerformance);
+//		 breakTimeStampLeakageChecking.breakTimeStampLeakageChecking(companyID,
+//		 employeeID, processingDate, breakTimeOfDailyPerformance);
 
 		// 休憩系打刻順序不正をチェックする
-		// breakTimeStampIncorrectOrderChecking.breakTimeStampIncorrectOrderChecking(companyID,
-		// employeeID, processingDate, breakTimeOfDailyPerformance);
+//		 breakTimeStampIncorrectOrderChecking.breakTimeStampIncorrectOrderChecking(companyID,
+//		 employeeID, processingDate, breakTimeOfDailyPerformance);
 		UseAtr useAtr2 = UseAtr.USE;
 		if (useAtr2 == UseAtr.USE) {
 			// 入退門の打刻漏れをチェックする

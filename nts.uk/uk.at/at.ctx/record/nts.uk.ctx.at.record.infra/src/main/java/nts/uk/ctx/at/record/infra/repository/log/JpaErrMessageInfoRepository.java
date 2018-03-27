@@ -7,11 +7,11 @@ import javax.ejb.Stateless;
 import lombok.val;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.uk.ctx.at.record.dom.workrecord.log.ErrMessageContent;
-import nts.uk.ctx.at.record.dom.workrecord.log.ErrMessageInfo;
-import nts.uk.ctx.at.record.dom.workrecord.log.ErrMessageInfoRepository;
-import nts.uk.ctx.at.record.dom.workrecord.log.ErrMessageResource;
-import nts.uk.ctx.at.record.dom.workrecord.log.enums.ExecutionContent;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageContent;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfo;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfoRepository;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageResource;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionContent;
 import nts.uk.ctx.at.record.infra.entity.log.KrcdtErrMessageInfo;
 import nts.uk.ctx.at.record.infra.entity.log.KrcdtErrMessageInfoPK;
 @Stateless

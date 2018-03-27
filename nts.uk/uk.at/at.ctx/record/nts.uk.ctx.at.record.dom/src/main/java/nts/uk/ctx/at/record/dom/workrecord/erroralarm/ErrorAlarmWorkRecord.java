@@ -11,10 +11,12 @@ import lombok.Setter;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.dom.AggregateRoot;
 import nts.gul.text.IdentifierUtil;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.ErrorAlarmCondition;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.enums.ErrorAlarmClassification;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.primitivevalue.ErrorAlarmWorkRecordCode;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.primitivevalue.ErrorAlarmWorkRecordName;
+import nts.uk.ctx.at.record.dom.workrecord.errorsetting.SystemFixedErrorAlarm;
 
 /**
  * @author hungnm 勤務実績のエラーアラーム
@@ -121,5 +123,69 @@ public class ErrorAlarmWorkRecord extends AggregateRoot {
 	public void setCheckId(String errorAlarmCheckID) {
 		this.errorAlarmCheckID = errorAlarmCheckID;
 	}
-
+	
+//	/**
+//	 * システム固定エラーチェック
+//	 * @return
+//	 */
+//	public EmployeeDailyPerError systemErrorCheck(IntegrationOfDaily integrationOfDaily) {
+//		
+//		SystemFixedErrorAlarm fixedErrorAlarmCode = SystemFixedErrorAlarm.valueOf(this.code.toString());
+//		switch(fixedErrorAlarmCode) {
+//			//遅刻
+//			case LATE:
+//				break;
+//			//早退
+//			case LEAVE_EARLY:
+//				break;
+//			//事前残業申請超過
+//			case PRE_OVERTIME_APP_EXCESS:
+//				break;
+//			//事前休出申請超過
+//			case PRE_HOLIDAYWORK_APP_EXCESS:
+//				break;
+//			//事前フレックス申請超過
+//			case PRE_FLEX_APP_EXCESS:
+//				break;
+//			//事前深夜申請超過
+//			case PRE_MIDNIGHT_EXCESS:
+//				break;
+//			//残業時間実績超過
+//			case OVER_TIME_EXCESS:
+//				checkOverTimeExcess(integrationOfDaily);
+//				break;
+//			//休出時間実績超過
+//			case REST_TIME_EXCESS:
+//				break;
+//			//フレックス時間実績超過
+//			case FLEX_OVER_TIME:
+//				break;
+//			//深夜時間実績超過
+//			case MIDNIGHT_EXCESS:
+//				break;
+//			
+//			//乖離時間のエラー	
+//			case ERROR_OF_DIVERGENCE_TIME:
+//				break;
+//			//乖離時間のアラーム
+//			case ALARM_OF_DIVERGENCE_TIME:
+//				break;
+//			//それ以外ルート
+//			default:
+//				
+//		}
+//	}
+//
+//	/**
+//	 * 残業時間実装超過のチェック
+//	 * @param integrationOfDaily
+//	 */
+//	private void checkOverTimeExcess(IntegrationOfDaily integrationOfDaily) {
+//		if(integrationOfDaily.getAttendanceTimeOfDailyPerformance().isPresent()) {
+//			if(integrationOfDaily.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().isPresent()) {
+//				integrationOfDaily.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get();
+//			}
+//		}
+//	}
 }
+

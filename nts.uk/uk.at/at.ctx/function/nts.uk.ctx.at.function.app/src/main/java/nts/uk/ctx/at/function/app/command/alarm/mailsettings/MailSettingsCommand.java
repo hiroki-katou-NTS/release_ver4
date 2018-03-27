@@ -19,7 +19,7 @@ public class MailSettingsCommand {
 	private String mailRely;
 	
 	public MailSettings toDomain(){
-		return new MailSettings(subject, text, mailAddressBCC, mailAddressCC, mailRely);
+		return new MailSettings(subject, text, mailAddressCC, mailAddressBCC, mailRely);
 	}
 	
 }

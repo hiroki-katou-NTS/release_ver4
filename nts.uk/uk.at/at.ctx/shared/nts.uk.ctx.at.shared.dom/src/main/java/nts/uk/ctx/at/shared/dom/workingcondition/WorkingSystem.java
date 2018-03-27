@@ -64,4 +64,37 @@ public enum WorkingSystem {
 		// Not found.
 		return null;
 	}
+	
+	/**
+	 * 固定勤務であるか判定する
+	 * @return　固定勤務である
+	 */
+	public boolean isRegularWork() {
+		return this.equals(REGULAR_WORK);
+	}
+	
+	
+	/**
+	 * 就業計算対象外であるか判定する
+	 * @return　就業計算対象外である
+	 */
+	public boolean isExcludedWorkingCalculate() {
+		return this.equals(EXCLUDED_WORKING_CALCULATE);
+	}
+	
+	/**
+	 * 変形労働であるか判定する
+	 * @return　変形労働である
+	 */
+	public boolean isVariableWorkingTimeWork() {
+		return this.equals(VARIABLE_WORKING_TIME_WORK);
+	}
+	
+	/**
+	 * フレックス時間勤務であるか判定する
+	 * @return　フレックス勤務である
+	 */
+	public boolean isFlexTimeWork() {
+		return this.equals(FLEX_TIME_WORK);
+	}
 }

@@ -231,7 +231,7 @@ module nts.uk.ui {
                     });
                 }
 
-                var $this = createNoticeDialog(message, buttons);
+                var $this = createNoticeDialog(message, buttons, { text: toBeResource.confirm });
             });
 
             return handlers;

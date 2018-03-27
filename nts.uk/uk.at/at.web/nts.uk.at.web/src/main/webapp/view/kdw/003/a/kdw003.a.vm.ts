@@ -333,7 +333,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 displayFormat : 0,
                 initScreen: 0,
                 lstEmployee: [],
-                formatCodes: self.formatCodes()
+                formatCodes: self.formatCodes(),
+                objectShare: self.shareObject()
             };
             nts.uk.ui.block.invisible();
             nts.uk.ui.block.grayout();
@@ -824,7 +825,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     displayFormat : self.displayFormat(),
                     initScreen: 1,
                     lstEmployee: lstEmployee,
-                    formatCodes: self.formatCodes()
+                    formatCodes: self.formatCodes(),
+                    objectShare: self.shareObject()
                 };
                 nts.uk.ui.block.invisible();
                 nts.uk.ui.block.grayout();
@@ -2471,12 +2473,12 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 this.transitionDesScreen = dataInit.transitionDesScreen;
             }
             if (dataExtract != undefined) {
-                this.dateTarget = dataExtract.dateTarget;
+                this.dateTarget = moment(dataExtract.dateTarget, "YYYY/MM/DD");
                 this.displayFormat = dataExtract.displayFormat;
                 this.individualStartUp = dataExtract.individualStartUp;
                 this.lstExtratedEmployee = dataExtract.lstExtratedEmployee;
-                this.startDate = dataExtract.startDate;
-                this.endDate = dataExtract.endDate;
+                this.startDate = moment(dataExtract.startDate, "YYYY/MM/DD");;
+                this.endDate = moment(dataExtract.endDate, "YYYY/MM/DD");
             }
         }
     }

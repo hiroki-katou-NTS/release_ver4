@@ -8,9 +8,9 @@ import javax.ejb.Stateless;
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.workrecord.log.EmpCalAndSumExeLog;
-import nts.uk.ctx.at.record.dom.workrecord.log.EmpCalAndSumExeLogRepository;
-import nts.uk.ctx.at.record.dom.workrecord.log.ExecutionLog;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLog;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ExecutionLog;
 import nts.uk.ctx.at.record.infra.entity.log.KrcdtEmpExecutionLog;
 import nts.uk.ctx.at.record.infra.entity.log.KrcdtExecutionLog;
 

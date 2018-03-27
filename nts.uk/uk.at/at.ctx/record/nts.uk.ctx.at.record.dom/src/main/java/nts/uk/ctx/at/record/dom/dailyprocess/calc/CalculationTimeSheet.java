@@ -14,12 +14,14 @@ import nts.uk.ctx.at.record.dom.bonuspay.autocalc.BonusPayAutoCalcSet;
 import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.daily.TimeWithCalculation;
 import nts.uk.ctx.at.record.dom.daily.bonuspaytime.BonusPayTime;
+import nts.uk.ctx.at.record.dom.daily.midnight.MidNightTimeSheet;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.BonusPayTimesheet;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.SpecBonusPayTimesheet;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
 import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalAtrOvertime;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.RaisingSalaryCalcAtr;
+import nts.uk.ctx.at.shared.dom.worktime.common.EmTimeZoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.TimeZoneRounding;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
@@ -99,8 +101,8 @@ public abstract class CalculationTimeSheet {
 	 */
 	public TimeSpanForCalc reCreateTreatAsSiteiTimeEnd(AttendanceTime transTime,OverTimeFrameTimeSheetForCalc overTimeWork) {
 		TimeSpanForCalc copySpan = calcrange;
-		//return overTimeWork.reduceUntilSpecifiedTime(new AttendanceTime(copySpan.lengthAsMinutes() - transTime.valueAsMinutes()));
-		return copySpan;
+		return overTimeWork.reduceUntilSpecifiedTime(new AttendanceTime(copySpan.lengthAsMinutes() - transTime.valueAsMinutes()));
+		//return copySpan;
 	}
 	
 	/**
@@ -108,7 +110,7 @@ public abstract class CalculationTimeSheet {
 	 * @param assingnTime 指定時間
 	 * @return 縮小後の時間帯
 	 */
-	public TimeZoneRounding reduceUntilSpecifiedTime(AttendanceTime assignTime) {
+	public TimeSpanForCalc reduceUntilSpecifiedTime(AttendanceTime assignTime) {
 		AttendanceTime shortened = calcTotalTime().minusMinutes(assignTime.valueAsMinutes());
 		
 		AttendanceTime newEnd = new AttendanceTime(timeSheet.getStart().forwardByMinutes(shortened.valueAsMinutes()).valueAsMinutes());
@@ -133,7 +135,7 @@ public abstract class CalculationTimeSheet {
 			}
 		}
 		
-		return newTimeSpan;
+		return newTimeSpan.timeSpan();
 	}
 	
 	/**
@@ -553,4 +555,45 @@ public abstract class CalculationTimeSheet {
 //		}
 //		
 //	}
+	//---------------------------実働時間帯へ持っていきたい-------------------------------↓
+	/**
+	 * 指定された時間帯と重複している加給時間帯を取得
+	 * @param bonusPayTimeSheet
+	 * @param duplicateTimeSheet
+	 * @return
+	 */
+	public static List<BonusPayTimeSheetForCalc> getDuplicatedBonusPay(List<BonusPayTimeSheetForCalc> bonusPayTimeSheet,TimeSpanForCalc timeSpan){
+		return bonusPayTimeSheet.stream()
+								.filter(tc -> tc.getCalcrange().checkDuplication(timeSpan).isDuplicated())
+								.map(tc -> tc.convertForCalcCorrectRange(tc.getCalcrange().getDuplicatedWith(timeSpan).get()))
+								.collect(Collectors.toList());
+	}
+	
+	/**
+	 * 指定された時間帯と重複している特定加給時間帯を取得
+	 * @param bonusPayTimeSheet
+	 * @param duplicateTimeSheet
+	 * @return
+	 */
+	public static List<SpecBonusPayTimeSheetForCalc> getDuplicatedSpecBonusPay(List<SpecBonusPayTimeSheetForCalc> bonusPayTimeSheet,TimeSpanForCalc timeSpan){
+		return bonusPayTimeSheet.stream()
+								.filter(tc -> tc.getCalcrange().checkDuplication(timeSpan).isDuplicated())
+								.map(tc -> tc.convertForCalcCorrectRange(tc.getCalcrange().getDuplicatedWith(timeSpan).get()))
+								.collect(Collectors.toList());
+	}
+	
+	/**
+	 * 指定された時間帯と重複している深夜時間帯を取得
+	 * @param midNightTimeSheet
+	 * @param duplicateTimeSheet
+	 * @return
+	 */
+	public static Optional<MidNightTimeSheetForCalc> getDuplicateMidNight(MidNightTimeSheet midNightTimeSheet, TimeSpanForCalc timeSpan){ 
+		val duplicateMidNightSpan = timeSpan.getDuplicatedWith(midNightTimeSheet.getTimeSpan());
+		if(duplicateMidNightSpan.isPresent()) {
+			return Optional.of(MidNightTimeSheetForCalc.convertForCalc(midNightTimeSheet).getDuplicateRangeTimeSheet(duplicateMidNightSpan.get()));
+		}
+		return Optional.empty();
+	}
+	//---------------------------実働時間帯へ持っていきたい-------------------------------↑
 }

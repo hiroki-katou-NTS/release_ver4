@@ -68,4 +68,5 @@ public class WorkTimezoneOtherSubHolTimeSet extends WorkTimeDomainObject {
 	public void restoreDefaultData(ScreenMode screenMode) {
 		this.subHolTimeSet.restoreDefaultData(screenMode);
 	}
+	
 }

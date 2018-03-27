@@ -91,7 +91,7 @@ public class DeductionTimeSheet {
 		/*控除でない外出削除*/
 		List<TimeSheetOfDeductionItem> goOutDeletedList = new ArrayList<TimeSheetOfDeductionItem>();
 		for(TimeSheetOfDeductionItem timesheet: useDedTimeSheet) {
-			if(!(timesheet.getDeductionAtr().isGoOut() && timesheet.getGoOutReason().get().isPublicOrCmpensation())) {
+			if(dedAtr.isAppropriate() || (!(timesheet.getDeductionAtr().isGoOut() && timesheet.getGoOutReason().get().isPublicOrCmpensation()))) {
 				goOutDeletedList.add(timesheet);
 			}
 		}

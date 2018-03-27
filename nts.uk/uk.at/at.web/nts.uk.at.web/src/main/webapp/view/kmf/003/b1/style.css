@@ -4,6 +4,10 @@
 	background: #c7f391 !important;
 }
 
+td.ui-widget-header {
+    text-align: center;
+}
+
 .top-tbl tr {
 	height: 10px;
 }
@@ -52,81 +56,10 @@ span.nts-editor-wrapped.ntsControl.symbol.symbol-right {
     width: auto !important;
 }
 
-table.contents-header td.numbers {
-	width: 18px;
+td.numbers {
+	text-align: center;
 }
 
-table.contents-header td.pay-day-cal {
-	width: auto;
-}
-
-table.contents-header td.input-units {
-	width: 25px;
-}
-
-table.contents-header td.input-units-last {
-	width: 25px;
-}
-
-table.contents-header td.base-date {
-	width: 150px;
-}
-
-table.contents-header td.allow-pay {
-	width: 34px;
-}
-
-.base-date-options {
-	width: 150px;
-	min-width: 0 !important;
-}
-
-.contents-header {
-	width: 418px;
-    margin-top: 40px;
-}
-
-.contents-data {
-	width: 418px;
-}
-
-.contents-data td {
-    border: 1px solid #CCC;
-    text-align: center;
-    height: 20px;
-}
-
-.nts-combo-item .nts-column {
-	text-align: left;	
-}
-
-table.contents-data td.numbers {
-	width: 54px;
-}
-
-table.contents-data td.pay-day-cal {
-	width: 219px;
-}
-
-table.contents-data td.input-units {
-	width: 71px;
-}
-
-table.contents-data td.base-date {
-	width: 156px;
-}
-
-table.contents-data td.allow-pay {
-	width: 40px;
-}
-
-table.contents-data thead, table.contents-data tbody {
-	display: block;
-}
-
-table.contents-data tbody {
-    height: 225px;   
-    overflow-y: auto;   
-    overflow-x: hidden; 
-    border: 1px solid #CCC;
+td.input-units {
+	text-align: center;
 }

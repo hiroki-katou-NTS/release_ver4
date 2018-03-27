@@ -65,4 +65,12 @@ public enum CompensatoryOccurrenceDivision {
 		// Not found.
 		return null;
 	}
+	
+	/**
+	 * 残業であるか判定する
+	 * @return　残業である
+	 */
+	public boolean isOverTime() {
+		return FromOverTime.equals(this);
+	}
 }

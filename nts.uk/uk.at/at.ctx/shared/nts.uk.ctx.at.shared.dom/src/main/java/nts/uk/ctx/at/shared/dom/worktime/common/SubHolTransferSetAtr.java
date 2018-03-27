@@ -65,4 +65,12 @@ public enum SubHolTransferSetAtr {
 		// Not found.
 		return null;
 	}
+	
+	/**
+	 * 指定した時間を代休とするか判定する
+	 * @return　指定した時間を代休とする
+	 */
+	public boolean isSpecifiedTimeSubHol() {
+		return this.equals(SPECIFIED_TIME_SUB_HOL);
+	}
 }

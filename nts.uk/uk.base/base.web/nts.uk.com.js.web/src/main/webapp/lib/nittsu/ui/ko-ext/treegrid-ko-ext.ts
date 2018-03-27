@@ -211,11 +211,15 @@ module nts.uk.ui.koExtentions {
                 $treegrid.igTreeGridSelection("clearSelection");
             } else {
                 // Compare value.
-                var olds = _.map($treegrid.igTreeGridSelection("selectedRow") as Array<any>, function(row: any) {
-                    return row.id;
-                });
+                let uiSR =  $treegrid.ntsTreeView('getSelected');
+//                _.map($treegrid.igTreeGridSelection("selectedRow") as Array<any>, function(row: any) {
+//                    return row.id;
+//                });
                 // Not change, do nothing.
                 if (multiple) {
+                    let olds = _.map(uiSR as Array<any>, function(row: any) {
+                        return row.id;
+                    });
                     if (_.isEqual(selectedValues.sort(), olds.sort())) {
                         return;
                     }
@@ -225,7 +229,7 @@ module nts.uk.ui.koExtentions {
                         $treegrid.igTreeGridSelection("selectRowById", val);
                     })
                 } else {
-                    if (olds.length > 1 && olds[0] === singleValue) {
+                    if (uiSR !== undefined && uiSR.id === singleValue) {
                         return;
                     }
                     $treegrid.igTreeGridSelection("clearSelection");

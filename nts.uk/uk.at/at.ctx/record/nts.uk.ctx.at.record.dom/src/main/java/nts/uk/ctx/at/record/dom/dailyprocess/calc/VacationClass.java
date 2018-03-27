@@ -6,12 +6,12 @@ import lombok.Value;
 import lombok.val;
 import nts.uk.ctx.at.record.dom.daily.vacationusetime.HolidayOfDaily;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
-import nts.uk.ctx.at.shared.dom.employment.statutory.worktime.employment.WorkingSystem;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.AddSettingOfFlexWork;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.AddSettingOfIrregularWork;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.AddSettingOfRegularWork;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.CalculationByActualTimeAtr;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.StatutoryDivision;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
 import nts.uk.ctx.at.shared.dom.workrule.addsettingofworktime.AddVacationSet;
 import nts.uk.ctx.at.shared.dom.workrule.addsettingofworktime.NotUseAtr;
 import nts.uk.ctx.at.shared.dom.workrule.addsettingofworktime.VacationAddTimeSet;
@@ -180,16 +180,16 @@ public class VacationClass {
 								AddSettingOfIrregularWork addSettingOfIrregularWork,
 								AddSettingOfFlexWork addSettingOfFlexWork) {
 		switch (workingSystem) {
-		case RegularWork:
+		case REGULAR_WORK:
 			return addSettingOfRegularWork.getNotUseAtr(statutoryDivision);
 
-		case FlexTimeWork:
+		case FLEX_TIME_WORK:
 			return addSettingOfFlexWork.getNotUseAtr(statutoryDivision);
 
-		case VariableWorkingTimeWork:
+		case VARIABLE_WORKING_TIME_WORK:
 			return addSettingOfIrregularWork.getNotUseAtr(statutoryDivision);
 
-		case ExcludedWorkingCalculate:
+		case EXCLUDED_WORKING_CALCULATE:
 			throw new RuntimeException("不正な労働制です");
 		default:
 			throw new RuntimeException("不正な労働制です");
@@ -234,16 +234,16 @@ public class VacationClass {
 																	 AddSettingOfIrregularWork addSettingOfIrregularWork, 
 																	 AddSettingOfFlexWork addSettingOfFlexWork) {
 		switch (workingSystem) {
-		case RegularWork:
+		case REGULAR_WORK:
 			return addSettingOfRegularWork.getCalculationByActualTimeAtr(statutoryDivision);
 
-		case FlexTimeWork:
+		case FLEX_TIME_WORK:
 			return addSettingOfFlexWork.getCalculationByActualTimeAtr(statutoryDivision);
 
-		case VariableWorkingTimeWork:
+		case VARIABLE_WORKING_TIME_WORK:
 			return addSettingOfIrregularWork.getCalculationByActualTimeAtr(statutoryDivision);
 
-		case ExcludedWorkingCalculate:
+		case EXCLUDED_WORKING_CALCULATE:
 			throw new RuntimeException("不正な労働制です");
 		default:
 			throw new RuntimeException("不正な労働制です");

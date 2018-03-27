@@ -8,6 +8,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.layer.dom.AggregateRoot;
 import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.at.shared.dom.specialholiday.event.SpecialHolidayEvent;
 import nts.uk.ctx.at.shared.dom.specialholiday.grantday.GrantPeriodic;
 import nts.uk.ctx.at.shared.dom.specialholiday.grantday.GrantRegular;
 import nts.uk.ctx.at.shared.dom.specialholiday.grantday.GrantSingle;
@@ -105,5 +106,12 @@ public class SpecialHoliday extends AggregateRoot {
 	 */
 	public boolean isMethodManageRemainNumber() {
 		return this.grantMethod == GrantMethod.DoNot_ManageRemainNumber;
+	}
+	
+	public void publishEvent(boolean flag) {
+		SpecialHolidayEvent event = new SpecialHolidayEvent(flag,
+				this.specialHolidayCode,
+				this.specialHolidayName);
+		event.toBePublished();
 	}
 }

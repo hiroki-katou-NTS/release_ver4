@@ -4,6 +4,7 @@
  *****************************************************************/
 package nts.uk.ctx.at.schedule.pub.schedule.basicschedule;
 
+import java.util.List;
 import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
@@ -22,4 +23,14 @@ public interface ScBasicSchedulePub {
 	 * @return the optional
 	 */
 	public Optional<ScBasicScheduleExport> findById(String employeeId, GeneralDate baseDate);
+	
+	/**
+	 * Find work schedule break time (勤務予定休憩時間帯)
+	 * RequestList351
+	 * 
+	 * @param employeeId the employee id
+	 * @param baseDate the base date
+	 * @return the optional
+	 */
+	public List<ScWorkBreakTimeExport> findWorkBreakTime(String employeeId, GeneralDate baseDate);
 }

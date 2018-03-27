@@ -7,8 +7,8 @@ import javax.ejb.Stateless;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
-import nts.uk.ctx.at.record.dom.workrecord.log.CaseSpecExeContent;
-import nts.uk.ctx.at.record.dom.workrecord.log.CaseSpecExeContentRepository;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.CaseSpecExeContent;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.CaseSpecExeContentRepository;
 import nts.uk.ctx.at.record.infra.entity.log.KrcstCaseSpecExeContent;
 
 @Stateless

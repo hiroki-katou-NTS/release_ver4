@@ -14,6 +14,7 @@ import com.aspose.cells.PageSetup;
 import com.aspose.cells.SaveFormat;
 import com.aspose.cells.SaveOptions;
 import com.aspose.cells.TxtSaveOptions;
+import com.aspose.cells.TxtValueQuoteType;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.WorkbookDesigner;
 import com.aspose.cells.WorksheetCollection;
@@ -130,7 +131,7 @@ public class AsposeCellsReportContext implements AutoCloseable {
 	public void saveAsCSV(OutputStream outputStream) {
 		try {
 			TxtSaveOptions opts = new TxtSaveOptions(SaveFormat.CSV);
-			opts.setAlwaysQuoted(true);
+			opts.setQuoteType(TxtValueQuoteType.ALWAYS);
 			opts.setEncoding(Encoding.getUTF8());
 			this.workbook.save(outputStream, opts);
 		} catch (Exception e) {

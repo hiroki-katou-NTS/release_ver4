@@ -1,7 +1,7 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository;
 
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.workrecord.log.enums.ExecutionType;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
 /**
  * @author nampt
  * 日別実績処理

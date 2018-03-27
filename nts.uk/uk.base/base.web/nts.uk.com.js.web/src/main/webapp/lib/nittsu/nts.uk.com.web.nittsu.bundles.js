@@ -4781,6 +4781,7 @@ var nts;
                 toBeResource.info = "情報";
                 toBeResource.warn = "警告";
                 toBeResource.error = "エラー";
+                toBeResource.confirm = "確認";
                 toBeResource.unset = "未設定";
                 toBeResource.errorContent = "エラー内容";
                 toBeResource.errorCode = "エラーコード";
@@ -5508,7 +5509,7 @@ var nts;
                                 }
                             });
                         }
-                        var $this = createNoticeDialog(message, buttons);
+                        var $this = createNoticeDialog(message, buttons, { text: ui_1.toBeResource.confirm });
                     });
                     return handlers;
                 }
@@ -16345,7 +16346,7 @@ var nts;
                             }
                         }
                         $grid.data("enable", enable);
-                        if (String($grid.attr("filtered")) === "true" && $grid.data("ui-changed") !== true) {
+                        if (String($grid.attr("filtered")) === "true") {
                             var filteredSource_1 = [];
                             _.forEach(gridSource, function (item) {
                                 var itemX = _.find(sources, function (s) {
@@ -16360,7 +16361,7 @@ var nts;
                                 $grid.igGrid("dataBind");
                             }
                         }
-                        else if ($grid.data("ui-changed") !== true) {
+                        else {
                             var currentSources = sources.slice();
                             var observableColumns = _.filter(ko.unwrap(data.columns), function (c) {
                                 c["key"] = c["key"] === undefined ? c["prop"] : c["key"];
@@ -18945,11 +18946,15 @@ var nts;
                         }
                         else {
                             // Compare value.
-                            var olds = _.map($treegrid.igTreeGridSelection("selectedRow"), function (row) {
-                                return row.id;
-                            });
+                            var uiSR = $treegrid.ntsTreeView('getSelected');
+                            //                _.map($treegrid.igTreeGridSelection("selectedRow") as Array<any>, function(row: any) {
+                            //                    return row.id;
+                            //                });
                             // Not change, do nothing.
                             if (multiple) {
+                                var olds = _.map(uiSR, function (row) {
+                                    return row.id;
+                                });
                                 if (_.isEqual(selectedValues.sort(), olds.sort())) {
                                     return;
                                 }
@@ -18960,7 +18965,7 @@ var nts;
                                 });
                             }
                             else {
-                                if (olds.length > 1 && olds[0] === singleValue) {
+                                if (uiSR !== undefined && uiSR.id === singleValue) {
                                     return;
                                 }
                                 $treegrid.igTreeGridSelection("clearSelection");
@@ -19973,28 +19978,39 @@ var nts;
                 (function (accordion) {
                     $.widget("ui.accordion", $.ui.accordion, {
                         _create: function () {
-                            this["tabindex"] = this.element.attr("tabindex") ? this.element.attr("tabindex") : 0;
+                            this["tabindex"] = parseInt(this.element.attr("tabindex"), 10);
+                            this["useTabindex"] = this["tabindex"] >= 0;
                             this.element.removeAttr("tabindex");
                             return this._super();
                         },
                         _refresh: function () {
                             this._super();
-                            if (!this.active.length) {
-                                this.headers.eq(0).attr("tabIndex", this.tabindex);
+                            if (this.useTabindex) {
+                                if (!this.active.length) {
+                                    this.headers.eq(0).attr("tabindex", this.tabindex);
+                                }
+                                else {
+                                    this.active.attr({
+                                        tabIndex: this.tabindex
+                                    });
+                                }
                             }
                             else {
-                                this.active.attr({
-                                    tabIndex: this.tabindex
-                                });
+                                this.headers.eq(0).removeAttr("tabindex");
                             }
                         },
                         _toggle: function (data) {
                             this._super(data);
                             var toShow = data.newPanel;
-                            toShow.prev().attr({ tabIndex: this.tabindex });
+                            if (this.useTabindex) {
+                                toShow.prev().attr({ tabIndex: this.tabindex });
+                            }
+                            else {
+                                toShow.prev().removeAttr("tabindex");
+                            }
                         },
                         _keydown: function (event) {
-                            if (event.altKey || event.ctrlKey) {
+                            if (event.altKey || event.ctrlKey || !this.useTabindex) {
                                 return;
                             }
                             var keyCode = $.ui.keyCode, length = this.headers.length, currentIndex = this.headers.index(event.target), toFocus = false;
@@ -20019,8 +20035,8 @@ var nts;
                                     break;
                             }
                             if (toFocus) {
-                                $(event.target).attr("tabIndex", -1);
-                                $(toFocus).attr("tabIndex", this.tabindex);
+                                $(event.target).removeAttr("tabindex");
+                                $(toFocus).attr("tabindex", this.tabindex);
                                 $(toFocus).trigger("focus");
                                 event.preventDefault();
                             }
@@ -20954,7 +20970,10 @@ var nts;
                                 _.defer(function () {
                                     var selected = getSelectRow($grid);
                                     if (!nts.uk.util.isNullOrEmpty(selected)) {
-                                        var $scrollContainer = $grid.igGrid("scrollContainer");
+                                        selected = oldSelected;
+                                    }
+                                    var $scrollContainer = $grid.igGrid("scrollContainer");
+                                    _.defer(function () {
                                         if ($scrollContainer.length > 0) {
                                             var firstRowOffset = $($("#single-list").igGrid("rowAt", 0)).offset().top;
                                             var selectRowOffset = $($("#single-list").igGrid("rowAt", index)).offset().top;
@@ -20964,7 +20983,7 @@ var nts;
                                             var index = $(selected["element"]).attr("data-row-idx");
                                             $grid.igGrid("virtualScrollTo", nts.uk.util.isNullOrEmpty(index) ? oldSelected.index : parseInt(index)); //.scrollTop(scrollTop);    
                                         }
-                                    }
+                                    });
                                 });
                             }
                         });
@@ -28056,8 +28075,10 @@ var nts;
                         // Get data
                         var data = valueAccessor();
                         var image = ko.unwrap(data.image);
+                        var textId = ko.unwrap(data.textId);
                         var enable = (data.enable !== undefined) ? ko.unwrap(data.enable) : true;
                         var position = ko.unwrap(data.position);
+                        var isImage = !uk.util.isNullOrUndefined(image);
                         //Position
                         var myPositions = position.replace(/[^a-zA-Z ]/gmi, "").split(" ");
                         var atPositions = position.split(" ");
@@ -28099,11 +28120,18 @@ var nts;
                                 $caret.css(caretPosition, parseFloat($popup.css(caretPosition)) * -1);
                             }
                         }).wrap($("<div class='ntsControl ntsHelpButton'></div>"));
+                        var $content;
+                        if (isImage) {
+                            $content = $("<img src='" + uk.request.resolvePath(image) + "' />");
+                        }
+                        else {
+                            $content = $("<span>").text(uk.resource.getText(textId));
+                        }
                         var $container = $(element).closest(".ntsHelpButton");
                         var $caret = $("<span class='caret-helpbutton caret-" + caretDirection + "'></span>");
                         var $popup = $("<div class='nts-help-button-image'></div>")
                             .append($caret)
-                            .append($("<img src='" + uk.request.resolvePath(image) + "' />"))
+                            .append($content)
                             .appendTo($container).hide();
                         // Click outside event
                         $("html").on("click", function (event) {

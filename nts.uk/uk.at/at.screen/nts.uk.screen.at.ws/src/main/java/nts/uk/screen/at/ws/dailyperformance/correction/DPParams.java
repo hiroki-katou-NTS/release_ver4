@@ -8,6 +8,7 @@ import java.util.List;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.CorrectionOfDailyPerformance;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyPerformanceEmployeeDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ObjectShare;
 
 /**
  * @author hungnm
@@ -23,5 +24,5 @@ public class DPParams {
 	public List<String> errorCodes;
 	// only use when click button  A2_4
 	public List<String> formatCodes;
-	
+    public ObjectShare objectShare;	
 }

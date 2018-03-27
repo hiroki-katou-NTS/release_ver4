@@ -287,6 +287,7 @@ module nts.uk.ui.sample.controls {
         }},
         "はてなアイコン": { doc: docs.helpbutton, props: {
             "画像ファイル": { api: "image" },
+            "テキスト": { api: "textId" },
         }},
         "凡例ボタン": { doc: docs.legendbutton, props: {
             "内容": { api: "" },

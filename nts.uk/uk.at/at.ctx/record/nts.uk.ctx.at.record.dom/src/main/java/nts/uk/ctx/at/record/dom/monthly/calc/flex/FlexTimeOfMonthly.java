@@ -16,6 +16,7 @@ import nts.uk.ctx.at.record.dom.monthlyaggrmethod.flex.AggrSettingMonthlyOfFlx;
 import nts.uk.ctx.at.record.dom.monthlyaggrmethod.flex.AggregateSetting;
 import nts.uk.ctx.at.record.dom.monthlyaggrmethod.flex.CarryforwardSetInShortageFlex;
 import nts.uk.ctx.at.record.dom.monthlyaggrmethod.flex.FlexAggregateMethod;
+import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.export.DeductDaysAndTime;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.RepositoriesRequiredByMonthlyAggr;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.excessoutside.ExcessOutsideWorkMng;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.premiumtarget.AddedVacationUseTime;
@@ -27,6 +28,7 @@ import nts.uk.ctx.at.shared.dom.calculation.holiday.FlexWork;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.HolidayAddtion;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonth;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonthWithMinus;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -52,6 +54,8 @@ public class FlexTimeOfMonthly {
 	
 	/** 加算した休暇使用時間 */
 	private AddedVacationUseTime addedVacationUseTime;
+	/** 控除の日数と時間 */
+	private DeductDaysAndTime deductDaysAndTime;
 	
 	/**
 	 * コンストラクタ
@@ -140,7 +144,7 @@ public class FlexTimeOfMonthly {
 			
 				// 処理日の職場コードを取得する
 				String workplaceId = "empty";
-				val affWorkplaceOpt = repositories.getAffWorkplaceAdapter().findBySid(employeeId, procDate);
+				val affWorkplaceOpt = repositories.getAffWorkplace().findBySid(employeeId, procDate);
 				if (affWorkplaceOpt.isPresent()){
 					workplaceId = affWorkplaceOpt.get().getWorkplaceId();
 				}
@@ -186,6 +190,7 @@ public class FlexTimeOfMonthly {
 	 * @param yearMonth 年月（度）
 	 * @param datePeriod 期間
 	 * @param flexAggregateMethod フレックス集計方法
+	 * @param workingConditionItem 労働条件項目
 	 * @param workplaceId 職場ID
 	 * @param employmentCd 雇用コード
 	 * @param aggrSetOfFlex フレックス時間勤務の月の集計設定
@@ -198,6 +203,7 @@ public class FlexTimeOfMonthly {
 	public void aggregateMonthlyHours(String companyId, String employeeId,
 			YearMonth yearMonth, DatePeriod datePeriod,
 			FlexAggregateMethod flexAggregateMethod,
+			WorkingConditionItem workingConditionItem,
 			String workplaceId, String employmentCd,
 			AggrSettingMonthlyOfFlx aggrSetOfFlex,
 			Optional<HolidayAddtion> holidayAdditionOpt,
@@ -243,9 +249,17 @@ public class FlexTimeOfMonthly {
 					repositories);
 		}
 		
+		// 年休・欠勤控除　準備
+		this.deductDaysAndTime = new DeductDaysAndTime(
+				this.flexShortDeductTime.getAnnualLeaveDeductDays(),
+				this.flexShortDeductTime.getAbsenceDeductTime());
+		
 		// 年休控除する
+		this.deductAnnualLeave(companyId, employeeId, datePeriod, flexAggregateMethod,
+				workingConditionItem, aggrSetOfFlex, repositories);
 		
 		// 欠勤控除する
+		this.deductAbsence();
 	}
 	
 	/**
@@ -289,7 +303,7 @@ public class FlexTimeOfMonthly {
 			// 繰越時間相殺前とフレックス繰越時間の差分をフレックス超過時間・フレックス時間に加算する
 			val difference = carryforwardTimeBeforeOffset.minusMinutes(carryforwardTime.v());
 			this.flexExcessTime = this.flexExcessTime.addMinutes(difference.v());
-			this.flexTime.setFlexTime(this.flexTime.getFlexTime().addSameTime(difference.v()));
+			this.flexTime.setFlexTime(this.flexTime.getFlexTime().addMinutes(difference.v(), 0));
 		}
 		else {
 			
@@ -645,7 +659,7 @@ public class FlexTimeOfMonthly {
 			// 繰越時間相殺前とフレックス繰越時間の差分をフレックス超過時間・フレックス時間に加算する
 			val difference = carryforwardTimeBeforeOffset.minusMinutes(carryforwardTime.v());
 			this.flexExcessTime = this.flexExcessTime.addMinutes(difference.v());
-			this.flexTime.setFlexTime(this.flexTime.getFlexTime().addSameTime(difference.v()));
+			this.flexTime.setFlexTime(this.flexTime.getFlexTime().addMinutes(difference.v(), 0));
 		}
 		else {
 			
@@ -723,5 +737,132 @@ public class FlexTimeOfMonthly {
 				carryforwardTimeBeforeOffset.v(), 0));
 		
 		return addedVacationUseTime;
+	}
+	
+	/**
+	 * 年休控除する
+	 * @param companyId 会社ID
+	 * @param employeeId 社員ID
+	 * @param period 期間
+	 * @param flexAggregateMethod フレックス集計方法
+	 * @param workingConditionItem 労働条件項目
+	 * @param aggrSetOfFlex フレックス時間勤務の月の集計設定
+	 * @param repositories 月次集計が必要とするリポジトリ
+	 */
+	private void deductAnnualLeave(
+			String companyId,
+			String employeeId,
+			DatePeriod period,
+			FlexAggregateMethod flexAggregateMethod,
+			WorkingConditionItem workingConditionItem,
+			AggrSettingMonthlyOfFlx aggrSetOfFlex,
+			RepositoriesRequiredByMonthlyAggr repositories){
+		
+		// 「控除前のフレックス不足時間」を入れておく
+		this.flexShortDeductTime.setFlexShortTimeBeforeDeduct(this.flexShortageTime);
+		
+		// 年休控除日数を時間換算する
+		this.deductDaysAndTime.timeConversionOfDeductAnnualLeaveDays(
+				companyId, employeeId, period, workingConditionItem, repositories);
+		if (this.deductDaysAndTime.getErrorMessageIds().size() > 0){
+			return;
+		}
+		
+		// フレックス不足時間を年休控除する
+		if (this.flexShortageTime.greaterThan(0)){
+			AttendanceTimeMonth subtractTime = this.deductDaysAndTime.getAnnualLeaveDeductTime();
+			if (subtractTime.greaterThan(this.flexShortageTime.v())){
+				subtractTime = this.flexShortageTime;
+			}
+			// フレックス不足時間から年休控除時間を引く
+			this.flexShortageTime = this.flexShortageTime.minusMinutes(subtractTime.v());
+			// 引いた分を年休控除時間から引く
+			this.deductDaysAndTime.minusMinutesToAnnualLeaveDeductTime(subtractTime.v());
+			// 引いた分をフレックス時間に足す
+			int flexMinutes = this.flexTime.getFlexTime().getTime().v();
+			if (flexMinutes < 0){
+				int addMinutes = subtractTime.v();
+				if (addMinutes > -flexMinutes) addMinutes = -flexMinutes;
+				this.flexTime.getFlexTime().setTime(new AttendanceTimeMonthWithMinus(flexMinutes + addMinutes));
+			}
+		}
+		if (this.deductDaysAndTime.getAnnualLeaveDeductTime().lessThanOrEqualTo(0)) return;
+		
+		// 「フレックス繰越不足時間」を年休控除する
+		val flexCarryforwardShortTime = this.flexCarryforwardTime.getFlexCarryforwardShortageTime();
+		if (flexCarryforwardShortTime.greaterThan(0)){
+			AttendanceTimeMonth subtractTime = this.deductDaysAndTime.getAnnualLeaveDeductTime();
+			if (subtractTime.greaterThan(flexCarryforwardShortTime.v())){
+				subtractTime = flexCarryforwardShortTime;
+			}
+			// フレックス繰越不足時間から年休控除時間を引く
+			this.flexCarryforwardTime.setFlexCarryforwardShortageTime(
+					flexCarryforwardShortTime.minusMinutes(subtractTime.v()));
+			// 引いた分を年休控除時間から引く
+			this.deductDaysAndTime.minusMinutesToAnnualLeaveDeductTime(subtractTime.v());
+		}
+		if (this.deductDaysAndTime.getAnnualLeaveDeductTime().lessThanOrEqualTo(0)) return;
+		
+		// 法定内・法定外フレックス時間に加算する
+		if (flexAggregateMethod == FlexAggregateMethod.PRINCIPLE){
+			val aggrSet = aggrSetOfFlex.getLegalAggregateSet().getAggregateTimeSet().getAggregateSet();
+			if (aggrSet == AggregateSetting.INCLUDE_ALL_OUTSIDE_TIME_IN_FLEX_TIME){
+				// 年休控除時間を法定外フレックス時間に加算する
+				this.flexTime.setIllegalFlexTime(this.flexTime.getIllegalFlexTime().addMinutes(
+						this.deductDaysAndTime.getAnnualLeaveDeductTime().v()));
+			}
+			if (aggrSet == AggregateSetting.MANAGE_DETAIL){
+				// 年休控除時間を法定内フレックス時間に加算する
+				this.flexTime.setLegalFlexTime(this.flexTime.getLegalFlexTime().addMinutes(
+						this.deductDaysAndTime.getAnnualLeaveDeductTime().v()));
+			}
+		}
+		// 年休控除時間をフレックス時間に加算する
+		int flexMinutes = this.flexTime.getFlexTime().getTime().v();
+		if (flexMinutes < 0){
+			int addMinutes = this.deductDaysAndTime.getAnnualLeaveDeductTime().v();
+			if (addMinutes > -flexMinutes) addMinutes = -flexMinutes;
+			this.flexTime.getFlexTime().setTime(new AttendanceTimeMonthWithMinus(flexMinutes + addMinutes));
+		}
+	}
+	
+	/**
+	 * 欠勤控除する
+	 */
+	private void deductAbsence(){
+		
+		// フレックス不足時間を欠勤控除する
+		if (this.flexShortageTime.greaterThan(0)){
+			AttendanceTimeMonth subtractTime = this.deductDaysAndTime.getAbsenceDeductTime();
+			if (subtractTime.greaterThan(this.flexShortageTime.v())){
+				subtractTime = this.flexShortageTime;
+			}
+			// フレックス不足時間から欠勤控除時間を引く
+			this.flexShortageTime = this.flexShortageTime.minusMinutes(subtractTime.v());
+			// 引いた分を欠勤控除時間から引く
+			this.deductDaysAndTime.minusMinutesToAbsenceDeductTime(subtractTime.v());
+			// 引いた分をフレックス時間に足す
+			int flexMinutes = this.flexTime.getFlexTime().getTime().v();
+			if (flexMinutes < 0){
+				int addMinutes = subtractTime.v();
+				if (addMinutes > -flexMinutes) addMinutes = -flexMinutes;
+				this.flexTime.getFlexTime().setTime(new AttendanceTimeMonthWithMinus(flexMinutes + addMinutes));
+			}
+		}
+		if (this.deductDaysAndTime.getAbsenceDeductTime().lessThanOrEqualTo(0)) return;
+		
+		// フレックス繰越不足時間を欠勤控除する
+		val flexCarryforwardShortTime = this.flexCarryforwardTime.getFlexCarryforwardShortageTime();
+		if (flexCarryforwardShortTime.greaterThan(0)){
+			AttendanceTimeMonth subtractTime = this.deductDaysAndTime.getAbsenceDeductTime();
+			if (subtractTime.greaterThan(flexCarryforwardShortTime.v())){
+				subtractTime = flexCarryforwardShortTime;
+			}
+			// フレックス繰越不足時間から欠勤控除時間を引く
+			this.flexCarryforwardTime.setFlexCarryforwardShortageTime(
+					flexCarryforwardShortTime.minusMinutes(subtractTime.v()));
+			// 引いた分を欠勤控除時間から引く
+			this.deductDaysAndTime.minusMinutesToAbsenceDeductTime(subtractTime.v());
+		}
 	}
 }

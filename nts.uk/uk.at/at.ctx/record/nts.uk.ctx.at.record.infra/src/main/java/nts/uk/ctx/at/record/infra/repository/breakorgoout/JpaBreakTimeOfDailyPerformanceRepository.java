@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.infra.repository.breakorgoout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -29,6 +30,8 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 
 	private static final String SELECT_BY_EMPLOYEE_AND_DATE;
 
+	private static final String FIND;
+
 	static {
 		StringBuilder builderString = new StringBuilder();
 		builderString.append("DELETE ");
@@ -50,6 +53,14 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 		builderString.append("WHERE a.krcdtDaiBreakTimePK.employeeId = :employeeId ");
 		builderString.append("AND a.krcdtDaiBreakTimePK.ymd = :ymd ");
 		SELECT_BY_EMPLOYEE_AND_DATE = builderString.toString();
+
+		builderString = new StringBuilder();
+		builderString.append("SELECT a ");
+		builderString.append("FROM KrcdtDaiBreakTime a ");
+		builderString.append("WHERE a.krcdtDaiBreakTimePK.employeeId = :employeeId ");
+		builderString.append("AND a.krcdtDaiBreakTimePK.ymd = :ymd ");
+		builderString.append("AND a.krcdtDaiBreakTimePK.breakType = :breakType ");
+		FIND = builderString.toString();
 	}
 
 	@Override
@@ -83,13 +94,13 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 	}
 
 	private BreakTimeOfDailyPerformance toDtomain(Integer type, List<KrcdtDaiBreakTime> value) {
-		return new BreakTimeOfDailyPerformance(
-				value.get(0).krcdtDaiBreakTimePK.employeeId, EnumAdaptor.valueOf(type, BreakType.class),
-				value.stream().map(item -> new BreakTimeSheet(
-							new BreakFrameNo(item.krcdtDaiBreakTimePK.breakFrameNo), 
-							toTimeWithDayAttr(item.startStampTime),
-							toTimeWithDayAttr(item.endStampTime), 
-							new AttendanceTime(0))).collect(Collectors.toList()), 
+		return new BreakTimeOfDailyPerformance(value.get(0).krcdtDaiBreakTimePK.employeeId,
+				EnumAdaptor.valueOf(type, BreakType.class),
+				value.stream()
+						.map(item -> new BreakTimeSheet(new BreakFrameNo(item.krcdtDaiBreakTimePK.breakFrameNo),
+								toTimeWithDayAttr(item.startStampTime), toTimeWithDayAttr(item.endStampTime),
+								new AttendanceTime(0)))
+						.collect(Collectors.toList()),
 				value.get(0).krcdtDaiBreakTimePK.ymd);
 	}
 
@@ -128,8 +139,21 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 		query.append("AND a.krcdtDaiBreakTimePK.ymd <= :end AND a.krcdtDaiBreakTimePK.ymd >= :start ");
 		return queryProxy().query(query.toString(), KrcdtDaiBreakTime.class).setParameter("employeeId", employeeId)
 				.setParameter("end", ymd.end()).setParameter("start", ymd.start()).getList().stream()
-				.collect(Collectors.groupingBy(c -> c.krcdtDaiBreakTimePK.employeeId + c.krcdtDaiBreakTimePK.ymd.toString()))
+				.collect(Collectors
+						.groupingBy(c -> c.krcdtDaiBreakTimePK.employeeId + c.krcdtDaiBreakTimePK.ymd.toString()))
 				.entrySet().stream().map(c -> group(c.getValue())).flatMap(List::stream).collect(Collectors.toList());
+	}
+
+	@Override
+	public Optional<BreakTimeOfDailyPerformance> find(String employeeId, GeneralDate ymd, int breakType) {
+		
+		List<KrcdtDaiBreakTime> krcdtDaiBreakTimes = this.queryProxy().query(FIND, KrcdtDaiBreakTime.class).setParameter("employeeId", employeeId)
+				.setParameter("ymd", ymd).setParameter("breakType", breakType).getList();
+		if (krcdtDaiBreakTimes == null || krcdtDaiBreakTimes.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		return Optional.ofNullable(group(krcdtDaiBreakTimes).get(0));
 	}
 
 }

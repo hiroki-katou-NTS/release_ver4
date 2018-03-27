@@ -148,7 +148,7 @@ public class RegularAndIrregularTimeOfMonthly {
 				
 				// 処理日の職場コードを取得する
 				String workplaceId = "empty";
-				val affWorkplaceOpt = repositories.getAffWorkplaceAdapter().findBySid(employeeId, procDate);
+				val affWorkplaceOpt = repositories.getAffWorkplace().findBySid(employeeId, procDate);
 				if (affWorkplaceOpt.isPresent()){
 					workplaceId = affWorkplaceOpt.get().getWorkplaceId();
 				}

@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.uk.ctx.at.record.dom.workrecord.log.TargetPerson;
-import nts.uk.ctx.at.record.dom.workrecord.log.TargetPersonRepository;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.TargetPerson;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.TargetPersonRepository;
 import nts.uk.ctx.at.record.infra.entity.log.KrcdtEmpExeTarget;
 import nts.uk.ctx.at.record.infra.entity.log.KrcdtEmpExeTargetStt;
 

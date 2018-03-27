@@ -12,7 +12,6 @@ import nts.uk.ctx.at.record.dom.MidNightTimeSheetForCalc;
 import nts.uk.ctx.at.record.dom.calculationattribute.AutoCalOfOverTime;
 import nts.uk.ctx.at.record.dom.daily.TimeWithCalculation;
 import nts.uk.ctx.at.record.dom.daily.midnight.MidNightTimeSheet;
-import nts.uk.ctx.at.record.dom.daily.overtimework.enums.StatutoryAtr;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.BonusPaySetting;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.BonusPayTimesheet;
@@ -20,15 +19,17 @@ import nts.uk.ctx.at.shared.dom.bonuspay.setting.SpecBonusPayTimesheet;
 import nts.uk.ctx.at.shared.dom.common.DailyTime;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
-import nts.uk.ctx.at.shared.dom.employment.statutory.worktime.employment.WorkingSystem;
 import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalAtrOvertime;
-import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.AutoCalculationOfOverTimeWork;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalOvertimeSetting;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
+import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.StatutoryAtr;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.overtime.overtimeframe.OverTimeFrameNo;
 import nts.uk.ctx.at.shared.dom.workrule.overtime.StatutoryPrioritySet;
 import nts.uk.ctx.at.shared.dom.workrule.statutoryworktime.DailyCalculationPersonalInformation;
 import nts.uk.ctx.at.shared.dom.worktime.common.EmTimezoneNo;
 import nts.uk.ctx.at.shared.dom.worktime.common.LegalOTSetting;
 import nts.uk.ctx.at.shared.dom.worktime.common.OverTimeOfTimeZoneSet;
+import nts.uk.ctx.at.shared.dom.worktime.common.SettlementOrder;
 import nts.uk.ctx.at.shared.dom.worktime.common.TimeZoneRounding;
 import nts.uk.ctx.at.shared.dom.worktime.predset.BreakDownTimeDay;
 import nts.uk.shr.com.time.TimeWithDayAttr;
@@ -57,7 +58,7 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 	private boolean asTreatBindTime;
 	
 	//精算順序
-	//private Optional<精算順序> payOrder;
+	private Optional<SettlementOrder> payOrder;
 
 	//調整時間
 	private Optional<AttendanceTime> adjustTime;
@@ -82,16 +83,18 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 	public OverTimeFrameTimeSheetForCalc(TimeZoneRounding timeSheet, TimeSpanForCalc calcrange,
 			List<TimeSheetOfDeductionItem> recorddeductionTimeSheets,
 			List<TimeSheetOfDeductionItem> deductionTimeSheets, List<BonusPayTimeSheetForCalc> bonusPayTimeSheet,
-			List<SpecBonusPayTimeSheetForCalc> specifiedBonusPayTimeSheet, Optional<MidNightTimeSheetForCalc> midNighttimeSheet,
-			OverTimeFrameTime frameTime, StatutoryAtr withinStatutryAtr, boolean goEarly, EmTimezoneNo overTimeWorkSheetNo,
-			boolean asTreatBindTime, Optional<AttendanceTime> adjustTime) {
-		super(timeSheet, calcrange, recorddeductionTimeSheets,deductionTimeSheets, bonusPayTimeSheet, specifiedBonusPayTimeSheet,
-				midNighttimeSheet);
+			List<SpecBonusPayTimeSheetForCalc> specifiedBonusPayTimeSheet,
+			Optional<MidNightTimeSheetForCalc> midNighttimeSheet, OverTimeFrameTime frameTime,
+			StatutoryAtr withinStatutryAtr, boolean goEarly, EmTimezoneNo overTimeWorkSheetNo, boolean asTreatBindTime,
+			Optional<SettlementOrder> payOrder, Optional<AttendanceTime> adjustTime) {
+		super(timeSheet, calcrange, recorddeductionTimeSheets, deductionTimeSheets, bonusPayTimeSheet,
+				specifiedBonusPayTimeSheet, midNighttimeSheet);
 		this.frameTime = frameTime;
 		this.withinStatutryAtr = withinStatutryAtr;
 		this.goEarly = goEarly;
 		this.overTimeWorkSheetNo = overTimeWorkSheetNo;
 		this.asTreatBindTime = asTreatBindTime;
+		this.payOrder = payOrder;
 		this.adjustTime = adjustTime;
 	}
 	
@@ -124,7 +127,7 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 	 */
 	public static List<OverTimeFrameTimeSheetForCalc> createOverWorkFrame(List<OverTimeOfTimeZoneSet> overTimeHourSetList,WorkingSystem workingSystem,
 												TimeLeavingWork attendanceLeave,int workNo,
-												BreakDownTimeDay breakdownTimeDay,DailyTime dailyTime,AutoCalculationOfOverTimeWork autoCalculationSet,
+												BreakDownTimeDay breakdownTimeDay,DailyTime dailyTime,AutoCalOvertimeSetting autoCalculationSet,
 												LegalOTSetting statutorySet,StatutoryPrioritySet prioritySet ,BonusPaySetting bonusPaySetting,MidNightTimeSheet midNightTimeSheet,
 												DailyCalculationPersonalInformation personalInfo,boolean isCalcWithinOverTime,DeductionTimeSheet deductionTimeSheet) {
 		List<OverTimeFrameTimeSheetForCalc> createTimeSheet = new ArrayList<>();
@@ -139,11 +142,11 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 		}
 //		/*変形残業　振替*/
 		List<OverTimeFrameTimeSheetForCalc> afterVariableWork = new ArrayList<>();
-		afterVariableWork = dicisionCalcVariableWork(createTimeSheet,breakdownTimeDay,autoCalculationSet,personalInfo,isCalcWithinOverTime);
+		afterVariableWork = dicisionCalcVariableWork(createTimeSheet,breakdownTimeDay,autoCalculationSet,personalInfo,isCalcWithinOverTime,overTimeHourSetList);
 		afterVariableWork.stream().sorted((first,second) -> first.calcrange.getStart().compareTo(second.calcrange.getStart()));
 //		/*法定内残業　振替*/
 		List<OverTimeFrameTimeSheetForCalc> afterCalcStatutoryOverTimeWork = new ArrayList<>();
-		afterCalcStatutoryOverTimeWork = diciaionCalcStatutory(statutorySet ,dailyTime ,afterVariableWork,autoCalculationSet);
+		afterCalcStatutoryOverTimeWork = diciaionCalcStatutory(statutorySet ,dailyTime ,afterVariableWork,autoCalculationSet,breakdownTimeDay,overTimeHourSetList);
 		
 		/*return*/
 		//return afterCalcStatutoryOverTimeWork;
@@ -167,24 +170,15 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 //		deductionTimeSheet.getForRecordTimeZoneList();/*法定内区分の置き換え*/
 //		deductionTimeSheet.getForDeductionTimeZoneList();/*法定内区分の置き換え*/
 		/*加給*/
-		val bonusPayTimeSheet = bonusPaySetting.getLstBonusPayTimesheet().stream().map(tc ->BonusPayTimeSheetForCalc.convertForCalc(tc)).collect(Collectors.toList());
-		val duplibonusPayTimeSheet = bonusPayTimeSheet.stream()
-											 .filter(tc -> tc.getCalcrange().checkDuplication(timeSpan).isDuplicated())
-											 .map(tc -> tc.convertForCalcCorrectRange(tc.getCalcrange().getDuplicatedWith(timeSpan).get()))
-											 .collect(Collectors.toList());
+		val duplibonusPayTimeSheet = getDuplicatedBonusPay(bonusPaySetting.getLstBonusPayTimesheet().stream().map(tc ->BonusPayTimeSheetForCalc.convertForCalc(tc)).collect(Collectors.toList()),
+													  	   timeSpan);
 											 
 		/*特定日*/
-		val specifiedBonusPayTimeSheet = bonusPaySetting.getLstSpecBonusPayTimesheet().stream().map(tc -> SpecBonusPayTimeSheetForCalc.convertForCalc(tc)).collect(Collectors.toList());
-		val duplispecifiedBonusPayTimeSheet = specifiedBonusPayTimeSheet.stream()
-											 .filter(tc -> tc.getCalcrange().checkDuplication(timeSpan).isDuplicated())
-				 							 .map(tc -> tc.convertForCalcCorrectRange(tc.getCalcrange().getDuplicatedWith(timeSpan).get()))
-				 							 .collect(Collectors.toList());
+		val duplispecifiedBonusPayTimeSheet = getDuplicatedSpecBonusPay(bonusPaySetting.getLstSpecBonusPayTimesheet().stream().map(tc -> SpecBonusPayTimeSheetForCalc.convertForCalc(tc)).collect(Collectors.toList()),
+																   		timeSpan);
 		/*深夜*/
-		val duplicateMidNightSpan = timeSpan.getDuplicatedWith(midNightTimeSheet.getTimeSpan());
-		Optional<MidNightTimeSheetForCalc> duplicatemidNightTimeSheet = Optional.empty();
-		if(duplicateMidNightSpan.isPresent()) {
-			duplicatemidNightTimeSheet = Optional.of(MidNightTimeSheetForCalc.convertForCalc(midNightTimeSheet).getDuplicateRangeTimeSheet(duplicateMidNightSpan.get()));
-		}
+		val duplicatemidNightTimeSheet = getDuplicateMidNight(midNightTimeSheet,
+														 	  timeSpan);
 		
 		return new OverTimeFrameTimeSheetForCalc(new TimeZoneRounding(timeSpan.getStart(),timeSpan.getEnd(),overTimeHourSet.getTimezone().getRounding()),
 											  	timeSpan,
@@ -202,6 +196,7 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 											  	false,
 											  	overTimeHourSet.getWorkTimezoneNo(),
 											  	false,
+											  	Optional.of(overTimeHourSet.getSettlementOrder()),
 											  	Optional.empty()
 											  	);
 	}
@@ -215,8 +210,8 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 	 */
 	private static List<OverTimeFrameTimeSheetForCalc> dicisionCalcVariableWork(
 			List<OverTimeFrameTimeSheetForCalc> createTimeSheet, BreakDownTimeDay breakdownTimeDay, 
-			AutoCalculationOfOverTimeWork autoCalculationSet,DailyCalculationPersonalInformation personalInfo,
-			boolean isCalcWithinOverTime) {
+			AutoCalOvertimeSetting autoCalculationSet,DailyCalculationPersonalInformation personalInfo,
+			boolean isCalcWithinOverTime,List<OverTimeOfTimeZoneSet> overTimeHourSetList) {
 		List<OverTimeFrameTimeSheetForCalc> returnList = createTimeSheet;
 		//変形労働か
 		if(personalInfo.getWorkingSystem().isVariableWorkingTimeWork()) {
@@ -226,7 +221,8 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 				//480　＝　法定労働
 				//breakdownTimeDay = 所定内時間
 				AttendanceTime ableRangeTime = new AttendanceTime(480 - breakdownTimeDay.getPredetermineWorkTime());
-				returnList.addAll(reclassified(ableRangeTime, createTimeSheet, autoCalculationSet,Optional.of(true)));
+				if(ableRangeTime.greaterThan(0))
+					returnList.addAll(reclassified(ableRangeTime, createTimeSheet, autoCalculationSet,Optional.of(true),overTimeHourSetList));
 			}
 		}
 		return returnList;
@@ -243,12 +239,20 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
      * @return
      */
     public static List<OverTimeFrameTimeSheetForCalc> diciaionCalcStatutory(LegalOTSetting statutorySet,DailyTime dailyTime,List<OverTimeFrameTimeSheetForCalc> overTimeWorkFrameTimeSheetList
-                                                                    		,AutoCalculationOfOverTimeWork autoCalculationSet) {
+                                                                    		,AutoCalOvertimeSetting autoCalculationSet,BreakDownTimeDay breakdownTimeDay,List<OverTimeOfTimeZoneSet> overTimeHourSetList) {
     	List<OverTimeFrameTimeSheetForCalc> returnList = new ArrayList<>();
         if(statutorySet.isLegal()) {
             /*振替処理   法定内基準時間を計算する*/
-        	AttendanceTime ableRangeTime = new AttendanceTime(0);
-            returnList.addAll(reclassified(ableRangeTime,overTimeWorkFrameTimeSheetList,autoCalculationSet,Optional.of(true)));
+        	AttendanceTime ableRangeTime = new AttendanceTime(480 - breakdownTimeDay.getPredetermineWorkTime());
+        	if(ableRangeTime.greaterThan(0))
+        		returnList.addAll(reclassified(ableRangeTime,
+        									   overTimeWorkFrameTimeSheetList.stream()
+        									   								 .filter(tc -> tc.getPayOrder().isPresent())
+        									   								 .sorted((first,second) -> first.getPayOrder().get().compareTo(second.getPayOrder().get()))
+        									   								 .collect(Collectors.toList()),
+        									   autoCalculationSet,
+        									   Optional.of(true),
+        									   overTimeHourSetList));
         }
         return overTimeWorkFrameTimeSheetList;
     }
@@ -261,19 +265,20 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 	 * @param autoCalculationSet　時間外の自動計算設定
 	 */
 	public static List<OverTimeFrameTimeSheetForCalc> reclassified(AttendanceTime ableRangeTime,List<OverTimeFrameTimeSheetForCalc> overTimeWorkFrameTimeSheetList,
-																   AutoCalculationOfOverTimeWork autoCalculationSet,Optional<Boolean> forceCalcTime) {
+			AutoCalOvertimeSetting autoCalculationSet,Optional<Boolean> forceCalcTime,
+																   List<OverTimeOfTimeZoneSet> overTimeHourSetList) {
 		AttendanceTime overTime = new AttendanceTime(0);
 		AttendanceTime transTime = new AttendanceTime(0);
 		for(int number = 0; number < overTimeWorkFrameTimeSheetList.size(); number++) {
-			overTime = overTimeWorkFrameTimeSheetList.get(number).correctCalculationTime(Optional.of(true),autoCalculationSet,DeductionAtr.Appropriate);
-			if(forceCalcTime.get()) {
-				if(!decisionCalcAtr(overTimeWorkFrameTimeSheetList.get(number),autoCalculationSet)) {
-					overTime = new AttendanceTime(0);
-				}
-			}
-			else {
-				overTime = new AttendanceTime(0);
-			}
+			overTime = overTimeWorkFrameTimeSheetList.get(number).correctCalculationTime(Optional.of(true),autoCalculationSet,DeductionAtr.Deduction);
+//			if(forceCalcTime.get()) {
+//				if(!decisionCalcAtr(overTimeWorkFrameTimeSheetList.get(number),autoCalculationSet)) {
+//					overTime = new AttendanceTime(0);
+//				}
+//			}
+//			else {
+//				overTime = new AttendanceTime(0);
+//			}
 			//振替できる時間計算
 			if(ableRangeTime.greaterThan(overTime)) {
 				transTime = overTime;
@@ -281,6 +286,10 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 			else {
 				transTime = ableRangeTime;
 			}
+			
+			if(transTime.lessThanOrEqualTo(0))
+				break;
+			
 			//振替時間を調整時間に入れる
 			if(overTimeWorkFrameTimeSheetList.get(number).adjustTime.isPresent()) {
 				overTimeWorkFrameTimeSheetList.get(number).adjustTime = Optional.of(overTimeWorkFrameTimeSheetList.get(number).adjustTime.get().addMinutes(transTime.valueAsMinutes()));
@@ -289,13 +298,11 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 				overTimeWorkFrameTimeSheetList.get(number).adjustTime = Optional.of(transTime);
 			}
 
-			if(transTime.lessThanOrEqualTo(0))
-				break;
 			//終了時間の判断
 			TimeWithDayAttr endTime = reCreateSiteiTimeFromStartTime(transTime,overTimeWorkFrameTimeSheetList.get(number));
 			
 			/*ここで分割*/
-			overTimeWorkFrameTimeSheetList = correctTimeSpan(overTimeWorkFrameTimeSheetList.get(number).splitTimeSpan(endTime),overTimeWorkFrameTimeSheetList,number);
+			overTimeWorkFrameTimeSheetList = correctTimeSpan(overTimeWorkFrameTimeSheetList.get(number).splitTimeSpan(endTime,overTimeHourSetList),overTimeWorkFrameTimeSheetList,number);
 			ableRangeTime.minusMinutes(transTime.valueAsMinutes()) ; 
 		}
 		return overTimeWorkFrameTimeSheetList;
@@ -327,20 +334,20 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 	 * 計算区分の判定処理
 	 * @return 打刻から計算する
 	 */
-	public static boolean decisionCalcAtr(OverTimeFrameTimeSheetForCalc overTimeWorkFrameTimeSheet,AutoCalculationOfOverTimeWork autoCalculationSet) {
+	public static boolean decisionCalcAtr(OverTimeFrameTimeSheetForCalc overTimeWorkFrameTimeSheet,AutoCalOvertimeSetting autoCalculationSet) {
 		if(overTimeWorkFrameTimeSheet.getWithinStatutryAtr().isStatutory()) {
 			if(overTimeWorkFrameTimeSheet.isGoEarly()) {
 				/*早出残業区分を参照*/
-				return autoCalculationSet.getEarlyOvertimeHours().getCalculationClassification().isCalculateEmbossing();
+				return autoCalculationSet.getEarlyOtTime().getCalAtr().isCalculateEmbossing();
 			}
 			else {
 				/*普通残業計算区分を参照*/
-				return autoCalculationSet.getNormalOvertimeHours().getCalculationClassification().isCalculateEmbossing();
+				return autoCalculationSet.getNormalOtTime().getCalAtr().isCalculateEmbossing();
 			}
 		}
 		else {
 			/*法定内の場合*/
-			return autoCalculationSet.getLegalOvertimeHours().getCalculationClassification().isCalculateEmbossing();
+			return autoCalculationSet.getLegalOtTime().getCalAtr().isCalculateEmbossing();
 		}
 	}
 
@@ -348,12 +355,15 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
      * 時間帯の分割
      * @return
      */
-    public List<OverTimeFrameTimeSheetForCalc> splitTimeSpan(TimeWithDayAttr baseTime){
+    public List<OverTimeFrameTimeSheetForCalc> splitTimeSpan(TimeWithDayAttr baseTime,List<OverTimeOfTimeZoneSet> overTimeHourSetList){
         List<OverTimeFrameTimeSheetForCalc> returnList = new ArrayList<>();
         if(this.calcrange.getEnd().equals(baseTime)) {
             returnList.add(this);
         }
         else {
+        	val statutoryOverFrameNo = overTimeHourSetList.stream()
+        												  .filter(tc -> tc.getLegalOTframeNo().v().intValue() == this.getFrameTime().getOverWorkFrameNo().v())
+        												  .findFirst();
             returnList.add(new OverTimeFrameTimeSheetForCalc(this.timeSheet
                                                          ,new TimeSpanForCalc(this.calcrange.getStart(), baseTime)
                                                          ,this.recreateDeductionItemBeforeBase(baseTime, true,DeductionAtr.Appropriate)
@@ -361,11 +371,12 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
                                                          ,this.recreateBonusPayListBeforeBase(baseTime, true)
                                                          ,this.recreateSpecifiedBonusPayListBeforeBase(baseTime, true)
                                                          ,this.recreateMidNightTimeSheetBeforeBase(baseTime, true)
-                                                         ,this.getFrameTime()
+                                                         ,this.getFrameTime().changeFrameNo(statutoryOverFrameNo.isPresent()?statutoryOverFrameNo.get().getLegalOTframeNo().v():this.getFrameTime().getOverWorkFrameNo().v())
                                                          ,StatutoryAtr.DeformationCriterion
                                                          ,this.goEarly
                                                          ,this.getOverTimeWorkSheetNo()
                                                          ,this.asTreatBindTime
+                                                         ,this.payOrder
                                                          ,this.getAdjustTime()));
             
             returnList.add(new OverTimeFrameTimeSheetForCalc(this.timeSheet
@@ -380,6 +391,7 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
                                                          ,this.goEarly
                                                          ,this.getOverTimeWorkSheetNo()
                                                          ,this.asTreatBindTime
+                                                         ,this.payOrder
                                                          ,this.getAdjustTime()));
         }
         return returnList;
@@ -394,15 +406,15 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 	 * @param forceCalcTime 強制時間区分
 	 * @param autoCalcSet 
 	 */
-	public AttendanceTime correctCalculationTime(Optional<Boolean> forceCalcTime,AutoCalculationOfOverTimeWork autoCalcSet
+	public AttendanceTime correctCalculationTime(Optional<Boolean> forceCalcTime,AutoCalOvertimeSetting autoCalcSet
 												,DeductionAtr dedAtr) {
 		//区分をみて、計算設定を設定
 		//一旦、打刻から計算する場合　を入れとく
-		val forceAtr = AutoCalAtrOvertime.CALCULATEMBOSS;
+		//val forceAtr = AutoCalAtrOvertime.CALCULATEMBOSS;
 		AttendanceTime calcTime = overTimeCalculationByAdjustTime(dedAtr);
-		if(!forceAtr.isCalculateEmbossing()) {
-			calcTime = new AttendanceTime(0);
-		}
+		//if(!forceAtr.isCalculateEmbossing()) {
+		//	calcTime = new AttendanceTime(0);
+		//}
 		return calcTime;
 	}
 	
@@ -424,14 +436,19 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 		AttendanceTime calcCareTime = calcDedTimeByAtr(dedAtr,ConditionAtr.Care);
 		//育児時間
 		AttendanceTime calcChildTime = calcDedTimeByAtr(dedAtr,ConditionAtr.Child);
-		//調整時間を減算(元に戻す)
-		this.calcrange.getEnd().backByMinutes(this.adjustTime.orElse(new AttendanceTime(0)).valueAsMinutes());
-		return new AttendanceTime(this.calcrange.lengthAsMinutes()
+		
+		//計算処理
+		AttendanceTime time = new AttendanceTime(this.calcrange.lengthAsMinutes()
 								 -calcBreakTime.valueAsMinutes()
 								 -calcUnionGoOutTime.valueAsMinutes()
 								 -calcPrivateGoOutTime.valueAsMinutes()
 								 -calcCareTime.valueAsMinutes()
 								 -calcChildTime.valueAsMinutes());
+		//調整時間を減算(元に戻す)
+		this.calcrange.getEnd().backByMinutes(this.adjustTime.orElse(new AttendanceTime(0)).valueAsMinutes());
+		
+		return time;
+		
 	}
 	
 	/**
@@ -450,4 +467,5 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 		}
 		return dedTotalTime;
 	}
+
 }

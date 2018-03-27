@@ -144,6 +144,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
             selectedErrorAlarm.messageColor(param && param.messageColor ? param.messageColor : null);
             selectedErrorAlarm.cancelableAtr(param && param.cancelableAtr ? param.cancelableAtr : 0);
             selectedErrorAlarm.errorDisplayItem(param && param.errorDisplayItem ? param.errorDisplayItem : null);
+            selectedErrorAlarm.errorDisplayItem.valueHasMutated();
             selectedErrorAlarm.errorDisplayItemName("");
             selectedErrorAlarm.alCheckTargetCondition.setData(param && param.alCheckTargetCondition ? param.alCheckTargetCondition : null);
             selectedErrorAlarm.workTypeCondition.setData(param && param.workTypeCondition ? param.workTypeCondition : null);

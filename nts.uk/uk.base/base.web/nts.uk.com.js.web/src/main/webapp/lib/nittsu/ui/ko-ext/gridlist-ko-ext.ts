@@ -236,7 +236,7 @@ module nts.uk.ui.koExtentions {
             
             $grid.data("enable", enable);
             
-            if(String($grid.attr("filtered")) === "true" && $grid.data("ui-changed") !== true){
+            if(String($grid.attr("filtered")) === "true"){
                 let filteredSource = [];
                 _.forEach(gridSource, function(item){
                     let itemX = _.find(sources, function (s){
@@ -250,7 +250,7 @@ module nts.uk.ui.koExtentions {
                     $grid.igGrid('option', 'dataSource', _.cloneDeep(filteredSource));
                     $grid.igGrid("dataBind");    
                 }
-            } else if ($grid.data("ui-changed") !== true) {
+            } else {
                 let currentSources = sources.slice();
                 
                 var observableColumns = _.filter(ko.unwrap(data.columns), function(c){

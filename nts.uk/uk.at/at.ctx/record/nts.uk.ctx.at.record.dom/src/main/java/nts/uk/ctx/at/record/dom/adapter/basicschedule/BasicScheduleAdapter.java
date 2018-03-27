@@ -10,5 +10,7 @@ public interface BasicScheduleAdapter {
 	Optional<BasicScheduleSidDto> findAllBasicSchedule(String employeeId, GeneralDate baseDate);
 	
 	List<WorkScheduleSidImport> findAllWorkSchedule();
+	
+	List<WorkBreakTimeImport> findWorkBreakTime(String employeeId, GeneralDate baseDate);
 
 }

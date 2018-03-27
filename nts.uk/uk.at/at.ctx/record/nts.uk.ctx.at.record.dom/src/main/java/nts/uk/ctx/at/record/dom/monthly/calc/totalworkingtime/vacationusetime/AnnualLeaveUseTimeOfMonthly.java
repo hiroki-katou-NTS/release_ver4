@@ -88,4 +88,12 @@ public class AnnualLeaveUseTimeOfMonthly {
 			//this.useTime.addMinutes(annualLeaveUseTime.getUseTime().valueAsMinutes());
 		}
 	}
+	
+	/**
+	 * 使用時間に分を加算する
+	 * @param minutes 分
+	 */
+	public void addMinuteToUseTime(int minutes){
+		this.useTime = this.useTime.addMinutes(minutes);
+	}
 }

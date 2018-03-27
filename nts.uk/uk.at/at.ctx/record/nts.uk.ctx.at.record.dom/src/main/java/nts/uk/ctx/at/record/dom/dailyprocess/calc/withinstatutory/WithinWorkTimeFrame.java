@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.dailyprocess.calc.withinstatutory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.val;
@@ -9,6 +10,7 @@ import nts.uk.ctx.at.record.dom.MidNightTimeSheetForCalc;
 import nts.uk.ctx.at.record.dom.daily.LateTimeOfDaily;
 import nts.uk.ctx.at.record.dom.daily.LeaveEarlyTimeOfDaily;
 import nts.uk.ctx.at.record.dom.daily.TimevacationUseTimeOfDaily;
+import nts.uk.ctx.at.record.dom.daily.midnight.MidNightTimeSheet;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.BonusPayTimeSheetForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CalculationTimeSheet;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.ConditionAtr;
@@ -20,18 +22,20 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.LeaveEarlyTimeSheet;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.PredetermineTimeSetForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.SpecBonusPayTimeSheetForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.TimeSheetOfDeductionItem;
+import nts.uk.ctx.at.shared.dom.bonuspay.setting.BonusPaySetting;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.BonusPayTimesheet;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.SpecBonusPayTimesheet;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
-import nts.uk.ctx.at.shared.dom.employment.statutory.worktime.employment.WorkingSystem;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.AddSettingOfFlexWork;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.AddSettingOfIrregularWork;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.AddSettingOfRegularWork;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.CalculationByActualTimeAtr;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.HolidayAdditionAtr;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
 import nts.uk.ctx.at.shared.dom.workrule.addsettingofworktime.VacationAddTimeSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.EmTimeFrameNo;
+import nts.uk.ctx.at.shared.dom.worktime.common.EmTimeZoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.TimeZoneRounding;
 import nts.uk.ctx.at.shared.dom.worktype.AttendanceHolidayAttr;
 
@@ -257,7 +261,6 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 	 * @return
 	 */
 	public AttendanceTime calcActualWorkTimeAndWorkTime(HolidayAdditionAtr holidayAdditionAtr,
-														Optional<DeductionTimeSheet> dedTimeSheet,
 														TimevacationUseTimeOfDaily timevacationUseTimeOfDaily,
 														WorkingSystem workingSystem,
 														AddSettingOfRegularWork addSettingOfRegularWork,
@@ -273,8 +276,11 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 														) {
 		AttendanceTime actualTime = calcActualTime();
 		AttendanceTime dedAllTime = new AttendanceTime(0);
-		if(dedTimeSheet.isPresent()) {
-			dedAllTime = dedTimeSheet.get().calcDeductionAllTimeSheet(DeductionAtr.Deduction, this.getTimeSheet().timeSpan());
+		val dedTimeSheets = this.deductionTimeSheet;
+		if(!dedTimeSheets.isEmpty()) {
+			dedAllTime = new AttendanceTime(dedTimeSheets.stream()
+									  					 .map(tc -> tc.calcTotalTime().valueAsMinutes())
+									  					 .collect(Collectors.summingInt(tc -> tc)));
 		}
 		if(dedAllTime.greaterThan(0)) {
 			actualTime = actualTime.minusMinutes(dedAllTime.valueAsMinutes());
@@ -283,19 +289,20 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 		/*就業時間算出ロジックをここに*/
 		
 		//控除時間の内、時間休暇で相殺した時間を計算
-		DeductionOffSetTime timeVacationOffSetTime = (dedTimeSheet.isPresent())
-													  ?dedTimeSheet.get().calcTotalDeductionOffSetTime(lateTimeOfDaily,lateTimeSheet,leaveEarlyTimeOfDaily,leaveEarlyTimeSheet)
+		DeductionOffSetTime timeVacationOffSetTime = //(dedTimeSheet.isPresent())
+													 // ?dedTimeSheet.get().calcTotalDeductionOffSetTime(lateTimeOfDaily,lateTimeSheet,leaveEarlyTimeOfDaily,leaveEarlyTimeSheet)
 													  //控除時間帯が存在する前提で動いていたため、控除時間帯が無かったらオールゼロで修正
-												      :new DeductionOffSetTime(new AttendanceTime(0),new AttendanceTime(0),new AttendanceTime(0),new AttendanceTime(0));
+												     // :new DeductionOffSetTime(new AttendanceTime(0),new AttendanceTime(0),new AttendanceTime(0),new AttendanceTime(0));
+													 new DeductionOffSetTime(new AttendanceTime(0),new AttendanceTime(0),new AttendanceTime(0),new AttendanceTime(0));
 		//時間休暇使用の残時間を計算 
-		timevacationUseTimeOfDaily.subtractionDeductionOffSetTime(timeVacationOffSetTime);
+		//timevacationUseTimeOfDaily.subtractionDeductionOffSetTime(timeVacationOffSetTime);
 		//就業時間に加算する時間休暇を就業時間へ加算     
 		workTime = new AttendanceTime(workTime.valueAsMinutes() + calcTimeVacationAddTime(vacationAddTimeSet,
 																						  getCalculationByActualTimeAtr(workingSystem,
 																													  	addSettingOfRegularWork,
 																													  	addSettingOfIrregularWork,
 																													  	addSettingOfFlexWork),
-																						  timeVacationOffSetTime).valueAsMinutes());
+																  						  timeVacationOffSetTime).valueAsMinutes());
 		return workTime;
 	}
 	
@@ -442,20 +449,39 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 																	AddSettingOfIrregularWork addSettingOfIrregularWork, 
 																	AddSettingOfFlexWork addSettingOfFlexWork) {
 		switch (workingSystem) {
-		case RegularWork:
+		case REGULAR_WORK:
 			return addSettingOfRegularWork.getHolidayCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getCalculationByActualTime();
 
-		case FlexTimeWork:
+		case FLEX_TIME_WORK:
 			return addSettingOfFlexWork.getHolidayCalcMethodSet().getPremiumCalcMethodOfHoliday().getCalculationByActualTime();
 
-		case VariableWorkingTimeWork:
+		case VARIABLE_WORKING_TIME_WORK:
 			return addSettingOfIrregularWork.getHolidayCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getCalculationByActualTime();
 
-		case ExcludedWorkingCalculate:
+		case EXCLUDED_WORKING_CALCULATE:
 			return CalculationByActualTimeAtr.CalculationByActualTime;
 		default:
 			throw new RuntimeException("不正な労働制です");
 		}
 	}
-			
+
+	public static WithinWorkTimeFrame createWithinWorkTimeFrame(EmTimeZoneSet duplicateTimeSheet,DeductionTimeSheet deductionTimeSheet,
+																BonusPaySetting bonusPaySetting,MidNightTimeSheet midNightTimeSheet) {
+		//控除時間帯
+		List<TimeSheetOfDeductionItem> dedTimeSheet = deductionTimeSheet.getDupliRangeTimeSheet(duplicateTimeSheet.getTimezone().timeSpan(), DeductionAtr.Deduction);
+		List<TimeSheetOfDeductionItem> recordTimeSheet = deductionTimeSheet.getDupliRangeTimeSheet(duplicateTimeSheet.getTimezone().timeSpan(), DeductionAtr.Appropriate);
+		
+		/*加給*/
+		List<BonusPayTimeSheetForCalc> bonusPayTimeSheet = getDuplicatedBonusPay(bonusPaySetting.getLstBonusPayTimesheet().stream().map(tc ->BonusPayTimeSheetForCalc.convertForCalc(tc)).collect(Collectors.toList()),
+																				 new TimeSpanForCalc(duplicateTimeSheet.getTimezone().getStart(),duplicateTimeSheet.getTimezone().getEnd()));
+		/*特定日*/
+		List<SpecBonusPayTimeSheetForCalc> specifiedBonusPayTimeSheet = getDuplicatedSpecBonusPay(bonusPaySetting.getLstSpecBonusPayTimesheet().stream().map(tc -> SpecBonusPayTimeSheetForCalc.convertForCalc(tc)).collect(Collectors.toList()),
+																				 new TimeSpanForCalc(duplicateTimeSheet.getTimezone().getStart(),duplicateTimeSheet.getTimezone().getEnd()));
+
+		/*深夜*/
+		Optional<MidNightTimeSheetForCalc> duplicatemidNightTimeSheet = getDuplicateMidNight(midNightTimeSheet,
+																							new TimeSpanForCalc(duplicateTimeSheet.getTimezone().getStart(),duplicateTimeSheet.getTimezone().getEnd()));
+		return new WithinWorkTimeFrame(duplicateTimeSheet.getEmploymentTimeFrameNo(),duplicateTimeSheet.getTimezone(),duplicateTimeSheet.getTimezone().timeSpan(),recordTimeSheet,dedTimeSheet,bonusPayTimeSheet,duplicatemidNightTimeSheet,specifiedBonusPayTimeSheet);
+	}
+	
 }

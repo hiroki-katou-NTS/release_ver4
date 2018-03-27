@@ -149,6 +149,8 @@ module nts.uk.at.view.kmf003.a.viewmodel {
                                     
                         self.setFocus();  
                         
+                        self.setConditionValueChanges();
+                        
                         // clear all error
                         nts.uk.ui.errors.clearAll();
                     }).fail(function(res) {
@@ -504,7 +506,7 @@ module nts.uk.at.view.kmf003.a.viewmodel {
                     _.forEach(check, function(item, index) {
                         var value = check[index + 1] != null ? check[index + 1].conditionValue : 0;
                         
-                        if(item.conditionValue <= value) {
+                        if(flag && item.conditionValue <= value) {
                             nts.uk.ui.dialog.alertError({ messageId: "Msg_264" });
                             flag = false;
                             return;
@@ -875,6 +877,33 @@ module nts.uk.at.view.kmf003.a.viewmodel {
                         }
                         
                         self.limitedValue02(result < 0 ? "" : result.toString());
+                    } else {
+                        if(self.useCls03()) {
+                            if(self.conditionValue01() == undefined || self.conditionValue01() == "") {
+                                result = 0;
+                            } else {
+                                result = Number(value) - 1;
+                            }
+                            self.limitedValue03(result < 0 ? "" : result.toString());
+                        } else {
+                            if(self.useCls04()) {
+                                if(self.conditionValue01() == undefined || self.conditionValue01() == "") {
+                                    result = 0;
+                                } else {
+                                    result = Number(value) - 1;
+                                }
+                                self.limitedValue04(result < 0 ? "" : result.toString());
+                            } else {
+                                if(self.useCls05()) {
+                                    if(self.conditionValue01() == undefined || self.conditionValue01() == "") {
+                                        result = 0;
+                                    } else {
+                                        result = Number(value) - 1;
+                                    }
+                                    self.limitedValue05(result < 0 ? "" : result.toString());
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -897,6 +926,24 @@ module nts.uk.at.view.kmf003.a.viewmodel {
                             result = Number(value) - 1;
                         }
                         self.limitedValue03(result < 0 ? "" : result.toString());
+                    } else {
+                        if(self.useCls04()) {
+                            if(self.conditionValue02() == undefined || self.conditionValue02() == "") {
+                                result = 0;
+                            } else {
+                                result = Number(value) - 1;
+                            }
+                            self.limitedValue04(result < 0 ? "" : result.toString());
+                        } else {
+                            if(self.useCls05()) {
+                                if(self.conditionValue02() == undefined || self.conditionValue02() == "") {
+                                    result = 0;
+                                } else {
+                                    result = Number(value) - 1;
+                                }
+                                self.limitedValue05(result < 0 ? "" : result.toString());
+                            }
+                        }
                     }
                 }
             });
@@ -910,21 +957,51 @@ module nts.uk.at.view.kmf003.a.viewmodel {
                 if(self.A7_4SelectedRuleCode() == 0){
                     if((Number(value) > (Number(self.limitedValue03())) || Number(self.conditionValue03()) < 0)) {
                         $('#cond03').ntsError('set', {messageId:"Msg_262"});
-                    }                    
+                    } else {
+                        if(self.useCls04()) {
+                            if(self.conditionValue03() == undefined || self.conditionValue03() == "") {
+                                result = 0;
+                            } else {
+                                result = Number(value) - 1;
+                            }
+                            
+                            self.limitedValue04(result < 0 ? "" : result.toString());
+                        } else {
+                            if(self.useCls05()) {
+                                if(self.conditionValue03() == undefined || self.conditionValue03() == "") {
+                                    result = 0;
+                                } else {
+                                    result = Number(value) - 1;
+                                }
+                                
+                                self.limitedValue05(result < 0 ? "" : result.toString());
+                            }
+                        }
+                    }                  
                 } else if(self.A7_4SelectedRuleCode() == 1){
                     if((Number(value) > (Number(self.limitedValue03())) || Number(self.conditionValue03()) < 0)) {
                         $('#cond03').ntsError('set', {messageId:"Msg_263"});
-                    }
-                } else {
-                    if(self.useCls04()) {
-                        if(self.conditionValue03() == undefined || self.conditionValue03() == "") {
-                            result = 0;
+                    } else {
+                        if(self.useCls04()) {
+                            if(self.conditionValue03() == undefined || self.conditionValue03() == "") {
+                                result = 0;
+                            } else {
+                                result = Number(value) - 1;
+                            }
+                            
+                            self.limitedValue04(result < 0 ? "" : result.toString());
                         } else {
-                            result = Number(value) - 1;
+                            if(self.useCls05()) {
+                                if(self.conditionValue03() == undefined || self.conditionValue03() == "") {
+                                    result = 0;
+                                } else {
+                                    result = Number(value) - 1;
+                                }
+                                
+                                self.limitedValue05(result < 0 ? "" : result.toString());
+                            }
                         }
-                        
-                        self.limitedValue04(result < 0 ? "" : result.toString());
-                    }
+                    }   
                 }
             });
             
@@ -937,11 +1014,31 @@ module nts.uk.at.view.kmf003.a.viewmodel {
                 if(self.A7_4SelectedRuleCode() == 0){
                     if((Number(value) > (Number(self.limitedValue04())) || Number(self.conditionValue04()) < 0)) {
                         $('#cond04').ntsError('set', {messageId:"Msg_262"});
-                    }  
+                    } else {
+                        if(self.useCls05()) {
+                            if(self.conditionValue04() == undefined || self.conditionValue04() == "") {
+                                result = 0;
+                            } else {
+                                result = Number(value) - 1;
+                            }
+                            
+                            self.limitedValue05(result < 0 ? "" : result.toString());
+                        }
+                    } 
                 } else if(self.A7_4SelectedRuleCode() == 1){
                     if((Number(value) > (Number(self.limitedValue04())) || Number(self.conditionValue04()) < 0)) {
                         $('#cond04').ntsError('set', {messageId:"Msg_263"});
-                    }
+                    } else {
+                        if(self.useCls05()) {
+                            if(self.conditionValue04() == undefined || self.conditionValue04() == "") {
+                                result = 0;
+                            } else {
+                                result = Number(value) - 1;
+                            }
+                            
+                            self.limitedValue05(result < 0 ? "" : result.toString());
+                        }
+                    } 
                 } else {
                     if(self.useCls05()) {
                         if(self.conditionValue04() == undefined || self.conditionValue04() == "") {

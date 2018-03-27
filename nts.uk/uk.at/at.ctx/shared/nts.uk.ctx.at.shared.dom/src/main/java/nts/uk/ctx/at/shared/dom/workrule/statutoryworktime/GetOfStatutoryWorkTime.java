@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.shared.dom.common.DailyTime;
-import nts.uk.ctx.at.shared.dom.employment.statutory.worktime.employment.WorkingSystem;
 import nts.uk.ctx.at.shared.dom.statutory.worktime.UsageUnitSettingRepository;
 import nts.uk.ctx.at.shared.dom.statutory.worktime.company.CompanyWtSetting;
 import nts.uk.ctx.at.shared.dom.statutory.worktime.company.CompanyWtSettingRepository;
@@ -17,6 +16,7 @@ import nts.uk.ctx.at.shared.dom.statutory.worktime.employment.EmploymentWtSettin
 import nts.uk.ctx.at.shared.dom.statutory.worktime.employment.EmploymentWtSettingRepository;
 import nts.uk.ctx.at.shared.dom.statutory.worktime.workplace.WorkPlaceWtSetting;
 import nts.uk.ctx.at.shared.dom.statutory.worktime.workplace.WorkPlaceWtSettingRepository;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
 import nts.uk.ctx.at.shared.dom.workrule.statutoryworktime.DailyCalculationPersonalInformation;
 import nts.uk.ctx.at.shared.dom.workrule.statutoryworktime.StatutoryWorkTimeSet;
 
@@ -82,8 +82,8 @@ public class GetOfStatutoryWorkTime {
 	 */
 	private DailyCalculationPersonalInformation TimeOfDailyForFixedAndFluid(WorkingSystem workingSystem,String companyId,String placeId,String employmentCd,String employeerId,GeneralDate targetDate) {
 		switch(workingSystem) {
-		case RegularWork:
-		case VariableWorkingTimeWork:
+		case REGULAR_WORK:
+		case VARIABLE_WORKING_TIME_WORK:
 			Optional<StatutoryWorkTimeSet> statutoryWorkTimeSet = statutoryWorkTimeSet(companyId,placeId,employmentCd,employeerId,targetDate);
 			if(statutoryWorkTimeSet.isPresent()) {
 				if(workingSystem.isRegularWork()) {
@@ -94,8 +94,8 @@ public class GetOfStatutoryWorkTime {
 				}
 			}
 			return new DailyCalculationPersonalInformation(Optional.of(new DailyTime(0)),new DailyTime(0),workingSystem);
-		case ExcludedWorkingCalculate:
-		case FlexTimeWork:
+		case EXCLUDED_WORKING_CALCULATE:
+		case FLEX_TIME_WORK:
 			return new DailyCalculationPersonalInformation(Optional.of(new DailyTime(0)),new DailyTime(0),workingSystem);
 		default:
 			throw new RuntimeException("unknown workingSystem" + workingSystem);	
@@ -113,11 +113,11 @@ public class GetOfStatutoryWorkTime {
 	 */
 	private DailyCalculationPersonalInformation TimeOfDailyForFlex(WorkingSystem workingSystem,String companyId,String placeId,String employmentCd,String employeerId,GeneralDate targetDate) {
 		switch(workingSystem) {
-		case RegularWork:
-		case VariableWorkingTimeWork:
-		case ExcludedWorkingCalculate:
+		case REGULAR_WORK:
+		case VARIABLE_WORKING_TIME_WORK:
+		case EXCLUDED_WORKING_CALCULATE:
 			return new DailyCalculationPersonalInformation(Optional.of(new DailyTime(0)),new DailyTime(0),workingSystem);
-		case FlexTimeWork:
+		case FLEX_TIME_WORK:
 			Optional<StatutoryWorkTimeSet> statutoryWorkTimeSet = statutoryWorkTimeSet(companyId,placeId,employmentCd,employeerId,targetDate);
 			if(statutoryWorkTimeSet.isPresent()) {
 				return new DailyCalculationPersonalInformation(Optional.of(statutoryWorkTimeSet.get().getFlexSet().getSpecifiedSetting().getDaily()),
