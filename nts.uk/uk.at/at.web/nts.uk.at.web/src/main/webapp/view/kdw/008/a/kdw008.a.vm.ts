@@ -86,7 +86,9 @@ module nts.uk.at.view.kdw008.a {
                 });
                 self.tabs = ko.observableArray([
                     { id: 'tab-1', title: '日次項目', content: '.tab-content-1', enable: ko.observable(true), visible: ko.observable(true) },
+                    { id: 'tab-2a', title: 'tab2a', content: '.tab-content-2a', enable: ko.observable(true), visible: ko.observable(true) },
                     { id: 'tab-2', title: '月次項目', content: '.tab-content-2', enable: ko.observable(true), visible: ko.observable(true) }
+                    
                 ]);
                 self.selectedTab = ko.observable('tab-1');
 

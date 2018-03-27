@@ -60,7 +60,7 @@ public class WorkTypeIsClosedServiceImpl implements WorkTypeIsClosedService{
 				&& workTypeData.getDailyWork().getMorning() == WorkTypeClassification.Attendance) {
 			workAtrTmp = WorkAtr.Monring;
 		} else if(workTypeData.getDailyWork().getWorkTypeUnit() == WorkTypeUnit.MonringAndAfternoon
-				&& workTypeData.getDailyWork().getMorning() == WorkTypeClassification.Attendance) {
+				&& workTypeData.getDailyWork().getAfternoon() == WorkTypeClassification.Attendance) {
 			workAtrTmp = WorkAtr.Afternoon;
 		} else {
 			workAtrTmp = WorkAtr.OneDay;

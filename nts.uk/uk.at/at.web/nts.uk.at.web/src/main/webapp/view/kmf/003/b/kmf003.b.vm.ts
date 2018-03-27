@@ -211,7 +211,7 @@ module nts.uk.at.view.kmf003.b.viewmodel {
                     };
                     self.items.push(new Item(item));    
                 }
-            }
+            });
         }
         
         /**
@@ -326,9 +326,9 @@ module nts.uk.at.view.kmf003.b.viewmodel {
             }
 
             var grantHolidayTblList = [];
-            _.forEach(self.items(), function(item) {
+            _.forEach(self.items(), function(item, index) {
                 grantHolidayTblList.push({
-                    grantNum: item.grantYearHolidayNo(),
+                    grantNum: index + 1,
                     conditionNo: item.conditionNo(),
                     yearHolidayCode: item.yearHolidayCode(),
                     year: item.lengthOfServiceYears(),

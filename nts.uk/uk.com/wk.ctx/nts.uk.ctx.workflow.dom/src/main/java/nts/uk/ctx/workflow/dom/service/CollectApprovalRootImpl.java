@@ -1,6 +1,7 @@
 package nts.uk.ctx.workflow.dom.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -20,6 +21,7 @@ import nts.uk.ctx.workflow.dom.adapter.bs.EmployeeAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.SyJobTitleAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.ConcurrentEmployeeImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.JobTitleImport;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.SimpleJobTitleImport;
 import nts.uk.ctx.workflow.dom.adapter.workplace.WorkplaceApproverAdapter;
 import nts.uk.ctx.workflow.dom.adapter.workplace.WorkplaceImport;
 import nts.uk.ctx.workflow.dom.approvermanagement.setting.ApprovalSettingRepository;
@@ -277,15 +279,24 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 	public Boolean compareHierarchyTargetPerson(String companyID, String targetPersonID, String positionID,
 			GeneralDate date) {
 		JobTitleImport jobOfEmp = syJobTitleAdapter.findJobTitleBySid(targetPersonID, date);
+		SimpleJobTitleImport approverInfo = null;
+		SimpleJobTitleImport requestInfo = null;
 		// 承認者の
-		JobTitleImport jobOfApprover = syJobTitleAdapter.findJobTitleByPositionId(companyID, positionID, date);		
-		if (jobOfEmp != null) {
+		List<SimpleJobTitleImport> approverInfoList = syJobTitleAdapter.findByIds(companyID, Arrays.asList(positionID), date);
+		if(!CollectionUtil.isEmpty(approverInfoList)){
+			approverInfo = approverInfoList.get(0);
+		}		
+		if (approverInfo != null) {
 			// 申請の
-			JobTitleImport jobOfRequest = syJobTitleAdapter.findJobTitleByPositionId(companyID, jobOfEmp.getPositionId(), date);
-			if (jobOfApprover == null || jobOfRequest == null) {
+			List<SimpleJobTitleImport> requestInfoList = syJobTitleAdapter
+					.findByIds(companyID, Arrays.asList(jobOfEmp.getPositionId()), date);
+			if(!CollectionUtil.isEmpty(requestInfoList)){
+				requestInfo = requestInfoList.get(0);
+			}
+			if (requestInfo == null) {
 				return false;
 			}
-			if (jobOfApprover.isGreaterThan(jobOfRequest)) {
+			if (requestInfo.getDisporder() > approverInfo.getDisporder()) {
 				return true;
 			}
 		}

@@ -507,7 +507,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			return integrationOfDaily;
 		
 		val workType = this.workTypeRepository.findByPK(companyId,integrationOfDaily.getWorkInformation().getRecordWorkInformation().getWorkTypeCode().v()); // 要確認：勤務種類マスタが削除されている場合は考慮しない？
-		if(!workType.isPresent()) return integrationOfDaily;
+		if(!workType.isPresent() || !workTime.isPresent()) return integrationOfDaily;
 		//休暇加算時間設定
 		VacationAddTimeSet vacationAddSetting = new VacationAddTimeSet(new BreakDownTimeDay(oneRange.getPredetermineTimeSetForCalc().getAdditionSet().getPredTime().getOneDay(), 
 																							oneRange.getPredetermineTimeSetForCalc().getAdditionSet().getPredTime().getMorning(),
@@ -545,14 +545,13 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		
 
 //		// 編集状態を取得（日別実績の編集状態が持つ勤怠項目IDのみのList作成）
-		List<Integer> attendanceItemIdList = integrationOfDaily.getEditState().stream().filter(editState -> editState.getEmployeeId()==copyIntegrationOfDaily.getAffiliationInfor().getEmployeeId()
-				   && editState.getYmd() == copyIntegrationOfDaily.getAffiliationInfor().getYmd())
+		List<Integer> attendanceItemIdList = integrationOfDaily.getEditState().stream().filter(editState -> editState.getEmployeeId().equals(copyIntegrationOfDaily.getAffiliationInfor().getEmployeeId())
+				   && editState.getYmd().equals(copyIntegrationOfDaily.getAffiliationInfor().getYmd()))
         .map(editState -> editState.getAttendanceItemId())
         .distinct()
         .collect(Collectors.toList());
 
-		IntegrationOfDaily calcResultIntegrationOfDaily = integrationOfDaily;
-		
+		IntegrationOfDaily calcResultIntegrationOfDaily = integrationOfDaily;		
 		if(!attendanceItemIdList.isEmpty()) {
 			DailyRecordToAttendanceItemConverter beforDailyRecordDto = this.dailyRecordToAttendanceItemConverter.setData(copyIntegrationOfDaily);	
 			List<ItemValue> itemValueList = beforDailyRecordDto.convert(attendanceItemIdList);		

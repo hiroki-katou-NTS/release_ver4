@@ -8,6 +8,7 @@ import java.util.List;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.JobTitleImport;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.SimpleJobTitleImport;
 
 /**
  * The Interface EmployeePub.
@@ -52,4 +53,15 @@ public interface SyJobTitleAdapter {
 	 */
 	// RequestList #74
 	List<JobTitleImport> findAll(String companyId, GeneralDate baseDate);
+	
+	/**
+	 * Find by ids.
+	 *
+	 * @param companyId the company id
+	 * @param jobIds the job ids
+	 * @param baseDate the base date
+	 * @return the list
+	 */
+	// RequestList #158
+	List<SimpleJobTitleImport> findByIds(String companyId,List<String> jobIds, GeneralDate baseDate);
 }

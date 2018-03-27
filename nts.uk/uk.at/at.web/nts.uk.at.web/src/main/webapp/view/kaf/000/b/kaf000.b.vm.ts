@@ -276,7 +276,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             let self = this;
             self.inputCommonData(new model.InputCommonData(self.dataApplication(), self.reasonToApprover()));
             service.approveApp(self.inputCommonData()).done(function(data) {
-                nts.uk.ui.dialog.alert({ messageId: 'Msg_220' }).then(function() {
+                nts.uk.ui.dialog.info({ messageId: 'Msg_220' }).then(function() {
                     if (!nts.uk.util.isNullOrUndefined(data)) {
                         nts.uk.ui.dialog.info({ messageId: 'Msg_392', messageParams: [data] }).then(() => {
                             location.reload();
@@ -297,7 +297,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             let self = this;
             self.inputCommonData(new model.InputCommonData(self.dataApplication(), self.reasonToApprover()));
             service.denyApp(self.inputCommonData()).done(function(data) {
-                nts.uk.ui.dialog.alert({ messageId: 'Msg_222' }).then(function() {
+                nts.uk.ui.dialog.info({ messageId: 'Msg_222' }).then(function() {
                     if (!nts.uk.util.isNullOrUndefined(data)) {
                         nts.uk.ui.dialog.info({ messageId: 'Msg_392', messageParams: [data] }).then(() => {
                             location.reload();
@@ -369,7 +369,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             self.inputCommandEvent(new model.InputCommandEvent(self.inputCommandEvent().version, self.appID(), self.appReasonEvent()));
             nts.uk.ui.dialog.confirm({ messageId: 'Msg_18' }).ifYes(function() {
                 service.deleteApp(self.inputCommandEvent()).done(function(data) {
-                    nts.uk.ui.dialog.alert({ messageId: 'Msg_16' }).then(function() {
+                    nts.uk.ui.dialog.info({ messageId: 'Msg_16' }).then(function() {
                         //kiểm tra list người xác nhận, nếu khác null thì show info 392
                         if (!nts.uk.util.isNullOrEmpty(data)) {
                             nts.uk.ui.dialog.info({ messageId: 'Msg_392', messageParams: [data] }).then(function() {
@@ -431,7 +431,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             self.inputCommandEvent(new model.InputCommandEvent(self.inputCommandEvent().version, self.appID(), self.appReasonEvent()));
             nts.uk.ui.dialog.confirm({ messageId: 'Msg_249' }).ifYes(function() {
                 service.cancelApp(self.inputCommandEvent()).done(function() {
-                    nts.uk.ui.dialog.alert({ messageId: "Msg_224" }).then(() => {
+                    nts.uk.ui.dialog.info({ messageId: "Msg_224" }).then(() => {
                         location.reload();
                     });
                 }).fail(function(res: any) {

@@ -24,5 +24,5 @@ public interface PreOvertimeReflectService {
 	 * @param dataData
 	 * @return
 	 */
-	public IntegrationOfDaily calculateForAppReflect(WorkInfoOfDailyPerformance workInfo, String employeeId, GeneralDate dataData);
+	public IntegrationOfDaily calculateForAppReflect(String employeeId, GeneralDate dataData);
 }

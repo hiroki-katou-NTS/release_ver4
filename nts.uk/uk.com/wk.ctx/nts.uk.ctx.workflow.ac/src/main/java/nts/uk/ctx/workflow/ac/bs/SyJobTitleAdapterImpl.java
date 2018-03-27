@@ -16,6 +16,7 @@ import nts.uk.ctx.bs.employee.pub.jobtitle.JobTitleExport;
 import nts.uk.ctx.bs.employee.pub.jobtitle.SyJobTitlePub;
 import nts.uk.ctx.workflow.dom.adapter.bs.SyJobTitleAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.JobTitleImport;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.SimpleJobTitleImport;
 
 /**
  * @author vunv
@@ -69,5 +70,16 @@ public class SyJobTitleAdapterImpl implements SyJobTitleAdapter{
 				.map(x -> this.toImport(x))
 				.collect(Collectors.toList());
 		return data;
+	}
+
+	@Override
+	public List<SimpleJobTitleImport> findByIds(String companyId, List<String> jobIds, GeneralDate baseDate) {
+		return syJobTitlePub.findByIds(companyId, jobIds, baseDate).stream()
+				.map(x -> new SimpleJobTitleImport(
+						x.getJobTitleId(), 
+						x.getJobTitleCode(), 
+						x.getJobTitleName(), 
+						x.getDisporder()))
+				.collect(Collectors.toList());
 	}
 }

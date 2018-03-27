@@ -1,17 +1,18 @@
 package nts.uk.ctx.at.schedule.dom.adapter.executionlog.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Value;
 
 /**
  * The Class EmployeeDto.
  */
-@Getter
-@Setter
+@Value
 public class EmployeeDto {
+	/** The employee Id. */
+	String employeeId;
+	
 	/** The employee code. */
-	public String employeeCode;
+	String employeeCode;
 
 	/** The employee name. */
-	public String employeeName;
+	String employeeName;
 }

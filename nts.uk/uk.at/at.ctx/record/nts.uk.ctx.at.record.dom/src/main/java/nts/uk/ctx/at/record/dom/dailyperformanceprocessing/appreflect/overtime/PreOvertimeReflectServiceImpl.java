@@ -122,11 +122,10 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 			
 			//日別実績の修正からの計算
 			//○日別実績を置き換える Replace daily performance		
-			IntegrationOfDaily calculateData = calculate.calculate(this.calculateForAppReflect(workRepository.find(param.getEmployeeId(), param.getDateInfo()).get(), param.getEmployeeId(), param.getDateInfo()));
+			IntegrationOfDaily calculateData = calculate.calculate(this.calculateForAppReflect(param.getEmployeeId(), param.getDateInfo()));
 			attendanceTime.updateFlush(calculateData.getAttendanceTimeOfDailyPerformance().get());
 			
 			output.setReflectedState(ReflectedStateRecord.REFLECTED);
-			//dang lay nham thong tin enum
 			output.setReasonNotReflect(ReasonNotReflectRecord.ACTUAL_CONFIRMED);
 			return output;
 	
@@ -137,9 +136,10 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 
 
 	@Override
-	public IntegrationOfDaily calculateForAppReflect(WorkInfoOfDailyPerformance workInfor, String employeeId,
+	public IntegrationOfDaily calculateForAppReflect(String employeeId,
 			GeneralDate dateData) {
 		String companyId = AppContexts.user().companyId();
+		WorkInfoOfDailyPerformance workInfor = workRepository.find(employeeId, dateData).get();
 		//日別実績の計算区分
 		CalAttrOfDailyPerformance calAtrrOfDailyData = calAttrOfDaily.find(employeeId, dateData);
 		//日別実績の所属情報

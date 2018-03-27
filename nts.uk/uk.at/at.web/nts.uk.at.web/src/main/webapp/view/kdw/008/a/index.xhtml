@@ -55,19 +55,22 @@
 						<td>
 							<div>
 								<div style="margin-bottom: 20px">
-									<div id="label3" data-bind="ntsFormLabel: { constraint: 'DailyPerformanceFormatCode', inline: true, required: true, enable: true}">#{i18n.getText('KDW008_7')}
-											</div> <input id="currentCode"
-											data-bind="ntsTextEditor: {value: currentDailyFormatCode,
+									<div id="label3"
+										data-bind="ntsFormLabel: { constraint: 'DailyPerformanceFormatCode', inline: true, required: true, enable: true}">#{i18n.getText('KDW008_7')}
+									</div>
+									<input id="currentCode"
+										data-bind="ntsTextEditor: {value: currentDailyFormatCode,
 																   enable : showCode,
 																   constraint: 'DailyPerformanceFormatCode',
 																   option: {autofill:true, filldirection:'left'},
 																   name: '#[KDW008_7]',
 																   required: true	}" /><br />
-									
+
 								</div>
-								<div id="label4" data-bind="ntsFormLabel: { constraint: 'DailyPerformanceFormatName', inline: true, required: true, enable: true}">#{i18n.getText('KDW008_8')}</div> 
-										<input id="currentName"
-										data-bind="ntsTextEditor: {value: currentDailyFormatName,
+								<div id="label4"
+									data-bind="ntsFormLabel: { constraint: 'DailyPerformanceFormatName', inline: true, required: true, enable: true}">#{i18n.getText('KDW008_8')}</div>
+								<input id="currentName"
+									data-bind="ntsTextEditor: {value: currentDailyFormatName,
 																   constraint: 'DailyPerformanceFormatName',
 																   name: '#[KDW008_8]',
 																   required: true}" /><br />
@@ -87,7 +90,8 @@
 												value: selectedSheetNo,
 												enable: true}">
 										</div>
-										<div id="label2" data-bind="ntsFormLabel: { constraint: 'DailyPerFormatSheetName', inline: true, required: true, enable: true}">#{i18n.getText('KDW008_8')}</div>
+										<div id="label2"
+											data-bind="ntsFormLabel: { constraint: 'DailyPerFormatSheetName', inline: true, required: true, enable: true}">#{i18n.getText('KDW008_8')}</div>
 										<input class="need-check"
 											data-bind="ntsTextEditor: {value: selectedSheetName,
 																	   constraint: 'DailyPerFormatSheetName',
@@ -123,6 +127,36 @@
 													swapTarget: 'right'}">
 									</div>
 								</div>
+								<div class="tab-content-2a" style="height: 500px; width: 900px;">
+									<label>#{i18n.getText('KDW008_28')}</label>
+									
+									<div style="margin-top: 10px" id="swap-list2"
+										data-bind="ntsSwapList: {
+											showSearchBox: { showLeft : true, showRight: true},
+											height: 400,
+											dataSource: dailyDataSource,
+											primaryKey: 'attendanceItemId',
+											columns: columns2,
+											value: authorityFormatDailyValue,
+											searchMode: 'filter',
+											searchCriterion: ['attendanceItemName','attendanceItemId'],
+											draggable: true,
+											enableRowNumbering: false,
+											multipleDrag: { left: true, right: false },
+											innerDrag: { left: false, right: true },
+											outerDrag: { left: true, right: true },
+											itemsLimit: { right: 100}
+										}"></div>
+									<div id="up-down"
+										data-bind="ntsUpDown: {
+													targetSource: authorityFormatDailyValue,
+													primaryKey: 'attendanceItemId',
+													comId: '#swap-list2',
+													type: 'swap',
+													swapTarget: 'right'}">
+									</div>
+								</div>
+
 								<div class="tab-content-2" style="height: 500px; width: 900px;">
 									<div id="messageSwaplist">#{i18n.getText('KDW008_28')}</div>
 									<div style="margin-top: 10px" id="swap-list"
@@ -152,6 +186,7 @@
 												swapTarget: 'right'}">
 									</div>
 								</div>
+
 							</div>
 						</td>
 					</tr>

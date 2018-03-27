@@ -322,8 +322,6 @@ public class WorkUpdateServiceImpl implements ScheWorkUpdateService{
 		ActualWorkingTimeOfDaily actualWorkingTimeOfDaily = attendanceTimeData.getActualWorkingTimeOfDaily();
 		TotalWorkingTime totalWorkingTime = actualWorkingTimeOfDaily.getTotalWorkingTime();		
 		ExcessOfStatutoryTimeOfDaily excessOfStatutoryTimeOfDaily = totalWorkingTime.getExcessOfStatutoryTimeOfDaily();
-		//lam nham khong phair 休出深夜 ma la 法定外残業深夜時間
-		//TODO se lam lai khi co domain nay
 		Optional<HolidayWorkTimeOfDaily> optWorkHolidayTime = excessOfStatutoryTimeOfDaily.getWorkHolidayTime();
 		if(!optWorkHolidayTime.isPresent()) {
 			return;

@@ -121,13 +121,24 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 
 	@Override
 	public void update(BreakTimeOfDailyPerformance breakTimes) {
-		commandProxy().updateAll(KrcdtDaiBreakTime.toEntity(breakTimes));
+		List<KrcdtDaiBreakTime> all = KrcdtDaiBreakTime.toEntity(breakTimes);
+		List<KrcdtDaiBreakTime> toRemove = all.stream().filter(c -> c.endStampTime == null && c.startStampTime == null).collect(Collectors.toList());
+		List<KrcdtDaiBreakTime> toUpdate = all.stream().filter(c -> c.endStampTime != null && c.startStampTime != null).collect(Collectors.toList());
+		toRemove.stream().forEach(c -> commandProxy().remove(KrcdtDaiBreakTime.class, c.krcdtDaiBreakTimePK));
+		commandProxy().updateAll(toUpdate);
 	}
 
 	@Override
 	public void update(List<BreakTimeOfDailyPerformance> breakTimes) {
-		commandProxy().updateAll(breakTimes.stream().map(c -> KrcdtDaiBreakTime.toEntity(c)).flatMap(List::stream)
-				.collect(Collectors.toList()));
+		List<KrcdtDaiBreakTime> all = breakTimes.stream().map(c -> KrcdtDaiBreakTime.toEntity(c)).flatMap(List::stream)
+				.collect(Collectors.toList());
+		List<KrcdtDaiBreakTime> toRemove = all.stream().filter(c -> c.endStampTime == null && c.startStampTime == null).collect(Collectors.toList());
+		List<KrcdtDaiBreakTime> toUpdate = all.stream().filter(c -> c.endStampTime != null && c.startStampTime != null).collect(Collectors.toList());
+		toRemove.stream().forEach(c -> commandProxy().remove(KrcdtDaiBreakTime.class, c.krcdtDaiBreakTimePK));
+//		commandProxy().removeAll(toRemove);
+		commandProxy().updateAll(toUpdate);
+//		commandProxy().updateAll(breakTimes.stream().map(c -> KrcdtDaiBreakTime.toEntity(c)).flatMap(List::stream)
+//				.collect(Collectors.toList()));
 	}
 
 	@Override

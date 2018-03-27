@@ -6,6 +6,7 @@ package nts.uk.ctx.at.schedule.app.find.executionlog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -76,12 +77,17 @@ public class ScheduleExecutionLogFinder {
 		if (CollectionUtil.isEmpty(scheduleExecutionLogs)) {
 			return new ArrayList<>();
 		}
-
+		
+		// fixbug #88257
+		List<String> employeeIds = scheduleExecutionLogs.stream().map(x -> x.getExecutionEmployeeId()).collect(Collectors.toList());
+		List<EmployeeDto> employeeList = employeeAdapter.findByEmployeeIds(employeeIds);
+		Map<String, EmployeeDto> employeeMap = employeeList.stream()
+				.collect(Collectors.toMap(EmployeeDto::getEmployeeId, x->x));
 		// return full by map
 		return scheduleExecutionLogs.stream().map(item -> {
 			ScheduleExecutionLogDto dto = new ScheduleExecutionLogDto();
 			item.saveToMemento(dto);
-			EmployeeDto employee = employeeAdapter.findByEmployeeId(dto.getExecutionEmployeeId());
+			EmployeeDto employee = employeeMap.get(dto.getExecutionEmployeeId());
 			dto.setEmployeeCode(employee.getEmployeeCode());
 			dto.setEmployeeName(employee.getEmployeeName());
 			return dto;

@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.schedule.dom.adapter.executionlog;
 
+import java.util.List;
+
 import nts.uk.ctx.at.schedule.dom.adapter.executionlog.dto.EmployeeDto;
 
 /**
@@ -14,4 +16,11 @@ public interface SCEmployeeAdapter {
 	 * @return the employee dto
 	 */
 	EmployeeDto findByEmployeeId(String sId);
+	
+	/**
+	 * Find employee by list sid
+	 * @param sids
+	 * @return
+	 */
+	List<EmployeeDto> findByEmployeeIds(List<String> sids);
 }
