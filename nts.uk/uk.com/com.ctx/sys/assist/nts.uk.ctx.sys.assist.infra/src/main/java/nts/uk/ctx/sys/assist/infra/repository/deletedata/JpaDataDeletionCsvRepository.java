@@ -245,6 +245,7 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 	 */
 	@Override
 	public List<List<String>> getDataForEachCaegory(TableDeletionDataCsv tableDelData, List<EmployeeDeletion> employeeDeletions) {
+		
 //		Map<String, Object> parrams = new HashMap<>();
 //		String sqlStr = buildGetDataForEachCatSql(tableDelData, employeeDeletions, parrams);
 //		Query query = this.getEntityManager().createNativeQuery(sqlStr);
@@ -265,45 +266,6 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 		List<List<String>> result =  this.getDataDynamic(tableDelData, targetEmployeesSid);
 		return result;
 	}
-
-	/**
-	 * 
-	 * @param tableDelData
-	 * @param employeeDeletions
-	 * @param parrams
-	 * @return
-	 */
-	private String buildGetDataForEachCatSql(TableDeletionDataCsv tableDelData, 
-			List<EmployeeDeletion> employeeDeletions, Map<String, Object> parrams) {
-		boolean hasParentTbl = tableDelData.hasParentTblFlg();
-		StringBuffer query = new StringBuffer();
-		// build select part
-		buildSelectPart(query, tableDelData, hasParentTbl);
-		//build form part
-		buildFromPart(query, tableDelData.getTableEnglishName());
-		//build inner joint
-		if (hasParentTbl && tableDelData.getParentTblName().isPresent()) {
-			buildInnerJoint(query, tableDelData);
-		}
-		//build where part
-		buildWherePart(query, tableDelData, employeeDeletions, parrams);
-		return query.toString();
-	}
-	
-	private String getFieldAcq(List<String> allColumns, Optional<String> fieldName, String fieldAcqName) {
-		String fieldAcq = fieldName.orElse("");
-		if (!Strings.isNullOrEmpty(fieldAcq)) {
-			if (allColumns.contains(fieldAcq)) {
-				return " t." + fieldAcq + " AS " + fieldAcqName + ", ";
-			} else {
-				return " p." + fieldAcq + " AS " + fieldAcqName + ", ";
-			}
-		} else {
-			return " '' AS " + fieldAcqName + ", ";
-		}
-	}
-	
-	
 	
 	public List<List<String>> getDataDynamic(TableDeletionDataCsv tableList, List<String> targetEmployeesSid) {
 		StringBuffer query = new StringBuffer("");
@@ -537,9 +499,6 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 		// Order By
 		query.append(" ORDER BY H_CID, H_SID, H_DATE, H_DATE_START");
 		String querySql = query.toString();
-		if(tableList.getTableEnglishName().equals("BPSMT_PERSON")) {
-			query.toString();
-		}
 		List<Object[]> listTemp = new ArrayList<>();
 		if(!targetEmployeesSid.isEmpty()) {
 			List<String> lSid = new ArrayList<>();
@@ -568,7 +527,258 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 			return record;
 		}).collect(Collectors.toList());
 	}
+	
+	public void delelteDataDynamic(TableDeletionDataCsv tableList, List<String> targetEmployeesSid) {
+		StringBuffer query = new StringBuffer("");
+		// All Column
+		List<String> columns = getAllColumnName(tableList.getTableEnglishName());
+		// Select
+		query.append(" DELETE "  + tableList.getTableEnglishName());
+		
+		// From
+		query.append(" FROM ").append(tableList.getTableEnglishName()).append(" t");
+		if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value && tableList.getParentTblName().isPresent()) {
+			// アルゴリズム「親テーブルをJOINする」を実行する
+			query.append(" INNER JOIN ").append(tableList.getParentTblName().get()).append(" p ON ");
 
+			String[] parentFields = { tableList.getFieldParent1().orElse(""), tableList.getFieldParent2().orElse(""),
+					tableList.getFieldParent3().orElse(""), tableList.getFieldParent4().orElse(""),
+					tableList.getFieldParent5().orElse(""), tableList.getFieldParent6().orElse(""),
+					tableList.getFieldParent7().orElse(""), tableList.getFieldParent8().orElse(""),
+					tableList.getFieldParent9().orElse(""), tableList.getFieldParent10().orElse("") };
+
+			String[] childFields = { tableList.getFieldChild1().orElse(""), tableList.getFieldChild2().orElse(""),
+					tableList.getFieldChild3().orElse(""), tableList.getFieldChild4().orElse(""),
+					tableList.getFieldChild5().orElse(""), tableList.getFieldChild6().orElse(""),
+					tableList.getFieldChild7().orElse(""), tableList.getFieldChild8().orElse(""),
+					tableList.getFieldChild9().orElse(""), tableList.getFieldChild10().orElse("") };
+
+			boolean isFirstOnStatement = true;
+			for (int i = 0; i < parentFields.length; i++) {
+				if (!Strings.isNullOrEmpty(parentFields[i]) && !Strings.isNullOrEmpty(childFields[i])) {
+					if (!isFirstOnStatement) {
+						query.append(" AND ");
+					}
+					isFirstOnStatement = false;
+					query.append("p." + parentFields[i] + "=" + "t." + childFields[i]);
+				}
+			}
+		}
+
+		String[] fieldKeyQuerys = { tableList.getFieldKeyQuery1().orElse(""), tableList.getFieldKeyQuery2().orElse(""),
+				tableList.getFieldKeyQuery3().orElse(""), tableList.getFieldKeyQuery4().orElse(""),
+				tableList.getFieldKeyQuery5().orElse(""), tableList.getFieldKeyQuery6().orElse(""),
+				tableList.getFieldKeyQuery7().orElse(""), tableList.getFieldKeyQuery8().orElse(""),
+				tableList.getFieldKeyQuery9().orElse(""), tableList.getFieldKeyQuery10().orElse("") };
+		String[] clsKeyQuerys = { tableList.getClsKeyQuery1().orElse(""), tableList.getClsKeyQuery2().orElse(""),
+				tableList.getClsKeyQuery3().orElse(""), tableList.getClsKeyQuery4().orElse(""),
+				tableList.getClsKeyQuery5().orElse(""), tableList.getClsKeyQuery6().orElse(""),
+				tableList.getClsKeyQuery7().orElse(""), tableList.getClsKeyQuery8().orElse(""),
+				tableList.getClsKeyQuery9().orElse(""), tableList.getClsKeyQuery10().orElse("") };
+		
+		// Where
+		query.append(" WHERE 1 = 1 ");
+
+		List<Integer> companyCdIndexs = new ArrayList<Integer>();
+		List<Integer> yearIndexs = new ArrayList<Integer>();
+		List<Integer> yearMonthIndexs = new ArrayList<Integer>();
+		List<Integer> yearMonthDayIndexs = new ArrayList<Integer>();
+		for (int i = 0; i < clsKeyQuerys.length; i++) {
+			if (clsKeyQuerys[i] == "")
+				continue;
+			switch (clsKeyQuerys[i]) {
+			case COMPANY_CD:
+				companyCdIndexs.add(i);
+				break;
+
+			case YEAR:
+				yearIndexs.add(i);
+				break;
+
+			case YEAR_MONTH:
+				yearMonthIndexs.add(i);
+				break;
+
+			case YEAR_MONTH_DAY:
+				yearMonthDayIndexs.add(i);
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		Map<String, Object> params = new HashMap<>();
+		if (companyCdIndexs.size() > 0) {
+			query.append(" AND ( ");
+			boolean isFirstOrStatement = true;
+			for (Integer index : companyCdIndexs) {
+				if (!isFirstOrStatement) {
+					query.append(" OR ");
+				}
+				isFirstOrStatement = false;
+				if (columns.contains(fieldKeyQuerys[index])) {
+					query.append(" t.");
+					query.append(fieldKeyQuerys[index]);
+				} else {
+					query.append(" p.");
+					query.append(fieldKeyQuerys[index]);
+				}
+				query.append(" = ?companyId ");
+				params.put("companyId", AppContexts.user().companyId());
+			}
+			query.append(" ) ");
+		}
+
+		// 履歴区分を判別する。履歴なしの場合
+		if (tableList.getHistoryCls() == HistoryDiviSion.NO_HISTORY.value) {
+			List<Integer> indexs = new ArrayList<Integer>();
+			switch (tableList.getTimeStore()) {
+			case 3: // ANNUAL
+				indexs = yearIndexs;
+				break;
+			case 2: // MONTHLY
+				indexs = yearMonthIndexs;
+				break;
+			case 1: // DAILY
+				indexs = yearMonthDayIndexs;
+				break;
+
+			default:
+				break;
+			}
+
+			if (indexs.size() > 0) {
+				query.append(" AND ( ");
+				boolean isFirstOrStatement = true;
+				for (Integer index : indexs) {
+					if (!isFirstOrStatement) {
+						query.append(" OR ");
+					}
+					isFirstOrStatement = false;
+					// Start Date
+					if (columns.contains(fieldKeyQuerys[index])) {
+						query.append(" (t.");
+						query.append(fieldKeyQuerys[index]);
+					} else {
+						query.append(" (p.");
+						query.append(fieldKeyQuerys[index]);
+					}
+
+					query.append(" >= ?startDate ");
+					query.append(" AND ");
+
+					// End Date
+					if (columns.contains(fieldKeyQuerys[index])) {
+						query.append(" t.");
+						query.append(fieldKeyQuerys[index]);
+					} else {
+						query.append(" p.");
+						query.append(fieldKeyQuerys[index]);
+					}
+
+					query.append(" <= ?endDate) ");
+
+					switch (tableList.getTimeStore()) {
+					case 1 : //DAILY
+						params.put("startDate", tableList.getStartDateOfDaily());
+						params.put("endDate", tableList.getEndDateOfDaily());
+						break;
+					case 2 : //MONTHLY
+						params.put("startDate",
+								Integer.valueOf(tableList.getStartDateOfDaily().replaceAll("\\/", "")));
+						params.put("endDate", Integer.valueOf(tableList.getEndDateOfDaily().replaceAll("\\/", "")));
+						break;
+					case 3 : // ANNUAL
+						params.put("startDate", Integer.valueOf(tableList.getStartDateOfDaily()));
+						params.put("endDate", Integer.valueOf(tableList.getEndDateOfDaily()));
+						break;
+
+					default:
+						break;
+					}
+				}
+				query.append(" ) ");
+			}
+		}
+
+		// 抽出条件キー固定
+		query.append(tableList.getDefaultCondKeyQuery().orElse(""));
+		for (int i = 0; i < clsKeyQuerys.length; i++) {
+			if (EMPLOYEE_CD.equals(clsKeyQuerys[i]) && !targetEmployeesSid.isEmpty()) {
+				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
+					query.append(" AND p." + fieldKeyQuerys[i] + " IN (?listTargetSid) ");
+				} else {
+					query.append(" AND t." + fieldKeyQuerys[i] + " IN (?listTargetSid) ");
+				}
+			}
+		}
+		
+		
+		String querySql = query.toString();
+		if(!targetEmployeesSid.isEmpty()) {
+			List<String> lSid = new ArrayList<>();
+			CollectionUtil.split(targetEmployeesSid, 1000, subIdList -> {
+				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ","\\', '"));
+			});
+			for (String sid : lSid) {
+				Query queryString = getEntityManager().createNativeQuery(querySql.replaceAll("\\?listTargetSid", sid));
+				for (Entry<String, Object> entry : params.entrySet()) {
+					queryString.setParameter(entry.getKey(), entry.getValue());
+				}
+				queryString.executeUpdate();
+			}
+		}else {
+			Query queryString = getEntityManager().createNativeQuery(querySql);
+			for (Entry<String, Object> entry : params.entrySet()) {
+				queryString.setParameter(entry.getKey(), entry.getValue());
+			}
+			queryString.executeUpdate();
+		}
+	}
+
+
+
+	/**
+	 * 
+	 * @param tableDelData
+	 * @param employeeDeletions
+	 * @param parrams
+	 * @return
+	 */
+	private String buildGetDataForEachCatSql(TableDeletionDataCsv tableDelData, 
+			List<EmployeeDeletion> employeeDeletions, Map<String, Object> parrams) {
+		boolean hasParentTbl = tableDelData.hasParentTblFlg();
+		StringBuffer query = new StringBuffer();
+		// build select part
+		buildSelectPart(query, tableDelData, hasParentTbl);
+		//build form part
+		buildFromPart(query, tableDelData.getTableEnglishName());
+		//build inner joint
+		if (hasParentTbl && tableDelData.getParentTblName().isPresent()) {
+			buildInnerJoint(query, tableDelData);
+		}
+		//build where part
+		buildWherePart(query, tableDelData, employeeDeletions, parrams);
+		return query.toString();
+	}
+	
+	private String getFieldAcq(List<String> allColumns, Optional<String> fieldName, String fieldAcqName) {
+		String fieldAcq = fieldName.orElse("");
+		if (!Strings.isNullOrEmpty(fieldAcq)) {
+			if (allColumns.contains(fieldAcq)) {
+				return " t." + fieldAcq + " AS " + fieldAcqName + ", ";
+			} else {
+				return " p." + fieldAcq + " AS " + fieldAcqName + ", ";
+			}
+		} else {
+			return " '' AS " + fieldAcqName + ", ";
+		}
+	}
+	
+	
+	
+	
 
 	public List<String> getAllColumnName(String tableName) {
 		List<?> columns = this.getEntityManager().createNativeQuery(SELECT_COLUMN_NAME_SQL)
@@ -780,13 +990,7 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 			tblAcq = tableDelData.getParentTblName().get();
 		}
 		
-		List<String> lstEmployeeIds = new ArrayList<>();
-		if (employeeDeletions != null && employeeDeletions.size() > 0) {
-			for (EmployeeDeletion employeeDeletion : employeeDeletions) {
-				lstEmployeeIds.add(employeeDeletion.getEmployeeId());
-			}
-		}
-		
+		List lstEmployeeIds = employeeDeletions.stream().map(emp -> emp.getEmployeeId()).collect(Collectors.toList());
 		
 		buffer.append(" WHERE 1 = 1 ");
 		
@@ -895,16 +1099,10 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 	 * 
 	 */
 	@Override
-	public int deleteData(TableDeletionDataCsv tableDelData, List<EmployeeDeletion> employeeDeletions) {
-		Map<String, Object> parrams = new HashMap<>();
-		String sqlStr = buildDelDataForEachCatSql(tableDelData, employeeDeletions, parrams);
-		Query query = this.getEntityManager().createNativeQuery(sqlStr);
-		for(Entry<String, Object> entry : parrams.entrySet()) {
-			query.setParameter(entry.getKey(), entry.getValue());
-		}
+	public void deleteData(TableDeletionDataCsv tableDelData, List<EmployeeDeletion> employeeDeletions) {
 		
-		int numberDel = query.executeUpdate();
-		return numberDel;
+		List targetEmployeesSid = employeeDeletions.stream().map(emp -> emp.getEmployeeId()).collect(Collectors.toList());
+		delelteDataDynamic(tableDelData, targetEmployeesSid);
 	}
 	
 	/**
@@ -983,75 +1181,6 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 		String fieldParent9 = tableDelData.getFieldParent9().get();
 		String fieldChild10 = tableDelData.getFieldChild10().get();
 		String fieldParent10 = tableDelData.getFieldParent10().get();
-		
-//		buffer.append(" WHERE ");
-//		buffer.append(" EXISTS ( ");
-//		buffer.append(" SELECT ");
-//		
-//		String prefix = "";
-//		if (fieldParent1 != null && !"null".equals(fieldParent1) && !fieldParent1.isEmpty()) {
-//			buffer.append(prefix);
-//			prefix = ",";
-//			buffer.append(parentTblName + "." + fieldParent1);
-//		}
-//		
-//		if (fieldParent2 != null && !"null".equals(fieldParent2) && !fieldParent2.isEmpty()) {
-//			buffer.append(prefix);
-//			prefix = ",";
-//			buffer.append(parentTblName + "." + fieldParent2);
-//		}
-//		
-//		if (fieldParent3 != null && !"null".equals(fieldParent3) && !fieldParent3.isEmpty()) {
-//			buffer.append(prefix);
-//			prefix = ",";
-//			buffer.append(parentTblName + "." + fieldParent3);
-//		}
-//		
-//		if (fieldParent4 != null && !"null".equals(fieldParent4) && !fieldParent4.isEmpty()) {
-//			buffer.append(prefix);
-//			prefix = ",";
-//			buffer.append(parentTblName + "." + fieldParent4);
-//		}
-//		
-//		if (fieldParent5 != null && !"null".equals(fieldParent5) && !fieldParent5.isEmpty()) {
-//			buffer.append(prefix);
-//			prefix = ",";
-//			buffer.append(parentTblName + "." + fieldParent5);
-//		}
-//		
-//		if (fieldParent6 != null && !"null".equals(fieldParent6) && !fieldParent6.isEmpty()) {
-//			buffer.append(prefix);
-//			prefix = ",";
-//			buffer.append(parentTblName + "." + fieldParent6);
-//		}
-//		
-//		if (fieldParent7 != null && !"null".equals(fieldParent7) && !fieldParent7.isEmpty()) {
-//			buffer.append(prefix);
-//			prefix = ",";
-//			buffer.append(parentTblName + "." + fieldParent7);
-//		}
-//		
-//		if (fieldParent8 != null && !"null".equals(fieldParent8) && !fieldParent8.isEmpty()) {
-//			buffer.append(prefix);
-//			prefix = ",";
-//			buffer.append(parentTblName + "." + fieldParent8);
-//		}
-//		
-//		if (fieldParent9 != null && !"null".equals(fieldParent9) && !fieldParent9.isEmpty()) {
-//			buffer.append(prefix);
-//			prefix = ",";
-//			buffer.append(parentTblName + "." + fieldParent9);
-//		}
-//		
-//		if (fieldParent10 != null && !"null".equals(fieldParent10) && !fieldParent10.isEmpty()) {
-//			buffer.append(prefix);
-//			prefix = ",";
-//			buffer.append(parentTblName + "." + fieldParent10);
-//		}
-//		
-//			
-//		buffer.append(" FROM " + parentTblName);
-		
 		
 		//build inner joint
 		String prefix = "";

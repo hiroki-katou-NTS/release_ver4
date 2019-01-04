@@ -13,5 +13,5 @@ public interface DataDeletionCsvRepository {
 	List<TableDeletionDataCsv> getTableDelDataCsvById(String delId);
 	List<String> getColumnName(String nameTable);
 	List<List<String>> getDataForEachCaegory(TableDeletionDataCsv tableDelData, List<EmployeeDeletion> employeeDeletions);
-	int deleteData(TableDeletionDataCsv tableDelData, List<EmployeeDeletion> employeeDeletions);
+	void deleteData(TableDeletionDataCsv tableDelData, List<EmployeeDeletion> employeeDeletions);
 }
