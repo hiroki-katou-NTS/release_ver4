@@ -289,22 +289,53 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 	 * @param rowOffset
 	 * @param headerData
 	 */
-	private void processingPeriod(RangeCustom range, AnnualWorkScheduleData data, int rowOffset, HeaderData headerData){
-		range.cell("period1st", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth1st() != null ? data.getMonth1st().getValue() : BigDecimal.ZERO, data.getMonth2nd() != null ? data.getMonth2nd().getValue() : null) :  
-			this.fromMinutesToHHmm(data.getMonth1st() != null ? data.getMonth1st().getValue() : null, data.getMonth2nd() != null ? data.getMonth2nd().getValue() : null ,data.getMonth3rd() != null ? data.getMonth3rd().getValue() : null));
+	private void processingPeriod(RangeCustom range, AnnualWorkScheduleData data, int rowOffset,
+			HeaderData headerData) {
+		range.cell("period1st", rowOffset, 0)
+				.putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())
+						? this.fromMinutesToHHmm(
+								data.getMonth1st() != null ? data.getMonth1st().getValue() : BigDecimal.ZERO,
+								data.getMonth2nd() != null ? data.getMonth2nd().getValue() : null)
+						: this.fromMinutesToHHmm(data.getMonth1st() != null ? data.getMonth1st().getValue() : null,
+								data.getMonth2nd() != null ? data.getMonth2nd().getValue() : null,
+								data.getMonth3rd() != null ? data.getMonth3rd().getValue() : null));
 		this.setCellStyle(range.cell("period1st", rowOffset, 0), data.getColorPeriodMonth1st());
-		range.cell("period2nd", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth3rd() != null ? data.getMonth3rd().getValue() : null, data.getMonth4th() != null ? data.getMonth4th().getValue() : null) : 
-			this.fromMinutesToHHmm(data.getMonth3rd() != null ? data.getMonth3rd().getValue() : null, data.getMonth4th() != null ? data.getMonth4th().getValue() : null, data.getMonth6th() != null ? data.getMonth6th().getValue() : null));
+		range.cell("period2nd", rowOffset, 0)
+				.putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())
+						? this.fromMinutesToHHmm(data.getMonth3rd() != null ? data.getMonth3rd().getValue() : null,
+								data.getMonth4th() != null ? data.getMonth4th().getValue() : null)
+						: this.fromMinutesToHHmm(data.getMonth4th() != null ? data.getMonth4th().getValue() : null,
+								data.getMonth5th() != null ? data.getMonth5th().getValue() : null,
+								data.getMonth6th() != null ? data.getMonth6th().getValue() : null));
+		
 		this.setCellStyle(range.cell("period2nd", rowOffset, 0), data.getColorPeriodMonth2nd());
-		range.cell("period3rd", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth5th() != null ? data.getMonth5th().getValue() : null, data.getMonth6th() != null ?data.getMonth6th().getValue() : null) : 
-			this.fromMinutesToHHmm(data.getMonth7th() != null ? data.getMonth7th().getValue() : null , data.getMonth8th() != null ? data.getMonth8th().getValue() : null,data.getMonth9th() != null ? data.getMonth9th().getValue() : null));
+		range.cell("period3rd", rowOffset, 0)
+				.putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())
+						? this.fromMinutesToHHmm(data.getMonth5th() != null ? data.getMonth5th().getValue() : null,
+								data.getMonth6th() != null ? data.getMonth6th().getValue() : null)
+						: this.fromMinutesToHHmm(data.getMonth7th() != null ? data.getMonth7th().getValue() : null,
+								data.getMonth8th() != null ? data.getMonth8th().getValue() : null,
+								data.getMonth9th() != null ? data.getMonth9th().getValue() : null));
 		this.setCellStyle(range.cell("period3rd", rowOffset, 0), data.getColorPeriodMonth3rd());
-		range.cell("period4th", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth7th() !=null ?data.getMonth7th().getValue() : null , data.getMonth8th() != null ?data.getMonth8th().getValue() : null) : 
-			this.fromMinutesToHHmm(data.getMonth10th() != null ? data.getMonth10th().getValue() : null , data.getMonth11th() != null ? data.getMonth11th().getValue() : null, data.getMonth12th() !=null ? data.getMonth12th().getValue() : null));
+		range.cell("period4th", rowOffset, 0)
+				.putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())
+						? this.fromMinutesToHHmm(data.getMonth7th() != null ? data.getMonth7th().getValue() : null,
+								data.getMonth8th() != null ? data.getMonth8th().getValue() : null)
+						: this.fromMinutesToHHmm(data.getMonth10th() != null ? data.getMonth10th().getValue() : null,
+								data.getMonth11th() != null ? data.getMonth11th().getValue() : null,
+								data.getMonth12th() != null ? data.getMonth12th().getValue() : null));
 		this.setCellStyle(range.cell("period4th", rowOffset, 0), data.getColorPeriodMonth4th());
-		range.cell("period5th", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth9th() !=null ? data.getMonth9th().getValue() : null, data.getMonth10th() !=null ? data.getMonth10th().getValue() : null) : null);
+		range.cell("period5th", rowOffset, 0)
+				.putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())
+						? this.fromMinutesToHHmm(data.getMonth9th() != null ? data.getMonth9th().getValue() : null,
+								data.getMonth10th() != null ? data.getMonth10th().getValue() : null)
+						: null);
 		this.setCellStyle(range.cell("period5th", rowOffset, 0), data.getColorPeriodMonth5th());
-		range.cell("period6th", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth11th() !=null ? data.getMonth11th().getValue() : null, data.getMonth12th() !=null ? data.getMonth12th().getValue() : null): null);
+		range.cell("period6th", rowOffset, 0)
+				.putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())
+						? this.fromMinutesToHHmm(data.getMonth11th() != null ? data.getMonth11th().getValue() : null,
+								data.getMonth12th() != null ? data.getMonth12th().getValue() : null)
+						: null);
 		this.setCellStyle(range.cell("period6th", rowOffset, 0), data.getColorPeriodMonth6th());
 	}
 
@@ -312,7 +343,7 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 		BigDecimal total = BigDecimal.ZERO;
 		for (BigDecimal d : a) {
 			if (d != null) {
-				total.add(d);
+				total = total.add(d);
 			}
 		}
 
