@@ -233,7 +233,7 @@ module nts.uk.at.view.kwr008.a {
                 self.isEmployeeWorkplaceFollow = ko.observable(true);
                 self.isMutipleCheck = ko.observable(true);
                 self.showDepartment = ko.observable(false); // 部門条件
-                self.isSelectAllEmployee = ko.observable(true); //社員リスト
+                self.isSelectAllEmployee = ko.observable(false); //社員リスト
                 self.baseDate = ko.observable(moment());
                 self.periodStartDate = ko.observable(moment());
                 self.periodEndDate = ko.observable(moment());
