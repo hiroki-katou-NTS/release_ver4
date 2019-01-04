@@ -1,9 +1,14 @@
 package nts.uk.ctx.at.function.infra.generator.annualworkschedule;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
@@ -22,6 +27,7 @@ import com.aspose.cells.WorksheetCollection;
 import nts.arc.layer.infra.file.export.FileGeneratorContext;
 import nts.uk.ctx.at.function.dom.annualworkschedule.enums.OutputAgreementTime;
 import nts.uk.ctx.at.function.dom.annualworkschedule.enums.PageBreakIndicator;
+import nts.uk.ctx.at.function.dom.annualworkschedule.enums.ValueOuputFormat;
 import nts.uk.ctx.at.function.dom.annualworkschedule.export.AnnualWorkScheduleData;
 import nts.uk.ctx.at.function.dom.annualworkschedule.export.AnnualWorkScheduleGenerator;
 import nts.uk.ctx.at.function.dom.annualworkschedule.export.EmployeeData;
@@ -126,7 +132,7 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 				boolean isNewPage = sumRowCount > rowsPerPage
 						|| (nextWorkplace && PageBreakIndicator.WORK_PLACE.equals(dataSource.getPageBreak()));
 				print(wsc, newRange, emp, isNewPage || nextWorkplace, is7Group, itemBooks,
-						dataSource.isOutNumExceedTime36Agr());
+						dataSource.isOutNumExceedTime36Agr(), dataSource.getHeader());
 				if (isNewPage) {
 					pageBreaks.add(newRange.range.getFirstRow());
 					sumRowCount = newRange.range.getRowCount(); // reset sum row
@@ -136,7 +142,7 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 			}
 
 			print(wsc, new RangeCustom(empRange, 0), firstEmp, true, is7Group, itemBooks,
-					dataSource.isOutNumExceedTime36Agr());
+					dataSource.isOutNumExceedTime36Agr(), dataSource.getHeader());
 
 			reportContext.processDesigner();
 			reportContext.saveAsExcel(this.createNewFile(fileContext, this.getReportName(REPORT_FILE_NAME)));
@@ -192,7 +198,7 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 	 * @param isNewPage
 	 */
 	private void print(WorksheetCollection wsc, RangeCustom range, EmployeeData emp, boolean isPrintWorkplace,
-			boolean is7Group, List<ExportItem> itemBooks, boolean isOutNumExceedTime36Agr) {
+			boolean is7Group, List<ExportItem> itemBooks, boolean isOutNumExceedTime36Agr, HeaderData headerData) {
 		if (isPrintWorkplace) {
 			String workplace = emp.getEmployeeInfo().getWorkplaceName();
 			range.cell("workplace").putValue(workplace);
@@ -250,18 +256,8 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 				range.cell("numExceedTime", rowOffset, 0).putValue(data.formatMonthsExceeded());
 				range.cell("numRemainingTime", rowOffset, 0).putValue(data.formatMonthsRemaining());
 			}
-			range.cell("period1st", rowOffset, 0).putValue(data.formatMonthPeriod1st());
-			this.setCellStyle(range.cell("period1st", rowOffset, 0), data.getColorPeriodMonth1st());
-			range.cell("period2nd", rowOffset, 0).putValue(data.formatMonthPeriod2nd());
-			this.setCellStyle(range.cell("period2nd", rowOffset, 0), data.getColorPeriodMonth2nd());
-			range.cell("period3rd", rowOffset, 0).putValue(data.formatMonthPeriod3rd());
-			this.setCellStyle(range.cell("period3rd", rowOffset, 0), data.getColorPeriodMonth3rd());
-			range.cell("period4th", rowOffset, 0).putValue(data.formatMonthPeriod4th());
-			this.setCellStyle(range.cell("period4th", rowOffset, 0), data.getColorPeriodMonth4th());
-			range.cell("period5th", rowOffset, 0).putValue(data.formatMonthPeriod5th());
-			this.setCellStyle(range.cell("period5th", rowOffset, 0), data.getColorPeriodMonth5th());
-			range.cell("period6th", rowOffset, 0).putValue(data.formatMonthPeriod6th());
-			this.setCellStyle(range.cell("period6th", rowOffset, 0), data.getColorPeriodMonth6th());
+		
+			processingPeriod(range, data, rowOffset, headerData);
 			if (is7Group) {
 				range.cell("period7th", rowOffset, 0).putValue(data.formatMonthPeriod7th());
 				this.setCellStyle(range.cell("period7th", rowOffset, 0), data.getColorPeriodMonth7th());
@@ -269,6 +265,7 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 			rowOffset++;
 		}
 	}
+
 
 	private RangeCustom copyRangeDown(Range range, int extra) throws Exception {
 		Range newRange = range.getWorksheet().getCells().createRange(range.getFirstRow() + range.getRowCount() + extra,
@@ -285,6 +282,50 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 		style.setForegroundArgbColor(color);
 		cell.setStyle(style);
 	}
+	/**
+	 * processingPeriod
+	 * @param range
+	 * @param data
+	 * @param rowOffset
+	 * @param headerData
+	 */
+	private void processingPeriod(RangeCustom range, AnnualWorkScheduleData data, int rowOffset, HeaderData headerData){
+		range.cell("period1st", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth1st() != null ? data.getMonth1st().getValue() : BigDecimal.ZERO, data.getMonth2nd() != null ? data.getMonth2nd().getValue() : null) :  
+			this.fromMinutesToHHmm(data.getMonth1st() != null ? data.getMonth1st().getValue() : null, data.getMonth2nd() != null ? data.getMonth2nd().getValue() : null ,data.getMonth3rd() != null ? data.getMonth3rd().getValue() : null));
+		this.setCellStyle(range.cell("period1st", rowOffset, 0), data.getColorPeriodMonth1st());
+		range.cell("period2nd", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth3rd() != null ? data.getMonth3rd().getValue() : null, data.getMonth4th() != null ? data.getMonth4th().getValue() : null) : 
+			this.fromMinutesToHHmm(data.getMonth3rd() != null ? data.getMonth3rd().getValue() : null, data.getMonth4th() != null ? data.getMonth4th().getValue() : null, data.getMonth6th() != null ? data.getMonth6th().getValue() : null));
+		this.setCellStyle(range.cell("period2nd", rowOffset, 0), data.getColorPeriodMonth2nd());
+		range.cell("period3rd", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth5th() != null ? data.getMonth5th().getValue() : null, data.getMonth6th() != null ?data.getMonth6th().getValue() : null) : 
+			this.fromMinutesToHHmm(data.getMonth7th() != null ? data.getMonth7th().getValue() : null , data.getMonth8th() != null ? data.getMonth8th().getValue() : null,data.getMonth9th() != null ? data.getMonth9th().getValue() : null));
+		this.setCellStyle(range.cell("period3rd", rowOffset, 0), data.getColorPeriodMonth3rd());
+		range.cell("period4th", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth7th() !=null ?data.getMonth7th().getValue() : null , data.getMonth8th() != null ?data.getMonth8th().getValue() : null) : 
+			this.fromMinutesToHHmm(data.getMonth10th() != null ? data.getMonth10th().getValue() : null , data.getMonth11th() != null ? data.getMonth11th().getValue() : null, data.getMonth12th() !=null ? data.getMonth12th().getValue() : null));
+		this.setCellStyle(range.cell("period4th", rowOffset, 0), data.getColorPeriodMonth4th());
+		range.cell("period5th", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth9th() !=null ? data.getMonth9th().getValue() : null, data.getMonth10th() !=null ? data.getMonth10th().getValue() : null) : null);
+		this.setCellStyle(range.cell("period5th", rowOffset, 0), data.getColorPeriodMonth5th());
+		range.cell("period6th", rowOffset, 0).putValue(OutputAgreementTime.TWO_MONTH.equals(headerData.getOutputAgreementTime())? this.fromMinutesToHHmm(data.getMonth11th() !=null ? data.getMonth11th().getValue() : null, data.getMonth12th() !=null ? data.getMonth12th().getValue() : null): null);
+		this.setCellStyle(range.cell("period6th", rowOffset, 0), data.getColorPeriodMonth6th());
+	}
+
+	public String fromMinutesToHHmm(BigDecimal... a) {
+		BigDecimal total = BigDecimal.ZERO;
+		for (BigDecimal d : a) {
+			if (d != null) {
+				total.add(d);
+			}
+		}
+
+		if (total.compareTo(BigDecimal.ZERO) > 0) {
+			
+			int hours = (int) TimeUnit.MINUTES.toHours(total.longValue());
+			int remainMinutes = total.intValue() - (int) TimeUnit.HOURS.toMinutes(hours);
+			return String.format("%02d:%02d", hours, remainMinutes);
+
+		}
+		return "";
+	}
+
 }
 
 class RangeCustom {

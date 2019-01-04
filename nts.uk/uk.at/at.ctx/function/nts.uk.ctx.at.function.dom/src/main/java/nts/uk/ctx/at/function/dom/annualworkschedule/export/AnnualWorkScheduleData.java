@@ -171,7 +171,7 @@ public class AnnualWorkScheduleData {
 		return formatBigDecimal(item.getValue());
 	}
 
-	private String formatBigDecimal(BigDecimal value) {
+	public String formatBigDecimal(BigDecimal value) {
 		if (value == null)
 			return "";
 		if (valOutFormat.equals(ValueOuputFormat.TIME)) {
