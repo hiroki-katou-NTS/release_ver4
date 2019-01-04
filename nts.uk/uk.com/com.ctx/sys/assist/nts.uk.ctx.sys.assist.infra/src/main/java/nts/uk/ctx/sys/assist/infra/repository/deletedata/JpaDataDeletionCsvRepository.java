@@ -649,35 +649,64 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 			}
 
 			if (indexs.size() > 0) {
+				indexs.add(99);
 				query.append(" AND ( ");
 				boolean isFirstOrStatement = true;
-				for (Integer index : indexs) {
+				for (int i = 0; i <= indexs.size(); i++) {
 					if (!isFirstOrStatement) {
 						query.append(" OR ");
 					}
 					isFirstOrStatement = false;
-					// Start Date
-					if (columns.contains(fieldKeyQuerys[index])) {
-						query.append(" (t.");
-						query.append(fieldKeyQuerys[index]);
-					} else {
-						query.append(" (p.");
-						query.append(fieldKeyQuerys[index]);
+					if ((i != (indexs.size() - 1)) && (i < indexs.size())) {
+						// Start Date
+						if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
+							query.append(" (t.");
+							query.append(fieldKeyQuerys[indexs.get(i)]);
+						} else {
+							query.append(" (p.");
+							query.append(fieldKeyQuerys[indexs.get(i)]);
+						}
+
+						query.append(" >= ?startDate ");
+						query.append(" AND ");
+
+						// End Date
+						if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
+							query.append(" t.");
+							query.append(fieldKeyQuerys[indexs.get(i)]);
+						} else {
+							query.append(" p.");
+							query.append(fieldKeyQuerys[indexs.get(i)]);
+						}
+
+						query.append(" <= ?endDate) ");
+					} else if (i == (indexs.size() - 1)) {
+						// fix bug #103051
+						// Start Date
+						if (columns.contains(fieldKeyQuerys[indexs.get(i - 2)])) {
+							query.append(" (t.");
+							query.append(fieldKeyQuerys[indexs.get(i - 2)]);
+						} else {
+							query.append(" (p.");
+							query.append(fieldKeyQuerys[indexs.get(i - 2)]);
+						}
+
+						query.append(" <= ?startDate ");
+						query.append(" AND ");
+
+						// End Date
+						if (columns.contains(fieldKeyQuerys[indexs.get(i - 1)])) {
+							query.append(" t.");
+							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
+						} else {
+							query.append(" p.");
+							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
+						}
+
+						isFirstOrStatement = true;
+
+						query.append(" >= ?endDate) ");
 					}
-
-					query.append(" >= ?startDate ");
-					query.append(" AND ");
-
-					// End Date
-					if (columns.contains(fieldKeyQuerys[index])) {
-						query.append(" t.");
-						query.append(fieldKeyQuerys[index]);
-					} else {
-						query.append(" p.");
-						query.append(fieldKeyQuerys[index]);
-					}
-
-					query.append(" <= ?endDate) ");
 
 					switch (tableList.getTimeStore()) {
 					case 1 : //DAILY
