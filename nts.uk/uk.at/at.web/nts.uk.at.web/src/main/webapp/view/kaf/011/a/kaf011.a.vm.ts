@@ -70,24 +70,9 @@ module nts.uk.at.view.kaf011.a.screenModel {
             let self = this;
 
             self.appComSelectedCode.subscribe((newCode) => {
-                if (newCode == 0) {
-                    $("#absDatePicker").ntsError("clear");
-                    $("#recDatePicker").ntsError("clear");
-                    $("#recTime1Start ,#recTime1End").ntsError("clear"); 
-                    return; 
-                };
-                if (newCode == 1) {
-                    $("#absDatePicker").ntsError("clear");
-                    $("#recDatePicker").ntsError("clear");
-                    $("#recTime1Start ,#recTime1End").ntsError("clear");
-                    return;
-                }
-                if (newCode == 2) {
-                    $("#absDatePicker").ntsError("clear");
-                    $("#recDatePicker").ntsError("clear");
-                    $("#recTime1Start ,#recTime1End").ntsError("clear");
-                }
-
+                
+                setTimeout(()=>self.clearTextboxError(newCode), 100);
+                
             });
             self.appReasons.subscribe((appReasons) => {
                 if (appReasons) {
@@ -126,6 +111,26 @@ module nts.uk.at.view.kaf011.a.screenModel {
                 }
 
             });
+        }
+        
+        clearTextboxError(newCode) {
+            if (newCode == 0) {
+                $("#absDatePicker").ntsError("clear");
+                $("#recDatePicker").ntsError("clear");
+                $("#recTime1Start ,#recTime1End").ntsError("clear");
+                return;
+            };
+            if (newCode == 1) {
+                $("#absDatePicker").ntsError("clear");
+                $("#recDatePicker").ntsError("clear");
+                $("#recTime1Start ,#recTime1End").ntsError("clear");
+                return;
+            }
+            if (newCode == 2) {
+                $("#absDatePicker").ntsError("clear");
+                $("#recDatePicker").ntsError("clear");
+                $("#recTime1Start ,#recTime1End").ntsError("clear");
+            }
         }
         enablePrepost() {
             let self = this;
