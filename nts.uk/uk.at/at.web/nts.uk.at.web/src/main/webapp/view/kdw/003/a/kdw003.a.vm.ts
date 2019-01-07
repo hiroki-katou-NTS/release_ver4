@@ -808,7 +808,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         processFlex(data, showListError): JQueryPromise<any> {
             let dfd = $.Deferred(),
                 self = this;
-            if (self.displayFormat() === 0) {
+            if (self.displayFormat() === 0 && !_.isEmpty(self.selectedEmployee())) {
                 self.loadRemainNumberTable();
             }
             let monthResult = data.monthResult;
@@ -1919,8 +1919,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 if (lst != undefined) {
                     lstEmployee.push(lst);
                     dfd.resolve(lstEmployee);
-                }
-                else if (self.selectedEmployee() != undefined && self.selectedEmployee() != null && self.selectedEmployee() != "") {
+                }else if (!_.isEmpty(self.selectedEmployee())) {
                     //let dfd2 = $.Deferred();
                     service.searchEmployee(self.selectedEmployee()).done(data => {
                         let emp = {
@@ -1938,6 +1937,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         //  dfd2.resolve();
                     });
                     // dfd2.promise();
+                }else{
+                    self.lstEmployee(lstEmployee);
+                    dfd.resolve(lstEmployee);
                 }
             } else {
                 lstEmployee = self.lstEmployee();
