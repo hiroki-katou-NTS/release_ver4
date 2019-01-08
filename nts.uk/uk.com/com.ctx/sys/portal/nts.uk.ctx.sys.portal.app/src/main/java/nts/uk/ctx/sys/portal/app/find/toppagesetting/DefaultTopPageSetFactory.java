@@ -171,6 +171,10 @@ public class DefaultTopPageSetFactory implements TopPageSetFactory {
 			if(layoutMypage.isNotActiveMyPage()==true && layoutTopPage!=null){
 					check = true;
 			}
+			if(layoutMypage.getLayoutID() == null){//Khong hien thi myPage
+				checkMyPage = false;
+				check = true;
+			}
 			return new LayoutAllDto(layoutMypage, layoutTopPage, check, checkMyPage, checkTopPage);
 		}
 		// topPageJob: setting
@@ -198,6 +202,10 @@ public class DefaultTopPageSetFactory implements TopPageSetFactory {
 				if(layoutMypage.isNotActiveMyPage()==true && layoutTopPage!=null){
 					check = true;
 				}
+				if(layoutMypage.getLayoutID() == null){//Khong hien thi myPage
+					checkMyPage = false;
+					check = true;
+				}
 				return new LayoutAllDto(layoutMypage, layoutTopPage, check, true, checkTopPage);
 			}
 		}
@@ -214,6 +222,10 @@ public class DefaultTopPageSetFactory implements TopPageSetFactory {
 			}
 			// use my page
 			LayoutForMyPageDto layoutMypage = findLayoutMyPage();
+			if(layoutMypage.getLayoutID() == null){//Khong hien thi myPage
+				checkMyPage = false;
+				check = true;
+			}
 			return new LayoutAllDto(layoutMypage, layoutTopPage, check, checkMyPage, checkTopPage);
 		}
 		//// display top page job title set (職位別トップページ設定)-A
@@ -232,6 +244,10 @@ public class DefaultTopPageSetFactory implements TopPageSetFactory {
 		}
 		LayoutForMyPageDto layoutMypage = findLayoutMyPage();
 		if(layoutMypage.isNotActiveMyPage()==true && layoutTopPage!=null){
+			check = true;
+		}
+		if(layoutMypage.getLayoutID() == null){//Khong hien thi myPage
+			checkMyPage = false;
 			check = true;
 		}
 		return new LayoutAllDto(layoutMypage, layoutTopPage, check, checkMyPage, checkTopPage);
@@ -274,6 +290,10 @@ public class DefaultTopPageSetFactory implements TopPageSetFactory {
 				if(layoutMypage.isNotActiveMyPage()==true && layoutToppage!=null){
 					check = true;
 				}
+				if(layoutMypage.getLayoutID() == null){//Khong hien thi myPage
+					checkMyPage = false;
+					check = true;
+				}
 				return new LayoutAllDto(layoutMypage, layoutToppage, check, checkMyPage, checkTopPage);
 			}
 		}
@@ -284,6 +304,10 @@ public class DefaultTopPageSetFactory implements TopPageSetFactory {
 			return new LayoutAllDto(null, null, check, checkMyPage, checkTopPage);
 		}
 		LayoutForMyPageDto layoutMypage = findLayoutMyPage();
+		if(layoutMypage.getLayoutID() == null){//Khong hien thi myPage
+			checkMyPage = false;
+			check = true;
+		}
 		return new LayoutAllDto(layoutMypage, null, check, checkMyPage, checkTopPage);
 	}
 
@@ -338,6 +362,12 @@ public class DefaultTopPageSetFactory implements TopPageSetFactory {
 	public LayoutForMyPageDto findLayoutMyPage() {
 		// employeeId
 		String employeeId = AppContexts.user().employeeId();
+		//hoatt 2019.01.07
+		//EA修正履歴 No.3053
+		if(employeeId == null){//ログインユーザコンテキストの社員IDをチェックする
+			//ログインユーザコンテキスト．社員IDがNullの場合
+			return new LayoutForMyPageDto(null, null, PGType.MYPAGE.value, false, null, null);
+		}
 		Optional<MyPage> mPage = mypage.getMyPage(employeeId);
 		if (!mPage.isPresent()) {// register my page
 			MyPage mypageNew = MyPage.createNew(employeeId);
