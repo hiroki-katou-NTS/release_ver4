@@ -159,7 +159,7 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 	@Override
 	public boolean checkReflectRecordStartEndTime(String workTypeCode, Integer frameNo,
 			boolean isAttendence, String employeeId, GeneralDate baseDate) {
-		Optional<TimeLeavingOfDailyPerformance> optTimeLeaving = timeLeavingOfDailyRepos.findByKey(employeeId, baseDate);
+		/*Optional<TimeLeavingOfDailyPerformance> optTimeLeaving = timeLeavingOfDailyRepos.findByKey(employeeId, baseDate);
 		//出勤時刻を取得する
 		//打刻元情報を取得する		
 		if(!optTimeLeaving.isPresent()) {
@@ -207,7 +207,8 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 				|| actualStamp.getStampSourceInfo() == StampSourceInfo.STAMP_AUTO_SET_PERSONAL_INFO) {
 			return true;
 		}
-		return false;
+		return false;*/
+		return true;
 	}
 
 }
