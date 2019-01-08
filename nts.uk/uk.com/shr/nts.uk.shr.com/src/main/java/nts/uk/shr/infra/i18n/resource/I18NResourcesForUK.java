@@ -34,6 +34,8 @@ public class I18NResourcesForUK implements I18NResources, I18NResourceCustomizer
 
 	private I18NResourcesCustomized customizedResources = new I18NResourcesCustomized();
 	
+	private GeneralDateTime SERVER_START_TIME = null;
+	
 	private I18NResourceContentProcessor contentProcessor = new I18NResourceContentProcessor(
 			id -> this.localize(id).orElse(id));
 	
@@ -49,7 +51,7 @@ public class I18NResourcesForUK implements I18NResources, I18NResourceCustomizer
 					this.customizedResources.put(
 							languageId, this.resourcesRepository.loadResourcesEachCompanies(languageId));
 				});
-		
+		this.SERVER_START_TIME = GeneralDateTime.now();
 		log.info("[INIT END] nts.uk.shr.infra.i18n.resource.I18NResourcesForUK");
 	}
 
@@ -94,9 +96,17 @@ public class I18NResourcesForUK implements I18NResources, I18NResourceCustomizer
 	public String getVersionOfCurrentCompany() {
 		
 		val context = CompanyAndLanguage.createAsLogin();
-		return this.resourcesRepository.getLastUpdatedDateTime(context.companyId, context.languageId)
-				.map(d -> d.toString("yyyyMMdd_hhmmss"))
-				.orElse("0");
+		GeneralDateTime lastUpdated = this.resourcesRepository.getLastUpdatedDateTime(context.companyId, context.languageId).orElse(null);
+		
+		if (lastUpdated == null || lastUpdated.before(SERVER_START_TIME)) {
+			lastUpdated = SERVER_START_TIME;
+		} 
+		
+		if(lastUpdated == null){
+			return "0";
+		}
+		
+		return lastUpdated.toString("yyyyMMdd_hhmmss");
 	}
 	
 	public Map<String, String> loadForUserByClassId(String classId) {
