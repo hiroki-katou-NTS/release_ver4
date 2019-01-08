@@ -47,7 +47,7 @@ public class SrcdtLogBasicInfo extends UkJpaEntity {
 	public String userName;
 
 	@Column(name = "SID")
-	@Basic(optional = false)
+	@Basic(optional = true)
 	public String employeeId;
 
 	@Column(name = "IP_ADDRESS")
