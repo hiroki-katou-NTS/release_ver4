@@ -71,7 +71,7 @@ module nts.uk.at.view.kaf011.a.screenModel {
 
             self.appComSelectedCode.subscribe((newCode) => {
                 
-                setTimeout(()=>self.clearTextboxError(newCode), 100);
+                setTimeout(()=>self.clearTextboxError(), 100);
                 
             });
             self.appReasons.subscribe((appReasons) => {
@@ -113,24 +113,9 @@ module nts.uk.at.view.kaf011.a.screenModel {
             });
         }
         
-        clearTextboxError(newCode) {
-            if (newCode == 0) {
-                $("#absDatePicker").ntsError("clear");
-                $("#recDatePicker").ntsError("clear");
-                $("#recTime1Start ,#recTime1End").ntsError("clear");
-                return;
-            };
-            if (newCode == 1) {
-                $("#absDatePicker").ntsError("clear");
-                $("#recDatePicker").ntsError("clear");
-                $("#recTime1Start ,#recTime1End").ntsError("clear");
-                return;
-            }
-            if (newCode == 2) {
-                $("#absDatePicker").ntsError("clear");
-                $("#recDatePicker").ntsError("clear");
-                $("#recTime1Start ,#recTime1End").ntsError("clear");
-            }
+        clearTextboxError() {
+            nts.uk.ui.errors.clearAll();
+            return;
         }
         enablePrepost() {
             let self = this;
