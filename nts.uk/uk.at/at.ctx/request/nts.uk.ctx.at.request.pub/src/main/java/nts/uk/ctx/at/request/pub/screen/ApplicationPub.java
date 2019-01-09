@@ -24,4 +24,14 @@ public interface ApplicationPub {
 	 * @return
 	 */
 	public ApplicationDeadlineExport getApplicationDeadline(String companyID, Integer closureID);
+	
+	/**
+	 * 社員、期間に一致する申請をグループ化して取得する
+	 * RequestList #542
+	 * @param employeeID
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	public List<AppGroupExport> getApplicationGroupBySID(List<String> employeeID, GeneralDate startDate, GeneralDate endDate);
 }

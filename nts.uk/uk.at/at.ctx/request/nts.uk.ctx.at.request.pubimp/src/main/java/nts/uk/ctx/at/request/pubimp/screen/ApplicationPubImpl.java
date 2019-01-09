@@ -22,9 +22,13 @@ import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsence;
 import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsenceRepository;
 import nts.uk.ctx.at.request.dom.application.common.adapter.closure.PresentClosingPeriodImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.closure.RqClosureAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.shift.businesscalendar.daycalendar.ObtainDeadlineDateAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.WkpHistImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.WorkplaceAdapter;
+import nts.uk.ctx.at.request.dom.application.workchange.AppWorkChange;
+import nts.uk.ctx.at.request.dom.application.workchange.IAppWorkChangeRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSetRepository;
 import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispNameRepository;
@@ -32,9 +36,12 @@ import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispNameReposito
 import nts.uk.ctx.at.request.dom.setting.request.application.ApplicationDeadline;
 import nts.uk.ctx.at.request.dom.setting.request.application.ApplicationDeadlineRepository;
 import nts.uk.ctx.at.request.dom.setting.request.application.DeadlineCriteria;
+import nts.uk.ctx.at.request.pub.screen.AppGroupExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationDeadlineExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationPub;
+import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
+import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.shr.com.context.AppContexts;
 @Stateless
 public class ApplicationPubImpl implements ApplicationPub {
@@ -56,36 +63,127 @@ public class ApplicationPubImpl implements ApplicationPub {
 	private AppAbsenceRepository appAbsenceRepository;
 	@Inject
 	private HdAppSetRepository hdAppSetRepository;
+	@Inject
+	private IAppWorkChangeRepository appWorkChangeRepository;
+	@Inject
+	private ScBasicScheduleAdapter scBasicScheduleAdapter;
+	@Inject
+	private BasicScheduleService basicScheduleService;
 	
 	@Override
 	public List<ApplicationExport> getApplicationBySID(List<String> employeeID, GeneralDate startDate,
 			GeneralDate endDate) {
+		String companyID = AppContexts.user().companyId();
 		List<ApplicationExport> applicationExports = new ArrayList<>();
 		List<Application_New> application = this.applicationRepository_New.getApplicationBySIDs(employeeID, startDate, endDate);
 		if(CollectionUtil.isEmpty(application)){
 			return applicationExports;
 		}
-		List<Application_New> applicationExcessHoliday = application.stream().filter(x -> x.getAppType().value != ApplicationType.ABSENCE_APPLICATION.value).collect(Collectors.toList());
+		List<Application_New> applicationExcessHoliday = application.stream()
+				.filter(x -> x.getAppType().value != ApplicationType.ABSENCE_APPLICATION.value &&
+							x.getAppType().value != ApplicationType.WORK_CHANGE_APPLICATION.value)
+				.collect(Collectors.toList());
 		for(Application_New app : applicationExcessHoliday){
-			ApplicationExport applicationExport = new ApplicationExport();
-			applicationExport.setAppDate(app.getAppDate());
-			applicationExport.setAppType(app.getAppType().value);
-			applicationExport.setEmployeeID(app.getEmployeeID());
-			applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
-			applicationExport.setAppTypeName(appDispNameRepository.getDisplay(app.getAppType().value).isPresent() ? appDispNameRepository.getDisplay(app.getAppType().value).get().getDispName().toString() : "" );
-			applicationExports.add(applicationExport);
+			if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
+				ApplicationExport applicationExport = new ApplicationExport();
+				applicationExport.setAppDate(app.getAppDate());
+				applicationExport.setAppType(app.getAppType().value);
+				applicationExport.setEmployeeID(app.getEmployeeID());
+				applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+				applicationExport.setAppTypeName(appDispNameRepository.getDisplay(app.getAppType().value).isPresent() ? appDispNameRepository.getDisplay(app.getAppType().value).get().getDispName().toString() : "" );
+				applicationExports.add(applicationExport);
+			} else {
+				for(GeneralDate loopDate = app.getStartDate().get(); loopDate.beforeOrEquals(app.getEndDate().get()); loopDate = loopDate.addDays(1)){
+					ApplicationExport applicationExport = new ApplicationExport();
+					applicationExport.setAppDate(loopDate);
+					applicationExport.setAppType(app.getAppType().value);
+					applicationExport.setEmployeeID(app.getEmployeeID());
+					applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+					applicationExport.setAppTypeName(appDispNameRepository.getDisplay(app.getAppType().value).isPresent() ? appDispNameRepository.getDisplay(app.getAppType().value).get().getDispName().toString() : "" );
+					applicationExports.add(applicationExport);
+				}
+			}
 		}
 		List<Application_New> applicationHoliday = application.stream().filter(x -> x.getAppType().value == ApplicationType.ABSENCE_APPLICATION.value).collect(Collectors.toList());
+		
 		for(Application_New app : applicationHoliday){
-			Optional<AppAbsence> optAppAbsence = appAbsenceRepository.getAbsenceById(app.getCompanyID(), app.getAppID());
-			ApplicationExport applicationExport = new ApplicationExport();
-			applicationExport.setAppDate(app.getAppDate());
-			applicationExport.setAppType(app.getAppType().value);
-			applicationExport.setEmployeeID(app.getEmployeeID());
-			applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
-			applicationExport.setAppTypeName(this.getAppAbsenceName(optAppAbsence.get().getHolidayAppType().value));
-			applicationExports.add(applicationExport);
+			if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
+				Optional<AppAbsence> optAppAbsence = appAbsenceRepository.getAbsenceById(app.getCompanyID(), app.getAppID());
+				ApplicationExport applicationExport = new ApplicationExport();
+				applicationExport.setAppDate(app.getAppDate());
+				applicationExport.setAppType(app.getAppType().value);
+				applicationExport.setEmployeeID(app.getEmployeeID());
+				applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+				// ドメインモデル「休暇申請種類表示名」を取得する
+				applicationExport.setAppTypeName(this.getAppAbsenceName(optAppAbsence.get().getHolidayAppType().value));
+				applicationExports.add(applicationExport);
+			} else {
+				for(GeneralDate loopDate = app.getStartDate().get(); loopDate.beforeOrEquals(app.getEndDate().get()); loopDate = loopDate.addDays(1)){
+					Optional<AppAbsence> optAppAbsence = appAbsenceRepository.getAbsenceById(app.getCompanyID(), app.getAppID());
+					ApplicationExport applicationExport = new ApplicationExport();
+					applicationExport.setAppDate(loopDate);
+					applicationExport.setAppType(app.getAppType().value);
+					applicationExport.setEmployeeID(app.getEmployeeID());
+					applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+					// ドメインモデル「休暇申請種類表示名」を取得する
+					applicationExport.setAppTypeName(this.getAppAbsenceName(optAppAbsence.get().getHolidayAppType().value));
+					applicationExports.add(applicationExport);
+				}
+			}
 		}
+		List<Application_New> appWorkChangeLst = application.stream()
+				.filter(x -> x.getAppType().value == ApplicationType.WORK_CHANGE_APPLICATION.value)
+				.collect(Collectors.toList());
+		for(Application_New app : appWorkChangeLst){
+			if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
+				ApplicationExport applicationExport = new ApplicationExport();
+				applicationExport.setAppDate(app.getAppDate());
+				applicationExport.setAppType(app.getAppType().value);
+				applicationExport.setEmployeeID(app.getEmployeeID());
+				applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+				applicationExport.setAppTypeName(appDispNameRepository.getDisplay(app.getAppType().value).isPresent() ? appDispNameRepository.getDisplay(app.getAppType().value).get().getDispName().toString() : "" );
+				applicationExports.add(applicationExport);
+			} else {
+				// 申請種類＝勤務変更申請　＆　休日を除外するの場合
+				AppWorkChange appWorkChange = appWorkChangeRepository.getAppworkChangeById(companyID, app.getAppID()).get();
+				for(GeneralDate loopDate = app.getStartDate().get(); loopDate.beforeOrEquals(app.getEndDate().get()); loopDate = loopDate.addDays(1)){
+					if(appWorkChange.getExcludeHolidayAtr()==0){
+						ApplicationExport applicationExport = new ApplicationExport();
+						applicationExport.setAppDate(loopDate);
+						applicationExport.setAppType(app.getAppType().value);
+						applicationExport.setEmployeeID(app.getEmployeeID());
+						applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+						applicationExport.setAppTypeName(appDispNameRepository.getDisplay(app.getAppType().value).isPresent() ? appDispNameRepository.getDisplay(app.getAppType().value).get().getDispName().toString() : "" );
+						applicationExports.add(applicationExport);
+					} else {
+						// Imported「勤務予定基本情報」を取得する
+						Optional<ScBasicScheduleImport> opScBasicScheduleImport = scBasicScheduleAdapter.findByID(app.getEmployeeID(), loopDate);
+						if(!opScBasicScheduleImport.isPresent()){
+							ApplicationExport applicationExport = new ApplicationExport();
+							applicationExport.setAppDate(loopDate);
+							applicationExport.setAppType(app.getAppType().value);
+							applicationExport.setEmployeeID(app.getEmployeeID());
+							applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+							applicationExport.setAppTypeName(appDispNameRepository.getDisplay(app.getAppType().value).isPresent() ? appDispNameRepository.getDisplay(app.getAppType().value).get().getDispName().toString() : "" );
+							applicationExports.add(applicationExport);
+							continue;
+						}
+						// 1日半日出勤・1日休日系の判定
+						WorkStyle workStyle = basicScheduleService.checkWorkDay(opScBasicScheduleImport.get().getWorkTypeCode());
+						if(workStyle.value!=0){
+							ApplicationExport applicationExport = new ApplicationExport();
+							applicationExport.setAppDate(loopDate);
+							applicationExport.setAppType(app.getAppType().value);
+							applicationExport.setEmployeeID(app.getEmployeeID());
+							applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+							applicationExport.setAppTypeName(appDispNameRepository.getDisplay(app.getAppType().value).isPresent() ? appDispNameRepository.getDisplay(app.getAppType().value).get().getDispName().toString() : "" );
+							applicationExports.add(applicationExport);
+						}
+					}
+				}
+			}
+		}
+		
 		return applicationExports;
 	}
 	@Override
@@ -168,6 +266,16 @@ public class ApplicationPubImpl implements ApplicationPub {
 			break;
 		}
 		return holidayAppTypeName;
+	}
+	@Override
+	public List<AppGroupExport> getApplicationGroupBySID(List<String> employeeID, GeneralDate startDate,
+			GeneralDate endDate) {
+		List<ApplicationExport> appExportLst = this.getApplicationBySID(employeeID, startDate, endDate);
+		return appExportLst.stream().map(x -> new AppGroupExport(x.getAppDate(),x.getAppType(),x.getEmployeeID(),x.getAppTypeName()))
+				.collect(Collectors.groupingBy(x -> x.getAppDate())).entrySet().stream().map(x -> {
+					return x.getValue().stream().collect(Collectors.groupingBy(y -> y.getAppType())).entrySet()
+							.stream().map(y -> y.getValue().get(0)).collect(Collectors.toList()).get(0);
+				}).collect(Collectors.toList());
 	}
 
 	@Override
