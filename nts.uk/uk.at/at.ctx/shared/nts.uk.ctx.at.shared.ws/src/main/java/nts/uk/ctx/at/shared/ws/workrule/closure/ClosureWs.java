@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.ws.workrule.closure;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -37,6 +38,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.DayMonthChange;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.shr.com.context.AppContexts;
+import nts.uk.shr.com.context.LoginUserContext;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -325,6 +327,25 @@ public class ClosureWs {
 		DatePeriod period = this.closureService.getClosurePeriod(closureId, YearMonth.of(yearMonth));
 		return DatePeriodDto.builder()
 				.endDate(period.end().toString("yyyy-MM-dd"))
+				.startDate(period.start().toString("yyyy-MM-dd")).build();
+	}
+	
+	/**
+	 * Calculate period.
+	 *
+	 * @param closureId the closure id
+	 * @param yearMonth the year month
+	 * @return the date period dto
+	 */
+	@POST
+	@Path("calculateperiod/{closureid}")
+	public DatePeriodDto calculatePeriod(@PathParam("closureid") int closureId) {
+		LoginUserContext loginUserContext = AppContexts.user();
+		String companyId = loginUserContext.companyId();
+		Optional<Closure> closure = this.closureRepository.findById(companyId, closureId);
+		DatePeriod period = this.closureService.getClosurePeriod(closureId,
+				closure.get().getClosureMonth().getProcessingYm());
+		return DatePeriodDto.builder().endDate(period.end().toString("yyyy-MM-dd"))
 				.startDate(period.start().toString("yyyy-MM-dd")).build();
 	}
 

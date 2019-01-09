@@ -763,7 +763,8 @@ module nts.uk.com.view.ccg.share.ccg {
                             // initialize selected cosure subscriber
                             self.selectedClosure.subscribe(vl => {
                                 // calculate period by current month
-                                self.calculatePeriod(parseInt(moment().format(CcgDateFormat.YEAR_MONTH))).done(period => {
+                                // self.calculatePeriod(parseInt(moment().format(CcgDateFormat.YEAR_MONTH))).done(period => {
+                                self.calculatePeriod105458().done(period => {
                                     self.isApplySearchDone = false;
                                     self.inputPeriod(new DateRangePickerModel(period.startDate, period.endDate));
                                     self.isApplySearchDone = true;
@@ -1498,7 +1499,8 @@ module nts.uk.com.view.ccg.share.ccg {
 
                 // Period accuracy is YM 
                 if (self.showPeriodYM) {
-                    self.calculatePeriod(parseInt(self.periodEnd().format(CcgDateFormat.YEAR_MONTH))).done(period => {
+                    // self.calculatePeriod(parseInt(self.periodEnd().format(CcgDateFormat.YEAR_MONTH))).done(period => {
+                    self.calculatePeriod105458().done(period => {
                         if (!self.showBaseDate) {
                             // set base date = period end
                             self.acquiredBaseDate(period.endDate);
@@ -1551,6 +1553,19 @@ module nts.uk.com.view.ccg.share.ccg {
                 const closureId = self.selectedClosure() == ConfigEnumClosure.CLOSURE_ALL ? 1 : self.selectedClosure();
                 // アルゴリズム「当月の期間を算出する」を実行する
                 service.calculatePeriod(closureId, yearMonth)
+                    .done(period => dfd.resolve(period));
+                return dfd.promise();
+            }
+            
+            /**
+             * Calculate date period from selected closure id and yearMonth
+             */
+            public calculatePeriod105458(): JQueryPromise<DatePeriodDto> {
+                let self = this;
+                let dfd = $.Deferred<DatePeriodDto>();
+                const closureId = self.selectedClosure() == ConfigEnumClosure.CLOSURE_ALL ? 1 : self.selectedClosure();
+                // アルゴリズム「当月の期間を算出する」を実行する
+                service.calculatePeriod105458(closureId)
                     .done(period => dfd.resolve(period));
                 return dfd.promise();
             }
