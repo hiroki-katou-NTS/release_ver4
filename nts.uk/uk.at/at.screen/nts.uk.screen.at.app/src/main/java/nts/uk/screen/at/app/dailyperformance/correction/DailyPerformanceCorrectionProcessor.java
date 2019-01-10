@@ -55,6 +55,7 @@ import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
 import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
+import nts.uk.ctx.at.request.app.find.application.applicationlist.AppGroupExportDto;
 import nts.uk.ctx.at.request.app.find.application.applicationlist.ApplicationExportDto;
 import nts.uk.ctx.at.request.app.find.application.applicationlist.ApplicationListForScreen;
 import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
@@ -956,17 +957,25 @@ public class DailyPerformanceCorrectionProcessor {
     public Map<String,  String> getApplication(List<String> listEmployeeId, DateRange dateRange, Map<String, Boolean> disableSignMap){
 		// No 20 get submitted application
 		Map<String, String> appMapDateSid = new HashMap<>();
-		List<ApplicationExportDto> appplication = listEmployeeId.isEmpty() ? Collections.emptyList()
+		//requestlist26
+		List<ApplicationExportDto> appplicationDisable = listEmployeeId.isEmpty() ? Collections.emptyList()
 				: applicationListFinder.getApplicationBySID(listEmployeeId, dateRange.getStartDate(),
 						dateRange.getEndDate());
-		appplication.forEach(x -> {
+		//requestlist542
+		List<AppGroupExportDto> appplicationName = listEmployeeId.isEmpty() ? Collections.emptyList()
+				: applicationListFinder.getApplicationGroupBySID(listEmployeeId, dateRange.getStartDate(),
+						dateRange.getEndDate());
+		appplicationName.forEach(x -> {
 			String key = x.getEmployeeID() + "|" + x.getAppDate();
 			if (appMapDateSid.containsKey(key)) {
 				appMapDateSid.put(key, appMapDateSid.get(key) + "  " + x.getAppTypeName());
 			} else {
 				appMapDateSid.put(key, x.getAppTypeName());
 			}
-			
+		});
+		
+		appplicationDisable.forEach(x -> {
+			String key = x.getEmployeeID() + "|" + x.getAppDate();
 			if (disableSignMap != null) {
 				boolean disable = (x.getReflectState() == ReflectedState_New.NOTREFLECTED.value
 						|| x.getReflectState() == ReflectedState_New.REMAND.value)
