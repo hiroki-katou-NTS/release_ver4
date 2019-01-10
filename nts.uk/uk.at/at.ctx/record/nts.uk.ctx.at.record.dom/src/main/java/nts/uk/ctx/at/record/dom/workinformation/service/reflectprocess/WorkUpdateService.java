@@ -88,8 +88,10 @@ public interface WorkUpdateService {
 	 * @param dateData
 	 * @param worktimeFrame
 	 * @param isPre
+	 * @param isRec: True: 振出申請、False：　休日出勤申請 fix bug 103077
 	 */
-	public IntegrationOfDaily updateWorkTimeFrame(String employeeId, GeneralDate dateData, Map<Integer, Integer> worktimeFrame, boolean isPre, IntegrationOfDaily dailyData);
+	public IntegrationOfDaily updateWorkTimeFrame(String employeeId, GeneralDate dateData, Map<Integer, Integer> worktimeFrame, 
+			boolean isPre, IntegrationOfDaily dailyData, boolean isRec);
 	/**
 	 * 就時の反映
 	 * @param employeeId
