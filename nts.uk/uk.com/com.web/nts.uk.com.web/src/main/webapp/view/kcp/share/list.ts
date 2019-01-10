@@ -411,7 +411,7 @@ module kcp.share.list {
                         
                         /*setTimeout(function() {
                             let chk = gridList.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                            if (chk[0].getAttribute("data-chk") == "off") {
+                            if (chk[0].getAttribute("data-chk") == "off") { 
                                 chk.click();
                             }
                         }, 1);*/
