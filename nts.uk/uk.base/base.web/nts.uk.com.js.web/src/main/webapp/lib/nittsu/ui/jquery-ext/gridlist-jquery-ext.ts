@@ -162,7 +162,10 @@ module nts.uk.ui.jqueryExtentions {
                 // for performance when select all
                 let baseID = _.map($grid.igGrid("option").dataSource, $grid.igGrid("option", "primaryKey"));
                 if (_.isEqual(selectedId, baseID)) {
-                    $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']").click();
+                    let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                    if (chk[0].getAttribute("data-chk") == "off") {
+                        chk.click();
+                    }
                 } else {
                     (<Array<string>>selectedId).forEach(id => $grid.igGridSelection('selectRowById', id));
                 }
