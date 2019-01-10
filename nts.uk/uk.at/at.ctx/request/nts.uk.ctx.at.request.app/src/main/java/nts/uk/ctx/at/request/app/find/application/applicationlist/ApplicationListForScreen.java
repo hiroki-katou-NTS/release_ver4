@@ -63,7 +63,7 @@ public class ApplicationListForScreen {
 			return applicationExports;
 		}
 		List<Application_New> applicationExcessHoliday = application.stream()
-				.filter(x -> x.getAppType().value != ApplicationType.ABSENCE_APPLICATION.value || 
+				.filter(x -> x.getAppType().value != ApplicationType.ABSENCE_APPLICATION.value && 
 							x.getAppType().value != ApplicationType.WORK_CHANGE_APPLICATION.value)
 				.collect(Collectors.toList());
 		for(Application_New app : applicationExcessHoliday){

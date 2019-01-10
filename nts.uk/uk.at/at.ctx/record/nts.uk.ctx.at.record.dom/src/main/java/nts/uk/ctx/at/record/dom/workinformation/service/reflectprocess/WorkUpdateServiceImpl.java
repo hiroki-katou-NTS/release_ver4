@@ -417,7 +417,7 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 	}
 	@Override
 	public IntegrationOfDaily updateWorkTimeFrame(String employeeId, GeneralDate dateData, Map<Integer, Integer> worktimeFrame,
-			boolean isPre, IntegrationOfDaily dailyData) {
+			boolean isPre, IntegrationOfDaily dailyData, boolean isRec) {
 		if(dailyData == null || !dailyData.getAttendanceTimeOfDailyPerformance().isPresent()) {
 			return dailyData;
 		}
@@ -494,8 +494,11 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 			
 		}
 		dailyData.setAttendanceTimeOfDailyPerformance(Optional.of(attendanceTimeData));
-		//attendanceTime.updateFlush(attendanceTimeData);		
-		this.updateEditStateOfDailyPerformance(employeeId, dateData, lstWorktimeFrameTemp);
+		//↓ fix bug 103077
+		if(!isRec) {
+			this.updateEditStateOfDailyPerformance(employeeId, dateData, lstWorktimeFrameTemp);	
+		}
+		//↑ fix bug 103077
 		return dailyData;
 	}
 	

@@ -17,6 +17,10 @@ import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepo
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
 import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
+import nts.uk.ctx.at.record.dom.monthly.flex.CalcFlexChangeDto;
+import nts.uk.ctx.at.record.dom.monthly.flex.CheckBeforeCalcFlexChangeService;
+import nts.uk.ctx.at.record.dom.monthly.flex.ConditionCalcResult;
+import nts.uk.ctx.at.record.dom.monthly.flex.MessageFlex;
 import nts.uk.ctx.at.record.dom.statutoryworkinghours.monthly.MonthlyFlexStatutoryLaborTime;
 import nts.uk.ctx.at.record.dom.statutoryworkinghours.monthly.MonthlyStatutoryWorkingHours;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingCondition;
@@ -36,7 +40,7 @@ import nts.uk.shr.com.history.DateHistoryItem;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
-public class CheckBeforeCalcFlexChange {
+public class CheckBeforeCalcFlexChange implements CheckBeforeCalcFlexChangeService {
 
 	@Inject
 	private ShClosurePub shClosurePub;
@@ -74,6 +78,7 @@ public class CheckBeforeCalcFlexChange {
 	private static final String TIME_DEFAULT = "0:00";
 
 	// 社員のフレックス繰越上限時間を求める
+	@Override
 	public ConditionCalcResult getConditionCalcFlex(String companyId, CalcFlexChangeDto calc) {
 		return getConditionCalcFlex(companyId, calc, Optional.empty(), Optional.empty());
 	}

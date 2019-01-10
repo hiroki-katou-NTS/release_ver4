@@ -395,12 +395,12 @@ module nts.uk.at.view.kaf018.f.viewmodel {
 
             //create leftMost Header and Content            
             leftmostColumns = [
-                { headerText: text("KAF018_60"), key: "sName", width: "200px", control: "link", handler: function(rData, rowIdx, key) { } }
+                { headerText: text("KAF018_60"), key: "sName", width: "200px", handler: function(rData, rowIdx, key) { } }
             ];
             leftmostEmpNameHeaderWidth += 352;
 
             if (self.useSetting.monthlyConfirm) {
-                leftmostColumns.push({ headerText: formatText(text("KAF018_61"), self.currentMonth), key: "monthConfirm", width: "44px", headerControl: "link", headerHandler: function() { } });
+                leftmostColumns.push({ headerText: formatText(text("KAF018_61"), self.currentMonth), key: "monthConfirm", width: "44px", headerHandler: function() { } });
                 leftmostEmpNameHeaderWidth -= 44;
             }
             if (self.useSetting.usePersonConfirm) {

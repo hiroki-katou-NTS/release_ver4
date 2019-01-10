@@ -73,7 +73,7 @@ public class HolidayWorkReflectProcessImpl implements HolidayWorkReflectProcess{
 			}
 		}
 		//事前休出時間の反映
-		return workUpdate.updateWorkTimeFrame(employeeId, baseDate, tmp, true, dailyData);
+		return workUpdate.updateWorkTimeFrame(employeeId, baseDate, tmp, true, dailyData, false);
 		
 	}
 

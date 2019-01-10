@@ -68,8 +68,9 @@ public class SubmitLoginFormOneCommandHandler extends LoginBaseCommandHandler<Su
 			// find user by login id
 			Optional<UserImportNew> userOp = userAdapter.findUserByContractAndLoginIdNew(command.getContractCode(), loginId);
 			if (!userOp.isPresent()) {
-				ParamLoginRecord param = new ParamLoginRecord(" ", LoginMethod.NORMAL_LOGIN.value, LoginStatus.Fail.value,
-						TextResource.localize("Msg_301"), null);
+				String remarkText = loginId + " " + TextResource.localize("Msg_301");
+				ParamLoginRecord param = new ParamLoginRecord(" ", LoginMethod.NORMAL_LOGIN.value,
+						LoginStatus.Fail.value, remarkText, null);
 				
 				// アルゴリズム「ログイン記録」を実行する１
 				this.service.callLoginRecord(param);
@@ -80,8 +81,9 @@ public class SubmitLoginFormOneCommandHandler extends LoginBaseCommandHandler<Su
 			// check password
 			String msgErrorId = this.compareHashPassword(userOp.get(), oldPassword);
 			if (!StringUtil.isNullOrEmpty(msgErrorId, true)){
-				ParamLoginRecord param = new ParamLoginRecord(" ", LoginMethod.NORMAL_LOGIN.value, LoginStatus.Fail.value,
-						TextResource.localize(msgErrorId), null);
+				String remarkText = loginId + " " + TextResource.localize(msgErrorId);
+				ParamLoginRecord param = new ParamLoginRecord(" ", LoginMethod.NORMAL_LOGIN.value,
+						LoginStatus.Fail.value, remarkText, null);
 				
 				// アルゴリズム「ログイン記録」を実行する１
 				this.service.callLoginRecord(param);
@@ -90,12 +92,12 @@ public class SubmitLoginFormOneCommandHandler extends LoginBaseCommandHandler<Su
 			}
 	
 			// check time limit
-			this.checkLimitTime(userOp);
+			this.checkLimitTime(userOp,loginId);
 			
 			user = userOp.get();
 		}
 		//アルゴリズム「エラーチェック（形式１）」を実行する
-		this.errorCheck(user.getUserId(), RoleType.COMPANY_MANAGER.value, command.getContractCode(), command.isSignOn());
+		this.errorCheck(command.getLoginId(),user.getUserId(), RoleType.COMPANY_MANAGER.value, command.getContractCode(), command.isSignOn());
 		
 		//ログインセッション作成 (set info to session)
 		context.getCommand().getRequest().changeSessionId();
@@ -140,10 +142,11 @@ public class SubmitLoginFormOneCommandHandler extends LoginBaseCommandHandler<Su
 	 *
 	 * @param user the user
 	 */
-	private void checkLimitTime(Optional<UserImportNew> user) {
+	private void checkLimitTime(Optional<UserImportNew> user,String loginId) {
 		if (user.get().getExpirationDate().before(GeneralDate.today())) {
+			String remarkText = loginId + " " + TextResource.localize("Msg_316");
 			ParamLoginRecord param = new ParamLoginRecord(" ", LoginMethod.NORMAL_LOGIN.value, LoginStatus.Fail.value,
-					TextResource.localize("Msg_316"), null);
+					remarkText, null);
 			
 			// アルゴリズム「ログイン記録」を実行する１
 			this.service.callLoginRecord(param);

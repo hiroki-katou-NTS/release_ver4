@@ -8,6 +8,10 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.monthly.flex.CalcFlexChangeDto;
+import nts.uk.ctx.at.record.dom.monthly.flex.CheckBeforeCalcFlexChangeService;
+import nts.uk.ctx.at.record.dom.monthly.flex.ConditionCalcResult;
+import nts.uk.ctx.at.record.dom.monthly.flex.MessageFlex;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.CheckShortage;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.CheckShortageFlex;
 import nts.uk.ctx.at.record.dom.workrecord.operationsetting.DaiPerformanceFun;
@@ -53,7 +57,7 @@ public class FlexInfoDisplayChange {
 //	private DailyPerformanceScreenRepo dailyPerformanceScreenRepo;
 
 	@Inject
-	private CheckBeforeCalcFlexChange checkBeforeCalcFlex;
+	private CheckBeforeCalcFlexChangeService checkBeforeCalcFlex;
 
 	// <<Public>> フレックス情報を表示する
 	public FlexShortageDto flexInfo(String companyId, String employeeId, GeneralDate baseDate, String roleId,
@@ -93,7 +97,7 @@ public class FlexInfoDisplayChange {
 //			Optional<WorkingConditionItem> wCItem = workConditions.stream().filter(x -> x.getHistoryId().equals(hist))
 //					.findFirst();
 		calcFlex.createWCItem(workConditions);
-		ConditionCalcResult conditionResult = checkBeforeCalcFlex.getConditionCalcFlex(companyId, calcFlex, closureEmployment, closingPeriod);
+		ConditionCalcResult conditionResult = checkBeforeCalcFlex.getConditionCalcFlex(companyId, calcFlex);
 		dataMonth.createRedConditionMessage(conditionResult.getValueResult());
 		dataMonth.createNotForward("");
 
