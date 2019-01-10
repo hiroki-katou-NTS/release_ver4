@@ -1,0 +1,5 @@
+package nts.uk.ctx.at.record.app.service.dailyimport;
+
+public class DailyDataImportService {
+
+}
