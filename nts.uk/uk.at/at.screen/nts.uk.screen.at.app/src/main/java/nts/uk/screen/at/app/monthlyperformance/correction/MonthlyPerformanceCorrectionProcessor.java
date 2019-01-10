@@ -788,10 +788,6 @@ public class MonthlyPerformanceCorrectionProcessor {
 			MonthlyModifyResult rowData = employeeDataMap.get(employeeId);
 			if (rowData == null) continue; //neu khong co data cua nhan vien thi bo qua
 			
-			// lock check box1 identify
-			if (!employeeIdLogin.equals(employeeId) || param.getInitMenuMode() == 2) {
-				lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
-			}
 			String lockStatus = lockStatusMap.isEmpty() || !lockStatusMap.containsKey(employee.getId()) || param.getInitMenuMode() == 1 ? ""
 					: lockStatusMap.get(employee.getId()).getLockStatusString();
 			
@@ -882,7 +878,11 @@ public class MonthlyPerformanceCorrectionProcessor {
 			   
 			MPDataDto mpdata = new MPDataDto(employeeId, lockStatus, "", employee.getCode(), employee.getBusinessName(),
 					employeeId, "", identify, approve, dailyConfirm, "");
-			
+			// lock check box1 identify
+			if (!employeeIdLogin.equals(employeeId) || param.getInitMenuMode() == 2 
+					|| ((!StringUtil.isNullOrEmpty(lockStatus, true)) && (approvalProcessingUseSetting.getUseMonthApproverConfirm() && approve == true))) {
+				lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
+			}
 			
 			// Setting data for dynamic column
 			List<EditStateOfMonthlyPerformanceDto> newList = editStateOfMonthlyPerformanceDtos.stream()
@@ -916,7 +916,8 @@ public class MonthlyPerformanceCorrectionProcessor {
 						if (param.getInitMenuMode() == 2) { // mode approve disable neu co bat ki lock nao khac month approve lock
 							//if (!StringUtil.isNullOrEmpty(lockStatus, true) && !lockStatus.equals(MonthlyPerformaceLockStatus.LOCK_MONTHLY_APPROVAL))
 							if (!StringUtil.isNullOrEmpty(lockStatus, true))
-								cellStatus.add(STATE_DISABLE);
+								cellStatus.add(STATE_DISABLE);	
+							
 						} else { // mode khac cu co lock la approve
 							if (!StringUtil.isNullOrEmpty(lockStatus, true))
 								cellStatus.add(STATE_DISABLE);
