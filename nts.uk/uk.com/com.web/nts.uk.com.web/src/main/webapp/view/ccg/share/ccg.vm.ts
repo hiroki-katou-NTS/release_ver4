@@ -1542,6 +1542,12 @@ module nts.uk.com.view.ccg.share.ccg {
                     const periodEnd = _.isNil(options.periodEndDate) ? moment().toISOString() : options.periodEndDate;
                     self.inputPeriod(new DateRangePickerModel(periodStart, periodEnd));
                 }
+                
+                if(options.showClosure) {
+                    self.calculatePeriod105458().done(period => {
+                        self.inputPeriod(new DateRangePickerModel(period.startDate, period.endDate));
+                    });
+                }
             }
 
             /**
