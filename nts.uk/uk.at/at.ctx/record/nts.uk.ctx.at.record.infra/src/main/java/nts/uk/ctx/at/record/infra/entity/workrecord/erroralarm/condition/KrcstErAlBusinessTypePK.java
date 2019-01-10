@@ -30,9 +30,18 @@ public class KrcstErAlBusinessTypePK implements Serializable {
 	@Size(min = 1, max = 36)
 	@Column(name = "ERAL_CHECK_ID")
 	public String eralCheckId;
+	
 	@Basic(optional = false)
 	@NotNull
 	@Size(min = 1, max = 10)
 	@Column(name = "BUSINESS_TYPE_CD")
 	public String businessTypeCd;
+	
+	@Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 17)
+    @Column(name = "CID")
+	public String cid;
+	
+	
 }

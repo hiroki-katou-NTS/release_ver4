@@ -18,6 +18,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -127,7 +128,10 @@ public class KwrmtErAlWorkRecord extends UkJpaEntity implements Serializable {
 	public String eralCheckId;
 
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", insertable = false, updatable = false)
+	@JoinColumns({
+		@JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", insertable = false, updatable = false),
+		@JoinColumn(name = "CID", referencedColumnName = "CID", insertable = false, updatable = false)
+	})
 	public KrcmtErAlCondition krcmtErAlCondition;
 
 	@OneToMany(mappedBy = "kwrmtErAlWorkRecord", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -353,7 +357,7 @@ public class KwrmtErAlWorkRecord extends UkJpaEntity implements Serializable {
 				.collect(Collectors.toList());
 		String cancelRoleId = domain.getCancelRoleId();
 		String messageDisplay = conditionDomain.getDisplayMessage().v();
-		KrcmtErAlCondition krcmtErAlCondition = new KrcmtErAlCondition(eralCheckId, messageDisplay, (0),
+		KrcmtErAlCondition krcmtErAlCondition = new KrcmtErAlCondition(eralCheckId,domain.getCompanyId(), messageDisplay, (0),
 				Collections.emptyList(), (0), Collections.emptyList(), (0), Collections.emptyList(), (0),
 				Collections.emptyList(), (0), (0), null, null, null, Collections.emptyList(), Collections.emptyList(),
 				(0), (0), null, null, null, Collections.emptyList(), Collections.emptyList(), (0), (0), "0", null, null,
@@ -366,16 +370,16 @@ public class KwrmtErAlWorkRecord extends UkJpaEntity implements Serializable {
 			int filterByClassification = (conditionDomain.getCheckTargetCondtion().getFilterByClassification() ? 1 : 0);
 			List<KrcstErAlBusinessType> lstBusinessType = conditionDomain.getCheckTargetCondtion()
 					.getLstBusinessTypeCode().stream().map(businessTypeCd -> new KrcstErAlBusinessType(
-							new KrcstErAlBusinessTypePK(eralCheckId, businessTypeCd.v())))
+							new KrcstErAlBusinessTypePK(eralCheckId, businessTypeCd.v(),domain.getCompanyId())))
 					.collect(Collectors.toList());
 			List<KrcstErAlJobTitle> lstJobTitle = conditionDomain.getCheckTargetCondtion().getLstJobTitleId().stream()
-					.map(jobTitleId -> new KrcstErAlJobTitle(new KrcstErAlJobTitlePK(eralCheckId, jobTitleId)))
+					.map(jobTitleId -> new KrcstErAlJobTitle(new KrcstErAlJobTitlePK(eralCheckId, jobTitleId,domain.getCompanyId())))
 					.collect(Collectors.toList());
 			List<KrcstErAlEmployment> lstEmployment = conditionDomain.getCheckTargetCondtion().getLstEmploymentCode()
-					.stream().map(emptCd -> new KrcstErAlEmployment(new KrcstErAlEmploymentPK(eralCheckId, emptCd.v())))
+					.stream().map(emptCd -> new KrcstErAlEmployment(new KrcstErAlEmploymentPK(eralCheckId, emptCd.v(),domain.getCompanyId())))
 					.collect(Collectors.toList());
 			List<KrcstErAlClass> lstClassification = conditionDomain.getCheckTargetCondtion().getLstClassificationCode()
-					.stream().map(clssCd -> new KrcstErAlClass(new KrcstErAlClassPK(eralCheckId, clssCd.v())))
+					.stream().map(clssCd -> new KrcstErAlClass(new KrcstErAlClassPK(eralCheckId, clssCd.v(),domain.getCompanyId())))
 					.collect(Collectors.toList());
 			// Set worktype condition
 			int workTypeUseAtr = conditionDomain.getWorkTypeCondition().isUse() ? 1 : 0;
@@ -391,16 +395,16 @@ public class KwrmtErAlWorkRecord extends UkJpaEntity implements Serializable {
 				wtPlanFilterAtr = wtypeCondition.getWorkTypePlan().isUse() ? 1 : 0;
 				wtActualFilterAtr = wtypeCondition.getWorkTypeActual().isUse() ? 1 : 0;
 				lstWtPlan = wtypeCondition.getWorkTypePlan().getLstWorkType().stream()
-						.map(wtCode -> new KrcstErAlWtPlan(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v())))
+						.map(wtCode -> new KrcstErAlWtPlan(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v(),domain.getCompanyId())))
 						.collect(Collectors.toList());
 				lstWtActual = wtypeCondition.getWorkTypeActual().getLstWorkType().stream()
-						.map(wtCode -> new KrcstErAlWtActual(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v())))
+						.map(wtCode -> new KrcstErAlWtActual(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v(),domain.getCompanyId())))
 						.collect(Collectors.toList());
 			} else {
 				SingleWorkType wtypeCondition = (SingleWorkType) conditionDomain.getWorkTypeCondition();
 				wtPlanFilterAtr = wtypeCondition.getTargetWorkType().isUse() ? 1 : 0;
 				lstWtPlan = wtypeCondition.getTargetWorkType().getLstWorkType().stream()
-						.map(wtCode -> new KrcstErAlWtPlan(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v())))
+						.map(wtCode -> new KrcstErAlWtPlan(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v(),domain.getCompanyId())))
 						.collect(Collectors.toList());
 			}
 			// Set worktime condition
@@ -417,16 +421,16 @@ public class KwrmtErAlWorkRecord extends UkJpaEntity implements Serializable {
 				whPlanFilterAtr = wtimeCondition.getWorkTimePlan().isUse() ? 1 : 0;
 				whActualFilterAtr = wtimeCondition.getWorkTimeActual().isUse() ? 1 : 0;
 				lstWhPlan = wtimeCondition.getWorkTimePlan().getLstWorkTime().stream()
-						.map(wtCode -> new KrcstErAlWhPlan(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v())))
+						.map(wtCode -> new KrcstErAlWhPlan(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v(),domain.getCompanyId())))
 						.collect(Collectors.toList());
 				lstWhActual = wtimeCondition.getWorkTimeActual().getLstWorkTime().stream()
-						.map(wtCode -> new KrcstErAlWhActual(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v())))
+						.map(wtCode -> new KrcstErAlWhActual(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v(),domain.getCompanyId())))
 						.collect(Collectors.toList());
 			} else {
 				SingleWorkTime wtimeCondition = (SingleWorkTime) conditionDomain.getWorkTimeCondition();
 				whPlanFilterAtr = wtimeCondition.getTargetWorkTime().isUse() ? 1 : 0;
 				lstWhPlan = wtimeCondition.getTargetWorkTime().getLstWorkTime().stream()
-						.map(wtCode -> new KrcstErAlWhPlan(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v())))
+						.map(wtCode -> new KrcstErAlWhPlan(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v(),domain.getCompanyId())))
 						.collect(Collectors.toList());
 			}
 			// Set attendance item condition
@@ -448,7 +452,7 @@ public class KwrmtErAlWorkRecord extends UkJpaEntity implements Serializable {
 					.collect(Collectors.toList());
 			KrcstErAlConGroup krcstErAlConGroup2 = new KrcstErAlConGroup(atdItemConditionGroup2, conditionOperator2,
 					lstAtdItemCon2);
-			krcmtErAlCondition = new KrcmtErAlCondition(eralCheckId, messageDisplay, filterByBusinessType,
+			krcmtErAlCondition = new KrcmtErAlCondition(eralCheckId,domain.getCompanyId(), messageDisplay, filterByBusinessType,
 					lstBusinessType, filterByJobTitle, lstJobTitle, filterByEmployment, lstEmployment,
 					filterByClassification, lstClassification, workTypeUseAtr, wtPlanActualOperator, wtPlanFilterAtr,
 					wtActualFilterAtr, wtCompareAtr, lstWtActual, lstWtPlan, workingHoursUseAtr, whPlanActualOperator,

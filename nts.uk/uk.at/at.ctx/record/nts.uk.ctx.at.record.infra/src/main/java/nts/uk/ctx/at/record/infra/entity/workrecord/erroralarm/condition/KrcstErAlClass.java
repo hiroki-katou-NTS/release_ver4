@@ -41,7 +41,9 @@ public class KrcstErAlClass extends UkJpaEntity implements Serializable {
 	
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	@JoinColumns({
-		@JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", insertable = false, updatable = false) })
+		@JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", insertable = false, updatable = false),
+		@JoinColumn(name = "CID", referencedColumnName = "CID", insertable = false, updatable = false) 
+	})
 	public KrcmtErAlCondition krcmtErAlCondition;
 
 	public KrcstErAlClass(KrcstErAlClassPK krcstErAlClassPK) {
