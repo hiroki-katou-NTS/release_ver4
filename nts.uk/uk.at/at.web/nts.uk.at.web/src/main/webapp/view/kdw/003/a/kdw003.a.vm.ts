@@ -1968,6 +1968,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 //set = false de co the jump den ham subscribe
                 self.isVisibleMIGrid(false);
             }
+            self.flagCalculation = false;
             self.reloadScreen();
         }
 
@@ -2174,6 +2175,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 //  let errorCodes =["0001","0002","003"];     
                 let errorParam = { initMode: 0, selectedItems: [] };
                 setShared("KDW003D_ErrorParam", errorParam);
+                self.flagCalculation = false;
                 modal("/view/kdw/003/d/index.xhtml").onClosed(() => {
                     nts.uk.ui.block.clear();
                     let errorCodes = nts.uk.ui.windows.getShared('KDW003D_Output');
@@ -2216,6 +2218,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             var self = this;
             if (!self.hasEmployee || self.hasErrorBuss) return;
             if (!nts.uk.ui.errors.hasError()) {
+                self.flagCalculation = false;
                 setShared("selectedPerfFmtCodeList", self.formatCodes());
                 modal("/view/kdw/003/c/index.xhtml").onClosed(() => {
                     var dataTemp = nts.uk.ui.windows.getShared('KDW003C_Output');
