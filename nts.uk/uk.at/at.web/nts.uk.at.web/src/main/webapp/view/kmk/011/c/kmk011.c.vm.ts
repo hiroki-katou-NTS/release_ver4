@@ -63,11 +63,8 @@ module nts.uk.at.view.kmk011.c.viewmodel {
                     self.divReasonCode(self.itemDivReason().divergenceReasonCode);
                     self.divReasonContent(self.itemDivReason().reason);
                     self.requiredAtr(self.itemDivReason().reasonRequired);
-                    if (self.dataSource().length > 1) {
-                        self.enableDel(true);
-                    }
-                    else self.enableDel(false);
 
+                    self.enableDel(true);
                     if (self.mode) {
                         self.enableMode(true);
                     }
@@ -279,10 +276,7 @@ module nts.uk.at.view.kmk011.c.viewmodel {
                 self.enableCode(false);
                 self.currentCode(code);
                 $("#inpReason").focus();
-                if (self.dataSource().length > 1) {
-                    self.enableDel(true);
-                }
-                else self.enableDel(false);
+                self.enableDel(true);
                 dfd.resolve();
             }).fail(function(error) {
                 nts.uk.ui.dialog.alert(error.message);
@@ -327,10 +321,10 @@ module nts.uk.at.view.kmk011.c.viewmodel {
                 } else {
                     self.refreshData();
                 }
-                if (self.dataSource().length > 1) {
-                    self.enableDel(true);
+                if (_.isEmpty(self.dataSource())) {
+                    self.enableDel(false);
                 }
-                else self.enableDel(false);
+                else self.enableDel(true);
                 dfd.resolve();
             }).fail(function(error) {
                 nts.uk.ui.dialog.alert(error.message);
