@@ -1971,6 +1971,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 self.isVisibleMIGrid(false);
             }
             self.flagCalculation = false;
+            self.listErrorMonth = [];
             self.reloadScreen();
         }
 

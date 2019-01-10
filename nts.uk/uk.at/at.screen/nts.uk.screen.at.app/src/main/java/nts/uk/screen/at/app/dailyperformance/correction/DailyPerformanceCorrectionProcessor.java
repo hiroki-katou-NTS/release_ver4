@@ -1229,6 +1229,7 @@ public class DailyPerformanceCorrectionProcessor {
 		List<DPErrorDto> lstError = this.repo.getListDPError(dateRange,
 				lstEmployee.stream().map(e -> e.getId()).collect(Collectors.toList()));
 		Map<String, String> appMapDateSid = getApplication(new ArrayList<>(lstEmployee.stream().map(x -> x.getId()).collect(Collectors.toSet())), dateRange, null);
+		int rowId = 0;
 		if (lstError.size() > 0) {
 			// 対応するドメインモデル「勤務実績のエラーアラーム」をすべて取得する
 			// Get list error setting
@@ -1236,7 +1237,6 @@ public class DailyPerformanceCorrectionProcessor {
 					.getErrorSetting(companyId, lstError.stream().map(e -> e.getErrorCode()).collect(Collectors.toList()), true, true, false);
 			// convert to list error reference
 			//IntStream.range(0, lstError.size()).forEach(id -> {
-			int rowId = 0;
 			for (int id = 0; id < lstError.size(); id++) {
 				for (DPErrorSettingDto errorSetting : lstErrorSetting) {
 					if (lstError.get(id).getErrorCode().equals(errorSetting.getErrorAlarmCode())) {
@@ -1276,6 +1276,7 @@ public class DailyPerformanceCorrectionProcessor {
 					}
 				}
 			}
+		}
 			// get list item to add item name
 			Set<Integer> itemIds = lstError.stream().flatMap(x -> x.getAttendanceItemId().stream()).collect(Collectors.toSet());
 			
@@ -1301,7 +1302,6 @@ public class DailyPerformanceCorrectionProcessor {
 					}
 				}
 			}
-		}
 		return lstErrorRefer;
 	}
 

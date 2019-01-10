@@ -388,8 +388,8 @@ public class DailyModifyResCommandFacade {
 				//計算後エラーチェック
 				ErrorAfterCalcDaily errorCheck = checkErrorAfterCalcDaily(resultIU, monthParam, resultOlds, dataParent.getMode(), dataParent.getMonthValue(), dataParent.getDateRange(), dataParent.getDailyEdits(), dataParent.getItemValues());
 				hasError = errorCheck.getHasError();
-				resultError = errorCheck.getResultError();
 				if(hasError) {
+					resultError = errorCheck.getResultError();
 					dataResultAfterIU.setErrorMap(resultError);
 					return dataResultAfterIU;
 				}
@@ -506,12 +506,14 @@ public class DailyModifyResCommandFacade {
 		return t -> seen.add(keyExtractor.apply(t));
 	}
 
-	public List<EmployeeMonthlyPerError> mapDomainMonthChange(List<Pair<String, GeneralDate>> employeeChange,
+	public Pair<Boolean , List<EmployeeMonthlyPerError>> mapDomainMonthChange(List<Pair<String, GeneralDate>> employeeChange,
 			List<IntegrationOfDaily> domainDailyNew, List<IntegrationOfMonthly> domainMonthNew, List<DailyRecordDto> dailyDtoEditAll, DateRange dateRange, List<DPItemValue> lstItemEdits) {
 		Set<String> employeeIds = employeeChange.stream().map(x -> x.getLeft()).collect(Collectors.toSet());
 		String companyId = AppContexts.user().companyId();
 		List<EmployeeMonthlyPerError> monthPer = new ArrayList<>();
-		employeeIds.stream().forEach(emp -> {
+		boolean onlyErrorOld = true;
+		for(String emp: employeeIds) {
+		//employeeIds.stream().forEach(emp -> {
 			List<IntegrationOfDaily> domainDailyEditAll  = dailyDtoEditAll.stream().filter(x -> x.getEmployeeId().equals(emp)).map(x -> x.toDomain(null, null)).collect(Collectors.toList());
 			domainDailyEditAll = unionDomain(domainDailyEditAll, domainDailyNew);
 			// Acquire closing date corresponding to employee
@@ -553,20 +555,25 @@ public class DailyModifyResCommandFacade {
 			val lstWTClassification = new HashSet<>();
 			if (!itemEdit28s.isEmpty()) {
 				List<WorkType> lstWType = workTypeRepository.getPossibleWorkType(companyId, itemEdit28s);
-				lstWType.stream().forEach(wt -> {
+				for(WorkType wt : lstWType) {
+				//lstWType.stream().forEach(wt -> {
 					val wtTemp = checkInGroupWorkPer(wt);
-					if (wtTemp != null)
+					if (wtTemp != null) {
 						lstWTClassification.add(convertError(wtTemp));
-				});
+						onlyErrorOld = false;
+					}
+				//});
+				}
 
 			}
-			
-			lstEmpMonthError = lstEmpMonthError.stream().filter(lstErrorTemp -> !lstWTClassification.contains(lstErrorTemp.getErrorType())).collect(Collectors.toList());
+			//boolean hasErrorInDB = !lstEmpMonthError.stream().filter(x -> x.getErrorType()).collect(Collectors.toList()).isEmpty();
+			lstEmpMonthError = lstWTClassification.isEmpty() ? lstEmpMonthError : lstEmpMonthError.stream().filter(lstErrorTemp -> lstWTClassification.contains(lstErrorTemp.getErrorType())).collect(Collectors.toList());
 			
 			monthPer.addAll(lstEmpMonthError);
-		});
+		//});
+		}
 		
-		return monthPer;
+		return Pair.of(onlyErrorOld, monthPer);
 	}
 	
 	private WorkTypeClassification checkInGroupWorkPer(WorkType wt) {
@@ -841,14 +848,14 @@ public class DailyModifyResCommandFacade {
 		
 		// 残数系のエラーチェック（月次集計なし）
 		val sidChange = itemInGroupChange(resultIU.getLstDailyDomain(), resultOlds);
-		val errorMonth = validatorDataDaily.errorMonthNew(
-				mapDomainMonthChange(sidChange, resultIU.getLstDailyDomain(), resultIU.getLstMonthDomain(), dailyDtoEditAll, range, lstItemEdits));
+		val pairError = mapDomainMonthChange(sidChange, resultIU.getLstDailyDomain(), resultIU.getLstMonthDomain(), dailyDtoEditAll, range, lstItemEdits);
+	    Map<Integer, List<DPItemValue>> errorMonth = validatorDataDaily.errorMonthNew(pairError.getRight());
 		// val errorMonth = validatorDataDaily.errorMonth(resultIU.getLstMonthDomain(),
 		// monthParam);
 
-		if (!errorMonth.isEmpty()) {
+		if (!errorMonth.isEmpty() && !pairError.getLeft()) {
 			resultError.putAll(errorMonth);
-			hasError = true;
+			hasError =  true;
 		}
 				
 		return new ErrorAfterCalcDaily(hasError, resultError, dataResultAfterIU.getFlexShortage());
@@ -893,10 +900,12 @@ public class DailyModifyResCommandFacade {
 		}
 		// 残数系のエラーチェック（月次集計なし）
 		val sidChange = itemInGroupChange(resultIU.getLstDailyDomain(), resultOlds);
-		val errorMonth = validatorDataDaily.errorMonthNew(mapDomainMonthChange(sidChange, resultIU.getLstDailyDomain(), resultIU.getLstMonthDomain(), dailyEditAll, range, lstItemEdits));
+		val pairError = mapDomainMonthChange(sidChange, resultIU.getLstDailyDomain(), resultIU.getLstMonthDomain(), dailyEditAll, range, lstItemEdits);
+	    Map<Integer, List<DPItemValue>> errorMonth = validatorDataDaily.errorMonthNew(pairError.getRight());
+		//val errorMonth = validatorDataDaily.errorMonthNew();
 		//val errorMonth = validatorDataDaily.errorMonth(resultIU.getLstMonthDomain(), monthParam);
 		
-		if (!errorMonth.isEmpty()) {
+		if (!errorMonth.isEmpty() && !pairError.getLeft()) {
 			resultError.putAll(errorMonth);
 			hasError = true;
 		}
