@@ -596,6 +596,7 @@ public class DailyPerformanceCorrectionProcessor {
 				screenDto.setCellSate(data.getId(), DPText.LOCK_SIGN, DPText.STATE_DISABLE);
 			}
 			
+			
 			ApproveRootStatusForEmpDto approveRootStatus =  dpLock.getLockCheckApprovalDay().get(data.getEmployeeId() + "|" + data.getDate());
 		//	if(mode == ScreenMode.APPROVAL.value){
 			data.setApproval(approveRootStatus == null ? false : approveRootStatus.isCheckApproval());
@@ -604,7 +605,7 @@ public class DailyPerformanceCorrectionProcessor {
 		//	}
 			DailyModifyResult resultOfOneRow = getRow(resultDailyMap, data.getEmployeeId(), data.getDate());
 			if (resultOfOneRow != null && (displayFormat == 2 ? !data.getError().equals("") : true)) {
-				lockDataCheckbox(sId, screenDto, data, identityProcessDtoOpt, approvalUseSettingDtoOpt, approveRootStatus, mode, data.isApproval());
+				lockDataCheckbox(sId, screenDto, data, identityProcessDtoOpt, approvalUseSettingDtoOpt, approveRootStatus, mode, data.isApproval(), data.isSign());
 				boolean lockDaykWpl = false, lockHist = false, lockApprovalMonth = false, lockConfirmMonth = false;
 				if (showLock == null || showLock) {
 					lockDaykWpl = checkLockAndSetState(dpLock.getLockDayAndWpl(), data);
@@ -712,7 +713,7 @@ public class DailyPerformanceCorrectionProcessor {
 				lock = true;
 			}
 			
-			if ((lockConfirmMonth || lockApproval || lockSign) && !(lockApprovalMonth || lockHist || lockDaykWpl))
+			if ((lockConfirmMonth || lockSign) && !(lockApprovalMonth || lockHist || lockDaykWpl))
 				lockCell(screenDto, data, false);
 			else
 				lockCell(screenDto, data, true);
@@ -985,7 +986,8 @@ public class DailyPerformanceCorrectionProcessor {
 	}
 
 	public void lockDataCheckbox(String sId, DailyPerformanceCorrectionDto screenDto, 
-			DPDataDto data, Optional<IdentityProcessUseSetDto> identityProcessUseSetDto, Optional<ApprovalUseSettingDto> approvalUseSettingDto, ApproveRootStatusForEmpDto approveRootStatus, int mode, boolean checkApproval) {
+			DPDataDto data, Optional<IdentityProcessUseSetDto> identityProcessUseSetDto, Optional<ApprovalUseSettingDto> approvalUseSettingDto, ApproveRootStatusForEmpDto approveRootStatus,
+			int mode, boolean checkApproval, boolean sign) {
 		// disable, enable check sign no 10
 		if (!sId.equals(data.getEmployeeId())) {
 			screenDto.setCellSate(data.getId(), DPText.LOCK_SIGN, DPText.STATE_DISABLE);
@@ -1030,8 +1032,12 @@ public class DailyPerformanceCorrectionProcessor {
 			if (approveRootStatus == null)
 				return;
 			if (approveRootStatus.getApproverEmployeeState() != null
-					&& approveRootStatus.getApproverEmployeeState() != ApproverEmployeeState.PHASE_DURING && !checkApproval) {
-				screenDto.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_DISABLE);
+					&& !checkApproval) {
+				if(approveRootStatus.getApproverEmployeeState() != ApproverEmployeeState.PHASE_DURING) {
+					screenDto.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_DISABLE);
+				}else if(identityProcessUseSetDto.isPresent() && identityProcessUseSetDto.get().isUseConfirmByYourself() && !sign) {
+					screenDto.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_DISABLE);
+				}
 			}else if(approveRootStatus.getApprovalStatus() != null
 					&& approveRootStatus.getApprovalStatus().value == ReleasedProprietyDivision.NOT_RELEASE.value && checkApproval){
 				screenDto.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_DISABLE);

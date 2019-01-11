@@ -140,7 +140,7 @@ public class DPDisplayLockProcessor {
 					.get(data.getEmployeeId() + "|" + data.getDate());
 
 			process.lockDataCheckbox(sId, result, data, identityProcessDtoOpt, approvalUseSettingDtoOpt,
-					approveRootStatus, mode, data.isApproval());
+					approveRootStatus, mode, data.isApproval(), data.isSign());
 			boolean lockDaykWpl = false, lockHist = false, lockApprovalMonth = false, lockConfirmMonth = false;
 			if (param.isShowLock()) {
 				lockDaykWpl = process.checkLockAndSetState(dpLock.getLockDayAndWpl(), data);
