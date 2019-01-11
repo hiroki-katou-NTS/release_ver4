@@ -3,22 +3,24 @@ package nts.uk.ctx.at.function.infra.generator.annualworkschedule;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
 import com.aspose.cells.BorderType;
 import com.aspose.cells.Cell;
+import com.aspose.cells.CellArea;
 import com.aspose.cells.CellBorderType;
+import com.aspose.cells.Cells;
 import com.aspose.cells.Color;
 import com.aspose.cells.HorizontalPageBreakCollection;
+import com.aspose.cells.ImageOrPrintOptions;
 import com.aspose.cells.PageSetup;
+import com.aspose.cells.PrintingPageType;
 import com.aspose.cells.Range;
+import com.aspose.cells.Row;
 import com.aspose.cells.Style;
 import com.aspose.cells.Workbook;
 import com.aspose.cells.Worksheet;
@@ -27,7 +29,6 @@ import com.aspose.cells.WorksheetCollection;
 import nts.arc.layer.infra.file.export.FileGeneratorContext;
 import nts.uk.ctx.at.function.dom.annualworkschedule.enums.OutputAgreementTime;
 import nts.uk.ctx.at.function.dom.annualworkschedule.enums.PageBreakIndicator;
-import nts.uk.ctx.at.function.dom.annualworkschedule.enums.ValueOuputFormat;
 import nts.uk.ctx.at.function.dom.annualworkschedule.export.AnnualWorkScheduleData;
 import nts.uk.ctx.at.function.dom.annualworkschedule.export.AnnualWorkScheduleGenerator;
 import nts.uk.ctx.at.function.dom.annualworkschedule.export.EmployeeData;
@@ -52,6 +53,8 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 	private static final int ROW_PER_PAGE_7_GROUP_MONTHS = 28;
 	/** C2_3 or C2_5 */
 	private static final int MAX_GROUP_MONTHS = 7;
+	
+	private static final int NUMBER_FIRST_ROW_OF_HEADER = 2;
 
 	@Override
 	public void generate(FileGeneratorContext fileContext, ExportData dataSource) {
@@ -116,7 +119,12 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 			RangeCustom newRange = new RangeCustom(empRange, 0);
 			int offset = 0, sumRowCount = workplaceRange.getRowCount();
 			boolean nextWorkplace;
-			for (String empId : empIds) {
+//			Row row2 = ws.getCells().getRow(2);
+//			Row row3 = ws.getCells().getRow(3);
+//			int breakPage = 0;
+			for (int i = 0; i < empIds.size(); i++) {
+				String empId = empIds.get(i);
+				
 				EmployeeData emp = dataSource.getEmployees().get(empId);
 				nextWorkplace = !workplaceCd.equals(emp.getEmployeeInfo().getWorkplaceCode());
 
@@ -134,9 +142,15 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 				print(wsc, newRange, emp, isNewPage || nextWorkplace, is7Group, itemBooks,
 						dataSource.isOutNumExceedTime36Agr(), dataSource.getHeader());
 				if (isNewPage) {
+//					breakPage = + 1;
 					pageBreaks.add(newRange.range.getFirstRow());
-					sumRowCount = newRange.range.getRowCount(); // reset sum row
-																// count
+//					int row = newRange.
+					sumRowCount = newRange.range.getRowCount(); // reset sum row count
+//					// print Header
+//					Cells cells = ws.getCells();
+//					cells.copyRow(cells, NUMBER_FIRST_ROW_OF_HEADER, rowsPerPage* breakPage + 1);
+//					cells.copyRow(cells, NUMBER_FIRST_ROW_OF_HEADER + 1, rowsPerPage* breakPage + 2 );
+					
 				}
 				offset = newRange.offset;
 			}
@@ -257,7 +271,18 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 				range.cell("numRemainingTime", rowOffset, 0).putValue(data.formatMonthsRemaining());
 			}
 		
-			processingPeriod(range, data, rowOffset, headerData);
+			range.cell("period1st", rowOffset, 0).putValue(data.formatMonthPeriod1st());
+			this.setCellStyle(range.cell("period1st", rowOffset, 0), data.getColorPeriodMonth1st());
+			range.cell("period2nd", rowOffset, 0).putValue(data.formatMonthPeriod2nd());
+			this.setCellStyle(range.cell("period2nd", rowOffset, 0), data.getColorPeriodMonth2nd());
+			range.cell("period3rd", rowOffset, 0).putValue(data.formatMonthPeriod3rd());
+			this.setCellStyle(range.cell("period3rd", rowOffset, 0), data.getColorPeriodMonth3rd());
+			range.cell("period4th", rowOffset, 0).putValue(data.formatMonthPeriod4th());
+			this.setCellStyle(range.cell("period4th", rowOffset, 0), data.getColorPeriodMonth4th());
+			range.cell("period5th", rowOffset, 0).putValue(data.formatMonthPeriod5th());
+			this.setCellStyle(range.cell("period5th", rowOffset, 0), data.getColorPeriodMonth5th());
+			range.cell("period6th", rowOffset, 0).putValue(data.formatMonthPeriod6th());
+			this.setCellStyle(range.cell("period6th", rowOffset, 0), data.getColorPeriodMonth6th());			
 			if (is7Group) {
 				range.cell("period7th", rowOffset, 0).putValue(data.formatMonthPeriod7th());
 				this.setCellStyle(range.cell("period7th", rowOffset, 0), data.getColorPeriodMonth7th());

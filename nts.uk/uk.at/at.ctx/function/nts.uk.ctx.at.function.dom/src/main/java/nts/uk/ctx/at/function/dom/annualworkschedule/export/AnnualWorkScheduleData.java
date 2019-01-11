@@ -17,6 +17,7 @@ import nts.uk.ctx.at.function.dom.annualworkschedule.CalcFormulaItem;
 import nts.uk.ctx.at.function.dom.annualworkschedule.ItemOutTblBook;
 import nts.uk.ctx.at.function.dom.annualworkschedule.enums.ValueOuputFormat;
 import nts.uk.ctx.at.shared.dom.monthly.agreement.AgreementTimeStatusOfMonthly;
+import nts.uk.ctx.at.shared.dom.monthly.agreement.PeriodAtrOfAgreement;
 
 @Setter
 @Getter
@@ -429,7 +430,8 @@ public class AnnualWorkScheduleData {
 			List<AgreementTimeByPeriodImport> listAgreementTimeBymonth,
 			List<AgreementTimeByPeriodImport> listAgreementTimeByYear,
 			List<AgreementTimeByPeriodImport> listExcesMonths, YearMonth startYm, Integer monthsExceeded,
-			Integer monthLimit) {
+			Integer monthLimit, PeriodAtrOfAgreement periodAtr, List<String> header) {
+		
 		AnnualWorkScheduleData annualWorkScheduleData = new AnnualWorkScheduleData();
 		annualWorkScheduleData.setHeadingName(itemOut.getHeadingName().v());
 		annualWorkScheduleData.setValOutFormat(itemOut.getValOutFormat());
@@ -457,14 +459,27 @@ public class AnnualWorkScheduleData {
 		listExcesMonths = listExcesMonths.stream().sorted((excesMonth1, excesMonth2) -> Integer
 				.compare(excesMonth1.getStartMonth().v(), excesMonth2.getStartMonth().v()))
 				.collect(Collectors.toList());
-		int periodIndex = 1;
-		for (AgreementTimeByPeriodImport m : listExcesMonths) {
-			BigDecimal value = new BigDecimal(m.getAgreementTime().v());
-			AgreementTimeStatusOfMonthly status = m.getStatus();
-			ItemData item = new ItemData(value, status);
-			annualWorkScheduleData.setPeriodMonthData(item, periodIndex);
-			periodIndex = periodIndex + 1;
-		}
+			for(int i = 0; i < header.size(); i++){
+				int monthValue = Integer.valueOf(header.get(i).split("～")[0]).intValue();
+				@SuppressWarnings("unused")
+				boolean mark = false;
+				for (AgreementTimeByPeriodImport m : listExcesMonths) {
+					if(monthValue == m.getStartMonth().month()){
+						BigDecimal value = new BigDecimal(m.getAgreementTime().v());
+						AgreementTimeStatusOfMonthly status = m.getStatus();
+						ItemData item = new ItemData(value, status);
+						annualWorkScheduleData.setPeriodMonthData(item, i+1);
+						mark = true;
+						break;
+					}
+				}
+				if(mark = false) {
+					ItemData item = new ItemData(null, AgreementTimeStatusOfMonthly.NORMAL);
+					annualWorkScheduleData.setPeriodMonthData(item, i+1);
+				}else {
+					mark = false;
+				}
+			}
 		return annualWorkScheduleData;
 	}
 	
