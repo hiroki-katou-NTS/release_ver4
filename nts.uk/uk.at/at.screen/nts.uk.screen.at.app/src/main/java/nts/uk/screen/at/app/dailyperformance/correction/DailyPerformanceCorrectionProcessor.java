@@ -713,7 +713,7 @@ public class DailyPerformanceCorrectionProcessor {
 				lock = true;
 			}
 			
-			if ((lockConfirmMonth || lockSign) && !(lockApprovalMonth || lockHist || lockDaykWpl))
+			if ((lockConfirmMonth || lockSign) && !(lockApprovalMonth || lockHist || lockDaykWpl || lockApproval))
 				lockCell(screenDto, data, false);
 			else
 				lockCell(screenDto, data, true);
