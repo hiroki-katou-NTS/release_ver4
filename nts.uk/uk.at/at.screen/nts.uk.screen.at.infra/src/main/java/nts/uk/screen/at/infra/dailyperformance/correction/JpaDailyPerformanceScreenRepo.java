@@ -1052,7 +1052,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		}
 
 		Connection con = this.getEntityManager().unwrap(Connection.class);
-		String query = "SELECT s.*, u.MESSAGE_DISPLAY FROM KRCMT_ERAL_SET as s JOIN KRCMT_ERAL_CONDITION as u ON s.ERAL_CHECK_ID = u.ERAL_CHECK_ID WHERE s.CID = ? AND s.ERROR_ALARM_CD IN ("
+		String query = "SELECT s.*, u.MESSAGE_DISPLAY FROM KRCMT_ERAL_SET as s JOIN KRCMT_ERAL_CONDITION as u ON s.ERAL_CHECK_ID = u.ERAL_CHECK_ID AND s.CID = u.CID WHERE s.CID = ? AND s.ERROR_ALARM_CD IN ("
 				+ textIn + ")";
 		if (atr.isEmpty())
 			return new ArrayList<>();
