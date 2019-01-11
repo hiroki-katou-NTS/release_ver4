@@ -365,7 +365,7 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 							// Get all daily result in Date
 							if (!singleIdUpper.isEmpty() || !singleIdLower.isEmpty()) {
 								for (AttendanceItemValueResult item : dailyValues) {
-									if (item.getWorkingDate().equals(startDateByClosure)) {
+									if (item.getWorkingDate().equals(startDateByClosure) && item.getEmployeeId().equals(employee.employeeId)) {
 										itemValueResult = item;
 										break;
 									}
