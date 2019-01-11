@@ -3,7 +3,9 @@
  */
 package nts.uk.ctx.at.record.app.find.divergence.time.reason;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,12 +53,9 @@ public class DivergenceReasonSelectFinder {
 			return dto;
 		}).collect(Collectors.toList());
 		//sort list by reason code
-		result.sort((DivergenceReasonSelectDto o1,DivergenceReasonSelectDto o2) ->{ 
-			Integer code1 = Integer.parseInt(o1.getDivergenceReasonCode());
-			Integer code2 = Integer.parseInt(o2.getDivergenceReasonCode());
-			return code1 - code2;
-			});
-		return result;
+		List<DivergenceReasonSelectDto> lstSortCode = new ArrayList<>();
+		lstSortCode = result.stream().sorted(Comparator.comparing(DivergenceReasonSelectDto::getDivergenceReasonCode)).collect(Collectors.toList());
+		return lstSortCode;
 	}
 
 	/**
