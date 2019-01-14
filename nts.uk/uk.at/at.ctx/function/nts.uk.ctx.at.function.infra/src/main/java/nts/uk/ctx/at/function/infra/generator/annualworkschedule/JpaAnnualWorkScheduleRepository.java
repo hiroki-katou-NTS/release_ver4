@@ -329,7 +329,9 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 			if (outputAgreementTime36.isPresent()) {
 				// アルゴリズム「36協定時間の作成」を実行する
 				annualWorkScheduleData.putAll(this.create36AgreementTime(cid, yearMonthPeriod, empId,
-						outputAgreementTime36.get(), fiscalYear, startYm, isOutNumExceed, periodAtr, monthLimit, exportData.getHeader().getMonthPeriodLabels()));
+						outputAgreementTime36.get(), fiscalYear, startYm, isOutNumExceed, periodAtr, monthLimit,
+						exportData.getHeader() == null ? new ArrayList<>()
+								: (exportData.getHeader().getMonthPeriodLabels()== null? new ArrayList<>(): exportData.getHeader().getMonthPeriodLabels())));
 			}
 			empData.setAnnualWorkSchedule(annualWorkScheduleData);
 		});
@@ -378,7 +380,6 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 			// RequestList458
 			monthsExceeded = getExcessTimesYearAdapter.algorithm(employeeId, fiscalYear);
 		}
-
 		// パラメータ「表示形式」をチェックする
 		List<AgreementTimeByPeriodImport> listExcesMonths = new ArrayList<>();
 		if (PeriodAtrOfAgreement.TWO_MONTHS.equals(periodAtr) || PeriodAtrOfAgreement.THREE_MONTHS.equals(periodAtr)) {
