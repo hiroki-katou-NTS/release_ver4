@@ -642,7 +642,8 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 							for (MonthlyAttendanceItemValueResult item : monthlyValues) {
 								if (item.getYearMonth()
 										.equals(closureDate.getLastDayOfMonth() ? yearMonth : yearMonth.addMonths(1))
-										&& item.getClouseDate() == closureDate.getClosureDay().v()) {
+										&& item.getClouseDate() == closureDate.getClosureDay().v()
+										&& employee.getEmployeeId().equals(item.getEmployeeId())) {
 									itemValueResult = item;
 									break;
 								}
