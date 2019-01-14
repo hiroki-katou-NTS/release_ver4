@@ -365,7 +365,7 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 							// Get all daily result in Date
 							if (!singleIdUpper.isEmpty() || !singleIdLower.isEmpty()) {
 								for (AttendanceItemValueResult item : dailyValues) {
-									if (item.getWorkingDate().equals(startDateByClosure)) {
+									if (item.getWorkingDate().equals(startDateByClosure) && item.getEmployeeId().equals(employee.employeeId)) {
 										itemValueResult = item;
 										break;
 									}
@@ -642,7 +642,8 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 							for (MonthlyAttendanceItemValueResult item : monthlyValues) {
 								if (item.getYearMonth()
 										.equals(closureDate.getLastDayOfMonth() ? yearMonth : yearMonth.addMonths(1))
-										&& item.getClouseDate() == closureDate.getClosureDay().v()) {
+										&& item.getClouseDate() == closureDate.getClosureDay().v()
+										&& employee.getEmployeeId().equals(item.getEmployeeId())) {
 									itemValueResult = item;
 									break;
 								}
