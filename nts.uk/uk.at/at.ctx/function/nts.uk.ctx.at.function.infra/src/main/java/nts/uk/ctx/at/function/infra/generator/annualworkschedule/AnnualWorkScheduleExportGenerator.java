@@ -87,7 +87,7 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 			}
 			PageSetup pageSetup = ws.getPageSetup();
 			pageSetup.setZoom(pageScale);
-
+			pageSetup.setPrintArea("A1:W");
 			// delete superfluous rows
 			Range empRange = wsc.getRangeByName("employeeRange");
 			int rowPerEmp = dataSource.getExportItems().size();
@@ -143,7 +143,7 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 
 			print(wsc, new RangeCustom(empRange, 0), firstEmp, true, is7Group, itemBooks,
 					dataSource.isOutNumExceedTime36Agr(), dataSource.getHeader());
-
+			
 			reportContext.processDesigner();
 			reportContext.saveAsExcel(this.createNewFile(fileContext, this.getReportName(REPORT_FILE_NAME)));
 		} catch (Exception e) {
