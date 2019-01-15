@@ -1,5 +1,8 @@
 package nts.uk.ctx.sys.log.infra.repository.datacorrectionlog;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +19,7 @@ import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.log.dom.datacorrectionlog.DataCorrectionLogRepository;
 import nts.uk.ctx.sys.log.infra.entity.datacorrectionlog.SrcdtDataCorrectionLog;
+import nts.uk.ctx.sys.log.infra.entity.datacorrectionlog.SrcdtDataCorrectionLogPk;
 import nts.uk.shr.com.security.audittrail.correction.content.DataCorrectionLog;
 import nts.uk.shr.com.security.audittrail.correction.content.TargetDataType;
 import nts.uk.shr.com.security.audittrail.correction.processor.DataCorrectionLogWriter;
@@ -37,13 +41,56 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 			DatePeriod datePeriod) {
 		if (targetDataType == null || listEmployeeId.isEmpty())
 			return Collections.emptyList();
-		String query = "SELECT a FROM SrcdtDataCorrectionLog a WHERE a.pk.targetDataType = :targetDataType AND a.employeeId IN :listEmpId AND a.pk.ymdKey >= :startYmd AND a.pk.ymdKey <= :endYmd";
+		Connection con = this.getEntityManager().unwrap(Connection.class);
+//		String query = "SELECT a FROM SrcdtDataCorrectionLog a WHERE a.pk.targetDataType = :targetDataType AND a.employeeId IN :listEmpId AND a.pk.ymdKey >= :startYmd AND a.pk.ymdKey <= :endYmd";
 		List<DataCorrectionLog> resultList = new ArrayList<>();
 		CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			resultList.addAll(this.queryProxy().query(query, SrcdtDataCorrectionLog.class)
-				.setParameter("targetDataType", targetDataType.value).setParameter("listEmpId", subList)
-				.setParameter("startYmd", datePeriod.start()).setParameter("endYmd", datePeriod.end())
-				.getList(c -> c.toDomainToView()));
+			String listEmp = "(";
+			for(int i = 0; i < subList.size(); i++){
+				listEmp += "'"+ subList.get(i) +"',";
+			}
+			// remove last , in string and add )
+			listEmp = listEmp.substring(0, listEmp.length() - 1) + ")";
+			String query = "SELECT OPERATION_ID, USER_ID, TARGET_DATA_TYPE, ITEM_ID, USER_NAME, SID, YMD_KEY, YM_KEY, Y_KEY, STRING_KEY, CORRECTION_ATTR, ITEM_NAME, RAW_VALUE_BEFORE_ID, VIEW_VALUE_BEFORE, RAW_VALUE_AFTER_ID, VIEW_VALUE_AFTER, VALUE_DATA_TYPE, SHOW_ORDER, NOTE"
+					+ " FROM SRCDT_DATA_CORRECTION_LOG "
+					+ " WHERE TARGET_DATA_TYPE = "+ "'" + targetDataType.value + "'" 
+					+ " AND SID IN " + listEmp 
+					+ " AND YMD_KEY >= " + "'" + datePeriod.start() + "'" 
+					+ " AND YMD_KEY <= " + "'" + datePeriod.end() + "'";
+			try {
+				ResultSet rs = con.createStatement().executeQuery(query);
+				while (rs.next()) {
+					String operationId = rs.getString("OPERATION_ID");
+					String userId = rs.getString("USER_ID");
+					String sId = rs.getString("SID");
+					String userName = rs.getString("USER_NAME");
+					int targetDtType = rs.getInt("TARGET_DATA_TYPE");
+					String stringKey = rs.getString("STRING_KEY");
+					int correctionAttr = rs.getInt("CORRECTION_ATTR");
+					String itemId = rs.getString("ITEM_ID");
+					String itemName = rs.getString("ITEM_NAME");
+					String viewValueBefore = rs.getString("VIEW_VALUE_BEFORE");
+					String viewValueAfter = rs.getString("VIEW_VALUE_AFTER");
+					String rawValueBefore = rs.getString("RAW_VALUE_BEFORE_ID");
+					String rawValueAfter = rs.getString("RAW_VALUE_AFTER_ID");
+					int showOrder = rs.getInt("SHOW_ORDER");
+					String note = rs.getString("NOTE");
+					GeneralDate ymdKey = GeneralDate.fromString(rs.getString("YMD_KEY"), "yyyy-MM-dd");
+					Integer ymKey = Integer.valueOf(rs.getInt("YM_KEY"));
+					Integer yKey = Integer.valueOf(rs.getInt("Y_KEY"));
+					Integer valueType = Integer.valueOf(rs.getInt("VALUE_DATA_TYPE"));
+					
+					SrcdtDataCorrectionLogPk pk = new SrcdtDataCorrectionLogPk(operationId, userId, targetDtType,
+							itemId, ymdKey);
+					SrcdtDataCorrectionLog srcdtDataCorrectionLog = new SrcdtDataCorrectionLog(pk, userName, sId, ymKey,
+							yKey, stringKey, correctionAttr, itemName, rawValueBefore, viewValueBefore, rawValueAfter,
+							viewValueAfter, valueType, showOrder, note);
+					
+					resultList.add(srcdtDataCorrectionLog.toDomainToView());
+				}
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		});
 		return resultList;
 	}
@@ -311,5 +358,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 		});
 		return resultList;
 	}
+	
+	
 
 }
