@@ -205,4 +205,22 @@ public class ApplicationListForScreen {
 		}
 		return holidayAppTypeName;
 	}
+	
+	/**
+	 * 社員、期間に一致する申請をグループ化して取得する
+	 * RequestList #542
+	 * @param employeeID
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	public List<AppGroupExportDto> getApplicationGroupBySID(List<String> employeeID, GeneralDate startDate,
+			GeneralDate endDate) {
+		List<ApplicationExportDto> appExportLst = this.getApplicationBySID(employeeID, startDate, endDate);
+		return appExportLst.stream().map(x -> new AppGroupExportDto(x.getAppDate(),x.getAppType(),x.getEmployeeID(),x.getAppTypeName()))
+				.collect(Collectors.groupingBy(x -> x.getAppDate())).entrySet().stream().map(x -> {
+					return x.getValue().stream().collect(Collectors.groupingBy(y -> y.getAppType())).entrySet()
+							.stream().map(y -> y.getValue().get(0)).collect(Collectors.toList()).get(0);
+				}).collect(Collectors.toList());
+	}
 }

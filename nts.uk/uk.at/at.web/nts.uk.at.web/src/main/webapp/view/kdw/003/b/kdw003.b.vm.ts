@@ -42,7 +42,11 @@ module nts.uk.at.view.kdw003.b {
                             itemName: value.itemName, 
                             errorCode: "" });
                     });
-                    let arr: any[] = _.orderBy(data, ['employeeCode', 'date', 'errorCode'], ['asc', 'asc', 'asc']);
+                    let dataTemp = _.uniqWith(data, function(x, y) {
+                        if (_.isEmpty(x.date)) return x.employeeCode === y.employeeCode && x.message === y.message;
+                        else return false;
+                    });
+                    let arr: any[] = _.orderBy(dataTemp, ['employeeCode', 'date', 'errorCode'], ['asc', 'asc', 'asc']);
 
                     _.each(data, (dt: any) => {
                         arrErrorCode.push(dt.errorCode);

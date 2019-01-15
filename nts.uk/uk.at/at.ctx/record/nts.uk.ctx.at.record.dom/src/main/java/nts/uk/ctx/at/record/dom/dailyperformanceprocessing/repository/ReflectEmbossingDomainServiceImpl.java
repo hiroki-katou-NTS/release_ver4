@@ -431,10 +431,10 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 					// lay tu a nam tren chuyen xuong
 					AttendanceLeavingGateOfDaily attendanceLeavingGateOfDailyTemp = null;
 					if (attendanceLeavingGateOfDaily == null) {
-						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, date, employeeId,
+						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, WorkInfo, date, employeeId,
 								attendanceLeavingGateOfDailyTemp, worktNo, inOrOutClass, x, lstStamp);
 					} else {
-						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, date, employeeId,
+						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, WorkInfo, date, employeeId,
 								attendanceLeavingGateOfDaily, worktNo, inOrOutClass, x, lstStamp);
 					}
 
@@ -446,10 +446,10 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 					// lay tu a nam tren chuyen xuong
 					AttendanceLeavingGateOfDaily attendanceLeavingGateOfDailyTemp = null;
 					if (attendanceLeavingGateOfDaily == null) {
-						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, date, employeeId,
+						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, WorkInfo, date, employeeId,
 								attendanceLeavingGateOfDailyTemp, worktNo, inOrOutClass, x, lstStamp);
 					} else {
-						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, date, employeeId,
+						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, WorkInfo, date, employeeId,
 								attendanceLeavingGateOfDaily, worktNo, inOrOutClass, x, lstStamp);
 					}
 				}
@@ -466,10 +466,10 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 					// lay tu a nam tren chuyen xuong
 					AttendanceLeavingGateOfDaily attendanceLeavingGateOfDailyTemp = null;
 					if (attendanceLeavingGateOfDaily == null) {
-						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, date, employeeId,
+						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, WorkInfo, date, employeeId,
 								attendanceLeavingGateOfDailyTemp, worktNo, inOrOutClass, x, lstStamp);
 					} else {
-						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, date, employeeId,
+						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, WorkInfo, date, employeeId,
 								attendanceLeavingGateOfDaily, worktNo, inOrOutClass, x, lstStamp);
 					}
 
@@ -481,10 +481,10 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 					// fixed lay tu a nam tren chuyen xuong
 					AttendanceLeavingGateOfDaily attendanceLeavingGateOfDailyTemp = null;
 					if (attendanceLeavingGateOfDaily == null) {
-						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, date, employeeId,
+						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, WorkInfo, date, employeeId,
 								attendanceLeavingGateOfDailyTemp, worktNo, inOrOutClass, x, lstStamp);
 					} else {
-						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, date, employeeId,
+						attendanceLeavingGateOfDaily = reflectInOutCompany(companyId, WorkInfo, date, employeeId,
 								attendanceLeavingGateOfDaily, worktNo, inOrOutClass, x, lstStamp);
 					}
 				}
@@ -770,7 +770,7 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 	}
 
 	// 入退門を反映する
-	AttendanceLeavingGateOfDaily reflectInOutCompany(String companyId, GeneralDate date, String employeeId,
+	AttendanceLeavingGateOfDaily reflectInOutCompany(String companyId, WorkInfoOfDailyPerformance workInfo, GeneralDate date, String employeeId,
 			AttendanceLeavingGateOfDaily attendanceLeavingGateOfDailyTemp, int worktNo, String inOrOutClass,
 			StampItem x, List<StampItem> lstStamp) {
 
@@ -810,7 +810,7 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 		}
 
 		// 反映するか判断する
-		boolean determineReflect = this.determineReflect(companyId, x, date, employeeId, inOrOutClass,
+		boolean determineReflect = this.determineReflect(companyId, workInfo, x, date, employeeId, inOrOutClass,
 				reflectEntryGateOutput);
 		if (determineReflect) {
 			// 反映する
@@ -904,7 +904,7 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 	}
 
 	// 反映するか判断する
-	private boolean determineReflect(String companyId, StampItem stamp, GeneralDate date, String employeeId,
+	private boolean determineReflect(String companyId, WorkInfoOfDailyPerformance workInfo, StampItem stamp, GeneralDate date, String employeeId,
 			String attendanceClass, ReflectEntryGateOutput reflectEntryGateOutput) {
 		if (reflectEntryGateOutput != null) {
 			StampSourceInfo stampSourceInfo = reflectEntryGateOutput.getStampSourceInfo();
@@ -912,7 +912,7 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 				return false;
 			} else {
 				// 前優先後優先を見て反映するか確認する
-				return this.confirmReflectFirstOrAfterPriority(companyId, attendanceClass, stamp,
+				return this.confirmReflectFirstOrAfterPriority(companyId, workInfo, attendanceClass, stamp,
 						reflectEntryGateOutput, date, employeeId);
 			}
 		} else {
@@ -3134,9 +3134,9 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 	}
 
 	// 前優先後優先を見て反映するか確認する
-	private boolean confirmReflectFirstOrAfterPriority(String companyId, String attendanceClass, StampItem stamp,
+	private boolean confirmReflectFirstOrAfterPriority(String companyId, WorkInfoOfDailyPerformance workInfo, String attendanceClass, StampItem stamp,
 			ReflectEntryGateOutput reflectEntryGateOutput, GeneralDate date, String employeeId) {
-		Optional<WorkInfoOfDailyPerformance> WorkInfoOptional = this.workInforRepo.find(employeeId, date);
+		Optional<WorkInfoOfDailyPerformance> WorkInfoOptional = workInfo != null ? Optional.of(workInfo) : this.workInforRepo.find(employeeId, date);
 		if (WorkInfoOptional.isPresent()) {
 			WorkInformation recordWorkInformation = WorkInfoOptional.get().getRecordInfo();
 			WorkTimeCode workTimeCode = recordWorkInformation.getWorkTimeCode();
