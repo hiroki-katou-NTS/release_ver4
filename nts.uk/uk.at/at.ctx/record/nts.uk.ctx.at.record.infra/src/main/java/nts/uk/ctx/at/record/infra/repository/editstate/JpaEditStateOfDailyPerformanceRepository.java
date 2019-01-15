@@ -90,6 +90,26 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 	}
 
 	@Override
+	public void deleteBy(List<String> employeeIds, List<GeneralDate> processingYmds, List<Integer> itemIdList) {
+		StringBuilder builderString = new StringBuilder();
+		builderString.append("DELETE ");
+		builderString.append("FROM KrcdtDailyRecEditSet a ");
+		builderString.append("WHERE a.krcdtDailyRecEditSetPK.employeeId IN :employeeIds ");
+		builderString.append("AND a.krcdtDailyRecEditSetPK.processingYmd IN :processingYmds ");
+		builderString.append("AND a.krcdtDailyRecEditSetPK.attendanceItemId IN :attendanceItemIds ");
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstEmployeeIds -> {
+			CollectionUtil.split(processingYmds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, ymds -> {
+				this.getEntityManager().createQuery(builderString.toString())
+					.setParameter("employeeIds", lstEmployeeIds)
+					.setParameter("processingYmds", ymds)
+					.setParameter("attendanceItemIds", itemIdList)
+					.executeUpdate();
+			});
+		});
+		this.getEntityManager().flush();
+	}
+
+	@Override
 	public void add(List<EditStateOfDailyPerformance> editStates) {
 		this.commandProxy().insertAll(
 						editStates.stream()

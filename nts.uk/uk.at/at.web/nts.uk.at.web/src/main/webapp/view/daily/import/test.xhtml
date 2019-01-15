@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition template="../../../master/base.xhtml">
+			<ui:define name="htmlHead">
+				<com:stylefile path="/view/sample/catalog/catalog.css" of="/nts.uk.com.web"/>
+			    <com:scriptfile path="/view/sample/catalog/catalog.js" of="/nts.uk.com.web"/>
+			    <com:scriptfile path="start.js"/>
+			    <com:scriptfile path="vm.js"/>
+			    <com:scriptfile path="service.js"/>
+			</ui:define>
+			
+			<ui:define name="content">
+				<div id="contents-area">
+				    <div id="side-menu" class="cf"></div>
+				    <div id="content" class="cf">
+				    	<h1>日次データ受入</h1>
+						<BUTTON data-bind="click: function() { nts.uk.ui.windows.sub.modeless('/view/daily/import/index.xhtml'); }">日次データ受入を開く</BUTTON>
+				    	<span id="elapseTime"></span>
+						<div class="footer cf">
+							<button class="previous large">Previous</button>
+							<button class="next proceed large">Next</button>
+						</div>
+				    </div>
+				</div>
+			</ui:define>
+		</ui:composition>
+   	</body>
+</html>

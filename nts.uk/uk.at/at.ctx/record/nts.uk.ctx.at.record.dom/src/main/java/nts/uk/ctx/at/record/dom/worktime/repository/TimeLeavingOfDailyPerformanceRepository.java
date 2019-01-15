@@ -23,8 +23,12 @@ public interface TimeLeavingOfDailyPerformanceRepository {
 	void add(TimeLeavingOfDailyPerformance timeLeaving);
 	
 	void update(TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance);
+	
+	void update(List<TimeLeavingOfDailyPerformance> domains);
 
 	void insert(TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance);
 
 	void updateFlush(TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance);
+	
+	void deleteTimeNoBy(List<String> employeeIds, List<GeneralDate> processingYmds, int no);
 }

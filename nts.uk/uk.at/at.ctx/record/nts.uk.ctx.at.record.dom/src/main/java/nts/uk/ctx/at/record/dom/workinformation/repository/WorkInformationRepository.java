@@ -29,6 +29,10 @@ public interface WorkInformationRepository {
 	
 	void updateByKey(WorkInfoOfDailyPerformance workInfoOfDailyPerformance);
 	
+	void update(List<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance);
+	
+	void updateV2(List<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance);
+	
 	void insert(WorkInfoOfDailyPerformance workInfoOfDailyPerformance);
 	
 	void updateByKeyFlush(WorkInfoOfDailyPerformance workInfoOfDailyPerformance);
