@@ -1114,7 +1114,7 @@ module nts.uk.com.view.ccg.share.ccg {
              * function click by apply data search employee (init tab 2)
              * get base date
              */
-            applyDataSearch(): JQueryPromise<void> {
+            public applyDataSearch(): JQueryPromise<void> {
                 let dfd = $.Deferred<void>();
                 let self = this;
                 if (!self.isApplySearchDone) {
@@ -1503,14 +1503,16 @@ module nts.uk.com.view.ccg.share.ccg {
                 if (self.showPeriodYM || self.showPeriod) {
                     // self.calculatePeriod(parseInt(self.periodEnd().format(CcgDateFormat.YEAR_MONTH))).done(period => {
                     self.calculatePeriod105458().done(period => {
-                        self.inputPeriod(new DateRangePickerModel(period.startDate, period.endDate));
                         if (!self.showBaseDate) {
                             // set base date = period end
                             self.acquiredBaseDate(period.endDate);
-                        } else {
+                        } 
+                    
+                        if (self.showBaseDate && self.showClosure && self.isFirstTime) {
+                            //                            self.isApplySearchDone = false;
+                            self.inputPeriod(new DateRangePickerModel(period.startDate, period.endDate));
                             self.inputBaseDate(period.endDate);
                         }
-
                         dfd.resolve();
                     });
                 } else {

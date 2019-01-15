@@ -1011,11 +1011,10 @@ module kcp.share.list {
                     self.addAreadySettingAttr(data, self.alreadySettingList());
                 }
                 self.itemList(data);
-                let check = _.filter(data, (i: any) => { return i.code == self.componentOption.backupSelectedCode[0];});
-                if (check.length >0) {
+                let check = _.filter(data, (i: any) => { return self.componentOption.backupSelectedCode && i.code == self.componentOption.backupSelectedCode[0]; });
+                if (check.length > 0) {
                     self.componentOption.selectedCode(self.componentOption.backupSelectedCode);
-                }
-                else {
+                } else {
                     self.componentOption.selectedCode([]);
                 }
             })
