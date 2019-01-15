@@ -38,7 +38,7 @@ public class DailyDataImportWebService extends WebService{
 	@POST
 	@Path("export/errors")
 	public ExportServiceResult exportErrors(DailyImportErrorExportQuery query) {
-		CSVFileData fileData = new CSVFileData("エラー一覧", Arrays.asList("従業員コード", "対象日", "項目名", "メッセージ"), new ArrayList<>());
+		CSVFileData fileData = new CSVFileData("エラー一覧.CSV", Arrays.asList("従業員コード", "対象日", "項目名", "メッセージ"), new ArrayList<>());
 		query.getErrors().stream().forEach(e -> {
 			Map<String, Object> record = new HashMap<>();
 			record.put("従業員コード", e.getEmployeeCode());
