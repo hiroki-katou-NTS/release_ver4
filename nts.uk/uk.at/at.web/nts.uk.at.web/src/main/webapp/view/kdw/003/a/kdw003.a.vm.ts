@@ -1722,6 +1722,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 $("#btnVacationRemaining").show();
                 $('#numberHoliday').show();
                 $('#fixed-table').show();
+                $('#content-all-grid').attr('style', 'top: 15px !IMPORTANT ; position: relative; clear: both');
                 //  $("#content-grid").attr('style', 'top: 244px !IMPORTANT');
             } else if (self.displayFormat() == 1) {
                 $("#daterangepicker").css("display", "none");
@@ -1731,6 +1732,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 $('#numberHoliday').hide();
                 $('#fixed-table').hide();
                 $('#flex').hide();
+                $('#content-all-grid').attr('style', 'top: 0px !IMPORTANT ; position: relative; clear: both');
                 // $("#content-grid").attr('style', 'top: 225px !IMPORTANT');
             } else {
                 $("#daterangepicker").css("display", "block");
@@ -1740,6 +1742,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 $('#numberHoliday').hide();
                 $('#fixed-table').hide();
                 $('#flex').hide();
+                $('#content-all-grid').attr('style', 'top: 0px !IMPORTANT ; position: relative; clear: both');
                 // $("#content-grid").attr('style', 'top: 180px !IMPORTANT');
             }
         }
