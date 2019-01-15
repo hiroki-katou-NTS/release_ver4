@@ -443,13 +443,14 @@ public class DailyPerformanceCorrectionProcessor {
 							if (!emp.isEmpty())
 								screenDto.setMonthResult(monthFlexProcessor
 										.getDPMonthFlex(new DPMonthFlexParam(companyId, emp.get(0), dateRangeTemp.getEndDate(),
-												screenDto.getEmploymentCode(), dailyPerformanceDto, disItem.getAutBussCode())));
+												emp.get(0).equals(sId) ? screenDto.getEmploymentCode() : this.getEmploymentCode(companyId, dateRangeTemp.getEndDate(), emp.get(0)), 
+												dailyPerformanceDto, disItem.getAutBussCode())));
 							if (emp.get(0).equals(sId)) {
 								//社員に対応する締め期間を取得する
 								DatePeriod period = closureService.findClosurePeriod(emp.get(0), dateRangeTemp.getEndDate());
 								
 								//パラメータ「日別実績の修正の状態．対象期間．終了日」がパラメータ「締め期間」に含まれているかチェックする
-								if (!period.contains(dateRangeTemp.getEndDate())) {
+								if (period == null || !period.contains(dateRangeTemp.getEndDate())) {
 									screenDto.setIndentityMonthResult(new IndentityMonthResult(false, true, true));
 									//対象日の本人確認が済んでいるかチェックする
 									//screenDto.checkShowTighProcess(displayFormat, true);
