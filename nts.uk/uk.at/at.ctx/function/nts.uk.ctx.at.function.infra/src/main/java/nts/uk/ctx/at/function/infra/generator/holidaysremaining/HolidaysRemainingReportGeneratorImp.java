@@ -711,7 +711,7 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 					}
 					// I1_3 代休_使用数_日数
 					cells.get(firstRow, 6).setValue(currentHolidayItem.getMonthUse());
-					if (isRemainingChargeSubstitute) {
+					if (isOutputItemSubstitute) {
 						// I1_4 代休_残数_日数
 						cells.get(firstRow, 7).setValue(currentHolidayItem.getMonthEndRemain());
 						if (currentHolidayItem.getMonthEndRemain() < 0) {
@@ -887,7 +887,7 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 					}
 					// J1_3 振休_使用数
 					cells.get(firstRow, 6).setValue(holidayRemainItem.getMonthUse());
-					if (isNumberRemainingPause) {
+					if (isPauseItem) {
 						// J1_4 振休_残数
 						cells.get(firstRow, 7).setValue(holidayRemainItem.getMonthEndRemain());
 						if (holidayRemainItem.getMonthEndRemain() < 0) {
