@@ -143,14 +143,14 @@ public class HolidayServiceImpl implements HolidayService {
 			listWorkTimeCodes.forEach(x -> workTimes.add(x));
 		}
 		workTimeHolidayWork.setWorkTimeCodes(workTimes);
-		if(!personalLablorCodition.isPresent() || personalLablorCodition.get().getWorkCategory().getWeekdayTime() == null){
+		if(!personalLablorCodition.isPresent() || personalLablorCodition.get().getWorkCategory().getHolidayWork() == null){
 			// 先頭の勤務種類を選択する
 			if(!CollectionUtil.isEmpty(workTimeHolidayWork.getWorkTimeCodes())){
 				workTimeHolidayWork.setWorkTimeCode(workTimeHolidayWork.getWorkTimeCodes().get(0));
 			}
 		}else{
 			//ドメインモデル「個人勤務日区分別勤務.休日出勤時.就業時間帯コード」を選択する
-			workTimeHolidayWork.setWorkTimeCode(personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTimeCode().get().toString());
+			workTimeHolidayWork.setWorkTimeCode(personalLablorCodition.get().getWorkCategory().getHolidayWork().getWorkTimeCode().get().toString());
 		}
 		if(workTimeHolidayWork.getWorkTimeCode() != null){
 			WorkTimeSetting workTime =  workTimeRepository.findByCode(companyID,workTimeHolidayWork.getWorkTimeCode())
