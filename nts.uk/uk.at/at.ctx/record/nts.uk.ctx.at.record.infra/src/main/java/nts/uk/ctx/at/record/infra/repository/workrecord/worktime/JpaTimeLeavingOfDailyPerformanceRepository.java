@@ -590,9 +590,9 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 	@SneakyThrows
 	private void internalUpdate(List<String> lstEmployeeIds, List<GeneralDate> ymds) {
 		StringBuilder builderString = new StringBuilder();
-		builderString.append("UPDATE KRCDT_TIME_LEAVING_WORK a ");
-		builderString.append(" SET ATD_STAMP_ROUDING_TIME_DAY = NULL, ATD_STAMP_TIME = NULL, ATD_STAMP_PLACE_CODE = NULL, ATD_STAMP_SOURCE_INFO = NULL");
-		builderString.append(" SET LWK_STAMP_ROUDING_TIME_DAY = NULL, LWK_STAMP_TIME = NULL, LWK_STAMP_PLACE_CODE = NULL, LWK_STAMP_SOURCE_INFO = NULL");
+		builderString.append("UPDATE KRCDT_TIME_LEAVING_WORK ");
+		builderString.append(" SET ATD_STAMP_ROUDING_TIME_DAY = NULL, ATD_STAMP_TIME = NULL, ATD_STAMP_PLACE_CODE = NULL, ATD_STAMP_SOURCE_INFO = NULL,");
+		builderString.append(" LWK_STAMP_ROUDING_TIME_DAY = NULL, LWK_STAMP_TIME = NULL, LWK_STAMP_PLACE_CODE = NULL, LWK_STAMP_SOURCE_INFO = NULL");
 		builderString.append(" WHERE SID IN ("+ lstEmployeeIds.stream().map(c -> "?").collect(Collectors.joining(", ")) +") ");
 		builderString.append(" AND YMD IN (" + ymds.stream().map(c -> "?").collect(Collectors.joining(", ")) + ") ");
 		builderString.append(" AND WORK_NO = 1 AND TIME_LEAVING_TYPE = 0");
