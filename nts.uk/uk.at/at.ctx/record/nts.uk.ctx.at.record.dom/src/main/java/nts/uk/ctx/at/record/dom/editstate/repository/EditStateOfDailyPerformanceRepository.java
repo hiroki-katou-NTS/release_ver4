@@ -14,7 +14,7 @@ public interface EditStateOfDailyPerformanceRepository {
 	
 	void deleteByListEmployeeId(List<String> employeeIds, List<GeneralDate> processingYmds);
 	
-	void deleteBy(List<String> employeeIds, List<GeneralDate> processingYmds, List<Integer> itemIdList);
+	void deleteBy(List<String> employeeIds, List<GeneralDate> processingYmds);
 	
 	void add(List<EditStateOfDailyPerformance> editStates);
 	

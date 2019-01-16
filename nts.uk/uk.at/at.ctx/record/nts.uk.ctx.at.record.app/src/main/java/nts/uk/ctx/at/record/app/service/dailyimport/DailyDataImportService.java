@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import nts.arc.task.data.TaskDataSetter;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -18,5 +19,5 @@ public interface DailyDataImportService {
 	void removePreData(DatePeriod period, List<String> empIds, List<TimeLeavingOfDailyPerformance> timeLeaves);
 	
 	void finishUpdate(List<WorkInfoOfDailyPerformance> cWorkInfo, List<TimeLeavingOfDailyPerformance> cTimeLeave,
-			List<BreakTimeOfDailyPerformance> cBreak);
+			List<BreakTimeOfDailyPerformance> cBreak, List<EditStateOfDailyPerformance> edits);
 }

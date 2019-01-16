@@ -41,10 +41,10 @@ public class DailyDataImportWebService extends WebService{
 		CSVFileData fileData = new CSVFileData("エラー一覧.CSV", Arrays.asList("従業員コード", "対象日", "項目名", "メッセージ"), new ArrayList<>());
 		query.getErrors().stream().forEach(e -> {
 			Map<String, Object> record = new HashMap<>();
-			record.put("従業員コード", e.getEmployeeCode());
+			record.put("従業員コード", "'" + e.getEmployeeCode());
 			record.put("対象日", e.getYmd() == null ? "" : e.getYmd().toString("yyyy/MM/dd"));
 			record.put("項目名", e.getItems().isEmpty() ? "" : e.getItems().stream().collect(Collectors.joining(" ")));
-			record.put("メッセージ", e.getItems().isEmpty() ? "" : "項目エラー");
+			record.put("メッセージ", e.getMessage());
 			fileData.getDatas().add(record);
 		});
 		return exportService.start(fileData);

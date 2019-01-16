@@ -26,7 +26,8 @@ public class DailyDataImportTempRepositoryImpl extends JpaRepository implements 
 	@SneakyThrows
 	public List<DailyDataImportTemp> getDataImport(DatePeriod period, String companyCode) {
 		String sql = "SELECT SCD, YMD, WORKTYPE, WORKTIME, STARTTIME, ENDTIME, BREAKSTARTTIME1, BREAKENDTIME1, BREAKSTARTTIME2, "
-				+ " BREAKENDTIME2 FROM KRCDT_TEMP_DAI WHERE CCD = ? AND YMD <= ? AND YMD >= ?";
+				+ " BREAKENDTIME2 FROM KRCDT_TEMP_DAI WHERE CCD = ? AND YMD <= ? AND YMD >= ?"
+				+ " ORDER BY SCD, YMD";
 		
 		try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
 			stmt.setInt(1, Integer.valueOf(companyCode));

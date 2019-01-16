@@ -6,6 +6,8 @@ module nts.uk.at.view.daily.importing.viewmodel {
         elapseTime: nts.uk.ui.sharedvm.KibanTimer;
         totalEmp: KnockoutObservable<string>;
         processEmp: KnockoutObservable<string>;
+        processRecordNumbers: KnockoutObservable<number>;
+        successRecordNumber: KnockoutObservable<number>;
         status: KnockoutObservable<string>;
         errorNumber: KnockoutObservable<string>;
         errors: KnockoutObservableArray<any>;
@@ -14,11 +16,13 @@ module nts.uk.at.view.daily.importing.viewmodel {
 
         constructor() {
             let self = this;
-            self.dateValue = ko.observable({startDate: "2018/10/01", endDate: "2018/10/31"});
+            self.dateValue = ko.observable({startDate: null, endDate: null});
             self.processId = ko.observable("");
             self.canProcess = ko.observable(true);
             self.totalEmp = ko.observable("");
             self.processEmp = ko.observable("");
+            self.processRecordNumbers = ko.observable("");
+            self.successRecordNumber = ko.observable("");
             self.status = ko.observable("");
             self.errorNumber = ko.observable("");
             self.errors = ko.observableArray();
@@ -29,9 +33,14 @@ module nts.uk.at.view.daily.importing.viewmodel {
 
         importData() {
             let self = this;
+            self.reset();
             self.elapseTime.start();
-            self.errors([]); 
             self.canProcess(false);
+            if(_.isNil(self.dateValue().startDate) || _.isNil(self.dateValue().endDate) 
+                || !moment(self.dateValue().startDate).isValid() || !moment(self.dateValue().endDate).isValid()){
+                nts.uk.ui.dialog.alertError("処理期間を入力してください");
+                return;
+            }
             service.importData({startDate: moment(self.dateValue().startDate).utc().format(), 
                                 endDate: moment(self.dateValue().endDate).utc().format()}).done((taskInfo) => {
                             self.processId(taskInfo.id);
@@ -45,6 +54,8 @@ module nts.uk.at.view.daily.importing.viewmodel {
                                         self.processEmp(processed + "人　/　" + totalProcess + "人");
                                         self.status(self.getAsyncData(res.taskDatas, "status").valueAsString);
                                         self.errorNumber(self.getAsyncData(res.taskDatas, "errorCount").valueAsNumber);
+                                        self.processRecordNumbers(self.getAsyncData(res.taskDatas, "processRecords").valueAsNumber);
+                                        self.successRecordNumber(self.getAsyncData(res.taskDatas, "successRecords").valueAsNumber);
 
                                         if(res.succeeded || res.failed || res.cancelled) {
                                             self.canProcess(true);
@@ -63,6 +74,17 @@ module nts.uk.at.view.daily.importing.viewmodel {
                                     return infor.pending || infor.running;
                                 }).pause(1000));
                         });
+        }
+
+        private reset() {
+            let self = this;
+            self.totalEmp("");
+            self.processEmp("");
+            self.status("");
+            self.errorNumber("");
+            self.processRecordNumbers("");
+            self.successRecordNumber("");
+            self.errors([]); 
         }
 
         private getAsyncData(data: Array<any>, key: string): any {

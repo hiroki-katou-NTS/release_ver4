@@ -9,7 +9,7 @@
 <body>
 	<ui:composition template="../../../master/dialog.xhtml">
 		<ui:define name="htmlHead">
-           	<script>var dialogSize = { width: 530, height: 300 };</script>
+           	<script>var dialogSize = { width: 530, height: 400 };</script>
 			<com:stylefile path="style.css" />
 			<com:scriptfile path="start.js" />
 			<com:scriptfile path="service.js" />
@@ -23,7 +23,10 @@
 				<button class="normal" data-bind="click: closeDialog">#{i18n.getText('KSM004_59')}</button>
 			</div>
 			<div id="contents-area">
-				<div id="process-range" data-bind="ntsDateRangePicker: { required: true, showNextPrevious: true, value: dateValue, maxRange: 'oneMonth'}"></div>
+				<div id="process-range" class="cf">
+					<div id="process-range-label" data-bind="ntsFormLabel: {}"><label>処理機関：　</label></div>
+					<div id="process-range-picker" data-bind="ntsDateRangePicker: { required: true, showNextPrevious: true, value: dateValue, maxRange: 'oneMonth'}"></div>
+				</div>
 				<div id="process-info">
 					<table>
 						<COLGROUP>
@@ -36,7 +39,7 @@
 								<td><span id="elapseTime"></span></td>
 							</tr>
 							<tr>
-								<td class="info-label">処理従業員状態：　</td>
+								<td class="info-label">処理人数：　</td>
 								<td><span data-bind="text: processEmp"></span></td>
 							</tr>
 							<tr>
@@ -44,7 +47,15 @@
 								<td><span data-bind="text: status"></span></td>
 							</tr>
 							<tr>
-								<td class="info-label">エラー数：　</td>
+								<td class="info-label">受入データ件数：　</td>
+								<td><span data-bind="text: processRecordNumbers"></span></td>
+							</tr>
+							<tr>
+								<td class="info-label">受入成功件数：　</td>
+								<td><span data-bind="text: successRecordNumber"></span></td>
+							</tr>
+							<tr>
+								<td class="info-label">エラー件数：　</td>
 								<td><span data-bind="text: errorNumber"></span></td>
 							</tr>
 						</tbody>
