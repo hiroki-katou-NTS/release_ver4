@@ -135,14 +135,15 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 			List<BreakTimeOfDailyPerformance> breakItems = breakItemRepo.finds(empIds, period);
 			
 			dataSetter.updateData("status", "準備中 (2/2)");
+			AtomicInteger successEmpCount = new AtomicInteger(0);
 			
-			parallelManager.forEach(empIds, emp -> {
-				self.removePreData(period, Arrays.asList(emp), 
-						timeLeaves.stream().filter(tl -> tl.getEmployeeId().equals(emp)).collect(Collectors.toList()));
-			});
+			//parallelManager.forEach(empIds, emp -> {
+				self.removePreData(period, empIds, timeLeaves);
+				//dataSetter.updateData(SUCCESSED_EMP_COUNT, successEmpCount.incrementAndGet());
+			//});
 
 			dataSetter.updateData("status", "受入データ処理中");
-			AtomicInteger successEmpCount = new AtomicInteger(0);
+			//successEmpCount.set(0);
 			AtomicInteger successRecordCount = new AtomicInteger(0);
 			
 			parallelManager.forEach(groupByEmpCode(importData), edi -> {
@@ -203,7 +204,7 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 	@TransactionAttribute(value = TransactionAttributeType.REQUIRED)
 	public void removePreData(DatePeriod period, List<String> empIds, List<TimeLeavingOfDailyPerformance> timeLeaves) {
 		List<GeneralDate> processingYmds = period.datesBetween();
-
+		/*
 		timeLeaves.forEach(tl -> {
 			tl.getAttendanceLeavingWork(1).ifPresent(alw -> {
 				alw.getAttendanceStamp().ifPresent(as -> {
@@ -213,8 +214,9 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 					ls.removeStamp();
 				});
 			});
-		});
-		timeLeavingRepo.update(timeLeaves);
+		});*/
+//		timeLeavingRepo.update(timeLeaves);
+		timeLeavingRepo.deleteScheStamp(empIds, processingYmds);
 		// timeLeavingRepo.deleteTimeNoBy(empIds, processingYmds, 1);
 		breakItemRepo.deleteRecord1And2By(empIds, processingYmds);
 		editStateRepo.deleteBy(empIds, processingYmds);

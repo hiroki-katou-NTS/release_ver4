@@ -94,7 +94,7 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 
 	@Override
 	public void deleteBy(List<String> employeeIds, List<GeneralDate> processingYmds) {
-		StringBuilder builderString = new StringBuilder();
+		/*StringBuilder builderString = new StringBuilder();
 		builderString.append("DELETE ");
 		builderString.append("FROM KrcdtDailyRecEditSet a ");
 		builderString.append("WHERE a.krcdtDailyRecEditSetPK.employeeId IN :employeeIds ");
@@ -108,19 +108,24 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 					//.setParameter("attendanceItemIds", itemIdList)
 					.executeUpdate();
 			});
-		});
+		});*/
 		//this.getEntityManager().flush();
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, sublistEmployeeIds -> {
+			CollectionUtil.split(processingYmds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, sublistYMDs -> {
+				internalDelete(sublistEmployeeIds, sublistYMDs);
+			});
+		});
 	}
 	
 	@SneakyThrows
-	private void internalDelete(List<String> sublistEmployeeIds, List<GeneralDate> sublistYMDs, List<Integer> itemIdList) {
+	private void internalDelete(List<String> sublistEmployeeIds, List<GeneralDate> sublistYMDs) {
 		StringBuilder builderString = new StringBuilder();
 		builderString.append("DELETE FROM KRCDT_DAILY_REC_EDIT_SET ");
 		builderString.append(" WHERE SID IN ( ");
 		builderString.append(sublistEmployeeIds.stream().map(c -> "?").collect(Collectors.joining(", ")));
 		builderString.append(" ) AND YMD IN ( ");
-		builderString.append(sublistYMDs.stream().map(c -> "?").collect(Collectors.joining(", ")));
-		builderString.append(" ) AND ATTENDANCE_ITEM_ID IN (" + itemIdList.stream().map(c -> "?").collect(Collectors.joining(", ")) +") ");
+		builderString.append(sublistYMDs.stream().map(c -> "?").collect(Collectors.joining(", ")) + ")");
+		//builderString.append(" AND ATTENDANCE_ITEM_ID IN (" + itemIdList.stream().map(c -> "?").collect(Collectors.joining(", ")) +") ");
 		try (PreparedStatement ps = this.connection().prepareStatement(builderString.toString())) {
 			for (int i = 0; i < sublistEmployeeIds.size(); i++) {
 				ps.setString(i + 1, sublistEmployeeIds.get(i));
@@ -128,9 +133,9 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 			for (int i = 0; i < sublistYMDs.size(); i++) {
 				ps.setDate(i + 1 + sublistEmployeeIds.size(), Date.valueOf(sublistYMDs.get(i).localDate()));
 			}
-			for (int i = 0; i < sublistYMDs.size(); i++) {
+			/*for (int i = 0; i < sublistYMDs.size(); i++) {
 				ps.setInt(i + 1 + sublistEmployeeIds.size() + sublistYMDs.size(), itemIdList.get(i));
-			}
+			}*/
 			ps.executeUpdate();
 		}
 

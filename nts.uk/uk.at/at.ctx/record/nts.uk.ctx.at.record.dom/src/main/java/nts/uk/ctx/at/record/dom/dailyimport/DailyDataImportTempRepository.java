@@ -12,4 +12,6 @@ public interface DailyDataImportTempRepository {
 	List<String> getTargetEmpCode(DatePeriod period, String companyCode);
 	
 	List<DailyDataImportTemp> getDataImport(DatePeriod period, String companyCode, Collection<String> empCode);
+	
+	void truncateTable();
 }

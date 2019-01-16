@@ -60,7 +60,6 @@ public class DailyDataImportTempRepositoryImpl extends JpaRepository implements 
 	}
 
 	@Override
-	@SneakyThrows
 	public List<DailyDataImportTemp> getDataImport(DatePeriod period, String companyCode, Collection<String> empCode) {
 		List<DailyDataImportTemp> result = new ArrayList<>();
 		CollectionUtil.split(new ArrayList<>(empCode), DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, emps -> {
@@ -68,6 +67,14 @@ public class DailyDataImportTempRepositoryImpl extends JpaRepository implements 
 		});
 		
 		return result;
+	}
+	
+	@Override
+	@SneakyThrows
+	public void truncateTable() {
+		try (PreparedStatement stmt = this.connection().prepareStatement("truncate table KRCDT_TEMP_DAI")) {
+			stmt.executeUpdate();
+		}
 	}
 
 	@SneakyThrows

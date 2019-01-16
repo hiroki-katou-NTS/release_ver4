@@ -118,7 +118,7 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 
 	@Override
 	public void deleteRecord1And2By(List<String> employeeIds, List<GeneralDate> ymds) {
-		StringBuilder builderString = new StringBuilder();
+		/*StringBuilder builderString = new StringBuilder();
 		builderString.append("DELETE FROM KrcdtDaiBreakTime a ");
 		builderString.append(" WHERE a.krcdtDaiBreakTimePK.employeeId IN :employeeIds ");
 		builderString.append(" AND a.krcdtDaiBreakTimePK.ymd IN :ymds ");
@@ -131,13 +131,13 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 					.setParameter("ymds", sublistYMDs)
 					.executeUpdate();
 			});
-		});
-		/*
+		});*/
+		
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, sublistEmployeeIds -> {
 			CollectionUtil.split(ymds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, sublistYMDs -> {
 				internalDelete(sublistEmployeeIds, sublistYMDs);
 			});
-		});*/
+		});
 	}
 
 	@SneakyThrows

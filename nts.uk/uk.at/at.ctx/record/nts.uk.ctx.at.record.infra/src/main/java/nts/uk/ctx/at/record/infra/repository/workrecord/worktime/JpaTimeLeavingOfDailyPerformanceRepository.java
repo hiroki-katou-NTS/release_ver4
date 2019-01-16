@@ -576,6 +576,36 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 			});
 		});
 	}
+	
+	@Override
+	public void deleteScheStamp(List<String> employeeIds, List<GeneralDate> processingYmds) {
+		
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstEmployeeIds -> {
+			CollectionUtil.split(processingYmds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, ymds -> {
+				internalUpdate(lstEmployeeIds, ymds);
+			});
+		});
+	}
+
+	@SneakyThrows
+	private void internalUpdate(List<String> lstEmployeeIds, List<GeneralDate> ymds) {
+		StringBuilder builderString = new StringBuilder();
+		builderString.append("UPDATE KRCDT_TIME_LEAVING_WORK a ");
+		builderString.append(" SET ATD_STAMP_ROUDING_TIME_DAY = NULL, ATD_STAMP_TIME = NULL, ATD_STAMP_PLACE_CODE = NULL, ATD_STAMP_SOURCE_INFO = NULL");
+		builderString.append(" SET LWK_STAMP_ROUDING_TIME_DAY = NULL, LWK_STAMP_TIME = NULL, LWK_STAMP_PLACE_CODE = NULL, LWK_STAMP_SOURCE_INFO = NULL");
+		builderString.append(" WHERE SID IN ("+ lstEmployeeIds.stream().map(c -> "?").collect(Collectors.joining(", ")) +") ");
+		builderString.append(" AND YMD IN (" + ymds.stream().map(c -> "?").collect(Collectors.joining(", ")) + ") ");
+		builderString.append(" AND WORK_NO = 1 AND TIME_LEAVING_TYPE = 0");
+		try (PreparedStatement ps = this.connection().prepareStatement(builderString.toString())) {
+			for (int i = 0; i < lstEmployeeIds.size(); i++) {
+				ps.setString(i + 1, lstEmployeeIds.get(i));
+			}
+			for (int i = 0; i < ymds.size(); i++) {
+				ps.setDate(i + 1 + lstEmployeeIds.size(), Date.valueOf(ymds.get(i).localDate()));
+			}
+			ps.executeUpdate();
+		}
+	}
 
 	@Override
 	public void update(List<TimeLeavingOfDailyPerformance> domains) {

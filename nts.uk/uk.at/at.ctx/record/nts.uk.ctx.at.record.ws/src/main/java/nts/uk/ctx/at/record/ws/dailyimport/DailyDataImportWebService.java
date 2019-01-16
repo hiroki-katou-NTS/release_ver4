@@ -16,6 +16,7 @@ import nts.arc.layer.ws.WebService;
 import nts.arc.task.AsyncTaskInfo;
 import nts.uk.ctx.at.record.app.command.dailyimport.DailyDataImportExecuteHandler;
 import nts.uk.ctx.at.record.app.command.dailyimport.DailyDataImportExexuteCommand;
+import nts.uk.ctx.at.record.app.command.dailyimport.DailyDataImportTruncateDataHandler;
 import nts.uk.shr.infra.file.csv.CSVExportService;
 import nts.uk.shr.infra.file.csv.CSVFileData;
 
@@ -27,12 +28,21 @@ public class DailyDataImportWebService extends WebService{
 	private DailyDataImportExecuteHandler executer;
 	
 	@Inject
+	private DailyDataImportTruncateDataHandler truncater;
+	
+	@Inject
 	private CSVExportService exportService;
 	
 	@POST
 	@Path("import")
 	public AsyncTaskInfo execute(DailyDataImportExexuteCommand command) {
 		return executer.handle(command);
+	}
+	
+	@POST
+	@Path("truncate")
+	public void truncate() {
+		truncater.handle(null);
 	}
 	
 	@POST

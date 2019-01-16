@@ -75,6 +75,18 @@ module nts.uk.at.view.daily.importing.viewmodel {
                                 }).pause(1000));
                         });
         }
+        
+        truncate() {
+            let self = this;
+            nts.uk.ui.dialog.confirm({ messageId: "本当に削除してよろしいですか？" }).ifYes(() => {
+                    service.truncate().done(() => {
+                        nts.uk.ui.dialog.info("「削除しました」");
+                        });
+                 }).ifNo(() => {
+                     return;
+                 });
+            
+        }
 
         private reset() {
             let self = this;

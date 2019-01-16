@@ -31,4 +31,6 @@ public interface TimeLeavingOfDailyPerformanceRepository {
 	void updateFlush(TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance);
 	
 	void deleteTimeNoBy(List<String> employeeIds, List<GeneralDate> processingYmds, int no);
+	
+	void deleteScheStamp(List<String> employeeIds, List<GeneralDate> processingYmds);
 }
