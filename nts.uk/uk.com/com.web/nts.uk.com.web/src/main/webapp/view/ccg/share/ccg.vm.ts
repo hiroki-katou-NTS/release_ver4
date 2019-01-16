@@ -270,7 +270,7 @@ module nts.uk.com.view.ccg.share.ccg {
             public initSubscribers(): void {
                 let self = this;
                 self.baseDate.subscribe(vl => {
-                    self.applyDataSearch();
+                    self.applyDataSearch(); console.log("Line 273 " + vl);
                 });
 
                 self.selectedTab.subscribe(vl => {
@@ -282,7 +282,7 @@ module nts.uk.com.view.ccg.share.ccg {
 
                 self.inputPeriod.subscribe(value => {
                     if (!$('.ntsDatepicker').ntsError('hasError')) {
-                        _.defer(() => self.applyDataSearch());
+                        _.defer(() => self.applyDataSearch()); console.log("Line 285 " + value.startDate + "~" + value.endDate);
                     }
                 });
 
@@ -914,7 +914,7 @@ module nts.uk.com.view.ccg.share.ccg {
                 if (self.isFirstTime) {
                     // Apply data search & load Kcp components
                     self.synchronizeDate();
-                    self.toggleSlide().done(() => $.when(self.applyDataSearch(), self.loadKcp005()).always(() => {
+                    console.log("Line 917"); self.toggleSlide().done(() => $.when(self.applyDataSearch(), self.loadKcp005()).always(() => {
                         // Set acquired base date to status period end date
                         self.retirePeriod(new DateRangePickerModel('1900/01/01', self.queryParam.baseDate));
 
@@ -1126,7 +1126,7 @@ module nts.uk.com.view.ccg.share.ccg {
                 if (!self.isValidInput() || self.isInvalidBaseDate()) {
                     dfd.reject();
                     return dfd.promise();
-                }
+                } console.log("pass applyDataSearch");
 
                 self.isApplySearchDone = false;
                 nts.uk.ui.block.grayout(); // block ui
@@ -1509,7 +1509,7 @@ module nts.uk.com.view.ccg.share.ccg {
                         } 
                     
                         if (self.showBaseDate && self.showClosure && self.isFirstTime) {
-                            //                            self.isApplySearchDone = false;
+                            self.isApplySearchDone = false;
                             self.inputPeriod(new DateRangePickerModel(period.startDate, period.endDate));
                             self.inputBaseDate(period.endDate);
                         }
