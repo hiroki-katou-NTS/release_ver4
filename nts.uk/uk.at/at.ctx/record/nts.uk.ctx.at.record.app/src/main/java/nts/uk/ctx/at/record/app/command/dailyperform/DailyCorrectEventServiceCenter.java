@@ -34,6 +34,9 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.optitem.OptionalItem;
 import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
+import nts.uk.ctx.at.record.dom.service.event.common.CorrectEventConts;
+import nts.uk.ctx.at.record.dom.service.event.common.EventHandleResult;
+import nts.uk.ctx.at.record.dom.service.event.common.EventHandleResult.EventHandleAction;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
@@ -63,23 +66,6 @@ public class DailyCorrectEventServiceCenter {
 
 	@Inject
 	private OptionalItemRepository optionalMasterRepo;
-	
-	public final static List<Integer> WORK_INFO_ITEMS = Arrays.asList(28, 29);
-	
-	public final static List<Integer> LEAVE_ITEMS = Arrays.asList(31, 41);
-	
-	public final static List<Integer> ATTENDANCE_ITEMS = Arrays.asList(34, 44);
-	
-	public final static List<Integer> BREAK_TIME_ITEMS = Arrays.asList(157, 159, 160, 161, 163, 165, 166, 167, 169, 171, 172,
-			173, 175, 177, 178, 179, 181, 183, 184, 185, 187, 189, 190, 191, 193, 195, 196, 197, 199, 201, 202, 203,
-			205, 207, 208, 209, 211, 213, 214, 215);
-	
-	public final static List<Integer> START_BREAK_TIME_CLOCK_ITEMS = Arrays.asList(157, 163, 169, 175, 181, 187, 193, 199, 205, 211);
-	
-	public final static List<Integer> END_BREAK_TIME_CLOCK_ITEMS = Arrays.asList(159, 165, 171, 177, 183, 189, 195, 201, 207, 213);
-	
-	public final static List<Integer> ATTENDANCE_LEAVE_ITEMS = Arrays.asList(31, 34, 41, 44);
-
 
 	
 	public CorrectResult correctTimeLeaveAndBreakTime(List<DailyRecordWorkCommand> sources, String companyId){
@@ -112,28 +98,28 @@ public class DailyCorrectEventServiceCenter {
 		triggerTimeLeave(companyId, workType, workCondition, 
 				eventBus, triggerBus, domain.getWorkInformation(), domain.getEditState(),
 				domain.getAttendanceLeave(), e -> {
-					if(e.action == EventHandleAction.ABORT){
+					if(e.getAction() == EventHandleAction.ABORT){
 						return;
 					}
 					
-					domain.setAttendanceLeave(Optional.ofNullable(e.data));
+					domain.setAttendanceLeave(Optional.ofNullable(e.getData()));
 					
 					correctedType.add(DailyDomainGroup.ATTENDACE_LEAVE);
 				});
 		
 		triggerBreakTime(companyId, workType, eventBus, triggerBus, domain.getWorkInformation(),
 				domain.getEditState(), domain.getBreakTime(), domain.getAttendanceLeave(), e -> {
-					if(e.action == EventHandleAction.ABORT){
+					if(e.getAction() == EventHandleAction.ABORT){
 						return;
 					}
-					if(e.action == EventHandleAction.DELETE){
+					if(e.getAction() == EventHandleAction.DELETE){
 						
 						domain.getBreakTime().removeIf(b -> b.getBreakType() == BreakType.REFER_WORK_TIME);
 						
-					} else if(e.action == EventHandleAction.INSERT || e.action == EventHandleAction.UPDATE) {
+					} else if(e.getAction() == EventHandleAction.INSERT || e.getAction() == EventHandleAction.UPDATE) {
 						
 						domain.getBreakTime().removeIf(b -> b.getBreakType() == BreakType.REFER_WORK_TIME);
-						domain.getBreakTime().add(e.data);
+						domain.getBreakTime().add(e.getData());
 						domain.getBreakTime().sort((c1, c2) -> c1.getBreakType().compareTo(c2.getBreakType()));
 					}
 					correctedType.add(DailyDomainGroup.BREAK_TIME);
@@ -156,8 +142,8 @@ public class DailyCorrectEventServiceCenter {
 	}
 	
 	private EventTriggerBus judgeEventTriggerType(List<ItemValue> s) {
-		boolean workInfoChanged = s.stream().anyMatch(i -> WORK_INFO_ITEMS.contains(i.itemId()));
-		boolean timeLeaveChanged = s.stream().anyMatch(i -> ATTENDANCE_LEAVE_ITEMS.contains(i.itemId()));
+		boolean workInfoChanged = s.stream().anyMatch(i -> CorrectEventConts.WORK_INFO_ITEMS.contains(i.itemId()));
+		boolean timeLeaveChanged = s.stream().anyMatch(i -> CorrectEventConts.ATTENDANCE_LEAVE_ITEMS.contains(i.itemId()));
 		return EventTriggerBus.builder().workInfoChanged(workInfoChanged).timeLeaveChanged(timeLeaveChanged).build();
 	}
 	
@@ -196,7 +182,7 @@ public class DailyCorrectEventServiceCenter {
 			
 			EventHandleResult<BreakTimeOfDailyPerformance>  breakTimeCorrected = breakTimeCorrectHandler.handle(breakTimeEvent);
 			
-			if(breakTimeCorrected.action == EventHandleAction.ABORT){
+			if(breakTimeCorrected.getAction() == EventHandleAction.ABORT){
 				actionAfterComplete.accept(EventHandleResult.onFail());
 				return;
 			}
@@ -229,7 +215,7 @@ public class DailyCorrectEventServiceCenter {
 	
 			EventHandleResult<TimeLeavingOfDailyPerformance> timeLeaveCorrected = timeLeaveCorrectHandler.handle(timeLeaveEvent);
 	
-			if(timeLeaveCorrected.action == EventHandleAction.ABORT){
+			if(timeLeaveCorrected.getAction() == EventHandleAction.ABORT){
 			actionAfterComplete.accept(EventHandleResult.onFail());
 			return;
 		}
@@ -245,9 +231,9 @@ public class DailyCorrectEventServiceCenter {
 	}
 
 	private Map<DailyRecordWorkCommand, EventTriggerBus> mapShouldTriggerSources(List<DailyRecordWorkCommand> sources, EventTrigger eventBus) {
-		List<Integer> timeLeaveItems = mergeItems(ATTENDANCE_ITEMS, LEAVE_ITEMS);
+		List<Integer> timeLeaveItems = mergeItems(CorrectEventConts.ATTENDANCE_ITEMS, CorrectEventConts.LEAVE_ITEMS);
 		return sources.stream().collect(Collectors.toMap(s -> s, s -> {
-			boolean workInfoChanged = s.itemValues().stream().anyMatch(i -> WORK_INFO_ITEMS.contains(i.itemId()));
+			boolean workInfoChanged = s.itemValues().stream().anyMatch(i -> CorrectEventConts.WORK_INFO_ITEMS.contains(i.itemId()));
 			boolean timeLeaveChanged = s.itemValues().stream().anyMatch(i -> timeLeaveItems.contains(i.itemId()));
 			return EventTriggerBus.builder().workInfoChanged(workInfoChanged).timeLeaveChanged(timeLeaveChanged).build();
 		}));
@@ -294,17 +280,17 @@ public class DailyCorrectEventServiceCenter {
 			triggerTimeLeave(companyId, workTypes.get(wi.getRecordInfo().getWorkTypeCode()), getBySidAndDate(workCondition, wi), 
 					eventTriggerBus, c.getValue(), wi, dailyRecord.getEditState().getData(),
 					dailyRecord.getTimeLeaving().getData(), e -> {
-						dailyRecord.getTimeLeaving().updateDataO(Optional.ofNullable(e.data));
+						dailyRecord.getTimeLeaving().updateDataO(Optional.ofNullable(e.getData()));
 						dailyRecord.getTimeLeaving().shouldDeleteIfNull();
 					});
 			
 			triggerBreakTime(companyId, workTypes.get(wi.getRecordInfo().getWorkTypeCode()), eventTriggerBus, c.getValue(), wi,
 					dailyRecord.getEditState().getData(), dailyRecord.getBreakTime().getData(), dailyRecord.getTimeLeaving().getData(), e -> {
-						if(e.action == EventHandleAction.DELETE){
+						if(e.getAction() == EventHandleAction.DELETE){
 							dailyRecord.getBreakTime().getData().removeIf(b -> b.getBreakType() == BreakType.REFER_WORK_TIME);
 							dailyRecord.getBreakTime().shouldDeleteIfNull();
-						} else if(e.action == EventHandleAction.INSERT || e.action == EventHandleAction.UPDATE) {
-							dailyRecord.getBreakTime().updateData(e.data);
+						} else if(e.getAction() == EventHandleAction.INSERT || e.getAction() == EventHandleAction.UPDATE) {
+							dailyRecord.getBreakTime().updateData(e.getData());
 						}
 					});
 			
@@ -336,35 +322,6 @@ public class DailyCorrectEventServiceCenter {
 		private List<DailyRecordWorkCommand> data;
 		
 		private Map<String, Map<GeneralDate, WorkingConditionItem>> workCondition;
-	}
-	
-	@AllArgsConstructor
-	public static class EventHandleResult<T> {
-		
-		EventHandleAction action;
-		
-		T data;
-		
-		public static <T> EventHandleResult<T> withResult(EventHandleAction action, T data){
-			return new EventHandleResult<T>(action, data);
-		}
-		
-		public static <T> EventHandleResult<T> onFail(){
-			return new EventHandleResult<T>(EventHandleAction.ABORT, null);
-		}
-	}
-	
-	@AllArgsConstructor
-	public enum EventHandleAction {
-		
-		DELETE(1, "DELETE"),
-		UPDATE(2, "UPDATE"),
-		INSERT(3, "INSERT"),
-		ABORT(4, "ABORT");
-		
-		final int value;
-		
-		final String name;
 	}
 	
 	@Builder
