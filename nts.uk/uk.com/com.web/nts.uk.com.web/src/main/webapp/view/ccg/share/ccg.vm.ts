@@ -766,7 +766,7 @@ module nts.uk.com.view.ccg.share.ccg {
                                 // self.calculatePeriod(parseInt(moment().format(CcgDateFormat.YEAR_MONTH))).done(period => {
                                 self.calculatePeriod105458().done(period => {
                                     self.isApplySearchDone = false;
-                                    self.inputPeriod(new DateRangePickerModel(period.startDate, period.endDate));
+                                    self.inputPeriod(new DateRangePickerModel(self.showPeriodYM ? period.endDate : period.startDate, period.endDate));
                                     self.inputBaseDate(period.endDate);
                                     self.isApplySearchDone = true;
 
@@ -938,6 +938,7 @@ module nts.uk.com.view.ccg.share.ccg {
              */
             private synchronizeDate(): void {
                 let self = this;
+                self.isApplySearchDone = false;
                 // synchronize baseDate
                 if (self.baseDateOfParentScreen) {
                     const isSameDate = moment.isMoment(self.baseDateOfParentScreen()) ?
@@ -967,6 +968,8 @@ module nts.uk.com.view.ccg.share.ccg {
                 if (!_.isEmpty(self.errors)) {
                     self.errors.ntsError('check');
                 }
+                
+                self.isApplySearchDone = true;
             }
 
             /**
@@ -1510,7 +1513,7 @@ module nts.uk.com.view.ccg.share.ccg {
                     
                         if (self.showBaseDate && self.showClosure && self.isFirstTime) {
                             self.isApplySearchDone = false;
-                            self.inputPeriod(new DateRangePickerModel(period.startDate, period.endDate));
+                            self.inputPeriod(new DateRangePickerModel(self.showPeriodYM ? period.endDate : period.startDate, period.endDate));
                             self.inputBaseDate(period.endDate);
                         }
                         dfd.resolve();
