@@ -2583,7 +2583,7 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 		if (x.getStampCombinationAtr().value != 6 && x.getStampCombinationAtr().value != 7) {
 
 			// 1* // Phán đoán điều kiện phản ảnh 出退勤 của 通常打刻
-			boolean checkReflectNormal = checkReflectNormal(attendanceClass, x, timePrintDestinationOutput, date,
+			boolean checkReflectNormal = checkReflectNormal(WorkInfo, attendanceClass, x, timePrintDestinationOutput, date,
 					employeeId, companyId);
 			// 1*
 			if (checkReflectNormal) {
@@ -2932,7 +2932,7 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 	// Phán đoán điều kiện phản ảnh 出退勤 của 通常打刻 (true reflect and false no
 	// reflect)
 	// 通常打刻の出退勤を反映する
-	private boolean checkReflectNormal(String attendanceClass, StampItem stamp,
+	private boolean checkReflectNormal(WorkInfoOfDailyPerformance workInfo, String attendanceClass, StampItem stamp,
 			TimePrintDestinationOutput timePrintDestinationOutput, GeneralDate date, String employeeId,
 			String companyId) {
 		if (timePrintDestinationOutput.getLocationCode() == null
@@ -2960,7 +2960,7 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 					boolean checkPriorityAutoStamp = checkPriorityAutoStamp(timePrintDestinationOutput, companyId);
 					if (checkPriorityAutoStamp) {
 						// 3* 前優先後優先を見て反映するか確認する
-						boolean confirmReflectPriority = confirmReflectPriority(companyId, attendanceClass, stamp,
+						boolean confirmReflectPriority = confirmReflectPriority(companyId, workInfo, attendanceClass, stamp,
 								timePrintDestinationOutput, date, employeeId);
 						if (confirmReflectPriority) {
 							return true;
@@ -2979,9 +2979,9 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 	}
 
 	// 3* 前優先後優先を見て反映するか確認する (true reflect and false no reflect )
-	private boolean confirmReflectPriority(String companyId, String attendanceClass, StampItem stamp,
+	private boolean confirmReflectPriority(String companyId, WorkInfoOfDailyPerformance workInfo, String attendanceClass, StampItem stamp,
 			TimePrintDestinationOutput timePrintDestinationOutput, GeneralDate date, String employeeId) {
-		Optional<WorkInfoOfDailyPerformance> WorkInfoOptional = this.workInforRepo.find(employeeId, date);
+		Optional<WorkInfoOfDailyPerformance> WorkInfoOptional = workInfo != null ? Optional.of(workInfo) : this.workInforRepo.find(employeeId, date);
 		if (WorkInfoOptional.isPresent()) {
 			WorkInformation recordWorkInformation = WorkInfoOptional.get().getRecordInfo();
 			WorkTimeCode workTimeCode = recordWorkInformation.getWorkTimeCode();
