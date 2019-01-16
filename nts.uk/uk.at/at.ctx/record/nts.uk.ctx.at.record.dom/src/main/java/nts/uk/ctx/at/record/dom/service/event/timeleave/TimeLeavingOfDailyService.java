@@ -54,17 +54,17 @@ public class TimeLeavingOfDailyService {
 	private EditStateOfDailyPerformanceRepository editStateRepo;
 
 	public EventHandleResult<IntegrationOfDaily> correct(String companyId, IntegrationOfDaily working,
-			Optional<WorkingConditionItem> cachedWorkCondition, Optional<WorkType> cachedWorkType) {
+			Optional<WorkingConditionItem> cachedWorkCondition, Optional<WorkType> cachedWorkType, boolean directToDB) {
 
 		WorkInfoOfDailyPerformance wi = working.getWorkInformation();
 		if(wi == null) {
-			return EventHandleResult.withResult(EventHandleAction.ABORT, null);
+			return EventHandleResult.withResult(EventHandleAction.ABORT, working);
 		}
 		
 		WorkType wt = getWithDefaul(cachedWorkType,
 				() -> getDefaultWorkType(wi.getRecordInfo().getWorkTypeCode().v(), companyId));
 		if (wt == null) {
-			return EventHandleResult.onFail();
+			return EventHandleResult.withResult(EventHandleAction.ABORT, working);
 		}
 		TimeLeavingOfDailyPerformance tlo = getWithDefaul(working.getAttendanceLeave(),
 				() -> getTimeLeaveDefault(wi.getEmployeeId(), wi.getYmd()));
@@ -78,9 +78,10 @@ public class TimeLeavingOfDailyService {
 				if (tlo != null) {
 					tl = mergeWithEditStates(working.getEditState(), wi.getEmployeeId(), wi.getYmd(), tlo, wts);
 				}
-				
-				return updated(working, updateTimeLeave(companyId, wi, tl, getWorkConditionOrDefault(cachedWorkCondition, wi.getEmployeeId(), wi.getYmd()), 
-														wi.getEmployeeId(), wi.getYmd()));
+				TimeLeavingOfDailyPerformance  updated = updateTimeLeave(companyId, wi, tl, 
+																			getWorkConditionOrDefault(cachedWorkCondition, wi.getEmployeeId(), wi.getYmd()), 
+																			wi.getEmployeeId(), wi.getYmd());
+				return updated(working, updated, directToDB);
 			//} else {
 			//	return EventHandleResult.onFail();
 			//}
@@ -88,17 +89,22 @@ public class TimeLeavingOfDailyService {
 
 		/** どちらか一方が 年休 or 特別休暇 の場合 */
 		if (wt.getDailyWork().isAnnualOrSpecialHoliday()) {
-			return EventHandleResult.onFail();
+			return EventHandleResult.withResult(EventHandleAction.ABORT, working);
 			// return EventHandleResult.withResult(EventHandleAction.UPDATE,
 			// deleteTimeLeave(true, command));
 		}
 		
-		return updated(working, deleteTimeLeave(false, tlo));
+		return updated(working, deleteTimeLeave(false, tlo), directToDB);
 	}
 
 	private EventHandleResult<IntegrationOfDaily> updated(IntegrationOfDaily working,
-			TimeLeavingOfDailyPerformance corrected) {
+			TimeLeavingOfDailyPerformance corrected, boolean directToDB) {
 		working.setAttendanceLeave(Optional.of(corrected));
+		
+
+		if(directToDB){
+			this.timeLeaveRepo.update(working.getAttendanceLeave().orElse(null));
+		}
 		
 		return EventHandleResult.withResult(EventHandleAction.UPDATE, working);
 	}

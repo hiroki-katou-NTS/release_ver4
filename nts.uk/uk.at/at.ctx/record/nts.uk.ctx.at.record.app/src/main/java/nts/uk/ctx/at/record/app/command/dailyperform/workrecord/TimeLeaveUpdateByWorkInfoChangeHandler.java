@@ -16,7 +16,6 @@ import nts.uk.ctx.at.record.dom.service.event.timeleave.TimeLeavingOfDailyServic
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.shr.com.context.AppContexts;
 
 /** Event：出退勤時刻を補正する */
@@ -25,9 +24,6 @@ public class TimeLeaveUpdateByWorkInfoChangeHandler extends CommandHandlerWithRe
 
 	@Inject
 	private WorkInformationRepository workInfoRepo;
-
-	@Inject
-	private TimeLeavingOfDailyPerformanceRepository timeLeaveRepo;
 
 	@Inject
 	private TimeLeavingOfDailyService eventService;
@@ -54,11 +50,7 @@ public class TimeLeaveUpdateByWorkInfoChangeHandler extends CommandHandlerWithRe
 				Optional.empty(), Optional.empty(),
 				command.cachedEditState.isPresent() ? command.cachedEditState.get() : new ArrayList<>(), Optional.empty(),
 				new ArrayList<>());
-		EventHandleResult<IntegrationOfDaily> result = eventService.correct(companyId, working, command.cachedWorkCondition, command.cachedWorkType);
-		
-		if(!command.actionOnCache && result.getAction() != EventHandleAction.ABORT){
-			this.timeLeaveRepo.update(result.getData().getAttendanceLeave().orElse(null));
-		}
+		EventHandleResult<IntegrationOfDaily> result = eventService.correct(companyId, working, command.cachedWorkCondition, command.cachedWorkType, !command.actionOnCache);
 		
 		if(command.isTriggerRelatedEvent && result.getAction() != EventHandleAction.ABORT) {
 			/** <<Event>> 実績の出退勤が変更されたイベントを発行する　*/

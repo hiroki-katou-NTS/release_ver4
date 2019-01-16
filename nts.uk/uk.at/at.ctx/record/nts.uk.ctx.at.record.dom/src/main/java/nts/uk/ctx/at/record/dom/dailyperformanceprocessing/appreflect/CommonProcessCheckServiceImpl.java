@@ -23,6 +23,8 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.CalculateOption;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CommonCompanySettingForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.service.event.breaktime.BreakTimeOfDailyService;
+import nts.uk.ctx.at.record.dom.service.event.timeleave.TimeLeavingOfDailyService;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
@@ -31,6 +33,8 @@ import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanc
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeIsFluidWork;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
@@ -57,6 +61,12 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	private WorkingConditionItemRepository workingCondition;
 	@Inject
 	private TimeLeavingOfDailyPerformanceRepository timeLeaving;
+	@Inject
+	private TimeLeavingOfDailyService timeLeavingService;
+	@Inject
+	private BreakTimeOfDailyService breakTimeDailyService;
+	@Inject
+	private WorkTypeRepository worktypeRepo;
 	@Override
 	public boolean commonProcessCheck(CommonCheckParameter para) {
 		ReflectedStateRecord state = ReflectedStateRecord.CANCELED;
@@ -109,11 +119,10 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		if(integrationOfDaily == null) {
 			integrationOfDaily = preOvertime.calculateForAppReflect(sid, ymd);
 		}
-
+		Optional<WorkingConditionItem> optWorkingCondition = workingCondition.getBySidAndStandardDate(sid, ymd);
 		String companyId = AppContexts.user().companyId();
 		if(integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode() != null
 				&& integrationOfDaily.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
-			Optional<WorkingConditionItem> optWorkingCondition = workingCondition.getBySidAndStandardDate(sid, ymd);
 			TimeLeavingOfDailyPerformance timeInfor = reflectWorkInfor.createStamp(companyId, 
 					integrationOfDaily.getWorkInformation(),
 					optWorkingCondition,
@@ -136,6 +145,13 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		
 		//就業時間帯の休憩時間帯を日別実績に反映する
 		integrationOfDaily = this.updateBreakTimeInfor(sid, ymd, integrationOfDaily, companyId);
+		if(integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode() != null) {
+			Optional<WorkType> workTypeInfor = worktypeRepo.findByPK(companyId, integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode().v());
+			//出退勤時刻を補正する
+			integrationOfDaily = timeLeavingService.correct(companyId, integrationOfDaily, optWorkingCondition, workTypeInfor, true).getData();
+			//休憩時間帯を補正する	
+			integrationOfDaily = breakTimeDailyService.correct(companyId, integrationOfDaily, workTypeInfor, true).getData();
+		}
 		
 		List<IntegrationOfDaily> lstCal = calService.calculateForSchedule(CalculateOption.asDefault(),
 				Arrays.asList(integrationOfDaily) , 

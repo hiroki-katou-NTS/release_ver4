@@ -54,22 +54,21 @@ public class BreakTimeOfDailyService {
 	private EditStateOfDailyPerformanceRepository editStateRepo;
 
 	public EventHandleResult<IntegrationOfDaily> correct(String companyId, IntegrationOfDaily working,
-			Optional<WorkType> cachedWorkType) {
+			Optional<WorkType> cachedWorkType, boolean directToDB) {
 
 		WorkInfoOfDailyPerformance wi = working.getWorkInformation();
 		if (wi == null) {
-			return EventHandleResult.withResult(EventHandleAction.ABORT, null);
+			return EventHandleResult.withResult(EventHandleAction.ABORT, working);
 		}
 
 		WorkType wt = getWithDefaul(cachedWorkType,
 				() -> getDefaultWorkType(wi.getRecordInfo().getWorkTypeCode().v(), companyId));
 		if (wt == null) {
-			return EventHandleResult.withResult(EventHandleAction.ABORT, null);
+			return EventHandleResult.withResult(EventHandleAction.ABORT, working);
 		}
 
 		if (!wt.isWokingDay()) {
-			/** 「日別実績の休憩時間帯」を削除する */
-			return EventHandleResult.withResult(EventHandleAction.DELETE, null);
+			return deleteBreakTime(working, directToDB);
 		}
 
 		BreakTimeOfDailyPerformance breakTime = getUpdateBreakTime(working.getAttendanceLeave(),
@@ -79,11 +78,23 @@ public class BreakTimeOfDailyService {
 			/** 「日別実績の休憩時間帯」を更新する */
 			working.getBreakTime().removeIf(b -> b.getBreakType() == BreakType.REFER_WORK_TIME);
 			working.getBreakTime().add(breakTime);
+			if (directToDB) {
+				this.breakTimeRepo.update(breakTime);
+			}
 			return EventHandleResult.withResult(EventHandleAction.UPDATE, working);
 		}
 
 		/** 「日別実績の休憩時間帯」を削除する */
-		return EventHandleResult.withResult(EventHandleAction.DELETE, null);
+		return deleteBreakTime(working, directToDB);
+	}
+
+	private EventHandleResult<IntegrationOfDaily> deleteBreakTime(IntegrationOfDaily working, boolean directToDB) {
+		working.getBreakTime().removeIf(c -> c.getBreakType() == BreakType.REFER_WORK_TIME);
+		/** 「日別実績の休憩時間帯」を削除する */
+		if (directToDB) {
+			this.breakTimeRepo.delete(working.getWorkInformation().getEmployeeId(), working.getWorkInformation().getYmd());
+		}
+		return EventHandleResult.withResult(EventHandleAction.DELETE, working);
 	}
 
 	/** 「補正した休憩時間帯」を取得する */

@@ -108,7 +108,8 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 			boolean temp = judgmentService.checkWorkTypeIsHD(workTypeCode);
 			//打刻元情報をチェックする
 			if(temp) {
-				Optional<TimeLeavingOfDailyPerformance> optTimeLeavingOfDaily = timeLeavingOfDailyRepos.findByKey(employeeId, baseDate);
+				//2019.01.16　dudt　fix bug 105518 　↓
+				/*Optional<TimeLeavingOfDailyPerformance> optTimeLeavingOfDaily = timeLeavingOfDailyRepos.findByKey(employeeId, baseDate);
 				if(optTimeLeavingOfDaily.isPresent()) {
 					TimeLeavingOfDailyPerformance timeLeavingOfDaily = optTimeLeavingOfDaily.get();
 					List<TimeLeavingWork> timeLeavingWorks = timeLeavingOfDaily.getTimeLeavingWorks().stream()
@@ -139,7 +140,9 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 						 }
 						
 					}
-				}
+				}*/				
+				return false;
+				//2019.01.16　dudt　fix bug 105518 　↑
 			}
 			
 			return true;

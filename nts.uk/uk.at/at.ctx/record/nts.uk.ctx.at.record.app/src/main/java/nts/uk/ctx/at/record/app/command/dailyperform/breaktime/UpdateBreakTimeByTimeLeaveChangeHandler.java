@@ -11,7 +11,6 @@ import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerWithResult;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
-import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.service.event.breaktime.BreakTimeOfDailyService;
 import nts.uk.ctx.at.record.dom.service.event.common.EventHandleResult;
@@ -27,9 +26,6 @@ public class UpdateBreakTimeByTimeLeaveChangeHandler extends
 
 	@Inject
 	private WorkInformationRepository workInfoRepo;
-
-	@Inject
-	private BreakTimeOfDailyPerformanceRepository breakTimeRepo;
 
 	@Inject
 	private BreakTimeOfDailyService eventService;
@@ -56,13 +52,10 @@ public class UpdateBreakTimeByTimeLeaveChangeHandler extends
 			working.getBreakTime().add(b);
 		});
 
-		EventHandleResult<IntegrationOfDaily> result = eventService.correct(companyId, working, command.cachedWorkType);
+		EventHandleResult<IntegrationOfDaily> result = eventService.correct(companyId, working, command.cachedWorkType, !command.actionOnCache);
 
 		/** 「日別実績の休憩時間帯」を削除する */
 		if (result.getAction() == EventHandleAction.DELETE) {
-			if (!command.actionOnCache) {
-				this.breakTimeRepo.delete(command.getEmployeeId(), command.targetDate);
-			}
 			return EventHandleResult.withResult(EventHandleAction.DELETE, null);
 		}
 
@@ -70,9 +63,6 @@ public class UpdateBreakTimeByTimeLeaveChangeHandler extends
 		if (result.getAction() == EventHandleAction.UPDATE || result.getAction() == EventHandleAction.INSERT) {
 			BreakTimeOfDailyPerformance breakTime = result.getData().getBreakTime().stream()
 					.filter(b -> b.getBreakType() == BreakType.REFER_WORK_TIME).findFirst().orElse(null);
-			if (!command.actionOnCache) {
-				this.breakTimeRepo.update(breakTime);
-			}
 			return EventHandleResult.withResult(EventHandleAction.UPDATE, breakTime);
 		}
 		return EventHandleResult.onFail();
