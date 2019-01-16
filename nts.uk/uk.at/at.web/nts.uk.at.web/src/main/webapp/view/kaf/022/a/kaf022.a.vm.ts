@@ -2564,7 +2564,7 @@ module nts.uk.at.view.kmf022 {
                     useAtr: self.selectedIdK15(),
                     checkUpLimitHalfDayHD: self.selectedIdK16(),
                     deferredComment: self.texteditorK17.value(),
-                    deferredLettleColor: self.valueK18(),
+                    deferredLettleColor: self.valueK18() == null ? '' : self.valueK18(),
                     deferredBold: self.enableK19() ? 1 : 0,
                     pickUpComment: self.texteditorK20.value(),
                     pickUpLettleColor: self.valueK23(),
