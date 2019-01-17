@@ -259,7 +259,8 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 	 * 予定項目ID=残業時間(枠番)の項目ID: 事前申請
 	 * @return
 	 */
-	private List<Integer> lstPreOvertimeItem(){
+	@Override
+	public List<Integer> lstPreOvertimeItem(){
 		List<Integer> lstItem = new ArrayList<Integer>();
 		lstItem.add(220);
 		lstItem.add(225);
@@ -501,8 +502,12 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 		//↑ fix bug 103077
 		return dailyData;
 	}
-	
-	private List<Integer> lstPreWorktimeFrameItem(){
+	/**
+	 * 事前休日出勤時間の項目ID
+	 * @return
+	 */
+	@Override
+	public List<Integer> lstPreWorktimeFrameItem(){
 		List<Integer> lstItem = new ArrayList<>();
 		lstItem.add(270);
 		lstItem.add(275);
@@ -516,7 +521,12 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 		lstItem.add(315);
 		return lstItem;
 	}
-	private List<Integer> lstAfterWorktimeFrameItem(){
+	/**
+	 * 事後休日出勤時間帯の項目ID
+	 * @return
+	 */
+	@Override
+	public List<Integer> lstAfterWorktimeFrameItem(){
 		List<Integer> lstItem = new ArrayList<>();
 		lstItem.add(266);
 		lstItem.add(271);
@@ -530,7 +540,12 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 		lstItem.add(311);
 		return lstItem;
 	}
-	private List<Integer> lstTranfertimeFrameItem(){
+	/**
+	 * 振替時間の項目ID
+	 * @return
+	 */
+	@Override
+	public List<Integer> lstTranfertimeFrameItem(){
 		List<Integer> lstItem = new ArrayList<>();		
 		lstItem.add(267);
 		lstItem.add(272);

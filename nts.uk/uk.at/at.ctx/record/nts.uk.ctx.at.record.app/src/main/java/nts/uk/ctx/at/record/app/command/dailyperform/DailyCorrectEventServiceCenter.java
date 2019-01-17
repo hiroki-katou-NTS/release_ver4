@@ -37,6 +37,7 @@ import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
 import nts.uk.ctx.at.record.dom.service.event.common.CorrectEventConts;
 import nts.uk.ctx.at.record.dom.service.event.common.EventHandleResult;
 import nts.uk.ctx.at.record.dom.service.event.common.EventHandleResult.EventHandleAction;
+import nts.uk.ctx.at.record.dom.service.event.overtime.OvertimeOfDailyService;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
@@ -66,6 +67,10 @@ public class DailyCorrectEventServiceCenter {
 
 	@Inject
 	private OptionalItemRepository optionalMasterRepo;
+	
+	/** TODO: create handler (?) (Tin!!!)*/
+	@Inject
+	private OvertimeOfDailyService overtimeCorrectService;
 
 	
 	public CorrectResult correctTimeLeaveAndBreakTime(List<DailyRecordWorkCommand> sources, String companyId){
@@ -124,7 +129,11 @@ public class DailyCorrectEventServiceCenter {
 					}
 					correctedType.add(DailyDomainGroup.BREAK_TIME);
 				});
-		DailyRecordDto correctted = AttendanceItemUtil.fromItemValues(DailyRecordDto.from(domain), updated.getItems());
+		//updated.getItems().addAll(Arrays.asList(a));
+		DailyRecordDto correctted = AttendanceItemUtil.fromItemValues(
+				DailyRecordDto.from(overtimeCorrectService.correct(domain, Optional.of(workType))), 
+				updated.getItems());
+		correctedType.add(DailyDomainGroup.ATTENDANCE_TIME);
 		
 		return new EventCorrectResult(setOptionalItemAtr(baseDto), setOptionalItemAtr(correctted), updated, correctedType);
 	}
@@ -293,6 +302,11 @@ public class DailyCorrectEventServiceCenter {
 							dailyRecord.getBreakTime().updateData(e.getData());
 						}
 					});
+			
+			/** TODO: need test (Tin!!!) */
+			IntegrationOfDaily domainForCorrect = dailyRecord.toDomain();
+			domainForCorrect = overtimeCorrectService.correct(domainForCorrect, Optional.ofNullable(workTypes.get(wi.getRecordInfo().getWorkTypeCode())));
+			dailyRecord.getAttendanceTime().updateData(domainForCorrect.getAttendanceTimeOfDailyPerformance());
 			
 			return dailyRecord;
 		}).collect(Collectors.toList());

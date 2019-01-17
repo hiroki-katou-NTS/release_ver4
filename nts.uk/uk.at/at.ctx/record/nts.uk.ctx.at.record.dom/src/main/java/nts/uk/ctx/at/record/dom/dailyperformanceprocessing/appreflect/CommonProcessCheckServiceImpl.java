@@ -24,6 +24,7 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.CommonCompanySettingForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.service.event.breaktime.BreakTimeOfDailyService;
+import nts.uk.ctx.at.record.dom.service.event.overtime.OvertimeOfDailyService;
 import nts.uk.ctx.at.record.dom.service.event.timeleave.TimeLeavingOfDailyService;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
@@ -67,6 +68,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	private BreakTimeOfDailyService breakTimeDailyService;
 	@Inject
 	private WorkTypeRepository worktypeRepo;
+	@Inject
+	private OvertimeOfDailyService overTimeService;
 	@Override
 	public boolean commonProcessCheck(CommonCheckParameter para) {
 		ReflectedStateRecord state = ReflectedStateRecord.CANCELED;
@@ -151,6 +154,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 			integrationOfDaily = timeLeavingService.correct(companyId, integrationOfDaily, optWorkingCondition, workTypeInfor, true).getData();
 			//休憩時間帯を補正する	
 			integrationOfDaily = breakTimeDailyService.correct(companyId, integrationOfDaily, workTypeInfor, true).getData();
+			//事前残業、休日時間を補正する
+			integrationOfDaily = overTimeService.correct(integrationOfDaily, workTypeInfor);
 		}
 		
 		List<IntegrationOfDaily> lstCal = calService.calculateForSchedule(CalculateOption.asDefault(),
