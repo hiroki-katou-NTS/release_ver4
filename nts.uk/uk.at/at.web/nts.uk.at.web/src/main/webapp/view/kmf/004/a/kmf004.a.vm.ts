@@ -379,9 +379,17 @@ module nts.uk.at.view.kmf004.a.viewmodel {
             let temp = [];
             _.forEach(targetItems, function(code) {
                 let selectedItem = _.find(self.targetItems(), function(o) { return o.code == code; });
-                if (selectedItem) {
-                    temp.push(selectedItem);
+                if (!selectedItem) {
+                    let frameNo = code.substring(1, code.length),
+                        itemType = code.charAt(0);
+                    selectedItem = {
+                        code: code,
+                        itemType: itemType,
+                        frameNo: frameNo,
+                        name: frameNo + nts.uk.resource.getText("KMF004_163"),
+                    }
                 }
+                temp.push(selectedItem);
             });
 
             let text = "";
@@ -488,16 +496,7 @@ module nts.uk.at.view.kmf004.a.viewmodel {
                 let temp = [];
                 _.forEach(self.selectedTargetItems, function(code) {
                     let selectedItem : ItemFrame = _.find(self.targetItems(), function(o) { return o.code == code; }
-                    if (!selectedItem) {
-                        let frameNo = code.substring(1, code.length),
-                            itemType = code.charAt(0);
-                        selectedItem = {
-                            code: code,
-                            itemType: itemType,
-                            frameNo: frameNo,
-                            name: code + nts.uk.resource.getText("KMF004_163"),
-                        }
-                    }
+                    
                     temp.push(selectedItem);
                 });
 
