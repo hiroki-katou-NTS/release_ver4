@@ -371,16 +371,10 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 			// listCurrentHoliday = remainDel.getResult269();
 			for (YearMonth s = currentMonth; s.lessThanOrEqualTo(endDate.yearMonth()); s = s.addMonths(1)) {
 				GeneralDate end = GeneralDate.ymd(s.year(), s.month(), 1).addMonths(1).addDays(-1);
-				DatePeriod periodDate = new DatePeriod(GeneralDate.ymd(s.year(), s.month(), 1),
-						endDate.before(end) ? endDate : end);
-				BreakDayOffRemainMngParam param = new BreakDayOffRemainMngParam(cId, employeeId, periodDate, false,
-						closureInforOpt.get().getPeriod().end(), false, new ArrayList<>(), new ArrayList<>(),
-						new ArrayList<>());
-				BreakDayOffRemainMngOfInPeriod currentHoliday = breakDayOffMngInPeriodQuery
-						.getBreakDayOffMngInPeriod(param);
-				listCurrentHoliday.add(new CurrentHolidayImported(currentMonth, currentHoliday.getCarryForwardDays(),
-						currentHoliday.getOccurrenceDays(), currentHoliday.getUseDays(),
-						currentHoliday.getUnDigestedDays(), currentHoliday.getRemainDays()));
+				DatePeriod periodDate = new DatePeriod(GeneralDate.ymd(s.year(), s.month(), 1), endDate.before(end) ? endDate : end);
+				BreakDayOffRemainMngParam param = new BreakDayOffRemainMngParam(cId, employeeId, periodDate, false, closureInforOpt.get().getPeriod().end(), false, new ArrayList<>(), new ArrayList<>(),new ArrayList<>());
+				BreakDayOffRemainMngOfInPeriod currentHoliday = breakDayOffMngInPeriodQuery .getBreakDayOffMngInPeriod(param);
+				listCurrentHoliday.add(new CurrentHolidayImported(s, currentHoliday.getCarryForwardDays(), currentHoliday.getOccurrenceDays(), currentHoliday.getUseDays(), currentHoliday.getUnDigestedDays(), currentHoliday.getRemainDays()));
 			}
 			// Call RequestList259 ver2 - hoatt
 			if (currentMonth.compareTo(startDate.yearMonth()) > 0) {
@@ -397,15 +391,10 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 			 */
 			for (YearMonth s = currentMonth; s.lessThanOrEqualTo(endDate.yearMonth()); s = s.addMonths(1)) {
 				GeneralDate end = GeneralDate.ymd(s.year(), s.month(), 1).addMonths(1).addDays(-1);
-				DatePeriod periodDate = new DatePeriod(GeneralDate.ymd(s.year(), s.month(), 1),
-						endDate.before(end) ? endDate : end);
-				AbsRecMngInPeriodParamInput param = new AbsRecMngInPeriodParamInput(cId, employeeId, periodDate,
-						closureInforOpt.get().getPeriod().end(), false, false, new ArrayList<>(), new ArrayList<>(),
-						new ArrayList<>());
+				DatePeriod periodDate = new DatePeriod(GeneralDate.ymd(s.year(), s.month(), 1), endDate.before(end) ? endDate : end);
+				AbsRecMngInPeriodParamInput param = new AbsRecMngInPeriodParamInput(cId, employeeId, periodDate, closureInforOpt.get().getPeriod().end(), false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 				AbsRecRemainMngOfInPeriod remainMng = absenceReruitmentMngInPeriodQuery.getAbsRecMngInPeriod(param);
-				listCurrentHolidayRemain.add(new CurrentHolidayRemainImported(s, remainMng.getCarryForwardDays(),
-						remainMng.getOccurrenceDays(), remainMng.getUseDays(), remainMng.getUnDigestedDays(),
-						remainMng.getRemainDays()));
+				listCurrentHolidayRemain.add(new CurrentHolidayRemainImported(s, remainMng.getCarryForwardDays(), remainMng.getOccurrenceDays(), remainMng.getUseDays(), remainMng.getUnDigestedDays(), remainMng.getRemainDays()));
 			}
 
 			// Call RequestList260 ver2 - hoatt
