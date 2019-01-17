@@ -2,6 +2,7 @@ package nts.uk.ctx.at.request.pubimp.screen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -167,6 +168,23 @@ public class ApplicationPubImpl implements ApplicationPub {
 			break;
 		}
 		return holidayAppTypeName;
+	}
+
+	@Override
+	public List<AppGroupExport> getApplicationGroupBySID(List<String> employeeID, GeneralDate startDate,
+			GeneralDate endDate) {
+		List<ApplicationExport> appExportLst = this.getApplicationBySID(employeeID, startDate, endDate);
+		List<AppGroupExport> result = new ArrayList<>();
+		Map<Object, List<AppGroupExport>> mapDate =  appExportLst.stream()
+				.map(x -> new AppGroupExport(x.getAppDate(),x.getAppType(),x.getEmployeeID(),x.getAppTypeName()))
+				.collect(Collectors.groupingBy(x -> x.getAppDate()));
+		mapDate.entrySet().stream().forEach(x -> {
+			Map<Object, List<AppGroupExport>> mapDateType = x.getValue().stream().collect(Collectors.groupingBy(y -> y.getAppType()));
+			mapDateType.entrySet().stream().forEach(y -> {
+				result.add(y.getValue().get(0));
+			});
+		});
+		return result;
 	}
 
 }
