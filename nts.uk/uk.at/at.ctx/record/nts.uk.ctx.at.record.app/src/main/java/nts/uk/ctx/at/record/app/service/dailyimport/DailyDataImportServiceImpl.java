@@ -289,8 +289,9 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 			toUpdateTL.add(currentDateTimeLeave);
 		}
 
-		if(processBreakItem(currentDateBreak, 1, importData.getBreakStart1(), importData.getBreakEnd1(), error, updatedItems) ||
-				processBreakItem(currentDateBreak, 2, importData.getBreakStart2(), importData.getBreakEnd2(), error, updatedItems)){
+		boolean break1Error = processBreakItem(currentDateBreak, 1, importData.getBreakStart1(), importData.getBreakEnd1(), error, updatedItems),
+				break2Error = processBreakItem(currentDateBreak, 2, importData.getBreakStart2(), importData.getBreakEnd2(), error, updatedItems);
+		if(break1Error || break2Error){
 			toUpdateBK.add(currentDateBreak);
 		}
 
