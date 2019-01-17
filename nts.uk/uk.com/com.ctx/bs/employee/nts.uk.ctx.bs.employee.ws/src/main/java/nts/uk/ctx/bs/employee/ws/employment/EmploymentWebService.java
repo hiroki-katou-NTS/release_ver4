@@ -102,4 +102,13 @@ public class EmploymentWebService extends WebService {
 		names = this.finder.findByCodes(employmentCodes).stream().map(item -> item.getName()).collect(Collectors.toList());
 		return names;
 	}
+	
+	@POST
+	@Path("findNamesByCodesWithNull")
+	public List<String> findNamesByCodesWithNull(List<String> employmentCodes) {
+		List<String> names = new ArrayList<>();
+		if (employmentCodes == null || employmentCodes.isEmpty()) return names;
+		names = this.finder.findByCodesWithNull(employmentCodes).stream().map(item -> item.getName()).collect(Collectors.toList());
+		return names;
+	}
 }
