@@ -3,6 +3,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
     import getShared = nts.uk.ui.windows.getShared;
     import block = nts.uk.ui.block;
     import alertError = nts.uk.ui.dialog.alertError;
+    import getText = nts.uk.resource.getText;
 
     enum ScreenMode {
         Daily = 0,
@@ -20,32 +21,32 @@ module nts.uk.at.view.kdw007.a.viewmodel {
         ]);
         showTypeAtr: KnockoutObservable<number> = ko.observable(0);
         listUseAtr: KnockoutObservableArray<any> = ko.observableArray([
-            { code: '1', name: nts.uk.resource.getText("Enum_UseAtr_Use") },
-            { code: '0', name: nts.uk.resource.getText("Enum_UseAtr_NotUse") }
+            { code: '1', name: getText("Enum_UseAtr_Use") },
+            { code: '0', name: getText("Enum_UseAtr_NotUse") }
         ]);
         listRemarkCancelErrorInput: KnockoutObservableArray<any> = ko.observableArray([
-            { code: '1', name: nts.uk.resource.getText("KDW007_109") },
-            { code: '0', name: nts.uk.resource.getText("KDW007_110") }
+            { code: '1', name: getText("KDW007_109") },
+            { code: '0', name: getText("KDW007_110") }
         ]);
         listRemarkColumnNo: KnockoutObservableArray<any> = ko.observableArray([]);
         listTypeAtr: KnockoutObservableArray<any> = ko.observableArray([
-            { code: '0', name: nts.uk.resource.getText("Enum_ErrorAlarmClassification_Error") },
-            { code: '1', name: nts.uk.resource.getText("Enum_ErrorAlarmClassification_Alarm") },
-            { code: '2', name: nts.uk.resource.getText("Enum_ErrorAlarmClassification_Other") }
+            { code: '0', name: getText("Enum_ErrorAlarmClassification_Error") },
+            { code: '1', name: getText("Enum_ErrorAlarmClassification_Alarm") },
+            { code: '2', name: getText("Enum_ErrorAlarmClassification_Other") }
         ]);
         gridListColumns: KnockoutObservableArray<any> = ko.observableArray([
-            { headerText: nts.uk.resource.getText("KDW007_6"), key: 'code', width: 45 },
-            { headerText: nts.uk.resource.getText("KDW007_7"), key: 'name', width: 280 ,formatter: _.escape}
+            { headerText: getText("KDW007_6"), key: 'code', width: 45 },
+            { headerText: getText("KDW007_7"), key: 'name', width: 280 ,formatter: _.escape}
         ]);
         lstFilteredData: KnockoutObservableArray<any> = ko.observableArray([]);
         selectedErrorAlarm: KnockoutObservable<any>;
         selectedErrorAlarmCode: KnockoutObservable<string> = ko.observable(null);
         tabs: KnockoutObservableArray<any> = ko.observableArray([
-            { id: 'tab-1', title: nts.uk.resource.getText("KDW007_9"), content: '.settingTab', enable: ko.observable(true), visible: ko.observable(true) },
-            { id: 'tab-2', title: nts.uk.resource.getText("KDW007_83"), content: '.checkScopeTab', enable: ko.observable(true), visible: ko.observable(true) },
-            { id: 'tab-3', title: nts.uk.resource.getText("KDW007_84"), content: '.conditionSettingTab1', enable: ko.observable(true), visible: ko.observable(true) },
-            { id: 'tab-4', title: nts.uk.resource.getText("KDW007_85"), content: '.conditionSettingTab2', enable: ko.observable(true), visible: ko.observable(true) },
-            { id: 'tab-5', title: nts.uk.resource.getText("KDW007_86"), content: '.applicationTab', enable: ko.observable(true), visible: ko.observable(true) }
+            { id: 'tab-1', title: getText("KDW007_9"), content: '.settingTab', enable: ko.observable(true), visible: ko.observable(true) },
+            { id: 'tab-2', title: getText("KDW007_83"), content: '.checkScopeTab', enable: ko.observable(true), visible: ko.observable(true) },
+            { id: 'tab-3', title: getText("KDW007_84"), content: '.conditionSettingTab1', enable: ko.observable(true), visible: ko.observable(true) },
+            { id: 'tab-4', title: getText("KDW007_85"), content: '.conditionSettingTab2', enable: ko.observable(true), visible: ko.observable(true) },
+            { id: 'tab-5', title: getText("KDW007_86"), content: '.applicationTab', enable: ko.observable(true), visible: ko.observable(true) }
         ]);
         selectedTab: KnockoutObservable<string> = ko.observable('tab-1');
         errorDisplayItemName: KnockoutObservable<string> = ko.observable("");
@@ -55,9 +56,9 @@ module nts.uk.at.view.kdw007.a.viewmodel {
             { code: 1, name: 'OR' }
         ]);
         enumFilterByCompare: KnockoutObservableArray<any> = ko.observableArray([
-            { code: 0, name: nts.uk.resource.getText("Enum_FilterByCompare_NotCompare") },
-            { code: 1, name: nts.uk.resource.getText("Enum_FilterByCompare_Extract_Same") },
-            { code: 2, name: nts.uk.resource.getText("Enum_FilterByCompare_Extract_Different") }
+            { code: 0, name: getText("Enum_FilterByCompare_NotCompare") },
+            { code: 1, name: getText("Enum_FilterByCompare_Extract_Same") },
+            { code: 2, name: getText("Enum_FilterByCompare_Extract_Different") }
         ]);
         // Tab 5
         lstApplicationType = ko.observableArray([
@@ -82,7 +83,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
         ]);
         appTypeGridlistColumns = ko.observableArray([
             { headerText: 'コード', key: 'code', width: 100, hidden: true },
-            { headerText: nts.uk.resource.getText("KDW007_82"), key: 'name', width: 300 },
+            { headerText: getText("KDW007_82"), key: 'name', width: 300 },
         ]);
 
         sideBar: KnockoutObservable<number>;
@@ -228,7 +229,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     dfd.resolve();
                 });
             } else if (self.screenMode() == ScreenMode.Monthly) {
-                $('#pg-name').text('KDW007A ' + nts.uk.resource.getText("KDW007_41"));
+                $('#pg-name').text('KDW007A ' + getText("KDW007_41"));
                 self.sideBar(2);
                 service.getAllMonthlyCondition().done((lstData: Array<any>) => {
                     if (lstData && lstData.length > 0) {
@@ -304,9 +305,9 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                             condition.inputCheckCondition(conditionParam.inputCheckCondition);
                             if(conditionParam.conditionType == 2){
                                 if(condition.inputCheckCondition() == 0){
-                                    condition.displayLeftCompare(nts.uk.resource.getText("KDW007_108"));
+                                    condition.displayLeftCompare(getText("KDW007_108"));
                                 }else{
-                                    condition.displayLeftCompare(nts.uk.resource.getText("KDW007_107"));
+                                    condition.displayLeftCompare(getText("KDW007_107"));
                                 }    
                             }
                         }
@@ -323,9 +324,9 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                             condition.inputCheckCondition(conditionParam.inputCheckCondition);
                             if(conditionParam.conditionType == 2){
                                 if(condition.inputCheckCondition() == 0){
-                                    condition.displayLeftCompare(nts.uk.resource.getText("KDW007_108"));
+                                    condition.displayLeftCompare(getText("KDW007_108"));
                                 }else{
-                                    condition.displayLeftCompare(nts.uk.resource.getText("KDW007_107"));
+                                    condition.displayLeftCompare(getText("KDW007_107"));
                                 }    
                             }
                         }
@@ -864,7 +865,9 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     for (let i = 0; i < lstBussinessType.length; i++) {
                         service.getBusinessTypeByCode(lstBussinessType[i]).done((businessType) => {
                             if (businessType) {
-                                lstItem.push({ order: i, text: businessType.businessTypeName });
+                                lstItem.push({ order: lstBussinessType[i], text: businessType.businessTypeName });
+                            } else {
+                                lstItem.push({ order: lstBussinessType[i], text: lstBussinessType[i] + getText("KDW007_111") });  
                             }
                             if (lstItem.length == lstBussinessType.length) {
                                 dfd.resolve();
@@ -875,7 +878,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                         lstItem = _.orderBy(lstItem, ['order'], ['asc']);
                         for (let i = 0; i < lstItem.length; i++) {
                             if (displayText !== "") {
-                                displayText = displayText + ", " + lstItem[i].text;
+                                displayText = displayText + " + " + lstItem[i].text;
                             } else {
                                 displayText = displayText + lstItem[i].text;
                             }
@@ -902,17 +905,15 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                             for (let jobTitle of allJobTitle) {
                                 if (lstJobTitle[i] === jobTitle.id) {
                                     if (displayText !== "") {
-                                        displayText = displayText + ", " + jobTitle.name;
+                                        displayText = displayText + " + " + jobTitle.name;
                                     } else {
                                         displayText = displayText + jobTitle.name;
-                                    }
-                                    if (i === lstJobTitle.length - 1) {
-                                        this.displayLstJobTitle(displayText);
-                                        $("#displayLstJobTitle").trigger('validate');
                                     }
                                 }
                             }
                         }
+                        this.displayLstJobTitle(displayText);
+                        $("#displayLstJobTitle").trigger('validate');
                     });
                 } else {
                     this.displayLstJobTitle("");
@@ -926,7 +927,9 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     for (let i = 0; i < lstEmpt.length; i++) {
                         service.getEmploymentByCode(lstEmpt[i]).done((empt) => {
                             if (empt) {
-                                lstItem.push({ order: i, text: empt.name });
+                                lstItem.push({ order: lstEmpt[i], text: empt.name });
+                            } else {
+                                lstItem.push({ order: lstEmpt[i], text: lstEmpt[i] + getText("KDW007_111") });  
                             }
                             if (lstItem.length == lstEmpt.length) {
                                 dfd.resolve();
@@ -937,7 +940,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                         lstItem = _.orderBy(lstItem, ['order'], ['asc']);
                         for (let i = 0; i < lstItem.length; i++) {
                             if (displayText !== "") {
-                                displayText = displayText + ", " + lstItem[i].text;
+                                displayText = displayText + " + " + lstItem[i].text;
                             } else {
                                 displayText = displayText + lstItem[i].text;
                             }
@@ -959,7 +962,9 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     for (let i = 0; i < lstClss.length; i++) {
                         service.getClassificationByCode(lstClss[i]).done((clss) => {
                             if (clss) {
-                                lstItem.push({ order: i, text: clss.name });
+                                lstItem.push({ order: lstClss[i], text: clss.name });
+                            } else {
+                                lstItem.push({ order: lstClss[i], text: lstClss[i] + getText("KDW007_111") });  
                             }
                             if (lstItem.length == lstClss.length) {
                                 dfd.resolve();
@@ -970,7 +975,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                         lstItem = _.orderBy(lstItem, ['order'], ['asc']);
                         for (let i = 0; i < lstItem.length; i++) {
                             if (displayText !== "") {
-                                displayText = displayText + ", " + lstItem[i].text;
+                                displayText = displayText + " + " + lstItem[i].text;
                             } else {
                                 displayText = displayText + lstItem[i].text;
                             }
@@ -1051,19 +1056,22 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                         }
                     }).then(() => {
                         for (let i = 0; i < lstWorkTypeCode.length; i++) {
-                            for (let workType of lstWorkType) {
-                                if (lstWorkTypeCode[i] === workType.workTypeCode) {
-                                    if (displayText !== "") {
-                                        displayText = displayText + ", " + workType.name;
-                                    } else {
-                                        displayText = displayText + workType.name;
-                                    }
-                                    if (i === lstWorkTypeCode.length - 1) {
-                                        this.displayLstWorkTypePlan(displayText);
-                                    }
+                            let workType = _.find(lstWorkType, ['workTypeCode', lstWorkTypeCode[i]]);
+                            if (workType) {
+                                if (displayText !== "") {
+                                    displayText = displayText + " + " + workType.name;
+                                } else {
+                                    displayText = displayText + workType.name;
+                                }
+                            } else {
+                                if (displayText !== "") {
+                                    displayText = displayText + " + " + lstWorkTypeCode[i] + getText("KDW007_111");
+                                } else {
+                                    displayText = displayText + lstWorkTypeCode[i] + getText("KDW007_111");
                                 }
                             }
                         }
+                        this.displayLstWorkTypePlan(displayText);
                         $("#displayLstWorkTypePlan").ntsError("clear");
                     });
                 } else {
@@ -1080,19 +1088,22 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                         }
                     }).then(() => {
                         for (let i = 0; i < lstWorkTypeCode.length; i++) {
-                            for (let workType of lstWorkType) {
-                                if (lstWorkTypeCode[i] === workType.workTypeCode) {
-                                    if (displayText !== "") {
-                                        displayText = displayText + ", " + workType.name;
-                                    } else {
-                                        displayText = displayText + workType.name;
-                                    }
-                                    if (i === lstWorkTypeCode.length - 1) {
-                                        this.displayLstWorkTypeActual(displayText);
-                                    }
+                            let workType = _.find(lstWorkType, ['workTypeCode', lstWorkTypeCode[i]]);
+                            if (workType) {
+                                if (displayText !== "") {
+                                    displayText = displayText + " + " + workType.name;
+                                } else {
+                                    displayText = displayText + workType.name;
+                                }
+                            } else {
+                                if (displayText !== "") {
+                                    displayText = displayText + " + " + lstWorkTypeCode[i] + getText("KDW007_111");
+                                } else {
+                                    displayText = displayText + lstWorkTypeCode[i] + getText("KDW007_111");
                                 }
                             }
                         }
+                        this.displayLstWorkTypeActual(displayText);
                         $("#displayLstWorkTypeActual").ntsError("clear");
                     });
                 } else {
@@ -1157,19 +1168,22 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                         }
                     }).then(() => {
                         for (let i = 0; i < lstWorkTimeCode.length; i++) {
-                            for (let workTime of lstWorkTime) {
-                                if (lstWorkTimeCode[i] === workTime.worktimeCode) {
-                                    if (displayText !== "") {
-                                        displayText = displayText + ", " + workTime.workTimeName;
-                                    } else {
-                                        displayText = displayText + workTime.workTimeName;
-                                    }
-                                    if (i === lstWorkTimeCode.length - 1) {
-                                        this.displayLstWorkTimePlan(displayText);
-                                    }
+                            let workTime = _.find(lstWorkTime, ['worktimeCode', lstWorkTimeCode[i]]);
+                            if (workTime) {
+                                if (displayText !== "") {
+                                    displayText = displayText + " + " + workTime.workTimeName;
+                                } else {
+                                    displayText = displayText + workTime.workTimeName;
+                                }
+                            } else {
+                                if (displayText !== "") {
+                                    displayText = displayText + " + " + lstWorkTimeCode[i] + getText("KDW007_111");
+                                } else {
+                                    displayText = displayText + lstWorkTimeCode[i] + getText("KDW007_111");
                                 }
                             }
                         }
+                        this.displayLstWorkTimePlan(displayText);
                         $("#displayLstWorkTimePlan").ntsError("clear");
                     });
                 } else {
@@ -1186,19 +1200,22 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                         }
                     }).then(() => {
                         for (let i = 0; i < lstWorkTimeCode.length; i++) {
-                            for (let workTime of lstWorkTime) {
-                                if (lstWorkTimeCode[i] === workTime.worktimeCode) {
-                                    if (displayText !== "") {
-                                        displayText = displayText + ", " + workTime.workTimeName;
-                                    } else {
-                                        displayText = displayText + workTime.workTimeName;
-                                    }
-                                    if (i === lstWorkTimeCode.length - 1) {
-                                        this.displayLstWorkTimeActual(displayText);
-                                    }
+                            let workTime = _.find(lstWorkTime, ['worktimeCode', lstWorkTimeCode[i]]);
+                            if (workTime) {
+                                if (displayText !== "") {
+                                    displayText = displayText + " + " + workTime.workTimeName;
+                                } else {
+                                    displayText = displayText + workTime.workTimeName;
+                                }
+                            } else {
+                                if (displayText !== "") {
+                                    displayText = displayText + " + " + lstWorkTimeCode[i] + getText("KDW007_111");
+                                } else {
+                                    displayText = displayText + lstWorkTimeCode[i] + getText("KDW007_111");
                                 }
                             }
                         }
+                        this.displayLstWorkTimeActual(displayText);
                         $("#displayLstWorkTimeActual").ntsError("clear");
                     });
                 } else {
@@ -1354,7 +1371,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     }
                 }
             } else {
-                self.displayLeftCompare(self.inputCheckCondition() == 0 ? nts.uk.resource.getText("KDW007_108") : nts.uk.resource.getText("KDW007_107"));
+                self.displayLeftCompare(self.inputCheckCondition() == 0 ? getText("KDW007_108") : getText("KDW007_107"));
             }
         }
 
