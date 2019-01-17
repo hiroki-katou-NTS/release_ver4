@@ -161,7 +161,7 @@ module nts.uk.ui.jqueryExtentions {
             if ($grid.igGridSelection('option', 'multipleSelection')) {
                 // for performance when select all
                 let baseID = _.map($grid.igGrid("option").dataSource, $grid.igGrid("option", "primaryKey"));
-                if (_.isEqual(selectedId, baseID)) {
+                if (_.isEqual(_.sortBy(_.uniq(selectedId)), _.sortBy(_.uniq(baseID)))) {
                     let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
                     if (chk[0].getAttribute("data-chk") == "off") {
                         chk.click();
@@ -755,7 +755,7 @@ module nts.uk.ui.jqueryExtentions {
             
             if (!isEqual) {
                 let clickCheckBox = false;
-                if (value.length == sources.length) {
+                if (_.uniq(value).length == _.uniq(sources).length) {
                     if (multiple) {
                         let features = _.find($grid.igGrid("option", "features"), function (f){
                             return f.name === "RowSelectors";     

@@ -19,7 +19,19 @@ module nts.uk.ui.jqueryExtentions {
             if (virtualization) {
                 $grid.on("selectChange", function() {
                     var row = null;
+                    if ($grid.igGridSelection('option', 'multipleSelection')) {
+                        let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                        if (chk[0].getAttribute("data-chk") == "on") {
+                            return;
+                        }
+                    }
                     var selectedRows = $grid.igGrid("selectedRows");
+                    var keyProperty = $grid.igGrid("option", "primaryKey");
+                    var sourceKeys = _.map($grid.igGrid("option", "dataSource"), (o) => o[keyProperty]);
+                    var selectedKeys = _.map(selectedRows, (o) => o["id"]);
+                    if (_.isEqual(_.sortBy(_.uniq(sourceKeys)), _.sortBy(_.uniq(selectedKeys)))) {
+                        return;    
+                    }
                     if (selectedRows) {
                         row = selectedRows[0];
                     } else {
@@ -32,7 +44,19 @@ module nts.uk.ui.jqueryExtentions {
             } else {
                 $grid.on("selectChange", function() {
                     var row = null;
+                    if ($grid.igGridSelection('option', 'multipleSelection')) {
+                        let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                        if (chk[0].getAttribute("data-chk") == "on") {
+                            return;
+                        }
+                    }
                     var selectedRows = $grid.igGrid("selectedRows");
+                    var keyProperty = $grid.igGrid("option", "primaryKey");
+                    var sourceKeys = _.map($grid.igGrid("option", "dataSource"), (o) => o[keyProperty]);
+                    var selectedKeys = _.map(selectedRows, (o) => o["id"]);
+                    if (_.isEqual(_.sortBy(_.uniq(sourceKeys)), _.sortBy(_.uniq(selectedKeys)))) {
+                        return;    
+                    }
                     if (selectedRows) {
                         row = selectedRows[0];
                     } else {
