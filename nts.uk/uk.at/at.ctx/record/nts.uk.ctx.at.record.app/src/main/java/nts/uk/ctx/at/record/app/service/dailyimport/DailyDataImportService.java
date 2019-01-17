@@ -16,8 +16,6 @@ public interface DailyDataImportService {
 	
 	void removePreData(DatePeriod period, List<String> empIds);
 	
-	void removePreData(DatePeriod period, List<String> empIds, List<TimeLeavingOfDailyPerformance> timeLeaves);
-	
 	void finishUpdate(List<WorkInfoOfDailyPerformance> cWorkInfo, List<TimeLeavingOfDailyPerformance> cTimeLeave,
 			List<BreakTimeOfDailyPerformance> cBreak, List<EditStateOfDailyPerformance> edits);
 }

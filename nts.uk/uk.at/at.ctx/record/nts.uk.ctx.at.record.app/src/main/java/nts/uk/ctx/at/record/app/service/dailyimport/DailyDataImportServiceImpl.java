@@ -130,15 +130,16 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 			List<String> empIds = new ArrayList<>(mappedEmp.values());
 			dataSetter.setData("processEmpCount", empIds.size());
 			
-			List<WorkInfoOfDailyPerformance> workInfos = workInfoRepo.findByListEmployeeId(empIds, period);
-			List<TimeLeavingOfDailyPerformance> timeLeaves = timeLeavingRepo.finds(empIds, period);
-			List<BreakTimeOfDailyPerformance> breakItems = breakItemRepo.finds(empIds, period);
 			
 			dataSetter.updateData("status", "準備中 (2/2)");
 			AtomicInteger successEmpCount = new AtomicInteger(0);
 			
 			//parallelManager.forEach(empIds, emp -> {
-				self.removePreData(period, empIds, timeLeaves);
+				self.removePreData(period, empIds);
+				
+			List<WorkInfoOfDailyPerformance> workInfos = workInfoRepo.findByListEmployeeId(empIds, period);
+			List<TimeLeavingOfDailyPerformance> timeLeaves = timeLeavingRepo.finds(empIds, period);
+			List<BreakTimeOfDailyPerformance> breakItems = breakItemRepo.finds(empIds, period);
 				//dataSetter.updateData(SUCCESSED_EMP_COUNT, successEmpCount.incrementAndGet());
 			//});
 
@@ -183,26 +184,6 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 	
 	@TransactionAttribute(value = TransactionAttributeType.REQUIRED)
 	public void removePreData(DatePeriod period, List<String> empIds) {
-		List<GeneralDate> processingYmds = period.datesBetween();
-
-		timeLeavingRepo.finds(empIds, period).stream().forEach(tl -> {
-			tl.getAttendanceLeavingWork(1).ifPresent(alw -> {
-				alw.getAttendanceStamp().ifPresent(as -> {
-					as.removeStamp();
-				});
-				alw.getLeaveStamp().ifPresent(ls -> {
-					ls.removeStamp();
-				});
-			});
-			timeLeavingRepo.update(tl);
-		});
-		// timeLeavingRepo.deleteTimeNoBy(empIds, processingYmds, 1);
-		breakItemRepo.deleteRecord1And2By(empIds, processingYmds);
-		editStateRepo.deleteByListEmployeeId(empIds, processingYmds);
-	}
-	
-	@TransactionAttribute(value = TransactionAttributeType.REQUIRED)
-	public void removePreData(DatePeriod period, List<String> empIds, List<TimeLeavingOfDailyPerformance> timeLeaves) {
 		List<GeneralDate> processingYmds = period.datesBetween();
 		/*
 		timeLeaves.forEach(tl -> {
@@ -289,8 +270,9 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 			toUpdateTL.add(currentDateTimeLeave);
 		}
 
-		if(processBreakItem(currentDateBreak, 1, importData.getBreakStart1(), importData.getBreakEnd1(), error, updatedItems) ||
-				processBreakItem(currentDateBreak, 2, importData.getBreakStart2(), importData.getBreakEnd2(), error, updatedItems)){
+		boolean break1Error = processBreakItem(currentDateBreak, 1, importData.getBreakStart1(), importData.getBreakEnd1(), error, updatedItems),
+				break2Error = processBreakItem(currentDateBreak, 2, importData.getBreakStart2(), importData.getBreakEnd2(), error, updatedItems);
+		if(break1Error || break2Error){
 			toUpdateBK.add(currentDateBreak);
 		}
 
