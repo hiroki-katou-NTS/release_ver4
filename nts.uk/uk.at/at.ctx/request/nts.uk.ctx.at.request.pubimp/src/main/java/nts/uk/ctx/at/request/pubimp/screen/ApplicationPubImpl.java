@@ -267,16 +267,6 @@ public class ApplicationPubImpl implements ApplicationPub {
 		}
 		return holidayAppTypeName;
 	}
-	@Override
-	public List<AppGroupExport> getApplicationGroupBySID(List<String> employeeID, GeneralDate startDate,
-			GeneralDate endDate) {
-		List<ApplicationExport> appExportLst = this.getApplicationBySID(employeeID, startDate, endDate);
-		return appExportLst.stream().map(x -> new AppGroupExport(x.getAppDate(),x.getAppType(),x.getEmployeeID(),x.getAppTypeName()))
-				.collect(Collectors.groupingBy(x -> x.getAppDate())).entrySet().stream().map(x -> {
-					return x.getValue().stream().collect(Collectors.groupingBy(y -> y.getAppType())).entrySet()
-							.stream().map(y -> y.getValue().get(0)).collect(Collectors.toList()).get(0);
-				}).collect(Collectors.toList());
-	}
 
 	@Override
 	public List<AppGroupExport> getApplicationGroupBySID(List<String> employeeID, GeneralDate startDate,
