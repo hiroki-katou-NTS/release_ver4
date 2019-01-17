@@ -87,7 +87,7 @@ public class KrqstWpAppConfig extends UkJpaEntity implements Serializable {
 									x.breakTimeDisFlg == 1? true : false, 
 									EnumAdaptor.valueOf(x.atworkTimeBeginDisFlg, AtWorkAtr.class), 
 									x.goOutTimeBeginDisFlg == 1 ? true : false, 
-									x.requiredInstructionFlg == 1 ? false : true, 
+									x.requiredInstructionFlg == 1 ? true : false, 
 									UseAtr.toEnum(x.timeCalUseAtr), 
 									UseAtr.toEnum(x.timeInputUseAtr), 
 									EnumAdaptor.valueOf(x.timeEndDispFlg, DisplayBreakTime.class)))))
@@ -118,7 +118,7 @@ public class KrqstWpAppConfig extends UkJpaEntity implements Serializable {
 						detail.timeInputUseAtr = setting.getApplicationDetailSetting().get().getTimeInputUse().value;
 						detail.timeEndDispFlg = setting.getApplicationDetailSetting().get().getTimeEndDispFlg().value;
 						detail.requiredInstructionFlg = setting.getApplicationDetailSetting().get()
-								.getRequiredInstruction() ? 0 : 1;
+								.getRequiredInstruction() ? 1 : 0;
 						detail.instructionAtr = setting.getInstructionUseSetting().instructionAtr.value;
 						detail.instructionMemo = setting.getInstructionUseSetting().instructionRemarks.v();
 						detail.instructionUseAtr = setting.getInstructionUseSetting().instructionUseDivision.value;
