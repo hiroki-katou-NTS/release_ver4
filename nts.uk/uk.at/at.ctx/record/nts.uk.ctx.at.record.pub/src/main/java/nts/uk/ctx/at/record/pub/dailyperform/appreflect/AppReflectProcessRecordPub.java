@@ -47,7 +47,7 @@ public interface AppReflectProcessRecordPub {
 	 * @param isPre : true: 事前申請処理, false: 事後申請処理
 	 * @return
 	 */
-	public boolean absenceReflect(CommonReflectPubParameter param, boolean isPre);
+	public boolean absenceReflect(WorkChangeCommonReflectPubPara param, boolean isPre);
 	/**
 	 * 	勤務実績に反映: 事前申請の処理(休日出勤申請)
 	 * @param param

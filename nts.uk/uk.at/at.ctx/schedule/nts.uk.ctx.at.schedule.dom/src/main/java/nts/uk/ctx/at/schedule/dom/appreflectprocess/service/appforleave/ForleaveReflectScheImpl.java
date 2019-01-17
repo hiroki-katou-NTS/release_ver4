@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.schedule.dom.appreflectprocess.service.CommonReflectParamSche;
 import nts.uk.ctx.at.schedule.dom.appreflectprocess.service.UpdateScheCommonAppRelect;
+import nts.uk.ctx.at.schedule.dom.appreflectprocess.service.workchange.WorkChangecommonReflectParamSche;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicSchedule;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicScheduleRepository;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.service.StartEndTimeReflectScheService;
@@ -32,8 +33,9 @@ public class ForleaveReflectScheImpl implements ForleaveReflectSche{
 	@Inject
 	private BasicScheduleRepository basicScheRepo;
 	@Override
-	public boolean forlearveReflectSche(CommonReflectParamSche reflectParam) {
+	public boolean forlearveReflectSche(WorkChangecommonReflectParamSche param) {
 		try {
+			CommonReflectParamSche reflectParam = param.getCommon();
 			for(int i = 0; reflectParam.getStartDate().daysTo(reflectParam.getEndDate()) - i >= 0; i++){
 				GeneralDate loopDate = reflectParam.getStartDate().addDays(i);
 				Optional<BasicSchedule> optionalEntity = basicScheRepo.find(reflectParam.getEmployeeId(), loopDate);
@@ -46,6 +48,10 @@ public class ForleaveReflectScheImpl implements ForleaveReflectSche{
 				//勤種の反映
 				//勤務種類を反映する
 				updateRelect.updateScheWorkType(reflectParam.getEmployeeId(), loopDate, reflectParam.getWorktypeCode());
+				//就業時間帯を変更する
+				if(param.getExcludeHolidayAtr() != 0) {
+					updateRelect.updateScheWorkTime(reflectParam.getEmployeeId(), loopDate, reflectParam.getWorkTimeCode());
+				}
 				//時刻の反映
 				this.reflectTime(reflectParam.getEmployeeId(), loopDate, reflectParam.getWorktypeCode(), reflectParam.getStartTime(), reflectParam.getEndTime());
 			}

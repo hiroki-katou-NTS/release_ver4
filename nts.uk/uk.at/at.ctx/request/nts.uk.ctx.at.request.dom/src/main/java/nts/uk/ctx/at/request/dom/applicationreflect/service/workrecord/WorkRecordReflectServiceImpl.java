@@ -33,7 +33,7 @@ public class WorkRecordReflectServiceImpl implements WorkRecordReflectService{
 				return reflectRecord.gobackReflectRecord(gobackpara, true) 
 						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
 			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.ABSENCE_APPLICATION) {
-				CommonReflectPara absenceInfor = appRecordInfor.getAbsenceInfor();
+				WorkChangeCommonReflectPara absenceInfor = appRecordInfor.getAbsenceInfor();
 				return reflectRecord.absenceReflectRecor(absenceInfor, true)
 						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
 			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.BREAK_TIME_APPLICATION) {
@@ -65,7 +65,7 @@ public class WorkRecordReflectServiceImpl implements WorkRecordReflectService{
 				return  reflectRecord.gobackReflectRecord(gobackpara, false) 
 						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
 			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.ABSENCE_APPLICATION) {
-				CommonReflectPara absenceInfor = appRecordInfor.getAbsenceInfor();
+				WorkChangeCommonReflectPara absenceInfor = appRecordInfor.getAbsenceInfor();
 				return reflectRecord.absenceReflectRecor(absenceInfor, false)
 						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
 			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.WORK_CHANGE_APPLICATION) {

@@ -87,7 +87,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 		OvertimeReflectPara overTimeTmp = null;
 		WorkChangeCommonReflectPara workchangeData = null;
 		HolidayWorkReflectPara holidayworkInfor = null;
-		CommonReflectPara absenceData = null;
+		WorkChangeCommonReflectPara absenceData = null;
 		CommonReflectPara absenceLeaveAppInfor = null;
 		CommonReflectPara recruitmentInfor = null;
 		ReflectScheDto reflectScheParam = new ReflectScheDto(appInfor.getEmployeeID(), 
@@ -303,7 +303,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 		
 	}
 	
-	private CommonReflectPara getAbsence(Application_New appInfor, AppAbsence absenceAppData,
+	private WorkChangeCommonReflectPara getAbsence(Application_New appInfor, AppAbsence absenceAppData,
 			InformationSettingOfEachApp reflectSetting) {
 		CommonReflectPara absenceInfor = null;
 		
@@ -312,11 +312,11 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				reflectSetting.getScheAndWorkChange(), 
 				reflectSetting.isJizenScheYusen(), 
 				absenceAppData.getWorkTypeCode().v(), 
-				"",
+				absenceAppData.getWorkTimeCode() == null ? null : absenceAppData.getWorkTimeCode().v(),
 				appInfor.getStartDate().isPresent() ? appInfor.getStartDate().get() : null,
 				appInfor.getEndDate().isPresent() ? appInfor.getEndDate().get() : null,
 						null, null);
-		return absenceInfor;
+		return new WorkChangeCommonReflectPara(absenceInfor, absenceAppData.isChangeWorkHour() == true ? 1 : 0);
 	}
 	
 	

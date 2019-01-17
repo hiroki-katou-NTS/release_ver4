@@ -1,25 +1,17 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.absence;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.workchange.WorkChangeCommonReflectPara;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
-import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
-import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
-import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
-import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.ctx.at.shared.dom.worktype.algorithm.JudgmentWorkTypeService;
@@ -34,16 +26,15 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	@Inject
 	private BasicScheduleService basicScheService;
 	@Inject
-	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDailyRepos;
-	@Inject
 	private JudgmentWorkTypeService judgmentService;
 	@Inject
 	private WorkInformationRepository workRepository;
 	@Inject
 	private WorkTypeIsClosedService workTypeRepo;
 	@Override
-	public boolean absenceReflect(CommonReflectParameter absencePara, boolean isPre) {
+	public boolean absenceReflect(WorkChangeCommonReflectPara param, boolean isPre) {
 		try {
+			CommonReflectParameter absencePara = param.getCommon();
 			for(int i = 0; absencePara.getStartDate().daysTo(absencePara.getEndDate()) - i >= 0; i++){
 				GeneralDate loopDate = absencePara.getStartDate().addDays(i);
 				WorkInfoOfDailyPerformance dailyInfor = workRepository.find(absencePara.getEmployeeId(), loopDate).get();
@@ -64,6 +55,11 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 				dailyInfor = this.reflectScheStartEndTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode(), isRecordWorkType, dailyInfor);			
 				//勤種の反映
 				dailyInfor = workTimeUpdate.updateRecordWorkType(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode(), false, dailyInfor);
+				//就業時間帯
+				if(param.getExcludeHolidayAtr() != 0) {
+					dailyInfor = workTimeUpdate.updateRecordWorkTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTimeCode(), true, dailyInfor);
+					dailyInfor = workTimeUpdate.updateRecordWorkTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTimeCode(), false, dailyInfor);
+				}
 				workRepository.updateByKeyFlush(dailyInfor);
 				//開始終了時刻の反映
 				this.reflectRecordStartEndTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode());					

@@ -221,8 +221,8 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 	}
 
 	@Override
-	public boolean absenceReflect(CommonReflectPubParameter param, boolean isPre) {
-		return absenceReflect.absenceReflect(this.toRecordPara(param), isPre);		
+	public boolean absenceReflect(WorkChangeCommonReflectPubPara param, boolean isPre) {
+		return absenceReflect.absenceReflect(new WorkChangeCommonReflectPara(this.toRecordPara(param.getCommon()), param.getExcludeHolidayAtr()), isPre);		
 	}
 
 	@Override
