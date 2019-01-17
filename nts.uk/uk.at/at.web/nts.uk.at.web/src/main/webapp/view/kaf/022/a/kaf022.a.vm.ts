@@ -2567,7 +2567,7 @@ module nts.uk.at.view.kmf022 {
                     deferredLettleColor: self.valueK18() == null ? '' : self.valueK18(),
                     deferredBold: self.enableK19() ? 1 : 0,
                     pickUpComment: self.texteditorK20.value(),
-                    pickUpLettleColor: self.valueK23(),
+                    pickUpLettleColor: self.valueK23() == null ? '' : self.valueK23(),
                     pickUpBold: self.enableK24() ? 1 : 0,
                     permissionDivision: self.selectedIdK21(),
                     appliDateContrac: self.selectedIdK22(),
