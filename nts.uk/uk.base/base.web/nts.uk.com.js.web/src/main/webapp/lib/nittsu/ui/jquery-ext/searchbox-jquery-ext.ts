@@ -18,57 +18,40 @@ module nts.uk.ui.jqueryExtentions {
             var $grid = $control;
             if (virtualization) {
                 $grid.on("selectChange", function() {
-                    var row = null;
-                    if ($grid.igGridSelection('option', 'multipleSelection')) {
-                        let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                        if (chk[0].getAttribute("data-chk") == "on") {
-                            return;
-                        }
-                    }
-                    var selectedRows = $grid.igGrid("selectedRows");
-                    var keyProperty = $grid.igGrid("option", "primaryKey");
-                    var sourceKeys = _.map($grid.igGrid("option", "dataSource"), (o) => o[keyProperty]);
-                    var selectedKeys = _.map(selectedRows, (o) => o["id"]);
-                    if (_.isEqual(_.sortBy(_.uniq(sourceKeys)), _.sortBy(_.uniq(selectedKeys)))) {
-                        return;    
-                    }
-                    if (selectedRows) {
-                        row = selectedRows[0];
-                    } else {
-                        row = $grid.igGrid("selectedRow");
-                    }
-                    if (row) {
-                        ui.ig.grid.virtual.expose(row, $grid);
-                    }
+                    exporeTo($grid, (row) => ui.ig.grid.virtual.expose(row, $grid));
                 });
             } else {
                 $grid.on("selectChange", function() {
-                    var row = null;
-                    if ($grid.igGridSelection('option', 'multipleSelection')) {
-                        let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                        if (chk[0].getAttribute("data-chk") == "on") {
-                            return;
-                        }
-                    }
-                    var selectedRows = $grid.igGrid("selectedRows");
-                    var keyProperty = $grid.igGrid("option", "primaryKey");
-                    var sourceKeys = _.map($grid.igGrid("option", "dataSource"), (o) => o[keyProperty]);
-                    var selectedKeys = _.map(selectedRows, (o) => o["id"]);
-                    if (_.isEqual(_.sortBy(_.uniq(sourceKeys)), _.sortBy(_.uniq(selectedKeys)))) {
-                        return;    
-                    }
-                    if (selectedRows) {
-                        row = selectedRows[0];
-                    } else {
-                        row = $grid.igGrid("selectedRow");
-                    }
-                    if (row) {
-                        ui.ig.grid.expose(row, $grid);
-                    }
+                    exporeTo($grid, (row) => ui.ig.grid.expose(row, $grid));
                 });
             }
             return $grid;
         }
+        
+        function exporeTo($grid: JQuery, exposeFunction: Function){
+            var row = null;
+            if ($grid.igGridSelection('option', 'multipleSelection')) {
+                let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                if (chk[0].getAttribute("data-chk") == "on") {
+                    return;
+                }
+            }
+            var selectedRows = $grid.igGrid("selectedRows");
+            var keyProperty = $grid.igGrid("option", "primaryKey");
+            var sourceKeys = _.map($grid.igGrid("option", "dataSource"), (o) => o[keyProperty]);
+            var selectedKeys = _.map(selectedRows, (o) => o["id"]);
+            if (_.isEqual(_.sortBy(_.uniq(sourceKeys)), _.sortBy(_.uniq(selectedKeys)))) {
+                return;    
+            }
+            if (selectedRows) {
+                row = selectedRows[0];
+            } else {
+                row = $grid.igGrid("selectedRow");
+            }
+            if (row) {
+                exposeFunction(row);
+            }
+        } 
         
         function getSelectRowIndex($grid: JQuery, selectedValue): number {
             let dataSource = $grid.igGrid("option", "dataSource");
