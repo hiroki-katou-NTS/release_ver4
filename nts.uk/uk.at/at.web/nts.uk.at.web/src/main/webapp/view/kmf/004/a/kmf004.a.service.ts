@@ -9,7 +9,7 @@ module nts.uk.at.view.kmf004.a.service {
         remove: "shared/specialholiday/delete",
         getAllAbsenceFrame: "at/share/worktype/absenceframe/findAll",
         getAllSpecialHolidayFrame: "at/share/worktype/specialholidayframe/findAll",
-        findEmpByCodes: "bs/employee/employment/findByCodes",
+        findEmpByCodes: "bs/employee/employment/findNamesByCodesWithNull",
         findClsByCodes: "bs/employee/classification/getClsNameByCds",
         findAllItemFrame: "shared/specialholiday/findAllItemFrame",
     }

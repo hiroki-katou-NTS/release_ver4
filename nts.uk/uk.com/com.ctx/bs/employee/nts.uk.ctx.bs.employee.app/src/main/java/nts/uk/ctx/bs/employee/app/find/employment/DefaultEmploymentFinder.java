@@ -4,6 +4,7 @@
  *****************************************************************/
 package nts.uk.ctx.bs.employee.app.find.employment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,6 +12,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.i18n.I18NText;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.app.find.employment.dto.EmploymentDto;
 import nts.uk.ctx.bs.employee.app.find.employment.dto.EmploymentFindDto;
 import nts.uk.ctx.bs.employee.dom.employment.Employment;
@@ -87,6 +90,34 @@ public class DefaultEmploymentFinder implements EmploymentFinder {
 			dto.setName(employment.getEmploymentName().v());
 			return dto;
 		}).collect(Collectors.toList());
+	}
+	
+	/* (non-Javadoc)
+	 * @see nts.uk.ctx.bs.employee.app.find.employment.EmploymentFinder#findByCodesWithNull(java.util.List)
+	 */
+	@Override
+	public List<EmploymentDto> findByCodesWithNull(List<String> empCodes) {
+		// Get Company Id
+		
+		List<EmploymentDto> result = new ArrayList<EmploymentDto>();
+		
+		String companyId = AppContexts.user().companyId();
+		if(CollectionUtil.isEmpty(empCodes)){
+			return result;
+		}
+		
+		empCodes.forEach(code->{
+			Optional<Employment> optEmp = this.repository.findEmployment(companyId, code);
+			String itemName ;
+			if(optEmp.isPresent()){
+				itemName = optEmp.get().getEmploymentName().v();
+			}else{
+				itemName = code+ I18NText.getText("KMF004_163");
+			}
+			
+			result.add(new EmploymentDto(code, itemName));
+		});
+		return result;
 	}
 	
 	

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.i18n.I18NText;
 import nts.uk.ctx.bs.employee.app.find.classification.dto.ClassificationFindDto;
 import nts.uk.ctx.bs.employee.dom.classification.Classification;
 import nts.uk.ctx.bs.employee.dom.classification.ClassificationRepository;
@@ -34,6 +35,8 @@ public class ClassificationFinder {
 	 */
 	public ClassificationFindDto findClassificationByCode(String code){
 		
+		ClassificationFindDto dto = new ClassificationFindDto();
+		
 		// get login info
 		LoginUserContext loginUserContext = AppContexts.user();
 		
@@ -43,11 +46,12 @@ public class ClassificationFinder {
 		// get all management category
 		Optional<Classification> optClassification = this.repository.findClassification(companyId, code);
 		
-		if(!optClassification.isPresent()){
-			return null;
+		if (!optClassification.isPresent()) {
+			dto.setName(code + I18NText.getText("KMF004_163"));
+			return dto;
 		}
 		
-		ClassificationFindDto dto = new ClassificationFindDto();
+		
 		optClassification.get().saveToMemento(dto);
 		
 		return dto;
