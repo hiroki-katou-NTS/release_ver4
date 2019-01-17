@@ -108,6 +108,8 @@ public interface SyEmployeePub {
 	// RequestList52
 	List<EmpOfLoginCompanyExport> getListEmpOfLoginCompany(String cid);
 	
+	List<EmpOfLoginCompanyExport> getActiceEmpsOfLoginCompany(String cid);
+	
 	/**
 	 * Find by emp id.
 	 *

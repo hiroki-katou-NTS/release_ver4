@@ -48,7 +48,7 @@ public class EmployeeRecordAdapterImpl implements EmployeeRecordAdapter{
 
 	@Override
 	public Map<String, String> mapEmpCodeToId(List<String> listEmpCode) {
-		List<EmpOfLoginCompanyExport> lstInfor = employeePub.getListEmpOfLoginCompany(AppContexts.user().companyId());
+		List<EmpOfLoginCompanyExport> lstInfor = employeePub.getActiceEmpsOfLoginCompany(AppContexts.user().companyId());
 		return lstInfor.stream().filter(c -> c.getSid() != null && listEmpCode.contains(c.getScd()))
 								.collect(Collectors.toMap(c -> c.getScd(), c -> c.getSid()));
 	}
