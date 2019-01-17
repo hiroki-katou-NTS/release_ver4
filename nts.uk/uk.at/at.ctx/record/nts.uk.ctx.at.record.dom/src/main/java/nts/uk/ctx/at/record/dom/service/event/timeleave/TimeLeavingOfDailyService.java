@@ -99,7 +99,7 @@ public class TimeLeavingOfDailyService {
 
 	private EventHandleResult<IntegrationOfDaily> updated(IntegrationOfDaily working,
 			TimeLeavingOfDailyPerformance corrected, boolean directToDB) {
-		working.setAttendanceLeave(Optional.of(corrected));
+		working.setAttendanceLeave(Optional.ofNullable(corrected));
 		
 
 		if(directToDB){
