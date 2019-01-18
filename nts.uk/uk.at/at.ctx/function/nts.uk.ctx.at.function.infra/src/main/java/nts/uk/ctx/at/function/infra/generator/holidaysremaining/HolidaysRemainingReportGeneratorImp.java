@@ -714,6 +714,7 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 					if (isOutputItemSubstitute) {
 						// I1_4 代休_残数_日数
 						cells.get(firstRow, 7).setValue(currentHolidayItem.getMonthEndRemain());
+						cells.get(firstRow, 8).setValue(currentHolidayItem.getMonthExtinction());
 						if (currentHolidayItem.getMonthEndRemain() < 0) {
 							setForegroundRed(cells.get(firstRow, 7));
 						}
