@@ -270,7 +270,7 @@ module nts.uk.com.view.ccg.share.ccg {
             public initSubscribers(): void {
                 let self = this;
                 self.baseDate.subscribe(vl => {
-                    self.applyDataSearch();
+                    self.applyDataSearch(); console.log("Line 273 " + vl);
                 });
 
                 self.selectedTab.subscribe(vl => {
@@ -282,7 +282,7 @@ module nts.uk.com.view.ccg.share.ccg {
 
                 self.inputPeriod.subscribe(value => {
                     if (!$('.ntsDatepicker').ntsError('hasError')) {
-                        _.defer(() => self.applyDataSearch());
+                        _.defer(() => self.applyDataSearch()); console.log("Line 285 " + value.startDate + "~" + value.endDate);
                     }
                 });
 
@@ -763,9 +763,11 @@ module nts.uk.com.view.ccg.share.ccg {
                             // initialize selected cosure subscriber
                             self.selectedClosure.subscribe(vl => {
                                 // calculate period by current month
-                                self.calculatePeriod(parseInt(moment().format(CcgDateFormat.YEAR_MONTH))).done(period => {
+                                // self.calculatePeriod(parseInt(moment().format(CcgDateFormat.YEAR_MONTH))).done(period => {
+                                self.calculatePeriod105458().done(period => {
                                     self.isApplySearchDone = false;
-                                    self.inputPeriod(new DateRangePickerModel(period.startDate, period.endDate));
+                                    self.inputPeriod(new DateRangePickerModel(self.showPeriodYM ? period.endDate : period.startDate, period.endDate));
+                                    self.inputBaseDate(period.endDate);
                                     self.isApplySearchDone = true;
 
                                     this.saveEmployeeRangeSelection();
@@ -912,7 +914,7 @@ module nts.uk.com.view.ccg.share.ccg {
                 if (self.isFirstTime) {
                     // Apply data search & load Kcp components
                     self.synchronizeDate();
-                    self.toggleSlide().done(() => $.when(self.applyDataSearch(), self.loadKcp005()).always(() => {
+                    console.log("Line 917"); self.toggleSlide().done(() => $.when(self.applyDataSearch(), self.loadKcp005()).always(() => {
                         // Set acquired base date to status period end date
                         self.retirePeriod(new DateRangePickerModel('1900/01/01', self.queryParam.baseDate));
 
@@ -936,6 +938,7 @@ module nts.uk.com.view.ccg.share.ccg {
              */
             private synchronizeDate(): void {
                 let self = this;
+                self.isApplySearchDone = false;
                 // synchronize baseDate
                 if (self.baseDateOfParentScreen) {
                     const isSameDate = moment.isMoment(self.baseDateOfParentScreen()) ?
@@ -965,6 +968,8 @@ module nts.uk.com.view.ccg.share.ccg {
                 if (!_.isEmpty(self.errors)) {
                     self.errors.ntsError('check');
                 }
+                
+                self.isApplySearchDone = true;
             }
 
             /**
@@ -1112,7 +1117,7 @@ module nts.uk.com.view.ccg.share.ccg {
              * function click by apply data search employee (init tab 2)
              * get base date
              */
-            applyDataSearch(): JQueryPromise<void> {
+            public applyDataSearch(): JQueryPromise<void> {
                 let dfd = $.Deferred<void>();
                 let self = this;
                 if (!self.isApplySearchDone) {
@@ -1124,7 +1129,7 @@ module nts.uk.com.view.ccg.share.ccg {
                 if (!self.isValidInput() || self.isInvalidBaseDate()) {
                     dfd.reject();
                     return dfd.promise();
-                }
+                } console.log("pass applyDataSearch");
 
                 self.isApplySearchDone = false;
                 nts.uk.ui.block.grayout(); // block ui
@@ -1497,13 +1502,20 @@ module nts.uk.com.view.ccg.share.ccg {
                 }
 
                 // Period accuracy is YM 
-                if (self.showPeriodYM) {
-                    self.calculatePeriod(parseInt(self.periodEnd().format(CcgDateFormat.YEAR_MONTH))).done(period => {
+//                if (self.showPeriodYM) {
+                if (self.showPeriodYM || self.showPeriod) {
+                    // self.calculatePeriod(parseInt(self.periodEnd().format(CcgDateFormat.YEAR_MONTH))).done(period => {
+                    self.calculatePeriod105458().done(period => {
                         if (!self.showBaseDate) {
                             // set base date = period end
                             self.acquiredBaseDate(period.endDate);
+                        } 
+                    
+                        if (self.showBaseDate && self.showClosure && self.isFirstTime) {
+                            self.isApplySearchDone = false;
+                            self.inputPeriod(new DateRangePickerModel(self.showPeriodYM ? period.endDate : period.startDate, period.endDate));
+                            self.inputBaseDate(period.endDate);
                         }
-
                         dfd.resolve();
                     });
                 } else {
@@ -1548,9 +1560,22 @@ module nts.uk.com.view.ccg.share.ccg {
             public calculatePeriod(yearMonth: number): JQueryPromise<DatePeriodDto> {
                 let self = this;
                 let dfd = $.Deferred<DatePeriodDto>();
-                const closureId = self.selectedClosure() == ConfigEnumClosure.CLOSURE_ALL ? 1 : self.selectedClosure();
+                const closureId = (self.selectedClosure() == null || self.selectedClosure() == ConfigEnumClosure.CLOSURE_ALL) ? 1 : self.selectedClosure();
                 // アルゴリズム「当月の期間を算出する」を実行する
                 service.calculatePeriod(closureId, yearMonth)
+                    .done(period => dfd.resolve(period));
+                return dfd.promise();
+            }
+            
+            /**
+             * Calculate date period from selected closure id and yearMonth
+             */
+            public calculatePeriod105458(): JQueryPromise<DatePeriodDto> {
+                let self = this;
+                let dfd = $.Deferred<DatePeriodDto>();
+                const closureId = (self.selectedClosure() == null ||self.selectedClosure() == ConfigEnumClosure.CLOSURE_ALL) ? 1 : self.selectedClosure();
+                // アルゴリズム「当月の期間を算出する」を実行する
+                service.calculatePeriod105458(closureId)
                     .done(period => dfd.resolve(period));
                 return dfd.promise();
             }
