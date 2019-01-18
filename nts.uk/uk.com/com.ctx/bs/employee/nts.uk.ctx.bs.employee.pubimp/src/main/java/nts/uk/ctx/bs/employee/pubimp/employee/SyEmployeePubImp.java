@@ -37,6 +37,8 @@ import nts.uk.ctx.bs.employee.dom.jobtitle.affiliate.AffJobTitleHistoryItem;
 import nts.uk.ctx.bs.employee.dom.jobtitle.affiliate.AffJobTitleHistoryItemRepository;
 //import nts.uk.ctx.bs.employee.dom.jobtitle.affiliate.AffJobTitleHistoryRepository;
 import nts.uk.ctx.bs.employee.dom.temporaryabsence.TempAbsHistRepository;
+import nts.uk.ctx.bs.employee.dom.temporaryabsence.frame.TempAbsenceFrame;
+import nts.uk.ctx.bs.employee.dom.temporaryabsence.frame.TempAbsenceRepositoryFrame;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistory;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryItem;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryItemRepository;
@@ -55,6 +57,7 @@ import nts.uk.ctx.bs.employee.pub.employee.JobClassification;
 import nts.uk.ctx.bs.employee.pub.employee.MailAddress;
 import nts.uk.ctx.bs.employee.pub.employee.StatusOfEmployeeExport;
 import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
+import nts.uk.ctx.bs.employee.pub.employee.TempAbsenceFrameExport;
 import nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub;
 import nts.uk.ctx.bs.person.dom.person.info.Person;
 import nts.uk.ctx.bs.person.dom.person.info.PersonRepository;
@@ -104,6 +107,9 @@ public class SyEmployeePubImp implements SyEmployeePub {
 
 	@Inject
 	private TempAbsHistRepository tempAbsHistRepository;
+	
+	@Inject
+	private TempAbsenceRepositoryFrame tempAbsenceRepoFrame;
 
 //	@Inject
 //	private AffJobTitleHistoryRepository affJobRep;
@@ -819,6 +825,17 @@ public class SyEmployeePubImp implements SyEmployeePub {
 			result.setEmployeeId(employee.getEmployeeId());
 
 			return result;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<TempAbsenceFrameExport> getTempAbsenceFrameByCid(String cid) {
+		List<TempAbsenceFrame> listTempAbsenceFrame = tempAbsenceRepoFrame.findByCidForReq546(cid);
+		if (listTempAbsenceFrame.isEmpty())
+			return new ArrayList<>();
+		return listTempAbsenceFrame.stream().map(i -> {
+			return new TempAbsenceFrameExport(i.getCompanyId(), i.getTempAbsenceFrNo().v().intValue(),
+					i.getUseClassification().value, i.getTempAbsenceFrName().toString());
 		}).collect(Collectors.toList());
 	}
 }
