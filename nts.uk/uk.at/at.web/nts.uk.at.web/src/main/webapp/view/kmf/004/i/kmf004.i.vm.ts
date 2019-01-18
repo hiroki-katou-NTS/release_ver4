@@ -199,7 +199,7 @@ module nts.uk.at.view.kmf004.i.viewmodel {
                 }
                 let codes = _.map(newData, item => { return item.employmentCd });
                 service.findEmpByCodes(codes).done((datas) => {
-                    self.employmentTxt(_.map(datas, item => { return item.name }).join(' + '));
+                    self.employmentTxt(_.map(datas, item => { return item }).join(' + '));
                 });
             });
             self.clsList.subscribe((newData) => {

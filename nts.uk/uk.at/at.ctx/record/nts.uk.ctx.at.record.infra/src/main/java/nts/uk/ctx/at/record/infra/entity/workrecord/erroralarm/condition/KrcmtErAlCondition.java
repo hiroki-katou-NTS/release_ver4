@@ -10,16 +10,15 @@ import java.util.stream.Collectors;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -75,11 +74,8 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	@Basic(optional = false)
-	@NotNull
-	@Column(name = "ERAL_CHECK_ID")
-	public String eralCheckId;
+	@EmbeddedId
+	public KrcmtErAlConditionPK krcmtErAlConditionPK;
 
 	@Basic(optional = true)
 	@Column(name = "MESSAGE_DISPLAY")
@@ -91,8 +87,8 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 	@Column(name = "FILTER_BY_BUSINESS_TYPE")
 	public int filterByBusinessType;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
+	@OneToMany(mappedBy ="krcmtErAlCondition", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	//@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
 	public List<KrcstErAlBusinessType> lstBusinessType;
 	
 	@Transient
@@ -101,8 +97,8 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 	@Column(name = "FILTER_BY_JOB_TITLE")
 	public int filterByJobTitle;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
+	@OneToMany(mappedBy = "krcmtErAlCondition" , cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	//@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
 	public List<KrcstErAlJobTitle> lstJobTitle;
 	
 	@Transient
@@ -111,8 +107,8 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 	@Column(name = "FILTER_BY_EMPLOYMENT")
 	public int filterByEmployment;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
+	@OneToMany(mappedBy="krcmtErAlCondition", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	//@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
 	public List<KrcstErAlEmployment> lstEmployment;
 	
 	@Transient
@@ -121,8 +117,8 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 	@Column(name = "FILTER_BY_CLASSIFICATION")
 	public int filterByClassification;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
+	@OneToMany(mappedBy = "krcmtErAlCondition" ,cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	//@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
 	public List<KrcstErAlClass> lstClassification;
 	
 	@Transient
@@ -143,15 +139,15 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 	@Column(name = "WT_COMPARE_ATR")
 	public Integer wtCompareAtr;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
+	@OneToMany(mappedBy ="krcmtErAlCondition" , cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	//@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
 	public List<KrcstErAlWtActual> lstWtActual;
 	
 	@Transient
 	public KrcstErAlWtActual wtActual;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
+	@OneToMany(mappedBy = "krcmtErAlCondition",cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	//@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
 	public List<KrcstErAlWtPlan> lstWtPlan;
 	
 	@Transient
@@ -172,15 +168,15 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 	@Column(name = "WH_COMPARE_ATR")
 	public Integer whCompareAtr;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
+	@OneToMany(mappedBy = "krcmtErAlCondition",cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	//@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
 	public List<KrcstErAlWhActual> lstWhActual;
 	
 	@Transient
 	public KrcstErAlWhActual whActual;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
+	@OneToMany(mappedBy = "krcmtErAlCondition",cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	//@JoinColumns({ @JoinColumn(name = "ERAL_CHECK_ID", referencedColumnName = "ERAL_CHECK_ID", nullable = true) })
 	public List<KrcstErAlWhPlan> lstWhPlan;
 	
 	@Transient
@@ -211,15 +207,13 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 	@OneToOne(mappedBy = "krcmtErAlCondition")
 	public KwrmtErAlWorkRecord kwrmtErAlWorkRecord;
 
-	@Column(name = "CID",nullable = false,updatable = false)
-	public String companyId;
 	
 	@Override
 	protected Object getKey() {
-		return this.eralCheckId;
+		return this.krcmtErAlConditionPK;
 	}
 
-	public KrcmtErAlCondition(String eralCheckId, String messageDisplay, int filterByBusinessType,
+	public KrcmtErAlCondition(String eralCheckId,String cid, String messageDisplay, int filterByBusinessType,
 			List<KrcstErAlBusinessType> lstBusinessType, int filterByJobTitle, List<KrcstErAlJobTitle> lstJobTitle,
 			int filterByEmployment, List<KrcstErAlEmployment> lstEmployment, int filterByClassification,
 			List<KrcstErAlClass> lstClassification, int workTypeUseAtr, int wtPlanActualOperator,
@@ -230,7 +224,7 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 			int group2UseAtr, String atdItemConditionGroup1, KrcstErAlConGroup krcstErAlConGroup1,
 			String atdItemConditionGroup2, KrcstErAlConGroup krcstErAlConGroup2, int continuousPeriod) {
 		super();
-		this.eralCheckId = eralCheckId;
+		this.krcmtErAlConditionPK = new KrcmtErAlConditionPK(eralCheckId,cid);
 		this.messageDisplay = messageDisplay;
 		this.filterByBusinessType = filterByBusinessType;
 		this.lstBusinessType = lstBusinessType;
@@ -264,9 +258,10 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 	}
 
 	public static KrcmtErAlCondition fromDomain(ErrorAlarmCondition conditionDomain) {
+		String companyID= AppContexts.user().companyId();
 		String eralCheckId = conditionDomain.getErrorAlarmCheckID();
 		String displayMessage = conditionDomain.getDisplayMessage().v();
-		KrcmtErAlCondition krcmtErAlCondition = new KrcmtErAlCondition(eralCheckId, displayMessage, 0,
+		KrcmtErAlCondition krcmtErAlCondition = new KrcmtErAlCondition(eralCheckId,companyID, displayMessage, 0,
 				Collections.emptyList(), 0, Collections.emptyList(), 0, Collections.emptyList(), 0,
 				Collections.emptyList(), 0, 0, null, null, null, Collections.emptyList(), Collections.emptyList(), 0, 0,
 				null, null, null, Collections.emptyList(), Collections.emptyList(), 0, 0, "0", null, null, null, 0);
@@ -278,16 +273,16 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 		int filterByClassification = conditionDomain.getCheckTargetCondtion().getFilterByClassification() ? 1 : 0;
 		List<KrcstErAlBusinessType> lstBusinessType = conditionDomain.getCheckTargetCondtion().getLstBusinessTypeCode()
 				.stream().map(businessTypeCd -> new KrcstErAlBusinessType(
-						new KrcstErAlBusinessTypePK(eralCheckId, businessTypeCd.v())))
+						new KrcstErAlBusinessTypePK(eralCheckId, businessTypeCd.v(),companyID)))
 				.collect(Collectors.toList());
 		List<KrcstErAlJobTitle> lstJobTitle = conditionDomain.getCheckTargetCondtion().getLstJobTitleId().stream()
-				.map(jobTitleId -> new KrcstErAlJobTitle(new KrcstErAlJobTitlePK(eralCheckId, jobTitleId)))
+				.map(jobTitleId -> new KrcstErAlJobTitle(new KrcstErAlJobTitlePK(eralCheckId, jobTitleId,companyID)))
 				.collect(Collectors.toList());
 		List<KrcstErAlEmployment> lstEmployment = conditionDomain.getCheckTargetCondtion().getLstEmploymentCode()
-				.stream().map(emptCd -> new KrcstErAlEmployment(new KrcstErAlEmploymentPK(eralCheckId, emptCd.v())))
+				.stream().map(emptCd -> new KrcstErAlEmployment(new KrcstErAlEmploymentPK(eralCheckId, emptCd.v(),companyID)))
 				.collect(Collectors.toList());
 		List<KrcstErAlClass> lstClassification = conditionDomain.getCheckTargetCondtion().getLstClassificationCode()
-				.stream().map(clssCd -> new KrcstErAlClass(new KrcstErAlClassPK(eralCheckId, clssCd.v())))
+				.stream().map(clssCd -> new KrcstErAlClass(new KrcstErAlClassPK(eralCheckId, clssCd.v(),companyID)))
 				.collect(Collectors.toList());
 		// Set worktype condition
 		int workTypeUseAtr = conditionDomain.getWorkTypeCondition().isUse() ? 1 : 0;
@@ -303,16 +298,16 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 			wtPlanFilterAtr = wtypeCondition.getWorkTypePlan().isUse() ? 1 : 0;
 			wtActualFilterAtr = wtypeCondition.getWorkTypeActual().isUse() ? 1 : 0;
 			lstWtPlan = wtypeCondition.getWorkTypePlan().getLstWorkType().stream()
-					.map(wtCode -> new KrcstErAlWtPlan(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v())))
+					.map(wtCode -> new KrcstErAlWtPlan(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v(),companyID)))
 					.collect(Collectors.toList());
 			lstWtActual = wtypeCondition.getWorkTypeActual().getLstWorkType().stream()
-					.map(wtCode -> new KrcstErAlWtActual(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v())))
+					.map(wtCode -> new KrcstErAlWtActual(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v(),companyID)))
 					.collect(Collectors.toList());
 		} else {
 			SingleWorkType wtypeCondition = (SingleWorkType) conditionDomain.getWorkTypeCondition();
 			wtPlanFilterAtr = wtypeCondition.getTargetWorkType().isUse() ? 1 : 0;
 			lstWtPlan = wtypeCondition.getTargetWorkType().getLstWorkType().stream()
-					.map(wtCode -> new KrcstErAlWtPlan(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v())))
+					.map(wtCode -> new KrcstErAlWtPlan(new KrcstErAlWtPlanActualPK(eralCheckId, wtCode.v(),companyID)))
 					.collect(Collectors.toList());
 		}
 		// Set worktime condition
@@ -329,16 +324,16 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 			whPlanFilterAtr = wtimeCondition.getWorkTimePlan().isUse() ? 1 : 0;
 			whActualFilterAtr = wtimeCondition.getWorkTimeActual().isUse() ? 1 : 0;
 			lstWhPlan = wtimeCondition.getWorkTimePlan().getLstWorkTime().stream()
-					.map(wtCode -> new KrcstErAlWhPlan(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v())))
+					.map(wtCode -> new KrcstErAlWhPlan(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v(),companyID)))
 					.collect(Collectors.toList());
 			lstWhActual = wtimeCondition.getWorkTimeActual().getLstWorkTime().stream()
-					.map(wtCode -> new KrcstErAlWhActual(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v())))
+					.map(wtCode -> new KrcstErAlWhActual(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v(),companyID)))
 					.collect(Collectors.toList());
 		} else {
 			SingleWorkTime wtimeCondition = (SingleWorkTime) conditionDomain.getWorkTimeCondition();
 			whPlanFilterAtr = (wtimeCondition.getTargetWorkTime().isUse() ? 1 : 0);
 			lstWhPlan = wtimeCondition.getTargetWorkTime().getLstWorkTime().stream()
-					.map(wtCode -> new KrcstErAlWhPlan(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v())))
+					.map(wtCode -> new KrcstErAlWhPlan(new KrcstErAlWhPlanActualPK(eralCheckId, wtCode.v(),companyID)))
 					.collect(Collectors.toList());
 		}
 		// Set attendance item condition
@@ -360,7 +355,7 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 				.collect(Collectors.toList());
 		KrcstErAlConGroup krcstErAlConGroup2 = new KrcstErAlConGroup(atdItemConditionGroup2, conditionOperator2,
 				lstAtdItemCon2);
-		krcmtErAlCondition = new KrcmtErAlCondition(eralCheckId, displayMessage, filterByBusinessType, lstBusinessType,
+		krcmtErAlCondition = new KrcmtErAlCondition(eralCheckId,companyID, displayMessage, filterByBusinessType, lstBusinessType,
 				filterByJobTitle, lstJobTitle, filterByEmployment, lstEmployment, filterByClassification,
 				lstClassification, workTypeUseAtr, wtPlanActualOperator, wtPlanFilterAtr, wtActualFilterAtr,
 				wtCompareAtr, lstWtActual, lstWtPlan, workingHoursUseAtr, whPlanActualOperator, whPlanFilterAtr,
@@ -529,7 +524,7 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 								.orElse(new KrcstErAlConGroup("", 0, new ArrayList<>())).conditionOperator,
 						conditionsGroup2);
 		// }
-		condition.setCheckId(entity.eralCheckId);
+		condition.setCheckId(entity.krcmtErAlConditionPK.eralCheckId);
 		return condition;
 	}
 
@@ -610,6 +605,6 @@ public class KrcmtErAlCondition extends UkJpaEntity implements Serializable {
 	}
 
 	public void setCompanyId(String companyId) {
-		this.companyId = companyId;
+		this.krcmtErAlConditionPK.cid = companyId;
 	}
 }

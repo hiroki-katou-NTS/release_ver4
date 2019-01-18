@@ -302,29 +302,10 @@ public class OvertimePreProcessImpl implements IOvertimePreProcess {
 	@Override
 	public List<OvertimeWorkFrame> getOvertimeHours(int overtimeAtr, String companyID) {
 		List<OvertimeWorkFrame> overtimeFrames = new ArrayList<>();
-		// 早出残業の場合
-		if (overtimeAtr == OverTimeAtr.PREOVERTIME.value) {
-			List<OvertimeWorkFrame> overtimeFramePres = this.overtimeFrameRepository.getOvertimeWorkFrameByFrameByCom(companyID, NotUseAtr.USE.value);
-			overtimeFrames = overtimeFramePres.stream().filter(x -> {
-				return x.getOvertimeWorkFrNo().v().intValue() == 1;
-			}).collect(Collectors.toList());
-		}
-		// 通常残業の場合
-		if (overtimeAtr == OverTimeAtr.REGULAROVERTIME.value) {
-			List<OvertimeWorkFrame> overtimeFrameRegulars = this.overtimeFrameRepository.getOvertimeWorkFrameByFrameByCom(companyID, NotUseAtr.USE.value);
-			overtimeFrames = overtimeFrameRegulars.stream().filter(x -> {
-				return (x.getOvertimeWorkFrNo().v().intValue() == 2) || (x.getOvertimeWorkFrNo().v().intValue() == 3);
-			}).sorted(Comparator.comparing(OvertimeWorkFrame::getOvertimeWorkFrNo)).collect(Collectors.toList());
-		}
-		// 早出残業・通常残業の場合
-		if (overtimeAtr == OverTimeAtr.ALL.value) {
-			List<OvertimeWorkFrame> overtimeFrameAll = this.overtimeFrameRepository.getOvertimeWorkFrameByFrameByCom(companyID, NotUseAtr.USE.value);
-			overtimeFrames = overtimeFrameAll.stream().filter(x -> {
-				return (x.getOvertimeWorkFrNo().v().intValue() == 1) || 
-						(x.getOvertimeWorkFrNo().v().intValue() == 2) ||
-						(x.getOvertimeWorkFrNo().v().intValue() == 3);
-			}).sorted(Comparator.comparing(OvertimeWorkFrame::getOvertimeWorkFrNo)).collect(Collectors.toList());
-		}
+		List<OvertimeWorkFrame> overtimeFrameRegulars = this.overtimeFrameRepository.getOvertimeWorkFrameByFrameByCom(companyID, NotUseAtr.USE.value);
+		overtimeFrames = overtimeFrameRegulars.stream().filter(x -> {
+			return (x.getOvertimeWorkFrNo().v().intValue() == 2) || (x.getOvertimeWorkFrNo().v().intValue() == 3);
+		}).sorted(Comparator.comparing(OvertimeWorkFrame::getOvertimeWorkFrNo)).collect(Collectors.toList());
 		return overtimeFrames;
 	}
 

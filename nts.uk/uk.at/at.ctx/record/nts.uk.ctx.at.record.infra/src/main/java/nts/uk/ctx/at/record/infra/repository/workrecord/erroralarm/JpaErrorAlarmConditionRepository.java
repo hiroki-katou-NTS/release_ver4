@@ -22,9 +22,13 @@ import nts.uk.shr.com.context.AppContexts;
 @Stateless
 public class JpaErrorAlarmConditionRepository extends JpaRepository implements ErrorAlarmConditionRepository {
 
-	private static final String FIND_BY_ERROR_ALARM_CHECK_ID = "SELECT a FROM KrcmtErAlCondition a WHERE a.eralCheckId = :eralCheckId ";
-	//private final String DELETE_BY_ERROR_ALARM_CHECK_IDS = "DELETE FROM KrcmtErAlCondition a WHERE a.eralCheckId IN :erAlCheckIds ";
-	private static final String FIND_BY_ERROR_ALARM_CHECK_IDS = "SELECT a  FROM KrcmtErAlCondition a WHERE a.eralCheckId IN :erAlCheckIds ";
+	private static final String FIND_BY_ERROR_ALARM_CHECK_ID = "SELECT a FROM KrcmtErAlCondition a "
+			+ " WHERE a.krcmtErAlConditionPK.eralCheckId = :eralCheckId "
+			+ " AND a.krcmtErAlConditionPK.cid = :cid ";
+	
+	private static final String FIND_BY_ERROR_ALARM_CHECK_IDS = "SELECT a  FROM KrcmtErAlCondition a "
+			+ " WHERE a.krcmtErAlConditionPK.eralCheckId IN :erAlCheckIds "
+			+ " AND a.krcmtErAlConditionPK.cid = :cid ";
 	
 	@Override
 	public void addErrorAlarmCondition(ErrorAlarmCondition conditionDomain) {
@@ -84,10 +88,12 @@ public class JpaErrorAlarmConditionRepository extends JpaRepository implements E
 //			+ " WHERE a.eralCheckId IN :erAlCheckIds ";
 	@Override
 	public void removeErrorAlarmCondition(List<String> listErAlCheckID) {
+		String companyId = AppContexts.user().companyId();
 		List<KrcmtErAlCondition> listEralCon = new ArrayList<>();
 		CollectionUtil.split(listErAlCheckID, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			listEralCon.addAll(this.queryProxy().query(FIND_BY_ERROR_ALARM_CHECK_IDS, KrcmtErAlCondition.class)
                 .setParameter("erAlCheckIds", subList)
+                .setParameter("cid", companyId)
                 .getList());
 		});
 		
@@ -109,16 +115,20 @@ public class JpaErrorAlarmConditionRepository extends JpaRepository implements E
     }
 
 	private Optional<KrcmtErAlCondition> findByErrorAlamCheckId(String eralCheckId) {
+		String companyId = AppContexts.user().companyId();
         return this.queryProxy().query(FIND_BY_ERROR_ALARM_CHECK_ID, KrcmtErAlCondition.class)
-                .setParameter("eralCheckId", eralCheckId).getSingle();
+                .setParameter("eralCheckId", eralCheckId)
+                .setParameter("cid", companyId).getSingle();
     }
 	@Override
 	public List<ErrorAlarmCondition> findConditionByListErrorAlamCheckId(List<String> listEralCheckId) {
+		String companyId = AppContexts.user().companyId();
 		if(listEralCheckId.isEmpty()) return new ArrayList<ErrorAlarmCondition>();
 		List<KrcmtErAlCondition> entities = new ArrayList<>();
 		CollectionUtil.split(listEralCheckId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			entities.addAll(this.queryProxy().query(FIND_BY_ERROR_ALARM_CHECK_IDS, KrcmtErAlCondition.class)
 								.setParameter("erAlCheckIds", subList)
+								.setParameter("cid", companyId)
 								.getList());
 		});
 		return entities.stream().map(item -> 
@@ -127,14 +137,16 @@ public class JpaErrorAlarmConditionRepository extends JpaRepository implements E
 
 	@Override
 	public List<ErrorAlarmCondition> findMessageConByListErAlCheckId(List<String> listEralCheckId) {
+		String companyId = AppContexts.user().companyId();
 		if(listEralCheckId.isEmpty()) return new ArrayList<ErrorAlarmCondition>();
 		List<KrcmtErAlCondition> entities = new ArrayList<>();
 		CollectionUtil.split(listEralCheckId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			entities.addAll(this.queryProxy().query(FIND_BY_ERROR_ALARM_CHECK_IDS, KrcmtErAlCondition.class)
                 							 .setParameter("erAlCheckIds", subList)
+                							 .setParameter("cid", companyId)
                 							 .getList());
 		});
 		return entities.stream().map(item -> 
-                	new ErrorAlarmCondition(item.eralCheckId, item.messageDisplay)).collect(Collectors.toList());
+                	new ErrorAlarmCondition(item.krcmtErAlConditionPK.eralCheckId, item.messageDisplay)).collect(Collectors.toList());
 	}
 }

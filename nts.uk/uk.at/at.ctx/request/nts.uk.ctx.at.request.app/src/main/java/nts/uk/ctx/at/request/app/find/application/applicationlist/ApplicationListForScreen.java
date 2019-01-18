@@ -3,6 +3,7 @@ package nts.uk.ctx.at.request.app.find.application.applicationlist;
 /*import nts.uk.ctx.at.request.dom.setting.company.displayname.HdAppDispNameRepository;*/
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -204,5 +205,29 @@ public class ApplicationListForScreen {
 			break;
 		}
 		return holidayAppTypeName;
+	}
+	
+	/**
+	 * 社員、期間に一致する申請をグループ化して取得する
+	 * RequestList #542
+	 * @param employeeID
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	public List<AppGroupExportDto> getApplicationGroupBySID(List<String> employeeID, GeneralDate startDate,
+			GeneralDate endDate) {
+		List<ApplicationExportDto> appExportLst = this.getApplicationBySID(employeeID, startDate, endDate);
+		List<AppGroupExportDto> result = new ArrayList<>();
+		Map<Object, List<AppGroupExportDto>> mapDate =  appExportLst.stream()
+				.map(x -> new AppGroupExportDto(x.getAppDate(),x.getAppType(),x.getEmployeeID(),x.getAppTypeName()))
+				.collect(Collectors.groupingBy(x -> x.getAppDate()));
+		mapDate.entrySet().stream().forEach(x -> {
+			Map<Object, List<AppGroupExportDto>> mapDateType = x.getValue().stream().collect(Collectors.groupingBy(y -> y.getAppType()));
+			mapDateType.entrySet().stream().forEach(y -> {
+				result.add(y.getValue().get(0));
+			});
+		});
+		return result;
 	}
 }

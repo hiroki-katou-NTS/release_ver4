@@ -34,7 +34,7 @@ public interface AppReflectProcessRecord {
 	 * @param isPre True: 事前, False: 事後
 	 * @return
 	 */
-	public boolean absenceReflectRecor(CommonReflectPara para, boolean isPre);
+	public boolean absenceReflectRecor(WorkChangeCommonReflectPara para, boolean isPre);
 	/**
 	 * 勤務実績に反映: 事前申請の処理(休日出勤申請)
 	 * @param para

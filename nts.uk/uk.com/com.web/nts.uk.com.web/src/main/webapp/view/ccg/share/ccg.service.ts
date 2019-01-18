@@ -125,6 +125,14 @@ module nts.uk.com.view.ccg.share.ccg {
             const param = '/' + closureId + '/' + yearMonth;
             return nts.uk.request.ajax('at', servicePath.calculatePeriod + param);
         }
+        
+         /**
+         * Calculate period
+         */
+        export function calculatePeriod105458(closureId: number): JQueryPromise<model.DatePeriodDto> {
+            const param = '/' + closureId;
+            return nts.uk.request.ajax('at', servicePath.calculatePeriod + param);
+        }
 
         /**
          * call service get employee by login

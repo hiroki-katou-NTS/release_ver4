@@ -14,6 +14,7 @@ import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.PCLogOnInfoOfDa
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthlyRepository;
+import nts.uk.ctx.at.record.dom.monthly.flex.CheckBeforeCalcFlexChangeService;
 import nts.uk.ctx.at.record.dom.monthly.roundingset.RoundingSetOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.verticaltotal.GetVacationAddSet;
 import nts.uk.ctx.at.record.dom.monthly.vtotalmethod.PayItemCountOfMonthlyRepository;
@@ -220,6 +221,9 @@ public class RepositoriesRequiredByMonthlyAggrImpl implements RepositoriesRequir
 	/** 会社別変形労働労働時間 */
 	@Inject
 	private ComTransLaborTimeRepository comTransLaborTime;
+	/** 社員のフレックス繰越上限時間を求める */
+	@Inject
+	private CheckBeforeCalcFlexChangeService checkBeforeCalcFlex;
 	
 	/** 月別実績の勤怠時間 */
 	@Inject

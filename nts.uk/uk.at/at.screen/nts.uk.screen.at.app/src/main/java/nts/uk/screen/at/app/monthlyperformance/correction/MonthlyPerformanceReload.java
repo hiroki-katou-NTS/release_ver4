@@ -346,10 +346,6 @@ public class MonthlyPerformanceReload {
 			MonthlyModifyResult rowData = employeeDataMap.get(employeeId);
 			if (rowData == null) continue;
 			
-			// lock check box1 identify
-			if (!employeeIdLogin.equals(employeeId) || param.getInitMenuMode() == 2) {
-				lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
-			}
 			String lockStatus = lockStatusMap.isEmpty() || !lockStatusMap.containsKey(employee.getId()) || param.getInitMenuMode() == 1 ? ""
 					: lockStatusMap.get(employee.getId()).getLockStatusString();
 
@@ -457,6 +453,11 @@ public class MonthlyPerformanceReload {
 			MPDataDto mpdata = new MPDataDto(employeeId, lockStatus, "", employee.getCode(), employee.getBusinessName(),
 					employeeId, "", identify, approve, dailyConfirm, "");
 
+			// lock check box1 identify
+			if (!employeeIdLogin.equals(employeeId) || param.getInitMenuMode() == 2 
+					|| ((!StringUtil.isNullOrEmpty(lockStatus, true)) && (approvalProcessingUseSetting.getUseMonthApproverConfirm() && approve == true))) {
+				lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
+			}
 			// Setting data for dynamic column
 			List<EditStateOfMonthlyPerformanceDto> newList = editStateOfMonthlyPerformanceDtos.stream()
 					.filter(item -> item.getEmployeeId().equals(employeeId)).collect(Collectors.toList());

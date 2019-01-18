@@ -113,13 +113,29 @@ public class SrcdtDataCorrectionLog extends UkJpaEntity {
 	protected Object getKey() {
 		return this.pk;
 	}
-
+	
 	/**
 	 * convert data to read only, not to write
 	 * 
 	 * @return domain DataCorrectionLog
 	 */
 	public DataCorrectionLog toDomainToView() {
+		GeneralDate ymd = this.pk.ymdKey;
+		if (this.pk.ymdKey == null) {
+			if (this.ymKey != null) {
+				YearMonth ym = YearMonth.of(this.ymKey);
+				ymd = GeneralDate.ymd(ym.year(), ym.month(), 1);
+			} else if (this.yKey != null)
+				ymd = GeneralDate.ymd(this.yKey, 1, 1);
+		}
+		return new DataCorrectionLog(this.pk.operationId, new UserInfo(this.pk.userId, this.employeeId, this.userName),
+				TargetDataType.of(this.pk.targetDataType), TargetDataKey.of(ymd, this.stringKey),
+				CorrectionAttr.of(this.correctionAttr),
+				ItemInfo.createToView(this.pk.itemId, this.itemName, this.viewValueBefore, this.viewValueAfter),
+				this.showOrder, this.note);
+	}
+	
+	public DataCorrectionLog toDomainToViewJDBC() {
 		GeneralDate ymd = this.pk.ymdKey;
 		if (this.pk.ymdKey == null) {
 			if (this.ymKey != null) {
@@ -179,6 +195,28 @@ public class SrcdtDataCorrectionLog extends UkJpaEntity {
 				CorrectionAttr.of(this.correctionAttr),
 				ItemInfo.createWithViewValue(this.pk.itemId, this.itemName, DataValueAttribute.STRING, this.rawValueBefore, this.rawValueAfter, this.viewValueBefore, this.viewValueAfter),
 				this.showOrder, this.note);
+	}
+
+	public SrcdtDataCorrectionLog(SrcdtDataCorrectionLogPk pk, String userName, String employeeId, Integer ymKey,
+			Integer yKey, String stringKey, int correctionAttr, String itemName, String rawValueBefore,
+			String viewValueBefore, String rawValueAfter, String viewValueAfter, Integer valueType, int showOrder,
+			String note) {
+		super();
+		this.pk = pk;
+		this.userName = userName;
+		this.employeeId = employeeId;
+		this.ymKey = ymKey;
+		this.yKey = yKey;
+		this.stringKey = stringKey;
+		this.correctionAttr = correctionAttr;
+		this.itemName = itemName;
+		this.rawValueBefore = rawValueBefore;
+		this.viewValueBefore = viewValueBefore;
+		this.rawValueAfter = rawValueAfter;
+		this.viewValueAfter = viewValueAfter;
+		this.valueType = valueType;
+		this.showOrder = showOrder;
+		this.note = note;
 	}
 	
 }

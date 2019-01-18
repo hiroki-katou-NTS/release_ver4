@@ -254,15 +254,16 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 			if(!optActualStamp.isPresent()) {
 				return true;		
 			} 
-			WorkStamp actualStamp = optActualStamp.get();
+			/*WorkStamp actualStamp = optActualStamp.get();
 			//ドメインモデル「勤怠打刻」．打刻元情報が「打刻自動セット(個人情報)、直行直帰」
 			if(actualStamp.getStampSourceInfo() == StampSourceInfo.STAMP_AUTO_SET_PERSONAL_INFO
 					|| actualStamp.getStampSourceInfo() == StampSourceInfo.GO_STRAIGHT) {
 				return true;
-			}
+			}*/
 		}
 		
-		return false;
+		//return false;
+		return true;
 		
 	}
 	@Override

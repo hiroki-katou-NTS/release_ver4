@@ -119,11 +119,6 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 									  Optional.empty(),
 									  companySet,
 									  Collections.emptyList()).getLst();
-//		//勤務情報のステータスを変更
-//		result.forEach(tc ->{
-//			tc.integrationOfDaily.getWorkInformation().changeCalcState(CalculationState.Calculated);
-//			//dailyCalculationEmployeeService.upDateCalcState(tc);
-//		});
 		return result.stream().map(ts -> ts.getIntegrationOfDaily()).collect(Collectors.toList()); 
 	}
 	
@@ -291,20 +286,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 		
 		//労働制マスタ取得
 		val masterData = workingConditionItemRepository.getBySidAndPeriodOrderByStrDWithDatePeriod(integraListByRecordAndEmpId,maxGeneralDate,minGeneralDate);
-		
-		
-//			   return c.getKey().contains(date) && c.getValue().getEmployeeId().equals(EmpId);
-//		   }).findFirst()
-		org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-		int dataCount = 1;
-		for(Map.Entry<DateHistoryItem, WorkingConditionItem> outPutLogData : masterData.getMappingItems().entrySet()) {
-			log.info(String.valueOf(dataCount) + "回目のループです。"); 
-			log.info("社員ID:" + outPutLogData.getValue().getEmployeeId());
-			log.info("StartDay:" + outPutLogData.getKey().start());
-			log.info("EndDay:" + outPutLogData.getKey().end());
-			log.info("労働制:" + outPutLogData.getValue().getLaborSystem());
-		}
-		log.info("取得した全件データの出力は終わりました。");
+
 		//日ごとループ(1人社員の)
 		List<ManageCalcStateAndResult> returnList = new ArrayList<>();
 		for(IntegrationOfDaily record:recordList) {
@@ -333,12 +315,6 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 				if(dailyUnit == null || dailyUnit.getDailyTime() == null)
 					dailyUnit = new DailyUnit(new TimeOfDay(0));
 				//実績計算
-				log.info("使おうとしてる労働条件の出力を開始します。");
-				log.info("社員ID:" + nowWorkingItem.get().getValue().getEmployeeId());
-				log.info("StartDay:" + nowWorkingItem.get().getKey().start());
-				log.info("EndDay:" + nowWorkingItem.get().getKey().end());
-				log.info("労働制:" + nowWorkingItem.get().getValue().getLaborSystem());
-				log.info("使おうとしてる労働条件の出力を終了します。");
 				ManageCalcStateAndResult result = calculate.calculate(calcOption, record, 
 													   companyCommonSetting,
 													   new ManagePerPersonDailySet(Optional.of(nowWorkingItem.get().getValue()), dailyUnit),

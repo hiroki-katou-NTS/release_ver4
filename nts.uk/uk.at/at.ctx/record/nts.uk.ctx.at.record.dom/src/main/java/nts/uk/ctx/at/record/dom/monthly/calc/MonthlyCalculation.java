@@ -5,14 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
 import nts.arc.diagnose.stopwatch.concurrent.ConcurrentStopwatches;
-import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
+import nts.gul.util.Time;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceItemOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.agreement.AgreementTimeOfManagePeriod;
@@ -21,6 +22,8 @@ import nts.uk.ctx.at.record.dom.monthly.calc.actualworkingtime.RegularAndIrregul
 import nts.uk.ctx.at.record.dom.monthly.calc.flex.FlexTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.calc.totalworkingtime.AggregateTotalWorkingTime;
 import nts.uk.ctx.at.record.dom.monthly.erroralarm.Flex;
+import nts.uk.ctx.at.record.dom.monthly.flex.CalcFlexChangeDto;
+import nts.uk.ctx.at.record.dom.monthly.flex.ConditionCalcResult;
 import nts.uk.ctx.at.record.dom.monthly.roundingset.RoundingSetOfMonthly;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.MonthlyAggregationErrorInfo;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.MonAggrCompanySettings;
@@ -392,91 +395,31 @@ public class MonthlyCalculation {
 			// 退職日が当月の期間内の時、翌月繰越可能時間 = 0
 			if (this.isRetireMonth) break;
 			
-			// 翌月の雇用→締め→期間を確認する
-			GeneralDate nextBaseDate = procPeriod.end().addDays(1);		// 翌月開始日
-			val nextEmploymentOpt = employeeSets.getEmployment(nextBaseDate);
-			if (!nextEmploymentOpt.isPresent()) break;
-			String nextEmploymentCd = nextEmploymentOpt.get().getEmploymentCode();
-			val nextClosureEmploymentOpt = repositories.getClosureEmployment().findByEmploymentCD(
-					companyId, nextEmploymentCd);
-			if (!nextClosureEmploymentOpt.isPresent()) break;
-			Integer nextClosureId = nextClosureEmploymentOpt.get().getClosureId();
-			if (!companySets.getClosureMap().containsKey(nextClosureId)) break;
-			Closure nextClosure = companySets.getClosureMap().get(nextClosureId);
-			val nextClosurePeriodOpt = nextClosure.getClosurePeriodByYmd(nextBaseDate);
-			if (!nextClosurePeriodOpt.isPresent()) break;
-			val nextClosurePeriod = nextClosurePeriodOpt.get();
-			val nextClosureDate = nextClosurePeriod.getClosureDate();
-			val nextYearMonth = nextClosurePeriod.getYearMonth();
-			DatePeriod nextPeriod = nextClosurePeriod.getPeriod();
-
-			// 翌月のフレックス勤務の期間を確認する
-			List<DatePeriod> flexPeriods = new ArrayList<>();
+			// 翌月までの労働条件を確認する
+			GeneralDate nextEndDate = procPeriod.end().addDays(31);		// 翌月終了日を含む期間（月末対策のため、31日加算）
+			DatePeriod checkPeriod = new DatePeriod(procPeriod.start(), nextEndDate);
 			List<WorkingConditionItem> workingConditionItems = repositories.getWorkingConditionItem()
-					.getBySidAndPeriodOrderByStrD(employeeId, nextPeriod);
-			for (val item : workingConditionItems){
-				if (item.getLaborSystem() != WorkingSystem.FLEX_TIME_WORK) continue;
-				val workingConditionOpt = repositories.getWorkingCondition().getByHistoryId(item.getHistoryId());
-				if (workingConditionOpt.isPresent()){
-					flexPeriods.add(workingConditionOpt.get().getDateHistoryItem().get(0).span());
-				}
+					.getBySidAndPeriodOrderByStrD(employeeId, checkPeriod);
+			List<WorkingConditionItem> workConditions = workingConditionItems.stream()
+					.filter(x -> x.getLaborSystem().equals(WorkingSystem.FLEX_TIME_WORK)).collect(Collectors.toList());
+			
+			// フレックス期間がなければ、翌月繰越可能時間 = 0
+			if (workConditions.isEmpty()) break;
+			
+			// 社員のフレックス繰越上限時間（翌月繰越可能時間）を求める
+			CalcFlexChangeDto calcFlex = CalcFlexChangeDto.createCalcFlexDto(employeeId, procPeriod.end());
+			calcFlex.createWCItem(workConditions);
+			ConditionCalcResult conditionResult = repositories.getCheckBeforeCalcFlex().getConditionCalcFlex(
+					companyId, calcFlex);
+			long canNextCarryforwardSeconds = 0L;
+			try {
+				canNextCarryforwardSeconds = Time.parse(conditionResult.getValueResult()).totalSeconds();
 			}
-			
-			// 翌月がフレックス勤務でない時、翌月繰越可能時間 = 0
-			boolean isNextFlex = false;
-			for (val flexPeriod : flexPeriods){
-				if (flexPeriod.contains(nextBaseDate)) isNextFlex = true;
+			catch (Exception ex) {
+				canNextCarryforwardSeconds = 0L;
 			}
-			if (!isNextFlex) break;
-			
-			// 翌月の「月別実績の勤怠時間」を取得する
-			val nextAttendanceTimeOpt = repositories.getAttendanceTimeOfMonthly().find(
-					employeeId, nextYearMonth, EnumAdaptor.valueOf(nextClosureId, ClosureId.class), nextClosureDate);
-			
-			int canNextCarryforwardMinute = 0;		// 翌月繰越可能時間
-// delete Redmine#102997　（Redmine#102745 の対応による削除漏れ）
-//			if (nextAttendanceTimeOpt.isPresent()){
-//				val nextMonthlyCalculation = nextAttendanceTimeOpt.get().getMonthlyCalculation();
-//				
-//				// 「月別実績の勤怠時間」から翌月繰越可能時間を算出する
-//				int nextStatMinutes = nextMonthlyCalculation.getStatutoryWorkingTime().v();
-//				int nextPredMinutes = nextMonthlyCalculation.getAggregateTime().getPrescribedWorkingTime()
-//						.getSchedulePrescribedWorkingTime().v();
-//				canNextCarryforwardMinute = nextStatMinutes - nextPredMinutes;
-//			}
-//			else {
-				
-				// 週・月の法定労働時間を取得（フレックス用）
-				val nextFlexMonAndWeekStatTime = repositories.getMonthlyStatutoryWorkingHours().getFlexMonAndWeekStatutoryTime(
-						companyId, nextEmploymentCd, employeeId, nextBaseDate, nextYearMonth);
-				int nextStatMinutes = nextFlexMonAndWeekStatTime.getStatutorySetting().v();
-				
-				// 日別実績の勤務予定時間を集計する　→　所定労働時間
-				int nextPredMinutes = 0;
-				val dailyMap = monthlyCalcDailys.getAttendanceTimeOfDailyMap();
-				GeneralDate checkDate = nextPeriod.start();
-				while (checkDate.beforeOrEquals(nextPeriod.end())){
-					boolean isFlexDay = false;
-					for (val flexPeriod : flexPeriods){
-						if (flexPeriod.contains(checkDate)) isFlexDay = true;
-					}
-					if (isFlexDay){
-						if (dailyMap.containsKey(checkDate)){
-							// 日別実績の勤怠時間.勤務予定時間.計画所定労働時間
-							val attendanceTimeOfDaily = dailyMap.get(checkDate);
-							val scheTime = attendanceTimeOfDaily.getWorkScheduleTimeOfDaily();
-							if (scheTime != null){
-								val schePresTime = scheTime.getSchedulePrescribedLaborTime();
-								if (schePresTime != null) nextPredMinutes += schePresTime.v();
-							}
-						}
-					}
-					checkDate = checkDate.addDays(1);
-				}
-				canNextCarryforwardMinute = nextStatMinutes - nextPredMinutes;
-//			}
-			if (canNextCarryforwardMinute < 0) canNextCarryforwardMinute = 0;
-			this.settingsByFlex.setCanNextCarryforwardTimeMonth(new AttendanceTimeMonth(canNextCarryforwardMinute));
+			long canNextCarryforwardMinute = canNextCarryforwardSeconds / Time.STEP;
+			this.settingsByFlex.setCanNextCarryforwardTimeMonth(new AttendanceTimeMonth((int)canNextCarryforwardMinute));
 			break;
 		default:
 			this.statutoryWorkingTime = new AttendanceTimeMonth(0);

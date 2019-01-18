@@ -32,7 +32,7 @@ public class AppReflectRecordPara {
 	/**
 	 * 休暇申請
 	 */
-	private CommonReflectPara absenceInfor;
+	private WorkChangeCommonReflectPara absenceInfor;
 	/**
 	 * 振休申請
 	 */

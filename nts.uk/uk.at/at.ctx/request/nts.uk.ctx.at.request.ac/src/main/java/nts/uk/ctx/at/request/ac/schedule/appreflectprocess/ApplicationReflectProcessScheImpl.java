@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.schedule.pub.appreflectprocess.ApplicationGobackScheInforDto;
+import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsence;
 import nts.uk.ctx.at.request.dom.application.holidayshipment.recruitmentapp.RecruitmentApp;
 import nts.uk.ctx.at.request.dom.application.workchange.AppWorkChange;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.ApplicationReflectProcessSche;
@@ -43,15 +44,17 @@ public class ApplicationReflectProcessScheImpl implements ApplicationReflectProc
 
 	@Override
 	public boolean forleaveReflect(ReflectScheDto reflectSche) {
+		AppAbsence forLeave = reflectSche.getForLeave();
 		CommonReflectSchePubParam leavePra = new CommonReflectSchePubParam(reflectSche.getEmployeeId(),
 				reflectSche.getDatePara(),
 				reflectSche.getForLeave().getWorkTypeCode() != null ? reflectSche.getForLeave().getWorkTypeCode().v() : null, //勤務種類=INPUT．勤務種類コード chi update workType
 				null,
 				reflectSche.getAppInfor().getStartDate().isPresent() ? reflectSche.getAppInfor().getStartDate().get() : null,
 				reflectSche.getAppInfor().getEndDate().isPresent() ? reflectSche.getAppInfor().getEndDate().get() : null,
-				reflectSche.getForLeave().getStartTime1() != null ? reflectSche.getForLeave().getStartTime1().v() : null,
-				reflectSche.getForLeave().getEndTime1() != null ? reflectSche.getForLeave().getEndTime1().v() : null);
-		return appReflectSchePub.appForLeaveSche(leavePra);
+						forLeave.getStartTime1() != null ? forLeave.getStartTime1().v() : null,
+								forLeave.getEndTime1() != null ? forLeave.getEndTime1().v() : null);
+		WorkChangeCommonReflectSchePubParam paraInput = new WorkChangeCommonReflectSchePubParam(leavePra, forLeave.isChangeWorkHour() == true ? 1 : 0);
+		return appReflectSchePub.appForLeaveSche(paraInput);
 	}
 
 	@Override

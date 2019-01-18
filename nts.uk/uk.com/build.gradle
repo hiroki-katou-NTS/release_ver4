@@ -1140,6 +1140,9 @@ project (':com.web:nts.uk.com.web') {
 		runtime group: 'at.auth', name: 'nts.uk.ctx.at.auth.pub', version: version
 		runtime group: 'at.auth', name: 'nts.uk.ctx.at.auth.pubimp', version: version
 		
+		runtime group: 'at.screen', name: 'nts.uk.screen.at.app', version: version
+		runtime group: 'at.screen', name: 'nts.uk.screen.at.infra', version: version
+		
 		runtime group: 'at.function', name: 'nts.uk.ctx.at.function.ac', version: version
 		runtime group: 'at.function', name: 'nts.uk.ctx.at.function.app', version: version
 		runtime group: 'at.function', name: 'nts.uk.ctx.at.function.dom', version: version

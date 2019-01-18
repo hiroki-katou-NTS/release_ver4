@@ -7,7 +7,7 @@ module nts.uk.at.view.kmf004.i.service {
         changeSpecialEvent: basePath + "changeSpecialEvent/{0}",
         save: basePath + "save",
         remove: basePath + "delete/{0}",
-        findEmpByCodes: "bs/employee/employment/findByCodes",
+        findEmpByCodes: "bs/employee/employment/findNamesByCodesWithNull",
         findClsByCodes: "bs/employee/classification/getClsNameByCds"
     }
 

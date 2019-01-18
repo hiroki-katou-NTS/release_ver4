@@ -1,8 +1,7 @@
 package nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.OverTimeRecordAtr;
@@ -117,4 +116,24 @@ public interface WorkUpdateService {
 	 * @param overTimeAtr
 	 */
 	public void reflectReason(String sid, GeneralDate appDate, String appReason, OverTimeRecordAtr overTimeAtr);
+	/**
+	 * 事前残業の勤務項目
+	 * @return
+	 */
+	public List<Integer> lstPreOvertimeItem();
+	/**
+	 * 事前休日出勤時間の項目ID
+	 * @return
+	 */
+	List<Integer> lstPreWorktimeFrameItem();
+	/**
+	 * 事後休日出勤時間帯の項目ID
+	 * @return
+	 */
+	List<Integer> lstAfterWorktimeFrameItem();
+	/**
+	 * 振替時間の項目ID
+	 * @return
+	 */
+	List<Integer> lstTranfertimeFrameItem();
 }

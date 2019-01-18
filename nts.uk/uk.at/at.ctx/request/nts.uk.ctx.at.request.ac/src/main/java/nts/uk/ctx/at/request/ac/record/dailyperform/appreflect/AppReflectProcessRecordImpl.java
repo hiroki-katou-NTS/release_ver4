@@ -146,8 +146,8 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 	}
 
 	@Override
-	public boolean absenceReflectRecor(CommonReflectPara para, boolean isPre) {
-		return recordPub.absenceReflect(this.toPubPara(para), isPre);		
+	public boolean absenceReflectRecor(WorkChangeCommonReflectPara para, boolean isPre) {
+		return recordPub.absenceReflect(new WorkChangeCommonReflectPubPara(toPubPara(para.getCommonPara()), para.getExcludeHolidayAtr()), isPre);		
 	}
 
 	@Override

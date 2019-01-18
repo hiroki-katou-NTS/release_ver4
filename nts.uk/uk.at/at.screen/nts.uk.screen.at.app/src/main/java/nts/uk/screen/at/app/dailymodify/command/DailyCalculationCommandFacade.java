@@ -142,7 +142,7 @@ public class DailyCalculationCommandFacade {
 								.workingDate(dto.getKey().getDate()).completed())
 						.collect(Collectors.toList());
 			// check error sau khi tinh toan
-			DataResultAfterIU afterError = errorCheckAfterCalculation(editedDomains, monthlyResults, dataParent.getMonthValue(), dataParent.getDateRange(), dataParent.getMode(), resultOlds, editedDtos);
+			DataResultAfterIU afterError = errorCheckAfterCalculation(editedDomains, monthlyResults, dataParent.getMonthValue(), dataParent.getDateRange(), dataParent.getMode(), resultOlds, editedDtos, dataParent.getItemValues());
 			resultError = afterError.getErrorMap();
 			flexShortage = afterError.getFlexShortage();
 
@@ -266,7 +266,7 @@ public class DailyCalculationCommandFacade {
 	 * 計算後エラーチェック
 	 */
 	private DataResultAfterIU errorCheckAfterCalculation(List<IntegrationOfDaily> dailyResults,
-			List<IntegrationOfMonthly> monthlyResults, DPMonthValue monthlyParam, DateRange dateRange, int mode, List<DailyModifyResult> resultOlds, List<DailyRecordDto> editedDtos) {
+			List<IntegrationOfMonthly> monthlyResults, DPMonthValue monthlyParam, DateRange dateRange, int mode, List<DailyModifyResult> resultOlds, List<DailyRecordDto> editedDtos, List<DPItemValue> lstItemEdits) {
 //		Map<Integer, List<DPItemValue>> resultError = new HashMap<>();
 		
 //		// 乖離エラーのチェック
@@ -300,7 +300,7 @@ public class DailyCalculationCommandFacade {
 //		}
 
 		RCDailyCorrectionResult resultIU = new RCDailyCorrectionResult(dailyResults, monthlyResults, null, null, null, true);
-		ErrorAfterCalcDaily errorCheck = dailyModifyResCommandFacade.checkErrorAfterCalc(resultIU, monthParam, resultOlds, mode, monthlyParam, dateRange, editedDtos);
+		ErrorAfterCalcDaily errorCheck = dailyModifyResCommandFacade.checkErrorAfterCalc(resultIU, monthParam, resultOlds, mode, monthlyParam, dateRange, editedDtos, lstItemEdits);
 		
 		// 残数系のエラーチェック
 //		List<DPItemValue> errorMonth = validatorDataDaily.errorMonth(monthlyResults, null).get(TypeError.ERROR_MONTH.value);

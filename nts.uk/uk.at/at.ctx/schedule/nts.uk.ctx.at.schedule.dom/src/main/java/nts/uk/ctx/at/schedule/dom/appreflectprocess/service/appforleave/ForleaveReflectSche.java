@@ -2,6 +2,7 @@ package nts.uk.ctx.at.schedule.dom.appreflectprocess.service.appforleave;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.schedule.dom.appreflectprocess.service.CommonReflectParamSche;
+import nts.uk.ctx.at.schedule.dom.appreflectprocess.service.workchange.WorkChangecommonReflectParamSche;
 
 /**
  * (休暇申請)勤務予定への反映
@@ -13,7 +14,7 @@ public interface ForleaveReflectSche {
 	 * (休暇申請)勤務予定への反映
 	 * @param reflectParam
 	 */
-	public boolean forlearveReflectSche(CommonReflectParamSche reflectParam);
+	public boolean forlearveReflectSche(WorkChangecommonReflectParamSche reflectParam);
 	/**
 	 * 時刻の反映
 	 * @param employeeId

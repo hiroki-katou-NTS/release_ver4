@@ -13,7 +13,7 @@ public interface AppReflectProcessSchePub {
 	 * 休暇申請
 	 * @param reflectPara
 	 */
-	public boolean appForLeaveSche(CommonReflectSchePubParam appForleaverPara);
+	public boolean appForLeaveSche(WorkChangeCommonReflectSchePubParam appForleaverPara);
 	/**
 	 * 勤務変更申請
 	 * @param workChangeParam

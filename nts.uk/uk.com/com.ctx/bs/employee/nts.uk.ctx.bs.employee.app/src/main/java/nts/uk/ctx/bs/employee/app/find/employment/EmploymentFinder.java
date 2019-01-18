@@ -35,4 +35,13 @@ public interface EmploymentFinder {
 	 * @return the list
 	 */
 	List<EmploymentDto> findByCodes(List<String> empCodes);
+	
+	/**
+	 * Find by codes with null.
+	 *
+	 * @param code the code
+	 * @return the list
+	 * */
+
+	List<EmploymentDto> findByCodesWithNull(List<String> empCodes);
 }

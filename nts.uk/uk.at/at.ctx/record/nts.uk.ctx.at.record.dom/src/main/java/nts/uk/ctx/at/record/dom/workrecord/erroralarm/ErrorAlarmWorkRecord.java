@@ -154,6 +154,10 @@ public class ErrorAlarmWorkRecord extends AggregateRoot {
 		return this;
 	}
 	
+	public void setCompanyId(String companyId) {
+		this.companyId = companyId;
+	}
+	
 
 }
 

@@ -6,6 +6,8 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.logging.log4j.util.Strings;
+
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.EmploymentRootAtr;
@@ -105,26 +107,36 @@ public class GoBackDirectlyUpdateDefault implements GoBackDirectlyUpdateService 
 		// ドメインモデル「直行直帰申請共通設定」．勤務の変更をチェックする
 		GoBackDirectlyCommonSetting setting = goBackDirectCommonSetRepo.findByCompanyID(application.getCompanyID()).get();
 		if(setting.getWorkChangeFlg()==WorkChangeFlg.DECIDECHANGE){
-			workTimeCD = goBackDirectly.getWorkTypeCD().map(x -> x.v()).orElse("");
-			workTypeCD = goBackDirectly.getSiftCD().map(x -> x.v()).orElse("");
+			workTypeCD = goBackDirectly.getWorkTypeCD().map(x -> x.v()).orElse("");
+			workTimeCD = goBackDirectly.getSiftCD().map(x -> x.v()).orElse("");
 		} else {
 			// 実績の取得
 			AchievementOutput achievementOutput = collectAchievement.getAchievement(application.getCompanyID(), application.getEmployeeID(), application.getAppDate());
 			workTimeCD = achievementOutput.getWorkTime().getWorkTimeCD();
 			workTypeCD = achievementOutput.getWorkType().getWorkTypeCode();
 		}
-		// 所定時間帯を取得する
-		PredetermineTimeSetForCalc predetermineTimeSetForCalc = workTimeSettingService.getPredeterminedTimezone(application.getCompanyID(), workTimeCD, workTypeCD, null); 
-		Optional<TimezoneUse> opTimezoneUse = predetermineTimeSetForCalc.getTimezones().stream().filter(x -> x.getWorkNo() == 1).findAny();
+		// 取得した「勤務種類コード」「就業時間帯コード」をチェックする
+		Optional<TimezoneUse> opTimezoneUse = Optional.empty();
+		if(Strings.isNotBlank(workTypeCD) && Strings.isNotBlank(workTimeCD)){
+			// 所定時間帯を取得する
+			PredetermineTimeSetForCalc predetermineTimeSetForCalc = workTimeSettingService.getPredeterminedTimezone(application.getCompanyID(), workTimeCD, workTypeCD, null); 
+			opTimezoneUse = predetermineTimeSetForCalc.getTimezones().stream().filter(x -> x.getWorkNo() == 1).findAny();
+		}
 		// 勤務開始1に時刻が入力されたか
 		if(!goBackDirectly.getWorkTimeStart1().isPresent()){
-			// 勤務開始1に(勤務NO=1)の「計算用所定時間設定」．時間帯．開始を入れる
-			goBackDirectly.setWorkTimeStart1(opTimezoneUse.map(x -> new WorkTimeGoBack(x.getStart().v())));
+			// 取得した「勤務種類コード」「就業時間帯コード」をチェックする
+			if(Strings.isNotBlank(workTypeCD) && Strings.isNotBlank(workTimeCD)){
+				// 勤務開始1に(勤務NO=1)の「計算用所定時間設定」．時間帯．開始を入れる
+				goBackDirectly.setWorkTimeStart1(opTimezoneUse.map(x -> new WorkTimeGoBack(x.getStart().v())));
+			}
 		}
 		// 勤務終了1に時刻が入力されたか
 		if(!goBackDirectly.getWorkTimeEnd1().isPresent()){
-			// 勤務終了1に(勤務NO=1)の「計算用所定時間設定」．時間帯．終了を入れる
-			goBackDirectly.setWorkTimeEnd1(opTimezoneUse.map(x -> new WorkTimeGoBack(x.getEnd().v())));
+			// 取得した「勤務種類コード」「就業時間帯コード」をチェックする
+			if(Strings.isNotBlank(workTypeCD) && Strings.isNotBlank(workTimeCD)){
+				// 勤務終了1に(勤務NO=1)の「計算用所定時間設定」．時間帯．終了を入れる
+				goBackDirectly.setWorkTimeEnd1(opTimezoneUse.map(x -> new WorkTimeGoBack(x.getEnd().v())));
+			}
 		}
 		// ドメインモデル「直行直帰申請」の更新する
 		this.goBackDirectlyRepo.update(goBackDirectly);

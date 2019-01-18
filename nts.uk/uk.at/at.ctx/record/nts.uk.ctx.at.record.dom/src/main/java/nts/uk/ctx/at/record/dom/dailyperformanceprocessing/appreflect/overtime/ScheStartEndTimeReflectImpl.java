@@ -361,10 +361,10 @@ public class ScheStartEndTimeReflectImpl implements ScheStartEndTimeReflect {
 			return false;
 		}
 		//打刻自動セット区分を取得する
-		if(workTypeService.checkStampAutoSet(workTypeCode, AttendanceOfficeAtr.ATTENDANCE)) {
+		/*if(workTypeService.checkStampAutoSet(workTypeCode, AttendanceOfficeAtr.ATTENDANCE)) {
 			return absService.checkReflectRecordStartEndTime(employeeId, datadata, frameNo, isPre);
-		}
-		return false;
+		}*/
+		return true;
 	}
 
 }

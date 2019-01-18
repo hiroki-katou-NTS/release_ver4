@@ -40,7 +40,19 @@ module nts.uk.at.view.kmf004.j.viewmodel {
 
         submit() {
             let self = this;
-
+            let NoDataCodes = [];
+            //remove nodata code from code list
+            _.forEach(self.currentCodeList(),(code)=>{
+                let item = _.find(self.items(), function(o) { return o.code == code; });
+                if(!item){
+                    NoDataCodes.push(code);
+                }
+            });
+            _.forEach(NoDataCodes, (code) => {
+                let index = self.currentCodeList().indexOf(code);
+                self.currentCodeList().splice(index, 1);
+            });
+            
             if (self.currentCodeList().length > 0) {
                 nts.uk.ui.windows.setShared("KMF004_J_SELECTED_ITEMS", self.currentCodeList());
                 nts.uk.ui.windows.close();

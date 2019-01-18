@@ -81,7 +81,7 @@ public class MonthlyCalculatingDailys {
 		MonthlyCalculatingDailys result = new MonthlyCalculatingDailys();
 		
 		// 取得期間を　開始日-1月～終了日+1月　とする　（前月の最終週、36協定締め日違いの集計のため）
-		DatePeriod findPeriod = new DatePeriod(period.start().addMonths(-1), period.end().addMonths(1));
+		DatePeriod findPeriod = new DatePeriod(period.start().addMonths(-1), period.end().addDays(31));
 		
 		// 日別実績の勤怠時間
 		val attendanceTimeOfDailyList =
@@ -234,7 +234,7 @@ public class MonthlyCalculatingDailys {
 		this.loadDataCommonForAgreement(employeeId, period, repositories);
 		
 		// 取得期間を　開始日-1月～終了日+1月　とする　（前月の最終週、36協定締め日違いの集計のため）
-		DatePeriod findPeriod = new DatePeriod(period.start().addMonths(-1), period.end().addMonths(1));
+		DatePeriod findPeriod = new DatePeriod(period.start().addMonths(-1), period.end().addDays(31));
 		
 		// 日別実績の出退勤
 		val timeLeaveOfDailyList =
@@ -306,7 +306,7 @@ public class MonthlyCalculatingDailys {
 		MonthlyCalculatingDailys result = new MonthlyCalculatingDailys();
 		
 		// 取得期間を　開始日-1月～終了日+1月　とする　（前月の最終週、36協定締め日違いの集計のため）
-		DatePeriod findPeriod = new DatePeriod(period.start().addMonths(-1), period.end().addMonths(1));
+		DatePeriod findPeriod = new DatePeriod(period.start().addMonths(-1), period.end().addDays(31));
 		
 		// 日別実績の勤怠時間
 		val attendanceTimeOfDailyList =
@@ -338,7 +338,7 @@ public class MonthlyCalculatingDailys {
 		MonthlyCalculatingDailys result = new MonthlyCalculatingDailys();
 		
 		// 取得期間を　開始日-1月～終了日+1月　とする　（前月の最終週、36協定締め日違いの集計のため）
-		DatePeriod findPeriod = new DatePeriod(period.start().addMonths(-1), period.end().addMonths(1));
+		DatePeriod findPeriod = new DatePeriod(period.start().addMonths(-1), period.end().addDays(31));
 		
 		// 日別実績の勤怠時間
 		val attendanceTimeOfDailyList =
@@ -370,7 +370,7 @@ public class MonthlyCalculatingDailys {
 			RepositoriesRequiredByMonthlyAggr repositories){
 		
 		// 取得期間を　開始日-1月～終了日+1月　とする　（前月の最終週、36協定締め日違いの集計のため）
-		DatePeriod findPeriod = new DatePeriod(period.start().addMonths(-1), period.end().addMonths(1));
+		DatePeriod findPeriod = new DatePeriod(period.start().addMonths(-1), period.end().addDays(31));
 		
 		// 日別実績の勤務情報
 		val workInfoOfDailyList =

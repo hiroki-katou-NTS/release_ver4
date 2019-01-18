@@ -60,8 +60,9 @@ public class AppReflectProcessSchePubImpl implements AppReflectProcessSchePub{
 	}
 
 	@Override
-	public boolean appForLeaveSche(CommonReflectSchePubParam appForleaverPara) {
-		return leaveReflect.forlearveReflectSche(this.toParamSche(appForleaverPara));
+	public boolean appForLeaveSche(WorkChangeCommonReflectSchePubParam appForleaverPara) {
+		return leaveReflect.forlearveReflectSche(new WorkChangecommonReflectParamSche(this.toParamSche(appForleaverPara.getCommon()),
+				appForleaverPara.getExcludeHolidayAtr()));
 	}
 
 	@Override

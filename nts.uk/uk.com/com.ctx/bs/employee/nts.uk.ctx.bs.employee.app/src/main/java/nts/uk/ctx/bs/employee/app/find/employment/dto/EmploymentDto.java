@@ -4,7 +4,9 @@
  *****************************************************************/
 package nts.uk.ctx.bs.employee.app.find.employment.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * The Class EmploymentDto.
@@ -14,6 +16,8 @@ import lombok.Data;
  * Instantiates a new employment dto.
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class EmploymentDto {
 	
 	/** The code. */

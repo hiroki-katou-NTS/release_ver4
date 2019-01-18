@@ -100,7 +100,7 @@ module nts.uk.at.view.kaf018.d.viewmodel {
             var self = this;
             $("#grid1").ntsGrid({
                 width: '1120px',
-                height: '500px',
+                height: '450px',
                 dataSource: self.listDataDisp(),
                 primaryKey: 'appId',
                 virtualization: true,

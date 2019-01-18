@@ -30,10 +30,18 @@ public class KrcstErAlJobTitlePK implements Serializable {
     @Size(min = 1, max = 36)
     @Column(name = "ERAL_CHECK_ID")
     public String eralCheckId;
+	
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 36)
     @Column(name = "JOB_ID")
     public String jobId;
+    
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 17)
+    @Column(name = "CID")
+	public String cid;
+    
     
 }
