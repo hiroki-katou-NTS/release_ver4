@@ -1226,7 +1226,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 		}
 		//EA2238
 		//上記、開始日付の２年後（＋２年－１日）」を終了日付として取得
-		return new DatePeriod(startDate,startDate);//KO COMMIT LEN
+		return new DatePeriod(startDate,startDate.addYears(2).addDays(-1));
 	}
 	/**
 	 * 12.1 - 申請一覧初期日付期間_申請
