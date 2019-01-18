@@ -344,20 +344,6 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		//実際の計算処理
 		val calcResult = calcRecord(record,schedule, companyCommonSetting,personCommonSetting, converter);
 		calcResult.setCalAttr(copyCalcAtr);
-		org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-		log.info("使った労働制は↓です。");
-		if(personCommonSetting.getPersonInfo().isPresent()) {
-			String wS = personCommonSetting.getPersonInfo().get().getLaborSystem().toString();
-			log.info("社員ID:"+integrationOfDaily.getAffiliationInfor().getEmployeeId());
-			log.info("targetDay:"+integrationOfDaily.getAffiliationInfor().getYmd().toString());
-			log.info("労働制:" + wS);
-		}
-		else {
-			log.info("社員ID:"+integrationOfDaily.getAffiliationInfor().getEmployeeId());
-			log.info("targetDay:"+integrationOfDaily.getAffiliationInfor().getYmd().toString());
-			log.info("計算内部ですが、労働制がOptional.emptyだそうです。");
-		}
-		log.info("使った労働制は↑でした。");
 		return ManageCalcStateAndResult.successCalc(calcResult);
 	}
 
@@ -539,32 +525,6 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		
 		//0時跨ぎ計算設定
 		Optional<ZeroTime> overDayEndCalcSet = companyCommonSetting.getZeroTime();
-		
-////		//日別実績の計算区分
-//		if(integrationOfDaily.getCalAttr() == null
-//				|| (integrationOfDaily.getCalAttr().getRasingSalarySetting() == null)
-//				|| (integrationOfDaily.getCalAttr().getOvertimeSetting() == null)
-//				|| (integrationOfDaily.getCalAttr().getLeaveEarlySetting() == null)
-//				|| (integrationOfDaily.getCalAttr().getHolidayTimeSetting() == null)
-//				|| (integrationOfDaily.getCalAttr().getFlexExcessTime() == null)
-//				|| (integrationOfDaily.getCalAttr().getDivergenceTime() == null))
-//		{
-//			val autoCalcSet = new AutoCalSetting(TimeLimitUpperLimitSetting.NOUPPERLIMIT,AutoCalAtrOvertime.CALCULATEMBOSS);
-//			val calAttr = new CalAttrOfDailyPerformance(employeeId, 
-//													targetDate,
-//													new AutoCalFlexOvertimeSetting(autoCalcSet),
-//													new AutoCalRaisingSalarySetting(true,true),
-//													new AutoCalRestTimeSetting(autoCalcSet,autoCalcSet),
-//													new AutoCalOvertimeSetting(autoCalcSet, 
-//																			   autoCalcSet, 
-//																			   autoCalcSet, 
-//																			   autoCalcSet, 
-//																			   autoCalcSet, 
-//																			   autoCalcSet),
-//													new AutoCalcOfLeaveEarlySetting(true, true),
-//													new AutoCalcSetOfDivergenceTime(DivergenceTimeAttr.USE));
-//			integrationOfDaily.setCalAttr(calAttr);
-//		}	
 		
 		//自動計算設定
 		CalAttrOfDailyPerformance calcSetinIntegre = integrationOfDaily.getCalAttr();

@@ -158,18 +158,6 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 				   																		scheleaveLateSet,
 				   																		schePred)));
 		
-		/* 乖離時間の計算 */
-//		val attendanceTime = recordReGetClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get();
-//		val actualWorkingTime = attendanceTime.getActualWorkingTimeOfDaily();
-//		forCalcDivergenceDto = forCalcDivergenceDto.setData(recordReGetClass.getIntegrationOfDaily());
-//		actualWorkingTime.setDivTime(ActualWorkingTimeOfDaily.createDivergenceTimeOfDaily(
-//				forCalcDivergenceDto,
-//				divergenceTimeList,
-//				recordReGetClass.getIntegrationOfDaily().getCalAttr(),
-//				recordReGetClass.getFixRestTimeSetting(),
-//				actualWorkingTime.getTotalWorkingTime()
-//				));
-		
 		return recordReGetClass.getIntegrationOfDaily();
 	}
 	
