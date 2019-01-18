@@ -57,6 +57,8 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.Tar
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
+import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
+import nts.uk.shr.com.context.AppContexts;
 //import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.EmploymentCode;
 //import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 //import nts.uk.shr.com.context.AppContexts;
@@ -172,6 +174,9 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	@Inject
 	private ManagedParallelWithContext parallel;
 	
+	@Inject
+	private InterimRemainDataMngRegisterDateChange interimData;
+	
 	/**
 	 * 社員の日別実績を計算
 	 * @param asyncContext 同期コマンドコンテキスト
@@ -185,6 +190,8 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	@Override
 	//@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void calculate(AsyncCommandHandlerContext asyncContext, List<String> employeeIds,DatePeriod datePeriod, Consumer<ProcessState> counter,ExecutionType reCalcAtr, String empCalAndSumExecLogID) {
+		
+		String cid = AppContexts.user().companyId();
 		
 		this.parallel.forEach(employeeIds, employeeId -> {
 			
@@ -223,6 +230,10 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 				for(ManageCalcStateAndResult stateInfo : afterCalcRecord.getLst()) {
 					upDateCalcState(stateInfo);
 				}
+				
+				//暫定データ
+				interimData.registerDateChange(cid , employeeId, datePeriod.datesBetween());
+				//
 				counter.accept(afterCalcRecord.getPs() == ProcessState.SUCCESS?ProcessState.SUCCESS:ProcessState.INTERRUPTION);
 			}
 		});
