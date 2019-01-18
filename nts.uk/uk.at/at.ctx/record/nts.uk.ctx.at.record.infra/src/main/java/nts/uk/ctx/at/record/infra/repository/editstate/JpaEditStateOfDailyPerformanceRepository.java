@@ -33,7 +33,7 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 //	private static final String REMOVE_BY_EMPLOYEE;
 
 	private static final String DEL_BY_LIST_KEY;
-
+	
 //	private static final String DEL_BY_LIST_ITEM_ID;
 
 	static {
@@ -235,6 +235,25 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 				throw new RuntimeException(e);
 			}
 		});
+	}
+
+	@Override
+	public List<EditStateOfDailyPerformance> findByEditState(String sid, GeneralDate ymd, List<Integer> ids,
+			EditStateSetting editState) {
+		StringBuilder builderString = new StringBuilder();
+		builderString.append("SELECT a ");
+		builderString.append("FROM KrcdtDailyRecEditSet a ");
+		builderString.append("WHERE a.krcdtDailyRecEditSetPK.employeeId = :employeeId ");
+		builderString.append("AND a.krcdtDailyRecEditSetPK.processingYmd = :ymd ");
+		builderString.append("AND a.krcdtDailyRecEditSetPK.attendanceItemId IN :items ");
+		builderString.append("AND a.editState = :editState ");
+		builderString.append("ORDER BY a.krcdtDailyRecEditSetPK.attendanceItemId");
+		return this.queryProxy().query(builderString.toString(), KrcdtDailyRecEditSet.class)
+				.setParameter("employeeId", sid)
+				.setParameter("ymd", ymd)
+				.setParameter("items", ids)
+				.setParameter("editState", editState.value)
+				.getList(c -> toDomain(c));
 	}
 
 }
