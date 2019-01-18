@@ -21,6 +21,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
@@ -65,6 +67,36 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @TransactionAttribute(value = TransactionAttributeType.SUPPORTS)
 public class DailyDataImportServiceImpl implements DailyDataImportService {
 
+	private static final String EMPLOYEE_NOT_EXSIST_MES = "社員が存在しません。";
+
+	private static final String PARAM2 = "{1}";
+
+	private static final String PARAM1 = "{0}";
+
+	private static final String WORK_TYPE_ITEM_NAME = "勤務種類";
+
+	private static final String WORK_TIME_ITEM_NAME = "就業時間帯";
+
+	private static final String LEAVING_TIME_ITEM_NAME = "退勤時刻";
+
+	private static final String ATTENDANCE_TIME_ITEM_NAME = "出勤時刻";
+
+	private static final String BREAKTIME_END_ITEM_NAME = "休憩終了時刻";
+
+	private static final String BREAKTIME_START_ITEM_NAME = "休憩開始時刻";
+
+	private static final String ITEM_ERROR_MES = "項目エラー。";
+
+	private static final String DAILY_RECORD_NOT_EXSIST_MES = "日次データが存在しません。";
+
+	private static final String PROCESS_STATUS = "status";
+
+	private static final String ACTUAL_PROCESS_EMPLOYEE_NUMBER = "processEmpCount";
+
+	private static final String TOTAL_PROCESS_RECORDS = "processRecords";
+
+	private static final String TOTAL_EMPLOYEE_NUMBER = "totalEmpCount";
+
 	private static final String SUCCESSED_EMP_COUNT = "processedEmpCount";
 
 	private static final String ERROR_NUMBER = "errorCount";
@@ -75,7 +107,7 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 
 	private static final String SPLIT_BY_1000_REG = "(?<=\\G.{1000})";
 
-	private static final String ERROR_NAME_FORMAT = "Error_{0}_{1}";
+	private static final String ERROR_NAME_FORMAT = StringUtils.join(new String[]{"Error", PARAM1, PARAM2}, "_");
 	
 	@Inject
 	private DailyDataImportTempRepository tempRepo;
@@ -109,7 +141,7 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 	}
 
 	public List<RecordImportError> importAt(DatePeriod period, TaskDataSetter dataSetter, Supplier<Boolean> isCanceled) {
-		dataSetter.setData("status", "準備中 (1/2)");
+		dataSetter.setData(PROCESS_STATUS, ImportState.DATA_COLLECTING.description);
 		
 		List<RecordImportError> errors = Collections.synchronizedList(new ArrayList<>());
 		ObjectMapper jsonMapper = initJsonMapper();
@@ -119,8 +151,8 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 		List<String> importedEmpCd = importData.stream().map(c -> c.getEmployeeCode()).distinct()
 				.collect(Collectors.toList());
 		
-		dataSetter.setData("totalEmpCount", importedEmpCd.size());
-		dataSetter.setData("processRecords", importData.size());
+		dataSetter.setData(TOTAL_EMPLOYEE_NUMBER, importedEmpCd.size());
+		dataSetter.setData(TOTAL_PROCESS_RECORDS, importData.size());
 		dataSetter.setData(SUCCESSED_RECORDS_NUMBER, 0);
 		dataSetter.setData(ERROR_NUMBER, 0);
 		dataSetter.setData(SUCCESSED_EMP_COUNT, 0);
@@ -128,23 +160,20 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 		if(!importData.isEmpty()){
 			Map<String, String> mappedEmp = empAdapter.mapEmpCodeToId(importedEmpCd);
 			List<String> empIds = new ArrayList<>(mappedEmp.values());
-			dataSetter.setData("processEmpCount", empIds.size());
+			dataSetter.setData(ACTUAL_PROCESS_EMPLOYEE_NUMBER, empIds.size());
 			
 			
-			dataSetter.updateData("status", "準備中 (2/2)");
-			AtomicInteger successEmpCount = new AtomicInteger(0);
+			dataSetter.updateData(PROCESS_STATUS, ImportState.BEFORE_DATA_DELETING.description);
 			
-			//parallelManager.forEach(empIds, emp -> {
-				self.removePreData(period, empIds);
+			self.removePreData(period, empIds);
 				
 			List<WorkInfoOfDailyPerformance> workInfos = workInfoRepo.findByListEmployeeId(empIds, period);
 			List<TimeLeavingOfDailyPerformance> timeLeaves = timeLeavingRepo.finds(empIds, period);
 			List<BreakTimeOfDailyPerformance> breakItems = breakItemRepo.finds(empIds, period);
-				//dataSetter.updateData(SUCCESSED_EMP_COUNT, successEmpCount.incrementAndGet());
-			//});
 
-			dataSetter.updateData("status", "受入データ処理中");
+			dataSetter.updateData(PROCESS_STATUS, ImportState.DATA_PROCESSING.description);
 			//successEmpCount.set(0);
+			AtomicInteger successEmpCount = new AtomicInteger(0);
 			AtomicInteger successRecordCount = new AtomicInteger(0);
 			
 			parallelManager.forEach(groupByEmpCode(importData), edi -> {
@@ -156,17 +185,17 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 				String empId = mappedEmp.get(edi.getKey());
 				if (empId == null) {
 					edi.getValue().stream().forEach(ddit -> {
-						errorsPerEmp.add(new RecordImportError(edi.getKey(), ddit.getYmd(), "社員が存在しません。"));
+						errorsPerEmp.add(new RecordImportError(edi.getKey(), ddit.getYmd(), EMPLOYEE_NOT_EXSIST_MES));
 					});
 					
 				} else {
 					errorsPerEmp.addAll(processOneEmp(empId, workInfos, timeLeaves, breakItems, edi));
-					dataSetter.updateData(SUCCESSED_EMP_COUNT, successEmpCount.incrementAndGet());
 				}
 				
 				
 				setErrorOnSetter(dataSetter, jsonMapper, edi.getKey(), errorsPerEmp);
 				errors.addAll(errorsPerEmp);
+				dataSetter.updateData(SUCCESSED_EMP_COUNT, successEmpCount.incrementAndGet());
 				dataSetter.updateData(SUCCESSED_RECORDS_NUMBER, successRecordCount.addAndGet(edi.getValue().size() - errorsPerEmp.size()));
 				dataSetter.updateData(ERROR_NUMBER, errors.size());
 				
@@ -177,7 +206,7 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 			dataSetter.updateData(ERROR_NUMBER, errors.size());
 		}
 
-		dataSetter.updateData("status", "受入完了");
+		dataSetter.updateData(PROCESS_STATUS, ImportState.PROCESS_COMPLETE.description);
 		
 		return errors;
 	}
@@ -185,20 +214,8 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 	@TransactionAttribute(value = TransactionAttributeType.REQUIRED)
 	public void removePreData(DatePeriod period, List<String> empIds) {
 		List<GeneralDate> processingYmds = period.datesBetween();
-		/*
-		timeLeaves.forEach(tl -> {
-			tl.getAttendanceLeavingWork(1).ifPresent(alw -> {
-				alw.getAttendanceStamp().ifPresent(as -> {
-					as.removeStamp();
-				});
-				alw.getLeaveStamp().ifPresent(ls -> {
-					ls.removeStamp();
-				});
-			});
-		});*/
-//		timeLeavingRepo.update(timeLeaves);
+		
 		timeLeavingRepo.deleteScheStamp(empIds, processingYmds);
-		// timeLeavingRepo.deleteTimeNoBy(empIds, processingYmds, 1);
 		breakItemRepo.deleteRecord1And2By(empIds, processingYmds);
 		editStateRepo.deleteBy(empIds, processingYmds);
 	}
@@ -206,6 +223,7 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 	@TransactionAttribute(value = TransactionAttributeType.REQUIRED)
 	public void finishUpdate(List<WorkInfoOfDailyPerformance> workInfos, List<TimeLeavingOfDailyPerformance> timeLeaves,
 			List<BreakTimeOfDailyPerformance> breakTimes, List<EditStateOfDailyPerformance> editStates) {
+		
 		timeLeavingRepo.update(timeLeaves);
 		breakItemRepo.updateV2(breakTimes);
 		workInfoRepo.updateV2(workInfos);
@@ -253,10 +271,10 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 		GeneralDate currentDate = importData.getYmd();
 		WorkInfoOfDailyPerformance currentDateWorkInfo = currentInfos.get(importData.getYmd());
 		if (currentDateWorkInfo == null) {
-			return new RecordImportError(edi.getKey(), currentDate, "日次データが存在しません。");
+			return new RecordImportError(edi.getKey(), currentDate, DAILY_RECORD_NOT_EXSIST_MES);
 		}
 		List<Integer> updatedItems = new ArrayList<>();
-		RecordImportError error = new RecordImportError(edi.getKey(), currentDate, "項目エラー。");
+		RecordImportError error = new RecordImportError(edi.getKey(), currentDate, ITEM_ERROR_MES);
 		
 		TimeLeavingOfDailyPerformance currentDateTimeLeave = getCurrentTimeLeave(edi, currentTimeLeaves, currentDate, empId);
 
@@ -311,7 +329,7 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 	}
 
 	private String convertToTaskDataName(String empCode, int idx) {
-		return ERROR_NAME_FORMAT.replace("{0}", empCode).replace("{1}", String.valueOf(idx));
+		return ERROR_NAME_FORMAT.replace(PARAM1, empCode).replace(PARAM2, String.valueOf(idx));
 	}
 
 	private Set<Entry<String, List<DailyDataImportTemp>>> groupByEmpCode(List<DailyDataImportTemp> importData) {
@@ -341,7 +359,7 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 		WorkTimeCode workTimeCode = cWorkInfo.getRecordInfo().getSiftCode();
 
 		if (ddi.getWorkType().trim().length() != 3) {
-			error.getItems().add("勤務種類");
+			error.getItems().add(WORK_TYPE_ITEM_NAME);
 		} else {
 			workTypeCode = new WorkTypeCode(ddi.getWorkType());
 			updatedItems.add(28);
@@ -350,7 +368,7 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 
 		if (ddi.getWorkTime().isPresent()) {
 			if (ddi.getWorkTime().get().trim().length() != 3) {
-				error.getItems().add("就業時間帯");
+				error.getItems().add(WORK_TIME_ITEM_NAME);
 			} else {
 				workTimeCode = new WorkTimeCode(ddi.getWorkTime().get());
 				updatedItems.add(29);
@@ -366,8 +384,8 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 
 	private boolean processTimeLeaving(DailyDataImportTemp ddi, RecordImportError error,
 			TimeLeavingOfDailyPerformance cTimeLeave, List<Integer> updatedItems) {
-		String start = ddi.getStartTime().orElse("");
-		String end = ddi.getEndTime().orElse("");
+		String start = ddi.getStartTime().orElse(null);
+		String end = ddi.getEndTime().orElse(null);
 		MutableValue<Boolean> isProcessed = new MutableValue<Boolean>(false);
 		
 		if (StringUtil.isNullOrEmpty(start, true) && StringUtil.isNullOrEmpty(end, true)) {
@@ -400,21 +418,21 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 						updatedItems.addAll(Arrays.asList(30, 31, 32, 33, 34, 35, 36, 37, 38, 39));
 						isProcessed.set(true);
 					} else {
-						error.getItems().add("出勤時刻");
-						error.getItems().add("退勤時刻");
+						error.getItems().add(ATTENDANCE_TIME_ITEM_NAME);
+						error.getItems().add(LEAVING_TIME_ITEM_NAME);
 					}
 				} else if (attendance.isSuccess()) {
-					error.getItems().add("退勤時刻");
+					error.getItems().add(LEAVING_TIME_ITEM_NAME);
 				} else if (leaving.isSuccess()) {
-					error.getItems().add("出勤時刻");
+					error.getItems().add(ATTENDANCE_TIME_ITEM_NAME);
 				} else {
-					error.getItems().add("出勤時刻");
-					error.getItems().add("退勤時刻");
+					error.getItems().add(ATTENDANCE_TIME_ITEM_NAME);
+					error.getItems().add(LEAVING_TIME_ITEM_NAME);
 				}
 			} else if (!StringUtil.isNullOrEmpty(start, true)) {
-				error.getItems().add("退勤時刻");
+				error.getItems().add(LEAVING_TIME_ITEM_NAME);
 			} else if (!StringUtil.isNullOrEmpty(end, true)) {
-				error.getItems().add("出勤時刻");
+				error.getItems().add(ATTENDANCE_TIME_ITEM_NAME);
 			}
 		});
 		
@@ -434,21 +452,21 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 					updatedItems.addAll(breakNo == 1 ? Arrays.asList(157, 159) : Arrays.asList(163, 165));
 					return true;
 				} else {
-					error.getItems().add("休憩開始時刻" + breakNo);
-					error.getItems().add("休憩終了時刻" + breakNo);
+					error.getItems().add(BREAKTIME_START_ITEM_NAME + breakNo);
+					error.getItems().add(BREAKTIME_END_ITEM_NAME + breakNo);
 				}
 			} else if (bre.isSuccess()) {
-				error.getItems().add("休憩開始時刻" + breakNo);
+				error.getItems().add(BREAKTIME_START_ITEM_NAME + breakNo);
 			} else if (brs.isSuccess()) {
-				error.getItems().add("休憩終了時刻" + breakNo);
+				error.getItems().add(BREAKTIME_END_ITEM_NAME + breakNo);
 			} else {
-				error.getItems().add("休憩開始時刻" + breakNo);
-				error.getItems().add("休憩終了時刻" + breakNo);
+				error.getItems().add(BREAKTIME_START_ITEM_NAME + breakNo);
+				error.getItems().add(BREAKTIME_END_ITEM_NAME + breakNo);
 			}
 		} else if (breakEnd.isPresent()) {
-			error.getItems().add("休憩開始時刻" + breakNo);
+			error.getItems().add(BREAKTIME_START_ITEM_NAME + breakNo);
 		} else if (breakStart.isPresent()) {
-			error.getItems().add("休憩終了時刻" + breakNo);
+			error.getItems().add(BREAKTIME_END_ITEM_NAME + breakNo);
 		}
 		
 		return false;
