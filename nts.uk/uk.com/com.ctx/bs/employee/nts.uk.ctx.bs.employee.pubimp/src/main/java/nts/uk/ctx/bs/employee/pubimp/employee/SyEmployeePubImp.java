@@ -8,11 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -511,6 +509,34 @@ public class SyEmployeePubImp implements SyEmployeePub {
 		// lây toàn bộ nhân viên theo cid
 		List<EmployeeDataMngInfo> lstEmp = empDataMngRepo.getAllByCid(cid);
 
+		if (lstEmp.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<String> lstpid = lstEmp.stream().map(m -> m.getPersonId()).collect(Collectors.toList());
+
+		Map<String, Person> personMap = personRepository.getPersonByPersonIds(lstpid).stream()
+				.collect(Collectors.toMap(x -> x.getPersonId(), x -> x));
+		List<EmpOfLoginCompanyExport> lstresult = new ArrayList<>();
+		lstEmp.forEach(m -> {
+			EmpOfLoginCompanyExport emp = new EmpOfLoginCompanyExport();
+			emp.setScd(m.getEmployeeCode().v());
+			emp.setSid(m.getEmployeeId());
+			emp.setBussinesName(personMap.get(m.getPersonId()).getPersonNameGroup().getBusinessName().v());
+			lstresult.add(emp);
+
+		});
+		return lstresult;
+	}
+	
+	@Override
+	public List<EmpOfLoginCompanyExport> getActiceEmpsOfLoginCompany(String cid) {
+
+		// lây toàn bộ nhân viên theo cid
+		List<EmployeeDataMngInfo> lstEmp = empDataMngRepo.getAllByCid(cid).stream()
+															.filter(e -> e.getDeletedStatus() == EmployeeDeletionAttr.NOTDELETED)
+															.collect(Collectors.toList());
+		
 		if (lstEmp.isEmpty()) {
 			return Collections.emptyList();
 		}

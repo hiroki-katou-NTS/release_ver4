@@ -1,0 +1,27 @@
+#process-info td {
+	border: solid 1px black; 
+	padding-left: 10px;
+	line-height: 30px;
+}
+
+#process-info table .info-label{
+	background-color: #CFF1A5;
+}
+#process-range{
+	display: inline-block;
+	width: 100%;
+	text-align: center;
+    margin-bottom: 10px;
+}
+#process-range-picker div:first-child{
+	display: inline-block;
+}
+#process-range-picker {
+	display: inline-block;
+}
+#process-info{
+	display: inline-block;
+}
+#process-range-label{
+	float: left;
+}
