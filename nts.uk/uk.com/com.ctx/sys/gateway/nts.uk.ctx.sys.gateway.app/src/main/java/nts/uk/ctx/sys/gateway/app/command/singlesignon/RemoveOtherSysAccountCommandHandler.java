@@ -13,6 +13,7 @@ import nts.arc.layer.app.command.CommandHandler;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccount;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccountRepository;
+import nts.uk.shr.com.context.AppContexts;
 
 /**
  * The Class RemoveOtherSysAccountCommandHandler.
@@ -32,12 +33,11 @@ public class RemoveOtherSysAccountCommandHandler extends CommandHandler<RemoveOt
 		
 		// Get command
 		RemoveOtherSysAccountCommand command = context.getCommand();
-		
-		Optional<OtherSysAccount> opOtherSysAcc = otherSysAccountRepository.findByUserId(command.getUserId());
-		
+		String cid = AppContexts.user().companyId();
+		Optional<OtherSysAccount> opOtherSysAcc = otherSysAccountRepository.findByEmployeeId(cid,command.getEmployeeId());
 		if(opOtherSysAcc.isPresent()){
 			// remove
-			this.otherSysAccountRepository.remove(opOtherSysAcc.get().getUserId());
+			this.otherSysAccountRepository.remove(cid,opOtherSysAcc.get().getEmployeeId());
 			
 		}
 		

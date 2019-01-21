@@ -17,6 +17,7 @@ import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccount;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccountRepository;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.UseAtr;
+import nts.uk.shr.com.context.AppContexts;
 
 /**
  * The Class SaveOtherSysAccountCommandHandler.
@@ -33,10 +34,11 @@ public class SaveOtherSysAccountCommandHandler extends CommandHandler<SaveOtherS
 	 */
 	@Override
 	protected void handle(CommandHandlerContext<SaveOtherSysAccountCommand> context) {
-		
+		String cid = AppContexts.user().companyId();
 		// Get command
 		SaveOtherSysAccountCommand command = context.getCommand();
-		Optional<OtherSysAccount> opOtherSysAcc = otherSysAccountRepository.findByUserId(command.getUserId());
+		command.setCompanyId(cid);
+		Optional<OtherSysAccount> opOtherSysAcc = otherSysAccountRepository.findByEmployeeId(cid,command.getEmployeeId());
 
 		if (opOtherSysAcc.isPresent()) {
 			this.validate(command);				
@@ -69,7 +71,7 @@ public class SaveOtherSysAccountCommandHandler extends CommandHandler<SaveOtherS
 					.findByCompanyCodeAndUserName(dto.getCompanyCode().v(), dto.getUserName().v());
 
 			// Check condition
-			if (opOtherSysAccount.isPresent() && !opOtherSysAccount.get().getUserId().equals(dto.getUserId())) {
+			if (opOtherSysAccount.isPresent() && !opOtherSysAccount.get().getEmployeeId().equals(dto.getEmployeeId())) {
 				// Has error, throws message
 				isError = true;
 				exceptions.addMessage("Msg_616");

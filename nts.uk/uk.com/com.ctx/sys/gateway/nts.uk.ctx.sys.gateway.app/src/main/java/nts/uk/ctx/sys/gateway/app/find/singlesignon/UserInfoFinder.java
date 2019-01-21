@@ -148,7 +148,7 @@ public class UserInfoFinder {
 			List<OtherSysAccount> listOtherSysAccs = otherSysAccountRepository.findAllOtherSysAccount(listUserIDs);
 
 			Map<String, OtherSysAccount> mapOtherSysAccount = listOtherSysAccs.stream()
-					.collect(Collectors.toMap(OtherSysAccount::getUserId, Function.identity()));
+					.collect(Collectors.toMap(OtherSysAccount::getEmployeeId, Function.identity()));
 
 			listUserMap.forEach(w -> {
 				OtherSysAccount otherSysAcc = mapOtherSysAccount.get(w.getUserId());
@@ -161,10 +161,10 @@ public class UserInfoFinder {
 
 		} else {
 			List<String> listUserID = listUserMap.stream().map(UserDto::getUserId).collect(Collectors.toList());
-			List<WindowsAccount> lstWindowAccount = windowAccountRepository.findByListUserId(listUserID);
+			List<WindowsAccount> lstWindowAccount = windowAccountRepository.findByListEmployeeId(listUserID);
 
 			listUserMap.forEach(w -> {
-				boolean hasSetting = lstWindowAccount.stream().anyMatch(item -> item.getUserId().equals(w.getUserId()));
+				boolean hasSetting = lstWindowAccount.stream().anyMatch(item -> item.getEmployeeId().equals(w.getEmployeeId()));
 				w.setIsSetting(hasSetting);
 
 			});

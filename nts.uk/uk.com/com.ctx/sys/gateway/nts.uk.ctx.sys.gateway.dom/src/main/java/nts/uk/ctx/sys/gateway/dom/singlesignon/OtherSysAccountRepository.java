@@ -17,7 +17,7 @@ public interface OtherSysAccountRepository {
 	 *
 	 * @param userId the user id
 	 */
-	void remove(String userId);
+	void remove(String cid,String userId);
 
 	/**
 	 * Adds the.
@@ -36,12 +36,13 @@ public interface OtherSysAccountRepository {
 	Optional<OtherSysAccount> findByCompanyCodeAndUserName(String companyCode, String userName);
 
 	/**
-	 * Find by user id.
+	 * Find by employee id.
 	 *
-	 * @param userId the user id
+	 * @param cid the cid
+	 * @param employeeId the employee id
 	 * @return the optional
 	 */
-	Optional<OtherSysAccount> findByUserId(String userId);
+	Optional<OtherSysAccount> findByEmployeeId(String cid, String employeeId);
 
 	/**
 	 * Update.

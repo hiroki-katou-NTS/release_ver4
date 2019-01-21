@@ -68,7 +68,7 @@ public class WindowAccountWs extends WebService{
 	@POST
 	@Path("find/window/account")
 	public List<WindowsAccountFinderDto> findListWindowAccByUserId(WindowsAccountFinderDto windownAccountFinderDto) {
-		return this.windowAccountFinder.findWindowAccountByUserId(windownAccountFinderDto.getUserId());
+		return this.windowAccountFinder.findWindowAccountByEmployeeId(windownAccountFinderDto.getEmployeeId());
 	}
 
 	/**
@@ -79,8 +79,8 @@ public class WindowAccountWs extends WebService{
 	 */
 	@POST
 	@Path("find/window/alreadysetting")
-	public List<String> findAlreadySetting(List<String> userIds) {
-		return this.windowAccountFinder.findAlreadySetting(userIds);
+	public List<String> findAlreadySetting(List<String> employeeIds) {
+		return this.windowAccountFinder.findAlreadySetting(employeeIds);
 	}
 	
 	/**

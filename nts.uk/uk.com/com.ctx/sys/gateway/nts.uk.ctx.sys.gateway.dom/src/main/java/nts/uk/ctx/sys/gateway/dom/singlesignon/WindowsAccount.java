@@ -20,9 +20,13 @@ import nts.gul.text.StringUtil;
 @Getter
 public class WindowsAccount extends AggregateRoot{
 
-	// ユーザID
-	/** The user id. */
-	private String userId;
+	//会社ID
+	/** The company id. */
+	private String companyId;
+
+	// 社員ID
+	/** The employee id. */
+	private String employeeId;
 
 	// アカウント情報
 	/** The hot name. */
@@ -35,7 +39,8 @@ public class WindowsAccount extends AggregateRoot{
 	 *            the memento
 	 */
 	public WindowsAccount(WindowsAccountGetMemento memento) {
-		this.userId = memento.getUserId();
+		this.companyId = memento.getCompanyId();
+		this.employeeId = memento.getEmployeeId();
 		this.accountInfos = memento.getAccountInfos();
 	}
 
@@ -67,7 +72,8 @@ public class WindowsAccount extends AggregateRoot{
 	 *            the memento
 	 */
 	public void saveToMemento(WindowsAccountSetMemento memento) {
-		memento.setUserId(this.userId);
+		memento.setCompanyId(this.companyId);
+		memento.setEmployeeId(this.employeeId);
 		memento.setAccountInfos(this.accountInfos);
 	}
 	

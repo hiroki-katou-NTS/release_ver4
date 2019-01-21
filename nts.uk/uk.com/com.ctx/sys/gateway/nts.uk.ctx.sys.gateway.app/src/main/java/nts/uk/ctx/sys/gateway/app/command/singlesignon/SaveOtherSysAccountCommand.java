@@ -17,29 +17,33 @@ import nts.uk.ctx.sys.gateway.dom.singlesignon.UserName;
 @Setter
 @Getter
 public class SaveOtherSysAccountCommand implements OtherSysAccountGetMemento {
-
-	// ユーザID
-	/** The user id. */
-	private String userId;
+	
+	/** The company id. */
+	// 会社ID
+	public String companyId;
+	
+	/** The employee id. */
+	// 社員ID
+	public String employeeId;
 
 	/** The company code. */
 	// 会社コード
-	private String companyCode;
+	public String companyCode;
 
 	// ユーザ名
 	/** The user name. */
-	private String userName;
+	public String userName;
 
 	// 利用区分
 	/** The use atr. */
-	private Integer useAtr;
+	public Integer useAtr;
 
 	/* (non-Javadoc)
 	 * @see nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccountGetMemento#getUserId()
 	 */
 	@Override
-	public String getUserId() {
-		return this.userId;
+	public String getEmployeeId() {
+		return this.employeeId;
 	}
 
 	/* (non-Javadoc)
@@ -64,5 +68,13 @@ public class SaveOtherSysAccountCommand implements OtherSysAccountGetMemento {
 	@Override
 	public UseAtr getUseAtr() {
 		return UseAtr.valueOf(this.useAtr);
+	}
+
+	/* (non-Javadoc)
+	 * @see nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccountGetMemento#companyId()
+	 */
+	@Override
+	public String getCompanyId() {
+		return this.companyId;
 	}
 }

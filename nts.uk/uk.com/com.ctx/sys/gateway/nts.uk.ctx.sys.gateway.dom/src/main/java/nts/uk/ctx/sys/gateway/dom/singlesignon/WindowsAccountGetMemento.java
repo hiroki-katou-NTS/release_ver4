@@ -11,12 +11,20 @@ import java.util.List;
  */
 public interface WindowsAccountGetMemento {
 	
+
 	/**
-	 * Gets the user id.
+	 * Gets the company id.
 	 *
-	 * @return the user id
+	 * @return the company id
 	 */
-	String getUserId();
+	String getCompanyId();
+	
+	/**
+	 * Gets the employee id.
+	 *
+	 * @return the employee id
+	 */
+	String getEmployeeId();
 	
 	/**
 	 * Gets the hot name.

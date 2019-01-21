@@ -13,6 +13,7 @@ import nts.arc.layer.app.command.CommandHandler;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.WindowsAccount;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.WindowsAccountRepository;
+import nts.uk.shr.com.context.AppContexts;
 
 /**
  * The Class RemoveWindowAccountCommandHandler.
@@ -33,15 +34,14 @@ public class RemoveWindowAccountCommandHandler extends CommandHandler<RemoveWind
 	 */
 	@Override
 	protected void handle(CommandHandlerContext<RemoveWindowAccountCommand> context) {
-
 		// Get command
 		RemoveWindowAccountCommand command = context.getCommand();
-
-		Optional<WindowsAccount> optWindowAcc = windowAccountRepository.findByUserId(command.getUserIdDelete());
+		String companyId = AppContexts.user().companyId();
+		Optional<WindowsAccount> optWindowAcc = windowAccountRepository.findByEmployeeId(companyId,command.getEmployeeId());
 
 		if(optWindowAcc.isPresent()) {
 			optWindowAcc.get().getAccountInfos().forEach(wd -> {
-				windowAccountRepository.remove(optWindowAcc.get().getUserId(), wd.getNo());
+				windowAccountRepository.remove(companyId, optWindowAcc.get().getEmployeeId(), wd.getNo());
 			});
 		}
 	}
