@@ -93,9 +93,15 @@ module nts.uk.ui.jqueryExtentions {
         function setupScrollWhenBinding($grid: JQuery): any {
             let gridId = "#" + $grid.attr("id");
             $(document).delegate(gridId, "iggriddatarendered", function (evt, ui) {
+                if (isCheckedAll($grid)) {
+                    return;
+                }
                 let oldSelected = getSelectRow($grid);
                 if(!nts.uk.util.isNullOrEmpty(oldSelected)){
                     _.defer(() => { 
+                        if (isCheckedAll($grid)) {
+                            return;
+                        }
                         let selected = getSelectRow($grid);
                         if(!nts.uk.util.isNullOrEmpty(selected)){
                             selected = oldSelected;    
@@ -117,6 +123,17 @@ module nts.uk.ui.jqueryExtentions {
                     });    
                 }
             });
+        }
+        
+        function isCheckedAll($grid: JQuery){
+            if ($grid.igGridSelection('option', 'multipleSelection')) {
+                let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                if (chk[0].getAttribute("data-chk") == "on") {
+                    return true;
+                }
+            }
+            
+            return false;
         }
         
         function getSelectRow($grid: JQuery) {
@@ -156,11 +173,14 @@ module nts.uk.ui.jqueryExtentions {
         }
 
         function setSelected($grid: JQuery, selectedId: any) {
+            let baseID = _.map($grid.igGrid("option").dataSource, $grid.igGrid("option", "primaryKey"));
+            if(_.isEmpty(baseID)){
+                return;
+            }
             deselectAll($grid);
 
             if ($grid.igGridSelection('option', 'multipleSelection')) {
                 // for performance when select all
-                let baseID = _.map($grid.igGrid("option").dataSource, $grid.igGrid("option", "primaryKey"));
                 if (_.isEqual(_.sortBy(_.uniq(selectedId)), _.sortBy(_.uniq(baseID)))) {
                     let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
                     if (chk[0].getAttribute("data-chk") == "off") {

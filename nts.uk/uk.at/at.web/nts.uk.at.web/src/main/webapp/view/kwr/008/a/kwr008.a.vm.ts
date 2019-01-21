@@ -397,7 +397,7 @@ module nts.uk.at.view.kwr008.a {
             */
             public applyKCP005ContentSearch(dataList: EmployeeSearchDto[]): void {
                 var self = this;
-                self.employeeList([]);
+                //self.employeeList([]);
                 var employeeSearchs: UnitModel[] = [];
                 for (var employeeSearch of dataList) {
                     var employee: UnitModel = {
@@ -409,6 +409,7 @@ module nts.uk.at.view.kwr008.a {
                     employeeSearchs.push(employee);
                 }
                 self.employeeList(employeeSearchs);
+                
                 self.lstPersonComponentOption = {
                     isShowAlreadySet: false,
                     isMultiSelect: true,
@@ -424,8 +425,10 @@ module nts.uk.at.view.kwr008.a {
                     maxWidth: 550,
                     maxRows: 15
                 };
-                var empCodeList = dataList.map((employee) => employee.employeeCode );
-                self.selectedEmployeeCode(empCodeList);
+                _.defer(() => {
+                    var empCodeList = dataList.map((employee) => employee.employeeCode );
+                    self.selectedEmployeeCode(empCodeList);
+                });
             }
 
             /**
