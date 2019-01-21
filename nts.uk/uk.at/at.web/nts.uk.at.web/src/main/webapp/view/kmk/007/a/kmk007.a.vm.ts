@@ -152,12 +152,12 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                     self.setWorkTypeSet(self.currentWorkType().oneDay(), ko.toJS(self.oneDay));
                 }
                 if(newOneDayCls == 13){//休業
-                //勤務の分類にて「休業」を選択する
-                if(self.isCreated()){//新規モード
-                    self.lstHdWrk(self.rq546);
-                }else{//更新モード
-                    self.hdWrk();
-                }
+                    //勤務の分類にて「休業」を選択する
+                    if(self.isCreated()){//新規モード
+                        self.lstHdWrk(self.rq546);
+                    }else{//更新モード
+                        self.hdWrk();
+                    }
                 }
             });
 
@@ -606,10 +606,18 @@ module nts.uk.at.view.kmk007.a.viewmodel {
 
             service.loadWorkType().done(out => {
                 let data = out.lstWorkType;
+                self.rq546 = [];
                 _.each(out.rq546, item =>{
                     self.rq546.push(new ItemModel(item.no -2, item.name, 0));
                 });
                 self.rq546 = _.orderBy(self.rq546, 'code');
+                if(self.currentWorkType().oneDayCls() == 13){
+                    if(self.isCreated()){//新規モード
+                        self.lstHdWrk(self.rq546);
+                    }else{//更新モード
+                        self.hdWrk();
+                    }
+                }
                 if (data && !!data.length) {
                     lwt(_(data).orderBy(['dispOrder', 'workTypeCode'], ['asc', 'asc'])
                         .map(x => $.extend({
