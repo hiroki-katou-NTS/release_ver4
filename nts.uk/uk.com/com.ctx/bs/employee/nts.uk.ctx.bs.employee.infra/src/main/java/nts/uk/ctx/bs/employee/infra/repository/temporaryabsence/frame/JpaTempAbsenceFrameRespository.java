@@ -35,7 +35,7 @@ public class JpaTempAbsenceFrameRespository extends JpaRepository
 			+ " WHERE e.bsystTempAbsenceFramePK.cid = :cid "
 			+ " AND e.useAtr = 1 "
 			+ " AND e.bsystTempAbsenceFramePK.tempAbsenceFrNo >= 2"
-			+ " AND e.bsystTempAbsenceFramePK.tempAbsenceFrNo <= 9";
+			+ " AND e.bsystTempAbsenceFramePK.tempAbsenceFrNo <= 10";
 
 	/*
 	 * (non-Javadoc)
