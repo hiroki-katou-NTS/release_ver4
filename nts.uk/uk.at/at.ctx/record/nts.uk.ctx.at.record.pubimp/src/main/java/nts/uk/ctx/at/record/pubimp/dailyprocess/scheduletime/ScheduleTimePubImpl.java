@@ -19,6 +19,7 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
 import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeSheet;
 import nts.uk.ctx.at.record.dom.breakorgoout.primitivevalue.BreakFrameNo;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.CalculateOption;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CommonCompanySettingForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.ManagePerCompanySet;
@@ -49,7 +50,7 @@ public class ScheduleTimePubImpl implements ScheduleTimePub{
 
 	@Override
 	public Object getCompanySettingForCalclationScheduleTimeForMultiPeople() {
-		ManagePerCompanySet companySet = this.commonCompanySetting.getCompanySetting();
+		ManagePerCompanySet companySet = this.commonCompanySetting.getCompanySetting(new CalculateOption(true, true));
 		MasterShareContainer<String> shareContainer = MasterShareBus.open();
 		companySet.setShareContainer(shareContainer);
 		return companySet;
