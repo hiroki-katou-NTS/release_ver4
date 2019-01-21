@@ -24,6 +24,8 @@ public interface UserPublisher {
 	List<UserExport> getListUserByListAsId(List<String> listAssociatePersonId);
 	
 	Optional<UserExport> getByUserId(String userId);
+	
+	Optional<UserExport> getBySid(String sid);
 	/** Requestlist 313
 	 * [No.313]社員IDからユーザを取得する
 	 */

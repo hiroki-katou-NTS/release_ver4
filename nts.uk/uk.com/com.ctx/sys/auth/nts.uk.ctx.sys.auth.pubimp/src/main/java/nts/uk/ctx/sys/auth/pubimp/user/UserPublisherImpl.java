@@ -114,4 +114,20 @@ public class UserPublisherImpl implements UserPublisher {
 			return Optional.of(fromDomain(optUser.get()));
 		}
 	}
+
+	@Override
+	public Optional<UserExport> getBySid(String sid) {
+		// Lay RequestList No.1
+		PersonInfoExport exportData = iPersonInfoPub.getPersonInfo(sid);
+		if (exportData == null) {
+			return Optional.empty();
+		} else {
+			Optional<User> opUser = userRepo.getByAssociatedPersonId(exportData.getPid());
+			if (!opUser.isPresent()) {
+				return Optional.empty();
+			}
+			User user = opUser.get();
+			return Optional.of(this.fromDomain(user));
+		}
+	}
 }
