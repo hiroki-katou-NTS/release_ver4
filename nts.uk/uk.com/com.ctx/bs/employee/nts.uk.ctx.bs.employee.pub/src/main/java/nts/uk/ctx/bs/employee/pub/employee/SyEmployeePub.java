@@ -182,4 +182,13 @@ public interface SyEmployeePub {
 	// RequestList126-2
 	List<EmployeIdCdPnameExport> getSidCdPnameBySIds(List<String> sIdsInput);
 	
+	/**
+	 * RequestList546
+	 * 会社IDから使用する休業枠（休職を除く）を取得する
+	 * @param cid
+	 * @return
+	 */
+	List<TempAbsenceFrameExport> getTempAbsenceFrameByCid(String cid);
+	
+	
 }
