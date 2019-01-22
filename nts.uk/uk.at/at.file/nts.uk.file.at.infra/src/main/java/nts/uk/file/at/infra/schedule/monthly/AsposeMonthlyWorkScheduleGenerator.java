@@ -336,7 +336,7 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 			String currentFormattedDate = LocalDateTime.now().format(jpFormatter);
 			
 			// Create print area
-			createPrintArea(currentRow, sheet);
+			createPrintArea(sheet);
 			
 			// Save workbook
 			if (query.getFileType() == FileOutputType.FILE_TYPE_EXCEL)
@@ -1389,33 +1389,36 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 			while (iteratorEmployee.hasNext()) {
 				EmployeeReportData employeeReportData = iteratorEmployee.next();
 				
-				Range workplaceRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_WORKPLACE_ROW);
-				Range workplaceRange = cells.createRange(currentRow, 0, 1, DATA_COLUMN_INDEX[5]);
-				workplaceRange.copy(workplaceRangeTemp);
-				rowPageTracker.useOneRowAndCheckResetRemainingRow(sheet, currentRow);
-				
-				// A3_1
-				Cell workplaceTagCell = cells.get(currentRow, 0);
-				workplaceTagCell.setValue(WorkScheOutputConstants.WORKPLACE +"　"+ workplaceReportData.getWorkplaceCode() + " " + workplaceReportData.getWorkplaceName());
+				if (condition.isShowWorkplace()) {
+					Range workplaceRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_WORKPLACE_ROW);
+					Range workplaceRange = cells.createRange(currentRow, 0, 1, DATA_COLUMN_INDEX[5]);
+					workplaceRange.copy(workplaceRangeTemp);
+					rowPageTracker.useOneRowAndCheckResetRemainingRow(sheet, currentRow);
+					// A3_1
+					Cell workplaceTagCell = cells.get(currentRow, 0);
+					workplaceTagCell.setValue(WorkScheOutputConstants.WORKPLACE + "　"
+							+ workplaceReportData.getWorkplaceCode() + " " + workplaceReportData.getWorkplaceName());
+					currentRow++;
+				} 
 				
 				// A3_2
 //				Cell workplaceInfo = cells.get(currentRow, DATA_COLUMN_INDEX[0]);
 //				workplaceInfo.setValue(workplaceReportData.getWorkplaceCode() + " " + workplaceReportData.getWorkplaceName());
 				
-				currentRow++;
+				if (condition.isShowPersonal()) {
+					Range employeeRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_EMPLOYEE_ROW);
+					Range employeeRange = cells.createRange(currentRow, 0, 1, DATA_COLUMN_INDEX[5]);
+					employeeRange.copy(employeeRangeTemp);
+					rowPageTracker.useOneRowAndCheckResetRemainingRow(sheet, currentRow);
+					// A4_1
+					Cell employeeTagCell = cells.get(currentRow, 0);
+					employeeTagCell.setValue(WorkScheOutputConstants.EMPLOYEE + "　" + employeeReportData.employeeCode
+							+ "　" + employeeReportData.employeeName + "　" + WorkScheOutputConstants.EMPLOYMENT + "　"
+							+ employeeReportData.employmentName + "　" + WorkScheOutputConstants.POSITION + "　"
+							+ employeeReportData.position);
+					currentRow++;
+				} 
 				
-				Range employeeRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_EMPLOYEE_ROW);
-				Range employeeRange = cells.createRange(currentRow, 0, 1, DATA_COLUMN_INDEX[5]);
-				employeeRange.copy(employeeRangeTemp);
-				rowPageTracker.useOneRowAndCheckResetRemainingRow(sheet, currentRow);
-				
-				// A4_1
-				Cell employeeTagCell = cells.get(currentRow, 0);
-				employeeTagCell.setValue(WorkScheOutputConstants.EMPLOYEE + "　" + employeeReportData.employeeCode + "　"
-						+ employeeReportData.employeeName + "　" + WorkScheOutputConstants.EMPLOYMENT + "　"
-						+ employeeReportData.employmentName + "　" + WorkScheOutputConstants.POSITION + "　"
-						+ employeeReportData.position);
-
 				// A4_2
 //				Cell employeeCell = cells.get(currentRow, DATA_COLUMN_INDEX[0]);
 //				employeeCell.setValue(employeeReportData.employeeCode + " " + employeeReportData.employeeName);
@@ -1436,7 +1439,6 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 //				Cell jobTitleCell = cells.get(currentRow, DATA_COLUMN_INDEX[4]);
 //				jobTitleCell.setValue(employeeReportData.position);
 				
-				currentRow++;
 				boolean colorWhite = true; // true = white, false = light blue, start with white row
 				
 				// Detail personal performance
@@ -1862,6 +1864,10 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 				            }
 				        }
 				        currentRow += dataRowCount;
+					} else {
+						if (levelIterator != null && levelIterator.hasNext()) {
+							levelIterator.next();
+						}
 					}
 				} while (levelIterator != null && levelIterator.hasNext());
 			}
@@ -2013,16 +2019,17 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		List<MonthlyPersonalPerformanceData> employeeReportData = rootWorkplace.getLstDailyPersonalData();
 		if (employeeReportData != null && !employeeReportData.isEmpty()) {
 			rowPageTracker.useOneRowAndCheckResetRemainingRow(sheet, currentRow);
-			// B4_1
-			Cell workplaceTagCell = cells.get(currentRow, 0);
-			workplaceTagCell.setValue(WorkScheOutputConstants.WORKPLACE + "　" + rootWorkplace.getWorkplaceCode() + "　"
-					+ rootWorkplace.getWorkplaceName());
-
+			if (condition.getTotalOutputSetting().isDetails() || condition.getTotalOutputSetting().isWorkplaceTotal()
+					|| condition.getTotalOutputSetting().isCumulativeWorkplace()) {
+				// B4_1
+				Cell workplaceTagCell = cells.get(currentRow, 0);
+				workplaceTagCell.setValue(WorkScheOutputConstants.WORKPLACE + "　" + rootWorkplace.getWorkplaceCode()
+						+ "　" + rootWorkplace.getWorkplaceName());
+				currentRow++;
+			}
 //			// B4_2
 //			Cell workplaceCell = cells.get(currentRow, 2);
 //			workplaceCell.setValue(rootWorkplace.getWorkplaceCode() + " " + rootWorkplace.getWorkplaceName());
-			
-			currentRow++;
 			
 			Iterator<MonthlyPersonalPerformanceData> dataIterator = employeeReportData.iterator();
 			
@@ -2626,10 +2633,11 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 	 * @param currentRow the current row
 	 * @param sheet the sheet
 	 */
-	private void createPrintArea(int currentRow, Worksheet sheet) {
+	private void createPrintArea(Worksheet sheet) {
 		// Get the last column and row name
 		Cells cells = sheet.getCells();
-		Cell lastCell = cells.get(currentRow - 1, 38);
+		int maxDataRow = cells.getMaxDataRow();
+		Cell lastCell = cells.get(maxDataRow, 38);
 		String lastCellName = lastCell.getName();
 		
 		PageSetup pageSetup = sheet.getPageSetup();
