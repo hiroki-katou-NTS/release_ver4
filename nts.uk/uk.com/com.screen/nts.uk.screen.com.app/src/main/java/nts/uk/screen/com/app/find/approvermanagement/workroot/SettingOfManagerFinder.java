@@ -14,6 +14,8 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.UseClassification;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.ctx.bs.person.dom.person.common.ConstantUtils;
+import nts.uk.ctx.sys.auth.pub.role.RoleExport;
+import nts.uk.ctx.sys.auth.pub.role.RoleExportRepo;
 import nts.uk.ctx.workflow.app.command.approvermanagement.workroot.HistoryCmm053Command;
 import nts.uk.ctx.workflow.app.find.approvermanagement.workroot.ManagerSettingDto;
 import nts.uk.ctx.workflow.dom.adapter.bs.EmployeeAdapter;
@@ -50,6 +52,9 @@ public class SettingOfManagerFinder {
 	
 	@Inject
 	private ApprovalSettingRepository appSetRepo;
+	
+	@Inject
+	private RoleExportRepo roleExportRepo;
 
 	/**
 	 * Get 上司の設定
@@ -79,6 +84,7 @@ public class SettingOfManagerFinder {
 		GeneralDate closingStartDate = null;
 		SettingInfo commonSettingInfo  = null;
 		SettingInfo monthlySettingInfo = null;
+		boolean displayDailyApprover = false;
 
 		// ドメインモデル「個人別就業承認ルート」を取得する
 		Optional<PersonApprovalRoot> commonPsApp = this.personAppRootRepo.getNewestCommonPsAppRoot(companyId, employeeId);
@@ -162,9 +168,21 @@ public class SettingOfManagerFinder {
 
 		// ログイン者の承認権限を取得する
 		hasAuthority         = this.employeeAdapter.canApprovalOnBaseDate(companyId, loginId, baseDate);
+		
+		// ロールを取得する
+		Optional<RoleExport> opRoleExport = roleExportRepo.findByRoleId(AppContexts.user().roles().forAttendance());
+		if(opRoleExport.isPresent()){
+			displayDailyApprover = true;
+		} else {
+			if(opRoleExport.get().getEmployeeReferenceRange()==3){
+				displayDailyApprover = false;
+			} else {
+				displayDailyApprover = true;
+			}
+		}
 
 		return new ManagerSettingDto(startDate, endDate, isNewMode, departmentCode, departmentApproverId,
-				departmentName, dailyApprovalCode, dailyApproverId, dailyApprovalName, hasAuthority, closingStartDate);
+				departmentName, dailyApprovalCode, dailyApproverId, dailyApprovalName, hasAuthority, closingStartDate, displayDailyApprover);
 	}
 
 	/**
