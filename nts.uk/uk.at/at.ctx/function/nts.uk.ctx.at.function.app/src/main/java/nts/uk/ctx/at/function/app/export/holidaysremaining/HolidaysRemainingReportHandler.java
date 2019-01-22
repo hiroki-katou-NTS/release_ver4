@@ -252,8 +252,7 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 				String positionName = emp.getPosition() != null ? emp.getPosition().getPositionName() : "";
 				
 				Optional<ClosureEmployment> closureEmployment = closureEmployments.stream().filter(c -> c.getEmploymentCD().equals(emp.getEmployeeCode())).findFirst();
-
-				Optional<YearMonth> currentMonth = Optional.empty();
+				Optional<YearMonth> currentMonth = hdRemainManageFinder.getCurrentMonth(cId, emp.getEmployeeId(), baseDate);
 				DatePeriod outPeriodInfo = null;
 				if(closureEmployment.isPresent()) {
 					OutputPeriodInformation p = closedAdditionalOutputPeriod.get(closureEmployment.get().getClosureId());
