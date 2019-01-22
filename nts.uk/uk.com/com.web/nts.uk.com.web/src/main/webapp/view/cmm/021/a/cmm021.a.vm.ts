@@ -595,11 +595,21 @@ module nts.uk.com.view.cmm021.a {
                 service.saveWindowAccount(saveCommand)
                     .done((data: any) => {
                         _self.isSaveActive = true;
-                        _self.reloadAlreadySettingWindow().done(() => {
-                            nts.uk.ui.dialog.info({ messageId: 'Msg_15' });
-                            _self.updateMode();
-                            dfd.resolve();
-                        }).always(() => nts.uk.ui.block.clear());
+                        service.findListUserInfo(_self.employeeIds(), false)
+                            .done((data: UserDto[]) => {
+                                _self.reloadAlreadySettingWindow().done(() => {
+                                    _self.listUserDto = data;
+                                    let oldSid = _self.selectedEmployeeId();
+                                    _self.selectUse.valueHasMutated();
+                                    //select saved Item
+                                    if (_self.selectUse() == 1) {
+                                        _self.selectedEmployeeId(oldSid);
+                                    }
+                                    nts.uk.ui.dialog.info({ messageId: 'Msg_15' });
+                                    _self.updateMode();
+                                    dfd.resolve();
+                                });
+                            }).always(() => nts.uk.ui.block.clear());
                     }).fail(function(res: any) {
                         nts.uk.ui.dialog.bundledErrors(res);
                         nts.uk.ui.block.clear();
@@ -1184,12 +1194,23 @@ module nts.uk.com.view.cmm021.a {
                     nts.uk.ui.block.invisible();
                     service.saveOtherSysAccount(otherAcc)
                         .done((data: any) => {
-                            _self.isSaveActive = true;
-                            _self.reloadAlreadySettingOtherAcc().done(() => {
-                                nts.uk.ui.dialog.info({ messageId: 'Msg_15' });
-                                _self.updateMode();
-                                dfd.resolve();
-                            }).always(() => nts.uk.ui.block.clear());
+                            //
+                            service.findListUserInfo(_self.employeeIds(), true)
+                                .done((data2: UserDto[]) => {
+                                    _self.listUserDtoScreenAC = data2;
+                                    _self.reloadAlreadySettingOtherAcc().done(() => {
+                                        let oldSid = _self.selectedEmployeeId();
+                                        _self.selectUse.valueHasMutated();
+                                        //select saved Item
+                                        if (_self.selectUse() == 1) {
+                                            _self.selectedEmployeeId(oldSid);
+                                        }
+                                        _self.isSaveActive = true;
+                                        nts.uk.ui.dialog.info({ messageId: 'Msg_15' });
+                                        _self.updateMode();
+                                        dfd.resolve();
+                                    });
+                                }).always(() => nts.uk.ui.block.clear());
                         }).fail((res: any) => {
                             nts.uk.ui.dialog.bundledErrors(res);
                             nts.uk.ui.block.clear();

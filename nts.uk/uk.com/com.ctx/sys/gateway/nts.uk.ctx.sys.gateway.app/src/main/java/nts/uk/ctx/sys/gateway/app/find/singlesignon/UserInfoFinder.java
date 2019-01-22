@@ -144,14 +144,14 @@ public class UserInfoFinder {
 	// set isSetting for win acc and other acc
 	public List<UserDto> loadUserSetting(List<UserDto> listUserMap, Boolean isScreenC) {
 		if (isScreenC) {
-			List<String> listUserIDs = listUserMap.stream().map(UserDto::getUserId).collect(Collectors.toList());
-			List<OtherSysAccount> listOtherSysAccs = otherSysAccountRepository.findAllOtherSysAccount(listUserIDs);
+			List<String> listEmployeeId = listUserMap.stream().map(UserDto::getEmployeeId).collect(Collectors.toList());
+			List<OtherSysAccount> listOtherSysAccs = otherSysAccountRepository.findAllOtherSysAccount(listEmployeeId);
 
 			Map<String, OtherSysAccount> mapOtherSysAccount = listOtherSysAccs.stream()
 					.collect(Collectors.toMap(OtherSysAccount::getEmployeeId, Function.identity()));
 
 			listUserMap.forEach(w -> {
-				OtherSysAccount otherSysAcc = mapOtherSysAccount.get(w.getUserId());
+				OtherSysAccount otherSysAcc = mapOtherSysAccount.get(w.getEmployeeId());
 				if (otherSysAcc != null) {
 					w.setIsSetting(true);
 				} else {
@@ -160,8 +160,8 @@ public class UserInfoFinder {
 			});
 
 		} else {
-			List<String> listUserID = listUserMap.stream().map(UserDto::getUserId).collect(Collectors.toList());
-			List<WindowsAccount> lstWindowAccount = windowAccountRepository.findByListEmployeeId(listUserID);
+			List<String> listEmployeeId = listUserMap.stream().map(UserDto::getEmployeeId).collect(Collectors.toList());
+			List<WindowsAccount> lstWindowAccount = windowAccountRepository.findByListEmployeeId(listEmployeeId);
 
 			listUserMap.forEach(w -> {
 				boolean hasSetting = lstWindowAccount.stream().anyMatch(item -> item.getEmployeeId().equals(w.getEmployeeId()));
