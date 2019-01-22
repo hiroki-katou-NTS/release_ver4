@@ -171,7 +171,7 @@ public class SettingOfManagerFinder {
 		
 		// ロールを取得する
 		Optional<RoleExport> opRoleExport = roleExportRepo.findByRoleId(AppContexts.user().roles().forAttendance());
-		if(opRoleExport.isPresent()){
+		if(!opRoleExport.isPresent()){
 			displayDailyApprover = true;
 		} else {
 			if(opRoleExport.get().getEmployeeReferenceRange()==3){
