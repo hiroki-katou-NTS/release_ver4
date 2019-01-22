@@ -1,3 +1,7 @@
+/******************************************************************
+ * Copyright (c) 2017 Nittsu System to present.                   *
+ * All right reserved.                                            *
+ *****************************************************************/
 package nts.uk.file.at.app.export.dailyschedule.data;
 
 import java.util.ArrayList;
@@ -44,6 +48,9 @@ public class EmployeeReportData {
 	/** The personal total. */
 	public Map<Integer, TotalValue> mapPersonalTotal = new LinkedHashMap<>();
 	
+	/** The count. */
+	public int count = 0;
+	
 	// Copy data
 	public EmployeeReportData copyData() {
 		EmployeeReportData newEmployee = new EmployeeReportData();
@@ -54,5 +61,17 @@ public class EmployeeReportData {
 		newEmployee.position = position;
 		newEmployee.lstDetailedPerformance = new ArrayList<>();
 		return newEmployee;
+	}
+
+	/**
+	 * Count item.
+	 *
+	 * @return the int
+	 */
+	public int countItem() {
+		this.lstDetailedMonthlyPerformance.stream().forEach(item -> {
+			this.count = this.count + item.getActualValue().size();
+		});
+		return this.count;
 	}
 }
