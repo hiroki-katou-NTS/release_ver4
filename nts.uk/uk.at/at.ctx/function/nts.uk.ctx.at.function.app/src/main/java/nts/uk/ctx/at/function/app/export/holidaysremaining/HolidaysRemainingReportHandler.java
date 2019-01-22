@@ -134,7 +134,7 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 	private BreakDayOffMngInPeriodQuery breakDayOffMngInPeriodQuery;
 	@Inject
 	private ClosureEmploymentRepository closureEmploymentRepository;
-
+	
 	@Override
 	protected void handle(ExportServiceContext<HolidaysRemainingReportQuery> context) {
 		val query = context.getQuery();
@@ -203,9 +203,10 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 			if (varVacaCtr.isPauseItemHolidaySetting() == false) {
 				hdManagement.getListItemsOutput().getPause().setPauseItem(false);
 			}
-			
 			List<Integer> checkItem = hdManagement.getListItemsOutput().getSpecialHoliday();
-			if(checkItem.isEmpty()){
+			boolean listSpecialHoliday = varVacaCtr.getListSpecialHoliday().containsAll(checkItem);
+			
+			if(!listSpecialHoliday == true){
 				hdManagement.getListItemsOutput().setSpecialHoliday(new ArrayList<>());
 			}
 			if (!hdManagement.getListItemsOutput().getAnnualHoliday().isYearlyHoliday() 
@@ -454,7 +455,8 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 					employeeId, closureInforOpt.get().getPeriod(), false, baseDate, sphdCode, false);
 			mapSpecVaca.put(sphdCode, specialVacationImported);
 
-			// Call RequestList263 ver2 - hoatt
+			// Call RequestList263 ver2 - 
+
 			if (currentMonth.compareTo(startDate.yearMonth()) > 0) {
 				List<SpecialHolidayImported> specialHolidayList = specialLeaveAdapter.getSpeHoliOfConfirmedMonthly(
 						employeeId, startDate.yearMonth(), currentMonth.previousMonth(), Arrays.asList(sphdCode));
