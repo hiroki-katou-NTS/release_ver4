@@ -177,7 +177,22 @@ module nts.uk.ui.jqueryExtentions {
             if(_.isEmpty(baseID)){
                 return;
             }
-            deselectAll($grid);
+            
+            if(baseID.length >= 500){
+                let oldSelectedID = _.map(getSelected($grid), "id"), 
+                    shouldRemove: Array<string> = _.difference(oldSelectedID, selectedId), 
+                    shouldSelect: Array<string> = _.difference(selectedId, oldSelectedID);
+                /** When data source large (data source > 500 (?)):
+                        if new value for select = half of data source
+                            or removed selected value = 1/3 of data source, 
+                            should deselect all and loop for select,
+                        else if deselect old values that not selected and select new selected only*/
+                if(shouldSelect.length < baseID.length / 2 || shouldRemove.length < baseID.length / 3) {
+                    shouldRemove.forEach(id => $grid.igGridSelection("deselectRowById", id));
+                    shouldSelect.forEach(id => $grid.igGridSelection('selectRowById', id));
+                    return;
+                }    
+            }
 
             if ($grid.igGridSelection('option', 'multipleSelection')) {
                 // for performance when select all
@@ -187,9 +202,11 @@ module nts.uk.ui.jqueryExtentions {
                         chk.click();
                     }
                 } else {
+                    deselectAll($grid);
                     (<Array<string>>selectedId).forEach(id => $grid.igGridSelection('selectRowById', id));
                 }
             } else {
+                deselectAll($grid);
                 $grid.igGridSelection('selectRowById', selectedId);
             }
         }
@@ -785,7 +802,10 @@ module nts.uk.ui.jqueryExtentions {
                 }
                 
                 if (clickCheckBox) {
-                    $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']").click();
+                    let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                    if (chk[0].getAttribute("data-chk") == "off") {
+                        chk.click();
+                    }
                 } else {
                     $grid.ntsGridList('setSelected', value.length === 0 ? (!multiple ? undefined : value) : value);    
                 }

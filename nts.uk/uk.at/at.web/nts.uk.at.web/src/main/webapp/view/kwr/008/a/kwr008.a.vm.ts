@@ -415,7 +415,7 @@ module nts.uk.at.view.kwr008.a {
                     isMultiSelect: true,
                     listType: ListType.EMPLOYEE,
                     employeeInputList: self.employeeList,
-                    selectType: SelectType.SELECT_BY_SELECTED_CODE,
+                    selectType: SelectType.SELECT_ALL,
                     selectedCode: self.selectedEmployeeCode,
                     isDialog: false,
                     isShowNoSelectRow: false,
@@ -423,12 +423,13 @@ module nts.uk.at.view.kwr008.a {
                     isShowWorkPlaceName: true,
                     isShowSelectAllButton: false,
                     maxWidth: 550,
-                    maxRows: 15
-                };
+                    maxRows: 15,
+                    isSelectAllAfterReload: true
+                };/*
                 _.defer(() => {
                     var empCodeList = dataList.map((employee) => employee.employeeCode );
                     self.selectedEmployeeCode(empCodeList);
-                });
+                });*/
             }
 
             /**

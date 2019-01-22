@@ -396,26 +396,28 @@ module kcp.share.list {
                     // update datasource
                     gridList.ntsGridList("setDataSource", self.itemList());
                     
-                    if (self.listType !== ListType.EMPLOYEE) {
-                        searchBox.ntsSearchBox("setDataSource", self.itemList());        
-                    }
-
-                    // select all items in multi mode
-                    if (self.isSelectAllAfterReload && !_.isEmpty(self.itemList()) && self.isMultipleSelect) {
-                        let selectedValues = _.map(self.itemList(), item => self.listType == ListType.JOB_TITLE ? item.id : item.code);
-                        if (_.isEmpty(selectedValues)){
-                            self.selectedCodes([]);
-                        } else {
-                            gridList.ntsGridList("setSelectedValue", selectedValues);
+                    _.defer(() => {
+                        if (self.listType !== ListType.EMPLOYEE) {
+                            searchBox.ntsSearchBox("setDataSource", self.itemList());        
                         }
-                        
-                        /*setTimeout(function() {
-                            let chk = gridList.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                            if (chk[0].getAttribute("data-chk") == "off") { 
-                                chk.click();
+    
+                        // select all items in multi mode
+                        if (self.isSelectAllAfterReload && !_.isEmpty(self.itemList()) && self.isMultipleSelect) {
+                            let selectedValues = _.map(self.itemList(), item => self.listType == ListType.JOB_TITLE ? item.id : item.code);
+                            if (_.isEmpty(selectedValues)){
+                                self.selectedCodes([]);
+                            } else {
+                                gridList.ntsGridList("setSelectedValue", selectedValues);
                             }
-                        }, 1);*/
-                    }
+                            
+                            /*setTimeout(function() {
+                                let chk = gridList.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                                if (chk[0].getAttribute("data-chk") == "off") { 
+                                    chk.click();
+                                }
+                            }, 1);*/
+                        }    
+                    });
                 });
             }
         }
