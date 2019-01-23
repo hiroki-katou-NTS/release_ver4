@@ -46,8 +46,13 @@ module nts.uk.com.view.cmm007.c {
                             let temp = new viewmodel.moduleDto(i.companyId, i.tempAbsenceFrNo, i.useClassification, i.tempAbsenceFrName);
                             _self.mapModel.set(i.tempAbsenceFrNo , temp);
                         } else {
-                            _self.mapModel.get(i.tempAbsenceFrNo).tempAbsenceFrName(i.tempAbsenceFrName);
-                            _self.mapModel.get(i.tempAbsenceFrNo).useClassification(i.useClassification);
+                            //set value 休職 == 使用する
+                            if (i.tempAbsenceFrNo == 1) {
+                                _self.mapModel.get(i.tempAbsenceFrNo).useClassification(1);
+                            } else {
+                                _self.mapModel.get(i.tempAbsenceFrNo).tempAbsenceFrName(i.tempAbsenceFrName);
+                                _self.mapModel.get(i.tempAbsenceFrNo).useClassification(i.useClassification);
+                            }
                         }
                     }
                     

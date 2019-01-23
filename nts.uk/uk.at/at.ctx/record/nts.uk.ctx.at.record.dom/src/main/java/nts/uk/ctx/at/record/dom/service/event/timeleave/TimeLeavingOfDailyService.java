@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.service.event.timeleave;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -89,9 +90,8 @@ public class TimeLeavingOfDailyService {
 
 		/** どちらか一方が 年休 or 特別休暇 の場合 */
 		if (wt.getDailyWork().isAnnualOrSpecialHoliday()) {
-			return EventHandleResult.withResult(EventHandleAction.ABORT, working);
-			// return EventHandleResult.withResult(EventHandleAction.UPDATE,
-			// deleteTimeLeave(true, command));
+			//return EventHandleResult.withResult(EventHandleAction.ABORT, working);
+			return updated(working, deleteTimeLeave(true, tlo), directToDB);
 		}
 		
 		return updated(working, deleteTimeLeave(false, tlo), directToDB);
@@ -101,7 +101,6 @@ public class TimeLeavingOfDailyService {
 			TimeLeavingOfDailyPerformance corrected, boolean directToDB) {
 		working.setAttendanceLeave(Optional.ofNullable(corrected));
 		
-
 		if(directToDB){
 			this.timeLeaveRepo.update(working.getAttendanceLeave().orElse(null));
 		}
@@ -219,10 +218,16 @@ public class TimeLeavingOfDailyService {
 	/** 日別実績の出退勤を削除する */
 	private TimeLeavingOfDailyPerformance deleteTimeLeave(boolean isSPR, TimeLeavingOfDailyPerformance tl) {
 		if (tl != null) {
+			if(isSPR) {
+				if(shouldSaveStamp(tl)){
+					return tl;
+				}
+			}
+			
 			tl.getTimeLeavingWorks().stream().forEach(tlw -> {
 				tlw.getAttendanceStamp().ifPresent(as -> {
 					as.getStamp().ifPresent(ass -> {
-						if (isRemoveStamp(ass, isSPR)) {
+						if (isRemoveStamp(ass)) {
 							as.removeStamp();
 						}
 					});
@@ -230,7 +235,7 @@ public class TimeLeavingOfDailyService {
 
 				tlw.getLeaveStamp().ifPresent(as -> {
 					as.getStamp().ifPresent(ass -> {
-						if (isRemoveStamp(ass, isSPR)) {
+						if (isRemoveStamp(ass)) {
 							as.removeStamp();
 						}
 					});
@@ -240,11 +245,31 @@ public class TimeLeavingOfDailyService {
 		return tl;
 	}
 
-	private boolean isRemoveStamp(WorkStamp ass, boolean isSPR) {
-		if (isSPR && ass.getStampSourceInfo() == StampSourceInfo.SPR) {
-			return false;
-		}
+	private boolean shouldSaveStamp(TimeLeavingOfDailyPerformance tl) {
+		return tl.getTimeLeavingWorks().stream().anyMatch(tlx -> {
+			AtomicBoolean flag = new AtomicBoolean(false);
+			
+			tlx.getAttendanceStamp().ifPresent(tlxa -> {
+				tlxa.getStamp().ifPresent(tlxas -> {
+					if(tlxas.getStampSourceInfo() == StampSourceInfo.SPR){
+						flag.set(true);
+					}
+				});
+			});
+			
+			tlx.getLeaveStamp().ifPresent(tlxl -> {
+				tlxl.getStamp().ifPresent(tlxls -> {
+					if(tlxls.getStampSourceInfo() == StampSourceInfo.SPR){
+						flag.set(true);
+					}
+				});
+			});
+			
+			return flag.get();
+		});
+	}
 
+	private boolean isRemoveStamp(WorkStamp ass) {
 		return ass.getStampSourceInfo() == StampSourceInfo.GO_STRAIGHT
 				|| ass.getStampSourceInfo() == StampSourceInfo.GO_STRAIGHT_APPLICATION
 				|| ass.getStampSourceInfo() == StampSourceInfo.GO_STRAIGHT_APPLICATION_BUTTON

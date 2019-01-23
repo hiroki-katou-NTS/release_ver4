@@ -31,19 +31,11 @@
 								<!-- C3_2 -->
 									<span>#{i18n.getText('CMM007_28')}</span>
 								<!-- C3_3 --> <span
-								data-bind="text: mapModel.get(1).tempAbsenceFrName, enable: false"></span>
+								data-bind="text: mapModel.get(1).tempAbsenceFrName, enable: true"></span>
 							</td>
 							<td>
 								<div class=" " tabindex="-1"
-									data-bind="ntsSwitchButton: {
-												name: '#[CMM007_103]',
-												options: checkStatusSetOptions,
-												optionsValue: 'code',
-												optionsText: 'name',
-												value: checkStatusEnable(mapModel.get(1).tempAbsenceFrNo()), 
-												enable: true,
-												},
-												click: function (data) { clickCheckbox(mapModel.get(1).tempAbsenceFrNo(), data)}">
+									data-bind="text:checkStatusSetOptions()[0].name ">
 									
 								</div>
 							</td>

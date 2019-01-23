@@ -8,6 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import nts.uk.screen.at.app.worktype.WorkTypeDto;
+import nts.uk.screen.at.app.worktype.WorkTypeOut;
 import nts.uk.screen.at.app.worktype.WorkTypeProcessor;
 
 /**
@@ -99,7 +100,7 @@ public class Kmk007WebService {
 	 */
 	@POST
 	@Path("findAll")
-	public List<WorkTypeDto> findAll(){
+	public WorkTypeOut findAll(){
 		return workTypeProcessor.findWorkTypeAll();
 	}
 	

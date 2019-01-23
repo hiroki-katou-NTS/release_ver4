@@ -1353,8 +1353,9 @@ public class AggregateMonthlyRecordServiceProc {
 	 */
 	private void customizeForOtsuka(){
 		
+		//2018.01.21 DEL shuichi_ishida Redmine#105681
 		// 時短日割適用日数
-		this.TimeSavingDailyRateApplyDays();
+		//this.TimeSavingDailyRateApplyDays();
 	}
 	
 	/**

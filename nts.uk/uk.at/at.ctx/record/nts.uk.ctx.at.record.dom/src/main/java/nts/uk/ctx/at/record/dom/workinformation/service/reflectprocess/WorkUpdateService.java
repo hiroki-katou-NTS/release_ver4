@@ -136,4 +136,14 @@ public interface WorkUpdateService {
 	 * @return
 	 */
 	List<Integer> lstTranfertimeFrameItem();
+	/**
+	 * 事後残業の勤務項目
+	 * @return
+	 */
+	List<Integer> lstAfterOvertimeItem();
+	/**
+	 * 残業枠時間．振替時間
+	 * @return
+	 */
+	List<Integer> lstTransferTimeOtItem();
 }

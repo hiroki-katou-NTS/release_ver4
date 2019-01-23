@@ -278,7 +278,8 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 	 * 予定項目ID=残業時間(枠番)の項目ID: 事後申請
 	 * @return
 	 */
-	private List<Integer> lstAfterOvertimeItem(){
+	@Override
+	public List<Integer> lstAfterOvertimeItem(){
 		List<Integer> lstItem = new ArrayList<Integer>();
 		lstItem.add(216);
 		lstItem.add(221);
@@ -1027,6 +1028,21 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 		}
 		timeLeavingOfDaily.updateFlush(timeDaily);
 				
+	}
+	@Override
+	public List<Integer> lstTransferTimeOtItem() {
+		List<Integer> lstItem = new ArrayList<>();		
+		lstItem.add(269);
+		lstItem.add(274);
+		lstItem.add(279);
+		lstItem.add(284);
+		lstItem.add(289);
+		lstItem.add(294);
+		lstItem.add(299);
+		lstItem.add(304);
+		lstItem.add(309);
+		lstItem.add(314);
+		return lstItem;
 	}
 
 }

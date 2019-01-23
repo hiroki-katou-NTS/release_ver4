@@ -98,6 +98,16 @@ public class TimeLeavingOfDailyPerformance extends AggregateRoot {
 		return this.timeLeavingWorks.stream().filter(ts -> ts.getWorkNo().v() == workNo).findFirst();
 	}
 	
+	public Optional<TimeLeavingWork> forceAccessAttendanceLeavingWork(int workNo) {
+		Optional<TimeLeavingWork> tlw = this.timeLeavingWorks.stream().filter(ts -> ts.getWorkNo().v() == workNo).findFirst();
+		if(tlw.isPresent()){
+			return tlw;
+		}
+		TimeLeavingWork ntlw = new TimeLeavingWork(new WorkNo(workNo), new TimeActualStamp(), new TimeActualStamp());
+		this.timeLeavingWorks.add(ntlw);
+		return Optional.of(ntlw);
+	}
+	
 	/**
 	 * 退勤を返す　　　（勤務回数が2回目の場合は2回目の退勤を返す）
 	 * @return

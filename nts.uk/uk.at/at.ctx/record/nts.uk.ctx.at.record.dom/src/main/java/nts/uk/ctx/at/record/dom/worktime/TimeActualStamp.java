@@ -106,4 +106,8 @@ public class TimeActualStamp {
 		}
 		return false;
 	}
+	
+	public void updateStamp(WorkStamp stamp){
+		this.stamp = Optional.ofNullable(stamp);
+	}
 }

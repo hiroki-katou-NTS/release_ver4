@@ -26,6 +26,8 @@ public class RoleExport {
 	
 	/** The assign atr. */
 	private Integer assignAtr; 
+	
+	private Integer employeeReferenceRange;
 
 	/**
 	 * Instantiates a new role export.
@@ -37,13 +39,14 @@ public class RoleExport {
 	 * @param assignAtr the assign atr
 	 */
 	public RoleExport(String companyId, String roleId, String roleCode, String roleName,
-			Integer assignAtr) {
+			Integer assignAtr, Integer employeeReferenceRange) {
 		super();
 		this.companyId = companyId;
 		this.roleId = roleId;
 		this.roleCode = roleCode;
 		this.roleName = roleName;
 		this.assignAtr = assignAtr;
+		this.employeeReferenceRange = employeeReferenceRange;
 	}
 	
 }

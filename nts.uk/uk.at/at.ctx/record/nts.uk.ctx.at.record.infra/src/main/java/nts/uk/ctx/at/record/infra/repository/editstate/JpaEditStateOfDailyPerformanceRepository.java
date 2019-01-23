@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.record.infra.repository.editstate;
 
 import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
+import lombok.SneakyThrows;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -33,7 +36,7 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 //	private static final String REMOVE_BY_EMPLOYEE;
 
 	private static final String DEL_BY_LIST_KEY;
-
+	
 //	private static final String DEL_BY_LIST_ITEM_ID;
 
 	static {
@@ -87,6 +90,55 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 			});
 		});
 		this.getEntityManager().flush();
+	}
+
+	@Override
+	public void deleteBy(List<String> employeeIds, List<GeneralDate> processingYmds) {
+		/*StringBuilder builderString = new StringBuilder();
+		builderString.append("DELETE ");
+		builderString.append("FROM KrcdtDailyRecEditSet a ");
+		builderString.append("WHERE a.krcdtDailyRecEditSetPK.employeeId IN :employeeIds ");
+		builderString.append("AND a.krcdtDailyRecEditSetPK.processingYmd IN :processingYmds ");
+		//builderString.append("AND a.krcdtDailyRecEditSetPK.attendanceItemId IN :attendanceItemIds ");
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstEmployeeIds -> {
+			CollectionUtil.split(processingYmds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, ymds -> {
+				this.getEntityManager().createQuery(builderString.toString())
+					.setParameter("employeeIds", lstEmployeeIds)
+					.setParameter("processingYmds", ymds)
+					//.setParameter("attendanceItemIds", itemIdList)
+					.executeUpdate();
+			});
+		});*/
+		//this.getEntityManager().flush();
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, sublistEmployeeIds -> {
+			CollectionUtil.split(processingYmds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, sublistYMDs -> {
+				internalDelete(sublistEmployeeIds, sublistYMDs);
+			});
+		});
+	}
+	
+	@SneakyThrows
+	private void internalDelete(List<String> sublistEmployeeIds, List<GeneralDate> sublistYMDs) {
+		StringBuilder builderString = new StringBuilder();
+		builderString.append("DELETE FROM KRCDT_DAILY_REC_EDIT_SET ");
+		builderString.append(" WHERE SID IN ( ");
+		builderString.append(sublistEmployeeIds.stream().map(c -> "?").collect(Collectors.joining(", ")));
+		builderString.append(" ) AND YMD IN ( ");
+		builderString.append(sublistYMDs.stream().map(c -> "?").collect(Collectors.joining(", ")) + ")");
+		//builderString.append(" AND ATTENDANCE_ITEM_ID IN (" + itemIdList.stream().map(c -> "?").collect(Collectors.joining(", ")) +") ");
+		try (PreparedStatement ps = this.connection().prepareStatement(builderString.toString())) {
+			for (int i = 0; i < sublistEmployeeIds.size(); i++) {
+				ps.setString(i + 1, sublistEmployeeIds.get(i));
+			}
+			for (int i = 0; i < sublistYMDs.size(); i++) {
+				ps.setDate(i + 1 + sublistEmployeeIds.size(), Date.valueOf(sublistYMDs.get(i).localDate()));
+			}
+			/*for (int i = 0; i < sublistYMDs.size(); i++) {
+				ps.setInt(i + 1 + sublistEmployeeIds.size() + sublistYMDs.size(), itemIdList.get(i));
+			}*/
+			ps.executeUpdate();
+		}
+
 	}
 
 	@Override
@@ -235,6 +287,25 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 				throw new RuntimeException(e);
 			}
 		});
+	}
+
+	@Override
+	public List<EditStateOfDailyPerformance> findByEditState(String sid, GeneralDate ymd, List<Integer> ids,
+			EditStateSetting editState) {
+		StringBuilder builderString = new StringBuilder();
+		builderString.append("SELECT a ");
+		builderString.append("FROM KrcdtDailyRecEditSet a ");
+		builderString.append("WHERE a.krcdtDailyRecEditSetPK.employeeId = :employeeId ");
+		builderString.append("AND a.krcdtDailyRecEditSetPK.processingYmd = :ymd ");
+		builderString.append("AND a.krcdtDailyRecEditSetPK.attendanceItemId IN :items ");
+		builderString.append("AND a.editState = :editState ");
+		builderString.append("ORDER BY a.krcdtDailyRecEditSetPK.attendanceItemId");
+		return this.queryProxy().query(builderString.toString(), KrcdtDailyRecEditSet.class)
+				.setParameter("employeeId", sid)
+				.setParameter("ymd", ymd)
+				.setParameter("items", ids)
+				.setParameter("editState", editState.value)
+				.getList(c -> toDomain(c));
 	}
 
 }

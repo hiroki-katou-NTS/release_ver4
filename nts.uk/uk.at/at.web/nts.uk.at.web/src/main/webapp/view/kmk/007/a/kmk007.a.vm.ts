@@ -18,7 +18,6 @@ module nts.uk.at.view.kmk007.a.viewmodel {
         currentMorning: KnockoutObservable<WorkTypeSet>;
         currentAfternoon: KnockoutObservable<WorkTypeSet>;
         itemHodidayAtr: KnockoutObservableArray<ItemModel>;
-        itemCloseAtr: KnockoutObservableArray<ItemModel>;
         itemListHaftDay: KnockoutObservableArray<ItemModel>;
         itemCalculatorMethod: KnockoutObservableArray<any>;
         enableMethod: KnockoutObservable<boolean>;
@@ -29,7 +28,8 @@ module nts.uk.at.view.kmk007.a.viewmodel {
         isEnable: KnockoutObservable<boolean> = ko.observable(true);
         isEnableOneDay: KnockoutObservable<boolean> = ko.observable(false);
         langId: KnockoutObservable<string> = ko.observable('ja');
-
+        rq546: Array<any> = [];
+        lstHdWrk: KnockoutObservableArray<ItemModel> = ko.observableArray([]);
         constructor() {
             var self = this,
                 lwt: any = self.listWorkType,
@@ -121,19 +121,6 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                 new ItemModel(2, nts.uk.resource.getText('Enum_HolidayAtr_PUBLIC_HOLIDAY'), 0)
             ]);
 
-            //休業区分
-            self.itemCloseAtr = ko.observableArray([
-                new ItemModel(0, nts.uk.resource.getText('Enum_CloseAtr_PRENATAL'), 0),
-                new ItemModel(1, nts.uk.resource.getText('Enum_CloseAtr_POSTPARTUM'), 0),
-                new ItemModel(2, nts.uk.resource.getText('Enum_CloseAtr_CHILD_CARE'), 0),
-                new ItemModel(3, nts.uk.resource.getText('Enum_CloseAtr_CARE'), 0),
-                new ItemModel(4, nts.uk.resource.getText('Enum_CloseAtr_INJURY_OR_ILLNESS'), 0),
-                new ItemModel(5, nts.uk.resource.getText('Enum_CloseAtr_OPTIONAL_LEAVE_1'), 0),
-                new ItemModel(6, nts.uk.resource.getText('Enum_CloseAtr_OPTIONAL_LEAVE_2'), 0),
-                new ItemModel(7, nts.uk.resource.getText('Enum_CloseAtr_OPTIONAL_LEAVE_3'), 0),
-                new ItemModel(8, nts.uk.resource.getText('Enum_CloseAtr_OPTIONAL_LEAVE_4'), 0)
-            ]);
-
             //出勤率の計算方法
             self.itemCalculatorMethod = ko.observableArray([
                 { code: 0, name: nts.uk.resource.getText('Enum_CalculateMethod_DO_NOT_GO_TO_WORK') },
@@ -163,6 +150,14 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                     self.setWorkTypeSet(self.currentWorkType().oneDay(), ko.toJS(self.currentOneDay()));
                 } else {
                     self.setWorkTypeSet(self.currentWorkType().oneDay(), ko.toJS(self.oneDay));
+                }
+                if(newOneDayCls == 13){//休業
+                    //勤務の分類にて「休業」を選択する
+                    if(self.isCreated()){//新規モード
+                        self.lstHdWrk(self.rq546);
+                    }else{//更新モード
+                        self.hdWrk();
+                    }
                 }
             });
 
@@ -255,6 +250,21 @@ module nts.uk.at.view.kmk007.a.viewmodel {
             });
         }
 
+        //休業: 更新モード
+        hdWrk(){
+            let self = this;
+            self.lstHdWrk(self.rq546); 
+            let no = self.currentWorkType().oneDay().closeAtr();
+            if(self.checkExist(self.rq546, no) == undefined || self.checkExist(self.rq546, no) == null){
+                let code = no + 2;
+                self.lstHdWrk.push(new ItemModel(no, code < 10 ? '0' + code + '未使用' : code + '未使用', 0));
+            }
+        }
+        checkExist(lst: Array<ItemModel>, no: number){
+            return _.find(lst, item => {
+                return item.code == no;
+            });
+        }
 
         startPage(): JQueryPromise<any> {
             let self = this,
@@ -594,7 +604,20 @@ module nts.uk.at.view.kmk007.a.viewmodel {
 
             lwt.removeAll();
 
-            service.loadWorkType().done(data => {
+            service.loadWorkType().done(out => {
+                let data = out.lstWorkType;
+                self.rq546 = [];
+                _.each(out.rq546, item =>{
+                    self.rq546.push(new ItemModel(item.no -2, item.name, 0));
+                });
+                self.rq546 = _.orderBy(self.rq546, 'code');
+                if(self.currentWorkType().oneDayCls() == 13){
+                    if(self.isCreated()){//新規モード
+                        self.lstHdWrk(self.rq546);
+                    }else{//更新モード
+                        self.hdWrk();
+                    }
+                }
                 if (data && !!data.length) {
                     lwt(_(data).orderBy(['dispOrder', 'workTypeCode'], ['asc', 'asc'])
                         .map(x => $.extend({
