@@ -4,7 +4,9 @@
  *****************************************************************/
 package nts.uk.ctx.sys.gateway.app.command.singlesignon;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -17,6 +19,7 @@ import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccount;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccountRepository;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.UseAtr;
+import nts.uk.shr.com.context.AppContexts;
 
 /**
  * The Class SaveOtherSysAccountCommandHandler.
@@ -33,10 +36,11 @@ public class SaveOtherSysAccountCommandHandler extends CommandHandler<SaveOtherS
 	 */
 	@Override
 	protected void handle(CommandHandlerContext<SaveOtherSysAccountCommand> context) {
-		
+		String cid = AppContexts.user().companyId();
 		// Get command
 		SaveOtherSysAccountCommand command = context.getCommand();
-		Optional<OtherSysAccount> opOtherSysAcc = otherSysAccountRepository.findByUserId(command.getUserId());
+		command.setCompanyId(cid);
+		Optional<OtherSysAccount> opOtherSysAcc = otherSysAccountRepository.findByEmployeeId(cid,command.getEmployeeId());
 
 		if (opOtherSysAcc.isPresent()) {
 			this.validate(command);				
@@ -65,11 +69,12 @@ public class SaveOtherSysAccountCommandHandler extends CommandHandler<SaveOtherS
 
 		// check only company code and user name
 		if (!StringUtils.isEmpty(dto.getCompanyCode().v()) && !StringUtils.isEmpty(dto.getUserName().v())) {
-			Optional<OtherSysAccount> opOtherSysAccount = otherSysAccountRepository
-					.findByCompanyCodeAndUserName(dto.getCompanyCode().v(), dto.getUserName().v());
+			List<OtherSysAccount> opOtherSysAccount = otherSysAccountRepository
+					.findByCompanyCodeAndUserName(dto.getCompanyCode().v(), dto.getUserName().v()).stream()
+					.filter(item -> !item.getEmployeeId().equals(dto.getEmployeeId())&&item.getAccountInfo().getUseAtr().equals(UseAtr.Use)).collect(Collectors.toList());
 
 			// Check condition
-			if (opOtherSysAccount.isPresent() && !opOtherSysAccount.get().getUserId().equals(dto.getUserId())) {
+			if (!opOtherSysAccount.isEmpty() && !opOtherSysAccount.get(0).getEmployeeId().equals(dto.getEmployeeId())) {
 				// Has error, throws message
 				isError = true;
 				exceptions.addMessage("Msg_616");

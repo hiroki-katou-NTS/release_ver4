@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccount;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccountRepository;
+import nts.uk.shr.com.context.AppContexts;
 
 /**
  * The Class OtherSysAccFinder.
@@ -31,10 +32,11 @@ public class OtherSysAccFinder {
 	 *            the user id
 	 * @return the other sys acc finder dto
 	 */
-	public OtherSysAccFinderDto findByUserId(String userId) {
+	public OtherSysAccFinderDto findByEmployeeId(String employeeId) {
 		
 		OtherSysAccFinderDto otherSysAccFinderDto = new OtherSysAccFinderDto();
-		Optional<OtherSysAccount> opOtherSysAcc = otherSysAccountRepository.findByUserId(userId);
+		String cid = AppContexts.user().companyId();
+		Optional<OtherSysAccount> opOtherSysAcc = otherSysAccountRepository.findByEmployeeId(cid,employeeId);
 		if (opOtherSysAcc.isPresent()) {
 			opOtherSysAcc.get().saveToMemento(otherSysAccFinderDto);
 		}
@@ -49,7 +51,7 @@ public class OtherSysAccFinder {
 	 * @return the list
 	 */
 	public List<String> findAlreadySetting(List<String> userIds) {
-		return otherSysAccountRepository.findAllOtherSysAccount(userIds).stream().map(OtherSysAccount::getUserId)
+		return otherSysAccountRepository.findAllOtherSysAccount(userIds).stream().map(OtherSysAccount::getEmployeeId)
 				.collect(Collectors.toList());
 	}
 	

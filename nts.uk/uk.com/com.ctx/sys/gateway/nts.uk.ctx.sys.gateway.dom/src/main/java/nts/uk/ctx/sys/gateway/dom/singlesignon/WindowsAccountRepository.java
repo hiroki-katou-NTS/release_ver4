@@ -16,25 +16,27 @@ public interface WindowsAccountRepository {
 	/**
 	 * Find list window account by user id.
 	 *
-	 * @param userId the user id
+	 * @param companyId the company id
+	 * @param employeeId the employee id
 	 * @return the list
 	 */
-	Optional<WindowsAccount> findListWindowAccountByUserId(String userId);
+	Optional<WindowsAccount> findListWindowAccountByEmployeeId(String companyId, String employeeId);
 
 	/**
 	 * Removes the.
 	 *
-	 * @param userId the user id
+	 * @param cid the cid
+	 * @param sid the sid
 	 * @param no the no
 	 */
-	void remove(String userId, Integer no);
+	void remove(String cid, String sid, Integer no);
 
 	/**
 	 * Adds the.
 	 *
 	 * @param windowAccount the window account
 	 */
-	void add(String userId, WindowsAccountInfo windowAccountInfo);
+	void add(String cid, String employeeId, WindowsAccountInfo windowAccountInfo);
 	
 	/**
 	 * Findby user name and host name.
@@ -61,7 +63,7 @@ public interface WindowsAccountRepository {
 	 * @param userId the user id
 	 * @return the list
 	 */
-	Optional<WindowsAccount> findByUserId(String userId);
+	Optional<WindowsAccount> findByEmployeeId(String cid,String empployeeId);
 
 	/**
 	 * Update.
@@ -69,7 +71,7 @@ public interface WindowsAccountRepository {
 	 * @param winAccCommand the win acc command
 	 * @param winAccDB the win acc DB
 	 */
-	void update(String userId, WindowsAccountInfo winAccCommand, WindowsAccountInfo winAccDB);
+	void update(String companyId, String employeeId, WindowsAccountInfo winAccCommand, WindowsAccountInfo winAccDB);
 	
 	
 	/**
@@ -78,6 +80,6 @@ public interface WindowsAccountRepository {
 	 * @param ltsUserId the lts user id
 	 * @return the list
 	 */
-	List<WindowsAccount> findByListUserId(List<String> ltsUserId);
+	List<WindowsAccount> findByListEmployeeId(List<String> lstEmployeeId);
 	
 }

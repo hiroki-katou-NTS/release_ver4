@@ -35,8 +35,8 @@ public class JpaOtherSysAccountSetMemento implements OtherSysAccountSetMemento {
 	 * @see nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccountSetMemento#setUserId(java.lang.String)
 	 */
 	@Override
-	public void setUserId(String userId) {
-		this.typedValue.getSgwmtOtherSysAccPK().setUserId(userId);
+	public void setEmployeeId(String employeeId) {
+		this.typedValue.getSgwmtOtherSysAccPK().setEmployeeId(employeeId);
 	}
 
 	/* (non-Javadoc)
@@ -63,4 +63,8 @@ public class JpaOtherSysAccountSetMemento implements OtherSysAccountSetMemento {
 		this.typedValue.setUseAtr(useAtr.value);
 	}
 
+	@Override
+	public void setCompanyId(String companyId) {
+		this.typedValue.getSgwmtOtherSysAccPK().setCid(companyId);
+	}
 }

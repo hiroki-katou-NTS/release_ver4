@@ -16,7 +16,7 @@ public class WindowsAccountFinderDto {
 
 	// ユーザID
 	/** The user id. */
-	private String userId;
+	private String employeeId;
 
 	// ホスト名
 	/** The host name. */
@@ -41,24 +41,20 @@ public class WindowsAccountFinderDto {
 		super();
 	}
 
+	
 	/**
 	 * Instantiates a new windows account finder dto.
 	 *
-	 * @param userId
-	 *            the user id
-	 * @param hostName
-	 *            the host name
-	 * @param userName
-	 *            the user name
-	 * @param no
-	 *            the no
-	 * @param useAtr
-	 *            the use atr
+	 * @param employeeId the employee id
+	 * @param hostName the host name
+	 * @param userName the user name
+	 * @param no the no
+	 * @param useAtr the use atr
 	 */
-	public WindowsAccountFinderDto(String userId, String hostName, String userName, Integer no,
+	public WindowsAccountFinderDto(String employeeId, String hostName, String userName, Integer no,
 			Integer useAtr) {
 		super();
-		this.userId = userId;
+		this.employeeId = employeeId;
 		this.hostName = hostName;
 		this.userName = userName;
 		this.no = no;

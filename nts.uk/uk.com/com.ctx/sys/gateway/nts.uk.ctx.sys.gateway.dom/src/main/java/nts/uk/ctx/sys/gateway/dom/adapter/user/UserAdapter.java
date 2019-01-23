@@ -108,6 +108,13 @@ public interface UserAdapter {
 	 */
 	Optional<UserInforExImport> getByEmpID(String empID);
 
+	/**
+	 * Find user by employee id.
+	 *
+	 * @param sid the sid
+	 * @return the optional
+	 */
+	Optional<UserImportNew> findUserByEmployeeId(String sid);
 	
 	/**
 	 * Find user by contract and login id new.

@@ -70,7 +70,7 @@ public class OtherSysAccountWs extends WebService{
 	@Path("find/otherSysAcc")
 	@POST
 	public OtherSysAccFinderDto findOtherSysAccByUserID(OtherSysAccFinderDto otherSysAcc) {
-		return this.otherSysAccFinder.findByUserId(otherSysAcc.getUserId());
+		return this.otherSysAccFinder.findByEmployeeId(otherSysAcc.getEmployeeId());
 	}
 
 	/**
