@@ -33,7 +33,7 @@ public interface OtherSysAccountRepository {
 	 * @param userName the user name
 	 * @return the optional
 	 */
-	Optional<OtherSysAccount> findByCompanyCodeAndUserName(String companyCode, String userName);
+	List<OtherSysAccount> findByCompanyCodeAndUserName(String companyCode, String userName);
 
 	/**
 	 * Find by employee id.

@@ -4,7 +4,9 @@
  *****************************************************************/
 package nts.uk.ctx.sys.gateway.app.command.singlesignon;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -67,11 +69,12 @@ public class SaveOtherSysAccountCommandHandler extends CommandHandler<SaveOtherS
 
 		// check only company code and user name
 		if (!StringUtils.isEmpty(dto.getCompanyCode().v()) && !StringUtils.isEmpty(dto.getUserName().v())) {
-			Optional<OtherSysAccount> opOtherSysAccount = otherSysAccountRepository
-					.findByCompanyCodeAndUserName(dto.getCompanyCode().v(), dto.getUserName().v());
+			List<OtherSysAccount> opOtherSysAccount = otherSysAccountRepository
+					.findByCompanyCodeAndUserName(dto.getCompanyCode().v(), dto.getUserName().v()).stream()
+					.filter(item -> !item.getEmployeeId().equals(dto.getEmployeeId())&&item.getAccountInfo().getUseAtr().equals(UseAtr.Use)).collect(Collectors.toList());
 
 			// Check condition
-			if (opOtherSysAccount.isPresent() && !opOtherSysAccount.get().getEmployeeId().equals(dto.getEmployeeId())) {
+			if (!opOtherSysAccount.isEmpty() && !opOtherSysAccount.get(0).getEmployeeId().equals(dto.getEmployeeId())) {
 				// Has error, throws message
 				isError = true;
 				exceptions.addMessage("Msg_616");

@@ -79,7 +79,7 @@ public class JpaOtherSysAccountRepository extends JpaRepository implements Other
 	 * findByCompanyCodeAndUserName(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public Optional<OtherSysAccount> findByCompanyCodeAndUserName(String companyCode, String userName) {
+	public List<OtherSysAccount> findByCompanyCodeAndUserName(String companyCode, String userName) {
 		// Get entity manager
 		EntityManager em = this.getEntityManager();
 		CriteriaBuilder bd = em.getCriteriaBuilder();
@@ -101,9 +101,11 @@ public class JpaOtherSysAccountRepository extends JpaRepository implements Other
 		List<SgwmtOtherSysAcc> result = em.createQuery(cq).getResultList();
 
 		if (result.isEmpty()) {
-			return Optional.empty();
+			return new ArrayList<>();
 		} else {
-			return Optional.of(this.toDomain(result.get(0)));
+			return result.stream().map(item -> {
+				return this.toDomain(item);
+			}).collect(Collectors.toList());
 		}
 
 	}
