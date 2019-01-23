@@ -42,6 +42,7 @@ public class AtItemNameAcFinder implements AtItemNameAdapter {
 			dto.setAttendanceItemDisplayNumber(x.getDisplayNumber());
 			dto.setNameLineFeedPosition(x.getNameLineFeedPosition());
 			dto.setUserCanUpdateAtr(x.getUserCanUpdateAtr().value);
+			dto.setTypeOfAttendanceItem(x.getDailyAttendanceAtr().value);
 			return dto;
 		}).collect(Collectors.toList());
 
@@ -57,6 +58,7 @@ public class AtItemNameAcFinder implements AtItemNameAdapter {
 			dto.setAttendanceItemDisplayNumber(x.getDisplayNumber());
 			dto.setNameLineFeedPosition(x.getNameLineFeedPosition());
 			dto.setUserCanUpdateAtr(x.getUserCanUpdateAtr().value);
+			dto.setTypeOfAttendanceItem(x.getMonthlyAttendanceAtr().value);
 			return dto;
 		}).collect(Collectors.toList());
 
