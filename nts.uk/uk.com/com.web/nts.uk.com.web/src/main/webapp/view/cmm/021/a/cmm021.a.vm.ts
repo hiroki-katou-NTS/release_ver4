@@ -329,7 +329,38 @@ module nts.uk.com.view.cmm021.a {
                         return '';
                     } }
                 ]);
-
+                //control validate screen C
+                _self.enable_otherAcc.subscribe((val:any)=>{
+                    if (!val) {
+                        $('#focus-CompanyCode').ntsError('clear');
+                        $('#userName6').ntsError('clear');
+                    }
+                });
+                //control validate screen B
+                _self.enable_WinAcc2.subscribe((val: any) => {
+                    if (!val) {
+                        $('#hostName2').ntsError('clear');
+                        $('#userName2').ntsError('clear');
+                    }
+                });
+                _self.enable_WinAcc3.subscribe((val: any) => {
+                    if (!val) {
+                        $('#hostName3').ntsError('clear');
+                        $('#userName3').ntsError('clear');
+                    }
+                });
+                _self.enable_WinAcc4.subscribe((val: any) => {
+                    if (!val) {
+                        $('#hostName4').ntsError('clear');
+                        $('#userName4').ntsError('clear');
+                    }
+                });
+                _self.enable_WinAcc5.subscribe((val: any) => {
+                    if (!val) {
+                        $('#hostName5').ntsError('clear');
+                        $('#userName5').ntsError('clear');
+                    }
+                });
             }
 
             /**
@@ -1151,7 +1182,7 @@ module nts.uk.com.view.cmm021.a {
                         _self.userName6(data.userName);
                         _self.enable_otherAcc(true);
                         _self.updateMode();
-                    } else if (data.userId != null && data.useAtr == 0) {
+                    } else if (data.employeeId != null && data.useAtr == 0) {
                         _self.companyCode6(data.companyCode);
                         _self.userName6(data.userName);
                         _self.enable_otherAcc(false);
