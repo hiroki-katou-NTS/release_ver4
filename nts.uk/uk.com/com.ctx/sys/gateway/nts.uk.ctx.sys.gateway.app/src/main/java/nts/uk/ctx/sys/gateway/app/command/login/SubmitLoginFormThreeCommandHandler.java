@@ -73,6 +73,7 @@ public class SubmitLoginFormThreeCommandHandler extends LoginBaseCommandHandler<
 			//get User
 			user = this.getUserAndCheckLimitTime(windowAcc);
 			oldPassword = user.getPassword();
+			this.getEmployeeInfoCaseSignon(windowAcc,true);
 		} else {
 			String employeeCode = command.getEmployeeCode();
 			oldPassword = command.getPassword();
