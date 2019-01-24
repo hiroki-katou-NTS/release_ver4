@@ -342,7 +342,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 			query.toString();
 		}
 		List<Object[]> listTemp = new ArrayList<>();
-		if(!targetEmployeesSid.isEmpty()) {
+		if(!targetEmployeesSid.isEmpty() && query.toString().contains("?listTargetSid")) {
 			List<String> lSid = new ArrayList<>();
 			CollectionUtil.split(targetEmployeesSid, 1000, subIdList -> {
 				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ","\\', '"));
