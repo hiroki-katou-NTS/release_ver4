@@ -30172,9 +30172,15 @@ var nts;
                     function setupScrollWhenBinding($grid) {
                         var gridId = "#" + $grid.attr("id");
                         $(document).delegate(gridId, "iggriddatarendered", function (evt, ui) {
+                            if (isCheckedAll($grid)) {
+                                return;
+                            }
                             var oldSelected = getSelectRow($grid);
                             if (!nts.uk.util.isNullOrEmpty(oldSelected)) {
                                 _.defer(function () {
+                                    if (isCheckedAll($grid)) {
+                                        return;
+                                    }
                                     var selected = getSelectRow($grid);
                                     if (!nts.uk.util.isNullOrEmpty(selected)) {
                                         selected = oldSelected;
@@ -30196,6 +30202,15 @@ var nts;
                                 });
                             }
                         });
+                    }
+                    function isCheckedAll($grid) {
+                        if ($grid.igGridSelection('option', 'multipleSelection')) {
+                            var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                            if (chk[0].getAttribute("data-chk") == "on") {
+                                return true;
+                            }
+                        }
+                        return false;
                     }
                     function getSelectRow($grid) {
                         var row = null;
@@ -30231,11 +30246,38 @@ var nts;
                         };
                     }
                     function setSelected($grid, selectedId) {
-                        deselectAll($grid);
+                        var baseID = _.map($grid.igGrid("option").dataSource, $grid.igGrid("option", "primaryKey"));
+                        if (_.isEmpty(baseID)) {
+                            return;
+                        }
+                        if (baseID.length >= 500) {
+                            var oldSelectedID = _.map(getSelected($grid), "id"), shouldRemove = _.difference(oldSelectedID, selectedId), shouldSelect = _.difference(selectedId, oldSelectedID);
+                            /** When data source large (data source > 500 (?)):
+                                    if new value for select = half of data source
+                                        or removed selected value = 1/3 of data source,
+                                        should deselect all and loop for select,
+                                    else if deselect old values that not selected and select new selected only*/
+                            if (shouldSelect.length < baseID.length / 2 || shouldRemove.length < baseID.length / 3) {
+                                shouldRemove.forEach(function (id) { return $grid.igGridSelection("deselectRowById", id); });
+                                shouldSelect.forEach(function (id) { return $grid.igGridSelection('selectRowById', id); });
+                                return;
+                            }
+                        }
                         if ($grid.igGridSelection('option', 'multipleSelection')) {
-                            selectedId.forEach(function (id) { return $grid.igGridSelection('selectRowById', id); });
+                            // for performance when select all
+                            if (_.isEqual(_.sortBy(_.uniq(selectedId)), _.sortBy(_.uniq(baseID)))) {
+                                var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                                if (chk[0].getAttribute("data-chk") == "off") {
+                                    chk.click();
+                                }
+                            }
+                            else {
+                                deselectAll($grid);
+                                selectedId.forEach(function (id) { return $grid.igGridSelection('selectRowById', id); });
+                            }
                         }
                         else {
+                            deselectAll($grid);
                             $grid.igGridSelection('selectRowById', selectedId);
                         }
                     }
@@ -30749,7 +30791,7 @@ var nts;
                         });
                         if (!isEqual) {
                             var clickCheckBox = false;
-                            if (value.length == sources.length) {
+                            if (_.uniq(value).length == _.uniq(sources).length) {
                                 if (multiple) {
                                     var features = _.find($grid.igGrid("option", "features"), function (f) {
                                         return f.name === "RowSelectors";
@@ -30758,7 +30800,10 @@ var nts;
                                 }
                             }
                             if (clickCheckBox) {
-                                $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']").click();
+                                var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                                if (chk[0].getAttribute("data-chk") == "off") {
+                                    chk.click();
+                                }
                             }
                             else {
                                 $grid.ntsGridList('setSelected', value.length === 0 ? (!multiple ? undefined : value) : value);
@@ -36666,35 +36711,40 @@ var nts;
                         var $grid = $control;
                         if (virtualization) {
                             $grid.on("selectChange", function () {
-                                var row = null;
-                                var selectedRows = $grid.igGrid("selectedRows");
-                                if (selectedRows) {
-                                    row = selectedRows[0];
-                                }
-                                else {
-                                    row = $grid.igGrid("selectedRow");
-                                }
-                                if (row) {
-                                    ui.ig.grid.virtual.expose(row, $grid);
-                                }
+                                exporeTo($grid, function (row) { return ui.ig.grid.virtual.expose(row, $grid); });
                             });
                         }
                         else {
                             $grid.on("selectChange", function () {
-                                var row = null;
-                                var selectedRows = $grid.igGrid("selectedRows");
-                                if (selectedRows) {
-                                    row = selectedRows[0];
-                                }
-                                else {
-                                    row = $grid.igGrid("selectedRow");
-                                }
-                                if (row) {
-                                    ui.ig.grid.expose(row, $grid);
-                                }
+                                exporeTo($grid, function (row) { return ui.ig.grid.expose(row, $grid); });
                             });
                         }
                         return $grid;
+                    }
+                    function exporeTo($grid, exposeFunction) {
+                        var row = null;
+                        if ($grid.igGridSelection('option', 'multipleSelection')) {
+                            var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                            if (chk[0].getAttribute("data-chk") == "on") {
+                                return;
+                            }
+                        }
+                        var selectedRows = $grid.igGrid("selectedRows");
+                        var keyProperty = $grid.igGrid("option", "primaryKey");
+                        var sourceKeys = _.map($grid.igGrid("option", "dataSource"), function (o) { return o[keyProperty]; });
+                        var selectedKeys = _.map(selectedRows, function (o) { return o["id"]; });
+                        if (_.isEqual(_.sortBy(_.uniq(sourceKeys)), _.sortBy(_.uniq(selectedKeys)))) {
+                            return;
+                        }
+                        if (selectedRows) {
+                            row = selectedRows[0];
+                        }
+                        else {
+                            row = $grid.igGrid("selectedRow");
+                        }
+                        if (row) {
+                            exposeFunction(row);
+                        }
                     }
                     function getSelectRowIndex($grid, selectedValue) {
                         var dataSource = $grid.igGrid("option", "dataSource");
