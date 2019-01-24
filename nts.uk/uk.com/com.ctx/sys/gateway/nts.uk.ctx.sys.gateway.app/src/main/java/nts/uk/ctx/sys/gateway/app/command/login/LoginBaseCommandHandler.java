@@ -23,6 +23,7 @@ import nts.gul.security.hash.password.PasswordHash;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.sys.gateway.app.command.login.dto.CheckChangePassDto;
 import nts.uk.ctx.sys.gateway.app.command.login.dto.ParamLoginRecord;
+import nts.uk.ctx.sys.gateway.app.command.login.dto.SignonEmployeeInfoData;
 import nts.uk.ctx.sys.gateway.dom.adapter.company.CompanyBsAdapter;
 import nts.uk.ctx.sys.gateway.dom.adapter.company.CompanyBsImport;
 import nts.uk.ctx.sys.gateway.dom.adapter.employee.EmployeeInfoAdapter;
@@ -51,6 +52,7 @@ import nts.uk.ctx.sys.gateway.dom.login.dto.EmployeeDataMngInfoImport;
 import nts.uk.ctx.sys.gateway.dom.login.dto.EmployeeGeneralInfoAdapter;
 import nts.uk.ctx.sys.gateway.dom.login.dto.EmployeeGeneralInfoImport;
 import nts.uk.ctx.sys.gateway.dom.login.dto.EmployeeImport;
+import nts.uk.ctx.sys.gateway.dom.login.dto.EmployeeImportNew;
 import nts.uk.ctx.sys.gateway.dom.login.dto.RoleImport;
 import nts.uk.ctx.sys.gateway.dom.login.dto.RoleIndividualGrantImport;
 import nts.uk.ctx.sys.gateway.dom.login.dto.SDelAtr;
@@ -237,6 +239,28 @@ public abstract class LoginBaseCommandHandler<T> extends CommandHandlerWithResul
 		return true;
 	}
 
+	/**
+	 * Gets the employee info case signon.
+	 *
+	 * @param companyId the company id
+	 * @param employeeId the employee id
+	 * @param isSignOn the is sign on
+	 * @return the employee info case signon
+	 */
+	//EA修正履歴 No.3067、3068、3069
+	protected SignonEmployeeInfoData getEmployeeInfoCaseSignon(WindowsAccount windowAcc, Boolean isSignOn) {
+		// imported（GateWay）「会社情報」を取得する
+		CompanyInformationImport companyInformationImport = this.companyInformationAdapter.findById(windowAcc.getCompanyId());
+
+		// Imported（GateWay）「社員」を取得する
+		Optional<EmployeeImportNew> opEm = this.employeeAdapter.getEmployeeBySid(windowAcc.getEmployeeId());
+
+		// 社員が削除されたかを取得
+		this.checkEmployeeDelStatus(windowAcc.getEmployeeId(), isSignOn);
+		
+		return new SignonEmployeeInfoData(companyInformationImport, opEm.get());
+	}
+	
 	/**
 	 * Check employee del status.
 	 *
@@ -627,6 +651,7 @@ public abstract class LoginBaseCommandHandler<T> extends CommandHandlerWithResul
 		// cut hostname
 		String hostname = domain.substring(0, domain.lastIndexOf(";"));
 		
+		//EA修正履歴 No.3067、3068、3069
 		// get user
 		Optional<UserImportNew> optUserImport = this.userAdapter.findUserByEmployeeId(windowAccount.getEmployeeId());
 
