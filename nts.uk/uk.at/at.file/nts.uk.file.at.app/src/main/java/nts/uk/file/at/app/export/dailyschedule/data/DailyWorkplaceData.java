@@ -42,4 +42,7 @@ public class DailyWorkplaceData {
 	
 	// Period for optimizing performance
 	public DatePeriod period;
+	
+	// Employee data & child workplaces' employee data presentation
+	public boolean hasData = false;
 }
