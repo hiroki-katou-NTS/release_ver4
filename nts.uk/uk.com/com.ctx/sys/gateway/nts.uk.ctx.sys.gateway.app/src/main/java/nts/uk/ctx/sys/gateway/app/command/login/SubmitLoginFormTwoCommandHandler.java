@@ -17,6 +17,7 @@ import nts.arc.time.GeneralDate;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.sys.gateway.app.command.login.dto.CheckChangePassDto;
 import nts.uk.ctx.sys.gateway.app.command.login.dto.ParamLoginRecord;
+import nts.uk.ctx.sys.gateway.app.command.login.dto.SignonEmployeeInfoData;
 import nts.uk.ctx.sys.gateway.dom.adapter.user.UserAdapter;
 import nts.uk.ctx.sys.gateway.dom.adapter.user.UserImportNew;
 import nts.uk.ctx.sys.gateway.dom.login.EmployCodeEditType;
@@ -66,6 +67,7 @@ public class SubmitLoginFormTwoCommandHandler extends LoginBaseCommandHandler<Su
 		String contractCode = command.getContractCode();
 		String companyId = contractCode + "-" + companyCode;
 		String employeeId = null;
+		SignonEmployeeInfoData signonEmployeeInfoData =null;
 		
 		if (command.isSignOn()) {
 			// アルゴリズム「アカウント照合」を実行する
@@ -74,7 +76,7 @@ public class SubmitLoginFormTwoCommandHandler extends LoginBaseCommandHandler<Su
 			//get User
 			user = this.getUserAndCheckLimitTime(windowAcc);
 			oldPassword = user.getPassword();
-			this.getEmployeeInfoCaseSignon(windowAcc,true);
+			signonEmployeeInfoData = this.getEmployeeInfoCaseSignon(windowAcc,true);
 		} else {
 			String employeeCode = command.getEmployeeCode();
 			oldPassword = command.getPassword();

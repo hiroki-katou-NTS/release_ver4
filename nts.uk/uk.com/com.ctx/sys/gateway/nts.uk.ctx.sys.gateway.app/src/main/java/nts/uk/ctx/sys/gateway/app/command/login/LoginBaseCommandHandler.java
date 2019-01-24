@@ -23,6 +23,7 @@ import nts.gul.security.hash.password.PasswordHash;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.sys.gateway.app.command.login.dto.CheckChangePassDto;
 import nts.uk.ctx.sys.gateway.app.command.login.dto.ParamLoginRecord;
+import nts.uk.ctx.sys.gateway.app.command.login.dto.SignonEmployeeInfoData;
 import nts.uk.ctx.sys.gateway.dom.adapter.company.CompanyBsAdapter;
 import nts.uk.ctx.sys.gateway.dom.adapter.company.CompanyBsImport;
 import nts.uk.ctx.sys.gateway.dom.adapter.employee.EmployeeInfoAdapter;
@@ -247,15 +248,17 @@ public abstract class LoginBaseCommandHandler<T> extends CommandHandlerWithResul
 	 * @return the employee info case signon
 	 */
 	//EA修正履歴 No.3067、3068、3069
-	protected void getEmployeeInfoCaseSignon(WindowsAccount windowAcc, Boolean isSignOn) {
+	protected SignonEmployeeInfoData getEmployeeInfoCaseSignon(WindowsAccount windowAcc, Boolean isSignOn) {
 		// imported（GateWay）「会社情報」を取得する
-		this.companyInformationAdapter.findById(windowAcc.getCompanyId());
+		CompanyInformationImport companyInformationImport = this.companyInformationAdapter.findById(windowAcc.getCompanyId());
 
 		// Imported（GateWay）「社員」を取得する
 		Optional<EmployeeImportNew> opEm = this.employeeAdapter.getEmployeeBySid(windowAcc.getEmployeeId());
 
 		// 社員が削除されたかを取得
 		this.checkEmployeeDelStatus(windowAcc.getEmployeeId(), isSignOn);
+		
+		return new SignonEmployeeInfoData(companyInformationImport, opEm.get());
 	}
 	
 	/**
