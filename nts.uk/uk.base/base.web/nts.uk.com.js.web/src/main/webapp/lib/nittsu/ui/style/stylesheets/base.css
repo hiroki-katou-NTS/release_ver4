@@ -3134,7 +3134,7 @@ button.nts-switch-button[disabled].selected {
   margin: 20px;
   word-break: break-all;
   -ms-word-break: break-all;
-  max-height: 180px;
+  max-height: 220px;
   overflow-y: auto;
   line-height: 22px;
 }
