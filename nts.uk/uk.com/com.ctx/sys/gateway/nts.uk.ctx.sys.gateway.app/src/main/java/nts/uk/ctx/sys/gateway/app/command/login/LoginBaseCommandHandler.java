@@ -628,7 +628,7 @@ public abstract class LoginBaseCommandHandler<T> extends CommandHandlerWithResul
 		String hostname = domain.substring(0, domain.lastIndexOf(";"));
 		
 		// get user
-		Optional<UserImportNew> optUserImport = this.userAdapter.findByUserId(windowAccount.getUserId());
+		Optional<UserImportNew> optUserImport = this.userAdapter.findUserByEmployeeId(windowAccount.getEmployeeId());
 
 		// Validate limit time
 		if (optUserImport.isPresent()) {

@@ -27,6 +27,7 @@ import nts.uk.ctx.sys.gateway.dom.singlesignon.WindowsAccount;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.WindowsAccountGetMemento;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.WindowsAccountInfo;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.WindowsAccountRepository;
+import nts.uk.shr.com.context.AppContexts;
 
 /**
  * The Class SaveWindowAccountCommandHandler.
@@ -47,6 +48,7 @@ public class SaveWindowAccountCommandHandler extends CommandHandler<SaveWindowAc
 	 */
 	@Override
 	protected void handle(CommandHandlerContext<SaveWindowAccountCommand> context) {
+		String companyId = AppContexts.user().companyId();
 		// Get command
 		SaveWindowAccountCommand command = context.getCommand();
 
@@ -79,15 +81,15 @@ public class SaveWindowAccountCommandHandler extends CommandHandler<SaveWindowAc
 			}
 			
 			// remove old domain
-			Optional<WindowsAccount> optWindowAcc = windowAccountRepository.findByUserId(command.getUserId());
+			Optional<WindowsAccount> optWindowAcc = windowAccountRepository.findByEmployeeId(companyId,command.getEmployeeId());
 		
 			// add and update data to db
-			this.save(optWindowAcc,listWinAccDto );
+			this.save(companyId,optWindowAcc,listWinAccDto );
 
 		}
 	
-	private void save(Optional<WindowsAccount> optWindowAccDB, List<WindowAccountDto> listWinAccDto) {
-		WindowsAccount windAccCommand = this.toWindowsAccountDomain(listWinAccDto);
+	private void save(String cid,Optional<WindowsAccount> optWindowAccDB, List<WindowAccountDto> listWinAccDto) {
+		WindowsAccount windAccCommand = this.toWindowsAccountDomain(cid,listWinAccDto);
 		windAccCommand.validate();
 		
 		Map<Integer, WindowsAccountInfo> mapWinAcc = new HashMap<Integer, WindowsAccountInfo>();
@@ -107,9 +109,9 @@ public class SaveWindowAccountCommandHandler extends CommandHandler<SaveWindowAc
 			
 			// not existed, insert DB
 			if (winAccDb == null) {
-				this.windowAccountRepository.add(windAccCommand.getUserId(), domain);
+				this.windowAccountRepository.add(windAccCommand.getCompanyId(), windAccCommand.getEmployeeId(), domain);
 			} else {
-				this.windowAccountRepository.update(windAccCommand.getUserId(), domain, winAccDb);
+				this.windowAccountRepository.update(windAccCommand.getCompanyId(), windAccCommand.getEmployeeId(), domain, winAccDb);
 			}
 		}
 		
@@ -118,7 +120,7 @@ public class SaveWindowAccountCommandHandler extends CommandHandler<SaveWindowAc
 			optWindowAccDB.get().getAccountInfos().stream().filter(
 					domain -> domain.getNo() != null && !lstWinAccSaved.contains(domain.getNo()))
 					.forEach(domain -> {
-						this.windowAccountRepository.remove(windAccCommand.getUserId(), domain.getNo());
+						this.windowAccountRepository.remove(windAccCommand.getCompanyId(),windAccCommand.getEmployeeId(), domain.getNo());
 					});
 		}
 	}
@@ -142,7 +144,7 @@ public class SaveWindowAccountCommandHandler extends CommandHandler<SaveWindowAc
 					.findbyUserNameAndHostNameAndIsUsed(dto.getUserName().v(), dto.getHostName().v());
 
 			// Check condition
-			if (opWindowAccount.isPresent() && !opWindowAccount.get().getUserId().equals(dto.getUserId())) {
+			if (opWindowAccount.isPresent() && !opWindowAccount.get().getEmployeeId().equals(dto.getEmployeeId())) {
 				// Has error, throws message
 				isError = true;
 				exceptions.addMessage("Msg_616");
@@ -160,8 +162,8 @@ public class SaveWindowAccountCommandHandler extends CommandHandler<SaveWindowAc
 	 *
 	 * @return the total condition
 	 */
-	public WindowsAccount toWindowsAccountDomain(List<WindowAccountDto> windowAccountDtos) {
-		return new WindowsAccount(new WindowsAccountDtoGetMemento(windowAccountDtos));
+	public WindowsAccount toWindowsAccountDomain(String cid, List<WindowAccountDto> windowAccountDtos) {
+		return new WindowsAccount(new WindowsAccountDtoGetMemento(cid,windowAccountDtos));
 	}
 
 	/**
@@ -171,6 +173,9 @@ public class SaveWindowAccountCommandHandler extends CommandHandler<SaveWindowAc
 
 		/** The command. */
 		private List<WindowAccountDto> windowAccountDtos;
+		
+		/** The cid. */
+		private String cid;
 
 		/**
 		 * Instantiates a new dto get memento.
@@ -178,17 +183,18 @@ public class SaveWindowAccountCommandHandler extends CommandHandler<SaveWindowAc
 		 * @param command
 		 *            the command
 		 */
-		public WindowsAccountDtoGetMemento(List<WindowAccountDto> windowAccountDtos) {
+		public WindowsAccountDtoGetMemento(String cid, List<WindowAccountDto> windowAccountDtos) {
+			this.cid = cid;
 			this.windowAccountDtos = windowAccountDtos;
 		}
 
 
 		@Override
-		public String getUserId() {
+		public String getEmployeeId() {
 			if (CollectionUtil.isEmpty(this.windowAccountDtos)) {
 				return null;
 			}
-			return this.windowAccountDtos.stream().findFirst().get().getUserId();
+			return this.windowAccountDtos.stream().findFirst().get().getEmployeeId();
 		}
 
 		@Override
@@ -200,6 +206,12 @@ public class SaveWindowAccountCommandHandler extends CommandHandler<SaveWindowAc
 			
 			return this.windowAccountDtos.stream().map(item -> new WindowsAccountInfo(item))
 					.collect(Collectors.toList());
+		}
+
+
+		@Override
+		public String getCompanyId() {
+			return this.cid;
 		}
 
 	}

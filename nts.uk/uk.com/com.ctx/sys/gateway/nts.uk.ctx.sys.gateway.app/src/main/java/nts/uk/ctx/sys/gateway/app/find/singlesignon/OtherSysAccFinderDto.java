@@ -20,9 +20,12 @@ import nts.uk.ctx.sys.gateway.dom.singlesignon.UserName;
 @Setter
 public class OtherSysAccFinderDto implements OtherSysAccountSetMemento{
 	
+	/** The company id. */
+	private String companyId;
+	
+	/** The employee id. */
 	// ユーザID
-	/** The user id. */
-	private String userId;
+	private String employeeId;
 
 	/** The company code. */
 	// 会社コード
@@ -41,8 +44,8 @@ public class OtherSysAccFinderDto implements OtherSysAccountSetMemento{
 	 * @see nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccountSetMemento#setUserId(java.lang.String)
 	 */
 	@Override
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setEmployeeId(String employeeId) {
+		this.employeeId = employeeId;
 		
 	}
 
@@ -68,6 +71,14 @@ public class OtherSysAccFinderDto implements OtherSysAccountSetMemento{
 	@Override
 	public void setUseAtr(UseAtr useAtr) {
 		this.useAtr = useAtr.value;
+	}
+
+	/* (non-Javadoc)
+	 * @see nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccountSetMemento#setCompanyId(java.lang.String)
+	 */
+	@Override
+	public void setCompanyId(String companyId) {
+		this.companyId = companyId;
 	}
 
 }

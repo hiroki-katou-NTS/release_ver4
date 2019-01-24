@@ -9,13 +9,13 @@ module nts.uk.com.view.cmm021.a {
             findAlreadySettingWindow: "ctx/sys/gateway/single/signon/find/window/alreadysetting",
             findAlreadySettingOtherAcc: "ctx/sys/gateway/single/signon/find/otheracc/alreadysetting",
             findListUserInfo: "ctx/sys/gateway/single/signon/find/userInfo",
-            findListWindowAccByUserId: "ctx/sys/gateway/single/signon/find/window/account",
+            findListWindowAccByEmployeeId: "ctx/sys/gateway/single/signon/find/window/account",
             saveWindowAccount: "ctx/sys/gateway/single/signon/save/windowAcc",
             removeWindowAccount: "ctx/sys/gateway/single/signon/remove/windowAcc",
                         
             saveOtherSysAccount: "ctx/sys/gateway/single/signon/save/otherSysAcc",
             removeOtherSysAccount: "ctx/sys/gateway/single/signon/remove/otherSysAcc",
-            findOtherSysAccByUserId: "ctx/sys/gateway/single/signon/find/otherSysAcc",
+            findOtherSysAccByEmployeeId: "ctx/sys/gateway/single/signon/find/otherSysAcc",
 
 
         }
@@ -34,26 +34,26 @@ module nts.uk.com.view.cmm021.a {
             return nts.uk.request.ajax(servicePath.findListUserInfo, { employeeIds: sIds, isScreenC: isScreenC});
         }
 
-        export function findListWindowAccByUserId(userId: string): JQueryPromise<model.WindownAccountFinderDto[]> {
-            return nts.uk.request.ajax(servicePath.findListWindowAccByUserId, { userId: userId });
+        export function findListWindowAccByEmployeeId(employeeId: string): JQueryPromise<model.WindownAccountFinderDto[]> {
+            return nts.uk.request.ajax(servicePath.findListWindowAccByEmployeeId, { employeeId: employeeId });
         }
 
         export function saveWindowAccount(saveWindowAcc: model.SaveWindowAccountCommand): JQueryPromise<any> {
             return nts.uk.request.ajax(servicePath.saveWindowAccount, saveWindowAcc);
         }
         
-        export function removeWindowAccount(userIdDelete: string): JQueryPromise<any> {
-            return nts.uk.request.ajax(servicePath.removeWindowAccount, { userIdDelete: userIdDelete });
+        export function removeWindowAccount(employeeId: string): JQueryPromise<any> {
+            return nts.uk.request.ajax(servicePath.removeWindowAccount, { employeeId : employeeId });
         }
         
         
         //Screen C
-        export function findOtherSysAccByUserId(userId: string): JQueryPromise<model.OtherSysAccFinderDto> {
-            return nts.uk.request.ajax(servicePath.findOtherSysAccByUserId, { userId: userId });
+        export function findOtherSysAccByEmployeeId(employeeId: string): JQueryPromise<model.OtherSysAccFinderDto> {
+            return nts.uk.request.ajax(servicePath.findOtherSysAccByEmployeeId, { employeeId: employeeId });
         }
         
-        export function removeOtherSysAccount(userId: string): JQueryPromise<any> {
-            return nts.uk.request.ajax(servicePath.removeOtherSysAccount, { userId: userId });
+        export function removeOtherSysAccount(employeeId: string): JQueryPromise<any> {
+            return nts.uk.request.ajax(servicePath.removeOtherSysAccount, { employeeId: employeeId });
         }
         
        export function saveOtherSysAccount(saveWindowAcc: model.SaveOtherSysAccountCommand): JQueryPromise<any> {
@@ -94,19 +94,19 @@ module nts.uk.com.view.cmm021.a {
                 winAcc3: WindowAccountDto;
                 winAcc4: WindowAccountDto;
                 winAcc5: WindowAccountDto;
-                userId: string;
+                employeeId: string;
             }           
             
             export class WindowAccountDto {
-                userId: string;
+                employeeId: string;
                 hostName: string;
                 userName: string;
                 no: number;
                 useAtr: number;
                 isChange: boolean;
                 
-                constructor (userId: string, hostName: string, userName: string, no: number, useAtr: number) {
-                    this.userId = userId;
+                constructor (employeeId: string, hostName: string, userName: string, no: number, useAtr: number) {
+                    this.employeeId = employeeId;
                     this.hostName = hostName;
                     this.userName = userName;
                     this.no = no;
@@ -116,14 +116,14 @@ module nts.uk.com.view.cmm021.a {
             }
             
             export class OtherSysAccFinderDto{
-                userId: string;
+                employeeId: string;
                 companyCode: string;
                 userName: string;
                 useAtr: number;
                 isChange: boolean;
                 
-                constructor (userId: string, companyCode: string, userName: string, useAtr: number) {
-                    this.userId = userId;
+                constructor (employeeId: string, companyCode: string, userName: string, useAtr: number) {
+                    this.employeeId = employeeId;
                     this.companyCode = companyCode;
                     this.userName = userName;
                     this.useAtr = useAtr;
@@ -132,7 +132,7 @@ module nts.uk.com.view.cmm021.a {
             }
             
             export class SaveOtherSysAccountCommand {
-                userId: string;
+                employeeId: string;
                 companyCode: string;
                 userName: string;
                 useAtr: number;

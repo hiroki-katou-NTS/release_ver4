@@ -8,6 +8,6 @@ import javax.persistence.metamodel.StaticMetamodel;
 @StaticMetamodel(SgwmtOtherSysAccPK.class)
 public class SgwmtOtherSysAccPK_ { 
 	
-    public static volatile SingularAttribute<SgwmtOtherSysAccPK, String> userId;
-
+	public static volatile SingularAttribute<SgwmtOtherSysAccPK, String> cid;
+    public static volatile SingularAttribute<SgwmtOtherSysAccPK, String> employeeId;
 }
