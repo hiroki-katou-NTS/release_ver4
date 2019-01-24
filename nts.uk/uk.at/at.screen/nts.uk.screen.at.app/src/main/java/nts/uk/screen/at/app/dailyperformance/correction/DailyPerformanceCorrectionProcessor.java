@@ -815,7 +815,7 @@ public class DailyPerformanceCorrectionProcessor {
 							if(item.getId() == 31 && data.getEmployeeId().equals(share.getInitClock().getEmployeeId()) && data.getDate().equals(share.getInitClock().getDateSpr())){
 								//value = share.getInitClock().getGoOut() != null ?  share.getInitClock().getGoOut() : "";
 								if (!share.getInitClock().getGoOut().equals("")) {
-									if (value.equals("") || (Integer.parseInt(value) != Integer.parseInt(share.getInitClock().getGoOut())))
+									//if (value.equals("") || (Integer.parseInt(value) != Integer.parseInt(share.getInitClock().getGoOut())))
 										change31 = true;
 								}
 								ChangeSPR changeSPR31 = processSPR(data.getEmployeeId(), data.getDate(), share, change31, false);
@@ -823,7 +823,7 @@ public class DailyPerformanceCorrectionProcessor {
 								screenDto.setChangeSPR(changeSPR31.setRow31(data.getId()));
 							}else if(item.getId() == 34 && data.getEmployeeId().equals(share.getInitClock().getEmployeeId()) && data.getDate().equals(share.getInitClock().getDateSpr())){
 								if (!share.getInitClock().getLiveTime().equals("")) {
-									if (value.equals("") || (Integer.parseInt(value) != Integer.parseInt(share.getInitClock().getLiveTime())))
+									//if (value.equals("") || (Integer.parseInt(value) != Integer.parseInt(share.getInitClock().getLiveTime())))
 										change34 = true;
 								}
 								ChangeSPR changeSPR34 = processSPR(data.getEmployeeId(), data.getDate(), share, false, change34);
