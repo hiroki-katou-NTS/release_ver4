@@ -997,6 +997,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 							else {
 								personalPerformanceDate.actualValue.add(new ActualValue(item.getAttendanceDisplay(), "", ActualValue.STRING));
 							}
+							dailyWorkplaceData.hasData = true;
 						});
 					});
 				}
@@ -1202,6 +1203,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 				else {
 					detailedDate.actualValue.add(new ActualValue(item.getAttendanceDisplay(), "", ActualValue.STRING));
 				}
+				workplaceData.setHasData(true);
 			});
 		});
 		return employeeData;
@@ -1217,6 +1219,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		// Recursive
 		workplaceData.getLstChildWorkplaceReportData().values().forEach(x -> {
 			calculateTotalExportByEmployee(x, lstAttendanceId);
+			workplaceData.setHasData(workplaceData.isHasData() || x.isHasData());
 		});
 		// Workplace
 		workplaceData.workplaceTotal = new WorkplaceTotal();
@@ -1355,6 +1358,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		// Recursive
 		workplaceData.getLstChildWorkplaceData().values().forEach(x -> {
 			calculateTotalExportByDate(x);
+			workplaceData.setHasData(workplaceData.isHasData() || x.isHasData());
 		});
 		// Workplace
 		workplaceData.workplaceTotal = new WorkplaceTotal();
@@ -2291,23 +2295,25 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		}
 		
 		Map<String, WorkplaceReportData> mapChildWorkplace = workplaceReportData.getLstChildWorkplaceReportData();
+		int childHasDataCount = (int)mapChildWorkplace.values().stream().map(child -> child.isHasData()).filter(child -> child).count();
 		if (((condition.getPageBreakIndicator() == PageBreakIndicator.WORKPLACE || 
 				condition.getPageBreakIndicator() == PageBreakIndicator.EMPLOYEE) &&
-				mapChildWorkplace.size() > 0 ) && workplaceReportData.level != 0) { /* Trick to not page break between detailed data and total data */
+				mapChildWorkplace.size() > 0 ) && workplaceReportData.level != 0 && childHasDataCount > 0) { /* Trick to not page break between detailed data and total data */
 			Range lastRowRange = cells.createRange(currentRow - 1, 0, 1, 39);
         	lastRowRange.setOutlineBorder(BorderType.BOTTOM_BORDER, CellBorderType.THIN, Color.getBlack());
         	rowPageTracker.resetRemainingRow();
 			sheet.getHorizontalPageBreaks().add(currentRow);
 		}
-		// Process to child workplace
+		// Process to child workplace9
 		Iterator<Map.Entry<String, WorkplaceReportData>> it = mapChildWorkplace.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<String, WorkplaceReportData> entry = it.next();
-			currentRow = writeDetailedWorkSchedule(currentRow, templateSheetCollection, sheet, entry.getValue(), dataRowCount, condition, rowPageTracker);
+			WorkplaceReportData childWorkplaceReportData = entry.getValue();
+			currentRow = writeDetailedWorkSchedule(currentRow, templateSheetCollection, sheet, childWorkplaceReportData, dataRowCount, condition, rowPageTracker);
 			
 			// Page break by workplace
 			if ((condition.getPageBreakIndicator() == PageBreakIndicator.WORKPLACE || condition.getPageBreakIndicator() == PageBreakIndicator.EMPLOYEE)
-					&& it.hasNext()/* && entry.getValue().getParent().level != 0*/) {
+					&& it.hasNext() && childWorkplaceReportData.isHasData()) {
 				rowPageTracker.resetRemainingRow();
 				sheet.getHorizontalPageBreaks().add(currentRow);
 			}
@@ -2323,7 +2329,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			
 			int level = workplaceReportData.getLevel();
 			
-			if (findWorkplaceHigherEnabledLevel(workplaceReportData, totalHierarchyOption) <= level) {
+			if (findWorkplaceHigherEnabledLevel(workplaceReportData, totalHierarchyOption) <= level && workplaceReportData.isHasData()) {
 				String tagStr;
 				
 				WorkplaceReportData parentWorkplace = workplaceReportData.getParent();
@@ -2466,6 +2472,9 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			rowPageTracker.useOneRowAndCheckResetRemainingRow(sheet, currentRow);
 			//dateRange.setOutlineBorder(BorderType.TOP_BORDER, CellBorderType.THIN, Color.getBlack());
 			
+			DailyWorkplaceData rootWorkplace = dailyReportData.getLstWorkplaceData();
+			if (!rootWorkplace.isHasData()) continue; // Skip to next day when none of workplace has data
+			
 			// B3_1
 			Cell dateTagCell = cells.get(currentRow, 0);
 			DateTimeFormatter jpFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd (E)", Locale.JAPAN);
@@ -2478,7 +2487,6 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			
 			currentRow++;
 			
-			DailyWorkplaceData rootWorkplace = dailyReportData.getLstWorkplaceData();
 			currentRow = writeDailyDetailedPerformanceDataOnWorkplace(currentRow, sheet, templateSheetCollection, rootWorkplace, dataRowCount, condition, rowPageTracker);
 		
 			if (iteratorWorkplaceData.hasNext()) {
@@ -2537,7 +2545,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		boolean colorWhite = true; // true = white, false = light blue, start with white row
 		
 		List<DailyPersonalPerformanceData> employeeReportData = rootWorkplace.getLstDailyPersonalData();
-		if (employeeReportData != null && !employeeReportData.isEmpty()) {
+		if (employeeReportData != null && !employeeReportData.isEmpty() && rootWorkplace.isHasData()) {
 			rowPageTracker.useOneRowAndCheckResetRemainingRow(sheet, currentRow);
 			// B4_1
 			Cell workplaceTagCell = cells.get(currentRow, 0);
@@ -2694,6 +2702,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			workplaceTotalCellTag.setValue(WorkScheOutputConstants.WORKPLACE_TOTAL);
 			
 			// B6_2
+			if (rootWorkplace.hasData)
 			currentRow = writeWorkplaceTotal(currentRow, rootWorkplace, sheet, dataRowCount, true);
 		}
 		
@@ -2701,9 +2710,10 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 
 		
 		Map<String, DailyWorkplaceData> mapChildWorkplace = rootWorkplace.getLstChildWorkplaceData();
+		int childHasDataCount = (int) mapChildWorkplace.values().stream().map(child -> child.isHasData()).filter(child -> child).count();
 		if (((condition.getPageBreakIndicator() == PageBreakIndicator.WORKPLACE || 
 				condition.getPageBreakIndicator() == PageBreakIndicator.EMPLOYEE) &&
-				mapChildWorkplace.size() > 0) && rootWorkplace.level != 0) {
+				mapChildWorkplace.size() > 0) && rootWorkplace.level != 0 && childHasDataCount>0 && rootWorkplace.isHasData()) {
 			Range lastRowRange = cells.createRange(currentRow - 1, 0, 1, 39);
         	lastRowRange.setOutlineBorder(BorderType.BOTTOM_BORDER, CellBorderType.THIN, Color.getBlack());
         	rowPageTracker.resetRemainingRow();
@@ -2712,16 +2722,18 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		// Child workplace
 		for (Map.Entry<String, DailyWorkplaceData> entry: mapChildWorkplace.entrySet()) {
 			// Page break by workplace
+			DailyWorkplaceData childWorkplaceData = entry.getValue();
+			//&& childWorkplaceData.is
 			if ((condition.getPageBreakIndicator() == PageBreakIndicator.WORKPLACE || 
-					condition.getPageBreakIndicator() == PageBreakIndicator.EMPLOYEE) && !firstWorkplace) {
+					condition.getPageBreakIndicator() == PageBreakIndicator.EMPLOYEE) && !firstWorkplace  && childWorkplaceData.isHasData()) {
 				Range lastRowRange = cells.createRange(currentRow - 1, 0, 1, 39);
 	        	lastRowRange.setOutlineBorder(BorderType.BOTTOM_BORDER, CellBorderType.THIN, Color.getBlack());
 	        	rowPageTracker.resetRemainingRow();
 				sheet.getHorizontalPageBreaks().add(currentRow);
 			}
-			firstWorkplace = false;
+			firstWorkplace = firstWorkplace && !childWorkplaceData.isHasData();
 			
-			currentRow = writeDailyDetailedPerformanceDataOnWorkplace(currentRow, sheet, templateSheetCollection, entry.getValue(), dataRowCount, condition, rowPageTracker);
+			currentRow = writeDailyDetailedPerformanceDataOnWorkplace(currentRow, sheet, templateSheetCollection, childWorkplaceData, dataRowCount, condition, rowPageTracker);
 		}
 		
 		// Workplace hierarchy total
