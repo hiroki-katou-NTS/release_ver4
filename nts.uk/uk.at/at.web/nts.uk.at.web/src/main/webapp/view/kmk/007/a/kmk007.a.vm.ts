@@ -274,7 +274,7 @@ module nts.uk.at.view.kmk007.a.viewmodel {
             }else{
                 self.lstHdWrk(self.copyData());
             }
-            
+            self.closeAtr(no);
         }
         copyData(){
             let self = this;
@@ -440,6 +440,9 @@ module nts.uk.at.view.kmk007.a.viewmodel {
             }
             service.addWorkType(self.isCreated(), command).done(function() {
                 self.isCreated(false);
+                if(self.currentWorkType().oneDayCls() == 13){
+                   self.currentWorkType().oneDay().closeAtr(self.closeAtr());
+                }
                 self.getWorkType().done(function() {
                     self.currentCode(workType.workTypeCode());
                 });
