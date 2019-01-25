@@ -332,9 +332,23 @@ public abstract class LoginBaseCommandHandler<T> extends CommandHandlerWithResul
 		manager.loggedInAsEmployee(user.getUserId(), em.getPersonalId(), user.getContractCode(), em.getCompanyId(),
 				companyCode, em.getEmployeeId(), em.getEmployeeCode());
 	}
+    /**
+    * CCG007-C.セッション生成
+    * @param user ドメインモデル「ユーザ」
+    * @param em 社員
+    * @param companyCode 会社コード
+    */
+   public void initSessionC(UserImportNew user, EmployeeImport em, String companyCode) {
+       //「ログインユーザコンテキスト」を新規作成、セッションに格納
+       manager.loggedInAsEmployee(user.getUserId(), em.getPersonalId(), user.getContractCode(), em.getCompanyId(),
+               companyCode, em.getEmployeeId(), em.getEmployeeCode());
+       //権限（ロール）情報を取得、設定する 
+       this.setRoleId(user.getUserId());
+   }
+   /**
 
 	/**
-	 * Inits the session.
+	 * CCG007-B.セッション生成
 	 *
 	 * @param user
 	 *            the user
