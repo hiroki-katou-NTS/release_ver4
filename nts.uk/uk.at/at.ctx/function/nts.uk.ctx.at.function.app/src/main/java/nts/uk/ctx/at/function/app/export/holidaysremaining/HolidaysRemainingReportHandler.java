@@ -204,11 +204,22 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 				hdManagement.getListItemsOutput().getPause().setPauseItem(false);
 			}
 			List<Integer> checkItem = hdManagement.getListItemsOutput().getSpecialHoliday();
-			boolean listSpecialHoliday = varVacaCtr.getListSpecialHoliday().containsAll(checkItem);
+			boolean listSpecialHoliday = true;
+			for (Integer item : checkItem) {
+				for(SpecialHoliday list : varVacaCtr.getListSpecialHoliday()){
+				if(list.getSpecialHolidayCode().v().equals(item)){
+					listSpecialHoliday = true;
+					break;
+				}
+				else listSpecialHoliday= false;
+				}
+				
+			}
 			
-			if(!listSpecialHoliday == true){
+			if(!listSpecialHoliday){
 				hdManagement.getListItemsOutput().setSpecialHoliday(new ArrayList<>());
 			}
+			
 			if (!hdManagement.getListItemsOutput().getAnnualHoliday().isYearlyHoliday() 
 					&& !hdManagement.getListItemsOutput().getYearlyReserved().isYearlyReserved()
 					&& !hdManagement.getListItemsOutput().getSubstituteHoliday().isOutputItemSubstitute()
