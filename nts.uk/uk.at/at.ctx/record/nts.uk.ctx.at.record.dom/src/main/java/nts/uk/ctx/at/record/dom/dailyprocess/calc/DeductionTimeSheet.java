@@ -481,8 +481,8 @@ public class DeductionTimeSheet {
 		}
 		// スケを参照
 		else {
-			return breakTimeOfDailyList.stream().filter(tc -> tc.getBreakType().isReferSchedule()).findFirst().get()
-					.changeAllTimeSheetToDeductionItem();
+			BreakTimeOfDailyPerformance test = breakTimeOfDailyList.stream().filter(tc -> tc.getBreakType().isReferSchedule()).findFirst().get();
+			return test.changeAllTimeSheetToDeductionItem();
 		}
 	}
 
