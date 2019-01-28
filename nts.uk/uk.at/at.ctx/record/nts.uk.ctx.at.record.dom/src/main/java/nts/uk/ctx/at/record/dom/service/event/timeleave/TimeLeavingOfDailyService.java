@@ -12,8 +12,10 @@ import javax.inject.Inject;
 
 import lombok.val;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.ReflectWorkInforDomainService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.converter.DailyRecordToAttendanceItemConverter;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
@@ -26,6 +28,9 @@ import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
 import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
 import nts.uk.ctx.at.record.dom.worktime.primitivevalue.WorkTimes;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
+import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemIdContainer;
+import nts.uk.ctx.at.shared.dom.attendance.util.enu.DailyDomainGroup;
+import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkAtr;
@@ -53,6 +58,9 @@ public class TimeLeavingOfDailyService {
 
 	@Inject
 	private EditStateOfDailyPerformanceRepository editStateRepo;
+	
+	@Inject
+	private AttendanceItemConvertFactory convertFactory;
 
 	public EventHandleResult<IntegrationOfDaily> correct(String companyId, IntegrationOfDaily working,
 			Optional<WorkingConditionItem> cachedWorkCondition, Optional<WorkType> cachedWorkType, boolean directToDB) {
@@ -70,6 +78,15 @@ public class TimeLeavingOfDailyService {
 		TimeLeavingOfDailyPerformance tlo = getWithDefaul(working.getAttendanceLeave(),
 				() -> getTimeLeaveDefault(wi.getEmployeeId(), wi.getYmd()));
 
+		DailyRecordToAttendanceItemConverter converter = convertFactory.createDailyConverter()
+																		.employeeId(wi.getEmployeeId())
+																		.workingDate(wi.getYmd())
+																		.withTimeLeaving(tlo);
+		
+		List<Integer> canbeCorrectedItem = AttendanceItemIdContainer.getItemIdByDailyDomains(DailyDomainGroup.ATTENDACE_LEAVE);
+		List<ItemValue> beforeCorrectItemValues = converter.convert(canbeCorrectedItem);
+		TimeLeavingOfDailyPerformance correctedTlo = null;
+		
 		/** 取得したドメインモデル「勤務種類．一日の勤務．勤務区分」をチェックする */
 		WorkAtr dayAtr = isWokingDay(wt);
 		if (dayAtr != null) {
@@ -79,30 +96,40 @@ public class TimeLeavingOfDailyService {
 				if (tlo != null) {
 					tl = mergeWithEditStates(working.getEditState(), wi.getEmployeeId(), wi.getYmd(), tlo, wts);
 				}
-				TimeLeavingOfDailyPerformance  updated = updateTimeLeave(companyId, wi, tl, 
-																			getWorkConditionOrDefault(cachedWorkCondition, wi.getEmployeeId(), wi.getYmd()), 
-																			wi.getEmployeeId(), wi.getYmd());
-				return updated(working, updated, directToDB);
+				correctedTlo = updateTimeLeave(companyId, wi, tl, 
+												getWorkConditionOrDefault(cachedWorkCondition, wi.getEmployeeId(), wi.getYmd()), 
+												wi.getEmployeeId(), wi.getYmd());
 			//} else {
 			//	return EventHandleResult.onFail();
 			//}
-		}
-
-		/** どちらか一方が 年休 or 特別休暇 の場合 */
-		if (wt.getDailyWork().isAnnualOrSpecialHoliday()) {
-			//return EventHandleResult.withResult(EventHandleAction.ABORT, working);
-			return updated(working, deleteTimeLeave(true, tlo), directToDB);
+		} else {
+			/** どちらか一方が 年休 or 特別休暇 の場合 */
+			if (wt.getDailyWork().isAnnualOrSpecialHoliday()) {
+				//return EventHandleResult.withResult(EventHandleAction.ABORT, working);
+				correctedTlo = deleteTimeLeave(true, tlo);
+			} else {
+				correctedTlo = deleteTimeLeave(false, tlo);
+			}
 		}
 		
-		return updated(working, deleteTimeLeave(false, tlo), directToDB);
+		return updated(working, converter, canbeCorrectedItem, correctedTlo, directToDB, beforeCorrectItemValues);
 	}
 
-	private EventHandleResult<IntegrationOfDaily> updated(IntegrationOfDaily working,
-			TimeLeavingOfDailyPerformance corrected, boolean directToDB) {
+	private EventHandleResult<IntegrationOfDaily> updated(IntegrationOfDaily working, 
+			DailyRecordToAttendanceItemConverter converter, List<Integer> canbeCorrectedItem,
+			TimeLeavingOfDailyPerformance corrected, boolean directToDB, List<ItemValue> beforeCorrectItemValues) {
 		working.setAttendanceLeave(Optional.ofNullable(corrected));
+
+		List<ItemValue> afterCorrectItemValues = converter.withTimeLeaving(corrected).convert(canbeCorrectedItem);
+		
+		afterCorrectItemValues.removeAll(beforeCorrectItemValues);
+		List<Integer> correctedItemIds = afterCorrectItemValues.stream().map(iv -> iv.getItemId()).collect(Collectors.toList());
+		working.getEditState().removeIf(es -> correctedItemIds.contains(es.getAttendanceItemId()));
 		
 		if(directToDB){
 			this.timeLeaveRepo.update(working.getAttendanceLeave().orElse(null));
+			this.editStateRepo.deleteByListItemId(working.getWorkInformation().getEmployeeId(), 
+													working.getWorkInformation().getYmd(), correctedItemIds);
 		}
 		
 		return EventHandleResult.withResult(EventHandleAction.UPDATE, working);
