@@ -36,9 +36,9 @@ public class MonthlyDayoffRemainData extends AggregateRoot{
 	private GeneralDate startDate;
 	/**	終了年月日 */
 	private GeneralDate endDate;
-	/**	発生 */
+	/**	発生  1*/
 	private DayOffDayAndTimes occurrenceDayTimes;	
-	/**	使用 */
+	/**	使用 2 */
 	private DayOffDayAndTimes useDayTimes;	
 	/**	残日数, 残時間 */
 	private DayOffRemainDayAndTimes remainingDayTimes;
