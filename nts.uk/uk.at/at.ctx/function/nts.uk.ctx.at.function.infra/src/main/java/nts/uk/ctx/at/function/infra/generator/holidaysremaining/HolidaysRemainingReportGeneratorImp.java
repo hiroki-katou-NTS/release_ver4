@@ -721,17 +721,17 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 		if (isOutputItemSubstitute) {
 			// I1_4 代休_残数_日数
 			cells.get(firstRow, 7).setValue(currentHolidayLeft.getMonthEndRemain());
+			cells.get(firstRow, 8).setValue(currentHolidayLeft.getMonthEndRemain());
 			if (currentHolidayLeft.getMonthEndRemain() < 0) {
 				setForegroundRed(cells.get(firstRow, 7));
 			}
 		}
 		if (isRepresentSubstitute) {
-				// I1_5 代休_未消化_日数
-			cells.get(firstRow, 8).setValue(currentHolidayLeft.getMonthEndRemain());
-				if (currentHolidayLeft.getMonthExtinction() != null
-						&& currentHolidayLeft.getMonthExtinction().intValue() > 0) {
-					setForegroundRed(cells.get(firstRow, 8));
-				}
+			// I1_5 代休_未消化_日数
+			if (currentHolidayLeft.getMonthExtinction() != null
+					&& currentHolidayLeft.getMonthExtinction().intValue() > 0) {
+				setForegroundRed(cells.get(firstRow, 8));
+			}
 		}
 
 		// Set background
@@ -901,13 +901,13 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 			if (isPauseItem) {
 				// J1_4 振休_残数
 				cells.get(firstRow, 7).setValue(currentHolidayRemainLeft.getMonthEndRemain());
+				cells.get(firstRow, 8).setValue(currentHolidayRemainLeft.getMonthExtinction());
 				if (currentHolidayRemainLeft.getMonthEndRemain() < 0) {
 					setForegroundRed(cells.get(firstRow, 7));
 				}
 			}
 			if (isUndigestedPause) {
 				// J1_5 振休_未消化
-				cells.get(firstRow, 8).setValue(currentHolidayRemainLeft.getMonthExtinction());
 				if (currentHolidayRemainLeft.getMonthExtinction() != null
 						&& currentHolidayRemainLeft.getMonthExtinction().intValue() > 0) {
 					setForegroundRed(cells.get(firstRow, 8));
