@@ -14,6 +14,8 @@ import java.util.stream.IntStream;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.app.command.dailyperform.month.UpdateMonthDailyParam;
@@ -43,6 +45,7 @@ import nts.uk.screen.at.app.dailymodify.query.DailyModifyResult;
 import nts.uk.screen.at.app.dailyperformance.correction.checkdata.dto.FlexShortageRCDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPItemValue;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ResultReturnDCUpdateData;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.TypeError;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
@@ -373,13 +376,13 @@ public class ValidatorDataDailyRes {
 	/**
 	 * 計算後エラーチェック
 	 */
-	public Map<Integer, List<DPItemValue>> errorCheckDivergence(List<IntegrationOfDaily> dailyResults,
+	public Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> errorCheckDivergence(List<IntegrationOfDaily> dailyResults,
 			List<IntegrationOfMonthly> monthlyResults) {
-		Map<Integer, List<DPItemValue>> resultError = new HashMap<>();
+		Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> resultError = new HashMap<>();
 
 		// 乖離エラーのチェック
-		List<DPItemValue> divergenceErrors = new ArrayList<>();
 		for (IntegrationOfDaily d : dailyResults) {
+			List<DPItemValue> divergenceErrors = new ArrayList<>();
 			List<EmployeeDailyPerError> employeeError = d.getEmployeeError();
 			for (EmployeeDailyPerError err : employeeError) {
 				if (err != null && err.getErrorAlarmWorkRecordCode().v().startsWith("D") && err.getErrorAlarmMessage().isPresent() && err.getErrorAlarmMessage().get().v().equals(TextResource.localize("Msg_1298"))) {
@@ -392,9 +395,12 @@ public class ValidatorDataDailyRes {
 					}
 				}
 			}
+			if (!divergenceErrors.isEmpty()) {
+				 Map<Integer, List<DPItemValue>> temMap = new HashMap<>();
+				temMap.put(TypeError.DEVIATION_REASON.value, divergenceErrors);
+				resultError.put(Pair.of(d.getWorkInformation().getEmployeeId(), d.getWorkInformation().getYmd()), new ResultReturnDCUpdateData(d.getWorkInformation().getEmployeeId(), d.getWorkInformation().getYmd(), temMap));
+			}
 		}
-		if (!divergenceErrors.isEmpty())
-			resultError.put(TypeError.DEVIATION_REASON.value, divergenceErrors);
 		return resultError;
 	}
 

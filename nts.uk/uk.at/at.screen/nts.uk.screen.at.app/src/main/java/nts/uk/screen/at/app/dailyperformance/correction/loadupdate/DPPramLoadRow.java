@@ -1,7 +1,10 @@
 package nts.uk.screen.at.app.dailyperformance.correction.loadupdate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,5 +53,9 @@ public class DPPramLoadRow {
 	private boolean showLock;
 	
 	private List<CellEdit> cellEdits;
+	
+	private List<Pair<String, GeneralDate>> lstSidDateDomainError = new ArrayList<>();
+		
+	private boolean errorAllSidDate = false;
 	
 }

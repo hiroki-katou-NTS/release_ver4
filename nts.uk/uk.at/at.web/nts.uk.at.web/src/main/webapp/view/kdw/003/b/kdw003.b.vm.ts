@@ -9,6 +9,8 @@ module nts.uk.at.view.kdw003.b {
             listExportDto: KnockoutObservableArray<ExportDto> = ko.observableArray([]);
             textApp: KnockoutObservable<any> = ko.observable(nts.uk.resource.getText('KDW003_63'));
             isDisableExportCSV: KnockoutObservable<boolean> = ko.observable(false);
+            messageAlert: KnockoutObservable<any> =  ko.observable(nts.uk.resource.getText('KDW003_63'));
+            showMessage: KnockoutObservable<any> = ko.observable(false);
 
             constructor() {
 
@@ -26,61 +28,97 @@ module nts.uk.at.view.kdw003.b {
                 nts.uk.ui.windows.close();
             }
 
-            startPage(param, errorValidate): JQueryPromise<any> {
+            startPage(param, errorValidate, messageRefer): JQueryPromise<any> {
                 let self = this,
                     dfd = $.Deferred();
-                service.getErrorRefer(param).done((data) => {
-                    let arrErrorCode: string[] = [];
-                    let i: number = data.length;
-                    _.each(errorValidate, value => {
-                        data.push({ 
-                            id: i++, 
-                            date: value.date, 
-                            employeeCode: value.employeeCode, 
-                            employeeName: value.employeeName, 
-                            message: value.message, 
-                            itemName: value.itemName, 
-                            errorCode: "" });
+                if (!_.isEmpty(messageRefer)) {
+                    self.showMessage(true);
+                    self.messageAlert(nts.uk.resource.getMessage(messageRefer));
+                    let windowSize = nts.uk.ui.windows.getSelf();
+                    windowSize.$dialog.dialog('option', {
+                        width : 900,
+                        height : 530
                     });
+                    let data = [];
+                     let i: number = 0;
+                    _.each(errorValidate, value => {
+                        data.push({
+                            id: i++,
+                            date: value.date,
+                            employeeCode: value.employeeCode,
+                            employeeName: value.employeeName,
+                            message: value.message,
+                            itemName: value.itemName,
+                            errorCode: ""
+                        });
+                    });
+
                     let dataTemp = _.uniqWith(data, function(x, y) {
                         if (_.isEmpty(x.date)) return x.employeeCode === y.employeeCode && x.message === y.message;
                         else return false;
                     });
                     let arr: any[] = _.orderBy(dataTemp, ['employeeCode', 'date', 'errorCode'], ['asc', 'asc', 'asc']);
-
-                    _.each(data, (dt: any) => {
-                        arrErrorCode.push(dt.errorCode);
-                    });
-
-                    arrErrorCode = _.uniq(arrErrorCode);
-
-                    if (arrErrorCode.length != 0) {
-                        service.getErrAndAppTypeCd(arrErrorCode).done((data1) => {
-                            self.lstError(arr.map((d) => { 
-                                return new ErrorReferModel(d, data1.employeeIdLogin, !!data1.mapErrCdAppTypeCd[d.errorCode] ? data1.mapErrCdAppTypeCd[d.errorCode] : []); 
-                            }));
-                            self.listExportDto(arr.map((d) => { return new ExportDto(d); }));
-                            if (self.lstError().length == 0) self.isDisableExportCSV(true);
-
-                            self.loadGrid();
-
-                            dfd.resolve();
-                        }).fail(() => {
-                            dfd.reject();
+                    
+                    self.lstError(arr);
+                    self.listExportDto(arr.map((d) => { return new ExportDto(d); }));
+                    if (self.lstError().length == 0) self.isDisableExportCSV(true);
+                    self.loadGridSimple();
+                    dfd.resolve();
+                } else {
+                    self.showMessage(false);
+                    service.getErrorRefer(param).done((data) => {
+                        let arrErrorCode: string[] = [];
+                        let i: number = data.length;
+                        _.each(errorValidate, value => {
+                            data.push({ 
+                                id: i++, 
+                                date: value.date, 
+                                employeeCode: value.employeeCode, 
+                                employeeName: value.employeeName, 
+                                message: value.message, 
+                                itemName: value.itemName, 
+                                errorCode: "" });
                         });
-                    } else {
-                        if (self.lstError().length == 0) self.isDisableExportCSV(true);
-                        self.loadGrid();
-                        dfd.resolve();
-                    }
-
-                }).fail(() => {
-                    dfd.reject();
-                });
+                        let dataTemp = _.uniqWith(data, function(x, y) {
+                            if (_.isEmpty(x.date)) return x.employeeCode === y.employeeCode && x.message === y.message;
+                            else return false;
+                        });
+                        let arr: any[] = _.orderBy(dataTemp, ['employeeCode', 'date', 'errorCode'], ['asc', 'asc', 'asc']);
+    
+                        _.each(data, (dt: any) => {
+                            arrErrorCode.push(dt.errorCode);
+                        });
+    
+                        arrErrorCode = _.uniq(arrErrorCode);
+    
+                        if (arrErrorCode.length != 0) {
+                            service.getErrAndAppTypeCd(arrErrorCode).done((data1) => {
+                                self.lstError(arr.map((d) => { 
+                                    return new ErrorReferModel(d, data1.employeeIdLogin, !!data1.mapErrCdAppTypeCd[d.errorCode] ? data1.mapErrCdAppTypeCd[d.errorCode] : []); 
+                                }));
+                                self.listExportDto(arr.map((d) => { return new ExportDto(d); }));
+                                if (self.lstError().length == 0) self.isDisableExportCSV(true);
+    
+                                self.loadGridNormal();
+    
+                                dfd.resolve();
+                            }).fail(() => {
+                                dfd.reject();
+                            });
+                        } else {
+                            if (self.lstError().length == 0) self.isDisableExportCSV(true);
+                            self.loadGrid();
+                            dfd.resolve();
+                        }
+    
+                    }).fail(() => {
+                        dfd.reject();
+                    });
+                   }
                 return dfd.promise();
             }
 
-            loadGrid() {
+            loadGridSimple() {
                 let self = this;
 
                 $("#grid").igGrid({
@@ -93,18 +131,11 @@ module nts.uk.at.view.kdw003.b {
                     autoCommit: true,
                     columns: [
                         { key: "id", width: "130px", hidden: true, dataType: "number" },
-                        { key: "stateBtn", width: "130px", hidden: true, dataType: "string" },
                         { key: "employeeCode", width: "120px", headerText: getText('KDW003_32'), dataType: "string" },
                         { key: "employeeName", width: "150px", headerText: getText('KDW003_33'), dataType: "string" },
                         { key: "date", width: "130px", headerText: getText('KDW003_34'), dataType: "string" },
-                        { key: "errorCode", width: "50px", headerText: "コード", dataType: "string" },
                         { key: "message", width: "300px", headerText: getText('KDW003_36'), dataType: "string" },
-                        { key: "itemName", width: "170px", headerText: getText('KDW003_37'), dataType: "string" },
-                        { key: "submitedName", width: "170px", headerText: getText('KDW003_62'), dataType: "string" },
-                        {
-                            key: "application", width: "70px", headerText: getText('KDW003_63'), dataType: "string", unbound: true,
-                            template: "<input type= \"button\"  onclick = \"nts.uk.at.view.kdw003.b.viewmodel.redirectApplication(${id}) \" value= \" " + getText('KDW003_63') + " \" ${stateBtn} />"
-                        }
+                        { key: "itemName", width: "170px", headerText: getText('KDW003_37'), dataType: "string" }
                     ],
                     features: [
                         {
@@ -117,11 +148,8 @@ module nts.uk.at.view.kdw003.b {
                                 { columnKey: "employeeCode", readOnly: true },
                                 { columnKey: "employeeName", readOnly: true },
                                 { columnKey: "date", readOnly: true },
-                                { columnKey: "errorCode", readOnly: true },
                                 { columnKey: "message", readOnly: true },
-                                { columnKey: "itemName", readOnly: true },
-                                { columnKey: "submitedName", readOnly: true },
-                                { columnKey: "application", readOnly: true }
+                                { columnKey: "itemName", readOnly: true }
                             ]
                         },
                         {
@@ -139,8 +167,67 @@ module nts.uk.at.view.kdw003.b {
                     ]
                 });
             }
-        }
 
+         loadGridNormal(){
+                        let self = this;
+        
+                        $("#grid").igGrid({
+                            primaryKey: "id",
+                            height: 400,
+                            dataSource: self.lstError(),
+                            autoGenerateColumns: false,
+                            alternateRowStyles: false,
+                            dataSourceType: "json",
+                            autoCommit: true,
+                            columns: [
+                                { key: "id", width: "130px", hidden: true, dataType: "number" },
+                                { key: "stateBtn", width: "130px", hidden: true, dataType: "string" },
+                                { key: "employeeCode", width: "120px", headerText: getText('KDW003_32'), dataType: "string" },
+                                { key: "employeeName", width: "150px", headerText: getText('KDW003_33'), dataType: "string" },
+                                { key: "date", width: "130px", headerText: getText('KDW003_34'), dataType: "string" },
+                                { key: "errorCode", width: "50px", headerText: "コード", dataType: "string" },
+                                { key: "message", width: "300px", headerText: getText('KDW003_36'), dataType: "string" },
+                                { key: "itemName", width: "170px", headerText: getText('KDW003_37'), dataType: "string" },
+                                { key: "submitedName", width: "170px", headerText: getText('KDW003_62'), dataType: "string" },
+                                {
+                                    key: "application", width: "70px", headerText: getText('KDW003_63'), dataType: "string", unbound: true,
+                                    template: "<input type= \"button\"  onclick = \"nts.uk.at.view.kdw003.b.viewmodel.redirectApplication(${id}) \" value= \" " + getText('KDW003_63') + " \" ${stateBtn} />"
+                                }
+                            ],
+                            features: [
+                                {
+                                    name: "Updating",
+                                    showDoneCancelButtons: false,
+                                    enableAddRow: false,
+                                    enableDeleteRow: false,
+                                    editMode: 'cell',
+                                    columnSettings: [
+                                        { columnKey: "employeeCode", readOnly: true },
+                                        { columnKey: "employeeName", readOnly: true },
+                                        { columnKey: "date", readOnly: true },
+                                        { columnKey: "errorCode", readOnly: true },
+                                        { columnKey: "message", readOnly: true },
+                                        { columnKey: "itemName", readOnly: true },
+                                        { columnKey: "submitedName", readOnly: true },
+                                        { columnKey: "application", readOnly: true }
+                                    ]
+                                },
+                                {
+                                    name: "Selection",
+                                    mode: "row",
+                                    multipleSelection: false,
+                                    touchDragSelect: false,
+                                    multipleCellSelectOnClick: false
+                                },
+                                {
+                                    name: 'Paging',
+                                    type: "local",
+                                    pageSize: 10
+                                }
+                            ]
+                        });
+                    }
+        }
         export function redirectApplication(id) {
             let dataSource = $("#grid").igGrid("option", "dataSource");
             let rowSelect = _.find(dataSource, (value) => {

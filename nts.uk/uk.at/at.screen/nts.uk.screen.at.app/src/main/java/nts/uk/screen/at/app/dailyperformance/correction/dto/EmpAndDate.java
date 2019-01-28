@@ -9,6 +9,6 @@ import nts.arc.time.GeneralDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmpAndDate {
-	private String employeeId;
-	private GeneralDate date;
+	public String employeeId;
+	public GeneralDate date;
 }

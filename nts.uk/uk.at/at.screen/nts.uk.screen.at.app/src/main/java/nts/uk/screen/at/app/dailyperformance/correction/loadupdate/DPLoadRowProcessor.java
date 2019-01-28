@@ -172,7 +172,7 @@ public class DPLoadRowProcessor {
 		//List<DailyRecordDto> dailyRow = resultPair.getRight();
 		Map<Pair<String, GeneralDate>, DailyRecordDto> mapDtoChange = resultPair.getRight().stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x));
 		result.setDomainOld(param.getDailys().stream().map(x ->{
-			return mapDtoChange.getOrDefault(Pair.of(x.getEmployeeId(), x.getDate()), x);
+			return param.getLstSidDateDomainError().contains(Pair.of(x.getEmployeeId(), x.getDate())) ? mapDtoChange.getOrDefault(Pair.of(x.getEmployeeId(), x.getDate()), x) : x;
 		}).collect(Collectors.toList()));
 		
 		Map<Pair<String, GeneralDate>, DailyRecordDto> mapDtoOld = param.getDailys().stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x));
