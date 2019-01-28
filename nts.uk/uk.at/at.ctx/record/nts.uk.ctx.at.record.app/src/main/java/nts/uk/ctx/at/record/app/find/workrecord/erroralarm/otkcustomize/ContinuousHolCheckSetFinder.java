@@ -52,7 +52,7 @@ public class ContinuousHolCheckSetFinder {
 	 */
 	public List<OtkWorkTypeDto> findAllWorkType() {
 		return this.workTypeReposity.findByCompanyId(AppContexts.user().companyId()).stream()
-				.map(e -> new OtkWorkTypeDto(e.getWorkTypeCode().v(), e.getName().v())).collect(Collectors.toList());
+				.map(e -> new OtkWorkTypeDto(e.getWorkTypeCode().v(), e.getName().v(), e.getDeprecate().value)).collect(Collectors.toList());
 	}
 
 }
