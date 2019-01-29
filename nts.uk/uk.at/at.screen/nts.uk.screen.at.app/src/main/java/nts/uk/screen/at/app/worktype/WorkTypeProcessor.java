@@ -91,7 +91,12 @@ public class WorkTypeProcessor {
 	 * @param companyId
 	 * @return
 	 */
-	public WorkTypeOut findWorkTypeAll(){
+    public List<WorkTypeDto> findWorkTypeAll(){
+		String companyId = AppContexts.user().companyId();
+        return this.workTypeQueryRepository.findAllWorkType(companyId);
+	}
+	
+	public WorkTypeOut findWorkTypeAllKMK007(){
 		String companyId = AppContexts.user().companyId();
 		List<WorkTypeDto> lstWorkType =  workTypeQueryRepository.findAllWorkType(companyId);
 		//会社IDから使用する休業枠（休職を除く）を取得する - RQ546
@@ -100,7 +105,6 @@ public class WorkTypeProcessor {
 				.collect(Collectors.toList());
 		return new WorkTypeOut(lstWorkType, rq546);
 	}
-	
 	/**
 	 * Find work type by work type attribute
 	 * @param workTypeAtr 分類
