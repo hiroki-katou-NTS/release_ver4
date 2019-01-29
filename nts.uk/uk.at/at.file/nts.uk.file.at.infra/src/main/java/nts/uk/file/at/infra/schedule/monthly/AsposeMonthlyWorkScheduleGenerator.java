@@ -287,7 +287,7 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 			currentRow+=nSize*2;
 			
 			// Back up start row
-//			int startRow = currentRow;
+			int startRow = currentRow;
 			
 			// Create row page tracker
 			RowPageTracker rowPageTracker = new RowPageTracker();
@@ -300,6 +300,10 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 				MonthlyReportData dailyReportData = reportData.getMonthlyReportData();
 				currentRow = writeDetailedMonthlySchedule(currentRow, sheetCollection, sheet, dailyReportData, nSize, condition, rowPageTracker);
 			}
+			
+			// Set default row height 0.45cm
+			Range dataRange = sheet.getCells().createRange(startRow, 0, currentRow, DATA_COLUMN_INDEX[5]);
+			dataRange.setRowHeight(13);
 
 			//hide footer
 			hideFooter(sheet);
