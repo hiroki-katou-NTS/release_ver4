@@ -86,7 +86,7 @@ public class ViewContext extends UIComponentBase {
 			}
 		});
 		
-		//writeOperationSetting(builder);
+		writeOperationSetting(builder);
 
 		if(builder.length() > 0){
 			builder.append(", ");
