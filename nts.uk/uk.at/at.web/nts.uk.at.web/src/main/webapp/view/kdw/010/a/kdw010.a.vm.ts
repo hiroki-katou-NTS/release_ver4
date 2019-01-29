@@ -120,18 +120,12 @@ module nts.uk.at.view.kdw010.a {
                 _.forEach(codes, function(value) {
                     var workType = dataWorkType.filter(e => e.code == value)[0];
                     if (!_.isEmpty(workType)) {
-                        if (workType.deprecate == 1) {
-                             workType = {
-                                code: value,
-                                name: value + ' マスタ未登録'
-                            };
-                        }
                         listWorkTypeResult.push(workType);
                     }
                     else {
                       var workTypeMaster =  {
                             code : value,
-                            name : value + ' マスタ未登録'
+                            name : value + 'マスタ未登録'
                       };  
                       listWorkTypeResult.push(workTypeMaster);  
                     }
