@@ -46,7 +46,7 @@
 				<span
 					class="action-bar"> <!-- BEGIN A2_1 & A2_2 -->
 					<button tabindex="1" class="proceed"
-						data-bind="click: saveAccount, enable: enable_Save">#{i18n.getText('CMM021_5')}</button>
+						data-bind="click: saveAccount, enable: $root.errors.isEmpty">#{i18n.getText('CMM021_5')}</button>
 					<button tabindex="2" class="danger"
 						data-bind="click: deleteAccount, enable: enable_Delete">#{i18n.getText('CMM021_6')}</button>
 					<!-- END A2_1 & A2_2 -->

@@ -10,11 +10,18 @@ package nts.uk.ctx.sys.gateway.dom.singlesignon;
 public interface OtherSysAccountSetMemento {
 	
 	/**
-	 * Sets the user id.
+	 * Sets the company id.
 	 *
-	 * @param userId the new user id
+	 * @param companyId the new company id
 	 */
-	void setUserId(String userId);
+	void setCompanyId(String companyId);
+	
+	/**
+	 * Sets the employee id.
+	 *
+	 * @param employeeId the new employee id
+	 */
+	void setEmployeeId(String employeeId);
 	
 	/**
 	 * Sets the company code.

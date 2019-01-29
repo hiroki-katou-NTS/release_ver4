@@ -9,13 +9,19 @@ package nts.uk.ctx.sys.gateway.dom.singlesignon;
  */
 public interface OtherSysAccountGetMemento {
 
-	
+
 	/**
-	 * Gets the user id.
+	 * Company id.
 	 *
-	 * @return the user id
+	 * @return the string
 	 */
-	String getUserId();
+	String getCompanyId();
+	/**
+	 * Gets the employee id.
+	 *
+	 * @return the employee id
+	 */
+	String getEmployeeId();
 	
 	/**
 	 * Gets the company code.

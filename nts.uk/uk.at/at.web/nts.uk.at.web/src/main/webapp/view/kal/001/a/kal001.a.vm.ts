@@ -100,13 +100,14 @@ module nts.uk.at.view.kal001.a.model {
                 isMultiSelect: self.isMultiSelect(),
                 listType: ListType.EMPLOYEE,
                 employeeInputList: self.employeeList,
-                selectType: SelectType.SELECT_BY_SELECTED_CODE,
+                selectType: SelectType.SELECT_ALL,  
                 selectedCode: self.multiSelectedCode,
                 isDialog: self.isDialog(),
                 isShowNoSelectRow: self.isShowNoSelectRow(),
                 alreadySettingList: self.alreadySettingList,
                 isShowWorkPlaceName: self.isShowWorkPlaceName(),
-                isShowSelectAllButton: self.isShowSelectAllButton(),
+                isShowSelectAllButton: self.isShowSelectAllButton(), 
+                isSelectAllAfterReload: true,
                 maxRows  : 22
             };
             self.empCount = ko.observable(0);

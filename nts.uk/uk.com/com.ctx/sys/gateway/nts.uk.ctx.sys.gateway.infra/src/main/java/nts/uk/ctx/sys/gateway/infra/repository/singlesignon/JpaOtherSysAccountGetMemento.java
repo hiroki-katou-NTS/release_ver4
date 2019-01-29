@@ -35,8 +35,8 @@ public class JpaOtherSysAccountGetMemento implements OtherSysAccountGetMemento {
 	 * @see nts.uk.ctx.sys.gateway.dom.singlesignon.OtherSysAccountGetMemento#getUserId()
 	 */
 	@Override
-	public String getUserId() {
-		return this.typedValue.getSgwmtOtherSysAccPK().getUserId();
+	public String getEmployeeId() {
+		return this.typedValue.getSgwmtOtherSysAccPK().getEmployeeId();
 	}
 
 	/* (non-Javadoc)
@@ -61,6 +61,11 @@ public class JpaOtherSysAccountGetMemento implements OtherSysAccountGetMemento {
 	@Override
 	public UseAtr getUseAtr() {
 		return UseAtr.valueOf(this.typedValue.getUseAtr());
+	}
+
+	@Override
+	public String getCompanyId() {
+		return this.typedValue.getSgwmtOtherSysAccPK().getCid();
 	}
 
 }

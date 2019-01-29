@@ -16,4 +16,8 @@ public class DCCalcTimeParam {
 	 private List<DailyRecordDto> dailyEdits;
 	
      private List<DPItemValue> itemEdits;
+     
+     private Boolean changeSpr31;
+     
+     private Boolean changeSpr34;
 }

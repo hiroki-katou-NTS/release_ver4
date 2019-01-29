@@ -24,14 +24,13 @@ public class JpaWindowAccountInfoSetMemento implements WindowsAccountInfoSetMeme
 	 *
 	 * @param typedValue the typed value
 	 */
-	public JpaWindowAccountInfoSetMemento(String userId, SgwmtWindowAcc typedValue) {
+	public JpaWindowAccountInfoSetMemento(String companyId, String employeeId, SgwmtWindowAcc typedValue) {
 		this.typedValue = typedValue;
-		
 		if (this.typedValue.getSgwmtWindowAccPK() == null) {
 			this.typedValue.setSgwmtWindowAccPK(new SgwmtWindowAccPK());
 		}
-		
-		this.typedValue.getSgwmtWindowAccPK().setUserId(userId);
+		this.typedValue.getSgwmtWindowAccPK().setEmployeeId(employeeId);
+		this.typedValue.getSgwmtWindowAccPK().setCid(companyId);
 	}
 
 	/* (non-Javadoc)

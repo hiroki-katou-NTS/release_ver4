@@ -277,4 +277,15 @@ public class UserAdapterImpl implements UserAdapter {
 		     return dto;
 		    }).collect(Collectors.toList());
 	}
+
+	@Override
+	public Optional<UserImportNew> findUserByEmployeeId(String sid) {
+		Optional<UserExport> user = this.userPublisher.getBySid(sid);
+
+		// Check found or not!
+		if (user.isPresent()) {
+			return this.covertToImportDomainNew(user);
+		}
+		return Optional.empty();
+	}
 }

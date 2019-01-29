@@ -16,7 +16,7 @@ import nts.uk.ctx.sys.gateway.dom.singlesignon.UseAtr;
 public class RemoveWindowAccountCommand {
 	// ユーザID
 	/** The user id. */
-	private String userId;
+	private String employeeId;
 
 	// ホスト名
 	/** The hot name. */

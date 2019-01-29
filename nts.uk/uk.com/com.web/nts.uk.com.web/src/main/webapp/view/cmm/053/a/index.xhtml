@@ -87,7 +87,7 @@
 									data-bind="text: departmentName"></span>
 							</div>
 						</div>
-						<div class="div-line flex valign-center" data-bind="visible: hasAuthority()">
+						<div class="div-line flex valign-center" data-bind="if: $vm.displayDailyApprover">
 							<!--A2_9 日別の承認する人（就労先マネージャーなど）を入力してください。-->
 							<div id="A2_9" class="column-1" data-bind="ntsFormLabel: {constraint: 'EmployeeCode'}">#{i18n.getText('CMM053_13')}</div>
 							<!--A2_10 日別の承認する人のコード-->

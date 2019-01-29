@@ -17,6 +17,7 @@ import com.google.common.base.Strings;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.sys.assist.dom.category.TimeStore;
 import nts.uk.ctx.sys.assist.dom.categoryfieldmt.HistoryDiviSion;
 import nts.uk.ctx.sys.assist.dom.saveprotetion.SaveProtetion;
 import nts.uk.ctx.sys.assist.dom.saveprotetion.SaveProtetionRepository;
@@ -240,39 +241,39 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 			}
 
 			if (indexs.size() > 0) {
-				indexs.add(99);
 				query.append(" AND ( ");
 				boolean isFirstOrStatement = true;
-				for (int i = 0; i <= indexs.size(); i++) {
+				for (int i = 0; i < indexs.size(); i++) {
 					if (!isFirstOrStatement) {
 						query.append(" OR ");
 					}
 					isFirstOrStatement = false;
-					if ((i != (indexs.size() - 1)) && (i < indexs.size())) {
-						// Start Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
-							query.append(" (t.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
-						} else {
-							query.append(" (p.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
-						}
+					// Start Date
+					if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
+						query.append(" (t.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					} else {
+						query.append(" (p.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					}
 
-						query.append(" >= ?startDate ");
-						query.append(" AND ");
+					query.append(" >= ?startDate ");
+					query.append(" AND ");
 
-						// End Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
-							query.append(" t.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
-						} else {
-							query.append(" p.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
-						}
+					// End Date
+					if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
+						query.append(" t.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					} else {
+						query.append(" p.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					}
 
-						query.append(" <= ?endDate) ");
-					} else if (i == (indexs.size() - 1)) {
-						// fix bug #103051
+					query.append(" <= ?endDate) ");
+					
+					// fix bug #103051
+					if ((indexs.size() > 1) && (i == indexs.size() - 1)
+							&& (tableList.getRetentionPeriodCls() == TimeStore.DAILY)) {
 						// Start Date
 						if (columns.contains(fieldKeyQuerys[indexs.get(i - 2)])) {
 							query.append(" (t.");
@@ -341,7 +342,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 			query.toString();
 		}
 		List<Object[]> listTemp = new ArrayList<>();
-		if(!targetEmployeesSid.isEmpty()) {
+		if(!targetEmployeesSid.isEmpty() && query.toString().contains("?listTargetSid")) {
 			List<String> lSid = new ArrayList<>();
 			CollectionUtil.split(targetEmployeesSid, 1000, subIdList -> {
 				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ","\\', '"));

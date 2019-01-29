@@ -1062,7 +1062,7 @@ module nts.uk.com.view.ccg.share.ccg {
                     isMultipleUse: true,
                     listType: ListType.EMPLOYEE,
                     employeeInputList: self.employeeListTab3,
-                    selectType: SelectType.SELECT_BY_SELECTED_CODE,
+                    selectType: SelectType.SELECT_ALL,
                     selectedCode: self.selectedEmployeesTab3,
                     isDialog: true,
                     hasPadding: false,
@@ -1070,6 +1070,7 @@ module nts.uk.com.view.ccg.share.ccg {
                     isShowWorkPlaceName: true,
                     tabindex: self.ccg001Tabindex,
                     maxRows: maxRows,
+                    isSelectAllAfterReload: true,
                 }
 
                 // Show KCP005

@@ -19,37 +19,53 @@ public class SgwmtOtherSysAccPK implements Serializable {
 	//default serial version id, required for serializable classes.
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="USER_ID")
-	private String userId;
+	@Column(name="CID")
+	private String cid;
+	
+	@Column(name="SID")
+	private String employeeId;
 
 	public SgwmtOtherSysAccPK() {
 		super();
 	}	
-
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof SgwmtOtherSysAccPK)) {
-			return false;
-		}
-		SgwmtOtherSysAccPK castOther = (SgwmtOtherSysAccPK)other;
-		return 
-			this.userId.equals(castOther.userId);
+	
+	public SgwmtOtherSysAccPK(String cid, String employeeId) {
+		super();
+		this.cid = cid;
+		this.employeeId = employeeId;
 	}
 
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int hash = 17;
-		hash = hash * prime + this.userId.hashCode();
-		
-		return hash;
+		int result = 1;
+		result = prime * result + ((cid == null) ? 0 : cid.hashCode());
+		result = prime * result + ((employeeId == null) ? 0 : employeeId.hashCode());
+		return result;
 	}
 
 
-	public SgwmtOtherSysAccPK(String userId) {
-		super();
-		this.userId = userId;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SgwmtOtherSysAccPK other = (SgwmtOtherSysAccPK) obj;
+		if (cid == null) {
+			if (other.cid != null)
+				return false;
+		} else if (!cid.equals(other.cid))
+			return false;
+		if (employeeId == null) {
+			if (other.employeeId != null)
+				return false;
+		} else if (!employeeId.equals(other.employeeId))
+			return false;
+		return true;
 	}
 	
 	

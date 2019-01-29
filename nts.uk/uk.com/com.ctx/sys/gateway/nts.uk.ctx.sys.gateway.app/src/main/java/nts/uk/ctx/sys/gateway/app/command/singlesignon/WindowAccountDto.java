@@ -16,9 +16,9 @@ import nts.uk.ctx.sys.gateway.dom.singlesignon.WindowsAccountInfoGetMemento;
 @Setter
 public class WindowAccountDto implements WindowsAccountInfoGetMemento {
 
-	// ユーザID
-	/** The user id. */
-	private String userId;
+	// 社員ID
+	/** The employee id. */
+	private String employeeId;
 
 	// ホスト名
 	/** The host name. */
@@ -94,11 +94,11 @@ public class WindowAccountDto implements WindowsAccountInfoGetMemento {
 	}
 	
 	/**
-	 * Gets the user id.
+	 * Gets the employee id.
 	 *
-	 * @return the user id
+	 * @return the employee id
 	 */
-	public String getUserId() {
-		return this.userId;
+	public String getEmployeeId() {
+		return this.employeeId;
 	}
 }
