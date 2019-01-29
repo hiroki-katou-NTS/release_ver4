@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.breakorgoout.enums;
 
 import lombok.AllArgsConstructor;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.TimeSheetAtr;
+import nts.uk.ctx.at.shared.dom.worktime.common.FixedRestCalculateMethod;
 /**
  * 
  * @author nampt
@@ -42,6 +43,15 @@ public enum BreakType {
 			return this.isReferSchedule();
 			default:
 				throw new RuntimeException("unknown TimeSheet Atr");
+		}
+	}
+	
+	public static BreakType convertFromFixedRestCalculateMethod(FixedRestCalculateMethod calcMethod) {
+		if(calcMethod.isReferToMaster()) {
+			return REFER_WORK_TIME;
+		}
+		else {
+			return REFER_SCHEDULE;
 		}
 	}
 }
