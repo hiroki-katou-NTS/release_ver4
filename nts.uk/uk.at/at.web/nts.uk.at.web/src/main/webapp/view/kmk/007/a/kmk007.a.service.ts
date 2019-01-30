@@ -1,7 +1,7 @@
 module nts.uk.at.view.kmk007.a.service {
 
     var paths: any = {
-        findAll: "at/screen/worktype/findAll",
+        findAll: "at/screen/worktype/findAll-kmk007",
         find: "at/share/worktype/findById/{0}",
         addWorkType: "at/share/worktype/add",
         removeWorkType: "at/share/worktype/remove",
