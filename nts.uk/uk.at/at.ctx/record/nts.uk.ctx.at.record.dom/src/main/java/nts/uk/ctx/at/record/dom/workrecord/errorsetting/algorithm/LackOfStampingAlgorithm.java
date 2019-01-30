@@ -108,6 +108,12 @@ public class LackOfStampingAlgorithm {
 					employeeDailyPerError = new EmployeeDailyPerError(companyID, employeeID, processingDate,
 							new ErrorAlarmWorkRecordCode("S001"), attendanceItemIDList);
 				}
+			}else {
+				List<Integer> attendanceItemIDList = new ArrayList<>();
+				attendanceItemIDList.add(31);
+				attendanceItemIDList.add(34);
+				employeeDailyPerError = new EmployeeDailyPerError(companyID, employeeID, processingDate,
+						new ErrorAlarmWorkRecordCode("S001"), attendanceItemIDList);
 			}
 		}
 
