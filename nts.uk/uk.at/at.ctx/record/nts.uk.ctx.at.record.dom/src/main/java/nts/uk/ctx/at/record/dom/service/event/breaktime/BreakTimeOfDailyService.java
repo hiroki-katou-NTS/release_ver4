@@ -28,6 +28,9 @@ import nts.uk.ctx.at.record.dom.service.event.common.EventHandleResult.EventHand
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
+import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemIdContainer;
+import nts.uk.ctx.at.shared.dom.attendance.util.ItemConst;
+import nts.uk.ctx.at.shared.dom.attendance.util.enu.DailyDomainGroup;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
@@ -52,6 +55,9 @@ public class BreakTimeOfDailyService {
 
 	@Inject
 	private EditStateOfDailyPerformanceRepository editStateRepo;
+	
+	@Inject
+	private AttendanceItemConvertFactory convertFactory;
 
 	public EventHandleResult<IntegrationOfDaily> correct(String companyId, IntegrationOfDaily working,
 			Optional<WorkType> cachedWorkType, boolean directToDB) {
@@ -66,40 +72,63 @@ public class BreakTimeOfDailyService {
 		if (wt == null) {
 			return EventHandleResult.withResult(EventHandleAction.ABORT, working);
 		}
+		List<Integer> canBeUpdatedItemIds = AttendanceItemIdContainer.getItemIdByDailyDomains(DailyDomainGroup.BREAK_TIME, (type, path) -> {
+				return path.contains(ItemConst.E_WORK_REF);
+		});
 
 		if (!wt.isWokingDay()) {
-			return deleteBreakTime(working, directToDB);
+			return deleteBreakTime(working, directToDB, canBeUpdatedItemIds);
 		}
 
-		BreakTimeOfDailyPerformance breakTime = getUpdateBreakTime(working.getAttendanceLeave(),
-				working.getBreakTime().stream().filter(b -> b.getBreakType() == BreakType.REFER_WORK_TIME).findFirst(),
-				wi, companyId, working.getEditState());
+		BreakTimeOfDailyPerformance breakTimeRecord = getWithDefaul(
+							working.getBreakTime().stream().filter(b -> b.getBreakType() == BreakType.REFER_WORK_TIME).findFirst(),
+							() -> getBreakTimeDefault(wi.getEmployeeId(), wi.getYmd()));
+		
+		DailyRecordToAttendanceItemConverter converter = convertFactory.createDailyConverter()
+				.employeeId(wi.getEmployeeId())
+				.workingDate(wi.getYmd())
+				.withBreakTime(breakTimeRecord);
+
+		List<ItemValue> beforeCorrectItemValues = converter.convert(canBeUpdatedItemIds);
+
+		BreakTimeOfDailyPerformance breakTime = getUpdateBreakTime(working.getAttendanceLeave(), breakTimeRecord, wi, companyId, working.getEditState());
 		if (breakTime != null) {
 			/** 「日別実績の休憩時間帯」を更新する */
 			working.getBreakTime().removeIf(b -> b.getBreakType() == BreakType.REFER_WORK_TIME);
 			working.getBreakTime().add(breakTime);
+			
+			List<ItemValue> afterCorrectItemValues = converter.withBreakTime(breakTime).convert(canBeUpdatedItemIds);
+			
+			afterCorrectItemValues.removeAll(beforeCorrectItemValues);
+			List<Integer> correctedItemIds = afterCorrectItemValues.stream().map(iv -> iv.getItemId()).collect(Collectors.toList());
+			working.getEditState().removeIf(es -> correctedItemIds.contains(es.getAttendanceItemId()));
+			
 			if (directToDB) {
 				this.breakTimeRepo.update(breakTime);
+				this.editStateRepo.deleteByListItemId(working.getWorkInformation().getEmployeeId(), working.getWorkInformation().getYmd(), correctedItemIds);
 			}
 			return EventHandleResult.withResult(EventHandleAction.UPDATE, working);
 		}
 
 		/** 「日別実績の休憩時間帯」を削除する */
-		return deleteBreakTime(working, directToDB);
+		return deleteBreakTime(working, directToDB, canBeUpdatedItemIds);
 	}
 
-	private EventHandleResult<IntegrationOfDaily> deleteBreakTime(IntegrationOfDaily working, boolean directToDB) {
+	private EventHandleResult<IntegrationOfDaily> deleteBreakTime(IntegrationOfDaily working, boolean directToDB, List<Integer> canBeUpdatedItemIds) {
 		working.getBreakTime().removeIf(c -> c.getBreakType() == BreakType.REFER_WORK_TIME);
+		working.getEditState().removeIf(es -> canBeUpdatedItemIds.contains(es.getAttendanceItemId()));
+		
 		/** 「日別実績の休憩時間帯」を削除する */
 		if (directToDB) {
 			this.breakTimeRepo.delete(working.getWorkInformation().getEmployeeId(), working.getWorkInformation().getYmd());
+			this.editStateRepo.deleteByListItemId(working.getWorkInformation().getEmployeeId(), working.getWorkInformation().getYmd(), canBeUpdatedItemIds);
 		}
 		return EventHandleResult.withResult(EventHandleAction.DELETE, working);
 	}
 
 	/** 「補正した休憩時間帯」を取得する */
 	private BreakTimeOfDailyPerformance getUpdateBreakTime(Optional<TimeLeavingOfDailyPerformance> timeLeaveO,
-			Optional<BreakTimeOfDailyPerformance> cachedBreakTime, WorkInfoOfDailyPerformance wi, String companyId,
+			BreakTimeOfDailyPerformance breakTimeRecord, WorkInfoOfDailyPerformance wi, String companyId,
 			List<EditStateOfDailyPerformance> editState) {
 		TimeLeavingOfDailyPerformance timeLeave = getWithDefaul(timeLeaveO,
 				() -> getTimeLeaveDefault(wi.getEmployeeId(), wi.getYmd()));
@@ -107,14 +136,12 @@ public class BreakTimeOfDailyService {
 		BreakTimeOfDailyPerformance breakTime = reflectBreakTimeService.reflectBreakTime(companyId, wi.getEmployeeId(),
 				wi.getYmd(), null, timeLeave, wi);
 
-		BreakTimeOfDailyPerformance breakTimeRecord = getWithDefaul(cachedBreakTime,
-				() -> getBreakTimeDefault(wi.getEmployeeId(), wi.getYmd()));
-
 		if (breakTimeRecord != null) {
 			return mergeWithEditStates(wi.getEmployeeId(), wi.getYmd(), editState, breakTime, breakTimeRecord);
 		}
 		return breakTime;
 	}
+	
 
 	/** 取得したドメインモデル「編集状態」を見て、マージする */
 	private BreakTimeOfDailyPerformance mergeWithEditStates(String empId, GeneralDate targetDate,

@@ -18,4 +18,6 @@ public interface FixedCheckItemAdapter {
 		
 		public List<ValueExtractAlarm> checkingData(String workplaceID,String employeeID,GeneralDate startDate,GeneralDate endDate);
 		public List<ValueExtractAlarm> checkAdminUnverified(String workplaceID,String employeeID,DatePeriod datePeriod);
+		
+		public List<ValueExtractAlarm> checkContinuousVacation(String employeeID,DatePeriod datePeriod);
 }

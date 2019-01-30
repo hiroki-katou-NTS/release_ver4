@@ -730,14 +730,14 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             //                            objectName["A31"] = "" + self.convertMinute(self.shareObject().initClock.goOut);
                             //                            $("#dpGrid").ntsGrid("updateRow", "_" + data.changeSPR.rowId31, objectName);
                             //$("#dpGrid").mGrid("updateCell", "_" + data.changeSPR.rowId31, "A31", self.convertMinute(self.shareObject().initClock.goOut));
-                            self.updateCellSpr("_" + data.changeSPR.rowId31, "A31", self.convertMinute(self.shareObject().initClock.goOut));
+                            self.updateCellSpr("_" + data.changeSPR.rowId31, "A31", self.convertMinute(self.shareObject().initClock.goOut), self.shareObject().initClock.canEdit, false);
                             sprStamp.change31 = true;
                         }
 
                         if (data.changeSPR.change34) {
                             //let objectName = {};
                             //objectName["A34"] = "" + self.convertMinute(self.shareObject().initClock.liveTime);
-                            self.updateCellSpr("_" + data.changeSPR.rowId34, "A34", self.convertMinute(self.shareObject().initClock.liveTime));
+                            self.updateCellSpr("_" + data.changeSPR.rowId34, "A34", self.convertMinute(self.shareObject().initClock.liveTime), false, self.shareObject().initClock.canEdit);
                             //$("#dpGrid").ntsGrid("updateRow", "_" + data.changeSPR.rowId34, objectName);
                             sprStamp.change34 = true;
                         }
@@ -766,7 +766,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         //let objectName = {};
                         //objectName["A31"] = "" + self.convertMinute(self.shareObject().initClock.goOut);
                         //$("#dpGrid").ntsGrid("updateRow", "_" + data.changeSPR.rowId31, objectName);
-                        self.updateCellSpr("_" + data.changeSPR.rowId31, "A31", self.convertMinute(self.shareObject().initClock.goOut));
+                        self.updateCellSpr("_" + data.changeSPR.rowId31, "A31", self.convertMinute(self.shareObject().initClock.goOut), self.shareObject().initClock.canEdit, false);
                         sprStamp.change31 = true;
                     }
 
@@ -774,7 +774,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         //let objectName = {};
                         //objectName["A34"] = "" + self.convertMinute(self.shareObject().initClock.liveTime);
                         //$("#dpGrid").ntsGrid("updateRow", "_" + data.changeSPR.rowId34, objectName);
-                        self.updateCellSpr("_" + data.changeSPR.rowId34, "A34", self.convertMinute(self.shareObject().initClock.liveTime));
+                        self.updateCellSpr("_" + data.changeSPR.rowId34, "A34", self.convertMinute(self.shareObject().initClock.liveTime), false, self.shareObject().initClock.canEdit);
                         sprStamp.change34 = true;
                     }
                     if ((data.changeSPR.change31 || data.changeSPR.change34) && self.shareObject().initClock.canEdit) {
@@ -785,13 +785,13 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             }
         }
 
-        updateCellSpr(rowId: any, item: any, value: any) {
+        updateCellSpr(rowId: any, item: any, value: any, changeSpr31 ?: boolean, changeSpr34 ?: boolean) {
             let self = this;
             let dfd = $.Deferred();
             nts.uk.ui.block.invisible();
             nts.uk.ui.block.grayout();
             $("#dpGrid").mGrid("updateCell", rowId, item, value, false, true);
-            self.inputProcess(rowId, item, value).done(value => {
+            self.inputProcess(rowId, item, value, changeSpr31, changeSpr34).done(value => {
                 _.each(value.cellEdits, itemResult => {
                     $("#dpGrid").mGrid("updateCell", itemResult.id, itemResult.item, itemResult.value, true, true);
                 })
@@ -1044,7 +1044,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             }
 
             let checkDailyChange = (dataChangeProcess.length > 0 || dataCheckSign.length > 0 || dataCheckApproval.length > 0) && checkDataCare;
-            if (checkDailyChange || (self.valueUpdateMonth != null && self.valueUpdateMonth.items) || self.flagCalculation) {
+            if (checkDailyChange || (self.valueUpdateMonth != null && self.valueUpdateMonth.items) || self.flagCalculation || !_.isEmpty(sprStampSourceInfo)) {
                 self.lstErrorFlex = [];
                 service.addAndUpdate(dataParent).done((dataAfter) => {
                     // alert("done");
@@ -3690,7 +3690,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             return dfd.promise();
         }
 
-        inputProcess(rowId, columnKey, value) {
+        inputProcess(rowId, columnKey, value, changeSpr31 ?: boolean, changeSpr34 ?: boolean) {
             let dfd = $.Deferred(),
                 keyId: any,
                 valueError: any,
@@ -3774,7 +3774,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
 
                     let param = {
                         //dailyEdits: __viewContext.vm.lstDomainEdit,
-                        itemEdits: dataChageRow
+                        itemEdits: dataChageRow,
+                        changeSpr31: changeSpr31,
+                        changeSpr34: changeSpr34
                     };
                     service.calcTime(param).done((value) => {
                         //__viewContext.vm.lstDomainEdit = value.dailyEdits;

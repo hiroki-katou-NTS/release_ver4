@@ -575,7 +575,8 @@ public class DailyAggregationProcessService {
 		List<ValueExtractAlarm> listValueExtractAlarm = new ArrayList<>(); 
 		
 		//get data by dailyAlarmCondition
-		List<FixedConWorkRecordAdapterDto> listFixed =  fixedConWorkRecordAdapter.getAllFixedConWorkRecordByID(dailyAlarmCondition.getDailyAlarmConID());
+		List<FixedConWorkRecordAdapterDto> listFixed =  fixedConWorkRecordAdapter.getAllFixedConWorkRecordByID(dailyAlarmCondition.getDailyAlarmConID())
+				.stream().sorted((x,y) -> x.getFixConWorkRecordNo() - y.getFixConWorkRecordNo()).collect(Collectors.toList());
 		for(int i = 0;i < listFixed.size();i++) {
 			if(listFixed.get(i).isUseAtr()) {
 				FixedConWorkRecordAdapterDto fixedData = listFixed.get(i);
@@ -635,6 +636,16 @@ public class DailyAggregationProcessService {
 							tmp.setComment(Optional.ofNullable(fixedData.getMessage()));
 						}
 						listValueExtractAlarm.addAll(listCheckAdminUnverified);
+					}
+					break;
+				case 5:
+					List<ValueExtractAlarm> listCheckVacation = fixedCheckItemAdapter.checkContinuousVacation(employee.getId(), new DatePeriod(period.getStartDate(),  period.getEndDate()));
+					
+					if (!listCheckVacation.isEmpty()) {
+						for (ValueExtractAlarm tmp : listCheckVacation) {
+							tmp.setComment(Optional.ofNullable(fixedData.getMessage()));
+						}
+						listValueExtractAlarm.addAll(listCheckVacation);
 					}
 					break;
 				default:

@@ -75,6 +75,12 @@ public class FixedCheckItemAcFinder implements FixedCheckItemAdapter {
 		return fixedCheckItemPub.checkAdminUnverified(workplaceID, employeeID, datePeriod )
 				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
 	}
+
+	@Override
+	public List<ValueExtractAlarm> checkContinuousVacation(String employeeID, DatePeriod datePeriod) {
+		return fixedCheckItemPub.checkContinuousVacation(employeeID, datePeriod)
+				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
+	}
 	
 
 }

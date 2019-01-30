@@ -51,7 +51,7 @@ public class HolidayWorkReflectProcessImpl implements HolidayWorkReflectProcess{
 		//INPUT．予定と実績を同じに変更する区分をチェックする
 		//INPUT．就業時間帯コードに値があるかチェックする
 		if(scheAndRecordSameChangeFlg == ScheAndRecordSameChangeFlg.DO_NOT_CHANGE_AUTO
-				|| workTimeCode.isEmpty()) {
+				|| workTimeCode == null || workTimeCode.isEmpty()) {
 			return false;
 		}
 		//流動勤務かどうかの判断処理

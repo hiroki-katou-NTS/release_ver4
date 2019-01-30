@@ -82,10 +82,10 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 		builderString.append("SELECT e");
 		builderString.append(" FROM CmmmtAgent e");
 		builderString.append(" WHERE e.cmmmtAgentPK.companyId = :companyId"); 
-		builderString.append(" AND e.agentSid1 = :employeeId");
+		builderString.append(" AND (e.agentSid1 = :employeeId");
 		builderString.append(" OR e.agentSid2 = :employeeId");
 		builderString.append(" OR e.agentSid3 = :employeeId");
-		builderString.append(" OR e.agentSid4 = :employeeId");
+		builderString.append(" OR e.agentSid4 = :employeeId)");
 		builderString.append(" AND e.startDate <= :startDate");
 		builderString.append(" AND e.endDate >= :endDate");
 		SELECT_AGENT_ALL_DATE = builderString.toString();

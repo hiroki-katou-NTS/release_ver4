@@ -2281,6 +2281,15 @@ public class AttendanceItemIdContainer implements ItemConst {
 		}).flatMap(List::stream).collect(Collectors.toList());
 	}
 	
+	public static List<Integer> getItemIdByDailyDomains(DailyDomainGroup domain, 
+			BiFunction<DailyDomainGroup, String, Boolean> customCondition){
+		
+		return DAY_ITEM_ID_CONTAINER.entrySet().stream()
+									.filter(en -> en.getValue().indexOf(domain.name) == 0)
+									.filter(en -> customCondition.apply(domain, en.getValue()))
+									.map(en -> en.getKey()).collect(Collectors.toList());
+	}
+	
 	public static List<Integer> getItemIdByMonthlyDomains(MonthlyDomainGroup... domains){
 		return Arrays.stream(domains).map(e -> {
 			return MONTHLY_ITEM_ID_CONTAINER.entrySet().stream()

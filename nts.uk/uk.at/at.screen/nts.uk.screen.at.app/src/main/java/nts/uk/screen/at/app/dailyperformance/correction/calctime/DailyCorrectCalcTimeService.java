@@ -16,6 +16,7 @@ import nts.uk.ctx.at.record.app.command.dailyperform.correctevent.EventCorrectRe
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
 import nts.uk.ctx.at.record.app.find.dailyperform.editstate.EditStateOfDailyPerformanceDto;
 import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
+import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
@@ -47,7 +48,7 @@ public class DailyCorrectCalcTimeService {
 	private ValidatorDataDailyRes validatorDataDaily;
 	
 
-	public DCCalcTime calcTime(List<DailyRecordDto> dailyEdits, List<DPItemValue> itemEdits) {
+	public DCCalcTime calcTime(List<DailyRecordDto> dailyEdits, List<DPItemValue> itemEdits, Boolean changeSpr31, Boolean changeSpr34) {
 		
 	    DCCalcTime calcTime = new DCCalcTime();
         
@@ -56,6 +57,12 @@ public class DailyCorrectCalcTimeService {
 		
 		DailyRecordDto dtoEdit = dailyEdits.stream()
 				.filter(x -> equalEmpAndDate(x.getEmployeeId(), x.getDate(), itemEditCalc)).findFirst().orElse(null);
+		if((changeSpr31 != null || changeSpr34 != null) && dtoEdit.getTimeLeaving().isPresent() && !dtoEdit.getTimeLeaving().get().getWorkAndLeave().isEmpty()) {
+				dtoEdit.getTimeLeaving().get().getWorkAndLeave().stream().filter(x -> x.getNo() == 1).forEach(x -> {
+					if(changeSpr31 != null && changeSpr31.booleanValue() && x.getWorking() != null) x.getWorking().getTime().setStampSourceInfo(StampSourceInfo.SPR.value);
+					if(changeSpr34 != null && changeSpr34.booleanValue() && x.getLeave() != null) x.getLeave().getTime().setStampSourceInfo(StampSourceInfo.SPR.value);
+				});
+		}
 
 		val itemValues = itemEdits.stream().map(x -> new ItemValue(x.getValue(), x.getValueType() == null ? ValueType.UNKNOWN : ValueType.valueOf(x.getValueType()),
 				x.getLayoutCode(), x.getItemId())).collect(Collectors.toList());

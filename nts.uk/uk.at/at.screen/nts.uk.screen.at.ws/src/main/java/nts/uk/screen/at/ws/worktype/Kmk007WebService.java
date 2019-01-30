@@ -100,10 +100,14 @@ public class Kmk007WebService {
 	 */
 	@POST
 	@Path("findAll")
-	public WorkTypeOut findAll(){
+    public List<WorkTypeDto> findAll(){
 		return workTypeProcessor.findWorkTypeAll();
 	}
-	
+	@POST
+	@Path("findAll-kmk007")
+	public WorkTypeOut findAllKMK007(){
+		return workTypeProcessor.findWorkTypeAllKMK007();
+	}
 	/**
 	 * Find work type by 分類.
 	 *
