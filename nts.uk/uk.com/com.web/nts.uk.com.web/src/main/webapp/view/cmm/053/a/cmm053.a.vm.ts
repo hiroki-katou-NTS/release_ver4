@@ -195,6 +195,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         regSettingManager_click(data) {
             let self = this;
             $('.nts-input').trigger("validate");
+            _.delay(() => {
             if (!nts.uk.ui.errors.hasError()) {
                 let startDate = new Date(self.settingManager().startDate());
                 let closingStartDate = new Date(self.settingManager().closingStartDate());
@@ -255,7 +256,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                         }      
                     }
                 }
-            }
+            }},300);
         }
 
         /**
@@ -354,7 +355,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         getEmployeeByCode(employeeCode: any, approverType:number): JQueryPromise<any> {
             let self = this;
             var dfd = $.Deferred();
-            block.invisible();
+//            block.invisible();
             let paramFind = {
                 employeeCode: employeeCode,
                 hasAuthority: self.settingManager().hasAuthority(),
@@ -372,7 +373,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                         self.settingManager().dailyApproverId(result.employeeID);
                     }
                 }
-                block.clear();
+//                block.clear();
                 dfd.resolve();
             }).fail(error => {
                 if (approverType == APPROVER_TYPE.DEPARTMENT_APPROVER) {
@@ -382,7 +383,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                     self.settingManager().dailyApprovalName('');
                     $('#A2_10').ntsError('set', { messageId: error.messageId});
                 }
-                block.clear();
+//                block.clear();
                 dfd.reject();
             });
             return dfd.promise();
