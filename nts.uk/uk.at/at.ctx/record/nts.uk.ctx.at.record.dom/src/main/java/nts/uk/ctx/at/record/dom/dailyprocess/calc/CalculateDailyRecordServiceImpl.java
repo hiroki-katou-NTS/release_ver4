@@ -619,15 +619,18 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				useLstTimeZone = flexWorkSetOpt.get().getLstHalfDayWorkTimezone().stream().filter(tc -> tc.getAmpmAtr().equals(AmPmAtr.PM)).findFirst().get().getWorkTimezone().getLstOTTimezone();
 			}
 			
-			BreakType nowBreakType = BreakType.REFER_WORK_TIME;
-			if(flexWorkSetOpt.get().getOffdayWorkTime().getRestTimezone().isFixRestTime()) {
-				switch(flexWorkSetOpt.get().getRestSetting().getFlowRestSetting().getFlowFixedRestSetting().getCalculateMethod()) {
-				case REFER_MASTER:
-					break;
-				case REFER_SCHEDULE:
-					nowBreakType = BreakType.REFER_SCHEDULE;
-				default:
-					break;
+			BreakType nowBreakType = BreakType.REFER_SCHEDULE;
+			if(timeSheetAtr.isRecord()) {
+				if(flexWorkSetOpt.get().getOffdayWorkTime().getRestTimezone().isFixRestTime()) {
+					switch(flexWorkSetOpt.get().getRestSetting().getFlowRestSetting().getFlowFixedRestSetting().getCalculateMethod()) {
+					case REFER_MASTER:
+						nowBreakType = BreakType.REFER_WORK_TIME;
+						break;
+					case REFER_SCHEDULE:
+						nowBreakType = BreakType.REFER_SCHEDULE;
+					default:
+						break;
+					}
 				}
 			}
 			final BreakType flexBreakType = nowBreakType;
@@ -728,20 +731,23 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 				ootsukaFixedWorkSet = fixedWorkSetting.get().getCalculationSetting();
 				
-				BreakType nowBreakType = BreakType.convertFromFixedRestCalculateMethod(fixedWorkSetting.get().getFixedWorkRestSetting().getCalculateMethod());
+				BreakType nowBreakType = BreakType.REFER_SCHEDULE;
+				if(timeSheetAtr.isRecord()) {
+					nowBreakType = BreakType.convertFromFixedRestCalculateMethod(fixedWorkSetting.get().getFixedWorkRestSetting().getCalculateMethod());
+
+				}
+				final BreakType flexBreakType = nowBreakType;
 				if(!integrationOfDaily.getBreakTime().isEmpty()) {
 					Optional<BreakTimeOfDailyPerformance> breakTimeByBreakType = integrationOfDaily.getBreakTime().stream()
-																				.filter(tc -> tc.getBreakType() == nowBreakType)
-																				.findFirst();
+																		.filter(tc -> tc.getBreakType() == flexBreakType)
+																		.findFirst();
 					breakTimeByBreakType.ifPresent(tc -> breakTimeSheet.addAll(tc.getBreakTimeSheets()));
-					
+			
 					breakCount = breakTimeSheet.stream()
-											   .filter(tc -> (tc.getStartTime() != null && tc.getEndTime()!=null && tc.getEndTime().greaterThan(tc.getStartTime())))
-											   .collect(Collectors.toList())
-											   .size();
+									   .filter(tc -> (tc.getStartTime() != null && tc.getEndTime()!=null && tc.getEndTime().greaterThan(tc.getStartTime())))
+									   .collect(Collectors.toList())
+									   .size();
 				}
-
-				
 				
 				breakTimeOfDailyList.add(new BreakTimeOfDailyPerformance(employeeId, 
 																		 nowBreakType, 

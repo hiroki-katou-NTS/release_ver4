@@ -19,6 +19,13 @@ public enum TimeSheetAtr {
 		return SCHEDULE.equals(this);
 	}
 	
+	/**
+	 * 実績時間帯から呼び出されたか判定する
+	 * @return　実績時間帯である
+	 */
+	public boolean isRecord() {
+		return RECORD.equals(this);
+	}
 	
 	public BreakType decisionBreakTime() {
 		switch(this) {
