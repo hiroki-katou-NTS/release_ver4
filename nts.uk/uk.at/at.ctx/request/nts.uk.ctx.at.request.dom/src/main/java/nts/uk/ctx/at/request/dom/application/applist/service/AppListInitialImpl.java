@@ -334,6 +334,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 	public AppListOutPut getAppListByApproval(AppListExtractCondition param, ApprovalListDisplaySetting displaySet) {
 		String companyId = AppContexts.user().companyId();
 		String sID = AppContexts.user().employeeId();
+		GeneralDate sysDate = GeneralDate.today();
 //		GeneralDate baseDate = GeneralDate.today();
 		//ドメインモデル「承認機能設定」を取得する-(Lấy dữ liệu domain 承認機能設定) - wait hoi lai ben nhat
 		//comment code - EA2237
@@ -346,7 +347,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 		//申請一覧抽出条件.申請表示対象が「事前通知」または「検討指示」が指定
 		List<Application_New> lstApp = new ArrayList<>();
 			//ドメインモデル「代行者管理」を取得する-(Lấy dữ liệu domain 代行者管理) - wait request 244
-			List<AgentDataRequestPubImport> lstAgent = agentAdapter.lstAgentData(companyId, sID, param.getStartDate(), param.getEndDate());
+			List<AgentDataRequestPubImport> lstAgent = agentAdapter.lstAgentData(companyId, sID, sysDate, sysDate);
 			List<String> lstEmp = new ArrayList<>();
 			for (AgentDataRequestPubImport agent : lstAgent) {
 				lstEmp.add(agent.getEmployeeId());
