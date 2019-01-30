@@ -1,5 +1,5 @@
 /******************************************************************
- * Copyright (c) 2018 Nittsu System to present.                   *
+ * Copyright (c) 2017 Nittsu System to present.                   *
  * All right reserved.                                            *
  *****************************************************************/
 package nts.uk.file.at.infra.schedule.monthly;
@@ -92,6 +92,7 @@ import nts.uk.file.at.app.export.employee.jobtitle.EmployeeJobHistExport;
 import nts.uk.file.at.app.export.employee.jobtitle.JobTitleImportAdapter;
 import nts.uk.file.at.app.export.monthlyschedule.DetailedMonthlyPerformanceReportData;
 import nts.uk.file.at.app.export.monthlyschedule.MonthlyRecordValuesExport;
+import nts.uk.file.at.app.export.monthlyschedule.MonthlyReportConstant;
 import nts.uk.file.at.app.export.monthlyschedule.MonthlyWorkScheduleCondition;
 import nts.uk.file.at.app.export.monthlyschedule.MonthlyWorkScheduleGenerator;
 import nts.uk.file.at.app.export.monthlyschedule.MonthlyWorkScheduleQuery;
@@ -155,36 +156,39 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 	@Inject
 	private CompanyMonthlyItemService companyMonthlyItemService;
 	
+	/** The parallel. */
 	@Inject
 	private ManagedParallelWithContext parallel;
 
 	/** The Constant TEMPLATE_DATE. */
-	private static final String TEMPLATE_DATE= "report/KWR006_Date.xlsx";
+	private static final String TEMPLATE_DATE= MonthlyReportConstant.TEMPLATE_DATE;
 
 	/** The Constant TEMPLATE_EMPLOYEE. */
-	private static final String TEMPLATE_EMPLOYEE = "report/KWR006_Employee.xlsx";
+	private static final String TEMPLATE_EMPLOYEE = MonthlyReportConstant.TEMPLATE_EMPLOYEE;
 	
 	/** The Constant CHUNK_SIZE. */
-	private static final int CHUNK_SIZE = 16;
+	private static final int CHUNK_SIZE = MonthlyReportConstant.CHUNK_SIZE;
 
 	/** The Constant DATA_COLUMN_INDEX. */
-	private static final int[] DATA_COLUMN_INDEX = {3, 9, 11, 15, 17, 39};
+	private static final int[] DATA_COLUMN_INDEX = MonthlyReportConstant.DATA_COLUMN_INDEX;
 
 	/** The font family. */
-	private final String FONT_FAMILY = "ＭＳ ゴシック";
+	private final String FONT_FAMILY = MonthlyReportConstant.FONT_FAMILY;
 
 	/** The font size. */
-	private final double FONT_SIZE = 6.5;
+	private final double FONT_SIZE = MonthlyReportConstant.FONT_SIZE;
 	
 	/** The Constant DATA_PREFIX. */
-	private static final String DATA_PREFIX = "DATA_";
+	private static final String DATA_PREFIX = MonthlyReportConstant.DATA_PREFIX;
 	
 	/** The Constant DATA_PREFIX_NO_WORKPLACE. */
-	private static final String DATA_PREFIX_NO_WORKPLACE = "NOWPK_";
+	private static final String DATA_PREFIX_NO_WORKPLACE = MonthlyReportConstant.DATA_PREFIX_NO_WORKPLACE;
 	
-	private static final int CHUNK_SIZE_ERROR = 5;
+	/** The Constant CHUNK_SIZE_ERROR. */
+	private static final int CHUNK_SIZE_ERROR = MonthlyReportConstant.CHUNK_SIZE_ERROR;
 	
-	private static final int REMARK_CELL_WIDTH = 4;
+	/** The Constant REMARK_CELL_WIDTH. */
+	private static final int REMARK_CELL_WIDTH = MonthlyReportConstant.REMARK_CELL_WIDTH;
 
 	/*
 	 * (non-Javadoc)
@@ -1400,8 +1404,8 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 				if (condition.isShowWorkplace()) usedRow++;
 				if (condition.isShowPersonal())  usedRow++;
 				if (totalOutput.isDetails() && !employeeReportData.getLstDetailedMonthlyPerformance().isEmpty()) {
-					int countItem = employeeReportData.countItem();
-					usedRow += (countItem % CHUNK_SIZE) != 0 ? countItem / CHUNK_SIZE + 1 : countItem / CHUNK_SIZE;
+					usedRow += employeeReportData.countItem();
+//					usedRow += (countItem % CHUNK_SIZE) != 0 ? countItem / CHUNK_SIZE + 1 : countItem / CHUNK_SIZE;
 				}
 				if (rowPageTracker.checkRemainingRowSufficient(usedRow) <= 0) {
 					sheet.getHorizontalPageBreaks().add(currentRow);
