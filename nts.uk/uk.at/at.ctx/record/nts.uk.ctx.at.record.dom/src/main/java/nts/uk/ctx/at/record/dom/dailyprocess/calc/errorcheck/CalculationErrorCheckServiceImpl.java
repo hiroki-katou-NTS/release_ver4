@@ -150,9 +150,10 @@ public class CalculationErrorCheckServiceImpl implements CalculationErrorCheckSe
 	public List<EmployeeDailyPerError> systemErrorCheck(IntegrationOfDaily integrationOfDaily,ErrorAlarmWorkRecord errorItem, 
 			DailyRecordToAttendanceItemConverter attendanceItemConverter, ManagePerCompanySet master) {
 		Optional<SystemFixedErrorAlarm> fixedErrorAlarmCode = SystemFixedErrorAlarm.getEnumFromErrorCode(errorItem.getCode().toString());
-		if(!integrationOfDaily.getAttendanceLeave().isPresent() || !fixedErrorAlarmCode.isPresent())
+		//if(!integrationOfDaily.getAttendanceLeave().isPresent() || !fixedErrorAlarmCode.isPresent())
+		if(!fixedErrorAlarmCode.isPresent())
 			return Collections.emptyList();
-		
+
 		switch(fixedErrorAlarmCode.get()) {
 			//事前残業申請超過
 			case PRE_OVERTIME_APP_EXCESS:
