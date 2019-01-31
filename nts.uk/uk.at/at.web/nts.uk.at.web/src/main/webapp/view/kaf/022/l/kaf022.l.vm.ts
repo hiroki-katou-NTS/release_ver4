@@ -126,6 +126,8 @@ module nts.uk.at.view.kmf022.l.viewmodel {
                     let foundEmployment = _.find(self.workTypeList, function(item:any) { return wkType.workTypeCode === item.workTypeCode; });
                     if(!nts.uk.util.isNullOrUndefined(foundEmployment)){
                         wkType.workTypeName = foundEmployment.name
+                    } else {
+                        wkType.workTypeName = wkType.workTypeCode + "マスタ未登録";
                     }
                     return wkType;
                     });
