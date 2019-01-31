@@ -1,5 +1,5 @@
 /******************************************************************
- * Copyright (c) 2017 Nittsu System to present.                   *
+ * Copyright (c) 2018 Nittsu System to present.                   *
  * All right reserved.                                            *
  *****************************************************************/
 package nts.uk.ctx.at.record.app.find.optitem.calculation;
@@ -27,6 +27,9 @@ public class SelectedAttendanceItemDto implements SelectedAttendanceItemSetMemen
 
 	/** The operator text. */
 	private String operatorText;
+	
+	/** The attendance item display number. */
+	private Integer attendanceItemDisplayNumber;
 
 	/*
 	 * (non-Javadoc)
