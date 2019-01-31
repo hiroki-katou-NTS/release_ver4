@@ -103,6 +103,7 @@ module nts.uk.at.view.kmk002.c {
 
                 // set datasource for left table
                 self.leftItems(data);
+                self.sortLeftTable();
 
                 // set displayNumber for right table
                 param.itemSelection.attendanceItems.forEach(item => {
@@ -111,12 +112,13 @@ module nts.uk.at.view.kmk002.c {
                         item.attendanceItemDisplayNumber = vl.attendanceItemDisplayNumber;    
                     }
                 });
-
+                let sortedRightTable = _.sortBy(param.itemSelection.attendanceItems,item => item.attendanceItemDisplayNumber);
                 // Set param to view model.
                 self.fromDto(param);
 
                 // remove selected items from left table.
                 self.removeItemFromLeftTable(param.itemSelection.attendanceItems);
+                self.rightItems(sortedRightTable);
 
             }
 
