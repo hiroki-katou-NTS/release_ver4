@@ -105,16 +105,18 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             //社員コードを入力する
             self.settingManager().departmentCode.subscribe(value => {
                 $('#A2_7').ntsError('clear');
-                if(value == ''){
-                    return;
-                }
-                if (value) {
-                    if (!self.isInitDepartment && value.length == 6) {
-                        self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
-                        self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
+                setTimeout(function() {
+                    if (value == '') {
+                        return;
                     }
-                }
-                self.isInitDepartment = false;
+                    if (value) {
+                        if (!self.isInitDepartment && value.length == 6) {
+                            self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
+                            self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
+                        }
+                    }
+                    self.isInitDepartment = false;
+                }, 100);
             });
             //focus out
             $(document).on('blur', '#A2_7, #A2_10', (evt: Event) => {
@@ -128,25 +130,27 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                             self.settingManager().dailyApprovalCode.valueHasMutated();
                         }
                     }
-                }, 100);
+                }, 200);
             });
 
             //社員コードを入力する
             self.settingManager().dailyApprovalCode.subscribe(value => {
                 $('#A2_10').ntsError('clear');
-                if(value == ''){
-                    return;
-                }
-                if (value) {
-                    if (!self.isInitdailyApproval && value.length == 6) {
-                        self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
-                        self.getEmployeeByCode(value, APPROVER_TYPE.DAILY_APPROVER);
+                setTimeout(function() {
+                    if (value == '') {
+                        return;
                     }
-                } else {
-                    self.settingManager().dailyApproverId("");  
-                    self.settingManager().dailyApprovalName("");
-                }
-                self.isInitdailyApproval = false;
+                    if (value) {
+                        if (!self.isInitdailyApproval && value.length == 6) {
+                            self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
+                            self.getEmployeeByCode(value, APPROVER_TYPE.DAILY_APPROVER);
+                        }
+                    } else {
+                        self.settingManager().dailyApproverId("");
+                        self.settingManager().dailyApprovalName("");
+                    }
+                    self.isInitdailyApproval = false;
+                }, 200);
             });
         }
 
