@@ -32,7 +32,7 @@
 				<!--A1_2 新規-->
 				<button id="A1_2" data-bind="click: function(){$parent.addSettingManager_click($data)}, enable: $parent.screenMode() == 1" style="margin-left: 50px;" tabindex="1">#{i18n.getText('CMM053_2')}</button>
 				<!--A1_3 登録-->
-				<button id="A1_3" data-bind="click: function(){$parent.regSettingManager_click($data)}" class="proceed" tabindex="2">#{i18n.getText('CMM053_3')}</button>
+				<button id="A1_3" data-bind="enable: $root.errors.isEmpty, click: function(){$parent.regSettingManager_click($data)}" class="proceed" tabindex="2">#{i18n.getText('CMM053_3')}</button>
 				<!--A1_4 削除-->
 				<button id="A1_4" data-bind="click: function(){$parent.delSettingManager_click($data)}, enable: $parent.screenMode() == 1" class="danger" tabindex="3">#{i18n.getText('CMM053_4')}</button>
 				<!--A1_5 過去履歴-->
