@@ -804,15 +804,22 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 		// Optional<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance =
 		// this.workInformationRepository
 		// .find(employeeId, processingDate);
-		WorkTimeCode workTimeCode = null;
-		WorkTypeCode workTypeCode = null;
+		String workTimeCode = null;
+		String workTypeCode = null;
+		
+		if(workInfoOfDailyPerformanceOpt.isPresent() && workInfoOfDailyPerformanceOpt.get().getRecordInfo() != null){
+			if(workInfoOfDailyPerformanceOpt.get().getRecordInfo().getWorkTypeCode() != null){
+				workTypeCode = workInfoOfDailyPerformanceOpt.get().getRecordInfo().getWorkTypeCode().v();
+			}
+			if(workInfoOfDailyPerformanceOpt.get().getRecordInfo().getSiftCode() != null){
+				workTimeCode = workInfoOfDailyPerformanceOpt.get().getRecordInfo().getSiftCode().v();
+			}
+		}
 		// 就業時間帯コードを取得
-		if (workInfoOfDailyPerformanceOpt.isPresent()
-				&& workInfoOfDailyPerformanceOpt.get().getRecordInfo().getSiftCode() == null) {
+		if (workTimeCode == null) {
 			// 休日出勤時の勤務情報を取得する
-			workTypeCode = workInfoOfDailyPerformanceOpt.get().getRecordInfo().getWorkTypeCode();
 			Optional<SingleDaySchedule> singleDaySchedule = workingConditionItemService
-					.getHolidayWorkSchedule(companyId, employeeId, processingDate, workTypeCode.v());
+					.getHolidayWorkSchedule(companyId, employeeId, processingDate, workTypeCode);
 			if (!singleDaySchedule.isPresent()) {
 				ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
 						new ErrMessageResource("016"), EnumAdaptor.valueOf(0, ExecutionContent.class), processingDate,
@@ -822,14 +829,11 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 				return newReflectStampOutput;
 			}
 
-			workTimeCode = singleDaySchedule.get().getWorkTimeCode().orElse(null);
-		} else {
-			workTimeCode = workInfoOfDailyPerformanceOpt.isPresent()
-					? workInfoOfDailyPerformanceOpt.get().getRecordInfo().getSiftCode() : null;
+			workTimeCode = singleDaySchedule.get().getWorkTimeCode().isPresent() ? singleDaySchedule.get().getWorkTimeCode().get().v() : null;
 		}
 		// ドメインモデル「就業時間帯の設定」を取得する
 		Optional<WorkTimeSetting> workTimeOpt = this.workTimeSettingRepository.findByCodeAndAbolishCondition(companyId,
-				workTimeCode.v(), AbolishAtr.NOT_ABOLISH);
+				workTimeCode, AbolishAtr.NOT_ABOLISH);
 		if (!workTimeOpt.isPresent()) {
 			ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
 					new ErrMessageResource("016"), EnumAdaptor.valueOf(0, ExecutionContent.class), processingDate,
@@ -843,7 +847,7 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 		// 打刻反映時間帯を取得する - start
 		// 打刻反映時の出勤休日扱いチェック
 		CheckAttendanceHolidayOutPut attendanceHolidayOutPut = this.checkAttendanceHoliday(employeeId,
-				empCalAndSumExecLogID, companyId, workTypeCode.v(), processingDate);
+				empCalAndSumExecLogID, companyId, workTypeCode, processingDate);
 		if (attendanceHolidayOutPut.getErrMesInfos() != null && !attendanceHolidayOutPut.getErrMesInfos().isEmpty()) {
 			errMesInfos.addAll(attendanceHolidayOutPut.getErrMesInfos());
 			newReflectStampOutput.setErrMesInfos(errMesInfos);
@@ -858,7 +862,7 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 		}
 		// 終了状態：出勤扱い - 出勤系の打刻範囲を取得する
 		else {
-			stampReflectRangeOutput = this.attendanSytemStampRange(workTimeCode, companyId,
+			stampReflectRangeOutput = this.attendanSytemStampRange(new WorkTimeCode(workTimeCode), companyId,
 					workInfoOfDailyPerformanceOpt.get());
 		}
 
