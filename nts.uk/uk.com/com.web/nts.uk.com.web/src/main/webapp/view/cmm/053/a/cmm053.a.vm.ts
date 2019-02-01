@@ -105,7 +105,6 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             //社員コードを入力する
             self.settingManager().departmentCode.subscribe(value => {
                 $('#A2_7').ntsError('clear');
-                console.log(value);
                 if(value == ''){
                     return;
                 }
