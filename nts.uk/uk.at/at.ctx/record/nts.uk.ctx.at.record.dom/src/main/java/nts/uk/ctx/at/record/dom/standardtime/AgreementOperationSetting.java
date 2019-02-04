@@ -9,6 +9,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.dom.AggregateRoot;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
+import nts.uk.ctx.at.record.dom.monthly.agreement.AgreementTimeOfManagePeriod;
 import nts.uk.ctx.at.record.dom.standardtime.enums.ClosingDateAtr;
 import nts.uk.ctx.at.record.dom.standardtime.enums.TimeOverLimitType;
 import nts.uk.ctx.at.shared.dom.common.Year;
@@ -145,5 +146,27 @@ public class AgreementOperationSetting extends AggregateRoot {
 			aggrPeriod.setPeriod(new DatePeriod(closingStart, closingEnd));
 		}
 		return Optional.of(aggrPeriod);
+	}
+	
+	/**
+	 * 36協定Dto（年度の設定）
+	 * @param source 管理期間の36協定時間
+	 * @return 管理期間の36協定時間
+	 */
+	// 2019.2.5 add shuichi_ishida
+	public AgreementTimeOfManagePeriod setYearDto(AgreementTimeOfManagePeriod source){
+		
+		if (source == null) return null;
+		int calcYear = source.getYearMonth().year();
+		int checkMonth = source.getYearMonth().month();
+		if (checkMonth < this.startingMonth.value + 1) {
+			calcYear--;
+		}
+		return AgreementTimeOfManagePeriod.of(
+				source.getEmployeeId(),
+				source.getYearMonth(),
+				new Year(calcYear),
+				source.getAgreementTime(),
+				source.getBreakdown());
 	}
 }

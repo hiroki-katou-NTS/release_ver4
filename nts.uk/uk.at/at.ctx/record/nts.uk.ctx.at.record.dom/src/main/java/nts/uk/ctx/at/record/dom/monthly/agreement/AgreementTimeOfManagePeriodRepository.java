@@ -4,11 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import nts.arc.time.YearMonth;
-import nts.uk.ctx.at.shared.dom.common.Year;
 
 /**
  * リポジトリ：管理期間の36協定時間
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 public interface AgreementTimeOfManagePeriodRepository {
 
@@ -19,14 +18,6 @@ public interface AgreementTimeOfManagePeriodRepository {
 	 * @return 該当する管理期間の36協定時間
 	 */
 	Optional<AgreementTimeOfManagePeriod> find(String employeeId, YearMonth yearMonth);
-
-	/**
-	 * 検索　（年度）
-	 * @param employeeId 社員ID
-	 * @param year 年度
-	 * @return 年度に該当する管理期間の36協定時間　（年月順）
-	 */
-	List<AgreementTimeOfManagePeriod> findByYearOrderByYearMonth(String employeeId, Year year);
 
 	/**
 	 * 検索　（社員IDリスト）
@@ -56,11 +47,4 @@ public interface AgreementTimeOfManagePeriodRepository {
 	 * @param yearMonth 年月
 	 */
 	void remove(String employeeId, YearMonth yearMonth);
-	
-	/**
-	 * 削除　（年度）
-	 * @param employeeId 社員ID
-	 * @param year 年度
-	 */
-	void removeByYear(String employeeId, Year year);
 }
