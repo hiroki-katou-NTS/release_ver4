@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import nts.arc.layer.dom.DomainObject;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.LogOnInfo;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
@@ -27,8 +28,10 @@ public class TimeLeavingWork extends DomainObject{
 	 */
 	private WorkNo workNo;
 	
+	@Setter
 	private Optional<TimeActualStamp> attendanceStamp;
-	
+
+	@Setter
 	private Optional<TimeActualStamp> leaveStamp;
 	
 	private TimeSpanForCalc timespan;

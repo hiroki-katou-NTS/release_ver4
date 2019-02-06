@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import nts.uk.ctx.sys.gateway.dom.singlesignon.WindowsAccount;
 import nts.uk.ctx.sys.gateway.dom.singlesignon.WindowsAccountRepository;
+import nts.uk.shr.com.context.AppContexts;
 
 /**
  * The Class WindowAccountFinder.
@@ -26,22 +27,22 @@ public class WindowsAccountFinder {
 	private WindowsAccountRepository windowAccountRepository;
 
 	/**
-	 * Find window account by user id.
+	 * Find window account by employee id.
 	 *
-	 * @param userId
-	 *            the user id
-	 * @return the windown account finder dto
+	 * @param employeeId the employee id
+	 * @return the list
 	 */
-	public List<WindowsAccountFinderDto> findWindowAccountByUserId(String userId) {
+	public List<WindowsAccountFinderDto> findWindowAccountByEmployeeId(String employeeId) {
 
+		String companyId = AppContexts.user().companyId();
 		Optional<WindowsAccount> optWindowAccount = this.windowAccountRepository
-				.findListWindowAccountByUserId(userId);
+				.findListWindowAccountByEmployeeId(companyId,employeeId);
 
 		// Check exist
 		if (optWindowAccount.isPresent()) {
 			WindowsAccount windowsAccount = optWindowAccount.get();
 			return windowsAccount.getAccountInfos().stream()
-					.map(accInfo -> new WindowsAccountFinderDto(userId, accInfo.getHostName().v(),
+					.map(accInfo -> new WindowsAccountFinderDto(employeeId, accInfo.getHostName().v(),
 							accInfo.getUserName().v(), accInfo.getNo(), accInfo.getUseAtr().value))
 					.collect(Collectors.toList());
 		}
@@ -57,8 +58,8 @@ public class WindowsAccountFinder {
 	 * @param userIds the user ids
 	 * @return the list
 	 */
-	public List<String> findAlreadySetting(List<String> userIds) {
-		return windowAccountRepository.findByListUserId(userIds).stream().map(WindowsAccount::getUserId)
+	public List<String> findAlreadySetting(List<String> employeeIds) {
+		return windowAccountRepository.findByListEmployeeId(employeeIds).stream().map(WindowsAccount::getEmployeeId)
 				.collect(Collectors.toList());
 	}
 

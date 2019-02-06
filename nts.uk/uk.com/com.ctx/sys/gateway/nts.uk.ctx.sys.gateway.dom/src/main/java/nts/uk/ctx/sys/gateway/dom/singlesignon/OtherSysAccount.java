@@ -11,9 +11,13 @@ import nts.arc.layer.dom.AggregateRoot;
 @Getter
 public class OtherSysAccount extends AggregateRoot {
 
+	
+	/** The company id. */
+	private String companyId;
+	
+	/** The employee id. */
 	// ユーザID
-	/** The user id. */
-	private String userId;
+	private String employeeId;
 
 	/** The company code. */
 	// アカウント情報
@@ -25,7 +29,8 @@ public class OtherSysAccount extends AggregateRoot {
 	 * @param memento the memento
 	 */
 	public OtherSysAccount(OtherSysAccountGetMemento memento) {
-		this.userId = memento.getUserId();
+		this.companyId = memento.getCompanyId();
+		this.employeeId = memento.getEmployeeId();
 		this.accountInfo = new OtherSystemAccountInfo(memento.getUseAtr(), memento.getCompanyCode(),
 				memento.getUserName());
 	}
@@ -36,7 +41,8 @@ public class OtherSysAccount extends AggregateRoot {
 	 * @param memento the memento
 	 */
 	public void saveToMemento(OtherSysAccountSetMemento memento) {
-		memento.setUserId(this.userId);
+		memento.setCompanyId(this.companyId);
+		memento.setEmployeeId(this.employeeId);
 		memento.setCompanyCode(this.accountInfo.getCompanyCode());
 		memento.setUserName(this.accountInfo.getUserName());
 		memento.setUseAtr(this.accountInfo.getUseAtr());

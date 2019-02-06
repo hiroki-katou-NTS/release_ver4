@@ -9,6 +9,7 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.uk.ctx.bs.employee.pub.employee.EmployeeBasicInfoExport;
 import nts.uk.ctx.bs.employee.pub.employee.EmployeeDataMngInfoExport;
 import nts.uk.ctx.bs.employee.pub.employee.StatusOfEmployeeExport;
 import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
@@ -19,6 +20,7 @@ import nts.uk.ctx.bs.employee.pub.employee.employeeInfo.EmployeeInfoPub;
 import nts.uk.ctx.sys.gateway.dom.login.adapter.SysEmployeeAdapter;
 import nts.uk.ctx.sys.gateway.dom.login.dto.EmployeeDataMngInfoImport;
 import nts.uk.ctx.sys.gateway.dom.login.dto.EmployeeImport;
+import nts.uk.ctx.sys.gateway.dom.login.dto.EmployeeImportNew;
 import nts.uk.ctx.sys.gateway.dom.login.dto.SDelAtr;
 import nts.uk.ctx.sys.gateway.dom.login.dto.StatusOfEmployeeImport;
 
@@ -128,5 +130,17 @@ public class SysEmployeeAdapterImpl implements SysEmployeeAdapter {
 		
 		//return
 		return new StatusOfEmployeeImport(status.isDeleted());
+	}
+
+	@Override
+	public Optional<EmployeeImportNew> getEmployeeBySid(String sid) {
+		EmployeeBasicInfoExport em = this.syEmployeePub.findBySId(sid);
+		if (em == null) {
+			return Optional.empty();
+		} else {
+			// convert to Import Dto
+			return Optional.of(new EmployeeImportNew(em.getPId(), em.getPName(), em.getEntryDate(), em.getGender(),
+					em.getBirthDay(), em.getEmployeeId(), em.getEmployeeCode(), em.getRetiredDate()));
+		}
 	}
 }

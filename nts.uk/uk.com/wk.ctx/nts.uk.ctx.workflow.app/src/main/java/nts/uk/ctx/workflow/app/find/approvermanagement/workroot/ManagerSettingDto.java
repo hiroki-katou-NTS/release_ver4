@@ -33,4 +33,6 @@ public class ManagerSettingDto {
 	private boolean hasAuthority;
 	/** 締めの開始日 */
 	private GeneralDate closingStartDate;
+	
+	private boolean displayDailyApprover;
 }

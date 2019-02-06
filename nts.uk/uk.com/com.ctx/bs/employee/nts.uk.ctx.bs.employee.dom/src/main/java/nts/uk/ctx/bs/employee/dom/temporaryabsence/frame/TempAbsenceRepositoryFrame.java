@@ -42,4 +42,11 @@ public interface TempAbsenceRepositoryFrame {
 	 * @return the list
 	 */
 	List<TempAbsenceFrame> findWithUseState(String cId,Integer useAtr);
+	
+	/**
+	 * 
+	 * @param cId
+	 * @return
+	 */
+	List<TempAbsenceFrame> findByCidForReq546(String cId);
 }

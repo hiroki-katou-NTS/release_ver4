@@ -29,7 +29,7 @@ public class SaveWindowAccountCommand {
 	/** The win acc 5. */
 	private WindowAccountDto winAcc5;
 	
-	/** The user id. */
-	private String userId;
+	/** The employee id. */
+	private String employeeId;
 	
 }

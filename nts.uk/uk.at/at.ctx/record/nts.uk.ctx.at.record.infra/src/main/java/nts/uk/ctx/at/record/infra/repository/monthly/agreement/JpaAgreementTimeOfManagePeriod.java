@@ -17,21 +17,14 @@ import nts.uk.ctx.at.record.dom.monthly.agreement.AgreementTimeOfManagePeriod;
 import nts.uk.ctx.at.record.dom.monthly.agreement.AgreementTimeOfManagePeriodRepository;
 import nts.uk.ctx.at.record.infra.entity.monthly.agreement.KrcdtMonMngAgreTime;
 import nts.uk.ctx.at.record.infra.entity.monthly.agreement.KrcdtMonMngAgreTimePK;
-import nts.uk.ctx.at.shared.dom.common.Year;
 
 /**
  * リポジトリ実装：管理期間の36協定時間
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Stateless
 public class JpaAgreementTimeOfManagePeriod extends JpaRepository implements AgreementTimeOfManagePeriodRepository {
 
-	private static final String FIND_BY_YEAR =
-			"SELECT a FROM KrcdtMonMngAgreTime a "
-			+ "WHERE a.PK.employeeId = :employeeId "
-			+ "AND a.year = :year "
-			+ "ORDER BY a.PK.yearMonth ";
-	
 	private static final String FIND_BY_EMPLOYEES = "SELECT a FROM KrcdtMonMngAgreTime a "
 			+ "WHERE a.PK.employeeId IN :employeeIds "
 			+ "AND a.PK.yearMonth = :yearMonth "
@@ -47,11 +40,6 @@ public class JpaAgreementTimeOfManagePeriod extends JpaRepository implements Agr
 			+ "WHERE a.PK.employeeId = :employeeId "
 			+ "AND a.PK.yearMonth = :yearMonth ";
 	
-	private static final String REMOVE_BY_YEAR =
-			"DELETE FROM KrcdtMonMngAgreTime a "
-			+ "WHERE a.PK.employeeId = :employeeId "
-			+ "AND a.year = :year ";
-	
 	/** 検索 */
 	@Override
 	public Optional<AgreementTimeOfManagePeriod> find(String employeeId, YearMonth yearMonth) {
@@ -62,16 +50,6 @@ public class JpaAgreementTimeOfManagePeriod extends JpaRepository implements Agr
 						yearMonth.v()),
 						KrcdtMonMngAgreTime.class)
 				.map(c -> c.toDomain());
-	}
-
-	/** 検索　（年度） */
-	@Override
-	public List<AgreementTimeOfManagePeriod> findByYearOrderByYearMonth(String employeeId, Year year) {
-		
-		return this.queryProxy().query(FIND_BY_YEAR, KrcdtMonMngAgreTime.class)
-				.setParameter("employeeId", employeeId)
-				.setParameter("year", year.v())
-				.getList(c -> c.toDomain());
 	}
 
 	/** 検索　（社員IDリスト） */
@@ -139,16 +117,6 @@ public class JpaAgreementTimeOfManagePeriod extends JpaRepository implements Agr
 		this.getEntityManager().createQuery(REMOVE_BY_PK)
 				.setParameter("employeeId", employeeId)
 				.setParameter("yearMonth", yearMonth.v())
-				.executeUpdate();
-	}
-
-	/** 削除　（年度） */
-	@Override
-	public void removeByYear(String employeeId, Year year) {
-
-		this.getEntityManager().createQuery(REMOVE_BY_YEAR)
-				.setParameter("employeeId", employeeId)
-				.setParameter("year", year.v())
 				.executeUpdate();
 	}
 }

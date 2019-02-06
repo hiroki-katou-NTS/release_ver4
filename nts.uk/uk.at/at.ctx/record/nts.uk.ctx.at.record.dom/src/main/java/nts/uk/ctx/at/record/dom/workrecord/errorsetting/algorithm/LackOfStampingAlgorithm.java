@@ -51,12 +51,12 @@ public class LackOfStampingAlgorithm {
 				List<TimeLeavingWork> timeLeavingWorkList = timeLeavingOfDailyPerformance.getTimeLeavingWorks();
 				List<Integer> attendanceItemIDList = new ArrayList<>();
 				for (TimeLeavingWork timeLeavingWork : timeLeavingWorkList) {
-					if (timeLeavingWork.getLeaveStamp() != null 
-							&& timeLeavingWork.getLeaveStamp().isPresent()
-							&& timeLeavingWork.getAttendanceStamp() != null
-							&& timeLeavingWork.getAttendanceStamp().isPresent()) {
-						Optional<WorkStamp> leavingStamp = timeLeavingWork.getLeaveStamp().get().getStamp();
-						Optional<WorkStamp> attendanceStamp = timeLeavingWork.getAttendanceStamp().get().getStamp();
+//					if (timeLeavingWork.getLeaveStamp() != null 
+//							&& timeLeavingWork.getLeaveStamp().isPresent()
+//							&& timeLeavingWork.getAttendanceStamp() != null
+//							&& timeLeavingWork.getAttendanceStamp().isPresent()) {
+						Optional<WorkStamp> leavingStamp = timeLeavingWork.getLeaveStamp().isPresent() ? timeLeavingWork.getLeaveStamp().get().getStamp() : Optional.empty();
+						Optional<WorkStamp> attendanceStamp = timeLeavingWork.getAttendanceStamp().isPresent() ? timeLeavingWork.getAttendanceStamp().get().getStamp() : Optional.empty();
 						if (leavingStamp.isPresent() && !attendanceStamp.isPresent()) {
 							if (timeLeavingWork.getWorkNo().v().intValue() == 1) {
 								attendanceItemIDList.add(31);
@@ -102,12 +102,18 @@ public class LackOfStampingAlgorithm {
 								}
 							}
 						}
-					}
+//					}
 				}
 				if (!attendanceItemIDList.isEmpty()) {
 					employeeDailyPerError = new EmployeeDailyPerError(companyID, employeeID, processingDate,
 							new ErrorAlarmWorkRecordCode("S001"), attendanceItemIDList);
 				}
+			}else {
+				List<Integer> attendanceItemIDList = new ArrayList<>();
+				attendanceItemIDList.add(31);
+				attendanceItemIDList.add(34);
+				employeeDailyPerError = new EmployeeDailyPerError(companyID, employeeID, processingDate,
+						new ErrorAlarmWorkRecordCode("S001"), attendanceItemIDList);
 			}
 		}
 

@@ -1,4 +1,5 @@
 module nts.uk.at.view.kmk007.a.viewmodel {
+    import getText = nts.uk.resource.getText;
     export class ScreenModel {
         columns: KnockoutObservableArray<any>;
         currentCode: KnockoutObservable<any>;
@@ -18,7 +19,6 @@ module nts.uk.at.view.kmk007.a.viewmodel {
         currentMorning: KnockoutObservable<WorkTypeSet>;
         currentAfternoon: KnockoutObservable<WorkTypeSet>;
         itemHodidayAtr: KnockoutObservableArray<ItemModel>;
-        itemCloseAtr: KnockoutObservableArray<ItemModel>;
         itemListHaftDay: KnockoutObservableArray<ItemModel>;
         itemCalculatorMethod: KnockoutObservableArray<any>;
         enableMethod: KnockoutObservable<boolean>;
@@ -29,7 +29,9 @@ module nts.uk.at.view.kmk007.a.viewmodel {
         isEnable: KnockoutObservable<boolean> = ko.observable(true);
         isEnableOneDay: KnockoutObservable<boolean> = ko.observable(false);
         langId: KnockoutObservable<string> = ko.observable('ja');
-
+        rq546: Array<any> = [];
+        lstHdWrk: KnockoutObservableArray<ItemModel> = ko.observableArray([]);
+        closeAtr: KnockoutObservable<any> = ko.observable(null);
         constructor() {
             var self = this,
                 lwt: any = self.listWorkType,
@@ -83,75 +85,62 @@ module nts.uk.at.view.kmk007.a.viewmodel {
 
             //1日-勤務種類の分類 
             self.itemListOneDay = ko.observableArray([
-                new ItemModel(0, nts.uk.resource.getText('Enum_WorkTypeClassification_Attendance'), 1),
-                new ItemModel(1, nts.uk.resource.getText('Enum_WorkTypeClassification_Holiday'), 6),
-                new ItemModel(2, nts.uk.resource.getText('Enum_WorkTypeClassification_AnnualHoliday'), 1),
-                new ItemModel(3, nts.uk.resource.getText('Enum_WorkTypeClassification_YearlyReserved'), 1),
-                new ItemModel(4, nts.uk.resource.getText('Enum_WorkTypeClassification_SpecialHoliday'), 2),
-                new ItemModel(5, nts.uk.resource.getText('Enum_WorkTypeClassification_Absence'), 3),
-                new ItemModel(6, nts.uk.resource.getText('Enum_WorkTypeClassification_SubstituteHoliday'), 5),
-                new ItemModel(7, nts.uk.resource.getText('Enum_WorkTypeClassification_Shooting'), 1),
-                new ItemModel(8, nts.uk.resource.getText('Enum_WorkTypeClassification_Pause'), 6),
-                new ItemModel(9, nts.uk.resource.getText('Enum_WorkTypeClassification_TimeDigestVacation'), 4),
-                new ItemModel(10, nts.uk.resource.getText('Enum_WorkTypeClassification_ContinuousWork'), 7),
-                new ItemModel(11, nts.uk.resource.getText('Enum_WorkTypeClassification_HolidayWork'), 7),
-                new ItemModel(12, nts.uk.resource.getText('Enum_WorkTypeClassification_LeaveOfAbsence'), 7),
-                new ItemModel(13, nts.uk.resource.getText('Enum_WorkTypeClassification_Closure'), 7)
+                new ItemModel(0, getText('Enum_WorkTypeClassification_Attendance'), 1),
+                new ItemModel(1, getText('Enum_WorkTypeClassification_Holiday'), 6),
+                new ItemModel(2, getText('Enum_WorkTypeClassification_AnnualHoliday'), 1),
+                new ItemModel(3, getText('Enum_WorkTypeClassification_YearlyReserved'), 1),
+                new ItemModel(4, getText('Enum_WorkTypeClassification_SpecialHoliday'), 2),
+                new ItemModel(5, getText('Enum_WorkTypeClassification_Absence'), 3),
+                new ItemModel(6, getText('Enum_WorkTypeClassification_SubstituteHoliday'), 5),
+                new ItemModel(7, getText('Enum_WorkTypeClassification_Shooting'), 1),
+                new ItemModel(8, getText('Enum_WorkTypeClassification_Pause'), 6),
+                new ItemModel(9, getText('Enum_WorkTypeClassification_TimeDigestVacation'), 4),
+                new ItemModel(10, getText('Enum_WorkTypeClassification_ContinuousWork'), 7),
+                new ItemModel(11, getText('Enum_WorkTypeClassification_HolidayWork'), 7),
+                new ItemModel(12, getText('Enum_WorkTypeClassification_LeaveOfAbsence'), 7),
+                new ItemModel(13, getText('Enum_WorkTypeClassification_Closure'), 7)
             ]);
 
             //午前と午後-勤務種類の分類 
             self.itemListHaftDay = ko.observableArray([
-                new ItemModel(0, nts.uk.resource.getText('Enum_WorkTypeClassification_Attendance'), 1),
-                new ItemModel(1, nts.uk.resource.getText('Enum_WorkTypeClassification_Holiday'), 6),
-                new ItemModel(2, nts.uk.resource.getText('Enum_WorkTypeClassification_AnnualHoliday'), 1),
-                new ItemModel(3, nts.uk.resource.getText('Enum_WorkTypeClassification_YearlyReserved'), 1),
-                new ItemModel(4, nts.uk.resource.getText('Enum_WorkTypeClassification_SpecialHoliday'), 2),
-                new ItemModel(5, nts.uk.resource.getText('Enum_WorkTypeClassification_Absence'), 3),
-                new ItemModel(6, nts.uk.resource.getText('Enum_WorkTypeClassification_SubstituteHoliday'), 5),
-                new ItemModel(7, nts.uk.resource.getText('Enum_WorkTypeClassification_Shooting'), 1),
-                new ItemModel(8, nts.uk.resource.getText('Enum_WorkTypeClassification_Pause'), 6),
-                new ItemModel(9, nts.uk.resource.getText('Enum_WorkTypeClassification_TimeDigestVacation'), 4)
+                new ItemModel(0, getText('Enum_WorkTypeClassification_Attendance'), 1),
+                new ItemModel(1, getText('Enum_WorkTypeClassification_Holiday'), 6),
+                new ItemModel(2, getText('Enum_WorkTypeClassification_AnnualHoliday'), 1),
+                new ItemModel(3, getText('Enum_WorkTypeClassification_YearlyReserved'), 1),
+                new ItemModel(4, getText('Enum_WorkTypeClassification_SpecialHoliday'), 2),
+                new ItemModel(5, getText('Enum_WorkTypeClassification_Absence'), 3),
+                new ItemModel(6, getText('Enum_WorkTypeClassification_SubstituteHoliday'), 5),
+                new ItemModel(7, getText('Enum_WorkTypeClassification_Shooting'), 1),
+                new ItemModel(8, getText('Enum_WorkTypeClassification_Pause'), 6),
+                new ItemModel(9, getText('Enum_WorkTypeClassification_TimeDigestVacation'), 4)
             ]);
 
 
             //休日区分
             self.itemHodidayAtr = ko.observableArray([
-                new ItemModel(0, nts.uk.resource.getText('Enum_HolidayAtr_STATUTORY_HOLIDAYS'), 0),
-                new ItemModel(1, nts.uk.resource.getText('Enum_HolidayAtr_NON_STATUTORY_HOLIDAYS'), 0),
-                new ItemModel(2, nts.uk.resource.getText('Enum_HolidayAtr_PUBLIC_HOLIDAY'), 0)
-            ]);
-
-            //休業区分
-            self.itemCloseAtr = ko.observableArray([
-                new ItemModel(0, nts.uk.resource.getText('Enum_CloseAtr_PRENATAL'), 0),
-                new ItemModel(1, nts.uk.resource.getText('Enum_CloseAtr_POSTPARTUM'), 0),
-                new ItemModel(2, nts.uk.resource.getText('Enum_CloseAtr_CHILD_CARE'), 0),
-                new ItemModel(3, nts.uk.resource.getText('Enum_CloseAtr_CARE'), 0),
-                new ItemModel(4, nts.uk.resource.getText('Enum_CloseAtr_INJURY_OR_ILLNESS'), 0),
-                new ItemModel(5, nts.uk.resource.getText('Enum_CloseAtr_OPTIONAL_LEAVE_1'), 0),
-                new ItemModel(6, nts.uk.resource.getText('Enum_CloseAtr_OPTIONAL_LEAVE_2'), 0),
-                new ItemModel(7, nts.uk.resource.getText('Enum_CloseAtr_OPTIONAL_LEAVE_3'), 0),
-                new ItemModel(8, nts.uk.resource.getText('Enum_CloseAtr_OPTIONAL_LEAVE_4'), 0)
+                new ItemModel(0, getText('Enum_HolidayAtr_STATUTORY_HOLIDAYS'), 0),
+                new ItemModel(1, getText('Enum_HolidayAtr_NON_STATUTORY_HOLIDAYS'), 0),
+                new ItemModel(2, getText('Enum_HolidayAtr_PUBLIC_HOLIDAY'), 0)
             ]);
 
             //出勤率の計算方法
             self.itemCalculatorMethod = ko.observableArray([
-                { code: 0, name: nts.uk.resource.getText('Enum_CalculateMethod_DO_NOT_GO_TO_WORK') },
-                { code: 1, name: nts.uk.resource.getText('Enum_CalculateMethod_MAKE_ATTENDANCE_DAY') },
-                { code: 2, name: nts.uk.resource.getText('Enum_CalculateMethod_EXCLUDE_FROM_WORK_DAY') },
-                { code: 3, name: nts.uk.resource.getText('Enum_CalculateMethod_TIME_DIGEST_VACATION') }
+                { code: 0, name: getText('Enum_CalculateMethod_DO_NOT_GO_TO_WORK') },
+                { code: 1, name: getText('Enum_CalculateMethod_MAKE_ATTENDANCE_DAY') },
+                { code: 2, name: getText('Enum_CalculateMethod_EXCLUDE_FROM_WORK_DAY') },
+                { code: 3, name: getText('Enum_CalculateMethod_TIME_DIGEST_VACATION') }
             ]);
 
             self.roundingRules = ko.observableArray([
-                { code: '0', name: nts.uk.resource.getText('KMK007_19') },
-                { code: '1', name: nts.uk.resource.getText('KMK007_20') }
+                { code: '0', name: getText('KMK007_19') },
+                { code: '1', name: getText('KMK007_20') }
             ]);
 
 
             self.columns = ko.observableArray([
-                { headerText: nts.uk.resource.getText('KMK007_7'), key: 'workTypeCode', width: 70, formatter: _.escape },
-                { headerText: nts.uk.resource.getText('KMK007_8'), key: 'name', width: 110, formatter: _.escape },
-                { headerText: nts.uk.resource.getText('KMK007_10'), key: 'icon', width: 30 }
+                { headerText: getText('KMK007_7'), key: 'workTypeCode', width: 70, formatter: _.escape },
+                { headerText: getText('KMK007_8'), key: 'name', width: 110, formatter: _.escape },
+                { headerText: getText('KMK007_10'), key: 'icon', width: 30 }
             ]);
 
             self.currentCode = ko.observable();
@@ -163,6 +152,15 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                     self.setWorkTypeSet(self.currentWorkType().oneDay(), ko.toJS(self.currentOneDay()));
                 } else {
                     self.setWorkTypeSet(self.currentWorkType().oneDay(), ko.toJS(self.oneDay));
+                }
+                if(newOneDayCls == 13){//休業
+                    //勤務の分類にて「休業」を選択する
+                    if(self.isCreated()){//新規モード
+                        self.lstHdWrk(self.copyData());
+                    }else{//更新モード
+                        self.hdWrk();
+                    }
+                    self.closeAtr(self.currentWorkType().oneDay().closeAtr());
                 }
             });
 
@@ -180,6 +178,8 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                 } else {
                     self.setWorkTypeSet(self.currentWorkType().morning(), ko.toJS(self.oneDay));
                 }
+                self.closeAtr(self.currentWorkType().oneDay().closeAtr());
+                
             });
 
             self.currentWorkType().afternoonCls.subscribe(function(newOneDayCls) {
@@ -241,6 +241,14 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                         self.setWorkTypeSet(cwt.oneDay(), itemWorkType.oneDay);
                         self.setWorkTypeSet(cwt.morning(), itemWorkType.morning);
                         self.setWorkTypeSet(cwt.afternoon(), itemWorkType.afternoon);
+                        if(itemWorkType.oneDayCls == 13){
+                            if(self.isCreated()){//新規モード
+                                self.lstHdWrk(self.copyData());
+                            }else{//更新モード
+                                self.hdWrk();
+                            }
+                            self.closeAtr(self.currentWorkType().oneDay().closeAtr());
+                        }
                     });
                 } else {
                     self.isCreated(true);
@@ -255,6 +263,32 @@ module nts.uk.at.view.kmk007.a.viewmodel {
             });
         }
 
+        //休業: 更新モード
+        hdWrk(){
+            let self = this;
+            let no = self.currentWorkType().oneDay().closeAtr();
+            if(self.checkExist(self.rq546, no) == undefined || self.checkExist(self.rq546, no) == null){
+                self.lstHdWrk(self.copyData());
+                let code = no + 2;
+                self.lstHdWrk.push(new ItemModel(no, code < 10 ? '0' + code + getText('KMK007_112') : code + getText('KMK007_112'), 0));
+            }else{
+                self.lstHdWrk(self.copyData());
+            }
+            self.closeAtr(no);
+        }
+        copyData(){
+            let self = this;
+            let result = [];
+            _.each(self.rq546, item => {
+                result.push(item);
+            });
+            return result;
+        }
+        checkExist(lst: Array<ItemModel>, no: number){
+            return _.find(lst, item => {
+                return item.code == no;
+            });
+        }
 
         startPage(): JQueryPromise<any> {
             let self = this,
@@ -300,7 +334,7 @@ module nts.uk.at.view.kmk007.a.viewmodel {
 
             worktypeset.workTypeCode(itemWorkType.workTypeCode);
             worktypeset.attendanceTime(itemWorkType.attendanceTime);
-            worktypeset.closeAtr(itemWorkType.closeAtr);
+            worktypeset.closeAtr = ko.observable(itemWorkType.closeAtr);
             worktypeset.countHodiday(itemWorkType.countHodiday == 0 ? true : false);
             worktypeset.dayNightTimeAsk(itemWorkType.dayNightTimeAsk);
             worktypeset.digestPublicHd(itemWorkType.digestPublicHd);
@@ -401,9 +435,14 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                 nts.uk.ui.dialog.alertError({ messageId: "Msg_922" });
                 return;
             }
-
+            if(self.currentWorkType().oneDayCls() == 13){
+               command.oneDay.closeAtr = self.closeAtr();
+            }
             service.addWorkType(self.isCreated(), command).done(function() {
                 self.isCreated(false);
+                if(self.currentWorkType().oneDayCls() == 13){
+                   self.currentWorkType().oneDay().closeAtr(self.closeAtr());
+                }
                 self.getWorkType().done(function() {
                     self.currentCode(workType.workTypeCode());
                 });
@@ -594,7 +633,20 @@ module nts.uk.at.view.kmk007.a.viewmodel {
 
             lwt.removeAll();
 
-            service.loadWorkType().done(data => {
+            service.loadWorkType().done(out => {
+                let data = out.lstWorkType;
+                self.rq546 = [];
+                _.each(out.rq546, item =>{
+                    self.rq546.push(new ItemModel(item.no -2, item.name, 0));
+                });
+                self.rq546 = _.orderBy(self.rq546, 'code');
+                if(self.currentWorkType().oneDayCls() == 13){
+                    if(self.isCreated()){//新規モード
+                        self.lstHdWrk(self.copyData());
+                    }else{//更新モード
+                        self.hdWrk();
+                    }
+                }
                 if (data && !!data.length) {
                     lwt(_(data).orderBy(['dispOrder', 'workTypeCode'], ['asc', 'asc'])
                         .map(x => $.extend({
@@ -752,7 +804,7 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                 var cols = $("#single-list").igGrid("option", "columns");
                 if ($("#single-list").igGrid("option", "columns").length == 3) {
                     //add columns otherLanguageName   
-                    var newColumn = { headerText: nts.uk.resource.getText('KMK007_9'), key: 'nameNotJP', width: 100, formatter: _.escape };
+                    var newColumn = { headerText: getText('KMK007_9'), key: 'nameNotJP', width: 100, formatter: _.escape };
                     cols.splice(2, 0, newColumn);
                     $("#single-list").igGrid("option", "columns", cols);
                 }

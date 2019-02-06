@@ -184,7 +184,12 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 		if (domain == null) {
 			return;
 		}
-		KrcdtDaiLeavingWork entity = getDailyLeaving(domain.getEmployeeId(), domain.getYmd());
+		
+		internalUpdate(domain, getDailyLeaving(domain.getEmployeeId(), domain.getYmd()));
+		// this.getEntityManager().flush();
+	}
+
+	private void internalUpdate(TimeLeavingOfDailyPerformance domain, KrcdtDaiLeavingWork entity) {
 		List<KrcdtTimeLeavingWork> timeWorks = entity.timeLeavingWorks;
 		entity.workTimes = domain.getWorkTimes() == null ? null : domain.getWorkTimes().v();
 		domain.getTimeLeavingWorks().stream().forEach(c -> {
@@ -283,7 +288,6 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 		if (!timeWorks.isEmpty()) {
 			this.commandProxy().updateAll(entity.timeLeavingWorks);
 		}
-		// this.getEntityManager().flush();
 	}
 
 	private KrcdtDaiLeavingWork getDailyLeaving(String employee, GeneralDate date) {
@@ -553,6 +557,84 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 				.entrySet().stream()
 				.map(e -> KrcdtDaiLeavingWork.toDomain((KrcdtDaiLeavingWork) e.getKey(), e.getValue()))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public void deleteTimeNoBy(List<String> employeeIds, List<GeneralDate> processingYmds, int no) {
+		StringBuilder builderString = new StringBuilder();
+		builderString.append("DELETE FROM KrcdtTimeLeavingWork a ");
+		builderString.append("WHERE a.krcdtTimeLeavingWorkPK.employeeId IN :employeeIds ");
+		builderString.append("AND a.krcdtTimeLeavingWorkPK.ymd IN :processingYmds ");
+		builderString.append("AND a.krcdtTimeLeavingWorkPK.workNo = :no ");
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstEmployeeIds -> {
+			CollectionUtil.split(processingYmds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, ymds -> {
+				this.getEntityManager().createQuery(builderString.toString())
+					.setParameter("employeeIds", lstEmployeeIds)
+					.setParameter("processingYmds", ymds)
+					.setParameter("no", no)
+					.executeUpdate();
+			});
+		});
+	}
+	
+	@Override
+	public void deleteScheStamp(List<String> employeeIds, List<GeneralDate> processingYmds) {
+		
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstEmployeeIds -> {
+			CollectionUtil.split(processingYmds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, ymds -> {
+				internalUpdate(lstEmployeeIds, ymds);
+			});
+		});
+	}
+
+	@SneakyThrows
+	private void internalUpdate(List<String> lstEmployeeIds, List<GeneralDate> ymds) {
+		StringBuilder builderString = new StringBuilder();
+		builderString.append("UPDATE KRCDT_TIME_LEAVING_WORK ");
+		builderString.append(" SET ATD_STAMP_ROUDING_TIME_DAY = NULL, ATD_STAMP_TIME = NULL, ATD_STAMP_PLACE_CODE = NULL, ATD_STAMP_SOURCE_INFO = NULL,");
+		builderString.append(" LWK_STAMP_ROUDING_TIME_DAY = NULL, LWK_STAMP_TIME = NULL, LWK_STAMP_PLACE_CODE = NULL, LWK_STAMP_SOURCE_INFO = NULL");
+		builderString.append(" WHERE SID IN ("+ lstEmployeeIds.stream().map(c -> "?").collect(Collectors.joining(", ")) +") ");
+		builderString.append(" AND YMD IN (" + ymds.stream().map(c -> "?").collect(Collectors.joining(", ")) + ") ");
+		builderString.append(" AND WORK_NO = 1 AND TIME_LEAVING_TYPE = 0");
+		try (PreparedStatement ps = this.connection().prepareStatement(builderString.toString())) {
+			for (int i = 0; i < lstEmployeeIds.size(); i++) {
+				ps.setString(i + 1, lstEmployeeIds.get(i));
+			}
+			for (int i = 0; i < ymds.size(); i++) {
+				ps.setDate(i + 1 + lstEmployeeIds.size(), Date.valueOf(ymds.get(i).localDate()));
+			}
+			ps.executeUpdate();
+		}
+	}
+
+	@Override
+	public void update(List<TimeLeavingOfDailyPerformance> domains) {
+		List<KrcdtDaiLeavingWork> olds = finds(domains.stream().map(c -> c.getEmployeeId()).collect(Collectors.toList()), 
+												domains.stream().map(c -> c.getYmd()).collect(Collectors.toList()));
+		
+		domains.stream().forEach(d -> {
+			KrcdtDaiLeavingWork e = olds.stream().filter(o -> o.krcdtDaiLeavingWorkPK.employeeId.equals(d.getEmployeeId())
+																&& o.krcdtDaiLeavingWorkPK.ymd.equals(d.getYmd()))
+										.findFirst().orElseGet(() -> getDefault(d.getEmployeeId(), d.getYmd()));
+			internalUpdate(d, e);
+		});
+	}
+	
+	private List<KrcdtDaiLeavingWork> finds(List<String> employeeIds, List<GeneralDate> ymds) {
+		List<KrcdtDaiLeavingWork> result = new ArrayList<>();
+		StringBuilder builderString = new StringBuilder();
+		builderString.append("SELECT a FROM KrcdtDaiLeavingWork a");
+		builderString.append(" WHERE a.krcdtDaiLeavingWorkPK.employeeId IN :employeeIds");
+		builderString.append(" AND a.krcdtDaiLeavingWorkPK.ymd IN :processingYmds");
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, sublistEmployeeIds -> {
+			CollectionUtil.split(ymds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, sublistYMDs -> {
+				result.addAll(this.getEntityManager().createQuery(builderString.toString(), KrcdtDaiLeavingWork.class)
+										.setParameter("employeeIds", sublistEmployeeIds)
+										.setParameter("processingYmds", sublistYMDs).getResultList());
+			});
+		});
+		
+		return result;
 	}
 
 }

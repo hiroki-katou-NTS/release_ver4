@@ -66,12 +66,6 @@ public interface AbsenceReruitmentMngInPeriodQuery {
 	 */
 	AbsRecDetailPara getNotTypeRec(InterimAbsMng lstAbsMng, InterimRemain remainData);
 	/**
-	 * 4.未使用の振出(暫定)を取得する
-	 * @param paramInput
-	 * @return
-	 */
-	List<AbsRecDetailPara> getUnUseDayInterimRec(AbsRecMngInPeriodParamInput paramInput);
-	/**
 	 * 4-1.振休と紐付けをしない振出を取得する
 	 * @param interimRecMng
 	 * @param remainData

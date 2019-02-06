@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.record.pubimp.fixedcheckitem;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -8,6 +10,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.app.service.workrecord.erroralarm.recordcheck.ErAlWorkRecordCheckService;
+import nts.uk.ctx.at.record.app.service.workrecord.erroralarm.recordcheck.result.ContinuousHolidayCheckResult;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.fixedcheckitem.checkadminunverified.CheckAdminUnverifiedService;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.fixedcheckitem.checkingData.CheckingDataService;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.fixedcheckitem.checkprincipalunconfirm.CheckPrincipalUnconfirmService;
@@ -16,6 +20,7 @@ import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.fixedcheckitem.w
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.fixedcheckitem.worktypenotregister.WorkTypeNotRegisterService;
 import nts.uk.ctx.at.record.pub.fixedcheckitem.FixedCheckItemPub;
 import nts.uk.ctx.at.record.pub.fixedcheckitem.ValueExtractAlarmWRPubExport;
+import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
@@ -35,6 +40,9 @@ public class FixedCheckItemPubImpl implements FixedCheckItemPub {
 	
 	@Inject
 	private CheckingDataService checkingDataService;
+	
+	@Inject
+	private ErAlWorkRecordCheckService erAlWorkRecordCheckService; 
 	
 	
 	@Override
@@ -94,6 +102,27 @@ public class FixedCheckItemPubImpl implements FixedCheckItemPub {
 			DatePeriod datePeriod) {
 		return checkAdminUnverifiedService.checkAdminUnverified(workplaceID, employeeID,datePeriod)
 				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<ValueExtractAlarmWRPubExport> checkContinuousVacation(String employeeID, DatePeriod datePeriod) {
+		List<ValueExtractAlarmWRPubExport> listResult = new ArrayList<>();
+		ContinuousHolidayCheckResult data = erAlWorkRecordCheckService.checkContinuousHolidays(employeeID, datePeriod);
+		if(data.getCheckResult().isEmpty())
+			return Collections.emptyList();
+		data.getCheckResult().forEach((k,v)->{
+			ValueExtractAlarmWRPubExport value = new ValueExtractAlarmWRPubExport(
+					null,
+					employeeID,
+					k,
+					TextResource.localize("KAL010_1"),
+					TextResource.localize("KAL010_301"),
+					TextResource.localize("KAL010_302"),
+					"");
+			listResult.add(value);		
+		});
+		
+		return listResult;
 	}
 	
 	

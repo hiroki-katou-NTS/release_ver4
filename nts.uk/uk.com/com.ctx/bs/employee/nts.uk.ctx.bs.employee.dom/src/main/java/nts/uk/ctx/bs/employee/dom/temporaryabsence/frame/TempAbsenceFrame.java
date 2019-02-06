@@ -4,6 +4,8 @@
  *****************************************************************/
 package nts.uk.ctx.bs.employee.dom.temporaryabsence.frame;
 
+import java.math.BigDecimal;
+
 import lombok.Getter;
 import lombok.Setter;
 import nts.arc.layer.dom.AggregateRoot;
@@ -99,4 +101,15 @@ public class TempAbsenceFrame extends AggregateRoot{
 		
 		return true;
 	}
+
+	public TempAbsenceFrame(String companyId, int tempAbsenceFrNo, int useClassification,
+			String tempAbsenceFrName) {
+		super();
+		this.companyId = companyId;
+		this.tempAbsenceFrNo   = new TempAbsenceFrameNo(new BigDecimal(tempAbsenceFrNo));
+		this.useClassification = NotUseAtr.valueOf(useClassification) ;
+		this.tempAbsenceFrName = new TempAbsenceFrameName(tempAbsenceFrName);
+	}
+	
+	
 }

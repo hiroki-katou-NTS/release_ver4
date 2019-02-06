@@ -124,28 +124,6 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		}
 		Optional<WorkingConditionItem> optWorkingCondition = workingCondition.getBySidAndStandardDate(sid, ymd);
 		String companyId = AppContexts.user().companyId();
-		if(integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode() != null
-				&& integrationOfDaily.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
-			TimeLeavingOfDailyPerformance timeInfor = reflectWorkInfor.createStamp(companyId, 
-					integrationOfDaily.getWorkInformation(),
-					optWorkingCondition,
-					integrationOfDaily.getAttendanceLeave().isPresent() ? integrationOfDaily.getAttendanceLeave().get() : null,
-					sid,
-					ymd,
-					null);
-			if(!integrationOfDaily.getAttendanceLeave().isPresent()) {
-				//日別実績の出退勤
-				Optional<TimeLeavingOfDailyPerformance> findByKeyTimeLeaving = timeLeaving.findByKey(sid, ymd);
-				if(!findByKeyTimeLeaving.isPresent()) {
-					timeLeaving.add(timeInfor);
-				}
-			} else {
-				timeLeaving.update(timeInfor);
-			}
-			integrationOfDaily.setAttendanceLeave(Optional.of(timeInfor));	
-		}
-		
-		
 		//就業時間帯の休憩時間帯を日別実績に反映する
 		integrationOfDaily = this.updateBreakTimeInfor(sid, ymd, integrationOfDaily, companyId);
 		if(integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode() != null) {

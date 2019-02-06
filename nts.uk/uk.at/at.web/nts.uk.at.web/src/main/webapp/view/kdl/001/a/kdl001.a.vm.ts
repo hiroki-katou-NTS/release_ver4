@@ -51,6 +51,7 @@ module nts.uk.at.view.kdl001.a {
                 nts.uk.ui.block.invisible();
                 kdl001.a.service.findByCodeList(self.selectAbleCodeList())
                     .done(function(data) {
+                        data = _.sortBy(data, (item: any) => { return item.code; });
                             self.bindItemList(data);
                         if (!nts.uk.util.isNullOrEmpty(self.selectAbleItemList())) {
                             if (nts.uk.util.isNullOrEmpty(self.selectedCodeList())) {
@@ -96,6 +97,7 @@ module nts.uk.at.view.kdl001.a {
                 }
                 kdl001.a.service.findByTime(command)
                     .done(function(data) {
+                        data = _.sortBy(data, (item: any) => { return item.code; });
                         self.selectAbleItemList(data);
                         if (!nts.uk.util.isNullOrEmpty(self.selectAbleItemList())) {
                             self.selectedCodeList([_.first(self.selectAbleItemList()).code]);
@@ -120,6 +122,7 @@ module nts.uk.at.view.kdl001.a {
                 self.endTime('');
                 kdl001.a.service.findByCodeList(self.selectAbleCodeList())
                     .done(function(data) {
+                        data = _.sortBy(data, (item: any) => { return item.code; });
                         self.bindItemList(data);
                         if (!nts.uk.util.isNullOrEmpty(self.selectAbleItemList())) {
                             if (nts.uk.util.isNullOrEmpty(self.selectedCodeList())) {

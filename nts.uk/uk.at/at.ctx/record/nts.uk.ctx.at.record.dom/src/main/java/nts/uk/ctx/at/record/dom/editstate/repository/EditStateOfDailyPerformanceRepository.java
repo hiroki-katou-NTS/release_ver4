@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 public interface EditStateOfDailyPerformanceRepository {
@@ -13,6 +14,8 @@ public interface EditStateOfDailyPerformanceRepository {
 	void delete(String employeeId, GeneralDate ymd);
 	
 	void deleteByListEmployeeId(List<String> employeeIds, List<GeneralDate> processingYmds);
+	
+	void deleteBy(List<String> employeeIds, List<GeneralDate> processingYmds);
 	
 	void add(List<EditStateOfDailyPerformance> editStates);
 	
@@ -33,4 +36,6 @@ public interface EditStateOfDailyPerformanceRepository {
 	void updateByKeyFlush(List<EditStateOfDailyPerformance> editStates);
 
 	void deleteByListItemId(String employeeId, GeneralDate ymd, List<Integer> itemIdList);
+	
+	List<EditStateOfDailyPerformance> findByEditState(String sid, GeneralDate ymd, List<Integer> ids, EditStateSetting editState);
 }

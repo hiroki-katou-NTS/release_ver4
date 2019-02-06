@@ -14,7 +14,9 @@ public enum WorkRecordFixedCheckItem {
 	
 	DATA_CHECK(4,"管理者未確認"),
 	
-	ADMINISTRATOR_NOT_CONFIRMED(5,"データのチェック");
+	ADMINISTRATOR_NOT_CONFIRMED(5,"データのチェック"),
+	
+	CONTINUOUS_VATATION_CHECK(6,"連続休暇チェック");
 	
 	public int value;
 	

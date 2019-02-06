@@ -12,9 +12,8 @@ import nts.uk.ctx.sys.gateway.dom.singlesignon.UseAtr;
 @Getter
 public class RemoveOtherSysAccountCommand {
 
-	// ユーザID
-	/** The user id. */
-	private String userId;
+	/** The employee id. */
+	private String employeeId;
 
 	/** The company code. */
 	// 会社コード

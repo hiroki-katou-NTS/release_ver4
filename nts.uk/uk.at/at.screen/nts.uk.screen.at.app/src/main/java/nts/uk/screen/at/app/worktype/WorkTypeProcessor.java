@@ -2,6 +2,7 @@ package nts.uk.screen.at.app.worktype;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -9,6 +10,7 @@ import javax.inject.Inject;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.worktype.DeprecateClassification;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
+import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
@@ -16,7 +18,8 @@ public class WorkTypeProcessor {
 
 	@Inject
 	private WorkTypeQueryRepository workTypeQueryRepository;
-	
+	@Inject
+	private SyEmployeePub syEmpPub;
 	/**
 	 * Find work type by company for KAF022
 	 * @param companyId
@@ -88,11 +91,20 @@ public class WorkTypeProcessor {
 	 * @param companyId
 	 * @return
 	 */
-	public List<WorkTypeDto> findWorkTypeAll(){
+    public List<WorkTypeDto> findWorkTypeAll(){
 		String companyId = AppContexts.user().companyId();
-		return this.workTypeQueryRepository.findAllWorkType(companyId);
+        return this.workTypeQueryRepository.findAllWorkType(companyId);
 	}
 	
+	public WorkTypeOut findWorkTypeAllKMK007(){
+		String companyId = AppContexts.user().companyId();
+		List<WorkTypeDto> lstWorkType =  workTypeQueryRepository.findAllWorkType(companyId);
+		//会社IDから使用する休業枠（休職を除く）を取得する - RQ546
+		List<HdWorkDto> rq546 = syEmpPub.getTempAbsenceFrameByCid(companyId).stream()
+				.map(c -> new HdWorkDto(c.getTempAbsenceFrNo(), c.getTempAbsenceFrName()))
+				.collect(Collectors.toList());
+		return new WorkTypeOut(lstWorkType, rq546);
+	}
 	/**
 	 * Find work type by work type attribute
 	 * @param workTypeAtr 分類

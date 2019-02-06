@@ -6,8 +6,10 @@ package nts.uk.ctx.at.record.app.find.optitem;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -99,7 +101,7 @@ public class OptionalItemFinder {
 	 */
 	private void setNameAndOrder(List<FormulaDto> listFormula, OptionalItem optionalItem) {
 		// Get list attendance item
-		Map<Integer, String> attendanceItems = this.getAttendanceItems(optionalItem.getPerformanceAtr());
+		Map<Integer, AttendanceItemDetailDto> attendanceItems = this.getAttendanceItems(optionalItem.getPerformanceAtr());
 
 		// Get list formula order.
 		Map<FormulaId, Integer> orders = this.getFormulaOrders(AppContexts.user().companyId(),
@@ -114,10 +116,13 @@ public class OptionalItemFinder {
 			if (item.getCalcAtr() == CalculationAtr.ITEM_SELECTION.value) {
 
 				item.getItemSelection().getAttendanceItems().forEach(attendanceItem -> {
-					String attendanceName = attendanceItems.get(attendanceItem.getAttendanceItemId());
+					String attendanceName = attendanceItems.get(attendanceItem.getAttendanceItemId()).getName();
+					Integer attendanceDisplayNumber = attendanceItems.get(attendanceItem.getAttendanceItemId())
+							.getDisplayNumber();
 					String operatorText = OperatorAtr.valueOf(attendanceItem.getOperator()).description;
 					attendanceItem.setAttendanceItemName(attendanceName);
 					attendanceItem.setOperatorText(operatorText);
+					attendanceItem.setAttendanceItemDisplayNumber(attendanceDisplayNumber);
 				});
 
 			}
@@ -131,42 +136,43 @@ public class OptionalItemFinder {
 	 * @param atr the atr
 	 * @return the attendance items
 	 */
-	private Map<Integer, String> getAttendanceItems(PerformanceAtr atr) {
-		Map<Integer, String> result;
+	private Map<Integer, AttendanceItemDetailDto> getAttendanceItems(PerformanceAtr atr) {
+		Map<Integer, AttendanceItemDetailDto> result;
 		switch (atr) {
 		case DAILY_PERFORMANCE: {
-			result = this.dailyRepo.getList(AppContexts.user().companyId()).stream()
-					.collect(Collectors.toMap(DailyAttendanceItem::getAttendanceItemId,
-							item -> item.getAttendanceName().v()));
-
+			List<DailyAttendanceItem> items = this.dailyRepo.getList(AppContexts.user().companyId());
+			
 			// get attd item name list
 			List<DailyAttendanceItemNameAdapterDto> attdItemNames = this.dailyAttdItemNameAdapter
-					.getDailyAttendanceItemName(new ArrayList<Integer>(result.keySet()));
+					.getDailyAttendanceItemName(items.stream().map(DailyAttendanceItem::getAttendanceItemId).collect(Collectors.toList()));
+			
+			Map<Integer, String> nameMap = attdItemNames.stream()
+					.collect(Collectors.toMap(DailyAttendanceItemNameAdapterDto::getAttendanceItemId,
+							DailyAttendanceItemNameAdapterDto::getAttendanceItemName));
 
-			// set attendance item name
-			attdItemNames.forEach(item -> {
-				result.replace(item.getAttendanceItemId(), item.getAttendanceItemName());
-			});
+			result = items.stream().collect(
+					Collectors.toMap(DailyAttendanceItem::getAttendanceItemId, item -> AttendanceItemDetailDto.builder()
+							.name(nameMap.get(item.getAttendanceItemId())).displayNumber(item.getDisplayNumber()).build()));
+
 			break;
 		}
 
 		case MONTHLY_PERFORMANCE: {
-			result = this.monthlyRepo.findAll(AppContexts.user().companyId()).stream()
-					.collect(Collectors.toMap(MonthlyAttendanceItem::getAttendanceItemId,
-							item -> item.getAttendanceName().v()));
-
 			
-			// get attd item name list
-			List<AttItemName> attdItemNames = this.attdItemNameAdapter
-					.getNameOfAttendanceItem(new ArrayList<Integer>(result.keySet()), TypeOfItemImport.Monthly);
-//			// get attd item name list
-//			List<AttendanceItemName> attdItemNames = monthlyAttdItemNameAdapter
-//					.getNameOfMonthlyAttendanceItem(new ArrayList<Integer>(result.keySet()));
+			List<MonthlyAttendanceItem> items = this.monthlyRepo.findAll(AppContexts.user().companyId());
 
-			// set attendance item name
-			attdItemNames.forEach(item -> {
-				result.replace(item.getAttendanceItemId(), item.getAttendanceItemName());
-			});
+			// get attd item name list
+			List<AttItemName> attdItemNames = this.attdItemNameAdapter.getNameOfAttendanceItem(
+					items.stream().map(MonthlyAttendanceItem::getAttendanceItemId).collect(Collectors.toList()),
+					TypeOfItemImport.Monthly);
+
+			Map<Integer, String> nameMap = attdItemNames.stream()
+					.collect(Collectors.toMap(AttItemName::getAttendanceItemId, AttItemName::getAttendanceItemName));
+
+			result = items.stream()
+					.collect(Collectors.toMap(MonthlyAttendanceItem::getAttendanceItemId,
+							item -> AttendanceItemDetailDto.builder().name(nameMap.get(item.getAttendanceItemId()))
+									.displayNumber(item.getDisplayNumber()).build()));
 			break;
 		}
 

@@ -8,11 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,6 +35,8 @@ import nts.uk.ctx.bs.employee.dom.jobtitle.affiliate.AffJobTitleHistoryItem;
 import nts.uk.ctx.bs.employee.dom.jobtitle.affiliate.AffJobTitleHistoryItemRepository;
 //import nts.uk.ctx.bs.employee.dom.jobtitle.affiliate.AffJobTitleHistoryRepository;
 import nts.uk.ctx.bs.employee.dom.temporaryabsence.TempAbsHistRepository;
+import nts.uk.ctx.bs.employee.dom.temporaryabsence.frame.TempAbsenceFrame;
+import nts.uk.ctx.bs.employee.dom.temporaryabsence.frame.TempAbsenceRepositoryFrame;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistory;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryItem;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryItemRepository;
@@ -55,6 +55,7 @@ import nts.uk.ctx.bs.employee.pub.employee.JobClassification;
 import nts.uk.ctx.bs.employee.pub.employee.MailAddress;
 import nts.uk.ctx.bs.employee.pub.employee.StatusOfEmployeeExport;
 import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
+import nts.uk.ctx.bs.employee.pub.employee.TempAbsenceFrameExport;
 import nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub;
 import nts.uk.ctx.bs.person.dom.person.info.Person;
 import nts.uk.ctx.bs.person.dom.person.info.PersonRepository;
@@ -104,6 +105,9 @@ public class SyEmployeePubImp implements SyEmployeePub {
 
 	@Inject
 	private TempAbsHistRepository tempAbsHistRepository;
+	
+	@Inject
+	private TempAbsenceRepositoryFrame tempAbsenceRepoFrame;
 
 //	@Inject
 //	private AffJobTitleHistoryRepository affJobRep;
@@ -530,6 +534,34 @@ public class SyEmployeePubImp implements SyEmployeePub {
 		});
 		return lstresult;
 	}
+	
+	@Override
+	public List<EmpOfLoginCompanyExport> getActiceEmpsOfLoginCompany(String cid) {
+
+		// lây toàn bộ nhân viên theo cid
+		List<EmployeeDataMngInfo> lstEmp = empDataMngRepo.getAllByCid(cid).stream()
+															.filter(e -> e.getDeletedStatus() == EmployeeDeletionAttr.NOTDELETED)
+															.collect(Collectors.toList());
+		
+		if (lstEmp.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<String> lstpid = lstEmp.stream().map(m -> m.getPersonId()).collect(Collectors.toList());
+
+		Map<String, Person> personMap = personRepository.getPersonByPersonIds(lstpid).stream()
+				.collect(Collectors.toMap(x -> x.getPersonId(), x -> x));
+		List<EmpOfLoginCompanyExport> lstresult = new ArrayList<>();
+		lstEmp.forEach(m -> {
+			EmpOfLoginCompanyExport emp = new EmpOfLoginCompanyExport();
+			emp.setScd(m.getEmployeeCode().v());
+			emp.setSid(m.getEmployeeId());
+			emp.setBussinesName(personMap.get(m.getPersonId()).getPersonNameGroup().getBusinessName().v());
+			lstresult.add(emp);
+
+		});
+		return lstresult;
+	}
 
 	@Override
 	public EmployeeBasicExport getEmpBasicBySId(String sId) {
@@ -819,6 +851,17 @@ public class SyEmployeePubImp implements SyEmployeePub {
 			result.setEmployeeId(employee.getEmployeeId());
 
 			return result;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<TempAbsenceFrameExport> getTempAbsenceFrameByCid(String cid) {
+		List<TempAbsenceFrame> listTempAbsenceFrame = tempAbsenceRepoFrame.findByCidForReq546(cid);
+		if (listTempAbsenceFrame.isEmpty())
+			return new ArrayList<>();
+		return listTempAbsenceFrame.stream().map(i -> {
+			return new TempAbsenceFrameExport(i.getCompanyId(), i.getTempAbsenceFrNo().v().intValue(),
+					i.getUseClassification().value, i.getTempAbsenceFrName().toString());
 		}).collect(Collectors.toList());
 	}
 }

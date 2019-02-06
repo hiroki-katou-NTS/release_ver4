@@ -1,5 +1,9 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.absence;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
@@ -11,7 +15,12 @@ import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdat
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
+import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
+import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
+import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
+import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.ctx.at.shared.dom.worktype.algorithm.JudgmentWorkTypeService;
@@ -31,6 +40,8 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	private WorkInformationRepository workRepository;
 	@Inject
 	private WorkTypeIsClosedService workTypeRepo;
+	@Inject
+	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDailyRepos;
 	@Override
 	public boolean absenceReflect(WorkChangeCommonReflectPara param, boolean isPre) {
 		try {
@@ -104,46 +115,57 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 			boolean temp = judgmentService.checkWorkTypeIsHD(workTypeCode);
 			//打刻元情報をチェックする
 			if(temp) {
-				//2019.01.16　dudt　fix bug 105518 　↓
-				/*Optional<TimeLeavingOfDailyPerformance> optTimeLeavingOfDaily = timeLeavingOfDailyRepos.findByKey(employeeId, baseDate);
+				Optional<TimeLeavingOfDailyPerformance> optTimeLeavingOfDaily = timeLeavingOfDailyRepos.findByKey(employeeId, baseDate);
 				if(optTimeLeavingOfDaily.isPresent()) {
 					TimeLeavingOfDailyPerformance timeLeavingOfDaily = optTimeLeavingOfDaily.get();
-					List<TimeLeavingWork> timeLeavingWorks = timeLeavingOfDaily.getTimeLeavingWorks().stream()
-							.filter(x -> x.getWorkNo().v() == 1).collect(Collectors.toList());
-					if(!timeLeavingWorks.isEmpty()) {
-						TimeLeavingWork timeLeaving1 = timeLeavingWorks.get(0);
-						Optional<TimeActualStamp> optAttendanceStamp = timeLeaving1.getAttendanceStamp();
-						if(optAttendanceStamp.isPresent()) {
-							TimeActualStamp attendanceStamp = optAttendanceStamp.get();
-							Optional<WorkStamp> optWorkStamp = attendanceStamp.getStamp();
-							if(optWorkStamp.isPresent()) {
-								WorkStamp workStamp = optWorkStamp.get();
-								if(workStamp.getStampSourceInfo() == StampSourceInfo.SPR) {
-									return false;
-								}
-							}
-						}
-						 Optional<TimeActualStamp> optLeaveStamp = timeLeaving1.getLeaveStamp();
-						 if(optLeaveStamp.isPresent()) {
-							 TimeActualStamp leaveStamp = optLeaveStamp.get();
-							 Optional<WorkStamp> optStamp = leaveStamp.getStamp();
-							 if(optStamp.isPresent()) {
-								 WorkStamp stamp = optStamp.get();
-								 if(stamp.getStampSourceInfo() == StampSourceInfo.SPR) {
-									 return false;
-								 }
-							 }
-						 }
-						
+					if(checkReflectNenkyuTokkyu(timeLeavingOfDaily, 1)) {
+						return checkReflectNenkyuTokkyu(timeLeavingOfDaily, 2);
+					} else {
+						return false;
 					}
-				}*/				
-				return false;
-				//2019.01.16　dudt　fix bug 105518 　↑
+				}
 			}
 			
 			return true;
 		}
 		return false;
+	}
+	/**
+	 * 打刻元情報をチェックする
+	 * @param timeLeavingOfDaily
+	 * @param workNo
+	 * @return
+	 */
+	private boolean checkReflectNenkyuTokkyu(TimeLeavingOfDailyPerformance timeLeavingOfDaily, int workNo) {
+		List<TimeLeavingWork> timeLeavingWorks = timeLeavingOfDaily.getTimeLeavingWorks().stream()
+				.filter(x -> x.getWorkNo().v() == workNo).collect(Collectors.toList());
+		if(!timeLeavingWorks.isEmpty()) {
+			TimeLeavingWork timeLeaving1 = timeLeavingWorks.get(0);
+			Optional<TimeActualStamp> optAttendanceStamp = timeLeaving1.getAttendanceStamp();
+			if(optAttendanceStamp.isPresent()) {
+				TimeActualStamp attendanceStamp = optAttendanceStamp.get();
+				Optional<WorkStamp> optWorkStamp = attendanceStamp.getStamp();
+				if(optWorkStamp.isPresent()) {
+					WorkStamp workStamp = optWorkStamp.get();
+					if(workStamp.getStampSourceInfo() == StampSourceInfo.SPR) {
+						return false;
+					}
+				}
+			}
+			Optional<TimeActualStamp> optLeaveStamp = timeLeaving1.getLeaveStamp();
+			if(optLeaveStamp.isPresent()) {
+				TimeActualStamp leaveStamp = optLeaveStamp.get();
+				Optional<WorkStamp> optStamp = leaveStamp.getStamp();
+				if(optStamp.isPresent()) {
+					WorkStamp stamp = optStamp.get();
+					if(stamp.getStampSourceInfo() == StampSourceInfo.SPR) {
+						return false;
+					}
+				}
+			}
+			
+		}
+		return true;
 	}
 	
 

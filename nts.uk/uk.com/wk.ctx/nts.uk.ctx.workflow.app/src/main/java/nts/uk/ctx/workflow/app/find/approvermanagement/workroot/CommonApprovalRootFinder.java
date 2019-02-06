@@ -515,18 +515,11 @@ public class CommonApprovalRootFinder {
 		String companyId     = AppContexts.user().companyId();
 		String employeeCode  = param.getEmployeeCode();
 		GeneralDate baseDate = Objects.isNull(param.getBaseDate()) ? GeneralDate.today() : param.getBaseDate();
-		Optional<EmployeeWithRangeLoginImport> employeeWithRange = null;
+		Optional<EmployeeWithRangeLoginImport> employeeWithRange = Optional.empty();
 
-		// 承認権限がある社員
-		if (param.isHasAuthority()) {
-			// ログイン者の社員参照範囲で社員コードから社員を取得する
-			// RequestList314
-			employeeWithRange = this.employeeWithRangeAdapter.findEmployeeByAuthorizationAuthority(companyId, employeeCode);
-		} else {
-			// 社員コードから承認権限ありの社員のみ取得する
-			// RequestList315
-			employeeWithRange = this.employeeWithRangeAdapter.findByEmployeeByLoginRange(companyId, employeeCode, baseDate);
-		}
+		//社員コードから承認権限ありの社員のみ取得する
+		// RequestList315
+		employeeWithRange = this.employeeWithRangeAdapter.findByEmployeeByLoginRange(companyId, employeeCode, baseDate);
 
 		if (!employeeWithRange.isPresent())
 			throw new BusinessException("Msg_1078");

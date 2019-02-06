@@ -23,6 +23,24 @@ module nts.uk.time {
             return year + "年 " + month + " 月";
         return year;
     }
+    
+    export function today (): moment.Moment {
+        let todayDate ="";
+        nts.uk.request.syncAjax("com", "server/time/today/").done(function(res) {
+            todayDate = res;
+        }).fail(function() {
+        });
+        return moment.utc(todayDate, "yyyy/MM/dd");
+    }
+    
+    export function now (): moment.Moment {
+        let nowDateTime ="";
+        nts.uk.request.syncAjax("com", "server/time/now/").done(function(res) {
+            nowDateTime = res;
+        }).fail(function() {
+        });
+        return moment.utc(nowDateTime);
+    }
 
     export class JapanYearMonth {
         empire: string;

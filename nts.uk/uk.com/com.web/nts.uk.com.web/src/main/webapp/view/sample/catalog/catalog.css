@@ -90,6 +90,34 @@ table.matrix th,td {
 	padding: 5px;
 }
 
+.important h3 {
+	position: relative;
+}
+.important h3:after{
+	background: greenyellow;
+	content:'Important';
+	position: absolute;
+	top: -13px;
+	left: 64px;
+	border-radius: 20px;
+	padding: 5px 15px;
+	color: red;
+}
+.important h3:before{
+	border-right: 2em solid greenyellow;
+    border-top: 0.5em solid transparent;
+    border-bottom: 1em solid transparent;
+    content: '';
+    position:absolute;
+    top: -7px;
+    left: 43px;
+}
+.important b {
+	color: red;
+	opacity: 0.8;
+	text-decoration: underline;
+}
+
 /*** Theme ***/
 /* Valentine */
 /*html, body{background: #ffdddd url(valentine-bg.jpg) center center; background-size: 100% auto; background-attachment: fixed;}

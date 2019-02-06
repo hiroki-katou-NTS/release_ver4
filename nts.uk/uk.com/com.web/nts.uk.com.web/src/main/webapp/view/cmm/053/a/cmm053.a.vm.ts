@@ -35,7 +35,8 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         tabindex: number = -1;
         isInitDepartment: boolean = true;
         isInitdailyApproval: boolean = true;
-
+        displayDailyApprover: KnockoutObservable<boolean> = ko.observable(false);
+        checkSubscribe: KnockoutObservable<STATUS_SUBSCRIBE> = ko.observable(null);
         constructor() {
             let self = this;
 
@@ -103,25 +104,53 @@ module nts.uk.com.view.cmm053.a.viewmodel {
 
             //社員コードを入力する
             self.settingManager().departmentCode.subscribe(value => {
-                if (value) {
-                    if (!self.isInitDepartment && value.length == 6) {
-                        self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
+                $('#A2_7').ntsError('clear');
+                setTimeout(function() {
+                    if (value == '') {
+                        return;
                     }
-                }
-                self.isInitDepartment = false;
+                    if (value) {
+                        if (!self.isInitDepartment && value.length == 6) {
+                            self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
+                            self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
+                        }
+                    }
+                    self.isInitDepartment = false;
+                }, 100);
+            });
+            //focus out
+            $(document).on('blur', '#A2_7, #A2_10', (evt: Event) => {
+                setTimeout(function() {
+                    if ($(evt.target).attr('id') == 'A2_7') {
+                        if (evt.target.value == self.settingManager().departmentCode()) {
+                            self.settingManager().departmentCode.valueHasMutated();
+                        }
+                    } else if ($(evt.target).attr('id') == 'A2_10') {
+                        if (evt.target.value == self.settingManager().dailyApprovalCode()) {
+                            self.settingManager().dailyApprovalCode.valueHasMutated();
+                        }
+                    }
+                }, 200);
             });
 
             //社員コードを入力する
             self.settingManager().dailyApprovalCode.subscribe(value => {
-                if (value) {
-                    if (!self.isInitdailyApproval && value.length == 6) {
-                        self.getEmployeeByCode(value, APPROVER_TYPE.DAILY_APPROVER);
+                $('#A2_10').ntsError('clear');
+                setTimeout(function() {
+                    if (value == '') {
+                        return;
                     }
-                } else {
-                    self.settingManager().dailyApproverId("");  
-                    self.settingManager().dailyApprovalName("");
-                }
-                self.isInitdailyApproval = false;
+                    if (value) {
+                        if (!self.isInitdailyApproval && value.length == 6) {
+                            self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
+                            self.getEmployeeByCode(value, APPROVER_TYPE.DAILY_APPROVER);
+                        }
+                    } else {
+                        self.settingManager().dailyApproverId("");
+                        self.settingManager().dailyApprovalName("");
+                    }
+                    self.isInitdailyApproval = false;
+                }, 200);
             });
         }
 
@@ -164,6 +193,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                     self.settingManager().closingStartDate(result.closingStartDate);
                     self.settingManager().hasAuthority(result.hasAuthority);
                     self.settingManager().hasHistory(!result.newMode);
+                    self.displayDailyApprover(result.displayDailyApprover);
                     if (result.newMode) {
                         self.settingNewMode();
                     } else {
@@ -181,9 +211,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         //「新規」ボタンを押下
         addSettingManager_click(data) {
             let self = this;
-            block.invisible();
             self.settingNewMode();
-            block.clear();
         }
 
         //登録する
@@ -191,6 +219,12 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         regSettingManager_click(data) {
             let self = this;
             $('.nts-input').trigger("validate");
+            setTimeout(function(){
+               let tc = setInterval(function(){
+               if(self.checkSubscribe() != STATUS_SUBSCRIBE.PENDING) {
+                   clearInterval(tc);
+                   if(STATUS_SUBSCRIBE.DONE){
+                       
             if (!nts.uk.ui.errors.hasError()) {
                 let startDate = new Date(self.settingManager().startDate());
                 let closingStartDate = new Date(self.settingManager().closingStartDate());
@@ -202,33 +236,61 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                 } else {
                     //入力承認者の承認権限をチェックする
                     if (!self.settingManager().hasAuthority()) {
-                        self.getEmployeeByCode(self.settingManager().departmentCode(), APPROVER_TYPE.DEPARTMENT_APPROVER);
-                    }
-
-                    if (!nts.uk.ui.errors.hasError()) {
-                        let command = ko.toJS(self.settingManager());
-                        command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
-                        command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
-                        //ドメインモデル「承認設定」．本人による承認をチェックする
-                        self.checkApprovalSetting(command).done(() => {
-                            if (self.screenMode() == EXECUTE_MODE.NEW_MODE) {
-                                self.callInsertHistoryService(command);
-                                return;
-                            }
-
-                            if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory()) {
-                                self.callUpdateHistoryService(command);
-                                return;
-                            }
-
-                            if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && !self.settingManager().hasHistory()) {
-                                self.callInsertHistoryService(command);
-                                return;
-                            }
-                        });
+                        self.getEmployeeByCode(self.settingManager().departmentCode(), APPROVER_TYPE.DEPARTMENT_APPROVER).done(()=>{
+                            if (!nts.uk.ui.errors.hasError()) {
+                                let command = ko.toJS(self.settingManager());
+                                command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
+                                command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
+                                //ドメインモデル「承認設定」．本人による承認をチェックする
+                                self.checkApprovalSetting(command).done(() => {
+                                    if (self.screenMode() == EXECUTE_MODE.NEW_MODE) {
+                                        self.callInsertHistoryService(command);
+                                        return;
+                                    }
+        
+                                    if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory()) {
+                                        self.callUpdateHistoryService(command);
+                                        return;
+                                    }
+        
+                                    if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && !self.settingManager().hasHistory()) {
+                                        self.callInsertHistoryService(command);
+                                        return;
+                                    }
+                                });
+                            }        
+                        });      
+                    } else {
+                        if (!nts.uk.ui.errors.hasError()) {
+                            let command = ko.toJS(self.settingManager());
+                            command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
+                            command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
+                            //ドメインモデル「承認設定」．本人による承認をチェックする
+                            self.checkApprovalSetting(command).done(() => {
+                                if (self.screenMode() == EXECUTE_MODE.NEW_MODE) {
+                                    self.callInsertHistoryService(command);
+                                    return;
+                                }
+    
+                                if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory()) {
+                                    self.callUpdateHistoryService(command);
+                                    return;
+                                }
+    
+                                if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && !self.settingManager().hasHistory()) {
+                                    self.callInsertHistoryService(command);
+                                    return;
+                                }
+                            });
+                        }      
                     }
                 }
             }
+            }
+             }
+            }, 300);
+            
+            },200);
         }
 
         /**
@@ -324,9 +386,10 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         }
 
         //社員コードを入力する
-        getEmployeeByCode(employeeCode: any, approverType:number) {
+        getEmployeeByCode(employeeCode: any, approverType:number): JQueryPromise<any> {
             let self = this;
-            block.invisible();
+            var dfd = $.Deferred();
+//            block.invisible();
             let paramFind = {
                 employeeCode: employeeCode,
                 hasAuthority: self.settingManager().hasAuthority(),
@@ -344,17 +407,24 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                         self.settingManager().dailyApproverId(result.employeeID);
                     }
                 }
-                block.clear();
+                self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
+//                block.clear();
+                dfd.resolve();
             }).fail(error => {
+                self.checkSubscribe(STATUS_SUBSCRIBE.FAIL);
                 if (approverType == APPROVER_TYPE.DEPARTMENT_APPROVER) {
+                     $('#A2_7').ntsError('clear');
                     self.settingManager().departmentName('');
                     $('#A2_7').ntsError('set', { messageId: error.messageId});
                 } else {
+                    $('#A2_10').ntsError('clear');
                     self.settingManager().dailyApprovalName('');
                     $('#A2_10').ntsError('set', { messageId: error.messageId});
                 }
-                block.clear();
+//                block.clear();
+                dfd.reject();
             });
+            return dfd.promise();
         }
 
         settingNewMode() {
@@ -603,5 +673,10 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         periodStart: string; // 対象期間（開始)
         periodEnd: string; // 対象期間（終了）
         listEmployee: Array<EmployeeSearchDto>; // 検索結果
+    }
+    export enum STATUS_SUBSCRIBE{
+        PENDING = 0,
+        DONE = 1,
+        FAIL = 2
     }
 }

@@ -1863,7 +1863,8 @@ module nts.uk.at.view.kmk002.a {
 
                 // set result display
                 let result = '';
-                dto.attendanceItems.forEach(item => {
+                let sortAttdanceItems = _.sortBy(dto.attendanceItems,item=>item.attendanceItemDisplayNumber);
+                sortAttdanceItems.forEach(item => {
                     result += item.operatorText + ' ' + item.attendanceItemName + ' ';
                 });
 

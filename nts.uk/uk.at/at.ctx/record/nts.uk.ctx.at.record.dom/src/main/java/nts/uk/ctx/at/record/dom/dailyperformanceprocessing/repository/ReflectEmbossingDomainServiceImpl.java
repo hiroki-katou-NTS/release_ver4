@@ -507,10 +507,10 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 					// fixed lay tu a nam tren chuyen xuong
 					PCLogOnInfoOfDaily pcLogOnInfoOfDailyTemp = null;
 					if (pcLogOnInfoOfDaily == null) {
-						pcLogOnInfoOfDaily = reflectInOutPC(date, employeeId, pcLogOnInfoOfDailyTemp, worktNo,
+						pcLogOnInfoOfDaily = reflectInOutPC(companyId, date, employeeId, WorkInfo, pcLogOnInfoOfDailyTemp, worktNo,
 								inOrOutClass, x, lstStamp);
 					} else {
-						pcLogOnInfoOfDaily = reflectInOutPC(date, employeeId, pcLogOnInfoOfDaily, worktNo, inOrOutClass,
+						pcLogOnInfoOfDaily = reflectInOutPC(companyId, date, employeeId, WorkInfo, pcLogOnInfoOfDaily, worktNo, inOrOutClass,
 								x, lstStamp);
 					}
 
@@ -522,10 +522,10 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 					// fixed lay tu a nam tren chuyen xuong
 					PCLogOnInfoOfDaily pcLogOnInfoOfDailyTemp = null;
 					if (pcLogOnInfoOfDaily == null) {
-						pcLogOnInfoOfDaily = reflectInOutPC(date, employeeId, pcLogOnInfoOfDailyTemp, worktNo,
+						pcLogOnInfoOfDaily = reflectInOutPC(companyId, date, employeeId, WorkInfo, pcLogOnInfoOfDailyTemp, worktNo,
 								inOrOutClass, x, lstStamp);
 					} else {
-						pcLogOnInfoOfDaily = reflectInOutPC(date, employeeId, pcLogOnInfoOfDaily, worktNo, inOrOutClass,
+						pcLogOnInfoOfDaily = reflectInOutPC(companyId, date, employeeId, WorkInfo, pcLogOnInfoOfDaily, worktNo, inOrOutClass,
 								x, lstStamp);
 					}
 				}
@@ -548,10 +548,10 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 					// fixed lay tu a nam tren chuyen xuong
 					PCLogOnInfoOfDaily pcLogOnInfoOfDailyTemp = null;
 					if (pcLogOnInfoOfDaily == null) {
-						pcLogOnInfoOfDaily = reflectInOutPC(date, employeeId, pcLogOnInfoOfDailyTemp, worktNo,
+						pcLogOnInfoOfDaily = reflectInOutPC(companyId, date, employeeId, WorkInfo, pcLogOnInfoOfDailyTemp, worktNo,
 								inOrOutClass, x, lstStamp);
 					} else {
-						pcLogOnInfoOfDaily = reflectInOutPC(date, employeeId, pcLogOnInfoOfDaily, worktNo, inOrOutClass,
+						pcLogOnInfoOfDaily = reflectInOutPC(companyId, date, employeeId, WorkInfo, pcLogOnInfoOfDaily, worktNo, inOrOutClass,
 								x, lstStamp);
 					}
 
@@ -563,10 +563,10 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 					// fixed lay tu a nam tren chuyen xuong
 					PCLogOnInfoOfDaily pcLogOnInfoOfDailyTemp = null;
 					if (pcLogOnInfoOfDaily == null) {
-						pcLogOnInfoOfDaily = reflectInOutPC(date, employeeId, pcLogOnInfoOfDailyTemp, worktNo,
+						pcLogOnInfoOfDaily = reflectInOutPC(companyId, date, employeeId, WorkInfo, pcLogOnInfoOfDailyTemp, worktNo,
 								inOrOutClass, x, lstStamp);
 					} else {
-						pcLogOnInfoOfDaily = reflectInOutPC(date, employeeId, pcLogOnInfoOfDaily, worktNo, inOrOutClass,
+						pcLogOnInfoOfDaily = reflectInOutPC(companyId, date, employeeId, WorkInfo, pcLogOnInfoOfDaily, worktNo, inOrOutClass,
 								x, lstStamp);
 					}
 				}
@@ -602,7 +602,7 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 	}
 
 	// PCログオンログオフを反映する
-	PCLogOnInfoOfDaily reflectInOutPC(GeneralDate date, String employeeId, PCLogOnInfoOfDaily pcLogOnInfoOfDailyTemp,
+	PCLogOnInfoOfDaily reflectInOutPC(String companyId, GeneralDate date, String employeeId, WorkInfoOfDailyPerformance workInfo, PCLogOnInfoOfDaily pcLogOnInfoOfDailyTemp,
 			int worktNo, String inOrOutClass, StampItem x, List<StampItem> lstStamp) {
 		PCLogOnInfoOfDaily pcLogOnInfoOfDaily = null;
 		int indexPCLogOnInfo = -1;
@@ -635,7 +635,7 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 		}
 
 		// 反映するか判断する
-		boolean determineReflect = this.determineReflect(inOrOutClass, x, pcLogonLogoffReflectOuput);
+		boolean determineReflect = this.determineReflect(companyId, workInfo, inOrOutClass, x, pcLogonLogoffReflectOuput, date, employeeId);
 
 		if (determineReflect) {
 			// 反映する
@@ -688,18 +688,41 @@ public class ReflectEmbossingDomainServiceImpl implements ReflectEmbossingDomain
 	}
 
 	// 反映するか判断する
-	boolean determineReflect(String inOrOutClass, StampItem x, PCLogonLogoffReflectOuput pcLogonLogoffReflectOuput) {
+	boolean determineReflect(String companyId, WorkInfoOfDailyPerformance workInfo, String inOrOutClass, StampItem x, PCLogonLogoffReflectOuput pcLogonLogoffReflectOuput, GeneralDate date, String employeeId) {
 		if (pcLogonLogoffReflectOuput == null) {
 			return true;
 		}
-		if ("PCログオン".equals(inOrOutClass)) {
-			if (x.getAttendanceTime().v() < pcLogonLogoffReflectOuput.getTimeOfDay().v()) {
-				return true;
+		Optional<WorkInfoOfDailyPerformance> WorkInfoOptional = workInfo != null ? Optional.of(workInfo) : this.workInforRepo.find(employeeId, date);
+		if (WorkInfoOptional.isPresent()) {
+			WorkInformation recordWorkInformation = WorkInfoOptional.get().getRecordInfo();
+			WorkTimeCode workTimeCode = recordWorkInformation.getWorkTimeCode();
+
+			PrioritySetting prioritySetting = this.getPrioritySetting(companyId, workTimeCode.v(),
+					"PCログオン".equals(inOrOutClass) ? StampPiorityAtr.PCLOGIN : StampPiorityAtr.PC_LOGOUT);
+			MultiStampTimePiorityAtr priorityAtr = null;
+			if (prioritySetting == null) {
+				priorityAtr = MultiStampTimePiorityAtr.valueOf(0);
+			} else {
+				priorityAtr = prioritySetting.getPriorityAtr();
 			}
-			return false;
-		}
-		if (x.getAttendanceTime().v() > pcLogonLogoffReflectOuput.getTimeOfDay().v()) {
-			return true;
+
+			AttendanceTime attendanceTime = x.getAttendanceTime();
+			TimeWithDayAttr timeDestination = pcLogonLogoffReflectOuput.getTimeOfDay();
+			if (priorityAtr.value == 0) {
+				if (timeDestination != null && (attendanceTime.v().intValue() >= timeDestination.v().intValue())) {
+					return false;
+				} else {
+					return true;
+				}
+
+			} else {
+				if (timeDestination == null || (timeDestination != null && (attendanceTime.v().intValue() > timeDestination.v().intValue()))) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+
 		}
 		return false;
 	}

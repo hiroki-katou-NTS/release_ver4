@@ -297,7 +297,7 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 
 	@Inject
 	private SpecificDateAttrOfDailyPerforRepo specificDateAttrOfDailyPerforRepo;
-
+	
 	@Resource
 	private SessionContext scContext;
 
@@ -1315,7 +1315,15 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 							workInfoOfDailyPerformanceUpdate, timeLeavingOptional, empCalAndSumExecLogID, reCreateAttr,
 							Optional.of(calAttrOfDailyPerformance), Optional.of(affiliationInforOfDailyPerfor),
 							Optional.empty());
+				} else {
+					// fixbug 105926
+					stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(
+							companyId, employeeID, day,
+							Optional.of(workInfoOfDailyPerformanceUpdate), null, empCalAndSumExecLogID, reCreateAttr,
+							Optional.of(calAttrOfDailyPerformance), Optional.of(affiliationInforOfDailyPerfor),
+							Optional.of(workTypeOfDailyPerformance));
 				}
+				
 				if (stampOutput.getErrMesInfos() == null || stampOutput.getErrMesInfos().isEmpty()) {
 					this.registerDailyPerformanceInfoService.registerDailyPerformanceInfo(companyId, employeeID, day,
 							stampOutput.getReflectStampOutput(), affiliationInforOfDailyPerfor,

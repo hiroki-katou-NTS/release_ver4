@@ -40,5 +40,23 @@ public class MonthlyWorkScheduleCondition {
 	/** The total output setting. */
 	// 月別勤務表用明細・合計出力設定
 	private WorkScheduleSettingTotalOutput totalOutputSetting;
+	
+	/**
+	 * Checks if is show workplace.
+	 *
+	 * @return the boolean
+	 */
+	public Boolean isShowWorkplace() {
+		return this.totalOutputSetting.isDetails() || this.totalOutputSetting.isWorkplaceTotal()
+				|| this.totalOutputSetting.isCumulativeWorkplace() || this.totalOutputSetting.isPersonalTotal();
+	}
 
+	/**
+	 * Checks if is show personal.
+	 *
+	 * @return the boolean
+	 */
+	public Boolean isShowPersonal() {
+		return this.totalOutputSetting.isDetails() || this.totalOutputSetting.isPersonalTotal();
+	}
 }

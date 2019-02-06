@@ -33,6 +33,7 @@ public class WorkTimeIsFluidWorkImpl implements WorkTimeIsFluidWork{
 		Optional<WorkTimeSetting> findByCode = workTimeSettingRepository.findByCode(companyId, workTimeCode);
 		if(!findByCode.isPresent()) {
 			workTimeForm = WorkTimeForm.FIXED;
+			return false;
 		}
 		WorkTimeSetting workTimeData = findByCode.get();
 		if(workTimeData.getWorkTimeDivision().getWorkTimeDailyAtr() == WorkTimeDailyAtr.FLEX_WORK) {

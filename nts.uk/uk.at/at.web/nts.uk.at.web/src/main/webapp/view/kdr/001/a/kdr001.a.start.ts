@@ -11,20 +11,6 @@ module nts.uk.at.view.kdr001.a {
                 $('#employeeSearch').ntsListComponent(self.lstPersonComponentOption).done(function() {
                 });
                 
-                let $startDate = $("#ccg001-search-period .ntsStartDatePicker"),
-                    $endDate = $("#ccg001-search-period .ntsEndDatePicker");
-                if ($startDate) {
-                    $startDate.change(function(data) {
-                        if(data.currentTarget.value == screenModel.startDateString()) return;
-                       screenModel.startDateString(data.currentTarget.value);
-                    });
-                }
-                if ($endDate) {
-                    $endDate.change(function(data) {
-                        screenModel.endDateString(data.currentTarget.value);
-                    });
-                }
-                
             });
             
             $('#A1_1').focus();
