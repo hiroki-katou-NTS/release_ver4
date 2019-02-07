@@ -23,4 +23,20 @@ public enum WorkTypeSetCheck {
 	
 	public final int value;
 
+	
+	/**
+	 * チェックしないであるか判定する
+	 * @return　チェックしないである
+	 */
+	public boolean isNoCheck() {
+		return this.equals(NO_CHECK);
+	}
+	
+	/**
+	 * チェックするであるか判定する
+	 * @return　チェックする
+	 */
+	public boolean isCheck() {
+		return this.equals(CHECK);
+	}
 }
