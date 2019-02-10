@@ -27,7 +27,7 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 
 /**
  * 月別実績の勤務日数
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class WorkDaysOfMonthly {
@@ -146,6 +146,7 @@ public class WorkDaysOfMonthly {
 	 * @param predetermineTimeSet 所定時間設定
 	 * @param isAttendanceDay 出勤しているかどうか
 	 * @param isTwoTimesStampExists 2回目の打刻が存在するかどうか
+	 * @param predTimeSetOnWeekday 所定時間設定（平日時）
 	 */
 	public void aggregate(
 			WorkingSystem workingSystem,
@@ -157,13 +158,15 @@ public class WorkDaysOfMonthly {
 			PayItemCountOfMonthly payItemCount,
 			PredetemineTimeSetting predetermineTimeSet,
 			boolean isAttendanceDay,
-			boolean isTwoTimesStampExists){
+			boolean isTwoTimesStampExists,
+			PredetemineTimeSetting predTimeSetOnWeekday){
 		
 		// 出勤日数の集計
 		this.attendanceDays.aggregate(workingSystem, workTypeDaysCountTable, isAttendanceDay);
 		
 		// 欠勤日数の集計
-		this.absenceDays.aggregate(workingSystem, workType, workTypeDaysCountTable, isAttendanceDay);
+		this.absenceDays.aggregate(workingSystem, workType, workTypeDaysCountTable, isAttendanceDay,
+				predetermineTimeSet, predTimeSetOnWeekday);
 		
 		// 所定日数の集計
 		this.predetermineDays.aggregate(workTypeDaysCountTable);
@@ -201,7 +204,8 @@ public class WorkDaysOfMonthly {
 		this.recruitmentDays.aggregate(workingSystem, workTypeDaysCountTable, isAttendanceDay);
 		
 		// 特別休暇日数の集計
-		this.specialVacationDays.aggregate(workingSystem, workType, workTypeDaysCountTable, isAttendanceDay);
+		this.specialVacationDays.aggregate(workingSystem, workType, workTypeDaysCountTable, isAttendanceDay,
+				predetermineTimeSet, predTimeSetOnWeekday);
 	}
 	
 	/**
