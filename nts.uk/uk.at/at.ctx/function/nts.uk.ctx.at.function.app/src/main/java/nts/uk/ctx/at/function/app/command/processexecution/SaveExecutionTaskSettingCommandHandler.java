@@ -130,6 +130,18 @@ public class SaveExecutionTaskSettingCommandHandler
 		taskSetting.validate();
 		GeneralDate startDate = command.getStartDate();
 		GeneralDate endDate2 = command.getEndDate();
+		
+		//sheet 補足資料⑤
+		//compare system date and system time
+		Integer timeSystem = GeneralDateTime.now().minutes()+GeneralDateTime.now().hours()*60;
+		if(startDate.before(GeneralDate.today())) {
+			if(command.getStartTime() < timeSystem) {
+				startDate = GeneralDate.today().addDays(1);
+			}else {
+				startDate = GeneralDate.today();
+			}
+				
+		}
 
 		val scheduletimeData = new ScheduledJobUserData();
 		scheduletimeData.put("companyId", companyId);
