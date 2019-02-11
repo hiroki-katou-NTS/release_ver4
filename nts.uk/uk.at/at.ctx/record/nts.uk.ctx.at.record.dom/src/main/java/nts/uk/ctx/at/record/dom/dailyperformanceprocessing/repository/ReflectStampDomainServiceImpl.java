@@ -328,9 +328,9 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 		// fake data
 		List<StampReflectTimezoneOutput> lstStampReflectTimezone = new ArrayList<>();
 		StampReflectTimezoneOutput stampReflectTimezoneOutput1 = new StampReflectTimezoneOutput(new WorkNo(1),
-				GoLeavingWorkAtr.GO_WORK, new TimeWithDayAttr(1440), new TimeWithDayAttr(0));
+				GoLeavingWorkAtr.GO_WORK, new TimeWithDayAttr(1740), new TimeWithDayAttr(300));
 		StampReflectTimezoneOutput stampReflectTimezoneOutput2 = new StampReflectTimezoneOutput(new WorkNo(1),
-				GoLeavingWorkAtr.LEAVING_WORK, new TimeWithDayAttr(1440), new TimeWithDayAttr(0));
+				GoLeavingWorkAtr.LEAVING_WORK, new TimeWithDayAttr(1740), new TimeWithDayAttr(300));
 		lstStampReflectTimezone.add(stampReflectTimezoneOutput1);
 		lstStampReflectTimezone.add(stampReflectTimezoneOutput2);
 		stampReflectRangeOutput.setLstStampReflectTimezone(lstStampReflectTimezone);
