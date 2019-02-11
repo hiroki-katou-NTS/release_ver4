@@ -13,6 +13,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.schedule.app.command.executionlog.CreateScheduleMasterCache;
@@ -111,13 +113,16 @@ public class ScheCreExeWorkTypeHandler {
 			WorkTimeGetterCommand commandWorkTimeGetter = commandWorktypeGetter.toWorkTime();
 			commandWorkTimeGetter.setWorkTypeCode(optWorktype.get().getWorktypeCode());
 			// 就業時間帯を取得する(lấy dữ liệu worktime)
-			Optional<String> optionalWorkTime = this.scheCreExeWorkTimeHandler.getWorktime(commandWorkTimeGetter, masterCache);
-
+			Pair<Boolean, Optional<String>> pair = this.scheCreExeWorkTimeHandler.getWorktime(commandWorkTimeGetter, masterCache);
+			// neu pair.getKey() == false nghia la khong tim duoc worktimeCode,
+			// da ghi errorLog, dung xu ly hien tai, chuyen sang ngay ke tiep
+			if (pair.getKey()) {
 				// update all basic schedule
 				this.scheCreExeBasicScheduleHandler.updateAllDataToCommandSave(command, dateInPeriod,
 						workingConditionItem.getEmployeeId(), optWorktype.get(),
-						optionalWorkTime.isPresent() ? optionalWorkTime.get() : null, masterCache,
-						listBasicSchedule, dateRegistedEmpSche);
+						pair.getValue().isPresent() ? pair.getValue().get() : null, masterCache, listBasicSchedule,
+						dateRegistedEmpSche);
+			}
 		}
 	}
 
