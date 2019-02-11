@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeRecordAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeRecordImport;
 import nts.uk.ctx.at.record.dom.adapter.request.application.ApprovalStatusRequestAdapter;
@@ -48,6 +49,8 @@ import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecordRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
@@ -78,6 +81,9 @@ public class RealityStatusService {
 
 	@Inject
 	private EmployeeDailyPerErrorRepository employeeDailyPerErrorRepo;
+	
+	@Inject
+	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;
 
 	/**
 	 * 承認状況職場実績起動
@@ -670,22 +676,25 @@ public class RealityStatusService {
 	private List<EmployeeErrorOuput> checkEmployeeErrorOnProcessingDate(String employeeId, GeneralDate startDate,
 			GeneralDate endDate) {
 		List<EmployeeErrorOuput> listEmpErrorOutput = new ArrayList<>();
-		List<GeneralDate> daysBetween = this.getDaysBetween(startDate, endDate);
-
+		
+		// 対応するドメインモデル「社員の日別実績エラー一覧」を取得する
 		List<EmployeeDailyPerError> listEmpDailyError = this.employeeDailyPerErrorRepo
 				.findByPeriodOrderByYmd(employeeId, new DatePeriod(startDate, endDate));
-		for (GeneralDate processingDate : daysBetween) {
-			boolean hasError = true;
-			if (listEmpDailyError.stream().filter(x -> x.getDate().equals(processingDate)).count() == 0) {
-				hasError = false;
+		
+		String companyID = AppContexts.user().companyId();
+		// 対応するドメインモデル「勤務実績のエラーアラーム」を取得する
+		for(EmployeeDailyPerError emp : listEmpDailyError){
+			List<ErrorAlarmWorkRecord> errorAlarmWorkRecordLst =  errorAlarmWorkRecordRepository.getListErAlByListCodeError(
+					companyID, Arrays.asList(emp.getErrorAlarmWorkRecordCode().v()));
+			if(!CollectionUtil.isEmpty(errorAlarmWorkRecordLst)){
+				listEmpErrorOutput.add(new EmployeeErrorOuput(emp.getDate(), true));
 			}
-			EmployeeErrorOuput result = new EmployeeErrorOuput(processingDate, hasError);
-			listEmpErrorOutput.add(result);
 		}
-
+		
 		return listEmpErrorOutput;
 	}
 
+	/*
 	private List<GeneralDate> getDaysBetween(GeneralDate startDate, GeneralDate endDate) {
 		List<GeneralDate> daysBetween = new ArrayList<>();
 
@@ -697,6 +706,7 @@ public class RealityStatusService {
 
 		return daysBetween;
 	}
+	*/
 	/**
 	 * 承認状況未確認チェック月別
 	 * @param 社員ID - sID
