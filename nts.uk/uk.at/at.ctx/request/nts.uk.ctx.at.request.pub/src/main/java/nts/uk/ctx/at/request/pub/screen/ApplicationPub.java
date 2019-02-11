@@ -34,4 +34,12 @@ public interface ApplicationPub {
 	 * @return
 	 */
 	public List<AppGroupExport> getApplicationGroupBySID(List<String> employeeID, GeneralDate startDate, GeneralDate endDate);
+	
+	/**
+	 * [No.556]遷移先申請画面一覧を取得する
+	 * RequestList #556
+	 * @param companyID
+	 * @return
+	 */
+	public List<AppWithOvertimeExport> getAppWithOvertimeInfo(String companyID);
 }

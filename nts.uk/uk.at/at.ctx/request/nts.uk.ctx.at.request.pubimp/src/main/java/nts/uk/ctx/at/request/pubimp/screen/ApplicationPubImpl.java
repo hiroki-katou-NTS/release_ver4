@@ -27,16 +27,19 @@ import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.ba
 import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.shift.businesscalendar.daycalendar.ObtainDeadlineDateAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.WkpHistImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.WorkplaceAdapter;
+import nts.uk.ctx.at.request.dom.application.overtime.OverTimeAtr;
 import nts.uk.ctx.at.request.dom.application.workchange.AppWorkChange;
 import nts.uk.ctx.at.request.dom.application.workchange.IAppWorkChangeRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispName;
 import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispNameRepository;
 //import nts.uk.ctx.at.request.dom.setting.company.displayname.HdAppDispNameRepository;
 import nts.uk.ctx.at.request.dom.setting.request.application.ApplicationDeadline;
 import nts.uk.ctx.at.request.dom.setting.request.application.ApplicationDeadlineRepository;
 import nts.uk.ctx.at.request.dom.setting.request.application.DeadlineCriteria;
 import nts.uk.ctx.at.request.pub.screen.AppGroupExport;
+import nts.uk.ctx.at.request.pub.screen.AppWithOvertimeExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationDeadlineExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationPub;
@@ -282,6 +285,34 @@ public class ApplicationPubImpl implements ApplicationPub {
 				result.add(y.getValue().get(0));
 			});
 		});
+		return result;
+	}
+	
+	@Override
+	public List<AppWithOvertimeExport> getAppWithOvertimeInfo(String companyID) {
+		List<AppWithOvertimeExport> result = new ArrayList<>();
+		// ドメインモデル「申請表示名」を取得する
+		List<AppDispName> appDispNameLst = appDispNameRepository.getAll();
+		for(AppDispName appDispName : appDispNameLst){
+			if(appDispName.getAppType()!=ApplicationType.OVER_TIME_APPLICATION){
+				// outputパラメータに値をセットする
+				result.add(new AppWithOvertimeExport(appDispName.getAppType().value, appDispName.getDispName().v(), null));
+			} else {
+				// outputパラメータに残業申請のモード別の値をセットする
+				result.add(new AppWithOvertimeExport(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.PREOVERTIME.name, 
+						OverTimeAtr.PREOVERTIME.value));
+				result.add(new AppWithOvertimeExport(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.REGULAROVERTIME.name, 
+						OverTimeAtr.REGULAROVERTIME.value));
+				result.add(new AppWithOvertimeExport(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.ALL.name, 
+						OverTimeAtr.ALL.value));
+			}
+		}
 		return result;
 	}
 

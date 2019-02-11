@@ -19,10 +19,12 @@ import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsence;
 import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsenceRepository;
 import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleImport;
+import nts.uk.ctx.at.request.dom.application.overtime.OverTimeAtr;
 import nts.uk.ctx.at.request.dom.application.workchange.AppWorkChange;
 import nts.uk.ctx.at.request.dom.application.workchange.IAppWorkChangeRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispName;
 import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispNameRepository;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
@@ -228,6 +230,39 @@ public class ApplicationListForScreen {
 				result.add(y.getValue().get(0));
 			});
 		});
+		return result;
+	}
+	
+	/**
+	 * [No.556]遷移先申請画面一覧を取得する
+	 * RequestList #556
+	 * @param companyID
+	 * @return
+	 */
+	public List<AppWithOvertimeExportDto> getAppWithOvertimeInfo(String companyID){
+		List<AppWithOvertimeExportDto> result = new ArrayList<>();
+		// ドメインモデル「申請表示名」を取得する
+		List<AppDispName> appDispNameLst = appDispNameRepository.getAll();
+		for(AppDispName appDispName : appDispNameLst){
+			if(appDispName.getAppType()!=ApplicationType.OVER_TIME_APPLICATION){
+				// outputパラメータに値をセットする
+				result.add(new AppWithOvertimeExportDto(appDispName.getAppType().value, appDispName.getDispName().v(), null));
+			} else {
+				// outputパラメータに残業申請のモード別の値をセットする
+				result.add(new AppWithOvertimeExportDto(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.PREOVERTIME.name, 
+						OverTimeAtr.PREOVERTIME.value));
+				result.add(new AppWithOvertimeExportDto(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.REGULAROVERTIME.name, 
+						OverTimeAtr.REGULAROVERTIME.value));
+				result.add(new AppWithOvertimeExportDto(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.ALL.name, 
+						OverTimeAtr.ALL.value));
+			}
+		}
 		return result;
 	}
 }
