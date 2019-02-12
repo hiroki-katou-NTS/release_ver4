@@ -131,12 +131,11 @@ public class AbsenceDaysOfMonthly {
 								}
 							}
 							
-							// 1日平日出勤・１日休日系の判定
-							val workTypeSet = workType.getWorkTypeSet();
-							if (workTypeSet != null) {
+							// 1日・午前・午後の判定
+							if (workTypeDaysCountTable.getAbsenceWorkAtrMap().containsKey(absenceFrameNo)) {
+								val workAtr = workTypeDaysCountTable.getAbsenceWorkAtrMap().get(absenceFrameNo);
 								
 								// 時間をセット
-								val workAtr = workTypeSet.getWorkAtr();
 								if (workAtr == WorkAtr.OneDay && checkBreakDownTime != null) {
 									if (checkBreakDownTime.getOneDay() != null) {
 										addMinutes = checkBreakDownTime.getOneDay().v();
