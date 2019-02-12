@@ -17,6 +17,8 @@ import javax.inject.Inject;
 
 import nts.arc.enums.EnumConstant;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.request.app.find.application.applicationlist.AppWithDetailExportDto;
+import nts.uk.ctx.at.request.app.find.application.applicationlist.ApplicationListForScreen;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceCorrectionProcessor;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceScreenRepo;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.AffEmploymentHistoryDto;
@@ -29,6 +31,9 @@ public class DataDialogWithTypeProcessor {
 
 	@Inject
 	private DailyPerformanceScreenRepo repo;
+	
+	@Inject
+	private ApplicationListForScreen applicationListForScreen;
 
 	// 勤務種類
 	public CodeNameType getDutyType(String companyId, String workTypeCode, String employmentCode) {
@@ -273,6 +278,30 @@ public class DataDialogWithTypeProcessor {
 	// get application NO19
 	public List<EnumConstant> getNameAppliction(){
 		String companyId = AppContexts.user().companyId();
-		return repo.findApplicationCall(companyId);
+		List<AppWithDetailExportDto> lstApp = applicationListForScreen.getAppWithOvertimeInfo(companyId);
+		List<EnumConstant> result =  lstApp.stream().map(x -> {
+			return new EnumConstant(convertTypeUi(x), x.getAppName(), x.getOvertimeAtr() == null ? "" : x.getOvertimeAtr().toString());
+		}).collect(Collectors.toList());
+		return result;
+	}
+	
+	private int convertTypeUi(AppWithDetailExportDto dto) {
+		switch (dto.getAppType()) {
+		case 0:
+			return dto.getOvertimeAtr() -1;
+		case 7:
+			return dto.getAppType() + dto.getStampAtr() + 1;
+		case 6:
+			return 7;
+		case 1:
+		case 2:
+		case 4:
+			return dto.getAppType() + 2;
+		case 10:
+			return 15;
+
+		default:
+			return dto.getAppType() + 999;
+		}
 	}
 }
