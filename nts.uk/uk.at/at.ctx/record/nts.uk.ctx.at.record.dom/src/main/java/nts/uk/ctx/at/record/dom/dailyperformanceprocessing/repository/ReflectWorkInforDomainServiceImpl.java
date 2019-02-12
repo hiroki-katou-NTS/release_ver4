@@ -373,10 +373,19 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 				} else {
 					WorkInfoOfDailyPerformance workInfoOfDailyPerformance = this.workInformationRepository
 							.find(employeeId, day).get();
+					NewReflectStampOutput stampOutput = new NewReflectStampOutput();
+					WorkStyle workStyle = basicScheduleService
+							.checkWorkDay(workInfoOfDailyPerformance.getRecordInfo().getWorkTypeCode().v());
+					if (workStyle != WorkStyle.ONE_DAY_REST) {
+						 stampOutput = this.reflectStampDomainServiceImpl.reflectStampInfo(companyId,
+								employeeId, day, workInfoOfDailyPerformance, null, empCalAndSumExecLogID, reCreateAttr,
+								Optional.empty(), Optional.empty(), Optional.empty());
+					}else {
+						 stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(companyId,
+								employeeId, day, Optional.of(workInfoOfDailyPerformance), null, empCalAndSumExecLogID, reCreateAttr,
+								Optional.empty(), Optional.empty(), Optional.empty());
+					}
 					Boolean existsDailyInfo = workInfoOfDailyPerformance != null;
-					NewReflectStampOutput stampOutput = this.reflectStampDomainServiceImpl.reflectStampInfo(companyId,
-							employeeId, day, workInfoOfDailyPerformance, null, empCalAndSumExecLogID, reCreateAttr,
-							Optional.empty(), Optional.empty(), Optional.empty());
 					// this.registerDailyPerformanceInfoService.registerDailyPerformanceInfo(companyId,
 					// employeeId, day,
 					// stampOutput, null, workInfoOfDailyPerformance,
