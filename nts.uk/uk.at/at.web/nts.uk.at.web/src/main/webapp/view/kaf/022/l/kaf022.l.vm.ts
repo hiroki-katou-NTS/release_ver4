@@ -809,13 +809,19 @@ module nts.uk.at.view.kmf022.l.viewmodel {
 
             nts.uk.ui.windows.sub.modal('/view/kdl/002/a/index.xhtml').onClosed(function(): any {                
                 let data = nts.uk.ui.windows.getShared('KDL002_SelectedNewItem');
-                let newSelectedCodes = [];
-                if(data != null && data.length > 0){
-                    _.forEach(data, function(item: any) {
-                        let newSelectedCode = {companyID: itemSet.companyId, employmentCode: itemSet.employmentCode, appType: itemSet.appType, holidayOrPauseType: itemSet.holidayOrPauseType, workTypeCode: item.code, workTypeName: item.name};
-                        newSelectedCodes.push(newSelectedCode);
-                    });
-                    itemSet.lstWorkType(newSelectedCodes);
+                let isCancel = nts.uk.ui.windows.getShared('KDL002_IsCancel');
+                if(!nts.uk.util.isNullOrUndefined(isCancel)){
+                    if(!isCancel){
+                        let newSelectedCodes = [];
+                        if(data != null && data.length > 0){
+                            _.forEach(data, function(item: any) {
+                                let name = nts.uk.util.isNullOrUndefined(item.name)||nts.uk.util.isNullOrEmpty(item.name) ? 'マスタ未登録' : item.name;
+                                let newSelectedCode = {companyID: itemSet.companyId, employmentCode: itemSet.employmentCode, appType: itemSet.appType, holidayOrPauseType: itemSet.holidayOrPauseType, workTypeCode: item.code, workTypeName: name};
+                                newSelectedCodes.push(newSelectedCode);
+                            });
+                            itemSet.lstWorkType(newSelectedCodes);
+                        }
+                    }
                 }
                 clear();  
             });
@@ -1000,7 +1006,9 @@ module nts.uk.at.view.kmf022.l.viewmodel {
                                                         return elem.workTypeName;
                                                     }).join(" + "));
             this.lstWorkType.subscribe(value =>{
-                    this.displayWorkTypes(_.map(this.lstWorkType(), item =>{return item.workTypeName;}).join(" + "));
+                    this.displayWorkTypes(_.map(this.lstWorkType(), item =>{
+                        return nts.uk.util.isNullOrUndefined(item.workTypeName)||nts.uk.util.isNullOrEmpty(item.workTypeName) ? 'マスタ未登録' : item.workTypeName;
+                    }).join(" + "));
             });
             this.holidayTypeUseFlg.subscribe(value => {
                 if(value == false && this.displayFlag() == true){
