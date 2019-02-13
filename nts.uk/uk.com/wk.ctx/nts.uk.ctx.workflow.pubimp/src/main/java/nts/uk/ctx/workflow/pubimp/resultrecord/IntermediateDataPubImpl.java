@@ -48,6 +48,7 @@ import nts.uk.ctx.workflow.pub.resultrecord.ApproveDoneExport;
 import nts.uk.ctx.workflow.pub.resultrecord.ApproverApproveExport;
 import nts.uk.ctx.workflow.pub.resultrecord.ApproverEmpExport;
 import nts.uk.ctx.workflow.pub.resultrecord.EmpPerformMonthParam;
+import nts.uk.ctx.workflow.pub.resultrecord.EmpSprDailyConfirmExport;
 import nts.uk.ctx.workflow.pub.resultrecord.EmployeePerformParam;
 import nts.uk.ctx.workflow.pub.resultrecord.IntermediateDataPub;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppEmpStatusExport;
@@ -528,8 +529,8 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	}
 
 	@Override
-	public List<String> dailyConfirmSearch(String companyID, String approverID, GeneralDate date) {
-		List<String> result = new ArrayList<>();
+	public List<EmpSprDailyConfirmExport> dailyConfirmSearch(String companyID, String approverID, GeneralDate date) {
+		List<EmpSprDailyConfirmExport> result = new ArrayList<>();
 		List<AppRootInstance> appRootInstanceLst = new ArrayList<>();
 		// ドメインモデル「承認ルート中間データ」を取得する
 		List<AppRootInstance> approverInstLst = appRootInstanceRepository.findByApproverDateCID(companyID, approverID, date, RecordRootType.CONFIRM_WORK_BY_DAY);
@@ -556,15 +557,22 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 			ApprovalRootState approvalRootState = appRootInstanceService.convertFromAppRootInstance(appRootInstance, appRootConfirm);
 			// 3.指定した社員が承認できるかの判断(NoDBACCESS)
 			ApproverPersonOutput approverPersonOutput = judgmentApprovalStatusService.judgmentTargetPerCanApproveNoDB(approvalRootState, approverID);
-			if(!(approverPersonOutput.getAuthorFlag()&&approverPersonOutput.getApprovalAtr()==ApprovalBehaviorAtr.UNAPPROVED&&!approverPersonOutput.getExpirationAgentFlag())){
-				return;
+			
+			if(approverPersonOutput.getAuthorFlag()&&approverPersonOutput.getApprovalAtr()==ApprovalBehaviorAtr.UNAPPROVED&&!approverPersonOutput.getExpirationAgentFlag()){
+				// （基幹・社員Export）アルゴリズム「社員IDから個人社員基本情報を取得」を実行する　RequestList No.1
+				PersonImport personImport = employeeAdapter.getEmployeeInformation(approvalRootState.getEmployeeID());
+				if(personImport==null || Strings.isBlank(personImport.getEmployeeCode())){
+					return;
+				}
+				result.add(new EmpSprDailyConfirmExport(personImport.getEmployeeCode(), 0));
+			} else if(approverPersonOutput.getApprovalAtr()==ApprovalBehaviorAtr.APPROVED){
+				// （基幹・社員Export）アルゴリズム「社員IDから個人社員基本情報を取得」を実行する　RequestList No.1
+				PersonImport personImport = employeeAdapter.getEmployeeInformation(approvalRootState.getEmployeeID());
+				if(personImport==null || Strings.isBlank(personImport.getEmployeeCode())){
+					return;
+				}
+				result.add(new EmpSprDailyConfirmExport(personImport.getEmployeeCode(), 1));
 			}
-			// （基幹・社員Export）アルゴリズム「社員IDから個人社員基本情報を取得」を実行する　RequestList No.1
-			PersonImport personImport = employeeAdapter.getEmployeeInformation(approvalRootState.getEmployeeID());
-			if(personImport==null || Strings.isBlank(personImport.getEmployeeCode())){
-				return;
-			}
-			result.add(personImport.getEmployeeCode());
 		});
 		return result;
 	}
