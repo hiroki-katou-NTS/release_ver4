@@ -1,8 +1,8 @@
 package nts.uk.ctx.at.record.app.command.dailyperform.correctevent;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +15,6 @@ import nts.uk.ctx.at.shared.dom.attendance.util.enu.DailyDomainGroup;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 public class EventCorrectResult {
 
@@ -49,5 +48,20 @@ public class EventCorrectResult {
 		canBeCorrected.removeAll(beforeCorrect);
 		
 		return canBeCorrected;
+	}
+
+	public EventCorrectResult(DailyRecordDto base, DailyRecordDto corrected, DailyModifyRCResult updated,
+			List<DailyDomainGroup> correctedType) {
+		super();
+		this.base = base;
+		this.corrected = corrected;
+		this.updated = updated;
+		this.correctedType = correctedType;
+	}
+	
+	public void removeEditStatesForCorrectedItem() {
+		List<Integer> canbeCorrected = getCorrectedItemsWithStrict().stream().map(bc -> bc.getItemId()).collect(Collectors.toList());
+		
+		this.corrected.getEditStates().removeIf(es -> canbeCorrected.contains(es.getAttendanceItemId()));
 	}
 }

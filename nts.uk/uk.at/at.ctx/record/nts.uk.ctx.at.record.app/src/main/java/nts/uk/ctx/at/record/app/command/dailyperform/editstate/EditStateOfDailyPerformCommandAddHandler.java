@@ -16,6 +16,9 @@ public class EditStateOfDailyPerformCommandAddHandler extends CommandFacade<Edit
 	@Override
 	protected void handle(CommandHandlerContext<EditStateOfDailyPerformCommand> context) {
 		EditStateOfDailyPerformCommand command = context.getCommand();
+		
+		repo.delete(command.getEmployeeId(), command.getWorkDate());
+		
 		if(!command.getData().isEmpty()){
 			repo.add(command.toDomain());
 		}

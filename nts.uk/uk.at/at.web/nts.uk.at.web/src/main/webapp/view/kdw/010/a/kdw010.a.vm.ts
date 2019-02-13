@@ -63,10 +63,12 @@ module nts.uk.at.view.kdw010.a {
                     }
                 });
                 self.targetWorkTypes.subscribe(function(newTargetWorkTypes: Array<model.OtkWorkTypeDto>) {
+                    newTargetWorkTypes = _.sortBy(newTargetWorkTypes, (item) => { return item.code; });
                     self.joinNameTargetWorkType(self.joinNameWorkTypeMethod(newTargetWorkTypes));
                     self.selectedCodeTargetWorkType(newTargetWorkTypes.map(e => e.code));
                 });
                 self.ignoreWorkTypes.subscribe(function(newIgnoreWorkTypes: Array<model.OtkWorkTypeDto>) {
+                    newIgnoreWorkTypes = _.sortBy(newIgnoreWorkTypes, (item) => { return item.code; });
                     self.joinNameIgnoreWorkType(self.joinNameWorkTypeMethod(newIgnoreWorkTypes));
                     self.selectedCodeIgnoreWorkType(newIgnoreWorkTypes.map(e => e.code));
                 });
@@ -144,13 +146,15 @@ module nts.uk.at.view.kdw010.a {
                 var selectedCode = typeWorkType == TARGET_TYPE ? self.selectedCodeTargetWorkType() : self.selectedCodeIgnoreWorkType();
                 setShared('KDL002_SelectedItemId', selectedCode);
                 modal('/view/kdl/002/a/index.xhtml').onClosed(function(): any {
-                    var newItemSelected = getShared('KDL002_SelectedNewItem');
-                    //defined target or ignore work type
-                    if (typeWorkType == TARGET_TYPE) {
-                        self.targetWorkTypes(newItemSelected);
-                        errors.clearAll();
-                    } else {
-                        self.ignoreWorkTypes(newItemSelected);
+                    if (!getShared('KDL002_IsCancel')) {
+                        var newItemSelected = getShared('KDL002_SelectedNewItem');
+                        //defined target or ignore work type
+                        if (typeWorkType == TARGET_TYPE) {
+                            self.targetWorkTypes(newItemSelected);
+                            errors.clearAll();
+                        } else {
+                            self.ignoreWorkTypes(newItemSelected);
+                        }
                     }
                 });
             }

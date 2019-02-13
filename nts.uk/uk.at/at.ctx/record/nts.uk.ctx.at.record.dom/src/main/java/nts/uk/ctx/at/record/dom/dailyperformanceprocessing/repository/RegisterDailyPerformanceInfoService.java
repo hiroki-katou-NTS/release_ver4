@@ -28,6 +28,7 @@ import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.algorithm.CreateEmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @Stateless
@@ -196,6 +197,9 @@ public class RegisterDailyPerformanceInfoService {
 			// ドメインモデル「打刻」を更新する (Update 「打刻」) - JDBC
 			if (stampOutput.getLstStamp() != null && !stampOutput.getLstStamp().isEmpty()) {
 				stampOutput.getLstStamp().forEach(stampItem -> {
+					if(stampItem.getAttendanceTime().v() >= 1440) {
+						stampItem.setAttendanceTime(new AttendanceTime(stampItem.getAttendanceTime().v() - 1440));
+					}
 					this.stampRepository.updateStampItem(stampItem);
 				});
 			}

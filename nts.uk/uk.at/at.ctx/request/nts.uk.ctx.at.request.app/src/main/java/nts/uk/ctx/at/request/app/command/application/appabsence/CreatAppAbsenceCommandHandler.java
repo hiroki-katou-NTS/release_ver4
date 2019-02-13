@@ -204,21 +204,23 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 	 */
 	public void checkBeforeRegister(CreatAppAbsenceCommand command,GeneralDate startDate,GeneralDate endDate,boolean isInsert){
 		String companyID = AppContexts.user().companyId();
-		int countDay = 0;
+		//hoatt 2019.02.11
+		//EA修正履歴 No.3104
+//		int countDay = 0;
 		//申請開始日から申請終了日までループする-(loop từ applicationStartDate tới applicationEndDate)
-		for(int i = 0; startDate.compareTo(endDate) + i <= 0; i++){
-			GeneralDate appDate = startDate.addDays(i);
-			countDay = countDay + 1;
+//		for(int i = 0; startDate.compareTo(endDate) + i <= 0; i++){
+//			GeneralDate appDate = startDate.addDays(i);
+//			countDay = countDay + 1;
 			// 休暇・振替系申請存在チェック
-			if(isInsert){//INPUT．モード=新規(INPUT.mode = New)
+//			if(isInsert){//INPUT．モード=新規(INPUT.mode = New)
 				//アルゴリズム「休暇・振替系申請存在チェック」を実施する-(thực hiện thuật toán 「Check tồn tại đơn xin nghỉ phép-nghỉ bù」)
-				saveHolidayShipmentCommandHandler.vacationTransferCheck(command.getEmployeeID(), appDate, command.getPrePostAtr());
-			}
+//				saveHolidayShipmentCommandHandler.vacationTransferCheck(command.getEmployeeID(), appDate, command.getPrePostAtr());
+//			}
 			//その以外
-			if(command.getHolidayAppType() == HolidayAppType.DIGESTION_TIME.value){
+//			if(command.getHolidayAppType() == HolidayAppType.DIGESTION_TIME.value){
 				// 11.時間消化登録時のエラーチェック :TODO
-			}
-		}
+//			}
+//		}
 		SpecHolidayCommand specHd = command.getSpecHd();
 		//選択する休暇種類をチェックする-(check holidayType đang chọn)
 		if(command.getHolidayAppType() == HolidayAppType.SPECIAL_HOLIDAY.value){//選択する休暇種類が特別休暇の場合

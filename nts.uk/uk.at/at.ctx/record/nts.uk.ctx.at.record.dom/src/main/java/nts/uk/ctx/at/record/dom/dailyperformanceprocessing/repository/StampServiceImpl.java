@@ -3,6 +3,7 @@ package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -11,6 +12,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.StampReflectRangeOutput;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.TimeZoneOutput;
+import nts.uk.ctx.at.record.dom.stamp.ReflectedAtr;
 import nts.uk.ctx.at.record.dom.stamp.StampItem;
 import nts.uk.ctx.at.record.dom.stamp.StampRepository;
 import nts.uk.ctx.at.record.dom.stamp.card.StampCardItem;
@@ -21,6 +23,7 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.Err
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageResource;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionContent;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.shr.com.i18n.TextResource;
 
 @Stateless
@@ -33,6 +36,7 @@ public class StampServiceImpl implements StampDomainService {
 	@Inject
 	private StampCardtemRepository stampCardRepo;
 
+	//打刻を取得する
 	public List<StampItem> handleData(StampReflectRangeOutput s, ExecutionType reCreateAttr,
 			String empCalAndSumExecLogID, GeneralDate date, String employeeId, String companyId) {
 		if (s.getLstStampReflectTimezone().isEmpty()) {
@@ -84,14 +88,16 @@ public class StampServiceImpl implements StampDomainService {
 							&& x.getReflectedAtr().value == 0) {
 						lstStampItemOutput.add(x);
 					}
+					lstStampItemOutput.addAll(findStempItemNext(lstStampItem, date.addDays(1), stampRange, x.getReflectedAtr()));
 				}
+				lstStampItemOutput = lstStampItemOutput.stream().collect(Collectors.toSet()).stream().collect(Collectors.toList());
 				lstStampItemOutput.sort(Comparator.comparing(StampItem::getDate));
 				lstStampItemOutput.sort(Comparator.comparing(StampItem::getAttendanceTime));
 
 				return lstStampItemOutput;
 			}
-
-			lstStampItem.forEach(x -> {
+             
+			for(StampItem x : lstStampItem) {
 				int attendanceClock = x.getAttendanceTime().v().intValue();
 				TimeZoneOutput stampRange = s.getStampRange();
 				if (x.getDate().year()==date.year()&& x.getDate().month() == date.month() && x.getDate().day() == date.day()
@@ -99,11 +105,25 @@ public class StampServiceImpl implements StampDomainService {
 						&& attendanceClock <= stampRange.getEnd().v().intValue()) {
 					lstStampItemOutput.add(x);
 				}
-			});
+				lstStampItemOutput.addAll(findStempItemNext(lstStampItem, date.addDays(1), stampRange, x.getReflectedAtr()));
+			};
+			lstStampItemOutput = lstStampItemOutput.stream().collect(Collectors.toSet()).stream().collect(Collectors.toList());
 			lstStampItemOutput.sort(Comparator.comparing(StampItem::getDate));
 			lstStampItemOutput.sort(Comparator.comparing(StampItem::getAttendanceTime));
 		}
 		return lstStampItemOutput;
 	}
 
+	private List<StampItem> findStempItemNext(List<StampItem> lstStampItem, GeneralDate tomorow, TimeZoneOutput stampRange, ReflectedAtr reflectedAtr){
+		List<StampItem> lstStampItemResult = lstStampItem.stream().filter(x -> x.getDate().year() == tomorow.year()
+				&& x.getDate().month() == tomorow.month() && x.getDate().day() == tomorow.day() 
+				&& x.getAttendanceTime().v() >= 0
+				&& x.getAttendanceTime().v() <= stampRange.getStart().v().intValue()
+				&& (reflectedAtr == ReflectedAtr.NOTREFLECTED ? x.getReflectedAtr().value == 0 : true)).map(x ->{
+					x.setAttendanceTime(new AttendanceTime(x.getAttendanceTime().v() + 1440));
+					return x;
+				}).collect(Collectors.toList());
+		
+		return lstStampItemResult;
+	}
 }
