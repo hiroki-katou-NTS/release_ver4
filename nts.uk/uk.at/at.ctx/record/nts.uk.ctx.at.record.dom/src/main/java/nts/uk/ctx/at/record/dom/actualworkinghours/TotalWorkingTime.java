@@ -241,7 +241,7 @@ public class TotalWorkingTime {
 																  new AttendanceTime(0),
 																  Collections.emptyList()),
 									Collections.emptyList(),
-									new RaiseSalaryTimeOfDailyPerfor(Collections.emptyList(),Collections.emptyList()),
+									new RaiseSalaryTimeOfDailyPerfor(new ArrayList<>(),new ArrayList<>()),
 									new WorkTimes(0),
 									new TemporaryTimeOfDaily(Collections.emptyList()),
 									new ShortWorkTimeOfDaily(new WorkTimes(0),
