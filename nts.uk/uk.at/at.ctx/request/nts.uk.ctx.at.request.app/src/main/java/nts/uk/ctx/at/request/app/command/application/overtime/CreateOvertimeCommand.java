@@ -129,4 +129,6 @@ public class CreateOvertimeCommand {
 	 * 時間外時間の詳細
 	 */
 	private AppOvertimeDetailCommand appOvertimeDetail;
+	
+	private String appReasonID;
 }
