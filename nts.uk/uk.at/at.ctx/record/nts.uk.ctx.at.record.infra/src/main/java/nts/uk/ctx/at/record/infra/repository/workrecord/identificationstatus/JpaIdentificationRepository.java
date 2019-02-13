@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import org.apache.logging.log4j.util.Strings;
+
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
@@ -142,8 +144,14 @@ public class JpaIdentificationRepository extends JpaRepository implements Identi
 	@Override
 	public List<Identification> findByEmployeeIDSortDate(String employeeID, GeneralDate startDate,
 			GeneralDate endDate) {
+		// Đối ứng SPR
+		String companyID = "000000000000-0001";
+		String loginCompanyID = AppContexts.user().companyId();
+		if(Strings.isNotBlank(loginCompanyID)){
+			companyID = loginCompanyID;
+		}
 		return this.queryProxy().query(GET_BY_EMPLOYEE_ID_SORT_DATE, KrcdtIdentificationStatus.class)
-				.setParameter("companyID", AppContexts.user().companyId()).setParameter("employeeId", employeeID)
+				.setParameter("companyID", companyID).setParameter("employeeId", employeeID)
 				.setParameter("startDate", startDate).setParameter("endDate", endDate).getList(c -> c.toDomain());
 	}
 
