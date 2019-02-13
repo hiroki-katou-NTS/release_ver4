@@ -2433,10 +2433,15 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             nts.uk.ui.block.grayout();
             let dataRowEnd = dataSource[dataSource.length - 1];
             service.releaseClosure({ employeeId: dataRowEnd.employeeId, date: dataRowEnd.dateDetail }).done((data) => {
-                self.processLockButton(self.showLock());
-                nts.uk.ui.dialog.info({ messageId: "Msg_1445" }).then(() => {
-                    if (self.showDialogError) self.showErrorDialog();
-                });
+                if (!_.isEmpty(data)) {
+                    nts.uk.ui.dialog.info({ messageId: data }).then(() => {
+                    });
+                } else {
+                    self.processLockButton(self.showLock());
+                    nts.uk.ui.dialog.info({ messageId: "Msg_1445" }).then(() => {
+                        if (self.showDialogError) self.showErrorDialog();
+                    });
+                }
                 nts.uk.ui.block.clear();
             });
             nts.uk.ui.block.clear();

@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.stamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.dom.AggregateRoot;
 //import nts.arc.time.GeneralDate;
@@ -25,6 +26,7 @@ public class StampItem extends AggregateRoot {
 	/**
 	 * 勤怠時刻
 	 */
+	@Setter
 	private AttendanceTime attendanceTime;
 	/**
 	 * 打刻組み合わせ区分

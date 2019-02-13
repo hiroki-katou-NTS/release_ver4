@@ -12,6 +12,8 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.gul.text.StringUtil;
@@ -120,12 +122,11 @@ public class ScheCreExeWorkTimeHandler {
 	 * @param empGeneralInfo
 	 * @param mapEmploymentStatus
 	 * @param listWorkingConItem
-	 * @return
+	 * @return  Pair<Boolean, Optional<String>>, if boolean = false is mean has error
 	 */
-	public Optional<String> getWorktime(
+	public Pair<Boolean, Optional<String>> getWorktime(
 			WorkTimeGetterCommand command,
 			CreateScheduleMasterCache masterCache) {
-
 		Optional<BasicWorkSetting> optionalBasicWorkSetting = this.scheCreExeBasicWorkSettingHandler
 				.getBasicWorkSetting(command.toBasicWorkSetting(), masterCache.getEmpGeneralInfo());
 
@@ -136,7 +137,7 @@ public class ScheCreExeWorkTimeHandler {
 					: optionalBasicWorkSetting.get().getWorkingCode().v());
 			return this.getWorkingTimeZoneCode(commandGetter, masterCache);
 		}
-		return Optional.empty();
+		return Pair.of(true, Optional.empty());
 	}
 
 	/**
@@ -724,11 +725,10 @@ public class ScheCreExeWorkTimeHandler {
 	 * @param command
 	 * @param mapEmploymentStatus
 	 * @param listWorkingConItem
-	 * @return
+	 * @return Pair<Boolean, Optional<String>>, if boolean = false is mean has error
 	 */
-	public Optional<String> getWorkingTimeZoneCode(WorkTimeZoneGetterCommand command,
+	public Pair<Boolean, Optional<String>> getWorkingTimeZoneCode(WorkTimeZoneGetterCommand command,
 			CreateScheduleMasterCache masterCache) {
-
 		String worktimeCode = null;
 
 		// check reference working hours
@@ -753,7 +753,7 @@ public class ScheCreExeWorkTimeHandler {
 		final String workTimeCode = worktimeCode;
 		//if worktimeCode = null, it mean day off, haven't error
 		if (StringUtil.isNullOrEmpty(worktimeCode, true)) {
-			return Optional.empty();
+			return Pair.of(true, Optional.empty());
 		}
 		Optional<WorkTimeSetting> workTimeSetting = masterCache.getListWorkTimeSetting().stream()
 				.filter(x -> (x.getCompanyId().equals(command.getBaseGetter().getCompanyId())
@@ -762,10 +762,10 @@ public class ScheCreExeWorkTimeHandler {
 		if (!workTimeSetting.isPresent()) {
 			// add error message 591
 			this.scheCreExeErrorLogHandler.addError(command.getBaseGetter(), command.getEmployeeId(), "Msg_591");
+			return Pair.of(false, null);
 		} else {
-			return Optional.of(worktimeCode);
+			return Pair.of(true, Optional.of(worktimeCode));
 		}
-		return Optional.empty();
 	}
 
 }

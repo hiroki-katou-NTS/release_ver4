@@ -10,11 +10,14 @@ import nts.uk.ctx.at.shared.dom.common.days.AttendanceDaysMonth;
 import nts.uk.ctx.at.record.dom.monthly.WorkTypeDaysCountTable;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonth;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
+import nts.uk.ctx.at.shared.dom.worktime.predset.BreakDownTimeDay;
+import nts.uk.ctx.at.shared.dom.worktime.predset.PredetemineTimeSetting;
+import nts.uk.ctx.at.shared.dom.worktype.WorkAtr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 
 /**
  * 月別実績の欠勤日数
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class AbsenceDaysOfMonthly {
@@ -64,9 +67,16 @@ public class AbsenceDaysOfMonthly {
 	 * @param workType 勤務種類
 	 * @param workTypeDaysCountTable 勤務種類の日数カウント表
 	 * @param isAttendanceDay 出勤しているかどうか
+	 * @param predetermineTimeSet 所定時間設定
+	 * @param predTimeSetOnWeekday 所定時間設定（平日時）
 	 */
-	public void aggregate(WorkingSystem workingSystem, WorkType workType,
-			WorkTypeDaysCountTable workTypeDaysCountTable, boolean isAttendanceDay){
+	public void aggregate(
+			WorkingSystem workingSystem,
+			WorkType workType,
+			WorkTypeDaysCountTable workTypeDaysCountTable,
+			boolean isAttendanceDay,
+			PredetemineTimeSetting predetermineTimeSet,
+			PredetemineTimeSetting predTimeSetOnWeekday){
 
 		if (workType == null) return;
 		if (workTypeDaysCountTable == null) return;
@@ -102,12 +112,58 @@ public class AbsenceDaysOfMonthly {
 					this.absenceDaysList.putIfAbsent(absenceFrameNo, new AggregateAbsenceDays(absenceFrameNo));
 					val targetAbsenceDays = this.absenceDaysList.get(absenceFrameNo);
 					targetAbsenceDays.addDays(aggrAbsenceDays.getDays().v());
+					
+					// 枠時間の集計
+					int addMinutes = 0;
+					if (aggrAbsenceDays.getDays().v() > 0.0) {
+						
+						// 所定時間設定を取得
+						PredetemineTimeSetting checkPredTimeSet = predetermineTimeSet;
+						if (predetermineTimeSet == null) {
+							checkPredTimeSet = predTimeSetOnWeekday;
+						}
+						if (checkPredTimeSet != null) {
+							
+							BreakDownTimeDay checkBreakDownTime = null;
+							if (checkPredTimeSet.getPredTime() != null) {
+								if (checkPredTimeSet.getPredTime().getPredTime() != null) {
+									checkBreakDownTime = checkPredTimeSet.getPredTime().getPredTime();
+								}
+							}
+							
+							// 1日平日出勤・１日休日系の判定
+							val workTypeSet = workType.getWorkTypeSet();
+							if (workTypeSet != null) {
+								
+								// 時間をセット
+								val workAtr = workTypeSet.getWorkAtr();
+								if (workAtr == WorkAtr.OneDay && checkBreakDownTime != null) {
+									if (checkBreakDownTime.getOneDay() != null) {
+										addMinutes = checkBreakDownTime.getOneDay().v();
+										targetAbsenceDays.addTime(addMinutes);
+									}
+								}
+								if (workAtr == WorkAtr.Monring && checkBreakDownTime != null) {
+									if (checkBreakDownTime.getMorning() != null) {
+										addMinutes = checkBreakDownTime.getMorning().v();
+										targetAbsenceDays.addTime(addMinutes);
+									}
+								}
+								if (workAtr == WorkAtr.Afternoon && checkBreakDownTime != null) {
+									if (checkBreakDownTime.getAfternoon() != null) {
+										addMinutes = checkBreakDownTime.getAfternoon().v();
+										targetAbsenceDays.addTime(addMinutes);
+									}
+								}
+							}
+						}
+					}
+					
+					// 欠勤合計日数の集計
+					this.totalAbsenceDays = this.totalAbsenceDays.addDays(aggrAbsenceDays.getDays().v());
+					this.totalAbsenceTime = this.totalAbsenceTime.addMinutes(addMinutes);
 				}
 			}
-			
-			// 欠勤合計日数の集計
-			this.totalAbsenceDays = this.totalAbsenceDays.addDays(aggrAbsenceDays.getDays().v());
-			this.totalAbsenceTime = this.totalAbsenceTime.addMinutes(aggrAbsenceDays.getTime().v());
 		}
 	}
 	

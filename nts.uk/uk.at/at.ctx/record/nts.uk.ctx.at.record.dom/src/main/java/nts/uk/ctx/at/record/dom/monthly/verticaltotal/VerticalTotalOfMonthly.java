@@ -144,6 +144,22 @@ public class VerticalTotalOfMonthly {
 				}
 			}
 			
+			// 平日時就業時間帯を取得
+			PredetemineTimeSetting predTimeSetOnWeekday = null;
+			val workConditionItemOpt = employeeSets.getWorkingConditionItem(procYmd);
+			if (workConditionItemOpt.isPresent()) {
+				val workCategory = workConditionItemOpt.get().getWorkCategory();
+				if (workCategory != null) {
+					val weekdayTime = workCategory.getWeekdayTime();
+					if (weekdayTime != null) {
+						if (weekdayTime.getWorkTimeCode().isPresent()) {
+							predTimeSetOnWeekday = companySets.getPredetemineTimeSetMap(
+									weekdayTime.getWorkTimeCode().get().v(), repositories);
+						}
+					}
+				}
+			}
+			
 			// 必要なマスタがない時、その日をスキップする
 			boolean isSkip = false;
 			if (workType == null) isSkip = true;
@@ -175,7 +191,7 @@ public class VerticalTotalOfMonthly {
 			this.workDays.aggregate(workingSystem, workType, attendanceTimeOfDaily, temporaryTimeOfDaily,
 					specificDateAttrOfDaily,
 					workTypeDaysCountTable, companySets.getPayItemCount(), predetermineTimeSet,
-					isAttendanceDay, isTwoTimesStampExists);
+					isAttendanceDay, isTwoTimesStampExists, predTimeSetOnWeekday);
 			
 			// 勤務時間集計
 			this.workTime.aggregate(workType, attendanceTimeOfDaily);

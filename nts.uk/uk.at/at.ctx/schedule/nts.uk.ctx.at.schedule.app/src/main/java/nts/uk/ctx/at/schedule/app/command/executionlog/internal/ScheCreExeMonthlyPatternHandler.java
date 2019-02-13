@@ -10,6 +10,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import nts.arc.time.GeneralDate;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.schedule.app.command.executionlog.CreateScheduleMasterCache;
@@ -139,23 +141,21 @@ public class ScheCreExeMonthlyPatternHandler {
 				masterCache);
 		if (workTypeOpt.isPresent()) {// 取得エラーなし
 			// 在職状態に対応する「就業時間帯コード」を取得する
-			Optional<String> workTimeOpt = this.getWorkingTimeZoneCode(workMonthlySet, commandWorktypeGetter, masterCache);
-			// 取得エラーなし
-			// 休憩予定時間帯を取得する
-			// 勤務予定マスタ情報を取得する
-			// 勤務予定時間帯を取得する
-			// アルゴリズム「社員の短時間勤務を取得」を実行し、短時間勤務を取得する // request list #72
-			// 取得した情報をもとに「勤務予定基本情報」を作成する (create basic schedule)
-			// 予定確定区分を取得し、「勤務予定基本情報. 確定区分」に設定する
-			scheCreExeBasicScheduleHandler.updateAllDataToCommandSave(
-					command,
-					dateInPeriod,
-					workingConditionItem.getEmployeeId(),
-					workTypeOpt.get(),
-					workTimeOpt.isPresent() ? workTimeOpt.get() : null,
-					masterCache,
-					listBasicSchedule,
-					dateRegistedEmpSche);
+			Pair<Boolean, Optional<String>> pair = this.getWorkingTimeZoneCode(workMonthlySet, commandWorktypeGetter, masterCache);
+			// neu pair.getKey() == false nghia la khong tim duoc worktimeCode, da ghi errorLog, dung xu ly hien tai, chuyen sang ngay ke tiep
+			if(pair.getKey()){
+				// 取得エラーなし
+				// 休憩予定時間帯を取得する
+				// 勤務予定マスタ情報を取得する
+				// 勤務予定時間帯を取得する
+				// アルゴリズム「社員の短時間勤務を取得」を実行し、短時間勤務を取得する // request list #72
+				// 取得した情報をもとに「勤務予定基本情報」を作成する (create basic schedule)
+				// 予定確定区分を取得し、「勤務予定基本情報. 確定区分」に設定する
+				scheCreExeBasicScheduleHandler.updateAllDataToCommandSave(command, dateInPeriod,
+						workingConditionItem.getEmployeeId(), workTypeOpt.get(),
+						pair.getValue().isPresent() ? pair.getValue().get() : null, masterCache, listBasicSchedule,
+						dateRegistedEmpSche);
+			}
 		}
 
 	}
@@ -215,9 +215,9 @@ public class ScheCreExeMonthlyPatternHandler {
 	 * 
 	 * @param workMonthlySet
 	 * @param command
-	 * @return
+	 * @return Pair<Boolean, Optional<String>>, if boolean = false is mean has error
 	 */
-	public Optional<String> getWorkingTimeZoneCode(
+	public Pair<Boolean, Optional<String>> getWorkingTimeZoneCode(
 			WorkMonthlySetting workMonthlySet,
 			WorkTypeGetterCommand commandWorktypeGetter,
 			CreateScheduleMasterCache masterCache) {
