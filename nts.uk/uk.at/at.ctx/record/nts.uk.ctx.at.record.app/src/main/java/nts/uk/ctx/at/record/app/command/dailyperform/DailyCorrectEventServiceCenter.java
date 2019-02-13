@@ -135,7 +135,11 @@ public class DailyCorrectEventServiceCenter {
 				updated.getItems());
 		correctedType.add(DailyDomainGroup.ATTENDANCE_TIME);
 		
-		return new EventCorrectResult(setOptionalItemAtr(baseDto), setOptionalItemAtr(correctted), updated, correctedType);
+		EventCorrectResult result = new EventCorrectResult(setOptionalItemAtr(baseDto), setOptionalItemAtr(correctted), updated, correctedType);
+		
+		result.removeEditStatesForCorrectedItem();
+		
+		return result;
 	}
 	
 	

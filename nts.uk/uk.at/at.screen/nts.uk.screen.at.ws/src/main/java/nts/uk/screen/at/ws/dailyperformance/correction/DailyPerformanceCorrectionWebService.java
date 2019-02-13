@@ -210,8 +210,8 @@ public class DailyPerformanceCorrectionWebService {
 	
 	@POST
 	@Path("releaseClosure")
-	public void releaseClosure(EmpAndDate empAndDate){
-		personalTightCommandFacade.releasePersonalTight(empAndDate.getEmployeeId(), empAndDate.getDate());
+	public JavaTypeResult<String> releaseClosure(EmpAndDate empAndDate){
+		return new JavaTypeResult<String>(personalTightCommandFacade.releasePersonalTight(empAndDate.getEmployeeId(), empAndDate.getDate()));
 	}
 	
 	public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
