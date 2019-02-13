@@ -99,7 +99,6 @@ module kdl002.a.viewmodel {
                 }    
                 nts.uk.ui.windows.setShared('KDL002_SelectedNewItem', lstObj2);
             }
-            nts.uk.ui.windows.setShared('KDL002_IsCancel', false);
             nts.uk.ui.windows.close();
         }
         /**
@@ -135,7 +134,6 @@ module kdl002.a.viewmodel {
                 }
                 nts.uk.ui.windows.setShared('KDL002_SelectedNewItem', lstCancel,true);
             }
-            nts.uk.ui.windows.setShared('KDL002_IsCancel', true);
             nts.uk.ui.windows.close();
         }
     }
