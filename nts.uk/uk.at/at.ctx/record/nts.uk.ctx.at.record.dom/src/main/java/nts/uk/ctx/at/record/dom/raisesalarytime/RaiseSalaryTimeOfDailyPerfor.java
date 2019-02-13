@@ -36,7 +36,7 @@ public class RaiseSalaryTimeOfDailyPerfor {
 	
 	public static RaiseSalaryTimeOfDailyPerfor calcBonusPayTime(CalculationRangeOfOneDay oneDayRange,AutoCalRaisingSalarySetting raisingAutoCalcSet,BonusPayAutoCalcSet bonusPayAutoCalcSet,
 			   											CalAttrOfDailyPerformance calcAtrOfDaily) {
-		if(oneDayRange == null) return new RaiseSalaryTimeOfDailyPerfor(Collections.emptyList(), Collections.emptyList());
+		if(oneDayRange == null) return new RaiseSalaryTimeOfDailyPerfor(new ArrayList<>(), new ArrayList<>());
 		val bonusPay = oneDayRange.calcBonusPayTime(raisingAutoCalcSet, bonusPayAutoCalcSet, calcAtrOfDaily,BonusPayAtr.BonusPay);
 		val specBonusPay = oneDayRange.calcSpecBonusPayTime(raisingAutoCalcSet, bonusPayAutoCalcSet, calcAtrOfDaily, BonusPayAtr.SpecifiedBonusPay);
 		
