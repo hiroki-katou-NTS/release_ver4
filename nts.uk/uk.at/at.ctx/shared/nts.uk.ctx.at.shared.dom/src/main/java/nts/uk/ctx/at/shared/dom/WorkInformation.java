@@ -32,4 +32,10 @@ public class WorkInformation {
 	public void removeWorkTimeInHolydayWorkType(){
 		this.siftCode = null;
 	}
+
+	public void setSiftCode(WorkTimeCode siftCode) {
+		this.siftCode = siftCode;
+	}
+	
+	
 }
