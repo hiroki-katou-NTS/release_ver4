@@ -107,6 +107,14 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	private static final String FIND_WORKTYPE_BY_DEPRECATE = SELECT_FROM_WORKTYPE
 			+ " WHERE c.kshmtWorkTypePK.companyId = :companyId" + " AND c.kshmtWorkTypePK.workTypeCode = :workTypeCd"
 			+ " AND c.deprecateAtr = 0";
+	//hoatt - kaf006
+	private static final String FIND_FOR_APP_HD = "SELECT c FROM KshmtWorkType c"
+			+ " WHERE c.kshmtWorkTypePK.companyId = :companyId"
+			+ " AND c.kshmtWorkTypePK.workTypeCode IN :lstWorkTypeCD"
+			+ " AND c.deprecateAtr = :deprecateAtr"
+			+ " AND ((c.worktypeAtr = 0 AND c.oneDayAtr IN :hdType)"
+			+ " OR (c.worktypeAtr = 1 AND c.morningAtr IN :hdType AND c.afternoonAtr IN :hdType))"
+			+ " ORDER BY c.kshmtWorkTypePK.workTypeCode ASC";
 	// findWorkType(java.lang.String, java.lang.Integer, java.util.List,
 	// java.util.List)
 	private static final String FIND_WORKTYPE_ALLDAY_AND_HALFDAY;
@@ -653,5 +661,16 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 								.getList());
 		});
 		return listObject.stream().collect(Collectors.toMap(x -> String.valueOf(x[0]), x -> String.valueOf(x[1])));
+	}
+
+	@Override
+	public List<WorkType> findForAppHdKAF006(String companyId, List<String> lstWorkTypeCD, int deprecateAtr,
+			List<Integer> hdType) {
+		return this.queryProxy().query(FIND_FOR_APP_HD, KshmtWorkType.class)
+				.setParameter("companyId", companyId)
+				.setParameter("lstWorkTypeCD", lstWorkTypeCD)
+				.setParameter("deprecateAtr", deprecateAtr)
+				.setParameter("hdType", hdType)
+				.getList(c -> toDomain(c));
 	}
 }

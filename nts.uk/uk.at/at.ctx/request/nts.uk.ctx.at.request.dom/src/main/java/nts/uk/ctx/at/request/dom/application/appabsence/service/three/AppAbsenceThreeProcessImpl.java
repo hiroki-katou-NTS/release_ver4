@@ -15,8 +15,11 @@ import nts.uk.ctx.at.request.dom.application.appabsence.AbsenceWorkType;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSet;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmployWorkType;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmploymentSetting;
+import nts.uk.ctx.at.shared.dom.worktype.DeprecateClassification;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 
 @Stateless
 public class AppAbsenceThreeProcessImpl implements AppAbsenceThreeProcess {
@@ -46,6 +49,7 @@ public class AppAbsenceThreeProcessImpl implements AppAbsenceThreeProcess {
 	public List<WorkType> getWorkTypeDetails(List<AppEmploymentSetting> appEmploymentWorkType, String companyID,
 			String employeeID,int holidayType,int alldayHalfDay, boolean displayHalfDayValue) {
 		List<WorkType> result = new ArrayList<>();
+		//ドメインモデル「休暇申請対象勤務種類」を取得する
 		List<String> lstWorkTypeCodes = new ArrayList<>();
 		if(!CollectionUtil.isEmpty(appEmploymentWorkType)){
 			List<AppEmploymentSetting> appEmploymentWorkTypes = appEmploymentWorkType.stream().filter(x -> x.getHolidayOrPauseType() == holidayType).collect(Collectors.toList());
@@ -74,27 +78,19 @@ public class AppAbsenceThreeProcessImpl implements AppAbsenceThreeProcess {
 					// 勤務種類組み合わせ全表示チェック = ON
 					List<Integer> allDayAtrs = new ArrayList<>();
 					allDayAtrs.add(convertHolidayType(holidayType));
-					List<Integer> halfDay = new ArrayList<>();
-					// 休日
-					halfDay.add(1);
-					// 年休
-					halfDay.add(2);
-					//積立年休
-					halfDay.add(3);
-					// 特別休暇
-					halfDay.add(4);
-					// 欠勤
-					halfDay.add(5);
-					// 代休
-					halfDay.add(6);
-					// 振休
-					halfDay.add(8);
-					//時間消化休暇
-					halfDay.add(9);
-					result = this.workTypeRepository.findWorkTypeForAppHolidayAppType(companyID,allDayAtrs,halfDay,halfDay,convertHolidayType(holidayType),convertHolidayType(holidayType));
+					List<Integer> hdType = new ArrayList<>();
+					hdType.add(WorkTypeClassification.Holiday.value);//休日
+					hdType.add(WorkTypeClassification.AnnualHoliday.value);//年休
+					hdType.add(WorkTypeClassification.YearlyReserved.value);//積立年休
+					hdType.add(WorkTypeClassification.SpecialHoliday.value);//特別休暇
+					hdType.add(WorkTypeClassification.Absence.value);//欠勤
+					hdType.add(WorkTypeClassification.SubstituteHoliday.value);//代休
+					hdType.add(WorkTypeClassification.Pause.value);//振休
+					hdType.add(WorkTypeClassification.TimeDigestVacation.value);//時間消化休暇
+					result = workTypeRepository.findForAppHdKAF006(companyID,lstWorkTypeCodes,DeprecateClassification.NotDeprecated.value, hdType);
 				}else{
 					//勤務種類組み合わせ全表示チェック = OFF
-					result = this.workTypeRepository.findWorkTypeByCodes(companyID, lstWorkTypeCodes, 0, 0);
+					result = this.workTypeRepository.findWorkTypeByCodes(companyID, lstWorkTypeCodes, DeprecateClassification.NotDeprecated.value, WorkTypeUnit.OneDay.value);
 				}
 				
 			}else if(alldayHalfDay == 1){
