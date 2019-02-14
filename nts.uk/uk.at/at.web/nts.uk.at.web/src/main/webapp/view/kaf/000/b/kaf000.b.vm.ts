@@ -141,6 +141,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                     let returnReason = data.applicationDto.reversionReason;
                     $("#returnReason").html(returnReason.replace(/\n/g,"\<br/>"));
                 }
+                self.reasonToApprover(data.authorCmt);
                 let deadlineMsg = data.outputMessageDeadline;
                 if (!nts.uk.text.isNullOrEmpty(deadlineMsg.message)) {
                     self.reasonOutputMessFull(self.reasonOutputMess + deadlineMsg.message);
