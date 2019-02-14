@@ -10,11 +10,14 @@ import nts.uk.ctx.at.shared.dom.common.days.AttendanceDaysMonth;
 import nts.uk.ctx.at.record.dom.monthly.WorkTypeDaysCountTable;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonth;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
+import nts.uk.ctx.at.shared.dom.worktime.predset.BreakDownTimeDay;
+import nts.uk.ctx.at.shared.dom.worktime.predset.PredetemineTimeSetting;
+import nts.uk.ctx.at.shared.dom.worktype.WorkAtr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 
 /**
  * 月別実績の特別休暇日数
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class SpcVacationDaysOfMonthly {
@@ -64,9 +67,16 @@ public class SpcVacationDaysOfMonthly {
 	 * @param workType 勤務種類
 	 * @param workTypeDaysCountTable 勤務種類の日数カウント表
 	 * @param isAttendanceDay 出勤しているかどうか
+	 * @param predetermineTimeSet 所定時間設定
+	 * @param predTimeSetOnWeekday 所定時間設定（平日時）
 	 */
-	public void aggregate(WorkingSystem workingSystem, WorkType workType,
-			WorkTypeDaysCountTable workTypeDaysCountTable, boolean isAttendanceDay){
+	public void aggregate(
+			WorkingSystem workingSystem,
+			WorkType workType,
+			WorkTypeDaysCountTable workTypeDaysCountTable,
+			boolean isAttendanceDay,
+			PredetemineTimeSetting predetermineTimeSet,
+			PredetemineTimeSetting predTimeSetOnWeekday){
 
 		if (workType == null) return;
 		if (workTypeDaysCountTable == null) return;
@@ -103,9 +113,54 @@ public class SpcVacationDaysOfMonthly {
 					val targetSpcVacationDays = this.spcVacationDaysList.get(spcVacationFrameNo);
 					targetSpcVacationDays.addDays(aggrSpcVacationDays.getDays().v());
 					
+					// 枠時間の集計
+					int addMinutes = 0;
+					if (aggrSpcVacationDays.getDays().v() > 0.0) {
+						
+						// 所定時間設定を取得
+						PredetemineTimeSetting checkPredTimeSet = predetermineTimeSet;
+						if (predetermineTimeSet == null) {
+							checkPredTimeSet = predTimeSetOnWeekday;
+						}
+						if (checkPredTimeSet != null) {
+							
+							BreakDownTimeDay checkBreakDownTime = null;
+							if (checkPredTimeSet.getPredTime() != null) {
+								if (checkPredTimeSet.getPredTime().getPredTime() != null) {
+									checkBreakDownTime = checkPredTimeSet.getPredTime().getPredTime();
+								}
+							}
+							
+							// 1日・午前・午後の判定
+							if (workTypeDaysCountTable.getSpcVacationWorkAtrMap().containsKey(spcVacationFrameNo)) {
+								val workAtr = workTypeDaysCountTable.getSpcVacationWorkAtrMap().get(spcVacationFrameNo);
+								
+								// 時間をセット
+								if (workAtr == WorkAtr.OneDay && checkBreakDownTime != null) {
+									if (checkBreakDownTime.getOneDay() != null) {
+										addMinutes = checkBreakDownTime.getOneDay().v();
+										targetSpcVacationDays.addTime(addMinutes);
+									}
+								}
+								if (workAtr == WorkAtr.Monring && checkBreakDownTime != null) {
+									if (checkBreakDownTime.getMorning() != null) {
+										addMinutes = checkBreakDownTime.getMorning().v();
+										targetSpcVacationDays.addTime(addMinutes);
+									}
+								}
+								if (workAtr == WorkAtr.Afternoon && checkBreakDownTime != null) {
+									if (checkBreakDownTime.getAfternoon() != null) {
+										addMinutes = checkBreakDownTime.getAfternoon().v();
+										targetSpcVacationDays.addTime(addMinutes);
+									}
+								}
+							}
+						}
+					}
+					
 					// 特別休暇合計日数の集計
 					this.totalSpcVacationDays = this.totalSpcVacationDays.addDays(aggrSpcVacationDays.getDays().v());
-					this.totalSpcVacationTime = this.totalSpcVacationTime.addMinutes(aggrSpcVacationDays.getTime().v());
+					this.totalSpcVacationTime = this.totalSpcVacationTime.addMinutes(addMinutes);
 				}
 			}
 		}

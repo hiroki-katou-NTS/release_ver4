@@ -26,9 +26,9 @@ public class PClogOnOffLackOfStamp {
 
 	@Inject
 	private BasicScheduleService basicScheduleService;
-	
-	@Inject
-	private ManagedParallelWithContext managedParallelWithContext;
+// fix bug 106204
+//	@Inject
+//	private ManagedParallelWithContext managedParallelWithContext;
 
 	public EmployeeDailyPerError pClogOnOffLackOfStamp(String companyId, String employeeId, GeneralDate processingDate,
 			PCLogOnInfoOfDaily pCLogOnInfoOfDaily, WorkInfoOfDailyPerformance workInfoOfDailyPerformance) {
@@ -43,7 +43,8 @@ public class PClogOnOffLackOfStamp {
 				List<Integer> attendanceItemIDList = new ArrayList<>();
 				
 				List<LogOnInfo> logOnInfos = pCLogOnInfoOfDaily.getLogOnInfo();
-				this.managedParallelWithContext.forEach (logOnInfos,logOnInfo -> {
+				// fix bug 106204
+				logOnInfos.forEach(logOnInfo ->  {
 					// ログオフのみ存在している(only has Logoff time)
 					if ((logOnInfo.getLogOff() != null && logOnInfo.getLogOff().isPresent() && !logOnInfo.getLogOn().isPresent())
 							|| (logOnInfo.getLogOff() != null && logOnInfo.getLogOff().isPresent()

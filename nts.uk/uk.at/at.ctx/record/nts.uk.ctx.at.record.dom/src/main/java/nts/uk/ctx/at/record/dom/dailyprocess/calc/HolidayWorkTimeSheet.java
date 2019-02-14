@@ -155,7 +155,7 @@ public class HolidayWorkTimeSheet{
 													  Optional<WorkTimezoneOtherSubHolTimeSet> eachWorkTimeSet,
 													  Optional<CompensatoryOccurrenceSetting> eachCompanyTimeSet) {
 		//平日ではない
-		if(!workType.getDailyWork().isHolidayWork()) 
+		if(!workType.getDailyWork().isHolidayWork() || !workType.isGenSubHolidayForHolidayWork()) 
 			return Optional.empty();
 		val transSet = getTransSet(eachWorkTimeSet,eachCompanyTimeSet);
 		//就業時間帯の代休設定取得できない

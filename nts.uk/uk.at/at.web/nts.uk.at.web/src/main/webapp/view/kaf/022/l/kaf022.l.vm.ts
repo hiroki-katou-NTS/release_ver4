@@ -845,7 +845,8 @@ module nts.uk.at.view.kmf022.l.viewmodel {
             itemSet.holidayOrPauseType = data.holidayOrPauseType;
             itemSet.displayFlag(data.displayFlag);
             itemSet.holidayTypeUseFlg(data.holidayTypeUseFlg);
-            itemSet.lstWorkType(data.lstWorkType);
+            let sortLst = _.orderBy(data.lstWorkType,['workTypeCode'],['asc']);
+            itemSet.lstWorkType(sortLst);
         }        
         initDataSettingWithListCode(itemSet, datas:any[]){
             let self = this;
@@ -858,7 +859,8 @@ module nts.uk.at.view.kmf022.l.viewmodel {
                     itemSet[index].holidayOrPauseType = item.holidayOrPauseType;
                     itemSet[index].displayFlag(item.displayFlag);
                     itemSet[index].holidayTypeUseFlg(item.holidayTypeUseFlg);
-                    itemSet[index].lstWorkType(item.lstWorkType);
+                    let sortLst = _.orderBy(item.lstWorkType,['workTypeCode'],['asc']);
+                    itemSet[index].lstWorkType(sortLst);
                 }
             });            
         }

@@ -20,7 +20,7 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeSetCheck;
 
 /**
  * 勤務種類の日数カウント表
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class WorkTypeDaysCountTable {
@@ -39,8 +39,12 @@ public class WorkTypeDaysCountTable {
 	private AttendanceDaysMonth retentionYearlyDays;
 	/** 特休日数 */
 	private Map<Integer, AggregateSpcVacationDays> spcVacationDaysMap;
+	/** 特休単位 */
+	private Map<Integer, WorkAtr> spcVacationWorkAtrMap;
 	/** 欠勤日数 */
 	private Map<Integer, AggregateAbsenceDays> absenceDaysMap;
+	/** 欠勤単位 */
+	private Map<Integer, WorkAtr> absenceWorkAtrMap;
 	/** 代休日数 */
 	private AttendanceDaysMonth compensatoryLeaveDays;
 	/** 振出日数 */
@@ -87,7 +91,9 @@ public class WorkTypeDaysCountTable {
 		this.annualLeaveDays = new AttendanceDaysMonth(0.0);
 		this.retentionYearlyDays = new AttendanceDaysMonth(0.0);
 		this.spcVacationDaysMap = new HashMap<>();
+		this.spcVacationWorkAtrMap = new HashMap<>();
 		this.absenceDaysMap = new HashMap<>();
+		this.absenceWorkAtrMap = new HashMap<>();
 		this.compensatoryLeaveDays = new AttendanceDaysMonth(0.0);
 		this.transferAttendanceDays = new AttendanceDaysMonth(0.0);
 		this.transferHolidayGenerateDays = new AttendanceDaysMonth(0.0);
@@ -172,6 +178,7 @@ public class WorkTypeDaysCountTable {
 		int sumAbsenceNo = -1;
 		int sumSpHolidayNo = -1;
 		CloseAtr closeAtr = null;
+		WorkAtr workAtr = null;
 		if (workTypeSet != null && workTypeSet.isPresent()) {
 			publicHoliday = (workTypeSet.get().getDigestPublicHd() == WorkTypeSetCheck.CHECK); 
 			notCountForHolidayDays = (workTypeSet.get().getCountHodiday() != WorkTypeSetCheck.CHECK);
@@ -179,6 +186,7 @@ public class WorkTypeDaysCountTable {
 			sumAbsenceNo = workTypeSet.get().getSumAbsenseNo();
 			sumSpHolidayNo = workTypeSet.get().getSumSpHodidayNo();
 			closeAtr = workTypeSet.get().getCloseAtr();
+			workAtr = workTypeSet.get().getWorkAtr();
 		}
 		
 		switch (workTypeClass){
@@ -208,6 +216,9 @@ public class WorkTypeDaysCountTable {
 				this.spcVacationDaysMap.putIfAbsent(spcVacationFrameNo, new AggregateSpcVacationDays(spcVacationFrameNo));
 				val targetSpcVacationDays = this.spcVacationDaysMap.get(spcVacationFrameNo);
 				targetSpcVacationDays.addDays(addDays);
+				if (workAtr != null) {
+					this.spcVacationWorkAtrMap.putIfAbsent(spcVacationFrameNo, workAtr);
+				}
 			}
 			if (this.addSpecialHoliday) this.attendanceDays = this.attendanceDays.addDays(addDays);
 			this.predetermineDays = this.predetermineDays.addDays(addDays);
@@ -218,6 +229,9 @@ public class WorkTypeDaysCountTable {
 				this.absenceDaysMap.putIfAbsent(absenceFrameNo, new AggregateAbsenceDays(absenceFrameNo));
 				val targetAbsenceDays = this.absenceDaysMap.get(absenceFrameNo);
 				targetAbsenceDays.addDays(addDays);
+				if (workAtr != null) {
+					this.absenceWorkAtrMap.putIfAbsent(absenceFrameNo, workAtr);
+				}
 			}
 			this.predetermineDays = this.predetermineDays.addDays(addDays);
 			break;

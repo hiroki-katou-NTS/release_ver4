@@ -297,7 +297,7 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 
 	@Inject
 	private SpecificDateAttrOfDailyPerforRepo specificDateAttrOfDailyPerforRepo;
-
+	
 	@Resource
 	private SessionContext scContext;
 
@@ -373,10 +373,19 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 				} else {
 					WorkInfoOfDailyPerformance workInfoOfDailyPerformance = this.workInformationRepository
 							.find(employeeId, day).get();
+					NewReflectStampOutput stampOutput = new NewReflectStampOutput();
+					WorkStyle workStyle = basicScheduleService
+							.checkWorkDay(workInfoOfDailyPerformance.getRecordInfo().getWorkTypeCode().v());
+					if (workStyle != WorkStyle.ONE_DAY_REST) {
+						 stampOutput = this.reflectStampDomainServiceImpl.reflectStampInfo(companyId,
+								employeeId, day, workInfoOfDailyPerformance, null, empCalAndSumExecLogID, reCreateAttr,
+								Optional.empty(), Optional.empty(), Optional.empty());
+					}else {
+						 stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(companyId,
+								employeeId, day, Optional.of(workInfoOfDailyPerformance), null, empCalAndSumExecLogID, reCreateAttr,
+								Optional.empty(), Optional.empty(), Optional.empty());
+					}
 					Boolean existsDailyInfo = workInfoOfDailyPerformance != null;
-					NewReflectStampOutput stampOutput = this.reflectStampDomainServiceImpl.reflectStampInfo(companyId,
-							employeeId, day, workInfoOfDailyPerformance, null, empCalAndSumExecLogID, reCreateAttr,
-							Optional.empty(), Optional.empty(), Optional.empty());
 					// this.registerDailyPerformanceInfoService.registerDailyPerformanceInfo(companyId,
 					// employeeId, day,
 					// stampOutput, null, workInfoOfDailyPerformance,
@@ -1315,7 +1324,15 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 							workInfoOfDailyPerformanceUpdate, timeLeavingOptional, empCalAndSumExecLogID, reCreateAttr,
 							Optional.of(calAttrOfDailyPerformance), Optional.of(affiliationInforOfDailyPerfor),
 							Optional.empty());
+				} else {
+					// fixbug 105926
+					stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(
+							companyId, employeeID, day,
+							Optional.of(workInfoOfDailyPerformanceUpdate), null, empCalAndSumExecLogID, reCreateAttr,
+							Optional.of(calAttrOfDailyPerformance), Optional.of(affiliationInforOfDailyPerfor),
+							Optional.of(workTypeOfDailyPerformance));
 				}
+				
 				if (stampOutput.getErrMesInfos() == null || stampOutput.getErrMesInfos().isEmpty()) {
 					this.registerDailyPerformanceInfoService.registerDailyPerformanceInfo(companyId, employeeID, day,
 							stampOutput.getReflectStampOutput(), affiliationInforOfDailyPerfor,

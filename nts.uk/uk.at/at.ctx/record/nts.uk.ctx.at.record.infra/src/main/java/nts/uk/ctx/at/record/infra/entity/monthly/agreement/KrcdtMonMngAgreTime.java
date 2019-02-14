@@ -37,10 +37,6 @@ public class KrcdtMonMngAgreTime extends UkJpaEntity implements Serializable {
 	@EmbeddedId
 	public KrcdtMonMngAgreTimePK PK;
 	
-	/** 年度 */
-	@Column(name = "YEAR")
-	public int year;
-	
 	/** 36協定時間 */
 	@Column(name = "AGREEMENT_TIME")
 	public int agreementTime;
@@ -141,7 +137,7 @@ public class KrcdtMonMngAgreTime extends UkJpaEntity implements Serializable {
 		return AgreementTimeOfManagePeriod.of(
 				this.PK.employeeId,
 				new YearMonth(this.PK.yearMonth),
-				new Year(this.year),
+				new Year(this.PK.yearMonth / 100),
 				agreementTime,
 				breakdown);
 	}
@@ -167,7 +163,6 @@ public class KrcdtMonMngAgreTime extends UkJpaEntity implements Serializable {
 		val agreementTime = domain.getAgreementTime();
 		val breakdown = domain.getBreakdown();
 		
-		this.year = domain.getYear().v();
 		this.agreementTime = agreementTime.getAgreementTime().v();
 		this.limitErrorTime = agreementTime.getLimitErrorTime().v();
 		this.limitAlarmTime = agreementTime.getLimitAlarmTime().v();

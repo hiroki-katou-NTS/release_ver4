@@ -342,79 +342,6 @@ public class AbsenceReruitmentMngInPeriodQueryImpl implements AbsenceReruitmentM
 	}
 
 	@Override
-	public List<AbsRecDetailPara> getUnUseDayInterimRec(AbsRecMngInPeriodParamInput paramInput) {
-		List<InterimRemain> lstInterimMngOfRec = new ArrayList<>();
-		List<InterimRecMng> lstRecMng = new ArrayList<>();
-		List<AbsRecDetailPara> lstOutputOfRec = new ArrayList<>();
-		//INPUT．モードをチェックする
-		if(paramInput.isMode()) {
-			//暫定残数管理データを作成する
-			Map<GeneralDate, DailyInterimRemainMngData> interimData = createDataService.monthInterimRemainData(paramInput.getCid(), paramInput.getSid(), paramInput.getDateData());
-			//メモリ上からドメインモデル「暫定振休管理データ」を取得する
-			if(!interimData.isEmpty()) {				
-				List<DailyInterimRemainMngData> lstRemainMngData = interimData.values().stream().collect(Collectors.toList());
-				for (DailyInterimRemainMngData x : lstRemainMngData) {
-					Optional<InterimRecMng> optRecMng = x.getRecData();
-					optRecMng.ifPresent(y -> {
-						lstRecMng.add(y);
-					});
-					List<InterimRemain> lstInterimCreate = x.getRecAbsData();
-					lstInterimMngOfRec.addAll(lstInterimCreate);
-				}				
-			}
-			
-		} else {
-			//ドメインモデル「暫定振出管理データ」を取得する
-			lstInterimMngOfRec =  interimRepo.getRemainBySidPriod(paramInput.getSid(), paramInput.getDateData(), RemainType.PICKINGUP);
-			lstInterimMngOfRec.stream().forEach(x -> {
-				Optional<InterimRecMng> optRecMng = recAbsRepo.getReruitmentById(x.getRemainManaID());
-				optRecMng.ifPresent(z -> lstRecMng.add(z));
-			});			
-		}
-		//INPUT．上書きフラグをチェックする
-		if(paramInput.isMode()
-				&& !paramInput.getInterimMng().isEmpty()
-				&& !paramInput.getUseRecMng().isEmpty()) {
-			List<InterimRecMng> lstRecMngTmp = new ArrayList<>(lstRecMng);
-			List<InterimRemain> lstInterimMngTmp = new ArrayList<>(lstInterimMngOfRec);
-			for (InterimRecMng recMng : paramInput.getUseRecMng()) {
-				List<InterimRemain> lstInputData = paramInput.getInterimMng().stream()
-						.filter(x -> x.getRemainManaID() == recMng.getRecruitmentMngId())
-						.collect(Collectors.toList());
-				if(!lstInputData.isEmpty()) {
-					InterimRemain inputRemainData = lstInputData.get(0);
-					//INPUT．上書き用の暫定管理データをドメインモデル「暫定振出管理データ」に追加する
-					List<InterimRemain> lstRemainTmp = lstInterimMngTmp.stream()
-						.filter(x -> x.getYmd() == inputRemainData.getYmd())
-						.collect(Collectors.toList());				
-					if(!lstRemainTmp.isEmpty()) {
-						InterimRemain remainTmp = lstRemainTmp.get(0);
-						List<InterimRecMng> lstRecTmp = lstRecMngTmp.stream().filter(y -> y.getRecruitmentMngId() == remainTmp.getRemainManaID())
-								.collect(Collectors.toList());
-						if(!lstRecTmp.isEmpty()) {
-							InterimRecMng recMngTmp = lstRecTmp.get(0);
-							lstRecMng.remove(recMngTmp);
-							lstRecMng.add(recMng);
-						}
-					}
-					
-					lstInterimMngOfRec.add(inputRemainData);
-				}
-			}
-			
-		}
-		LeaveSetOutput getSetForLeave = absenceTenProcess.getSetForLeave(paramInput.getCid(), paramInput.getSid(), paramInput.getBaseDate());
-		for (InterimRecMng interimRecMng : lstRecMng) {
-			InterimRemain remainData = lstInterimMngOfRec.stream().filter(x -> x.getRemainManaID().equals(interimRecMng.getRecruitmentMngId()))
-					.collect(Collectors.toList()).get(0);
-			AbsRecDetailPara outputData = this.getUnUseDayOfRecInterim(interimRecMng, remainData,getSetForLeave, paramInput.getDateData().start(),
-					paramInput.getBaseDate(), paramInput.getCid(), paramInput.getSid());
-			lstOutputOfRec.add(outputData);
-		}
-		return lstOutputOfRec;
-	}
-
-	@Override
 	public AbsRecDetailPara getUnUseDayOfRecInterim(InterimRecMng interimRecMng, InterimRemain remainData,LeaveSetOutput getSetForLeave,
 			GeneralDate startDate, GeneralDate baseDate, String cid, String sid) {
 		//ドメインモデル「暫定振出振休紐付け管理」を取得する
@@ -439,6 +366,9 @@ public class AbsenceReruitmentMngInPeriodQueryImpl implements AbsenceReruitmentM
 		if(getSetForLeave.getExpirationOfLeave() == 0 ||getSetForLeave.getExpirationOfLeave() == 2) {
 			//社員に対応する処理締めを取得する
 			Closure period = closureService.getClosureDataByEmployee(sid, baseDate);
+			if(period == null) {
+				return null;
+			}
 			//指定した年月日時点の締め期間を取得する
 			Optional<ClosurePeriod> optClosurePeriod = period.getClosurePeriodByYmd(remainData.getYmd());			
 			if(getSetForLeave.getExpirationOfLeave() == 0) {
@@ -799,7 +729,9 @@ public class AbsenceReruitmentMngInPeriodQueryImpl implements AbsenceReruitmentM
 					.collect(Collectors.toList()).get(0);
 			AbsRecDetailPara outputData = this.getUnUseDayOfRecInterim(interimRecMng, remainData, getSetForLeave, paramInput.getDateData().start(),
 					paramInput.getBaseDate(), paramInput.getCid(), paramInput.getSid());
-			lstOutputOfRec.add(outputData);
+			if(outputData != null) {
+				lstOutputOfRec.add(outputData);	
+			}			
 		}
 		return lstOutputOfRec;
 	}
