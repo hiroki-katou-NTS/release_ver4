@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.task.parallel.ManagedParallelWithContext;
+import nts.arc.task.parallel.ManagedParallelWithContext.ControlOption;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.uk.ctx.at.function.app.command.processexecution.ListLeaderOrNotEmpOutput;
@@ -57,6 +59,12 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 	
 	@Inject
 	private CreateperApprovalDailyAdapter createperApprovalDailyAdapter;
+	
+	@Inject
+	private ManagedParallelWithContext managedParallelWithContext;
+	
+	public static int MAX_DELAY_PARALLEL = 0;
+	
 	@Override
 	public void checkAppRouteUpdateDaily(String execId, ProcessExecution procExec, ProcessExecutionLog procExecLog) {
 		/**ドメインモデル「更新処理自動実行ログ」を更新する*/
@@ -86,16 +94,20 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 		
 		List<CheckCreateperApprovalClosure> listCheckCreateApp = new ArrayList<>();
 		//取得した就業締め日の数(so du lieu 就業締め日 lay duoc)　＝　回数
-		for(Closure closure : listClosure) {
+		this.managedParallelWithContext.forEach(
+				ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
+				listClosure,
+				itemClosure -> {
+		//for(Closure closure : listClosure) {
 			/**締め開始日を取得する*/
-			PresentClosingPeriodFunImport closureData =  funClosureAdapter.getClosureById(procExec.getCompanyId(), closure.getClosureId().value).get();
+			PresentClosingPeriodFunImport closureData =  funClosureAdapter.getClosureById(procExec.getCompanyId(), itemClosure.getClosureId().value).get();
 			GeneralDate startDate = GeneralDate.today().addDays(-1);
 			if(procExec.getProcessExecType() == ProcessExecType.RE_CREATE){
 				startDate = closureData.getClosureStartDate();
 			}
 			
 			//雇用コードを取得する(lấy 雇用コード)
-			List<ClosureEmployment> listClosureEmployment =  closureEmploymentRepo.findByClosureId(procExec.getCompanyId(), closure.getClosureId().value);
+			List<ClosureEmployment> listClosureEmployment =  closureEmploymentRepo.findByClosureId(procExec.getCompanyId(), itemClosure.getClosureId().value);
 			List<String> listClosureEmploymentCode = listClosureEmployment.stream().map(c->c.getEmploymentCD()).collect(Collectors.toList());
 			/**対象社員を取得する*/
 			RegulationInfoEmployeeAdapterImport regulationInfoEmployeeAdapterImport = new RegulationInfoEmployeeAdapterImport();
@@ -241,7 +253,7 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 				if(!listEmp.isEmpty()) {
 					/**異動者、勤務種別変更者、休職者・休業者のみの社員ID（List）を作成する*/	
 					DatePeriod maxPeriodBetweenCalAndCreate = new DatePeriod(closureData.getClosureStartDate(), GeneralDate.fromString("9999/12/31", "yyyy/MM/dd"));
-					ListLeaderOrNotEmpOutput listLeaderOrNotEmpOutput = transfereePerson.createProcessForChangePerOrWorktype(closure.getClosureId().value, procExec.getCompanyId(),
+					ListLeaderOrNotEmpOutput listLeaderOrNotEmpOutput = transfereePerson.createProcessForChangePerOrWorktype(itemClosure.getClosureId().value, procExec.getCompanyId(),
 							listEmp, 
 							maxPeriodBetweenCalAndCreate, procExec);
 					listEmployeeID.addAll(listLeaderOrNotEmpOutput.getLeaderEmpIdList());
@@ -255,8 +267,10 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 				createNewEmp = procExec.getExecSetting().getAppRouteUpdateDaily().getCreateNewEmp().get().value;
 			boolean check = createperApprovalDailyAdapter.createperApprovalDaily(procExec.getCompanyId(), procExecLog.getExecId(),
 					listEmployeeID, procExec.getProcessExecType().value, createNewEmp, closureData.getClosureStartDate(),closureData.getClosureEndDate());
-			listCheckCreateApp.add(new CheckCreateperApprovalClosure(closure.getClosureId().value,check));
-		}
+			listCheckCreateApp.add(new CheckCreateperApprovalClosure(itemClosure.getClosureId().value,check));
+		
+		
+				});
 		
 		boolean checkError = false;
 		/*終了状態で「エラーあり」が返ってきたか確認する*/
