@@ -563,7 +563,6 @@ module nts.uk.at.view.kmk007.a.viewmodel {
          * Reset display
          */
         private cleanForm(): void {
-            var self = this,
             let self = this,
                 lwtData = ko.toJS(self.listWorkType),
                 cwt = self.currentWorkType(),
