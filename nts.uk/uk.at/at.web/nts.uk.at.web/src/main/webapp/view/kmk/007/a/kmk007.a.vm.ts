@@ -9,8 +9,8 @@ module nts.uk.at.view.kmk007.a.viewmodel {
 
         itemListOneDay: KnockoutObservableArray<ItemModel>;
         listWorkType: KnockoutObservableArray<any> = ko.observableArray([]);
-        listSpecialHlFrame: KnockoutObservableArray<any>;
-        listAbsenceFrame: KnockoutObservableArray<any>;
+        listSpecialHlFrame: KnockoutObservableArray<any> = ko.observableArray([]);
+        listAbsenceFrame: KnockoutObservableArray<any> = ko.observableArray([]);
         oneDay: KnockoutObservable<WorkTypeSet>;
         currentOneDayCls: KnockoutObservable<number>;
         currentMorningCls: KnockoutObservable<number>;
@@ -51,8 +51,6 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                 };
 
             self.selectedRuleCode = ko.observable(1);
-            self.listSpecialHlFrame = ko.observableArray([]);
-            self.listAbsenceFrame = ko.observableArray([]);
 
             self.oneDay = ko.observable(new WorkTypeSet(iwork));
             self.currentOneDay = ko.observable(new WorkTypeSet(iwork));
@@ -205,7 +203,9 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                     self.isCreated(false);
                     self.isEnableOneDay(false);
                     self.index(_.findIndex(ko.toJS(lwt), x => x.workTypeCode == newValue));
-
+                    //reload Frame
+                    self.getSpecialHolidayFrame();
+                    self.getAbsenceFrame();
                     service.findWorkType(newValue).done(function(workTypeRes) {
                         let itemWorkType: any = ko.toJS(self.convertToModel(workTypeRes)),
                             itemWorkTypeLang = _.find(ko.toJS(lwt), (x: IWorkType) => x.workTypeCode == newValue);
@@ -331,7 +331,7 @@ module nts.uk.at.view.kmk007.a.viewmodel {
         }
 
         private setWorkTypeSet(worktypeset: WorkTypeSet, itemWorkType: IWorkTypeSet): void {
-
+            let self = this;
             worktypeset.workTypeCode(itemWorkType.workTypeCode);
             worktypeset.attendanceTime(itemWorkType.attendanceTime);
             worktypeset.closeAtr = ko.observable(itemWorkType.closeAtr);
@@ -344,6 +344,9 @@ module nts.uk.at.view.kmk007.a.viewmodel {
             worktypeset.sumSpHodidayNo(itemWorkType.sumSpHodidayNo);
             worktypeset.timeLeaveWork(itemWorkType.timeLeaveWork);
             worktypeset.workAtr(itemWorkType.workAtr);
+            worktypeset.updateListAbsenceFrame(self.listAbsenceFrame());
+            worktypeset.updateListSpecialHlFrame(self.listSpecialHlFrame());
+
         }
 
         private openDiablogC() {
@@ -445,6 +448,7 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                 }
                 self.getWorkType().done(function() {
                     self.currentCode(workType.workTypeCode());
+                    self.currentCode.valueHasMutated();
                 });
 
                 nts.uk.ui.dialog.info({ messageId: "Msg_15" });
@@ -560,11 +564,15 @@ module nts.uk.at.view.kmk007.a.viewmodel {
          */
         private cleanForm(): void {
             var self = this,
+            let self = this,
                 lwtData = ko.toJS(self.listWorkType),
                 cwt = self.currentWorkType(),
                 od = cwt.oneDay(),
                 mn = cwt.morning(),
-                af = cwt.afternoon();
+                af = cwt.afternoon(),
+                specialHlFrames = self.listSpecialHlFrame(),
+                absenceFrames = self.listAbsenceFrame();
+                
             self.isEnableOneDay(true);
             self.checkDisabled(true);
             cwt.workTypeCode('');
@@ -574,9 +582,6 @@ module nts.uk.at.view.kmk007.a.viewmodel {
             cwt.abolishAtr(0);
             cwt.memo('');
             cwt.workAtr(0);
-            cwt.oneDayCls(0);
-            cwt.morningCls(0);
-            cwt.afternoonCls(0);
             cwt.calculatorMethod(1);
 
             od.workTypeCode('');
@@ -587,6 +592,10 @@ module nts.uk.at.view.kmk007.a.viewmodel {
             od.closeAtr(0);
             od.sumAbsenseNo(0);
             od.sumSpHodidayNo(0);
+            self.oneDay().sumAbsenseNo(0);
+            self.oneDay().sumSpHodidayNo(0);
+            self.currentOneDay().sumAbsenseNo = 0;
+            self.currentOneDay().sumSpHodidayNo = 0;
             od.timeLeaveWork(0);
             od.attendanceTime(0);
             od.genSubHodiday(0);
@@ -600,6 +609,8 @@ module nts.uk.at.view.kmk007.a.viewmodel {
             mn.closeAtr(0);
             mn.sumAbsenseNo(0);
             mn.sumSpHodidayNo(0);
+            self.currentMorning().sumAbsenseNo = 0;
+            self.currentMorning().sumSpHodidayNo = 0;
             mn.timeLeaveWork(0);
             mn.attendanceTime(0);
             mn.genSubHodiday(0);
@@ -613,11 +624,17 @@ module nts.uk.at.view.kmk007.a.viewmodel {
             af.closeAtr(0);
             af.sumAbsenseNo(0);
             af.sumSpHodidayNo(0);
+            self.currentAfternoon().sumAbsenseNo = 0;
+            self.currentAfternoon().sumSpHodidayNo = 0;
             af.timeLeaveWork(0);
             af.attendanceTime(0);
             af.genSubHodiday(0);
             af.dayNightTimeAsk(0);
             self.currentCode("");
+            
+            cwt.oneDayCls(0);
+            cwt.morningCls(0);
+            cwt.afternoonCls(0);
             if (lwtData.length > 0) {
                 nts.uk.ui.errors.clearAll();
             }
@@ -716,17 +733,28 @@ module nts.uk.at.view.kmk007.a.viewmodel {
          * Get data special holiday frame form database
          */
         private getSpecialHolidayFrame(): any {
-            var self = this;
-            var dfd = $.Deferred();
+            let self = this,
+                dfd = $.Deferred();
             service.getAllSpecialHolidayFrame().done(function(data) {
                 if (data.length != 0) {
-                    self.listSpecialHlFrame.removeAll();
+                    let specialHlFrames = [];
+
                     _.forEach(data, function(item) {
                         if (item.deprecateSpecialHd == 0) {
-                            var specialHlFrame = new ItemModel(item.specialHdFrameNo, item.specialHdFrameName, item.deprecateSpecialHd)
-                            self.listSpecialHlFrame.push(ko.toJS(specialHlFrame));
+                            let specialHlFrame = new ItemModel(item.specialHdFrameNo,
+                                item.specialHdFrameName,
+                                item.deprecateSpecialHd);
+                            specialHlFrames.push(ko.toJS(specialHlFrame));
                         }
                     });
+
+                    specialHlFrames = _.sortBy(specialHlFrames, ["code"]);
+
+                    self.listSpecialHlFrame(specialHlFrames);
+                    self.currentWorkType().oneDay().updateListSpecialHlFrame(specialHlFrames);
+                    self.currentWorkType().morning().updateListSpecialHlFrame(specialHlFrames);
+                    self.currentWorkType().afternoon().updateListSpecialHlFrame(specialHlFrames);
+
                 }
                 dfd.resolve();
             }).fail((res) => { });
@@ -737,17 +765,26 @@ module nts.uk.at.view.kmk007.a.viewmodel {
          * Get data absence frame from database
          */
         private getAbsenceFrame(): any {
-            var self = this;
-            var dfd = $.Deferred();
+            let self = this,
+                dfd = $.Deferred();
             service.getAllAbsenceFrame().done(function(data) {
                 if (data.length != 0) {
-                    self.listAbsenceFrame.removeAll();
+                    let listAbsenceFrames = [];
                     _.forEach(data, function(item) {
                         if (item.deprecateAbsence == 0) {
-                            var absenceFrame = new ItemModel(item.absenceFrameNo, item.absenceFrameName, item.deprecateAbsence)
-                            self.listAbsenceFrame.push(ko.toJS(absenceFrame));
+                            let absenceFrame = new ItemModel(item.absenceFrameNo,
+                                item.absenceFrameName,
+                                item.deprecateAbsence);
+                            listAbsenceFrames.push(ko.toJS(absenceFrame));
                         }
                     });
+
+                    listAbsenceFrames = _.sortBy(listAbsenceFrames, ["code"]);
+
+                    self.listAbsenceFrame(listAbsenceFrames);
+                    self.currentWorkType().oneDay().updateListAbsenceFrame(listAbsenceFrames);
+                    self.currentWorkType().morning().updateListAbsenceFrame(listAbsenceFrames);
+                    self.currentWorkType().afternoon().updateListAbsenceFrame(listAbsenceFrames);
                 }
                 dfd.resolve();
             }).fail((res) => { });
@@ -1036,6 +1073,8 @@ module nts.uk.at.view.kmk007.a.viewmodel {
         attendanceTime: KnockoutObservable<any>;
         genSubHodiday: KnockoutObservable<any>;
         dayNightTimeAsk: KnockoutObservable<any>;
+        listAbsenceFrame: KnockoutObservableArray<any> = ko.observableArray([]);
+        listSpecialHlFrame: KnockoutObservableArray<any> = ko.observableArray([]);
 
         constructor(param: IWorkTypeSet) {
             if (param) {
@@ -1052,6 +1091,33 @@ module nts.uk.at.view.kmk007.a.viewmodel {
                 this.genSubHodiday = ko.observable(!!param.genSubHodiday);
                 this.dayNightTimeAsk = ko.observable(!!param.dayNightTimeAsk);
             }
+        }
+        
+        updateListAbsenceFrame(listAbsences) {
+            let self = this;
+            let listAbsenceFrames = _.map(listAbsences, item => new ItemModel(item.code, item.name, item.priority)),
+                absCode = this.sumAbsenseNo(),
+                selectedAbs = _.find(listAbsenceFrames, { 'code': absCode });
+            if (!selectedAbs && absCode != 0) {
+                listAbsenceFrames.push(new ItemModel(absCode,
+                    absCode + "マスタ未登録",
+                    1));
+            }
+            self.listAbsenceFrame(_.sortBy(listAbsenceFrames, ['code']));
+        }
+        
+        updateListSpecialHlFrame(listHlFrames) {
+            let self = this;
+
+            let listSpecialHlFrames = _.map(listHlFrames, item => new ItemModel(item.code, item.name, item.priority)),
+                SHCode = self.sumSpHodidayNo(),
+                selectedSH = _.find(listSpecialHlFrames, { 'code': SHCode });
+            if (!selectedSH && SHCode != 0) {
+                listSpecialHlFrames.push(new ItemModel(SHCode,
+                    SHCode + "マスタ未登録",
+                    1));
+            }
+            self.listSpecialHlFrame(_.sortBy(listSpecialHlFrames, ['code']));
         }
     }
 }
