@@ -227,7 +227,7 @@ public interface IntermediateDataPub {
 	 * @param date
 	 * @return
 	 */
-	public List<String> dailyConfirmSearch(String companyID, String approverID, GeneralDate date);
+	public List<EmpSprDailyConfirmExport> dailyConfirmSearch(String companyID, String approverID, GeneralDate date);
 	
 	/**
 	 * RequestList 538
