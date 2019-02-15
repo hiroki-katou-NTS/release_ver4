@@ -21,4 +21,5 @@ public class AppDateDataDto{
 	private ApplicationDto_New applicationDto;
 	private Integer errorFlag;
 	private Integer defaultPrePostAtr;
+	private String authorCmt;
 }

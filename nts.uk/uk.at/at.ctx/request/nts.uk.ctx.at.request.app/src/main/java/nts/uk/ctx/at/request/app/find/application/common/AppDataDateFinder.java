@@ -26,6 +26,7 @@ import nts.uk.ctx.at.request.dom.application.common.adapter.workflow.dto.Approva
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.init.CollectApprovalRootPatternService;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.init.StartupErrorCheckService;
 import nts.uk.ctx.at.request.dom.application.common.service.other.CollectAchievement;
+import nts.uk.ctx.at.request.dom.application.common.service.other.DetailScreenAppDataService;
 import nts.uk.ctx.at.request.dom.application.common.service.other.OtherCommonAlgorithm;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.AchievementOutput;
 import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSettingRepository;
@@ -67,6 +68,9 @@ public class AppDataDateFinder {
 	@Inject
 	private ApplicationSettingRepository applicationSettingRepository;
 	
+	@Inject
+	private DetailScreenAppDataService detailScreenAppDataService;
+	
 	private static final String DATE_FORMAT = "yyyy/MM/dd";
 	
 	public AppDateDataDto getAppDataByDate(Integer appTypeValue, String appDate, Boolean isStartUp, String appID,String employeeID, int overtimeAtr){
@@ -74,6 +78,7 @@ public class AppDataDateFinder {
 		if(employeeID == null){
 			 employeeID = AppContexts.user().employeeId();
 		}
+		String authorCmt = Strings.EMPTY;
 		GeneralDate appGeneralDate = GeneralDate.fromString(appDate, DATE_FORMAT);
 		AchievementOutput achievementOutput = new AchievementOutput(appGeneralDate, null, null, null, null, null, null);
 		ApprovalRootContentImport_New approvalRootContentImport = null;
@@ -117,6 +122,7 @@ public class AppDataDateFinder {
 					.reflectPlanTime(application.getReflectionInformation().getDateTimeReflection().map(x -> x.toString(DATE_FORMAT)).orElse(null))
 					.reflectPerTime(application.getReflectionInformation().getDateTimeReflectionReal().map(x -> x.toString(DATE_FORMAT)).orElse(null))
 					.build();
+			authorCmt = detailScreenAppDataService.getDetailScreenAppData(appID).getAuthorComment();
 		} else {
 			achievementOutput = collectAchievement.getAchievement(companyID, employeeID, appGeneralDate);
 			if(isStartUp.equals(Boolean.TRUE)){
@@ -153,7 +159,8 @@ public class AppDataDateFinder {
 						achievementOutput.getEndTime2()),
 				applicationDto,
 				approvalRootContentImport == null ? null : approvalRootContentImport.getErrorFlag().value,
-				defaultPrePostAtr.value);
+				defaultPrePostAtr.value,
+				authorCmt);
 	}
 	
 }
