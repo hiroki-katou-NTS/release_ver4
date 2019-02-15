@@ -9,6 +9,6 @@ import nts.uk.ctx.at.request.dom.application.common.service.other.output.Process
  */
 public interface DetailAfterApproval_New {
 	
-	public ProcessResult doApproval(String companyID, String appID, String employeeID, String memo);
+	public ProcessResult doApproval(String companyID, String appID, String employeeID, String memo, String appReason, boolean isUpdateAppReason);
 	
 }

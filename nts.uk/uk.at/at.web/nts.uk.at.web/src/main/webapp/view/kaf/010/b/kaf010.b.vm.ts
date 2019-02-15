@@ -598,6 +598,23 @@ module nts.uk.at.view.kaf010.b {
                 });
             }
             
+            getBoxReason(){
+                var self = this;
+                return appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
+            
+            }
+        
+            getAreaReason(){
+                var self = this;
+                return appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);   
+            }
+            
+            resfreshReason(appReason: string){
+                var self = this;
+                self.selectedReason('');  
+                self.multilContent(appReason);  
+            }
+            
             updateOvertime(command: any){
                 service.updateOvertime(command)
                 .done((data) => {

@@ -602,6 +602,23 @@ module nts.uk.at.view.kaf006.b{
                 .then(function() { nts.uk.ui.block.clear(); });
              });
          }
+            
+        getBoxReason(){
+            var self = this;
+            return appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());  
+        }
+    
+        getAreaReason(){
+            var self = this;
+            return appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), self.enbContentReason());   
+        }   
+            
+        resfreshReason(appReason: string){
+            var self = this;
+            self.selectedReason('');    
+            self.multilContent(appReason);
+        }
+            
         getReason(inputReasonID: string, inputReasonList: Array<common.ComboReason>, detailReason: string): string{
             let appReason = '';
             let inputReason: string = '';

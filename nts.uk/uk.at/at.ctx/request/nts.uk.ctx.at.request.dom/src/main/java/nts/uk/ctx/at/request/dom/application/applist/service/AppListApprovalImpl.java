@@ -54,7 +54,7 @@ public class AppListApprovalImpl implements AppListApprovalRepository{
 				continue;
 			}
 			//共通アルゴリズム「詳細画面承認後の処理」を実行する(thực hiện xử lý 「詳細画面承認後の処理」) - 8.2
-			ProcessResult result = detailAfAppv.doApproval(companyID, app.getAppID(), employeeID, "");
+			ProcessResult result = detailAfAppv.doApproval(companyID, app.getAppID(), employeeID, "", "", false);
 			if(!Strings.isBlank(result.getReflectAppId())){
 				lstRefAppId.add(result.getReflectAppId());
 			}

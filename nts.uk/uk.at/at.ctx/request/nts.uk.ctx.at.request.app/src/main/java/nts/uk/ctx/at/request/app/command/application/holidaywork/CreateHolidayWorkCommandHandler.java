@@ -123,7 +123,7 @@ public class CreateHolidayWorkCommandHandler extends CommandHandlerWithResult<Cr
 			// 9.振休申請取り消し
 			Optional<Application_New> optapplicationLeaveApp = this.applicationRepository_New.findByID(companyId, command.getLeaveAppID());
 			if(optapplicationLeaveApp.isPresent()){
-				HolidayShipmentCommand commandHoliday = new HolidayShipmentCommand(command.getLeaveAppID(), null, optapplicationLeaveApp.get().getVersion(), null);	
+				HolidayShipmentCommand commandHoliday = new HolidayShipmentCommand(command.getLeaveAppID(), null, optapplicationLeaveApp.get().getVersion(), null, "", "");	
 				this.cancelHolidayShipmentCommandHandler.handle(commandHoliday);
 			}
 			// 10.関連マスタ更新

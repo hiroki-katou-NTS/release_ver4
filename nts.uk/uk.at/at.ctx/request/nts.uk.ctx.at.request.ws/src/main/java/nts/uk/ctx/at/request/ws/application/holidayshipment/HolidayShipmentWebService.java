@@ -29,6 +29,7 @@ import nts.uk.ctx.at.request.app.find.application.holidayshipment.HolidayShipmen
 import nts.uk.ctx.at.request.app.find.application.holidayshipment.HolidayShipmentScreenCFinder;
 import nts.uk.ctx.at.request.app.find.application.holidayshipment.dto.HolidayShipmentDto;
 import nts.uk.ctx.at.request.app.find.application.holidayshipment.dto.WorkTimeInfoDto;
+import nts.uk.ctx.at.request.dom.application.common.service.other.output.ApproveProcessResult;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
 
 @Path("at/request/application/holidayshipment")
@@ -117,8 +118,8 @@ public class HolidayShipmentWebService extends WebService {
 
 	@POST
 	@Path("approve")
-	public JavaTypeResult<ProcessResult> approve(HolidayShipmentCommand command) {
-		return new JavaTypeResult<ProcessResult>(this.approveHandler.handle(command));
+	public JavaTypeResult<ApproveProcessResult> approve(HolidayShipmentCommand command) {
+		return new JavaTypeResult<ApproveProcessResult>(this.approveHandler.handle(command));
 	}
 
 	@POST
