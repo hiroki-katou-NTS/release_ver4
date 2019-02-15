@@ -266,27 +266,27 @@ public class ApplicationListForScreen {
 				// outputパラメータに打刻申請のモード別の値をセットする
 				result.add(new AppWithDetailExportDto(
 						ApplicationType.STAMP_APPLICATION.value, 
-						appDispName.getDispName().v() + StampRequestMode.STAMP_GO_OUT_PERMIT.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_GO_OUT_PERMIT.name, 
 						null,
 						StampRequestMode.STAMP_GO_OUT_PERMIT.value));
 				result.add(new AppWithDetailExportDto(
 						ApplicationType.STAMP_APPLICATION.value, 
-						appDispName.getDispName().v() + StampRequestMode.STAMP_WORK.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_WORK.name, 
 						null,
 						StampRequestMode.STAMP_WORK.value));
 				result.add(new AppWithDetailExportDto(
 						ApplicationType.STAMP_APPLICATION.value, 
-						appDispName.getDispName().v() + StampRequestMode.STAMP_CANCEL.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_CANCEL.name, 
 						null,
 						StampRequestMode.STAMP_CANCEL.value));
 				result.add(new AppWithDetailExportDto(
 						ApplicationType.STAMP_APPLICATION.value, 
-						appDispName.getDispName().v() + StampRequestMode.STAMP_ONLINE_RECORD.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_ONLINE_RECORD.name, 
 						null,
 						StampRequestMode.STAMP_ONLINE_RECORD.value));
 				result.add(new AppWithDetailExportDto(
 						ApplicationType.STAMP_APPLICATION.value, 
-						appDispName.getDispName().v() + StampRequestMode.OTHER.value, 
+						appDispName.getDispName().v() + StampRequestMode.OTHER.name, 
 						null,
 						StampRequestMode.OTHER.value));
 			} else {
