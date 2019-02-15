@@ -792,7 +792,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             nts.uk.ui.block.invisible();
             nts.uk.ui.block.grayout();
             $("#dpGrid").mGrid("updateCell", rowId, item, value, false, true);
-            self.inputProcess(rowId, item, value, changeSpr31, changeSpr34).done(value => {
+            self.inputProcessCommon(rowId, item, value, changeSpr31, changeSpr34).done(value => {
                 _.each(value.cellEdits, itemResult => {
                     $("#dpGrid").mGrid("updateCell", itemResult.id, itemResult.item, itemResult.value, true, true);
                 })
@@ -3772,7 +3772,11 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             return dfd.promise();
         }
 
-        inputProcess(rowId, columnKey, value, changeSpr31 ?: boolean, changeSpr34 ?: boolean) {
+        inputProcess(rowId, columnKey, value) {
+            return __viewContext.vm.inputProcessCommon(rowId, columnKey, value);
+        }
+
+        inputProcessCommon(rowId, columnKey, value, changeSpr31 ?: boolean, changeSpr34 ?: boolean): JQueryPromise<any>{
             let dfd = $.Deferred(),
                 keyId: any,
                 valueError: any,
@@ -3879,9 +3883,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     });
                 }
             }
-            return dfd.promise();
+            return dfd.promise(); 
         }
-
         getDataShare(data: any) {
             var self = this;
             var param = {
