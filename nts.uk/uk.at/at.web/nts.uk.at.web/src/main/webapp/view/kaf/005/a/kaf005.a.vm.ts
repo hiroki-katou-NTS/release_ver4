@@ -636,6 +636,7 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             if (nts.uk.ui.errors.hasError()){return;}              
             //block screen
             nts.uk.ui.block.invisible();
+            /*
             let appReason: string,
                 divergenceReason: string;
                 appReason = self.getReason(
@@ -650,10 +651,14 @@ module nts.uk.at.view.kaf005.a.viewmodel {
                 nts.uk.ui.dialog.alertError({ messageId: 'Msg_115' }).then(function(){nts.uk.ui.block.clear();});    
                 return;    
             }
-            if(!appcommon.CommonProcess.checklenghtReason(appReason,"#appReason")){
+            */
+            let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
+            let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);
+            
+            if(!appcommon.CommonProcess.checklenghtReason(comboBoxReason+":"+textAreaReason,"#appReason")){
                 return;
             }
-            divergenceReason = self.getReason(
+            let divergenceReason = self.getReason(
                 self.displayDivergenceReasonForm(),
                 self.selectedReason2(),
                 self.reasonCombo2(),
@@ -677,7 +682,7 @@ module nts.uk.at.view.kaf005.a.viewmodel {
                 applicationDate: new Date(self.appDate()),
                 prePostAtr: self.prePostSelected(),
                 applicantSID: self.employeeID(),
-                applicationReason: appReason,
+                applicationReason: textAreaReason,
                 workTypeCode: self.workTypeCd(),
                 siftTypeCode: self.siftCD(),
                 workClockFrom1: self.timeStart1(),
@@ -693,7 +698,8 @@ module nts.uk.at.view.kaf005.a.viewmodel {
                 divergenceReasonContent: divergenceReason,
                 sendMail: self.checkBoxValue(),
                 overtimeAtr: self.overtimeAtr(),
-                calculateFlag: self.calculateFlag()
+                calculateFlag: self.calculateFlag(),
+                appReasonID: comboBoxReason
             };
             //登録前エラーチェック
             service.checkBeforeRegister(overtime).done((data) => {                

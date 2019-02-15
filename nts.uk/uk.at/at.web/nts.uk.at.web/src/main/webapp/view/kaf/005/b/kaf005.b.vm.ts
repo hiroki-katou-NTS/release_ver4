@@ -528,6 +528,8 @@ module nts.uk.at.view.kaf005.b {
                     self.displayAppReasonContentFlg(),
                     self.multilContent()
                 );
+                
+                /*
                 let appReasonError = !appcommon.CommonProcess.checkAppReason(true, self.typicalReasonDisplayFlg(), self.displayAppReasonContentFlg(), appReason);
                 if(appReasonError){
                     nts.uk.ui.dialog.alertError({ messageId: 'Msg_115' }).then(function(){nts.uk.ui.block.clear();});    
@@ -536,6 +538,15 @@ module nts.uk.at.view.kaf005.b {
                 if(!appcommon.CommonProcess.checklenghtReason(appReason,"#appReason")){
                     return;
                 }
+                */
+                
+                let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
+                let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);
+                
+                if(!appcommon.CommonProcess.checklenghtReason(comboBoxReason+":"+textAreaReason,"#appReason")){
+                    return;
+                }
+                
                 divergenceReason = self.getReason(
                     self.displayDivergenceReasonForm(),
                     self.selectedReason2(),
@@ -562,7 +573,7 @@ module nts.uk.at.view.kaf005.b {
                     applicationDate: new Date(self.appDate()),
                     prePostAtr: self.prePostSelected(),
                     applicantSID: self.employeeID(),
-                    applicationReason: appReason,
+                    applicationReason: textAreaReason,
                     appApprovalPhaseCmds: self.approvalList,
                     workTypeCode: self.workTypeCd(),
                     siftTypeCode: self.siftCD(),
@@ -579,7 +590,8 @@ module nts.uk.at.view.kaf005.b {
                     overtimeAtr: self.overtimeAtr(),
                     divergenceReasonContent: divergenceReason,
                     sendMail: self.manualSendMailAtr(),
-                    calculateFlag: self.calculateFlag()
+                    calculateFlag: self.calculateFlag(),
+                    appReasonID: comboBoxReason
                 }
                 
                 service.checkBeforeUpdate(command).done((data) => {                

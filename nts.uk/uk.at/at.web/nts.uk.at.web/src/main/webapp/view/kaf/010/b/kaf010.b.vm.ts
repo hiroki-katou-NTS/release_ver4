@@ -480,6 +480,7 @@ module nts.uk.at.view.kaf010.b {
                 //return if has error
                 if (nts.uk.ui.errors.hasError()){return;}   
                 nts.uk.ui.block.invisible();
+                /*
                 appReason = self.getReason(
                     self.typicalReasonDisplayFlg(),
                     self.selectedReason(),
@@ -493,6 +494,14 @@ module nts.uk.at.view.kaf010.b {
                     return;    
                 }
                 if(!appcommon.CommonProcess.checklenghtReason(appReason,"#appReason")){
+                    return;
+                }
+                */
+                
+                let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
+                let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);
+                
+                if(!appcommon.CommonProcess.checklenghtReason(comboBoxReason+":"+textAreaReason,"#appReason")){
                     return;
                 }
                 divergenceReason = self.getReason(
@@ -520,7 +529,7 @@ module nts.uk.at.view.kaf010.b {
                     applicationDate: new Date(self.appDate()),
                     prePostAtr: self.prePostSelected(),
                     applicantSID: self.employeeID(),
-                    applicationReason: appReason,
+                    applicationReason: textAreaReason,
                     workTypeCode: self.workTypeCd(),
                     siftTypeCode: self.siftCD(),
                     workClockStart1: self.timeStart1(),
@@ -538,7 +547,8 @@ module nts.uk.at.view.kaf010.b {
                     holidayWorkShiftNight: ko.toJS(overTimeShiftNightTmp == null ? -1 : overTimeShiftNightTmp),
                     divergenceReasonContent: divergenceReason,
                     sendMail: self.manualSendMailAtr(),
-                    calculateFlag: self.calculateFlag()
+                    calculateFlag: self.calculateFlag(),
+                    appReasonID: comboBoxReason
                 }
                 
                 service.checkBeforeUpdate(command).done((data) => {                

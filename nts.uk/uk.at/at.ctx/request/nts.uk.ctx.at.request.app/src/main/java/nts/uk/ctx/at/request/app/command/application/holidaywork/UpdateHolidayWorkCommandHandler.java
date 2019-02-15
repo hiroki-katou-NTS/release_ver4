@@ -11,10 +11,12 @@ import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
 
+import nts.arc.error.BusinessException;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerWithResult;
 import nts.uk.ctx.at.request.dom.application.AppReason;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
+import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.after.DetailAfterUpdate;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.before.DetailBeforeUpdate;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
@@ -23,6 +25,12 @@ import nts.uk.ctx.at.request.dom.application.holidayworktime.AppHolidayWorkRepos
 import nts.uk.ctx.at.request.dom.application.holidayworktime.HolidayWorkClock;
 import nts.uk.ctx.at.request.dom.application.holidayworktime.HolidayWorkInput;
 import nts.uk.ctx.at.request.dom.application.overtime.AppOvertimeDetail;
+import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSetting;
+import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSettingRepository;
+import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSetting;
+import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSettingRepository;
+import nts.uk.ctx.at.request.dom.setting.request.application.common.RequiredFlg;
+import nts.uk.ctx.at.request.dom.setting.request.gobackdirectlycommon.primitive.AppDisplayAtr;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;
@@ -40,6 +48,12 @@ public class UpdateHolidayWorkCommandHandler extends CommandHandlerWithResult<Up
 	@Inject
 	private InterimRemainDataMngRegisterDateChange interimRemainDataMngRegisterDateChange;
 	
+	@Inject
+	ApplicationSettingRepository applicationSettingRepository;
+	
+	@Inject
+	private AppTypeDiscreteSettingRepository appTypeDiscreteSettingRepository;
+	
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<UpdateHolidayWorkCommand> context) {
 		String companyID = AppContexts.user().companyId();
@@ -48,6 +62,34 @@ public class UpdateHolidayWorkCommandHandler extends CommandHandlerWithResult<Up
 		if(!opAppHolidayWork.isPresent()){
 			throw new RuntimeException("khong tim dc doi tuong");
 		}
+		
+		AppTypeDiscreteSetting appTypeDiscreteSetting = appTypeDiscreteSettingRepository.getAppTypeDiscreteSettingByAppType(
+				companyID, 
+				ApplicationType.BREAK_TIME_APPLICATION.value).get();
+		String appReason = Strings.EMPTY;	
+		String typicalReason = Strings.EMPTY;
+		String displayReason = Strings.EMPTY;
+		if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)){
+			typicalReason += updateHolidayWorkCommand.getAppReasonID();
+		}
+		if(appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+			if(Strings.isNotBlank(typicalReason)){
+				displayReason += System.lineSeparator();
+			}
+			displayReason += updateHolidayWorkCommand.getApplicationReason();
+		}
+		Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
+				.getApplicationSettingByComID(companyID);
+		ApplicationSetting applicationSetting = applicationSettingOp.get();
+		if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)
+			||appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+			if (applicationSetting.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
+					&& Strings.isBlank(typicalReason+displayReason)) {
+				throw new BusinessException("Msg_115");
+			}
+		}
+		appReason = typicalReason + displayReason;
+		
 		AppHolidayWork appHolidayWork = opAppHolidayWork.get();
 		List<HolidayWorkInput> holidayWorkInputs = new ArrayList<>();
 		holidayWorkInputs.addAll(updateHolidayWorkCommand.getRestTime().stream().filter(x -> x.getStartTime()!=null||x.getEndTime()!=null).map(x -> x.convertToDomain()).collect(Collectors.toList()));
@@ -57,7 +99,7 @@ public class UpdateHolidayWorkCommandHandler extends CommandHandlerWithResult<Up
 		Optional<AppOvertimeDetail> appOvertimeDetailOtp = updateHolidayWorkCommand.getAppOvertimeDetail() == null ? Optional.empty()
 				: Optional.ofNullable(updateHolidayWorkCommand.getAppOvertimeDetail().toDomain(companyID, appHolidayWork.getAppID()));
 		String divergenceReason = updateHolidayWorkCommand.getDivergenceReasonContent().replaceFirst(":", System.lineSeparator());
-		String applicationReason = updateHolidayWorkCommand.getApplicationReason().replaceFirst(":", System.lineSeparator());
+		String applicationReason = appReason;
 		appHolidayWork.setDivergenceReason(divergenceReason);
 		appHolidayWork.setHolidayWorkInputs(holidayWorkInputs);
 		appHolidayWork.setAppOvertimeDetail(appOvertimeDetailOtp);

@@ -202,6 +202,7 @@ module nts.uk.at.view.kaf010.share {
             divergenceReasonContent: string;
             sendMail:boolean;
             calculateFlag: number;
+            appReasonID: string;
         }
         export class OverTimeInput {
             companyID: KnockoutObservable<string>;

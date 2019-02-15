@@ -130,4 +130,6 @@ public class UpdateHolidayWorkCommand {
 	 * 時間外時間の詳細
 	 */
 	private AppOvertimeDetailCommand appOvertimeDetail;
+	
+	private String appReasonID;
 }

@@ -131,11 +131,13 @@ module nts.uk.at.view.kaf011.b.viewmodel {
                 saveCmd = self.genSaveCmd();
             self.validateControl();
             if (nts.uk.ui.errors.hasError()) { return; }
-
+            
+            /*
             let isCheckReasonError = !self.checkReason();
             if (isCheckReasonError) {
                 return;
             }
+            */
 
             block.invisible();
             service.update(saveCmd).done(() => {
