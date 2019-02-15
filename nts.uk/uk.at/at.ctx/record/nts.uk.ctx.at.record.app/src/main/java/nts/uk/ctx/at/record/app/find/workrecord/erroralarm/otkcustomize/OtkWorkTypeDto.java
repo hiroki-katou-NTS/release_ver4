@@ -15,5 +15,8 @@ public class OtkWorkTypeDto {
 	
 	/** The name. */
 	private String name;
+	
+	/** The deprecate. */
+	private Integer deprecate;
 
 }
