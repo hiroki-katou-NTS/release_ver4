@@ -312,6 +312,28 @@ module nts.uk.at.view.kaf009.b {
                     }
                 });
             }
+            
+            getBoxReason(){
+                var self = this;
+                let txtReasonTmp = self.selectedReason();
+                if(!nts.uk.text.isNullOrEmpty(self.selectedReason())){
+                    let reasonText = _.find(self.reasonCombo(),function(data){return data.reasonId == self.selectedReason()});;
+                    txtReasonTmp = reasonText.reasonName;
+                }
+                return txtReasonTmp;    
+            }
+        
+            getAreaReason(){
+                var self = this;
+                return self.multilContent();    
+            }
+            
+            resfreshReason(appReason: string){
+                var self = this;
+                self.selectedReason('');    
+                self.multilContent(appReason);
+            }
+            
             /**
              * アルゴリズム「直行直帰するチェック」を実行する
              */

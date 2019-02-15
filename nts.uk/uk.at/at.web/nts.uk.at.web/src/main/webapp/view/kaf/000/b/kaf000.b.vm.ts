@@ -111,6 +111,12 @@ module nts.uk.at.view.kaf000.b.viewmodel {
         }
 
         abstract update(): any;
+        
+        abstract getBoxReason(): any;
+        
+        abstract getAreaReason(): any;
+        
+        abstract resfreshReason(appReason: string): any;
 
         start(baseDate: any): JQueryPromise<any> {
             nts.uk.ui.block.invisible();
@@ -305,11 +311,22 @@ module nts.uk.at.view.kaf000.b.viewmodel {
          *  btn Approve　承認
          */
         btnApprove() {
+            // self.getBoxReason();
             nts.uk.ui.block.invisible();
-            let self = this;
-            self.inputCommonData(new model.InputCommonData(self.dataApplication(), self.reasonToApprover()));
-            let approveCmd = self.appType() != 10 ? self.inputCommonData() : self.getHolidayShipmentCmd(self.reasonToApprover());
+            let self = this, 
+                inputCommonData = {
+                    applicationDto: self.dataApplication(),
+                    memo: self.reasonToApprover(),
+                    comboBoxReason: self.getBoxReason(),
+                    textAreaReason: self.getAreaReason()
+                };
+            // self.inputCommonData(new model.InputCommonData(self.dataApplication(), self.reasonToApprover()));
+            if(!appcommon.CommonProcess.checklenghtReason(inputCommonData.comboBoxReason+":"+inputCommonData.textAreaReason,"#appReason")){
+                return;
+            }
+            let approveCmd = self.appType() != 10 ? inputCommonData : self.getHolidayShipmentCmd(self.reasonToApprover());
             service.approveApp(approveCmd, self.appType()).done(function(data) {
+                self.resfreshReason(data.appReason);
                 self.sendMail('Msg_220', data);
             }).fail(function(res: any) {
                 self.showError(res);
@@ -498,7 +515,9 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                 absAppID: vm.absWk().appID(),
                 recAppID: vm.recWk().appID(),
                 appVersion: vm.version,
-                memo: memo ? memo : ""
+                memo: memo ? memo : "",
+                comboBoxReason: self.getBoxReason(),
+                textAreaReason: self.getAreaReason()
             }
 
             return shipmentCmd;
