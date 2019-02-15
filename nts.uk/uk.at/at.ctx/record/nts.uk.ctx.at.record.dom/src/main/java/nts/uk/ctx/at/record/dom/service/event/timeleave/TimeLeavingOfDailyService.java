@@ -23,6 +23,7 @@ import nts.uk.ctx.at.record.dom.service.event.common.CorrectEventConts;
 import nts.uk.ctx.at.record.dom.service.event.common.EventHandleResult;
 import nts.uk.ctx.at.record.dom.service.event.common.EventHandleResult.EventHandleAction;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
 import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
@@ -78,49 +79,93 @@ public class TimeLeavingOfDailyService {
 		TimeLeavingOfDailyPerformance tlo = getWithDefaul(working.getAttendanceLeave(),
 				() -> getTimeLeaveDefault(wi.getEmployeeId(), wi.getYmd()));
 
-		DailyRecordToAttendanceItemConverter converter = convertFactory.createDailyConverter()
+		 DailyRecordToAttendanceItemConverter converter = convertFactory.createDailyConverter()
 																		.employeeId(wi.getEmployeeId())
 																		.workingDate(wi.getYmd())
 																		.withTimeLeaving(tlo);
 		
 		List<Integer> canbeCorrectedItem = AttendanceItemIdContainer.getItemIdByDailyDomains(DailyDomainGroup.ATTENDACE_LEAVE);
 		List<ItemValue> beforeCorrectItemValues = converter.convert(canbeCorrectedItem);
+	
+		List<EditStateOfDailyPerformance> editStates = getEditStateByItems(working.getEditState(), wi.getEmployeeId(), wi.getYmd());
+		
+		if(isPairUpdatedByHand(editStates, 1) && isPairUpdatedByHand(editStates, 2)){
+			return EventHandleResult.withResult(EventHandleAction.ABORT, working);
+		}
+
+		if (wt.getDailyWork() == null) {
+			return EventHandleResult.withResult(EventHandleAction.ABORT, working);
+		}
+		if(tlo != null){
+			if(tlo.getTimeLeavingWorks().stream().anyMatch(tl -> isSpr(tl.getAttendanceStamp()) || isSpr(tl.getLeaveStamp()))){
+				return EventHandleResult.withResult(EventHandleAction.ABORT, working);
+			}
+		}
 		TimeLeavingOfDailyPerformance correctedTlo = null;
 		
 		/** 取得したドメインモデル「勤務種類．一日の勤務．勤務区分」をチェックする */
 		WorkAtr dayAtr = isWokingDay(wt);
 		if (dayAtr != null) {
 			val wts = wt.getWorkTypeSetByAtr(dayAtr).get();
-			//if (wts.getAttendanceTime() == WorkTypeSetCheck.CHECK || wts.getTimeLeaveWork() == WorkTypeSetCheck.CHECK) {
+			if (wts.getAttendanceTime() == WorkTypeSetCheck.CHECK && wts.getTimeLeaveWork() == WorkTypeSetCheck.CHECK) {
 				TimeLeavingOfDailyPerformance tl = null;
 				if (tlo != null) {
-					tl = mergeWithEditStates(working.getEditState(), wi.getEmployeeId(), wi.getYmd(), tlo, wts);
+					tl = mergeWithEditStates(working.getEditState(), tlo, wts);
 				}
 				correctedTlo = updateTimeLeave(companyId, wi, tl, 
 												getWorkConditionOrDefault(cachedWorkCondition, wi.getEmployeeId(), wi.getYmd()), 
 												wi.getEmployeeId(), wi.getYmd());
-			//} else {
-			//	return EventHandleResult.onFail();
-			//}
+			} else {
+				return EventHandleResult.withResult(EventHandleAction.ABORT, working);
+			}
 		} else {
 			/** どちらか一方が 年休 or 特別休暇 の場合 */
 			if (wt.getDailyWork().isAnnualOrSpecialHoliday()) {
 				//return EventHandleResult.withResult(EventHandleAction.ABORT, working);
-				correctedTlo = deleteTimeLeave(true, tlo);
+				correctedTlo = deleteTimeLeave(true, tlo, editStates);
 			} else {
-				correctedTlo = deleteTimeLeave(false, tlo);
+				correctedTlo = deleteTimeLeave(false, tlo, editStates);
 			}
 		}
 		
-		return updated(working, converter, canbeCorrectedItem, correctedTlo, directToDB, beforeCorrectItemValues);
+		return updated(working, correctedTlo, directToDB, converter, canbeCorrectedItem, beforeCorrectItemValues);
+	}
+
+	private boolean isSpr(Optional<TimeActualStamp> stamp) {
+		AtomicBoolean flag = new AtomicBoolean(false);
+		
+		stamp.ifPresent(s -> s.getStamp().ifPresent(ss -> {
+			if(ss.getStampSourceInfo() == StampSourceInfo.SPR){
+				flag.set(true);
+			}
+		}));
+		
+		return flag.get();
+	}
+
+	private boolean isPairUpdatedByHand(List<EditStateOfDailyPerformance> editStates, int no) {
+		int idx = no - 1;
+		return isItemUpdatedByHand(editStates, CorrectEventConts.LEAVE_ITEMS.get(idx)) 
+				|| isItemUpdatedByHand(editStates, CorrectEventConts.ATTENDANCE_ITEMS.get(idx));
+	}
+
+	private boolean isItemUpdatedByHand(List<EditStateOfDailyPerformance> editStates, int itemId) {
+		Optional<EditStateOfDailyPerformance> itemState = editStates.stream().filter(es -> es.getAttendanceItemId() == itemId).findFirst();
+		
+		if(!itemState.isPresent()){
+			return false;
+		}
+		
+		return itemState.get().getEditStateSetting() != EditStateSetting.REFLECT_APPLICATION;
 	}
 
 	private EventHandleResult<IntegrationOfDaily> updated(IntegrationOfDaily working, 
-			DailyRecordToAttendanceItemConverter converter, List<Integer> canbeCorrectedItem,
-			TimeLeavingOfDailyPerformance corrected, boolean directToDB, List<ItemValue> beforeCorrectItemValues) {
-		working.setAttendanceLeave(Optional.ofNullable(corrected));
+			TimeLeavingOfDailyPerformance correctedTlo, boolean directToDB,
+			DailyRecordToAttendanceItemConverter converter, List<Integer> canbeCorrectedItem, 
+			List<ItemValue> beforeCorrectItemValues) {
+		working.setAttendanceLeave(Optional.ofNullable(correctedTlo));
 
-		List<ItemValue> afterCorrectItemValues = converter.withTimeLeaving(corrected).convert(canbeCorrectedItem);
+		List<ItemValue> afterCorrectItemValues = converter.withTimeLeaving(correctedTlo).convert(canbeCorrectedItem);
 		
 		afterCorrectItemValues.removeAll(beforeCorrectItemValues);
 		List<Integer> correctedItemIds = afterCorrectItemValues.stream().map(iv -> iv.getItemId()).collect(Collectors.toList());
@@ -162,9 +207,9 @@ public class TimeLeavingOfDailyService {
 	}
 
 	/** 取得したドメインモデル「編集状態」を見て、マージする */
-	private TimeLeavingOfDailyPerformance mergeWithEditStates(List<EditStateOfDailyPerformance> cached , String empId, GeneralDate target,
+	private TimeLeavingOfDailyPerformance mergeWithEditStates(List<EditStateOfDailyPerformance> editStates,
 			TimeLeavingOfDailyPerformance timeLeave, WorkTypeSet wts) {
-		List<Integer> inputByReflect = getEditStateByItems(cached, empId, target).stream()
+		List<Integer> inputByReflect = editStates.stream()
 				.filter(es -> isInputByReflect(es.getEditStateSetting())).map(c -> c.getAttendanceItemId())
 				.collect(Collectors.toList());
 		if (wts.getAttendanceTime() == WorkTypeSetCheck.CHECK) {
@@ -243,7 +288,7 @@ public class TimeLeavingOfDailyService {
 	}
 
 	/** 日別実績の出退勤を削除する */
-	private TimeLeavingOfDailyPerformance deleteTimeLeave(boolean isSPR, TimeLeavingOfDailyPerformance tl) {
+	private TimeLeavingOfDailyPerformance deleteTimeLeave(boolean isSPR, TimeLeavingOfDailyPerformance tl, List<EditStateOfDailyPerformance> editState) {
 		if (tl != null) {
 			if(isSPR) {
 				if(shouldSaveStamp(tl)){
@@ -252,24 +297,32 @@ public class TimeLeavingOfDailyService {
 			}
 			
 			tl.getTimeLeavingWorks().stream().forEach(tlw -> {
-				tlw.getAttendanceStamp().ifPresent(as -> {
-					as.getStamp().ifPresent(ass -> {
-						if (isRemoveStamp(ass)) {
-							as.removeStamp();
-						}
+				boolean cantRemove = editState.stream().anyMatch(es -> isHandUpdatePair(tlw.getWorkNo().v(), es));
+				if(!cantRemove){
+					tlw.getAttendanceStamp().ifPresent(as -> {
+						as.getStamp().ifPresent(ass -> {
+							if (isRemoveStamp(ass)) {
+								as.removeStamp();
+							}
+						});
 					});
-				});
 
-				tlw.getLeaveStamp().ifPresent(as -> {
-					as.getStamp().ifPresent(ass -> {
-						if (isRemoveStamp(ass)) {
-							as.removeStamp();
-						}
+					tlw.getLeaveStamp().ifPresent(as -> {
+						as.getStamp().ifPresent(ass -> {
+							if (isRemoveStamp(ass)) {
+								as.removeStamp();
+							}
+						});
 					});
-				});
+				}
 			});
 		}
 		return tl;
+	}
+
+	private boolean isHandUpdatePair(int workNo, EditStateOfDailyPerformance es) {
+		return es.getAttendanceItemId() == CorrectEventConts.ATTENDANCE_ITEMS.get(workNo - 1) 
+				|| es.getAttendanceItemId() == CorrectEventConts.LEAVE_ITEMS.get(workNo - 1);
 	}
 
 	private boolean shouldSaveStamp(TimeLeavingOfDailyPerformance tl) {
