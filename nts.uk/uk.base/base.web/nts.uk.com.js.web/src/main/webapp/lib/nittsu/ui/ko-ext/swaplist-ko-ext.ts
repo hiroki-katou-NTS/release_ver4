@@ -733,7 +733,7 @@ module nts.uk.ui.koExtentions {
             });
             
             if(searchedValues === undefined){
-                nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOHIT"));
+                nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_25"));
                 return;        
             }
 

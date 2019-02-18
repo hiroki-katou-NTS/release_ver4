@@ -237,7 +237,7 @@ module nts.uk.ui.koExtentions {
                     if(_.isEmpty(result.options)){
                         let mes = '';
                         if(searchMode === "highlight"){
-                            mes = nts.uk.resource.getMessage("FND_E_SEARCH_NOHIT");
+                            mes = nts.uk.resource.getMessage("MsgB_25");
                         } else {
                             mes = nts.uk.ui.toBeResource.targetNotFound;    
                         }
