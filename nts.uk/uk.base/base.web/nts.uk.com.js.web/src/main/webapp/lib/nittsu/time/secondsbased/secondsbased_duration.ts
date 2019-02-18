@@ -18,7 +18,7 @@ module nts.uk.time.secondsBased {
                 
                 this.minutes = minutes;
                 this.seconds = seconds;
-                this.msg = msg || "FND_E_TIME";
+                this.msg = msg || "MsgB_15";
             }
             
             format() {

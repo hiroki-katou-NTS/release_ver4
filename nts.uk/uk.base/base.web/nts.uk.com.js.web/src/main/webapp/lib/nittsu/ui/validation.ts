@@ -504,7 +504,7 @@ module nts.uk.ui.validation {
             // Time duration
             if(this.mode === "time"){
                 var timeParse, isSecondBase = this.outputFormat.indexOf("s") >= 0,
-                    mesId = isSecondBase ? "FND_E_CLOCK_SECOND" : "FND_E_TIME";
+                    mesId = isSecondBase ? "FND_E_CLOCK_SECOND" : "MsgB_15";
                 if(isSecondBase){
                     timeParse = time.secondsBased.duration.parseString(inputText);    
                 } else {

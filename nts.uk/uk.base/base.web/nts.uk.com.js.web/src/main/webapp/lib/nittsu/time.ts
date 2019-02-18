@@ -244,7 +244,7 @@ module nts.uk.time {
             this.minus = minus;
             this.hours = hours;
             this.minutes = minutes;
-            this.msg = msg || "FND_E_TIME";
+            this.msg = msg || "MsgB_15";
         }
 
         static succeeded(minus, hours, minutes) {
