@@ -67,7 +67,7 @@ module nts.uk.ui.koExtentions {
             
             container.bind("validate", function () {
                 if (container.ctState("required", "get") && !container.ctState("selected", "get")) {
-                    container.ntsError("set", resource.getMessage("FND_E_REQ_SELECT", [container.ctState("name", "get")]), "FND_E_REQ_SELECT");
+                    container.ntsError("set", resource.getMessage("MsgB_2", [container.ctState("name", "get")]), "MsgB_2");
                 } else {
                     container.ntsError("clear");
                 }

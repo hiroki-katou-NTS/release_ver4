@@ -139,10 +139,10 @@ module nts.uk.ui.koExtentions {
                     if ((ui ? data[CHANGED] : true) && data[ENABLE] && data[REQUIRED] && (_.isEmpty(String(value).trim()) || _.isNil(value))) {
                         $element
                             .addClass('error')
-                            .ntsError("set", resource.getMessage("FND_E_REQ_SELECT", [data[NAME]]), "FND_E_REQ_SELECT");
+                            .ntsError("set", resource.getMessage("MsgB_2", [data[NAME]]), "MsgB_2");
 
                         if (accessor.value.addError) {
-                            accessor.value.addError("FND_E_REQ_SELECT", { MsgId: "FND_E_REQ_SELECT" });
+                            accessor.value.addError("MsgB_2", { MsgId: "MsgB_2" });
                         }
                     } else {
                         $element
@@ -150,7 +150,7 @@ module nts.uk.ui.koExtentions {
                             .ntsError("clear");
 
                         if (accessor.value.removeError) {
-                            accessor.value.removeError("FND_E_REQ_SELECT");
+                            accessor.value.removeError("MsgB_2");
                         }
                     }
                 })
