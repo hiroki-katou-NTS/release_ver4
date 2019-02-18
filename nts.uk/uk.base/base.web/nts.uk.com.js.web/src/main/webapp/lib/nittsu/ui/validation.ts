@@ -52,7 +52,7 @@ module nts.uk.ui.validation {
             // Check Required
             if (util.isNullOrEmpty(inputText)) {
                 if (this.required !== undefined && this.required !== false) {
-                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT');
+                    result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1');
                     return result;
                 } 
                 result.success(inputText);
@@ -130,7 +130,7 @@ module nts.uk.ui.validation {
             // Check Required
             if (util.isNullOrEmpty(inputText)) {
                 if (this.required !== undefined && this.required !== false) {
-                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT');
+                    result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1');
                     return result;
                 } 
                 result.success(inputText);
@@ -178,7 +178,7 @@ module nts.uk.ui.validation {
             // Check Required
             if (util.isNullOrEmpty(inputText)) {
                 if (this.required !== undefined && this.required !== false) {
-                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT');
+                    result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1');
                     return result;
                 } 
                 result.success(inputText);
@@ -227,7 +227,7 @@ module nts.uk.ui.validation {
             // Check Required
             if (util.isNullOrEmpty(inputText)) {
                 if (this.required !== undefined && this.required !== false) {
-                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT');
+                    result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1');
                     return result;
                 } 
                 result.success(inputText);
@@ -280,7 +280,7 @@ module nts.uk.ui.validation {
             let result = new ValidationResult();
             if (util.isNullOrEmpty(inputText)) {
                 if (self.options.required) { 
-                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT')
+                    result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1')
                     return result;
                 }
                 
@@ -324,7 +324,7 @@ module nts.uk.ui.validation {
             // Check Required
             if (util.isNullOrEmpty(inputText)) {
                 if (this.required !== undefined && this.required !== false) {
-                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT');
+                    result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1');
                     return result;
                 } 
                 result.success(inputText);
@@ -393,7 +393,7 @@ module nts.uk.ui.validation {
             if (this.option !== undefined) {
                 if(nts.uk.util.isNullOrUndefined(inputText) || inputText.trim().length <= 0){
                     if((this.option['required'] === true || this.constraint["required"] === true)&& nts.uk.util.isNullOrEmpty(this.option['defaultValue'])){    
-                        result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT');
+                        result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1');
                         return result;
                     } else {
                         result.success(this.option['defaultValue']);
@@ -487,7 +487,7 @@ module nts.uk.ui.validation {
                 inputText = this.defaultValue;
             } else if (util.isNullOrEmpty(inputText)) {
                 if (this.required === true) {
-                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT');
+                    result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1');
                     return result;
                 }
                 else {
@@ -628,7 +628,7 @@ module nts.uk.ui.validation {
             // Check required
             if (util.isNullOrEmpty(inputText)) {
                 if (this.required === true) {
-                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT');
+                    result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1');
                     return result;
                 } else {
                     result.success("");

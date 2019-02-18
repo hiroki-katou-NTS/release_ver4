@@ -5999,7 +5999,7 @@ module nts.uk.ui.mgrid {
                 let result = new ui.validation.ValidationResult();
                 if ((util.isNullOrUndefined(text) || text.length === 0)) {
                     if (self.options && self.options.required) {
-                        result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ self.name ]), 'FND_E_REQ_INPUT');
+                        result.fail(nts.uk.resource.getMessage('MsgB_1', [ self.name ]), 'MsgB_1');
                         return result;
                     }
                     if (!self.options || (self.options && !self.options.required)) {
@@ -6076,7 +6076,7 @@ module nts.uk.ui.mgrid {
                 
                 if (util.isNullOrEmpty(inputText)) {
                     if (this.required) {
-                        result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT');
+                        result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1');
                     } else result.success("");
                     return result;
                 }

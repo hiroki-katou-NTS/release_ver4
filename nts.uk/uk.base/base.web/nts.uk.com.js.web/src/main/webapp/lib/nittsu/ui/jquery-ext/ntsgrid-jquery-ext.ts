@@ -2566,7 +2566,7 @@ module nts.uk.ui.jqueryExtentions {
                 
                 validate(controlDef: any, value: any) {
                     let constraint = controlDef.constraint;
-                    if (constraint.required && (_.isEmpty(value) || _.isNull(value))) return validation.Result.invalid("FND_E_REQ_INPUT");
+                    if (constraint.required && (_.isEmpty(value) || _.isNull(value))) return validation.Result.invalid("MsgB_1");
                     switch (constraint.valueType) {
                         case "Integer":
                             let valid = uk.ntsNumber.isNumber(value, false);
@@ -3574,7 +3574,7 @@ module nts.uk.ui.jqueryExtentions {
                     let result = new ui.validation.ValidationResult();
                     if ((util.isNullOrUndefined(text) || text.length === 0)) {
                         if (self.options && self.options.required) {
-                            result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ self.name ]), 'FND_E_REQ_INPUT');
+                            result.fail(nts.uk.resource.getMessage('MsgB_1', [ self.name ]), 'MsgB_1');
                             return result;
                         }
                         if (!self.options || (self.options && !self.options.required)) {

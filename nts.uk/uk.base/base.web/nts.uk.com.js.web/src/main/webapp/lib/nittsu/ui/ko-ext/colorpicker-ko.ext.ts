@@ -82,7 +82,7 @@ module nts.uk.ui.koExtentions {
                         data.value(color.toHexString()); // #ff0000    
                     } else if (nts.uk.util.isNullOrUndefined(color)) {
                         if(required === true){
-                            $picker.ntsError('set', nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ dataName ]), 'FND_E_REQ_INPUT');
+                            $picker.ntsError('set', nts.uk.resource.getMessage('MsgB_1', [ dataName ]), 'MsgB_1');
                         } else {
                             data.value(null);
                         }
@@ -98,7 +98,7 @@ module nts.uk.ui.koExtentions {
                 $p.ntsError('clear');
                     let value = $p.spectrum("get");
                     if(nts.uk.util.isNullOrUndefined(value)){
-                        $p.ntsError('set', nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ dataName ]), 'FND_E_REQ_INPUT');
+                        $p.ntsError('set', nts.uk.resource.getMessage('MsgB_1', [ dataName ]), 'MsgB_1');
                     }    
             }
             
