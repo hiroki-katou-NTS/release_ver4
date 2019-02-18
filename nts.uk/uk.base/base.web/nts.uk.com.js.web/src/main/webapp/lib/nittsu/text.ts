@@ -188,7 +188,7 @@
         export function allHalfAlphanumeric(text: string) {
             return {
                         probe: regexp.allHalfAlphanumeric.test(text),
-                        messageId: 'FND_E_ALPHANUMERIC'
+                        messageId: 'MsgB_6'
                     };
         }
 
@@ -268,14 +268,14 @@
         export function workplaceCode(text: string) {
             return {
                 probe: regexp.workplaceCode.test(text),
-                messageId: 'FND_E_ALPHANUMERIC'
+                messageId: 'MsgB_6'
             };            
         }
         
         export function employeeCode(text: string) {
             return {
                 probe: regexp.employeeCode.test(text),
-                messageId: 'FND_E_ALPHANUMERIC'
+                messageId: 'MsgB_6'
             };            
         }
 
