@@ -53,7 +53,7 @@ module validationcps009 {
                 case ITEM_SINGLE_TYPE.DATE:
                     rmError($element, "MsgB_1") || rmError($element, "Msg_824");
                     item.dateValue.subscribe(d => {
-                        !nou(d) && (rmError($element.find('.nts-input'), "Msg_824") || rmError($element.find('.nts-input'), "FND_E_DATE_YMD"));
+                        !nou(d) && (rmError($element.find('.nts-input'), "Msg_824") || rmError($element.find('.nts-input'), "MsgB_18"));
                     });
                     break;
                 default: break;
