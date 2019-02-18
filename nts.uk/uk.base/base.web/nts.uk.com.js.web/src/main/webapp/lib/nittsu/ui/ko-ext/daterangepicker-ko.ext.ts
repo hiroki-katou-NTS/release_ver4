@@ -260,7 +260,7 @@ module nts.uk.ui.koExtentions {
             } else if(self.dateFormat === "YYYY/MM/DD" && self.maxRange === "oneMonth"){
                 let maxDate = startDate.add(31, "days");
                 if(endDate.isSameOrAfter(maxDate)){
-                    self.$ntsDateRange.ntsError('set', self.getMessage("FND_E_SPAN_OVER_MONTH", [self.rangeName]), "FND_E_SPAN_OVER_MONTH");         
+                    self.$ntsDateRange.ntsError('set', self.getMessage("MsgB_22", [self.rangeName]), "MsgB_22");         
                 }
             } else if (self.maxRange === "oneYear"){
                 let maxDate = _.cloneDeep(startDate);
