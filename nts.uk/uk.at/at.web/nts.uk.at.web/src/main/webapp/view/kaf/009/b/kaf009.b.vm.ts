@@ -104,9 +104,11 @@ module nts.uk.at.view.kaf009.b {
             realTimeWorkTime: KnockoutObservable<string> = ko.observable("");
             realTimeHour1: KnockoutObservable<string> = ko.observable("");
             realTimeHour2: KnockoutObservable<string> = ko.observable("");
+            appCur: any = null;
             constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
                 super(listAppMetadata, currentApp);
                 let self = this;
+                self.appCur = currentApp;
                 self.multiOption = ko.mapping.fromJS(new nts.uk.ui.option.MultilineEditorOption({
                     resizeable: false,
                     width: "500",
@@ -296,14 +298,14 @@ module nts.uk.at.view.kaf009.b {
                                 if(data.autoSendMail){
                                     appcommon.CommonProcess.displayMailResult(data);    
                                 } else {
-                                    location.reload();
+                                    self.reBinding(self.listAppMeta, self.appCur, false);
                                 }
                             });
                         })
                         .fail(function(res) { 
                             if(res.optimisticLock == true){
                                 nts.uk.ui.dialog.alertError({ messageId: "Msg_197" }).then(function(){
-                                    location.reload();
+                                    self.reBinding(self.listAppMeta, self.appCur, false);
                                 });    
                             } else {
                                 nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function(){nts.uk.ui.block.clear();}); 

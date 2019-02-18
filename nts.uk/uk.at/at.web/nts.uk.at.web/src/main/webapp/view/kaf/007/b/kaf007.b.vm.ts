@@ -50,9 +50,11 @@ module nts.uk.at.view.kaf007.b {
             timeRequired: KnockoutObservable<boolean> = ko.observable(false);
             //screen B default hidden
             showExcludeHoliday: KnockoutObservable<boolean> = ko.observable(false);
+            appCur: any = null;
             constructor( listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata ) {
                 super( listAppMetadata, currentApp );
                 let self = this;
+                self.appCur = currentApp;
                 self.targetDate = currentApp.appDate;
                 self.startPage( self.appID() );               
             }
@@ -245,7 +247,7 @@ module nts.uk.at.view.kaf007.b {
                         if(data.autoSendMail){
                             appcommon.CommonProcess.displayMailResult(data);    
                         } else {
-                            location.reload();
+                            self.reBinding(self.listAppMeta, self.appCur, false);
                         }
                     });
                 }).fail((res) => {

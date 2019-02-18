@@ -29,13 +29,16 @@ function initScreen(screenModel: any, listAppMeta: Array<model.ApplicationMetada
         screenModel = new nts.uk.at.view.kaf011.b.viewmodel.ScreenModel(listAppMeta, currentApp);
     }
     __viewContext['viewModel'] = screenModel;
-    screenModel.start(moment.utc().format("YYYY/MM/DD")).done(function() {
+    screenModel.start(moment.utc().format("YYYY/MM/DD"), true).done(function() {
         __viewContext.bind(screenModel);
         if (currentApp.appType == 10) {
             $("#fixed-table").ntsFixedTable({ width: 100 });
         }
     });
 }
+    
+__viewContext.initScreen = initScreen;
+__viewContext.getProgramName = getProgramName;
 
 __viewContext.ready(function() {
     var listAppMeta: Array<model.ApplicationMetadata> = [];
@@ -64,10 +67,11 @@ function getProgramName(programID: string, screenID: string){
     nts.uk.request.ajax("com", namePath).done((value) => {
         if(!nts.uk.util.isNullOrEmpty(value)){
             $("#pg-name").text(value);
+        }else{
+            $("#pg-name").text('');
         }   
     });           
 }
-
 
 
 
