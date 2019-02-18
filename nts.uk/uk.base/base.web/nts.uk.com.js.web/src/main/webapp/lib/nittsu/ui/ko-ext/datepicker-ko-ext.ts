@@ -223,7 +223,7 @@ module nts.uk.ui.koExtentions {
                     if (isHasDay && isHasMonth && isHasYear) {
                         mesId = "MsgB_18", fm = "YYYY/MM/DD";
                     } else if (isHasMonth && isHasYear) {
-                        mesId = "FND_E_DATE_YM", fm = "YYYY/MM";
+                        mesId = "MsgB_19", fm = "YYYY/MM";
                     } 
                     $input.ntsError('set', { messageId: mesId, messageParams: [ name, minDate.format(fm), maxDate.format(fm) ] }, mesId, false); 
                     if (hasDayofWeek) {
