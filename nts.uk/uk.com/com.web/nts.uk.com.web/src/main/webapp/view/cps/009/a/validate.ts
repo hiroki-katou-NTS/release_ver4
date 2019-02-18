@@ -41,7 +41,7 @@ module validationcps009 {
                 case ITEM_SINGLE_TYPE.TIMEPOINT:
                     rmError($element, "MsgB_1") || rmError($element, "Msg_824");
                     item.dateWithDay.subscribe(d => {
-                        !nou(d) && (rmError($element, "Msg_824") || rmError($element, "FND_E_TIME"));
+                        !nou(d) && (rmError($element, "Msg_824") || rmError($element, "MsgB_15"));
                     });
                     break;
                 case ITEM_SINGLE_TYPE.SEL_BUTTON:
