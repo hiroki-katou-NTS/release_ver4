@@ -2570,7 +2570,7 @@ module nts.uk.ui.jqueryExtentions {
                     switch (constraint.valueType) {
                         case "Integer":
                             let valid = uk.ntsNumber.isNumber(value, false);
-                            if (!valid) return validation.Result.invalid("FND_E_INTEGER");
+                            if (!valid) return validation.Result.invalid("MsgB_8");
                             let formatted = value;
                             if (constraint.format === "Number_Separated") {
                                 formatted = uk.ntsNumber.formatNumber(value, { formatId: constraint.format });

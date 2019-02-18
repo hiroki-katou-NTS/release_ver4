@@ -21,7 +21,7 @@
             if (message !== undefined) message.id = 'FND_E_REALNUMBER';
             return isDecimal(value, option);
         } else {
-            if (message !== undefined) message.id = 'FND_E_INTEGER';
+            if (message !== undefined) message.id = 'MsgB_8';
             return isInteger(value, option);
         }
     }
