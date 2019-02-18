@@ -218,7 +218,7 @@ module nts.uk.ui.koExtentions {
                     var isHasYear = (nts.uk.util.isNullOrEmpty(otFormat) ? false : otFormat.indexOf("Y") >= 0) || otFormat.indexOf("Y") >= 0;
                     var isHasMonth = (nts.uk.util.isNullOrEmpty(otFormat) ? false : otFormat.indexOf("M") >= 0) || otFormat.indexOf("M") >= 0;
                     var isHasDay = (nts.uk.util.isNullOrEmpty(otFormat) ? false : otFormat.indexOf("D") >= 0) || otFormat.indexOf("D") >= 0;
-                    var mesId = "FND_E_DATE_Y";
+                    var mesId = "MsgB_20";
                     var fm = "YYYY";
                     if (isHasDay && isHasMonth && isHasYear) {
                         mesId = "MsgB_18", fm = "YYYY/MM/DD";

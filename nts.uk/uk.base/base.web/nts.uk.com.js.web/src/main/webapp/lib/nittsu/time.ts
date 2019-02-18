@@ -680,7 +680,7 @@ module nts.uk.time {
             } else if (isHasMonth && isHasYear) {
                 result.failedWithMessegeId("MsgB_19", [result.systemMin().format("YYYY/MM"), result.systemMax().format("YYYY/MM")]);
             } else {
-                result.failedWithMessegeId("FND_E_DATE_Y", [result.systemMin().format("YYYY"), result.systemMax().format("YYYY")]);
+                result.failedWithMessegeId("MsgB_20", [result.systemMin().format("YYYY"), result.systemMax().format("YYYY")]);
             }
         }
         return result;
