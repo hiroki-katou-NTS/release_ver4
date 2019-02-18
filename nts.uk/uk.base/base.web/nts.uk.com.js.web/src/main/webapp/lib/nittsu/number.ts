@@ -18,7 +18,7 @@
 
     export function isNumber(value: any, isDecimalValue?: boolean, option?: any, message?: any) {
         if (isDecimalValue) {
-            if (message !== undefined) message.id = 'FND_E_REALNUMBER';
+            if (message !== undefined) message.id = 'MsgB_11';
             return isDecimal(value, option);
         } else {
             if (message !== undefined) message.id = 'MsgB_8';
