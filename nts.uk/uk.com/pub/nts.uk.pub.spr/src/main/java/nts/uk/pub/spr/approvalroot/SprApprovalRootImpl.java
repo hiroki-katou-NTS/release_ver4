@@ -1,6 +1,7 @@
 package nts.uk.pub.spr.approvalroot;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -82,12 +83,27 @@ public class SprApprovalRootImpl implements SprApprovalRootService {
 		List<EmpSprDailyConfirmExport> empOnConfirmList = new ArrayList<>();
 		List<String> empOnConfirmCDList = new ArrayList<>();
 		empOnAppCDList = this.getAppRootStateIDByType(companyID, approverID, date, 0);
-		empOnAppList = empOnAppCDList.stream().map(x -> new EmpSprDailyConfirmExport(x, null)).collect(Collectors.toList()); 
+		empOnAppCDList = empOnAppCDList.stream().distinct().sorted(Comparator.comparing(String::toString)).collect(Collectors.toList());
+		empOnAppList = empOnAppCDList.stream().map(x -> new EmpSprDailyConfirmExport(x, 0)).collect(Collectors.toList()); 
 		empOnConfirmList = intermediateDataPub.dailyConfirmSearch(companyID, approverID, date);
+		empOnConfirmList.sort(Comparator.comparing(EmpSprDailyConfirmExport::getEmp));
 		empOnConfirmCDList = empOnConfirmList.stream().map(x -> x.getEmp()).collect(Collectors.toList());
-		empOnSettingList.addAll(empOnAppList);
-		empOnSettingList.addAll(empOnConfirmList);
-		empOnSettingList = empOnSettingList.stream().distinct().collect(Collectors.toList());
+		empOnConfirmCDList = empOnConfirmCDList.stream().distinct().sorted(Comparator.comparing(String::toString)).collect(Collectors.toList());
+		
+		// merge list confirm
+		for(EmpSprDailyConfirmExport empConfirm : empOnConfirmList){
+			List<String> sumCDLst = empOnSettingList.stream().map(x -> x.getEmp()).collect(Collectors.toList());
+			if(!sumCDLst.contains(empConfirm.getEmp())){
+				empOnSettingList.add(empConfirm);
+			}
+		}
+		// merge list application
+		for(EmpSprDailyConfirmExport empApp : empOnAppList){
+			List<String> sumCDLst = empOnSettingList.stream().map(x -> x.getEmp()).collect(Collectors.toList());
+			if(!sumCDLst.contains(empApp.getEmp())){
+				empOnSettingList.add(empApp);
+			}
+		}
 		for(EmpSprDailyConfirmExport emp : empOnSettingList){
 			Integer status1 = 0;
 			Integer status2 = 0;
