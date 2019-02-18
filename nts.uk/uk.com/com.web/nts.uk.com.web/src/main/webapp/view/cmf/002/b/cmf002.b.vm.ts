@@ -333,7 +333,7 @@ module nts.uk.com.view.cmf002.b.viewmodel {
             $("#B5_2").trigger("validate");
             if (!self.categoryName() || self.categoryName().trim() == '') {
                 var CMF002_43 = resource.getText('CMF002_43');
-                $('#B6_2').ntsError('set', resource.getMessage("FND_E_REQ_SELECT", [CMF002_43]), "FND_E_REQ_SELECT");
+                $('#B6_2').ntsError('set', resource.getMessage("MsgB_2", [CMF002_43]), "MsgB_2");
             }
             if (nts.uk.ui.errors.hasError()) {
                return;

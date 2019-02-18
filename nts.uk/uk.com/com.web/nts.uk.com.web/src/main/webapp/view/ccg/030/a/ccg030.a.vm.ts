@@ -70,7 +70,7 @@ module ccg030.a.viewmodel {
             $(".nts-input").trigger("validate");
             if (util.isNullOrEmpty(self.selectedFlowMenu().fileID())) {
                 let CCG030_26 = resource.getText("CCG030_26");
-                $('#file_upload').ntsError('set', resource.getMessage("FND_E_REQ_SELECT", [CCG030_26]), "FND_E_REQ_SELECT");
+                $('#file_upload').ntsError('set', resource.getMessage("MsgB_2", [CCG030_26]), "MsgB_2");
             }
             if (!errors.hasError()) {
                 self.selectedFlowMenu().topPageCode(text.padLeft($("#inpCode").val(), '0', 4));
