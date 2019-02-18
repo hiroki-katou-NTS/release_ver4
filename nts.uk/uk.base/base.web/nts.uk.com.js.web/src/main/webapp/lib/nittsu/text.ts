@@ -210,7 +210,7 @@
         export function allFullKatakana(text: string) {
             return {
                         probe: regexp.allFullKatakanaReg.test(text),
-                        messageId: 'FND_E_KANA'
+                        messageId: 'MsgB_7'
                     };
         }
 
