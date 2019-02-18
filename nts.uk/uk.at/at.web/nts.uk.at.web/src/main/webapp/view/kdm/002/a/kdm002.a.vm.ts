@@ -277,7 +277,8 @@ module nts.uk.at.view.kdm002.a {
                     isShowWorkPlaceName: true,
                     isShowSelectAllButton: true,
                     maxWidth: 550,
-                    maxRows: 15
+                    maxRows: 15,
+                    isSelectAllAfterReload: true
                 };
                 
             }
