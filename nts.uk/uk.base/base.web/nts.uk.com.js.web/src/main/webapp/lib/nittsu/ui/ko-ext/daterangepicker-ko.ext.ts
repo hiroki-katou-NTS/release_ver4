@@ -282,7 +282,7 @@ module nts.uk.ui.koExtentions {
                     maxDate = maxDate.add(1, 'year');
                 }
                 if (endDate.isAfter(maxDate)) {
-                    self.$ntsDateRange.ntsError('set', self.getMessage("FND_E_SPAN_OVER_YEAR", [self.rangeName]), "FND_E_SPAN_OVER_YEAR");        
+                    self.$ntsDateRange.ntsError('set', self.getMessage("MsgB_23", [self.rangeName]), "MsgB_23");        
                 }
             }  
         }
