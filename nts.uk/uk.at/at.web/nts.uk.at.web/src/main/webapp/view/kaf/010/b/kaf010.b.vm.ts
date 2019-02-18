@@ -451,7 +451,7 @@ module nts.uk.at.view.kaf010.b {
             }
 
             setErrorB6_8() {
-                $('.breakTimesCheck').ntsError('set', { messageId: 'FND_E_REQ_INPUT', messageParams: [nts.uk.resource.getText("KAF010_56")] });
+                $('.breakTimesCheck').ntsError('set', { messageId: 'MsgB_1', messageParams: [nts.uk.resource.getText("KAF010_56")] });
             }
 
             clearErrorB6_8() {

@@ -254,7 +254,7 @@ module nts.uk.at.view.kmf004.d.viewmodel {
             };
             
             if(self.daysReq() && dataItem.numberOfDays === "") {
-                $("#granted-days-number").ntsError("set", "固定付与日数を入力してください", "FND_E_REQ_INPUT");
+                $("#granted-days-number").ntsError("set", "固定付与日数を入力してください", "MsgB_1");
                 return;
             }
             

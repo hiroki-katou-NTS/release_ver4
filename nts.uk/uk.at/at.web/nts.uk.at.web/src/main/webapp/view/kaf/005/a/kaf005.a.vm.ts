@@ -598,7 +598,7 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             let self = this;
             _.each(self.overtimeHours(), function(item) {
                 $('input#overtimeHoursCheck_' + item.attendanceID() + '_' + item.frameNo())
-                    .ntsError('set', { messageId: 'FND_E_REQ_INPUT', messageParams: [self.getValueOfNameId(item.nameID())] });
+                    .ntsError('set', { messageId: 'MsgB_1', messageParams: [self.getValueOfNameId(item.nameID())] });
             })
         }
 
