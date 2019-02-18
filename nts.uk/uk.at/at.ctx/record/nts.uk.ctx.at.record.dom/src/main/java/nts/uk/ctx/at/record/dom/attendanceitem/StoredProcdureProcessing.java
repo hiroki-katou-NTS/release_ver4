@@ -229,7 +229,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 						flexTime = flex.getFlexTime().getTime().valueAsMinutes(), 
 						timeFlex = flexTime > 0 ? flexTime - timePreFlex : 0,
 						timePre = preOver.stream().mapToInt(t -> t).sum() + timePreFlex,
-						time = overTime.stream().mapToInt(t -> t).sum() + timePre + flexTime;
+						time = overTime.stream().mapToInt(t -> t).sum() + preOver.stream().mapToInt(t -> t).sum() + flexTime;
 				
 				/** 任意項目18, 任意項目28: 事前残業時間 > 0 である事が条件 */
 				processOptionalItem(() -> timePre > 0, optionalItem, COUNT_ON, COUNT_OFF, 18, 28);
@@ -257,7 +257,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 				processOptionalItem(() -> flexTime >= 0, optionalItem, flexTime, timeOff, 41);
 			} else {
 				/** 任意項目18, 19, 21, 23, 28 */
-				updateOptionalItemWithNo(optionalItem, COUNT_OFF, 18, 19, 21, 23, 28);
+				updateOptionalItemWithNo(optionalItem, COUNT_OFF, 18, 19, 21, 23, 27, 28);
 
 				/** 任意項目40, 41 */
 				updateOptionalItemWithNo(optionalItem, timeOff, 40, 41);
