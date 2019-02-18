@@ -256,7 +256,7 @@ module nts.uk.ui.koExtentions {
             let startDate = moment(oldValue.startDate, self.dateFormat);
             let endDate = moment(oldValue.endDate, self.dateFormat);
             if (endDate.isBefore(startDate)) {
-                self.$ntsDateRange.ntsError('set', self.getMessage("FND_E_SPAN_REVERSED", [self.rangeName]), "FND_E_SPAN_REVERSED");    
+                self.$ntsDateRange.ntsError('set', self.getMessage("MsgB_21", [self.rangeName]), "MsgB_21");    
             } else if(self.dateFormat === "YYYY/MM/DD" && self.maxRange === "oneMonth"){
                 let maxDate = startDate.add(31, "days");
                 if(endDate.isSameOrAfter(maxDate)){
