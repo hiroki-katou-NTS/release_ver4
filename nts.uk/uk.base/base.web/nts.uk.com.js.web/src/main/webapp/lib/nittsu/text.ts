@@ -221,7 +221,7 @@
         export function allHalf(text: string) {
             return {
                         probe: text.length === countHalf(text),
-                        messageId: 'FND_E_ANYHALFWIDTH'
+                        messageId: 'MsgB_4'
                     };
         }
 
