@@ -2582,7 +2582,7 @@ module nts.uk.ui.jqueryExtentions {
                             if (uk.ntsNumber.isHalfInt(value)) {
                                 return validation.Result.OK(value);
                             }
-                            return validation.Result.invalid("FND_E_HALFINT");
+                            return validation.Result.invalid("MsgB_14");
                         case "String":
                             return validation.Result.OK(value);
                     }

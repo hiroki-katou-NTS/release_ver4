@@ -257,7 +257,7 @@
             if (val !== NaN && (val * 2) % 1 === 0) probe = true;
             return {
                         probe: probe,
-                        messageId: 'FND_E_HALFINT'
+                        messageId: 'MsgB_14'
                     };
         }
         
