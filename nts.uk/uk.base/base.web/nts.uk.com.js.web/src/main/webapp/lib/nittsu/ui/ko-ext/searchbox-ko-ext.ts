@@ -295,7 +295,7 @@ module nts.uk.ui.koExtentions {
             var nextSearch = function() {
                 let searchKey = $input.val();
                 if(_.isEmpty(searchKey)) {
-                    nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOWORD")).then(() => { 
+                    nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_24")).then(() => { 
                         $input.focus(); 
 //                        $input.select();
                     });

@@ -249,7 +249,7 @@ module nts.uk.ui.jqueryExtentions {
             var nextSearch = function() {
                 let searchKey = $input.val();
                 if(nts.uk.util.isNullOrEmpty(searchKey)) {
-                    nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOWORD")).then(() => { 
+                    nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_24")).then(() => { 
                         $input.focus(); 
 //                        $input.select();
                     });

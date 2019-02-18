@@ -621,7 +621,7 @@ module nts.uk.ui.koExtentions {
             var searchContents = this.$searchBox.val();
             var orders: Array<number> = new Array<number>(); 
             if (nts.uk.util.isNullOrEmpty(searchContents)) {
-                nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOWORD"));
+                nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_24"));
                 return null;
             }
             var searchCriterion = this.searchCriterion;
@@ -708,7 +708,7 @@ module nts.uk.ui.koExtentions {
         highlightSearch(): void {
             var value = this.$searchBox.val();
             if (nts.uk.util.isNullOrEmpty(value)) {
-                nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOWORD"));
+                nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_24"));
                 return;    
             }
             var source = this.dataSource.slice();
