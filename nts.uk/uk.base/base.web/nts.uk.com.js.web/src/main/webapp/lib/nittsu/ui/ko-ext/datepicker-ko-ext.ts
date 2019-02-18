@@ -221,7 +221,7 @@ module nts.uk.ui.koExtentions {
                     var mesId = "FND_E_DATE_Y";
                     var fm = "YYYY";
                     if (isHasDay && isHasMonth && isHasYear) {
-                        mesId = "FND_E_DATE_YMD", fm = "YYYY/MM/DD";
+                        mesId = "MsgB_18", fm = "YYYY/MM/DD";
                     } else if (isHasMonth && isHasYear) {
                         mesId = "FND_E_DATE_YM", fm = "YYYY/MM";
                     } 
