@@ -166,7 +166,7 @@
         export function allHalfNumeric(text: string) {
             return  { 
                         probe: regexp.allHalfNumeric.test(text),
-                        messageId: 'FND_E_NUMERIC'
+                        messageId: 'MsgB_5'
                     };
         }
 
