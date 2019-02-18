@@ -155,7 +155,7 @@
         export function anyChar(text: string) {
             return {
                         probe: true,
-                        messageId: 'FND_E_ANY'
+                        messageId: 'MsgB_3'
                    }
         }
 
