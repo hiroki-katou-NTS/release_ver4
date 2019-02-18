@@ -587,7 +587,7 @@ module nts.uk.ui.validation {
                     maxStr = this.constraint.max;
                     let maxMoment = moment.duration(maxStr);
                     if (parseResult.success && (maxMoment.hours()*60 + maxMoment.minutes()) < inputMoment) {
-                        result.fail(nts.uk.resource.getMessage("FND_E_CLOCK", [ this.name, minStr, maxStr ]), "FND_E_CLOCK");
+                        result.fail(nts.uk.resource.getMessage("MsgB_16", [ this.name, minStr, maxStr ]), "MsgB_16");
                         return result;
                     } 
                 } 
@@ -595,13 +595,13 @@ module nts.uk.ui.validation {
                     minStr = this.constraint.min;
                     let minMoment = moment.duration(minStr);
                     if (parseResult.success && (minMoment.hours()*60 + minMoment.minutes()) > inputMoment) {
-                        result.fail(nts.uk.resource.getMessage("FND_E_CLOCK", [ this.name, minStr, maxStr ]), "FND_E_CLOCK");
+                        result.fail(nts.uk.resource.getMessage("MsgB_16", [ this.name, minStr, maxStr ]), "MsgB_16");
                         return result;
                     }
                 }
                 
                 if (!result.isValid && this.constraint.valueType === "Clock") {
-                    result.fail(nts.uk.resource.getMessage("FND_E_CLOCK", [this.name, minStr, maxStr]), "FND_E_CLOCK");
+                    result.fail(nts.uk.resource.getMessage("MsgB_16", [this.name, minStr, maxStr]), "MsgB_16");
                 }
                 
             }
@@ -657,7 +657,7 @@ module nts.uk.ui.validation {
             var parsed = time.minutesBased.clock.dayattr.parseString(inputText);
             if (!parsed.success || parsed.asMinutes !== Math.round(parsed.asMinutes) 
                 || parsed.asMinutes < minValue || parsed.asMinutes > maxValue) {
-                result.fail(nts.uk.resource.getMessage("FND_E_CLOCK", [ this.name, minValue.fullText, maxValue.fullText ]), "FND_E_CLOCK");
+                result.fail(nts.uk.resource.getMessage("MsgB_16", [ this.name, minValue.fullText, maxValue.fullText ]), "MsgB_16");
             } else {
                 result.success(parsed.asMinutes);
             }
