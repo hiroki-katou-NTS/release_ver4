@@ -141,6 +141,19 @@ public class AggregateOverTime implements Cloneable {
 	}
 	
 	/**
+	 * 法定内残業時間（時系列ワーク）に残業時間・振替時間のみを加算する
+	 * @param ymd 年月日
+	 * @param legalOverTime 法定内残業時間　（加算元）
+	 */
+	public void addLegalOverAndTransInTimeSeriesWork(GeneralDate ymd, OverTimeFrameTime legalOverTime){
+		
+		this.timeSeriesWorks.putIfAbsent(ymd, new OverTimeOfTimeSeries(ymd, legalOverTime.getOverWorkFrameNo()));
+		val targetTimeSeriesWork = this.timeSeriesWorks.get(ymd);
+		
+		targetTimeSeriesWork.addLegalOverAndTrans(legalOverTime);
+	}
+	
+	/**
 	 * 集計する
 	 * @param datePeriod 期間
 	 */

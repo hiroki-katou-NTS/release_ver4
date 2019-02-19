@@ -63,6 +63,14 @@ public class HolidayWorkTimeOfTimeSeries {
 	}
 	
 	/**
+	 * 法定内休出時間に休出枠時間の休出時間・振替時間を加算する
+	 * @param addTime 加算時間　（休出枠時間）
+	 */
+	public void addLegalHdwkAndTrans(HolidayWorkFrameTime addTime){
+		this.legalHolidayWorkTime = this.addHdwkAndTransTime(this.legalHolidayWorkTime, addTime);
+	}
+	
+	/**
 	 * 休出時間：休出時間を加算する
 	 * @param holidayWorkTime 休出時間　（計算付き時間）
 	 */
@@ -119,6 +127,25 @@ public class HolidayWorkTimeOfTimeSeries {
 						addTime.getTransferTime().get().getCalcTime())),
 				Finally.of(target.getBeforeApplicationTime().get().addMinutes(
 						addTime.getBeforeApplicationTime().get().v()))
+			);
+	}
+	
+	/**
+	 * 休出枠時間に休出時間・振替時間を加算する
+	 * @param target 休出枠時間　（加算先）
+	 * @param addTime 加算する休出枠時間
+	 * @return 休出枠時間　（加算後）
+	 */
+	private HolidayWorkFrameTime addHdwkAndTransTime(HolidayWorkFrameTime target, HolidayWorkFrameTime addTime){
+		return new HolidayWorkFrameTime(
+				target.getHolidayFrameNo(),
+				Finally.of(target.getHolidayWorkTime().get().addMinutes(
+						addTime.getHolidayWorkTime().get().getTime(),
+						addTime.getHolidayWorkTime().get().getCalcTime())),
+				Finally.of(target.getTransferTime().get().addMinutes(
+						addTime.getTransferTime().get().getTime(),
+						addTime.getTransferTime().get().getCalcTime())),
+				Finally.of(target.getBeforeApplicationTime().get())
 			);
 	}
 	

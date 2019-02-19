@@ -44,6 +44,7 @@ import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerforma
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.adapter.employee.EmpEmployeeAdapter;
 import nts.uk.ctx.at.shared.dom.adapter.employment.ShareEmploymentAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.holidaymanagement.CompanyAdapter;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.HolidayAddtionRepository;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.flex.FlexShortageLimitRepository;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.flex.InsufficientFlexHolidayMntRepository;
@@ -92,6 +93,8 @@ public interface RepositoriesRequiredByMonthlyAggr {
 	/** 並列化処理 */
 	ManagedParallelWithContext getParallel();
 	
+	/** 会社の取得 */
+	CompanyAdapter getCompany();
 	/** 社員の取得 */
 	EmpEmployeeAdapter getEmpEmployee();
 

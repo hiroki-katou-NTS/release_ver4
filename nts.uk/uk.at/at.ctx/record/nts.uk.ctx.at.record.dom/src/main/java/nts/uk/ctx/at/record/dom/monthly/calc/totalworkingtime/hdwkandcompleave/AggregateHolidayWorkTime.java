@@ -139,6 +139,19 @@ public class AggregateHolidayWorkTime implements Cloneable {
 	}
 	
 	/**
+	 * 法定内休出時間（時系列ワーク）に休出時間・振替時間を加算する
+	 * @param ymd 年月日
+	 * @param legalHolidayWorkTime 法定内休出時間　（加算元）
+	 */
+	public void addLegalHdwkAndTransInTimeSeriesWork(GeneralDate ymd, HolidayWorkFrameTime legalHolidayWorkTime){
+		
+		this.timeSeriesWorks.putIfAbsent(ymd, new HolidayWorkTimeOfTimeSeries(ymd, legalHolidayWorkTime.getHolidayFrameNo()));
+		val targetTimeSeriesWork = this.timeSeriesWorks.get(ymd);
+		
+		targetTimeSeriesWork.addLegalHdwkAndTrans(legalHolidayWorkTime);
+	}
+	
+	/**
 	 * 集計する
 	 * @param datePeriod 期間
 	 */

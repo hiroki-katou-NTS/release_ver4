@@ -455,6 +455,10 @@ public class OverTimeOfMonthly implements Cloneable {
 
 				// 取得した残業枠時間を「フレックス時間」に入れる
 				flexTime.addOverTimeFrameTime(ymd, overTimeFrameSrc);
+				
+				// 取得した残業枠時間を「集計残業時間」に入れる　（法定内残業時間）　（Redmine#106235）
+				val targetAggregateOverTime = this.getTargetAggregateOverTime(overTimeFrameNo);
+				targetAggregateOverTime.addLegalOverAndTransInTimeSeriesWork(ymd, overTimeFrameSrc);
 				continue;
 			}
 				
