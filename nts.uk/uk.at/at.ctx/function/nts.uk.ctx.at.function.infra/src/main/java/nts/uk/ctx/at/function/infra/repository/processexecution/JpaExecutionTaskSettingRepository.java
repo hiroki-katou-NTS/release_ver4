@@ -82,6 +82,7 @@ public class JpaExecutionTaskSettingRepository extends JpaRepository
 		oldData.scheduleId = updateData.scheduleId;
 		oldData.endScheduleId = updateData.endScheduleId;
 		this.commandProxy().update(oldData);
+		this.getEntityManager().flush();
 	}
 
 	/**
