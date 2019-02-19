@@ -564,14 +564,14 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 				if(personImport==null || Strings.isBlank(personImport.getEmployeeCode())){
 					return;
 				}
-				result.add(new EmpSprDailyConfirmExport(personImport.getEmployeeCode(), 0));
+				result.add(new EmpSprDailyConfirmExport(personImport.getEmployeeCode(), 1));
 			} else if(approverPersonOutput.getApprovalAtr()==ApprovalBehaviorAtr.APPROVED){
 				// （基幹・社員Export）アルゴリズム「社員IDから個人社員基本情報を取得」を実行する　RequestList No.1
 				PersonImport personImport = employeeAdapter.getEmployeeInformation(approvalRootState.getEmployeeID());
 				if(personImport==null || Strings.isBlank(personImport.getEmployeeCode())){
 					return;
 				}
-				result.add(new EmpSprDailyConfirmExport(personImport.getEmployeeCode(), 1));
+				result.add(new EmpSprDailyConfirmExport(personImport.getEmployeeCode(), 0));
 			}
 		});
 		return result;
