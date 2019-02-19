@@ -23,7 +23,6 @@ import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerforma
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.medical.MedicalCareTimeOfDaily;
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workingtime.StayingTimeOfDaily;
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workschedule.WorkScheduleTimeOfDaily;
-import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
 import nts.uk.ctx.at.record.dom.daily.ExcessOverTimeWorkMidNightTime;
 import nts.uk.ctx.at.record.dom.daily.TimeDivergenceWithCalculation;
 import nts.uk.ctx.at.record.dom.daily.TimeDivergenceWithCalculationMinusExist;
@@ -83,9 +82,6 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	
 	@Inject
 	private AnyItemValueOfDailyRepo dailyOptionalItem;
-	
-	@Inject
-	private AttendanceTimeRepository dailyAttendanceTime;
 	
 	@Inject
 	private AnyItemOfMonthlyRepository monthlyOptionalItem;
@@ -376,13 +372,12 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		}
 		
 		/** 任意項目の件数を取得 */
-		List<AnyItemValueOfDaily> optionalItemsInMonth = dailyOptionalItem.finds(Arrays.asList(attendanceTime.get().getEmployeeId()), attendanceTime.get().getDatePeriod());
+		List<AnyItemValueOfDaily> optionalItemsInMonth = dailyOptionalItem.finds(Arrays.asList(employeeId), attendanceTime.get().getDatePeriod());
 		List<AnyItemValue> items = optionalItemsInMonth.stream().map(o -> o.getItems()).flatMap(List::stream).collect(Collectors.toList());
 		double count18 = sumCountItem(items, 18), count19 = sumCountItem(items, 19), 
-				count21 = sumCountItem(items, 21), count23 = sumCountItem(items, 23);
+				count21 = sumCountItem(items, 21), count23 = sumCountItem(items, 23),
+				count27 = sumCountItem(items, 27);
 		
-		/** 残業日数を取得 */
-		int countOver = countOverTime(employeeId, attendanceTime);
 		
 		List<AnyItemOfMonthly> dataToProcess = new ArrayList<>(monthlyOptionalItems);
 
@@ -405,7 +400,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 22, getOnDefault(count18, count21), dataToProcess);
 		
 		/** 任意項目24: 割合を計算 */
-		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 24, getOnDefault(countOver, count23), dataToProcess);
+		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 24, getOnDefault(count27, count23), dataToProcess);
 		
 		/** 任意項目46: 割合を計算 */
 		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 46, sumFor46(dataToProcess), dataToProcess);
@@ -413,17 +408,6 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		monthlyOptionalItem.persistAndUpdate(dataToProcess);
 		
 		return dataToProcess;
-	}
-
-	private int countOverTime(String employeeId, Optional<AttendanceTimeOfMonthly> attendanceTime) {
-		List<AttendanceTimeOfDailyPerformance> dailyAttendance = dailyAttendanceTime.finds(Arrays.asList(employeeId), attendanceTime.get().getDatePeriod());
-		return dailyAttendance.stream().mapToInt(at -> {
-			Optional<OverTimeOfDaily>  ot = getOverTime(at);
-			if(ot.isPresent()){
-				return ot.get().getOverTimeWorkFrameTime().stream().mapToInt(otf -> sumActualOvertime(otf)).sum() > 0 ? 1 : 0;
-			}
-			return 0;
-		}).sum();
 	}
 	
 	private void accessMonthlyItem(String employeeId, YearMonth yearMonth, ClosureId closureId,
