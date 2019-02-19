@@ -836,6 +836,7 @@ module nts.uk.at.view.kaf010.a.viewmodel {
         findBychangeAppDateData(data: any) {
             var self = this;
             let overtimeDto = data;
+            self.prePostSelected(overtimeDto.displayPrePostFlg);
             self.displayCaculationTime(overtimeDto.displayCaculationTime);
             self.displayPrePostFlg(data.displayPrePostFlg ? true : false);
             self.restTimeDisFlg(self.restTimeDisFlg());
