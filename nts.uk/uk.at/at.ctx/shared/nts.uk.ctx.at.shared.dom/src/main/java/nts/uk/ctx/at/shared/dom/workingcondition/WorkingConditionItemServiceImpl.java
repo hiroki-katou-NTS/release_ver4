@@ -82,14 +82,14 @@ public class WorkingConditionItemServiceImpl implements WorkingConditionItemServ
 					}
 					return Optional.of(domain.getWorkCategory().getHolidayWork());
 				default:
-					return null;
+					return Optional.empty();
 				}
 
 			}
 			return optpublicHoliday;
 		}
 
-		return null;
+		return Optional.empty();
 	}
 
 	/**
