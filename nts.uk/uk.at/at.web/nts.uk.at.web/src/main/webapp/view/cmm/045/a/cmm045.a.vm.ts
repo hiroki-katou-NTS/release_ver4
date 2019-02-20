@@ -969,14 +969,13 @@ module cmm045.a.viewmodel {
             let applicant: string = masterInfo.workplaceName == '' ? empNameFull : masterInfo.workplaceName + '<br/>' + empNameFull;
             let reason = self.displaySet().appReasonDisAtr == 1 ? '<br/>' + app.applicationReason : '';
             let appContent006 = '';
-            if(absence.allDayHalfDayLeaveAtr == 0 && absence.holidayAppType != 3){//休暇申請.終日半日休暇区分　＝　終日休暇 且休暇申請.休暇種類　≠ 特別休暇 ver39
-                appContent006 = self.convertAbsenceAllDay(absence);
+            //ver46
+            if(absence.holidayAppType != 3){//休暇申請.休暇種類　≠ 特別休暇
+                appContent006 = self.convertAbsenceNotSpecial(absence);
             }
+            
             if(absence.holidayAppType == 3){//休暇申請.休暇種類　＝ 特別休暇 ver39
                 appContent006 = self.convertAbsenceSpecial(absence);
-            }
-            if(absence.allDayHalfDayLeaveAtr == 1){//休暇申請.終日半日休暇区分　＝　半日休暇
-                appContent006 = self.convertAbsenceHalfDay(absence);
             }
             let prePost = app.prePostAtr == 0 ? '事前' : '事後';
             let prePostApp = masterInfo.checkAddNote == true ? prePost + getText('CMM045_101') : prePost;
@@ -987,10 +986,9 @@ module cmm045.a.viewmodel {
                 masterInfo.statusFrameAtr, app.version, masterInfo.checkTimecolor, null, app.reflectPerState);
             return a;
         }
-        //※休暇申請.終日半日休暇区分　＝　終日休暇 且休暇申請.休暇種類　≠ 特別休暇 ver39
-        convertAbsenceAllDay(absence: vmbase.AppAbsenceFull): string{
-            let self = this;
-            return getText('CMM045_248') + getText('CMM045_230', [self.convertNameHoliday(absence.holidayAppType)]);
+        //休暇申請.休暇種類　≠ 特別休暇 ver46
+        convertAbsenceNotSpecial(absence: vmbase.AppAbsenceFull): string{
+            return absence.workTypeName;
         }
         //※休暇申請.休暇種類　＝ 特別休暇 ver39
         convertAbsenceSpecial(absence: vmbase.AppAbsenceFull): string{
@@ -999,14 +997,15 @@ module cmm045.a.viewmodel {
             let result = absence.workTypeName + absence.relationshipName + day;
             return result;
         }
+        //ver46
         //※休暇申請.終日半日休暇区分　＝　半日休暇
-        convertAbsenceHalfDay(absence: vmbase.AppAbsenceFull): string{
-            let self = this;
-            let time1 = absence.startTime1 == '' ? '' : absence.startTime1 + getText('CMM045_100') +  absence.endTime1;
-            let time2 =  absence.startTime2 == '' ? '' : absence.startTime2 + getText('CMM045_100') + absence.endTime2;
-            let result = getText('CMM045_249') + getText('CMM045_230', [self.convertNameHoliday(absence.holidayAppType)])  + time1 + time2;
-            return result;
-        }
+//        convertAbsenceHalfDay(absence: vmbase.AppAbsenceFull): string{
+//            let self = this;
+//            let time1 = absence.startTime1 == '' ? '' : absence.startTime1 + getText('CMM045_100') +  absence.endTime1;
+//            let time2 =  absence.startTime2 == '' ? '' : absence.startTime2 + getText('CMM045_100') + absence.endTime2;
+//            let result = getText('CMM045_249') + getText('CMM045_230', [self.convertNameHoliday(absence.holidayAppType)])  + time1 + time2;
+//            return result;
+//        }
         convertNameHoliday(holidayType: number): string{
             let self = this;
             switch(holidayType){
