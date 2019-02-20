@@ -600,10 +600,10 @@ module cmm045.a.viewmodel {
                 return '';
             }
             if(timeNo417.numOfYear36Over == 0){//未超過の場合
-                return '<br/>' + getText('CMM045_282') + self.convertTime_Short_HM(timeNo417.totalOv) + '　、' + getText('CMM045_283') + getText('CMM045_284', [timeNo417.numOfYear36Over]);
+                return '<br/>' + getText('CMM045_282') + self.convertTime_Short_HM(timeNo417.totalOv) + '　' + getText('CMM045_283') + getText('CMM045_284', [timeNo417.numOfYear36Over]);
             }
             //超過した場合
-            let a1 = getText('CMM045_282') + self.convertTime_Short_HM(timeNo417.totalOv) + '、' + getText('CMM045_283') + getText('CMM045_284', [timeNo417.numOfYear36Over]);
+            let a1 = getText('CMM045_282') + self.convertTime_Short_HM(timeNo417.totalOv) + '　' + getText('CMM045_283') + getText('CMM045_284', [timeNo417.numOfYear36Over]);
             let lstMonth: Array<number> = [];
             //#102100
             let listMY = _.sortBy(timeNo417.lstOverMonth);
@@ -613,7 +613,7 @@ module cmm045.a.viewmodel {
 //            lstMonth = _.sortBy(lstMonth);
             let a2 = '';
             _.each(lstMonth, function(mon){
-                a2 = a2 == '' ? getText('CMM045_285', [mon]) : a2 + '、' + getText('CMM045_285', [mon]);
+                a2 = a2 == '' ? getText('CMM045_285', [mon]) : a2 + '　' + getText('CMM045_285', [mon]);
             });
             return a2 == '' ? '<br/>' + a1 : '<br/>' + a1 + '(' + a2 + ')';
         }
