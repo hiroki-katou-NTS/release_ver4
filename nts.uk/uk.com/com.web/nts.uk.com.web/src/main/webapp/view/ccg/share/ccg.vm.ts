@@ -1503,10 +1503,10 @@ module nts.uk.com.view.ccg.share.ccg {
                 }
 
                 // Period accuracy is YM 
-//                if (self.showPeriodYM) {
-                if (self.showPeriodYM || self.showPeriod) {
-                    // self.calculatePeriod(parseInt(self.periodEnd().format(CcgDateFormat.YEAR_MONTH))).done(period => {
-                    self.calculatePeriod105458().done(period => {
+                if (self.showPeriodYM) {
+//                if (self.showPeriodYM || self.showPeriod) {
+                      self.calculatePeriod(parseInt(self.periodEnd().format(CcgDateFormat.YEAR_MONTH))).done(period => {
+//                    self.calculatePeriod105458().done(period => {
                         if (!self.showBaseDate) {
                             // set base date = period end
                             self.acquiredBaseDate(period.endDate);

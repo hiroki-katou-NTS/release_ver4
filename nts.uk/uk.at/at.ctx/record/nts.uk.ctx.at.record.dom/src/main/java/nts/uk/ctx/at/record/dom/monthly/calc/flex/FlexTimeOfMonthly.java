@@ -1114,6 +1114,51 @@ public class FlexTimeOfMonthly {
 	}
 	
 	/**
+	 * フレックス勤務の就業時間を求める
+	 * @param companyId 会社ID
+	 * @param employeeId 社員ID
+	 * @param yearMonth 年月（度）
+	 * @param datePeriod 期間
+	 * @param flexAggregateMethod フレックス集計方法
+	 * @param settingsByFlex フレックス勤務が必要とする設定
+	 * @param aggregateTotalWorkingTime 集計総労働時間
+	 * @return 就業時間
+	 */
+	public Optional<AttendanceTimeMonth> askWorkTimeOfFlex(
+			String companyId,
+			String employeeId,
+			YearMonth yearMonth,
+			DatePeriod datePeriod,
+			FlexAggregateMethod flexAggregateMethod,
+			SettingRequiredByFlex settingsByFlex,
+			AggregateTotalWorkingTime aggregateTotalWorkingTime){
+		
+		// 「フレックス集計方法」を確認する　（原則集計かどうか）
+		if (flexAggregateMethod == FlexAggregateMethod.PRINCIPLE){
+			
+			// 「フレ超過時間」OR「フレ繰越勤務時間」に値が入っているか確認する
+			if (this.flexExcessTime.greaterThan(0) ||
+				this.flexCarryforwardTime.getFlexCarryforwardWorkTime().greaterThan(0)){
+				
+				// 設定上の所定労働時間を確認する
+				val prescribedWorkingTimeSet = settingsByFlex.getPrescribedWorkingTimeMonth();
+				
+				// 所定労働時間を求める
+				val prescribedWorkingTime =
+						this.askCompensatoryLeaveAfterDeduction(companyId, employeeId, yearMonth, datePeriod,
+								aggregateTotalWorkingTime, prescribedWorkingTimeSet);
+				int predMinutes = prescribedWorkingTime.v();
+				if (predMinutes < 0) predMinutes = 0;
+				
+				// 所定労働時間を返す　（呼び出し元で就業時間に入れる）
+				return Optional.of(new AttendanceTimeMonth(predMinutes));
+			}
+		}
+		
+		return Optional.empty();
+	}
+	
+	/**
 	 * 年休控除する
 	 * @param companyId 会社ID
 	 * @param employeeId 社員ID

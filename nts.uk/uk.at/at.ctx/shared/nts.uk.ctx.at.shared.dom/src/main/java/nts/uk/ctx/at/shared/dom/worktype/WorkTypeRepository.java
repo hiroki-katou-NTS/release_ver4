@@ -299,4 +299,14 @@ public interface WorkTypeRepository {
 	 * @return the list
 	 */
 	List<WorkType> findWorkTypeByCondition(String companyId);
+	/**
+	 * @author hoatt
+	 * get worktype 休暇申請の種類
+	 * @param companyId 会社ID
+	 * @param lstWorkTypeCD 勤務種類リスト
+	 * @param deprecateAtr 廃止区分
+	 * @param hdType 休暇申請の種類
+	 * @return
+	 */
+	List<WorkType> findForAppHdKAF006(String companyId, List<String> lstWorkTypeCD, int deprecateAtr, List<Integer> hdType);
 }

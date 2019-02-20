@@ -29,8 +29,14 @@ import nts.uk.ctx.sys.gateway.dom.adapter.company.CompanyBsImport;
 import nts.uk.ctx.sys.gateway.dom.adapter.employee.EmployeeInfoAdapter;
 import nts.uk.ctx.sys.gateway.dom.adapter.employee.EmployeeInfoDtoImport;
 import nts.uk.ctx.sys.gateway.dom.adapter.employee.StatusOfEmployment;
+import nts.uk.ctx.sys.gateway.dom.adapter.employment.SEmpHistImport;
+import nts.uk.ctx.sys.gateway.dom.adapter.employment.GwSyEmploymentAdapter;
 import nts.uk.ctx.sys.gateway.dom.adapter.status.employment.StatusEmploymentAdapter;
 import nts.uk.ctx.sys.gateway.dom.adapter.status.employment.StatusOfEmploymentImport;
+import nts.uk.ctx.sys.gateway.dom.adapter.syjobtitle.EmployeeJobHistImport;
+import nts.uk.ctx.sys.gateway.dom.adapter.syjobtitle.GwSyJobTitleAdapter;
+import nts.uk.ctx.sys.gateway.dom.adapter.syworkplace.SWkpHistImport;
+import nts.uk.ctx.sys.gateway.dom.adapter.syworkplace.GwSyWorkplaceAdapter;
 import nts.uk.ctx.sys.gateway.dom.adapter.user.CheckBeforeChangePass;
 import nts.uk.ctx.sys.gateway.dom.adapter.user.PassStatus;
 import nts.uk.ctx.sys.gateway.dom.adapter.user.UserAdapter;
@@ -168,6 +174,18 @@ public abstract class LoginBaseCommandHandler<T> extends CommandHandlerWithResul
 	
 	@Inject
 	private StatusEmploymentAdapter statusEmploymentAdapter;
+	
+	/** The sy job title adapter. */
+	@Inject
+	private GwSyJobTitleAdapter syJobTitleAdapter;
+	
+	/** The sy workplace adapter. */
+	@Inject
+	private GwSyWorkplaceAdapter syWorkplaceAdapter;
+	
+	/** The sy employment adapter. */
+	@Inject
+	private GwSyEmploymentAdapter syEmploymentAdapter;
 	
 	private static final boolean IS_EMPLOYMENT = true;
 	private static final boolean IS_CLASSIFICATION = false;
@@ -786,32 +804,46 @@ public abstract class LoginBaseCommandHandler<T> extends CommandHandlerWithResul
 		}
 		
 		List<String> lstEmployeeId = new ArrayList<>();
-		DatePeriod periodEmployee = new DatePeriod(GeneralDate.today(), GeneralDate.today());
+//		DatePeriod periodEmployee = new DatePeriod(GeneralDate.today(), GeneralDate.today());
 		
 		if (employeeId != null) { // employeeId = null when single sign on
-			boolean isEmployeeHis;
 			lstEmployeeId.add(employeeId);
-			// Imported「社員の履歴情報」 を取得する(get Imported「社員の履歴情報」)
-			EmployeeGeneralInfoImport importPub = employeeGeneralInfoAdapter.getEmployeeGeneralInfo(lstEmployeeId, periodEmployee, IS_EMPLOYMENT, IS_CLASSIFICATION, IS_JOBTITLE, IS_WORKPLACE, IS_DEPARTMENT);
-			// 職場履歴一覧がEmpty or 雇用履歴一覧がEmpty or 職位履歴一覧がEmpty
-			isEmployeeHis = importPub.isLstWorkplace() || importPub.isLstEmployment() || importPub.isLstJobTitle();
-			
-			if (isEmployeeHis) {
-				Integer loginMethod = LoginMethod.NORMAL_LOGIN.value;
-				if (isSignon){
-					loginMethod = LoginMethod.SINGLE_SIGN_ON.value;
-				}
-				ParamLoginRecord param = new ParamLoginRecord(companyId, loginMethod, LoginStatus.Fail.value,
-						TextResource.localize("Msg_1420"), employeeId);
-				
-				// アルゴリズム「ログイン記録」を実行する２ (Execute algorithm "login recording")
-				this.service.callLoginRecord(param);
+			// 社員所属職位履歴を取得
+			List<EmployeeJobHistImport> job = this.syJobTitleAdapter.findBySid(employeeId, GeneralDate.today());
+			if (!job.isEmpty()) {
 
-				throw new BusinessException("Msg_1420");
+				// 社員所属職場履歴を取得
+				List<SWkpHistImport> wkp = this.syWorkplaceAdapter.findBySid(companyId, employeeId,
+						GeneralDate.today());
+				if (!wkp.isEmpty()) {
+					// 社員所属雇用履歴を取得
+					Optional<SEmpHistImport> emp = this.syEmploymentAdapter.findSEmpHistBySid(companyId, employeeId,
+							GeneralDate.today());
+					if (!emp.isPresent()) {
+						this.showError(isSignon, companyId, employeeId);
+					}
+				} else {
+					this.showError(isSignon, companyId, employeeId);
+				}
+			} else {
+				this.showError(isSignon, companyId, employeeId);
 			}
 		}
 	}
 	
+	private void showError(boolean isSignon, String companyId, String employeeId) {
+		Integer loginMethod = LoginMethod.NORMAL_LOGIN.value;
+		if (isSignon) {
+			loginMethod = LoginMethod.SINGLE_SIGN_ON.value;
+		}
+		ParamLoginRecord param = new ParamLoginRecord(companyId, loginMethod, LoginStatus.Fail.value,
+				TextResource.localize("Msg_1420"), employeeId);
+
+		// アルゴリズム「ログイン記録」を実行する２ (Execute algorithm "login recording")
+		this.service.callLoginRecord(param);
+
+		throw new BusinessException("Msg_1420");
+	}
 	/**
 	 * Gets the list company.
 	 *

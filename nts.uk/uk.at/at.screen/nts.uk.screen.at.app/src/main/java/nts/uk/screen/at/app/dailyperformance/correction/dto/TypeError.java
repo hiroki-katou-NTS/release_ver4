@@ -10,6 +10,7 @@ public enum TypeError {
 	ITEM28(3),
 	DEVIATION_REASON(4),
 	ERROR_MONTH(5),
-	RELEASE_CHECKBOX(6);
+	RELEASE_CHECKBOX(6),
+	NOT_FOUND_WORKTYPE(7);
 	public final int value;
 }

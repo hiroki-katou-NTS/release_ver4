@@ -265,9 +265,9 @@ module nts.uk.at.view.kaf011.a.screenModel {
             let isControlError = self.validateControl();
             if (isControlError) { return; }
 
-            let isCheckReasonError = !self.checkReason(),
-                checkBoxValue = self.checkBoxValue();
-            if (isCheckReasonError) { return; }
+            // let isCheckReasonError = !self.checkReason(),
+            let checkBoxValue = self.checkBoxValue();
+            // if (isCheckReasonError) { return; }
             block.invisible();
             service.save(saveCmd).done((data) => {
                 dialog({ messageId: 'Msg_15' }).then(function() {

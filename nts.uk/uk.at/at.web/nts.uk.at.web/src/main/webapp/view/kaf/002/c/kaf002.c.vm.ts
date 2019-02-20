@@ -4,6 +4,7 @@ module nts.uk.at.view.kaf002.c {
     import kaf000 = nts.uk.at.view.kaf000;
     import kaf002 = nts.uk.at.view.kaf002;
     import vmbase = nts.uk.at.view.kaf002.shr.vmbase; 
+    import appcommon = nts.uk.at.view.kaf000.shr.model;
     export module viewmodel {
         export class ScreenModel extends kaf000.b.viewmodel.ScreenModel {
             cm: kaf002.cm.viewmodel.ScreenModel;
@@ -48,6 +49,21 @@ module nts.uk.at.view.kaf002.c {
             update(){
                 var self = this;
                 self.cm.update(self.approvalList);
+            }
+            
+            getBoxReason(){
+                var self = this;
+                return cm.getBoxReason();
+            }
+        
+            getAreaReason(){
+                var self = this;
+                return cm.getAreaReason(); 
+            }
+            
+            resfreshReason(appReason: string){
+                var self = this;
+                return cm.resfreshReason(appReason);
             }
         }
     }

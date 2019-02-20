@@ -55,8 +55,7 @@ public class TimeLeavingWork extends DomainObject{
 	public void setStampFromPCLogOn(Optional<LogOnInfo> pcLogOnInfo) {
 		if(pcLogOnInfo.isPresent()
 		   && pcLogOnInfo.get().getLogOn().isPresent()) {
-			if(this.attendanceStamp.isPresent()
-				&& this.attendanceStamp.get().getActualStamp().isPresent()) {
+			if(this.attendanceStamp.isPresent()) {
 				this.attendanceStamp.get().setStampFromPcLogOn(pcLogOnInfo.get().getLogOn().get());
 			}
 		}

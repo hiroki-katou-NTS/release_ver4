@@ -490,6 +490,10 @@ public class HolidayWorkTimeOfMonthly implements Cloneable {
 						
 						// 取得した休出枠時間を「フレックス時間」に入れる
 						flexTime.addHolidayWorkTimeFrameTime(ymd, holidayWorkFrameTimeSrc);
+						
+						// 取得した休出枠時間を「集計休出時間」に入れる　（法定内休出時間）　（Redmine#106235）
+						val targetHolidayWorkTime = this.getTargetAggregateHolidayWorkTime(holidayWorkFrameNo);
+						targetHolidayWorkTime.addLegalHdwkAndTransInTimeSeriesWork(ymd, holidayWorkFrameTimeSrc);
 						continue;
 					}
 				}

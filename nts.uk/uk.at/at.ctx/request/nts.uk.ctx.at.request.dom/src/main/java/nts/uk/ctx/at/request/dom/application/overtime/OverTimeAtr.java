@@ -9,19 +9,22 @@ public enum OverTimeAtr {
 	/**
 	 * 早出残業
 	 */
-	PREOVERTIME(0),
+	PREOVERTIME(0, "早出残業"),
 	/**
 	 * 通常残業
 	 */
-	REGULAROVERTIME(1),
+	REGULAROVERTIME(1, "通常残業"),
 	/**
 	 * 早出残業・通常残業
 	 */
-	ALL(2);
+	ALL(2, "早出残業・通常残業");
 	public final int value;
 	
-	OverTimeAtr(int value){
+	public final String name;
+	
+	OverTimeAtr(int value, String name){
 		this.value = value;
+		this.name = name;
 	}
 
 }

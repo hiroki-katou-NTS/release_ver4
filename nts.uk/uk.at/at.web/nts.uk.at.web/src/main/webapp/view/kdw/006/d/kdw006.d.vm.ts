@@ -18,7 +18,7 @@ module nts.uk.at.view.kdw006.d.viewmodel {
             self.columns1 = ko.observableArray([
                 { headerText: 'ID', key: 'roleId', width: 100, hidden: true },
                 { headerText: getText('KDW006_44'), key: 'roleCode', width: 100 },
-                { headerText: getText('KDW006_45'), key: 'roleName', width: 150 }
+                { headerText: getText('KDW006_45'), key: 'roleName', width: 150, formatter: _.escape }
             ]);
 
             self.selectedItem.subscribe(function(newValue) {

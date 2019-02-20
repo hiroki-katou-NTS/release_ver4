@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.task.parallel.ManagedParallelWithContext;
+import nts.arc.task.parallel.ManagedParallelWithContext.ControlOption;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.uk.ctx.at.function.app.command.processexecution.approuteupdatedaily.CheckCreateperApprovalClosure;
@@ -52,6 +54,11 @@ public class AppRouteUpdateMonthlyDefault implements AppRouteUpdateMonthlyServic
 
 	@Inject
 	private CreateperApprovalMonthlyAdapter createperApprovalMonthlyAdapter;  
+	
+	@Inject
+	private ManagedParallelWithContext managedParallelWithContext;
+	
+	public static int MAX_DELAY_PARALLEL = 0;
 
 	@Override
 	public void checkAppRouteUpdateMonthly(String execId, ProcessExecution procExec, ProcessExecutionLog procExecLog) {
@@ -80,16 +87,19 @@ public class AppRouteUpdateMonthlyDefault implements AppRouteUpdateMonthlyServic
 		/** ドメインモデル「就業締め日」を取得する(lấy thông tin domain ル「就業締め日」) */
 		List<Closure> listClosure = closureRepository.findAllActive(procExec.getCompanyId(),
 				UseClassification.UseClass_Use);
-
-		for (Closure closure : listClosure) {
+		this.managedParallelWithContext.forEach(
+				ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
+				listClosure,
+				itemClosure -> {
+//		for (Closure closure : listClosure) {
 			/** 締め開始日を取得する */
 			PresentClosingPeriodFunImport closureData = funClosureAdapter
-					.getClosureById(procExec.getCompanyId(), closure.getClosureId().value).get();
+					.getClosureById(procExec.getCompanyId(), itemClosure.getClosureId().value).get();
 			GeneralDate startDate = closureData.getClosureStartDate();
 
 			// 雇用コードを取得する(lấy 雇用コード)
 			List<ClosureEmployment> listClosureEmployment = closureEmploymentRepo
-					.findByClosureId(procExec.getCompanyId(), closure.getClosureId().value);
+					.findByClosureId(procExec.getCompanyId(), itemClosure.getClosureId().value);
 			List<String> listClosureEmploymentCode = listClosureEmployment.stream().map(c -> c.getEmploymentCD())
 					.collect(Collectors.toList());
 			/** 対象社員を取得する */
@@ -232,9 +242,10 @@ public class AppRouteUpdateMonthlyDefault implements AppRouteUpdateMonthlyServic
 			 lstRegulationInfoEmployee.stream().map(c -> c.getEmployeeId()).collect(Collectors.toList()), 
 			 procExec.getProcessExecType().value, 
 			 closureData.getClosureEndDate());
-			 listCheckCreateApp.add(new CheckCreateperApprovalClosure(closure.getClosureId().value,check));
+			 listCheckCreateApp.add(new CheckCreateperApprovalClosure(itemClosure.getClosureId().value,check));
 			
-		}
+//		}
+	});
 		
 		boolean checkError = false;
 		/*終了状態で「エラーあり」が返ってきたか確認する*/

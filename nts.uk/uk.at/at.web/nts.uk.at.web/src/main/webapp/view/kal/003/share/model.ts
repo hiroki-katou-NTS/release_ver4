@@ -112,28 +112,37 @@ module nts.uk.at.view.kal003.share.model {
             ko.computed({
                 read: () => {
                     let fbe = ko.toJS(this.filterByEmployment);
-                    $('[data-bind="with: tabScopeCheck"] #scopechecktab1').trigger('validate');
+                    if (!fbe) {
+                        $('[data-bind="with: tabScopeCheck"] #scopechecktab1').trigger('validate');
+                    }
                 }
             });
             
             ko.computed({
                 read: () => {
                     let fbc = ko.toJS(this.filterByClassification);
-                    $('[data-bind="with: tabScopeCheck"] #scopechecktab2').trigger('validate');
+                    if (!fbc) {
+                        $('[data-bind="with: tabScopeCheck"] #scopechecktab2').trigger('validate');
+                    }
                 }
             });
             
             ko.computed({
                 read: () => {
+                    
                     let fbj = ko.toJS(this.filterByJobTitle);
-                    $('[data-bind="with: tabScopeCheck"] #scopechecktab3').trigger('validate');
+                    if (!fbj) {
+                        $('[data-bind="with: tabScopeCheck"] #scopechecktab3').trigger('validate');
+                    }
                 }
             });
             
             ko.computed({
                 read: () => {
                     let fbb = ko.toJS(this.filterByBusinessType);
-                    $('[data-bind="with: tabScopeCheck"] #scopechecktab4').trigger('validate');
+                    if (!fbb) {
+                        $('[data-bind="with: tabScopeCheck"] #scopechecktab4').trigger('validate');
+                    }
                 }
             });
 

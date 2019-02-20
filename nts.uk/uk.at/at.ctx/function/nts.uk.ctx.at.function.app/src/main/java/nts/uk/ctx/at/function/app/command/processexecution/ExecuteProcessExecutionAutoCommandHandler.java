@@ -15,6 +15,8 @@ import javax.inject.Inject;
 import nts.arc.layer.app.command.AsyncCommandHandler;
 import nts.arc.layer.app.command.AsyncCommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerContext;
+import nts.arc.task.parallel.ManagedParallelWithContext;
+import nts.arc.task.parallel.ManagedParallelWithContext.ControlOption;
 //import nts.arc.task.AsyncTaskInfo;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
@@ -215,6 +217,11 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 	@Inject
 	private AppReflectManagerAdapter appReflectManagerAdapter;
+
+	@Inject
+	private ManagedParallelWithContext managedParallelWithContext;
+	
+	public static int MAX_DELAY_PARALLEL = 0;
 
 	/**
 	 * 更新処理を開始する
@@ -2398,7 +2405,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		this.executionLogRepository.addExecutionLog(executionLog);
 
 		boolean isHasException = false;
-		boolean endStatusIsInterrupt = false;
+		//boolean endStatusIsInterrupt = false;
+		List<Boolean> listCheck = new ArrayList<>();
 		// 就業担当者の社員ID（List）を取得する : RQ526
 		List<String> listManagementId = employeeManageAdapter.getListEmpID(companyId, GeneralDate.today());
 		try {
@@ -2532,31 +2540,58 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				List<RegulationInfoEmployeeAdapterDto> lstRegulationInfoEmployee = this.regulationInfoEmployeeAdapter
 						.find(regulationInfoEmployeeAdapterImport);
 
-				int sizeEmployee = lstRegulationInfoEmployee.size();
-				for (int j = 0; j < sizeEmployee; j++) {
-					RegulationInfoEmployeeAdapterDto regulationInfoEmployeeAdapterDto = lstRegulationInfoEmployee
-							.get(j);
-					AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> asyContext = (AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>) context;
-					ProcessState aggregate = monthlyService.aggregate(asyContext, companyId,
-							regulationInfoEmployeeAdapterDto.getEmployeeId(), GeneralDate.legacyDate(now.date()),
-							execId, ExecutionType.NORMAL_EXECUTION);
-					// 中断
-					if (aggregate.value == 0) {
-						endStatusIsInterrupt = true;
+				// int sizeEmployee = lstRegulationInfoEmployee.size();
+				this.managedParallelWithContext.forEach(
+						ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
+						lstRegulationInfoEmployee,
+						item -> {
+							RegulationInfoEmployeeAdapterDto regulationInfoEmployeeAdapterDto = item;
+							AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> asyContext = (AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>) context;
+							ProcessState aggregate = monthlyService.aggregate(asyContext, companyId,
+									regulationInfoEmployeeAdapterDto.getEmployeeId(), GeneralDate.legacyDate(now.date()),
+									execId, ExecutionType.NORMAL_EXECUTION);
+							// 中断
+							if (aggregate.value == 0) {
+								//endStatusIsInterrupt = true;
+								listCheck.add(true);
+								//break;
+								return;
+							}
+							
+						});
+//				for (int j = 0; j < sizeEmployee; j++) {
+//					RegulationInfoEmployeeAdapterDto regulationInfoEmployeeAdapterDto = lstRegulationInfoEmployee
+//							.get(j);
+//					AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> asyContext = (AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>) context;
+//					ProcessState aggregate = monthlyService.aggregate(asyContext, companyId,
+//							regulationInfoEmployeeAdapterDto.getEmployeeId(), GeneralDate.legacyDate(now.date()),
+//							execId, ExecutionType.NORMAL_EXECUTION);
+//					// 中断
+//					if (aggregate.value == 0) {
+//						endStatusIsInterrupt = true;
+//						break;
+//					}
+//				}
+//				if (endStatusIsInterrupt) {
+//					break;
+//				}
+				if(!listCheck.isEmpty()) {
+					if (listCheck.get(0)) {
 						break;
 					}
-				}
-				if (endStatusIsInterrupt) {
-					break;
 				}
 			}
 		} catch (Exception e) {
 			isHasException = true;
 		}
-
-		if (endStatusIsInterrupt) {
-			return true; // 終了状態 ＝ 中断
+		if(!listCheck.isEmpty()) {
+			if (listCheck.get(0)) {
+				return true; // 終了状態 ＝ 中断
+			}
 		}
+//		if (listCheck.isEmpty()) {
+//			return true; // 終了状態 ＝ 中断
+//		}
 		if (isHasException) {
 			// ドメインモデル「更新処理自動実行ログ」を更新する
 			for (int i = 0; i < size; i++) {
@@ -2971,21 +3006,58 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		 * .find(regulationInfoEmployeeAdapterImport);
 		 */
 		boolean isInterrupt = false;
-		int size = lstEmpId.size();
-		for (int i = 0; i < size; i++) {
-			// アルゴリズム「開始日を入社日にする」を実行する
-			DatePeriod employeeDatePeriod = this.makeStartDateForHiringDate(processExecution, lstEmpId.get(i), period);
-			if (employeeDatePeriod == null && processExecution.getExecSetting().getDailyPerf()
-					.getTargetGroupClassification().isMidJoinEmployee()) {
-				continue;
-			}
-			boolean executionDaily = this.executionDaily(companyId, context, processExecution, lstEmpId.get(i),
-					empCalAndSumExeLog, employeeDatePeriod, typeExecution, dailyCreateLog);
-			if (executionDaily) {
-				isInterrupt = true;
-				break;
-			}
-		}
+		List<Boolean> listIsInterrupt = new ArrayList<>();
+		List<String> listErrorTryCatch = new ArrayList<>();
+		//int size = lstEmpId.size();
+				this.managedParallelWithContext.forEach(
+						ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
+						lstEmpId,
+						empId -> {
+							// アルゴリズム「開始日を入社日にする」を実行する
+							try {
+								DatePeriod employeeDatePeriod = this.makeStartDateForHiringDate(processExecution, empId, period);
+								if (employeeDatePeriod == null && processExecution.getExecSetting().getDailyPerf()
+										.getTargetGroupClassification().isMidJoinEmployee()) {
+									
+								}else {
+									boolean executionDaily = this.executionDaily(companyId, context, processExecution, empId,
+											empCalAndSumExeLog, employeeDatePeriod, typeExecution, dailyCreateLog);
+									if (executionDaily) {
+										listIsInterrupt.add(true);
+										return;
+									}
+								}
+							} catch (CreateDailyException ex) {
+								listErrorTryCatch.add("errCreateDailyException");
+							} catch (DailyCalculateException ex) {
+								listErrorTryCatch.add("errDailyCalculateException");
+							}
+						});
+				if(!listErrorTryCatch.isEmpty()) {
+					if(listErrorTryCatch.get(0).equals("errCreateDailyException")) {
+						throw new CreateDailyException();
+					}
+					if(listErrorTryCatch.get(0).equals("errDailyCalculateException")) {
+						throw new DailyCalculateException();
+					}
+				}
+				if(!listIsInterrupt.isEmpty()) {
+					isInterrupt = true;
+				}
+//		for (int i = 0; i < size; i++) {
+//			// アルゴリズム「開始日を入社日にする」を実行する
+//			DatePeriod employeeDatePeriod = this.makeStartDateForHiringDate(processExecution, lstEmpId.get(i), period);
+//			if (employeeDatePeriod == null && processExecution.getExecSetting().getDailyPerf()
+//					.getTargetGroupClassification().isMidJoinEmployee()) {
+//				continue;
+//			}
+//			boolean executionDaily = this.executionDaily(companyId, context, processExecution, lstEmpId.get(i),
+//					empCalAndSumExeLog, employeeDatePeriod, typeExecution, dailyCreateLog);
+//			if (executionDaily) {
+//				isInterrupt = true;
+//				break;
+//			}
+//		}
 		List<ErrMessageInfo> errMessageInfos = this.errMessageInfoRepository
 				.getAllErrMessageInfoByEmpID(empCalAndSumExeLog.getEmpCalAndSumExecLogID());
 		List<String> errorMessage = errMessageInfos.stream().map(error -> {

@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import org.apache.logging.log4j.util.Strings;
+
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -298,7 +300,12 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	@Override
 	public List<AppRootInstance> findByEmpLstPeriod(List<String> employeeIDLst, DatePeriod period,
 			RecordRootType rootType) {
-		String companyID =  AppContexts.user().companyId();
+		// Đối ứng SPR
+		String companyID = "000000000000-0001";
+		String loginCompanyID = AppContexts.user().companyId();
+		if(Strings.isNotBlank(loginCompanyID)){
+			companyID = loginCompanyID;
+		}
 		Connection con = this.getEntityManager().unwrap(Connection.class);
 		String query = FIND_BY_EMPS_PERIOD;
 		

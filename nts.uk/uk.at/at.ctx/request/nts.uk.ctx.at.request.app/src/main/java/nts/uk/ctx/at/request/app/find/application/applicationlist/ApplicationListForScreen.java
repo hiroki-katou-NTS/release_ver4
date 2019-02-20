@@ -19,10 +19,13 @@ import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsence;
 import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsenceRepository;
 import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleImport;
+import nts.uk.ctx.at.request.dom.application.overtime.OverTimeAtr;
+import nts.uk.ctx.at.request.dom.application.stamp.StampRequestMode;
 import nts.uk.ctx.at.request.dom.application.workchange.AppWorkChange;
 import nts.uk.ctx.at.request.dom.application.workchange.IAppWorkChangeRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispName;
 import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispNameRepository;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
@@ -228,6 +231,69 @@ public class ApplicationListForScreen {
 				result.add(y.getValue().get(0));
 			});
 		});
+		return result;
+	}
+	
+	/**
+	 * [No.556]遷移先申請画面一覧を取得する
+	 * RequestList #556
+	 * @param companyID
+	 * @return
+	 */
+	public List<AppWithDetailExportDto> getAppWithOvertimeInfo(String companyID){
+		List<AppWithDetailExportDto> result = new ArrayList<>();
+		// ドメインモデル「申請表示名」を取得する
+		List<AppDispName> appDispNameLst = appDispNameRepository.getAll();
+		for(AppDispName appDispName : appDispNameLst){
+			if(appDispName.getAppType()==ApplicationType.OVER_TIME_APPLICATION){
+				// outputパラメータに残業申請のモード別の値をセットする
+				result.add(new AppWithDetailExportDto(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.PREOVERTIME.name, 
+						OverTimeAtr.PREOVERTIME.value + 1,
+						null));
+				result.add(new AppWithDetailExportDto(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.REGULAROVERTIME.name, 
+						OverTimeAtr.REGULAROVERTIME.value + 1,
+						null));
+				result.add(new AppWithDetailExportDto(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.ALL.name, 
+						OverTimeAtr.ALL.value + 1,
+						null));
+			} else if(appDispName.getAppType()==ApplicationType.STAMP_APPLICATION){
+				// outputパラメータに打刻申請のモード別の値をセットする
+				result.add(new AppWithDetailExportDto(
+						ApplicationType.STAMP_APPLICATION.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_GO_OUT_PERMIT.name, 
+						null,
+						StampRequestMode.STAMP_GO_OUT_PERMIT.value));
+				result.add(new AppWithDetailExportDto(
+						ApplicationType.STAMP_APPLICATION.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_WORK.name, 
+						null,
+						StampRequestMode.STAMP_WORK.value));
+				result.add(new AppWithDetailExportDto(
+						ApplicationType.STAMP_APPLICATION.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_CANCEL.name, 
+						null,
+						StampRequestMode.STAMP_CANCEL.value));
+				result.add(new AppWithDetailExportDto(
+						ApplicationType.STAMP_APPLICATION.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_ONLINE_RECORD.name, 
+						null,
+						StampRequestMode.STAMP_ONLINE_RECORD.value));
+				result.add(new AppWithDetailExportDto(
+						ApplicationType.STAMP_APPLICATION.value, 
+						appDispName.getDispName().v() + StampRequestMode.OTHER.name, 
+						null,
+						StampRequestMode.OTHER.value));
+			} else {
+				// outputパラメータに値をセットする
+				result.add(new AppWithDetailExportDto(appDispName.getAppType().value, appDispName.getDispName().v(), null, null));
+			}
+		}
 		return result;
 	}
 }
