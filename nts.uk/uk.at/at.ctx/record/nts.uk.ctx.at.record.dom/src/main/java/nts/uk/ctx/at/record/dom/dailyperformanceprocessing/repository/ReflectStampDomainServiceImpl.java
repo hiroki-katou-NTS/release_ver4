@@ -818,7 +818,7 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 		}
 		
 		//ドメインモデル「勤務種類」を取得
-		boolean checkWorkType = this.workTypeRepository.findWorkTypeRecord(companyId, workTimeCode);
+		boolean checkWorkType = this.workTypeRepository.findWorkTypeRecord(companyId, workTypeCode);
 		if(checkWorkType == false){
 			//エラー処理
 			ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
