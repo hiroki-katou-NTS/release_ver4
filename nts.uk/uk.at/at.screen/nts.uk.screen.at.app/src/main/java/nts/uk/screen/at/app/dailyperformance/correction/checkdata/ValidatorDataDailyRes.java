@@ -176,7 +176,7 @@ public class ValidatorDataDailyRes {
 		if (itemCanCheck.isEmpty())
 			return result;
 		Map<Integer, String> itemCheckMap = itemCanCheck.stream()
-				.collect(Collectors.toMap(x -> x.getItemId(), x -> x.getValue()));
+				.collect(Collectors.toMap(x -> x.getItemId(), x -> x.getValue() == null ? "" : x.getValue()));
 		List<DPItemValue> itemCheckDBs = new ArrayList<>();
 		// loc nhung thang chi duoc insert 1 trong 1 cap
 		itemCanCheck.forEach(x -> {
@@ -193,7 +193,8 @@ public class ValidatorDataDailyRes {
 				.collect(Collectors.toMap(x -> x.getItemId(), x -> x.getValue() == null ? "" : x.getValue()));
 		itemCheckDBs.stream().forEach(x -> {
 			if (valueGetFromDBMap.containsKey(INPUT_CHECK_MAP.get(x.getItemId()))
-					&& valueGetFromDBMap.get(INPUT_CHECK_MAP.get(x.getItemId())).equals("")) {
+					&& valueGetFromDBMap.get(INPUT_CHECK_MAP.get(x.getItemId())).equals("")
+			|| ((x.getValue() == null || x.getValue().equals("")) && !valueGetFromDBMap.get(INPUT_CHECK_MAP.get(x.getItemId())).equals(""))) {
 				result.add(x);
 			}
 		});
