@@ -1,3 +1,7 @@
+/******************************************************************
+ * Copyright (c) 2017 Nittsu System to present.                   *
+ * All right reserved.                                            *
+ *****************************************************************/
 package nts.uk.ctx.at.shared.dom.workingcondition;
 
 import java.util.Optional;
@@ -6,7 +10,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.shared.dom.worktype.holidayset.HolidaySetting;
+import nts.uk.ctx.at.shared.dom.worktype.WorkAtr;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeSet;
 import nts.uk.ctx.at.shared.dom.worktype.holidayset.HolidaySettingRepository;
 
 /**
@@ -31,10 +37,9 @@ public class WorkingConditionItemServiceImpl implements WorkingConditionItemServ
 	@Inject
 	private WorkingConditionItemRepository repositoryWorkingConditionItem;
 
-	/** The repository holiday setting. */
+	/** The work type repository. */
 	@Inject
-	private HolidaySettingRepository repositoryHolidaySetting;
-
+	private WorkTypeRepository workTypeRepository;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -59,24 +64,20 @@ public class WorkingConditionItemServiceImpl implements WorkingConditionItemServ
 
 			// check public holiday is present
 			if (!optpublicHoliday.isPresent()) {
-				Optional<HolidaySetting> optHolidaySetting = this.repositoryHolidaySetting
-						.findBy(companyId);
-				HolidaySetting domainHolidaySetting = optHolidaySetting.get();
-				int holidayAtr = domainHolidaySetting.getHolidayAtr().value;
-
+				WorkTypeSet workTypeSet = this.workTypeRepository.findByPK(companyId, workTypeCode).get().getWorkTypeSetByAtr(WorkAtr.OneDay).get();
 				// filter by holiday Setting atr
-				switch (holidayAtr) {
-				case WorkingConditionItemServiceImpl.STATUTORY_HOLIDAYS:
+				switch (workTypeSet.getHolidayAtr()) {
+				case STATUTORY_HOLIDAYS:
 					if (this.checkInLawBreakTime(domain.getWorkCategory())) {
 						return domain.getWorkCategory().getInLawBreakTime();
 					}
 					return Optional.of(domain.getWorkCategory().getHolidayWork());
-				case WorkingConditionItemServiceImpl.NON_STATUTORY_HOLIDAYS:
+				case NON_STATUTORY_HOLIDAYS:
 					if (this.checkInLawBreakTime(domain.getWorkCategory())) {
 						return domain.getWorkCategory().getOutsideLawBreakTime();
 					}
 					return Optional.of(domain.getWorkCategory().getHolidayWork());
-				case WorkingConditionItemServiceImpl.PUBLIC_HOLIDAY:
+				case PUBLIC_HOLIDAY:
 					if (this.checkInLawBreakTime(domain.getWorkCategory())) {
 						return domain.getWorkCategory().getHolidayAttendanceTime();
 					}
