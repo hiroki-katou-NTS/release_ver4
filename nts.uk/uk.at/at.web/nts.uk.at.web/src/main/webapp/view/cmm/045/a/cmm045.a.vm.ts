@@ -613,7 +613,7 @@ module cmm045.a.viewmodel {
 //            lstMonth = _.sortBy(lstMonth);
             let a2 = '';
             _.each(lstMonth, function(mon){
-                a2 = a2 == '' ? getText('CMM045_285', [mon]) : a2 + '　' + getText('CMM045_285', [mon]);
+                a2 = a2 == '' ? getText('CMM045_285', [mon]) : a2 + '、' + getText('CMM045_285', [mon]);
             });
             return a2 == '' ? '<br/>' + a1 : '<br/>' + a1 + '(' + a2 + ')';
         }
