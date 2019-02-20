@@ -816,8 +816,21 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 				workTimeCode = workInfoOfDailyPerformanceOpt.get().getRecordInfo().getSiftCode().v();
 			}
 		}
+		
+		//ドメインモデル「勤務種類」を取得
+		boolean checkWorkType = this.workTypeRepository.findWorkTypeRecord(companyId, workTimeCode);
+		if(checkWorkType == false){
+			//エラー処理
+			ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
+					new ErrMessageResource("023"), EnumAdaptor.valueOf(0, ExecutionContent.class), processingDate,
+					new ErrMessageContent(TextResource.localize("Msg_590")));
+			errMesInfos.add(employmentErrMes);
+			newReflectStampOutput.setErrMesInfos(errMesInfos);
+			return newReflectStampOutput;
+		}
+		
 		// 就業時間帯コードを取得
-		if (workTimeCode == null) {
+		if (workTimeCode == null && checkWorkType == true) {
 			// 休日出勤時の勤務情報を取得する
 			Optional<SingleDaySchedule> singleDaySchedule = workingConditionItemService
 					.getHolidayWorkSchedule(companyId, employeeId, processingDate, workTypeCode);
