@@ -1032,7 +1032,6 @@ module cmm045.a.viewmodel {
         /**
          * 振休振出申請
          * kaf011 - appType = 10
-         * TO DO
          */
         formatCompltLeave(app: vmbase.ApplicationDto_New, complt: vmbase.AppCompltLeaveSync, masterInfo: vmbase.AppMasterInfo): vmbase.DataModeApp{
             let self = this;
@@ -1064,7 +1063,6 @@ module cmm045.a.viewmodel {
          * 振休振出申請
          * 同期
          * kaf011 - appType = 10
-         * TO DO
          */
         formatCompltSync(app: vmbase.ApplicationDto_New, complt: vmbase.AppCompltLeaveSync, masterInfo: vmbase.AppMasterInfo): vmbase.DataModeApp{
             let self = this;
@@ -1169,7 +1167,7 @@ module cmm045.a.viewmodel {
             let self = this;
             let time = compltLeave.startTime + getText('CMM045_100') + compltLeave.endTime;
             let reasonApp = self.displaySet().appReasonDisAtr == 1 ? '<br/>' + reason : '';
-            return getText('CMM045_262') + self.convertDateShort_MD(date) + getText('CMM045_230', [compltLeave.workTypeName]) + time + reasonApp;
+            return getText('CMM045_262') + compltLeave.workTypeName + time + reasonApp;
         }
         //※振休申請のみ同期なし・紐付けなし
         //申請/承認モード
@@ -1179,9 +1177,9 @@ module cmm045.a.viewmodel {
             let eTime = compltLeave.endTime == '' ? '' : getText('CMM045_100') + compltLeave.endTime;
             let time = compltLeave.startTime + eTime;
             let reasonApp = self.displaySet().appReasonDisAtr == 1 ? '<br/>' + reason : '';
-            return getText('CMM045_263') + self.convertDateShort_MD(date) + getText('CMM045_230', [compltLeave.workTypeName]) + time + reasonApp;
+            return getText('CMM045_263') + compltLeave.workTypeName + time + reasonApp;
         }
-        //※振休振出申請　同期（あり/なし）・紐付けあり
+        //※振休振出申請　同期あり・紐付けあり
         //申請モード/承認モード merge convert C + D
         //申請日付(A6_C2_6)、入力日(A6_C2_8)、承認状況(A6_C2_9)表示（２段）
         //振出(rec) -> 振休(abs)
