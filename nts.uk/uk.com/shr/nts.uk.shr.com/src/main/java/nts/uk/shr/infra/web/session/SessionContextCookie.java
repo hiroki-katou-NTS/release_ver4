@@ -33,7 +33,8 @@ public class SessionContextCookie {
 	
 	public static Optional<NewCookie> createNewCookieFromSession() {
 		
-		if (!CDI.current().select(SessionLowLayer.class).get().isLoggedIn()) {
+		val session = CDI.current().select(SessionLowLayer.class).get();
+		if (!session.isLoggedIn()) {
 			return Optional.empty();
 		}
 		
@@ -44,7 +45,7 @@ public class SessionContextCookie {
 				null,
 				NewCookie.DEFAULT_VERSION,
 				null,
-				NewCookie.DEFAULT_MAX_AGE,
+				session.secondsSessionTimeout(),
 				null,
 				false,
 				false));

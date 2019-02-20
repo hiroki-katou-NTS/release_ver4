@@ -31,7 +31,8 @@ public class SharingSessionFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
-		boolean isLoggedIn = CDI.current().select(SessionLowLayer.class).get().isLoggedIn();
+		val sessionLowLayer = CDI.current().select(SessionLowLayer.class).get();
+		boolean isLoggedIn = sessionLowLayer.isLoggedIn();
 		val httpRequest = (HttpServletRequest) request;
 
 		/*
@@ -64,6 +65,7 @@ public class SharingSessionFilter implements Filter {
 			val httpResponse = (HttpServletResponse) response;
 			val newSessionContextCookie = new Cookie(COOKIE_SESSION_CONTEXT, createStringSessionContext());
 			newSessionContextCookie.setPath("/");
+			newSessionContextCookie.setMaxAge(sessionLowLayer.secondsSessionTimeout());
 			httpResponse.addCookie(newSessionContextCookie);
 		}
 	}
