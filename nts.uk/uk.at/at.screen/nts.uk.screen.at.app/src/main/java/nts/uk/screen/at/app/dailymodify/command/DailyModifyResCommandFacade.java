@@ -341,7 +341,7 @@ public class DailyModifyResCommandFacade {
 				List<DPItemValue> itemInputError28 = new ArrayList<>();
 				List<DPItemValue> itemInputWorkType = new ArrayList<>();
 				Map<Integer, List<DPItemValue>>  errorTemp = new HashMap<>();
-				List<DPItemValue> itemCovert = x.getValue().stream().filter(y -> y.getValue() != null)
+				List<DPItemValue> itemCovert = x.getValue().stream()
 						.collect(Collectors.toList()).stream().filter(distinctByKey(p -> p.getItemId()))
 						.collect(Collectors.toList());
 				List<DailyModifyResult> itemValues = itemCovert.isEmpty() ? Collections.emptyList()
