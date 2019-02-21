@@ -331,7 +331,7 @@ public class AbsenceServiceProcessImpl implements AbsenceServiceProcess{
 			ReNumAnnLeaReferenceDateImport year = annLeaRemNumberAdapter.getReferDateAnnualLeaveRemainNumber(employeeID, baseDate);
 			//年休残数 ← 年休残数.年休残数（付与前）日数 annualLeaveRemainNumberExport.annualLeaveGrantPreDay
 			yearRemain = year.getAnnualLeaveRemainNumberExport() == null ? null : 
-				year.getAnnualLeaveRemainNumberExport().getAnnualLeaveGrantPreDay();
+				year.getAnnualLeaveRemainNumberExport().getAnnualLeaveGrantDay();
 		}
 		return NumberOfRemainOutput.init(yearRemain, subHdRemain, subVacaRemain, stockRemain);
 	}
