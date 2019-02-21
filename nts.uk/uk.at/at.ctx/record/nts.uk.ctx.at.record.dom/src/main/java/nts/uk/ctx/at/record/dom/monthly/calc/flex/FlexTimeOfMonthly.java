@@ -1153,6 +1153,16 @@ public class FlexTimeOfMonthly {
 				// 所定労働時間を返す　（呼び出し元で就業時間に入れる）
 				return Optional.of(new AttendanceTimeMonth(predMinutes));
 			}
+			// 「フレ不足時間」に値が入っているか確認する
+			else if (this.flexShortageTime.greaterThan(0)) {
+				
+				// フレックス対象時間を集計する　→　所定労働時間
+				int predMinutes = this.aggregateFlexTargetTime(datePeriod, aggregateTotalWorkingTime).v();
+				if (predMinutes < 0) predMinutes = 0;
+				
+				// 所定労働時間を返す　（呼び出し元で就業時間に入れる）
+				return Optional.of(new AttendanceTimeMonth(predMinutes));
+			}
 		}
 		
 		return Optional.empty();
