@@ -2,6 +2,7 @@ package nts.uk.ctx.at.request.app.find.application.applicationlist;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 
@@ -15,6 +16,7 @@ public class AppWithDetailExportDto {
 	/*
 	 * 申請種類
 	 */
+	@Setter
 	private Integer appType;
 	
 	/*

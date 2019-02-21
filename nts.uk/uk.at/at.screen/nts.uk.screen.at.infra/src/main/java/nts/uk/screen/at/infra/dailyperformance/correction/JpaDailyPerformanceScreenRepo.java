@@ -1519,7 +1519,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	@Override
 	public Map<String, List<EnumConstant>> findErAlApplicationByCidAndListErrCd(String companyId,
-			List<String> errorCode) {
+			List<String> errorCode, Map<Integer, String> nameAppType) {
 		List<KrcstErAlApplication> entity = this.queryProxy().query(SEL_FIND_ER_AL_APP, KrcstErAlApplication.class)
 				.setParameter("cid", companyId).setParameter("errorCd", errorCode).getList();
 		Map<String, List<EnumConstant>> result = new HashMap<>();
@@ -1530,8 +1530,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 									.groupingBy(x -> x.krcstErAlApplicationPK.errorCd,
 											Collectors.mapping(
 													x -> new EnumConstant(x.krcstErAlApplicationPK.appTypeCd,
-															EnumAdaptor.valueOf(x.krcstErAlApplicationPK.appTypeCd,
-																	ApplicationType.class).nameId,
+															nameAppType.get(x.krcstErAlApplicationPK.appTypeCd) == null ? "" : nameAppType.get(x.krcstErAlApplicationPK.appTypeCd),
 															""),
 													Collectors.toList())));
 		}
