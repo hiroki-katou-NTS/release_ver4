@@ -251,7 +251,7 @@ public class DailyCalculationCommandFacade {
 			List<DPItemValue> itemInputWorkType = new ArrayList<>();
 			// List<DPItemValue> itemInputDeviation = new ArrayList<>();
 			Map<Integer, List<DPItemValue>> resultError = new HashMap<>();
-			List<DPItemValue> itemCovert = x.getValue().stream().filter(y -> y.getValue() != null)
+			List<DPItemValue> itemCovert = x.getValue().stream()
 					.collect(Collectors.toList()).stream().filter(distinctByKey(p -> p.getItemId()))
 					.collect(Collectors.toList());
 			List<DailyModifyResult> itemValues = itemCovert.isEmpty() ? Collections.emptyList()

@@ -262,6 +262,7 @@ public class DailyModifyResCommandFacade {
 		DataResultAfterIU dataResultAfterIU = new DataResultAfterIU();
 		Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> lstResultReturnDailyError = new HashMap<>();
 		boolean hasErrorRow = false;
+		dataParent.setFlagCalculation(false);
 		// insert flex
 		UpdateMonthDailyParam monthParam = null;
 		if (dataParent.getMonthValue() != null) {
@@ -543,11 +544,22 @@ public class DailyModifyResCommandFacade {
 		dataResultAfterIU.setErrorMap(convertErrorToType(lstResultReturnDailyError, resultErrorMonth));
 		
 		//登録確認メッセージ
-		if(dataResultAfterIU.getErrorMap().isEmpty() && dataResultAfterIU.getErrorMap().values().isEmpty() && !hasErrorRow) {
+		if((dataResultAfterIU.getErrorMap().isEmpty() && dataResultAfterIU.getErrorMap().values().isEmpty() && !hasErrorRow)) {
 			dataResultAfterIU.setMessageAlert("Msg_15");
 		}else {
-			dataResultAfterIU.setMessageAlert("Msg_1489");
+			Map<Integer, List<DPItemValue>> errorMapTemp = dataResultAfterIU.getErrorMap().entrySet().stream()
+					.filter(x -> x.getKey() != TypeError.CONTINUOUS.value)
+					.collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+			if (errorMapTemp.values().isEmpty()) {
+				dataResultAfterIU.setMessageAlert("Msg_15");
+			} else {
+				dataResultAfterIU.setMessageAlert("Msg_1489");
+			}
 		}
+		
+//		if(dataParent.isFlagCalculation() && !dataParent.getLstSidDateDomainError().isEmpty()) {
+//			dataResultAfterIU.setMessageAlert("Msg_1489");
+//		}
 		val empSidUpdate = dailyEdits.stream().map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toList());
 		dataResultAfterIU.setLstSidDateDomainError(empSidUpdate);
 		return dataResultAfterIU;

@@ -1154,7 +1154,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             self.initScreenSPR = 1;
                             self.clickFromExtract = false;
                             self.showTextStyle = false;
-                            errorAll = false;
+                            //errorAll = false;
                             errorNoReload = false;
                         }
 
