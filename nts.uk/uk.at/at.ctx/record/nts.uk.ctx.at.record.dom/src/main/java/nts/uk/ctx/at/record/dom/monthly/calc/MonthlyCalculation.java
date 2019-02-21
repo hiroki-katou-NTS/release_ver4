@@ -363,12 +363,16 @@ public class MonthlyCalculation {
 		this.settingsByDefo.getHolidayAdditionMap().putAll(companySets.getHolidayAdditionMap());
 		this.settingsByFlex.getHolidayAdditionMap().putAll(companySets.getHolidayAdditionMap());
 		
+		// 法定労働時間を取得する年月（年度＋月）を取得する　（Redmine#106201）
+		// 暦上の年月を渡して、年度に沿った年月を取得する
+		YearMonth statYearMonth = repositories.getCompany().getYearMonthFromCalenderYM(companyId, yearMonth);
+		
 		// 週間、月間法定・所定労働時間　取得
 		switch (this.workingSystem){
 		case REGULAR_WORK:
 		case VARIABLE_WORKING_TIME_WORK:
 			val monAndWeekStatTimeOpt = repositories.getMonthlyStatutoryWorkingHours().getMonAndWeekStatutoryTime(
-					companyId, this.employmentCd, employeeId, procPeriod.end(), yearMonth, this.workingSystem);
+					companyId, this.employmentCd, employeeId, procPeriod.end(), statYearMonth, this.workingSystem);
 			if (!monAndWeekStatTimeOpt.isPresent()){
 				this.errorInfos.add(new MonthlyAggregationErrorInfo(
 						"008", new ErrMessageContent(TextResource.localize("Msg_1235"))));
@@ -385,7 +389,7 @@ public class MonthlyCalculation {
 			break;
 		case FLEX_TIME_WORK:
 			val flexMonAndWeekStatTime = repositories.getMonthlyStatutoryWorkingHours().getFlexMonAndWeekStatutoryTime(
-					companyId, this.employmentCd, employeeId, procPeriod.end(), yearMonth);
+					companyId, this.employmentCd, employeeId, procPeriod.end(), statYearMonth);
 			int statMinutes = flexMonAndWeekStatTime.getStatutorySetting().v();
 			int predMinutes = flexMonAndWeekStatTime.getSpecifiedSetting().v();
 			this.statutoryWorkingTime = new AttendanceTimeMonth(statMinutes);
@@ -596,6 +600,15 @@ public class MonthlyCalculation {
 
 			// 年休使用時間に加算する
 			this.addAnnualLeaveUseTime();
+			
+			// フレックス勤務の就業時間を求める　（Redmine#106235）
+			val workTimeOpt = this.flexTime.askWorkTimeOfFlex(
+					 this.companyId, this.employeeId, this.yearMonth, aggrPeriod,
+					this.settingsByFlex.getFlexAggrSet().getAggrMethod(),
+					settingsByFlex, this.aggregateTime);
+			if (workTimeOpt.isPresent()) {
+				this.aggregateTime.getWorkTime().setWorkTime(workTimeOpt.get());
+			}
 			
 			// 控除時間が余分に入れられていないか確認する
 			this.checkDeductTime();

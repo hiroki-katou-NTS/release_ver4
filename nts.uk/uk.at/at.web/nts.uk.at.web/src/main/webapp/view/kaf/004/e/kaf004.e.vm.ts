@@ -181,6 +181,22 @@ module nts.uk.at.view.kaf004.e.viewmodel {
             }
 
         }
+        
+        getBoxReason(){
+            var self = this;
+            return appcommon.CommonProcess.getComboBoxReason(self.selectedCode(), self.ListTypeReason(), self.appCommonSetting().appTypeDiscreteSetting().displayReasonFlg() != 0);
+        }
+    
+        getAreaReason(){
+            var self = this;
+            return appcommon.CommonProcess.getTextAreaReason(self.appreason(), self.appCommonSetting().appTypeDiscreteSetting().typicalReasonDisplayFlg() != 0, true);   
+        }
+        
+        resfreshReason(appReason: string){
+            var self = this;
+            self.selectedCode('');   
+            self.appreason(appReason); 
+        }
     }
 
 

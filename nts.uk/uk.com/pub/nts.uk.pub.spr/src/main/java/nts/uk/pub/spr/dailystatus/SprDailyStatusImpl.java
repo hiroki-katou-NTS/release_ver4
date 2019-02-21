@@ -15,7 +15,7 @@ import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.pub.workrecord.identificationstatus.IndentificationPub;
 import nts.uk.ctx.bs.employee.pub.spr.EmployeeSprPub;
 import nts.uk.ctx.bs.employee.pub.spr.export.EmpSprExport;
-import nts.uk.ctx.workflow.pub.spr.SprAppRootStatePub;
+import nts.uk.ctx.workflow.pub.resultrecord.IntermediateDataPub;
 import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
 import nts.uk.pub.spr.dailystatus.output.DailyStatusSpr;
 import nts.uk.pub.spr.login.paramcheck.LoginParamCheck;
@@ -33,13 +33,13 @@ public class SprDailyStatusImpl implements SprDailyStatusService {
 	private EmployeeSprPub employeeSprPub;
 	
 	@Inject
-	private SprAppRootStatePub sprAppRootStateService;
-	
-	@Inject
 	private IndentificationPub indentificationPub;
 	
 	@Inject
 	private LoginParamCheck loginParamCheck;
+	
+	@Inject
+	private IntermediateDataPub intermediateDataPub;
 	
 	@Override
 	public List<DailyStatusSpr> getStatusOfDaily(String loginEmpCD, String employeeCD, String startDate,
@@ -129,10 +129,9 @@ public class SprDailyStatusImpl implements SprDailyStatusService {
 	@Override
 	public Integer getManagerStatus(GeneralDate appDate, String employeeID) {
 		// （ワークフローExport）アルゴリズム「承認対象者と期間から承認状況を取得する」を実行する
-		List<AppRootStateStatusSprExport> appRootStateStatusSprList = sprAppRootStateService.getStatusByEmpAndDate(
+		List<AppRootStateStatusSprExport> appRootStateStatusSprList = intermediateDataPub.getAppRootStatusByEmpPeriod(
 				employeeID, 
-				appDate, 
-				appDate,
+				new DatePeriod(appDate, appDate), 
 				1);
 		if(CollectionUtil.isEmpty(appRootStateStatusSprList)){
 			return 0;

@@ -63,6 +63,14 @@ public class OverTimeOfTimeSeries {
 	}
 	
 	/**
+	 * 法定内残業時間に残業枠時間の残業時間・振替時間を加算する
+	 * @param addTime 加算時間　（残業枠時間）
+	 */
+	public void addLegalOverAndTrans(OverTimeFrameTime addTime){
+		this.legalOverTime = this.addOverAndTransTime(this.legalOverTime, addTime);
+	}
+	
+	/**
 	 * 残業時間：残業時間を加算する
 	 * @param overTime 残業時間　（計算付き時間）
 	 */
@@ -121,6 +129,26 @@ public class OverTimeOfTimeSeries {
 				target.getBeforeApplicationTime().addMinutes(addTime.getBeforeApplicationTime().v()),
 				target.getOrderTime().addMinutes(addTime.getOrderTime().v())
 			);
+	}
+	
+	/**
+	 * 残業枠時間に残業時間・振替時間を加算する
+	 * @param target 残業枠時間　（加算先）
+	 * @param addTime 加算する残業枠時間
+	 * @return 残業枠時間　（加算後）
+	 */
+	private OverTimeFrameTime addOverAndTransTime(OverTimeFrameTime target, OverTimeFrameTime addTime){
+		
+		return new OverTimeFrameTime(
+				target.getOverWorkFrameNo(),
+				target.getOverTimeWork().addMinutes(
+						addTime.getOverTimeWork().getTime(),
+						addTime.getOverTimeWork().getCalcTime()),
+				target.getTransferTime().addMinutes(
+						addTime.getTransferTime().getTime(),
+						addTime.getTransferTime().getCalcTime()),
+				target.getBeforeApplicationTime(),
+				target.getOrderTime());
 	}
 	
 	/**

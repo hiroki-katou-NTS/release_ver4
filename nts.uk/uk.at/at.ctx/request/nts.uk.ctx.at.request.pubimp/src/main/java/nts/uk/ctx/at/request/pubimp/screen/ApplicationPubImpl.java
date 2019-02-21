@@ -27,16 +27,20 @@ import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.ba
 import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.shift.businesscalendar.daycalendar.ObtainDeadlineDateAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.WkpHistImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.WorkplaceAdapter;
+import nts.uk.ctx.at.request.dom.application.overtime.OverTimeAtr;
+import nts.uk.ctx.at.request.dom.application.stamp.StampRequestMode;
 import nts.uk.ctx.at.request.dom.application.workchange.AppWorkChange;
 import nts.uk.ctx.at.request.dom.application.workchange.IAppWorkChangeRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispName;
 import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispNameRepository;
 //import nts.uk.ctx.at.request.dom.setting.company.displayname.HdAppDispNameRepository;
 import nts.uk.ctx.at.request.dom.setting.request.application.ApplicationDeadline;
 import nts.uk.ctx.at.request.dom.setting.request.application.ApplicationDeadlineRepository;
 import nts.uk.ctx.at.request.dom.setting.request.application.DeadlineCriteria;
 import nts.uk.ctx.at.request.pub.screen.AppGroupExport;
+import nts.uk.ctx.at.request.pub.screen.AppWithDetailExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationDeadlineExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationPub;
@@ -282,6 +286,64 @@ public class ApplicationPubImpl implements ApplicationPub {
 				result.add(y.getValue().get(0));
 			});
 		});
+		return result;
+	}
+	
+	@Override
+	public List<AppWithDetailExport> getAppWithOvertimeInfo(String companyID) {
+		List<AppWithDetailExport> result = new ArrayList<>();
+		// ドメインモデル「申請表示名」を取得する
+		List<AppDispName> appDispNameLst = appDispNameRepository.getAll();
+		for(AppDispName appDispName : appDispNameLst){
+			if(appDispName.getAppType()==ApplicationType.OVER_TIME_APPLICATION){
+				// outputパラメータに残業申請のモード別の値をセットする
+				result.add(new AppWithDetailExport(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.PREOVERTIME.name, 
+						OverTimeAtr.PREOVERTIME.value + 1,
+						null));
+				result.add(new AppWithDetailExport(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.REGULAROVERTIME.name, 
+						OverTimeAtr.REGULAROVERTIME.value + 1,
+						null));
+				result.add(new AppWithDetailExport(
+						ApplicationType.OVER_TIME_APPLICATION.value, 
+						appDispName.getDispName().v() + OverTimeAtr.ALL.name, 
+						OverTimeAtr.ALL.value + 1,
+						null));
+			} else if(appDispName.getAppType()==ApplicationType.STAMP_APPLICATION){
+				// outputパラメータに打刻申請のモード別の値をセットする
+				result.add(new AppWithDetailExport(
+						ApplicationType.STAMP_APPLICATION.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_GO_OUT_PERMIT.name, 
+						null,
+						StampRequestMode.STAMP_GO_OUT_PERMIT.value));
+				result.add(new AppWithDetailExport(
+						ApplicationType.STAMP_APPLICATION.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_WORK.name, 
+						null,
+						StampRequestMode.STAMP_WORK.value));
+				result.add(new AppWithDetailExport(
+						ApplicationType.STAMP_APPLICATION.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_CANCEL.name, 
+						null,
+						StampRequestMode.STAMP_CANCEL.value));
+				result.add(new AppWithDetailExport(
+						ApplicationType.STAMP_APPLICATION.value, 
+						appDispName.getDispName().v() + StampRequestMode.STAMP_ONLINE_RECORD.name, 
+						null,
+						StampRequestMode.STAMP_ONLINE_RECORD.value));
+				result.add(new AppWithDetailExport(
+						ApplicationType.STAMP_APPLICATION.value, 
+						appDispName.getDispName().v() + StampRequestMode.OTHER.name, 
+						null,
+						StampRequestMode.OTHER.value));
+			} else {
+				// outputパラメータに値をセットする
+				result.add(new AppWithDetailExport(appDispName.getAppType().value, appDispName.getDispName().v(), null, null));
+			}
+		}
 		return result;
 	}
 

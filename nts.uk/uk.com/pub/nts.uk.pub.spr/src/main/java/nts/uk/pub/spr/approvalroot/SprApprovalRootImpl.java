@@ -1,6 +1,7 @@
 package nts.uk.pub.spr.approvalroot;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import nts.uk.ctx.at.request.pub.spr.export.ApplicationSpr;
 import nts.uk.ctx.bs.employee.pub.spr.EmployeeSprPub;
 import nts.uk.ctx.bs.employee.pub.spr.export.EmpSprExport;
 import nts.uk.ctx.bs.employee.pub.spr.export.PersonInfoSprExport;
+import nts.uk.ctx.workflow.pub.resultrecord.EmpSprDailyConfirmExport;
 import nts.uk.ctx.workflow.pub.resultrecord.IntermediateDataPub;
 import nts.uk.ctx.workflow.pub.spr.SprApprovalSearchPub;
 import nts.uk.ctx.workflow.pub.spr.export.ApprovalRootStateSprExport;
@@ -75,24 +77,43 @@ public class SprApprovalRootImpl implements SprApprovalRootService {
 	@Override
 	public List<ApprovalRootSpr> getApproverStatus(String companyID, String approverID, GeneralDate date) {
 		List<ApprovalRootSpr> approvalRootSprList = new ArrayList<>();
-		List<String> empOnSettingList = new ArrayList<>();
-		List<String> empOnAppList = new ArrayList<>();
-		List<String> empOnConfirmList = new ArrayList<>();
-		empOnAppList = this.getAppRootStateIDByType(companyID, approverID, date, 0); 
+		List<EmpSprDailyConfirmExport> empOnSettingList = new ArrayList<>();
+		List<EmpSprDailyConfirmExport> empOnAppList = new ArrayList<>();
+		List<String> empOnAppCDList = new ArrayList<>();
+		List<EmpSprDailyConfirmExport> empOnConfirmList = new ArrayList<>();
+		List<String> empOnConfirmCDList = new ArrayList<>();
+		empOnAppCDList = this.getAppRootStateIDByType(companyID, approverID, date, 0);
+		empOnAppCDList = empOnAppCDList.stream().distinct().sorted(Comparator.comparing(String::toString)).collect(Collectors.toList());
+		empOnAppList = empOnAppCDList.stream().map(x -> new EmpSprDailyConfirmExport(x, 0)).collect(Collectors.toList()); 
 		empOnConfirmList = intermediateDataPub.dailyConfirmSearch(companyID, approverID, date);
-		empOnSettingList.addAll(empOnAppList);
-		empOnSettingList.addAll(empOnConfirmList);
-		empOnSettingList = empOnSettingList.stream().distinct().collect(Collectors.toList());
-		for(String empID : empOnSettingList){
+		empOnConfirmList.sort(Comparator.comparing(EmpSprDailyConfirmExport::getEmp));
+		empOnConfirmCDList = empOnConfirmList.stream().map(x -> x.getEmp()).collect(Collectors.toList());
+		empOnConfirmCDList = empOnConfirmCDList.stream().distinct().sorted(Comparator.comparing(String::toString)).collect(Collectors.toList());
+		
+		// merge list confirm
+		for(EmpSprDailyConfirmExport empConfirm : empOnConfirmList){
+			List<String> sumCDLst = empOnSettingList.stream().map(x -> x.getEmp()).collect(Collectors.toList());
+			if(!sumCDLst.contains(empConfirm.getEmp())){
+				empOnSettingList.add(empConfirm);
+			}
+		}
+		// merge list application
+		for(EmpSprDailyConfirmExport empApp : empOnAppList){
+			List<String> sumCDLst = empOnSettingList.stream().map(x -> x.getEmp()).collect(Collectors.toList());
+			if(!sumCDLst.contains(empApp.getEmp())){
+				empOnSettingList.add(empApp);
+			}
+		}
+		for(EmpSprDailyConfirmExport emp : empOnSettingList){
 			Integer status1 = 0;
 			Integer status2 = 0;
-			if(empOnAppList.contains(empID)){
+			if(empOnAppCDList.contains(emp.getEmp())){
 				status1 = 1;
 			}
-			if(empOnConfirmList.contains(empID)){
-				status2 = 1;
+			if(empOnConfirmCDList.contains(emp.getEmp())){
+				status2 = emp.getConfirmAtr();
 			}
-			approvalRootSprList.add(new ApprovalRootSpr(empID, status1, status2));
+			approvalRootSprList.add(new ApprovalRootSpr(emp.getEmp(), status1, status2));
 		};
 		return approvalRootSprList;
 	}

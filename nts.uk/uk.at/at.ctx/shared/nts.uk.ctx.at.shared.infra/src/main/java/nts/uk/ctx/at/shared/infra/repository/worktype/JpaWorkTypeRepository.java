@@ -4,6 +4,10 @@
  *****************************************************************/
 package nts.uk.ctx.at.shared.infra.repository.worktype;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,9 +18,11 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeInfor;
@@ -107,6 +113,14 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	private static final String FIND_WORKTYPE_BY_DEPRECATE = SELECT_FROM_WORKTYPE
 			+ " WHERE c.kshmtWorkTypePK.companyId = :companyId" + " AND c.kshmtWorkTypePK.workTypeCode = :workTypeCd"
 			+ " AND c.deprecateAtr = 0";
+	//hoatt - kaf006
+	private static final String FIND_FOR_APP_HD = "SELECT c FROM KshmtWorkType c"
+			+ " WHERE c.kshmtWorkTypePK.companyId = :companyId"
+			+ " AND c.kshmtWorkTypePK.workTypeCode IN :lstWorkTypeCD"
+			+ " AND c.deprecateAtr = :deprecateAtr"
+			+ " AND ((c.worktypeAtr = 0 AND c.oneDayAtr IN :hdType)"
+			+ " OR (c.worktypeAtr = 1 AND c.morningAtr IN :hdType AND c.afternoonAtr IN :hdType))"
+			+ " ORDER BY c.kshmtWorkTypePK.workTypeCode ASC";
 	// findWorkType(java.lang.String, java.lang.Integer, java.util.List,
 	// java.util.List)
 	private static final String FIND_WORKTYPE_ALLDAY_AND_HALFDAY;
@@ -423,6 +437,27 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 		return this.queryProxy().query(FIND_WORKTYPE, KshmtWorkType.class).setParameter("companyId", companyId)
 				.getList(c -> toDomain(c));
 	}
+	
+	@Override
+	public boolean findWorkTypeRecord(String companyId, String workTypeCode) {
+		try (PreparedStatement statement = this.connection().prepareStatement(
+				"select Count(*) from KSHMT_WORKTYPE"
+				+ " where CID = ? and CD = ?")) {
+			
+			statement.setString(1, companyId);
+			statement.setString(2,workTypeCode);
+			ResultSet result = statement.executeQuery();
+			while(result.next()){
+				if(result.getInt(1) > 0){
+					return true;
+				}
+            }
+			
+		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		}
+		return false;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -653,5 +688,16 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 								.getList());
 		});
 		return listObject.stream().collect(Collectors.toMap(x -> String.valueOf(x[0]), x -> String.valueOf(x[1])));
+	}
+
+	@Override
+	public List<WorkType> findForAppHdKAF006(String companyId, List<String> lstWorkTypeCD, int deprecateAtr,
+			List<Integer> hdType) {
+		return this.queryProxy().query(FIND_FOR_APP_HD, KshmtWorkType.class)
+				.setParameter("companyId", companyId)
+				.setParameter("lstWorkTypeCD", lstWorkTypeCD)
+				.setParameter("deprecateAtr", deprecateAtr)
+				.setParameter("hdType", hdType)
+				.getList(c -> toDomain(c));
 	}
 }

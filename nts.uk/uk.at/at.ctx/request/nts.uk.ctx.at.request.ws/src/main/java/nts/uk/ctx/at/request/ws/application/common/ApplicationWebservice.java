@@ -32,6 +32,7 @@ import nts.uk.ctx.at.request.app.find.application.common.dto.ApplicationPeriodDt
 import nts.uk.ctx.at.request.app.find.application.common.dto.ApplicationRemandDto;
 import nts.uk.ctx.at.request.app.find.application.common.dto.ApplicationSendDto;
 import nts.uk.ctx.at.request.app.find.application.common.dto.ClosureParam;
+import nts.uk.ctx.at.request.app.find.application.common.dto.InputApproveData;
 import nts.uk.ctx.at.request.app.find.application.common.dto.InputCommonData;
 import nts.uk.ctx.at.request.app.find.application.requestofearch.GetDataAppCfDetailFinder;
 import nts.uk.ctx.at.request.app.find.setting.request.application.ApplicationDeadlineDto;
@@ -39,6 +40,7 @@ import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.InputGe
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.after.RemandCommand;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.MailSenderResult;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.AchievementOutput;
+import nts.uk.ctx.at.request.dom.application.common.service.other.output.ApproveProcessResult;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
 import nts.uk.shr.com.context.ScreenIdentifier;
 import nts.uk.shr.infra.web.util.StartPageLogService;
@@ -93,7 +95,7 @@ public class ApplicationWebservice extends WebService {
 	 */
 	@POST
 	@Path("approveapp")
-	public ProcessResult approveApp(InputCommonData command){
+	public ApproveProcessResult approveApp(InputApproveData command){
 		 return this.approveApp.handle(command);
 	}
 	

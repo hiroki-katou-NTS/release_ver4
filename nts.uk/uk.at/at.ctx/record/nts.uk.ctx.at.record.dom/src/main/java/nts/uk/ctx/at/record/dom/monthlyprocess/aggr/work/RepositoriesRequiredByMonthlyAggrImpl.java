@@ -48,6 +48,7 @@ import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerforma
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.adapter.employee.EmpEmployeeAdapter;
 import nts.uk.ctx.at.shared.dom.adapter.employment.ShareEmploymentAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.holidaymanagement.CompanyAdapter;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.HolidayAddtionRepository;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.flex.FlexShortageLimitRepository;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.flex.InsufficientFlexHolidayMntRepository;
@@ -99,6 +100,9 @@ public class RepositoriesRequiredByMonthlyAggrImpl implements RepositoriesRequir
 	@Inject
 	private ManagedParallelWithContext parallel;
 	
+	/** 会社の取得 */
+	@Inject
+	private CompanyAdapter company;
 	/** 社員の取得 */
 	@Inject
 	private EmpEmployeeAdapter empEmployee;

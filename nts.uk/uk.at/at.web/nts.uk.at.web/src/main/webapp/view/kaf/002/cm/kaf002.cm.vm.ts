@@ -161,6 +161,22 @@ module nts.uk.at.view.kaf002.cm {
                 }    
             }
             
+            getBoxReason(){
+                var self = this;
+                return appcommon.CommonProcess.getComboBoxReason(self.currentReason(), self.inputReasons(), self.inputReasonsDisp() != 0);
+            }
+        
+            getAreaReason(){
+                var self = this;
+                return appcommon.CommonProcess.getTextAreaReason(self.application().contentReason(), self.detailReasonDisp() != 0, true);   
+            }
+            
+            resfreshReason(appReason: string){
+                var self = this;
+                self.currentReason(''); 
+                self.application().contentReason(appReason);   
+            }
+            
             getAttendanceItem(date: any, employeeList: Array<any>){
                 var self = this;
                 switch(self.stampRequestMode()){

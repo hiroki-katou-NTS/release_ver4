@@ -7,6 +7,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.uk.ctx.at.request.dom.application.AppReason;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 //import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
@@ -45,12 +46,15 @@ public class DetailAfterApprovalImpl_New implements DetailAfterApproval_New {
 	private OtherCommonAlgorithm otherCommonAlgorithm;
 	
 	@Override
-	public ProcessResult doApproval(String companyID, String appID, String employeeID, String memo) {
+	public ProcessResult doApproval(String companyID, String appID, String employeeID, String memo, String appReason, boolean isUpdateAppReason) {
 		boolean isProcessDone = true;
 		boolean isAutoSendMail = false;
 		List<String> autoSuccessMail = new ArrayList<>();
 		List<String> autoFailMail = new ArrayList<>();
 		Application_New application = applicationRepository.findByID(companyID, appID).get();
+		if(isUpdateAppReason){
+			application.setAppReason(new AppReason(appReason));
+		}
 		Integer phaseNumber = approvalRootStateAdapter.doApprove(
 				companyID, 
 				appID, 

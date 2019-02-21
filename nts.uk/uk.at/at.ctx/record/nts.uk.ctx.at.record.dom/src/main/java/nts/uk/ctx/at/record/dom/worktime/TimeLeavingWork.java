@@ -8,6 +8,7 @@ import lombok.Setter;
 import nts.arc.layer.dom.DomainObject;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.LogOnInfo;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
+import nts.uk.ctx.at.shared.dom.worktime.common.GoLeavingWorkAtr;
 //import nts.uk.ctx.at.shared.dom.worktime.common.GoLeavingWorkAtr;
 import nts.uk.ctx.at.shared.dom.worktime.common.TimeZone;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
@@ -55,15 +56,14 @@ public class TimeLeavingWork extends DomainObject{
 	public void setStampFromPCLogOn(Optional<LogOnInfo> pcLogOnInfo) {
 		if(pcLogOnInfo.isPresent()
 		   && pcLogOnInfo.get().getLogOn().isPresent()) {
-			if(this.attendanceStamp.isPresent()
-				&& this.attendanceStamp.get().getActualStamp().isPresent()) {
-				this.attendanceStamp.get().setStampFromPcLogOn(pcLogOnInfo.get().getLogOn().get());
+			if(this.attendanceStamp.isPresent()) {
+				this.attendanceStamp.get().setStampFromPcLogOn(pcLogOnInfo.get().getLogOn().get(), GoLeavingWorkAtr.GO_WORK);
 			}
 		}
 		if(pcLogOnInfo.isPresent()
 		   && pcLogOnInfo.get().getLogOff().isPresent()) {
 			if(this.leaveStamp.isPresent()) {
-				this.leaveStamp.get().setStampFromPcLogOn(pcLogOnInfo.get().getLogOff().get());
+				this.leaveStamp.get().setStampFromPcLogOn(pcLogOnInfo.get().getLogOff().get(),GoLeavingWorkAtr.LEAVING_WORK);
 			}
 		}
 	}

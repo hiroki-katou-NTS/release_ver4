@@ -285,6 +285,9 @@ module nts.uk.at.view.kaf000.shr{
                 if(!enableSet){
                     return "";    
                 }
+                if(nts.uk.util.isNullOrEmpty(reasonText)){
+                    return "";    
+                }
                 return reasonText;
             }
             

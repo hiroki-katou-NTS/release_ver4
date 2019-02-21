@@ -29,6 +29,7 @@ import nts.uk.ctx.at.record.dom.service.event.timeleave.TimeLeavingOfDailyServic
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
@@ -70,6 +71,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	private WorkTypeRepository worktypeRepo;
 	@Inject
 	private OvertimeOfDailyService overTimeService;
+	@Inject
+	private EmployeeDailyPerErrorRepository employeeError;
 	@Override
 	public boolean commonProcessCheck(CommonCheckParameter para) {
 		ReflectedStateRecord state = ReflectedStateRecord.CANCELED;
@@ -140,7 +143,11 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 				Arrays.asList(integrationOfDaily) , 
 				Optional.of(commonComSetting.getCompanySetting()));
 		lstCal.stream().forEach(x -> {
-			timeAndAnyItemUpService.addAndUpdate(x);	
+			timeAndAnyItemUpService.addAndUpdate(x);
+			employeeError.removeParam(sid, ymd);
+			if(!x.getEmployeeError().isEmpty()) {
+				employeeError.insert(x.getEmployeeError());	
+			}
 		});
 	}
 

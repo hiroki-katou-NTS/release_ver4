@@ -131,11 +131,13 @@ module nts.uk.at.view.kaf011.b.viewmodel {
                 saveCmd = self.genSaveCmd();
             self.validateControl();
             if (nts.uk.ui.errors.hasError()) { return; }
-
+            
+            /*
             let isCheckReasonError = !self.checkReason();
             if (isCheckReasonError) {
                 return;
             }
+            */
 
             block.invisible();
             service.update(saveCmd).done(() => {
@@ -148,6 +150,27 @@ module nts.uk.at.view.kaf011.b.viewmodel {
             }).always(() => {
                 block.clear();
             });
+        }
+        
+        getBoxReason(){
+            var self = this;
+            let result = "";
+            let selectedReason = self.appReasonSelectedID() ? _.find(self.appReasons(), { 'reasonID': self.appReasonSelectedID() }) : null
+            if (selectedReason) {
+                result = selectedReason.reasonTemp;
+            }
+            return result;
+        }
+    
+        getAreaReason(){
+            var self = this;
+            return self.reason(); 
+        }
+        
+        resfreshReason(appReason: string){
+            var self = this;
+            self.appReasonSelectedID('');   
+            self.reason(appReason); 
         }
 
         checkReason(): boolean {
