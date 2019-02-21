@@ -13,7 +13,6 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.shared.dom.worktype.WorkAtr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeSet;
-import nts.uk.ctx.at.shared.dom.worktype.holidayset.HolidaySettingRepository;
 
 /**
  * The Class WorkingConditionItemServiceIpm.
@@ -68,44 +67,27 @@ public class WorkingConditionItemServiceImpl implements WorkingConditionItemServ
 				// filter by holiday Setting atr
 				switch (workTypeSet.getHolidayAtr()) {
 				case STATUTORY_HOLIDAYS:
-					if (this.checkInLawBreakTime(domain.getWorkCategory())) {
-						return domain.getWorkCategory().getInLawBreakTime();
-					}
-					return Optional.of(domain.getWorkCategory().getHolidayWork());
+					return domain.getWorkCategory().getInLawBreakTime().isPresent()
+							? domain.getWorkCategory().getInLawBreakTime()
+							: Optional.of(domain.getWorkCategory().getHolidayWork());
 				case NON_STATUTORY_HOLIDAYS:
-					if (this.checkInLawBreakTime(domain.getWorkCategory())) {
-						return domain.getWorkCategory().getOutsideLawBreakTime();
-					}
-					return Optional.of(domain.getWorkCategory().getHolidayWork());
+					return domain.getWorkCategory().getOutsideLawBreakTime().isPresent()
+							? domain.getWorkCategory().getOutsideLawBreakTime()
+							: Optional.of(domain.getWorkCategory().getHolidayWork());
 				case PUBLIC_HOLIDAY:
-					if (this.checkInLawBreakTime(domain.getWorkCategory())) {
-						return domain.getWorkCategory().getHolidayAttendanceTime();
-					}
-					return Optional.of(domain.getWorkCategory().getHolidayWork());
+					return domain.getWorkCategory().getHolidayAttendanceTime().isPresent()
+							? domain.getWorkCategory().getHolidayAttendanceTime()
+							: Optional.of(domain.getWorkCategory().getHolidayWork());
 				default:
 					return Optional.empty();
 				}
 
 			}
+			
 			return optpublicHoliday;
 		}
 
 		return Optional.empty();
-	}
-
-	/**
-	 * Check in law break time.
-	 *
-	 * @param persWorkCategory
-	 *            the pers work category
-	 * @return the boolean
-	 */
-	private Boolean checkInLawBreakTime(PersonalWorkCategory persWorkCategory) {
-		if (persWorkCategory.getInLawBreakTime().isPresent()) {
-			return true;
-		}
-
-		return false;
 	}
 
 }
