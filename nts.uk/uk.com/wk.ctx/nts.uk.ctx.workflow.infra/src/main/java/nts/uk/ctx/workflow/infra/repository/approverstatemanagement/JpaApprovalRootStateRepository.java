@@ -971,10 +971,12 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		Connection con = this.getEntityManager().unwrap(Connection.class);
 		try {
 			String query = BASIC_SELECT + 
-					" WHERE root.APPROVAL_RECORD_DATE >= 'startDate'" +
-					" AND root.APPROVAL_RECORD_DATE <= 'endDate'" +
-					" AND approver.APPROVER_CHILD_ID = 'approverID'" +
-					" AND approver.CID = 'companyID'";
+					" LEFT JOIN KRQDT_APPLICATION app" +
+					" ON root.ROOT_STATE_ID = app.APP_ID" +
+					" WHERE approver.APPROVER_CHILD_ID = 'approverID'" +
+					" AND approver.CID = 'companyID'" +
+					" AND app.APP_DATE >= 'startDate'" +
+					" AND app.APP_DATE <= 'endDate'";
 			query = query.replaceAll("startDate", period.start().toString("yyyy-MM-dd"));
 			query = query.replaceAll("endDate", period.end().toString("yyyy-MM-dd"));
 			query = query.replaceAll("approverID", approverID);
@@ -1015,12 +1017,14 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		Connection con = this.getEntityManager().unwrap(Connection.class);
 		try {
 			String query = BASIC_SELECT + 
-					" WHERE root.APPROVAL_RECORD_DATE >= 'startDate'" +
-					" AND root.APPROVAL_RECORD_DATE <= 'endDate'" +
-					" AND root.APPROVAL_RECORD_DATE >= 'agentStartDate'" +
-					" AND root.APPROVAL_RECORD_DATE <= 'agentEndDate'" +
-					" AND approver.APPROVER_CHILD_ID = 'approverID'" +
-					" AND approver.CID = 'companyID'";
+					" LEFT JOIN KRQDT_APPLICATION app" +
+					" ON root.ROOT_STATE_ID = app.APP_ID" +
+					" WHERE approver.APPROVER_CHILD_ID = 'approverID'" +
+					" AND approver.CID = 'companyID'" +
+					" AND app.APP_DATE >= 'startDate'" +
+					" AND app.APP_DATE <= 'endDate'" +
+					" AND app.APP_DATE >= 'agentStartDate'" +
+					" AND app.APP_DATE <= 'agentEndDate'";
 			query = query.replaceAll("startDate", period.start().toString("yyyy-MM-dd"));
 			query = query.replaceAll("endDate", period.end().toString("yyyy-MM-dd"));
 			query = query.replaceAll("agentStartDate", agentPeriod.start().toString("yyyy-MM-dd"));
