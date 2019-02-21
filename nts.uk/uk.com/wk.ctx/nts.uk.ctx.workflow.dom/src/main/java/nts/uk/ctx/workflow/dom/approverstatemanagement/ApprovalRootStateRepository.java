@@ -87,7 +87,9 @@ public interface ApprovalRootStateRepository {
 	 */
 	public List<ApprovalPhaseState> findPhaseApprovalMax(String appID);
 	
+	// only for SPR
 	public List<ApprovalRootState> getByApproverPeriod(String companyID, String approverID, DatePeriod period);
 	
+	// only for SPR
 	public List<ApprovalRootState> getByApproverAgentPeriod(String companyID, String approverID, DatePeriod period, DatePeriod agentPeriod); 
 }
