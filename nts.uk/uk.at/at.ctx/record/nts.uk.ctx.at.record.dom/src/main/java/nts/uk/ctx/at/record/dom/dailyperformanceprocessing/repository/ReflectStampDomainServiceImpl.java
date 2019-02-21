@@ -183,6 +183,17 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 			newReflectStampOutput.setReflectStampOutput(reflectStamp);
 			return newReflectStampOutput;
 		}
+		//ドメインモデル「勤務種類」を取得
+		boolean checkWorkType = this.workTypeRepository.findWorkTypeRecord(companyID, workTypeCode.v());
+		if(checkWorkType == false){
+			//エラー処理
+			ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeID, empCalAndSumExecLogID,
+					new ErrMessageResource("023"), EnumAdaptor.valueOf(0, ExecutionContent.class), processingDate,
+					new ErrMessageContent(TextResource.localize("Msg_590")));
+			errMesInfos.add(employmentErrMes);
+			newReflectStampOutput.setErrMesInfos(errMesInfos);
+			return newReflectStampOutput;
+		}
 
 		// ドメインモデル「就業時間帯の設定」を取得する
 		Optional<WorkTimeSetting> workTimeOpt = this.workTimeSettingRepository.findByCodeAndAbolishCondition(companyID,
