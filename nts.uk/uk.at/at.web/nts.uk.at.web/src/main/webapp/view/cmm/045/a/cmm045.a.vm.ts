@@ -1215,15 +1215,16 @@ module cmm045.a.viewmodel {
                 abs = compltSync.appMain;
                 rec = compltSync.appSub;
                 recContent = self.convertA(rec, compltSync.appDateSub, '');
-                absContent = self.convertB(abs, app.applicationDate, app.applicationReason);
+                absContent = self.convertB(abs, app.applicationDate, '');
                 
             }else{
                 rec = compltSync.appMain;
                 abs = compltSync.appSub;
                 absContent = self.convertB(abs, compltSync.appDateSub, '');
-                recContent = self.convertA(rec, app.applicationDate, app.applicationReason);
+                recContent = self.convertA(rec, app.applicationDate, '');
             }
-            return  '<div class = "rec" >' + recContent + '</div>' + '<div class = "abs" >' + absContent + '</div>';
+            let cont1 = '<div class = "rec" >' + recContent + '</div>' + '<div class = "abs" >' + absContent + '</div>' + app.applicationReason;
+            return self.displaySet().appReasonDisAtr == 1 ? cont1 : '<div class = "rec" >' + recContent + '</div>' + '<div class = "abs" >' + absContent + '</div>';
         }
         //※振休振出申請　同期あり・紐付けあり
         //承認モード
