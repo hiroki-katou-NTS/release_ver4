@@ -353,7 +353,12 @@ public class JudgmentApprovalStatusImpl implements JudgmentApprovalStatusService
 
 	@Override
 	public ApproverPersonOutput judgmentTargetPerCanApproveNoDB(ApprovalRootState approvalRootState, String approverID) {
-		String companyID = AppContexts.user().companyId();
+		// Đối ứng SPR
+		String companyID = "000000000000-0001";
+		String loginCompanyID = AppContexts.user().companyId();
+		if(Strings.isNotBlank(loginCompanyID)){
+			companyID = loginCompanyID;
+		}
 		String employeeID = approverID;
 		// 承認できるフラグ
 		Boolean authorFlag = false;

@@ -299,49 +299,49 @@ public class ApplicationPubImpl implements ApplicationPub {
 				// outputパラメータに残業申請のモード別の値をセットする
 				result.add(new AppWithDetailExport(
 						ApplicationType.OVER_TIME_APPLICATION.value, 
-						appDispName.getDispName().v() + OverTimeAtr.PREOVERTIME.name, 
+						appDispName.getDispName().v() + "申請" + " (" + OverTimeAtr.PREOVERTIME.name + ")", 
 						OverTimeAtr.PREOVERTIME.value + 1,
 						null));
 				result.add(new AppWithDetailExport(
 						ApplicationType.OVER_TIME_APPLICATION.value, 
-						appDispName.getDispName().v() + OverTimeAtr.REGULAROVERTIME.name, 
+						appDispName.getDispName().v() + "申請" + " (" + OverTimeAtr.REGULAROVERTIME.name + ")", 
 						OverTimeAtr.REGULAROVERTIME.value + 1,
 						null));
 				result.add(new AppWithDetailExport(
 						ApplicationType.OVER_TIME_APPLICATION.value, 
-						appDispName.getDispName().v() + OverTimeAtr.ALL.name, 
+						appDispName.getDispName().v() + "申請" + " (" + OverTimeAtr.ALL.name + ")", 
 						OverTimeAtr.ALL.value + 1,
 						null));
 			} else if(appDispName.getAppType()==ApplicationType.STAMP_APPLICATION){
 				// outputパラメータに打刻申請のモード別の値をセットする
 				result.add(new AppWithDetailExport(
 						ApplicationType.STAMP_APPLICATION.value, 
-						appDispName.getDispName().v() + StampRequestMode.STAMP_GO_OUT_PERMIT.name, 
+						appDispName.getDispName().v() + "申請" + " (" + StampRequestMode.STAMP_GO_OUT_PERMIT.name + ")", 
 						null,
 						StampRequestMode.STAMP_GO_OUT_PERMIT.value));
 				result.add(new AppWithDetailExport(
 						ApplicationType.STAMP_APPLICATION.value, 
-						appDispName.getDispName().v() + StampRequestMode.STAMP_WORK.name, 
+						appDispName.getDispName().v() + "申請" + " (" + StampRequestMode.STAMP_WORK.name + ")", 
 						null,
 						StampRequestMode.STAMP_WORK.value));
 				result.add(new AppWithDetailExport(
 						ApplicationType.STAMP_APPLICATION.value, 
-						appDispName.getDispName().v() + StampRequestMode.STAMP_CANCEL.name, 
+						appDispName.getDispName().v() + "申請" + " (" + StampRequestMode.STAMP_CANCEL.name + ")", 
 						null,
 						StampRequestMode.STAMP_CANCEL.value));
 				result.add(new AppWithDetailExport(
 						ApplicationType.STAMP_APPLICATION.value, 
-						appDispName.getDispName().v() + StampRequestMode.STAMP_ONLINE_RECORD.name, 
+						appDispName.getDispName().v() + "申請" + " (" + StampRequestMode.STAMP_ONLINE_RECORD.name + ")", 
 						null,
 						StampRequestMode.STAMP_ONLINE_RECORD.value));
 				result.add(new AppWithDetailExport(
 						ApplicationType.STAMP_APPLICATION.value, 
-						appDispName.getDispName().v() + StampRequestMode.OTHER.name, 
+						appDispName.getDispName().v() + "申請" + " (" + StampRequestMode.OTHER.name + ")", 
 						null,
 						StampRequestMode.OTHER.value));
 			} else {
 				// outputパラメータに値をセットする
-				result.add(new AppWithDetailExport(appDispName.getAppType().value, appDispName.getDispName().v(), null, null));
+				result.add(new AppWithDetailExport(appDispName.getAppType().value, appDispName.getDispName().v() + "申請", null, null));
 			}
 		}
 		return result;

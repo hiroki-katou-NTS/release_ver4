@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import nts.arc.enums.EnumConstant;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.function.dom.dailyfix.IAppliCalDaiCorrecRepository;
 import nts.uk.ctx.at.request.app.find.application.applicationlist.AppWithDetailExportDto;
 import nts.uk.ctx.at.request.app.find.application.applicationlist.ApplicationListForScreen;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceCorrectionProcessor;
@@ -34,6 +35,9 @@ public class DataDialogWithTypeProcessor {
 	
 	@Inject
 	private ApplicationListForScreen applicationListForScreen;
+	
+	@Inject
+	private IAppliCalDaiCorrecRepository iAppliCalDaiCorrecRepository;
 
 	// 勤務種類
 	public CodeNameType getDutyType(String companyId, String workTypeCode, String employmentCode) {
@@ -278,14 +282,19 @@ public class DataDialogWithTypeProcessor {
 	// get application NO19
 	public List<EnumConstant> getNameAppliction(){
 		String companyId = AppContexts.user().companyId();
-		List<AppWithDetailExportDto> lstApp = applicationListForScreen.getAppWithOvertimeInfo(companyId);
+		List<Integer> lstAppSlect = iAppliCalDaiCorrecRepository.findByCom(companyId).stream().map(x -> x.getAppType().value).collect(Collectors.toList());
+		List<AppWithDetailExportDto> lstApp = applicationListForScreen.getAppWithOvertimeInfo(companyId).stream()
+				.map(x -> {
+					x.setAppType(convertTypeUi(x));
+					return x;
+				}).filter(x -> lstAppSlect.contains(x.getAppType())).collect(Collectors.toList());
 		List<EnumConstant> result =  lstApp.stream().map(x -> {
-			return new EnumConstant(convertTypeUi(x), x.getAppName(), x.getOvertimeAtr() == null ? "" : x.getOvertimeAtr().toString());
+			return new EnumConstant(x.getAppType(), x.getAppName(), x.getOvertimeAtr() == null ? "" : x.getOvertimeAtr().toString());
 		}).collect(Collectors.toList());
 		return result;
 	}
 	
-	private int convertTypeUi(AppWithDetailExportDto dto) {
+	public int convertTypeUi(AppWithDetailExportDto dto) {
 		switch (dto.getAppType()) {
 		case 0:
 			return dto.getOvertimeAtr() -1;

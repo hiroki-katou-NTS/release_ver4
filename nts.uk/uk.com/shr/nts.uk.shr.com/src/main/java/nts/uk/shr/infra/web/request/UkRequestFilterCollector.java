@@ -31,7 +31,7 @@ public class UkRequestFilterCollector implements RequestFilterCollector {
 			RequestFilterMapping.map(PathPattern.ALL_REQUESTS, new SharingSessionFilter()),
 			RequestFilterMapping.map(PathPattern.BATCH_WEB_APIS, new BatchRequestProcessor()),
 			RequestFilterMapping.map(PathPattern.ALL_WEB_APIS, new ProgramIdDetector()),
-			RequestFilterMapping.map(PathPattern.ALL_SCREENS, new ScreenLoginSessionValidator()),
+			//RequestFilterMapping.map(PathPattern.ALL_SCREENS, new ScreenLoginSessionValidator()),
 			RequestFilterMapping.map(PathPattern.ALL_WEB_APIS, new WebApiLoginSessionValidator()),
 			RequestFilterMapping.map(PathPattern.LOGIN_SCREENS, new WindowsAccountCatcher()),
 			RequestFilterMapping.map(PathPattern.ALL_SCREENS, new StartPageLogWriter()),
