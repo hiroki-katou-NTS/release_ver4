@@ -291,7 +291,7 @@ public class ApplicationListForScreen {
 						StampRequestMode.OTHER.value));
 			} else {
 				// outputパラメータに値をセットする
-				result.add(new AppWithDetailExportDto(appDispName.getAppType().value, appDispName.getDispName().v(), null, null));
+				result.add(new AppWithDetailExportDto(appDispName.getAppType().value, appDispName.getDispName().v() + "申請", null, null));
 			}
 		}
 		return result;
