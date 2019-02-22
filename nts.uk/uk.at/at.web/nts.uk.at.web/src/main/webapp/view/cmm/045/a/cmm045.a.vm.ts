@@ -839,7 +839,8 @@ module cmm045.a.viewmodel {
             //ver14
             let contentv4 = time1 + time2;
             let contentv42 = self.convertFrameTime(overTime.lstFrame);
-            let appContentPost: string = masterInfo.detailSet == 1 ? contentv4 + contentv42 : contentv42;
+            let cont1SetTrue = contentv4 == '' ? contentv42 : contentv4 + '　' + contentv42;
+            let appContentPost: string = masterInfo.detailSet == 1 ? cont1SetTrue : contentv42;
             
             let prePost = app.prePostAtr == 0 ? '事前' : '事後';
             //No.417
