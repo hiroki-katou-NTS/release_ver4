@@ -4,6 +4,10 @@
  *****************************************************************/
 package nts.uk.ctx.at.shared.infra.repository.worktype;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,9 +18,11 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeInfor;
@@ -430,6 +436,27 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	public List<WorkType> findWorkTypeByCondition(String companyId) {
 		return this.queryProxy().query(FIND_WORKTYPE, KshmtWorkType.class).setParameter("companyId", companyId)
 				.getList(c -> toDomain(c));
+	}
+	
+	@Override
+	public boolean findWorkTypeRecord(String companyId, String workTypeCode) {
+		try (PreparedStatement statement = this.connection().prepareStatement(
+				"select Count(*) from KSHMT_WORKTYPE"
+				+ " where CID = ? and CD = ?")) {
+			
+			statement.setString(1, companyId);
+			statement.setString(2,workTypeCode);
+			ResultSet result = statement.executeQuery();
+			while(result.next()){
+				if(result.getInt(1) > 0){
+					return true;
+				}
+            }
+			
+		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		}
+		return false;
 	}
 
 	/*

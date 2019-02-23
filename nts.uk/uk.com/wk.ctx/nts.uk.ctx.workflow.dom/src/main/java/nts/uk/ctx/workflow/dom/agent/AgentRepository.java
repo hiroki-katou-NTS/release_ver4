@@ -117,4 +117,7 @@ public interface AgentRepository {
 	 * @return
 	 */
 	List<Agent> getAgentBySidDate(String companyId, String employeeId, GeneralDate startDate, GeneralDate endDate);
+	
+	// only for SPR
+	List<Agent> findAgentForSpr(String companyId, String approverID, GeneralDate startDate, GeneralDate endDate);
 }

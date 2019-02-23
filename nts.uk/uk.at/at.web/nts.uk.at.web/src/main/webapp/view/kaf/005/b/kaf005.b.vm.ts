@@ -132,9 +132,11 @@ module nts.uk.at.view.kaf005.b {
             //画面モード(表示/編集)
             editable: KnockoutObservable<boolean> = ko.observable( true );
             enableOvertimeInput: KnockoutObservable<boolean> = ko.observable(false);
+            appCur: any = null;
             constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
                 super(listAppMetadata, currentApp);
                 var self = this;
+                self.appCur = currentApp;
                 self.startPage(self.appID()).done(function(){
                     $("#fixed-overtime-hour-table").ntsFixedTable({ height: self.heightOvertimeHours() });
                     $("#fixed-break_time-table").ntsFixedTable({ height: 120 });
@@ -162,7 +164,9 @@ module nts.uk.at.view.kaf005.b {
                     nts.uk.request.ajax("com", namePath).done((value) => {
                         if(!nts.uk.util.isNullOrEmpty(value)){
                             $("#pg-name").text(value);
-                        }   
+                        }else{
+                            $("#pg-name").text('');
+                        }
                     });
                     self.initData(data);
                     self.checkRequiredOvertimeHours();
@@ -658,20 +662,21 @@ module nts.uk.at.view.kaf005.b {
             }
             
             updateOvertime(command: any){
+                let self = this;
                 service.updateOvertime(command)
                 .done((data) => {
                     nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
                         if(data.autoSendMail){
                             appcommon.CommonProcess.displayMailResult(data);  
                         } else {
-                            location.reload();
+                            self.reBinding(self.listAppMeta, self.appCur, false);
                         }
                     });   
                 })
                 .fail(function(res) { 
                     if(res.optimisticLock == true){
                         nts.uk.ui.dialog.alertError({ messageId: "Msg_197" }).then(function(){
-                            location.reload();
+                            self.reBinding(self.listAppMeta, self.appCur, false);
                         });    
                     } else {
                         nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function(){nts.uk.ui.block.clear();}); 

@@ -309,4 +309,6 @@ public interface WorkTypeRepository {
 	 * @return
 	 */
 	List<WorkType> findForAppHdKAF006(String companyId, List<String> lstWorkTypeCD, int deprecateAtr, List<Integer> hdType);
+
+	boolean findWorkTypeRecord(String companyId, String workTypeCode);
 }

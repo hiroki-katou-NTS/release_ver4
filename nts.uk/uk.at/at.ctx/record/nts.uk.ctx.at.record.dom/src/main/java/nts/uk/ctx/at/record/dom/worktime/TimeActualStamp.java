@@ -6,6 +6,7 @@ import lombok.Getter;
 //import lombok.NoArgsConstructor;
 //import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.LogOnInfo;
 import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
+import nts.uk.ctx.at.shared.dom.worktime.common.GoLeavingWorkAtr;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
 /**
@@ -86,12 +87,22 @@ public class TimeActualStamp {
 		this.stamp = Optional.empty();
 	}
 	
-	public void setStampFromPcLogOn(TimeWithDayAttr pcLogOnStamp) {
+	public void setStampFromPcLogOn(TimeWithDayAttr pcLogOnStamp, GoLeavingWorkAtr goWork) {
 		if(this.stamp.isPresent()) {
-			this.stamp.get().setStampFromPcLogOn(pcLogOnStamp);
+			if(this.stamp.get().getTimeWithDay().greaterThan(pcLogOnStamp) && goWork.isGO_WORK()) {
+				this.stamp.get().setStampFromPcLogOn(pcLogOnStamp);	
+			}
+			else if(this.stamp.get().getTimeWithDay().lessThan(pcLogOnStamp) && goWork.isLEAVING_WORK()) {
+				this.stamp.get().setStampFromPcLogOn(pcLogOnStamp);	
+			}
 		}
 		if(this.actualStamp.isPresent()) {
-			this.actualStamp.get().setStampFromPcLogOn(pcLogOnStamp);
+			if(this.actualStamp.get().getTimeWithDay().greaterThan(pcLogOnStamp) && goWork.isGO_WORK()) {
+				this.actualStamp.get().setStampFromPcLogOn(pcLogOnStamp);	
+			}
+			else if(this.actualStamp.get().getTimeWithDay().lessThan(pcLogOnStamp) && goWork.isLEAVING_WORK()) {
+				this.actualStamp.get().setStampFromPcLogOn(pcLogOnStamp);	
+			}
 		}
 	}
 	

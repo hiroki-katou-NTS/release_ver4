@@ -7,4 +7,6 @@ public interface SessionLowLayer {
 	void loggedOut();
 	
 	boolean isLoggedIn();
+	
+	int secondsSessionTimeout();
 }

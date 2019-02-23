@@ -7,22 +7,22 @@
 	<div class="valign-center control-group">
 		<div data-bind="ntsCheckBox: { checked: filterByEmployment, enable: true }"></div>
 		<button data-bind="click: openCDL002Dialog, enable: filterByEmployment">#{i18n.getText('KAL003_17')}</button>
-		<input id = "scopechecktab1" data-bind="ntsTextEditor: {name: '#{i18n.getText('KAL003_17')}', value: displayTargetEmployment, required: filterByEmployment, readonly: true, option: {width: '300px'}}" />
+		<input data-bind="ntsTextEditor: {name: '#{i18n.getText('KAL003_17')}', value: displayTargetEmployment, required: filterByEmployment,readonly: true, enable: filterByEmployment, option: {width: '300px'}}" />
 	</div>
 	<div class="valign-center control-group">
 		<div data-bind="ntsCheckBox: { checked: filterByClassification, enable: true }"></div>
 		<button data-bind="click: openCDL003Dialog, enable: filterByClassification">#{i18n.getText('KAL003_18')}</button>
-		<input id = "scopechecktab2" data-bind="ntsTextEditor: {name: '#{i18n.getText('KAL003_18')}', value: displayTargetClassification, required: filterByClassification, readonly: true, option: {width: '300px'}}" />
+		<input data-bind="ntsTextEditor: {name: '#{i18n.getText('KAL003_18')}', value: displayTargetClassification, required: filterByClassification,readonly: true, enable: filterByClassification, option: {width: '300px'}}" />
 	</div>
 	<div class="valign-center control-group">
 		<div data-bind="ntsCheckBox: { checked: filterByJobTitle, enable: true }"></div>
 		<button data-bind="click: openCDL004Dialog, enable: filterByJobTitle">#{i18n.getText('KAL003_19')}</button>
-		<input id = "scopechecktab3" data-bind="ntsTextEditor: {name: '#{i18n.getText('KAL003_19')}', value: displayTargetJobTitle, required: filterByJobTitle, readonly: true, option: {width: '300px'}}" />
+		<input data-bind="ntsTextEditor: {name: '#{i18n.getText('KAL003_19')}', value: displayTargetJobTitle, required: filterByJobTitle,readonly: true, enable: filterByJobTitle, option: {width: '300px'}}" />
 	</div>
 	<div class="valign-center control-group">
 		<div data-bind="ntsCheckBox: { checked: filterByBusinessType, enable: true }"></div>
 		<button data-bind="click: openCDL024Dialog, enable: filterByBusinessType">#{i18n.getText('KAL003_20')}</button>
-		<input id = "scopechecktab4" data-bind="ntsTextEditor: {name: '#{i18n.getText('KAL003_20')}', value: displayTargetBusinessType, required: filterByBusinessType, readonly: true, option: {width: '300px'}}" />
+		<input data-bind="ntsTextEditor: {name: '#{i18n.getText('KAL003_20')}', value: displayTargetBusinessType, required: filterByBusinessType,readonly: true, enable: filterByBusinessType, option: {width: '300px'}}" />
 	</div>
 
 </ui:composition>

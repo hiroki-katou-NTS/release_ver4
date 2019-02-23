@@ -76,19 +76,19 @@ module nts.uk.at.view.kaf000.b.viewmodel {
         displayReturnReasonPanel: KnockoutObservable<boolean> = ko.observable(false);
         version: number = 0;
         editable: KnockoutObservable<boolean> = ko.observable(false);
-        
+
         constructor(listAppMetadata: Array<shrvm.model.ApplicationMetadata>, currentApp: shrvm.model.ApplicationMetadata) {
             let self = this;
             //reason input event
             // Metadata
             nts.uk.characteristics.restore("AppListExtractCondition").done((obj) => {
-                if(nts.uk.util.isNullOrUndefined(obj)){
-                    self.displayGoback(false);        
+                if (nts.uk.util.isNullOrUndefined(obj)) {
+                    self.displayGoback(false);
                 } else {
-                    self.displayGoback(true);                 
+                    self.displayGoback(true);
                 }
-            }).fail(()=>{
-                self.displayGoback(false);      
+            }).fail(() => {
+                self.displayGoback(false);
             });
             self.listAppMeta = listAppMetadata;
             self.appType = ko.observable(currentApp.appType);
@@ -118,7 +118,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
         
         abstract resfreshReason(appReason: string): any;
 
-        start(baseDate: any): JQueryPromise<any> {
+        start(baseDate: any, isWriteLog: boolean): JQueryPromise<any> {
             nts.uk.ui.block.invisible();
             let self = this;
             self.inputDetail().baseDate = baseDate;
@@ -131,10 +131,12 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             }).done((data) => {
                 //write log
                 let appType = data.applicationDto.applicationType;
-                if(appType != 0){
-                    let paramLog = {programId: 'KAF000',
-                                    screenId: 'B', 
-                                    queryString: 'apptype='+appType};
+                if (appType != 0 && isWriteLog) {
+                    let paramLog = {
+                        programId: 'KAF000',
+                        screenId: 'B',
+                        queryString: 'apptype=' + appType
+                    };
                     service.writeLog(paramLog);
                 }
                 self.inputCommandEvent().version = data.applicationDto.version;
@@ -143,9 +145,9 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                 self.appType(data.applicationDto.applicationType);
                 self.approvalRootState(ko.mapping.fromJS(data.listApprovalPhaseStateDto)());
                 self.displayReturnReasonPanel(!nts.uk.util.isNullOrEmpty(data.applicationDto.reversionReason));
-                if(self.displayReturnReasonPanel()){
+                if (self.displayReturnReasonPanel()) {
                     let returnReason = data.applicationDto.reversionReason;
-                    $("#returnReason").html(returnReason.replace(/\n/g,"\<br/>"));
+                    $("#returnReason").html(returnReason.replace(/\n/g, "\<br/>"));
                 }
                 self.reasonToApprover(data.authorCmt);
                 let deadlineMsg = data.outputMessageDeadline;
@@ -258,7 +260,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                     data.authorizableFlags,
                     data.alternateExpiration,
                     data.loginInputOrApproval);
-                self.editable(data.initMode==0?false:true);
+                self.editable(data.initMode == 0 ? false : true);
                 dfd.resolve(data);
             }).fail(function(res: any) {
                 dfd.reject();
@@ -271,11 +273,24 @@ module nts.uk.at.view.kaf000.b.viewmodel {
          */
         btnBefore() {
             let self = this;
-            var prevAppInfo = self.getPrevAppInfo();
-            nts.uk.request.jump("/view/kaf/000/b/index.xhtml", {
-                'listAppMeta': _.map(self.listAppMeta, x => { return x.appID }),
-                'currentApp': prevAppInfo.appID
+            var listAppMeta: Array<shrvm.model.ApplicationMetadata> = [];
+            var currentApp: shrvm.model.ApplicationMetadata;
+            var listValue: Array<string> = _.map(self.listAppMeta, x => { return x.appID });
+            var currentValue: string = self.getPrevAppInfo().appID;
+            nts.uk.at.view.kaf000.b.service.getAppByListID(listValue).done((data) => {
+                let path = '';
+                _.forEach(listValue, (value) => {
+                    listAppMeta.push(_.find(data, (o) => { return o.appID == value; }));
+                });
+                currentApp = _.find(listAppMeta, x => { return x.appID == currentValue; });
+                //rebinding
+                self.reBinding(listAppMeta, currentApp, true);
+            }).fail((res) => {
+                nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() {
+                    shrvm.model.CommonProcess.callCMM045();
+                });
             });
+            
         }
 
         private getPrevAppInfo(): shrvm.model.ApplicationMetadata {
@@ -292,13 +307,101 @@ module nts.uk.at.view.kaf000.b.viewmodel {
          */
         btnAfter() {
             let self = this;
-            var nextAppInfo = self.getNextAppInfo();
-            nts.uk.request.jump("/view/kaf/000/b/index.xhtml", {
-                'listAppMeta': _.map(self.listAppMeta, x => { return x.appID }),
-                'currentApp': nextAppInfo.appID
+            var listAppMeta: Array<shrvm.model.ApplicationMetadata> = [];
+            var currentApp: shrvm.model.ApplicationMetadata;
+            var listValue: Array<string> = _.map(self.listAppMeta, x => { return x.appID });
+            var currentValue: string = self.getNextAppInfo().appID;
+            nts.uk.at.view.kaf000.b.service.getAppByListID(listValue).done((data) => {
+                let path = '';
+                _.forEach(listValue, (value) => {
+                    listAppMeta.push(_.find(data, (o) => { return o.appID == value; }));
+                });
+                currentApp = _.find(listAppMeta, x => { return x.appID == currentValue; });
+                //rebinding
+                self.reBinding(listAppMeta, currentApp, true);
+            }).fail((res) => {
+                nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() {
+                    shrvm.model.CommonProcess.callCMM045();
+                });
             });
         }
-
+        reBinding(listAppMeta: any, currentApp: any, isWriteLog: boolean){
+            var self = this;
+            var screenModel: any = {};
+//            $.get('/nts.uk.at.web/view/kaf/000/b/index2.xhtml').done(html => {
+//                    console.log(html);
+            let html = self.htmlInner(currentApp);
+//            let htmlN = html.replace(/\<\?xml version='1\.0' encoding='UTF\-8' \?\>/, "");
+//            let htmlF = htmlN.replace("<!DOCTYPE html>", "");
+            document.querySelector('#master-content').innerHTML = html;
+            ko.cleanNode(document.querySelector('#master-content'));
+            screenModel = self.getScreenModel(listAppMeta, currentApp);
+            __viewContext['viewModel'] = screenModel;
+            ko.applyBindings(screenModel, document.querySelector('#master-content'));
+            self = screenModel;
+            self.appID(currentApp.appID);
+            self.appType(currentApp.appType);
+            __viewContext.transferred.value.currentApp = currentApp.appID;
+            self.start(moment.utc().format("YYYY/MM/DD"), isWriteLog).done(function() {
+                self.pgname(currentApp)
+                if (currentApp.appType == 10) {
+                    $("#fixed-table").ntsFixedTable({ width: 100 });
+                }
+            });
+//                });
+        }
+        htmlInner(currentApp){
+            if (currentApp.appType == 0) {
+                return shrvm.model.Template.view5b;
+            } else if (currentApp.appType == 1) {
+                return shrvm.model.Template.view6b;
+            } else if (currentApp.appType == 2) {
+                return shrvm.model.Template.view7b;
+            } else if (currentApp.appType == 4) {
+                return shrvm.model.Template.view9b;
+            } else if (currentApp.appType == 6) {
+                return shrvm.model.Template.view10b;
+            } else if (currentApp.appType == 10) {
+                return shrvm.model.Template.view11b;
+            }
+        }
+        getScreenModel(listAppMeta: any,currentApp:any){
+            if (currentApp.appType == 7) {
+                return new kaf002.c.viewmodel.ScreenModel(listAppMeta, currentApp);
+            } else if (currentApp.appType == 9) {
+                return new nts.uk.at.view.kaf004.e.viewmodel.ScreenModel(listAppMeta, currentApp);
+            } else if (currentApp.appType == 4) {
+                return new nts.uk.at.view.kaf009.b.viewmodel.ScreenModel(listAppMeta, currentApp);
+            } else if (currentApp.appType == 0) {
+                return new nts.uk.at.view.kaf005.b.viewmodel.ScreenModel(listAppMeta, currentApp);
+            } else if (currentApp.appType == 2) {
+                return new nts.uk.at.view.kaf007.b.viewmodel.ScreenModel(listAppMeta, currentApp);
+            } else if (currentApp.appType == 6) {
+                return new nts.uk.at.view.kaf010.b.viewmodel.ScreenModel(listAppMeta, currentApp);
+            } else if (currentApp.appType == 1) {
+                return new nts.uk.at.view.kaf006.b.viewmodel.ScreenModel(listAppMeta, currentApp);
+            } else if (currentApp.appType == 10) {
+                return new nts.uk.at.view.kaf011.b.viewmodel.ScreenModel(listAppMeta, currentApp);
+            }
+            return null;
+        }
+        pgname(currentApp){
+        if (currentApp.appType == 7) {
+            __viewContext.getProgramName("KAF002", "C");
+        } else if (currentApp.appType == 9) {
+            __viewContext.getProgramName("KAF004", "E");
+        } else if (currentApp.appType == 4) {
+            __viewContext.getProgramName("KAF009", "B");
+        } else if (currentApp.appType == 2) {
+            __viewContext.getProgramName("KAF007", "B");
+        } else if (currentApp.appType == 6) {
+            __viewContext.getProgramName("KAF010", "B");
+        } else if (currentApp.appType == 1) {
+            __viewContext.getProgramName("KAF006", "B");
+        } else if (currentApp.appType == 10) {
+            __viewContext.getProgramName("KAF011", "B");
+        }
+        }
         private getNextAppInfo(): shrvm.model.ApplicationMetadata {
             let self = this;
             let index = _.findIndex(self.listAppMeta, x => { return x.appID == self.appID() });
@@ -350,49 +453,49 @@ module nts.uk.at.view.kaf000.b.viewmodel {
 
         sendMail(msg, data) {
             let self = this,
-            vm: nts.uk.at.view.kaf011.b.viewmodel.ScreenModel = __viewContext['viewModel'];
+                vm: nts.uk.at.view.kaf011.b.viewmodel.ScreenModel = __viewContext['viewModel'];
             if (data.processDone) {
                 nts.uk.ui.dialog.info({ messageId: msg }).then(function() {
                     if (data.autoSendMail) {
                         appcommon.CommonProcess.displayMailResultKAF000(data);
                     }
                 });
-                if(!nts.uk.util.isNullOrEmpty(data.reflectAppId)){//TH goi xu ly phan anh
+                if (!nts.uk.util.isNullOrEmpty(data.reflectAppId)) {//TH goi xu ly phan anh
                     let lstIdRef = [data.reflectAppId];
-                    if(self.appType() == 10){//kaf011
+                    if (self.appType() == 10) {//kaf011
                         let absAppID = vm.absWk().appID();
                         let recAppID = vm.recWk().appID();
-                        if(data.reflectAppId == absAppID && recAppID != null){
+                        if (data.reflectAppId == absAppID && recAppID != null) {
                             lstIdRef.push(recAppID);
                         }
-                        if(data.reflectAppId == recAppID && absAppID != null){
+                        if (data.reflectAppId == recAppID && absAppID != null) {
                             lstIdRef.push(absAppID);
                         }
                     }
-                    service.reflectAppSingle(lstIdRef).done(function(){
-                        self.start(moment.utc().format("YYYY/MM/DD")).done(()=>{
-                            nts.uk.ui.block.clear();        
+                    service.reflectAppSingle(lstIdRef).done(function() {
+                        self.start(moment.utc().format("YYYY/MM/DD")).done(() => {
+                            nts.uk.ui.block.clear();
                         });
                     }).fail(() => {
                         self.start(moment.utc().format("YYYY/MM/DD")).done(() => {
                             nts.uk.ui.block.clear();
                         });
                     });;
-                }else{
-                    self.start(moment.utc().format("YYYY/MM/DD")).done(()=>{
-                            nts.uk.ui.block.clear();        
-                        });
+                } else {
+                    self.start(moment.utc().format("YYYY/MM/DD")).done(() => {
+                        nts.uk.ui.block.clear();
+                    });
                 }
-                
+
             } else {
                 nts.uk.ui.block.clear();
             }
-            
+
         }
 
-       callReflect(data) {
+        callReflect(data) {
             let self = this;
-            service.reflectAppSingle(data).always(()=> self.reloadPage());
+            service.reflectAppSingle(data).always(() => self.reloadPage());
         }
 
         reloadPage() {
@@ -407,8 +510,8 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             let command = { appID: self.getAppId(), version: self.dataApplication().version };
             setShared("KDL034_PARAM", command);
             nts.uk.ui.windows.sub.modal("/view/kdl/034/a/index.xhtml").onClosed(() => {
-                self.start(moment.utc().format("YYYY/MM/DD")).done(()=>{
-                    nts.uk.ui.block.clear();        
+                self.start(moment.utc().format("YYYY/MM/DD")).done(() => {
+                    nts.uk.ui.block.clear();
                 });
             });
         }
@@ -476,8 +579,8 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             let command = { appID: self.appID() };
             setShared("KDL030_PARAM", command);
             nts.uk.ui.windows.sub.modal("/view/kdl/030/a/index.xhtml").onClosed(() => {
-                self.start(moment.utc().format("YYYY/MM/DD")).done(()=>{
-                    nts.uk.ui.block.clear();       
+                self.start(moment.utc().format("YYYY/MM/DD")).done(() => {
+                    nts.uk.ui.block.clear();
                 });
             });
         }
@@ -492,12 +595,12 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             nts.uk.ui.dialog.confirm({ messageId: 'Msg_18' }).ifYes(function() {
                 service.deleteApp(deleteCmd, self.appType()).done(function(data) {
                     nts.uk.ui.dialog.info({ messageId: 'Msg_16' }).then(function() {
-                            //kiểm tra list người xác nhận, nếu khác null thì show info 392
-                            if (data.autoSendMail) {
-                                appcommon.CommonProcess.displayMailDeleteRs(data);
-                            } else {
-                                shrvm.model.CommonProcess.callCMM045();
-                            }
+                        //kiểm tra list người xác nhận, nếu khác null thì show info 392
+                        if (data.autoSendMail) {
+                            appcommon.CommonProcess.displayMailDeleteRs(data);
+                        } else {
+                            shrvm.model.CommonProcess.callCMM045();
+                        }
                     });
                 }).fail(function(res: any) {
                     self.showError(res);
@@ -567,8 +670,8 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             nts.uk.ui.dialog.confirm({ messageId: 'Msg_249' }).ifYes(function() {
                 service.cancelApp(cancelCmd, self.appType()).done(function() {
                     nts.uk.ui.dialog.info({ messageId: "Msg_224" }).then(() => {
-                        self.start(moment.utc().format("YYYY/MM/DD")).done(()=>{
-                            nts.uk.ui.block.clear();        
+                        self.start(moment.utc().format("YYYY/MM/DD")).done(() => {
+                            nts.uk.ui.block.clear();
                         });
                     });
                 }).fail(function(res: any) {
@@ -612,7 +715,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             return listApprover;
         }
 
-        callCMM045A(){
+        callCMM045A() {
             shrvm.model.CommonProcess.callCMM045();
         }
     }

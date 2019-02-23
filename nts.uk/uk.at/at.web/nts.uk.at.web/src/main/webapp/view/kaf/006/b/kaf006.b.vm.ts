@@ -125,9 +125,11 @@ module nts.uk.at.view.kaf006.b{
         relaResonDis: KnockoutObservable<boolean> = ko.observable(true);
         hdTypeDis: KnockoutObservable<boolean> = ko.observable(false);
         dataMax: KnockoutObservable<boolean> = ko.observable(false);
+        appCur: any = null;
         constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
             super(listAppMetadata, currentApp);
             let self = this;
+            self.appCur = currentApp;
               self.startPage(self.appID()).done(function(){
 
                 });   
@@ -594,7 +596,7 @@ module nts.uk.at.view.kaf006.b{
                     if(data.autoSendMail){
                         appcommon.CommonProcess.displayMailResult(data);   
                     } else {
-                        location.reload();
+                        self.reBinding(self.listAppMeta, self.appCur, false);
                     }
                 });
              }).fail((res) =>{

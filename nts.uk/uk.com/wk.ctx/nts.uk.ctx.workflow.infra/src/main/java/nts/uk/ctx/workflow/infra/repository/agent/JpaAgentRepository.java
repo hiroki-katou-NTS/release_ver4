@@ -386,4 +386,15 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 				.getList(c -> convertToDomain(c));
 	}
 
+	@Override
+	public List<Agent> findAgentForSpr(String companyId, String approverID, GeneralDate startDate,
+			GeneralDate endDate) {
+		return this.queryProxy().query(SELECT_AGENT_BY_TYPE1, CmmmtAgent.class)
+				.setParameter("companyId", companyId)
+				.setParameter("employeeId", approverID)
+				.setParameter("startDate", startDate)
+				.setParameter("endDate", endDate)
+				.getList(c -> convertToDomain(c));
+	}
+
 }
