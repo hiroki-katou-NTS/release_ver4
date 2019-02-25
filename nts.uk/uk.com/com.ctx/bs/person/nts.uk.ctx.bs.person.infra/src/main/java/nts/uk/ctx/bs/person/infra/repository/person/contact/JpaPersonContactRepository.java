@@ -1,5 +1,7 @@
 package nts.uk.ctx.bs.person.infra.repository.person.contact;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +11,8 @@ import javax.ejb.Stateless;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.person.dom.person.contact.EmergencyContact;
 import nts.uk.ctx.bs.person.dom.person.contact.PersonContact;
@@ -135,8 +139,33 @@ public class JpaPersonContactRepository extends JpaRepository implements PersonC
 	public List<PersonContact> getByPersonIdList(List<String> personIds) {
 		List<BpsmtPersonContact> entities = new ArrayList<>();
 		CollectionUtil.split(personIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			entities.addAll(this.queryProxy().query(GET_BY_LIST, BpsmtPersonContact.class)
-				.setParameter("personIdList", subList).getList());
+			
+			String sql = "select * from BPSMT_PERSON_CONTACT"
+					+ " where PID in (" + NtsStatement.In.createParamsString(subList) + ")";
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setString(i + 1, subList.get(i));
+				}
+				List<BpsmtPersonContact> ents = new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+					BpsmtPersonContact ent = new BpsmtPersonContact();
+					ent.bpsmtPersonContactPK = new BpsmtPersonContactPK(rec.getString("PID"));
+					ent.cellPhoneNumber = rec.getString("CELL_PHONE_NO");
+					ent.mailAdress = rec.getString("MAIL_ADDRESS");
+					ent.mobileMailAdress = rec.getString("MOBILE_MAIL_ADDRESS");
+					ent.memo1 = rec.getString("MEMO1");
+					ent.contactName1 = rec.getString("CONTACT_NAME_1");
+					ent.phoneNo1 = rec.getString("PHONE_NO_1");
+					ent.memo2 = rec.getString("MEMO2");
+					ent.contactName2 = rec.getString("CONTACT_NAME_2");
+					ent.phoneNo2 = rec.getString("PHONE_NO_2");
+					return ent;
+				});
+				entities.addAll(ents);
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		});
 		return entities.stream().map(ent -> toDomain(ent)).collect(Collectors.toList());
 	}
