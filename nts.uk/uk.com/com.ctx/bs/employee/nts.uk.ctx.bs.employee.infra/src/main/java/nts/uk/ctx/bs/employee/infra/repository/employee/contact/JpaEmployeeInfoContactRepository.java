@@ -1,5 +1,7 @@
 package nts.uk.ctx.bs.employee.infra.repository.employee.contact;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +11,8 @@ import javax.ejb.Stateless;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.dom.employee.contact.EmployeeInfoContact;
 import nts.uk.ctx.bs.employee.dom.employee.contact.EmployeeInfoContactRepository;
@@ -98,9 +102,34 @@ public class JpaEmployeeInfoContactRepository extends JpaRepository implements E
 		
 		List<BsymtEmpInfoContact> entities = new ArrayList<>();
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			entities.addAll(this.queryProxy().query(GET_BY_LIST, BsymtEmpInfoContact.class)
-								.setParameter("employeeIds", subList)
-								.getList());
+			
+			String sql = "select * from BSYMT_EMP_INFO_CONTACT"
+					+ " where SID in (" + NtsStatement.In.createParamsString(subList) + ")";
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setString(1 + i, subList.get(i));
+				}
+				
+				List<BsymtEmpInfoContact> ents = new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+					BsymtEmpInfoContact ent = new BsymtEmpInfoContact();
+					ent.bsymtEmpInfoContactPK = new BsymtEmpInfoContactPK(rec.getString("SID"));
+					ent.cid = rec.getString("CID");
+					ent.cellPhoneNo = rec.getString("CELL_PHONE_NO");
+					ent.mailAdress = rec.getString("MAIL_ADDRESS");
+					ent.phoneMailAddress = rec.getString("PHONE_MAIL_ADDRESS");
+					ent.seatDialIn = rec.getString("SEAT_DIAL_IN");
+					ent.seatExtensionNo = rec.getString("SEAT_EXTENSION_NO");
+					return ent;
+				});
+				
+				entities.addAll(ents);
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+			
 		});
 		return entities.stream().map(ent -> toDomain(ent)).collect(Collectors.toList());
 	}
