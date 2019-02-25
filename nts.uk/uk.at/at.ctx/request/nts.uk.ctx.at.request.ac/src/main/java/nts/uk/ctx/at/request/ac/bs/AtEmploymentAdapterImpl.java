@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.request.ac.bs;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ public class AtEmploymentAdapterImpl implements AtEmploymentAdapter{
 	public List<EmploymentHisImport> findByListSidAndPeriod(String sId, DatePeriod datePeriod) {
 		List<EmploymentHisExport> empHistPub =  syEmploymentPub
 					.findByListSidAndPeriod(Arrays.asList(sId), datePeriod);
+		if(empHistPub.isEmpty()) return Collections.emptyList();
 		List<EmploymentHisImport> empHist = empHistPub.get(0).getLstEmpCodeandPeriod()
 					.stream().map(c -> new EmploymentHisImport(sId,
 							c.getHistoryID(), c.getDatePeriod(), c.getEmploymentCode()))
