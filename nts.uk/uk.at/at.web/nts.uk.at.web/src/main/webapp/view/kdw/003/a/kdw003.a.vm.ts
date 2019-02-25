@@ -1086,6 +1086,12 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         if (key != "6") {
                             if (key != "5") {
                                 _.each(value, errorResult => {
+                                    // if error after calc
+                                    if (_.isEmpty(errorResult.rowId)) {
+                                        errorResult.rowId = _.map(_.filter(dataSource, tempSource => {
+                                            return tempSource.employeeId == errorResult.employeeId && tempSource.dateDetail._i == errorResult.date;
+                                        }), temp2 => { return temp2.id })
+                                    }
                                     let dataTemp1 = _.map(_.filter(dataChange, temp => {
                                         return temp.rowId == errorResult.rowId;
                                     }), temp2 => {return temp2.rowId})
