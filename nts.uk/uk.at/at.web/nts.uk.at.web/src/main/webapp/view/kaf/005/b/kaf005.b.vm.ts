@@ -132,9 +132,11 @@ module nts.uk.at.view.kaf005.b {
             //画面モード(表示/編集)
             editable: KnockoutObservable<boolean> = ko.observable( true );
             enableOvertimeInput: KnockoutObservable<boolean> = ko.observable(false);
+            appCur: any = null;
             constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
                 super(listAppMetadata, currentApp);
                 var self = this;
+                self.appCur = currentApp;
                 self.startPage(self.appID()).done(function(){
                     $("#fixed-overtime-hour-table").ntsFixedTable({ height: self.heightOvertimeHours() });
                     $("#fixed-break_time-table").ntsFixedTable({ height: 120 });
@@ -162,7 +164,9 @@ module nts.uk.at.view.kaf005.b {
                     nts.uk.request.ajax("com", namePath).done((value) => {
                         if(!nts.uk.util.isNullOrEmpty(value)){
                             $("#pg-name").text(value);
-                        }   
+                        }else{
+                            $("#pg-name").text('');
+                        }
                     });
                     self.initData(data);
                     self.checkRequiredOvertimeHours();
@@ -528,6 +532,8 @@ module nts.uk.at.view.kaf005.b {
                     self.displayAppReasonContentFlg(),
                     self.multilContent()
                 );
+                
+                /*
                 let appReasonError = !appcommon.CommonProcess.checkAppReason(true, self.typicalReasonDisplayFlg(), self.displayAppReasonContentFlg(), appReason);
                 if(appReasonError){
                     nts.uk.ui.dialog.alertError({ messageId: 'Msg_115' }).then(function(){nts.uk.ui.block.clear();});    
@@ -536,6 +542,15 @@ module nts.uk.at.view.kaf005.b {
                 if(!appcommon.CommonProcess.checklenghtReason(appReason,"#appReason")){
                     return;
                 }
+                */
+                
+                let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
+                let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);
+                
+                if(!appcommon.CommonProcess.checklenghtReason(comboBoxReason+":"+textAreaReason,"#appReason")){
+                    return;
+                }
+                
                 divergenceReason = self.getReason(
                     self.displayDivergenceReasonForm(),
                     self.selectedReason2(),
@@ -562,7 +577,7 @@ module nts.uk.at.view.kaf005.b {
                     applicationDate: new Date(self.appDate()),
                     prePostAtr: self.prePostSelected(),
                     applicantSID: self.employeeID(),
-                    applicationReason: appReason,
+                    applicationReason: textAreaReason,
                     appApprovalPhaseCmds: self.approvalList,
                     workTypeCode: self.workTypeCd(),
                     siftTypeCode: self.siftCD(),
@@ -579,7 +594,8 @@ module nts.uk.at.view.kaf005.b {
                     overtimeAtr: self.overtimeAtr(),
                     divergenceReasonContent: divergenceReason,
                     sendMail: self.manualSendMailAtr(),
-                    calculateFlag: self.calculateFlag()
+                    calculateFlag: self.calculateFlag(),
+                    appReasonID: comboBoxReason
                 }
                 
                 service.checkBeforeUpdate(command).done((data) => {                
@@ -629,21 +645,38 @@ module nts.uk.at.view.kaf005.b {
                 });
             }
             
+            getBoxReason(){
+                var self = this;
+                return appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());   
+            }
+        
+            getAreaReason(){
+                var self = this;
+                return appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);    
+            }
+            
+            resfreshReason(appReason: string){
+                var self = this;
+                self.selectedReason('');   
+                self.multilContent(appReason); 
+            }
+            
             updateOvertime(command: any){
+                let self = this;
                 service.updateOvertime(command)
                 .done((data) => {
                     nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
                         if(data.autoSendMail){
                             appcommon.CommonProcess.displayMailResult(data);  
                         } else {
-                            location.reload();
+                            self.reBinding(self.listAppMeta, self.appCur, false);
                         }
                     });   
                 })
                 .fail(function(res) { 
                     if(res.optimisticLock == true){
                         nts.uk.ui.dialog.alertError({ messageId: "Msg_197" }).then(function(){
-                            location.reload();
+                            self.reBinding(self.listAppMeta, self.appCur, false);
                         });    
                     } else {
                         nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function(){nts.uk.ui.block.clear();}); 

@@ -73,12 +73,17 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 
 	@Override
 	public List<ApprovalRootStateStatus> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType) {
-		String companyID = AppContexts.user().companyId();
+		// Đối ứng SPR
+		String companyID = "000000000000-0001";
+		String loginCompanyID = AppContexts.user().companyId();
+		if(Strings.isNotBlank(loginCompanyID)){
+			companyID = loginCompanyID;
+		}
 		List<ApprovalRootStateStatus> appRootStatusLst = new ArrayList<>();
 		// 対象者と期間から承認ルート中間データを取得する
 		List<AppRootInstancePeriod> appRootInstancePeriodLst = this.getAppRootInstanceByEmpPeriod(employeeIDLst, period, rootType);
 		// INPUT．対象者社員IDの先頭から最後へループ
-		employeeIDLst.forEach(employeeIDLoop -> {
+		for(String employeeIDLoop : employeeIDLst) {
 			// INPUT．期間の開始日から終了日へループ
 			for(GeneralDate loopDate = period.start(); loopDate.beforeOrEquals(period.end()); loopDate = loopDate.addDays(1)){
 				// 対象日の承認ルート中間データを取得する
@@ -94,7 +99,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 				// 承認ルート状況を取得する
 				appRootStatusLst.addAll(approvalRootStateStatusService.getApprovalRootStateStatus(Arrays.asList(approvalRootState)));
 			}
-		});
+		}
 		return appRootStatusLst;
 	}
 

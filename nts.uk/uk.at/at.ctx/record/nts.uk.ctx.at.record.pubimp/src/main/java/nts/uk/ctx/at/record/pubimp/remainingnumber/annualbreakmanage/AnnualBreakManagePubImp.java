@@ -128,7 +128,7 @@ public class AnnualBreakManagePubImp implements AnnualBreakManagePub {
 				getAnnLeaRemNumWithinPeriod.
 				algorithm(companyId, 
 						employeeId, 
-						new DatePeriod(startDate.get(), designatedPeriod.end().addDays(-1)), 
+						new DatePeriod(startDate.get(), confirmDay), 
 						InterimRemainMngMode.OTHER, 
 						designatedPeriod.end(), 
 						false, 

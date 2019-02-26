@@ -37,7 +37,8 @@ module nts.uk.com.view.cmf002.x.viewmodel {
             self.execHistList = ko.observable([]);
             self.selectorExeHist = ko.observable({});
             self.execHistColumns = [
-                { headerText: "", key: 'outputProcessId', dataType: 'string' },
+                // fix bug 105365
+                { headerText: "", key: 'outputProcessId', dataType: 'string', ntsControl: "Label" },
                 // X5_H1_2
                 { headerText: getText("CMF002_310"), dataType: 'string', key: 'deleteFile', width: '80px', unbound: false, ntsControl: 'ButtonDel' },
                 // X5_H1_3
@@ -59,7 +60,8 @@ module nts.uk.com.view.cmf002.x.viewmodel {
                 // X5_H1_11
                 { headerText: getText("CMF002_319"), template: '<div class="limited-label">${totalErrorCountName}</div>', dataType: 'string', key: 'totalErrorCountName', width: '70px' },
                 // X5_H1_12
-                { headerText: getText("CMF002_320"), dataType: 'string', key: 'totalErrorCountBtn', width: '50px', unbound: false, ntsControl: 'ButtonLog' },
+                // fix bug 105365
+                { headerText: getText("CMF002_320"), dataType: 'string', key: 'totalErrorCountBtn', width: '50px', unbound: true, ntsControl: 'ButtonLog' },
                 // X5_H1_13
                 { headerText: getText("CMF002_321"), template: '<div class="limited-label">${fileName}</div>', dataType: 'string', key: 'fileName', width: '190px' },
                 // X5_H1_14

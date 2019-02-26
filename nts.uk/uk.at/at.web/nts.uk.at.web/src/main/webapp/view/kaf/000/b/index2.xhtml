@@ -1,0 +1,201 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:com="http://xmlns.jcp.org/jsf/component"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+	<body>
+		<ui:composition>
+			<div id="functions-area">
+				<div>
+					<!-- B1_1 -->
+					<div style="display: inline-block;" data-bind="if: displayGoback">
+						<a class="goback link-button"
+							data-bind="click: callCMM045A">#{i18n.getText('KAF000_14')}</a>
+					</div>
+					<!-- B1_2 -->
+					<button class="kaf000-function-btn"
+						data-bind="click: btnBefore, enable: enableBefore">
+						<i class="icon icon-button-arrow-left"></i>
+					</button>
+					<!-- B1_3 -->
+					<button class="kaf000-function-btn"
+						data-bind="click: btnAfter, enable: enableAfter">
+						<i class="icon icon-button-arrow-right"></i>
+					</button>
+					<div style="display: inline-block;">
+						<!-- B1_4 -->
+						<div class="controlButtonCell_kaf000"
+							data-bind="if: displayApprovalButton">
+							<button class="proceed kaf000-function-btn"
+								data-bind="click: btnApprove, 
+														enable: enableApprovalButton()
+														">#{i18n.getText('KAF000_15')}</button>
+						</div>
+						<!-- B1_14 -->
+						<div class="controlButtonCell_kaf000"
+							data-bind="if: displayApprovalLabel">
+							<div class="comment">
+								<label>【承認】</label>
+							</div>
+						</div>
+						<!-- B1_5 -->
+						<div class="controlButtonCell_kaf000"
+							data-bind="if: displayDenyButton">
+							<button class="kaf000-function-btn"
+								data-bind="click: btnDeny, 
+										enable: enableDenyButton()
+										">#{i18n.getText('KAF000_16')}</button>
+						</div>
+						<!-- B1_15 -->
+						<div class="controlButtonCell_kaf000"
+							data-bind="if: displayDenyLabel">
+							<div class="comment">
+								<label>【否認】</label>
+							</div>
+						</div>
+						<!-- B1_7 -->
+						<div class="controlButtonCell_kaf000"
+							data-bind="if: displayReleaseButton">
+							<button class="kaf000-function-btn"
+								data-bind="click: btnRelease, 
+										enable: enableReleaseButton()
+										">#{i18n.getText('KAF000_18')}</button>
+						</div>
+						<!-- B1_6 -->
+						<div class="controlButtonCell_kaf000"
+							data-bind="if: displayRemandButton">
+							<button class="kaf000-function-btn"
+								data-bind="click: btnRemand, 
+										enable: enableRemandButton()
+										   ">#{i18n.getText('KAF000_17')}</button>
+						</div>
+					</div>
+					<div class="kaf000-function-div-update">
+						<!-- B1_8 -->
+						<div class="controlButtonCell_kaf000"
+							data-bind="if: displayUpdateButton">
+							<button id = "updateKAF000" class="proceed kaf000-function-btn"
+								data-bind="click: update, enable : enableUpdateButton()">#{i18n.getText('KAF000_19')}</button>
+
+						</div>
+						<!-- B1_9 -->
+						<div class="controlButtonCell_kaf000" style="visibility: hidden;">
+							<button class="kaf000-function-btn">#{i18n.getText('KAF000_20')}</button>
+						</div>
+						<!-- B1_10 -->
+						<div class="controlButtonCell_kaf000" style="visibility: hidden;">
+							<button class="kaf000-function-btn"
+								data-bind="click: btnReferences">#{i18n.getText('KAF000_21')}</button>
+						</div>
+						<!-- B1_11 -->
+						<div class="controlButtonCell_kaf000">
+							<button class="kaf000-function-btn"
+								data-bind="click: btnSendEmail">#{i18n.getText('KAF000_22')}</button>
+						</div>
+					</div>
+					<div class="kaf000-function-div-delete">
+						<!-- B1_12 -->
+						<div class="controlButtonCell_kaf000"
+							data-bind="if: displayDeleteButton">
+							<button class="danger kaf000-function-btn"
+								data-bind="click: btnDelete, enable : enableDeleteButton()">#{i18n.getText('KAF000_23')}</button>
+						</div>
+					</div>
+					<div class="kaf000-function-div-cancel" data-bind="if: false">
+						<!-- B1_13 -->
+						<div class="controlButtonCell_kaf000"
+							data-bind="if: displayCancelButton">
+							<button class="danger kaf000-function-btn"
+								data-bind="click: btnCancel, enable : enableCancelButton()">#{i18n.getText('KAF000_24')}</button>
+						</div>
+					</div>
+					<br></br>
+				</div>
+			</div>
+			<div id="contents-area">
+			<div id = "appNew">
+				<!-- row1 -->
+				<div id="message-area" data-bind="visible : messageArea">
+					<table>
+						<tr>
+							<!-- A1_1 -->
+							<!-- A1_2 -->
+							<td class="message-td"
+								data-bind="visible : reasonOutputMessFull() != null">
+								<div data-bind="text: reasonOutputMessFull()"></div>
+							</td>
+						</tr>
+						<tr>
+							<!-- A1_3 -->
+							<!-- A1_4 -->
+							<td class="message-td"
+								data-bind="visible:  reasonOutputMessDealineFull() != null ">
+								<div data-bind="text: reasonOutputMessDealineFull()"></div>
+							</td>
+						</tr>
+					</table>
+				</div>
+
+				<div data-bind="if: displayReturnReasonPanel">
+					<!-- row2 -->
+					<div id="message-area" style="margin-top: 16px;">
+						<!-- B3_1 -->
+						<div class="message-td" id="returnReason"></div> 
+					</div>
+				</div>
+
+				<div data-bind="if: displayApprovalReason">
+					<!-- row 2 B4_1-->
+					<div style="margin-top: 16px; float: left; margin-right: 47px">
+						<div
+							data-bind="ntsFormLabel: {constraint: 'ApproverReason', enable: true }">#{i18n.getText('KAF000_28')}</div>
+					</div>
+					<!-- row 2 B4_2-->
+					<div style="margin-top: 16px;">
+						<textarea style="width: 628px; height: 50px"
+							data-bind="ntsMultilineEditor: { value: reasonToApprover, 
+																									constraint: 'ApproverReason',
+																									enable: enableApprovalReason(),
+																									name:'#[KAF000_28]' }" />
+
+					</div>
+				</div>
+
+				<!-- Body -->
+				<com:ko-if bind="appType() == 7">
+					<ui:include src="../../002/c/index.xhtml" />
+				</com:ko-if>
+				<com:ko-if bind="appType() == 9">
+					<ui:include src="../../004/e/index.xhtml" />
+				</com:ko-if>
+				<com:ko-if bind="appType() == 4">
+					<ui:include src="../../009/b/index.xhtml" />
+				</com:ko-if>
+				<com:ko-if bind="appType() == 0">
+					<ui:include src="../../005/b/index.xhtml" />
+				</com:ko-if>
+				<com:ko-if bind="appType() == 1">
+					<ui:include src="../../006/b/index.xhtml" />
+				</com:ko-if>
+				<com:ko-if bind="appType() == 2">
+					<ui:include src="../../007/b/index.xhtml" />
+				</com:ko-if>
+				<com:ko-if bind="appType() == 6">
+					<ui:include src="../../010/b/index.xhtml" />
+				</com:ko-if>
+				<com:ko-if bind="appType() == 10">
+					<ui:include src="../../011/b/index.xhtml" />
+				</com:ko-if>
+				<!-- Footer -->
+				<div style="clear: both"></div>
+				</div>
+				<div id = "appr">
+					<ui:include src="../../000/b/index1.xhtml" />
+				</div>
+
+				<!-- end footer -->
+			</div>
+		</ui:composition>
+   	</body>
+</html>

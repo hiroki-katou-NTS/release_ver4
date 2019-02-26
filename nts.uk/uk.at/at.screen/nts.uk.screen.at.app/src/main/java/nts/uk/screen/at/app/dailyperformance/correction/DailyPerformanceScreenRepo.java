@@ -203,7 +203,7 @@ public interface DailyPerformanceScreenRepo {
 	
 	void updateColumnsWidth(Map<Integer, Integer> lstHeader, List<String> formatCodes);
 	
-	Map<String, List<EnumConstant>> findErAlApplicationByCidAndListErrCd(String companyId, List<String> errorCode);
+	Map<String, List<EnumConstant>> findErAlApplicationByCidAndListErrCd(String companyId, List<String> errorCode, Map<Integer, String> nameWithType);
 	
 	List<EnumConstant> findApplicationCall(String companyId);
 	

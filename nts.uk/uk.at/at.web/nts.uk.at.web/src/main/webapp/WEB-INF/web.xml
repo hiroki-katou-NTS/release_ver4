@@ -6,10 +6,6 @@
     
     <distributable/>
     
-    <session-config>
-        <session-timeout>1440</session-timeout>
-    </session-config>
-    
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>

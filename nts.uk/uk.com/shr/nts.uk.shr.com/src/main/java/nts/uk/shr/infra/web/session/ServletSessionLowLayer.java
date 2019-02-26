@@ -42,4 +42,9 @@ public class ServletSessionLowLayer implements SessionLowLayer {
 	private Optional<HttpSession> getSession() {
 		return Optional.ofNullable(this.request.getSession(false));
 	}
+
+	@Override
+	public int secondsSessionTimeout() {
+		return this.request.getSession(true).getMaxInactiveInterval();
+	}
 }

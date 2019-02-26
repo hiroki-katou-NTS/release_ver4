@@ -55,11 +55,11 @@ module nts.uk.at.view.kaf011.b.viewmodel {
         firstLoad: KnockoutObservable<boolean> = ko.observable(true);
         
         remainDays: KnockoutObservable<number> = ko.observable(null);
-
+        appCur: any = null;
         constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
             super(listAppMetadata, currentApp);
             let self = this;
-            
+            self.appCur = currentApp;
             self.startPage(self.appID());
             
             self.prePostSelectedCode.subscribe((newCd) => {
@@ -131,11 +131,13 @@ module nts.uk.at.view.kaf011.b.viewmodel {
                 saveCmd = self.genSaveCmd();
             self.validateControl();
             if (nts.uk.ui.errors.hasError()) { return; }
-
+            
+            /*
             let isCheckReasonError = !self.checkReason();
             if (isCheckReasonError) {
                 return;
             }
+            */
 
             block.invisible();
             service.update(saveCmd).done(() => {
@@ -148,6 +150,27 @@ module nts.uk.at.view.kaf011.b.viewmodel {
             }).always(() => {
                 block.clear();
             });
+        }
+        
+        getBoxReason(){
+            var self = this;
+            let result = "";
+            let selectedReason = self.appReasonSelectedID() ? _.find(self.appReasons(), { 'reasonID': self.appReasonSelectedID() }) : null
+            if (selectedReason) {
+                result = selectedReason.reasonTemp;
+            }
+            return result;
+        }
+    
+        getAreaReason(){
+            var self = this;
+            return self.reason(); 
+        }
+        
+        resfreshReason(appReason: string){
+            var self = this;
+            self.appReasonSelectedID('');   
+            self.reason(appReason); 
         }
 
         checkReason(): boolean {
@@ -196,7 +219,7 @@ module nts.uk.at.view.kaf011.b.viewmodel {
             service.findById(appParam).done((data) => {
                 self.setDataFromStart(data);
                 if (isReload)
-                    self.start(data.application.applicationDate).done(() => {
+                    self.start(data.application.applicationDate, false).done(() => {
                         nts.uk.ui.block.clear();
                     });
             }).fail((error) => {
@@ -269,7 +292,7 @@ module nts.uk.at.view.kaf011.b.viewmodel {
             confirm({ messageId: 'Msg_18' }).ifYes(function() {
                 block.invisible();
                 service.removeAbs(removeCmd).done(function(data) {
-                    location.reload();
+                    self.reBinding(self.listAppMeta, self.appCur, false);
                 }).fail(function(res: any) {
                     alError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() {
                     });
@@ -285,7 +308,7 @@ module nts.uk.at.view.kaf011.b.viewmodel {
             confirm({ messageId: 'Msg_249' }).ifYes(function() {
                 block.invisible();
                 service.cancelAbs(cancelCmd).done(function(data) {
-                    location.reload();
+                    self.reBinding(self.listAppMeta, self.appCur, false);
                 }).fail(function(res: any) {
                     alError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() {
                     });

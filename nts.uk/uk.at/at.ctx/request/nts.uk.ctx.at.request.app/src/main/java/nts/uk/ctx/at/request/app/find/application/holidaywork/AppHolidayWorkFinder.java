@@ -232,9 +232,12 @@ public class AppHolidayWorkFinder {
 			// 3.事前事後の判断処理(事前事後非表示する場合)
 			PrePostAtr prePostAtrJudgment = otherCommonAlgorithm.preliminaryJudgmentProcessing(
 					EnumAdaptor.valueOf(ApplicationType.BREAK_TIME_APPLICATION.value, ApplicationType.class),
-					appCommonSettingOutput.generalDate,0);
+					GeneralDate.fromString(appDate, DATE_FORMAT),0);
 			if(prePostAtrJudgment != null){
 				prePostAtr = prePostAtrJudgment.value;
+				ApplicationDto_New appDto = new ApplicationDto_New();
+				appDto.setPrePostAtr(prePostAtr);
+				result.setApplication(appDto);
 			}
 		}else{
 			result.setDisplayPrePostFlg(AppDisplayAtr.DISPLAY.value);
