@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
+import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
@@ -33,6 +34,7 @@ import nts.uk.ctx.at.request.app.find.setting.company.applicationapprovalsetting
 import nts.uk.ctx.at.request.app.find.setting.workplace.ApprovalFunctionSettingDto;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.EmploymentRootAtr;
+import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.AtEmployeeAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.EmployeeRequestAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.EmploymentHistoryImported;
@@ -52,6 +54,7 @@ import nts.uk.ctx.at.request.dom.setting.company.request.RequestSettingRepositor
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmploymentSetting;
 import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSetting;
 import nts.uk.ctx.at.request.dom.setting.request.application.common.BaseDateFlg;
+import nts.uk.ctx.at.request.dom.setting.request.gobackdirectlycommon.primitive.AppDisplayAtr;
 import nts.uk.ctx.at.request.dom.setting.workplace.ApprovalFunctionSetting;
 import nts.uk.ctx.at.request.dom.setting.workplace.RequestOfEachCompanyRepository;
 import nts.uk.ctx.at.request.dom.setting.workplace.RequestOfEachWorkplaceRepository;
@@ -254,7 +257,7 @@ public class HolidayShipmentScreenAFinder {
 		// AchievementOutput achievementOutput = getAchievement(companyID,
 		// employeeID, baseDate);
 		// アルゴリズム「申請日の変更」を実行する
-		setChangeAppDateData(recDate, absDate, companyID, employeeID, uiType, output);
+		setChangeAppDateData(recDate, absDate, companyID, employeeID, uiType, output, appCommonSettingOutput, baseDate);
 
 		return output;
 	}
@@ -282,7 +285,7 @@ public class HolidayShipmentScreenAFinder {
 	}
 
 	private void setChangeAppDateData(GeneralDate recDate, GeneralDate absDate, String companyID, String employeeID,
-			int uiType, HolidayShipmentDto output) {
+			int uiType, HolidayShipmentDto output, AppCommonSettingOutput appCommonSettingOutput, GeneralDate appDate) {
 		// アルゴリズム「基準申請日の決定」を実行する
 		GeneralDate referenceDate = DetRefDate(recDate, absDate);
 		int rootAtr = EmploymentRootAtr.APPLICATION.value;
@@ -308,8 +311,15 @@ public class HolidayShipmentScreenAFinder {
 		setDateSpecificSetting(companyID, employeeID, inputDate, getSetting, recWkTypeCD, recWkTimeCode, absWkTypeCD,
 				absWkTimeCode, appCommonSet, output);
 		// アルゴリズム「事前事後区分の最新化」を実行する
-		output.setPreOrPostType(
-				otherCommonAlgorithm.judgmentPrePostAtr(APP_TYPE, referenceDate, uiType == 0 ? true : false).value);
+		if (appCommonSettingOutput.applicationSetting.getDisplayPrePostFlg().value == AppDisplayAtr.NOTDISPLAY.value) {
+			// 3.事前事後の判断処理(事前事後非表示する場合)
+			PrePostAtr prePostAtrJudgment = otherCommonAlgorithm.preliminaryJudgmentProcessing(
+					EnumAdaptor.valueOf(ApplicationType.BREAK_TIME_APPLICATION.value, ApplicationType.class),
+					appDate,0);
+			if(prePostAtrJudgment != null){
+				output.setPreOrPostType(prePostAtrJudgment.value);
+			}
+		}
 
 		output.setRefDate(inputDate);
 
