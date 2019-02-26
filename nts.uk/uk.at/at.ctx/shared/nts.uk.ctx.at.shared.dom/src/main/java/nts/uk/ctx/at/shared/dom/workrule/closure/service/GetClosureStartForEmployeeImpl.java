@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.shared.dom.workrule.closure.service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -41,4 +43,5 @@ public class GetClosureStartForEmployeeImpl implements GetClosureStartForEmploye
 				this.closureEmploymentRepo);
 		return proc.algorithm(employeeId);
 	}
+
 }
