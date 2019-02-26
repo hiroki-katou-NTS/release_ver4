@@ -92,7 +92,7 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 	public static final String YM_FORMATER = "uuuu/MM";
 
 	@Override
-	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ExportData outputProcess(String cid, String setItemsOutputCd, Year fiscalYear, YearMonth startYm,
 			YearMonth endYm, List<Employee> employees, PrintFormat printFormat, int breakPage, ExcludeEmp excludeEmp,
 			Integer monthLimit) {
