@@ -19,5 +19,4 @@ public interface GetClosureStartForEmployee {
 	 */
 	Optional<GeneralDate> algorithm(String employeeId);
 
-	Map<String, GeneralDate> algorithm(List<String> employeeIds);
 }

@@ -44,12 +44,4 @@ public class GetClosureStartForEmployeeImpl implements GetClosureStartForEmploye
 		return proc.algorithm(employeeId);
 	}
 
-	public Map<String, GeneralDate> algorithm(List<String> employeeIds){
-		GetClosureStartForEmployeeProc proc = new GetClosureStartForEmployeeProc(
-				this.closureService,
-				this.empEmployee,
-				this.shareEmploymentAdapter,
-				this.closureEmploymentRepo);
-		return proc.algorithm(employeeIds);
-	}
 }
