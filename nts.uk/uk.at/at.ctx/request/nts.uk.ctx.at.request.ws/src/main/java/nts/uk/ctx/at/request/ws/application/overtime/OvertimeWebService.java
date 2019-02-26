@@ -12,8 +12,6 @@ import nts.uk.ctx.at.request.app.command.application.overtime.CheckBeforeRegiste
 import nts.uk.ctx.at.request.app.command.application.overtime.CheckConvertPrePost;
 import nts.uk.ctx.at.request.app.command.application.overtime.CreateOvertimeCommand;
 import nts.uk.ctx.at.request.app.command.application.overtime.CreateOvertimeCommandHandler;
-import nts.uk.ctx.at.request.app.command.application.overtime.CreateTestDataCommand;
-import nts.uk.ctx.at.request.app.command.application.overtime.CreateTestDataCommandHandler;
 import nts.uk.ctx.at.request.app.command.application.overtime.UpdateOvertimeCommand;
 import nts.uk.ctx.at.request.app.command.application.overtime.UpdateOvertimeCommandHandler;
 import nts.uk.ctx.at.request.app.find.application.overtime.AppOvertimeFinder;
@@ -124,14 +122,5 @@ public class OvertimeWebService extends WebService{
 		return this.overtimeFinder.getRecordWork(param.employeeID, param.appDate, param.siftCD,param.prePostAtr,param.getOvertimeHours(),param.getWorkTypeCode(),
 				param.getStartTimeRests(),
 				param.getEndTimeRests());
-	}
-	
-	@Inject
-	private CreateTestDataCommandHandler testHandler;
-	
-	@POST
-	@Path("testdata")
-	public void createTestData(CreateTestDataCommand command) {
-		this.testHandler.handle(command);
 	}
 }
