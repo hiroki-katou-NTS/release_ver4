@@ -3781,6 +3781,7 @@ module nts.uk.ui.mgrid {
                     if (!_.isNil(dirties[id]) && !_.isNil(dirties[id][coord.columnKey])) {
                         delete dirties[id][coord.columnKey];
                     }
+                    return { c: calcCell };
                 } else {
                     if (cellValue === origVal) {
                         $cell = lch.cellAt($grid, coord.rowIdx, coord.columnKey, desc);
@@ -3788,6 +3789,7 @@ module nts.uk.ui.mgrid {
                             if (!_.isNil(dirties[id]) && !_.isNil(dirties[id][coord.columnKey])) {
                                 delete dirties[id][coord.columnKey];
                             }
+                            rData[coord.columnKey] = cellValue;
                             return { c: calcCell };
                         }
                         $cell.classList.remove(color.ManualEditTarget);
