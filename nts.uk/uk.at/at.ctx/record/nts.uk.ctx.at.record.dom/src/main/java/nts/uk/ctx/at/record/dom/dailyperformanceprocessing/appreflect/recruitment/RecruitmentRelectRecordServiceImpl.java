@@ -69,7 +69,7 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 			daily.setWorkInformation(dailyInfor);
 			//開始終了時刻の反映
 			daily = this.reflectRecordStartEndTime(param, daily);			
-			commonService.calculateOfAppReflect(daily, param.getEmployeeId(), param.getBaseDate());
+			commonService.calculateOfAppReflect(daily, param.getEmployeeId(), param.getBaseDate(), false);
 			return true;
 		} catch (Exception e) {
 			return false;

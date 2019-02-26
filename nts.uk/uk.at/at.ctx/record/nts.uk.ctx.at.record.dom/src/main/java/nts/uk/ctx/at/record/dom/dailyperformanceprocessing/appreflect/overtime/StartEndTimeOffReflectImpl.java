@@ -47,11 +47,11 @@ public class StartEndTimeOffReflectImpl implements StartEndTimeOffReflect{
 				param.isAutoClearStampFlg(),
 				param.getOvertimePara());
 		//開始終了時刻の反映(事前)
-		StartEndTimeRelectCheck startEndTimeData = new StartEndTimeRelectCheck(param.getEmployeeId(), param.getDateInfo(), param.getOvertimePara().getStartTime1(), 
+		/*StartEndTimeRelectCheck startEndTimeData = new StartEndTimeRelectCheck(param.getEmployeeId(), param.getDateInfo(), param.getOvertimePara().getStartTime1(), 
 				param.getOvertimePara().getEndTime1(), param.getOvertimePara().getStartTime2(), 
 				param.getOvertimePara().getEndTime2(), 
 				param.getOvertimePara().getWorkTimeCode(), param.getOvertimePara().getWorkTypeCode(), param.getOvertimePara().getOvertimeAtr());
-		this.startEndTimeOutput(startEndTimeData, workInfo);
+		this.startEndTimeOutput(startEndTimeData, workInfo);*/
 	}
 
 	@Override

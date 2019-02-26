@@ -65,7 +65,7 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 			dailyInfor = this.reflectRecordStartEndTime(param, dailyInfor);
 			workRepository.updateByKeyFlush(dailyInfor);
 			
-			commonService.calculateOfAppReflect(null, param.getEmployeeId(), param.getBaseDate());
+			commonService.calculateOfAppReflect(null, param.getEmployeeId(), param.getBaseDate(),false);
 			return true;
 		}catch (Exception e) {
 			return false;
