@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.shared.dom.workrule.closure.service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -40,5 +42,14 @@ public class GetClosureStartForEmployeeImpl implements GetClosureStartForEmploye
 				this.shareEmploymentAdapter,
 				this.closureEmploymentRepo);
 		return proc.algorithm(employeeId);
+	}
+
+	public Map<String, GeneralDate> algorithm(List<String> employeeIds){
+		GetClosureStartForEmployeeProc proc = new GetClosureStartForEmployeeProc(
+				this.closureService,
+				this.empEmployee,
+				this.shareEmploymentAdapter,
+				this.closureEmploymentRepo);
+		return proc.algorithm(employeeIds);
 	}
 }
