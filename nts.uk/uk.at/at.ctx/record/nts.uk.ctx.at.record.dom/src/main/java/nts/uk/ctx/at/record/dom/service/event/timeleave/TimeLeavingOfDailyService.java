@@ -32,6 +32,7 @@ import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanc
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemIdContainer;
 import nts.uk.ctx.at.shared.dom.attendance.util.enu.DailyDomainGroup;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
+import nts.uk.ctx.at.shared.dom.workingcondition.NotUseAtr;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkAtr;
@@ -107,14 +108,15 @@ public class TimeLeavingOfDailyService {
 		WorkAtr dayAtr = isWokingDay(wt);
 		if (dayAtr != null) {
 			val wts = wt.getWorkTypeSetByAtr(dayAtr).get();
-			if (wts.getAttendanceTime() == WorkTypeSetCheck.CHECK && wts.getTimeLeaveWork() == WorkTypeSetCheck.CHECK) {
+			Optional<WorkingConditionItem>  workCondition = getWorkConditionOrDefault(cachedWorkCondition, wi.getEmployeeId(), wi.getYmd());
+			if ((workCondition.isPresent() && workCondition.get().getAutoStampSetAtr() == NotUseAtr.USE) 
+					|| wts.getAttendanceTime() == WorkTypeSetCheck.CHECK 
+					|| wts.getTimeLeaveWork() == WorkTypeSetCheck.CHECK) {
 				TimeLeavingOfDailyPerformance tl = null;
 				if (tlo != null) {
 					tl = mergeWithEditStates(working.getEditState(), tlo, wts);
 				}
-				correctedTlo = updateTimeLeave(companyId, wi, tl, 
-												getWorkConditionOrDefault(cachedWorkCondition, wi.getEmployeeId(), wi.getYmd()), 
-												wi.getEmployeeId(), wi.getYmd());
+				correctedTlo = updateTimeLeave(companyId, wi, tl, workCondition, wi.getEmployeeId(), wi.getYmd());
 			} else {
 				return EventHandleResult.withResult(EventHandleAction.ABORT, working);
 			}
