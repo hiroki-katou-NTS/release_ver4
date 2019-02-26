@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -67,9 +68,11 @@ public class MonthlyAttendanceItemAcFinder implements MonthlyAttendanceItemAdapt
 	@Override
 	public List<MonthlyAttendanceResultImport> getMonthlyValueOfParallel(Collection<String> employeeIds,
 			YearMonthPeriod range, Collection<Integer> itemIds) {
+		final AtomicInteger counter = new AtomicInteger(0);
+		Collection<List<String>> partList = employeeIds.stream().collect(Collectors.groupingBy(it -> counter.getAndIncrement() / 100)).values();
 		List<MonthlyAttendanceResultImport> itemValuesSync = Collections.synchronizedList(new ArrayList<>());
-		this.parallel.forEach(employeeIds, employeeID -> {
-			itemValuesSync.addAll(this.getMonthlyValueOf(employeeID, range, itemIds));
+		this.parallel.forEach(partList, employeeIDs -> {
+			itemValuesSync.addAll(this.getMonthlyValueOf(employeeIDs, range, itemIds));
 		});
 		return new ArrayList<>(itemValuesSync);
 	}
