@@ -1,20 +1,25 @@
 package nts.uk.ctx.at.request.app.find.application.approvalstatus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.i18n.I18NText;
+import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.request.app.find.application.common.ApplicationDto_New;
@@ -31,6 +36,7 @@ import nts.uk.ctx.at.request.dom.application.applist.service.detail.AppOverTimeI
 import nts.uk.ctx.at.request.dom.application.applist.service.detail.AppWorkChangeFull;
 import nts.uk.ctx.at.request.dom.application.approvalstatus.ApprovalStatusMailTemp;
 import nts.uk.ctx.at.request.dom.application.approvalstatus.ApprovalStatusMailType;
+import nts.uk.ctx.at.request.dom.application.approvalstatus.service.AggregateApprovalStatus;
 import nts.uk.ctx.at.request.dom.application.approvalstatus.service.ApprovalStatusService;
 import nts.uk.ctx.at.request.dom.application.approvalstatus.service.output.ApplicationsListOutput;
 import nts.uk.ctx.at.request.dom.application.approvalstatus.service.output.ApprovalStatusEmployeeOutput;
@@ -252,24 +258,35 @@ public class ApprovalStatusFinder {
 //		}).collect(Collectors.toList());
 //		return lstClosureDto;
 	}
+	
+	@Inject
+	private AggregateApprovalStatus aggregateApprovalStatus;
+	
+	@Inject
+	private ManagedParallelWithContext parallel;
+	
 	/**
 	 * アルゴリズム「承認状況職場別起動」を実行する
 	 * 
 	 * @param appStatus
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ApprovalSttAppOutput> getAppSttByWorkpace(ApprovalStatusActivityData appStatus) {
-		List<ApprovalSttAppOutput> listAppSttApp = new ArrayList<>();
+		List<ApprovalSttAppOutput> listAppSttApp = Collections.synchronizedList(new ArrayList<>());
 		GeneralDate startDate = appStatus.getStartDate();
 		GeneralDate endDate = appStatus.getEndDate();
+		String companyId = AppContexts.user().companyId();
 		List<WorkplaceInfor> listWorkPlaceInfor = appStatus.getListWorkplace();
-		for (WorkplaceInfor wkp : listWorkPlaceInfor) {
+		
+		this.parallel.forEach(listWorkPlaceInfor, wkp -> {
 			// アルゴリズム「承認状況取得職場社員」を実行する
 			List<ApprovalStatusEmployeeOutput> listAppStatusEmp = appSttService.getApprovalStatusEmployee(wkp.getCode(),
 					startDate, endDate, appStatus.getListEmpCd());
+			
 			// アルゴリズム「承認状況取得申請承認」を実行する
-			ApprovalSttAppOutput approvalSttApp = appSttService.getApprovalSttApp(wkp, listAppStatusEmp);
+			ApprovalSttAppOutput approvalSttApp = this.aggregateApprovalStatus.aggregate(companyId, wkp, listAppStatusEmp);
 			listAppSttApp.add(approvalSttApp);
-		}
+		});
 
 		return listAppSttApp;
 	}
