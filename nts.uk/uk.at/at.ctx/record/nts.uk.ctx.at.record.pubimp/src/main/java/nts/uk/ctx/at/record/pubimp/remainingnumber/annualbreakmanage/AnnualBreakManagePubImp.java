@@ -218,9 +218,11 @@ public class AnnualBreakManagePubImp implements AnnualBreakManagePub {
 		Map<String, AnnualLeaveEmpBasicInfo> annualLeaveEmpBasicInfoList = annLeaEmpBasicInfoRepository
 				.getList(employeeIds).stream()
 				.collect(Collectors.toMap(AnnualLeaveEmpBasicInfo::getEmployeeId, Function.identity()));
+		Map<String, GeneralDate> listStart = getClosureStartForEmployee.algorithm(employeeIds);
+		AnnualLeaveEmpBasicInfo annualLeaveEmpBasicInfo;
 		for (String employeeId : employeeIds) {
 			List<NextAnnualLeaveGrant> nextAnnualLeaveGrant = new ArrayList<>();
-			AnnualLeaveEmpBasicInfo annualLeaveEmpBasicInfo = annualLeaveEmpBasicInfoList.get(employeeId);
+			annualLeaveEmpBasicInfo = annualLeaveEmpBasicInfoList.get(employeeId);
 			Optional<GeneralDate> start_date = Optional.empty();
 			if (annualLeaveEmpBasicInfo == null) {
 				nextAnnualLeaveGrantMap.put(employeeId, nextAnnualLeaveGrant);
@@ -233,7 +235,7 @@ public class AnnualBreakManagePubImp implements AnnualBreakManagePub {
 				continue;
 			}
 			if (time == null) {
-				start_date = getClosureStartForEmployee.algorithm(employeeId);
+				start_date =  Optional.ofNullable(listStart.get(employeeId));
 			}
 			EmployeeRecordImport employeeRecordImport = employeeRecordImportMap.get(employeeId);
 			nextAnnualLeaveGrant = getNextAnnualLeaveGrant

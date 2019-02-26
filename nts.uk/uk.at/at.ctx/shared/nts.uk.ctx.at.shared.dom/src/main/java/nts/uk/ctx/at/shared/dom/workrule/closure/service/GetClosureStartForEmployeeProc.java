@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.shared.dom.workrule.closure.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import lombok.val;
@@ -67,11 +69,11 @@ public class GetClosureStartForEmployeeProc {
 		// チェック開始日・終了日を計算
 		this.calcCheckStartAndEnd();
 		if (this.checkStart == null || this.checkEnd == null) return Optional.empty();
-		
+
 		// 「検索開始日」←「チェック開始日」
 		GeneralDate searchStart = this.checkStart;
 		while (true){
-			
+
 			// 「所属雇用履歴」を取得する
 			val bsEmploymentHistOpt = this.shareEmploymentAdapter.findEmploymentHistory(
 					companyId, employeeId, searchStart);
@@ -119,6 +121,59 @@ public class GetClosureStartForEmployeeProc {
 		
 		// チェック開始日を返す
 		return Optional.ofNullable(this.checkStart);
+	}
+
+	public Map<String, GeneralDate> algorithm(List<String> employeeIds){
+		String companyId = AppContexts.user().companyId();
+		this.closureInfos = this.closureService.getAllClosureInfo();
+		Map<String, GeneralDate> checkStart = new HashMap<>();
+		for (String employeeId : employeeIds) {
+			this.calcCheckStartAndEnd();
+			if (this.checkStart == null || this.checkEnd == null) continue;
+			GeneralDate searchStart = this.checkStart;
+			while (true) {
+				val bsEmploymentHistOpt = shareEmploymentAdapter.findEmploymentHistory(
+						companyId, employeeId, searchStart);
+				if (!bsEmploymentHistOpt.isPresent()) break;
+				val bsEmploymentHist = bsEmploymentHistOpt.get();
+				val employmentCd = bsEmploymentHist.getEmploymentCode();
+				Integer closureId = 1;
+				val closureEmploymentOpt = closureEmploymentRepo.findByEmploymentCD(companyId, employmentCd);
+				if (closureEmploymentOpt.isPresent()) {
+					val closureEmployment = closureEmploymentOpt.get();
+					closureId = closureEmployment.getClosureId();
+				}
+
+				// 締め情報．期間を取得
+				ClosureInfo targetClosureInfo = null;
+				for (val closureInfo : this.closureInfos) {
+					if (closureInfo.getClosureId().value == closureId) {
+						targetClosureInfo = closureInfo;
+						break;
+					}
+				}
+				if (targetClosureInfo == null) break;
+
+				// 既に締められた雇用履歴かチェック
+				if (bsEmploymentHist.getPeriod().end().afterOrEquals(targetClosureInfo.getPeriod().start())) {
+					// 雇用履歴の途中まで締められたかチェック
+					if (bsEmploymentHist.getPeriod().start().before(targetClosureInfo.getPeriod().start())) {
+						// チェック開始日　←　「締め情報．期間．開始日」
+						this.checkStart = targetClosureInfo.getPeriod().start();
+					}
+				} else {
+					// チェック開始日　←　「所属雇用履歴．期間．終了日」の翌日
+					this.checkStart = bsEmploymentHist.getPeriod().end().addDays(1);
+				}
+				checkStart.put(employeeId, this.checkStart);
+				// チェック終了日までチェックが完了したかチェック
+				if (this.checkEnd.beforeOrEquals(bsEmploymentHist.getPeriod().end())) break;
+
+				// 検索開始日　←　所属雇用履歴．期間．終了日の翌日
+				searchStart = bsEmploymentHist.getPeriod().end().addDays(1);
+			}
+		}
+		return checkStart;
 	}
 	
 	/**
