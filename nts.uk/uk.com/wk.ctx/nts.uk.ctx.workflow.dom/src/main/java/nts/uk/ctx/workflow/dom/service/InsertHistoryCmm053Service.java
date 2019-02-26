@@ -22,7 +22,7 @@ public interface InsertHistoryCmm053Service {
 	 * @param dailyApproverId
 	 */
 	void insertHistoryByManagerSetting(String companyId, String historyId, String employeeId, GeneralDate startDate, String departmentApproverId,
-			String dailyApproverId);
+			String dailyApproverId, boolean dailyDisplay);
 
 	/**
 	 * １．バラバラ履歴の場合
