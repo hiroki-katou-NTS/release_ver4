@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.request.infra.repository.application.common;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,8 +11,10 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.collection.CollectionUtil;
@@ -189,15 +193,60 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 	 * @author hoatt
 	 * get list application by sID
 	 */
+	@SneakyThrows
 	@Override
 	public List<Application_New> getListAppBySID(String companyId, String sID, GeneralDate startDate,
 			GeneralDate endDate) {
-		return this.queryProxy().query(SELECT_APP_BY_SID, KrqdtApplication_New.class)
-				.setParameter("companyID", companyId)
-				.setParameter("employeeID", sID)
-				.setParameter("startDate", startDate)
-				.setParameter("endDate", endDate)
-				.getList(c -> c.toDomain());
+		
+		String sql = "select * from KRQDT_APPLICATION"
+				+ " where CID = ?"
+				+ " and (APPLICANTS_SID = ? or ENTERED_PERSON_SID = ?)"
+				+ " and ("
+				+ "   (APP_START_DATE between ? and ? and APP_END_DATE is null)" // 単一日の申請
+				+ "   or (APP_START_DATE >= ? and APP_END_DATE <= ?)" // 期間の申請
+				+ " )"
+				+ " and APP_TYPE in (0,1,2,4,6,10)";
+		
+		try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+			
+			stmt.setString(1, companyId);
+			stmt.setString(2, sID);
+			stmt.setString(3, sID);
+			stmt.setDate(4, Date.valueOf(startDate.localDate()));
+			stmt.setDate(5, Date.valueOf(endDate.localDate()));
+			stmt.setDate(6, Date.valueOf(startDate.localDate()));
+			stmt.setDate(7, Date.valueOf(endDate.localDate()));
+			
+			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+				
+				KrqdtApplication_New ent = new KrqdtApplication_New();
+				ent.krqdpApplicationPK = new KrqdpApplicationPK_New();
+				ent.krqdpApplicationPK.companyID = rec.getString("CID");
+				ent.krqdpApplicationPK.appID = rec.getString("APP_ID");
+				ent.version = rec.getLong("EXCLUS_VER");
+				ent.prePostAtr = rec.getInt("PRE_POST_ATR");
+				ent.inputDate = rec.getGeneralDateTime("INPUT_DATE");
+				ent.enteredPersonID = rec.getString("ENTERED_PERSON_SID");
+				ent.reversionReason = rec.getString("REASON_REVERSION");
+				ent.appDate = rec.getGeneralDate("APP_DATE");
+				ent.appReason = rec.getString("APP_REASON");
+				ent.appType = rec.getInt("APP_TYPE");
+				ent.employeeID = rec.getString("APPLICANTS_SID");
+				ent.startDate = rec.getGeneralDate("APP_START_DATE");
+				ent.endDate = rec.getGeneralDate("APP_END_DATE");
+				ent.stateReflection = rec.getInt("REFLECT_PLAN_STATE");
+				ent.stateReflectionReal = rec.getInt("REFLECT_PER_STATE");
+				ent.forcedReflection = rec.getInt("REFLECT_PLAN_ENFORCE_ATR");
+				ent.forcedReflectionReal = rec.getInt("REFLECT_PER_ENFORCE_ATR");
+				ent.notReason = rec.getInt("REFLECT_PLAN_SCHE_REASON");
+				ent.notReasonReal = rec.getInt("REFLECT_PER_SCHE_REASON");
+				ent.dateTimeReflection = rec.getGeneralDateTime("REFLECT_PLAN_TIME");
+				ent.dateTimeReflectionReal = rec.getGeneralDateTime("REFLECT_PER_TIME");
+				
+				return ent.toDomain();
+				
+			});
+		}
 	}
 	/**
 	 * @author hoatt
