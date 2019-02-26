@@ -3107,6 +3107,9 @@ module nts.uk.ui.mgrid {
                     let disFormat = su.formatSave(col[0], val);
                     su.wedgeCell(_$grid[0], { rowIdx: idx, columnKey: key }, disFormat, reset);
                     $.data($cell, v.DATA, disFormat);
+                    if (_zeroHidden && ti.isZero(disFormat, key)) {
+                        $cell.innerHTML = "";
+                    }
                 } else if (dkn.controlType[key] === dkn.CHECKBOX) {
                     let check = $cell.querySelector("input[type='checkbox']");
                     if (!check) return;
@@ -3872,9 +3875,13 @@ module nts.uk.ui.mgrid {
                             }
                         } else {
                             formatted = !_.isNil(column) ? format(column[0], cellValue) : cellValue;
-                            t.c.textContent = formatted;
                             disFormat = cellValue === "" || _.isNil(column) ? cellValue : formatSave(column[0], cellValue);
                             $.data(t.c, v.DATA, disFormat);
+                            if (maf.zeroHidden && ti.isZero(disFormat, coord.columnKey)) {
+                                t.c.textContent = "";
+                            } else {
+                                t.c.textContent = formatted;
+                            }
                         }
                         
                         if (t.colour) t.c.classList.add(t.colour);
@@ -5023,7 +5030,11 @@ module nts.uk.ui.mgrid {
                 
                 kt._adjuster.nostal(table.cols, bodyGroupArr, sumGroupArr);
                 kt._adjuster.handle(); 
-                if (lo.changeZero(_vessel().zeroHidden)) _vessel().zeroHidden = _zeroHidden;         
+                
+                let tmp = _vessel().zeroHidden;
+                _vessel().zeroHidden = _zeroHidden;
+                _zeroHidden = tmp;
+                if (lo.changeZero(_vessel().zeroHidden)) _zeroHidden = _vessel().zeroHidden;      
                 return;
             }
             
@@ -5056,7 +5067,11 @@ module nts.uk.ui.mgrid {
             kt._adjuster.nostal(_mafollicle[SheetDef][_currentSheet].hColArr, 
                 _mafollicle[SheetDef][_currentSheet].bColArr, _mafollicle[SheetDef][_currentSheet].sumColArr);
             kt._adjuster.handle();
-            if (lo.changeZero(_vessel().zeroHidden)) _vessel().zeroHidden = _zeroHidden;
+            
+            let tmp = _vessel().zeroHidden;
+            _vessel().zeroHidden = _zeroHidden;
+            _zeroHidden = tmp;
+            if (lo.changeZero(_vessel().zeroHidden)) _zeroHidden = _vessel().zeroHidden;
         }
     }
     
