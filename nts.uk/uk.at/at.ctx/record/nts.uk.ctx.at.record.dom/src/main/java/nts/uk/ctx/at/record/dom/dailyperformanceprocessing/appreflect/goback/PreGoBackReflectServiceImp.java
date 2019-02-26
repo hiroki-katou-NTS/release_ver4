@@ -35,7 +35,7 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 			workRepository.updateByKeyFlush(reflectWorkTypeTime.getDailyInfo());
 			//時刻の反映
 			scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect());			
-			commonService.calculateOfAppReflect(null, para.getEmployeeId(), para.getDateData());
+			commonService.calculateOfAppReflect(null, para.getEmployeeId(), para.getDateData(), false);
 			return true;
 		} catch(Exception ex) {
 			return false;
@@ -55,7 +55,7 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 			workRepository.updateByKeyFlush(reflectWorkTypeTime.getDailyInfo());
 			//時刻の反映
 			scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect());
-			commonService.calculateOfAppReflect(null, para.getEmployeeId(), para.getDateData());
+			commonService.calculateOfAppReflect(null, para.getEmployeeId(), para.getDateData(), false);
 			return true;
 		} catch (Exception ex) {
 			return false;
