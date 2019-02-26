@@ -1,10 +1,10 @@
 package nts.uk.ctx.at.record.pubimp.remainingnumber.annualbreakmanage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -31,8 +31,10 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremaini
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremainingdata.AnnualLeaveTimeRemainHistRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremainingdata.AnnualLeaveTimeRemainingHistory;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.GetClosureStartForEmployee;
+import nts.uk.ctx.at.shared.dom.yearholidaygrant.GrantHdTblSet;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.YearHolidayRepository;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.export.GetNextAnnualLeaveGrant;
+import nts.uk.ctx.at.shared.dom.yearholidaygrant.export.GetNextAnnualLeaveGrantProcKdm002;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.export.NextAnnualLeaveGrant;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.context.LoginUserContext;
@@ -58,6 +60,9 @@ public class AnnualBreakManagePubImp implements AnnualBreakManagePub {
 	
 	@Inject
 	private GetNextAnnualLeaveGrant getNextAnnualLeaveGrant;
+	
+	@Inject
+	private GetNextAnnualLeaveGrantProcKdm002 getNextAnnualLeaveGrantKdm002;
 	
 	/** 年休付与テーブル設定 */
 	@Inject
@@ -211,40 +216,20 @@ public class AnnualBreakManagePubImp implements AnnualBreakManagePub {
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	private Map<String, List<NextAnnualLeaveGrant>> calculateNextHolidayGrantImpr(List<String> employeeIds,
 			DatePeriod time) {
-		Map<String, List<NextAnnualLeaveGrant>> nextAnnualLeaveGrantMap = new HashMap<>();
 		String companyId = AppContexts.user().companyId();
-		Map<String, EmployeeRecordImport> employeeRecordImportMap = pmployeeRecordAdapter.getPersonInfor(employeeIds)
-				.stream().collect(Collectors.toMap(EmployeeRecordImport::getEmployeeId, Function.identity()));
-		Map<String, AnnualLeaveEmpBasicInfo> annualLeaveEmpBasicInfoList = annLeaEmpBasicInfoRepository
+		Map<String, GeneralDate> employeeRecordImportMap = pmployeeRecordAdapter.getPersonInfor(employeeIds).stream()
+				.collect(Collectors.toMap(EmployeeRecordImport::getEmployeeId, EmployeeRecordImport::getEntryDate));
+		Map<String, AnnualLeaveEmpBasicInfo> annualLeaveEmpBasicInfoMap = annLeaEmpBasicInfoRepository
 				.getList(employeeIds).stream()
 				.collect(Collectors.toMap(AnnualLeaveEmpBasicInfo::getEmployeeId, Function.identity()));
-		for (String employeeId : employeeIds) {
-			List<NextAnnualLeaveGrant> nextAnnualLeaveGrant = new ArrayList<>();
-			AnnualLeaveEmpBasicInfo annualLeaveEmpBasicInfo = annualLeaveEmpBasicInfoList.get(employeeId);
-			Optional<GeneralDate> start_date = Optional.empty();
-			if (annualLeaveEmpBasicInfo == null) {
-				nextAnnualLeaveGrantMap.put(employeeId, nextAnnualLeaveGrant);
-				continue;
-			}
-			val grantHdTblSetOpt = this.yearHolidayRepo.findByCode(companyId,
-					annualLeaveEmpBasicInfo.getGrantRule().getGrantTableCode().toString());
-			if (!grantHdTblSetOpt.isPresent()) {
-				nextAnnualLeaveGrantMap.put(employeeId, nextAnnualLeaveGrant);
-				continue;
-			}
-			if (time == null) {
-				start_date = getClosureStartForEmployee.algorithm(employeeId);
-			}
-			EmployeeRecordImport employeeRecordImport = employeeRecordImportMap.get(employeeId);
-			nextAnnualLeaveGrant = getNextAnnualLeaveGrant
-					.algorithm(companyId, annualLeaveEmpBasicInfo.getGrantRule().getGrantTableCode().toString(),
-							employeeRecordImport.getEntryDate(),
-							annualLeaveEmpBasicInfo.getGrantRule().getGrantStandardDate(),
-							time == null ? new DatePeriod(start_date.get().addDays(1),
-									GeneralDate.fromString("9999/12/31", "yyyy/mm/dd")) : time,
-							time == null ? true : false);
-			nextAnnualLeaveGrantMap.put(employeeId, nextAnnualLeaveGrant);
-		}
+		Set<String> grantTableCodeSet = annualLeaveEmpBasicInfoMap.values().stream()
+				.map(i -> i.getGrantRule().getGrantTableCode().toString()).collect(Collectors.toSet());
+		Map<String, GrantHdTblSet> grantHdTblSetMap = yearHolidayRepo.findAll(companyId).stream()
+				.filter(i -> grantTableCodeSet.contains(i.getYearHolidayCode().v()))
+				.collect(Collectors.toMap(a -> a.getYearHolidayCode().v(), a -> a));
+		Map<String, List<NextAnnualLeaveGrant>> nextAnnualLeaveGrantMap = getNextAnnualLeaveGrantKdm002.algorithm(
+				companyId, employeeIds, annualLeaveEmpBasicInfoMap, employeeRecordImportMap, time, false,
+				grantHdTblSetMap);
 		return nextAnnualLeaveGrantMap;
 	}
 
