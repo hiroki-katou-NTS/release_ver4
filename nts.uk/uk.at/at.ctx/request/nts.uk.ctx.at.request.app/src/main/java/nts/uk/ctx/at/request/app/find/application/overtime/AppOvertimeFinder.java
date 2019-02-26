@@ -709,6 +709,7 @@ public class AppOvertimeFinder {
 			PrePostAtr prePostAtrJudgment = otherCommonAlgorithm.preliminaryJudgmentProcessing(EnumAdaptor.valueOf(ApplicationType.OVER_TIME_APPLICATION.value, ApplicationType.class), GeneralDate.fromString(appDate, DATE_FORMAT),overtimeAtr);
 			if(prePostAtrJudgment != null){
 				prePostAtr = prePostAtrJudgment.value;
+				applicationDto.setPrePostAtr(prePostAtr);
 			}
 		}
 		// ドメインモデル「申請設定」．承認ルートの基準日をチェックする ( Domain model "application setting". Check base date of approval route )
