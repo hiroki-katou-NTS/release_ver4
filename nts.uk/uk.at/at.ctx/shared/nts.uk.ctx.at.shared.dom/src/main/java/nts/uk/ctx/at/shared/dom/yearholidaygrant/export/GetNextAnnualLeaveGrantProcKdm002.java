@@ -22,6 +22,7 @@ import nts.uk.ctx.at.shared.dom.yearholidaygrant.GrantYearHolidayRepository;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.LengthServiceRepository;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.LengthServiceTbl;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.UseSimultaneousGrant;
+import nts.uk.ctx.at.shared.dom.yearholidaygrant.YearHolidayRepository;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
@@ -32,6 +33,10 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 public class GetNextAnnualLeaveGrantProcKdm002 {
 
+	/** 年休付与テーブル設定 */
+	@Inject
+	private YearHolidayRepository yearHolidayRepo;
+	
 	/** 勤続年数テーブル */
 	@Inject
 	private LengthServiceRepository lengthServiceRepo;
@@ -53,12 +58,15 @@ public class GetNextAnnualLeaveGrantProcKdm002 {
 	 */
 	public Map<String, List<NextAnnualLeaveGrant>> algorithm(String companyId, List<String> employeeIds,
 			Map<String, AnnualLeaveEmpBasicInfo> annualLeaveEmpBasicInfoMap, Map<String, GeneralDate> entryDateMap,
-			DatePeriod period, boolean isSingleDay, Map<String, GrantHdTblSet> grantHdTblSetMap) {
+			DatePeriod period, boolean isSingleDay) {
 		Map<String, List<NextAnnualLeaveGrant>> result = new HashMap<>();
 		Set<String> grantTableCodeSet = annualLeaveEmpBasicInfoMap.values().stream()
 				.map(i -> i.getGrantRule().getGrantTableCode().v()).collect(Collectors.toSet());
 		Map<String, List<LengthServiceTbl>> lengthServiceTblMap = lengthServiceRepo.findByCode(companyId,
 				new ArrayList<>(grantTableCodeSet));
+		Map<String, GrantHdTblSet> grantHdTblSetMap = yearHolidayRepo.findAll(companyId).stream()
+				.filter(i -> grantTableCodeSet.contains(i.getYearHolidayCode().v()))
+				.collect(Collectors.toMap(a -> a.getYearHolidayCode().v(), a -> a));
 		for (String empId : employeeIds) {
 			List<NextAnnualLeaveGrant> nextAnnualLeaveGrantList = new ArrayList<>();
 			AnnualLeaveEmpBasicInfo annualLeaveEmpBasicInfo = annualLeaveEmpBasicInfoMap.get(empId);
