@@ -24,7 +24,11 @@ module nts.uk.at.view.kaf018.b.viewmodel {
         
         constructor() {
             var self = this;
-            $("#fixed-table").ntsFixedTable({ width: 1000, height: 163 });
+            
+            var fixedTableOffsetTop = 214;
+            var marginBottom = 70;
+            var tableHeight = $(window).height() - fixedTableOffsetTop - marginBottom;
+            $("#fixed-table").ntsFixedTable({ width: 1000, height: tableHeight });
         }
 
         startPage(): JQueryPromise<any> {
