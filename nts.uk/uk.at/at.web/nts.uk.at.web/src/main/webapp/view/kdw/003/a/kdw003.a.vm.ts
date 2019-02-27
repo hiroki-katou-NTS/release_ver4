@@ -691,7 +691,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             console.log("thoi gian load ccg: " + (performance.now() - startTime));
             // no20
             self.dPErrorDto(data.dperrorDto);
-            self.displayNumberZero();
+           // self.displayNumberZero();
             self.displayProfileIcon(self.displayFormat());
             self.dislayNumberHeaderText();
             console.log("thoi gian load 0: " + (performance.now() - startTime));
@@ -1073,13 +1073,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             $("#next-month").ntsError("clear");
                             self.lstErrorFlex = [];
                         }
-                        nts.uk.ui.block.clear();
+                        //nts.uk.ui.block.clear();
                     }
 
-                   if(!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15"){
-                         nts.uk.ui.dialog.info({ messageId: "Msg_15" });
-                    }
-                
                   // list row data error
                     self.lstErrorAfterCalcUpdate;
                     _.each(dataAfter.errorMap, (value, key) => {
@@ -1118,16 +1114,37 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         if (!self.flagCalculation) {
                             if (checkDailyChange) {
                                 // self.reloadScreen();
-                                self.loadRowScreen(false, false);
+                                self.loadRowScreen(false, false).done(() =>{
+                                    nts.uk.ui.block.clear();
+                                    if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
+                                        nts.uk.ui.dialog.info({ messageId: "Msg_15" });
+                                    }
+                                    if (dataAfter.errorMap[6] != undefined) {
+                                        nts.uk.ui.dialog.info({ messageId: "Msg_1455" });
+                                    }
+                                });
                             } else {
-                                self.loadRowScreen(true, false);
+                                self.loadRowScreen(true, false).done(() =>{
+                                    nts.uk.ui.block.clear();
+                                    if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
+                                        nts.uk.ui.dialog.info({ messageId: "Msg_15" });
+                                    }
+                                    if (dataAfter.errorMap[6] != undefined) {
+                                        nts.uk.ui.dialog.info({ messageId: "Msg_1455" });
+                                    }
+                                });
                                 //nts.uk.ui.block.clear();
                             }
                         } else {
-                            self.loadRowScreen(false, true);
-                        }
-                        if (dataAfter.errorMap[6] != undefined) {
-                            nts.uk.ui.dialog.info({ messageId: "Msg_1455" });
+                            self.loadRowScreen(false, true).done(() =>{
+                                nts.uk.ui.block.clear();
+                                if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
+                                    nts.uk.ui.dialog.info({ messageId: "Msg_15" });
+                                }
+                                if (dataAfter.errorMap[6] != undefined) {
+                                    nts.uk.ui.dialog.info({ messageId: "Msg_1455" });
+                                }
+                            });
                         }
 
 //                        if ((dataAfter.showErrorDialog == null && self.showDialogError) || dataAfter.showErrorDialog) {
@@ -1139,7 +1156,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         }else {
                             self.showDialogError = false;
                         }
-                        nts.uk.ui.block.clear();
+                       // nts.uk.ui.block.clear();
                     } else {
                         let errorAll = false;
                         errorNoReload = true;
@@ -1183,10 +1200,14 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         if (dataAfter.errorMap[7] != undefined) {
                             errorAll = true;
                         }
-                        self.loadRowScreen(false, self.flagCalculation);
-                        nts.uk.ui.block.clear();
-                        if (errorAll || errorFlex || self.hasErrorCalc) self.showErrorDialog(dataAfter.messageAlert);
-                        self.hasErrorCalc = false;
+                        self.loadRowScreen(false, self.flagCalculation).done(() =>{
+                             nts.uk.ui.block.clear();
+                             if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
+                                 nts.uk.ui.dialog.info({ messageId: "Msg_15" });
+                             }
+                             if (errorAll || errorFlex || self.hasErrorCalc) self.showErrorDialog(dataAfter.messageAlert);
+                             self.hasErrorCalc = false;
+                        });
                     }
                     dfd.resolve(errorNoReload);
                 }).fail((data) => {
@@ -1400,11 +1421,11 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     });
                     
                      if (!self.displayWhenZero()) {
-                        $("#dpGrid").mGrid("hideZero", true)
+                       // $("#dpGrid").mGrid("hideZero", true)
                         $("#dpGrid").mGrid("hideZero", false)
                         $("#dpGrid").mGrid("hideZero", true)
                     } else {
-                        $("#dpGrid").mGrid("hideZero", false)
+                        //$("#dpGrid").mGrid("hideZero", false)
                         $("#dpGrid").mGrid("hideZero", true)
                         $("#dpGrid").mGrid("hideZero", false)
                     }
@@ -1506,7 +1527,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             return itemId;
         }
 
-        loadRowScreen(onlyLoadMonth: boolean, onlyCalc: boolean) {
+        loadRowScreen(onlyLoadMonth: boolean, onlyCalc: boolean) : JQueryPromise<any> {
             var self = this;
             let lstEmployee = [];
             if (self.displayFormat() === 0) {
@@ -1622,17 +1643,17 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     });
  
                     if (!self.displayWhenZero()) {
-                        $("#dpGrid").mGrid("hideZero", true)
-                        $("#dpGrid").mGrid("hideZero", false)
-                        $("#dpGrid").mGrid("hideZero", true)
+                        //$("#dpGrid").mGrid("hideZero", true)
+//                        $("#dpGrid").mGrid("hideZero", false)
+//                        $("#dpGrid").mGrid("hideZero", true)
                     } else {
-                        $("#dpGrid").mGrid("hideZero", false)
-                        $("#dpGrid").mGrid("hideZero", true)
-                        $("#dpGrid").mGrid("hideZero", false)
+                        //$("#dpGrid").mGrid("hideZero", false)
+//                        $("#dpGrid").mGrid("hideZero", true)
+//                        $("#dpGrid").mGrid("hideZero", false)
                     }
-                }, 1000);
-                nts.uk.ui.block.clear();
-                dfd.resolve();
+                 dfd.resolve();
+                }, 100);
+                //nts.uk.ui.block.clear();
             });
             return dfd.promise();
         }
@@ -3116,6 +3137,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 columns: self.headersGrid,
                 hidePrimaryKey: true,
                 userId: self.employIdLogin,
+                hideZero: !self.displayWhenZero(),
                 getUserId: function(primaryKey) {
                     let ids = primaryKey.split("_");
                     return ids[2] + "-" + ids[3] + "-" + ids[4] + "-" + ids[5] + "-" + ids[6];
