@@ -139,7 +139,9 @@ module nts.uk.at.view.kaf009.a.viewmodel {
                                 self.kaf000_a.getAppDataDate(4, moment(value).format(self.dateType), false,self.employeeID)
                                     .done((changeDateData) => {
                                         self.setRealData(changeDateData);
-                                        self.defaultPrePost = changeDateData.defaultPrePostAtr;
+                                        if(!self.prePostDisp()){
+                                            self.defaultPrePost = changeDateData.defaultPrePostAtr;    
+                                        }
                                         nts.uk.ui.block.clear();
                                     }).fail(() => {
                                         nts.uk.ui.block.clear();
@@ -538,7 +540,7 @@ module nts.uk.at.view.kaf009.a.viewmodel {
                 0,
                 "",
                 txtReasonTmp,
-                self.prePostSelected() == 2 ? self.defaultPrePost : self.prePostSelected(),
+                self.prePostDisp() ? self.prePostSelected() : self.defaultPrePost,
                 moment().format(self.dateType),
                 self.employeeID,
                 "",
