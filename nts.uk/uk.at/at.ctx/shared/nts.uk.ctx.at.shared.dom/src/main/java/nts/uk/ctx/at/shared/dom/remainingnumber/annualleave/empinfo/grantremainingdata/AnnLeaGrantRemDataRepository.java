@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremainingdata;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
@@ -38,5 +39,7 @@ public interface AnnLeaGrantRemDataRepository {
 	List<AnnualLeaveGrantRemainingData> checkConditionUniqueForUpdate(String employeeId, String annLeavID, GeneralDate grantDate);
 	// get list annual leave grant remaining data by startDate <= grantDate <= endDate
 	List<AnnualLeaveGrantRemainingData> findInDate(String employeeId, GeneralDate startDate, GeneralDate endDate);
+	
+	Map<String, List<AnnualLeaveGrantRemainingData>> findInDate(List<String> employeeId, GeneralDate startDate, GeneralDate endDate);
 
 }
