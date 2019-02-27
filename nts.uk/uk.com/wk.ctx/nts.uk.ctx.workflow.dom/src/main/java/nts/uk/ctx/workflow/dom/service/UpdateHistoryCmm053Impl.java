@@ -1,7 +1,9 @@
 package nts.uk.ctx.workflow.dom.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -42,25 +44,28 @@ public class UpdateHistoryCmm053Impl implements UpdateHistoryCmm053Service {
 	@Override
 	//03.履歴更新を登録する
 	public void updateHistoryByManagerSetting(String companyId, String historyId, String employeeId, GeneralDate startDate,
-			String departmentApproverId, String dailyApproverId) {
+			String departmentApproverId, String dailyApproverId, boolean dailyDisplay) {
 		String endDate    = "9999-12-31";
 		Optional<PersonApprovalRoot> commonPs  = this.repoPerson.getNewestCommonPsAppRoot(companyId, employeeId);
 		Optional<PersonApprovalRoot> monthlyPs = this.repoPerson.getNewestMonthlyPsAppRoot(companyId, employeeId);
 
 		if (commonPs.isPresent() && monthlyPs.isPresent()) {
-			// １．バラバラ履歴の場合
+			// １．バラバラ履歴の場合: TH 2 loai deu co ls
 			if (commonPs.get().getEmploymentAppHistoryItems().get(0).start()
 					.compareTo(monthlyPs.get().getEmploymentAppHistoryItems().get(0).start()) != 0) {
+				//TH 2 lich su khong giong nhau
 				this.insertHistoryCmm053Service.updateOrInsertDiffStartDate(companyId, employeeId, historyId, startDate,
-						endDate, commonPs, monthlyPs, departmentApproverId, dailyApproverId);
+						endDate, commonPs, monthlyPs, departmentApproverId, dailyApproverId, dailyDisplay);
 			} else{
-				this.updateApproverFirstPhase(companyId, dailyApproverId, commonPs.get());
-				this.updateApproverFirstPhase(companyId, departmentApproverId, monthlyPs.get());
+				//TH 2 lich su giong nhau
+				this.updateRootCMM053(companyId, departmentApproverId, dailyApproverId, commonPs.get(), monthlyPs.get(), dailyDisplay);
+//				this.updateApproverFirstPhase(companyId, dailyApproverId, commonPs.get());
+//				this.updateApproverFirstPhase(companyId, departmentApproverId, monthlyPs.get());
 			}
 		} else {
-			// ２．一個履歴の場合
+			// ２．一個履歴の場合: TH chi co 1 loai co lich su
 			this.insertHistoryCmm053Service.updateOrInsertHistory(companyId, employeeId, historyId, startDate, endDate,
-					commonPs, monthlyPs, departmentApproverId, dailyApproverId);
+					commonPs, monthlyPs, departmentApproverId, dailyApproverId, dailyDisplay);
 		}
 		//履歴の開始日とシステム日付をチェックする
 		GeneralDate systemDate = GeneralDate.today();
@@ -93,6 +98,40 @@ public class UpdateHistoryCmm053Impl implements UpdateHistoryCmm053Service {
 					this.repoApprover.updateEmployeeIdApprover(firstApprover.get());
 				}
 			}
+		}
+	}
+	public void updateRootCMM053(String companyId, String a27, String a210,PersonApprovalRoot commonRoot, PersonApprovalRoot monthlyRoot, boolean dailyDisplay) {
+		Optional<ApprovalPhase> commonPhase = repoAppPhase.getApprovalFirstPhase(companyId, commonRoot.getBranchId());
+		List<Approver> lstApprNew = new ArrayList<>();
+		//common
+		if(commonPhase.isPresent()){
+			ApprovalPhase phase = commonPhase.get();
+			String phaseId = phase.getApprovalPhaseId();
+			//delete approver old
+			repoApprover.deleteAllApproverByAppPhId(companyId, phaseId);
+			//insert approver moi
+			String branchId = commonRoot.getBranchId();
+			//common
+			if(dailyDisplay){//common insert 2 record
+				//a210
+				lstApprNew.add(Approver.createSimpleFromJavaType(companyId,  branchId, phaseId, UUID.randomUUID().toString(), null, a210, 0, 0, 0));
+				//a27
+				lstApprNew.add(Approver.createSimpleFromJavaType(companyId,  branchId, phaseId, UUID.randomUUID().toString(), null, a27, 1, 0, 0));
+			}else{//common insert 1 record
+				lstApprNew.add(Approver.createSimpleFromJavaType(companyId,  branchId, phaseId, UUID.randomUUID().toString(), null, a27, 1, 0, 0));
+			}
+ 		}
+		//monthly A27
+		Optional<ApprovalPhase> monthlyPhase = repoAppPhase.getApprovalFirstPhase(companyId, monthlyRoot.getBranchId());
+		if(monthlyPhase.isPresent()){
+			ApprovalPhase mphase = monthlyPhase.get();
+			String mphaseId = mphase.getApprovalPhaseId();
+			//delete approver old
+			repoApprover.deleteAllApproverByAppPhId(companyId, mphaseId);
+			lstApprNew.add(Approver.createSimpleFromJavaType(companyId,  monthlyRoot.getBranchId(), mphaseId, UUID.randomUUID().toString(), null, a27, 0, 0, 0));
+		}
+		if(!lstApprNew.isEmpty()){
+			repoApprover.addAllApprover(lstApprNew);
 		}
 	}
 }

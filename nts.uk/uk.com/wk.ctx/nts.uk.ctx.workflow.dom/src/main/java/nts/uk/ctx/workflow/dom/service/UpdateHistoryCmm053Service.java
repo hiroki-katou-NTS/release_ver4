@@ -19,7 +19,7 @@ public interface UpdateHistoryCmm053Service {
 	 * @param dailyApproverId
 	 */
 	void updateHistoryByManagerSetting(String companyId, String historyId, String employeeId, GeneralDate startDate,
-			String departmentApproverId, String dailyApproverId);
+			String departmentApproverId, String dailyApproverId, boolean dailyDisplay);
 
 	/**
 	 * Update approver first phase
