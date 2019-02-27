@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -31,7 +30,6 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremaini
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremainingdata.AnnualLeaveTimeRemainHistRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremainingdata.AnnualLeaveTimeRemainingHistory;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.GetClosureStartForEmployee;
-import nts.uk.ctx.at.shared.dom.yearholidaygrant.GrantHdTblSet;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.YearHolidayRepository;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.export.GetNextAnnualLeaveGrant;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.export.GetNextAnnualLeaveGrantProcKdm002;
@@ -222,14 +220,8 @@ public class AnnualBreakManagePubImp implements AnnualBreakManagePub {
 		Map<String, AnnualLeaveEmpBasicInfo> annualLeaveEmpBasicInfoMap = annLeaEmpBasicInfoRepository
 				.getList(employeeIds).stream()
 				.collect(Collectors.toMap(AnnualLeaveEmpBasicInfo::getEmployeeId, Function.identity()));
-		Set<String> grantTableCodeSet = annualLeaveEmpBasicInfoMap.values().stream()
-				.map(i -> i.getGrantRule().getGrantTableCode().toString()).collect(Collectors.toSet());
-		Map<String, GrantHdTblSet> grantHdTblSetMap = yearHolidayRepo.findAll(companyId).stream()
-				.filter(i -> grantTableCodeSet.contains(i.getYearHolidayCode().v()))
-				.collect(Collectors.toMap(a -> a.getYearHolidayCode().v(), a -> a));
 		Map<String, List<NextAnnualLeaveGrant>> nextAnnualLeaveGrantMap = getNextAnnualLeaveGrantKdm002.algorithm(
-				companyId, employeeIds, annualLeaveEmpBasicInfoMap, employeeRecordImportMap, time, false,
-				grantHdTblSetMap);
+				companyId, employeeIds, annualLeaveEmpBasicInfoMap, employeeRecordImportMap, time, false);
 		return nextAnnualLeaveGrantMap;
 	}
 
