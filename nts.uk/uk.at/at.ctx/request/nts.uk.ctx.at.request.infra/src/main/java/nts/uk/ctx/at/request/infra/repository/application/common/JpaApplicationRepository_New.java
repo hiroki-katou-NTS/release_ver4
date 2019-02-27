@@ -200,22 +200,16 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		
 		String sql = "select * from KRQDT_APPLICATION"
 				+ " where CID = ?"
-				+ " and (APPLICANTS_SID = ? or ENTERED_PERSON_SID = ?)"
-				+ " and ("
-				+ "   (APP_START_DATE between ? and ? and APP_END_DATE is null)" // 単一日の申請
-				+ "   or (APP_START_DATE >= ? and APP_END_DATE <= ?)" // 期間の申請
-				+ " )"
+				+ " and APPLICANTS_SID = ?"
+				+ " and APP_START_DATE <= ? and APP_END_DATE >= ?"
 				+ " and APP_TYPE in (0,1,2,4,6,10)";
 		
 		try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
 			
 			stmt.setString(1, companyId);
 			stmt.setString(2, sID);
-			stmt.setString(3, sID);
+			stmt.setDate(3, Date.valueOf(endDate.localDate()));
 			stmt.setDate(4, Date.valueOf(startDate.localDate()));
-			stmt.setDate(5, Date.valueOf(endDate.localDate()));
-			stmt.setDate(6, Date.valueOf(startDate.localDate()));
-			stmt.setDate(7, Date.valueOf(endDate.localDate()));
 			
 			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
 				
