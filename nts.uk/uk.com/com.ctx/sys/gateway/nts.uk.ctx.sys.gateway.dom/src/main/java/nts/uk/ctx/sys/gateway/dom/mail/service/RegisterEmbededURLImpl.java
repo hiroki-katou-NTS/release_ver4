@@ -43,8 +43,7 @@ public class RegisterEmbededURLImpl implements RegisterEmbededURL {
 
 	@Override
 	public String obtainApplicationEmbeddedUrl(String appId, int appType, int prePostAtr, String employeeId) {
-		String loginId = AppContexts.user().employeeCode();
-		return this.registerEmbeddedForApp(appId, appType, prePostAtr, loginId, employeeId);
+		return this.registerEmbeddedForApp(appId, appType, prePostAtr, "", employeeId);
 	}
 
 	@Override
