@@ -40,7 +40,7 @@ public interface InsertHistoryCmm053Service {
 	 */
 	void updateOrInsertDiffStartDate(String companyId, String employeeId, String historyId, GeneralDate startDate,
 			String endDate, Optional<PersonApprovalRoot> commonPs, Optional<PersonApprovalRoot> monthlyPs,
-			String departmentApproverId, String dailyApproverId);
+			String departmentApproverId, String dailyApproverId, boolean dailyDisplay);
 
 	/**
 	 * ２．一個履歴の場合 
@@ -58,5 +58,5 @@ public interface InsertHistoryCmm053Service {
 	 */
 	void updateOrInsertHistory(String companyId, String employeeId, String historyId, GeneralDate startDate,
 			String endDate, Optional<PersonApprovalRoot> commonPs, Optional<PersonApprovalRoot> monthlyPs,
-			String departmentApproverId, String dailyApproverId);
+			String departmentApproverId, String dailyApproverId, boolean dailyDisplay);
 }
