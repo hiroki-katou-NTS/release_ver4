@@ -326,13 +326,13 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 	public MailResult sendMailApprover(List<String> listDestination, Application_New application, String text) {
 		List<String> successList = new ArrayList<>();
 		List<String> failList = new ArrayList<>();
-		String loginID = AppContexts.user().employeeId();
+		String sIDlogin = AppContexts.user().employeeId();
 		String companyID = AppContexts.user().companyId();
 		List<String> paramIDList = new ArrayList<>();
 		paramIDList.addAll(listDestination);
-		paramIDList.add(loginID);
+		paramIDList.add(sIDlogin);
 		List<MailDestinationImport> mailResultList = envAdapter.getEmpEmailAddress(companyID, paramIDList, 6);
-		String loginMail = mailResultList.stream().filter(x -> x.getEmployeeID().equals(loginID)).findAny()
+		String loginMail = mailResultList.stream().filter(x -> x.getEmployeeID().equals(sIDlogin)).findAny()
 				.map(x -> { 
 					if(CollectionUtil.isEmpty(x.getOutGoingMails()) || x.getOutGoingMails().get(0)==null){
 						return ""; 
@@ -340,7 +340,7 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 						return x.getOutGoingMails().get(0).getEmailAddress(); 
 					} 
 				}).orElse("");
-		String loginName = employeeAdaptor.getEmployeeName(loginID);
+		String loginName = employeeAdaptor.getEmployeeName(sIDlogin);
 		String applicantName = employeeAdaptor.getEmployeeName(application.getEmployeeID());
 		for(String employeeID : listDestination){
 			String employeeName = employeeAdaptor.getEmployeeName(employeeID);
@@ -364,7 +364,7 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 						application.getAppID(), 
 						application.getAppType().value, 
 						application.getPrePostAtr().value, 
-						loginID, 
+						"", 
 						employeeID);
 			};
 			Optional<AppDispName> opAppDispName = appDispNameRepository.getDisplay(application.getAppType().value);
@@ -399,13 +399,13 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 	public MailResult sendMailApplicant(Application_New application, String text) {
 		List<String> successList = new ArrayList<>();
 		List<String> failList = new ArrayList<>();
-		String loginID = AppContexts.user().employeeId();
+		String sIDlogin = AppContexts.user().employeeId();
 		String companyID = AppContexts.user().companyId();
 		String employeeID = application.getEmployeeID();
 		String employeeName = employeeAdaptor.getEmployeeName(employeeID);
-		List<String> listDestination = new ArrayList<>(Arrays.asList(loginID, employeeID));
+		List<String> listDestination = new ArrayList<>(Arrays.asList(sIDlogin, employeeID));
 		List<MailDestinationImport> mailResultList = envAdapter.getEmpEmailAddress(companyID, listDestination, 6);
-		String loginMail = mailResultList.stream().filter(x -> x.getEmployeeID().equals(loginID)).findAny()
+		String loginMail = mailResultList.stream().filter(x -> x.getEmployeeID().equals(sIDlogin)).findAny()
 				.map(x -> { 
 					if(CollectionUtil.isEmpty(x.getOutGoingMails()) || x.getOutGoingMails().get(0)==null){ 
 						return ""; 
@@ -413,7 +413,7 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 						return x.getOutGoingMails().get(0).getEmailAddress(); 
 					} 
 				}).orElse("");
-		String loginName = employeeAdaptor.getEmployeeName(loginID);
+		String loginName = employeeAdaptor.getEmployeeName(sIDlogin);
 		String applicantName = employeeAdaptor.getEmployeeName(application.getEmployeeID());
 		String applicantMail = mailResultList.stream().filter(x -> x.getEmployeeID().equals(employeeID)).findAny()
 				.map(x -> { 
@@ -435,7 +435,7 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 					application.getAppID(), 
 					application.getAppType().value, 
 					application.getPrePostAtr().value, 
-					loginID, 
+					"", 
 					employeeID);
 		};
 		Optional<AppDispName> opAppDispName = appDispNameRepository.getDisplay(application.getAppType().value);
