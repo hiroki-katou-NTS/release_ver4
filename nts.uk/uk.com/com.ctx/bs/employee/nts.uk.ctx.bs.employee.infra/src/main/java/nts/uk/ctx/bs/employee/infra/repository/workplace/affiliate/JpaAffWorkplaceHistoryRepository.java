@@ -4,6 +4,8 @@
  *****************************************************************/
 package nts.uk.ctx.bs.employee.infra.repository.workplace.affiliate;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,8 +15,10 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistory;
@@ -356,15 +360,23 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 	}
 
 	@Override
+	@SneakyThrows
 	public List<String> getByWplIdAndPeriod(String workplaceId, GeneralDate startDate, GeneralDate endDate) {
 
-		List<String> listWkpHist = this.queryProxy().query(SELECT_BY_WKPID_PERIOD, String.class)
-				.setParameter("workPlaceId", workplaceId).setParameter("startDate", startDate)
-				.setParameter("endDate", endDate).getList();
-		if (!listWkpHist.isEmpty()) {
-			return listWkpHist;
-		} else {
-			return Collections.emptyList();
+		String sql = "select distinct h.SID from BSYMT_AFF_WORKPLACE_HIST h"
+				+ " inner join BSYMT_AFF_WPL_HIST_ITEM i"
+				+ " on h.HIST_ID = i.HIST_ID"
+				+ " where i.WORKPLACE_ID = ?"
+				+ " and h.START_DATE <= ? and h.END_DATE >= ?";
+		
+		try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+			stmt.setString(1, workplaceId);
+			stmt.setDate(2, Date.valueOf(endDate.localDate()));
+			stmt.setDate(3, Date.valueOf(startDate.localDate()));
+			
+			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+				return rec.getString("SID");
+			});
 		}
 	}
 	
