@@ -117,13 +117,13 @@ public class TimeLeavingOfDailyService {
 				if (tlo != null) {
 					tl = mergeWithEditStates(working.getEditState(), tlo, wts);
 				}
-				if(wts.getAttendanceTime() == WorkTypeSetCheck.CHECK) {
-					wi.setGoStraightAtr(NotUseAttribute.Use);
-				}
-				if(wts.getTimeLeaveWork() == WorkTypeSetCheck.CHECK) {
-					wi.setBackStraightAtr(NotUseAttribute.Use);
-				}
-				correctedTlo = updateTimeLeave(companyId, wi, tl, workCondition, wi.getEmployeeId(), wi.getYmd());
+				WorkInfoOfDailyPerformance clonedWI = new WorkInfoOfDailyPerformance(wi.getEmployeeId(), wi.getRecordInfo(), 
+						wi.getScheduleInfo(), wi.getCalculationState(), 
+						wts.getAttendanceTime() == WorkTypeSetCheck.CHECK ? NotUseAttribute.Use : NotUseAttribute.Not_use, 
+						wts.getTimeLeaveWork() == WorkTypeSetCheck.CHECK ? NotUseAttribute.Use : NotUseAttribute.Not_use, 
+						wi.getYmd(), wi.getDayOfWeek(), wi.getScheduleTimeSheets()) ;
+				
+				correctedTlo = updateTimeLeave(companyId, clonedWI, tl, workCondition, wi.getEmployeeId(), wi.getYmd());
 			} else {
 				return EventHandleResult.withResult(EventHandleAction.ABORT, working);
 			}
