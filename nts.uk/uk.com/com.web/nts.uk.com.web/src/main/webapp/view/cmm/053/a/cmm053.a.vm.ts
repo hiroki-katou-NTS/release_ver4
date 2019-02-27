@@ -107,6 +107,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                 $('#A2_7').ntsError('clear');
                 setTimeout(function() {
                     if (value == '') {
+                        self.settingManager().departmentName('');
                         return;
                     }
                     if (value) {
@@ -138,6 +139,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                 $('#A2_10').ntsError('clear');
                 setTimeout(function() {
                     if (value == '') {
+                        self.settingManager().dailyApprovalName('');
                         return;
                     }
                     if (value) {
@@ -241,6 +243,9 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                                 let command = ko.toJS(self.settingManager());
                                 command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
                                 command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
+                                if(nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())){
+                                    command.dailyApproverId = '';
+                                }
                                 //ドメインモデル「承認設定」．本人による承認をチェックする
                                 self.checkApprovalSetting(command).done(() => {
                                     if (self.screenMode() == EXECUTE_MODE.NEW_MODE) {
@@ -265,6 +270,9 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                             let command = ko.toJS(self.settingManager());
                             command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
                             command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
+                            if(nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())){
+                                command.dailyApproverId = '';
+                            }
                             //ドメインモデル「承認設定」．本人による承認をチェックする
                             self.checkApprovalSetting(command).done(() => {
                                 if (self.screenMode() == EXECUTE_MODE.NEW_MODE) {
