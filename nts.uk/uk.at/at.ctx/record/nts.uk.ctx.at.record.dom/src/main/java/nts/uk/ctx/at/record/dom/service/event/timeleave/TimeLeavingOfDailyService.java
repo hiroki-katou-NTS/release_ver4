@@ -23,6 +23,7 @@ import nts.uk.ctx.at.record.dom.service.event.common.CorrectEventConts;
 import nts.uk.ctx.at.record.dom.service.event.common.EventHandleResult;
 import nts.uk.ctx.at.record.dom.service.event.common.EventHandleResult.EventHandleAction;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.workinformation.enums.NotUseAttribute;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
@@ -115,6 +116,12 @@ public class TimeLeavingOfDailyService {
 				TimeLeavingOfDailyPerformance tl = null;
 				if (tlo != null) {
 					tl = mergeWithEditStates(working.getEditState(), tlo, wts);
+				}
+				if(wts.getAttendanceTime() == WorkTypeSetCheck.CHECK) {
+					wi.setGoStraightAtr(NotUseAttribute.Use);
+				}
+				if(wts.getTimeLeaveWork() == WorkTypeSetCheck.CHECK) {
+					wi.setBackStraightAtr(NotUseAttribute.Use);
 				}
 				correctedTlo = updateTimeLeave(companyId, wi, tl, workCondition, wi.getEmployeeId(), wi.getYmd());
 			} else {
