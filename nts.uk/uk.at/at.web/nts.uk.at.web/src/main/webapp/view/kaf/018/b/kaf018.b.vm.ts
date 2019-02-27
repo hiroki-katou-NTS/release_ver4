@@ -24,7 +24,6 @@ module nts.uk.at.view.kaf018.b.viewmodel {
         isCheckedAll: KnockoutObservable<boolean> = ko.observable(false);
         constructor() {
             var self = this;
-            $("#fixed-table").ntsFixedTable({ width: 1030, height: 163 });
             self.isCheckedAll.subscribe(function(isCheck){
                 _.each(self.tempData, function(item){
                     if(item.isEnabled){
@@ -32,6 +31,11 @@ module nts.uk.at.view.kaf018.b.viewmodel {
                     }
                 });
             });
+            
+            var fixedTableOffsetTop = 214;
+            var marginBottom = 70;
+            var tableHeight = $(window).height() - fixedTableOffsetTop - marginBottom;
+            $("#fixed-table").ntsFixedTable({ width: 1030, height: tableHeight });
         }
 
         startPage(): JQueryPromise<any> {
