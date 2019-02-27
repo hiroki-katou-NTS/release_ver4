@@ -21,7 +21,7 @@ import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
-//import nts.arc.task.parallel.ManagedParallelWithContext;
+import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.uk.ctx.at.function.dom.adapter.RegularSortingTypeImport;
@@ -88,6 +88,8 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 	private AgreementTimeByPeriodAdapter agreementTimeByPeriodAdapter;
 	@Inject
 	private JobTitleAdapter jobTitleAdapter;
+	@Inject
+	private ManagedParallelWithContext parallel;
 
 	public static final String YM_FORMATER = "uuuu/MM";
 
@@ -322,7 +324,7 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 			boolean isOutNumExceed, PeriodAtrOfAgreement periodAtr, Integer monthLimit) {
 		Optional<ItemOutTblBook> outputAgreementTime36 = listItemOut.stream().filter(m -> m.isItem36AgreementTime())
 				.findFirst();
-		employeeIds.forEach(empId -> {
+		this.parallel.forEach(employeeIds, empId -> {
 			EmployeeData empData = exportData.getEmployees().get(empId);
 			Map<String, AnnualWorkScheduleData> annualWorkScheduleData = new HashMap<>();
 			// 36協定時間を出力するかのチェックをする
@@ -355,6 +357,7 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 	 * @param displayFormat
 	 *            表示形式
 	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	private Map<String, AnnualWorkScheduleData> create36AgreementTime(String cid, YearMonthPeriod yearMonthPeriod,
 			String employeeId, ItemOutTblBook outputAgreementTime36, Year fiscalYear, YearMonth startYm, boolean isOutNumExceed,
 			PeriodAtrOfAgreement periodAtr, Integer monthLimit, List<String> header) {
