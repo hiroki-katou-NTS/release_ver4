@@ -537,9 +537,9 @@ public class ExcessOutsideWorkMng {
 		
 		DatePeriod targetPeriod = new DatePeriod(datePeriod.start(), procDate);
 		
-		// 累計就業時間を集計する
+		// 集計対象時間を集計する
 		AttendanceTimeMonthWithMinus totalWorkTime =
-				new AttendanceTimeMonthWithMinus(workTime.getTimeSeriesTotalLegalActualTime(targetPeriod).v());
+				new AttendanceTimeMonthWithMinus(workTime.getAggregateTargetTime(targetPeriod).v());
 		
 		// 累計フレックス時間を集計する
 		AttendanceTimeMonthWithMinus totalFlexTime =

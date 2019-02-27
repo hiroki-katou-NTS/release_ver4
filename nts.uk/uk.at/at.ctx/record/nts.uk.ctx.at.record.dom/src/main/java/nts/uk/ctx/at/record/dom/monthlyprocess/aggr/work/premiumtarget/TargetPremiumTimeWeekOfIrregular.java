@@ -10,7 +10,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 変形労働勤務の週割増対象時間
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class TargetPremiumTimeWeekOfIrregular {
@@ -23,7 +23,7 @@ public class TargetPremiumTimeWeekOfIrregular {
 	private AttendanceTimeMonth premiumTimeOfPrevMonth;
 	
 	/**
-	 * 変形労働勤務の月割増時間の対象となる時間を求める
+	 * 変形労働勤務の週割増時間の対象となる時間を求める
 	 * @param companyId 会社ID
 	 * @param employeeId 社員ID
 	 * @param weekPeriod 週割増処理期間
@@ -33,7 +33,7 @@ public class TargetPremiumTimeWeekOfIrregular {
 	 * @param premiumTimeOfPrevMonLast 前月の最終週の週割増対象時間
 	 * @return 変形労働勤務の週割増対象時間
 	 */
-	public static TargetPremiumTimeWeekOfIrregular askPremiumTimeMonth(String companyId, String employeeId, DatePeriod weekPeriod,
+	public static TargetPremiumTimeWeekOfIrregular askPremiumTimeWeek(String companyId, String employeeId, DatePeriod weekPeriod,
 			AddSet addSet, AggregateTotalWorkingTime aggregateTotalWorkingTime, boolean isAddVacation,
 			AttendanceTimeMonth premiumTimeOfPrevMonLast){
 
@@ -42,10 +42,10 @@ public class TargetPremiumTimeWeekOfIrregular {
 		domain.premiumTimeOfCurrentMonth = new AttendanceTimeMonth(0);
 		domain.premiumTimeOfPrevMonth = new AttendanceTimeMonth(premiumTimeOfPrevMonLast.v());
 		
-		// 法定内時間を取得する
-		val legalTime = aggregateTotalWorkingTime.getWorkTime().getTimeSeriesTotalLegalActualTime(weekPeriod);
+		// 集計対象時間を取得する
+		val legalTime = aggregateTotalWorkingTime.getWorkTime().getAggregateTargetTime(weekPeriod);
 
-		// 週割増時間に法定内時間（就業時間）を加算する
+		// 週割増時間に集計対象時間を加算する
 		domain.premiumTimeWeek = domain.premiumTimeWeek.addMinutes(legalTime.v());
 		
 		// 法定内残業時間を取得する
@@ -63,7 +63,7 @@ public class TargetPremiumTimeWeekOfIrregular {
 		// 休暇加算を確認する
 		if (isAddVacation){
 			
-			// 加算する休暇時間を取得する
+			// 休暇加算時間を取得する
 			val vacationAddTime = GetVacationAddTime.getTime(
 					weekPeriod, aggregateTotalWorkingTime.getVacationUseTime(), addSet);
 			

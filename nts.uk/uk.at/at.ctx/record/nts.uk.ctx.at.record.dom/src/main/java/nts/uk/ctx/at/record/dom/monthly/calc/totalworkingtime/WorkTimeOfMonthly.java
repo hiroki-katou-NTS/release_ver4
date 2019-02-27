@@ -16,11 +16,15 @@ import nts.uk.ctx.at.record.dom.monthly.calc.actualworkingtime.RegularAndIrregul
 import nts.uk.ctx.at.record.dom.monthly.calc.flex.FlexTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.calc.totalworkingtime.hdwkandcompleave.HolidayWorkTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.calc.totalworkingtime.overtime.OverTimeOfMonthly;
+import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.MonAggrCompanySettings;
+import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.RepositoriesRequiredByMonthlyAggr;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.timeseries.WorkTimeOfTimeSeries;
 import nts.uk.ctx.at.record.dom.weekly.RegAndIrgTimeOfWeekly;
+import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonth;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
@@ -93,9 +97,15 @@ public class WorkTimeOfMonthly implements Cloneable {
 	 * 就業時間を確認する
 	 * @param datePeriod 期間
 	 * @param attendanceTimeOfDailyMap 日別実績の勤怠時間リスト
+	 * @param workInformationOfDailyMap 日別実績の勤務情報リスト
+	 * @param companySets 月別集計で必要な会社別設定
+	 * @param repositories 月次集計が必要とするリポジトリ
 	 */
 	public void confirm(DatePeriod datePeriod,
-			Map<GeneralDate, AttendanceTimeOfDailyPerformance> attendanceTimeOfDailyMap){
+			Map<GeneralDate, AttendanceTimeOfDailyPerformance> attendanceTimeOfDailyMap,
+			Map<GeneralDate, WorkInfoOfDailyPerformance> workInformationOfDailyMap,
+			MonAggrCompanySettings companySets,
+			RepositoriesRequiredByMonthlyAggr repositories){
 		
 		for (val attendanceTimeOfDaily : attendanceTimeOfDailyMap.values()) {
 			val ymd = attendanceTimeOfDaily.getYmd();
@@ -132,6 +142,18 @@ public class WorkTimeOfMonthly implements Cloneable {
 			// 「日別実績の総労働時間．休暇加算時間」を取得する
 			val vacationAddTime = totalWorkingTime.getVacationAddTime();
 	
+			// 勤務種類を確認する
+			WorkType workType = null;
+			if (workInformationOfDailyMap.containsKey(ymd)) {
+				if (workInformationOfDailyMap.get(ymd).getRecordInfo() != null) {
+					val record = workInformationOfDailyMap.get(ymd).getRecordInfo();
+					if (record.getWorkTypeCode() != null) {
+						String workTypeCode = record.getWorkTypeCode().v();
+						workType = companySets.getWorkTypeMap(workTypeCode, repositories);
+					}
+				}
+			}
+			
 			// 時系列ワークに追加
 			val workTimeOfTimeSeries = WorkTimeOfTimeSeries.of(ymd,
 					WithinStatutoryTimeOfDaily.createWithinStatutoryTimeOfDaily(
@@ -140,7 +162,8 @@ public class WorkTimeOfMonthly implements Cloneable {
 							withinPrescribedPremiumTime,
 							withinPrescribedTimeOfDaily.getWithinStatutoryMidNightTime(),
 							withinPrescribedTimeOfDaily.getVacationAddTime()),
-					vacationAddTime
+					vacationAddTime,
+					workType
 					);
 			this.timeSeriesWorks.putIfAbsent(ymd, workTimeOfTimeSeries);
 		}
@@ -174,6 +197,21 @@ public class WorkTimeOfMonthly implements Cloneable {
 			returnTime = returnTime.addMinutes(timeSeriesWork.getLegalTime().getActualWorkTime().v());
 		}
 		return returnTime;
+	}
+	
+	/**
+	 * 集計対象時間を取得
+	 * @param datePeriod 期間
+	 * @return 集計対象時間
+	 */
+	public AttendanceTimeMonth getAggregateTargetTime(DatePeriod datePeriod){
+		
+		AttendanceTimeMonth result = new AttendanceTimeMonth(0);
+		for (val timeSeriesWork : this.timeSeriesWorks.values()){
+			if (!datePeriod.contains(timeSeriesWork.getYmd())) continue;
+			result = result.addMinutes(timeSeriesWork.getAggregateTargetTime().v());
+		}
+		return result;
 	}
 	
 	/**
@@ -248,10 +286,16 @@ public class WorkTimeOfMonthly implements Cloneable {
 	 * 就業時間を集計する　（任意期間別集計用）
 	 * @param datePeriod 期間
 	 * @param attendanceTimeOfDailyMap 日別実績の勤怠時間リスト
+	 * @param workInfoOfDailyMap 日別実績の勤務情報リスト
+	 * @param companySets 月別集計で必要な会社別設定
+	 * @param repositories 月次集計が必要とするリポジトリ
 	 */
 	public void aggregateForByPeriod(
 			DatePeriod datePeriod,
-			Map<GeneralDate, AttendanceTimeOfDailyPerformance> attendanceTimeOfDailyMap){
+			Map<GeneralDate, AttendanceTimeOfDailyPerformance> attendanceTimeOfDailyMap,
+			Map<GeneralDate, WorkInfoOfDailyPerformance> workInfoOfDailyMap,
+			MonAggrCompanySettings companySets,
+			RepositoriesRequiredByMonthlyAggr repositories){
 		
 		for (val attendanceTimeOfDaily : attendanceTimeOfDailyMap.values()) {
 			val ymd = attendanceTimeOfDaily.getYmd();
@@ -272,6 +316,18 @@ public class WorkTimeOfMonthly implements Cloneable {
 						new AttendanceTime(0));
 			}
 	
+			// 勤務種類を確認する
+			WorkType workType = null;
+			if (workInfoOfDailyMap.containsKey(ymd)) {
+				if (workInfoOfDailyMap.get(ymd).getRecordInfo() != null) {
+					val record = workInfoOfDailyMap.get(ymd).getRecordInfo();
+					if (record.getWorkTypeCode() != null) {
+						String workTypeCode = record.getWorkTypeCode().v();
+						workType = companySets.getWorkTypeMap(workTypeCode, repositories);
+					}
+				}
+			}
+			
 			// 時系列ワークに追加
 			val workTimeOfTimeSeries = WorkTimeOfTimeSeries.of(ymd,
 					WithinStatutoryTimeOfDaily.createWithinStatutoryTimeOfDaily(
@@ -280,7 +336,8 @@ public class WorkTimeOfMonthly implements Cloneable {
 							withinPrescribedTimeOfDaily.getWithinPrescribedPremiumTime(),
 							withinPrescribedTimeOfDaily.getWithinStatutoryMidNightTime(),
 							withinPrescribedTimeOfDaily.getVacationAddTime()),
-					new AttendanceTime(0));
+					new AttendanceTime(0),
+					workType);
 			this.timeSeriesWorks.putIfAbsent(ymd, workTimeOfTimeSeries);
 		}
 	}
