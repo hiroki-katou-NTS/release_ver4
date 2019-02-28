@@ -434,6 +434,7 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 	 */
 	private void createOptionalItems(ExportData exportData, YearMonthPeriod yearMonthPeriod, List<String> employeeIds,
 			List<ItemOutTblBook> listItemOut, YearMonth startYm) {
+		if (listItemOut.isEmpty()) return;
 		List<Integer> allItemIds = new ArrayList<>();
 		for(ItemOutTblBook itemOut: listItemOut){
 			List<Integer> itemIds = itemOut.getListOperationSetting().stream().map(os -> os.getAttendanceItemId())
@@ -441,6 +442,7 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 			allItemIds.addAll(itemIds);
 		}
 		allItemIds = allItemIds.stream().distinct().collect(Collectors.toList());
+		if (allItemIds.isEmpty()) return;
 		// アルゴリズム「対象期間の月次データの取得」を実行する
 		List<MonthlyAttendanceResultImport> allMonthlyAtt = monthlyAttendanceItemAdapter
 				.getMonthlyValueOfParallel(employeeIds, yearMonthPeriod, allItemIds);
