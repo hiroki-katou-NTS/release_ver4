@@ -335,6 +335,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
 //            let htmlF = htmlN.replace("<!DOCTYPE html>", "");
             document.querySelector('#master-content').innerHTML = html;
             ko.cleanNode(document.querySelector('#master-content'));
+            $('#master-content').css("display","none");
             screenModel = self.getScreenModel(listAppMeta, currentApp);
             __viewContext['viewModel'] = screenModel;
             ko.applyBindings(screenModel, document.querySelector('#master-content'));
@@ -343,6 +344,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             self.appType(currentApp.appType);
             __viewContext.transferred.value.currentApp = currentApp.appID;
             self.start(moment.utc().format("YYYY/MM/DD"), isWriteLog).done(function() {
+                $('#master-content').css("display","");
                 self.pgname(currentApp)
                 if (currentApp.appType == 10) {
                     $("#fixed-table").ntsFixedTable({ width: 100 });
