@@ -228,6 +228,56 @@ public class JpaWorkingConditionItemRepository extends JpaRepository
 				new JpaWorkingConditionItemGetMemento(result.get(FIRST_ITEM_INDEX))));
 	}
 
+	@Override
+	public List<WorkingConditionItem> getBySidsAndStandardDate(List<String> employeeIds, GeneralDate baseDate) {
+		// get entity manager
+		EntityManager em = this.getEntityManager();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+
+		CriteriaQuery<KshmtWorkingCondItem> cq = criteriaBuilder
+				.createQuery(KshmtWorkingCondItem.class);
+
+		// root data
+		Root<KshmtWorkingCondItem> root = cq.from(KshmtWorkingCondItem.class);
+
+		// select root
+		cq.select(root);
+
+		List<KshmtWorkingCondItem> result = new ArrayList<>();
+
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			// add where
+			List<Predicate> lstpredicateWhere = new ArrayList<>();
+
+			// equal
+			lstpredicateWhere.add(root.get(KshmtWorkingCondItem_.sid).in(subList));
+			lstpredicateWhere.add(criteriaBuilder.lessThanOrEqualTo(
+					root.get(KshmtWorkingCondItem_.kshmtWorkingCond).get(KshmtWorkingCond_.strD),
+					baseDate));
+			lstpredicateWhere.add(criteriaBuilder.greaterThanOrEqualTo(
+					root.get(KshmtWorkingCondItem_.kshmtWorkingCond).get(KshmtWorkingCond_.endD),
+					baseDate));
+
+			// set where to SQL
+			cq.where(lstpredicateWhere.toArray(new Predicate[]{}));
+
+			// creat query
+			TypedQuery<KshmtWorkingCondItem> query = em.createQuery(cq);
+
+			result.addAll(query.getResultList());
+		});
+
+		// Check empty
+		if (CollectionUtil.isEmpty(result)) {
+			return Collections.emptyList();
+		}
+
+		// exclude select
+		return result.stream().map(
+				entity -> new WorkingConditionItem(new JpaWorkingConditionItemGetMemento(entity)))
+				.collect(Collectors.toList());
+	}
+
 	/**
 	 * Gets the list by sid and date period
 	 *

@@ -322,9 +322,24 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 	private void createAnnualWorkSchedule36Agreement(String cid, ExportData exportData, YearMonthPeriod yearMonthPeriod,
 			List<String> employeeIds, List<ItemOutTblBook> listItemOut, Year fiscalYear, YearMonth startYm,
 			boolean isOutNumExceed, PeriodAtrOfAgreement periodAtr, Integer monthLimit) {
-		Optional<ItemOutTblBook> outputAgreementTime36 = listItemOut.stream().filter(m -> m.isItem36AgreementTime())
+		Optional<ItemOutTblBook> outputAgreementTime36Otp = listItemOut.stream().filter(m -> m.isItem36AgreementTime())
 				.findFirst();
-		this.parallel.forEach(employeeIds, empId -> {
+		// 36協定時間を出力するかのチェックをする
+		if (outputAgreementTime36Otp.isPresent()) {
+			ItemOutTblBook outputAgreementTime36 = outputAgreementTime36Otp.get();
+
+		}
+		GeneralDate criteria = GeneralDate.ymd(fiscalYear.v(), 12, 31);
+		Month startMonth = new Month(startYm.getMonth().getValue());
+		List<PeriodAtrOfAgreement> periodAtrs = new ArrayList<>();
+		periodAtrs.add(PeriodAtrOfAgreement.ONE_MONTH);
+		periodAtrs.add(PeriodAtrOfAgreement.ONE_YEAR);
+		if (PeriodAtrOfAgreement.TWO_MONTHS.equals(periodAtr) || PeriodAtrOfAgreement.THREE_MONTHS.equals(periodAtr)) {
+			periodAtrs.add(periodAtr);
+		}
+		agreementTimeByPeriodAdapter.algorithmImprove(cid,employeeIds,criteria,startMonth,fiscalYear,periodAtrs);
+
+		/*this.parallel.forEach(employeeIds, empId -> {
 			EmployeeData empData = exportData.getEmployees().get(empId);
 			Map<String, AnnualWorkScheduleData> annualWorkScheduleData = new HashMap<>();
 			// 36協定時間を出力するかのチェックをする
@@ -340,7 +355,7 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 		// アルゴリズム「任意項目の作成」を実行する
 		this.createOptionalItems(exportData, yearMonthPeriod, employeeIds,
 				listItemOut.stream().filter(item -> !item.isItem36AgreementTime()).collect(Collectors.toList()),
-				startYm);
+				startYm);*/
 		// 対象の社員IDをエラーリストに格納する
 		exportData.storeEmployeeError();
 	}
