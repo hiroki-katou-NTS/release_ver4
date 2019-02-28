@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.request.app.command.application.common;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -15,11 +17,18 @@ import nts.arc.layer.app.command.CommandHandlerWithResult;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.app.find.application.common.ApplicationDto_New;
 import nts.uk.ctx.at.request.app.find.application.common.dto.InputApproveData;
+import nts.uk.ctx.at.request.app.find.setting.company.request.applicationsetting.apptypesetting.DisplayReasonDto;
+import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.InitMode;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.after.DetailAfterApproval_New;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.before.DetailBeforeUpdate;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.DetailScreenInitModeOutput;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.OutputMode;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.User;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ApproveProcessResult;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
+import nts.uk.ctx.at.request.dom.setting.company.request.applicationsetting.apptypesetting.DisplayReasonRepository;
 import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSetting;
 import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSettingRepository;
 import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSetting;
@@ -44,6 +53,12 @@ public class UpdateApplicationApproveHandler extends CommandHandlerWithResult<In
 	
 	@Inject
 	private AppTypeDiscreteSettingRepository appTypeDiscreteSettingRepository;
+	
+	@Inject
+	private DisplayReasonRepository displayRep;
+	
+	@Inject
+	private InitMode initMode;
 
 	@Override
 	protected ApproveProcessResult handle(CommandHandlerContext<InputApproveData> context) {
@@ -52,39 +67,59 @@ public class UpdateApplicationApproveHandler extends CommandHandlerWithResult<In
 		String employeeID = AppContexts.user().employeeId();
 		ApplicationDto_New command = context.getCommand().getApplicationDto();
 		
-		AppTypeDiscreteSetting appTypeDiscreteSetting = appTypeDiscreteSettingRepository.getAppTypeDiscreteSettingByAppType(
-				companyID, 
-				command.getApplicationType()).get();
-		String appReason = Strings.EMPTY;	
-		String typicalReason = Strings.EMPTY;
-		String displayReason = Strings.EMPTY;
-		if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)){
-			typicalReason += context.getCommand().getComboBoxReason();
-		}
-		if(appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
-			if(Strings.isNotBlank(typicalReason)){
-				displayReason += System.lineSeparator();
-			}
-			displayReason += context.getCommand().getTextAreaReason();
-		}
 		Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
 				.getApplicationSettingByComID(companyID);
 		ApplicationSetting applicationSetting = applicationSettingOp.get();
-		if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)
-				&&appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+		List<DisplayReasonDto> displayReasonDtoLst = 
+				displayRep.findDisplayReason(companyID).stream().map(x -> DisplayReasonDto.fromDomain(x)).collect(Collectors.toList());
+		DisplayReasonDto displayReasonSet = displayReasonDtoLst.stream().filter(x -> x.getTypeOfLeaveApp() == context.getCommand().getHolidayAppType())
+				.findAny().orElse(null);
+		DetailScreenInitModeOutput output = initMode.getDetailScreenInitMode(EnumAdaptor.valueOf(context.getCommand().getUser(), User.class), context.getCommand().getReflectPerState());
+		String appReason = Strings.EMPTY;
+		boolean isUpdateReason = false;
+		if(output.getOutputMode()==OutputMode.EDITMODE){
+			boolean displayFixedReason = false;
+			boolean displayAppReason = false;
+			Integer appType = command.getApplicationType();
+			if(appType==ApplicationType.ABSENCE_APPLICATION.value){
+				displayFixedReason = displayReasonSet.getDisplayFixedReason() == 1 ? true : false;
+				displayAppReason = displayReasonSet.getDisplayAppReason() == 1 ? true : false;
+			} else {
+				AppTypeDiscreteSetting appTypeDiscreteSetting = appTypeDiscreteSettingRepository.getAppTypeDiscreteSettingByAppType(
+						companyID, 
+						appType).get();
+				displayFixedReason = appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY);
+				displayAppReason = appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY);
+			}
+			String typicalReason = Strings.EMPTY;
+			String displayReason = Strings.EMPTY;
+			if(displayFixedReason){
+				typicalReason += context.getCommand().getComboBoxReason();
+			}
+			if(displayAppReason){
+				if(Strings.isNotBlank(typicalReason)){
+					displayReason += System.lineSeparator();
+				}
+				displayReason += context.getCommand().getTextAreaReason();
+			}
+			
+			if(displayFixedReason||displayAppReason){
 				if (applicationSetting.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
 						&& Strings.isBlank(typicalReason+displayReason)) {
 					throw new BusinessException("Msg_115");
 				}
 			}
-		appReason = typicalReason + displayReason;
-		
+			appReason = typicalReason + displayReason;
+			if(displayFixedReason||displayAppReason){
+				isUpdateReason = true;
+			}
+		}
 		// 4-1.詳細画面登録前の処理 lan nay deu bi hoan lai
 		beforeRegisterRepo.processBeforeDetailScreenRegistration(companyID, command.getApplicantSID(),
 				GeneralDate.today(), 1,command.getApplicationID(), EnumAdaptor.valueOf(command.getPrePostAtr(), PrePostAtr.class), command.getVersion());
 		
 		//8-2.詳細画面承認後の処理
-		ProcessResult processResult = detailAfterApproval_New.doApproval(companyID, command.getApplicationID(), employeeID, memo, appReason, true);
+		ProcessResult processResult = detailAfterApproval_New.doApproval(companyID, command.getApplicationID(), employeeID, memo, appReason, isUpdateReason);
 		
 		return new ApproveProcessResult(
 				processResult.isProcessDone(), 

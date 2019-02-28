@@ -558,7 +558,7 @@ module nts.uk.at.view.kaf006.b{
              if (nts.uk.ui.errors.hasError()){return;} 
              nts.uk.ui.block.invisible();
              let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
-             let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), self.enbContentReason());
+             let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true); 
              let appReason: string;
              if (!appcommon.CommonProcess.checklenghtReason(comboBoxReason+":"+textAreaReason, "#appReason")) {
                  return;
@@ -612,7 +612,7 @@ module nts.uk.at.view.kaf006.b{
     
         getAreaReason(){
             var self = this;
-            return appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), self.enbContentReason());   
+            return appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);   
         }   
             
         resfreshReason(appReason: string){
