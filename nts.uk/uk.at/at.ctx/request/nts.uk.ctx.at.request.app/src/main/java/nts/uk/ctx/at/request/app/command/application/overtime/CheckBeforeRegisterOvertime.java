@@ -90,7 +90,7 @@ public class CheckBeforeRegisterOvertime {
 			boolean isPreExcessCheck = overTimeSetting.getPreExcessDisplaySetting().equals(UseAtr.USE);
 		if (overtimeInputs != null && !overtimeInputs.isEmpty() && isPreExcessCheck) {
 			res = beforeCheck.preApplicationExceededCheck(app.getCompanyID(), app.getAppDate(),
-					app.getInputDate(), app.getPrePostAtr(), AttendanceType.NORMALOVERTIME.value, overtimeInputs);
+					app.getInputDate(), app.getPrePostAtr(), AttendanceType.NORMALOVERTIME.value, overtimeInputs, employeeId);
 			if (res.getErrorCode() != 0) {
 				result.setErrorCode(res.getErrorCode());
 				result.setFrameNo(res.getFrameNo());
@@ -155,7 +155,7 @@ public class CheckBeforeRegisterOvertime {
 		
 		if (overtimeInputs != null && !overtimeInputs.isEmpty()) {
 			res = beforeCheck.preApplicationExceededCheck(appRoot.getCompanyID(), appRoot.getAppDate(),
-					appRoot.getInputDate(), appRoot.getPrePostAtr(), AttendanceType.NORMALOVERTIME.value, overtimeInputs);
+					appRoot.getInputDate(), appRoot.getPrePostAtr(), AttendanceType.NORMALOVERTIME.value, overtimeInputs, employeeId);
 			if (res.getErrorCode() != 0) {
 				result.setErrorCode(res.getErrorCode());
 				result.setFrameNo(res.getFrameNo());
