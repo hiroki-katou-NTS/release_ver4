@@ -1130,10 +1130,11 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             nts.uk.ui.dialog.info({ messageId: "Msg_1455" });
                         }
 
-                        if ((dataAfter.showErrorDialog == null && self.showDialogError) || dataAfter.showErrorDialog) {
-                            self.showDialogError = true;
-                            self.showErrorDialog(dataAfter.messageAlert);
-                        } else if(errorFlex|| (self.flagCalculation && self.hasErrorCalc)){
+//                        if ((dataAfter.showErrorDialog == null && self.showDialogError) || dataAfter.showErrorDialog) {
+//                            self.showDialogError = true;
+//                            self.showErrorDialog(dataAfter.messageAlert);
+//                        } else 
+                        if(errorFlex|| (self.flagCalculation && self.hasErrorCalc)){
                             self.showErrorDialog(dataAfter.messageAlert);
                         }else {
                             self.showDialogError = false;
