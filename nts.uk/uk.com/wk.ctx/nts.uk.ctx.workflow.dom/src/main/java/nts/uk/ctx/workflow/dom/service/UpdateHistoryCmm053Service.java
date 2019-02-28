@@ -28,4 +28,7 @@ public interface UpdateHistoryCmm053Service {
 	 * @param psAppRoot
 	 */
 	void updateApproverFirstPhase(String companyId, String employeeIdApprover, PersonApprovalRoot psAppRoot);
+	
+	void updateRootCMM053(String companyId, String a27, String a210,PersonApprovalRoot commonRoot, 
+			PersonApprovalRoot monthlyRoot, boolean dailyDisplay);
 }
