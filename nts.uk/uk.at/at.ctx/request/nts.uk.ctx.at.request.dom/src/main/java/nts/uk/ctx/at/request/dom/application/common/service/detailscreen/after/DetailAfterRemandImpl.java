@@ -185,7 +185,7 @@ public class DetailAfterRemandImpl implements DetailAfterRemand {
 							application.getAppID(), 
 							application.getAppType().value, 
 							application.getPrePostAtr().value, 
-							AppContexts.user().employeeId(), 
+							"", 
 							employee);
 				}
 			}
