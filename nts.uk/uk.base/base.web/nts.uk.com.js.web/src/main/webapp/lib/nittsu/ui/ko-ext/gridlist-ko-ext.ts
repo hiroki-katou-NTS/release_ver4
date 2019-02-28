@@ -435,7 +435,7 @@ module nts.uk.ui.koExtentions {
                 }
                 if(clickCheckBox){
                     let $checkBox = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                    if ($checkBox.data("chk") === "off") {
+                    if ($checkBox[0].getAttribute("data-chk") === "off") {
                         $checkBox.click();
                     }
                 } else {
