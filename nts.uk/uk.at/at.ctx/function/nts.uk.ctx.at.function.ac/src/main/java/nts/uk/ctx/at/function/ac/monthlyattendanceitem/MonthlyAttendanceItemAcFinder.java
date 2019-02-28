@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.task.parallel.ManagedParallelWithContext;
@@ -18,6 +20,7 @@ import nts.uk.ctx.at.function.dom.adapter.monthlyattendanceitem.MonthlyAttendanc
 import nts.uk.ctx.at.record.pub.dailyattendanceitem.AttendanceItemService;
 import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
 
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @Stateless
 public class MonthlyAttendanceItemAcFinder implements MonthlyAttendanceItemAdapter {
 
@@ -52,6 +55,7 @@ public class MonthlyAttendanceItemAcFinder implements MonthlyAttendanceItemAdapt
 	/**
 	 * RequestList421
 	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Override
 	public List<MonthlyAttendanceResultImport> getMonthlyValueOf(String employeeId, YearMonthPeriod range,
 			Collection<Integer> itemIds) {
