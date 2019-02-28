@@ -164,7 +164,7 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 		wsc.addCopy(0);
 		Worksheet ws = wsc.get(sheetIndex);
 		// sheet name
-		String sheetName = sheetIndex == 1 ? reportName : reportName + "_" + (sheetIndex - 1);
+		String sheetName = sheetIndex == 1 ? reportName : reportName + sheetIndex;
 		ws.setName(sheetName);
 		return ws;
 	}
