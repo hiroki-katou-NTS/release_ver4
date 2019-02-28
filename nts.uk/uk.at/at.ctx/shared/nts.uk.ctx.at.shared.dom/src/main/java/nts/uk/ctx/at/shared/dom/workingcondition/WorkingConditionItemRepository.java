@@ -50,7 +50,7 @@ public interface WorkingConditionItemRepository {
 	 * @param baseDate the base date
 	 * @return the optional
 	 */
-	List<WorkingConditionItem> getBySidsAndStandardDate(List<String> employeeIds, GeneralDate baseDate);
+	List<WorkingConditionItemCustom> getBySidsAndStandardDate(List<String> employeeIds, GeneralDate baseDate);
 	
 	/**
 	 * Gets the by sids and base date.

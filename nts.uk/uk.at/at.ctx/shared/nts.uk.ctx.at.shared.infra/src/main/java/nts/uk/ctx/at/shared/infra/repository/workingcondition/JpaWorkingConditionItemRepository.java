@@ -36,6 +36,7 @@ import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.workingcondition.MonthlyPatternCode;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemCustom;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionWithDataPeriod;
 import nts.uk.ctx.at.shared.infra.entity.workingcondition.KshmtDayofweekTimeZone;
@@ -229,7 +230,7 @@ public class JpaWorkingConditionItemRepository extends JpaRepository
 	}
 
 	@Override
-	public List<WorkingConditionItem> getBySidsAndStandardDate(List<String> employeeIds, GeneralDate baseDate) {
+	public List<WorkingConditionItemCustom> getBySidsAndStandardDate(List<String> employeeIds, GeneralDate baseDate) {
 		// get entity manager
 		EntityManager em = this.getEntityManager();
 		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
@@ -273,8 +274,7 @@ public class JpaWorkingConditionItemRepository extends JpaRepository
 		}
 
 		// exclude select
-		return result.stream().map(
-				entity -> new WorkingConditionItem(new JpaWorkingConditionItemGetMemento(entity)))
+		return result.stream().map(entity -> new WorkingConditionItemCustom(entity.getSid(), entity.getLaborSys()))
 				.collect(Collectors.toList());
 	}
 

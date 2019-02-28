@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.infra.repository.standardtime;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -8,7 +9,9 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 
 import lombok.val;
+import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.gul.collection.CollectionUtil;
 //import nts.arc.time.YearMonth;
 //import nts.uk.ctx.at.record.dom.standardtime.AgreementMonthSetting;
 import nts.uk.ctx.at.record.dom.standardtime.AgreementYearSetting;
@@ -91,11 +94,15 @@ public class JpaAgreementYearSettingRepository extends JpaRepository implements 
 
 	@Override
 	public List<AgreementYearSetting> findByKey(List<String> employeeIds, int yearMonth) {
-		if (employeeIds == null || employeeIds.isEmpty()) return Collections.emptyList();
-		return this.queryProxy().query(FIND_BY_IDS, KmkmtAgeementYearSetting.class)
-				.setParameter("employeeIds", employeeIds)
-				.setParameter("yearValue", yearMonth)
-				.getList(f -> toDomain(f));
+		if (employeeIds == null || employeeIds.isEmpty())
+			return Collections.emptyList();
+		List<AgreementYearSetting> result = new ArrayList<>();
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
+			result.addAll(this.queryProxy().query(FIND_BY_IDS, KmkmtAgeementYearSetting.class)
+					.setParameter("employeeIds", splitData).setParameter("yearValue", yearMonth)
+					.getList(f -> toDomain(f)));
+		});
+		return result;
 	}
 
 	@Override

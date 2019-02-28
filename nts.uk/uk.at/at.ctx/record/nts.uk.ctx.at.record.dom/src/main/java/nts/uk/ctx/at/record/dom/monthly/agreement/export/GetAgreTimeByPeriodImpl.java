@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import lombok.val;
+import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.monthly.agreement.AgreementTimeOfManagePeriod;
@@ -21,6 +22,7 @@ import nts.uk.ctx.at.shared.dom.common.Month;
 import nts.uk.ctx.at.shared.dom.common.Year;
 import nts.uk.ctx.at.shared.dom.monthly.agreement.PeriodAtrOfAgreement;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemCustom;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 
 /**
@@ -45,6 +47,8 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
 	/** 36協定年月設定 */
 	@Inject
 	private AgreementMonthSettingRepository agreementMonthSetRepo;
+    @Inject
+    private ManagedParallelWithContext parallel;
 	
 	/** 指定期間36協定時間の取得 */
 	@Override
@@ -166,73 +170,83 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
 
 	@Override
 	public List<AgreementTimeByEmp> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
-														Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs) {
-		List<AgreementTimeByEmp> agreementTimes = new ArrayList<>();
-		YearMonth startYm = YearMonth.of(year.v(), startMonth.v());
-		List<YearMonth> periodYmAll = new ArrayList<>();
-		for (int i = 0; i < 12; i++) {
-			periodYmAll.add(startYm.addMonths(i));
-		}
-		// 36協定時間を取得
-		Map<String, List<AgreementTimeOfManagePeriod>> agreementTimeAll =
-				this.agreementTimeOfMngPrdRepo.findBySidsAndYearMonths(employeeIds, periodYmAll).stream()
-						.collect(Collectors.groupingBy(AgreementTimeOfManagePeriod::getEmployeeId));
+                                                     Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs) {
+        YearMonth startYm = YearMonth.of(year.v(), startMonth.v());
+        List<YearMonth> periodYmAll = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            periodYmAll.add(startYm.addMonths(i));
+        }
+        // 36協定時間を取得
+        Map<String, List<AgreementTimeOfManagePeriod>> agreementTimeAll =
+                this.agreementTimeOfMngPrdRepo.findBySidsAndYearMonths(employeeIds, periodYmAll).stream()
+                        .collect(Collectors.groupingBy(AgreementTimeOfManagePeriod::getEmployeeId));
 
-		// 「労働条件項目」を取得
-		Map<String, WorkingConditionItem> workingConditionItemAll =
-				this.workingConditionItem.getBySidsAndStandardDate(employeeIds, criteria).stream()
-						.collect(Collectors.toMap(WorkingConditionItem::getEmployeeId, x -> x));
+        // 「労働条件項目」を取得
+        Map<String, WorkingConditionItemCustom> workingConditionItemAll =
+                this.workingConditionItem.getBySidsAndStandardDate(employeeIds, criteria).stream()
+                        .collect(Collectors.toMap(WorkingConditionItemCustom::getEmployeeId, x -> x));
 
-		Map<String, AgreementYearSetting> yearSetAll = new HashMap<>();
-		if (periodAtrs.contains(PeriodAtrOfAgreement.ONE_YEAR)) {
-			// 36協定年度設定を取得する
-			yearSetAll = this.agreementYearSetRepo.findByKey(employeeIds, year.v()).stream()
-					.collect(Collectors.toMap(AgreementYearSetting::getEmployeeId, x -> x));
-		}
+        Map<String, AgreementYearSetting> yearSetAll = new HashMap<>();
+        if (periodAtrs.contains(PeriodAtrOfAgreement.ONE_YEAR)) {
+            // 36協定年度設定を取得する
+            yearSetAll = this.agreementYearSetRepo.findByKey(employeeIds, year.v()).stream()
+                    .collect(Collectors.toMap(AgreementYearSetting::getEmployeeId, x -> x));
+        }
 
-		Map<String, List<AgreementMonthSetting>> monthSetAll = new HashMap<>();
-		if (periodAtrs.contains(PeriodAtrOfAgreement.ONE_MONTH)) {
-			// 36協定年月設定を取得する
-			monthSetAll = this.agreementMonthSetRepo.findByKey(employeeIds, periodYmAll).stream()
-					.collect(Collectors.groupingBy(AgreementMonthSetting::getEmployeeId));
-		}
+        Map<String, List<AgreementMonthSetting>> monthSetAll = new HashMap<>();
+        if (periodAtrs.contains(PeriodAtrOfAgreement.ONE_MONTH)) {
+            // 36協定年月設定を取得する
+            monthSetAll = this.agreementMonthSetRepo.findByKey(employeeIds, periodYmAll).stream()
+                    .collect(Collectors.groupingBy(AgreementMonthSetting::getEmployeeId));
+        }
 
-		for (String employeeId : employeeIds) {
-			if (!agreementTimeAll.containsKey(employeeId)) continue;
-			List<AgreementTimeOfManagePeriod> agreementTimeByEmp = agreementTimeAll.get(employeeId);
+        Map<String, AgreementYearSetting> finalYearSetAll = yearSetAll;
+        Map<String, List<AgreementMonthSetting>> finalMonthSetAll = monthSetAll;
+        List<AgreementTimeByEmp> agreementTimes = Collections.synchronizedList(new ArrayList<>());
+        this.parallel.forEach(employeeIds, employeeId -> {
+            if (!agreementTimeAll.containsKey(employeeId)) return;
+            List<AgreementTimeOfManagePeriod> agreementTimeByEmp = agreementTimeAll.get(employeeId);
 
-			// 「労働条件項目」を取得
-			if (!workingConditionItemAll.containsKey(employeeId)) continue;
-			WorkingConditionItem workingConditionItemByEmp = workingConditionItemAll.get(employeeId);
+            // 「労働条件項目」を取得
+            if (!workingConditionItemAll.containsKey(employeeId)) return;
+            WorkingConditionItemCustom workingConditionItemByEmp = workingConditionItemAll.get(employeeId);
 
-			AgreementYearSetting yearSetByEmp = null;
-			if (yearSetAll.containsKey(employeeId)){
-				// 36協定年度設定を取得する
-				yearSetByEmp = yearSetAll.get(employeeId);
-			}
+            AgreementYearSetting yearSetByEmp = null;
+            if (finalYearSetAll.containsKey(employeeId)) {
+                // 36協定年度設定を取得する
+                yearSetByEmp = finalYearSetAll.get(employeeId);
+            }
 
-			Map<Integer, AgreementMonthSetting> monthSetByEmp = new HashMap();
-			if (monthSetAll.containsKey(employeeId)) {
-				// 36協定年月設定を取得する
-				monthSetByEmp = monthSetAll.get(employeeId).stream()
-						.collect(Collectors.toMap(x -> x.getYearMonthValue().v(), x -> x));
-			}
+            Map<Integer, AgreementMonthSetting> monthSetByEmp = new HashMap();
+            if (finalMonthSetAll.containsKey(employeeId)) {
+                // 36協定年月設定を取得する
+                monthSetByEmp = finalMonthSetAll.get(employeeId).stream()
+                        .collect(Collectors.toMap(x -> x.getYearMonthValue().v(), x -> x));
+            }
 
-			List<AgreementTimeByEmp> results = this.getAgreementTimeByEmp(companyId, employeeId, criteria, periodAtrs,
-					startYm, agreementTimeByEmp, workingConditionItemByEmp, yearSetByEmp, monthSetByEmp);
-			agreementTimes.addAll(results);
-		}
-		// 年間36協定時間を返す
-		return agreementTimes;
+            List<AgreementTimeByEmp> results = this.getAgreementTimeByEmp(companyId, employeeId, criteria, periodAtrs,
+                    startYm, agreementTimeByEmp, workingConditionItemByEmp, yearSetByEmp, monthSetByEmp);
+            agreementTimes.addAll(results);
+        });
+        // 年間36協定時間を返す
+        return new ArrayList<>(agreementTimes);
 	}
 
 	private List<AgreementTimeByEmp> getAgreementTimeByEmp(String companyId, String employeeId, GeneralDate criteria,
 															  List<PeriodAtrOfAgreement> periodAtrs, YearMonth startYm,
 															  List<AgreementTimeOfManagePeriod> agreementTimeByEmp,
-															  WorkingConditionItem workingConditionItemByEmp,
+															  WorkingConditionItemCustom workingConditionItemByEmp,
 															  AgreementYearSetting yearSetByEmp,
 															  Map<Integer, AgreementMonthSetting> monthSetByEmp){
 		List<AgreementTimeByEmp> agreementTimes = new ArrayList<>();
+		
+		// 労働制を確認する
+		val workingSystem = workingConditionItemByEmp.getLaborSystem();
+
+		// 36協定基本設定を取得する
+		val basicAgreementSet = this.agreementDomainService.getBasicSet(
+				companyId, employeeId, criteria, workingSystem);
+		
 		for (PeriodAtrOfAgreement periodAtr : periodAtrs) {
 			// ループする期間を判断
 			int stepMon = 2;
@@ -259,14 +273,7 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
 				// 36協定時間を合計
 				for (val agreeemntTime : agreementTimeList) {
 					result.addMinutesToAgreementTime(agreeemntTime.getAgreementTime().getAgreementTime().v());
-				}
-
-				// 労働制を確認する
-				val workingSystem = workingConditionItemByEmp.getLaborSystem();
-
-				// 36協定基本設定を取得する
-				val basicAgreementSet = this.agreementDomainService.getBasicSet(
-						companyId, employeeId, criteria, workingSystem);
+				}				
 
 				// 取得した限度時間をセット
 				switch (periodAtr) {
@@ -291,8 +298,9 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
 					default:    // ONE_MONTH
 						result.setLimitAlarmTime(new LimitOneYear(basicAgreementSet.getAlarmOneMonth().v()));
 						result.setLimitErrorTime(new LimitOneYear(basicAgreementSet.getErrorOneMonth().v()));
-						if (monthSetByEmp.containsKey(i + 1)) {
-							val monthSet = monthSetByEmp.get(i + 1);
+						int month = startYm.addMonths(i + 1).v();
+						if (monthSetByEmp.containsKey(month)) {
+							val monthSet = monthSetByEmp.get(month);
 							result.setExceptionLimitAlarmTime(Optional.of(
 									new LimitOneYear(monthSet.getAlarmOneMonth().v())));
 							result.setExceptionLimitErrorTime(Optional.of(
