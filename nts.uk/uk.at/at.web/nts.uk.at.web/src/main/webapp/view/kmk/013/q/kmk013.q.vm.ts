@@ -77,6 +77,8 @@ module nts.uk.at.view.kmk013.q {
                                                                                                         enumRoleOPenPeriod: any, enumRoleOTWork: any,
                                                                                                         dataOvertimeworkframe: any, dataWorkdayoffframe: any) {
                             
+                            dataOvertimeworkframe = _.sortBy(dataOvertimeworkframe, (item: any) => { return item.overtimeWorkFrNo; });
+                            dataWorkdayoffframe = _.sortBy(dataWorkdayoffframe,(item:any)=>{return item.workdayoffFrNo;});
                         // get new data after save
                         if (self.roleFrameList().length > 0 || self.overtimeList().length > 0) {
                             for (let i=0; i<10; i++) {
