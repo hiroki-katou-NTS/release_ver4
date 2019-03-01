@@ -10,7 +10,7 @@ import nts.arc.primitive.constraint.StringMaxLength;
  * @author danpv
  *
  */
-@StringMaxLength(30)
+@StringMaxLength(20)
 public class ChangeableWorkTypeGroupName extends StringPrimitiveValue<ChangeableWorkTypeGroupName>{
 
 	/**

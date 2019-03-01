@@ -14,4 +14,6 @@ public class HolidayShipmentCommand {
 	private String memo;
 	private String comboBoxReason;
     private String textAreaReason;
+    private Integer user;
+    private Integer reflectPerState;
 }
