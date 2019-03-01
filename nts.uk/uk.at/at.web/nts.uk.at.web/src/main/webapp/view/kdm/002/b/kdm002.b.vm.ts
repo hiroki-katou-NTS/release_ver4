@@ -42,7 +42,8 @@ module nts.uk.at.view.kdm002.b {
             taskId: KnockoutObservable<string> = ko.observable('');
             timeStartt: any;
             timeNow: any;
-            excelContent: KnockoutObservableArray<any> = ko.observableArray([]);
+            excelContent: KnockoutObservable<number> = ko.observable(0);
+            exportTaskId: string;
             startExportExcel: KnockoutObservable<boolean>;
             constructor() {
                 let self = this;
@@ -140,7 +141,6 @@ module nts.uk.at.view.kdm002.b {
                     .task(() => {
                         return nts.uk.request.asyncTask.getInfo(self.taskId()).done(function(res: any) {
                             if (res.running || res.succeeded || res.cancelled) {
-                                self.excelContent.removeAll();
                                 self.imErrorLog.removeAll();
                                 _.forEach(res.taskDatas, item => {
                                     if (item.key.substring(0, 10) == "ERROR_LIST") {
@@ -158,59 +158,8 @@ module nts.uk.at.view.kdm002.b {
                                 });
 
                                 if (res.succeeded) {
-                                    let excelKeyList = [];
-                                    let i = 0;
-                                    for (let data of res.taskDatas) {
-                                        let [excelKeyData] = data.key.split(',');
-                                        if (i == 0) {
-                                            excelKeyList.push(excelKeyData);
-                                        }
-                                        if (res.taskDatas[i + 1]) {
-                                            let [nextExcelKeyData] = res.taskDatas[i + 1].key.split(',');
-                                            if (nts.uk.ntsNumber.isNumber(nextExcelKeyData) && excelKeyData != nextExcelKeyData) {
-                                                excelKeyList.push(nextExcelKeyData);
-                                            }
-                                        }
-                                        if (excelKeyData) {
-                                            data.excelKey = excelKeyData;
-                                        }
-                                        i++;
-                                    }
-                                    _.forEach(excelKeyList, extractExcelKey => {
-                                        let listData = _.filter(res.taskDatas, x => { return x.excelKey === extractExcelKey; });
-                                        if (listData) {
-                                            let exContent,
-                                                numberOfWorkTypeUsedImport = [],
-                                                plannedVacationListCommand = [];
-                                            
-                                            for (let item of listData) {
-                                                let [itemKey, itemKeyValue] = item.key.split(',');
-                                                if (itemKeyValue === 'EXCEL_LIST' && !exContent) {
-                                                    exContent = JSON.parse(item.valueAsString);
-                                                    exContent.numberOfWorkTypeUsedImport = numberOfWorkTypeUsedImport;
-                                                    exContent.plannedVacationListCommand = plannedVacationListCommand;
-                                                }
-                                                if (itemKeyValue === "WORKTYPEUSED") {
-                                                    if (exContent && exContent.numberOfWorkTypeUsedImport) {
-                                                        exContent.numberOfWorkTypeUsedImport.push.apply(exContent.numberOfWorkTypeUsedImport, JSON.parse(item.valueAsString));
-                                                    } else {
-                                                        numberOfWorkTypeUsedImport = JSON.parse(item.valueAsString);
-                                                    }
-                                                }
-                                                 
-                                                if (itemKeyValue === "PLANNEDVACATION") {
-                                                    if (exContent && exContent.plannedVacationListCommand) {
-                                                        exContent.plannedVacationListCommand.push.apply(exContent.plannedVacationListCommand, JSON.parse(item.valueAsString));
-                                                    } else {
-                                                        plannedVacationListCommand = JSON.parse(item.valueAsString);
-                                                    }
-                                                } 
-                                            }
-                                            if (exContent) {
-                                                self.excelContent.push(exContent);
-                                            }
-                                        }
-                                    });
+                                    self.exportTaskId = _.find(res.taskDatas, i => i.key == "EXPORT_TASK_ID").valueAsString;
+                                    self.excelContent(_.find(res.taskDatas, i => i.key == "EXPORT_SIZE").valueAsNumber)
                                 }
 
                                 if (res.running) {
@@ -226,7 +175,7 @@ module nts.uk.at.view.kdm002.b {
                             }
 
                             if (res.succeeded || res.failed || res.cancelled) {
-                                if (self.excelContent().length == 0 && self.imErrorLog().length == 0) {
+                                if (self.excelContent() == 0 && self.imErrorLog().length == 0) {
                                     self.status(getText("KDM002_29"));
                                     $('#BTN_CLOSE').focus();
                                 }
@@ -240,7 +189,7 @@ module nts.uk.at.view.kdm002.b {
                                     self.status(getText("KDM002_30"));
                                     $('#BTN_ERROR_EXPORT').focus();
                                 }
-                                if (self.excelContent().length > 0) {
+                                if (self.excelContent() > 0) {
                                     if (res.succeeded) {
                                         if (self.imErrorLog().length == 0) {
                                             self.status(getText("KDM002_29"));
@@ -258,13 +207,13 @@ module nts.uk.at.view.kdm002.b {
 
                                 self.isStop(true);
 
-                                if (self.excelContent().length == 0 && self.imErrorLog().length == 0) {
+                                if (self.excelContent() == 0 && self.imErrorLog().length == 0) {
                                     $('#BTN_CLOSE').focus();
                                 }
                                 if (self.imErrorLog().length > 0) {
                                     $('#BTN_ERROR_EXPORT').focus();
                                 }
-                                if (self.excelContent().length > 0) {
+                                if (self.excelContent() > 0) {
                                     if (res.succeeded) {
                                         if (self.imErrorLog().length == 0) {
                                             $('#BTN_CLOSE').focus();
@@ -309,18 +258,15 @@ module nts.uk.at.view.kdm002.b {
             }
 
             // Excel出力情報ListをもとにExcel出力をする (Xuất ra file excel)
-            excelExport(): JQueryPromise<any> {
+            excelExport() {
                 let self = this;
-                let dfd = $.Deferred();
                 nts.uk.ui.block.invisible();
-                service.exportExcel(ko.toJS(self.excelContent() || [])).always(function() {
-                    nts.uk.ui.block.clear();
-                }).done(function() {
-
-                    dfd.resolve();
+                nts.uk.request.downloadFileWithTask(self.exportTaskId).done(function() {
+                    console.log("export succeeded")
                 }).fail(function() {
                     $('#BTN_CLOSE').focus();
-                    dfd.reject();
+                }).always(function() {
+                    nts.uk.ui.block.clear();
                 });
             }
         }
