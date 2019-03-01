@@ -74,10 +74,6 @@ public class UpdateApplicationApproveHandler extends CommandHandlerWithResult<In
 		Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
 				.getApplicationSettingByComID(companyID);
 		ApplicationSetting applicationSetting = applicationSettingOp.get();
-		List<DisplayReasonDto> displayReasonDtoLst = 
-				displayRep.findDisplayReason(companyID).stream().map(x -> DisplayReasonDto.fromDomain(x)).collect(Collectors.toList());
-		DisplayReasonDto displayReasonSet = displayReasonDtoLst.stream().filter(x -> x.getTypeOfLeaveApp() == context.getCommand().getHolidayAppType())
-				.findAny().orElse(null);
 		DetailScreenInitModeOutput output = initMode.getDetailScreenInitMode(EnumAdaptor.valueOf(context.getCommand().getUser(), User.class), context.getCommand().getReflectPerState());
 		String appReason = applicationRepository.findByID(companyID, command.getApplicationID()).get().getAppReason().v();
 		boolean isUpdateReason = false;
@@ -86,6 +82,10 @@ public class UpdateApplicationApproveHandler extends CommandHandlerWithResult<In
 			boolean displayAppReason = false;
 			Integer appType = command.getApplicationType();
 			if(appType==ApplicationType.ABSENCE_APPLICATION.value){
+				List<DisplayReasonDto> displayReasonDtoLst = 
+						displayRep.findDisplayReason(companyID).stream().map(x -> DisplayReasonDto.fromDomain(x)).collect(Collectors.toList());
+				DisplayReasonDto displayReasonSet = displayReasonDtoLst.stream().filter(x -> x.getTypeOfLeaveApp() == context.getCommand().getHolidayAppType())
+						.findAny().orElse(null);
 				displayFixedReason = displayReasonSet.getDisplayFixedReason() == 1 ? true : false;
 				displayAppReason = displayReasonSet.getDisplayAppReason() == 1 ? true : false;
 			} else {
