@@ -261,13 +261,21 @@ module nts.uk.at.view.kdm002.b {
             excelExport() {
                 let self = this;
                 nts.uk.ui.block.invisible();
-                nts.uk.request.downloadFileWithTask(self.exportTaskId).done(function() {
-                    console.log("export succeeded")
-                }).fail(function() {
-                    $('#BTN_CLOSE').focus();
-                }).always(function() {
-                    nts.uk.ui.block.clear();
-                });
+                nts.uk.deferred.repeat(conf => conf.task(() => {
+                    return nts.uk.request.asyncTask.getInfo(self.exportTaskId).done(function(res: any) {
+                        if (res.status == "PENDING" || res.status == "RUNNING") {
+                            console.log("running");
+                        } else if (res.failed || res.status == "ABORTED") { 
+                            console.log(res.error);
+                            nts.uk.ui.block.clear();
+                        } else {
+                            nts.uk.request.specials.donwloadFile(res.id);
+                            nts.uk.ui.block.clear();
+                        }
+                    });
+                }).while(infor => {
+                    return infor.pending || infor.running;
+                }).pause(1000));
             }
         }
 
