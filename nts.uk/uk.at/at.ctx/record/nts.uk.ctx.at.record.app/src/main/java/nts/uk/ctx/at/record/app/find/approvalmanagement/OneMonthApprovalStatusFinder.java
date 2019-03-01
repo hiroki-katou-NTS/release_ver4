@@ -28,5 +28,5 @@ public class OneMonthApprovalStatusFinder {
 			GeneralDate endDateParam) {
 		return oneMonthApprovalSttDomainService.getOneMonthApprovalStatus(closureIdParam, startDateParam, endDateParam);
 	}
-
+	
 }
