@@ -12,6 +12,7 @@ import nts.arc.error.BusinessException;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerWithResult;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.InitMode;
@@ -47,6 +48,9 @@ public class ApproveHolidayShipmentCommandHandler
 	
 	@Inject
 	private InitMode initMode;
+	
+	@Inject
+	private ApplicationRepository_New applicationRepository;
 
 	@Override
 	protected ApproveProcessResult handle(CommandHandlerContext<HolidayShipmentCommand> context) {
@@ -84,16 +88,17 @@ public class ApproveHolidayShipmentCommandHandler
 						&& Strings.isBlank(typicalReason+displayReason)) {
 					throw new BusinessException("Msg_115");
 				}
-			}
-			appReason = typicalReason + displayReason;
-			if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)
-					||appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+				appReason = typicalReason + displayReason;
 				isUpdateReason = true;
 			}
 		}
 		
 		// アルゴリズム「振休振出申請の承認」を実行する
 		ProcessResult processResult = approvalApplication(command, companyID, employeeID, version, memo, appReason, isUpdateReason);
+		
+		if(!isUpdateReason){
+			appReason = applicationRepository.findByID(companyID, processResult.getAppID()).get().getAppReason().v();
+		}
 		
 		return new ApproveProcessResult(
 				processResult.isProcessDone(), 

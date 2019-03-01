@@ -18,6 +18,7 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.app.find.application.common.ApplicationDto_New;
 import nts.uk.ctx.at.request.app.find.application.common.dto.InputApproveData;
 import nts.uk.ctx.at.request.app.find.setting.company.request.applicationsetting.apptypesetting.DisplayReasonDto;
+import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.InitMode;
@@ -59,6 +60,9 @@ public class UpdateApplicationApproveHandler extends CommandHandlerWithResult<In
 	
 	@Inject
 	private InitMode initMode;
+	
+	@Inject
+	private ApplicationRepository_New applicationRepository;
 
 	@Override
 	protected ApproveProcessResult handle(CommandHandlerContext<InputApproveData> context) {
@@ -70,18 +74,18 @@ public class UpdateApplicationApproveHandler extends CommandHandlerWithResult<In
 		Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
 				.getApplicationSettingByComID(companyID);
 		ApplicationSetting applicationSetting = applicationSettingOp.get();
-		List<DisplayReasonDto> displayReasonDtoLst = 
-				displayRep.findDisplayReason(companyID).stream().map(x -> DisplayReasonDto.fromDomain(x)).collect(Collectors.toList());
-		DisplayReasonDto displayReasonSet = displayReasonDtoLst.stream().filter(x -> x.getTypeOfLeaveApp() == context.getCommand().getHolidayAppType())
-				.findAny().orElse(null);
 		DetailScreenInitModeOutput output = initMode.getDetailScreenInitMode(EnumAdaptor.valueOf(context.getCommand().getUser(), User.class), context.getCommand().getReflectPerState());
-		String appReason = Strings.EMPTY;
+		String appReason = applicationRepository.findByID(companyID, command.getApplicationID()).get().getAppReason().v();
 		boolean isUpdateReason = false;
 		if(output.getOutputMode()==OutputMode.EDITMODE){
 			boolean displayFixedReason = false;
 			boolean displayAppReason = false;
 			Integer appType = command.getApplicationType();
 			if(appType==ApplicationType.ABSENCE_APPLICATION.value){
+				List<DisplayReasonDto> displayReasonDtoLst = 
+						displayRep.findDisplayReason(companyID).stream().map(x -> DisplayReasonDto.fromDomain(x)).collect(Collectors.toList());
+				DisplayReasonDto displayReasonSet = displayReasonDtoLst.stream().filter(x -> x.getTypeOfLeaveApp() == context.getCommand().getHolidayAppType())
+						.findAny().orElse(null);
 				displayFixedReason = displayReasonSet.getDisplayFixedReason() == 1 ? true : false;
 				displayAppReason = displayReasonSet.getDisplayAppReason() == 1 ? true : false;
 			} else {
@@ -108,9 +112,7 @@ public class UpdateApplicationApproveHandler extends CommandHandlerWithResult<In
 						&& Strings.isBlank(typicalReason+displayReason)) {
 					throw new BusinessException("Msg_115");
 				}
-			}
-			appReason = typicalReason + displayReason;
-			if(displayFixedReason||displayAppReason){
+				appReason = typicalReason + displayReason;
 				isUpdateReason = true;
 			}
 		}
