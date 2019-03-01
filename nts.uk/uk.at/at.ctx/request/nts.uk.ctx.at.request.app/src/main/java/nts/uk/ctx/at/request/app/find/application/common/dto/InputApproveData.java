@@ -13,4 +13,7 @@ public class InputApproveData {
 	String memo;
 	String comboBoxReason;
     String textAreaReason;
+    Integer holidayAppType;
+    Integer user;
+    Integer reflectPerState;
 }

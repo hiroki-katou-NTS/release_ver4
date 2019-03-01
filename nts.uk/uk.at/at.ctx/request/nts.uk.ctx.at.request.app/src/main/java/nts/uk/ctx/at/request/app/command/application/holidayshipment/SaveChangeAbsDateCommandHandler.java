@@ -199,7 +199,7 @@ public class SaveChangeAbsDateCommandHandler
 	private void cancelOldAbsApp(SaveHolidayShipmentCommand command, AbsenceLeaveAppCommand absCmd, String oldAppID) {
 		String companyID = AppContexts.user().companyId();
 		HolidayShipmentCommand shipmentCmd = new HolidayShipmentCommand(oldAppID, null,
-				command.getAppCmd().getAppVersion(), "", "", "");
+				command.getAppCmd().getAppVersion(), "", "", "",0,0);
 		cancelHanler.cancelAppForPaidLeave(companyID, shipmentCmd);
 
 	}
