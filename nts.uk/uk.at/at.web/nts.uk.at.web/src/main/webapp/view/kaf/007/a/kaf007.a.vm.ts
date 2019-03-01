@@ -255,28 +255,22 @@ module nts.uk.at.view.kaf007.a.viewmodel {
             nts.uk.ui.block.invisible();
             let appReason: string;
             if (!self.validateInputTime()) { return; }
-            appReason = self.getReason(
-                self.typicalReasonDisplayFlg(),
-                self.selectedReason(),
-                self.reasonCombo(),
-                self.displayAppReasonContentFlg(),
-                self.multilContent().trim()
-            );
-            if (!appcommon.CommonProcess.checklenghtReason(appReason, "#inpReasonTextarea")) {
+            
+            let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
+            let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);
+            
+            if(!appcommon.CommonProcess.checklenghtReason(comboBoxReason+":"+textAreaReason,"#inpReasonTextarea")){
                 return;
             }
-            let appReasonError = !appcommon.CommonProcess.checkAppReason(self.requiredReason(), self.typicalReasonDisplayFlg(), self.displayAppReasonContentFlg(), appReason);
-            if (appReasonError) {
-                nts.uk.ui.dialog.alertError({ messageId: 'Msg_115' }).then(function() { nts.uk.ui.block.clear(); });
-                return;
-            }
+            
             //申請日付
             self.appWorkChange().application().applicationDate(self.getStartDate());
 
             self.appWorkChange().application().startDate(self.getStartDate());
             self.appWorkChange().application().endDate(self.getEndDate());
             //申請理由
-            self.appWorkChange().application().applicationReason(appReason);
+            self.appWorkChange().application().appReasonID = comboBoxReason;
+            self.appWorkChange().application().applicationReason(textAreaReason);
             //勤務を変更する
             self.appWorkChange().workChange().workChangeAtr(self.workChangeAtr() == true ? 1 : 0);
             // 休日に関して
