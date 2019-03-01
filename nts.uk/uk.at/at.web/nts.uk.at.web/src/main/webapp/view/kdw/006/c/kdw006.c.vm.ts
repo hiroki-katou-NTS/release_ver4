@@ -86,7 +86,8 @@ module nts.uk.at.view.kdw006.c.viewmodel {
                     let itemModel = _.find(self.appTypeEnum(), function(obj) {
                         return obj.value == item;
                     });
-                    result += itemModel.fieldName + ",";
+                   if(!_.isEmpty(itemModel))
+                        result += itemModel.fieldName + ",";
                 })
                 let size = result.length - 1;
                 self.appType(result.slice(0, size));
