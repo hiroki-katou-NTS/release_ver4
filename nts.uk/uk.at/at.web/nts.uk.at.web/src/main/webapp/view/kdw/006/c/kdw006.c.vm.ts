@@ -14,12 +14,14 @@ module nts.uk.at.view.kdw006.c.viewmodel {
 
         sideBar: KnockoutObservable<number>;
         appType: KnockoutObservable<string>;
+        appTypeEnum : KnockoutObservable<any>;
 
         constructor() {
             let self = this;
             self.itemList = ko.observableArray([]);
             self.hiddenYourself = ko.observable(true);
             self.hiddenSuper = ko.observable(true);
+            self.appTypeEnum = ko.observable(null);
 
             self.sideBar = ko.observable(0);
             let yourSelf = __viewContext.enums.YourselfConfirmError;
@@ -65,6 +67,13 @@ module nts.uk.at.view.kdw006.c.viewmodel {
                 comment: null,
                 dailySelfChkDispAtr: 0
             }));
+            
+            service.getApplicationType().done(function(data) {
+                let dfd = $.Deferred();
+                self.appTypeEnum(data);
+                dfd.resolve();
+                return dfd.promise();
+            });
 
             self.appType = ko.observable('');
             self.appTypeDto.subscribe((value) => {
@@ -74,10 +83,10 @@ module nts.uk.at.view.kdw006.c.viewmodel {
                     valueSort = value.appTypes();
                 }
                 _.forEach(valueSort, function(item) {
-                    let itemModel = _.find(listAppType, function(obj) {
+                    let itemModel = _.find(self.appTypeEnum(), function(obj) {
                         return obj.value == item;
                     });
-                    result += itemModel.name + ",";
+                    result += itemModel.fieldName + ",";
                 })
                 let size = result.length - 1;
                 self.appType(result.slice(0, size));
