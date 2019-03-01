@@ -120,4 +120,7 @@ public class UpdateAppAbsenceCommand {
 	private boolean displayEndDateFlg;
 	//specHoliday
 	private SpecHolidayCommand specHd;
+	
+	Integer user;
+    Integer reflectPerState;
 }

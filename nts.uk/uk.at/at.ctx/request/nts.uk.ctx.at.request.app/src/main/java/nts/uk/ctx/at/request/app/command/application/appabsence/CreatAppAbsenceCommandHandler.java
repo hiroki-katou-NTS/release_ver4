@@ -21,7 +21,6 @@ import nts.arc.layer.app.command.CommandHandlerWithResult;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.text.IdentifierUtil;
-import nts.uk.ctx.at.request.app.command.application.holidayshipment.SaveHolidayShipmentCommandHandler;
 import nts.uk.ctx.at.request.app.find.application.appabsence.dto.SettingNo65;
 import nts.uk.ctx.at.request.app.find.setting.company.request.applicationsetting.apptypesetting.DisplayReasonDto;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
@@ -67,8 +66,6 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 	private IFactoryApplication iFactoryApplication;
 	@Inject
 	private NewBeforeRegister_New newBeforeRegister;
-	@Inject
-	private SaveHolidayShipmentCommandHandler saveHolidayShipmentCommandHandler;
 	@Inject 
 	private AbsenceServiceProcess absenceServiceProcess;
 	@Inject
@@ -142,7 +139,7 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 			appReason = typicalReason + displayReason;
 		}
 		Application_New appRoot = iFactoryApplication.buildApplication(appID, startDate,
-				command.getPrePostAtr(), appReason, appReason.replaceFirst(":", System.lineSeparator()),
+				command.getPrePostAtr(), appReason, appReason,
 				ApplicationType.ABSENCE_APPLICATION, startDate, endDate, command.getEmployeeID());
 		AppForSpecLeave specHd = null;
 		SpecHolidayCommand specHdCm = command.getSpecHd();
