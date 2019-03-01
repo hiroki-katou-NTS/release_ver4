@@ -384,15 +384,15 @@ module cmm045.shr {
             reasonAppPre: string;
             appPreHd: any;
             /**就業時間外深夜 - 計算就業外深夜*/
-            shiftNightTime: string;
+            shiftNightTime: number;
             /**フレックス超過時間 - 計算フレックス*/
-            flexTime: string;
+            flexTime: number;
             workTypeName: string;
             workTimeName: string;
             constructor(preAppID: string, postAppID: string, lstFrameRes: Array<vmbase.OverTimeFrame>,
                 strTime1: string, endTime1: string, strTime2: string, endTime2: string,
-                appPre: any, reasonAppPre: string, appPreHd: any, shiftNightTime: string,
-                flexTime: string, workTypeName: string, workTimeName: string){
+                appPre: any, reasonAppPre: string, appPreHd: any, shiftNightTime: number,
+                flexTime: number, workTypeName: string, workTimeName: string){
                 this.preAppID = preAppID;
                 this.postAppID = postAppID;
                 this.lstFrameRes = lstFrameRes;

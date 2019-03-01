@@ -1752,7 +1752,7 @@ module cmm045.a.viewmodel {
             let denialNumber = 0;
             _.each(lstApp, function(app){
                 let add = self.checkSync(self.lstAppCompltSync(), app.appId) ? 2 : 1;
-                if(app.appStatusNo == 5){ unApprovalNumber += 1; }//UNAPPROVED:5
+                if(app.appStatusNo == 5){ unApprovalNumber += add; }//UNAPPROVED:5
                 if(app.appStatusNo == 4){//APPROVED: 4
                     let agent = self.findAgent(app.appId);
                     if(agent != undefined && agent.agentId != null && agent.agentId != '' && agent.agentId.match(/^\s+$/) == null){
@@ -1780,7 +1780,7 @@ module cmm045.a.viewmodel {
         }
         findAgent(appId: string): any{
             return _.find(this.lstListAgent(), function(agent){
-                return agent.appID = appId;    
+                return agent.appID == appId;    
             });
         }
         convertTime_Short_HM(time: number): string {
