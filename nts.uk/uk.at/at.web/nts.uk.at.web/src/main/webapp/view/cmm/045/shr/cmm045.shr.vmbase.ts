@@ -383,9 +383,16 @@ module cmm045.shr {
             appPre: any;
             reasonAppPre: string;
             appPreHd: any;
+            /**就業時間外深夜 - 計算就業外深夜*/
+            shiftNightTime: string;
+            /**フレックス超過時間 - 計算フレックス*/
+            flexTime: string;
+            workTypeName: string;
+            workTimeName: string;
             constructor(preAppID: string, postAppID: string, lstFrameRes: Array<vmbase.OverTimeFrame>,
                 strTime1: string, endTime1: string, strTime2: string, endTime2: string,
-                appPre: any, reasonAppPre: string, appPreHd: any){
+                appPre: any, reasonAppPre: string, appPreHd: any, shiftNightTime: string,
+                flexTime: string, workTypeName: string, workTimeName: string){
                 this.preAppID = preAppID;
                 this.postAppID = postAppID;
                 this.lstFrameRes = lstFrameRes;
@@ -396,6 +403,10 @@ module cmm045.shr {
                 this.appPre = appPre;
                 this.reasonAppPre = reasonAppPre;
                 this.appPreHd = appPreHd;
+                this.shiftNightTime = shiftNightTime;
+                this.flexTime = flexTime;
+                this.workTypeName = workTypeName;
+                this.workTimeName = workTimeName;
             }
         }
         export class ApproveAgent{

@@ -17,4 +17,12 @@ public class TimeResultOutput {
 	private String strTime2;
 	/**退勤時刻2  - 終了時刻2*/
 	private String endTime2;
+	/**就業時間外深夜 - 計算就業外深夜*/
+	private Integer shiftNightTime;
+	/**フレックス超過時間 - 計算フレックス*/
+	private Integer flexTime;
+	/**勤務種類name*/
+	private String workTypeName;
+	/**就業時間帯name*/
+	private String workTimeName;
 }

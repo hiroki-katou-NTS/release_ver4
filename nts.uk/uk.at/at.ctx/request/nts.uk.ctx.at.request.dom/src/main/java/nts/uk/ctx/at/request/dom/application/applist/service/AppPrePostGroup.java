@@ -35,4 +35,14 @@ public class AppPrePostGroup {
 	private AppOverTimeInfoFull appPre;
 	private String reasonAppPre;
 	private AppHolidayWorkFull appPreHd;
+	/**就業時間外深夜 - 計算就業外深夜*/
+	@Setter
+	private Integer shiftNightTime;
+	/**フレックス超過時間 - 計算フレックス*/
+	@Setter
+	private Integer flexTime;
+	@Setter
+	private String workTypeName;
+	@Setter
+	private String workTimeName;
 }
