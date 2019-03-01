@@ -153,23 +153,39 @@ module nts.uk.at.view.kdw006.g.viewmodel {
 
         saveData() {
             let self = this;
-            nts.uk.ui.block.invisible();
-            service.register(self.selectedCode(), self.groups1(), self.groups2()).done(function(res) {
-                if (self.groups1.length > 0 || self.groups2.length > 0) {
-                    self.listSetting.push(self.selectedCode());
-                } else {
-                    self.listSetting.remove(self.selectedCode());
+            $('.name-group').trigger('validate');
+            
+            setTimeout(() => {
+                if (nts.uk.ui.errors.hasError()) {
+                    return;
                 }
-                nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
-                    self.selectedCode.valueHasMutated();
+                //            if(self.validate()){
+                //               return; 
+                //            }
+                nts.uk.ui.block.invisible();
+                service.register(self.selectedCode(), self.groups1(), self.groups2()).done(function(res) {
+                    if (self.groups1.length > 0 || self.groups2.length > 0) {
+                        self.listSetting.push(self.selectedCode());
+                    } else {
+                        self.listSetting.remove(self.selectedCode());
+                    }
+                    nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
+                        self.selectedCode.valueHasMutated();
+                        nts.uk.ui.block.clear();
+                    });
+                }).fail(() => {
+                    nts.uk.ui.block.clear();
+                }).always(() => {
                     nts.uk.ui.block.clear();
                 });
-            }).fail(() => {
-                nts.uk.ui.block.clear();
-            }).always(() => {
-                nts.uk.ui.block.clear();
-            });
+            }, 100);
         }
+        
+        private validate(): boolean {
+                let self = this;
+                $("#test").ntsEditor('validate');
+                return $('.nts-input').ntsError('hasError');
+            }
 
         copyData() {
             let self = this;

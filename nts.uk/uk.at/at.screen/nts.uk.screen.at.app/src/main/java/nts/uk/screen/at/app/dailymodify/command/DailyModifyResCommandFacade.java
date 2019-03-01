@@ -548,7 +548,7 @@ public class DailyModifyResCommandFacade {
 			dataResultAfterIU.setMessageAlert("Msg_15");
 		}else {
 			Map<Integer, List<DPItemValue>> errorMapTemp = dataResultAfterIU.getErrorMap().entrySet().stream()
-					.filter(x -> x.getKey() != TypeError.CONTINUOUS.value)
+					.filter(x -> x.getKey() != TypeError.CONTINUOUS.value && x.getKey() != TypeError.RELEASE_CHECKBOX.value)
 					.collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
 			if (errorMapTemp.values().isEmpty()) {
 				dataResultAfterIU.setMessageAlert("Msg_15");
