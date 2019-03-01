@@ -21,7 +21,6 @@ import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
-//import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.uk.ctx.at.function.dom.adapter.RegularSortingTypeImport;
@@ -33,6 +32,7 @@ import nts.uk.ctx.at.function.dom.adapter.annualworkschedule.EmployeeInformation
 import nts.uk.ctx.at.function.dom.adapter.annualworkschedule.PositionImport;
 import nts.uk.ctx.at.function.dom.adapter.jobtitle.JobTitleAdapter;
 import nts.uk.ctx.at.function.dom.adapter.jobtitle.JobTitleImport;
+import nts.uk.ctx.at.function.dom.adapter.monthly.agreement.AgreementTimeByEmpImport;
 import nts.uk.ctx.at.function.dom.adapter.monthly.agreement.AgreementTimeByPeriodAdapter;
 import nts.uk.ctx.at.function.dom.adapter.monthly.agreement.AgreementTimeByPeriodImport;
 import nts.uk.ctx.at.function.dom.adapter.monthly.agreement.GetExcessTimesYearAdapter;
@@ -168,6 +168,7 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 			} else if (OutputAgreementTime.THREE_MONTH.equals(setOutItemsWoSc.getDisplayFormat())){
 				periodAtr = PeriodAtrOfAgreement.THREE_MONTHS;
 			}
+
 			this.createAnnualWorkSchedule36Agreement(cid, exportData, yearMonthPeriod, employeeIds, listItemOut,
 					fiscalYear, startYm, setOutItemsWoSc.isOutNumExceedTime36Agr(), periodAtr, monthLimit);
 		} else {
@@ -320,21 +321,50 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 	private void createAnnualWorkSchedule36Agreement(String cid, ExportData exportData, YearMonthPeriod yearMonthPeriod,
 			List<String> employeeIds, List<ItemOutTblBook> listItemOut, Year fiscalYear, YearMonth startYm,
 			boolean isOutNumExceed, PeriodAtrOfAgreement periodAtr, Integer monthLimit) {
-		Optional<ItemOutTblBook> outputAgreementTime36 = listItemOut.stream().filter(m -> m.isItem36AgreementTime())
+		Optional<ItemOutTblBook> outputAgreementTime36Otp = listItemOut.stream().filter(ItemOutTblBook::isItem36AgreementTime)
 				.findFirst();
-		employeeIds.forEach(empId -> {
-			EmployeeData empData = exportData.getEmployees().get(empId);
-			Map<String, AnnualWorkScheduleData> annualWorkScheduleData = new HashMap<>();
-			// 36協定時間を出力するかのチェックをする
-			if (outputAgreementTime36.isPresent()) {
-				// アルゴリズム「36協定時間の作成」を実行する
-				annualWorkScheduleData.putAll(this.create36AgreementTime(cid, yearMonthPeriod, empId,
-						outputAgreementTime36.get(), fiscalYear, startYm, isOutNumExceed, periodAtr, monthLimit,
-						exportData.getHeader() == null ? new ArrayList<>()
-								: (exportData.getHeader().getMonthPeriodLabels()== null? new ArrayList<>(): exportData.getHeader().getMonthPeriodLabels())));
-			}
-			empData.setAnnualWorkSchedule(annualWorkScheduleData);
-		});
+        // 36協定時間を出力するかのチェックをする
+        if (outputAgreementTime36Otp.isPresent()) {
+            ItemOutTblBook outputAgreementTime36 = outputAgreementTime36Otp.get();
+
+            GeneralDate criteria = GeneralDate.ymd(fiscalYear.v(), 12, 31);
+            Month startMonth = new Month(startYm.getMonth().getValue());
+            List<PeriodAtrOfAgreement> periodAtrs = new ArrayList<>();
+            periodAtrs.add(PeriodAtrOfAgreement.ONE_MONTH);
+            periodAtrs.add(PeriodAtrOfAgreement.ONE_YEAR);
+            if (PeriodAtrOfAgreement.TWO_MONTHS.equals(periodAtr) || PeriodAtrOfAgreement.THREE_MONTHS.equals(periodAtr)) {
+                periodAtrs.add(periodAtr);
+            }
+
+            // パラメータ「超過月数を出力する」をチェックする
+            Map<String, Integer> monthsExceededAll = new HashMap<>();
+            if (isOutNumExceed) {
+                // 年間超過回数の取得
+                // RequestList458
+                monthsExceededAll = getExcessTimesYearAdapter.algorithm(employeeIds, fiscalYear);
+            }
+
+            // RequestList453
+            // 36協定時間を取得する
+            Map<String, List<AgreementTimeByEmpImport>> agreementTimeAll =
+                    agreementTimeByPeriodAdapter.algorithmImprove(cid, employeeIds, criteria, startMonth, fiscalYear, periodAtrs)
+                            .stream().collect(Collectors.groupingBy(AgreementTimeByEmpImport::getEmployeeId));
+
+            for (Map.Entry<String, List<AgreementTimeByEmpImport>> entry : agreementTimeAll.entrySet()) {
+                EmployeeData empData = exportData.getEmployees().get(entry.getKey());
+                Integer monthsExceeded = 0;
+                if (monthsExceededAll.containsKey(entry.getKey())) {
+                    monthsExceeded = monthsExceededAll.get(entry.getKey());
+                }
+                Map<String, AnnualWorkScheduleData> annualWorkScheduleData = new HashMap<>();
+                // アルゴリズム「36協定時間の作成」を実行する
+                annualWorkScheduleData.putAll(this.create36AgreementTime(entry.getValue(), monthsExceeded,
+                        outputAgreementTime36, startYm, periodAtr, monthLimit,
+                        exportData.getHeader() == null ? new ArrayList<>()
+                                : (exportData.getHeader().getMonthPeriodLabels() == null ? new ArrayList<>() : exportData.getHeader().getMonthPeriodLabels())));
+                empData.setAnnualWorkSchedule(annualWorkScheduleData);
+            }
+        }
 		// アルゴリズム「任意項目の作成」を実行する
 		this.createOptionalItems(exportData, yearMonthPeriod, employeeIds,
 				listItemOut.stream().filter(item -> !item.isItem36AgreementTime()).collect(Collectors.toList()),
@@ -355,35 +385,31 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 	 * @param displayFormat
 	 *            表示形式
 	 */
-	private Map<String, AnnualWorkScheduleData> create36AgreementTime(String cid, YearMonthPeriod yearMonthPeriod,
-			String employeeId, ItemOutTblBook outputAgreementTime36, Year fiscalYear, YearMonth startYm, boolean isOutNumExceed,
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	private Map<String, AnnualWorkScheduleData> create36AgreementTime(
+			List<AgreementTimeByEmpImport> agreementTimes, Integer monthsExceeded,
+			ItemOutTblBook outputAgreementTime36, YearMonth startYm,
 			PeriodAtrOfAgreement periodAtr, Integer monthLimit, List<String> header) {
-		GeneralDate criteria = GeneralDate.ymd(fiscalYear.v(), 12, 31);
-		
-		Month startMonth = new Month(startYm.getMonth().getValue());
 		// RequestList453
 		// 36協定時間を取得する
 		// 明細用
-		List<AgreementTimeByPeriodImport> listAgreementTimeByMonth = agreementTimeByPeriodAdapter.algorithm(cid, employeeId,
-				criteria, startMonth, fiscalYear, PeriodAtrOfAgreement.ONE_MONTH);
+		List<AgreementTimeByPeriodImport> listAgreementTimeByMonth = agreementTimes.stream()
+				.filter(x -> PeriodAtrOfAgreement.ONE_MONTH.equals(x.getPeriodAtr()))
+				.map(AgreementTimeByEmpImport::getAgreementTime).collect(Collectors.toList());
 		// 年間合計用
-		List<AgreementTimeByPeriodImport> listAgreementTimeByYear = agreementTimeByPeriodAdapter.algorithm(cid, employeeId,
-				criteria, startMonth, fiscalYear, PeriodAtrOfAgreement.ONE_YEAR);
+		List<AgreementTimeByPeriodImport> listAgreementTimeByYear = agreementTimes.stream()
+				.filter(x -> PeriodAtrOfAgreement.ONE_YEAR.equals(x.getPeriodAtr()))
+				.map(AgreementTimeByEmpImport::getAgreementTime).collect(Collectors.toList());
 		
 		if (listAgreementTimeByMonth.isEmpty())
 			return new HashMap<>();
 
-		// パラメータ「超過月数を出力する」をチェックする
-		Integer monthsExceeded = 0;
-		if (isOutNumExceed) {
-			// 年間超過回数の取得
-			// RequestList458
-			monthsExceeded = getExcessTimesYearAdapter.algorithm(employeeId, fiscalYear);
-		}
 		// パラメータ「表示形式」をチェックする
 		List<AgreementTimeByPeriodImport> listExcesMonths = new ArrayList<>();
 		if (PeriodAtrOfAgreement.TWO_MONTHS.equals(periodAtr) || PeriodAtrOfAgreement.THREE_MONTHS.equals(periodAtr)) {
-			listExcesMonths = this.create36AgreementFewMonth(cid, employeeId, fiscalYear, startYm, periodAtr);
+			listExcesMonths = agreementTimes.stream()
+					.filter(x -> periodAtr.equals(x.getPeriodAtr()))
+					.map(AgreementTimeByEmpImport::getAgreementTime).collect(Collectors.toList());
 		}
 
 		Map<String, AnnualWorkScheduleData> data = new HashMap<>();
@@ -407,6 +433,7 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 	 */
 	private void createOptionalItems(ExportData exportData, YearMonthPeriod yearMonthPeriod, List<String> employeeIds,
 			List<ItemOutTblBook> listItemOut, YearMonth startYm) {
+		if (listItemOut.isEmpty()) return;
 		List<Integer> allItemIds = new ArrayList<>();
 		for(ItemOutTblBook itemOut: listItemOut){
 			List<Integer> itemIds = itemOut.getListOperationSetting().stream().map(os -> os.getAttendanceItemId())
@@ -414,6 +441,7 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 			allItemIds.addAll(itemIds);
 		}
 		allItemIds = allItemIds.stream().distinct().collect(Collectors.toList());
+		if (allItemIds.isEmpty()) return;
 		// アルゴリズム「対象期間の月次データの取得」を実行する
 		List<MonthlyAttendanceResultImport> allMonthlyAtt = monthlyAttendanceItemAdapter
 				.getMonthlyValueOfParallel(employeeIds, yearMonthPeriod, allItemIds);
@@ -522,4 +550,58 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
 		}
 		return monthPeriodLabels;
 	}
+	
+	
+	/**
+	 * 36協定時間の作成
+	 * 
+	 * @param yearMonthPeriod
+	 *            対象期間
+	 * @param employeeId
+	 *            社員ID
+	 * @param outNumExceedTime36Agr
+	 *            超過月数出力するか
+	 * @param displayFormat
+	 *            表示形式
+	 */
+//	private Map<String, AnnualWorkScheduleData> create36AgreementTime(String cid, YearMonthPeriod yearMonthPeriod,
+//			List<String> employeeIds, ItemOutTblBook outputAgreementTime36, Year fiscalYear, YearMonth startYm, boolean isOutNumExceed,
+//			PeriodAtrOfAgreement periodAtr, Integer monthLimit, List<String> header) {
+//		GeneralDate criteria = GeneralDate.ymd(fiscalYear.v(), 12, 31);
+//		
+//		Month startMonth = new Month(startYm.getMonth().getValue());
+//		// RequestList453
+//		// 36協定時間を取得する
+//		// 明細用
+//		List<AgreementTimeByPeriodImport> listAgreementTimeByMonth = agreementTimeByPeriodAdapter.algorithm(cid, employeeId,
+//				criteria, startMonth, fiscalYear, PeriodAtrOfAgreement.ONE_MONTH);
+//		// 年間合計用
+//		List<AgreementTimeByPeriodImport> listAgreementTimeByYear = agreementTimeByPeriodAdapter.algorithm(cid, employeeId,
+//				criteria, startMonth, fiscalYear, PeriodAtrOfAgreement.ONE_YEAR);
+//		
+//		if (listAgreementTimeByMonth.isEmpty())
+//			return new HashMap<>();
+//
+//		// パラメータ「超過月数を出力する」をチェックする
+//		Map<String,Integer> monthsExceeded = new HashMap<>();
+//		
+//		if (isOutNumExceed) {
+//			// 年間超過回数の取得
+//			// RequestList458
+//			monthsExceeded = getExcessTimesYearAdapter.algorithm(employeeIds, fiscalYear);
+//		}
+//		// パラメータ「表示形式」をチェックする
+//		List<AgreementTimeByPeriodImport> listExcesMonths = new ArrayList<>();
+//		if (PeriodAtrOfAgreement.TWO_MONTHS.equals(periodAtr) || PeriodAtrOfAgreement.THREE_MONTHS.equals(periodAtr)) {
+//			listExcesMonths = this.create36AgreementFewMonth(cid, employeeId, fiscalYear, startYm, periodAtr);
+//		}
+//
+//		Map<String, AnnualWorkScheduleData> data = new HashMap<>();
+//		// アルゴリズム「月平均の算出」を実行する
+//		data.put(outputAgreementTime36.getCd().v(),
+//				AnnualWorkScheduleData.fromAgreementTimeList(outputAgreementTime36, listAgreementTimeByMonth,
+//						listAgreementTimeByYear, listExcesMonths, startYm, monthsExceeded, monthLimit, periodAtr, header)
+//						.calc(false));
+//		return data;
+//	}
 }

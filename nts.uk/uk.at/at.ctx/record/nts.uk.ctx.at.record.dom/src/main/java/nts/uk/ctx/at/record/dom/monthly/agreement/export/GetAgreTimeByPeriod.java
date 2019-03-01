@@ -25,4 +25,7 @@ public interface GetAgreTimeByPeriod {
 	 */
 	List<AgreementTimeByPeriod> algorithm(String companyId, String employeeId, GeneralDate criteria,
 			Month startMonth, Year year, PeriodAtrOfAgreement periodAtr);
+
+	List<AgreementTimeByEmp> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
+											  Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs);
 }

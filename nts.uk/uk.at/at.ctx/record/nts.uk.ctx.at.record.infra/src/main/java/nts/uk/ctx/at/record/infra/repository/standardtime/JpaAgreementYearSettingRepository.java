@@ -1,13 +1,17 @@
 package nts.uk.ctx.at.record.infra.repository.standardtime;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
 
 import lombok.val;
+import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.gul.collection.CollectionUtil;
 //import nts.arc.time.YearMonth;
 //import nts.uk.ctx.at.record.dom.standardtime.AgreementMonthSetting;
 import nts.uk.ctx.at.record.dom.standardtime.AgreementYearSetting;
@@ -26,6 +30,7 @@ public class JpaAgreementYearSettingRepository extends JpaRepository implements 
 
 	private static final String IS_EXIST_DATA;
 	private static final String FIND_BY_ID;
+	private static final String FIND_BY_IDS;
 
 	static {
 		StringBuilder builderString = new StringBuilder();
@@ -64,6 +69,13 @@ public class JpaAgreementYearSettingRepository extends JpaRepository implements 
 		builderString.append("AND a.kmkmtAgeementYearSettingPK.yearValue = :yearValue ");
 		builderString.append("ORDER BY a.kmkmtAgeementYearSettingPK.yearValue DESC ");
 		FIND_BY_ID = builderString.toString();
+
+		builderString = new StringBuilder();
+		builderString.append("SELECT a ");
+		builderString.append("FROM KmkmtAgeementYearSetting a ");
+		builderString.append("WHERE a.kmkmtAgeementYearSettingPK.employeeId IN :employeeIds ");
+		builderString.append("AND a.kmkmtAgeementYearSettingPK.yearValue = :yearValue ");
+		FIND_BY_IDS = builderString.toString();
 	}
 
 	@Override
@@ -78,6 +90,19 @@ public class JpaAgreementYearSettingRepository extends JpaRepository implements 
 				.setParameter("employeeId", employeeId)
 				.setParameter("yearValue", yearMonth)
 				.getSingle(f -> toDomain(f));
+	}
+
+	@Override
+	public List<AgreementYearSetting> findByKey(List<String> employeeIds, int yearMonth) {
+		if (employeeIds == null || employeeIds.isEmpty())
+			return Collections.emptyList();
+		List<AgreementYearSetting> result = new ArrayList<>();
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
+			result.addAll(this.queryProxy().query(FIND_BY_IDS, KmkmtAgeementYearSetting.class)
+					.setParameter("employeeIds", splitData).setParameter("yearValue", yearMonth)
+					.getList(f -> toDomain(f)));
+		});
+		return result;
 	}
 
 	@Override
