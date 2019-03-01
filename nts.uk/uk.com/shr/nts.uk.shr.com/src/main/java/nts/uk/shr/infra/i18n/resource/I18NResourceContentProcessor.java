@@ -79,7 +79,7 @@ public class I18NResourceContentProcessor {
 				param = this.getArgument(params.get(paramIndex));
 			}
 			
-			matcher.appendReplacement(sb, param);
+			matcher.appendReplacement(sb, Matcher.quoteReplacement(param));
 		}
 		
 		matcher.appendTail(sb);
