@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
 
+import nts.arc.i18n.I18NText;
 import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsence;
 import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsenceRepository;
 import nts.uk.ctx.at.request.dom.application.appabsence.appforspecleave.AppForSpecLeave;
@@ -131,9 +132,9 @@ public class AppDetailInfoImpl implements AppDetailInfoRepository{
 			if(overTime.getAttendanceType().equals(AttendanceType.NORMALOVERTIME)){
 				String name = "";
 				if(overTime.getFrameNo() == 11){
-					name = "時間外深夜時間";
+					name = I18NText.getText("CMM045_270");
 				}else if(overTime.getFrameNo() == 12){
-					name = "ﾌﾚｯｸｽ超過";
+					name = I18NText.getText("CMM045_271");
 				}else{
 				lstFrameNo.add(overTime.getFrameNo());
 				List<OvertimeWorkFrame> lstFramOt = repoOverTimeFr.getOvertimeWorkFrameByFrameNos(companyId, lstFrameNo);
