@@ -872,17 +872,25 @@ module cmm045.a.viewmodel {
                 //ver14
 //                let reasonOtPre = self.displaySet().appReasonDisAtr == 0 || groups.reasonAppPre == '' ? '' : '<br/>' + groups.reasonAppPre;
                 let content1 = time1 == '' ? time2 : time2 == '' ? time1 : time1 + '　' + time2;
-                let contentSetTrue = content1 == '' ? self.convertFrameTime(groups.appPre.lstFrame) : content1 + '　' + self.convertFrameTime(groups.appPre.lstFrame);
-                appPre = detailSet == 1 ? contentSetTrue : self.convertFrameTime(groups.appPre.lstFrame);;
+                let content2 = self.convertFrameTime(groups.appPre.lstFrame);
+                let contentSetTrue = content1 == '' ? content2 : content1 + '　' + content2;
+                appPre = detailSet == 1 ? contentSetTrue : content2;
             }
             let appResContent = '';
             //thuc te
             let timeRes1 = groups.strTime1  == '' ? '' : groups.strTime1 + getText('CMM045_100') + groups.endTime1;
             let timeRes2 = groups.strTime2  == '' ? '' : groups.strTime2 + getText('CMM045_100') + groups.endTime2;
             //ver14
-            let contentRes1 =  timeRes1 + timeRes2;
-            let contentRes2 = self.convertFrameTime(groups.lstFrameRes);
-            let appRes = detailSet == 1 ? contentRes1 + contentRes2 : contentRes2;
+            let contentRes1 =  timeRes1 == '' ? timeRes2 : timeRes2 == '' ? timeRes1 : timeRes1 + '　' + timeRes2;
+            let lstFrameOv: Array<any> = groups.lstFrameRes;
+            //add shiftNight
+            lstFrameOv.push(new vmbase.OverTimeFrame(1,11,getText('CMM045_270'),0,groups.shiftNightTime));
+            //add flex
+            lstFrameOv.push(new vmbase.OverTimeFrame(1,12,getText('CMM045_271'),0,groups.flexTime));
+            let contentRes2 = self.convertFrameTime(lstFrameOv);
+            let contResTrue = contentRes1 == '' ? contentRes2 : contentRes1 + '　' + contentRes2;
+            let appRes = detailSet == 1 ? contResTrue : contentRes2;
+            
             appResContent = getText('CMM045_274') + appRes;
             let appInfor = {
                 appPre: appPre == null ? '' : getText('CMM045_273') + appPre,
