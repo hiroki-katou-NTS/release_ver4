@@ -14,6 +14,8 @@ import nts.arc.layer.app.command.CommandHandlerWithResult;
 import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
+import nts.uk.ctx.at.request.dom.application.PrePostAtr;
+import nts.uk.ctx.at.request.dom.application.UseAtr;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.RegisterAtApproveReflectionInfoService_New;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.after.NewAfterRegister_New;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
@@ -21,6 +23,8 @@ import nts.uk.ctx.at.request.dom.application.overtime.AppOverTime;
 import nts.uk.ctx.at.request.dom.application.overtime.AppOvertimeDetail;
 import nts.uk.ctx.at.request.dom.application.overtime.service.IFactoryOvertime;
 import nts.uk.ctx.at.request.dom.application.overtime.service.OvertimeService;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.OvertimeRestAppCommonSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.OvertimeRestAppCommonSetting;
 import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSetting;
 import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSettingRepository;
 import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSetting;
@@ -50,6 +54,9 @@ public class CreateOvertimeCommandHandler extends CommandHandlerWithResult<Creat
 	
 	@Inject
 	private AppTypeDiscreteSettingRepository appTypeDiscreteSettingRepository;
+	
+	@Inject
+	private OvertimeRestAppCommonSetRepository overtimeRestAppCommonSetRepository;
 
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<CreateOvertimeCommand> context) {
@@ -86,10 +93,32 @@ public class CreateOvertimeCommandHandler extends CommandHandlerWithResult<Creat
 			}
 		}
 		appReason = typicalReason + displayReason;
-
+		
+		String divergenceReason = Strings.EMPTY;  
+		String divergenceReasonCombox = Strings.EMPTY;
+		String divergenceReasonArea = Strings.EMPTY;
+		
+		Integer prePostAtr = command.getPrePostAtr();
+		
+		OvertimeRestAppCommonSetting overtimeRestAppCommonSet = this.overtimeRestAppCommonSetRepository.getOvertimeRestAppCommonSetting(
+				companyId, 
+				ApplicationType.OVER_TIME_APPLICATION.value).get();
+		boolean displayDivergenceReasonCombox = (prePostAtr != PrePostAtr.PREDICT.value) && (overtimeRestAppCommonSet.getDivergenceReasonFormAtr().value == UseAtr.USE.value);
+		boolean displayDivergenceReasonArea = (prePostAtr != PrePostAtr.PREDICT.value) && (overtimeRestAppCommonSet.getDivergenceReasonInputAtr().value == UseAtr.USE.value);
+		if(displayDivergenceReasonCombox){
+			divergenceReasonCombox += command.getDivergenceReasonContent();
+		}
+		if(displayDivergenceReasonArea){
+			if(Strings.isNotBlank(divergenceReasonCombox)){
+				divergenceReasonArea += System.lineSeparator();
+			}
+			divergenceReasonArea += command.getDivergenceReasonArea();
+		}
+		
+		divergenceReason = divergenceReasonCombox + divergenceReasonArea;
 		// Create Application
 		Application_New appRoot = factoryOvertime.buildApplication(appID, command.getApplicationDate(),
-				command.getPrePostAtr(), appReason,
+				prePostAtr, appReason,
 				appReason,command.getApplicantSID());
 
 		Integer workClockFrom1 = command.getWorkClockFrom1() == null ? null : command.getWorkClockFrom1().intValue();
@@ -101,7 +130,7 @@ public class CreateOvertimeCommandHandler extends CommandHandlerWithResult<Creat
 				: Optional.ofNullable(command.getAppOvertimeDetail().toDomain(companyId, appID));
 		AppOverTime overTimeDomain = factoryOvertime.buildAppOverTime(companyId, appID, command.getOvertimeAtr(),
 				command.getWorkTypeCode(), command.getSiftTypeCode(), workClockFrom1, workClockTo1, workClockFrom2,
-				workClockTo2, command.getDivergenceReasonContent().replaceFirst(":", System.lineSeparator()),
+				workClockTo2, divergenceReason,
 				command.getFlexExessTime(), command.getOverTimeShiftNight(),
 				CheckBeforeRegisterOvertime.getOverTimeInput(command, companyId, appID), 
 				appOvertimeDetailOtp);

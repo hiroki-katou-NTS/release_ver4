@@ -18,14 +18,22 @@ import nts.arc.layer.app.command.CommandHandlerWithResult;
 import nts.uk.ctx.at.request.dom.application.AppReason;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
+import nts.uk.ctx.at.request.dom.application.PrePostAtr;
+import nts.uk.ctx.at.request.dom.application.UseAtr;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.InitMode;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.after.DetailAfterUpdate;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.before.DetailBeforeUpdate;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.DetailScreenInitModeOutput;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.OutputMode;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.User;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
 import nts.uk.ctx.at.request.dom.application.overtime.AppOverTime;
 import nts.uk.ctx.at.request.dom.application.overtime.AppOvertimeDetail;
 import nts.uk.ctx.at.request.dom.application.overtime.OverTimeAtr;
 import nts.uk.ctx.at.request.dom.application.overtime.OverTimeInput;
 import nts.uk.ctx.at.request.dom.application.overtime.OvertimeRepository;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.OvertimeRestAppCommonSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.OvertimeRestAppCommonSetting;
 import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSetting;
 import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSettingRepository;
 import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSetting;
@@ -60,6 +68,12 @@ public class UpdateOvertimeCommandHandler extends CommandHandlerWithResult<Updat
 	
 	@Inject
 	private AppTypeDiscreteSettingRepository appTypeDiscreteSettingRepository;
+	
+	@Inject
+	private InitMode initMode;
+	
+	@Inject
+	private OvertimeRestAppCommonSetRepository overtimeRestAppCommonSetRepository;
 
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<UpdateOvertimeCommand> context) {
@@ -69,33 +83,60 @@ public class UpdateOvertimeCommandHandler extends CommandHandlerWithResult<Updat
 		if(!opAppOverTime.isPresent()){
 			throw new RuntimeException("khong ton tai doi tuong de update");
 		}
-		
-		AppTypeDiscreteSetting appTypeDiscreteSetting = appTypeDiscreteSettingRepository.getAppTypeDiscreteSettingByAppType(
-				companyID, 
-				ApplicationType.OVER_TIME_APPLICATION.value).get();
-		String appReason = Strings.EMPTY;	
-		String typicalReason = Strings.EMPTY;
-		String displayReason = Strings.EMPTY;
-		if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)){
-			typicalReason += command.getAppReasonID();
-		}
-		if(appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
-			if(Strings.isNotBlank(typicalReason)){
-				displayReason += System.lineSeparator();
+		DetailScreenInitModeOutput output = initMode.getDetailScreenInitMode(EnumAdaptor.valueOf(context.getCommand().getUser(), User.class), context.getCommand().getReflectPerState());
+		String appReason = opAppOverTime.get().getApplication().getAppReason().v();
+		String divergenceReason = opAppOverTime.get().getDivergenceReason(); 
+		if(output.getOutputMode()==OutputMode.EDITMODE){
+			AppTypeDiscreteSetting appTypeDiscreteSetting = appTypeDiscreteSettingRepository.getAppTypeDiscreteSettingByAppType(
+					companyID, 
+					ApplicationType.OVER_TIME_APPLICATION.value).get();
+			String typicalReason = Strings.EMPTY;
+			String displayReason = Strings.EMPTY;
+			if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)){
+				typicalReason += command.getAppReasonID();
 			}
-			displayReason += command.getApplicationReason();
-		}
-		Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
-				.getApplicationSettingByComID(companyID);
-		ApplicationSetting applicationSetting = applicationSettingOp.get();
-		if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)
-			||appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
-			if (applicationSetting.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
-					&& Strings.isBlank(typicalReason+displayReason)) {
-				throw new BusinessException("Msg_115");
+			if(appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+				if(Strings.isNotBlank(typicalReason)){
+					displayReason += System.lineSeparator();
+				}
+				displayReason += command.getApplicationReason();
+			}
+			Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
+					.getApplicationSettingByComID(companyID);
+			ApplicationSetting applicationSetting = applicationSettingOp.get();
+			if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)
+				||appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+				if (applicationSetting.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
+						&& Strings.isBlank(typicalReason+displayReason)) {
+					throw new BusinessException("Msg_115");
+				}
+				appReason = typicalReason + displayReason;
+			}
+			
+			String divergenceReasonCombox = Strings.EMPTY;
+			String divergenceReasonArea = Strings.EMPTY;
+			
+			Integer prePostAtr = opAppOverTime.get().getApplication().getPrePostAtr().value;
+			
+			OvertimeRestAppCommonSetting overtimeRestAppCommonSet = this.overtimeRestAppCommonSetRepository.getOvertimeRestAppCommonSetting(
+					companyID, 
+					ApplicationType.OVER_TIME_APPLICATION.value).get();
+			boolean displayDivergenceReasonCombox = (prePostAtr != PrePostAtr.PREDICT.value) && (overtimeRestAppCommonSet.getDivergenceReasonFormAtr().value == UseAtr.USE.value);
+			boolean displayDivergenceReasonArea = (prePostAtr != PrePostAtr.PREDICT.value) && (overtimeRestAppCommonSet.getDivergenceReasonInputAtr().value == UseAtr.USE.value);
+			if(displayDivergenceReasonCombox){
+				divergenceReasonCombox += command.getDivergenceReasonContent();
+			}
+			if(displayDivergenceReasonArea){
+				if(Strings.isNotBlank(typicalReason)){
+					divergenceReasonArea += System.lineSeparator();
+				}
+				divergenceReasonArea += command.getDivergenceReasonArea();
+			}
+			
+			if(displayDivergenceReasonCombox||displayDivergenceReasonArea){
+				divergenceReason = divergenceReasonCombox + divergenceReasonArea;
 			}
 		}
-		appReason = typicalReason + displayReason;
 		
 		AppOverTime appOverTime = opAppOverTime.get();
 		List<OverTimeInput> overTimeInputs = new ArrayList<>();
@@ -105,7 +146,6 @@ public class UpdateOvertimeCommandHandler extends CommandHandlerWithResult<Updat
 		overTimeInputs.addAll(command.getBonusTimes().stream().filter(x -> x.getApplicationTime()!=null).map(x -> x.convertToDomain()).collect(Collectors.toList()));
 		Optional<AppOvertimeDetail> appOvertimeDetailOtp = command.getAppOvertimeDetail() == null ? Optional.empty()
 				: Optional.ofNullable(command.getAppOvertimeDetail().toDomain(companyID, appOverTime.getAppID()));
-		String divergenceReason = command.getDivergenceReasonContent().replaceFirst(":", System.lineSeparator());
 		String applicationReason = appReason;
 		appOverTime.setDivergenceReason(divergenceReason);
 		appOverTime.setFlexExessTime(command.getFlexExessTime());

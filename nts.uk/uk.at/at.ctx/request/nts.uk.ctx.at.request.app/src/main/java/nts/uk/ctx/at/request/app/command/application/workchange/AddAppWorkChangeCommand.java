@@ -18,5 +18,8 @@ public class AddAppWorkChangeCommand {
 	
 	
 	String employeeID;
+	
+	Integer user;
+    Integer reflectPerState;
 
 }
