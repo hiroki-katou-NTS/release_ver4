@@ -584,11 +584,11 @@
 									<com:ko tag="foreach" bind="listDataA8">
 									<tr data-bind="if: (appType() == 0 &#124;&#124; appType() == 1) &amp; flg() != 1">
 										<td class="color-header"><span  id="a8_8" class="label" data-bind="text:appTypeName"></span></td>
-										<td><div
-												data-bind="ntsCheckBox: { checked: displayFixedReason },attr:{
-														tabindex:87 + $index()*6
-													}">#{i18n.getText('KAF022_61')}</div></td>
-										<td><div
+										<td data-bind = "attr: {colspan: appType() == 1 ?  '2' : '1'}, if: appType() == 0">
+											<div data-bind="ntsCheckBox: { checked: displayFixedReason },
+														attr:{tabindex:87 + $index()*6}">#{i18n.getText('KAF022_61')}</div>
+										</td>
+										<td data-bind = "visible: appType() == 0"><div
 												data-bind="ntsCheckBox: { checked: displayAppReason },attr:{
 														tabindex:88 + $index()*6
 													}">#{i18n.getText('KAF022_61')}</div></td>
