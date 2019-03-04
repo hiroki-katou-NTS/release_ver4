@@ -388,6 +388,7 @@ public class DailyModifyResCommandFacade {
 			dataResultAfterIU.setErrorMap(convertErrorToType(lstResultReturnDailyError, resultErrorMonth));
 			dataResultAfterIU.setMessageAlert("Msg_1489");
 			dataResultAfterIU.setErrorAllSidDate(true);
+			dataResultAfterIU.setShowErrorDialog(dataParent.getShowDialogError());
 			return dataResultAfterIU;
 		}
 		
@@ -456,6 +457,7 @@ public class DailyModifyResCommandFacade {
 							dataResultAfterIU.setErrorMap(convertErrorToType(lstResultReturnDailyError, resultErrorMonth));
 							dataResultAfterIU.setMessageAlert("Msg_1489");
 							dataResultAfterIU.setErrorAllSidDate(true);
+							dataResultAfterIU.setShowErrorDialog(dataParent.getShowDialogError());
 							return dataResultAfterIU;
 						}
 					}

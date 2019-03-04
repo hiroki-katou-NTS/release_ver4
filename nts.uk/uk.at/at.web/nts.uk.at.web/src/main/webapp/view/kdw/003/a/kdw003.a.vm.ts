@@ -1034,7 +1034,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 // dailyOlds: self.lstDomainOld,
                 //dailyEdits: self.lstDomainEdit,
                 flagCalculation: self.flagCalculation,
-                lstNotFoundWorkType: self.workTypeNotFound
+                lstNotFoundWorkType: self.workTypeNotFound,
+                showDialogError: self.showDialogError
             }
             if (self.displayFormat() == 0) {
                 if (!_.isEmpty(self.shareObject()) && self.shareObject().initClock != null) {
@@ -1152,9 +1153,12 @@ module nts.uk.at.view.kdw003.a.viewmodel {
 //                            self.showErrorDialog(dataAfter.messageAlert);
 //                        } else 
                         if(errorFlex|| (self.flagCalculation && self.hasErrorCalc)){
-                            self.showErrorDialog(dataAfter.messageAlert);
+                            self.showErrorDialog(dataAfter.messageAlert).done(() => {
+                                if (dataAfter.showErrorDialog) self.showErrorDialog();
+                            }); 
                         }else {
-                            self.showDialogError = false;
+                            //self.showDialogError = false;
+                            if (dataAfter.showErrorDialog) self.showErrorDialog();
                         }
                        // nts.uk.ui.block.clear();
                     } else {
@@ -1205,7 +1209,13 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                              if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
                                  nts.uk.ui.dialog.info({ messageId: "Msg_15" });
                              }
-                             if (errorAll || errorFlex || self.hasErrorCalc) self.showErrorDialog(dataAfter.messageAlert);
+                             if (errorAll || errorFlex || self.hasErrorCalc) {
+							  self.showErrorDialog(dataAfter.messageAlert).done(() =>{
+                               if(dataAfter.showErrorDialog) self.showErrorDialog();   
+                              }); 
+							 }else{
+							  if(dataAfter.showErrorDialog) self.showErrorDialog();
+							 }
                              self.hasErrorCalc = false;
                         });
                     }
@@ -1987,6 +1997,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         if (data.showErrorDialog) {
                             self.showDialogError = true;
                             self.showErrorDialog();
+                        }else{
+                            self.showDialogError = false;
                         }
                     }
                     nts.uk.ui.block.clear();
@@ -2122,8 +2134,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             return errorValidateScreeen;
         }
 
-        showErrorDialog(messageAlert ?: string) {
+        showErrorDialog(messageAlert ?: string): JQueryPromise<any> {
             var self = this;
+            let dfd = $.Deferred();
             if(self.openedScreenB) return;
             if (!self.hasEmployee || self.hasErrorBuss) return;
             let lstEmployee = [];
@@ -2262,12 +2275,12 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 setShared("paramToGetError", param);
                 setShared("errorValidate", errorValidateScreeen);
                 setShared("messageKdw003a", (_.isEmpty(messageAlert) || !_.isString(messageAlert)) ? null : messageAlert);
-                self.openedScreenB = true;
-                self.dialogShow = nts.uk.ui.windows.sub.modeless("/view/kdw/003/b/index.xhtml").onClosed(function() {
-                    let errorCodes = nts.uk.ui.windows.getShared('shareToKdw003aa');
-                    self.openedScreenB = false;
+                //self.openedScreenB = true;
+                self.dialogShow = nts.uk.ui.windows.sub.modeless("/view/kdw/003/b/index.xhtml").onOpened(() =>{
+                     dfd.resolve();
                 });
             }
+           return dfd.promise();
         }
 
         changeExtractionCondition() {
