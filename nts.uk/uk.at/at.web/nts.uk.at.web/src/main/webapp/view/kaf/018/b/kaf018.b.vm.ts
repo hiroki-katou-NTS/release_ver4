@@ -21,10 +21,15 @@ module nts.uk.at.view.kaf018.b.viewmodel {
         listEmployeeCode: Array<any>;
         listWorkplace: Array<model.WorkplaceInfor>;
         inputContent: any;
-        
+        isCheckedAll: KnockoutObservable<boolean> = ko.observable(false);
         constructor() {
             var self = this;
-            $("#fixed-table").ntsFixedTable({ width: 1000, height: 163 });
+            $("#fixed-table").ntsFixedTable({ width: 1030, height: 163 });
+            self.isCheckedAll.subscribe(function(isCheck){
+                _.each(self.tempData, function(item){
+                    item.isChecked(isCheck)
+                });
+            });
         }
 
         startPage(): JQueryPromise<any> {
