@@ -1118,20 +1118,28 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                                 self.loadRowScreen(false, false).done(() =>{
                                     nts.uk.ui.block.clear();
                                     if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
-                                        nts.uk.ui.dialog.info({ messageId: "Msg_15" });
+                                        nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
+                                            if (dataAfter.showErrorDialog && dataAfter.errorMap[6] == undefined) self.showErrorDialog();
+                                        });
                                     }
                                     if (dataAfter.errorMap[6] != undefined) {
-                                        nts.uk.ui.dialog.info({ messageId: "Msg_1455" });
+                                        nts.uk.ui.dialog.info({ messageId: "Msg_1455" }).then(() => {
+                                            if (dataAfter.showErrorDialog) self.showErrorDialog();
+                                        });
                                     }
                                 });
                             } else {
                                 self.loadRowScreen(true, false).done(() =>{
                                     nts.uk.ui.block.clear();
                                     if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
-                                        nts.uk.ui.dialog.info({ messageId: "Msg_15" });
+                                        nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
+                                            if (dataAfter.showErrorDialog && dataAfter.errorMap[6] == undefined) self.showErrorDialog();
+                                        });
                                     }
                                     if (dataAfter.errorMap[6] != undefined) {
-                                        nts.uk.ui.dialog.info({ messageId: "Msg_1455" });
+                                        nts.uk.ui.dialog.info({ messageId: "Msg_1455" }).then(() => {
+                                            if (dataAfter.showErrorDialog) self.showErrorDialog();
+                                        });
                                     }
                                 });
                                 //nts.uk.ui.block.clear();
@@ -1140,10 +1148,14 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             self.loadRowScreen(false, true).done(() =>{
                                 nts.uk.ui.block.clear();
                                 if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
-                                    nts.uk.ui.dialog.info({ messageId: "Msg_15" });
+                                    nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
+                                            if (dataAfter.showErrorDialog && dataAfter.errorMap[6] == undefined) self.showErrorDialog();
+                                        });
                                 }
                                 if (dataAfter.errorMap[6] != undefined) {
-                                    nts.uk.ui.dialog.info({ messageId: "Msg_1455" });
+                                    nts.uk.ui.dialog.info({ messageId: "Msg_1455" }).then(() => {
+                                        if (dataAfter.showErrorDialog) self.showErrorDialog();
+                                    });
                                 }
                             });
                         }
@@ -1156,10 +1168,11 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             self.showErrorDialog(dataAfter.messageAlert).done(() => {
                                 if (dataAfter.showErrorDialog) self.showErrorDialog();
                             }); 
-                        }else {
-                            //self.showDialogError = false;
-                            if (dataAfter.showErrorDialog) self.showErrorDialog();
                         }
+//                       else {
+//                            //self.showDialogError = false;
+//                            if (dataAfter.showErrorDialog) self.showErrorDialog();
+//                        }
                        // nts.uk.ui.block.clear();
                     } else {
                         let errorAll = false;
@@ -1207,15 +1220,18 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         self.loadRowScreen(false, self.flagCalculation).done(() =>{
                              nts.uk.ui.block.clear();
                              if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
-                                 nts.uk.ui.dialog.info({ messageId: "Msg_15" });
+                                 nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
+                                     if (dataAfter.showErrorDialog) self.showErrorDialog();
+                                 });
+                             } else {
+                                 if (errorAll || errorFlex || self.hasErrorCalc) {
+                                     self.showErrorDialog(dataAfter.messageAlert).done(() => {
+                                         if (dataAfter.showErrorDialog) self.showErrorDialog();
+                                     });
+                                 } else {
+                                     if (dataAfter.showErrorDialog) self.showErrorDialog();
+                                 }
                              }
-                             if (errorAll || errorFlex || self.hasErrorCalc) {
-							  self.showErrorDialog(dataAfter.messageAlert).done(() =>{
-                               if(dataAfter.showErrorDialog) self.showErrorDialog();   
-                              }); 
-							 }else{
-							  if(dataAfter.showErrorDialog) self.showErrorDialog();
-							 }
                              self.hasErrorCalc = false;
                         });
                     }
