@@ -63,7 +63,7 @@
 							<div style="margin-left: -4px"
 								data-bind="ntsCheckBox: { 
 										checked: $data.requiredInstructionFlg, 
-										enable: $data.useAtr() == 1
+										enable: ($data.useAtr() == 1) &amp;&amp; false
 									}">#{i18n.getText('KAF022_288')}</div>
 						</td>
 						<td>
@@ -219,7 +219,7 @@
 							<div style="margin-left: -4px"
 								data-bind="ntsCheckBox: { 
 									checked: $data.requiredInstructionFlg, 
-									enable: !!$data.useAtr()
+									enable: (!!$data.useAtr()) &amp;&amp; false
 								}">#{i18n.getText('KAF022_290')}</div>
 						</td>
 						<td>
@@ -287,7 +287,7 @@
 									optionsValue: 'code',
 									optionsText: 'name',
 									value: $data.useAtr,
-									enable: true
+									enable: false
 								}"></div>
 						</td>
 						<td></td>
@@ -298,7 +298,7 @@
 									optionsValue: 'code',
 									optionsText: 'name',
 									value: $data.timeCalUseAtr,
-									enable: true
+									enable: false
 								}"></div>
 						</td>
 						<td><textarea class = "memo" style="height: 40px; width: 174px"
@@ -315,7 +315,7 @@
 							optionsValue: 'code',
 							optionsText: 'name',
 							value: $data.useAtr,
-							enable: true}"></div>
+							enable: false}"></div>
 						</td>
 						<td></td>
 						<td>
@@ -325,14 +325,14 @@
 							optionsValue: 'code',
 							optionsText: 'name',
 							value: $data.lateOrLeaveAppCancelFlg,
-							enable: true}"></div>
+							enable: false}"></div>
 							<div
 								data-bind="ntsRadioBoxGroup: {
 							options: $vmm.lateOrLeaveAppSettingAtr,
 							optionsValue: 'code',
 							optionsText: 'name',
 							value: $data.lateOrLeaveAppSettingFlg,
-							enable: true}"></div>
+							enable: false}"></div>
 						</td>
 						<td><textarea class = "memo" style="height: 80px; width: 174px"
 								data-bind="ntsMultilineEditor: { value: $data.memo, constraint: 'Memo' , name:'#{i18n.getText('KAF022_315')}'}" />
@@ -348,7 +348,7 @@
 							optionsValue: 'code',
 							optionsText: 'name',
 							value: $data.useAtr,
-							enable: true}"></div>
+							enable: false}"></div>
 						</td>
 						<td></td>
 						<td></td>
@@ -366,7 +366,7 @@
 							optionsValue: 'code',
 							optionsText: 'name',
 							value: $data.useAtr,
-							enable: true}"></div>
+							enable: false}"></div>
 						</td>
 						<td></td>
 						<td></td>
@@ -384,7 +384,7 @@
 										optionsValue: 'code',
 										optionsText: 'name',
 										value: $data.useAtr,
-										enable: true
+										enable: false
 									}"></div>
 						</td>
 						<td></td>
