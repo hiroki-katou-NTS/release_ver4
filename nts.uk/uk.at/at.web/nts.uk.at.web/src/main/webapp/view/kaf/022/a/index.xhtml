@@ -395,7 +395,7 @@
 													constraint: 'DispName',
 													option: $parent.option,
 													required: $parent.required,
-													enable: $parent.enable,
+													enable: !((appType()==3)||(appType()==7)||(appType()==8)||(appType()==9)||(appType()==11)||(appType()==12)||(appType()==13)||(appType()==14)),
 													readonly: $parent.readonly
 													 },attr:{
 														tabindex:29 + $index()
@@ -446,7 +446,7 @@
 														value: retrictPreDay,
 														optionsText: 'name',
 														editable: $parent.isEditable,
-														enable: $parent.isEnable,
+														enable: ((appType()==2)||(appType()==9)),
 														columns: [
 															{ prop: 'name', length: 4 }
 														]},attr:{
@@ -524,7 +524,7 @@
 									<tr data-bind="if: appType()!=0 &amp; appType()!=3 &amp; appType()!=8 &amp; appType()!=11 &amp; appType()!=13 &amp; appType()!=14 &amp; appType()!=12">
 										<td class="color-header" id="a7_5" data-bind="text:appTypeName">#{i18n.getText('KAF022_4')}</td>
 										<td><div
-												data-bind="ntsCheckBox: { checked: retrictPreUseFlg },attr:{
+												data-bind="ntsCheckBox: { checked: retrictPreUseFlg, enable: !((appType()==7)||(appType()==9)) },attr:{
 														tabindex:48 + ($index()-1)*3
 													}">#{i18n.getText('KAF022_61')}</div></td>
 										<td class="flex valign-center">
@@ -537,7 +537,7 @@
 													value: retrictPreDay,
 													optionsText: 'name',
 													editable: $parent.isEditable,
-													enable: $parent.isEnable,
+													enable: !((appType()==7)||(appType()==9)),
 													columns: [
 														{ prop: 'name', length: 4 }
 													]},attr:{
@@ -547,7 +547,7 @@
 											<span class="label" id="a7_29">#{i18n.getText('KAF022_65')}</span>
 										</td>
 										<td><div
-												data-bind="ntsCheckBox: { checked: retrictPostAllowFutureFlg },attr:{
+												data-bind="ntsCheckBox: { checked: retrictPostAllowFutureFlg, enable: !((appType()==7)||(appType()==9)) },attr:{
 														tabindex:50 + ($index()-1)*3
 													}">#{i18n.getText('KAF022_68')}</div></td>
 									</tr>
@@ -628,11 +628,17 @@
 									<tr data-bind="if: flg() == 1">
 										<td class="color-header"><span class = "hdtype" id="a8_8"  data-bind="text:appTypeName"></span></td>
 										<td><div
-												data-bind="ntsCheckBox: { checked: displayFixedReason },attr:{
+												data-bind="ntsCheckBox: { 
+															checked: displayFixedReason,
+															enable: !((appType()==5)||(appType()==6))
+													 },attr:{
 														tabindex:93 + $index()*6
 													}">#{i18n.getText('KAF022_61')}</div></td>
 										<td><div
-												data-bind="ntsCheckBox: { checked: displayAppReason },attr:{
+												data-bind="ntsCheckBox: { 
+															checked: displayAppReason,
+															enable: !((appType()==5)||(appType()==6))
+													},attr:{
 														tabindex:94 + $index()*6
 													}">#{i18n.getText('KAF022_61')}</div></td>
 									</tr>
@@ -641,19 +647,31 @@
 									<tr data-bind="if: (appType() == 2 &#124;&#124; appType() == 4 &#124;&#124; appType() == 6 &#124;&#124; appType() == 7 &#124;&#124; appType() == 9 &#124;&#124; appType() == 10) &amp; flg() == 0">
 										<td class="color-header"><span  id="a8_8" class="label" data-bind="text:appTypeName"></span></td>
 										<td><div
-												data-bind="ntsCheckBox: { checked: displayFixedReason },attr:{
+												data-bind="ntsCheckBox: { 
+															checked: displayFixedReason, 
+															enable: !((appType()==7)||(appType()==9))
+													},attr:{
 														tabindex:95 + $index()*6
 													}">#{i18n.getText('KAF022_61')}</div></td>
 										<td><div
-												data-bind="ntsCheckBox: { checked: displayAppReason },attr:{
+												data-bind="ntsCheckBox: { 
+															checked: displayAppReason,
+															enable: !((appType()==7)||(appType()==9)) 
+													},attr:{
 														tabindex:96 + $index()*6
 													}">#{i18n.getText('KAF022_61')}</div></td>
 										<td><div
-												data-bind="ntsCheckBox: { checked: sendMailWhenRegister },attr:{
+												data-bind="ntsCheckBox: { 
+															checked: sendMailWhenRegister,
+															enable: !((appType()==7)||(appType()==9))
+													 },attr:{
 														tabindex:97 + $index()*6
 													}">#{i18n.getText('KAF022_75')}</div></td>
 										<td><div
-												data-bind="ntsCheckBox: { checked: sendMailWhenApproval },attr:{
+												data-bind="ntsCheckBox: { 
+															checked: sendMailWhenApproval,
+															enable: !((appType()==7)||(appType()==9))
+													},attr:{
 														tabindex:98 + $index()*6
 													}">#{i18n.getText('KAF022_75')}</div></td>
 										<td>
@@ -666,7 +684,7 @@
 													value: displayInitialSegment,
 													optionsText: 'name',
 													editable: $parent.isEditable,
-													enable: $parent.isEnable,
+													enable: !((appType()==7)||(appType()==9)),
 													columns: [
 														{ prop: 'name', length: 7 }
 													]},attr:{
@@ -675,7 +693,10 @@
 											</div>
 										</td>
 										<td><div
-												data-bind="ntsCheckBox: { checked: canClassificationChange, enable: disableA8 },attr:{
+												data-bind="ntsCheckBox: { 
+															checked: canClassificationChange, 
+															enable: disableA8() &amp;&amp; !((appType()==7)||(appType()==9)) 
+													},attr:{
 														tabindex:100 + $index()*6
 													}">#{i18n.getText('KAF022_75')}</div></td>
 									</tr>
@@ -958,7 +979,7 @@
 													optionsValue: 'code',
 													optionsText: 'name',
 													value: selectedIdA14_3,
-													enable: enableA5_14}">
+													enable: enableA5_14() &amp;&amp; false }">
 											</div>
 										</td>
 									</tr>
@@ -1017,7 +1038,7 @@
 													constraint: constraint,
 													option: option,
 													required: required,
-													enable: enable,
+													enable: enable &amp;&amp; false,
 													readonly: readonly}" />
 											</div>
 										</td>
@@ -1032,7 +1053,7 @@
 													constraint: constraint,
 													option: option,
 													required: required,
-													enable: enable,
+													enable: enable &amp;&amp; false,
 													readonly: readonly}" ></textarea>
 											</div>
 										</td>
@@ -1049,7 +1070,7 @@
 													constraint: constraint,
 													option: option,
 													required: required,
-													enable: enable,
+													enable: enable &amp;&amp; false,
 													readonly: readonly}" />
 											</div>
 										</td>
@@ -1064,7 +1085,7 @@
 													constraint: constraint,
 													option: option,
 													required: required,
-													enable: enable,
+													enable: enable &amp;&amp; false,
 													readonly: readonly}" ></textarea>
 											</div>
 										</td>
