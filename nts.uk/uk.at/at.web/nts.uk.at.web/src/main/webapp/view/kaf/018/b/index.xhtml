@@ -60,7 +60,7 @@
 						<col width="100px" />
 						<col width="100px" />
 						<col width="100px" />
-						<col width="100px" />
+						<col width="130px" />
 					</colgroup>
 					<thead>
 						<tr>
@@ -69,7 +69,8 @@
 							<th class="ui-widget-header">#{i18n.getText('KAF018_22')}</th>
 							<th class="ui-widget-header">#{i18n.getText('KAF018_23')}</th>
 							<th class="ui-widget-header">#{i18n.getText('KAF018_24')}</th>
-							<th class="ui-widget-header">#{i18n.getText('KAF018_25')}</th>
+							<th class="ui-widget-header"><div tabindex="-1" data-bind="ntsCheckBox: 
+								{ checked: isCheckedAll, enable: true }, visible: true">#{i18n.getText('KAF018_25')}</div></th>
 						</tr>
 					</thead>
 					<tbody data-bind="foreach: tempData">

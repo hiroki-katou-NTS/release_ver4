@@ -28,7 +28,7 @@ module nts.uk.at.view.kaf018.e.viewmodel {
         person: number;
         daily: number;
         monthly: number;
-
+        isCheckedAll: KnockoutObservable<boolean> = ko.observable(false);
         constructor() {
             var self = this;
 
@@ -37,6 +37,11 @@ module nts.uk.at.view.kaf018.e.viewmodel {
             self.person = TransmissionAttr.PERSON;
             self.daily = TransmissionAttr.DAILY;
             self.monthly = TransmissionAttr.MONTHLY;
+            self.isCheckedAll.subscribe(function(isCheck){
+                _.each(self.listWkpStatusConfirm, function(item){
+                    item.check(isCheck)
+                });
+            });
         }
 
         /**
