@@ -102,7 +102,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     if (lstData && lstData.length > 0) {
                         let sortedData: Array<any> = _.orderBy(lstData, ['code'], ['asc']);
                         self.lstFilteredData(sortedData);
-                        if (self.codeToSelect() == null) {
+                        if (self.codeToSelect() == null || !self.isNewMode()) {
                             if (self.selectedErrorAlarmCode() == self.lstFilteredData()[0].code)
                                 self.selectedErrorAlarmCode.valueHasMutated();
                             else 
