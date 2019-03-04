@@ -62,7 +62,8 @@ public class InsertHistoryCmm053Impl implements InsertHistoryCmm053Service {
 		List<PersonApprovalRoot> psOlds = this.repoPerson.getPsAppRootLastest(companyId, employeeId, GeneralDate.fromString("9999/12/31", "yyyy/MM/dd"));
 
 		// 追加する履歴を最新の履歴の開始年月日と比較する
-		if (!psOlds.isEmpty() && startDate.before(psOlds.get(0).getEmploymentAppHistoryItems().get(0).start())) {
+		if (!psOlds.isEmpty() && startDate.beforeOrEquals(psOlds.get(0).getEmploymentAppHistoryItems().get(0).start())) {
+			//追加する履歴の開始年月日 >= 最新の履歴の開始年月日 が falseの場合
 			throw new BusinessException("Msg_153");
 		}
 

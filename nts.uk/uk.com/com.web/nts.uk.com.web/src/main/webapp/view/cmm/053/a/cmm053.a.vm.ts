@@ -243,7 +243,8 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                                 let command = ko.toJS(self.settingManager());
                                 command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
                                 command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
-                                if(nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())){
+                                if(command.dailyApprovalCode == null || command.dailyApprovalCode === undefined 
+                                    || nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())){
                                     command.dailyApproverId = '';
                                 }
                                 //ドメインモデル「承認設定」．本人による承認をチェックする
@@ -270,7 +271,8 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                             let command = ko.toJS(self.settingManager());
                             command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
                             command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
-                            if(nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())){
+                            if(command.dailyApprovalCode == null || command.dailyApprovalCode === undefined 
+                                    || nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())){
                                 command.dailyApproverId = '';
                             }
                             //ドメインモデル「承認設定」．本人による承認をチェックする
