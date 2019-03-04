@@ -1,5 +1,8 @@
 package nts.uk.ctx.at.request.ac.bs;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
@@ -25,6 +28,15 @@ public class SyEmployeeAdapterImpl implements SyEmployeeAdapter{
 				infor.getRetiredDate());
 		
 		return data;
+	}
+
+	@Override
+	public List<SyEmployeeImport> getPersonInfor(List<String> employeeIds) {
+		return personInfoPub.listPersonInfor(employeeIds).stream()
+				.map(infor -> new SyEmployeeImport(infor.getPid(), infor.getBusinessName(), infor.getEntryDate(),
+						infor.getGender(), infor.getBirthDay(), infor.getEmployeeId(), infor.getEmployeeCode(),
+						infor.getRetiredDate()))
+				.collect(Collectors.toList());
 	}
 
 }

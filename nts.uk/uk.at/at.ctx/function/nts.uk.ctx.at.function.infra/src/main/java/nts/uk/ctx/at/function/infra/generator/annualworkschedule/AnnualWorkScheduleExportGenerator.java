@@ -45,110 +45,128 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 
 	private static final int MAX_EXPORT_ITEM = 10;
 	private static final int ROW_PER_PAGE = 26;
-	private static final int ROW_PER_PAGE_7_GROUP_MONTHS = 28;
-	/** C2_3 or C2_5 */
-	private static final int MAX_GROUP_MONTHS = 7;
+	private static final int MAX_PAGE_PER_SHEET = 1000;
 
 	@Override
 	public void generate(FileGeneratorContext fileContext, ExportData dataSource) {
 		try (AsposeCellsReportContext reportContext = this.createContext(TEMPLATE_FILE)) {
 			Workbook wb = reportContext.getWorkbook();
 			WorksheetCollection wsc = wb.getWorksheets();
-			Worksheet ws = wsc.get(0);
-			boolean is7Group = true;
-			int pageScale = 95;
-			// set A_11
-			reportContext.setHeader(0, "&8&\"MS ゴシック\""+dataSource.getHeader().getTitle());
-			// set A1_2
-			reportContext.setHeader(1, "&16&\"MS ゴシック\"" /* font size */
-					+ dataSource.getHeader().getReportName());
-			
-			// Set header date
-			DateTimeFormatter fullDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/M/d  H:mm", Locale.JAPAN);
-			reportContext.setHeader(2, "&8&\"MS ゴシック\"" + LocalDateTime.now().format(fullDateTimeFormatter) + "\npage &P ");
-			
-			ws.setName(dataSource.getHeader().getReportName());
+			int sheetIndex = 1;
+			this.setupSheet(wsc, dataSource);
+			Worksheet ws = this.copySheet(wsc, sheetIndex, dataSource.getHeader().getReportName());
 
-			// delete superfluous column
-			int rowsPerPage = ROW_PER_PAGE_7_GROUP_MONTHS;
-			if (dataSource.getHeader().getMonthPeriodLabels() == null
-					|| dataSource.getHeader().getMonthPeriodLabels().size() < MAX_GROUP_MONTHS) {
-				ws.getCells().deleteColumn(wsc.getRangeByName("monthPeriodLabel7").getFirstColumn());
-				is7Group = false;
-				pageScale += 3;
-				rowsPerPage = ROW_PER_PAGE;
-				wsc.getRangeByName("monthPeriod6Range").setOutlineBorder(BorderType.RIGHT_BORDER, CellBorderType.DOTTED,
-						Color.getBlack());
-			}
-			if (!dataSource.isOutNumExceedTime36Agr()) {
-				ws.getCells().deleteColumn(wsc.getRangeByName("numExceedTime").getFirstColumn());
-				ws.getCells().deleteColumn(wsc.getRangeByName("numRemainingTime").getFirstColumn());
-				pageScale += 6;
-			}
-			PageSetup pageSetup = ws.getPageSetup();
-			pageSetup.setZoom(pageScale);
-			pageSetup.setPrintArea("A1:W");
-			// delete superfluous rows
 			Range empRange = wsc.getRangeByName("employeeRange");
-			int rowPerEmp = dataSource.getExportItems().size();
-			ws.getCells().deleteRows(empRange.getFirstRow() + empRange.getRowCount() // last
-																						// row
-					- (MAX_EXPORT_ITEM - rowPerEmp), MAX_EXPORT_ITEM - rowPerEmp);
-			// refresh range after delete superfluous rows
-			empRange = wsc.getRangeByName("employeeRange");
 			Range workplaceRange = wsc.getRangeByName("workplaceRange");
-			// set border bottom after delete superfluous rows
-			empRange.setOutlineBorder(BorderType.BOTTOM_BORDER, CellBorderType.MEDIUM, Color.getBlack());
-			// print header
-			this.printHeader(wsc, dataSource.getHeader());
 
 			HorizontalPageBreakCollection pageBreaks = ws.getHorizontalPageBreaks();
 			List<String> empIds = dataSource.getEmployeeIds();
 			List<ExportItem> itemBooks = dataSource.getExportItems();
 			// set first employee
-			EmployeeData firstEmp = dataSource.getEmployees().get(empIds.remove(0));
+			EmployeeData firstEmp = dataSource.getEmployees().get(empIds.get(0));
 
 			String workplaceCd = firstEmp.getEmployeeInfo().getWorkplaceCode();
-			RangeCustom newRange = new RangeCustom(empRange, 0);
-			int offset = 0, sumRowCount = workplaceRange.getRowCount();
+			RangeCustom newRange;
+			int offset = 0, sumRowCount = 0;
 			boolean nextWorkplace;
-			
-			for (String empId: empIds ) {
-				
+			boolean isFirstEmp = true;
+			for (String empId : empIds) {
 				EmployeeData emp = dataSource.getEmployees().get(empId);
 				nextWorkplace = !workplaceCd.equals(emp.getEmployeeInfo().getWorkplaceCode());
 
-				// check next work place or new page
-				if (nextWorkplace || (sumRowCount + empRange.getRowCount() > rowsPerPage)) {
+				if (isFirstEmp) {
+					newRange = new RangeCustom(wsc.getRangeByName(ws.getName() + "!workplaceRange"), 0);
+				} else if (nextWorkplace || (sumRowCount + empRange.getRowCount() > ROW_PER_PAGE)) {
+					// check next work place or new page
 					workplaceCd = emp.getEmployeeInfo().getWorkplaceCode();
-					newRange = copyRangeDown(workplaceRange, offset);
+					newRange = copyRangeDown(ws, workplaceRange, offset);
 				} else {
-					newRange = copyRangeDown(empRange, offset);
+					newRange = copyRangeDown(ws, empRange, offset);
 				}
 				sumRowCount += newRange.range.getRowCount();
 				// break page and print
-				boolean isNewPage = sumRowCount > rowsPerPage
+				boolean isNewPage = sumRowCount > ROW_PER_PAGE
 						|| (nextWorkplace && PageBreakIndicator.WORK_PLACE.equals(dataSource.getPageBreak()));
-				print(wsc, newRange, emp, isNewPage || nextWorkplace, is7Group, itemBooks,
-						dataSource.isOutNumExceedTime36Agr(), dataSource.getHeader());
 				if (isNewPage) {
-//					breakPage = + 1;
+					// check to next sheet
 					pageBreaks.add(newRange.range.getFirstRow());
-//					int row = newRange.
-					sumRowCount = newRange.range.getRowCount(); // reset sum row count
-					
+					if (pageBreaks.getCount() == MAX_PAGE_PER_SHEET) {
+						// delete range of last page
+						newRange.delete();
+						// add sheet
+						sheetIndex++;
+						ws = this.copySheet(wsc, sheetIndex, dataSource.getHeader().getReportName());
+						// first range of sheet
+						newRange = new RangeCustom(wsc.getRangeByName(ws.getName() + "!workplaceRange"), 0);
+						pageBreaks = ws.getHorizontalPageBreaks();
+					}
+					// reset sum row count
+					sumRowCount = newRange.range.getRowCount();
 				}
+				print(newRange, emp, isFirstEmp || isNewPage || nextWorkplace, itemBooks,
+						dataSource.isOutNumExceedTime36Agr());
 				offset = newRange.offset;
+				isFirstEmp = false;
 			}
 
-			print(wsc, new RangeCustom(empRange, 0), firstEmp, true, is7Group, itemBooks,
-					dataSource.isOutNumExceedTime36Agr(), dataSource.getHeader());
-			
+			// delete temp sheet
+			wsc.removeAt(0);
+
+			// focus first sheet
+			wsc.setActiveSheetIndex(0);
+
 			reportContext.processDesigner();
 			reportContext.saveAsExcel(this.createNewFile(fileContext, this.getReportName(REPORT_FILE_NAME)));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private void setupSheet(WorksheetCollection wsc, ExportData dataSource) {
+		Worksheet ws = wsc.get(0);
+		PageSetup pageSetup = ws.getPageSetup();
+		int pageScale = 98;
+		// set A_11
+		pageSetup.setHeader(0, "&8&\"MS ゴシック\"" + dataSource.getHeader().getTitle());
+		// set A1_2
+		pageSetup.setHeader(1, "&16&\"MS ゴシック\"" /* font size */
+				+ dataSource.getHeader().getReportName());
+		// Set header date
+		DateTimeFormatter fullDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/M/d  H:mm", Locale.JAPAN);
+		pageSetup.setHeader(2, "&8&\"MS ゴシック\"" + LocalDateTime.now().format(fullDateTimeFormatter) + "\npage &P ");
+
+		if (!dataSource.isOutNumExceedTime36Agr()) {
+			ws.getCells().deleteColumn(wsc.getRangeByName("numExceedTime").getFirstColumn());
+			ws.getCells().deleteColumn(wsc.getRangeByName("numRemainingTime").getFirstColumn());
+			pageScale += 6;
+		}
+		pageSetup.setZoom(pageScale);
+		pageSetup.setPrintArea("A1:W");
+
+		Range empRange = wsc.getRangeByName("employeeRange");
+		int rowPerEmp = dataSource.getExportItems().size();
+		ws.getCells().deleteRows(empRange.getFirstRow() + empRange.getRowCount() // last
+				// row
+				- (MAX_EXPORT_ITEM - rowPerEmp), MAX_EXPORT_ITEM - rowPerEmp);
+		// refresh range after delete superfluous rows
+		empRange = wsc.getRangeByName("employeeRange");
+		// set border bottom after delete superfluous rows
+		empRange.setOutlineBorder(BorderType.BOTTOM_BORDER, CellBorderType.MEDIUM, Color.getBlack());
+		// print header
+		this.printHeader(wsc, dataSource.getHeader());
+
+		// select range
+		Range headerRange = wsc.getRangeByName("headerRange");
+		ws.selectRange(headerRange.getFirstRow(), headerRange.getFirstColumn(), headerRange.getRowCount(), headerRange.getColumnCount(), true);
+	}
+
+	private Worksheet copySheet(WorksheetCollection wsc, int sheetIndex, String reportName) throws Exception {
+		wsc.addCopy(0);
+		Worksheet ws = wsc.get(sheetIndex);
+		// sheet name
+		String sheetName = sheetIndex == 1 ? reportName : reportName + sheetIndex;
+		ws.setName(sheetName);
+		return ws;
 	}
 
 	/**
@@ -192,13 +210,8 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 		}
 	}
 
-	/**
-	 * @param range
-	 * @param emp
-	 * @param isNewPage
-	 */
-	private void print(WorksheetCollection wsc, RangeCustom range, EmployeeData emp, boolean isPrintWorkplace,
-			boolean is7Group, List<ExportItem> itemBooks, boolean isOutNumExceedTime36Agr, HeaderData headerData) {
+	private void print(RangeCustom range, EmployeeData emp, boolean isPrintWorkplace,
+			List<ExportItem> itemBooks, boolean isOutNumExceedTime36Agr) {
 		if (isPrintWorkplace) {
 			String workplace = emp.getEmployeeInfo().getWorkplaceName();
 			range.cell("workplace").putValue(workplace);
@@ -268,18 +281,14 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 			range.cell("period5th", rowOffset, 0).putValue(data.formatMonthPeriod5th());
 			this.setCellStyle(range.cell("period5th", rowOffset, 0), data.getColorPeriodMonth5th());
 			range.cell("period6th", rowOffset, 0).putValue(data.formatMonthPeriod6th());
-			this.setCellStyle(range.cell("period6th", rowOffset, 0), data.getColorPeriodMonth6th());			
-			if (is7Group) {
-				range.cell("period7th", rowOffset, 0).putValue(data.formatMonthPeriod7th());
-				this.setCellStyle(range.cell("period7th", rowOffset, 0), data.getColorPeriodMonth7th());
-			}
+			this.setCellStyle(range.cell("period6th", rowOffset, 0), data.getColorPeriodMonth6th());
 			rowOffset++;
 		}
 	}
 
 
-	private RangeCustom copyRangeDown(Range range, int extra) throws Exception {
-		Range newRange = range.getWorksheet().getCells().createRange(range.getFirstRow() + range.getRowCount() + extra,
+	private RangeCustom copyRangeDown(Worksheet ws, Range range, int extra) throws Exception {
+		Range newRange = ws.getCells().createRange(range.getFirstRow() + range.getRowCount() + extra,
 				range.getFirstColumn(), range.getRowCount(), range.getColumnCount());
 		newRange.copyStyle(range);
 		int offset = newRange.getFirstRow() - range.getFirstRow();
@@ -348,5 +357,9 @@ class RangeCustom {
 
 	public Cell firstCell() {
 		return range.getCellOrNull(0, 0);
+	}
+
+	public void delete(){
+		worksheet.getCells().deleteRows(this.range.getFirstRow(), this.range.getRowCount());
 	}
 }

@@ -1,18 +1,18 @@
 package nts.uk.ctx.at.record.pubimp.monthly.agreement;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.monthly.agreement.export.GetAgreTimeByPeriod;
+import nts.uk.ctx.at.record.pub.monthly.agreement.AgreementTimeByEmpExport;
 import nts.uk.ctx.at.record.pub.monthly.agreement.AgreementTimeByPeriod;
 import nts.uk.ctx.at.record.pub.monthly.agreement.AgreementTimeByPeriodPub;
 import nts.uk.ctx.at.shared.dom.common.Month;
 import nts.uk.ctx.at.shared.dom.common.Year;
 import nts.uk.ctx.at.shared.dom.monthly.agreement.PeriodAtrOfAgreement;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 指定期間36協定時間の取得
@@ -46,5 +46,12 @@ public class AgreementTimeByPeriodPubImpl implements AgreementTimeByPeriodPub {
 				domain.getExceptionLimitErrorTime(),
 				domain.getExceptionLimitAlarmTime(),
 				domain.getStatus());
+	}
+
+	@Override
+	public List<AgreementTimeByEmpExport> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
+													Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs) {
+		return this.getAgreTimeByPeriod.algorithmImprove(companyId, employeeIds, criteria, startMonth, year, periodAtrs)
+				.stream().map(AgreementTimeByEmpExport::fromDomain).collect(Collectors.toList());
 	}
 }

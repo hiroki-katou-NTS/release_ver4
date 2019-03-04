@@ -191,7 +191,7 @@ module nts.uk.at.view.kwr001.a {
                         self.datepickerValue().endDate = moment(data.periodEnd).format("YYYY/MM/DD");
                         self.datepickerValue.valueHasMutated();
                         
-                        self.employeeList.removeAll();
+                        //self.employeeList.removeAll();
                         var employeeSearchs: UnitModel[] = [];
                         _.forEach(data.listEmployee, function(value) {
                             var employee: UnitModel = {

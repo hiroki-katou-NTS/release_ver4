@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.shared.dom.workrule.closure.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import lombok.val;
@@ -67,11 +69,11 @@ public class GetClosureStartForEmployeeProc {
 		// チェック開始日・終了日を計算
 		this.calcCheckStartAndEnd();
 		if (this.checkStart == null || this.checkEnd == null) return Optional.empty();
-		
+
 		// 「検索開始日」←「チェック開始日」
 		GeneralDate searchStart = this.checkStart;
 		while (true){
-			
+
 			// 「所属雇用履歴」を取得する
 			val bsEmploymentHistOpt = this.shareEmploymentAdapter.findEmploymentHistory(
 					companyId, employeeId, searchStart);
