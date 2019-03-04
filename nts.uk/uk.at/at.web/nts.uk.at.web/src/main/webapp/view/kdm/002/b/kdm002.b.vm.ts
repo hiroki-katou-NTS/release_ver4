@@ -4,6 +4,7 @@ module nts.uk.at.view.kdm002.b {
     import setShared = nts.uk.ui.windows.setShared;
     import getShared = nts.uk.ui.windows.getShared;
     import alertError = nts.uk.ui.dialog.alertError;
+    import kibanTimer = nts.uk.ui.sharedvm.KibanTimer;
 
     export module viewmodel {
 
@@ -22,7 +23,7 @@ module nts.uk.at.view.kdm002.b {
 
             // table result
             timeStart: KnockoutObservable<string>;
-            timeOver: KnockoutObservable<string> = ko.observable('00:00:00');
+            timeOver: kibanTimer = new kibanTimer('timeOver');
             status: KnockoutObservable<string> = ko.observable(getText("KDM002_28"));
             result: KnockoutObservable<string> = ko.observable('');
             resultMessage: string = getText("KDM002_31");
@@ -91,6 +92,7 @@ module nts.uk.at.view.kdm002.b {
                 let self = this;
                 let dfd = $.Deferred();
                 self.execution().done(() => {
+                    self.timeOver.start();
                 }).always(() => {
                     dfd.resolve();
                 });;
@@ -158,19 +160,12 @@ module nts.uk.at.view.kdm002.b {
                                 });
 
                                 if (res.succeeded) {
-                                    self.exportTaskId = _.find(res.taskDatas, i => i.key == "EXPORT_TASK_ID").valueAsString;
-                                    self.excelContent(_.find(res.taskDatas, i => i.key == "EXPORT_SIZE").valueAsNumber)
-                                }
-
-                                if (res.running) {
-                                    // 経過時間＝現在時刻－開始時刻
-                                    self.timeNow = new Date();
-                                    let over = (self.timeNow.getSeconds() + self.timeNow.getMinutes() * 60 + self.timeNow.getHours() * 60) - (self.timeStartt.getSeconds() + self.timeStartt.getMinutes() * 60 + self.timeStartt.getHours() * 60);
-                                    let time = new Date(null);
-                                    time.setSeconds(over); // specify value for SECONDS here
-                                    let result = time.toISOString().substr(11, 8);
-
-                                    self.timeOver(result);
+                                    let exportId = _.find(res.taskDatas, i => i.key == "EXPORT_TASK_ID");
+                                    let exportSize = _.find(res.taskDatas, i => i.key == "EXPORT_SIZE");
+                                    if (exportId)
+                                        self.exportTaskId = exportId.valueAsString;
+                                    if (exportSize)
+                                        self.excelContent(exportSize.valueAsNumber);
                                 }
                             }
 
@@ -205,6 +200,7 @@ module nts.uk.at.view.kdm002.b {
                                     self.status(getText("KDM002_23"));
                                 }
 
+                                self.timeOver.end();
                                 self.isStop(true);
 
                                 if (self.excelContent() == 0 && self.imErrorLog().length == 0) {
@@ -235,6 +231,7 @@ module nts.uk.at.view.kdm002.b {
             // 中断ボタンをクリックする
             stop() {
                 let self = this;
+                self.timeOver.end();
                 self.isStop(true);
                 if (nts.uk.text.isNullOrEmpty(self.taskId())) {
                     return;
@@ -260,22 +257,24 @@ module nts.uk.at.view.kdm002.b {
             // Excel出力情報ListをもとにExcel出力をする (Xuất ra file excel)
             excelExport() {
                 let self = this;
-                nts.uk.ui.block.invisible();
-                nts.uk.deferred.repeat(conf => conf.task(() => {
-                    return nts.uk.request.asyncTask.getInfo(self.exportTaskId).done(function(res: any) {
-                        if (res.status == "PENDING" || res.status == "RUNNING") {
-                            console.log("running");
-                        } else if (res.failed || res.status == "ABORTED") { 
-                            console.log(res.error);
-                            nts.uk.ui.block.clear();
-                        } else {
-                            nts.uk.request.specials.donwloadFile(res.id);
-                            nts.uk.ui.block.clear();
-                        }
-                    });
-                }).while(infor => {
-                    return infor.pending || infor.running;
-                }).pause(1000));
+                if (self.exportTaskId) {
+                    nts.uk.ui.block.invisible();
+                    nts.uk.deferred.repeat(conf => conf.task(() => {
+                        return nts.uk.request.asyncTask.getInfo(self.exportTaskId).done(function(res: any) {
+                            if (res.status == "PENDING" || res.status == "RUNNING") {
+                                console.log("running");
+                            } else if (res.failed || res.status == "ABORTED") { 
+                                console.log(res.error);
+                                nts.uk.ui.block.clear();
+                            } else {
+                                nts.uk.request.specials.donwloadFile(res.id);
+                                nts.uk.ui.block.clear();
+                            }
+                        });
+                    }).while(infor => {
+                        return infor.pending || infor.running;
+                    }).pause(1000));
+                }
             }
         }
 
