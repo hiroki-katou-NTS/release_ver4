@@ -681,7 +681,12 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     let results = getShared("kml001selectedCodeList");
                     if (results) {
                         if (planOrActual === "plan") {
-                            self.selectedErrorAlarm().workTimeCondition.planLstWorkTime(results.sort());
+                            if(results.sort()[0] == ""){
+                                results.shift()
+                                self.selectedErrorAlarm().workTimeCondition.planLstWorkTime(results.sort());
+                            }else {
+                                self.selectedErrorAlarm().workTimeCondition.planLstWorkTime(results.sort());
+                            }
                         } else {
                             self.selectedErrorAlarm().workTimeCondition.actualLstWorkTime(results.sort());
                         }
