@@ -102,6 +102,20 @@ public class AutoCalOvertimeSetting extends DomainObject {
 	}
 	
 	/**
+	 * 法内残業の計算区分を受け取った計算区分へ変更する
+	 * @param atr
+	 */
+	public AutoCalOvertimeSetting changeNormalAutoCalcSetting(AutoCalAtrOvertime atr) {
+		return new AutoCalOvertimeSetting(
+				this.earlyOtTime,
+				this.earlyMidOtTime,
+				this.normalOtTime,
+				this.normalMidOtTime,
+				this.legalOtTime.changeCalcAtr(atr),
+				this.legalMidOtTime);
+	}
+	
+	/**
 	 * 計算区分の判定処理
 	 * @param statutoryAtr 法定内区分
 	 * @param goEarly 早出区分

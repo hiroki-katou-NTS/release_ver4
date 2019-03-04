@@ -73,6 +73,7 @@ public class WithinStatutoryTimeOfDaily {
 	@Setter
 	private AttendanceTime workTime;
 	//実働就業時間
+	@Setter
 	private AttendanceTime actualWorkTime = new AttendanceTime(0);
 	//所定内割増時間
 	private AttendanceTime withinPrescribedPremiumTime = new AttendanceTime(0);

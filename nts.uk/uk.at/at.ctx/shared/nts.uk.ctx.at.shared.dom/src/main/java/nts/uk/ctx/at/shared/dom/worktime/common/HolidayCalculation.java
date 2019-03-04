@@ -36,4 +36,14 @@ public class HolidayCalculation extends WorkTimeDomainObject {
 	public void saveToMememto(HolidayCalculationSetMemento memento){
 		memento.setIsCalculate(this.isCalculate);
 	}
+
+	/**
+	 * Default Constctor
+	 * @param isCalculate
+	 */
+	public HolidayCalculation(NotUseAtr isCalculate) {
+		super();
+		this.isCalculate = isCalculate;
+	}
+
 }
