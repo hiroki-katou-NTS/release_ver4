@@ -688,7 +688,12 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                                 self.selectedErrorAlarm().workTimeCondition.planLstWorkTime(results.sort());
                             }
                         } else {
+                            if(results.sort()[0] == ""){
+                                results.shift()
+                                self.selectedErrorAlarm().workTimeCondition.planLstWorkTime(results.sort());
+                            }else {
                             self.selectedErrorAlarm().workTimeCondition.actualLstWorkTime(results.sort());
+                            }    
                         }
                     }
                 });
