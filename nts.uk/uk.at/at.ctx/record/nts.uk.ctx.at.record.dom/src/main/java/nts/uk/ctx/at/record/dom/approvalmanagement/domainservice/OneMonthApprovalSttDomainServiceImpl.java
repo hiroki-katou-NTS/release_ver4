@@ -238,6 +238,10 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 				//社員ID（List）と指定期間から所属会社履歴項目を取得 【Request：No211】
 				List<AffCompanyHistImport> listAffCompanyHistImport  = this.syCompanyRecordAdapter
 				.getAffCompanyHistByEmployee(new ArrayList<>(listAppId), datePeriod);
+				if(listAffCompanyHistImport.isEmpty() || listAffCompanyHistImport.stream().flatMap(x -> x.getLstAffComHistItem().stream()).collect(Collectors.toList()).isEmpty()) {
+					oneMonthApprovalStatusDto.setMessageID("Msg_875");
+					return oneMonthApprovalStatusDto;
+				}
 				//日の本人確認を取得する
 				listIdentification = this.getIdentification(new ArrayList<>(listAppId), datePeriod);
 				//取得した「所属会社履歴項目」に当てはまらない対象者、対象日の「ルート状況」を取り除く
