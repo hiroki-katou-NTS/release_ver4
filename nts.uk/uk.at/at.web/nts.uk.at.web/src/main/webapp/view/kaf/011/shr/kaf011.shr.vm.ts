@@ -283,8 +283,8 @@ module nts.uk.at.view.kaf011.shr {
                         if (data.timezoneUseDtos) {
                             $("#recTime1Start").ntsError("clear");
                             $("#recTime1End").ntsError("clear");
-                            let timeZone1 = data.timezoneUseDtos[0];
-                            let timeZone2 = data.timezoneUseDtos[1];
+                            let timeZone1 = _.find(data.timezoneUseDtos, ['workNo', 1]);
+                            let timeZone2 = _.find(data.timezoneUseDtos, ['workNo', 2]); 
 
                             timeZone1 ? self.wkTime1().updateData(timeZone1) : self.wkTime1().clearData();
 
