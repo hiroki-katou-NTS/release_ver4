@@ -14,7 +14,9 @@
 			<com:scriptfile path="kdw006.g.start.js" />
 			<com:scriptfile path="kdw006.g.vm.js" />
 			<com:scriptfile path="kdw006.g.service.js" />
-
+			<com:ValidatorScript>
+					nts.uk.ctx.at.record.dom.workrecord.workingtype.ChangeableWorkTypeGroupName
+			</com:ValidatorScript>
 			<com:EnumScript>
 				nts.uk.ctx.at.record.dom.workrecord.operationsetting.YourselfConfirmError
 			</com:EnumScript>
@@ -67,8 +69,8 @@
 
 								<div id="items-type2" data-bind="foreach : groups2">
 									<div class="up-part">
-										<span class="no-group" data-bind="text: no"></span> <input
-											class="name-group"
+										<span class="no-group" id="test1" data-bind="text: no"></span> <input
+											class="name-group" id="test"
 											data-bind="attr: {tabindex:  no == 5 ? 18 : 0 || no == 6 ? 21 : 0 || no == 7 ? 24 : 0 || no == 5 ? 27 : 0 || no == 5 ? 30 : 0 || no == 5 ? 32 : 0}, 
 											ntsTextEditor: { name: '#[KDW006_57]',constraint: 'ChangeableWorkTypeGroupName', value: name}" />
 									</div>

@@ -10,7 +10,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 前月の最終週の週割増対象時間
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class TargetPrmTimeWeekOfPrevMonLast {
@@ -33,11 +33,11 @@ public class TargetPrmTimeWeekOfPrevMonLast {
 		TargetPrmTimeWeekOfPrevMonLast domain = new TargetPrmTimeWeekOfPrevMonLast();
 		domain.targetTime = new AttendanceTimeMonth(0);
 		
-		// 実働就業時間を取得する
+		// 集計対象時間を取得する
 		val workTimeOfMonthly = aggregateTotalWorkingTime.getWorkTime();
-		val workTime = workTimeOfMonthly.getTimeSeriesTotalLegalActualTime(weekPeriod);
+		val workTime = workTimeOfMonthly.getAggregateTargetTime(weekPeriod);
 
-		// 対象時間に実働就業時間を加算する
+		// 対象時間に集計対象時間を加算する
 		domain.targetTime = domain.targetTime.addMinutes(workTime.v());
 		
 		// 法定内残業時間を取得する
@@ -54,7 +54,7 @@ public class TargetPrmTimeWeekOfPrevMonLast {
 		// 対象時間に休出時間を加算する
 		domain.targetTime = domain.targetTime.addMinutes(legalHolidayWorkTime.v());
 		
-		// 加算する休暇時間を取得する
+		// 休暇加算時間を取得する
 		val vacationUseTime = aggregateTotalWorkingTime.getVacationUseTime();
 		val addVacationTime = GetVacationAddTime.getTime(weekPeriod, vacationUseTime, addSet);
 		

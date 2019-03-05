@@ -284,7 +284,7 @@ public class HolidayThreeProcessImpl implements HolidayThreeProcess {
 		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, appDate, inputDate,
 				ApplicationType.BREAK_TIME_APPLICATION.value, PrePostAtr.PREDICT.value);
 		if (beforeApplication.isEmpty()) {
-			throw new BusinessException("Msg_424",employeeName,"");
+			throw new BusinessException("Msg_1508",employeeName);
 		}
 		// 事前申請否認チェック
 		// 否認以外：
@@ -292,7 +292,7 @@ public class HolidayThreeProcessImpl implements HolidayThreeProcess {
 		ReflectedState_New refPlan = beforeApplication.get(0).getReflectionInformation().getStateReflectionReal();
 		if (refPlan.equals(ReflectedState_New.DENIAL) || refPlan.equals(ReflectedState_New.REMAND)) {
 			// 背景色を設定する
-			throw new BusinessException("Msg_424",employeeName,"");
+			throw new BusinessException("Msg_1508",employeeName);
 		}
 		String beforeCid = beforeApplication.get(0).getCompanyID();
 		String beforeAppId = beforeApplication.get(0).getAppID();

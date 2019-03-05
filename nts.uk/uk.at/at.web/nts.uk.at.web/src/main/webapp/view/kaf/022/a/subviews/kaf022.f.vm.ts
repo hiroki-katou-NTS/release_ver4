@@ -61,7 +61,7 @@ ko.components.register('kaf022-f', {
                                 optionsValue: 'code',
                                 optionsText: 'name',
                                 value: selectedIdF10,
-                                enable: true
+                                enable: false
                             }">
                         </div>
                     </td>
@@ -193,7 +193,7 @@ ko.components.register('kaf022-f', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $fv.selectedIdF11,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -217,7 +217,7 @@ ko.components.register('kaf022-f', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $fv.selectedIdF12,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -229,7 +229,7 @@ ko.components.register('kaf022-f', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $fv.selectedIdF14,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>

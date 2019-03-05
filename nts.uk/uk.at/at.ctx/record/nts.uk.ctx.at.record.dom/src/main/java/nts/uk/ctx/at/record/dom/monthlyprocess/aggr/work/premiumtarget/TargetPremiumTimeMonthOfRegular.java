@@ -10,7 +10,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 通常勤務の月割増対象時間
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class TargetPremiumTimeMonthOfRegular {
@@ -38,11 +38,11 @@ public class TargetPremiumTimeMonthOfRegular {
 	public AddedVacationUseTime askPremiumTimeMonth(String companyId, String employeeId, DatePeriod datePeriod,
 			AddSet addSet, AggregateTotalWorkingTime aggregateTotalWorkingTime){
 
-		// 法定内時間を取得する
+		// 集計対象時間を取得する
 		val workTimeOfMonthly = aggregateTotalWorkingTime.getWorkTime();
-		val workTime = workTimeOfMonthly.getTimeSeriesTotalLegalActualTime(datePeriod);
+		val workTime = workTimeOfMonthly.getAggregateTargetTime(datePeriod);
 
-		// 通常勤務の月割増対象時間に就業時間を加算する
+		// 通常勤務の月割増対象時間に集計対象時間を加算する
 		this.targetPremiumTimeMonth = this.targetPremiumTimeMonth.addMinutes(workTime.v());
 		
 		// 法定内残業時間を取得する
@@ -59,7 +59,7 @@ public class TargetPremiumTimeMonthOfRegular {
 		// 通常勤務の月割増対象時間に休出時間を加算する
 		this.targetPremiumTimeMonth = this.targetPremiumTimeMonth.addMinutes(legalHolidayWorkTime.v());
 		
-		// 加算する休暇時間を取得する
+		// 休暇加算時間を取得する
 		val vacationUseTime = aggregateTotalWorkingTime.getVacationUseTime();
 		val addVacationTime = GetVacationAddTime.getTime(datePeriod, vacationUseTime, addSet);
 		

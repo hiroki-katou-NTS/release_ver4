@@ -9,6 +9,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
+import lombok.Getter;
 import lombok.val;
 import nts.uk.ctx.at.record.dom.daily.holidayworktime.HolidayWorkFrameTime;
 import nts.uk.ctx.at.record.dom.daily.holidayworktime.HolidayWorkMidNightTime;
@@ -40,6 +41,8 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 
+	private boolean workTypeChangedFromSpecialHoliday = false;
+	
 	@Override
 	public WorkType getOotsukaWorkType(WorkType workType,
 									   Optional<FixedWorkCalcSetting> calcMethodOfFixWork,
@@ -59,7 +62,10 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 	 * @return 作成した勤務種類
 	 */
 	private WorkType createOotsukaWorkType(WorkType workType) {
-		if(workType.getDailyWork().getWorkTypeUnit().isOneDay()) {
+		
+		changeWorkTypeFlag(workType);
+		
+		if(workType.getDailyWork().getWorkTypeUnit().isOneDay()) {			
 			val workTypeSet = workType.getWorkTypeSetByAtr(WorkAtr.OneDay);
 		
 			val dailyWork = new DailyWork(WorkTypeUnit.OneDay, 
@@ -146,6 +152,15 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 			createWorkType.addWorkTypeSet(createWorkTypeSetAfternoon);
 			return createWorkType;
 		}
+	}
+
+	/**
+	 * 内部で保持している変更前の勤務種類が何だったかフラグの変更
+	 * @param workType
+	 */
+	private void changeWorkTypeFlag(WorkType workType) {
+		if(workType.getDailyWork().isOneOrHalfDaySpecHoliday())
+			workTypeChangedFromSpecialHoliday = true;
 	}
 
 	/**
@@ -291,5 +306,10 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 			map.put(ot.getOverWorkFrameNo(), ot);
 		}
 		return map;
+	}
+
+	@Override
+	public boolean getWorkTypeChangedFromSpecialHoliday() {
+		return this.workTypeChangedFromSpecialHoliday;
 	}
 }

@@ -212,26 +212,20 @@ module nts.uk.at.view.kaf007.b {
                 if(!self.validateInputTime()){
                     nts.uk.ui.block.clear();
                     return;
-                }                
-                appReason = self.getReason(
-                    self.typicalReasonDisplayFlg(),
-                    self.selectedReason(),
-                    self.reasonCombo(),
-                    self.displayAppReasonContentFlg(),
-                    self.multilContent().trim()
-                );
-                if(!appcommon.CommonProcess.checklenghtReason(appReason,"#inpReasonTextarea")){
-                        return;
+                }  
+                
+                let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
+                let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);
+                
+                if(!appcommon.CommonProcess.checklenghtReason(comboBoxReason+":"+textAreaReason,"#inpReasonTextarea")){
+                    return;
                 }
-                let appReasonError = !appcommon.CommonProcess.checkAppReason(self.requiredReason(), self.typicalReasonDisplayFlg(), self.displayAppReasonContentFlg(), appReason);
-                if(appReasonError){
-                    nts.uk.ui.dialog.alertError({ messageId: 'Msg_115' }).then(function(){nts.uk.ui.block.clear();});    
-                    return;    
-                }
+                
                 //Approval phase
                 self.appWorkChange().appApprovalPhases = self.approvalList;                
                 //申請理由
-                self.appWorkChange().application().applicationReason(appReason);                
+                self.appWorkChange().application().appReasonID = comboBoxReason;
+                self.appWorkChange().application().applicationReason(textAreaReason);              
                 //勤務を変更する
                 self.appWorkChange().workChange().workChangeAtr(self.workChangeAtr() == true ? 1 : 0);
                 // 休日に関して
@@ -242,6 +236,8 @@ module nts.uk.at.view.kaf007.b {
                 let workChange = ko.toJS(self.appWorkChange());
                 //application change date format
                 self.changeDateFormat(workChange);
+                workChange.user = self.user;
+                workChange.reflectPerState = self.reflectPerState;
                 service.updateWorkChange(workChange).done((data) => {
                     nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
                         if(data.autoSendMail){

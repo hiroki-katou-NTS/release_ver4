@@ -74,7 +74,7 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 				workRepository.updateByKeyFlush(dailyInfor);
 				//開始終了時刻の反映
 				this.reflectRecordStartEndTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode());					
-				commonService.calculateOfAppReflect(null, absencePara.getEmployeeId(), loopDate);
+				commonService.calculateOfAppReflect(null, absencePara.getEmployeeId(), loopDate, false);
 			}
 			return true;
 		} catch (Exception e) {

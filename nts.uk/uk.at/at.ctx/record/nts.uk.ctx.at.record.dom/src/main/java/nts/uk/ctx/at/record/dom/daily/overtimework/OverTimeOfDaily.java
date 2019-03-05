@@ -29,6 +29,7 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.FlexWithinWorkTimeSheet;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.ManageReGetClass;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTime;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTimeSheet;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTimeSheetForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeSheet;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.PredetermineTimeSetForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.VacationClass;
@@ -62,6 +63,7 @@ import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.StatutoryAtr;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.overtime.overtimeframe.OverTimeFrameNo;
 //import nts.uk.ctx.at.shared.dom.workrule.waytowork.PersonalLaborCondition;
 import nts.uk.ctx.at.shared.dom.worktime.common.DeductionTime;
+import nts.uk.ctx.at.shared.dom.worktime.common.OverTimeOfTimeZoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 //import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneCommonSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneOtherSubHolTimeSet;
@@ -662,5 +664,87 @@ public class OverTimeOfDaily {
 			map.put(ot.getOverWorkFrameNo(), ot);
 		}
 		return map;
+	}
+	
+	public void transWithinOverTimeForOOtsukaSpecialHoliday(List<OverTimeOfTimeZoneSet> overTimeSheetByWorkTimeMaster,AttendanceTime withinOverTime) {
+		AttendanceTime copyWithinOverTime = withinOverTime;
+		List<OverTimeOfTimeZoneSet> sortedOverTimeZoneSet = overTimeSheetByWorkTimeMaster;
+		if(overTimeSheetByWorkTimeMaster.size() > 0) {
+			boolean nextLoopFlag = true;
+			while(nextLoopFlag) {
+				for(int index = 0 ; index <= sortedOverTimeZoneSet.size() ; index++) {
+					if(index == sortedOverTimeZoneSet.size() - 1)
+					{
+						nextLoopFlag = false;
+						break;
+					}
+					//精算順序の比較
+					if(sortedOverTimeZoneSet.get(index).getSettlementOrder().greaterThan(sortedOverTimeZoneSet.get(index + 1).getSettlementOrder())) {
+						OverTimeOfTimeZoneSet pary = sortedOverTimeZoneSet.get(index);
+						sortedOverTimeZoneSet.set(index, sortedOverTimeZoneSet.get(index + 1));
+						sortedOverTimeZoneSet.set(index + 1, pary);
+						break;
+					}
+					//枠の比較(精算順序同じケースの整頓)
+					else if(sortedOverTimeZoneSet.get(index).getSettlementOrder().equals(sortedOverTimeZoneSet.get(index + 1).getSettlementOrder())) {
+						if(sortedOverTimeZoneSet.get(index).getTimezone().getStart().greaterThan(sortedOverTimeZoneSet.get(index + 1).getTimezone().getStart()) ) {
+							OverTimeOfTimeZoneSet pary = sortedOverTimeZoneSet.get(index);
+							sortedOverTimeZoneSet.set(index, sortedOverTimeZoneSet.get(index + 1));
+							sortedOverTimeZoneSet.set(index + 1, pary);
+							break;
+						}
+					}
+		
+				}
+			}
+		}
+		
+		
+		for(OverTimeOfTimeZoneSet set : sortedOverTimeZoneSet) {
+			Optional<AttendanceTime> transAndOverTime = overTimeWorkFrameTime.stream().filter(tc -> tc.getOverWorkFrameNo().compareTo(set.getOtFrameNo().v()) == 0)
+										  											  .map(ts -> ts.getOverTimeWork().getTime().addMinutes(ts.getTransferTime().getTime().valueAsMinutes()))
+										  											  .findFirst();
+			AttendanceTime transTime = new AttendanceTime(0) ;
+			if(transAndOverTime.isPresent() && transAndOverTime.get().greaterThan(copyWithinOverTime.valueAsMinutes())) {
+				transTime = transAndOverTime.get();
+			}
+			else {
+				transTime = copyWithinOverTime;
+			}
+			
+			final int toTime = transTime.valueAsMinutes();
+			//減算
+			overTimeWorkFrameTime.forEach(tc ->{
+				if(tc.getOverWorkFrameNo().compareTo(set.getOtFrameNo().v()) == 0) {
+					tc.minusTimeResultGreaterEqualZero(new AttendanceTime(toTime));
+				}
+			});
+			//加算
+			Optional<OverTimeFrameNo> forcsWithin = overTimeWorkFrameTime.stream().filter(tc -> tc.getOverWorkFrameNo().compareTo(set.getLegalOTframeNo().v()) == 0)
+																				  .map(ts -> ts.getOverWorkFrameNo())
+																				  .findFirst();
+			//既存枠がある
+			if(forcsWithin.isPresent()) {
+				overTimeWorkFrameTime.forEach(ts ->{
+					if(ts.getOverWorkFrameNo().compareTo(forcsWithin.get()) == 0) {
+						ts.add(new AttendanceTime(toTime));
+					}
+				});
+			}
+			//既存枠がない
+			else {
+				this.overTimeWorkFrameTime.add(new OverTimeFrameTime(new OverTimeFrameNo(set.getLegalOTframeNo().v()), 
+																	 TimeDivergenceWithCalculation.sameTime(new AttendanceTime(toTime)), 
+																	 TimeDivergenceWithCalculation.sameTime(new AttendanceTime(0)), 
+																	 new AttendanceTime(0), 
+																	 new AttendanceTime(0)));
+			}
+			
+			copyWithinOverTime = copyWithinOverTime.minusMinutes(toTime);
+
+			if(copyWithinOverTime.lessThan(0))
+				break;
+		}
+		
 	}
 }

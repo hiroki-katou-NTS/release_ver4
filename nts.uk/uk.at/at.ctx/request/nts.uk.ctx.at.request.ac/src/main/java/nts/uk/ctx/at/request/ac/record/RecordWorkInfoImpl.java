@@ -44,7 +44,7 @@ public class RecordWorkInfoImpl implements RecordWorkInfoAdapter {
 				recordWorkInfo.getLateTime2(), 
 				recordWorkInfo.getLeaveEarlyTime2(), 
 				recordWorkInfo.getChildCareTime(),
-				0,
+				recordWorkInfo.getFlexTime(),
 				overtimeCaculations,
 				headCaculation,
 				holiday,

@@ -6,7 +6,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 休暇加算時間を取得する
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 public class GetVacationAddTime {
 
@@ -31,16 +31,20 @@ public class GetVacationAddTime {
 		
 		if (addSet.isRetentionYearly()){
 			
-			// 休暇使用時間に積立年休使用時間を加算する
+			// 休暇加算時間に積立年休使用時間を加算する
 			vacationAddTime = vacationAddTime.addMinutes(
 					vacationUseTime.getRetentionYearly().getTotalUseTime(datePeriod).v());
 		}
 		
-		if (addSet.isSpecialHoliday()){
+		// 大塚モードの確認
+		if (false) {
 			
-			// 休暇使用時間に特別休暇使用時間を加算する
-			vacationAddTime = vacationAddTime.addMinutes(
-					vacationUseTime.getSpecialHoliday().getTotalUseTime(datePeriod).v());
+			if (addSet.isSpecialHoliday()){
+				
+				// 休暇加算時間に特別休暇使用時間を加算する
+				vacationAddTime = vacationAddTime.addMinutes(
+						vacationUseTime.getSpecialHoliday().getTotalUseTime(datePeriod).v());
+			}
 		}
 
 		return vacationAddTime;

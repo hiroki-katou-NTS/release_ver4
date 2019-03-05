@@ -322,8 +322,11 @@ public class ErAlWorkRecordCheckService {
 					markPreviousDate = false;
 				}
 				count++;
-			} else if (!setting.getIgnoreWorkType().contains(currentWTC)) {
-				if (count <= 0 && endMark.afterOrEquals(info.getYmd())) {
+			} else if (setting.getIgnoreWorkType().contains(currentWTC)) {
+				if (endMark.afterOrEquals(info.getYmd())) {
+					if (count >= setting.getMaxContinuousDays().v()) {
+						result.put(markDate, count);
+					}
 					finishing = true;
 					break;
 				}
@@ -331,12 +334,13 @@ public class ErAlWorkRecordCheckService {
 				if (count >= setting.getMaxContinuousDays().v()) {
 					result.put(markDate, count);
 				}
-				if (endMark.afterOrEquals(info.getYmd())) {
+				markPreviousDate = true;
+				count = 0;
+				
+				if (count <= 0 && endMark.afterOrEquals(info.getYmd())) {
 					finishing = true;
 					break;
 				}
-				markPreviousDate = true;
-				count = 0;
 			}
 		}
 		if(finishing) { return; }

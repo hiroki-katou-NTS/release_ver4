@@ -218,7 +218,7 @@ public class RegAndIrgTimeOfWeekly implements Cloneable {
 			AttendanceTimeMonth premiumTimeOfPrevMonLast){
 		
 		// 変形労働勤務の週割増時間の対象となる時間を求める
-		val targetPremiumTimeWeekOfIrg = TargetPremiumTimeWeekOfIrregular.askPremiumTimeMonth(
+		val targetPremiumTimeWeekOfIrg = TargetPremiumTimeWeekOfIrregular.askPremiumTimeWeek(
 				companyId, employeeId, weekPeriod, addSet, aggregateTotalWorkingTime, true,
 				premiumTimeOfPrevMonLast);
 		val targetPremiumTimeWeek = targetPremiumTimeWeekOfIrg.getPremiumTimeWeek();

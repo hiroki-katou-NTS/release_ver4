@@ -41,6 +41,7 @@ import nts.uk.ctx.at.shared.dom.worktime.fixedset.FixRestTimezoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
 import nts.uk.ctx.at.shared.dom.worktype.AttendanceHolidayAttr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
 /**
@@ -160,19 +161,39 @@ public class ActualWorkingTimeOfDaily {
 					);
 		
 		
-		/*大塚残業*/
-		TotalWorkingTime calcResultOotsuka = calcOotsuka(recordClass,
-														 totalWorkingTime,
-														 workType,
-														 workScheduleTime.getRecordPrescribedLaborTime());
+		TotalWorkingTime calcResultOotsuka;
+		if(workType.getDailyWork().decisionMatchWorkType(WorkTypeClassification.SpecialHoliday).isFullTime()) {
+			//大塚モード(特休時計算)
+			calcResultOotsuka = totalWorkingTime.SpecialHolidayCalculationForOotsuka(recordClass,
+				    vacationClass,
+				    workType,
+				    workTimeDailyAtr,
+				    flexCalcMethod,
+					bonusPayAutoCalcSet,
+					eachCompanyTimeSet,
+					conditionItem,
+					predetermineTimeSetByPersonInfo,
+					leaveLateSet);
+		}
+		else {
+			/*大塚残業*/
+			calcResultOotsuka = calcOotsuka(recordClass,
+											totalWorkingTime,
+											workType,
+											workScheduleTime.getRecordPrescribedLaborTime());
+		}
+		
+
 		
 		/*大塚モードの計算（欠勤控除時間）*/
 		//1日出勤系の場合は処理を呼ばないように作成が必要
 		if(workType.getDailyWork().decisionNeedPredTime() != AttendanceHolidayAttr.FULL_TIME && recordClass.getCalculatable()) {
+			//大塚モード休憩未取得
 			calcResultOotsuka = calcResultOotsuka.reCalcLateLeave(recordClass.getWorkTimezoneCommonSet(),
-																  recordClass.getFixRestTimeSetting(),
-																  recordClass.getFixWoSetting(),
-																  recordClass.getIntegrationOfDaily().getAttendanceLeave());
+					  recordClass.getFixRestTimeSetting(),
+					  recordClass.getFixWoSetting(),
+					  recordClass.getIntegrationOfDaily().getAttendanceLeave());	
+
 		}
 		
 		/*拘束差異時間*/

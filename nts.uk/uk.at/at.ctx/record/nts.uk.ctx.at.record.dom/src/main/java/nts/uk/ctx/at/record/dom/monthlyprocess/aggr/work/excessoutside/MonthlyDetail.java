@@ -22,6 +22,7 @@ import nts.uk.ctx.at.record.dom.monthly.calc.totalworkingtime.hdwkandcompleave.A
 import nts.uk.ctx.at.record.dom.monthly.calc.totalworkingtime.overtime.AggregateOverTime;
 import nts.uk.ctx.at.record.dom.monthlyaggrmethod.legaltransferorder.LegalTransferOrderSetOfAggrMonthly;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.MonthlyAggregationErrorInfo;
+import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.MonAggrCompanySettings;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.RepositoriesRequiredByMonthlyAggr;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.premiumtarget.getvacationaddtime.AddSet;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.premiumtarget.getvacationaddtime.GetAddSet;
@@ -41,6 +42,7 @@ import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.holidaywork.HolidayWork
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.overtime.overtimeframe.OverTimeFrameNo;
 import nts.uk.ctx.at.shared.dom.worktime.common.subholtransferset.HolidayWorkAndTransferAtr;
 import nts.uk.ctx.at.shared.dom.worktime.common.subholtransferset.OverTimeAndTransferAtr;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 
 /**
  * 月次明細
@@ -140,7 +142,9 @@ public class MonthlyDetail {
 		
 		// 就業時間を限度として割り当てる（週割）
 		if (weeklyPTAfterAssign.greaterThan(0)){
-			weeklyPTAfterAssign = this.assignWithWorkTimeAsLimitForWeek(procDate, weeklyPTAfterAssign);
+			weeklyPTAfterAssign = this.assignWithWorkTimeAsLimitForWeek(
+					procDate, weeklyPTAfterAssign, workInformationOfDailyMap,
+					excessOutsideWorkMng.getCompanySets(), repositories);
 		}
 		
 		// 休暇使用時間を限度として割り当てる（週割）
@@ -403,11 +407,17 @@ public class MonthlyDetail {
 	 * 就業時間を限度として割り当てる（週割）
 	 * @param procDate 処理日
 	 * @param weeklyPTForAssign 逆時系列割り当て用の週割増時間
+	 * @param workInformationOfDailyMap 日別実績の勤務情報リスト
+	 * @param companySets 月別集計で必要な会社別設定
+	 * @param repositories 月次集計が必要とするリポジトリ
 	 * @return 逆時系列割り当て用の週割増時間　（割り当て後）
 	 */
 	private AttendanceTimeMonthWithMinus assignWithWorkTimeAsLimitForWeek(
 			GeneralDate procDate,
-			AttendanceTimeMonthWithMinus weeklyPTForAssign){
+			AttendanceTimeMonthWithMinus weeklyPTForAssign,
+			Map<GeneralDate, WorkInformation> workInformationOfDailyMap,
+			MonAggrCompanySettings companySets,
+			RepositoriesRequiredByMonthlyAggr repositories){
 		
 		AttendanceTimeMonthWithMinus weeklyPTAfterAssign = new AttendanceTimeMonthWithMinus(weeklyPTForAssign.v());
 		val weeklyPremiumTime = this.excessOutsideWorkMng.getExcessOutsideWorkDetail().getWeeklyPremiumTime();
@@ -417,6 +427,15 @@ public class MonthlyDetail {
 		val timeSeriesWorks = this.workTime;
 		if (!timeSeriesWorks.containsKey(procDate)) return weeklyPTAfterAssign;
 		val workTimeMinutes = timeSeriesWorks.get(procDate).getLegalTime().getWorkTime().v();
+		
+		// 該当年月日の勤務種類を確認する
+		WorkType workType = null;
+		if (workInformationOfDailyMap.containsKey(procDate)) {
+			if (workInformationOfDailyMap.get(procDate).getWorkTypeCode() != null) {
+				String workTypeCode = workInformationOfDailyMap.get(procDate).getWorkTypeCode().v();
+				workType = companySets.getWorkTypeMap(workTypeCode, repositories);
+			}
+		}
 		
 		// 月次明細を限度として「時系列の週割増時間」に割り当てる
 		Integer assignMinutes = weeklyPTAfterAssign.v();
@@ -436,7 +455,8 @@ public class MonthlyDetail {
 						new AttendanceTime(0),
 						new WithinStatutoryMidNightTime(TimeDivergenceWithCalculation.sameTime(new AttendanceTime(0))),
 						new AttendanceTime(0)),
-				new AttendanceTime(0)
+				new AttendanceTime(0),
+				workType
 				));
 		
 		return weeklyPTAfterAssign;

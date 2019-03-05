@@ -49,6 +49,36 @@ public class OverTimeFrameTime {
 									 this.orderTime);
 	}
 
+	public OverTimeFrameTime addTransoverTime(AttendanceTime time,AttendanceTime calcTime) {
+		return new OverTimeFrameTime(this.OverWorkFrameNo,
+									 this.OverTimeWork,
+									 this.TransferTime.addMinutes(time, calcTime),
+									 this.BeforeApplicationTime,
+									 this.orderTime);
+	}
+	
+	/**
+	 * 大塚モード特休処理　振替元時間減算処理
+	 * @param time
+	 */
+	public void minusTimeResultGreaterEqualZero(AttendanceTime time) {
+		int result = this.getOverTimeWork().getTime().valueAsMinutes() - this.getTransferTime().getTime().valueAsMinutes();
+		if(result < 0)
+			result = 0;
+		this.OverTimeWork = TimeDivergenceWithCalculation.sameTime(new AttendanceTime(result - time.valueAsMinutes()));
+		this.TransferTime = TimeDivergenceWithCalculation.sameTime(new AttendanceTime(0));
+	}
+	
+	/**
+	 * 大塚モード　振替先時間加算
+	 * @param time
+	 */
+	public void add(AttendanceTime time) {
+		int result = this.getOverTimeWork().getTime().valueAsMinutes() + this.getTransferTime().getTime().valueAsMinutes();
+		this.OverTimeWork = TimeDivergenceWithCalculation.sameTime(new AttendanceTime(result + time.valueAsMinutes()));
+		this.TransferTime = TimeDivergenceWithCalculation.sameTime(new AttendanceTime(0));
+	}
+	
 	/**
 	 * 残業枠Noを入れ替えて作り直す
 	 * @return

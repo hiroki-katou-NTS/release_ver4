@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.dom.AggregateRoot;
 /**
@@ -12,6 +13,7 @@ import nts.arc.layer.dom.AggregateRoot;
  *
  */
 @Getter
+@Setter
 @AllArgsConstructor
 public class ApprovalPhase extends AggregateRoot{
 	/**会社ID*/

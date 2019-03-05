@@ -533,17 +533,6 @@ module nts.uk.at.view.kaf005.b {
                     self.multilContent()
                 );
                 
-                /*
-                let appReasonError = !appcommon.CommonProcess.checkAppReason(true, self.typicalReasonDisplayFlg(), self.displayAppReasonContentFlg(), appReason);
-                if(appReasonError){
-                    nts.uk.ui.dialog.alertError({ messageId: 'Msg_115' }).then(function(){nts.uk.ui.block.clear();});    
-                    return;    
-                }
-                if(!appcommon.CommonProcess.checklenghtReason(appReason,"#appReason")){
-                    return;
-                }
-                */
-                
                 let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
                 let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);
                 
@@ -551,16 +540,13 @@ module nts.uk.at.view.kaf005.b {
                     return;
                 }
                 
-                divergenceReason = self.getReason(
-                    self.displayDivergenceReasonForm(),
-                    self.selectedReason2(),
-                    self.reasonCombo2(),
-                    self.displayDivergenceReasonInput(),
-                    self.multilContent2()
-                );
-                if(!appcommon.CommonProcess.checklenghtReason(divergenceReason,"#divergenceReason")){
+                let comboDivergenceReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason2(), self.reasonCombo2(), self.displayDivergenceReasonForm());
+                let areaDivergenceReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent2(), self.displayDivergenceReasonInput(), true);
+                
+                if(!appcommon.CommonProcess.checklenghtReason(comboDivergenceReason+":"+areaDivergenceReason,"#divergenceReason")){
                     return;
                 }
+                
                 let overTimeShiftNightTmp: number = null;
                 let flexExessTimeTmp: number = null;
                 for (let i = 0; i < self.overtimeHours().length; i++) {
@@ -592,10 +578,13 @@ module nts.uk.at.view.kaf005.b {
                     overTimeShiftNight: overTimeShiftNightTmp == null ? null : overTimeShiftNightTmp,
                     flexExessTime: flexExessTimeTmp == null ? null : flexExessTimeTmp,
                     overtimeAtr: self.overtimeAtr(),
-                    divergenceReasonContent: divergenceReason,
+                    divergenceReasonContent: comboDivergenceReason,
                     sendMail: self.manualSendMailAtr(),
                     calculateFlag: self.calculateFlag(),
-                    appReasonID: comboBoxReason
+                    appReasonID: comboBoxReason,
+                    divergenceReasonArea: areaDivergenceReason,
+                    user: self.user,
+                    reflectPerState: self.reflectPerState
                 }
                 
                 service.checkBeforeUpdate(command).done((data) => {                

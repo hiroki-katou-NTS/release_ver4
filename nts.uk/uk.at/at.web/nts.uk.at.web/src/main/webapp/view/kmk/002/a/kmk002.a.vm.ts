@@ -1004,6 +1004,29 @@ module nts.uk.at.view.kmk002.a {
                 this.amountLower = ko.observable(null);
                 this.timeUpper = ko.observable(null);
                 this.timeLower = ko.observable(null);
+                
+                this.upperCheck.subscribe(vl => {
+                    if (vl) {
+                        $('#inp-upper-amount').ntsEditor('validate');
+                        $('#inp-upper-number').ntsEditor('validate');
+                        $('#inp-upper-time').ntsEditor('validate');
+                    } else {
+                        $('#inp-upper-amount').ntsError('clear');
+                        $('#inp-upper-number').ntsError('clear');
+                        $('#inp-upper-time').ntsError('clear');
+                    }
+                });
+                this.lowerCheck.subscribe(vl => {
+                    if (vl) {
+                        $('#inp-lower-amount').ntsEditor('validate');
+                        $('#inp-lower-number').ntsEditor('validate');
+                        $('#inp-lower-time').ntsEditor('validate');
+                    } else {
+                        $('#inp-lower-amount').ntsError('clear');
+                        $('#inp-lower-number').ntsError('clear');
+                        $('#inp-lower-time').ntsError('clear');
+                    }
+                });
             }
 
             /**
@@ -1030,11 +1053,19 @@ module nts.uk.at.view.kmk002.a {
                     $('#inp-upper-amount').ntsEditor('validate');
                     $('#inp-upper-number').ntsEditor('validate');
                     $('#inp-upper-time').ntsEditor('validate');
+                } else {
+                    $('#inp-upper-amount').ntsError('clear');
+                    $('#inp-upper-number').ntsError('clear');
+                    $('#inp-upper-time').ntsError('clear');
                 }
                 if (self.lowerCheck()) {
                     $('#inp-lower-amount').ntsEditor('validate');
                     $('#inp-lower-number').ntsEditor('validate');
                     $('#inp-lower-time').ntsEditor('validate');
+                } else {
+                    $('#inp-lower-amount').ntsError('clear');
+                    $('#inp-lower-number').ntsError('clear');
+                    $('#inp-lower-time').ntsError('clear');
                 }
             }
 

@@ -84,7 +84,7 @@ public class CheckTranmissionImpl implements CheckTransmission {
 						application.getAppID(), 
 						application.getAppType().value, 
 						application.getPrePostAtr().value, 
-						AppContexts.user().employeeId(), 
+						"", 
 						applicantID);
 			}
 		}
@@ -140,7 +140,7 @@ public class CheckTranmissionImpl implements CheckTransmission {
 									application.getAppID(), 
 									application.getAppType().value, 
 									application.getPrePostAtr().value, 
-									AppContexts.user().employeeId(), 
+									"", 
 									employeeToSendId);
 						}
 					}

@@ -96,7 +96,8 @@
 								<th class="ui-widget-header" colspan="2">#{i18n.getText('KAF018_55')}</th>
 							</com:ko-if>
 							<!-- E5_H5_1 -->
-							<th class="ui-widget-header" rowspan="2">#{i18n.getText('KAF018_58')}</th>
+							<th class="ui-widget-header" rowspan="2"><div tabindex="-1" data-bind="ntsCheckBox: 
+								{ checked: isCheckedAll, enable: true }, visible: true">#{i18n.getText('KAF018_58')}</div></th>
 						</tr>
 						<tr>
 							<com:ko-if bind="useSetting.useBossConfirm">
