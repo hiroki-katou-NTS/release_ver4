@@ -102,7 +102,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     if (lstData && lstData.length > 0) {
                         let sortedData: Array<any> = _.orderBy(lstData, ['code'], ['asc']);
                         self.lstFilteredData(sortedData);
-                        if (self.codeToSelect() == null || !_.find(self.lstFilteredData(), {'code':self.codeToSelect()})) {
+                        if (!_.find(self.lstFilteredData(), {'code':self.codeToSelect()})) {
                             if (self.selectedErrorAlarmCode() == self.lstFilteredData()[0].code)
                                 self.selectedErrorAlarmCode.valueHasMutated();
                             else 
@@ -130,6 +130,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
             });
             self.selectedErrorAlarmCode.subscribe((code) => {
                 if (code) {
+                    self.codeToSelect(null);
                     let foundItem: ErrorAlarmWorkRecord = _.find(self.lstFilteredData(), (item) => {
                         return item.code == code;
                     });
