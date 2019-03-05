@@ -27,7 +27,9 @@ module nts.uk.at.view.kaf018.b.viewmodel {
             $("#fixed-table").ntsFixedTable({ width: 1030, height: 163 });
             self.isCheckedAll.subscribe(function(isCheck){
                 _.each(self.tempData, function(item){
-                    item.isChecked(isCheck)
+                    if(item.isEnabled){
+                        item.isChecked(isCheck)
+                    }
                 });
             });
         }

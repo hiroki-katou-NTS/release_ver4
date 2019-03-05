@@ -39,7 +39,9 @@ module nts.uk.at.view.kaf018.e.viewmodel {
             self.monthly = TransmissionAttr.MONTHLY;
             self.isCheckedAll.subscribe(function(isCheck){
                 _.each(self.listWkpStatusConfirm, function(item){
-                    item.check(isCheck)
+                    if(item.enable){
+                        item.check(isCheck)
+                    }
                 });
             });
         }
@@ -205,7 +207,7 @@ module nts.uk.at.view.kaf018.e.viewmodel {
     }
 
 
-    class ApprovalStatusActivity {
+    export class ApprovalStatusActivity {
         code: string;
         name: string;
         monthConfirm: number;
