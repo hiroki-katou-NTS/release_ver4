@@ -15,18 +15,22 @@ module nts.uk.at.view.kal001.d.service {
             let command = new ExtractAlarmCommand(listEmployee, alarmCode, 
                                                    _.map(listPeriodByCategory, (item) =>{ return new PeriodByCategoryCommand(item);}),statusId);
             
-            let def = $.Deferred();
+            let def = $.Deferred(), toStopForWriteData = ko.observable(false);
             
             nts.uk.request.ajax("at", paths.extractAlarm, command).done(function(task){
                 taskId(task.id);
                 nts.uk.deferred.repeat(conf => conf.task(() => {
-                    return nts.uk.request.asyncTask.getInfo(task.id).done(function(res: any) {
+                    return nts.uk.request.asyncTask.getInfo(task.id, !toStopForWriteData()).done(function(res: any) {
                         let taskData = res.taskDatas;
                         _.forEach(taskData, itemCount => {
                             if (itemCount.key === "empCount") {
                                 numberEmpSuccess(itemCount.valueAsNumber);
                             }
                         });
+                        let dataWriting = _.find(res.taskDatas, function(t){ return t.key === "dataWriting"; });
+                        if(dataWriting !== null && dataWriting !== undefined && dataWriting.valueAsBoolean === true) {
+                            toStopForWriteData(true);
+                        }
                         if(res.succeeded){
                             let data = {};
                             let sorted = _.sortBy(res.taskDatas, function(t){ return parseInt(t.key.replace("dataNo", "")) });

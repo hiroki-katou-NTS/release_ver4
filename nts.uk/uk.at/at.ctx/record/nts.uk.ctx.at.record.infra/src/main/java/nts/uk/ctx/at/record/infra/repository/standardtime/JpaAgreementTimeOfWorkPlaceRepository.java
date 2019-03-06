@@ -4,11 +4,13 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.uk.ctx.at.record.dom.standardtime.AgreementTimeOfWorkPlace;
@@ -86,6 +88,22 @@ public class JpaAgreementTimeOfWorkPlaceRepository extends JpaRepository impleme
 		// .setParameter("workPlaceId", workplaceId)
 		// .setParameter("laborSystemAtr", laborSystemAtr.value)
 		// .getSingle(f -> f.kmkmtAgeementTimeWorkPlacePK.basicSettingId);
+	}
+	
+	@Override
+	@SneakyThrows
+	public List<AgreementTimeOfWorkPlace> findWorkPlaceSetting(List<String> workplaceId) {
+		String query = "select WKPCD, BASIC_SETTING_ID, LABOR_SYSTEM_ATR from KMKMT_AGREEMENTTIME_WPL where WKPCD IN (" + workplaceId.stream().map(s -> "?").collect(Collectors.joining(",")) +" )";
+		try (PreparedStatement statement = this.connection().prepareStatement(query)) {
+			for(int i = 0; i < workplaceId.size(); i++){
+				statement.setString(i + 1, workplaceId.get(i));
+			}
+
+			return new NtsResultSet(statement.executeQuery()).getList(rec -> {
+				return new AgreementTimeOfWorkPlace(rec.getString(1), rec.getString(2), 
+													EnumAdaptor.valueOf(rec.getInt(3), LaborSystemtAtr.class));
+			});
+		}
 	}
 
 	private KmkmtAgeementTimeWorkPlace toEntity(AgreementTimeOfWorkPlace agreementTimeOfWorkPlace) {

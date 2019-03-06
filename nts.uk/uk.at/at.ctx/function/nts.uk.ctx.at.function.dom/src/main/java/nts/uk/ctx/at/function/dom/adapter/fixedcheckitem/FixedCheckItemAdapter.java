@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.function.dom.adapter.fixedcheckitem;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
@@ -13,11 +14,13 @@ public interface FixedCheckItemAdapter {
 		public Optional<ValueExtractAlarm>  checkWorkTimeNotRegister(String workplaceID,String employeeID,GeneralDate date,String workTimeCD);
 		
 		public List<ValueExtractAlarm> checkPrincipalUnconfirm(String workplaceID,String employeeID,GeneralDate startDate,GeneralDate endDate);
+		public Map<String, List<GeneralDate>> checkPrincipalConfirmed(List<String> employeeID,GeneralDate startDate,GeneralDate endDate);
 		
 		public List<ValueExtractAlarm> checkAdminUnverified(String workplaceID,String employeeID,GeneralDate startDate,GeneralDate endDate);
 		
 		public List<ValueExtractAlarm> checkingData(String workplaceID,String employeeID,GeneralDate startDate,GeneralDate endDate);
 		public List<ValueExtractAlarm> checkAdminUnverified(String workplaceID,String employeeID,DatePeriod datePeriod);
+		public Map<String, List<GeneralDate>> checkAdminUnverified(List<String> employeeID,DatePeriod datePeriod);
 		
 		public List<ValueExtractAlarm> checkContinuousVacation(String employeeID,DatePeriod datePeriod);
 }

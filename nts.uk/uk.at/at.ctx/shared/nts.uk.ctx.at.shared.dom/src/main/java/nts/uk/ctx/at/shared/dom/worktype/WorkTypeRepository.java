@@ -198,6 +198,8 @@ public interface WorkTypeRepository {
 	 */
 	List<WorkType> findWorkOneDay(String companyId, int abolishAtr, int worktypeAtr, int oneDay);
 	
+	List<String> findWorkTypeCodeOneDay(String companyId, int abolishAtr, int worktypeAtr, int oneDay);
+	
 	/**
 	 * Gets the acquired attendance work types.
 	 *

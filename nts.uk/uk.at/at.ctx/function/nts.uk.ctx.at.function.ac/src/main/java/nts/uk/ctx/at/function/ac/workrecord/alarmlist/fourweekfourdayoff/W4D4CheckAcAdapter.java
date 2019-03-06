@@ -47,8 +47,8 @@ public class W4D4CheckAcAdapter implements W4D4CheckAdapter {
 		return new  InfoCheckNotRegisterPubExport(
 				dto.getEmployeeId(),
 				dto.getWorkTimeCode(),
-				dto.getWorkTypeCode()
-				);
+				dto.getWorkTypeCode(),
+				dto.getWorkingDate());
 	}
 
 }

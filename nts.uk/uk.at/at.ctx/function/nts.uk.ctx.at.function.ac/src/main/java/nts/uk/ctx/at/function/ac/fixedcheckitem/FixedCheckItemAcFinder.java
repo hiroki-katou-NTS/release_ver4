@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.function.ac.fixedcheckitem;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,11 @@ public class FixedCheckItemAcFinder implements FixedCheckItemAdapter {
 		return fixedCheckItemPub.checkPrincipalUnconfirm(workplaceID, employeeID, startDate, endDate)
 				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
 	}
+	
+	@Override
+	public Map<String, List<GeneralDate>> checkPrincipalConfirmed(List<String> employeeID,GeneralDate startDate, GeneralDate endDate) {
+		return fixedCheckItemPub.checkPrincipalConfirmed(employeeID, startDate, endDate);
+	}
 
 	@Override
 	public List<ValueExtractAlarm> checkAdminUnverified(String workplaceID, String employeeID,
@@ -74,6 +80,11 @@ public class FixedCheckItemAcFinder implements FixedCheckItemAdapter {
 	public List<ValueExtractAlarm> checkAdminUnverified(String workplaceID, String employeeID, DatePeriod datePeriod) {
 		return fixedCheckItemPub.checkAdminUnverified(workplaceID, employeeID, datePeriod )
 				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
+	}
+	
+	@Override
+	public Map<String, List<GeneralDate>> checkAdminUnverified(List<String> employeeID, DatePeriod datePeriod) {
+		return fixedCheckItemPub.checkAdminUnverified(employeeID, datePeriod );
 	}
 
 	@Override

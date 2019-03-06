@@ -3,6 +3,7 @@ package nts.uk.ctx.at.record.pubimp.fixedcheckitem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -70,6 +71,12 @@ public class FixedCheckItemPubImpl implements FixedCheckItemPub {
 		return checkPrincipalUnconfirmService.checkPrincipalUnconfirm(workplaceID, employeeID, startDate, endDate)
 				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
 	}
+	
+	@Override
+	public Map<String, List<GeneralDate>> checkPrincipalConfirmed(List<String> employeeID,
+			GeneralDate startDate, GeneralDate endDate) {
+		return checkPrincipalUnconfirmService.checkPrincipalConfirmed(employeeID, startDate, endDate);
+	}
 
 	@Override
 	public List<ValueExtractAlarmWRPubExport> checkAdminUnverified(String workplaceID, String employeeID,
@@ -102,6 +109,12 @@ public class FixedCheckItemPubImpl implements FixedCheckItemPub {
 			DatePeriod datePeriod) {
 		return checkAdminUnverifiedService.checkAdminUnverified(workplaceID, employeeID,datePeriod)
 				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
+	}
+	
+	@Override
+	public Map<String, List<GeneralDate>> checkAdminUnverified(List<String> employeeID,
+			DatePeriod datePeriod) {
+		return checkAdminUnverifiedService.checkAdminUnverified(employeeID, datePeriod);
 	}
 
 	@Override

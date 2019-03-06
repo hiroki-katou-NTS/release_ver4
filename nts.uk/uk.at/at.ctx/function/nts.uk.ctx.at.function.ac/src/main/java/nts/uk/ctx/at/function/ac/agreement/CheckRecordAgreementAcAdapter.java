@@ -208,6 +208,11 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 			if (!fiscalYears.contains(tagetYear)) {
 				fiscalYears.add(tagetYear);
 			}
+			
+			/** TODO: need check period */
+			Object basicSetGetter = agreementTimeByPeriodPub.algorithm(AppContexts.user().companyId(), employeeIds, period);
+
+			/** TODO: 並列処理にしてみる　*/
 			// 社員IDの件数分ループ
 			for (String empId : employeeIds) {
 				List<AgreementTimeByPeriod> lstAgreementTimeByPeriod = new ArrayList<>();
@@ -221,7 +226,7 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 						//RequestList No.453 指定期間36協定時間の取得
 						List<AgreementTimeByPeriod> agreementTimeByPeriods = agreementTimeByPeriodPub.algorithm(
 								agreeConditionError.getCompanyId(), empId, baseDate.end(),
-								new Month(startingMonth), new Year(fiscalYear), periodAtr);
+								new Month(startingMonth), new Year(fiscalYear), periodAtr, basicSetGetter);
 						if(!CollectionUtil.isEmpty(agreementTimeByPeriods)){
 							for (AgreementTimeByPeriod agreementTimeByPeriod : agreementTimeByPeriods) {
 								int checkEnd = agreementTimeByPeriod.getEndMonth().compareTo(yearMonthPeriod.start());

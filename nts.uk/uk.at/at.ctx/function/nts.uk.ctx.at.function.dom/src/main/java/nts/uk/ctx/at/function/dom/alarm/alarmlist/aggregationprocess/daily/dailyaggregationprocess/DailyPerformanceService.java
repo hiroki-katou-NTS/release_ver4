@@ -20,6 +20,7 @@ import nts.uk.ctx.at.function.dom.adapter.ErrorAlarmWorkRecordAdapter;
 import nts.uk.ctx.at.function.dom.adapter.ErrorAlarmWorkRecordAdapterDto;
 import nts.uk.ctx.at.function.dom.adapter.WorkRecordExtraConAdapter;
 import nts.uk.ctx.at.function.dom.adapter.application.ApplicationAdapter;
+import nts.uk.ctx.at.function.dom.adapter.application.ApplicationImport;
 import nts.uk.ctx.at.function.dom.adapter.dailyattendanceitem.AttendanceItemValueImport;
 import nts.uk.ctx.at.function.dom.adapter.dailyattendanceitem.AttendanceResultImport;
 import nts.uk.ctx.at.function.dom.adapter.eralworkrecorddto.MessageWRExtraConAdapterDto;
@@ -29,6 +30,7 @@ import nts.uk.ctx.at.function.dom.adapter.workrecord.erroralarm.EmployeeDailyPer
 import nts.uk.ctx.at.function.dom.alarm.alarmdata.ValueExtractAlarm;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.EmployeeSearchDto;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.PeriodByAlarmCategory;
+import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.daily.dailyaggregationprocess.DailyAggregationProcessService.DataHolder;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.daily.DailyAlarmCondition;
 import nts.uk.ctx.at.function.dom.attendanceitemframelinking.AttendanceItemLinking;
 import nts.uk.ctx.at.function.dom.attendanceitemframelinking.repository.AttendanceItemLinkingRepository;
@@ -42,6 +44,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class DailyPerformanceService {
+
 	// 社員の日別実績エラー一覧
 	@Inject
 	private EmployeeDailyPerErrorAdapter employeeDailyAdapter;
@@ -88,7 +91,7 @@ public class DailyPerformanceService {
 
 	public List<ValueExtractAlarm> aggregationProcess(DailyAlarmCondition dailyAlarmCondition, PeriodByAlarmCategory period, EmployeeSearchDto employee, String companyID) {
 		List<ValueExtractAlarm> valueExtractAlarmList = new ArrayList<>();
-
+		String KAL010_1 = TextResource.localize("KAL010_1");
 		List<String> listErrorAlarmCode = dailyAlarmCondition.getErrorAlarmCode();
 		if (listErrorAlarmCode == null || listErrorAlarmCode.isEmpty())
 			return new ArrayList<>();
@@ -178,7 +181,7 @@ public class DailyPerformanceService {
 					attdResult,
 					dailyAttendanceItems,attendanceItemAndFrameNos);
 						
-			ValueExtractAlarm data = new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), eDaily.getDate().toString(), TextResource.localize("KAL010_1"),
+			ValueExtractAlarm data = new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), eDaily.getDate().toString(), KAL010_1,
 					alarmContentMessage.getAlarmItem(), alarmContentMessage.getAlarmContent(),
 					errAlarmCheckIDToMessage.get(errorAlarmMap.get(eDaily.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage());
 
@@ -189,10 +192,79 @@ public class DailyPerformanceService {
 
 	}
 	
+	public List<ValueExtractAlarm> aggregationProcess(DatePeriod period, List<String> employeeIds, List<EmployeeSearchDto> employee, DataHolder holder, List<ApplicationImport> apps) {
+		
+		List<ValueExtractAlarm> valueExtractAlarmList = new ArrayList<>();
+		String KAL010_1 = TextResource.localize("KAL010_1");
+		Map<String, ErrorAlarmWorkRecordAdapterDto> errorAlarmMap = holder.errorAlarmWorkRecord.stream().collect(Collectors.toMap(ErrorAlarmWorkRecordAdapterDto::getCode, x -> x));
+		
+		// 社員の日別実績エラー一覧
+		List<EmployeeDailyPerErrorImport> employeeDailyList = employeeDailyAdapter.getByErrorAlarm(employeeIds, period, holder.eralCode);
+
+		holder.dailyAlarmCondition.stream().forEach(dailyAlCon -> {
+			List<EmployeeDailyPerErrorImport> empDailyError = employeeDailyList.stream().filter(error -> {
+				if(!dailyAlCon.getErrorAlarmCode().contains(error.getErrorAlarmWorkRecordCode())){
+					return false;
+				}
+				if(!dailyAlCon.isAddApplication()){
+					return true;
+				}
+				ErrorAlarmWorkRecordAdapterDto errorAlarm = errorAlarmMap.get(error.getErrorAlarmWorkRecordCode());
+				if(errorAlarm.getUseAtr() > 0){
+					Optional<ErAlApplicationAdapterDto> erAlApplicationOpt = holder.eralApps.stream().filter(ea -> ea.getErrorAlarmCode().equals(error.getErrorAlarmWorkRecordCode())).findFirst();
+					if(erAlApplicationOpt.isPresent()){
+						List<Integer> listAppTypeWrited = apps.stream().filter(app -> app.getAppDate().equals(error.getDate()) && app.getEmployeeID().equals(error.getEmployeeID())).map(app -> app.getAppType())
+																		.collect(Collectors.toList());
+
+						if (intersectTwoListAppType(erAlApplicationOpt.get().getAppType(), listAppTypeWrited)) {
+							return false;
+						}
+					}
+				}
+				return true;
+			}).collect(Collectors.toList());
+			
+			// Remove error code from errorAlarmWorkRecord if error code not in
+			// employeeDailyList
+			List<String> errorCodeList = empDailyError.stream().map(x -> x.getErrorAlarmWorkRecordCode()).distinct().collect(Collectors.toList());
+
+			// 勤務実績のエラーアラームチェック
+			List<String> errorAlarmCheckIDs = holder.errorAlarmWorkRecord.stream().filter(c -> errorCodeList.contains(c.getCode())).map(x -> x.getErrorAlarmCheckID()).collect(Collectors.toList());
+
+			Map<String, MessageWRExtraConAdapterDto> errAlarmCheckIDToMessage = holder.messageList.stream().filter(mes -> errorAlarmCheckIDs.contains(mes.getErrorAlarmCheckID()))
+																											.collect(Collectors.toMap(MessageWRExtraConAdapterDto::getErrorAlarmCheckID, x -> x));
+			 
+			Set<Integer> listItemIDs = empDailyError.stream().map(error -> error.getAttendanceItemList()).flatMap(List::stream).collect(Collectors.toSet());
+			List<String> empIds = empDailyError.stream().map(error -> error.getEmployeeID()).collect(Collectors.toList());
+			
+			List<AttendanceItemLinking> currentNos = holder.attendanceItemAndFrameNos.stream().filter(ai -> listItemIDs.contains(ai.getAttendanceItemId())).collect(Collectors.toList());
+			List<DailyAttendanceItemAdapterDto> currentAttendanceItems = holder.dailyAttendanceItems.stream().filter(ai -> listItemIDs.contains(ai.getAttendanceItemId())).collect(Collectors.toList());
+			List<AttendanceResultImport> currentattdResoult = attendanceItemAdapter.getValueOf(empIds , period, new ArrayList<>(listItemIDs));
+			
+			empDailyError.stream().forEach(error -> {
+				currentattdResoult.stream().filter(attendanceResult -> error.getEmployeeID().equals(attendanceResult.getEmployeeId())
+																			&& error.getDate().equals(attendanceResult.getWorkingDate()))
+											.findFirst().ifPresent(attendanceResult -> {
+												AlarmContentMessage alarmContentMessage = this.calculateAlarmContentMessage(error, holder.comId, errorAlarmMap,attendanceResult,currentAttendanceItems,currentNos);
+												EmployeeSearchDto em = employee.stream().filter(e -> e.getId().equals(error.getEmployeeID())).findAny().get();
+												
+												ValueExtractAlarm data = new ValueExtractAlarm(em.getWorkplaceId(), em.getId(), error.getDate().toString(), KAL010_1,
+														alarmContentMessage.getAlarmItem(), alarmContentMessage.getAlarmContent(),
+														errAlarmCheckIDToMessage.get(errorAlarmMap.get(error.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage());
+
+												valueExtractAlarmList.add(data);
+				});
+			});
+		});
+
+		return valueExtractAlarmList;
+
+	}
+	
 	public List<ValueExtractAlarm> aggregationProcess(DailyAlarmCondition dailyAlarmCondition, DatePeriod period, List<String> employeeIds, 
 			List<EmployeeSearchDto> employee, String companyID) {
 		List<ValueExtractAlarm> valueExtractAlarmList = new ArrayList<>();
-
+		String KAL010_1 = TextResource.localize("KAL010_1");
 		List<String> listErrorAlarmCode = dailyAlarmCondition.getErrorAlarmCode();
 		if (listErrorAlarmCode == null || listErrorAlarmCode.isEmpty())
 			return new ArrayList<>();
@@ -281,7 +353,7 @@ public class DailyPerformanceService {
 			}
 			AlarmContentMessage alarmContentMessage = this.calculateAlarmContentMessage(eDaily, companyID, errorAlarmMap,attdResult,dailyAttendanceItems,attendanceItemAndFrameNos);
 			EmployeeSearchDto em = employee.stream().filter(e -> e.getId().equals(eDaily.getEmployeeID())).findAny().get();
-			ValueExtractAlarm data = new ValueExtractAlarm(em.getWorkplaceId(), em.getId(), eDaily.getDate().toString(), TextResource.localize("KAL010_1"),
+			ValueExtractAlarm data = new ValueExtractAlarm(em.getWorkplaceId(), em.getId(), eDaily.getDate().toString(), KAL010_1,
 					alarmContentMessage.getAlarmItem(), alarmContentMessage.getAlarmContent(),
 					errAlarmCheckIDToMessage.get(errorAlarmMap.get(eDaily.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage());
 
@@ -293,8 +365,7 @@ public class DailyPerformanceService {
 	}
 
 	private boolean intersectTwoListAppType(List<Integer> listAppType1, List<Integer> listAppType2) {
-		List<Integer> intersect = listAppType1.stream().filter(listAppType2::contains).collect(Collectors.toList());
-		return !intersect.isEmpty();
+		return listAppType1.stream().anyMatch(listAppType2::contains);
 	}
 	
 	

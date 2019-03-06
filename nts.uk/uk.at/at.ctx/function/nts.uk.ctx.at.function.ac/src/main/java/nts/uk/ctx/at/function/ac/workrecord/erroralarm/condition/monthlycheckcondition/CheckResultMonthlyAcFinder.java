@@ -77,8 +77,7 @@ public class CheckResultMonthlyAcFinder implements CheckResultMonthlyAdapter {
 		return new Check36AgreementValueImport(
 				export.isCheck36AgreementCon(),
 				export.getErrorValue(),
-				export.getAlarmValue()
-				);
+				export.getAlarmValue());
 	}
 
 	@Override
@@ -123,11 +122,19 @@ public class CheckResultMonthlyAcFinder implements CheckResultMonthlyAdapter {
 
 	@Override
 	public List<MonthlyRecordValuesImport> getListMonthlyRecords(String employeeId ,YearMonthPeriod period, List<Integer> itemIds) {
-		List<MonthlyRecordValuesExport> x = getMonthlyRecordPub.algorithm(employeeId, period, itemIds);;
+		List<MonthlyRecordValuesExport> x = getMonthlyRecordPub.algorithm(employeeId, period, itemIds);
 		List<MonthlyRecordValuesImport> y = x.stream().map(z -> {
 			return MonthlyRecordValuesImport.of(z.getYearMonth(), z.getClosureId(),z.getClosureDate(),z.getItemValues());
 		}).collect(Collectors.toList());
 		return y;
+	}
+	
+	public Map<String, List<MonthlyRecordValuesImport>> getListMonthlyRecords(List<String> employeeId ,YearMonthPeriod period, List<Integer> itemIds){
+		return getMonthlyRecordPub.algorithm(employeeId, period, itemIds).entrySet().stream().collect(Collectors.toMap(c -> c.getKey(), c -> {
+			return c.getValue().stream().map(z -> {
+				return MonthlyRecordValuesImport.of(z.getYearMonth(), z.getClosureId(),z.getClosureDate(),z.getItemValues());
+			}).collect(Collectors.toList());
+		}));
 	}
 	
 	@Override
@@ -151,6 +158,7 @@ public class CheckResultMonthlyAcFinder implements CheckResultMonthlyAdapter {
 				int closureId = monthlyRecordValuesImport.getClosureId().value;
 				Check36AgreementValueImport checkAgreementError = convertToCheck36AgreementValue(checkResultMonthlyPub.check36AgreementCondition(employeeId, yearMonth, 
 						closureId, monthlyRecordValuesImport.getClosureDate(),convertToAgreementCheckCon36Import(agreementCheckCon36)));
+				checkAgreementError.setYm(yearMonth);
 				lstReturn.add(checkAgreementError);
 			}
 		}
@@ -163,4 +171,11 @@ public class CheckResultMonthlyAcFinder implements CheckResultMonthlyAdapter {
 		return checkResultMonthlyPub.checkPerTimeMonActualResult(yearMonth, employeeID, 
 				convertToAttendanceItemCon(attendanceItemCondition));
 	}
+	
+	//HoiDD No.257
+		@Override
+		public Map<String,Map<YearMonth,Map<String,Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemConAdapterDto> attendanceItemCondition) {
+			return checkResultMonthlyPub.checkPerTimeMonActualResult(yearMonth, employeeID, 
+					attendanceItemCondition.entrySet().stream().collect(Collectors.toMap(c -> c.getKey(), c -> convertToAttendanceItemCon(c.getValue()))));
+		}
 }

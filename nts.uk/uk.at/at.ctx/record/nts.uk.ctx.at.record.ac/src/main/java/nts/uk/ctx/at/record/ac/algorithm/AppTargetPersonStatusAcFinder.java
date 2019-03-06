@@ -17,48 +17,54 @@ import nts.uk.ctx.workflow.pub.service.export.ApproveRootStatusForEmpExport;
 import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+
 @Stateless
 public class AppTargetPersonStatusAcFinder implements AppTargetPersonStatusAdapter {
 
 	@Inject
 	private ApprovalRootStatePub approvalRootStatePub;
 	@Inject
-	private IntermediateDataPub intermediateDataPub; 
-	
-	
+	private IntermediateDataPub intermediateDataPub;
+
 	@Override
 	public List<StateConfirm> appTargetPersonStatus(String employeeID, GeneralDate startDate, GeneralDate endDate,
 			int routeType) {
-		//rq NO 113 old
-		List<ApproveRootStatusForEmpExport> listState = approvalRootStatePub.getApprovalByEmplAndDate(startDate, endDate, employeeID, AppContexts.user().companyId(), routeType);
-		
-		if(!listState.isEmpty()) {
-			return listState.stream().map(c->convertToStateConfirm(c)).collect(Collectors.toList());
+		// rq NO 113 old
+		List<ApproveRootStatusForEmpExport> listState = approvalRootStatePub.getApprovalByEmplAndDate(startDate,
+				endDate, employeeID, AppContexts.user().companyId(), routeType);
+
+		if (!listState.isEmpty()) {
+			return listState.stream().map(c -> convertToStateConfirm(c)).collect(Collectors.toList());
 		}
 		return Collections.emptyList();
 	}
-	
+
 	private StateConfirm convertToStateConfirm(ApproveRootStatusForEmpExport export) {
-		return new StateConfirm(
-				export.getAppDate(),
-				export.getApprovalStatus().value ==2?true:false
-				);
+		return new StateConfirm(export.getAppDate(), export.getApprovalStatus().value == 2 ? true : false, export.getEmployeeID());
 	}
+
 	@Override
 	public List<StateConfirm> appTargetPersonStatus(String employeeID, DatePeriod date, Integer routeType) {
-		List<AppRootStateStatusSprExport> listState=intermediateDataPub.getAppRootStatusByEmpPeriod(employeeID, date, routeType);
-		if(!CollectionUtil.isEmpty(listState)) {
-			return listState.stream().map(c->convertToStateConfirms(c)).collect(Collectors.toList());
+		List<AppRootStateStatusSprExport> listState = intermediateDataPub.getAppRootStatusByEmpPeriod(employeeID, date,
+				routeType);
+		if (!CollectionUtil.isEmpty(listState)) {
+			return listState.stream().map(c -> convertToStateConfirms(c)).collect(Collectors.toList());
+		}
+		return Collections.emptyList();
+	}
+
+	@Override
+	public List<StateConfirm> appTargetPersonStatus(List<String> employeeID, DatePeriod date, Integer routeType) {
+		List<AppRootStateStatusSprExport> listState = intermediateDataPub.getAppRootStatusByEmpsPeriod(employeeID, date,
+				routeType);
+		if (!CollectionUtil.isEmpty(listState)) {
+			return listState.stream().map(c -> convertToStateConfirms(c)).collect(Collectors.toList());
 		}
 		return Collections.emptyList();
 	}
 
 	private StateConfirm convertToStateConfirms(AppRootStateStatusSprExport export) {
-		return new StateConfirm(
-				export.getDate(),
-				export.getDailyConfirmAtr() ==2?true:false
-				);
+		return new StateConfirm(export.getDate(), export.getDailyConfirmAtr() == 2 ? true : false, export.getEmployeeID());
 	}
-	
-	
+
 }

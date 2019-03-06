@@ -85,6 +85,17 @@ public class JpaAgreementTimeOfClassificationRepository extends JpaRepository
 				.setParameter("classificationCode", classificationCode)
 				.getSingle(f -> f.kmkmtAgeementTimeClassPK.basicSettingId);
 	}
+	
+	@Override
+	public List<AgreementTimeOfClassification> find(String companyId, List<String> classificationCode) {
+		String query = "SELECT a FROM KmkmtAgeementTimeClass a WHERE a.kmkmtAgeementTimeClassPK.companyId = :companyId "
+				+ "AND a.kmkmtAgeementTimeClassPK.classificationCode in :classificationCode ";
+		
+		return this.queryProxy().query(query, KmkmtAgeementTimeClass.class)
+				.setParameter("companyId", companyId)
+				.setParameter("classificationCode", classificationCode)
+				.getList(f -> toDomain(f));
+	}
 
 	private KmkmtAgeementTimeClass toEntity(AgreementTimeOfClassification agreementTimeOfClassification) {
 		val entity = new KmkmtAgeementTimeClass();

@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.fixedcheckitem.
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -47,6 +48,9 @@ public class CheckPrincipalUnconfirmDefault implements CheckPrincipalUnconfirmSe
 		return listValueExtractAlarmWR;
 	}
 	
-	
+	public Map<String, List<GeneralDate>> checkPrincipalConfirmed(List<String> employeeID, GeneralDate startDate,
+			GeneralDate endDate){
+		return checkConfirmService.checkConfirm(employeeID, startDate, endDate);
+	}
 
 }
