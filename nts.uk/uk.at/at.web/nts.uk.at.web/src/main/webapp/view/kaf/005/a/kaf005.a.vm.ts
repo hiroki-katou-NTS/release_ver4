@@ -145,9 +145,11 @@ module nts.uk.at.view.kaf005.a.viewmodel {
         //画面モード(表示/編集)
         editable: KnockoutObservable<boolean> = ko.observable(true);
         enableOvertimeInput: KnockoutObservable<boolean> = ko.observable(false);
+        isSpr: boolean = false;
         constructor(transferData :any) {
             let self = this;
             if(transferData != null){
+                self.isSpr = true;
                 self.timeStart1(transferData.startTime);
                 self.timeEnd1(transferData.endTime);
                 self.appDate(transferData.appDate);
@@ -742,6 +744,11 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             var self = this;
             service.createOvertime(overtime).done((data) => {
                 nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
+                    if(self.isSpr){
+                        let cache = JSON.parse(window.sessionStorage.getItem("nts.uk.request.STORAGE_KEY_TRANSFER_DATA"));    
+                        cache.applicationReason = self.multilContent();
+                        window.sessionStorage.setItem("nts.uk.request.STORAGE_KEY_TRANSFER_DATA", JSON.stringify(cache));        
+                    }
                     if(data.autoSendMail){
                         appcommon.CommonProcess.displayMailResult(data);  
                     } else {
