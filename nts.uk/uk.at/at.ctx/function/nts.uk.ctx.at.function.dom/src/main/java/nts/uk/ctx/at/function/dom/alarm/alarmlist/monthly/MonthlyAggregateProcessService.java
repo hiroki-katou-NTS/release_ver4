@@ -304,10 +304,11 @@ public class MonthlyAggregateProcessService {
 									}
 								}
 								//add to list
+								String yearMonth = annualLeaveUsageImport.getYearMonth().year() + "/"+ (annualLeaveUsageImport.getYearMonth().month() < 10?"0"+annualLeaveUsageImport.getYearMonth().month() : annualLeaveUsageImport.getYearMonth().month());
 								ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 										employee.getWorkplaceId(),
 										employee.getId(),
-										annualLeaveUsageImport.getYearMonth().toString(),
+										yearMonth,
 										alarmName,
 										itemName,
 										alarmMessage,	
