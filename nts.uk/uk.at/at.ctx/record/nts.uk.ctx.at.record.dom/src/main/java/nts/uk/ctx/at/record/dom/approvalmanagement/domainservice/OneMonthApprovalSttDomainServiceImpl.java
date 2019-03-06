@@ -6,7 +6,6 @@ package nts.uk.ctx.at.record.dom.approvalmanagement.domainservice;
 import java.util.ArrayList;
 //import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.val;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
@@ -26,6 +26,8 @@ import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeDto;
 import nts.uk.ctx.at.record.dom.adapter.employee.RegularSortingTypeImport;
 import nts.uk.ctx.at.record.dom.adapter.employee.RegulationInfoEmployeeAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employee.SortingConditionOrderImport;
+import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistAdapter;
+import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
@@ -40,7 +42,6 @@ import nts.uk.ctx.at.record.dom.approvalmanagement.dtos.OneMonthApprovalStatusDt
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
-import nts.uk.ctx.at.shared.dom.adapter.employment.ShareEmploymentAdapter;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
@@ -78,11 +79,14 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 	@Inject
 	private SyCompanyRecordAdapter syCompanyRecordAdapter;
 	
-	@Inject
-	private ShareEmploymentAdapter shareEmploymentAdapter;
+//	@Inject
+//	private ShareEmploymentAdapter shareEmploymentAdapter;
 	
 	@Inject
 	private EmployeeAdapter atEmployeeAdapter;
+	
+	@Inject
+	private EmploymentHistAdapter employmentHistAdapter;
 
 	private List<ApprovalEmployeeDto> buildApprovalEmployeeData(List<Identification> listIdentification,List<EmployeeDto> lstEmployee,
 			ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport) {
@@ -235,6 +239,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			} else {
 				List<ApprovalRootSituation> listApp =approvalRootOfEmployeeImport.getApprovalRootSituations();
 				Set<String> listAppId = approvalRootOfEmployeeImport.getApprovalRootSituations().stream().map(c->c.getTargetID()).collect(Collectors.toSet());
+				//対象期間に在職しているかチェックする
 				//社員ID（List）と指定期間から所属会社履歴項目を取得 【Request：No211】
 				List<AffCompanyHistImport> listAffCompanyHistImport  = this.syCompanyRecordAdapter
 				.getAffCompanyHistByEmployee(new ArrayList<>(listAppId), datePeriod);
@@ -300,8 +305,8 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			
 			// アルゴリズム「表示する承認者の集計」を実行する
 			// 対応するImported「（就業）社員」をすべて取得する -requestList31-2
-			Map<String, String> mapEmp = this.shareEmploymentAdapter.findEmpHistoryVer2(companyId, lstEmployees, datePeriod.end())
-					.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getEmploymentCode()));
+//			Map<String, String> mapEmp = this.shareEmploymentAdapter.findEmpHistoryVer2(companyId, lstEmployees, datePeriod.end())
+//					.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getEmploymentCode()));
 			// アルゴリズム「社員をしぼり込む」を実行する
 			// ドメインモデル「雇用に紐づく就業締め」を取得する
 			List<ClosureEmployment> lstClosureEmployment = closureEmploymentRepository
@@ -311,17 +316,33 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			}).collect(Collectors.toList()));
 			
 			// 対応するすべての社員を取得する
-			List<String> listSid = mapEmp.entrySet().stream().filter(x -> lstEmploymentCd.contains(x.getValue()))
-					.map(x -> {
-						return x.getKey();
-					}).collect(Collectors.toList());
+//			List<String> listSid = mapEmp.entrySet().stream().filter(x -> lstEmploymentCd.contains(x.getValue()))
+//					.map(x -> {
+//						return x.getKey();
+//					}).collect(Collectors.toList());
 			
-			// 個人ID（List）からビジネスネームを取得する
+			//対象期間に対象の締めに紐付いた雇用に属しているかチェックする
+			List<EmploymentHistImport> lstEmpHist = employmentHistAdapter.findBySidDatePeriod(lstEmployees, datePeriod)
+					.stream().filter(x -> lstEmploymentCd.contains(x.getEmploymentCode())).collect(Collectors.toList());
+			ApprovalRootOfEmployeeImport approvalRootOfEmployeeImportTemp = new ApprovalRootOfEmployeeImport(approvalRootOfEmployeeImport.getEmployeeStandard(), approvalRootSituations);
+			List<ApprovalRootSituation> approvalRootSituationsTemp = new ArrayList<>();
+			approvalRootOfEmployeeImport.getApprovalRootSituations().stream().forEach(x -> {
+				val lstFilter = lstEmpHist.stream().filter(y -> {
+					return y.getEmployeeId().equals(x.getTargetID())
+							&& x.getAppDate().afterOrEquals(y.getPeriod().start())
+							&& x.getAppDate().beforeOrEquals(y.getPeriod().end());
+				}).collect(Collectors.toList());
+				if(!lstFilter.isEmpty()) {
+					approvalRootSituationsTemp.add(x);
+				}
+			});
+			approvalRootOfEmployeeImportTemp.setApprovalRootSituations(approvalRootSituationsTemp);
+			//  
 			// RequestList228
-			List<EmployeeDto> listEmployeeInfo = atEmployeeAdapter.getByListSID(listSid);
+			List<EmployeeDto> listEmployeeInfo = atEmployeeAdapter.getByListSID(lstEmployees);
 			
 			List<ApprovalEmployeeDto> buildApprovalEmployeeData = buildApprovalEmployeeData(listIdentification,listEmployeeInfo,
-					approvalRootOfEmployeeImport);
+					approvalRootOfEmployeeImportTemp);
 			if (buildApprovalEmployeeData.isEmpty()) {
 				oneMonthApprovalStatusDto.setMessageID("Msg_875");
 				return oneMonthApprovalStatusDto;
