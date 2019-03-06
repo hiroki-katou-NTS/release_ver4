@@ -1,5 +1,5 @@
 module nts.uk.at.view.kaf018.b.viewmodel {
-    import text = nts.uk.resource.getText;
+    import getText = nts.uk.resource.getText;
     import getShared = nts.uk.ui.windows.getShared;
     import formatDate = nts.uk.time.formatDate;
     import info = nts.uk.ui.dialog.info;
@@ -9,7 +9,7 @@ module nts.uk.at.view.kaf018.b.viewmodel {
     import block = nts.uk.ui.block;
 
     export class ScreenModel {
-        tempData: Array<model.ConfirmationStatus> = [];
+        tempData: Array<model.ConfStatusDta> = [];
         enable: KnockoutObservable<boolean> = ko.observable(true);
         listWorkplaceId: KnockoutObservableArray<string> = ko.observableArray([]);
         closureId: number;
@@ -22,17 +22,7 @@ module nts.uk.at.view.kaf018.b.viewmodel {
         listWorkplace: Array<model.WorkplaceInfor>;
         inputContent: any;
         isCheckedAll: KnockoutObservable<boolean> = ko.observable(false);
-        constructor() {
-            var self = this;
-            $("#fixed-table").ntsFixedTable({ width: 1030, height: 163 });
-            self.isCheckedAll.subscribe(function(isCheck){
-                _.each(self.tempData, function(item){
-                    if(item.isEnabled){
-                        item.isChecked(isCheck)
-                    }
-                });
-            });
-        }
+        constructor() { }
 
         startPage(): JQueryPromise<any> {
             var self = this;
@@ -58,9 +48,13 @@ module nts.uk.at.view.kaf018.b.viewmodel {
             };
             service.getAppSttByWorkpace(obj).done(function(data: any) {
                 _.forEach(data, function(item) {
-                    self.tempData.push(new model.ConfirmationStatus(item.workplaceId, item.workplaceName, item.enabled, item.checked, item.numOfApp, item.approvedNumOfCase, item.numOfUnreflected, item.numOfUnapproval, item.numOfDenials));
-
+                    self.tempData.push(new model.ConfStatusDta(item.workplaceId, item.workplaceName,item.enabled, item.checked, 
+                            self.getRecord(item.approvedNumOfCase ? item.approvedNumOfCase : 0),
+                            self.getRecord1(item.numOfApp ? item.numOfApp : 0, item.numOfUnreflected ? item.numOfUnreflected : 0),
+                            self.getRecord(item.numOfUnapproval ? item.numOfUnapproval : 0),
+                            self.getRecord(item.numOfDenials ? item.numOfDenials : 0)));
                 })
+                self.initNtsGrid(self.listHidden());
                 dfd.resolve();
                 block.clear();
             }).fail(function() {
@@ -74,8 +68,8 @@ module nts.uk.at.view.kaf018.b.viewmodel {
             block.invisible();
             let confirmStatus: Array<model.UnApprovalSendMail> = [];
             _.forEach(self.tempData, function(item) {
-                if (item.isChecked()) {
-                    confirmStatus.push(new model.UnApprovalSendMail(item.workplaceId, item.isChecked()));
+                if (item.isChecked) {
+                    confirmStatus.push(new model.UnApprovalSendMail(item.workplaceId, item.isChecked));
                 }
             });
 
@@ -132,12 +126,16 @@ module nts.uk.at.view.kaf018.b.viewmodel {
             };
              nts.uk.request.jump('/view/kaf/018/a/index.xhtml', params);    
         }
-        
-        gotoC(index) {
+
+        gotoC(id) {
             var self = this;
             let listWorkplace = [];
-            _.each(self.tempData, function(item) {
+            let indexs = null;
+            _.each(self.tempData, function(item, index) {
                 listWorkplace.push(new shareModel.ItemModel(item.workplaceId, item.workplaceName));
+                if(item.workplaceId == id){
+                    indexs = index;
+                }
             });
             let params = {
                 closureId: self.closureId,
@@ -146,11 +144,55 @@ module nts.uk.at.view.kaf018.b.viewmodel {
                 startDate: self.startDate,
                 endDate: self.endDate,
                 listWorkplace: listWorkplace,
-                selectedWplIndex: index(),
+                selectedWplIndex: indexs,
                 listEmployeeCode: self.listEmployeeCode,
                 inputContent: self.inputContent
             };
             nts.uk.request.jump('/view/kaf/018/c/index.xhtml', params);
+        }
+        listHidden(): Array<any>{
+            let self = this;
+            let lstHidden = [];
+             _.each(self.tempData, function(item, index) {
+                if(item.isEnabled == false){
+                    lstHidden.push(item.workplaceId);
+                }
+            });
+            return lstHidden;
+        }
+        initNtsGrid(lstHidden: Array<any>) {
+            var self = this;
+            $("#gridB").ntsGrid({
+                width: '750px',
+                height: '174px',
+                dataSource: self.tempData,
+                primaryKey: 'workplaceId',
+                rowVirtualization: true,
+                virtualization: true,
+                hidePrimaryKey: true,
+                virtualizationMode: 'continuous',
+                columns: [
+                    { headerText: getText('KAF018_20'), key: 'workplaceName', dataType: 'string', width: '210px', ntsControl: 'LinkLabel' },
+                    { headerText: getText('KAF018_21'), key: 'numOfUnreflected', dataType: 'string', width: '100px' },
+                    { headerText: getText('KAF018_22'), key: 'numOfUnapproval', dataType: 'string', width: '100px'},
+                    { headerText: getText('KAF018_23'), key: 'approvedNumOfCase', dataType: 'string', width: '100px'},
+                    { headerText: getText('KAF018_24'), key: 'numOfDenials', dataType: 'string', width: '100px'},
+                    { headerText: 'ID', key: 'workplaceId', dataType: 'string', width: '0px', ntsControl: 'Label'},
+                    { headerText: getText('KAF018_25'), key: 'isChecked', dataType: 'boolean', width: '120px', 
+                            showHeaderCheckbox: true, ntsControl: 'Checkbox',  hiddenRows: lstHidden}
+                ],
+                features: [
+                    {
+                        name: 'Selection',
+                        mode: 'row',
+                        multipleSelection: true
+                    }
+                ],
+                ntsControls: [{ name: 'Checkbox', options: { value: 1, text: '' }, optionsValue: 'value', optionsText: 'text', controlType: 'CheckBox' },
+                    { name: 'LinkLabel' ,click: function(rowId){self.gotoC(rowId)}, controlType: 'LinkLabel' }],
+            });
+            $("#gridB").setupSearchScroll("igGrid", true);
+            $("#gridB").focus();
         }
     }
 
@@ -201,46 +243,30 @@ module nts.uk.at.view.kaf018.b.viewmodel {
             }
         }
         
-        export class ConfirmationStatus {
+        export class ConfStatusDta {
             workplaceId: string;
             workplaceName: string;
             isEnabled: boolean;
-
-            isChecked: KnockoutObservable<boolean>;
-            /**
-             * ・申請件数
-             */
-            numOfApp: number;
-            /**
-             * ・承認済件数
-             */
-            approvedNumOfCase: number;
-            /**
-             * ・未反映件数
-             */
-            numOfUnreflected: number;
-            /**
-             * ・未承認件数
-             */
-            numOfUnapproval: number;
-            /**
-             * ・否認件数
-             */
-            numOfDenials: number;
-
-            constructor(workplaceId: string, workplaceName: string, isEnabled: boolean, isChecked: boolean, numOfApp: number,
-                approvedNumOfCase: number, numOfUnreflected: number, numOfUnapproval: number, numOfDenials: number) {
+            isChecked: boolean;
+            /**承認済件数*/
+            approvedNumOfCase: string;
+            /**未反映件数*/
+            numOfUnreflected: string;
+            /**未承認件数*/
+            numOfUnapproval: string;
+            /**否認件数*/
+            numOfDenials: string;
+            constructor(workplaceId: string, workplaceName: string,isEnabled: boolean, isChecked: boolean,
+                approvedNumOfCase: any, numOfUnreflected: any, numOfUnapproval: any, numOfDenials: any) {
                 this.workplaceId = workplaceId;
                 this.workplaceName = workplaceName;
-                this.numOfApp = numOfApp ? numOfApp : 0;
-                this.approvedNumOfCase = approvedNumOfCase ? approvedNumOfCase : 0;
-                this.numOfUnreflected = numOfUnreflected ? numOfUnreflected : 0;
-                this.numOfUnapproval = numOfUnapproval ? numOfUnapproval : 0;
-                this.numOfDenials = numOfDenials ? numOfDenials : 0;
                 this.isEnabled = isEnabled;
-                this.isChecked = ko.observable(isChecked);
+                this.approvedNumOfCase = approvedNumOfCase;
+                this.numOfUnreflected = numOfUnreflected;
+                this.numOfUnapproval = numOfUnapproval;
+                this.numOfDenials = numOfDenials;
+                this.isChecked = isChecked;
             }
         }
-
     }
 }
