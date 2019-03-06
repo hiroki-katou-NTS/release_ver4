@@ -207,7 +207,6 @@ module nts.uk.at.view.kaf018.e.viewmodel {
                     }).fail(function(err) {
                         error({ messageId: err.messageId });
                     }).always(function() {
-                        self.focusE5();
                         block.clear();
                     });
                 })
