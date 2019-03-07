@@ -1,7 +1,9 @@
 package nts.uk.ctx.workflow.dom.resultrecord;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -62,4 +64,9 @@ public class AppRootConfirm {
 	 */
 	private Optional<ClosureDate> closureDate;
 	
+	
+	public static AppRootConfirm dummy(String companyID, String employeeID, GeneralDate date, RecordRootType rootType) {
+		return new AppRootConfirm(UUID.randomUUID().toString(), companyID, employeeID, date, rootType, new ArrayList<>(),
+				Optional.empty(), Optional.empty(), Optional.empty());
+	}
 }

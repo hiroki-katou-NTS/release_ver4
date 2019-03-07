@@ -199,8 +199,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 		// ドメインモデル「就業実績確認状態」を取得する
 		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpDate(companyID, employeeID, date, rootType);
 		if(!opAppRootConfirm.isPresent()){
-			return new AppRootConfirm(UUID.randomUUID().toString(), companyID, employeeID, date, rootType, new ArrayList<>(),
-					Optional.empty(), Optional.empty(), Optional.empty());
+			return AppRootConfirm.dummy(companyID, employeeID, date, rootType);
 		}
 		return opAppRootConfirm.get();
 	}
