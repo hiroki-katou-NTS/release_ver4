@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.application.realitystatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +19,11 @@ import javax.inject.Inject;
 
 import nts.arc.diagnose.stopwatch.concurrent.ConcurrentStopwatches;
 import nts.arc.error.BusinessException;
+import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
+import nts.gul.util.value.MutableValue;
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeRecordAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeRecordImport;
 import nts.uk.ctx.at.record.dom.adapter.request.application.ApprovalStatusRequestAdapter;
@@ -89,6 +92,9 @@ public class RealityStatusService {
 	
 	@Inject
 	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;
+	
+	@Inject
+	private ManagedParallelWithContext parallel;
 
 	/**
 	 * 承認状況職場実績起動
@@ -99,12 +105,13 @@ public class RealityStatusService {
 		ConcurrentStopwatches.clear();
 		
 		String cId = AppContexts.user().companyId();
-		List<StatusWkpActivityOutput> listStatusActivity = new ArrayList<StatusWkpActivityOutput>();
+		List<StatusWkpActivityOutput> listStatusActivity = Collections.synchronizedList(new ArrayList<StatusWkpActivityOutput>());
 		// アルゴリズム「承認状況取得実績使用設定」を実行する
 		UseSetingOutput useSeting = this.getUseSetting(cId);
-		boolean error = false;
+		MutableValue<Boolean> error = new MutableValue<Boolean>(false);
+		
 		// 職場ID(リスト)
-		for (String wkpId : listWorkplaceId) {
+		this.parallel.forEach(listWorkplaceId, wkpId -> {
 			// アルゴリズム「承認状況取得社員」を実行する
 			List<RealityStatusEmployeeImport> listStatusEmp = approvalStatusRequestAdapter
 					.getApprovalStatusEmployee(wkpId, startDate, endDate, listEmpCd);
@@ -114,23 +121,25 @@ public class RealityStatusService {
 				count = this.getApprovalSttConfirmWkpResults(listStatusEmp, wkpId, useSeting, endDate, closureID);
 			}
 			catch(BusinessException ex){
-				error = true;
+				error.set(true);
 			}
+			
 			// 保持内容．未確認データ確認
 			if (isConfirmData) {
 				// 職場本人未確認件数及び職場上司未確認件数、月別未確認件数がすべて「０件」の場合
 				if (count.personUnconfirm == 0 && count.bossUnconfirm == 0 && count.monthUnconfirm == 0) {
-					continue;
+					return;
 				}
 			}
 			
 			listStatusActivity.add(new StatusWkpActivityOutput(wkpId, count.monthConfirm, count.monthUnconfirm,
 					count.personConfirm, count.personUnconfirm, count.bossConfirm, count.bossUnconfirm));
 
-		}
-		return new SttWkpActivityOutputFull(listStatusActivity, error);
+		});
 		
 		ConcurrentStopwatches.printAll();
+		
+		return new SttWkpActivityOutputFull(listStatusActivity, error.get());
 	}
 
 	/**
