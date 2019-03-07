@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
 
+import nts.arc.diagnose.stopwatch.concurrent.ConcurrentStopwatches;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
@@ -73,6 +74,9 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 
 	@Override
 	public List<ApprovalRootStateStatus> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType) {
+		
+		ConcurrentStopwatches.start("AppRootInstanceServiceImpl.getAppRootStatusByEmpsPeriod");
+		
 		// Đối ứng SPR
 		String companyID = "000000000000-0001";
 		String loginCompanyID = AppContexts.user().companyId();
@@ -101,6 +105,9 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 			}
 		}
 		return appRootStatusLst;
+		
+		ConcurrentStopwatches.stop("AppRootInstanceServiceImpl.getAppRootStatusByEmpsPeriod");
+		
 	}
 
 	@Override

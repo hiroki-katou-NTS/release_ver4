@@ -16,6 +16,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
+import nts.arc.diagnose.stopwatch.concurrent.ConcurrentStopwatches;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -94,6 +95,9 @@ public class RealityStatusService {
 	 */
 	public SttWkpActivityOutputFull getStatusWkpActivity(List<String> listWorkplaceId, GeneralDate startDate,
 			GeneralDate endDate, List<String> listEmpCd, boolean isConfirmData, Integer closureID) {
+		
+		ConcurrentStopwatches.clear();
+		
 		String cId = AppContexts.user().companyId();
 		List<StatusWkpActivityOutput> listStatusActivity = new ArrayList<StatusWkpActivityOutput>();
 		// アルゴリズム「承認状況取得実績使用設定」を実行する
@@ -125,6 +129,8 @@ public class RealityStatusService {
 
 		}
 		return new SttWkpActivityOutputFull(listStatusActivity, error);
+		
+		ConcurrentStopwatches.printAll();
 	}
 
 	/**
