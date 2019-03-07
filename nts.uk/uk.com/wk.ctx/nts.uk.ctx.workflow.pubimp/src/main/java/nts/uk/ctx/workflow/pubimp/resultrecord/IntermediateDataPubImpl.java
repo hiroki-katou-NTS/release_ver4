@@ -106,9 +106,9 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	private EmployeeAdapter employeeAdapter;
 
 	@Override
-	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpPeriod(String employeeID, DatePeriod period,
+	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period,
 			Integer rootType) throws BusinessException {
-		List<String> employeeIDLst = Arrays.asList(employeeID);
+		
 		List<AppRootStateStatusSprExport> rslist = new ArrayList<>();
 		try {
 			rslist=	appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class))
