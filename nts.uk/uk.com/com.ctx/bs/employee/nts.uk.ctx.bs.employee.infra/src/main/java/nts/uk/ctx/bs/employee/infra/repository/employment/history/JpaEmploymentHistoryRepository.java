@@ -245,8 +245,8 @@ public class JpaEmploymentHistoryRepository extends JpaRepository implements Emp
 					stmt.setString(1 + i, subList.get(i));
 				}
 
-				stmt.setDate(1 + i, Date.valueOf(datePeriod.start().localDate()));
-				stmt.setDate(2 + i, Date.valueOf(datePeriod.end().localDate()));
+				stmt.setDate(1 + i, Date.valueOf(datePeriod.end().localDate()));
+				stmt.setDate(2 + i, Date.valueOf(datePeriod.start().localDate()));
 				
 				List<BsymtEmploymentHist> ents = new NtsResultSet(stmt.executeQuery()).getList(rec -> {
 					BsymtEmploymentHist ent = new BsymtEmploymentHist();
