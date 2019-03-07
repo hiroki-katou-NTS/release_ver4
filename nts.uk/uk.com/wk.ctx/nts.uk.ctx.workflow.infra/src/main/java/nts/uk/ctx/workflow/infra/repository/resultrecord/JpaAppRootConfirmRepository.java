@@ -358,7 +358,6 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	@SneakyThrows
 	public Optional<AppRootConfirm> findByEmpDate(String companyID, String employeeID, GeneralDate date,
 			RecordRootType rootType) {
-		Connection con = this.getEntityManager().unwrap(Connection.class);
 
 		ConcurrentStopwatches.start("JpaAppRootConfirmRepository.findByEmpDate");
 		
@@ -367,7 +366,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		query = query.replaceAll("rootType", String.valueOf(rootType.value));
 		query = query.replaceAll("employeeID", employeeID);
 		query = query.replaceAll("recordDate", date.toString("yyyy-MM-dd"));
-		try (PreparedStatement pstatement = con.prepareStatement(query)) {
+		try (PreparedStatement pstatement = this.connection().prepareStatement(query)) {
 			ResultSet rs = pstatement.executeQuery();
 			List<AppRootConfirm> listResult = toDomain(createFullJoinAppRootConfirm(rs));
 			if(CollectionUtil.isEmpty(listResult)){
