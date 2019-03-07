@@ -16,6 +16,7 @@ import javax.persistence.Query;
 import com.google.common.base.Strings;
 
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.file.export.FileGeneratorContext;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.assist.dom.category.TimeStore;
 import nts.uk.ctx.sys.assist.dom.categoryfieldmt.HistoryDiviSion;
@@ -26,6 +27,8 @@ import nts.uk.ctx.sys.assist.dom.tablelist.TableListRepository;
 import nts.uk.ctx.sys.assist.infra.entity.tablelist.SspmtTableList;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
+import nts.uk.shr.infra.file.csv.CSVReportGenerator;
+import nts.uk.shr.infra.file.csv.CsvReportWriter;
 
 @Stateless
 public class JpaTableListRepository extends JpaRepository implements TableListRepository {
@@ -41,6 +44,11 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 	
 	@Inject
 	private SaveProtetionRepository saveProtetionRepo;
+	
+	@Inject 
+	private CSVReportGenerator generator;
+	
+	private static final String CSV_EXTENSION = ".csv";
 
 	@Override
 	public void add(TableList domain) {
@@ -82,7 +90,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 	}
 	
 	@Override
-	public List<List<String>> getDataDynamic(TableList tableList, List<String> targetEmployeesSid) {
+	public void getDataDynamic(TableList tableList, List<String> targetEmployeesSid, List<String> headerCsv3, FileGeneratorContext generatorContext ) {
 		StringBuffer query = new StringBuffer("");
 		// All Column
 		List<String> columns = getAllColumnName(tableList.getTableEnglishName());
@@ -341,33 +349,72 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 		if(tableList.getTableEnglishName().equals("BPSMT_PERSON")) {
 			query.toString();
 		}
-		List<Object[]> listTemp = new ArrayList<>();
 		if(!targetEmployeesSid.isEmpty() && query.toString().contains("?listTargetSid")) {
+		
+		if(!targetEmployeesSid.isEmpty()) {
+			
 			List<String> lSid = new ArrayList<>();
-			CollectionUtil.split(targetEmployeesSid, 1000, subIdList -> {
+			CollectionUtil.split(targetEmployeesSid, 100, subIdList -> {
 				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ","\\', '"));
-			});
+			}); 
+			
+			CsvReportWriter csv = generator.generate(generatorContext, AppContexts.user().companyId() + tableList.getCategoryName()
+			+ tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3);
+			
 			for (String sid : lSid) {
+				
+				int offset = 0;
 				Query queryString = getEntityManager().createNativeQuery(querySql.replaceAll("\\?listTargetSid", sid));
 				for (Entry<String, Object> entry : params.entrySet()) {
 					queryString.setParameter(entry.getKey(), entry.getValue());
 				}
-				listTemp.addAll((List<Object[]>) queryString.getResultList());
+				////
+				List<Object[]> listObjs = new ArrayList<>();
+				
+				while ((listObjs = queryString.setFirstResult(offset)
+								              .setMaxResults(10000)
+								              .getResultList()).size() > 0) {
+					this.getEntityManager().clear(); // 一次キャッシュのクリア
+					offset += listObjs.size();
+					listObjs.forEach(objects ->{
+						Map<String, Object> rowCsv = new HashMap<>();
+						int i = 0;
+						for (String columnName : headerCsv3) {
+							rowCsv.put(columnName, objects[i] != null ? String.valueOf(objects[i]) : "");
+							i++;
+						}
+						csv.writeALine(rowCsv);
+					});
+				}
 			}
+			csv.destroy();
 		}else {
 			Query queryString = getEntityManager().createNativeQuery(querySql);
 			for (Entry<String, Object> entry : params.entrySet()) {
 				queryString.setParameter(entry.getKey(), entry.getValue());
 			}
-			listTemp.addAll((List<Object[]>) queryString.getResultList());
-		}
-		return listTemp.stream().map(objects -> {
-			List<String> record = new ArrayList<String>();
-			for (Object field : objects) {
-				record.add(field != null ? String.valueOf(field) : "");
+			
+			List<Object[]> listObj = queryString.getResultList();
+			listObj.forEach(objects ->{
+				Map<String, Object> rowCsv = new HashMap<>();
+				int i = 0;
+				for (String columnName : headerCsv3) {
+					rowCsv.put(columnName, objects[i] != null ? String.valueOf(objects[i]) : "");
+					i++;
+				}
+				//dataSourceCsv.add(rowCsv);
+				
+				/*List<String> record = new ArrayList<String>();
+				for (Object field : objects) {
+					record.add(field != null ? String.valueOf(field) : "");
+				}
+				result.add(record); */
+			});
+			listObj.clear();
 			}
-			return record;
-		}).collect(Collectors.toList());
+
+		}
+
 	}
 
 	@Override

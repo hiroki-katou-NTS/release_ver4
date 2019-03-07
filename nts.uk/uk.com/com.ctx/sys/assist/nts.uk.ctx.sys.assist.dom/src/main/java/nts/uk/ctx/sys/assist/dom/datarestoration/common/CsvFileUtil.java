@@ -1,15 +1,19 @@
 package nts.uk.ctx.sys.assist.dom.datarestoration.common;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
 
@@ -27,7 +31,7 @@ public class CsvFileUtil {
 	static List<List<String>> getAllRecord(InputStream inputStream) {
 		// get csv reader
 		NtsCsvReader csvReader = NtsCsvReader.newReader().withNoHeader().skipEmptyLines(true)
-				.withChartSet(CHARSET).withFormat(CSVFormat.EXCEL.withRecordSeparator(NEW_LINE_CHAR));
+				.withChartSet(Charset.forName("Shift_JIS")).withFormat(CSVFormat.EXCEL.withRecordSeparator(NEW_LINE_CHAR));
 		List<List<String>> result = new ArrayList<>();
 		try {
 			CSVParsedResult csvParsedResult = csvReader.parse(inputStream);
@@ -53,7 +57,7 @@ public class CsvFileUtil {
 	public static List<List<String>> getAllRecord(String fileId, String fileName) {
 		// get csv reader
 		NtsCsvReader csvReader = NtsCsvReader.newReader().withNoHeader().skipEmptyLines(true)
-				.withChartSet(StandardCharsets.UTF_8).withFormat(CSVFormat.EXCEL.withRecordSeparator(NEW_LINE_CHAR));
+				.withChartSet(Charset.forName("Shift_JIS")).withFormat(CSVFormat.EXCEL.withRecordSeparator(NEW_LINE_CHAR));
 		List<List<String>> result = new ArrayList<>();
 		try {
 			InputStream inputStream = createInputStreamFromFile(fileId, fileName);
@@ -71,18 +75,24 @@ public class CsvFileUtil {
 	static List<String> getCsvHeader(String fileName, String fileId) {
 		// get csv reader
 		NtsCsvReader csvReader = NtsCsvReader.newReader().withNoHeader().skipEmptyLines(true)
-				.withChartSet(CHARSET).withFormat(CSVFormat.EXCEL.withRecordSeparator(NEW_LINE_CHAR));
+				.withChartSet(Charset.forName("Shift_JIS"))
+				.withFormat(CSVFormat.EXCEL.withRecordSeparator(NEW_LINE_CHAR));
 		List<String> data = new ArrayList<>();
 		try {
 			InputStream inputStream = createInputStreamFromFile(fileId, fileName);
-			if (!Objects.isNull(inputStream)){
+			if (!Objects.isNull(inputStream)) {
+				
 				CSVParsedResult csvParsedResult = csvReader.parse(inputStream);
-				if(!csvParsedResult.getRecords().isEmpty()){
+
+				int count = 0;
+				if (!csvParsedResult.getRecords().isEmpty()) {
 					NtsCsvRecord header = csvParsedResult.getRecords().get(0);
 					for (int i = 0; i < header.columnLength(); i++) {
 						data.add((String) header.getColumn(i));
 					}
 				}
+				csvParsedResult = null;
+				inputStream.close();
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
