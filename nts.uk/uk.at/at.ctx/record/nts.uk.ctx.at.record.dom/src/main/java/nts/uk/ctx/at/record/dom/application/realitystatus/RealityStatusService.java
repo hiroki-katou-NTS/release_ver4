@@ -235,12 +235,7 @@ public class RealityStatusService {
 			lstParam.add(new EmpPerformMonthParamImport(baseDate.yearMonth(), closureID, closureDate, baseDate, emp));
 		}
 		List<AppRootSttMonthEmpImport> listApproval = new ArrayList<>();
-		try {
-			listApproval = approvalStatusAdapter.getAppRootStatusByEmpsMonth(lstParam);
-		}
-		catch(Exception ex){
-			throw new BusinessException("Msg_1430", "承認者");
-		}
+		listApproval = approvalStatusAdapter.getAppRootStatusByEmpsMonth(lstParam);
 		for (AppRootSttMonthEmpImport appRootStt : listApproval) {
 			result.put(appRootStt.getEmployeeID(), appRootStt);
 		}
