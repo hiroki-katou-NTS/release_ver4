@@ -369,7 +369,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 			String sql = "select * from BSYMT_EMP_DTA_MNG_INFO"
 					+ " where CID = ?"
 					+ " and SID in (" + NtsStatement.In.createParamsString(subList) + ")";
-			try (PreparedStatement stmt = this.connection().prepareStatement("sql")) {
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
 				
 				stmt.setString(1, companyId);
 				for (int i = 0; i < subList.size(); i++) {
