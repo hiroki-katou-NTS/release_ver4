@@ -24,6 +24,7 @@ import nts.uk.ctx.at.record.dom.workrecord.erroralarm.primitivevalue.AttendanceI
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.primitivevalue.CheckedAmountValue;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.primitivevalue.CheckedTimeDuration;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.primitivevalue.CheckedTimesValue;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.primitivevalue.CheckedTimesValueDay;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
 import nts.uk.shr.com.time.TimeWithDayAttr;
@@ -179,8 +180,10 @@ public class CheckResultMulMonCondition implements CheckActualResultMulMonth{
 				atdItemConDomain.setCompareRange(atdItemCon.getCompareOperator(), (V) new CheckedTimeDuration(atdItemCon.getCompareStartValue().intValue()), (V) new CheckedTimeDuration(atdItemCon.getCompareEndValue().intValue()));
 			} else if (atdItemCon.getConditionAtr() == ConditionAtr.TIME_WITH_DAY.value) {
 				atdItemConDomain.setCompareRange(atdItemCon.getCompareOperator(), (V) new TimeWithDayAttr(atdItemCon.getCompareStartValue().intValue()), (V) new TimeWithDayAttr(atdItemCon.getCompareEndValue().intValue()));
-			} else if (atdItemCon.getConditionAtr() == ConditionAtr.TIMES.value || atdItemCon.getConditionAtr() == ConditionAtr.DAYS.value) {
+			} else if (atdItemCon.getConditionAtr() == ConditionAtr.TIMES.value ) {
 				atdItemConDomain.setCompareRange(atdItemCon.getCompareOperator(), (V) new CheckedTimesValue(atdItemCon.getCompareStartValue().intValue()), (V) new CheckedTimesValue(atdItemCon.getCompareEndValue().intValue()));
+			} else if (atdItemCon.getConditionAtr() == ConditionAtr.DAYS.value) {
+				atdItemConDomain.setCompareRange(atdItemCon.getCompareOperator(), (V) new CheckedTimesValueDay(atdItemCon.getCompareStartValue().doubleValue()), (V) new CheckedTimesValueDay(atdItemCon.getCompareEndValue().doubleValue()));
 			}
 		} else {
 			if (atdItemCon.getConditionType() == ConditionType.FIXED_VALUE.value) {
@@ -190,8 +193,10 @@ public class CheckResultMulMonCondition implements CheckActualResultMulMonth{
 					atdItemConDomain.setCompareSingleValue(atdItemCon.getCompareOperator(), atdItemCon.getConditionType(), (V) new CheckedTimeDuration(atdItemCon.getCompareStartValue().intValue()));
 				} else if (atdItemCon.getConditionAtr() == ConditionAtr.TIME_WITH_DAY.value) {
 					atdItemConDomain.setCompareSingleValue(atdItemCon.getCompareOperator(), atdItemCon.getConditionType(), (V) new TimeWithDayAttr(atdItemCon.getCompareStartValue().intValue()));
-				} else if (atdItemCon.getConditionAtr() == ConditionAtr.TIMES.value || atdItemCon.getConditionAtr() == ConditionAtr.DAYS.value) {
+				} else if (atdItemCon.getConditionAtr() == ConditionAtr.TIMES.value ) {
 					atdItemConDomain.setCompareSingleValue(atdItemCon.getCompareOperator(), atdItemCon.getConditionType(), (V) new CheckedTimesValue(atdItemCon.getCompareStartValue().intValue()));
+				} else if ( atdItemCon.getConditionAtr() == ConditionAtr.DAYS.value) {
+					atdItemConDomain.setCompareSingleValue(atdItemCon.getCompareOperator(), atdItemCon.getConditionType(), (V) new CheckedTimesValueDay(atdItemCon.getCompareStartValue().doubleValue()));
 				}
 			} else {
 				atdItemConDomain.setCompareSingleValue(atdItemCon.getCompareOperator(), atdItemCon.getConditionType(), (V) new AttendanceItemId(atdItemCon.getSingleAtdItem()));
