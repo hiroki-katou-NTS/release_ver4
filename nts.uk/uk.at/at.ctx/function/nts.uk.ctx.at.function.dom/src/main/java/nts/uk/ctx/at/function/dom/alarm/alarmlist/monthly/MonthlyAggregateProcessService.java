@@ -160,7 +160,7 @@ public class MonthlyAggregateProcessService {
 			for (FixedExtraMonFunImport fixedExtraMonFunImport : listFixed) {
 				if(fixedExtraMonFunImport.getFixedExtraItemMonNo() == SysFixedMonPerEralEnum.CHECK_DEADLINE_HOLIDAY.value
 						&& fixedExtraMonFunImport.isUseAtr()){
-					Optional<List<ValueExtractAlarm>> valueExtractAlarms = extractErrorAlarmForHoliday(fixedExtraMonFunImport, employee, companyID);
+					Optional<List<ValueExtractAlarm>> valueExtractAlarms = extractErrorAlarmForHoliday(fixedExtraMonFunImport, employee, companyID,lstYearMonth.get(0));
 					if (valueExtractAlarms.isPresent()) {
 						listValueExtractAlarm.addAll(valueExtractAlarms.get());
 					}
@@ -978,7 +978,7 @@ public class MonthlyAggregateProcessService {
 	 * @param companyID
 	 * @return
 	 */
-	private Optional<List<ValueExtractAlarm>> extractErrorAlarmForHoliday(FixedExtraMonFunImport fixedExtraMonFunImport, EmployeeSearchDto employee, String companyID) {
+	private Optional<List<ValueExtractAlarm>> extractErrorAlarmForHoliday(FixedExtraMonFunImport fixedExtraMonFunImport, EmployeeSearchDto employee, String companyID,YearMonth yearMonth) {
 		List<ValueExtractAlarm> listValueExtractAlarm = new ArrayList<>();
 		
 		GeneralDate today = GeneralDate.today();
@@ -1028,7 +1028,7 @@ public class MonthlyAggregateProcessService {
 					ValueExtractAlarm valueExractAlarm = new ValueExtractAlarm();
 					valueExractAlarm.setEmployeeID(employee.getId());
 					valueExractAlarm.setWorkplaceID(Optional.ofNullable(employee.getWorkplaceId()));
-					valueExractAlarm.setAlarmValueDate(GeneralDate.today().toString().substring(0, 7));
+					valueExractAlarm.setAlarmValueDate(yearmonthToString(yearMonth));
 					valueExractAlarm.setClassification(TextResource.localize("KAL010_100"));
 					valueExractAlarm.setAlarmItem(TextResource.localize("KAL010_278"));
 					valueExractAlarm.setAlarmValueMessage(TextResource.localize("KAL010_279",
