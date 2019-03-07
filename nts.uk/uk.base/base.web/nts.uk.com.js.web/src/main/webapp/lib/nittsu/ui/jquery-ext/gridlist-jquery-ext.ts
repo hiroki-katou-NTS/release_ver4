@@ -126,9 +126,9 @@ module nts.uk.ui.jqueryExtentions {
         }
         
         function isCheckedAll($grid: JQuery){
-            if ($grid.igGridSelection('option', 'multipleSelection')) {
+            if ($grid.data("igGrid") && $grid.igGridSelection('option', 'multipleSelection')) {
                 let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                if (chk[0].getAttribute("data-chk") == "on") {
+                if (chk.attr("data-chk") === "on") {
                     return true;
                 }
             }
@@ -198,7 +198,7 @@ module nts.uk.ui.jqueryExtentions {
                 // for performance when select all
                 if (_.isEqual(_.sortBy(_.uniq(selectedId)), _.sortBy(_.uniq(baseID)))) {
                     let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                    if (chk[0].getAttribute("data-chk") == "off") {
+                    if (chk.attr("data-chk") === "off") {
                         chk.click();
                     }
                 } else {
@@ -803,7 +803,7 @@ module nts.uk.ui.jqueryExtentions {
                 
                 if (clickCheckBox) {
                     let chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                    if (chk[0].getAttribute("data-chk") == "off") {
+                    if (chk.attr("data-chk") === "off") {
                         chk.click();
                     }
                 } else {
