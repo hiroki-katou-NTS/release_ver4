@@ -355,6 +355,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	}
 
 	@Override
+	@SneakyThrows
 	public Optional<AppRootConfirm> findByEmpDate(String companyID, String employeeID, GeneralDate date,
 			RecordRootType rootType) {
 		Connection con = this.getEntityManager().unwrap(Connection.class);
@@ -374,9 +375,6 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			} else {
 				return Optional.of(listResult.get(0));
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return Optional.empty();
 		}
 		
 		finally {
