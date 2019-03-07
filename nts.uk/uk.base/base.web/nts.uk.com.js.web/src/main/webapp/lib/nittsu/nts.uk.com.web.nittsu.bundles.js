@@ -30238,9 +30238,9 @@ var nts;
                         });
                     }
                     function isCheckedAll($grid) {
-                        if ($grid.igGridSelection('option', 'multipleSelection')) {
+                        if ($grid.data("igGrid") && $grid.igGridSelection('option', 'multipleSelection')) {
                             var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                            if (chk[0].getAttribute("data-chk") == "on") {
+                            if (chk.attr("data-chk") === "on") {
                                 return true;
                             }
                         }
@@ -30301,7 +30301,7 @@ var nts;
                             // for performance when select all
                             if (_.isEqual(_.sortBy(_.uniq(selectedId)), _.sortBy(_.uniq(baseID)))) {
                                 var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                                if (chk[0].getAttribute("data-chk") == "off") {
+                                if (chk.attr("data-chk") === "off") {
                                     chk.click();
                                 }
                             }
@@ -30835,7 +30835,7 @@ var nts;
                             }
                             if (clickCheckBox) {
                                 var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                                if (chk[0].getAttribute("data-chk") == "off") {
+                                if (chk.attr("data-chk") === "off") {
                                     chk.click();
                                 }
                             }
@@ -36759,7 +36759,7 @@ var nts;
                         var row = null;
                         if ($grid.igGridSelection('option', 'multipleSelection')) {
                             var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                            if (chk[0].getAttribute("data-chk") == "on") {
+                            if (chk.attr("data-chk") === "off") {
                                 return;
                             }
                         }
