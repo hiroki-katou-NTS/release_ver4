@@ -344,10 +344,11 @@ public class MonthlyAggregateProcessService {
 									}
 								}
 								//add to list
+								String yearMonth = dayoffCurrentMonthOfEmployeeImport.getYm().year() + "/"+ (dayoffCurrentMonthOfEmployeeImport.getYm().month() < 10?"0"+dayoffCurrentMonthOfEmployeeImport.getYm().month() : dayoffCurrentMonthOfEmployeeImport.getYm().month());
 								ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 										employee.getWorkplaceId(),
 										employee.getId(),
-										dayoffCurrentMonthOfEmployeeImport.getYm().toString(),
+										yearMonth,
 										alarmName,
 										itemName,
 										alarmMessage,	
@@ -383,10 +384,11 @@ public class MonthlyAggregateProcessService {
 									}
 								}
 								//add to list
+								String yearMonth = statusOfHolidayImported.getYm().year() + "/"+ (statusOfHolidayImported.getYm().month() < 10?"0"+statusOfHolidayImported.getYm().month() : statusOfHolidayImported.getYm().month());
 								ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 										employee.getWorkplaceId(),
 										employee.getId(),
-										statusOfHolidayImported.getYm().toString(),
+										yearMonth,
 										alarmName,
 										itemName,
 										alarmMessage,	
@@ -423,10 +425,11 @@ public class MonthlyAggregateProcessService {
 									}
 								}
 								//add to list
+								String yearMonth = reserveLeaveUsageImport.getYearMonth().year() + "/"+ (reserveLeaveUsageImport.getYearMonth().month() < 10?"0"+reserveLeaveUsageImport.getYearMonth().month() : reserveLeaveUsageImport.getYearMonth().month());
 								ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 										employee.getWorkplaceId(),
 										employee.getId(),
-										reserveLeaveUsageImport.getYearMonth().toString(),
+										yearMonth,
 										alarmName,
 										itemName,
 										alarmMessage,	
@@ -463,10 +466,11 @@ public class MonthlyAggregateProcessService {
 									}
 								}
 								//add to list
+								String yearMonth = specialHolidayImported.getYm().year() + "/"+ (specialHolidayImported.getYm().month() < 10?"0"+specialHolidayImported.getYm().month() : specialHolidayImported.getYm().month());
 								ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 										employee.getWorkplaceId(),
 										employee.getId(),
-										specialHolidayImported.getYm().toString(),
+										yearMonth,
 										alarmName,
 										itemName,
 										alarmMessage,	
