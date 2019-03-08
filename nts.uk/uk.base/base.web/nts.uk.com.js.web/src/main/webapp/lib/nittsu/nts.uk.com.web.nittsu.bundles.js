@@ -31,12 +31,12 @@ var nts;
             function isNumber(value, isDecimalValue, option, message) {
                 if (isDecimalValue) {
                     if (message !== undefined)
-                        message.id = 'MsgB_11';
+                        message.id = 'FND_E_REALNUMBER';
                     return isDecimal(value, option);
                 }
                 else {
                     if (message !== undefined)
-                        message.id = 'MsgB_8';
+                        message.id = 'FND_E_INTEGER';
                     return isInteger(value, option);
                 }
             }
@@ -44,7 +44,7 @@ var nts;
             function isHalfInt(value, message) {
                 var val = parseFloat(value);
                 if (message !== undefined)
-                    message.id = 'MsgB_14';
+                    message.id = 'FND_E_HALFINT';
                 if (val !== NaN && (val * 2) % 1 === 0)
                     return true;
                 return false;
@@ -1097,7 +1097,7 @@ var nts;
             function anyChar(text) {
                 return {
                     probe: true,
-                    messageId: 'MsgB_3'
+                    messageId: 'FND_E_ANY'
                 };
             }
             text_3.anyChar = anyChar;
@@ -1108,7 +1108,7 @@ var nts;
             function allHalfNumeric(text) {
                 return {
                     probe: regexp.allHalfNumeric.test(text),
-                    messageId: 'MsgB_5'
+                    messageId: 'FND_E_NUMERIC'
                 };
             }
             text_3.allHalfNumeric = allHalfNumeric;
@@ -1130,7 +1130,7 @@ var nts;
             function allHalfAlphanumeric(text) {
                 return {
                     probe: regexp.allHalfAlphanumeric.test(text),
-                    messageId: 'MsgB_6'
+                    messageId: 'FND_E_ALPHANUMERIC'
                 };
             }
             text_3.allHalfAlphanumeric = allHalfAlphanumeric;
@@ -1152,7 +1152,7 @@ var nts;
             function allFullKatakana(text) {
                 return {
                     probe: regexp.allFullKatakanaReg.test(text),
-                    messageId: 'MsgB_7'
+                    messageId: 'FND_E_KANA'
                 };
             }
             text_3.allFullKatakana = allFullKatakana;
@@ -1163,7 +1163,7 @@ var nts;
             function allHalf(text) {
                 return {
                     probe: text.length === countHalf(text),
-                    messageId: 'MsgB_4'
+                    messageId: 'FND_E_ANYHALFWIDTH'
                 };
             }
             text_3.allHalf = allHalf;
@@ -1200,7 +1200,7 @@ var nts;
                     probe = true;
                 return {
                     probe: probe,
-                    messageId: 'MsgB_14'
+                    messageId: 'FND_E_HALFINT'
                 };
             }
             text_3.halfInt = halfInt;
@@ -1211,14 +1211,14 @@ var nts;
             function workplaceCode(text) {
                 return {
                     probe: regexp.workplaceCode.test(text),
-                    messageId: 'MsgB_6'
+                    messageId: 'FND_E_ALPHANUMERIC'
                 };
             }
             text_3.workplaceCode = workplaceCode;
             function employeeCode(text) {
                 return {
                     probe: regexp.employeeCode.test(text),
-                    messageId: 'MsgB_6'
+                    messageId: 'FND_E_ALPHANUMERIC'
                 };
             }
             text_3.employeeCode = employeeCode;
@@ -1862,7 +1862,7 @@ var nts;
                     _this.minus = minus;
                     _this.hours = hours;
                     _this.minutes = minutes;
-                    _this.msg = msg || "MsgB_15";
+                    _this.msg = msg || "FND_E_TIME";
                     return _this;
                 }
                 ResultParseTime.succeeded = function (minus, hours, minutes) {
@@ -2059,7 +2059,7 @@ var nts;
                     var _this = _super.call(this, success) || this;
                     _this.hour = hour;
                     _this.minute = minute;
-                    _this.msg = msg || nts.uk.resource.getMessage("MsgB_18");
+                    _this.msg = msg || nts.uk.resource.getMessage("FND_E_DATE_YMD");
                     return _this;
                 }
                 ResultParseTimeOfTheDay.succeeded = function (hour, minute) {
@@ -2095,16 +2095,16 @@ var nts;
                 var checkNum = timeOfDay.replace(/[0-9]/g, "");
                 var stringLength = timeOfDay.length;
                 if (checkNum.length > 0)
-                    return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("MsgB_18"));
+                    return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("FND_E_DATE_YMD"));
                 if (stringLength < 3 || stringLength > 4)
-                    return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("MsgB_18"));
+                    return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("FND_E_DATE_YMD"));
                 var hour = parseInt(timeOfDay.substring(0, stringLength - 2));
                 var minute = parseInt(timeOfDay.substring(stringLength - 2));
                 //console.log(checkNum.substring(0,stringLength-2));
                 if (hour < 0 || hour > 23)
-                    return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("MsgB_18"));
+                    return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("FND_E_DATE_YMD"));
                 if (minute < 0 || minute > 59)
-                    return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("MsgB_18"));
+                    return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("FND_E_DATE_YMD"));
                 return ResultParseTimeOfTheDay.succeeded(hour, minute);
             }
             time_1.parseTimeOfTheDay = parseTimeOfTheDay;
@@ -2115,7 +2115,7 @@ var nts;
                     _this.year = year;
                     _this.month = month;
                     _this.date = date;
-                    _this.msg = msg || nts.uk.resource.getMessage("MsgB_18");
+                    _this.msg = msg || nts.uk.resource.getMessage("FND_E_DATE_YMD");
                     return _this;
                 }
                 ResultParseYearMonthDate.succeeded = function (year, month, date) {
@@ -2278,13 +2278,13 @@ var nts;
                     var isHasMonth = (nts.uk.util.isNullOrEmpty(outputFormat) ? false : outputFormat.indexOf("M") >= 0) || parsedFormat.indexOf("M") >= 0;
                     var isHasDay = (nts.uk.util.isNullOrEmpty(outputFormat) ? false : outputFormat.indexOf("D") >= 0) || parsedFormat.indexOf("D") >= 0;
                     if (isHasDay && isHasMonth && isHasYear) {
-                        result.failedWithMessegeId("MsgB_18", [result.systemMin().format("YYYY/MM/DD"), result.systemMax().format("YYYY/MM/DD")]);
+                        result.failedWithMessegeId("FND_E_DATE_YMD", [result.systemMin().format("YYYY/MM/DD"), result.systemMax().format("YYYY/MM/DD")]);
                     }
                     else if (isHasMonth && isHasYear) {
-                        result.failedWithMessegeId("MsgB_19", [result.systemMin().format("YYYY/MM"), result.systemMax().format("YYYY/MM")]);
+                        result.failedWithMessegeId("FND_E_DATE_YM", [result.systemMin().format("YYYY/MM"), result.systemMax().format("YYYY/MM")]);
                     }
                     else {
-                        result.failedWithMessegeId("MsgB_20", [result.systemMin().format("YYYY"), result.systemMax().format("YYYY")]);
+                        result.failedWithMessegeId("FND_E_DATE_Y", [result.systemMin().format("YYYY"), result.systemMax().format("YYYY")]);
                     }
                 }
                 return result;
@@ -2681,7 +2681,7 @@ var nts;
                             _this.minus = minus;
                             _this.hours = hours;
                             _this.minutes = minutes;
-                            _this.msg = msg || "MsgB_15";
+                            _this.msg = msg || "FND_E_TIME";
                             return _this;
                         }
                         ResultParseMiuntesBasedDuration.prototype.format = function () {
@@ -3104,7 +3104,7 @@ var nts;
                             _this.hours = hours;
                             _this.minutes = minutes;
                             _this.seconds = seconds;
-                            _this.msg = msg || "MsgB_15";
+                            _this.msg = msg || "FND_E_TIME";
                             return _this;
                         }
                         ResultParseSecondsBasedDuration.prototype.format = function () {
@@ -4588,7 +4588,7 @@ var nts;
                         // Check Required
                         if (util.isNullOrEmpty(inputText)) {
                             if (this.required !== undefined && this.required !== false) {
-                                result.fail(nts.uk.resource.getMessage('MsgB_1', [this.name]), 'MsgB_1');
+                                result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [this.name]), 'FND_E_REQ_INPUT');
                                 return result;
                             }
                             result.success(inputText);
@@ -4660,7 +4660,7 @@ var nts;
                         // Check Required
                         if (util.isNullOrEmpty(inputText)) {
                             if (this.required !== undefined && this.required !== false) {
-                                result.fail(nts.uk.resource.getMessage('MsgB_1', [this.name]), 'MsgB_1');
+                                result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [this.name]), 'FND_E_REQ_INPUT');
                                 return result;
                             }
                             result.success(inputText);
@@ -4701,7 +4701,7 @@ var nts;
                         // Check Required
                         if (util.isNullOrEmpty(inputText)) {
                             if (this.required !== undefined && this.required !== false) {
-                                result.fail(nts.uk.resource.getMessage('MsgB_1', [this.name]), 'MsgB_1');
+                                result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [this.name]), 'FND_E_REQ_INPUT');
                                 return result;
                             }
                             result.success(inputText);
@@ -4744,7 +4744,7 @@ var nts;
                         // Check Required
                         if (util.isNullOrEmpty(inputText)) {
                             if (this.required !== undefined && this.required !== false) {
-                                result.fail(nts.uk.resource.getMessage('MsgB_1', [this.name]), 'MsgB_1');
+                                result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [this.name]), 'FND_E_REQ_INPUT');
                                 return result;
                             }
                             result.success(inputText);
@@ -4788,7 +4788,7 @@ var nts;
                         var result = new ValidationResult();
                         if (util.isNullOrEmpty(inputText)) {
                             if (self.options.required) {
-                                result.fail(nts.uk.resource.getMessage('MsgB_1', [this.name]), 'MsgB_1');
+                                result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [this.name]), 'FND_E_REQ_INPUT');
                                 return result;
                             }
                             result.success(inputText);
@@ -4823,7 +4823,7 @@ var nts;
                         // Check Required
                         if (util.isNullOrEmpty(inputText)) {
                             if (this.required !== undefined && this.required !== false) {
-                                result.fail(nts.uk.resource.getMessage('MsgB_1', [this.name]), 'MsgB_1');
+                                result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [this.name]), 'FND_E_REQ_INPUT');
                                 return result;
                             }
                             result.success(inputText);
@@ -4886,7 +4886,7 @@ var nts;
                         if (this.option !== undefined) {
                             if (nts.uk.util.isNullOrUndefined(inputText) || inputText.trim().length <= 0) {
                                 if ((this.option['required'] === true || this.constraint["required"] === true) && nts.uk.util.isNullOrEmpty(this.option['defaultValue'])) {
-                                    result.fail(nts.uk.resource.getMessage('MsgB_1', [this.name]), 'MsgB_1');
+                                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [this.name]), 'FND_E_REQ_INPUT');
                                     return result;
                                 }
                                 else {
@@ -4976,7 +4976,7 @@ var nts;
                         }
                         else if (util.isNullOrEmpty(inputText)) {
                             if (this.required === true) {
-                                result.fail(nts.uk.resource.getMessage('MsgB_1', [this.name]), 'MsgB_1');
+                                result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [this.name]), 'FND_E_REQ_INPUT');
                                 return result;
                             }
                             else {
@@ -4990,7 +4990,7 @@ var nts;
                         var maxStr, minStr, max, min;
                         // Time duration
                         if (this.mode === "time") {
-                            var timeParse, isSecondBase = this.outputFormat.indexOf("s") >= 0, mesId = isSecondBase ? "MsgB_17" : "MsgB_15";
+                            var timeParse, isSecondBase = this.outputFormat.indexOf("s") >= 0, mesId = isSecondBase ? "FND_E_CLOCK_SECOND" : "FND_E_TIME";
                             if (isSecondBase) {
                                 timeParse = uk.time.secondsBased.duration.parseString(inputText);
                             }
@@ -5072,7 +5072,7 @@ var nts;
                                 maxStr = this.constraint.max;
                                 var maxMoment = moment.duration(maxStr);
                                 if (parseResult.success && (maxMoment.hours() * 60 + maxMoment.minutes()) < inputMoment) {
-                                    result.fail(nts.uk.resource.getMessage("MsgB_16", [this.name, minStr, maxStr]), "MsgB_16");
+                                    result.fail(nts.uk.resource.getMessage("FND_E_CLOCK", [this.name, minStr, maxStr]), "FND_E_CLOCK");
                                     return result;
                                 }
                             }
@@ -5080,12 +5080,12 @@ var nts;
                                 minStr = this.constraint.min;
                                 var minMoment = moment.duration(minStr);
                                 if (parseResult.success && (minMoment.hours() * 60 + minMoment.minutes()) > inputMoment) {
-                                    result.fail(nts.uk.resource.getMessage("MsgB_16", [this.name, minStr, maxStr]), "MsgB_16");
+                                    result.fail(nts.uk.resource.getMessage("FND_E_CLOCK", [this.name, minStr, maxStr]), "FND_E_CLOCK");
                                     return result;
                                 }
                             }
                             if (!result.isValid && this.constraint.valueType === "Clock") {
-                                result.fail(nts.uk.resource.getMessage("MsgB_16", [this.name, minStr, maxStr]), "MsgB_16");
+                                result.fail(nts.uk.resource.getMessage("FND_E_CLOCK", [this.name, minStr, maxStr]), "FND_E_CLOCK");
                             }
                         }
                         return result;
@@ -5107,7 +5107,7 @@ var nts;
                         // Check required
                         if (util.isNullOrEmpty(inputText)) {
                             if (this.required === true) {
-                                result.fail(nts.uk.resource.getMessage('MsgB_1', [this.name]), 'MsgB_1');
+                                result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [this.name]), 'FND_E_REQ_INPUT');
                                 return result;
                             }
                             else {
@@ -5133,7 +5133,7 @@ var nts;
                         var parsed = uk.time.minutesBased.clock.dayattr.parseString(inputText);
                         if (!parsed.success || parsed.asMinutes !== Math.round(parsed.asMinutes)
                             || parsed.asMinutes < minValue || parsed.asMinutes > maxValue) {
-                            result.fail(nts.uk.resource.getMessage("MsgB_16", [this.name, minValue.fullText, maxValue.fullText]), "MsgB_16");
+                            result.fail(nts.uk.resource.getMessage("FND_E_CLOCK", [this.name, minValue.fullText, maxValue.fullText]), "FND_E_CLOCK");
                         }
                         else {
                             result.success(parsed.asMinutes);
@@ -15623,9 +15623,9 @@ var nts;
                                 if ((ui ? data[CHANGED] : true) && data[ENABLE] && data[REQUIRED] && (_.isEmpty(String(value).trim()) || _.isNil(value))) {
                                     $element
                                         .addClass('error')
-                                        .ntsError("set", uk.resource.getMessage("MsgB_2", [data[NAME]]), "MsgB_2");
+                                        .ntsError("set", uk.resource.getMessage("FND_E_REQ_SELECT", [data[NAME]]), "FND_E_REQ_SELECT");
                                     if (accessor.value.addError) {
-                                        accessor.value.addError("MsgB_2", { MsgId: "MsgB_2" });
+                                        accessor.value.addError("FND_E_REQ_SELECT", { MsgId: "FND_E_REQ_SELECT" });
                                     }
                                 }
                                 else {
@@ -15633,7 +15633,7 @@ var nts;
                                         .removeClass('error')
                                         .ntsError("clear");
                                     if (accessor.value.removeError) {
-                                        accessor.value.removeError("MsgB_2");
+                                        accessor.value.removeError("FND_E_REQ_SELECT");
                                     }
                                 }
                             })
@@ -16198,13 +16198,13 @@ var nts;
                                 var isHasYear = (nts.uk.util.isNullOrEmpty(otFormat) ? false : otFormat.indexOf("Y") >= 0) || otFormat.indexOf("Y") >= 0;
                                 var isHasMonth = (nts.uk.util.isNullOrEmpty(otFormat) ? false : otFormat.indexOf("M") >= 0) || otFormat.indexOf("M") >= 0;
                                 var isHasDay = (nts.uk.util.isNullOrEmpty(otFormat) ? false : otFormat.indexOf("D") >= 0) || otFormat.indexOf("D") >= 0;
-                                var mesId = "MsgB_20";
+                                var mesId = "FND_E_DATE_Y";
                                 var fm = "YYYY";
                                 if (isHasDay && isHasMonth && isHasYear) {
-                                    mesId = "MsgB_18", fm = "YYYY/MM/DD";
+                                    mesId = "FND_E_DATE_YMD", fm = "YYYY/MM/DD";
                                 }
                                 else if (isHasMonth && isHasYear) {
-                                    mesId = "MsgB_19", fm = "YYYY/MM";
+                                    mesId = "FND_E_DATE_YM", fm = "YYYY/MM";
                                 }
                                 $input.ntsError('set', { messageId: mesId, messageParams: [name, minDate.format(fm), maxDate.format(fm)] }, mesId, false);
                                 if (hasDayofWeek) {
@@ -18967,7 +18967,7 @@ var nts;
                                 if (ko.toJS(data.required) && _.isEmpty(ko.toJS(data.value)) && $container.data("enable")) {
                                     $element
                                         .addClass('error')
-                                        .ntsError("set", nts.uk.resource.getMessage("MsgB_2", [ko.toJS(data.name)]), "MsgB_2");
+                                        .ntsError("set", nts.uk.resource.getMessage("FND_E_REQ_SELECT", [ko.toJS(data.name)]), "FND_E_REQ_SELECT");
                                 }
                                 else {
                                     $element.removeClass('error')
@@ -19597,7 +19597,7 @@ var nts;
                                 if (_.isEmpty(result.options)) {
                                     var mes = '';
                                     if (searchMode === "highlight") {
-                                        mes = nts.uk.resource.getMessage("MsgB_25");
+                                        mes = nts.uk.resource.getMessage("FND_E_SEARCH_NOHIT");
                                     }
                                     else {
                                         mes = nts.uk.ui.toBeResource.targetNotFound;
@@ -19653,7 +19653,7 @@ var nts;
                         var nextSearch = function () {
                             var searchKey = $input.val();
                             if (_.isEmpty(searchKey)) {
-                                nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_24")).then(function () {
+                                nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOWORD")).then(function () {
                                     $input.focus();
                                     //                        $input.select();
                                 });
@@ -20265,7 +20265,7 @@ var nts;
                         var searchContents = this.$searchBox.val();
                         var orders = new Array();
                         if (nts.uk.util.isNullOrEmpty(searchContents)) {
-                            nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_24"));
+                            nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOWORD"));
                             return null;
                         }
                         var searchCriterion = this.searchCriterion;
@@ -20352,7 +20352,7 @@ var nts;
                     GridSwapPart.prototype.highlightSearch = function () {
                         var value = this.$searchBox.val();
                         if (nts.uk.util.isNullOrEmpty(value)) {
-                            nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_24"));
+                            nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOWORD"));
                             return;
                         }
                         var source = this.dataSource.slice();
@@ -20374,7 +20374,7 @@ var nts;
                             }) !== undefined;
                         });
                         if (searchedValues === undefined) {
-                            nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_25"));
+                            nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOHIT"));
                             return;
                         }
                         this.$listControl.ntsGridList('setSelected', searchedValues !== undefined ? [searchedValues[this.primaryKey]] : []);
@@ -20736,7 +20736,7 @@ var nts;
                         var defVal = new nts.uk.util.value.DefaultValue().onReset(container, data.value);
                         container.bind("validate", function () {
                             if (container.ctState("required", "get") && !container.ctState("selected", "get")) {
-                                container.ntsError("set", uk.resource.getMessage("MsgB_2", [container.ctState("name", "get")]), "MsgB_2");
+                                container.ntsError("set", uk.resource.getMessage("FND_E_REQ_SELECT", [container.ctState("name", "get")]), "FND_E_REQ_SELECT");
                             }
                             else {
                                 container.ntsError("clear");
@@ -28065,7 +28065,7 @@ var nts;
                             var result = new ui.validation.ValidationResult();
                             if ((uk.util.isNullOrUndefined(text) || text.length === 0)) {
                                 if (self.options && self.options.required) {
-                                    result.fail(nts.uk.resource.getMessage('MsgB_1', [self.name]), 'MsgB_1');
+                                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [self.name]), 'FND_E_REQ_INPUT');
                                     return result;
                                 }
                                 if (!self.options || (self.options && !self.options.required)) {
@@ -28137,7 +28137,7 @@ var nts;
                             var result = new ui.validation.ValidationResult();
                             if (uk.util.isNullOrEmpty(inputText)) {
                                 if (this.required) {
-                                    result.fail(nts.uk.resource.getMessage('MsgB_1', [this.name]), 'MsgB_1');
+                                    result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [this.name]), 'FND_E_REQ_INPUT');
                                 }
                                 else
                                     result.success("");
@@ -28163,7 +28163,7 @@ var nts;
                             var parsed = uk.time.minutesBased.duration.parseString(inputText);
                             if (!parsed.success || (parsedValue = parsed.toValue()) !== Math.round(parsedValue)
                                 || parsedValue < minValue || parsedValue > maxValue) {
-                                result.fail(nts.uk.resource.getMessage("MsgB_16", [self.name, minParsed.format(), maxParsed.format()]), "MsgB_16");
+                                result.fail(nts.uk.resource.getMessage("FND_E_CLOCK", [self.name, minParsed.format(), maxParsed.format()]), "FND_E_CLOCK");
                             }
                             else {
                                 result.success(parsedValue);
@@ -33613,12 +33613,12 @@ var nts;
                             TextEditor.prototype.validate = function (controlDef, value) {
                                 var constraint = controlDef.constraint;
                                 if (constraint.required && (_.isEmpty(value) || _.isNull(value)))
-                                    return validation.Result.invalid("MsgB_1");
+                                    return validation.Result.invalid("FND_E_REQ_INPUT");
                                 switch (constraint.valueType) {
                                     case "Integer":
                                         var valid = uk.ntsNumber.isNumber(value, false);
                                         if (!valid)
-                                            return validation.Result.invalid("MsgB_8");
+                                            return validation.Result.invalid("FND_E_INTEGER");
                                         var formatted = value;
                                         if (constraint.format === "Number_Separated") {
                                             formatted = uk.ntsNumber.formatNumber(value, { formatId: constraint.format });
@@ -33630,7 +33630,7 @@ var nts;
                                         if (uk.ntsNumber.isHalfInt(value)) {
                                             return validation.Result.OK(value);
                                         }
-                                        return validation.Result.invalid("MsgB_14");
+                                        return validation.Result.invalid("FND_E_HALFINT");
                                     case "String":
                                         return validation.Result.OK(value);
                                 }
@@ -34616,7 +34616,7 @@ var nts;
                                 var result = new ui.validation.ValidationResult();
                                 if ((uk.util.isNullOrUndefined(text) || text.length === 0)) {
                                     if (self.options && self.options.required) {
-                                        result.fail(nts.uk.resource.getMessage('MsgB_1', [self.name]), 'MsgB_1');
+                                        result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [self.name]), 'FND_E_REQ_INPUT');
                                         return result;
                                     }
                                     if (!self.options || (self.options && !self.options.required)) {
@@ -36918,7 +36918,7 @@ var nts;
                                 if (nts.uk.util.isNullOrEmpty(result.options)) {
                                     var mes = '';
                                     if (searchMode === "highlight") {
-                                        mes = nts.uk.resource.getMessage("MsgB_25");
+                                        mes = nts.uk.resource.getMessage("FND_E_SEARCH_NOHIT");
                                     }
                                     else {
                                         mes = nts.uk.ui.toBeResource.targetNotFound;
@@ -36973,7 +36973,7 @@ var nts;
                         var nextSearch = function () {
                             var searchKey = $input.val();
                             if (nts.uk.util.isNullOrEmpty(searchKey)) {
-                                nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_24")).then(function () {
+                                nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOWORD")).then(function () {
                                     $input.focus();
                                     //                        $input.select();
                                 });
@@ -38080,7 +38080,7 @@ var nts;
                                 }
                                 else if (nts.uk.util.isNullOrUndefined(color)) {
                                     if (required === true) {
-                                        $picker.ntsError('set', nts.uk.resource.getMessage('MsgB_1', [dataName]), 'MsgB_1');
+                                        $picker.ntsError('set', nts.uk.resource.getMessage('FND_E_REQ_INPUT', [dataName]), 'FND_E_REQ_INPUT');
                                     }
                                     else {
                                         data.value(null);
@@ -38094,7 +38094,7 @@ var nts;
                             $p.ntsError('clear');
                             var value = $p.spectrum("get");
                             if (nts.uk.util.isNullOrUndefined(value)) {
-                                $p.ntsError('set', nts.uk.resource.getMessage('MsgB_1', [dataName]), 'MsgB_1');
+                                $p.ntsError('set', nts.uk.resource.getMessage('FND_E_REQ_INPUT', [dataName]), 'FND_E_REQ_INPUT');
                             }
                         };
                         $container.keydown(function (evt, ui) {
@@ -38360,12 +38360,12 @@ var nts;
                         var startDate = moment(oldValue.startDate, self.dateFormat);
                         var endDate = moment(oldValue.endDate, self.dateFormat);
                         if (endDate.isBefore(startDate)) {
-                            self.$ntsDateRange.ntsError('set', self.getMessage("MsgB_21", [self.rangeName]), "MsgB_21");
+                            self.$ntsDateRange.ntsError('set', self.getMessage("FND_E_SPAN_REVERSED", [self.rangeName]), "FND_E_SPAN_REVERSED");
                         }
                         else if (self.dateFormat === "YYYY/MM/DD" && self.maxRange === "oneMonth") {
                             var maxDate = startDate.add(31, "days");
                             if (endDate.isSameOrAfter(maxDate)) {
-                                self.$ntsDateRange.ntsError('set', self.getMessage("MsgB_22", [self.rangeName]), "MsgB_22");
+                                self.$ntsDateRange.ntsError('set', self.getMessage("FND_E_SPAN_OVER_MONTH", [self.rangeName]), "FND_E_SPAN_OVER_MONTH");
                             }
                         }
                         else if (self.maxRange === "oneYear") {
@@ -38392,7 +38392,7 @@ var nts;
                                 maxDate = maxDate.add(1, 'year');
                             }
                             if (endDate.isAfter(maxDate)) {
-                                self.$ntsDateRange.ntsError('set', self.getMessage("MsgB_23", [self.rangeName]), "MsgB_23");
+                                self.$ntsDateRange.ntsError('set', self.getMessage("FND_E_SPAN_OVER_YEAR", [self.rangeName]), "FND_E_SPAN_OVER_YEAR");
                             }
                         }
                     };
@@ -38662,7 +38662,7 @@ var nts;
                         }
                         if (mEnd.isBefore(mStart)) {
                             self.$root.find(".datetimepairrange-container")
-                                .ntsError('set', nts.uk.resource.getMessage('MsgB_21', [self.name]), 'MsgB_21', false);
+                                .ntsError('set', nts.uk.resource.getMessage('FND_E_SPAN_REVERSED', [self.name]), 'FND_E_SPAN_REVERSED', false);
                             return false;
                         }
                         if (self.maxRange > 0) {
@@ -38870,7 +38870,7 @@ var nts;
                         $container.bind("validate", function () {
                             if ($container.data(REQUIRED) && uk.util.isNullOrEmpty(ko.unwrap(data.filename))) {
                                 var controlName = $container.data(CONTROL_NAME);
-                                $container.ntsError("set", uk.resource.getMessage("MsgB_2", [controlName]), "MsgB_2");
+                                $container.ntsError("set", uk.resource.getMessage("FND_E_REQ_SELECT", [controlName]), "FND_E_REQ_SELECT");
                             }
                             else {
                                 $container.ntsError("clear");
@@ -39798,13 +39798,13 @@ var nts;
                                 return;
                             var required = $container.data("required");
                             if (required && (monthValueAccessor.value() === 0 || _.isNil(monthValueAccessor.value()))) {
-                                $monthPicker.addClass("error").ntsError("set", uk.resource.getMessage("MsgB_2", [dataName + "の月"]), "MsgB_2");
+                                $monthPicker.addClass("error").ntsError("set", uk.resource.getMessage("FND_E_REQ_SELECT", [dataName + "の月"]), "FND_E_REQ_SELECT");
                             }
                             else {
                                 $monthPicker.removeClass("error").ntsError("clear");
                             }
                             if (required && (dayValueAccessor.value() === 0 || _.isNil(dayValueAccessor.value()))) {
-                                $dayPicker.addClass("error").ntsError("set", uk.resource.getMessage("MsgB_2", [dataName + "の日"]), "MsgB_2");
+                                $dayPicker.addClass("error").ntsError("set", uk.resource.getMessage("FND_E_REQ_SELECT", [dataName + "の日"]), "FND_E_REQ_SELECT");
                             }
                             else {
                                 $dayPicker.removeClass("error").ntsError("clear");
