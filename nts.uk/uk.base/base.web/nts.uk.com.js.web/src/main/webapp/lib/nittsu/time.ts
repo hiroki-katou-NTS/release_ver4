@@ -244,7 +244,7 @@ module nts.uk.time {
             this.minus = minus;
             this.hours = hours;
             this.minutes = minutes;
-            this.msg = msg || "MsgB_15";
+            this.msg = msg || "FND_E_TIME";
         }
 
         static succeeded(minus, hours, minutes) {
@@ -453,7 +453,7 @@ module nts.uk.time {
             super(success);
             this.hour = hour;
             this.minute = minute;
-            this.msg = msg || nts.uk.resource.getMessage("MsgB_18");
+            this.msg = msg || nts.uk.resource.getMessage("FND_E_DATE_YMD");
         }
         static succeeded(hour, minute) {
             return new ResultParseTimeOfTheDay(true, "", hour, minute);
@@ -486,13 +486,13 @@ module nts.uk.time {
         timeOfDay = timeOfDay.replace(":", "");
         var checkNum = timeOfDay.replace(/[0-9]/g, "");
         var stringLength = timeOfDay.length;
-        if (checkNum.length > 0) return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("MsgB_18"));
-        if (stringLength < 3 || stringLength > 4) return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("MsgB_18"));
+        if (checkNum.length > 0) return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("FND_E_DATE_YMD"));
+        if (stringLength < 3 || stringLength > 4) return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("FND_E_DATE_YMD"));
         var hour = parseInt(timeOfDay.substring(0, stringLength - 2));
         var minute = parseInt(timeOfDay.substring(stringLength - 2));
         //console.log(checkNum.substring(0,stringLength-2));
-        if (hour < 0 || hour > 23) return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("MsgB_18"));
-        if (minute < 0 || minute > 59) return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("MsgB_18"));
+        if (hour < 0 || hour > 23) return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("FND_E_DATE_YMD"));
+        if (minute < 0 || minute > 59) return ResultParseTimeOfTheDay.failed(nts.uk.resource.getMessage("FND_E_DATE_YMD"));
         return ResultParseTimeOfTheDay.succeeded(hour, minute);
     }
 
@@ -506,7 +506,7 @@ module nts.uk.time {
             this.year = year;
             this.month = month;
             this.date = date;
-            this.msg = msg || nts.uk.resource.getMessage("MsgB_18");
+            this.msg = msg || nts.uk.resource.getMessage("FND_E_DATE_YMD");
         }
 
         static succeeded(year, month, date) {
@@ -676,11 +676,11 @@ module nts.uk.time {
             let isHasMonth = (nts.uk.util.isNullOrEmpty(outputFormat) ? false : outputFormat.indexOf("M") >= 0) || parsedFormat.indexOf("M") >= 0;
             let isHasDay = (nts.uk.util.isNullOrEmpty(outputFormat) ? false : outputFormat.indexOf("D") >= 0) || parsedFormat.indexOf("D") >= 0;
             if (isHasDay && isHasMonth && isHasYear) {
-                result.failedWithMessegeId("MsgB_18", [result.systemMin().format("YYYY/MM/DD"), result.systemMax().format("YYYY/MM/DD")]);
+                result.failedWithMessegeId("FND_E_DATE_YMD", [result.systemMin().format("YYYY/MM/DD"), result.systemMax().format("YYYY/MM/DD")]);
             } else if (isHasMonth && isHasYear) {
-                result.failedWithMessegeId("MsgB_19", [result.systemMin().format("YYYY/MM"), result.systemMax().format("YYYY/MM")]);
+                result.failedWithMessegeId("FND_E_DATE_YM", [result.systemMin().format("YYYY/MM"), result.systemMax().format("YYYY/MM")]);
             } else {
-                result.failedWithMessegeId("MsgB_20", [result.systemMin().format("YYYY"), result.systemMax().format("YYYY")]);
+                result.failedWithMessegeId("FND_E_DATE_Y", [result.systemMin().format("YYYY"), result.systemMax().format("YYYY")]);
             }
         }
         return result;

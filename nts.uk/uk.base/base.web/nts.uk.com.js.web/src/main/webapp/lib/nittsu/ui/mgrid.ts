@@ -6016,7 +6016,7 @@ module nts.uk.ui.mgrid {
                 let result = new ui.validation.ValidationResult();
                 if ((util.isNullOrUndefined(text) || text.length === 0)) {
                     if (self.options && self.options.required) {
-                        result.fail(nts.uk.resource.getMessage('MsgB_1', [ self.name ]), 'MsgB_1');
+                        result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ self.name ]), 'FND_E_REQ_INPUT');
                         return result;
                     }
                     if (!self.options || (self.options && !self.options.required)) {
@@ -6093,7 +6093,7 @@ module nts.uk.ui.mgrid {
                 
                 if (util.isNullOrEmpty(inputText)) {
                     if (this.required) {
-                        result.fail(nts.uk.resource.getMessage('MsgB_1', [ this.name ]), 'MsgB_1');
+                        result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ this.name ]), 'FND_E_REQ_INPUT');
                     } else result.success("");
                     return result;
                 }
@@ -6116,7 +6116,7 @@ module nts.uk.ui.mgrid {
                 let parsed = time.minutesBased.duration.parseString(inputText);
                 if (!parsed.success || (parsedValue = parsed.toValue()) !== Math.round(parsedValue) 
                     || parsedValue < minValue || parsedValue > maxValue) {
-                    result.fail(nts.uk.resource.getMessage("MsgB_16", [ self.name, minParsed.format(), maxParsed.format() ]), "MsgB_16");
+                    result.fail(nts.uk.resource.getMessage("FND_E_CLOCK", [ self.name, minParsed.format(), maxParsed.format() ]), "FND_E_CLOCK");
                 } else {
                     result.success(parsedValue);
                 }

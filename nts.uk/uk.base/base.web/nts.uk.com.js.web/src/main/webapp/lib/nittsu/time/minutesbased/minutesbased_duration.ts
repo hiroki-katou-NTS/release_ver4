@@ -17,7 +17,7 @@ module nts.uk.time.minutesBased {
                 this.hours = hours;
                 
                 this.minutes = minutes;
-                this.msg = msg || "MsgB_15";
+                this.msg = msg || "FND_E_TIME";
             }
             
             format() {

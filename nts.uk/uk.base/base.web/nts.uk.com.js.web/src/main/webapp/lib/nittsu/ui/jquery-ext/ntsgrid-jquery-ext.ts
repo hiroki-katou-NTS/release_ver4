@@ -2566,11 +2566,11 @@ module nts.uk.ui.jqueryExtentions {
                 
                 validate(controlDef: any, value: any) {
                     let constraint = controlDef.constraint;
-                    if (constraint.required && (_.isEmpty(value) || _.isNull(value))) return validation.Result.invalid("MsgB_1");
+                    if (constraint.required && (_.isEmpty(value) || _.isNull(value))) return validation.Result.invalid("FND_E_REQ_INPUT");
                     switch (constraint.valueType) {
                         case "Integer":
                             let valid = uk.ntsNumber.isNumber(value, false);
-                            if (!valid) return validation.Result.invalid("MsgB_8");
+                            if (!valid) return validation.Result.invalid("FND_E_INTEGER");
                             let formatted = value;
                             if (constraint.format === "Number_Separated") {
                                 formatted = uk.ntsNumber.formatNumber(value, { formatId: constraint.format });
@@ -2582,7 +2582,7 @@ module nts.uk.ui.jqueryExtentions {
                             if (uk.ntsNumber.isHalfInt(value)) {
                                 return validation.Result.OK(value);
                             }
-                            return validation.Result.invalid("MsgB_14");
+                            return validation.Result.invalid("FND_E_HALFINT");
                         case "String":
                             return validation.Result.OK(value);
                     }
@@ -3574,7 +3574,7 @@ module nts.uk.ui.jqueryExtentions {
                     let result = new ui.validation.ValidationResult();
                     if ((util.isNullOrUndefined(text) || text.length === 0)) {
                         if (self.options && self.options.required) {
-                            result.fail(nts.uk.resource.getMessage('MsgB_1', [ self.name ]), 'MsgB_1');
+                            result.fail(nts.uk.resource.getMessage('FND_E_REQ_INPUT', [ self.name ]), 'FND_E_REQ_INPUT');
                             return result;
                         }
                         if (!self.options || (self.options && !self.options.required)) {

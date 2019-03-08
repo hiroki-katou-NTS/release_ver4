@@ -21,39 +21,39 @@ module validationcps009 {
 
             switch (item.dataType()) {
                 case ITEM_SINGLE_TYPE.STRING:
-                    rmError($element, "MsgB_1") || rmError($element, "Msg_824");
+                    rmError($element, "FND_E_REQ_INPUT") || rmError($element, "Msg_824");
                     item.stringValue.subscribe(d => {
-                        !nou(d) && (rmError($element, "Msg_824") || rmError($element, "MsgB_1"));
+                        !nou(d) && (rmError($element, "Msg_824") || rmError($element, "FND_E_REQ_INPUT"));
                     });
                     break;
                 case ITEM_SINGLE_TYPE.NUMERIC:
-                    rmError($element, "MsgB_1") || rmError($element, "Msg_824");
+                    rmError($element, "FND_E_REQ_INPUT") || rmError($element, "Msg_824");
                     item.numbereditor.value.subscribe(d => {
-                        !nou(d) && (rmError($element, "Msg_824") || rmError($element, "MsgB_1"));
+                        !nou(d) && (rmError($element, "Msg_824") || rmError($element, "FND_E_REQ_INPUT"));
                     });
                     break;
                 case ITEM_SINGLE_TYPE.TIME:
-                    rmError($element, "MsgB_1") || rmError($element, "Msg_824");
+                    rmError($element, "FND_E_REQ_INPUT") || rmError($element, "Msg_824");
                     item.dateWithDay.subscribe(d => {
-                        !nou(d) && (rmError($element, "Msg_824") || rmError($element, "MsgB_1"));
+                        !nou(d) && (rmError($element, "Msg_824") || rmError($element, "FND_E_REQ_INPUT"));
                     });
                     break;
                 case ITEM_SINGLE_TYPE.TIMEPOINT:
-                    rmError($element, "MsgB_1") || rmError($element, "Msg_824");
+                    rmError($element, "FND_E_REQ_INPUT") || rmError($element, "Msg_824");
                     item.dateWithDay.subscribe(d => {
-                        !nou(d) && (rmError($element, "Msg_824") || rmError($element, "MsgB_15"));
+                        !nou(d) && (rmError($element, "Msg_824") || rmError($element, "FND_E_TIME"));
                     });
                     break;
                 case ITEM_SINGLE_TYPE.SEL_BUTTON:
-                    rmError($element, "MsgB_1") || rmError($element, "Msg_824");
+                    rmError($element, "FND_E_REQ_INPUT") || rmError($element, "Msg_824");
                     item.selectionName.subscribe(d => {
                         !nou(d) && rmError($element, "Msg_824");
                     });
                     break;
                 case ITEM_SINGLE_TYPE.DATE:
-                    rmError($element, "MsgB_1") || rmError($element, "Msg_824");
+                    rmError($element, "FND_E_REQ_INPUT") || rmError($element, "Msg_824");
                     item.dateValue.subscribe(d => {
-                        !nou(d) && (rmError($element.find('.nts-input'), "Msg_824") || rmError($element.find('.nts-input'), "MsgB_18"));
+                        !nou(d) && (rmError($element.find('.nts-input'), "Msg_824") || rmError($element.find('.nts-input'), "FND_E_DATE_YMD"));
                     });
                     break;
                 default: break;
