@@ -81,6 +81,16 @@ module nts.uk.com.view.kal001.d.viewmodel {
                     console.log("time service 2  : "+(performance.now() -start).toString());
                     self.processExtraId(statusId);
                     service.extractAlarm(self.taskId, self.numberEmpSuccess, statusId, self.listSelectedEmpployee, self.currentAlarmCode, self.listPeriodByCategory).done((dataExtractAlarm: service.ExtractedAlarmDto)=>{
+                        for(let i = 0;i<dataExtractAlarm.extractedAlarmData.length;i++){
+                            if(dataExtractAlarm.extractedAlarmData[i].workplaceID == null){
+                                for(let j = 0;j<self.listSelectedEmpployee.length;j++){
+                                   if( dataExtractAlarm.extractedAlarmData[i].employeeID == self.listSelectedEmpployee[j].id){
+                                       dataExtractAlarm.extractedAlarmData[i].workplaceID = self.listSelectedEmpployee[j].workplaceId;
+                                       break;
+                                   }
+                                }
+                            }
+                        }
                         console.log("time service 3  : "+(performance.now() -start).toString());
                         let status =  dataExtractAlarm.extracting == true ? AlarmExtraStatus.END_ABNORMAL : AlarmExtraStatus.END_NORMAL;
                         // Update status into domain (ドメインモデル「アラームリスト抽出処理状況」を更新する)
