@@ -181,7 +181,8 @@ module nts.uk.com.view.kal001.d.viewmodel {
             let params = {
                 extractingFlg : self.extractingFlg(),
                 isExtracting : self.isExtracting(),
-                listAlarmExtraValueWkReDto : self.listAlarmExtraValueWkReDto
+                listAlarmExtraValueWkReDto : self.listAlarmExtraValueWkReDto,
+                currentAlarmCode : self.currentAlarmCode
             };
             nts.uk.ui.windows.setShared("KAL001_D_PARAMS",params);
             close();

@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.function.dom.alarm.alarmlist.monthly;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
