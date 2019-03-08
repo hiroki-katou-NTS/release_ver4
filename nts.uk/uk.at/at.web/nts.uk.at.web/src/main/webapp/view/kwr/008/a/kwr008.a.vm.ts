@@ -425,11 +425,11 @@ module nts.uk.at.view.kwr008.a {
                     maxWidth: 550,
                     maxRows: 15,
                     isSelectAllAfterReload: true
-                };/*
+                };
                 _.defer(() => {
                     var empCodeList = dataList.map((employee) => employee.employeeCode );
                     self.selectedEmployeeCode(empCodeList);
-                });*/
+                });
             }
 
             /**
