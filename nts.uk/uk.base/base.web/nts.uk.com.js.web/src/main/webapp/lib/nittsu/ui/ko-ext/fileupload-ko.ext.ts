@@ -117,7 +117,7 @@ module nts.uk.ui.koExtentions {
             $container.bind("validate", function () {
                 if ($container.data(REQUIRED) && util.isNullOrEmpty(ko.unwrap(data.filename))) {
                     let controlName = $container.data(CONTROL_NAME);
-                    $container.ntsError("set", resource.getMessage("FND_E_REQ_SELECT", [controlName]), "FND_E_REQ_SELECT");
+                    $container.ntsError("set", resource.getMessage("MsgB_2", [controlName]), "MsgB_2");
                 } else {
                     $container.ntsError("clear");
                 }

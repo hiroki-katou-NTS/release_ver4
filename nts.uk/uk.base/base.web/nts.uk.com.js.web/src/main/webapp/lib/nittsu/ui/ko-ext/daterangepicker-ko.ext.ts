@@ -256,11 +256,11 @@ module nts.uk.ui.koExtentions {
             let startDate = moment(oldValue.startDate, self.dateFormat);
             let endDate = moment(oldValue.endDate, self.dateFormat);
             if (endDate.isBefore(startDate)) {
-                self.$ntsDateRange.ntsError('set', self.getMessage("FND_E_SPAN_REVERSED", [self.rangeName]), "FND_E_SPAN_REVERSED");    
+                self.$ntsDateRange.ntsError('set', self.getMessage("MsgB_21", [self.rangeName]), "MsgB_21");    
             } else if(self.dateFormat === "YYYY/MM/DD" && self.maxRange === "oneMonth"){
                 let maxDate = startDate.add(31, "days");
                 if(endDate.isSameOrAfter(maxDate)){
-                    self.$ntsDateRange.ntsError('set', self.getMessage("FND_E_SPAN_OVER_MONTH", [self.rangeName]), "FND_E_SPAN_OVER_MONTH");         
+                    self.$ntsDateRange.ntsError('set', self.getMessage("MsgB_22", [self.rangeName]), "MsgB_22");         
                 }
             } else if (self.maxRange === "oneYear"){
                 let maxDate = _.cloneDeep(startDate);
@@ -282,7 +282,7 @@ module nts.uk.ui.koExtentions {
                     maxDate = maxDate.add(1, 'year');
                 }
                 if (endDate.isAfter(maxDate)) {
-                    self.$ntsDateRange.ntsError('set', self.getMessage("FND_E_SPAN_OVER_YEAR", [self.rangeName]), "FND_E_SPAN_OVER_YEAR");        
+                    self.$ntsDateRange.ntsError('set', self.getMessage("MsgB_23", [self.rangeName]), "MsgB_23");        
                 }
             }  
         }

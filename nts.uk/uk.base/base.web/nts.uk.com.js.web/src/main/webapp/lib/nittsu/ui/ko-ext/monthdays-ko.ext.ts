@@ -102,14 +102,14 @@ module nts.uk.ui.koExtentions {
                 let required = $container.data("required");
                 if (required && (monthValueAccessor.value() === 0 || _.isNil(monthValueAccessor.value()))) {
                     $monthPicker.addClass("error").ntsError("set", 
-                        resource.getMessage("FND_E_REQ_SELECT", [ dataName + "の月" ]), "FND_E_REQ_SELECT");
+                        resource.getMessage("MsgB_2", [ dataName + "の月" ]), "MsgB_2");
                 } else {
                     $monthPicker.removeClass("error").ntsError("clear");
                 }
                 
                 if (required && (dayValueAccessor.value() === 0 || _.isNil(dayValueAccessor.value()))) {
                     $dayPicker.addClass("error").ntsError("set", 
-                        resource.getMessage("FND_E_REQ_SELECT", [ dataName + "の日" ]), "FND_E_REQ_SELECT");
+                        resource.getMessage("MsgB_2", [ dataName + "の日" ]), "MsgB_2");
                 } else {
                     $dayPicker.removeClass("error").ntsError("clear");
                 }

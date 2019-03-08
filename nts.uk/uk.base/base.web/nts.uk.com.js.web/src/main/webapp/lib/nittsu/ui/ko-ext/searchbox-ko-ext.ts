@@ -237,7 +237,7 @@ module nts.uk.ui.koExtentions {
                     if(_.isEmpty(result.options)){
                         let mes = '';
                         if(searchMode === "highlight"){
-                            mes = nts.uk.resource.getMessage("FND_E_SEARCH_NOHIT");
+                            mes = nts.uk.resource.getMessage("MsgB_25");
                         } else {
                             mes = nts.uk.ui.toBeResource.targetNotFound;    
                         }
@@ -295,7 +295,7 @@ module nts.uk.ui.koExtentions {
             var nextSearch = function() {
                 let searchKey = $input.val();
                 if(_.isEmpty(searchKey)) {
-                    nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("FND_E_SEARCH_NOWORD")).then(() => { 
+                    nts.uk.ui.dialog.alert(nts.uk.resource.getMessage("MsgB_24")).then(() => { 
                         $input.focus(); 
 //                        $input.select();
                     });

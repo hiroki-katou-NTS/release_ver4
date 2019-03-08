@@ -218,12 +218,12 @@ module nts.uk.ui.koExtentions {
                     var isHasYear = (nts.uk.util.isNullOrEmpty(otFormat) ? false : otFormat.indexOf("Y") >= 0) || otFormat.indexOf("Y") >= 0;
                     var isHasMonth = (nts.uk.util.isNullOrEmpty(otFormat) ? false : otFormat.indexOf("M") >= 0) || otFormat.indexOf("M") >= 0;
                     var isHasDay = (nts.uk.util.isNullOrEmpty(otFormat) ? false : otFormat.indexOf("D") >= 0) || otFormat.indexOf("D") >= 0;
-                    var mesId = "FND_E_DATE_Y";
+                    var mesId = "MsgB_20";
                     var fm = "YYYY";
                     if (isHasDay && isHasMonth && isHasYear) {
-                        mesId = "FND_E_DATE_YMD", fm = "YYYY/MM/DD";
+                        mesId = "MsgB_18", fm = "YYYY/MM/DD";
                     } else if (isHasMonth && isHasYear) {
-                        mesId = "FND_E_DATE_YM", fm = "YYYY/MM";
+                        mesId = "MsgB_19", fm = "YYYY/MM";
                     } 
                     $input.ntsError('set', { messageId: mesId, messageParams: [ name, minDate.format(fm), maxDate.format(fm) ] }, mesId, false); 
                     if (hasDayofWeek) {

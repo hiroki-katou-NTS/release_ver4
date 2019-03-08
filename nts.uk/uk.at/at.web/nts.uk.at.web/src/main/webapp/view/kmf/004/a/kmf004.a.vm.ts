@@ -672,8 +672,8 @@ module nts.uk.at.view.kmf004.a.viewmodel {
 
             if (self.yearReq() && self.dayReq()) {
                 if (dataItem.regularCommand.grantTime.fixGrantDate.interval === "" && dataItem.regularCommand.grantTime.fixGrantDate.grantDays === "") {
-                    $("#years").ntsError("set", "付与周期を入力してください", "FND_E_REQ_INPUT");
-                    $("#days").ntsError("set", "付与日数を入力してください", "FND_E_REQ_INPUT");
+                    $("#years").ntsError("set", "付与周期を入力してください", "MsgB_1");
+                    $("#days").ntsError("set", "付与日数を入力してください", "MsgB_1");
                 }
             }
 
@@ -682,7 +682,7 @@ module nts.uk.at.view.kmf004.a.viewmodel {
             }
 
             if (self.selectedTimeMethod() == 0 && dataItem.periodicCommand.limitCarryoverDays === "") {
-                $("#limitedDays").ntsError("set", "蓄積上限日数を入力してください", "FND_E_REQ_INPUT");
+                $("#limitedDays").ntsError("set", "蓄積上限日数を入力してください", "MsgB_1");
             }
 
 

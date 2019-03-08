@@ -48,7 +48,7 @@ module nts.layout {
 
                     if (element && (element.tagName.toUpperCase() == "BUTTON" || $element.hasClass('radio-wrapper'))) {
                         x.value.subscribe(d => {
-                            !nou(d) && rmError($element, "FND_E_REQ_SELECT");
+                            !nou(d) && rmError($element, "MsgB_2");
                         });
                     }
                 });
@@ -104,7 +104,7 @@ module nts.layout {
                             if (_.isNil(x.value) && (x.required || !_.isEmpty(x.textValue))) {
                                 if (!getError($element).length) {
                                     $element.ntsError('set', {
-                                        messageId: "FND_E_REQ_SELECT",
+                                        messageId: "MsgB_2",
                                         messageParams: [x.itemName]
                                     });
                                 }

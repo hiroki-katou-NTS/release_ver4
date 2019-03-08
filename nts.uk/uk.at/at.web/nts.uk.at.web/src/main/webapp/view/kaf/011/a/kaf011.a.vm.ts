@@ -211,7 +211,7 @@ module nts.uk.at.view.kaf011.a.screenModel {
             if (isRecCreate) {
                 let wkTimeCd = self.recWk().wkTimeCD();
                 if (!wkTimeCd) {
-                    $('#recTimeBtn').ntsError('set', { messageId: 'FND_E_REQ_SELECT', messageParams: [text('KAF011_30')] });
+                    $('#recTimeBtn').ntsError('set', { messageId: 'MsgB_2', messageParams: [text('KAF011_30')] });
                     isError = true;
                 }
             }
@@ -228,7 +228,7 @@ module nts.uk.at.view.kaf011.a.screenModel {
                 if (isUseWkTime) {
                     let wkTimeCd = self.absWk().wkTimeCD();
                     if (!wkTimeCd) {
-                        $('#absTimeBtn').ntsError('set', { messageId: 'FND_E_REQ_SELECT', messageParams: [text('KAF011_30')] });
+                        $('#absTimeBtn').ntsError('set', { messageId: 'MsgB_2', messageParams: [text('KAF011_30')] });
                         isError = true;
                     }
                 }

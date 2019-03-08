@@ -71,7 +71,7 @@ module nts.uk.ui.koExtentions {
             }
             if(mEnd.isBefore(mStart)){
                 self.$root.find(".datetimepairrange-container")
-                        .ntsError('set', nts.uk.resource.getMessage('FND_E_SPAN_REVERSED', [self.name]) , 'FND_E_SPAN_REVERSED', false);
+                        .ntsError('set', nts.uk.resource.getMessage('MsgB_21', [self.name]) , 'MsgB_21', false);
                 return false;
             }
             if(self.maxRange > 0){

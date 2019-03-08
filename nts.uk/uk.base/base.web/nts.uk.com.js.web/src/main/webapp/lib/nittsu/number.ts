@@ -18,17 +18,17 @@
 
     export function isNumber(value: any, isDecimalValue?: boolean, option?: any, message?: any) {
         if (isDecimalValue) {
-            if (message !== undefined) message.id = 'FND_E_REALNUMBER';
+            if (message !== undefined) message.id = 'MsgB_11';
             return isDecimal(value, option);
         } else {
-            if (message !== undefined) message.id = 'FND_E_INTEGER';
+            if (message !== undefined) message.id = 'MsgB_8';
             return isInteger(value, option);
         }
     }
     
     export function isHalfInt(value: any, message?: any) {
         var val = parseFloat(value);
-        if (message !== undefined) message.id = 'FND_E_HALFINT';
+        if (message !== undefined) message.id = 'MsgB_14';
         if (val !== NaN && (val * 2) % 1 === 0) return true;
         return false;
     }

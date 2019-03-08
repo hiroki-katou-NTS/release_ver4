@@ -155,7 +155,7 @@
         export function anyChar(text: string) {
             return {
                         probe: true,
-                        messageId: 'FND_E_ANY'
+                        messageId: 'MsgB_3'
                    }
         }
 
@@ -166,7 +166,7 @@
         export function allHalfNumeric(text: string) {
             return  { 
                         probe: regexp.allHalfNumeric.test(text),
-                        messageId: 'FND_E_NUMERIC'
+                        messageId: 'MsgB_5'
                     };
         }
 
@@ -188,7 +188,7 @@
         export function allHalfAlphanumeric(text: string) {
             return {
                         probe: regexp.allHalfAlphanumeric.test(text),
-                        messageId: 'FND_E_ALPHANUMERIC'
+                        messageId: 'MsgB_6'
                     };
         }
 
@@ -210,7 +210,7 @@
         export function allFullKatakana(text: string) {
             return {
                         probe: regexp.allFullKatakanaReg.test(text),
-                        messageId: 'FND_E_KANA'
+                        messageId: 'MsgB_7'
                     };
         }
 
@@ -221,7 +221,7 @@
         export function allHalf(text: string) {
             return {
                         probe: text.length === countHalf(text),
-                        messageId: 'FND_E_ANYHALFWIDTH'
+                        messageId: 'MsgB_4'
                     };
         }
 
@@ -257,7 +257,7 @@
             if (val !== NaN && (val * 2) % 1 === 0) probe = true;
             return {
                         probe: probe,
-                        messageId: 'FND_E_HALFINT'
+                        messageId: 'MsgB_14'
                     };
         }
         
@@ -268,14 +268,14 @@
         export function workplaceCode(text: string) {
             return {
                 probe: regexp.workplaceCode.test(text),
-                messageId: 'FND_E_ALPHANUMERIC'
+                messageId: 'MsgB_6'
             };            
         }
         
         export function employeeCode(text: string) {
             return {
                 probe: regexp.employeeCode.test(text),
-                messageId: 'FND_E_ALPHANUMERIC'
+                messageId: 'MsgB_6'
             };            
         }
 
