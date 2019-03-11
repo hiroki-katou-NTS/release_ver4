@@ -165,7 +165,7 @@ module nts.uk.at.view.kaf018.b.viewmodel {
             var self = this;
             $("#gridB").ntsGrid({
                 width: '750px',
-                height: '174px',
+                height: '609px',
                 dataSource: self.tempData,
                 primaryKey: 'workplaceId',
                 rowVirtualization: true,
@@ -178,9 +178,9 @@ module nts.uk.at.view.kaf018.b.viewmodel {
                     { headerText: getText('KAF018_22'), key: 'numOfUnapproval', dataType: 'string', width: '100px'},
                     { headerText: getText('KAF018_23'), key: 'approvedNumOfCase', dataType: 'string', width: '100px'},
                     { headerText: getText('KAF018_24'), key: 'numOfDenials', dataType: 'string', width: '100px'},
-                    { headerText: 'ID', key: 'workplaceId', dataType: 'string', width: '0px', ntsControl: 'Label'},
                     { headerText: getText('KAF018_25'), key: 'isChecked', dataType: 'boolean', width: '120px', 
-                            showHeaderCheckbox: true, ntsControl: 'Checkbox',  hiddenRows: lstHidden}
+                            showHeaderCheckbox: true, ntsControl: 'Checkbox',  hiddenRows: lstHidden},
+                    { headerText: 'ID', key: 'workplaceId', dataType: 'string', width: '0px', ntsControl: 'Label'}
                 ],
                 features: [
                     {
