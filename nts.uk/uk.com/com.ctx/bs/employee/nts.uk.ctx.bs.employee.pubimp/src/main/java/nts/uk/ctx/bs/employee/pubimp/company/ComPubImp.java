@@ -11,9 +11,11 @@ import javax.inject.Inject;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHist;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistByEmployee;
+import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistItem;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistRepository;
 import nts.uk.ctx.bs.employee.pub.company.AffComHistItem;
 import nts.uk.ctx.bs.employee.pub.company.AffCompanyHistExport;
+import nts.uk.ctx.bs.employee.pub.company.StatusOfEmployee;
 import nts.uk.ctx.bs.employee.pub.company.SyCompanyPub;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -88,6 +90,32 @@ public class ComPubImp implements SyCompanyPub {
 				.collect(Collectors.toList()));
 
 		return affComHostEx;
+	}
+
+	@Override
+	public List<StatusOfEmployee> GetListAffComHistByListSidAndPeriod(List<String> sids, DatePeriod datePeriod) {
+		
+		if (sids.isEmpty() || datePeriod.start() == null || datePeriod.end() == null)
+			return Collections.emptyList();
+		
+		List<AffCompanyHistByEmployee> listAffComHisByEmp = this.affComHistRepo.getAffEmployeeHistory(sids, datePeriod);
+		
+		if(listAffComHisByEmp.isEmpty())
+			return Collections.emptyList();
+		
+		List<StatusOfEmployee> result = listAffComHisByEmp.stream().map(i ->{
+			return new StatusOfEmployee();
+		}).collect(Collectors.toList());
+		
+		for (int i = 0; i < listAffComHisByEmp.size(); i++) {
+			List<DatePeriod> lstPeriod = listAffComHisByEmp.get(i).items()
+					.stream().map(ent -> ent.span())
+					.collect(Collectors.toList());
+			StatusOfEmployee statusOfEmployee = new StatusOfEmployee(listAffComHisByEmp.get(i).getSId(), lstPeriod);
+			result.add(statusOfEmployee);
+		}
+		
+		return result;
 	};
 
 }

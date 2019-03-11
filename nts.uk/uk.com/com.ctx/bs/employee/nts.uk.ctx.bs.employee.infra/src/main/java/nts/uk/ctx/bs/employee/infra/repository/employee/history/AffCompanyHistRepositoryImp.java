@@ -64,6 +64,9 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 
 	private static final String SELECT_BY_EMPLOYEE_ID_LIST = String.join(" ", SELECT_NO_PARAM,
 			"WHERE c.bsymtAffCompanyHistPk.sId IN :sIdList  ORDER BY c.startDate ");
+	
+	private static final String SELECT_BY_EMPLOYEE_ID_LIST_FOR_REQ588 = String.join(" ", SELECT_NO_PARAM,
+			"WHERE c.bsymtAffCompanyHistPk.sId IN :sIdList  AND c.startDate <= :endDate AND :startDate <= c.endDate ");
 
 	private static final String SELECT_BY_EMPID_AND_BASE_DATE = String.join(" ", SELECT_NO_PARAM,
 			"WHERE c.bsymtAffCompanyHistPk.sId = :sId", "AND c.startDate <= :baseDate", "AND c.endDate >= :baseDate",
@@ -441,6 +444,45 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
 			List<BsymtAffCompanyHist> lstBsymtAffCompanyHist = this.queryProxy()
 					.query(SELECT_BY_EMPLOYEE_ID_LIST, BsymtAffCompanyHist.class).setParameter("sIdList", subList)
+					.getList();
+			entities.addAll(lstBsymtAffCompanyHist);
+		});
+
+		// Convert Result List to Map
+		Map<String, List<BsymtAffCompanyHist>> resultMap = entities.stream()
+				.collect(Collectors.groupingBy(item -> item.bsymtAffCompanyHistPk.sId));
+
+		List<AffCompanyHistByEmployee> resultList = new ArrayList<>();
+		
+		resultMap.forEach((employeeId, entitiesOfEmp) -> {
+			List<AffCompanyHistItem> lstAffCompanyHistoryItem = entitiesOfEmp
+					.stream().map(ent -> new AffCompanyHistItem(ent.bsymtAffCompanyHistPk.historyId,
+							ent.destinationData == 1, new DatePeriod(ent.startDate, ent.endDate)))
+					.collect(Collectors.toList());
+			AffCompanyHistByEmployee empHist = new AffCompanyHistByEmployee(employeeId, lstAffCompanyHistoryItem);
+			resultList.add(empHist);
+		});
+		
+		return resultList;
+	}
+	
+	// RequestList 588
+	@Override
+	public List<AffCompanyHistByEmployee> getAffEmployeeHistory(List<String> employeeIds, DatePeriod datePeriod) {
+
+		if (employeeIds.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		// ResultList
+		List<BsymtAffCompanyHist> entities = new ArrayList<>();
+		// Split employeeId List if size of employeeId List is greater than 1000
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
+			List<BsymtAffCompanyHist> lstBsymtAffCompanyHist = this.queryProxy()
+					.query(SELECT_BY_EMPLOYEE_ID_LIST_FOR_REQ588, BsymtAffCompanyHist.class)
+					.setParameter("sIdList", subList)
+					.setParameter("startDate", datePeriod.start())
+					.setParameter("endDate", datePeriod.end())
 					.getList();
 			entities.addAll(lstBsymtAffCompanyHist);
 		});
