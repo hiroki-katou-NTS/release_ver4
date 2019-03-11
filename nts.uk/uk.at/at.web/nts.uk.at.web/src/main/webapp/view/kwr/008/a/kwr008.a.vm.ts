@@ -319,8 +319,7 @@ module nts.uk.at.view.kwr008.a {
 
                     /** Return data */
                     returnDataFromCcg001: function(data: Ccg001ReturnedData) {
-                        self.selectedEmployee(data.listEmployee);
-                        self.applyKCP005ContentSearch(data.listEmployee);
+                        self.employeeList(self.convertEmployeeList(data.listEmployee));
                     }
                 }
                 //$('#ccgcomponent').ntsGroupComponent(self.ccgcomponent);
@@ -392,12 +391,9 @@ module nts.uk.at.view.kwr008.a {
                 $('#outputItem').trigger('validate');
                 return nts.uk.ui.errors.hasError();
             }
-            /**
-            * apply ccg001 search data to kcp005
-            */
-            public applyKCP005ContentSearch(dataList: EmployeeSearchDto[]): void {
-                var self = this;
-                //self.employeeList([]);
+
+            convertEmployeeList(dataList: EmployeeSearchDto[]) {
+
                 var employeeSearchs: UnitModel[] = [];
                 for (var employeeSearch of dataList) {
                     var employee: UnitModel = {
@@ -408,7 +404,16 @@ module nts.uk.at.view.kwr008.a {
                     };
                     employeeSearchs.push(employee);
                 }
-                self.employeeList(employeeSearchs);
+                return employeeSearchs;
+            }
+
+
+            /**
+            * apply ccg001 search data to kcp005
+            */
+            public applyKCP005ContentSearch(dataList: EmployeeSearchDto[]): void {
+                var self = this;
+                self.employeeList([]);
                 
                 self.lstPersonComponentOption = {
                     isShowAlreadySet: false,
@@ -425,11 +430,11 @@ module nts.uk.at.view.kwr008.a {
                     maxWidth: 550,
                     maxRows: 15,
                     isSelectAllAfterReload: true
-                };
+                };/*
                 _.defer(() => {
                     var empCodeList = dataList.map((employee) => employee.employeeCode );
                     self.selectedEmployeeCode(empCodeList);
-                });
+                });*/
             }
 
             /**
