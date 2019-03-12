@@ -104,7 +104,6 @@ module nts.uk.com.view.cmm053.a.viewmodel {
 
             //社員コードを入力する
             self.settingManager().departmentCode.subscribe(value => {
-                $('#A2_7').ntsError('clear');
                 setTimeout(function() {
                     if (value == '') {
                         self.settingManager().departmentName('');
@@ -136,7 +135,6 @@ module nts.uk.com.view.cmm053.a.viewmodel {
 
             //社員コードを入力する
             self.settingManager().dailyApprovalCode.subscribe(value => {
-                $('#A2_10').ntsError('clear');
                 setTimeout(function() {
                     if (value == '') {
                         self.settingManager().dailyApprovalName('');
@@ -212,6 +210,8 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         //新規する
         //「新規」ボタンを押下
         addSettingManager_click(data) {
+            $('#A2_7').ntsError('clear');
+            $('#A2_10').ntsError('clear');
             let self = this;
             self.settingNewMode();
         }
