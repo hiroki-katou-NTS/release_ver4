@@ -80,8 +80,8 @@ public class KTG001QueryProcessor {
 
 		// RootType(就業日別確認) = 1
 		DatePeriod period = new DatePeriod(closureStartDate, closureEndDate);
-		boolean checkDateApproved = dailyPerformanceAdapter.isDataExist(employeeID, period, 1);
-//		AppEmpStatusExport appEmpStatusExport = 
+//		boolean checkDateApproved = dailyPerformanceAdapter.isDataExist(employeeID, period, 1);
+		boolean checkDateApproved = this.ObtAppliDataPreAbs(employeeID, period);
 		return checkDateApproved;
 	}
 	
@@ -91,33 +91,34 @@ public class KTG001QueryProcessor {
 	 */
 	public boolean ObtAppliDataPreAbs(String employeeID, DatePeriod period){
 		List<String> listEmp = new ArrayList<>();
-		List<String> listEmpTemp = new ArrayList<>();
-		AppEmpStatusImport appEmpStatusImport = dailyPerformanceAdapter.appEmpStatusExport(employeeID, period, 1);
+		// list luu 年月日 tam thoi
+		List<GeneralDate> listEmpTemp = new ArrayList<>();
+		List<RouteSituationImport> routeLst = new ArrayList<>();
 		Map<String, List<GeneralDate>> empDate = new HashMap<String, List<GeneralDate>>();
-		List<GeneralDate> listDate = new ArrayList<>();
-		for(RouteSituationImport item: appEmpStatusImport.getRouteSituationLst()){
-			listDate.add(item.getDate());
-		}
+		// [No.133](中間データ版)承認状況を取得する
+		AppEmpStatusImport appEmpStatusImport = dailyPerformanceAdapter.appEmpStatusExport(employeeID, period, 1);
 		// 取得したデータから、承認すべき社員と年月日リストを抽出する
-		empDate.put(appEmpStatusImport.getEmployeeID(), listDate);
-		listEmp.add(employeeID);
-		// check duplicate
-		listEmpTemp.addAll(listEmpTemp);
-		for(String obj: listEmp){
-			listEmpTemp.remove(obj);
-			if(listEmpTemp.contains(obj)){
-				listEmp.remove(obj);
+		routeLst.addAll(appEmpStatusImport.getRouteSituationLst());
+		for(RouteSituationImport item : routeLst){
+			if(!empDate.containsKey(item.getEmployeeID())){
+				listEmpTemp = new ArrayList<>();
+				listEmpTemp.add(item.getDate());
+				empDate.put(item.getEmployeeID(), listEmpTemp);
+			}else{
+				List<GeneralDate> variable = empDate.get(item.getEmployeeID());
+				variable.add(item.getDate());
 			}
 		}
 		// 日の本人確認を取得する
 		List<Identification> listIdent = identificationRepository.findByListEmployeeID(listEmp, period.start(), period.end());
-		Map<String, GeneralDate> empDateIdenti = new HashMap<String, GeneralDate>();
-		for(Identification x : listIdent){
-			empDateIdenti.put(x.getEmployeeId(), x.getProcessingYmd());
-		}
 		// 社員IDと年月日が一致する「日の本人確認」があるかチェックする
-		if(empDateIdenti.containsValue(empDate)){
-			return true;
+		for(Identification obj : listIdent){
+			if(empDate.containsKey(obj.getProcessingYmd())){
+				List<GeneralDate> listValue = empDate.get(obj.getEmployeeId());
+				if(listValue.contains(obj.getProcessingYmd())){
+					return true;
+				}
+			}
 		}
 		return false;
 	}
