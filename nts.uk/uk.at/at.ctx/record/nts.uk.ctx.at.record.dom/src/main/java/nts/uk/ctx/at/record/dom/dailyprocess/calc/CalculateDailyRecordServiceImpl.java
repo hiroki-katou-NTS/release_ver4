@@ -295,21 +295,6 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		if (isShareContainerNotInit) {
 			companyCommonSetting.getShareContainer().clearAll();
 		}
-
-		/*ログ差し込み*/
-		org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-		log.info("return 直前です。");
-		if(result.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance() != null
-		&& result.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().isPresent()
-		&& result.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork() != null
-		&& result.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().isPresent()) {
-			for(OverTimeFrameTime otFrame : result.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get().getOverTimeWorkFrameTime()) {
-				log.info("枠Ｎｏ："+otFrame.getOverWorkFrameNo());
-				log.info("残業時間："+otFrame.getOverTimeWork().getTime());
-				log.info("計算残業時間："+otFrame.getOverTimeWork().getCalcTime());
-			}
-		}
-		/*ログ差し込み*/
 		
 		return result;
 	}
