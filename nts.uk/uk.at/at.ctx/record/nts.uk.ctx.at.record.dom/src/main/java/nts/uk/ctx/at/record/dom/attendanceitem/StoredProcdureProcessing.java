@@ -317,7 +317,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 					if(DEFAULT_WORK_TYPE.equals(d.getWorkInformation().getRecordInfo().getWorkTypeCode())  ){
 						setOverTime(d, 30, 60);
 					} else if(DEFAULT_WORK_TIME.contains(d.getWorkInformation().getRecordInfo().getWorkTimeCode())) {
-						WorkType wt = workTypeMap.get(d.getWorkInformation().getRecordInfo().getWorkTypeCode());
+						WorkType wt = workTypes.get(d.getWorkInformation().getRecordInfo().getWorkTypeCode());
 						if(wt != null){
 							if(wt.getDailyWork().getOneDay() == WorkTypeClassification.HolidayWork 
 									|| wt.getDailyWork().getAfternoon() == WorkTypeClassification.HolidayWork 
