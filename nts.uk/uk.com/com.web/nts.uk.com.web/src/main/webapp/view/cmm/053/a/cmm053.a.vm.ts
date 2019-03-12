@@ -104,7 +104,6 @@ module nts.uk.com.view.cmm053.a.viewmodel {
 
             //社員コードを入力する
             self.settingManager().departmentCode.subscribe(value => {
-                $('#A2_7').ntsError('clear');
                 setTimeout(function() {
                     if (value == '') {
                         self.settingManager().departmentName('');
@@ -136,7 +135,6 @@ module nts.uk.com.view.cmm053.a.viewmodel {
 
             //社員コードを入力する
             self.settingManager().dailyApprovalCode.subscribe(value => {
-                $('#A2_10').ntsError('clear');
                 setTimeout(function() {
                     if (value == '') {
                         self.settingManager().dailyApprovalName('');
@@ -212,6 +210,8 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         //新規する
         //「新規」ボタンを押下
         addSettingManager_click(data) {
+            $('#A2_7').ntsError('clear');
+            $('#A2_10').ntsError('clear');
             let self = this;
             self.settingNewMode();
         }
@@ -221,111 +221,88 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         regSettingManager_click(data) {
             let self = this;
             $('.nts-input').trigger("validate");
-            setTimeout(function(){
-               let tc = setInterval(function(){
-               if(self.checkSubscribe() != STATUS_SUBSCRIBE.PENDING) {
-                   clearInterval(tc);
-                   if(STATUS_SUBSCRIBE.DONE){
-                       
-            if (!nts.uk.ui.errors.hasError()) {
-                let startDate = new Date(self.settingManager().startDate());
-                let closingStartDate = new Date(self.settingManager().closingStartDate());
-                //開始日＜締めの開始日
-                if (startDate < closingStartDate && !(self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory())) {
-                    closingStartDate = nts.uk.time.formatDate(closingStartDate, 'yyyy/MM/dd');
-                    //エラーメッセージ（Msg_1072）
-                    dialog.alertError({ messageId: "Msg_1072", messageParams: [closingStartDate] });
-                } else {
-                    //入力承認者の承認権限をチェックする
-                    if (!self.settingManager().hasAuthority()) {
-                        self.getEmployeeByCode(self.settingManager().departmentCode(), APPROVER_TYPE.DEPARTMENT_APPROVER).done(()=>{
+            setTimeout(function() {
+                let tc = setInterval(function() {
+                    if (self.checkSubscribe() != STATUS_SUBSCRIBE.PENDING) {
+                        clearInterval(tc);
+                        if (STATUS_SUBSCRIBE.DONE) {
                             if (!nts.uk.ui.errors.hasError()) {
-                                let command = ko.toJS(self.settingManager());
-                                command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
-                                command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
-                                if(command.dailyApprovalCode == null || command.dailyApprovalCode === undefined 
-                                    || nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())){
-                                    command.dailyApproverId = '';
+                                let startDate = new Date(self.settingManager().startDate());
+                                let closingStartDate = new Date(self.settingManager().closingStartDate());
+                                let paramcheckReg = {
+                                    codeA16: self.findA16().code,
+                                    codeA27: self.settingManager().departmentCode(),
+                                    codeA210: self.settingManager().dailyApprovalCode(),
+                                    baseDate: moment(new Date(self.settingManager().startDate())).format('YYYY/MM/DD')
                                 }
-                                //ドメインモデル「承認設定」．本人による承認をチェックする
-                                self.checkApprovalSetting(command).done(() => {
-                                    if (self.screenMode() == EXECUTE_MODE.NEW_MODE) {
-                                        self.callInsertHistoryService(command);
+                                service.checkBfReg(paramcheckReg).done((result) => {
+                                    if (result.errFlg) {//エラーがある場合
+                                        if (result.errA27) {
+                                            $('#A2_7').ntsError('set', { messageId: result.msgId });
+                                        }
+                                        if (result.errA210) {
+                                            $('#A2_10').ntsError('set', { messageId: result.msgId });
+                                        }
                                         return;
                                     }
-        
-                                    if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory()) {
-                                        self.callUpdateHistoryService(command);
-                                        return;
-                                    }
-        
-                                    if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && !self.settingManager().hasHistory()) {
-                                        self.callInsertHistoryService(command);
-                                        return;
+                                    if (!nts.uk.ui.errors.hasError()) {
+                                        let command = ko.toJS(self.settingManager());
+                                        command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
+                                        command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
+                                        if (command.dailyApprovalCode == null || command.dailyApprovalCode === undefined
+                                            || nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())) {
+                                            command.dailyApproverId = '';
+                                        }
+                                        if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory()) {
+                                            self.callUpdateHistoryService(command);
+                                        } else if (self.screenMode() == EXECUTE_MODE.NEW_MODE) {
+                                            //開始日＜締めの開始日 
+                                            if (startDate < closingStartDate && !(self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory())) {
+                                                closingStartDate = nts.uk.time.formatDate(closingStartDate, 'yyyy/MM/dd');
+                                                //エラーメッセージ（Msg_1072）
+                                                dialog.alertError({ messageId: "Msg_1072", messageParams: [closingStartDate] });
+                                            } else {
+                                                self.callInsertHistoryService(command);
+                                            }
+                                        }
                                     }
                                 });
-                            }        
-                        });      
-                    } else {
-                        if (!nts.uk.ui.errors.hasError()) {
-                            let command = ko.toJS(self.settingManager());
-                            command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
-                            command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
-                            if(command.dailyApprovalCode == null || command.dailyApprovalCode === undefined 
-                                    || nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())){
-                                command.dailyApproverId = '';
                             }
-                            //ドメインモデル「承認設定」．本人による承認をチェックする
-                            self.checkApprovalSetting(command).done(() => {
-                                if (self.screenMode() == EXECUTE_MODE.NEW_MODE) {
-                                    self.callInsertHistoryService(command);
-                                    return;
-                                }
-    
-                                if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory()) {
-                                    self.callUpdateHistoryService(command);
-                                    return;
-                                }
-    
-                                if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && !self.settingManager().hasHistory()) {
-                                    self.callInsertHistoryService(command);
-                                    return;
-                                }
-                            });
-                        }      
+                        }
                     }
-                }
-            }
-            }
-             }
-            }, 300);
-            
+                }, 300);
             },200);
         }
 
+        findA16(){
+            let self = this;
+            return _.find(self.employeeInputList(), emp =>{
+                return emp.id == self.selectedItem();
+            });     
+        }
         /**
          * 入力承認者の承認権限をチェックする
          */
-        checkInputApproverAuthority(employeeCode: any){
-            let self = this;
-            self.getEmployeeByCode(employeeCode, APPROVER_TYPE.DEPARTMENT_APPROVER);
-        }
+//        checkInputApproverAuthority(employeeCode: any){
+//            let self = this;
+//            self.getEmployeeByCode(employeeCode, APPROVER_TYPE.DEPARTMENT_APPROVER);
+//        }
         
-        checkApprovalSetting(command): JQueryPromise<any> {
-            let self = this,
-                dfd = $.Deferred();
-            block.invisible();
-            service.checkApprovalSetting(command).done(() => {
-                 block.clear();
-                dfd.resolve();
-            }).fail(error => {
-                dialog.alertError({ messageId: error.messageId });
-                 block.clear();
-                dfd.rejected();
-                })
-
-            return dfd.promise();
-        }
+//        checkApprovalSetting(command): JQueryPromise<any> {
+//            let self = this,
+//                dfd = $.Deferred();
+//            block.invisible();
+//            service.checkApprovalSetting(command).done(() => {
+//                 block.clear();
+//                dfd.resolve();
+//            }).fail(error => {
+//                dialog.alertError({ messageId: error.messageId });
+//                 block.clear();
+//                dfd.rejected();
+//                })
+//
+//            return dfd.promise();
+//        }
 
         //削除する
         //「削除」ボタンをクリックする
