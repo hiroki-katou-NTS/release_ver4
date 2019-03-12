@@ -1,9 +1,9 @@
 package nts.uk.ctx.sys.assist.dom.datarestoration;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import nts.uk.ctx.sys.assist.dom.category.StorageRangeSaved;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 
@@ -32,15 +32,15 @@ public interface PerformDataRecoveryRepository {
 	Integer countDataTransactionExitTableByVKeyUp(Map<String, String> filedWhere, String tableName, String namePhysicalCid,
 			String cidCurrent);
 
-	void deleteDataExitTableByVkey(Map<String, String> filedWhere, String tableName, String namePhysicalCid,
+	void deleteDataExitTableByVkey(List<Map<String, String>> lsiFiledWhere2, String tableName, String namePhysicalCid,
 			String cidCurrent);
 	
-	void deleteTransactionDataExitTableByVkey(Map<String, String> filedWhere, String tableName, String namePhysicalCid,
+	void deleteTransactionDataExitTableByVkey(List<Map<String, String>> lsiFiledWhere2, String tableName, String namePhysicalCid,
 			String cidCurrent);
 	
-	void insertDataTable(HashMap<String, String> dataInsertDb, String tableName, List<String> columnNotNull);
+	void insertDataTable( StringBuilder insertToTable);
 	
-	void insertTransactionDataTable(HashMap<String, String> dataInsertDb, String tableName, List<String> columnNotNull);
+	void insertTransactionDataTable(StringBuilder insertToTable);
 
 	List<TableList> getByRecoveryProcessingId(String dataRecoveryProcessId);
 
