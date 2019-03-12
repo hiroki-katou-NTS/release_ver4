@@ -17412,7 +17412,8 @@ var nts;
                                 var result = validator.validate(newText);
                                 if (result.isValid) {
                                     $input.ntsError('clearKibanError');
-                                    $input.val(formatter.format(result.parsedValue));
+                                    //$input.val(formatter.format(result.parsedValue));
+                                    value(formatter.format(result.parsedValue));
                                 }
                                 else {
                                     var error = $input.ntsError('getError');
