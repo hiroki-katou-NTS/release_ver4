@@ -3,11 +3,11 @@ package nts.uk.ctx.at.function.dom.alarm.alarmlist.attendanceholiday.whethertoch
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import nts.arc.time.GeneralDate;
+//import nts.arc.time.GeneralDate;
 //import nts.uk.ctx.at.function.dom.alarm.alarmlist.attendanceholiday.whethertocheck.narrowlastdays.NarrowLastDays;
 //import nts.uk.ctx.at.function.dom.alarm.alarmlist.attendanceholiday.whethertocheck.narrowuntilnext.NarrowUntilNext;
-import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategory;
-import nts.uk.ctx.at.function.dom.alarm.checkcondition.annualholiday.AnnualHolidayAlarmCondition;
+//import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategory;
+//import nts.uk.ctx.at.function.dom.alarm.checkcondition.annualholiday.AnnualHolidayAlarmCondition;
 /**
  * チェック対象か判断
  * @author tutk
