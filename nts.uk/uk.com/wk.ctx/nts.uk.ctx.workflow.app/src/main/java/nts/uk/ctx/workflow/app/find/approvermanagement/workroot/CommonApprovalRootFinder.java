@@ -10,18 +10,26 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.logging.log4j.util.Strings;
+
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.workflow.dom.adapter.bs.EmployeeAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.PersonAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.SyJobTitleAdapter;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmpInfoRQ18;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.JobTitleImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.PersonImport;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmployment;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmploymentImport;
 import nts.uk.ctx.workflow.dom.adapter.employee.EmployeeWithRangeAdapter;
 import nts.uk.ctx.workflow.dom.adapter.employee.EmployeeWithRangeLoginImport;
 import nts.uk.ctx.workflow.dom.adapter.workplace.WorkplaceApproverAdapter;
 import nts.uk.ctx.workflow.dom.adapter.workplace.WorkplaceImport;
+import nts.uk.ctx.workflow.dom.approvermanagement.setting.ApprovalSetting;
+import nts.uk.ctx.workflow.dom.approvermanagement.setting.ApprovalSettingRepository;
+import nts.uk.ctx.workflow.dom.approvermanagement.setting.PrincipalApprovalFlg;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApprovalPhase;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApprovalPhaseRepository;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.Approver;
@@ -62,7 +70,10 @@ public class CommonApprovalRootFinder {
 	@Inject
 	private EmployeeAdapter employeeAdapter;
 	@Inject
-	private EmployeeWithRangeAdapter employeeWithRangeAdapter;
+	private EmployeeWithRangeAdapter empWithRanAd;
+	@Inject
+	private ApprovalSettingRepository appSetRepo;
+	
 	private static final int COMPANY = 0;
 	private static final int WORKPLACE = 1;
 	/**
@@ -507,7 +518,7 @@ public class CommonApprovalRootFinder {
 	}
 
 	/**
-	 * 社員コードを入力する
+	 * 05.社員コードを入力する
 	 * @param employeeCode
 	 * @return
 	 */
@@ -516,10 +527,25 @@ public class CommonApprovalRootFinder {
 		String employeeCode  = param.getEmployeeCode();
 		GeneralDate baseDate = Objects.isNull(param.getBaseDate()) ? GeneralDate.today() : param.getBaseDate();
 		Optional<EmployeeWithRangeLoginImport> employeeWithRange = Optional.empty();
-
+		//2019.03.11 hoatt
+		//「会社ID」「社員コード」より社員基本情報を取得 - RQ18
+		Optional<EmpInfoRQ18> empInfo = employeeAdapter.getEmpInfoByScd(companyId, employeeCode);
+		if(!empInfo.isPresent()){//データがないの場合
+			//エラーメッセージ	（Msg_1512）
+			throw new BusinessException("Msg_1512");
+		}
+		//在職状態を取得
+		StatusOfEmploymentImport sttEmp = employeeAdapter.getStatusOfEmployment(empInfo.get().getEmployeeId(), baseDate);
+		if(sttEmp != null && (sttEmp.getStatusOfEmployment().equals(StatusOfEmployment.RETIREMENT)||
+				sttEmp.getStatusOfEmployment().equals(StatusOfEmployment.LEAVE_OF_ABSENCE)||
+				sttEmp.getStatusOfEmployment().equals(StatusOfEmployment.HOLIDAY))){
+			//在職状態は退職　OR　休職　OR　休業の場合
+			//エラーメッセージ	（Msg_1511）
+			throw new BusinessException("Msg_1511");
+		}
 		//社員コードから承認権限ありの社員のみ取得する
 		// RequestList315
-		employeeWithRange = this.employeeWithRangeAdapter.findByEmployeeByLoginRange(companyId, employeeCode, baseDate);
+		employeeWithRange = this.empWithRanAd.findByEmployeeByLoginRange(companyId, employeeCode, baseDate);
 
 		if (!employeeWithRange.isPresent())
 			throw new BusinessException("Msg_1078");
@@ -584,5 +610,99 @@ public class CommonApprovalRootFinder {
 	 */
 	public WorkplaceImport getWpInfoLogin(){
 		return adapterWp.findBySid(AppContexts.user().employeeId(), GeneralDate.today());
+	}
+
+	/**
+	 * check before register cmm053
+	 * @author hoatt
+	 * 2019.03.11
+	 * @param param
+	 * @return
+	 */
+	public OutputCheckRegCmm053 checkReg(ParamCheckRegCmm053 param){
+		String companyId     = AppContexts.user().companyId();
+		GeneralDate baseDate = GeneralDate.fromString(param.getBaseDate(), "yyyy/MM/dd");
+		String codeA27 = param.getCodeA27();
+		String codeA210 = param.getCodeA210();
+		String codeA16 = param.getCodeA16();
+		boolean displayA210 = Strings.isNotBlank(codeA210);
+		OutputCheckRegCmm053 result = new OutputCheckRegCmm053(false, false, false, null);
+		//「会社ID」「社員コード」より社員基本情報を取得 - RQ18
+		//A2_7
+		Optional<EmpInfoRQ18> empA27 = employeeAdapter.getEmpInfoByScd(companyId, codeA27);
+		Optional<EmpInfoRQ18> empA210 = Optional.empty();
+		if(displayA210){
+			empA210 = employeeAdapter.getEmpInfoByScd(companyId, codeA27);
+		}
+		if(!empA27.isPresent() || (displayA210 && !empA210.isPresent())){//データがないの場合
+			//エラーメッセージ	（Msg_1512）
+			result.setErrFlg(true);
+			result.setErrA27(!empA27.isPresent());
+			result.setErrA210(displayA210 && !empA210.isPresent());
+			result.setMsgId("Msg_1512");
+			return result;
+		}
+		//在職状態を取得 - RQ75
+		StatusOfEmploymentImport sttEmpA27 = employeeAdapter.getStatusOfEmployment(empA27.get().getEmployeeId(), baseDate);
+		StatusOfEmploymentImport sttEmpA210 = null;
+		if(displayA210){
+			sttEmpA210 = employeeAdapter.getStatusOfEmployment(empA210.get().getEmployeeId(), baseDate);
+		}
+		//check A27
+		if(sttEmpA27 != null && (sttEmpA27.getStatusOfEmployment().equals(StatusOfEmployment.RETIREMENT)||
+				sttEmpA27.getStatusOfEmployment().equals(StatusOfEmployment.LEAVE_OF_ABSENCE)||
+				sttEmpA27.getStatusOfEmployment().equals(StatusOfEmployment.HOLIDAY))){
+			//在職状態は退職　OR　休職　OR　休業の場合
+			//エラーメッセージ	（Msg_1511）
+			result.setErrFlg(true);
+			result.setErrA27(true);
+			result.setMsgId("Msg_1511");
+		}
+		//check A210
+		if(displayA210 && sttEmpA27 != null && (sttEmpA210.getStatusOfEmployment().equals(StatusOfEmployment.RETIREMENT)||
+				sttEmpA210.getStatusOfEmployment().equals(StatusOfEmployment.LEAVE_OF_ABSENCE)||
+				sttEmpA210.getStatusOfEmployment().equals(StatusOfEmployment.HOLIDAY))){
+			//在職状態は退職　OR　休職　OR　休業の場合
+			//エラーメッセージ	（Msg_1511）
+			result.setErrFlg(true);
+			result.setErrA210(true);
+			result.setMsgId("Msg_1511");
+		}
+		if(result.isErrFlg()){
+			return result;
+		}
+		//社員コードから承認権限ありの社員のみ取得する - RQ315
+		Optional<EmployeeWithRangeLoginImport> roleA27 =  empWithRanAd.findByEmployeeByLoginRange(companyId, codeA27, baseDate);
+		Optional<EmployeeWithRangeLoginImport> roleA210 =  Optional.empty();
+		if(displayA210){
+			roleA210 =  empWithRanAd.findByEmployeeByLoginRange(companyId, codeA210, baseDate);
+		}
+		if(!roleA27.isPresent() || (displayA210 && !roleA210.isPresent())){//データがないの場合
+			//エラーメッセージ	（Msg_1078）
+			result.setErrFlg(true);
+			result.setErrA27(!roleA27.isPresent());
+			result.setErrA210(displayA210 && !roleA210.isPresent());
+			result.setMsgId("Msg_1078");
+			return result;
+		}
+		//ドメインモデル「承認設定」．本人による承認をチェックする
+		Optional<ApprovalSetting> appSetOpt = appSetRepo.getApprovalByComId(companyId);
+		if (!appSetOpt.isPresent()) {
+			return result;
+		}
+		ApprovalSetting appSet = appSetOpt.get();
+		if (appSet.getPrinFlg().equals(PrincipalApprovalFlg.NOT_PRINCIPAL)) {
+			// ドメインモデル「承認設定」．本人による承認がfalse(domain 「承認設定」．本人による承認 = false)
+			if (codeA16.equals(codeA27) || (displayA210 && codeA16.equals(codeA210))) {
+				//選択している社員ID（A1_6）　＝＝　入力している社員ID（A2_7）	又は	選択している社員ID（A1_6）　＝＝　入力している社員ID（A2_10）
+				//エラーメッセージ	（Msg_1487）
+				result.setErrFlg(true);
+				result.setErrA27(codeA16.equals(codeA27));
+				result.setErrA210(displayA210 && codeA16.equals(codeA210));
+				result.setMsgId("Msg_1487");
+				return result;
+			}
+		}
+		return result;
 	}
 }
