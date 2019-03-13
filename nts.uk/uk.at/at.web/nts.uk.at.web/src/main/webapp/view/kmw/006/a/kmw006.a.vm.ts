@@ -34,6 +34,8 @@ module nts.uk.at.view.kmw006.a.viewmodel {
         executable: KnockoutObservable<boolean> = ko.observable(true);
         displayClosurePeriod: KnockoutObservable<boolean>;
         first: KnockoutObservable<boolean> = ko.observable(true);
+        totalCount: KnockoutObservable<number> = ko.observable(0);
+        processedCount: KnockoutObservable<number> = ko.observable(0);
 
         constructor() {
             var self = this;
@@ -192,13 +194,6 @@ module nts.uk.at.view.kmw006.a.viewmodel {
                 listEmployeeId: listEmpId,
                 closureId: localStorage.getItem("MonthlyClosureId"),
                 startDT: localStorage.getItem("MonthlyClosureStartDT")
-//                endDT: localStorage.getItem("MonthlyClosureEndDT"),
-//                currentMonth: localStorage.getItem("MonthlyClosureCurrentMonth"),
-//                closureDay: localStorage.getItem("MonthlyClosureDay"),
-//                isLastDayOfMonth: localStorage.getItem("MonthlyClosureDayOfMonth"),
-//                periodStart: localStorage.getItem("MonthlyClosurePeriodStart"),
-//                periodEnd: localStorage.getItem("MonthlyClosurePeriodEnd"),
-//                check : null
             }
             service.getInfors(screenParams).done((results: any) => {
 
@@ -213,15 +208,21 @@ module nts.uk.at.view.kmw006.a.viewmodel {
                         self.selectedClosureId.valueHasMutated();
                     else
                         self.selectedClosureId(results.selectClosureId);
+                    
+                    block.clear();
                 } else {//running => open dialog F
-                    self.openKmw006fDialog(results.screenParams);
-                    self.first(false);
+                    block.grayout();
+                    $.when(self.getAllPersonNo(results.screenParams)).done(() =>{
+                        results.screenParams.totalCount = self.totalCount();
+                        self.openKmw006fDialog(results.screenParams);
+                        self.first(false);
+                        block.clear();
+                    });
                 }
                 dfd.resolve();
             }).fail((error) => {
                 dfd.reject();
                 alertError(error);
-            }).always(() => {
                 block.clear();
             });
             return dfd.promise();
@@ -280,6 +281,20 @@ module nts.uk.at.view.kmw006.a.viewmodel {
         private openKmw006cDialog() {
             modal("/view/kmw/006/c/index.xhtml").onClosed(() => {
             });
+        }
+        
+        getAllPersonNo(params: any): JQueryPromise<any> {
+            let self = this,
+                dfd = $.Deferred();
+            let data = {
+                closureId: params.closureId,
+                yearMonth: params.currentMonth
+            }
+            service.getAllPersonNo(data).done(no => {
+                self.totalCount(no);
+                dfd.resolve();
+            });
+            return dfd.promise();
         }
 
     }
