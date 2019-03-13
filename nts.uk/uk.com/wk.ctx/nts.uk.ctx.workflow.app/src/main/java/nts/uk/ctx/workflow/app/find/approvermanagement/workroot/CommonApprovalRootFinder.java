@@ -36,6 +36,7 @@ import nts.uk.ctx.workflow.dom.approvermanagement.workroot.Approver;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApproverRepository;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.CompanyApprovalRootRepository;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ConfirmPerson;
+import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ConfirmationRootType;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.PersonApprovalRoot;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.PersonApprovalRootRepository;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.WorkplaceApprovalRootRepository;
@@ -571,35 +572,47 @@ public class CommonApprovalRootFinder {
 		List<PastHistoryDto> itemModel = grouped.entrySet().stream().map(item -> {
 			GeneralDate startDate    = null;
 			GeneralDate endDate      = null;
-			String departmentCode    = null;
-			String departmentName    = null;
-			String dailyApprovalCode = null;
-			String dailyApprovalName = null;
-
+			String codeB17  = null;
+			String nameB18  = null;
+			String codeB110 = null;
+			String nameB111 = null;
+			String codeB112 = null;
+			String nameB113 = null;
 			if (!item.getValue().isEmpty()) {
 				for(PersonApprovalRoot psAppRoot: item.getValue()){
 					startDate = psAppRoot.getEmploymentAppHistoryItems().get(0).start();
 					endDate   = psAppRoot.getEmploymentAppHistoryItems().get(0).end();
 					Optional<ApprovalPhase> psAppPhase = this.repoAppPhase.getApprovalFirstPhase(companyId, psAppRoot.getBranchId());
 					if(psAppPhase.isPresent()){
-						Optional<Approver> firstApprover = psAppPhase.get().getApprovers().stream().filter(x-> x.getOrderNumber() == 0).findFirst();
-						if(firstApprover.isPresent()){
-							String sId = firstApprover.get().getEmployeeId();
-							PersonImport person = this.employeeAdapter.getEmployeeInformation(sId);
-							if (psAppRoot.getEmploymentRootAtr().value == 0
-									&& Objects.isNull(psAppRoot.getApplicationType())) {
-								dailyApprovalCode = person.getEmployeeCode();
-								dailyApprovalName = person.getEmployeeName();
-							} else if (psAppRoot.getEmploymentRootAtr().value == 2
-									&& psAppRoot.getConfirmationRootType().value == 1) {
-								departmentCode = person.getEmployeeCode();
-								departmentName = person.getEmployeeName();
+						Optional<Approver> approver1 = psAppPhase.get().getApprovers().stream().filter(x-> x.getOrderNumber() == 0).findFirst();
+						PersonImport person = null;
+						if(approver1.isPresent()){
+							person = this.employeeAdapter.getEmployeeInformation(approver1.get().getEmployeeId());
+						}
+						if(psAppRoot.isCommon()){
+							if(person != null){
+								codeB110 = person.getEmployeeCode();
+								nameB111 = person.getEmployeeName();
+							}
+							Optional<Approver> approver2 = psAppPhase.get().getApprovers().stream().filter(x-> x.getOrderNumber() == 1).findFirst();
+							if(approver2.isPresent()){
+								PersonImport person2 = this.employeeAdapter.getEmployeeInformation(approver2.get().getEmployeeId());
+								if(person2 != null){
+									codeB112 = person2.getEmployeeCode();
+									nameB113 = person2.getEmployeeName();
+								}
+							}
+						}
+						if(psAppRoot.isConfirm() && psAppRoot.getConfirmationRootType().equals(ConfirmationRootType.MONTHLY_CONFIRMATION)){
+							if(person != null){
+								codeB17 = person.getEmployeeCode();
+								nameB18 = person.getEmployeeName();
 							}
 						}
 					}
 				}
 			}
-			return new PastHistoryDto(startDate, endDate, departmentCode, departmentName, dailyApprovalCode, dailyApprovalName);
+			return new PastHistoryDto(startDate, endDate, codeB17, nameB18, codeB110, nameB111, codeB112, nameB113);
 		}).collect(Collectors.toList());
 		return itemModel;
 	}
