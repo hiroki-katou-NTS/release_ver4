@@ -124,7 +124,7 @@ public class UpdateHistoryCmm053Impl implements UpdateHistoryCmm053Service {
 					//a27
 					lstApprNew.add(Approver.createSimpleFromJavaType(companyId,  branchId, phaseId, UUID.randomUUID().toString(), null, a27, 1, 0, 0));
 				}else{//common insert 1 record
-					lstApprNew.add(Approver.createSimpleFromJavaType(companyId,  branchId, phaseId, UUID.randomUUID().toString(), null, a27, 1, 0, 0));
+					lstApprNew.add(Approver.createSimpleFromJavaType(companyId,  branchId, phaseId, UUID.randomUUID().toString(), null, a27, 0, 0, 0));
 				}
 	 		}
 		}
