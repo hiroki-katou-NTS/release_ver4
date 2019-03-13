@@ -114,25 +114,13 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                             self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
                             self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
                         }
+                    }else{
+                        self.settingManager().departmentApproverId('');
+                         self.settingManager().departmentName('');
                     }
                     self.isInitDepartment = false;
                 }, 100);
             });
-            //focus out
-            $(document).on('blur', '#A2_7, #A2_10', (evt: Event) => {
-                setTimeout(function() {
-                    if ($(evt.target).attr('id') == 'A2_7') {
-                        if (evt.target.value == self.settingManager().departmentCode()) {
-                            self.settingManager().departmentCode.valueHasMutated();
-                        }
-                    } else if ($(evt.target).attr('id') == 'A2_10') {
-                        if (evt.target.value == self.settingManager().dailyApprovalCode()) {
-                            self.settingManager().dailyApprovalCode.valueHasMutated();
-                        }
-                    }
-                }, 200);
-            });
-
             //社員コードを入力する
             self.settingManager().dailyApprovalCode.subscribe(value => {
                 setTimeout(function() {
@@ -151,6 +139,35 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                     }
                     self.isInitdailyApproval = false;
                 }, 200);
+            });
+            
+            //focus out
+            $(document).on('blur', '#A2_7, #A2_10', (evt: Event) => {
+                setTimeout(function() {
+                    if ($(evt.target).attr('id') == 'A2_7') {
+                        if (evt.target.value == self.settingManager().departmentCode()) {
+                            self.settingManager().departmentCode.valueHasMutated();
+                        }
+                    } else if ($(evt.target).attr('id') == 'A2_10') {
+                        if (evt.target.value == self.settingManager().dailyApprovalCode()) {
+                            self.settingManager().dailyApprovalCode.valueHasMutated();
+                        }
+                    }
+                }, 200);
+            });
+            //bat su kien err cua kiban
+            $(document).on('input', '#A2_7, #A2_10', (evt: Event) => {
+                setTimeout(function() {
+                    if ($(evt.target).attr('id') == 'A2_7') {
+                        if ($(evt.target).closest('.ntsControl').hasClass('error')) {
+                            self.settingManager().departmentName('');
+                        }
+                    } else if ($(evt.target).attr('id') == 'A2_10') {
+                        if ($(evt.target).closest('.ntsControl').hasClass('error')) {
+                            self.settingManager().dailyApprovalName('');
+                        }
+                    }
+                }, 100);
             });
         }
 
