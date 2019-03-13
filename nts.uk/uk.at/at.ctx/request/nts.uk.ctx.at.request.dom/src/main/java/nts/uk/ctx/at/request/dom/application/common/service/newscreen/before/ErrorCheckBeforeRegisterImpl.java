@@ -345,7 +345,7 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 	 * 03-05_事前否認チェック
 	 */
 	@Override
-	public OvertimeCheckResult preliminaryDenialCheck(String companyId, GeneralDate appDate, GeneralDateTime inputDate,
+	public OvertimeCheckResult preliminaryDenialCheck(String companyId, String employeeID, GeneralDate appDate, GeneralDateTime inputDate,
 			PrePostAtr prePostAtr,int appType) {
 		OvertimeCheckResult result = new OvertimeCheckResult();
 		result.setErrorCode(0);

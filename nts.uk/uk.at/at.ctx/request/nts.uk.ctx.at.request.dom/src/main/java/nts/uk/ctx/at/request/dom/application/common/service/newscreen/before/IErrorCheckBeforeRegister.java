@@ -86,5 +86,5 @@ public interface IErrorCheckBeforeRegister {
 	 * @param prePostAtr: 事前事後区分
 	 * @return true: show confirm dialog,
 	 */
-	OvertimeCheckResult preliminaryDenialCheck(String companyId, GeneralDate appDate, GeneralDateTime inputDate, PrePostAtr prePostAtr,int appType);
+	OvertimeCheckResult preliminaryDenialCheck(String companyId, String employeeID, GeneralDate appDate, GeneralDateTime inputDate, PrePostAtr prePostAtr,int appType);
 }
