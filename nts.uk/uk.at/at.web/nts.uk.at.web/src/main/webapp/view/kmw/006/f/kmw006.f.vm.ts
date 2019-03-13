@@ -28,14 +28,10 @@ module nts.uk.at.view.kmw006.f.viewmodel {
         constructor() {
             var self = this;
             self.params = getShared("kmw006fParams");
-
-            if (self.params.check != 2 || !self.params.check) {
-                if (self.params)
-                    self.totalCount(self.params.listEmployeeId.length);
-                else
-                    self.totalCount(localStorage.getItem("MonthlyClosureListEmpId") ? localStorage.getItem("MonthlyClosureListEmpId").split(',').length : 0);
-            }
-            
+            if (self.params)
+                self.totalCount(self.params.listEmployeeId.length);
+            else
+                self.totalCount(localStorage.getItem("MonthlyClosureListEmpId") ? localStorage.getItem("MonthlyClosureListEmpId").split(',').length : 0);
             
             self.items = ko.observableArray([]);
             self.initIGrid();
@@ -98,7 +94,9 @@ module nts.uk.at.view.kmw006.f.viewmodel {
             });
             if (self.taskId() == null) {
                 // get total from screen A
-                self.totalCount(self.params.totalCount);
+                if(self.params.totalCount > self.totalCount()){
+                    self.totalCount(self.params.totalCount);
+                }
                 tmp = setTimeout(self.getPersonCompleteNo(), 1000);
             } else {
                 nts.uk.deferred.repeat(conf => conf
@@ -209,7 +207,7 @@ module nts.uk.at.view.kmw006.f.viewmodel {
             let id = self.params.monthlyClosureUpdateLogId;
             service.getPersonCompleteNo(id).done(no => {
                 self.processedCount(no);
-                if (self.processedCount() == self.totalCount()) {
+                if (self.processedCount() == self.totalCount() || self.completeStatus() == COMPLETE_STATUS.COMPLETE || self.completeStatus() == COMPLETE_STATUS.COMPLETE_WITH_ERROR) {
                     service.getListError(id).done(data => {
                         if (data.length == 0) {
                             self.completeStatus(COMPLETE_STATUS.COMPLETE);
