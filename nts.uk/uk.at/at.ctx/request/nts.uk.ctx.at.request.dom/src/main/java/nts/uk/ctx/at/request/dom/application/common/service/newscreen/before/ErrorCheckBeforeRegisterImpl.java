@@ -118,7 +118,7 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 		}
 		// ドメインモデル「申請」を取得
 		// 事前申請漏れチェック
-		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, appDate, inputDate,
+		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, employeeID, appDate, inputDate,
 				ApplicationType.OVER_TIME_APPLICATION.value, PrePostAtr.PREDICT.value);
 		if (beforeApplication.isEmpty()) {
 			// TODO: QA Pending
@@ -350,7 +350,7 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 		OvertimeCheckResult result = new OvertimeCheckResult();
 		result.setErrorCode(0);
 		// ドメインモデル「申請」
-		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, appDate, inputDate,
+		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, employeeID, appDate, inputDate,
 				appType, PrePostAtr.PREDICT.value);
 		if (beforeApplication.isEmpty()) {
 			return result;
