@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
@@ -62,7 +62,7 @@ import nts.uk.ctx.workflow.dom.service.output.RepresenterInforOutput;
  * @author Doan Duy Hung
  *
  */
-@Stateless
+@RequestScoped
 public class CollectApprovalRootImpl implements CollectApprovalRootService {
 	
 	@Inject
@@ -500,7 +500,13 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 		
 		// ドメインモデル「個人別就業承認ルート」を取得する(lấy thông tin domain 「個人別就業承認ルート」)
 		// ②個人別の共通の承認ルートを取得、なかったら③へ
-		Optional<PersonApprovalRoot> opPerAppRootsOfCommon = perApprovalRootRepository.findByBaseDateOfCommon(companyID, employeeID, standardDate);
+		Optional<PersonApprovalRoot> opPerAppRootsOfCommon;
+		try {
+			opPerAppRootsOfCommon = perApprovalRootRepository.findByBaseDateOfCommon(companyID, employeeID, standardDate);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ApprovalRootContentOutput(ApprovalRootState.builder().listApprovalPhaseState(Collections.emptyList()).build(), ErrorFlag.ABNORMAL_TERMINATION);
+		}
 		if(opPerAppRootsOfCommon.isPresent()){
 			List<ApprovalPhase> listApprovalPhaseBefore = approvalPhaseRepository.getAllIncludeApprovers(companyID, opPerAppRootsOfCommon.get().getBranchId());
 			List<ApprovalPhase> listApprovalPhaseAfter = this.adjustmentData(companyID, employeeID, standardDate, listApprovalPhaseBefore);
@@ -545,7 +551,13 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 				}
 				return new ApprovalRootContentOutput(approvalRootState, errorFlag);
 			}
-			Optional<WorkplaceApprovalRoot> opWkpAppRootsOfCom = wkpApprovalRootRepository.findByBaseDateOfCommon(companyID, wｋｐId, standardDate);
+			Optional<WorkplaceApprovalRoot> opWkpAppRootsOfCom;
+			try {
+				opWkpAppRootsOfCom = wkpApprovalRootRepository.findByBaseDateOfCommon(companyID, wｋｐId, standardDate);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new ApprovalRootContentOutput(ApprovalRootState.builder().listApprovalPhaseState(Collections.emptyList()).build(), ErrorFlag.ABNORMAL_TERMINATION);
+			}
 			if(opWkpAppRootsOfCom.isPresent()){
 				List<ApprovalPhase> listApprovalPhaseBefore = approvalPhaseRepository.getAllIncludeApprovers(companyID, opWkpAppRootsOfCom.get().getBranchId());
 				List<ApprovalPhase> listApprovalPhaseAfter = this.adjustmentData(companyID, employeeID, standardDate, listApprovalPhaseBefore);
@@ -590,7 +602,13 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 			return new ApprovalRootContentOutput(approvalRootState, errorFlag);
 		}
 		
-		Optional<CompanyApprovalRoot> opCompanyAppRootsOfCom = comApprovalRootRepository.findByBaseDateOfCommon(companyID, standardDate);
+		Optional<CompanyApprovalRoot> opCompanyAppRootsOfCom;
+		try {
+			opCompanyAppRootsOfCom = comApprovalRootRepository.findByBaseDateOfCommon(companyID, standardDate);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ApprovalRootContentOutput(ApprovalRootState.builder().listApprovalPhaseState(Collections.emptyList()).build(), ErrorFlag.ABNORMAL_TERMINATION);
+		}
 		if(opCompanyAppRootsOfCom.isPresent()){
 			List<ApprovalPhase> listApprovalPhaseBefore = approvalPhaseRepository.getAllIncludeApprovers(companyID, opCompanyAppRootsOfCom.get().getBranchId());
 			List<ApprovalPhase> listApprovalPhaseAfter = this.adjustmentData(companyID, employeeID, standardDate, listApprovalPhaseBefore);
