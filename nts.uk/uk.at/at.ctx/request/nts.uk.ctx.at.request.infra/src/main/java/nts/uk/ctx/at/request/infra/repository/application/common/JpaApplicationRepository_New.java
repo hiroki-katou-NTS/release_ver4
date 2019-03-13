@@ -50,6 +50,7 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 			+ "ORDER BY c.inputDate DESC";
 	private static final String SELECT_BY_DATE = SELECT_FROM_APPLICATION + " AND a.appDate >= :startDate AND a.appDate <= :endDate";
 	private static  final String SELECT_BEFORE_APPLICATION = SELECT_FROM_APPLICATION 
+			+ " AND a.employeeID = :employeeID"
 			+ " AND a.appDate = :appDate "
 			+ " AND a.appType = :applicationType "
 			+ " AND a.prePostAtr = :prePostAtr ORDER BY a.inputDate DESC";
@@ -180,10 +181,11 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		return data;
 	}
 	@Override
-	public List<Application_New> getBeforeApplication(String companyId, GeneralDate appDate, GeneralDateTime inputDate,
+	public List<Application_New> getBeforeApplication(String companyId, String employeeID, GeneralDate appDate, GeneralDateTime inputDate,
 			int appType, int prePostAtr) {
 		return this.queryProxy().query(SELECT_BEFORE_APPLICATION, KrqdtApplication_New.class)
 				.setParameter("companyID", companyId)
+				.setParameter("employeeID", employeeID)
 				.setParameter("appDate", appDate)
 				.setParameter("applicationType", appType)
 				.setParameter("prePostAtr", prePostAtr)				

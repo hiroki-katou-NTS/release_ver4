@@ -281,7 +281,7 @@ public class HolidayThreeProcessImpl implements HolidayThreeProcess {
 		}
 		// ドメインモデル「申請」を取得
 		// 事前申請漏れチェック
-		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, appDate, inputDate,
+		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, employeeID, appDate, inputDate,
 				ApplicationType.BREAK_TIME_APPLICATION.value, PrePostAtr.PREDICT.value);
 		if (beforeApplication.isEmpty()) {
 			throw new BusinessException("Msg_1508",employeeName);
