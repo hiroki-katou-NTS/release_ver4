@@ -5,7 +5,9 @@ module nts.uk.at.view.kmw006.f.viewmodel {
     import getShared = nts.uk.ui.windows.getShared;
     import setShared = nts.uk.ui.windows.setShared;
     import kibanTimer = nts.uk.ui.sharedvm.KibanTimer;
-
+    
+    var tmp = null;
+    
     export class ScreenModel {
 
         items: KnockoutObservableArray<MonthlyClosureErrorInfor>;
@@ -21,6 +23,7 @@ module nts.uk.at.view.kmw006.f.viewmodel {
         dispProcessCount: KnockoutObservable<string>;
         completeStatus: KnockoutObservable<number> = ko.observable(COMPLETE_STATUS.INCOMPLETE);
         params: any;
+        duration: KnockoutObservable<number> = ko.observable(0);
 
         constructor() {
             var self = this;
@@ -29,6 +32,7 @@ module nts.uk.at.view.kmw006.f.viewmodel {
                 self.totalCount(self.params.listEmployeeId.length);
             else
                 self.totalCount(localStorage.getItem("MonthlyClosureListEmpId") ? localStorage.getItem("MonthlyClosureListEmpId").split(',').length : 0);
+            
             self.items = ko.observableArray([]);
             self.initIGrid();
             self.dispProcessCount = ko.computed(() => {
@@ -76,18 +80,6 @@ module nts.uk.at.view.kmw006.f.viewmodel {
         private processMonthlyUpdate(): void {
             var self = this;
             var command = self.params;
-//            var command = {
-//                    closureDay : self.params.closureDay,
-//                    closureId: self.params.closureId,
-//                    currentMonth: self.params.currentMonth,
-//                    endDT: self.params.endDT,
-//                    isLastDayOfMonth: self.params.isLastDayOfMonth,
-//                    listEmployeeId: self.params.listEmployeeId,
-//                    monthlyClosureUpdateLogId: self.params.monthlyClosureUpdateLogId,
-//                    periodEnd: self.params.periodEnd,
-//                    periodStart: moment(self.params.periodStart).format("yyyy-MM-dd hh:mm:ss.SSS"),
-//                    startDT: self.params.startDT
-//                }
             service.executeMonthlyClosure(command).done(res => {
                 self.taskId(res.id);
                 localStorage.setItem("MonthlyClosureTaskId", res.id);
@@ -96,31 +88,41 @@ module nts.uk.at.view.kmw006.f.viewmodel {
         }
 
         private checkAsyncProcess(): void {
-            var self = this;
-            nts.uk.deferred.repeat(conf => conf
-                .task(() => {
-                    return nts.uk.request.asyncTask.getInfo(self.taskId()).done(info => {
-                        self.processedCount(self.getAsyncData(info.taskDatas, "processed").valueAsNumber);
-                        if (!info.pending && !info.running) {
-                            if (info.status == "COMPLETED" || localStorage.getItem("MCUdpStatus") == "COMPLETED") {
-                                localStorage.setItem("MCUdpStatus", info.status);
-                                self.processedCount(self.totalCount());
-                            }
-                            self.checkResult(info);
-                            if (info.error) {
-                                alertError(info.error);
-                                self.completeStatus(COMPLETE_STATUS.COMPLETE_WITH_ERROR);
-                            }
-                        }
-                    });
-                })
-                .while(info => info.pending || info.running)
-                .pause(1000)
-            );
+            let self = this;
+            service.getDurationTime(self.params.monthlyClosureUpdateLogId).done(data => {
+                self.duration(data);
+            });
+            if (self.taskId() == null) {
+                // get total from screen A
+                if(self.params.totalCount > self.totalCount()){
+                    self.totalCount(self.params.totalCount);
+                }
+                tmp = setTimeout(self.getPersonCompleteNo(), 1000);
+            } else {
+                nts.uk.deferred.repeat(conf => conf
+                    .task(() => {
+                        return nts.uk.request.asyncTask.getInfo(self.taskId()).done(info => {
+                            self.processedCount(self.getAsyncData(info.taskDatas, "processed").valueAsNumber);
+                            if (!info.pending && !info.running) {
+                                if (info.status == "COMPLETED" || localStorage.getItem("MCUdpStatus") == "COMPLETED") {
+                                    localStorage.setItem("MCUdpStatus", info.status);
+                                    self.processedCount(self.totalCount());
+                                }
+                                self.checkResult(info);
+                                if (info.error) {
+                                    alertError(info.error);
+                                    self.completeStatus(COMPLETE_STATUS.COMPLETE_WITH_ERROR);
+                                }
+                        }});
+                    })
+                    .while(info => info.pending || info.running)
+                    .pause(1000)
+                );
+            }
         }
 
         private getAsyncData(data: Array<any>, key: string): any {
-            var result = _.find(data, (item) => {
+            let result = _.find(data, (item) => {
                 return item.key == key;
             });
             return result || { valueAsString: "", valueAsNumber: 0, valueAsBoolean: false };
@@ -139,9 +141,11 @@ module nts.uk.at.view.kmw006.f.viewmodel {
                 $("#single-list").igGrid("option", "dataSource", self.items());
                 self.isComplete(true);
                 $("#F3_2").focus();
-                self.endTime(taskInfor.finishedAt);
-                localStorage.setItem("MonthlyClosureExecutionEndDate", self.endTime());
                 self.elapseTime.end();
+                let time = self.duration() + self.elapseTime.elapsedSeconds;
+                self.endTime(moment.utc(self.startTime()).add(time, 'second').format());
+                localStorage.setItem("MonthlyClosureExecutionEndDate", self.endTime());
+                $("#elapseTime").text(self.formatTime(time));
                 self.completeStatus(result.updateLog.completeStatus);
             }).fail((error) => {
                 alertError(error);
@@ -153,19 +157,12 @@ module nts.uk.at.view.kmw006.f.viewmodel {
         private confirmComplete() {
             let self = this;
             block.invisible();
-            service.completeConfirm(self.params ? self.params.monthlyClosureUpdateLogId : localStorage.getItem("MonthlyClosureUpdateLogId")).done(() => {
+            nts.uk.at.view.kmw006.f.service.completeConfirm(self.params ? self.params.monthlyClosureUpdateLogId : localStorage.getItem("MonthlyClosureUpdateLogId")).done(() => {
                 localStorage.removeItem("MonthlyClosureUpdateLogId");
                 localStorage.removeItem("MonthlyClosureListEmpId");
                 localStorage.removeItem("MonthlyClosureId");
                 localStorage.removeItem("MonthlyClosureExecutionDateTime");
                 localStorage.removeItem("MonthlyClosureTaskId");
-//                localStorage.removeItem("MonthlyClosureStartDT");
-//                localStorage.removeItem("MonthlyClosureEndDT");
-//                localStorage.removeItem("MonthlyClosureCurrentMonth");
-//                localStorage.removeItem("MonthlyClosureDay");
-//                localStorage.removeItem("MonthlyClosureDayOfMonth");
-//                localStorage.removeItem("MonthlyClosurePeriodStart");
-//                localStorage.removeItem("MonthlyClosurePeriodEnd");
                 setShared("kmw006fConfirm", {check: true});
                 nts.uk.ui.windows.close();
             }).fail((error) => {
@@ -199,7 +196,53 @@ module nts.uk.at.view.kmw006.f.viewmodel {
                 ]
             });
         }
+        
+        formatTime(second: number) {
+            let d = (s) => { f = Math.floor; g = (n) => ('00' + n).slice(-2); return f(s / 3600) + ':' + g(f(s / 60) % 60) + ':' + g(s % 60) };
+            return d(second);
+        }
+        
+        getPersonCompleteNo() {
+            let self = this;
+            let id = self.params.monthlyClosureUpdateLogId;
+            service.getPersonCompleteNo(id).done(no => {
+                self.processedCount(no);
+                if (self.processedCount() == self.totalCount() || self.completeStatus() == COMPLETE_STATUS.COMPLETE || self.completeStatus() == COMPLETE_STATUS.COMPLETE_WITH_ERROR) {
+                    service.getListError(id).done(data => {
+                        if (data.length == 0) {
+                            self.completeStatus(COMPLETE_STATUS.COMPLETE);
+                        } else {
+                            // 
+                            let listErr: Array<MonthlyClosureErrorInfor> = [];
+                            for (let i = 0; i < data.length; i++) {
+                                let item = data[i];
+                                listErr.push(new MonthlyClosureErrorInfor(i + 1, item.employeeCode, item.employeeName, item.errorMessage, item.atr));
+                            }
+                            self.items(listErr);
+                            $("#single-list").igGrid("option", "dataSource", self.items());
+                            $("#F3_2").focus();
+                            //
+                            self.completeStatus(COMPLETE_STATUS.COMPLETE_WITH_ERROR);
+                        }
 
+                        self.elapseTime.end();
+                        self.isComplete(true);
+                        let time = self.duration() + self.elapseTime.elapsedSeconds;
+                        self.endTime(moment.utc(self.startTime()).add(time, 'second').format());
+                        localStorage.setItem("MonthlyClosureExecutionEndDate", self.endTime());
+                        $("#elapseTime").text(self.formatTime(time));
+                        
+                        clearTimeout(tmp);
+                    });
+                } else {
+                    tmp = setTimeout(self.getPersonCompleteNo(), 1000); // repeat myself
+                }
+            }).fail((error) => {
+                clearTimeout(tmp);
+                alertError(error);
+            });
+        }
+    
     }
 
     class MonthlyClosureErrorInfor {

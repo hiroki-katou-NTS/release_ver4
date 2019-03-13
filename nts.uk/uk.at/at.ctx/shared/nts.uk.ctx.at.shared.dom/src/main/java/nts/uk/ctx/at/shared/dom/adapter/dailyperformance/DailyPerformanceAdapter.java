@@ -17,5 +17,5 @@ public interface DailyPerformanceAdapter {
   
   boolean dataMonth(String approverID,DatePeriod period, YearMonth yearMonth);
   
-  
+  AppEmpStatusImport appEmpStatusExport(String employeeID, DatePeriod period, Integer rootType);
 }
