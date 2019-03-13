@@ -645,7 +645,7 @@ public class CommonApprovalRootFinder {
 		Optional<EmpInfoRQ18> empA27 = employeeAdapter.getEmpInfoByScd(companyId, codeA27);
 		Optional<EmpInfoRQ18> empA210 = Optional.empty();
 		if(displayA210){
-			empA210 = employeeAdapter.getEmpInfoByScd(companyId, codeA27);
+			empA210 = employeeAdapter.getEmpInfoByScd(companyId, codeA210);
 		}
 		if(!empA27.isPresent() || (displayA210 && !empA210.isPresent())){//データがないの場合
 			//エラーメッセージ	（Msg_1512）
