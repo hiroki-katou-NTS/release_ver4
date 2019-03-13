@@ -11,11 +11,12 @@ module nts.uk.com.view.cmm053.b.viewmodel {
         selectedPastHistory: KnockoutObservable<string> = ko.observable('');
         startDate: KnockoutObservable<string> = ko.observable('');
         endDate: KnockoutObservable<string> = ko.observable('');
-        departmentCode: KnockoutObservable<string> = ko.observable('');
-        departmentName: KnockoutObservable<string> = ko.observable('');
-        dailyApprovalCode: KnockoutObservable<string> = ko.observable('');
-        dailyApprovalName: KnockoutObservable<string> = ko.observable('');
-
+        codeB17: KnockoutObservable<string> = ko.observable('');
+        nameB18: KnockoutObservable<string> = ko.observable('');
+        codeB110: KnockoutObservable<string> = ko.observable('');
+        nameB111: KnockoutObservable<string> = ko.observable('');
+        codeB112: KnockoutObservable<string> = ko.observable('');
+        nameB113: KnockoutObservable<string> = ko.observable('');
         constructor() {
             let self = this;
             self.initScreen();
@@ -25,10 +26,12 @@ module nts.uk.com.view.cmm053.b.viewmodel {
                     if (_pastHistory) {
                         self.startDate(_pastHistory.startDate());
                         self.endDate(_pastHistory.endDate());
-                        self.departmentCode(_pastHistory.departmentCode());
-                        self.departmentName(_pastHistory.departmentName());
-                        self.dailyApprovalCode(_pastHistory.dailyApprovalCode());
-                        self.dailyApprovalName(_pastHistory.dailyApprovalName());
+                        self.codeB17(_pastHistory.codeB17());
+                        self.nameB18(_pastHistory.nameB18());
+                        self.codeB110(_pastHistory.codeB110());
+                        self.nameB111(_pastHistory.nameB111());
+                        self.codeB112(_pastHistory.codeB112());
+                        self.nameB113(_pastHistory.nameB113());
                     }
                 }
             });
@@ -57,7 +60,7 @@ module nts.uk.com.view.cmm053.b.viewmodel {
                         return dateB - dateA;
                     });
                     let _pastHistoryList: Array<PastHistory> = _.map(result, x => {
-                        return new PastHistory(x.startDate, x.endDate, x.departmentCode, x.departmentName, x.dailyApprovalCode, x.dailyApprovalName)
+                        return new PastHistory(x.startDate, x.endDate, x.codeB17, x.nameB18, x.codeB110, x.nameB111, x.codeB112, x.nameB113)
                     });
                     self.pastHistoryItems(_pastHistoryList);
                     self.selectedPastHistory(_pastHistoryList[0].startEndDate);
@@ -79,18 +82,23 @@ module nts.uk.com.view.cmm053.b.viewmodel {
         startEndDate: string;
         startDate: KnockoutObservable<string>;
         endDate: KnockoutObservable<string>;
-        departmentCode: KnockoutObservable<string>;
-        departmentName: KnockoutObservable<string>;
-        dailyApprovalCode: KnockoutObservable<string>;
-        dailyApprovalName: KnockoutObservable<string>;
-        constructor(startDate: string, endDate: string, departmentCode: string, departmentName: string, dailyApprovalCode: string, dailyApprovalName: string) {
+        codeB17: KnockoutObservable<string>;
+        nameB18: KnockoutObservable<string>;
+        codeB110: KnockoutObservable<string>;
+        nameB111: KnockoutObservable<string>;
+        codeB112: KnockoutObservable<string>;
+        nameB113: KnockoutObservable<string>;
+        constructor(startDate: string, endDate: string, codeB17: string, nameB18: string,
+            codeB110: string, nameB111: string, codeB112: string, nameB113: string) {
             this.startEndDate = startDate + '～' + endDate;
             this.startDate = ko.observable(startDate);
             this.endDate = ko.observable(endDate);
-            this.departmentCode = ko.observable(departmentCode);
-            this.departmentName = ko.observable(departmentName);
-            this.dailyApprovalCode = ko.observable(dailyApprovalCode);
-            this.dailyApprovalName = ko.observable(dailyApprovalName);
+            this.codeB17 = ko.observable(codeB17);
+            this.nameB18 = ko.observable(nameB18);
+            this.codeB110 = ko.observable(codeB110);
+            this.nameB111 = ko.observable(nameB111);
+            this.codeB112 = ko.observable(codeB112);
+            this.nameB113 = ko.observable(nameB113);
         }
     }
 }
