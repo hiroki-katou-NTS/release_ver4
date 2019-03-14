@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.logging.log4j.util.Strings;
+
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHist;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistByEmployee;
@@ -111,8 +113,10 @@ public class ComPubImp implements SyCompanyPub {
 			List<DatePeriod> lstPeriod = listAffComHisByEmp.get(i).items()
 					.stream().map(ent -> ent.span())
 					.collect(Collectors.toList());
-			StatusOfEmployee statusOfEmployee = new StatusOfEmployee(listAffComHisByEmp.get(i).getSId(), lstPeriod);
-			result.add(statusOfEmployee);
+			if (listAffComHisByEmp.get(i).getSId() != null && !lstPeriod.isEmpty()) {
+				StatusOfEmployee statusOfEmployee = new StatusOfEmployee(listAffComHisByEmp.get(i).getSId(), lstPeriod);
+				result.add(statusOfEmployee);
+			}
 		}
 		
 		return result;
