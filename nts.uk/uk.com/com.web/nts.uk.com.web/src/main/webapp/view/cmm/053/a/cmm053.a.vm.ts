@@ -36,7 +36,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         isInitDepartment: boolean = true;
         isInitdailyApproval: boolean = true;
         displayDailyApprover: KnockoutObservable<boolean> = ko.observable(false);
-        checkSubscribe: KnockoutObservable<STATUS_SUBSCRIBE> = ko.observable(null);
+        checkSubscribe: KnockoutObservable<STATUS_SUBSCRIBE> = ko.observable(STATUS_SUBSCRIBE.DONE);
         constructor() {
             let self = this;
 
@@ -102,40 +102,30 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                 }
             });
 
-            //社員コードを入力する
+            //社員コードを入力する A2_7
             self.settingManager().departmentCode.subscribe(value => {
+                self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
                 setTimeout(function() {
-                    if (value == '') {
-                        self.settingManager().departmentName('');
-                        return;
-                    }
-                    if (value) {
-                        if (!self.isInitDepartment && value.length == 6) {
-                            self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
-                            self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
-                        }
+                    if (value != '' && value != null && value !== undefined && value.length == 6){
+                        self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
                     }else{
                         self.settingManager().departmentApproverId('');
                          self.settingManager().departmentName('');
+                        self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
                     }
                     self.isInitDepartment = false;
                 }, 100);
             });
-            //社員コードを入力する
+            //社員コードを入力する A2_10
             self.settingManager().dailyApprovalCode.subscribe(value => {
+                self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
                 setTimeout(function() {
-                    if (value == '') {
-                        self.settingManager().dailyApprovalName('');
-                        return;
-                    }
-                    if (value) {
-                        if (!self.isInitdailyApproval && value.length == 6) {
-                            self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
-                            self.getEmployeeByCode(value, APPROVER_TYPE.DAILY_APPROVER);
-                        }
+                    if (value != '' && value != null && value !== undefined && value.length == 6){
+                        self.getEmployeeByCode(value, APPROVER_TYPE.DAILY_APPROVER);
                     } else {
                         self.settingManager().dailyApproverId("");
                         self.settingManager().dailyApprovalName("");
+                        self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
                     }
                     self.isInitdailyApproval = false;
                 }, 200);
@@ -192,36 +182,40 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             if (!self.selectedItem()) {
                 return;
             }
-            _.defer(() => {nts.uk.ui.errors.clearAll()});
-            self.settingManager().employeeId(self.selectedItem());
-            var dfd = $.Deferred();
-            service.getSettingManager(self.selectedItem()).done(result => {
-                if (result) {
-                    self.isInitDepartment = true;
-                    self.isInitdailyApproval = true;
-                    self.settingManager().startDate(result.startDate);
-                    self.settingManager().endDate(result.endDate);
-                    self.settingManager().departmentCode(result.departmentCode);
-                    self.settingManager().departmentApproverId(result.departmentApproverId);
-                    self.settingManager().dailyApprovalCode(result.dailyApprovalCode);
-                    self.settingManager().dailyApproverId(result.dailyApproverId);
-                    self.settingManager().departmentName(result.departmentName);
-                    self.settingManager().dailyApprovalName(result.dailyApprovalName);
-                    self.settingManager().closingStartDate(result.closingStartDate);
-                    self.settingManager().hasAuthority(result.hasAuthority);
-                    self.settingManager().hasHistory(!result.newMode);
-                    self.displayDailyApprover(result.displayDailyApprover);
-                    if (result.newMode) {
-                        self.settingNewMode();
-                    } else {
-                        self.screenMode(EXECUTE_MODE.UPDATE_MODE);
-                        //フォーカス制御
-                        $('#A2_7').focus();
+            setTimeout(function() {
+                let tc = setInterval(function() {
+                    if (self.checkSubscribe() != STATUS_SUBSCRIBE.PENDING) {
+                        clearInterval(tc);
+                        _.defer(() => { nts.uk.ui.errors.clearAll() });
+                        self.settingManager().employeeId(self.selectedItem());
+                        service.getSettingManager(self.selectedItem()).done(result => {
+                            if (result) {
+                                self.isInitDepartment = true;
+                                self.isInitdailyApproval = true;
+                                self.settingManager().startDate(result.startDate);
+                                self.settingManager().endDate(result.endDate);
+                                self.settingManager().departmentCode(result.departmentCode);
+                                self.settingManager().departmentApproverId(result.departmentApproverId);
+                                self.settingManager().dailyApprovalCode(result.dailyApprovalCode);
+                                self.settingManager().dailyApproverId(result.dailyApproverId);
+                                self.settingManager().departmentName(result.departmentName);
+                                self.settingManager().dailyApprovalName(result.dailyApprovalName);
+                                self.settingManager().closingStartDate(result.closingStartDate);
+                                self.settingManager().hasAuthority(result.hasAuthority);
+                                self.settingManager().hasHistory(!result.newMode);
+                                self.displayDailyApprover(result.displayDailyApprover);
+                                if (result.newMode) {
+                                    self.settingNewMode();
+                                } else {
+                                    self.screenMode(EXECUTE_MODE.UPDATE_MODE);
+                                    //フォーカス制御
+                                    $('#A2_7').focus();
+                                }
+                            }
+                        });
                     }
-                }
-                dfd.resolve();
-            });
-            return dfd.promise();
+                }, 300);
+            }, 200);
         }
 
         //新規する
@@ -242,7 +236,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                 let tc = setInterval(function() {
                     if (self.checkSubscribe() != STATUS_SUBSCRIBE.PENDING) {
                         clearInterval(tc);
-                        if (STATUS_SUBSCRIBE.DONE) {
+                        if (self.checkSubscribe() == STATUS_SUBSCRIBE.DONE) {
                             if (!nts.uk.ui.errors.hasError()) {
                                 let startDate = new Date(self.settingManager().startDate());
                                 let closingStartDate = new Date(self.settingManager().closingStartDate());
@@ -252,6 +246,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                                     codeA210: self.settingManager().dailyApprovalCode(),
                                     baseDate: moment(new Date(self.settingManager().startDate())).format('YYYY/MM/DD')
                                 }
+                                block.invisible();
                                 service.checkBfReg(paramcheckReg).done((result) => {
                                     if (result.errFlg) {//エラーがある場合
                                         if (result.errA27) {
@@ -260,6 +255,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                                         if (result.errA210) {
                                             $('#A2_10').ntsError('set', { messageId: result.msgId });
                                         }
+                                        block.clear();
                                         return;
                                     }
                                     if (!nts.uk.ui.errors.hasError()) {
@@ -297,29 +293,6 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                 return emp.id == self.selectedItem();
             });     
         }
-        /**
-         * 入力承認者の承認権限をチェックする
-         */
-//        checkInputApproverAuthority(employeeCode: any){
-//            let self = this;
-//            self.getEmployeeByCode(employeeCode, APPROVER_TYPE.DEPARTMENT_APPROVER);
-//        }
-        
-//        checkApprovalSetting(command): JQueryPromise<any> {
-//            let self = this,
-//                dfd = $.Deferred();
-//            block.invisible();
-//            service.checkApprovalSetting(command).done(() => {
-//                 block.clear();
-//                dfd.resolve();
-//            }).fail(error => {
-//                dialog.alertError({ messageId: error.messageId });
-//                 block.clear();
-//                dfd.rejected();
-//                })
-//
-//            return dfd.promise();
-//        }
 
         //削除する
         //「削除」ボタンをクリックする
@@ -351,15 +324,14 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             service.insertHistoryByManagerSetting(command).done(result => {
                 //情報メッセージMsg_15
                 dialog.info({ messageId: "Msg_15" }).then(() => {
-                    self.initScreen().done(()=>{
-                        self.isInitDepartment = false;
-                        self.isInitdailyApproval = false;    
-                    });
+                    self.initScreen();
+                    self.isInitDepartment = false;
+                    self.isInitdailyApproval = false;    
                 });
-            }).fail(error => {
-                dialog.alertError({ messageId: error.messageId });
-            }).always(function() {
                 block.clear();
+            }).fail(error => {
+                block.clear();
+                dialog.alertError({ messageId: error.messageId });
             });
         }
 
@@ -369,15 +341,14 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             service.updateHistoryByManagerSetting(command).done(result => {
                 //情報メッセージMsg_15
                 dialog.info({ messageId: "Msg_15" }).then(() => {
-                    self.initScreen().done(() => {
-                        self.isInitDepartment = false;
-                        self.isInitdailyApproval = false;
-                    });
+                    self.initScreen();
+                    self.isInitDepartment = false;
+                    self.isInitdailyApproval = false;
                 });
-            }).fail(error => {
-                dialog.alertError({ messageId: error.messageId });
-            }).always(function() {
                 block.clear();
+            }).fail(error => {
+                block.clear();
+                dialog.alertError({ messageId: error.messageId });
             });
         }
 
@@ -393,7 +364,6 @@ module nts.uk.com.view.cmm053.a.viewmodel {
         getEmployeeByCode(employeeCode: any, approverType:number): JQueryPromise<any> {
             let self = this;
             var dfd = $.Deferred();
-//            block.invisible();
             let paramFind = {
                 employeeCode: employeeCode,
                 hasAuthority: self.settingManager().hasAuthority(),
@@ -405,14 +375,13 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                         self.settingManager().departmentName(result.businessName);
                         self.settingManager().departmentCode(result.employeeCD);
                         self.settingManager().departmentApproverId(result.employeeID);
-                    } else {
+                    } else if(approverType == APPROVER_TYPE.DAILY_APPROVER){
                         self.settingManager().dailyApprovalName(result.businessName);
                         self.settingManager().dailyApprovalCode(result.employeeCD);
                         self.settingManager().dailyApproverId(result.employeeID);
                     }
                 }
                 self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
-//                block.clear();
                 dfd.resolve();
             }).fail(error => {
                 self.checkSubscribe(STATUS_SUBSCRIBE.FAIL);
@@ -425,7 +394,6 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                     self.settingManager().dailyApprovalName('');
                     $('#A2_10').ntsError('set', { messageId: error.messageId});
                 }
-//                block.clear();
                 dfd.reject();
             });
             return dfd.promise();
@@ -433,25 +401,32 @@ module nts.uk.com.view.cmm053.a.viewmodel {
 
         settingNewMode() {
             let self = this;
-            //最初履歴がない場合
-            if (!self.settingManager().hasHistory()) {
-                self.settingManager().startDate(self.settingManager().closingStartDate());
-            } else {
-                self.settingManager().startDate('');
-            }
-            //画面をクリアする
-            self.settingManager().endDate('');
-            self.settingManager().departmentApproverId('');
-            self.settingManager().departmentCode('');
-            self.settingManager().departmentName('');
-            self.settingManager().dailyApproverId('');
-            self.settingManager().dailyApprovalCode('');
-            self.settingManager().dailyApprovalName('');
+            setTimeout(function() {
+                let tc = setInterval(function() {
+                    if (self.checkSubscribe() != STATUS_SUBSCRIBE.PENDING) {
+                        clearInterval(tc);
+                        //最初履歴がない場合
+                        if (!self.settingManager().hasHistory()) {
+                            self.settingManager().startDate(self.settingManager().closingStartDate());
+                        } else {
+                            self.settingManager().startDate('');
+                        }
+                        //画面をクリアする
+                        self.settingManager().endDate('');
+                        self.settingManager().departmentApproverId('');
+                        self.settingManager().departmentCode('');
+                        self.settingManager().departmentName('');
+                        self.settingManager().dailyApproverId('');
+                        self.settingManager().dailyApprovalCode('');
+                        self.settingManager().dailyApprovalName('');
 
-            //画面を新規モードにする
-            self.screenMode(EXECUTE_MODE.NEW_MODE);
-            //フォーカス制御
-            $('#A2_3').focus();
+                        //画面を新規モードにする
+                        self.screenMode(EXECUTE_MODE.NEW_MODE);
+                        //フォーカス制御
+                        $('#A2_3').focus();
+                    }
+                }, 300);
+            }, 200);
         }
 
         initKCP009() {
