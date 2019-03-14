@@ -59,6 +59,6 @@ public class HolidayWorkInputDto {
 				"", 
 				holidayWorkInput.getStartTime()== null ? null : holidayWorkInput.getStartTime().v(), 
 				holidayWorkInput.getEndTime() == null ? null : holidayWorkInput.getEndTime().v(), 
-				holidayWorkInput.getApplicationTime().v(),0);
+				holidayWorkInput.getApplicationTime() == null ? null : holidayWorkInput.getApplicationTime().v(),0);
 	}
 }
