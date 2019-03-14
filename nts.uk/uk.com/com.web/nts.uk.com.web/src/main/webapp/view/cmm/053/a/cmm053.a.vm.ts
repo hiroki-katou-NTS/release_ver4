@@ -98,6 +98,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             //選択社員を切り替える
             self.selectedItem.subscribe(newValue => {
                 if (newValue) {
+                    block.invisible();
                     self.initScreen();
                 }
             });
@@ -212,6 +213,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                                     $('#A2_7').focus();
                                 }
                             }
+                            block.clear();
                         });
                     }
                 }, 300);
