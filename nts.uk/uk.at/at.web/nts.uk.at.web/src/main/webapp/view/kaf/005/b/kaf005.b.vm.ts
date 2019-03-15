@@ -5,6 +5,7 @@ module nts.uk.at.view.kaf005.b {
     import dialog = nts.uk.ui.dialog;
     import appcommon = nts.uk.at.view.kaf000.shr.model;
     import util = nts.uk.util;
+    import text = nts.uk.resource.getText;
 
     export module viewmodel {
         export class ScreenModel extends kaf000.b.viewmodel.ScreenModel {
@@ -218,11 +219,11 @@ module nts.uk.at.view.kaf005.b {
                 self.employeeID(data.application.applicantSID);
                 if (data.siftType != null) {
                     self.siftCD(data.siftType.siftCode);
-                    self.siftName(data.siftType.siftName);
+                    self.siftName(data.siftType.siftName || text("KAL003_120"));
                 }
                 if (data.workType != null) {
                     self.workTypeCd(data.workType.workTypeCode);
-                    self.workTypeName(data.workType.workTypeName);
+                    self.workTypeName(data.workType.workTypeName || text("KAL003_120"));
                 }
                 
                 self.workTypecodes(data.workTypes);

@@ -5,6 +5,7 @@ module nts.uk.at.view.kaf005.a.viewmodel {
     import appcommon = nts.uk.at.view.kaf000.shr.model;
     import setShared = nts.uk.ui.windows.setShared;
     import util = nts.uk.util;
+    import text = nts.uk.resource.getText;
 
     export class ScreenModel {
         
@@ -351,11 +352,11 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             self.employeeID(data.employeeID);
             if (data.siftType != null) {
                 self.siftCD(data.siftType.siftCode);
-                self.siftName(data.siftType.siftName);
+                self.siftName(data.siftType.siftName || text("KAL003_120"));
             }
             if (data.workType != null) {
                 self.workTypeCd(data.workType.workTypeCode);
-                self.workTypeName(data.workType.workTypeName);
+                self.workTypeName(data.workType.workTypeName || text("KAL003_120"));
             }
             self.workTypecodes(data.workTypes);
             self.workTimecodes(data.siftTypes);
@@ -1042,11 +1043,11 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             self.employeeName(overtimeDto.employeeName);
             if (overtimeDto.siftType != null) {
                 self.siftCD(overtimeDto.siftType.siftCode);
-                self.siftName(overtimeDto.siftType.siftName);
+                self.siftName(overtimeDto.siftType.siftName|| text("KAL003_120"));
             }
             if (overtimeDto.workType != null) {
                 self.workTypeCd(overtimeDto.workType.workTypeCode);
-                self.workTypeName(overtimeDto.workType.workTypeName);
+                self.workTypeName(overtimeDto.workType.workTypeName|| text("KAL003_120"));
             }
             $("#inpStartTime1").ntsError("clear"); 
             $("#inpEndTime1").ntsError("clear");

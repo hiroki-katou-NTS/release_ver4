@@ -4,7 +4,6 @@
  *****************************************************************/
 package nts.uk.ctx.at.shared.infra.repository.worktype;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,11 +17,9 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
-import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeInfor;
@@ -417,6 +414,14 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	@Override
 	public Optional<WorkType> findByPK(String companyId, String workTypeCd) {
 		return this.queryProxy().find(new KshmtWorkTypePK(companyId, workTypeCd), KshmtWorkType.class)
+				.map(x -> toDomain(x));
+	}
+	
+	@Override
+	public Optional<WorkType> findNoAbolishByPK(String companyId, String workTypeCd) {
+		return this.queryProxy().find(new KshmtWorkTypePK(companyId, workTypeCd), KshmtWorkType.class).filter(x -> {
+			return x.deprecateAtr == 0;
+		})
 				.map(x -> toDomain(x));
 	}
 
