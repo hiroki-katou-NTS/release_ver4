@@ -546,13 +546,14 @@ public class DailyModifyResCommandFacade {
 		dataResultAfterIU.setErrorMap(convertErrorToType(lstResultReturnDailyError, resultErrorMonth));
 		
 		//登録確認メッセージ
-		if((dataResultAfterIU.getErrorMap().isEmpty() && dataResultAfterIU.getErrorMap().values().isEmpty() && !hasErrorRow)) {
+		if((dataResultAfterIU.getErrorMap().isEmpty() && dataResultAfterIU.getErrorMap().values().isEmpty() && !hasErrorRow 
+				                                      && (dataResultAfterIU.getFlexShortage() == null || !dataResultAfterIU.getFlexShortage().isError()))) {
 			dataResultAfterIU.setMessageAlert("Msg_15");
 		}else {
 			Map<Integer, List<DPItemValue>> errorMapTemp = dataResultAfterIU.getErrorMap().entrySet().stream()
 					.filter(x -> x.getKey() != TypeError.CONTINUOUS.value && x.getKey() != TypeError.RELEASE_CHECKBOX.value)
 					.collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
-			if (errorMapTemp.values().isEmpty()) {
+			if (errorMapTemp.values().isEmpty() && (dataResultAfterIU.getFlexShortage() == null || !dataResultAfterIU.getFlexShortage().isError())) {
 				dataResultAfterIU.setMessageAlert("Msg_15");
 			} else {
 				dataResultAfterIU.setMessageAlert("Msg_1489");
