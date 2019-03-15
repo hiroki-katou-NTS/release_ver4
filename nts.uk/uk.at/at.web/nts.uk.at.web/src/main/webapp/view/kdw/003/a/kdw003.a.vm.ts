@@ -2534,7 +2534,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             nts.uk.ui.block.grayout();
             let dataRowEnd = dataSource[dataSource.length - 1];
             if (self.showFlex()) {
-                self.insertUpdate(true).done((loadContinue: boolean) => {
+                self.insertUpdate("Tight").done((loadContinue: boolean) => {
                     if(!loadContinue){
                     service.addClosure({ employeeId: dataRowEnd.employeeId, date: dataRowEnd.dateDetail, showFlex: self.showFlex() }).done((data) => {
                         self.processLockButton(self.showLock());
