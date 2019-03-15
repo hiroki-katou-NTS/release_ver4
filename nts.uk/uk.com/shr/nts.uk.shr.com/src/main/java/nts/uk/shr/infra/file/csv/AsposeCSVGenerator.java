@@ -19,14 +19,15 @@ public class AsposeCSVGenerator extends FileGenerator implements CSVReportGenera
 	public void generate(FileGeneratorContext generatorContext, CSVFileData dataSource) {
 		List<String> headers = dataSource.getHeaders();
 		List<Map<String, Object>> datas = dataSource.getDatas();
-		try(OutputStream os = createNewFile(generatorContext, dataSource.getFileName())){
-			CsvReportWriter writer = new CsvReportWriter(os, headers);
+		OutputStream os = createNewFile(generatorContext, dataSource.getFileName());
+		CsvReportWriter writer = new CsvReportWriter(os, headers);
+		
+		datas.stream().forEach(data -> {
 			
-			datas.stream().forEach(data -> {
-				
-				writer.writeALine(data);
-			});
-		}
+			writer.writeALine(data);
+		});
+		
+		writer.destroy();
 	}
 	
 	@SneakyThrows
