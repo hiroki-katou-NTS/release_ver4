@@ -113,13 +113,56 @@ public class ComPubImp implements SyCompanyPub {
 			List<DatePeriod> lstPeriod = listAffComHisByEmp.get(i).items()
 					.stream().map(ent -> ent.span())
 					.collect(Collectors.toList());
-			if (listAffComHisByEmp.get(i).getSId() != null && !lstPeriod.isEmpty()) {
-				StatusOfEmployee statusOfEmployee = new StatusOfEmployee(listAffComHisByEmp.get(i).getSId(), lstPeriod);
+			if (listAffComHisByEmp.get(i).getSId() != null && !listAffComHisByEmp.get(i).getSId().isEmpty() && !lstPeriod.isEmpty()) {
+				StatusOfEmployee statusOfEmployee = new StatusOfEmployee(listAffComHisByEmp.get(i).getSId(), CheckPeriod(lstPeriod, datePeriod));
 				result.add(statusOfEmployee);
 			}
 		}
-		
 		return result;
 	};
+	
+	List<DatePeriod> CheckPeriod(List<DatePeriod> lstPeriod, DatePeriod param) {
+
+		List<DatePeriod> result = new ArrayList<>();
+		for (int i = 0; i < lstPeriod.size(); i++) {
+			GeneralDate start = lstPeriod.get(i).start();
+			GeneralDate end = lstPeriod.get(i).end();
+			/**
+			 *  case1
+			 *   period |========================>
+			 *   param       |===========>
+			 */
+			if(param.start().afterOrEquals(start) && param.end().beforeOrEquals(end)){
+				result.add(new DatePeriod(param.start(), param.end()));
+			}
+			/**
+			 *  case2
+			 *  period           |========================>
+			 *  param       |===========>
+			 */
+			if(param.start().beforeOrEquals(start) && param.end().afterOrEquals(start) && param.end().beforeOrEquals(end)){
+				result.add(new DatePeriod(start , param.end()));
+			}
+			/**
+			 *  case3
+			 *  period           |========================>
+			 *  param       |===================================>
+			 */
+			if(param.start().beforeOrEquals(start) && param.end().afterOrEquals(end)){
+				result.add(new DatePeriod(start , end));
+			}
+			/**
+			 *  case4
+			 *  period      |========================>
+			 *  param                        |===========>
+			 *  
+			 */
+			if(param.start().afterOrEquals(start) && param.start().beforeOrEquals(end) && param.end().afterOrEquals(end)){
+				result.add(new DatePeriod(param.start() , end));
+			}
+		}
+		return result;
+
+	}
 
 }

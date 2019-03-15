@@ -66,7 +66,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 			"WHERE c.bsymtAffCompanyHistPk.sId IN :sIdList  ORDER BY c.startDate ");
 	
 	private static final String SELECT_BY_EMPLOYEE_ID_LIST_FOR_REQ588 = String.join(" ", SELECT_NO_PARAM,
-			"WHERE c.bsymtAffCompanyHistPk.sId IN :sIdList  AND c.startDate = :startDate AND c.endDate = :endDate ");
+			"WHERE c.bsymtAffCompanyHistPk.sId IN :sIdList  AND c.startDate <= :endDate AND :startDate <= c.endDate ");
 
 	private static final String SELECT_BY_EMPID_AND_BASE_DATE = String.join(" ", SELECT_NO_PARAM,
 			"WHERE c.bsymtAffCompanyHistPk.sId = :sId", "AND c.startDate <= :baseDate", "AND c.endDate >= :baseDate",
