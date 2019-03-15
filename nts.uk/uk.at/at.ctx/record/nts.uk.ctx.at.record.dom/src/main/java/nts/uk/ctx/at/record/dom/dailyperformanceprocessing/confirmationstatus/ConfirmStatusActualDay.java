@@ -38,7 +38,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  * 日の実績の確認状況を取得する
  */
 @Stateless
-public class ConfirmApprovalStatusActualDay {
+public class ConfirmStatusActualDay {
 
 	@Inject
 	private IdentificationRepository identificationRepository;
@@ -213,7 +213,7 @@ public class ConfirmApprovalStatusActualDay {
 		if (!closureEndOpt.isPresent())
 			return Arrays.asList(closureEndOpt.get());
 
-		val closureStart = closureStartOpt.get(), closureEnd = closureEndOpt.get();
+		ClosurePeriod closureStart = closureStartOpt.get(), closureEnd = closureEndOpt.get();
 		if (closureStart.getClosureId() == closureEnd.getClosureId() && closureStart.getPeriod().equals(closureEnd.getPeriod())) {
 			return Arrays.asList(closureEndOpt.get());
 		} else {

@@ -46,7 +46,7 @@ import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusFor
 import nts.uk.ctx.at.record.dom.daily.dailyperformance.classification.EnumCodeName;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
-import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmApprovalStatusActualDay;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.divergence.time.DivergenceTimeUseSet;
@@ -216,7 +216,7 @@ public class DailyPerformanceCorrectionProcessor {
 	private PublicHolidayRepository publicHolidayRepository;
 	
 	@Inject
-	private ConfirmApprovalStatusActualDay confirmApprovalStatusActualDay;
+	private ConfirmStatusActualDay confirmApprovalStatusActualDay;
 	
 	@Inject
 	private ApprovalStatusActualDay approvalStatusActualDay;

@@ -22,7 +22,7 @@ import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
-import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmApprovalStatusActualDay;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.workinformation.enums.CalculationState;
@@ -86,7 +86,7 @@ public class DailyPerformanceErrorCodeProcessor {
 	private PublicHolidayRepository publicHolidayRepository;
 	
 	@Inject
-	private ConfirmApprovalStatusActualDay confirmApprovalStatusActualDay;
+	private ConfirmStatusActualDay confirmApprovalStatusActualDay;
 	
 	@Inject
 	private ApprovalStatusActualDay approvalStatusActualDay;

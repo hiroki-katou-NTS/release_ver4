@@ -49,7 +49,7 @@ public class ApprovalStatusActualDay {
 	private IdentificationRepository identificationRepository;
 
 	@Inject
-	private ConfirmApprovalStatusActualDay confirmStatusActualDay;
+	private ConfirmStatusActualDay confirmStatusActualDay;
 
 	/**
 	 * 日の実績の承認状況を取得する

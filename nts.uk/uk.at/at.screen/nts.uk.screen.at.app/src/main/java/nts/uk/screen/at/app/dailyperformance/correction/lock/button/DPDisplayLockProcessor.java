@@ -17,7 +17,7 @@ import nts.arc.time.GeneralDate;
 import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
-import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmApprovalStatusActualDay;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.workinformation.enums.CalculationState;
@@ -62,7 +62,7 @@ public class DPDisplayLockProcessor {
 	private CheckIndentityMonth checkIndentityMonth;
 	
 	@Inject
-	private ConfirmApprovalStatusActualDay confirmApprovalStatusActualDay;
+	private ConfirmStatusActualDay confirmApprovalStatusActualDay;
 	
 	@Inject
 	private ApprovalStatusActualDay approvalStatusActualDay;
