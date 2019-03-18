@@ -351,66 +351,71 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 		if (tableList.getTableEnglishName().equals("BPSMT_PERSON")) {
 			query.toString();
 		}
-		if (!targetEmployeesSid.isEmpty() && query.toString().contains("?listTargetSid")) {
 
-			if (!targetEmployeesSid.isEmpty()) {
+		if (!targetEmployeesSid.isEmpty()) {
 
-				List<String> lSid = new ArrayList<>();
-				CollectionUtil.split(targetEmployeesSid, 100, subIdList -> {
-					lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ",
-							"\\', '"));
-				});
+			List<String> lSid = new ArrayList<>();
+			CollectionUtil.split(targetEmployeesSid, 100, subIdList -> {
+				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ",
+						"\\', '"));
+			});
 
-				CsvReportWriter csv = generator.generate(generatorContext, AppContexts.user().companyId()
-						+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3);
+			CsvReportWriter csv = generator.generate(generatorContext, AppContexts.user().companyId()
+					+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3);
 
-				for (String sid : lSid) {
+			for (String sid : lSid) {
 
-					int offset = 0;
-					Query queryString = getEntityManager()
-							.createNativeQuery(querySql.replaceAll("\\?listTargetSid", sid));
-					for (Entry<String, Object> entry : params.entrySet()) {
-						queryString.setParameter(entry.getKey(), entry.getValue());
-					}
-					////
-					List<Object[]> listObjs = new ArrayList<>();
+				int offset = 0;
 
-					while ((listObjs = queryString.setFirstResult(offset).setMaxResults(10000).getResultList())
-							.size() > 0) {
-						this.getEntityManager().clear(); // 一次キャッシュのクリア
-						offset += listObjs.size();
-						listObjs.forEach(objects -> {
-							Map<String, Object> rowCsv = new HashMap<>();
-							int i = 0;
-							for (String columnName : headerCsv3) {
-								rowCsv.put(columnName, objects[i] != null ? String.valueOf(objects[i]) : "");
-								i++;
-							}
-							csv.writeALine(rowCsv);
-						});
-					}
-				}
-				csv.destroy();
-			} else {
 				Query queryString = getEntityManager().createNativeQuery(querySql);
+
+				if (query.toString().contains("?listTargetSid")) {
+					queryString = getEntityManager().createNativeQuery(querySql.replaceAll("\\?listTargetSid", sid));
+				}
 				for (Entry<String, Object> entry : params.entrySet()) {
 					queryString.setParameter(entry.getKey(), entry.getValue());
 				}
+				
+				List<Object[]> listObjs = new ArrayList<>();
 
-				List<Object[]> listObj = queryString.getResultList();
-				listObj.forEach(objects -> {
-					Map<String, Object> rowCsv = new HashMap<>();
-					int i = 0;
-					for (String columnName : headerCsv3) {
-						rowCsv.put(columnName, objects[i] != null ? String.valueOf(objects[i]) : "");
-						i++;
-					}
-				});
-				listObj.clear();
+				while ((listObjs = queryString.setFirstResult(offset).setMaxResults(10000).getResultList())
+						.size() > 0) {
+					this.getEntityManager().clear(); // 一次キャッシュのクリア
+					offset += listObjs.size();
+					listObjs.forEach(objects -> {
+						Map<String, Object> rowCsv = new HashMap<>();
+						int i = 0;
+						for (String columnName : headerCsv3) {
+							rowCsv.put(columnName, objects[i] != null ? String.valueOf(objects[i]) : "");
+							i++;
+						}
+						csv.writeALine(rowCsv);
+					});
+				}
+			}
+			csv.destroy();
+		} else {
+			Query queryString = getEntityManager().createNativeQuery(querySql);
+			for (Entry<String, Object> entry : params.entrySet()) {
+				queryString.setParameter(entry.getKey(), entry.getValue());
 			}
 
-		}
+			CsvReportWriter csv = generator.generate(generatorContext, AppContexts.user().companyId()
+					+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3);
 
+			List<Object[]> listObj = queryString.getResultList();
+			listObj.forEach(objects -> {
+				Map<String, Object> rowCsv = new HashMap<>();
+				int i = 0;
+				for (String columnName : headerCsv3) {
+					rowCsv.put(columnName, objects[i] != null ? String.valueOf(objects[i]) : "");
+					i++;
+				}
+				csv.writeALine(rowCsv);
+			});
+			csv.destroy();
+			listObj.clear();
+		}
 	}
 
 	@Override
