@@ -73,8 +73,7 @@ public class ConfirmStatusActualDay {
 			List<ConfirmStatusActualResult> lstResultEmpTemp = new ArrayList<>(), 
 											lstResultEmpTemp1 = new ArrayList<>(),
 											lstResultEmpTemp2 = new ArrayList<>();
-			List<DatePeriod> lstPeriod = statusOfEmp.getListPeriod().stream().map(x -> mergeDateInPeriod(x, period))
-					.sorted((x, y) -> x.start().compareTo(y.start())).collect(Collectors.toList());
+			List<DatePeriod> lstPeriod = statusOfEmp.getListPeriod();
 			String employeeId = statusOfEmp.getEmployeeId();
 			List<GeneralDate> dateTemps = new ArrayList<>();
 			lstPeriod.stream().forEach(periodTemp -> {
@@ -241,9 +240,9 @@ public class ConfirmStatusActualDay {
 		}
 	}
 	
-  public DatePeriod mergeDateInPeriod(DatePeriod periodNeedMerge, DatePeriod periodCheck) {
-	  GeneralDate startDate = periodNeedMerge.start().afterOrEquals(periodCheck.start()) ? periodNeedMerge.start() : periodCheck.start();
-	  GeneralDate endDate = periodNeedMerge.end().beforeOrEquals(periodCheck.end()) ? periodNeedMerge.end() : periodCheck.end();
-      return new DatePeriod(startDate, endDate);
-  }
+//  public DatePeriod mergeDateInPeriod(DatePeriod periodNeedMerge, DatePeriod periodCheck) {
+//	  GeneralDate startDate = periodNeedMerge.start().afterOrEquals(periodCheck.start()) ? periodNeedMerge.start() : periodCheck.start();
+//	  GeneralDate endDate = periodNeedMerge.end().beforeOrEquals(periodCheck.end()) ? periodNeedMerge.end() : periodCheck.end();
+//      return new DatePeriod(startDate, endDate);
+//  }
 }

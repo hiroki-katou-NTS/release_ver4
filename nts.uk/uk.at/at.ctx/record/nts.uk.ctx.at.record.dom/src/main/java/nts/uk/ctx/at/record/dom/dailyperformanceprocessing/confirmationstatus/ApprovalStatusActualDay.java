@@ -70,7 +70,7 @@ public class ApprovalStatusActualDay {
 
 		statusOfEmps.stream().forEach(statusOfEmp -> {
 			List<ApprovalStatusActualResult> resultPart = new ArrayList<>(), resultPart2 = new ArrayList<>();
-			List<DatePeriod> lstDatePeriod = statusOfEmp.getListPeriod().stream().map(x -> confirmStatusActualDay.mergeDateInPeriod(x, period)).collect(Collectors.toList());
+			List<DatePeriod> lstDatePeriod = statusOfEmp.getListPeriod();
 			String employeeId = statusOfEmp.getEmployeeId();
 			Map<Pair<String, GeneralDate>, ApprovalStatus> mapApprovalRootBySId = new HashMap<>();
 			lstDatePeriod.stream().forEach(datePeriod -> {
