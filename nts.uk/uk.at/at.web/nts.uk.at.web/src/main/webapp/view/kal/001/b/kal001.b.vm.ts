@@ -17,8 +17,10 @@ module nts.uk.at.view.kal001.b {
             dataSource : Array<model.ValueExtractAlarmDto>=[];
             flgActive : KnockoutObservable<boolean>;
             processId: string;
+            currentAlarmCode: string;
             constructor(param) {
                 let self = this;
+                self.currentAlarmCode = param.currentAlarmCode;
                 self.processId = param.processId;
                 self.eralRecord = ko.observable(param.totalErAlRecord);
                 self.currentSelectedRow = ko.observable(null);
@@ -66,11 +68,7 @@ module nts.uk.at.view.kal001.b {
             exportExcel(): void {
                 let self = this;
                 block.invisible();
-//                let params = {
-//                    data: self.dataSource
-//                };
-                service.exportAlarmData(self.processId).done(() => {
-
+                service.exportAlarmData(self.processId, self.currentAlarmCode).done(() => {
                 }).fail((errExcel) =>{
                     alertError(errExcel);
                 }).always(()=>{
@@ -80,11 +78,18 @@ module nts.uk.at.view.kal001.b {
             
             sendEmail(): void {
                 let self = this;
+                nts.uk.ui.windows.setShared("processId", self.processId);
+//=======
 //                let shareEmployee = _.map(self.dataSource, (item) =>{
-//                   return {employeeID: item.employeeID, workplaceID: item.workplaceID}; 
+//                   return {
+//                    employeeID: item.employeeID, 
+//                    workplaceID: item.workplaceID,
+//                    workplaceName:item.workplaceName
+//                    }; 
 //                });
 //                nts.uk.ui.windows.setShared("employeeList", _.uniqWith(shareEmployee, _.isEqual));
-                nts.uk.ui.windows.setShared("processId", self.processId);
+//                //nts.uk.ui.windows.setShared("employeeList", _.uniqWith(_.filter(shareEmployee,function(x){return x.workplaceID !=null;} ), _.isEqual));
+//>>>>>>> delivery/release_ootsuka
                 modal("/view/kal/001/c/index.xhtml").onClosed(() => {
                     
                 });

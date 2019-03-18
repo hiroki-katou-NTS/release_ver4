@@ -108,7 +108,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC48,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -120,7 +120,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC38,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -132,7 +132,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC39,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -144,7 +144,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC40,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -168,7 +168,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC28,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -192,7 +192,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC29,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -204,7 +204,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC30,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -216,7 +216,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC31,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -228,7 +228,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC32,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -281,7 +281,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC36,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -305,7 +305,7 @@ ko.components.register('kaf022-c', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC49,
-                            enable: true}">
+                            enable: false}">
                         </div>
                     </td>
                 </tr>
@@ -406,7 +406,7 @@ ko.components.register('kaf022-c', {
                             value: $cv.texteditorC46.value,
                             constraint: 'ObstacleName',
                             required: false,
-                            enable: true,
+                            enable: false,
                             readonly: false
                         }" />
                     </td>
@@ -421,7 +421,7 @@ ko.components.register('kaf022-c', {
                             value: $cv.texteditorC47.value,
                             constraint: 'ObstacleName',
                             required: false,
-                            enable: true,
+                            enable: false,
                             readonly: false
                         }" />
                     </td>

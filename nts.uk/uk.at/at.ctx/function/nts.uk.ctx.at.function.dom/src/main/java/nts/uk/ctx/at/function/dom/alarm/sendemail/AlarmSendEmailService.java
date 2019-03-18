@@ -48,13 +48,13 @@ public class AlarmSendEmailService implements SendEmailService {
 	
 	public String alarmSendEmail(String companyID, GeneralDate executeDate, List<String> employeeTagetIds,
 			List<String> managerTagetIds, List<ValueExtractAlarmDto> valueExtractAlarmDtos,
-			MailSettingsParamDto mailSettingsParamDto) {
-		return process(companyID, executeDate, employeeTagetIds, managerTagetIds, valueExtractAlarmDtos,mailSettingsParamDto);
+			MailSettingsParamDto mailSettingsParamDto,String currentAlarmCode) {
+		return process(companyID, executeDate, employeeTagetIds, managerTagetIds, valueExtractAlarmDtos,mailSettingsParamDto,currentAlarmCode);
 	}
 	
 	private String process(String companyID, GeneralDate executeDate, List<String> employeeTagetIds,
 			List<String> managerTagetIds, List<ValueExtractAlarmDto> valueExtractAlarmDtos,
-			MailSettingsParamDto mailSettingsParamDto){
+			MailSettingsParamDto mailSettingsParamDto,String currentAlarmCode){
 		List<String> errors = new ArrayList<>();
 		Integer functionID = 9; //function of Alarm list = 9
 		
@@ -71,7 +71,7 @@ public class AlarmSendEmailService implements SendEmailService {
 					// Do send email
 					boolean isSucess = sendMail(companyID, employeeId, functionID,
 							valueExtractAlarmEmpDtos, mailSettingsParamDto.getSubject(),
-							mailSettingsParamDto.getText());
+							mailSettingsParamDto.getText(), currentAlarmCode);
 					if (!isSucess) {
 						errors.add(employeeId);
 					}
@@ -117,7 +117,7 @@ public class AlarmSendEmailService implements SendEmailService {
 							// Get subject , body mail
 							boolean isSucess = sendMail(companyID, employeeId, functionID,
 									valueExtractAlarmManagerDtos,mailSettingsParamDto.getSubjectAdmin(),
-									mailSettingsParamDto.getTextAdmin());
+									mailSettingsParamDto.getTextAdmin(),currentAlarmCode);
 							if (!isSucess) {
 								errors.add(employeeId);
 							}
@@ -161,7 +161,7 @@ public class AlarmSendEmailService implements SendEmailService {
 	 */
 	private boolean sendMail(String companyID, String employeeId, Integer functionID,
 			List<ValueExtractAlarmDto> listDataAlarmExport, String subjectEmail,
-			String bodyEmail) throws BusinessException {
+			String bodyEmail,String currentAlarmCode) throws BusinessException {
 		// call request list 397 return email address
 		MailDestinationAlarmImport mailDestinationAlarmImport = iMailDestinationAdapter
 				.getEmpEmailAddress(companyID, employeeId, functionID);
@@ -175,7 +175,7 @@ public class AlarmSendEmailService implements SendEmailService {
 					subjectEmail = TextResource.localize("KAL010_300");
 				}
 				// Genarate excel
-				AlarmExportDto alarmExportDto = alarmListGenerator.generate(new FileGeneratorContext(), listDataAlarmExport);
+				AlarmExportDto alarmExportDto = alarmListGenerator.generate(new FileGeneratorContext(), listDataAlarmExport,currentAlarmCode);
 				// Create file attach
 				List<MailAttachedFileItf> attachedFiles = new ArrayList<MailAttachedFileItf>();
 				attachedFiles.add(new MailAttachedFilePath(alarmExportDto.getPath(), alarmExportDto.getFileName()));

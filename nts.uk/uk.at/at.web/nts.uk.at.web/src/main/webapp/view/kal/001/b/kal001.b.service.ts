@@ -8,8 +8,8 @@ module nts.uk.at.view.kal001.b {
         /**
          * save file excel
          */
-        export function exportAlarmData(processId): JQueryPromise<any> {
-            return nts.uk.request.exportFile(paths.exportAlarmData + processId);
+        export function exportAlarmData(processId, currentAlarmCode): JQueryPromise<any> {
+            return nts.uk.request.exportFile(paths.exportAlarmData + currentAlarmCode + "/" + processId);
         };
     }
 }

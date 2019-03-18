@@ -245,6 +245,9 @@ public class ApplicationListForScreen {
 		// ドメインモデル「申請表示名」を取得する
 		List<AppDispName> appDispNameLst = appDispNameRepository.getAll();
 		for(AppDispName appDispName : appDispNameLst){
+			if(appDispName.getDispName() == null){
+				continue;
+			}
 			if(appDispName.getAppType()==ApplicationType.OVER_TIME_APPLICATION){
 				// outputパラメータに残業申請のモード別の値をセットする
 				result.add(new AppWithDetailExportDto(

@@ -19,6 +19,6 @@ public class AlarmExportService extends ExportService<AlarmExportQuery> {
 		AlarmExportQuery query = context.getQuery();
 		List<ValueExtractAlarmDto> dataSource = query.getData();
 		// invoke generator
-		this.generator.generateExcelScreen(context.getGeneratorContext(), dataSource);
+		this.generator.generateExcelScreen(context.getGeneratorContext(), dataSource,query.getCurrentAlarmCode());
 	}
 }

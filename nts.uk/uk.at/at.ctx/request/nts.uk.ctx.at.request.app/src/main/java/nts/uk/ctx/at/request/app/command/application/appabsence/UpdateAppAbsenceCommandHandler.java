@@ -29,8 +29,12 @@ import nts.uk.ctx.at.request.dom.application.appabsence.HolidayAppType;
 import nts.uk.ctx.at.request.dom.application.appabsence.appforspecleave.AppForSpecLeave;
 import nts.uk.ctx.at.request.dom.application.appabsence.appforspecleave.AppForSpecLeaveRepository;
 import nts.uk.ctx.at.request.dom.application.appabsence.service.AbsenceServiceProcess;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.InitMode;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.after.DetailAfterUpdate;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.before.DetailBeforeUpdate;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.DetailScreenInitModeOutput;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.OutputMode;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.User;
 import nts.uk.ctx.at.request.dom.application.common.service.other.OtherCommonAlgorithm;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
 import nts.uk.ctx.at.request.dom.setting.company.request.applicationsetting.apptypesetting.DisplayReasonRepository;
@@ -71,6 +75,8 @@ public class UpdateAppAbsenceCommandHandler extends CommandHandlerWithResult<Upd
 //	private AppTypeDiscreteSettingRepository appTypeDiscreteSettingRepository;
 	@Inject
 	private OtherCommonAlgorithm otherCommonAlg;	
+	@Inject
+	private InitMode initMode;
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<UpdateAppAbsenceCommand> context) {
 		String companyID = AppContexts.user().companyId();
@@ -86,39 +92,42 @@ public class UpdateAppAbsenceCommandHandler extends CommandHandlerWithResult<Upd
 				displayRep.findDisplayReason(companyID).stream().map(x -> DisplayReasonDto.fromDomain(x)).collect(Collectors.toList());
 		DisplayReasonDto displayReasonSet = displayReasonDtoLst.stream().filter(x -> x.getTypeOfLeaveApp() == command.getHolidayAppType())
 				.findAny().orElse(null);
-		String appReason = "";
-		if(displayReasonSet!=null){
-			boolean displayFixedReason = displayReasonSet.getDisplayFixedReason() == 1 ? true : false;
-			boolean displayAppReason = displayReasonSet.getDisplayAppReason() == 1 ? true : false;
-			String typicalReason = Strings.EMPTY;
-			String displayReason = Strings.EMPTY;
-			if(displayFixedReason){
-				if(Strings.isBlank(command.getAppReasonID())){
-					typicalReason += "";
-				} else {
-					typicalReason += command.getAppReasonID();
+		DetailScreenInitModeOutput output = initMode.getDetailScreenInitMode(EnumAdaptor.valueOf(context.getCommand().getUser(), User.class), context.getCommand().getReflectPerState());
+		String appReason = opAppAbsence.get().getApplication().getAppReason().v();
+		if(output.getOutputMode()==OutputMode.EDITMODE){
+			if(displayReasonSet!=null){
+				boolean displayFixedReason = displayReasonSet.getDisplayFixedReason() == 1 ? true : false;
+				boolean displayAppReason = displayReasonSet.getDisplayAppReason() == 1 ? true : false;
+				String typicalReason = Strings.EMPTY;
+				String displayReason = Strings.EMPTY;
+				if(displayFixedReason){
+					if(Strings.isBlank(command.getAppReasonID())){
+						typicalReason += "";
+					} else {
+						typicalReason += command.getAppReasonID();
+					}
+				}
+				if(displayAppReason){
+					if(Strings.isNotBlank(typicalReason)){
+						displayReason += System.lineSeparator();
+					}
+					if(Strings.isBlank(command.getApplicationReason())){
+						displayReason += "";
+					} else {
+						displayReason += command.getApplicationReason();
+					}
+				}
+				Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
+						.getApplicationSettingByComID(companyID);
+				ApplicationSetting applicationSetting = applicationSettingOp.get();
+				if(displayFixedReason||displayAppReason){
+					if (applicationSetting.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
+							&& Strings.isBlank(typicalReason+displayReason)) {
+						throw new BusinessException("Msg_115");
+					}
+					appReason = typicalReason + displayReason;
 				}
 			}
-			if(displayAppReason){
-				if(Strings.isNotBlank(typicalReason)){
-					displayReason += System.lineSeparator();
-				}
-				if(Strings.isBlank(command.getApplicationReason())){
-					displayReason += "";
-				} else {
-					displayReason += command.getApplicationReason();
-				}
-			}
-			Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
-					.getApplicationSettingByComID(companyID);
-			ApplicationSetting applicationSetting = applicationSettingOp.get();
-			if(displayFixedReason||displayAppReason){
-				if (applicationSetting.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
-						&& Strings.isBlank(typicalReason+displayReason)) {
-					throw new BusinessException("Msg_115");
-				}
-			}
-			appReason = typicalReason + displayReason;
 		}
 		AppAbsence appAbsence = opAppAbsence.get();
 		appAbsence.setAllDayHalfDayLeaveAtr(EnumAdaptor.valueOf(command.getAllDayHalfDayLeaveAtr(), AllDayHalfDayLeaveAtr.class));

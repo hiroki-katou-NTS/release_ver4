@@ -180,11 +180,6 @@ public class WorkplacePubImp implements SyWorkplacePub {
 	@Override
 	public List<AffWorkplaceExport> findListSIdByCidAndWkpIdAndPeriod(String workplaceId, GeneralDate startDate,
 			GeneralDate endDate) {
-		//EA修正履歴2638 liên quan đến bug #100243, lọc ra những employee không bị xóa
-		List<EmployeeDataMngInfo> listEmpDomain = empDataMngRepo.getAllEmpNotDeleteByCid(AppContexts.user().companyId());
-
-		Map<String, String> mapSidPid = listEmpDomain.stream()
-				.collect(Collectors.toMap(x -> x.getEmployeeId(), x -> x.getPersonId()));
 
 		List<String> listSid = affWorkplaceHistoryRepository.getByWplIdAndPeriod(workplaceId, startDate, endDate);
 
@@ -197,7 +192,13 @@ public class WorkplacePubImp implements SyWorkplacePub {
 				.collect(Collectors.toMap(x -> x.getPId(), x -> x));
 
 		List<AffWorkplaceExport> result = new ArrayList<>();
+		
+		//EA修正履歴2638 liên quan đến bug #100243, lọc ra những employee không bị xóa
+		List<EmployeeDataMngInfo> listEmpDomain = empDataMngRepo.findBySidNotDel(listSid);
 
+		Map<String, String> mapSidPid = listEmpDomain.stream()
+				.collect(Collectors.toMap(x -> x.getEmployeeId(), x -> x.getPersonId()));
+		
 		listSid.forEach(sid -> {
 			AffCompanyHist affCompanyHist = mapPidAndAffCompanyHist.get(mapSidPid.get(sid));
 			// check null

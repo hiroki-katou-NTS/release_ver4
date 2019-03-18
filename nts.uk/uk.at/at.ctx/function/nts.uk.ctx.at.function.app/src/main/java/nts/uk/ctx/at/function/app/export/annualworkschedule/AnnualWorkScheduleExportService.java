@@ -37,7 +37,7 @@ public class AnnualWorkScheduleExportService extends ExportService<AnnualWorkSch
 	private AgreementOperationSettingAdapter agreementOperationSettingAdapter;
 
 	@Override
-	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	protected void handle(ExportServiceContext<AnnualWorkScheduleExportQuery> context) {
 		String companyId = AppContexts.user().companyId();
 		AnnualWorkScheduleExportQuery query = context.getQuery();

@@ -32,7 +32,7 @@ module nts.uk.at.view.kal001.c {
                 ];
                 
                 service.getEmployeeSendEmail(self.processId).done((listEmployeeDto: Array<modeldto.EmployeeDto>) => {
-                    _.map(listEmployeeDto, (e) => {
+                    _.forEach(listEmployeeDto, (e) => {
                         self.listEmployee.push(new modeldto.EmployeeSendEmail(e));
                     });
                     // create table

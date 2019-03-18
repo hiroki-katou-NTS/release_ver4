@@ -12,6 +12,7 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.monthly.agreement.export.AgeementTimeCommonSetting;
 import nts.uk.ctx.at.record.dom.monthly.agreement.export.AgeementTimeCommonSettingService;
 import nts.uk.ctx.at.record.dom.monthly.agreement.export.GetAgreTimeByPeriod;
+import nts.uk.ctx.at.record.pub.monthly.agreement.AgreementTimeByEmpExport;
 import nts.uk.ctx.at.record.pub.monthly.agreement.AgreementTimeByPeriod;
 import nts.uk.ctx.at.record.pub.monthly.agreement.AgreementTimeByPeriodPub;
 import nts.uk.ctx.at.shared.dom.common.Month;
@@ -68,8 +69,15 @@ public class AgreementTimeByPeriodPubImpl implements AgreementTimeByPeriodPub {
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public Object algorithm(String companyId, List<String> employeeIds, DatePeriod criteria) {
+	public Object getCommonSetting(String companyId, List<String> employeeIds, DatePeriod criteria) {
 		
 		return this.settingService.getCommonService(companyId, employeeIds, criteria);
+		
+	}
+	
+	public List<AgreementTimeByEmpExport> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
+													Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs) {
+		return this.getAgreTimeByPeriod.algorithmImprove(companyId, employeeIds, criteria, startMonth, year, periodAtrs)
+				.stream().map(AgreementTimeByEmpExport::fromDomain).collect(Collectors.toList());
 	}
 }

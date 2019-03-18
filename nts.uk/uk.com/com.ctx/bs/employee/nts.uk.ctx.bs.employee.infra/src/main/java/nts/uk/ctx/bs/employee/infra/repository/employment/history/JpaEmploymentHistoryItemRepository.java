@@ -568,7 +568,7 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 			.getList(c -> new EmpmInfo(c[0].toString(), c[1].toString(), c[2].toString()));
 		Map<String, EmpmInfo> mapResult = new HashMap<>();
 		for(String sid : lstSID){
-			List<EmpmInfo> empInfo = lst.stream().filter(c -> c.getSid().equals(c)).collect(Collectors.toList());
+			List<EmpmInfo> empInfo = lst.stream().filter(c -> c.getSid().equals(sid)).collect(Collectors.toList());
 			if(empInfo.isEmpty()){
 				continue;
 			}

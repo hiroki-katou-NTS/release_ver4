@@ -361,8 +361,48 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		List<BsymtAffCompanyHist> resultList = new ArrayList<>();
 		// Split employeeId List if size of employeeId List is greater than 1000
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
-			List<BsymtAffCompanyHist> lstBsymtAffCompanyHist = this.queryProxy()
-			.query(SELECT_BY_EMPLOYEE_ID_LIST, BsymtAffCompanyHist.class).setParameter("sIdList", subList).getList();
+			
+			String sql = "select * from BSYMT_AFF_COM_HIST h"
+					+ " inner join BSYMT_AFF_COM_INFO i"
+					+ " on h.HIST_ID = i.HIST_ID"
+					+ " where h.SID in (" + NtsStatement.In.createParamsString(subList) + ")";
+			
+			List<BsymtAffCompanyHist> lstBsymtAffCompanyHist;
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setString(1 + i, subList.get(i));
+				}
+				
+				lstBsymtAffCompanyHist = new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+					
+					BsymtAffCompanyInfo info = new BsymtAffCompanyInfo();
+					info.bsymtAffCompanyInfoPk = new BsymtAffCompanyInfoPk();
+					info.bsymtAffCompanyInfoPk.historyId = rec.getString("HIST_ID");
+					info.sid = rec.getString("SID");
+					info.recruitmentCategoryCode = rec.getString("RECRUIMENT_CATEGORY_CD");
+					info.adoptionDate = rec.getGeneralDate("ADOPTION_DATE");
+					info.retirementAllowanceCalcStartDate = rec.getGeneralDate("RETIREMENT_CALC_STR_D");
+					
+					BsymtAffCompanyHist hist = new BsymtAffCompanyHist();
+					hist.bsymtAffCompanyHistPk = new BsymtAffCompanyHistPk();
+					hist.bsymtAffCompanyHistPk.pId = rec.getString("PID");
+					hist.bsymtAffCompanyHistPk.sId = rec.getString("SID");
+					hist.bsymtAffCompanyHistPk.historyId = rec.getString("HIST_ID");
+					hist.companyId = rec.getString("CID");
+					hist.destinationData = rec.getInt("DESTINATION_DATA");
+					hist.startDate = rec.getGeneralDate("START_DATE");
+					hist.endDate = rec.getGeneralDate("END_DATE");
+					hist.bsymtAffCompanyInfo = info;
+					info.bpsdtAffCompanyHist = hist;
+					
+					return hist;
+				});
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 			
 			resultList.addAll(lstBsymtAffCompanyHist);
 		});

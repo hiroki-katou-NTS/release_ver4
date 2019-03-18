@@ -1,25 +1,60 @@
 package nts.uk.ctx.at.record.dom.daily.overtimework;
 
+import lombok.Getter;
 import lombok.Value;
 import nts.uk.ctx.at.record.dom.daily.TimeDivergenceWithCalculationMinusExist;
 import nts.uk.ctx.at.record.dom.daily.TimeWithCalculation;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 
 /**
  * フレックス時間
  * @author keisuke_hoshina
  *
  */
-@Value
+@Getter
 public class FlexTime {
 	//フレックス時間
 	private TimeDivergenceWithCalculationMinusExist flexTime;
 	//申請時間
 	private AttendanceTime beforeApplicationTime; 
 	
+	/**
+	 * Constructor
+	 * @param flexTime
+	 * @param beforeApplicationTime
+	 */
+	public FlexTime(TimeDivergenceWithCalculationMinusExist flexTime, AttendanceTime beforeApplicationTime) {
+		super();
+		this.flexTime = flexTime;
+		this.beforeApplicationTime = beforeApplicationTime;
+	}
+	
+	
 	public TimeWithCalculation getNotMinusFlexTime() {
 		return TimeWithCalculation.createTimeWithCalculation(new AttendanceTime(this.flexTime.getTime() == null ? 0 :this.flexTime.getTime().valueAsMinutes()),
 				 new AttendanceTime(this.flexTime.getCalcTime()==null ? 0 : this.flexTime.getCalcTime().valueAsMinutes()));
+	}
+	
+	public void setFlexTime(AttendanceTimeOfExistMinus flexTime, AttendanceTimeOfExistMinus calcFlexTime) {
+		this.setOnlyFlexTime(flexTime);
+		this.setOnlyCalcFlexTime(calcFlexTime);
+	}
+	
+	/**
+	 * フレックス時間のみのセッター(計算フレに入れない)
+	 * @param flexTime
+	 */
+	public void setOnlyFlexTime(AttendanceTimeOfExistMinus flexTime) {
+		this.flexTime = TimeDivergenceWithCalculationMinusExist.createTimeWithCalculation(flexTime, this.flexTime.getCalcTime());
+	}
+	
+	/**
+	 * 計算フレックス時間のみのセッター(フレに入れない)
+	 * @param flexTime
+	 */
+	public void setOnlyCalcFlexTime(AttendanceTimeOfExistMinus calcFlexTime) {
+		this.flexTime = TimeDivergenceWithCalculationMinusExist.createTimeWithCalculation(this.flexTime.getTime(), calcFlexTime);
 	}
 	
 	/**
@@ -62,5 +97,4 @@ public class FlexTime {
 		TimeDivergenceWithCalculationMinusExist calcedDiverGenceTime = this.flexTime==null?this.flexTime:this.flexTime.calcDiverGenceTime();
 		return new FlexTime(calcedDiverGenceTime,this.beforeApplicationTime);
 	}
-	
 }

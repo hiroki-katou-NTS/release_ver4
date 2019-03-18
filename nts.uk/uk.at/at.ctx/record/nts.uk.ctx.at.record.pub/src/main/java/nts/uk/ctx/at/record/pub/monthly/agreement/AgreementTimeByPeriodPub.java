@@ -31,5 +31,9 @@ public interface AgreementTimeByPeriodPub {
 	List<AgreementTimeByPeriod> algorithm(String companyId, String employeeId, GeneralDate criteria,
 			Month startMonth, Year year, PeriodAtrOfAgreement periodAtr, Object basicSetGetter);
 	
-	Object algorithm(String companyId, List<String> employeeId, DatePeriod criteria);
+	Object getCommonSetting(String companyId, List<String> employeeId, DatePeriod criteria);
+
+	// RequestList453
+	List<AgreementTimeByEmpExport> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
+									   Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs);
 }

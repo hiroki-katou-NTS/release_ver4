@@ -32,7 +32,7 @@ public class CreateperApprovalMonthlyDefault implements CreateperApprovalMonthly
 				/**アルゴリズム「指定社員の中間データを作成する」を実行する*/
 				AppRootInsContentFnImport appRootInsContentFnImport =  createDailyApproverAdapter.createDailyApprover(employeeID, 2, endDateClosure,endDateClosure);
 				
-				boolean flagError = appRootInsContentFnImport.getErrorFlag().intValue()==1?true:false;
+				boolean flagError = appRootInsContentFnImport.getErrorFlag().intValue()==0?false:true;
 				String errorMessage = appRootInsContentFnImport.getErrorMsgID();
 				//取得したエラーフラグ != エラーなし
 				if(flagError) {

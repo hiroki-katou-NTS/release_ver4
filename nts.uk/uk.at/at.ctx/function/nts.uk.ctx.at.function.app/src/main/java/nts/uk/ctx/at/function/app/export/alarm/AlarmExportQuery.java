@@ -20,4 +20,6 @@ public class AlarmExportQuery {
 	
 	/** Data export */
 	private List<ValueExtractAlarmDto> data;
+	
+	private String currentAlarmCode;
 }

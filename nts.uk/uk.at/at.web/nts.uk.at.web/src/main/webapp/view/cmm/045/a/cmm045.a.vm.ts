@@ -213,7 +213,7 @@ module cmm045.a.viewmodel {
                             data.displaySet.otActualDisAtr, data.displaySet.warningDateDisAtr, data.displaySet.appReasonDisAtr));
                         _.each(data.lstApp, function(app) {
                             self.lstAppCommon.push(new vmbase.ApplicationDto_New(app.applicationID, app.prePostAtr, app.inputDate, app.enteredPersonSID,
-                                app.reversionReason, app.applicationDate, app.applicationReason, app.applicationType, app.applicantSID,
+                                app.reversionReason, app.applicationDate, _.escape(app.applicationReason), app.applicationType, app.applicantSID,
                                 app.reflectPlanScheReason, app.reflectPlanTime, app.reflectPlanState, app.reflectPlanEnforce,
                                 app.reflectPerScheReason, app.reflectPerTime, app.reflectPerState, app.reflectPerEnforce,
                                 app.startDate, app.endDate, app.version));
@@ -238,7 +238,8 @@ module cmm045.a.viewmodel {
                                 overTime.workClockTo2, overTime.total, lstFrame, overTime.overTimeShiftNight, overTime.flexExessTime, timeNo417));
                         });
                         _.each(data.lstAppGroup, function(group) {
-                            lstAppGroup.push(new vmbase.AppPrePostGroup(group.preAppID, group.postAppID, group.time,group.strTime1,group.endTime1,group.strTime2,group.endTime2, group.appPre, group.reasonAppPre, group.appPreHd));
+                            lstAppGroup.push(new vmbase.AppPrePostGroup(group.preAppID, group.postAppID, group.time,group.strTime1,group.endTime1,group.strTime2,group.endTime2,
+                                    group.appPre, group.reasonAppPre, group.appPreHd, group.shiftNightTime, group.flexTime, group.workTypeName, group.workTimeName));
                         });
                         self.itemApplication([]);
                         self.itemApplication.push(new vmbase.ChoseApplicationList(-1, '全件表示'));
@@ -346,8 +347,7 @@ module cmm045.a.viewmodel {
                     { headerText: getText('CMM045_52'), key: 'appName', dataType: 'string', width: '90px'},
                     { headerText: getText('CMM045_53'), key: 'appAtr', dataType: 'string', width: '65px', hidden: isHidden},
                     { headerText: getText('CMM045_54'), key: 'appDate', dataType: 'string', width: '157px'},
-                    { headerText: getText('CMM045_55'), key: 'appContent', dataType: 'string', width: '408px', 
-                        formatter: (v) => (v.replace(/(<|<)script>/gi, '&lt;script&gt;').replace(/(<\/)script>/gi, '&lt;/script&gt;'))},
+                    { headerText: getText('CMM045_55'), key: 'appContent', dataType: 'string', width: '408px'},
                     { headerText: getText('CMM045_56'), key: 'inputDate', dataType: 'string', width: '120px'},
                     { headerText: getText('CMM045_57'), key: 'appStatus', dataType: 'string', width: '75px'}
                 ],
@@ -515,8 +515,7 @@ module cmm045.a.viewmodel {
                     { headerText: getText('CMM045_52'), key: 'appName', dataType: 'string', width: '90px'},
                     { headerText: getText('CMM045_53'), key: 'appAtr', dataType: 'string', width: '65px', hidden: isHidden},
                     { headerText: getText('CMM045_54'), key: 'appDate', dataType: 'string', width: '157px'},
-                    { headerText: getText('CMM045_55'), key: 'appContent', dataType: 'string', width: '341px',
-                        formatter: (v) => (v.replace(/(<|<)script>/gi, '&lt;script&gt;').replace(/(<\/)script>/gi, '&lt;/script&gt;'))},
+                    { headerText: getText('CMM045_55'), key: 'appContent', dataType: 'string', width: '341px'},
                     { headerText: getText('CMM045_56'), key: 'inputDate', dataType: 'string', width: '120px'},
                     { headerText: getText('CMM045_57'), key: 'appStatus', dataType: 'string', width: '75px'},
                     { headerText: getText('CMM045_58'), key: 'displayAppStatus', dataType: 'string', width: '95px' },
@@ -871,17 +870,25 @@ module cmm045.a.viewmodel {
                 //ver14
 //                let reasonOtPre = self.displaySet().appReasonDisAtr == 0 || groups.reasonAppPre == '' ? '' : '<br/>' + groups.reasonAppPre;
                 let content1 = time1 == '' ? time2 : time2 == '' ? time1 : time1 + '　' + time2;
-                let contentSetTrue = content1 == '' ? self.convertFrameTime(groups.appPre.lstFrame) : content1 + '　' + self.convertFrameTime(groups.appPre.lstFrame);
-                appPre = detailSet == 1 ? contentSetTrue : self.convertFrameTime(groups.appPre.lstFrame);;
+                let content2 = self.convertFrameTime(groups.appPre.lstFrame);
+                let contentSetTrue = content1 == '' ? content2 : content1 + '　' + content2;
+                appPre = detailSet == 1 ? contentSetTrue : content2;
             }
             let appResContent = '';
             //thuc te
             let timeRes1 = groups.strTime1  == '' ? '' : groups.strTime1 + getText('CMM045_100') + groups.endTime1;
             let timeRes2 = groups.strTime2  == '' ? '' : groups.strTime2 + getText('CMM045_100') + groups.endTime2;
             //ver14
-            let contentRes1 =  timeRes1 + timeRes2;
-            let contentRes2 = self.convertFrameTime(groups.lstFrameRes);
-            let appRes = detailSet == 1 ? contentRes1 + contentRes2 : contentRes2;
+            let contentRes1 =  timeRes1 == '' ? timeRes2 : timeRes2 == '' ? timeRes1 : timeRes1 + '　' + timeRes2;
+            let lstFrameOv: Array<any> = groups.lstFrameRes;
+            //add shiftNight
+            lstFrameOv.push(new vmbase.OverTimeFrame(1,11,getText('CMM045_270'),0,groups.shiftNightTime));
+            //add flex
+            lstFrameOv.push(new vmbase.OverTimeFrame(1,12,getText('CMM045_271'),0,groups.flexTime));
+            let contentRes2 = self.convertFrameTime(lstFrameOv);
+            let contResTrue = contentRes1 == '' ? contentRes2 : contentRes1 + '　' + contentRes2;
+            let appRes = detailSet == 1 ? contResTrue : contentRes2;
+            
             appResContent = getText('CMM045_274') + appRes;
             let appInfor = {
                 appPre: appPre == null ? '' : getText('CMM045_273') + appPre,
@@ -908,8 +915,14 @@ module cmm045.a.viewmodel {
             }
             let appResContent = '';
             //thuc te
+            let nameRes = groups.workTypeName == '' ? groups.workTimeName : groups.workTimeName == '' ? groups.workTypeName : groups.workTypeName + '　' + groups.workTimeName;
+            let time1 = groups.strTime1 == '' ? '' : groups.strTime1 + getText('CMM045_100') + groups.endTime1;
+            let time2 = groups.strTime2 == '' ? '' : groups.strTime2 + getText('CMM045_100') + groups.endTime2;
+            let timeF = time1 == '' ? time2 : time2 == '' ? time1 : time1 + '　' + time2;
+            let res1 = nameRes == '' ? timeF : timeF == '' ? nameRes : nameRes + '　' + timeF;
             let appRes = self.convertFrameTimeHd(groups.lstFrameRes);
-            appResContent = getText('CMM045_274') + appRes;
+            let contRes = res1 == '' ? appRes : appRes = '' ? res1 : res1 + '　' + appRes;
+            appResContent = getText('CMM045_274') + contRes;
 
 
             let appInfor = {
@@ -1515,7 +1528,7 @@ module cmm045.a.viewmodel {
                     data.displaySet.otActualDisAtr, data.displaySet.warningDateDisAtr, data.displaySet.appReasonDisAtr));
                 _.each(data.lstApp, function(app) {
                     self.lstAppCommon.push(new vmbase.ApplicationDto_New(app.applicationID, app.prePostAtr, app.inputDate, app.enteredPersonSID,
-                        app.reversionReason, app.applicationDate, app.applicationReason, app.applicationType, app.applicantSID,
+                        app.reversionReason, app.applicationDate, _.escape(app.applicationReason), app.applicationType, app.applicantSID,
                         app.reflectPlanScheReason, app.reflectPlanTime, app.reflectPlanState, app.reflectPlanEnforce,
                         app.reflectPerScheReason, app.reflectPerTime, app.reflectPerState, app.reflectPerEnforce,
                         app.startDate, app.endDate, app.version));
@@ -1540,7 +1553,8 @@ module cmm045.a.viewmodel {
                         overTime.workClockTo2, overTime.total, lstFrame, overTime.overTimeShiftNight, overTime.flexExessTime, timeNo417));
                 });
                 _.each(data.lstAppGroup, function(group) {
-                    lstAppGroup.push(new vmbase.AppPrePostGroup(group.preAppID, group.postAppID, group.time,group.strTime1,group.endTime1,group.strTime2,group.endTime2, group.appPre, group.reasonAppPre, group.appPreHd));
+                    lstAppGroup.push(new vmbase.AppPrePostGroup(group.preAppID, group.postAppID, group.time,group.strTime1,group.endTime1,group.strTime2,group.endTime2, 
+                                group.appPre, group.reasonAppPre, group.appPreHd, group.shiftNightTime, group.flexTime, group.workTypeName, group.workTimeName));
                 });
                 self.itemApplication([]);
                 self.itemApplication.push(new vmbase.ChoseApplicationList(-1, '全件表示'));
@@ -1736,7 +1750,7 @@ module cmm045.a.viewmodel {
             let denialNumber = 0;
             _.each(lstApp, function(app){
                 let add = self.checkSync(self.lstAppCompltSync(), app.appId) ? 2 : 1;
-                if(app.appStatusNo == 5){ unApprovalNumber += 1; }//UNAPPROVED:5
+                if(app.appStatusNo == 5){ unApprovalNumber += add; }//UNAPPROVED:5
                 if(app.appStatusNo == 4){//APPROVED: 4
                     let agent = self.findAgent(app.appId);
                     if(agent != undefined && agent.agentId != null && agent.agentId != '' && agent.agentId.match(/^\s+$/) == null){
@@ -1764,7 +1778,7 @@ module cmm045.a.viewmodel {
         }
         findAgent(appId: string): any{
             return _.find(this.lstListAgent(), function(agent){
-                return agent.appID = appId;    
+                return agent.appID == appId;    
             });
         }
         convertTime_Short_HM(time: number): string {

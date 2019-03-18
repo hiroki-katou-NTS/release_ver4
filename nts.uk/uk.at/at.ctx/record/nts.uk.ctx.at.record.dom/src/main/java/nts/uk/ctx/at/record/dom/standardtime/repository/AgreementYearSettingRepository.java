@@ -23,4 +23,6 @@ public interface AgreementYearSettingRepository {
 	void updateById(AgreementYearSetting agreementYearSetting, Integer yearMonthValueOld);
 
 	Optional<AgreementYearSetting> findByKey(String employeeId, int yearMonth);
+
+	List<AgreementYearSetting> findByKey(List<String> employeeIds, int yearMonth);
 }

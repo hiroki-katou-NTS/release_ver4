@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.shared.dom.yearholidaygrant;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 /**
  * the length service repository interface
@@ -26,6 +27,8 @@ public interface LengthServiceRepository {
 	 * @return the holiday grant by codes
 	 */
 	List<LengthServiceTbl> findByCode(String companyId, String yearHolidayCode);
+	
+	Map<String, List<LengthServiceTbl>> findByCode(String companyId, List<String> yearHolidayCode);
 	
 	/**
 	 * Adds the holiday grant.

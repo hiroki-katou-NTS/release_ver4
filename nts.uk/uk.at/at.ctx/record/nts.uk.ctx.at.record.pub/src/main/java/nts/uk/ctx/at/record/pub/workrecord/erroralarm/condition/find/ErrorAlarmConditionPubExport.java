@@ -155,6 +155,10 @@ public class ErrorAlarmConditionPubExport {
 					atdItemConDomain.setCompareRange(atdItemCon.getCompareOperator(),
 							(V)new CheckedTimesValue(atdItemCon.getCompareStartValue().intValue()),
 							(V)new CheckedTimesValue(atdItemCon.getCompareEndValue().intValue()));
+				} else if (atdItemCon.getConditionAtr() == ConditionAtr.DAYS.value) {
+					atdItemConDomain.setCompareRange(atdItemCon.getCompareOperator(),
+							(V)new CheckedTimesValueDay(atdItemCon.getCompareStartValue().doubleValue()),
+							(V)new CheckedTimesValueDay(atdItemCon.getCompareEndValue().doubleValue()));
 				}
 			} else {
 				if (atdItemCon.getConditionType() == ConditionType.FIXED_VALUE.value) {
@@ -174,6 +178,10 @@ public class ErrorAlarmConditionPubExport {
 						atdItemConDomain.setCompareSingleValue(atdItemCon.getCompareOperator(),
 								atdItemCon.getConditionType(),
 								(V)new CheckedTimesValue(atdItemCon.getCompareStartValue().intValue()));
+					} else if (atdItemCon.getConditionAtr() == ConditionAtr.DAYS.value) {
+						atdItemConDomain.setCompareSingleValue(atdItemCon.getCompareOperator(),
+								atdItemCon.getConditionType(),
+								(V)new CheckedTimesValueDay(atdItemCon.getCompareStartValue().doubleValue()));
 					}
 				} else {
 					atdItemConDomain.setCompareSingleValue(atdItemCon.getCompareOperator(), atdItemCon.getConditionType(),

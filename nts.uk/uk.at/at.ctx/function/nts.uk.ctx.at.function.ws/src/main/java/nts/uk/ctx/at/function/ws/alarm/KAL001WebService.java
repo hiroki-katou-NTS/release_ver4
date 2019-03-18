@@ -136,9 +136,9 @@ public class KAL001WebService {
 	}
 	
 	@POST
-	@Path("export-alarm-data/{processId}")
-	public ExportServiceResult generate(@PathParam("processId") String processId) {
+	@Path("export-alarm-data/{alarmCode}/{processId}")
+	public ExportServiceResult generate(@PathParam("alarmCode") String alarmCode, @PathParam("processId") String processId) {
 
-		return this.alarmExportService.start(new AlarmExportQuery(extractResultFinder.getResultDto(processId)));
+		return this.alarmExportService.start(new AlarmExportQuery(extractResultFinder.getResultDto(processId), alarmCode));
 	}
 }

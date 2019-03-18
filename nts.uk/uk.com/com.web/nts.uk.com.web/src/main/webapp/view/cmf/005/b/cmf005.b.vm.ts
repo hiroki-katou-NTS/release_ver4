@@ -564,7 +564,8 @@ module nts.uk.com.view.cmf005.b.viewmodel {
                 isShowWorkPlaceName: true,
                 isShowSelectAllButton: true,
                 maxWidth: 550,
-                maxRows: 15
+                maxRows: 15,
+                isSelectAllAfterReload: true
             };
         }
 

@@ -216,7 +216,7 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 			}
 			
 			/** TODO: need check period */
-			Object basicSetGetter = agreementTimeByPeriodPub.algorithm(AppContexts.user().companyId(), employeeIds, period);
+			Object basicSetGetter = agreementTimeByPeriodPub.getCommonSetting(AppContexts.user().companyId(), employeeIds, period);
 
 			/** TODO: 並列処理にしてみる　*/
 			// 社員IDの件数分ループ

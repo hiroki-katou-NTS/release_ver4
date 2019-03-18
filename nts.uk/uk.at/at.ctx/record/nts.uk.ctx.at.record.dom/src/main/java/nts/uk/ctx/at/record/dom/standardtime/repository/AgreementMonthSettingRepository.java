@@ -14,6 +14,8 @@ public interface AgreementMonthSettingRepository {
 	List<AgreementMonthSetting> find(String employeeId);
 	
 	Optional<AgreementMonthSetting> findByKey(String employeeId, YearMonth yearMonth);
+
+	List<AgreementMonthSetting> findByKey(List<String> employeeIds, List<YearMonth> yearMonths);
 	
 	void add(AgreementMonthSetting agreementMonthSetting);
 	

@@ -31,7 +31,7 @@ public class SendAutoExeEmailDefault implements SendAutoExeEmailService {
 	
 	@Override
 	public Optional<OutputSendAutoExe> sendAutoExeEmail(String companyId, GeneralDateTime executionDate,
-			List<ExtractedAlarmDto> listExtractedAlarmDto, boolean sendMailPerson, boolean sendMailAdmin) {
+			List<ExtractedAlarmDto> listExtractedAlarmDto, boolean sendMailPerson, boolean sendMailAdmin,String alarmCode) {
 		OutputSendAutoExe outputSendAutoExe = new OutputSendAutoExe();
 		
 		//本人送信対象(List)
@@ -99,7 +99,8 @@ public class SendAutoExeEmailDefault implements SendAutoExeEmailService {
 						listEmpPersonID,
 						listEmpAdminID,
 						extractedAlarmDto.getExtractedAlarmData().stream().map(c->convertToDto(c)).collect(Collectors.toList()),
-						mailSettingsParamDto);
+						mailSettingsParamDto,
+						alarmCode);
 			}
 		}
 		catch (Exception e) {

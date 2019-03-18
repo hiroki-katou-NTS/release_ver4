@@ -13,4 +13,5 @@ public class ParamAlarmSendEmailCommand {
 	private List<String> listEmployeeSendTaget;
 	private List<String> listManagerSendTaget;
 	private String processId;
+	private String currentAlarmCode;
 }

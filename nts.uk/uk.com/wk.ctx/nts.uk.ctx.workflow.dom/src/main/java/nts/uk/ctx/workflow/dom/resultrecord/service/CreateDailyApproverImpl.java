@@ -77,6 +77,9 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 		case APPROVER_UP_10:
 			errorMsgID = "Msg_325";
 			break;
+		case ABNORMAL_TERMINATION:
+			errorMsgID = "Msg_1339";
+			break;
 		default:
 			break;
 		}

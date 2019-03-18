@@ -107,7 +107,7 @@ module nts.uk.at.view.kdw003.b {
                             });
                         } else {
                             if (self.lstError().length == 0) self.isDisableExportCSV(true);
-                            self.loadGrid();
+                            self.loadGridNormal();
                             dfd.resolve();
                         }
     
