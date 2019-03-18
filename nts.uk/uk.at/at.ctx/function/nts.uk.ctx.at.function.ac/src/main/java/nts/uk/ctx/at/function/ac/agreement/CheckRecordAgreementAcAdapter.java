@@ -8,7 +8,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.function.dom.adapter.agreement.CheckRecordAgreementAdapter;
@@ -124,6 +127,7 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<CheckedOvertimeImport> checkNumberOvertime(List<String> employeeIds, List<DatePeriod> periods,
 			List<AgreeCondOt> listCondOt) {
 		
@@ -159,12 +163,14 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 		}
 		return result;
 	}
-
+	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<CheckedAgreementResult> checkArgreementResult(List<String> employeeIds, DatePeriod period,
 			AgreeConditionError agreeConditionError, Optional<AgreementOperationSettingImport> agreementSetObj,
 			List<Closure> closureList,Map<String,Integer> mapEmpIdClosureID) {
 
+		
 		List<CheckedAgreementResult> checkedAgreementResults = new ArrayList<CheckedAgreementResult>();
 		List<Integer> fiscalYears  = new ArrayList<>();
 		YearMonthPeriod  yearMonthPeriod = null;

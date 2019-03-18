@@ -10,9 +10,14 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import lombok.SneakyThrows;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -67,6 +72,9 @@ public class AgreementProcessService {
 	
 	@Inject
 	private ManagedParallelWithContext parallelManager;
+	
+	@Resource
+	private SessionContext scContext;
 	
 	public List<ValueExtractAlarm> agreementProcess(List<String> checkConditionCodes, List<PeriodByAlarmCategory> periodAlarms, List<EmployeeSearchDto> employees, Optional<AgreementOperationSettingImport> agreementSetObj){
 		
@@ -172,10 +180,16 @@ public class AgreementProcessService {
 		}
 		return result;
 	}
+
+	@Inject
+	private AgreementCheckService checkService;
 	
+	@SneakyThrows
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ValueExtractAlarm> agreementProcess(String comId, List<AlarmCheckConditionByCategory> agreementErAl, List<PeriodByAlarmCategory> periodAlarms, 
 			List<EmployeeSearchDto> employees, Optional<AgreementOperationSettingImport> agreementSetObj, Consumer<Integer> counter, Supplier<Boolean> shouldStop){
-		
+
+//		Logger.getLogger(getClass()).info("Transaction Status 1: " + tsr.getTransactionStatus());
 		List<ValueExtractAlarm> result = Collections.synchronizedList(new ArrayList<>());
 		List<String> empIds = employees.stream().map( e ->e.getId()).collect(Collectors.toList());
 		Map<String,Integer> empIdToClosureId = new HashMap<>();
@@ -183,74 +197,18 @@ public class AgreementProcessService {
 		List<Closure> closureList = getClosure(comId, empIds, empIdToClosureId, employmentCodeToEmpIds);
 		
 		Map<String, EmployeeSearchDto> mapEmployee = employees.stream().collect(Collectors.toMap(EmployeeSearchDto::getId, x ->x));
-		
+//		Logger.getLogger(getClass()).info("Transaction Status 2: " + tsr.getTransactionStatus());
 		/** TODO: parallel from here */
-		parallelManager.forEach(CollectionUtil.partitionBySize(empIds, 100), employeeIds -> {
-			for(AlarmCheckConditionByCategory alarmCheck : agreementErAl) {
-				// 36協定のアラームチェック条件
-				AlarmChkCondAgree36 alarmChkCon36 = alarmCheck.getAlarmChkCondAgree36();
-				
-				// アルゴリズム「超過回数チェック」を実行する
-				for (PeriodByAlarmCategory periodAlarm : periodAlarms) {
-					
-					synchronized (this) {
-						if(shouldStop.get()) {
-							return;
-						}
-					}
-					//抽出条件に対応する期間を取得する 
-					// List<36協定エラーアラームのチェック条件>
-					alarmChkCon36.getListCondError().stream().filter( e ->e.getUseAtr() == UseClassification.Use).forEach(agreeConditionError -> {
-						
-						Period periodCheck = getPeriod(agreeConditionError);
-						
-						if(periodAlarm.getPeriod36Agreement() == periodCheck.value ){
-							//ドメインモデル「36協定エラーアラームチェック名称」を取得する
-							Optional<AgreeNameError> optAgreeName = agreeNameRepo.findById(periodCheck.value, agreeConditionError.getErrorAlarm().value);
-							
-							// アルゴリズム「36協定実績をチェックする」を実行する
-							List<CheckedAgreementResult> checkAgreementsResult = checkAgreementAdapter.checkArgreementResult(employeeIds,
-																															new DatePeriod(periodAlarm.getStartDate(), periodAlarm.getEndDate()), 
-																															agreeConditionError, agreementSetObj, closureList,empIdToClosureId);
-							if(!CollectionUtil.isEmpty(checkAgreementsResult)){
-								result.addAll(generationValueExtractAlarm(mapEmployee, checkAgreementsResult, agreeConditionError, optAgreeName));	
-							}
-						}
-					});
-					
-					if(Period.Yearly.value == periodAlarm.getPeriod36Agreement()){
-						List<DatePeriod> periodsYear = new ArrayList<>();
-						periodsYear.add(new DatePeriod(periodAlarm.getStartDate(), periodAlarm.getEndDate()));
-						List<CheckedOvertimeImport> checkOvertimes = checkAgreementAdapter.checkNumberOvertime(empIds, periodsYear,
-								alarmChkCon36.getListCondOt());
-						for (CheckedOvertimeImport check : checkOvertimes) {
-
-							String hour = check.getOt36().hour() + "";
-							if (hour.length() < 2)
-								hour = "0" + hour;
-							String minute = check.getOt36().minute() + "";
-							if (minute.length() < 2)
-								minute = "0" + minute;
-							String ot36 = hour + ":" + minute;
-
-							String datePeriod = check.getDatePeriod().start().toString() + "~"
-									+ check.getDatePeriod().end().toString();
-
-							result.add(new ValueExtractAlarm(mapEmployee.get(check.getEmployeeId()).getWorkplaceId(),
-															check.getEmployeeId(), datePeriod, TextResource.localize("KAL010_208"),
-															TextResource.localize("KAL010_201"), TextResource.localize("KAL010_202",
-																	check.getNo() + "", ot36, check.getExcessNum().v() + ""),
-															check.getMessageDisp().v()));
-						}
-					}
-				}
-			}
-			synchronized (this) {
-				counter.accept(employeeIds.size());
-			}
+		parallelManager.forEach(CollectionUtil.partitionBySize(empIds, 25), employeeIds -> {
+//		CollectionUtil.split(empIds, 25, employeeIds -> {
+			checkService.check(agreementErAl, periodAlarms, agreementSetObj, counter, shouldStop, result, empIds, empIdToClosureId,
+					closureList, mapEmployee, employeeIds);
 		});
+//		Logger.getLogger(getClass()).info("Transaction Status 10: " + tsr.getTransactionStatus());
 		return result;
 	}
+
+	
 
 	private Period getPeriod(AgreeConditionError agreeConditionError) {
 		if (agreeConditionError.getPeriod() == Period.One_Week 

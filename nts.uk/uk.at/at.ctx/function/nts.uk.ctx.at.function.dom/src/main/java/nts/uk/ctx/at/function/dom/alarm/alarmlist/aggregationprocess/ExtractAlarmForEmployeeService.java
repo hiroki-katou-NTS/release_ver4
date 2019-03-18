@@ -1,17 +1,21 @@
 package nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.transaction.TransactionSynchronizationRegistry;
 
-import nts.arc.task.parallel.ManagedParallelWithContext;
+import org.apache.log4j.Logger;
+
 import nts.uk.ctx.at.function.dom.adapter.standardtime.AgreementOperationSettingAdapter;
 import nts.uk.ctx.at.function.dom.adapter.standardtime.AgreementOperationSettingImport;
 import nts.uk.ctx.at.function.dom.adapter.workplace.WorkplaceAdapter;
@@ -29,7 +33,6 @@ import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.daily.daily
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.monthly.MonthlyAggregateProcessService;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.multiplemonth.MultipleMonthAggregateProcessService;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategory;
-import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategoryRepository;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.CheckCondition;
 import nts.uk.ctx.at.function.dom.alarm.w4d4alarm.W4D4AlarmService;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -37,8 +40,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 public class ExtractAlarmForEmployeeService {
 	
-	private static final List<Integer> CHECK_CATEGORY = Arrays.asList(AlarmCategory.DAILY.value, AlarmCategory.SCHEDULE_4WEEK.value, AlarmCategory.AGREEMENT.value, AlarmCategory.MONTHLY.value, AlarmCategory.MULTIPLE_MONTH.value);
-
 	@Inject 
 	private DailyAggregationProcessService dailyAggregationProcessService;
 	
@@ -65,12 +66,6 @@ public class ExtractAlarmForEmployeeService {
 	
 	@Inject
 	private AgreementOperationSettingAdapter agreementOperationSettingAdapter;
-	
-	@Inject
-	private AlarmCheckConditionByCategoryRepository erAlByCateRepo;
-	
-	@Inject
-	private ManagedParallelWithContext parallelManager;
 	
 	public List<ValueExtractAlarm> process(String comId, List<CheckCondition> checkConList, List<PeriodByAlarmCategory> listPeriodByCategory, List<EmployeeSearchDto> employees){
 		
@@ -168,31 +163,36 @@ public class ExtractAlarmForEmployeeService {
 			return false;
 		}).collect(Collectors.toList());
 	}
-	
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ValueExtractAlarm> processV2(String comId, List<CheckCondition> checkConList, List<PeriodByAlarmCategory> listPeriodByCategory, 
 			List<EmployeeSearchDto> employees, List<AlarmCheckConditionByCategory> eralCate, Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
 		List<ValueExtractAlarm> result = (new ArrayList<>());
 
 		List<String> employeeIds = employees.stream().map(c -> c.getId()).collect(Collectors.toList());
 		List<WorkplaceImport> optWorkplaceImports = workplaceAdapter.getWorlkplaceHistoryByIDs(employeeIds);
-		
+
 //		List<Runnable> checks = new ArrayList<>();
 //		checks.add(() -> {
 			result.addAll(runDailyCheckErAl(comId, checkConList, listPeriodByCategory, employees,
 					employeeIds, optWorkplaceImports, eralCate, counter, shouldStop));
 //		});
+
 //		checks.add(() -> {
 			result.addAll(runW4d4CheckErAl(comId, checkConList, listPeriodByCategory, employees, employeeIds,
 					optWorkplaceImports, eralCate, counter, shouldStop));
 //		});
+
 //		checks.add(() -> {
 			result.addAll(runAgreementCheckErAl(comId, checkConList, listPeriodByCategory, employees, employeeIds,
 					optWorkplaceImports, eralCate, counter, shouldStop));
 //		});
+
 //		checks.add(() -> {
 			result.addAll(runMonthlyCheckErAl(comId, checkConList, listPeriodByCategory, employees,
 					employeeIds, optWorkplaceImports, eralCate, counter, shouldStop));
 //		});
+
 //		checks.add(() -> {
 			result.addAll(runMultiMonthCheckErAl(comId, checkConList, listPeriodByCategory, employees,
 					employeeIds, optWorkplaceImports, eralCate, counter, shouldStop));

@@ -3,7 +3,6 @@ package nts.uk.ctx.at.record.dom.monthly.agreement.export;
 import java.util.List;
 
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.standardtime.repository.AgreementDomainServiceImpl.BasicAgreementSettingsGetter;
 import nts.uk.ctx.at.shared.dom.common.Month;
 import nts.uk.ctx.at.shared.dom.common.Year;
 import nts.uk.ctx.at.shared.dom.monthly.agreement.PeriodAtrOfAgreement;

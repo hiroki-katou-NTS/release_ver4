@@ -15,6 +15,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -197,7 +199,8 @@ public class W4D4AlarmService {
 		return result;
 
 	}
-	
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ValueExtractAlarm> calculateTotal4W4D(String companyID, List<EmployeeSearchDto> employees, DatePeriod period, List<AlarmCheckConditionByCategory> w4d4ErAl, 
 			Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
 		List<ValueExtractAlarm> result = Collections.synchronizedList(new ArrayList<ValueExtractAlarm>());
@@ -234,7 +237,7 @@ public class W4D4AlarmService {
 						});
 						
 						synchronized (this) {
-							counter.accept(emps.size() / w4d4ErAl.size());
+							counter.accept(emps.size());
 						}
 						
 					});

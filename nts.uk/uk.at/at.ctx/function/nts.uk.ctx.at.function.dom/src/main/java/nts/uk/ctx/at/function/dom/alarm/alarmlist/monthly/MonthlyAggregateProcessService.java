@@ -12,8 +12,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import lombok.val;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
@@ -48,6 +51,7 @@ import nts.uk.ctx.at.function.dom.adapter.workrecord.identificationstatus.identi
 import nts.uk.ctx.at.function.dom.alarm.AlarmCategory;
 import nts.uk.ctx.at.function.dom.alarm.alarmdata.ValueExtractAlarm;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.EmployeeSearchDto;
+import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.ErAlConstant;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategory;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategoryRepository;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.monthly.MonAlarmCheckCon;
@@ -158,44 +162,48 @@ public class MonthlyAggregateProcessService {
 		
 		return listValueExtractAlarm;
 	}
-	
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ValueExtractAlarm> monthlyAggregateProcess(String companyID , List<AlarmCheckConditionByCategory> monthlyErAl, DatePeriod period, List<EmployeeSearchDto> employees, 
 			Consumer<Integer> counter, Supplier<Boolean> shouldStop){
+
+		List<ValueExtractAlarm> listValueExtractAlarm = Collections.synchronizedList(new ArrayList<>());
 		
-		List<String> employeeIds = employees.stream().map( e ->e.getId()).collect(Collectors.toList());
-		
-		List<ValueExtractAlarm> listValueExtractAlarm = new ArrayList<>(); 	
-		Map<String, List<RegulationInfoEmployeeResult>> listTargetMap = erAlWorkRecordCheckAdapter.filterEmployees(new DatePeriod(period.end(),period.end()), 
-																													employeeIds, 
-																													monthlyErAl.stream().map(c -> c.getExtractTargetCondition()).collect(Collectors.toList()));
-		monthlyErAl.stream().forEach(eral -> {
-			synchronized (this) {
-				if(shouldStop.get()) {
-					return;
+		parallelManager.forEach(CollectionUtil.partitionBySize(employees, 100), emps -> {
+			List<String> employeeIds = emps.stream().map( e ->e.getId()).collect(Collectors.toList());
+			 	
+			Map<String, List<RegulationInfoEmployeeResult>> listTargetMap = erAlWorkRecordCheckAdapter.filterEmployees(new DatePeriod(period.end(),period.end()), 
+																														employeeIds, 
+																														monthlyErAl.stream().map(c -> c.getExtractTargetCondition()).collect(Collectors.toList()));
+			monthlyErAl.stream().forEach(eral -> {
+				synchronized (this) {
+					if(shouldStop.get()) {
+						return;
+					}
 				}
-			}
-			//対象者を絞り込む
-			List<String> listEmployeeID = listTargetMap.get(eral.getExtractTargetCondition().getId()).stream().map(c -> c.getEmployeeId()).collect(Collectors.toList());
-			
-			//対象者の件数をチェック : 対象者　≦　0
-			if(!listEmployeeID.isEmpty()) {
-				MonAlarmCheckCon monAlarmCheckCon = (MonAlarmCheckCon) eral.getExtractionCondition();
+				//対象者を絞り込む
+				List<String> listEmployeeID = listTargetMap.get(eral.getExtractTargetCondition().getId()).stream().map(c -> c.getEmployeeId()).collect(Collectors.toList());
 				
-				List<FixedExtraMonFunImport> listFixed = fixedExtraMonFunAdapter.getByEralCheckID(monAlarmCheckCon.getMonAlarmCheckConID());
-				List<ExtraResultMonthlyDomainEventDto> listExtra = extraResultMonthlyFunAdapter.getListExtraResultMonByListEralID(monAlarmCheckCon.getArbExtraCon());
+				//対象者の件数をチェック : 対象者　≦　0
+				if(!listEmployeeID.isEmpty()) {
+					MonAlarmCheckCon monAlarmCheckCon = (MonAlarmCheckCon) eral.getExtractionCondition();
+					
+					List<FixedExtraMonFunImport> listFixed = fixedExtraMonFunAdapter.getByEralCheckID(monAlarmCheckCon.getMonAlarmCheckConID());
+					List<ExtraResultMonthlyDomainEventDto> listExtra = extraResultMonthlyFunAdapter.getListExtraResultMonByListEralID(monAlarmCheckCon.getArbExtraCon());
+					
+					List<EmployeeSearchDto> employeesDto = emps.stream().filter(c-> listEmployeeID.contains(c.getId())).collect(Collectors.toList());
+					//tab 2
+					/***/
+					listValueExtractAlarm.addAll(this.extractMonthlyFixed(listFixed, period, employeesDto, companyID));
+					//tab 3
+					/***/
+					listValueExtractAlarm.addAll(this.extraResultMonthlyV2(companyID, listExtra, period, employeesDto));
+				}
 				
-				List<EmployeeSearchDto> employeesDto = employees.stream().filter(c-> listEmployeeID.contains(c.getId())).collect(Collectors.toList());
-				//tab 2
-				/***/
-				listValueExtractAlarm.addAll(this.extractMonthlyFixed(listFixed, period, employeesDto, companyID));
-				//tab 3
-				/***/
-				listValueExtractAlarm.addAll(this.extraResultMonthlyV2(companyID, listExtra, period, employeesDto));
-			}
-			
-			synchronized (this) {
-				counter.accept(listEmployeeID.size() / monthlyErAl.size());
-			}
+				synchronized (this) {
+					counter.accept(emps.size());
+				}
+			});
 		});
 		
 		return listValueExtractAlarm;
@@ -257,63 +265,62 @@ public class MonthlyAggregateProcessService {
 		if (closureMap.isEmpty()) {
 			return listValueExtractAlarm;
 		}
-		parallelManager.forEach(CollectionUtil.partitionBySize(employee, 100), emps -> {
-			emps.stream().forEach(emp -> {
-				Closure closure = closureMap.get(emp.getId());
-				if(closure == null){
-					return;
-				}
-				//締めのアルゴリズム「当月の期間を算出する」を実行する
-				DatePeriod periodCurrentMonth = closureService.getClosurePeriod(closure.getClosureId().value,
-						closure.getClosureMonth().getProcessingYm());
-				
-				//代休期限アラーム基準日を決定する
-				DatePeriod periodCheckDealMonth = closureService.getClosurePeriod(closure.getClosureId().value,
-						getDeadlCheckMonth(periodCurrentMonth, deadlCheckMonth));
+		employee.stream().forEach(emp -> {
+			Closure closure = closureMap.get(emp.getId());
+			if(closure == null){
+				return;
+			}
+			val closureOpt = Optional.ofNullable(closure);
+			//締めのアルゴリズム「当月の期間を算出する」を実行する
+			DatePeriod periodCurrentMonth = closureService.getClosurePeriod(closure.getClosureId().value,
+					closure.getClosureMonth().getProcessingYm(), closureOpt);
+			
+			//代休期限アラーム基準日を決定する
+			DatePeriod periodCheckDealMonth = closureService.getClosurePeriod(closure.getClosureId().value,
+					getDeadlCheckMonth(periodCurrentMonth, deadlCheckMonth), closureOpt);
 
-				//RequestList No.203 期間内の休出代休残数を取得する
-				//集計開始日
-				//集計終了日
-				DatePeriod newPeriod = new DatePeriod(periodCurrentMonth.start(), periodCurrentMonth.end().addYears(1));
-				
-				BreakDayOffRemainMngParam param = new BreakDayOffRemainMngParam(companyID, emp.getId(),
-						newPeriod, false, periodCurrentMonth.end(), false, Collections.emptyList(),
-						Collections.emptyList(), Collections.emptyList());
-				BreakDayOffRemainMngOfInPeriod breakDayOffRemainMngOfInPeriod = breakDayOffMngInPeriodQuery
-						.getBreakDayOffMngInPeriod(param);
-				List<BreakDayOffDetail> lstDetailData = breakDayOffRemainMngOfInPeriod.getLstDetailData();
+			//RequestList No.203 期間内の休出代休残数を取得する
+			//集計開始日
+			//集計終了日
+			DatePeriod newPeriod = new DatePeriod(periodCurrentMonth.start(), periodCurrentMonth.end().addYears(1));
+			
+			BreakDayOffRemainMngParam param = new BreakDayOffRemainMngParam(companyID, emp.getId(),
+					newPeriod, false, periodCurrentMonth.end(), false, Collections.emptyList(),
+					Collections.emptyList(), Collections.emptyList());
+			BreakDayOffRemainMngOfInPeriod breakDayOffRemainMngOfInPeriod = breakDayOffMngInPeriodQuery
+					.getBreakDayOffMngInPeriod(param);
+			List<BreakDayOffDetail> lstDetailData = breakDayOffRemainMngOfInPeriod.getLstDetailData();
 
-				List<BreakDayOffDetail> lstExtractData = new ArrayList<>();
-				if (!CollectionUtil.isEmpty(lstDetailData)) {
-					//代休期限アラーム基準日以前に発生した未使用の休出を抽出する
-					lstExtractData = lstDetailData.stream().filter(detail -> {
-						return ((detail.getOccurrentClass() == OccurrenceDigClass.OCCURRENCE)
-								&& (detail.getUnUserOfBreak().isPresent()
-										&& detail.getUnUserOfBreak().get().getDigestionAtr() == DigestionAtr.UNUSED)
-								&& (detail.getYmdData().getDayoffDate().isPresent()
-										&& detail.getYmdData().getDayoffDate().get().beforeOrEquals(periodCheckDealMonth.end())));
-					}).collect(Collectors.toList());
+			List<BreakDayOffDetail> lstExtractData = new ArrayList<>();
+			if (!CollectionUtil.isEmpty(lstDetailData)) {
+				//代休期限アラーム基準日以前に発生した未使用の休出を抽出する
+				lstExtractData = lstDetailData.stream().filter(detail -> {
+					return ((detail.getOccurrentClass() == OccurrenceDigClass.OCCURRENCE)
+							&& (detail.getUnUserOfBreak().isPresent()
+									&& detail.getUnUserOfBreak().get().getDigestionAtr() == DigestionAtr.UNUSED)
+							&& (detail.getYmdData().getDayoffDate().isPresent()
+									&& detail.getYmdData().getDayoffDate().get().beforeOrEquals(periodCheckDealMonth.end())));
+				}).collect(Collectors.toList());
 
-					if (!CollectionUtil.isEmpty(lstExtractData)) {
-						//アラームメッセージを生成する
-						lstExtractData.stream().forEach(breakDayOffDetail -> {
-							fixedExtraMonFunImport.stream().forEach(fix -> {
-								ValueExtractAlarm valueExractAlarm = new ValueExtractAlarm();
-								valueExractAlarm.setEmployeeID(emp.getId());
-								valueExractAlarm.setWorkplaceID(Optional.ofNullable(emp.getWorkplaceId()));
-								valueExractAlarm.setAlarmValueDate(GeneralDate.today().toString().substring(0, 7));
-								valueExractAlarm.setClassification(KAL010_100);
-								valueExractAlarm.setAlarmItem(KAL010_278);
-								valueExractAlarm.setAlarmValueMessage(TextResource.localize("KAL010_279",
-										String.valueOf(deadlCheckMonth), breakDayOffDetail.getYmdData().getDayoffDate().get().toString(),
-										String.valueOf(breakDayOffDetail.getUnUserOfBreak().get().getUnUsedDays())));
-								valueExractAlarm.setComment(Optional.ofNullable(fix.getMessage()));
-								listValueExtractAlarm.add(valueExractAlarm);
-							});
+				if (!CollectionUtil.isEmpty(lstExtractData)) {
+					//アラームメッセージを生成する
+					lstExtractData.stream().forEach(breakDayOffDetail -> {
+						fixedExtraMonFunImport.stream().forEach(fix -> {
+							ValueExtractAlarm valueExractAlarm = new ValueExtractAlarm();
+							valueExractAlarm.setEmployeeID(emp.getId());
+							valueExractAlarm.setWorkplaceID(Optional.ofNullable(emp.getWorkplaceId()));
+							valueExractAlarm.setAlarmValueDate(GeneralDate.today().toString(ErAlConstant.YM_FORMAT));
+							valueExractAlarm.setClassification(KAL010_100);
+							valueExractAlarm.setAlarmItem(KAL010_278);
+							valueExractAlarm.setAlarmValueMessage(TextResource.localize("KAL010_279",
+									String.valueOf(deadlCheckMonth), breakDayOffDetail.getYmdData().getDayoffDate().get().toString(),
+									String.valueOf(breakDayOffDetail.getUnUserOfBreak().get().getUnUsedDays())));
+							valueExractAlarm.setComment(Optional.ofNullable(fix.getMessage()));
+							listValueExtractAlarm.add(valueExractAlarm);
 						});
-					}
+					});
 				}
-			});
+			}
 		});
 		
 		return listValueExtractAlarm;
@@ -330,7 +337,7 @@ public class MonthlyAggregateProcessService {
 					if(empEral != null) {
 						empEral.stream().filter(c -> c != null).forEach(er -> {
 							listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), er.getEmployeeID(), 
-																			er.getAlarmValueDate().substring(0, 7), er.getClassification(), 
+																			er.getAlarmValueDate(), er.getClassification(), 
 																			er.getAlarmItem(), er.getAlarmValueMessage(), 
 																			fix.getMessage()));
 						});
@@ -416,7 +423,7 @@ public class MonthlyAggregateProcessService {
 									ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 											employee.getWorkplaceId(),
 											employee.getId(),
-											annualLeaveUsageImport.getYearMonth().toString(),
+											toYMString(annualLeaveUsageImport.getYearMonth()),
 											alarmName,
 											itemName,
 											alarmMessage,	
@@ -455,7 +462,7 @@ public class MonthlyAggregateProcessService {
 									ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 											employee.getWorkplaceId(),
 											employee.getId(),
-											dayoffCurrentMonthOfEmployeeImport.getYm().toString(),
+											toYMString(dayoffCurrentMonthOfEmployeeImport.getYm()),
 											alarmName,
 											itemName,
 											alarmMessage,	
@@ -494,12 +501,11 @@ public class MonthlyAggregateProcessService {
 									ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 											employee.getWorkplaceId(),
 											employee.getId(),
-											statusOfHolidayImported.getYm().toString(),
+											toYMString(statusOfHolidayImported.getYm()),
 											alarmName,
 											itemName,
 											alarmMessage,	
-											extra.getDisplayMessage()
-											);
+											extra.getDisplayMessage());
 									listValueExtractAlarm.add(resultCheckRemain);
 								}
 							}
@@ -534,7 +540,7 @@ public class MonthlyAggregateProcessService {
 									ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 											employee.getWorkplaceId(),
 											employee.getId(),
-											reserveLeaveUsageImport.getYearMonth().toString(),
+											toYMString(reserveLeaveUsageImport.getYearMonth()),
 											alarmName,
 											itemName,
 											alarmMessage,	
@@ -574,7 +580,7 @@ public class MonthlyAggregateProcessService {
 									ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 											employee.getWorkplaceId(),
 											employee.getId(),
-											specialHolidayImported.getYm().toString(),
+											toYMString(specialHolidayImported.getYm()),
 											alarmName,
 											itemName,
 											alarmMessage,	
@@ -610,7 +616,7 @@ public class MonthlyAggregateProcessService {
 								if (check36AgreementValueImport.isCheck36AgreementCon()) {
 									ValueExtractAlarm resultMonthlyValue = new ValueExtractAlarm(
 											employee.getWorkplaceId(), employee.getId(),
-											this.yearmonthToString(check36AgreementValueImport.getYm()), KAL010_100,
+											this.toYMString(check36AgreementValueImport.getYm()), KAL010_100,
 											extra.getTypeCheckItem() == 1 ? KAL010_204 : KAL010_206,
 											TextResource.localize(extra.getTypeCheckItem() == 1 ? "KAL010_205" : "KAL010_207",
 													this.timeToString(check36AgreementValueImport.getErrorValue())),
@@ -648,6 +654,10 @@ public class MonthlyAggregateProcessService {
 			}
 			
 			return listValueExtractAlarm;
+		}
+
+		private String toYMString(YearMonth ym) {
+			return GeneralDate.ymd(ym.year(), ym.month(), 1).toString(ErAlConstant.YM_FORMAT);
 		}
 
 		private void processOtherType(List<ValueExtractAlarm> listValueExtractAlarm,
@@ -781,7 +791,7 @@ public class MonthlyAggregateProcessService {
 			ValueExtractAlarm resultMonthlyValue = new ValueExtractAlarm(
 					employee.getWorkplaceId(),
 					employee.getId(),
-					this.yearmonthToString(yearMonth),
+					this.toYMString(yearMonth),
 					KAL010_100,
 					nameItem,
 					//TODO : còn thiếu
@@ -829,7 +839,7 @@ public class MonthlyAggregateProcessService {
 			ValueExtractAlarm resultMonthlyValue = new ValueExtractAlarm(
 					employee.getWorkplaceId(),
 					employee.getId(),
-					this.yearmonthToString(yearMonth),
+					this.toYMString(yearMonth),
 					KAL010_100,
 					TextResource.localize("KAL010_60"),
 					alarmDescriptionValue,	

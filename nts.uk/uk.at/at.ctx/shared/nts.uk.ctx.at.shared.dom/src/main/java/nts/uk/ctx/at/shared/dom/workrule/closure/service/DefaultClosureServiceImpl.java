@@ -64,7 +64,14 @@ public class DefaultClosureServiceImpl implements ClosureService {
 	// 当月の期間を算出する 2018.4.4 update shuichu_ishida
 	@Override
 	public DatePeriod getClosurePeriod(int closureId, YearMonth processYm) {
-
+		// ドメインモデル「締め」を取得する
+		val closureOpt = this.closureRepository.findById(AppContexts.user().companyId(), closureId);
+		
+		return getClosurePeriod(closureId, processYm, closureOpt);
+	}
+	
+	@Override
+	public DatePeriod getClosurePeriod(int closureId, YearMonth processYm, Optional<Closure> closureOpt) {
 		// 【処理概要】
 		// 渡されてきた年月に応じた期間を返す。
 		// ただし、締め日変更がある年月の場合、
@@ -72,11 +79,7 @@ public class DefaultClosureServiceImpl implements ClosureService {
 		// 締め．当月．処理当月 と同じ年月の時は、締め日変更区分の設定値に応じた期間を返す。
 
 		// ログインしている会社IDを取得する
-		LoginUserContext loginUserContext = AppContexts.user();
-		String companyId = loginUserContext.companyId();
-
 		// ドメインモデル「締め」を取得する
-		val closureOpt = this.closureRepository.findById(companyId, closureId);
 		if (!closureOpt.isPresent())
 			return null;
 		val closure = closureOpt.get();

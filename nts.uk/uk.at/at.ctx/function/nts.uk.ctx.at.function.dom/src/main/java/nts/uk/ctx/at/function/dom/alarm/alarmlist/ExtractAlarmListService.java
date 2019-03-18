@@ -7,8 +7,14 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.transaction.TransactionSynchronizationRegistry;
+
+import org.apache.log4j.Logger;
 
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
@@ -59,7 +65,8 @@ public class ExtractAlarmListService {
 		return new ExtractedAlarmDto(sortedAlarmExtraValue, false, false);		
 
 	}
-	
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ExtractedAlarmDto extractAlarmV2(List<EmployeeSearchDto> listEmployee,
 			List<PeriodByAlarmCategory> periodByCategory, List<AlarmCheckConditionByCategory> eralCate,
 			List<CheckCondition> checkConList, Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
@@ -76,12 +83,12 @@ public class ExtractAlarmListService {
 		// ドメインモデル「アラームリスト抽出処理状況」を作成する
 //		GeneralDateTime now1 = GeneralDateTime.now();
 		GeneralDate today = GeneralDate.today();
-
 		
 		// 勤務実績のアラームリストの集計処理を行う
 		List<AlarmExtraValueWkReDto> listAlarmExtraValueWR = aggregationProcessService.processAlarmListWorkRecordV2(today, companyID, listEmployee,
 				periodByCategory, eralCate, checkConList, counter, shouldStop);
-
+		
+		
 		// 集計結果を確認する sort list
 		Comparator<AlarmExtraValueWkReDto> comparator = Comparator.comparing(AlarmExtraValueWkReDto::getHierarchyCd)
 																	.thenComparing(Comparator.comparing(AlarmExtraValueWkReDto::getEmployeeCode))

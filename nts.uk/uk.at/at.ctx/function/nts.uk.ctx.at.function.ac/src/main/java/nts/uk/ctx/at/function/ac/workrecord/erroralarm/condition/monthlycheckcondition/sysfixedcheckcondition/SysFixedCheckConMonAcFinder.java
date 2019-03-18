@@ -17,6 +17,7 @@ import nts.uk.ctx.at.function.dom.adapter.sysfixedcheckcondition.SysFixedCheckCo
 import nts.uk.ctx.at.function.dom.adapter.workrecord.approvalmanagement.ApprovalProcessImport;
 import nts.uk.ctx.at.function.dom.adapter.workrecord.identificationstatus.identityconfirmprocess.IdentityConfirmProcessImport;
 import nts.uk.ctx.at.function.dom.alarm.alarmdata.ValueExtractAlarm;
+import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.ErAlConstant;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthlyRepository;
@@ -95,7 +96,7 @@ public class SysFixedCheckConMonAcFinder implements SysFixedCheckConMonAdapter {
 		return new ValueExtractAlarm(
 				export.getWorkplaceID().orElse(null),
 				export.getEmployeeID(),
-				export.getAlarmValueDate().toString(),
+				export.getAlarmValueDate().toString(ErAlConstant.YM_FORMAT),
 				export.getClassification(),
 				export.getAlarmItem(),
 				export.getAlarmValueMessage(),
@@ -154,13 +155,13 @@ public class SysFixedCheckConMonAcFinder implements SysFixedCheckConMonAdapter {
 			String alarmValueMessage=TextResource.localize("KAL010_129");
 			if (CollectionUtil.isEmpty(appRootStateStatusSprExports)) {
 				// Create Alarm message
-				valueExtractAlarms.add(new ValueExtractAlarm(null, employeeId.toString(), date.toString(),
+				valueExtractAlarms.add(new ValueExtractAlarm(null, employeeId.toString(), date.toString(ErAlConstant.DATE_FORMAT),
 						classification, alarmItem, alarmValueMessage, null));
 			} else {
 				
 				// 承認ルート状況.承認状況!＝承認済 
 				if (appRootStateStatusSprExports.get(0).getDailyConfirmAtr() != approved) {
-					valueExtractAlarms.add(new ValueExtractAlarm(null, employeeId.toString(), date.toString(),
+					valueExtractAlarms.add(new ValueExtractAlarm(null, employeeId.toString(), date.toString(ErAlConstant.DATE_FORMAT),
 							classification, alarmItem, alarmValueMessage, null));
 				}
 
@@ -200,7 +201,7 @@ public class SysFixedCheckConMonAcFinder implements SysFixedCheckConMonAdapter {
 					if(!appSttEx.isPresent() || (appSttEx.isPresent() && appSttEx.get().getDailyConfirmAtr() != 2)){
 						GeneralDate current = GeneralDate.ymd(c.getYearMonth().year(), c.getYearMonth().month(), 1);
 						// 2:承認済 ; 1:承認中 ; 0:未承認
-						valueExtractAlarms.add(new ValueExtractAlarm(null, c.getEmployeeId(), current.toString("yyyy-MM-dd"),
+						valueExtractAlarms.add(new ValueExtractAlarm(null, c.getEmployeeId(), current.toString(ErAlConstant.YM_FORMAT),
 								classification, alarmItem, alarmValueMessage, null));
 					} 
 				});

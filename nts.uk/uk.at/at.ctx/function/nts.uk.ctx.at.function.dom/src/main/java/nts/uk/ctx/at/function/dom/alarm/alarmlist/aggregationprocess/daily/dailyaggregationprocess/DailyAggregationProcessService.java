@@ -13,6 +13,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
@@ -45,6 +47,7 @@ import nts.uk.ctx.at.function.dom.alarm.AlarmCategory;
 import nts.uk.ctx.at.function.dom.alarm.alarmdata.ValueExtractAlarm;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.EmployeeSearchDto;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.PeriodByAlarmCategory;
+import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.ErAlConstant;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategory;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategoryRepository;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.daily.DailyAlarmCondition;
@@ -113,7 +116,8 @@ public class DailyAggregationProcessService {
 	
 	@Inject
 	private WorkTimeSettingRepository workTimeSettingRepository;
-	
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ValueExtractAlarm> dailyAggregationProcess(String comId, PeriodByAlarmCategory periodAlarm, 
 			List<EmployeeSearchDto> employees, List<AlarmCheckConditionByCategory> eralCate, Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
 		
@@ -138,7 +142,7 @@ public class DailyAggregationProcessService {
 			result.addAll(this.extractFixedConditionV2(comId, holder.dailyAlarmCondition, periodAlarm, emps, employeeIds));
 			
 			synchronized (this) {
-				counter.accept(emps.size());
+				counter.accept(emps.size() * eralCate.size());
 			}
 		});
 		
@@ -263,7 +267,7 @@ public class DailyAggregationProcessService {
 				period.getListDate().stream().forEach(date -> {
 					if(empEral == null || !empEral.contains(date)){
 						no3.stream().forEach(c -> {
-							listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(), 
+							listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(ErAlConstant.DATE_FORMAT), 
 																			KAL010_1, KAL010_42, KAL010_43, c.getMessage()));
 						});	
 					}
@@ -304,7 +308,7 @@ public class DailyAggregationProcessService {
 					if (erals.containsKey(emp.getId())) {
 						erals.get(emp.getId()).forEach(eral -> {
 							no4.stream().forEach(c -> {
-								listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), eral.toString(), 
+								listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), eral.toString(ErAlConstant.DATE_FORMAT), 
 																				KAL010_1, KAL010_44, KAL010_45, c.getMessage()));
 							});	
 						});
@@ -344,7 +348,7 @@ public class DailyAggregationProcessService {
 						if(!no1.isEmpty() && !workTypes.containsKey(rw.getWorkTypeCode())) {
 							String KAL010_7 = TextResource.localize("KAL010_7", rw.getWorkTypeCode());
 							no1.stream().forEach(fixed -> {
-								listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(),
+								listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(ErAlConstant.DATE_FORMAT),
 																				KAL010_1, KAL010_6, KAL010_7, fixed.getMessage()));
 							});
 						}
@@ -352,14 +356,14 @@ public class DailyAggregationProcessService {
 							if(workTimes.containsKey(rw.getWorkTimeCode())) {
 								String KAL010_9 = TextResource.localize("KAL010_9", rw.getWorkTimeCode());
 								no2.stream().forEach(fixed -> {
-									listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(),
+									listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(ErAlConstant.DATE_FORMAT),
 																					KAL010_1, KAL010_8, KAL010_9, fixed.getMessage()));
 								});
 							}
 						}
 					} else {
 						noOthers.stream().forEach(c -> {
-							listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(), 
+							listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(ErAlConstant.DATE_FORMAT), 
 																			KAL010_1, KAL010_65, KAL010_66, c.getMessage()));
 						});	
 					}
@@ -601,7 +605,7 @@ public class DailyAggregationProcessService {
 		if(alarmContent.length()>100) {
 			alarmContent = alarmContent.substring(0, 100);
 		}
-		return new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), date.toString(), TextResource.localize("KAL010_1"), alarmItem, alarmContent, workRecordExtraCon.getErrorAlarmCondition().getDisplayMessage());
+		return new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), date.toString(ErAlConstant.DATE_FORMAT), TextResource.localize("KAL010_1"), alarmItem, alarmContent, workRecordExtraCon.getErrorAlarmCondition().getDisplayMessage());
 	}
 	
 	private String  checkConditionGenerateAlarmContent(TypeCheckWorkRecord checkItem,  WorkRecordExtraConAdapterDto workRecordExtraCon, String companyID, Map<Integer,DailyAttendanceItem> mapAtdItemName) {

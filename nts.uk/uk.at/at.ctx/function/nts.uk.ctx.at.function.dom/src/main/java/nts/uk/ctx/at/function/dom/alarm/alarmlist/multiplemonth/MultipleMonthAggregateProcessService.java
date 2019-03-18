@@ -11,9 +11,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
+import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
@@ -28,6 +31,7 @@ import nts.uk.ctx.at.function.dom.adapter.workrecord.erroralarm.recordcheck.Regu
 import nts.uk.ctx.at.function.dom.alarm.AlarmCategory;
 import nts.uk.ctx.at.function.dom.alarm.alarmdata.ValueExtractAlarm;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.EmployeeSearchDto;
+import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.ErAlConstant;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.monthly.CompareOperatorText;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategory;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategoryRepository;
@@ -64,7 +68,9 @@ public class MultipleMonthAggregateProcessService {
 	@Inject
 	private ErAlWorkRecordCheckAdapter erAlWorkRecordCheckAdapter;
 	
-
+	@Inject
+	private ManagedParallelWithContext parallelManager;
+	
 	public List<ValueExtractAlarm> multimonthAggregateProcess(String companyID, String checkConditionCode,
 			DatePeriod period, List<EmployeeSearchDto> employees) {
 
@@ -107,40 +113,45 @@ public class MultipleMonthAggregateProcessService {
 		return listValueExtractAlarm;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ValueExtractAlarm> multimonthAggregateProcess(String companyID, List<AlarmCheckConditionByCategory> multiMonthErAl,
 			DatePeriod period, List<EmployeeSearchDto> employees, Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
 
-		List<String> employeeIds = employees.stream().map(e -> e.getId()).collect(Collectors.toList());
-
-		List<ValueExtractAlarm> listValueExtractAlarm = new ArrayList<>();
-		Map<String, List<RegulationInfoEmployeeResult>> listTargetMap = erAlWorkRecordCheckAdapter.filterEmployees(new DatePeriod(period.end(),period.end()), 
-																													employeeIds, 
-																													multiMonthErAl.stream().map(c -> c.getExtractTargetCondition()).collect(Collectors.toList()));
+		List<ValueExtractAlarm> listValueExtractAlarm = Collections.synchronizedList(new ArrayList<>());
 		
-		multiMonthErAl.stream().forEach(eral -> {
-			synchronized (this) {
-				if(shouldStop.get()){
-					return;
+		parallelManager.forEach(CollectionUtil.partitionBySize(employees, 100), emps -> {
+			List<String> employeeIds = emps.stream().map(e -> e.getId()).collect(Collectors.toList());
+
+			Map<String, List<RegulationInfoEmployeeResult>> listTargetMap = erAlWorkRecordCheckAdapter.filterEmployees(new DatePeriod(period.end(),period.end()), 
+																														employeeIds, 
+																														multiMonthErAl.stream().map(c -> c.getExtractTargetCondition()).collect(Collectors.toList()));
+			
+			multiMonthErAl.stream().forEach(eral -> {
+				synchronized (this) {
+					if(shouldStop.get()){
+						return;
+					}
 				}
-			}
-			List<RegulationInfoEmployeeResult> targetEmps = listTargetMap.get(eral.getExtractTargetCondition().getId());
+				List<RegulationInfoEmployeeResult> targetEmps = listTargetMap.get(eral.getExtractTargetCondition().getId());
 
-			// 対象者の件数をチェック : 対象者 ≦ 0
-			if (!targetEmps.isEmpty()) {
-				// list alarmPartem
-				MulMonAlarmCond mulMonAlarmCond = (MulMonAlarmCond) eral.getExtractionCondition();
-				List<MulMonCheckCondDomainEventDto> listExtra = multiMonthFucAdapter
-						.getListMultiMonCondByListEralID(mulMonAlarmCond.getErrorAlarmCondIds());
-				
-				YearMonthPeriod yearMonthPeriod = new YearMonthPeriod(period.start().yearMonth(), period.end().yearMonth());
+				// 対象者の件数をチェック : 対象者 ≦ 0
+				if (!targetEmps.isEmpty()) {
+					// list alarmPartem
+					MulMonAlarmCond mulMonAlarmCond = (MulMonAlarmCond) eral.getExtractionCondition();
+					List<MulMonCheckCondDomainEventDto> listExtra = multiMonthFucAdapter
+							.getListMultiMonCondByListEralID(mulMonAlarmCond.getErrorAlarmCondIds());
+					
+					YearMonthPeriod yearMonthPeriod = new YearMonthPeriod(period.start().yearMonth(), period.end().yearMonth());
 
-				// tab1
-				listValueExtractAlarm.addAll(this.extraResultMulMon2(companyID, listExtra, period, targetEmps, yearMonthPeriod));
-			}
-			synchronized (this) {
-				counter.accept(targetEmps.size() / multiMonthErAl.size());
-			}
+					// tab1
+					listValueExtractAlarm.addAll(this.extraResultMulMon2(companyID, listExtra, period, targetEmps, yearMonthPeriod));
+				}
+				synchronized (this) {
+					counter.accept(targetEmps.size());
+				}
+			});
 		});
+		
 
 		return listValueExtractAlarm;
 	}
@@ -153,7 +164,8 @@ public class MultipleMonthAggregateProcessService {
 		// convert date to String
 		GeneralDate tempStart = period.start();
 		GeneralDate tempEnd = period.end();
-		String periodYearMonth = tempStart.toString("yyyy/MM") + "~" + tempEnd.toString("yyyy/MM");
+		String periodYearMonth = tempStart.toString(ErAlConstant.YM_FORMAT) + ErAlConstant.PERIOD_SEPERATOR
+				+ tempEnd.toString(ErAlConstant.YM_FORMAT);
 		// save moths of NumberMonth
 		for (MulMonCheckCondDomainEventDto extra : listExtra) {
 			if(!extra.isUseAtr())
@@ -352,7 +364,7 @@ public class MultipleMonthAggregateProcessService {
 				}//end switch check item
 				if (checkAddAlarm) {
 					ValueExtractAlarm resultMonthlyValue = new ValueExtractAlarm(employee.getWorkplaceId(),
-							employee.getEmployeeId(), tempStart.toString("yyyy/MM"), TextResource.localize("KAL010_250"),
+							employee.getEmployeeId(), tempStart.toString(ErAlConstant.YM_FORMAT), TextResource.localize("KAL010_250"),
 							checkItem.nameId, alarmDescription, extra.getDisplayMessage());
 					listValueExtractAlarm.add(resultMonthlyValue);
 				}

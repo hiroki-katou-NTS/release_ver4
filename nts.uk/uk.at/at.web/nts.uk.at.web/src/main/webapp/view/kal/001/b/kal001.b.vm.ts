@@ -11,16 +11,19 @@ module nts.uk.at.view.kal001.b {
     export module viewmodel {
         export class ScreenModel {
 
-            columns: KnockoutObservableArray<any>;
+            columns: Array<any>;
             currentSelectedRow: KnockoutObservable<any>;
-
+            eralRecord: KnockoutObservable<number>;
             dataSource : Array<model.ValueExtractAlarmDto>=[];
             flgActive : KnockoutObservable<boolean>;
-            constructor() {
+            processId: string;
+            constructor(param) {
                 let self = this;
+                self.processId = param.processId;
+                self.eralRecord = ko.observable(param.totalErAlRecord);
                 self.currentSelectedRow = ko.observable(null);
                 self.flgActive = ko.observable(true);
-                self.columns = ko.observableArray([
+                self.columns = [
                     { headerText: '', key: 'guid', width: 1 ,hidden :true },
                     { headerText: getText('KAL001_20'), key: 'workplaceName', width: 100 },
                     { headerText: getText('KAL001_13'), key: 'employeeCode', width: 110 },
@@ -30,7 +33,7 @@ module nts.uk.at.view.kal001.b {
                     { headerText: getText('KAL001_17'), key: 'alarmItem', width: 150 },
                     { headerText: getText('KAL001_18'), key: 'alarmValueMessage', width: 200 },
                     { headerText: getText('KAL001_19'), key: 'comment', width: 200 }
-                ]);
+                ];
 
             }
 
@@ -38,10 +41,10 @@ module nts.uk.at.view.kal001.b {
                 let self = this;
                 let dfd = $.Deferred();
                 $("#grid").igGrid({ 
-                        height: '500px',
+                        height: '450px',
                         dataSource: self.dataSource,
                         primaryKey: 'guid',
-                        columns: self.columns(), 
+                        columns: self.columns, 
                         features: [
                             { name: 'Paging', type: 'local', pageSize: 20 },
                             {
@@ -63,10 +66,10 @@ module nts.uk.at.view.kal001.b {
             exportExcel(): void {
                 let self = this;
                 block.invisible();
-                let params = {
-                    data: self.dataSource
-                };
-                service.exportAlarmData(params).done(() => {
+//                let params = {
+//                    data: self.dataSource
+//                };
+                service.exportAlarmData(self.processId).done(() => {
 
                 }).fail((errExcel) =>{
                     alertError(errExcel);
@@ -77,10 +80,11 @@ module nts.uk.at.view.kal001.b {
             
             sendEmail(): void {
                 let self = this;
-                let shareEmployee = _.map(self.dataSource, (item) =>{
-                   return {employeeID: item.employeeID, workplaceID: item.workplaceID}; 
-                });
-                nts.uk.ui.windows.setShared("employeeList", _.uniqWith(shareEmployee, _.isEqual));
+//                let shareEmployee = _.map(self.dataSource, (item) =>{
+//                   return {employeeID: item.employeeID, workplaceID: item.workplaceID}; 
+//                });
+//                nts.uk.ui.windows.setShared("employeeList", _.uniqWith(shareEmployee, _.isEqual));
+                nts.uk.ui.windows.setShared("processId", self.processId);
                 modal("/view/kal/001/c/index.xhtml").onClosed(() => {
                     
                 });

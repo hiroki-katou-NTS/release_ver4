@@ -30,6 +30,8 @@ import nts.uk.ctx.at.function.dom.adapter.workrecord.erroralarm.EmployeeDailyPer
 import nts.uk.ctx.at.function.dom.alarm.alarmdata.ValueExtractAlarm;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.EmployeeSearchDto;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.PeriodByAlarmCategory;
+import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.ErAlConstant;
+import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.ExtractAlarmForEmployeeService;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.daily.dailyaggregationprocess.DailyAggregationProcessService.DataHolder;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.daily.DailyAlarmCondition;
 import nts.uk.ctx.at.function.dom.attendanceitemframelinking.AttendanceItemLinking;
@@ -248,8 +250,8 @@ public class DailyPerformanceService {
 												AlarmContentMessage alarmContentMessage = this.calculateAlarmContentMessage(error, holder.comId, errorAlarmMap,attendanceResult,currentAttendanceItems,currentNos);
 												EmployeeSearchDto em = employee.stream().filter(e -> e.getId().equals(error.getEmployeeID())).findAny().get();
 												
-												ValueExtractAlarm data = new ValueExtractAlarm(em.getWorkplaceId(), em.getId(), error.getDate().toString(), KAL010_1,
-														alarmContentMessage.getAlarmItem(), alarmContentMessage.getAlarmContent(),
+												ValueExtractAlarm data = new ValueExtractAlarm(em.getWorkplaceId(), em.getId(), error.getDate().toString(ErAlConstant.DATE_FORMAT), 
+														KAL010_1, alarmContentMessage.getAlarmItem(), alarmContentMessage.getAlarmContent(),
 														errAlarmCheckIDToMessage.get(errorAlarmMap.get(error.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage());
 
 												valueExtractAlarmList.add(data);
