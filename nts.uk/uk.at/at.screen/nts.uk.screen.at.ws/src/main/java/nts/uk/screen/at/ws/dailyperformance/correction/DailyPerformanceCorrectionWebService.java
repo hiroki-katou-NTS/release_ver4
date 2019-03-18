@@ -139,7 +139,7 @@ public class DailyPerformanceCorrectionWebService {
 	@Path("startScreen")
 	public DailyPerformanceCorrectionDto startScreen(DPParams params ) throws InterruptedException{
 		HttpSession session = httpRequest.getSession();
-		Integer closureId = (Integer) session.getAttribute("closureId");
+		Integer closureId = params.closureId == null ? (Integer) session.getAttribute("closureId") : params.closureId;
 		DailyPerformanceCorrectionDto dtoResult = this.processor.generateData(params.dateRange, params.lstEmployee, params.initScreen, params.mode, params.displayFormat, params.correctionOfDaily, params.formatCodes, params.showError, params.showLock, params.objectShare, closureId);
 		session.setAttribute("domainOlds", dtoResult.getDomainOld());
 		session.setAttribute("domainEdits", null);

@@ -160,7 +160,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         listCheckDeviation: any = [];
         listErrorMonth: any = [];
         lstErrorFlex: any = [];
-        hasErrorCalc: booelan = false;
+        hasErrorCalc: boolean = false;
         
         employIdLogin: any;
         dialogShow: any;
@@ -245,6 +245,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         transitionDesScreen: boolean = false;
         
         openedScreenB: boolean = false;
+        
+        closureId: any = null;
         constructor(dataShare: any) {
             var self = this;
 
@@ -305,6 +307,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 self.shareObject().mapDataShare(dataShare.initParam, dataShare.extractionParam, dataShare.dataSPR);
                 self.showDateRange(_.isEmpty(self.shareObject().changePeriodAtr) ? true : self.shareObject().changePeriodAtr);
                 self.transitionDesScreen = _.isEmpty(self.shareObject().transitionDesScreen) ? false : true;
+                self.closureId = _.isEmpty(self.shareObject().targetClosure) ? null : self.shareObject().targetClosure;
             }
 
             //            self.flexShortage.subscribe((val:any) => {
@@ -483,7 +486,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     lstEmployee: [],
                     formatCodes: self.formatCodes(),
                     objectShare: _.isEmpty(self.shareObject()) ? null : self.shareObject(),
-                    showError: _.isEmpty(self.shareObject()) ? null : self.shareObject().errorRefStartAtr
+                    showError: _.isEmpty(self.shareObject()) ? null : self.shareObject().errorRefStartAtr,
+                    closureId: self.closureId
                 };
                 // delete grid in localStorage
                 self.deleteGridInLocalStorage();
@@ -1902,7 +1906,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     lstEmployee: lstEmployee,
                     formatCodes: self.formatCodes(),
                     objectShare: null,
-                    showLock: self.showLock()
+                    showLock: self.showLock(),
+                    closureId: self.closureId
                 };
                 self.characteristics.formatExtract = param.displayFormat;
                 character.save('characterKdw003a', self.characteristics);
@@ -3062,6 +3067,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     self.selectedEmployee(self.lstEmployee()[0].id);
                     self.dateRanger({ startDate: dataList.periodStart, endDate: dataList.periodEnd });
                     self.hasEmployee = true;
+                    self.closureId = dataList.closureId;
                     self.loadKcp009();
                     self.btnExtraction_Click();
                 },

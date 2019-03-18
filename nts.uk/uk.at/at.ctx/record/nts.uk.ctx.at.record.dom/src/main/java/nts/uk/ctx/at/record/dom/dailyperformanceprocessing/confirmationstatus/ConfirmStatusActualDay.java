@@ -117,7 +117,7 @@ public class ConfirmStatusActualDay {
 					}).collect(Collectors.toList());
 					// TODO: 取得した「本人確認処理の利用設定．月の本人確認を利用する」をチェックする
 					lstResultEmpTemp1.addAll(
-							updatePermission(companyId, employeeId, optIndentity.get(), mergePeriodClr, lstResult));
+							updatePermission(companyId, employeeId, optIndentity.get(), mergePeriodClr, lstResultEmpTemp2));
 				} else {
 
 					Map<Pair<String, GeneralDate>, ApprovalStatusForEmployee> mapApprovalStatus = new HashMap<>();
