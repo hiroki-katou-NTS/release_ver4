@@ -47,6 +47,19 @@ public class WorkTypeFinder {
 		List<WorkTypeInfor> lst = this.workTypeRepo.getPossibleWorkTypeAndOrder(companyId, lstPossible);
 		return lst;
 	}
+	
+	/**
+	 * Gets the possible work type. with No Master
+	 *
+	 * @param lstPossible the lst possible
+	 * @return the possible work type
+	 */
+	public List<WorkTypeInfor> getPossibleWorkTypeWithNoMaster(List<String> lstPossible) {
+		// company id
+		String companyId = AppContexts.user().companyId();
+		List<WorkTypeInfor> lst = this.workTypeRepo.getPossibleWorkTypeWithNoMasterAndOrder(companyId, lstPossible);
+		return lst;
+	}
 
 	/**
 	 * Find not deprecated by list code.
