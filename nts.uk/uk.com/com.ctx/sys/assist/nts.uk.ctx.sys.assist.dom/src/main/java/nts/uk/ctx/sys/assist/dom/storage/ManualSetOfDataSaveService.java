@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.layer.app.file.export.ExportService;
@@ -21,6 +23,7 @@ import nts.arc.layer.infra.file.export.FileGeneratorContext;
 import nts.arc.layer.infra.file.temp.ApplicationTemporaryFileFactory;
 import nts.arc.layer.infra.file.temp.ApplicationTemporaryFilesContainer;
 import nts.arc.time.GeneralDateTime;
+import nts.gul.collection.CollectionUtil;
 import nts.gul.security.crypt.commonkey.CommonKeyCrypt;
 import nts.uk.ctx.sys.assist.dom.category.Category;
 import nts.uk.ctx.sys.assist.dom.category.CategoryRepository;
@@ -35,6 +38,7 @@ import nts.uk.shr.com.enumcommon.NotUseAtr;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.infra.file.csv.CSVFileData;
 import nts.uk.shr.infra.file.csv.CSVReportGenerator;
+import nts.uk.shr.infra.file.csv.CsvReportWriter;
 
 /**
  * @author nam.lh
@@ -343,20 +347,23 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 			ResultState resultState = ResultState.NORMAL_END;
 			List<String> headerCsv = this.getTextHeaderCsv1();
 			// Get data from Manual Setting table
-			List<Map<String, Object>> dataSourceCsv = new ArrayList<>();
+			Map<String, Object> rowCsv = new HashMap<>();
 			int offset = 0;
 			List<String> categoryIds = new ArrayList<>();
 //			List<String> targetEmployeesSid = targetEmployeesRepo.getTargetEmployeesListById(storeProcessingId).stream().map(c -> c.getSid()).collect(Collectors.toList());
+			CsvReportWriter csv = generator.generate(generatorContext,FILE_NAME_CSV1 + CSV_EXTENSION, headerCsv);
+			
 			while (true) {
 				// テーブル一覧の１行分を処理する
 				List<TableList> tableLists = repoTableList.getByOffsetAndNumber(storeProcessingId, offset,
 						NUM_OF_TABLE_EACH_PROCESS);
-
+				int i = 0;
 				for (TableList tableList : tableLists) {
-					dataSourceCsv = getDataSourceCsv1(dataSourceCsv, headerCsv, tableList);
-
+					rowCsv = getDataSourceCsv1(rowCsv, headerCsv, tableList);
+					csv.writeALine(rowCsv);
+					i++;
 					// Add Table to CSV Auto
-					resultState = generalCsvAuto(generatorContext, storeProcessingId, tableList, targetEmployeesSid);
+					resultState = generalCsvAuto(generatorContext, storeProcessingId, tableList, targetEmployeesSid , i);
 					if (resultState != ResultState.NORMAL_END) {
 						return resultState;
 					}
@@ -370,15 +377,15 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 						}
 					}
 				}
-
+				csv.destroy();
 				offset += NUM_OF_TABLE_EACH_PROCESS;
 				// テーブルをすべて書き出したか判定
 				if (tableLists.size() < NUM_OF_TABLE_EACH_PROCESS)
 					break;
 			}
 
-			CSVFileData fileData = new CSVFileData(FILE_NAME_CSV1 + CSV_EXTENSION, headerCsv, dataSourceCsv);
-			generator.generate(generatorContext, fileData);
+			//CSVFileData fileData = new CSVFileData(FILE_NAME_CSV1 + CSV_EXTENSION, headerCsv, dataSourceCsv);
+			//generator.generate(generatorContext, fileData);
 			return ResultState.NORMAL_END;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -387,7 +394,7 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 
 	}
 
-	private List<Map<String, Object>> getDataSourceCsv1(List<Map<String, Object>> dataSourceCsv, List<String> headerCsv,
+	private Map<String, Object> getDataSourceCsv1(Map<String, Object> dataSourceCsv, List<String> headerCsv,
 			TableList tableList) {
 		Map<String, Object> rowCsv = new HashMap<>();
 		rowCsv.put(headerCsv.get(0), tableList.getDataStorageProcessingId());
@@ -505,27 +512,29 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 		rowCsv.put(headerCsv.get(112), tableList.getCanNotBeOld().orElse(null));
 		rowCsv.put(headerCsv.get(113), tableList.getSelectionTargetForRes().orElse(null));
 
-		dataSourceCsv.add(rowCsv);
-		return dataSourceCsv;
+		return rowCsv;
 	}
 
 	private ResultState generalCsv2(FileGeneratorContext generatorContext, List<TargetEmployees> targetEmployees) {
 		try {
 			// Add Table to CSV2
 			List<String> headerCsv2 = this.getTextHeaderCsv2();
-			List<Map<String, Object>> dataSourceCsv2 = new ArrayList<>();
+			CsvReportWriter csv = generator.generate(generatorContext,FILE_NAME_CSV2 + CSV_EXTENSION, headerCsv2);
 			for (TargetEmployees targetEmp : targetEmployees) {
 				Map<String, Object> rowCsv2 = new HashMap<>();
 				rowCsv2.put(headerCsv2.get(0), targetEmp.getSid());
 				rowCsv2.put(headerCsv2.get(1), targetEmp.getScd());
 				rowCsv2.put(headerCsv2.get(2), targetEmp.getBusinessname() != null
 						? CommonKeyCrypt.encrypt(targetEmp.getBusinessname().v()) : "");
-				dataSourceCsv2.add(rowCsv2);
+				csv.writeALine(rowCsv2);
 			}
+			
+			csv.destroy();
 
-			CSVFileData fileData = new CSVFileData(FILE_NAME_CSV2 + CSV_EXTENSION, headerCsv2, dataSourceCsv2);
-
+			/*CSVFileData fileData = new CSVFileData(FILE_NAME_CSV2 + CSV_EXTENSION, headerCsv2, dataSourceCsv2);
 			generator.generate(generatorContext, fileData);
+			headerCsv2.clear();
+			dataSourceCsv2.clear();*/
 			return ResultState.NORMAL_END;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -535,7 +544,7 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 	}
 
 	private ResultState generalCsvAuto(FileGeneratorContext generatorContext, String storeProcessingId,
-			TableList tableList, List<String> targetEmployeesSid) {
+			TableList tableList, List<String> targetEmployeesSid, int index) {
 		try {
 			// ドメインモデル「データ保存動作管理」を取得し「中断終了」を判別
 			Optional<DataStorageMng> dataStorageMng = repoDataSto.getDataStorageMngById(storeProcessingId);
@@ -544,31 +553,37 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 			if (dataStorageMng.isPresent() && dataStorageMng.get().getDoNotInterrupt() == NotUseAtr.USE) {
 				return ResultState.INTERRUPTION;
 			}
-
-			List<List<String>> listObject = repoTableList.getDataDynamic(tableList, targetEmployeesSid);
-
-			// Add Table to CSV Auto
+			
 			List<String> headerCsv3 = this.getTextHeaderCsv3(tableList.getTableEnglishName());
-			List<Map<String, Object>> dataSourceCsv3 = new ArrayList<>();
-			for (List<String> record : listObject) {
-				Map<String, Object> rowCsv = new HashMap<>();
-				int i = 0;
-				for (String columnName : headerCsv3) {
-					rowCsv.put(columnName, record.get(i));
-					i++;
-				}
-				dataSourceCsv3.add(rowCsv);
-			}
-
+			
+			// get data from table
+			getData(tableList, targetEmployeesSid, index , headerCsv3, generatorContext);
+			
+			/*
 			CSVFileData fileData = new CSVFileData(AppContexts.user().companyId() + tableList.getCategoryName()
 					+ tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3, dataSourceCsv3);
-
+			
 			generator.generate(generatorContext, fileData);
+			
+			dataSourceCsv3.clear();
+			fileData = null; */
+			
+
 			return ResultState.NORMAL_END;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResultState.ABNORMAL_END;
 		}
+	}
+	
+	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+	private void getData(TableList tableList, List<String> targetEmployeesSid , int index  , List<String> headerCsv3, FileGeneratorContext generatorContext) {
+		long startTime = System.nanoTime();
+		System.out.println("============ Table Running : "+ index + " == " + tableList.getTableEnglishName());
+		repoTableList.getDataDynamic(tableList, targetEmployeesSid , headerCsv3, generatorContext);
+		long endTime = System.nanoTime();	
+		long duration = (endTime - startTime) / 1000000; // ms;
+		System.out.println("============ Table Done :"+ index + " == " + tableList.getTableEnglishName()+ " === "+ duration);
 	}
 
 	private ResultState evaluateNormalEnd(String storeProcessingId, FileGeneratorContext generatorContext,

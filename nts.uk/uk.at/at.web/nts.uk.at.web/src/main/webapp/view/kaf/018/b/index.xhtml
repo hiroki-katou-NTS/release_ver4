@@ -27,8 +27,8 @@
 				<table id="tbl-control">
 					<colgroup>
 						<col width="100px" />
+						<col width="100px" />
 						<col width="300px" />
-						<col width="500px" />
 					</colgroup>
 					<tr>
 						<td>
@@ -37,12 +37,12 @@
 						</td>
 						<td>
 							<!-- B2_1対象締め -->
-							<div class="limited-label label" style="width: 290px;"  data-bind="text: closureName"></div>
+							<div class="limited-label label" style="width: 200px;"  data-bind="text: closureName"></div>
 						</td>
 						<td>
 							<!-- B3対象年月-->
 							<!-- B3_1対象期間-->
-							<div class="limited-label label" style="width: 490px;" data-bind="text: getTargetDate()"></div>
+							<div class="limited-label label" style="width: 300px;" data-bind="text: getTargetDate()"></div>
 						</td>
 						<!-- B4未承認項目説明はてな -->
 						<td>
@@ -52,39 +52,8 @@
 						</td>
 					</tr>
 				</table>
-				<!-- B5職場一覧 -->
-				<table id="fixed-table" tabindex="2">
-					<colgroup>
-						<col width="350px" />
-						<col width="250px" />
-						<col width="100px" />
-						<col width="100px" />
-						<col width="100px" />
-						<col width="130px" />
-					</colgroup>
-					<thead>
-						<tr>
-							<th class="ui-widget-header">#{i18n.getText('KAF018_20')}</th>
-							<th class="ui-widget-header">#{i18n.getText('KAF018_21')}</th>
-							<th class="ui-widget-header">#{i18n.getText('KAF018_22')}</th>
-							<th class="ui-widget-header">#{i18n.getText('KAF018_23')}</th>
-							<th class="ui-widget-header">#{i18n.getText('KAF018_24')}</th>
-							<th class="ui-widget-header"><div tabindex="-1" data-bind="ntsCheckBox: 
-								{ checked: isCheckedAll, enable: true }, visible: true">#{i18n.getText('KAF018_25')}</div></th>
-						</tr>
-					</thead>
-					<tbody data-bind="foreach: tempData">
-						<tr>
-							<td><a tabindex="-1" class="hyperlink" href="#" data-bind="text: workplaceName, click: function(){$parent.gotoC($index)}"></a></td>
-							<td data-bind="text: $parent.getRecord1(numOfApp, numOfUnreflected)"></td>
-							<td data-bind="text: $parent.getRecord(numOfUnapproval)"></td>
-							<td data-bind="text: $parent.getRecord(approvedNumOfCase)"></td>
-							<td data-bind="text: $parent.getRecord(numOfDenials)"></td>
-							
-							<td><div tabindex="-1" data-bind="ntsCheckBox: { checked: isChecked, enable: isEnabled }, visible: isEnabled" /></td>
-						</tr>
-					</tbody>
-				</table>
+				<!-- B5 -->
+				<table tabindex="9" id="gridB"></table>
 			</div>
 		</ui:define>
 	</ui:composition>

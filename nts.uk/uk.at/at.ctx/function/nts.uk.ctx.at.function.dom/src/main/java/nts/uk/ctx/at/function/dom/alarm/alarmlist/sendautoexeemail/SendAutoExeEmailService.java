@@ -7,6 +7,6 @@ import nts.arc.time.GeneralDateTime;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.ExtractedAlarmDto;
 
 public interface SendAutoExeEmailService {
-	public Optional<OutputSendAutoExe> sendAutoExeEmail(String companyId,GeneralDateTime executionDate,List<ExtractedAlarmDto> listExtractedAlarmDto,boolean sendMailPerson,boolean sendMailAdmin);
+	public Optional<OutputSendAutoExe> sendAutoExeEmail(String companyId,GeneralDateTime executionDate,List<ExtractedAlarmDto> listExtractedAlarmDto,boolean sendMailPerson,boolean sendMailAdmin,String alarmCode);
 	
 }

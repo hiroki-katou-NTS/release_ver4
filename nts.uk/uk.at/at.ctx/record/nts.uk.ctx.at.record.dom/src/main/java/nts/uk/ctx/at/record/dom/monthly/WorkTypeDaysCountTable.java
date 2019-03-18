@@ -71,6 +71,9 @@ public class WorkTypeDaysCountTable {
 	/** 特別休暇を加算する */
 	private boolean addSpecialHoliday;
 	
+	/** 1日連続勤務かどうか */
+	private boolean continuousWorkDay;
+	
 	/** 月別実績の縦計方法 */
 	private Optional<VerticalTotalMethodOfMonthly> verticalTotalMethodOpt;
 	
@@ -109,6 +112,8 @@ public class WorkTypeDaysCountTable {
 		//*****（未）　特別休暇の判定方法について、設計確認要。
 		this.addSpecialHoliday = false;
 		
+		this.continuousWorkDay = false;
+		
 		this.verticalTotalMethodOpt = verticalTotalMethod;
 		
 		this.confirmCount(workType);
@@ -138,6 +143,11 @@ public class WorkTypeDaysCountTable {
 			if (this.isCountWorkingDaysForAttendanceRate(workTypeClass)){
 				this.workingDaysForAttendanceRate = this.workingDaysForAttendanceRate.addDays(1.0);
 			}
+			
+			// 1日連続勤務かどうか確認する
+			if (workTypeClass == WorkTypeClassification.ContinuousWork) {
+				this.continuousWorkDay = true;
+			}
 		}
 		else {
 			
@@ -158,6 +168,12 @@ public class WorkTypeDaysCountTable {
 			if (this.isCountWorkingDaysForAttendanceRate(workTypeClassAM) ||
 				this.isCountWorkingDaysForAttendanceRate(workTypeClassPM)){
 				this.workingDaysForAttendanceRate = this.workingDaysForAttendanceRate.addDays(1.0);
+			}
+			
+			// 1日連続勤務かどうか確認する
+			if (workTypeClassAM == WorkTypeClassification.ContinuousWork &&
+				workTypeClassPM == WorkTypeClassification.ContinuousWork) {
+				this.continuousWorkDay = true;
 			}
 		}
 	}

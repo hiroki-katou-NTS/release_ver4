@@ -213,7 +213,7 @@ module cmm045.a.viewmodel {
                             data.displaySet.otActualDisAtr, data.displaySet.warningDateDisAtr, data.displaySet.appReasonDisAtr));
                         _.each(data.lstApp, function(app) {
                             self.lstAppCommon.push(new vmbase.ApplicationDto_New(app.applicationID, app.prePostAtr, app.inputDate, app.enteredPersonSID,
-                                app.reversionReason, app.applicationDate, app.applicationReason, app.applicationType, app.applicantSID,
+                                app.reversionReason, app.applicationDate, _.escape(app.applicationReason), app.applicationType, app.applicantSID,
                                 app.reflectPlanScheReason, app.reflectPlanTime, app.reflectPlanState, app.reflectPlanEnforce,
                                 app.reflectPerScheReason, app.reflectPerTime, app.reflectPerState, app.reflectPerEnforce,
                                 app.startDate, app.endDate, app.version));
@@ -347,8 +347,7 @@ module cmm045.a.viewmodel {
                     { headerText: getText('CMM045_52'), key: 'appName', dataType: 'string', width: '90px'},
                     { headerText: getText('CMM045_53'), key: 'appAtr', dataType: 'string', width: '65px', hidden: isHidden},
                     { headerText: getText('CMM045_54'), key: 'appDate', dataType: 'string', width: '157px'},
-                    { headerText: getText('CMM045_55'), key: 'appContent', dataType: 'string', width: '408px', 
-                        formatter: (v) => (v.replace(/(<|<)script>/gi, '&lt;script&gt;').replace(/(<\/)script>/gi, '&lt;/script&gt;'))},
+                    { headerText: getText('CMM045_55'), key: 'appContent', dataType: 'string', width: '408px'},
                     { headerText: getText('CMM045_56'), key: 'inputDate', dataType: 'string', width: '120px'},
                     { headerText: getText('CMM045_57'), key: 'appStatus', dataType: 'string', width: '75px'}
                 ],
@@ -516,8 +515,7 @@ module cmm045.a.viewmodel {
                     { headerText: getText('CMM045_52'), key: 'appName', dataType: 'string', width: '90px'},
                     { headerText: getText('CMM045_53'), key: 'appAtr', dataType: 'string', width: '65px', hidden: isHidden},
                     { headerText: getText('CMM045_54'), key: 'appDate', dataType: 'string', width: '157px'},
-                    { headerText: getText('CMM045_55'), key: 'appContent', dataType: 'string', width: '341px',
-                        formatter: (v) => (v.replace(/(<|<)script>/gi, '&lt;script&gt;').replace(/(<\/)script>/gi, '&lt;/script&gt;'))},
+                    { headerText: getText('CMM045_55'), key: 'appContent', dataType: 'string', width: '341px'},
                     { headerText: getText('CMM045_56'), key: 'inputDate', dataType: 'string', width: '120px'},
                     { headerText: getText('CMM045_57'), key: 'appStatus', dataType: 'string', width: '75px'},
                     { headerText: getText('CMM045_58'), key: 'displayAppStatus', dataType: 'string', width: '95px' },
@@ -1530,7 +1528,7 @@ module cmm045.a.viewmodel {
                     data.displaySet.otActualDisAtr, data.displaySet.warningDateDisAtr, data.displaySet.appReasonDisAtr));
                 _.each(data.lstApp, function(app) {
                     self.lstAppCommon.push(new vmbase.ApplicationDto_New(app.applicationID, app.prePostAtr, app.inputDate, app.enteredPersonSID,
-                        app.reversionReason, app.applicationDate, app.applicationReason, app.applicationType, app.applicantSID,
+                        app.reversionReason, app.applicationDate, _.escape(app.applicationReason), app.applicationType, app.applicantSID,
                         app.reflectPlanScheReason, app.reflectPlanTime, app.reflectPlanState, app.reflectPlanEnforce,
                         app.reflectPerScheReason, app.reflectPerTime, app.reflectPerState, app.reflectPerEnforce,
                         app.startDate, app.endDate, app.version));

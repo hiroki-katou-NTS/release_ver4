@@ -63,77 +63,7 @@
 					</tr>
 				</table>
 				<!-- E5 -->
-				<table id="fixed-table" tabindex="4">
-					<colgroup>
-						<col width="350px" />
-						<com:ko-if bind="useSetting.monthlyConfirm">
-							<col width="100px" />
-						</com:ko-if>
-						<com:ko-if bind="useSetting.useBossConfirm">
-							<col width="100px" />
-							<col width="100px" />
-						</com:ko-if>
-						<com:ko-if bind="useSetting.usePersonConfirm">
-							<col width="100px" />
-							<col width="100px" />
-						</com:ko-if>
-						<col width="150px" />
-					</colgroup>
-					<thead>
-						<tr>
-							<!-- E5_H1_1 -->
-							<th class="ui-widget-header" rowspan="2">#{i18n.getText('KAF018_52')}</th>
-							<com:ko-if bind="useSetting.monthlyConfirm">
-								<!-- E5_H2_1 -->
-								<th class="ui-widget-header" rowspan="2">#{i18n.getText('KAF018_53')}</th>
-							</com:ko-if>
-							<com:ko-if bind="useSetting.useBossConfirm">
-								<!-- E5_H3_1 -->
-								<th class="ui-widget-header" colspan="2">#{i18n.getText('KAF018_54')}</th>
-							</com:ko-if>
-							<com:ko-if bind="useSetting.usePersonConfirm">
-								<!-- E5_H4_1 -->
-								<th class="ui-widget-header" colspan="2">#{i18n.getText('KAF018_55')}</th>
-							</com:ko-if>
-							<!-- E5_H5_1 -->
-							<th class="ui-widget-header" rowspan="2"><div tabindex="-1" data-bind="ntsCheckBox: 
-								{ checked: isCheckedAll, enable: true }, visible: true">#{i18n.getText('KAF018_58')}</div></th>
-						</tr>
-						<tr>
-							<com:ko-if bind="useSetting.useBossConfirm">
-								<!-- E5_H3_2 -->
-								<th class="ui-widget-header">#{i18n.getText('KAF018_99')}</th>
-								<!-- E5_H3_3 -->
-								<th class="ui-widget-header">#{i18n.getText('KAF018_100')}</th>
-							</com:ko-if>
-							<com:ko-if bind="useSetting.usePersonConfirm">
-								<!-- E5_H4_2 -->
-								<th class="ui-widget-header">#{i18n.getText('KAF018_56')}</th>
-								<!-- E5_H4_3 -->
-								<th class="ui-widget-header">#{i18n.getText('KAF018_57')}</th>
-							</com:ko-if>
-						</tr>
-					</thead>
-					<tbody data-bind="foreach: listWkpStatusConfirm">
-						<tr>
-							<td><a tabindex="-1" class="hyperlink" href="#"
-								data-bind="text: name, click: function(){$parent.gotoF($index)}">アイコン無し、ただのリンク</a></td>
-							<com:ko-if bind="$parent.useSetting.monthlyConfirm">
-								<td data-bind="text: $parent.getRecord(monthConfirm)"></td>
-							</com:ko-if>
-							<com:ko-if bind="$parent.useSetting.useBossConfirm">
-								<td data-bind="text: $parent.getRecord(dayBossUnconfirm)"></td>
-								<td data-bind="text: $parent.getRecord(dayBossConfirm)"></td>
-							</com:ko-if>
-							<com:ko-if bind="$parent.useSetting.usePersonConfirm">
-								<td data-bind="text: $parent.getRecord(dayPrincipalUnconfirm)"></td>
-								<td data-bind="text: $parent.getRecord(dayPrincipalConfirm)"></td>
-							</com:ko-if>
-							<td><div tabindex="-1"
-									data-bind="ntsCheckBox: { checked: check, enable: enable }, visible: enable" /></td>
-						</tr>
-					</tbody>
-				</table>
+			 <table tabindex="9" id="gridE"></table>
 			</div>
 		</ui:define>
 	</ui:composition>

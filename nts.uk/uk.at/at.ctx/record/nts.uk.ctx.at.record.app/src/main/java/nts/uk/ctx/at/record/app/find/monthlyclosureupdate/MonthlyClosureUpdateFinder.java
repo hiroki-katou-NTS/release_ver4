@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.record.app.find.monthlyclosureupdate;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -10,14 +12,19 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
+import nts.arc.time.GeneralDateTime;
 import nts.arc.time.YearMonth;
+import nts.uk.ctx.at.auth.dom.employmentrole.EmployeeReferenceRange;
 import nts.uk.ctx.at.record.app.command.monthlyclosureupdate.MonthlyClosureResponse;
 import nts.uk.ctx.at.record.app.command.monthlyclosureupdate.OutputParam;
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeRecordAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeRecordImport;
+import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQuery;
+import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryAdapter;
 import nts.uk.ctx.at.record.dom.monthlyclosureupdatelog.MonthlyClosureCompleteStatus;
 import nts.uk.ctx.at.record.dom.monthlyclosureupdatelog.MonthlyClosureExecutionStatus;
 import nts.uk.ctx.at.record.dom.monthlyclosureupdatelog.MonthlyClosurePersonExecutionResult;
+import nts.uk.ctx.at.record.dom.monthlyclosureupdatelog.MonthlyClosurePersonExecutionStatus;
 import nts.uk.ctx.at.record.dom.monthlyclosureupdatelog.MonthlyClosureUpdateErrorInfor;
 import nts.uk.ctx.at.record.dom.monthlyclosureupdatelog.MonthlyClosureUpdateErrorInforRepository;
 import nts.uk.ctx.at.record.dom.monthlyclosureupdatelog.MonthlyClosureUpdateLog;
@@ -30,6 +37,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureInfor;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.shr.com.context.AppContexts;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 
@@ -60,7 +68,14 @@ public class MonthlyClosureUpdateFinder {
 
 	@Inject
 	private MonthlyClosureUpdatePersonLogRepository monthlyClosurePersonLogRepo;
+	
+	@Inject
+	private MonthlyClosureUpdateLogRepository monthlyClosureUpdateLogRepository;
+	
+	@Inject
+	private RegulationInfoEmployeeQueryAdapter employeeSearch;
 
+	
 	public MonthlyClosureUpdateLogDto findById(String id) {
 		return domainToDto(monthlyClosureUpdateRepo.getLogById(id).get());
 	}
@@ -250,5 +265,73 @@ public class MonthlyClosureUpdateFinder {
 		listResult.sort((e1, e2) -> e1.getEmployeeCode().compareToIgnoreCase(e2.getEmployeeCode()));
 		return listResult;
 	}
-
+	
+	public List<MonthlyClosureErrorInforDto> getListErrorInforByLogId(String logId) {
+		List<MonthlyClosureErrorInforDto> listResult = new ArrayList<>();
+		List<MonthlyClosureUpdateErrorInfor> errInfors = errorInforRepo.getAll(logId);
+		for (MonthlyClosureUpdateErrorInfor errInfor : errInfors) {
+			EmployeeRecordImport empImport = empImportAdapter.getPersonInfor(errInfor.getEmployeeId());
+			MonthlyClosureErrorInforDto result = new MonthlyClosureErrorInforDto(empImport.getEmployeeCode(),
+					empImport.getPname(), errInfor.getErrorMessage(), errInfor.getAtr().value);
+			listResult.add(result);
+		}
+		listResult.sort((e1, e2) -> e1.getEmployeeCode().compareToIgnoreCase(e2.getEmployeeCode()));
+		return listResult;
+	}
+	
+	public Integer getPersonCompleteNo(String id){
+		List<MonthlyClosureUpdatePersonLog> listPersonLog = this.closureUpdatePersonLogRepo.getAll(id);
+		int countComplete = (int)listPersonLog.stream().filter(x -> x.getExecutionStatus().value == MonthlyClosurePersonExecutionStatus.COMPLETE.value).count();
+		return new Integer(countComplete);
+	}
+	
+	public Integer getAllPersonNo(DataToGetPersonNo param){
+		DatePeriod closureDP = this.closureService.getClosurePeriodNws(param.getClosureId(), new YearMonth(param.getYearMonth()));
+		if(closureDP != null){
+			List<String> listEmpId = employeeSearch.search(createQueryToFilterEmployees(closureDP, param.getClosureId())).stream()
+					.map(item -> item.getEmployeeId()).collect(Collectors.toList());
+			int allPerson = listEmpId.size();
+			return new Integer(allPerson);
+		}
+		return new Integer(0);
+	}
+	
+	public Integer getDurationTime(String id){
+		Optional<MonthlyClosureUpdateLog> optMonthlyClosureUpdateLog = this.monthlyClosureUpdateLogRepository.getLogById(id);
+		if(optMonthlyClosureUpdateLog.isPresent()){
+			GeneralDateTime startTime = optMonthlyClosureUpdateLog.get().getExecutionDateTime();
+			GeneralDateTime systemTime = GeneralDateTime.now();
+			int diffTime = (int)ChronoUnit.SECONDS.between(startTime.localDateTime(), systemTime.localDateTime());
+			
+			return new Integer(diffTime);
+		}
+		return new Integer(0); 
+	}
+	
+	private RegulationInfoEmployeeQuery createQueryToFilterEmployees(DatePeriod closurePeriod, int closureId) {
+		RegulationInfoEmployeeQuery query = new RegulationInfoEmployeeQuery();
+		query.setBaseDate(closurePeriod.end());
+		query.setReferenceRange(EmployeeReferenceRange.ALL_EMPLOYEE.value);
+		query.setFilterByEmployment(false);
+		query.setFilterByDepartment(false);
+		query.setFilterByWorkplace(false);
+		query.setFilterByClassification(false);
+		query.setFilterByJobTitle(false);
+		query.setFilterByWorktype(false);
+		query.setPeriodStart(closurePeriod.start());
+		query.setPeriodEnd(closurePeriod.end());
+		query.setIncludeIncumbents(true);
+		query.setIncludeWorkersOnLeave(true);
+		query.setIncludeOccupancy(true);
+		query.setIncludeRetirees(false);
+		query.setRetireStart(GeneralDate.today());
+		query.setRetireEnd(GeneralDate.today());
+		query.setSortOrderNo(1);
+		// query.setNameType(nameType);
+		query.setSystemType(2);
+		query.setFilterByClosure(true);
+		query.setClosureIds(Arrays.asList(closureId));
+		return query;
+	}
+	
 }

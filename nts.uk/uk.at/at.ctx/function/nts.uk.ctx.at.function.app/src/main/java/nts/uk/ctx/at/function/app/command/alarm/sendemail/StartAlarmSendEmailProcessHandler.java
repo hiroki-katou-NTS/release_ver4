@@ -29,9 +29,9 @@ public class StartAlarmSendEmailProcessHandler extends CommandHandlerWithResult<
 		List<String> listManagerTagetId=command.getListManagerSendTaget(); // 管理者送信対象：List<社員ID>
 		List<ValueExtractAlarmDto> listValueExtractAlarmDto=command.getListValueExtractAlarmDto();//アラーム抽出結果
 		MailSettingsParamDto mailSettingsParamDto=command.getMailSettingsParamDto();//メール送信設定
-		
+		String currentAlarmCode = command.getCurrentAlarmCode();
 		return sendEmailService.alarmSendEmail(companyID, executeDate, listEmployeeTagetId, listManagerTagetId,
-				listValueExtractAlarmDto, mailSettingsParamDto);
+				listValueExtractAlarmDto, mailSettingsParamDto,currentAlarmCode);
 	}
 
 }

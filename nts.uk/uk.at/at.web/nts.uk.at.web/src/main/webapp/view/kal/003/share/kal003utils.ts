@@ -68,7 +68,7 @@ module nts.uk.at.view.kal003.share {
         export function getDefaultWorkTypeCondition(): model.WorkTypeCondition {
             return new model.WorkTypeCondition({
                 useAtr: false,
-                comparePlanAndActual: 1,
+                comparePlanAndActual: 0,
                 planFilterAtr: false,
                 planLstWorkType: [],
                 actualFilterAtr: false,

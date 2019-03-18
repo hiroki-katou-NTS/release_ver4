@@ -10,7 +10,8 @@ module nts.uk.com.view.cmm053.a.service {
         insertHistoryByManagerSetting: "workflow/approvermanagement/workroot/managersetting/insert",
         updateHistoryByManagerSetting: "workflow/approvermanagement/workroot/managersetting/update",
         deleteHistoryByManagerSetting: "workflow/approvermanagement/workroot/managersetting/delete",
-        checkApprovalSetting:"screen/com/cmm053/check-approval-setting"
+        checkApprovalSetting:"screen/com/cmm053/check-approval-setting",
+        checkBfReg: "workflow/approvermanagement/workroot/checkBfRegCMM053"
     }
     
     
@@ -49,5 +50,9 @@ module nts.uk.com.view.cmm053.a.service {
     
     export function checkApprovalSetting(command): JQueryPromise<any> {
         return ajax(paths.checkApprovalSetting, command);
+    }
+    
+    export function checkBfReg(command): JQueryPromise<any> {
+        return ajax(paths.checkBfReg, command);
     }
 }

@@ -701,11 +701,12 @@ public class OverTimeOfDaily {
 		
 		
 		for(OverTimeOfTimeZoneSet set : sortedOverTimeZoneSet) {
+			//全残業枠の残業時間＋振出時間の合計
 			Optional<AttendanceTime> transAndOverTime = overTimeWorkFrameTime.stream().filter(tc -> tc.getOverWorkFrameNo().compareTo(set.getOtFrameNo().v()) == 0)
 										  											  .map(ts -> ts.getOverTimeWork().getTime().addMinutes(ts.getTransferTime().getTime().valueAsMinutes()))
 										  											  .findFirst();
 			AttendanceTime transTime = new AttendanceTime(0) ;
-			if(transAndOverTime.isPresent() && transAndOverTime.get().greaterThan(copyWithinOverTime.valueAsMinutes())) {
+			if(transAndOverTime.isPresent() && copyWithinOverTime.greaterThan(transAndOverTime.get())) {
 				transTime = transAndOverTime.get();
 			}
 			else {

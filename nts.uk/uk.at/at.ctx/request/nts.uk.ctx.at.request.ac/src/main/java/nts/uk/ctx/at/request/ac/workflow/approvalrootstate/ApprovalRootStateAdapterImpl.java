@@ -98,9 +98,19 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 		}
 		return approvalPhaseImport_NewMap;
 	}
+	
+	public MailDestinationCache createMailDestinationCache(String companyID) {
+
+		return new MailDestinationCache(
+				sid -> this.iMailDestinationPub.getEmpEmailAddress(companyID, Arrays.asList(sid), 6));
+	}
+	
 	@Override
-	public ApprovalRootContentImport_New getApprovalRootContent(String companyID, String employeeID, Integer appTypeValue, GeneralDate appDate, String appID, Boolean isCreate) {
+	public ApprovalRootContentImport_New getApprovalRootContent(
+			String companyID, String employeeID, Integer appTypeValue, GeneralDate appDate, String appID, Boolean isCreate,
+			MailDestinationCache mailDestCache) {
 		ApprovalRootContentExport approvalRootContentExport = approvalRootStatePub.getApprovalRoot(companyID, employeeID, appTypeValue, appDate, appID, isCreate);
+		
 		return new ApprovalRootContentImport_New(
 					new ApprovalRootStateImport_New(
 						approvalRootContentExport.getApprovalRootState().getListApprovalPhaseState().stream()
@@ -113,7 +123,7 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 										String approverPhaseMail = "";
 										String representerPhaseMail = "";
 										if(Strings.isNotBlank(y.getApproverID())){
-											List<MailDestination> approverPhaseDest = iMailDestinationPub.getEmpEmailAddress(companyID, Arrays.asList(y.getApproverID()), 6);
+											List<MailDestination> approverPhaseDest = mailDestCache.get(y.getApproverID());
 											if(!CollectionUtil.isEmpty(approverPhaseDest)){
 												List<OutGoingMail> approverPhaseOuts = approverPhaseDest.get(0).getOutGoingMails();
 												if(!CollectionUtil.isEmpty(approverPhaseOuts)){
@@ -123,7 +133,7 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 											}
 										}
 										if(Strings.isNotBlank(y.getRepresenterID())){
-											List<MailDestination> representerPhaseDest = iMailDestinationPub.getEmpEmailAddress(companyID, Arrays.asList(y.getRepresenterID()), 6);
+											List<MailDestination> representerPhaseDest = mailDestCache.get(y.getRepresenterID());
 											if(!CollectionUtil.isEmpty(representerPhaseDest)){
 												List<OutGoingMail> representerPhaseOuts = representerPhaseDest.get(0).getOutGoingMails();
 												if(!CollectionUtil.isEmpty(representerPhaseOuts)){
@@ -139,7 +149,7 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 												y.getListApprover().stream().map(z -> {
 													String approverMail = "";
 													String representerMail = "";
-													List<MailDestination> approverDest = iMailDestinationPub.getEmpEmailAddress(companyID, Arrays.asList(z.getApproverID()), 6);
+													List<MailDestination> approverDest = mailDestCache.get(z.getApproverID());
 													if(!CollectionUtil.isEmpty(approverDest)){
 														List<OutGoingMail> approverOuts = approverDest.get(0).getOutGoingMails();
 														if(!CollectionUtil.isEmpty(approverOuts)){
@@ -148,7 +158,7 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 														}
 													}
 													if(Strings.isNotBlank(z.getRepresenterID())){
-														List<MailDestination> representerDest = iMailDestinationPub.getEmpEmailAddress(companyID, Arrays.asList(z.getRepresenterID()), 6);
+														List<MailDestination> representerDest = mailDestCache.get(z.getRepresenterID());
 														if(!CollectionUtil.isEmpty(representerDest)){
 															List<OutGoingMail> representerOuts = representerDest.get(0).getOutGoingMails();
 															if(!CollectionUtil.isEmpty(representerOuts)){

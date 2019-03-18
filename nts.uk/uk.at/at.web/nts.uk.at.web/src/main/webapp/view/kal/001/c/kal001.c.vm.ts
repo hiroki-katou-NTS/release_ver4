@@ -51,7 +51,7 @@ module nts.uk.at.view.kal001.c {
                 
                 service.getEmployeeSendEmail(self.shareEmployees()).done((listEmployeeDto: Array<modeldto.EmployeeDto>) => {
                     _.map(listEmployeeDto, (e) => {
-                        self.listEmployee.push(
+                        self.listEmployee.push( 
                             new modeldto.EmployeeSendEmail(e));
                     });
                     // create table
@@ -222,6 +222,7 @@ module nts.uk.at.view.kal001.c {
         export class ShareEmployee{
             employeeID: string;
             workplaceID: string;
+            workplaceName: string;
         }
         
         

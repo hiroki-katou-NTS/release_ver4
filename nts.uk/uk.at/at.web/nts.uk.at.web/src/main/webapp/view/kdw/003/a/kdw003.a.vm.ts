@@ -906,7 +906,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             this.insertUpdate();
         }
 
-        insertUpdate(): JQueryPromise<any> {
+        insertUpdate(confirmMonth ?: boolean): JQueryPromise<any> {
             var self = this;
             let dfd = $.Deferred();
             if (!self.hasEmployee || self.hasErrorBuss) {
@@ -1117,7 +1117,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                                 // self.reloadScreen();
                                 self.loadRowScreen(false, false).done(() =>{
                                     nts.uk.ui.block.clear();
-                                    if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
+                                    if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15" && _.isEmpty(confirmMonth)) {
                                         nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
                                             if (dataAfter.showErrorDialog && dataAfter.errorMap[6] == undefined) self.showErrorDialog();
                                         });
@@ -1131,7 +1131,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             } else {
                                 self.loadRowScreen(true, false).done(() =>{
                                     nts.uk.ui.block.clear();
-                                    if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
+                                    if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15" && _.isEmpty(confirmMonth)) {
                                         nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
                                             if (dataAfter.showErrorDialog && dataAfter.errorMap[6] == undefined) self.showErrorDialog();
                                         });
@@ -1147,7 +1147,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         } else {
                             self.loadRowScreen(false, true).done(() =>{
                                 nts.uk.ui.block.clear();
-                                if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
+                                if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15" && _.isEmpty(confirmMonth)) {
                                     nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
                                             if (dataAfter.showErrorDialog && dataAfter.errorMap[6] == undefined) self.showErrorDialog();
                                         });
@@ -1219,7 +1219,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         }
                         self.loadRowScreen(false, self.flagCalculation).done(() =>{
                              nts.uk.ui.block.clear();
-                             if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15") {
+                             if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15" && _.isEmpty(confirmMonth)) {
                                  nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
                                      if (dataAfter.showErrorDialog) self.showErrorDialog();
                                  });
@@ -2291,8 +2291,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 setShared("paramToGetError", param);
                 setShared("errorValidate", errorValidateScreeen);
                 setShared("messageKdw003a", (_.isEmpty(messageAlert) || !_.isString(messageAlert)) ? null : messageAlert);
-                //self.openedScreenB = true;
+                self.openedScreenB = true;
                 self.dialogShow = nts.uk.ui.windows.sub.modeless("/view/kdw/003/b/index.xhtml").onClosed(() =>{
+                     self.openedScreenB = false;
                      dfd.resolve();
                 });
             }
@@ -2533,17 +2534,17 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             nts.uk.ui.block.grayout();
             let dataRowEnd = dataSource[dataSource.length - 1];
             if (self.showFlex()) {
-                self.insertUpdate().done((loadContinue: boolean) => {
+                self.insertUpdate("Tight").done((loadContinue: boolean) => {
                     if(!loadContinue){
                     service.addClosure({ employeeId: dataRowEnd.employeeId, date: dataRowEnd.dateDetail, showFlex: self.showFlex() }).done((data) => {
                         self.processLockButton(self.showLock());
                         nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
-                            if (self.showDialogError) self.showErrorDialog();
+                            //if (self.showDialogError) self.showErrorDialog();
                         });
                         nts.uk.ui.block.clear();
                     });
                     }else{
-                        self.showErrorDialog();
+                        self.showErrorDialog("Msg_1489");
                         nts.uk.ui.block.clear();
                     }
                 });
