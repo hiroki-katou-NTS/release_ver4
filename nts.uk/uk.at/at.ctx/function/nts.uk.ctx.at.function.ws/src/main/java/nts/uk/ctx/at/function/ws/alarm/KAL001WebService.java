@@ -92,7 +92,7 @@ public class KAL001WebService {
 	}
 
 	
-	private static final int KAL001_LIMIT_LIVE_VIEW = 100;
+	private static final int KAL001_LIMIT_LIVE_VIEW = 1000;
 	
 	@POST
 	@Path("extract/result/{processId}")
