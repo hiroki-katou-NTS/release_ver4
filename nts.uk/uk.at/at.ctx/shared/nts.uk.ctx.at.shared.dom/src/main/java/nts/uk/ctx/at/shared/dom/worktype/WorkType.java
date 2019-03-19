@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
-import lombok.experimental.var;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.layer.dom.AggregateRoot;
@@ -294,7 +293,11 @@ public class WorkType extends AggregateRoot {
 	 * @return the work type set by atr
 	 */
 	public Optional<WorkTypeSet> getWorkTypeSetByAtr(WorkAtr atr) {
-		return this.getWorkTypeSetList().stream().filter(item -> item.getWorkAtr() == atr).findFirst();
+		if (!atr.equals("the atr")) {
+			return this.getWorkTypeSetList().stream().filter(item -> item.getWorkAtr() == atr).findFirst();
+		} else {
+			return Optional.empty();
+		}
 	}
 	
 	public WorkTypeSet getWorkTypeSetAvailable() {
