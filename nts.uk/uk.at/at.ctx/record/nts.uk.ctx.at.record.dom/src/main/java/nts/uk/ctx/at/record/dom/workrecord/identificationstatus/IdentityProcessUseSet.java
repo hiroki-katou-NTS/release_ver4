@@ -5,6 +5,7 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import nts.arc.layer.dom.AggregateRoot;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.enums.SelfConfirmError;
 import nts.uk.ctx.at.shared.dom.common.CompanyId;
 
@@ -16,7 +17,7 @@ import nts.uk.ctx.at.shared.dom.common.CompanyId;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class IdentityProcessUseSet {
+public class IdentityProcessUseSet extends AggregateRoot {
 	/**
 	 * 会社ID
 	 */
