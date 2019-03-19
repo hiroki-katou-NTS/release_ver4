@@ -340,6 +340,9 @@ public class ExcessOutsideWorkMng {
 					this.settingsByReg, this.settingsByDefo,
 					aggrValue.getAggregateTotalWorkingTime(), repositories);
 			
+			// 月次明細に計算結果をコピーする
+			this.monthlyDetail.setFromAggregateTotalWorkingTime(aggrValue.getAggregateTotalWorkingTime());
+			
 			// 通常・変形労働勤務の逆時系列割り当て
 			this.assignReverseTimeSeriesOfRegAndIrg(
 					regAndIrgTime, aggrValue.getAggregateTotalWorkingTime(), repositories);

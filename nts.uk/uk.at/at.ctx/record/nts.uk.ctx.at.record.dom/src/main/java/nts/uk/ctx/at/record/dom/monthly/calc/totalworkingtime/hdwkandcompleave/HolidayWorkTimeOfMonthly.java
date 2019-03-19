@@ -403,7 +403,7 @@ public class HolidayWorkTimeOfMonthly implements Cloneable {
 				}
 				break;
 				
-			case STATUTORY_HOLIDAYS:
+			case NON_STATUTORY_HOLIDAYS:
 				
 				// 取得した休出枠時間を集計休出時間に入れる
 				switch (holidayWorkAndTransferAtr){
@@ -417,7 +417,7 @@ public class HolidayWorkTimeOfMonthly implements Cloneable {
 				}
 				break;
 				
-			case NON_STATUTORY_HOLIDAYS:
+			case STATUTORY_HOLIDAYS:
 				
 				// 取得した休出枠時間を集計休出時間に入れる　（入れた時間分を法定内休出にできる時間から引く）
 				switch (holidayWorkAndTransferAtr){
