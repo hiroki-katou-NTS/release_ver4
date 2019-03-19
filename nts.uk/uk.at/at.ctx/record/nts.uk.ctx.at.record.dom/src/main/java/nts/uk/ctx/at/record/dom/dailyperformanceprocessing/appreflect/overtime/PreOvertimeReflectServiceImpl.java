@@ -111,7 +111,7 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 			workRepository.updateByKeyFlush(dailyInfor);
 			
 			//開始終了時刻の反映 phai lay du lieu cua 日別実績の勤務情報 sau khi update
-			startEndtimeOffReflect.startEndTimeOffReflect(param, dailyInfor);
+			//startEndtimeOffReflect.startEndTimeOffReflect(param, dailyInfor);
 
 			//残業時間を反映する
 			//残業枠時間
@@ -135,7 +135,7 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 					param.getOvertimePara().getAppReason(),param.getOvertimePara().getOvertimeAtr());
 			//日別実績の修正からの計算
 			//○日別実績を置き換える Replace daily performance	
-			commonService.calculateOfAppReflect(null, param.getEmployeeId(), param.getDateInfo());
+			commonService.calculateOfAppReflect(null, param.getEmployeeId(), param.getDateInfo(), true);
 			return true;
 	
 		} catch (Exception ex) {

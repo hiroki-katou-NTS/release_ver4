@@ -434,7 +434,10 @@ module nts.uk.ui.koExtentions {
                     }
                 }
                 if(clickCheckBox){
-                    $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']").click();
+                    let $checkBox = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                    if ($checkBox.length > 0 && $checkBox[0].getAttribute("data-chk") === "off") {
+                        $checkBox.click();
+                    }
                 } else {
                     $grid.ntsGridList('setSelected', data.value());    
                 }

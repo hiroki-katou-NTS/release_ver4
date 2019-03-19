@@ -16,4 +16,5 @@ public class ParamAlarmSendEmailCommand {
 	private List<String> listManagerSendTaget;
 	private List<ValueExtractAlarmDto> listValueExtractAlarmDto;
 	private MailSettingsParamDto mailSettingsParamDto;
+	private String currentAlarmCode;
 }

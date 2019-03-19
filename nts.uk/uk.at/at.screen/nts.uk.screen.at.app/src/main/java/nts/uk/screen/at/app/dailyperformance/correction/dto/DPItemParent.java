@@ -49,4 +49,6 @@ public class DPItemParent {
 	private boolean errorAllSidDate;
 	
 	private List<DPItemValue> lstNotFoundWorkType = new ArrayList<>();
+	
+	private Boolean showDialogError;
 }

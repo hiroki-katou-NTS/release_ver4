@@ -380,6 +380,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 									processingDate, workInfoOfDailyPerformanceUpdate, null, empCalAndSumExecLogID,
 									reCreateAttr, Optional.ofNullable(calAttrOfDailyPerformance),
 									affiliationInforOfDailyPerfor, Optional.empty());
+							if(stampOutput.getErrMesInfos().isEmpty()) {
 
 							DailyRecordToAttendanceItemConverter converter = attendanceItemConvertFactory
 									.createDailyConverter();
@@ -435,7 +436,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							stampOutput.getReflectStampOutput().setTemporaryTimeOfDailyPerformance(converter2.temporaryTime().orElse(null));
 							stampOutput.getReflectStampOutput().setAttendanceLeavingGateOfDaily(converter2.attendanceLeavingGate().orElse(null));
 							stampOutput.getReflectStampOutput().setPcLogOnInfoOfDaily(converter2.pcLogInfo().orElse(null));
-							
+							}
 							//---------------
 
 //							if (!attItemIdStateOfTimeLeaving.isEmpty()) {

@@ -9,15 +9,28 @@
 #tbl-control td{
 	padding: 5px;
 }
-.fixed-table thead th{
+.ui-iggrid-header.ui-widget-header{
 	text-align: center;
 }
 
-.fixed-table tbody td{
-	text-align: center;
-	height: 27px;
-}
-
-.fixed-table tbody td:NTH-CHILD(1){
+#gridE tbody tr td:NTH-CHILD(1){
 	text-align: left;
+}
+#gridE tbody tr td:NTH-CHILD(2){
+	text-align: center;
+}
+#gridE tbody tr td:NTH-CHILD(3){
+	text-align: center;
+}
+#gridE tbody tr td:NTH-CHILD(5){
+	text-align: center;
+}
+#gridE tbody tr td:NTH-CHILD(5){
+	text-align: center;
+}
+#gridE tbody tr td:NTH-CHILD(6){
+	text-align: center;
+}
+#gridE tbody tr td:NTH-CHILD(7){
+	text-align: center;
 }

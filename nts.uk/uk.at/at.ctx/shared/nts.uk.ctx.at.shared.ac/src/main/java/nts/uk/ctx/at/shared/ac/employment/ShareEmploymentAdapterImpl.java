@@ -78,7 +78,7 @@ public class ShareEmploymentAdapterImpl implements ShareEmploymentAdapter{
 		Map<String, SEmpHistExport> lar = employment.findSEmpHistBySidVer2(companyId, lstSID, baseDate);
 		Map<String, BsEmploymentHistoryImport> mapResult = new HashMap<>();
 		for (String sid : lstSID) {
-			if(lar.containsKey(sid)){
+			if(!lar.containsKey(sid)){
 				continue;
 			}
 			SEmpHistExport empHist = lar.get(sid);

@@ -3,11 +3,14 @@
  */
 package nts.uk.ctx.at.record.ws.workrecord.operationsetting;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import nts.arc.enums.EnumConstant;
 import nts.arc.layer.ws.WebService;
 import nts.uk.ctx.at.record.app.command.workrecord.operationsetting.ApprovalProcessCommand;
 import nts.uk.ctx.at.record.app.command.workrecord.operationsetting.DaiPerformanceFunCommand;
@@ -19,6 +22,7 @@ import nts.uk.ctx.at.record.app.command.workrecord.operationsetting.UpdateDaiPer
 import nts.uk.ctx.at.record.app.command.workrecord.operationsetting.UpdateFormatPerformanceCommandHandler;
 import nts.uk.ctx.at.record.app.command.workrecord.operationsetting.UpdateIdentityProcessCommandHandler;
 import nts.uk.ctx.at.record.app.command.workrecord.operationsetting.UpdateMonPerformanceFunCommandHandler;
+import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.ApplicationTypeFinder;
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.ApprovalProcessDto;
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.ApprovalProcessFinder;
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.DaiPerformanceFunDto;
@@ -67,6 +71,9 @@ public class OperationSettingWebservice extends WebService {
 	
 	@Inject
 	private UpdateIdentityProcessCommandHandler updateIdentityProcessCommandHandler;
+	
+	@Inject
+	private ApplicationTypeFinder appTypeFinder; 
 	
 	@POST 
 	@Path("getFormat")
@@ -140,5 +147,11 @@ public class OperationSettingWebservice extends WebService {
 	@Path("updateIdentity")
 	public void updateIdentityProcess(IdentityProcessCommand command){
 		updateIdentityProcessCommandHandler.handle(command);
+	}
+	
+	@POST
+	@Path("findApplicationType")
+	public List<EnumConstant> getApplicationType() {
+		return appTypeFinder.getAppWithOvertimeInfo();
 	}
 }

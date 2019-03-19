@@ -28,6 +28,8 @@ import nts.uk.ctx.workflow.app.find.approvermanagement.workroot.EmployeeRegister
 import nts.uk.ctx.workflow.app.find.approvermanagement.workroot.EmployeeSearch;
 import nts.uk.ctx.workflow.app.find.approvermanagement.workroot.EmployeeUnregisterFinder;
 import nts.uk.ctx.workflow.app.find.approvermanagement.workroot.MasterApproverRootDto;
+import nts.uk.ctx.workflow.app.find.approvermanagement.workroot.OutputCheckRegCmm053;
+import nts.uk.ctx.workflow.app.find.approvermanagement.workroot.ParamCheckRegCmm053;
 import nts.uk.ctx.workflow.app.find.approvermanagement.workroot.ParamDto;
 import nts.uk.ctx.workflow.app.find.approvermanagement.workroot.PastHistoryDto;
 import nts.uk.ctx.workflow.dom.adapter.bs.EmployeeAdapter;
@@ -209,5 +211,11 @@ public class WorkAppApprovalRootWebService extends WebService{
 	@Path("find-wpInfo-login")
 	public WorkplaceImport getWpInfoLogin(){
 		return comFinder.getWpInfoLogin();
+	}
+	
+	@POST
+	@Path("checkBfRegCMM053")
+	public OutputCheckRegCmm053 checkBfResCmm053(ParamCheckRegCmm053 param){
+		return comFinder.checkReg(param);
 	}
 }

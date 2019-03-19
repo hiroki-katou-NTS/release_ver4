@@ -2,6 +2,7 @@ package nts.uk.ctx.at.request.app.command.application.remainingnumber.checkfunc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -11,13 +12,11 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.val;
 import nts.arc.layer.app.command.AsyncCommandHandler;
 import nts.arc.layer.app.command.AsyncCommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerContext;
+import nts.arc.layer.app.file.export.ExportServiceResult;
 import nts.arc.task.data.TaskDataSetter;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.SyEmployeeAdapter;
@@ -57,6 +56,9 @@ public class SyncCheckFuncDataCommandHandler extends AsyncCommandHandler<CheckFu
 
 	@Inject
 	private VacationHistoryRepository vacationHistoryRepository;
+
+	@Inject
+	private RemainingNumberExportExcel exportService;
 
 	@Override
 	protected void handle(CommandHandlerContext<CheckFuncDataCommand> context) {
@@ -120,14 +122,18 @@ public class SyncCheckFuncDataCommandHandler extends AsyncCommandHandler<CheckFu
 
 			// アルゴリズム「Excel出力データ取得」を実行する
 			List<ExcelInforCommand> excelInforList = new ArrayList<>();
+			List<String> empResultIds = employeeListResult.stream().map(i -> i.getEmployeeId())
+					.collect(Collectors.toList());
+			Map<String, SyEmployeeImport> employeeRecordImportMap = employeeRecordAdapter.getPersonInfor(empResultIds)
+					.stream().collect(Collectors.toMap(i -> i.getEmployeeId(), i -> i));
 			for (int i = 0; i < employeeListResult.size(); i++) {
 				if (asyncTask.hasBeenRequestedToCancel()) {
 					asyncTask.finishedAsCancelled();
 					break;
 				}
 				// Imported(就業)「社員」を取得する
-				SyEmployeeImport employeeRecordImport = employeeRecordAdapter
-						.getPersonInfor(employeeListResult.get(i).getEmployeeId());
+				SyEmployeeImport employeeRecordImport = employeeRecordImportMap
+						.get(employeeListResult.get(i).getEmployeeId());
 
 				if (employeeRecordImport == null) {
 					// 取得失敗
@@ -141,8 +147,8 @@ public class SyncCheckFuncDataCommandHandler extends AsyncCommandHandler<CheckFu
 				// (Thực hiện thuật toán 「指定年月日時点の年休残数を取得-lấy số phép còn lại
 				// tại thời điểm xác định」)
 				List<YearlyHolidaysTimeRemainingImport> yearlyHolidaysTimeRemainingImport = annualBreakManageAdapter
-						.getYearHolidayTimeAnnualRemaining(employeeListResult.get(i).getEmployeeId(),
-								command.getDate(), command.getStartTime(), command.getEndTime());
+						.getYearHolidayTimeAnnualRemaining(employeeListResult.get(i).getEmployeeId(), command.getDate(),
+								command.getStartTime(), command.getEndTime());
 				if (yearlyHolidaysTimeRemainingImport.isEmpty()) {
 					// 取得失敗
 					// パラメータ.処理人数に＋１加算する
@@ -198,31 +204,20 @@ public class SyncCheckFuncDataCommandHandler extends AsyncCommandHandler<CheckFu
 				excelInforCommand.setDateAnnualRetirement(
 						yearlyHolidaysTimeRemainingImport.get(0).getAnnualRemainingGrantTime());
 				excelInforCommand.setDateAnnualRest(yearlyHolidaysTimeRemainingImport.get(0).getAnnualRemaining());
-				excelInforList.add(excelInforCommand);
 				++countEmployee;
 				setter.updateData(NUMBER_OF_SUCCESS, countEmployee);
 
-				ObjectMapper mapper = new ObjectMapper();
-				try {
-					for (int j = 0; j <= plannedVacationList.size(); j += 10) {
-						List<NumberOfWorkTypeUsedImport> listNumberOfWorkTypeUsedImport = dailyWorkTypeListImport.get()
-								.getNumberOfWorkTypeUsedExports().stream().skip(j).limit(10)
-								.collect(Collectors.toList());
-						String workTypeUsedJsonString = mapper.writeValueAsString(listNumberOfWorkTypeUsedImport);
-						setter.setData(i + ",WORKTYPEUSED," + j, workTypeUsedJsonString);
-
-						List<PlannedVacationListCommand> listPlannedVacationListCommand = plannedVacationList.stream()
-								.skip(j).limit(10).collect(Collectors.toList());
-						String plannedVacationJsonString = mapper.writeValueAsString(listPlannedVacationListCommand);
-						setter.setData(i + ",PLANNEDVACATION," + j, plannedVacationJsonString);
-					}
-					String jsonInString = mapper.writeValueAsString(excelInforCommand);
-					setter.setData(i + ",EXCEL_LIST", jsonInString);
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
-
+				List<NumberOfWorkTypeUsedImport> listNumberOfWorkTypeUsedImport = dailyWorkTypeListImport.get()
+						.getNumberOfWorkTypeUsedExports().stream().collect(Collectors.toList());
+				List<PlannedVacationListCommand> listPlannedVacationListCommand = plannedVacationList.stream()
+						.collect(Collectors.toList());
+				excelInforCommand.setNumberOfWorkTypeUsedImport(listNumberOfWorkTypeUsedImport);
+				excelInforCommand.setPlannedVacationListCommand(listPlannedVacationListCommand);
+				excelInforList.add(excelInforCommand);
 			}
+			setter.setData("EXPORT_SIZE", excelInforList.size());
+			ExportServiceResult exportResult = exportService.start(excelInforList);
+			setter.setData("EXPORT_TASK_ID", exportResult.getTaskId());
 
 			if (asyncTask.hasBeenRequestedToCancel()) {
 				asyncTask.finishedAsCancelled();

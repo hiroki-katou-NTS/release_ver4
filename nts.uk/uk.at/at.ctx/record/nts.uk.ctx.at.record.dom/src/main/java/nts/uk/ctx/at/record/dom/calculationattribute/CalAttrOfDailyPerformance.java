@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nts.arc.layer.dom.AggregateRoot;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalAtrOvertime;
 import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalFlexOvertimeSetting;
 import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalOvertimeSetting;
 import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalRestTimeSetting;
@@ -57,5 +58,16 @@ public class CalAttrOfDailyPerformance extends AggregateRoot {
 //		//休出
 //		this.holidayTimeSetting
 //		
-//	}
+//	} 
+
+	public CalAttrOfDailyPerformance reCreate(AutoCalAtrOvertime atr) {
+		return new CalAttrOfDailyPerformance(this.employeeId,
+											 this.ymd,
+											 this.flexExcessTime,
+											 this.rasingSalarySetting,
+											 this.holidayTimeSetting,
+											 this.overtimeSetting.changeNormalAutoCalcSetting(atr),
+											 this.leaveEarlySetting,
+											 this.divergenceTime);
+	}
 }

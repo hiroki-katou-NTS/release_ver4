@@ -3,15 +3,12 @@
  */
 package nts.uk.ctx.at.record.dom.approvalmanagement.dtos;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 
 /**
  * @author hungnm

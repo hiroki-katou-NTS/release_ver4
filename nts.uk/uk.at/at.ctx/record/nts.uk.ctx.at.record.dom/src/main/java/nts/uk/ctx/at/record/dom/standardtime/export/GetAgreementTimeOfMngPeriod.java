@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.dom.standardtime.export;
 
 import java.util.List;
+import java.util.Map;
 
 import nts.uk.ctx.at.record.dom.monthly.agreement.AgreementTimeOfManagePeriod;
 import nts.uk.ctx.at.shared.dom.common.Year;
@@ -18,4 +19,13 @@ public interface GetAgreementTimeOfMngPeriod {
 	 * @return 管理期間の36協定時間リスト
 	 */
 	List<AgreementTimeOfManagePeriod> algorithm(String employeeId, Year year);
+	
+	
+	/**
+	 * 管理期間の36協定時間を取得
+	 * @param employeeId List 社員ID
+	 * @param year 年度
+	 * @return 管理期間の36協定時間リスト
+	 */
+	Map<String,List<AgreementTimeOfManagePeriod>> algorithm(List<String> employeeId, Year year);
 }

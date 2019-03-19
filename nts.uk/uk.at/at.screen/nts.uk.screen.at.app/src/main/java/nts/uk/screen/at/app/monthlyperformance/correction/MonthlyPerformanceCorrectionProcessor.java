@@ -33,6 +33,8 @@ import nts.uk.ctx.at.record.app.find.monthly.root.common.ClosureDateDto;
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.FormatPerformanceDto;
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.IdentityProcessDto;
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.IdentityProcessFinder;
+import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
+import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQuery;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryAdapter;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryR;
@@ -114,18 +116,16 @@ public class MonthlyPerformanceCorrectionProcessor {
 	private IdentityProcessFinder identityProcessFinder;
 	@Inject
 	private EmploymentAdapter employmentAdapter;
-//	@Inject
-//	private ClosureEmploymentRepository closureEmploymentRepository;
 	@Inject
 	private ShClosurePub shClosurePub;
-
 	@Inject
 	private ClosureRepository closureRepository;
-
 	@Inject
 	private ClosureService closureService;
 	@Inject
 	private MonthlyPerformanceDisplay monthlyDisplay;
+	@Inject
+	private SyCompanyRecordAdapter syCompanyRecordAdapter;
 	/**
 	 * 実績の時系列をチェックする
 	 */
@@ -305,7 +305,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 				createFixedHeader(screenDto, yearMonth, closureId, optApprovalProcessingUseSetting.get(),mess);
 				return screenDto;
 			}
-
+			
 			List<MonthlyPerformaceLockStatus> lstLockStatus = screenDto.getParam().getLstLockStatus();
 			if (lstLockStatus.stream().allMatch(item -> item.getLockStatusString() != Strings.EMPTY)) {
 				screenDto.setShowRegisterButton(false);
@@ -313,7 +313,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 				screenDto.setShowRegisterButton(true);
 			
 			// アルゴリズム「月別実績を表示する」を実行する Hiển thị monthly result
-			displayMonthlyResult(screenDto, yearMonth, closureId, optApprovalProcessingUseSetting.get(), companyId, results);
+			displayMonthlyResult(screenDto, yearMonth, closureId, optApprovalProcessingUseSetting.get(), companyId, results, employeeIds);
 		
 		} else { // 「月別実績の承認」からの場合
 			//アルゴリズム「締め情報の表示」を実行する       move 実績期間の表示
@@ -466,7 +466,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 
 				// アルゴリズム「月別実績を表示する」を実行する Hiển thị monthly result
 				displayMonthlyResult(screenDto, yearMonth, screenDto.getSelectedClosure(), approvalProcessingUseSetting,
-						companyId, results);
+						companyId, results, employeeIds);
 
 			} else {
 				throw new BusinessException("Msg_873");
@@ -636,7 +636,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 	 */
 	private void displayMonthlyResult(MonthlyPerformanceCorrectionDto screenDto, Integer yearMonth, Integer closureId,
 			ApprovalProcessingUseSetting approvalProcessingUseSetting, String companyId,
-			List<MonthlyModifyResult> results) {
+			List<MonthlyModifyResult> results, List<String> employeeIds) {
 		/**
 		 * Create Grid Sheet DTO
 		 */
@@ -982,6 +982,25 @@ public class MonthlyPerformanceCorrectionProcessor {
 			}
 			lstData.add(mpdata);
 		}
+		
+		//指定した年月の期間を算出する
+		DatePeriod datePeriodClosure = closureService.getClosurePeriod(closureId.intValue(), new YearMonth(yearMonth));
+		//社員ID（List）と指定期間から所属会社履歴項目を取得
+		// RequestList211
+		List<AffCompanyHistImport> listAffCompanyHistImport = syCompanyRecordAdapter
+				.getAffCompanyHistByEmployee(employeeIds, datePeriodClosure);
+		
+		//取得した情報を元に月別実績を画面に表示する
+		//NOTE: ※取得した「会社所属履歴」をもとに、菜食していない期間の実績は表示しないでください
+		List<MPDataDto> listData =  new ArrayList<>();
+		screenDto.getLstData().forEach(x -> {
+			Optional<AffCompanyHistImport> optMonthlyPerformanceEmployeeDto = listAffCompanyHistImport.stream()
+					.filter(y -> x.getEmployeeId().equals(y.getEmployeeId())).findFirst();
+			if (optMonthlyPerformanceEmployeeDto.isPresent()
+					&& optMonthlyPerformanceEmployeeDto.get().getLstAffComHistItem().size() > 0)
+				listData.add(x);
+		});
+		screenDto.setLstData(listData);
 
 		// screenDto.getItemValues().addAll(results.isEmpty() ? new
 		// ArrayList<>() : results.get(0).getItems());

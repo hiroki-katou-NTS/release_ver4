@@ -64,7 +64,7 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 					AppRootInsContentFnImport appRootInsContentFnImport = createDailyApproverAdapter
 							.createDailyApprover(employeeID, 1, ymd,startDateClosure);
 
-					boolean flagError = appRootInsContentFnImport.getErrorFlag().intValue() == 1 ? true : false;
+					boolean flagError = appRootInsContentFnImport.getErrorFlag().intValue() == 0 ? false:true;
 					String errorMessage = appRootInsContentFnImport.getErrorMsgID();
 					// 取得したエラーフラグ != エラーなし
 					if (flagError) {
@@ -82,7 +82,7 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 					AppRootInsContentFnImport appRootInsContentFnImport = createDailyApproverAdapter
 							.createDailyApprover(employeeID, 1,endDateClosure, startDateClosure);
 
-					boolean flagError = appRootInsContentFnImport.getErrorFlag().intValue() == 1 ? true : false;
+					boolean flagError = appRootInsContentFnImport.getErrorFlag().intValue() == 0 ? false:true;
 					String errorMessage = appRootInsContentFnImport.getErrorMsgID();
 					if (flagError) {
 						/** ドメインモデル「承認中間データエラーメッセージ情報（日別実績）」を追加する */

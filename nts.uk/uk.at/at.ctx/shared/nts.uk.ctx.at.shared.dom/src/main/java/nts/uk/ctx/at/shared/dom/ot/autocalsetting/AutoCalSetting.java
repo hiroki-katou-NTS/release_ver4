@@ -41,4 +41,12 @@ public class AutoCalSetting extends ValueObject {
 		return new AutoCalSetting(TimeLimitUpperLimitSetting.NOUPPERLIMIT, AutoCalAtrOvertime.APPLYMANUALLYENTER);
 	}
 
+	
+	/**
+	 * 計算区分を受け取った計算区分へ変更する
+	 */
+	public AutoCalSetting changeCalcAtr(AutoCalAtrOvertime atr) {
+		return new AutoCalSetting(this.upLimitORtSet, atr);
+	}
+
 }

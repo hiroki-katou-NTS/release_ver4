@@ -20,6 +20,7 @@ import nts.uk.ctx.at.record.dom.daily.breaktimegoout.BreakTimeOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CheckExcessAtr;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.ManageReGetClass;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTime;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.PredetermineTimeSetForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.VacationClass;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.converter.DailyRecordToAttendanceItemConverter;
@@ -32,6 +33,7 @@ import nts.uk.ctx.at.record.dom.raborstandardact.flex.SettingOfFlexWork;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.SystemFixedErrorAlarm;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.kmk013_splitdomain.DeductLeaveEarly;
+import nts.uk.ctx.at.shared.dom.calculation.holiday.time.OverTimeFrame;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryOccurrenceSetting;
@@ -41,6 +43,7 @@ import nts.uk.ctx.at.shared.dom.worktime.fixedset.FixRestTimezoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
 import nts.uk.ctx.at.shared.dom.worktype.AttendanceHolidayAttr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
 /**
@@ -158,21 +161,53 @@ public class ActualWorkingTimeOfDaily {
 					predetermineTimeSetByPersonInfo,
 					leaveLateSet
 					);
+		/*ログ差し込み*/
+		org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ActualWorkingTimeOfDaily.class);
+		log.info("計算後、大塚処理前の残業値を出力します。");
+		if(totalWorkingTime.getExcessOfStatutoryTimeOfDaily().getOverTimeWork() != null
+		&& totalWorkingTime.getExcessOfStatutoryTimeOfDaily().getOverTimeWork().isPresent()) {
+			for(OverTimeFrameTime otFrame : totalWorkingTime.getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get().getOverTimeWorkFrameTime()) {
+				log.info("枠Ｎｏ："+otFrame.getOverWorkFrameNo());
+				log.info("残業時間："+otFrame.getOverTimeWork().getTime());
+				log.info("計算残業時間："+otFrame.getOverTimeWork().getCalcTime());
+			}
+		}
+		/*ログ差し込み*/
 		
 		
-		/*大塚残業*/
-		TotalWorkingTime calcResultOotsuka = calcOotsuka(recordClass,
-														 totalWorkingTime,
-														 workType,
-														 workScheduleTime.getRecordPrescribedLaborTime());
+		TotalWorkingTime calcResultOotsuka;
+		if(workType.getDailyWork().decisionMatchWorkType(WorkTypeClassification.SpecialHoliday).isFullTime()) {
+			//大塚モード(特休時計算)
+			calcResultOotsuka = totalWorkingTime.SpecialHolidayCalculationForOotsuka(recordClass,
+				    vacationClass,
+				    workType,
+				    workTimeDailyAtr,
+				    flexCalcMethod,
+					bonusPayAutoCalcSet,
+					eachCompanyTimeSet,
+					conditionItem,
+					predetermineTimeSetByPersonInfo,
+					leaveLateSet);
+		}
+		else {
+			/*大塚残業*/
+			calcResultOotsuka = calcOotsuka(recordClass,
+											totalWorkingTime,
+											workType,
+											workScheduleTime.getRecordPrescribedLaborTime());
+		}
+		
+
 		
 		/*大塚モードの計算（欠勤控除時間）*/
 		//1日出勤系の場合は処理を呼ばないように作成が必要
 		if(workType.getDailyWork().decisionNeedPredTime() != AttendanceHolidayAttr.FULL_TIME && recordClass.getCalculatable()) {
+			//大塚モード休憩未取得
 			calcResultOotsuka = calcResultOotsuka.reCalcLateLeave(recordClass.getWorkTimezoneCommonSet(),
-																  recordClass.getFixRestTimeSetting(),
-																  recordClass.getFixWoSetting(),
-																  recordClass.getIntegrationOfDaily().getAttendanceLeave());
+					  recordClass.getFixRestTimeSetting(),
+					  recordClass.getFixWoSetting(),
+					  recordClass.getIntegrationOfDaily().getAttendanceLeave());	
+
 		}
 		
 		/*拘束差異時間*/

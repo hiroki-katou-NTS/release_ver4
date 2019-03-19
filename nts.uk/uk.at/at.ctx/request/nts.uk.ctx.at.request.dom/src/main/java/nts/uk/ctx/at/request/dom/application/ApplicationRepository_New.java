@@ -35,7 +35,7 @@ public interface ApplicationRepository_New {
 	 * @param prePostAtr: 事前事後区分
 	 * @return
 	 */
-	public List<Application_New>  getBeforeApplication(String companyId, GeneralDate appDate, GeneralDateTime inputDate, int appType, int prePostAtr);
+	public List<Application_New>  getBeforeApplication(String companyId, String employeeID, GeneralDate appDate, GeneralDateTime inputDate, int appType, int prePostAtr);
 	
 	public void insert(Application_New application);
 	

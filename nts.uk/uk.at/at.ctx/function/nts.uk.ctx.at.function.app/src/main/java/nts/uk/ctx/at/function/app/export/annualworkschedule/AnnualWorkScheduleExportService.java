@@ -37,13 +37,14 @@ public class AnnualWorkScheduleExportService extends ExportService<AnnualWorkSch
 	private AgreementOperationSettingAdapter agreementOperationSettingAdapter;
 
 	@Override
-	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	protected void handle(ExportServiceContext<AnnualWorkScheduleExportQuery> context) {
 		String companyId = AppContexts.user().companyId();
 		AnnualWorkScheduleExportQuery query = context.getQuery();
 		PrintFormat printFormat = EnumAdaptor.valueOf(query.getPrintFormat(), PrintFormat.class);
 		ExcludeEmp excludeEmp = EnumAdaptor.valueOf(query.getExcludeEmp(), ExcludeEmp.class);
 		List<Employee> employees = query.getEmployees().stream()
+                .distinct()
 				.map(m -> new Employee(m.getEmployeeId(), m.getCode(), m.getName(), m.getWorkplaceName()))
 				.collect(Collectors.toList());
 		Year fiscalYear = null;

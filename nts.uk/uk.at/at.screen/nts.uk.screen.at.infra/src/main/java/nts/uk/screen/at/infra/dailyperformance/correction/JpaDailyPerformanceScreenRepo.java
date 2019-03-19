@@ -1807,8 +1807,8 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 					builderString.append("SELECT c.CLOSURE_ID , c.USE_ATR, c.CLOSURE_MONTH, emp.EMPLOYMENT_CD ");
 					builderString.append("FROM KCLMT_CLOSURE c JOIN ");
 					builderString.append(
-							"KCLMT_CLOSURE_EMPLOYMENT emp ON c.CID = emp.CID AND c.CLOSURE_ID = emp.CLOSURE_ID");
-					builderString.append("WHERE emp.CID = ? AND c.USE_ATR = 1");
+							"KCLMT_CLOSURE_EMPLOYMENT emp ON c.CID = emp.CID AND c.CLOSURE_ID = emp.CLOSURE_ID ");
+					builderString.append("WHERE emp.CID = ? AND c.USE_ATR = 1 ");
 					builderString.append("AND emp.EMPLOYMENT_CD IN ( ").append(joinParam(subList)).append(")");
 
 					try (PreparedStatement statement = this.connection().prepareStatement(builderString.toString())) {

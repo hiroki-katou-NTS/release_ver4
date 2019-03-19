@@ -1670,6 +1670,24 @@ var nts;
                     return year + "年 " + month + " 月";
                 return year;
             }
+            function today() {
+                var todayDate = "";
+                nts.uk.request.syncAjax("com", "server/time/today/").done(function (res) {
+                    todayDate = res;
+                }).fail(function () {
+                });
+                return moment.utc(todayDate, "yyyy/MM/dd");
+            }
+            time_1.today = today;
+            function now() {
+                var nowDateTime = "";
+                nts.uk.request.syncAjax("com", "server/time/now/").done(function (res) {
+                    nowDateTime = res;
+                }).fail(function () {
+                });
+                return moment.utc(nowDateTime);
+            }
+            time_1.now = now;
             var JapanYearMonth = (function () {
                 function JapanYearMonth(empire, year, month) {
                     this.empire = empire;
@@ -17334,6 +17352,7 @@ var nts;
                     }
                     EditorProcessor.prototype.init = function ($input, data) {
                         var _this = this;
+                        var DATA_CHANGE_EVENT_STATUS = "change-event-status";
                         var self = this;
                         var value = data.value;
                         var constraintName = (data.constraint !== undefined) ? ko.unwrap(data.constraint) : "";
@@ -17360,6 +17379,11 @@ var nts;
                             }
                         });
                         $input.on(valueUpdate, function (e) {
+                            if ($input.data(DATA_CHANGE_EVENT_STATUS) === "doing") {
+                                return;
+                            }
+                            $input.data(DATA_CHANGE_EVENT_STATUS, "doing");
+                            _.defer(function () { return $input.data(DATA_CHANGE_EVENT_STATUS, "done"); });
                             var newText = $input.val();
                             var validator = _this.getValidator(data);
                             var result = validator.validate(newText);
@@ -17395,6 +17419,14 @@ var nts;
                                 if (result.isValid) {
                                     $input.ntsError('clearKibanError');
                                     $input.val(formatter.format(result.parsedValue));
+                                    /**
+                                     On window-8.1 with IE browser, the 'change' event is not called automatically.
+                                     So, we trigger it manually when the 'value' isn't equals the result.parsedValue.
+                                     See more information at 106538
+                                    */
+                                    if (value() != result.parsedValue) {
+                                        $input.trigger(valueUpdate);
+                                    }
                                 }
                                 else {
                                     var error = $input.ntsError('getError');
@@ -18561,7 +18593,10 @@ var nts;
                                 }
                             }
                             if (clickCheckBox) {
-                                $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']").click();
+                                var $checkBox = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                                if ($checkBox.length > 0 && $checkBox[0].getAttribute("data-chk") === "off") {
+                                    $checkBox.click();
+                                }
                             }
                             else {
                                 $grid.ntsGridList('setSelected', data.value());
@@ -25121,6 +25156,9 @@ var nts;
                                 var disFormat = su.formatSave(col[0], val);
                                 su.wedgeCell(_$grid[0], { rowIdx: idx, columnKey: key }, disFormat, reset);
                                 $.data($cell, v.DATA, disFormat);
+                                if (_zeroHidden && ti.isZero(disFormat, key)) {
+                                    $cell.innerHTML = "";
+                                }
                             }
                             else if (dkn.controlType[key] === dkn.CHECKBOX) {
                                 var check = $cell.querySelector("input[type='checkbox']");
@@ -25850,6 +25888,7 @@ var nts;
                                 if (!_.isNil(dirties[id]) && !_.isNil(dirties[id][coord.columnKey])) {
                                     delete dirties[id][coord.columnKey];
                                 }
+                                return { c: calcCell };
                             }
                             else {
                                 if (cellValue === origVal) {
@@ -25858,6 +25897,7 @@ var nts;
                                         if (!_.isNil(dirties[id]) && !_.isNil(dirties[id][coord.columnKey])) {
                                             delete dirties[id][coord.columnKey];
                                         }
+                                        rData[coord.columnKey] = cellValue;
                                         return { c: calcCell };
                                     }
                                     $cell.classList.remove(color.ManualEditTarget);
@@ -25942,9 +25982,14 @@ var nts;
                                     }
                                     else {
                                         formatted = !_.isNil(column) ? format(column[0], cellValue) : cellValue;
-                                        t.c.textContent = formatted;
                                         disFormat = cellValue === "" || _.isNil(column) ? cellValue : formatSave(column[0], cellValue);
                                         $.data(t.c, v.DATA, disFormat);
+                                        if (maf.zeroHidden && ti.isZero(disFormat, coord.columnKey)) {
+                                            t.c.textContent = "";
+                                        }
+                                        else {
+                                            t.c.textContent = formatted;
+                                        }
                                     }
                                     if (t.colour)
                                         t.c.classList.add(t.colour);
@@ -27086,8 +27131,11 @@ var nts;
                             _mafollicle[SheetDef][_currentSheet].sumColArr = sumGroupArr_1;
                             kt._adjuster.nostal(table.cols, bodyGroupArr_1, sumGroupArr_1);
                             kt._adjuster.handle();
+                            var tmp_2 = _vessel().zeroHidden;
+                            _vessel().zeroHidden = _zeroHidden;
+                            _zeroHidden = tmp_2;
                             if (lo.changeZero(_vessel().zeroHidden))
-                                _vessel().zeroHidden = _zeroHidden;
+                                _zeroHidden = _vessel().zeroHidden;
                             return;
                         }
                         _maxFreeWidth = _mafollicle[SheetDef][_currentSheet].maxWidth;
@@ -27116,8 +27164,11 @@ var nts;
                         sumTbl.replaceChild(_vessel().$sumBody, bSumBody);
                         kt._adjuster.nostal(_mafollicle[SheetDef][_currentSheet].hColArr, _mafollicle[SheetDef][_currentSheet].bColArr, _mafollicle[SheetDef][_currentSheet].sumColArr);
                         kt._adjuster.handle();
+                        var tmp = _vessel().zeroHidden;
+                        _vessel().zeroHidden = _zeroHidden;
+                        _zeroHidden = tmp;
                         if (lo.changeZero(_vessel().zeroHidden))
-                            _vessel().zeroHidden = _zeroHidden;
+                            _zeroHidden = _vessel().zeroHidden;
                     }
                     gp.hopto = hopto;
                 })(gp = mgrid.gp || (mgrid.gp = {}));
@@ -30204,9 +30255,9 @@ var nts;
                         });
                     }
                     function isCheckedAll($grid) {
-                        if ($grid.igGridSelection('option', 'multipleSelection')) {
+                        if ($grid.data("igGrid") && $grid.igGridSelection('option', 'multipleSelection')) {
                             var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                            if (chk[0].getAttribute("data-chk") == "on") {
+                            if (chk.attr("data-chk") === "on") {
                                 return true;
                             }
                         }
@@ -30267,7 +30318,7 @@ var nts;
                             // for performance when select all
                             if (_.isEqual(_.sortBy(_.uniq(selectedId)), _.sortBy(_.uniq(baseID)))) {
                                 var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                                if (chk[0].getAttribute("data-chk") == "off") {
+                                if (chk.attr("data-chk") === "off") {
                                     chk.click();
                                 }
                             }
@@ -30801,7 +30852,7 @@ var nts;
                             }
                             if (clickCheckBox) {
                                 var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                                if (chk[0].getAttribute("data-chk") == "off") {
+                                if (chk.attr("data-chk") === "off") {
                                     chk.click();
                                 }
                             }
@@ -36725,7 +36776,7 @@ var nts;
                         var row = null;
                         if ($grid.igGridSelection('option', 'multipleSelection')) {
                             var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
-                            if (chk[0].getAttribute("data-chk") == "on") {
+                            if (chk.attr("data-chk") === "off") {
                                 return;
                             }
                         }

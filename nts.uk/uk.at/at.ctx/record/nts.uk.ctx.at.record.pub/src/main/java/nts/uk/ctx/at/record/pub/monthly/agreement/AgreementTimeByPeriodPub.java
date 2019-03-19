@@ -3,6 +3,7 @@ package nts.uk.ctx.at.record.pub.monthly.agreement;
 import java.util.List;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.monthly.agreement.export.AgreementTimeByEmp;
 import nts.uk.ctx.at.shared.dom.common.Month;
 import nts.uk.ctx.at.shared.dom.common.Year;
 import nts.uk.ctx.at.shared.dom.monthly.agreement.PeriodAtrOfAgreement;
@@ -26,4 +27,8 @@ public interface AgreementTimeByPeriodPub {
 	// RequestList453
 	List<AgreementTimeByPeriod> algorithm(String companyId, String employeeId, GeneralDate criteria,
 			Month startMonth, Year year, PeriodAtrOfAgreement periodAtr);
+
+	// RequestList453
+	List<AgreementTimeByEmpExport> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
+									   Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs);
 }

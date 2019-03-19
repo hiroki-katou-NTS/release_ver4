@@ -12,28 +12,28 @@
 					<!-- A14_1 - A14_8 -->
 					<table id = "reamaning">
 						<tr style = "background-color: #97D155">
-							<td data-bind = "css: { display1: !yearDis()}">
-								<div>#{i18n.getText('KAF006_69')}</div>
-							</td>
 							<td data-bind = "css: { display1: !subHdDis()}">
 								<div>#{i18n.getText('KAF006_70')}</div>
 							</td>
 							<td data-bind = "css: { display1: !subVacaDis()}">
 								<div>#{i18n.getText('KAF006_71')}</div>
 							</td>
+							<td data-bind = "css: { display1: !yearDis()}">
+								<div>#{i18n.getText('KAF006_69')}</div>
+							</td>
 							<td data-bind = "css: { display1: !stockDis()}">
 								<div>#{i18n.getText('KAF006_72')}</div>
 							</td>
 						</tr>
 						<tr>
-							<td class ="flRight" data-bind = "css: { display1: !yearDis()}">
-								<div data-bind = "text: yearRemain"></div>
-							</td>
 							<td class ="flRight" data-bind = "css: { display1: !subHdDis()}">
 								<div data-bind = "text: subHdRemain"></div>
 							</td>
 							<td class ="flRight" data-bind = "css: { display1: !subVacaDis()}">
 								<div data-bind = "text: subVacaRemain"></div>
+							</td>
+							<td class ="flRight" data-bind = "css: { display1: !yearDis()}">
+								<div data-bind = "text: yearRemain"></div>
 							</td>
 							<td class ="flRight" data-bind = "css: { display1: !stockDis()}">
 								<div data-bind = "text: stockRemain"></div>
@@ -64,15 +64,15 @@
 					<!-- A14_1 - A14_8 -->
 					<table id = "reamaning">
 						<tr style = "background-color: #97D155">
-							<td>#{i18n.getText('KAF006_69')}</td>
 							<td>#{i18n.getText('KAF006_70')}</td>
 							<td>#{i18n.getText('KAF006_71')}</td>
+							<td>#{i18n.getText('KAF006_69')}</td>
 							<td>#{i18n.getText('KAF006_72')}</td>
 						</tr>
 						<tr>
-							<td class ="flRight" data-bind = "text: yearRemain"></td>
 							<td class ="flRight" data-bind = "text: subHdRemain"></td>
 							<td class ="flRight" data-bind = "text: subVacaRemain"></td>
+							<td class ="flRight" data-bind = "text: yearRemain"></td>
 							<td class ="flRight" data-bind = "text: stockRemain"></td>
 						</tr>
 					</table>

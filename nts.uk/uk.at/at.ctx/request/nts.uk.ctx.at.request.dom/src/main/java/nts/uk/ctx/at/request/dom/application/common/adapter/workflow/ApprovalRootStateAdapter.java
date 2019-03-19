@@ -1,8 +1,12 @@
 package nts.uk.ctx.at.request.dom.application.common.adapter.workflow;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workflow.dto.AgentPubImport;
@@ -28,7 +32,40 @@ public interface ApprovalRootStateAdapter {
 	
 	public Map<String,List<ApprovalPhaseStateImport_New>> getApprovalRootContents(List<String> appIDs,String companyID);
 	
-	public ApprovalRootContentImport_New getApprovalRootContent(String companyID, String employeeID, Integer appTypeValue, GeneralDate appDate, String appID, Boolean isCreate);
+	
+
+	
+	/**
+	 * cache of IMailDestinationPub for performance
+	 * @author m_kitahira
+	 */
+	@RequiredArgsConstructor
+	public static class MailDestinationCache {
+		private final Function<String, Object> pub;
+		private final Map<String, Object> cache = new HashMap<>();
+		
+		@SuppressWarnings("unchecked")
+		public <T> T get(String employeeId) {
+			if (cache.containsKey(employeeId)) {
+				return (T)cache.get(employeeId);
+			}
+			
+			Object dests = this.pub.apply(employeeId); 
+			
+			cache.put(employeeId, dests);
+			return (T)dests;
+		}
+	}
+	
+	public MailDestinationCache createMailDestinationCache(String companyID);
+	
+	public default ApprovalRootContentImport_New getApprovalRootContent(String companyID, String employeeID, Integer appTypeValue, GeneralDate appDate, String appID, Boolean isCreate) {
+		val cache = this.createMailDestinationCache(companyID);
+		return this.getApprovalRootContent(companyID, employeeID, appTypeValue, appDate, appID, isCreate, cache);
+	}
+	
+	public ApprovalRootContentImport_New getApprovalRootContent(String companyID, String employeeID, Integer appTypeValue, GeneralDate appDate, String appID, Boolean isCreate,
+			MailDestinationCache mailDestinationCache);
 	
 	public void insertByAppType(String companyID, String employeeID, Integer appTypeValue, GeneralDate date, String appID);
 	

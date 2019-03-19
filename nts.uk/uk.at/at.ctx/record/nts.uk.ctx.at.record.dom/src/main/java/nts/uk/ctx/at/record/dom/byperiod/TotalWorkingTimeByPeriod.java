@@ -22,7 +22,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 期間別の総労働時間
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class TotalWorkingTimeByPeriod implements Cloneable {
@@ -111,7 +111,8 @@ public class TotalWorkingTimeByPeriod implements Cloneable {
 		// 就業時間の集計
 		{
 			// 日別実績の集計処理
-			this.workTime.aggregateForByPeriod(datePeriod, attendanceTimeOfDailyMap);
+			this.workTime.aggregateForByPeriod(
+					datePeriod, attendanceTimeOfDailyMap, workInfoOfDailyMap, companySets, repositories);
 			
 			// 就業時間の合計処理
 			this.workTime.totalizeWorkTime(datePeriod);

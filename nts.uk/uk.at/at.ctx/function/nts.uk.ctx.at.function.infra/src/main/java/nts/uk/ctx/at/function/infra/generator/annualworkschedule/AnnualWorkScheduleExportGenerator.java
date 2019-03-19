@@ -45,7 +45,7 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 
 	private static final int MAX_EXPORT_ITEM = 10;
 	private static final int ROW_PER_PAGE = 26;
-	private static final int MAX_PAGE_PER_SHEET = 1024;
+	private static final int MAX_PAGE_PER_SHEET = 1000;
 
 	@Override
 	public void generate(FileGeneratorContext fileContext, ExportData dataSource) {
@@ -164,7 +164,7 @@ public class AnnualWorkScheduleExportGenerator extends AsposeCellsReportGenerato
 		wsc.addCopy(0);
 		Worksheet ws = wsc.get(sheetIndex);
 		// sheet name
-		String sheetName = sheetIndex == 1 ? reportName : reportName + "_" + (sheetIndex - 1);
+		String sheetName = sheetIndex == 1 ? reportName : reportName + sheetIndex;
 		ws.setName(sheetName);
 		return ws;
 	}

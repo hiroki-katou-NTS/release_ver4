@@ -7,6 +7,7 @@ package nts.uk.ctx.workflow.ac.bs;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -14,7 +15,6 @@ import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.task.parallel.ManagedParallelWithContext;
-import nts.arc.task.parallel.ParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.pub.employee.ConcurrentEmployeeExport;
@@ -27,6 +27,7 @@ import nts.uk.ctx.sys.auth.pub.grant.RoleSetGrantedEmployeePub;
 import nts.uk.ctx.workflow.dom.adapter.bs.EmployeeAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.PersonAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.ConcurrentEmployeeImport;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmpInfoRQ18;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmployeeImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.PersonImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmployment;
@@ -182,10 +183,19 @@ public class EmployeeAdapterImpl implements EmployeeAdapter {
 	@Override
 	public StatusOfEmploymentImport getStatusOfEmployment(String employeeID, GeneralDate referenceDate) {
 		StatusOfEmploymentExport statusOfEmploymentExport = statusOfEmploymentPub.getStatusOfEmployment(employeeID, referenceDate);
+		if(statusOfEmploymentExport == null){
+			return null;
+		}
 		return new StatusOfEmploymentImport(
 				statusOfEmploymentExport.getEmployeeId(), 
 				statusOfEmploymentExport.getRefereneDate(), 
 				EnumAdaptor.valueOf(statusOfEmploymentExport.getStatusOfEmployment(), StatusOfEmployment.class), 
 				statusOfEmploymentExport.getTempAbsenceFrNo());
+	}
+
+	@Override
+	public Optional<EmpInfoRQ18> getEmpInfoByScd(String companyId, String employeeCode) {
+		return emInfor.getEmployeeInfo(companyId, employeeCode)
+				.map(c -> new EmpInfoRQ18(c.getCompanyId(), c.getEmployeeCode(), c.getEmployeeId(), c.getPersonId(), c.getPerName()));
 	}
 }

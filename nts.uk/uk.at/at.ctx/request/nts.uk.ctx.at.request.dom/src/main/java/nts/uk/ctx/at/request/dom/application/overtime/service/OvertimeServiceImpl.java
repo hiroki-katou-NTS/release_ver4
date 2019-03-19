@@ -37,6 +37,7 @@ import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
+import nts.uk.ctx.at.shared.dom.worktime.common.DeductionTime;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktype.DailyWork;
@@ -277,7 +278,14 @@ public class OvertimeServiceImpl implements OvertimeService {
 		// 平日か休日か判断する
 		WeekdayHolidayClassification weekDay = checkHolidayOrNot(workTypeCode);
 		// 休憩時間帯の取得
-		return this.timeService.getBreakTimeZone(companyID, workTimeCode, weekDay.value, workStyle);
+		BreakTimeZoneSharedOutPut breakTimeZoneSharedOutPut = this.timeService.getBreakTimeZone(companyID, workTimeCode, weekDay.value, workStyle);
+		Collections.sort(breakTimeZoneSharedOutPut.getLstTimezone(), new Comparator<DeductionTime>(){
+			@Override
+            public int compare(DeductionTime o1, DeductionTime o2) {
+                return o1.getStart().v().compareTo(o2.getStart().v());
+            }
+		});
+		return breakTimeZoneSharedOutPut;
 	}
 
 	private WeekdayHolidayClassification checkHolidayOrNot(String workTypeCd) {
