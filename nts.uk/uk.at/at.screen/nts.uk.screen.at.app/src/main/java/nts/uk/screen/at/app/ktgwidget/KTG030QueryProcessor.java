@@ -14,6 +14,7 @@ import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootOfEmpMonthImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootSituationMonth;
+import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalActionByEmpl;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
@@ -96,11 +97,18 @@ public class KTG030QueryProcessor {
 		List<YearMonth> listEmpTemp = new ArrayList<>();
 		List<AppRootSituationMonth> approvalRootSituations = new ArrayList<>();
 		Map<String, List<YearMonth>> empDate = new HashMap<String, List<YearMonth>>();
+		List<AppRootSituationMonth> tg = new ArrayList<>();
 		// [No.534](中間データ版)承認状況を取得する （月別）
 		AppRootOfEmpMonthImport rootOfEmp = approvalStatusAdapter.getApprovalEmpStatusMonth(employeeID, yearMonth, closureId, closureDate, period.end());
 		// 取得したデータから、承認すべき社員と年月日リストを抽出する
 		approvalRootSituations.addAll(rootOfEmp.getApprovalRootSituations());
-		for(AppRootSituationMonth item : approvalRootSituations){
+		for (AppRootSituationMonth item : approvalRootSituations) {
+			if(item.getApprovalStatus().getApprovalActionByEmpl().value == 1){
+				tg.add(item);
+			}
+		}
+		
+		for(AppRootSituationMonth item : tg){
 			if(!empDate.containsKey(item.getTargetID())){
 				listEmpTemp = new ArrayList<>();
 				listEmpTemp.add(item.getYearMonth());
