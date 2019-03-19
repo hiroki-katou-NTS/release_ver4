@@ -735,8 +735,16 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 				ScheduleCreatorExecutionCommand scheduleCommand = getScheduleCreatorExecutionAllEmp(execId, procExec,
 						loginContext, calculateSchedulePeriod, empIds);
-				//handle = 
-						this.scheduleExecution.handle(scheduleCommand);
+				
+				try {
+					this.scheduleExecution.handle(scheduleCommand);
+				} catch (Exception e) {
+					// 再実行の場合にExceptionが発生したかどうかを確認する。
+					if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+						return false;
+					}
+				}
+						
 			}
 			// 異動者・新入社員のみ作成の場合
 			else {
@@ -754,16 +762,22 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				} else {
 					// 社員ID（新入社員）（List）のみ
 					if (!CollectionUtil.isEmpty(newEmployeeList) && !CollectionUtil.isEmpty(temporaryEmployeeList)) {
-						ScheduleCreatorExecutionCommand scheduleCreatorExecutionOneEmp = this
-								.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
-										calculateSchedulePeriod, newEmployeeList);
-						//handle = 
-								this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp);
-						ScheduleCreatorExecutionCommand scheduleCreatorExecutionOneEmp3 = this
-								.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
-										calculateSchedulePeriod, temporaryEmployeeList);
-						//handle = 
-								this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
+						
+						try {
+							ScheduleCreatorExecutionCommand scheduleCreatorExecutionOneEmp = this
+									.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
+											calculateSchedulePeriod, newEmployeeList);
+							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp);
+							ScheduleCreatorExecutionCommand scheduleCreatorExecutionOneEmp3 = this
+									.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
+											calculateSchedulePeriod, temporaryEmployeeList);
+							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
+						} catch (Exception e) {
+							// 再実行の場合にExceptionが発生したかどうかを確認する。
+							if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+								return false;
+							}
+						}
 					}
 					// 社員ID（異動者、勤務種別変更者）（List）のみ
 					if (!CollectionUtil.isEmpty(reEmployeeList)) {
@@ -775,8 +789,14 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 										calculateSchedulePeriod, reEmployeeList);
 						scheduleCreatorExecutionOneEmp1.getScheduleExecutionLog()
 								.setPeriod(new DatePeriod(periodDate.start(), endDate));
-						//handle = 
-								this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
+						try {
+							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
+						} catch (Exception e) {
+							// 再実行の場合にExceptionが発生したかどうかを確認する。
+							if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+								return false;
+							}
+						}
 					}
 
 				}
@@ -877,13 +897,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		executionLogAdapterFn.updateExecuteLog(param);
 
 		if (isInterruption) {
-			return false;
-		}
-		
-		boolean checkError = this.scheCreExeErrorLogHandler
-				.checkExistErrorByExeId(execId);
-		//再実行の場合にExceptionが発生したかどうかを確認する。
-		if(checkError == true && procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
 			return false;
 		}
 		return true;
@@ -1959,11 +1972,13 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 				// 「全締めの期間.開始日年月日」以降に「所属職場履歴.期間.開始日」が存在する
 				wkpImportList.forEach(emp -> {
-					for (String empId : employeeIdList) {
-						if (empId.equals(emp.getEmployeeId())) {
-							listSetReEmployeeList.add(emp.getEmployeeId());
-							break;
-						}
+					if (employeeIdList.contains(emp.getEmployeeId())) {
+						emp.getLstWkpIdAndPeriod().forEach(x -> {
+							if (x.getDatePeriod().start().afterOrEquals(closurePeriod.start())) {
+								listSetReEmployeeList.add(emp.getEmployeeId());
+								return;
+							}
+						});
 					}
 					// final List<WorkPlaceIdAndPeriodImport> subList = emp.getLstWkpIdAndPeriod();
 					// for (WorkPlaceIdAndPeriodImport period : subList) {
@@ -1985,7 +2000,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					if (optional.isPresent()) {
 						for (DateHistoryItem history : optional.get().getHistory()) {
 							// 「全締めの期間.開始日年月日」以降に「社員の勤務種別の履歴.履歴.期間.開始日」が存在する
-							if (history.start().beforeOrEquals(closurePeriod.start())) {
+							if (history.start().afterOrEquals(closurePeriod.start())) {
 								// 取得したImported（勤務実績）「所属職場履歴」.社員IDを異動者とする
 								listSetReEmployeeList.add(optional.get().getEmployeeId());
 								break;
