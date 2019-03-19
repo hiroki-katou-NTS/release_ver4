@@ -21,6 +21,8 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
+
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
@@ -390,7 +392,9 @@ public class JpaWorkplaceConfigInfoRepository extends JpaRepository
 
 		String prHierarchyCode = wkpConfigInfo.getLstWkpHierarchy().get(FIRST_ITEM_INDEX)
 				.getHierarchyCode().v();
-
+		
+		List<String> parentCodes = getCanBeParentCodes(prHierarchyCode);
+		
 		EntityManager em = this.getEntityManager();
 		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 
@@ -410,12 +414,11 @@ public class JpaWorkplaceConfigInfoRepository extends JpaRepository
 				.add(criteriaBuilder.equal(root.get(BsymtWkpConfigInfo_.bsymtWkpConfigInfoPK)
 						.get(BsymtWkpConfigInfoPK_.historyId), wkpConfigInfo.getHistoryId()));
 
-		ParameterExpression<String> prHierarchyCodeParameter = criteriaBuilder
-				.parameter(String.class, "prHierarchyCodeParameter");
-		Path<String> senderEmailPath = root.get(BsymtWkpConfigInfo_.hierarchyCd);
+//		ParameterExpression<String> prHierarchyCodeParameter = criteriaBuilder
+//				.parameter(String.class, "prHierarchyCodeParameter");
+//		Path<String> senderEmailPath = root.get(BsymtWkpConfigInfo_.hierarchyCd);
 
-		lstpredicateWhere.add(criteriaBuilder.like(prHierarchyCodeParameter,
-				criteriaBuilder.concat(senderEmailPath, "%")));
+		lstpredicateWhere.add(root.get(BsymtWkpConfigInfo_.hierarchyCd).in(parentCodes));
 
 		// Base in EAP: Don't exclude
 		// Ignore the wkp
@@ -425,9 +428,10 @@ public class JpaWorkplaceConfigInfoRepository extends JpaRepository
 		cq.where(lstpredicateWhere.toArray(new Predicate[] {}));
 
 		cq.orderBy(criteriaBuilder.asc(root.get(BsymtWkpConfigInfo_.hierarchyCd)));
-
-		List<BsymtWkpConfigInfo> lstEntity = em.createQuery(cq)
-				.setParameter("prHierarchyCodeParameter", prHierarchyCode).getResultList();
+		
+		List<BsymtWkpConfigInfo> lstEntity = em.createQuery(cq).getResultList();
+//		List<BsymtWkpConfigInfo> lstEntity = em.createQuery(cq)
+//				.setParameter("prHierarchyCodeParameter", prHierarchyCode).getResultList();
 
 		
 		// check empty
@@ -437,6 +441,21 @@ public class JpaWorkplaceConfigInfoRepository extends JpaRepository
 		
 		return Optional
 				.of(new WorkplaceConfigInfo(new JpaWorkplaceConfigInfoGetMemento(lstEntity)));
+	}
+
+	private List<String> getCanBeParentCodes(String prHierarchyCode) {
+		String[] codeAvailables = prHierarchyCode.split("(?<=\\G.{3})");
+		
+		List<String> parentCodes = new ArrayList<>();
+		for(String c : codeAvailables){
+			if(parentCodes.isEmpty()){
+				parentCodes.add(c);
+			} else {
+				parentCodes.add(StringUtils.join(parentCodes.get(parentCodes.size() - 1), c));
+			}
+		}
+		
+		return parentCodes;
 	}
 
 	/*
