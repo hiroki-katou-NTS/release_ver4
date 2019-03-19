@@ -22,8 +22,8 @@
 				 
 			</div>
 			<div id="contents-area"> 
-				<div data-bind="if: eralRecord() > 0">
-					<H3>100 of <span data-bind="text: eralRecord"/> records are showed!! </H3>
+				<div data-bind="if: eralRecord() > 1000">
+					<H3 data-bind="text: eralRecordText"></H3>
 				</div>
 				<table tabindex="4" id="grid"></table>
 			</div>
