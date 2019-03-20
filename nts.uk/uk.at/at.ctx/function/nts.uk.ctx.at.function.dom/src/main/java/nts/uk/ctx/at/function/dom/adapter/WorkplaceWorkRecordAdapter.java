@@ -9,4 +9,6 @@ public interface WorkplaceWorkRecordAdapter {
 	List<WorkPlaceHistImport> getWplByListSidAndPeriod(List<String> sids,  DatePeriod datePeriod);
 	
 	List<String> findListWorkplaceIdByBaseDate(GeneralDate baseDate);
+	
+	List<AffWorkplaceHistoryImport> getWorkplaceBySidsAndBaseDate(List<String> sids, GeneralDate baseDate);
 }
