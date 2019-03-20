@@ -465,6 +465,14 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 		return this.queryProxy().find(new KshmtWorkTypePK(companyId, workTypeCd), KshmtWorkType.class)
 				.map(x -> toDomain(x));
 	}
+	
+	@Override
+	public Optional<WorkType> findNoAbolishByPK(String companyId, String workTypeCd) {
+		return this.queryProxy().find(new KshmtWorkTypePK(companyId, workTypeCd), KshmtWorkType.class).filter(x -> {
+			return x.deprecateAtr == 0;
+		})
+				.map(x -> toDomain(x));
+	}
 
 	/*
 	 * (non-Javadoc)

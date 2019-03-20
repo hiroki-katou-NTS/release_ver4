@@ -132,6 +132,15 @@ public interface WorkTypeRepository {
 	Optional<WorkType> findByPK(String companyId, String workTypeCd);
 	
 	/**
+	 * Find NoAbolish by PK.
+	 *
+	 * @param companyId the company id
+	 * @param workTypeCd the work type cd
+	 * @return the optional
+	 */
+	Optional<WorkType> findNoAbolishByPK(String companyId, String workTypeCd);
+	
+	/**
 	 * Find work type set.
 	 *
 	 * @param companyId the company id

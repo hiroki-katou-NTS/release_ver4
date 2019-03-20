@@ -5,6 +5,7 @@ module nts.uk.at.view.kaf010.a.viewmodel {
     import appcommon = nts.uk.at.view.kaf000.shr.model;
     import setShared = nts.uk.ui.windows.setShared;
     import util = nts.uk.util;
+    import text = nts.uk.resource.getText;
     
     export class ScreenModel {
         
@@ -290,11 +291,11 @@ module nts.uk.at.view.kaf010.a.viewmodel {
             self.employeeID(data.employeeID);
             if (data.workTime != null) {
                 self.siftCD(data.workTime.siftCode);
-                self.siftName(data.workTime.siftName);
+                self.siftName(data.workTime.siftName|| text("KAL003_120"));
             }
             if (data.workType != null) {
                 self.workTypeCd(data.workType.workTypeCode);
-                self.workTypeName(data.workType.workTypeName);
+                self.workTypeName(data.workType.workTypeName|| text("KAL003_120"));
             }
             self.workTypecodes(data.workTypes);
             self.workTimecodes(data.workTimes);
