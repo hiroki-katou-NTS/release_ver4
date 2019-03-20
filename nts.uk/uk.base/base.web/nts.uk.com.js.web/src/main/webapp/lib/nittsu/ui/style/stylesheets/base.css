@@ -5031,52 +5031,57 @@ div .ex-area-line.x-stay {
 }
 
 /* line 77, ../sass/components/_mgrid.scss */
+.mgrid table tr td.mgrid-hide .ntsCheckBox {
+  display: none;
+}
+
+/* line 81, ../sass/components/_mgrid.scss */
 .mgrid table tr td.mgrid-disable {
   background-color: #CCC;
   color: #333;
 }
 
-/* line 82, ../sass/components/_mgrid.scss */
+/* line 86, ../sass/components/_mgrid.scss */
 .mgrid table tr td.mgrid-reflect {
   background-color: #BFEA60;
 }
 
-/* line 86, ../sass/components/_mgrid.scss */
+/* line 90, ../sass/components/_mgrid.scss */
 .mgrid table tr td.mgrid-manual-edit-other {
   background-color: #CEE6FF;
 }
 
-/* line 90, ../sass/components/_mgrid.scss */
+/* line 94, ../sass/components/_mgrid.scss */
 .mgrid table tr td.mgrid-manual-edit-target {
   background-color: #94B7FE;
 }
 
-/* line 94, ../sass/components/_mgrid.scss */
+/* line 98, ../sass/components/_mgrid.scss */
 .mgrid table tr td.mgrid-calc {
   background-color: #F69164;
 }
 
-/* line 98, ../sass/components/_mgrid.scss */
+/* line 102, ../sass/components/_mgrid.scss */
 .mgrid table tr td.mgrid-alarm {
   background-color: #F6F636;
 }
 
-/* line 102, ../sass/components/_mgrid.scss */
+/* line 106, ../sass/components/_mgrid.scss */
 .mgrid table tr td.mgrid-error {
   background-color: #FD4D4D;
 }
 
-/* line 106, ../sass/components/_mgrid.scss */
+/* line 110, ../sass/components/_mgrid.scss */
 .mgrid table tr td.cell-selected:not(.nts-control) {
   background-color: #007fff;
 }
 
-/* line 110, ../sass/components/_mgrid.scss */
+/* line 114, ../sass/components/_mgrid.scss */
 .mgrid table tr td.cell-selected:not(.ui-state-hover) {
   color: #fff;
 }
 
-/* line 114, ../sass/components/_mgrid.scss */
+/* line 118, ../sass/components/_mgrid.scss */
 .mcombo-wrapper {
   position: relative;
   display: inline-block;
@@ -5084,7 +5089,7 @@ div .ex-area-line.x-stay {
   height: 26px;
 }
 
-/* line 121, ../sass/components/_mgrid.scss */
+/* line 125, ../sass/components/_mgrid.scss */
 .mcombo {
   height: 95%;
   border: 1px solid #c5c5c5;
@@ -5092,7 +5097,7 @@ div .ex-area-line.x-stay {
   background: white;
 }
 
-/* line 128, ../sass/components/_mgrid.scss */
+/* line 132, ../sass/components/_mgrid.scss */
 .mcombo-button {
   float: right;
   position: relative;
@@ -5107,26 +5112,26 @@ div .ex-area-line.x-stay {
   border-width: 0 0 0 1px;
 }
 
-/* line 142, ../sass/components/_mgrid.scss */
+/* line 146, ../sass/components/_mgrid.scss */
 .mcombo-button:hover {
   background-color: #efebeb;
 }
 
-/* line 146, ../sass/components/_mgrid.scss */
+/* line 150, ../sass/components/_mgrid.scss */
 .mcombo-buttonicon {
   position: absolute;
   top: 50%;
   margin-top: -8px;
 }
 
-/* line 152, ../sass/components/_mgrid.scss */
+/* line 156, ../sass/components/_mgrid.scss */
 .mcombo-value {
   height: 90%;
   padding-left: 2px;
   padding-top: 2px;
 }
 
-/* line 158, ../sass/components/_mgrid.scss */
+/* line 162, ../sass/components/_mgrid.scss */
 .mcombo-dropdown {
   position: absolute;
   top: 0px;
@@ -5143,14 +5148,14 @@ div .ex-area-line.x-stay {
   border-radius: 3px;
 }
 
-/* line 174, ../sass/components/_mgrid.scss */
+/* line 178, ../sass/components/_mgrid.scss */
 .mcombo-list {
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-/* line 180, ../sass/components/_mgrid.scss */
+/* line 184, ../sass/components/_mgrid.scss */
 .mcombo-listitemholder {
   margin: 0;
   padding: 0;
@@ -5158,7 +5163,7 @@ div .ex-area-line.x-stay {
   overflow-x: hidden;
 }
 
-/* line 187, ../sass/components/_mgrid.scss */
+/* line 191, ../sass/components/_mgrid.scss */
 .mcombo-listitemholder .mcombo-listitem {
   position: relative;
   padding: 3px;
@@ -5168,23 +5173,23 @@ div .ex-area-line.x-stay {
   background-image: none;
 }
 
-/* line 196, ../sass/components/_mgrid.scss */
+/* line 200, ../sass/components/_mgrid.scss */
 .mcombo-listitemholder .mcombo-listitem.selecteditem {
   background-color: #007fff;
   color: #fff;
 }
 
-/* line 201, ../sass/components/_mgrid.scss */
+/* line 205, ../sass/components/_mgrid.scss */
 .mcombo-listitemholder .mcombo-listitem:not(.selecteditem):hover {
   background-color: #efebeb;
 }
 
-/* line 205, ../sass/components/_mgrid.scss */
+/* line 209, ../sass/components/_mgrid.scss */
 .mcombo-state-active {
   border-color: #0096f2;
 }
 
-/* line 209, ../sass/components/_mgrid.scss */
+/* line 213, ../sass/components/_mgrid.scss */
 .mcombo-item {
   width: 100%;
   height: 20px;
@@ -5192,14 +5197,14 @@ div .ex-area-line.x-stay {
   white-space: nowrap;
 }
 
-/* line 216, ../sass/components/_mgrid.scss */
+/* line 220, ../sass/components/_mgrid.scss */
 .mcombo-item-column {
   display: inline-block;
   height: 20px;
   overflow: hidden;
 }
 
-/* line 222, ../sass/components/_mgrid.scss */
+/* line 226, ../sass/components/_mgrid.scss */
 .medit-container {
   position: relative;
   width: 99%;
@@ -5207,7 +5212,7 @@ div .ex-area-line.x-stay {
   background-color: #fff;
 }
 
-/* line 229, ../sass/components/_mgrid.scss */
+/* line 233, ../sass/components/_mgrid.scss */
 .medit-container .medit {
   height: 90%;
   width: 96%;
@@ -5217,27 +5222,27 @@ div .ex-area-line.x-stay {
   margin: 0% 2%;
 }
 
-/* line 238, ../sass/components/_mgrid.scss */
+/* line 242, ../sass/components/_mgrid.scss */
 .medit-container .medit {
   font-family: "Meiryo UI";
 }
 
-/* line 242, ../sass/components/_mgrid.scss */
+/* line 246, ../sass/components/_mgrid.scss */
 .medit-container .medit::-ms-clear {
   display: none;
 }
 
-/* line 246, ../sass/components/_mgrid.scss */
+/* line 250, ../sass/components/_mgrid.scss */
 .mgrid table tr td.nts-control {
   padding: 0px !important;
 }
 
-/* line 250, ../sass/components/_mgrid.scss */
+/* line 254, ../sass/components/_mgrid.scss */
 .mgrid table tr td.merror {
   border: 1px double #ff6666;
 }
 
-/* line 254, ../sass/components/_mgrid.scss */
+/* line 258, ../sass/components/_mgrid.scss */
 .mgrid .mgrid-fixed-summaries tr td,
 .mgrid .mgrid-free-summaries tr td {
   border-width: 0px 0px 0px 1px;
@@ -5251,7 +5256,7 @@ div .ex-area-line.x-stay {
   text-align: center;
 }
 
-/* line 267, ../sass/components/_mgrid.scss */
+/* line 271, ../sass/components/_mgrid.scss */
 .mgrid .mgrid-fixed-summaries tr td:hover,
 .mgrid .mgrid-free-summaries tr td:hover {
   background-color: #C5F1F7;
@@ -5259,7 +5264,7 @@ div .ex-area-line.x-stay {
   color: #000;
 }
 
-/* line 274, ../sass/components/_mgrid.scss */
+/* line 278, ../sass/components/_mgrid.scss */
 .mgrid-pagerecordlabel {
   float: left;
   line-height: 1.9em;
@@ -5267,7 +5272,7 @@ div .ex-area-line.x-stay {
   margin-left: 5px;
 }
 
-/* line 281, ../sass/components/_mgrid.scss */
+/* line 285, ../sass/components/_mgrid.scss */
 .mgrid-paging-nav {
   float: right;
   position: relative;
@@ -5275,7 +5280,7 @@ div .ex-area-line.x-stay {
   padding-right: 5px;
 }
 
-/* line 288, ../sass/components/_mgrid.scss */
+/* line 292, ../sass/components/_mgrid.scss */
 .mgrid-firstpage {
   width: 26px;
   padding-left: 5px;
@@ -5287,7 +5292,7 @@ div .ex-area-line.x-stay {
   cursor: pointer;
 }
 
-/* line 299, ../sass/components/_mgrid.scss */
+/* line 303, ../sass/components/_mgrid.scss */
 .mgrid-lastpage {
   width: 26px;
   padding-right: 5px;
@@ -5299,20 +5304,20 @@ div .ex-area-line.x-stay {
   cursor: pointer;
 }
 
-/* line 310, ../sass/components/_mgrid.scss */
+/* line 314, ../sass/components/_mgrid.scss */
 .mgrid-firstpage:hover, .mgrid-lastpage:hover {
   border-color: #ccc;
   background-color: #ededed;
 }
 
-/* line 315, ../sass/components/_mgrid.scss */
+/* line 319, ../sass/components/_mgrid.scss */
 .mgrid-page-buttonlist {
   text-decoration: none;
   line-height: 1.4em;
   display: inline-block;
 }
 
-/* line 321, ../sass/components/_mgrid.scss */
+/* line 325, ../sass/components/_mgrid.scss */
 .mgrid-page-button {
   text-decoration: none;
   line-height: 1.4em;
@@ -5324,18 +5329,18 @@ div .ex-area-line.x-stay {
   border-radius: 3px;
 }
 
-/* line 332, ../sass/components/_mgrid.scss */
+/* line 336, ../sass/components/_mgrid.scss */
 .mgrid-page-button:not(.ui-state-active):hover {
   border-color: #ccc;
   background-color: #ededed;
 }
 
-/* line 337, ../sass/components/_mgrid.scss */
+/* line 341, ../sass/components/_mgrid.scss */
 .mgrid-pageimg.ui-icon-arrowstop-1-e {
   margin-left: 10px;
 }
 
-/* line 341, ../sass/components/_mgrid.scss */
+/* line 345, ../sass/components/_mgrid.scss */
 .mgrid-sheet-nav {
   float: left;
   position: relative;
@@ -5347,7 +5352,7 @@ div .ex-area-line.x-stay {
   left: 20px;
 }
 
-/* line 352, ../sass/components/_mgrid.scss */
+/* line 356, ../sass/components/_mgrid.scss */
 .mgrid-sheet-buttonlist {
   text-decoration: none;
   line-height: 1.8em;
@@ -5355,7 +5360,7 @@ div .ex-area-line.x-stay {
   float: left;
 }
 
-/* line 359, ../sass/components/_mgrid.scss */
+/* line 363, ../sass/components/_mgrid.scss */
 .mgrid-sheet-button {
   text-decoration: none;
   line-height: 1.8em;
@@ -5368,19 +5373,19 @@ div .ex-area-line.x-stay {
   border-radius: 3px;
 }
 
-/* line 371, ../sass/components/_mgrid.scss */
+/* line 375, ../sass/components/_mgrid.scss */
 .mgrid-sheet-button:not(.ui-state-active):hover {
   border-color: #ccc;
   background-color: #ededed;
 }
 
-/* line 376, ../sass/components/_mgrid.scss */
+/* line 380, ../sass/components/_mgrid.scss */
 .mgrid-sheet-scrollbar {
   width: 20px;
   height: 30px;
 }
 
-/* line 381, ../sass/components/_mgrid.scss */
+/* line 385, ../sass/components/_mgrid.scss */
 .mgrid-sheet-scrollbar li {
   line-height: 15px;
   font-size: 0.5rem;
@@ -5392,18 +5397,18 @@ div .ex-area-line.x-stay {
   -webkit-user-select: none;
 }
 
-/* line 392, ../sass/components/_mgrid.scss */
+/* line 396, ../sass/components/_mgrid.scss */
 .mgrid-sheet-scrollbar:not(.ui-state-disabled) li:hover {
   background-color: #ccc;
 }
 
-/* line 396, ../sass/components/_mgrid.scss */
+/* line 400, ../sass/components/_mgrid.scss */
 .mgrid-sheet-scrollbar:not(.disable) li:active {
   color: white;
   background-color: gray;
 }
 
-/* line 401, ../sass/components/_mgrid.scss */
+/* line 405, ../sass/components/_mgrid.scss */
 .mgrid-sheet-scrollbar.disable li {
   color: #aaa;
 }
