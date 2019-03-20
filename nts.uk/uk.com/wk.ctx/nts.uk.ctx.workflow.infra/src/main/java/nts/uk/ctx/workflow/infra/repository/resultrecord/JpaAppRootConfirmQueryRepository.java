@@ -102,7 +102,7 @@ public class JpaAppRootConfirmQueryRepository
 					+ " and r.ROOT_TYPE = ?"
 					+ " and r.EMPLOYEE_ID in (" + NtsStatement.In.createParamsString(subEmpIds) + ")"
 					+ " and r.RECORD_DATE between ? and ?"
-					+ " and p.APP_PHASE_ATR = 1"
+					+ " and (p.APP_PHASE_ATR = 1 or p.APP_PHASE_ATR is null)"
 					+ " group by r.ROOT_ID, r.EMPLOYEE_ID, r.RECORD_DATE";
 			
 			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
