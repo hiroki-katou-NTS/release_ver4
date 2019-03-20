@@ -20,6 +20,7 @@ import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituat
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApproveRootStatusForEmpImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalActionByEmpl;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
+import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApproverEmployeeState;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.confirmstatusmonthly.AvailabilityAtr;
@@ -117,6 +118,11 @@ public class ApprovalStatusMonthly {
 			//・解除可否：取得した「基準社員の承認対象者．解除可否区分」
 			approvalStatusResult.setWhetherToRelease(EnumAdaptor.valueOf(approvalRootSituation.get().getApprovalStatus().getReleaseDivision().value, ReleasedAtr.class) );
 			
+			//Output「基準社員の承認対象者．ルート状況．基準社員のルート状況」をチェックする
+			if(approvalRootSituation.get().getApprovalAtr() != ApproverEmployeeState.PHASE_DURING ) {
+				approvalStatusResult.setImplementaPropriety(AvailabilityAtr.CAN_NOT_RELEASE);
+				continue;
+			}
 			//ドメインモデル「本人確認処理の利用設定」を取得する
 			Optional<IdentityProcessUseSet> identityProcessUseSet = identityProcessUseSetRepo.findByKey(companyId);
 			if(optApprovalUse.get().getUseDayApproverConfirm()) {
