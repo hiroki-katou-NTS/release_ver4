@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -256,19 +257,25 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 		String companyID = AppContexts.user().companyId();
 		List<ApproverToApprove> approverToApproveLst = new ArrayList<>();
 		// 対象者と期間から承認ルート中間データを取得する
-		List<AppRootInstancePeriod> appRootInstancePeriodLst = this.getAppRootInstanceByEmpPeriod(employeeIDLst, period, rootType);
+		val appRootInstancePeriodMapByEmpId = this.getAppRootInstanceByEmpPeriod(employeeIDLst, period, rootType)
+				.stream().collect(Collectors.toMap(a -> a.getEmployeeID(), a -> a));
+		
+		List<AppRootConfirm> appRootConfirms = appRootConfirmRepository.findByEmpDate(companyID, employeeIDLst, period, rootType);
+		
 		// INPUT．対象者社員IDの先頭から最後へループ
 		employeeIDLst.forEach(employeeIDLoop -> {
 			// INPUT．期間の開始日から終了日へループ
 			for(GeneralDate loopDate = period.start(); loopDate.beforeOrEquals(period.end()); loopDate = loopDate.addDays(1)){
 				// 対象日の承認ルート中間データを取得する
-				AppRootInstance appRootInstance = this.getAppRootInstanceByDate(loopDate, 
-						appRootInstancePeriodLst.stream().filter(x -> x.getEmployeeID().equals(employeeIDLoop)).findAny().get().getAppRootInstanceLst());
+				val appRootInstancePeriod = appRootInstancePeriodMapByEmpId.get(employeeIDLoop);
+				AppRootInstance appRootInstance = this.getAppRootInstanceByDate(loopDate, appRootInstancePeriod.getAppRootInstanceLst());
+				
 				if(appRootInstance==null){
 					throw new BusinessException("Msg_1430", "承認者");
 				}
+				
 				// 対象日の就業実績確認状態を取得する
-				AppRootConfirm appRootConfirm = this.getAppRootConfirmByDate(companyID, employeeIDLoop, loopDate, rootType);
+				AppRootConfirm appRootConfirm = AppRootConfirm.find(appRootConfirms, companyID, employeeIDLoop, loopDate, rootType);
 				// 中間データから承認ルートインスタンスに変換する
 				ApprovalRootState approvalRootState = this.convertFromAppRootInstance(appRootInstance, appRootConfirm);
 				// 承認ルート状況を取得する
