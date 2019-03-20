@@ -226,4 +226,9 @@ public interface SyWorkplacePub {
 	 */
 	Map<Pair<String, GeneralDate>, Pair<String,String>> getWorkplaceMapCodeBaseDateName(String companyId,
 			List<String> wpkCodes, List<GeneralDate> baseDates);
+	
+	//RequestList590
+	//指定した基準日以降の所属職場履歴を取得する
+	// AffWorkplaceHistoryExport
+	List<AffWorkplaceHistoryExport> getWorkplaceBySidsAndBaseDate(List<String> sids, GeneralDate baseDate);
 }
