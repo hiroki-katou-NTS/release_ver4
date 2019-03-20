@@ -271,28 +271,37 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 		});
 		
 		YearMonthPeriod periodMonthly = new YearMonthPeriod(request.getStartDate().yearMonth(), request.getEndDate().yearMonth());
-		List<MonthlyAttendanceItemValueResult> monthlyValues = attendanceService.getMonthlyValueOf(empIDs, periodMonthly, monthlyId);
-		
+		List<MonthlyAttendanceItemValueResult> monthlyValues;
+
 		List<AttendanceItemValueResult> dailyValues;
 		{
-			List<AttendanceItemValueResult> syncResults = Collections.synchronizedList(new ArrayList<>());
+			List<AttendanceItemValueResult> syncResultsDaily = Collections.synchronizedList(new ArrayList<>());
+            List<MonthlyAttendanceItemValueResult> syncResultsMonthly = Collections.synchronizedList(new ArrayList<>());
 			this.parallel.forEach(empIDs, empId -> {
-				syncResults.addAll(attendanceService.getValueOf(Arrays.asList(empId), period, singleId));
+			    if (!singleId.isEmpty()){
+                    syncResultsDaily.addAll(attendanceService.getValueOf(Arrays.asList(empId), period, singleId));
+                }
+                if (!monthlyId.isEmpty()) {
+                    syncResultsMonthly.addAll(attendanceService.getMonthlyValueOf(Arrays.asList(empId), periodMonthly, monthlyId));
+                }
 			});
-			dailyValues = new ArrayList<>(syncResults);
+			dailyValues = new ArrayList<>(syncResultsDaily);
+            monthlyValues =  new ArrayList<>(syncResultsMonthly);
 		}
+
+		List<String> sIds = distinctEmployeeListAfterSort.stream().map(x -> x.employeeId).collect(Collectors.toList());
+		// get Closure
+		Map<String, Closure> closureAll = closureEmploymentService.findClosureByEmployee(sIds, request.getEndDate());
 
 		for (Employee employee : distinctEmployeeListAfterSort) {
 
 			// Number of real data
 			Integer realDataOfEmployee = 0;
 
-			// get Closure
-			Optional<Closure> optionalClosure = closureEmploymentService.findClosureByEmployee(employee.getEmployeeId(),
-					request.getEndDate());
 			ClosureDate closureDate = new ClosureDate(1, false);
-			if (optionalClosure.isPresent()) {
-				Closure closure = optionalClosure.get();
+			if (closureAll.containsKey(employee.getEmployeeId())){
+				// get Closure
+				Closure closure = closureAll.get(employee.getEmployeeId());
 
 				// get closure history
 				List<ClosureHistory> closureHistory = closure.getClosureHistories();
