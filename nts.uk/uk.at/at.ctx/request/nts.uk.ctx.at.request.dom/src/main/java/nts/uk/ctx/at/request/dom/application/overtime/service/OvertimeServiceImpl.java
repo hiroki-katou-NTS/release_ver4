@@ -255,7 +255,7 @@ public class OvertimeServiceImpl implements OvertimeService {
 			String wkTimeCd = personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTimeCode().get()
 					.v().toString();
 			this.workTimeRepository.findByCode(companyID, wkTimeCd).ifPresent(wkTime -> {
-				siftType.setSiftName(wkTime.getWorkTimeDisplayName().toString());
+				siftType.setSiftName(wkTime.getWorkTimeDisplayName().getWorkTimeAbName().v());
 			});
 			siftType.setSiftCode(wkTimeCd);
 			workTypeAndSiftType.setSiftType(siftType);
