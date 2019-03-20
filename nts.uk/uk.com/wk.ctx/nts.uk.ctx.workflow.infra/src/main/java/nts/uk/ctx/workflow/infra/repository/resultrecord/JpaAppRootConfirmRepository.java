@@ -17,7 +17,6 @@ import javax.ejb.Stateless;
 import org.apache.logging.log4j.util.Strings;
 
 import lombok.SneakyThrows;
-import nts.arc.diagnose.stopwatch.concurrent.ConcurrentStopwatches;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -359,8 +358,6 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	public Optional<AppRootConfirm> findByEmpDate(String companyID, String employeeID, GeneralDate date,
 			RecordRootType rootType) {
 
-		ConcurrentStopwatches.start("JpaAppRootConfirmRepository.findByEmpDate");
-		
 		String query = FIND_BY_EMP_DATE;
 		query = query.replaceAll("companyID", companyID);
 		query = query.replaceAll("rootType", String.valueOf(rootType.value));
@@ -376,17 +373,11 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			}
 		}
 		
-		finally {
-			ConcurrentStopwatches.stop("JpaAppRootConfirmRepository.findByEmpDate");
-		}
-		
 	}
 
 	@Override
 	public List<AppRootConfirm> findByEmpDate(String companyID, List<String> employeeIDs, DatePeriod date,
 			RecordRootType rootType) {
-		
-		ConcurrentStopwatches.start("JpaAppRootConfirmRepository.findByEmpDate_list");
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT appRoot.ROOT_ID, appRoot.CID, appRoot.EMPLOYEE_ID, appRoot.RECORD_DATE, appRoot.ROOT_TYPE, ");
@@ -413,10 +404,6 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
-		}
-		
-		finally {
-			ConcurrentStopwatches.stop("JpaAppRootConfirmRepository.findByEmpDate_list");
 		}
 	}
 
