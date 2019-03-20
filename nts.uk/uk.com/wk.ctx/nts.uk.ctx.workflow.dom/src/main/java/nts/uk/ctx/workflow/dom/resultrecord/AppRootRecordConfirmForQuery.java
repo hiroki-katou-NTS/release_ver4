@@ -27,8 +27,11 @@ public class AppRootRecordConfirmForQuery {
 	/** 確認済みフェーズがあるか */
 	private final boolean existsConfirmedPhase;
 	
-	/** 確認済みの最終フェーズ */
-	private final int finalConfirmedPhase;
+	/**
+	 * 確認済みの最終フェーズ
+	 * null if existsConfirmedPhase is false
+	 */
+	private final Integer finalConfirmedPhase;
 	
 	/**
 	 * 指定したフェーズが既に確認済みであればtrueを返す
