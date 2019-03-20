@@ -598,7 +598,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	public List<RouteSituation> getApproverRouteSituation(DatePeriod period, List<ApprovalRouteDetails> approverRouteLst, List<String> agentLst, RecordRootType rootType) {
 		String companyID = AppContexts.user().companyId();
 		List<RouteSituation> routeSituationLst = new ArrayList<>();
-		List<String> empLst = approverRouteLst.stream().map(x -> x.getEmployeeID()).collect(Collectors.toList());
+		List<String> empLst = approverRouteLst.stream().map(x -> x.getAppRootInstance().getEmployeeID()).collect(Collectors.toList());
 		List<AppRootConfirm> appRootConfirmLst = appRootConfirmRepository.findByEmpDate(companyID, empLst, period, rootType);
 		// 取得した対象者(List)の先頭から最後へループ
 		for(ApprovalRouteDetails approvalRouteDetails : approverRouteLst){
@@ -641,7 +641,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	public List<RouteSituation> getAgentRouteSituation(DatePeriod period, List<ApprovalRouteDetails> agentRouteLst, List<String> agentLst, RecordRootType rootType) {
 		String companyID = AppContexts.user().companyId();
 		List<RouteSituation> routeSituationLst = new ArrayList<>();
-		List<String> empLst = agentRouteLst.stream().map(x -> x.getEmployeeID()).collect(Collectors.toList());
+		List<String> empLst = agentRouteLst.stream().map(x -> x.getAppRootInstance().getEmployeeID()).collect(Collectors.toList());
 		List<AppRootConfirm> appRootConfirmLst = appRootConfirmRepository.findByEmpDate(companyID, empLst, period, rootType);
 		// 取得した対象者(List)の先頭から最後へループ
 		for(ApprovalRouteDetails approvalRouteDetails : agentRouteLst){
