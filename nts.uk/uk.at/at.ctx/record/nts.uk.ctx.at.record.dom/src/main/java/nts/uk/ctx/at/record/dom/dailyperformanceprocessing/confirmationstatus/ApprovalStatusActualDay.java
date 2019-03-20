@@ -23,6 +23,7 @@ import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalStatus;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApproveRootStatusForEmpImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalActionByEmpl;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
+import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApproverEmployeeState;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ReleasedProprietyDivision;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
@@ -72,19 +73,21 @@ public class ApprovalStatusActualDay {
 			List<ApprovalStatusActualResult> resultPart = new ArrayList<>(), resultPart2 = new ArrayList<>();
 			List<DatePeriod> lstDatePeriod = statusOfEmp.getListPeriod();
 			String employeeId = statusOfEmp.getEmployeeId();
-			Map<Pair<String, GeneralDate>, ApprovalStatus> mapApprovalRootBySId = new HashMap<>();
+			Map<Pair<String, GeneralDate>, Pair<ApprovalStatus, ApproverEmployeeState>> mapApprovalRootBySId = new HashMap<>();
 			lstDatePeriod.stream().forEach(datePeriod -> {
 
+				//対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 				List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
 						.getApprovalByListEmplAndListApprovalRecordDate(datePeriod.datesBetween(),
 								Arrays.asList(employeeId), 1);
 
+				//対応するImported「基準社員の承認対象者」を取得する
 				ApprovalRootOfEmployeeImport approvalRoot = approvalStatusAdapter.getApprovalRootOfEmloyeeNew(
 						datePeriod.start(), datePeriod.end(), AppContexts.user().employeeId(), companyId, 1);
-				Map<Pair<String, GeneralDate>, ApprovalStatus> mapApprovalRoot = approvalRoot
+				Map<Pair<String, GeneralDate>, Pair<ApprovalStatus, ApproverEmployeeState>> mapApprovalRoot = approvalRoot
 						.getApprovalRootSituations().stream()
 						.collect(Collectors.toMap(x -> Pair.of(x.getTargetID(), x.getAppDate()),
-								x -> x.getApprovalStatus()));
+								x -> Pair.of(x.getApprovalStatus(), x.getApprovalAtr())));
 				mapApprovalRootBySId.putAll(mapApprovalRoot);
 
 				// set 承認状況： 取得した「承認対象者の承認状況．承認状況」
@@ -100,22 +103,24 @@ public class ApprovalStatusActualDay {
 				// ApprovalActionByEmpl
 				resultPart2.stream().forEach(x -> {
 					val temp = mapApprovalRoot.get(Pair.of(x.getEmployeeId(), x.getDate()));
-					if (temp != null && temp.getApprovalActionByEmpl() == ApprovalActionByEmpl.APPROVALED)
+					if (temp != null && temp.getLeft().getApprovalActionByEmpl() == ApprovalActionByEmpl.APPROVALED)
 						x.updateApprovalStatus(true);
 				});
 
 				Optional<IdentityProcessUseSet> identitySetOpt = iFindDataDCRecord.findIdentityByKey(companyId);
 				if (!identitySetOpt.isPresent() || !identitySetOpt.get().isUseConfirmByYourself()) {
-					resultPart.addAll(updatePermissionCheck(resultPart2, true));
+					resultPart.addAll(updatePermissionCheckWithCondition(resultPart2, true, mapApprovalRoot));
 				} else {
+					//Acquire the domain model "identification of the day"
 					List<Identification> lstIdentity = identificationRepository.findByEmployeeID(employeeId,
 							datePeriod.start(), datePeriod.end());
 					List<GeneralDate> dateTemps = lstIdentity.stream().map(x -> x.getProcessingYmd())
 							.collect(Collectors.toList());
-					val temp1 = updatePermissionCheck(resultPart2.stream().filter(x -> !dateTemps.contains(x.getDate()))
-							.collect(Collectors.toList()), false);
-					val temp2 = updatePermissionCheck(resultPart2.stream().filter(x -> dateTemps.contains(x.getDate()))
-							.collect(Collectors.toList()), true);
+					
+					val temp1 = updatePermissionCheckWithCondition(resultPart2.stream().filter(x -> !dateTemps.contains(x.getDate()))
+							.collect(Collectors.toList()), false, mapApprovalRoot);
+					val temp2 = updatePermissionCheckWithCondition(resultPart2.stream().filter(x -> dateTemps.contains(x.getDate()))
+							.collect(Collectors.toList()), true, mapApprovalRoot);
 					resultPart.addAll(temp1);
 					resultPart.addAll(temp2);
 				}
@@ -145,7 +150,7 @@ public class ApprovalStatusActualDay {
 						val mapApprovalRoot = mapApprovalRootBySId.get(Pair.of(x.getEmployeeId(), x.getDate()));
 						val tempApprovalStatus = mapApprovalStatus == null ? null : mapApprovalStatus.getApprovalStatus(); 
 						if (mapApprovalRoot != null && tempApprovalStatus != null && (x.getDate().afterOrEquals(mergePeriod.start()) && x.getDate().beforeOrEquals(mergePeriod.end()))) {
-							if (mapApprovalRoot.getReleaseDivision() == ReleasedProprietyDivision.RELEASE && tempApprovalStatus == ApprovalStatusForEmployee.UNAPPROVED)
+							if (mapApprovalRoot.getLeft().getReleaseDivision() == ReleasedProprietyDivision.RELEASE && tempApprovalStatus == ApprovalStatusForEmployee.UNAPPROVED)
 								x.setPermissionRelease(true);
 							else
 								x.setPermissionRelease(false);
@@ -158,9 +163,11 @@ public class ApprovalStatusActualDay {
 		return resultResult;
 	}
 
-	public <T extends ConfirmStatusActualResult> List<T> updatePermissionCheck(List<T> datas, boolean checked) {
+	public <T extends ConfirmStatusActualResult> List<T> updatePermissionCheckWithCondition(List<T> datas, boolean checked, Map<Pair<String, GeneralDate>, Pair<ApprovalStatus, ApproverEmployeeState>> mapApprovalRoot) {
 		return datas.stream().map(x -> {
-			x.setPermissionChecked(checked);
+			val data = mapApprovalRoot.get(Pair.of(x.getEmployeeId(), x.getDate()));
+			val dataCompleteApproval = (data == null) ? false : data.getRight() != ApproverEmployeeState.PHASE_DURING;
+			x.setPermissionChecked(checked && !dataCompleteApproval);
 			return x;
 		}).collect(Collectors.toList());
 	}
