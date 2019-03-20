@@ -107,7 +107,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             self.settingManager().departmentCode.subscribe(value => {
                 self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
                 setTimeout(function() {
-                    if (value != '' && value != null && value !== undefined && value.length == 6){
+                    if (value != '' && value != null && value !== undefined){
                         self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
                     }else{
                         self.settingManager().departmentApproverId('');
@@ -121,7 +121,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             self.settingManager().dailyApprovalCode.subscribe(value => {
                 self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
                 setTimeout(function() {
-                    if (value != '' && value != null && value !== undefined && value.length == 6){
+                    if (value != '' && value != null && value !== undefined){
                         self.getEmployeeByCode(value, APPROVER_TYPE.DAILY_APPROVER);
                     } else {
                         self.settingManager().dailyApproverId("");
@@ -275,12 +275,16 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                                             if (startDate < closingStartDate && !(self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory())) {
                                                 closingStartDate = nts.uk.time.formatDate(closingStartDate, 'yyyy/MM/dd');
                                                 //エラーメッセージ（Msg_1072）
-                                                dialog.alertError({ messageId: "Msg_1072", messageParams: [closingStartDate] });
+                                                dialog.alertError({ messageId: "Msg_1072", messageParams: [closingStartDate] }).then(() =>{
+                                                    block.clear();    
+                                                });
                                             } else {
                                                 self.callInsertHistoryService(command);
                                             }
                                         }
                                     }
+                                }).fail(()=>{
+                                    block.clear();    
                                 });
                             }
                         }
