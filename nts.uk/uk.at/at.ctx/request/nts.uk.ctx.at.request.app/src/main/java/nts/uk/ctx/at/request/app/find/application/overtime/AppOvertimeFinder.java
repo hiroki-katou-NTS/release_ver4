@@ -1132,7 +1132,7 @@ public class AppOvertimeFinder {
 			Optional<WorkTimeSetting> workTime = workTimeRepository.findByCode(companyID,
 					appOvertime.getSiftCode().toString());
 			if (workTime.isPresent()) {
-				siftType.setSiftName(workTime.get().getWorkTimeDisplayName().getWorkTimeName().toString());
+				siftType.setSiftName(workTime.get().getWorkTimeDisplayName().getWorkTimeName().v());
 			}
 			preAppOvertimeDto.setSiftTypePre(siftType);
 		}
