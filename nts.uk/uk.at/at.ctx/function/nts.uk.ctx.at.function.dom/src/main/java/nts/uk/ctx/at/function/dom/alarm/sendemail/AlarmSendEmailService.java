@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -18,6 +19,7 @@ import nts.gul.collection.CollectionUtil;
 import nts.gul.mail.send.MailAttachedFileItf;
 import nts.gul.mail.send.MailAttachedFilePath;
 import nts.gul.mail.send.MailContents;
+import nts.gul.mail.send.MailSendOptions;
 import nts.uk.ctx.at.function.dom.adapter.alarm.EmployeePubAlarmAdapter;
 import nts.uk.ctx.at.function.dom.adapter.alarm.EmployeeSprPubAlarmAdapter;
 import nts.uk.ctx.at.function.dom.adapter.alarm.IMailDestinationAdapter;
@@ -25,6 +27,7 @@ import nts.uk.ctx.at.function.dom.adapter.alarm.MailDestinationAlarmImport;
 import nts.uk.ctx.at.function.dom.adapter.alarm.OutGoingMailAlarm;
 import nts.uk.ctx.at.function.dom.alarm.export.AlarmExportDto;
 import nts.uk.ctx.at.function.dom.alarm.export.AlarmListGenerator;
+import nts.uk.ctx.at.function.dom.alarm.mailsettings.MailSettings;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.mail.MailSender;
 import nts.uk.shr.com.mail.SendMailFailedException;
@@ -48,13 +51,16 @@ public class AlarmSendEmailService implements SendEmailService {
 	
 	public String alarmSendEmail(String companyID, GeneralDate executeDate, List<String> employeeTagetIds,
 			List<String> managerTagetIds, List<ValueExtractAlarmDto> valueExtractAlarmDtos,
-			MailSettingsParamDto mailSettingsParamDto,String currentAlarmCode) {
-		return process(companyID, executeDate, employeeTagetIds, managerTagetIds, valueExtractAlarmDtos,mailSettingsParamDto,currentAlarmCode);
+			MailSettingsParamDto mailSettingsParamDto,String currentAlarmCode,
+			boolean useAuthentication,Optional<MailSettings> mailSetting,Optional<MailSettings> mailSettingAdmins,Optional<String> senderAddress) {
+		return process(companyID, executeDate, employeeTagetIds, managerTagetIds, valueExtractAlarmDtos,mailSettingsParamDto,currentAlarmCode,
+				useAuthentication,mailSetting,mailSettingAdmins,senderAddress);
 	}
-	
+	//メール送信処理
 	private String process(String companyID, GeneralDate executeDate, List<String> employeeTagetIds,
 			List<String> managerTagetIds, List<ValueExtractAlarmDto> valueExtractAlarmDtos,
-			MailSettingsParamDto mailSettingsParamDto,String currentAlarmCode){
+			MailSettingsParamDto mailSettingsParamDto,String currentAlarmCode,
+			boolean useAuthentication,Optional<MailSettings> mailSetting,Optional<MailSettings> mailSettingAdmins,Optional<String> senderAddress){
 		List<String> errors = new ArrayList<>();
 		Integer functionID = 9; //function of Alarm list = 9
 		
@@ -71,7 +77,8 @@ public class AlarmSendEmailService implements SendEmailService {
 					// Do send email
 					boolean isSucess = sendMail(companyID, employeeId, functionID,
 							valueExtractAlarmEmpDtos, mailSettingsParamDto.getSubject(),
-							mailSettingsParamDto.getText(), currentAlarmCode);
+							mailSettingsParamDto.getText(), currentAlarmCode,
+							useAuthentication,mailSetting,senderAddress);
 					if (!isSucess) {
 						errors.add(employeeId);
 					}
@@ -117,7 +124,8 @@ public class AlarmSendEmailService implements SendEmailService {
 							// Get subject , body mail
 							boolean isSucess = sendMail(companyID, employeeId, functionID,
 									valueExtractAlarmManagerDtos,mailSettingsParamDto.getSubjectAdmin(),
-									mailSettingsParamDto.getTextAdmin(),currentAlarmCode);
+									mailSettingsParamDto.getTextAdmin(),currentAlarmCode,
+									useAuthentication,mailSettingAdmins,senderAddress);
 							if (!isSucess) {
 								errors.add(employeeId);
 							}
@@ -150,6 +158,7 @@ public class AlarmSendEmailService implements SendEmailService {
 	}
 	
 	/**
+	 * 対象者にメールを送信する
 	 * Send mail flow employeeId
 	 * @param companyID
 	 * @param employeeId
@@ -161,13 +170,14 @@ public class AlarmSendEmailService implements SendEmailService {
 	 */
 	private boolean sendMail(String companyID, String employeeId, Integer functionID,
 			List<ValueExtractAlarmDto> listDataAlarmExport, String subjectEmail,
-			String bodyEmail,String currentAlarmCode) throws BusinessException {
+			String bodyEmail,String currentAlarmCode,
+			boolean useAuthentication,Optional<MailSettings> mailSetting,Optional<String> senderAddress) throws BusinessException {
 		// call request list 397 return email address
 		MailDestinationAlarmImport mailDestinationAlarmImport = iMailDestinationAdapter
 				.getEmpEmailAddress(companyID, employeeId, functionID);
 		if (mailDestinationAlarmImport != null) {
 			// Get all mail address
-			List<OutGoingMailAlarm> emails = mailDestinationAlarmImport.getOutGoingMails();
+			List<OutGoingMailAlarm> emails = mailDestinationAlarmImport.getOutGoingMails().stream().filter(c->c.getEmailAddress() !=null).collect(Collectors.toList());
 			if (CollectionUtil.isEmpty(emails)) {
 				return true;
 			} else {
@@ -181,20 +191,47 @@ public class AlarmSendEmailService implements SendEmailService {
 				attachedFiles.add(new MailAttachedFilePath(alarmExportDto.getPath(), alarmExportDto.getFileName()));
 				
 				// Create mail content
+				//メール内容を作成する
 				MailContents mailContent = new MailContents(subjectEmail, bodyEmail,attachedFiles);
 				
-				for (OutGoingMailAlarm outGoingMailAlarm : emails) {
+				//for (OutGoingMailAlarm outGoingMailAlarm : emails) {
 					// If not email to return false
-					if (StringUtils.isEmpty(outGoingMailAlarm.getEmailAddress())) {
-						return false;
-					}
-					// Do send mail
-					try {
-						mailSender.sendFromAdmin(outGoingMailAlarm.getEmailAddress(), mailContent);
-					} catch (SendMailFailedException e) {
-						throw e;
+//					if (StringUtils.isEmpty(emails.getEmailAddress())) {
+//						return false;
+//					}
+				List<String> replyToList = new ArrayList<>();
+				List<String> toList = emails.stream().map(c-> c.getEmailAddress()).collect(Collectors.toList());
+				List<String> ccList = new ArrayList<>();
+				List<String> bccList = new ArrayList<>();
+				String senderAddressInput = "";
+				if(senderAddress.isPresent()) {
+					senderAddressInput = senderAddress.get();
+				}
+				if(mailSetting.isPresent()) {
+					ccList = mailSetting.get().getMailAddressCC();
+					bccList = mailSetting.get().getMailAddressBCC();
+					if(mailSetting.get().getMailRely().isPresent()) {
+						replyToList.add(mailSetting.get().getMailRely().get().v());
 					}
 				}
+				// Do send mail
+				MailSendOptions mailSendOptions = new MailSendOptions(senderAddressInput, replyToList, toList, ccList, bccList);
+				try {
+					if(useAuthentication) {
+						mailSender.sendFromAdmin(mailContent, companyID, mailSendOptions);
+					}else {
+						if(senderAddress.isPresent()) {
+							mailSender.send(mailContent, companyID, mailSendOptions);
+						}else {
+							mailSender.sendFromAdmin(mailContent, companyID, mailSendOptions);
+							
+						}
+						
+					}
+				} catch (SendMailFailedException e) {
+					throw e;
+				}
+				//}
 			}
 		}
 		return true;
