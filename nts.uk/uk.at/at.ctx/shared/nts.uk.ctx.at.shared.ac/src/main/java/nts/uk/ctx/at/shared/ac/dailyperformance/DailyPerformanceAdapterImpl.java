@@ -16,6 +16,7 @@ import nts.uk.ctx.at.shared.dom.adapter.dailyperformance.ApproveRootStatusForEmp
 import nts.uk.ctx.at.shared.dom.adapter.dailyperformance.DailyPerformanceAdapter;
 import nts.uk.ctx.at.shared.dom.adapter.dailyperformance.RouteSituationImport;
 import nts.uk.ctx.workflow.pub.resultrecord.IntermediateDataPub;
+import nts.uk.ctx.workflow.pub.resultrecord.export.AppEmpStatusExport;
 import nts.uk.ctx.workflow.pub.service.ApprovalRootStatePub;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
@@ -57,12 +58,13 @@ public class DailyPerformanceAdapterImpl implements DailyPerformanceAdapter {
 	 */
 	@Override 
 	public AppEmpStatusImport appEmpStatusExport(String employeeID, DatePeriod period, Integer rootType) {
-		List<RouteSituationImport> routeSituationLst = intermediateDataPub.getApprovalEmpStatus(employeeID, period, rootType).getRouteSituationLst().stream().map(item -> {
+		AppEmpStatusExport appEmpStatusExport = intermediateDataPub.getApprovalEmpStatus(employeeID, period, rootType);
+		List<RouteSituationImport> routeSituationLst = appEmpStatusExport.getRouteSituationLst().stream().map(item -> {
 			return new RouteSituationImport(item.getDate(), item.getEmployeeID(), item.getApproverEmpState(), 
 											Optional.of(new ApprovalStatusImport(item.getApprovalStatus().get().getReleaseAtr(), item.getApprovalStatus().get().getApprovalAction())));
 		}).collect(Collectors.toList());
 		// use RequestList133
-		AppEmpStatusImport x = new AppEmpStatusImport(intermediateDataPub.getApprovalEmpStatus(employeeID, period, rootType).getEmployeeID(), routeSituationLst);
+		AppEmpStatusImport x = new AppEmpStatusImport(appEmpStatusExport.getEmployeeID(), routeSituationLst);
 		return x;
 	}
 
