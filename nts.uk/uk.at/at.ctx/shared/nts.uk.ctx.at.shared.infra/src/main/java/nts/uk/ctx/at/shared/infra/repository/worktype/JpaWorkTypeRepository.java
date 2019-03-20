@@ -4,7 +4,6 @@
  *****************************************************************/
 package nts.uk.ctx.at.shared.infra.repository.worktype;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,11 +17,9 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
-import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeInfor;
@@ -33,6 +30,7 @@ import nts.uk.ctx.at.shared.infra.entity.worktype.KshmtWorkTypePK;
 import nts.uk.ctx.at.shared.infra.entity.worktype.KshmtWorkTypeSet;
 import nts.uk.ctx.at.shared.infra.entity.worktype.KshmtWorkTypeSetPK;
 import nts.uk.ctx.at.shared.infra.entity.worktype.worktypedisporder.KshmtWorkTypeOrder;
+import nts.uk.shr.com.i18n.TextResource;
 
 @Stateless
 public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepository {
@@ -133,6 +131,7 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	private static final String FIND_BY_CODES;
 	private static final String SELECT_WORKTYPE_AND_ORDER;
 	private static final String SELECT_WORKTYPE_ALL_ORDER;
+	private static final String SELECT_WORKTYPE_WITH_NO_MASTER_AND_ORDER;
 	
 	static {
 		StringBuilder stringBuilder = new StringBuilder();
@@ -145,6 +144,19 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 		stringBuilder.append("WHERE c.kshmtWorkTypePK.companyId = :companyId ");
 		stringBuilder.append("AND c.kshmtWorkTypePK.workTypeCode IN :lstPossible ");
 		SELECT_WORKTYPE_AND_ORDER = stringBuilder.toString();
+	}
+	
+	static{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("SELECT NEW " + WorkTypeInfor.class.getName());
+		stringBuilder.append(
+				"(c.kshmtWorkTypePK.workTypeCode, c.name, c.abbreviationName, c.symbolicName, c.deprecateAtr, c.memo, c.worktypeAtr, c.oneDayAtr, c.morningAtr, c.afternoonAtr, c.calculatorMethod, o.dispOrder) ");
+		stringBuilder.append("FROM KshmtWorkType c LEFT JOIN KshmtWorkTypeOrder o ");
+		stringBuilder.append(
+				"ON c.kshmtWorkTypePK.companyId = o.kshmtWorkTypeDispOrderPk.companyId AND c.kshmtWorkTypePK.workTypeCode = o.kshmtWorkTypeDispOrderPk.workTypeCode ");
+		stringBuilder.append("WHERE c.kshmtWorkTypePK.companyId = :companyId ");
+		stringBuilder.append("AND c.kshmtWorkTypePK.workTypeCode = :wkTypeCd ");
+		SELECT_WORKTYPE_WITH_NO_MASTER_AND_ORDER = stringBuilder.toString();
 	}
 	
 	static {
@@ -341,6 +353,40 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 								.setParameter("companyId", companyId)
 								.setParameter("lstPossible", subList)
 								.getList());
+		});
+		List<WorkTypeInfor> lstOrder = resultList.stream().filter(c -> c.getDispOrder() != null).collect(Collectors.toList());
+		List<WorkTypeInfor> lstNotOrder = resultList.stream().filter(c -> c.getDispOrder() == null).collect(Collectors.toList());
+		Collections.sort(lstOrder, Comparator.comparing(WorkTypeInfor:: getDispOrder));
+		Collections.sort(lstNotOrder, Comparator.comparing(WorkTypeInfor:: getWorkTypeCode));
+		List<WorkTypeInfor> lstSort = new ArrayList<>();
+		lstSort.addAll(lstOrder);
+		lstSort.addAll(lstNotOrder);
+		return lstSort;
+	}
+	
+	@Override
+	public List<WorkTypeInfor> getPossibleWorkTypeWithNoMasterAndOrder(String companyId, List<String> lstPossible) {
+		if(CollectionUtil.isEmpty(lstPossible)){
+			return Collections.emptyList();
+		}
+		List<WorkTypeInfor> resultList = new ArrayList<>();
+		
+		lstPossible.forEach(wkTypeCd -> {
+
+			WorkTypeInfor wkType;
+
+			Optional<WorkTypeInfor> optWkInfo = this.queryProxy().query(SELECT_WORKTYPE_WITH_NO_MASTER_AND_ORDER, WorkTypeInfor.class)
+					.setParameter("companyId", companyId).setParameter("wkTypeCd", wkTypeCd).getSingle();
+			if (optWkInfo.isPresent()) {
+
+				wkType = optWkInfo.get();
+			} else {
+				wkType = new WorkTypeInfor(wkTypeCd, TextResource.localize("KAL003_120"), "", "", 0, "", 0, 0, 0, 0, 0,
+						null, Collections.emptyList());
+			}
+
+			resultList.add(wkType);
+
 		});
 		List<WorkTypeInfor> lstOrder = resultList.stream().filter(c -> c.getDispOrder() != null).collect(Collectors.toList());
 		List<WorkTypeInfor> lstNotOrder = resultList.stream().filter(c -> c.getDispOrder() == null).collect(Collectors.toList());

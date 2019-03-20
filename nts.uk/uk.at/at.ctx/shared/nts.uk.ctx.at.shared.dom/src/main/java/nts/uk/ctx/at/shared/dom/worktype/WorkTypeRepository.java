@@ -34,6 +34,15 @@ public interface WorkTypeRepository {
 	List<WorkTypeInfor> getPossibleWorkTypeAndOrder(String companyId, List<String> lstPossible);
 	
 	/**
+	 * Gets the possible work type and order.
+	 *
+	 * @param companyId the company id
+	 * @param lstPossible the lst possible
+	 * @return the possible work type and order
+	 */
+	List<WorkTypeInfor> getPossibleWorkTypeWithNoMasterAndOrder(String companyId, List<String> lstPossible);
+	
+	/**
 	 * Find all by order.
 	 *
 	 * @param companyId the company id

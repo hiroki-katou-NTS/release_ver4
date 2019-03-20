@@ -94,6 +94,19 @@ public class WorkTimeWebServiceNew extends WebService {
 	public List<WorkTimeDto> findByCodes(List<String> codes) {
 		return this.workTimeSetFinder.findByCodes(codes);
 	}
+	
+	/**
+	 * Find by codes.
+	 *
+	 * @param codes
+	 *            the codes
+	 * @return the list
+	 */
+	@POST
+	@Path("find_by_code_with_no_master")
+	public List<WorkTimeDto> findByCodesWithNoMaster(List<String> codes) {
+		return this.workTimeSetFinder.findByCodesWithNoMaster(codes);
+	}
 
 	/**
 	 * Find with condition.
