@@ -44,6 +44,8 @@ import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfo;
 import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfoRepository;
 import nts.uk.ctx.bs.employee.pub.workplace.AffAtWorkplaceExport;
 import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceExport;
+import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceHistoryExport;
+import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceHistoryItemExport;
 import nts.uk.ctx.bs.employee.pub.workplace.SWkpHistExport;
 import nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub;
 import nts.uk.ctx.bs.employee.pub.workplace.WkpByEmpExport;
@@ -843,6 +845,34 @@ public class WorkplacePubImp implements SyWorkplacePub {
 		});
 
 		return mapResult;
+	}
+
+	@Override
+	public List< AffWorkplaceHistoryExport> getWorkplaceBySidsAndBaseDate(List<String> sids, GeneralDate baseDate) {
+		List<String> histIds =  new ArrayList<>();
+		List<AffWorkplaceHistoryExport>  result = new ArrayList<>();
+		Map<String, List<AffWorkplaceHistory>> workplaceHistMap = affWorkplaceHistoryRepository.getWorkplaceHistoryBySidsAndDateV2( baseDate, sids).parallelStream().collect(Collectors.groupingBy(c -> c.getEmployeeId()));
+		workplaceHistMap.values().parallelStream().forEach(c -> {
+			histIds.addAll(c.get(0).getHistoryIds());
+		});
+		List<AffWorkplaceHistoryItem> histItemMaps = affWorkplaceHistoryItemRepository.findByHistIds(histIds);
+		workplaceHistMap.entrySet().parallelStream().forEach(c -> {
+			AffWorkplaceHistory value = c.getValue().get(0);
+			Map<String, AffWorkplaceHistoryItemExport> workplaceHistItems = new HashMap<>();
+			value.getHistoryItems().parallelStream().forEach(hist -> {
+				Optional<AffWorkplaceHistoryItem> workplacehistItemOpt = histItemMaps.parallelStream()
+						.filter(item -> item.getHistoryId().equals(hist.identifier())).findFirst();
+				if (workplacehistItemOpt.isPresent()) {
+					AffWorkplaceHistoryItem histItem = workplacehistItemOpt.get();
+					AffWorkplaceHistoryItemExport histItemExport = new AffWorkplaceHistoryItemExport(
+							histItem.getHistoryId(), histItem.getWorkplaceId(), histItem.getNormalWorkplaceId());
+					workplaceHistItems.put(hist.identifier(), histItemExport);
+				}
+			});
+			AffWorkplaceHistoryExport export = new AffWorkplaceHistoryExport(value.getEmployeeId(), value.getHistoryItems(), workplaceHistItems);
+			result.add(export);
+		});
+		return result;
 	}
 		
 }
