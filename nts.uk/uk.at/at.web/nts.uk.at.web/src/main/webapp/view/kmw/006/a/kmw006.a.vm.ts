@@ -216,7 +216,7 @@ module nts.uk.at.view.kmw006.a.viewmodel {
                     let currentTime = new Date(moment().format('YYYY-MM-DD HH:mm:ss'));
                     let startDT = new Date(moment.utc(results.screenParams.startDT).format('YYYY-MM-DD HH:mm:ss'))
                     let duration = (currentTime.getTime() - startDT.getTime()) / 1000;
-                    if(results.screenParams.executionStatus != 2 && duration < 10){
+                    if(results.screenParams.executionStatus != 2 && duration < 14400){
                         // open dialog F
                         $.when(self.getAllPersonNo(results.screenParams)).done(() => {
                             results.screenParams.totalCount = self.totalCount();
