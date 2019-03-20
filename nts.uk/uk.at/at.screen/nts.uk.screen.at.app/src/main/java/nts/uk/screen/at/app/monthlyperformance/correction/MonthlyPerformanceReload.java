@@ -449,7 +449,7 @@ public class MonthlyPerformanceReload {
 				if(approvalStatusMonth.isPresent()) {
 					for (ApprovalStatusResult approvalStatusResult : approvalStatusMonth.get().getApprovalStatusResult()) {
 						// *7 set value approval mode 2
-						if(approvalStatusResult.getEmployeeId().equals(employee)) {
+						if(approvalStatusResult.getEmployeeId().equals(employee.getId())) {
 							approve = approvalStatusResult.isApprovalStatus();
 							// *5 check disable mode approval 
 							if(approve) {
@@ -473,7 +473,7 @@ public class MonthlyPerformanceReload {
 				for (ApprovalStatusResult approvalStatusResult : approvalStatusMonth.get().getApprovalStatusResult()) {
 					if(approvalStatusMonth.isPresent()) {
 						//*6 : set value approval mode 0,1
-						if(approvalStatusResult.getEmployeeId().equals(employee)) {
+						if(approvalStatusResult.getEmployeeId().equals(employee.getId())) {
 							if(approvalStatusResult.getNormalStatus() == ApprovalStatusForEmployee.UNAPPROVED) {
 								approve = false;
 							}else {
@@ -488,25 +488,17 @@ public class MonthlyPerformanceReload {
 			// set state identify
 			if(statusConfirmMonthDto.isPresent()) {
 				for (ConfirmStatusResult confirmStatusResult : statusConfirmMonthDto.get().getListConfirmStatus()) {
-					if(confirmStatusResult.getEmployeeId().equals(employee)) {
+					if(confirmStatusResult.getEmployeeId().equals(employee.getId())) {
 						identify =  confirmStatusResult.isConfirmStatus();
 					}
 				}
 			}
 			if (param.getInitMenuMode() == 2) {
 				lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
-				if(statusConfirmMonthDto.isPresent()) {
-					for (ConfirmStatusResult confirmStatusResult : statusConfirmMonthDto.get().getListConfirmStatus()) {
-						if(confirmStatusResult.getEmployeeId().equals(employee)) {
-							
-						}
-					}
-				}
-				
 			} else {
 				if(statusConfirmMonthDto.isPresent()) {
 					for (ConfirmStatusResult confirmStatusResult : statusConfirmMonthDto.get().getListConfirmStatus()) {
-						if(confirmStatusResult.getEmployeeId().equals(employee)) {
+						if(confirmStatusResult.getEmployeeId().equals(employee.getId())) {
 							if(identify) {
 								//解除可否
 								if(confirmStatusResult.getWhetherToRelease() == ReleasedAtr.CAN_NOT_RELEASE) {
