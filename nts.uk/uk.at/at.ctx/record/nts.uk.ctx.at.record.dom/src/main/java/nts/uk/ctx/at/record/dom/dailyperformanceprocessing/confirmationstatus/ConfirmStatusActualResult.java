@@ -47,7 +47,7 @@ public class ConfirmStatusActualResult {
 	
 	public ConfirmStatusActualResult setPermission(boolean permissionCheck, boolean permissionRelease) {
 		this.permissionCheck = ReleasedAtr.valueOf(permissionCheck ? 1: 0);
-		this.permissionRelease = ReleasedAtr.valueOf(permissionCheck ? 1: 0);
+		this.permissionRelease = ReleasedAtr.valueOf(permissionRelease ? 1: 0);
 		return this;
 	}
 	

@@ -122,7 +122,7 @@ public class ApprovalStatusActualDay {
 
 			});
 
-			if (!optApprovalUse.isPresent() || !optApprovalUse.get().getUseDayApproverConfirm()) {
+			if (!optApprovalUse.isPresent() || !optApprovalUse.get().getUseMonthApproverConfirm()) {
 				updatePermissionRelease(resultPart, true);
 			} else {
 				// 指定した年月日時点の締め期間を取得する
@@ -146,7 +146,7 @@ public class ApprovalStatusActualDay {
 						val tempApprovalStatus = mapApprovalStatus.get(Pair.of(x.getEmployeeId(), x.getDate()));
 						val mapApprovalRoot = mapApprovalRootBySId.get(Pair.of(x.getEmployeeId(), x.getDate())); 
 						if (mapApprovalRoot != null && tempApprovalStatus != null) {
-							if (mapApprovalRoot.getReleaseDivision() == ReleasedProprietyDivision.RELEASE && tempApprovalStatus != ApprovalStatusForEmployee.UNAPPROVED)
+							if (mapApprovalRoot.getReleaseDivision() == ReleasedProprietyDivision.RELEASE && tempApprovalStatus == ApprovalStatusForEmployee.UNAPPROVED)
 								x.setPermissionRelease(true);
 							else
 								x.setPermissionRelease(false);

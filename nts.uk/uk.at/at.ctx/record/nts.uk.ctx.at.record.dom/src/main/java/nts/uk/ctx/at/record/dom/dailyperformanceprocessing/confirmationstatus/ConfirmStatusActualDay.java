@@ -169,11 +169,14 @@ public class ConfirmStatusActualDay {
 					val mapApprovalStatus = lstApprovalStatus.stream().collect(Collectors
 							.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus()));
 					//lstResultEmpTemp3 = 
-					lstResultEmpTemp1.stream().forEach(x ->{
+					lstResultEmpTemp1.forEach(x ->{
 						val temp = mapApprovalStatus.get(Pair.of(x.getEmployeeId(), x.getDate()));
 						if(temp != null ) {
-							if(x.getPermissionRelease() == ReleasedAtr.CAN_IMPLEMENT && temp == ApprovalStatusForEmployee.UNAPPROVED) x.setPermission(true, true);
-							else x.setPermission(true, false);
+							if(x.getPermissionRelease() == ReleasedAtr.CAN_IMPLEMENT && temp == ApprovalStatusForEmployee.UNAPPROVED) {
+								x.setPermission(true, true);
+							}else {
+								x.setPermission(true, false);
+							}
 						}
 					});
 					

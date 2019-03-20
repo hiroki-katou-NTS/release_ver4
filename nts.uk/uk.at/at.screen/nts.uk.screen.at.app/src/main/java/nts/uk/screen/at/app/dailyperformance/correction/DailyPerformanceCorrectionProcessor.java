@@ -550,13 +550,16 @@ public class DailyPerformanceCorrectionProcessor {
 		
 		DPLockDto dpLockDto = findLock.checkLockAll(companyId, listEmployeeId, dateRangeTemp, sId, mode, identityProcessDtoOpt, approvalUseSettingDtoOpt);
 		String keyFind = IdentifierUtil.randomUniqueId();
+		long startTime1 = System.currentTimeMillis();
 		List<ConfirmStatusActualResult> confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId,
 				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(),
 				Optional.of(keyFind));
+		System.out.println("thoi gian load checkbox 1:" + (System.currentTimeMillis()-startTime1));
 		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDay.processApprovalStatus(companyId,
 				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(),
 				Optional.of(keyFind));
-				
+		//approvalResults = new ArrayList<>();
+		System.out.println("thoi gian load checkbox 2:" + (System.currentTimeMillis()-startTime1));		
 		mapDataIntoGrid(screenDto, sId, appMapDateSid, listEmployeeId, resultDailyMap, mode, displayFormat, showLock,
 				identityProcessDtoOpt, approvalUseSettingDtoOpt, dateRange, objectShare,
 				companyId, disItem, dPControlDisplayItem, dailyRecEditSetsMap,
@@ -628,7 +631,7 @@ public class DailyPerformanceCorrectionProcessor {
 			// state check box sign
 			boolean disableSignApp = disableSignMap.containsKey(data.getEmployeeId() + "|" + data.getDate()) && disableSignMap.get(data.getEmployeeId() + "|" + data.getDate());
 			
-			if(dataSign == null || (dataSign.isStatus() ? disableSignApp && !dataSign.notDisableForConfirm() : !dataSign.notDisableForConfirm())){
+			if(dataSign == null || (!dataSign.isStatus() ? (!dataSign.notDisableForConfirm() ? true : disableSignApp) : !dataSign.notDisableForConfirm())){
 				screenDto.setCellSate(data.getId(), DPText.LOCK_SIGN, DPText.STATE_DISABLE);
 			}
 			ApprovalStatusActualResult dataApproval = mapApprovalResults.get(Pair.of(data.getEmployeeId(), data.getDate()));
@@ -758,7 +761,7 @@ public class DailyPerformanceCorrectionProcessor {
 			if ((lockConfirmMonth || lockSign) && !(lockApprovalMonth || lockHist || lockDaykWpl || lockApproval))
 				lockCell(screenDto, data, false);
 			else
-				lockCell(screenDto, data, true);
+				lockCell(screenDto, data, false);
 		}
 		
 		if (mode == ScreenMode.APPROVAL.value) screenDto.setCellSate(data.getId(), DPText.LOCK_SIGN, DPText.STATE_DISABLE);
