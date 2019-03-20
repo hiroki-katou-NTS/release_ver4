@@ -289,6 +289,11 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
             monthlyValues =  new ArrayList<>(syncResultsMonthly);
 		}
 
+		Map<String, List<AttendanceItemValueResult>> dailyValuesAll = dailyValues.stream()
+                .collect(Collectors.groupingBy(AttendanceItemValueResult::getEmployeeId));
+        Map<String, List<MonthlyAttendanceItemValueResult>> monthlyValuesAll = monthlyValues.stream()
+                .collect(Collectors.groupingBy(MonthlyAttendanceItemValueResult::getEmployeeId));
+
 		List<String> sIds = distinctEmployeeListAfterSort.stream().map(x -> x.employeeId).collect(Collectors.toList());
 		// get Closure
 		Map<String, Closure> closureAll = closureEmploymentService.findClosureByEmployee(sIds, request.getEndDate());
@@ -373,12 +378,19 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 									.build();
 							// Get all daily result in Date
 							if (!singleIdUpper.isEmpty() || !singleIdLower.isEmpty()) {
-								for (AttendanceItemValueResult item : dailyValues) {
+                                if (dailyValuesAll.containsKey(employee.employeeId)){
+                                    List<AttendanceItemValueResult> dailyValuesByEmp = dailyValuesAll.get(employee.employeeId);
+                                    Optional<AttendanceItemValueResult> itemValueOtp = dailyValuesByEmp.stream().filter(x -> x.getWorkingDate().equals(closureDateTemp)).findFirst();
+                                    if (itemValueOtp.isPresent()) {
+                                        itemValueResult = itemValueOtp.get();
+                                    }
+                                }
+								/*for (AttendanceItemValueResult item : dailyValues) {
 									if (item.getWorkingDate().equals(startDateByClosure) && item.getEmployeeId().equals(employee.employeeId)) {
 										itemValueResult = item;
 										break;
 									}
-								}
+								}*/
 							}
 
 							// Fill in upper single item
@@ -648,15 +660,17 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 						if (!calculateUpperMonthly.isEmpty() || !calculateLowerMonthly.isEmpty()) {
 
 							// Get montnly result
-							for (MonthlyAttendanceItemValueResult item : monthlyValues) {
-								if (item.getYearMonth()
-										.equals(closureDate.getLastDayOfMonth() ? yearMonth : yearMonth.addMonths(1))
-										&& item.getClouseDate() == closureDate.getClosureDay().v()
-										&& employee.getEmployeeId().equals(item.getEmployeeId())) {
-									itemValueResult = item;
-									break;
-								}
-							}
+                            if (monthlyValuesAll.containsKey(employee.getEmployeeId())) {
+                                List<MonthlyAttendanceItemValueResult> monthlyValuesByEmp = monthlyValuesAll.get(employee.getEmployeeId());
+                                for (MonthlyAttendanceItemValueResult item : monthlyValuesByEmp) {
+                                    if (item.getYearMonth()
+                                            .equals(closureDate.getLastDayOfMonth() ? yearMonth : yearMonth.addMonths(1))
+                                            && item.getClouseDate() == closureDate.getClosureDay().v()) {
+                                        itemValueResult = item;
+                                        break;
+                                    }
+                                }
+                            }
 						}
 
 						for (CalculateAttendanceRecord item : calculateUpperMonthly) {
