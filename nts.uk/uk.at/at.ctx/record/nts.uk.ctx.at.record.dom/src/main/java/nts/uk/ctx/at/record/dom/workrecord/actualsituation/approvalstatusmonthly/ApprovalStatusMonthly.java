@@ -177,6 +177,6 @@ public class ApprovalStatusMonthly {
 			listApprovalStatusResult.add(approvalStatusResult);
 		}
 		
-		return Optional.of(new ApprovalStatusMonth());
+		return Optional.of(new ApprovalStatusMonth(listApprovalStatusResult));
 	}
 }
