@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.ac.employment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,8 +9,11 @@ import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistImport;
+import nts.uk.ctx.bs.employee.pub.employment.EmploymentHisExport;
 import nts.uk.ctx.bs.employee.pub.employment.EmploymentHisOfEmployee;
 import nts.uk.ctx.bs.employee.pub.employment.IEmploymentHistoryPub;
+import nts.uk.ctx.bs.employee.pub.employment.SyEmploymentPub;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * アダプタ実装：所属雇用履歴を取得する
@@ -21,6 +25,9 @@ public class EmploymentHistAdapterImpl implements EmploymentHistAdapter {
 	@Inject
 	private IEmploymentHistoryPub employmentHistoryPub;
 	
+	@Inject
+	private SyEmploymentPub syEmploymentPub;
+	
 	@Override
 	public List<EmploymentHistImport> findByEmployeeIdOrderByStartDate(String employeeId) {
 
@@ -28,5 +35,15 @@ public class EmploymentHistAdapterImpl implements EmploymentHistAdapter {
 
 		return empHists.stream().map(c -> new EmploymentHistImport(
 				c.getSId(), c.getEmploymentCD(), c.getStartDate(), c.getEndDate())).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<EmploymentHistImport> findBySidDatePeriod(List<String> employeeIds, DatePeriod period) {
+		List<EmploymentHisExport> empHistPub = syEmploymentPub.findByListSidAndPeriod(employeeIds, period);
+		List<EmploymentHistImport> result = new ArrayList<>();
+		empHistPub.stream().forEach(x ->{
+			result.addAll(x.getLstEmpCodeandPeriod().stream().map(c -> new EmploymentHistImport(x.getEmployeeId(), c.getEmploymentCode(), c.getDatePeriod())).collect(Collectors.toList()));
+		});
+		return result;
 	}
 }

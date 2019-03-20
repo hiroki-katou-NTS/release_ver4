@@ -64,7 +64,7 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 				}
 				//日別実績の勤務情報  変更
 				workRepository.updateByKeyFlush(dailyInfor);
-				commonService.calculateOfAppReflect(null, workchangePara.getEmployeeId(), loopDate);
+				commonService.calculateOfAppReflect(null, workchangePara.getEmployeeId(), loopDate, false);
 			}			
 			return true;	
 		}catch (Exception e) {

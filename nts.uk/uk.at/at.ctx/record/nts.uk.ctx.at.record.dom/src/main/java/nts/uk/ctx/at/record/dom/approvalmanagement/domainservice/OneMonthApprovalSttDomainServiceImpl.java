@@ -4,7 +4,6 @@
 package nts.uk.ctx.at.record.dom.approvalmanagement.domainservice;
 
 import java.util.ArrayList;
-import java.util.Collections;
 //import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -14,20 +13,21 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.val;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.arc.time.YearMonth;
-import nts.uk.ctx.at.auth.dom.employmentrole.EmployeeReferenceRange;
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
 import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
+import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeAdapter;
+import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeDto;
 import nts.uk.ctx.at.record.dom.adapter.employee.RegularSortingTypeImport;
 import nts.uk.ctx.at.record.dom.adapter.employee.RegulationInfoEmployeeAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employee.SortingConditionOrderImport;
-import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQuery;
-import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryAdapter;
-import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryR;
+import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistAdapter;
+import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
@@ -74,60 +74,36 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 	private ClosureEmploymentRepository closureEmploymentRepository;
 
 	@Inject
-	private RegulationInfoEmployeeQueryAdapter regulationInfoEmployeeQueryAdapter;
-	
-	@Inject
 	private RegulationInfoEmployeeAdapter regulationInfoEmployeeAdapter;
 	
 	@Inject
 	private SyCompanyRecordAdapter syCompanyRecordAdapter;
+	
+//	@Inject
+//	private ShareEmploymentAdapter shareEmploymentAdapter;
+	
+	@Inject
+	private EmployeeAdapter atEmployeeAdapter;
+	
+	@Inject
+	private EmploymentHistAdapter employmentHistAdapter;
 
-	private RegulationInfoEmployeeQuery createQueryEmployee(List<String> employeeCodes, GeneralDate startDate,
-			GeneralDate endDate) {
-		RegulationInfoEmployeeQuery query = new RegulationInfoEmployeeQuery();
-		query.setBaseDate(GeneralDate.today());
-		query.setReferenceRange(EmployeeReferenceRange.ALL_EMPLOYEE.value);
-		query.setFilterByEmployment(true);
-		query.setEmploymentCodes(employeeCodes);
-		query.setFilterByDepartment(false);
-		query.setDepartmentCodes(Collections.emptyList());
-		query.setFilterByWorkplace(false);
-		query.setWorkplaceCodes(Collections.emptyList());
-		query.setFilterByClassification(false);
-		query.setClassificationCodes(Collections.emptyList());
-		query.setFilterByJobTitle(false);
-		query.setJobTitleCodes(Collections.emptyList());
-		query.setFilterByWorktype(false);
-		query.setWorktypeCodes(Collections.emptyList());
-		query.setPeriodStart(startDate);
-		query.setPeriodEnd(endDate);
-		query.setIncludeIncumbents(true);
-		query.setIncludeWorkersOnLeave(true);
-		query.setIncludeOccupancy(true);
-		query.setIncludeAreOnLoan(true);
-		query.setIncludeGoingOnLoan(false);
-		query.setIncludeRetirees(false);
-		query.setRetireStart(GeneralDate.today());
-		query.setRetireEnd(GeneralDate.today());
-		return query;
-	}
-
-	private List<ApprovalEmployeeDto> buildApprovalEmployeeData(List<Identification> listIdentification,List<RegulationInfoEmployeeQueryR> lstEmployee,
+	private List<ApprovalEmployeeDto> buildApprovalEmployeeData(List<Identification> listIdentification,List<EmployeeDto> lstEmployee,
 			ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport) {
 
 		List<ApprovalEmployeeDto> lstApprovalEmployee = new ArrayList<>();
 		List<ApprovalRootSituation> lstApproval = approvalRootOfEmployeeImport.getApprovalRootSituations();
 
-		for (RegulationInfoEmployeeQueryR empQ : lstEmployee) {
+		for (EmployeeDto empQ : lstEmployee) {
 			ApprovalEmployeeDto approvalEmployee = new ApprovalEmployeeDto();
 
-			approvalEmployee.setEmployeeId(empQ.getEmployeeId());
-			approvalEmployee.setEmployeeCode(empQ.getEmployeeCode());
-			approvalEmployee.setEmployeeName(empQ.getEmployeeName());
+			approvalEmployee.setEmployeeId(empQ.getSid());
+			approvalEmployee.setEmployeeCode(empQ.getScd());
+			approvalEmployee.setEmployeeName(empQ.getBussinessName());
 			
 			
 			List<DateApprovalStatusDto> lstDateApprovalStatusDto = lstApproval.stream()
-					.filter(f -> empQ.getEmployeeId().equals(f.getTargetID())).map(apv -> {
+					.filter(f -> empQ.getSid().equals(f.getTargetID())).map(apv -> {
 						ApprovalStatus status = apv.getApprovalStatus();
 						ApproverEmployeeState state = apv.getApprovalAtr();
 						ApprovalActionByEmpl aproval = status.getApprovalActionByEmpl();
@@ -163,52 +139,10 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 							dateApvS.setStatus(4);
 						}
 						
-						
-						
-//						if (ApprovalActionByEmpl.APPROVALED.equals(aproval)
-//								&& ApproverEmployeeState.PHASE_DURING.equals(state)) {
-//							dateApvS.setStatus(0);
-//						} else if (ApprovalActionByEmpl.APPROVAL_REQUIRE.equals(aproval)
-//								&& ApproverEmployeeState.PHASE_DURING.equals(state)) {
-//							dateApvS.setStatus(1);
-//						} else if (ApprovalActionByEmpl.NOT_APPROVAL.equals(aproval)
-//								&& ApproverEmployeeState.PHASE_LESS.equals(state)) {
-//							dateApvS.setStatus(2);
-//						} else if (ApprovalActionByEmpl.NOT_APPROVAL.equals(aproval)
-//								&& ApproverEmployeeState.PHASE_DURING.equals(state)) {
-//							dateApvS.setStatus(2);
-//						} else if (ApprovalActionByEmpl.NOT_APPROVAL.equals(aproval)
-//								&& ApproverEmployeeState.PHASE_PASS.equals(state)) {
-//							dateApvS.setStatus(0);
-//						} else if (ApprovalActionByEmpl.NOT_APPROVAL.equals(aproval)
-//								&& ApproverEmployeeState.COMPLETE.equals(state)) {
-//							dateApvS.setStatus(0);
-//						} else if(ApprovalActionByEmpl.APPROVALED.equals(aproval)
-//								&& ApproverEmployeeState.COMPLETE.equals(state)) {
-//							dateApvS.setStatus(0);
-//						}
-
 						return dateApvS;
 					}).collect(Collectors.toList());
 
 			if (!lstDateApprovalStatusDto.isEmpty()) {
-//				for(GeneralDate date = startDate;startDate.beforeOrEquals(endDate);) {
-//					boolean check = true;
-//					for(DateApprovalStatusDto dateApprovalStatusDto :lstDateApprovalStatusDto ) {
-//						if(date.equals(dateApprovalStatusDto.getDate())) {
-//							check = false;
-//							break;
-//						}
-//					}
-//					if(!check) {
-//						lstDateApprovalStatusDto.add(new DateApprovalStatusDto(date,3));
-//					}
-//					date = startDate.addDays(1);
-//				}
-				//lstDateApprovalStatusDto.sort(c);
-				
-				//lstDateApprovalStatusDto.sort((x, y) -> x.getDate().compareTo(y.getDate()));
-				
 				approvalEmployee.setLstStatus(lstDateApprovalStatusDto);
 				lstApprovalEmployee.add(approvalEmployee);
 			}
@@ -247,6 +181,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 		if (approvalProcUseSet.isPresent()) {
 			useDayApprovalComfirmCheck = approvalProcUseSet.get().getUseDayApproverConfirm();
 		}
+		
 		if (useDayApprovalComfirmCheck) {
 			List<YearMonth> lstYearMonth = new ArrayList<>();
 			int currentClosure = 0;
@@ -291,7 +226,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 					AppContexts.user().companyId(), 1);
 			
 			List<ApprovalRootSituation> approvalRootSituations = new ArrayList<>();
-			List<String> lstEmployment = new ArrayList<>();
+			List<String> lstEmploymentCd = new ArrayList<>();
 			// fix bug 91363
 			List<String> lstEmployees= new ArrayList<>();
 			if (approvalRootOfEmployeeImport == null
@@ -301,14 +236,17 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 				oneMonthApprovalStatusDto.setMessageID("Msg_916");
 				return oneMonthApprovalStatusDto;
 				//throw new BusinessException("Msg_874");
-			}
-			else
-			{
+			} else {
 				List<ApprovalRootSituation> listApp =approvalRootOfEmployeeImport.getApprovalRootSituations();
 				Set<String> listAppId = approvalRootOfEmployeeImport.getApprovalRootSituations().stream().map(c->c.getTargetID()).collect(Collectors.toSet());
+				//対象期間に在職しているかチェックする
 				//社員ID（List）と指定期間から所属会社履歴項目を取得 【Request：No211】
 				List<AffCompanyHistImport> listAffCompanyHistImport  = this.syCompanyRecordAdapter
 				.getAffCompanyHistByEmployee(new ArrayList<>(listAppId), datePeriod);
+				if(listAffCompanyHistImport.isEmpty() || listAffCompanyHistImport.stream().flatMap(x -> x.getLstAffComHistItem().stream()).collect(Collectors.toList()).isEmpty()) {
+					oneMonthApprovalStatusDto.setMessageID("Msg_875");
+					return oneMonthApprovalStatusDto;
+				}
 				//日の本人確認を取得する
 				listIdentification = this.getIdentification(new ArrayList<>(listAppId), datePeriod);
 				//取得した「所属会社履歴項目」に当てはまらない対象者、対象日の「ルート状況」を取り除く
@@ -348,14 +286,10 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 									}
 								}
 							}
-							
 							break;
 						}
 					}
-					
-					
 				}
-				
 			}
 			
 			approvalRootOfEmployeeImport.setApprovalRootSituations(approvalRootSituations);
@@ -369,26 +303,46 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			lstEmployees = this.regulationInfoEmployeeAdapter.sortEmployees(companyId, employeeList,
 					this.createListConditions(), this.convertFromDateToDateTime(datePeriod.end()));
 			
+			// アルゴリズム「表示する承認者の集計」を実行する
+			// 対応するImported「（就業）社員」をすべて取得する -requestList31-2
+//			Map<String, String> mapEmp = this.shareEmploymentAdapter.findEmpHistoryVer2(companyId, lstEmployees, datePeriod.end())
+//					.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getEmploymentCode()));
+			// アルゴリズム「社員をしぼり込む」を実行する
 			// ドメインモデル「雇用に紐づく就業締め」を取得する
 			List<ClosureEmployment> lstClosureEmployment = closureEmploymentRepository
 					.findByClosureId(AppContexts.user().companyId(), currentClosure);
-//			List<String> lstEmployment = new ArrayList<>();
-			lstEmployment.addAll(lstClosureEmployment.stream().map(closureEmployment -> {
+			lstEmploymentCd.addAll(lstClosureEmployment.stream().map(closureEmployment -> {
 				return closureEmployment.getEmploymentCD();
 			}).collect(Collectors.toList()));
-			/*
-			 * // しぼり込んだ社員一覧が0件の場合 if (lstEmployment.size() == 0) { throw new
-			 * BusinessException("Msg_875"); }
-			 */
-			// 対応するすべての社員を取得する
-			// 【条件】 ・取得したドメインモデル「雇用に紐づく就業締め．雇用コード」に一致する基準日時点の所属雇用 ・在職している社員
-			List<RegulationInfoEmployeeQueryR> lstEmployee = regulationInfoEmployeeQueryAdapter
-					.search(createQueryEmployee(lstEmployment, datePeriod.start(), datePeriod.end()));
-			System.out.println(lstEmployee.stream().map(x -> x.getEmployeeId()).collect(Collectors.toList()));
-			System.out.println(approvalRootOfEmployeeImport.getApprovalRootSituations().stream().map(x -> x.getTargetID()).distinct().collect(Collectors.toList()));
 			
-			List<ApprovalEmployeeDto> buildApprovalEmployeeData = buildApprovalEmployeeData(listIdentification,lstEmployee,
-					approvalRootOfEmployeeImport);
+			// 対応するすべての社員を取得する
+//			List<String> listSid = mapEmp.entrySet().stream().filter(x -> lstEmploymentCd.contains(x.getValue()))
+//					.map(x -> {
+//						return x.getKey();
+//					}).collect(Collectors.toList());
+			
+			//対象期間に対象の締めに紐付いた雇用に属しているかチェックする
+			List<EmploymentHistImport> lstEmpHist = employmentHistAdapter.findBySidDatePeriod(lstEmployees, datePeriod)
+					.stream().filter(x -> lstEmploymentCd.contains(x.getEmploymentCode())).collect(Collectors.toList());
+			ApprovalRootOfEmployeeImport approvalRootOfEmployeeImportTemp = new ApprovalRootOfEmployeeImport(approvalRootOfEmployeeImport.getEmployeeStandard(), approvalRootSituations);
+			List<ApprovalRootSituation> approvalRootSituationsTemp = new ArrayList<>();
+			approvalRootOfEmployeeImport.getApprovalRootSituations().stream().forEach(x -> {
+				val lstFilter = lstEmpHist.stream().filter(y -> {
+					return y.getEmployeeId().equals(x.getTargetID())
+							&& x.getAppDate().afterOrEquals(y.getPeriod().start())
+							&& x.getAppDate().beforeOrEquals(y.getPeriod().end());
+				}).collect(Collectors.toList());
+				if(!lstFilter.isEmpty()) {
+					approvalRootSituationsTemp.add(x);
+				}
+			});
+			approvalRootOfEmployeeImportTemp.setApprovalRootSituations(approvalRootSituationsTemp);
+			//  
+			// RequestList228
+			List<EmployeeDto> listEmployeeInfo = atEmployeeAdapter.getByListSID(lstEmployees);
+			
+			List<ApprovalEmployeeDto> buildApprovalEmployeeData = buildApprovalEmployeeData(listIdentification,listEmployeeInfo,
+					approvalRootOfEmployeeImportTemp);
 			if (buildApprovalEmployeeData.isEmpty()) {
 				oneMonthApprovalStatusDto.setMessageID("Msg_875");
 				return oneMonthApprovalStatusDto;

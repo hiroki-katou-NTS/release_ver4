@@ -116,6 +116,7 @@ public class FlexWithinWorkTimeSheet extends WithinWorkTimeSheet{
 		if(workType.getDailyWork().isOneDayHoliday() || workType.getDailyWork().isHolidayWork() || workType.getDailyWork().isPause())
 			return flexTime;
 		//フレックス計算しない　and 非勤務日
+		
 		if(!calcMethod.isCalclateFlexTime() && workType.getDailyWork().getAttendanceHolidayAttr().isHoliday()) 
 				return flexTime; 
 		/*フレックス時間の計算*/

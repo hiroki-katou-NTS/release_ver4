@@ -7,5 +7,5 @@ import nts.arc.time.GeneralDate;
 public interface SendEmailService {
 	public String alarmSendEmail(String companyID, GeneralDate executeDate, List<String> listEmployeeTagetId,
 			List<String> listManagerTagetId, List<ValueExtractAlarmDto> listValueExtractAlarmDto,
-			MailSettingsParamDto mailSettingsParamDto);
+			MailSettingsParamDto mailSettingsParamDto,String currentAlarmCode);
 }

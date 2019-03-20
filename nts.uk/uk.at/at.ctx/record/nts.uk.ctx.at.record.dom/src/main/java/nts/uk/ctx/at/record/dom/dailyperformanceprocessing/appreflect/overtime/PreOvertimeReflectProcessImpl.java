@@ -66,12 +66,12 @@ public class PreOvertimeReflectProcessImpl implements PreOvertimeReflectProcess{
 			ischeck = true;
 		} 
 		//勤種・就時の反映
-		ReflectParameter reflectInfo = new ReflectParameter(para.getEmployeeId(), 
+		/*ReflectParameter reflectInfo = new ReflectParameter(para.getEmployeeId(), 
 				para.getDateInfo(), 
 				para.getOvertimePara().getWorkTimeCode(), 
 				para.getOvertimePara().getWorkTypeCode(),
 				false); 
-		dailyInfo = workUpdate.updateWorkTimeType(reflectInfo, false, dailyInfo);
+		dailyInfo = workUpdate.updateWorkTimeType(reflectInfo, false, dailyInfo);*/
 		return new AppReflectRecordWork(ischeck, dailyInfo);
 		
 	}

@@ -1,13 +1,18 @@
 package nts.uk.ctx.at.shared.infra.repository.remainingnumber;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremainingdata.AnnLeaGrantRemDataRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremainingdata.AnnualLeaveConditionInfo;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremainingdata.AnnualLeaveGrantRemainingData;
@@ -223,6 +228,23 @@ public class JpaAnnLeaGrantRemDataRepo extends JpaRepository implements AnnLeaGr
 				.setParameter("endDate", endDate)
 				.getList();
 		return entities.stream().map(ent -> toDomain(ent)).collect(Collectors.toList());
+	}
+
+
+	@Override
+	public Map<String, List<AnnualLeaveGrantRemainingData>> findInDate(List<String> employeeId, GeneralDate startDate,
+			GeneralDate endDate) {
+		if (employeeId.isEmpty())
+			return Collections.emptyMap();
+		String query = "SELECT a FROM KRcmtAnnLeaRemain a WHERE a.sid IN :employeeId AND a.grantDate >= :startDate AND a.grantDate <= :endDate ORDER BY a.grantDate DESC";
+		List<AnnualLeaveGrantRemainingData> result = new ArrayList<>();
+		CollectionUtil.split(employeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+			result.addAll(this.queryProxy().query(query, KRcmtAnnLeaRemain.class).setParameter("employeeId", subIdList)
+					.setParameter("startDate", startDate)
+					.setParameter("endDate", endDate)
+					.getList(ent -> toDomain(ent)));
+		});
+		return result.stream().collect(Collectors.groupingBy(i -> i.getEmployeeId()));
 	}
 
 }

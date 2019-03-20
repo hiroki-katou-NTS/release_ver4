@@ -96,6 +96,20 @@ public abstract class CalculationTimeSheet {
 		this.midNightTimeSheet = midNighttimeSheet;		
 	}
 	
+	public void replaceTimeSheet(TimeSpanForCalc calcRange) {
+		this.timeSheet = new TimeZoneRounding(calcRange.getStart(), calcRange.getEnd(), this.timeSheet.getRounding());
+		this.calcrange = calcRange;
+
+	}
+	
+	public void replaceOwnDedTimeSheet() {
+		List<TimeSheetOfDeductionItem> ded = new ArrayList<>(this.deductionTimeSheet);
+		this.deductionTimeSheet.clear();
+		this.addDuplicatedDeductionTimeSheet(ded, DeductionAtr.Deduction, Optional.empty());
+		List<TimeSheetOfDeductionItem> rec = new ArrayList<>(this.recordedTimeSheet);
+		this.recordedTimeSheet.clear();
+		this.addDuplicatedDeductionTimeSheet(rec, DeductionAtr.Appropriate, Optional.empty());
+	}
 	
 	/**
 	 * 控除時間帯を入れ替える(この処理は「残業枠時間帯作成」で使用する想定で作成)

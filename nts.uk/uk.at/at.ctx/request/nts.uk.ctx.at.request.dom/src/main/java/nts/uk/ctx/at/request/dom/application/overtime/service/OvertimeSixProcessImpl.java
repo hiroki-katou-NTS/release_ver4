@@ -66,7 +66,14 @@ public class OvertimeSixProcessImpl implements OvertimeSixProcess{
 							continue;
 						}else if(overtimeInputCaculation.getResultCaculation()!= null && overtimeInputCaculation.getResultCaculation() > 0){
 							// 03-01_事前申請超過チェック
-							OvertimeCheckResult overtimeCheckResult = this.IErrorCheckBeforeRegister.preApplicationExceededCheck(overtimeInput.getCompanyID(),appDate, inputDate, EnumAdaptor.valueOf(prePostAtr, PrePostAtr.class), overtimeInputCaculation.getAttendanceID(), convert(overtimeInput));
+							OvertimeCheckResult overtimeCheckResult = this.IErrorCheckBeforeRegister.preApplicationExceededCheck(
+									companyID,
+									appDate, 
+									inputDate, 
+									EnumAdaptor.valueOf(prePostAtr, PrePostAtr.class), 
+									overtimeInputCaculation.getAttendanceID(), 
+									convert(overtimeInput),
+									employeeID);
 							overtimeInput.setErrorCode(overtimeCheckResult.getErrorCode());
 							// 06-04_計算実績超過チェック
 							List<CaculationTime> caculations = new ArrayList<>();

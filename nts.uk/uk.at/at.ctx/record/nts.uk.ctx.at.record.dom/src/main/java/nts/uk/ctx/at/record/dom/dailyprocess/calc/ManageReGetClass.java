@@ -24,6 +24,7 @@ import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.overtime.overtimeframe.
 import nts.uk.ctx.at.shared.dom.workrule.statutoryworktime.DailyCalculationPersonalInformation;
 import nts.uk.ctx.at.shared.dom.worktime.common.EmTimeFrameNo;
 import nts.uk.ctx.at.shared.dom.worktime.common.EmTimeZoneSet;
+import nts.uk.ctx.at.shared.dom.worktime.common.OverTimeOfTimeZoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.TimeZoneRounding;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneOtherSubHolTimeSet;
 import nts.uk.ctx.at.shared.dom.worktime.fixedset.FixRestTimezoneSet;
@@ -104,6 +105,11 @@ public class ManageReGetClass {
 	
 	//
 	private Optional<DeductLeaveEarly> leaveLateSet;
+	
+	//大塚用　固定勤務の残業時間帯設定
+	private List<OverTimeOfTimeZoneSet> overTimeSheetSetting;
+	
+	private Optional<PredetermineTimeSetForCalc> predSetForOOtsuka;
 
 	public ManageReGetClass(CalculationRangeOfOneDay calculationRangeOfOneDay, IntegrationOfDaily integrationOfDaily,
 			Optional<WorkTimeSetting> workTimeSetting, Optional<WorkType> workType,
@@ -123,7 +129,9 @@ public class ManageReGetClass {
 			Optional<nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneCommonSet> workTimezoneCommonSet,
 			List<OverTimeFrameNo> statutoryFrameNoList,
 			Optional<FlexCalcSetting> flexCalcSetting,
-			Optional<DeductLeaveEarly> leaveLateSet) {
+			Optional<DeductLeaveEarly> leaveLateSet,
+			List<OverTimeOfTimeZoneSet> overTimeSheetSetting,
+			Optional<PredetermineTimeSetForCalc> predSetForOotsuka) {
 		super();
 		this.calculationRangeOfOneDay = calculationRangeOfOneDay;
 		this.integrationOfDaily = integrationOfDaily;
@@ -147,6 +155,8 @@ public class ManageReGetClass {
 		this.statutoryFrameNoList = statutoryFrameNoList;
 		this.flexCalcSetting = flexCalcSetting;
 		this.leaveLateSet = leaveLateSet;
+		this.overTimeSheetSetting = overTimeSheetSetting;
+		this.predSetForOOtsuka = predSetForOotsuka;
 	}
 	/**
 	 * 計算処理に入ることができないと判断できた時Factory Method
@@ -192,6 +202,8 @@ public class ManageReGetClass {
 									Optional.empty(),
 									Collections.emptyList(),
 									Optional.empty(),
+									Optional.empty(),
+									Collections.emptyList(),
 									Optional.empty());
 				
 	}
@@ -208,7 +220,8 @@ public class ManageReGetClass {
 											 WorkFlexAdditionSet workFlexAdditionSet, 
 											 HourlyPaymentAdditionSet hourlyPaymentAdditionSet,
 											 WorkDeformedLaborAdditionSet workDeformedLaborAdditionSet,
-											 Optional<DeductLeaveEarly> lateLeave
+											 Optional<DeductLeaveEarly> lateLeave,
+											 Optional<PredetermineTimeSetForCalc> predSetForOotsuka
 			) {
 		return new ManageReGetClass(new CalculationRangeOfOneDay(Finally.of(new FlexWithinWorkTimeSheet(Arrays.asList(new WithinWorkTimeFrame(new EmTimeFrameNo(5), 
 																																			  new TimeZoneRounding(new TimeWithDayAttr(0), new TimeWithDayAttr(0), null), 
@@ -249,7 +262,9 @@ public class ManageReGetClass {
 									Optional.empty(),
 									Collections.emptyList(),
 									Optional.empty(),
-									lateLeave);
+									lateLeave,
+									Collections.emptyList(),
+									predSetForOotsuka);
 				
 	}
 	
@@ -274,7 +289,9 @@ public class ManageReGetClass {
 											Optional<nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneCommonSet> workTimezoneCommonSet,
 											List<OverTimeFrameNo> statutoryFrameNoList,
 											Optional<FlexCalcSetting> flexCalcSetting,
-											Optional<DeductLeaveEarly> lateLeave) {
+											Optional<DeductLeaveEarly> lateLeave,
+											List<OverTimeOfTimeZoneSet> overTimeSheetSetting,
+											Optional<PredetermineTimeSetForCalc> predSetForOotsuka) {
 		
 		return new ManageReGetClass(calculationRangeOfOneDay,
 									integrationOfDaily,
@@ -297,7 +314,9 @@ public class ManageReGetClass {
 									workTimezoneCommonSet,
 									statutoryFrameNoList,
 									flexCalcSetting,
-									lateLeave);
+									lateLeave,
+									overTimeSheetSetting,
+									predSetForOotsuka);
 	
 	}
 	

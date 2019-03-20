@@ -130,7 +130,7 @@ public class AggregateTotalWorkingTime implements Cloneable {
 		this.prescribedWorkingTime.confirm(datePeriod, attendanceTimeOfDailyMap);
 
 		// 就業時間を集計する
-		this.workTime.confirm(datePeriod, attendanceTimeOfDailyMap);
+		this.workTime.confirm(datePeriod, attendanceTimeOfDailyMap, workInfoOfDailyMap, companySets, repositories);
 	}
 	
 	/**

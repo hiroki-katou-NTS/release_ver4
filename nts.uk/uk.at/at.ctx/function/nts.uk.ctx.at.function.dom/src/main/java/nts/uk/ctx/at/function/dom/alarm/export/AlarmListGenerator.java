@@ -18,7 +18,7 @@ public interface AlarmListGenerator {
 	 * @param fileContext the file context
 	 * @param exportData the export data
 	 */
-	AlarmExportDto generate(FileGeneratorContext generatorContext, List<ValueExtractAlarmDto> dataSource);
+	AlarmExportDto generate(FileGeneratorContext generatorContext, List<ValueExtractAlarmDto> dataSource,String currentAlarmCode);
 	
 	/**
 	 * Generate excel for screen
@@ -27,5 +27,5 @@ public interface AlarmListGenerator {
 	 * @param exportData the export data
 	 * @return 
 	 */
-	 void generateExcelScreen(FileGeneratorContext generatorContext, List<ValueExtractAlarmDto> dataSource);
+	 void generateExcelScreen(FileGeneratorContext generatorContext, List<ValueExtractAlarmDto> dataSource,String currentAlarmCode);
 }

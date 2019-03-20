@@ -1670,6 +1670,24 @@ var nts;
                     return year + "年 " + month + " 月";
                 return year;
             }
+            function today() {
+                var todayDate = "";
+                nts.uk.request.syncAjax("com", "server/time/today/").done(function (res) {
+                    todayDate = res;
+                }).fail(function () {
+                });
+                return moment.utc(todayDate, "yyyy/MM/dd");
+            }
+            time_1.today = today;
+            function now() {
+                var nowDateTime = "";
+                nts.uk.request.syncAjax("com", "server/time/now/").done(function (res) {
+                    nowDateTime = res;
+                }).fail(function () {
+                });
+                return moment.utc(nowDateTime);
+            }
+            time_1.now = now;
             var JapanYearMonth = (function () {
                 function JapanYearMonth(empire, year, month) {
                     this.empire = empire;
@@ -17334,6 +17352,7 @@ var nts;
                     }
                     EditorProcessor.prototype.init = function ($input, data) {
                         var _this = this;
+                        var DATA_CHANGE_EVENT_STATUS = "change-event-status";
                         var self = this;
                         var value = data.value;
                         var constraintName = (data.constraint !== undefined) ? ko.unwrap(data.constraint) : "";
@@ -17360,6 +17379,11 @@ var nts;
                             }
                         });
                         $input.on(valueUpdate, function (e) {
+                            if ($input.data(DATA_CHANGE_EVENT_STATUS) === "doing") {
+                                return;
+                            }
+                            $input.data(DATA_CHANGE_EVENT_STATUS, "doing");
+                            _.defer(function () { return $input.data(DATA_CHANGE_EVENT_STATUS, "done"); });
                             var newText = $input.val();
                             var validator = _this.getValidator(data);
                             var result = validator.validate(newText);
@@ -17395,6 +17419,14 @@ var nts;
                                 if (result.isValid) {
                                     $input.ntsError('clearKibanError');
                                     $input.val(formatter.format(result.parsedValue));
+                                    /**
+                                     On window-8.1 with IE browser, the 'change' event is not called automatically.
+                                     So, we trigger it manually when the 'value' isn't equals the result.parsedValue.
+                                     See more information at 106538
+                                    */
+                                    if (value() != result.parsedValue) {
+                                        $input.trigger(valueUpdate);
+                                    }
                                 }
                                 else {
                                     var error = $input.ntsError('getError');
@@ -18561,7 +18593,10 @@ var nts;
                                 }
                             }
                             if (clickCheckBox) {
-                                $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']").click();
+                                var $checkBox = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                                if ($checkBox.length > 0 && $checkBox[0].getAttribute("data-chk") === "off") {
+                                    $checkBox.click();
+                                }
                             }
                             else {
                                 $grid.ntsGridList('setSelected', data.value());
@@ -25121,6 +25156,9 @@ var nts;
                                 var disFormat = su.formatSave(col[0], val);
                                 su.wedgeCell(_$grid[0], { rowIdx: idx, columnKey: key }, disFormat, reset);
                                 $.data($cell, v.DATA, disFormat);
+                                if (_zeroHidden && ti.isZero(disFormat, key)) {
+                                    $cell.innerHTML = "";
+                                }
                             }
                             else if (dkn.controlType[key] === dkn.CHECKBOX) {
                                 var check = $cell.querySelector("input[type='checkbox']");
@@ -25850,6 +25888,7 @@ var nts;
                                 if (!_.isNil(dirties[id]) && !_.isNil(dirties[id][coord.columnKey])) {
                                     delete dirties[id][coord.columnKey];
                                 }
+                                return { c: calcCell };
                             }
                             else {
                                 if (cellValue === origVal) {
@@ -25858,6 +25897,7 @@ var nts;
                                         if (!_.isNil(dirties[id]) && !_.isNil(dirties[id][coord.columnKey])) {
                                             delete dirties[id][coord.columnKey];
                                         }
+                                        rData[coord.columnKey] = cellValue;
                                         return { c: calcCell };
                                     }
                                     $cell.classList.remove(color.ManualEditTarget);
@@ -25942,9 +25982,14 @@ var nts;
                                     }
                                     else {
                                         formatted = !_.isNil(column) ? format(column[0], cellValue) : cellValue;
-                                        t.c.textContent = formatted;
                                         disFormat = cellValue === "" || _.isNil(column) ? cellValue : formatSave(column[0], cellValue);
                                         $.data(t.c, v.DATA, disFormat);
+                                        if (maf.zeroHidden && ti.isZero(disFormat, coord.columnKey)) {
+                                            t.c.textContent = "";
+                                        }
+                                        else {
+                                            t.c.textContent = formatted;
+                                        }
                                     }
                                     if (t.colour)
                                         t.c.classList.add(t.colour);
@@ -27086,8 +27131,11 @@ var nts;
                             _mafollicle[SheetDef][_currentSheet].sumColArr = sumGroupArr_1;
                             kt._adjuster.nostal(table.cols, bodyGroupArr_1, sumGroupArr_1);
                             kt._adjuster.handle();
+                            var tmp_2 = _vessel().zeroHidden;
+                            _vessel().zeroHidden = _zeroHidden;
+                            _zeroHidden = tmp_2;
                             if (lo.changeZero(_vessel().zeroHidden))
-                                _vessel().zeroHidden = _zeroHidden;
+                                _zeroHidden = _vessel().zeroHidden;
                             return;
                         }
                         _maxFreeWidth = _mafollicle[SheetDef][_currentSheet].maxWidth;
@@ -27116,8 +27164,11 @@ var nts;
                         sumTbl.replaceChild(_vessel().$sumBody, bSumBody);
                         kt._adjuster.nostal(_mafollicle[SheetDef][_currentSheet].hColArr, _mafollicle[SheetDef][_currentSheet].bColArr, _mafollicle[SheetDef][_currentSheet].sumColArr);
                         kt._adjuster.handle();
+                        var tmp = _vessel().zeroHidden;
+                        _vessel().zeroHidden = _zeroHidden;
+                        _zeroHidden = tmp;
                         if (lo.changeZero(_vessel().zeroHidden))
-                            _vessel().zeroHidden = _zeroHidden;
+                            _zeroHidden = _vessel().zeroHidden;
                     }
                     gp.hopto = hopto;
                 })(gp = mgrid.gp || (mgrid.gp = {}));
@@ -30172,9 +30223,15 @@ var nts;
                     function setupScrollWhenBinding($grid) {
                         var gridId = "#" + $grid.attr("id");
                         $(document).delegate(gridId, "iggriddatarendered", function (evt, ui) {
+                            if (isCheckedAll($grid)) {
+                                return;
+                            }
                             var oldSelected = getSelectRow($grid);
                             if (!nts.uk.util.isNullOrEmpty(oldSelected)) {
                                 _.defer(function () {
+                                    if (isCheckedAll($grid)) {
+                                        return;
+                                    }
                                     var selected = getSelectRow($grid);
                                     if (!nts.uk.util.isNullOrEmpty(selected)) {
                                         selected = oldSelected;
@@ -30196,6 +30253,15 @@ var nts;
                                 });
                             }
                         });
+                    }
+                    function isCheckedAll($grid) {
+                        if ($grid.data("igGrid") && $grid.igGridSelection('option', 'multipleSelection')) {
+                            var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                            if (chk.attr("data-chk") === "on") {
+                                return true;
+                            }
+                        }
+                        return false;
                     }
                     function getSelectRow($grid) {
                         var row = null;
@@ -30231,11 +30297,38 @@ var nts;
                         };
                     }
                     function setSelected($grid, selectedId) {
-                        deselectAll($grid);
+                        var baseID = _.map($grid.igGrid("option").dataSource, $grid.igGrid("option", "primaryKey"));
+                        if (_.isEmpty(baseID)) {
+                            return;
+                        }
+                        if (baseID.length >= 500) {
+                            var oldSelectedID = _.map(getSelected($grid), "id"), shouldRemove = _.difference(oldSelectedID, selectedId), shouldSelect = _.difference(selectedId, oldSelectedID);
+                            /** When data source large (data source > 500 (?)):
+                                    if new value for select = half of data source
+                                        or removed selected value = 1/3 of data source,
+                                        should deselect all and loop for select,
+                                    else if deselect old values that not selected and select new selected only*/
+                            if (shouldSelect.length < baseID.length / 2 || shouldRemove.length < baseID.length / 3) {
+                                shouldRemove.forEach(function (id) { return $grid.igGridSelection("deselectRowById", id); });
+                                shouldSelect.forEach(function (id) { return $grid.igGridSelection('selectRowById', id); });
+                                return;
+                            }
+                        }
                         if ($grid.igGridSelection('option', 'multipleSelection')) {
-                            selectedId.forEach(function (id) { return $grid.igGridSelection('selectRowById', id); });
+                            // for performance when select all
+                            if (_.isEqual(_.sortBy(_.uniq(selectedId)), _.sortBy(_.uniq(baseID)))) {
+                                var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                                if (chk.attr("data-chk") === "off") {
+                                    chk.click();
+                                }
+                            }
+                            else {
+                                deselectAll($grid);
+                                selectedId.forEach(function (id) { return $grid.igGridSelection('selectRowById', id); });
+                            }
                         }
                         else {
+                            deselectAll($grid);
                             $grid.igGridSelection('selectRowById', selectedId);
                         }
                     }
@@ -30749,7 +30842,7 @@ var nts;
                         });
                         if (!isEqual) {
                             var clickCheckBox = false;
-                            if (value.length == sources.length) {
+                            if (_.uniq(value).length == _.uniq(sources).length) {
                                 if (multiple) {
                                     var features = _.find($grid.igGrid("option", "features"), function (f) {
                                         return f.name === "RowSelectors";
@@ -30758,7 +30851,10 @@ var nts;
                                 }
                             }
                             if (clickCheckBox) {
-                                $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']").click();
+                                var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                                if (chk.attr("data-chk") === "off") {
+                                    chk.click();
+                                }
                             }
                             else {
                                 $grid.ntsGridList('setSelected', value.length === 0 ? (!multiple ? undefined : value) : value);
@@ -36666,35 +36762,40 @@ var nts;
                         var $grid = $control;
                         if (virtualization) {
                             $grid.on("selectChange", function () {
-                                var row = null;
-                                var selectedRows = $grid.igGrid("selectedRows");
-                                if (selectedRows) {
-                                    row = selectedRows[0];
-                                }
-                                else {
-                                    row = $grid.igGrid("selectedRow");
-                                }
-                                if (row) {
-                                    ui.ig.grid.virtual.expose(row, $grid);
-                                }
+                                exporeTo($grid, function (row) { return ui.ig.grid.virtual.expose(row, $grid); });
                             });
                         }
                         else {
                             $grid.on("selectChange", function () {
-                                var row = null;
-                                var selectedRows = $grid.igGrid("selectedRows");
-                                if (selectedRows) {
-                                    row = selectedRows[0];
-                                }
-                                else {
-                                    row = $grid.igGrid("selectedRow");
-                                }
-                                if (row) {
-                                    ui.ig.grid.expose(row, $grid);
-                                }
+                                exporeTo($grid, function (row) { return ui.ig.grid.expose(row, $grid); });
                             });
                         }
                         return $grid;
+                    }
+                    function exporeTo($grid, exposeFunction) {
+                        var row = null;
+                        if ($grid.igGridSelection('option', 'multipleSelection')) {
+                            var chk = $grid.closest('.ui-iggrid').find(".ui-iggrid-rowselector-header").find("span[data-role='checkbox']");
+                            if (chk.attr("data-chk") === "off") {
+                                return;
+                            }
+                        }
+                        var selectedRows = $grid.igGrid("selectedRows");
+                        var keyProperty = $grid.igGrid("option", "primaryKey");
+                        var sourceKeys = _.map($grid.igGrid("option", "dataSource"), function (o) { return o[keyProperty]; });
+                        var selectedKeys = _.map(selectedRows, function (o) { return o["id"]; });
+                        if (_.isEqual(_.sortBy(_.uniq(sourceKeys)), _.sortBy(_.uniq(selectedKeys)))) {
+                            return;
+                        }
+                        if (selectedRows) {
+                            row = selectedRows[0];
+                        }
+                        else {
+                            row = $grid.igGrid("selectedRow");
+                        }
+                        if (row) {
+                            exposeFunction(row);
+                        }
                     }
                     function getSelectRowIndex($grid, selectedValue) {
                         var dataSource = $grid.igGrid("option", "dataSource");

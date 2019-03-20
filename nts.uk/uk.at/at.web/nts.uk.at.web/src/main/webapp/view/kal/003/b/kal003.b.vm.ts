@@ -119,12 +119,12 @@ module nts.uk.at.view.kal003.b.viewmodel {
                             $(".nts-input").ntsError("clear");
                         }
                     });
-                    self.workRecordExtractingCondition().errorAlarmCondition().workTypeCondition().comparePlanAndActual = ko.observable(0);
+                    self.workRecordExtractingCondition().errorAlarmCondition().workTypeCondition().comparePlanAndActual = ko.observable(self.setting.errorAlarmCondition.workTypeCondition.comparePlanAndActual);
                     self.required_BA1_4 = ko.observable(self.workRecordExtractingCondition().errorAlarmCondition().workTypeCondition().comparePlanAndActual() > 0);
                     self.workRecordExtractingCondition().errorAlarmCondition().workTypeCondition().comparePlanAndActual.subscribe((newV) => {
                         self.required_BA1_4(newV > 0);
                         $(".nts-input").ntsError("clear");
-                    });
+                    }); 
                     break;
                 }
                 case sharemodel.CATEGORY.MONTHLY: {

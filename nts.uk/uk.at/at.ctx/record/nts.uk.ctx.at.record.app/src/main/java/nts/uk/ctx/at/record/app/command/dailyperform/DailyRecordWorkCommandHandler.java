@@ -404,7 +404,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 		List<IntegrationOfDaily> domainDailyNew = convertToDomain(commandNew);
 		if (month == null || !month.getDomainMonth().isPresent()) {
 			// remove domain error
-			employeeErrorRepo.removeParam(toMapParam(commandNew));
+			//employeeErrorRepo.removeParam(toMapParam(commandNew));
 
 			// caculator
 			domainDailyNew = calcService.calculate(domainDailyNew);
@@ -434,6 +434,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 		// get error after caculator
 		// update data
 		long time = System.currentTimeMillis();
+		employeeErrorRepo.removeParam(toMapParam(commandNew));
 		registerNotCalcDomain(commandNew, isUpdate);
 		List<IntegrationOfDaily> lastDt =  updateDomainAfterCalc(domainDailyNew);
 		
@@ -490,7 +491,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 	public RCDailyCorrectionResult handlerNoCalc(List<DailyRecordWorkCommand> commandNew, List<DailyRecordWorkCommand> commandOld, List<EmployeeDailyPerError> lstError,
 			List<DailyItemValue> dailyItems, boolean isUpdate, UpdateMonthDailyParam month, int mode, Map<Integer, DPAttendanceItemRC> lstAttendanceItem) {
 		
-		employeeErrorRepo.removeParam(toMapParam(commandNew));
+		//employeeErrorRepo.removeParam(toMapParam(commandNew));
 
 		List<IntegrationOfDaily> domainDailyNew = convertToDomain(commandNew);
 

@@ -20,6 +20,8 @@ module nts.uk.at.view.kdw006.c.service {
         updateMonthly: 'at/record/workrecord/operationsetting/updateMonthly',
 
         updateAppType: 'at/function/dailyfix/update',
+        
+        getApplicationType: 'at/record/workrecord/operationsetting/findApplicationType',
     };
 
     export function updateAppType(cm: any): JQueryPromise<any> {
@@ -62,5 +64,9 @@ module nts.uk.at.view.kdw006.c.service {
     export function getMonthly(): JQueryPromise<any> {
         return nts.uk.request.ajax(servicePath.getMonthly);
     }
+        
+    export function getApplicationType(): JQueryPromise<any> {
+        return nts.uk.request.ajax(servicePath.getApplicationType);
+    } 
 
 }

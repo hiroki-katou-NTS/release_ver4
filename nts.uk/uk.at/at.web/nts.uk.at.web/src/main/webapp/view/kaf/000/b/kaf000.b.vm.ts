@@ -76,6 +76,8 @@ module nts.uk.at.view.kaf000.b.viewmodel {
         displayReturnReasonPanel: KnockoutObservable<boolean> = ko.observable(false);
         version: number = 0;
         editable: KnockoutObservable<boolean> = ko.observable(false);
+        user: number = 0;
+        reflectPerState: number  = 0;
 
         constructor(listAppMetadata: Array<shrvm.model.ApplicationMetadata>, currentApp: shrvm.model.ApplicationMetadata) {
             let self = this;
@@ -260,6 +262,8 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                     data.authorizableFlags,
                     data.alternateExpiration,
                     data.loginInputOrApproval);
+                self.user = data.user;
+                self.reflectPerState = data.reflectPlanState;
                 self.editable(data.initMode == 0 ? false : true);
                 dfd.resolve(data);
             }).fail(function(res: any) {
@@ -335,6 +339,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
 //            let htmlF = htmlN.replace("<!DOCTYPE html>", "");
             document.querySelector('#master-content').innerHTML = html;
             ko.cleanNode(document.querySelector('#master-content'));
+            $('#master-content').css("display","none");
             screenModel = self.getScreenModel(listAppMeta, currentApp);
             __viewContext['viewModel'] = screenModel;
             ko.applyBindings(screenModel, document.querySelector('#master-content'));
@@ -343,6 +348,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             self.appType(currentApp.appType);
             __viewContext.transferred.value.currentApp = currentApp.appID;
             self.start(moment.utc().format("YYYY/MM/DD"), isWriteLog).done(function() {
+                $('#master-content').css("display","");
                 self.pgname(currentApp)
                 if (currentApp.appType == 10) {
                     $("#fixed-table").ntsFixedTable({ width: 100 });
@@ -422,13 +428,18 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                     applicationDto: self.dataApplication(),
                     memo: self.reasonToApprover(),
                     comboBoxReason: self.getBoxReason(),
-                    textAreaReason: self.getAreaReason()
+                    textAreaReason: self.getAreaReason(),
+                    user: self.user,
+                    reflectPerState: self.reflectPerState
                 };
             // self.inputCommonData(new model.InputCommonData(self.dataApplication(), self.reasonToApprover()));
             if(!appcommon.CommonProcess.checklenghtReason(inputCommonData.comboBoxReason+":"+inputCommonData.textAreaReason,"#appReason")){
                 return;
             }
             let approveCmd = self.appType() != 10 ? inputCommonData : self.getHolidayShipmentCmd(self.reasonToApprover());
+            if(self.appType() == 1){
+                approveCmd.holidayAppType = nts.uk.ui._viewModel.content.holidayTypeCode();        
+            }
             service.approveApp(approveCmd, self.appType()).done(function(data) {
                 self.resfreshReason(data.appReason);
                 self.sendMail('Msg_220', data);
@@ -621,7 +632,9 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                 appVersion: vm.version,
                 memo: memo ? memo : "",
                 comboBoxReason: self.getBoxReason(),
-                textAreaReason: self.getAreaReason()
+                textAreaReason: self.getAreaReason(),
+                user: self.user,
+                reflectPerState: self.reflectPerState
             }
 
             return shipmentCmd;

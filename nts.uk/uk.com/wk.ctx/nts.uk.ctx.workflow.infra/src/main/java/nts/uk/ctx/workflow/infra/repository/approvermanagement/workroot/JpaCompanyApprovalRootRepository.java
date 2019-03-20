@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -21,7 +21,7 @@ import nts.uk.ctx.workflow.infra.entity.approvermanagement.workroot.WwfmtComAppr
  * @author hoatt
  *
  */
-@Stateless
+@RequestScoped
 public class JpaCompanyApprovalRootRepository extends JpaRepository implements CompanyApprovalRootRepository{
 
 	private static final String FIND_BY_ALL = "SELECT c FROM WwfmtComApprovalRoot c";

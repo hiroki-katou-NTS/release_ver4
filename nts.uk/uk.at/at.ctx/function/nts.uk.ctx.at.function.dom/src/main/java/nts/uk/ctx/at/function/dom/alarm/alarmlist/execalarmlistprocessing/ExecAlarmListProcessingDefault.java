@@ -73,7 +73,7 @@ public class ExecAlarmListProcessingDefault implements ExecAlarmListProcessingSe
 	@Override
 	public OutputExecAlarmListPro execAlarmListProcessing(String extraProcessStatusID, String companyId,
 			List<String> workplaceIdList, List<String> listPatternCode, GeneralDateTime dateTime,
-			boolean sendMailPerson, boolean sendMailAdmin) {
+			boolean sendMailPerson, boolean sendMailAdmin,String alarmCode) {
 		String errorMessage = "";
 		// ドメインモデル「アラームリスト抽出処理状況」を取得する
 		// TODO : ・状態＝処理中???
@@ -214,7 +214,7 @@ public class ExecAlarmListProcessingDefault implements ExecAlarmListProcessingSe
 		} // end list employmentcode
 
 		Optional<OutputSendAutoExe> outputSendAutoExe = sendAutoExeEmailService.sendAutoExeEmail(companyId, dateTime,
-				listExtractedAlarmDto, sendMailPerson, sendMailAdmin);
+				listExtractedAlarmDto, sendMailPerson, sendMailAdmin,alarmCode);
 
 		AlarmListExtraProcessStatus alarmListExtra = alarmListExtraProcessStatus.get();
 		int endTime = GeneralDateTime.now().hours() * 60 + GeneralDateTime.now().minutes();

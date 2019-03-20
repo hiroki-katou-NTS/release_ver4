@@ -74,6 +74,18 @@ public class EmpEmployeeAdapterImpl implements EmpEmployeeAdapter {
 		}
 		return null;
 	}
+	
+	@Override
+	public List<EmployeeImport> findByEmpId(List<String> empIds) {
+		// Get Employee Basic Info
+		List<EmployeeBasicInfoExport> empExportList = employeePub.findBySIds(empIds);
+		return empExportList.stream().map(empExport -> EmployeeImport.builder().employeeId(empExport.getEmployeeId())
+				.employeeCode(empExport.getEmployeeCode()).employeeName(empExport.getPName())
+				.employeeMailAddress(
+						empExport.getPMailAddr() == null ? null : (new MailAddress(empExport.getPMailAddr().v())))
+				.entryDate(empExport.getEntryDate()).retiredDate(empExport.getRetiredDate()).build())
+				.collect(Collectors.toList());
+	}
 
 	@Override
 	public List<String> getListEmpByWkpAndEmpt(List<String> wkps, List<String> lstempts, DatePeriod dateperiod) {

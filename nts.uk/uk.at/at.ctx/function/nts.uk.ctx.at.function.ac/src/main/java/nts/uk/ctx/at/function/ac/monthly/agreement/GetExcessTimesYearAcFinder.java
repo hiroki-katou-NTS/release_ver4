@@ -1,5 +1,9 @@
 package nts.uk.ctx.at.function.ac.monthly.agreement;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
@@ -19,6 +23,14 @@ public class GetExcessTimesYearAcFinder implements GetExcessTimesYearAdapter {
 	@Override
 	public int algorithm(String employeeId, Year year) {
 		return getExcessTimesYearPub.algorithm(employeeId, year).getExcessTimes();
+	}
+	
+	@Override
+	public Map<String,Integer> algorithm(List<String> employeeIds, Year year) {
+		return getExcessTimesYearPub.algorithm(employeeIds, year).entrySet().stream().collect(Collectors.toMap(
+	            e -> e.getKey(),
+	            e -> e.getValue().getExcessTimes()
+	        ));
 	}
 
 }

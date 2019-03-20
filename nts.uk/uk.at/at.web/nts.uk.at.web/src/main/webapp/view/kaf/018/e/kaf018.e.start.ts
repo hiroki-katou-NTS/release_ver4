@@ -7,7 +7,6 @@ module nts.uk.at.view.kaf018.e {
         let screenModel = new kaf018.e.viewmodel.ScreenModel();
         screenModel.startPage().done(function() {
             __viewContext.bind(screenModel);
-            screenModel.initFixedTable();
         })
     });
 }

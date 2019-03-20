@@ -264,6 +264,9 @@ module nts.uk.at.view.kaf011.shr {
                     service.changeDay(changeDateParam).done((data: IHolidayShipment) => {
                         vm.recWk().setWkTypes(data.recWkTypes || []);
                         vm.absWk().setWkTypes(data.absWkTypes || []);
+                        if(vm.displayPrePostFlg()==0){
+                            vm.prePostSelectedCode(data.preOrPostType);    
+                        }
                         vm.kaf000_a.start(vm.employeeID(), 1, 10, moment(data.refDate).format("YYYY/MM/DD")).done(() => {
                         });
                     }).always(() => {
@@ -280,8 +283,8 @@ module nts.uk.at.view.kaf011.shr {
                         if (data.timezoneUseDtos) {
                             $("#recTime1Start").ntsError("clear");
                             $("#recTime1End").ntsError("clear");
-                            let timeZone1 = data.timezoneUseDtos[0];
-                            let timeZone2 = data.timezoneUseDtos[1];
+                            let timeZone1 = _.find(data.timezoneUseDtos, ['workNo', 1]);
+                            let timeZone2 = _.find(data.timezoneUseDtos, ['workNo', 2]); 
 
                             timeZone1 ? self.wkTime1().updateData(timeZone1) : self.wkTime1().clearData();
 

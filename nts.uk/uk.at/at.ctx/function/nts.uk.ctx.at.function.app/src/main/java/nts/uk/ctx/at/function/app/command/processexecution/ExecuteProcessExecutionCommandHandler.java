@@ -2874,7 +2874,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		// アラームリスト自動実行処理を実行する
 		OutputExecAlarmListPro outputExecAlarmListPro = this.execAlarmListProcessingService.execAlarmListProcessing(
 				extraProcessStatusID, companyId, workplaceIdList, listPatternCode, GeneralDateTime.now(),
-				sendMailPerson, sendMailAdmin);
+				sendMailPerson, sendMailAdmin,
+				!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent()?"":processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v());
 
 		// ドメインモデル「更新処理自動実行ログ」を取得しチェックする（中断されている場合は更新されているため、最新の情報を取得する）
 		Optional<ProcessExecutionLog> processExecutionLog = procExecLogRepo.getLogByCIdAndExecCd(companyId, execItemCd,

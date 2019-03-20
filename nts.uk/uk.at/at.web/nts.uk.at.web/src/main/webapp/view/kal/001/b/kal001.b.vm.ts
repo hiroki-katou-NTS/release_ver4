@@ -64,7 +64,8 @@ module nts.uk.at.view.kal001.b {
                 let self = this;
                 block.invisible();
                 let params = {
-                    data: self.dataSource
+                    data: self.dataSource,
+                    currentAlarmCode : nts.uk.ui.windows.getShared("extractedAlarmData").currentAlarmCode
                 };
                 service.exportAlarmData(params).done(() => {
 
@@ -78,9 +79,14 @@ module nts.uk.at.view.kal001.b {
             sendEmail(): void {
                 let self = this;
                 let shareEmployee = _.map(self.dataSource, (item) =>{
-                   return {employeeID: item.employeeID, workplaceID: item.workplaceID}; 
+                   return {
+                    employeeID: item.employeeID, 
+                    workplaceID: item.workplaceID,
+                    workplaceName:item.workplaceName
+                    }; 
                 });
                 nts.uk.ui.windows.setShared("employeeList", _.uniqWith(shareEmployee, _.isEqual));
+                //nts.uk.ui.windows.setShared("employeeList", _.uniqWith(_.filter(shareEmployee,function(x){return x.workplaceID !=null;} ), _.isEqual));
                 modal("/view/kal/001/c/index.xhtml").onClosed(() => {
                     
                 });
