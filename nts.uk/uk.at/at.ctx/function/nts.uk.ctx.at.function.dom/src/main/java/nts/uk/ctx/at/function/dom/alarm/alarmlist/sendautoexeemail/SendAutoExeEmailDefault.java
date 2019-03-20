@@ -116,7 +116,7 @@ public class SendAutoExeEmailDefault implements SendAutoExeEmailService {
 						useAuthentication,
 						mailSetting,
 						mailSettingAdmins,
-						Optional.empty());
+						mailSettingAutomatic.get().getSenderAddress());
 			}
 		}
 		catch (Exception e) {

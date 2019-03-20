@@ -211,7 +211,9 @@ public class AlarmSendEmailService implements SendEmailService {
 					ccList = mailSetting.get().getMailAddressCC();
 					bccList = mailSetting.get().getMailAddressBCC();
 					if(mailSetting.get().getMailRely().isPresent()) {
-						replyToList.add(mailSetting.get().getMailRely().get().v());
+						if(!mailSetting.get().getMailRely().get().v().equals("") && mailSetting.get().getMailRely().get().v() != null ) {
+							replyToList.add(mailSetting.get().getMailRely().get().v());
+						}
 					}
 				}
 				// Do send mail
