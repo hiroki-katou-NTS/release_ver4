@@ -55,13 +55,27 @@ public class CheckMonthlyClosureCommandHandler extends CommandHandlerWithResult<
 
 	@Inject
 	private MonthlyClosureUpdatePersonLogRepository closureUpdatePersonLogRepo;
+	
+	@Inject
+	private UpdateStatus updateStatus;
 
 	@Override
 	protected MonthlyClosureResponse handle(CommandHandlerContext<CheckCommand> context) {
 		String companyId = AppContexts.user().companyId();
 		String employeeId = AppContexts.user().employeeId();
 		int closureId = context.getCommand().getClosureId();
-		OutputParam checkStatus = checkExecutionStatus(companyId);
+		OutputParam checkStatus = new OutputParam();
+		// update status = 2 cho all nhan vien trong cong ty co thoi gian xu ly
+		// > 4h ma chua done
+		this.updateStatus.updateStatusForCompany(companyId);
+		
+		if(context.getCommand().getOverTime()){
+			// neu overTime = true nghia la xu ly da chay qua 4h
+			// setStatus = 1 de luon luon chay xu ly moi
+			checkStatus.setStatus(1);
+		} else {
+			checkStatus = checkExecutionStatus(companyId);
+		}
 
 		Optional<Closure> optClosure = closureRepo.findById(companyId, closureId);
 		Closure closure = optClosure.get();
@@ -90,7 +104,7 @@ public class CheckMonthlyClosureCommandHandler extends CommandHandlerWithResult<
 				MonthlyClosureResponse result = new MonthlyClosureResponse(log.getId(), listEmpId, closureId,
 						executionDT, executionEnd, closure.getClosureMonth().getProcessingYm().v(),
 						closureDate.getClosureDay().v(), closureDate.getLastDayOfMonth(), closurePeriod.start(),
-						closurePeriod.end(),1);
+						closurePeriod.end(), 1, log.getExecutionStatus().value);
 				return result;
 			} else {
 				throw new BusinessException("Msg_1105");
@@ -105,7 +119,7 @@ public class CheckMonthlyClosureCommandHandler extends CommandHandlerWithResult<
 				MonthlyClosureResponse resultClosurtLog = new MonthlyClosureResponse(log.getId(), listEmpId, closureId,
 						executionDT, executionEnd, closure.getClosureMonth().getProcessingYm().v(),
 						closureDate.getClosureDay().v(), closureDate.getLastDayOfMonth(), closurePeriod.start(),
-						closurePeriod.end(),2);
+						closurePeriod.end(), 2, log.getExecutionStatus().value);
 				return resultClosurtLog;
 			} else {
 				MonthlyClosureUpdatePersonLog resultLog = new MonthlyClosureUpdatePersonLog(employeeId, log.getId(),
@@ -117,7 +131,7 @@ public class CheckMonthlyClosureCommandHandler extends CommandHandlerWithResult<
 				MonthlyClosureResponse resultCloLog = new MonthlyClosureResponse(
 						resultLog.getMonthlyClosureUpdateLogId(), listEmployeeId, closureId, executionDT, null,
 						closure.getClosureMonth().getProcessingYm().v(), closureDate.getClosureDay().v(),
-						closureDate.getLastDayOfMonth(), closurePeriod.start(), closurePeriod.end(),2);
+						closureDate.getLastDayOfMonth(), closurePeriod.start(), closurePeriod.end(), 2, log.getExecutionStatus().value);
 				return resultCloLog;
 			}
 

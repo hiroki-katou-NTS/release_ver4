@@ -89,6 +89,13 @@ public class MonthlyClosureUpdateWebService extends WebService {
 	public Kmw006aResultDto getInfor(MonthlyClosureResponse response) {
 		return monthlyClosureFinder.getClosureInfors(response);
 	}
+	
+	@POST
+	@Path("getInforsWithNoParams")
+	public Kmw006aResultDto getInfor() {
+		return monthlyClosureFinder.getClosureInfor();
+	}
+	
 
 	@POST
 	@Path("getLogInfors")

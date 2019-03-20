@@ -27,5 +27,5 @@ public class MonthlyClosureResponse {
 	private GeneralDate periodStart;
 	private GeneralDate periodEnd;
 	private Integer check;
-
+	private Integer executionStatus;
 }
