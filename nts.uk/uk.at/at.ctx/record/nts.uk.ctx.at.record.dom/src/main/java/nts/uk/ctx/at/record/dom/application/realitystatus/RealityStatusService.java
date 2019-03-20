@@ -108,7 +108,6 @@ public class RealityStatusService {
 		List<StatusWkpActivityOutput> listStatusActivity = Collections.synchronizedList(new ArrayList<StatusWkpActivityOutput>());
 		// アルゴリズム「承認状況取得実績使用設定」を実行する
 		UseSetingOutput useSeting = this.getUseSetting(cId);
-		MutableValue<Boolean> error = new MutableValue<Boolean>(false);
 		
 		// 職場ID(リスト)
 		this.parallel.forEach(listWorkplaceId, wkpId -> {
@@ -117,12 +116,7 @@ public class RealityStatusService {
 					.getApprovalStatusEmployee(wkpId, startDate, endDate, listEmpCd);
 			// アルゴリズム「承認状況取得職場実績確認」を実行する
 			SumCountOutput count = new SumCountOutput();
-			try{
-				count = this.getApprovalSttConfirmWkpResults(listStatusEmp, wkpId, useSeting, endDate, closureID);
-			}
-			catch(BusinessException ex){
-				error.set(true);
-			}
+			count = this.getApprovalSttConfirmWkpResults(listStatusEmp, wkpId, useSeting, endDate, closureID);
 			
 			// 保持内容．未確認データ確認
 			if (isConfirmData) {
@@ -139,7 +133,7 @@ public class RealityStatusService {
 		
 		ConcurrentStopwatches.printAll();
 		
-		return new SttWkpActivityOutputFull(listStatusActivity, error.get());
+		return new SttWkpActivityOutputFull(listStatusActivity, false);
 	}
 
 	/**
