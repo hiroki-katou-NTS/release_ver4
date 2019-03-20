@@ -1746,7 +1746,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		// ドメインモデル「エラーメッセージ情報」を取得する
 		List<ErrMessageInfo> listErrDailyCalculation = errMessageInfoRepository.getAllErrMessageInfoByID(execId,
 				ExecutionContent.DAILY_CALCULATION.value);
-		if(!listErrDailyCreation.isEmpty()) {
+		if(!listErrDailyCalculation.isEmpty()) {
 			isHasDailyCalculateException = true;
 		}
 		if (isHasDailyCalculateException) {
