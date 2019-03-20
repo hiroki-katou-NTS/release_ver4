@@ -3,9 +3,7 @@ package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -120,17 +118,21 @@ public class ConfirmStatusActualDay {
 							updatePermission(companyId, employeeId, optIndentity.get(), mergePeriodClr, lstResultEmpTemp2));
 				} else {
 
-					Map<Pair<String, GeneralDate>, ApprovalStatusForEmployee> mapApprovalStatus = new HashMap<>();
+					//Map<Pair<String, GeneralDate>, ApprovalStatusForEmployee> mapApprovalStatus = new HashMap<>();
 					DatePeriod mergePeriod = mergePeriodClr.getPeriod();
 					// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 					List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-							.getApprovalByListEmplAndListApprovalRecordDateNew(mergePeriod.datesBetween(),
+							.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(mergePeriod.end()),
 									Arrays.asList(employeeId), 2);
-					mapApprovalStatus.putAll(lstApprovalStatus.stream().collect(Collectors
-							.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus())));
+//					mapApprovalStatus.putAll(lstApprovalStatus.stream().collect(Collectors
+//							.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus())));
 					// list emp date unApproval
+					val approvalStatusMonth = lstApprovalStatus.isEmpty() ? null : lstApprovalStatus.get(0);
 					val lstEmpDateUnApproval = lstResultEmpTemp2.stream().filter(x -> {
-						val value = mapApprovalStatus.get(Pair.of(x.getEmployeeId(), x.getDate()));
+						val value = (approvalStatusMonth != null && (x.getDate().afterOrEquals(mergePeriod.start())
+								&& x.getDate().beforeOrEquals(mergePeriod.end())))
+										? approvalStatusMonth.getApprovalStatus()
+										: null;
 						if (value != null && value == ApprovalStatusForEmployee.UNAPPROVED)
 							return true;
 						else
@@ -145,7 +147,10 @@ public class ConfirmStatusActualDay {
 
 					// list emp date Approval
 					val lstEmpDateApproval = lstResultEmpTemp2.stream().filter(x -> {
-						val value = mapApprovalStatus.get(Pair.of(x.getEmployeeId(), x.getDate()));
+						val value = (approvalStatusMonth != null && (x.getDate().afterOrEquals(mergePeriod.start())
+								&& x.getDate().beforeOrEquals(mergePeriod.end())))
+										? approvalStatusMonth.getApprovalStatus()
+										: null;
 						if (value != null && value != ApprovalStatusForEmployee.UNAPPROVED)
 							return true;
 						else

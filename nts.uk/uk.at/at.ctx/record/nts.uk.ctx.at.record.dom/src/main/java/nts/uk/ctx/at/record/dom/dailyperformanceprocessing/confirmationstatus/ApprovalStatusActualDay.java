@@ -137,15 +137,14 @@ public class ApprovalStatusActualDay {
 					DatePeriod mergePeriod = mergePeriodClr.getPeriod();
 					// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 					List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-							.getApprovalByListEmplAndListApprovalRecordDateNew(mergePeriod.datesBetween(),
+							.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(mergePeriod.end()),
 									Arrays.asList(employeeId), 2);
-					val mapApprovalStatus = lstApprovalStatus.stream().collect(Collectors
-							.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus()));
+					ApproveRootStatusForEmpImport mapApprovalStatus = lstApprovalStatus.isEmpty() ? null : lstApprovalStatus.get(0);
 					// mapApprovalRootBySId 
 					resultPart.stream().forEach(x -> {
-						val tempApprovalStatus = mapApprovalStatus.get(Pair.of(x.getEmployeeId(), x.getDate()));
-						val mapApprovalRoot = mapApprovalRootBySId.get(Pair.of(x.getEmployeeId(), x.getDate())); 
-						if (mapApprovalRoot != null && tempApprovalStatus != null) {
+						val mapApprovalRoot = mapApprovalRootBySId.get(Pair.of(x.getEmployeeId(), x.getDate()));
+						val tempApprovalStatus = mapApprovalStatus == null ? null : mapApprovalStatus.getApprovalStatus(); 
+						if (mapApprovalRoot != null && tempApprovalStatus != null && (x.getDate().afterOrEquals(mergePeriod.start()) && x.getDate().beforeOrEquals(mergePeriod.end()))) {
 							if (mapApprovalRoot.getReleaseDivision() == ReleasedProprietyDivision.RELEASE && tempApprovalStatus == ApprovalStatusForEmployee.UNAPPROVED)
 								x.setPermissionRelease(true);
 							else
