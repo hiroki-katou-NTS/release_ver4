@@ -43,16 +43,16 @@ public class ExcessOutsideWorkDto implements ItemConst {
 	}
 
 	private int calcFakeNo(int excessNo, int breakdownNo) {
-		return (breakdownNo - 1 ) * 5 + excessNo;
+		return (excessNo - 1 ) * 5 + breakdownNo;
 	}
 	
 	private int calcBreakDownNo(int fakeNo) {
-		return ((fakeNo - 1) / 5) + 1;
+		int excessNo = fakeNo % 5;
+		return excessNo == 0 ? 5 : excessNo;
 	}
 	
 	private int calcExcessNo(int fakeNo) {
-		int excessNo = fakeNo % 5;
-		return excessNo == 0 ? 5 : excessNo;
+		return ((fakeNo - 1) / 5) + 1;
 	}
 
 	public ExcessOutsideWork toDomain() {
