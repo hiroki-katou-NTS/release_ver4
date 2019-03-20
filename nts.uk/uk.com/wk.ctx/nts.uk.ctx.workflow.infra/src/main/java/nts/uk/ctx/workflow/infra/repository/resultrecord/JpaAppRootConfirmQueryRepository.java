@@ -114,8 +114,8 @@ public class JpaAppRootConfirmQueryRepository
 					stmt.setString(3 + i, subEmpIds.get(i));
 				}
 				
-				stmt.setDate(3 + subEmpIds.size(), Date.valueOf(period.end().localDate()));
-				stmt.setDate(4 + subEmpIds.size(), Date.valueOf(period.start().localDate()));
+				stmt.setDate(3 + subEmpIds.size(), Date.valueOf(period.start().localDate()));
+				stmt.setDate(4 + subEmpIds.size(), Date.valueOf(period.end().localDate()));
 				
 				List<AppRootRecordConfirmForQuery> subResults = new NtsResultSet(stmt.executeQuery()).getList(rec -> {
 					
