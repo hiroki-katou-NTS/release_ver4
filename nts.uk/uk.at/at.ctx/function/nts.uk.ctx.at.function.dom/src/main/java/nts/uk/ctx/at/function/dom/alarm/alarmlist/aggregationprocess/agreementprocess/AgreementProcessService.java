@@ -199,7 +199,7 @@ public class AgreementProcessService {
 		Map<String, EmployeeSearchDto> mapEmployee = employees.stream().collect(Collectors.toMap(EmployeeSearchDto::getId, x ->x));
 //		Logger.getLogger(getClass()).info("Transaction Status 2: " + tsr.getTransactionStatus());
 		/** TODO: parallel from here */
-		parallelManager.forEach(CollectionUtil.partitionBySize(empIds, 25), employeeIds -> {
+		parallelManager.forEach(CollectionUtil.partitionBySize(empIds, 50), employeeIds -> {
 //		CollectionUtil.split(empIds, 25, employeeIds -> {
 			checkService.check(agreementErAl, periodAlarms, agreementSetObj, counter, shouldStop, result, empIds, empIdToClosureId,
 					closureList, mapEmployee, employeeIds);

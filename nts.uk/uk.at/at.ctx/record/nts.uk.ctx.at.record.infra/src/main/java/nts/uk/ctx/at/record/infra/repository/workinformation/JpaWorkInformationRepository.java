@@ -239,21 +239,6 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 	}
 
 	@Override
-	public List<WorkInfoOfDailyPerformance> findByListEmployeeId(List<String> employeeIds, DatePeriod ymds) {
-		List<Object[]> result = new ArrayList<>();
-		StringBuilder query = new StringBuilder(
-				"SELECT af, c from KrcdtDaiPerWorkInfo af LEFT JOIN af.scheduleTimes c ");
-		query.append(" WHERE af.krcdtDaiPerWorkInfoPK.employeeId IN :employeeId ");
-		query.append(" AND af.krcdtDaiPerWorkInfoPK.ymd <= :end AND af.krcdtDaiPerWorkInfoPK.ymd >= :start");
-		TypedQueryWrapper<Object[]> tQuery = this.queryProxy().query(query.toString(), Object[].class);
-		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds -> {
-			result.addAll(tQuery.setParameter("employeeId", empIds).setParameter("start", ymds.start())
-					.setParameter("end", ymds.end()).getList());
-		});
-		return toDomainFromJoin(result);
-	}
-
-	@Override
 	public void updateByKey(WorkInfoOfDailyPerformance domain) {
 
 		if (domain != null) {

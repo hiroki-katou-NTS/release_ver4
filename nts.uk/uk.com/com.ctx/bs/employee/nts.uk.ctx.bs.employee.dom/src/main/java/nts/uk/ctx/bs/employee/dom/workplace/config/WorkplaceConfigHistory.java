@@ -24,6 +24,10 @@ public class WorkplaceConfigHistory extends GeneralHistoryItem<WorkplaceConfigHi
 	public WorkplaceConfigHistory(WorkplaceConfigHistoryGetMemento memento) {
 		super(memento.getHistoryId(), memento.getPeriod());
 	}
+	
+	public WorkplaceConfigHistory(String hisId, DatePeriod period) {
+		super(hisId, period);
+	}
 
 	/**
 	 * Save to memento.

@@ -47,6 +47,19 @@ public class BreakTimeSheet extends DomainObject {
 	
 	/** 休憩時間: 勤怠時間 */
 	private AttendanceTime breakTime;
+
+
+	public BreakTimeSheet(BreakFrameNo breakFrameNo, TimeWithDayAttr startTime, TimeWithDayAttr endTime) {
+		super();
+		this.breakFrameNo = breakFrameNo;
+		this.startTime = startTime;
+		this.endTime = endTime;
+		if(startTime != null && endTime != null){
+			this.breakTime = new AttendanceTime(startTime.valueAsMinutes() - endTime.valueAsMinutes());
+		} else {
+			this.breakTime = AttendanceTime.ZERO;
+		}
+	}
 	
 	/**
 	 * 指定された時間帯に重複する休憩時間帯の重複時間（分）を返す

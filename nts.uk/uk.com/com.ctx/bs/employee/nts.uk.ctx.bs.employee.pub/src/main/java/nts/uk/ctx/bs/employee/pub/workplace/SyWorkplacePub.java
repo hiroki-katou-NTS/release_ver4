@@ -56,6 +56,8 @@ public interface SyWorkplacePub {
 	 */
 	// RequestList65
 	List<String> findWpkIdsBySid(String companyId, String employeeId, GeneralDate date);
+	
+	Map<GeneralDate, Map<String, List<String>>> findWpkIdsBySids(String companyId, List<String> employeeId, DatePeriod date);
 
 	/**
 	 * Find by wkp id.

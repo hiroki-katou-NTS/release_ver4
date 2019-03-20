@@ -41,7 +41,7 @@ public class BasicAgreementSettingsGetter {
 	private List<AffClassificationSidImport> affClassifications = new ArrayList<>();
 	private List<AgreementTimeOfClassification> agreeTimeClassifi = new ArrayList<>();
 	
-	private Map<String, Map<GeneralDate, List<String>>> empToWorkplaceId = new HashMap<>();
+	private Map<GeneralDate, Map<String, List<String>>> empToWorkplaceId = new HashMap<>();
 	private Map<String, AgreementTimeOfWorkPlace> agreeTimeWP = new HashMap<>();
 	
 	private Map<String, List<SyEmploymentImport>> employments = new HashMap<>();
@@ -53,7 +53,7 @@ public class BasicAgreementSettingsGetter {
 	
 	public BasicAgreementSettingsGetter(AgreementUnitSetting unitSetting,
 			List<AffClassificationSidImport> affClassifications, List<AgreementTimeOfClassification> agreeTimeClassifi,
-			Map<String, Map<GeneralDate, List<String>>> empToWorkplaceId,
+			Map<GeneralDate, Map<String, List<String>>> empToWorkplaceId,
 			Map<String, AgreementTimeOfWorkPlace> agreeTimeWP, Map<String, List<SyEmploymentImport>> employments,
 			Map<String, AgreementTimeOfEmployment> agreeTimeEmployment, List<AgreementTimeOfCompany> agreeTimeCompany,
 			Map<String, BasicAgreementSetting> basicAgreeSettings) {
@@ -89,9 +89,9 @@ public class BasicAgreementSettingsGetter {
 			}
 		}
 		if (this.unitSetting.getWorkPlaceUseAtr() == UseClassificationAtr.USE) {
-			Map<GeneralDate, List<String>> empWp = this.empToWorkplaceId.get(employeeId);
-			if(empWp != null && empWp.containsKey(criteriaDate)) {
-				for(String workplaceId : empWp.get(criteriaDate)) {
+			Map<String, List<String>> empWp = this.empToWorkplaceId.get(criteriaDate);
+			if(empWp != null && empWp.containsKey(employeeId)) {
+				for(String workplaceId : empWp.get(employeeId)) {
 					AgreementTimeOfWorkPlace atwp = this.agreeTimeWP.get(workplaceId);
 					if(atwp != null){
 						if(this.basicAgreeSettings.containsKey(atwp.getBasicSettingId())){

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * The Interface ScBasicSchedulePub.
@@ -24,6 +25,8 @@ public interface ScBasicSchedulePub {
 	 * @return the optional
 	 */
 	public Optional<ScBasicScheduleExport> findById(String employeeId, GeneralDate baseDate);
+	
+	public List<ScBasicScheduleExport> findById(List<String> employeeID, DatePeriod date);
 
 	/**
 	 * Find work schedule break time (勤務予定休憩時間帯) RequestList351

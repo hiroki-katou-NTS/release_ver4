@@ -162,7 +162,7 @@ public class AgreementDomainServiceImpl implements AgreementDomainService {
 		Map<String, BasicAgreementSetting> basicAgreeSettings = new HashMap<>();
 		List<AffClassificationSidImport> affClassifications = new ArrayList<>();
 		List<AgreementTimeOfClassification> agreeTimeClassifi = new ArrayList<>();
-		Map<String, Map<GeneralDate, List<String>>> empToWorkplaceId = new HashMap<>();
+		Map<GeneralDate, Map<String, List<String>>> empToWorkplaceId = new HashMap<>();
 		Map<String, AgreementTimeOfWorkPlace> agreeTimeWP = new HashMap<>();
 		Map<String, List<SyEmploymentImport>> employments = new HashMap<>();
 		Map<String, AgreementTimeOfEmployment> agreeTimeEmployment = new HashMap<>();
@@ -181,13 +181,14 @@ public class AgreementDomainServiceImpl implements AgreementDomainService {
 		}
 		
 		if(agreementUnitSet.getWorkPlaceUseAtr() == UseClassificationAtr.USE){
-			employeeIds.stream().forEach(empId -> {
-				Map<GeneralDate, List<String>> empDateToWpId = new HashMap<>();
-				datePeriod.datesBetween().forEach(date -> {
-					empDateToWpId.put(date, this.affWorkplaceAdapter.findAffiliatedWorkPlaceIdsToRoot(companyId, empId, date));
-				});
-				empToWorkplaceId.put(empId, empDateToWpId);
-			});
+			empToWorkplaceId.putAll(this.affWorkplaceAdapter.findAffiliatedWorkPlaceIdsToRoot(companyId, employeeIds, datePeriod));
+//			employeeIds.stream().forEach(empId -> {
+//				Map<GeneralDate, List<String>> empDateToWpId = new HashMap<>();
+//				datePeriod.datesBetween().forEach(date -> {
+//					empDateToWpId.put(date, this.affWorkplaceAdapter.findAffiliatedWorkPlaceIdsToRoot(companyId, empId, date));
+//				});
+//				empToWorkplaceId.put(empId, empDateToWpId);
+//			});
 			List<String> workplaceIds = empToWorkplaceId.entrySet().stream().map(c -> 
 													c.getValue().values().stream().flatMap(List::stream).distinct().collect(Collectors.toList()))
 											.flatMap(List::stream).distinct().collect(Collectors.toList());

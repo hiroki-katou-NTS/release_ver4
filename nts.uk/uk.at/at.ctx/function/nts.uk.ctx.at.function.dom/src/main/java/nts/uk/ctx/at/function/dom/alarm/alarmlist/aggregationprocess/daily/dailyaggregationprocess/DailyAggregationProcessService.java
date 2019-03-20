@@ -126,6 +126,7 @@ public class DailyAggregationProcessService {
 		
 
 		DataHolder holder = new DataHolder(comId, eralCate);
+		String KAL010_1 = TextResource.localize("KAL010_1");
 		
 		parallelManager.forEach(CollectionUtil.partitionBySize(employees, 100), emps -> {
 			
@@ -138,7 +139,7 @@ public class DailyAggregationProcessService {
 			List<String> employeeIds = emps.stream().map(e -> e.getId()).collect(Collectors.toList());
 			List<ApplicationImport> apps = applicationAdapter.getApplicationBySID(employeeIds, datePeriod.start(), datePeriod.end());
 			result.addAll(dailyPerformanceService.aggregationProcess(datePeriod, employeeIds, emps, holder, apps));
-			result.addAll(this.extractCheckCondition(datePeriod, emps, comId, employeeIds, holder));
+			result.addAll(this.extractCheckCondition(datePeriod, emps, comId, employeeIds, holder, KAL010_1));
 			result.addAll(this.extractFixedConditionV2(comId, holder.dailyAlarmCondition, periodAlarm, emps, employeeIds));
 			
 			synchronized (this) {
@@ -150,7 +151,8 @@ public class DailyAggregationProcessService {
 	}
 	
 	// tab3: チェック条件
-	private List<ValueExtractAlarm> extractCheckCondition(DatePeriod period, List<EmployeeSearchDto> employee, String companyID, List<String> emIds, DataHolder holder) {
+	private List<ValueExtractAlarm> extractCheckCondition(DatePeriod period, List<EmployeeSearchDto> employee, String companyID, 
+			List<String> emIds, DataHolder holder, String KAL010_1) {
 		List<ValueExtractAlarm> listValueExtractAlarm = new ArrayList<>();
 		
 		List<ErrorRecordImport> listErrorRecord = erAlWorkRecordCheckAdapter.check(holder.eralId, period, emIds);
@@ -163,7 +165,8 @@ public class DailyAggregationProcessService {
 		
 		return listErrorRecord.stream().filter(er -> er.isError()).map(er -> this.checkConditionGenerateValue(empMap.get(er.getEmployeeId()), 
 																												er.getDate(), holder.mapWorkRecordExtraCon.get(er.getErAlId()), 
-																												companyID, getAlarmItem(holder, er), mapAttdName)).collect(Collectors.toList());
+																												companyID, getAlarmItem(holder, er), 
+																												mapAttdName, KAL010_1)).collect(Collectors.toList());
 	}
 
 	private String getAlarmItem(DataHolder holder, ErrorRecordImport errorRecord) {
@@ -442,6 +445,7 @@ public class DailyAggregationProcessService {
 	// tab3: チェック条件
 	private List<ValueExtractAlarm> extractCheckCondition(DailyAlarmCondition dailyAlarmCondition, DatePeriod period, 
 			List<EmployeeSearchDto> employee, String companyID, List<String> emIds) {
+		String KAL010_1 = TextResource.localize("KAL010_1");
 		List<ValueExtractAlarm> listValueExtractAlarm = new ArrayList<>();
 		List<WorkRecordExtraConAdapterDto> listWorkRecordExtraCon=  workRecordExtraConAdapter.getAllWorkRecordExtraConByListID(dailyAlarmCondition.getExtractConditionWorkRecord());
 		Map<String, WorkRecordExtraConAdapterDto> mapWorkRecordExtraCon = listWorkRecordExtraCon.stream().collect(Collectors.toMap(WorkRecordExtraConAdapterDto::getErrorAlarmCheckID, x->x));
@@ -466,7 +470,8 @@ public class DailyAggregationProcessService {
 						break;
 					}
 				}
-				listValueExtractAlarm.add(this.checkConditionGenerateValue(em, errorRecord.getDate(), mapWorkRecordExtraCon.get(errorRecord.getErAlId()), companyID, alarmItem, mapAttdName));				
+				listValueExtractAlarm.add(this.checkConditionGenerateValue(em, errorRecord.getDate(), 
+						mapWorkRecordExtraCon.get(errorRecord.getErAlId()), companyID, alarmItem, mapAttdName, KAL010_1));				
 			}			
 		}
 		
@@ -597,7 +602,8 @@ public class DailyAggregationProcessService {
 		return listAlarmItemName;
 	}
 	
-	private ValueExtractAlarm checkConditionGenerateValue(EmployeeSearchDto employee, GeneralDate date, WorkRecordExtraConAdapterDto workRecordExtraCon,  String companyID,String alarmItem, Map<Integer,DailyAttendanceItem> mapAtdItemName) {
+	private ValueExtractAlarm checkConditionGenerateValue(EmployeeSearchDto employee, GeneralDate date, WorkRecordExtraConAdapterDto workRecordExtraCon,  
+			String companyID,String alarmItem, Map<Integer,DailyAttendanceItem> mapAtdItemName, String KAL010_1) {
 		String alarmContent = "";
 		TypeCheckWorkRecord checkItem = EnumAdaptor.valueOf(workRecordExtraCon.getCheckItem(), TypeCheckWorkRecord.class);
 		
@@ -605,7 +611,7 @@ public class DailyAggregationProcessService {
 		if(alarmContent.length()>100) {
 			alarmContent = alarmContent.substring(0, 100);
 		}
-		return new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), date.toString(ErAlConstant.DATE_FORMAT), TextResource.localize("KAL010_1"), alarmItem, alarmContent, workRecordExtraCon.getErrorAlarmCondition().getDisplayMessage());
+		return new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), date.toString(ErAlConstant.DATE_FORMAT), KAL010_1, alarmItem, alarmContent, workRecordExtraCon.getErrorAlarmCondition().getDisplayMessage());
 	}
 	
 	private String  checkConditionGenerateAlarmContent(TypeCheckWorkRecord checkItem,  WorkRecordExtraConAdapterDto workRecordExtraCon, String companyID, Map<Integer,DailyAttendanceItem> mapAtdItemName) {

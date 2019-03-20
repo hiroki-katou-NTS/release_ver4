@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.infra.repository.standardtime;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -93,6 +94,9 @@ public class JpaAgreementTimeOfWorkPlaceRepository extends JpaRepository impleme
 	@Override
 	@SneakyThrows
 	public List<AgreementTimeOfWorkPlace> findWorkPlaceSetting(List<String> workplaceId) {
+		if(workplaceId.isEmpty()){
+			return new ArrayList<>();
+		}
 		String query = "select WKPCD, BASIC_SETTING_ID, LABOR_SYSTEM_ATR from KMKMT_AGREEMENTTIME_WPL where WKPCD IN (" + workplaceId.stream().map(s -> "?").collect(Collectors.joining(",")) +" )";
 		try (PreparedStatement statement = this.connection().prepareStatement(query)) {
 			for(int i = 0; i < workplaceId.size(); i++){

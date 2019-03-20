@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.infra.repository.standardtime;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,6 +89,9 @@ public class JpaAgreementTimeOfClassificationRepository extends JpaRepository
 	
 	@Override
 	public List<AgreementTimeOfClassification> find(String companyId, List<String> classificationCode) {
+		if(classificationCode.isEmpty()){
+			return new ArrayList<>();
+		}
 		String query = "SELECT a FROM KmkmtAgeementTimeClass a WHERE a.kmkmtAgeementTimeClassPK.companyId = :companyId "
 				+ "AND a.kmkmtAgeementTimeClassPK.classificationCode in :classificationCode ";
 		
