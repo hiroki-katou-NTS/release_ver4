@@ -1833,8 +1833,13 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			// 異動者の絞り込み todo request list 189
 			List<WorkPlaceHistImport> wplByListSidAndPeriod = this.workplaceWorkRecordAdapter
 					.getWplByListSidAndPeriod(empIds, new DatePeriod(startDate, GeneralDate.ymd(9999, 12, 31)));
-			wplByListSidAndPeriod.forEach(x -> {
-				setEmpIds.add(x.getEmployeeId());
+			wplByListSidAndPeriod.forEach(emp -> {
+					emp.getLstWkpIdAndPeriod().forEach(x -> {
+						if (x.getDatePeriod().start().afterOrEquals(startDate)) {
+							setEmpIds.add(emp.getEmployeeId());
+							return;
+						}
+					});
 			});
 		}
 		if (procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTypeChangePerson()) {
