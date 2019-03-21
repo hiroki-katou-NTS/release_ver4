@@ -60,6 +60,7 @@ public class ConfirmStatusMonthly {
 
 	
 	public Optional<StatusConfirmMonthDto> getConfirmStatusMonthly(String companyId,Integer closureId,ClosureDate closureDate, List<String> listEmployeeId,YearMonth yearmonthInput) {
+		iFindDataDCRecord.clearAllStateless();
 		List<ConfirmStatusResult> listConfirmStatus = new ArrayList<>();
 		//ドメインモデル「本人確認処理の利用設定」を取得する
 		Optional<IdentityProcessUseSet> identityProcessUseSet = identityProcessUseSetRepo.findByKey(companyId);
@@ -91,7 +92,7 @@ public class ConfirmStatusMonthly {
 			confirmStatus.setEmployeeId(employeeId);
 			confirmStatus.setYearMonth(yearmonthInput);
 			
-			if(!confirmationMonth.isPresent()) {
+			if(confirmationMonth.isPresent()) {
 				confirmStatus.setConfirmStatus(true);
 			}else {
 				confirmStatus.setConfirmStatus(false);
@@ -120,7 +121,7 @@ public class ConfirmStatusMonthly {
 				confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_RELEASE);
 			}else {
 				//取得した「承認処理の利用設定．月の承認者確認を利用する」をチェックする
-				if(optApprovalUse.get().getUseMonthApproverConfirm()) {
+				if(!optApprovalUse.get().getUseMonthApproverConfirm()) {
 					confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_RELEASE);
 				}else {
 					//対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する : RQ462
@@ -128,14 +129,16 @@ public class ConfirmStatusMonthly {
 							.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(datePeriod.end()),
 									Arrays.asList(employeeId), 2); // 2 : 月別確認
 					if(lstApprovalStatus.isEmpty()) {
-						continue;
-					}
-					//取得した「承認対象者の承認状況」をチェックする
-					if(lstApprovalStatus.get(0).getApprovalStatus() == ApprovalStatusForEmployee.UNAPPROVED) {
 						confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_RELEASE);
 					}else {
-						confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_NOT_RELEASE);
+						//取得した「承認対象者の承認状況」をチェックする
+						if(lstApprovalStatus.get(0).getApprovalStatus() == ApprovalStatusForEmployee.UNAPPROVED) {
+							confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_RELEASE);
+						}else {
+							confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_NOT_RELEASE);
+						}
 					}
+					
 					
 				}
 			}

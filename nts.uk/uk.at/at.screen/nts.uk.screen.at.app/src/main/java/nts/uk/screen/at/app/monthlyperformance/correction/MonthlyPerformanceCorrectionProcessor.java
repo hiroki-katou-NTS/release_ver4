@@ -881,7 +881,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 						if(approvalStatusResult.getEmployeeId().equals(employee.getId())) {
 							approve = approvalStatusResult.isApprovalStatus();
 							// *5 check disable mode approval 
-							if(approve) {
+							if(!approve) {
 								if(approvalStatusResult.getImplementaPropriety() == AvailabilityAtr.CAN_NOT_RELEASE) {
 									lstCellState.add(new MPCellStateDto(employeeId, "approval", Arrays.asList(STATE_DISABLE)));
 								}
@@ -899,8 +899,8 @@ public class MonthlyPerformanceCorrectionProcessor {
 				}
 			}else {
 				lstCellState.add(new MPCellStateDto(employeeId, "approval", Arrays.asList(STATE_DISABLE)));
-				for (ApprovalStatusResult approvalStatusResult : approvalStatusMonth.get().getApprovalStatusResult()) {
-					if(approvalStatusMonth.isPresent()) {
+				if(approvalStatusMonth.isPresent()) {	
+					for (ApprovalStatusResult approvalStatusResult : approvalStatusMonth.get().getApprovalStatusResult()) {
 						//*6 : set value approval mode 0,1
 						if(approvalStatusResult.getEmployeeId().equals(employee.getId())) {
 							if(approvalStatusResult.getNormalStatus() == ApprovalStatusForEmployee.UNAPPROVED) {
@@ -922,7 +922,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 					}
 				}
 			}
-			if (param.getInitMenuMode() == 2) {
+			if (param.getInitMenuMode() == 2 || !employee.getId().equals(employeeIdLogin)) {
 				lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
 			} else {
 				if(statusConfirmMonthDto.isPresent()) {
