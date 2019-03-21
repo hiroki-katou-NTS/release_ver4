@@ -6,21 +6,13 @@ package nts.uk.file.at.infra.schedule.daily;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -143,6 +135,7 @@ import nts.uk.shr.infra.file.report.aspose.cells.AsposeCellsReportGenerator;
  * The Class AsposeWorkScheduleOutputConditionGenerator.
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsReportGenerator implements WorkScheduleOutputGenerator{
 
 	/** The workplace config repository. */
@@ -531,7 +524,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		// Push all employeeId into print order
 		List<EmployeePrintOrder> lstEmployeePrintOrder = new ArrayList<>();
 		int order = 0;
-		
+
 		// Get all workplace of selected employees within given period
 		for (String employeeId: query.getEmployeeId()) {
 			WkpHistImport workplaceHist = workplaceAdapter.findWkpBySid(employeeId, baseDate);
@@ -541,11 +534,22 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			}
 			lstWorkplaceId.add(workplaceHist.getWorkplaceId());
 			queryData.getLstWorkplaceImport().add(workplaceHist);
-			
+
 			// Also add into print order list
 			lstEmployeePrintOrder.add(new EmployeePrintOrder(order++, employeeId));
 		}
-		
+
+/*        // Get all workplace of selected employees within given period
+		List<WkpHistImport> workplaceHists = workplaceAdapter.findWkpBySidAndBaseDate(query.getEmployeeId(), baseDate);
+        lstEmployeeNoWorkplace = workplaceHists.stream().filter(Objects::isNull).map(WkpHistImport::getEmployeeId).collect(Collectors.toList());
+        lstWorkplaceId = workplaceHists.stream().map(WkpHistImport::getWorkplaceId).collect(Collectors.toList());
+        queryData.setLstWorkplaceImport(workplaceHists);
+
+        // Also add into print order list
+        for (int i = 0; i < workplaceHists.size(); i++) {
+            lstEmployeePrintOrder.add(new EmployeePrintOrder(i, workplaceHists.get(i).getEmployeeId()));
+        }*/
+
 		if (!lstEmployeeNoWorkplace.isEmpty()) {
 			List<EmployeeDto> lstEmployeeDto = employeeAdapter.findByEmployeeIds(lstEmployeeNoWorkplace);
 			int numOfChunks = (int)Math.ceil((double)lstEmployeeDto.size() / LIMIT_DATA_PACK);
@@ -602,17 +606,13 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 				List<AttendanceResultImport> result = attendaceAdapter.getValueOf(Arrays.asList(employeeId), new DatePeriod(query.getStartDate(), query.getEndDate()), itemsId);
 				resultsSync.addAll(result);
 			});
-			lstAttendanceResultImport = new ArrayList<>();
-			lstAttendanceResultImport.addAll(resultsSync);
+			lstAttendanceResultImport = new ArrayList<>(resultsSync);
 		}
-		
+
 		queryData.setLstAttendanceResultImport(lstAttendanceResultImport);
 		
 		// Extract list employeeId from attendance result list -> List employee won't have those w/o data
-		List<String> lstEmployeeWithData = lstAttendanceResultImport.stream().map(attendanceData -> {
-			String employeeId = attendanceData.getEmployeeId();
-			return employeeId;
-		}).collect(Collectors.toList());
+		List<String> lstEmployeeWithData = lstAttendanceResultImport.stream().map(AttendanceResultImport::getEmployeeId).distinct().collect(Collectors.toList());
 		
 		// From list employeeId above -> Find back their workplace hierachy code
 		Set<String> lstWorkplaceIdWithData = new HashSet<>();
@@ -1125,16 +1125,17 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 				});
 				
 				// Analyze remark content size and append remark content list
+				StringBuilder errorDetails = new StringBuilder();
 				for (int i = 0; i < lstRemarkContentStr.size(); i++) {
 					String remarkContentStr = lstRemarkContentStr.get(i);
-					int bufferredLength = detailedDate.errorDetail.length() + 5;
-					if (bufferredLength >= 35 && dataRowCount == 1) {
-						detailedDate.errorDetail += " 他" + (lstRemarkContentStr.size() - i - 1) + "件";
-					}
-					else {
-						detailedDate.errorDetail += " " + remarkContentStr;
+					int bufferedLength = detailedDate.errorDetail.length() + 5;
+					if (bufferedLength >= 35 && dataRowCount == 1) {
+						errorDetails.append(" 他").append(lstRemarkContentStr.size() - i - 1).append("件");
+					} else {
+						errorDetails.append(" ").append(remarkContentStr);
 					}
 				}
+				detailedDate.errorDetail += errorDetails.toString();
 			}
 			
 			// ER/AL
