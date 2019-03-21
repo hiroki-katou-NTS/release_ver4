@@ -561,11 +561,14 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 	//key: sid, value: EmploymentInfo
 	@Override
 	public Map<String, EmpmInfo> getLstDetailEmpHistItem(String companyId, List<String> lstSID, GeneralDate date) {
-		List<EmpmInfo> lst =  this.queryProxy().query(GET_BY_LSTSID_DATE, Object[].class)
-			.setParameter("companyId", companyId)
-			.setParameter("lstSID", lstSID)
-			.setParameter("date", date)
-			.getList(c -> new EmpmInfo(c[0].toString(), c[1].toString(), c[2].toString()));
+		List<EmpmInfo> lst = new ArrayList<>();
+		CollectionUtil.split(lstSID, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
+			lst.addAll(this.queryProxy().query(GET_BY_LSTSID_DATE, Object[].class)
+					.setParameter("companyId", companyId)
+					.setParameter("lstSID", splitData)
+					.setParameter("date", date)
+					.getList(c -> new EmpmInfo(c[0].toString(), c[1].toString(), c[2].toString())));
+		});
 		Map<String, EmpmInfo> mapResult = new HashMap<>();
 		for(String sid : lstSID){
 			List<EmpmInfo> empInfo = lst.stream().filter(c -> c.getSid().equals(sid)).collect(Collectors.toList());

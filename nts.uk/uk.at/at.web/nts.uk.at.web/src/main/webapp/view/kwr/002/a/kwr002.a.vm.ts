@@ -357,14 +357,15 @@ module nts.uk.com.view.kwr002.a {
                     nts.uk.ui.block.clear();
                 }).fail((res: any) => {
                     nts.uk.ui.block.clear();
-                    if (res.message !== "" && res.businessException) {
+                    nts.uk.ui.dialog.error(res);
+                    /*if (res.message !== "" && res.businessException) {
                         nts.uk.ui.dialog.caution(res).then(() => {
                             nts.uk.ui.dialog.error({ messageId: 'Msg_37' });
                         });
                     } else {
                         nts.uk.ui.dialog.error({ messageId: "Msg_37" });
 
-                    }
+                    }*/
 
                 });
             }
@@ -386,7 +387,8 @@ module nts.uk.com.view.kwr002.a {
                     nts.uk.ui.block.clear();
                 }).fail((res: any) => {
                     nts.uk.ui.block.clear();
-                    if (res.message !== "" && res.businessException) {
+                    nts.uk.ui.dialog.error(res);
+                    /*if (res.message !== "" && res.businessException) {
                         nts.uk.ui.dialog.caution(res).then(() => {
                             nts.uk.ui.dialog.error({ messageId: 'Msg_37' });
                         });
@@ -395,7 +397,7 @@ module nts.uk.com.view.kwr002.a {
                     } else {
                         nts.uk.ui.dialog.error({ messageId: "Msg_37" });
 
-                    }
+                    }*/
 
 
                 });
