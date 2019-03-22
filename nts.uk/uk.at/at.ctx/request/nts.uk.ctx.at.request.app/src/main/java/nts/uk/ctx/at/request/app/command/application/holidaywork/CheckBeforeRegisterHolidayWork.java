@@ -130,10 +130,11 @@ public class CheckBeforeRegisterHolidayWork {
 		// TODO: ３６協定時間上限チェック（年間）
 		beforeCheck.TimeUpperLimitYearCheck();
 		// 事前否認チェック
+		/*
 		res = beforeCheck.preliminaryDenialCheck(app.getCompanyID(), app.getEmployeeID(), app.getAppDate(), app.getInputDate(),
-				app.getPrePostAtr(),ApplicationType.BREAK_TIME_APPLICATION.value);
+		 		app.getPrePostAtr(),ApplicationType.BREAK_TIME_APPLICATION.value);
 		result.setConfirm(res.isConfirm());
-
+		*/
 		return result;
 	}
 	
