@@ -44,10 +44,10 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 
 	@Inject
 	private SaveProtetionRepository saveProtetionRepo;
-
-	@Inject
+	
+	@Inject 
 	private CSVReportGenerator generator;
-
+	
 	private static final String CSV_EXTENSION = ".csv";
 
 	@Override
@@ -233,8 +233,8 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 		}
 
 		// 履歴区分を判別する。履歴なしの場合
+		List<Integer> indexs = new ArrayList<Integer>();
 		if (tableList.getHistoryCls() == HistoryDiviSion.NO_HISTORY) {
-			List<Integer> indexs = new ArrayList<Integer>();
 			switch (tableList.getRetentionPeriodCls()) {
 			case ANNUAL:
 				indexs = yearIndexs;
@@ -352,7 +352,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 			query.toString();
 		}
 
-		if (!targetEmployeesSid.isEmpty()) {
+		if (!targetEmployeesSid.isEmpty() && query.toString().contains("?listTargetSid")) {
 
 			List<String> lSid = new ArrayList<>();
 			CollectionUtil.split(targetEmployeesSid, 100, subIdList -> {

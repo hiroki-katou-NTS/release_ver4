@@ -36,11 +36,13 @@ import org.slf4j.LoggerFactory;
 import nts.arc.system.ServerSystemProperties;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
+import nts.gul.csv.CSVBufferReader;
 import nts.gul.csv.CSVParsedResult;
 import nts.gul.csv.CustomCsvReader;
 import nts.gul.csv.NtsCsvReader;
 import nts.gul.csv.NtsCsvRecord;
 import nts.gul.text.StringUtil;
+import nts.gul.util.value.MutableValue;
 import nts.uk.ctx.sys.assist.dom.category.Category;
 import nts.uk.ctx.sys.assist.dom.category.CategoryRepository;
 import nts.uk.ctx.sys.assist.dom.category.StorageRangeSaved;
@@ -128,8 +130,7 @@ public class RecoveryStorageService {
 		datetimeRange.put(YEAR, 4);
 	}
 
-	public void recoveryStorage(String dataRecoveryProcessId) throws ParseException, NoSuchMethodException,
-			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void recoveryStorage(String dataRecoveryProcessId) throws Exception {
 		NUMBER_ERROR = 0;
 		Optional<PerformDataRecovery> performRecoveries = performDataRecoveryRepository
 				.getPerformDatRecoverById(dataRecoveryProcessId);
@@ -193,20 +194,21 @@ public class RecoveryStorageService {
 	}
 
 	public DataRecoveryOperatingCondition exCurrentCategory(TableListByCategory tableListByCategory,
-			TableListByCategory tableNotUseByCategory, String uploadId, String dataRecoveryProcessId)
-			throws ParseException, NoSuchMethodException, SecurityException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException {
+			TableListByCategory tableNotUseByCategory, String uploadId, String dataRecoveryProcessId) throws Exception {
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 		// カテゴリの中の社員単位の処理
-		condition = exTableUse(tableListByCategory, dataRecoveryProcessId, uploadId);
+
+		HashMap<String, CSVBufferReader> csvByteReadMaper = new HashMap<>();
+
+		condition = exTableUse(tableListByCategory, dataRecoveryProcessId, uploadId, csvByteReadMaper);
 
 		if (condition == DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS) {
 			// の処理対象社員コードをクリアする
 			dataRecoveryMngRepository.updateProcessTargetEmpCode(dataRecoveryProcessId, null);
 
 			// カテゴリの中の日付単位の処理
-			condition = exTableNotUse(tableNotUseByCategory, dataRecoveryProcessId, uploadId);
+			condition = exTableNotUse(tableNotUseByCategory, dataRecoveryProcessId, uploadId, csvByteReadMaper);
 
 		}
 
@@ -215,7 +217,8 @@ public class RecoveryStorageService {
 	}
 
 	public DataRecoveryOperatingCondition exTableUse(TableListByCategory tableListByCategory,
-			String dataRecoveryProcessId, String uploadId)  {
+			String dataRecoveryProcessId, String uploadId, HashMap<String, CSVBufferReader> csvByteReadMaper)
+			throws Exception {
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 		List<DataRecoveryTable> targetDataByCate = new ArrayList<>();
@@ -276,21 +279,12 @@ public class RecoveryStorageService {
 							null);
 				}).collect(Collectors.toList());
 
-				if(empSelectRange.isEmpty())
+				if (empSelectRange.isEmpty())
 					return DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
-				try {
-					this.forEmployee(dataRecoveryProcessId, empSelectRange, targetDataByCate, listTarget);
-				} catch (Exception e) {
-					e.getMessage();
-				}
+				this.forEmployee(dataRecoveryProcessId, empSelectRange, targetDataByCate, listTarget, csvByteReadMaper);
 
 			} else {
-
-				try {
-					this.forEmployee(dataRecoveryProcessId, employeeInfos, targetDataByCate, listTarget);
-				} catch (Exception e) {
-					e.getMessage();
-				}
+				this.forEmployee(dataRecoveryProcessId, employeeInfos, targetDataByCate, listTarget, csvByteReadMaper);
 			}
 		}
 		return condition;
@@ -299,10 +293,18 @@ public class RecoveryStorageService {
 	@Transactional(value = TxType.REQUIRES_NEW, rollbackOn = Exception.class)
 	public DataRecoveryOperatingCondition forEmployee(String dataRecoveryProcessId,
 			List<EmployeeDataReInfoImport> employeeInfos, List<DataRecoveryTable> targetDataByCate,
-			List<Target> listTarget) throws Exception {
+			List<Target> listTarget, HashMap<String, CSVBufferReader> csvByteReadMaper) throws Exception {
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 		String errorCode = "";
+
+		// khởi tạo csv Reader
+		for (int i = 0; i < targetDataByCate.size(); i++) {
+			String filePath = getExtractDataStoragePath(targetDataByCate.get(i).getUploadId()) + "//"
+					+ targetDataByCate.get(i).getFileNameCsv() + ".csv";
+			CSVBufferReader reader = new CSVBufferReader(new File(filePath));
+			csvByteReadMaper.put(targetDataByCate.get(i).getFileNameCsv(), reader);
+		}
 
 		int i = 0;
 		// Foreach 対象社員コード＿ID
@@ -318,7 +320,7 @@ public class RecoveryStorageService {
 
 			try {
 				condition = self.recoveryDataByEmployee(dataRecoveryProcessId,
-						employeeDataMngInfoImport.getEmployeeId(), targetDataByCate, listTarget);
+						employeeDataMngInfoImport.getEmployeeId(), targetDataByCate, listTarget, csvByteReadMaper);
 				long endTime = System.nanoTime();
 				long duration = (endTime - startTime) / 1000000; // ms;
 				System.out.println("== Employee :" + i++ + " == Time Restore => " + duration);
@@ -344,7 +346,8 @@ public class RecoveryStorageService {
 
 	@Transactional(value = TxType.REQUIRES_NEW, rollbackOn = Exception.class)
 	public DataRecoveryOperatingCondition recoveryDataByEmployee(String dataRecoveryProcessId, String employeeId,
-			List<DataRecoveryTable> targetDataByCate, List<Target> listTarget) throws Exception {
+			List<DataRecoveryTable> targetDataByCate, List<Target> listTarget,
+			HashMap<String, CSVBufferReader> csvByteReadMaper) throws Exception {
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 		Optional<PerformDataRecovery> performDataRecovery = performDataRecoveryRepository
@@ -378,7 +381,7 @@ public class RecoveryStorageService {
 				// 対象社員の日付順の処理
 				long startTime = System.nanoTime();
 				condition = crudDataByTable(dataRecoveryTable, employeeId, dataRecoveryProcessId, tableList,
-						performDataRecovery, resultsSetting, true);
+						performDataRecovery, resultsSetting, true, csvByteReadMaper);
 				long endTime = System.nanoTime();
 				long duration = (endTime - startTime) / 1000000; // ms;
 				System.out
@@ -402,9 +405,9 @@ public class RecoveryStorageService {
 
 	public DataRecoveryOperatingCondition crudDataByTable(DataRecoveryTable dataRecoveryTable, String employeeId,
 			String dataRecoveryProcessId, Optional<TableList> tableList,
-			Optional<PerformDataRecovery> performDataRecovery, List<String> resultsSetting, Boolean tableUse)
-			throws ParseException, NoSuchMethodException, SecurityException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException {
+			Optional<PerformDataRecovery> performDataRecovery, List<String> resultsSetting, Boolean tableUse,
+			HashMap<String, CSVBufferReader> csvByteReadMaper) throws ParseException, NoSuchMethodException,
+			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 
@@ -412,21 +415,13 @@ public class RecoveryStorageService {
 		List<String> targetDataHeader = CsvFileUtil.getCsvHeader(dataRecoveryTable.getFileNameCsv(),
 				dataRecoveryTable.getUploadId());
 
-		// List<List<String>> dataTableNotHeader = new ArrayList<>();
-
-		// sort date of targetData
-		// dieu chinh (Bo sort di)
-		// dataTableNotHeader = sortByDate(targetDataTable);
-
 		List<DataRecoveryOperatingCondition> listCondition = new ArrayList<>();
 		try {
-			NtsCsvReader csvReader = NtsCsvReader.newReader().skipEmptyLines(true)
-					.withChartSet(Charset.forName("Shift_JIS"));
 
-			InputStream inputStream = createInputStreamFromFile(dataRecoveryTable.getUploadId(),
-					dataRecoveryTable.getFileNameCsv());
-			if (!Objects.isNull(inputStream)) {
-				Consumer<CSVParsedResult> csvResult = (dataRow) -> {
+			System.out.println("============= employeeId " + employeeId);
+			if (employeeId != null) {
+				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
+				reader.readFilter(1000, dataRow -> {
 
 					List<NtsCsvRecord> records = dataRow.getRecords();
 
@@ -467,9 +462,9 @@ public class RecoveryStorageService {
 
 						List<String> columnNotNull = checkTypeColumn(TABLE_NAME);
 						int check = 0;
-						for (int i = 0; i < records.size(); i++) {
+						for (int k = 0; k < records.size(); k++) {
 
-							NtsCsvRecord row = records.get(i);
+							NtsCsvRecord row = records.get(k);
 
 							if (row.getRowNumber() != 1) {
 								int indexCidOfCsv = 0;
@@ -597,18 +592,185 @@ public class RecoveryStorageService {
 						long duration = (endTime - startTime) / 1000000; // ms;
 						System.out.println("========= Time Retore " + duration);
 					}
-				};
+				}, 1, employeeId);
+			} else {
+				NtsCsvReader csvReader = NtsCsvReader.newReader().skipEmptyLines(true)
+						.withChartSet(Charset.forName("Shift_JIS"));
 
-				CustomCsvReader csvCustomReader = csvReader.createCustomCsvReader(inputStream);
-				csvCustomReader.setNoHeader(true);
-				Function<NtsCsvRecord, Boolean> customCheckRow = (row) -> {
-					if (row.getColumn(1).equals(employeeId))
-						return true;
-					return false;
+				InputStream inputStream = createInputStreamFromFile(dataRecoveryTable.getUploadId(),
+						dataRecoveryTable.getFileNameCsv());
+				if (!Objects.isNull(inputStream)) {
+					Consumer<CSVParsedResult> csvResult = (dataRow) -> {
 
-				};
-				csvCustomReader.readByStep(3000, csvResult, customCheckRow);
-				csvCustomReader.close();
+						List<NtsCsvRecord> records = dataRow.getRecords();
+
+						System.out.println("============= list record size " + records.size());
+						if (!records.isEmpty()) {
+
+							long startTime = System.nanoTime();
+
+							StringBuilder INSERT_TO_TABLE = new StringBuilder("");
+
+							List<Integer> listCount = new ArrayList<>();
+							String namePhysicalCid = null, TABLE_NAME = null;
+							List<Map<String, String>> listFiledWhere = new ArrayList<>();
+							String cidCurrent = AppContexts.user().companyId();
+
+							HashMap<Integer, String> indexAndFiled = new HashMap<>();
+							// search data by employee
+
+							if (tableList.isPresent()) {
+								TABLE_NAME = tableList.get().getTableEnglishName();
+								try {
+									indexAndFiled = indexMapFiledCsv(targetDataHeader, tableList);
+								} catch (NoSuchMethodException | SecurityException | IllegalAccessException
+										| IllegalArgumentException | InvocationTargetException e) {
+									e.printStackTrace();
+								}
+							}
+
+							// 対象データの会社IDをパラメータの会社IDに入れ替える - swap CID
+							// 既存データの検索
+							try {
+								namePhysicalCid = findNamePhysicalCid(tableList);
+							} catch (NoSuchMethodException | SecurityException | IllegalAccessException
+									| IllegalArgumentException | InvocationTargetException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+
+							List<String> columnNotNull = checkTypeColumn(TABLE_NAME);
+							int check = 0;
+							for (int i = 0; i < records.size(); i++) {
+
+								NtsCsvRecord row = records.get(i);
+
+								if (row.getRowNumber() != 1) {
+									int indexCidOfCsv = 0;
+									int count = 0;
+
+									// データベース復旧処理
+									if ((tableUse && employeeId != null
+											&& !row.getColumn(INDEX_SID).equals(employeeId))) {
+										continue;
+									}
+
+									// set câu insert
+									StringBuilder INSERT_BY_TABLE = new StringBuilder("INSERT INTO ");
+
+									INSERT_BY_TABLE.append(TABLE_NAME);
+									INSERT_BY_TABLE.append(" (");
+
+									StringBuilder values = new StringBuilder(" VALUES (");
+									//
+
+									String V_FILED_KEY_UPDATE = null, h_Date_Csv = null, dateSub = "";
+
+									if (resultsSetting.size() == 1) {
+										h_Date_Csv = row.getColumn(INDEX_H_DATE).toString();
+									} else if (resultsSetting.size() == 2) {
+										h_Date_Csv = row.getColumn(INDEX_H_START_DATE).toString();
+									}
+
+									// 履歴区分を判別する - check history division
+									try {
+										if (((tableUse && tableList.get().getHistoryCls() == HistoryDiviSion.NO_HISTORY) || !tableUse)
+												&& (performDataRecovery.isPresent() && performDataRecovery.get().getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
+												&& tableList.get().getRetentionPeriodCls() != TimeStore.FULL_TIME && !checkSettingDate(resultsSetting, tableList, h_Date_Csv))) {
+											continue;
+										}
+									} catch (ParseException e1) {
+										e1.printStackTrace();
+									}
+
+									if (!h_Date_Csv.isEmpty()) {
+										if (tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY && tableUse)
+											dateSub = dateTimeCutter(YEAR_MONTH_DAY, h_Date_Csv).orElse("");
+										if (tableList.get().getRetentionPeriodCls() == TimeStore.FULL_TIME) {
+											dateSub = "";
+										}
+
+										dateSub = dateTimeCutter(resultsSetting.get(0), h_Date_Csv).orElse("");
+									} else {
+										dateSub = "";
+									}
+
+									dataRecoveryMngRepository.updateRecoveryDate(dataRecoveryProcessId, dateSub);
+
+									// create filed where for query
+									Map<String, String> filedWhere = new HashMap<>();
+									for (Map.Entry<Integer, String> entry : indexAndFiled.entrySet()) {
+										V_FILED_KEY_UPDATE = row.getColumn(entry.getKey()).toString();
+										filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
+									}
+									listFiledWhere.add(filedWhere);
+
+									if (tableUse) {
+										count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(
+												filedWhere, TABLE_NAME, namePhysicalCid, cidCurrent);
+									} else {
+										count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere,
+												TABLE_NAME, namePhysicalCid, cidCurrent);
+									}
+
+									if (count > 1 && tableUse) {
+										listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
+									} else if (count > 1 && !tableUse) {
+										continue;
+									}
+
+									indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
+
+									for (int j = 5; j < row.columnLength(); j++) {
+
+										// add columns name
+										INSERT_BY_TABLE.append(targetDataHeader.get(j) + ", ");
+										boolean anyNonEmpty = columnNotNull.stream()
+												.anyMatch(x -> x.equals(targetDataHeader));
+										String value = j == indexCidOfCsv ? cidCurrent : row.getColumn(j).toString();
+										// add values
+										if (StringUtils.isEmpty(value)) {
+											if (anyNonEmpty) {
+												values.append("'',");
+											} else {
+												values.append("null,");
+											}
+										} else {
+											values.append("'" + value + "',");
+										}
+									}
+
+									INSERT_BY_TABLE.append(")");
+									INSERT_BY_TABLE.append(values.toString().replaceAll(",$", ")"));
+
+									// query.executeUpdate();
+									INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+									listCount.add(count);
+									check++;
+								}
+							}
+
+							// insert delete data
+							if (check > 0) {
+								if (tableUse) {
+									crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid,
+											cidCurrent, INSERT_TO_TABLE);
+								} else {
+									crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
+											INSERT_TO_TABLE);
+								}
+							}
+							long endTime = System.nanoTime();
+							long duration = (endTime - startTime) / 1000000; // ms;
+							System.out.println("========= Time Retore " + duration);
+						}
+					};
+
+					CustomCsvReader csvCustomReader = csvReader.createCustomCsvReader(inputStream);
+					csvCustomReader.setNoHeader(true);
+					csvCustomReader.readByStep(3000, csvResult);
+					csvCustomReader.close();
+				}
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -618,8 +780,9 @@ public class RecoveryStorageService {
 	}
 
 	public DataRecoveryOperatingCondition exTableNotUse(TableListByCategory tableNotUseByCategory,
-			String dataRecoveryProcessId, String uploadId) throws ParseException, NoSuchMethodException,
-			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			String dataRecoveryProcessId, String uploadId, HashMap<String, CSVBufferReader> csvByteReadMaper)
+			throws ParseException, NoSuchMethodException, SecurityException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 		if (tableNotUseByCategory.getTables().size() == 0) {
@@ -645,7 +808,8 @@ public class RecoveryStorageService {
 			// Optional<TableList> tableList =
 			// performDataRecoveryRepository.getByInternal(a.getInternalFileName(),
 			// dataRecoveryProcessId);
-			condition = exDataTabeRangeDate(dataRecoveryTable, Optional.of(tableList), dataRecoveryProcessId);
+			condition = exDataTabeRangeDate(dataRecoveryTable, Optional.of(tableList), dataRecoveryProcessId,
+					csvByteReadMaper);
 
 			// Xác định trạng thái error
 			if (condition == DataRecoveryOperatingCondition.ABNORMAL_TERMINATION) {
@@ -658,7 +822,8 @@ public class RecoveryStorageService {
 	}
 
 	public DataRecoveryOperatingCondition exDataTabeRangeDate(DataRecoveryTable dataRecoveryTable,
-			Optional<TableList> tableList, String dataRecoveryProcessId) throws ParseException, NoSuchMethodException,
+			Optional<TableList> tableList, String dataRecoveryProcessId,
+			HashMap<String, CSVBufferReader> csvByteReadMaper) throws ParseException, NoSuchMethodException,
 			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		// アルゴリズム「日付処理の設定」を実行し日付設定を取得する
@@ -669,6 +834,12 @@ public class RecoveryStorageService {
 		if (resultsSetting.isEmpty()) {
 			return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
 		}
+
+		// khởi tạo csv Reader
+		String filePath = getExtractDataStoragePath(dataRecoveryTable.getUploadId()) + "//"
+				+ dataRecoveryTable.getFileNameCsv() + ".csv";
+		CSVBufferReader reader = new CSVBufferReader(new File(filePath));
+		csvByteReadMaper.put(dataRecoveryTable.getFileNameCsv(), reader);
 
 		if (tableList.isPresent()) {
 
@@ -685,7 +856,7 @@ public class RecoveryStorageService {
 					.getPerformDatRecoverById(dataRecoveryProcessId);
 
 			condition = this.crudDataByTable(dataRecoveryTable, null, dataRecoveryProcessId, tableList,
-					performDataRecovery, resultsSetting, false);
+					performDataRecovery, resultsSetting, false, csvByteReadMaper);
 
 		}
 
