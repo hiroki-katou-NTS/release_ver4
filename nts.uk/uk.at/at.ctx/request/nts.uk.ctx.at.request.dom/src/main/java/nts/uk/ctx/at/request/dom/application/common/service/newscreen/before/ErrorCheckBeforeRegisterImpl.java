@@ -423,6 +423,7 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 
 	@Override
 	public String inconsistencyCheck(String companyID, String employeeID, GeneralDate appDate) {
+		// ドメインモデル「残業休出申請共通設定」を取得
 		Optional<OvertimeRestAppCommonSetting> opOvertimeRestAppCommonSet = this.overtimeRestAppCommonSetRepository
 				.getOvertimeRestAppCommonSetting(companyID, ApplicationType.BREAK_TIME_APPLICATION.value);
 		if(!opOvertimeRestAppCommonSet.isPresent()){
@@ -433,6 +434,7 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 		if(appDateContradictionAtr==AppDateContradictionAtr.NOTCHECK){
 			return Strings.EMPTY;
 		}
+		// アルゴリズム「03-08-1_勤務種類矛盾チェック」を実行する
 		String workTypeCD = this.workTypeInconsistencyCheck(companyID, employeeID, appDate);
 		if(Strings.isBlank(workTypeCD)){
 			if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
@@ -440,7 +442,7 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 			}
 			return "Msg_1520"; 
 		}
-		
+		// ドメインモデル「勤務種類」を1件取得する
 		WorkType workType = workTypeRepository.findByPK(companyID, workTypeCD).get();
 		WorkTypeClassification workTypeClassification = workType.getDailyWork().getOneDay();
 		if(workTypeClassification==WorkTypeClassification.Holiday||
@@ -456,11 +458,20 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 		
 	}
 	
+	/**
+	 * 
+	 * @param companyID
+	 * @param employeeID
+	 * @param appDate
+	 * @return
+	 */
 	private String workTypeInconsistencyCheck(String companyID, String employeeID, GeneralDate appDate){
+		// Imported(申請承認)「勤務実績」を取得する
 		RecordWorkInfoImport recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(employeeID, appDate);
 		if(Strings.isNotBlank(recordWorkInfoImport.getWorkTypeCode())){
 			return recordWorkInfoImport.getWorkTypeCode();
 		}
+		// Imported(申請承認)「勤務予定」を取得する
 		Optional<ScBasicScheduleImport> opScBasicScheduleImport = scBasicScheduleAdapter.findByID(employeeID, appDate);
 		if(!opScBasicScheduleImport.isPresent()){
 			return null;

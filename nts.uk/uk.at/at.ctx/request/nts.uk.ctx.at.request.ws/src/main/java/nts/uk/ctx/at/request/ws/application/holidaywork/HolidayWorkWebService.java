@@ -31,6 +31,7 @@ import nts.uk.ctx.at.request.dom.application.common.service.newscreen.before.IEr
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
 import nts.uk.ctx.at.request.dom.application.overtime.service.CaculationTime;
 import nts.uk.ctx.at.shared.app.find.worktime.common.dto.DeductionTimeDto;
+import nts.uk.shr.com.context.AppContexts;
 
 
 @Path("at/request/application/holidaywork")
@@ -113,8 +114,9 @@ public class HolidayWorkWebService extends WebService{
 	@POST
 	@Path("confirmInconsistency")
 	public JavaTypeResult<String> confirmInconsistency(CreateHolidayWorkCommand command) {
+		String companyID = AppContexts.user().companyId();
 		return new JavaTypeResult<String>(iErrorCheckBeforeRegister.inconsistencyCheck(
-				command.getCompanyID(), 
+				companyID, 
 				command.getApplicantSID(), 
 				command.getApplicationDate()));
 	}
@@ -122,8 +124,9 @@ public class HolidayWorkWebService extends WebService{
 	@POST
 	@Path("confirmPrerepudiation")
 	public JavaTypeResult<Boolean> confirmPrerepudiation(CreateHolidayWorkCommand command) {
+		String companyID = AppContexts.user().companyId();
 		return new JavaTypeResult<Boolean>(this.iErrorCheckBeforeRegister.preliminaryDenialCheck(
-				command.getCompanyID(), 
+				companyID, 
 				command.getApplicantSID(), 
 				command.getApplicationDate(), 
 				GeneralDateTime.now(), 
