@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.logging.log4j.util.Strings;
+
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
@@ -20,6 +22,10 @@ import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
 import nts.uk.ctx.at.request.dom.application.UseAtr;
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.EmployeeRequestAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoImport;
+import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleImport;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.output.AppCommonSettingOutput;
 import nts.uk.ctx.at.request.dom.application.common.service.other.Time36UpperLimitCheck;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.AppTimeItem;
@@ -31,6 +37,7 @@ import nts.uk.ctx.at.request.dom.application.overtime.AttendanceType;
 import nts.uk.ctx.at.request.dom.application.overtime.OverTimeInput;
 import nts.uk.ctx.at.request.dom.application.overtime.OvertimeCheckResult;
 import nts.uk.ctx.at.request.dom.application.overtime.OvertimeInputRepository;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.AppDateContradictionAtr;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.OvertimeRestAppCommonSetRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.OvertimeRestAppCommonSetting;
 //import nts.uk.shr.com.context.AppContexts;
@@ -38,6 +45,9 @@ import nts.uk.ctx.at.request.dom.setting.workplace.ApprovalFunctionSetting;
 import nts.uk.ctx.at.shared.dom.common.CompanyId;
 import nts.uk.ctx.at.shared.dom.ot.frame.OvertimeWorkFrame;
 import nts.uk.ctx.at.shared.dom.ot.frame.OvertimeWorkFrameRepository;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 
 @Stateless
 public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
@@ -65,6 +75,15 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 	
 	@Inject
 	private OvertimeWorkFrameRepository overtimeFrameRepository;
+	
+	@Inject
+	private RecordWorkInfoAdapter recordWorkInfoAdapter;
+	
+	@Inject
+	private ScBasicScheduleAdapter scBasicScheduleAdapter;
+	
+	@Inject
+	private WorkTypeRepository workTypeRepository;
 
 	// @Inject
 	// private PersonalLaborConditionRepository
@@ -400,5 +419,52 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public String inconsistencyCheck(String companyID, String employeeID, GeneralDate appDate) {
+		Optional<OvertimeRestAppCommonSetting> opOvertimeRestAppCommonSet = this.overtimeRestAppCommonSetRepository
+				.getOvertimeRestAppCommonSetting(companyID, ApplicationType.BREAK_TIME_APPLICATION.value);
+		if(!opOvertimeRestAppCommonSet.isPresent()){
+			return Strings.EMPTY;
+		}
+		OvertimeRestAppCommonSetting overtimeRestAppCommonSet = opOvertimeRestAppCommonSet.get();
+		AppDateContradictionAtr appDateContradictionAtr = overtimeRestAppCommonSet.getAppDateContradictionAtr();
+		if(appDateContradictionAtr==AppDateContradictionAtr.NOTCHECK){
+			return Strings.EMPTY;
+		}
+		String workTypeCD = this.workTypeInconsistencyCheck(companyID, employeeID, appDate);
+		if(Strings.isBlank(workTypeCD)){
+			if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
+				throw new BusinessException("Msg_1519", appDate.toString("yyyy/MM/dd"));
+			}
+			return "Msg_1520"; 
+		}
+		
+		WorkType workType = workTypeRepository.findByPK(companyID, workTypeCD).get();
+		WorkTypeClassification workTypeClassification = workType.getDailyWork().getOneDay();
+		if(workTypeClassification==WorkTypeClassification.Holiday||
+			workTypeClassification==WorkTypeClassification.Pause||
+			workTypeClassification==WorkTypeClassification.HolidayWork){
+			return Strings.EMPTY;
+		}
+		if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
+			String name = workType.getName().v();
+			throw new BusinessException("Msg_1521", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "");
+		}
+		return "Msg_1522"; 
+		
+	}
+	
+	private String workTypeInconsistencyCheck(String companyID, String employeeID, GeneralDate appDate){
+		RecordWorkInfoImport recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(employeeID, appDate);
+		if(Strings.isNotBlank(recordWorkInfoImport.getWorkTypeCode())){
+			return recordWorkInfoImport.getWorkTypeCode();
+		}
+		Optional<ScBasicScheduleImport> opScBasicScheduleImport = scBasicScheduleAdapter.findByID(employeeID, appDate);
+		if(!opScBasicScheduleImport.isPresent()){
+			return null;
+		}
+		return opScBasicScheduleImport.get().getWorkTypeCode();
 	}
 }

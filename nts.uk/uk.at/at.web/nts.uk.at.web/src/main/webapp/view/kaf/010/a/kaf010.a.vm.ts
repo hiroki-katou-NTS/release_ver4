@@ -517,6 +517,8 @@ module nts.uk.at.view.kaf010.a.viewmodel {
             service.checkBeforeRegister(overtime).done((data) => {                
                 if (data.errorCode == 0) {
                     overtime.appOvertimeDetail = data.appOvertimeDetail;
+                    self.confirmInconsistency(data, overtime);
+                    /*
                     if (data.confirm) {
                         //メッセージNO：829
                         dialog.confirm({ messageId: "Msg_829" }).ifYes(() => {
@@ -531,6 +533,7 @@ module nts.uk.at.view.kaf010.a.viewmodel {
                         //登録処理を実行
                         self.registerData(overtime);
                     }
+                    */
                 } else if (data.errorCode == 1){
                     self.calculateFlag(1);
                     if(data.frameNo == -1){
@@ -1102,6 +1105,53 @@ module nts.uk.at.view.kaf010.a.viewmodel {
 //                });
 //            }
         }
+        
+        confirmInconsistency(data: any, overtime: any){
+            let self = this;
+            service.confirmInconsistency(overtime).done((data1) => { 
+                if (!nts.uk.util.isNullOrEmpty(data1)) {
+                    //メッセージNO：829
+                    dialog.confirm({ messageId: data1 }).ifYes(() => {
+                        //登録処理を実行
+                        self.confirmPrerepudiation(data, overtime);
+                    }).ifNo(() => {
+                        //終了状態：処理をキャンセル
+                        nts.uk.ui.block.clear();
+                        return;
+                    });
+                } else {
+                    //登録処理を実行
+                    self.confirmPrerepudiation(data, overtime);
+                }   
+            }).fail((res) => {
+                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                .then(function() { nts.uk.ui.block.clear(); });           
+            });    
+        }
+        
+        confirmPrerepudiation(data: any, overtime: any){
+            let self = this;
+            service.confirmPrerepudiation(overtime).done((data2) => { 
+                if (data2) {
+                    //メッセージNO：829
+                    dialog.confirm({ messageId: "Msg_829" }).ifYes(() => {
+                        //登録処理を実行
+                        self.registerData(overtime);
+                    }).ifNo(() => {
+                        //終了状態：処理をキャンセル
+                        nts.uk.ui.block.clear();
+                        return;
+                    });
+                } else {
+                    //登録処理を実行
+                    self.registerData(overtime);
+                }   
+            }).fail((res) => {
+                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                .then(function() { nts.uk.ui.block.clear(); });           
+            });      
+        }
+        
     }
 
 }
