@@ -25,6 +25,8 @@ import nts.uk.ctx.at.function.dom.adapter.alarm.EmployeeSprPubAlarmAdapter;
 import nts.uk.ctx.at.function.dom.adapter.alarm.IMailDestinationAdapter;
 import nts.uk.ctx.at.function.dom.adapter.alarm.MailDestinationAlarmImport;
 import nts.uk.ctx.at.function.dom.adapter.alarm.OutGoingMailAlarm;
+import nts.uk.ctx.at.function.dom.alarm.createerrorinfo.CreateErrorInfo;
+import nts.uk.ctx.at.function.dom.alarm.createerrorinfo.OutputErrorInfo;
 import nts.uk.ctx.at.function.dom.alarm.export.AlarmExportDto;
 import nts.uk.ctx.at.function.dom.alarm.export.AlarmListGenerator;
 import nts.uk.ctx.at.function.dom.alarm.mailsettings.MailSettings;
@@ -40,14 +42,17 @@ public class AlarmSendEmailService implements SendEmailService {
 	@Inject
 	private MailSender mailSender;
 	
-	@Inject
-	private EmployeeSprPubAlarmAdapter employeeSprPubAlarmAdapter;
+//	@Inject
+//	private EmployeeSprPubAlarmAdapter employeeSprPubAlarmAdapter;
 	
 	@Inject
 	private EmployeePubAlarmAdapter employeePubAlarmAdapter;
 	
 	@Inject
 	private AlarmListGenerator alarmListGenerator;
+	
+	@Inject
+	private CreateErrorInfo createErrorInfo;
 	
 	public String alarmSendEmail(String companyID, GeneralDate executeDate, List<String> employeeTagetIds,
 			List<String> managerTagetIds, List<ValueExtractAlarmDto> valueExtractAlarmDtos,
@@ -63,7 +68,8 @@ public class AlarmSendEmailService implements SendEmailService {
 			boolean useAuthentication,Optional<MailSettings> mailSetting,Optional<MailSettings> mailSettingAdmins,Optional<String> senderAddress){
 		List<String> errors = new ArrayList<>();
 		Integer functionID = 9; //function of Alarm list = 9
-		
+		List<String> listEmpAdminError = new ArrayList<>();
+		List<String> listworkplaceError = new ArrayList<>();
 		boolean isErrorSendMailEmp = false;
 		//Send mail for employee
 		// get address email
@@ -87,6 +93,7 @@ public class AlarmSendEmailService implements SendEmailService {
 				}
 			}
 		}
+		Map<String, List<String>> mapWorkplaceAndListSid = new HashMap<>();
 		// Send mail for Manager
 		// get list employeeId of manager
 		if (!isErrorSendMailEmp && !CollectionUtil.isEmpty(managerTagetIds)) {
@@ -127,34 +134,46 @@ public class AlarmSendEmailService implements SendEmailService {
 									mailSettingsParamDto.getTextAdmin(),currentAlarmCode,
 									useAuthentication,mailSettingAdmins,senderAddress);
 							if (!isSucess) {
-								errors.add(employeeId);
+								//errors.add(employeeId);
+								listEmpAdminError.add(employeeId);
 							}
 						} catch (SendMailFailedException e) {
 							throw e;
 						}
 					}
+					mapWorkplaceAndListSid.put(workplaceId, listEmpAdminError);
+					
+				}else {
+					listworkplaceError.add(workplaceId);
 				}
 			}
 		}
-		String empployeeNameError = isErrorSendMailEmp + ";";// return status check display alert error
-
-		if (!CollectionUtil.isEmpty(errors)) {
-			int index = 0;
-			int errorsSize = errors.size();
-			for (String sId : errors) {
-				// save using request list 346
-				String empNames =  employeeSprPubAlarmAdapter.getEmployeeNameBySId(sId);
-				if (!StringUtils.isEmpty(empNames)) {
-					empployeeNameError += empNames;
-				}
-				index++;
-				if(index != errorsSize){
-					empployeeNameError += "<br/>";        
-                }   
-			}
-		}
+		//String empployeeNameError = isErrorSendMailEmp + ";";// return status check display alert error
 		
-		return empployeeNameError;
+//		if (!CollectionUtil.isEmpty(errors)) {
+//			int index = 0;
+//			int errorsSize = errors.size();
+//			for (String sId : errors) {
+//				// save using request list 346
+//				String empNames =  employeeSprPubAlarmAdapter.getEmployeeNameBySId(sId);
+//				if (!StringUtils.isEmpty(empNames)) {
+//					empployeeNameError += empNames;
+//				}
+//				index++;
+//				if(index != errorsSize){
+//					empployeeNameError += "<br/>";        
+//                }   
+//			}
+//		}
+		OutputErrorInfo outputErrorInfo = createErrorInfo.getErrorInfo(GeneralDate.today(),errors,mapWorkplaceAndListSid,listworkplaceError);
+		String errorInfo = "";
+		if(!outputErrorInfo.getError().equals("")) {
+			errorInfo +=outputErrorInfo.getError();
+		}
+		if(!outputErrorInfo.getErrorWkp().equals("")) {
+			errorInfo +=outputErrorInfo.getErrorWkp();
+		}
+		return errorInfo;
 	}
 	
 	/**

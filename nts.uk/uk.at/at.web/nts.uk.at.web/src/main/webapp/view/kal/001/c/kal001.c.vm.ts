@@ -74,53 +74,93 @@ module nts.uk.at.view.kal001.c {
                  let self = this;
                  let dfd = $.Deferred<any>();
                  block.grayout();
-                
-                 // check status
-                 let isHaveChecked = _.find(self.listEmployee, item => item.isSendToMe || item.isSendToManager) !== undefined;
-                 
-                 if(isHaveChecked){
-                     let listEmployeeSendTaget = [], listManagerSendTaget = [];
-                     _.forEach(self.listEmployee, function(item: modeldto.EmployeeSendEmail) {
-                        if (item.isSendToMe == true ) {
-                             //set to employeee list taget
-                             listEmployeeSendTaget.push(item.employeeId);
+                 service.getAllMailSet().done(function(data: MailAutoAndNormalDto) {
+                     if (data && (data.mailSettingNormalDto.mailSettings != null || data.mailSettingNormalDto.mailSettingAdmins != null)) {
+                         let mailSetings = data.mailSettingNormalDto.mailSettings;
+                         let mailSetingAdmins = data.mailSettingNormalDto.mailSettingAdmins;
+                         let subject,text,subjectAdmin,textAdmin ="";
+                         if( mailSetings!= null){
+                             subject = mailSetings.subject;
+                             text = mailSetings.text;
                          }
-                         if (item.isSendToManager == true) {
-                             //set to Manager list taget
-                             listManagerSendTaget.push(item.employeeId);
-                         }
-                     });
-                     let params ={
-                       listEmployeeSendTaget: listEmployeeSendTaget,
-                       listManagerSendTaget: listManagerSendTaget,
-                       processId: self.processId
-                     };
-                     // call service send mail
-                     service.alarmListSendEmail(params).done(function(data: string) {
-                        if(data.length > 0){
-                         let returnParam = data.split(";");
-                         let isSendMailError = returnParam[0];
-                         let errorStr = returnParam[1];
-                         if (errorStr.length > 0) {
-                             let strDisplay = nts.uk.resource.getMessage('Msg_965') + "<br/>" + errorStr;
-                             info({ message: strDisplay });
-                             block.clear();
+                         if(mailSetingAdmins != null){
+                             subjectAdmin = mailSetingAdmins.subject;
+                             textAdmin = mailSetingAdmins.text;
+                          }
+                         // setting subject , body mail
+                         self.mailSettingsParamDto = new MailSettingsParamDto(subject,text,subjectAdmin,textAdmin);
+                         
+                         // check status
+                         let isHaveChecked = false;
+                         self.listEmployeeChecked = ko.observableArray([]);
+                         self.listEmployeeSendTaget = ko.observableArray([]);
+                         self.listManagerSendTaget = ko.observableArray([]);
+                         _.forEach(self.listEmployee(), function(item: modeldto.EmployeeSendEmail) {
+                             if (item.isSendToMe == true && item.isSendToManager == true)
+                             {
+                                 isHaveChecked = true;
+                                 self.listEmployeeChecked.push(item);
+                                 //set to employeee list taget
+                                 self.listEmployeeSendTaget.push(item.employeeId);
+                                 self.listManagerSendTaget.push(item.employeeId);
+                                     
+                             }
+                             else if (item.isSendToMe == true )
+                             {
+                                 isHaveChecked = true;
+                                 self.listEmployeeChecked.push(item);
+                                 //set to employeee list taget
+                                 self.listEmployeeSendTaget.push(item.employeeId);
+                             }
+                             else if (item.isSendToManager == true)
+                             {
+                                 isHaveChecked = true;
+                                 self.listEmployeeChecked.push(item);
+                                 //set to Manager list taget
+                                 self.listManagerSendTaget.push(item.employeeId);
+                             }
+                         });
+                         
+                         if(isHaveChecked){
+                             let params ={
+                               listEmployeeSendTaget: self.listEmployeeSendTaget(),
+                               listManagerSendTaget: self.listManagerSendTaget(),
+                               listValueExtractAlarmDto: self.listValueExtractAlarmDto,
+                               mailSettingsParamDto: self.mailSettingsParamDto
+                             };
+                             // call service send mail
+                             service.alarmListSendEmail(params).done(function(data: string) {
+                                if(data.length > 0){
+                                 //let returnParam = data.split(";");
+                                 //let isSendMailError = returnParam[0];
+                                 //let errorStr = returnParam[1];
+                                 //if (errorStr.length > 0) {
+                                     //let strDisplay = nts.uk.resource.getMessage('Msg_965') + "<br/>" + errorStr;
+                                     info({ message: data });
+                                     block.clear();
+                                 } else {
+                                     info({ messageId: 'Msg_207' });
+                                     block.clear();
+                                 }
+                                //}
+                             }).always(() => {
+                                 block.clear();
+                             }).fail(function(error) {
+                                 alertError(error);
+                                 block.clear();
+                                 dfd.resolve();
+                             });
                          } else {
-                             info({ messageId: 'Msg_207' });
+                             alertError({ messageId: 'Msg_657' });
                              block.clear();
                          }
-                        }
-                     }).always(() => {
+                         
+                     } else {
+                         alertError({ messageId: 'Msg_1169' });
                          block.clear();
-                     }).fail(function(error) {
-                         alertError(error);
-                         block.clear();
-                         dfd.resolve();
-                     });
-                 } else {
-                     alertError({ messageId: 'Msg_657' });
-                     block.clear();
-                 }     
+                     }
+                     
+                 });       
                  return dfd.promise();
             }
 
