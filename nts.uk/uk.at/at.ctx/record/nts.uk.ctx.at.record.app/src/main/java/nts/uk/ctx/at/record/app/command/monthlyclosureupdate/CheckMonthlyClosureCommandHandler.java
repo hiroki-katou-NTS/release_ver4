@@ -65,6 +65,7 @@ public class CheckMonthlyClosureCommandHandler extends CommandHandlerWithResult<
 		String employeeId = AppContexts.user().employeeId();
 		int closureId = context.getCommand().getClosureId();
 		OutputParam checkStatus = new OutputParam();
+		GeneralDateTime currentDT = GeneralDateTime.now();
 		// update status = 2 cho all nhan vien trong cong ty co thoi gian xu ly
 		// > 4h ma chua done
 		this.updateStatus.updateStatusForCompany(companyId);
@@ -104,7 +105,7 @@ public class CheckMonthlyClosureCommandHandler extends CommandHandlerWithResult<
 				MonthlyClosureResponse result = new MonthlyClosureResponse(log.getId(), listEmpId, closureId,
 						executionDT, executionEnd, closure.getClosureMonth().getProcessingYm().v(),
 						closureDate.getClosureDay().v(), closureDate.getLastDayOfMonth(), closurePeriod.start(),
-						closurePeriod.end(), 1, log.getExecutionStatus().value);
+						closurePeriod.end(), 1, log.getExecutionStatus().value, currentDT);
 				return result;
 			} else {
 				throw new BusinessException("Msg_1105");
@@ -119,7 +120,7 @@ public class CheckMonthlyClosureCommandHandler extends CommandHandlerWithResult<
 				MonthlyClosureResponse resultClosurtLog = new MonthlyClosureResponse(log.getId(), listEmpId, closureId,
 						executionDT, executionEnd, closure.getClosureMonth().getProcessingYm().v(),
 						closureDate.getClosureDay().v(), closureDate.getLastDayOfMonth(), closurePeriod.start(),
-						closurePeriod.end(), 2, log.getExecutionStatus().value);
+						closurePeriod.end(), 2, log.getExecutionStatus().value, currentDT);
 				return resultClosurtLog;
 			} else {
 				MonthlyClosureUpdatePersonLog resultLog = new MonthlyClosureUpdatePersonLog(employeeId, log.getId(),
@@ -131,7 +132,7 @@ public class CheckMonthlyClosureCommandHandler extends CommandHandlerWithResult<
 				MonthlyClosureResponse resultCloLog = new MonthlyClosureResponse(
 						resultLog.getMonthlyClosureUpdateLogId(), listEmployeeId, closureId, executionDT, null,
 						closure.getClosureMonth().getProcessingYm().v(), closureDate.getClosureDay().v(),
-						closureDate.getLastDayOfMonth(), closurePeriod.start(), closurePeriod.end(), 2, log.getExecutionStatus().value);
+						closureDate.getLastDayOfMonth(), closurePeriod.start(), closurePeriod.end(), 2, log.getExecutionStatus().value, currentDT);
 				return resultCloLog;
 			}
 

@@ -110,6 +110,7 @@ public class MonthlyClosureUpdateFinder {
 		String companyId = AppContexts.user().companyId();
 		String employeeId = AppContexts.user().employeeId();
 		OutputParam outputParam = this.checkExecutionStatus(companyId);
+		GeneralDateTime currentDT = GeneralDateTime.now();
 
 		if (outputParam.getStatus() == 2) { 
 			// open dialog F
@@ -121,7 +122,7 @@ public class MonthlyClosureUpdateFinder {
 				MonthlyClosureResponse resultClosurtLog = new MonthlyClosureResponse(log.getId(), listEmpId,
 						response.getClosureId(), response.getStartDT(), response.getEndDT(), response.getCurrentMonth(),
 						response.getClosureDay(), response.getIsLastDayOfMonth(),
-						response.getPeriodStart(), response.getPeriodEnd(), 2, log.getExecutionStatus().value);
+						response.getPeriodStart(), response.getPeriodEnd(), 2, log.getExecutionStatus().value, currentDT);
 				return new Kmw006aResultDto(false, log.getClosureId().value, null, resultClosurtLog);
 			} else {
 				MonthlyClosureUpdatePersonLog resultLog = new MonthlyClosureUpdatePersonLog(employeeId, log.getId(),
@@ -134,7 +135,7 @@ public class MonthlyClosureUpdateFinder {
 				MonthlyClosureResponse resultCloLog = new MonthlyClosureResponse(log.getId(), listEmployeeId,
 						log.getClosureId().value, log.getExecutionDateTime(), response.getEndDT(), log.getTargetYearMonth().v(),
 						log.getClosureDate().getClosureDay().v(), log.getClosureDate().getLastDayOfMonth(),
-						log.getExecutionPeriod().start(), null, 2, log.getExecutionStatus().value);
+						log.getExecutionPeriod().start(), null, 2, log.getExecutionStatus().value, currentDT);
 				return new Kmw006aResultDto(false, log.getClosureId().value, null, resultCloLog);
 			}
 		} else {

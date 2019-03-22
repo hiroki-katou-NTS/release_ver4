@@ -213,9 +213,9 @@ module nts.uk.at.view.kmw006.a.viewmodel {
                     block.clear();
                 } else {
                     block.grayout();
-                    let currentTime = new Date(moment().format('YYYY-MM-DDTHH:mm:ssZ'));
-                    let startDT = new Date(moment.utc(results.screenParams.startDT).format('YYYY-MM-DDTHH:mm:ssZ'))
-                    let duration = (currentTime.getTime() - startDT.getTime()) / 1000;
+                    var currentTime = new Date(moment.utc(results.screenParams.currentDT).format('YYYY-MM-DDTHH:mm:ss'));
+                    var startDT = new Date(moment.utc(results.screenParams.startDT).format('YYYY-MM-DDTHH:mm:ss'));
+                    var duration = (currentTime.getTime() - startDT.getTime()) / 1000;
                     if(results.screenParams.executionStatus != 2 && duration < 14400){
                         // open dialog F
                         $.when(self.getAllPersonNo(results.screenParams)).done(() => {
