@@ -598,12 +598,12 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	public List<RouteSituation> getApproverRouteSituation(DatePeriod period, List<ApprovalRouteDetails> approverRouteLst, List<String> agentLst, RecordRootType rootType) {
 		String companyID = AppContexts.user().companyId();
 		List<RouteSituation> routeSituationLst = new ArrayList<>();
-		List<String> empLst = approverRouteLst.stream().map(x -> x.getAppRootInstance().getEmployeeID()).collect(Collectors.toList());
+		List<String> empLst = approverRouteLst.stream().map(x -> x.getAppRootInstance().getEmployeeID()).distinct().collect(Collectors.toList());
 		List<AppRootConfirm> appRootConfirmLst = appRootConfirmRepository.findByEmpDate(companyID, empLst, period, rootType);
 		// 取得した対象者(List)の先頭から最後へループ
-		for(ApprovalRouteDetails approvalRouteDetails : approverRouteLst){
+		for(String empLoop : empLst){
 			List<AppRootInstance> appRootInstanceLst = approverRouteLst.stream().map(x -> x.getAppRootInstance())
-					.filter(x -> x.getEmployeeID().equals(approvalRouteDetails.getAppRootInstance().getEmployeeID())).collect(Collectors.toList());
+					.filter(x -> x.getEmployeeID().equals(empLoop)).collect(Collectors.toList());
 			DatePeriod loopPeriod = period;
 			// INPUT．期間の開始日から終了日へループ
 			for(GeneralDate loopDate = loopPeriod.start(); loopDate.beforeOrEquals(loopPeriod.end()); loopDate = loopDate.addDays(1)){
@@ -614,7 +614,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 				}
 				// 対象日の就業実績確認状態を取得する
 				List<AppRootConfirm> appRootConfirmPeriod = appRootConfirmLst.stream()
-						.filter(x -> x.getEmployeeID().equals(approvalRouteDetails.getAppRootInstance().getEmployeeID())).collect(Collectors.toList());
+						.filter(x -> x.getEmployeeID().equals(empLoop)).collect(Collectors.toList());
 				Optional<AppRootConfirm> opAppRootConfirm = Optional.empty();
 				for(AppRootConfirm appRootConfirmParam : appRootConfirmPeriod){
 					if(appRootConfirmParam.getRecordDate().compareTo(loopDate)==0){
@@ -629,7 +629,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 				// 中間データから承認ルートインスタンスに変換する
 				ApprovalRootState approvalRootState = this.convertFromAppRootInstance(appRootInstance, appRootConfirm);
 				// 基準社員を元にルート状況を取得する
-				RouteSituation routeSituation = this.getRouteSituationByEmp(approvalRootState, approvalRouteDetails.getEmployeeID(), agentLst);
+				RouteSituation routeSituation = this.getRouteSituationByEmp(approvalRootState, approverRouteLst.get(0).getEmployeeID(), agentLst);
 				// 実行結果をoutput「ルート状況」に追加する
 				routeSituationLst.add(routeSituation);
 			}
@@ -641,12 +641,12 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	public List<RouteSituation> getAgentRouteSituation(DatePeriod period, List<ApprovalRouteDetails> agentRouteLst, List<String> agentLst, RecordRootType rootType) {
 		String companyID = AppContexts.user().companyId();
 		List<RouteSituation> routeSituationLst = new ArrayList<>();
-		List<String> empLst = agentRouteLst.stream().map(x -> x.getAppRootInstance().getEmployeeID()).collect(Collectors.toList());
+		List<String> empLst = agentRouteLst.stream().map(x -> x.getAppRootInstance().getEmployeeID()).distinct().collect(Collectors.toList());
 		List<AppRootConfirm> appRootConfirmLst = appRootConfirmRepository.findByEmpDate(companyID, empLst, period, rootType);
 		// 取得した対象者(List)の先頭から最後へループ
-		for(ApprovalRouteDetails approvalRouteDetails : agentRouteLst){
+		for(String empLoop : empLst){
 			List<AppRootInstance> appRootInstanceLst = agentRouteLst.stream().map(x -> x.getAppRootInstance())
-					.filter(x -> x.getEmployeeID().equals(approvalRouteDetails.getAppRootInstance().getEmployeeID())).collect(Collectors.toList());
+					.filter(x -> x.getEmployeeID().equals(empLoop)).collect(Collectors.toList());
 			DatePeriod loopPeriod = period;
 			// INPUT．期間の開始日から終了日へループ
 			for(GeneralDate loopDate = loopPeriod.start(); loopDate.beforeOrEquals(loopPeriod.end()); loopDate = loopDate.addDays(1)){
@@ -655,12 +655,13 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 				if(appRootInstance==null){
 					throw new BusinessException("Msg_1430", "承認者");
 				}
+				ApprovalRouteDetails approvalRouteDetails = agentRouteLst.stream().filter(x -> x.getAppRootInstance().getRootID().equals(appRootInstance.getRootID())).findAny().get();
 				// ループする日は代行期間内かチェックする
 				if((approvalRouteDetails.getStartDate().isPresent()&&approvalRouteDetails.getStartDate().get().beforeOrEquals(loopDate)) ||
 						(approvalRouteDetails.getEndDate().isPresent()&&approvalRouteDetails.getEndDate().get().afterOrEquals(loopDate))){
 					// 対象日の就業実績確認状態を取得する
 					List<AppRootConfirm> appRootConfirmPeriod = appRootConfirmLst.stream()
-							.filter(x -> x.getEmployeeID().equals(approvalRouteDetails.getAppRootInstance().getEmployeeID())).collect(Collectors.toList());
+							.filter(x -> x.getEmployeeID().equals(empLoop)).collect(Collectors.toList());
 					Optional<AppRootConfirm> opAppRootConfirm = Optional.empty();
 					for(AppRootConfirm appRootConfirmParam : appRootConfirmPeriod){
 						if(appRootConfirmParam.getRecordDate().compareTo(loopDate)==0){
