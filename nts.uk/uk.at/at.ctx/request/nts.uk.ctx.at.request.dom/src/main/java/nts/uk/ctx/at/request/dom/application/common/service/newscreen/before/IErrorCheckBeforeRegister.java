@@ -95,5 +95,5 @@ public interface IErrorCheckBeforeRegister {
 	 * @param appDate
 	 * @return true: show confirm dialog
 	 */
-	public String inconsistencyCheck(String companyID, String employeeID, GeneralDate appDate);
+	public List<String> inconsistencyCheck(String companyID, String employeeID, GeneralDate appDate);
 }

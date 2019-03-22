@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.request.dom.application.common.service.newscreen.before;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -422,39 +423,40 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 	}
 
 	@Override
-	public String inconsistencyCheck(String companyID, String employeeID, GeneralDate appDate) {
+	public List<String> inconsistencyCheck(String companyID, String employeeID, GeneralDate appDate) {
 		// ドメインモデル「残業休出申請共通設定」を取得
 		Optional<OvertimeRestAppCommonSetting> opOvertimeRestAppCommonSet = this.overtimeRestAppCommonSetRepository
 				.getOvertimeRestAppCommonSetting(companyID, ApplicationType.BREAK_TIME_APPLICATION.value);
 		if(!opOvertimeRestAppCommonSet.isPresent()){
-			return Strings.EMPTY;
+			return Collections.emptyList();
 		}
 		OvertimeRestAppCommonSetting overtimeRestAppCommonSet = opOvertimeRestAppCommonSet.get();
 		AppDateContradictionAtr appDateContradictionAtr = overtimeRestAppCommonSet.getAppDateContradictionAtr();
 		if(appDateContradictionAtr==AppDateContradictionAtr.NOTCHECK){
-			return Strings.EMPTY;
+			return Collections.emptyList();
 		}
 		// アルゴリズム「03-08-1_勤務種類矛盾チェック」を実行する
 		String workTypeCD = this.workTypeInconsistencyCheck(companyID, employeeID, appDate);
-		if(Strings.isBlank(workTypeCD)){
+		// ドメインモデル「勤務種類」を1件取得する
+		Optional<WorkType> opWorkType = workTypeRepository.findByPK(companyID, workTypeCD);
+		if(Strings.isBlank(workTypeCD)||!opWorkType.isPresent()){
 			if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
 				throw new BusinessException("Msg_1519", appDate.toString("yyyy/MM/dd"));
 			}
-			return "Msg_1520"; 
+			return Arrays.asList("Msg_1520", appDate.toString("yyyy/MM/dd")); 
 		}
-		// ドメインモデル「勤務種類」を1件取得する
-		WorkType workType = workTypeRepository.findByPK(companyID, workTypeCD).get();
+		WorkType workType = opWorkType.get();
 		WorkTypeClassification workTypeClassification = workType.getDailyWork().getOneDay();
 		if(workTypeClassification==WorkTypeClassification.Holiday||
 			workTypeClassification==WorkTypeClassification.Pause||
 			workTypeClassification==WorkTypeClassification.HolidayWork){
-			return Strings.EMPTY;
+			return Collections.emptyList();
 		}
+		String name = workType.getName().v();
 		if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
-			String name = workType.getName().v();
-			throw new BusinessException("Msg_1521", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "");
+			throw new BusinessException("Msg_1521", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "未登録のマスタ");
 		}
-		return "Msg_1522"; 
+		return Arrays.asList("Msg_1522", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "未登録のマスタ"); 
 		
 	}
 	

@@ -113,12 +113,12 @@ public class HolidayWorkWebService extends WebService{
 	
 	@POST
 	@Path("confirmInconsistency")
-	public JavaTypeResult<String> confirmInconsistency(CreateHolidayWorkCommand command) {
+	public List<String> confirmInconsistency(CreateHolidayWorkCommand command) {
 		String companyID = AppContexts.user().companyId();
-		return new JavaTypeResult<String>(iErrorCheckBeforeRegister.inconsistencyCheck(
+		return iErrorCheckBeforeRegister.inconsistencyCheck(
 				companyID, 
 				command.getApplicantSID(), 
-				command.getApplicationDate()));
+				command.getApplicationDate());
 	}
 	
 	@POST
