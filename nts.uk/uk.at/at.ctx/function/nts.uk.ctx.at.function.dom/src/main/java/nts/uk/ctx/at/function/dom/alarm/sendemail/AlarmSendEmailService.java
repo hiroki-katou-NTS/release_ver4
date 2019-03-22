@@ -179,7 +179,7 @@ public class AlarmSendEmailService implements SendEmailService {
 			// Get all mail address
 			List<OutGoingMailAlarm> emails = mailDestinationAlarmImport.getOutGoingMails().stream().filter(c->c.getEmailAddress() !=null).collect(Collectors.toList());
 			if (CollectionUtil.isEmpty(emails)) {
-				return true;
+				return false;
 			} else {
 				if(StringUtils.isEmpty(subjectEmail)){
 					subjectEmail = TextResource.localize("KAL010_300");
