@@ -13,6 +13,7 @@ import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 import nts.uk.ctx.at.shared.dom.worktime.common.GoLeavingWorkAtr;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
 import nts.uk.shr.com.time.TimeWithDayAttr;
@@ -32,11 +33,10 @@ public class PCLogOnInfoOfDaily {
 	/** ログオン情報: ログオン情報 */
 	private List<LogOnInfo> logOnInfo;
 	
-	
 	//出勤ログイン乖離時間の計算
-	public AttendanceTime calcPCLogOnCalc(Optional<TimeLeavingOfDailyPerformance> attendanceLeave,GoLeavingWorkAtr goLeavingWorkAtr) {
-		if(!attendanceLeave.isPresent()) return new AttendanceTime(0);
-		List<AttendanceTime> resultList = new ArrayList<>();
+	public AttendanceTimeOfExistMinus calcPCLogOnCalc(Optional<TimeLeavingOfDailyPerformance> attendanceLeave,GoLeavingWorkAtr goLeavingWorkAtr) {
+		if(!attendanceLeave.isPresent()) return new AttendanceTimeOfExistMinus(0);
+		List<AttendanceTimeOfExistMinus> resultList = new ArrayList<>();
 		for(LogOnInfo logOn : this.logOnInfo) {
 			if(!logOn.getLogOnLogOffTime(goLeavingWorkAtr).isPresent()) {
 				continue;
@@ -64,12 +64,12 @@ public class PCLogOnInfoOfDaily {
 			
 			//出勤なら「出勤-ログオン」、退勤なら「ログオフ-退勤」
 			int calcResult = goLeavingWorkAtr.isGO_WORK()?stamp-pcLogOn:pcLogOn-stamp;
-			resultList.add(new AttendanceTime(calcResult));
+			resultList.add(new AttendanceTimeOfExistMinus(calcResult));
 		}
-		AttendanceTime result = new AttendanceTime(resultList.stream().filter(t -> t != null).mapToInt(t -> t.valueAsMinutes()).sum());	
-		if(result==null||result.lessThan(0)) {
-			return new AttendanceTime(0);
-		}
+		AttendanceTimeOfExistMinus result = new AttendanceTimeOfExistMinus(resultList.stream().filter(t -> t != null).mapToInt(t -> t.valueAsMinutes()).sum());
+//		if(result==null||result.lessThan(0)) {
+//			return new AttendanceTime(0);
+//		}
 		return result;
 	}
 	

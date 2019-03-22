@@ -2646,9 +2646,9 @@ public class KrcdtDayTime extends UkJpaEntity implements Serializable{
 		// 日別実績の勤怠時間
 		return new AttendanceTimeOfDailyPerformance(this.krcdtDayTimePK == null ? null : this.krcdtDayTimePK.employeeID, this.krcdtDayTimePK.generalDate,
 				shedule, actual,
-				new StayingTimeOfDaily(new AttendanceTime(this.aftPcLogoffTime),
-						new AttendanceTime(this.bfrPcLogonTime), new AttendanceTime(this.bfrWorkTime),
-						new AttendanceTime(this.stayingTime), new AttendanceTime(this.aftLeaveTime)),
+				new StayingTimeOfDaily(new AttendanceTimeOfExistMinus(this.aftPcLogoffTime),
+						new AttendanceTimeOfExistMinus(this.bfrPcLogonTime), new AttendanceTimeOfExistMinus(this.bfrWorkTime),
+						new AttendanceTime(this.stayingTime), new AttendanceTimeOfExistMinus(this.aftLeaveTime)),
 				new AttendanceTimeOfExistMinus(this.budgetTimeVariance), new AttendanceTimeOfExistMinus(this.unemployedTime));
 		
 	}
@@ -3062,9 +3062,9 @@ public class KrcdtDayTime extends UkJpaEntity implements Serializable{
 																					   entity.krcdtDayTimePK.generalDate,
 																					   workScheduleTimeOfDaily,
 																					   actualWorkingTimeOfDaily,
-																					   new StayingTimeOfDaily(new AttendanceTime(entity.aftPcLogoffTime),
-																								new AttendanceTime(entity.bfrPcLogonTime), new AttendanceTime(entity.bfrWorkTime),
-																								new AttendanceTime(entity.stayingTime), new AttendanceTime(entity.aftLeaveTime)),
+																					   new StayingTimeOfDaily(new AttendanceTimeOfExistMinus(entity.aftPcLogoffTime),
+																								new AttendanceTimeOfExistMinus(entity.bfrPcLogonTime), new AttendanceTimeOfExistMinus(entity.bfrWorkTime),
+																								new AttendanceTime(entity.stayingTime), new AttendanceTimeOfExistMinus(entity.aftLeaveTime)),
 																					   new AttendanceTimeOfExistMinus(entity.budgetTimeVariance),
 																					   new AttendanceTimeOfExistMinus(entity.unemployedTime)
 																					   );
