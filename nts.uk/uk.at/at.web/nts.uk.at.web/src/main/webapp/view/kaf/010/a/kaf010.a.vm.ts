@@ -1111,8 +1111,7 @@ module nts.uk.at.view.kaf010.a.viewmodel {
             let self = this;
             service.confirmInconsistency(overtime).done((data1) => { 
                 if (!nts.uk.util.isNullOrEmpty(data1)) {
-                    //メッセージNO：829
-                    dialog.confirm({ messageId: data1 }).ifYes(() => {
+                    dialog.confirm({ messageId: data1[0], messageParams: [data1[1],data1[2]] }).ifYes(() => {
                         //登録処理を実行
                         self.confirmPrerepudiation(data, overtime);
                     }).ifNo(() => {
