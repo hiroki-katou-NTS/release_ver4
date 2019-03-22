@@ -2461,132 +2461,6 @@ public class KrcdtMonMerge extends UkJpaEntity implements Serializable {
 		// 時間外超過：時間
 		Map<Integer, ExcessOutSideWorkEachBreakdown> excessOutsideTimeMap = excessOutsideWork == null ? new HashMap<>() : excessOutsideWork.getTime();
 		
-		for (int i = 0; i < 50; i++){
-			int breakdownNo = i / 5 + 1;
-			int excessNo = i % 5 + 1;
-			
-			ExcessOutsideWork excessOutsideTime = new ExcessOutsideWork(breakdownNo, excessNo);
-			if (excessOutsideTimeMap.containsKey(breakdownNo)){
-				Map<Integer, ExcessOutsideWork> breakdown = excessOutsideTimeMap.get(breakdownNo).getBreakdown();
-				if (breakdown.containsKey(excessNo)){
-					excessOutsideTime = breakdown.get(excessNo);
-				}
-			}
-			switch (i + 1){
-			case 1:
-				toEntityExcessOutsideWork1(excessOutsideTime);
-				break;
-			case 2:
-				toEntityExcessOutsideWork2(excessOutsideTime);
-				break;
-			case 3:
-				toEntityExcessOutsideWork3(excessOutsideTime);
-				break;
-			case 4:
-				toEntityExcessOutsideWork4(excessOutsideTime);
-				break;
-			case 5:
-				toEntityExcessOutsideWork5(excessOutsideTime);
-				break;
-			case 6:
-				toEntityExcessOutsideWork6(excessOutsideTime);
-				break;
-			case 7:
-				toEntityExcessOutsideWork7(excessOutsideTime);
-				break;
-			case 8:
-				toEntityExcessOutsideWork8(excessOutsideTime);
-				break;
-			case 9:
-				toEntityExcessOutsideWork9(excessOutsideTime);
-				break;
-			case 10:
-				toEntityExcessOutsideWork10(excessOutsideTime);
-				break;
-			case 11:
-				toEntityExcessOutsideWork11(excessOutsideTime);
-				break;
-			case 12:
-				toEntityExcessOutsideWork12(excessOutsideTime);
-				break;
-			case 13:
-				toEntityExcessOutsideWork13(excessOutsideTime);
-				break;
-			case 14:
-				toEntityExcessOutsideWork14(excessOutsideTime);
-				break;
-			case 15:
-				toEntityExcessOutsideWork15(excessOutsideTime);
-				break;
-			case 16:
-				toEntityExcessOutsideWork16(excessOutsideTime);
-				break;
-			case 17:
-				toEntityExcessOutsideWork17(excessOutsideTime);
-				break;
-			case 18:
-				toEntityExcessOutsideWork18(excessOutsideTime);
-				break;
-			case 19:
-				toEntityExcessOutsideWork19(excessOutsideTime);
-				break;
-			case 20:
-				toEntityExcessOutsideWork20(excessOutsideTime);
-				break;
-			case 21:
-				toEntityExcessOutsideWork21(excessOutsideTime);
-				break;
-			case 22:
-				toEntityExcessOutsideWork22(excessOutsideTime);
-				break;
-			case 23:
-				toEntityExcessOutsideWork23(excessOutsideTime);
-				break;
-			case 24:
-				toEntityExcessOutsideWork24(excessOutsideTime);
-				break;
-			case 25:
-				toEntityExcessOutsideWork25(excessOutsideTime);
-				break;
-			case 26:
-				toEntityExcessOutsideWork26(excessOutsideTime);
-				break;
-			case 27:
-				toEntityExcessOutsideWork27(excessOutsideTime);
-				break;
-			case 28:
-				toEntityExcessOutsideWork28(excessOutsideTime);
-				break;
-			case 29:
-				toEntityExcessOutsideWork29(excessOutsideTime);
-				break;
-			case 30:
-				toEntityExcessOutsideWork30(excessOutsideTime);
-				break;
-			case 31:
-				toEntityExcessOutsideWork31(excessOutsideTime);
-				break;
-			case 32:
-				toEntityExcessOutsideWork32(excessOutsideTime);
-				break;
-			case 33:
-				toEntityExcessOutsideWork33(excessOutsideTime);
-				break;
-			case 34:
-				toEntityExcessOutsideWork34(excessOutsideTime);
-				break;
-			case 35:
-				toEntityExcessOutsideWork35(excessOutsideTime);
-				break;
-	/** KRCDT_MON_EXCOUT_TIME 50 **/
-	private void toEntityExcessOutsideWorkMerge(ExcessOutsideWorkOfMonthly excessOutsideWork) {
-		
-		// 時間外超過
-		toEntityExcessOutsideWorkOfMonthly(excessOutsideWork);
-		
-		// 時間外超過：時間
-		Map<Integer, ExcessOutSideWorkEachBreakdown> excessOutsideTimeMap = excessOutsideWork == null ? new HashMap<>() : excessOutsideWork.getTime();
-		
 		toEntityExcessOutsideWork1(getExcessTime(excessOutsideTimeMap, 1, 1));
 		toEntityExcessOutsideWork2(getExcessTime(excessOutsideTimeMap, 2, 1));
 		toEntityExcessOutsideWork3(getExcessTime(excessOutsideTimeMap, 3, 1));
@@ -2639,6 +2513,7 @@ public class KrcdtMonMerge extends UkJpaEntity implements Serializable {
 		toEntityExcessOutsideWork50(getExcessTime(excessOutsideTimeMap, 10, 5));
 		
 	}
+	
 
 	private ExcessOutsideWork getExcessTime(Map<Integer, ExcessOutSideWorkEachBreakdown> excessOutsideTimeMap,
 			int breakdownNo, int excessNo) {
