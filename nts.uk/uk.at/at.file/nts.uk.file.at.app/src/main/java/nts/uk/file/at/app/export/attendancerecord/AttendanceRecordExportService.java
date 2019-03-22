@@ -159,7 +159,7 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 		List<String> empIDs = request.getEmployeeList().stream().map(e -> e.getEmployeeId()).collect(Collectors.toList());
 		
 		GeneralDate endByClosure = GeneralDate.ymd(request.getEndDate().year(), request.getEndDate().month(), request.getEndDate().lastDateInMonth());
-		GeneralDate startTime = request.getStartDate().addMonths(-1);
+		GeneralDate startTime = request.getStartDate();
 		GeneralDate startByClosure = GeneralDate.ymd(startTime.year(), startTime.month(), 1);
 		
 		DatePeriod period = new DatePeriod(startByClosure, endByClosure);
