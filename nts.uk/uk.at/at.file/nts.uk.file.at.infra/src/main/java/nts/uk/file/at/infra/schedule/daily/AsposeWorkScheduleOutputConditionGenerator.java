@@ -7,6 +7,7 @@ package nts.uk.file.at.infra.schedule.daily;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -518,7 +519,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		List<EmployeePrintOrder> lstEmployeePrintOrder = new ArrayList<>();
 		int order = 0;
 
-		// Get all workplace of selected employees within given period
+/*		// Get all workplace of selected employees within given period
 		for (String employeeId: query.getEmployeeId()) {
 			WkpHistImport workplaceHist = workplaceAdapter.findWkpBySid(employeeId, baseDate);
 			if (workplaceHist == null) {
@@ -530,18 +531,28 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 
 			// Also add into print order list
 			lstEmployeePrintOrder.add(new EmployeePrintOrder(order++, employeeId));
-		}
+		}*/
 
-/*        // Get all workplace of selected employees within given period
-		List<WkpHistImport> workplaceHists = workplaceAdapter.findWkpBySidAndBaseDate(query.getEmployeeId(), baseDate);
-        lstEmployeeNoWorkplace = workplaceHists.stream().filter(Objects::isNull).map(WkpHistImport::getEmployeeId).collect(Collectors.toList());
-        lstWorkplaceId = workplaceHists.stream().map(WkpHistImport::getWorkplaceId).collect(Collectors.toList());
-        queryData.setLstWorkplaceImport(workplaceHists);
+		/*
+		 * Tuning performance
+		 */
+        // Get all workplace of selected employees within given period
+		Map<String, WkpHistImport> workplaceHists = workplaceAdapter.findWkpBySidAndBaseDate(query.getEmployeeId(), baseDate).stream().collect(Collectors.toMap(WkpHistImport::getEmployeeId, Function.identity()));
+
+		//Get employees having no workplace on base date
+        for (String employeeId : query.getEmployeeId()) {
+            if (!workplaceHists.containsKey(employeeId)) {
+                lstEmployeeNoWorkplace.add(employeeId);
+            }
+        }
+
+        lstWorkplaceId = workplaceHists.values().stream().map(WkpHistImport::getWorkplaceId).collect(Collectors.toList());
+        queryData.setLstWorkplaceImport(new ArrayList<>(workplaceHists.values()));
 
         // Also add into print order list
-        for (int i = 0; i < workplaceHists.size(); i++) {
-            lstEmployeePrintOrder.add(new EmployeePrintOrder(i, workplaceHists.get(i).getEmployeeId()));
-        }*/
+        for (String key : workplaceHists.keySet()) {
+            lstEmployeePrintOrder.add(new EmployeePrintOrder(order++, key));
+        }
 
 		if (!lstEmployeeNoWorkplace.isEmpty()) {
 			List<EmployeeDto> lstEmployeeDto = employeeAdapter.findByEmployeeIds(lstEmployeeNoWorkplace);

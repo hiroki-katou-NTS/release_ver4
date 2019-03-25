@@ -418,38 +418,37 @@ public class WorkplacePubImp implements SyWorkplacePub {
 	@Override
 	public List<SWkpHistExport> findBySId(List<String> sids, GeneralDate baseDate) {
 		String companyID = AppContexts.user().companyId();
-		// get AffWorkplaceHistory
+		// Get AffWorkplaceHistory
 		List<AffWorkplaceHistory> affWrkPlc = affWorkplaceHistoryRepository.getWorkplaceHistoryByEmpIdsAndDate(baseDate, sids);
+		// Check exist
 		if (affWrkPlc.isEmpty())
 			return Collections.emptyList();
 
-		// get AffWorkplaceHistoryItem
-		List<String> historyIds = affWrkPlc.stream().map(c->c.getHistoryItems().get(0).identifier()).collect(Collectors.toList());
+		// Get AffWorkplaceHistoryItem
+		List<String> historyIds = affWrkPlc.stream().map(c -> c.getHistoryItems().get(0).identifier()).collect(Collectors.toList());
 		List<AffWorkplaceHistoryItem> affWrkPlcItem = affWorkplaceHistoryItemRepository.findByHistIds(historyIds);
+		// Check exist
 		if (affWrkPlcItem.isEmpty())
 			return Collections.emptyList();
 
 		// Get workplace info.
-		List<WorkplaceInfo> optWorkplaceInfo = workplaceInfoRepo.findByWkpIds(companyID,affWrkPlcItem.stream().map(c->c.getWorkplaceId()).collect(Collectors.toList()));
-
+		List<String> workplaceIds = affWrkPlcItem.stream().map(AffWorkplaceHistoryItem::getWorkplaceId).distinct().collect(Collectors.toList());
+		List<WorkplaceInfo> list = workplaceInfoRepo.findByBaseDateWkpIds(companyID, baseDate, workplaceIds);
 		// Check exist
-		if (optWorkplaceInfo.isEmpty()) {
+		if (list.isEmpty()) {
 			return Collections.emptyList();
 		}
 
+		// Convert and get data
 		List<SWkpHistExport> listData = new ArrayList<>();
-		for (WorkplaceInfo workplaceInfo : optWorkplaceInfo) {
-			lblWpi: for (AffWorkplaceHistoryItem affWorkplaceHistoryItem : affWrkPlcItem) {
-				if (affWorkplaceHistoryItem.getWorkplaceId().equals(workplaceInfo.getWorkplaceId())) {
-					for (AffWorkplaceHistory affWorkplaceHistory : affWrkPlc) {
-						if (affWorkplaceHistoryItem.getEmployeeId().equals(affWorkplaceHistory.getEmployeeId())) {
-							listData.add(convertToWorkplaceInfo(workplaceInfo, affWorkplaceHistory));
-							continue lblWpi;
-						}
-					}
-				}
-			}
-		}
+		Map<String, AffWorkplaceHistoryItem> affWorkplaceHistItemMap = affWrkPlcItem.stream().collect(Collectors.toMap(AffWorkplaceHistoryItem::getEmployeeId, Function.identity()));
+		Map<String, WorkplaceInfo> workplaceInfoMap = list.stream().collect(Collectors.toMap(WorkplaceInfo::getWorkplaceId, Function.identity()));
+
+		affWrkPlc.forEach(w -> {
+			String workplaceId = affWorkplaceHistItemMap.get(w.getEmployeeId()).getWorkplaceId();
+			listData.add(convertToWorkplaceInfo(workplaceInfoMap.get(workplaceId), w));
+		});
+
 		return listData;
 	}
 
