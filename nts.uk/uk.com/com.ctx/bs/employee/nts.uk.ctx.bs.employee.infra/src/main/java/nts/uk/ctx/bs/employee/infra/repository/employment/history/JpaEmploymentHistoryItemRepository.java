@@ -576,4 +576,50 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 		}
 		return mapResult;
 	}
+
+	@Override
+	public List<EmploymentHistoryOfEmployee> getEmploymentBySID(List<String> sids,
+			List<String> employmentCodes, DatePeriod dateRange) {
+		if (CollectionUtil.isEmpty(sids)) {
+			return new ArrayList<>();
+		}
+		String cid = AppContexts.user().companyId();
+		List<EmploymentHistoryOfEmployee> listHistItem = new ArrayList<>();
+		CollectionUtil.split(sids, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			String sql = "SELECT a.sid, a.START_DATE, a.END_DATE, b.EMP_CD FROM BSYMT_EMPLOYMENT_HIST a INNER JOIN BSYMT_EMPLOYMENT_HIS_ITEM b ON a.HIST_ID = b.HIST_ID"
+					  + " WHERE a.CID = ? AND a.START_DATE  < ? AND a.END_DATE > ? AND  b.EMP_CD IN ("
+					  +  NtsStatement.In.createParamsString(employmentCodes) + ")"
+					  + " AND a.SID IN (" + NtsStatement.In.createParamsString(subList) + ")  ORDER BY b.EMP_CD";
+				try(PreparedStatement statement = this.connection().prepareStatement(sql)){
+					statement.setString(1, cid);
+					GeneralDate startDate = dateRange.start().addDays(1);
+					GeneralDate endDate = dateRange.end().addDays(1);
+					statement.setDate(2, Date.valueOf(startDate.localDate()));
+					statement.setDate(3, Date.valueOf(endDate.localDate()));
+					int sizeEmmCode = employmentCodes.size();
+					for (int i = 0; i < sizeEmmCode; i++) {
+						statement.setString(4 + i, employmentCodes.get(i));
+					}
+					
+					for (int i = 0; i < subList.size(); i++) {
+						statement.setString(sizeEmmCode + 1 + i , subList.get(i));
+					}
+					
+					List<EmploymentHistoryOfEmployee> results = new NtsResultSet(statement.executeQuery()).getList(rec -> {
+						EmploymentHistoryOfEmployee e = new EmploymentHistoryOfEmployee();
+						e.setSId(rec.getString("SID"));
+						e.setStartDate(rec.getGeneralDate("START_DATE"));
+						e.setEndDate(rec.getGeneralDate("END_DATE").addDays(-1));
+						e.setEmploymentCD(rec.getString("EMP_CD"));						
+						return e;
+					});
+					
+					listHistItem.addAll(results);
+					
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
+				};
+		});
+		return listHistItem;
+	}
 }
