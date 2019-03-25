@@ -239,50 +239,54 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 	@Override
 	public List<EmployeeDailyPerError> finds(List<String> employeeID, DatePeriod processingDate) {
 		//fix response 192
-				String GET_BY_LIST_EMP_AND_PERIOD = "SELECT a.*,b.* FROM KRCDT_SYAIN_DP_ER_LIST a"
-						+ " JOIN KRCDT_ER_ATTENDANCE_ITEM b"
-						+ " ON b.ID = a.ID "
-						+ " WHERE a.PROCESSING_DATE <= ?"
-						+ " AND a.PROCESSING_DATE >= ?"
-						+ " AND  a.SID IN (" ;
-				
-				for(int i = 0;i<employeeID.size();i++) {
-					GET_BY_LIST_EMP_AND_PERIOD = GET_BY_LIST_EMP_AND_PERIOD+"?";
-					if(i < employeeID.size()-1) {
-						GET_BY_LIST_EMP_AND_PERIOD = GET_BY_LIST_EMP_AND_PERIOD+",";
-					}
+		String GET_BY_LIST_EMP_AND_PERIOD = "SELECT a.*, b.* FROM KRCDT_SYAIN_DP_ER_LIST a"
+				+ " JOIN KRCDT_ER_ATTENDANCE_ITEM b"
+				+ " ON b.ID = a.ID "
+				+ " WHERE a.PROCESSING_DATE <= ?"
+				+ " AND a.PROCESSING_DATE >= ?"
+				+ " AND  a.SID IN (";
+
+		//fix exceeding max condition of IN statement
+		List<EmployeeDailyPerError> resultReturn = new ArrayList<>();
+		StringBuilder stringBuilder = new StringBuilder();
+		CollectionUtil.split(employeeID, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			int size = subList.size();
+			for (int i = 0; i < size; i++) {
+				stringBuilder.append("?");
+				if (i < subList.size() - 1) {
+					stringBuilder.append(",");
 				}
-				GET_BY_LIST_EMP_AND_PERIOD = GET_BY_LIST_EMP_AND_PERIOD+")";
-				try (PreparedStatement statement = this.connection().prepareStatement(GET_BY_LIST_EMP_AND_PERIOD)) {
-					statement.setDate(1, Date.valueOf(processingDate.end().localDate()));
-					statement.setDate(2, Date.valueOf(processingDate.start().localDate()));
-					for(int i = 0;i<employeeID.size();i++) {
-						statement.setString(i+3, employeeID.get(i));
-					}
-					
-					List<EmployeeDailyPerError> results =  new NtsResultSet(statement.executeQuery()).getList(rs -> { 
-						return new EmployeeDailyPerError(
+			}
+			stringBuilder.append(")");
+			String QUERY = GET_BY_LIST_EMP_AND_PERIOD + stringBuilder.toString();
+			try (PreparedStatement statement = this.connection().prepareStatement(QUERY)) {
+				statement.setDate(1, Date.valueOf(processingDate.end().localDate()));
+				statement.setDate(2, Date.valueOf(processingDate.start().localDate()));
+				for (int i = 0; i < size; i++) {
+					statement.setString(i + 3, subList.get(i));
+				}
+				List<EmployeeDailyPerError> results = new NtsResultSet(statement.executeQuery()).getList(rs ->
+						new EmployeeDailyPerError(
 								rs.getString("ID"),
-								rs.getString("CID"), 
+								rs.getString("CID"),
 								rs.getString("SID"),
 								rs.getGeneralDate("PROCESSING_DATE"),
 								new ErrorAlarmWorkRecordCode(rs.getString("ERROR_CODE")),
 								Arrays.asList(rs.getInt("ATTENDANCE_ITEM_ID")),
 								rs.getInt("ERROR_CANCELABLE"),
-								rs.getString("ERROR_MESSAGE"));
-					});
-					
-					List<EmployeeDailyPerError> resultReturn = new ArrayList<>();
-					Map<String, List<EmployeeDailyPerError>> groupResult = results.stream().collect(Collectors.groupingBy(x -> x.getId()));
-					groupResult.forEach((key, value) ->{
-						 List<Integer> id = value.stream().flatMap(x -> x.getAttendanceItemList().stream()).collect(Collectors.toList());
-						 value.get(0).setAttendanceItemList(id);
-						 resultReturn.add(value.get(0));
-					});
-					return resultReturn;
-				} catch (SQLException e) {
-					throw new RuntimeException(e);
-				}
+								rs.getString("ERROR_MESSAGE")));
+
+				Map<String, List<EmployeeDailyPerError>> groupResult = results.stream().collect(Collectors.groupingBy(EmployeeDailyPerError::getId));
+				groupResult.forEach((key, value) -> {
+					List<Integer> id = value.stream().flatMap(x -> x.getAttendanceItemList().stream()).collect(Collectors.toList());
+					value.get(0).setAttendanceItemList(id);
+					resultReturn.add(value.get(0));
+				});
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return resultReturn;
 //				builderString.append("SELECT a ");
 //				builderString.append("FROM KrcdtSyainDpErList a ");
 //				builderString.append("WHERE a.employeeId IN :employeeId ");
