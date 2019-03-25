@@ -408,10 +408,11 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 
 			// caculator
 			domainDailyNew = calcService.calculate(domainDailyNew);
+			
+			domainDailyNew = registerCalcedService.runStoredProcess(domainDailyNew);
 
 		}
 
-		domainDailyNew = registerCalcedService.runStoredProcess(domainDailyNew);
 		return new RCDailyCorrectionResult(domainDailyNew, null, commandNew, commandOld, dailyItems, isUpdate);
 	}
 	
@@ -434,7 +435,9 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 		// get error after caculator
 		// update data
 		long time = System.currentTimeMillis();
-		employeeErrorRepo.removeParam(toMapParam(commandNew));
+		if (month == null || !month.getDomainMonth().isPresent()) {
+			employeeErrorRepo.removeParam(toMapParam(commandNew));
+		}
 		registerNotCalcDomain(commandNew, isUpdate);
 		List<IntegrationOfDaily> lastDt =  updateDomainAfterCalc(domainDailyNew);
 		
