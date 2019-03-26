@@ -116,6 +116,10 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                         self.isNewMode(false);
                         self.selectedTab('tab-1');
                     } else {
+                        if(val == 0){
+                        self.setNewMode();
+                        self.newTab()   
+                        }
                         self.lstFilteredData([]);
                         self.selectedErrorAlarmCode(null);
                         self.reSetData(self.selectedErrorAlarm(), null);
