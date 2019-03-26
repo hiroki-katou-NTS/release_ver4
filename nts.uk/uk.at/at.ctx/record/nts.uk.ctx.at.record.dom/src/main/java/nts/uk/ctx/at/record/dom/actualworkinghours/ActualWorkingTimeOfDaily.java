@@ -201,12 +201,14 @@ public class ActualWorkingTimeOfDaily {
 		
 		/*大塚モードの計算（欠勤控除時間）*/
 		//1日出勤系の場合は処理を呼ばないように作成が必要
-		if(workType.getDailyWork().decisionNeedPredTime() != AttendanceHolidayAttr.FULL_TIME && recordClass.getCalculatable()) {
+		if(recordClass.getCalculatable()) {
 			//大塚モード休憩未取得
 			calcResultOotsuka = calcResultOotsuka.reCalcLateLeave(recordClass.getWorkTimezoneCommonSet(),
 					  recordClass.getFixRestTimeSetting(),
 					  recordClass.getFixWoSetting(),
-					  recordClass.getIntegrationOfDaily().getAttendanceLeave());	
+					  recordClass.getIntegrationOfDaily().getAttendanceLeave(),
+					  workScheduleTime.getRecordPrescribedLaborTime(), 
+					  workType);	
 
 		}
 		
