@@ -242,8 +242,9 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                             if (!nts.uk.ui.errors.hasError()) {
                                 let startDate = new Date(self.settingManager().startDate());
                                 let closingStartDate = new Date(self.settingManager().closingStartDate());
+                                let $vm = ko.dataFor(document.querySelector('#function-panel'))
                                 let paramcheckReg = {
-                                    codeA16: self.findA16().code,
+                                    codeA16: $vm.empDisplayCode(),
                                     codeA27: self.settingManager().departmentCode(),
                                     codeA210: self.settingManager().dailyApprovalCode(),
                                     baseDate: moment(new Date(self.settingManager().startDate())).format('YYYY/MM/DD')
@@ -291,13 +292,6 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                     }
                 }, 300);
             },200);
-        }
-
-        findA16(){
-            let self = this;
-            return _.find(self.employeeInputList(), emp =>{
-                return emp.id == self.selectedItem();
-            });     
         }
 
         //削除する
