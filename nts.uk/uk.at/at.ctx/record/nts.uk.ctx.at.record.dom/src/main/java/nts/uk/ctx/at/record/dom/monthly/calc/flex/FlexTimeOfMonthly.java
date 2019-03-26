@@ -863,11 +863,13 @@ public class FlexTimeOfMonthly {
 			else {
 				// 法定内・法定外フレックス時間に分けて計算する
 				
-				// 法定労働時間から代休分を引く
-				val compensatoryLeave = aggregateTotalWorkingTime.getVacationUseTime().getCompensatoryLeave();
-				compensatoryLeave.aggregate(datePeriod);
-				int statutoryAfterDeduct = statutoryWorkingTimeMonth.v() - compensatoryLeave.getUseTime().v();
-				if (statutoryAfterDeduct < 0) statutoryAfterDeduct = 0;
+				// 2019.03.27 DEL shuichi_ishida Redmine#106923
+//				// 法定労働時間から代休分を引く
+//				val compensatoryLeave = aggregateTotalWorkingTime.getVacationUseTime().getCompensatoryLeave();
+//				compensatoryLeave.aggregate(datePeriod);
+//				int statutoryAfterDeduct = statutoryWorkingTimeMonth.v() - compensatoryLeave.getUseTime().v();
+//				if (statutoryAfterDeduct < 0) statutoryAfterDeduct = 0;
+				int statutoryAfterDeduct = statutoryWorkingTimeMonth.v();
 				
 				// 法定内として扱う時間を求める
 				int treatLegal = statutoryAfterDeduct - compensatoryLeaveAfterDudection.v() - this.flexCarryforwardTime.getFlexCarryforwardWorkTime().v();
