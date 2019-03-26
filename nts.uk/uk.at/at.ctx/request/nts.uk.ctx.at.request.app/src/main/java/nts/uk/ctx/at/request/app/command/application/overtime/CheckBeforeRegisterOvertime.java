@@ -63,17 +63,17 @@ public class CheckBeforeRegisterOvertime {
 				CheckBeforeRegisterOvertime.getOverTimeInput(command, companyId, appID),
 				Optional.empty());
 
-		return CheckBeforeRegister(command.getCalculateFlag(), appRoot, overTimeDomain);
+		return CheckBeforeRegister(command.getCalculateFlag(), appRoot, overTimeDomain, command.isCheckOver1Year());
 	}
 
-	public OvertimeCheckResultDto CheckBeforeRegister(int calculateFlg, Application_New app, AppOverTime overtime) {
+	public OvertimeCheckResultDto CheckBeforeRegister(int calculateFlg, Application_New app, AppOverTime overtime, boolean checkOver1Year) {
 		// 社員ID
 		String employeeId = AppContexts.user().employeeId();
 		String companyID =  app.getCompanyID();
 		OvertimeCheckResultDto result = new OvertimeCheckResultDto(0, 0, 0, false, null);
 		OvertimeCheckResult res = new OvertimeCheckResult();
 		// 2-1.新規画面登録前の処理を実行する
-		newBeforeRegister.processBeforeRegister(app,overtime.getOverTimeAtr().value);
+		newBeforeRegister.processBeforeRegister(app,overtime.getOverTimeAtr().value, checkOver1Year);
 		// 登録前エラーチェック
 		// 計算ボタン未クリックチェック
 		beforeCheck.calculateButtonCheck(calculateFlg, app.getCompanyID(), employeeId, 1,

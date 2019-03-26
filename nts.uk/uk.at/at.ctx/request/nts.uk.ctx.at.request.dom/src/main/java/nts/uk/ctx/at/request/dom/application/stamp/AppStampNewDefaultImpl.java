@@ -62,16 +62,16 @@ public class AppStampNewDefaultImpl implements AppStampNewDomainService {
 	}
 
 	@Override
-	public ProcessResult appStampRegister(String applicationReason, AppStamp appStamp) {
+	public ProcessResult appStampRegister(String applicationReason, AppStamp appStamp, boolean checkOver1Year) {
 		appStampCommonDomainService.appReasonCheck(applicationReason, appStamp);
 		appStampCommonDomainService.validateReason(appStamp);
-		return appStampRegistration(appStamp);
+		return appStampRegistration(appStamp, checkOver1Year);
 	}
 	
 	// 打刻申請の新規登録
-	private ProcessResult appStampRegistration(AppStamp appStamp) {
+	private ProcessResult appStampRegistration(AppStamp appStamp, boolean checkOver1Year) {
 		StampRequestSetting stampRequestSetting = stampRequestSettingRepository.findByCompanyID(appStamp.getApplication_New().getCompanyID()).get();
-		newBeforeRegister.processBeforeRegister(appStamp.getApplication_New(),0);
+		newBeforeRegister.processBeforeRegister(appStamp.getApplication_New(), 0, checkOver1Year);
 		appStamp.customValidate(stampRequestSetting.getStampPlaceDisp());
 		appStampRepository.addStamp(appStamp);
 		applicationApprovalService.insert(appStamp.getApplication_New());
