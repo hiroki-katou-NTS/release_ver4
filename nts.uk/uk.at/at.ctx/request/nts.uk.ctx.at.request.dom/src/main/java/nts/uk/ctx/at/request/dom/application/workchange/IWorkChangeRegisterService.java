@@ -12,7 +12,7 @@ public interface IWorkChangeRegisterService {
 	 * @param app: 申請
 	 * @return List approval email.
 	 */
-	ProcessResult registerData(AppWorkChange workChange, Application_New app);
+	ProcessResult registerData(AppWorkChange workChange, Application_New app, boolean checkOver1Year);
 	/**
 	 * アルゴリズム「勤務変更申請就業時間チェックの内容」を実行する
 	 * 就業時間

@@ -139,11 +139,11 @@ public class GoBackDirectlyRegisterDefault implements GoBackDirectlyRegisterServ
 
 	
 	@Override
-	public void checkBeforRegister(GoBackDirectly goBackDirectly, Application_New application) {
+	public void checkBeforRegister(GoBackDirectly goBackDirectly, Application_New application, boolean checkOver1Year) {
 		String companyID = AppContexts.user().companyId();
 		GoBackDirectlyCommonSetting goBackCommonSet = goBackDirectCommonSetRepo.findByCompanyID(companyID).get();
 		//アルゴリズム「2-1.新規画面登録前の処理」を実行する
-		processBeforeRegister.processBeforeRegister(application,0);
+		processBeforeRegister.processBeforeRegister(application,0, checkOver1Year);
 		// アルゴリズム「直行直帰するチェック」を実行する - client da duoc check
 		// アルゴリズム「直行直帰遅刻早退のチェック」を実行する
 		GoBackDirectLateEarlyOuput goBackLateEarly = this.goBackDirectLateEarlyCheck(goBackDirectly, application);

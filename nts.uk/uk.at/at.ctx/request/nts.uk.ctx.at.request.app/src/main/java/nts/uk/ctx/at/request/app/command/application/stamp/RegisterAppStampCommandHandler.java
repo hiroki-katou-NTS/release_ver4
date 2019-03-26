@@ -82,7 +82,7 @@ public class RegisterAppStampCommandHandler extends CommandHandlerWithResult<App
 										Optional.ofNullable(x.getEndTime()).map(p -> new TimeWithDayAttr(p)), 
 										Optional.ofNullable(x.getEndLocation()))
 							).collect(Collectors.toList()));
-				return applicationStampNewDomainService.appStampRegister(applicationReason, appStamp);
+				return applicationStampNewDomainService.appStampRegister(applicationReason, appStamp, appStampCmd.isCheckOver1Year());
 			case STAMP_WORK: 
 				List<AppStampWorkCmd> appStampWorkCmdsReal = appStampCmd.getAppStampWorkCmds()
 				.stream()
@@ -108,7 +108,7 @@ public class RegisterAppStampCommandHandler extends CommandHandlerWithResult<App
 										Optional.ofNullable(x.getEndTime()).map(p -> new TimeWithDayAttr(p)), 
 										Optional.ofNullable(x.getEndLocation()))
 							).collect(Collectors.toList()));
-				return applicationStampNewDomainService.appStampRegister(applicationReason, appStamp);
+				return applicationStampNewDomainService.appStampRegister(applicationReason, appStamp, appStampCmd.isCheckOver1Year());
 			case STAMP_CANCEL: 
 				appStamp = AppStamp.createCancelStamp(
 						companyID, 
@@ -121,7 +121,7 @@ public class RegisterAppStampCommandHandler extends CommandHandlerWithResult<App
 										x.getStampFrameNo(), 
 										x.getCancelAtr())	
 							).collect(Collectors.toList()));
-				return applicationStampNewDomainService.appStampRegister(applicationReason, appStamp);
+				return applicationStampNewDomainService.appStampRegister(applicationReason, appStamp, appStampCmd.isCheckOver1Year());
 			case STAMP_ONLINE_RECORD: 
 				appStamp = AppStamp.createOnlineRecordStamp(
 						companyID, 
@@ -131,7 +131,7 @@ public class RegisterAppStampCommandHandler extends CommandHandlerWithResult<App
 						Optional.of(new AppStampOnlineRecord(
 								EnumAdaptor.valueOf(appStampCmd.getAppStampOnlineRecordCmd().getStampCombinationAtr(), AppStampCombinationAtr.class),
 								appStampCmd.getAppStampOnlineRecordCmd().getAppTime())));
-				return applicationStampNewDomainService.appStampRegister(applicationReason, appStamp);
+				return applicationStampNewDomainService.appStampRegister(applicationReason, appStamp, appStampCmd.isCheckOver1Year());
 			case OTHER: 
 				List<AppStampWorkCmd> appStampOtherCmdsReal = appStampCmd.getAppStampWorkCmds()
 					.stream()
@@ -157,7 +157,7 @@ public class RegisterAppStampCommandHandler extends CommandHandlerWithResult<App
 										Optional.ofNullable(x.getEndTime()).map(p -> new TimeWithDayAttr(p)), 
 										Optional.ofNullable(x.getEndLocation()))
 							).collect(Collectors.toList()));
-				return applicationStampNewDomainService.appStampRegister(applicationReason, appStamp);
+				return applicationStampNewDomainService.appStampRegister(applicationReason, appStamp, appStampCmd.isCheckOver1Year());
 			default:
 				return null;
 			

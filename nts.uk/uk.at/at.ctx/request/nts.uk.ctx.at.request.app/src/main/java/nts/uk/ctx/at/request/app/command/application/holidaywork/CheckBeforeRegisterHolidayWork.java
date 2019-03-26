@@ -72,16 +72,16 @@ public class CheckBeforeRegisterHolidayWork {
 				 command.getOverTimeShiftNight(),
 				CheckBeforeRegisterHolidayWork.getHolidayWorkInput(command, companyId, appID), Optional.empty());
 
-		return CheckBeforeRegister(command.getCalculateFlag(), appRoot, holidayWorkDomain);
+		return CheckBeforeRegister(command.getCalculateFlag(), appRoot, holidayWorkDomain, command.isCheckOver1Year());
 	}
 
-	public OvertimeCheckResultDto CheckBeforeRegister(int calculateFlg, Application_New app, AppHolidayWork appHolidayWork) {
+	public OvertimeCheckResultDto CheckBeforeRegister(int calculateFlg, Application_New app, AppHolidayWork appHolidayWork, boolean checkOver1Year) {
 		// 社員ID
 		String employeeId = AppContexts.user().employeeId();
 		OvertimeCheckResultDto result = new OvertimeCheckResultDto(0, 0, 0, false, null);
 		OvertimeCheckResult res = new OvertimeCheckResult();
 		// 2-1.新規画面登録前の処理を実行する
-		newBeforeRegister.processBeforeRegister(app,0);
+		newBeforeRegister.processBeforeRegister(app, 0, checkOver1Year);
 		// 登録前エラーチェック
 		// 計算ボタン未クリックチェック
 		//03-06_計算ボタンチェック

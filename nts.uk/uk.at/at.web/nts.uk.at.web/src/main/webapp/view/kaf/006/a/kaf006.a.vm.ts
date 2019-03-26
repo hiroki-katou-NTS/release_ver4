@@ -712,6 +712,39 @@ module nts.uk.at.view.kaf006.a.viewmodel {
                 });
             }
         }
+//        checkBfRegister(){
+//            let self = this;
+//             if(self.selectedTypeOfDuty() == null){
+//                 $("#workTypes").trigger('validate');
+//                return;
+//            }
+//            let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
+//            let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true); 
+//            let paramCheck = {  appType: 1,
+//                                prePostAtr: self.prePostSelected(),
+//                                startDate: nts.uk.util.isNullOrEmpty(self.startAppDate()) ? null : moment(self.startAppDate()).format(self.DATE_FORMAT),
+//                                endDate: nts.uk.util.isNullOrEmpty(self.endAppDate()) ? moment(self.startAppDate()).format(self.DATE_FORMAT) : moment(self.endAppDate()).format(self.DATE_FORMAT),
+//                                employeeID: self.employeeID(),
+//                                appReasonID: comboBoxReason,
+//                                applicationReason: textAreaReason,
+//                                overTimeAtr:0}
+//            nts.uk.at.view.kaf000.a.service.checkBfRegister(paramCheck).done(()=>{
+//                self.registerApp();
+//            }).fail((res)=>{
+//                if(res.messageId == "Msg_1518"){//confirm
+//                    dialog.confirm({messageId: res.messageId}).ifYes(() => {
+//                            self.registerApp();
+//                        }).ifCancel(() => {
+//                            nts.uk.ui.block.clear();
+//                        });
+//                }else{
+//                    dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+//                        .then(function() {
+//                            nts.uk.ui.block.clear();
+//                        });
+//                }
+//            });
+//        }
         registerApp(){
             let self = this;
             let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
@@ -753,15 +786,35 @@ module nts.uk.at.view.kaf006.a.viewmodel {
                 startTime2: self.timeStart2(),
                 endTime2: self.timeEnd2(),
                 displayEndDateFlg: self.displayEndDateFlg(),
-                specHd: specHd
+                specHd: specHd,
+                checkOver1Year: true
                 
             };
-            if(paramInsert.workTypeCode == null){
-                 $("#workTypes").trigger('validate');
-                return;
-            }
             service.createAbsence(paramInsert).done((data) => {
-                nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
+                self.sendMail(data);
+            }).fail((res) => {
+                if(res.messageId == "Msg_1518"){//confirm
+                    dialog.confirm({messageId: res.messageId}).ifYes(() => {
+                        paramInsert.checkOver1Year = false;
+                             service.createAbsence(paramInsert).done((data) => {
+                                self.sendMail(data);
+                            }).fail((res) => {
+                                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                                        .then(function() { nts.uk.ui.block.clear(); });
+                            });
+                        }).ifNo(() => {
+                            nts.uk.ui.block.clear();
+                        });
+                    
+                }else{
+                    dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                        .then(function() { nts.uk.ui.block.clear(); });
+                }
+            });    
+        }
+        sendMail(data){
+            let self = this;
+            nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
                     if(data.autoSendMail){
                         appcommon.CommonProcess.displayMailResult(data);   
                     } else {
@@ -772,10 +825,6 @@ module nts.uk.at.view.kaf006.a.viewmodel {
                         }   
                     }
                 });
-            }).fail((res) => {
-                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
-                    .then(function() { nts.uk.ui.block.clear(); });
-            });    
         }
         getReason(inputReasonID: string, inputReasonList: Array<common.ComboReason>, detailReason: string): string {
             let appReason = '';

@@ -29,4 +29,6 @@ public class SaveHolidayShipmentCommand {
 	 * 申請 ITEM
 	 */
 	private ApplicationCommand appCmd;
+	
+	private boolean checkOver1Year;
 }
