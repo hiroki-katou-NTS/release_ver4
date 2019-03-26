@@ -69,12 +69,12 @@ public class StartAlarmSendEmailProcessHandler extends CommandHandlerWithResult<
 		//ドメインモデル「メールサーバ」を取得する
 		boolean useAuthentication =  mailServerAdapter.findBy(companyID);
 		//メール設定(本人宛)：アラームリスト通常用メール設定.本人宛メール設定
-		Optional<MailSettings> mailSetting = mailSettingNormal.get().getMailSettings();
+		Optional<MailSettings> mailSettings = mailSettingNormal.get().getMailSettings();
 		//メール設定(管理者宛)：アラームリスト通常用メール設定.管理者宛メール設定
 		Optional<MailSettings> mailSettingAdmins = mailSettingNormal.get().getMailSettingAdmins();
 		return sendEmailService.alarmSendEmail(companyID, executeDate, listEmployeeTagetId, listManagerTagetId,
 				listValueExtractAlarmDto, mailSettingsParamDto,currentAlarmCode,
-				useAuthentication,mailSetting,mailSettingAdmins,Optional.empty());
+				useAuthentication,mailSettings,mailSettingAdmins,Optional.empty());
 	}
 
 	private MailSettingsParamDto buildMailSend(MailAutoAndNormalDto mailSetting) {
