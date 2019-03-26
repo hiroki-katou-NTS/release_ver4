@@ -81,8 +81,12 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	public List<ApprovalRootStateStatus> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType) {
 		
 		// Đối ứng SPR
-		String companyID = Strings.isNotBlank(AppContexts.user().companyId()) ? "000000000000-0001" : AppContexts.user().companyId();
-
+		String companyID = "000000000000-0001";
+		String loginCompanyID = AppContexts.user().companyId();
+		if(Strings.isNotBlank(loginCompanyID)){
+			companyID = loginCompanyID;
+		}
+		
 		// レスポンス改善版
 		val interms = this.confirmQueryRepository.queryInterm(companyID, employeeIDLst, period, RecordRootType.CONFIRM_WORK_BY_DAY);
 		val confirms = this.confirmQueryRepository.queryConfirm(companyID, employeeIDLst, period, rootType);
