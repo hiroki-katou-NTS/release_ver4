@@ -6,6 +6,7 @@ package nts.uk.ctx.bs.employee.dom.workplace.config.info;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import nts.arc.layer.dom.AggregateRoot;
 
@@ -14,6 +15,7 @@ import nts.arc.layer.dom.AggregateRoot;
  */
 // 職場構成情報
 @Getter
+@AllArgsConstructor
 public class WorkplaceConfigInfo extends AggregateRoot {
 
 	/** The company id. */

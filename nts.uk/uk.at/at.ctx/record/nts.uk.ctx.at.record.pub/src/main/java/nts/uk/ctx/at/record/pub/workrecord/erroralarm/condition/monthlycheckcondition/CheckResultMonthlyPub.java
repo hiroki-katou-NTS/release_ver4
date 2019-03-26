@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.pub.workrecord.erroralarm.condition.monthlycheckcondition;
 
+import java.util.List;
 //import java.util.List;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.monthlycheckcondition.Check36AgreementValue;
 import nts.uk.ctx.at.record.pub.workrecord.erroralarm.condition.find.AttendanceItemConditionPubExport;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
+import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
 
 public interface CheckResultMonthlyPub {
 	/**
@@ -55,5 +57,16 @@ public interface CheckResultMonthlyPub {
 	 * @return
 	 */
 	Map<String, Integer> checkPerTimeMonActualResult(YearMonth yearMonth, String employeeID,AttendanceItemConditionPubExport attendanceItemCondition);
+	
+	//HoiDD No.257
+	/**
+	 * 月別実績をチェックする 
+	 * @param yearMonth
+	 * @param employeeID
+	 * @param attendanceItemCondition
+	 * @param ListAttendanceIds
+	 * @return
+	 */
+	Map<String,Map<YearMonth,Map<String,Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemConditionPubExport> attendanceItemCondition);
 
 }

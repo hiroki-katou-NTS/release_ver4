@@ -36,6 +36,7 @@ import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryItem;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryItemRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfig;
+import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfigHistory;
 import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfigRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfo;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfoRepository;
@@ -330,6 +331,30 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 		// Return
 		return lstWpkIds.stream().distinct().collect(Collectors.toList());
+	}
+	
+	@Override
+	public Map<GeneralDate, Map<String, List<String>>> findWpkIdsBySids(String companyId, List<String> employeeId, DatePeriod date) {
+		// Query
+		Map<GeneralDate, List<AffWorkplaceHistoryItem>> his = new HashMap<>();
+		date.datesBetween().stream().forEach(c -> {
+			his.put(c, affWorkplaceHistoryItemRepository.getAffWrkplaHistItemByListEmpIdAndDateV2(c, employeeId));
+		});
+
+		List<String> lstWpkIds = his.entrySet().stream().map(c -> c.getValue().stream().map(h -> h.getWorkplaceId()).collect(Collectors.toList()))
+										.flatMap(List::stream).distinct().collect(Collectors.toList());
+		Map<WorkplaceConfigHistory, List<WorkplaceConfigInfo>> wpc = wkpConfigInfoRepo.findAllParentByWkpId(companyId, date, lstWpkIds);
+
+		return his.entrySet().stream().collect(Collectors.toMap(c -> c.getKey(), c -> {
+			List<WorkplaceConfigInfo> wpConfig = wpc.entrySet().stream().filter(wpch -> wpch.getKey().contains(c.getKey())).findFirst().get().getValue();
+			return c.getValue().stream().collect(Collectors.groupingBy(h -> h.getEmployeeId(), Collectors.collectingAndThen(Collectors.toList(), list -> {
+				Optional<WorkplaceConfigInfo> currentWpci = wpConfig.stream().filter(w -> w.getLstWkpHierarchy().get(0).getWorkplaceId().equals(list.get(0).getEmployeeId())).findFirst();
+				if(currentWpci.isPresent()){
+					return currentWpci.get().getLstWkpHierarchy().stream().map(wkph -> wkph.getWorkplaceId()).collect(Collectors.toList());
+				}
+				return new ArrayList<>();
+			})));
+		}));
 	}
 
 	/*

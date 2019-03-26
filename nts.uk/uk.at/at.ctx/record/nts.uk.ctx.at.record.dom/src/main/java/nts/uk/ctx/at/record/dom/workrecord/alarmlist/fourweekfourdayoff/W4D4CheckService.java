@@ -41,7 +41,7 @@ public class W4D4CheckService {
 			String alarmComment = TextResource.localize("KAL010_64");
 			String alarmMessage = TextResource.localize("KAL010_63");
 			alarmMessage = TextResource.localize("KAL010_63",countHoliday+"日","(" +alarmDate +")");
-			AlarmExtractionValue4W4D result = new AlarmExtractionValue4W4D(workplaceID, employeeID, alarmDate, W4D4, W4D4, alarmMessage, alarmComment);
+			AlarmExtractionValue4W4D result = new AlarmExtractionValue4W4D(workplaceID, employeeID, period, W4D4, W4D4, alarmMessage, alarmComment);
 			return Optional.of(result);
 		}
 		

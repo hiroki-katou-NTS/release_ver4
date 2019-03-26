@@ -8,6 +8,8 @@ import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.affiliation.AffiliationInfoOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthly;
+import nts.uk.ctx.at.record.dom.monthly.information.care.MonCareHdRemain;
+import nts.uk.ctx.at.record.dom.monthly.information.childnursing.MonChildHdRemain;
 import nts.uk.ctx.at.record.dom.monthly.remarks.RemarksMonthlyRecord;
 import nts.uk.ctx.at.record.dom.monthly.vacation.absenceleave.monthremaindata.AbsenceLeaveRemainData;
 import nts.uk.ctx.at.record.dom.monthly.vacation.annualleave.AnnLeaRemNumEachMonth;
@@ -56,6 +58,10 @@ public interface MonthlyRecordToAttendanceItemConverter {
 
 	MonthlyRecordToAttendanceItemConverter withAbsenceLeave(AbsenceLeaveRemainData domain);
 
+	MonthlyRecordToAttendanceItemConverter withMonChildHd(MonChildHdRemain monChildHdRemain);
+
+	MonthlyRecordToAttendanceItemConverter withMonCareHd(MonCareHdRemain monCareHdRemain);
+
 	MonthlyRecordToAttendanceItemConverter withRemarks(List<RemarksMonthlyRecord> domain);
 
 	MonthlyRecordToAttendanceItemConverter completed();
@@ -67,6 +73,10 @@ public interface MonthlyRecordToAttendanceItemConverter {
 	List<AnyItemOfMonthly> toAnyItems();
 	
 	Optional<AnnLeaRemNumEachMonth> toAnnLeave();
+	
+	Optional<MonCareHdRemain> toMonCareHd();
+	
+	Optional<MonChildHdRemain> toMonChildHd();
 	
 	Optional<RsvLeaRemNumEachMonth> toRsvLeave();
 	

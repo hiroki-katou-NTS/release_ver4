@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.record.infra.repository.standardtime;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -105,6 +107,17 @@ public class JpaBasicAgreementSettingRepository extends JpaRepository implements
 	public Optional<BasicAgreementSetting> find(String basicSettingId) {
 		return this.queryProxy().query(FIND, KmkmtBasicAgreementSetting.class)
 				.setParameter("basicSettingId", basicSettingId).getSingle(f -> toDomain(f));
+	}
+	
+	@Override
+	public List<BasicAgreementSetting> find(List<String> basicSettingId) {
+		if(basicSettingId.isEmpty()){
+			return new ArrayList<>();
+		}
+		String query = "SELECT a FROM KmkmtBasicAgreementSetting a WHERE a.kmkmtBasicAgreementSettingPK.basicSettingId in :basicSettingId ";
+		
+		return this.queryProxy().query(query, KmkmtBasicAgreementSetting.class)
+				.setParameter("basicSettingId", basicSettingId).getList(f -> toDomain(f));
 	}
 
 	private KmkmtBasicAgreementSetting toEntity(BasicAgreementSetting basicAgreementSetting, boolean isCompany) {

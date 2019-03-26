@@ -16,12 +16,14 @@ import nts.uk.ctx.at.record.dom.workrecord.erroralarm.monthlycheckcondition.sysf
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.monthlycheckcondition.sysfixedcheckcondition.monthlyunconfirmed.MonthlyUnconfirmedService;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.enums.SelfConfirmError;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentityProcessUseSetRepository;
 import nts.uk.ctx.at.record.pub.fixedcheckitem.ValueExtractAlarmWRPubExport;
 import nts.uk.ctx.at.record.pub.workrecord.erroralarm.condition.monthlycheckcondition.sysfixedcheckcondition.SysFixedCheckConMonPub;
 import nts.uk.ctx.at.record.pub.workrecord.identificationstatus.identityconfirmprocess.IdentityConfirmProcessExport;
 import nts.uk.ctx.at.shared.dom.remainingnumber.subhdmana.service.LeaveManagementService;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryLeaveComSetting;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
+import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 @Stateless
@@ -35,6 +37,9 @@ public class SysFixedCheckConMonPubImpl implements SysFixedCheckConMonPub {
 	
 	@Inject
 	private LeaveManagementService leaveManagementService;
+	
+	@Inject
+	private IdentityProcessUseSetRepository identityProcessRepo;
 	
 	@Override
 	public Optional<ValueExtractAlarmWRPubExport> checkAgreement(String employeeID, int yearMonth,int closureId,ClosureDate closureDate) {
@@ -65,6 +70,21 @@ public class SysFixedCheckConMonPubImpl implements SysFixedCheckConMonPub {
 			identityProcess = Optional.of(IdentityProcessUseSet.createFromJavaType(identityExport.getCompanyId(), identityExport.isUseConfirmByYourself(),
 					identityExport.isUseIdentityOfMonth(),yourSelfConfirmError));
 		}
+		List<ValueExtractAlarmWR> datas = monthlyUnconfirmedService.checkMonthlyUnconfirmeds(employeeID, yearMonth,identityProcess);
+		List<ValueExtractAlarmWRPubExport> lstReturn = new ArrayList<>();
+		if(!CollectionUtil.isEmpty(datas)) {
+			
+			for (ValueExtractAlarmWR valueExtractAlarmWR : datas) {
+				lstReturn.add(convertToExport(valueExtractAlarmWR));
+			}
+		}
+		return lstReturn;
+	}
+	
+	@Override
+	public List<ValueExtractAlarmWRPubExport> checkMonthlyUnconfirmeds(List<String> employeeID, List<YearMonth> yearMonth) {
+		Optional<IdentityProcessUseSet> identityProcess = identityProcessRepo.findByKey(AppContexts.user().companyId());
+		
 		List<ValueExtractAlarmWR> datas = monthlyUnconfirmedService.checkMonthlyUnconfirmeds(employeeID, yearMonth,identityProcess);
 		List<ValueExtractAlarmWRPubExport> lstReturn = new ArrayList<>();
 		if(!CollectionUtil.isEmpty(datas)) {

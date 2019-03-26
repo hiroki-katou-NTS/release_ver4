@@ -22,7 +22,11 @@ public interface SysFixedCheckConMonAdapter {
 	// 1:月次未確認 ( process two record Monthly)
 	public List<ValueExtractAlarm> checkMonthlyUnconfirmeds(String employeeID, int yearMonth,IdentityConfirmProcessImport identityConfirmProcessImport);
 	
+	public List<ValueExtractAlarm> checkMonthlyUnconfirmeds(List<String> employeeID, List<YearMonth> yearMonth);
+	
 	// 2:1960
 	public List<ValueExtractAlarm> checkMonthlyUnconfirmedsAdmin(String employeeId, YearMonth yearMonth,ApprovalProcessImport approvalProcessImport);
+	
+	public List<ValueExtractAlarm> checkMonthlyUnconfirmedsAdmin(List<String> employeeID, List<YearMonth> yearMonth);
 	
 }

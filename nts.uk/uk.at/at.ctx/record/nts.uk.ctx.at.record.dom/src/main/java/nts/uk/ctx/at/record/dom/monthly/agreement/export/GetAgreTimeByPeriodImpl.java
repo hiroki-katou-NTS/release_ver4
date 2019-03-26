@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -14,6 +16,7 @@ import nts.uk.ctx.at.record.dom.monthly.agreement.AgreementTimeOfManagePeriod;
 import nts.uk.ctx.at.record.dom.monthly.agreement.AgreementTimeOfManagePeriodRepository;
 import nts.uk.ctx.at.record.dom.standardtime.AgreementMonthSetting;
 import nts.uk.ctx.at.record.dom.standardtime.AgreementYearSetting;
+import nts.uk.ctx.at.record.dom.standardtime.BasicAgreementSetting;
 import nts.uk.ctx.at.record.dom.standardtime.primitivevalue.LimitOneYear;
 import nts.uk.ctx.at.record.dom.standardtime.repository.AgreementDomainService;
 import nts.uk.ctx.at.record.dom.standardtime.repository.AgreementMonthSettingRepository;
@@ -24,6 +27,7 @@ import nts.uk.ctx.at.shared.dom.monthly.agreement.PeriodAtrOfAgreement;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemCustom;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
 
 /**
  * 実装：指定期間36協定時間の取得
@@ -54,6 +58,21 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
 	@Override
 	public List<AgreementTimeByPeriod> algorithm(String companyId, String employeeId, GeneralDate criteria,
 			Month startMonth, Year year, PeriodAtrOfAgreement periodAtr) {
+		
+		return internalAlgorithm(companyId, employeeId, criteria, startMonth, year, periodAtr, null);
+	}
+
+	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	public List<AgreementTimeByPeriod> algorithm(String companyId, String employeeId, GeneralDate criteria,
+			Month startMonth, Year year, PeriodAtrOfAgreement periodAtr, AgeementTimeCommonSetting settingGetter) {
+		
+		return internalAlgorithm(companyId, employeeId, criteria, startMonth, year, periodAtr, settingGetter);
+	}
+	
+	private List<AgreementTimeByPeriod> internalAlgorithm(String companyId, String employeeId, GeneralDate criteria,
+			Month startMonth, Year year, PeriodAtrOfAgreement periodAtr, 
+			AgeementTimeCommonSetting settingGetter) {
 		
 		List<AgreementTimeByPeriod> results = new ArrayList<>();
 
@@ -90,22 +109,20 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
 			Optional<YearMonth> checkYmOpt = Optional.empty();
 			if (periodAtr == PeriodAtrOfAgreement.ONE_YEAR) checkYearOpt = Optional.of(year);
 			if (periodAtr == PeriodAtrOfAgreement.ONE_MONTH) checkYmOpt = Optional.of(periodYmList.get(0));
-			
+
 			// 状態チェック
 			{
 				// 「労働条件項目」を取得
-				val workingConditionItemOpt =
-						this.workingConditionItem.getBySidAndStandardDate(employeeId, criteria);
+				val workingConditionItemOpt = getWorkCondition(employeeId, criteria, settingGetter);
 				if (!workingConditionItemOpt.isPresent()){
 					return results;
 				}
-				
+
 				// 労働制を確認する
 				val workingSystem = workingConditionItemOpt.get().getLaborSystem();
 				
 				// 36協定基本設定を取得する
-				val basicAgreementSet = this.agreementDomainService.getBasicSet(
-						companyId, employeeId, criteria, workingSystem);
+				val basicAgreementSet = getBasicSetting(companyId, employeeId, criteria, settingGetter, workingSystem);
 				
 				// 「年度」を確認
 				Optional<AgreementYearSetting> yearSetOpt = Optional.empty();
@@ -114,7 +131,7 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
 					// 36協定年度設定を取得する
 					yearSetOpt = this.agreementYearSetRepo.findByKey(employeeId, checkYearOpt.get().v());
 				}
-				
+
 				// 「年月」を確認
 				Optional<AgreementMonthSetting> monthSetOpt = Optional.empty();
 				if (checkYmOpt.isPresent()){
@@ -168,6 +185,23 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
 		return results;
 	}
 
+	private Optional<WorkingConditionItem> getWorkCondition(String employeeId, GeneralDate criteria,
+			AgeementTimeCommonSetting settingGetter) {
+		if(settingGetter == null){
+			return this.workingConditionItem.getBySidAndStandardDate(employeeId, criteria);
+		}
+		return settingGetter.getWorkCondition(employeeId, criteria);
+	}
+
+	private BasicAgreementSetting getBasicSetting(String companyId,
+			String employeeId, GeneralDate criteria, AgeementTimeCommonSetting settingGetter,
+			WorkingSystem workingSystem) {
+		if(settingGetter == null){
+			return agreementDomainService.getBasicSet(companyId, employeeId, criteria, workingSystem);
+		}
+		return settingGetter.getBasicSet(companyId, employeeId, criteria, workingSystem);
+	} 
+	
 	@Override
 	public List<AgreementTimeByEmp> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
                                                      Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs) {
@@ -217,7 +251,7 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
                 yearSetByEmp = finalYearSetAll.get(employeeId);
             }
 
-            Map<Integer, AgreementMonthSetting> monthSetByEmp = new HashMap();
+            Map<Integer, AgreementMonthSetting> monthSetByEmp = new HashMap<>();
             if (finalMonthSetAll.containsKey(employeeId)) {
                 // 36協定年月設定を取得する
                 monthSetByEmp = finalMonthSetAll.get(employeeId).stream()

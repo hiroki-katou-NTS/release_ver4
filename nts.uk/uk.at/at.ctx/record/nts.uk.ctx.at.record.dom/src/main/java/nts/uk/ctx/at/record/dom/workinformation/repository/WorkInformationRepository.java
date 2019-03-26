@@ -21,8 +21,6 @@ public interface WorkInformationRepository {
 	
 	List<WorkInfoOfDailyPerformance> finds(Map<String, List<GeneralDate>> param);
 	
-	List<WorkInfoOfDailyPerformance> findByListEmployeeId(List<String> employeeIds, DatePeriod ymds);
-	
 	List<WorkInfoOfDailyPerformance> findByEmployeeId(String employeeId);
 	
 	void delete(String employeeId, GeneralDate ymd);

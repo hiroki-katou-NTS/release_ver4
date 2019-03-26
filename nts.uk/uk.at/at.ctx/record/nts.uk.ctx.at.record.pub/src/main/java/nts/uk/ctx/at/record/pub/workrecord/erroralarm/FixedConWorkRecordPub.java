@@ -10,6 +10,8 @@ public interface FixedConWorkRecordPub {
 	 * @return
 	 */
 	List<FixedConWorkRecordPubExport> getAllFixedConWorkRecordByID(String dailyAlarmConID);
+	
+	List<FixedConWorkRecordPubExport> getAllFixedConWorkRecordByID(List<String> dailyAlarmConID);
 
 	/**
 	 * get fixed condition work record by dailyAlarmConID and fixConWorkRecordNo

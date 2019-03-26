@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.infra.repository.workrecord.erroralarm;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,9 +22,8 @@ public class JpaErAlApplicationRepository extends JpaRepository implements ErAlA
 	public Optional<ErAlApplication> getAllErAlAppByEralCode(String companyID, String errorAlarmCode) {
 
 		List<KrcstErAlApplication> listKrcstErAlApplication = this.queryProxy()
-																	.query(GET_ERAL_BY_CODE, KrcstErAlApplication.class)
-																	.setParameter("cid", companyID)
-																	.setParameter("errorCd", errorAlarmCode).getList();
+				.query(GET_ERAL_BY_CODE, KrcstErAlApplication.class).setParameter("cid", companyID)
+				.setParameter("errorCd", errorAlarmCode).getList();
 		if (listKrcstErAlApplication.isEmpty()) {
 			return Optional.ofNullable(null);
 		}
@@ -31,6 +31,22 @@ public class JpaErAlApplicationRepository extends JpaRepository implements ErAlA
 				.collect(Collectors.toList());
 
 		return Optional.of(new ErAlApplication(companyID, errorAlarmCode, listAppType));
+	}
+
+	public List<ErAlApplication> getAllErAlAppByEralCode(String companyID, List<String> errorAlarmCode) {
+		String GET_ERAL_BY_CODE = " SELECT c FROM KrcstErAlApplication c "
+				+ " WHERE c.krcstErAlApplicationPK.cid = :cid" + " AND c.krcstErAlApplicationPK.errorCd in :errorCd";
+		
+		List<KrcstErAlApplication> eralApps = this.queryProxy()
+				.query(GET_ERAL_BY_CODE, KrcstErAlApplication.class).setParameter("cid", companyID)
+				.setParameter("errorCd", errorAlarmCode).getList();
+		if (errorAlarmCode.isEmpty()) {
+			return new ArrayList<>();
+		}
+		return errorAlarmCode.stream().map(eralCode -> {
+			return new ErAlApplication(companyID, eralCode, eralApps.stream().map(eralApp -> eralApp.krcstErAlApplicationPK.appTypeCd)
+					.collect(Collectors.toList()));
+		}).filter(eralApp -> !eralApp.getAppType().isEmpty()).collect(Collectors.toList());
 	}
 
 }

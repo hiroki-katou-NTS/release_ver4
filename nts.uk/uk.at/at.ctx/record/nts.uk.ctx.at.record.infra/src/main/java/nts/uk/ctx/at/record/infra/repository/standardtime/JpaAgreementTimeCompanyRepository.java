@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.infra.repository.standardtime;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -31,6 +32,13 @@ public class JpaAgreementTimeCompanyRepository extends JpaRepository implements 
 	public Optional<AgreementTimeOfCompany> find(String companyId, LaborSystemtAtr laborSystemAtr) {
 		return this.queryProxy().query(FIND, KmkmtAgeementTimeCompany.class).setParameter("companyId", companyId)
 				.setParameter("laborSystemAtr", laborSystemAtr.value).getSingle(f -> toDomain(f));
+	}
+	
+	@Override
+	public List<AgreementTimeOfCompany> find(String companyId) {
+		String query = "SELECT a FROM KmkmtAgeementTimeCompany a WHERE a.kmkmtAgeementTimeCompanyPK.companyId = :companyId ";
+		
+		return this.queryProxy().query(query, KmkmtAgeementTimeCompany.class).setParameter("companyId", companyId).getList(f -> toDomain(f));
 	}
 
 	@Override
