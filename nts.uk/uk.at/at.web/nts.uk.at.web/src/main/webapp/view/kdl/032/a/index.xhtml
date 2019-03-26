@@ -7,7 +7,7 @@
 	<body>
 		<ui:composition template="../../../../master/dialog.xhtml">
 			<ui:define name="htmlHead">
-				<script>var dialogSize = { width: 350, height: 450 };</script>
+				<script>var dialogSize = { width: 580, height: 600 };</script>
 				<com:ValidatorScript>
 					nts.uk.shr.com.primitive.PersonId
 				</com:ValidatorScript>
@@ -24,7 +24,7 @@
 				<div style = "margin-top: 20px;margin-left: 30px;">
 				<table id="single-list" tabindex="1"
 					data-bind="ntsGridList: {								
-					height: 255,
+					height: 420,
 					dataSource: deviationTimeList,
 					primaryKey: 'divergenceReasonCode',
 					columns: columns,
