@@ -22,7 +22,7 @@ public interface NewBeforeRegister_New {
 	 * @param targetApp
 	 * @param overTimeAtr, If APP_TYPE = 0 thì mới có overTime Atr, còn các loại đơn khác thì truyền 0 vào
 	 */
-	public void processBeforeRegister(Application_New application,int overTimeAtr);
+	public void processBeforeRegister(Application_New application,int overTimeAtr, boolean checkOver1Year);
 	
 	/**
 	 * 1.入社前退職チェック

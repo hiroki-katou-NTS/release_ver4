@@ -8,4 +8,6 @@ public interface SyEmployeeFnAdapter {
 	List<EmployeeBasicInfoFnImport> findBySIds(List<String> sIds);
 	
 	List<String> getListEmployeeId(List<String> wkpIds, DatePeriod dateperiod);
+	
+	List<EmployeeInfoImport> getByListSid(List<String> sIds);
 }
