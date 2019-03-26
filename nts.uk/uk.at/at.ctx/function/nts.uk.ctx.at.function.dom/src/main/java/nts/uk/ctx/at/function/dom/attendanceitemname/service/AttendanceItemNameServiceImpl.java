@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -124,9 +125,9 @@ public class AttendanceItemNameServiceImpl implements AttendanceItemNameService 
 		LoginUserContext login = AppContexts.user();
 		String companyId = login.companyId();
 		attendanceItems = this.getAttendanceItemName(attendanceItems);
-		Map<Integer, AttItemName> mapAttendanceItems = attendanceItems.stream()
+		Map<Integer, AttItemName> mapAttendanceItems = attendanceItems.stream().distinct()
 				.collect(Collectors.toMap(AttItemName::getAttendanceItemId, x -> x));
-		Map<Integer, AttendanceItemLinking> mapItemLinking = attendanceItemAndFrameNos.stream()
+		Map<Integer, AttendanceItemLinking> mapItemLinking = attendanceItemAndFrameNos.stream().distinct()
 				.collect(Collectors.toMap(AttendanceItemLinking::getAttendanceItemId, x -> x));
 		for (AttendanceItemLinking link : attendanceItemAndFrameNos) {
 			int id = link.getAttendanceItemId();
