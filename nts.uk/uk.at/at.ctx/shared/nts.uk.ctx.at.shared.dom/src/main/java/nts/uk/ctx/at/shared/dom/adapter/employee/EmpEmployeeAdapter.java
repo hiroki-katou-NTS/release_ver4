@@ -23,6 +23,8 @@ public interface EmpEmployeeAdapter {
 	// for RequestList #1-2
 	EmployeeImport findByEmpId(String empId);
 	
+	List<EmployeeImport> findByEmpId(List<String> empIds);
+	
 	// RequestList335
 	List<String> getListEmpByWkpAndEmpt(List<String> wkps , List<String> lstempts , DatePeriod dateperiod);
 	

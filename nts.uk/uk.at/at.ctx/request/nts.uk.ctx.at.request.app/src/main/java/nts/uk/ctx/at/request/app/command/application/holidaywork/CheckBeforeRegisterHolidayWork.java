@@ -72,16 +72,16 @@ public class CheckBeforeRegisterHolidayWork {
 				 command.getOverTimeShiftNight(),
 				CheckBeforeRegisterHolidayWork.getHolidayWorkInput(command, companyId, appID), Optional.empty());
 
-		return CheckBeforeRegister(command.getCalculateFlag(), appRoot, holidayWorkDomain);
+		return CheckBeforeRegister(command.getCalculateFlag(), appRoot, holidayWorkDomain, command.isCheckOver1Year());
 	}
 
-	public OvertimeCheckResultDto CheckBeforeRegister(int calculateFlg, Application_New app, AppHolidayWork appHolidayWork) {
+	public OvertimeCheckResultDto CheckBeforeRegister(int calculateFlg, Application_New app, AppHolidayWork appHolidayWork, boolean checkOver1Year) {
 		// 社員ID
 		String employeeId = AppContexts.user().employeeId();
 		OvertimeCheckResultDto result = new OvertimeCheckResultDto(0, 0, 0, false, null);
 		OvertimeCheckResult res = new OvertimeCheckResult();
 		// 2-1.新規画面登録前の処理を実行する
-		newBeforeRegister.processBeforeRegister(app,0);
+		newBeforeRegister.processBeforeRegister(app, 0, checkOver1Year);
 		// 登録前エラーチェック
 		// 計算ボタン未クリックチェック
 		//03-06_計算ボタンチェック
@@ -130,10 +130,11 @@ public class CheckBeforeRegisterHolidayWork {
 		// TODO: ３６協定時間上限チェック（年間）
 		beforeCheck.TimeUpperLimitYearCheck();
 		// 事前否認チェック
-		res = beforeCheck.preliminaryDenialCheck(app.getCompanyID(), app.getAppDate(), app.getInputDate(),
-				app.getPrePostAtr(),ApplicationType.BREAK_TIME_APPLICATION.value);
+		/*
+		res = beforeCheck.preliminaryDenialCheck(app.getCompanyID(), app.getEmployeeID(), app.getAppDate(), app.getInputDate(),
+		 		app.getPrePostAtr(),ApplicationType.BREAK_TIME_APPLICATION.value);
 		result.setConfirm(res.isConfirm());
-
+		*/
 		return result;
 	}
 	
@@ -219,7 +220,7 @@ public class CheckBeforeRegisterHolidayWork {
 		// TODO: ３６協定時間上限チェック（年間）
 		beforeCheck.TimeUpperLimitYearCheck();
 		// 事前否認チェック
-		res = beforeCheck.preliminaryDenialCheck(appRoot.getCompanyID(), appRoot.getAppDate(), appRoot.getInputDate(),
+		res = beforeCheck.preliminaryDenialCheck(appRoot.getCompanyID(), appRoot.getEmployeeID(), appRoot.getAppDate(), appRoot.getInputDate(),
 				appRoot.getPrePostAtr(),ApplicationType.BREAK_TIME_APPLICATION.value);
 		result.setConfirm(res.isConfirm());
 

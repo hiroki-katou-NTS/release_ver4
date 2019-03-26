@@ -1,14 +1,19 @@
 package nts.uk.ctx.at.record.infra.repository.standardtime;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
 import lombok.val;
+import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.YearMonth;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.standardtime.AgreementMonthSetting;
 import nts.uk.ctx.at.record.dom.standardtime.repository.AgreementMonthSettingRepository;
 import nts.uk.ctx.at.record.infra.entity.standardtime.KmkmtAgreementMonthSet;
@@ -20,6 +25,8 @@ public class JpaAgreementMonthSettingRepository extends JpaRepository implements
 	private static final String FIND;
 
 	private static final String FIND_BY_KEY;
+
+	private static final String FIND_BY_KEYS;
 
 	private static final String DEL_BY_KEY;
 
@@ -41,6 +48,13 @@ public class JpaAgreementMonthSettingRepository extends JpaRepository implements
 		builderString.append("WHERE a.kmkmtAgreementMonthSetPK.employeeId = :employeeId ");
 		builderString.append("AND a.kmkmtAgreementMonthSetPK.yearmonthValue = :yearmonthValue ");
 		FIND_BY_KEY = builderString.toString();
+
+		builderString = new StringBuilder();
+		builderString.append("SELECT a ");
+		builderString.append("FROM KmkmtAgreementMonthSet a ");
+		builderString.append("WHERE a.kmkmtAgreementMonthSetPK.employeeId IN :employeeIds ");
+		builderString.append("AND a.kmkmtAgreementMonthSetPK.yearmonthValue IN :yearmonthValues ");
+		FIND_BY_KEYS = builderString.toString();
 
 		builderString = new StringBuilder();
 		builderString.append("DELETE ");
@@ -79,6 +93,22 @@ public class JpaAgreementMonthSettingRepository extends JpaRepository implements
 				.setParameter("yearmonthValue", yearMonth.v())
 				.getSingle(f -> toDomain(f));
 	}
+
+    @Override
+    public List<AgreementMonthSetting> findByKey(List<String> employeeIds, List<YearMonth> yearMonths) {
+		if (employeeIds == null || employeeIds.isEmpty())
+			return Collections.emptyList();
+		if (yearMonths == null || yearMonths.isEmpty())
+			return Collections.emptyList();
+		List<Integer> yearmonthValues = yearMonths.stream().map(x -> x.v()).collect(Collectors.toList());
+		List<AgreementMonthSetting> result = new ArrayList<>();
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
+			result.addAll(this.queryProxy().query(FIND_BY_KEYS, KmkmtAgreementMonthSet.class)
+					.setParameter("employeeIds", splitData).setParameter("yearmonthValues", yearmonthValues)
+					.getList(f -> toDomain(f)));
+		});
+		return result;
+    }
 	
 	@Override
 	public void add(AgreementMonthSetting agreementMonthSetting) {

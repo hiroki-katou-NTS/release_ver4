@@ -5,6 +5,7 @@ module nts.uk.at.view.kaf010.b {
     import dialog = nts.uk.ui.dialog;
     import appcommon = nts.uk.at.view.kaf000.shr.model;
     import util = nts.uk.util;
+    import text = nts.uk.resource.getText;
 
     export module viewmodel {
         export class ScreenModel extends kaf000.b.viewmodel.ScreenModel {
@@ -137,9 +138,11 @@ module nts.uk.at.view.kaf010.b {
             //画面モード(表示/編集)
             editable: KnockoutObservable<boolean> = ko.observable(true);
             enableOvertimeInput: KnockoutObservable<boolean> = ko.observable(false);
+            appCur: any = null;
             constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
                 super(listAppMetadata, currentApp);
                 var self = this;
+                self.appCur = currentApp;
                     $("#fixed-table-holiday").ntsFixedTable({ height: 120 });
                     $("#fixed-break_time-table-holiday").ntsFixedTable({ height: 119 });
                     $("#fixed-break_time-table-holiday-pre").ntsFixedTable({ height: 119 });
@@ -214,11 +217,11 @@ module nts.uk.at.view.kaf010.b {
                 self.inputDate(data.application.inputDate);
                 if (data.workTime != null) {
                     self.siftCD(data.workTime.siftCode);
-                    self.siftName(data.workTime.siftName);
+                    self.siftName(data.workTime.siftName|| text("KAL003_120"));
                 }
                 if (data.workType != null) {
                     self.workTypeCd(data.workType.workTypeCode);
-                    self.workTypeName(data.workType.workTypeName);
+                    self.workTypeName(data.workType.workTypeName|| text("KAL003_120"));
                 }
                 
                 self.workTypecodes(data.workTypes);
@@ -616,20 +619,21 @@ module nts.uk.at.view.kaf010.b {
             }
             
             updateOvertime(command: any){
+                let self = this;
                 service.updateOvertime(command)
                 .done((data) => {
                     nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
                         if(data.autoSendMail){
                             appcommon.CommonProcess.displayMailResult(data); 
                         } else {
-                            location.reload();
+                            self.reBinding(self.listAppMeta, self.appCur, false);
                         }
                     });    
                 })
                 .fail(function(res) { 
                     if(res.optimisticLock == true){
                         nts.uk.ui.dialog.alertError({ messageId: "Msg_197" }).then(function(){
-                            location.reload();
+                            self.reBinding(self.listAppMeta, self.appCur, false);
                         });    
                     } else {
                         nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function(){nts.uk.ui.block.clear();}); 

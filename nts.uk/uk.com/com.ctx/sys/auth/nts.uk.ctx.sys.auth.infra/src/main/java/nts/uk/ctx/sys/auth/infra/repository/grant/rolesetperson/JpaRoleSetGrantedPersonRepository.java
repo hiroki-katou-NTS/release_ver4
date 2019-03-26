@@ -90,6 +90,8 @@ public class JpaRoleSetGrantedPersonRepository extends JpaRepository implements 
 	@Override
 	public Optional<RoleSetGrantedPerson> findByDetail(String companyID, String employeeID, List<String> roleSetCDLst,
 			GeneralDate date) {
+		if(roleSetCDLst.isEmpty())
+			return Optional.empty();
 		return this.queryProxy().query(FIND_BY_DETAIL ,SacmtRoleSetGrantedPerson.class)
 				.setParameter("companyId", companyID)
 				.setParameter("employeeId", employeeID)

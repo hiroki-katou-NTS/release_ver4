@@ -28,4 +28,5 @@ public class DPParams {
 	public Boolean showError;
     public ObjectShare objectShare;	
     public Boolean showLock;
+    public Integer closureId;
 }

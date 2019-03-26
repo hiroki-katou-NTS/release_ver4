@@ -29,7 +29,7 @@ public class WorkInformationOfDailyFinder extends FinderFacade {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends ConvertibleAttendanceItem> List<T> find(List<String> employeeId, DatePeriod baseDate) {
-		return (List<T>) this.workInfoRepo.findByListEmployeeId(employeeId, baseDate).stream()
+		return (List<T>) this.workInfoRepo.findByPeriodOrderByYmdAndEmps(employeeId, baseDate).stream()
 				.map(c -> WorkInformationOfDailyDto.getDto(c)).collect(Collectors.toList());
 	}
 

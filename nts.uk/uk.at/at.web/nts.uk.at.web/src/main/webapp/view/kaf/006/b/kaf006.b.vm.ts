@@ -125,9 +125,11 @@ module nts.uk.at.view.kaf006.b{
         relaResonDis: KnockoutObservable<boolean> = ko.observable(true);
         hdTypeDis: KnockoutObservable<boolean> = ko.observable(false);
         dataMax: KnockoutObservable<boolean> = ko.observable(false);
+        appCur: any = null;
         constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
             super(listAppMetadata, currentApp);
             let self = this;
+            self.appCur = currentApp;
               self.startPage(self.appID()).done(function(){
 
                 });   
@@ -472,7 +474,8 @@ module nts.uk.at.view.kaf006.b{
             self.displayPrePostFlg(data.prePostFlg);
             self.requiredReason(data.appReasonRequire);
             self.workTimeCode(data.workTimeCode);
-            self.displayWorkTimeName(nts.uk.util.isNullOrEmpty(data.workTimeCode) ? nts.uk.resource.getText('KAF006_21') : data.workTimeCode +"　"+ data.workTimeName);
+            let wktimeName = data.workTimeName || nts.uk.resource.getText('KAL003_120');
+            self.displayWorkTimeName(nts.uk.util.isNullOrEmpty(data.workTimeCode) ? nts.uk.resource.getText('KAF006_21') : data.workTimeCode +"　"+ wktimeName);
             if(data.applicationReasonDtos != null && data.applicationReasonDtos.length > 0){
                 let lstReasonCombo = _.map(data.applicationReasonDtos, o => { return new common.ComboReason(o.reasonID, o.reasonTemp); });
                 self.reasonCombo(lstReasonCombo);
@@ -556,7 +559,7 @@ module nts.uk.at.view.kaf006.b{
              if (nts.uk.ui.errors.hasError()){return;} 
              nts.uk.ui.block.invisible();
              let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
-             let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), self.enbContentReason());
+             let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true); 
              let appReason: string;
              if (!appcommon.CommonProcess.checklenghtReason(comboBoxReason+":"+textAreaReason, "#appReason")) {
                  return;
@@ -587,14 +590,16 @@ module nts.uk.at.view.kaf006.b{
                 endTime1: self.timeEnd1(),
                 startTime2: self.timeStart2(),
                 endTime2: self.timeEnd2(),
-                specHd: specHd
+                specHd: specHd,
+                user: self.user,
+                reflectPerState: self.reflectPerState
              };
              service.updateAbsence(paramInsert).done((data) =>{
                 nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
                     if(data.autoSendMail){
                         appcommon.CommonProcess.displayMailResult(data);   
                     } else {
-                        location.reload();
+                        self.reBinding(self.listAppMeta, self.appCur, false);
                     }
                 });
              }).fail((res) =>{
@@ -610,7 +615,7 @@ module nts.uk.at.view.kaf006.b{
     
         getAreaReason(){
             var self = this;
-            return appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), self.enbContentReason());   
+            return appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);   
         }   
             
         resfreshReason(appReason: string){

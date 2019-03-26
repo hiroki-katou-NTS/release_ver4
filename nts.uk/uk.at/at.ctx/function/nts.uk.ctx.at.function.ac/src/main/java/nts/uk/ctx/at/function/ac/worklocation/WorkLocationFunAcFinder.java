@@ -35,9 +35,9 @@ public class WorkLocationFunAcFinder implements RecordWorkInfoFunAdapter {
 	private RecordWorkInfoFunAdapterDto convertToExport(InfoCheckNotRegisterPubExport export) {
 		return new  RecordWorkInfoFunAdapterDto(
 					export.getEmployeeId(),
-					export.getWorkTimeCode()==null?null:export.getWorkTimeCode(),
-					export.getWorkTypeCode()
-				);
+					export.getWorkTimeCode(),
+					export.getWorkTypeCode(),
+					export.getWorkingDate());
 	}
 
 	@Override
@@ -66,8 +66,7 @@ public class WorkLocationFunAcFinder implements RecordWorkInfoFunAdapter {
 	private WorkInfoOfDailyPerFnImport convertToWorkInfoOfDailyPerformance(WorkInfoOfDailyPerExport domain) {
 		return new WorkInfoOfDailyPerFnImport(
 				domain.getEmployeeId(),
-				domain.getYmd()
-				);
+				domain.getYmd());
 	}
 
 

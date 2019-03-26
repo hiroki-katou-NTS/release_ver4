@@ -15,4 +15,6 @@ public interface AgreementTimeOfWorkPlaceRepository {
 	Optional<String> find(String workplaceId , LaborSystemtAtr laborSystemAtr);
 	
 	List<String> findWorkPlaceSetting(LaborSystemtAtr laborSystemAtr);
+	
+	List<AgreementTimeOfWorkPlace> findWorkPlaceSetting(List<String> workplaceId);
 }

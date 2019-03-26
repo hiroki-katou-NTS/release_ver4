@@ -125,4 +125,9 @@ public class UpdateOvertimeCommand {
 	private AppOvertimeDetailCommand appOvertimeDetail;
 	
 	private String appReasonID;
+	
+	private String divergenceReasonArea;
+	
+	Integer user;
+    Integer reflectPerState;
 }

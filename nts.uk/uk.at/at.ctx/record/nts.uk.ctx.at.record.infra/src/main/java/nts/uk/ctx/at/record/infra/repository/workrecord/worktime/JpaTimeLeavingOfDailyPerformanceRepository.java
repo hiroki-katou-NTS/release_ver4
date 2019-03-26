@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,16 +18,21 @@ import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.at.record.dom.worklocation.WorkLocationCD;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
 import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
+import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
 import nts.uk.ctx.at.record.dom.worktime.primitivevalue.WorkTimes;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 //import nts.uk.ctx.at.record.infra.entity.workinformation.KrcdtWorkScheduleTime;
@@ -35,6 +41,8 @@ import nts.uk.ctx.at.record.infra.entity.worktime.KrcdtDaiLeavingWork;
 import nts.uk.ctx.at.record.infra.entity.worktime.KrcdtDaiLeavingWorkPK;
 import nts.uk.ctx.at.record.infra.entity.worktime.KrcdtTimeLeavingWork;
 import nts.uk.ctx.at.record.infra.entity.worktime.KrcdtTimeLeavingWorkPK;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
+import nts.uk.shr.com.time.TimeWithDayAttr;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.infra.data.jdbc.JDBCUtil;
 
@@ -510,17 +518,97 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 
 	@Override
 	public List<TimeLeavingOfDailyPerformance> finds(List<String> employeeIds, DatePeriod ymd) {
-		List<Object[]> result = new ArrayList<>();
-		StringBuilder query = new StringBuilder(
-				"SELECT a, c from KrcdtDaiLeavingWork a LEFT JOIN a.timeLeavingWorks c ");
-		query.append(" WHERE a.krcdtDaiLeavingWorkPK.employeeId IN :employeeId ");
-		query.append(" AND a.krcdtDaiLeavingWorkPK.ymd <= :end AND a.krcdtDaiLeavingWorkPK.ymd >= :start");
-		TypedQueryWrapper<Object[]> tQuery = this.queryProxy().query(query.toString(), Object[].class);
+		List<TimeLeavingOfDailyPerformance> result = new ArrayList<>();
+
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds -> {
-			result.addAll(tQuery.setParameter("employeeId", empIds).setParameter("start", ymd.start())
-					.setParameter("end", ymd.end()).getList());
+			result.addAll(internalQuery(ymd, empIds));
 		});
-		return toDomainFromJoin(result);
+		return result;
+	}
+
+	@SneakyThrows
+	private List<TimeLeavingOfDailyPerformance> internalQuery(DatePeriod datePeriod, List<String> subList) {
+		String subIn = NtsStatement.In.createParamsString(subList);
+
+		Map<String, Map<GeneralDate, List<TimeLeavingWork>>> scheTimes = new HashMap<>(); 
+		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_TIME_LEAVING_WORK WHERE YMD >= ? AND YMD <= ? AND TIME_LEAVING_TYPE = 0 AND SID IN (" + subIn + ")")){
+			stmt.setDate(1, Date.valueOf(datePeriod.start().localDate()));
+			stmt.setDate(2, Date.valueOf(datePeriod.end().localDate()));
+			for (int i = 0; i < subList.size(); i++) {
+				stmt.setString(i + 3, subList.get(i));
+			}
+			new NtsResultSet(stmt.executeQuery()).getList(c -> {
+				String sid = c.getString("SID");
+				GeneralDate ymd = c.getGeneralDate("YMD");
+				if(!scheTimes.containsKey(sid)){
+					scheTimes.put(sid, new HashMap<>());
+				}
+				if(!scheTimes.get(sid).containsKey(ymd)) {
+					scheTimes.get(sid).put(ymd, new ArrayList<>());
+				}
+				getCurrent(scheTimes, sid, ymd).add(toDomain(c));
+				return null;
+			});
+		};
+		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_DAI_LEAVING_WORK WHERE YMD >= ? AND YMD <= ? AND SID IN (" + subIn + ")")){
+			stmt.setDate(1, Date.valueOf(datePeriod.start().localDate()));
+			stmt.setDate(2, Date.valueOf(datePeriod.end().localDate()));
+			for (int i = 0; i < subList.size(); i++) {
+				stmt.setString(i + 3, subList.get(i));
+			}
+			return new NtsResultSet(stmt.executeQuery()).getList(c -> {
+				String sid = c.getString("SID");
+				GeneralDate ymd = c.getGeneralDate("YMD");
+				return new TimeLeavingOfDailyPerformance(sid, new WorkTimes(c.getInt("WORK_TIMES")), getCurrent(scheTimes, sid, ymd), ymd);
+			});
+		}
+	}
+	
+	private TimeLeavingWork toDomain(NtsResultRecord r) {
+		TimeLeavingWork domain = new TimeLeavingWork(new WorkNo(r.getInt("WORK_NO")),
+				new TimeActualStamp(
+						r.getInt("ATD_ACTUAL_TIME") == null ? null : 
+										getWorkStamp(r.getInt("ATD_ACTUAL_ROUDING_TIME_DAY"), 
+													r.getInt("ATD_ACTUAL_TIME"), 
+													r.getString("ATD_ACTUAL_PLACE_CODE"), 
+													r.getInt("ATD_ACTUAL_SOURCE_INFO")),
+						r.getInt("ATD_STAMP_TIME") == null ? null : 
+										getWorkStamp(r.getInt("ATD_STAMP_ROUDING_TIME_DAY"), 
+													r.getInt("ATD_STAMP_TIME"),
+													r.getString("ATD_STAMP_PLACE_CODE"), 
+													r.getInt("ATD_STAMP_SOURCE_INFO")),
+						r.getInt("ATD_NUMBER_STAMP")),
+				new TimeActualStamp(
+						r.getInt("LWK_ACTUAL_TIME") == null ? null : 
+										getWorkStamp(r.getInt("LWK_ACTUAL_ROUDING_TIME_DAY"), 
+													r.getInt("LWK_ACTUAL_TIME"), 
+													r.getString("LWK_ACTUAL_PLACE_CODE"), 
+													r.getInt("LWK_ACTUAL_SOURCE_INFO")),
+						r.getInt("LWK_STAMP_TIME") == null ? null : 
+										getWorkStamp(r.getInt("LWK_STAMP_ROUDING_TIME_DAY"), 
+													r.getInt("LWK_STAMP_TIME"),
+													r.getString("LWK_STAMP_PLACE_CODE"), 
+													r.getInt("LWK_STAMP_SOURCE_INFO")),
+						r.getInt("LWK_NUMBER_STAMP")));
+		return domain;
+	}
+
+	private WorkStamp getWorkStamp(Integer roudingTime, Integer time, String placeCode, Integer sourceInfo) {
+		return new WorkStamp(
+				roudingTime == null ? null : new TimeWithDayAttr(roudingTime),
+				time == null ? null : new TimeWithDayAttr(time),
+				placeCode == null ? null : new WorkLocationCD(placeCode),
+				sourceInfo == null ? null : EnumAdaptor.valueOf(sourceInfo, StampSourceInfo.class));
+	}
+
+	private <T> List<T> getCurrent(Map<String, Map<GeneralDate, List<T>>> scheTimes,
+			String sid, GeneralDate ymd) {
+		if(scheTimes.containsKey(sid)){
+			if(scheTimes.get(sid).containsKey(ymd)){
+				return scheTimes.get(sid).get(ymd);
+			}
+		}
+		return new ArrayList<>();
 	}
 
 	@Override

@@ -38,17 +38,20 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 				}
 				
 				//予定勤種就時の反映
-				dailyInfor = commonService.reflectScheWorkTimeWorkType(workchangePara, isPre, dailyInfor);
+				boolean isScheReflect = commonService.checkReflectScheWorkTimeType(workchangePara, isPre, workchangePara.getWorkTimeCode());
 				TimeReflectPara timeReflect =  new TimeReflectPara(param.getCommon().getEmployeeId(),
 						loopDate,
 						param.getCommon().getStartTime(),
 						param.getCommon().getEndTime(),
 						1, true, true);
-				//TODO 予定開始終了時刻の反映
-				if(param.getCommon().getStartTime() != null 
-						&& param.getCommon().getEndTime() != null) {
-					
-					dailyInfor = workTimeUpdate.updateScheStartEndTime(timeReflect, dailyInfor);	
+				if(isScheReflect) {
+					dailyInfor = commonService.reflectScheWorkTimeWorkType(workchangePara, isPre, dailyInfor);
+					//TODO 予定開始終了時刻の反映
+					if(param.getCommon().getStartTime() != null 
+							&& param.getCommon().getEndTime() != null) {
+						
+						dailyInfor = workTimeUpdate.updateScheStartEndTime(timeReflect, dailyInfor);	
+					}
 				}
 				ReflectParameter reflectPara = new ReflectParameter(workchangePara.getEmployeeId(),
 						loopDate,
@@ -64,7 +67,7 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 				}
 				//日別実績の勤務情報  変更
 				workRepository.updateByKeyFlush(dailyInfor);
-				commonService.calculateOfAppReflect(null, workchangePara.getEmployeeId(), loopDate);
+				commonService.calculateOfAppReflect(null, workchangePara.getEmployeeId(), loopDate, false);
 			}			
 			return true;	
 		}catch (Exception e) {

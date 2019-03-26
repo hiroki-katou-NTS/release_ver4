@@ -189,6 +189,28 @@ public class DailyWork extends DomainObject { // 1日の勤務
 	}
 	
 	/**
+	 * 連続勤務か判定
+	 * 
+	 * @return true：連続勤務である false：連続勤務ではない
+	 */
+	public boolean isContinueWork() {
+		if (this.workTypeUnit == WorkTypeUnit.OneDay) {
+			return this.oneDay.isContinuousWork();
+		} else if (this.workTypeUnit == WorkTypeUnit.MonringAndAfternoon) {
+			return morning.isContinuousWork() || afternoon.isContinuousWork();
+		}
+		return false;
+	}
+	
+	/**
+	 * 平日出勤or休出であるか判定する
+	 * @return 平日出勤or休出である
+	 */
+	public boolean isWeekDayOrHolidayWork() {
+		return isWeekDayAttendance() || isHolidayWork();
+	}
+	
+	/**
 	 * 1日振休か判定する
 	 * @return　1日振休である
 	 */

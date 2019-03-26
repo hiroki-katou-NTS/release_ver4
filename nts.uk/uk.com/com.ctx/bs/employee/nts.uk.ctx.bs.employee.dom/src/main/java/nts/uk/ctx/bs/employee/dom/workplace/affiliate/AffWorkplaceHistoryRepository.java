@@ -73,4 +73,11 @@ public interface AffWorkplaceHistoryRepository {
 	List<String> getByLstWplIdAndPeriod(List<String> lstWkpId,GeneralDate startDate, GeneralDate endDate);
 
 	List<AffWorkplaceHistory> getByListSid(List<String> employeeIds);
+	/**
+	 * sids, baseDate <= start date
+	 * @param baseDate
+	 * @param employeeIds
+	 * @return
+	 */
+	List<AffWorkplaceHistory> getWorkplaceHistoryBySidsAndDateV2(GeneralDate baseDate, List<String> employeeIds);
 }

@@ -10,7 +10,7 @@ module nts.uk.at.view.daily.importing.service {
     }
 
     export function exportErrors(data): JQueryPromise<any> {
-        return nts.uk.request.ajax('at', paths.exportErrors, data);
+        return nts.uk.request.exportFile(paths.exportErrors, data);
     }
     
     export function truncate(): JQueryPromise<any> {

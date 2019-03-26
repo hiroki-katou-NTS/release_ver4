@@ -7,10 +7,13 @@ import nts.uk.ctx.at.request.dom.application.common.service.other.CollectAchieve
 import nts.gul.text.StringUtil;
 import nts.gul.collection.CollectionUtil;*/
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+
+import org.apache.logging.log4j.util.Strings;
 
 import nts.arc.error.BusinessException;
 import nts.arc.layer.app.command.CommandHandlerContext;
@@ -25,14 +28,19 @@ import nts.uk.ctx.at.request.dom.application.common.service.other.OtherCommonAlg
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
 import nts.uk.ctx.at.request.dom.application.workchange.AppWorkChange;
 import nts.uk.ctx.at.request.dom.application.workchange.IWorkChangeRegisterService;
+import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSetting;
+import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSettingRepository;
+import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSetting;
+import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSettingRepository;
+import nts.uk.ctx.at.request.dom.setting.request.application.common.RequiredFlg;
+import nts.uk.ctx.at.request.dom.setting.request.gobackdirectlycommon.primitive.AppDisplayAtr;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 @Transactional
 public class AddAppWorkChangeCommandHandler extends CommandHandlerWithResult<AddAppWorkChangeCommand, ProcessResult> {
-
-	private static final String COLON_STRING = ":";
+	
 	@Inject
 	private IWorkChangeRegisterService workChangeRegisterService;
 	@Inject
@@ -43,6 +51,12 @@ public class AddAppWorkChangeCommandHandler extends CommandHandlerWithResult<Add
 //	private SpecHdFrameForWkTypeSetService specHdWkpTypeSv;
 	@Inject 
 	private OtherCommonAlgorithm  otherCommonAlgorithm;
+	
+	@Inject
+	private AppTypeDiscreteSettingRepository appTypeDiscreteSettingRepository;
+	
+	@Inject
+	private ApplicationSettingRepository applicationSettingRepository;
 	
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<AddAppWorkChangeCommand> context) {
@@ -59,8 +73,37 @@ public class AddAppWorkChangeCommandHandler extends CommandHandlerWithResult<Add
 		// 入力者 = 申請者
 		// 申請者
 		String applicantSID = addCommand.getEmployeeID()!=null?addCommand.getEmployeeID(): AppContexts.user().employeeId();
+		
+		AppTypeDiscreteSetting appTypeDiscreteSetting = appTypeDiscreteSettingRepository.getAppTypeDiscreteSettingByAppType(
+				companyId, 
+				ApplicationType.WORK_CHANGE_APPLICATION.value).get();
+		String appReason = Strings.EMPTY;	
+		String typicalReason = Strings.EMPTY;
+		String displayReason = Strings.EMPTY;
+		if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)){
+			typicalReason += appCommand.getAppReasonID();
+		}
+		if(appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+			if(Strings.isNotBlank(typicalReason)){
+				displayReason += System.lineSeparator();
+			}
+			displayReason += appCommand.getApplicationReason();
+		}
+		Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
+				.getApplicationSettingByComID(companyId);
+		ApplicationSetting applicationSetting = applicationSettingOp.get();
+		if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)
+			||appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+			if (applicationSetting.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
+					&& Strings.isBlank(typicalReason+displayReason)) {
+				throw new BusinessException("Msg_115");
+			}
+		}
+		appReason = typicalReason + displayReason;
+		
 		// 申請
-		Application_New app = IfacApp.buildApplication(appID, appCommand.getStartDate(), appCommand.getPrePostAtr(), null, appCommand.getApplicationReason().replaceFirst(COLON_STRING, System.lineSeparator()), ApplicationType.WORK_CHANGE_APPLICATION, appCommand.getStartDate(), appCommand.getEndDate(), applicantSID);
+		Application_New app = IfacApp.buildApplication(appID, appCommand.getStartDate(), appCommand.getPrePostAtr(), appReason, 
+				appReason, ApplicationType.WORK_CHANGE_APPLICATION, appCommand.getStartDate(), appCommand.getEndDate(), applicantSID);
 					
 		// 勤務変更申請
 		AppWorkChange workChangeDomain = AppWorkChange.createFromJavaType(
@@ -84,7 +127,7 @@ public class AddAppWorkChangeCommandHandler extends CommandHandlerWithResult<Add
 		//1日休日のチェック
 		checkHoliday(companyId,applicantSID,addCommand);
 		//ドメインモデル「勤務変更申請設定」の新規登録をする
-		return workChangeRegisterService.registerData(workChangeDomain, app);
+		return workChangeRegisterService.registerData(workChangeDomain, app, addCommand.isCheckOver1Year());
 	}
 
 	

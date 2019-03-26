@@ -23,6 +23,13 @@ public class FixedConWorkRecordAcFinder implements FixedConWorkRecordAdapter {
 				.stream().map(c->convertToImport(c)).collect(Collectors.toList());
 		return data;
 	}
+	
+	@Override
+	public List<FixedConWorkRecordAdapterDto> getAllFixedConWorkRecordByID(List<String> dailyAlarmConID) {
+		List<FixedConWorkRecordAdapterDto> data = fixedConWorkRecordPub.getAllFixedConWorkRecordByID(dailyAlarmConID)
+				.stream().map(c->convertToImport(c)).collect(Collectors.toList());
+		return data;
+	}
 
 	@Override
 	public FixedConWorkRecordAdapterDto getFixedConWRByCode(String dailyAlarmConID,int fixConWorkRecordNo) {

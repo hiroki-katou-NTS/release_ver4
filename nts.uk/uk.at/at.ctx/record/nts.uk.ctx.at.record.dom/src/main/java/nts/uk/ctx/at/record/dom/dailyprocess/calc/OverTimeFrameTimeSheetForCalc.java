@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.dom.dailyprocess.calc;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 //import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +41,7 @@ import nts.uk.ctx.at.shared.dom.common.timerounding.Rounding;
 import nts.uk.ctx.at.shared.dom.common.timerounding.TimeRoundingSetting;
 import nts.uk.ctx.at.shared.dom.common.timerounding.Unit;
 import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalOvertimeSetting;
+import nts.uk.ctx.at.shared.dom.ot.frame.NotUseAtr;
 import nts.uk.ctx.at.shared.dom.statutory.worktime.sharedNew.DailyUnit;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.HolidayAdditionAtr;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.StatutoryDivision;
@@ -51,6 +53,7 @@ import nts.uk.ctx.at.shared.dom.workrule.overtime.StatutoryPrioritySet;
 import nts.uk.ctx.at.shared.dom.workrule.statutoryworktime.DailyCalculationPersonalInformation;
 //import nts.uk.ctx.at.shared.dom.workrule.waytowork.PersonalLaborCondition;
 import nts.uk.ctx.at.shared.dom.worktime.common.EmTimezoneNo;
+import nts.uk.ctx.at.shared.dom.worktime.common.HolidayCalculation;
 import nts.uk.ctx.at.shared.dom.worktime.common.LegalOTSetting;
 import nts.uk.ctx.at.shared.dom.worktime.common.OverTimeOfTimeZoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.SettlementOrder;
@@ -61,6 +64,7 @@ import nts.uk.ctx.at.shared.dom.worktime.flexset.CoreTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.predset.BreakDownTimeDay;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
 //import nts.uk.shr.com.enumcommon.NotUseAtr;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
@@ -376,18 +380,73 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
         	}
         	
         	AttendanceTime ableRangeTime = new AttendanceTime(dailyUnit.getDailyTime().valueAsMinutes() - workTime.valueAsMinutes());
-        	if(ableRangeTime.greaterThan(0))
-        		//
-        		return reclassified(ableRangeTime,overTimeWorkFrameTimeSheetList.stream()
-        									   								    .filter(tc -> tc.getPayOrder().isPresent())
-        									   								    .sorted((first,second) -> first.getPayOrder().get().compareTo(second.getPayOrder().isPresent()
-        									   								    																?second.getPayOrder().get()
-        									   								    																:new SettlementOrder(99)
-        									   								    																))
-        									   								    .collect(Collectors.toList()),
-        									   								    autoCalculationSet,
-        									   								    overTimeHourSetList,
-        									   								    holidayCalcMethodSet);
+        	
+        	/*ログ差し込み*/
+        	org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OverTimeFrameTimeSheetForCalc.class);
+        	log.info("時間帯での法内への振替可能時間："+ ableRangeTime.valueAsMinutes()); 
+        	/*ログ差し込み*/
+        	
+        	HolidayCalculation holidayCalculation = commonSetting.isPresent()?commonSetting.get().getHolidayCalculation():new HolidayCalculation(nts.uk.ctx.at.shared.dom.workdayoff.frame.NotUseAtr.USE);
+        	//*ログ　計算区分*//
+        	log.info("自動計算区分は："+ autoCalculationSet.getLegalOtTime().getCalAtr().toString() + ":です。"); 
+        	if(ableRangeTime.greaterThan(0) && autoCalculationSet.getLegalOtTime().getCalAtr().isCalculateEmbossing())
+        	{
+        		//*ログ　今日の勤務種類  *//
+        		log.info("今日の勤務種類 は特別休暇"+ (workType.getDailyWork().decisionMatchWorkType(WorkTypeClassification.SpecialHoliday).isFullTime()?"です。":"ではありません。"));
+        		log.info("就業時間帯その他タブ　休暇の場合に就業時間を計算：" + (holidayCalculation.getIsCalculate().isNotUse() ? "しません。" : "します"));
+        		
+        		log.info("特休の時に組み込んだ条件が正しく動いているか出力します。出力結果　→："+(!workType.getDailyWork().decisionMatchWorkType(WorkTypeClassification.SpecialHoliday).isFullTime() || holidayCalculation.getIsCalculate().isNotUse()));
+        		if(!workType.getDailyWork().decisionMatchWorkType(WorkTypeClassification.SpecialHoliday).isFullTime() || holidayCalculation.getIsCalculate().isNotUse()) {
+        			List<OverTimeFrameTimeSheetForCalc> result = reclassified(ableRangeTime,overTimeWorkFrameTimeSheetList.stream()
+							    .filter(tc -> tc.getPayOrder().isPresent())
+							    .sorted((first,second) -> first.getPayOrder().get().compareTo(second.getPayOrder().isPresent()
+							    																?second.getPayOrder().get()
+							    																:new SettlementOrder(99)
+							    																))
+							    .collect(Collectors.toList()),
+							    autoCalculationSet,
+							    overTimeHourSetList,
+							    holidayCalcMethodSet);    
+            		
+            		//returnの内容出力
+                	log.info("法内残業振替処理後の出力を行います。");
+                	for(OverTimeFrameTimeSheetForCalc ot : result) {
+                		log.info("枠No＝" + ot.getOverTimeWorkSheetNo());
+                		log.info("時間帯開始時刻："+ot.getTimeSheet().getStart());
+                		log.info("時間帯終了時刻："+ot.getTimeSheet().getEnd());
+                		
+                		log.info("計上用控除時間帯は次の通りです。");
+                		for(TimeSheetOfDeductionItem td : ot.getRecordedTimeSheet()) {
+                    		log.info("計上用控除区分："+td.getDeductionAtr());
+                    		log.info("計上用控除時間帯開始時刻："+td.getTimeSheet().getStart());
+                    		log.info("計上用控除時間帯終了時刻："+td.getTimeSheet().getEnd());
+                		}
+                		log.info("計上用控除時間帯は以上です。");
+                		
+                		log.info("控除用控除時間帯は次の通りです。");
+                		for(TimeSheetOfDeductionItem td : ot.getRecordedTimeSheet()) {
+                    		log.info("控除用控除区分："+td.getDeductionAtr());
+                    		log.info("控除用控除時間帯開始時刻："+td.getTimeSheet().getStart());
+                    		log.info("控除用控除時間帯終了時刻："+td.getTimeSheet().getEnd());
+                		}
+                		log.info("控除用控除時間帯は以上です。");
+                		
+                		
+                		if(ot.getPayOrder().isPresent()) {
+                			log.info("清算順序："+ot.getPayOrder().get());
+                		}
+                		else {
+                			log.info("この枠の清算順序は存在しません");
+                		}
+                		
+                		log.info("法内区分："+ot.getWithinStatutryAtr());
+                		
+                	}
+                	log.info("法内残業振替処理後の出力が完了しました。");
+        			
+            		return result;
+        		}
+        	}
         }
         return overTimeWorkFrameTimeSheetList;
     }
@@ -404,16 +463,68 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 		boolean forceAtr = true;
 		AttendanceTime overTime = new AttendanceTime(0);
 		AttendanceTime transTime = new AttendanceTime(0);
+		
+    	org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OverTimeFrameTimeSheetForCalc.class);
+    	
+		
+		//*ログ　残業時間帯.size*//
+    	log.info("受け取った残業時間帯のサイズ"+ overTimeWorkFrameTimeSheetList.size()); 
+		//*ログ　ループ開始を知らせるメッセージ*//
+    	log.info("法内残業分割のためのループを始めます。");
 		for(int number = 0; number < overTimeWorkFrameTimeSheetList.size(); number++) {
+			//*ログ　ループ回数*//
+			log.info(number+"回目のループです。");
+			//*----------------ログ　現在処理中の残業時間帯の情報を全て出す--------------------------*//		
+			log.info("****現在処理を行おうとしている残業時間帯確認用ログ出力開始****");
+    		log.info("枠No＝" + overTimeWorkFrameTimeSheetList.get(number).getOverTimeWorkSheetNo());
+    		log.info("時間帯開始時刻："+overTimeWorkFrameTimeSheetList.get(number).getTimeSheet().getStart());
+    		log.info("時間帯終了時刻："+overTimeWorkFrameTimeSheetList.get(number).getTimeSheet().getEnd());
+    		
+    		log.info("計上用控除時間帯は次の通りです。");
+    		for(TimeSheetOfDeductionItem td : overTimeWorkFrameTimeSheetList.get(number).getRecordedTimeSheet()) {
+        		log.info("計上用控除区分："+td.getDeductionAtr());
+        		log.info("計上用控除時間帯開始時刻："+td.getTimeSheet().getStart());
+        		log.info("計上用控除時間帯終了時刻："+td.getTimeSheet().getEnd());
+    		}
+    		log.info("計上用控除時間帯は以上です。");
+    		
+    		log.info("控除用控除時間帯は次の通りです。");
+    		for(TimeSheetOfDeductionItem td : overTimeWorkFrameTimeSheetList.get(number).getRecordedTimeSheet()) {
+        		log.info("控除用控除区分："+td.getDeductionAtr());
+        		log.info("控除用控除時間帯開始時刻："+td.getTimeSheet().getStart());
+        		log.info("控除用控除時間帯終了時刻："+td.getTimeSheet().getEnd());
+    		}
+    		log.info("控除用控除時間帯は以上です。");
+    		
+    		
+    		if(overTimeWorkFrameTimeSheetList.get(number).getPayOrder().isPresent()) {
+    			log.info("清算順序："+overTimeWorkFrameTimeSheetList.get(number).getPayOrder().get());
+    		}
+    		else {
+    			log.info("この枠の清算順序は存在しません");
+    		}
+    		log.info("法内区分："+overTimeWorkFrameTimeSheetList.get(number).getWithinStatutryAtr());
+    		log.info("****現在処理を行おうとしている残業時間帯確認用ログ出力終了****");
+    		//*----------------ログ　現在処理中の残業時間帯の情報を全て出す--------------------------*//
+			
+			
 			overTime = overTimeWorkFrameTimeSheetList.get(number).correctCalculationTime(Optional.of(forceAtr),autoCalculationSet,DeductionAtr.Deduction);
-
+			
+			
+			
 			//振替できる時間計算
+			log.info("振替できる時間:"+ableRangeTime);
+			//*ログ　overTime*//
+			log.info("現在処理中の時間帯の残業時間(仮):"+overTime);
 			if(ableRangeTime.greaterThan(overTime)) {
 				transTime = overTime;
 			}
 			else {
 				transTime = ableRangeTime;
 			}
+			
+			//*ログ　transTime*//
+			log.info("振替できる時間は:"+transTime + ":に決定しました。");
 			
 			if(transTime.lessThanOrEqualTo(0))
 				continue;
@@ -428,11 +539,50 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 
 			//終了時間の判断
 			TimeWithDayAttr endTime = reCreateSiteiTimeFromStartTime(transTime,overTimeWorkFrameTimeSheetList.get(number));
+			//*ログ　endTime*//
+			log.info("終了判断時刻："+endTime);
 			
 			/*ここで分割*/
 			overTimeWorkFrameTimeSheetList = correctTimeSpan(overTimeWorkFrameTimeSheetList.get(number).splitTimeSpan(endTime,overTimeHourSetList),overTimeWorkFrameTimeSheetList,number);
-			ableRangeTime = ableRangeTime.minusMinutes(transTime.valueAsMinutes()) ; 
+			//*ログ　分割後の残業時間帯(overTimeWorkFrameTimeSheetList)*//
+			log.info("****分割処理後の残業時間帯確認用ログ出力開始****");
+    		log.info("枠No＝" + overTimeWorkFrameTimeSheetList.get(number).getOverTimeWorkSheetNo());
+    		log.info("時間帯開始時刻："+overTimeWorkFrameTimeSheetList.get(number).getTimeSheet().getStart());
+    		log.info("時間帯終了時刻："+overTimeWorkFrameTimeSheetList.get(number).getTimeSheet().getEnd());
+    		
+    		log.info("計上用控除時間帯は次の通りです。");
+    		for(TimeSheetOfDeductionItem td : overTimeWorkFrameTimeSheetList.get(number).getRecordedTimeSheet()) {
+        		log.info("計上用控除区分："+td.getDeductionAtr());
+        		log.info("計上用控除時間帯開始時刻："+td.getTimeSheet().getStart());
+        		log.info("計上用控除時間帯終了時刻："+td.getTimeSheet().getEnd());
+    		}
+    		log.info("計上用控除時間帯は以上です。");
+    		
+    		log.info("控除用控除時間帯は次の通りです。");
+    		for(TimeSheetOfDeductionItem td : overTimeWorkFrameTimeSheetList.get(number).getRecordedTimeSheet()) {
+        		log.info("控除用控除区分："+td.getDeductionAtr());
+        		log.info("控除用控除時間帯開始時刻："+td.getTimeSheet().getStart());
+        		log.info("控除用控除時間帯終了時刻："+td.getTimeSheet().getEnd());
+    		}
+    		log.info("控除用控除時間帯は以上です。");
+    		
+    		
+    		if(overTimeWorkFrameTimeSheetList.get(number).getPayOrder().isPresent()) {
+    			log.info("清算順序："+overTimeWorkFrameTimeSheetList.get(number).getPayOrder().get());
+    		}
+    		else {
+    			log.info("この枠の清算順序は存在しません");
+    		}
+    		log.info("法内区分："+overTimeWorkFrameTimeSheetList.get(number).getWithinStatutryAtr());
+			log.info("****分割処理後の残業時間帯確認用ログ出力終了****");
+			
+			
+			ableRangeTime = ableRangeTime.minusMinutes(transTime.valueAsMinutes()) ;
+			//*ログ　計算後の振替可能時間*//
+			log.info("分割処理後に再計算した振替可能時間："+ableRangeTime);
 		}
+		//*ログ　ループ終了を知らせるメッセージ*//
+		log.info("法内残業分割のためのループを終了します。");
 		return overTimeWorkFrameTimeSheetList;
 	}
 	
@@ -454,12 +604,37 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 	public static List<OverTimeFrameTimeSheetForCalc> correctTimeSpan(List<OverTimeFrameTimeSheetForCalc> insertList,List<OverTimeFrameTimeSheetForCalc> originList,int nowNumber){
 		originList.remove(nowNumber);
 		originList.addAll(insertList);
-		originList = originList.stream()
-							   .filter(tc -> tc.getPayOrder().isPresent())
-							   .sorted((first,second) -> first.getPayOrder().get().compareTo(second.getPayOrder().isPresent()
-		    																				 ?second.getPayOrder().get()
-		    																				 :new SettlementOrder(99)))
-							   .collect(Collectors.toList());
+		List<OverTimeFrameTimeSheetForCalc> returnList = new ArrayList<>();
+		returnList = originList;		
+		
+		boolean nextLoopFlag = true;
+		while(nextLoopFlag) {
+			for(int index = 0 ; index <= originList.size() ; index++) {
+				if(index == originList.size() - 1)
+				{
+					nextLoopFlag = false;
+					break;
+				}
+				//精算順序の比較
+				if(returnList.get(index).getPayOrder().get().greaterThan(returnList.get(index + 1).getPayOrder().get())) {
+					OverTimeFrameTimeSheetForCalc pary = returnList.get(index);
+					returnList.set(index, returnList.get(index + 1));
+					returnList.set(index + 1, pary);
+					break;
+				}
+				//枠の比較(精算順序同じケースの整頓)
+				else if(returnList.get(index).getPayOrder().get().equals(returnList.get(index + 1).getPayOrder().get())) {
+					if(returnList.get(index).getCalcrange().getStart().greaterThan(returnList.get(index + 1).getCalcrange().getStart()) ) {
+						OverTimeFrameTimeSheetForCalc pary = returnList.get(index);
+						returnList.set(index, returnList.get(index + 1));
+						returnList.set(index + 1, pary);
+						break;
+					}
+				}
+
+			}
+		}
+		
 		return originList;
 	}
 	
@@ -494,6 +669,7 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
         }
         //分割
         else {
+        	/*法内へ振り替える側*/
         	//計上の控除時間帯
         	val beforeRec = this.getRecordedTimeSheet().stream()
         										.filter(tc -> tc.createDuplicateRange(new TimeSpanForCalc(this.calcrange.getStart(), baseTime)).isPresent())
@@ -532,6 +708,7 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
                                                          ,this.payOrder
                                                          ,Optional.of(new AttendanceTime(0))));
             
+            /*法外側*/
         	//計上の控除時間帯
         	val afterRec = this.getRecordedTimeSheet().stream()
         										.filter(tc -> tc.createDuplicateRange(new TimeSpanForCalc(baseTime, this.calcrange.getEnd())).isPresent())

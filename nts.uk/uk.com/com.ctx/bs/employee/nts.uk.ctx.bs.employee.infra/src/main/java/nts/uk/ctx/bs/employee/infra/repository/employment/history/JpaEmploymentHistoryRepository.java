@@ -17,6 +17,7 @@ import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.dom.employment.history.DateHistItem;
@@ -229,9 +230,38 @@ public class JpaEmploymentHistoryRepository extends JpaRepository implements Emp
 		List<BsymtEmploymentHist> lstEmpHist = new ArrayList<>();
 
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
-			lstEmpHist.addAll(this.queryProxy().query(SELECT_BY_LISTSID, BsymtEmploymentHist.class)
-					.setParameter("listSid", subList).setParameter("start", datePeriod.start())
-					.setParameter("end", datePeriod.end()).getList());
+			
+			String sql = "select * from BSYMT_EMPLOYMENT_HIST h"
+					+ " inner join BSYMT_EMPLOYMENT_HIS_ITEM i"
+					+ " on h.HIST_ID = i.HIST_ID"
+					+ " where h.SID in (" + NtsStatement.In.createParamsString(subList) + ")"
+					+ " and h.START_DATE <= ?"
+					+ " and h.END_DATE >= ?";
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				
+				int i = 0;
+				for (; i < subList.size(); i++) {
+					stmt.setString(1 + i, subList.get(i));
+				}
+
+				stmt.setDate(1 + i, Date.valueOf(datePeriod.end().localDate()));
+				stmt.setDate(2 + i, Date.valueOf(datePeriod.start().localDate()));
+				
+				List<BsymtEmploymentHist> ents = new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+					BsymtEmploymentHist ent = new BsymtEmploymentHist();
+					ent.hisId = rec.getString("HIST_ID");
+					ent.companyId = rec.getString("CID");
+					ent.sid = rec.getString("SID");
+					ent.strDate = rec.getGeneralDate("START_DATE");
+					ent.endDate = rec.getGeneralDate("END_DATE");
+					return ent;
+				});
+				lstEmpHist.addAll(ents);
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		});
 
 		Map<String, List<BsymtEmploymentHist>> map = lstEmpHist.stream().collect(Collectors.groupingBy(x -> x.sid));

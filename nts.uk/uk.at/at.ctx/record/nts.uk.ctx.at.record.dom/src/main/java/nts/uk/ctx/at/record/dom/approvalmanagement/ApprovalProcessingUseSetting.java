@@ -11,18 +11,22 @@ import nts.arc.layer.dom.AggregateRoot;
 import nts.uk.ctx.at.record.dom.approvalmanagement.enums.ConfirmationOfManagerOrYouself;
 
 /**
+ * 承認処理の利用設定
  * @author hungnm
  *
  */
 @Getter
 public class ApprovalProcessingUseSetting extends AggregateRoot {
-
+	/**会社ID*/
 	private String companyId;
 
+	/**日の承認者確認を利用する*/
 	private Boolean useDayApproverConfirm;
 
+	/**月の承認者確認を利用する*/
 	private Boolean useMonthApproverConfirm;
 
+	/**承認処理を利用しない職位*/
 	private List<String> lstJobTitleNotUse;
 
 	private ConfirmationOfManagerOrYouself supervisorConfirmErrorAtr;

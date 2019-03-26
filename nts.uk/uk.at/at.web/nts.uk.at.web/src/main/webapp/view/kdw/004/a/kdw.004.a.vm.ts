@@ -129,6 +129,7 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                 if(result.lstEmployee != null){
                     self.lstData = self.convertToGridData(result.lstEmployee);
                 } else {
+                    self.lstData = [];
                     nts.uk.ui.dialog.alert({ messageId: result.messageID  });
                 }
                 self.generateColumns();

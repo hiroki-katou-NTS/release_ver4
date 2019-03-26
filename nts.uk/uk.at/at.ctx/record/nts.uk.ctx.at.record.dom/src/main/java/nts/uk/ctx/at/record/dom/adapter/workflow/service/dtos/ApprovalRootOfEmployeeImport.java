@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * 基準社員の承認対象者
  * @author hungnm
  *
  */
@@ -23,7 +24,7 @@ public class ApprovalRootOfEmployeeImport {
 	private String employeeStandard;
 	
 	/**
-	 * ルート状況
+	 * ルート状況 - 対象者承認状況リスト
 	 */
 	private List<ApprovalRootSituation> approvalRootSituations;
 }

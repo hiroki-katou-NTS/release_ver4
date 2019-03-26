@@ -16,6 +16,7 @@ import nts.uk.ctx.at.record.app.command.monthlyclosureupdate.CheckMonthlyClosure
 import nts.uk.ctx.at.record.app.command.monthlyclosureupdate.ConfirmCompleteMonthlyUpdateCommandHandler;
 import nts.uk.ctx.at.record.app.command.monthlyclosureupdate.ExecuteMonthlyClosureCommandHandler;
 import nts.uk.ctx.at.record.app.command.monthlyclosureupdate.MonthlyClosureResponse;
+import nts.uk.ctx.at.record.app.find.monthlyclosureupdate.DataToGetPersonNo;
 import nts.uk.ctx.at.record.app.find.monthlyclosureupdate.Kmw006aResultDto;
 import nts.uk.ctx.at.record.app.find.monthlyclosureupdate.Kmw006cDto;
 import nts.uk.ctx.at.record.app.find.monthlyclosureupdate.Kmw006eParams;
@@ -88,6 +89,13 @@ public class MonthlyClosureUpdateWebService extends WebService {
 	public Kmw006aResultDto getInfor(MonthlyClosureResponse response) {
 		return monthlyClosureFinder.getClosureInfors(response);
 	}
+	
+	@POST
+	@Path("getInforsWithNoParams")
+	public Kmw006aResultDto getInfor() {
+		return monthlyClosureFinder.getClosureInfor();
+	}
+	
 
 	@POST
 	@Path("getLogInfors")
@@ -114,8 +122,34 @@ public class MonthlyClosureUpdateWebService extends WebService {
 	}
 	
 	@POST
-	@Path("getErrInfor")
-	public List<MonthlyClosureErrorInforDto> getListErrorInfor(Kmw006eParams params){
-		return this.monthlyClosureFinder.getListErrorInfor(params.getLogId(), params.getListEmpId());
+    @Path("getErrInfor")
+    public List<MonthlyClosureErrorInforDto> getListErrorInfor(Kmw006eParams params){
+        return this.monthlyClosureFinder.getListErrorInfor(params.getLogId(), params.getListEmpId());
 	}
+	
+	@POST
+	@Path("getPersonCompleteNo/{monthlyClosureId}")
+	public Integer getPersonCompleteNo(@PathParam("monthlyClosureId") String id){
+		return this.monthlyClosureFinder.getPersonCompleteNo(id);
+	}
+	
+	@POST
+	@Path("getDurationTime/{monthlyClosureId}")
+	public Integer getDurationTime(@PathParam("monthlyClosureId") String id){
+		return this.monthlyClosureFinder.getDurationTime(id);
+	}
+	
+	@POST
+	@Path("getListError/{monthlyClosureId}")
+	public List<MonthlyClosureErrorInforDto> getListError(@PathParam("monthlyClosureId") String id){
+		return this.monthlyClosureFinder.getListErrorInforByLogId(id);
+	}
+	
+	@POST
+	@Path("getAllPersonNo")
+	public Integer getAllPersonNo(DataToGetPersonNo param){
+		return this.monthlyClosureFinder.getAllPersonNo(param);
+	}
+	
+	
 }

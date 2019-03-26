@@ -643,10 +643,10 @@ public class FlexTimeOfMonthly {
 		
 		AttendanceTimeMonthWithMinus flexTargetTime = new AttendanceTimeMonthWithMinus(0);
 		
-		// 合計法定内実働時間を取得する
-		val totalLegalTime = aggregateTotalWorkingTime.getWorkTime().getTimeSeriesTotalLegalActualTime(datePeriod);
+		// 集計対象時間を取得する
+		val totalLegalTime = aggregateTotalWorkingTime.getWorkTime().getAggregateTargetTime(datePeriod);
 		
-		// フレックス対象時間に合計法定内時間（就業時間）を加算する
+		// フレックス対象時間に集計対象時間を加算する
 		flexTargetTime = flexTargetTime.addMinutes(totalLegalTime.v());
 				
 		// 合計フレックス時間を取得する
@@ -667,7 +667,7 @@ public class FlexTimeOfMonthly {
 				this.errorInfos.add(addSetWhenPremium.getErrorInfo().get());
 			}
 			
-			// 加算する休暇時間を取得する
+			// 休暇加算時間を取得する
 			vacationAddTime = GetVacationAddTime.getTime(
 					datePeriod, aggregateTotalWorkingTime.getVacationUseTime(), addSetWhenPremium);
 		}
@@ -681,7 +681,7 @@ public class FlexTimeOfMonthly {
 				this.errorInfos.add(addSetWhenOnlyLegal.getErrorInfo().get());
 			}
 			
-			// 加算する休暇時間を取得する
+			// 休暇加算時間を取得する
 			vacationAddTime = GetVacationAddTime.getTime(
 					datePeriod, aggregateTotalWorkingTime.getVacationUseTime(), addSetWhenOnlyLegal);
 		}
@@ -707,10 +707,10 @@ public class FlexTimeOfMonthly {
 		
 		int calcFlexTargetMinutes = 0;
 		
-		// 合計法定内実働時間を取得する
-		val totalLegalTime = aggregateTotalWorkingTime.getWorkTime().getTimeSeriesTotalLegalActualTime(datePeriod);
+		// 集計対象時間を取得する
+		val totalLegalTime = aggregateTotalWorkingTime.getWorkTime().getAggregateTargetTime(datePeriod);
 		
-		// 計算フレックス対象時間に合計法定内時間（就業時間）を加算する
+		// 計算フレックス対象時間に集計対象時間を加算する
 		calcFlexTargetMinutes += totalLegalTime.v();
 				
 		// 合計計算フレックス時間を取得する
@@ -731,7 +731,7 @@ public class FlexTimeOfMonthly {
 				this.errorInfos.add(addSetWhenPremium.getErrorInfo().get());
 			}
 			
-			// 加算する休暇時間を取得する
+			// 休暇加算時間を取得する
 			vacationAddMinutes = GetVacationAddTime.getTime(
 					datePeriod, aggregateTotalWorkingTime.getVacationUseTime(), addSetWhenPremium).v();
 		}
@@ -745,7 +745,7 @@ public class FlexTimeOfMonthly {
 				this.errorInfos.add(addSetWhenOnlyLegal.getErrorInfo().get());
 			}
 			
-			// 加算する休暇時間を取得する
+			// 休暇加算時間を取得する
 			vacationAddMinutes = GetVacationAddTime.getTime(
 					datePeriod, aggregateTotalWorkingTime.getVacationUseTime(), addSetWhenOnlyLegal).v();
 		}
@@ -1148,6 +1148,16 @@ public class FlexTimeOfMonthly {
 						this.askCompensatoryLeaveAfterDeduction(companyId, employeeId, yearMonth, datePeriod,
 								aggregateTotalWorkingTime, prescribedWorkingTimeSet);
 				int predMinutes = prescribedWorkingTime.v();
+				if (predMinutes < 0) predMinutes = 0;
+				
+				// 所定労働時間を返す　（呼び出し元で就業時間に入れる）
+				return Optional.of(new AttendanceTimeMonth(predMinutes));
+			}
+			// 「フレ不足時間」に値が入っているか確認する
+			else if (this.flexShortageTime.greaterThan(0)) {
+				
+				// フレックス対象時間を集計する　→　所定労働時間
+				int predMinutes = this.aggregateFlexTargetTime(datePeriod, aggregateTotalWorkingTime).v();
 				if (predMinutes < 0) predMinutes = 0;
 				
 				// 所定労働時間を返す　（呼び出し元で就業時間に入れる）

@@ -20,4 +20,7 @@ public interface AgreementTimeByPeriodAdapter {
 	 */
 	List<AgreementTimeByPeriodImport> algorithm(String companyId, String employeeId, GeneralDate criteria,
 			Month startMonth, Year year, PeriodAtrOfAgreement periodAtr);
+
+	List<AgreementTimeByEmpImport> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
+													Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs);
 }

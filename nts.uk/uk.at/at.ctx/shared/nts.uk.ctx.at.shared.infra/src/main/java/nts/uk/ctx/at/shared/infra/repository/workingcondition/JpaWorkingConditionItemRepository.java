@@ -36,6 +36,7 @@ import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.workingcondition.MonthlyPatternCode;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemCustom;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionWithDataPeriod;
 import nts.uk.ctx.at.shared.infra.entity.workingcondition.KshmtDayofweekTimeZone;
@@ -226,6 +227,55 @@ public class JpaWorkingConditionItemRepository extends JpaRepository
 		// exclude select
 		return Optional.of(new WorkingConditionItem(
 				new JpaWorkingConditionItemGetMemento(result.get(FIRST_ITEM_INDEX))));
+	}
+
+	@Override
+	public List<WorkingConditionItemCustom> getBySidsAndStandardDate(List<String> employeeIds, GeneralDate baseDate) {
+		// get entity manager
+		EntityManager em = this.getEntityManager();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+
+		CriteriaQuery<KshmtWorkingCondItem> cq = criteriaBuilder
+				.createQuery(KshmtWorkingCondItem.class);
+
+		// root data
+		Root<KshmtWorkingCondItem> root = cq.from(KshmtWorkingCondItem.class);
+
+		// select root
+		cq.select(root);
+
+		List<KshmtWorkingCondItem> result = new ArrayList<>();
+
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			// add where
+			List<Predicate> lstpredicateWhere = new ArrayList<>();
+
+			// equal
+			lstpredicateWhere.add(root.get(KshmtWorkingCondItem_.sid).in(subList));
+			lstpredicateWhere.add(criteriaBuilder.lessThanOrEqualTo(
+					root.get(KshmtWorkingCondItem_.kshmtWorkingCond).get(KshmtWorkingCond_.strD),
+					baseDate));
+			lstpredicateWhere.add(criteriaBuilder.greaterThanOrEqualTo(
+					root.get(KshmtWorkingCondItem_.kshmtWorkingCond).get(KshmtWorkingCond_.endD),
+					baseDate));
+
+			// set where to SQL
+			cq.where(lstpredicateWhere.toArray(new Predicate[]{}));
+
+			// creat query
+			TypedQuery<KshmtWorkingCondItem> query = em.createQuery(cq);
+
+			result.addAll(query.getResultList());
+		});
+
+		// Check empty
+		if (CollectionUtil.isEmpty(result)) {
+			return Collections.emptyList();
+		}
+
+		// exclude select
+		return result.stream().map(entity -> new WorkingConditionItemCustom(entity.getSid(), entity.getLaborSys()))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -791,24 +841,27 @@ public class JpaWorkingConditionItemRepository extends JpaRepository
 		if (entities.isEmpty()) return new HashMap<>();
 		return params.entrySet().stream().collect(Collectors.toMap(p -> p.getKey(), p -> {
 			List<Object[]> sub = entities.stream().filter(e -> ((KshmtWorkingCondItem) e[0]).getSid().equals(p.getKey())).collect(Collectors.toList());
-			return p.getValue().stream().collect(Collectors.toMap(d -> d, d -> {
+			Map<GeneralDate, WorkingConditionItem> result = new HashMap<>();
+			p.getValue().stream().forEach(d -> {
 				List<Object[]> data = sub.stream().filter(wc -> {
 					KshmtWorkingCond se = (KshmtWorkingCond) wc[1];
 					return se.getStrD().compareTo(d) <= 0 && se.getEndD().compareTo(d) >= 0;
 				}).collect(Collectors.toList());
 				
 				if(data.isEmpty()){
-					return null;
+					return;
 				}
 				
 				KshmtWorkingCondItem workCondItem = data.stream().filter(dt -> dt[0] != null).findFirst()
 						.map(dt -> (KshmtWorkingCondItem) dt[0]).orElse(null);
 				
 				if(workCondItem == null){
-					return null;
+					return;
 				}
-				return createWorkConditionItem(data, workCondItem);
-			}));
+				result.put(d, createWorkConditionItem(data, workCondItem));
+			});
+			
+			return result;
 		}));
 	}
 	

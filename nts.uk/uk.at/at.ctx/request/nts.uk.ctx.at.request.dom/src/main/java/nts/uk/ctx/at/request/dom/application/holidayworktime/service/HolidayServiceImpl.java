@@ -36,7 +36,6 @@ import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmpl
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmploymentSetting;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
-import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktype.HolidayAtr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
@@ -153,13 +152,9 @@ public class HolidayServiceImpl implements HolidayService {
 			workTimeHolidayWork.setWorkTimeCode(personalLablorCodition.get().getWorkCategory().getHolidayWork().getWorkTimeCode().get().toString());
 		}
 		if(workTimeHolidayWork.getWorkTimeCode() != null){
-			WorkTimeSetting workTime =  workTimeRepository.findByCode(companyID,workTimeHolidayWork.getWorkTimeCode())
-					.orElseGet(()->{
-						return workTimeRepository.findByCompanyId(companyID).get(0);
-					});
-			if(workTime != null){
-				workTimeHolidayWork.setWorkTimeName(workTime.getWorkTimeDisplayName().getWorkTimeName().toString());
-			}
+			workTimeRepository.findByCode(companyID, workTimeHolidayWork.getWorkTimeCode()).ifPresent(wkTime -> {
+				workTimeHolidayWork.setWorkTimeName(wkTime.getWorkTimeDisplayName().getWorkTimeName().toString());
+			});
 		}
 		return workTimeHolidayWork;
 	}

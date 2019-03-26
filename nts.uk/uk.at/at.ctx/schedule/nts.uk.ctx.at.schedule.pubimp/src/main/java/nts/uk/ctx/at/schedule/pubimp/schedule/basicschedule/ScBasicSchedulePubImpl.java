@@ -19,6 +19,7 @@ import nts.uk.ctx.at.schedule.pub.schedule.basicschedule.ScBasicScheduleExport;
 import nts.uk.ctx.at.schedule.pub.schedule.basicschedule.ScBasicSchedulePub;
 import nts.uk.ctx.at.schedule.pub.schedule.basicschedule.ScWorkBreakTimeExport;
 import nts.uk.ctx.at.schedule.pub.schedule.basicschedule.WorkScheduleTimeZoneExport;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * The Class ScBasicSchedulePubImpl.
@@ -40,6 +41,11 @@ public class ScBasicSchedulePubImpl implements ScBasicSchedulePub {
 	@Override
 	public Optional<ScBasicScheduleExport> findById(String employeeId, GeneralDate baseDate) {
 		return this.repository.find(employeeId, baseDate).map(domain -> this.convertExport(domain));
+	}
+	
+	@Override
+	public List<ScBasicScheduleExport> findById(List<String> employeeID, DatePeriod date) {
+		return this.repository.findSomePropertyWithJDBC(employeeID, date).stream().map(domain -> this.convertExport(domain)).collect(Collectors.toList());
 	}
 
 	@Override

@@ -18,5 +18,9 @@ public class AddAppWorkChangeCommand {
 	
 	
 	String employeeID;
+	
+	Integer user;
+    Integer reflectPerState;
 
+    boolean checkOver1Year;
 }

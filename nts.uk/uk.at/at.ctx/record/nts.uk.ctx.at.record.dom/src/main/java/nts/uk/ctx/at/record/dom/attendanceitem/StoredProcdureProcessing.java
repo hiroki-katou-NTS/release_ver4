@@ -314,22 +314,19 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 					if(!d.getAttendanceTimeOfDailyPerformance().isPresent()){
 						d.setAttendanceTimeOfDailyPerformance(Optional.of(createDefaultAttendanceTime(d)));
 					}
-					Optional<OverTimeOfDaily>  ot = d.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily()
-						.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork();
-					if(ot.isPresent()){
-						processOverTime(ot.get(), 4, startTime == null ? 0 : 30);
-						
-						processOverTime(ot.get(), 5, startTime == null ? 0 : 60);
-					} else {
-						OverTimeOfDaily otn = new OverTimeOfDaily(new ArrayList<>(), new ArrayList<>(), 
-								Finally.of(new ExcessOverTimeWorkMidNightTime(TimeDivergenceWithCalculation.sameTime(AttendanceTime.ZERO))));
-						
-						processOverTime(otn, 4, startTime == null ? 0 : 30);
-						
-						processOverTime(otn, 5, startTime == null ? 0 : 60);
-						
-						d.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily()
-								.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().updateOverTime(otn);
+					if(DEFAULT_WORK_TYPE.equals(d.getWorkInformation().getRecordInfo().getWorkTypeCode())  ){
+						setOverTime(d, 30, 60);
+					} else if(DEFAULT_WORK_TIME.contains(d.getWorkInformation().getRecordInfo().getWorkTimeCode())) {
+						WorkType wt = workTypes.get(d.getWorkInformation().getRecordInfo().getWorkTypeCode());
+						if(wt != null){
+							if(wt.getDailyWork().getOneDay() == WorkTypeClassification.HolidayWork 
+									|| wt.getDailyWork().getAfternoon() == WorkTypeClassification.HolidayWork 
+									|| wt.getDailyWork().getMorning() == WorkTypeClassification.HolidayWork){
+								setOverTime(d, 0, 0);
+							} else {
+								setOverTime(d, startTime == null ? 0 : 30, startTime == null ? 0 : 60);
+							}
+						}
 					}
 				}
 //			}
@@ -337,6 +334,26 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		});
 		
 		return dailies;
+	}
+
+	private void setOverTime(IntegrationOfDaily d, int timeFor4, int timeFor5) {
+		Optional<OverTimeOfDaily>  ot = d.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily()
+			.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork();
+		if(ot.isPresent()){
+			processOverTime(ot.get(), 4, timeFor4);
+			
+			processOverTime(ot.get(), 5, timeFor5);
+		} else {
+			OverTimeOfDaily otn = new OverTimeOfDaily(new ArrayList<>(), new ArrayList<>(), 
+					Finally.of(new ExcessOverTimeWorkMidNightTime(TimeDivergenceWithCalculation.sameTime(AttendanceTime.ZERO))));
+			
+			processOverTime(otn, 4, timeFor4);
+			
+			processOverTime(otn, 5, timeFor5);
+			
+			d.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily()
+					.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().updateOverTime(otn);
+		}
 	}
 
 	private AttendanceTimeOfDailyPerformance createDefaultAttendanceTime(IntegrationOfDaily d) {

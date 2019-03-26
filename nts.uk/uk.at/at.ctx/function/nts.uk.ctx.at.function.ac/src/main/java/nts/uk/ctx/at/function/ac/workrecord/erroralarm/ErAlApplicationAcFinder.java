@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.function.ac.workrecord.erroralarm;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -25,6 +27,11 @@ public class ErAlApplicationAcFinder implements ErAlApplicationAdapter {
 				export.getErrorAlarmCode(),
 				export.getAppType()
 				);
+	}
+
+	@Override
+	public List<ErAlApplicationAdapterDto> getAllErAlAppByEralCode(String companyID, List<String> errorAlarmCode) {
+		return erAlApplicationpub.getAllErAlAppByEralCode(companyID, errorAlarmCode).stream().map(c -> convertToImport(c)).collect(Collectors.toList());
 	}
 
 }

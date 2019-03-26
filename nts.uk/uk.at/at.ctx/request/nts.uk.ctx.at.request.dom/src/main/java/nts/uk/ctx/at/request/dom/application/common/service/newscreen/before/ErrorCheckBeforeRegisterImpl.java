@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.request.dom.application.common.service.newscreen.before;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -7,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+
+import org.apache.logging.log4j.util.Strings;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
@@ -19,6 +22,11 @@ import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
 import nts.uk.ctx.at.request.dom.application.UseAtr;
+import nts.uk.ctx.at.request.dom.application.common.adapter.bs.EmployeeRequestAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoImport;
+import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleImport;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.output.AppCommonSettingOutput;
 import nts.uk.ctx.at.request.dom.application.common.service.other.Time36UpperLimitCheck;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.AppTimeItem;
@@ -30,10 +38,17 @@ import nts.uk.ctx.at.request.dom.application.overtime.AttendanceType;
 import nts.uk.ctx.at.request.dom.application.overtime.OverTimeInput;
 import nts.uk.ctx.at.request.dom.application.overtime.OvertimeCheckResult;
 import nts.uk.ctx.at.request.dom.application.overtime.OvertimeInputRepository;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.AppDateContradictionAtr;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.OvertimeRestAppCommonSetRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.overtimerestappcommon.OvertimeRestAppCommonSetting;
 //import nts.uk.shr.com.context.AppContexts;
 import nts.uk.ctx.at.request.dom.setting.workplace.ApprovalFunctionSetting;
+import nts.uk.ctx.at.shared.dom.common.CompanyId;
+import nts.uk.ctx.at.shared.dom.ot.frame.OvertimeWorkFrame;
+import nts.uk.ctx.at.shared.dom.ot.frame.OvertimeWorkFrameRepository;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 
 @Stateless
 public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
@@ -55,6 +70,21 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 	
 	@Inject 
 	private AppOvertimeDetailRepository appOvertimeDetailRepository;
+	
+	@Inject
+	private EmployeeRequestAdapter employeeAdapter;
+	
+	@Inject
+	private OvertimeWorkFrameRepository overtimeFrameRepository;
+	
+	@Inject
+	private RecordWorkInfoAdapter recordWorkInfoAdapter;
+	
+	@Inject
+	private ScBasicScheduleAdapter scBasicScheduleAdapter;
+	
+	@Inject
+	private WorkTypeRepository workTypeRepository;
 
 	// @Inject
 	// private PersonalLaborConditionRepository
@@ -95,7 +125,8 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 	 */
 	@Override
 	public OvertimeCheckResult preApplicationExceededCheck(String companyId, GeneralDate appDate, GeneralDateTime inputDate,
-			PrePostAtr prePostAtr, int attendanceId, List<OverTimeInput> overtimeInputs) {
+			PrePostAtr prePostAtr, int attendanceId, List<OverTimeInput> overtimeInputs, String employeeID) {
+		String employeeName = employeeAdapter.getEmployeeName(employeeID);
 		OvertimeCheckResult result = new OvertimeCheckResult();
 		result.setFrameNo(-1);
 		// 社員ID
@@ -107,12 +138,11 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 		}
 		// ドメインモデル「申請」を取得
 		// 事前申請漏れチェック
-		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, appDate, inputDate,
+		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, employeeID, appDate, inputDate,
 				ApplicationType.OVER_TIME_APPLICATION.value, PrePostAtr.PREDICT.value);
 		if (beforeApplication.isEmpty()) {
 			// TODO: QA Pending
-			result.setErrorCode(1);
-			return result;
+			throw new BusinessException("Msg_1508",employeeName);
 		}
 		// 事前申請否認チェック
 		// 否認以外：
@@ -120,8 +150,7 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 		ReflectedState_New refPlan = beforeApplication.get(0).getReflectionInformation().getStateReflectionReal();
 		if (refPlan.equals(ReflectedState_New.DENIAL) || refPlan.equals(ReflectedState_New.REMAND)) {
 			// 背景色を設定する
-			result.setErrorCode(1);
-			return result;
+			throw new BusinessException("Msg_1508",employeeName);
 		}
 		String beforeCid = beforeApplication.get(0).getCompanyID();
 		String beforeAppId = beforeApplication.get(0).getAppID();
@@ -152,9 +181,9 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 			// 事前申請の申請時間＞事後申請の申請時間
 			if (beforeTime.getApplicationTime() != null && afterTime.getApplicationTime() != null && beforeTime.getApplicationTime().v() < afterTime.getApplicationTime().v()) {
 				// 背景色を設定する
-				result.setErrorCode(1);
-				result.setFrameNo(frameNo);
-				return result;
+				Optional<OvertimeWorkFrame> overtimeWorkFrame = this.overtimeFrameRepository.findOvertimeWorkFrame(new CompanyId(companyId), frameNo);
+				throw new BusinessException("Msg_424",employeeName, overtimeWorkFrame.isPresent() ? overtimeWorkFrame.get().getOvertimeWorkFrName().toString() : "",
+						"", String.valueOf(frameNo), String.valueOf(1));
 			}
 		}
 		result.setErrorCode(0);
@@ -336,12 +365,12 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 	 * 03-05_事前否認チェック
 	 */
 	@Override
-	public OvertimeCheckResult preliminaryDenialCheck(String companyId, GeneralDate appDate, GeneralDateTime inputDate,
+	public OvertimeCheckResult preliminaryDenialCheck(String companyId, String employeeID, GeneralDate appDate, GeneralDateTime inputDate,
 			PrePostAtr prePostAtr,int appType) {
 		OvertimeCheckResult result = new OvertimeCheckResult();
 		result.setErrorCode(0);
 		// ドメインモデル「申請」
-		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, appDate, inputDate,
+		List<Application_New> beforeApplication = appRepository.getBeforeApplication(companyId, employeeID, appDate, inputDate,
 				appType, PrePostAtr.PREDICT.value);
 		if (beforeApplication.isEmpty()) {
 			return result;
@@ -391,5 +420,64 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public List<String> inconsistencyCheck(String companyID, String employeeID, GeneralDate appDate) {
+		// ドメインモデル「残業休出申請共通設定」を取得
+		Optional<OvertimeRestAppCommonSetting> opOvertimeRestAppCommonSet = this.overtimeRestAppCommonSetRepository
+				.getOvertimeRestAppCommonSetting(companyID, ApplicationType.BREAK_TIME_APPLICATION.value);
+		if(!opOvertimeRestAppCommonSet.isPresent()){
+			return Collections.emptyList();
+		}
+		OvertimeRestAppCommonSetting overtimeRestAppCommonSet = opOvertimeRestAppCommonSet.get();
+		AppDateContradictionAtr appDateContradictionAtr = overtimeRestAppCommonSet.getAppDateContradictionAtr();
+		if(appDateContradictionAtr==AppDateContradictionAtr.NOTCHECK){
+			return Collections.emptyList();
+		}
+		// アルゴリズム「03-08-1_勤務種類矛盾チェック」を実行する
+		String workTypeCD = this.workTypeInconsistencyCheck(companyID, employeeID, appDate);
+		// ドメインモデル「勤務種類」を1件取得する
+		Optional<WorkType> opWorkType = workTypeRepository.findByPK(companyID, workTypeCD);
+		if(Strings.isBlank(workTypeCD)||!opWorkType.isPresent()){
+			if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
+				throw new BusinessException("Msg_1519", appDate.toString("yyyy/MM/dd"));
+			}
+			return Arrays.asList("Msg_1520", appDate.toString("yyyy/MM/dd")); 
+		}
+		WorkType workType = opWorkType.get();
+		WorkTypeClassification workTypeClassification = workType.getDailyWork().getOneDay();
+		if(workTypeClassification==WorkTypeClassification.Holiday||
+			workTypeClassification==WorkTypeClassification.Pause||
+			workTypeClassification==WorkTypeClassification.HolidayWork){
+			return Collections.emptyList();
+		}
+		String name = workType.getName().v();
+		if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
+			throw new BusinessException("Msg_1521", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "未登録のマスタ");
+		}
+		return Arrays.asList("Msg_1522", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "未登録のマスタ"); 
+		
+	}
+	
+	/**
+	 * 
+	 * @param companyID
+	 * @param employeeID
+	 * @param appDate
+	 * @return
+	 */
+	private String workTypeInconsistencyCheck(String companyID, String employeeID, GeneralDate appDate){
+		// Imported(申請承認)「勤務実績」を取得する
+		RecordWorkInfoImport recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(employeeID, appDate);
+		if(Strings.isNotBlank(recordWorkInfoImport.getWorkTypeCode())){
+			return recordWorkInfoImport.getWorkTypeCode();
+		}
+		// Imported(申請承認)「勤務予定」を取得する
+		Optional<ScBasicScheduleImport> opScBasicScheduleImport = scBasicScheduleAdapter.findByID(employeeID, appDate);
+		if(!opScBasicScheduleImport.isPresent()){
+			return null;
+		}
+		return opScBasicScheduleImport.get().getWorkTypeCode();
 	}
 }

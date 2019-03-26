@@ -59,17 +59,20 @@
 								<td>
 									<div class="block-style">
 											<div class="margin-left-style" data-bind="ntsCheckBox: {checked: displayFlag, 
-																								enable: true, 
+																								enable: !((holidayOrPauseType==5)||(holidayOrPauseType==6)), 
 																								text: optionName()}"></div>
-									<div data-bind="ntsCheckBox: {checked: holidayTypeUseFlg, enable: displayFlag}">#{i18n.getText('KAF022_101')}</div>
+									<div data-bind="ntsCheckBox: {
+											checked: holidayTypeUseFlg, 
+											enable: displayFlag() &amp;&amp; !((holidayOrPauseType==5)||(holidayOrPauseType==6)) 
+										}">#{i18n.getText('KAF022_101')}</div>
 									</div>
 								</td>
 								<td>
 									<button class="small" data-bind="click: function(){ $parents[1].openKDL002Dialog($data); }, 
-																	enable: enableButton">#{i18n.getText('KAF022_280')}</button>
+																	enable: enableButton() &amp;&amp; !((holidayOrPauseType==5)||(holidayOrPauseType==6))">#{i18n.getText('KAF022_280')}</button>
 									<input  class="lagre-input-code" data-bind="ntsTextEditor: {value: displayWorkTypes,
 																								name: optionName, 
-																								enable: enableButton, 
+																								enable: enableButton() &amp;&amp; !((holidayOrPauseType==5)||(holidayOrPauseType==6)), 
 																								readonly: true,
 																								required: true},
 																								attr: { NameID: optionName }

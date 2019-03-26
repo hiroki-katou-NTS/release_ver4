@@ -8,6 +8,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import lombok.Value;
+import nts.arc.enums.EnumAdaptor;
+import nts.arc.layer.app.command.JavaTypeResult;
 import nts.arc.layer.ws.WebService;
 import nts.arc.time.GeneralDateTime;
 import nts.uk.ctx.at.request.app.command.application.holidaywork.CheckBeforeRegisterHolidayWork;
@@ -23,9 +25,13 @@ import nts.uk.ctx.at.request.app.find.application.holidaywork.dto.RecordWorkPara
 import nts.uk.ctx.at.request.app.find.application.overtime.dto.OvertimeCheckResultDto;
 import nts.uk.ctx.at.request.app.find.application.overtime.dto.ParamChangeAppDate;
 import nts.uk.ctx.at.request.app.find.application.overtime.dto.RecordWorkDto;
+import nts.uk.ctx.at.request.dom.application.ApplicationType;
+import nts.uk.ctx.at.request.dom.application.PrePostAtr;
+import nts.uk.ctx.at.request.dom.application.common.service.newscreen.before.IErrorCheckBeforeRegister;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
 import nts.uk.ctx.at.request.dom.application.overtime.service.CaculationTime;
 import nts.uk.ctx.at.shared.app.find.worktime.common.dto.DeductionTimeDto;
+import nts.uk.shr.com.context.AppContexts;
 
 
 @Path("at/request/application/holidaywork")
@@ -39,6 +45,9 @@ public class HolidayWorkWebService extends WebService{
 	private CreateHolidayWorkCommandHandler createHolidayWorkCommandHandler;
 	@Inject
 	private UpdateHolidayWorkCommandHandler updateHolidayWorkCommandHandle;
+	
+	@Inject
+	private IErrorCheckBeforeRegister iErrorCheckBeforeRegister;
 	
 	@POST
 	@Path("getHolidayWorkByUI")
@@ -100,6 +109,29 @@ public class HolidayWorkWebService extends WebService{
 	@Path("getBreakTimes")
 	public List<DeductionTimeDto> getBreakTimes(GetBreakTimeParam param) {
 		return this.appHolidayWorkFinder.getBreakTimes(param.getWorkTypeCD(), param.getWorkTimeCD());
+	}
+	
+	@POST
+	@Path("confirmInconsistency")
+	public List<String> confirmInconsistency(CreateHolidayWorkCommand command) {
+		String companyID = AppContexts.user().companyId();
+		return iErrorCheckBeforeRegister.inconsistencyCheck(
+				companyID, 
+				command.getApplicantSID(), 
+				command.getApplicationDate());
+	}
+	
+	@POST
+	@Path("confirmPrerepudiation")
+	public JavaTypeResult<Boolean> confirmPrerepudiation(CreateHolidayWorkCommand command) {
+		String companyID = AppContexts.user().companyId();
+		return new JavaTypeResult<Boolean>(this.iErrorCheckBeforeRegister.preliminaryDenialCheck(
+				companyID, 
+				command.getApplicantSID(), 
+				command.getApplicationDate(), 
+				GeneralDateTime.now(), 
+				EnumAdaptor.valueOf(command.getPrePostAtr(), PrePostAtr.class), 
+				ApplicationType.BREAK_TIME_APPLICATION.value).isConfirm());
 	}
 	
 }

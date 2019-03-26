@@ -5,6 +5,7 @@ module nts.uk.at.view.kaf010.a.viewmodel {
     import appcommon = nts.uk.at.view.kaf000.shr.model;
     import setShared = nts.uk.ui.windows.setShared;
     import util = nts.uk.util;
+    import text = nts.uk.resource.getText;
     
     export class ScreenModel {
         
@@ -290,11 +291,11 @@ module nts.uk.at.view.kaf010.a.viewmodel {
             self.employeeID(data.employeeID);
             if (data.workTime != null) {
                 self.siftCD(data.workTime.siftCode);
-                self.siftName(data.workTime.siftName);
+                self.siftName(data.workTime.siftName|| text("KAL003_120"));
             }
             if (data.workType != null) {
                 self.workTypeCd(data.workType.workTypeCode);
-                self.workTypeName(data.workType.workTypeName);
+                self.workTypeName(data.workType.workTypeName|| text("KAL003_120"));
             }
             self.workTypecodes(data.workTypes);
             self.workTimecodes(data.workTimes);
@@ -511,55 +512,63 @@ module nts.uk.at.view.kaf010.a.viewmodel {
                 leaveAppID: self.leaverAppID(),
                 uiType: self.uiType(),
                 calculateFlag: self.calculateFlag(),
-                appReasonID: comboBoxReason
+                appReasonID: comboBoxReason,
+                checkOver1Year: true;
             };
             //登録前エラーチェック
-            service.checkBeforeRegister(overtime).done((data) => {                
-                if (data.errorCode == 0) {
-                    overtime.appOvertimeDetail = data.appOvertimeDetail;
-                    if (data.confirm) {
-                        //メッセージNO：829
-                        dialog.confirm({ messageId: "Msg_829" }).ifYes(() => {
-                            //登録処理を実行
-                            self.registerData(overtime);
+            service.checkBeforeRegister(overtime).done((data) => {
+                overtime.checkOver1Year = false;             
+                self.checkBfRegDone(data, overtime);
+            }).fail((res) => {
+                if(res.messageId == "Msg_1518"){//confirm
+                    dialog.confirm({messageId: res.messageId}).ifYes(() => {
+                        overtime.checkOver1Year = false;
+                             service.checkBeforeRegister(overtime).done((data) => {                
+                                self.checkBfRegDone(data, overtime);
+                            }).fail((res) => {
+                                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                                .then(function() { nts.uk.ui.block.clear(); });
+                            });
                         }).ifNo(() => {
-                            //終了状態：処理をキャンセル
                             nts.uk.ui.block.clear();
-                            return;
                         });
-                    } else {
-                        //登録処理を実行
-                        self.registerData(overtime);
-                    }
-                } else if (data.errorCode == 1){
-                    self.calculateFlag(1);
-                    if(data.frameNo == -1){
-                        let frameName = "";
-                        //Setting color for item error
-                        for (let i = 0; i < self.breakTimes().length; i++) {
-                            self.changeColor( self.breakTimes()[i].attendanceID(), self.breakTimes()[i].frameNo(),data.errorCode);
-                            if(self.breakTimes().length == 1){
-                                frameName = self.breakTimes()[i].frameName();
-                            }else{
-                                if(i == 0){
-                                    frameName =  self.breakTimes()[0].frameName();
-                                }else{
-                                    frameName += "、"+ self.breakTimes()[i].frameName();
-                                }
+                    
+                }else{
+                    dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                        .then(function() { nts.uk.ui.block.clear(); });   
+                }        
+            });
+        }
+        checkBfRegDone(data, overtime) {
+            let self = this;
+            if (data.errorCode == 0) {
+                overtime.appOvertimeDetail = data.appOvertimeDetail;
+                self.confirmInconsistency(data, overtime);
+            } else if (data.errorCode == 1) {
+                self.calculateFlag(1);
+                if (data.frameNo == -1) {
+                    let frameName = "";
+                    //Setting color for item error
+                    for (let i = 0; i < self.breakTimes().length; i++) {
+                        self.changeColor(self.breakTimes()[i].attendanceID(), self.breakTimes()[i].frameNo(), data.errorCode);
+                        if (self.breakTimes().length == 1) {
+                            frameName = self.breakTimes()[i].frameName();
+                        } else {
+                            if (i == 0) {
+                                frameName = self.breakTimes()[0].frameName();
+                            } else {
+                                frameName += "、" + self.breakTimes()[i].frameName();
                             }
                         }
-                        
-                        dialog.alertError({messageId:"Msg_424", messageParams: [self.employeeName(),frameName]}) .then(function() { nts.uk.ui.block.clear(); }); 
-                    }else{
-                      //Change background color
-                        self.changeColor( data.attendanceId, data.frameNo,data.errorCode);
-                        dialog.alertError({messageId:"Msg_424", messageParams: [self.employeeName(),$('#overtimeHoursHeader_'+data.attendanceId+'_'+data.frameNo).text()]}) .then(function() { nts.uk.ui.block.clear(); }); 
-                    }                    
+                    }
+
+                    dialog.alertError({ messageId: "Msg_424", messageParams: [self.employeeName(), frameName] }).then(function() { nts.uk.ui.block.clear(); });
+                } else {
+                    //Change background color
+                    self.changeColor(data.attendanceId, data.frameNo, data.errorCode);
+                    dialog.alertError({ messageId: "Msg_424", messageParams: [self.employeeName(), $('#overtimeHoursHeader_' + data.attendanceId + '_' + data.frameNo).text()] }).then(function() { nts.uk.ui.block.clear(); });
                 }
-            }).fail((res) => {
-                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
-                .then(function() { nts.uk.ui.block.clear(); });           
-            });
+            }
         }
         //登録処理を実行
         registerData(overtime) {
@@ -738,10 +747,18 @@ module nts.uk.at.view.kaf010.a.viewmodel {
                 nts.uk.ui.block.clear();
                 dfd.resolve(data);
             }).fail(function(res){
-                self.changeColor(2,res.parameterIds[3],res.parameterIds[4]);
-                dialog.alertError({messageId:"Msg_424", messageParams: [res.parameterIds[0],res.parameterIds[1],res.parameterIds[2]]}).then(function() { 
-                    nts.uk.ui.block.clear(); 
-                });
+                if(res.messageId=="Msg_424"){
+                    self.changeColor(2,res.parameterIds[3],res.parameterIds[4]);
+                    dialog.alertError({messageId:"Msg_424", messageParams: [res.parameterIds[0],res.parameterIds[1],res.parameterIds[2]]}).then(function() { 
+                        nts.uk.ui.block.clear(); 
+                    });    
+                } else if(res.messageId=="Msg_1508"){ 
+                    dialog.alertError({messageId:"Msg_1508", messageParams: [res.parameterIds[0]]}).then(function() { 
+                        nts.uk.ui.block.clear(); 
+                    });   
+                } else {
+                    nts.uk.ui.block.clear();    
+                }
                 dfd.reject(res);
             });
             return dfd.promise();
@@ -836,7 +853,10 @@ module nts.uk.at.view.kaf010.a.viewmodel {
         findBychangeAppDateData(data: any) {
             var self = this;
             let overtimeDto = data;
-            self.prePostSelected(overtimeDto.displayPrePostFlg);
+            if(overtimeDto.displayPrePostFlg==0){
+                self.prePostSelected(overtimeDto.application.prePostAtr);        
+            }
+            
             self.displayCaculationTime(overtimeDto.displayCaculationTime);
             self.displayPrePostFlg(data.displayPrePostFlg ? true : false);
             self.restTimeDisFlg(self.restTimeDisFlg());
@@ -1091,6 +1111,52 @@ module nts.uk.at.view.kaf010.a.viewmodel {
 //                });
 //            }
         }
+        
+        confirmInconsistency(data: any, overtime: any){
+            let self = this;
+            service.confirmInconsistency(overtime).done((data1) => { 
+                if (!nts.uk.util.isNullOrEmpty(data1)) {
+                    dialog.confirm({ messageId: data1[0], messageParams: [data1[1],data1[2]] }).ifYes(() => {
+                        //登録処理を実行
+                        self.confirmPrerepudiation(data, overtime);
+                    }).ifNo(() => {
+                        //終了状態：処理をキャンセル
+                        nts.uk.ui.block.clear();
+                        return;
+                    });
+                } else {
+                    //登録処理を実行
+                    self.confirmPrerepudiation(data, overtime);
+                }   
+            }).fail((res) => {
+                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                .then(function() { nts.uk.ui.block.clear(); });           
+            });    
+        }
+        
+        confirmPrerepudiation(data: any, overtime: any){
+            let self = this;
+            service.confirmPrerepudiation(overtime).done((data2) => { 
+                if (data2) {
+                    //メッセージNO：829
+                    dialog.confirm({ messageId: "Msg_829" }).ifYes(() => {
+                        //登録処理を実行
+                        self.registerData(overtime);
+                    }).ifNo(() => {
+                        //終了状態：処理をキャンセル
+                        nts.uk.ui.block.clear();
+                        return;
+                    });
+                } else {
+                    //登録処理を実行
+                    self.registerData(overtime);
+                }   
+            }).fail((res) => {
+                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                .then(function() { nts.uk.ui.block.clear(); });           
+            });      
+        }
+        
     }
 
 }

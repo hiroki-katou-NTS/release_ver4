@@ -1,5 +1,5 @@
 module nts.uk.at.view.kaf018.e.viewmodel {
-    import text = nts.uk.resource.getText;
+    import getText = nts.uk.resource.getText;
     import getShared = nts.uk.ui.windows.getShared;
     import formatDate = nts.uk.time.formatDate;
     import info = nts.uk.ui.dialog.info;
@@ -9,7 +9,7 @@ module nts.uk.at.view.kaf018.e.viewmodel {
     import shareModel = kaf018.share.model;
 
     export class ScreenModel {
-        listWkpStatusConfirm: Array<ApprovalStatusActivity>;
+        listWkpStatusConfirm: Array<ApprSttActivityDta>;
         useSetting: shareModel.UseSetting;
         closureID: string;
         closureName: string;
@@ -28,7 +28,7 @@ module nts.uk.at.view.kaf018.e.viewmodel {
         person: number;
         daily: number;
         monthly: number;
-
+        isCheckedAll: KnockoutObservable<boolean> = ko.observable(false);
         constructor() {
             var self = this;
 
@@ -81,13 +81,20 @@ module nts.uk.at.view.kaf018.e.viewmodel {
                         }
                         _.each(data.lstData, function(item) {
                             let wkp = _.find(listWorkplace, { code: item.wkpId });
-                            self.listWkpStatusConfirm.push(new ApprovalStatusActivity(item.wkpId, wkp.name, item.monthUnconfirm, item.monthConfirm, item.bossUnconfirm, item.bossConfirm, item.personUnconfirm, item.personConfirm))
+                            self.listWkpStatusConfirm.push(new ApprSttActivityDta(item.wkpId, wkp.name, self.getRecord(item.monthConfirm),
+                                 item.monthUnconfirm, self.getRecord(item.bossUnconfirm),
+                                 self.getRecord(item.bossConfirm), self.getRecord(item.personUnconfirm),
+                                 self.getRecord(item.personConfirm),
+                                 !(item.personUnconfirm == 0 && item.bossUnconfirm == 0 && item.monthUnconfirm == 0)));
                             self.listWkpActive.push({ code: item.wkpId, name: wkp.name });
                         })
+                        self.initNtsGrid(self.listHidden());
                         block.clear();
                         dfd.resolve();
                     }).fail(function(res){
+                        nts.uk.ui.dialog.error({messageId: res.messageId, messageParams: res.parameterIds});
                         block.clear();
+                        dfd.resolve();
                     })
                 }).fail(function() {
                     block.clear();
@@ -98,10 +105,60 @@ module nts.uk.at.view.kaf018.e.viewmodel {
             }
             return dfd.promise();
         }
-
-        initFixedTable() {
+        listHidden(): Array<any>{
+            let self = this;
+            let lstHidden = [];
+             _.each(self.listWkpStatusConfirm, function(item, index) {
+                if(item.enable == false){
+                    lstHidden.push(item.code);
+                }
+            });
+            return lstHidden;
+        }
+        initNtsGrid(lstHidden: Array<any>) {
             var self = this;
-            let width = 500;
+            $("#gridE").ntsGrid({
+                width: self.ntsGridWidthCal(),
+                height: '629px',
+                dataSource: self.listWkpStatusConfirm,
+                primaryKey: 'code',
+                rowVirtualization: true,
+                virtualization: true,
+                hidePrimaryKey: true,
+                virtualizationMode: 'continuous',
+                columns: [
+                    { headerText: getText('KAF018_52'), key: 'name', dataType: 'string', width: '210px', ntsControl: 'LinkLabel' },
+                    { headerText: getText('KAF018_53'), key: 'monthConfirm', dataType: 'string', width: '100px', hidden: !self.useSetting.monthlyConfirm},
+                    { headerText: getText('KAF018_54'), 
+                        group:[{ headerText: getText('KAF018_99'), key: 'dayBossUnconfirm', dataType: 'string', width: '100px' },
+                                { headerText: getText('KAF018_100'), key: 'dayBossConfirm', dataType: 'string', width: '100px' }],
+                        hidden: !self.useSetting.useBossConfirm},
+                    { headerText: getText('KAF018_55'), 
+                        group:[{ headerText: getText('KAF018_56'), key: 'dayPrincipalUnconfirm', dataType: 'string', width: '100px' },
+                                { headerText: getText('KAF018_57'), key: 'dayPrincipalConfirm', dataType: 'string', width: '100px' }],
+                        hidden: !self.useSetting.usePersonConfirm},
+                    { headerText: getText('KAF018_58'), key: 'check', dataType: 'boolean', width: '120px', 
+                            showHeaderCheckbox: true, ntsControl: 'Checkbox',  hiddenRows: lstHidden},
+                    { headerText: 'ID', key: 'code', dataType: 'string', width: '0px', ntsControl: 'Label'}
+                ],
+                features: [
+                    {
+                        name: 'Selection',
+                        mode: 'row',
+                        multipleSelection: true
+                    },
+                    { name: "MultiColumnHeaders" }
+                ],
+                ntsControls: [{ name: 'Checkbox', options: { value: 1, text: '' }, optionsValue: 'value', optionsText: 'text', controlType: 'CheckBox' },
+                    { name: 'LinkLabel' ,click: function(rowId){self.gotoF(rowId)}, controlType: 'LinkLabel' }],
+            });
+            $("#gridE").setupSearchScroll("igGrid", true);
+            $("#gridE").focus();
+        }
+        
+        ntsGridWidthCal() {
+            var self = this;
+            let width = 350;
             if (self.useSetting.monthlyConfirm) {
                 width += 100;
             }
@@ -111,8 +168,7 @@ module nts.uk.at.view.kaf018.e.viewmodel {
             if (self.useSetting.usePersonConfirm) {
                 width += 200;
             }
-            $("#fixed-table").ntsFixedTable({ width: width, height: 186 });
-            self.focusE5();
+            return width;
         }
 
         sendMail(value: TransmissionAttr) {
@@ -120,7 +176,7 @@ module nts.uk.at.view.kaf018.e.viewmodel {
             block.invisible();
             let listWkp = [];
             _.each(self.listWkpStatusConfirm, function(item) {
-                listWkp.push({ wkpId: item.code, isCheckOn: item.check() ? 1 : 0 })
+                listWkp.push({ wkpId: item.code, isCheckOn: item.check ? 1 : 0 })
             })
             //アルゴリズム「承認状況未確認メール送信」を実行する
             service.checkSendUnconfirmedMail(listWkp).done(function() {
@@ -152,7 +208,6 @@ module nts.uk.at.view.kaf018.e.viewmodel {
                     }).fail(function(err) {
                         error({ messageId: err.messageId });
                     }).always(function() {
-                        self.focusE5();
                         block.clear();
                     });
                 })
@@ -167,13 +222,14 @@ module nts.uk.at.view.kaf018.e.viewmodel {
             return value ? value + "件" : "";
         }
 
-        focusE5() {
-            $("#fixed-table").focus();
-        }
-
-        gotoF(index) {
+        gotoF(id) {
             var self = this;
-
+            let indexs = null;
+            _.each(self.listWkpStatusConfirm, function(item, index) {
+                if(item.code == id){
+                    indexs = index;
+                }
+            });
             let params = {
                 closureID: self.closureID,
                 closureName: self.closureName,
@@ -182,7 +238,7 @@ module nts.uk.at.view.kaf018.e.viewmodel {
                 endDate: self.endDate,
                 isConfirmData: self.isConfirmData,
                 listWkp: self.listWkpActive,
-                selectedWplIndex: index(),
+                selectedWplIndex: indexs,
                 listEmployeeCode: self.listEmpCd,
                 inputContent: self.inputContent
                 
@@ -200,7 +256,7 @@ module nts.uk.at.view.kaf018.e.viewmodel {
     }
 
 
-    class ApprovalStatusActivity {
+    export class ApprovalStatusActivity {
         code: string;
         name: string;
         monthConfirm: number;
@@ -228,6 +284,31 @@ module nts.uk.at.view.kaf018.e.viewmodel {
                 this.enable = true;
             }
             this.check = ko.observable(false);
+        }
+    }
+    export class ApprSttActivityDta {
+        code: string;
+        name: string;
+        monthConfirm: string;
+        monthUnconfirm: number;
+        dayBossUnconfirm: string;
+        dayBossConfirm: string;
+        dayPrincipalUnconfirm: string;
+        dayPrincipalConfirm: string;
+        enable: boolean;
+        check: boolean;
+        constructor(code: string, name: string, monthConfirm: string, monthUnconfirm: number, dayBossUnconfirm: string,
+            dayBossConfirm: string, dayPrincipalUnconfirm: string, dayPrincipalConfirm: string, enable: boolean) {
+            this.code = code;
+            this.name = name;
+            this.monthUnconfirm = monthUnconfirm;
+            this.monthConfirm = monthConfirm;
+            this.dayBossUnconfirm = dayBossUnconfirm;
+            this.dayBossConfirm = dayBossConfirm;
+            this.dayPrincipalUnconfirm = dayPrincipalUnconfirm;
+            this.dayPrincipalConfirm = dayPrincipalConfirm;
+            this.enable = enable;
+            this.check = false;
         }
     }
 

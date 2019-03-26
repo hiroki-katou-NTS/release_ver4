@@ -39,7 +39,14 @@ public class OvertimeFourProcessImpl implements OvertimeFourProcess{
 							continue;
 						}else if(overtimeInputCaculation.getResultCaculation() != null && overtimeInputCaculation.getResultCaculation() > 0){
 							// 03-01_事前申請超過チェック
-							OvertimeCheckResult overtimeCheckResult = this.IErrorCheckBeforeRegister.preApplicationExceededCheck(overtimeInput.getCompanyID(),appDate, inputDate, EnumAdaptor.valueOf(prePostAtr, PrePostAtr.class), overtimeInputCaculation.getAttendanceID(), convert(overtimeInput));
+							OvertimeCheckResult overtimeCheckResult = this.IErrorCheckBeforeRegister.preApplicationExceededCheck(
+									companyID,
+									appDate, 
+									inputDate, 
+									EnumAdaptor.valueOf(prePostAtr, PrePostAtr.class), 
+									overtimeInputCaculation.getAttendanceID(), 
+									convert(overtimeInput),
+									employeeID);
 							if(overtimeCheckResult.getErrorCode() != 0){
 								overtimeInput.setErrorCode(overtimeCheckResult.getErrorCode());
 							}

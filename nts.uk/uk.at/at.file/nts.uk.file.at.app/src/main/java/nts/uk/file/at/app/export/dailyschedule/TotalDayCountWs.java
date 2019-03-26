@@ -54,7 +54,7 @@ public class TotalDayCountWs {
 			List<String> empList = new ArrayList<>();
 			empList.add(employeeId);
 			// 予定勤務種類コードを取得す�
-			List<WorkInfoOfDailyPerformance> dailyPerformanceList = workInformationRepo.findByListEmployeeId(empList, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()));
+			List<WorkInfoOfDailyPerformance> dailyPerformanceList = workInformationRepo.findByPeriodOrderByYmdAndEmps(empList, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()));
 			
 			int dayCount = 0;
 			for (WorkType workType: lstWorkType) {
@@ -85,7 +85,7 @@ public class TotalDayCountWs {
 		// 予定勤務種類コードを取得す�
 		//List<WorkInfoOfDailyPerformanceDetailDto> dailyPerformanceList = dailyPerformanceRepo.find(empList, dateRange);
 		
-		List<WorkInfoOfDailyPerformance> dailyPerformanceList = workInformationRepo.findByListEmployeeId(empList, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()));
+		List<WorkInfoOfDailyPerformance> dailyPerformanceList = workInformationRepo.findByPeriodOrderByYmdAndEmps(empList, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()));
 		
 		String companyId = AppContexts.user().companyId();
 		

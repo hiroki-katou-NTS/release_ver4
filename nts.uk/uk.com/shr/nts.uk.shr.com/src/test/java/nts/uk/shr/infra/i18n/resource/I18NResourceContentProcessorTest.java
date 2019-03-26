@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.regex.Matcher;
 
 import org.junit.Test;
 
@@ -52,10 +53,27 @@ public class I18NResourceContentProcessorTest {
 		assertThat(result, is("test にほんご - ABC - <TEXT1>"));
 	}
 	
+	@Test
+	public void backslash() {
+		val target = new I18NResourceContentProcessor(id -> localize(id));
+		
+		String result = target.process(LanguageConsts.DEFAULT_LANGUAGE_ID, "AB{0}C", Arrays.asList("\\"));
+		assertThat(result, is("AB\\C"));
+	}
+	
+	@Test
+	public void dollar() {
+		val target = new I18NResourceContentProcessor(id -> localize(id));
+
+		String result = target.process(LanguageConsts.DEFAULT_LANGUAGE_ID, "AB{0}C", Arrays.asList("$"));
+		assertThat(result, is("AB$C"));
+	}
+	
 	private static String localize(String id) {
 		switch (id) {
 		case "T1": return "TEXT1";
 		case "T2": return "TEXT2 has {#T1}!!";
+		case "T3": return "TEXT3 has {0}";
 		default: return "NO TEXT";
 		}
 	}

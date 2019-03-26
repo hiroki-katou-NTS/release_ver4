@@ -269,7 +269,7 @@ module nts.uk.at.view.kdm002.a {
                     isMultiSelect: true,
                     listType: ListType.EMPLOYEE,
                     employeeInputList: self.employeeList,
-                    selectType: SelectType.SELECT_BY_SELECTED_CODE,
+                    selectType: SelectType.SELECT_ALL,
                     selectedCode: self.selectedEmployeeCode,
                     isDialog: false,
                     isShowNoSelectRow: false,
@@ -277,7 +277,8 @@ module nts.uk.at.view.kdm002.a {
                     isShowWorkPlaceName: true,
                     isShowSelectAllButton: true,
                     maxWidth: 550,
-                    maxRows: 15
+                    maxRows: 15,
+                    isSelectAllAfterReload: true
                 };
                 
             }

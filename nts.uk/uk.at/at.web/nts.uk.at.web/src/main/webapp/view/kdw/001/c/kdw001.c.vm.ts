@@ -75,14 +75,15 @@ module nts.uk.at.view.kdw001.c {
                     isMultiSelect: true,
                     listType: ListType.EMPLOYEE,
                     employeeInputList: self.employeeList,
-                    selectType: SelectType.SELECT_BY_SELECTED_CODE,
+                    selectType: SelectType.SELECT_ALL,
                     selectedCode: self.multiSelectedCode,
                     isDialog: self.isDialog(),
                     isShowNoSelectRow: self.isShowNoSelectRow(),
                     alreadySettingList: self.alreadySettingList,
                     isShowWorkPlaceName: self.isShowWorkPlaceName(),
                     isShowSelectAllButton: false,
-                    maxRows: 10
+                    maxRows: 10,
+                    isSelectAllAfterReload: true
                 };
 
 

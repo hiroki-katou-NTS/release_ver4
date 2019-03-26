@@ -79,5 +79,15 @@ public class JpaFixedConWorkRecordRepository extends JpaRepository implements  F
 				.getList(c->c.toDomain());
 		return data;
 	}
+	
+	@Override
+	public List<FixedConditionWorkRecord> getAllFixedConWorkRecordByID(List<String> dailyAlarmConID) {
+		String SELECT_FIXED_CON_BY_ALARM_ID =SELECT_FROM_FIXED_CON 
+				+ " WHERE c.krcmtFixedConditionWorkRecordPK.dailyAlarmConID in :dailyAlarmConID ";
+		List<FixedConditionWorkRecord> data = this.queryProxy().query(SELECT_FIXED_CON_BY_ALARM_ID,KrcmtFixedConditionWorkRecord.class)
+				.setParameter("dailyAlarmConID", dailyAlarmConID)
+				.getList(c->c.toDomain());
+		return data;
+	}
 
 }

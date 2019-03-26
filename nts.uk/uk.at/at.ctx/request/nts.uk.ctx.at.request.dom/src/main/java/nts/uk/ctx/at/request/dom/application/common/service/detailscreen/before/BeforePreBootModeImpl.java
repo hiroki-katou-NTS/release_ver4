@@ -48,7 +48,7 @@ public class BeforePreBootModeImpl implements BeforePreBootMode {
 		}
 		//4.社員の当月の期間を算出する
 		PeriodCurrentMonth listDate = otherCommonAlgorithmService.employeePeriodCurrentMonthCalculate(companyID,
-				employeeID, baseDate);
+				applicationData.getEmployeeID(), baseDate);
 		GeneralDate startDate = listDate.getStartDate();
 		// 締め開始日 >  ドメインモデル「申請」．申請日 がtrue
 		if (startDate.after(applicationData.getAppDate())) {

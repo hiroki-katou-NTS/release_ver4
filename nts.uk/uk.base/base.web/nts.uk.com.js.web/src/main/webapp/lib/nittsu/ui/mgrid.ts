@@ -2850,9 +2850,11 @@ module nts.uk.ui.mgrid {
             clearState: function(idArr: Array<any>) {
                 let self = this;
                 
-                let cleanOthShtCellElm = function(id, c) {
+                let cleanOthShtCellElm = function(id, c, states) {
+                    if (!c) return;
                     let coord = ti.getCellCoord(c);
-                    color.ALL.forEach(s => {
+                    if (!states) states = color.ALL;
+                    states.forEach(s => {
                         if (c.classList.contains(s)) {
                             if (s === color.Disable) {
                                 self.enableNtsControlAt(id, coord.columnKey, c);
@@ -2861,46 +2863,64 @@ module nts.uk.ui.mgrid {
                         }
                     });
                     
-                    color.popState(id, coord.columnKey, color.ALL); 
+                    color.popState(id, coord.columnKey, states); 
                 };
                 
-                let clean = function(id) {
+                let clean = function(id, key, states) {
                     let idx = _.findIndex(_dataSource, r => r[_pk] === id); 
-                    let row = lch.rowAt(_$grid[0], idx);
-                    _.forEach(row, c => {
-                        cleanOthShtCellElm(id, c);
-                    });
+                    if (!_.isNil(key)) {
+                        let c = lch.cellAt(_$grid[0], idx, key);
+                        cleanOthShtCellElm(id, c, states);
+                    } else {
+                        let row = lch.rowAt(_$grid[0], idx);
+                        _.forEach(row, c => {
+                            cleanOthShtCellElm(id, c);
+                        });
+                    }
                     
                     _.forEach(_.keys(_mafollicle[SheetDef]), s => {
                         if (s === _currentSheet) return;
                         let maf = _mafollicle[_currentPage][s];
                         if (maf && maf.desc) {
-                            let othShtRow = lch.rowAt(_$grid[0], idx, maf.desc); 
-                            _.forEach(othShtRow, c => {
-                                cleanOthShtCellElm(id, c);
-                            }); 
-                        } else cleanOthSht(id, _mafollicle[SheetDef][s].columns);
+                            if (!_.isNil(key)) {
+                                let c = lch.cellAt(_$grid[0], idx, key, maf.desc);
+                                cleanOthShtCellElm(id, c, states);
+                            } else {
+                                let othShtRow = lch.rowAt(_$grid[0], idx, maf.desc); 
+                                _.forEach(othShtRow, c => {
+                                    cleanOthShtCellElm(id, c);
+                                }); 
+                            }
+                        } else cleanOthSht(id, _mafollicle[SheetDef][s].columns, states);
                     });
                 };
                 
-                let cleanOthSht = function(id, cols) {
+                let cleanOthSht = function(id, cols, states) {
+                    if (!states) {
+                        states = color.ALL;
+                    }
+                    
                     _.forEach(cols, c => {
                         if (c.group) {
-                            cleanOthSht(id, c.group);
+                            cleanOthSht(id, c.group, states);
                             return;
                         }
-                        color.popState(id, c.key, color.ALL);
+                        color.popState(id, c.key, states);
                     });
                 };
                 
-                if (idArr && !_.isArray(idArr)) {
-                    clean(idArr);
-                    return;
+                if (arguments.length > 1) {
+                    clean(idArr, arguments[1], arguments[2]);
+                } else {
+                    if (idArr && !_.isArray(idArr)) {
+                        clean(idArr);
+                        return;
+                    }
+                    
+                    _.forEach(idArr, id => {
+                        clean(id);
+                    });
                 }
-                
-                _.forEach(idArr, id => {
-                    clean(id);
-                });
             },
             hideZero: function(val) {
                 if (changeZero(val)) {
@@ -3107,6 +3127,9 @@ module nts.uk.ui.mgrid {
                     let disFormat = su.formatSave(col[0], val);
                     su.wedgeCell(_$grid[0], { rowIdx: idx, columnKey: key }, disFormat, reset);
                     $.data($cell, v.DATA, disFormat);
+                    if (_zeroHidden && ti.isZero(disFormat, key)) {
+                        $cell.innerHTML = "";
+                    }
                 } else if (dkn.controlType[key] === dkn.CHECKBOX) {
                     let check = $cell.querySelector("input[type='checkbox']");
                     if (!check) return;
@@ -3505,7 +3528,7 @@ module nts.uk.ui.mgrid {
                     let control = dkn.controlType[coord.columnKey];
                     let cEditor = _mEditor;
                     
-                    if (control === dkn.CHECKBOX && ti.isSpaceKey(evt)) {
+                    if (control === dkn.CHECKBOX && ti.isSpaceKey(evt) && !$tCell.classList.contains(color.Hide)) {
                         let check = $tCell.querySelector("input[type='checkbox']");
                         if (!check) return;
                         let checked;
@@ -3781,6 +3804,7 @@ module nts.uk.ui.mgrid {
                     if (!_.isNil(dirties[id]) && !_.isNil(dirties[id][coord.columnKey])) {
                         delete dirties[id][coord.columnKey];
                     }
+                    return { c: calcCell };
                 } else {
                     if (cellValue === origVal) {
                         $cell = lch.cellAt($grid, coord.rowIdx, coord.columnKey, desc);
@@ -3788,6 +3812,7 @@ module nts.uk.ui.mgrid {
                             if (!_.isNil(dirties[id]) && !_.isNil(dirties[id][coord.columnKey])) {
                                 delete dirties[id][coord.columnKey];
                             }
+                            rData[coord.columnKey] = cellValue;
                             return { c: calcCell };
                         }
                         $cell.classList.remove(color.ManualEditTarget);
@@ -3870,9 +3895,13 @@ module nts.uk.ui.mgrid {
                             }
                         } else {
                             formatted = !_.isNil(column) ? format(column[0], cellValue) : cellValue;
-                            t.c.textContent = formatted;
                             disFormat = cellValue === "" || _.isNil(column) ? cellValue : formatSave(column[0], cellValue);
                             $.data(t.c, v.DATA, disFormat);
+                            if (maf.zeroHidden && ti.isZero(disFormat, coord.columnKey)) {
+                                t.c.textContent = "";
+                            } else {
+                                t.c.textContent = formatted;
+                            }
                         }
                         
                         if (t.colour) t.c.classList.add(t.colour);
@@ -5021,7 +5050,11 @@ module nts.uk.ui.mgrid {
                 
                 kt._adjuster.nostal(table.cols, bodyGroupArr, sumGroupArr);
                 kt._adjuster.handle(); 
-                if (lo.changeZero(_vessel().zeroHidden)) _vessel().zeroHidden = _zeroHidden;         
+                
+                let tmp = _vessel().zeroHidden;
+                _vessel().zeroHidden = _zeroHidden;
+                _zeroHidden = tmp;
+                if (lo.changeZero(_vessel().zeroHidden)) _zeroHidden = _vessel().zeroHidden;      
                 return;
             }
             
@@ -5054,7 +5087,11 @@ module nts.uk.ui.mgrid {
             kt._adjuster.nostal(_mafollicle[SheetDef][_currentSheet].hColArr, 
                 _mafollicle[SheetDef][_currentSheet].bColArr, _mafollicle[SheetDef][_currentSheet].sumColArr);
             kt._adjuster.handle();
-            if (lo.changeZero(_vessel().zeroHidden)) _vessel().zeroHidden = _zeroHidden;
+            
+            let tmp = _vessel().zeroHidden;
+            _vessel().zeroHidden = _zeroHidden;
+            _zeroHidden = tmp;
+            if (lo.changeZero(_vessel().zeroHidden)) _zeroHidden = _vessel().zeroHidden;
         }
     }
     
@@ -6479,6 +6516,7 @@ module nts.uk.ui.mgrid {
         export const Reflect = "mgrid-reflect";
         export const Calculation = "mgrid-calc";
         export const Disable = "mgrid-disable";
+        export const Hide = "mgrid-hide";
         export const HOVER = "ui-state-hover";
         export const ALL = [ Error, Alarm, ManualEditTarget, ManualEditOther, Reflect, Calculation, Disable ];
         

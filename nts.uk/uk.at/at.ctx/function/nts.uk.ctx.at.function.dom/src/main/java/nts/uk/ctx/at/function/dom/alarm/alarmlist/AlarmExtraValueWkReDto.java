@@ -1,5 +1,8 @@
 package nts.uk.ctx.at.function.dom.alarm.alarmlist;
 
+import java.util.Arrays;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 import nts.gul.text.IdentifierUtil;
@@ -60,6 +63,14 @@ public class AlarmExtraValueWkReDto {
 		this.alarmValueMessage = alarmValueMessage;
 		this.comment = comment;
 	}
-	
 
+	public List<String> employeeData() {
+		
+		return Arrays.asList(employeeCode, workplaceName, employeeName);
+	}
+
+	public List<String> erAlData() {
+		
+		return Arrays.asList(employeeCode, alarmValueDate, categoryName, alarmItem, comment, guid, alarmValueMessage);
+	}
 }

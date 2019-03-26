@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.record.ac.workplace.affiliate;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -71,6 +72,11 @@ public class AffWorkplaceAdapterImpl implements AffWorkplaceAdapter {
 	@Override
 	public List<String> findAffiliatedWorkPlaceIdsToRoot(String companyId,String employeeId, GeneralDate baseDate) {
 		return this.wkpPub.findWpkIdsBySid(companyId ,employeeId, baseDate);
+	}
+	
+	@Override
+	public Map<GeneralDate, Map<String, List<String>>> findAffiliatedWorkPlaceIdsToRoot(String companyId, List<String> employeeId, DatePeriod baseDate){
+		return this.wkpPub.findWpkIdsBySids(companyId, employeeId, baseDate);
 	}
 
 	@Override

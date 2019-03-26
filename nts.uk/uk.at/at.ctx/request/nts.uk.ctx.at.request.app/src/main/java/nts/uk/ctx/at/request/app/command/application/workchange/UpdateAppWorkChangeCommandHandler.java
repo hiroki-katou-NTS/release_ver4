@@ -9,11 +9,13 @@ import javax.transaction.Transactional;
 import org.apache.logging.log4j.util.Strings;
 
 import nts.arc.enums.EnumAdaptor;
+import nts.arc.error.BusinessException;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerWithResult;
 import nts.arc.time.GeneralDateTime;
 import nts.uk.ctx.at.request.app.command.application.common.CreateApplicationCommand;
 import nts.uk.ctx.at.request.dom.application.AppReason;
+import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.DisabledSegment_New;
@@ -22,9 +24,19 @@ import nts.uk.ctx.at.request.dom.application.ReasonNotReflectDaily_New;
 import nts.uk.ctx.at.request.dom.application.ReasonNotReflect_New;
 import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
 import nts.uk.ctx.at.request.dom.application.ReflectionInformation_New;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.InitMode;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.DetailScreenInitModeOutput;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.OutputMode;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.output.User;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
 import nts.uk.ctx.at.request.dom.application.workchange.AppWorkChange;
 import nts.uk.ctx.at.request.dom.application.workchange.IWorkChangeUpdateService;
+import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSetting;
+import nts.uk.ctx.at.request.dom.setting.request.application.applicationsetting.ApplicationSettingRepository;
+import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSetting;
+import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSettingRepository;
+import nts.uk.ctx.at.request.dom.setting.request.application.common.RequiredFlg;
+import nts.uk.ctx.at.request.dom.setting.request.gobackdirectlycommon.primitive.AppDisplayAtr;
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
@@ -33,6 +45,18 @@ public class UpdateAppWorkChangeCommandHandler extends CommandHandlerWithResult<
 	//private static final String COLON_STRING = ":";
 	@Inject
 	private IWorkChangeUpdateService updateService;
+	
+	@Inject
+	private AppTypeDiscreteSettingRepository appTypeDiscreteSettingRepository;
+	
+	@Inject
+	private ApplicationSettingRepository applicationSettingRepository;
+	
+	@Inject
+	private InitMode initMode;
+	
+	@Inject
+	private ApplicationRepository_New applicationRepository;
 
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<AddAppWorkChangeCommand> context) {
@@ -45,6 +69,37 @@ public class UpdateAppWorkChangeCommandHandler extends CommandHandlerWithResult<
 		String companyId = AppContexts.user().companyId();
 		// 申請ID
 		String appID = appCommand.getApplicationID();
+		
+		DetailScreenInitModeOutput output = initMode.getDetailScreenInitMode(EnumAdaptor.valueOf(context.getCommand().getUser(), User.class), context.getCommand().getReflectPerState());
+		String appReason = applicationRepository.findByID(companyId, appID).get().getAppReason().v();
+		if(output.getOutputMode()==OutputMode.EDITMODE){
+			AppTypeDiscreteSetting appTypeDiscreteSetting = appTypeDiscreteSettingRepository.getAppTypeDiscreteSettingByAppType(
+					companyId, 
+					ApplicationType.WORK_CHANGE_APPLICATION.value).get();
+			String typicalReason = Strings.EMPTY;
+			String displayReason = Strings.EMPTY;
+			if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)){
+				typicalReason += appCommand.getAppReasonID();
+			}
+			if(appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+				if(Strings.isNotBlank(typicalReason)){
+					displayReason += System.lineSeparator();
+				}
+				displayReason += appCommand.getApplicationReason();
+			}
+			Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
+					.getApplicationSettingByComID(companyId);
+			ApplicationSetting applicationSetting = applicationSettingOp.get();
+			if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)
+				||appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+				if (applicationSetting.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
+						&& Strings.isBlank(typicalReason+displayReason)) {
+					throw new BusinessException("Msg_115");
+				}
+				appReason = typicalReason + displayReason;
+			}
+		}
+		
 		// 申請
 		Application_New updateApp = new Application_New(
 				appCommand.getVersion(), 
@@ -55,7 +110,7 @@ public class UpdateAppWorkChangeCommandHandler extends CommandHandlerWithResult<
 				appCommand.getEnteredPersonSID(), 
 				new AppReason(Strings.EMPTY), 
 				appCommand.getStartDate(),
-				new AppReason(appCommand.getApplicationReason()),
+				new AppReason(appReason),
 				ApplicationType.WORK_CHANGE_APPLICATION, 
 				appCommand.getApplicantSID(),
 				Optional.of(appCommand.getStartDate()),

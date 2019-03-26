@@ -37,6 +37,7 @@ import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
+import nts.uk.ctx.at.shared.dom.worktime.common.DeductionTime;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktype.DailyWork;
@@ -243,19 +244,20 @@ public class OvertimeServiceImpl implements OvertimeService {
 				workTypeAndSiftType.setSiftType(siftTypes.get(0));
 			}
 		}else{
-			WorkType workType = workTypeRepository.findByPK(companyID, personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTypeCode().get().v().toString())
-					.orElseGet(()->{
-						return workTypeRepository.findByCompanyId(companyID).get(0);
-					});
-			workTypeOvertime.setWorkTypeCode(workType.getWorkTypeCode().toString());
-			workTypeOvertime.setWorkTypeName(workType.getName().toString());
+			
+			String wktypeCd = personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTypeCode().get()
+					.v().toString();
+			workTypeRepository.findByPK(companyID, wktypeCd).ifPresent(wktype -> {
+				workTypeOvertime.setWorkTypeName(wktype.getName().toString());
+			});
+			workTypeOvertime.setWorkTypeCode(wktypeCd);
 			workTypeAndSiftType.setWorkType(workTypeOvertime);
-			WorkTimeSetting workTime =  workTimeRepository.findByCode(companyID,personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTimeCode().get().v().toString())
-					.orElseGet(()->{
-						return workTimeRepository.findByCompanyId(companyID).get(0);
-					});
-			siftType.setSiftCode(workTime.getWorktimeCode().toString());
-			siftType.setSiftName(workTime.getWorkTimeDisplayName().getWorkTimeName().toString());
+			String wkTimeCd = personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTimeCode().get()
+					.v().toString();
+			this.workTimeRepository.findByCode(companyID, wkTimeCd).ifPresent(wkTime -> {
+				siftType.setSiftName(wkTime.getWorkTimeDisplayName().getWorkTimeAbName().v());
+			});
+			siftType.setSiftCode(wkTimeCd);
 			workTypeAndSiftType.setSiftType(siftType);
 		}
 		//休憩時間帯を取得する
@@ -277,7 +279,14 @@ public class OvertimeServiceImpl implements OvertimeService {
 		// 平日か休日か判断する
 		WeekdayHolidayClassification weekDay = checkHolidayOrNot(workTypeCode);
 		// 休憩時間帯の取得
-		return this.timeService.getBreakTimeZone(companyID, workTimeCode, weekDay.value, workStyle);
+		BreakTimeZoneSharedOutPut breakTimeZoneSharedOutPut = this.timeService.getBreakTimeZone(companyID, workTimeCode, weekDay.value, workStyle);
+		Collections.sort(breakTimeZoneSharedOutPut.getLstTimezone(), new Comparator<DeductionTime>(){
+			@Override
+            public int compare(DeductionTime o1, DeductionTime o2) {
+                return o1.getStart().v().compareTo(o2.getStart().v());
+            }
+		});
+		return breakTimeZoneSharedOutPut;
 	}
 
 	private WeekdayHolidayClassification checkHolidayOrNot(String workTypeCd) {

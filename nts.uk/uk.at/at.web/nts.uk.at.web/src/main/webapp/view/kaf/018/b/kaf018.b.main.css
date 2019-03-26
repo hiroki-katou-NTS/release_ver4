@@ -3,25 +3,9 @@
 	height: auto !important;
 }
 
-.fixed-table tr{
-	height: 27px;
-}
-
 #tbl-control {
-	width: 1000px;
+	width: 750px;
 	margin-bottom: 10px;
-}
-
-.fixed-table thead th {
-	text-align: center;
-}
-
-.fixed-table tbody td {
-	text-align: center;
-}
-
-.fixed-table tbody td:NTH-CHILD(1) {
-	text-align: left;
 }
 
 .content-question {
@@ -30,4 +14,25 @@
 
 .btn-question {
 	float: right;
+}
+.ui-iggrid-header.ui-widget-header{
+	text-align: center;
+}
+#gridB tbody tr td:NTH-CHILD(1){
+	text-align: left;
+}
+#gridB tbody tr td:NTH-CHILD(2){
+	text-align: center;
+}
+#gridB tbody tr td:NTH-CHILD(3){
+	text-align: center;
+}
+#gridB tbody tr td:NTH-CHILD(4){
+	text-align: center;
+}
+#gridB tbody tr td:NTH-CHILD(5){
+	text-align: center;
+}
+#gridB tbody tr td:NTH-CHILD(6){
+	text-align: center;
 }

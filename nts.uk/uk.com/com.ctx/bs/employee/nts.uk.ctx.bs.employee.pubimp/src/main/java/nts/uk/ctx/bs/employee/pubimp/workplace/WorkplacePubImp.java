@@ -36,6 +36,7 @@ import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryItem;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryItemRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfig;
+import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfigHistory;
 import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfigRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfo;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfoRepository;
@@ -44,6 +45,8 @@ import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfo;
 import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfoRepository;
 import nts.uk.ctx.bs.employee.pub.workplace.AffAtWorkplaceExport;
 import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceExport;
+import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceHistoryExport;
+import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceHistoryItemExport;
 import nts.uk.ctx.bs.employee.pub.workplace.SWkpHistExport;
 import nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub;
 import nts.uk.ctx.bs.employee.pub.workplace.WkpByEmpExport;
@@ -180,11 +183,6 @@ public class WorkplacePubImp implements SyWorkplacePub {
 	@Override
 	public List<AffWorkplaceExport> findListSIdByCidAndWkpIdAndPeriod(String workplaceId, GeneralDate startDate,
 			GeneralDate endDate) {
-		//EA修正履歴2638 liên quan đến bug #100243, lọc ra những employee không bị xóa
-		List<EmployeeDataMngInfo> listEmpDomain = empDataMngRepo.getAllEmpNotDeleteByCid(AppContexts.user().companyId());
-
-		Map<String, String> mapSidPid = listEmpDomain.stream()
-				.collect(Collectors.toMap(x -> x.getEmployeeId(), x -> x.getPersonId()));
 
 		List<String> listSid = affWorkplaceHistoryRepository.getByWplIdAndPeriod(workplaceId, startDate, endDate);
 
@@ -197,7 +195,13 @@ public class WorkplacePubImp implements SyWorkplacePub {
 				.collect(Collectors.toMap(x -> x.getPId(), x -> x));
 
 		List<AffWorkplaceExport> result = new ArrayList<>();
+		
+		//EA修正履歴2638 liên quan đến bug #100243, lọc ra những employee không bị xóa
+		List<EmployeeDataMngInfo> listEmpDomain = empDataMngRepo.findBySidNotDel(listSid);
 
+		Map<String, String> mapSidPid = listEmpDomain.stream()
+				.collect(Collectors.toMap(x -> x.getEmployeeId(), x -> x.getPersonId()));
+		
 		listSid.forEach(sid -> {
 			AffCompanyHist affCompanyHist = mapPidAndAffCompanyHist.get(mapSidPid.get(sid));
 			// check null
@@ -327,6 +331,30 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 		// Return
 		return lstWpkIds.stream().distinct().collect(Collectors.toList());
+	}
+	
+	@Override
+	public Map<GeneralDate, Map<String, List<String>>> findWpkIdsBySids(String companyId, List<String> employeeId, DatePeriod date) {
+		// Query
+		Map<GeneralDate, List<AffWorkplaceHistoryItem>> his = new HashMap<>();
+		date.datesBetween().stream().forEach(c -> {
+			his.put(c, affWorkplaceHistoryItemRepository.getAffWrkplaHistItemByListEmpIdAndDateV2(c, employeeId));
+		});
+
+		List<String> lstWpkIds = his.entrySet().stream().map(c -> c.getValue().stream().map(h -> h.getWorkplaceId()).collect(Collectors.toList()))
+										.flatMap(List::stream).distinct().collect(Collectors.toList());
+		Map<WorkplaceConfigHistory, List<WorkplaceConfigInfo>> wpc = wkpConfigInfoRepo.findAllParentByWkpId(companyId, date, lstWpkIds);
+
+		return his.entrySet().stream().collect(Collectors.toMap(c -> c.getKey(), c -> {
+			List<WorkplaceConfigInfo> wpConfig = wpc.entrySet().stream().filter(wpch -> wpch.getKey().contains(c.getKey())).findFirst().get().getValue();
+			return c.getValue().stream().collect(Collectors.groupingBy(h -> h.getEmployeeId(), Collectors.collectingAndThen(Collectors.toList(), list -> {
+				Optional<WorkplaceConfigInfo> currentWpci = wpConfig.stream().filter(w -> w.getLstWkpHierarchy().get(0).getWorkplaceId().equals(list.get(0).getEmployeeId())).findFirst();
+				if(currentWpci.isPresent()){
+					return currentWpci.get().getLstWkpHierarchy().stream().map(wkph -> wkph.getWorkplaceId()).collect(Collectors.toList());
+				}
+				return new ArrayList<>();
+			})));
+		}));
 	}
 
 	/*
@@ -842,6 +870,34 @@ public class WorkplacePubImp implements SyWorkplacePub {
 		});
 
 		return mapResult;
+	}
+
+	@Override
+	public List< AffWorkplaceHistoryExport> getWorkplaceBySidsAndBaseDate(List<String> sids, GeneralDate baseDate) {
+		List<String> histIds =  new ArrayList<>();
+		List<AffWorkplaceHistoryExport>  result = new ArrayList<>();
+		Map<String, List<AffWorkplaceHistory>> workplaceHistMap = affWorkplaceHistoryRepository.getWorkplaceHistoryBySidsAndDateV2( baseDate, sids).parallelStream().collect(Collectors.groupingBy(c -> c.getEmployeeId()));
+		workplaceHistMap.values().parallelStream().forEach(c -> {
+			histIds.addAll(c.get(0).getHistoryIds());
+		});
+		List<AffWorkplaceHistoryItem> histItemMaps = affWorkplaceHistoryItemRepository.findByHistIds(histIds);
+		workplaceHistMap.entrySet().parallelStream().forEach(c -> {
+			AffWorkplaceHistory value = c.getValue().get(0);
+			Map<String, AffWorkplaceHistoryItemExport> workplaceHistItems = new HashMap<>();
+			value.getHistoryItems().parallelStream().forEach(hist -> {
+				Optional<AffWorkplaceHistoryItem> workplacehistItemOpt = histItemMaps.parallelStream()
+						.filter(item -> item.getHistoryId().equals(hist.identifier())).findFirst();
+				if (workplacehistItemOpt.isPresent()) {
+					AffWorkplaceHistoryItem histItem = workplacehistItemOpt.get();
+					AffWorkplaceHistoryItemExport histItemExport = new AffWorkplaceHistoryItemExport(
+							histItem.getHistoryId(), histItem.getWorkplaceId(), histItem.getNormalWorkplaceId());
+					workplaceHistItems.put(hist.identifier(), histItemExport);
+				}
+			});
+			AffWorkplaceHistoryExport export = new AffWorkplaceHistoryExport(value.getEmployeeId(), value.getHistoryItems(), workplaceHistItems);
+			result.add(export);
+		});
+		return result;
 	}
 		
 }

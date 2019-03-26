@@ -74,6 +74,10 @@
   	color: #000;
 }
 
+.mgrid table tr td.mgrid-hide .ntsCheckBox {
+	display: none;
+}
+
 .mgrid table tr td.mgrid-disable {
 	background-color: #CCC;
 	color: #333;

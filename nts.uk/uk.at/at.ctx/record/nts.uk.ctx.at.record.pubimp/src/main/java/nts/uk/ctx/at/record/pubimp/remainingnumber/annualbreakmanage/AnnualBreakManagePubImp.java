@@ -2,9 +2,14 @@ package nts.uk.ctx.at.record.pubimp.remainingnumber.annualbreakmanage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -27,12 +32,14 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.grantremaini
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.GetClosureStartForEmployee;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.YearHolidayRepository;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.export.GetNextAnnualLeaveGrant;
+import nts.uk.ctx.at.shared.dom.yearholidaygrant.export.GetNextAnnualLeaveGrantProcKdm002;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.export.NextAnnualLeaveGrant;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.context.LoginUserContext;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class AnnualBreakManagePubImp implements AnnualBreakManagePub {
 	@Inject
 	AnnualLeaveTimeRemainHistRepository annualLeaveTimeRemainHistRepository;
@@ -52,6 +59,9 @@ public class AnnualBreakManagePubImp implements AnnualBreakManagePub {
 	@Inject
 	private GetNextAnnualLeaveGrant getNextAnnualLeaveGrant;
 	
+	@Inject
+	private GetNextAnnualLeaveGrantProcKdm002 getNextAnnualLeaveGrantKdm002;
+	
 	/** 年休付与テーブル設定 */
 	@Inject
 	private YearHolidayRepository yearHolidayRepo;
@@ -66,15 +76,27 @@ public class AnnualBreakManagePubImp implements AnnualBreakManagePub {
 	public List<AnnualBreakManageExport> getEmployeeId(List<String> employeeId, GeneralDate startDate,
 			GeneralDate endDate) {
 		List<AnnualBreakManageExport> annualBreakManageExport = new ArrayList<>();
+		Map<String, List<NextAnnualLeaveGrant>> nextAnnualLeaveGrantMap = calculateNextHolidayGrantImpr(employeeId, new DatePeriod(startDate.addDays(-1), endDate.addDays(-1)));
+		List<String> noNextAnnualLeaveGrantEmp = new ArrayList<>();
 		for (String emp : employeeId) {
-			List<NextAnnualLeaveGrant> nextAnnualLeaveGrant = calculateNextHolidayGrant(emp, new DatePeriod(startDate.addDays(-1), endDate.addDays(-1)));
+			List<NextAnnualLeaveGrant> nextAnnualLeaveGrant = nextAnnualLeaveGrantMap.get(emp);
 			// 「年休付与がある社員IDList」に処理中の社員IDを追加
 			if (!nextAnnualLeaveGrant.isEmpty() ) {
 				annualBreakManageExport.add(new AnnualBreakManageExport(emp));
 			}else{
-				List<AnnualLeaveGrantRemainingData> listAnnLeaRemData = grantDataRep.findInDate(emp, startDate, endDate);
-				if(!listAnnLeaRemData.isEmpty()){
-					annualBreakManageExport.add(new AnnualBreakManageExport(emp));
+//				List<AnnualLeaveGrantRemainingData> listAnnLeaRemData = grantDataRep.findInDate(emp, startDate, endDate);
+//				if(!listAnnLeaRemData.isEmpty()){
+//					annualBreakManageExport.add(new AnnualBreakManageExport(emp));
+//				}
+				noNextAnnualLeaveGrantEmp.add(emp);
+			}
+		}
+		if (!noNextAnnualLeaveGrantEmp.isEmpty()) {
+			Map<String, List<AnnualLeaveGrantRemainingData>> annLeaRemDataMap = grantDataRep.findInDate(noNextAnnualLeaveGrantEmp, startDate, endDate);
+			for (String sid : noNextAnnualLeaveGrantEmp) {
+				List<AnnualLeaveGrantRemainingData> listAnnLeaRemData = annLeaRemDataMap.get(sid);
+				if (listAnnLeaRemData != null && !listAnnLeaRemData.isEmpty()) {
+					annualBreakManageExport.add(new AnnualBreakManageExport(sid));
 				}
 			}
 		}
@@ -187,6 +209,20 @@ public class AnnualBreakManagePubImp implements AnnualBreakManagePub {
 							time == null ? new DatePeriod(start_date.get().addDays(1), GeneralDate.fromString("9999/12/31", "yyyy/mm/dd")) : time, 
 							time == null ? true: false);
 		return nextAnnualLeaveGrant;
+	}
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	private Map<String, List<NextAnnualLeaveGrant>> calculateNextHolidayGrantImpr(List<String> employeeIds,
+			DatePeriod time) {
+		String companyId = AppContexts.user().companyId();
+		Map<String, GeneralDate> employeeRecordImportMap = pmployeeRecordAdapter.getPersonInfor(employeeIds).stream()
+				.collect(Collectors.toMap(EmployeeRecordImport::getEmployeeId, EmployeeRecordImport::getEntryDate));
+		Map<String, AnnualLeaveEmpBasicInfo> annualLeaveEmpBasicInfoMap = annLeaEmpBasicInfoRepository
+				.getList(employeeIds).stream()
+				.collect(Collectors.toMap(AnnualLeaveEmpBasicInfo::getEmployeeId, Function.identity()));
+		Map<String, List<NextAnnualLeaveGrant>> nextAnnualLeaveGrantMap = getNextAnnualLeaveGrantKdm002.algorithm(
+				companyId, employeeIds, annualLeaveEmpBasicInfoMap, employeeRecordImportMap, time, false);
+		return nextAnnualLeaveGrantMap;
 	}
 
 	@Override

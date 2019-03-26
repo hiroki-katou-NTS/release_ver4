@@ -68,7 +68,7 @@ public class AfterOvertimeReflectServiceImpl implements AfterOvertimeReflectServ
 			
 			//日別実績の修正からの計算
 			//○日別実績を置き換える Replace daily performance		
-			commonService.calculateOfAppReflect(null, overtimePara.getEmployeeId(), overtimePara.getDateInfo());
+			commonService.calculateOfAppReflect(null, overtimePara.getEmployeeId(), overtimePara.getDateInfo(), false);
 			return true;
 			
 		} catch (Exception e) {

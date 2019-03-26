@@ -1,7 +1,10 @@
 package nts.uk.ctx.at.shared.infra.repository.yearholidaygrant;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
@@ -115,6 +118,18 @@ public class JpaLengthServiceRepository extends JpaRepository implements LengthS
 				.executeUpdate();			
 		});
 		this.getEntityManager().flush();
+	}
+
+	@Override
+	public Map<String, List<LengthServiceTbl>> findByCode(String companyId, List<String> yearHolidayCode) {
+		if (yearHolidayCode.isEmpty())
+			return Collections.emptyMap();
+		String query = "SELECT c FROM KshstLengthServiceTbl c "
+				+ "WHERE c.kshstLengthServiceTblPK.companyId = :companyId "
+				+ "AND c.kshstLengthServiceTblPK.yearHolidayCode IN :yearHolidayCode ORDER BY c.kshstLengthServiceTblPK.grantNum ";
+		return this.queryProxy().query(query, KshstLengthServiceTbl.class).setParameter("companyId", companyId)
+				.setParameter("yearHolidayCode", yearHolidayCode).getList(c -> convertToDomain(c)).stream()
+				.collect(Collectors.groupingBy(i -> i.getYearHolidayCode().v()));
 	}
 
 }

@@ -56,10 +56,20 @@ public class AttendanceDaysOfMonthly {
 			this.days = this.days.addDays(workTypeDaysCountTable.getAttendanceDays().v());
 		}
 		else {
+			// その他労働制の時
 			
-			// その他労働制の時、出勤している日なら、出勤日数に加算する
-			if (isAttendanceDay){
+			// 勤務種類が連続勤務かどうかを判断する
+			if (workTypeDaysCountTable.isContinuousWorkDay()) {
+				
+				// 1日連続勤務の時、無条件で、出勤日数に加算する
 				this.days = this.days.addDays(workTypeDaysCountTable.getAttendanceDays().v());
+			}
+			else {
+				
+				// その他勤務の時、出勤している日なら、出勤日数に加算する
+				if (isAttendanceDay){
+					this.days = this.days.addDays(workTypeDaysCountTable.getAttendanceDays().v());
+				}
 			}
 		}
 	}

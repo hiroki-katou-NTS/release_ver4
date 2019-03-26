@@ -16,6 +16,8 @@ import javax.transaction.Transactional.TxType;
 
 import org.apache.commons.lang3.StringUtils;
 
+import nts.arc.error.BusinessException;
+import nts.arc.error.ErrorMessage;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.gul.collection.CollectionUtil;
@@ -149,119 +151,62 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 
 	@Override
 	@Transactional(value = TxType.REQUIRES_NEW)
-	public void deleteDataExitTableByVkey(Map<String, String> filedWhere, String tableName, String namePhysicalCid,
-			String cidCurrent) {
+	public void deleteDataExitTableByVkey(List<Map<String, String>> listFiledWhere2, String tableName,
+			String namePhysicalCid, String cidCurrent) {
 
 		EntityManager em = this.getEntityManager();
 
 		if (tableName != null) {
-			StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE FROM ");
-			DELETE_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
-			DELETE_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
-
-			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
+			StringBuilder DELETE_DATA_TABLE_SQL = new StringBuilder("");
+			for (int i = 0; i < listFiledWhere2.size(); i++) {
+				StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE FROM ");
+				DELETE_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
+				DELETE_BY_TABLE_SQL.append(makeWhereClause(listFiledWhere2.get(i), namePhysicalCid, cidCurrent));
+				
+				DELETE_DATA_TABLE_SQL.append(DELETE_BY_TABLE_SQL.toString() +"; ");
+			}
+			Query query = em.createNativeQuery(DELETE_DATA_TABLE_SQL.toString());
 			query.executeUpdate();
 		}
 	}
 	
 	@Override
-	public void deleteTransactionDataExitTableByVkey(Map<String, String> filedWhere, String tableName, String namePhysicalCid,
+	public void deleteTransactionDataExitTableByVkey(List<Map<String, String>> listFiledWhere2, String tableName, String namePhysicalCid,
 			String cidCurrent) {
 
 		EntityManager em = this.getEntityManager();
 
 		if (tableName != null) {
-			StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE FROM ");
-			DELETE_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
-			DELETE_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
+			StringBuilder DELETE_DATA_TABLE_SQL = new StringBuilder("");
+			for (int i = 0; i < listFiledWhere2.size(); i++) {
+				StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE FROM ");
+				DELETE_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
+				DELETE_BY_TABLE_SQL.append(makeWhereClause(listFiledWhere2.get(i), namePhysicalCid, cidCurrent));
 
-			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
+				DELETE_DATA_TABLE_SQL.append(DELETE_BY_TABLE_SQL.toString() +"; ");
+			}
+			Query query = em.createNativeQuery(DELETE_DATA_TABLE_SQL.toString());
 			query.executeUpdate();
+			
 		}
 	}
-
+	
 	@Override
 	@Transactional(value = TxType.REQUIRES_NEW)
-	public void insertDataTable(HashMap<String, String> dataInsertDb, String tableName, List<String> columnNotNull) {
-		StringBuilder INSERT_BY_TABLE = new StringBuilder(" INSERT INTO ");
-		if (tableName != null) {
-			INSERT_BY_TABLE.append(tableName);
-		}
-		List<String> cloumns = new ArrayList<>();
-		List<String> values = new ArrayList<>();
-		List<String> valuesNotNull = new ArrayList<>();
+	public void insertDataTable( StringBuilder insertToTable) {
+		
 		EntityManager em = this.getEntityManager();
-		int i = 0;
-		for (Map.Entry<String, String> entry : dataInsertDb.entrySet()) {
-			cloumns.add(entry.getKey());
-			boolean anyNonEmpty = columnNotNull.stream().anyMatch(x -> x.equals(entry.getKey()));
-			if (entry.getValue().isEmpty()) {
-				if(anyNonEmpty){
-					values.add("''");
-				} else {
-					values.add("null");
-				}
-			} else {
-				i++;
-				//values.add("'" + entry.getValue() + "'");
-				valuesNotNull.add(entry.getValue());
-				values.add("?"+i);
-			}
-
-		}
-		INSERT_BY_TABLE.append(" " + cloumns);
-		INSERT_BY_TABLE.append(" VALUES ");
-		INSERT_BY_TABLE.append(values);
-		String querySQL = INSERT_BY_TABLE.toString();
-		Query query = em.createNativeQuery(querySQL.replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
-		for (int j = 0; j < valuesNotNull.size(); j++) {
-			query.setParameter(j+1, valuesNotNull.get(j));
-		}
+		Query query = em.createNativeQuery(insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
 		query.executeUpdate();
-
 	}
 	
 	
 	@Override
-	public void insertTransactionDataTable(HashMap<String, String> dataInsertDb, String tableName, List<String> columnNotNull) {
-		StringBuilder INSERT_BY_TABLE = new StringBuilder(" INSERT INTO ");
-		if (tableName != null) {
-			INSERT_BY_TABLE.append(tableName);
-		}
+	public void insertTransactionDataTable(StringBuilder insertToTable) {
 		
-		List<String> cloumns = new ArrayList<>();
-		List<String> values = new ArrayList<>();
-		List<String> valuesNotNull = new ArrayList<>();
 		EntityManager em = this.getEntityManager();
-		int i =0;
-		for (Map.Entry<String, String> entry : dataInsertDb.entrySet()) {
-			
-			cloumns.add(entry.getKey());
-			boolean anyNonEmpty = columnNotNull.stream().anyMatch(x -> x.equals(entry.getKey()));
-			if (entry.getValue().isEmpty()) {
-				if(anyNonEmpty) {
-					values.add("''");
-				} else {
-					values.add("null");
-				}
-			} else {
-				i++;
-				//values.add("'" + entry.getValue() + "'");
-				valuesNotNull.add(entry.getValue());
-				values.add("?"+i);
-			}
-
-		}
-		INSERT_BY_TABLE.append(" " + cloumns);
-		INSERT_BY_TABLE.append(" VALUES ");
-		INSERT_BY_TABLE.append(values);
-		String querySQL = INSERT_BY_TABLE.toString();
-		Query query = em.createNativeQuery(querySQL.replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
-		for (int j = 0; j < valuesNotNull.size(); j++) {
-			query.setParameter(j+1, valuesNotNull.get(j));
-		}
+		Query query = em.createNativeQuery(insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
 		query.executeUpdate();
-
 	}
 	
 

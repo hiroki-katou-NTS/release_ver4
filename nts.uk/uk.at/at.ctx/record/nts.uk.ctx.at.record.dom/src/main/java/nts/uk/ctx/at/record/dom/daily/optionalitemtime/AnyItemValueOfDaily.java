@@ -46,8 +46,7 @@ public class AnyItemValueOfDaily {
     											   		  List<Formula> formulaList,
     											   		  List<EmpCondition> empConditionList,
     											   		  Optional<DailyRecordToAttendanceItemConverter> dailyRecordDto,
-    											   		  Optional<BsEmploymentHistoryImport> bsEmploymentHistOpt,
-    											   		  Optional<AnyItemValueOfDaily> anyItemValueOfDaily) {
+    											   		  Optional<BsEmploymentHistoryImport> bsEmploymentHistOpt) {
     	
     	Optional<AnyItemValueOfDaily> dailyAnyItem = dailyRecordDto.get().anyItems();
         //任意項目分ループ
@@ -90,6 +89,7 @@ public class AnyItemValueOfDaily {
             														 calcResult.getMoney().map(v -> new AnyItemAmount(v.intValue())),
             														 calcResult.getTime().map(v -> new AnyItemTime(v.intValue()))));
             		}
+            		
             		dailyAnyItem.get().items = forcsItem;
             		dailyRecordDto = Optional.of(dailyRecordDto.get().withAnyItems(dailyAnyItem.get()));
             	}

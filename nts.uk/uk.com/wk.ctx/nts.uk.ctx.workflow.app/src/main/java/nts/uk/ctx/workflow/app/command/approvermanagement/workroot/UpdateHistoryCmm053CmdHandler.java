@@ -32,11 +32,13 @@ public class UpdateHistoryCmm053CmdHandler extends CommandHandler<HistoryCmm053C
 		GeneralDate startDate        = command.getStartDate();
 		String departmentApproverId  = command.getDepartmentApproverId();
 		String dailyApproverId       = command.getDailyApproverId();
+        boolean dailyDisplay = Strings.isNotBlank(dailyApproverId) && !dailyApproverId.equals(departmentApproverId);
 		if (!command.isHasAuthority()) {
 			dailyApproverId = departmentApproverId;
 		}
 		updateHistoryCmm053Service.updateHistoryByManagerSetting(companyId, historyId, employeeId, startDate, 
 				departmentApproverId, 
-				Strings.isBlank(dailyApproverId) ? departmentApproverId : dailyApproverId);
+				Strings.isBlank(dailyApproverId) ? departmentApproverId : dailyApproverId,
+						dailyDisplay);
 	}
 }

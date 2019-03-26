@@ -1,18 +1,30 @@
 package nts.uk.screen.at.app.ktgwidget;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
+import nts.uk.ctx.at.shared.dom.adapter.dailyperformance.AppEmpStatusImport;
 import nts.uk.ctx.at.shared.dom.adapter.dailyperformance.DailyPerformanceAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.dailyperformance.RouteSituationImport;
 import nts.uk.ctx.at.shared.dom.adapter.employment.BsEmploymentHistoryImport;
 import nts.uk.ctx.at.shared.dom.adapter.employment.ShareEmploymentAdapter;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 import nts.uk.ctx.at.shared.pub.workrule.closure.PresentClosingPeriodExport;
 import nts.uk.ctx.at.shared.pub.workrule.closure.ShClosurePub;
+import nts.uk.ctx.workflow.dom.service.resultrecord.AppRootInstanceService;
+import nts.uk.ctx.workflow.dom.service.resultrecord.ApprovalActionByEmp;
+import nts.uk.ctx.workflow.pub.resultrecord.IntermediateDataPub;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -24,6 +36,8 @@ public class KTG001QueryProcessor {
 	@Inject
 	private ShClosurePub shClosurePub;
 
+	@Inject
+	private IdentificationRepository identificationRepository;
 	/**
 	 * 日別実績確認すべきデータ有無表示
 	 * 
@@ -35,6 +49,9 @@ public class KTG001QueryProcessor {
 	@Inject
 	private ShareEmploymentAdapter shareEmpAdapter;
 
+	@Inject
+	private AppRootInstanceService appRootInstanceService;
+	
 	public boolean confirmDailyActual() {
 		// アルゴリズム「雇用に基づく締めを取得する」をする
 		String cid = AppContexts.user().companyId();
@@ -70,7 +87,35 @@ public class KTG001QueryProcessor {
 
 		// RootType(就業日別確認) = 1
 		DatePeriod period = new DatePeriod(closureStartDate, closureEndDate);
-		boolean checkDateApproved = dailyPerformanceAdapter.isDataExist(employeeID, period, 1);
+//		boolean checkDateApproved = dailyPerformanceAdapter.isDataExist(employeeID, period, 1);
+		boolean checkDateApproved = this.obtAppliDataPreAbs(employeeID, period);
 		return checkDateApproved;
+	}
+	
+	/**
+	 * 承認すべき申請データ有無取得
+	 * @author yennth
+	 */
+	public boolean obtAppliDataPreAbs(String employeeID, DatePeriod period){
+		List<RouteSituationImport> routeLst = new ArrayList<>();
+		// [No.133](中間データ版)承認状況を取得する
+		AppEmpStatusImport appEmpStatusImport = dailyPerformanceAdapter.appEmpStatusExport(employeeID, period, 1);
+		// 取得したデータから、承認すべき社員と年月日リストを抽出する
+		routeLst.addAll(appEmpStatusImport.getRouteSituationLst());
+		Map<String, List<RouteSituationImport>> tg = routeLst.parallelStream().filter(
+				c -> (c.getApprovalStatus().isPresent() && c.getApprovalStatus().get().getApprovalAction() == 1))
+				.collect(Collectors.groupingBy(c -> c.getEmployeeID()));
+		// 日の本人確認を取得する
+		List<Identification> listIdent = identificationRepository.findByListEmployeeID(new ArrayList<>(tg.keySet()), period.start(), period.end());
+		for(Identification obj : listIdent){
+			if(tg.containsKey(obj.getEmployeeId())){
+				List<RouteSituationImport> listValue = tg.get(obj.getEmployeeId());
+				Optional<RouteSituationImport> opt = listValue.parallelStream().filter(item -> item.getDate().equals(obj.getProcessingYmd())).findFirst();
+				if(opt.isPresent()){
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

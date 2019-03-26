@@ -1519,7 +1519,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	@Override
 	public Map<String, List<EnumConstant>> findErAlApplicationByCidAndListErrCd(String companyId,
-			List<String> errorCode) {
+			List<String> errorCode, Map<Integer, String> nameAppType) {
 		List<KrcstErAlApplication> entity = this.queryProxy().query(SEL_FIND_ER_AL_APP, KrcstErAlApplication.class)
 				.setParameter("cid", companyId).setParameter("errorCd", errorCode).getList();
 		Map<String, List<EnumConstant>> result = new HashMap<>();
@@ -1530,8 +1530,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 									.groupingBy(x -> x.krcstErAlApplicationPK.errorCd,
 											Collectors.mapping(
 													x -> new EnumConstant(x.krcstErAlApplicationPK.appTypeCd,
-															EnumAdaptor.valueOf(x.krcstErAlApplicationPK.appTypeCd,
-																	ApplicationType.class).nameId,
+															nameAppType.get(x.krcstErAlApplicationPK.appTypeCd) == null ? "" : nameAppType.get(x.krcstErAlApplicationPK.appTypeCd),
 															""),
 													Collectors.toList())));
 		}
@@ -1808,8 +1807,8 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 					builderString.append("SELECT c.CLOSURE_ID , c.USE_ATR, c.CLOSURE_MONTH, emp.EMPLOYMENT_CD ");
 					builderString.append("FROM KCLMT_CLOSURE c JOIN ");
 					builderString.append(
-							"KCLMT_CLOSURE_EMPLOYMENT emp ON c.CID = emp.CID AND c.CLOSURE_ID = emp.CLOSURE_ID");
-					builderString.append("WHERE emp.CID = ? AND c.USE_ATR = 1");
+							"KCLMT_CLOSURE_EMPLOYMENT emp ON c.CID = emp.CID AND c.CLOSURE_ID = emp.CLOSURE_ID ");
+					builderString.append("WHERE emp.CID = ? AND c.USE_ATR = 1 ");
 					builderString.append("AND emp.EMPLOYMENT_CD IN ( ").append(joinParam(subList)).append(")");
 
 					try (PreparedStatement statement = this.connection().prepareStatement(builderString.toString())) {

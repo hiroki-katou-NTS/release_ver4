@@ -69,6 +69,7 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.context.LoginUserContext;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.infra.i18n.resource.I18NResourcesForUK;
 
 /**
  * The Class ScheduleCreatorExecutionCommandHandler.
@@ -151,7 +152,9 @@ public class ScheduleCreatorExecutionCommandHandler extends AsyncCommandHandler<
 
 	@Inject
 	private ClosureService closureService;
-
+	
+	@Inject
+	private I18NResourcesForUK internationalization;
 
 	/** The Constant DEFAULT_CODE. */
 	public static final String DEFAULT_CODE = "000";
@@ -327,6 +330,12 @@ public class ScheduleCreatorExecutionCommandHandler extends AsyncCommandHandler<
 							scheduleCreator);
 				});
 			} else {
+				String errorContent = this.internationalization.localize("Msg_1509").get();
+				// ドメインモデル「スケジュール作成エラーログ」を登録する
+				ScheduleErrorLog scheduleErrorLog = new ScheduleErrorLog(errorContent, command.getExecutionId(),
+						stateAndValueDatePeriod.value.end(), scheduleCreator.getEmployeeId());
+				this.scheduleErrorLogRepository.add(scheduleErrorLog);
+				
 				scheduleCreator.updateToCreated();
 				this.scheduleCreatorRepository.update(scheduleCreator);
 			}

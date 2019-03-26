@@ -5,6 +5,7 @@ module nts.uk.at.view.kal001.d.service {
             
             
             extractAlarm: "at/function/alarm/kal/001/extract/alarm",
+            extractResult: "at/function/alarm/kal/001/extract/result/",
             isExtracting: "at/function/alarm/kal/001/isextracting",
             extractStarting: "at/function/alarm/kal/001/extractstarting",
             extractFinished: "at/function/alarm/kal/001/extractfinished"
@@ -15,42 +16,80 @@ module nts.uk.at.view.kal001.d.service {
             let command = new ExtractAlarmCommand(listEmployee, alarmCode, 
                                                    _.map(listPeriodByCategory, (item) =>{ return new PeriodByCategoryCommand(item);}),statusId);
             
-            let def = $.Deferred();
+            let def = $.Deferred(), toStopForWriteData = ko.observable(false), secondForLoop = listEmployee.length > 50 ? 5000 : 1000;
             
             nts.uk.request.ajax("at", paths.extractAlarm, command).done(function(task){
                 taskId(task.id);
                 nts.uk.deferred.repeat(conf => conf.task(() => {
-                    return nts.uk.request.asyncTask.getInfo(task.id).done(function(res: any) {
+                    return nts.uk.request.asyncTask.getInfo(task.id, !toStopForWriteData()).done(function(res: any) {
                         let taskData = res.taskDatas;
                         _.forEach(taskData, itemCount => {
                             if (itemCount.key === "empCount") {
                                 numberEmpSuccess(itemCount.valueAsNumber);
                             }
                         });
+                        let dataWriting = _.find(res.taskDatas, function(t){ return t.key === "dataWriting"; });
+                        if(dataWriting !== null && dataWriting !== undefined && dataWriting.valueAsBoolean === true) {
+                            toStopForWriteData(true);
+                        }
                         if(res.succeeded){
                             let data = {};
-                            let sorted = _.sortBy(res.taskDatas, function(t){ return parseInt(t.key.replace("dataNo", "")) });
-                            let dataX = []; 
-                            _.forEach(sorted, item => {
-                                
-                                if(item.key === "extracting" ){
-                                    data["extracting"] = item.valueAsBoolean;
-                                } else if(item.key === "nullData"){
-                                    data["nullData"] = item.valueAsBoolean;
-                                }else if(item.key === "empCount"){
-                                }else {
-                                    dataX.push(JSON.parse(item.valueAsString));     
-                                }
-                            });
-                            data["extractedAlarmData"] = dataX;
-                            def.resolve(data);
+                            let nullData = _.find(res.taskDatas, (t) => t.key.indexOf("nullData") >= 0);
+                            data["nullData"] = nullData.valueAsBoolean;
+                            let eralRecord = _.find(res.taskDatas, (t) => t.key.indexOf("eralRecord") >= 0);
+                            data["eralRecord"] = eralRecord.valueAsNumber;
+                            if(nullData.valueAsBoolean === false){
+
+                                nts.uk.request.ajax("at", paths.extractResult + command.statusProcessId).done(function(result){
+                                    let empMap = _.groupBy(_.map(result.empInfos, (empData) => {
+                                        return {
+                                            employeeCode: empData[0],
+                                            employeeID: empData[1],
+                                            employeeName: empData[2],
+                                            workplaceName: empData[3],
+                                            start: moment(empData[4]),
+                                            end: moment(empData[5])
+                                        }
+                                    }), "employeeID");
+                                    
+                                    let dataX = []; 
+                                    _.forEach(result.empEralDatas, item => {
+                                        //let eralData = JSON.parse(item.valueAsString);
+                                        let empInfo = _.find(empMap[item[0]], (e) => {
+                                            if(item[2].indexOf("～") > 0) {
+                                                let parts = item[2].split("～");
+                                                let start = moment(parts[0].trim()), end = moment(parts[1].trim());
+                                                return e.start.isSameOrBefore(start) && e.end.isSameOrAfter(end);
+                                            } else {
+                                                let start = moment(item[2]);
+                                                return e.start.isSameOrBefore(start) && e.end.isSameOrAfter(start);
+                                            }    
+                                        });
+                                        if(!_.isNil(empInfo)) {
+                                            dataX.push(_.merge({
+                                                guid: item[1],
+                                                alarmValueDate: item[2],
+                                                categoryName: item[3],
+                                                alarmItem: item[4],
+                                                alarmValueMessage: item[5],
+                                                comment: item[6]
+                                            }, empInfo));    
+                                        }
+                                        
+                                    });
+                                    data["extractedAlarmData"] = dataX;
+                                    def.resolve(data); 
+                                });    
+                            } else {
+                                def.resolve(data); 
+                            }
                         } else if(res.failed){
                             def.reject(res.error);
                         }
                     });
                 }).while(infor => {
                     return (infor.pending || infor.running) && infor.status != "REQUESTED_CANCEL";
-                }).pause(1000));
+                }).pause(secondForLoop));
             });
             
             return def.promise();

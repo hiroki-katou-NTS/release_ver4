@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -63,7 +64,14 @@ public class DefaultClosureServiceImpl implements ClosureService {
 	// 当月の期間を算出する 2018.4.4 update shuichu_ishida
 	@Override
 	public DatePeriod getClosurePeriod(int closureId, YearMonth processYm) {
-
+		// ドメインモデル「締め」を取得する
+		val closureOpt = this.closureRepository.findById(AppContexts.user().companyId(), closureId);
+		
+		return getClosurePeriod(closureId, processYm, closureOpt);
+	}
+	
+	@Override
+	public DatePeriod getClosurePeriod(int closureId, YearMonth processYm, Optional<Closure> closureOpt) {
 		// 【処理概要】
 		// 渡されてきた年月に応じた期間を返す。
 		// ただし、締め日変更がある年月の場合、
@@ -71,11 +79,7 @@ public class DefaultClosureServiceImpl implements ClosureService {
 		// 締め．当月．処理当月 と同じ年月の時は、締め日変更区分の設定値に応じた期間を返す。
 
 		// ログインしている会社IDを取得する
-		LoginUserContext loginUserContext = AppContexts.user();
-		String companyId = loginUserContext.companyId();
-
 		// ドメインモデル「締め」を取得する
-		val closureOpt = this.closureRepository.findById(companyId, closureId);
 		if (!closureOpt.isPresent())
 			return null;
 		val closure = closureOpt.get();
@@ -454,5 +458,40 @@ public class DefaultClosureServiceImpl implements ClosureService {
 		List<Closure> closureList = closureRepository.findByListId(companyId, closureIds);
 		
 		return closureList;
+	}
+	
+	@Override
+	public Map<String, Closure> getClosureByEmployees(List<String> employeeIds, GeneralDate baseDate) {
+		String companyId = AppContexts.user().companyId();
+		//Imported「（就業）所属雇用履歴」を取得する
+		List<SharedSidPeriodDateEmploymentImport>  employmentHistList = this.shareEmploymentAdapter.getEmpHistBySidAndPeriod(employeeIds, new DatePeriod(baseDate, baseDate));
+		if(CollectionUtil.isEmpty(employmentHistList)) {
+			return Collections.emptyMap();
+		}
+		
+		List<String> empCds = employmentHistList.stream()
+				.flatMap(listContainer -> listContainer.getAffPeriodEmpCodeExports().stream()
+						.map(AffPeriodEmpCodeImport::getEmploymentCode))
+				.distinct()
+				.collect(Collectors.toList());
+				
+		//対応するドメインモデル「雇用に紐づく就業締め」を取得する (Lấy về domain model "Thuê" tương ứng)
+		Map<String, Integer> closureEmploymentList= closureEmploymentRepo.findListEmployment(companyId, empCds)
+				.stream().collect(Collectors.toMap(c -> c.getEmploymentCD(), c -> c.getClosureId()));
+		
+		if(closureEmploymentList.isEmpty()) {
+			return Collections.emptyMap();
+		}
+		
+		//対応するドメインモデル「締め」を取得する (Lấy về domain model "Hạn định" tương ứng)
+		Map<Integer, Closure> closureList = closureRepository.findByListId(companyId, new ArrayList<>(closureEmploymentList.values()))
+				.stream().collect(Collectors.toMap(c -> c.getClosureId().value, c -> c));
+		
+		return employmentHistList.stream().collect(Collectors.toMap(c -> c.getEmployeeId(), c -> {
+			if(!c.getAffPeriodEmpCodeExports().isEmpty()){
+				return closureList.get(closureEmploymentList.get(c.getAffPeriodEmpCodeExports().get(0).getEmploymentCode()));
+			}
+			return null;
+		}));
 	}
 }

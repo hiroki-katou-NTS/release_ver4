@@ -198,6 +198,14 @@ public enum WorkTypeClassification {
 	public boolean isHolidayWork() {
 		return HolidayWork.equals(this);
 	}
+	
+	/**
+	 * 連続勤務であるか判定する
+	 * @return　連続勤務である
+	 */
+	public boolean isContinuousWork() {
+		return ContinuousWork.equals(this);
+	}
 	/**
 	 * 休暇系であるか判定する
 	 * @return　休暇系である

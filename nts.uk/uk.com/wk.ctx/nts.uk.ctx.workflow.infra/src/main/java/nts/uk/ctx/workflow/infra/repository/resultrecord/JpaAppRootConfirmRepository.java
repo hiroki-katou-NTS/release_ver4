@@ -354,15 +354,16 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	}
 
 	@Override
+	@SneakyThrows
 	public Optional<AppRootConfirm> findByEmpDate(String companyID, String employeeID, GeneralDate date,
 			RecordRootType rootType) {
-		Connection con = this.getEntityManager().unwrap(Connection.class);
+
 		String query = FIND_BY_EMP_DATE;
 		query = query.replaceAll("companyID", companyID);
 		query = query.replaceAll("rootType", String.valueOf(rootType.value));
 		query = query.replaceAll("employeeID", employeeID);
 		query = query.replaceAll("recordDate", date.toString("yyyy-MM-dd"));
-		try (PreparedStatement pstatement = con.prepareStatement(query)) {
+		try (PreparedStatement pstatement = this.connection().prepareStatement(query)) {
 			ResultSet rs = pstatement.executeQuery();
 			List<AppRootConfirm> listResult = toDomain(createFullJoinAppRootConfirm(rs));
 			if(CollectionUtil.isEmpty(listResult)){
@@ -370,15 +371,14 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			} else {
 				return Optional.of(listResult.get(0));
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return Optional.empty();
 		}
+		
 	}
 
 	@Override
 	public List<AppRootConfirm> findByEmpDate(String companyID, List<String> employeeIDs, DatePeriod date,
 			RecordRootType rootType) {
+		
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT appRoot.ROOT_ID, appRoot.CID, appRoot.EMPLOYEE_ID, appRoot.RECORD_DATE, appRoot.ROOT_TYPE, ");
 		sql.append(" appRoot.YEARMONTH, appRoot.CLOSURE_ID, appRoot.CLOSURE_DAY, appRoot.LAST_DAY_FLG, ");

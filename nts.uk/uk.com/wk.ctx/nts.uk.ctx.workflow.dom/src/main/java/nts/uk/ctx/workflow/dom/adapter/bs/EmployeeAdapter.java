@@ -1,9 +1,11 @@
 package nts.uk.ctx.workflow.dom.adapter.bs;
 
 import java.util.List;
+import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.ConcurrentEmployeeImport;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmpInfoRQ18;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmployeeImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.PersonImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmploymentImport;
@@ -83,4 +85,6 @@ public interface EmployeeAdapter {
 	boolean isEmployeeDelete(String sid);
 	
 	StatusOfEmploymentImport getStatusOfEmployment(String employeeID, GeneralDate referenceDate);
+	//adapter RQ18
+	Optional<EmpInfoRQ18> getEmpInfoByScd(String companyId, String employeeCode);
 }
