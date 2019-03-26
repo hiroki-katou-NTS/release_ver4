@@ -569,7 +569,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		}
 		this.procExecLogRepo.update(procExecLog);
 		//AsyncTaskInfo handle = null;
-		boolean isException = true;
+		boolean isException = false;
 		// 就業担当者の社員ID（List）を取得する : RQ526
 		List<String> listManagementId = employeeManageAdapter.getListEmpID(companyId, GeneralDate.today());
 		try {
@@ -802,7 +802,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				}
 			}
 		} catch (Exception e) {
-			isException = false;
+			isException = true;
 			// ドメインモデル「更新処理自動実行ログ」を更新する
 			this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.ABNORMAL_END);
 			ScheduleErrorLogGeterCommand scheduleErrorLogGeterCommand = new ScheduleErrorLogGeterCommand();
