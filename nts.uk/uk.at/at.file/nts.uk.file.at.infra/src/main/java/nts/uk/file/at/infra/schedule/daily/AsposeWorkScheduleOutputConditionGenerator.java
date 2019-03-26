@@ -1038,7 +1038,10 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		String employeeId = employeeDto.getEmployeeId();
 		
 		List<ErrorAlarmWorkRecordCode> lstErAlCode = condition.getErrorAlarmCode().get();
-		
+
+        List<String> lstEmployeeId = query.getEmployeeId();
+        List<EmployeeDailyPerError> errorListAllEmployee = errorAlarmRepository.finds(lstEmployeeId, new DatePeriod(query.getStartDate(), endDate));
+
 		EmployeeReportData employeeData = new EmployeeReportData();
 		
 		// Employee code and name
@@ -1078,7 +1081,11 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			employeeData.lstDetailedPerformance.add(detailedDate);
 			
 			// ドメインモデル「社員の日別実績エラー一覧」を取得する
-			List<EmployeeDailyPerError> errorList = errorAlarmRepository.find(employeeId, workingDate);
+			//List<EmployeeDailyPerError> errorList = errorAlarmRepository.find(employeeId, workingDate);
+
+            List<EmployeeDailyPerError> errorList = errorListAllEmployee.stream()
+                    .filter(error -> StringUtils.equalsAnyIgnoreCase(error.getEmployeeID(), employeeId) && error.getDate().compareTo(workingDate) == 0).collect(Collectors.toList());
+
 			// Manually set error list into remark data container
 			queryData.getRemarkDataContainter().setErrorList(errorList);
 			

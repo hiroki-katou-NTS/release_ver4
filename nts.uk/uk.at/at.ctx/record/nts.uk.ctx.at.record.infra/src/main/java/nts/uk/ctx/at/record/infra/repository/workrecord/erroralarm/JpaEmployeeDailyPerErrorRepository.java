@@ -248,8 +248,8 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 
 		//fix exceeding max condition of IN statement
 		List<EmployeeDailyPerError> resultReturn = new ArrayList<>();
-		StringBuilder stringBuilder = new StringBuilder();
 		CollectionUtil.split(employeeID, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+            StringBuilder stringBuilder = new StringBuilder();
 			int size = subList.size();
 			for (int i = 0; i < size; i++) {
 				stringBuilder.append("?");
