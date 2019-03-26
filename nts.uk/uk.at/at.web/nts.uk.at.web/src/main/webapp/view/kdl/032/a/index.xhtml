@@ -7,7 +7,7 @@
 	<body>
 		<ui:composition template="../../../../master/dialog.xhtml">
 			<ui:define name="htmlHead">
-				<script>var dialogSize = { width: 580, height: 600 };</script>
+				<script>var dialogSize = { width: 580, height: 450 };</script>
 				<com:ValidatorScript>
 					nts.uk.shr.com.primitive.PersonId
 				</com:ValidatorScript>
@@ -23,12 +23,12 @@
 				<label style ="margin-left: 10px;"> #{i18n.getText('KDL032_2')}</label>
 				<div style = "margin-top: 20px;margin-left: 30px;">
 				<table id="single-list" tabindex="1"
-					data-bind="ntsGridList: {								
-					height: 420,
+					data-bind="ntsGridList: {		
 					dataSource: deviationTimeList,
 					primaryKey: 'divergenceReasonCode',
 					columns: columns,
-					value: selectCode
+					value: selectCode,
+					rows: 10
 					}"></table>	</div>
 			</div>
 			<div id= "functions-area-bottom">
