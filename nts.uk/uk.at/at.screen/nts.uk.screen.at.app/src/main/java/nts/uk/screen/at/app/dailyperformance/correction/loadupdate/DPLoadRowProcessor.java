@@ -18,8 +18,14 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.val;
 import nts.arc.time.GeneralDate;
+import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
 import nts.uk.ctx.at.record.dom.daily.itemvalue.DailyItemValue;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualDay;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualDay;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.workinformation.enums.CalculationState;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
@@ -41,11 +47,13 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.DPControlDisplayItem
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPDataDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPErrorDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPErrorSettingDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.DPHideControlCell;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyPerformanceCorrectionDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyRecEditSetDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.IdentityProcessUseSetDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.OperationOfDailyPerformanceDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ScreenMode;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.WorkInfoOfDailyPerformanceDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.checkapproval.ApproveRootStatusForEmpDto;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.CheckIndentityMonth;
@@ -93,6 +101,15 @@ public class DPLoadRowProcessor {
     @Inject
 	private ClosureService closureService;
     
+    @Inject
+	private ConfirmStatusActualDay confirmApprovalStatusActualDay;
+	
+	@Inject
+	private ApprovalStatusActualDay approvalStatusActualDay;
+	
+	@Inject
+	private IFindDataDCRecord iFindDataDCRecord;
+    
 	public DailyPerformanceCorrectionDto reloadGrid(DPPramLoadRow param){
 		DailyPerformanceCorrectionDto result = new DailyPerformanceCorrectionDto();
 		
@@ -102,10 +119,12 @@ public class DPLoadRowProcessor {
 		List<DPDataDto> lstDataTemp = param.getLstData();
 //		List<Integer> itemIds = param.getLstAttendanceItem().stream().map(x -> x.getId()).collect(Collectors.toList());
 		result.setIdentityProcessDto(param.getIdentityProcess());
+		result.setClosureId(param.getClosureId());
 		String NAME_EMPTY = TextResource.localize("KDW003_82");
 		String NAME_NOT_FOUND = TextResource.localize("KDW003_81");
 		String companyId = AppContexts.user().companyId();
 		String sId = AppContexts.user().employeeId();
+		iFindDataDCRecord.clearAllStateless();
 		
 		List<String> listEmployeeId = param.getLstData().stream().map(x -> x.getEmployeeId()).collect(Collectors.toSet()).stream().collect(Collectors.toList());
 		result.setLstData(lstDataTemp);
@@ -229,6 +248,17 @@ public class DPLoadRowProcessor {
 		List<DPDataDto> lstData = new ArrayList<DPDataDto>();
 		//get status check box 
 		DPLockDto dpLock = findLock.checkLockAll(companyId, listEmployeeId, dateRange, sId, mode, identityProcessDtoOpt, approvalUseSettingDtoOpt);
+		String keyFind = IdentifierUtil.randomUniqueId();
+		List<ConfirmStatusActualResult> confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId,
+				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), result.getClosureId(),
+				Optional.of(keyFind));
+		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDay.processApprovalStatus(companyId,
+				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), result.getClosureId(),
+				Optional.of(keyFind));
+		Map<Pair<String, GeneralDate>, ConfirmStatusActualResult> mapConfirmResult = confirmResults.stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x));
+		Map<Pair<String, GeneralDate>, ApprovalStatusActualResult> mapApprovalResults = approvalResults.stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x , (x, y) -> x));
+		//cell hide check box approval
+		List<DPHideControlCell> lstCellHideControl = new ArrayList<>();
 		for (DPDataDto data : result.getLstData()) {
 			data.resetData();
 			data.setEmploymentCode(result.getEmploymentCode());
@@ -245,27 +275,37 @@ public class DPLoadRowProcessor {
 			data.addCellData(new DPCellDataDto(DPText.COLUMN_SUBMITTED, "", "", ""));
 			data.addCellData(new DPCellDataDto(DPText.LOCK_APPLICATION, "", "", ""));
 			//set checkbox sign
-			data.setSign(dpLock.getSignDayMap().containsKey(data.getEmployeeId() + "|" + data.getDate()));
-			if(disableSignMap.containsKey(data.getEmployeeId() + "|" + data.getDate()) && disableSignMap.get(data.getEmployeeId() + "|" + data.getDate())){
+			ConfirmStatusActualResult dataSign = mapConfirmResult.get(Pair.of(data.getEmployeeId(), data.getDate()));
+			data.setSign(dataSign == null ? false : dataSign.isStatus());
+			// state check box sign
+			boolean disableSignApp = disableSignMap.containsKey(data.getEmployeeId() + "|" + data.getDate()) && disableSignMap.get(data.getEmployeeId() + "|" + data.getDate());
+			
+			if(dataSign == null || (!dataSign.isStatus() ? (!dataSign.notDisableForConfirm() ? true : disableSignApp) : !dataSign.notDisableForConfirm())){
 				result.setCellSate(data.getId(), DPText.LOCK_SIGN, DPText.STATE_DISABLE);
 			}
+			ApprovalStatusActualResult dataApproval = mapApprovalResults.get(Pair.of(data.getEmployeeId(), data.getDate()));
+			//set checkbox approval
+			data.setApproval(dataApproval == null ? false : mode == ScreenMode.NORMAL.value ? dataApproval.isStatusNormal() : dataApproval.isStatus());
+			if(dataApproval == null || (mode == ScreenMode.NORMAL.value ? !dataApproval.notDisableNormal() : !dataApproval.notDisableApproval())) {
+				result.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_DISABLE);
+			}
+			if(dataApproval == null) {
+				result.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_ERROR);
+				lstCellHideControl.add(new DPHideControlCell(data.getId(), DPText.LOCK_APPROVAL));
+			}
 			
-			ApproveRootStatusForEmpDto approveRootStatus =  dpLock.getLockCheckApprovalDay().get(data.getEmployeeId() + "|" + data.getDate());
-		//	if(mode == ScreenMode.APPROVAL.value){
-			data.setApproval(approveRootStatus == null ? false : approveRootStatus.isCheckApproval());
-		//	}
 			ApproveRootStatusForEmpDto approvalCheckMonth = dpLock.getLockCheckMonth().get(data.getEmployeeId() + "|" + data.getDate());
 			DailyModifyResult resultOfOneRow = process.getRow(resultDailyMap, data.getEmployeeId(), data.getDate());
 			
 			if (resultOfOneRow != null && (displayFormat == 2 ? !data.getError().equals("") : true)) {
-				process.lockDataCheckbox(sId, result, data, identityProcessDtoOpt, approvalUseSettingDtoOpt, approveRootStatus, mode, data.isApproval(), data.isSign());
+				process.lockDataCheckbox(sId, result, data, identityProcessDtoOpt, approvalUseSettingDtoOpt, mode, data.isApproval(), data.isSign());
 				boolean lockDaykWpl = false, lockHist = false, lockApprovalMonth = false, lockConfirmMonth = false;
 				if (param.isShowLock()) {
 					lockDaykWpl = process.checkLockAndSetState(dpLock.getLockDayAndWpl(), data);
 					lockHist = process.lockHist(dpLock.getLockHist(), data);
 					lockApprovalMonth = approvalCheckMonth == null ? false : approvalCheckMonth.isCheckApproval();
 					lockConfirmMonth = process.checkLockConfirmMonth(dpLock.getLockConfirmMonth(), data);
-					lockDaykWpl = process.lockAndDisable(result, data, mode, lockDaykWpl, data.isApproval(), lockHist,
+					lockDaykWpl = process.lockAndDisable(result, data, mode, lockDaykWpl, dataApproval == null ? false : dataApproval.isStatusNormal(), lockHist,
 							data.isSign(), lockApprovalMonth, lockConfirmMonth);
 				} else {
 					lockDaykWpl = process.lockAndDisable(result, data, mode, lockDaykWpl, false, lockHist,
@@ -290,7 +330,7 @@ public class DPLoadRowProcessor {
 			}
 			
 		}
-		
+		result.setLstHideControl(lstCellHideControl);
 		result.setLstData(lstData);
 		return result;
 	}

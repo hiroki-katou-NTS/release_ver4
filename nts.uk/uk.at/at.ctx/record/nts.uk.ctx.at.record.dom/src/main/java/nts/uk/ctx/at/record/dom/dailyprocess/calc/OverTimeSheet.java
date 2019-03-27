@@ -87,9 +87,15 @@ public class OverTimeSheet {
 														   Optional<CompensatoryOccurrenceSetting> eachCompanyTimeSet,
 														   IntegrationOfDaily integrationOfDaily,
 														   List<OverTimeFrameNo> statutoryFrameNoList) {
+		//*調査用ログ*//
+		org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OverTimeFrameTimeSheetForCalc.class);
+		
 		Map<Integer,OverTimeFrameTime> overTimeFrameList = new HashMap<Integer, OverTimeFrameTime>();
 		List<OverTimeFrameNo> numberOrder = new ArrayList<>();
+		log.info("処理対象の残業時間枠のリストサイズ"+ frameTimeSheets.size()); 
 		val sortedFrameTimeSheet = sortFrameTime(frameTimeSheets, workType, eachWorkTimeSet, eachCompanyTimeSet);
+		log.info("処理対象の残業時間枠のリストサイズ Part2"+ sortedFrameTimeSheet.size()); 
+
 		//時間帯の計算
 		for(OverTimeFrameTimeSheetForCalc overTimeFrameTime : sortedFrameTimeSheet) {
 			val forceAtr = autoCalcSet.decisionUseCalcSetting(overTimeFrameTime.getWithinStatutryAtr(), overTimeFrameTime.isGoEarly()).getCalAtr();
@@ -111,6 +117,8 @@ public class OverTimeSheet {
 			}
 		}
 		List<OverTimeFrameTime> calcOverTimeWorkTimeList = new ArrayList<>(overTimeFrameList.values()); 
+		
+		log.info("処理対象の残業時間枠のリストサイズ Part3"+ calcOverTimeWorkTimeList.size());
 		
 		//staticがついていなので、4末緊急対応
 		if(integrationOfDaily.getAttendanceTimeOfDailyPerformance().isPresent()
@@ -136,7 +144,7 @@ public class OverTimeSheet {
 			calcOverTimeWorkTimeList = reOrderList;
 		}
 		//staticがついていなので、4末緊急対応	
-		 
+		log.info("処理対象の残業時間枠のリストサイズ Part4"+ calcOverTimeWorkTimeList.size());
 		
 		//事前申請を上限とする制御
 		val afterCalcUpperTimeList = afterUpperControl(calcOverTimeWorkTimeList,autoCalcSet,statutoryFrameNoList);

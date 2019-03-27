@@ -35,6 +35,7 @@ import nts.uk.ctx.at.record.pub.workrecord.erroralarm.condition.monthlycheckcond
 import nts.uk.ctx.at.shared.dom.common.days.MonthlyDays;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
+import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
 
 @Stateless
 public class CheckResultMonthlyPubImpl implements CheckResultMonthlyPub {
@@ -188,5 +189,12 @@ public class CheckResultMonthlyPubImpl implements CheckResultMonthlyPub {
 				);
 		return result;
 	}
-
+	
+	//Hoidd No.257
+	@Override
+	public Map<String, Map<YearMonth,Map<String,Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemConditionPubExport> attendanceItemCondition) {
+		Map<String,Map<YearMonth,Map<String,Integer>>> result = perTimeMonActualResult.checkPerTimeMonActualResult(yearMonth,  employeeID, 
+				attendanceItemCondition.entrySet().stream().collect(Collectors.toMap(c -> c.getKey(), c -> convertToExport(c.getValue()))));
+		return result;
+	}
 }

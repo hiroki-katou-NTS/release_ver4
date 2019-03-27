@@ -43,16 +43,15 @@ public class ExcessOutsideWorkDto implements ItemConst {
 	}
 
 	private int calcFakeNo(int excessNo, int breakdownNo) {
-		return (breakdownNo - 1 ) * 5 + excessNo;
+		return Integer.parseInt(String.valueOf(excessNo) + String.valueOf(breakdownNo));
 	}
 	
 	private int calcBreakDownNo(int fakeNo) {
-		return ((fakeNo - 1) / 5) + 1;
+		return Integer.parseInt(String.valueOf(fakeNo).substring(1));
 	}
 	
 	private int calcExcessNo(int fakeNo) {
-		int excessNo = fakeNo % 5;
-		return excessNo == 0 ? 5 : excessNo;
+		return Integer.parseInt(String.valueOf(fakeNo).substring(0, 1));
 	}
 
 	public ExcessOutsideWork toDomain() {

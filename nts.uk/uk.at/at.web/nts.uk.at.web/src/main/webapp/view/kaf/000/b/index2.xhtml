@@ -29,7 +29,7 @@
 							data-bind="if: displayApprovalButton">
 							<button class="proceed kaf000-function-btn"
 								data-bind="click: btnApprove, 
-														enable: enableApprovalButton()
+														enable: enableApprovalButton() &amp;&amp; errorEmpty()
 														">#{i18n.getText('KAF000_15')}</button>
 						</div>
 						<!-- B1_14 -->
@@ -44,7 +44,7 @@
 							data-bind="if: displayDenyButton">
 							<button class="kaf000-function-btn"
 								data-bind="click: btnDeny, 
-										enable: enableDenyButton()
+										enable: enableDenyButton() &amp;&amp; errorEmpty()
 										">#{i18n.getText('KAF000_16')}</button>
 						</div>
 						<!-- B1_15 -->

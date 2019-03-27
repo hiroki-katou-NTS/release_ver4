@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.record.infra.repository.monthlyclosureupdatelog;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +12,7 @@ import nts.uk.ctx.at.record.dom.monthlyclosureupdatelog.MonthlyClosureExecutionS
 import nts.uk.ctx.at.record.dom.monthlyclosureupdatelog.MonthlyClosureUpdateLog;
 import nts.uk.ctx.at.record.dom.monthlyclosureupdatelog.MonthlyClosureUpdateLogRepository;
 import nts.uk.ctx.at.record.infra.entity.monthlyclosureupdatelog.KrcdtMclosureUpdLog;
+import nts.uk.shr.infra.data.jdbc.JDBCUtil;
 
 /**
  * 
@@ -51,6 +54,20 @@ public class JpaMonthlyClosureUpdateLogRepository extends JpaRepository implemen
 			this.commandProxy().update(entity);
 		} else
 			throw new RuntimeException("Can not find MonthlyClosureUpdateLog with id=" + domain.getId());
+	}
+	
+	@Override
+	public void updateStatusForCompany(String cid) {
+
+		Connection con = this.getEntityManager().unwrap(Connection.class);
+
+		String sqlQuery = "update KRCDT_MCLOSURE_UPD_LOG set EXECUTE_STATUS = " + 2 + " where CID = '" + cid
+				+ "' and EXECUTE_STATUS != " + 2;
+		try {
+			con.createStatement().executeUpdate(JDBCUtil.toUpdateWithCommonField(sqlQuery));
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

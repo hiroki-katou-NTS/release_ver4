@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.function.ac.fixedcheckitem;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import javax.inject.Inject;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.function.dom.adapter.fixedcheckitem.FixedCheckItemAdapter;
 import nts.uk.ctx.at.function.dom.alarm.alarmdata.ValueExtractAlarm;
+import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.ErAlConstant;
 import nts.uk.ctx.at.record.pub.fixedcheckitem.FixedCheckItemPub;
 import nts.uk.ctx.at.record.pub.fixedcheckitem.ValueExtractAlarmWRPubExport;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -43,6 +45,11 @@ public class FixedCheckItemAcFinder implements FixedCheckItemAdapter {
 		return fixedCheckItemPub.checkPrincipalUnconfirm(workplaceID, employeeID, startDate, endDate)
 				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
 	}
+	
+	@Override
+	public Map<String, List<GeneralDate>> checkPrincipalConfirmed(List<String> employeeID,GeneralDate startDate, GeneralDate endDate) {
+		return fixedCheckItemPub.checkPrincipalConfirmed(employeeID, startDate, endDate);
+	}
 
 	@Override
 	public List<ValueExtractAlarm> checkAdminUnverified(String workplaceID, String employeeID,
@@ -62,7 +69,7 @@ public class FixedCheckItemAcFinder implements FixedCheckItemAdapter {
 		return new ValueExtractAlarm(
 				export.getWorkplaceID().orElse(null),
 				export.getEmployeeID(),
-				export.getAlarmValueDate().toString(),
+				export.getAlarmValueDate().toString(ErAlConstant.DATE_FORMAT),
 				export.getClassification(),
 				export.getAlarmItem(),
 				export.getAlarmValueMessage(),
@@ -74,6 +81,11 @@ public class FixedCheckItemAcFinder implements FixedCheckItemAdapter {
 	public List<ValueExtractAlarm> checkAdminUnverified(String workplaceID, String employeeID, DatePeriod datePeriod) {
 		return fixedCheckItemPub.checkAdminUnverified(workplaceID, employeeID, datePeriod )
 				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
+	}
+	
+	@Override
+	public Map<String, List<GeneralDate>> checkAdminUnverified(List<String> employeeID, DatePeriod datePeriod) {
+		return fixedCheckItemPub.checkAdminUnverified(employeeID, datePeriod );
 	}
 
 	@Override

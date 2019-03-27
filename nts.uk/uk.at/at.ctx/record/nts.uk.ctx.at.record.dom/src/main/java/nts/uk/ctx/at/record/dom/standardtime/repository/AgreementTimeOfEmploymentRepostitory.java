@@ -15,4 +15,6 @@ public interface AgreementTimeOfEmploymentRepostitory {
 	Optional<String> findEmploymentBasicSettingId(String companyId, String employmentCategoryCode, LaborSystemtAtr laborSystemAtr);
 
 	List<String> findEmploymentSetting(String companyId, LaborSystemtAtr laborSystemAtr);
+	
+	List<AgreementTimeOfEmployment> findEmploymentSetting(String comId, List<String> employmentCategoryCode);
 }

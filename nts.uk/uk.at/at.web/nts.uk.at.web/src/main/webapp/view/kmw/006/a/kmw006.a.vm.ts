@@ -36,6 +36,7 @@ module nts.uk.at.view.kmw006.a.viewmodel {
         first: KnockoutObservable<boolean> = ko.observable(true);
         totalCount: KnockoutObservable<number> = ko.observable(0);
         processedCount: KnockoutObservable<number> = ko.observable(0);
+        isOverTime: KnockoutObservable<boolean> = ko.observable(false);
 
         constructor() {
             var self = this;
@@ -198,7 +199,7 @@ module nts.uk.at.view.kmw006.a.viewmodel {
             service.getInfors(screenParams).done((results: any) => {
 
                 if (results.listInfor != null) {
-                    for (var i = 0; i < results.listInfor.length; i++) {
+                    for (let i = 0; i < results.listInfor.length; i++) {
                         let r = results.listInfor[i];
                         self.itemList.push(new ItemModel(r.closureId, r.closureName));
                         self.listClosureInfo.push(new ClosureInfor(r.closureId, r.closureName, r.closureMonth, r.periodStart, r.periodEnd, r.targetYm, r.executionDt));
@@ -210,14 +211,47 @@ module nts.uk.at.view.kmw006.a.viewmodel {
                         self.selectedClosureId(results.selectClosureId);
                     
                     block.clear();
-                } else {//running => open dialog F
+                } else {
                     block.grayout();
-                    $.when(self.getAllPersonNo(results.screenParams)).done(() =>{
-                        results.screenParams.totalCount = self.totalCount();
-                        self.openKmw006fDialog(results.screenParams);
-                        self.first(false);
+                    var currentTime = new Date(moment.utc(results.screenParams.currentDT).format('YYYY-MM-DDTHH:mm:ss'));
+                    var startDT = new Date(moment.utc(results.screenParams.startDT).format('YYYY-MM-DDTHH:mm:ss'));
+                    var duration = (currentTime.getTime() - startDT.getTime()) / 1000;
+                    if(results.screenParams.executionStatus != 2 && duration < 14400){
+                        // open dialog F
+                        $.when(self.getAllPersonNo(results.screenParams)).done(() => {
+                            results.screenParams.totalCount = self.totalCount();
+                            self.openKmw006fDialog(results.screenParams);
+                            self.first(false);
+                            block.clear();
+                        });
+                    } else if ((results.screenParams.executionStatus == 0 || results.screenParams.executionStatus == 1) && duration > 14400) {
+                        nts.uk.ui.dialog.info({ messageId: "Msg_1515" });
+                        self.isOverTime(true);
+                        // get data for screen A
+                        // update status = 2 cho all nhan vien trong cong ty co thoi gian xu ly > 4h ma chua done
+                        service.getInforsWithNoParams().done(results => {
+                            for (let i = 0; i < results.listInfor.length; i++) {
+                                let r = results.listInfor[i];
+                                self.itemList.push(new ItemModel(r.closureId, r.closureName));
+                                self.listClosureInfo.push(new ClosureInfor(r.closureId, r.closureName, r.closureMonth, r.periodStart, r.periodEnd, r.targetYm, r.executionDt));
+                            }
+                            self.executable(results.executable);
+                            if (results.selectClosureId == self.selectedClosureId())
+                                self.selectedClosureId.valueHasMutated();
+                            else
+                                self.selectedClosureId(results.selectClosureId);
+                            // remove item of localStorage de khi excute se tao ra xu ly moi
+                            localStorage.removeItem("MonthlyClosureUpdateLogId");
+                            localStorage.removeItem("MonthlyClosureListEmpId");
+                            localStorage.removeItem("MonthlyClosureId");
+                            localStorage.removeItem("MonthlyClosureExecutionDateTime");
+                            localStorage.removeItem("MonthlyClosureTaskId");
+                            localStorage.removeItem("MonthlyClosureExecutionEndDate");
+                        });
+                        
                         block.clear();
-                    });
+                    }
+                    block.clear(); 
                 }
                 dfd.resolve();
             }).fail((error) => {
@@ -243,7 +277,7 @@ module nts.uk.at.view.kmw006.a.viewmodel {
                     startDT: localStorage.getItem("MonthlyClosureExecutionDateTime"),
                     endDT: localStorage.getItem("MonthlyClosureExecutionEndDate")
                 }
-                service.checkStatus({ closureId: self.selectedClosureId(), screenParams: screenParams }).done((result) => {
+                service.checkStatus({ closureId: self.selectedClosureId(), screenParams: screenParams, overTime: self.isOverTime() }).done((result) => {
                     if (result) {
                         let periodStart: string = result.periodStart;
                         let periodEnd: string = result.periodEnd;
@@ -260,6 +294,7 @@ module nts.uk.at.view.kmw006.a.viewmodel {
                         localStorage.setItem("MonthlyClosurePeriodStart", result.periodStart);
                         localStorage.setItem("MonthlyClosurePeriodEnd", result.periodEnd);
                     }
+                    self.isOverTime(false);
                     self.openKmw006fDialog(result);
                 }).fail((error) => {
                     alertError(error);

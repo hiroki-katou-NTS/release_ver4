@@ -5,6 +5,8 @@
 package nts.uk.ctx.at.shared.dom.workrule.closure.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -26,6 +28,8 @@ public interface ClosureService {
 	 */
 	// 当月の期間を算�する
 	public DatePeriod getClosurePeriod(int closureId, YearMonth processingYm);
+	
+	public DatePeriod getClosurePeriod(int closureId, YearMonth processingYm, Optional<Closure> closure);
 	
 	// TODO: Pls review
 	public DatePeriod getClosurePeriodNws(int closureId, YearMonth processingYm);
@@ -77,4 +81,6 @@ public interface ClosureService {
 	 * @return the closure data by employees
 	 */
 	List<Closure> getClosureDataByEmployees(List<String> employeeIds, GeneralDate baseDate);
+	
+	Map<String, Closure> getClosureByEmployees(List<String> employeeIds, GeneralDate baseDate);
 }

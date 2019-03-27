@@ -32,6 +32,7 @@ import nts.uk.ctx.at.shared.infra.entity.worktime.KshmtWorkTimeSet;
 import nts.uk.ctx.at.shared.infra.entity.worktime.KshmtWorkTimeSetPK;
 import nts.uk.ctx.at.shared.infra.entity.worktime.KshmtWorkTimeSetPK_;
 import nts.uk.ctx.at.shared.infra.entity.worktime.KshmtWorkTimeSet_;
+import nts.uk.shr.com.i18n.TextResource;
 
 /**
  * The Class JpaWorkTimeSettingRepository.
@@ -88,6 +89,55 @@ public class JpaWorkTimeSettingRepository extends JpaRepository implements WorkT
 			cq.where(lstpredicateWhere.toArray(new Predicate[] {}));
 
 			lstKwtstWorkTimeSet.addAll(em.createQuery(cq).getResultList());
+		});
+		
+		return lstKwtstWorkTimeSet.stream()
+				.map(item -> new WorkTimeSetting(new JpaWorkTimeSettingGetMemento(item)))
+				.collect(Collectors.toList());
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository#
+	 * findByCodes(java.lang.String, java.util.List)
+	 */
+	@Override
+	public List<WorkTimeSetting> findByCodesWithNoMaster(String companyID, List<String> codes) {
+		// get entity manager
+		EntityManager em = this.getEntityManager();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+
+		CriteriaQuery<KshmtWorkTimeSet> cq = criteriaBuilder.createQuery(KshmtWorkTimeSet.class);
+		Root<KshmtWorkTimeSet> root = cq.from(KshmtWorkTimeSet.class);
+
+		// select root
+		cq.select(root);
+		
+		List<KshmtWorkTimeSet> lstKwtstWorkTimeSet = new ArrayList<>();
+		
+		codes.forEach(code -> {
+			// add where
+			List<Predicate> lstpredicateWhere = new ArrayList<>();
+
+			lstpredicateWhere.add(criteriaBuilder
+					.equal(root.get(KshmtWorkTimeSet_.kshmtWorkTimeSetPK).get(KshmtWorkTimeSetPK_.worktimeCd), code));
+			lstpredicateWhere.add(criteriaBuilder
+					.equal(root.get(KshmtWorkTimeSet_.kshmtWorkTimeSetPK).get(KshmtWorkTimeSetPK_.cid), companyID));
+			lstpredicateWhere
+					.add(criteriaBuilder.equal(root.get(KshmtWorkTimeSet_.abolitionAtr), AbolishAtr.NOT_ABOLISH.value));
+			cq.where(lstpredicateWhere.toArray(new Predicate[] {}));
+			List<KshmtWorkTimeSet> results = em.createQuery(cq).getResultList();
+			KshmtWorkTimeSet wkTime;
+			if (results.isEmpty()) {
+				wkTime = new KshmtWorkTimeSet(new KshmtWorkTimeSetPK(companyID, code), 0,
+						TextResource.localize("KAL003_120"), TextResource.localize("KAL003_120"), "", 0, 0, 0, "", "",
+						"");
+			} else {
+				wkTime = results.get(0);
+			}
+			lstKwtstWorkTimeSet.add(wkTime);
 		});
 		
 		return lstKwtstWorkTimeSet.stream()

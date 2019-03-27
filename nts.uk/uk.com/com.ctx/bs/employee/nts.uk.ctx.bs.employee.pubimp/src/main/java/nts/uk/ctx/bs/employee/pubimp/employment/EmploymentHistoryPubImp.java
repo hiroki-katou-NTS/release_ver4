@@ -2,7 +2,9 @@ package nts.uk.ctx.bs.employee.pubimp.employment;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -66,6 +68,64 @@ public class EmploymentHistoryPubImp implements IEmploymentHistoryPub{
 			return Optional.of(new EmploymentHisExport(history.getEmployeeId(),lst));
 		}
 		return Optional.empty();
+	}
+
+	@Override
+	public Map<String, List<EmploymentHisOfEmployee>> getEmploymentBySidsAndEmploymentCds(List<String> sids,
+			List<String> employmentCodes, DatePeriod param) {
+		List<EmploymentHistoryOfEmployee>  listEmpOfEmployee = employmentHistoryItemRepository.getEmploymentBySID(sids, employmentCodes, param);
+		listEmpOfEmployee.parallelStream().forEach(c ->{
+				GeneralDate start = c.getStartDate();
+				GeneralDate end = c.getEndDate();
+				if(param.start().afterOrEquals(start) && param.end().beforeOrEquals(end)){
+					c.setStartDate(param.start());
+					c.setEndDate(param.end());
+					return;
+				}
+				
+				
+				/**
+				 *  case2
+				 *  period           |========================>
+				 *  param       |===========>
+				 */
+				if(param.start().beforeOrEquals(start) && param.end().afterOrEquals(start) && param.end().beforeOrEquals(end)){
+					c.setStartDate(start);
+					c.setEndDate(param.end());
+					return;
+				}
+				
+				/**
+				 *  case3
+				 *  period           |========================>
+				 *  param       |===================================>
+				 */
+				if(param.start().beforeOrEquals(start) && param.end().afterOrEquals(end)){
+					c.setStartDate(start);
+					c.setEndDate(end);
+					return;
+				}
+				
+				/**
+				 *  case4
+				 *  period      |========================>
+				 *  param                        |===========>
+				 *  
+				 */
+				if(param.start().afterOrEquals(start) && param.start().beforeOrEquals(end) && param.end().afterOrEquals(end)){
+					c.setStartDate(param.start() );
+					c.setEndDate(end);
+					return;
+				} 
+		 });
+		if (!listEmpOfEmployee.isEmpty()){
+			List<EmploymentHisOfEmployee>  result = listEmpOfEmployee.stream().map(temp -> {
+				return new EmploymentHisOfEmployee(temp.getSId(),temp.getStartDate(),temp.getEndDate(),temp.getEmploymentCD());
+			}).collect(Collectors.toList());
+			return  result.parallelStream().collect(Collectors.groupingBy(c -> c.getSId()));
+		}
+		
+		return new HashMap<>();
 	}
 	
 	

@@ -3,10 +3,10 @@ package nts.uk.ctx.at.record.pub.monthly.agreement;
 import java.util.List;
 
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.monthly.agreement.export.AgreementTimeByEmp;
 import nts.uk.ctx.at.shared.dom.common.Month;
 import nts.uk.ctx.at.shared.dom.common.Year;
 import nts.uk.ctx.at.shared.dom.monthly.agreement.PeriodAtrOfAgreement;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 指定期間36協定時間の取得
@@ -27,6 +27,11 @@ public interface AgreementTimeByPeriodPub {
 	// RequestList453
 	List<AgreementTimeByPeriod> algorithm(String companyId, String employeeId, GeneralDate criteria,
 			Month startMonth, Year year, PeriodAtrOfAgreement periodAtr);
+	
+	List<AgreementTimeByPeriod> algorithm(String companyId, String employeeId, GeneralDate criteria,
+			Month startMonth, Year year, PeriodAtrOfAgreement periodAtr, Object basicSetGetter);
+	
+	Object getCommonSetting(String companyId, List<String> employeeId, DatePeriod criteria);
 
 	// RequestList453
 	List<AgreementTimeByEmpExport> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,

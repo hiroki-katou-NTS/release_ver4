@@ -2,6 +2,7 @@ module nts.uk.at.view.kaf009.b {
     import common = nts.uk.at.view.kaf009.share.common;
     import model = nts.uk.at.view.kaf000.b.viewmodel.model;
     import appcommon = nts.uk.at.view.kaf000.shr.model;
+    import text = nts.uk.resource.getText;
     export module viewmodel{
         export class ScreenModel extends kaf000.b.viewmodel.ScreenModel {
             isNewScreen: KnockoutObservable<boolean> = ko.observable(false);
@@ -211,8 +212,8 @@ module nts.uk.at.view.kaf009.b {
                         self.version = detailData.goBackDirectlyDto.version;
                         //get all Location 
                         self.getAllWorkLocation();
-                        self.workTypeName(detailData.workTypeName);
-                        self.siftName(detailData.workTimeName);
+                        self.workTypeName(detailData.workTypeName|| text("KAL003_120"));
+                        self.siftName(detailData.workTimeName|| text("KAL003_120"));
                         self.workLocationName(detailData.workLocationName1 == null ? '' : detailData.workLocationName1);
                         self.workLocationName2(detailData.workLocationName2 == null ? '' : detailData.workLocationName2);
                         self.prePostSelected(detailData.prePostAtr);

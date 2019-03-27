@@ -10,7 +10,9 @@ module nts.uk.at.view.kaf010.shr.service {
         checkBeforeUpdate: "at/request/application/holidaywork/checkBeforeUpdate",
         findByAppID: "at/request/application/holidaywork/findByAppID",
         getRecordWork: "at/request/application/holidaywork/getRecordWork",
-        getBreakTimes: "at/request/application/holidaywork/getBreakTimes"
+        getBreakTimes: "at/request/application/holidaywork/getBreakTimes",
+        confirmInconsistency: "at/request/application/holidaywork/confirmInconsistency",
+        confirmPrerepudiation: "at/request/application/holidaywork/confirmPrerepudiation"
     }
     /** Get TitleMenu */
     export function getHolidayWorkByUI(param: any): JQueryPromise<any> {
@@ -55,5 +57,13 @@ module nts.uk.at.view.kaf010.shr.service {
     
      export function getBreakTimes(param: any): JQueryPromise<any> {
         return nts.uk.request.ajax("at", paths.getBreakTimes, param);
+    }
+    
+    export function confirmInconsistency(param: any): JQueryPromise<any> {
+        return nts.uk.request.ajax("at", paths.confirmInconsistency, param);
+    }
+    
+    export function confirmPrerepudiation(param: any): JQueryPromise<any> {
+        return nts.uk.request.ajax("at", paths.confirmPrerepudiation, param);
     }
 }

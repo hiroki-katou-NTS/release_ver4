@@ -9,6 +9,7 @@ import nts.uk.ctx.at.shared.dom.attendance.util.anno.AttendanceItemLayout;
 import nts.uk.ctx.at.shared.dom.attendance.util.anno.AttendanceItemValue;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 
 /** 日別実績の滞在時間 */
 @Data
@@ -57,11 +58,11 @@ public class StayingTimeDto implements ItemConst {
 
 	public StayingTimeOfDaily toDomain() {
 		return new StayingTimeOfDaily(
-							toAttendanceTime(afterPCLogOffTime), 
-							toAttendanceTime(beforePCLogOnTime),
-							toAttendanceTime(beforeWoringTime), 
+							toAttendanceTimeMinus(afterPCLogOffTime), 
+							toAttendanceTimeMinus(beforePCLogOnTime),
+							toAttendanceTimeMinus(beforeWoringTime), 
 							toAttendanceTime(stayingTime),
-							toAttendanceTime(afterLeaveTime));
+							toAttendanceTimeMinus(afterLeaveTime));
 	}
 	
 	public static StayingTimeOfDaily defaultDomain() {
@@ -75,8 +76,16 @@ public class StayingTimeDto implements ItemConst {
 	private AttendanceTime toAttendanceTime(Integer time) {
 		return time == null ? AttendanceTime.ZERO : new AttendanceTime(time);
 	}
+
+	private AttendanceTimeOfExistMinus toAttendanceTimeMinus(Integer time) {
+		return time == null ? new AttendanceTimeOfExistMinus(0) : new AttendanceTimeOfExistMinus(time);
+	}
 	
 	private static Integer getAttendanceTime(AttendanceTime time) {
+		return time == null ? 0 : time.valueAsMinutes();
+	}
+	
+	private static Integer getAttendanceTime(AttendanceTimeOfExistMinus time) {
 		return time == null ? 0 : time.valueAsMinutes();
 	}
 }

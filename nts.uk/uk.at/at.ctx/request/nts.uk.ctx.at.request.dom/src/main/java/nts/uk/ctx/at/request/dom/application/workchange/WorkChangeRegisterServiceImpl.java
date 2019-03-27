@@ -48,10 +48,10 @@ public class WorkChangeRegisterServiceImpl implements IWorkChangeRegisterService
 	@Inject
 	private OtherCommonAlgorithm otherCommonAlg;	
 	@Override
-	public ProcessResult registerData(AppWorkChange workChange, Application_New app) {
+	public ProcessResult registerData(AppWorkChange workChange, Application_New app, boolean checkOver1Year) {
 
 		// アルゴリズム「2-1.新規画面登録前の処理」を実行する
-		newBeforeRegister.processBeforeRegister(app,0);
+		newBeforeRegister.processBeforeRegister(app, 0, checkOver1Year);
 		
 		// ドメインモデル「勤務変更申請設定」の新規登録をする
 		appRepository.insert(app);

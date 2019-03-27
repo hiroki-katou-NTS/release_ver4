@@ -474,7 +474,8 @@ module nts.uk.at.view.kaf006.b{
             self.displayPrePostFlg(data.prePostFlg);
             self.requiredReason(data.appReasonRequire);
             self.workTimeCode(data.workTimeCode);
-            self.displayWorkTimeName(nts.uk.util.isNullOrEmpty(data.workTimeCode) ? nts.uk.resource.getText('KAF006_21') : data.workTimeCode +"　"+ data.workTimeName);
+            let wktimeName = data.workTimeName || nts.uk.resource.getText('KAL003_120');
+            self.displayWorkTimeName(nts.uk.util.isNullOrEmpty(data.workTimeCode) ? nts.uk.resource.getText('KAF006_21') : data.workTimeCode +"　"+ wktimeName);
             if(data.applicationReasonDtos != null && data.applicationReasonDtos.length > 0){
                 let lstReasonCombo = _.map(data.applicationReasonDtos, o => { return new common.ComboReason(o.reasonID, o.reasonTemp); });
                 self.reasonCombo(lstReasonCombo);

@@ -19,5 +19,7 @@ public class InsertApplicationGoBackDirectlyCommand {
 	 * 申請 ITEM
 	 */
 	CreateApplicationCommand appCommand;
+	
+	private boolean checkOver1Year;
 
 }

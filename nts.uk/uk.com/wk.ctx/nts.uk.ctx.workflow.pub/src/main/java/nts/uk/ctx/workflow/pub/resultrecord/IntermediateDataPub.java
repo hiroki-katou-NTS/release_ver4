@@ -1,5 +1,6 @@
 package nts.uk.ctx.workflow.pub.resultrecord;
 
+import java.util.Arrays;
 import java.util.List;
 
 import nts.arc.error.BusinessException;
@@ -9,6 +10,7 @@ import nts.uk.ctx.workflow.pub.resultrecord.export.AppEmpStatusExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppEmpSttMonthExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootInsContentExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootSttMonthExport;
+import nts.uk.ctx.workflow.pub.resultrecord.export.Request133Export;
 import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -23,7 +25,20 @@ public interface IntermediateDataPub {
 	 * @param rootType ルート種類（日別確認／月別確認）
 	 * @return 承認ルートの状況
 	 */
-	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpPeriod(String employeeID, DatePeriod period, Integer rootType) throws BusinessException;
+	public default Request133Export getAppRootStatusByEmpPeriod(String employeeID, DatePeriod period, Integer rootType) throws BusinessException {
+		return this.getAppRootStatusByEmpPeriod(Arrays.asList(employeeID), period, rootType);
+	}
+
+	
+	/**
+	 * RequestList 113
+	 * [No.113](中間データ版)承認対象者と期間から承認状況を取得する
+	 * @param employeeIDs 対象者社員ID
+	 * @param period 期間
+	 * @param rootType ルート種類（日別確認／月別確認）
+	 * @return 承認ルートの状況
+	 */
+	public Request133Export getAppRootStatusByEmpPeriod(List<String> employeeIDs, DatePeriod period, Integer rootType) throws BusinessException;
 	
 	/**
 	 * RequestList 155

@@ -316,6 +316,11 @@ public class DailyRecordToAttendanceItemConverterImpl implements DailyRecordToAt
 
 	@Override
 	public Optional<AnyItemValueOfDaily> anyItems() {
+		this.dailyRecord.getOptionalItem().ifPresent(c -> {
+			if(optionalItems != null) {
+				c.correctItems(optionalItems);
+			}
+		});
 		return this.dailyRecord.getOptionalItem().map(d -> d.toDomain(this.dailyRecord.employeeId(), this.dailyRecord.workingDate()));
 	}
 

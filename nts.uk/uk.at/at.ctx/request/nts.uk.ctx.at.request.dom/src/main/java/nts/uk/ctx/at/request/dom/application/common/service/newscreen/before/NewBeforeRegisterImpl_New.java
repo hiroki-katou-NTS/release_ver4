@@ -92,7 +92,7 @@ public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
 	@Inject
 	private IdentificationAdapter identificationAdapter;
 	
-	public void processBeforeRegister(Application_New application,int overTimeAtr){
+	public void processBeforeRegister(Application_New application, int overTimeAtr, boolean checkOver1Year){
 		// アルゴリズム「未入社前チェック」を実施する
 		retirementCheckBeforeJoinCompany(application.getCompanyID(), application.getEmployeeID(), application.getAppDate());
 		
@@ -111,8 +111,12 @@ public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
 				throw new BusinessException("Msg_277");
 			}
 			// 登録可能期間のチェック(１年以内)
-			if(periodCurrentMonth.getStartDate().addYears(1).beforeOrEquals(endDate)) {
-				throw new BusinessException("Msg_276", periodCurrentMonth.getStartDate().addYears(1).toString(DATE_FORMAT));
+			//EA修正履歴 No.3210
+			//hoatt 2019.03.22
+			if(periodCurrentMonth.getStartDate().addYears(1).beforeOrEquals(endDate) && checkOver1Year) {
+				//締め期間．開始年月日.AddYears(1) <= 申請する終了日がtrue
+				//確認メッセージ（Msg_1518）を表示する
+				throw new BusinessException("Msg_1518", periodCurrentMonth.getStartDate().addYears(1).toString(DATE_FORMAT));
 			}
 			
 			// 過去月のチェック

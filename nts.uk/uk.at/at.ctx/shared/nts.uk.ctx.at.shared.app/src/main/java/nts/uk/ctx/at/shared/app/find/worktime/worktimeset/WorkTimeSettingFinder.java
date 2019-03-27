@@ -114,8 +114,9 @@ public class WorkTimeSettingFinder {
 	public static final int TWO_TIMEZONE = 2;
 
 	public static final int SHIFT_ONE = 1;
-	
+
 	public static final int SHIFT_TWO = 2;
+
 	/**
 	 * Find all.
 	 *
@@ -145,6 +146,25 @@ public class WorkTimeSettingFinder {
 			List<PredetemineTimeSetting> workTimeSetItems = this.predetemineTimeSettingRepository
 					.findByCodeList(companyID, codes);
 			return getWorkTimeDtos(workTimeItems, workTimeSetItems);
+		}
+	}
+
+	/**
+	 * Find by codes with no master
+	 *
+	 * @param codes
+	 *            the codes
+	 * @return the list
+	 */
+	public List<WorkTimeDto> findByCodesWithNoMaster(List<String> codes) {
+		String companyID = AppContexts.user().companyId();
+		if (codes.isEmpty()) {
+			return Collections.emptyList();
+		} else {
+			return this.workTimeSettingRepository.findByCodesWithNoMaster(companyID, codes).stream().map(x -> {
+				return new WorkTimeDto(x.getWorktimeCode().v(), x.getWorkTimeDisplayName().getWorkTimeName().v(), "0",
+						"0", "0", "0", 0, 0, 0, 0);
+			}).collect(Collectors.toList());
 		}
 	}
 
@@ -241,9 +261,9 @@ public class WorkTimeSettingFinder {
 										timezone2.getEnd()) : null,
 								i18n.localize(currentWorkTime.getWorkTimeDivision().getWorkTimeMethodSet().nameId)
 										.get(),
-								currentWorkTime.getNote().v(), timezone1.getStart().v(), timezone1.getEnd().v(), 
-								(timezone2 != null) ? timezone2.getStart().v() : null , 
-										(timezone2 != null) ? timezone2.getEnd().v() : null));
+								currentWorkTime.getNote().v(), timezone1.getStart().v(), timezone1.getEnd().v(),
+								(timezone2 != null) ? timezone2.getStart().v() : null,
+								(timezone2 != null) ? timezone2.getEnd().v() : null));
 					} else {
 						workTimeDtos.add(new WorkTimeDto(currentWorkTime.getWorktimeCode().v(),
 								currentWorkTime.getWorkTimeDisplayName().getWorkTimeName().v(),
@@ -252,9 +272,9 @@ public class WorkTimeSettingFinder {
 								(timezone2 != null) ? createWorkTimeField(timezone2.getUseAtr(), timezone2.getStart(),
 										timezone2.getEnd()) : null,
 								i18n.localize(currentWorkTime.getWorkTimeDivision().getWorkTimeDailyAtr().nameId).get(),
-								currentWorkTime.getNote().v(), timezone1.getStart().v(), timezone1.getEnd().v(), 
-								(timezone2 != null) ? timezone2.getStart().v() : null , 
-										(timezone2 != null) ? timezone2.getEnd().v() : null));
+								currentWorkTime.getNote().v(), timezone1.getStart().v(), timezone1.getEnd().v(),
+								(timezone2 != null) ? timezone2.getStart().v() : null,
+								(timezone2 != null) ? timezone2.getEnd().v() : null));
 					}
 				}
 			}
@@ -269,13 +289,15 @@ public class WorkTimeSettingFinder {
 	 *            the work time set
 	 * @return true, if successful
 	 */
-//	private boolean checkNotUse(PredetemineTimeSetting workTimeSet) {
-//		for (TimezoneUse timezone : workTimeSet.getPrescribedTimezoneSetting().getLstTimezone()) {
-//			if (timezone.getUseAtr().equals(UseSetting.NOT_USE) && timezone.getWorkNo() == TimezoneUse.SHIFT_ONE)
-//				return true;
-//		}
-//		return false;
-//	}
+	// private boolean checkNotUse(PredetemineTimeSetting workTimeSet) {
+	// for (TimezoneUse timezone :
+	// workTimeSet.getPrescribedTimezoneSetting().getLstTimezone()) {
+	// if (timezone.getUseAtr().equals(UseSetting.NOT_USE) &&
+	// timezone.getWorkNo() == TimezoneUse.SHIFT_ONE)
+	// return true;
+	// }
+	// return false;
+	// }
 
 	/**
 	 * Creates the work time field.
@@ -289,8 +311,8 @@ public class WorkTimeSettingFinder {
 	 * @return the string
 	 */
 	private String createWorkTimeField(UseSetting useAtr, TimeWithDayAttr start, TimeWithDayAttr end) {
-		return start.getDayDivision().description + start.getInDayTimeWithFormat() + " ~ " + end.getDayDivision().description
-				+ end.getInDayTimeWithFormat();
+		return start.getDayDivision().description + start.getInDayTimeWithFormat() + " ~ "
+				+ end.getDayDivision().description + end.getInDayTimeWithFormat();
 	}
 
 	/**

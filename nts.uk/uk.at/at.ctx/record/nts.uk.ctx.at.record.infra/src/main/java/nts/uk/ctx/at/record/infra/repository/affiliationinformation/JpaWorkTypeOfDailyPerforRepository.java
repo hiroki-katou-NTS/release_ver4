@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.infra.repository.affiliationinformation;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -11,8 +12,12 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
+import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
@@ -122,16 +127,31 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 
 	@Override
 	public List<WorkTypeOfDailyPerformance> finds(List<String> employeeId, DatePeriod baseDate) {
-		List<KrcdtDaiWorkType> result = new ArrayList<>();
-		StringBuilder query = new StringBuilder("SELECT af FROM KrcdtDaiWorkType af ");
-		query.append("WHERE af.krcdtDaiWorkTypePK.employeeId IN :employeeId ");
-		query.append("AND af.krcdtDaiWorkTypePK.ymd <= :end AND af.krcdtDaiWorkTypePK.ymd >= :start");
-		TypedQueryWrapper<KrcdtDaiWorkType> tQuery = this.queryProxy().query(query.toString(), KrcdtDaiWorkType.class);
+		List<WorkTypeOfDailyPerformance> result = new ArrayList<>();
+
 		CollectionUtil.split(employeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds -> {
-			result.addAll(tQuery.setParameter("employeeId", empIds).setParameter("start", baseDate.start())
-					.setParameter("end", baseDate.end()).getList());
+			result.addAll(internalQuery(baseDate, empIds));
 		});
-		return result.stream().map(af -> af.toDomain()).collect(Collectors.toList());
+		return result;
+	}
+	
+	@SneakyThrows
+	private List<WorkTypeOfDailyPerformance> internalQuery(DatePeriod baseDate, List<String> empIds) {
+		String subEmp = NtsStatement.In.createParamsString(empIds);
+		StringBuilder query = new StringBuilder("SELECT SID, YMD, WORKTYPE_CODE FROM KRCDT_DAI_WORKTYPE");
+		query.append(" WHERE YMD <= ? AND YMD >= ? ");
+		query.append(" AND SID IN (" + subEmp + ")");
+		try (val stmt = this.connection().prepareStatement(query.toString())){
+			stmt.setDate(1, Date.valueOf(baseDate.end().localDate()));
+			stmt.setDate(2, Date.valueOf(baseDate.start().localDate()));
+			for (int i = 0; i < empIds.size(); i++) {
+				stmt.setString(i + 3, empIds.get(i));
+			}
+			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+				return new WorkTypeOfDailyPerformance(rec.getString("SID"), 
+						rec.getGeneralDate("YMD"), rec.getString("WORKTYPE_CODE"));
+			});
+		}
 	}
 
 	@Override

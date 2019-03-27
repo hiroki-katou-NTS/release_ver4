@@ -307,7 +307,7 @@ public class DataDialogWithTypeProcessor {
 		case 4:
 			return dto.getAppType() + 2;
 		case 10:
-			return 15;
+			return 14;
 
 		default:
 			return dto.getAppType() + 999;

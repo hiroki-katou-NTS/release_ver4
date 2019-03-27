@@ -26,4 +26,6 @@ public interface AlarmCheckConditionByCategoryRepository {
 	
 	public List<AlarmCheckConditionByCategory> findByCategoryAndCode(String companyId, int category, List<String> codes);
 	
+	public List<AlarmCheckConditionByCategory> findByCategoryAndCode(String companyId, List<Integer> categories, List<String> codes);
+	
 }

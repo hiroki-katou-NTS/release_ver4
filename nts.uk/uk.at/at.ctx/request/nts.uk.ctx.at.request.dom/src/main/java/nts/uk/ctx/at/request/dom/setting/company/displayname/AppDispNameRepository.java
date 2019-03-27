@@ -14,6 +14,9 @@ public interface AppDispNameRepository {
 	 * @author yennth
 	 */
 	List<AppDispName> getAll();
+	
+	List<AppDispName> getAll(List<Integer> appType);
+	
 	/**
 	 * get display name by company id and apptype
 	 * @return

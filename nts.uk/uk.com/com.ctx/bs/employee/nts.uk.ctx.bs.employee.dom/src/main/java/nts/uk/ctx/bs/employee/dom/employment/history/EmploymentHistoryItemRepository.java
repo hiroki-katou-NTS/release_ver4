@@ -121,4 +121,12 @@ public interface EmploymentHistoryItemRepository {
 	 */
 	Map<String, EmpmInfo> getLstDetailEmpHistItem(String companyId, List<String> lstSID, GeneralDate date);
 
+	/**
+	 * @author lanlt
+	 * @param sids
+	 * @param employmentCodes
+	 * @param dateRange
+	 * @return
+	 */
+	List<EmploymentHistoryOfEmployee> getEmploymentBySID(List<String> sids, List<String> employmentCodes, DatePeriod dateRange);
 }

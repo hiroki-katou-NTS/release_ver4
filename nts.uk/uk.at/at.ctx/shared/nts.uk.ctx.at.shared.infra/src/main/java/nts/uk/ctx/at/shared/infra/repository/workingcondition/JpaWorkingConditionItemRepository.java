@@ -841,24 +841,27 @@ public class JpaWorkingConditionItemRepository extends JpaRepository
 		if (entities.isEmpty()) return new HashMap<>();
 		return params.entrySet().stream().collect(Collectors.toMap(p -> p.getKey(), p -> {
 			List<Object[]> sub = entities.stream().filter(e -> ((KshmtWorkingCondItem) e[0]).getSid().equals(p.getKey())).collect(Collectors.toList());
-			return p.getValue().stream().collect(Collectors.toMap(d -> d, d -> {
+			Map<GeneralDate, WorkingConditionItem> result = new HashMap<>();
+			p.getValue().stream().forEach(d -> {
 				List<Object[]> data = sub.stream().filter(wc -> {
 					KshmtWorkingCond se = (KshmtWorkingCond) wc[1];
 					return se.getStrD().compareTo(d) <= 0 && se.getEndD().compareTo(d) >= 0;
 				}).collect(Collectors.toList());
 				
 				if(data.isEmpty()){
-					return null;
+					return;
 				}
 				
 				KshmtWorkingCondItem workCondItem = data.stream().filter(dt -> dt[0] != null).findFirst()
 						.map(dt -> (KshmtWorkingCondItem) dt[0]).orElse(null);
 				
 				if(workCondItem == null){
-					return null;
+					return;
 				}
-				return createWorkConditionItem(data, workCondItem);
-			}));
+				result.put(d, createWorkConditionItem(data, workCondItem));
+			});
+			
+			return result;
 		}));
 	}
 	

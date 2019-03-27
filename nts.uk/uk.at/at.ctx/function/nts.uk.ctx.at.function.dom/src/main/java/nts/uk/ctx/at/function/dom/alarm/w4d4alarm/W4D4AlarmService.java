@@ -9,14 +9,20 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 //import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
 import nts.arc.task.AsyncTask;
+import nts.arc.task.parallel.ManagedParallelWithContext;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.function.dom.adapter.worklocation.RecordWorkInfoFunAdapter;
 import nts.uk.ctx.at.function.dom.adapter.worklocation.RecordWorkInfoFunAdapterDto;
 import nts.uk.ctx.at.function.dom.adapter.workrecord.alarmlist.fourweekfourdayoff.W4D4CheckAdapter;
@@ -47,6 +53,9 @@ public class W4D4AlarmService {
 	
 	@Inject
 	private ErAlWorkRecordCheckAdapter erAlWorkRecordCheckAdapter;
+	
+	@Inject
+	private ManagedParallelWithContext parallelManager;
 	
 		
 	public List<ValueExtractAlarm> calculateTotal4W4D(EmployeeSearchDto employee, DatePeriod period, String checkConditionCode) {
@@ -187,6 +196,56 @@ public class W4D4AlarmService {
 		
 		
 	
+		return result;
+
+	}
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	public List<ValueExtractAlarm> calculateTotal4W4D(String companyID, List<EmployeeSearchDto> employees, DatePeriod period, List<AlarmCheckConditionByCategory> w4d4ErAl, 
+			Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
+		List<ValueExtractAlarm> result = Collections.synchronizedList(new ArrayList<ValueExtractAlarm>());
+		List<String> empIds = employees.stream().map(e-> e.getId()).collect(Collectors.toList());
+		
+		List<AlarmCheckTargetCondition> listExtractionCondition = w4d4ErAl.stream().map(c-> c.getExtractTargetCondition()).collect(Collectors.toList());
+		
+		List<String> workTypes = workTypeRepository.findWorkTypeCodeOneDay(companyID, DeprecateClassification.NotDeprecated.value, WorkTypeUnit.OneDay.value, WorkTypeClassification.Holiday.value);
+		
+		List<RecordWorkInfoFunAdapterDto> workInfos = recordWorkInfoFunAdapter.findByPeriodOrderByYmdAndEmps(empIds, period);
+
+		Map<String, List<RegulationInfoEmployeeResult>> listTargetMap = erAlWorkRecordCheckAdapter.filterEmployees(period, empIds, listExtractionCondition);
+		
+		w4d4ErAl.forEach(c -> {
+			AlarmCheckCondition4W4D fourW4DCheckCond = (AlarmCheckCondition4W4D) c.getExtractionCondition();
+			if (fourW4DCheckCond.isForActualResultsOnly()) {
+				List<RegulationInfoEmployeeResult> targetEmps = listTargetMap.get(c.getExtractTargetCondition().getId());
+				if(!targetEmps.isEmpty()) {
+					Map<String, List<RegulationInfoEmployeeResult>> valueMap = targetEmps.stream().collect(Collectors.groupingBy(v -> v.getEmployeeId(), Collectors.toList()));
+					parallelManager.forEach(CollectionUtil.partitionBySize(employees, 100), emps -> {
+						
+						synchronized (this) {
+							if(shouldStop.get()) {
+								return;
+							}
+						}
+						List<String> currentEmpIds = emps.stream().map(e -> e.getId()).collect(Collectors.toList());
+						emps.stream().forEach(emp -> {
+							if(valueMap.containsKey(emp.getId())){
+								List<RecordWorkInfoFunAdapterDto> currentWorkInfos = workInfos.stream().filter(wi -> currentEmpIds.contains(wi.getEmployeeId())).collect(Collectors.toList());
+								this.checkWithActualResults(emp, period, workTypes, currentWorkInfos).ifPresent(er -> {
+									result.add(er);
+								});
+							}
+						});
+						
+						synchronized (this) {
+							counter.accept(emps.size());
+						}
+						
+					});
+				}
+			}
+		});
+		
 		return result;
 
 	}

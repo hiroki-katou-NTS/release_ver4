@@ -31,5 +31,7 @@ public class DPDisplayLockParam {
 	private List<DPHeaderDto> lstHeader;
 
 	private boolean showLock;
+	
+	private Integer closureId;
 
 }
