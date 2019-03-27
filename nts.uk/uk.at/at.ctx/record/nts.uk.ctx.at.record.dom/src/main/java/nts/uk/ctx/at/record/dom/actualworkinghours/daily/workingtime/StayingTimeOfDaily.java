@@ -10,25 +10,26 @@ import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
 import nts.uk.ctx.at.record.dom.workrule.specific.CalculateOfTotalConstraintTime;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 
 /** 日別実績の滞在時間 */
 @Getter
 public class StayingTimeOfDaily {
 
 	/** PCログオフ後時間: 勤怠時間 */
-	private AttendanceTime afterPCLogOffTime;
+	private AttendanceTimeOfExistMinus afterPCLogOffTime;
 	
 	/** PCログオン前時間: 勤怠時間 */
-	private AttendanceTime beforePCLogOnTime;
+	private AttendanceTimeOfExistMinus beforePCLogOnTime;
 	
 	/** 出勤前時間: 勤怠時間 */
-	private AttendanceTime beforeWoringTime;
+	private AttendanceTimeOfExistMinus beforeWoringTime;
 	
 	/** 滞在時間: 勤怠時間 */
 	private AttendanceTime stayingTime;
 	
 	/** 退勤後時間: 勤怠時間 */
-	private AttendanceTime afterLeaveTime;
+	private AttendanceTimeOfExistMinus afterLeaveTime;
 	
 	public StayingTimeOfDaily() {
 		super();
@@ -37,6 +38,17 @@ public class StayingTimeOfDaily {
 	public StayingTimeOfDaily(AttendanceTime afterPCLogOffTime, AttendanceTime beforePCLogOnTime, AttendanceTime beforeWoringTime,
 			AttendanceTime stayingTime, AttendanceTime afterLeaveTime) {
 		super();
+		this.afterPCLogOffTime = new AttendanceTimeOfExistMinus(afterPCLogOffTime.valueAsMinutes());
+		this.beforePCLogOnTime = new AttendanceTimeOfExistMinus(beforePCLogOnTime.valueAsMinutes());
+		this.beforeWoringTime = new AttendanceTimeOfExistMinus(beforeWoringTime.valueAsMinutes());
+		this.stayingTime = stayingTime;
+		this.afterLeaveTime = new AttendanceTimeOfExistMinus(afterLeaveTime.valueAsMinutes());
+	}
+	
+	public StayingTimeOfDaily(AttendanceTimeOfExistMinus afterPCLogOffTime,
+			AttendanceTimeOfExistMinus beforePCLogOnTime, AttendanceTimeOfExistMinus beforeWoringTime,
+			AttendanceTime stayingTime, AttendanceTimeOfExistMinus afterLeaveTime) {
+		super();
 		this.afterPCLogOffTime = afterPCLogOffTime;
 		this.beforePCLogOnTime = beforePCLogOnTime;
 		this.beforeWoringTime = beforeWoringTime;
@@ -44,8 +56,9 @@ public class StayingTimeOfDaily {
 		this.afterLeaveTime = afterLeaveTime;
 	}
 	
+	
 	public static StayingTimeOfDaily defaultValue(){
-		return new StayingTimeOfDaily(new AttendanceTime(0), new AttendanceTime(0), new AttendanceTime(0), new AttendanceTime(0), new AttendanceTime(0));
+		return new StayingTimeOfDaily(new AttendanceTimeOfExistMinus(0), new AttendanceTimeOfExistMinus(0), new AttendanceTimeOfExistMinus(0), new AttendanceTime(0), new AttendanceTimeOfExistMinus(0));
 	}
 	
 	/**
@@ -62,5 +75,7 @@ public class StayingTimeOfDaily {
 			   											CalculateOfTotalConstraintTime calculateOfTotalConstraintTime) {
 		return calculateOfTotalConstraintTime.calcCalculateOfTotalConstraintTime(attendanceLeavingGateOfDaily,pCLogOnInfoOfDaily,attendanceLeave);
 	}
+
+
    
 }

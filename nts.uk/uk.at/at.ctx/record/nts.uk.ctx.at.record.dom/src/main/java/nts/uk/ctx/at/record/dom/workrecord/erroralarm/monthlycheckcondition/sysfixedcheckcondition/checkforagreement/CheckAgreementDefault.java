@@ -26,7 +26,8 @@ public class CheckAgreementDefault implements CheckAgreementService {
 	@Override
 	public Optional<ValueExtractAlarmWR> checkAgreement(String employeeID, int yearMonth,int closureId,ClosureDate closureDate) {
 		//実績データに埋まっている「36協定エラー状態」を取得する : 207
-		Optional<AttendanceTimeOfMonthly> attdTimeOfMonthly = attendanceTimeOfMonthlyRepo.find(employeeID,new YearMonth(yearMonth),
+		YearMonth ym = new YearMonth(yearMonth);
+		Optional<AttendanceTimeOfMonthly> attdTimeOfMonthly = attendanceTimeOfMonthlyRepo.find(employeeID, ym,
 				EnumAdaptor.valueOf(closureId, ClosureId.class),
 				closureDate);
 		if(!attdTimeOfMonthly.isPresent())
@@ -35,7 +36,7 @@ public class CheckAgreementDefault implements CheckAgreementService {
 		AgreementTimeOfMonthly agreementTimeOfMonthly = attdTimeOfMonthly.get().getMonthlyCalculation().getAgreementTime();
 		AgreementTimeStatusOfMonthly status = agreementTimeOfMonthly.getStatus();
 		
-		GeneralDate date = GeneralDate.fromString(String.valueOf(yearMonth).substring(0,4) + '-' + String.valueOf(yearMonth).substring(4,6) + '-' +"01", "yyyy-MM-dd");
+		GeneralDate date = GeneralDate.ymd(ym.year(), ym.month(), 1);
 		
 		if(status == AgreementTimeStatusOfMonthly.NORMAL ||status == AgreementTimeStatusOfMonthly.NORMAL_SPECIAL ) {
 			return Optional.empty();

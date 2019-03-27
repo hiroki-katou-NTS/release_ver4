@@ -34,6 +34,9 @@ function initScreen(screenModel: any, listAppMeta: Array<model.ApplicationMetada
         if (currentApp.appType == 10) {
             $("#fixed-table").ntsFixedTable({ width: 100 });
         }
+        nts.uk.ui._viewModel.errors.isEmpty.subscribe((values) => {
+            screenModel.errorEmpty(values);
+        });
     });
 }
     

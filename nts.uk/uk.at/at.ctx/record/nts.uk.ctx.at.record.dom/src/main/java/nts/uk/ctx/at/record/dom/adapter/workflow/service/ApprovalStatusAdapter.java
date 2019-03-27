@@ -3,6 +3,7 @@
  */
 package nts.uk.ctx.at.record.dom.adapter.workflow.service;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,7 +25,13 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  *
  */
 public interface ApprovalStatusAdapter {
-	List<ApproveRootStatusForEmpImport> getApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate, String employeeID,String companyID,Integer rootType); 
+	
+	default List<ApproveRootStatusForEmpImport> getApprovalByEmplAndDate(
+			GeneralDate startDate, GeneralDate endDate, String employeeID,String companyID,Integer rootType) {
+		return this.getApprovalByEmplAndDate(startDate, endDate, Arrays.asList(employeeID), companyID, rootType);
+	}
+	
+	List<ApproveRootStatusForEmpImport> getApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate, List<String> employeeID,String companyID,Integer rootType); 
 	
 	/**
 	 * <=>RequestList133

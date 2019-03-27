@@ -8,6 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
@@ -49,7 +52,8 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  * @author hungnm
  *
  */
-@RequestScoped
+@Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 
 //	@Inject
@@ -61,8 +65,9 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 	private SprAppRootStatePub sprPub;
 	@Override
 	public List<ApproveRootStatusForEmpImport> getApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate,
-			String employeeID, String companyID, Integer rootType) {
-		return intermediateDataPub.getAppRootStatusByEmpPeriod(employeeID, new DatePeriod(startDate, endDate), rootType)
+			List<String> employeeIDs, String companyID, Integer rootType) {
+		
+		return intermediateDataPub.getAppRootStatusByEmpsPeriod(employeeIDs, new DatePeriod(startDate, endDate), rootType)
 				.stream()
 				.map((pub) -> new ApproveRootStatusForEmpImport(pub.getEmployeeID(), pub.getDate(),
 						EnumAdaptor.valueOf(pub.getDailyConfirmAtr(), ApprovalStatusForEmployee.class)))

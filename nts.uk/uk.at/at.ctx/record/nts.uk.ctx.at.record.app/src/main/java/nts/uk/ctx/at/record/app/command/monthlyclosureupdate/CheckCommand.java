@@ -13,4 +13,6 @@ public class CheckCommand {
 	
 	private MonthlyClosureResponse screenParams;
 	
+	private Boolean overTime;
+	
 }

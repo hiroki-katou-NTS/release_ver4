@@ -33,7 +33,6 @@ import nts.uk.ctx.at.record.dom.raborstandardact.flex.SettingOfFlexWork;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.SystemFixedErrorAlarm;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.kmk013_splitdomain.DeductLeaveEarly;
-import nts.uk.ctx.at.shared.dom.calculation.holiday.time.OverTimeFrame;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryOccurrenceSetting;
@@ -41,7 +40,6 @@ import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.worktime.common.DeductionTime;
 import nts.uk.ctx.at.shared.dom.worktime.fixedset.FixRestTimezoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
-import nts.uk.ctx.at.shared.dom.worktype.AttendanceHolidayAttr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
 import nts.uk.shr.com.time.TimeWithDayAttr;
@@ -201,12 +199,14 @@ public class ActualWorkingTimeOfDaily {
 		
 		/*大塚モードの計算（欠勤控除時間）*/
 		//1日出勤系の場合は処理を呼ばないように作成が必要
-		if(workType.getDailyWork().decisionNeedPredTime() != AttendanceHolidayAttr.FULL_TIME && recordClass.getCalculatable()) {
+		if(recordClass.getCalculatable()) {
 			//大塚モード休憩未取得
 			calcResultOotsuka = calcResultOotsuka.reCalcLateLeave(recordClass.getWorkTimezoneCommonSet(),
 					  recordClass.getFixRestTimeSetting(),
 					  recordClass.getFixWoSetting(),
-					  recordClass.getIntegrationOfDaily().getAttendanceLeave());	
+					  recordClass.getIntegrationOfDaily().getAttendanceLeave(),
+					  workScheduleTime.getRecordPrescribedLaborTime(), 
+					  workType);	
 
 		}
 		

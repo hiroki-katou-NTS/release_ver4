@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,14 +16,17 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 
 import lombok.SneakyThrows;
+import lombok.val;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.at.record.dom.workinformation.ScheduleTimeSheet;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.enums.CalculationState;
 import nts.uk.ctx.at.record.dom.workinformation.enums.NotUseAttribute;
@@ -43,20 +47,8 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 public class JpaWorkInformationRepository extends JpaRepository implements WorkInformationRepository {
 
-	private static final String FIND_BY_PERIOD_ORDER_BY_YMD_AND_EMPS;
-
 	private static final String FIND_BY_EMPLOYEE_ID = "SELECT a FROM KrcdtDaiPerWorkInfo a "
 			+ " WHERE a.krcdtDaiPerWorkInfoPK.employeeId = :employeeId ";
-	static {
-		StringBuilder builderString = new StringBuilder();
-		builderString.append("SELECT a ");
-		builderString.append("FROM KrcdtDaiPerWorkInfo a ");
-		builderString.append("WHERE a.krcdtDaiPerWorkInfoPK.employeeId IN :employeeIds ");
-		builderString.append("AND a.krcdtDaiPerWorkInfoPK.ymd >= :startDate ");
-		builderString.append("AND a.krcdtDaiPerWorkInfoPK.ymd <= :endDate ");
-		builderString.append("ORDER BY a.krcdtDaiPerWorkInfoPK.ymd ");
-		FIND_BY_PERIOD_ORDER_BY_YMD_AND_EMPS = builderString.toString();
-	}
 
 	private String FIND_BY_WORKTYPE_PERIOD = "SELECT c.krcdtDaiPerWorkInfoPK.ymd" + " FROM KrcdtDaiPerWorkInfo c"
 			+ " WHERE c.krcdtDaiPerWorkInfoPK.ymd >= :startDate" + " AND c.krcdtDaiPerWorkInfoPK.ymd <= :endDate"
@@ -244,21 +236,6 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 								.map(c -> c.toDomain()).collect(Collectors.toList()));
 			});
 		}
-	}
-
-	@Override
-	public List<WorkInfoOfDailyPerformance> findByListEmployeeId(List<String> employeeIds, DatePeriod ymds) {
-		List<Object[]> result = new ArrayList<>();
-		StringBuilder query = new StringBuilder(
-				"SELECT af, c from KrcdtDaiPerWorkInfo af LEFT JOIN af.scheduleTimes c ");
-		query.append(" WHERE af.krcdtDaiPerWorkInfoPK.employeeId IN :employeeId ");
-		query.append(" AND af.krcdtDaiPerWorkInfoPK.ymd <= :end AND af.krcdtDaiPerWorkInfoPK.ymd >= :start");
-		TypedQueryWrapper<Object[]> tQuery = this.queryProxy().query(query.toString(), Object[].class);
-		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds -> {
-			result.addAll(tQuery.setParameter("employeeId", empIds).setParameter("start", ymds.start())
-					.setParameter("end", ymds.end()).getList());
-		});
-		return toDomainFromJoin(result);
 	}
 
 	@Override
@@ -500,15 +477,71 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 			DatePeriod datePeriod) {
 		if(employeeIds.isEmpty())
 			return Collections.emptyList();
+
 		List<WorkInfoOfDailyPerformance> resultList = new ArrayList<>();
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			resultList.addAll(this.queryProxy().query(FIND_BY_PERIOD_ORDER_BY_YMD_AND_EMPS, KrcdtDaiPerWorkInfo.class)
-				.setParameter("employeeIds", subList)
-				.setParameter("startDate", datePeriod.start())
-				.setParameter("endDate", datePeriod.end()).getList(f -> f.toDomain()));
+			resultList.addAll(internalQuery(datePeriod, subList));
 		});
 		resultList.sort(Comparator.comparing(WorkInfoOfDailyPerformance::getYmd));
 		return resultList;
+	}
+
+	@SneakyThrows
+	private List<WorkInfoOfDailyPerformance> internalQuery(DatePeriod datePeriod, List<String> subList) {
+		String subIn = NtsStatement.In.createParamsString(subList);
+
+		Map<String, Map<GeneralDate, List<ScheduleTimeSheet>>> scheTimes = new HashMap<>(); 
+		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_WORK_SCHEDULE_TIME WHERE YMD >= ? AND YMD <= ? AND SID IN (" + subIn + ")")){
+			stmt.setDate(1, Date.valueOf(datePeriod.start().localDate()));
+			stmt.setDate(2, Date.valueOf(datePeriod.end().localDate()));
+			for (int i = 0; i < subList.size(); i++) {
+				stmt.setString(i + 3, subList.get(i));
+			}
+			new NtsResultSet(stmt.executeQuery()).getList(c -> {
+				String sid = c.getString("SID");
+				GeneralDate ymd = c.getGeneralDate("YMD");
+				if(!scheTimes.containsKey(sid)){
+					scheTimes.put(sid, new HashMap<>());
+				}
+				if(!scheTimes.get(sid).containsKey(ymd)) {
+					scheTimes.get(sid).put(ymd, new ArrayList<>());
+				}
+				getScheduleTime(scheTimes, sid, ymd).add(new ScheduleTimeSheet(c.getInt("WORK_NO"), 
+						c.getInt("ATTENDANCE"), c.getInt("LEAVE_WORK")));
+				return null;
+			});
+		};
+		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_DAI_PER_WORK_INFO WHERE YMD >= ? AND YMD <= ? AND SID IN (" + subIn + ")")){
+			stmt.setDate(1, Date.valueOf(datePeriod.start().localDate()));
+			stmt.setDate(2, Date.valueOf(datePeriod.end().localDate()));
+			for (int i = 0; i < subList.size(); i++) {
+				stmt.setString(i + 3, subList.get(i));
+			}
+			return new NtsResultSet(stmt.executeQuery()).getList(c -> {
+				Integer calcState = c.getInt("CALCULATION_STATE"), goStraight = c.getInt("GO_STRAIGHT_ATR"), 
+						backStraight = c.getInt("BACK_STRAIGHT_ATR"), dayOfWeek = c.getInt("DAY_OF_WEEK");
+				String sid = c.getString("SID");
+				GeneralDate ymd = c.getGeneralDate("YMD");
+				return new WorkInfoOfDailyPerformance(sid, 
+						new WorkInformation(c.getString("RECORD_WORK_WORKTIME_CODE"), c.getString("RECORD_WORK_WORKTYPE_CODE")), 
+						new WorkInformation(c.getString("SCHEDULE_WORK_WORKTIME_CODE"), c.getString("SCHEDULE_WORK_WORKTYPE_CODE")), 
+						calcState == null ? null : EnumAdaptor.valueOf(calcState, CalculationState.class), 
+						goStraight == null ? null : EnumAdaptor.valueOf(goStraight, NotUseAttribute.class), 
+						backStraight == null ? null : EnumAdaptor.valueOf(backStraight, NotUseAttribute.class), 
+						ymd, dayOfWeek == null ? null : EnumAdaptor.valueOf(dayOfWeek, DayOfWeek.class), 
+						getScheduleTime(scheTimes, sid, ymd));
+			});
+		}
+	}
+
+	private List<ScheduleTimeSheet> getScheduleTime(Map<String, Map<GeneralDate, List<ScheduleTimeSheet>>> scheTimes,
+			String sid, GeneralDate ymd) {
+		if(scheTimes.containsKey(sid)){
+			if(scheTimes.get(sid).containsKey(ymd)){
+				return scheTimes.get(sid).get(ymd);
+			}
+		}
+		return new ArrayList<>();
 	}
 
 	@Override

@@ -24,7 +24,7 @@ public interface GoBackDirectlyRegisterService {
 	 * @param application
 	 * @param appApprovalPhases
 	 */
-	public void checkBeforRegister(GoBackDirectly goBackDirectly, Application_New application);
+	public void checkBeforRegister(GoBackDirectly goBackDirectly, Application_New application, boolean checkOver1Year);
 
 	/**
 	 * アルゴリズム「直行直帰するチェック」を実行する

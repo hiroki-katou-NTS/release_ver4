@@ -24904,9 +24904,13 @@ var nts;
                         },
                         clearState: function (idArr) {
                             var self = this;
-                            var cleanOthShtCellElm = function (id, c) {
+                            var cleanOthShtCellElm = function (id, c, states) {
+                                if (!c)
+                                    return;
                                 var coord = ti.getCellCoord(c);
-                                color.ALL.forEach(function (s) {
+                                if (!states)
+                                    states = color.ALL;
+                                states.forEach(function (s) {
                                     if (c.classList.contains(s)) {
                                         if (s === color.Disable) {
                                             self.enableNtsControlAt(id, coord.columnKey, c);
@@ -24914,44 +24918,64 @@ var nts;
                                         c.classList.remove(s);
                                     }
                                 });
-                                color.popState(id, coord.columnKey, color.ALL);
+                                color.popState(id, coord.columnKey, states);
                             };
-                            var clean = function (id) {
+                            var clean = function (id, key, states) {
                                 var idx = _.findIndex(_dataSource, function (r) { return r[_pk] === id; });
-                                var row = lch.rowAt(_$grid[0], idx);
-                                _.forEach(row, function (c) {
-                                    cleanOthShtCellElm(id, c);
-                                });
+                                if (!_.isNil(key)) {
+                                    var c = lch.cellAt(_$grid[0], idx, key);
+                                    cleanOthShtCellElm(id, c, states);
+                                }
+                                else {
+                                    var row = lch.rowAt(_$grid[0], idx);
+                                    _.forEach(row, function (c) {
+                                        cleanOthShtCellElm(id, c);
+                                    });
+                                }
                                 _.forEach(_.keys(_mafollicle[SheetDef]), function (s) {
                                     if (s === _currentSheet)
                                         return;
                                     var maf = _mafollicle[_currentPage][s];
                                     if (maf && maf.desc) {
-                                        var othShtRow = lch.rowAt(_$grid[0], idx, maf.desc);
-                                        _.forEach(othShtRow, function (c) {
-                                            cleanOthShtCellElm(id, c);
-                                        });
+                                        if (!_.isNil(key)) {
+                                            var c = lch.cellAt(_$grid[0], idx, key, maf.desc);
+                                            cleanOthShtCellElm(id, c, states);
+                                        }
+                                        else {
+                                            var othShtRow = lch.rowAt(_$grid[0], idx, maf.desc);
+                                            _.forEach(othShtRow, function (c) {
+                                                cleanOthShtCellElm(id, c);
+                                            });
+                                        }
                                     }
                                     else
-                                        cleanOthSht(id, _mafollicle[SheetDef][s].columns);
+                                        cleanOthSht(id, _mafollicle[SheetDef][s].columns, states);
                                 });
                             };
-                            var cleanOthSht = function (id, cols) {
+                            var cleanOthSht = function (id, cols, states) {
+                                if (!states) {
+                                    states = color.ALL;
+                                }
                                 _.forEach(cols, function (c) {
                                     if (c.group) {
-                                        cleanOthSht(id, c.group);
+                                        cleanOthSht(id, c.group, states);
                                         return;
                                     }
-                                    color.popState(id, c.key, color.ALL);
+                                    color.popState(id, c.key, states);
                                 });
                             };
-                            if (idArr && !_.isArray(idArr)) {
-                                clean(idArr);
-                                return;
+                            if (arguments.length > 1) {
+                                clean(idArr, arguments[1], arguments[2]);
                             }
-                            _.forEach(idArr, function (id) {
-                                clean(id);
-                            });
+                            else {
+                                if (idArr && !_.isArray(idArr)) {
+                                    clean(idArr);
+                                    return;
+                                }
+                                _.forEach(idArr, function (id) {
+                                    clean(id);
+                                });
+                            }
                         },
                         hideZero: function (val) {
                             if (changeZero(val)) {
@@ -25612,7 +25636,7 @@ var nts;
                                 var coord = ti.getCellCoord($tCell);
                                 var control = dkn.controlType[coord.columnKey];
                                 var cEditor = _mEditor;
-                                if (control === dkn.CHECKBOX && ti.isSpaceKey(evt)) {
+                                if (control === dkn.CHECKBOX && ti.isSpaceKey(evt) && !$tCell.classList.contains(color.Hide)) {
                                     var check = $tCell.querySelector("input[type='checkbox']");
                                     if (!check)
                                         return;
@@ -28553,6 +28577,7 @@ var nts;
                     color.Reflect = "mgrid-reflect";
                     color.Calculation = "mgrid-calc";
                     color.Disable = "mgrid-disable";
+                    color.Hide = "mgrid-hide";
                     color.HOVER = "ui-state-hover";
                     color.ALL = [color.Error, color.Alarm, color.ManualEditTarget, color.ManualEditOther, color.Reflect, color.Calculation, color.Disable];
                     /**

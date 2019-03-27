@@ -11,11 +11,13 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDateTime;
+import nts.uk.ctx.at.function.dom.adapter.mailserver.MailServerAdapter;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.AlarmExtraValueWkReDto;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.ExtractedAlarmDto;
 import nts.uk.ctx.at.function.dom.alarm.extraprocessstatus.ExtractionState;
 import nts.uk.ctx.at.function.dom.alarm.mailsettings.MailSettingAutomatic;
 import nts.uk.ctx.at.function.dom.alarm.mailsettings.MailSettingAutomaticRepository;
+import nts.uk.ctx.at.function.dom.alarm.mailsettings.MailSettings;
 import nts.uk.ctx.at.function.dom.alarm.sendemail.MailSettingsParamDto;
 import nts.uk.ctx.at.function.dom.alarm.sendemail.SendEmailService;
 import nts.uk.ctx.at.function.dom.alarm.sendemail.ValueExtractAlarmDto;
@@ -28,6 +30,9 @@ public class SendAutoExeEmailDefault implements SendAutoExeEmailService {
 	
 	@Inject
 	private SendEmailService sendEmailService;
+	
+	@Inject
+	private MailServerAdapter mailServerAdapter;
 	
 	@Override
 	public Optional<OutputSendAutoExe> sendAutoExeEmail(String companyId, GeneralDateTime executionDate,
@@ -55,7 +60,14 @@ public class SendAutoExeEmailDefault implements SendAutoExeEmailService {
 			return Optional.of(outputSendAutoExe);
 		}
 		
+		//ドメインモデル「メールサーバ」を取得する
+		boolean useAuthentication =  mailServerAdapter.findBy(companyId);
+		//メール設定(本人宛)：アラームリスト通常用メール設定.本人宛メール設定
+		Optional<MailSettings> mailSetting = mailSettingAutomatic.get().getMailSettings();
+		//メール設定(管理者宛)：アラームリスト通常用メール設定.管理者宛メール設定
+		Optional<MailSettings> mailSettingAdmins = mailSettingAutomatic.get().getMailSettingAdmins();
 		boolean checkErrorSendMail = false;
+		
 		try {
 			for(ExtractedAlarmDto extractedAlarmDto :listExtractedAlarmDto) {
 				
@@ -100,7 +112,11 @@ public class SendAutoExeEmailDefault implements SendAutoExeEmailService {
 						listEmpAdminID,
 						extractedAlarmDto.getExtractedAlarmData().stream().map(c->convertToDto(c)).collect(Collectors.toList()),
 						mailSettingsParamDto,
-						alarmCode);
+						alarmCode,
+						useAuthentication,
+						mailSetting,
+						mailSettingAdmins,
+						mailSettingAutomatic.get().getSenderAddress());
 			}
 		}
 		catch (Exception e) {

@@ -13,6 +13,8 @@ import nts.uk.ctx.at.record.app.find.monthly.root.AffiliationInfoOfMonthlyDto;
 import nts.uk.ctx.at.record.app.find.monthly.root.AnnLeaRemNumEachMonthDto;
 import nts.uk.ctx.at.record.app.find.monthly.root.AnyItemOfMonthlyDto;
 import nts.uk.ctx.at.record.app.find.monthly.root.AttendanceTimeOfMonthlyDto;
+import nts.uk.ctx.at.record.app.find.monthly.root.MonthlyCareHdRemainDto;
+import nts.uk.ctx.at.record.app.find.monthly.root.MonthlyChildCareHdRemainDto;
 import nts.uk.ctx.at.record.app.find.monthly.root.MonthlyDayoffRemainDataDto;
 import nts.uk.ctx.at.record.app.find.monthly.root.MonthlyRecordWorkDto;
 import nts.uk.ctx.at.record.app.find.monthly.root.MonthlyRemarksDto;
@@ -22,6 +24,8 @@ import nts.uk.ctx.at.record.app.find.monthly.root.common.ClosureDateDto;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.affiliation.AffiliationInfoOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthly;
+import nts.uk.ctx.at.record.dom.monthly.information.care.MonCareHdRemain;
+import nts.uk.ctx.at.record.dom.monthly.information.childnursing.MonChildHdRemain;
 import nts.uk.ctx.at.record.dom.monthly.remarks.RemarksMonthlyRecord;
 import nts.uk.ctx.at.record.dom.monthly.vacation.absenceleave.monthremaindata.AbsenceLeaveRemainData;
 import nts.uk.ctx.at.record.dom.monthly.vacation.annualleave.AnnLeaRemNumEachMonth;
@@ -223,5 +227,28 @@ public class MonthlyRecordToAttendanceItemConverterImpl implements MonthlyRecord
 	@Override
 	public List<RemarksMonthlyRecord> toRemarks() {
 		return this.monthlyRecord.toRemarks();
+	}
+
+	@Override
+	public MonthlyRecordToAttendanceItemConverter withMonChildHd(MonChildHdRemain monChildHdRemain) {
+		this.monthlyRecord.withChildCare(MonthlyChildCareHdRemainDto.from(monChildHdRemain));
+		return this;
+	}
+
+	@Override
+	public MonthlyRecordToAttendanceItemConverter withMonCareHd(MonCareHdRemain monCareHdRemain) {
+		this.monthlyRecord.withCare(MonthlyCareHdRemainDto.from(monCareHdRemain));
+		return this;
+	}
+
+	@Override
+	public Optional<MonCareHdRemain> toMonCareHd() {
+		
+		return Optional.ofNullable(this.monthlyRecord.toMonCare());
+	}
+
+	@Override
+	public Optional<MonChildHdRemain> toMonChildHd() {
+		return Optional.ofNullable(this.monthlyRecord.toMonChildCare());
 	}
 }

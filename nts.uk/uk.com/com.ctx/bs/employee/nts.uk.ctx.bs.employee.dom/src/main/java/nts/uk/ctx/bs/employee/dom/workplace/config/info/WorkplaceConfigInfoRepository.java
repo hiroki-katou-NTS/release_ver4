@@ -5,9 +5,12 @@
 package nts.uk.ctx.bs.employee.dom.workplace.config.info;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfigHistory;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * The Interface WorkplaceConfigInfoRepository.
@@ -94,6 +97,8 @@ public interface WorkplaceConfigInfoRepository {
 	 * @return the optional
 	 */
 	Optional<WorkplaceConfigInfo> findAllParentByWkpId(String companyId, GeneralDate baseDate, String wkpId);
+	
+	Map<WorkplaceConfigHistory, List<WorkplaceConfigInfo>> findAllParentByWkpId(String companyId, DatePeriod baseDate, List<String> wkpId);
 	
 	/**
 	 * Find by wkp ids at time.

@@ -58,6 +58,7 @@ public class CreateLateOrLeaveEarlyCommand {
 	private String appReason;
 	
 	private int actualCancel; 
+	private boolean checkOver1Year;
 	
 	public GeneralDate getApplicationDate() {
 	return GeneralDate.fromString(this.applicationDate, "yyyy/MM/dd");

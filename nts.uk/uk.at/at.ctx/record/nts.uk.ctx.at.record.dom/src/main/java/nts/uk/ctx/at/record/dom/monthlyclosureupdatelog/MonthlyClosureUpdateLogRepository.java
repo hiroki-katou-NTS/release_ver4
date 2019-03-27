@@ -25,4 +25,10 @@ public interface MonthlyClosureUpdateLogRepository {
 	
 	public void updateStatus(MonthlyClosureUpdateLog domain);
 	
+	/**
+	 * set status of all employee in company = 2 
+	 * @param cid
+	 */
+	public void updateStatusForCompany(String cid);
+	
 }

@@ -186,13 +186,13 @@ public class DataWorkServiceImpl implements IDataWorkService {
 				}
 			}
 			// ドメインモデル「個人勤務日区分別勤務」．平日時．就業時間帯コードを選択する
-			WorkTimeSetting workTime = workTimeSettingRepository.findByCode(companyId,
-					personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTimeCode().get().toString())
-					.orElseGet(()->{
-						return workTimeSettingRepository.findByCompanyId(companyId).get(0);
-					});
-			selectedData.setSelectedWorkTimeCd(workTime.getWorktimeCode().toString());
-			selectedData.setSelectedWorkTimeName(workTime.getWorkTimeDisplayName().getWorkTimeName().v());
+			
+			String wkTimeCd = personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTimeCode().get()
+					.toString();
+			workTimeSettingRepository.findByCode(companyId, wkTimeCd).ifPresent(wkTime -> {
+				selectedData.setSelectedWorkTimeName(wkTime.getWorkTimeDisplayName().getWorkTimeName().v());
+			});
+			selectedData.setSelectedWorkTimeCd(wkTimeCd);
 		}
 		// ドメイン「所定時間設定」.「所定時間帯設定」「時間帯(使用区分付き)」の開始時刻、終了時刻を取得する
 		Optional<PredetemineTimeSetting> opPredetemineTimeSetting = 

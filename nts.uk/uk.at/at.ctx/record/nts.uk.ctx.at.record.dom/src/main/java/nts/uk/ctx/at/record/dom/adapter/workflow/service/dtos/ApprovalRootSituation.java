@@ -20,7 +20,7 @@ public class ApprovalRootSituation {
 	 */
 	private String appRootID;
 	/**
-	 * ルートの状況
+	 * ルートの状況 - 基準社員のルート状況
 	 */
 	private ApproverEmployeeState approvalAtr;
 	/**

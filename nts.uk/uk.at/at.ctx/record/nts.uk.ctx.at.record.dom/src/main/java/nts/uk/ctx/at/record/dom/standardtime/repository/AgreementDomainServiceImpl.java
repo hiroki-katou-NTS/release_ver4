@@ -1,15 +1,28 @@
 package nts.uk.ctx.at.record.dom.standardtime.repository;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.classification.affiliate.AffClassificationAdapter;
+import nts.uk.ctx.at.record.dom.adapter.classification.affiliate.AffClassificationSidImport;
 import nts.uk.ctx.at.record.dom.adapter.employment.SyEmploymentAdapter;
+import nts.uk.ctx.at.record.dom.adapter.employment.SyEmploymentImport;
 import nts.uk.ctx.at.record.dom.adapter.workplace.affiliate.AffWorkplaceAdapter;
+import nts.uk.ctx.at.record.dom.standardtime.AgreementTimeOfClassification;
+import nts.uk.ctx.at.record.dom.standardtime.AgreementTimeOfCompany;
+import nts.uk.ctx.at.record.dom.standardtime.AgreementTimeOfEmployment;
+import nts.uk.ctx.at.record.dom.standardtime.AgreementTimeOfWorkPlace;
 import nts.uk.ctx.at.record.dom.standardtime.AgreementUnitSetting;
 import nts.uk.ctx.at.record.dom.standardtime.BasicAgreementSetting;
+import nts.uk.ctx.at.record.dom.standardtime.BasicAgreementSettingsGetter;
 import nts.uk.ctx.at.record.dom.standardtime.enums.LaborSystemtAtr;
 import nts.uk.ctx.at.record.dom.standardtime.enums.UseClassificationAtr;
 import nts.uk.ctx.at.record.dom.standardtime.primitivevalue.AlarmFourWeeks;
@@ -34,6 +47,7 @@ import nts.uk.ctx.at.record.dom.standardtime.primitivevalue.LimitTwoMonths;
 import nts.uk.ctx.at.record.dom.standardtime.primitivevalue.LimitTwoWeeks;
 import nts.uk.ctx.at.record.dom.standardtime.primitivevalue.LimitWeek;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * ドメインサービス実装：36協定
@@ -138,6 +152,78 @@ public class AgreementDomainServiceImpl implements AgreementDomainService {
 			if (basicAgreementSetOpt.isPresent()) return basicAgreementSetOpt.get();
 		}
 		
+		// 全ての値を0で返す
+		return getDefault();
+	}
+	
+	@Override
+	public BasicAgreementSettingsGetter getBasicSet(String companyId, List<String> employeeIds, DatePeriod datePeriod) {
+		// 「36協定単位設定」を取得する
+		Map<String, BasicAgreementSetting> basicAgreeSettings = new HashMap<>();
+		List<AffClassificationSidImport> affClassifications = new ArrayList<>();
+		List<AgreementTimeOfClassification> agreeTimeClassifi = new ArrayList<>();
+		Map<GeneralDate, Map<String, List<String>>> empToWorkplaceId = new HashMap<>();
+		Map<String, AgreementTimeOfWorkPlace> agreeTimeWP = new HashMap<>();
+		Map<String, List<SyEmploymentImport>> employments = new HashMap<>();
+		Map<String, AgreementTimeOfEmployment> agreeTimeEmployment = new HashMap<>();
+		List<AgreementTimeOfCompany> agreeTimeCompany = new ArrayList<>();
+		
+		AgreementUnitSetting agreementUnitSet = this.agreementUnitSetRepository.find(companyId).orElseGet(() -> new AgreementUnitSetting(companyId,
+				UseClassificationAtr.NOT_USE, UseClassificationAtr.NOT_USE, UseClassificationAtr.NOT_USE));
+		
+		if (agreementUnitSet.getClassificationUseAtr() == UseClassificationAtr.USE){
+			affClassifications = this.affClassficationAdapter.finds(companyId, employeeIds, datePeriod);
+			
+			agreeTimeClassifi = this.agreementTimeClassRepository.find(companyId, affClassifications.stream()
+																.map(c -> c.getClassificationCode()).distinct().collect(Collectors.toList()));
+			
+			basicAgreeSettings.putAll(this.getBasicSetting(agreeTimeClassifi.stream().map(c -> c.getBasicSettingId()).distinct().collect(Collectors.toList())));
+		}
+		
+		if(agreementUnitSet.getWorkPlaceUseAtr() == UseClassificationAtr.USE){
+			empToWorkplaceId.putAll(this.affWorkplaceAdapter.findAffiliatedWorkPlaceIdsToRoot(companyId, employeeIds, datePeriod));
+//			employeeIds.stream().forEach(empId -> {
+//				Map<GeneralDate, List<String>> empDateToWpId = new HashMap<>();
+//				datePeriod.datesBetween().forEach(date -> {
+//					empDateToWpId.put(date, this.affWorkplaceAdapter.findAffiliatedWorkPlaceIdsToRoot(companyId, empId, date));
+//				});
+//				empToWorkplaceId.put(empId, empDateToWpId);
+//			});
+			List<String> workplaceIds = empToWorkplaceId.entrySet().stream().map(c -> 
+													c.getValue().values().stream().flatMap(List::stream).distinct().collect(Collectors.toList()))
+											.flatMap(List::stream).distinct().collect(Collectors.toList());
+			// 職場36協定時間を取得する
+			agreeTimeWP = this.agreementTimeWorkPlaceRepository.findWorkPlaceSetting(workplaceIds)
+											.stream().collect(Collectors.toMap(c -> c.getWorkplaceId(), c -> c));
+			basicAgreeSettings.putAll(this.getBasicSetting(agreeTimeWP.values().stream()
+																.map(c -> c.getBasicSettingId()).distinct().collect(Collectors.toList())));
+		}
+		
+		if(agreementUnitSet.getEmploymentUseAtr() == UseClassificationAtr.USE){
+			employments = this.syEmploymentAdapter.finds(employeeIds, datePeriod);
+			List<String> employmentCodes = employments.entrySet().stream().map(c -> 
+																c.getValue().stream().map(h -> h.getEmploymentCode()).collect(Collectors.toList()))
+															.flatMap(List::stream).distinct().collect(Collectors.toList());
+			
+			agreeTimeEmployment = this.agreementTimeEmploymentRepository.findEmploymentSetting(companyId, employmentCodes)
+															.stream().collect(Collectors.toMap(c -> c.getEmploymentCategoryCode(), c -> c));
+			basicAgreeSettings.putAll(this.getBasicSetting(agreeTimeEmployment.values().stream()
+																.map(c -> c.getBasicSettingId()).distinct().collect(Collectors.toList())));
+		}
+		
+		agreeTimeCompany = this.agreementTimeCompanyRepository.find(companyId);
+		basicAgreeSettings.putAll(this.getBasicSetting(agreeTimeCompany.stream()
+																.map(c -> c.getBasicSettingId()).distinct().collect(Collectors.toList())));
+		
+		return new BasicAgreementSettingsGetter(agreementUnitSet, affClassifications, agreeTimeClassifi, empToWorkplaceId, 
+				agreeTimeWP, employments, agreeTimeEmployment, agreeTimeCompany, basicAgreeSettings);
+	}
+	
+	private Map<String, BasicAgreementSetting> getBasicSetting(List<String> setIds){
+		return this.basicAgreementSetRepository.find(setIds).stream().collect(Collectors.toMap(c -> c.getBasicSettingId(), c -> c));
+	}
+	
+	private BasicAgreementSetting getDefault(){
 		// 全ての値を0で返す
 		return new BasicAgreementSetting(
 				new String(),

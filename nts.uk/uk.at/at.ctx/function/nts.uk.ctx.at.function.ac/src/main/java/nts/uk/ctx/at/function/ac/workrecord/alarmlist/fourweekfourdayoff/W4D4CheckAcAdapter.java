@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import nts.uk.ctx.at.function.dom.adapter.worklocation.RecordWorkInfoFunAdapterDto;
 import nts.uk.ctx.at.function.dom.adapter.workrecord.alarmlist.fourweekfourdayoff.W4D4CheckAdapter;
 import nts.uk.ctx.at.function.dom.alarm.alarmdata.ValueExtractAlarm;
+import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.ErAlConstant;
 import nts.uk.ctx.at.record.pub.workinformation.InfoCheckNotRegisterPubExport;
 import nts.uk.ctx.at.record.pub.workrecord.alarmlist.fourweekfourdayoff.AlarmExtractionValue4W4DExport;
 import nts.uk.ctx.at.record.pub.workrecord.alarmlist.fourweekfourdayoff.W4D4CheckPub;
@@ -32,7 +33,7 @@ public class W4D4CheckAcAdapter implements W4D4CheckAdapter {
 				period,listHolidayWorkTypeCode,listWorkInfoOfDailyPerByID.stream().map(c->convertToExport(c)).collect(Collectors.toList()) );
 		if (optAlarmExport.isPresent()) {			
 			AlarmExtractionValue4W4DExport alarmExport = optAlarmExport.get();
-			ValueExtractAlarm alarmImport = new ValueExtractAlarm(workplaceID, employeeID, alarmExport.getDatePeriod(),
+			ValueExtractAlarm alarmImport = new ValueExtractAlarm(workplaceID, employeeID, toDateString(alarmExport.getDatePeriod()),
 					alarmExport.getClassification(), alarmExport.getAlarmItem(), alarmExport.getAlarmValueMessage(),
 					alarmExport.getComment());
 			return Optional.of(alarmImport);
@@ -43,12 +44,16 @@ public class W4D4CheckAcAdapter implements W4D4CheckAdapter {
 
 	}
 	
+	private String toDateString(DatePeriod period) {
+		return period.start().toString(ErAlConstant.DATE_FORMAT) + ErAlConstant.PERIOD_SEPERATOR + period.end().toString(ErAlConstant.DATE_FORMAT); 
+	}
+	
 	private InfoCheckNotRegisterPubExport convertToExport(RecordWorkInfoFunAdapterDto dto ) {
 		return new  InfoCheckNotRegisterPubExport(
 				dto.getEmployeeId(),
 				dto.getWorkTimeCode(),
-				dto.getWorkTypeCode()
-				);
+				dto.getWorkTypeCode(),
+				dto.getWorkingDate());
 	}
 
 }

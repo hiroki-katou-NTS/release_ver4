@@ -9,6 +9,7 @@ import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootStateStatus;
+import nts.uk.ctx.workflow.dom.service.output.Request133Output;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 /**
@@ -25,7 +26,7 @@ public interface AppRootInstanceService {
 	 * @param rootType ルート種類（日別確認／月別確認）
 	 * @return 承認ルートの状況
 	 */
-	public List<ApprovalRootStateStatus> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType);
+	public Request133Output getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType);
 	
 	public List<ApprovalRootStateStatus> getAppRootStatusByEmpsPeriod(String compID, List<String> employeeIDLst, DatePeriod period, RecordRootType rootType);
 	

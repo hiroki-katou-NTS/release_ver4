@@ -34,6 +34,15 @@ public interface WorkTimeSettingRepository {
 	 * @return the list
 	 */
 	public List<WorkTimeSetting> findByCodes(String companyId, List<String> codes);
+	
+	/**
+	 * Find by codes with No master
+	 *
+	 * @param companyId the company id
+	 * @param codes the codes
+	 * @return the list
+	 */
+	public List<WorkTimeSetting> findByCodesWithNoMaster(String companyID, List<String> codes);
 
 	/**
 	 * Find by code.

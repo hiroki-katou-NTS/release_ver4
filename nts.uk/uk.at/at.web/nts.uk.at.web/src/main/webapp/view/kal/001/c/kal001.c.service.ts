@@ -4,14 +4,14 @@ module nts.uk.at.view.kal001.c {
     export module service {
 
         var paths = {
-            getEmployeeSendEmail: "at/function/alarm/kal/001/get/employee/sendEmail",
+            getEmployeeSendEmail: "at/function/alarm/kal/001/get/employee/sendEmail/",
             getAllMailSet: "at/function/alarm/mailsetting/getinformailseting",
             alarmListSendEmail: "at/function/alarm/kal/001/send-email"
         }
 
 
-        export function getEmployeeSendEmail(query: any): JQueryPromise<any> {
-            return ajax("at", paths.getEmployeeSendEmail, query);
+        export function getEmployeeSendEmail(processId: string): JQueryPromise<any> {
+            return ajax("at", paths.getEmployeeSendEmail + processId);
         };
 
         export function getAllMailSet(): JQueryPromise<any> {

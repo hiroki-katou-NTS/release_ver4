@@ -52,7 +52,7 @@ public class AttendanceItemServiceCenter implements AttendanceItemService {
 	
 	private List<ItemValue> limitItemBy(AttendanceItemType type, List<ItemValue> source, List<ValueType> constraints){
 		Map<Integer, OptionalItem> optionalMaster = getOptionalMaster(type);
-		Map<Integer, Integer> optionalItems = AttendanceItemIdContainer.mapOptionalItemIdsToNos();
+		Map<Integer, Integer> optionalItems = AttendanceItemIdContainer.mapOptionalItemIdsToNos(type);
 		
 		return source.stream().filter(c -> {
 			if(!constraints.contains(c.getValueType())){

@@ -343,9 +343,9 @@ public class KrcdtDayAttendanceTime extends UkJpaEntity implements Serializable 
 		// 日別実績の勤怠時間
 		return new AttendanceTimeOfDailyPerformance(this.krcdtDayAttendanceTimePK == null ? null : this.krcdtDayAttendanceTimePK.employeeID, this.krcdtDayAttendanceTimePK.generalDate,
 				this.krcdtDayWorkScheTime == null ? null : this.krcdtDayWorkScheTime.toDomain(), actual,
-				new StayingTimeOfDaily(new AttendanceTime(this.aftPcLogoffTime),
-						new AttendanceTime(this.bfrPcLogonTime), new AttendanceTime(this.bfrWorkTime),
-						new AttendanceTime(this.stayingTime), new AttendanceTime(this.aftLeaveTime)),
+				new StayingTimeOfDaily(new AttendanceTimeOfExistMinus(this.aftPcLogoffTime),
+						new AttendanceTimeOfExistMinus(this.bfrPcLogonTime), new AttendanceTimeOfExistMinus(this.bfrWorkTime),
+						new AttendanceTime(this.stayingTime), new AttendanceTimeOfExistMinus(this.aftLeaveTime)),
 				new AttendanceTimeOfExistMinus(this.budgetTimeVariance), new AttendanceTimeOfExistMinus(this.unemployedTime));
 	}
 

@@ -269,23 +269,42 @@ module nts.uk.at.view.kaf011.a.screenModel {
             let checkBoxValue = self.checkBoxValue();
             // if (isCheckReasonError) { return; }
             block.invisible();
+            saveCmd.checkOver1Year = true;
             service.save(saveCmd).done((data) => {
-                dialog({ messageId: 'Msg_15' }).then(function() {
-                    if (data.autoSendMail) {
-                        appcommon.CommonProcess.displayMailResult(data);
-                    } else {
-                        if (checkBoxValue) {
-                            appcommon.CommonProcess.openDialogKDL030(data.appID);
-                        } else {
-                            location.reload();
-                        }
-                    }
-                });
-            }).fail((error) => {
-                alError({ messageId: error.messageId, messageParams: error.parameterIds });
+                self.saveDone(data, checkBoxValue);
+            }).fail((res) => {
+                if (res.messageId == "Msg_1518") {//confirm
+                    nts.uk.ui.dialog.confirm({ messageId: res.messageId }).ifYes(() => {
+                        saveCmd.checkOver1Year = false;
+                        service.save(saveCmd).done((data) => {
+                            self.saveDone(data, checkBoxValue);
+                        }).fail((res) => {
+                            nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                                .then(function() { nts.uk.ui.block.clear(); });
+                        });
+                    }).ifNo(() => {
+                        nts.uk.ui.block.clear();
+                    });
+                } else {
+                    nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                        .then(function() { nts.uk.ui.block.clear(); });
+                }
             }).always(() => {
                 block.clear();
                 $("#recDatePicker").focus();
+            });
+        }
+        saveDone(data, checkBoxValue) {
+            dialog({ messageId: 'Msg_15' }).then(function() {
+                if (data.autoSendMail) {
+                    appcommon.CommonProcess.displayMailResult(data);
+                } else {
+                    if (checkBoxValue) {
+                        appcommon.CommonProcess.openDialogKDL030(data.appID);
+                    } else {
+                        location.reload();
+                    }
+                }
             });
         }
 

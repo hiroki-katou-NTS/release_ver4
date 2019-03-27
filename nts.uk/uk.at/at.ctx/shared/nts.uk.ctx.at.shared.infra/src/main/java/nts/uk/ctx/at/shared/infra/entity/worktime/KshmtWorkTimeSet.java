@@ -11,6 +11,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
@@ -22,6 +23,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @Setter
 @Entity
 @Table(name = "KSHMT_WORK_TIME_SET")
+@AllArgsConstructor
 public class KshmtWorkTimeSet extends UkJpaEntity implements Serializable {
 
 	/** The Constant serialVersionUID. */

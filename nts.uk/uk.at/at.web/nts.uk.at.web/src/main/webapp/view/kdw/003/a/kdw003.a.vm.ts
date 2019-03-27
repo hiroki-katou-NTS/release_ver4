@@ -160,7 +160,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         listCheckDeviation: any = [];
         listErrorMonth: any = [];
         lstErrorFlex: any = [];
-        hasErrorCalc: booelan = false;
+        hasErrorCalc: boolean = false;
         
         employIdLogin: any;
         dialogShow: any;
@@ -245,6 +245,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         transitionDesScreen: boolean = false;
         
         openedScreenB: boolean = false;
+        
+        closureId: any = null;
         constructor(dataShare: any) {
             var self = this;
 
@@ -305,6 +307,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 self.shareObject().mapDataShare(dataShare.initParam, dataShare.extractionParam, dataShare.dataSPR);
                 self.showDateRange(_.isEmpty(self.shareObject().changePeriodAtr) ? true : self.shareObject().changePeriodAtr);
                 self.transitionDesScreen = _.isEmpty(self.shareObject().transitionDesScreen) ? false : true;
+                self.closureId = _.isEmpty(self.shareObject().targetClosure) ? null : self.shareObject().targetClosure;
             }
 
             //            self.flexShortage.subscribe((val:any) => {
@@ -483,7 +486,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     lstEmployee: [],
                     formatCodes: self.formatCodes(),
                     objectShare: _.isEmpty(self.shareObject()) ? null : self.shareObject(),
-                    showError: _.isEmpty(self.shareObject()) ? null : self.shareObject().errorRefStartAtr
+                    showError: _.isEmpty(self.shareObject()) ? null : self.shareObject().errorRefStartAtr,
+                    closureId: self.closureId
                 };
                 // delete grid in localStorage
                 self.deleteGridInLocalStorage();
@@ -694,6 +698,10 @@ module nts.uk.at.view.kdw003.a.viewmodel {
            // self.displayNumberZero();
             self.displayProfileIcon(self.displayFormat());
             self.dislayNumberHeaderText();
+            //set hide control approval
+            _.forEach(data.lstHideControl, hide =>{
+                $("#dpGrid").mGrid("setState", "_"+hide.rowId, hide.columnKey, ["mgrid-hide"]);
+            })
             console.log("thoi gian load 0: " + (performance.now() - startTime));
             //set SPR
             if (data.showErrorDialog) {
@@ -1655,10 +1663,17 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     rowIdsTemp = _.filter(rowIdsTemp, (v) => !_.includes(self.lstErrorAfterCalcUpdate, v.rowId));
                     data.lstCellState = _.filter(data.lstCellState, (v) => !_.includes(self.lstErrorAfterCalcUpdate, v.rowId));
                     data.lstCellStateCalc = _.filter(data.lstCellStateCalc, (v) => !_.includes(self.lstErrorAfterCalcUpdate, v.rowId));
-                                    
-                    $("#dpGrid").mGrid("clearState", _.map(rowIdsTemp, (value) => {
+                    let lstRowReload = _.map(rowIdsTemp, (value) => {
                         return value.rowId;
-                    }))
+                    })               
+                    $("#dpGrid").mGrid("clearState", lstRowReload);
+                    _.forEach(lstRowReload, tmp => {
+                       $("#dpGrid").mGrid("clearState", tmp, "approval", ["mgrid-hide"]); 
+                    });
+                    
+                    _.forEach(data.lstHideControl, hide => {
+                        $("#dpGrid").mGrid("setState", "_" + hide.rowId, hide.columnKey, ["mgrid-hide"]);
+                    })
                     _.each(data.lstCellState, (valt) => {
                         $("#dpGrid").mGrid("setState", valt.rowId, valt.columnKey, valt.state);
                     });
@@ -1902,7 +1917,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     lstEmployee: lstEmployee,
                     formatCodes: self.formatCodes(),
                     objectShare: null,
-                    showLock: self.showLock()
+                    showLock: self.showLock(),
+                    closureId: self.closureId
                 };
                 self.characteristics.formatExtract = param.displayFormat;
                 character.save('characterKdw003a', self.characteristics);
@@ -2002,6 +2018,10 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         self.displayNumberZero();
                         //self.displayProfileIcon(self.displayFormat());
                         self.dislayNumberHeaderText();
+                        // load hide Checkbox approval
+                        _.forEach(data.lstHideControl, hide =>{
+                           $("#dpGrid").mGrid("setState", "_"+hide.rowId, hide.columnKey, ["mgrid-hide"]);
+                        })
                         //check visable MIGrid
                         if (self.displayFormat() != 0) {
                             self.isVisibleMIGrid(false);
@@ -3062,6 +3082,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     self.selectedEmployee(self.lstEmployee()[0].id);
                     self.dateRanger({ startDate: dataList.periodStart, endDate: dataList.periodEnd });
                     self.hasEmployee = true;
+                    self.closureId = dataList.closureId;
                     self.loadKcp009();
                     self.btnExtraction_Click();
                 },
@@ -3509,10 +3530,12 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 endDate: __viewContext.vm.displayFormat() === 1 ? moment(__viewContext.vm.selectedDate()).format("YYYY/MM/DD") : moment(__viewContext.vm.dateRanger().endDate).format("YYYY/MM/DD")
 
             }
-            nts.uk.localStorage.setItem('UKProgramParam', 'a=0');
-            nts.uk.characteristics.save('AppListExtractCondition', dataShareCmm);
-            nts.uk.request.jump("/view/cmm/045/a/index.xhtml");
-
+            nts.uk.characteristics.remove("AppListExtractCondition").done(function() {
+                parent.nts.uk.characteristics.save('AppListExtractCondition', dataShareCmm).done(function() {
+                    nts.uk.localStorage.setItem('UKProgramParam', 'a=0');
+                    nts.uk.request.jump("/view/cmm/045/a/index.xhtml");
+                });
+            }); 
         }
 
         reloadGrid() {

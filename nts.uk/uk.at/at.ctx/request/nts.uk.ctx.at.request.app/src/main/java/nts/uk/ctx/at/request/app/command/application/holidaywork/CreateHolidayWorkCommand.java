@@ -145,4 +145,6 @@ public class CreateHolidayWorkCommand {
 	private AppOvertimeDetailCommand appOvertimeDetail;
 	
 	private String appReasonID;
+	
+	private boolean checkOver1Year;
 }

@@ -452,7 +452,7 @@ module nts.uk.at.view.kaf000.shr{
                     <div style="display: inline-block;">
 
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalButton">
-                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton()               ">承認</button>
+                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton() &amp;&amp; errorEmpty()">承認</button>
                         </div>
 
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalLabel">
@@ -462,7 +462,7 @@ module nts.uk.at.view.kaf000.shr{
                         </div>
 
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyButton">
-                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton()           ">否認</button>
+                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton() &amp;&amp; errorEmpty()">否認</button>
                         </div>
 
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyLabel">
@@ -3462,7 +3462,7 @@ module nts.uk.at.view.kaf000.shr{
                     <div style="display: inline-block;">
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalButton">
-                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton()               ">承認</button>
+                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton() &amp;&amp; errorEmpty()">承認</button>
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalLabel">
@@ -3472,7 +3472,7 @@ module nts.uk.at.view.kaf000.shr{
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyButton">
-                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton()           ">否認</button>
+                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton() &amp;&amp; errorEmpty()">否認</button>
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyLabel">
@@ -6474,7 +6474,7 @@ module nts.uk.at.view.kaf000.shr{
                     <div style="display: inline-block;">
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalButton">
-                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton()               ">承認</button>
+                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton()  &amp;&amp; errorEmpty()">承認</button>
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalLabel">
@@ -6484,7 +6484,7 @@ module nts.uk.at.view.kaf000.shr{
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyButton">
-                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton()           ">否認</button>
+                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton() &amp;&amp; errorEmpty() ">否認</button>
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyLabel">
@@ -9486,7 +9486,7 @@ module nts.uk.at.view.kaf000.shr{
                     <div style="display: inline-block;">
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalButton">
-                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton()               ">承認</button>
+                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton() &amp;&amp; errorEmpty()">承認</button>
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalLabel">
@@ -9496,7 +9496,7 @@ module nts.uk.at.view.kaf000.shr{
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyButton">
-                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton()           ">否認</button>
+                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton() &amp;&amp; errorEmpty()">否認</button>
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyLabel">
@@ -12498,7 +12498,7 @@ module nts.uk.at.view.kaf000.shr{
                     <div style="display: inline-block;">
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalButton">
-                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton()               ">承認</button>
+                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton() &amp;&amp; errorEmpty()">承認</button>
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalLabel">
@@ -12508,7 +12508,7 @@ module nts.uk.at.view.kaf000.shr{
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyButton">
-                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton()           ">否認</button>
+                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton() &amp;&amp; errorEmpty()">否認</button>
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyLabel">
@@ -15510,7 +15510,7 @@ module nts.uk.at.view.kaf000.shr{
                     <div style="display: inline-block;">
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalButton">
-                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton()               ">承認</button>
+                            <button class="proceed kaf000-function-btn" data-bind="click: btnApprove,                enable: enableApprovalButton() &amp;&amp; errorEmpty()">承認</button>
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayApprovalLabel">
@@ -15520,7 +15520,7 @@ module nts.uk.at.view.kaf000.shr{
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyButton">
-                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton()           ">否認</button>
+                            <button class="kaf000-function-btn" data-bind="click: btnDeny,            enable: enableDenyButton() &amp;&amp; errorEmpty()">否認</button>
                         </div>
                         
                         <div class="controlButtonCell_kaf000" data-bind="if: displayDenyLabel">

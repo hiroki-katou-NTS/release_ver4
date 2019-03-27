@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.infra.repository.affiliationinformation;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -11,16 +12,22 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPerfor;
+import nts.uk.ctx.at.record.dom.affiliationinformation.primitivevalue.ClassificationCode;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.AffiliationInforOfDailyPerforRepository;
 import nts.uk.ctx.at.record.infra.entity.affiliationinformation.KrcdtDaiAffiliationInf;
 import nts.uk.ctx.at.record.infra.entity.affiliationinformation.KrcdtDaiAffiliationInfPK;
+import nts.uk.ctx.at.shared.dom.bonuspay.primitives.BonusPaySettingCode;
+import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.EmploymentCode;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.infra.data.jdbc.JDBCUtil;
 
@@ -148,17 +155,32 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 
 	@Override
 	public List<AffiliationInforOfDailyPerfor> finds(List<String> employeeId, DatePeriod ymd) {
-		List<KrcdtDaiAffiliationInf> result = new ArrayList<>();
-		StringBuilder query = new StringBuilder("SELECT af FROM KrcdtDaiAffiliationInf af ");
-		query.append("WHERE af.krcdtDaiAffiliationInfPK.employeeId IN :employeeId ");
-		query.append("AND af.krcdtDaiAffiliationInfPK.ymd <= :end AND af.krcdtDaiAffiliationInfPK.ymd >= :start");
-		TypedQueryWrapper<KrcdtDaiAffiliationInf> tQuery = this.queryProxy().query(query.toString(),
-				KrcdtDaiAffiliationInf.class);
+		List<AffiliationInforOfDailyPerfor> result = new ArrayList<>();
+		
 		CollectionUtil.split(employeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds -> {
-			result.addAll(tQuery.setParameter("employeeId", empIds).setParameter("start", ymd.start())
-					.setParameter("end", ymd.end()).getList());
+			result.addAll(internalQuery(ymd, empIds));
 		});
-		return result.stream().map(af -> af.toDomain()).collect(Collectors.toList());
+		return result;
+	}
+	
+	@SneakyThrows
+	private List<AffiliationInforOfDailyPerfor> internalQuery(DatePeriod baseDate, List<String> empIds) {
+		String subEmp = NtsStatement.In.createParamsString(empIds);
+		StringBuilder query = new StringBuilder("SELECT EMP_CODE, SID, JOB_ID, WKP_ID, YMD, CLS_CODE, BONUS_PAY_CODE FROM KRCDT_DAI_AFFILIATION_INF");
+		query.append(" WHERE YMD <= ? AND YMD >= ? ");
+		query.append(" AND SID IN (" + subEmp + ")");
+		try (val stmt = this.connection().prepareStatement(query.toString())){
+			stmt.setDate(1, Date.valueOf(baseDate.end().localDate()));
+			stmt.setDate(2, Date.valueOf(baseDate.start().localDate()));
+			for (int i = 0; i < empIds.size(); i++) {
+				stmt.setString(i + 3, empIds.get(i));
+			}
+			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+				return new AffiliationInforOfDailyPerfor(new EmploymentCode(rec.getString("EMP_CODE")), 
+						rec.getString("SID"), rec.getString("JOB_ID"), rec.getString("WKP_ID"), rec.getGeneralDate("YMD"), 
+						new ClassificationCode(rec.getString("CLS_CODE")), new BonusPaySettingCode(rec.getString("BONUS_PAY_CODE")));
+			});
+		}
 	}
 
 	@Override

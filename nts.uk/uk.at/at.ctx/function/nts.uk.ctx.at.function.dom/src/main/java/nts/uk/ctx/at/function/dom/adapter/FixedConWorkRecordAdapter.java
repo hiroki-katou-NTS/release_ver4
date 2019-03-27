@@ -11,6 +11,8 @@ public interface FixedConWorkRecordAdapter {
 	 * @return
 	 */
 	List<FixedConWorkRecordAdapterDto> getAllFixedConWorkRecordByID(String dailyAlarmConID);
+	
+	List<FixedConWorkRecordAdapterDto> getAllFixedConWorkRecordByID(List<String> dailyAlarmConID);
 
 	/**
 	 * get fixed condition work record by dailyAlarmConID and fixConWorkRecordNo

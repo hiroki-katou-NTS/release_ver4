@@ -6,21 +6,22 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import lombok.val;
-import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthly;
-import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthlyKey;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthlyRepository;
+import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.affiliation.AffiliationInfoOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.affiliation.AffiliationInfoOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthlyRepository;
+import nts.uk.ctx.at.record.dom.monthly.mergetable.RemainMergeRepository;
 import nts.uk.ctx.at.record.dom.monthly.vacation.absenceleave.monthremaindata.AbsenceLeaveRemainData;
 import nts.uk.ctx.at.record.dom.monthly.vacation.absenceleave.monthremaindata.AbsenceLeaveRemainDataRepository;
 import nts.uk.ctx.at.record.dom.monthly.vacation.annualleave.AnnLeaRemNumEachMonth;
@@ -34,8 +35,6 @@ import nts.uk.ctx.at.record.dom.monthly.vacation.specialholiday.monthremaindata.
 import nts.uk.ctx.at.record.pub.monthly.GetMonthlyRecordPub;
 import nts.uk.ctx.at.record.pub.monthly.MonthlyRecordValuesExport;
 import nts.uk.ctx.at.shared.app.util.attendanceitem.ConvertHelper;
-import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
-import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
 
 /**
@@ -73,6 +72,12 @@ public class GetMonthlyRecordPubImpl implements GetMonthlyRecordPub {
 	@Inject
 	private AttendanceItemConvertFactory attendanceItemConverterFact;
 	
+	@Inject
+	private TimeOfMonthlyRepository timeRepo;
+	
+	@Inject
+	private RemainMergeRepository remainRepo;
+	
 	/** 月別実績データを取得する */
 	@Override
 	public List<MonthlyRecordValuesExport> algorithm(String employeeId, YearMonthPeriod period, List<Integer> itemIds) {
@@ -99,125 +104,47 @@ public class GetMonthlyRecordPubImpl implements GetMonthlyRecordPub {
 		val yearMonths = ConvertHelper.yearMonthsBetween(period);
 		
 		// 月別実績の所属情報を取得する
-		val affiliationInfos = this.affiliationInfoRepo.findBySidsAndYearMonths(employeeIds, yearMonths);
-		Map<AttendanceTimeOfMonthlyKey, AffiliationInfoOfMonthly> affiliationInfoMap = new HashMap<>();
-		for (val affiliationInfo : affiliationInfos){
-			AttendanceTimeOfMonthlyKey key = new AttendanceTimeOfMonthlyKey(
-					affiliationInfo.getEmployeeId(),
-					affiliationInfo.getYearMonth(),
-					affiliationInfo.getClosureId(),
-					affiliationInfo.getClosureDate());
-			affiliationInfoMap.putIfAbsent(key, affiliationInfo);
-		}
+		val times = timeRepo.findBySidsAndYearMonths(employeeIds, yearMonths);
+		val remains = remainRepo.findBySidsAndYearMonths(employeeIds, yearMonths);
 		
 		// 月別実績の任意項目を取得する
 		val anyItems = this.anyItemRepo.findBySidsAndMonths(employeeIds, yearMonths);
-		Map<AttendanceTimeOfMonthlyKey, List<AnyItemOfMonthly>> anyItemMap = new HashMap<>();
-		for (val anyItem : anyItems){
-			AttendanceTimeOfMonthlyKey key = new AttendanceTimeOfMonthlyKey(
-					anyItem.getEmployeeId(),
-					anyItem.getYearMonth(),
-					anyItem.getClosureId(),
-					anyItem.getClosureDate());
-			anyItemMap.putIfAbsent(key, new ArrayList<>());
-			anyItemMap.get(key).add(anyItem);
-		}
-		
-		// 年休月別残数データを取得する
-		val annualLeaves = this.annualLeaveRepo.findBySidsAndYearMonths(employeeIds, yearMonths);
-		Map<AttendanceTimeOfMonthlyKey, AnnLeaRemNumEachMonth> annualLeaveMap = new HashMap<>();
-		for (val annualLeave : annualLeaves){
-			AttendanceTimeOfMonthlyKey key = new AttendanceTimeOfMonthlyKey(
-					annualLeave.getEmployeeId(),
-					annualLeave.getYearMonth(),
-					annualLeave.getClosureId(),
-					annualLeave.getClosureDate());
-			annualLeaveMap.putIfAbsent(key, annualLeave);
-		}
-		
-		// 積立年休月別残数データを取得する
-		val reserveLeaves = this.reserveLeaveRepo.findBySidsAndYearMonths(employeeIds, yearMonths);
-		Map<AttendanceTimeOfMonthlyKey, RsvLeaRemNumEachMonth> reserveLeaveMap = new HashMap<>();
-		for (val reserveLeave : reserveLeaves){
-			AttendanceTimeOfMonthlyKey key = new AttendanceTimeOfMonthlyKey(
-					reserveLeave.getEmployeeId(),
-					reserveLeave.getYearMonth(),
-					reserveLeave.getClosureId(),
-					reserveLeave.getClosureDate());
-			reserveLeaveMap.putIfAbsent(key, reserveLeave);
-		}
-		
-		// 振休月別残数データを取得する
-		val absenceLeaves = this.absLeaRemRepo.findBySidsAndYearMonths(employeeIds, yearMonths);
-		Map<AttendanceTimeOfMonthlyKey, AbsenceLeaveRemainData> absenceLeaveMap = new HashMap<>();
-		for (val absenceLeave : absenceLeaves){
-			AttendanceTimeOfMonthlyKey key = new AttendanceTimeOfMonthlyKey(
-					absenceLeave.getSId(),
-					absenceLeave.getYm(),
-					EnumAdaptor.valueOf(absenceLeave.getClosureId(), ClosureId.class),
-					new ClosureDate(absenceLeave.getClosureDay(), absenceLeave.isLastDayIs()));
-			absenceLeaveMap.putIfAbsent(key, absenceLeave);
-		}
-		
-		// 代休月別残数データを取得する
-		val monDayoffs = this.monDayoffRemRepo.findBySidsAndYearMonths(employeeIds, yearMonths);
-		Map<AttendanceTimeOfMonthlyKey, MonthlyDayoffRemainData> monDayoffMap = new HashMap<>();
-		for (val monDayoff : monDayoffs){
-			AttendanceTimeOfMonthlyKey key = new AttendanceTimeOfMonthlyKey(
-					monDayoff.getSId(),
-					monDayoff.getYm(),
-					EnumAdaptor.valueOf(monDayoff.getClosureId(), ClosureId.class),
-					new ClosureDate(monDayoff.getClosureDay(), monDayoff.isLastDayis()));
-			monDayoffMap.putIfAbsent(key, monDayoff);
-		}
-		
-		// 特別休暇月別残数データを取得する
-		val specialLeaves = this.spcLeaRemRepo.findBySidsAndYearMonths(employeeIds, yearMonths);
-		Map<AttendanceTimeOfMonthlyKey, List<SpecialHolidayRemainData>> specialLeaveMap = new HashMap<>();
-		for (val specialLeave : specialLeaves){
-			AttendanceTimeOfMonthlyKey key = new AttendanceTimeOfMonthlyKey(
-					specialLeave.getSid(),
-					specialLeave.getYm(),
-					EnumAdaptor.valueOf(specialLeave.getClosureId(), ClosureId.class),
-					specialLeave.getClosureDate());
-			specialLeaveMap.putIfAbsent(key, new ArrayList<>());
-			specialLeaveMap.get(key).add(specialLeave);
-		}
-		
-		// 月別実績の勤怠時間を取得する
-		val attendanceTimes = this.attendanceTimeRepo.findBySidsAndYearMonths(employeeIds, yearMonths);
-		for (val attendanceTime : attendanceTimes){
+		for (val attendanceTime : times){
 			val employeeId = attendanceTime.getEmployeeId();
-			AttendanceTimeOfMonthlyKey key = new AttendanceTimeOfMonthlyKey(
-					employeeId,
-					attendanceTime.getYearMonth(),
-					attendanceTime.getClosureId(),
-					attendanceTime.getClosureDate());
+			
+			val currentRemain = remains.stream().filter(c -> {
+				return c.getMonthMergeKey().getEmployeeId().equals(employeeId)
+						&& c.getMonthMergeKey().getClosureDate().equals(attendanceTime.getClosureDate())
+						&& c.getMonthMergeKey().getClosureId().equals(attendanceTime.getClosureId())
+						&& c.getMonthMergeKey().getYearMonth().equals(attendanceTime.getYearMonth());
+			}).findFirst();
+			val currentAnyItems = anyItems.stream().filter(c -> {
+				return c.getEmployeeId().equals(employeeId)
+						&& c.getClosureDate().equals(attendanceTime.getClosureDate())
+						&& c.getClosureId().equals(attendanceTime.getClosureId())
+						&& c.getYearMonth().equals(attendanceTime.getYearMonth());
+			}).collect(Collectors.toList());
 			
 			// 勤怠項目値リストに変換する準備をする
 			val monthlyConverter = this.attendanceItemConverterFact.createMonthlyConverter();
-			monthlyConverter.withAttendanceTime(attendanceTime);
-			if (affiliationInfoMap.containsKey(key)){
-				monthlyConverter.withAffiliation(affiliationInfoMap.get(key));
-			}
-			if (anyItemMap.containsKey(key)){
-				monthlyConverter.withAnyItem(anyItemMap.get(key));
-			}
-			if (annualLeaveMap.containsKey(key)){
-				monthlyConverter.withAnnLeave(annualLeaveMap.get(key));
-			}
-			if (reserveLeaveMap.containsKey(key)){
-				monthlyConverter.withRsvLeave(reserveLeaveMap.get(key));
-			}
-			if (absenceLeaveMap.containsKey(key)){
-				monthlyConverter.withAbsenceLeave(absenceLeaveMap.get(key));
-			}
-			if (monDayoffMap.containsKey(key)){
-				monthlyConverter.withDayOff(monDayoffMap.get(key));
-			}
-			if (specialLeaveMap.containsKey(key)){
-				monthlyConverter.withSpecialLeave(specialLeaveMap.get(key));
-			}
+			
+			attendanceTime.getAffiliation().ifPresent(af -> {
+				monthlyConverter.withAffiliation(af);
+			});
+			attendanceTime.getAttendanceTime().ifPresent(at -> {
+				monthlyConverter.withAttendanceTime(at);
+			});
+			monthlyConverter.withAnyItem(currentAnyItems);
+			
+			currentRemain.ifPresent(remain -> {
+				monthlyConverter.withAnnLeave(remain.getAnnLeaRemNumEachMonth());
+				monthlyConverter.withRsvLeave(remain.getRsvLeaRemNumEachMonth());
+				monthlyConverter.withAbsenceLeave(remain.getAbsenceLeaveRemainData());
+				monthlyConverter.withDayOff(remain.getMonthlyDayoffRemainData());
+				monthlyConverter.withSpecialLeave(remain.getSpecialHolidayRemainList());
+				monthlyConverter.withMonCareHd(remain.getMonCareHdRemain());
+				monthlyConverter.withMonChildHd(remain.getMonChildHdRemain());
+			});
 			
 			// 月別実績データ値リストに追加する
 			results.putIfAbsent(employeeId, new ArrayList<>());

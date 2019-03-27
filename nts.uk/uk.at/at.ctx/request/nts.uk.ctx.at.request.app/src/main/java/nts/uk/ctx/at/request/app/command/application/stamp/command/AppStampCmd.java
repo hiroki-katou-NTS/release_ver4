@@ -37,5 +37,6 @@ public class AppStampCmd {
 	private List<AppStampWorkCmd> appStampWorkCmds;
 	private List<AppStampCancelCmd> appStampCancelCmds;
 	private AppStampOnlineRecordCmd appStampOnlineRecordCmd;
+	private boolean checkOver1Year;
 }
 

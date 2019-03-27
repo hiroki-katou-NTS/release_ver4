@@ -4,6 +4,7 @@ module nts.uk.at.view.kaf007.b {
     import dialog = nts.uk.ui.dialog;
     import model = nts.uk.at.view.kaf000.b.viewmodel.model;
     import appcommon = nts.uk.at.view.kaf000.shr.model;
+    import text = nts.uk.resource.getText;
     export module viewmodel {
         export class ScreenModel extends kaf000.b.viewmodel.ScreenModel {
             screenModeNew: KnockoutObservable<boolean> = ko.observable(false);
@@ -120,9 +121,9 @@ module nts.uk.at.view.kaf007.b {
                             let timeCd = self.appWorkChange().workChange().workTimeCd;
                             let timeName = self.appWorkChange().workChange().workTimeName;
                             typeCd(typeCd() === null ? '' : typeCd());
-                            typeName(typeName() === null ? '' : typeName());
+                            typeName(typeName() || text("KAL003_120"));
                             timeCd(timeCd() === null ? '' : timeCd());
-                            timeName(timeName() === null ? '' : timeName());
+                            timeName(timeName() || text("KAL003_120"));
                             //application data
                             ko.mapping.fromJS( detailData.applicationDto, {}, self.appWorkChange().application );
                             //setting reason content

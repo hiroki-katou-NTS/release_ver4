@@ -95,9 +95,9 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	public WorkInfoOfDailyPerformance reflectScheWorkTimeWorkType(CommonReflectParameter commonPara, boolean isPre,
 			WorkInfoOfDailyPerformance dailyInfor) {
 		//予定勤種を反映できるかチェックする
-		if(!this.checkReflectScheWorkTimeType(commonPara, isPre, commonPara.getWorkTimeCode())) {
+		/*if(!this.checkReflectScheWorkTimeType(commonPara, isPre, commonPara.getWorkTimeCode())) {
 			return dailyInfor;
-		}
+		}*/
 		//予定勤種の反映		
 		ReflectParameter para = new ReflectParameter(commonPara.getEmployeeId(), commonPara.getBaseDate(), commonPara.getWorkTimeCode(), 
 				commonPara.getWorkTypeCode(), false);

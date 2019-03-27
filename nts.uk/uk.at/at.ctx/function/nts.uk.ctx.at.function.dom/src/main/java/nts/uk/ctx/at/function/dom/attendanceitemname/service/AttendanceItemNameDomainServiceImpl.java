@@ -32,4 +32,14 @@ public class AttendanceItemNameDomainServiceImpl implements AttendanceItemNameDo
 				}).collect(Collectors.toList());
 	}
 
+	@Override
+	public List<AttendanceItemName> getNameOfAttendanceItem(TypeOfItem typeOfAttendanceItem) {
+		return attendanceItemNameService.getNameOfAttendanceItem(typeOfAttendanceItem).stream().map(x -> {
+					AttendanceItemName dto = new AttendanceItemName(x.getAttendanceItemId(), x.getAttendanceItemName(),
+							x.getAttendanceItemDisplayNumber(), x.getUserCanUpdateAtr(), x.getNameLineFeedPosition(),
+							x.getTypeOfAttendanceItem(), x.getFrameCategory());
+					return dto;
+				}).collect(Collectors.toList());
+	}
+
 }
