@@ -46,9 +46,9 @@ import nts.uk.ctx.at.request.pub.screen.ApplicationDeadlineExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationPub;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
-import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
+import nts.uk.ctx.at.shared.dom.worktype.service.JudgmentOneDayHoliday;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
@@ -75,11 +75,12 @@ public class ApplicationPubImpl implements ApplicationPub {
 	private IAppWorkChangeRepository appWorkChangeRepository;
 	@Inject
 	private ScBasicScheduleAdapter scBasicScheduleAdapter;
-	@Inject
-	private BasicScheduleService basicScheduleService;
 	
 	@Inject
 	public WorkTypeRepository workTypeRepo;
+	
+	@Inject
+	private JudgmentOneDayHoliday judgmentOneDayHoliday;
 	
 	@Override
 	public List<ApplicationExport> getApplicationBySID(List<String> employeeID, GeneralDate startDate,
@@ -193,9 +194,9 @@ public class ApplicationPubImpl implements ApplicationPub {
 								applicationExports.add(applicationExport);
 								continue;
 							}
-							// 1日半日出勤・1日休日系の判定
-							WorkStyle workStyle = basicScheduleService.checkWorkDayByList(opScBasicScheduleImport.get().getWorkTypeCode(), workTypes);
-							if(workStyle.value != 0){
+							// 1日休日の判定
+							boolean judgment = judgmentOneDayHoliday.judgmentOneDayHoliday(companyID, opScBasicScheduleImport.get().getWorkTypeCode());
+							if(judgment){
 								ApplicationExport applicationExport = new ApplicationExport();
 								applicationExport.setAppDate(loopDate);
 								applicationExport.setAppType(app.getAppType().value);
