@@ -909,6 +909,8 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 			// If real data of employee isn't exist
 			if (!invidual.isEmpty()) {
 				exceptions.addMessage("Msg_1269", invidual);
+			} else {
+				exceptions.addMessage("Msg_37");
 			}
 			exceptions.throwExceptions();
 
