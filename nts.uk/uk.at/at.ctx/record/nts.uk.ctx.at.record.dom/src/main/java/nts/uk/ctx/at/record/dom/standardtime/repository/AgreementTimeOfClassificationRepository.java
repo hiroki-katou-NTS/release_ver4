@@ -17,4 +17,6 @@ public interface AgreementTimeOfClassificationRepository {
 	List<String> findClassificationSetting(String companyId, LaborSystemtAtr laborSystemAtr);
 	
 	Optional<String> findEmploymentBasicSettingID(String companyId, LaborSystemtAtr laborSystemAtr, String classificationCode);
+	
+	List<AgreementTimeOfClassification> find(String companyId, List<String> classificationCode);
 }

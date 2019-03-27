@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.request.dom.application.appabsence;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface AppAbsenceRepository {
@@ -10,6 +11,8 @@ public interface AppAbsenceRepository {
 	 * @return
 	 */
 	public Optional<AppAbsence> getAbsenceById(String companyID, String appId);
+	
+	public List<AppAbsence> getAbsenceByIds(String companyID, List<String> appId);
 	
 	/**
 	 * insertAbsence

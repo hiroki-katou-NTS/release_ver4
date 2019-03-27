@@ -159,8 +159,8 @@ public class RecordWorkInfoPubImpl implements RecordWorkInfoPub {
 		return new InfoCheckNotRegisterPubExport(
 				domain.getEmployeeId(),
 				domain.getRecordInfo().getWorkTimeCode()==null?"":domain.getRecordInfo().getWorkTimeCode().v(),
-				domain.getRecordInfo().getWorkTypeCode().v()
-				);
+				domain.getRecordInfo().getWorkTypeCode().v(),
+				domain.getYmd());
 	}
 	
 	private Integer getCalcTime(TimeDivergenceWithCalculation calc){
@@ -189,9 +189,9 @@ public class RecordWorkInfoPubImpl implements RecordWorkInfoPub {
 	private InfoCheckNotRegisterPubExport convertToExportInfor(WorkInfoOfDailyPerformance domain) {
 		return new InfoCheckNotRegisterPubExport(
 				domain.getEmployeeId(),
-				domain.getRecordInfo() ==null?null : (domain.getRecordInfo().getWorkTimeCode()==null?null:domain.getRecordInfo().getWorkTimeCode().v()),
-				domain.getRecordInfo() ==null?null : (domain.getRecordInfo().getWorkTypeCode()==null?null:domain.getRecordInfo().getWorkTypeCode().v())
-				);
+				domain.getRecordInfo() ==null?null : (domain.getRecordInfo().getWorkTimeCode()==null? null : domain.getRecordInfo().getWorkTimeCode().v()),
+				domain.getRecordInfo() ==null?null : (domain.getRecordInfo().getWorkTypeCode()==null? null : domain.getRecordInfo().getWorkTypeCode().v()),
+				domain.getYmd());
 	}
 
 	@Override

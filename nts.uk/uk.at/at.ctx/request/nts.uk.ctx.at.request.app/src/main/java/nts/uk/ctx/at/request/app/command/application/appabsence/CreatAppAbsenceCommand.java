@@ -113,4 +113,5 @@ public class CreatAppAbsenceCommand {
 	//specHoliday
 	private SpecHolidayCommand specHd;
 	
+	private boolean checkOver1Year;
 }

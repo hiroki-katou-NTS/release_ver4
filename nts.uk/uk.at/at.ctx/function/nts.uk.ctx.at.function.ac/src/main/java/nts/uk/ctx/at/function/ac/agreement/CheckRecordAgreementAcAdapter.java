@@ -8,7 +8,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.function.dom.adapter.agreement.CheckRecordAgreementAdapter;
@@ -124,6 +127,7 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<CheckedOvertimeImport> checkNumberOvertime(List<String> employeeIds, List<DatePeriod> periods,
 			List<AgreeCondOt> listCondOt) {
 		
@@ -159,12 +163,14 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 		}
 		return result;
 	}
-
+	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<CheckedAgreementResult> checkArgreementResult(List<String> employeeIds, DatePeriod period,
 			AgreeConditionError agreeConditionError, Optional<AgreementOperationSettingImport> agreementSetObj,
 			List<Closure> closureList,Map<String,Integer> mapEmpIdClosureID) {
 
+		
 		List<CheckedAgreementResult> checkedAgreementResults = new ArrayList<CheckedAgreementResult>();
 		List<Integer> fiscalYears  = new ArrayList<>();
 		YearMonthPeriod  yearMonthPeriod = null;
@@ -208,6 +214,11 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 			if (!fiscalYears.contains(tagetYear)) {
 				fiscalYears.add(tagetYear);
 			}
+			
+			/** TODO: need check period */
+			Object basicSetGetter = agreementTimeByPeriodPub.getCommonSetting(AppContexts.user().companyId(), employeeIds, period);
+
+			/** TODO: 並列処理にしてみる　*/
 			// 社員IDの件数分ループ
 			for (String empId : employeeIds) {
 				List<AgreementTimeByPeriod> lstAgreementTimeByPeriod = new ArrayList<>();
@@ -221,7 +232,7 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 						//RequestList No.453 指定期間36協定時間の取得
 						List<AgreementTimeByPeriod> agreementTimeByPeriods = agreementTimeByPeriodPub.algorithm(
 								agreeConditionError.getCompanyId(), empId, baseDate.end(),
-								new Month(startingMonth), new Year(fiscalYear), periodAtr);
+								new Month(startingMonth), new Year(fiscalYear), periodAtr, basicSetGetter);
 						if(!CollectionUtil.isEmpty(agreementTimeByPeriods)){
 							for (AgreementTimeByPeriod agreementTimeByPeriod : agreementTimeByPeriods) {
 								int checkEnd = agreementTimeByPeriod.getEndMonth().compareTo(yearMonthPeriod.start());

@@ -1,15 +1,24 @@
 package nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.agreementprocess;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import lombok.SneakyThrows;
+import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
@@ -60,7 +69,12 @@ public class AgreementProcessService {
 	
 	@Inject
 	private ClosureRepository closureRepository;
-
+	
+	@Inject
+	private ManagedParallelWithContext parallelManager;
+	
+	@Resource
+	private SessionContext scContext;
 	
 	public List<ValueExtractAlarm> agreementProcess(List<String> checkConditionCodes, List<PeriodByAlarmCategory> periodAlarms, List<EmployeeSearchDto> employees, Optional<AgreementOperationSettingImport> agreementSetObj){
 		
@@ -121,10 +135,7 @@ public class AgreementProcessService {
 				//ドメインモデル「36協定エラーアラームチェック名称」を取得する
 				Optional<AgreeNameError> optAgreeName = agreeNameRepo.findById(agreeConditionError.getPeriod().value,
 						agreeConditionError.getErrorAlarm().value);
-				Period periodCheck = agreeConditionError.getPeriod();
-				if (periodCheck == Period.One_Week || periodCheck == Period.Two_Week || periodCheck == Period.Four_Week) {
-					periodCheck = Period.One_Week;
-				}
+				Period periodCheck = getPeriod(agreeConditionError);
 				for (PeriodByAlarmCategory periodAlarm : periodAlarms) {
 					if(periodAlarm.getPeriod36Agreement() == periodCheck.value){
 						DatePeriod period = new DatePeriod(periodAlarm.getStartDate(), periodAlarm.getEndDate());
@@ -168,6 +179,78 @@ public class AgreementProcessService {
 			}
 		}
 		return result;
+	}
+
+	@Inject
+	private AgreementCheckService checkService;
+	
+	@SneakyThrows
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	public List<ValueExtractAlarm> agreementProcess(String comId, List<AlarmCheckConditionByCategory> agreementErAl, List<PeriodByAlarmCategory> periodAlarms, 
+			List<EmployeeSearchDto> employees, Optional<AgreementOperationSettingImport> agreementSetObj, Consumer<Integer> counter, Supplier<Boolean> shouldStop){
+
+//		Logger.getLogger(getClass()).info("Transaction Status 1: " + tsr.getTransactionStatus());
+		List<ValueExtractAlarm> result = Collections.synchronizedList(new ArrayList<>());
+		List<String> empIds = employees.stream().map( e ->e.getId()).collect(Collectors.toList());
+		Map<String,Integer> empIdToClosureId = new HashMap<>();
+		Map<String,String> employmentCodeToEmpIds = new HashMap<>();
+		List<Closure> closureList = getClosure(comId, empIds, empIdToClosureId, employmentCodeToEmpIds);
+		
+		Map<String, EmployeeSearchDto> mapEmployee = employees.stream().collect(Collectors.toMap(EmployeeSearchDto::getId, x ->x));
+//		Logger.getLogger(getClass()).info("Transaction Status 2: " + tsr.getTransactionStatus());
+		/** TODO: parallel from here */
+		parallelManager.forEach(CollectionUtil.partitionBySize(empIds, 50), employeeIds -> {
+//		CollectionUtil.split(empIds, 25, employeeIds -> {
+			checkService.check(agreementErAl, periodAlarms, agreementSetObj, counter, shouldStop, result, empIds, empIdToClosureId,
+					closureList, mapEmployee, employeeIds);
+		});
+//		Logger.getLogger(getClass()).info("Transaction Status 10: " + tsr.getTransactionStatus());
+		return result;
+	}
+
+	
+
+	private Period getPeriod(AgreeConditionError agreeConditionError) {
+		if (agreeConditionError.getPeriod() == Period.One_Week 
+				|| agreeConditionError.getPeriod() == Period.Two_Week 
+				|| agreeConditionError.getPeriod() == Period.Four_Week) {
+			return Period.One_Week;
+		}
+		return agreeConditionError.getPeriod();
+	}
+	
+	private List<Closure> getClosure(String comId, List<String> empIds, Map<String,Integer> empIdToClosureId, Map<String,String> employmentCodeToEmpIds){
+
+		/**社員ID（List）と指定期間から社員の雇用履歴を取得 */
+		List<SharedSidPeriodDateEmploymentImport> employmentHistList = this.shareEmploymentAdapter.getEmpHistBySidAndPeriod(empIds, new DatePeriod(GeneralDate.today(), GeneralDate.today()));
+		if (!CollectionUtil.isEmpty(employmentHistList)) {
+			for (SharedSidPeriodDateEmploymentImport objecCheck : employmentHistList) {
+				for (AffPeriodEmpCodeImport affPeriodEmpCodeImport : objecCheck.getAffPeriodEmpCodeExports()) {
+					if (!employmentCodeToEmpIds.containsKey(affPeriodEmpCodeImport.getEmploymentCode())) {
+						employmentCodeToEmpIds.put(affPeriodEmpCodeImport.getEmploymentCode(), objecCheck.getEmployeeId());
+					}
+				}
+					
+			}
+				
+			
+			/** ドメインモデル「雇用に紐づく就業締め」を取得する */
+			List<ClosureEmployment> closureEmploymentList = closureEmploymentRepo.findListEmployment(comId, new ArrayList<>(employmentCodeToEmpIds.keySet()));
+
+			if (!CollectionUtil.isEmpty(closureEmploymentList)) {
+				empIds.stream().forEach(empId -> {
+					closureEmploymentList.stream().filter(c -> employmentCodeToEmpIds.containsKey(c.getEmploymentCD())).findFirst().ifPresent(clo -> {
+						empIdToClosureId.put(empId, clo.getClosureId());
+					});
+				});
+				
+				/** ドメインモデル「締め」を取得する*/
+				return closureRepository.findByListId(comId, empIdToClosureId.values().stream().distinct().collect(Collectors.toList()));
+			}
+
+		}
+		
+		return new ArrayList<>();
 	}
 	
 	private List<ValueExtractAlarm> generationValueExtractAlarm(Map<String, EmployeeSearchDto> mapEmployee, List<CheckedAgreementResult> checkAgreementsResult,AgreeConditionError agreeConditionError,Optional<AgreeNameError> optAgreeName){

@@ -148,33 +148,51 @@ module nts.uk.at.view.kaf011.c.screenModel {
             }
             self.validateControl();
             block.invisible();
+            saveCmd.checkOver1Year = true;
             service.changeAbsDate(saveCmd).done((data) => {
-                dialog({ messageId: 'Msg_15' }).then(function() {
-                    if (data.autoSendMail) {
-                        self.displayEmailResult(data);
-                    } else {
-                        let command = { appID: data.appID };
-                        setShared("KDL030_PARAM", command);
-                        modal("/view/kdl/030/a/index.xhtml").onClosed(() => {
-                            //phai de delay neu khong ham setShared se khong an
-                            _.delay(self.closeDialog(data.appID), 500, data.appID);
+                self.saveDone(data);
+            }).fail((res) => {
+                if (res.messageId == "Msg_1518") {//confirm
+                    nts.uk.ui.dialog.confirm({ messageId: res.messageId }).ifYes(() => {
+                        saveCmd.checkOver1Year = false;
+                        service.changeAbsDate(saveCmd).done((data) => {
+                            self.saveDone(data);
+                        }).fail((res) => {
+                            nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                                .then(function() { nts.uk.ui.block.clear(); });
                         });
-                    }
-
-                });
-            }).fail((error) => {
-                alError({ messageId: error.messageId, messageParams: error.parameterIds }).then(() => {
-                    if (error.messageId == 'Msg_198') {
-                        setShared('KAF_011_C_PARAMS', 'Msg_198');
-                        windows.close();
-                    }
-
-                });
+                    }).ifNo(() => {
+                        nts.uk.ui.block.clear();
+                    });
+                } else {
+                    alError({ messageId: error.messageId, messageParams: error.parameterIds }).then(() => {
+                        if (error.messageId == 'Msg_198') {
+                            setShared('KAF_011_C_PARAMS', 'Msg_198');
+                            windows.close();
+                        }
+                    });
+                }
 
             }).always(() => {
                 block.clear();
             });
+        }
+        
+        saveDone(data) {
+            let self = this;
+            dialog({ messageId: 'Msg_15' }).then(function() {
+                if (data.autoSendMail) {
+                    self.displayEmailResult(data);
+                } else {
+                    let command = { appID: data.appID };
+                    setShared("KDL030_PARAM", command);
+                    modal("/view/kdl/030/a/index.xhtml").onClosed(() => {
+                        //phai de delay neu khong ham setShared se khong an
+                        _.delay(self.closeDialog(data.appID), 500, data.appID);
+                    });
+                }
 
+            });
         }
 
         displayEmailResult(data) {

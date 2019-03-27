@@ -14,5 +14,5 @@ public interface AppStampNewDomainService {
 	public AppStampNewPreOutput appStampPreProcess(String companyID, String employeeID, GeneralDate appDate);
 	
 	// 外出／育児／介護の申請の新規登録
-	public ProcessResult appStampRegister(String applicationReason, AppStamp appStamp);
+	public ProcessResult appStampRegister(String applicationReason, AppStamp appStamp, boolean checkOver1Year);
 }

@@ -34,6 +34,15 @@ public interface WorkTypeRepository {
 	List<WorkTypeInfor> getPossibleWorkTypeAndOrder(String companyId, List<String> lstPossible);
 	
 	/**
+	 * Gets the possible work type and order.
+	 *
+	 * @param companyId the company id
+	 * @param lstPossible the lst possible
+	 * @return the possible work type and order
+	 */
+	List<WorkTypeInfor> getPossibleWorkTypeWithNoMasterAndOrder(String companyId, List<String> lstPossible);
+	
+	/**
 	 * Find all by order.
 	 *
 	 * @param companyId the company id
@@ -123,6 +132,15 @@ public interface WorkTypeRepository {
 	Optional<WorkType> findByPK(String companyId, String workTypeCd);
 	
 	/**
+	 * Find NoAbolish by PK.
+	 *
+	 * @param companyId the company id
+	 * @param workTypeCd the work type cd
+	 * @return the optional
+	 */
+	Optional<WorkType> findNoAbolishByPK(String companyId, String workTypeCd);
+	
+	/**
 	 * Find work type set.
 	 *
 	 * @param companyId the company id
@@ -197,6 +215,8 @@ public interface WorkTypeRepository {
 	 * @return the list
 	 */
 	List<WorkType> findWorkOneDay(String companyId, int abolishAtr, int worktypeAtr, int oneDay);
+	
+	List<String> findWorkTypeCodeOneDay(String companyId, int abolishAtr, int worktypeAtr, int oneDay);
 	
 	/**
 	 * Gets the acquired attendance work types.

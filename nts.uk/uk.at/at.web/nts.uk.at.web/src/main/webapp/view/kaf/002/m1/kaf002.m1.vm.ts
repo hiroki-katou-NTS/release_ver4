@@ -134,30 +134,48 @@ module nts.uk.at.view.kaf002.m1 {
                     appStampGoOutPermitCmds: _.map(self.filterAppStamp(self.appStampList()), item => self.convertToJS(item)),
                     appStampWorkCmds: null,
                     appStampCancelCmds: null,
-                    appStampOnlineRecordCmd: null  
+                    appStampOnlineRecordCmd: null,
+                    checkOver1Year: true
                 }
                 if(nts.uk.util.isNullOrEmpty(command.appStampGoOutPermitCmds)){
                     $('.m1-time-editor').first().ntsError('set', {messageId:"Msg_308"});        
                 } else {
                     nts.uk.ui.block.invisible();
-                    service.insert(command)
-                    .done((data) => {
-                        nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
-                            if(data.autoSendMail){
-                                appcommon.CommonProcess.displayMailResult(data);    
-                            } else {
-                                if(checkBoxValue){
-                                    appcommon.CommonProcess.openDialogKDL030(data.appID);   
-                                } else {
-                                    location.reload();
-                                }   
-                            }
-                        });    
-                    })
-                    .fail(function(res) { 
-                        nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function(){nts.uk.ui.block.clear();});    
+                    service.insert(command).done((data) => {
+                        self.insertDone(data, checkBoxValue);
+                    }).fail(function(res) {
+                        if (res.messageId == "Msg_1518") {//confirm
+                            nts.uk.ui.dialog.confirm({ messageId: res.messageId }).ifYes(() => {
+                                command.checkOver1Year = false;
+                                service.insert(command).done((data) => {
+                                    self.insertDone(data, checkBoxValue);
+                                }).fail((res) => {
+                                    nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                                        .then(function() { nts.uk.ui.block.clear(); });
+                                });
+                            }).ifNo(() => {
+                                nts.uk.ui.block.clear();
+                            });
+
+                        } else {
+                            nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() { nts.uk.ui.block.clear(); });
+                        }
                     });  
                 }
+            }
+            
+            insertDone(data, checkBoxValue) {
+                nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
+                    if (data.autoSendMail) {
+                        appcommon.CommonProcess.displayMailResult(data);
+                    } else {
+                        if (checkBoxValue) {
+                            appcommon.CommonProcess.openDialogKDL030(data.appID);
+                        } else {
+                            location.reload();
+                        }
+                    }
+                });
             }
             
             update(application : vmbase.Application){

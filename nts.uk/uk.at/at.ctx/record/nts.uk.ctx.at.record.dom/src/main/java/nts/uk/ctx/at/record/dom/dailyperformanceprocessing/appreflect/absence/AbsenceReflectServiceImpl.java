@@ -58,7 +58,7 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 				//予定勤種の反映
 				if(dailyInfor.getScheduleInfo() == null 
 						|| dailyInfor.getScheduleInfo().getWorkTimeCode() == null
-						|| commonService.checkReflectScheWorkTimeType(absencePara, true, dailyInfor.getScheduleInfo().getWorkTimeCode().v())) {
+						|| commonService.checkReflectScheWorkTimeType(absencePara, isPre, dailyInfor.getScheduleInfo().getWorkTimeCode().v())) {
 					isRecordWorkType = true;
 					dailyInfor = workTimeUpdate.updateRecordWorkType(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode(), true, dailyInfor);
 				}				
@@ -68,7 +68,9 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 				dailyInfor = workTimeUpdate.updateRecordWorkType(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode(), false, dailyInfor);
 				//就業時間帯
 				if(param.getExcludeHolidayAtr() != 0) {
-					dailyInfor = workTimeUpdate.updateRecordWorkTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTimeCode(), true, dailyInfor);
+					if(isRecordWorkType) {
+						dailyInfor = workTimeUpdate.updateRecordWorkTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTimeCode(), true, dailyInfor);	
+					}					
 					dailyInfor = workTimeUpdate.updateRecordWorkTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTimeCode(), false, dailyInfor);
 				}
 				workRepository.updateByKeyFlush(dailyInfor);

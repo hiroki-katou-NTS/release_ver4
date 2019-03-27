@@ -127,7 +127,7 @@ public class AddAppWorkChangeCommandHandler extends CommandHandlerWithResult<Add
 		//1日休日のチェック
 		checkHoliday(companyId,applicantSID,addCommand);
 		//ドメインモデル「勤務変更申請設定」の新規登録をする
-		return workChangeRegisterService.registerData(workChangeDomain, app);
+		return workChangeRegisterService.registerData(workChangeDomain, app, addCommand.isCheckOver1Year());
 	}
 
 	

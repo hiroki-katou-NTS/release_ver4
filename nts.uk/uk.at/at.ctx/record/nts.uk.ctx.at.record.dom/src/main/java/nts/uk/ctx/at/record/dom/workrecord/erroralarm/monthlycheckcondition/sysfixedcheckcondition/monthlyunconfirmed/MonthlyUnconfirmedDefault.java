@@ -43,6 +43,7 @@ public class MonthlyUnconfirmedDefault implements MonthlyUnconfirmedService {
 		}
 		//ドメインモデル「月別実績の勤怠時間」を取得する
 		List<AttendanceTimeOfMonthly> attendanceTimeOfMonthlys = new ArrayList<>();
+		YearMonth ym = YearMonth.of(yearMonth);
 		attendanceTimeOfMonthlys = attendanceTimeOfMonthlyRepo.findByYearMonthOrderByStartYmd(employeeID,
 				YearMonth.of(yearMonth));
 		//「月の本人確認を利用する」をチェックする  :  利用する場合
@@ -59,8 +60,7 @@ public class MonthlyUnconfirmedDefault implements MonthlyUnconfirmedService {
 					return Optional.empty();
 				}
 				// 取得できなかった場合
-				GeneralDate date = GeneralDate.fromString(String.valueOf(yearMonth).substring(0, 4) + '-'
-						+ String.valueOf(yearMonth).substring(4, 6) + '-' + "01", "yyyy-MM-dd");
+				GeneralDate date = GeneralDate.ymd(ym.year(), ym.month(), 1);
 				return Optional.of(new ValueExtractAlarmWR(null, employeeID, date, TextResource.localize("KAL010_100"),
 						TextResource.localize("KAL010_271"), TextResource.localize("KAL010_272"), null));
 
@@ -80,6 +80,7 @@ public class MonthlyUnconfirmedDefault implements MonthlyUnconfirmedService {
 		}
 		// ドメインモデル「月別実績の勤怠時間」を取得する
 		List<AttendanceTimeOfMonthly> attendanceTimeOfMonthlys = new ArrayList<>();
+		YearMonth ym = YearMonth.of(yearMonth);
 		attendanceTimeOfMonthlys = attendanceTimeOfMonthlyRepo.findByYearMonthOrderByStartYmd(employeeID,
 				YearMonth.of(yearMonth));
 		// 「月の本人確認を利用する」をチェックする : 利用する場合
@@ -95,9 +96,45 @@ public class MonthlyUnconfirmedDefault implements MonthlyUnconfirmedService {
 				// 取得できた場合
 				if (!confirmationMonth.isPresent()) {
 					// 取得できなかった場合
-					GeneralDate date = GeneralDate.fromString(String.valueOf(yearMonth).substring(0, 4) + '-'
-							+ String.valueOf(yearMonth).substring(4, 6) + '-' + "01", "yyyy-MM-dd");
+					GeneralDate date = GeneralDate.ymd(ym.year(), ym.month(), 1);
 					ValueExtractAlarmWR valueExtractAlarmWR = new ValueExtractAlarmWR(null, employeeID, date,
+							TextResource.localize("KAL010_100"), TextResource.localize("KAL010_102"),
+							TextResource.localize("KAL010_108"), null);
+					lstDataReturn.add(valueExtractAlarmWR);
+				}
+
+			}
+		}
+		return lstDataReturn;
+	}
+	
+	@Override
+	public List<ValueExtractAlarmWR> checkMonthlyUnconfirmeds(List<String> employeeID, List<YearMonth> yearMonth, Optional<IdentityProcessUseSet> identityProcess) {
+		List<ValueExtractAlarmWR> lstDataReturn = new ArrayList<>();
+		// ドメインモデル「本人確認処理の利用設定」を取得する
+		if (!identityProcess.isPresent()) {
+			return lstDataReturn;
+		}
+		// 「月の本人確認を利用する」をチェックする : 利用する場合
+		if (identityProcess.get().isUseIdentityOfMonth()) {
+			
+			// ドメインモデル「月別実績の勤怠時間」を取得する
+			List<AttendanceTimeOfMonthly> attendanceTimeOfMonthlys = attendanceTimeOfMonthlyRepo.findBySidsAndYearMonths(employeeID, yearMonth);
+			
+			List<ConfirmationMonth> confirmMonthlys = confirmationMonthRepo.findBySomeProperty(employeeID, yearMonth);
+			for (AttendanceTimeOfMonthly tmp : attendanceTimeOfMonthlys) {
+				// fix bug 101936 (thêm closureDate)
+				// ドメインモデル「月の本人確認」を取得する
+				// fix bug 101936
+				Optional<ConfirmationMonth> confirmationMonth = confirmMonthlys.stream().filter(c -> {
+					return c.getEmployeeId().equals(tmp.getEmployeeId()) && c.getClosureId() == tmp.getClosureId() 
+							&& c.getProcessYM().equals(tmp.getYearMonth()) && c.getClosureDate().equals(tmp.getClosureDate());
+				}).findFirst();
+				// 取得できた場合
+				if (!confirmationMonth.isPresent()) {
+					// 取得できなかった場合
+					GeneralDate date = GeneralDate.ymd(tmp.getYearMonth().year(), tmp.getYearMonth().month(), 1);
+					ValueExtractAlarmWR valueExtractAlarmWR = new ValueExtractAlarmWR(null, tmp.getEmployeeId(), date,
 							TextResource.localize("KAL010_100"), TextResource.localize("KAL010_102"),
 							TextResource.localize("KAL010_108"), null);
 					lstDataReturn.add(valueExtractAlarmWR);

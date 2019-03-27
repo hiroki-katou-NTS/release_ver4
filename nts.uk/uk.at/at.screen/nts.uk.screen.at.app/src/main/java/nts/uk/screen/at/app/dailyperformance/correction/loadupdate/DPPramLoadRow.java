@@ -58,4 +58,6 @@ public class DPPramLoadRow {
 		
 	private boolean errorAllSidDate = false;
 	
+	private Integer closureId;
+	
 }

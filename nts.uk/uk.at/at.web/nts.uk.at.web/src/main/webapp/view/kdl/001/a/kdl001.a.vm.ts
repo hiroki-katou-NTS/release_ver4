@@ -154,6 +154,7 @@ module nts.uk.at.view.kdl001.a {
                     nts.uk.ui.windows.setShared('kml001selectedCodeList', self.selectedCodeList());
                     nts.uk.ui.windows.setShared('kml001selectedTimes', self.getSelectedTimeItems(self.selectedCodeList()));
                     nts.uk.ui.block.clear();
+                    nts.uk.ui.windows.setShared('KDL001_IsCancel', false);
                     nts.uk.ui.windows.close();
                 }
             }
@@ -166,6 +167,7 @@ module nts.uk.at.view.kdl001.a {
             }
 
             closeDialog() {
+                 nts.uk.ui.windows.setShared('KDL001_IsCancel', true);
                 nts.uk.ui.windows.close();
             }
         }

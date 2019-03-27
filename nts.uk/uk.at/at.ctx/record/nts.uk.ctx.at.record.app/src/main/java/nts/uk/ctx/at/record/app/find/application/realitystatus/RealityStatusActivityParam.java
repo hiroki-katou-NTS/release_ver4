@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.app.find.application.realitystatus;
 
 import java.util.List;
 
+import lombok.Data;
 import lombok.Value;
 import nts.arc.time.GeneralDate;
 
@@ -10,7 +11,7 @@ import nts.arc.time.GeneralDate;
  * @author dat.lh
  *
  */
-@Value
+@Data
 public class RealityStatusActivityParam {
 	private GeneralDate startDate;
 	private GeneralDate endDate;

@@ -8,9 +8,13 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
+import lombok.val;
+import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
@@ -107,4 +111,36 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 		return data;
 	}
 
+	@Override
+	public List<ConfirmationMonth> findBySomeProperty(List<String> employeeIds, List<YearMonth> yearMonth) {
+		List<ConfirmationMonth> data = new ArrayList<>();
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			CollectionUtil.split(yearMonth, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, ym -> {
+				data.addAll(internalQuery(subList, ym));
+			});
+		});
+		
+		return data;
+	}
+
+	@SneakyThrows
+	private List<ConfirmationMonth> internalQuery(List<String> subList, List<YearMonth> ym) {
+		String subEmp = NtsStatement.In.createParamsString(subList);
+		String subYm = NtsStatement.In.createParamsString(ym);
+		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_CONFIRMATION_MONTH WHERE PROCESS_YM IN (" + subYm +") AND SID IN (" + subEmp + ")")){
+			for (int i = 0; i < ym.size(); i++) {
+				stmt.setInt(i + 1, ym.get(i).v());
+			}
+			for (int i = 0; i < subList.size(); i++) {
+				stmt.setString(i + 1 + ym.size(), subList.get(i));
+			}
+			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+				return new ConfirmationMonth(new CompanyId(rec.getString("CID")), rec.getString("SID"), 
+						EnumAdaptor.valueOf(rec.getInt("CLOSURE_ID"), ClosureId.class), 
+						new ClosureDate(rec.getInt("CLOSURE_DAY"), rec.getBoolean("IS_LAST_DAY")), 
+						new YearMonth(rec.getInt("PROCESS_YM")), 
+						rec.getGeneralDate("IDENTIFY_DATE"));
+			});
+		}
+	}
 }

@@ -8,8 +8,10 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.function.dom.adapter.employeebasic.EmployeeBasicInfoFnImport;
+import nts.uk.ctx.at.function.dom.adapter.employeebasic.EmployeeInfoImport;
 import nts.uk.ctx.at.function.dom.adapter.employeebasic.SyEmployeeFnAdapter;
 import nts.uk.ctx.bs.employee.pub.employee.EmployeeBasicInfoExport;
+import nts.uk.ctx.bs.employee.pub.employee.EmployeeInfoExport;
 import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -46,6 +48,21 @@ public class SyEmployeeFnAcFinder implements SyEmployeeFnAdapter {
 		if(listSyEmployee.isEmpty())
 			return Collections.emptyList();
 		return listSyEmployee;
+	}
+	@Override
+	public List<EmployeeInfoImport> getByListSid(List<String> sIds) {
+		List<EmployeeInfoExport> data =syEmployeePub.getByListSid(sIds);
+		if(data.isEmpty())
+			return Collections.emptyList();
+		return data.stream().map(c->convertToEmployeeInfoExport(c)).collect(Collectors.toList());
+	}
+	
+	private EmployeeInfoImport convertToEmployeeInfoExport(EmployeeInfoExport export) {
+		return new EmployeeInfoImport(
+				export.getSid(),
+				export.getScd(),
+				export.getBussinessName()
+				);
 	}
 
 }

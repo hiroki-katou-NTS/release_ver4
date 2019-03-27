@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
@@ -37,6 +40,7 @@ import nts.uk.ctx.workflow.dom.service.JudgmentApprovalStatusService;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootStateStatus;
 import nts.uk.ctx.workflow.dom.service.output.ApproverPersonOutput;
 import nts.uk.ctx.workflow.dom.service.output.Request133Output;
+import nts.uk.ctx.workflow.dom.service.output.ErrorFlag;
 import nts.uk.ctx.workflow.dom.service.resultrecord.AppRootConfirmService;
 import nts.uk.ctx.workflow.dom.service.resultrecord.AppRootInstancePeriod;
 import nts.uk.ctx.workflow.dom.service.resultrecord.AppRootInstanceService;
@@ -73,7 +77,8 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  * @author Doan Duy Hung
  *
  */
-@RequestScoped
+@Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class IntermediateDataPubImpl implements IntermediateDataPub {
 	
 	@Inject
@@ -104,9 +109,8 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	private EmployeeAdapter employeeAdapter;
 
 	@Override
-	public Request133Export getAppRootStatusByEmpPeriod(String employeeID, DatePeriod period,
+	public Request133Export getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period,
 			Integer rootType) throws BusinessException {
-		List<String> employeeIDLst = Arrays.asList(employeeID);
 		Request133Output result = appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
 		return new Request133Export(
 				result.getAppRootStatusLst().stream()
@@ -278,7 +282,53 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 
 	@Override
 	public AppRootInsContentExport createDailyApprover(String employeeID, Integer rootType, GeneralDate recordDate, GeneralDate closureStartDate) {
-		AppRootInstanceContent appRootInstanceContent = createDailyApprover.createDailyApprover(employeeID, EnumAdaptor.valueOf(rootType, RecordRootType.class), recordDate, closureStartDate);
+		// ドメインモデル「承認ルート中間データ」を削除する
+		String companyID = AppContexts.user().companyId();
+		RecordRootType rootTypeEnum = EnumAdaptor.valueOf(rootType, RecordRootType.class);
+		AppRootInstanceContent appRootInstanceContent = null;
+		for(GeneralDate loopDate = closureStartDate; loopDate.beforeOrEquals(recordDate); loopDate = loopDate.addDays(1)){
+			appRootInstanceContent = createDailyApprover.createDailyApprover(
+					employeeID, 
+					rootTypeEnum, 
+					loopDate, 
+					closureStartDate);
+			ErrorFlag errorFlag = appRootInstanceContent.getErrorFlag();
+			String errorMsgID = "";
+			switch (errorFlag) {
+			case NO_APPROVER:
+				errorMsgID = "Msg_324";
+				break;
+			case NO_CONFIRM_PERSON:
+				errorMsgID = "Msg_326";
+				break;
+			case APPROVER_UP_10:
+				errorMsgID = "Msg_325";
+				break;
+			case ABNORMAL_TERMINATION:
+				errorMsgID = "Msg_1339";
+				break;
+			default:
+				break;
+			}
+			if(errorFlag!=ErrorFlag.NO_ERROR){
+				return new AppRootInsContentExport(
+						new AppRootInsExport(
+								appRootInstanceContent.getAppRootInstance().getRootID(), 
+								appRootInstanceContent.getAppRootInstance().getCompanyID(), 
+								employeeID, 
+								appRootInstanceContent.getAppRootInstance().getDatePeriod(), 
+								rootType, 
+								Collections.emptyList()), 
+						errorFlag.value, 
+						errorMsgID);
+			}
+		}
+		// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」を取得する
+		AppRootInstance appRootInstNewest = appRootInstanceRepository.findByEmpDateNewest(companyID, employeeID, rootTypeEnum).get();
+		// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」をUPDATEする
+		DatePeriod newestPeriod = new DatePeriod(appRootInstNewest.getDatePeriod().start(), GeneralDate.fromString("9999/12/31", "yyyy/MM/dd")) ;
+		appRootInstNewest.setDatePeriod(newestPeriod);
+		appRootInstanceRepository.update(appRootInstNewest);
 		return new AppRootInsContentExport(
 				new AppRootInsExport(
 						appRootInstanceContent.getAppRootInstance().getRootID(), 

@@ -23,9 +23,13 @@ public interface CheckResultMonthlyAdapter {
 	// Call RQ 436
 	List<MonthlyRecordValuesImport> getListMonthlyRecords(String employeeId ,YearMonthPeriod period, List<Integer> itemIds);
 	
+	Map<String, List<MonthlyRecordValuesImport>> getListMonthlyRecords(List<String> employeeId ,YearMonthPeriod period, List<Integer> itemIds);
+	
 	// Process employee have many record alarm
 	List<Check36AgreementValueImport> check36AgreementConditions(String employeeId,List<MonthlyRecordValuesImport> monthlyRecords,AgreementCheckCon36FunImport agreementCheckCon36, Optional<Closure> closure);
 	
 	//HoiDD No.257
 	Map<String, Integer> checkPerTimeMonActualResult(YearMonth yearMonth, String employeeID, AttendanceItemConAdapterDto attendanceItemCondition);
+	
+	Map<String,Map<YearMonth,Map<String,Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemConAdapterDto> attendanceItemCondition);
 }

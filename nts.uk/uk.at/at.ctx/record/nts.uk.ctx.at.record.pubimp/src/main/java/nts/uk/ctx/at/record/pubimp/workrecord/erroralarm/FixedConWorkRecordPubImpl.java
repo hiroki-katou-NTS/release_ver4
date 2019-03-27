@@ -31,6 +31,15 @@ public class FixedConWorkRecordPubImpl implements FixedConWorkRecordPub {
 			return Collections.emptyList();
 		return data;
 	}
+	
+	@Override
+	public List<FixedConWorkRecordPubExport> getAllFixedConWorkRecordByID(List<String> dailyAlarmConID) {
+		List<FixedConWorkRecordPubExport> data = repo.getAllFixedConWorkRecordByID(dailyAlarmConID)
+				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
+		if(data.isEmpty())
+			return Collections.emptyList();
+		return data;
+	}
 
 	@Override
 	public FixedConWorkRecordPubExport getFixedConWRByCode(String dailyAlarmConID,int fixConWorkRecordNo) {

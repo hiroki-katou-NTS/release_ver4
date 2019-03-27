@@ -33,5 +33,14 @@ public interface SyCompanyPub {
 	
 	AffCompanyHistExport GetAffComHisBySid(String cid, String sid);
 	
+	/**
+	 * RequestList 588
+	 * 社員の指定期間中の所属期間を取得する
+	 * @param sid
+	 * @param datePeriod
+	 * @return
+	 */
+	List<StatusOfEmployee> GetListAffComHistByListSidAndPeriod(List<String> sid, DatePeriod datePeriod);
+	
 
 }

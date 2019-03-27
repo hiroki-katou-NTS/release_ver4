@@ -233,9 +233,9 @@ module nts.uk.at.view.kaf007.a.viewmodel {
             //Setting default value data work:
             self.appWorkChange().dataWork(settingData.dataWorkDto);
             self.appWorkChange().workChange().workTypeCd(settingData.dataWorkDto.selectedWorkTypeCd === null ? '' : settingData.dataWorkDto.selectedWorkTypeCd);
-            self.appWorkChange().workChange().workTypeName(settingData.dataWorkDto.selectedWorkTypeName === null ? '' : settingData.dataWorkDto.selectedWorkTypeName);
+            self.appWorkChange().workChange().workTypeName(settingData.dataWorkDto.selectedWorkTypeName || text("KAL003_120"));
             self.appWorkChange().workChange().workTimeCd(settingData.dataWorkDto.selectedWorkTimeCd === null ? '' : settingData.dataWorkDto.selectedWorkTimeCd);
-            self.appWorkChange().workChange().workTimeName(settingData.dataWorkDto.selectedWorkTimeName === null ? '' : settingData.dataWorkDto.selectedWorkTimeName);
+            self.appWorkChange().workChange().workTimeName(settingData.dataWorkDto.selectedWorkTimeName || text("KAL003_120"));
             if(!nts.uk.util.isNullOrUndefined(settingData.dataWorkDto.startTime1)){
                 self.appWorkChange().workChange().workTimeStart1(settingData.dataWorkDto.startTime1);    
             }
@@ -280,10 +280,34 @@ module nts.uk.at.view.kaf007.a.viewmodel {
             self.changeUnregisterValue();
 
             let workChange = ko.toJS(self.appWorkChange());
+            workChange.checkOver1Year = true;
 
             service.addWorkChange(workChange).done((data) => {
-                //Success
-                nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
+                self.sendMail(data);                
+            }).fail((res) => {
+                if(res.messageId == "Msg_1518"){//confirm
+                    dialog.confirm({messageId: res.messageId}).ifYes(() => {
+                        workChange.checkOver1Year = false;
+                        service.addWorkChange(workChange).done((data) => {
+                            self.sendMail(data);                
+                        }).fail((res) => {
+                            dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds });
+                            nts.uk.ui.block.clear();
+                        });
+                    }).ifNo(() => {
+                        nts.uk.ui.block.clear();
+                    });
+                    
+                }else{
+                    dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds });
+                    nts.uk.ui.block.clear();
+                }
+            });
+        }
+
+        sendMail(data){
+            let self = this;
+            nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(function() {
                     if (data.autoSendMail) {
                         appcommon.CommonProcess.displayMailResult(data);
                     } else {
@@ -294,12 +318,7 @@ module nts.uk.at.view.kaf007.a.viewmodel {
                         }
                     }
                 });
-            }).fail((res) => {
-                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds });
-                nts.uk.ui.block.clear();
-            });
         }
-
         getStartDate() {
             let self = this,
                 dateValue = self.multiDate() ? self.datePeriod().startDate : self.dateSingle();

@@ -3,9 +3,13 @@ package nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.function.dom.adapter.standardtime.AgreementOperationSettingAdapter;
@@ -16,6 +20,7 @@ import nts.uk.ctx.at.function.dom.adapter.workrecord.approvalmanagement.Approval
 import nts.uk.ctx.at.function.dom.adapter.workrecord.approvalmanagement.ApprovalProcessImport;
 import nts.uk.ctx.at.function.dom.adapter.workrecord.identificationstatus.identityconfirmprocess.IdentityConfirmProcessAdapter;
 import nts.uk.ctx.at.function.dom.adapter.workrecord.identificationstatus.identityconfirmprocess.IdentityConfirmProcessImport;
+import nts.uk.ctx.at.function.dom.alarm.AlarmCategory;
 import nts.uk.ctx.at.function.dom.alarm.alarmdata.ValueExtractAlarm;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.EmployeeSearchDto;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.PeriodByAlarmCategory;
@@ -23,6 +28,7 @@ import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.agreementpr
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.daily.dailyaggregationprocess.DailyAggregationProcessService;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.monthly.MonthlyAggregateProcessService;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.multiplemonth.MultipleMonthAggregateProcessService;
+import nts.uk.ctx.at.function.dom.alarm.checkcondition.AlarmCheckConditionByCategory;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.CheckCondition;
 import nts.uk.ctx.at.function.dom.alarm.w4d4alarm.W4D4AlarmService;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -139,5 +145,159 @@ public class ExtractAlarmForEmployeeService {
 
 		}
 		return result;
+	}
+	
+	private List<AlarmCheckConditionByCategory> getAlarmCheckConditionCate(List<AlarmCheckConditionByCategory> allEralCate, AlarmCategory cate, List<CheckCondition> target){
+		return allEralCate.stream().filter(c -> {
+			if(c.getCategory() != cate ){
+				return false;
+			}
+			Optional<CheckCondition> cco = target.stream().filter(cc -> cc.getAlarmCategory() == cate).findFirst();
+			if(cco.isPresent()){
+				return cco.get().getCheckConditionList().contains(c.getCode().v());
+			}
+			return false;
+		}).collect(Collectors.toList());
+	}
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	public List<ValueExtractAlarm> processV2(String comId, List<CheckCondition> checkConList, List<PeriodByAlarmCategory> listPeriodByCategory, 
+			List<EmployeeSearchDto> employees, List<AlarmCheckConditionByCategory> eralCate, Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
+		List<ValueExtractAlarm> result = (new ArrayList<>());
+
+		List<String> employeeIds = employees.stream().map(c -> c.getId()).collect(Collectors.toList());
+		List<WorkplaceImport> optWorkplaceImports = workplaceAdapter.getWorlkplaceHistoryByIDs(employeeIds);
+
+//		List<Runnable> checks = new ArrayList<>();
+//		checks.add(() -> {
+			result.addAll(runDailyCheckErAl(comId, checkConList, listPeriodByCategory, employees,
+					employeeIds, optWorkplaceImports, eralCate, counter, shouldStop));
+//		});
+
+//		checks.add(() -> {
+			result.addAll(runW4d4CheckErAl(comId, checkConList, listPeriodByCategory, employees, employeeIds,
+					optWorkplaceImports, eralCate, counter, shouldStop));
+//		});
+
+//		checks.add(() -> {
+			result.addAll(runAgreementCheckErAl(comId, checkConList, listPeriodByCategory, employees, employeeIds,
+					optWorkplaceImports, eralCate, counter, shouldStop));
+//		});
+
+//		checks.add(() -> {
+			result.addAll(runMonthlyCheckErAl(comId, checkConList, listPeriodByCategory, employees,
+					employeeIds, optWorkplaceImports, eralCate, counter, shouldStop));
+//		});
+
+//		checks.add(() -> {
+			result.addAll(runMultiMonthCheckErAl(comId, checkConList, listPeriodByCategory, employees,
+					employeeIds, optWorkplaceImports, eralCate, counter, shouldStop));
+//		});
+
+//		parallelManager.forEach(checks, check -> check.run());
+
+		return result;
+	}
+
+	private List<ValueExtractAlarm> runMultiMonthCheckErAl(String comId, List<CheckCondition> checkConList,
+			List<PeriodByAlarmCategory> listPeriodByCategory, List<EmployeeSearchDto> employees,
+			List<String> employeeIds, List<WorkplaceImport> optWorkplaceImports,
+			List<AlarmCheckConditionByCategory> eralCate, Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
+		List<AlarmCheckConditionByCategory> multiMonthErAl = getAlarmCheckConditionCate(eralCate, AlarmCategory.MULTIPLE_MONTH, checkConList);
+		if(!multiMonthErAl.isEmpty()){
+			PeriodByAlarmCategory multiMonthCate = listPeriodByCategory.stream().filter(c -> c.getCategory() == AlarmCategory.MULTIPLE_MONTH.value).findFirst().get();
+			
+			fillWorkPlaceForCategory(employees, employeeIds, optWorkplaceImports, multiMonthCate);
+			
+			/** need internal response */
+			return (multipleMonthAggregateProcessService.multimonthAggregateProcess(comId, multiMonthErAl, new DatePeriod(multiMonthCate.getStartDate(), 
+					multiMonthCate.getEndDate()), employees, counter, shouldStop));
+		}
+		
+		return new ArrayList<>();
+	}
+
+	private List<ValueExtractAlarm> runMonthlyCheckErAl(String comId, List<CheckCondition> checkConList,
+			List<PeriodByAlarmCategory> listPeriodByCategory, List<EmployeeSearchDto> employees,
+			List<String> employeeIds, List<WorkplaceImport> optWorkplaceImports,
+			List<AlarmCheckConditionByCategory> eralCate, Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
+		List<AlarmCheckConditionByCategory> monthlyErAl = getAlarmCheckConditionCate(eralCate, AlarmCategory.MONTHLY, checkConList);
+		if(!monthlyErAl.isEmpty()){
+			PeriodByAlarmCategory monthlyCate = listPeriodByCategory.stream().filter(c -> c.getCategory() == AlarmCategory.MONTHLY.value).findFirst().get();
+			
+			fillWorkPlaceForCategory(employees, employeeIds, optWorkplaceImports, monthlyCate);
+			
+			/** need internal response */
+			// #101960 「本人確認処理の利用設定」取得処理を追加（アルゴリズム移動） and 「承認処理の利用設定」取得処理を追加
+			return (monthlyAggregateProcessService.monthlyAggregateProcess(comId, monthlyErAl,
+					new DatePeriod(monthlyCate.getStartDate(), monthlyCate.getEndDate()), employees, counter, shouldStop));
+		}
+		
+		return new ArrayList<>();
+	}
+
+	private List<ValueExtractAlarm> runAgreementCheckErAl(String comId, List<CheckCondition> checkConList,
+			List<PeriodByAlarmCategory> listPeriodByCategory, List<EmployeeSearchDto> employees,
+			List<String> employeeIds, List<WorkplaceImport> optWorkplaceImports,
+			List<AlarmCheckConditionByCategory> eralCate, Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
+		List<AlarmCheckConditionByCategory> agreementErAl = getAlarmCheckConditionCate(eralCate, AlarmCategory.AGREEMENT, checkConList);
+		if(!agreementErAl.isEmpty()){
+			PeriodByAlarmCategory agreementCate = listPeriodByCategory.stream().filter(c -> c.getCategory() == AlarmCategory.AGREEMENT.value).findFirst().get();
+			
+			fillWorkPlaceForCategory(employees, employeeIds, optWorkplaceImports, agreementCate);
+			
+			/** need internal response */
+			// #101971, #101141, #101142, #101372 36協定チェック時の事前取得処理追加
+			return agreementProcessService.agreementProcess(comId, agreementErAl, listPeriodByCategory, employees, agreementOperationSettingAdapter.find(comId), counter, shouldStop);
+		}
+		
+		return new ArrayList<>();
+	}
+
+	private List<ValueExtractAlarm> runW4d4CheckErAl(String comId, List<CheckCondition> checkConList,
+			List<PeriodByAlarmCategory> listPeriodByCategory, List<EmployeeSearchDto> employees,
+			List<String> employeeIds, List<WorkplaceImport> optWorkplaceImports,
+			List<AlarmCheckConditionByCategory> eralCate, Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
+		List<AlarmCheckConditionByCategory> w4d4ErAl = getAlarmCheckConditionCate(eralCate, AlarmCategory.SCHEDULE_4WEEK, checkConList);
+		if(!w4d4ErAl.isEmpty()){
+			PeriodByAlarmCategory w4d4Cate = listPeriodByCategory.stream().filter(c -> c.getCategory() == AlarmCategory.SCHEDULE_4WEEK.value).findFirst().get();
+			
+			fillWorkPlaceForCategory(employees, employeeIds, optWorkplaceImports, w4d4Cate);
+			
+			/** need internal response */
+			return (w4D4AlarmService.calculateTotal4W4D(comId, employees, new DatePeriod(w4d4Cate.getStartDate(), w4d4Cate.getEndDate()), w4d4ErAl, counter, shouldStop));
+		}
+		return new ArrayList<>();
+	}
+
+	private List<ValueExtractAlarm> runDailyCheckErAl(String comId, List<CheckCondition> checkConList,
+			List<PeriodByAlarmCategory> listPeriodByCategory, List<EmployeeSearchDto> employees,
+			List<String> employeeIds, List<WorkplaceImport> optWorkplaceImports,
+			List<AlarmCheckConditionByCategory> eralCate, Consumer<Integer> counter, Supplier<Boolean> shouldStop) {
+		List<AlarmCheckConditionByCategory> dailyErAl = getAlarmCheckConditionCate(eralCate, AlarmCategory.DAILY, checkConList);
+		if(!dailyErAl.isEmpty()){
+			PeriodByAlarmCategory dailyCate = listPeriodByCategory.stream().filter(c -> c.getCategory() == AlarmCategory.DAILY.value).findFirst().get();
+			
+			fillWorkPlaceForCategory(employees, employeeIds, optWorkplaceImports, dailyCate);
+			/** need internal response */
+			return (dailyAggregationProcessService.dailyAggregationProcess(comId, dailyCate, employees, dailyErAl, counter, shouldStop));
+		}
+		
+		return new ArrayList<>();
+	}
+
+	private void fillWorkPlaceForCategory(List<EmployeeSearchDto> employees, List<String> employeeIds,
+			List<WorkplaceImport> optWorkplaceImports, PeriodByAlarmCategory dailyCate) {
+		optWorkplaceImports.stream()
+							.filter(e -> employeeIds.contains(e.getEmployeeId())
+									&& (e.getDateRange().start().beforeOrEquals(dailyCate.getEndDate())
+											&& e.getDateRange().end().afterOrEquals(dailyCate.getEndDate())))
+							.forEach(wp -> {
+								employees.stream().filter(e -> e.getId().equals(wp.getEmployeeId())).findFirst().ifPresent(e -> {
+									e.setWorkplaceId(wp.getWorkplaceId());
+									e.setWorkplaceCode(wp.getWorkplaceCode());
+									e.setWorkplaceName(wp.getWorkplaceName());
+								});
+							});
 	}
 }

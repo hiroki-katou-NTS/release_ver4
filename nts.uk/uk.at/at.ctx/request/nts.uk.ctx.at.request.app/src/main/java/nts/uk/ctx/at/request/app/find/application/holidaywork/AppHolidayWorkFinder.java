@@ -381,11 +381,13 @@ public class AppHolidayWorkFinder {
 			// 時刻計算利用チェック
 //			if (approvalFunctionSetting.getApplicationDetailSetting().get().getTimeCalUse().equals(UseAtr.USE)) {
 				
-				 workTypeCD = appHolidayWork.getWorkTypeCode() == null ? "" : appHolidayWork.getWorkTypeCode().v();
+				workTypeCD = appHolidayWork.getWorkTypeCode() == null ? "" : appHolidayWork.getWorkTypeCode().v();
 				WorkType workType = workTypeRepository.findByPK(companyID, workTypeCD).orElse(null) ;
+				String wkTypeName = null ;
 				if(workType != null){
-					appHolidayWorkDto.setWorkType(new WorkTypeOvertime(workType.getWorkTypeCode().v(),workType.getName().v()));
+					wkTypeName = workType.getName().v();
 				}
+				appHolidayWorkDto.setWorkType(new WorkTypeOvertime(workTypeCD,wkTypeName));
 				Optional<WorkingConditionItem> personalLablorCodition = workingConditionItemRepository.getBySidAndStandardDate(appHolidayWork.getApplication().getEmployeeID(),appHolidayWork.getApplication().getAppDate());
 				List<AppEmploymentSetting> appEmploymentWorkType = appCommonSettingOutput.appEmploymentWorkType;
 				// 4_b.勤務種類を取得する（詳細）
@@ -396,9 +398,11 @@ public class AppHolidayWorkFinder {
 				appHolidayWorkDto.setWorkTimes(listWorkTimeCodes);
 				 workTimeCD = appHolidayWork.getWorkTimeCode() == null ? "" : appHolidayWork.getWorkTimeCode().v();
 				WorkTimeSetting workTime =  workTimeRepository.findByCode(companyID, workTimeCD).orElse(null);
+				String wkTimeName= null ;
 				if(workTime != null){
-					appHolidayWorkDto.setWorkTime(new SiftType(appHolidayWork.getWorkTimeCode().toString(),workTime.getWorkTimeDisplayName().getWorkTimeName().toString()));
+					wkTimeName = workTime.getWorkTimeDisplayName().getWorkTimeName().toString();
 				}
+				appHolidayWorkDto.setWorkTime(new SiftType(workTimeCD,wkTimeName));
 				// 01-17_休憩時間取得(lay thoi gian nghi ngoi)
 				boolean displayRestTime = iOvertimePreProcess.getRestTime(approvalFunctionSetting);
 				appHolidayWorkDto.setDisplayRestTime(displayRestTime);

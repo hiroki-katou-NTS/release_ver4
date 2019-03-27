@@ -300,30 +300,30 @@ public class ScheCreExeMonthlyPatternHandler {
 		boolean valueIsCreate = this.isCreate(workingConditionItem.getEmployeeId(), dateInPeriod,
 				command.getContent().getReCreateContent().getRebuildTargetDetailsAtr().getRecreateConverter(),
 				basicSche.getWorkScheduleMaster().getWorkplaceId(), masterCache.getEmpGeneralInfo());
-		if (!valueIsCreate)
-			return false;
+		if (valueIsCreate)
+			return true;
 
 		// 休職休業者を再作成するか判定する
 		boolean valueIsReEmpOnLeaveOfAbsence = this.isReEmpOnLeaveOfAbsence(
 				command.getContent().getReCreateContent().getRebuildTargetDetailsAtr().getRecreateEmployeeOffWork(),
 				employmentInfo.getEmploymentState());
-		if (!valueIsReEmpOnLeaveOfAbsence) {
-			return false;
+		if (valueIsReEmpOnLeaveOfAbsence) {
+			return true;
 		}
 
 		// 直行直帰者を再作成するか判定する
 		boolean valueIsReDirectBounceBackEmp = this.isReDirectBounceBackEmp(
 				command.getContent().getReCreateContent().getRebuildTargetDetailsAtr().getRecreateDirectBouncer(),
 				workingConditionItem.getAutoStampSetAtr());
-		if (!valueIsReDirectBounceBackEmp) {
-			return false;
+		if (valueIsReDirectBounceBackEmp) {
+			return true;
 		}
 
 		// 短時間勤務者を再作成するか判定する
 		boolean valueIsReShortTime = masterCache.getShortWorkTimeDtos().isReShortTime(workingConditionItem.getEmployeeId(), dateInPeriod,
 				command.getContent().getReCreateContent().getRebuildTargetDetailsAtr().getRecreateShortTermEmployee());
-		if (!valueIsReShortTime) {
-			return false;
+		if (valueIsReShortTime) {
+			return true;
 		}
 
 		// 勤務種別変更者を再作成するか判定する
@@ -332,19 +332,19 @@ public class ScheCreExeMonthlyPatternHandler {
 				dateInPeriod,
 				command.getContent().getReCreateContent().getRebuildTargetDetailsAtr().getRecreateWorkTypeChange(),
 				basicSche.getWorkScheduleMaster().getBusinessTypeCd());
-		if (!valueIsReWorkerTypeChangePerson) {
-			return false;
+		if (valueIsReWorkerTypeChangePerson) {
+			return true;
 		}
 
 		// 手修正を保護するか判定する
 		boolean valueIsProtectHandCorrect = this.isProtectHandCorrect(workingConditionItem.getEmployeeId(),
 				dateInPeriod,
 				command.getContent().getReCreateContent().getRebuildTargetDetailsAtr().getProtectHandCorrection());
-		if (!valueIsProtectHandCorrect) {
-			return false;
+		if (valueIsProtectHandCorrect) {
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	/**

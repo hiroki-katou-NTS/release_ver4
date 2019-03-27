@@ -167,7 +167,7 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 			
 			self.removePreData(period, empIds);
 				
-			List<WorkInfoOfDailyPerformance> workInfos = workInfoRepo.findByListEmployeeId(empIds, period);
+			List<WorkInfoOfDailyPerformance> workInfos = workInfoRepo.findByPeriodOrderByYmdAndEmps(empIds, period);
 			List<TimeLeavingOfDailyPerformance> timeLeaves = timeLeavingRepo.finds(empIds, period);
 			List<BreakTimeOfDailyPerformance> breakItems = breakItemRepo.finds(empIds, period);
 

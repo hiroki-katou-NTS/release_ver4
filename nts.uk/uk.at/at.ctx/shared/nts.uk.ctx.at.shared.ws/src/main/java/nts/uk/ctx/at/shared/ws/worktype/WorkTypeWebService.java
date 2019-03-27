@@ -83,6 +83,18 @@ public class WorkTypeWebService extends WebService {
 	public List<WorkTypeInfor> getPossibleWorkType(List<String> lstPossible) {
 		return this.find.getPossibleWorkType(lstPossible);
 	}
+	
+	/**
+	 * Gets the possible work type with no master.
+	 *
+	 * @param lstPossible the lst possible
+	 * @return the possible work type
+	 */
+	@POST
+	@Path("get_possible_work_type_with_no_master")
+	public List<WorkTypeInfor> getPossibleWorkTypewithNoMaster(List<String> lstPossible) {
+		return this.find.getPossibleWorkTypeWithNoMaster(lstPossible);
+	}
 
 	/**
 	 * Find all.

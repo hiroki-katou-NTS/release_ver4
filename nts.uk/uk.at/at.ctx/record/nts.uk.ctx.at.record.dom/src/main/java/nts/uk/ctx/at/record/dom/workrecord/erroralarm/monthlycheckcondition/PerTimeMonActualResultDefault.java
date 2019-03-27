@@ -26,6 +26,7 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
+import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
 
 @Stateless
 public class PerTimeMonActualResultDefault implements PerTimeMonActualResultService {
@@ -124,6 +125,52 @@ public class PerTimeMonActualResultDefault implements PerTimeMonActualResultServ
 				
 				
 			}
+		}
+		
+		return results;
+	}
+	
+	@Override
+	public Map<String, Map<YearMonth, Map<String, Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemCondition> checkConditions) {
+		Map<String, Map<YearMonth, Map<String, Integer>>> results = new HashMap<>();
+		//締めをチェックする
+		List<YearMonth> yearmonths = yearMonth.yearMonthsBetween();
+		List<AttendanceTimeOfMonthly> attendanceTimeOfMonthlys = attendanceTimeOfMonthlyRepo.findBySidsAndYearMonths(employeeID, yearmonths);
+		List<AnyItemOfMonthly> anyItems = anyItemOfMonthlyRepo.findBySidsAndMonths(employeeID, yearmonths);
+
+		MonthlyRecordToAttendanceItemConverter monthly = attendanceItemConvertFactory.createMonthlyConverter();
+		
+		if (!CollectionUtil.isEmpty(attendanceTimeOfMonthlys)) {
+			attendanceTimeOfMonthlys.stream().forEach(atm -> {
+				
+				List<AnyItemOfMonthly> aims = anyItems.stream().filter(aim -> {
+					return aim.getEmployeeId().equals(atm.getEmployeeId()) && aim.getYearMonth().equals(atm.getYearMonth())
+							&& aim.getClosureId() == atm.getClosureId() && aim.getClosureDate().equals(atm.getClosureDate());
+				}).collect(Collectors.toList());
+				
+				monthly.withAttendanceTime(atm).withAnyItem(aims);
+				
+				checkConditions.entrySet().stream().forEach(con -> {
+
+					boolean check = con.getValue().check(item->{
+						if (item.isEmpty()) {
+							return new ArrayList<>();
+						}
+						return monthly.convert(item).stream().map(iv -> getValueNew(iv))
+								.collect(Collectors.toList());
+					}) == WorkCheckResult.ERROR;
+					
+					if (check) {
+						if(!results.containsKey(atm.getEmployeeId())){
+							results.put(atm.getEmployeeId(), new HashMap<>());
+						}
+						if(!results.get(atm.getEmployeeId()).containsKey(atm.getYearMonth())){
+							results.get(atm.getEmployeeId()).put(atm.getYearMonth(), new HashMap<>());
+						}
+						results.get(atm.getEmployeeId()).get(atm.getYearMonth()).put(con.getKey(), 1);
+					}
+				});
+			});
 		}
 		
 		return results;

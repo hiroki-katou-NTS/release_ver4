@@ -22,4 +22,5 @@ public class AddAppWorkChangeCommand {
 	Integer user;
     Integer reflectPerState;
 
+    boolean checkOver1Year;
 }
