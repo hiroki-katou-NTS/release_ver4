@@ -225,6 +225,12 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 	@Inject
 	private ManagedParallelWithContext managedParallelWithContext;
 	
+	@Inject
+	private AppRouteUpdateDailyService appRouteUpdateDailyService;
+
+	@Inject
+	private AppRouteUpdateMonthlyService appRouteUpdateMonthlyService;
+	
 	public static int MAX_DELAY_PARALLEL = 0;
 
 	/**
@@ -335,12 +341,12 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		 * procExecLog.setCurrentStatus(CurrentExecutionStatus.RUNNING);
 		 * procExecLog.setOverallStatus(null); this.procExecLogRepo.update(procExecLog);
 		 */
-		ProcessExecType processExecType = procExec.getProcessExecType();
+		
 		/*
 		 * 各処理を実行する 【パラメータ】 実行ID ＝ 取得した実行ID
 		 * 取得したドメインモデル「更新処理自動実行」、「実行タスク設定」、「更新処理自動実行ログ」の情報
 		 */
-		this.doProcesses(context, empCalAndSumExeLog, execId, procExec, procExecLog, companyId,processExecType);
+		this.doProcesses(context, empCalAndSumExeLog, execId, procExec, procExecLog, companyId);
 
 		processExecutionLogManage = this.processExecLogManaRepo.getLogByCIdAndExecCd(companyId, execItemCd).get();
 		// アルゴリズム「自動実行登録処理」を実行する
@@ -450,17 +456,11 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 	 *            更新処理自動実行ログ
 	 */
 
-	@Inject
-	private AppRouteUpdateDailyService appRouteUpdateDailyService;
-
-	@Inject
-	private AppRouteUpdateMonthlyService appRouteUpdateMonthlyService;
-
 	// true interrupt false non interrupt
 	// 各処理の分岐
 	private boolean doProcesses(CommandHandlerContext<ExecuteProcessExecutionCommand> context,
 			EmpCalAndSumExeLog empCalAndSumExeLog, String execId, ProcessExecution procExec,
-			ProcessExecutionLog procExecLog, String companyId,ProcessExecType processExecType) {
+			ProcessExecutionLog procExecLog, String companyId) {
 		// Initialize status [未実施] for each task
 		initAllTaskStatus(procExecLog, EndStatus.NOT_IMPLEMENT);
 		/*
@@ -583,7 +583,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		}
 		this.procExecLogRepo.update(procExecLog);
         AsyncTaskInfo handle = null;
-		boolean isException = false;
 
 		// 就業担当者の社員ID（List）を取得する : RQ526
 		List<String> listManagementId = employeeManageAdapter.getListEmpID(companyId, GeneralDate.today());
@@ -766,10 +765,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 						return false;
 					}
 				}
-				/*
-				 * // ドメインモデル「更新処理自動実行ログ」を更新する this.updateEachTaskStatus(procExecLog,
-				 * ProcessExecutionTask.SCH_CREATION, EndStatus.SUCCESS);
-				 */
 			}
 			// 異動者・新入社員のみ作成の場合
 			else {
@@ -784,20 +779,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				this.filterEmployeeList(procExec, empIds, period, reEmployeeList, newEmployeeList,
 						temporaryEmployeeList);
 				if (!CollectionUtil.isEmpty(reEmployeeList) && !CollectionUtil.isEmpty(newEmployeeList)) {
-					// ScheduleCreatorExecutionCommand scheduleCreatorExecutionRe =
-					// this.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
-					// calculateSchedulePeriod,reEmployeeList);
-					// AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctxRe = new
-					// AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand>(scheduleCreatorExecutionRe);
-					// ctxRe.setTaskId(context.asAsync().getTaskId());
-					// handle = this.scheduleExecution.handle(scheduleCreatorExecutionRe);
-					// ScheduleCreatorExecutionCommand scheduleCreatorExecutionNew =
-					// this.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
-					// calculateSchedulePeriod,newEmployeeList);
-					// AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctxNew = new
-					// AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand>(scheduleCreatorExecutionNew);
-					// ctxNew.setTaskId(context.asAsync().getTaskId());
-					// handle = this.scheduleExecution.handle(scheduleCreatorExecutionNew);
+
 				} else {
 					// 社員ID（新入社員）（List）のみ and 社員ID（新入社員以外）（List）
 					if (!CollectionUtil.isEmpty(newEmployeeList) && !CollectionUtil.isEmpty(temporaryEmployeeList)) {
@@ -848,7 +830,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				}
 			}
 		} catch (Exception e) {
-			isException = true;
 			// ドメインモデル「更新処理自動実行ログ」を更新する
 			this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.ABNORMAL_END);
 			ScheduleErrorLogGeterCommand scheduleErrorLogGeterCommand = new ScheduleErrorLogGeterCommand();
@@ -898,39 +879,41 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		int timeOut = 1;
 		boolean isInterruption = false;
 
-		if (isException) {
-			while (true) {
-				// find execution log by id
-				Optional<ScheduleExecutionLog> domainOpt = this.scheduleExecutionLogRepository
-						.findById(loginContext.companyId(), execId);
-				if (domainOpt.isPresent()) {
-					if (domainOpt.get().getCompletionStatus().value == CompletionStatus.COMPLETION_ERROR.value) {
-						this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION,
-								EndStatus.ABNORMAL_END);
-						break;
-					}
-					if (domainOpt.get().getCompletionStatus().value == CompletionStatus.INTERRUPTION.value) {
-						isInterruption = true;
-						break;
-					}
-					if (domainOpt.get().getCompletionStatus().value == CompletionStatus.DONE.value) {
-						this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.SUCCESS);
-						break;
-					}
-
-				}
-				if (timeOut == 24) {
+		while (true) {
+			// find execution log by id
+			Optional<ScheduleExecutionLog> domainOpt = this.scheduleExecutionLogRepository
+					.findById(loginContext.companyId(), execId);
+			if (domainOpt.isPresent()) {
+				if (domainOpt.get().getCompletionStatus().value == CompletionStatus.COMPLETION_ERROR.value) {
 					this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.ABNORMAL_END);
 					break;
 				}
-				timeOut++;
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				if (domainOpt.get().getCompletionStatus().value == CompletionStatus.INTERRUPTION.value) {
+					isInterruption = true;
+					break;
 				}
+				if (domainOpt.get().getCompletionStatus().value == CompletionStatus.DONE.value) {
+					this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.SUCCESS);
+					break;
+				}
+
+			}
+			if (timeOut == 2400) {
+				this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.ABNORMAL_END);
+				break;
+			}
+			timeOut++;
+			// set thread sleep 10s để cho xử lý schedule insert xong data rồi
+			// mới cho xử lý của anh Nam (KIF001) chạy
+			// nếu không màn KIF001 sẽ get data cũ của màn schedule để insert
+			// vào => như thế sẽ sai
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
+		
 		this.procExecLogRepo.update(procExecLog);
 		ExecutionLogImportFn param = new ExecutionLogImportFn();
 		List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
@@ -3003,7 +2986,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		return new DatePeriod(startClosingDate, endClosingDate);
 	}
 
-	//
+	// 実行前登録処理
 	private ProcessExecutionLog preExecutionRegistrationProcessing(String companyId, String execItemCd, String execId,
 			ProcessExecutionLogManage processExecutionLogManage, int execType) {
 		Optional<ProcessExecutionLog> procExecLogOpt = this.procExecLogRepo.getLog(companyId, execItemCd);
