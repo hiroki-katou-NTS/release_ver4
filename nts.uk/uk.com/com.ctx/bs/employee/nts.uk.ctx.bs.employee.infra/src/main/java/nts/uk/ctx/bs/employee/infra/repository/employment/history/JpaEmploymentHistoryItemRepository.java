@@ -607,7 +607,7 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 						EmploymentHistoryOfEmployee e = new EmploymentHistoryOfEmployee();
 						e.setSId(rec.getString("SID"));
 						e.setStartDate(rec.getGeneralDate("START_DATE"));
-						e.setEndDate(rec.getGeneralDate("END_DATE").addDays(-1));
+						e.setEndDate(rec.getGeneralDate("END_DATE"));
 						e.setEmploymentCD(rec.getString("EMP_CD"));						
 						return e;
 					});
