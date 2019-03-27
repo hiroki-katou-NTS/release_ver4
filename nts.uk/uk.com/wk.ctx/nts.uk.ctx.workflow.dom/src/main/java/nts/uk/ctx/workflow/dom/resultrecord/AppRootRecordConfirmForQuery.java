@@ -1,6 +1,7 @@
 package nts.uk.ctx.workflow.dom.resultrecord;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -55,10 +56,20 @@ public class AppRootRecordConfirmForQuery {
 	
 	public static class List {
 		
-		private final Map<GeneralDate, AppRootRecordConfirmForQuery> mapConfirms;
+		private final Map<String, Map<GeneralDate, AppRootRecordConfirmForQuery>> mapConfirms;
 		
 		public List(java.util.List<AppRootRecordConfirmForQuery> list) {
-			this.mapConfirms = list.stream().collect(Collectors.toMap(a -> a.getRecordDate(), a -> a));
+			
+			this.mapConfirms = new HashMap<>();
+			for (val confirm : list) {
+				String employeeId = confirm.getEmployeeId();
+				if (!this.mapConfirms.containsKey(employeeId)) {
+					this.mapConfirms.put(employeeId, new HashMap<>());
+				}
+				
+				val mapForOneEmployee = this.mapConfirms.get(employeeId);
+				mapForOneEmployee.put(confirm.getRecordDate(), confirm);
+			}
 		}
 		
 		public AggregateResult aggregate(
@@ -68,10 +79,11 @@ public class AppRootRecordConfirmForQuery {
 			
 			val results = new ArrayList<ApprovalRootStateStatus>();
 			boolean isError = false;
+			val mapForOneEmployee = this.mapConfirms.get(employeeId);
 			
 			for (val date : period.datesBetween()) {
 
-				AppRootRecordConfirmForQuery confirm = this.mapConfirms.get(date);
+				AppRootRecordConfirmForQuery confirm = mapForOneEmployee.get(date);
 				if (confirm == null) {
 					results.add(new ApprovalRootStateStatus(date, employeeId, DailyConfirmAtr.UNAPPROVED));
 					continue;
