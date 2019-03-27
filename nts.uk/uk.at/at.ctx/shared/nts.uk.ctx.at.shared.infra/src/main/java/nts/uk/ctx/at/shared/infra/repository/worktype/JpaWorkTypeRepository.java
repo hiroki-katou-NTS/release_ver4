@@ -112,13 +112,15 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 			+ " WHERE c.kshmtWorkTypePK.companyId = :companyId" + " AND c.kshmtWorkTypePK.workTypeCode = :workTypeCd"
 			+ " AND c.deprecateAtr = 0";
 	//hoatt - kaf006
-	private static final String FIND_FOR_APP_HD = "SELECT c FROM KshmtWorkType c"
+	private static final String FIND_FOR_APP_HD = "SELECT c,o.dispOrder FROM KshmtWorkType c"
+			+ " LEFT JOIN KshmtWorkTypeOrder o"
+			+ " ON c.kshmtWorkTypePK.companyId = o.kshmtWorkTypeDispOrderPk.companyId AND c.kshmtWorkTypePK.workTypeCode = o.kshmtWorkTypeDispOrderPk.workTypeCode"
 			+ " WHERE c.kshmtWorkTypePK.companyId = :companyId"
 			+ " AND c.kshmtWorkTypePK.workTypeCode IN :lstWorkTypeCD"
 			+ " AND c.deprecateAtr = :deprecateAtr"
 			+ " AND ((c.worktypeAtr = 0 AND c.oneDayAtr IN :hdType)"
 			+ " OR (c.worktypeAtr = 1 AND c.morningAtr IN :hdType AND c.afternoonAtr IN :hdType))"
-			+ " ORDER BY c.kshmtWorkTypePK.workTypeCode ASC";
+			+ " ORDER BY o.dispOrder ASC";
 	// findWorkType(java.lang.String, java.lang.Integer, java.util.List,
 	// java.util.List)
 	private static final String FIND_WORKTYPE_ALLDAY_AND_HALFDAY;
@@ -238,11 +240,13 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	}
 	static {
 		StringBuilder builder = new StringBuilder();
-		builder.append(SELECT_ALL_WORKTYPE);
+		builder.append("SELECT c,o.dispOrder FROM KshmtWorkType c");
+		builder.append(" LEFT JOIN KshmtWorkTypeOrder o");
+		builder.append(" ON c.kshmtWorkTypePK.companyId = o.kshmtWorkTypeDispOrderPk.companyId AND c.kshmtWorkTypePK.workTypeCode = o.kshmtWorkTypeDispOrderPk.workTypeCode");
 		builder.append(" AND c.deprecateAtr = 0");
 		builder.append(" AND c.kshmtWorkTypePK.workTypeCode IN :workTypeCodes");
 		builder.append(" AND c.worktypeAtr = 1 AND ( c.morningAtr IN :morningAtrs OR c.afternoonAtr IN :afternoonAtrs )");
-		builder.append(" ORDER BY c.kshmtWorkTypePK.workTypeCode ASC");
+		builder.append(" ORDER BY o.dispOrder ASC");
 		FIND_WORKTYPE_BY_LIST_WORKTYPECODES = builder.toString();
 
 	}
@@ -260,11 +264,14 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	}
 	static {
 		StringBuilder builder = new StringBuilder();
-		builder.append(SELECT_ALL_WORKTYPE);
+		builder.append("SELECT c,o.dispOrder FROM KshmtWorkType c");
+		builder.append(" LEFT JOIN KshmtWorkTypeOrder o");
+		builder.append(" ON c.kshmtWorkTypePK.companyId = o.kshmtWorkTypeDispOrderPk.companyId AND c.kshmtWorkTypePK.workTypeCode = o.kshmtWorkTypeDispOrderPk.workTypeCode");
+		builder.append(" WHERE c.kshmtWorkTypePK.companyId = :companyId");
 		builder.append(" AND c.deprecateAtr = :abolishAtr");
 		builder.append(" AND c.kshmtWorkTypePK.workTypeCode IN :workTypeCodes ");
 		builder.append(" AND c.worktypeAtr = :worktypeAtr ");
-		builder.append(" ORDER BY c.kshmtWorkTypePK.workTypeCode ASC");
+		builder.append(" ORDER BY o.dispOrder ASC");
 		FIND_BY_CODES = builder.toString();
 
 	}
@@ -695,7 +702,7 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	public List<WorkType> findWorkTypeForHalfDay(String companyId, List<Integer> halfDay, List<String> workTypeCodes) {
 		List<WorkType> resultList = new ArrayList<>();
 		CollectionUtil.split(halfDay, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstHalf -> {
-			CollectionUtil.split(workTypeCodes, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstCodes -> {
+			CollectionUtil.sfindWorkTypeByCodesplit(workTypeCodes, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstCodes -> {
 				resultList.addAll(this.queryProxy().query(FIND_WORKTYPE_BY_LIST_WORKTYPECODES, KshmtWorkType.class)
 				.setParameter("companyId", companyId)
 				.setParameter("workTypeCodes", lstCodes)
@@ -732,14 +739,26 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 			int worktypeAtr) {
 		List<WorkType> resultList = new ArrayList<>();
 		CollectionUtil.split(workTypeCodes, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			resultList.addAll(this.queryProxy().query(FIND_BY_CODES, KshmtWorkType.class)
+			resultList.addAll(this.queryProxy().query(FIND_BY_CODES, Object[].class)
 								.setParameter("companyId", companyId)
 								.setParameter("workTypeCodes", subList)
 								.setParameter("abolishAtr", abolishAtr)
-								.setParameter("worktypeAtr", worktypeAtr).getList(x -> toDomain(x)));
+								.setParameter("worktypeAtr", worktypeAtr).getList(x -> toDomainWithDispOrder(x)));
 		});
-		resultList.sort(Comparator.comparing(WorkType::getWorkTypeCode));
+		//resultList.sort(Comparator.comparing(WorkType::getWorkTypeCode));
 		return resultList;
+	}
+	
+	private WorkType toDomainWithDispOrder(Object[] object) {
+		KshmtWorkType entity = (KshmtWorkType) object[0];
+		Integer order = Integer.valueOf(object[1].toString());
+		
+		WorkType domain = WorkType.createSimpleFromJavaType(entity.kshmtWorkTypePK.companyId,
+				entity.kshmtWorkTypePK.workTypeCode, entity.symbolicName, entity.name, entity.abbreviationName,
+				entity.memo, entity.worktypeAtr, entity.oneDayAtr, entity.morningAtr, entity.afternoonAtr,
+				entity.deprecateAtr, entity.calculatorMethod); 
+		domain.setDisplayOrder(order);
+		return domain;
 	}
 
 	@Override
@@ -757,11 +776,11 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	@Override
 	public List<WorkType> findForAppHdKAF006(String companyId, List<String> lstWorkTypeCD, int deprecateAtr,
 			List<Integer> hdType) {
-		return this.queryProxy().query(FIND_FOR_APP_HD, KshmtWorkType.class)
+		return this.queryProxy().query(FIND_FOR_APP_HD, Object[].class)
 				.setParameter("companyId", companyId)
 				.setParameter("lstWorkTypeCD", lstWorkTypeCD)
 				.setParameter("deprecateAtr", deprecateAtr)
 				.setParameter("hdType", hdType)
-				.getList(c -> toDomain(c));
+				.getList(c -> toDomainWithDispOrder(c));
 	}
 }

@@ -1,7 +1,6 @@
 package nts.uk.ctx.at.request.dom.application.appabsence.service.three;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -31,17 +30,20 @@ public class AppAbsenceThreeProcessImpl implements AppAbsenceThreeProcess {
 			String employeeID, int holidayType, int alldayHalfDay, boolean displayHalfDayValue,Optional<HdAppSet> hdAppSet) {
 		List<AbsenceWorkType> absenceWorkTypes = new ArrayList<>();
 		// アルゴリズム「勤務種類を取得する（詳細）」を実行する(thực hiện xử lý 「勤務種類を取得する（詳細）」)
-		List<WorkType> workTypes = this.getWorkTypeDetails(appEmploymentWorkType, companyID, employeeID, holidayType, alldayHalfDay,displayHalfDayValue);
-		for(WorkType workType : workTypes){
-			AbsenceWorkType absenceWorkType = new AbsenceWorkType(workType.getWorkTypeCode().toString(), workType.getWorkTypeCode().toString() +"　　" + workType.getName().toString());
-			absenceWorkTypes.add(absenceWorkType);
-		}
+		List<WorkType> workTypes = this
+				.getWorkTypeDetails(appEmploymentWorkType, companyID, employeeID, holidayType, alldayHalfDay,
+						displayHalfDayValue);
 		// ドメインモデル「休暇申請設定」．「休暇申請未選択の設定」．未選択を表示するをチェックする(kiểm tra domain ドメインモデル「休暇申請設定」．「休暇申請未選択の設定」．未選択を表示する): bên anh chình chưa làm.
 		if(hdAppSet.isPresent()&& hdAppSet.get().getDisplayUnselect().value == 1 ? true : false){//#102295
 			AbsenceWorkType absenceWorkType = new AbsenceWorkType("", "未選択");
 			absenceWorkTypes.add(absenceWorkType);
 		}
-		Collections.sort(absenceWorkTypes, Comparator.comparing(AbsenceWorkType :: getWorkTypeCode));
+		for(WorkType workType : workTypes){
+			AbsenceWorkType absenceWorkType = new AbsenceWorkType(workType.getWorkTypeCode().toString(), workType.getWorkTypeCode().toString() +"　　" + workType.getName().toString());
+			absenceWorkTypes.add(absenceWorkType);
+		}
+		
+		//Collections.sort(absenceWorkTypes, Comparator.comparing(AbsenceWorkType :: getWorkTypeCode));
 		return absenceWorkTypes;
 	}
 	//  2.勤務種類を取得する（詳細）
@@ -104,6 +106,16 @@ public class AppAbsenceThreeProcessImpl implements AppAbsenceThreeProcess {
 				result = this.workTypeRepository.findWorkTypeForHalfDay(companyID, halfDay, lstWorkTypeCodes);
 			}
 		}
+//		//Sắp xếp theo disorder;
+		List<WorkType> disOrderList = result.stream().filter(w -> w.getDispOrder() != null)
+				.sorted(Comparator.comparing(WorkType::getDispOrder)).collect(Collectors.toList());
+
+		List<WorkType> wkTypeCDList = result.stream().filter(w -> w.getDispOrder() == null)
+				.sorted(Comparator.comparing(WorkType::getWorkTypeCode)).collect(Collectors.toList());
+
+		disOrderList.addAll(wkTypeCDList);
+
+		result = disOrderList;
 		return result;
 	}
 	private List<WorkType> getWorkTypeByHolidayType(String companyID,int holidayType){
