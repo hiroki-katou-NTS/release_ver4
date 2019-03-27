@@ -107,6 +107,10 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             self.settingManager().departmentCode.subscribe(value => {
                 self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
                 setTimeout(function() {
+                    if($('#A2_7').ntsError('hasError')){
+                        self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
+                        return;
+                    }
                     if (value != '' && value != null && value !== undefined){
                         self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
                     }else{
@@ -121,6 +125,10 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             self.settingManager().dailyApprovalCode.subscribe(value => {
                 self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
                 setTimeout(function() {
+                    if($('#A2_10').ntsError('hasError')){
+                        self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
+                        return;
+                    }
                     if (value != '' && value != null && value !== undefined){
                         self.getEmployeeByCode(value, APPROVER_TYPE.DAILY_APPROVER);
                     } else {
