@@ -227,9 +227,10 @@ public class W4D4AlarmService {
 								return;
 							}
 						}
+						List<String> currentEmpIds = emps.stream().map(e -> e.getId()).collect(Collectors.toList());
 						emps.stream().forEach(emp -> {
 							if(valueMap.containsKey(emp.getId())){
-								List<RecordWorkInfoFunAdapterDto> currentWorkInfos = workInfos.stream().filter(wi -> emps.contains(wi.getEmployeeId())).collect(Collectors.toList());
+								List<RecordWorkInfoFunAdapterDto> currentWorkInfos = workInfos.stream().filter(wi -> currentEmpIds.contains(wi.getEmployeeId())).collect(Collectors.toList());
 								this.checkWithActualResults(emp, period, workTypes, currentWorkInfos).ifPresent(er -> {
 									result.add(er);
 								});
