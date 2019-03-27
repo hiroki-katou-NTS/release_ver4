@@ -39,6 +39,8 @@ import nts.uk.ctx.at.record.dom.adapter.workplace.affiliate.AffWorkplaceAdapter;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.LockStatus;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecordRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.managectualsituation.AcquireActualStatus;
@@ -518,6 +520,9 @@ public class MonthlyPerformanceDisplay {
 	@Inject 
 	private ApprovalProcessRepository approvalRepo;
 	
+	@Inject
+	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;
+	
 	public List<MonthlyPerformaceLockStatus> checkLockStatus(String cid, List<String> empIds, Integer processDateYM,
 			Integer closureId, DatePeriod closureTime, int intScreenMode) {
 		List<MonthlyPerformaceLockStatus> monthlyLockStatusLst = new ArrayList<MonthlyPerformaceLockStatus>();
@@ -565,7 +570,12 @@ public class MonthlyPerformanceDisplay {
 			boolean checkExistRecordErrorListDate = false;
 			for(EmployeeDailyPerError employeeDailyPerError : listEmployeeDailyPerError) {
 				if(employeeDailyPerError.getEmployeeID().equals(affWorkplaceImport.getEmployeeId())) {
-					checkExistRecordErrorListDate = true;
+					//対応するドメインモデル「勤務実績のエラーアラーム」を取得する
+					List<ErrorAlarmWorkRecord> errorAlarmWorkRecordLst =  errorAlarmWorkRecordRepository.getListErAlByListCodeError(
+							cid, Arrays.asList(employeeDailyPerError.getErrorAlarmWorkRecordCode().v()));
+					if(!errorAlarmWorkRecordLst.isEmpty()) {
+						checkExistRecordErrorListDate = true;	
+					}
 					break;
 				}
 			}
