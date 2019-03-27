@@ -36,13 +36,12 @@ public class JpaErAlApplicationRepository extends JpaRepository implements ErAlA
 	public List<ErAlApplication> getAllErAlAppByEralCode(String companyID, List<String> errorAlarmCode) {
 		String GET_ERAL_BY_CODE = " SELECT c FROM KrcstErAlApplication c "
 				+ " WHERE c.krcstErAlApplicationPK.cid = :cid" + " AND c.krcstErAlApplicationPK.errorCd in :errorCd";
-		
-		List<KrcstErAlApplication> eralApps = this.queryProxy()
-				.query(GET_ERAL_BY_CODE, KrcstErAlApplication.class).setParameter("cid", companyID)
-				.setParameter("errorCd", errorAlarmCode).getList();
 		if (errorAlarmCode.isEmpty()) {
 			return new ArrayList<>();
 		}
+		List<KrcstErAlApplication> eralApps = this.queryProxy()
+				.query(GET_ERAL_BY_CODE, KrcstErAlApplication.class).setParameter("cid", companyID)
+				.setParameter("errorCd", errorAlarmCode).getList();
 		return errorAlarmCode.stream().map(eralCode -> {
 			return new ErAlApplication(companyID, eralCode, eralApps.stream().map(eralApp -> eralApp.krcstErAlApplicationPK.appTypeCd)
 					.collect(Collectors.toList()));

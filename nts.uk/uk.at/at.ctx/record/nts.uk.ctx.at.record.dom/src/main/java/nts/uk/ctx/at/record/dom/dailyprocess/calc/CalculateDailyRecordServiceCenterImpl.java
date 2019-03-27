@@ -20,19 +20,30 @@ import nts.arc.layer.app.command.AsyncCommandHandlerContext;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.personnelcostsetting.PersonnelCostSettingAdapter;
 import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemService;
+import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultDomainServiceImpl.ProcessState;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.errorcheck.CalculationErrorCheckService;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.optitem.OptionalItem;
+import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
+import nts.uk.ctx.at.record.dom.optitem.applicable.EmpCondition;
+import nts.uk.ctx.at.record.dom.optitem.applicable.EmpConditionRepository;
+import nts.uk.ctx.at.record.dom.optitem.calculation.Formula;
+import nts.uk.ctx.at.record.dom.optitem.calculation.FormulaRepository;
 import nts.uk.ctx.at.record.dom.statutoryworkinghours.DailyStatutoryWorkingHours;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.enums.CalculationState;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagement;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
+import nts.uk.ctx.at.shared.dom.adapter.employment.BsEmploymentHistoryImport;
+import nts.uk.ctx.at.shared.dom.adapter.employment.ShareEmploymentAdapter;
 import nts.uk.ctx.at.shared.dom.attendance.MasterShareBus;
 import nts.uk.ctx.at.shared.dom.attendance.MasterShareBus.MasterShareContainer;
+import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemIdContainer;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil.AttendanceItemType;
+import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.ctx.at.shared.dom.common.TimeOfDay;
 import nts.uk.ctx.at.shared.dom.statutory.worktime.sharedNew.DailyUnit;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
@@ -84,6 +95,35 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	@Inject
 	private DailyCalculationEmployeeService dailyCalculationEmployeeService;
 	
+	// 任意項目の計算の為に追加
+	@Inject
+	private ShareEmploymentAdapter shareEmploymentAdapter;
+
+	//任意項目
+	@Inject
+	private OptionalItemRepository optionalItemRepository;
+	
+	//労働条件
+	@Inject
+	private EmpConditionRepository empConditionRepository;
+	//計算式
+	@Inject
+	private FormulaRepository formulaRepository;
+	
+	
+	private Optional<BsEmploymentHistoryImport> c(String companyId, String employeeId, GeneralDate targetDate) {
+		return this.shareEmploymentAdapter.findEmploymentHistory(companyId, employeeId, targetDate);
+	}
+
+	private List<OptionalItem> getOptionalItemsFromRepository() {
+		return optionalItemRepository.findAll(AppContexts.user().companyCode());
+	}
+	
+	private List<EmpCondition> getEmpConditionFromRepository(List<Integer> optionalIds) {
+		return empConditionRepository.findAll(AppContexts.user().companyCode(), optionalIds);
+	}
+	
+	
 	@Override
 	//old_process. Don't use!
 	public List<IntegrationOfDaily> calculate(List<IntegrationOfDaily> integrationOfDaily){
@@ -101,14 +141,34 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			Optional<ManagePerCompanySet> companySet,
 			ExecutionType reCalcAtr){
 		if(reCalcAtr.isRerun()) {
-			val itemId = attendanceItemService.getTimeAndCountItem(AttendanceItemType.DAILY_ITEM).stream().map(tc -> tc.getItemId()).collect(Collectors.toList());
+			
+			val itemId = attendanceItemService.getTimeAndCountItem(AttendanceItemType.DAILY_ITEM);//.stream().map(tc -> tc.getItemId()).collect(Collectors.toList());
+			val beforeChangeItemId = new ArrayList<ItemValue>(itemId);
 			List<EditStateOfDailyPerformance> notReCalcItems = new ArrayList<>();
-			//時間・回数・任意項目だけ削除したリスト作成
+			
+			val optionalItems = getOptionalItemsFromRepository(companySet);
+			val empConds = getEmpConditions(companySet,optionalItems);
+			val formula = getFormula(companySet);
+			
+			
+			//計算式が設定されている任意項目のID取得(※itemIdリストへ追加すれば編集状態が消える)
+			//時間・回数だけ削除したリスト作成
 			integrationOfDaily.forEach(tc -> {
 				notReCalcItems.clear();
+				itemId.clear();
+				itemId.addAll(beforeChangeItemId);
+				
+				List<Integer> useOpIds = getUseOpIds(optionalItems, empConds, tc.getAffiliationInfor().getEmployeeId(), tc.getAffiliationInfor().getYmd(),formula);
+				
+				val itemIdsDeletedEdit = itemId.stream().filter(id ->{
+					return isIncludeId(id,useOpIds);
+				}).map(item -> item.getItemId()).collect(Collectors.toList());
+				
 				tc.getEditState().forEach(ts ->{
-					if(!itemId.contains(ts.getAttendanceItemId()))
+					//任意＋時間or回数以外の項目の編集状態残る
+					if(!itemIdsDeletedEdit.contains(ts.getAttendanceItemId()))
 						notReCalcItems.add(ts);
+					
 				});
 				tc.setEditState(notReCalcItems);
 			});
@@ -140,6 +200,76 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 		return result.stream().map(ts -> ts.getIntegrationOfDaily()).collect(Collectors.toList()); 
 	}
 	
+	private List<OptionalItem> getOptionalItemsFromRepository(Optional<ManagePerCompanySet> companySet) {
+		List<OptionalItem> opItems = new ArrayList<>();
+		if(companySet.isPresent()) {
+			opItems = companySet.get().getOptionalItems();
+		}
+		else {
+			opItems = getOptionalItemsFromRepository();
+		}
+		return opItems;
+	}
+	
+	private List<EmpCondition> getEmpConditions(Optional<ManagePerCompanySet> companySet, List<OptionalItem> opItems) {
+		List<EmpCondition> empCond = new ArrayList<>();
+		if(companySet.isPresent()) {
+			empCond = companySet.get().getEmpCondition();
+		}
+		else {
+			empCond = getEmpConditionFromRepository(opItems.stream().map(opItem -> opItem.getOptionalItemNo().v()).collect(Collectors.toList()));
+		}
+		return empCond;
+	}
+
+	private List<Formula> getFormula(Optional<ManagePerCompanySet> companySet){
+		if(companySet.isPresent()) {
+			return companySet.get().getFormulaList();
+		}
+		return formulaRepository.find(AppContexts.user().companyCode()); 
+	}
+	
+	private List<Integer> getUseOpIds(List<OptionalItem> opItems, List<EmpCondition> empCond, String employeeId, GeneralDate targetDate, List<Formula> formulaList) {
+		List<Integer> useOptionalIds = new ArrayList<>();
+		val bse = c(AppContexts.user().companyCode(), employeeId, targetDate);
+		for(OptionalItem opItem:opItems) {
+			if(decisionUseSetting(opItem,empCond,bse) && formulaList.stream().filter(t -> t.getOptionalItemNo().equals(opItem.getOptionalItemNo())).collect(Collectors.toList()).size() > 0) {
+			//if(decisionUseSetting(opItem,empCond,bse)) {
+				useOptionalIds.add(opItem.getOptionalItemNo().v());
+			}
+			
+		}
+		return useOptionalIds;
+	}
+	
+
+	
+	private boolean decisionUseSetting(OptionalItem optionalItem, List<EmpCondition> empConditionList, Optional<BsEmploymentHistoryImport> bsEmploymentHistOpt) {
+		return AnyItemValueOfDaily.decisionCondition(optionalItem, empConditionList, bsEmploymentHistOpt);
+	}
+	
+	private boolean isIncludeId(ItemValue id,List<Integer> useOpIds) {
+		if(AttendanceItemIdContainer.isOptionalItem(id)) {
+			final Map<Integer, Integer> optionalItemMap = AttendanceItemIdContainer.mapOptionalItemIdsToNos();
+			
+			if(optionalItemMap.containsKey(id.getItemId())) {
+				if(useOpIds.contains(optionalItemMap.get(id.getItemId()))) {
+					//編集状態を消す対象
+					return true;
+				}
+				else {
+					//編集状態を残す対象
+					return false;
+				}
+			}
+			//編集状態を残す対象
+			return false;
+		}
+		//編集状態を消す対象
+		return true;
+	}
+	
+
 	@Override
 	//スケジュール・申請から呼び出す窓口
 	public List<IntegrationOfDaily> calculateForSchedule(
@@ -166,22 +296,42 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			Optional<AsyncCommandHandlerContext> asyncContext,
 			List<ClosureStatusManagement> closureList,
 			ExecutionType reCalcAtr){
+		
 		if(reCalcAtr.isRerun()) {
-			//時間・回数の勤怠項目だけ　integrationの編集状態から削除
-			val itemId = attendanceItemService.getTimeAndCountItem(AttendanceItemType.DAILY_ITEM).stream().map(tc -> tc.getItemId()).collect(Collectors.toList());
+
+			val itemId = attendanceItemService.getTimeAndCountItem(AttendanceItemType.DAILY_ITEM);//.stream().map(tc -> tc.getItemId()).collect(Collectors.toList());
+			val beforeChangeItemId = new ArrayList<ItemValue>(itemId);
 			List<EditStateOfDailyPerformance> notReCalcItems = new ArrayList<>();
-			//時間・回数・任意項目だけ削除したリスト作成
+			
+			val setting = Optional.of(commonCompanySettingForCalc.getCompanySetting());
+			
+			val optionalItems = getOptionalItemsFromRepository(setting);
+			val empConds = getEmpConditions(setting,optionalItems);
+			val formula = getFormula(setting);
+			
 			integrationOfDaily.forEach(tc -> {
 				notReCalcItems.clear();
+				itemId.clear();
+				itemId.addAll(beforeChangeItemId);
+				
+				List<Integer> useOpIds = getUseOpIds(optionalItems, empConds, tc.getAffiliationInfor().getEmployeeId(), tc.getAffiliationInfor().getYmd(),formula);
+				
+				val itemIdsDeletedEdit = itemId.stream().filter(id ->{
+					return isIncludeId(id,useOpIds);
+				}).map(item -> item.getItemId()).collect(Collectors.toList());
+				
 				tc.getEditState().forEach(ts ->{
-					if(!itemId.contains(ts.getAttendanceItemId()))
+					//任意＋時間or回数以外の項目の編集状態残る
+					if(!itemIdsDeletedEdit.contains(ts.getAttendanceItemId()))
 						notReCalcItems.add(ts);
+					
 				});
 				tc.setEditState(notReCalcItems);
+				
 				//時間・回数の勤怠項目だけ　編集状態テーブルから削除
 				editStateOfDailyPerformanceRepository.deleteByListItemId(tc.getAffiliationInfor().getEmployeeId(),
 																		 tc.getAffiliationInfor().getYmd(), 
-																		 itemId);
+																		 itemIdsDeletedEdit);
 			});
 
 		}
@@ -189,6 +339,8 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	}
 
 
+
+	
 	@Override
 	//更新処理自動実行から呼び出す窓口
 	public ManageProcessAndCalcStateResult calculateForclosure(
