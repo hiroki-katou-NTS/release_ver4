@@ -310,7 +310,8 @@ public class MonthlyAggregateProcessService {
 							ValueExtractAlarm valueExractAlarm = new ValueExtractAlarm();
 							valueExractAlarm.setEmployeeID(emp.getId());
 							valueExractAlarm.setWorkplaceID(Optional.ofNullable(emp.getWorkplaceId()));
-							valueExractAlarm.setAlarmValueDate(GeneralDate.today().toString(ErAlConstant.YM_FORMAT));
+							//valueExractAlarm.setAlarmValueDate(GeneralDate.today().toString(ErAlConstant.YM_FORMAT));
+							valueExractAlarm.setAlarmValueDate(yearmonthToString(periodCurrentMonth.start().yearMonth()));
 							valueExractAlarm.setClassification(KAL010_100);
 							valueExractAlarm.setAlarmItem(KAL010_278);
 							valueExractAlarm.setAlarmValueMessage(TextResource.localize("KAL010_279",
