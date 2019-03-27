@@ -2,6 +2,8 @@ package nts.uk.ctx.workflow.dom.resultrecord;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.Value;
 import lombok.val;
@@ -9,6 +11,7 @@ import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.DailyConfirmAtr;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootStateStatus;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 実績確認状態
@@ -54,28 +57,33 @@ public class AppRootRecordConfirmForQuery {
 	
 	public static class List {
 		
-		private final java.util.List<AppRootRecordConfirmForQuery> list;
+		private final Map<GeneralDate, AppRootRecordConfirmForQuery> mapConfirms;
 		
 		public List(java.util.List<AppRootRecordConfirmForQuery> list) {
-			this.list = Collections.unmodifiableList(list);
+			this.mapConfirms = list.stream().collect(Collectors.toMap(a -> a.getRecordDate(), a -> a));
 		}
 		
-		public java.util.List<ApprovalRootStateStatus> aggregate(AppRootIntermForQuery.List interms) {
+		public java.util.List<ApprovalRootStateStatus> aggregate(
+				DatePeriod period,
+				String employeeId,
+				AppRootIntermForQuery.List interms) {
 			
-			java.util.List<ApprovalRootStateStatus> results = new ArrayList<>();
-			
-			for (val confirm : this.list) {
+			return period.datesBetween().stream().map(date -> {
 				
-				val interm = interms.find(confirm.employeeId, confirm.recordDate)
+				AppRootRecordConfirmForQuery confirm = this.mapConfirms.get(date);
+				if (confirm == null) {
+					return new ApprovalRootStateStatus(date, employeeId, DailyConfirmAtr.UNAPPROVED);
+				}
+				
+				AppRootIntermForQuery interm = interms.find(employeeId, date)
 						.orElseThrow(() -> new BusinessException("Msg_1430", "承認者"));
 				
-				results.add(new ApprovalRootStateStatus(
-						confirm.recordDate,
-						confirm.employeeId,
-						confirm.getConfirmStatus(interm.getFinalPhaseOrder())));
-			}
-			
-			return results;
+				return new ApprovalRootStateStatus(
+						date,
+						employeeId,
+						confirm.getConfirmStatus(interm.getFinalPhaseOrder()));
+				
+			}).collect(Collectors.toList());
 		}
 	}
 	
