@@ -3515,10 +3515,12 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 endDate: __viewContext.vm.displayFormat() === 1 ? moment(__viewContext.vm.selectedDate()).format("YYYY/MM/DD") : moment(__viewContext.vm.dateRanger().endDate).format("YYYY/MM/DD")
 
             }
-            nts.uk.localStorage.setItem('UKProgramParam', 'a=0');
-            nts.uk.characteristics.save('AppListExtractCondition', dataShareCmm);
-            nts.uk.request.jump("/view/cmm/045/a/index.xhtml");
-
+            nts.uk.characteristics.remove("AppListExtractCondition").done(function() {
+                parent.nts.uk.characteristics.save('AppListExtractCondition', dataShareCmm).done(function() {
+                    nts.uk.localStorage.setItem('UKProgramParam', 'a=0');
+                    nts.uk.request.jump("/view/cmm/045/a/index.xhtml");
+                });
+            }); 
         }
 
         reloadGrid() {
