@@ -78,6 +78,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
         editable: KnockoutObservable<boolean> = ko.observable(false);
         user: number = 0;
         reflectPerState: number  = 0;
+        errorEmpty: KnockoutObservable<boolean> = ko.observable(true);
 
         constructor(listAppMetadata: Array<shrvm.model.ApplicationMetadata>, currentApp: shrvm.model.ApplicationMetadata) {
             let self = this;
@@ -331,6 +332,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
         }
         reBinding(listAppMeta: any, currentApp: any, isWriteLog: boolean){
             var self = this;
+            nts.uk.ui.errors.clearAll();
             var screenModel: any = {};
 //            $.get('/nts.uk.at.web/view/kaf/000/b/index2.xhtml').done(html => {
 //                    console.log(html);
@@ -353,6 +355,10 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                 if (currentApp.appType == 10) {
                     $("#fixed-table").ntsFixedTable({ width: 100 });
                 }
+                nts.uk.ui._viewModel.errors.isEmpty.subscribe((values) => {
+                    console.log(values);
+                    screenModel.errorEmpty(values);
+                });
             });
 //                });
         }
