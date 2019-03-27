@@ -172,4 +172,13 @@ public interface PersonApprovalRootRepository {
 	
 	Optional<PersonApprovalRoot> getHistLastestCom(String companyId, String employeeId);
 	Optional<PersonApprovalRoot> getHistLastestPri(String companyId, String employeeId, int employmentRootAtr, Integer applicationType);
+	/**
+	 * 
+	 * @param companyID
+	 * @param employeeID
+	 * @param closureDate
+	 * @param inputDate
+	 * @return
+	 */
+	List<PersonApprovalRoot> findByNew512(String companyID, String employeeID, GeneralDate closureDate, GeneralDate inputDate);
 }

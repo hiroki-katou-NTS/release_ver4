@@ -117,6 +117,9 @@ public class JpaPersonApprovalRootRepository extends JpaRepository implements Pe
 			 + " AND c.employmentRootAtr = 2"
 			 + " AND c.confirmationRootType = :confirmationRootType"
 			 + " ORDER BY c.startDate DESC";
+	 private static final String FIND_BY_NEW_512 = FIN_BY_EMP
+			 + " AND c.startDate <= :inputDate"
+			 + " AND c.endDate >= :closureDate";
 	/**
 	 * get all Person Approval Root
 	 * @param companyId
@@ -470,5 +473,15 @@ public class JpaPersonApprovalRootRepository extends JpaRepository implements Pe
 					.getList(c->toDomainPsApR(c));
 		}
 		return !lst.isEmpty()? Optional.of(lst.get(0)) : Optional.empty();
+	}
+	@Override
+	public List<PersonApprovalRoot> findByNew512(String companyID, String employeeID, GeneralDate closureDate,
+			GeneralDate inputDate) {
+		return this.queryProxy().query(FIND_BY_NEW_512, WwfmtPsApprovalRoot.class)
+				.setParameter("companyId", companyID)
+				.setParameter("employeeId", employeeID)
+				.setParameter("closureDate", closureDate)
+				.setParameter("inputDate", inputDate)
+				.getList(c->toDomainPsApR(c));
 	}
 }

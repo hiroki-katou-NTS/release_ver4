@@ -2,6 +2,7 @@ package nts.uk.ctx.workflow.dom.service;
 
 import java.util.List;
 
+import nts.uk.ctx.workflow.dom.agent.Agent;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRepresenterOutput;
 /**
  * 承認代行情報の取得処理
@@ -18,5 +19,7 @@ public interface CollectApprovalAgentInforService {
 	 * @return
 	 */
 	public ApprovalRepresenterOutput getApprovalAgentInfor(String companyID, List<String> listApprover);
+	
+	public ApprovalRepresenterOutput getApprovalAgentInfor512(String companyID, List<String> listApprover, List<Agent> agentLst);
 	
 }

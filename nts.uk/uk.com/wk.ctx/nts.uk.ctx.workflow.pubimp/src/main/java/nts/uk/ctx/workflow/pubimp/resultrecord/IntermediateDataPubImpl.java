@@ -3,7 +3,9 @@ package nts.uk.ctx.workflow.pubimp.resultrecord;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,13 @@ import nts.uk.ctx.workflow.dom.adapter.bs.EmployeeAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.PersonImport;
 import nts.uk.ctx.workflow.dom.agent.Agent;
 import nts.uk.ctx.workflow.dom.agent.AgentRepository;
+import nts.uk.ctx.workflow.dom.approvermanagement.setting.ApprovalSettingRepository;
+import nts.uk.ctx.workflow.dom.approvermanagement.setting.PrincipalApprovalFlg;
+import nts.uk.ctx.workflow.dom.approvermanagement.workroot.CompanyApprovalRoot;
+import nts.uk.ctx.workflow.dom.approvermanagement.workroot.CompanyApprovalRootRepository;
+import nts.uk.ctx.workflow.dom.approvermanagement.workroot.EmploymentRootAtr;
+import nts.uk.ctx.workflow.dom.approvermanagement.workroot.PersonApprovalRoot;
+import nts.uk.ctx.workflow.dom.approvermanagement.workroot.PersonApprovalRootRepository;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalBehaviorAtr;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.DailyConfirmAtr;
@@ -107,6 +116,15 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	
 	@Inject
 	private EmployeeAdapter employeeAdapter;
+	
+	@Inject
+	private ApprovalSettingRepository appSetRepo;
+	
+	@Inject
+	private PersonApprovalRootRepository personApprovalRootRepository;
+	
+	@Inject
+	private CompanyApprovalRootRepository companyApprovalRootRepository;
 
 	@Override
 	public Request133Export getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period,
@@ -286,12 +304,37 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		String companyID = AppContexts.user().companyId();
 		RecordRootType rootTypeEnum = EnumAdaptor.valueOf(rootType, RecordRootType.class);
 		AppRootInstanceContent appRootInstanceContent = null;
+		// ドメインモデル「承認設定」．本人による承認を取得する
+		PrincipalApprovalFlg principalApprovalFlg = appSetRepo.getPrincipalByCompanyId(companyID).orElse(PrincipalApprovalFlg.NOT_PRINCIPAL);
+		// ドメインモデル「個人別就業承認ルート」を取得する(lấy thông tin domain「個人別就業承認ルート」)
+		List<PersonApprovalRoot> personLst = personApprovalRootRepository.findByNew512(companyID, employeeID, closureStartDate, recordDate);
+		// ドメインモデル「会社別就業承認ルート」を取得する(lấy dữ liệu domain 「会社別就業承認ルート」)
+		List<CompanyApprovalRoot> companyLst = companyApprovalRootRepository.findByNew512(companyID, closureStartDate, recordDate);
+		// 承認者ステータスリストを初期化する
+		Map<String, Map<GeneralDate, Boolean>> statusLst = new HashMap<>();
+		// ドメインモデル「代行承認」を取得する(lấy thông tin domain 「代行承認」)
+		List<Agent> agentLst = agentRepository.findByNew512(companyID, closureStartDate, recordDate);
 		for(GeneralDate loopDate = closureStartDate; loopDate.beforeOrEquals(recordDate); loopDate = loopDate.addDays(1)){
-			appRootInstanceContent = createDailyApprover.createDailyApprover(
+			// input．個人別就業承認ルートから、基準日に一致するデータを取得する
+			Optional<PersonApprovalRoot> opPsConfirm = this.filterPsConfirm(personLst, loopDate, rootType);
+			// input．個人別就業承認ルートから、基準日に一致するデータを取得する
+			Optional<CompanyApprovalRoot> opComConfirm = this.filterComConfirm(companyLst, loopDate, rootType);
+			// input．会社別就業承認ルートから、基準日に一致するデータを取得する
+			Optional<PersonApprovalRoot> opPsCom = this.filterPsCom(personLst, loopDate, rootType);
+			// input．会社別就業承認ルートから、基準日に一致するデータを取得する
+			Optional<CompanyApprovalRoot> opComCom = this.filterComCom(companyLst, loopDate, rootType);
+			appRootInstanceContent = createDailyApprover.createDailyApprover512(
 					employeeID, 
 					rootTypeEnum, 
 					loopDate, 
-					closureStartDate);
+					closureStartDate,
+					opPsConfirm,
+					opPsCom,
+					opComConfirm,
+					opComCom,
+					statusLst,
+					agentLst,
+					principalApprovalFlg);
 			ErrorFlag errorFlag = appRootInstanceContent.getErrorFlag();
 			String errorMsgID = "";
 			switch (errorFlag) {
@@ -349,6 +392,46 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 							.collect(Collectors.toList())), 
 				appRootInstanceContent.getErrorFlag().value, 
 				appRootInstanceContent.getErrorMsgID());
+	}
+	
+	private Optional<PersonApprovalRoot> filterPsConfirm(List<PersonApprovalRoot> personLst, GeneralDate loopDate, Integer confirmRootType){
+		return personLst.stream().filter(x -> {
+			if(x.getConfirmationRootType()==null) return false;
+			boolean result = x.getConfirmationRootType().value==confirmRootType;
+			result = result&&x.getEmploymentRootAtr()==EmploymentRootAtr.CONFIRMATION;
+			DatePeriod period = x.getEmploymentAppHistoryItems().get(0).getDatePeriod();
+			result = result&&period.start().beforeOrEquals(loopDate)&&period.end().afterOrEquals(loopDate);
+			return result;
+		}).findAny();
+	}
+	
+	private Optional<CompanyApprovalRoot> filterComConfirm(List<CompanyApprovalRoot> comLst, GeneralDate loopDate, Integer confirmRootType){
+		return comLst.stream().filter(x -> {
+			if(x.getConfirmationRootType()==null) return false;
+			boolean result =  x.getConfirmationRootType().value==confirmRootType;
+			result = result&&x.getEmploymentRootAtr()==EmploymentRootAtr.CONFIRMATION;
+			DatePeriod period = x.getEmploymentAppHistoryItems().get(0).getDatePeriod();
+			result = result&&period.start().beforeOrEquals(loopDate)&&period.end().afterOrEquals(loopDate);
+			return result;
+		}).findAny();
+	} 
+	
+	private Optional<PersonApprovalRoot> filterPsCom(List<PersonApprovalRoot> personLst, GeneralDate loopDate, Integer confirmRootType){
+		return personLst.stream().filter(x -> {
+			boolean result = x.getEmploymentRootAtr()==EmploymentRootAtr.COMMON;
+			DatePeriod period = x.getEmploymentAppHistoryItems().get(0).getDatePeriod();
+			result = result&&period.start().beforeOrEquals(loopDate)&&period.end().afterOrEquals(loopDate);
+			return result;
+		}).findAny();
+	}
+	
+	private Optional<CompanyApprovalRoot> filterComCom(List<CompanyApprovalRoot> comLst, GeneralDate loopDate, Integer confirmRootType){
+		return comLst.stream().filter(x -> {
+			boolean result = x.getEmploymentRootAtr()==EmploymentRootAtr.COMMON;
+			DatePeriod period = x.getEmploymentAppHistoryItems().get(0).getDatePeriod();
+			result = result&&period.start().beforeOrEquals(loopDate)&&period.end().afterOrEquals(loopDate);
+			return result;
+		}).findAny();
 	}
 
 	@Override
