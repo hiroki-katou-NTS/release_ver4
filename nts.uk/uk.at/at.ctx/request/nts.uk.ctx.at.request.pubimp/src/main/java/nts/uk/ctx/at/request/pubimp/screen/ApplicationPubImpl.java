@@ -45,7 +45,6 @@ import nts.uk.ctx.at.request.pub.screen.AppWithDetailExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationDeadlineExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationPub;
-import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.ctx.at.shared.dom.worktype.service.JudgmentOneDayHoliday;
