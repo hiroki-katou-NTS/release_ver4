@@ -1,6 +1,7 @@
 package nts.uk.ctx.workflow.dom.resultrecord;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,37 +73,64 @@ public class AppRootRecordConfirmForQuery {
 			}
 		}
 		
-		public AggregateResult aggregate(
-				DatePeriod period,
-				String employeeId,
-				AppRootIntermForQuery.List interms) {
+		/**
+		 * 中間データのフェーズ情報をもとに承認状況を集約する
+		 * @param period 対象期間
+		 * @param employeeId 対象社員
+		 * @param interms 中間データ
+		 * @return
+		 */
+		public AggregateResult aggregate(DatePeriod period, String employeeId, AppRootIntermForQuery.List interms) {
+
+			val mapForOneEmployee = this.mapConfirms.get(employeeId);
+			
+			// 該当社員の実績データが1つも無い
+			if (mapForOneEmployee == null) {
+				return allUnapproved(period, employeeId);
+			}
 			
 			val results = new ArrayList<ApprovalRootStateStatus>();
 			boolean isError = false;
-			val mapForOneEmployee = this.mapConfirms.get(employeeId);
 			
 			for (val date : period.datesBetween()) {
 
 				AppRootRecordConfirmForQuery confirm = mapForOneEmployee.get(date);
+				
+				// 実績データが無い
 				if (confirm == null) {
 					results.add(new ApprovalRootStateStatus(date, employeeId, DailyConfirmAtr.UNAPPROVED));
 					continue;
 				}
 				
 				val intermOpt = interms.find(employeeId, date);
+				
+				// 中間データに承認者が設定されていない
 				if (!intermOpt.isPresent()) {
 					isError = true;
 					continue;
 				}
 				
-				val status = new ApprovalRootStateStatus(
-						date,
-						employeeId,
-						confirm.getConfirmStatus(intermOpt.get().getFinalPhaseOrder()));
-				results.add(status);
+				results.add(createStatus(confirm, intermOpt.get()));
 			}
 			
 			return new AggregateResult(results, isError);
+		}
+
+		private ApprovalRootStateStatus createStatus(AppRootRecordConfirmForQuery confirm, AppRootIntermForQuery interm) {
+			
+			return new ApprovalRootStateStatus(
+					confirm.getRecordDate(),
+					confirm.getEmployeeId(),
+					confirm.getConfirmStatus(interm.getFinalPhaseOrder()));
+		}
+
+		private static AggregateResult allUnapproved(DatePeriod period, String employeeId) {
+			
+			val emptyResults = period.datesBetween().stream()
+					.map(date -> new ApprovalRootStateStatus(date, employeeId, DailyConfirmAtr.UNAPPROVED))
+					.collect(Collectors.toList());
+			
+			return new AggregateResult(emptyResults, false);
 		}
 		
 		@Value
