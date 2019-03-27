@@ -210,8 +210,8 @@ public class JpaAlarmListExtractResultRepoImpl extends JpaRepository implements 
 	@SneakyThrows
 	private List<ExtractEmployeeErAlData> getExtractedErrorWithLimit(List<String> executeIds, int limit) {
 		
-		StringBuilder queryBuilder = new StringBuilder("SELECT er.EXECUTE_ID, er.ALARM_TARGET_TIME, er.CATEGORY_CODE, er.CATEGORY_NAME, er.ALARM_ITEM, er.ALARM_MESSAGE, ");
-		queryBuilder.append(" er.COMMENT, er.EMPLOYEE_ID, er.RECORD_ID FROM KFNMT_ALEX_EMP_ERAL_DATA er" );
+		StringBuilder queryBuilder = new StringBuilder("SELECT DISTINCT er.EXECUTE_ID, er.ALARM_TARGET_TIME, er.CATEGORY_CODE, er.CATEGORY_NAME, er.ALARM_ITEM, er.ALARM_MESSAGE, ");
+		queryBuilder.append(" er.COMMENT, er.EMPLOYEE_ID, er.RECORD_ID, em.HIERARCHY_CD, em.EMPLOYEE_CODE FROM KFNMT_ALEX_EMP_ERAL_DATA er" );
 		queryBuilder.append(" JOIN KFNMT_ALEX_EMP_DATA em ON er.EMPLOYEE_ID = em.EMPLOYEE_ID" );
 		queryBuilder.append(" WHERE er.EXECUTE_ID IN (");
 		queryBuilder.append(executeIds.stream().map(c -> "?").collect(Collectors.joining(",")));
