@@ -702,15 +702,15 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	public List<WorkType> findWorkTypeForHalfDay(String companyId, List<Integer> halfDay, List<String> workTypeCodes) {
 		List<WorkType> resultList = new ArrayList<>();
 		CollectionUtil.split(halfDay, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstHalf -> {
-			CollectionUtil.sfindWorkTypeByCodesplit(workTypeCodes, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstCodes -> {
-				resultList.addAll(this.queryProxy().query(FIND_WORKTYPE_BY_LIST_WORKTYPECODES, KshmtWorkType.class)
+			CollectionUtil.split(workTypeCodes, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstCodes -> {
+				resultList.addAll(this.queryProxy().query(FIND_WORKTYPE_BY_LIST_WORKTYPECODES, Object[].class)
 				.setParameter("companyId", companyId)
 				.setParameter("workTypeCodes", lstCodes)
 				.setParameter("morningAtrs", lstHalf)
-				.setParameter("afternoonAtrs", lstHalf).getList(x -> toDomain(x)));
+				.setParameter("afternoonAtrs", lstHalf).getList(x -> toDomainWithDispOrder(x)));
 			});
 		});
-		resultList.sort(Comparator.comparing(WorkType::getWorkTypeCode));
+		///resultList.sort(Comparator.comparing(WorkType::getWorkTypeCode));
 		return resultList;
 	}
 
