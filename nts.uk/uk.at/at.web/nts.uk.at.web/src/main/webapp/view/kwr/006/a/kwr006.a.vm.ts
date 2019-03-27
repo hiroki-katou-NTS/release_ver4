@@ -50,6 +50,8 @@ module nts.uk.at.view.kwr006.a {
             // start variable of CCG001
             ccg001ComponentOption: GroupOption;
             // end variable of CCG001
+            
+            closureId: KnockoutObservable<number>;
 
             constructor() {
                 let self = this;
@@ -86,6 +88,7 @@ module nts.uk.at.view.kwr006.a {
                 self.taskId = ko.observable('');
                 self.errorLogs = ko.observableArray([]);
                 self.errorLogsNoWorkplace = ko.observableArray([]);
+                self.closureId = ko.observable(0);
             }
 
             private initSubscribers(): void {
@@ -193,6 +196,7 @@ module nts.uk.at.view.kwr006.a {
                                 };
                             });
                         self.employeeList(result);
+                        self.closureId(data.closureId);
                     }
                 }
             }
@@ -368,7 +372,8 @@ module nts.uk.at.view.kwr006.a {
                     code: self.monthlyWorkScheduleConditionModel.selectedCode(),
                     employeeId: self.getListSelectedEmployee(),
                     condition: self.monthlyWorkScheduleConditionModel.toDto(),
-                    fileType: null
+                    fileType: null,
+                    closureId: self.closureId()
                 };
             }
             
