@@ -2391,8 +2391,27 @@ public class AttendanceItemIdContainer implements ItemConst {
 	}
 	
 	public static Map<Integer, Integer> mapOptionalItemIdsToNos() {
+		return mapDailyOptionalItemIdsToNos();
+	}
+	
+	public static Map<Integer, Integer> mapOptionalItemIdsToNos(AttendanceItemType type) {
+		if(type == AttendanceItemType.MONTHLY_ITEM){
+			return mapMonthlyOptionalItemIdsToNos();
+		}
+		return mapDailyOptionalItemIdsToNos();
+	}
+	
+	private static Map<Integer, Integer> mapDailyOptionalItemIdsToNos() {
 		return DAY_ITEM_ID_CONTAINER.entrySet().stream()
 				.filter(en -> en.getValue().indexOf(DailyDomainGroup.OPTIONAL_ITEM.name) == 0)
+				.collect(Collectors.toMap(i -> i.getKey(), i -> {
+			return Integer.parseInt(i.getValue().replace(i.getValue().replaceAll(DEFAULT_NUMBER_REGEX, EMPTY_STRING), EMPTY_STRING));
+		}));
+	}
+	
+	private static Map<Integer, Integer> mapMonthlyOptionalItemIdsToNos() {
+		return MONTHLY_ITEM_ID_CONTAINER.entrySet().stream()
+				.filter(en -> en.getValue().indexOf(MonthlyDomainGroup.OPTIONAL_ITEM.name) == 0)
 				.collect(Collectors.toMap(i -> i.getKey(), i -> {
 			return Integer.parseInt(i.getValue().replace(i.getValue().replaceAll(DEFAULT_NUMBER_REGEX, EMPTY_STRING), EMPTY_STRING));
 		}));

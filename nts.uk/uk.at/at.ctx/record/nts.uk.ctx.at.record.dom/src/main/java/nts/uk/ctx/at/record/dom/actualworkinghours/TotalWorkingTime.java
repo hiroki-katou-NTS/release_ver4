@@ -101,12 +101,14 @@ import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.HolidayAdd
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.StatutoryDivision;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryOccurrenceSetting;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
+import nts.uk.ctx.at.shared.dom.worktime.common.DeductionTime;
 //import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
 //import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.AutoCalRaisingSalarySetting;
 //import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.overtime.overtimeframe.OverTimeFrameNo;
 //import nts.uk.ctx.at.shared.dom.workrule.statutoryworktime.DailyCalculationPersonalInformation;
 //import nts.uk.ctx.at.shared.dom.workrule.waytowork.PersonalLaborCondition;
 import nts.uk.ctx.at.shared.dom.worktime.common.EmTimeZoneSet;
+import nts.uk.ctx.at.shared.dom.worktime.common.FixedRestCalculateMethod;
 //import nts.uk.ctx.at.shared.dom.worktime.common.HolidayCalculation;
 //import nts.uk.ctx.at.shared.dom.worktime.common.LateEarlyAtr;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
@@ -118,6 +120,7 @@ import nts.uk.ctx.at.shared.dom.worktime.predset.TimezoneUse;
 //import nts.uk.ctx.at.shared.dom.worktime.flexset.CoreTimeSetting;
 //import nts.uk.ctx.at.shared.dom.worktime.flexset.FlexCalcSetting;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
+import nts.uk.ctx.at.shared.dom.worktype.AttendanceHolidayAttr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
@@ -815,14 +818,26 @@ public class TotalWorkingTime {
 	 * @param fixRestTimeZoneSet 
 	 * @param fixWoSetting 
 	 * @param attendanceLeave 
+	 * @param workType 
+	 * @param attendanceTime 
 	 * @return
 	 */
-	public TotalWorkingTime reCalcLateLeave(Optional<WorkTimezoneCommonSet> workTimeZone, Optional<FixRestTimezoneSet> fixRestTimeZoneSet, List<EmTimeZoneSet> fixWoSetting, Optional<TimeLeavingOfDailyPerformance> attendanceLeave) {
-		TotalWorkingTime result = this;
+	public TotalWorkingTime reCalcLateLeave(Optional<WorkTimezoneCommonSet> workTimeZone, Optional<FixRestTimezoneSet> fixRestTimeZoneSet, List<EmTimeZoneSet> fixWoSetting, Optional<TimeLeavingOfDailyPerformance> attendanceLeave, AttendanceTime actualPredTime, WorkType workType) {
+		if(workType.getDailyWork().decisionNeedPredTime() != AttendanceHolidayAttr.FULL_TIME) {
+			offSetRestTime(workTimeZone,fixRestTimeZoneSet,fixWoSetting,attendanceLeave);	
+		}		
+		offSetUnUseBreakTime(workTimeZone, fixRestTimeZoneSet, fixWoSetting, attendanceLeave, actualPredTime);
+		return this;
+	}
+	
+	/**
+	 * 大塚モード(欠勤控除)時の休暇加算時間との相殺処理
+	 */
+	private void offSetRestTime(Optional<WorkTimezoneCommonSet> workTimeZone, Optional<FixRestTimezoneSet> fixRestTimeZoneSet, List<EmTimeZoneSet> fixWoSetting, Optional<TimeLeavingOfDailyPerformance> attendanceLeave) {		
 		//休暇時に計算する設定かどうか判断
 		if(!workTimeZone.isPresent()
 		|| workTimeZone.get().getHolidayCalculation().getIsCalculate().isNotUse()) {
-			return result;
+			return ;
 		}
 
 		AttendanceTime unBreakTime = new AttendanceTime(0);
@@ -854,10 +869,100 @@ public class TotalWorkingTime {
 			//早退時間をクリア
 			this.leaveEarlyTimeOfDaily.get(0).rePlaceLeaveEarlyTime(TimeWithCalculation.sameTime(new AttendanceTime(0)));
 		}
-		
-		return result;
 	}
 	
+	/**
+	 * 大塚モード(欠勤控除)時の休憩未取得時間との相殺処理
+	 */
+	private void offSetUnUseBreakTime(Optional<WorkTimezoneCommonSet> workTimeZone, Optional<FixRestTimezoneSet> fixRestTimeZoneSet, List<EmTimeZoneSet> fixWoSetting, Optional<TimeLeavingOfDailyPerformance> attendanceLeave,
+									AttendanceTime actualPredTime) {
+		AttendanceTime unBreakTime = new AttendanceTime(0);
+		//休憩未取得を計算するためのチェック
+		if(fixRestTimeZoneSet.isPresent()
+		&& attendanceLeave != null
+		&& attendanceLeave.isPresent()) {
+			//休憩未取得時間の計算
+			unBreakTime = this.getBreakTimeOfDaily().calcUnUseBrekeTime(fixRestTimeZoneSet.get(), fixWoSetting, attendanceLeave.get());
+		}
+		
+		int withinBreakTime = 0;
+		//就業時間帯に設定されている休憩のループ
+		if(fixRestTimeZoneSet.isPresent()) {
+			for(DeductionTime breakTImeSheet : fixRestTimeZoneSet.get().getLstTimezone()) {
+				//就業時間帯に設定されている勤務時間帯のstream
+				withinBreakTime += fixWoSetting.stream().filter(tc -> tc.getTimezone().isOverlap(breakTImeSheet))
+													  .map(tt -> tt.getTimezone().getDuplicatedWith(breakTImeSheet.timeSpan()).get().lengthAsMinutes())
+													  .collect(Collectors.summingInt(ts -> ts));	
+			}			
+		}
+		//所定内休憩未取得時間
+		final val withinUnUseBreakTime = this.getWithinStatutoryTimeOfDaily().calcUnUseWithinBreakTime(unBreakTime, actualPredTime, new AttendanceTime(withinBreakTime));
+		if(withinUnUseBreakTime.greaterThan(0)) {
+			final AttendanceTime restWithinUnUseBreakTime = minusLateTime(withinUnUseBreakTime);
+			if(restWithinUnUseBreakTime.greaterThan(0)) {
+				minusEarlyLeaveTime(restWithinUnUseBreakTime);
+			}
+		}
+		
+	}
+	
+
+	/**
+	 * 大塚モード(欠勤控除)時の休憩未取得時間との相殺処理(遅刻時間Ver)
+	 * @return 残遅早相殺可能時間
+	 */
+	private AttendanceTime minusLateTime(AttendanceTime withinUnUseBreakTime) {
+		AttendanceTime restOffSetTime = withinUnUseBreakTime;
+		if(!this.lateTimeOfDaily.isEmpty()) {
+			//勤務NOの昇順でソート
+			this.lateTimeOfDaily.sort((c1, c2) -> c1.getWorkNo().compareTo(c2.getWorkNo()));
+			for(LateTimeOfDaily ltOfDaily:this.lateTimeOfDaily) {
+				val lateTime = ltOfDaily.getLateTime();
+				//残相殺可能時間が０になるパターン
+				if(lateTime.getTime().greaterThan(restOffSetTime.valueAsMinutes())) {
+					ltOfDaily.rePlaceLateTime(TimeWithCalculation.createTimeWithCalculation(lateTime.getTime().minusMinutes(restOffSetTime.valueAsMinutes()),
+																							lateTime.getCalcTime()));
+					restOffSetTime = new AttendanceTime(0);
+					break;
+				}
+				//残相殺可能時間が０より大きいパターン
+				else {
+					restOffSetTime = restOffSetTime.minusMinutes(lateTime.getTime().valueAsMinutes());
+					ltOfDaily.rePlaceLateTime(TimeWithCalculation.createTimeWithCalculation(new AttendanceTime(0),
+																							lateTime.getCalcTime()));
+				}
+			}
+		}
+		return restOffSetTime;
+	}
+
+	/**
+	 * 大塚モード(欠勤控除)時の休憩未取得時間との相殺処理(早退時間Ver)
+	 */
+	private void minusEarlyLeaveTime(AttendanceTime restWithinUnUseBreakTime) {
+		AttendanceTime restOffSetTime = restWithinUnUseBreakTime;
+		if(!this.leaveEarlyTimeOfDaily.isEmpty()) {
+			//勤務NOの昇順でソート
+			this.leaveEarlyTimeOfDaily.sort((c1, c2) -> c1.getWorkNo().compareTo(c2.getWorkNo()));
+			for(LeaveEarlyTimeOfDaily leOfDaily:this.leaveEarlyTimeOfDaily) {
+				val leaveEarlyTime = leOfDaily.getLeaveEarlyTime();
+				//残相殺可能時間が０になるパターン
+				if(leaveEarlyTime.getTime().greaterThan(restOffSetTime.valueAsMinutes())) {
+					leOfDaily.rePlaceLeaveEarlyTime(TimeWithCalculation.createTimeWithCalculation(leaveEarlyTime.getTime().minusMinutes(restOffSetTime.valueAsMinutes()),
+																								  leaveEarlyTime.getCalcTime()));
+					restOffSetTime = new AttendanceTime(0);
+					break;
+				}
+				//残相殺可能時間が０より大きいパターン
+				else {
+					restOffSetTime = restOffSetTime.minusMinutes(leaveEarlyTime.getTime().valueAsMinutes());
+					leOfDaily.rePlaceLeaveEarlyTime(TimeWithCalculation.createTimeWithCalculation(new AttendanceTime(0),
+																								  leaveEarlyTime.getCalcTime()));
+				}
+			}
+		}
+	}
+
 	/**
 	 * 遅刻早退の合計時間を取得
 	 * 大塚専用処理なので遅刻早退クラスに実装しない
