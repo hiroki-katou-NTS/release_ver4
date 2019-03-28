@@ -303,6 +303,7 @@ public class RecoveryStorageService {
 			String filePath = getExtractDataStoragePath(targetDataByCate.get(i).getUploadId()) + "//"
 					+ targetDataByCate.get(i).getFileNameCsv() + ".csv";
 			CSVBufferReader reader = new CSVBufferReader(new File(filePath));
+			reader.setCharset("Shift_JIS");
 			csvByteReadMaper.put(targetDataByCate.get(i).getFileNameCsv(), reader);
 		}
 
@@ -421,6 +422,7 @@ public class RecoveryStorageService {
 			System.out.println("============= employeeId " + employeeId);
 			if (employeeId != null) {
 				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
+				reader.setCharset("Shift_JIS");
 				reader.readFilter(1000, dataRow -> {
 
 					List<NtsCsvRecord> records = dataRow.getRecords();
@@ -761,6 +763,7 @@ public class RecoveryStorageService {
 				};
 
 				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
+				reader.setCharset("Shift_JIS");
 				reader.readChunk(csvResult, null, null);
 			}
 		} catch (Exception e) {
@@ -830,6 +833,7 @@ public class RecoveryStorageService {
 		String filePath = getExtractDataStoragePath(dataRecoveryTable.getUploadId()) + "//"
 				+ dataRecoveryTable.getFileNameCsv() + ".csv";
 		CSVBufferReader reader = new CSVBufferReader(new File(filePath));
+		reader.setCharset("Shift_JIS");
 		csvByteReadMaper.put(dataRecoveryTable.getFileNameCsv(), reader);
 
 		if (tableList.isPresent()) {
