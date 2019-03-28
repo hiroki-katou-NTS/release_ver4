@@ -14,13 +14,11 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerWithResult;
-import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.app.find.application.common.ApplicationDto_New;
 import nts.uk.ctx.at.request.app.find.application.common.dto.InputApproveData;
 import nts.uk.ctx.at.request.app.find.setting.company.request.applicationsetting.apptypesetting.DisplayReasonDto;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
-import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.InitMode;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.after.DetailAfterApproval_New;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.before.DetailBeforeUpdate;
@@ -70,10 +68,12 @@ public class UpdateApplicationApproveHandler extends CommandHandlerWithResult<In
 		String memo = context.getCommand().getMemo();
 		String employeeID = AppContexts.user().employeeId();
 		ApplicationDto_New command = context.getCommand().getApplicationDto();
-		
+		//アルゴリズム「排他チェック」を実行する (thực hiện xử lý 「check version」)
+		beforeRegisterRepo.exclusiveCheck(companyID, command.getApplicationID(), command.getVersion());
 		Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
 				.getApplicationSettingByComID(companyID);
 		ApplicationSetting applicationSetting = applicationSettingOp.get();
+		//14-3.詳細画面の初期モード
 		DetailScreenInitModeOutput output = initMode.getDetailScreenInitMode(EnumAdaptor.valueOf(context.getCommand().getUser(), User.class), context.getCommand().getReflectPerState());
 		String appReason = applicationRepository.findByID(companyID, command.getApplicationID()).get().getAppReason().v();
 		boolean isUpdateReason = false;
@@ -116,9 +116,6 @@ public class UpdateApplicationApproveHandler extends CommandHandlerWithResult<In
 				isUpdateReason = true;
 			}
 		}
-		// 4-1.詳細画面登録前の処理 lan nay deu bi hoan lai
-		beforeRegisterRepo.processBeforeDetailScreenRegistration(companyID, command.getApplicantSID(),
-				GeneralDate.today(), 1,command.getApplicationID(), EnumAdaptor.valueOf(command.getPrePostAtr(), PrePostAtr.class), command.getVersion());
 		
 		//8-2.詳細画面承認後の処理
 		ProcessResult processResult = detailAfterApproval_New.doApproval(companyID, command.getApplicationID(), employeeID, memo, appReason, isUpdateReason);

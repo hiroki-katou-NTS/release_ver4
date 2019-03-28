@@ -42,7 +42,7 @@ public class DetailBeforeUpdateImpl implements DetailBeforeUpdate {
 	}
 	
 	/**
-	 * 11-1.詳細画面差し戻し前の処理
+	 * 1.排他チェック
 	 */
 	public void exclusiveCheck(String companyID, String appID, Long version) {
 		if (applicationRepository.findByID(companyID, appID).isPresent()) {
@@ -83,7 +83,8 @@ public class DetailBeforeUpdateImpl implements DetailBeforeUpdate {
 		return exclusiveCheckErr(companyID, appID, version);
 	}
 
-	private boolean exclusiveCheckErr(String companyID, String appID, Long version) {
+	@Override
+	public boolean exclusiveCheckErr(String companyID, String appID, Long version) {
 		if (applicationRepository.findByID(companyID, appID).isPresent()) {
 			Application_New application = applicationRepository.findByID(companyID, appID).get();
 			if (!application.getVersion().equals(version)) {
