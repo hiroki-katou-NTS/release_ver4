@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
@@ -39,8 +36,6 @@ import nts.uk.ctx.workflow.dom.service.ApprovalRootStateStatusService;
 import nts.uk.ctx.workflow.dom.service.JudgmentApprovalStatusService;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootStateStatus;
 import nts.uk.ctx.workflow.dom.service.output.ApproverPersonOutput;
-import nts.uk.ctx.workflow.dom.service.output.Request133Output;
-import nts.uk.ctx.workflow.dom.service.output.ErrorFlag;
 import nts.uk.ctx.workflow.dom.service.resultrecord.AppRootConfirmService;
 import nts.uk.ctx.workflow.dom.service.resultrecord.AppRootInstancePeriod;
 import nts.uk.ctx.workflow.dom.service.resultrecord.AppRootInstanceService;
@@ -64,7 +59,6 @@ import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootInsContentExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootInsExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootSttMonthExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.ApprovalStatusExport;
-import nts.uk.ctx.workflow.pub.resultrecord.export.Request133Export;
 import nts.uk.ctx.workflow.pub.resultrecord.export.RouteSituationExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.RouteSituationMonthExport;
 import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
@@ -77,8 +71,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  * @author Doan Duy Hung
  *
  */
-@Stateless
-@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+@RequestScoped
 public class IntermediateDataPubImpl implements IntermediateDataPub {
 	
 	@Inject
@@ -109,15 +102,17 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	private EmployeeAdapter employeeAdapter;
 
 	@Override
-	public Request133Export getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period,
+	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpPeriod(String employeeID, DatePeriod period,
 			Integer rootType) throws BusinessException {
-		Request133Output result = appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
-		return new Request133Export(
-				result.getAppRootStatusLst().stream()
-					.map(x -> new AppRootStateStatusSprExport(x.getDate(), x.getEmployeeID(), x.getDailyConfirmAtr().value)).collect(Collectors.toList()), 
-				result.isErrorFlg(), 
-				result.getErrorMsgID(), 
-				result.getEmpLst());
+		List<String> employeeIDLst = Arrays.asList(employeeID);
+		List<AppRootStateStatusSprExport> rslist = new ArrayList<>();
+		try {
+			rslist=	appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class))
+			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList());
+		} catch (BusinessException e) {
+			throw new BusinessException("Msg_1430", "承認者");
+		}
+		return rslist;
 	}
 
 	@Override
@@ -126,7 +121,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		List<AppRootStateStatusSprExport> result = new ArrayList<>();
 		dateLst.forEach(date -> {
 			DatePeriod period = new DatePeriod(date, date);
-			result.addAll(appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class)).getAppRootStatusLst()
+			result.addAll(appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class))
 			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList()));
 		});
 		return result;
@@ -135,7 +130,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	@Override
 	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period,
 			Integer rootType) {
-		return appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class)).getAppRootStatusLst()
+		return appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class))
 			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList());
 	}
 	
@@ -282,53 +277,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 
 	@Override
 	public AppRootInsContentExport createDailyApprover(String employeeID, Integer rootType, GeneralDate recordDate, GeneralDate closureStartDate) {
-		// ドメインモデル「承認ルート中間データ」を削除する
-		String companyID = AppContexts.user().companyId();
-		RecordRootType rootTypeEnum = EnumAdaptor.valueOf(rootType, RecordRootType.class);
-		AppRootInstanceContent appRootInstanceContent = null;
-		for(GeneralDate loopDate = closureStartDate; loopDate.beforeOrEquals(recordDate); loopDate = loopDate.addDays(1)){
-			appRootInstanceContent = createDailyApprover.createDailyApprover(
-					employeeID, 
-					rootTypeEnum, 
-					loopDate, 
-					closureStartDate);
-			ErrorFlag errorFlag = appRootInstanceContent.getErrorFlag();
-			String errorMsgID = "";
-			switch (errorFlag) {
-			case NO_APPROVER:
-				errorMsgID = "Msg_324";
-				break;
-			case NO_CONFIRM_PERSON:
-				errorMsgID = "Msg_326";
-				break;
-			case APPROVER_UP_10:
-				errorMsgID = "Msg_325";
-				break;
-			case ABNORMAL_TERMINATION:
-				errorMsgID = "Msg_1339";
-				break;
-			default:
-				break;
-			}
-			if(errorFlag!=ErrorFlag.NO_ERROR){
-				return new AppRootInsContentExport(
-						new AppRootInsExport(
-								appRootInstanceContent.getAppRootInstance().getRootID(), 
-								appRootInstanceContent.getAppRootInstance().getCompanyID(), 
-								employeeID, 
-								appRootInstanceContent.getAppRootInstance().getDatePeriod(), 
-								rootType, 
-								Collections.emptyList()), 
-						errorFlag.value, 
-						errorMsgID);
-			}
-		}
-		// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」を取得する
-		AppRootInstance appRootInstNewest = appRootInstanceRepository.findByEmpDateNewest(companyID, employeeID, rootTypeEnum).get();
-		// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」をUPDATEする
-		DatePeriod newestPeriod = new DatePeriod(appRootInstNewest.getDatePeriod().start(), GeneralDate.fromString("9999/12/31", "yyyy/MM/dd")) ;
-		appRootInstNewest.setDatePeriod(newestPeriod);
-		appRootInstanceRepository.update(appRootInstNewest);
+		AppRootInstanceContent appRootInstanceContent = createDailyApprover.createDailyApprover(employeeID, EnumAdaptor.valueOf(rootType, RecordRootType.class), recordDate, closureStartDate);
 		return new AppRootInsContentExport(
 				new AppRootInsExport(
 						appRootInstanceContent.getAppRootInstance().getRootID(), 
