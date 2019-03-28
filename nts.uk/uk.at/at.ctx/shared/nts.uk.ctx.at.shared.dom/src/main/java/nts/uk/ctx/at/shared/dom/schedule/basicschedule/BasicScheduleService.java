@@ -3,6 +3,8 @@ package nts.uk.ctx.at.shared.dom.schedule.basicschedule;
 import java.util.List;
 import java.util.Optional;
 
+import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
 import nts.uk.shr.com.time.TimeWithDayAttr;
@@ -44,6 +46,12 @@ public interface BasicScheduleService {
 	 * 就業時間帯のマスタチェック
 	 */
 	void checkWorkTimeMater(String workTypeCode, String workTimeCode);
+	
+	/**
+	 * 休業休職の勤務種類コードを返す
+	 */
+	String getWorktypeCodeLeaveHolidayType(String companyId, String employeeId, GeneralDate day,
+			String workTypeCd, int closeAtr, Optional<WorkingConditionItem> optWorkingConditionItem);
 	
 	/**
 	 * Check needed of Work Time setting
