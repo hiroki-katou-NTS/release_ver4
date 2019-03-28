@@ -169,14 +169,4 @@ public interface PersonApprovalRootRepository {
 	 * @return
 	 */
 	List<PersonApprovalRoot> findEmpByConfirm(String companyID, String employeeID, ConfirmationRootType confirmType, GeneralDate date);
-	
-	/**
-	 * 
-	 * @param companyID
-	 * @param employeeID
-	 * @param closureDate
-	 * @param inputDate
-	 * @return
-	 */
-	List<PersonApprovalRoot> findByNew512(String companyID, String employeeID, GeneralDate closureDate, GeneralDate inputDate);
 }

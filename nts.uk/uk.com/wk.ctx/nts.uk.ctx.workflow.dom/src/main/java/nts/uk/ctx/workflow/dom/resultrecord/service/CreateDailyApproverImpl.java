@@ -1,7 +1,6 @@
 package nts.uk.ctx.workflow.dom.resultrecord.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -10,11 +9,7 @@ import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.workflow.dom.agent.Agent;
-import nts.uk.ctx.workflow.dom.approvermanagement.setting.PrincipalApprovalFlg;
-import nts.uk.ctx.workflow.dom.approvermanagement.workroot.CompanyApprovalRoot;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ConfirmationRootType;
-import nts.uk.ctx.workflow.dom.approvermanagement.workroot.PersonApprovalRoot;
 import nts.uk.ctx.workflow.dom.resultrecord.AppFrameInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppPhaseInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmRepository;
@@ -52,97 +47,6 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 																employeeID, 
 																EnumAdaptor.valueOf(rootType.value-1, ConfirmationRootType.class), 
 																recordDate);
-		AppRootInstance appRootInstance = new AppRootInstance(
-				approvalRootContentOutput.getApprovalRootState().getRootStateID(), 
-				companyID, 
-				employeeID, 
-				new DatePeriod(GeneralDate.fromString("1900/01/01", "yyyy/MM/dd"), GeneralDate.fromString("9999/12/31", "yyyy/MM/dd")), 
-				rootType, 
-				approvalRootContentOutput.getApprovalRootState().getListApprovalPhaseState().stream()
-					.map(x -> new AppPhaseInstance(
-							x.getPhaseOrder(), 
-							x.getApprovalForm(), 
-							x.getListApprovalFrame().stream()
-								.map(y -> new AppFrameInstance(
-										y.getFrameOrder(), 
-										y.getConfirmAtr().value==1?true:false, 
-										y.getListApproverState().stream().map(z -> z.getApproverID())
-								.collect(Collectors.toList())))
-					.collect(Collectors.toList())))
-				.collect(Collectors.toList()));
-		ErrorFlag errorFlag = approvalRootContentOutput.getErrorFlag();
-		String errorMsgID = "";
-		switch (errorFlag) {
-		case NO_APPROVER:
-			errorMsgID = "Msg_324";
-			break;
-		case NO_CONFIRM_PERSON:
-			errorMsgID = "Msg_326";
-			break;
-		case APPROVER_UP_10:
-			errorMsgID = "Msg_325";
-			break;
-		case ABNORMAL_TERMINATION:
-			errorMsgID = "Msg_1339";
-			break;
-		default:
-			break;
-		}
-		if(errorFlag!=ErrorFlag.NO_ERROR){
-			return new AppRootInstanceContent(appRootInstance, errorFlag, errorMsgID);
-		}
-		// ドメインモデル「承認ルート中間データ」を取得する
-		Optional<AppRootInstance> opAppRootInstanceNewestBelow = appRootInstanceRepository.findByEmpDateNewestBelow(companyID, employeeID, recordDate, rootType);
-		if(opAppRootInstanceNewestBelow.isPresent()){
-			// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」を取得する
-			AppRootInstance appRootInstanceConflict = appRootInstanceRepository.findByEmpDateNewest(companyID, employeeID, rootType).get();
-			// output．承認ルートの内容は取得したドメインモデル「承認ルート中間データ」を比較する
-			boolean isSame = compareAppRootContent(appRootInstanceConflict, appRootInstance)
-					&& compareAppRootContent(appRootInstance, appRootInstanceConflict);
-			if(isSame){
-				return new AppRootInstanceContent(appRootInstanceConflict, errorFlag, errorMsgID);
-			} else {
-				// ドメインモデル「承認ルート中間データ」を削除する
-				List<AppRootInstance> opAppRootInstanceOverLst = appRootInstanceRepository.findByEmpFromDate(companyID, employeeID, recordDate, rootType);
-				for(AppRootInstance appRootInstanceOver : opAppRootInstanceOverLst){
-					appRootInstanceRepository.delete(appRootInstanceOver);
-				}
-				// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」を取得する
-				AppRootInstance appRootInstNewest = appRootInstanceRepository.findByEmpDateNewest(companyID, employeeID, rootType).get();
-				// 取得した承認ルートをドメインモデル「承認ルート中間データ」にINSERTする
-				appRootInstance.setDatePeriod(new DatePeriod(recordDate, GeneralDate.fromString("9999/12/31", "yyyy/MM/dd")));
-				// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」をUPDATEする
-				DatePeriod oldPeriod = appRootInstNewest.getDatePeriod();
-				appRootInstNewest.setDatePeriod(new DatePeriod(oldPeriod.start(), recordDate.addDays(-1)));
-				appRootInstanceRepository.update(appRootInstNewest);
-				//ドメインモデル「承認済フェーズ」を削除する
-				appRootConfirmRepository.clearStatusFromDate(companyID, employeeID, recordDate, rootType);
-			}
-		}
-		// 取得した承認ルートをドメインモデル「承認ルート中間データ」にINSERTする
-		appRootInstanceRepository.insert(appRootInstance);
-		return new AppRootInstanceContent(appRootInstance, errorFlag, errorMsgID);
-	}
-	
-	@Override
-	public AppRootInstanceContent createDailyApprover512(String employeeID, RecordRootType rootType, GeneralDate recordDate, GeneralDate closureStartDate,
-			Optional<PersonApprovalRoot> opPsConfirm, Optional<PersonApprovalRoot> opPsCom, 
-			Optional<CompanyApprovalRoot> opComConfirm, Optional<CompanyApprovalRoot> opComCom,
-			Map<String, Map<GeneralDate, Boolean>> statusLst, List<Agent> agentLst, PrincipalApprovalFlg principalApprovalFlg) {
-		String companyID = AppContexts.user().companyId();
-		// 承認ルートを取得する（確認）
-		ApprovalRootContentOutput approvalRootContentOutput = collectApprovalRootService.getApprovalRootConfirm512(
-																companyID, 
-																employeeID, 
-																EnumAdaptor.valueOf(rootType.value-1, ConfirmationRootType.class), 
-																recordDate,
-																opPsConfirm, 
-																opPsCom, 
-																opComConfirm, 
-																opComCom,
-																statusLst, 
-																agentLst, 
-																principalApprovalFlg);
 		AppRootInstance appRootInstance = new AppRootInstance(
 				approvalRootContentOutput.getApprovalRootState().getRootStateID(), 
 				companyID, 
