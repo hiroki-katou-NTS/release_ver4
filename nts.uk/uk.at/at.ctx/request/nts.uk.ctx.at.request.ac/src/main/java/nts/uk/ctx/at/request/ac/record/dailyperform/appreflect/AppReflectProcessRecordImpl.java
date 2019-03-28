@@ -164,7 +164,9 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				para.getBaseDate(),
 				para.isHolidayWorkReflectFlg(),
 			 	EnumAdaptor.valueOf(para.getScheAndRecordSameChangeFlg().value, ScheAndRecordSameChangePubFlg.class), 
-				para.isScheReflectFlg(), 
+				para.isScheReflectFlg(),
+				para.isRecordReflectTimeFlg(),
+				para.isRecordReflectBreakFlg(),
 				appPara);
 		
 		return recordPub.holidayWorkReflect(pubPara, isPre);		

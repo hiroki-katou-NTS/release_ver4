@@ -46,6 +46,7 @@ import nts.uk.ctx.at.shared.dom.vacation.setting.annualpaidleave.AnnualPaidLeave
 import nts.uk.ctx.at.shared.dom.vacation.setting.annualpaidleave.OperationStartSetDailyPerform;
 import nts.uk.ctx.at.shared.dom.vacation.setting.annualpaidleave.OperationStartSetDailyPerformRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.GetClosureStartForEmployee;
+import nts.uk.ctx.at.shared.dom.yearholidaygrant.GrantDays;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.GrantHdTblSet;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.GrantYearHolidayRepository;
 import nts.uk.ctx.at.shared.dom.yearholidaygrant.LengthServiceRepository;
@@ -372,6 +373,11 @@ public class GetAnnLeaRemNumWithinPeriodProc {
 									nextAnnualGrantList.setTimeAnnualLeaveMaxDays(
 											grantHdTbl.getLimitTimeHd());
 								}
+							}
+							else {
+								
+								// 次回年休付与．付与日数　←　0
+								nextAnnualGrantList.setGrantDays(new GrantDays(0.0));
 							}
 						}
 					}

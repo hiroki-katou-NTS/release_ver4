@@ -57,8 +57,8 @@ public class RegisterAtApproveReflectionInfoDefault_New implements RegisterAtApp
 			application_New.getReflectionInformation().setStateReflectionReal(ReflectedState_New.WAITREFLECTION);
 			applicationRepository.update(application_New);
 			if((application.getPrePostAtr().equals(PrePostAtr.PREDICT)&&
-					(application.getAppType().equals(ApplicationType.OVER_TIME_APPLICATION)
-					|| application.getAppType().equals(ApplicationType.BREAK_TIME_APPLICATION)))
+					application.getAppType().equals(ApplicationType.OVER_TIME_APPLICATION))
+				|| application.getAppType().equals(ApplicationType.BREAK_TIME_APPLICATION)
 				|| application.getAppType().equals(ApplicationType.GO_RETURN_DIRECTLY_APPLICATION)
 				|| application.getAppType().equals(ApplicationType.WORK_CHANGE_APPLICATION)
 				|| application.getAppType().equals(ApplicationType.ABSENCE_APPLICATION)

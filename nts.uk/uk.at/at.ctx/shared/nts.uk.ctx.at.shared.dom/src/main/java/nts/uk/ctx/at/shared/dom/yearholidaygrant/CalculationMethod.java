@@ -8,10 +8,10 @@ package nts.uk.ctx.at.shared.dom.yearholidaygrant;
  *
  */
 public enum CalculationMethod {
-	/** 労働日数 */
-	WORKING_DAY(0),
 	/** 出勤率 */
-	ATTENDENCE_RATE(1);
+	ATTENDENCE_RATE(0),
+	/** 労働日数 */
+	WORKING_DAY(1);
 	
 	public final int value;
 	

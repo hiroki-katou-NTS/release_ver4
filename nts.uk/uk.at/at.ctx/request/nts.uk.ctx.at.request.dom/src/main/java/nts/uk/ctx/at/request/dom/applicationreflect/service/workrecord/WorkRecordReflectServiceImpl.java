@@ -22,69 +22,46 @@ public class WorkRecordReflectServiceImpl implements WorkRecordReflectService{
 		if (!checkReflect) {
 			return ReflectInformationResult.CHECKFALSE;
 		}
-		//事前事後区分を取得
-		if(recordInfor.getAppInfor().getPrePostAtr() == PrePostAtr.PREDICT) {
+		boolean isPre = recordInfor.getAppInfor().getPrePostAtr() == PrePostAtr.PREDICT ? true : false;
 			//申請種類
-			if(recordInfor.getAppInfor().getAppType() == ApplicationType.OVER_TIME_APPLICATION) {
-				return reflectRecord.overtimeReflectRecord(appRecordInfor.getOvertimeInfor(), true) 						
-						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.GO_RETURN_DIRECTLY_APPLICATION) {
-				GobackReflectPara gobackpara = appRecordInfor.getGobackInfor();
-				return reflectRecord.gobackReflectRecord(gobackpara, true) 
-						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.ABSENCE_APPLICATION) {
-				WorkChangeCommonReflectPara absenceInfor = appRecordInfor.getAbsenceInfor();
-				return reflectRecord.absenceReflectRecor(absenceInfor, true)
-						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.BREAK_TIME_APPLICATION) {
-				HolidayWorkReflectPara holidayworkData = appRecordInfor.getHolidayworkInfor();
-				return reflectRecord.holidayWorkReflectRecord(holidayworkData, true)
-						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.WORK_CHANGE_APPLICATION) {
-				WorkChangeCommonReflectPara workChangeData = appRecordInfor.getWorkchangeInfor();
-				return reflectRecord.workChangeReflectRecord(workChangeData, true)
-						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.COMPLEMENT_LEAVE_APPLICATION) {
-				CommonReflectPara absenceLeaveData = appRecordInfor.getAbsenceLeaveAppInfor();
-				CommonReflectPara recruitmentData = appRecordInfor.getRecruitmentInfor();
-				boolean kaf011 = true;
-				if(absenceLeaveData != null) {
-					kaf011 = reflectRecord.absenceLeaveReflectRecord(absenceLeaveData, true);
-				}
-				if(recruitmentData != null) {
-					kaf011 = reflectRecord.recruitmentReflectRecord(recruitmentData, true);
-				}
-				return kaf011 ?  ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
+		if(recordInfor.getAppInfor().getAppType() == ApplicationType.OVER_TIME_APPLICATION
+				&& recordInfor.getAppInfor().getPrePostAtr() == PrePostAtr.PREDICT) {
+			return reflectRecord.overtimeReflectRecord(appRecordInfor.getOvertimeInfor(), true) 						
+					? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
+		} 
+		if (recordInfor.getAppInfor().getAppType() == ApplicationType.GO_RETURN_DIRECTLY_APPLICATION) {
+			GobackReflectPara gobackpara = appRecordInfor.getGobackInfor();
+			return reflectRecord.gobackReflectRecord(gobackpara, isPre) 
+					? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
+		} 
+		if (recordInfor.getAppInfor().getAppType() == ApplicationType.ABSENCE_APPLICATION) {
+			WorkChangeCommonReflectPara absenceInfor = appRecordInfor.getAbsenceInfor();
+			return reflectRecord.absenceReflectRecor(absenceInfor, isPre)
+					? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
+		} 
+		if (recordInfor.getAppInfor().getAppType() == ApplicationType.BREAK_TIME_APPLICATION) {
+			HolidayWorkReflectPara holidayworkData = appRecordInfor.getHolidayworkInfor();
+			return reflectRecord.holidayWorkReflectRecord(holidayworkData, isPre)
+					? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
+		} 
+		if (recordInfor.getAppInfor().getAppType() == ApplicationType.WORK_CHANGE_APPLICATION) {
+			WorkChangeCommonReflectPara workChangeData = appRecordInfor.getWorkchangeInfor();
+			return reflectRecord.workChangeReflectRecord(workChangeData, isPre)
+					? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
+		} 
+		if (recordInfor.getAppInfor().getAppType() == ApplicationType.COMPLEMENT_LEAVE_APPLICATION) {
+			CommonReflectPara absenceLeaveData = appRecordInfor.getAbsenceLeaveAppInfor();
+			CommonReflectPara recruitmentData = appRecordInfor.getRecruitmentInfor();
+			boolean kaf011 = true;
+			if(absenceLeaveData != null) {
+				kaf011 = reflectRecord.absenceLeaveReflectRecord(absenceLeaveData, isPre);
 			}
-		} else {
-			if(recordInfor.getAppInfor().getAppType() == ApplicationType.OVER_TIME_APPLICATION) {		
-				//TODO: chua giao hang lan nay
-				//return reflectRecord.overtimeReflectRecord(appRecordInfor.getOvertimeInfor(), false);
-			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.GO_RETURN_DIRECTLY_APPLICATION) {
-				GobackReflectPara gobackpara = appRecordInfor.getGobackInfor();
-				return  reflectRecord.gobackReflectRecord(gobackpara, false) 
-						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.ABSENCE_APPLICATION) {
-				WorkChangeCommonReflectPara absenceInfor = appRecordInfor.getAbsenceInfor();
-				return reflectRecord.absenceReflectRecor(absenceInfor, false)
-						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.WORK_CHANGE_APPLICATION) {
-				WorkChangeCommonReflectPara workChangeData = appRecordInfor.getWorkchangeInfor();
-				return reflectRecord.workChangeReflectRecord(workChangeData, false)
-						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-			} else if (recordInfor.getAppInfor().getAppType() == ApplicationType.COMPLEMENT_LEAVE_APPLICATION) {
-				CommonReflectPara absenceLeaveData = appRecordInfor.getAbsenceLeaveAppInfor();
-				CommonReflectPara recruitmentData = appRecordInfor.getRecruitmentInfor();
-				boolean kaf011 = true;
-				if(absenceLeaveData != null) {
-					kaf011 = reflectRecord.absenceLeaveReflectRecord(absenceLeaveData, false);
-				}
-				if(recruitmentData != null) {
-					kaf011 = reflectRecord.recruitmentReflectRecord(recruitmentData, false);
-				}
-				return kaf011 ?  ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
+			if(recruitmentData != null) {
+				kaf011 = reflectRecord.recruitmentReflectRecord(recruitmentData, isPre);
 			}
+			return kaf011 ?  ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
 		}
+		
 		
 		return ReflectInformationResult.CHECKFALSE;
 	}

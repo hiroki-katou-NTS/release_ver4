@@ -11,10 +11,8 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerWithResult;
-import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
-import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.InitMode;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.after.DetailAfterApproval_New;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.before.DetailBeforeUpdate;
@@ -127,11 +125,13 @@ public class ApproveHolidayShipmentCommandHandler
 		return result;
 	}
 
+	//KAF011 承認処理
 	private ProcessResult approvalProcessing(String companyID, String appID, String employeeID, Long version,
 			String memo, String appReason, boolean isUpdateReason) {
-		// アルゴリズム「詳細画面登録前の処理」を実行する
-		detailBefUpdate.processBeforeDetailScreenRegistration(companyID, employeeID, GeneralDate.today(), 1, appID,
-				PrePostAtr.PREDICT, version);
+		//EA修正履歴 No.3258
+		//hoatt 2019.03.28
+		// アルゴリズム「排他チェック」を実行する (thực hiện xử lý 「check version」)
+		detailBefUpdate.exclusiveCheck(companyID, appID, version);
 		// アルゴリズム「申請個別のエラーチェック」を実行する không xử lý
 
 		// xử lý đồng thời

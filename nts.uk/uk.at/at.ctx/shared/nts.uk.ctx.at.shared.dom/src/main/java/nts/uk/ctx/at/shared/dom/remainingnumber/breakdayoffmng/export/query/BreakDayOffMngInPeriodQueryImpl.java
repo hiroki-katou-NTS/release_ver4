@@ -268,7 +268,7 @@ public class BreakDayOffMngInPeriodQueryImpl implements BreakDayOffMngInPeriodQu
 			if(detailData.getOccurrentClass() == OccurrenceDigClass.OCCURRENCE) {
 				UnUserOfBreak breakData = detailData.getUnUserOfBreak().get();
 				//期限切れかをチェックする
-				if(breakData.getExpirationDate().before(baseDate)) {
+				if(breakData.getExpirationDate().beforeOrEquals(baseDate)) {
 					if(dayOffSetting == null) {
 						continue;
 					}
