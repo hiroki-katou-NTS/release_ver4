@@ -2,11 +2,13 @@ package nts.uk.ctx.at.record.ac.employment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHisOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistImport;
 import nts.uk.ctx.bs.employee.pub.employment.EmploymentHisExport;
@@ -45,5 +47,17 @@ public class EmploymentHistAdapterImpl implements EmploymentHistAdapter {
 			result.addAll(x.getLstEmpCodeandPeriod().stream().map(c -> new EmploymentHistImport(x.getEmployeeId(), c.getEmploymentCode(), c.getDatePeriod())).collect(Collectors.toList()));
 		});
 		return result;
+	}
+
+	@Override
+	public Map<String, List<EmploymentHisOfEmployeeImport>> getEmploymentBySidsAndEmploymentCds(List<String> sids,
+			List<String> employmentCodes, DatePeriod dateRange) {
+		Map<String, List<EmploymentHisOfEmployee>> mapResult = employmentHistoryPub.getEmploymentBySidsAndEmploymentCds(sids, employmentCodes, dateRange);
+		return mapResult.entrySet().stream()
+				.collect(
+						Collectors.toMap(x -> x.getKey(),
+								x -> x.getValue().stream().map(y -> new EmploymentHisOfEmployeeImport(y.getSId(),
+										y.getStartDate(), y.getEndDate(), y.getEmploymentCD()))
+										.collect(Collectors.toList())));
 	}
 }

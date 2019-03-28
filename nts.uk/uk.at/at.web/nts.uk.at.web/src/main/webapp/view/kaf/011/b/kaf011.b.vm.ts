@@ -56,6 +56,15 @@ module nts.uk.at.view.kaf011.b.viewmodel {
         
         remainDays: KnockoutObservable<number> = ko.observable(null);
         appCur: any = null;
+        kaf011ReasonIsEditable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.editable() ? this.appTypeSet().displayAppReason() != 0 : false;
+            });
+        kdl003BtnEnable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.editable();
+            });
+        recTime1SwitchEnable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.editable();
+            });
         constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
             super(listAppMetadata, currentApp);
             let self = this;
@@ -86,7 +95,6 @@ module nts.uk.at.view.kaf011.b.viewmodel {
                     $('.absWkingTime').ntsError("clear");
                 }
             });
-            
             
         }
 
