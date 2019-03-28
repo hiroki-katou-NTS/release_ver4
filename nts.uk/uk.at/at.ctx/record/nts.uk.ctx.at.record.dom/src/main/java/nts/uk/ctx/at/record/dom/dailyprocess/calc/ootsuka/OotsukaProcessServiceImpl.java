@@ -39,8 +39,6 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 @Stateless
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class OotsukaProcessServiceImpl implements OotsukaProcessService{
-
-	private boolean workTypeChangedFromSpecialHoliday = false;
 	
 	@Override
 	public WorkType getOotsukaWorkType(WorkType workType,
