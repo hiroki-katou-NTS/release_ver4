@@ -37,8 +37,8 @@ public class ReflectAplicationCommmandHandler extends CommandHandler<List<String
 			}	
 			Application_New application = app.get();
 			if((application.getPrePostAtr().equals(PrePostAtr.PREDICT)&&
-						(application.getAppType().equals(ApplicationType.OVER_TIME_APPLICATION)
-						|| application.getAppType().equals(ApplicationType.BREAK_TIME_APPLICATION)))
+						application.getAppType().equals(ApplicationType.OVER_TIME_APPLICATION))
+					|| application.getAppType().equals(ApplicationType.BREAK_TIME_APPLICATION)
 					|| application.getAppType().equals(ApplicationType.GO_RETURN_DIRECTLY_APPLICATION)
 					|| application.getAppType().equals(ApplicationType.WORK_CHANGE_APPLICATION)
 					|| application.getAppType().equals(ApplicationType.ABSENCE_APPLICATION)

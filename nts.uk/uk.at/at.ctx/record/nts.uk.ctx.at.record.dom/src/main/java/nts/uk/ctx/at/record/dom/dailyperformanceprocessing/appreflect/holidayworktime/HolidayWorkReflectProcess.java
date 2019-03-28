@@ -44,9 +44,6 @@ public interface HolidayWorkReflectProcess {
 	 * @param baseDate
 	 * @param mapWorkTimeFrame 休出時間1～10
 	 */
-	public IntegrationOfDaily reflectWorkTimeFrame(String employeeId, 
-			GeneralDate baseDate, 
-			Map<Integer, Integer> mapWorkTimeFrame, 
-			IntegrationOfDaily dailyData);
+	public IntegrationOfDaily reflectWorkTimeFrame(HolidayWorktimePara holidayWorkPara, boolean isPre, IntegrationOfDaily daily);
 
 }

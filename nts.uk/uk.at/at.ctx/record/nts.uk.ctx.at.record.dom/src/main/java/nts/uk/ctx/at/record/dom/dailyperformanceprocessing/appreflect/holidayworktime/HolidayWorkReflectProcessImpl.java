@@ -60,12 +60,12 @@ public class HolidayWorkReflectProcessImpl implements HolidayWorkReflectProcess{
 	}
 
 	@Override
-	public IntegrationOfDaily reflectWorkTimeFrame(String employeeId, 
-			GeneralDate baseDate, 
-			Map<Integer, Integer> mapWorkTimeFrame, 
-			IntegrationOfDaily dailyData) {
+	public IntegrationOfDaily reflectWorkTimeFrame(HolidayWorktimePara holidayWorkPara, boolean isPre, IntegrationOfDaily daily) {
+		if(isPre && !holidayWorkPara.isHolidayWorkReflectFlg()) {
+			return daily;
+		}
 		Map<Integer, Integer> tmp = new HashMap<>();
-		for(Map.Entry<Integer,Integer> entry : mapWorkTimeFrame.entrySet()){
+		for(Map.Entry<Integer,Integer> entry : holidayWorkPara.getHolidayWorkPara().getMapWorkTimeFrame().entrySet()){
 			//INPUT．休出時間のループ中の番をチェックする
 			//INPUT．残業時間のループ中の番を、残業時間(反映用)に追加する
 			if(entry.getValue() >= 0) {
@@ -73,7 +73,7 @@ public class HolidayWorkReflectProcessImpl implements HolidayWorkReflectProcess{
 			}
 		}
 		//事前休出時間の反映
-		return workUpdate.updateWorkTimeFrame(employeeId, baseDate, tmp, true, dailyData, false);
+		return workUpdate.updateWorkTimeFrame(holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate(), tmp, isPre, daily, false);
 		
 	}
 
