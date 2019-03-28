@@ -758,12 +758,20 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 					return ManageReGetClass.cantCalc2(workType, integrationOfDaily, personalInfo, holidayCalcMethodSet,
 							regularAddSetting, flexAddSetting, hourlyPaymentAddSetting, illegularAddSetting, leaveLate,
 							Optional.empty());
+				
+				//大塚用勤務種類チェック処理の前後で勤務種類が変更になったか
+				final boolean isSpecialHoliday = workType.get().getDailyWork().isOneOrHalfDaySpecHoliday();
+				boolean workTypeChangedFlagForOOtsuka = ootsukaProcessService.decisionOotsukaMode(workType.get(), 
+																								  ootsukaFixedWorkSet, 
+																								  oneRange.getAttendanceLeavingWork(), 
+																								  fixedWorkSetting.get().getCommonSetting().getHolidayCalculation());
 				/* 大塚モード */
 				workType = Optional.of(ootsukaProcessService.getOotsukaWorkType(workType.get(), ootsukaFixedWorkSet,
 						oneRange.getAttendanceLeavingWork(),
 						fixedWorkSetting.get().getCommonSetting().getHolidayCalculation()));
 
-				if (ootsukaProcessService.getWorkTypeChangedFromSpecialHoliday()) {
+				//大塚用　勤務種類が変更になった時に
+				if (workTypeChangedFlagForOOtsuka && isSpecialHoliday) {
 					CalAttrOfDailyPerformance optionalInstance = calcSetinIntegre
 							.reCreate(AutoCalAtrOvertime.APPLYMANUALLYENTER);
 					calcSetinIntegre = optionalInstance;

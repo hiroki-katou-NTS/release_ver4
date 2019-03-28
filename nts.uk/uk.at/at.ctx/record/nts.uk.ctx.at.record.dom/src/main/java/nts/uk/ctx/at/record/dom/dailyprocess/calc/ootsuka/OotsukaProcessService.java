@@ -24,6 +24,4 @@ public interface OotsukaProcessService {
 	//大塚モード処理(日別実績の計算)
 	//&大塚モード処理(計算項目を置き換え)
 	public IntegrationOfDaily integrationConverter(IntegrationOfDaily fromStamp, IntegrationOfDaily fromPcLogInfo);
-	
-	public boolean getWorkTypeChangedFromSpecialHoliday();
 }

@@ -60,8 +60,6 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 	 */
 	private WorkType createOotsukaWorkType(WorkType workType) {
 		
-		changeWorkTypeFlag(workType);
-		
 		if(workType.getDailyWork().getWorkTypeUnit().isOneDay()) {			
 			val workTypeSet = workType.getWorkTypeSetByAtr(WorkAtr.OneDay);
 		
@@ -151,14 +149,7 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 		}
 	}
 
-	/**
-	 * 内部で保持している変更前の勤務種類が何だったかフラグの変更
-	 * @param workType
-	 */
-	private void changeWorkTypeFlag(WorkType workType) {
-		if(workType.getDailyWork().isOneOrHalfDaySpecHoliday())
-			workTypeChangedFromSpecialHoliday = true;
-	}
+
 
 	/**
 	 * 大塚モード判断処理
@@ -303,10 +294,5 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 			map.put(ot.getOverWorkFrameNo(), ot);
 		}
 		return map;
-	}
-
-	@Override
-	public boolean getWorkTypeChangedFromSpecialHoliday() {
-		return this.workTypeChangedFromSpecialHoliday;
 	}
 }
