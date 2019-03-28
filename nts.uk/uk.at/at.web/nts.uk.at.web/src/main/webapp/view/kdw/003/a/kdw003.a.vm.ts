@@ -3488,7 +3488,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         //                            nts.uk.request.jump("/view/kaer);
                         //                            break;
 
-                        case 15:
+                        case 14:
                             //KAF011-振休振出申請
                             nts.uk.request.jump("/view/kaf/011/a/index.xhtml", transfer);
                             break;
