@@ -307,7 +307,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 self.shareObject().mapDataShare(dataShare.initParam, dataShare.extractionParam, dataShare.dataSPR);
                 self.showDateRange(_.isEmpty(self.shareObject().changePeriodAtr) ? true : self.shareObject().changePeriodAtr);
                 self.transitionDesScreen = _.isEmpty(self.shareObject().transitionDesScreen) ? false : true;
-                self.closureId = _.isEmpty(self.shareObject().targetClosure) ? null : self.shareObject().targetClosure;
+                self.closureId = (self.shareObject().targetClosure != undefined && self.shareObject().targetClosure != null) ? self.shareObject().targetClosure : null;
             }
 
             //            self.flexShortage.subscribe((val:any) => {
@@ -4655,40 +4655,40 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         mapDataShare(dataInit: any, dataExtract: any, dataSPR: any) {
             var self = this;
             if (dataInit != undefined) {
-                this.changePeriodAtr = (dataInit.changePeriodAtr == null || dataInit.changePeriodAtr == undefined) ? true : dataInit.changePeriodAtr;
-                this.errorRefStartAtr = dataInit.errorRefStartAtr;
-                this.initClock = dataInit.initClock == undefined ? null : new SPRTime(dataInit.initClock);
-                this.lstEmployeeShare = dataInit.lstEmployee;
-                this.screenMode = dataInit.screenMode;
-                this.targetClosure = dataInit.targetClosure;
-                this.transitionDesScreen = dataInit.transitionDesScreen;
-                if (this.screenMode == ScreenMode.APPROVAL) {
+                self.changePeriodAtr = (dataInit.changePeriodAtr == null || dataInit.changePeriodAtr == undefined) ? true : dataInit.changePeriodAtr;
+                self.errorRefStartAtr = dataInit.errorRefStartAtr;
+                self.initClock = dataInit.initClock == undefined ? null : new SPRTime(dataInit.initClock);
+                self.lstEmployeeShare = dataInit.lstEmployee;
+                self.screenMode = dataInit.screenMode;
+                self.targetClosure = dataInit.targetClosure;
+                self.transitionDesScreen = dataInit.transitionDesScreen;
+                if (self.screenMode == ScreenMode.APPROVAL) {
                     $("#ccg001").hide();
                 }
             }
             if (dataExtract != undefined) {
-                this.dateTarget = moment(dataExtract.dateTarget, "YYYY/MM/DD");
-                this.displayFormat = dataExtract.displayFormat;
-                this.individualTarget = dataExtract.individualTarget;
-                this.lstExtractedEmployee = null//dataExtract.lstExtractedEmployee;
-                this.startDate = moment(dataExtract.startDate, "YYYY/MM/DD");
-                this.endDate = moment(dataExtract.endDate, "YYYY/MM/DD");
+                self.dateTarget = moment(dataExtract.dateTarget, "YYYY/MM/DD");
+                self.displayFormat = dataExtract.displayFormat;
+                self.individualTarget = dataExtract.individualTarget;
+                self.lstExtractedEmployee = null//dataExtract.lstExtractedEmployee;
+                self.startDate = moment(dataExtract.startDate, "YYYY/MM/DD");
+                self.endDate = moment(dataExtract.endDate, "YYYY/MM/DD");
             }
 
             if (dataSPR != undefined) {
-                this.changePeriodAtr = true;
-                this.errorRefStartAtr = true;
-                this.initClock = new SPRTime({ dateSpr: dataSPR.dateTarget, canEdit: true, employeeId: dataSPR.employeeId, liveTime: dataSPR.liveTime, goOut: dataSPR.goOut });
-                this.lstEmployeeShare = [];
-                this.screenMode = dataSPR.screenMode;
-                this.targetClosure = null;
-                this.transitionDesScreen = null;
-                this.dateTarget = moment(dataSPR.dateTarget, "YYYY/MM/DD");
-                this.displayFormat = dataExtract.displayFormat;
-                this.individualTarget = null;
-                this.lstExtractedEmployee = [];
-                this.startDate = moment(dataSPR.dateTarget, "YYYY/MM/DD");
-                this.endDate = moment(dataSPR.dateTarget, "YYYY/MM/DD");
+                self.changePeriodAtr = true;
+                self.errorRefStartAtr = true;
+                self.initClock = new SPRTime({ dateSpr: dataSPR.dateTarget, canEdit: true, employeeId: dataSPR.employeeId, liveTime: dataSPR.liveTime, goOut: dataSPR.goOut });
+                self.lstEmployeeShare = [];
+                self.screenMode = dataSPR.screenMode;
+                self.targetClosure = null;
+                self.transitionDesScreen = null;
+                self.dateTarget = moment(dataSPR.dateTarget, "YYYY/MM/DD");
+                self.displayFormat = dataExtract.displayFormat;
+                self.individualTarget = null;
+                self.lstExtractedEmployee = [];
+                self.startDate = moment(dataSPR.dateTarget, "YYYY/MM/DD");
+                self.endDate = moment(dataSPR.dateTarget, "YYYY/MM/DD");
             }
         }
     }
