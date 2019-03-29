@@ -7,6 +7,7 @@ module nts.uk.com.view.kwr002.a {
     import setShared = nts.uk.ui.windows.setShared;
     import getShared = nts.uk.ui.windows.getShared;
     import getMsg = nts.uk.resource.getMessage;
+    import isNullOrUndefined = nts.uk.util.isNullOrUndefined;
 
     export module viewModel {
         export class ScreenModel {
@@ -409,7 +410,9 @@ module nts.uk.com.view.kwr002.a {
                 let employeeIds: string[] = [];
                 let employee: Employee[] = [];
                 for (let employeeCode of employeeCodes) {
-                    employee.push(self.findEmployeeByCode(employeeCode));
+                    let emp = self.findEmployeeByCode(employeeCode);
+                    if (isNullOrUndefined(emp)) continue;
+                    employee.push(emp);
                 }
                 return employee;
             }
