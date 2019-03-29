@@ -63,6 +63,7 @@ import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootInsExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootSttMonthExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.ApprovalStatusExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.Request133Export;
+import nts.uk.ctx.workflow.pub.resultrecord.export.Request533Export;
 import nts.uk.ctx.workflow.pub.resultrecord.export.RouteSituationExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.RouteSituationMonthExport;
 import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
@@ -439,12 +440,15 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	}
 
 	@Override
-	public List<AppRootSttMonthExport> getAppRootStatusByEmpsMonth(
+	public Request533Export getAppRootStatusByEmpsMonth(
 			List<EmpPerformMonthParam> empPerformMonthParamLst) throws BusinessException{
 		String companyID = AppContexts.user().companyId();
 		List<AppRootSttMonthExport> appRootSttMonthLst = new ArrayList<>();
+		boolean errorFlg = false;
+		String errorMsgID = "";
+		List<String> errorEmpLst = new ArrayList<>();
 		// INPUT．対象者社員IDの先頭から最後へループ
-		empPerformMonthParamLst.forEach(employee -> {
+		for(EmpPerformMonthParam employee : empPerformMonthParamLst){
 			// 対象者と期間から承認ルート中間データを取得する
 			List<AppRootInstancePeriod> appRootInstancePeriodLst = appRootInstanceService.getAppRootInstanceByEmpPeriod(
 					Arrays.asList(employee.getEmployeeID()), 
@@ -454,11 +458,18 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 			AppRootInstance appRootInstance = appRootInstanceService.getAppRootInstanceByDate(employee.getBaseDate(), 
 					appRootInstancePeriodLst.stream().filter(x -> x.getEmployeeID().equals(employee.getEmployeeID())).findAny().get().getAppRootInstanceLst());
 			if(appRootInstance==null){
-				throw new BusinessException("Msg_1430", "承認者");
+				errorFlg = true;
+				errorMsgID = "Msg_1430";
+				errorEmpLst.add(employee.getEmployeeID());
+				continue;
 			}
 			// ドメインモデル「就業実績確認状態」を取得する
-			AppRootConfirm appRootConfirm = appRootInstanceService.getAppRootCFByMonth(companyID, employee.getEmployeeID(), employee.getYearMonth(), 
+			Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpMonth(companyID, employee.getEmployeeID(), employee.getYearMonth(), 
 					employee.getClosureID(), employee.getClosureDate(), RecordRootType.CONFIRM_WORK_BY_MONTH);
+			if(!opAppRootConfirm.isPresent()){
+				continue;
+			}
+			AppRootConfirm appRootConfirm = opAppRootConfirm.get();
 			// 中間データから承認ルートインスタンスに変換する
 			ApprovalRootState approvalRootState = appRootInstanceService.convertFromAppRootInstance(appRootInstance, appRootConfirm);
 			// 承認ルート状況を取得する
@@ -468,8 +479,8 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 					approvalRootStateStatusLst.get(0),
 					employee.getYearMonth(), employee.getClosureID(), employee.getClosureDate()));
 			}
-		});
-		return appRootSttMonthLst;
+		}
+		return new Request533Export(appRootSttMonthLst, errorFlg, errorMsgID, errorEmpLst);
 	}
 
 	@Override
