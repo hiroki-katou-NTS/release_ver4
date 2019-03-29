@@ -953,7 +953,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 columns: self.headersGrid(),
                 features: self.getGridFeatures(),
                 ntsFeatures: self.getNtsFeatures(),
-                ntsControls: self.getNtsControls(self.initMode())
+                ntsControls: self.getNtsControls(self.initMode(), self.closureId())
             }).create();
             self.showHeaderNumber.valueHasMutated();
             self.displayNumberZero1();
@@ -1276,7 +1276,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
         /**
          * Create NtsControls
          */
-        getNtsControls(initMode: number): Array<any> {
+        getNtsControls(initMode: number, closureId: any): Array<any> {
             let self = this;
             let ntsControls: Array<any> = [
                 { name: 'Checkbox', options: { value: 1, text: '' }, optionsValue: 'value', optionsText: 'text', controlType: 'CheckBox', enable: true },
@@ -1287,7 +1287,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                         let rowSelect = _.find(source, (value: any) => {
                             return value.id == data.id;
                         })
-                        let initParam = new DPCorrectionInitParam(ScreenMode.NORMAL, [rowSelect.employeeId], false, false, null, '/view/kmw/003/a/index.xhtml?initmode='+ initMode);
+                        let initParam = new DPCorrectionInitParam(ScreenMode.NORMAL, [rowSelect.employeeId], false, false, closureId, '/view/kmw/003/a/index.xhtml?initmode='+ initMode);
                         let extractionParam = new DPCorrectionExtractionParam(DPCorrectionDisplayFormat.INDIVIDUAl, rowSelect.startDate, rowSelect.endDate, [rowSelect.employeeId], rowSelect.employeeId);
                         nts.uk.request.jump("/view/kdw/003/a/index.xhtml", { initParam: initParam, extractionParam: extractionParam });
                     }
@@ -1921,7 +1921,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
             self.lstEmployee = lstEmployee;
             self.errorRefStartAtr = errorRefStartAtr;
             self.changePeriodAtr = changePeriodAtr;
-            self.targetClosue = targetClosue;
+            self.targetClosure = targetClosue;
             self.transitionDesScreen = transitionDesScreen;
         }
     }
