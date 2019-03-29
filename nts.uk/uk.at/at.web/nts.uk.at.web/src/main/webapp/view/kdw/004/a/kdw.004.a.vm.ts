@@ -160,7 +160,7 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                     //期間を変更する
                     changePeriodAtr: true,
                     //処理締め
-                    targetClosue: self.selectedClosure(),
+                    targetClosure: self.selectedClosure(),
                     //Optional
                     //打刻初期値
                     initClock: null,
@@ -196,7 +196,7 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                     // fix bug 101435
                     //期間を変更する
                     changePeriodAtr: true,
-                    targetClosue: self.selectedClosure(),
+                    targetClosure: self.selectedClosure(),
                     initClock: undefined,
                     transitionDesScreen: '/view/kdw/004/a/index.xhtml'
                 },
@@ -230,7 +230,7 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                     //期間を変更する
                     changePeriodAtr: true,
                     //処理締め
-                    targetClosue: self.selectedClosure(),
+                    targetClosure: self.selectedClosure(),
                     //Optional
                     //打刻初期値
                     initClock: null,
