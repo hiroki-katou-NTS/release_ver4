@@ -12,8 +12,10 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApproverEmployeeState;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
+import nts.uk.ctx.at.record.dom.workrecord.managectualsituation.ApprovalStatus;
 import nts.uk.ctx.at.shared.dom.adapter.dailyperformance.AppEmpStatusImport;
 import nts.uk.ctx.at.shared.dom.adapter.dailyperformance.DailyPerformanceAdapter;
 import nts.uk.ctx.at.shared.dom.adapter.dailyperformance.RouteSituationImport;
@@ -105,7 +107,7 @@ public class KTG001QueryProcessor {
 		routeLst.addAll(appEmpStatusImport.getRouteSituationLst());
 		//create Map＜社員ID、List＜年月日＞＞
 		Map<String, List<GeneralDate>> mapEmpYMD = routeLst.parallelStream().filter(
-				c -> (c.getApprovalStatus().isPresent() && c.getApprovalStatus().get().getApprovalAction() == 1))
+				c -> (c.getApprovalStatus().isPresent() && c.getApprovalStatus().get().getApprovalAction() == ApprovalActionByEmp.APPROVAL_REQUIRE.value && c.getApproverEmpState() == ApproverEmployeeState.PHASE_DURING.value))
 				.collect(Collectors.groupingBy(RouteSituationImport::getEmployeeID, Collectors.mapping(RouteSituationImport::getDate, Collectors.toList())));
 		
 		// 日の本人確認を取得する
