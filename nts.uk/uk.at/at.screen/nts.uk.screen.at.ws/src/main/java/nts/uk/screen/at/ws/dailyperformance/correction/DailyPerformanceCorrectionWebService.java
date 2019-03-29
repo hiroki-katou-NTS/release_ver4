@@ -169,7 +169,9 @@ public class DailyPerformanceCorrectionWebService {
 	@POST
 	@Path("getErrors")
 	public List<ErrorReferenceDto> getError(DPParams params ) {
-		return this.processor.getListErrorRefer(params.dateRange, params.lstEmployee);
+		HttpSession session = httpRequest.getSession();
+		Integer closureId = (Integer) session.getAttribute("closureId");
+		return this.processor.getListErrorRefer(params.dateRange, params.lstEmployee, closureId);
 	}
 	
 	@POST
