@@ -412,13 +412,13 @@ public class DefaultBasicScheduleService implements BasicScheduleService {
 	 * @param employeeId
 	 * @param day
 	 * @param workTypeCd
-	 * @param closeAtr
-	 * @param optWorkingConditionItem
+	 * @param tempAbsenceFrNo
+	 * @param exeId
 	 * @return
 	 */
 	@Override
 	public String getWorktypeCodeLeaveHolidayType(String companyId, String employeeId, GeneralDate day,
-			String workTypeCd, int closeAtr, Optional<WorkingConditionItem> optWorkingConditionItem) {
+			String workTypeCd, int tempAbsenceFrNo, Optional<WorkingConditionItem> optWorkingConditionItem) {
 
 		// アルゴリズム「1日半日出勤・1日休日系の判定」を実行し、「出勤休日区分」を取得する
 		WorkStyle workStyle = this.checkWorkDay(workTypeCd);
@@ -433,7 +433,7 @@ public class DefaultBasicScheduleService implements BasicScheduleService {
 
 		if (this.checkHolidayWork(worktype.getDailyWork())) {
 			// 休日出勤
-			if(!optWorkingConditionItem.isPresent()){
+			if(!optWorkingConditionItem.isPresent() || optWorkingConditionItem.get().getWorkCategory() == null){
 				// 取得失敗
 				return workTypeCd;
 			}
@@ -445,6 +445,40 @@ public class DefaultBasicScheduleService implements BasicScheduleService {
 			
 		} else {
 			// 休日出勤でない
+			// đoạn này trong EAP k viết rõ
+			int closeAtr = 0;
+			String wTypeCd = null;
+			 // convert TEMP_ABS_FRAME_NO -> CLOSE_ATR
+	        switch (tempAbsenceFrNo) {
+	        case 1:
+				List<WorkType> lstWorkType = this.workTypeRepo
+						.findByCompanyIdAndLeaveAbsence(companyId);
+	            if(lstWorkType.isEmpty()){
+	                break;
+	            }
+	            wTypeCd = lstWorkType.get(FIRST_DATA).getWorkTypeCode().v();
+	            break;
+	        case 2:
+	            closeAtr = 0;
+	            break;
+	        case 3:
+	            closeAtr = 1;
+	            break;
+	        case 4:
+	            closeAtr = 2;
+	            break;
+	        case 5:
+	            closeAtr = 3;
+	            break;
+	        default:
+	            // 6,7,8,9,10
+	            closeAtr = 4;
+	            break;
+	        }
+            if (wTypeCd != null) {
+                return wTypeCd;
+            }
+	        
 			// 休業区分の勤務種類コードを取得する
 			List<WorkTypeSet> lstWorkTypeSet = this.workTypeRepo.findWorkTypeSetCloseAtrDeprecateAtr(companyId,
 					closeAtr, DeprecateClassification.NotDeprecated.value);

@@ -51,7 +51,7 @@ public interface BasicScheduleService {
 	 * 休業休職の勤務種類コードを返す
 	 */
 	String getWorktypeCodeLeaveHolidayType(String companyId, String employeeId, GeneralDate day,
-			String workTypeCd, int closeAtr, Optional<WorkingConditionItem> optWorkingConditionItem);
+			String workTypeCd, int tempAbsenceFrNo, Optional<WorkingConditionItem> optWorkingConditionItem);
 	
 	/**
 	 * Check needed of Work Time setting
