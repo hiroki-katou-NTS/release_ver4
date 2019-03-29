@@ -632,7 +632,7 @@ public class DailyPerformanceCorrectionProcessor {
 		List<DPHideControlCell> lstCellHideControl = new ArrayList<>();
 		for (DPDataDto data : screenDto.getLstData()) {
 			//filter Date in Period
-			if(!checkDataInClosing(data, mapClosingEmpResult)) {
+			if(!checkDataInClosing(Pair.of(data.getEmployeeId(), data.getDate()), mapClosingEmpResult)) {
 				continue;
 			}
 			boolean textColorSpr = false;
@@ -1304,7 +1304,7 @@ public class DailyPerformanceCorrectionProcessor {
 	}
 
 	public List<ErrorReferenceDto> getListErrorRefer(DateRange dateRange,
-			List<DailyPerformanceEmployeeDto> lstEmployee) {
+			List<DailyPerformanceEmployeeDto> lstEmployee, Integer closureId) {
 		List<ErrorReferenceDto> lstErrorRefer = new ArrayList<>();
 		String companyId = AppContexts.user().companyId();
 		List<DPErrorDto> lstError = this.repo.getListDPError(dateRange,
@@ -1338,7 +1338,7 @@ public class DailyPerformanceCorrectionProcessor {
 												.containsKey(value.getEmployeeId() + "|" + value.getProcessingDate())
 														? appMapDateSid.get(
 																value.getEmployeeId() + "|" + value.getProcessingDate())
-														: ""));
+														: "", false));
 								rowId++;
 							}
 						} else {
@@ -1368,7 +1368,7 @@ public class DailyPerformanceCorrectionProcessor {
 			List<DPItemValue> dpItems = errorMonthProcessor.getErrorMonth(lstEmployee.stream().map(x -> x.getId()).collect(Collectors.toSet()), dateRange);
 			for(DPItemValue value : dpItems) {
 				lstErrorRefer.add(new ErrorReferenceDto(String.valueOf(rowId), value.getEmployeeId(),
-						value.getDate(), "", value.getMessage()));
+						value.getDate(), "", value.getMessage(), true));
 				rowId++;
 			}
 			
@@ -1383,6 +1383,20 @@ public class DailyPerformanceCorrectionProcessor {
 					}
 				}
 			}
+			
+	   Map<String, List<EmploymentHisOfEmployeeImport>> mapClosingEmpResult = checkClosingEmployee.checkClosingEmployee(companyId, lstEmployee.stream().map(x -> x.getId()).distinct().collect(Collectors.toList()), 
+					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), closureId);
+			
+		lstErrorRefer = lstErrorRefer.stream().filter(x -> {
+				if(x.getItemMonth().booleanValue()) {
+					return mapClosingEmpResult.containsKey(x.getEmployeeId());
+				}else {
+					return checkDataInClosing(Pair.of(x.getEmployeeId(), x.getDate()), mapClosingEmpResult);
+				}
+				
+			}).collect(Collectors.toList());
+			
+			
 		return lstErrorRefer;
 	}
 
@@ -1966,15 +1980,15 @@ public class DailyPerformanceCorrectionProcessor {
 		return query;
 	}
 	
-	public boolean checkDataInClosing(DPDataDto data, Map<String, List<EmploymentHisOfEmployeeImport>> mapClosingEmpResult) {
-		val empWithListDate = mapClosingEmpResult.get(data.getEmployeeId());
+	public boolean checkDataInClosing( Pair<String, GeneralDate> pairEmpDate, Map<String, List<EmploymentHisOfEmployeeImport>> mapClosingEmpResult) {
+		val empWithListDate = mapClosingEmpResult.get(pairEmpDate.getLeft());
 		if (empWithListDate == null)
 			return false;
 		List<DatePeriod> lstDatePeriod = empWithListDate.stream()
 				.map(x -> new DatePeriod(x.getStartDate(), x.getEndDate())).collect(Collectors.toList());
 
 		val check = lstDatePeriod.stream()
-				.filter(x -> x.start().beforeOrEquals(data.getDate()) && x.end().afterOrEquals(data.getDate()))
+				.filter(x -> x.start().beforeOrEquals(pairEmpDate.getRight()) && x.end().afterOrEquals(pairEmpDate.getRight()))
 				.findFirst();
 		return check.isPresent();
 	}

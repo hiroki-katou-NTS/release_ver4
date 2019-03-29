@@ -284,7 +284,7 @@ public class DailyPerformanceErrorCodeProcessor {
 		Map<String, ItemValue> itemValueMap = new HashMap<>();
 		for (DPDataDto data : screenDto.getLstData()) {
 			//filter Date in Period
-			if(!dailyProcessor.checkDataInClosing(data, mapClosingEmpResult)) {
+			if(!dailyProcessor.checkDataInClosing(Pair.of(data.getEmployeeId(), data.getDate()), mapClosingEmpResult)) {
 				continue;
 			}
 			
