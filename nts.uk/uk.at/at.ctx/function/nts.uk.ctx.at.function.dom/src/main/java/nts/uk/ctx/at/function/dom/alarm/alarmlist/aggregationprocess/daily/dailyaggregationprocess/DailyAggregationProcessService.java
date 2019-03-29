@@ -356,7 +356,7 @@ public class DailyAggregationProcessService {
 							});
 						}
 						if(!no2.isEmpty() && rw.getWorkTimeCode() != null) {
-							if(workTimes.containsKey(rw.getWorkTimeCode())) {
+							if(!workTimes.containsKey(rw.getWorkTimeCode())) {
 								String KAL010_9 = TextResource.localize("KAL010_9", rw.getWorkTimeCode());
 								no2.stream().forEach(fixed -> {
 									listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(ErAlConstant.DATE_FORMAT),
