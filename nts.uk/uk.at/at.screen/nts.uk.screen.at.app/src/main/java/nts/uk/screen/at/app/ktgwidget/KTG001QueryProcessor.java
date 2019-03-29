@@ -1,3 +1,4 @@
+
 package nts.uk.screen.at.app.ktgwidget;
 
 import java.util.ArrayList;
@@ -102,16 +103,20 @@ public class KTG001QueryProcessor {
 		AppEmpStatusImport appEmpStatusImport = dailyPerformanceAdapter.appEmpStatusExport(employeeID, period, 1);
 		// 取得したデータから、承認すべき社員と年月日リストを抽出する
 		routeLst.addAll(appEmpStatusImport.getRouteSituationLst());
-		Map<String, List<RouteSituationImport>> tg = routeLst.parallelStream().filter(
+		//create Map＜社員ID、List＜年月日＞＞
+		Map<String, List<GeneralDate>> mapEmpYMD = routeLst.parallelStream().filter(
 				c -> (c.getApprovalStatus().isPresent() && c.getApprovalStatus().get().getApprovalAction() == 1))
-				.collect(Collectors.groupingBy(c -> c.getEmployeeID()));
+				.collect(Collectors.groupingBy(RouteSituationImport::getEmployeeID, Collectors.mapping(RouteSituationImport::getDate, Collectors.toList())));
+		
 		// 日の本人確認を取得する
-		List<Identification> listIdent = identificationRepository.findByListEmployeeID(new ArrayList<>(tg.keySet()), period.start(), period.end());
-		for(Identification obj : listIdent){
-			if(tg.containsKey(obj.getEmployeeId())){
-				List<RouteSituationImport> listValue = tg.get(obj.getEmployeeId());
-				Optional<RouteSituationImport> opt = listValue.parallelStream().filter(item -> item.getDate().equals(obj.getProcessingYmd())).findFirst();
-				if(opt.isPresent()){
+		List<Identification> listIdent = identificationRepository.findByListEmployeeID(new ArrayList<>(mapEmpYMD.keySet()), period.start(), period.end());
+		
+		for(Identification obj : listIdent) {
+			if(mapEmpYMD.containsKey(obj.getEmployeeId())){
+				List<GeneralDate> ymd = mapEmpYMD.get(obj.getEmployeeId()).stream()
+											.filter(c -> c.equals(obj.getProcessingYmd()))
+											.collect(Collectors.toList());
+				if (ymd.size() >= 1) {
 					return true;
 				}
 			}
