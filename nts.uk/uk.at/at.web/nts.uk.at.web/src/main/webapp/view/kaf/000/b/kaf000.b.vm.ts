@@ -336,7 +336,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             var screenModel: any = {};
 //            $.get('/nts.uk.at.web/view/kaf/000/b/index2.xhtml').done(html => {
 //                    console.log(html);
-            let html = self.htmlInner(currentApp);
+            let html = shrvm.model.Template.TEMPKAF000B;
 //            let htmlN = html.replace(/\<\?xml version='1\.0' encoding='UTF\-8' \?\>/, "");
 //            let htmlF = htmlN.replace("<!DOCTYPE html>", "");
             document.querySelector('#master-content').innerHTML = html;
@@ -361,21 +361,6 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                 });
             });
 //                });
-        }
-        htmlInner(currentApp){
-            if (currentApp.appType == 0) {
-                return shrvm.model.Template.view5b;
-            } else if (currentApp.appType == 1) {
-                return shrvm.model.Template.view6b;
-            } else if (currentApp.appType == 2) {
-                return shrvm.model.Template.view7b;
-            } else if (currentApp.appType == 4) {
-                return shrvm.model.Template.view9b;
-            } else if (currentApp.appType == 6) {
-                return shrvm.model.Template.view10b;
-            } else if (currentApp.appType == 10) {
-                return shrvm.model.Template.view11b;
-            }
         }
         getScreenModel(listAppMeta: any,currentApp:any){
             if (currentApp.appType == 7) {

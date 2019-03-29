@@ -230,12 +230,12 @@
 				</div>
 			</div>
 		</div>
-		<div class="valign-center control-group" data-bind ="if: screenModeNew()">
+	<!-- 	<div class="valign-center control-group" data-bind ="if: screenModeNew()">
 			<div class="table">
 				<div class="cell valign-top cm-column2">
 				<div class="lblTitle"></div>
 				</div>
-				<!-- <div tabindex="12" class="row-cell-margin right-content"
+				<div tabindex="12" class="row-cell-margin right-content"
 						data-bind="ntsSwitchButton: {name: '#{i18n.getText('KAF010_3')}',
 										options:ko.observableArray([
 								                { goCode1: 1, goName1: '#{i18n.getText('KAF009_16')}' },
@@ -255,10 +255,10 @@
 										optionsValue: 'backCode1',
 										optionsText: 'backName1',
 										value: backSelected1}">
-				</div> -->
+				</div>
 			</div>
 		</div>
-		<!-- Man chi tiet -->
+		Man chi tiet
 		<div class="valign-center control-group"
 			data-bind="if: !screenModeNew()">
 			<div class="table" style = "margin-bottom: 9px;">
@@ -271,7 +271,7 @@
 				<lable class="label fix-margin-left"
 					data-bind="text: backSelected1()==0 ? '#{i18n.getText('KAF009_19')}' : '#{i18n.getText('KAF009_18')}'"></lable>
 			</div>
-		</div>
+		</div> -->
 		<!--勤務時間 2-->
 		<div data-bind ="visible : false" >
 			<div class="valign-center control-group" data-bind="if: useMulti()">
