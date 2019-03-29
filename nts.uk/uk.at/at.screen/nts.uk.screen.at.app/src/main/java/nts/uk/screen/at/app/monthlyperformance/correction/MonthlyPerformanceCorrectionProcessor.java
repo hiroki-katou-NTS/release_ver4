@@ -40,15 +40,11 @@ import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQue
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryR;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootOfEmpMonthImport;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootSituationMonth;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootSttMonthEmpImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.EmpPerformMonthParamImport;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalActionByEmpl;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApproverEmployeeState;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ReleasedProprietyDivision;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthly;
@@ -86,6 +82,9 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.ctx.at.shared.pub.workrule.closure.PresentClosingPeriodExport;
 import nts.uk.ctx.at.shared.pub.workrule.closure.ShClosurePub;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceScreenRepo;
+import nts.uk.screen.at.app.monthlyperformance.CheckDailyPerError;
+import nts.uk.screen.at.app.monthlyperformance.CheckEmpEralOuput;
+import nts.uk.screen.at.app.monthlyperformance.TypeErrorAlarm;
 //import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.ActualTime;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.ClosureInfoOuput;
@@ -182,6 +181,9 @@ public class MonthlyPerformanceCorrectionProcessor {
 
 	@Inject
 	private ConfirmStatusMonthly confirmStatusMonthly;
+	
+	@Inject
+	private CheckDailyPerError checkDailyPerError;
 
 	
 	private static final String STATE_DISABLE = "mgrid-disable";
@@ -823,13 +825,13 @@ public class MonthlyPerformanceCorrectionProcessor {
 			listCss.add("daily-confirm-color");
 			if (monthlyPerformaceLockStatus != null) {
 				if (monthlyPerformaceLockStatus.getMonthlyResultConfirm() == LockStatus.LOCK) {
-					dailyConfirm = "！";
+					dailyConfirm = "未";
 					// mau cua kiban chua dap ung duoc nen dang tu set mau
 					// set color for cell dailyConfirm
 					listCss.add("color-cell-un-approved");
 					screenDto.setListStateCell("dailyconfirm", employeeId, listCss);
 				} else {
-					dailyConfirm = "〇";
+					dailyConfirm = "済";
 					// mau cua kiban chua dap ung duoc nen dang tu set mau
 					// set color for cell dailyConfirm
 					listCss.add("color-cell-approved");
@@ -1087,15 +1089,30 @@ public class MonthlyPerformanceCorrectionProcessor {
 		// RequestList211
 		List<AffCompanyHistImport> listAffCompanyHistImport = syCompanyRecordAdapter
 				.getAffCompanyHistByEmployee(employeeIds, datePeriodClosure);
-		
+		List<CheckEmpEralOuput> listCheckEmpEralOuput = checkDailyPerError.checkDailyPerError(employeeIds, DatePeriod.daysFirstToLastIn(YearMonth.of(yearMonth)), listAffCompanyHistImport);
 		//取得した情報を元に月別実績を画面に表示する
 		//NOTE: ※取得した「会社所属履歴」をもとに、菜食していない期間の実績は表示しないでください
 		List<MPDataDto> listData =  new ArrayList<>();
 		screenDto.getLstData().forEach(x -> {
 			Optional<AffCompanyHistImport> optMonthlyPerformanceEmployeeDto = listAffCompanyHistImport.stream()
 					.filter(y -> x.getEmployeeId().equals(y.getEmployeeId())).findFirst();
+			
 			if (optMonthlyPerformanceEmployeeDto.isPresent()
 					&& optMonthlyPerformanceEmployeeDto.get().getLstAffComHistItem().size() > 0)
+				for(CheckEmpEralOuput checkEmpEralOuput: listCheckEmpEralOuput) {
+					if(x.getEmployeeId().equals(checkEmpEralOuput.getEmployId())) {
+						if(checkEmpEralOuput.getTypeAtr() == TypeErrorAlarm.ERROR) {
+							x.setError("ER");
+						}else if(checkEmpEralOuput.getTypeAtr() == TypeErrorAlarm.ALARM) {
+							x.setError("AL");
+						}else if(checkEmpEralOuput.getTypeAtr() == TypeErrorAlarm.ERROR_ALARM) {
+							x.setError("ER/AL");
+						}else {
+							x.setError("");
+						}
+						break;
+					}
+				}
 				listData.add(x);
 		});
 		screenDto.setLstData(listData);

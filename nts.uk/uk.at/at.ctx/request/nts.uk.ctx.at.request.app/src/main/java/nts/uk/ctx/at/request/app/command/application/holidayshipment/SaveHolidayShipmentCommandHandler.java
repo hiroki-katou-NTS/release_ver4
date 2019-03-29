@@ -923,12 +923,12 @@ public class SaveHolidayShipmentCommandHandler
 
 		ApplicationSetting appSet = appSetOp.get();
 
-		boolean isAllReasonControlDisplay = isComboBoxReasonDisplay(appTypeSet) && isReasonTextFieldDisplay(appTypeSet);
+		boolean isAnyReasonControlDisplay = isComboBoxReasonDisplay(appTypeSet) || isReasonTextFieldDisplay(appTypeSet);
 
 		boolean isReasonBlankWhenRequired = appSet.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
 				&& Strings.isBlank(appReason);
 
-		if (isAllReasonControlDisplay && isReasonBlankWhenRequired) {
+		if (isAnyReasonControlDisplay && isReasonBlankWhenRequired) {
 
 			throw new BusinessException("Msg_115");
 

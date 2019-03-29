@@ -16,7 +16,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 
 import nts.arc.time.GeneralDate;
-import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.schedule.app.command.executionlog.CreateScheduleMasterCache;
 import nts.uk.ctx.at.schedule.app.command.executionlog.ScheduleCreatorExecutionCommand;
 import nts.uk.ctx.at.schedule.app.command.executionlog.WorkCondItemDto;
@@ -26,11 +25,9 @@ import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicSchedule;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.service.DateRegistedEmpSche;
 import nts.uk.ctx.at.schedule.dom.shift.basicworkregister.BasicWorkSetting;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
-import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.worktype.DeprecateClassification;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
-import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
-import nts.uk.ctx.at.shared.dom.worktype.WorkTypeSet;
 
 /**
  * The Class ScheCreExeWorkTypeHandler.
@@ -54,10 +51,6 @@ public class ScheCreExeWorkTypeHandler {
 	/** The basic schedule service. */
 	@Inject
 	private BasicScheduleService basicScheduleService;
-
-	/** The work type repository. */
-	@Inject
-	private WorkTypeRepository workTypeRepository;
 
 	/** The sche cre exe basic schedule handler. */
 	@Inject
@@ -175,7 +168,11 @@ public class ScheCreExeWorkTypeHandler {
 	/**
 	 * Gets the worktype code leave holiday type.
 	 * 
-	 * 休業休職の勤務種類コードを返す
+	 * Có 2 xử lý tên giống nhau
+	 * đều là 「休業休職の勤務種類コードを返す」
+	 * nhưng xử lý khác nhau
+	 * 1 cái là xử lý của KSC001
+	 * 1 cái là xử lý chung bên context share 
 	 * 
 	 * @param command
 	 * @param optEmploymentInfo
@@ -184,85 +181,45 @@ public class ScheCreExeWorkTypeHandler {
 	 */
 	private String getWorktypeCodeLeaveHolidayType(WorkTypeByEmpStatusGetterCommand command,
 			Optional<EmploymentInfoImported> optEmploymentInfo, List<WorkCondItemDto> listWorkingConItem) {
-
-		// get work style by work type code
-		WorkStyle workStyle = this.basicScheduleService.checkWorkDay(command.getWorkTypeCode());
-
-		// is one day rest
-		if (workStyle.equals(WorkStyle.ONE_DAY_REST)) {
-			return command.getWorkTypeCode();
+		String employeeId = command.getEmployeeId(); 
+		String workTypeCode = command.getWorkTypeCode(); 
+		GeneralDate day = command.getBaseGetter().getToDate();
+		Optional<WorkCondItemDto> optWorkCondItemDto = listWorkingConItem.stream()
+				.filter(x -> (x.getEmployeeId().equals(employeeId)
+						&& x.getDatePeriod().contains(day)))
+				.findFirst();
+		if(!optWorkCondItemDto.isPresent()){
+			// Input「勤務種類コード」を返す
+			return workTypeCode;
+		} 
+		WorkCondItemDto workCondItemDto = optWorkCondItemDto.get();
+		Optional<WorkingConditionItem> optWorkingConditionItem = Optional.of(new WorkingConditionItem(
+				workCondItemDto.getHistoryId(),
+				workCondItemDto.getScheduleManagementAtr(),
+				workCondItemDto.getWorkDayOfWeek(),
+				workCondItemDto.getWorkCategory(),
+				workCondItemDto.getAutoStampSetAtr(),
+				workCondItemDto.getAutoIntervalSetAtr(),
+				workCondItemDto.getEmployeeId(),
+				workCondItemDto.getVacationAddedTimeAtr(),
+				workCondItemDto.getContractTime(),
+				workCondItemDto.getLaborSystem(),
+				workCondItemDto.getHolidayAddTimeSet().orElse(null),
+				workCondItemDto.getScheduleMethod().orElse(null),
+				Integer.valueOf(workCondItemDto.getHourlyPaymentAtr().value),
+				workCondItemDto.getTimeApply().orElse(null),
+				workCondItemDto.getMonthlyPattern().orElse(null)));
+		
+		String workTypeCd = this.basicScheduleService.getWorktypeCodeLeaveHolidayType(
+				command.getBaseGetter().getCompanyId(), employeeId, day, workTypeCode,
+				optEmploymentInfo.get().getTempAbsenceFrNo().get().intValue(), optWorkingConditionItem);
+		// 取得した勤務種類コードをチェック
+		if(workTypeCd == null){
+			// add message error log 601
+			this.scheCreExeErrorLogHandler.addError(command.getBaseGetter(), employeeId, "Msg_601");
 		}
-		// find work type
-		WorkType worktype = this.workTypeRepository
-				.findByPK(command.getBaseGetter().getCompanyId(), command.getWorkTypeCode()).get();
-
-		if (this.scheCreExeWorkTimeHandler.checkHolidayWork(worktype.getDailyWork())) {
-			// 休日出勤
-			// EA修正履歴 No1831
-			Optional<WorkCondItemDto> optionalWorkingConditionItem = listWorkingConItem.stream()
-					.filter(x -> x.getDatePeriod().contains(command.getBaseGetter().getToDate())
-							&& command.getEmployeeId().equals(x.getEmployeeId()))
-					.findFirst();
-
-			// check not exits data
-			if (!optionalWorkingConditionItem.isPresent()) {
-				return command.getWorkTypeCode();
-			}
-			return optionalWorkingConditionItem.get().getWorkCategory().getHolidayTime().getWorkTypeCode().isPresent()
-					? optionalWorkingConditionItem.get().getWorkCategory().getHolidayTime().getWorkTypeCode().get().v()
-					: null;
-		} else {
- 
-			int closeAtr = 0;
-			String WorkTypeCd = null;
-			// convert TEMP_ABS_FRAME_NO -> CLOSE_ATR
-			if (!optEmploymentInfo.get().getTempAbsenceFrNo().isPresent())
-				return null;
-
-			switch (optEmploymentInfo.get().getTempAbsenceFrNo().get()) {
-			case 1:
-				List<WorkType> findByCompanyIdAndLeaveAbsences = this.workTypeRepository
-						.findByCompanyIdAndLeaveAbsence(command.getBaseGetter().getCompanyId());
-				// check findByCompanyIdAndLeaveAbsences empty
-				if(findByCompanyIdAndLeaveAbsences.isEmpty()){
-					break;
-				}
-				WorkType workType2 = findByCompanyIdAndLeaveAbsences.get(FIRST_DATA);
-				WorkTypeCd = workType2.getWorkTypeCode().v();
-				break;
-			case 2:
-				closeAtr = 0;
-				break;
-			case 3:
-				closeAtr = 1;
-				break;
-			case 4:
-				closeAtr = 2;
-				break;
-			case 5:
-				closeAtr = 3;
-				break;
-			default:
-				// 6,7,8,9,10
-				closeAtr = 4;
-				break;
-			}
-			if (WorkTypeCd != null) {
-				return WorkTypeCd;
-			}
-			// find work type set by close atr employment status
-			List<WorkTypeSet> worktypeSets = this.workTypeRepository
-					.findWorkTypeSetCloseAtrDeprecateAtr(command.getBaseGetter().getCompanyId(), closeAtr, DeprecateClassification.NotDeprecated.value);
-
-			// check empty work type set
-			if (CollectionUtil.isEmpty(worktypeSets)) {
-
-				// add message error log 601
-				this.scheCreExeErrorLogHandler.addError(command.getBaseGetter(), command.getEmployeeId(), "Msg_601");
-				return ScheCreExeWorkTimeHandler.DEFAULT_CODE;
-			}
-			return worktypeSets.get(FIRST_DATA).getWorkTypeCd().v();
-		}
+		
+		return workTypeCd;
 	}
 
 	/**

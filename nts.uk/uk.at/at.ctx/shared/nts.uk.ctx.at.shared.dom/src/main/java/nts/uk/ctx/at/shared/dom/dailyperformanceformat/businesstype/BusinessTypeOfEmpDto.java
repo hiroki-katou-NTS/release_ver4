@@ -35,7 +35,7 @@ public class BusinessTypeOfEmpDto {
 		private final java.util.List<BusinessTypeOfEmpDto> list;
 
 		/**
-		 * 勤務種別変更者を再作成するか判定する
+		 * 勤務種別変更者再作成を判定する
 		 * 
 		 * @param empId
 		 * @param targetDate
@@ -45,22 +45,19 @@ public class BusinessTypeOfEmpDto {
 		 */
 		public boolean isReWorkerTypeChangePerson(String empId, GeneralDate targetDate, Boolean reWorkTypeChange,
 				String businessTypeCd) {
+			// パラメータ.勤務種別変更者を再作成を判定する
 			if (!reWorkTypeChange)
-				return true;
+				return false;
 			
 			Optional<BusinessTypeOfEmpDto> businessTypeOfEmpHis = this.list.stream()
 					.filter(x -> (x.getEmployeeId().equals(empId) && x.getStartDate().beforeOrEquals(targetDate)
 							&& x.getEndDate().afterOrEquals(targetDate)))
 					.findFirst();
-			
-			if (!businessTypeOfEmpHis.isPresent()) {
-				return true;
-			}
 
-			if (!businessTypeOfEmpHis.get().getBusinessTypeCd().equals(businessTypeCd))
-				return true;
+			if (!businessTypeOfEmpHis.isPresent() || businessTypeOfEmpHis.get().getBusinessTypeCd().equals(businessTypeCd))
+				return false;
 
-			return false;
+			return true;
 		}
 	}
 }

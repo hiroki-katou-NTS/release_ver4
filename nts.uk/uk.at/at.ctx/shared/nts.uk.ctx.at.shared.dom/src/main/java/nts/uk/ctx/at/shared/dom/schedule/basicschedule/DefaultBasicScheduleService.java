@@ -13,7 +13,9 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import nts.arc.error.BusinessException;
+import nts.arc.time.GeneralDate;
 import nts.gul.text.StringUtil;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.worktime.common.AbolishAtr;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
@@ -22,6 +24,7 @@ import nts.uk.ctx.at.shared.dom.worktype.DeprecateClassification;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeSet;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.TimeWithDayAttr;
@@ -39,6 +42,9 @@ public class DefaultBasicScheduleService implements BasicScheduleService {
 	public WorkTypeRepository workTypeRepo;
 	@Inject
 	private WorkTimeSettingRepository workTimeRepository;
+
+	/** The Constant FIRST_DATA. */
+	public static final int FIRST_DATA = 0;
 	
 	/**
 	 *  就業時間帯の必須チェック
@@ -398,6 +404,91 @@ public class DefaultBasicScheduleService implements BasicScheduleService {
 			throw new BusinessException("Msg_469");
 		}
 	}
+	
+	/**
+	 * 休業休職の勤務種類コードを返す
+	 * 
+	 * @param companyId
+	 * @param employeeId
+	 * @param day
+	 * @param workTypeCd
+	 * @param tempAbsenceFrNo
+	 * @param exeId
+	 * @return
+	 */
+	@Override
+	public String getWorktypeCodeLeaveHolidayType(String companyId, String employeeId, GeneralDate day,
+			String workTypeCd, int tempAbsenceFrNo, Optional<WorkingConditionItem> optWorkingConditionItem) {
+
+		// アルゴリズム「1日半日出勤・1日休日系の判定」を実行し、「出勤休日区分」を取得する
+		WorkStyle workStyle = this.checkWorkDay(workTypeCd);
+
+		// 入力パラメータ「勤務種類コード」を返す
+		if (workStyle.equals(WorkStyle.ONE_DAY_REST)) {
+			return workTypeCd;
+		}
+		// 勤務種類の分類を判断
+		WorkType worktype = this.workTypeRepo
+				.findByPK(companyId, workTypeCd).get();
+
+		if (this.checkHolidayWork(worktype.getDailyWork())) {
+			// 休日出勤
+			if(!optWorkingConditionItem.isPresent() || optWorkingConditionItem.get().getWorkCategory() == null){
+				// 取得失敗
+				return workTypeCd;
+			}
+			// パラメータ「労働条件項目」．区分別勤務．休日時を取得する
+			if(optWorkingConditionItem.get().getWorkCategory().getHolidayTime() != null){
+				// 取得できた
+				return optWorkingConditionItem.get().getWorkCategory().getHolidayTime().getWorkTypeCode().get().v();
+			}
+			
+		} else {
+			// 休日出勤でない
+			// đoạn này trong EAP k viết rõ
+			int closeAtr = 0;
+			String wTypeCd = null;
+			 // convert TEMP_ABS_FRAME_NO -> CLOSE_ATR
+	        switch (tempAbsenceFrNo) {
+	        case 1:
+				List<WorkType> lstWorkType = this.workTypeRepo
+						.findByCompanyIdAndLeaveAbsence(companyId);
+	            if(lstWorkType.isEmpty()){
+	                break;
+	            }
+	            wTypeCd = lstWorkType.get(FIRST_DATA).getWorkTypeCode().v();
+	            break;
+	        case 2:
+	            closeAtr = 0;
+	            break;
+	        case 3:
+	            closeAtr = 1;
+	            break;
+	        case 4:
+	            closeAtr = 2;
+	            break;
+	        case 5:
+	            closeAtr = 3;
+	            break;
+	        default:
+	            // 6,7,8,9,10
+	            closeAtr = 4;
+	            break;
+	        }
+            if (wTypeCd != null) {
+                return wTypeCd;
+            }
+	        
+			// 休業区分の勤務種類コードを取得する
+			List<WorkTypeSet> lstWorkTypeSet = this.workTypeRepo.findWorkTypeSetCloseAtrDeprecateAtr(companyId,
+					closeAtr, DeprecateClassification.NotDeprecated.value);
+			if(!lstWorkTypeSet.isEmpty()){
+				return lstWorkTypeSet.get(FIRST_DATA).getWorkTypeCd().v();
+			}
+		}
+		
+		return null;
+	}
 
 	/**
 	 * Checks if is work time valid.
@@ -411,6 +502,14 @@ public class DefaultBasicScheduleService implements BasicScheduleService {
 			return false;
 		}
 		return true;
+	}
+	
+	private boolean checkHolidayWork(DailyWork dailyWork) {
+		if (dailyWork.getWorkTypeUnit().value == WorkTypeUnit.OneDay.value) {
+			return dailyWork.getOneDay().value == WorkTypeClassification.HolidayWork.value;
+		}
+		return (dailyWork.getMorning().value == WorkTypeClassification.HolidayWork.value
+				|| dailyWork.getAfternoon().value == WorkTypeClassification.HolidayWork.value);
 	}
 
 	/**
