@@ -437,7 +437,6 @@ module nts.uk.at.view.kaf000.shr{
            public static TEMPKAF000B = `
             <div id="functions-area">
                 <div>
-                    
                     <div style="display: inline-block;" data-bind="if: displayGoback">
                         <a class="goback link-button" data-bind="click: callCMM045A">一覧へ戻る</a>
                     </div>
@@ -2704,25 +2703,7 @@ module nts.uk.at.view.kaf000.shr{
                 </div>
             </div>
         </div>
-        <div class="valign-center control-group" data-bind="if: screenModeNew()">
-            <div class="table">
-                <div class="cell valign-top cm-column2">
-                <div class="lblTitle"></div>
-                </div>
-                
-            </div>
-        </div>
-        
-        <div class="valign-center control-group" data-bind="if: !screenModeNew()">
-            <div class="table" style="margin-bottom: 9px;">
-                <div class="cell valign-top cm-column2">
-                    <div class="lblTitle"></div>
-                </div>
-                <lable class="label fix-margin-left" data-bind="text: goSelected1()==0 ? '直行しない' : '直行する'"></lable>
-                <label class="valign-center link-label-kaf010b"></label>    
-                <lable class="label fix-margin-left" data-bind="text: backSelected1()==0 ? '直帰しない' : '直帰する'"></lable>
-            </div>
-        </div>
+    
         
         <div data-bind="visible : false">
             <div class="valign-center control-group" data-bind="if: useMulti()">
