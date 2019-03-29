@@ -243,6 +243,7 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 		builder.append("SELECT c,o.dispOrder FROM KshmtWorkType c");
 		builder.append(" LEFT JOIN KshmtWorkTypeOrder o");
 		builder.append(" ON c.kshmtWorkTypePK.companyId = o.kshmtWorkTypeDispOrderPk.companyId AND c.kshmtWorkTypePK.workTypeCode = o.kshmtWorkTypeDispOrderPk.workTypeCode");
+		builder.append(" WHERE c.kshmtWorkTypePK.companyId = :companyId");
 		builder.append(" AND c.deprecateAtr = 0");
 		builder.append(" AND c.kshmtWorkTypePK.workTypeCode IN :workTypeCodes");
 		builder.append(" AND c.worktypeAtr = 1 AND ( c.morningAtr IN :morningAtrs OR c.afternoonAtr IN :afternoonAtrs )");
