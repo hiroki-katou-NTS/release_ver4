@@ -417,6 +417,10 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 self.setFixedHeader(data.lstFixedHeader);
                 self.extractionData();
                 self.loadGrid();
+                _.forEach(data.mpsateCellHideControl, (cellHide =>{
+                    $('#dpGrid').mGrid("setState", cellHide.rowId, cellHide.columnKey, ["mgrid-hide"])
+                }))
+                
                 self.employmentCode(data.employmentCode);
                 self.dailyPerfomanceData(self.dpData);
                 self.lstEmployee(_.orderBy(data.lstEmployee, ['code'], ['asc']));
@@ -532,6 +536,9 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 self.setFixedHeader(data.lstFixedHeader);
                 self.extractionData();
                 self.loadGrid();
+                _.forEach(data.mpsateCellHideControl, (cellHide =>{
+                    $('#dpGrid').mGrid("setState", cellHide.rowId, cellHide.columnKey, ["mgrid-hide"])
+                }))
                 self.employmentCode(data.employmentCode);
                 self.dailyPerfomanceData(self.dpData);
                 self.lstEmployee(_.orderBy(data.lstEmployee, ['code'], ['asc']));
@@ -596,6 +603,9 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 $("#dpGrid").mGrid("destroy");
                 $("#dpGrid").off();
                 self.loadGrid();
+                _.forEach(data.mpsateCellHideControl, (cellHide =>{
+                    $('#dpGrid').mGrid("setState", cellHide.rowId, cellHide.columnKey, ["mgrid-hide"])
+                }))
                 dfd.resolve();
             });
             return dfd.promise();
@@ -1335,7 +1345,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 nts.uk.ui.block.clear();
             }, 500);
         }
-        reloadGridLock() {
+        reloadGridLock(data) {
             let self = this;
             nts.uk.ui.block.invisible();
             nts.uk.ui.block.grayout();
@@ -1345,6 +1355,9 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 self.createSumColumn(self.dataAll());
                 self.extractionData();
                 self.loadGrid();
+                _.forEach(data.mpsateCellHideControl, (cellHide => {
+                    $('#dpGrid').mGrid("setState", cellHide.rowId, cellHide.columnKey, ["mgrid-hide"])
+                }));
                 nts.uk.ui.block.clear();
             }, 500);
         }
@@ -1550,7 +1563,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 self.monthlyParam().initMenuMode = self.initMode();
                 service.startScreen(self.monthlyParam()).done((data) => {
                     self.dataAll(data);
-                    self.reloadGridLock();
+                    self.reloadGridLock(data);
                 });
             }).ifNo(() => {
 
@@ -1576,7 +1589,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
             self.monthlyParam().initMenuMode = self.initMode();
             service.startScreen(self.monthlyParam()).done((data) => {
                 self.dataAll(data);
-                self.reloadGridLock();
+                self.reloadGridLock(data);
                 nts.uk.ui.dialog.info({ messageId: "Msg_984" });
             });
         }
