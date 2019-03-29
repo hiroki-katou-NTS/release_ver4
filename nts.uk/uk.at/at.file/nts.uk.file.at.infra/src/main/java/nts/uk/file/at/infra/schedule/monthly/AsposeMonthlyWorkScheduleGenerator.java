@@ -628,13 +628,32 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		List<String> lstEmployeeNoWorkplace = new ArrayList<>();
 		
 		GeneralDate finalDate = query.getBaseDate();
+
+        List<WkpHistImport> workplaceList;
+        {
+            List<WkpHistImport> workplaceListSync = Collections.synchronizedList(new ArrayList<>());
+            this.parallel.forEach(query.getEmployeeId(), sid -> {
+                WkpHistImport workplaceImport = workplaceAdapter.findWkpBySid(sid, finalDate);
+                workplaceListSync.add(workplaceImport);
+            });
+            workplaceList = new ArrayList<>(workplaceListSync);
+        }
+        Map<String, WkpHistImport> workplaceAll = workplaceList.stream().collect(Collectors.toMap(WkpHistImport::getEmployeeId, x -> x));
 		
 		for (String employeeId: query.getEmployeeId()) {
-			WkpHistImport workplaceImport = workplaceAdapter.findWkpBySid(employeeId, finalDate);
+			/*WkpHistImport workplaceImport = workplaceAdapter.findWkpBySid(employeeId, finalDate);
 			if (workplaceImport == null) {
 				lstEmployeeNoWorkplace.add(employeeId);
 				continue;
 			}
+			lstWorkplaceId.add(workplaceImport.getWorkplaceId());
+			queryData.getLstWorkplaceImport().add(workplaceImport);*/
+
+			if (!workplaceAll.containsKey(employeeId)){
+				lstEmployeeNoWorkplace.add(employeeId);
+				continue;
+			}
+			WkpHistImport workplaceImport = workplaceAll.get(employeeId);
 			lstWorkplaceId.add(workplaceImport.getWorkplaceId());
 			queryData.getLstWorkplaceImport().add(workplaceImport);
 		}
