@@ -334,11 +334,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             var self = this;
             nts.uk.ui.errors.clearAll();
             var screenModel: any = {};
-//            $.get('/nts.uk.at.web/view/kaf/000/b/index2.xhtml').done(html => {
-//                    console.log(html);
-            let html = shrvm.model.Template.TEMPKAF000B;
-//            let htmlN = html.replace(/\<\?xml version='1\.0' encoding='UTF\-8' \?\>/, "");
-//            let htmlF = htmlN.replace("<!DOCTYPE html>", "");
+            let html = __viewContext.html;
             document.querySelector('#master-content').innerHTML = html;
             ko.cleanNode(document.querySelector('#master-content'));
             $('#master-content').css("display","none");
@@ -349,6 +345,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             self.appID(currentApp.appID);
             self.appType(currentApp.appType);
             __viewContext.transferred.value.currentApp = currentApp.appID;
+            __viewContext.html = html;
             self.start(moment.utc().format("YYYY/MM/DD"), isWriteLog).done(function() {
                 $('#master-content').css("display","");
                 self.pgname(currentApp)

@@ -37,6 +37,11 @@ function initScreen(screenModel: any, listAppMeta: Array<model.ApplicationMetada
         nts.uk.ui._viewModel.errors.isEmpty.subscribe((values) => {
             screenModel.errorEmpty(values);
         });
+        $.get('/nts.uk.at.web/view/kaf/000/b/index2.xhtml').done(html => {
+            let htmlN = html.replace(/\<\?xml version='1\.0' encoding='UTF\-8' \?\>/, "");
+            let htmlF = htmlN.replace("<!DOCTYPE html>", "");
+            __viewContext.html = htmlF;
+            });
     });
 }
     
