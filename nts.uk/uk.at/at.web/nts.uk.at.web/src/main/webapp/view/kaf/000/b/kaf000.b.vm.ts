@@ -429,7 +429,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             }
             let approveCmd = self.appType() != 10 ? inputCommonData : self.getHolidayShipmentCmd(self.reasonToApprover());
             if(self.appType() == 1){
-                approveCmd.holidayAppType = nts.uk.ui._viewModel.content.holidayTypeCode();        
+                approveCmd.holidayAppType = self.holidayTypeCode();        
             }
             service.approveApp(approveCmd, self.appType()).done(function(data) {
                 self.resfreshReason(data.appReason);
