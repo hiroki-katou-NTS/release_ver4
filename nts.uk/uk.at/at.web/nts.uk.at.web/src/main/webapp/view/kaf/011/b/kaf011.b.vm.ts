@@ -74,6 +74,9 @@ module nts.uk.at.view.kaf011.b.viewmodel {
         absTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
             return this.editable() ? this.absWk().enableWkTime() == true : false;
         });
+        changeWorkHoursTypeEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.editable();
+        });
         constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
             super(listAppMetadata, currentApp);
             let self = this;
