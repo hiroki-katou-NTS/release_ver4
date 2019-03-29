@@ -575,6 +575,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		//AsyncTaskInfo handle = null;
 		// 就業担当者の社員ID（List）を取得する : RQ526
 		List<String> listManagementId = employeeManageAdapter.getListEmpID(companyId, GeneralDate.today());
+		boolean runSchedule = false;
 		try {
 			// 個人スケジュール作成区分の判定
 			if (!procExec.getExecSetting().getPerSchedule().isPerSchedule()) {
@@ -741,6 +742,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				
 				try {
 					this.scheduleExecution.handle(scheduleCommand);
+					runSchedule = true;
 				} catch (Exception e) {
 					// 再実行の場合にExceptionが発生したかどうかを確認する。
 					if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
@@ -775,6 +777,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 									.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
 											calculateSchedulePeriod, temporaryEmployeeList);
 							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
+							runSchedule = true;
 						} catch (Exception e) {
 							// 再実行の場合にExceptionが発生したかどうかを確認する。
 							if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
@@ -794,6 +797,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 								.setPeriod(new DatePeriod(periodDate.start(), endDate));
 						try {
 							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
+							runSchedule = true;
 						} catch (Exception e) {
 							// 再実行の場合にExceptionが発生したかどうかを確認する。
 							if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
@@ -847,39 +851,40 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		}
 		int timeOut = 1;
 		boolean isInterruption = false;
+		if(runSchedule){
+			while (true) {
+				// find execution log by id
+				Optional<ScheduleExecutionLog> domainOpt = this.scheduleExecutionLogRepository
+						.findById(loginContext.companyId(), execId);
+				if (domainOpt.isPresent()) {
+					if (domainOpt.get().getCompletionStatus().value == CompletionStatus.COMPLETION_ERROR.value) {
+						this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.ABNORMAL_END);
+						break;
+					}
+					if (domainOpt.get().getCompletionStatus().value == CompletionStatus.INTERRUPTION.value) {
+						isInterruption = true;
+						break;
+					}
+					if (domainOpt.get().getCompletionStatus().value == CompletionStatus.DONE.value) {
+						this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.SUCCESS);
+						break;
+					}
 
-		while (true) {
-			// find execution log by id
-			Optional<ScheduleExecutionLog> domainOpt = this.scheduleExecutionLogRepository
-					.findById(loginContext.companyId(), execId);
-			if (domainOpt.isPresent()) {
-				if (domainOpt.get().getCompletionStatus().value == CompletionStatus.COMPLETION_ERROR.value) {
+				}
+				if (timeOut == 2400) {
 					this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.ABNORMAL_END);
 					break;
 				}
-				if (domainOpt.get().getCompletionStatus().value == CompletionStatus.INTERRUPTION.value) {
-					isInterruption = true;
-					break;
+				timeOut++;
+				// set thread sleep 10s để cho xử lý schedule insert xong data rồi
+				// mới cho xử lý của anh Nam (KIF001) chạy
+				// nếu không màn KIF001 sẽ get data cũ của màn schedule để insert
+				// vào => như thế sẽ sai
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-				if (domainOpt.get().getCompletionStatus().value == CompletionStatus.DONE.value) {
-					this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.SUCCESS);
-					break;
-				}
-
-			}
-			if (timeOut == 2400) {
-				this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.ABNORMAL_END);
-				break;
-			}
-			timeOut++;
-			// set thread sleep 10s để cho xử lý schedule insert xong data rồi
-			// mới cho xử lý của anh Nam (KIF001) chạy
-			// nếu không màn KIF001 sẽ get data cũ của màn schedule để insert
-			// vào => như thế sẽ sai
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
 		}
 		
