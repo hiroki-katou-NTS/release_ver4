@@ -110,6 +110,8 @@ public class MonthlyPerformanceCorrectionDto {
 	
 	private String mess;
 	
+	private List<MPSateCellHideControl> mPSateCellHideControl = new ArrayList<>();
+	
 	public MonthlyPerformanceCorrectionDto(){
 		super();
 		this.lstFixedHeader = MPHeaderDto.GenerateFixedHeader();
