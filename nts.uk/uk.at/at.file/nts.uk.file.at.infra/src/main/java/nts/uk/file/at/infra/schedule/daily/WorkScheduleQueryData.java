@@ -1,7 +1,9 @@
 package nts.uk.file.at.infra.schedule.daily;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 import nts.arc.time.GeneralDate;
@@ -67,7 +69,7 @@ public class WorkScheduleQueryData {
 	WorkScheduleOutputQuery query;
 	
 	/** The lst workplace import. */
-	List<WkpHistImport> lstWorkplaceImport = new ArrayList<>();
+	Map<String, WkpHistImport> lstWorkplaceImport = new HashMap<>();
 	
 	/** The remark data containter. */
 	RemarkQueryDataContainer remarkDataContainter;
