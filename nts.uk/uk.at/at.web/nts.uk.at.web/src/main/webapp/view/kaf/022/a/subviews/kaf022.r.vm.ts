@@ -168,7 +168,7 @@ ko.components.register('kaf022-r', {
                                 optionsValue: 'code',
                                 optionsText: 'name',
                                 value: selectedIdR2_11,
-                                enable: true
+                                enable: false
                             }">
                         </div>
                     </td>
@@ -318,7 +318,7 @@ ko.components.register('kaf022-r', {
                                 optionsValue: 'code',
                                 optionsText: 'name',
                                 value: selectedIdR4_6,
-                                enable: true
+                                enable: false
                             }">
                         </div>
                     </td>
