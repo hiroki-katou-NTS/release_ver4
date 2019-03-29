@@ -620,6 +620,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             let startTime: number = performance.now();
             console.log(data);
             self.loadFirst = false;
+            self.closureId = data.closureId;
             //self.lstDomainOld = data.domainOld;
             //self.lstDomainEdit = _.cloneDeep(data.domainOld);
             if (data.typeBussiness != localStorage.getItem('kdw003_type')) {
@@ -1959,6 +1960,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             return;
                         });
                     } else {
+                        self.closureId = data.closureId;
                         self.initScreenSPR = 1;
                         self.hasErrorBuss = false;
                         //self.lstDomainOld = data.domainOld;
