@@ -262,7 +262,7 @@
 				<div class="div_line change_woking_hours"
 					data-bind="if:showAbsWorkTimeZone()">
 					<div class="div_line">
-						<div data-bind="ntsCheckBox: { checked: changeWorkHoursType }">#{i18n.getText('KAF011_29')}</div>
+						<div data-bind="ntsCheckBox: { checked: changeWorkHoursType,enable:$parent.changeWorkHoursTypeEnable }">#{i18n.getText('KAF011_29')}</div>
 					</div>
 					<hr style="width: 958px;" />
 					<div class="div_line">

@@ -81,6 +81,9 @@ module nts.uk.at.view.kaf011.a.screenModel {
         absTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
             return this.absWk().enableWkTime() == true;
         });
+        changeWorkHoursTypeEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return true;
+        });
         constructor() {
             let self = this;
 
