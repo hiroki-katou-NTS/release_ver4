@@ -1697,6 +1697,7 @@ public class DailyPerformanceCorrectionProcessor {
 		List<String> lstEmployeeId = new ArrayList<>();
 		if (mode == ScreenMode.NORMAL.value) {
 			
+			if(!employeeIds.isEmpty()) return employeeIds;
 			List<RegulationInfoEmployeeQueryR> regulationRs = regulationInfoEmployeePub.search(
 					createQueryEmployee(new ArrayList<>(), range.getStartDate(), range.getEndDate()));
 			lstEmployeeId = regulationRs.stream().map(x -> x.getEmployeeId()).distinct().collect(Collectors.toList());
