@@ -9,12 +9,7 @@ import javax.inject.Inject;
 
 import lombok.val;
 import nts.arc.time.GeneralDate;
-//import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
-//import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeOfDailyPerformance;
-//import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.AttendanceLeavingGateOfDaily;
-//import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
-//import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.algorithm.BreakTimeStampIncorrectOrderChecking;
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.algorithm.BreakTimeStampLeakageChecking;
@@ -31,10 +26,6 @@ import nts.uk.ctx.at.record.dom.workrecord.errorsetting.algorithm.PClogOnOffLack
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.algorithm.StampIncorrectOrderAlgorithm;
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.algorithm.TemporaryDoubleStampChecking;
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.algorithm.TemporaryStampOrderChecking;
-//import nts.uk.ctx.at.record.dom.worktime.TemporaryTimeOfDailyPerformance;
-//import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
-//import nts.uk.ctx.at.shared.dom.personallaborcondition.UseAtr;
-//import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.context.AppContexts;
 
@@ -138,12 +129,32 @@ public class DailyRecordCreateErrorAlarmServiceImpl implements DailyRecordCreate
 	//打刻順序不正
 	public List<EmployeeDailyPerError> stampIncorrectOrderAlgorithm(IntegrationOfDaily integrationOfDaily) {
 		List<EmployeeDailyPerError> returnList = new ArrayList<>();
+		// 出勤系打刻順序不正をチェックする
+		returnList.add(stampIncorrect(integrationOfDaily));
+		//出勤系以外の打刻順序不正をチェックする
+		returnList.addAll(stampIncorrectOrderAlgorithmOtherStamp(integrationOfDaily));
+		
+		return returnList;
+	}
+	
+	@Override
+	public EmployeeDailyPerError stampIncorrect(IntegrationOfDaily integrationOfDaily){
 		String companyId = AppContexts.user().companyId();
 		String empId = integrationOfDaily.getAffiliationInfor().getEmployeeId();
 		GeneralDate targetDate = integrationOfDaily.getAffiliationInfor().getYmd();
 		// 出勤系打刻順序不正をチェックする
-		returnList.add(this.stampIncorrectOrderAlgorithm.stampIncorrectOrder(companyId, empId, targetDate,
-				integrationOfDaily.getAttendanceLeave().orElse(null)));
+		return this.stampIncorrectOrderAlgorithm.stampIncorrectOrder(companyId, empId, targetDate,integrationOfDaily.getAttendanceLeave().orElse(null));
+	}
+	
+	/**
+	 * 出退勤打刻以外の順序不正チェック
+	 */
+	@Override
+	public List<EmployeeDailyPerError> stampIncorrectOrderAlgorithmOtherStamp(IntegrationOfDaily integrationOfDaily){
+		List<EmployeeDailyPerError> returnList = new ArrayList<>();
+		String companyId = AppContexts.user().companyId();
+		String empId = integrationOfDaily.getAffiliationInfor().getEmployeeId();
+		GeneralDate targetDate = integrationOfDaily.getAffiliationInfor().getYmd();
 		// 外出系打刻順序不正をチェックする
 		returnList.addAll(goingOutStampOrderChecking.goingOutStampOrderChecking(companyId, empId, targetDate,
 				integrationOfDaily.getOutingTime().orElse(null), integrationOfDaily.getAttendanceLeave().orElse(null), integrationOfDaily.getTempTime().orElse(null)));
@@ -205,4 +216,6 @@ public class DailyRecordCreateErrorAlarmServiceImpl implements DailyRecordCreate
 			return Optional.of(resultError);
 		}
 	}
+	
+
 }

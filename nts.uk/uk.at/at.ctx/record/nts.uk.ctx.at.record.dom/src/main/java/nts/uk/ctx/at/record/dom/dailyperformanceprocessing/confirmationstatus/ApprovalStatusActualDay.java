@@ -78,7 +78,7 @@ public class ApprovalStatusActualDay {
 
 				//対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 				List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-						.getApprovalByListEmplAndListApprovalRecordDate(datePeriod.datesBetween(),
+						.getApprovalByListEmplAndListApprovalRecordDateNew(datePeriod.datesBetween(),
 								Arrays.asList(employeeId), 1);
 
 				//対応するImported「基準社員の承認対象者」を取得する

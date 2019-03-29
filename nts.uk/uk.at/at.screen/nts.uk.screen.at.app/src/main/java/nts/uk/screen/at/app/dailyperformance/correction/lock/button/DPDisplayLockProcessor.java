@@ -31,6 +31,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.DPControlDisplayItem
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPDataDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPErrorDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPErrorSettingDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.DPHideControlCell;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyPerformanceCorrectionDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyRecEditSetDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
@@ -151,6 +152,8 @@ public class DPDisplayLockProcessor {
 			// screenDto.setFlexShortage(null);
 		}
 		
+		//cell hide check box approval
+		List<DPHideControlCell> lstCellHideControl = new ArrayList<>();
 		for (DPDataDto data : result.getLstData()) {
 			data.resetData();
 			if (!sId.equals(data.getEmployeeId())) {
@@ -171,6 +174,11 @@ public class DPDisplayLockProcessor {
 			if(dataApproval == null || (mode == ScreenMode.NORMAL.value ? !dataApproval.notDisableNormal() : !dataApproval.notDisableApproval())) {
 				result.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_DISABLE);
 			}
+			if(dataApproval == null) {
+				result.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_ERROR);
+				lstCellHideControl.add(new DPHideControlCell(data.getId(), DPText.LOCK_APPROVAL));
+			}
+			
 			ApproveRootStatusForEmpDto approvalCheckMonth = dpLock.getLockCheckMonth()
 					.get(data.getEmployeeId() + "|" + data.getDate());
 
@@ -200,7 +208,7 @@ public class DPDisplayLockProcessor {
 				result.setAlarmCellForFixedColumn(data.getId(), displayFormat);
 
 		}
-
+		result.setLstHideControl(lstCellHideControl);
 		result.setLstData(lstData);
 		return result;
 	}

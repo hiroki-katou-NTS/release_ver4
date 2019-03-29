@@ -698,6 +698,10 @@ module nts.uk.at.view.kdw003.a.viewmodel {
            // self.displayNumberZero();
             self.displayProfileIcon(self.displayFormat());
             self.dislayNumberHeaderText();
+            //set hide control approval
+            _.forEach(data.lstHideControl, hide =>{
+                $("#dpGrid").mGrid("setState", "_"+hide.rowId, hide.columnKey, ["mgrid-hide"]);
+            })
             console.log("thoi gian load 0: " + (performance.now() - startTime));
             //set SPR
             if (data.showErrorDialog) {
@@ -1054,7 +1058,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 dataParent["dateRange"] = dataSource.length > 0 ? { startDate: dataSource[0].dateDetail, endDate: dataSource[0].dateDetail } : null;
             }
 
-            let checkDailyChange = (dataChangeProcess.length > 0 || dataCheckSign.length > 0 || dataCheckApproval.length > 0) && checkDataCare;
+            let checkDailyChange = (dataChangeProcess.length > 0 || dataCheckSign.length > 0 || dataCheckApproval.length > 0 || self.sprStampSourceInfo() != null) && checkDataCare;
             if (checkDailyChange || (self.valueUpdateMonth != null && self.valueUpdateMonth.items) || self.flagCalculation || !_.isEmpty(sprStampSourceInfo)) {
                 self.lstErrorFlex = [];
                 service.addAndUpdate(dataParent).done((dataAfter) => {
@@ -1659,10 +1663,17 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     rowIdsTemp = _.filter(rowIdsTemp, (v) => !_.includes(self.lstErrorAfterCalcUpdate, v.rowId));
                     data.lstCellState = _.filter(data.lstCellState, (v) => !_.includes(self.lstErrorAfterCalcUpdate, v.rowId));
                     data.lstCellStateCalc = _.filter(data.lstCellStateCalc, (v) => !_.includes(self.lstErrorAfterCalcUpdate, v.rowId));
-                                    
-                    $("#dpGrid").mGrid("clearState", _.map(rowIdsTemp, (value) => {
+                    let lstRowReload = _.map(rowIdsTemp, (value) => {
                         return value.rowId;
-                    }))
+                    })               
+                    $("#dpGrid").mGrid("clearState", lstRowReload);
+                    _.forEach(lstRowReload, tmp => {
+                       $("#dpGrid").mGrid("clearState", tmp, "approval", ["mgrid-hide"]); 
+                    });
+                    
+                    _.forEach(data.lstHideControl, hide => {
+                        $("#dpGrid").mGrid("setState", "_" + hide.rowId, hide.columnKey, ["mgrid-hide"]);
+                    })
                     _.each(data.lstCellState, (valt) => {
                         $("#dpGrid").mGrid("setState", valt.rowId, valt.columnKey, valt.state);
                     });
@@ -2007,6 +2018,10 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         self.displayNumberZero();
                         //self.displayProfileIcon(self.displayFormat());
                         self.dislayNumberHeaderText();
+                        // load hide Checkbox approval
+                        _.forEach(data.lstHideControl, hide =>{
+                           $("#dpGrid").mGrid("setState", "_"+hide.rowId, hide.columnKey, ["mgrid-hide"]);
+                        })
                         //check visable MIGrid
                         if (self.displayFormat() != 0) {
                             self.isVisibleMIGrid(false);
@@ -3473,7 +3488,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         //                            nts.uk.request.jump("/view/kaer);
                         //                            break;
 
-                        case 15:
+                        case 14:
                             //KAF011-振休振出申請
                             nts.uk.request.jump("/view/kaf/011/a/index.xhtml", transfer);
                             break;
@@ -3515,10 +3530,12 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 endDate: __viewContext.vm.displayFormat() === 1 ? moment(__viewContext.vm.selectedDate()).format("YYYY/MM/DD") : moment(__viewContext.vm.dateRanger().endDate).format("YYYY/MM/DD")
 
             }
-            nts.uk.localStorage.setItem('UKProgramParam', 'a=0');
-            nts.uk.characteristics.save('AppListExtractCondition', dataShareCmm);
-            nts.uk.request.jump("/view/cmm/045/a/index.xhtml");
-
+            nts.uk.characteristics.remove("AppListExtractCondition").done(function() {
+                parent.nts.uk.characteristics.save('AppListExtractCondition', dataShareCmm).done(function() {
+                    nts.uk.localStorage.setItem('UKProgramParam', 'a=0');
+                    nts.uk.request.jump("/view/cmm/045/a/index.xhtml");
+                });
+            }); 
         }
 
         reloadGrid() {
@@ -4751,7 +4768,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             self.messageNoForward(messageNotForward);
 
             //フレックス不足(内前月繰越)
-            self.shortageTime(getText("KDW003_89", [self.convertToHours((Number(val191) + Number(val21))), self.convertToHours(Number(val21))]));
+            //self.shortageTime(getText("KDW003_89", [self.convertToHours((Number(val191) + Number(val21))), self.convertToHours(Number(val21))]));
+            self.shortageTime(getText("KDW003_89", [self.convertToHours(Number(val191)), self.convertToHours(Number(val19) - Number(val191) <= 0 ? Number(val19) : Number(val191))]));
+            
             //翌月繰越
             self.nextMonthTransferredMoneyTime(getText("KDW003_111", [self.convertToHours((Number(val18) + Number(val21)))]));
             //年休
@@ -4778,7 +4797,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 val190 = dataCalc.value190 == null ? 0 : dataCalc.value190.value,
                 val191 = dataCalc.value191 == null ? 0 : dataCalc.value191.value;
             //フレックス不足(内前月繰越)
-            self.shortageTime(getText("KDW003_89", [self.convertToHours((Number(val191) + Number(val21))), self.convertToHours(Number(val21))]));
+            //self.shortageTime(getText("KDW003_89", [self.convertToHours((Number(val191) + Number(val21))), self.convertToHours(Number(val21))]));
+              self.shortageTime(getText("KDW003_89", [self.convertToHours(Number(val191)), self.convertToHours(Number(val19) - Number(val191) <= 0 ? Number(val19) : Number(val191))]));
             //翌月繰越
             self.nextMonthTransferredMoneyTime(getText("KDW003_111", [self.convertToHours((Number(val18) + Number(val21)))]));
         }

@@ -39,13 +39,18 @@ public class ShortWorkTimeDto {
 		 * @return
 		 */
 		public boolean isReShortTime(String empId, GeneralDate targetDate, Boolean reShortTermEmp) {
-			// アルゴリズム「社員の短時間勤務を取得」を実行する
+			// パラメータ.短時間勤務者を再作成を判定する
+			if(!reShortTermEmp){
+				return false;
+			}
+			// 「社員の短時間勤務一覧」からパラメータ.社員ID、対象日をもとに該当する短時間勤務を取得する
 			boolean isSuccessProcess = this.acquireShortTimeWorkEmp(empId, targetDate);
-			if (!reShortTermEmp || isSuccessProcess) {
-				return true;
+			if (!isSuccessProcess) {
+				// 取得できない場合
+				return false;
 			}
 
-			return false;
+			return true;
 		}
 		
 		/**

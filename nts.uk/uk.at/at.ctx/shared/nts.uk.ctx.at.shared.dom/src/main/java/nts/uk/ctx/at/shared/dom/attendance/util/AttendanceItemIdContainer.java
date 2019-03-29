@@ -2201,8 +2201,8 @@ public class AttendanceItemIdContainer implements ItemConst {
 		temp.put(1270, join(MONTHLY_ABSENCE_LEAVE_REMAIN_NAME, OCCURRENCE));
 		temp.put(1271, join(MONTHLY_ABSENCE_LEAVE_REMAIN_NAME, USAGE));
 		temp.put(1272, join(MONTHLY_ABSENCE_LEAVE_REMAIN_NAME, REMAIN));
-		temp.put(1273, join(MONTHLY_ABSENCE_LEAVE_REMAIN_NAME, CARRY_FORWARD));
-		temp.put(1274, join(MONTHLY_ABSENCE_LEAVE_REMAIN_NAME, NOT_DIGESTION));
+		temp.put(1273, join(MONTHLY_ABSENCE_LEAVE_REMAIN_NAME, NOT_DIGESTION));
+		temp.put(1274, join(MONTHLY_ABSENCE_LEAVE_REMAIN_NAME, CARRY_FORWARD));
 		
 		temp.put(1275, join(MONTHLY_CHILD_CARE_HD_REMAIN_NAME, USAGE + DAYS));
 		temp.put(1276, join(MONTHLY_CHILD_CARE_HD_REMAIN_NAME, USAGE + DAYS + AFTER));
@@ -2391,8 +2391,27 @@ public class AttendanceItemIdContainer implements ItemConst {
 	}
 	
 	public static Map<Integer, Integer> mapOptionalItemIdsToNos() {
+		return mapDailyOptionalItemIdsToNos();
+	}
+	
+	public static Map<Integer, Integer> mapOptionalItemIdsToNos(AttendanceItemType type) {
+		if(type == AttendanceItemType.MONTHLY_ITEM){
+			return mapMonthlyOptionalItemIdsToNos();
+		}
+		return mapDailyOptionalItemIdsToNos();
+	}
+	
+	private static Map<Integer, Integer> mapDailyOptionalItemIdsToNos() {
 		return DAY_ITEM_ID_CONTAINER.entrySet().stream()
 				.filter(en -> en.getValue().indexOf(DailyDomainGroup.OPTIONAL_ITEM.name) == 0)
+				.collect(Collectors.toMap(i -> i.getKey(), i -> {
+			return Integer.parseInt(i.getValue().replace(i.getValue().replaceAll(DEFAULT_NUMBER_REGEX, EMPTY_STRING), EMPTY_STRING));
+		}));
+	}
+	
+	private static Map<Integer, Integer> mapMonthlyOptionalItemIdsToNos() {
+		return MONTHLY_ITEM_ID_CONTAINER.entrySet().stream()
+				.filter(en -> en.getValue().indexOf(MonthlyDomainGroup.OPTIONAL_ITEM.name) == 0)
 				.collect(Collectors.toMap(i -> i.getKey(), i -> {
 			return Integer.parseInt(i.getValue().replace(i.getValue().replaceAll(DEFAULT_NUMBER_REGEX, EMPTY_STRING), EMPTY_STRING));
 		}));

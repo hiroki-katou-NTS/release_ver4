@@ -65,6 +65,7 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 	@Override
 	public List<ApproveRootStatusForEmpImport> getApprovalByEmplAndDate(GeneralDate startDate, GeneralDate endDate,
 			List<String> employeeIDs, String companyID, Integer rootType) {
+		
 		return intermediateDataPub.getAppRootStatusByEmpsPeriod(employeeIDs, new DatePeriod(startDate, endDate), rootType)
 				.stream()
 				.map((pub) -> new ApproveRootStatusForEmpImport(pub.getEmployeeID(), pub.getDate(),

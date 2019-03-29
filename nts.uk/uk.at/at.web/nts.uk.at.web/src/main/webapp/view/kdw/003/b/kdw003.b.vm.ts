@@ -326,13 +326,13 @@ module nts.uk.at.view.kdw003.b {
                          transfer.screenMode = 1;
                         jump("/view/kaf/002/b/index.xhtml", transfer);
                         break;
-
+                        
                     //                        case 14:
                     //                            //KAF004-遅刻早退取消申請
                     //                            nts.uk.request.jump("/view/kaer);
                     //                            break;
 
-                    case 15:
+                    case 14:
                         //KAF011-振休振出申請
                         jump("/view/kaf/011/a/index.xhtml", transfer);
                         break;

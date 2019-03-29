@@ -351,25 +351,28 @@ public class FlexTimeOfMonthly {
 			return;
 		}
 		
-		// 翌月繰越の時
-		if (this.flexAggrSet.getInsufficSet().getCarryforwardSet() == CarryforwardSetInShortageFlex.NEXT_MONTH_CARRYFORWARD){
-		
-			// 前月の「月別実績の勤怠時間」を取得する
-			val prevYearMonth = yearMonth.previousMonth();
-			val prevAttendanceTimeList =
-					repositories.getAttendanceTimeOfMonthly().findByYearMonthOrderByStartYmd(employeeId, prevYearMonth);
+		// 前月からのフレ不足を繰越
+		{
+			// フレックス不足時の繰越設定を確認する　→　翌月繰越の時
+			if (this.flexAggrSet.getInsufficSet().getCarryforwardSet() == CarryforwardSetInShortageFlex.NEXT_MONTH_CARRYFORWARD){
 			
-			// 前月のフレックス不足時間を取得する　（開始日が最も大きい日のデータ）
-			AttendanceTimeMonth prevFlexShortageTime = new AttendanceTimeMonth(0);
-			if (!prevAttendanceTimeList.isEmpty()){
-				val prevAttendanceTime = prevAttendanceTimeList.get(prevAttendanceTimeList.size() - 1);
-				val prevFlexTime = prevAttendanceTime.getMonthlyCalculation().getFlexTime();
-				prevFlexShortageTime = new AttendanceTimeMonth(prevFlexTime.getFlexShortageTime().v());
+				// 前月の「月別実績の勤怠時間」を取得する
+				val prevYearMonth = yearMonth.previousMonth();
+				val prevAttendanceTimeList =
+						repositories.getAttendanceTimeOfMonthly().findByYearMonthOrderByStartYmd(employeeId, prevYearMonth);
+				
+				// 前月のフレックス不足時間を取得する　（開始日が最も大きい日のデータ）
+				AttendanceTimeMonth prevFlexShortageTime = new AttendanceTimeMonth(0);
+				if (!prevAttendanceTimeList.isEmpty()){
+					val prevAttendanceTime = prevAttendanceTimeList.get(prevAttendanceTimeList.size() - 1);
+					val prevFlexTime = prevAttendanceTime.getMonthlyCalculation().getFlexTime();
+					prevFlexShortageTime = new AttendanceTimeMonth(prevFlexTime.getFlexShortageTime().v());
+				}
+				
+				// 前月のフレックス不足時間を当月のフレックス繰越時間にコピーする
+				this.flexCarryforwardTime.setFlexCarryforwardTime(
+						new AttendanceTimeMonth(prevFlexShortageTime.v()));
 			}
-			
-			// 前月のフレックス不足時間を当月のフレックス繰越時間にコピーする
-			this.flexCarryforwardTime.setFlexCarryforwardTime(
-					new AttendanceTimeMonth(prevFlexShortageTime.v()));
 		}
 		
 		if (flexAggregateMethod == FlexAggregateMethod.FOR_CONVENIENCE){
@@ -388,7 +391,27 @@ public class FlexTimeOfMonthly {
 					settingsByFlex.getStatutoryWorkingTimeMonth());
 		}
 		
-		// 年休・欠勤控除　準備
+		// 大塚モードの判断
+		{
+			// 大塚カスタマイズ（フレ永続繰越）
+			{
+				// フレックス繰越不足時間が計算されているか確認
+				int carryforwardShortageMinutes = this.flexCarryforwardTime.getFlexCarryforwardShortageTime().v();
+				if (carryforwardShortageMinutes > 0){
+					
+					// フレ不足時間←フレ繰越不足時間を加算
+					this.flexShortageTime = this.flexShortageTime.addMinutes(carryforwardShortageMinutes);
+					
+					// フレックス時間←フレ繰越不足時間を減算
+					this.flexTime.setFlexTime(this.flexTime.getFlexTime().addMinutes(-carryforwardShortageMinutes, 0));
+					
+					// フレ繰越不足時間←0:00
+					this.flexCarryforwardTime.setFlexCarryforwardShortageTime(new AttendanceTimeMonth(0));
+				}
+			}
+		}
+		
+		// 年休控除と欠勤控除のパラメータを確認する　（実際は、計算の早い段階（前月データ確認のタイミング）で確認している）
 		this.deductDaysAndTime = new DeductDaysAndTime(
 				this.flexShortDeductTime.getAnnualLeaveDeductDays(),
 				this.flexShortDeductTime.getAbsenceDeductTime());
@@ -863,11 +886,13 @@ public class FlexTimeOfMonthly {
 			else {
 				// 法定内・法定外フレックス時間に分けて計算する
 				
-				// 法定労働時間から代休分を引く
-				val compensatoryLeave = aggregateTotalWorkingTime.getVacationUseTime().getCompensatoryLeave();
-				compensatoryLeave.aggregate(datePeriod);
-				int statutoryAfterDeduct = statutoryWorkingTimeMonth.v() - compensatoryLeave.getUseTime().v();
-				if (statutoryAfterDeduct < 0) statutoryAfterDeduct = 0;
+				// 2019.03.27 DEL shuichi_ishida Redmine#106923
+//				// 法定労働時間から代休分を引く
+//				val compensatoryLeave = aggregateTotalWorkingTime.getVacationUseTime().getCompensatoryLeave();
+//				compensatoryLeave.aggregate(datePeriod);
+//				int statutoryAfterDeduct = statutoryWorkingTimeMonth.v() - compensatoryLeave.getUseTime().v();
+//				if (statutoryAfterDeduct < 0) statutoryAfterDeduct = 0;
+				int statutoryAfterDeduct = statutoryWorkingTimeMonth.v();
 				
 				// 法定内として扱う時間を求める
 				int treatLegal = statutoryAfterDeduct - compensatoryLeaveAfterDudection.v() - this.flexCarryforwardTime.getFlexCarryforwardWorkTime().v();

@@ -99,6 +99,8 @@ public class DailyPerformanceCorrectionDto {
 	
 	private int errorInfomation;
 	
+	private List<DPHideControlCell> lstHideControl = new ArrayList<>();
+	
 	public DailyPerformanceCorrectionDto() {
 		super();
 		this.lstFixedHeader = DPHeaderDto.GenerateFixedHeader();

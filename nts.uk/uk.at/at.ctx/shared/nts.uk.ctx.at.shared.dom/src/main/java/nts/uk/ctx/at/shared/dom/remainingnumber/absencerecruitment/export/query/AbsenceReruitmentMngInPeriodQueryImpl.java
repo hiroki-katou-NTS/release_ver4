@@ -223,7 +223,7 @@ public class AbsenceReruitmentMngInPeriodQueryImpl implements AbsenceReruitmentM
 			} else if (detailData.getOccurrentClass() == OccurrenceDigClass.OCCURRENCE) {
 				UnUseOfRec recData = detailData.getUnUseOfRec().get();
 				//期限切れかをチェックする
-				if(recData.getExpirationDate().before(baseDate)) {
+				if(recData.getExpirationDate().beforeOrEquals(baseDate)) {
 					//未消化日数 += ループ中の「振出の未使用」．未使用日数
 					outData.setUnDigestedDays(outData.getUnDigestedDays() + recData.getUnUseDays());
 				} else {

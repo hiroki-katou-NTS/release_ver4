@@ -144,7 +144,7 @@
 						<div data-bind="ntsFormLabel: { }">#{i18n.getText('KAF011_30')}</div>
 					</div>
 					<div class="div_line_col_2 working_hour">
-						<button id="recTimeBtn" data-bind=" click: openKDL003">#{i18n.getText('KAF011_5')}</button>
+						<button id="recTimeBtn" data-bind=" click: openKDL003,enable:$parent.kdl003BtnEnable">#{i18n.getText('KAF011_5')}</button>
 						<div data-bind='text:wkText'></div>
 					</div>
 				</div>
@@ -156,25 +156,25 @@
 						<input id="recTime1Start"
 							data-bind="ntsTimeWithDayEditor: { name: '#{i18n.getText('KAF011_32')}', 
 							value: startTime , enable: $parents[1].drawalReqSet().permissionDivision()!=0 , readonly: false , required: true ,option: timeOption }" />
-						<div class="cf"
+						<!-- <div class="cf"
 							data-bind="ntsSwitchButton: {
 							options: startTypes ,
 							optionsValue: 'code',
 							optionsText: 'text',
 							value: startType ,
-							enable: true }"></div>
+							enable: $parents[1].recTime1SwitchEnable }"></div> -->
 						<div>#{i18n.getText('KAF011_37')}</div>
 						<input id="recTime1End"
 							data-bind="ntsTimeWithDayEditor: { name: '#{i18n.getText('KAF011_33')}', 
 							value: endTime , enable: $parents[1].drawalReqSet().permissionDivision()!=0 , readonly: false , required: true ,option: timeOption }" />
 
-						<div class="cf"
+						<!-- <div class="cf"
 							data-bind="ntsSwitchButton: {
 							options: endTypes ,
 							optionsValue: 'code',
 							optionsText: 'text',
 							value: endType ,
-							enable: true }"></div>
+							enable: $parents[1].recTime1SwitchEnable }"></div> -->
 					</div>
 				</div>
 
@@ -221,8 +221,8 @@
 								<button data-bind="click:$parent.removeAbs" class="danger">#{i18n.getText('KAF011_24')}</button>
 								<button data-bind="click:$parent.cancelAbs">#{i18n.getText('KAF011_25')}</button>
 							</div> -->
-							<button style="display: inline-block;"
-								data-bind="click:openCDialog">#{i18n.getText('KAF011_26')}</button>
+							<!-- <button style="display: inline-block;"
+								data-bind="click:openCDialog">#{i18n.getText('KAF011_26')}</button> -->
 							<div style="display: inline-block;"
 								data-bind="if:wkType().workAtr() == 0">
 								<button data-bind="click:changeAbsDateToHoliday">#{i18n.getText('KAF011_27')}</button>
@@ -314,7 +314,7 @@
 										value: appReasonSelectedID ,
 										optionsText: 'reasonTemp',
 										editable: false,
-										enable: true,
+										enable: kaf011ReasonIsEditable ,
 										columns:[
 											{ prop: 'reasonTemp', length: 10 },
 										]}">
@@ -333,7 +333,7 @@
 						data-bind="ntsMultilineEditor: {
 									constraint: 'AppReason',
 									value: reason ,
-									enable:appTypeSet().displayAppReason() != 0,
+									enable: kaf011ReasonIsEditable ,
 									name: '#{i18n.getText('KAF011_17')}',
 									option: {
 									resizeable: false ,

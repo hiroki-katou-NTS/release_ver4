@@ -326,7 +326,7 @@ public class ScheCreExeMonthlyPatternHandler {
 			return true;
 		}
 
-		// 勤務種別変更者を再作成するか判定する
+		// 勤務種別変更者再作成を判定する
 		boolean valueIsReWorkerTypeChangePerson = masterCache.getBusinessTypeOfEmpDtos().isReWorkerTypeChangePerson(
 				workingConditionItem.getEmployeeId(),
 				dateInPeriod,
@@ -336,7 +336,7 @@ public class ScheCreExeMonthlyPatternHandler {
 			return true;
 		}
 
-		// 手修正を保護するか判定する
+		// 手修正保護判定をする
 		boolean valueIsProtectHandCorrect = this.isProtectHandCorrect(workingConditionItem.getEmployeeId(),
 				dateInPeriod,
 				command.getContent().getReCreateContent().getRebuildTargetDetailsAtr().getProtectHandCorrection());
@@ -348,9 +348,7 @@ public class ScheCreExeMonthlyPatternHandler {
 	}
 
 	/**
-	 * 異動者を再作成するか判定する
-	 * 
-	 * (異動者再作成を判定する)
+	 * 異動者再作成を判定する
 	 * 
 	 * @param empId
 	 * @param targetDate
@@ -361,16 +359,14 @@ public class ScheCreExeMonthlyPatternHandler {
 	private boolean isCreate(String empId, GeneralDate targetDate, Boolean recreateConverter, String wkpId,
 			EmployeeGeneralInfoImported empGeneralInfo) {
 		// パラメータ.異動者を再作成を判定する
-		if (!recreateConverter) {
-			return true;
-		}
-
 		// EA No1842
-		if (null == wkpId) {
+		// パラメータ職場IDを判定する
+		if (!recreateConverter || null == wkpId) {
 			return false;
 		}
 
 		// EA No1677
+		// 「社員の履歴情報」から該当社員、該当日の所属職場履歴を取得する
 		Map<String, List<ExWorkplaceHistItemImported>> mapWorkplaceHist = empGeneralInfo.getWorkplaceDto().stream()
 				.collect(Collectors.toMap(ExWorkPlaceHistoryImported::getEmployeeId,
 						ExWorkPlaceHistoryImported::getWorkplaceItems));
@@ -381,17 +377,14 @@ public class ScheCreExeMonthlyPatternHandler {
 			optWorkplaceHistItem = listWorkplaceHistItem.stream()
 					.filter(workplaceHistItem -> workplaceHistItem.getPeriod().contains(targetDate)).findFirst();
 		}
-
-		if (!optWorkplaceHistItem.isPresent()) {
-			return true;
+		
+		if (!optWorkplaceHistItem.isPresent() || optWorkplaceHistItem.get().getWorkplaceId().equals(wkpId)) {
+			// 取得できない
+			// 取得した職場ID　＝　パラメータ．職場ID
+			return false;
 		}
 
-		// 取得した職場IDとパラメータ.職場IDを比較する
-		if (!optWorkplaceHistItem.get().getWorkplaceId().equals(wkpId)) {
-			return true;
-		}
-
-		return false;
+		return true;
 	}
 
 	/**
@@ -403,10 +396,10 @@ public class ScheCreExeMonthlyPatternHandler {
 	 */
 	private boolean isReEmpOnLeaveOfAbsence(Boolean recreateEmployeeOffWork, int statusOfEmployment) {
 		// 「在職状態.休職」 = 2 または 「在職状態.休業」 = 3 の場合
-		if (!recreateEmployeeOffWork || statusOfEmployment == 2 || statusOfEmployment == 3) {
-			return true;
+		if (!recreateEmployeeOffWork || (statusOfEmployment != 2 && statusOfEmployment != 3)) {
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	/**
@@ -418,15 +411,15 @@ public class ScheCreExeMonthlyPatternHandler {
 	 */
 	private boolean isReDirectBounceBackEmp(Boolean recreateDirectBouncer, NotUseAtr autoStampSetAtr) {
 		// 「在職状態.休職」 = 2 または 「在職状態.休業」 = 3 の場合
-		if (!recreateDirectBouncer || autoStampSetAtr == NotUseAtr.USE) {
-			return true;
+		if (!recreateDirectBouncer || autoStampSetAtr == NotUseAtr.NOTUSE) {
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 
 	/**
-	 * 手修正を保護するか判定する
+	 * 手修正保護判定をする
 	 * 
 	 * @param empId
 	 * @param targetDate
@@ -434,13 +427,14 @@ public class ScheCreExeMonthlyPatternHandler {
 	 * @return
 	 */
 	private boolean isProtectHandCorrect(String empId, GeneralDate targetDate, Boolean protectHandCorrection) {
+		// パラメータ．手修正を保護を判定する
 		if (!protectHandCorrection)
-			return true;
+			return false;
 		List<WorkScheduleState> listWorkScheduleState = this.workScheduleStateRepo.findByDateAndEmpId(empId,
 				targetDate);
 		if (listWorkScheduleState.size() == 0)
-			return true;
+			return false;
 
-		return false;
+		return true;
 	}
 }

@@ -229,12 +229,12 @@ public class DPLock {
 			}
 		}
 		
-		if(approvalUseSettingDto.isPresent()){
-			if(approvalUseSettingDto.get().getUseMonthApproverConfirm()) {
-				//dto.setLockCheckMonth(lockCheckMonth(dateRange, employeeIds));
-			}
-			if(approvalUseSettingDto.get().getUseDayApproverConfirm()) dto.setLockCheckApprovalDay(getCheckApproval(employeeIds, dateRange, employeeIdApproval, mode));
-		}
+//		if(approvalUseSettingDto.isPresent()){
+//			if(approvalUseSettingDto.get().getUseMonthApproverConfirm()) {
+//				//dto.setLockCheckMonth(lockCheckMonth(dateRange, employeeIds));
+//			}
+//			if(approvalUseSettingDto.get().getUseDayApproverConfirm()) dto.setLockCheckApprovalDay(getCheckApproval(employeeIds, dateRange, employeeIdApproval, mode));
+//		}
 		dto.setLockHist(lockHistMap(companyId, employeeIds));
 		return dto;
 	}

@@ -132,7 +132,7 @@ public class SprDailyStatusImpl implements SprDailyStatusService {
 		List<AppRootStateStatusSprExport> appRootStateStatusSprList = intermediateDataPub.getAppRootStatusByEmpPeriod(
 				employeeID, 
 				new DatePeriod(appDate, appDate), 
-				1);
+				1).getAppRootStateStatusLst();
 		if(CollectionUtil.isEmpty(appRootStateStatusSprList)){
 			return 0;
 		}

@@ -2,13 +2,16 @@ package nts.uk.ctx.workflow.dom.resultrecord;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.Value;
 import lombok.val;
-import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.DailyConfirmAtr;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootStateStatus;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 実績確認状態
@@ -54,28 +57,87 @@ public class AppRootRecordConfirmForQuery {
 	
 	public static class List {
 		
-		private final java.util.List<AppRootRecordConfirmForQuery> list;
+		private final Map<String, Map<GeneralDate, AppRootRecordConfirmForQuery>> mapConfirms;
 		
 		public List(java.util.List<AppRootRecordConfirmForQuery> list) {
-			this.list = Collections.unmodifiableList(list);
+			
+			this.mapConfirms = new HashMap<>();
+			for (val confirm : list) {
+				String employeeId = confirm.getEmployeeId();
+				if (!this.mapConfirms.containsKey(employeeId)) {
+					this.mapConfirms.put(employeeId, new HashMap<>());
+				}
+				
+				val mapForOneEmployee = this.mapConfirms.get(employeeId);
+				mapForOneEmployee.put(confirm.getRecordDate(), confirm);
+			}
 		}
 		
-		public java.util.List<ApprovalRootStateStatus> aggregate(AppRootIntermForQuery.List interms) {
+		/**
+		 * 中間データのフェーズ情報をもとに承認状況を集約する
+		 * @param period 対象期間
+		 * @param employeeId 対象社員
+		 * @param interms 中間データ
+		 * @return
+		 */
+		public AggregateResult aggregate(DatePeriod period, String employeeId, AppRootIntermForQuery.List interms) {
+
+			val mapForOneEmployee = this.mapConfirms.get(employeeId);
 			
-			java.util.List<ApprovalRootStateStatus> results = new ArrayList<>();
-			
-			for (val confirm : this.list) {
-				
-				val interm = interms.find(confirm.employeeId, confirm.recordDate)
-						.orElseThrow(() -> new BusinessException("Msg_1430", "承認者"));
-				
-				results.add(new ApprovalRootStateStatus(
-						confirm.recordDate,
-						confirm.employeeId,
-						confirm.getConfirmStatus(interm.getFinalPhaseOrder())));
+			// 該当社員の実績データが1つも無い
+			if (mapForOneEmployee == null) {
+				return allUnapproved(period, employeeId);
 			}
 			
-			return results;
+			val results = new ArrayList<ApprovalRootStateStatus>();
+			boolean isError = false;
+			
+			for (val date : period.datesBetween()) {
+
+				AppRootRecordConfirmForQuery confirm = mapForOneEmployee.get(date);
+				
+				// 実績データが無い
+				if (confirm == null) {
+					results.add(new ApprovalRootStateStatus(date, employeeId, DailyConfirmAtr.UNAPPROVED));
+					continue;
+				}
+				
+				val intermOpt = interms.find(employeeId, date);
+				
+				// 中間データに承認者が設定されていない
+				if (!intermOpt.isPresent()) {
+					isError = true;
+					continue;
+				}
+				
+				results.add(createStatus(confirm, intermOpt.get()));
+			}
+			
+			return new AggregateResult(results, isError);
+		}
+
+		private ApprovalRootStateStatus createStatus(AppRootRecordConfirmForQuery confirm, AppRootIntermForQuery interm) {
+			
+			return new ApprovalRootStateStatus(
+					confirm.getRecordDate(),
+					confirm.getEmployeeId(),
+					confirm.getConfirmStatus(interm.getFinalPhaseOrder()));
+		}
+
+		private static AggregateResult allUnapproved(DatePeriod period, String employeeId) {
+			
+			val emptyResults = period.datesBetween().stream()
+					.map(date -> new ApprovalRootStateStatus(date, employeeId, DailyConfirmAtr.UNAPPROVED))
+					.collect(Collectors.toList());
+			
+			return new AggregateResult(emptyResults, false);
+		}
+		
+		@Value
+		public static class AggregateResult {
+			
+			private final java.util.List<ApprovalRootStateStatus> results;
+			private final boolean error;
 		}
 	}
 	
