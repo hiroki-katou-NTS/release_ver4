@@ -156,25 +156,25 @@
 						<input id="recTime1Start"
 							data-bind="ntsTimeWithDayEditor: { name: '#{i18n.getText('KAF011_32')}', 
 							value: startTime , enable: $parents[1].drawalReqSet().permissionDivision()!=0 , readonly: false , required: true ,option: timeOption }" />
-						<div class="cf"
+						<!-- <div class="cf"
 							data-bind="ntsSwitchButton: {
 							options: startTypes ,
 							optionsValue: 'code',
 							optionsText: 'text',
 							value: startType ,
-							enable: $parents[1].recTime1SwitchEnable }"></div>
+							enable: $parents[1].recTime1SwitchEnable }"></div> -->
 						<div>#{i18n.getText('KAF011_37')}</div>
 						<input id="recTime1End"
 							data-bind="ntsTimeWithDayEditor: { name: '#{i18n.getText('KAF011_33')}', 
 							value: endTime , enable: $parents[1].drawalReqSet().permissionDivision()!=0 , readonly: false , required: true ,option: timeOption }" />
 
-						<div class="cf"
+						<!-- <div class="cf"
 							data-bind="ntsSwitchButton: {
 							options: endTypes ,
 							optionsValue: 'code',
 							optionsText: 'text',
 							value: endType ,
-							enable: $parents[1].recTime1SwitchEnable }"></div>
+							enable: $parents[1].recTime1SwitchEnable }"></div> -->
 					</div>
 				</div>
 
