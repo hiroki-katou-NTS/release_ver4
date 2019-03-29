@@ -512,26 +512,12 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		queryData.setDatePeriod(lstDate);
 		
 		Map<String, WorkplaceInfo> lstWorkplace = new TreeMap<>(); // Automatically sort by code, will need to check hierarchy later
-		List<String> lstWorkplaceId = new ArrayList<>();
+		List<String> lstWorkplaceId;
 		List<String> lstEmployeeNoWorkplace = new ArrayList<>();
 		
 		// Push all employeeId into print order
 		List<EmployeePrintOrder> lstEmployeePrintOrder = new ArrayList<>();
 		int order = 0;
-
-/*		// Get all workplace of selected employees within given period
-		for (String employeeId: query.getEmployeeId()) {
-			WkpHistImport workplaceHist = workplaceAdapter.findWkpBySid(employeeId, baseDate);
-			if (workplaceHist == null) {
-				lstEmployeeNoWorkplace.add(employeeId);
-				continue;
-			}
-			lstWorkplaceId.add(workplaceHist.getWorkplaceId());
-			queryData.getLstWorkplaceImport().add(workplaceHist);
-
-			// Also add into print order list
-			lstEmployeePrintOrder.add(new EmployeePrintOrder(order++, employeeId));
-		}*/
 
 		/*
 		 * Tuning performance
@@ -547,7 +533,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
         }
 
         lstWorkplaceId = workplaceHists.values().stream().map(WkpHistImport::getWorkplaceId).distinct().collect(Collectors.toList());
-        queryData.setLstWorkplaceImport(new ArrayList<>(workplaceHists.values()));
+        queryData.setLstWorkplaceImport(workplaceHists);
 
         // Also add into print order list
         for (String key : workplaceHists.keySet()) {
@@ -576,9 +562,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			}
 			
 			// Remove all of these employees from original list
-			lstEmployeeNoWorkplace.stream().forEach(employee -> {
-				query.getEmployeeId().remove(employee);
-			});
+			lstEmployeeNoWorkplace.forEach(employee -> query.getEmployeeId().remove(employee));
 			
 			// Stop sequence if no employee left
 			if (query.getEmployeeId().isEmpty())
@@ -596,9 +580,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 //		List<Integer> itemsId = AttendanceResultImportAdapter.convertList(outputItem.getLstDisplayedAttendance(), x -> x.getAttendanceDisplay());
 		List<Integer> itemsId = lstHaveName;
 		// Add additional item from remark input
-		List<RemarksContentChoice> lstRemarkEnable = outputItem.getLstRemarkContent().stream().filter(x -> x.isUsedClassification()).map(x -> {
-			return x.getPrintItem();
-		}).collect(Collectors.toList());
+		List<RemarksContentChoice> lstRemarkEnable = outputItem.getLstRemarkContent().stream().filter(PrintRemarksContent::isUsedClassification).map(PrintRemarksContent::getPrintItem).collect(Collectors.toList());
 		if (lstRemarkEnable.contains(RemarksContentChoice.REMARKS_INPUT))
 			itemsId.add(outputItem.getRemarkInputNo().value + 833); // Remark no (0~4) -> attendanceId (833~837)
 		
@@ -619,9 +601,9 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		List<String> lstEmployeeWithData = lstAttendanceResultImport.stream().map(AttendanceResultImport::getEmployeeId).distinct().collect(Collectors.toList());
 		
 		// From list employeeId above -> Find back their workplace hierachy code
-		Set<String> lstWorkplaceIdWithData = new HashSet<>();
+		Set<String> lstWorkplaceIdWithData;
 		lstWorkplaceIdWithData = lstEmployeeWithData.stream().map(employeeId -> {
-			WkpHistImport workplaceImport = queryData.getLstWorkplaceImport().stream().filter(hist -> StringUtils.equalsIgnoreCase(hist.getEmployeeId(), employeeId) ).findFirst().get();
+			WkpHistImport workplaceImport = queryData.getLstWorkplaceImport().get(employeeId);
 			WorkplaceHierarchy code = lstWorkplaceConfigInfo.stream().filter(x -> StringUtils.equalsIgnoreCase(x.getLstWkpHierarchy().get(0).getWorkplaceId(), workplaceImport.getWorkplaceId())).findFirst().get().getLstWkpHierarchy().get(0);
 			return code.getHierarchyCode().v();
 		}).collect(Collectors.toSet());
@@ -825,7 +807,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		Map<String, Map<GeneralDate, AttendanceResultImport>> lstAttendanceResultImport = queryData.getLstAttendanceResultImport()
 				.stream().collect(Collectors.groupingBy(AttendanceResultImport::getEmployeeId, Collectors.toMap(AttendanceResultImport::getWorkingDate, Function.identity())));
 		List<AttendanceItemsDisplay> lstDisplayItem = queryData.getLstDisplayItem();
-		List<WkpHistImport> lstWorkplaceHistImport = queryData.getLstWorkplaceImport();
+		Map<String, WkpHistImport> lstWorkplaceHistImport = queryData.getLstWorkplaceImport();
 		List<OptionalItem> lstOptionalItem = queryData.getLstOptionalItem();
 		
 		// Get all error alarm code
@@ -836,156 +818,159 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		
 		List<EmployeeDailyPerError> errorListAllEmployee = errorAlarmRepository.finds(lstEmployeeId, new DatePeriod(query.getStartDate(), endDate));
 		// Get list remark check box from screen C (UI)
-		List<PrintRemarksContent> lstRemarkContent = outSche.getLstRemarkContent();
+		List<PrintRemarksContent> lstRemarkContentUsedClassification = outSche.getLstRemarkContent().stream().filter(PrintRemarksContent::isUsedClassification).collect(Collectors.toList());
 
         List<String> tempErrorCode = errorListAllEmployee.stream().map(x -> x.getErrorAlarmWorkRecordCode().v()).distinct().collect(Collectors.toList());
 		List<ErrorAlarmWorkRecord> lstAllErrorRecord = errorAlarmWorkRecordRepo.getListErAlByListCode(companyId, tempErrorCode);
-		
+
+		Map<GeneralDate, WorkplaceDailyReportData> workplaceDailyReportDataMap = reportData.getDailyReportData().getLstDailyReportData().stream().collect(Collectors.toMap(WorkplaceDailyReportData::getDate, Function.identity()));
+
 		for (String employeeId: lstEmployeeId) {
 			EmployeeDto optEmployeeDto = lstEmployeeDto.get(employeeId);
 
-			datePeriod.stream().forEach(date -> {
-                Optional<WorkplaceDailyReportData> optDailyWorkplaceData = reportData.getDailyReportData().getLstDailyReportData().stream().filter(x -> x.getDate().compareTo(date) == 0).findFirst();
-                DailyWorkplaceData dailyWorkplaceData = findWorkplace(employeeId, optDailyWorkplaceData.get().getLstWorkplaceData(), query.getBaseDate(), lstWorkplaceHistImport, queryData.getLstWorkplaceConfigInfo());
-                if (dailyWorkplaceData != null) {
-                    DailyPersonalPerformanceData personalPerformanceDate = new DailyPersonalPerformanceData();
-                    if (optEmployeeDto != null) {
-                        personalPerformanceDate.setEmployeeName(optEmployeeDto.getEmployeeName());
-                        personalPerformanceDate.setEmployeeCode(optEmployeeDto.getEmployeeCode());
-                    }
-                    dailyWorkplaceData.getLstDailyPersonalData().add(personalPerformanceDate);
+			datePeriod.forEach(date -> {
+				if (workplaceDailyReportDataMap.containsKey(date)) {
+					WorkplaceDailyReportData optDailyWorkplaceData = workplaceDailyReportDataMap.get(date);
+					DailyWorkplaceData dailyWorkplaceData = findWorkplace(employeeId, optDailyWorkplaceData.getLstWorkplaceData(), query.getBaseDate(), lstWorkplaceHistImport, queryData.getLstWorkplaceConfigInfo());
+					if (dailyWorkplaceData != null) {
+						DailyPersonalPerformanceData personalPerformanceDate = new DailyPersonalPerformanceData();
+						if (optEmployeeDto != null) {
+							personalPerformanceDate.setEmployeeName(optEmployeeDto.getEmployeeName());
+							personalPerformanceDate.setEmployeeCode(optEmployeeDto.getEmployeeCode());
+						}
+						dailyWorkplaceData.getLstDailyPersonalData().add(personalPerformanceDate);
 
-                    if (lstAttendanceResultImport.get(employeeId) != null) {
-                        AttendanceResultImport attResultImport = lstAttendanceResultImport.get(employeeId).get(date);
-                        if (attResultImport != null) {
-                            GeneralDate workingDate = attResultImport.getWorkingDate();
+						if (lstAttendanceResultImport.containsKey(employeeId) && lstAttendanceResultImport.get(employeeId).containsKey(date)) {
+							AttendanceResultImport attResultImport = lstAttendanceResultImport.get(employeeId).get(date);
+							GeneralDate workingDate = attResultImport.getWorkingDate();
 
-                            // ドメインモデル「日別勤務表の出力項目」を取得する
-                            List<EmployeeDailyPerError> errorList = errorListAllEmployee.stream()
-                                    .filter(error -> StringUtils.equalsAnyIgnoreCase(error.getEmployeeID(), employeeId) && error.getDate().compareTo(workingDate) == 0).collect(Collectors.toList());
-                            // Manually set error list into remark query data container
-                            queryData.getRemarkDataContainter().setErrorList(errorList);
+							// ドメインモデル「日別勤務表の出力項目」を取得する
+							List<EmployeeDailyPerError> errorList = errorListAllEmployee.stream()
+									.filter(error -> StringUtils.equalsAnyIgnoreCase(error.getEmployeeID(), employeeId) && error.getDate().compareTo(workingDate) == 0).collect(Collectors.toList());
+							// Manually set error list into remark query data container
+							queryData.getRemarkDataContainter().setErrorList(errorList);
 
-                            List<String> lstRemarkContentStr = new ArrayList<>();
-                            if (query.getCondition().getErrorAlarmCode().isPresent()) {
-                                personalPerformanceDate.detailedErrorData = "";
+							List<String> lstRemarkContentStr = new ArrayList<>();
+							if (query.getCondition().getErrorAlarmCode().isPresent()) {
+								personalPerformanceDate.detailedErrorData = "";
 
-                                lstRemarkContent.stream().filter(remark -> remark.isUsedClassification()).forEach(remark -> {
+								lstRemarkContentUsedClassification.forEach(remark -> {
 
-                                    // Append 備考入力
-                                    if (remark.getPrintItem() == RemarksContentChoice.REMARKS_INPUT) {
-                                        Optional<AttendanceItemValueImport> optRemarkInput = attResultImport.getAttendanceItems().stream().filter(att -> att.getItemId() == outSche.getRemarkInputNo().value + 833).findFirst();
-                                        if (optRemarkInput.isPresent()) {
-                                            String value = optRemarkInput.get().getValue();
+									// Append 備考入力
+									if (remark.getPrintItem() == RemarksContentChoice.REMARKS_INPUT) {
+										Optional<AttendanceItemValueImport> optRemarkInput = attResultImport.getAttendanceItems().stream().filter(att -> att.getItemId() == outSche.getRemarkInputNo().value + 833).findFirst();
+										if (optRemarkInput.isPresent()) {
+											String value = optRemarkInput.get().getValue();
 //										value = StringUtils.substring(value, 0, 9); // Already dealt with null possibility
-                                            if (value != null) {
-                                                value = StringLength.cutOffAsLengthHalf(value, LIMIT_REMARK_INPUT);
-                                            }
-                                            personalPerformanceDate.detailedErrorData += (value == null ? "" : value + " ");
-                                        }
-                                    }
-                                    // Append マスタ未登録
-                                    else if (remark.getPrintItem() == RemarksContentChoice.MASTER_UNREGISTERED) {
-                                        List<AttendanceItemValueImport> lstItemMasterUnregistered = attResultImport.getAttendanceItems().stream().
-                                                filter(att -> EnumAdaptor.valueOf(att.getValueType(), ValueType.class) == ValueType.CODE).collect(Collectors.toList());
+											if (value != null) {
+												value = StringLength.cutOffAsLengthHalf(value, LIMIT_REMARK_INPUT);
+											}
+											personalPerformanceDate.detailedErrorData += (value == null ? "" : value + " ");
+										}
+									}
+									// Append マスタ未登録
+									else if (remark.getPrintItem() == RemarksContentChoice.MASTER_UNREGISTERED) {
+										List<AttendanceItemValueImport> lstItemMasterUnregistered = attResultImport.getAttendanceItems().stream().
+												filter(att -> EnumAdaptor.valueOf(att.getValueType(), ValueType.class) == ValueType.CODE).collect(Collectors.toList());
 
-                                        List<String> names = lstItemMasterUnregistered.stream()
-                                                .map(item -> this.getNameFromCode(item.getItemId(),
-                                                        item.getValue(), queryData, outSche))
-                                                .collect(Collectors.toList());
+										List<String> names = lstItemMasterUnregistered.stream()
+												.map(item -> this.getNameFromCode(item.getItemId(),
+														item.getValue(), queryData, outSche))
+												.collect(Collectors.toList());
 
-                                        boolean masterUnregistedFlag = names.stream()
-                                                .anyMatch(item -> StringUtils.equalsIgnoreCase(item,
-                                                        MASTER_UNREGISTERED));
+										boolean masterUnregistedFlag = names.stream()
+												.anyMatch(item -> StringUtils.equalsIgnoreCase(item,
+														MASTER_UNREGISTERED));
 
-                                        if (masterUnregistedFlag) {
-                                            lstRemarkContentStr.add(TextResource.localize(RemarksContentChoice.MASTER_UNREGISTERED.shortName));
-                                        }
-                                    } else {
-                                        // Get possible content based on remark choice
-                                        Optional<PrintRemarksContent> optContent = getRemarkContent(employeeId, workingDate, remark.getPrintItem(), lstErAlCode, queryData.getRemarkDataContainter());
-                                        if (optContent.isPresent()) {
-                                            // Add to remark
-                                            lstRemarkContentStr.add(TextResource.localize(optContent.get().getPrintItem().shortName));
-                                        }
-                                    }
-                                });
+										if (masterUnregistedFlag) {
+											lstRemarkContentStr.add(TextResource.localize(RemarksContentChoice.MASTER_UNREGISTERED.shortName));
+										}
+									} else {
+										// Get possible content based on remark choice
+										Optional<PrintRemarksContent> optContent = getRemarkContent(employeeId, workingDate, remark.getPrintItem(), lstErAlCode, queryData.getRemarkDataContainter());
+										if (optContent.isPresent()) {
+											// Add to remark
+											lstRemarkContentStr.add(TextResource.localize(optContent.get().getPrintItem().shortName));
+										}
+									}
+								});
 
-                                // Analyze remark content size and append remark content list
-                                StringBuilder stringBuilder = new StringBuilder();
-                                for (int i = 0; i < lstRemarkContentStr.size(); i++) {
-                                    String remarkContentStr = lstRemarkContentStr.get(i);
-                                    int bufferedLength = personalPerformanceDate.detailedErrorData.length() + 5;
-                                    if (bufferedLength >= 35 && dataRowCount == 1) {
-                                        stringBuilder.append(" 他").append(lstRemarkContentStr.size() - i - 1).append("件");
-                                    } else {
-                                        stringBuilder.append(" ").append(remarkContentStr);
-                                    }
-                                }
-                                personalPerformanceDate.detailedErrorData += stringBuilder.toString();
-                            }
+								// Analyze remark content size and append remark content list
+								StringBuilder remarkContentBuilder = new StringBuilder();
+								for (int i = 0; i < lstRemarkContentStr.size(); i++) {
+									String remarkContentStr = lstRemarkContentStr.get(i);
+									int bufferedLength = personalPerformanceDate.detailedErrorData.length() + 5;
+									if (bufferedLength >= 35 && dataRowCount == 1) {
+										remarkContentBuilder.append(" 他").append(lstRemarkContentStr.size() - i - 1).append("件");
+									} else {
+										remarkContentBuilder.append(" ").append(remarkContentStr);
+									}
+								}
+								personalPerformanceDate.detailedErrorData += remarkContentBuilder.toString();
+							}
 
-                            // ER/AL
-                            if (query.getCondition().getConditionSetting() == OutputConditionSetting.USE_CONDITION) {
-                                boolean erMark = false, alMark = false;
+							// ER/AL
+							if (query.getCondition().getConditionSetting() == OutputConditionSetting.USE_CONDITION) {
+								boolean erMark = false, alMark = false;
 
-                                List<String> lstErrorCode = errorList.stream().map(error -> error.getErrorAlarmWorkRecordCode().v()).collect(Collectors.toList());
-                                // ドメインモデル「勤務実績のエラーアラーム」を取得する
+								List<String> lstErrorCode = errorList.stream().map(error -> error.getErrorAlarmWorkRecordCode().v()).collect(Collectors.toList());
+								// ドメインモデル「勤務実績のエラーアラーム」を取得する
 
-                                List<ErrorAlarmWorkRecord> lstErrorRecord = lstAllErrorRecord.stream().filter(err -> {
-                                    return lstErrorCode.contains(err.getCode().v());
-                                }).collect(Collectors.toList());
+								List<ErrorAlarmWorkRecord> lstErrorRecord = lstAllErrorRecord.stream().filter(err -> {
+									return lstErrorCode.contains(err.getCode().v());
+								}).collect(Collectors.toList());
 
-                                for (ErrorAlarmWorkRecord error : lstErrorRecord) {
-                                    // コードから区分を取得する
-                                    switch (error.getTypeAtr()) {
-                                        case ALARM: // 区分　＝　エラー　のとき　AL
-                                            alMark = true;
-                                            break;
-                                        case ERROR: // 区分　=　アラーム　のとき　ER
-                                            erMark = true;
-                                            break;
-                                        case OTHER:
-                                            break;
-                                    }
-                                    if (erMark && alMark) break;
-                                }
-                                if (erMark && alMark) {
-                                    personalPerformanceDate.errorAlarmCode = WorkScheOutputConstants.ER_AL;
-                                } else if (erMark) {
-                                    personalPerformanceDate.errorAlarmCode = WorkScheOutputConstants.ER;
-                                } else if (alMark) {
-                                    personalPerformanceDate.errorAlarmCode = WorkScheOutputConstants.AL;
-                                }
-                            }
-                            personalPerformanceDate.actualValue = new ArrayList<>();
-                            lstDisplayItem.stream().forEach(item -> {
-                                Optional<AttendanceItemValueImport> optItemValue = attResultImport.getAttendanceItems().stream().filter(att -> att.getItemId() == item.getAttendanceDisplay()).findFirst();
-                                if (optItemValue.isPresent()) {
-                                    AttendanceItemValueImport itemValue = optItemValue.get();
-                                    ValueType valueTypeEnum = EnumAdaptor.valueOf(itemValue.getValueType(), ValueType.class);
-                                    int attendanceId = itemValue.getItemId();
-                                    if ((valueTypeEnum == ValueType.CODE || valueTypeEnum == ValueType.ATTR) && itemValue.getValue() != null) {
-                                        String value = this.getNameFromCode(attendanceId, itemValue.getValue(), queryData, outSche);
-                                        itemValue.setValue(value);
-                                    }
-                                    // Workaround for optional attendance item from KMK002
-                                    if (attendanceId >= ATTENDANCE_ID_OPTIONAL_START && attendanceId <= ATTENDANCE_ID_OPTIONAL_END) {
-                                        Optional<OptionalItem> optOptionalItem = lstOptionalItem.stream().filter(opt -> opt.getOptionalItemNo().v() == attendanceId - 640).findFirst();
-                                        optOptionalItem.ifPresent(optionalItem -> {
-                                            switch (optionalItem.getOptionalItemAtr()) {
-                                                case TIME:
-                                                    //int val = Integer.parseInt(itemValue.getValue());
-                                                    itemValue.setValueType(ValueType.TIME.value);
-                                                    break;
-                                                case NUMBER:
-                                                    itemValue.setValueType(ValueType.COUNT_WITH_DECIMAL.value);
-                                                    break;
-                                                case AMOUNT:
-                                                    itemValue.setValueType(ValueType.AMOUNT.value);
-                                                    break;
-                                            }
-                                        });
+								for (ErrorAlarmWorkRecord error : lstErrorRecord) {
+									// コードから区分を取得する
+									switch (error.getTypeAtr()) {
+										case ALARM: // 区分　＝　エラー　のとき　AL
+											alMark = true;
+											break;
+										case ERROR: // 区分　=　アラーム　のとき　ER
+											erMark = true;
+											break;
+										case OTHER:
+											break;
+									}
+									if (erMark && alMark) break;
+								}
+								if (erMark && alMark) {
+									personalPerformanceDate.errorAlarmCode = WorkScheOutputConstants.ER_AL;
+								} else if (erMark) {
+									personalPerformanceDate.errorAlarmCode = WorkScheOutputConstants.ER;
+								} else if (alMark) {
+									personalPerformanceDate.errorAlarmCode = WorkScheOutputConstants.AL;
+								}
+							}
+							personalPerformanceDate.actualValue = new ArrayList<>();
+
+							Map<Integer, AttendanceItemValueImport> mapAttItemValueImport = attResultImport.getAttendanceItems().stream().collect(Collectors.toMap(AttendanceItemValueImport::getItemId, Function.identity()));
+							lstDisplayItem.forEach(item -> {
+								if (mapAttItemValueImport.containsKey(item.getAttendanceDisplay())) {
+									AttendanceItemValueImport itemValue = mapAttItemValueImport.get(item.getAttendanceDisplay());
+									ValueType valueTypeEnum = EnumAdaptor.valueOf(itemValue.getValueType(), ValueType.class);
+									int attendanceId = itemValue.getItemId();
+									if ((valueTypeEnum == ValueType.CODE || valueTypeEnum == ValueType.ATTR) && itemValue.getValue() != null) {
+										String value = this.getNameFromCode(attendanceId, itemValue.getValue(), queryData, outSche);
+										itemValue.setValue(value);
+									}
+									// Workaround for optional attendance item from KMK002
+									if (attendanceId >= ATTENDANCE_ID_OPTIONAL_START && attendanceId <= ATTENDANCE_ID_OPTIONAL_END) {
+										Optional<OptionalItem> optOptionalItem = lstOptionalItem.stream().filter(opt -> opt.getOptionalItemNo().v() == attendanceId - 640).findFirst();
+										optOptionalItem.ifPresent(optionalItem -> {
+											switch (optionalItem.getOptionalItemAtr()) {
+												case TIME:
+													//int val = Integer.parseInt(itemValue.getValue());
+													itemValue.setValueType(ValueType.TIME.value);
+													break;
+												case NUMBER:
+													itemValue.setValueType(ValueType.COUNT_WITH_DECIMAL.value);
+													break;
+												case AMOUNT:
+													itemValue.setValueType(ValueType.AMOUNT.value);
+													break;
+											}
+										});
 
 //									try {
 //										int val = Integer.parseInt(itemValue.getValue());
@@ -993,16 +978,16 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 //									} catch (Exception e) {
 //										itemValue.setValueType(ValueType.AMOUNT.value);
 //									}
-                                    }
-                                    personalPerformanceDate.actualValue.add(new ActualValue(itemValue.getItemId(), itemValue.getValue(), itemValue.getValueType()));
-                                } else {
-                                    personalPerformanceDate.actualValue.add(new ActualValue(item.getAttendanceDisplay(), "", ActualValue.STRING));
-                                }
-                                dailyWorkplaceData.hasData = true;
-                            });
-                        }
-                    }
-                }
+									}
+									personalPerformanceDate.actualValue.add(new ActualValue(itemValue.getItemId(), itemValue.getValue(), itemValue.getValueType()));
+								} else {
+									personalPerformanceDate.actualValue.add(new ActualValue(item.getAttendanceDisplay(), "", ActualValue.STRING));
+								}
+								dailyWorkplaceData.hasData = true;
+							});
+						}
+					}
+				}
 			});
 			
 			
@@ -1028,9 +1013,9 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		OutputItemDailyWorkSchedule outSche = outputItemRepo.findByCidAndCode(companyId, condition.getCode().v()).get();
 		
 		// Get all data from query data container
-		List<AttendanceResultImport> lstAttendanceResultImport = queryData.getLstAttendanceResultImport();
+		Map<String, List<AttendanceResultImport>> lstAttendanceResultImport = queryData.getLstAttendanceResultImport().stream().collect(Collectors.groupingBy(AttendanceResultImport::getEmployeeId));
 		List<AttendanceItemsDisplay> lstDisplayItem = queryData.getLstDisplayItem();
-		List<WkpHistImport> lstWorkplaceImport = queryData.getLstWorkplaceImport();
+		Map<String, WkpHistImport> lstWorkplaceImport = queryData.getLstWorkplaceImport();
 		List<WorkplaceConfigInfo> lstWorkplaceConfigInfo = queryData.getLstWorkplaceConfigInfo();
 		List<OptionalItem> lstOptionalItem = queryData.getLstOptionalItem();
 		String employeeId = employeeDto.getEmployeeId();
@@ -1066,150 +1051,148 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		
 		WorkplaceReportData workplaceData = findWorkplace(employeeId, reportData.getWorkplaceReportData(), query.getBaseDate(), lstWorkplaceImport, lstWorkplaceConfigInfo);
 		workplaceData.lstEmployeeReportData.add(employeeData);
-		
-		lstAttendanceResultImport.stream().filter(x -> x.getEmployeeId().equals(employeeId)).sorted((o1,o2) -> o1.getWorkingDate().compareTo(o2.getWorkingDate())).forEach(x -> {
-			GeneralDate workingDate = x.getWorkingDate();
-			
-			DetailedDailyPerformanceReportData detailedDate = new DetailedDailyPerformanceReportData();
-			detailedDate.setDate(workingDate);
-			detailedDate.setDayOfWeek(String.valueOf(workingDate.dayOfWeek()));
-			employeeData.lstDetailedPerformance.add(detailedDate);
-			
-			// ドメインモデル「社員の日別実績エラー一覧」を取得する
-			List<EmployeeDailyPerError> errorList = errorAlarmRepository.find(employeeId, workingDate);
 
-			// Manually set error list into remark data container
-			queryData.getRemarkDataContainter().setErrorList(errorList);
-			
-			List<String> lstRemarkContentStr = new ArrayList<>();
-			detailedDate.errorDetail = "";
-			if (query.getCondition().getErrorAlarmCode().isPresent()) {
-				// Get list remark check box from screen C (UI)
-				List<PrintRemarksContent> lstRemarkContent = outSche.getLstRemarkContent();
-				lstRemarkContent.stream().filter(remark -> remark.isUsedClassification()).forEach(remark -> {
-					// Append 備考入力
-					if (remark.getPrintItem() == RemarksContentChoice.REMARKS_INPUT) {
-						Optional<AttendanceItemValueImport> optRemarkInput = x.getAttendanceItems().stream().filter(att -> att.getItemId() == outSche.getRemarkInputNo().value + 833).findFirst();
-						if (optRemarkInput.isPresent()) {
-							String value = optRemarkInput.get().getValue();
+		if(lstAttendanceResultImport.containsKey(employeeId)) {
+			lstAttendanceResultImport.get(employeeId).stream().sorted((o1, o2) -> o1.getWorkingDate().compareTo(o2.getWorkingDate())).forEach(x -> {
+				GeneralDate workingDate = x.getWorkingDate();
+
+				DetailedDailyPerformanceReportData detailedDate = new DetailedDailyPerformanceReportData();
+				detailedDate.setDate(workingDate);
+				detailedDate.setDayOfWeek(String.valueOf(workingDate.dayOfWeek()));
+				employeeData.lstDetailedPerformance.add(detailedDate);
+
+				// ドメインモデル「社員の日別実績エラー一覧」を取得する
+				List<EmployeeDailyPerError> errorList = errorAlarmRepository.find(employeeId, workingDate);
+
+				// Manually set error list into remark data container
+				queryData.getRemarkDataContainter().setErrorList(errorList);
+
+				List<String> lstRemarkContentStr = new ArrayList<>();
+				detailedDate.errorDetail = "";
+				if (query.getCondition().getErrorAlarmCode().isPresent()) {
+					// Get list remark check box from screen C (UI)
+					List<PrintRemarksContent> lstRemarkContent = outSche.getLstRemarkContent();
+					lstRemarkContent.stream().filter(remark -> remark.isUsedClassification()).forEach(remark -> {
+						// Append 備考入力
+						if (remark.getPrintItem() == RemarksContentChoice.REMARKS_INPUT) {
+							Optional<AttendanceItemValueImport> optRemarkInput = x.getAttendanceItems().stream().filter(att -> att.getItemId() == outSche.getRemarkInputNo().value + 833).findFirst();
+							if (optRemarkInput.isPresent()) {
+								String value = optRemarkInput.get().getValue();
 //							value = StringUtils.substring(value, 0, 9); // Already dealt with null possibility
-							if(value != null) {
-								value = StringLength.cutOffAsLengthHalf(value, LIMIT_REMARK_INPUT);
+								if (value != null) {
+									value = StringLength.cutOffAsLengthHalf(value, LIMIT_REMARK_INPUT);
+								}
+								detailedDate.errorDetail += (value == null ? "" : value + " ");
 							}
-							detailedDate.errorDetail += (value == null ? "" : value + " ");
 						}
-					}
-					// Append マスタ未登録
-					else if (remark.getPrintItem() == RemarksContentChoice.MASTER_UNREGISTERED) {
-						List<AttendanceItemValueImport> lstItemMasterUnregistered = x.getAttendanceItems().stream().
-								filter(att -> EnumAdaptor.valueOf(att.getValueType(), ValueType.class) == ValueType.CODE).collect(Collectors.toList());
-						
-						List<String> names = lstItemMasterUnregistered.stream()
-								.map(item -> this.getNameFromCode(item.getItemId(),
-										item.getValue(), queryData, outSche))
-								.collect(Collectors.toList());
+						// Append マスタ未登録
+						else if (remark.getPrintItem() == RemarksContentChoice.MASTER_UNREGISTERED) {
+							List<AttendanceItemValueImport> lstItemMasterUnregistered = x.getAttendanceItems().stream().
+									filter(att -> EnumAdaptor.valueOf(att.getValueType(), ValueType.class) == ValueType.CODE).collect(Collectors.toList());
 
-						boolean masterUnregistedFlag = names.stream()
-								.anyMatch(item -> StringUtils.equalsIgnoreCase(item,
-										MASTER_UNREGISTERED));
-							
-						if (masterUnregistedFlag) {
-							lstRemarkContentStr.add(TextResource.localize(RemarksContentChoice.MASTER_UNREGISTERED.shortName));
+							List<String> names = lstItemMasterUnregistered.stream()
+									.map(item -> this.getNameFromCode(item.getItemId(),
+											item.getValue(), queryData, outSche))
+									.collect(Collectors.toList());
+
+							boolean masterUnregistedFlag = names.stream()
+									.anyMatch(item -> StringUtils.equalsIgnoreCase(item,
+											MASTER_UNREGISTERED));
+
+							if (masterUnregistedFlag) {
+								lstRemarkContentStr.add(TextResource.localize(RemarksContentChoice.MASTER_UNREGISTERED.shortName));
+							}
+						} else {
+							// Get other possible content based on remark choice
+							Optional<PrintRemarksContent> optContent = getRemarkContent(employeeId, workingDate, remark.getPrintItem(), lstErAlCode, queryData.getRemarkDataContainter());
+							if (optContent.isPresent()) {
+								// Add to remark
+								lstRemarkContentStr.add(TextResource.localize(optContent.get().getPrintItem().shortName));
+							}
+						}
+					});
+
+					// Analyze remark content size and append remark content list
+					StringBuilder errorDetails = new StringBuilder();
+					for (int i = 0; i < lstRemarkContentStr.size(); i++) {
+						String remarkContentStr = lstRemarkContentStr.get(i);
+						int bufferedLength = detailedDate.errorDetail.length() + 5;
+						if (bufferedLength >= 35 && dataRowCount == 1) {
+							errorDetails.append(" 他").append(lstRemarkContentStr.size() - i - 1).append("件");
+						} else {
+							errorDetails.append(" ").append(remarkContentStr);
 						}
 					}
-					else {
-						// Get other possible content based on remark choice
-						Optional<PrintRemarksContent> optContent = getRemarkContent(employeeId, workingDate, remark.getPrintItem(), lstErAlCode, queryData.getRemarkDataContainter());
-						if (optContent.isPresent()) {
-							// Add to remark
-							lstRemarkContentStr.add(TextResource.localize(optContent.get().getPrintItem().shortName));
-						}
-					}
-				});
-				
-				// Analyze remark content size and append remark content list
-				StringBuilder errorDetails = new StringBuilder();
-				for (int i = 0; i < lstRemarkContentStr.size(); i++) {
-					String remarkContentStr = lstRemarkContentStr.get(i);
-					int bufferedLength = detailedDate.errorDetail.length() + 5;
-					if (bufferedLength >= 35 && dataRowCount == 1) {
-						errorDetails.append(" 他").append(lstRemarkContentStr.size() - i - 1).append("件");
-					} else {
-						errorDetails.append(" ").append(remarkContentStr);
-					}
+					detailedDate.errorDetail += errorDetails.toString();
 				}
-				detailedDate.errorDetail += errorDetails.toString();
-			}
-			
-			// ER/AL
-			//if (query.getCondition().getConditionSetting() == OutputConditionSetting.USE_CONDITION) {
+
+				// ER/AL
+				//if (query.getCondition().getConditionSetting() == OutputConditionSetting.USE_CONDITION) {
 				boolean erMark = false, alMark = false;
 				List<String> lstErrorCode = errorList.stream().map(error -> error.getErrorAlarmWorkRecordCode().v()).collect(Collectors.toList());
 				// ドメインモデル「勤務実績のエラーアラーム」を取得する
 				List<ErrorAlarmWorkRecord> lstErrorRecord = errorAlarmWorkRecordRepo.getListErAlByListCode(companyId, lstErrorCode);
-				
+
 				for (ErrorAlarmWorkRecord error : lstErrorRecord) {
 					// コードから区分を取得する
 					switch (error.getTypeAtr()) {
-					case ALARM: // 区分　＝　エラー　のとき　AL
-						alMark = true; 
-						break;
-					case ERROR: // 区分　=　アラーム　のとき　ER
-						erMark = true;
-						break;
-					case OTHER:
-						break;
+						case ALARM: // 区分　＝　エラー　のとき　AL
+							alMark = true;
+							break;
+						case ERROR: // 区分　=　アラーム　のとき　ER
+							erMark = true;
+							break;
+						case OTHER:
+							break;
 					}
 					if (erMark && alMark) break;
 				}
 				if (erMark && alMark) {
 					detailedDate.errorAlarmMark = WorkScheOutputConstants.ER_AL;
-				}
-				else if (erMark) {
+				} else if (erMark) {
 					detailedDate.errorAlarmMark = WorkScheOutputConstants.ER;
-				}
-				else if (alMark) {
+				} else if (alMark) {
 					detailedDate.errorAlarmMark = WorkScheOutputConstants.AL;
 				}
-			//}
-			
-			detailedDate.actualValue = new ArrayList<>();
-			lstDisplayItem.stream().forEach(item -> {
-				Optional<AttendanceItemValueImport> optItemValue = x.getAttendanceItems().stream().filter(att -> att.getItemId() == item.getAttendanceDisplay()).findFirst();
-				if (optItemValue.isPresent()) {
-					AttendanceItemValueImport itemValue = optItemValue.get();
-					ValueType valueTypeEnum = EnumAdaptor.valueOf(itemValue.getValueType(), ValueType.class);
-					int attendanceId = itemValue.getItemId();
-					if ((valueTypeEnum == ValueType.CODE || valueTypeEnum == ValueType.ATTR) && itemValue.getValue() != null) {
-						String value = this.getNameFromCode(attendanceId, itemValue.getValue(), queryData, outSche);
-						itemValue.setValue(value);
+				//}
+
+				detailedDate.actualValue = new ArrayList<>();
+				lstDisplayItem.forEach(item -> {
+					Optional<AttendanceItemValueImport> optItemValue = x.getAttendanceItems().stream().filter(att -> att.getItemId() == item.getAttendanceDisplay()).findFirst();
+					if (optItemValue.isPresent()) {
+						AttendanceItemValueImport itemValue = optItemValue.get();
+						ValueType valueTypeEnum = EnumAdaptor.valueOf(itemValue.getValueType(), ValueType.class);
+						int attendanceId = itemValue.getItemId();
+						if ((valueTypeEnum == ValueType.CODE || valueTypeEnum == ValueType.ATTR) && itemValue.getValue() != null) {
+							String value = this.getNameFromCode(attendanceId, itemValue.getValue(), queryData, outSche);
+							itemValue.setValue(value);
+						}
+						// Workaround for optional attendance item from KMK002
+						if (attendanceId >= ATTENDANCE_ID_OPTIONAL_START && attendanceId <= ATTENDANCE_ID_OPTIONAL_END) {
+							Optional<OptionalItem> optOptionalItem = lstOptionalItem.stream().filter(opt -> opt.getOptionalItemNo().v() == attendanceId - 640).findFirst();
+							optOptionalItem.ifPresent(optionalItem -> {
+								switch (optionalItem.getOptionalItemAtr()) {
+									case TIME:
+										itemValue.setValueType(ValueType.TIME.value);
+										break;
+									case NUMBER:
+										itemValue.setValueType(ValueType.COUNT_WITH_DECIMAL.value);
+										break;
+									case AMOUNT:
+										itemValue.setValueType(ValueType.AMOUNT.value);
+										break;
+								}
+							});
+						}
+
+						detailedDate.actualValue.add(new ActualValue(attendanceId, itemValue.getValue(), itemValue.getValueType()));
+					} else {
+						detailedDate.actualValue.add(new ActualValue(item.getAttendanceDisplay(), "", ActualValue.STRING));
 					}
-					// Workaround for optional attendance item from KMK002
-					if (attendanceId >= ATTENDANCE_ID_OPTIONAL_START && attendanceId <= ATTENDANCE_ID_OPTIONAL_END) {
-						Optional<OptionalItem> optOptionalItem = lstOptionalItem.stream().filter(opt -> opt.getOptionalItemNo().v() == attendanceId - 640).findFirst();
-						optOptionalItem.ifPresent(optionalItem -> {
-							switch(optionalItem.getOptionalItemAtr()) {
-							case TIME:
-								itemValue.setValueType(ValueType.TIME.value);
-								break;
-							case NUMBER:
-								itemValue.setValueType(ValueType.COUNT_WITH_DECIMAL.value);
-								break;
-							case AMOUNT:
-								itemValue.setValueType(ValueType.AMOUNT.value);
-								break;
-							}
-						}); 
-					}
-					
-					detailedDate.actualValue.add(new ActualValue(attendanceId, itemValue.getValue(), itemValue.getValueType()));
-				}
-				else {
-					detailedDate.actualValue.add(new ActualValue(item.getAttendanceDisplay(), "", ActualValue.STRING));
-				}
-				workplaceData.setHasData(true);
+					workplaceData.setHasData(true);
+				});
 			});
-		});
+		}
 		return employeeData;
 	}
 	
@@ -1280,8 +1263,8 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 				});
 				
 				// Add into total by attendanceId
-				employeeData.getLstDetailedPerformance().stream().forEach(detail -> {
-					detail.actualValue.stream().forEach((aVal) -> {
+				employeeData.getLstDetailedPerformance().forEach(detail -> {
+					detail.actualValue.forEach((aVal) -> {
 						int attdId = aVal.getAttendanceId();
 						int valueType = aVal.getValueType();
 						
@@ -1544,16 +1527,15 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 	 * @return the workplace report data
 	 */
 	private WorkplaceReportData findWorkplace(String employeeId, WorkplaceReportData rootWorkplace, GeneralDate baseDate,
-			List<WkpHistImport> lstWorkplaceHistImport, List<WorkplaceConfigInfo> lstWorkplaceConfigInfo) {
+			Map<String, WkpHistImport> lstWorkplaceHistImport, List<WorkplaceConfigInfo> lstWorkplaceConfigInfo) {
 		Map<String, WorkplaceReportData> mapWorkplaceInfo = rootWorkplace.getLstChildWorkplaceReportData();
-		WkpHistImport workplaceImport = lstWorkplaceHistImport.stream().filter(hist -> StringUtils.equalsIgnoreCase(hist.getEmployeeId(), employeeId) ).findFirst().get();
+		WkpHistImport workplaceImport = lstWorkplaceHistImport.get(employeeId);
 		//WkpInfo workplaceInfo = workplaceImport.getLstWkpInfo().stream().filter(x -> baseDate.compareTo(x.getDatePeriod().start()) >= 0 && baseDate.compareTo(x.getDatePeriod().end()) <= 0).findFirst().get();
 		WorkplaceHierarchy code = lstWorkplaceConfigInfo.stream().filter(x -> StringUtils.equalsIgnoreCase(x.getLstWkpHierarchy().get(0).getWorkplaceId(), workplaceImport.getWorkplaceId())).findFirst().get().getLstWkpHierarchy().get(0);
 		HierarchyCode hierarchyCode = code.getHierarchyCode();
 		if (mapWorkplaceInfo.containsKey(hierarchyCode.v())) {
-			WorkplaceReportData reportData = mapWorkplaceInfo.get(hierarchyCode.v());
 			//reportData.period = workplaceInfo.getDatePeriod();
-			return reportData;
+			return mapWorkplaceInfo.get(hierarchyCode.v());
 		}
 		else {
 			for (Map.Entry<String, WorkplaceReportData> keySet : mapWorkplaceInfo.entrySet()) {
@@ -1575,18 +1557,17 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 	 * @param lstWorkplaceConfigInfo the lst workplace config info
 	 * @return the daily workplace data
 	 */
-	private DailyWorkplaceData findWorkplace(String employeeId, DailyWorkplaceData rootWorkplace, GeneralDate baseDate, 
-			List<WkpHistImport> lstWkpHistImport, List<WorkplaceConfigInfo> lstWorkplaceConfigInfo) {
+	private DailyWorkplaceData findWorkplace(String employeeId, DailyWorkplaceData rootWorkplace, GeneralDate baseDate,
+			Map<String, WkpHistImport> lstWkpHistImport, List<WorkplaceConfigInfo> lstWorkplaceConfigInfo) {
 		
 		Map<String, DailyWorkplaceData> mapWorkplaceInfo = rootWorkplace.getLstChildWorkplaceData();
-		WkpHistImport workplaceImport = lstWkpHistImport.stream().filter(hist -> StringUtils.equalsIgnoreCase(hist.getEmployeeId(), employeeId) ).findFirst().get();
+		WkpHistImport workplaceImport = lstWkpHistImport.get(employeeId);
 		//WkpInfo workplaceInfo = workplaceImport.getLstWkpInfo().stream().filter(x -> baseDate.compareTo(x.getDatePeriod().start()) >= 0 && baseDate.compareTo(x.getDatePeriod().end()) <= 0).findFirst().get();
 		WorkplaceHierarchy code = lstWorkplaceConfigInfo.stream().filter(x -> StringUtils.equalsIgnoreCase(x.getLstWkpHierarchy().get(0).getWorkplaceId(), workplaceImport.getWorkplaceId())).findFirst().get().getLstWkpHierarchy().get(0);
 		HierarchyCode hierarchyCode = code.getHierarchyCode();
 		if (mapWorkplaceInfo.containsKey(hierarchyCode.v())) {
-			DailyWorkplaceData workplaceData = mapWorkplaceInfo.get(hierarchyCode.v());
 			//workplaceData.period = workplaceInfo.getDatePeriod();
-			return workplaceData;
+			return mapWorkplaceInfo.get(hierarchyCode.v());
 		}
 		else {
 			for (Map.Entry<String, DailyWorkplaceData> keySet : mapWorkplaceInfo.entrySet()) {
