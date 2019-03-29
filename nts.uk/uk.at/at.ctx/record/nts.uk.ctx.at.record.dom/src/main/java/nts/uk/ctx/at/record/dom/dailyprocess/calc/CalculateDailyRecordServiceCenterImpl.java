@@ -137,7 +137,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	//会社共通の設定を他のコンテキストで取得できる場合に呼び出す窓口
 	public List<IntegrationOfDaily> calculatePassCompanySetting(
 			CalculateOption calcOption,
-			List<IntegrationOfDaily> integrationOfDaily,
+			List<IntegrationOfDaily> integrationOfDailys,
 			Optional<ManagePerCompanySet> companySet,
 			ExecutionType reCalcAtr){
 		if(reCalcAtr.isRerun()) {
@@ -153,29 +153,29 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			
 			//計算式が設定されている任意項目のID取得(※itemIdリストへ追加すれば編集状態が消える)
 			//時間・回数だけ削除したリスト作成
-			integrationOfDaily.forEach(tc -> {
+			integrationOfDailys.forEach(integrationOfDaily -> {
 				notReCalcItems.clear();
 				itemId.clear();
 				itemId.addAll(beforeChangeItemId);
 				
-				List<Integer> useOpIds = getUseOpIds(optionalItems, empConds, tc.getAffiliationInfor().getEmployeeId(), tc.getAffiliationInfor().getYmd(),formula);
+				List<Integer> useOpIds = getUseOpIds(optionalItems, empConds, integrationOfDaily.getAffiliationInfor().getEmployeeId(), integrationOfDaily.getAffiliationInfor().getYmd(),formula);
 				
 				val itemIdsDeletedEdit = itemId.stream().filter(id ->{
 					return isIncludeId(id,useOpIds);
 				}).map(item -> item.getItemId()).collect(Collectors.toList());
 				
-				tc.getEditState().forEach(ts ->{
+				integrationOfDaily.getEditState().forEach(edit ->{
 					//任意＋時間or回数以外の項目の編集状態残る
-					if(!itemIdsDeletedEdit.contains(ts.getAttendanceItemId()))
-						notReCalcItems.add(ts);
+					if(!itemIdsDeletedEdit.contains(edit.getAttendanceItemId()))
+						notReCalcItems.add(edit);
 					
 				});
-				tc.setEditState(notReCalcItems);
+				integrationOfDaily.setEditState(notReCalcItems);
 			});
 		}
 		val result = commonPerCompany(
 									  calcOption,
-									  integrationOfDaily,
+									  integrationOfDailys,
 									  false,
 									  Optional.empty(),
 									  Optional.empty(),
@@ -233,7 +233,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 		List<Integer> useOptionalIds = new ArrayList<>();
 		val bse = c(AppContexts.user().companyCode(), employeeId, targetDate);
 		for(OptionalItem opItem:opItems) {
-			if(decisionUseSetting(opItem,empCond,bse) && formulaList.stream().filter(t -> t.getOptionalItemNo().equals(opItem.getOptionalItemNo())).collect(Collectors.toList()).size() > 0) {
+			if(decisionUseSetting(opItem,empCond,bse) && formulaList.stream().filter(formula -> formula.getOptionalItemNo().equals(opItem.getOptionalItemNo())).collect(Collectors.toList()).size() > 0) {
 			//if(decisionUseSetting(opItem,empCond,bse)) {
 				useOptionalIds.add(opItem.getOptionalItemNo().v());
 			}
@@ -292,7 +292,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	@Override
 	//就業計算と集計から呼び出す時の窓口
 	public ManageProcessAndCalcStateResult calculateForManageState(
-			List<IntegrationOfDaily> integrationOfDaily,
+			List<IntegrationOfDaily> integrationOfDailys,
 			Optional<AsyncCommandHandlerContext> asyncContext,
 			List<ClosureStatusManagement> closureList,
 			ExecutionType reCalcAtr){
@@ -309,33 +309,33 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			val empConds = getEmpConditions(setting,optionalItems);
 			val formula = getFormula(setting);
 			
-			integrationOfDaily.forEach(tc -> {
+			integrationOfDailys.forEach(integrationOfDaily -> {
 				notReCalcItems.clear();
 				itemId.clear();
 				itemId.addAll(beforeChangeItemId);
 				
-				List<Integer> useOpIds = getUseOpIds(optionalItems, empConds, tc.getAffiliationInfor().getEmployeeId(), tc.getAffiliationInfor().getYmd(),formula);
+				List<Integer> useOpIds = getUseOpIds(optionalItems, empConds, integrationOfDaily.getAffiliationInfor().getEmployeeId(), integrationOfDaily.getAffiliationInfor().getYmd(),formula);
 				
 				val itemIdsDeletedEdit = itemId.stream().filter(id ->{
 					return isIncludeId(id,useOpIds);
 				}).map(item -> item.getItemId()).collect(Collectors.toList());
 				
-				tc.getEditState().forEach(ts ->{
+				integrationOfDaily.getEditState().forEach(edit ->{
 					//任意＋時間or回数以外の項目の編集状態残る
-					if(!itemIdsDeletedEdit.contains(ts.getAttendanceItemId()))
-						notReCalcItems.add(ts);
+					if(!itemIdsDeletedEdit.contains(edit.getAttendanceItemId()))
+						notReCalcItems.add(edit);
 					
 				});
-				tc.setEditState(notReCalcItems);
+				integrationOfDaily.setEditState(notReCalcItems);
 				
 				//時間・回数の勤怠項目だけ　編集状態テーブルから削除
-				editStateOfDailyPerformanceRepository.deleteByListItemId(tc.getAffiliationInfor().getEmployeeId(),
-																		 tc.getAffiliationInfor().getYmd(), 
+				editStateOfDailyPerformanceRepository.deleteByListItemId(integrationOfDaily.getAffiliationInfor().getEmployeeId(),
+																		 integrationOfDaily.getAffiliationInfor().getYmd(), 
 																		 itemIdsDeletedEdit);
 			});
 
 		}
-		return commonPerCompany(CalculateOption.asDefault(), integrationOfDaily,true,asyncContext,Optional.empty(),Optional.empty(),closureList);
+		return commonPerCompany(CalculateOption.asDefault(), integrationOfDailys,true,asyncContext,Optional.empty(),Optional.empty(),closureList);
 	}
 
 
@@ -363,15 +363,15 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	 * @return 計算後実績データ
 	 */
 	@SuppressWarnings("rawtypes")
-	private ManageProcessAndCalcStateResult commonPerCompany(CalculateOption calcOption, List<IntegrationOfDaily> integrationOfDaily,boolean isManageState,
+	private ManageProcessAndCalcStateResult commonPerCompany(CalculateOption calcOption, List<IntegrationOfDaily> integrationOfDailys,boolean isManageState,
 													  Optional<AsyncCommandHandlerContext> asyncContext
 													 ,Optional<Consumer<ProcessState>> counter, 
 													 Optional<ManagePerCompanySet> companySet, 
 													 List<ClosureStatusManagement> closureList) {
 		/***会社共通処理***/
-		if(integrationOfDaily.isEmpty()) return new ManageProcessAndCalcStateResult(ProcessState.SUCCESS, integrationOfDaily.stream().map(tc -> ManageCalcStateAndResult.failCalc(tc)).collect(Collectors.toList()));
+		if(integrationOfDailys.isEmpty()) return new ManageProcessAndCalcStateResult(ProcessState.SUCCESS, integrationOfDailys.stream().map(tc -> ManageCalcStateAndResult.failCalc(tc)).collect(Collectors.toList()));
 		//社員毎の実績に纏める
-		Map<String,List<IntegrationOfDaily>> recordPerEmpId = getPerEmpIdRecord(integrationOfDaily);
+		Map<String,List<IntegrationOfDaily>> recordPerEmpId = getPerEmpIdRecord(integrationOfDailys);
 		String comanyId = AppContexts.user().companyId();
 		//会社共通の設定を
 		ManagePerCompanySet companyCommonSetting = companySet.orElseGet(() -> {
@@ -385,7 +385,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			companyCommonSetting.setShareContainer(shareContainer);
 		}
 		
-		companyCommonSetting.setPersonnelCostSettings(personnelCostSettingAdapter.findAll(comanyId, getDateSpan(integrationOfDaily)));
+		companyCommonSetting.setPersonnelCostSettings(personnelCostSettingAdapter.findAll(comanyId, getDateSpan(integrationOfDailys)));
 		
 
 		/***会社共通処理***/
@@ -426,7 +426,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	 * @return 対象者の締め一覧
 	 */
 	private List<ClosureStatusManagement> getclosure(String empId,List<ClosureStatusManagement> closureList){
-		return closureList.stream().filter(tc -> tc.getEmployeeId().equals(empId)).collect(Collectors.toList());
+		return closureList.stream().filter(closureStatus -> closureStatus.getEmployeeId().equals(empId)).collect(Collectors.toList());
 	}
 	
 	/**
@@ -446,7 +446,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 		val map = convertMap(recordList);
 		List<GeneralDate> sortedymd = recordList.stream()
 								  			.sorted((first,second) -> first.getAffiliationInfor().getYmd().compareTo(second.getAffiliationInfor().getYmd()))
-								  			.map(tc -> tc.getAffiliationInfor().getYmd())
+								  			.map(IntegrationOfDaily -> IntegrationOfDaily.getAffiliationInfor().getYmd())
 								  			.collect(Collectors.toList());
 		//開始日
 		val minGeneralDate = sortedymd.get(0);
@@ -522,11 +522,11 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	
 
 	//社員毎の実績にまとめる
-	private Map<String, List<IntegrationOfDaily>> getPerEmpIdRecord(List<IntegrationOfDaily> integrationOfDaily) {
-		List<String> empIdList = integrationOfDaily.stream().map(tc -> tc.getAffiliationInfor().getEmployeeId()).distinct().collect(Collectors.toList());
+	private Map<String, List<IntegrationOfDaily>> getPerEmpIdRecord(List<IntegrationOfDaily> integrationOfDailys) {
+		List<String> empIdList = integrationOfDailys.stream().map(integrationOfDaily -> integrationOfDaily.getAffiliationInfor().getEmployeeId()).distinct().collect(Collectors.toList());
 		Map<String, List<IntegrationOfDaily>> returnMap = new HashMap<>();
 		for(String empId : empIdList) {
-			val integrations = integrationOfDaily.stream().filter(tc -> tc.getAffiliationInfor().getEmployeeId().equals(empId)).collect(Collectors.toList());
+			val integrations = integrationOfDailys.stream().filter(integrationOfDaily -> integrationOfDaily.getAffiliationInfor().getEmployeeId().equals(empId)).collect(Collectors.toList());
 			returnMap.put(empId, integrations);
 		}
 		return returnMap;
@@ -538,10 +538,10 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	 * @param integrationOfDaily 日別実績(Work)
 	 * @return integrationOfDailyのMap
 	 */
-	private Map<GeneralDate, IntegrationOfDaily> convertMap(List<IntegrationOfDaily> integrationOfDaily) {
+	private Map<GeneralDate, IntegrationOfDaily> convertMap(List<IntegrationOfDaily> integrationOfDailys) {
 		Map<GeneralDate, IntegrationOfDaily> map = new HashMap<>();
-		integrationOfDaily.forEach(tc ->{
-			map.put(tc.getAffiliationInfor().getYmd(), tc);
+		integrationOfDailys.forEach(integrationOfDaily ->{
+			map.put(integrationOfDaily.getAffiliationInfor().getYmd(), integrationOfDaily);
 		});
 		return map;
 	}
@@ -571,13 +571,13 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 		Map<String,DatePeriod> returnMap = new HashMap<>();
 		//しゃいんID 一覧取得
 		List<String> idList = getAllEmpId(integrationOfDaily);
-		idList.forEach(ts -> {
+		idList.forEach(id -> {
 			//特定の社員IDに一致しているintegrationに絞る
-			val integrationOfDailys = integrationOfDaily.stream().filter(tc -> tc.getAffiliationInfor().getEmployeeId().equals(ts)).collect(Collectors.toList());
+			val integrationOfDailys = integrationOfDaily.stream().filter(tc -> tc.getAffiliationInfor().getEmployeeId().equals(id)).collect(Collectors.toList());
 			//特定社員の開始～終了を取得する
 			val createdDatePriod = getDateSpan(integrationOfDailys);
 			//Map<特定の社員ID、開始～終了>に追加する
-			returnMap.put(ts, createdDatePriod);
+			returnMap.put(id, createdDatePriod);
 		});
 		return returnMap;
 	}
@@ -585,8 +585,8 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	/*
 	 * 社員の一覧取得
 	 */
-	private List<String> getAllEmpId(List<IntegrationOfDaily> integrationOfDaily){
-		return integrationOfDaily.stream().distinct().map(tc->tc.getAffiliationInfor().getEmployeeId()).collect(Collectors.toList());
+	private List<String> getAllEmpId(List<IntegrationOfDaily> integrationOfDailys){
+		return integrationOfDailys.stream().distinct().map(integrationOfDaily->integrationOfDaily.getAffiliationInfor().getEmployeeId()).collect(Collectors.toList());
 	}
 	
 	/**
@@ -594,8 +594,8 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	 * @param integrationOfDaily 日別実績(WORK)LIST
 	 * @return 開始～終了
 	 */
-	private DatePeriod getDateSpan(List<IntegrationOfDaily> integrationOfDaily) {
-		val sortedIntegration = integrationOfDaily.stream().sorted((first,second) -> first.getAffiliationInfor().getYmd().compareTo(second.getAffiliationInfor().getYmd())).collect(Collectors.toList());
+	private DatePeriod getDateSpan(List<IntegrationOfDaily> integrationOfDailys) {
+		val sortedIntegration = integrationOfDailys.stream().sorted((first,second) -> first.getAffiliationInfor().getYmd().compareTo(second.getAffiliationInfor().getYmd())).collect(Collectors.toList());
 		return new DatePeriod(sortedIntegration.get(0).getAffiliationInfor().getYmd(), sortedIntegration.get(sortedIntegration.size() - 1).getAffiliationInfor().getYmd());
 	}
 	
@@ -615,7 +615,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 		
 		List<GeneralDate> sortedymd = integrationList.stream()
 								  					 	.sorted((first,second) -> first.getAffiliationInfor().getYmd().compareTo(second.getAffiliationInfor().getYmd()))
-								  					 	.map(tc -> tc.getAffiliationInfor().getYmd())
+								  					 	.map(integrationOfDaily -> integrationOfDaily.getAffiliationInfor().getYmd())
 								  					 	.collect(Collectors.toList());
 		
 		val minGeneralDate = sortedymd.get(0);
