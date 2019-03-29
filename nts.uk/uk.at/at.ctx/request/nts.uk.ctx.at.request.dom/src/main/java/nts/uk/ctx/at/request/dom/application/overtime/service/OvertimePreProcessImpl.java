@@ -74,6 +74,7 @@ import nts.uk.ctx.at.shared.dom.workdayoff.frame.WorkdayoffFrame;
 import nts.uk.ctx.at.shared.dom.workdayoff.frame.WorkdayoffFrameRepository;
 import nts.uk.ctx.at.shared.dom.worktime.predset.PredetemineTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.predset.PredetemineTimeSettingRepository;
+import nts.uk.ctx.at.shared.dom.worktime.predset.TimezoneUse;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
@@ -241,11 +242,12 @@ public class OvertimePreProcessImpl implements IOvertimePreProcess {
 					GeneralDate.fromString(appDate, DATE_FORMAT));
 			Optional<PredetemineTimeSetting> workTimeSet = workTimeSetRepository.findByWorkTimeCode(companyID, recordWorkInfoImport.getWorkTimeCode());
 			if (workTimeSet.isPresent()) {
-				if (workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().size() > 1 && workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().get(1).getUseAtr().value == UseAtr.USE.value) {
-					startTime2 = workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().get(1).getStart().v();
+				List<TimezoneUse> lstTimezone = workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().stream().sorted(Comparator.comparing(TimezoneUse::getWorkNo)).collect(Collectors.toList());
+				if (lstTimezone.size() > 1 && lstTimezone.get(1).getUseAtr().value == UseAtr.USE.value) {
+					startTime2 = lstTimezone.get(1).getStart().v();
 				}
-				if (workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().size() > 0) {
-					startTime1 = workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().get(0).getStart().v();
+				if (lstTimezone.size() > 0) {
+					startTime1 = lstTimezone.get(0).getStart().v();
 				}
 			}
 			if (recordWorkInfoImport.getLeaveStampTimeFirst() == null) {
@@ -268,13 +270,14 @@ public class OvertimePreProcessImpl implements IOvertimePreProcess {
 			// 01-14-4_始業時刻、終業時刻を初期表示
 			Optional<PredetemineTimeSetting> workTimeSet = workTimeSetRepository.findByWorkTimeCode(companyID, siftCD);
 			if (workTimeSet.isPresent()) {
-				if (workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().size() > 1 && workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().get(1).getUseAtr().value == UseAtr.USE.value) {
-					startTime2 = workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().get(1).getStart().v();
-					endTime2 = workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().get(1).getEnd().v();
+				List<TimezoneUse> lstTimezone = workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().stream().sorted(Comparator.comparing(TimezoneUse::getWorkNo)).collect(Collectors.toList());
+				if (lstTimezone.size() > 1 && lstTimezone.get(1).getUseAtr().value == UseAtr.USE.value) {
+					startTime2 = lstTimezone.get(1).getStart().v();
+					endTime2 = lstTimezone.get(1).getEnd().v();
 				}
-				if (workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().size() > 0 ) {
-					startTime1 = workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().get(0).getStart().v();
-					endTime1 = workTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone().get(0).getEnd().v();
+				if (lstTimezone.size() > 0 ) {
+					startTime1 = lstTimezone.get(0).getStart().v();
+					endTime1 = lstTimezone.get(0).getEnd().v();
 				}
 			}
 			break;
