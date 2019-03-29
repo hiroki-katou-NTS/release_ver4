@@ -67,7 +67,20 @@ module nts.uk.at.view.kaf011.a.screenModel {
         
         remainDays: KnockoutObservable<number> = ko.observable(null);
         
-        kaf011ReasonIsEditable: KnockoutObservable<boolean> = ko.observable(false);
+        kaf011ReasonIsEditable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.appTypeSet().displayAppReason() != 0;
+            });
+        kdl003BtnEnable: KnockoutObservable<boolean> = ko.observable(true);
+        recTimeSwitchEnable: KnockoutObservable<boolean> = ko.observable(true);
+        recTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return true;
+        });
+        absKdl003BtnEnable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.absWk().changeWorkHoursType();
+            });
+        absTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.absWk().enableWkTime() == true;
+        });
         constructor() {
             let self = this;
 
@@ -194,7 +207,6 @@ module nts.uk.at.view.kaf011.a.screenModel {
                 self.appTypeSet(new common.AppTypeSet(data.appTypeSet || null));
                 self.recWk().wkTimeName(data.wkTimeName || null);
                 self.recWk().wkTimeCD(data.wkTimeCD || null);
-                self.kaf011ReasonIsEditable(self.appTypeSet().displayAppReason() != 0);
             }
         }
         validateControl() {

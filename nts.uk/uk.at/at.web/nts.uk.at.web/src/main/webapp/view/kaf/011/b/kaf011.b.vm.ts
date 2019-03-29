@@ -62,9 +62,18 @@ module nts.uk.at.view.kaf011.b.viewmodel {
         kdl003BtnEnable: KnockoutObservable<boolean> = ko.computed(() => {
                 return this.editable();
             });
-        recTime1SwitchEnable: KnockoutObservable<boolean> = ko.computed(() => {
+        recTimeSwitchEnable: KnockoutObservable<boolean> = ko.computed(() => {
                 return this.editable();
             });
+        recTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.editable() ? this.drawalReqSet().permissionDivision() != 0 : false;
+        });
+        absKdl003BtnEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.editable() ? this.absWk().changeWorkHoursType() : false;
+        });
+        absTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.editable() ? this.absWk().enableWkTime() == true : false;
+        });
         constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
             super(listAppMetadata, currentApp);
             let self = this;
@@ -274,6 +283,8 @@ module nts.uk.at.view.kaf011.b.viewmodel {
                 
             }
             self.firstLoad(false);
+            self.recWk().wkTimeCD.valueHasMutated();
+            self.absWk().wkTimeCD.valueHasMutated();
         }
 
         setDataCommon(data) {
