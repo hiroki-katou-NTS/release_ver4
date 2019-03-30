@@ -280,6 +280,11 @@ module nts.uk.at.view.kaf011.a.screenModel {
             let self = this,
                 saveCmd = self.genSaveCmd();
 
+            let isCheckLengthError: boolean = !appcommon.CommonProcess.checklenghtReason(self.getReason(), "#appReason");
+            if (isCheckLengthError) {
+                return;
+            }
+            
             let isControlError = self.validateControl();
             if (isControlError) { return; }
 
@@ -361,13 +366,9 @@ module nts.uk.at.view.kaf011.a.screenModel {
             if (!nts.uk.util.isNullOrEmpty(inputReasonID)) {
                 inputReason = _.find(inputReasonList, { 'reasonID': inputReasonID }).reasonTemp;
             }
-            if (!nts.uk.util.isNullOrEmpty(inputReason) && !nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = inputReason + ":" + detailReason;
-            } else if (!nts.uk.util.isNullOrEmpty(inputReason) && nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = inputReason;
-            } else if (nts.uk.util.isNullOrEmpty(inputReason) && !nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = detailReason;
-            }
+
+            appReason = inputReason + ":" + detailReason;
+
             return appReason;
         }
 
