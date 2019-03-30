@@ -49,6 +49,8 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 	private static final int COMPANY = 0;
 	private static final int WORKPLACE = 1;
 	private static final int EDIT = 1;
+	private static final int COMMON = 0;
+	private static final int PRIVATE = 0;
 	@Override
 	protected void handle(CommandHandlerContext<UpdateWorkAppApprovalRByHistCommand> context) {
 		UpdateWorkAppApprovalRByHistCommand  objUpdateItem = context.getCommand();
@@ -348,6 +350,19 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 		String startDatePrevious = objUpdateItem.getStartDatePrevious();
 		GeneralDate sDatePrevious = GeneralDate.localDate(LocalDate.parse(startDatePrevious.replace("/","-")));
 		GeneralDate eDatePrevious = sDatePrevious.addDays(-1);//Edate to find history Previous
+		String employeeId = objUpdateItem.getEmployeeId();
+		GeneralDate dateLastest = null;
+		//ドメインモデル「就業承認ルート履歴」を取得する
+		if(objUpdateItem.getEditOrDelete() == EDIT && objUpdateItem.getCheckMode() == COMMON){//07.履歴編集を実行する(まとめて設定モード)
+			List<PersonApprovalRoot> histL = repoPerson.getHistLastestCom(companyId, employeeId);
+			if(!histL.isEmpty()) dateLastest = histL.get(0).getEmploymentAppHistoryItems().get(0).getDatePeriod().start();
+		}
+		if(objUpdateItem.getEditOrDelete() == EDIT && objUpdateItem.getCheckMode() == PRIVATE){//10.履歴編集を実行する(申請個別設定モード)
+			Integer employmentRootAtr = objUpdateItem.getLstUpdate().get(0).getEmployRootAtr();
+			Integer applicationType = objUpdateItem.getLstUpdate().get(0).getApplicationType();
+			List<PersonApprovalRoot> histL = repoPerson.getHistLastestPri(companyId, employeeId, employmentRootAtr, applicationType);
+			if(histL.isEmpty()) dateLastest = histL.get(0).getEmploymentAppHistoryItems().get(0).getDatePeriod().start();
+		}
 		for (UpdateHistoryDto updateItem : lstHist) {
 			//find history by type and 
 			List<PersonApprovalRoot> lstPsByApp = repoPerson.getPsApprovalRootByType(companyId, objUpdateItem.getEmployeeId(), updateItem.getApplicationType(), updateItem.getEmployRootAtr());
@@ -453,10 +468,17 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 		//EA修正履歴 No.3271
 		//EA修正履歴 No.3273
 		//EA修正履歴 No.3274
+		//EA修正履歴 No.3290
 		if(objUpdateItem.getEditOrDelete() == EDIT){//Edit
 			//履歴の開始日とシステム日付をチェックする
-			if(sDate.after(GeneralDate.today())){//履歴の開始日＞システム日付
+			if(sDate.after(GeneralDate.today()) || dateLastest == null){//履歴の開始日＞システム日付
 				return;
+			}
+			if(dateLastest.before(sDate)){//取得した開始日(1)＜新しい履歴の開始日
+				//指定社員の中間データを作成する（日別）
+				creDailyAppr.createDailyApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_DAY, dateLastest, dateLastest);
+				//指定社員の中間データを作成する（月別）
+				creDailyAppr.createDailyApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_MONTH, dateLastest, dateLastest);
 			}
 		}
 		//指定社員の中間データを作成する（日別）
