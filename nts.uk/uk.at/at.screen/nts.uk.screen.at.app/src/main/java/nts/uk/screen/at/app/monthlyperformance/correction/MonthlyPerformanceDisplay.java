@@ -18,6 +18,7 @@ import org.apache.logging.log4j.util.Strings;
 
 import nts.arc.error.BundledBusinessException;
 import nts.arc.error.BusinessException;
+import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.function.app.find.monthlycorrection.fixedformatmonthly.DisplayTimeItemDto;
 import nts.uk.ctx.at.function.app.find.monthlycorrection.fixedformatmonthly.MonPfmCorrectionFormatDto;
@@ -34,6 +35,7 @@ import nts.uk.ctx.at.function.dom.monthlycorrection.fixedformatmonthly.ColumnWid
 import nts.uk.ctx.at.function.dom.monthlycorrection.fixedformatmonthly.InitialDisplayMonthly;
 import nts.uk.ctx.at.function.dom.monthlycorrection.fixedformatmonthly.InitialDisplayMonthlyRepository;
 import nts.uk.ctx.at.function.dom.monthlycorrection.fixedformatmonthly.OrderReferWorkType;
+import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
 import nts.uk.ctx.at.record.dom.adapter.workplace.affiliate.AffAtWorkplaceImport;
 import nts.uk.ctx.at.record.dom.adapter.workplace.affiliate.AffWorkplaceAdapter;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.LockStatus;
@@ -108,6 +110,10 @@ public class MonthlyPerformanceDisplay {
 	private MonthlyPerformanceCheck monthlyCheck;
 	@Inject
 	private AttendanceItemNameAdapter attendanceItemNameAdapter;
+	
+	@Inject
+	private MonthlyPerformanceReload mpReload;
+	
 	private static final String KMW003_SELECT_FORMATCODE = "KMW003_SELECT_FORMATCODE";
 
 	/**
@@ -206,10 +212,10 @@ public class MonthlyPerformanceDisplay {
 			param.setLstAtdItemUnique(lstAtdItemUnique);
 		}
 		
-		// アルゴリズム「ロック状態をチェックする」を実行する
+		// アルゴリズム「ロック状態をチェックする」を実行する -- lock data
 		List<MonthlyPerformaceLockStatus> lstLockStatus = checkLockStatus(cId, lstEmployeeIds,
 				screenDto.getProcessDate(), screenDto.getClosureId(),
-				new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), param.getInitScreenMode());
+				new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), param.getInitScreenMode(), screenDto.getLstAffComHist());
 		param.setLstLockStatus(lstLockStatus);
 	}
 
@@ -524,7 +530,7 @@ public class MonthlyPerformanceDisplay {
 	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;
 	
 	public List<MonthlyPerformaceLockStatus> checkLockStatus(String cid, List<String> empIds, Integer processDateYM,
-			Integer closureId, DatePeriod closureTime, int intScreenMode) {
+			Integer closureId, DatePeriod closureTime, int intScreenMode, List<AffCompanyHistImport> lstAffComHist) {
 		List<MonthlyPerformaceLockStatus> monthlyLockStatusLst = new ArrayList<MonthlyPerformaceLockStatus>();
 		// ロック解除モード の場合
 		if (intScreenMode == 1) {
@@ -560,9 +566,16 @@ public class MonthlyPerformanceDisplay {
 		
 		for (AffAtWorkplaceImport affWorkplaceImport : affWorkplaceLst) {
 			
+			Optional<AffCompanyHistImport> affInHist = lstAffComHist.stream()
+					.filter(x -> x.getEmployeeId().equals(affWorkplaceImport.getEmployeeId())).findFirst();
+
+			List<DatePeriod> periodInHist = affInHist.isPresent() ? affInHist.get().getLstAffComHistItem().stream()
+					.map(x -> x.getDatePeriod()).collect(Collectors.toList()) : new ArrayList<>();
+					
+			List<GeneralDate> lstDateCheck = mpReload.mergeDatePeriod(closureTime, periodInHist);
 			List<Identification> listIdenByEmpID = new ArrayList<>();
 			for(Identification iden : listIdentification) {
-				if(iden.getEmployeeId().equals(affWorkplaceImport.getEmployeeId())) {
+				if(iden.getEmployeeId().equals(affWorkplaceImport.getEmployeeId()) && lstDateCheck.contains(iden.getProcessingYmd())) {
 					listIdenByEmpID.add(iden);
 				}
 			}
@@ -585,7 +598,7 @@ public class MonthlyPerformanceDisplay {
 					closureId, closureTime.end(), closureTime, affWorkplaceImport.getWorkplaceId());
 			/** TODO: */
 			MonthlyActualSituationOutput monthlymonthlyActualStatusOutput = monthlyActualStatus
-					.getMonthlyActualSituationStatus(param,approvalProcOp,listShareAff,checkIdentityOp,listIdenByEmpID,checkExistRecordErrorListDate);
+					.getMonthlyActualSituationStatus(param,approvalProcOp,listShareAff,checkIdentityOp,listIdenByEmpID,checkExistRecordErrorListDate, lstDateCheck);
 			// Output「月の実績の状況」を元に「ロック状態一覧」をセットする
 			monthlyLockStatus = new MonthlyPerformaceLockStatus(
 					monthlymonthlyActualStatusOutput.getEmployeeClosingInfo().getEmployeeId(),

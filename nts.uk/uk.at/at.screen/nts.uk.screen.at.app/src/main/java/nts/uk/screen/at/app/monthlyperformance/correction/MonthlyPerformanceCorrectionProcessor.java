@@ -294,6 +294,15 @@ public class MonthlyPerformanceCorrectionProcessor {
 					ClosureId.valueOf(closureId), screenDto.getClosureDate().toDomain(), ITEM_ID_ALL,
 					monthlyModifyQueryProcessor).call();
 			
+			//指定した年月の期間を算出する
+			DatePeriod datePeriodClosure = closureService.getClosurePeriod(closureId.intValue(), new YearMonth(yearMonth));
+			//社員ID（List）と指定期間から所属会社履歴項目を取得
+			// RequestList211
+			List<AffCompanyHistImport> lstAffComHist = syCompanyRecordAdapter
+					.getAffCompanyHistByEmployee(employeeIds, datePeriodClosure);
+			
+			screenDto.setLstAffComHist(lstAffComHist);
+			
 			// fix bug 
 			if (results.isEmpty()) {
 				String mess = new String("Msg_1450");
@@ -929,9 +938,11 @@ public class MonthlyPerformanceCorrectionProcessor {
 			if (param.getInitMenuMode() == 2 || !employee.getId().equals(employeeIdLogin)) {
 				lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
 			} else {
+				boolean checkExist = false;
 				if(statusConfirmMonthDto.isPresent()) {
 					for (ConfirmStatusResult confirmStatusResult : statusConfirmMonthDto.get().getListConfirmStatus()) {
 						if(confirmStatusResult.getEmployeeId().equals(employee.getId())) {
+							checkExist = true;
 							if(identify) {
 								//解除可否
 								if(confirmStatusResult.getWhetherToRelease() == ReleasedAtr.CAN_NOT_RELEASE) {
@@ -945,7 +956,8 @@ public class MonthlyPerformanceCorrectionProcessor {
 							}
 						}
 					}
-				}else {
+				}
+				if(!checkExist) {
 					lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
 				}
 			}	
@@ -1087,12 +1099,8 @@ public class MonthlyPerformanceCorrectionProcessor {
 		
 		// set state hide control
 		screenDto.setMPSateCellHideControl(mPSateCellHideControls);
-		//指定した年月の期間を算出する
-		DatePeriod datePeriodClosure = closureService.getClosurePeriod(closureId.intValue(), new YearMonth(yearMonth));
-		//社員ID（List）と指定期間から所属会社履歴項目を取得
-		// RequestList211
-		List<AffCompanyHistImport> listAffCompanyHistImport = syCompanyRecordAdapter
-				.getAffCompanyHistByEmployee(employeeIds, datePeriodClosure);
+		//get histtory into company
+		List<AffCompanyHistImport> listAffCompanyHistImport = screenDto.getLstAffComHist();
 		List<CheckEmpEralOuput> listCheckEmpEralOuput = checkDailyPerError.checkDailyPerError(employeeIds, DatePeriod.daysFirstToLastIn(YearMonth.of(yearMonth)), listAffCompanyHistImport);
 		//取得した情報を元に月別実績を画面に表示する
 		//NOTE: ※取得した「会社所属履歴」をもとに、菜食していない期間の実績は表示しないでください

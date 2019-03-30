@@ -15,12 +15,15 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 
 import nts.arc.error.BusinessException;
+import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.record.app.find.monthly.root.common.ClosureDateDto;
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.IdentityProcessDto;
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.IdentityProcessFinder;
+import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
+import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
 import nts.uk.ctx.at.record.dom.adapter.workplace.affiliate.AffAtWorkplaceImport;
 import nts.uk.ctx.at.record.dom.adapter.workplace.affiliate.AffWorkplaceAdapter;
@@ -67,6 +70,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureHistory;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
+import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.ActualTime;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.ActualTimeState;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.EditStateOfMonthlyPerformanceDto;
@@ -107,6 +111,12 @@ public class MonthlyPerformanceReload {
 
 	@Inject
 	private MonthlyPerformanceScreenRepo repo;
+	
+	@Inject
+	private ClosureService closureService;
+	
+	@Inject
+	private SyCompanyRecordAdapter syCompanyRecordAdapter;
 	
 	private static final String STATE_DISABLE = "mgrid-disable";
 	private static final String HAND_CORRECTION_MYSELF = "mgrid-manual-edit-target";
@@ -199,10 +209,17 @@ public class MonthlyPerformanceReload {
 		// set quyen chinh sua item theo user
 		screenDto.setAuthDto(monthlyItemAuthDto);
 		
+		//指定した年月の期間を算出する
+		DatePeriod datePeriodClosure = closureService.getClosurePeriod(screenDto.getClosureId(), new YearMonth(screenDto.getProcessDate()));
+		//社員ID（List）と指定期間から所属会社履歴項目を取得
+		// RequestList211
+		List<AffCompanyHistImport> lstAffComHist = syCompanyRecordAdapter
+				.getAffCompanyHistByEmployee(employeeIds, datePeriodClosure);
+		
 		// アルゴリズム「ロック状態をチェックする」を実行する - set lock
 		List<MonthlyPerformaceLockStatus> lstLockStatus = checkLockStatus(companyId, employeeIds,
 				param.getYearMonth(), param.getClosureId(),
-				new DatePeriod(param.getActualTime().getStartDate(), param.getActualTime().getEndDate()), param.getInitScreenMode());		
+				new DatePeriod(param.getActualTime().getStartDate(), param.getActualTime().getEndDate()), param.getInitScreenMode(), lstAffComHist);		
 		param.setLstLockStatus(lstLockStatus);
 		
 		// lay lai lock status vi khong the gui tu client len duoc
@@ -499,9 +516,11 @@ public class MonthlyPerformanceReload {
 			if (param.getInitMenuMode() == 2 || !employee.getId().equals(employeeIdLogin)) {
 				lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
 			} else {
+				boolean checkExist = false;
 				if(statusConfirmMonthDto.isPresent()) {
 					for (ConfirmStatusResult confirmStatusResult : statusConfirmMonthDto.get().getListConfirmStatus()) {
 						if(confirmStatusResult.getEmployeeId().equals(employee.getId())) {
+							checkExist = true;
 							if(identify) {
 								//解除可否
 								if(confirmStatusResult.getWhetherToRelease() == ReleasedAtr.CAN_NOT_RELEASE) {
@@ -515,7 +534,8 @@ public class MonthlyPerformanceReload {
 							}
 						}
 					}
-				}else {
+				}
+				if(!checkExist) {
 					lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
 				}
 			}
@@ -652,7 +672,7 @@ public class MonthlyPerformanceReload {
 
 	// copy ben MonthlyPerformanceDisplay
 	public List<MonthlyPerformaceLockStatus> checkLockStatus(String cid, List<String> empIds, Integer processDateYM,
-			Integer closureId, DatePeriod closureTime, int intScreenMode) {
+			Integer closureId, DatePeriod closureTime, int intScreenMode, List<AffCompanyHistImport> lstAffComHist) {
 		List<MonthlyPerformaceLockStatus> monthlyLockStatusLst = new ArrayList<MonthlyPerformaceLockStatus>();
 		// ロック解除モード の場合
 		if (intScreenMode == 1) {
@@ -690,6 +710,14 @@ public class MonthlyPerformanceReload {
 		
 		for (AffAtWorkplaceImport affWorkplaceImport : affWorkplaceLst) {
 			
+			Optional<AffCompanyHistImport> affInHist = lstAffComHist.stream()
+					.filter(x -> x.getEmployeeId().equals(affWorkplaceImport.getEmployeeId())).findFirst();
+
+			List<DatePeriod> periodInHist = affInHist.isPresent() ? affInHist.get().getLstAffComHistItem().stream()
+					.map(x -> x.getDatePeriod()).collect(Collectors.toList()) : new ArrayList<>();
+					
+			List<GeneralDate> lstDateCheck = mergeDatePeriod(closureTime, periodInHist);
+			
 			List<Identification> listIdenByEmpID = new ArrayList<>();
 			for(Identification iden : listIdentification) {
 				if(iden.getEmployeeId().equals(affWorkplaceImport.getEmployeeId())) {
@@ -714,7 +742,7 @@ public class MonthlyPerformanceReload {
 			AcquireActualStatus param = new AcquireActualStatus(cid, affWorkplaceImport.getEmployeeId(), processDateYM,
 					closureId, closureTime.end(), closureTime, affWorkplaceImport.getWorkplaceId());
 			MonthlyActualSituationOutput monthlymonthlyActualStatusOutput = monthlyActualStatus
-					.getMonthlyActualSituationStatus(param,approvalProcOp,listShareAff,checkIdentityOp,listIdenByEmpID,checkExistRecordErrorListDate);
+					.getMonthlyActualSituationStatus(param,approvalProcOp,listShareAff,checkIdentityOp,listIdenByEmpID,checkExistRecordErrorListDate, lstDateCheck);
 			// Output「月の実績の状況」を元に「ロック状態一覧」をセットする
 			monthlyLockStatus = new MonthlyPerformaceLockStatus(
 					monthlymonthlyActualStatusOutput.getEmployeeClosingInfo().getEmployeeId(),
@@ -763,4 +791,14 @@ public class MonthlyPerformanceReload {
 		return StringUtils.join(x);
 	}
 	
+	public List<GeneralDate> mergeDatePeriod(DatePeriod dist, List<DatePeriod> lstSource) {
+		List<DatePeriod> lstResult = new ArrayList<>();
+		lstSource.stream().forEach(x -> {
+			if (dist.start().beforeOrEquals(x.end()) || dist.end().afterOrEquals(x.start())) {
+				lstResult.add(new DatePeriod(dist.start().beforeOrEquals(x.start()) ? x.start() : dist.start(),
+						dist.end().beforeOrEquals(x.end()) ? dist.end() : x.end()));
+			}
+		});
+		return lstResult.stream().flatMap(x -> x.datesBetween().stream()).collect(Collectors.toList());
+	}
 }
