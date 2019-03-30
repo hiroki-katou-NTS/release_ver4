@@ -128,8 +128,7 @@ public class HolidayWorkFrameTimeSheetForCalc extends CalculationTimeSheet{
 		//休出枠No
 		BreakFrameNo breakFrameNo = holidayWorkFrameTimeSheet.decisionBreakFrameNoByHolidayAtr(today.getWorkTypeSetList().get(0).getHolidayAtr());
 		/*加給*/
-		val duplibonusPayTimeSheet = getBonusPayTimeSheetIncludeDedTimeSheet(bonuspaySetting, timeSpan, recordTimeSheet, recordTimeSheet);
-											 
+		val duplibonusPayTimeSheet = getBonusPayTimeSheetIncludeDedTimeSheet(bonuspaySetting, timeSpan, recordTimeSheet, recordTimeSheet);					 
 		/*特定日*/
 		val duplispecifiedBonusPayTimeSheet = getSpecBonusPayTimeSheetIncludeDedTimeSheet(bonuspaySetting, timeSpan, recordTimeSheet, recordTimeSheet, specificDateAttrSheets);
 		/*深夜*/

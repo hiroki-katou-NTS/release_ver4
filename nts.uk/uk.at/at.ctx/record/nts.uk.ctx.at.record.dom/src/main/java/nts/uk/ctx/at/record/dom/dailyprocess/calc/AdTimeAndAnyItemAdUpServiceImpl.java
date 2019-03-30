@@ -61,6 +61,7 @@ public class AdTimeAndAnyItemAdUpServiceImpl implements AdTimeAndAnyItemAdUpServ
 	@Inject
 	private TimeLeavingOfDailyPerformanceRepository timeLeave;
 	
+	/*任意項目ストアド*/
 	@Inject
 	private StoredProcedureFactory dbStoredProcess;
 	

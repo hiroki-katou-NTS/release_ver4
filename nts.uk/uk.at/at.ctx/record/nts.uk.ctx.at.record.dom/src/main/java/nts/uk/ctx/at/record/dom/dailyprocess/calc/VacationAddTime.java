@@ -19,7 +19,6 @@ public class VacationAddTime {
 	//特別休暇
 	private AttendanceTime SpecialHoliday;
 	
-	
 	/**
 	 * 引数として渡した休暇加算時間を加算した休暇加算時間を返す
 	 * @param vacationAddTime 合算したい休暇加算時間
@@ -31,7 +30,6 @@ public class VacationAddTime {
 									new AttendanceTime(this.SpecialHoliday.valueAsMinutes() + vacationAddTime.SpecialHoliday.valueAsMinutes()));
 	}
 	
-	
 	/**
 	 * 休暇加算時間の合計時間を返す処理
 	 * @return 年休＋積休＋特別休暇
@@ -39,5 +37,4 @@ public class VacationAddTime {
 	public int calcTotaladdVacationAddTime() {
 		return this.AnnualLeave.valueAsMinutes() + this.AccumulationVacation.valueAsMinutes() + this.SpecialHoliday.valueAsMinutes();
 	}
-	
 }

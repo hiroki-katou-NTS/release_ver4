@@ -68,7 +68,6 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 									  workType.getDailyWork().getMorning(), 
 									  workType.getDailyWork().getAfternoon());
 		
-		
 			val createWorkType = new WorkType(workType.getCompanyId(), 
 									workType.getWorkTypeCode(), 
 									workType.getSymbolicName(), 
@@ -90,8 +89,8 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 															WorkTypeSetCheck.NO_CHECK, 
 															WorkTypeSetCheck.NO_CHECK, 
 															workTypeSet.isPresent()?workTypeSet.get().getGenSubHodiday():WorkTypeSetCheck.NO_CHECK,
-															WorkTypeSetCheck.NO_CHECK
-														);
+															WorkTypeSetCheck.NO_CHECK);
+			
 			createWorkType.addWorkTypeSet(createWorkTypeSet);
 			return createWorkType;
 		}
@@ -103,7 +102,6 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 										  workType.getDailyWork().getOneDay(), 
 										  WorkTypeClassification.Attendance, 
 										  WorkTypeClassification.Attendance);
-
 
 			val createWorkType = new WorkType(workType.getCompanyId(), 
 											  workType.getWorkTypeCode(), 
@@ -126,8 +124,7 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 																   WorkTypeSetCheck.NO_CHECK, 
 																   WorkTypeSetCheck.NO_CHECK, 
 															       workTypeSetMorning.isPresent()?workTypeSetMorning.get().getGenSubHodiday():WorkTypeSetCheck.NO_CHECK,
-															       WorkTypeSetCheck.NO_CHECK
-				);		
+															       WorkTypeSetCheck.NO_CHECK);		
 			
 			WorkTypeSet createWorkTypeSetAfternoon = new WorkTypeSet(workTypeSetAfternoon.isPresent()?workTypeSetAfternoon.get().getCompanyId():workType.getCompanyId(), 
 					   												 workTypeSetAfternoon.isPresent()?workTypeSetAfternoon.get().getWorkTypeCd():workType.getWorkTypeCode(), 
@@ -141,8 +138,8 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 					   												 WorkTypeSetCheck.NO_CHECK, 
 					   												 WorkTypeSetCheck.NO_CHECK, 
 					   												 workTypeSetAfternoon.isPresent()?workTypeSetAfternoon.get().getGenSubHodiday():WorkTypeSetCheck.NO_CHECK,
-					   												 WorkTypeSetCheck.NO_CHECK
-				);
+					   												 WorkTypeSetCheck.NO_CHECK);
+			
 			createWorkType.addWorkTypeSet(createWorkTypeSetMorning);
 			createWorkType.addWorkTypeSet(createWorkTypeSetAfternoon);
 			return createWorkType;
