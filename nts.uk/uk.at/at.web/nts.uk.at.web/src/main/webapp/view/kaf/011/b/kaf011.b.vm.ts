@@ -152,12 +152,12 @@ module nts.uk.at.view.kaf011.b.viewmodel {
             self.validateControl();
             if (nts.uk.ui.errors.hasError()) { return; }
             
-            /*
+            
             let isCheckReasonError = !self.checkReason();
             if (isCheckReasonError) {
                 return;
             }
-            */
+            
 
             block.invisible();
             service.update(saveCmd).done(() => {
@@ -196,12 +196,13 @@ module nts.uk.at.view.kaf011.b.viewmodel {
         checkReason(): boolean {
             let self = this,
                 appReason = self.getReason();
+            
             let appReasonError = !nts.uk.at.view.kaf000.shr.model.CommonProcess.checkAppReason(true, self.appTypeSet().displayFixedReason() != 0, self.appTypeSet().displayAppReason() != 0, appReason);
             if (appReasonError) {
                 nts.uk.ui.dialog.alertError({ messageId: 'Msg_115' });
                 return false;
             }
-            let isCheckLengthError: boolean = !appcommon.CommonProcess.checklenghtReason(appReason, "#appReason");
+            let isCheckLengthError: boolean = !nts.uk.at.view.kaf000.shr.model.CommonProcess.checklenghtReason(appReason, "#appReason");
             if (isCheckLengthError) {
                 return false;
             }
