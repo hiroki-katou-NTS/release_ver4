@@ -70,6 +70,9 @@ module nts.uk.at.view.kaf011.a.screenModel {
         kaf011ReasonIsEditable: KnockoutObservable<boolean> = ko.computed(() => {
                 return this.appTypeSet().displayAppReason() != 0;
             });
+        kaf011FixedReasonIsEditable: KnockoutObservable<boolean> = ko.computed(() => {
+                return true;
+            });
         kdl003BtnEnable: KnockoutObservable<boolean> = ko.observable(true);
         recTimeSwitchEnable: KnockoutObservable<boolean> = ko.observable(true);
         recTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
