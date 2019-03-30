@@ -52,6 +52,15 @@ module nts.uk.at.view.kaf007.b {
             //screen B default hidden
             showExcludeHoliday: KnockoutObservable<boolean> = ko.observable(false);
             appCur: any = null;
+            
+            wkTime1Enable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.editable() ? this.enableTime() : false;
+            });
+            appReasonEnable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.editable() ? this.displayAppReasonContentFlg() : false;
+            });
+            
+            
             constructor( listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata ) {
                 super( listAppMetadata, currentApp );
                 let self = this;
