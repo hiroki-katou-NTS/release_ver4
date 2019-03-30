@@ -138,6 +138,9 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 	
 	@Inject
 	private WorkingConditionService workingConditionService;
+	
+	@Inject
+	private ReflectStampDomainService reflectStampDomainServiceImpl;
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Override
@@ -383,12 +386,25 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							this.attendanceLeavingGateOfDailyRepo.removeByKey(employeeID, processingDate);
 							// 日別実績のPCログオン情報
 							this.pcLogOnInfoOfDailyRepo.removeByKey(employeeID, processingDate);
-
+							
+							// Watanabe want to edit
+							WorkStyle workStyle = basicScheduleService
+									.checkWorkDay(workInfoOfDailyPerformance.get().getRecordInfo().getWorkTypeCode().v());
+							
 							// 打刻を取得して反映する
-							stampOutput = this.reflectStampDomainService.reflectStampInfo(companyID, employeeID,
-									processingDate, workInfoOfDailyPerformanceUpdate, null, empCalAndSumExecLogID,
-									reCreateAttr, Optional.ofNullable(calAttrOfDailyPerformance),
-									affiliationInforOfDailyPerfor, Optional.empty());
+							
+							if (workStyle != WorkStyle.ONE_DAY_REST) {
+								stampOutput = this.reflectStampDomainService.reflectStampInfo(companyID, employeeID,
+										processingDate, workInfoOfDailyPerformanceUpdate, null, empCalAndSumExecLogID,
+										reCreateAttr, Optional.ofNullable(calAttrOfDailyPerformance),
+										affiliationInforOfDailyPerfor, Optional.empty());
+							}else {
+								 stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(companyID,
+										 employeeID, processingDate, workInfoOfDailyPerformance, null, empCalAndSumExecLogID, reCreateAttr,
+										Optional.empty(), Optional.empty(), Optional.empty());
+							}
+							// ****
+							
 							if(stampOutput.getErrMesInfos().isEmpty()) {
 
 							DailyRecordToAttendanceItemConverter converter = attendanceItemConvertFactory
