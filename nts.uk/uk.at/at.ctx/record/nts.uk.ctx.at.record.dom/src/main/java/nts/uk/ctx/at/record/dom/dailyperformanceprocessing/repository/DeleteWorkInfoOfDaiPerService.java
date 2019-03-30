@@ -16,6 +16,7 @@ import nts.uk.ctx.at.record.dom.breakorgoout.repository.OutingTimeOfDailyPerform
 import nts.uk.ctx.at.record.dom.calculationattribute.repo.CalAttrOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.AttendanceLeavingGateOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.PCLogOnInfoOfDailyRepo;
+import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.raisesalarytime.repo.SpecificDateAttrOfDailyPerforRepo;
 import nts.uk.ctx.at.record.dom.shorttimework.repo.ShortTimeOfDailyPerformanceRepository;
@@ -90,6 +91,9 @@ public class DeleteWorkInfoOfDaiPerService {
 	@Inject
 	private EmployeeDailyPerErrorRepository employeeDailyPerErrorRepository;
 	
+	@Inject
+	private AnyItemValueOfDailyRepo anyItemValueOfDailyRepo;
+	
 //	@Inject
 //	private AppRootStateConfirmAdapter appRootStateConfirmAdapter;
 
@@ -117,6 +121,9 @@ public class DeleteWorkInfoOfDaiPerService {
 		this.employeeDailyPerErrorRepository.removeParam(employeeId, day);
 		// remove approval State from workflow
 //		this.appRootStateConfirmAdapter.deleteApprovalByEmployeeIdAndDate(employeeId, day);
+		this.anyItemValueOfDailyRepo.deleteAnyItemValueOfDaily(employeeId, day);
+		
+		
 	}
 
 }
