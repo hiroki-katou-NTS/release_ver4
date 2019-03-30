@@ -59,6 +59,9 @@ module nts.uk.at.view.kaf011.b.viewmodel {
         kaf011ReasonIsEditable: KnockoutObservable<boolean> = ko.computed(() => {
                 return this.editable() ? this.appTypeSet().displayAppReason() != 0 : false;
             });
+        kaf011FixedReasonIsEditable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.editable() ;
+            });
         kdl003BtnEnable: KnockoutObservable<boolean> = ko.computed(() => {
                 return this.editable();
             });
