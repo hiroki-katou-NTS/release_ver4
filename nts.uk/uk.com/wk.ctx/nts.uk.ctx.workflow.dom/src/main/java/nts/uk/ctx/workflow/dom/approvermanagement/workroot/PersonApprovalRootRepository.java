@@ -170,6 +170,6 @@ public interface PersonApprovalRootRepository {
 	 */
 	List<PersonApprovalRoot> findEmpByConfirm(String companyID, String employeeID, ConfirmationRootType confirmType, GeneralDate date);
 	
-	List<PersonApprovalRoot> getHistLastestCom(String companyId, String employeeId);
-	List<PersonApprovalRoot> getHistLastestPri(String companyId, String employeeId, int employmentRootAtr, Integer applicationType);
+	Optional<PersonApprovalRoot> getHistLastestCom(String companyId, String employeeId);
+	Optional<PersonApprovalRoot> getHistLastestPri(String companyId, String employeeId, int employmentRootAtr, Integer applicationType);
 }
