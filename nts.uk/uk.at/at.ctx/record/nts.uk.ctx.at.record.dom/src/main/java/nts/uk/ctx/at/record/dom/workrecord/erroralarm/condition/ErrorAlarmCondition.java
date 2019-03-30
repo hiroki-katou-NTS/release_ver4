@@ -61,7 +61,23 @@ public class ErrorAlarmCondition extends AggregateRoot {
 		super();
 		this.displayMessage = new DisplayMessage("");
 	}
+	
+	public void referenceTo(ErrorAlarmCondition target) {
+		this.errorAlarmCheckID = target.errorAlarmCheckID;
 
+		this.displayMessage = target.displayMessage;
+
+		this.checkTargetCondtion = target.checkTargetCondtion;
+
+		this.workTypeCondition = target.workTypeCondition;
+
+		this.workTimeCondition = target.workTimeCondition;
+
+		this.atdItemCondition = target.atdItemCondition;
+		
+		this.continuousPeriod = target.continuousPeriod;
+	}
+	
 	/**
 	 * Init
 	 * 
