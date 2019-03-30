@@ -24,6 +24,6 @@ public class UpdateWorkAppApprovalRByHistCommand {
 	private String startDatePrevious;
 	/**	list history and approvalId */
 	private List<UpdateHistoryDto> lstUpdate;
-	/**	checkMode */
+	/**	checkMode, common: 0, private: 1 */
 	private int checkMode;
 }
