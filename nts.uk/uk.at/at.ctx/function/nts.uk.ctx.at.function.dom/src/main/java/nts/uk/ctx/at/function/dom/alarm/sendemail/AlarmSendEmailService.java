@@ -68,7 +68,7 @@ public class AlarmSendEmailService implements SendEmailService {
 			boolean useAuthentication,Optional<MailSettings> mailSetting,Optional<MailSettings> mailSettingAdmins,Optional<String> senderAddress){
 		List<String> errors = new ArrayList<>();
 		Integer functionID = 9; //function of Alarm list = 9
-		List<String> listEmpAdminError = new ArrayList<>();
+//		List<String> listEmpAdminError = new ArrayList<>();
 		List<String> listworkplaceError = new ArrayList<>();
 		boolean isErrorSendMailEmp = false;
 		//Send mail for employee
@@ -120,6 +120,7 @@ public class AlarmSendEmailService implements SendEmailService {
 			}
 			
 			for (String workplaceId : workplaceIds) {
+				List<String> listEmpAdminError = new ArrayList<>();
 				// Call request list 218 return list employee Id
 				List<String> listEmployeeId = employeePubAlarmAdapter.getListEmployeeId(workplaceId,executeDate);
 				// 抽出結果：ループ中の職場単位のアラーム抽出結果 
