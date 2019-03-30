@@ -468,6 +468,10 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 								TimeLeavingOfDailyPerformance timeLeavingOptionalResult = this.inforService.createStamp(companyID, workInfoOfDailyPerformanceUpdate, workingConditionItem, timeLeavingOptional, employeeID, processingDate, null);
 								stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(timeLeavingOptionalResult);
 							}
+							
+							if(converter2.timeLeaving().isPresent()){
+								stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(converter2.timeLeaving().orElse(null));
+								}
 							}
 							//---------------
 
