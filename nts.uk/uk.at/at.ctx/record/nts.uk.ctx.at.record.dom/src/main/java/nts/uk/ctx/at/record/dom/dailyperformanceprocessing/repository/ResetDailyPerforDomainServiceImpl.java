@@ -467,13 +467,6 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 								TimeLeavingOfDailyPerformance timeLeavingOptional = stampBeforeReflection.getTimeLeavingOfDailyPerformance();
 								TimeLeavingOfDailyPerformance timeLeavingOptionalResult = this.inforService.createStamp(companyID, workInfoOfDailyPerformanceUpdate, workingConditionItem, timeLeavingOptional, employeeID, processingDate, null);
 								stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(timeLeavingOptionalResult);
-								if(stampOutput.getReflectStampOutput().getAttendanceLeavingGateOfDaily() == null && stampBeforeReflection.getAttendanceLeavingGateOfDaily() != null) {
-									stampOutput.getReflectStampOutput().setAttendanceLeavingGateOfDaily(converter.attendanceLeavingGate().orElse(null));
-								}
-								
-								if(stampOutput.getReflectStampOutput().getPcLogOnInfoOfDaily() == null && stampBeforeReflection.getPcLogOnInfoOfDaily() != null){
-									stampOutput.getReflectStampOutput().setPcLogOnInfoOfDaily(converter.pcLogInfo().orElse(null));
-								}
 							}
 							}
 							//---------------
