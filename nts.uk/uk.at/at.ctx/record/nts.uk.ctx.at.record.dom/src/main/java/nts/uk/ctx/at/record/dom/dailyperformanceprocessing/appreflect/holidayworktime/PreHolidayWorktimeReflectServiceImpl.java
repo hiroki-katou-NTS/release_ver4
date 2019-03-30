@@ -90,10 +90,12 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 			//休出時間の反映			
 			daily = holidayWorkProcess.reflectWorkTimeFrame(holidayWorkPara, isPre, daily);
 			//事前所定外深夜時間の反映
-			daily = workUpdate.updateTimeShiftNightHoliday(holidayWorkPara.getEmployeeId(),
-					holidayWorkPara.getBaseDate(), 
-					holidayWorkPara.getHolidayWorkPara().getNightTime(), 
-					true, daily);
+			if(isPre) {
+				daily = workUpdate.updateTimeShiftNightHoliday(holidayWorkPara.getEmployeeId(),
+						holidayWorkPara.getBaseDate(), 
+						holidayWorkPara.getHolidayWorkPara().getNightTime(), 
+						true, daily);	
+			}			
 			attendanceTime.updateFlush(daily.getAttendanceTimeOfDailyPerformance().get());
 			
 			List<EditStateOfDailyPerformance> lstEditState = dailyReposiroty.findByKey(holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate());
@@ -113,7 +115,8 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 		if(daily == null) {
 			return null;
 		}
-		if(isPre) {
+		if(!daily.getAttendanceTimeOfDailyPerformance().isPresent()
+				|| !daily.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getWorkHolidayTime().isPresent()) {
 			AttendanceTimeOfDailyPerformance attendanceTime = AttendanceTimeOfDailyPerformance.allZeroValue(employeeId, baseDate);
 			daily.setAttendanceTimeOfDailyPerformance(Optional.of(attendanceTime));
 			timeAndAnyItemUpService.addAndUpdate(daily);	
