@@ -201,7 +201,7 @@ module nts.uk.at.view.kaf011.b.viewmodel {
                 nts.uk.ui.dialog.alertError({ messageId: 'Msg_115' });
                 return false;
             }
-            let isCheckLengthError: boolean = !nts.uk.at.view.kaf000.shr.model.CommonProcess.checklenghtReason(appReason, "#appReason");
+            let isCheckLengthError: boolean = !appcommon.CommonProcess.checklenghtReason(appReason, "#appReason");
             if (isCheckLengthError) {
                 return false;
             }
@@ -221,13 +221,7 @@ module nts.uk.at.view.kaf011.b.viewmodel {
             if (!nts.uk.util.isNullOrEmpty(inputReasonID)) {
                 inputReason = _.find(inputReasonList, { 'reasonID': inputReasonID }).reasonTemp;
             }
-            if (!nts.uk.util.isNullOrEmpty(inputReason) && !nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = inputReason + ":" + detailReason;
-            } else if (!nts.uk.util.isNullOrEmpty(inputReason) && nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = inputReason;
-            } else if (nts.uk.util.isNullOrEmpty(inputReason) && !nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = detailReason;
-            }
+            appReason = inputReason + ":" + detailReason;
             return appReason;
         }
 
