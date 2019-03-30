@@ -129,7 +129,7 @@
 					<!-- <button id="workSelect-kaf007"
 						data-bind=" click: $vm.openKDL003Click.bind($vm)">#{i18n.getText('KAF007_24')}</button> -->
 					<button id="workSelect-kaf007"
-						data-bind=" click: function(){ $parent.openKDL003Click($vm) }">#{i18n.getText('KAF007_24')}</button>
+						data-bind="click: function(){ $parent.openKDL003Click($vm) }, enable: $parent.editable">#{i18n.getText('KAF007_24')}</button>
 				</div>
 				<div class="cell valign-center">
 					<!--A6_2 勤務種類名-->
@@ -158,7 +158,7 @@
 							data-bind="ntsTimeWithDayEditor: { name: '勤務時間直行',
 															constraint:'TimeWithDayAttr',
 															value: workChange().workTimeStart1, 
-															enable: $parent.enableTime() , 
+															enable: $parent.wkTime1Enable() , 
 															readonly: false,
 															required: $parent.requiredCheckTime }" />
 
@@ -175,7 +175,7 @@
 							data-bind="ntsTimeWithDayEditor: {name: '勤務時間直帰', 
 															constraint:'TimeWithDayAttr', 
 															value: workChange().workTimeEnd1, 
-															enable: $parent.enableTime() , 
+															enable: $parent.wkTime1Enable() , 
 															readonly: false,
 															required: $parent.requiredCheckTime }" />
 						<label
@@ -239,7 +239,9 @@
 							id="inpStartTime2"
 							data-bind="ntsTimeWithDayEditor: {name: '勤務時間２直行',
 															constraint:'TimeWithDayAttr',
-															value: workChange().workTimeStart2}" />
+															value: workChange().workTimeStart2,
+															enable:$parent.editable
+															}" />
 
 					</div>
 				</div>
@@ -252,7 +254,8 @@
 							class="right-content-kaf007 inputTime-kaf007"
 							data-bind="ntsTimeWithDayEditor: {name: '勤務時間２直帰', 
 															constraint:'TimeWithDayAttr',
-															value: workChange().workTimeEnd2}" />
+															value: workChange().workTimeEnd2,
+															enable:$parent.editable}" />
 					</div>
 				</div>
 			</div>
@@ -381,7 +384,7 @@
 									                   	},
 			                   						required : false, 
 			                   						name: '#[KAF007_29]',
-			                   						enable: $parent.displayAppReasonContentFlg }" />
+			                   						enable: $parent.appReasonEnable }" />
 			</div>
 		</div>
 	</div>

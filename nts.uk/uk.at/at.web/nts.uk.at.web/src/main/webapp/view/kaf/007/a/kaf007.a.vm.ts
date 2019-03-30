@@ -56,6 +56,12 @@ module nts.uk.at.view.kaf007.a.viewmodel {
         requiredCheckTime: KnockoutObservable<boolean> = ko.observable(this.isWorkChange() && true);
         timeRequired: KnockoutObservable<boolean> = ko.observable(false);
         showExcludeHoliday: KnockoutObservable<boolean> = ko.observable(false);
+        wkTime1Enable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.enableTime();
+        });
+        appReasonEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.displayAppReasonContentFlg();
+        });
         constructor() {
             let self = this,
                 application = self.appWorkChange().application();
