@@ -439,13 +439,11 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 									}								
 								}
 							}
-							
 							stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(converter2.timeLeaving().orElse(null));
 							stampOutput.getReflectStampOutput().setOutingTimeOfDailyPerformance(converter2.outingTime().orElse(null));
 							stampOutput.getReflectStampOutput().setTemporaryTimeOfDailyPerformance(converter2.temporaryTime().orElse(null));
 							stampOutput.getReflectStampOutput().setAttendanceLeavingGateOfDaily(converter2.attendanceLeavingGate().orElse(null));
 							stampOutput.getReflectStampOutput().setPcLogOnInfoOfDaily(converter2.pcLogInfo().orElse(null));
-							
 							// 社員の労働条件を取得する
 							Optional<WorkingConditionItem> workingConditionItem = this.workingConditionService.findWorkConditionByEmployee(employeeID, processingDate);
 							if(workingConditionItem.isPresent()){
@@ -453,11 +451,14 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 								TimeLeavingOfDailyPerformance timeLeavingOptional = stampBeforeReflection.getTimeLeavingOfDailyPerformance();
 								TimeLeavingOfDailyPerformance timeLeavingOptionalResult = this.inforService.createStamp(companyID, workInfoOfDailyPerformanceUpdate, workingConditionItem, timeLeavingOptional, employeeID, processingDate, null);
 								stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(timeLeavingOptionalResult);
+								if(stampOutput.getReflectStampOutput().getAttendanceLeavingGateOfDaily() == null && stampBeforeReflection.getAttendanceLeavingGateOfDaily() != null) {
+									stampOutput.getReflectStampOutput().setAttendanceLeavingGateOfDaily(converter.attendanceLeavingGate().orElse(null));
+								}
+								
+								if(stampOutput.getReflectStampOutput().getPcLogOnInfoOfDaily() == null && stampBeforeReflection.getPcLogOnInfoOfDaily() != null){
+									stampOutput.getReflectStampOutput().setPcLogOnInfoOfDaily(converter.pcLogInfo().orElse(null));
+								}
 							}
-							if(converter2.timeLeaving().isPresent()){
-							stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(converter2.timeLeaving().orElse(null));
-							}
-							
 							}
 							//---------------
 
