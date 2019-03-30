@@ -401,7 +401,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							}else {
 								 stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(companyID,
 										 employeeID, processingDate, workInfoOfDailyPerformance, null, empCalAndSumExecLogID, reCreateAttr,
-										Optional.empty(), Optional.empty(), Optional.empty());
+										 Optional.ofNullable(calAttrOfDailyPerformance),affiliationInforOfDailyPerfor, Optional.empty());
 							}
 							// ****
 							
