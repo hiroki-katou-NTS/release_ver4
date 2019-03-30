@@ -68,6 +68,24 @@ public class ErAlExtractResultFinder {
 					employee.getEmployeeId(), employee.getEmployeeCode(), employee.getEmployeeName(), eral.getAlarmTime(),
 					eral.getCategoryCode(), eral.getCategoryName(), eral.getAlarmItem(), eral.getAlarmMes(), eral.getComment());
 			
+		}).sorted((v1, v2) -> {
+			int compare1 = v1.getHierarchyCd().compareTo(v2.getHierarchyCd());
+			if(compare1 != 0){
+				return compare1;
+			}
+			int compare2 = v1.getEmployeeCode().compareTo(v2.getEmployeeCode());
+			if(compare2 != 0){
+				return compare2;
+			}
+			int compare3 = v1.getAlarmValueDate().compareTo(v2.getAlarmValueDate());
+			if(compare3 != 0){
+				return compare3;
+			}
+			int compare4 = v1.getCategory().compareTo(v2.getCategory());
+			if(compare4 != 0){
+				return compare4;
+			}
+			return v1.getAlarmItem().compareTo(v2.getAlarmItem());
 		}).filter(c -> c != null).collect(Collectors.toList());
 	}
 
