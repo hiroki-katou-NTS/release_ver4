@@ -194,7 +194,7 @@ public class JpaAlarmListExtractResultRepoImpl extends JpaRepository implements 
 		String findEmpData = "SELECT EXECUTE_ID, EMPLOYEE_ID, EMPLOYEE_CODE, EMPLOYEE_NAME, WORKPLACE_ID, WORKPLACE_NAME, "
 				+ "HIERARCHY_CD, WORKPLACE_WORK_START_DATE, WORKPLACE_WORK_END_DATE FROM KFNMT_ALEX_EMP_DATA WHERE EXECUTE_ID IN ("
 				+ executeIds.stream().map(c -> "?").collect(Collectors.joining(","))
-				+ ")";
+				+ ") ORDER BY HIERARCHY_CD, EMPLOYEE_CODE";
 		try(PreparedStatement st = this.connection().prepareStatement(findEmpData)) {
 			for(int i = 1; i <= executeIds.size(); i++){
 				st.setString(i, executeIds.get(i - 1));
