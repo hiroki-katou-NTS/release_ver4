@@ -51,8 +51,19 @@ __viewContext.getProgramName = getProgramName;
 __viewContext.ready(function() {
     var listAppMeta: Array<model.ApplicationMetadata> = [];
     var currentApp: model.ApplicationMetadata;
-    var listValue: Array<string> = __viewContext.transferred.value.listAppMeta;
-    var currentValue: string = __viewContext.transferred.value.currentApp;
+    var listValue: Array<string> = [];
+    var currentValue: string = '';
+    if(__viewContext.transferred.value == null || __viewContext.transferred.value === undefined){
+        let paramCache = nts.uk.ui.windows.getShared('paramInitKAF000');
+        if(paramCache != null && paramCache !== undefined){
+            listValue = paramCache.listAppMeta;
+            currentValue = paramCache.currentApp;
+        }
+    }else{
+        listValue = __viewContext.transferred.value.listAppMeta;
+        currentValue = __viewContext.transferred.value.currentApp;
+        nts.uk.ui.windows.setShared('paramInitKAF000', { 'listAppMeta': listValue, 'currentApp': currentValue });
+    }
     var screenModel: any = {};
     nts.uk.at.view.kaf000.b.service.getAppByListID(listValue)
         .done((data) => {
