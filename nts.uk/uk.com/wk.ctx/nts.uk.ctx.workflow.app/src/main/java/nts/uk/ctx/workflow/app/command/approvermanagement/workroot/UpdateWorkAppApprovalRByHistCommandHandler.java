@@ -50,7 +50,7 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 	private static final int WORKPLACE = 1;
 	private static final int EDIT = 1;
 	private static final int COMMON = 0;
-	private static final int PRIVATE = 0;
+	private static final int PRIVATE = 1;
 	@Override
 	protected void handle(CommandHandlerContext<UpdateWorkAppApprovalRByHistCommand> context) {
 		UpdateWorkAppApprovalRByHistCommand  objUpdateItem = context.getCommand();
@@ -354,14 +354,14 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 		GeneralDate dateLastest = null;
 		//ドメインモデル「就業承認ルート履歴」を取得する
 		if(objUpdateItem.getEditOrDelete() == EDIT && objUpdateItem.getCheckMode() == COMMON){//07.履歴編集を実行する(まとめて設定モード)
-			List<PersonApprovalRoot> histL = repoPerson.getHistLastestCom(companyId, employeeId);
-			if(!histL.isEmpty()) dateLastest = histL.get(0).getEmploymentAppHistoryItems().get(0).getDatePeriod().start();
+			Optional<PersonApprovalRoot> histL = repoPerson.getHistLastestCom(companyId, employeeId);
+			if(histL.isPresent()) dateLastest = histL.get().getEmploymentAppHistoryItems().get(0).getDatePeriod().start();
 		}
 		if(objUpdateItem.getEditOrDelete() == EDIT && objUpdateItem.getCheckMode() == PRIVATE){//10.履歴編集を実行する(申請個別設定モード)
 			Integer employmentRootAtr = objUpdateItem.getLstUpdate().get(0).getEmployRootAtr();
 			Integer applicationType = objUpdateItem.getLstUpdate().get(0).getApplicationType();
-			List<PersonApprovalRoot> histL = repoPerson.getHistLastestPri(companyId, employeeId, employmentRootAtr, applicationType);
-			if(histL.isEmpty()) dateLastest = histL.get(0).getEmploymentAppHistoryItems().get(0).getDatePeriod().start();
+			Optional<PersonApprovalRoot> histL = repoPerson.getHistLastestPri(companyId, employeeId, employmentRootAtr, applicationType);
+			if(histL.isPresent()) dateLastest = histL.get().getEmploymentAppHistoryItems().get(0).getDatePeriod().start();
 		}
 		for (UpdateHistoryDto updateItem : lstHist) {
 			//find history by type and 
