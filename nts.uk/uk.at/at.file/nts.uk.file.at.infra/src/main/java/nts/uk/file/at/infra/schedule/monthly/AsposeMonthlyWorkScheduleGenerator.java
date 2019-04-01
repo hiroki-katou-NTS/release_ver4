@@ -2773,10 +2773,13 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		if (sheetInfo.getSheet().getHorizontalPageBreaks().getCount() >= MAX_PAGE_PER_SHEET - 1) {
 			sheetInfo.setSheet(this.copySheet(wsc, sheetInfo));
 			return true;
-		} else {
-			sheetInfo.getSheet().getHorizontalPageBreaks().add(currentRow);
-			return false;
-		}
+        } else {
+            // check have row is printed
+            if (sheetInfo.getStartDataIndex() != currentRow) {
+                sheetInfo.getSheet().getHorizontalPageBreaks().add(currentRow);
+            }
+            return false;
+        }
 	}
 
 	private int printWorkplace(Cells cells, int currentRow, WorksheetCollection templateSheetCollection,

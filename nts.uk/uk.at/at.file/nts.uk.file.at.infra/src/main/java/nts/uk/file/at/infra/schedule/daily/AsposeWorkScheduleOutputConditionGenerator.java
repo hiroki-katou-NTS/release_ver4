@@ -3322,7 +3322,10 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			sheetInfo.setSheet(this.copySheet(wsc, sheetInfo));
 			return true;
 		} else {
-			sheetInfo.getSheet().getHorizontalPageBreaks().add(currentRow);
+			// check have row is printed
+			if (sheetInfo.getStartDataIndex() != currentRow) {
+				sheetInfo.getSheet().getHorizontalPageBreaks().add(currentRow);
+			}
 			return false;
 		}
 	}
