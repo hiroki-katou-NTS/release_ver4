@@ -1860,6 +1860,7 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 							rowPageTracker.resetRemainingRow();
 						}
 						
+                        cells = sheetInfo.getSheet().getCells();
 						Range wkpHierTotalRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_TOTAL_ROW + dataRowCount);
 						Range wkpHierTotalRange = cells.createRange(currentRow, 0, dataRowCount, DATA_COLUMN_INDEX[5]);
 						wkpHierTotalRange.copy(wkpHierTotalRangeTemp);
@@ -1983,9 +1984,6 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 			MonthlyWorkplaceData rootWorkplace = monthlyReportData.getLstWorkplaceData();
 //			if (!findDetailedData(rootWorkplace))
 //				continue;
-			Range dateRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_DATE_ROW);
-			Range dateRange = cells.createRange(currentRow, 0, 1, DATA_COLUMN_INDEX[5]);
-			dateRange.copy(dateRangeTemp);
 			// rowPageTracker.useOneRowAndCheckResetRemainingRow(sheetInfo.getSheet(), currentRow);
 			if (rowPageTracker.checkRemainingRowSufficient(3) <= 0) {
 				if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
@@ -1994,34 +1992,25 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 				}
 				rowPageTracker.resetRemainingRow();
 			}
-			rowPageTracker.useRemainingRow(1);
 			//dateRange.setOutlineBorder(BorderType.TOP_BORDER, CellBorderType.THIN, Color.getBlack());
 			
 			// B3_1
 			int month = monthlyReportData.getYearMonth().month();
 			String date = monthlyReportData.getYearMonth().year() + "/" + (month < 10 ? "0" + month : month);
-			Cell dateTagCell = cells.get(currentRow, 0);
-			dateTagCell.setValue(WorkScheOutputConstants.DATE_BRACKET + "　" +date);
-			
-//			// B3_2
-//			int month = monthlyReportData.getYearMonth().month();
-//			String date = monthlyReportData.getYearMonth().year() + "/" + (month < 10 ? "0" + month : month);
-//			Cell dateCell = cells.get(currentRow, 2);
-//			dateCell.setValue(date);
-			
-			currentRow++;
-			
-			
-			currentRow = writeDailyDetailedPerformanceDataOnWorkplace(currentRow, sheetInfo, templateSheetCollection, rootWorkplace, dataRowCount, condition, rowPageTracker);
+			String titleDate = WorkScheOutputConstants.DATE_BRACKET + "　" + date;
+			currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
+			rowPageTracker.useRemainingRow(1);
+
+			currentRow = writeDailyDetailedPerformanceDataOnWorkplace(currentRow, sheetInfo, templateSheetCollection, rootWorkplace, dataRowCount, condition, rowPageTracker, titleDate);
 		
-			if (condition.getPageBreakIndicator() == MonthlyWorkScheduleCondition.PAGE_BREAK_EMPLOYEE
+			/*if (condition.getPageBreakIndicator() == MonthlyWorkScheduleCondition.PAGE_BREAK_EMPLOYEE
 					|| condition.getPageBreakIndicator() == MonthlyWorkScheduleCondition.PAGE_BREAK_WORKPLACE) {
 				if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
 					cells = sheetInfo.getSheet().getCells();
 					currentRow = sheetInfo.getStartDataIndex();
 				}
 				rowPageTracker.resetRemainingRow();
-			}
+			}*/
 		}
 		
 		if (condition.getTotalOutputSetting().isGrossTotal()) {
@@ -2043,6 +2032,7 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 				}
 				rowPageTracker.resetRemainingRow();
 			}
+			cells = sheetInfo.getSheet().getCells();
 			Range wkpGrossTotalRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_TOTAL_ROW + dataRowCount);
 			Range wkpGrossTotalRange = cells.createRange(currentRow, 0, dataRowCount, DATA_COLUMN_INDEX[5]);
 			wkpGrossTotalRange.copy(wkpGrossTotalRangeTemp);
@@ -2077,34 +2067,46 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 	 * @return the int
 	 * @throws Exception the exception
 	 */
-	private int writeDailyDetailedPerformanceDataOnWorkplace(int currentRow, WorkSheetInfo sheetInfo, WorksheetCollection templateSheetCollection, MonthlyWorkplaceData rootWorkplace, int dataRowCount, MonthlyWorkScheduleCondition condition, RowPageTracker rowPageTracker) throws Exception {
+	private int writeDailyDetailedPerformanceDataOnWorkplace(int currentRow, WorkSheetInfo sheetInfo, WorksheetCollection templateSheetCollection, MonthlyWorkplaceData rootWorkplace, int dataRowCount, MonthlyWorkScheduleCondition condition, RowPageTracker rowPageTracker, String titleDate) throws Exception {
 		Cells cells = sheetInfo.getSheet().getCells();
 		if (!findDetailedData(rootWorkplace))
 			return currentRow;
-		Range workplaceRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_DATE_ROW);
+		String workplaceTitle = WorkScheOutputConstants.WORKPLACE + "　" + rootWorkplace.getWorkplaceCode()
+				+ "　" + rootWorkplace.getWorkplaceName();
+		/*Range workplaceRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_DATE_ROW);
 		Range workplaceRange = cells.createRange(currentRow, 0, 1, DATA_COLUMN_INDEX[5]);
-		workplaceRange.copy(workplaceRangeTemp);
+		workplaceRange.copy(workplaceRangeTemp);*/
 		
 		boolean colorWhite = true; // true = white, false = light blue, start with white row
 		
 		List<MonthlyPersonalPerformanceData> employeeReportData = rootWorkplace.getLstDailyPersonalData();
 		if (employeeReportData != null && !employeeReportData.isEmpty()) {
+			boolean isPrintWplTitle = false;
 			// rowPageTracker.useOneRowAndCheckResetRemainingRow(sheetInfo.getSheet(), currentRow);
 			if (rowPageTracker.checkRemainingRowSufficient(2) <= 0) {
+				rowPageTracker.resetRemainingRow();
 				if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
 					cells = sheetInfo.getSheet().getCells();
 					currentRow = sheetInfo.getStartDataIndex();
 				}
-				rowPageTracker.resetRemainingRow();
+				currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
+				currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
+				rowPageTracker.useRemainingRow(2);
+				isPrintWplTitle = true;
 			}
-			rowPageTracker.useRemainingRow(1);
+
 			if (condition.getTotalOutputSetting().isDetails() || condition.getTotalOutputSetting().isWorkplaceTotal()
 					|| condition.getTotalOutputSetting().isCumulativeWorkplace()) {
 				// B4_1
-				Cell workplaceTagCell = cells.get(currentRow, 0);
+				if (!isPrintWplTitle){
+					currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
+					rowPageTracker.useRemainingRow(1);
+				}
+
+				/*Cell workplaceTagCell = cells.get(currentRow, 0);
 				workplaceTagCell.setValue(WorkScheOutputConstants.WORKPLACE + "　" + rootWorkplace.getWorkplaceCode()
 						+ "　" + rootWorkplace.getWorkplaceName());
-				currentRow++;
+				currentRow++;*/
 			}
 //			// B4_2
 //			Cell workplaceCell = cells.get(currentRow, 2);
@@ -2121,11 +2123,14 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 				if (lstItem == null || lstItem.isEmpty()) continue;
 				
 				if (rowPageTracker.checkRemainingRowSufficient(dataRowCount) <= 0) {
+					rowPageTracker.resetRemainingRow();
 					if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
 						cells = sheetInfo.getSheet().getCells();
 						currentRow = sheetInfo.getStartDataIndex();
 					}
-					rowPageTracker.resetRemainingRow();
+					currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
+					currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
+					rowPageTracker.useRemainingRow(2);
 				}
 				
 				// B5_1
@@ -2260,11 +2265,14 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		        	lastRowRange.setOutlineBorder(BorderType.BOTTOM_BORDER, CellBorderType.THIN, Color.getBlack());
 		        	
 		        	// Page break by employee
+					rowPageTracker.resetRemainingRow();
 					if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
 						cells = sheetInfo.getSheet().getCells();
 						currentRow = sheetInfo.getStartDataIndex();
 					}
-					rowPageTracker.resetRemainingRow();
+					currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
+					currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
+					rowPageTracker.useRemainingRow(2);
 		        }
 			}
 		}
@@ -2320,7 +2328,7 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		while (workplaceIterator.hasNext()) {
 			Map.Entry<String, MonthlyWorkplaceData> entry = workplaceIterator.next();
 			MonthlyWorkplaceData childWorkplaceData = entry.getValue();
-			currentRow = writeDailyDetailedPerformanceDataOnWorkplace(currentRow, sheetInfo, templateSheetCollection, childWorkplaceData, dataRowCount, condition, rowPageTracker);
+			currentRow = writeDailyDetailedPerformanceDataOnWorkplace(currentRow, sheetInfo, templateSheetCollection, childWorkplaceData, dataRowCount, condition, rowPageTracker, titleDate);
 			
 			// Page break by workplace
 			if ((condition.getPageBreakIndicator() == MonthlyWorkScheduleCondition.PAGE_BREAK_WORKPLACE || 
@@ -2807,28 +2815,17 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
         return currentRow;
     }
 
-	private int printDateBracket(Cells cells, int currentRow, WorksheetCollection templateSheetCollection,
-								 WorkSheetInfo sheetInfo, WorkplaceMonthlyReportData monthlyReportData,
-								 RowPageTracker rowPageTracker) throws Exception {
+	private int printDateBracket(int currentRow, WorksheetCollection templateSheetCollection,
+								 WorkSheetInfo sheetInfo, String dateTitle) throws Exception {
+		Cells cells = sheetInfo.getSheet().getCells();
 		Range dateRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_DATE_ROW);
 		Range dateRange = cells.createRange(currentRow, 0, 1, DATA_COLUMN_INDEX[5]);
 		dateRange.copy(dateRangeTemp);
-		// rowPageTracker.useOneRowAndCheckResetRemainingRow(sheetInfo.getSheet(), currentRow);
-		if (rowPageTracker.checkRemainingRowSufficient(3) <= 0) {
-			if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
-				cells = sheetInfo.getSheet().getCells();
-				currentRow = sheetInfo.getStartDataIndex();
-			}
-			rowPageTracker.resetRemainingRow();
-		}
-		rowPageTracker.useRemainingRow(1);
 		//dateRange.setOutlineBorder(BorderType.TOP_BORDER, CellBorderType.THIN, Color.getBlack());
 
 		// B3_1
-		int month = monthlyReportData.getYearMonth().month();
-		String date = monthlyReportData.getYearMonth().year() + "/" + (month < 10 ? "0" + month : month);
 		Cell dateTagCell = cells.get(currentRow, 0);
-		dateTagCell.setValue(WorkScheOutputConstants.DATE_BRACKET + "　" +date);
+		dateTagCell.setValue(dateTitle);
 
 //		// B3_2
 //		int month = monthlyReportData.getYearMonth().month();
@@ -2836,6 +2833,19 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 //		Cell dateCell = cells.get(currentRow, 2);
 //		dateCell.setValue(date);
 
+		currentRow++;
+		return currentRow;
+	}
+
+	private int printWorkplace(int currentRow, WorksheetCollection templateSheetCollection,
+							   WorkSheetInfo sheetInfo, String workplaceTitle) throws Exception {
+		Cells cells = sheetInfo.getSheet().getCells();
+		Range workplaceRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_DAILY_WORKPLACE_ROW);
+		Range workplaceRange = cells.createRange(currentRow, 0, 1, DATA_COLUMN_INDEX[5]);
+		workplaceRange.copy(workplaceRangeTemp);
+		// B4_1
+		Cell workplaceTagCell = cells.get(currentRow, 0);
+		workplaceTagCell.setValue(workplaceTitle);
 		currentRow++;
 		return currentRow;
 	}
