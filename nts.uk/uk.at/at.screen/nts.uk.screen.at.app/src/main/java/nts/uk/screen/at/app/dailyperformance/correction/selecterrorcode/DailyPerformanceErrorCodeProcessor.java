@@ -20,6 +20,7 @@ import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
+import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHisOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualDay;
@@ -60,6 +61,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.checkapproval.Approv
 import nts.uk.screen.at.app.dailyperformance.correction.dto.checkshowbutton.DailyPerformanceAuthorityDto;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.DPLock;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.DPLockDto;
+import nts.uk.screen.at.app.dailyperformance.correction.process.CheckClosingEmployee;
 import nts.uk.screen.at.app.dailyperformance.correction.text.DPText;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
@@ -94,6 +96,9 @@ public class DailyPerformanceErrorCodeProcessor {
 	
 	@Inject
 	private IFindDataDCRecord iFindDataDCRecord;
+	
+	@Inject
+	private CheckClosingEmployee checkClosingEmployee;
 
 	private static final String LOCK_APPLICATION = "Application";
 	private static final String COLUMN_SUBMITTED = "Submitted";
@@ -142,7 +147,12 @@ public class DailyPerformanceErrorCodeProcessor {
 		// get employmentCode
 		AffEmploymentHistoryDto employment = repo.getAffEmploymentHistory(companyId, sId, dateRange.getEndDate());
 		screenDto.setEmploymentCode(employment == null ? "" : employment.getEmploymentCode());
+
 		List<String> listEmployeeId = lstEmployee.stream().map(e -> e.getId()).collect(Collectors.toList());
+		// 社員の締めをチェックする
+		Map<String, List<EmploymentHisOfEmployeeImport>> mapClosingEmpResult = checkClosingEmployee
+				.checkClosingEmployee(companyId, listEmployeeId,
+						new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId());
 		List<DPErrorDto> lstError = this.repo.getListDPError(screenDto.getDateRange(), listEmployeeId, errorCodes);
 		Map<String, String> mapIdError = new HashMap<>();
 		for (DPErrorDto dto : lstError) {
@@ -273,6 +283,11 @@ public class DailyPerformanceErrorCodeProcessor {
 		List<DPHideControlCell> lstCellHideControl = new ArrayList<>();
 		Map<String, ItemValue> itemValueMap = new HashMap<>();
 		for (DPDataDto data : screenDto.getLstData()) {
+			//filter Date in Period
+			if(!dailyProcessor.checkDataInClosing(Pair.of(data.getEmployeeId(), data.getDate()), mapClosingEmpResult)) {
+				continue;
+			}
+			
 			data.setEmploymentCode(screenDto.getEmploymentCode());
 			if (!sId.equals(data.getEmployeeId())) {
 				screenDto.setCellSate(data.getId(), LOCK_APPLICATION, STATE_DISABLE);

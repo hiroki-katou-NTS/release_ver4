@@ -14,6 +14,7 @@ import lombok.Data;
 import nts.uk.ctx.at.record.app.find.monthly.root.common.ClosureDateDto;
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.FormatPerformanceDto;
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.IdentityProcessDto;
+import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
 import nts.uk.ctx.at.shared.app.find.scherec.monthlyattditem.MonthlyItemControlByAuthDto;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.screen.at.app.monthlyperformance.correction.param.MonthlyPerformanceParam;
@@ -110,6 +111,10 @@ public class MonthlyPerformanceCorrectionDto {
 	
 	private String mess;
 	
+	private List<MPSateCellHideControl> mPSateCellHideControl = new ArrayList<>();
+	
+	//history into company
+	private List<AffCompanyHistImport> lstAffComHist;
 	public MonthlyPerformanceCorrectionDto(){
 		super();
 		this.lstFixedHeader = MPHeaderDto.GenerateFixedHeader();
@@ -118,6 +123,7 @@ public class MonthlyPerformanceCorrectionDto {
 		this.lstControlDisplayItem = new MPControlDisplayItem();
 		this.itemValues = new HashSet<>();
 		this.data = new HashMap<>();
+		this.lstAffComHist = new ArrayList<>();
 		
 	}
 	

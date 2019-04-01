@@ -38,6 +38,7 @@ import nts.gul.util.value.MutableValue;
 import nts.uk.ctx.at.auth.dom.employmentrole.EmployeeReferenceRange;
 import nts.uk.ctx.at.function.dom.adapter.person.EmployeeInfoFunAdapterDto;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
+import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHisOfEmployeeImport;
 //import nts.uk.ctx.at.record.dom.adapter.employee.NarrowEmployeeAdapter;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQuery;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryAdapter;
@@ -144,6 +145,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.lock.DPLockDto;
 import nts.uk.screen.at.app.dailyperformance.correction.month.ErrorMonthProcessor;
 import nts.uk.screen.at.app.dailyperformance.correction.monthflex.DPMonthFlexParam;
 import nts.uk.screen.at.app.dailyperformance.correction.monthflex.DPMonthFlexProcessor;
+import nts.uk.screen.at.app.dailyperformance.correction.process.CheckClosingEmployee;
 import nts.uk.screen.at.app.dailyperformance.correction.searchemployee.FindAllEmployee;
 import nts.uk.screen.at.app.dailyperformance.correction.text.DPText;
 import nts.uk.shr.com.context.AppContexts;
@@ -231,6 +233,9 @@ public class DailyPerformanceCorrectionProcessor {
 	
 	@Inject
 	private RegulationInfoEmployeeQueryAdapter regulationInfoEmployeePub;
+	
+	@Inject
+	private CheckClosingEmployee checkClosingEmployee;
 	
     static final Integer[] DEVIATION_REASON  = {436, 438, 439, 441, 443, 444, 446, 448, 449, 451, 453, 454, 456, 458, 459, 799, 801, 802, 804, 806, 807, 809, 811, 812, 814, 816, 817, 819, 821, 822};
 	public static final Map<Integer, Integer> DEVIATION_REASON_MAP = IntStream.range(0, DEVIATION_REASON.length-1).boxed().collect(Collectors.toMap(x -> DEVIATION_REASON[x], x -> x/3 +1));
@@ -380,7 +385,12 @@ public class DailyPerformanceCorrectionProcessor {
 		//get employee 
 		val timeStart2 = System.currentTimeMillis();
 		//List<AffCompanyHistImport> affCompany = changeEmployeeIds.isEmpty() ? Collections.emptyList() : employeeHistWorkRecordAdapter.getWplByListSidAndPeriod(changeEmployeeIds, new DatePeriod(GeneralDate.min(), GeneralDate.max()));
+		//社員ID（List）と指定期間から所属会社履歴項目を取得
 		Map<String, List<AffComHistItemAtScreen>> affCompanyMap = repo.getAffCompanyHistoryOfEmployee(AppContexts.user().companyId(), changeEmployeeIds);
+		
+		// 社員の締めをチェックする
+		Map<String, List<EmploymentHisOfEmployeeImport>> mapClosingEmpResult = checkClosingEmployee.checkClosingEmployee(companyId, changeEmployeeIds, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId());
+		
 		System.out.println("time map data wplhis, date:" + (System.currentTimeMillis() - timeStart2)); //slow
 		val timeStart3 = System.currentTimeMillis();
 		screenDto.setLstData(setWorkPlace(WPHMap, affCompanyMap, screenDto.getLstData()));
@@ -571,7 +581,7 @@ public class DailyPerformanceCorrectionProcessor {
 		mapDataIntoGrid(screenDto, sId, appMapDateSid, listEmployeeId, resultDailyMap, mode, displayFormat, showLock,
 				identityProcessDtoOpt, approvalUseSettingDtoOpt, dateRange, objectShare,
 				companyId, disItem, dPControlDisplayItem, dailyRecEditSetsMap,
-				workInfoOfDaily, disableSignMap, NAME_EMPTY, NAME_NOT_FOUND, dpLockDto, confirmResults, approvalResults);
+				workInfoOfDaily, disableSignMap, NAME_EMPTY, NAME_NOT_FOUND, dpLockDto, confirmResults, approvalResults, mapClosingEmpResult);
 		// set cell data
 		System.out.println("time get data into cell : " + (System.currentTimeMillis() - start1));
 		System.out.println("All time :" + (System.currentTimeMillis() - timeStart));
@@ -596,7 +606,9 @@ public class DailyPerformanceCorrectionProcessor {
 			DateRange dateRange, ObjectShare objectShare, String companyId,
 			DisplayItem disItem, DPControlDisplayItem dPControlDisplayItem,
 			Map<String, Integer> dailyRecEditSetsMap, List<WorkInfoOfDailyPerformanceDto> workInfoOfDaily, Map<String, Boolean> disableSignMap,
-			String NAME_EMPTY, String NAME_NOT_FOUND, DPLockDto dpLock, List<ConfirmStatusActualResult> confirmResults, List<ApprovalStatusActualResult> approvalResults){
+			String NAME_EMPTY, String NAME_NOT_FOUND, DPLockDto dpLock, List<ConfirmStatusActualResult> confirmResults, List<ApprovalStatusActualResult> approvalResults,
+			Map<String, List<EmploymentHisOfEmployeeImport>> mapClosingEmpResult
+			){
 		Map<String, ItemValue> itemValueMap = new HashMap<>();
 		List<DPDataDto> lstData = new ArrayList<DPDataDto>();
 		Set<Integer> types = dPControlDisplayItem.getLstAttendanceItem() == null ? new HashSet<>()
@@ -619,6 +631,10 @@ public class DailyPerformanceCorrectionProcessor {
 		//cell hide check box approval
 		List<DPHideControlCell> lstCellHideControl = new ArrayList<>();
 		for (DPDataDto data : screenDto.getLstData()) {
+			//filter Date in Period
+			if(!checkDataInClosing(Pair.of(data.getEmployeeId(), data.getDate()), mapClosingEmpResult)) {
+				continue;
+			}
 			boolean textColorSpr = false;
 			data.setEmploymentCode(screenDto.getEmploymentCode());
 			if (!sId.equals(data.getEmployeeId())) {
@@ -1288,7 +1304,7 @@ public class DailyPerformanceCorrectionProcessor {
 	}
 
 	public List<ErrorReferenceDto> getListErrorRefer(DateRange dateRange,
-			List<DailyPerformanceEmployeeDto> lstEmployee) {
+			List<DailyPerformanceEmployeeDto> lstEmployee, Integer closureId) {
 		List<ErrorReferenceDto> lstErrorRefer = new ArrayList<>();
 		String companyId = AppContexts.user().companyId();
 		List<DPErrorDto> lstError = this.repo.getListDPError(dateRange,
@@ -1322,7 +1338,7 @@ public class DailyPerformanceCorrectionProcessor {
 												.containsKey(value.getEmployeeId() + "|" + value.getProcessingDate())
 														? appMapDateSid.get(
 																value.getEmployeeId() + "|" + value.getProcessingDate())
-														: ""));
+														: "", false));
 								rowId++;
 							}
 						} else {
@@ -1352,7 +1368,7 @@ public class DailyPerformanceCorrectionProcessor {
 			List<DPItemValue> dpItems = errorMonthProcessor.getErrorMonth(lstEmployee.stream().map(x -> x.getId()).collect(Collectors.toSet()), dateRange);
 			for(DPItemValue value : dpItems) {
 				lstErrorRefer.add(new ErrorReferenceDto(String.valueOf(rowId), value.getEmployeeId(),
-						value.getDate(), "", value.getMessage()));
+						value.getDate(), "", value.getMessage(), true));
 				rowId++;
 			}
 			
@@ -1367,6 +1383,20 @@ public class DailyPerformanceCorrectionProcessor {
 					}
 				}
 			}
+			
+	   Map<String, List<EmploymentHisOfEmployeeImport>> mapClosingEmpResult = checkClosingEmployee.checkClosingEmployee(companyId, lstEmployee.stream().map(x -> x.getId()).distinct().collect(Collectors.toList()), 
+					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), closureId);
+			
+		lstErrorRefer = lstErrorRefer.stream().filter(x -> {
+				if(x.getItemMonth().booleanValue()) {
+					return mapClosingEmpResult.containsKey(x.getEmployeeId());
+				}else {
+					return checkDataInClosing(Pair.of(x.getEmployeeId(), x.getDate()), mapClosingEmpResult);
+				}
+				
+			}).collect(Collectors.toList());
+			
+			
 		return lstErrorRefer;
 	}
 
@@ -1681,6 +1711,7 @@ public class DailyPerformanceCorrectionProcessor {
 		List<String> lstEmployeeId = new ArrayList<>();
 		if (mode == ScreenMode.NORMAL.value) {
 			
+			if(!employeeIds.isEmpty()) return employeeIds;
 			List<RegulationInfoEmployeeQueryR> regulationRs = regulationInfoEmployeePub.search(
 					createQueryEmployee(new ArrayList<>(), range.getStartDate(), range.getEndDate()));
 			lstEmployeeId = regulationRs.stream().map(x -> x.getEmployeeId()).distinct().collect(Collectors.toList());
@@ -1947,6 +1978,19 @@ public class DailyPerformanceCorrectionProcessor {
 		query.setIncludeWorkersOnLeave(true);
 		query.setFilterByClosure(false);
 		return query;
+	}
+	
+	public boolean checkDataInClosing( Pair<String, GeneralDate> pairEmpDate, Map<String, List<EmploymentHisOfEmployeeImport>> mapClosingEmpResult) {
+		val empWithListDate = mapClosingEmpResult.get(pairEmpDate.getLeft());
+		if (empWithListDate == null)
+			return false;
+		List<DatePeriod> lstDatePeriod = empWithListDate.stream()
+				.map(x -> new DatePeriod(x.getStartDate(), x.getEndDate())).collect(Collectors.toList());
+
+		val check = lstDatePeriod.stream()
+				.filter(x -> x.start().beforeOrEquals(pairEmpDate.getRight()) && x.end().afterOrEquals(pairEmpDate.getRight()))
+				.findFirst();
+		return check.isPresent();
 	}
 }
  

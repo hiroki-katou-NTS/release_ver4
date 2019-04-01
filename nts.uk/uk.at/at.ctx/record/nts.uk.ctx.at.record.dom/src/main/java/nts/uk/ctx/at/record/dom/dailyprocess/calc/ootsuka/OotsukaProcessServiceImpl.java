@@ -39,8 +39,6 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 @Stateless
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class OotsukaProcessServiceImpl implements OotsukaProcessService{
-
-	private boolean workTypeChangedFromSpecialHoliday = false;
 	
 	@Override
 	public WorkType getOotsukaWorkType(WorkType workType,
@@ -62,8 +60,6 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 	 */
 	private WorkType createOotsukaWorkType(WorkType workType) {
 		
-		changeWorkTypeFlag(workType);
-		
 		if(workType.getDailyWork().getWorkTypeUnit().isOneDay()) {			
 			val workTypeSet = workType.getWorkTypeSetByAtr(WorkAtr.OneDay);
 		
@@ -71,7 +67,6 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 									  WorkTypeClassification.Attendance, 
 									  workType.getDailyWork().getMorning(), 
 									  workType.getDailyWork().getAfternoon());
-		
 		
 			val createWorkType = new WorkType(workType.getCompanyId(), 
 									workType.getWorkTypeCode(), 
@@ -94,8 +89,8 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 															WorkTypeSetCheck.NO_CHECK, 
 															WorkTypeSetCheck.NO_CHECK, 
 															workTypeSet.isPresent()?workTypeSet.get().getGenSubHodiday():WorkTypeSetCheck.NO_CHECK,
-															WorkTypeSetCheck.NO_CHECK
-														);
+															WorkTypeSetCheck.NO_CHECK);
+			
 			createWorkType.addWorkTypeSet(createWorkTypeSet);
 			return createWorkType;
 		}
@@ -107,7 +102,6 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 										  workType.getDailyWork().getOneDay(), 
 										  WorkTypeClassification.Attendance, 
 										  WorkTypeClassification.Attendance);
-
 
 			val createWorkType = new WorkType(workType.getCompanyId(), 
 											  workType.getWorkTypeCode(), 
@@ -130,8 +124,7 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 																   WorkTypeSetCheck.NO_CHECK, 
 																   WorkTypeSetCheck.NO_CHECK, 
 															       workTypeSetMorning.isPresent()?workTypeSetMorning.get().getGenSubHodiday():WorkTypeSetCheck.NO_CHECK,
-															       WorkTypeSetCheck.NO_CHECK
-				);		
+															       WorkTypeSetCheck.NO_CHECK);		
 			
 			WorkTypeSet createWorkTypeSetAfternoon = new WorkTypeSet(workTypeSetAfternoon.isPresent()?workTypeSetAfternoon.get().getCompanyId():workType.getCompanyId(), 
 					   												 workTypeSetAfternoon.isPresent()?workTypeSetAfternoon.get().getWorkTypeCd():workType.getWorkTypeCode(), 
@@ -145,22 +138,15 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 					   												 WorkTypeSetCheck.NO_CHECK, 
 					   												 WorkTypeSetCheck.NO_CHECK, 
 					   												 workTypeSetAfternoon.isPresent()?workTypeSetAfternoon.get().getGenSubHodiday():WorkTypeSetCheck.NO_CHECK,
-					   												 WorkTypeSetCheck.NO_CHECK
-				);
+					   												 WorkTypeSetCheck.NO_CHECK);
+			
 			createWorkType.addWorkTypeSet(createWorkTypeSetMorning);
 			createWorkType.addWorkTypeSet(createWorkTypeSetAfternoon);
 			return createWorkType;
 		}
 	}
 
-	/**
-	 * 内部で保持している変更前の勤務種類が何だったかフラグの変更
-	 * @param workType
-	 */
-	private void changeWorkTypeFlag(WorkType workType) {
-		if(workType.getDailyWork().isOneOrHalfDaySpecHoliday())
-			workTypeChangedFromSpecialHoliday = true;
-	}
+
 
 	/**
 	 * 大塚モード判断処理
@@ -305,10 +291,5 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 			map.put(ot.getOverWorkFrameNo(), ot);
 		}
 		return map;
-	}
-
-	@Override
-	public boolean getWorkTypeChangedFromSpecialHoliday() {
-		return this.workTypeChangedFromSpecialHoliday;
 	}
 }

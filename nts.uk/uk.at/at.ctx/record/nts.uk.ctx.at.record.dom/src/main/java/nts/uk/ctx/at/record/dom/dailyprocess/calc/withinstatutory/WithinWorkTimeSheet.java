@@ -3,13 +3,11 @@ package nts.uk.ctx.at.record.dom.dailyprocess.calc.withinstatutory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-//import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
-//import lombok.Setter;
 import lombok.val;
 import nts.gul.util.value.Finally;
 import nts.uk.ctx.at.record.dom.calculationattribute.BonusPayAutoCalcSet;
@@ -27,7 +25,6 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.BonusPayAtr;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CommonFixedWorkTimezoneSet;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.ConditionAtr;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.DeductionAtr;
-//import nts.uk.ctx.at.record.dom.dailyprocess.calc.DeductionOffSetTime;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.DeductionTimeSheet;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.FlexWithinWorkTimeSheet;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.LateLeaveEarlyManagementTimeSheet;
@@ -42,7 +39,6 @@ import nts.uk.ctx.at.record.dom.raisesalarytime.SpecificDateAttrOfDailyPerfor;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
 import nts.uk.ctx.at.shared.dom.PremiumAtr;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.BonusPaySetting;
-//import nts.uk.ctx.at.shared.dom.bonuspay.setting.BonusPayTimesheet;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.HolidayAddtionSet;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.WorkDeformedLaborAdditionSet;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.WorkFlexAdditionSet;
@@ -55,14 +51,12 @@ import nts.uk.ctx.at.shared.dom.calculation.holiday.kmk013_splitdomain.ENUM.Calc
 import nts.uk.ctx.at.shared.dom.common.TimeOfDay;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
-//import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalAtrOvertime;
 import nts.uk.ctx.at.shared.dom.statutory.worktime.sharedNew.DailyUnit;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.HolidayAdditionAtr;
 import nts.uk.ctx.at.shared.dom.vacation.setting.addsettingofworktime.StatutoryDivision;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.AutoCalRaisingSalarySetting;
-//import nts.uk.ctx.at.shared.dom.workrule.waytowork.PersonalLaborCondition;
 import nts.uk.ctx.at.shared.dom.worktime.common.AmPmAtr;
 import nts.uk.ctx.at.shared.dom.worktime.common.DeductionTime;
 import nts.uk.ctx.at.shared.dom.worktime.common.EmTimeZoneSet;
@@ -72,7 +66,6 @@ import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneCommonSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneLateEarlySet;
 import nts.uk.ctx.at.shared.dom.worktime.flexset.CoreTimeSetting;
-//import nts.uk.ctx.at.shared.dom.worktime.flexset.TimeSheet;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
 import nts.uk.ctx.at.shared.dom.worktype.AttendanceHolidayAttr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
@@ -968,16 +961,17 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 				}
 		}else {
 			Optional<PremiumCalcMethodDetailOfHoliday> advanceSet = holidayCalcMethodSet.getPremiumCalcMethodOfHoliday().getAdvanceSet();
-			
-				if(advanceSet.get().getNotDeductLateLeaveEarly().isEnableSetPerWorkHour()&&commonSetting.isPresent()) {
-					if(advanceSet.isPresent()&&advanceSet.get().getCalculateIncludCareTime()==NotUseAtr.USE
-							&&commonSetting.get().getLateEarlySet().getCommonSet().isDelFromEmTime()) {
-						decisionDeductChild = true;
-					}
-				}else {
-					if(advanceSet.isPresent()&&advanceSet.get().getCalculateIncludCareTime()==NotUseAtr.USE&&
-							advanceSet.get().getNotDeductLateLeaveEarly().isDeduct()) {
-						decisionDeductChild = true;
+				if(advanceSet.isPresent()){
+					if(advanceSet.get().getNotDeductLateLeaveEarly().isEnableSetPerWorkHour()&&commonSetting.isPresent()) {
+						if(advanceSet.get().getCalculateIncludCareTime()==NotUseAtr.USE
+								&&commonSetting.get().getLateEarlySet().getCommonSet().isDelFromEmTime()) {
+							decisionDeductChild = true;
+						}
+					}else {
+						if(advanceSet.get().getCalculateIncludCareTime()==NotUseAtr.USE&&
+								advanceSet.get().getNotDeductLateLeaveEarly().isDeduct()) {
+							decisionDeductChild = true;
+						}
 					}
 				}
 		}
@@ -1026,7 +1020,7 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 			   Optional<WorkTimezoneCommonSet> commonSetting
 			) {
 		//パラメータ「控除区分」＝”控除”　かつ　控除しない
-		if(deductionAtr.isDeduction()&&!holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().isDeductLateLeaveEarly(commonSetting)) {
+		if(deductionAtr.isDeduction()&&holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()&&!holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().isDeductLateLeaveEarly(commonSetting)) {
 			return new AttendanceTime(0);
 		}
 		//遅刻時間の計算   (最低勤務時間　－　パラメータで受け取った就業時間)
@@ -1123,8 +1117,6 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 	 * @return
 	 */
 	public AttendanceTime calcLateTime(DeductionAtr deductionAtr,
-			
-			
 			   PremiumAtr premiumAtr, 
 			   CalcurationByActualTimeAtr calcActualTime,
 			   VacationClass vacationClass,
@@ -1150,7 +1142,7 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 			   List<LeaveEarlyTimeOfDaily> leaveEarlyTime
 			) {
 		//パラメータ「控除区分」＝”控除”　かつ　控除しない
-		if(deductionAtr.isDeduction()&&!holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().isDeductLateLeaveEarly(commonSetting)) {
+		if(deductionAtr.isDeduction()&&holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()&&!holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().isDeductLateLeaveEarly(commonSetting)) {
 			return new AttendanceTime(0);
 		}
 		

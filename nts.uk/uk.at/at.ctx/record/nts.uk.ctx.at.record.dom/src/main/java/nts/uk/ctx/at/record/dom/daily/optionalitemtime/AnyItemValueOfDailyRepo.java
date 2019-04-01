@@ -28,4 +28,6 @@ public interface AnyItemValueOfDailyRepo {
 	public void remove(AnyItemValueOfDaily domain);
 	
 	public void removeByEmployeeIdAndDate(String employeeId, GeneralDate processingDate);
+	
+	public void deleteAnyItemValueOfDaily(String employeeId, GeneralDate ymd);
 }

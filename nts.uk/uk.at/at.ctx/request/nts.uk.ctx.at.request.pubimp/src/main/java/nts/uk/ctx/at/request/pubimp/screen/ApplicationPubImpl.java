@@ -45,10 +45,9 @@ import nts.uk.ctx.at.request.pub.screen.AppWithDetailExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationDeadlineExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationExport;
 import nts.uk.ctx.at.request.pub.screen.ApplicationPub;
-import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
-import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
+import nts.uk.ctx.at.shared.dom.worktype.service.JudgmentOneDayHoliday;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
@@ -75,11 +74,12 @@ public class ApplicationPubImpl implements ApplicationPub {
 	private IAppWorkChangeRepository appWorkChangeRepository;
 	@Inject
 	private ScBasicScheduleAdapter scBasicScheduleAdapter;
-	@Inject
-	private BasicScheduleService basicScheduleService;
 	
 	@Inject
 	public WorkTypeRepository workTypeRepo;
+	
+	@Inject
+	private JudgmentOneDayHoliday judgmentOneDayHoliday;
 	
 	@Override
 	public List<ApplicationExport> getApplicationBySID(List<String> employeeID, GeneralDate startDate,
@@ -95,24 +95,48 @@ public class ApplicationPubImpl implements ApplicationPub {
 							x.getAppType().value != ApplicationType.WORK_CHANGE_APPLICATION.value)
 				.collect(Collectors.toList());
 		List<AppDispName> allApps = appDispNameRepository.getAll(application.stream().map(c -> c.getAppType().value).distinct().collect(Collectors.toList()));
-		for(Application_New app : applicationExcessHoliday){
-			if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
-				ApplicationExport applicationExport = new ApplicationExport();
-				applicationExport.setAppDate(app.getAppDate());
-				applicationExport.setAppType(app.getAppType().value);
-				applicationExport.setEmployeeID(app.getEmployeeID());
-				applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
-				applicationExport.setAppTypeName(getAppName(companyID, allApps, app.getAppType()));
-				applicationExports.add(applicationExport);
-			} else {
-				for(GeneralDate loopDate = app.getStartDate().get(); loopDate.beforeOrEquals(app.getEndDate().get()); loopDate = loopDate.addDays(1)){
+		if(!applicationExcessHoliday.isEmpty()){
+			List<ScBasicScheduleImport> basicSchedules = new ArrayList<>();
+			GeneralDate minD = applicationExcessHoliday.stream().map(c -> c.getStartDate().orElse(null)).filter(c -> c != null).min((c1, c2) -> c1.compareTo(c2)).get();
+			GeneralDate maxD = applicationExcessHoliday.stream().map(c -> c.getEndDate().orElse(null)).filter(c -> c != null).max((c1, c2) -> c1.compareTo(c2)).get();
+			if(minD != null && maxD != null){
+				basicSchedules.addAll(scBasicScheduleAdapter.findByID(applicationExcessHoliday.stream().map(c -> c.getEmployeeID()).distinct().collect(Collectors.toList()), new DatePeriod(minD, maxD)));
+			}
+			for(Application_New app : applicationExcessHoliday){
+				if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
 					ApplicationExport applicationExport = new ApplicationExport();
-					applicationExport.setAppDate(loopDate);
+					applicationExport.setAppDate(app.getAppDate());
 					applicationExport.setAppType(app.getAppType().value);
 					applicationExport.setEmployeeID(app.getEmployeeID());
 					applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
 					applicationExport.setAppTypeName(getAppName(companyID, allApps, app.getAppType()));
 					applicationExports.add(applicationExport);
+				} else {
+					for(GeneralDate loopDate = app.getStartDate().get(); loopDate.beforeOrEquals(app.getEndDate().get()); loopDate = loopDate.addDays(1)){
+						// Imported「勤務予定基本情報」を取得する
+						Optional<ScBasicScheduleImport> opScBasicScheduleImport = findBasicSchedule(basicSchedules, app.getEmployeeID(), loopDate);
+						if(!opScBasicScheduleImport.isPresent()){
+							ApplicationExport applicationExport = new ApplicationExport();
+							applicationExport.setAppDate(loopDate);
+							applicationExport.setAppType(app.getAppType().value);
+							applicationExport.setEmployeeID(app.getEmployeeID());
+							applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+							applicationExport.setAppTypeName(getAppName(companyID, allApps, app.getAppType()));
+							applicationExports.add(applicationExport);
+							continue;
+						}
+						// 1日休日の判定
+						boolean judgment = judgmentOneDayHoliday.judgmentOneDayHoliday(companyID, opScBasicScheduleImport.get().getWorkTypeCode());
+						if(!judgment){
+							ApplicationExport applicationExport = new ApplicationExport();
+							applicationExport.setAppDate(loopDate);
+							applicationExport.setAppType(app.getAppType().value);
+							applicationExport.setEmployeeID(app.getEmployeeID());
+							applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+							applicationExport.setAppTypeName(getAppName(companyID, allApps, app.getAppType()));
+							applicationExports.add(applicationExport);
+						}
+					}
 				}
 			}
 		}
@@ -120,6 +144,12 @@ public class ApplicationPubImpl implements ApplicationPub {
 		if(!applicationHoliday.isEmpty()){
 			Optional<HdAppSet> hdAppSet = this.hdAppSetRepository.getAll();
 			List<AppAbsence> apps = appAbsenceRepository.getAbsenceByIds(companyID, applicationHoliday.stream().map(c -> c.getAppID()).distinct().collect(Collectors.toList()));
+			List<ScBasicScheduleImport> basicSchedules = new ArrayList<>();
+			GeneralDate minD = applicationHoliday.stream().map(c -> c.getStartDate().orElse(null)).filter(c -> c != null).min((c1, c2) -> c1.compareTo(c2)).get();
+			GeneralDate maxD = applicationHoliday.stream().map(c -> c.getEndDate().orElse(null)).filter(c -> c != null).max((c1, c2) -> c1.compareTo(c2)).get();
+			if(minD != null && maxD != null){
+				basicSchedules.addAll(scBasicScheduleAdapter.findByID(applicationHoliday.stream().map(c -> c.getEmployeeID()).distinct().collect(Collectors.toList()), new DatePeriod(minD, maxD)));
+			}
 			for(Application_New app : applicationHoliday){
 				if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
 					Optional<AppAbsence> optAppAbsence = apps.stream().filter(c -> c.getAppID().equals(app.getAppID())).findFirst();
@@ -133,15 +163,31 @@ public class ApplicationPubImpl implements ApplicationPub {
 					applicationExports.add(applicationExport);
 				} else {
 					for(GeneralDate loopDate = app.getStartDate().get(); loopDate.beforeOrEquals(app.getEndDate().get()); loopDate = loopDate.addDays(1)){
-						Optional<AppAbsence> optAppAbsence = apps.stream().filter(c -> c.getAppID().equals(app.getAppID())).findFirst();
-						ApplicationExport applicationExport = new ApplicationExport();
-						applicationExport.setAppDate(loopDate);
-						applicationExport.setAppType(app.getAppType().value);
-						applicationExport.setEmployeeID(app.getEmployeeID());
-						applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
-						// ドメインモデル「休暇申請種類表示名」を取得する
-						applicationExport.setAppTypeName(this.getAppAbsenceName(optAppAbsence.get().getHolidayAppType().value, hdAppSet));
-						applicationExports.add(applicationExport);
+						// Imported「勤務予定基本情報」を取得する
+						Optional<ScBasicScheduleImport> opScBasicScheduleImport = findBasicSchedule(basicSchedules, app.getEmployeeID(), loopDate);
+						if(!opScBasicScheduleImport.isPresent()){
+							ApplicationExport applicationExport = new ApplicationExport();
+							applicationExport.setAppDate(loopDate);
+							applicationExport.setAppType(app.getAppType().value);
+							applicationExport.setEmployeeID(app.getEmployeeID());
+							applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+							applicationExport.setAppTypeName(getAppName(companyID, allApps, app.getAppType()));
+							applicationExports.add(applicationExport);
+							continue;
+						}
+						// 1日休日の判定
+						boolean judgment = judgmentOneDayHoliday.judgmentOneDayHoliday(companyID, opScBasicScheduleImport.get().getWorkTypeCode());
+						if(!judgment){
+							Optional<AppAbsence> optAppAbsence = apps.stream().filter(c -> c.getAppID().equals(app.getAppID())).findFirst();
+							ApplicationExport applicationExport = new ApplicationExport();
+							applicationExport.setAppDate(loopDate);
+							applicationExport.setAppType(app.getAppType().value);
+							applicationExport.setEmployeeID(app.getEmployeeID());
+							applicationExport.setReflectState(app.getReflectionInformation().getStateReflectionReal().value);
+							// ドメインモデル「休暇申請種類表示名」を取得する
+							applicationExport.setAppTypeName(this.getAppAbsenceName(optAppAbsence.get().getHolidayAppType().value, hdAppSet));
+							applicationExports.add(applicationExport);
+						}
 					}
 				}
 			}
@@ -193,9 +239,9 @@ public class ApplicationPubImpl implements ApplicationPub {
 								applicationExports.add(applicationExport);
 								continue;
 							}
-							// 1日半日出勤・1日休日系の判定
-							WorkStyle workStyle = basicScheduleService.checkWorkDayByList(opScBasicScheduleImport.get().getWorkTypeCode(), workTypes);
-							if(workStyle.value != 0){
+							// 1日休日の判定
+							boolean judgment = judgmentOneDayHoliday.judgmentOneDayHoliday(companyID, opScBasicScheduleImport.get().getWorkTypeCode());
+							if(!judgment){
 								ApplicationExport applicationExport = new ApplicationExport();
 								applicationExport.setAppDate(loopDate);
 								applicationExport.setAppType(app.getAppType().value);

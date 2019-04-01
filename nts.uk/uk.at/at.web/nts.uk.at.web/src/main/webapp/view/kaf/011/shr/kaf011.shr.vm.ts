@@ -196,6 +196,88 @@ module nts.uk.at.view.kaf011.shr {
             appDate: KnockoutObservable<Date> = ko.observable(null);
             changeWorkHoursType: KnockoutObservable<any> = ko.observable(false);
 
+            showAbsWorkTimeZone = ko.computed(() => {
+                let self = this, vm: nts.uk.at.view.kaf011.a.screenModel.ViewModel = __viewContext['viewModel'],
+                    workAtr = self.wkType().workAtr();
+                if (!vm || !vm.drawalReqSet) {
+                    return false;
+                }
+                    let wkTimeSelect = vm.drawalReqSet().deferredWorkTimeSelect();
+
+                    //利用しない
+                    if (workAtr == 0 || wkTimeSelect == 0) {
+                        return false;
+                    }
+
+                    let morningType = self.wkType().morningCls(),
+                        afternoonType = self.wkType().afternoonCls(),
+                        Pause = 8,
+                        Attendance = 0;
+                    //利用する
+                    if (wkTimeSelect == 1) {
+                        //午前と午後
+                        if (workAtr == 1) {
+                            let isAHalfWorkDay = (afternoonType == Attendance && morningType == Pause) || (afternoonType == Pause && morningType == Attendance);
+                            if (isAHalfWorkDay) {
+                                return true;
+                            } else {
+                                let wkType = "1234569",
+                                    isAHalfDayOff = (wkType.indexOf(afternoonType) != -1 && morningType == Pause) || (wkType.indexOf(morningType) != -1 && afternoonType == Pause);
+                                if (isAHalfDayOff) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+
+                            }
+                        }
+                    }
+                    //半休時のみ利用する
+                    if (wkTimeSelect == 2) {
+                        //午前と午後
+                        if (workAtr == 1) {
+                            if (self.isBothTypeNotAttendance(afternoonType, morningType)) {
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                    }
+                    return true;
+                
+            });
+
+            showWorkingTime1 = ko.computed(() => {
+                let self = this, vm: nts.uk.at.view.kaf011.a.screenModel.ViewModel = __viewContext['viewModel'],
+                    workAtr = self.wkType().workAtr();
+                if (!vm || !vm.drawalReqSet) {
+                    return false;
+                }
+                let wkTimeSelect = vm.drawalReqSet().deferredWorkTimeSelect();
+                ////利用しない
+                if (workAtr == 0 || wkTimeSelect == 0) {
+                    return false;
+                }
+                let morningType = self.wkType().morningCls(),
+                    afternoonType = self.wkType().afternoonCls(),
+                    Pause = 8,
+                    Attendance = 0;
+                //半休時のみ利用する
+                //利用する
+                let isWkTimeIsHoliday = wkTimeSelect == 1 || wkTimeSelect == 2;
+                if (isWkTimeIsHoliday) {
+                    if (workAtr == 1) {
+                        if (self.isBothTypeNotAttendance(afternoonType, morningType)) {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+
+            });
+
             constructor(data) {
                 let self = this;
                 if (data) {
@@ -264,8 +346,8 @@ module nts.uk.at.view.kaf011.shr {
                     service.changeDay(changeDateParam).done((data: IHolidayShipment) => {
                         vm.recWk().setWkTypes(data.recWkTypes || []);
                         vm.absWk().setWkTypes(data.absWkTypes || []);
-                        if(vm.displayPrePostFlg()==0){
-                            vm.prePostSelectedCode(data.preOrPostType);    
+                        if (vm.displayPrePostFlg() == 0) {
+                            vm.prePostSelectedCode(data.preOrPostType);
                         }
                         vm.kaf000_a.start(vm.employeeID(), 1, 10, moment(data.refDate).format("YYYY/MM/DD")).done(() => {
                         });
@@ -284,7 +366,7 @@ module nts.uk.at.view.kaf011.shr {
                             $("#recTime1Start").ntsError("clear");
                             $("#recTime1End").ntsError("clear");
                             let timeZone1 = _.find(data.timezoneUseDtos, ['workNo', 1]);
-                            let timeZone2 = _.find(data.timezoneUseDtos, ['workNo', 2]); 
+                            let timeZone2 = _.find(data.timezoneUseDtos, ['workNo', 2]);
 
                             timeZone1 ? self.wkTime1().updateData(timeZone1) : self.wkTime1().clearData();
 
@@ -319,81 +401,6 @@ module nts.uk.at.view.kaf011.shr {
 
                 return true;
 
-            }
-
-            showAbsWorkTimeZone() {
-                let self = this, vm: nts.uk.at.view.kaf011.a.screenModel.ViewModel = __viewContext['viewModel'],
-                    workAtr = self.wkType().workAtr(),
-                    wkTimeSelect = vm.drawalReqSet().deferredWorkTimeSelect();
-
-                //利用しない
-                if (workAtr == 0 || wkTimeSelect == 0) {
-                    return false;
-                }
-
-                let morningType = self.wkType().morningCls(),
-                    afternoonType = self.wkType().afternoonCls(),
-                    Pause = 8,
-                    Attendance = 0;
-                //利用する
-                if (wkTimeSelect == 1) {
-                    //午前と午後
-                    if (workAtr == 1) {
-                        let isAHalfWorkDay = (afternoonType == Attendance && morningType == Pause) || (afternoonType == Pause && morningType == Attendance);
-                        if (isAHalfWorkDay) {
-                            return true;
-                        } else {
-                            let wkType = "1234569",
-                                isAHalfDayOff = (wkType.indexOf(afternoonType) != -1 && morningType == Pause) || (wkType.indexOf(morningType) != -1 && afternoonType == Pause);
-                            if (isAHalfDayOff) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-
-                        }
-                    }
-                }
-                //半休時のみ利用する
-                if (wkTimeSelect == 2) {
-                    //午前と午後
-                    if (workAtr == 1) {
-                        if (self.isBothTypeNotAttendance(afternoonType, morningType)) {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-
-                }
-                return true;
-            }
-
-            showWorkingTime1() {
-                let self = this, vm: nts.uk.at.view.kaf011.a.screenModel.ViewModel = __viewContext['viewModel'],
-                    workAtr = self.wkType().workAtr(),
-                    wkTimeSelect = vm.drawalReqSet().deferredWorkTimeSelect();
-                ////利用しない
-                if (workAtr == 0 || wkTimeSelect == 0) {
-                    return false;
-                }
-                let morningType = self.wkType().morningCls(),
-                    afternoonType = self.wkType().afternoonCls(),
-                    Pause = 8,
-                    Attendance = 0;
-                //半休時のみ利用する
-                //利用する
-                let isWkTimeIsHoliday = wkTimeSelect == 1 || wkTimeSelect == 2;
-                if (isWkTimeIsHoliday) {
-                    if (workAtr == 1) {
-                        if (self.isBothTypeNotAttendance(afternoonType, morningType)) {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-                }
-                return true;
             }
             isBothTypeNotAttendance(afternoonType, morningType) {
                 let Attendance = 0;
@@ -448,7 +455,7 @@ module nts.uk.at.view.kaf011.shr {
                     appReasonSelectedID: vm.appReasonSelectedID(),
                     absApp: ko.mapping.toJS(vm.absWk()),
                     version: vm.version,
-                    employeeID : vm.employeeID()
+                    employeeID: vm.employeeID()
                 }, true);
 
                 nts.uk.ui.windows.sub.modal('/view/kaf/011/c/index.xhtml').onClosed(function(): any {

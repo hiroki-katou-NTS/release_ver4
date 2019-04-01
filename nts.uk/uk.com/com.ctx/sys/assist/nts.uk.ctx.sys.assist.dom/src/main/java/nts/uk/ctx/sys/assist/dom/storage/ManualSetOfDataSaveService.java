@@ -530,11 +530,7 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 			}
 			
 			csv.destroy();
-
-			/*CSVFileData fileData = new CSVFileData(FILE_NAME_CSV2 + CSV_EXTENSION, headerCsv2, dataSourceCsv2);
-			generator.generate(generatorContext, fileData);
-			headerCsv2.clear();
-			dataSourceCsv2.clear();*/
+			
 			return ResultState.NORMAL_END;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -559,16 +555,6 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 			// get data from table
 			getData(tableList, targetEmployeesSid, index , headerCsv3, generatorContext);
 			
-			/*
-			CSVFileData fileData = new CSVFileData(AppContexts.user().companyId() + tableList.getCategoryName()
-					+ tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3, dataSourceCsv3);
-			
-			generator.generate(generatorContext, fileData);
-			
-			dataSourceCsv3.clear();
-			fileData = null; */
-			
-
 			return ResultState.NORMAL_END;
 		} catch (Exception e) {
 			e.printStackTrace();

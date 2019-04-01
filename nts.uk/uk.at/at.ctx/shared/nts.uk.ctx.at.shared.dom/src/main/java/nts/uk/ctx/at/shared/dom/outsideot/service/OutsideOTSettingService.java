@@ -53,7 +53,12 @@ public class OutsideOTSettingService {
 			}
 		}
 		Optional<Integer> flexExessOtp = itemIdList.stream()
-			.filter(x -> x == MonthlyItems.FLEX_EXCESS_TIME.itemId)
+			.filter(x -> {
+				boolean result = (x == MonthlyItems.FLEX_EXCESS_TIME.itemId);
+				result = result || (x == MonthlyItems.LEGAL_FLEX_TIME.itemId);
+				result = result || (x == MonthlyItems.ILLEGAL_FLEX_TIME.itemId);
+				return result;
+			})
 			.findFirst();
 		if(flexExessOtp.isPresent()){
 			targetFlex = true;

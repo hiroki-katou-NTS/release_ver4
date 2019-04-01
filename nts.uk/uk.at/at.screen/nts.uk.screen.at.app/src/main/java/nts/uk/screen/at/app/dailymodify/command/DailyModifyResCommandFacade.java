@@ -35,6 +35,7 @@ import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.Co
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.ParamDayApproval;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.RegisterDayApproval;
 import nts.uk.ctx.at.record.dom.daily.itemvalue.DailyItemValue;
+import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
@@ -141,6 +142,9 @@ public class DailyModifyResCommandFacade {
 	
 	@Inject
 	private WorkTypeRepository workTypeRepository;
+	
+	@Inject
+	private AnyItemValueOfDailyRepo anyItemValueOfDailyRepo;
 
 	public RCDailyCorrectionResult handleUpdate(List<DailyRecordDto> dtoOlds,
 			List<DailyRecordDto> dtoNews, List<DailyRecordWorkCommand> commandNew, List<DailyRecordWorkCommand> commandOld, List<DailyItemValue> dailyItems, UpdateMonthDailyParam month, int mode,
@@ -410,6 +414,15 @@ public class DailyModifyResCommandFacade {
 			if (dataParent.getSpr() != null) {
 				processor.insertStampSourceInfo(dataParent.getSpr().getEmployeeId(), dataParent.getSpr().getDate(),
 						dataParent.getSpr().isChange31(), dataParent.getSpr().isChange34());
+				dailyEdits.stream()
+						.filter(x -> x.getDate().equals(dataParent.getSpr().getDate())
+								&& x.getEmployeeId().equals(dataParent.getSpr().getEmployeeId()))
+						.map(x -> x.toDomain(x.getEmployeeId(), x.getDate())).forEach(d -> {
+							// 任意項目更新
+							d.getAnyItemValue().ifPresent(ai -> {
+								anyItemValueOfDailyRepo.persistAndUpdate(ai);
+							});
+						});
 			}
 			dataResultAfterIU.setShowErrorDialog(null);
 
@@ -484,6 +497,7 @@ public class DailyModifyResCommandFacade {
 				if (dataParent.getSpr() != null && !lstResultReturnDailyError.containsKey(Pair.of(dataParent.getSpr().getEmployeeId(), dataParent.getSpr().getDate()))) {
 					processor.insertStampSourceInfo(dataParent.getSpr().getEmployeeId(), dataParent.getSpr().getDate(),
 							dataParent.getSpr().isChange31(), dataParent.getSpr().isChange34());
+					
 				}
 
 				// 暫定データを登録する - Register provisional data

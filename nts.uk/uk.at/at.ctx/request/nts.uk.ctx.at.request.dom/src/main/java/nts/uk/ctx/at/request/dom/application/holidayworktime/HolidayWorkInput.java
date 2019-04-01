@@ -55,7 +55,11 @@ public class HolidayWorkInput {
 				frameNo,
 				startTime == null ? null :new HolidayAppPrimitiveTime(startTime),
 				endTime == null ? null : new HolidayAppPrimitiveTime(endTime),
-				new OvertimeAppPrimitiveTime(applicationTime));
+				applicationTime == null ? null : new OvertimeAppPrimitiveTime(applicationTime));
+	}
+	
+	public Integer getApptime(){
+		return applicationTime == null ? null : applicationTime.v();
 	}
 
 }

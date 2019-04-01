@@ -36,5 +36,13 @@ public interface DetailBeforeUpdate {
 	 */
 	public boolean processBefDetailScreenReg(String companyID, String employeeID, GeneralDate appDate, int employeeRouteAtr, String appID, 
 			PrePostAtr postAtr, Long version);
+	/**
+	 * 1.排他チェック (CMM045)
+	 * @param companyID
+	 * @param appID
+	 * @param version
+	 * @return
+	 */
+	public boolean exclusiveCheckErr(String companyID, String appID, Long version);
 }
 

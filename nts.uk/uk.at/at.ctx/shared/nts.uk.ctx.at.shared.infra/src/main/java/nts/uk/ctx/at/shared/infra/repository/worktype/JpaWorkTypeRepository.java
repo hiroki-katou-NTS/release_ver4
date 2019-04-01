@@ -243,6 +243,7 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 		builder.append("SELECT c,o.dispOrder FROM KshmtWorkType c");
 		builder.append(" LEFT JOIN KshmtWorkTypeOrder o");
 		builder.append(" ON c.kshmtWorkTypePK.companyId = o.kshmtWorkTypeDispOrderPk.companyId AND c.kshmtWorkTypePK.workTypeCode = o.kshmtWorkTypeDispOrderPk.workTypeCode");
+		builder.append(" WHERE c.kshmtWorkTypePK.companyId = :companyId");
 		builder.append(" AND c.deprecateAtr = 0");
 		builder.append(" AND c.kshmtWorkTypePK.workTypeCode IN :workTypeCodes");
 		builder.append(" AND c.worktypeAtr = 1 AND ( c.morningAtr IN :morningAtrs OR c.afternoonAtr IN :afternoonAtrs )");
@@ -751,13 +752,15 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	
 	private WorkType toDomainWithDispOrder(Object[] object) {
 		KshmtWorkType entity = (KshmtWorkType) object[0];
-		Integer order = Integer.valueOf(object[1].toString());
+		Integer order = object[1] != null ? Integer.valueOf(object[1].toString()) : null;
 		
 		WorkType domain = WorkType.createSimpleFromJavaType(entity.kshmtWorkTypePK.companyId,
 				entity.kshmtWorkTypePK.workTypeCode, entity.symbolicName, entity.name, entity.abbreviationName,
 				entity.memo, entity.worktypeAtr, entity.oneDayAtr, entity.morningAtr, entity.afternoonAtr,
-				entity.deprecateAtr, entity.calculatorMethod); 
-		domain.setDisplayOrder(order);
+				entity.deprecateAtr, entity.calculatorMethod);
+		if (order != null) {
+			domain.setDisplayOrder(order);
+		}
 		return domain;
 	}
 

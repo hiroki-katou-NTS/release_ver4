@@ -14,12 +14,12 @@ import javax.inject.Inject;
 
 import lombok.val;
 import nts.arc.error.BusinessException;
-//import nts.arc.error.RawErrorMessage;
 import nts.arc.layer.dom.AggregateRoot;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.gul.util.value.Finally;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.actualworkinghours.daily.midnight.MidnightTimeSheetRepo;
 import nts.uk.ctx.at.record.dom.adapter.personnelcostsetting.PersonnelCostSettingAdapter;
 import nts.uk.ctx.at.record.dom.adapter.personnelcostsetting.PersonnelCostSettingImport;
 import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPerfor;
@@ -28,13 +28,11 @@ import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
 import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
-//import nts.uk.ctx.at.record.dom.calculationattribute.AutoCalcSetOfDivergenceTime;
 import nts.uk.ctx.at.record.dom.calculationattribute.BonusPayAutoCalcSet;
 import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.calculationattribute.HolidayTimesheetCalculationSetting;
 import nts.uk.ctx.at.record.dom.calculationattribute.OvertimeTimesheetCalculationSetting;
 import nts.uk.ctx.at.record.dom.calculationattribute.WorkingTimesheetCalculationSetting;
-//import nts.uk.ctx.at.record.dom.calculationattribute.enums.DivergenceTimeAttr;
 import nts.uk.ctx.at.record.dom.daily.TimevacationUseTimeOfDaily;
 import nts.uk.ctx.at.record.dom.daily.midnight.MidNightTimeSheet;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
@@ -52,7 +50,6 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.converter.DailyRecordToAttenda
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.errorcheck.CalculationErrorCheckService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.errorcheck.DailyRecordCreateErrorAlermService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.ootsuka.OotsukaProcessService;
-//import nts.uk.ctx.at.record.dom.dailyprocess.calc.ootsuka.OotsukaProcessService;
 import nts.uk.ctx.at.record.dom.divergence.time.DivergenceTime;
 import nts.uk.ctx.at.record.dom.optitem.OptionalItem;
 import nts.uk.ctx.at.record.dom.optitem.applicable.EmpCondition;
@@ -82,7 +79,6 @@ import nts.uk.ctx.at.shared.dom.bonuspay.primitives.WorkingTimesheetCode;
 import nts.uk.ctx.at.shared.dom.bonuspay.repository.BPSettingRepository;
 import nts.uk.ctx.at.shared.dom.bonuspay.repository.BPTimesheetRepository;
 import nts.uk.ctx.at.shared.dom.bonuspay.repository.SpecBPTimesheetRepository;
-//import nts.uk.ctx.at.shared.dom.bonuspay.repository.WPBonusPaySettingRepository;
 import nts.uk.ctx.at.shared.dom.bonuspay.repository.WTBonusPaySettingRepository;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.BPUnitUseSetting;
 import nts.uk.ctx.at.shared.dom.bonuspay.setting.BonusPaySetting;
@@ -97,17 +93,9 @@ import nts.uk.ctx.at.shared.dom.common.CompanyId;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
 import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalAtrOvertime;
-//import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalAtrOvertime;
-//import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalFlexOvertimeSetting;
-//import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalOvertimeSetting;
-//import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalRestTimeSetting;
-//import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalSetting;
-//import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalcOfLeaveEarlySetting;
-//import nts.uk.ctx.at.shared.dom.ot.autocalsetting.TimeLimitUpperLimitSetting;
 import nts.uk.ctx.at.shared.dom.ot.zerotime.ZeroTime;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryOccurrenceSetting;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
-//import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.AutoCalRaisingSalarySetting;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.overtime.overtimeframe.OverTimeFrameNo;
 import nts.uk.ctx.at.shared.dom.workrule.overtime.StatutoryPrioritySet;
 import nts.uk.ctx.at.shared.dom.workrule.statutoryworktime.DailyCalculationPersonalInformation;
@@ -121,7 +109,7 @@ import nts.uk.ctx.at.shared.dom.worktime.common.LegalOTSetting;
 import nts.uk.ctx.at.shared.dom.worktime.common.OverTimeOfTimeZoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.RestClockManageAtr;
 import nts.uk.ctx.at.shared.dom.worktime.common.RestTimeOfficeWorkCalcMethod;
-//import nts.uk.ctx.at.shared.dom.worktime.common.TimezoneOfFixedRestTimeSet;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneCommonSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneOtherSubHolTimeSet;
@@ -134,11 +122,6 @@ import nts.uk.ctx.at.shared.dom.worktime.flexset.CoreTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.flexset.FlexCalcSetting;
 import nts.uk.ctx.at.shared.dom.worktime.flexset.FlexWorkSetting;
 import nts.uk.ctx.at.shared.dom.worktime.flexset.FlexWorkSettingRepository;
-//import nts.uk.ctx.at.shared.dom.worktime.flowset.FlowFixedRestCalcMethod;
-//import nts.uk.ctx.at.shared.dom.worktime.flowset.FlowFixedRestSet;
-//import nts.uk.ctx.at.shared.dom.worktime.flowset.FlowRestSetting;
-//import nts.uk.ctx.at.shared.dom.worktime.flowset.FlowRestTimezone;
-//import nts.uk.ctx.at.shared.dom.worktime.flowset.FlowWorkRestTimezone;
 import nts.uk.ctx.at.shared.dom.worktime.flowset.FlowWorkSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktime.predset.BreakDownTimeDay;
 import nts.uk.ctx.at.shared.dom.worktime.predset.PredetemineTimeSetting;
@@ -236,6 +219,8 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 	// 日別作成側にあったエラーチェック処理
 	private DailyRecordCreateErrorAlermService dailyRecordCreateErrorAlermService;
 
+	@Inject
+	private MidnightTimeSheetRepo midnightTimeSheetRepo;
 	/**
 	 * 勤務情報を取得して計算
 	 * 
@@ -256,6 +241,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			ManagePerCompanySet companyCommonSetting, ManagePerPersonDailySet personCommonSetting,
 			Optional<WorkInfoOfDailyPerformance> yesterDayInfo, Optional<WorkInfoOfDailyPerformance> tomorrowDayInfo) {
 
+		
 		DailyRecordToAttendanceItemConverter converter = attendanceItemConvertFactory.createDailyConverter();
 		// 計算できる状態にあるかのチェック①(勤務情報、会社共通の設定、個人共通の設定)
 		if (integrationOfDaily.getAffiliationInfor() == null || companyCommonSetting == null
@@ -323,16 +309,50 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			ManagePerCompanySet companyCommonSetting, ManagePerPersonDailySet personCommonSetting,
 			DailyRecordToAttendanceItemConverter converter, Optional<WorkInfoOfDailyPerformance> yesterDayInfo,
 			Optional<WorkInfoOfDailyPerformance> tomorrowDayInfo) {
-		// 打刻順序不正のチェック
+		// 出退勤打刻順序不正のチェック
+		//　※他の打刻順序不正は計算処理を実施する必要があるため、ここでは弾かない
 		// 不正の場合、勤務情報の計算ステータス→未計算にしつつ、エラーチェックは行う必要有）
-		val errorList = dailyRecordCreateErrorAlermService.stampIncorrectOrderAlgorithm(integrationOfDaily);
-		if (!errorList.stream().filter(tc -> tc != null).collect(Collectors.toList()).isEmpty()) {
-			val zeroValueClass = AttendanceTimeOfDailyPerformance.allZeroValue(
-					integrationOfDaily.getAffiliationInfor().getEmployeeId(),
-					integrationOfDaily.getAffiliationInfor().getYmd());
-			integrationOfDaily.setAttendanceTimeOfDailyPerformance(Optional.of(zeroValueClass));
+		val stampError = dailyRecordCreateErrorAlermService.stampIncorrect(integrationOfDaily);
+		if (stampError != null) {
+			
+			final String employeeId = integrationOfDaily.getAffiliationInfor().getEmployeeId();
+			GeneralDate targetDate = integrationOfDaily.getAffiliationInfor().getYmd();
+
+			
+			// // 編集状態を取得（日別実績の編集状態が持つ勤怠項目IDのみのList作成）
+			List<Integer> attendanceItemIdList = integrationOfDaily.getEditState().stream()
+					.filter(editState -> editState.getEmployeeId()
+							.equals(employeeId)
+							&& editState.getYmd().equals(targetDate))
+					.map(editState -> editState.getAttendanceItemId()).distinct().collect(Collectors.toList());
+
+			Optional<AttendanceTimeOfDailyPerformance> peform = Optional.of(AttendanceTimeOfDailyPerformance
+					.allZeroValue(integrationOfDaily.getAffiliationInfor().getEmployeeId(),
+							integrationOfDaily.getAffiliationInfor().getYmd()));
+			
+			DailyRecordToAttendanceItemConverter converterForAllZero = attendanceItemConvertFactory.createDailyConverter();
+			DailyRecordToAttendanceItemConverter beforDailyRecordDto = converterForAllZero.setData(integrationOfDaily);
+			//複製に対してsetしないと引数：integrationOfDailyが書き換わる(※参照型)
+			val recordAllZeroValueIntegration = beforDailyRecordDto.toDomain();
+			recordAllZeroValueIntegration.setAttendanceTimeOfDailyPerformance(peform);
+			List<ItemValue> itemValueList = Collections.emptyList();
+			if (!attendanceItemIdList.isEmpty()) {
+
+				itemValueList = beforDailyRecordDto.convert(attendanceItemIdList);
+				DailyRecordToAttendanceItemConverter afterDailyRecordDto = converterForAllZero
+						.setData(recordAllZeroValueIntegration);
+				afterDailyRecordDto.merge(itemValueList);
+
+				// 手修正された項目の値を計算前に戻す
+				integrationOfDaily = afterDailyRecordDto.toDomain();
+			}
+			else {
+				integrationOfDaily = recordAllZeroValueIntegration;
+			}
+			
 			return ManageCalcStateAndResult.failCalc(integrationOfDaily);
-		}
+		}		
+		
 		val copyCalcAtr = integrationOfDaily.getCalAttr();
 		// 予定の時間帯
 		val schedule = createSchedule(integrationOfDaily, companyCommonSetting, personCommonSetting, converter,
@@ -397,10 +417,10 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		Optional<WorkInformation> tommorowInfo = tomorrowDayInfo.isPresent()
 				? Optional.of(tomorrowDayInfo.get().getRecordInfo())
 				: Optional.empty();
-		;
+		
 
 		String companyId = AppContexts.user().companyId();
-		String employeeId = integrationOfDaily.getAffiliationInfor().getEmployeeId();
+		final String employeeId = integrationOfDaily.getAffiliationInfor().getEmployeeId();
 		String placeId = integrationOfDaily.getAffiliationInfor().getWplID();
 
 		GeneralDate targetDate = integrationOfDaily.getAffiliationInfor().getYmd();
@@ -409,12 +429,40 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		val workInfo = integrationOfDaily.getWorkInformation();
 		val wko = workInfo.getRecordInfo().getWorkTypeCode().v();
 		Optional<WorkType> workType = this.workTypeRepository.findByPK(companyId, wko); // 要確認：勤務種類マスタが削除されている場合は考慮しない？
-
+		
 		/// 連続勤務：ＡＬＬかつＣａｎｔにしないとフレ時間がー所定時間 で算出されてしまう
 		if (!workType.isPresent() || shouldTimeALLZero(integrationOfDaily, workType.get())) {
-			integrationOfDaily.setAttendanceTimeOfDailyPerformance(Optional.of(AttendanceTimeOfDailyPerformance
+			// // 編集状態を取得（日別実績の編集状態が持つ勤怠項目IDのみのList作成）
+			List<Integer> attendanceItemIdList = integrationOfDaily.getEditState().stream()
+					.filter(editState -> editState.getEmployeeId()
+							.equals(employeeId)
+							&& editState.getYmd().equals(targetDate))
+					.map(editState -> editState.getAttendanceItemId()).distinct().collect(Collectors.toList());
+
+			Optional<AttendanceTimeOfDailyPerformance> peform = Optional.of(AttendanceTimeOfDailyPerformance
 					.allZeroValue(integrationOfDaily.getAffiliationInfor().getEmployeeId(),
-							integrationOfDaily.getAffiliationInfor().getYmd())));
+							integrationOfDaily.getAffiliationInfor().getYmd()));
+			
+			DailyRecordToAttendanceItemConverter converter = attendanceItemConvertFactory.createDailyConverter();
+			DailyRecordToAttendanceItemConverter beforDailyRecordDto = converter.setData(integrationOfDaily);
+			val recordAllZeroValueIntegration = beforDailyRecordDto.toDomain();
+			recordAllZeroValueIntegration.setAttendanceTimeOfDailyPerformance(peform);
+			List<ItemValue> itemValueList = Collections.emptyList();
+			if (!attendanceItemIdList.isEmpty()) {
+
+				itemValueList = beforDailyRecordDto.convert(attendanceItemIdList);
+				DailyRecordToAttendanceItemConverter afterDailyRecordDto = converter
+						.setData(recordAllZeroValueIntegration);
+				afterDailyRecordDto.merge(itemValueList);
+
+				// 手修正された項目の値を計算前に戻す
+				integrationOfDaily = afterDailyRecordDto.toDomain();
+			}
+			else {
+				integrationOfDaily = recordAllZeroValueIntegration;
+			}
+			
+		
 			return ManageReGetClass.cantCalc(Optional.empty(), integrationOfDaily, null);
 		}
 		val beforeWorkType = workType;
@@ -534,8 +582,11 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		// 外出時間帯
 		Optional<OutingTimeOfDailyPerformance> goOutTimeSheetList = integrationOfDaily.getOutingTime();
 
+		//深夜時間帯(2019.3.31時点ではNotマスタ参照で動作している)
 		MidNightTimeSheet midNightTimeSheet = new MidNightTimeSheet(companyId, new TimeWithDayAttr(1320),
 				new TimeWithDayAttr(1740));
+		val mid = midnightTimeSheetRepo.findByCId(companyId);
+		
 		// 短時間
 		List<ShortWorkingTimeSheet> shortTimeSheets = new ArrayList<>();
 		if (integrationOfDaily.getShortTime().isPresent()) {
@@ -626,7 +677,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 						new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
 				TimeActualStamp stamp = new TimeActualStamp(attendance, leaving, 1);
 				TimeLeavingWork timeLeavingWork = new TimeLeavingWork(
-						new nts.uk.ctx.at.shared.dom.worktime.common.WorkNo(1), stamp, stamp);
+						new WorkNo(1), stamp, stamp);
 				List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
 				timeLeavingWorkList.add(timeLeavingWork);
 				TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance = new TimeLeavingOfDailyPerformance(
@@ -637,7 +688,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			List<EmTimeZoneSet> flexWoSetting = Collections.emptyList();
 			if (workType.get().getAttendanceHolidayAttr().isFullTime()) {
 				val timeSheet = flexWorkSetOpt.get().getLstHalfDayWorkTimezone().stream()
-						.filter(tc -> tc.getAmpmAtr().equals(AmPmAtr.ONE_DAY)).findFirst().get();
+						.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.ONE_DAY)).findFirst().get();
 				fixRestTimeSet = timeSheet.getRestTimezone().isFixRestTime()
 						? Optional.of(new FixRestTimezoneSet(
 								timeSheet.getRestTimezone().getFixedRestTimezone().getTimezones()))
@@ -646,7 +697,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				flexOtSetting = timeSheet.getWorkTimezone().getLstOTTimezone();
 			} else if (workType.get().getAttendanceHolidayAttr().isMorning()) {
 				val timeSheet = flexWorkSetOpt.get().getLstHalfDayWorkTimezone().stream()
-						.filter(tc -> tc.getAmpmAtr().equals(AmPmAtr.AM)).findFirst().get();
+						.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.AM)).findFirst().get();
 				fixRestTimeSet = timeSheet.getRestTimezone().isFixRestTime()
 						? Optional.of(new FixRestTimezoneSet(
 								timeSheet.getRestTimezone().getFixedRestTimezone().getTimezones()))
@@ -655,7 +706,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				flexOtSetting = timeSheet.getWorkTimezone().getLstOTTimezone();
 			} else if (workType.get().getAttendanceHolidayAttr().isAfternoon()) {
 				val timeSheet = flexWorkSetOpt.get().getLstHalfDayWorkTimezone().stream()
-						.filter(tc -> tc.getAmpmAtr().equals(AmPmAtr.PM)).findFirst().get();
+						.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.PM)).findFirst().get();
 				fixRestTimeSet = timeSheet.getRestTimezone().isFixRestTime()
 						? Optional.of(new FixRestTimezoneSet(
 								timeSheet.getRestTimezone().getFixedRestTimezone().getTimezones()))
@@ -669,7 +720,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 						: Optional.empty();
 			}
 
-			statutoryOverFrameNoList = flexOtSetting.stream().map(tc -> new OverTimeFrameNo(tc.getLegalOTframeNo().v()))
+			statutoryOverFrameNoList = flexOtSetting.stream().map(timeZoneSetting -> new OverTimeFrameNo(timeZoneSetting.getLegalOTframeNo().v()))
 					.collect(Collectors.toList());
 
 			flexCalcSetting = Optional.of(flexWorkSetOpt.get().getCalculateSetting());
@@ -680,18 +731,18 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			val tomorrow = getWorkTypeByWorkInfo(tomorrowDayInfo, workType.get());
 			// 先に1日埋める
 			List<OverTimeOfTimeZoneSet> useLstTimeZone = flexWorkSetOpt.get().getLstHalfDayWorkTimezone().stream()
-					.filter(tc -> tc.getAmpmAtr().equals(AmPmAtr.ONE_DAY)).findFirst().get().getWorkTimezone()
+					.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.ONE_DAY)).findFirst().get().getWorkTimezone()
 					.getLstOTTimezone();
 			// 午前勤務
 			if (workType.get().getAttendanceHolidayAttr().isMorning()) {
 				useLstTimeZone = flexWorkSetOpt.get().getLstHalfDayWorkTimezone().stream()
-						.filter(tc -> tc.getAmpmAtr().equals(AmPmAtr.AM)).findFirst().get().getWorkTimezone()
+						.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.AM)).findFirst().get().getWorkTimezone()
 						.getLstOTTimezone();
 			}
 			// 午後勤務
 			else if (workType.get().getAttendanceHolidayAttr().isAfternoon()) {
 				useLstTimeZone = flexWorkSetOpt.get().getLstHalfDayWorkTimezone().stream()
-						.filter(tc -> tc.getAmpmAtr().equals(AmPmAtr.PM)).findFirst().get().getWorkTimezone()
+						.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.PM)).findFirst().get().getWorkTimezone()
 						.getLstOTTimezone();
 			}
 
@@ -714,11 +765,11 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 			if (!integrationOfDaily.getBreakTime().isEmpty()) {
 				Optional<BreakTimeOfDailyPerformance> breakTimeByBreakType = integrationOfDaily.getBreakTime().stream()
-						.filter(tc -> tc.getBreakType().equals(flexBreakType)).findFirst();
+						.filter(breakTime -> breakTime.getBreakType().equals(flexBreakType)).findFirst();
 				breakTimeByBreakType.ifPresent(tc -> breakTimeSheet.addAll(tc.getBreakTimeSheets()));
 
-				breakCount = breakTimeSheet.stream().filter(tc -> (tc.getStartTime() != null && tc.getEndTime() != null
-						&& tc.getEndTime().greaterThan(tc.getStartTime()))).collect(Collectors.toList()).size();
+				breakCount = breakTimeSheet.stream().filter(timeSheet -> (timeSheet.getStartTime() != null && timeSheet.getEndTime() != null
+						&& timeSheet.getEndTime().greaterThan(timeSheet.getStartTime()))).collect(Collectors.toList()).size();
 			}
 
 			breakTimeOfDailyList
@@ -770,12 +821,20 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 					return ManageReGetClass.cantCalc2(workType, integrationOfDaily, personalInfo, holidayCalcMethodSet,
 							regularAddSetting, flexAddSetting, hourlyPaymentAddSetting, illegularAddSetting, leaveLate,
 							Optional.empty());
+				
+				//大塚用勤務種類チェック処理の前後で勤務種類が変更になったか
+				final boolean isSpecialHoliday = workType.get().getDailyWork().isOneOrHalfDaySpecHoliday();
+				boolean workTypeChangedFlagForOOtsuka = ootsukaProcessService.decisionOotsukaMode(workType.get(), 
+																								  ootsukaFixedWorkSet, 
+																								  oneRange.getAttendanceLeavingWork(), 
+																								  fixedWorkSetting.get().getCommonSetting().getHolidayCalculation());
 				/* 大塚モード */
 				workType = Optional.of(ootsukaProcessService.getOotsukaWorkType(workType.get(), ootsukaFixedWorkSet,
 						oneRange.getAttendanceLeavingWork(),
 						fixedWorkSetting.get().getCommonSetting().getHolidayCalculation()));
-
-				if (ootsukaProcessService.getWorkTypeChangedFromSpecialHoliday()) {
+				
+				//大塚用　勤務種類が変更になった時に
+				if (workTypeChangedFlagForOOtsuka && isSpecialHoliday) {
 					CalAttrOfDailyPerformance optionalInstance = calcSetinIntegre
 							.reCreate(AutoCalAtrOvertime.APPLYMANUALLYENTER);
 					calcSetinIntegre = optionalInstance;
@@ -784,19 +843,19 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				List<OverTimeOfTimeZoneSet> fixOtSetting = Collections.emptyList();
 				if (workType.get().getAttendanceHolidayAttr().isFullTime()) {
 					val timeSheet = fixedWorkSetting.get().getLstHalfDayWorkTimezone().stream()
-							.filter(tc -> tc.getDayAtr().equals(AmPmAtr.ONE_DAY)).findFirst().get();
+							.filter(timeZone -> timeZone.getDayAtr().equals(AmPmAtr.ONE_DAY)).findFirst().get();
 					fixWoSetting = timeSheet.getWorkTimezone().getLstWorkingTimezone();
 					fixOtSetting = timeSheet.getWorkTimezone().getLstOTTimezone();
 					fixRestTimeSet = Optional.of(timeSheet.getRestTimezone());
 				} else if (workType.get().getAttendanceHolidayAttr().isMorning()) {
 					val timeSheet = fixedWorkSetting.get().getLstHalfDayWorkTimezone().stream()
-							.filter(tc -> tc.getDayAtr().equals(AmPmAtr.AM)).findFirst().get();
+							.filter(timeZone -> timeZone.getDayAtr().equals(AmPmAtr.AM)).findFirst().get();
 					fixWoSetting = timeSheet.getWorkTimezone().getLstWorkingTimezone();
 					fixOtSetting = timeSheet.getWorkTimezone().getLstOTTimezone();
 					fixRestTimeSet = Optional.of(timeSheet.getRestTimezone());
 				} else if (workType.get().getAttendanceHolidayAttr().isAfternoon()) {
 					val timeSheet = fixedWorkSetting.get().getLstHalfDayWorkTimezone().stream()
-							.filter(tc -> tc.getDayAtr().equals(AmPmAtr.PM)).findFirst().get();
+							.filter(timeZone -> timeZone.getDayAtr().equals(AmPmAtr.PM)).findFirst().get();
 					fixWoSetting = timeSheet.getWorkTimezone().getLstWorkingTimezone();
 					fixOtSetting = timeSheet.getWorkTimezone().getLstOTTimezone();
 					fixRestTimeSet = Optional.of(timeSheet.getRestTimezone());
@@ -816,12 +875,12 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				final BreakType flexBreakType = nowBreakType;
 				if (!integrationOfDaily.getBreakTime().isEmpty()) {
 					Optional<BreakTimeOfDailyPerformance> breakTimeByBreakType = integrationOfDaily.getBreakTime()
-							.stream().filter(tc -> tc.getBreakType() == flexBreakType).findFirst();
+							.stream().filter(breakTime -> breakTime.getBreakType() == flexBreakType).findFirst();
 					breakTimeByBreakType.ifPresent(tc -> breakTimeSheet.addAll(tc.getBreakTimeSheets()));
 
 					breakCount = breakTimeSheet.stream()
-							.filter(tc -> (tc.getStartTime() != null && tc.getEndTime() != null
-									&& tc.getEndTime().greaterThan(tc.getStartTime())))
+							.filter(timeSheet -> (timeSheet.getStartTime() != null && timeSheet.getEndTime() != null
+									&& timeSheet.getEndTime().greaterThan(timeSheet.getStartTime())))
 							.collect(Collectors.toList()).size();
 				}
 
@@ -829,7 +888,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 						.add(new BreakTimeOfDailyPerformance(employeeId, nowBreakType, breakTimeSheet, targetDate));
 
 				statutoryOverFrameNoList = fixOtSetting.stream()
-						.map(tc -> new OverTimeFrameNo(tc.getLegalOTframeNo().v())).collect(Collectors.toList());
+						.map(timeZoneSetting -> new OverTimeFrameNo(timeZoneSetting.getLegalOTframeNo().v())).collect(Collectors.toList());
 
 				// 出退勤削除
 				if (!ootsukaProcessService.decisionOotsukaMode(workType.get(), ootsukaFixedWorkSet,
@@ -842,7 +901,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 							new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
 					TimeActualStamp stamp = new TimeActualStamp(attendance, leaving, 1);
 					TimeLeavingWork timeLeavingWork = new TimeLeavingWork(
-							new nts.uk.ctx.at.shared.dom.worktime.common.WorkNo(1), stamp, stamp);
+							new WorkNo(1), stamp, stamp);
 					List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
 					timeLeavingWorkList.add(timeLeavingWork);
 					TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance = new TimeLeavingOfDailyPerformance(
@@ -1153,7 +1212,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 					StampSourceInfo.CORRECTION_RECORD_SET);
 			TimeActualStamp stamp = new TimeActualStamp(attendance, leaving, 1);
 			TimeLeavingWork timeLeavingWork = new TimeLeavingWork(
-					new nts.uk.ctx.at.shared.dom.worktime.common.WorkNo(1), stamp, stamp);
+					new WorkNo(1), stamp, stamp);
 			List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
 			timeLeavingWorkList.add(timeLeavingWork);
 			timeLeavingOfDailyPerformance = Optional.of(
@@ -1282,8 +1341,6 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 		if (!itemValueList.isEmpty()) {
 			converter.setData(integrationOfDaily);
-			// List<ItemValue> itemValueList = converter.convert(attendanceItemIdList);
-			// converter.withAnyItems(result);
 			converter.merge(itemValueList);
 			// 手修正された項目の値を計算前に戻す
 			calcResultIntegrationOfDaily.setAnyItemValue(converter.anyItems());

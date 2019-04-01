@@ -131,6 +131,7 @@ public class JpaApprovalPhaseRepository extends JpaRepository implements Approva
 			lstEntity.add(approvalPhaseEntity);
 		}
 		this.commandProxy().insertAll(lstEntity);
+		this.getEntityManager().flush();
 	}
 	/**
 	 * add Approval Phase

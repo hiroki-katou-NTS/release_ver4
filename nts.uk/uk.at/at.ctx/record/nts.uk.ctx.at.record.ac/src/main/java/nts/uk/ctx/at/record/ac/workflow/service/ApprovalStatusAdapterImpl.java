@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -222,7 +221,7 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 				.collect(Collectors.toList());
 		List<AppRootSttMonthExport> exportResult = new ArrayList<>();
 		try{
-			exportResult = intermediateDataPub.getAppRootStatusByEmpsMonth(listParam);
+			exportResult = intermediateDataPub.getAppRootStatusByEmpsMonth(listParam).getAppRootSttMonthExportLst();
 		}
 		catch(BusinessException ex){
 			throw new BusinessException("Msg_1430", "承認者");

@@ -149,7 +149,7 @@ public class SysFixedCheckConMonAcFinder implements SysFixedCheckConMonAdapter {
 					employeeId));
 			//No.533
 			List<AppRootSttMonthExport> appRootStateStatusSprExports = intermediateDataPub
-					.getAppRootStatusByEmpsMonth(empPerformMonthParams);
+					.getAppRootStatusByEmpsMonth(empPerformMonthParams).getAppRootSttMonthExportLst();
 			String classification=TextResource.localize("KAL010_100");
 			String alarmItem=TextResource.localize("KAL010_128");
 			String alarmValueMessage=TextResource.localize("KAL010_129");
@@ -191,7 +191,7 @@ public class SysFixedCheckConMonAcFinder implements SysFixedCheckConMonAdapter {
 							atm.getClosureDate(),
 							atm.getDatePeriod().end(),
 							atm.getEmployeeId());
-				}).collect(Collectors.toList()));
+				}).collect(Collectors.toList())).getAppRootSttMonthExportLst();
 				
 				attendanceTimeOfMonthlys.stream().forEach(c -> {
 					Optional<AppRootSttMonthExport> appSttEx = appRootStates.stream().filter(ars -> {

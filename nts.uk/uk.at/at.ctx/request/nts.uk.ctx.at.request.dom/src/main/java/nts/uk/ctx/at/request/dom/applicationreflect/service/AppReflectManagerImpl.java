@@ -138,8 +138,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			if(absenceData == null) {
 				return outData;
 			}
-		} else if (appInfor.getAppType() == ApplicationType.BREAK_TIME_APPLICATION
-				&& appInfor.getPrePostAtr() == PrePostAtr.PREDICT) {			
+		} else if (appInfor.getAppType() == ApplicationType.BREAK_TIME_APPLICATION) {			
 			Optional<AppHolidayWork> getFullAppHolidayWork = holidayWorkRepo.getFullAppHolidayWork(appInfor.getCompanyID(), appInfor.getAppID());
 			if(!getFullAppHolidayWork.isPresent()) {
 				return outData;
@@ -295,10 +294,12 @@ public class AppReflectManagerImpl implements AppReflectManager {
 						holidayWorkData.getWorkClock1().getEndTime() == null ? null : holidayWorkData.getWorkClock1().getEndTime().v());
 		holidayPara = new HolidayWorkReflectPara(appInfor.getEmployeeID(),
 				appInfor.getAppDate(),
-				reflectSetting.isKyushutsu(),
+				reflectSetting.isHwScheReflectHwTime(),
 				reflectSetting.getScheAndWorkChange(),
 				reflectSetting.isJizenScheYusen(),
-				appPara);
+				appPara,
+				reflectSetting.isHwRecordReflectTime(),
+				reflectSetting.isHwRecordReflectBreak());
 		return holidayPara;
 		
 	}

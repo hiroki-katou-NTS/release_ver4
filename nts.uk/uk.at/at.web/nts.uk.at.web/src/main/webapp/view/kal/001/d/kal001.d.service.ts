@@ -39,7 +39,7 @@ module nts.uk.at.view.kal001.d.service {
                             let eralRecord = _.find(res.taskDatas, (t) => t.key.indexOf("eralRecord") >= 0);
                             data["eralRecord"] = eralRecord.valueAsNumber;
                             if(nullData.valueAsBoolean === false){
-
+                                let dateFormat = ['YYYY/MM', 'YYYY/MM/DD', 'YYYY'];
                                 nts.uk.request.ajax("at", paths.extractResult + command.statusProcessId).done(function(result){
                                     let empMap = _.groupBy(_.map(result.empInfos, (empData) => {
                                         return {
@@ -47,21 +47,25 @@ module nts.uk.at.view.kal001.d.service {
                                             employeeID: empData[1],
                                             employeeName: empData[2],
                                             workplaceName: empData[3],
-                                            start: moment(empData[4]),
-                                            end: moment(empData[5])
+                                            start: moment(empData[4], dateFormat),
+                                            end: moment(empData[5], dateFormat)
                                         }
                                     }), "employeeID");
                                     
                                     let dataX = []; 
                                     _.forEach(result.empEralDatas, item => {
+                                        let start = null, end = null;
+                                        if(item[2].indexOf("～") > 0) {
+                                            let parts = item[2].split("～");
+                                            start = moment(parts[0].trim(), dateFormat), end = moment(parts[1].trim(), dateFormat);
+                                        } else {
+                                            start = moment(item[2], dateFormat);
+                                        }    
                                         //let eralData = JSON.parse(item.valueAsString);
                                         let empInfo = _.find(empMap[item[0]], (e) => {
-                                            if(item[2].indexOf("～") > 0) {
-                                                let parts = item[2].split("～");
-                                                let start = moment(parts[0].trim()), end = moment(parts[1].trim());
+                                            if(end !== null) {
                                                 return e.start.isSameOrBefore(start) && e.end.isSameOrAfter(end);
                                             } else {
-                                                let start = moment(item[2]);
                                                 return e.start.isSameOrBefore(start) && e.end.isSameOrAfter(start);
                                             }    
                                         });

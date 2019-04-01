@@ -2,7 +2,6 @@ package nts.uk.ctx.at.record.dom.dailyprocess.calc.withinstatutory;
 
 import java.util.List;
 import java.util.Optional;
-//import java.util.stream.Collectors;
 
 import lombok.Value;
 import lombok.val;
@@ -11,10 +10,8 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.DeductionTimeSheet;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.PredetermineTimeSetForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.TimeSheetOfDeductionItem;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
-//import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
 import nts.uk.ctx.at.shared.dom.worktime.common.GraceTimeSetting;
-//import nts.uk.ctx.at.shared.dom.worktime.common.TimeZoneRounding;
 import nts.uk.ctx.at.shared.dom.worktime.flexset.CoreTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.predset.TimezoneUse;
 import nts.uk.ctx.at.shared.dom.worktype.AttendanceHolidayAttr;

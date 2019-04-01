@@ -16,11 +16,11 @@ import nts.arc.enums.EnumAdaptor;
 public class WithdrawalAppSet extends AggregateRoot{
 	// 会社ID
 	private String companyId;
-	// 事前反映設定
+	// 事前反映設定: 休出時間
 	private UseAtr prePerflex;
-	// 休憩時間
+	// 休出事後反映設定: 休憩時間
 	private UseAtr breakTime;
-	// 勤務時間（出勤、退勤時刻）
+	// 休出事後反映設定: 勤務時間（出勤、退勤時刻）
 	private UseAtr workTime;
 	// 休出時間未入力チェック
 	private UseAtr checkHdTime;

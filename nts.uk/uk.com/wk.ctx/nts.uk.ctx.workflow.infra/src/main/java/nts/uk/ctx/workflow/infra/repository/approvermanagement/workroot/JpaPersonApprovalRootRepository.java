@@ -96,6 +96,27 @@ public class JpaPersonApprovalRootRepository extends JpaRepository implements Pe
 			 + " AND c.endDate >= :baseDate"
 			 + " AND c.confirmationRootType = :confirmationRootType"
 			 + " AND c.employmentRootAtr = 2";
+	 private static final String GET_ALL__MODE_COM = "SELECT c FROM WwfmtPsApprovalRoot c"
+			 + " WHERE c.wwfmtPsApprovalRootPK.companyId = :companyId"
+			 + " AND c.wwfmtPsApprovalRootPK.employeeId = :employeeId"
+			 + " ORDER BY c.startDate DESC";
+	 private static final String GET_ALL_MODE_PRI_CM = "SELECT c FROM WwfmtPsApprovalRoot c"
+			 + " WHERE c.wwfmtPsApprovalRootPK.companyId = :companyId"
+			 + " AND c.wwfmtPsApprovalRootPK.employeeId = :employeeId"
+			 + " AND c.employmentRootAtr = 0"
+			 + " ORDER BY c.startDate DESC";
+	 private static final String GET_ALL_MODE_PRI_AP = "SELECT c FROM WwfmtPsApprovalRoot c"
+			 + " WHERE c.wwfmtPsApprovalRootPK.companyId = :companyId"
+			 + " AND c.wwfmtPsApprovalRootPK.employeeId = :employeeId"
+			 + " AND c.employmentRootAtr = 1"
+			 + " AND c.applicationType = :applicationType"
+			 + " ORDER BY c.startDate DESC";
+	 private static final String GET_ALL_MODE_PRI_CF = "SELECT c FROM WwfmtPsApprovalRoot c"
+			 + " WHERE c.wwfmtPsApprovalRootPK.companyId = :companyId"
+			 + " AND c.wwfmtPsApprovalRootPK.employeeId = :employeeId"
+			 + " AND c.employmentRootAtr = 2"
+			 + " AND c.confirmationRootType = :confirmationRootType"
+			 + " ORDER BY c.startDate DESC";
 	/**
 	 * get all Person Approval Root
 	 * @param companyId
@@ -417,5 +438,37 @@ public class JpaPersonApprovalRootRepository extends JpaRepository implements Pe
 				.setParameter("baseDate", date)
 				.setParameter("confirmationRootType", confirmType.value)
 				.getList(c->toDomainPsApR(c));
+	}
+	@Override
+	public Optional<PersonApprovalRoot> getHistLastestCom(String companyId, String employeeId) {
+		List<PersonApprovalRoot> lst =  this.queryProxy().query(GET_ALL__MODE_COM, WwfmtPsApprovalRoot.class)
+				.setParameter("companyId", companyId)
+				.setParameter("employeeId", employeeId)
+				.getList(c->toDomainPsApR(c));
+		return !lst.isEmpty()? Optional.of(lst.get(0)) : Optional.empty();
+	}
+	@Override
+	public Optional<PersonApprovalRoot> getHistLastestPri(String companyId, String employeeId, int employmentRootAtr,
+			Integer applicationType) {
+		List<PersonApprovalRoot> lst = new ArrayList<>();
+		if(employmentRootAtr == EmploymentRootAtr.COMMON.value){
+			lst = this.queryProxy().query(GET_ALL_MODE_PRI_CM, WwfmtPsApprovalRoot.class)
+					.setParameter("companyId", companyId)
+					.setParameter("employeeId", employeeId)
+					.getList(c->toDomainPsApR(c));
+		}else if(employmentRootAtr == EmploymentRootAtr.APPLICATION.value){
+			lst = this.queryProxy().query(GET_ALL_MODE_PRI_AP, WwfmtPsApprovalRoot.class)
+					.setParameter("companyId", companyId)
+					.setParameter("employeeId", employeeId)
+					.setParameter("applicationType", applicationType)
+					.getList(c->toDomainPsApR(c));
+		}else{
+			lst = this.queryProxy().query(GET_ALL_MODE_PRI_CF, WwfmtPsApprovalRoot.class)
+					.setParameter("companyId", companyId)
+					.setParameter("employeeId", employeeId)
+					.setParameter("confirmationRootType", applicationType)
+					.getList(c->toDomainPsApR(c));
+		}
+		return !lst.isEmpty()? Optional.of(lst.get(0)) : Optional.empty();
 	}
 }

@@ -55,7 +55,7 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 	public boolean recruitmentReflect(CommonReflectParameter param, boolean isPre) {
 		try {
 			IntegrationOfDaily daily = holidayWorktimeService.createIntegrationOfDailyStart(param.getEmployeeId(), param.getBaseDate(), 
-					param.getWorkTimeCode(), param.getWorkTypeCode(), param.getStartTime(), param.getEndTime());
+					param.getWorkTimeCode(), param.getWorkTypeCode(), param.getStartTime(), param.getEndTime(),isPre);
 			WorkInfoOfDailyPerformance dailyInfor = daily.getWorkInformation();
 			//予定勤種就時の反映
 			//予定開始終了の反映

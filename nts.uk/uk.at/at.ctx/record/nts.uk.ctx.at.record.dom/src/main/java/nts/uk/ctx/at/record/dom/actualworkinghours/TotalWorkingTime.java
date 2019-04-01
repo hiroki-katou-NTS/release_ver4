@@ -1124,28 +1124,28 @@ public class TotalWorkingTime {
 					calcFlexTime = AttendanceTimeOfExistMinus.ZERO;
 				//set flexTime And calcFlexTime
 
-				AttendanceTime flexPreAppTime = new AttendanceTime(0);
-//				ChildCareAttribute careAtr = ChildCareAttribute.CHILD_CARE;
-				if(recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().isPresent()
-					&& recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily() != null
-					&& recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime() != null){
-						if(recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily() != null) {
-							if(recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().isPresent()
-								&& recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get().getFlexTime() != null) {
-									//事前フレックス
-									flexPreAppTime = recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get().getFlexTime().getBeforeApplicationTime();
-							}
-						}
-				}
-				
-				Optional<WorkTimeCode> workTimeCode = Optional.empty();
-				//日別実績の所定外時間
-				if(recordClass.getCalculatable() && recordClass.getCalculationRangeOfOneDay().getWorkInformationOfDaily().getRecordInfo().getWorkTimeCode() != null) {
-					workTimeCode = recordClass.getCalculationRangeOfOneDay().getWorkInformationOfDaily().getRecordInfo().getWorkTimeCode().v() == null
-																				?Optional.empty()
-																				:Optional.of(new WorkTimeCode(recordClass.getCalculationRangeOfOneDay().getWorkInformationOfDaily().getRecordInfo().getWorkTimeCode().v().toString()));
-				}
-				
+//				AttendanceTime flexPreAppTime = new AttendanceTime(0);
+////				ChildCareAttribute careAtr = ChildCareAttribute.CHILD_CARE;
+//				if(recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().isPresent()
+//					&& recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily() != null
+//					&& recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime() != null){
+//						if(recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily() != null) {
+//							if(recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().isPresent()
+//								&& recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get().getFlexTime() != null) {
+//									//事前フレックス
+//									flexPreAppTime = recordClass.getIntegrationOfDaily().getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get().getFlexTime().getBeforeApplicationTime();
+//							}
+//						}
+//				}
+//				
+//				Optional<WorkTimeCode> workTimeCode = Optional.empty();
+//				//日別実績の所定外時間
+//				if(recordClass.getCalculatable() && recordClass.getCalculationRangeOfOneDay().getWorkInformationOfDaily().getRecordInfo().getWorkTimeCode() != null) {
+//					workTimeCode = recordClass.getCalculationRangeOfOneDay().getWorkInformationOfDaily().getRecordInfo().getWorkTimeCode().v() == null
+//																				?Optional.empty()
+//																				:Optional.of(new WorkTimeCode(recordClass.getCalculationRangeOfOneDay().getWorkInformationOfDaily().getRecordInfo().getWorkTimeCode().v().toString()));
+//				}
+//				
 //				WorkingConditionItem regularWorkCondition = conditionItem;//.changeWorkingSystemToRegular();
 //
 			

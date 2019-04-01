@@ -251,12 +251,13 @@ public class DailyAggregationProcessService {
 		
 		checkFixedNo3(period, employee, listValueExtractAlarm, listFixed, empIds);
 		checkFixedNo4(employee, listValueExtractAlarm, listFixed, empIds, datePeriod);
-		checkFixedNo5(employee, listValueExtractAlarm, listFixed, datePeriod);
+		checkFixedNo6(employee, listValueExtractAlarm, listFixed, datePeriod);
 		checkFixedNo1And2AndOther(comId, period, employee, empIds, listValueExtractAlarm, listFixed);
 		
 		return listValueExtractAlarm;
 	}
-
+	
+	/**　本人未確認　*/
 	private void checkFixedNo3(PeriodByAlarmCategory period, List<EmployeeSearchDto> employee,
 			List<ValueExtractAlarm> listValueExtractAlarm, List<FixedConWorkRecordAdapterDto> listFixed, List<String> empIds) {
 		List<FixedConWorkRecordAdapterDto> no3 = listFixed.stream().filter(c -> c.getFixConWorkRecordNo() == 3).collect(Collectors.toList());
@@ -280,15 +281,16 @@ public class DailyAggregationProcessService {
 	}
 
 	/** TODO: need response */
-	private void checkFixedNo5(List<EmployeeSearchDto> employee, List<ValueExtractAlarm> listValueExtractAlarm,
+	/** 連続休暇チェック */
+	private void checkFixedNo6(List<EmployeeSearchDto> employee, List<ValueExtractAlarm> listValueExtractAlarm,
 			List<FixedConWorkRecordAdapterDto> listFixed, DatePeriod datePeriod) {
-		List<FixedConWorkRecordAdapterDto> no5 = listFixed.stream().filter(c -> c.getFixConWorkRecordNo() == 5).collect(Collectors.toList());
-		if(!no5.isEmpty()){
+		List<FixedConWorkRecordAdapterDto> no6 = listFixed.stream().filter(c -> c.getFixConWorkRecordNo() == 6).collect(Collectors.toList());
+		if(!no6.isEmpty()){
 			employee.stream().forEach(emp -> {
 				List<ValueExtractAlarm> erals = fixedCheckItemAdapter.checkContinuousVacation(emp.getId(), datePeriod);
 				if (!erals.isEmpty()) {
 					for (ValueExtractAlarm tmp : erals) {
-						no5.stream().forEach(c -> {
+						no6.stream().forEach(c -> {
 							listValueExtractAlarm.add(new ValueExtractAlarm(tmp.getWorkplaceID().orElse(null), tmp.getEmployeeID(), tmp.getAlarmValueDate(), 
 																			tmp.getClassification(), tmp.getAlarmItem(), tmp.getAlarmValueMessage(), c.getMessage()));
 						});	
@@ -298,6 +300,7 @@ public class DailyAggregationProcessService {
 		}
 	}
 
+	/**　管理者未承認　*/
 	private void checkFixedNo4(List<EmployeeSearchDto> employee, List<ValueExtractAlarm> listValueExtractAlarm,
 			List<FixedConWorkRecordAdapterDto> listFixed, List<String> empIds, DatePeriod datePeriod) {
 		List<FixedConWorkRecordAdapterDto> no4 = listFixed.stream().filter(c -> c.getFixConWorkRecordNo() == 4).collect(Collectors.toList());
@@ -320,15 +323,13 @@ public class DailyAggregationProcessService {
 			}
 		}
 	}
-
+	/**　1： 勤務種類未登録、2： 就業時間帯未登録、5: 	データチェック */
 	private void checkFixedNo1And2AndOther(String comId, PeriodByAlarmCategory period, List<EmployeeSearchDto> employee,
 			List<String> empIds, List<ValueExtractAlarm> listValueExtractAlarm,
 			List<FixedConWorkRecordAdapterDto> listFixed) {
 		List<FixedConWorkRecordAdapterDto> no1 = listFixed.stream().filter(c -> c.getFixConWorkRecordNo() == 1).collect(Collectors.toList());
 		List<FixedConWorkRecordAdapterDto> no2 = listFixed.stream().filter(c -> c.getFixConWorkRecordNo() == 2).collect(Collectors.toList());
-		List<FixedConWorkRecordAdapterDto> noOthers = listFixed.stream().filter(c -> c.getFixConWorkRecordNo() != 1 && c.getFixConWorkRecordNo() != 2
-				&& c.getFixConWorkRecordNo() != 3 && c.getFixConWorkRecordNo() != 4
-				&& c.getFixConWorkRecordNo() != 5).collect(Collectors.toList());
+		List<FixedConWorkRecordAdapterDto> noOthers = listFixed.stream().filter(c -> c.getFixConWorkRecordNo() == 5).collect(Collectors.toList());
 		
 		if(!no1.isEmpty() || !no2.isEmpty() || !noOthers.isEmpty()){
 			List<RecordWorkInfoFunAdapterDto> recordWorkInfo = recordWorkInfoFunAdapter.findByPeriodOrderByYmdAndEmps(empIds, new DatePeriod(period.getStartDate(), period.getEndDate()));
@@ -356,7 +357,7 @@ public class DailyAggregationProcessService {
 							});
 						}
 						if(!no2.isEmpty() && rw.getWorkTimeCode() != null) {
-							if(workTimes.containsKey(rw.getWorkTimeCode())) {
+							if(!workTimes.containsKey(rw.getWorkTimeCode())) {
 								String KAL010_9 = TextResource.localize("KAL010_9", rw.getWorkTimeCode());
 								no2.stream().forEach(fixed -> {
 									listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(ErAlConstant.DATE_FORMAT),

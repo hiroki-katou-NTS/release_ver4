@@ -237,11 +237,9 @@ public class RecoveryStorageService {
 				// -- Tổng hợp ID Nhân viên duy nhất từ List Data
 				hashId.addAll(listSid);
 
-				if (listSid.size() > 1) {
-					DataRecoveryTable targetData = new DataRecoveryTable(uploadId,
-							tableListByCategory.getTables().get(j).getInternalFileName());
-					targetDataByCate.add(targetData);
-				}
+				DataRecoveryTable targetData = new DataRecoveryTable(uploadId,
+						tableListByCategory.getTables().get(j).getInternalFileName());
+				targetDataByCate.add(targetData);
 			}
 
 			// 対象社員コード＿ID
@@ -264,9 +262,17 @@ public class RecoveryStorageService {
 				}
 			}
 			// - end
-
+			
 			// check employeeId in Target of PreformDataRecovery
 			List<Target> listTarget = performDataRecoveryRepository.findByDataRecoveryId(dataRecoveryProcessId);
+						
+			// trường hợp list nhân viên tổng hợp từ các file excel băng null.
+			// thì lấy list nhân viên từ màn hình truyền lên.
+			if (hashId.isEmpty()) {
+				employeeInfos = listTarget.stream().map(i -> {
+					return new EmployeeDataReInfoImport(null, null, i.getSid(), i.getScd().orElse(""), null, null,null);
+				}).collect(Collectors.toList());
+			}
 
 			Optional<PerformDataRecovery> performDataRecovery = performDataRecoveryRepository
 					.getPerformDatRecoverById(dataRecoveryProcessId);
@@ -303,6 +309,7 @@ public class RecoveryStorageService {
 			String filePath = getExtractDataStoragePath(targetDataByCate.get(i).getUploadId()) + "//"
 					+ targetDataByCate.get(i).getFileNameCsv() + ".csv";
 			CSVBufferReader reader = new CSVBufferReader(new File(filePath));
+			reader.setCharset("Shift_JIS");
 			csvByteReadMaper.put(targetDataByCate.get(i).getFileNameCsv(), reader);
 		}
 
@@ -370,7 +377,7 @@ public class RecoveryStorageService {
 			// 履歴区分の判別する - check history division
 			if (tableList.isPresent() && tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY) {
 				try {
-					deleteEmployeeHistory(tableList, true, employeeId);
+					// deleteEmployeeHistory(tableList, true, employeeId);
 				} catch (Exception e) {
 					LOGGER.error("SQL error rollBack transaction");
 					throw new Exception(SQL_EXCEPTION);
@@ -421,6 +428,7 @@ public class RecoveryStorageService {
 			System.out.println("============= employeeId " + employeeId);
 			if (employeeId != null) {
 				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
+				reader.setCharset("Shift_JIS");
 				reader.readFilter(1000, dataRow -> {
 
 					List<NtsCsvRecord> records = dataRow.getRecords();
@@ -430,6 +438,7 @@ public class RecoveryStorageService {
 
 						long startTime = System.nanoTime();
 
+						StringBuilder DELETE_INSERT_TO_TABLE = new StringBuilder("");
 						StringBuilder INSERT_TO_TABLE = new StringBuilder("");
 
 						List<Integer> listCount = new ArrayList<>();
@@ -466,126 +475,125 @@ public class RecoveryStorageService {
 
 							NtsCsvRecord row = records.get(k);
 
-							if (row.getRowNumber() != 1) {
-								int indexCidOfCsv = 0;
-								int count = 0;
+							int indexCidOfCsv = 0;
+							int count = 0;
 
-								// データベース復旧処理
-								if ((tableUse && employeeId != null && !row.getColumn(INDEX_SID).equals(employeeId))) {
+							// データベース復旧処理
+							if ((tableUse && employeeId != null && !row.getColumn(INDEX_SID).equals(employeeId))) {
+								continue;
+							}
+
+							// set câu insert
+							StringBuilder INSERT_BY_TABLE = new StringBuilder("INSERT INTO ");
+
+							INSERT_BY_TABLE.append(TABLE_NAME);
+							INSERT_BY_TABLE.append(" (");
+
+							StringBuilder values = new StringBuilder(" VALUES (");
+							//
+
+							String V_FILED_KEY_UPDATE = null, h_Date_Csv = null, dateSub = "";
+
+							if (resultsSetting.size() == 1) {
+								h_Date_Csv = row.getColumn(INDEX_H_DATE).toString();
+							} else if (resultsSetting.size() == 2) {
+								h_Date_Csv = row.getColumn(INDEX_H_START_DATE).toString();
+							}
+
+							// 履歴区分を判別する - check history division
+							try {
+								if (((tableUse && tableList.get().getHistoryCls() == HistoryDiviSion.NO_HISTORY) || !tableUse)
+									&& (performDataRecovery.isPresent() && performDataRecovery.get().getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
+									&& tableList.get().getRetentionPeriodCls() != TimeStore.FULL_TIME
+									&& !checkSettingDate(resultsSetting, tableList, h_Date_Csv))) {
 									continue;
 								}
+							} catch (ParseException e1) {
+								e1.printStackTrace();
+							}
 
-								// set câu insert
-								StringBuilder INSERT_BY_TABLE = new StringBuilder("INSERT INTO ");
-
-								INSERT_BY_TABLE.append(TABLE_NAME);
-								INSERT_BY_TABLE.append(" (");
-
-								StringBuilder values = new StringBuilder(" VALUES (");
-								//
-
-								String V_FILED_KEY_UPDATE = null, h_Date_Csv = null, dateSub = "";
-
-								if (resultsSetting.size() == 1) {
-									h_Date_Csv = row.getColumn(INDEX_H_DATE).toString();
-								} else if (resultsSetting.size() == 2) {
-									h_Date_Csv = row.getColumn(INDEX_H_START_DATE).toString();
-								}
-
-								// 履歴区分を判別する - check history division
-								try {
-									if (((tableUse && tableList.get().getHistoryCls() == HistoryDiviSion.NO_HISTORY)
-											|| !tableUse)
-											&& (performDataRecovery.isPresent()
-													&& performDataRecovery.get()
-															.getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
-													&& tableList.get().getRetentionPeriodCls() != TimeStore.FULL_TIME
-													&& !checkSettingDate(resultsSetting, tableList, h_Date_Csv))) {
-										continue;
-									}
-								} catch (ParseException e1) {
-									e1.printStackTrace();
-								}
-
-								// update recovery date for have history, save
-								// range
-								// none, year,
-								// year/month, year/month/day
-								if (!h_Date_Csv.isEmpty()) {
-									if (tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY && tableUse)
-										dateSub = dateTimeCutter(YEAR_MONTH_DAY, h_Date_Csv).orElse("");
-									if (tableList.get().getRetentionPeriodCls() == TimeStore.FULL_TIME) {
-										dateSub = "";
-									}
-
-									dateSub = dateTimeCutter(resultsSetting.get(0), h_Date_Csv).orElse("");
-								} else {
+							// update recovery date for have history, save
+							// range
+							// none, year,
+							// year/month, year/month/day
+							if (!h_Date_Csv.isEmpty()) {
+								if (tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY && tableUse)
+									dateSub = dateTimeCutter(YEAR_MONTH_DAY, h_Date_Csv).orElse("");
+								if (tableList.get().getRetentionPeriodCls() == TimeStore.FULL_TIME) {
 									dateSub = "";
 								}
 
-								dataRecoveryMngRepository.updateRecoveryDate(dataRecoveryProcessId, dateSub);
-
-								// create filed where for query
-								Map<String, String> filedWhere = new HashMap<>();
-								for (Map.Entry<Integer, String> entry : indexAndFiled.entrySet()) {
-									V_FILED_KEY_UPDATE = row.getColumn(entry.getKey()).toString();
-									filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
-								}
-								listFiledWhere.add(filedWhere);
-
-								if (tableUse) {
-									count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(
-											filedWhere, TABLE_NAME, namePhysicalCid, cidCurrent);
-								} else {
-									count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere,
-											TABLE_NAME, namePhysicalCid, cidCurrent);
-								}
-
-								if (count > 1 && tableUse) {
-									listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
-								} else if (count > 1 && !tableUse) {
-									continue;
-								}
-
-								indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
-
-								for (int j = 5; j < row.columnLength(); j++) {
-
-									// add columns name
-									INSERT_BY_TABLE.append(targetDataHeader.get(j) + ", ");
-									boolean anyNonEmpty = columnNotNull.stream()
-											.anyMatch(x -> x.equals(targetDataHeader));
-									String value = j == indexCidOfCsv ? cidCurrent : row.getColumn(j).toString();
-									// add values
-									if (StringUtils.isEmpty(value)) {
-										if (anyNonEmpty) {
-											values.append("'',");
-										} else {
-											values.append("null,");
-										}
-									} else {
-										values.append("'" + value + "',");
-									}
-								}
-
-								INSERT_BY_TABLE.append(")");
-								INSERT_BY_TABLE.append(values.toString().replaceAll(",$", ")"));
-
-								// query.executeUpdate();
-								INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
-								listCount.add(count);
-								check++;
+								dateSub = dateTimeCutter(resultsSetting.get(0), h_Date_Csv).orElse("");
+							} else {
+								dateSub = "";
 							}
+
+							dataRecoveryMngRepository.updateRecoveryDate(dataRecoveryProcessId, dateSub);
+
+							// create filed where for query
+							Map<String, String> filedWhere = new HashMap<>();
+							for (Map.Entry<Integer, String> entry : indexAndFiled.entrySet()) {
+								V_FILED_KEY_UPDATE = row.getColumn(entry.getKey()).toString();
+								filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
+							}
+							listFiledWhere.add(filedWhere);
+
+							if (tableUse) {
+								count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(filedWhere,
+										TABLE_NAME, namePhysicalCid, cidCurrent);
+							} else {
+								count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere, TABLE_NAME,
+										namePhysicalCid, cidCurrent);
+							}
+
+							if (count > 1 && tableUse) {
+								listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
+							} else if (count > 1 && !tableUse) {
+								continue;
+							}
+
+							indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
+
+							for (int j = 5; j < row.columnLength(); j++) {
+
+								// add columns name
+								INSERT_BY_TABLE.append(targetDataHeader.get(j) + ", ");
+								boolean anyNonEmpty = columnNotNull.stream().anyMatch(x -> x.equals(targetDataHeader));
+								String value = j == indexCidOfCsv ? cidCurrent : row.getColumn(j).toString();
+								// add values
+								if (StringUtils.isEmpty(value)) {
+									if (anyNonEmpty) {
+										values.append("'',");
+									} else {
+										values.append("null,");
+									}
+								} else {
+									values.append("'" + value + "',");
+								}
+							}
+
+							INSERT_BY_TABLE.append(")");
+							INSERT_BY_TABLE.append(values.toString().replaceAll(",$", ")"));
+
+							// query.executeUpdate();
+							if (count == 1) {
+								DELETE_INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+							} else if (count == 0) {
+								INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+							}
+							
+							listCount.add(count);
+							check++;
 						}
 
 						// insert delete data
 						if (check > 0) {
 							if (tableUse) {
 								crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										INSERT_TO_TABLE);
+										DELETE_INSERT_TO_TABLE , INSERT_TO_TABLE);
 							} else {
 								crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										INSERT_TO_TABLE);
+										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
 							}
 						}
 						long endTime = System.nanoTime();
@@ -605,6 +613,7 @@ public class RecoveryStorageService {
 
 						long startTime = System.nanoTime();
 
+						StringBuilder DELETE_INSERT_TO_TABLE = new StringBuilder("");
 						StringBuilder INSERT_TO_TABLE = new StringBuilder("");
 
 						List<Integer> listCount = new ArrayList<>();
@@ -669,14 +678,11 @@ public class RecoveryStorageService {
 
 								// 履歴区分を判別する - check history division
 								try {
-									if (((tableUse && tableList.get().getHistoryCls() == HistoryDiviSion.NO_HISTORY)
-											|| !tableUse)
-											&& (performDataRecovery.isPresent()
-													&& performDataRecovery.get()
-															.getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
-													&& tableList.get().getRetentionPeriodCls() != TimeStore.FULL_TIME
-													&& !checkSettingDate(resultsSetting, tableList, h_Date_Csv))) {
-										continue;
+									if (((tableUse && tableList.get().getHistoryCls() == HistoryDiviSion.NO_HISTORY) || !tableUse)
+										&& (performDataRecovery.isPresent() && performDataRecovery.get() .getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
+										&& tableList.get().getRetentionPeriodCls() != TimeStore.FULL_TIME
+										&& !checkSettingDate(resultsSetting, tableList, h_Date_Csv))) {
+												continue;
 									}
 								} catch (ParseException e1) {
 									e1.printStackTrace();
@@ -747,7 +753,12 @@ public class RecoveryStorageService {
 								INSERT_BY_TABLE.append(values.toString().replaceAll(",$", ")"));
 
 								// query.executeUpdate();
-								INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+								if(count == 1) {
+									DELETE_INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+								}else if(count == 0) {
+									INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+								}
+								
 								listCount.add(count);
 								check++;
 							}
@@ -757,10 +768,10 @@ public class RecoveryStorageService {
 						if (check > 0) {
 							if (tableUse) {
 								crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										INSERT_TO_TABLE);
+										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
 							} else {
 								crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										INSERT_TO_TABLE);
+										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
 							}
 						}
 						long endTime = System.nanoTime();
@@ -770,6 +781,7 @@ public class RecoveryStorageService {
 				};
 
 				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
+				reader.setCharset("Shift_JIS");
 				reader.readChunk(csvResult, null, null);
 			}
 		} catch (Exception e) {
@@ -839,6 +851,7 @@ public class RecoveryStorageService {
 		String filePath = getExtractDataStoragePath(dataRecoveryTable.getUploadId()) + "//"
 				+ dataRecoveryTable.getFileNameCsv() + ".csv";
 		CSVBufferReader reader = new CSVBufferReader(new File(filePath));
+		reader.setCharset("Shift_JIS");
 		csvByteReadMaper.put(dataRecoveryTable.getFileNameCsv(), reader);
 
 		if (tableList.isPresent()) {
@@ -846,7 +859,7 @@ public class RecoveryStorageService {
 			// 履歴区分の判別する - check phân loại lịch sử
 			if (tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY) {
 				try {
-					deleteEmployeeHistory(tableList, false, null);
+					//deleteEmployeeHistory(tableList, false, null);
 				} catch (Exception e) {
 					LOGGER.info("Delete data of employee have history error");
 				}
@@ -870,20 +883,30 @@ public class RecoveryStorageService {
 	}
 
 	public void crudRow(List<Integer> listCount, List<Map<String, String>> lsiFiledWhere, String TABLE_NAME,
-			String namePhysicalCid, String cidCurrent, StringBuilder insertToTable) {
+			String namePhysicalCid, String cidCurrent, StringBuilder deleteInsertToTable, StringBuilder insertToTable) {
 		try {
-			List<Map<String, String>> lsiFiledWhere2 = new ArrayList<>();
+			List<Map<String, String>> listFiledWhereToDelAndInsert = new ArrayList<>();
+			List<Map<String, String>> listFiledWhereToInsert = new ArrayList<>();
 			for (int i = 0; i < listCount.size(); i++) {
 				if (listCount.get(i) == 1) {
-					lsiFiledWhere2.add(lsiFiledWhere.get(i));
+					listFiledWhereToDelAndInsert.add(lsiFiledWhere.get(i));
+				}else if(listCount.get(i) == 0){
+					listFiledWhereToInsert.add(lsiFiledWhere.get(i));
 				}
 			}
-			if (lsiFiledWhere2.size() > 0) {
-				performDataRecoveryRepository.deleteDataExitTableByVkey(lsiFiledWhere2, TABLE_NAME, namePhysicalCid,
+			if (listFiledWhereToDelAndInsert.size() > 0) {
+				// truong hop ban ghi do van con ton tai trong database : thi xoa di va insert lai
+				performDataRecoveryRepository.deleteDataExitTableByVkey(listFiledWhereToDelAndInsert, TABLE_NAME, namePhysicalCid,
 						cidCurrent);
 
+				performDataRecoveryRepository.insertDataTable(deleteInsertToTable);
+			} 
+			
+			if(listFiledWhereToInsert.size() > 0){
+				// truowng hop ban ghi do bi xoa di roi : thi chỉ cần insert vào thôi.
 				performDataRecoveryRepository.insertDataTable(insertToTable);
 			}
+			
 
 		} catch (Exception e) {
 			LOGGER.info("Error delete data for table " + TABLE_NAME);
@@ -892,18 +915,26 @@ public class RecoveryStorageService {
 	}
 
 	public void crudRowTransaction(List<Integer> listCount, List<Map<String, String>> lsiFiledWhere, String TABLE_NAME,
-			String namePhysicalCid, String cidCurrent, StringBuilder insertToTable) {
+			String namePhysicalCid, String cidCurrent, StringBuilder deleteInsertToTable, StringBuilder insertToTable) {
 		try {
-			List<Map<String, String>> lsiFiledWhere2 = new ArrayList<>();
+			List<Map<String, String>> listFiledWhereToDelAndInsert = new ArrayList<>();
+			List<Map<String, String>> listFiledWhereToInsert = new ArrayList<>();
 			for (int i = 0; i < listCount.size(); i++) {
 				if (listCount.get(i) == 1) {
-					lsiFiledWhere2.add(lsiFiledWhere.get(i));
+					listFiledWhereToDelAndInsert.add(lsiFiledWhere.get(i));
+				}else if(listCount.get(i) == 0){
+					listFiledWhereToInsert.add(lsiFiledWhere.get(i));
 				}
 			}
-			if (lsiFiledWhere2.size() > 0) {
-				performDataRecoveryRepository.deleteTransactionDataExitTableByVkey(lsiFiledWhere2, TABLE_NAME,
+			if (listFiledWhereToDelAndInsert.size() > 0) {
+				// truong hop ban ghi do van con ton tai trong database : thi xoa di va insert lai
+				performDataRecoveryRepository.deleteTransactionDataExitTableByVkey(listFiledWhereToDelAndInsert, TABLE_NAME,
 						namePhysicalCid, cidCurrent);
 
+				performDataRecoveryRepository.insertTransactionDataTable(deleteInsertToTable);
+			}
+			if(listFiledWhereToInsert.size() > 0){
+				
 				performDataRecoveryRepository.insertTransactionDataTable(insertToTable);
 			}
 
