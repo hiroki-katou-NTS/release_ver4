@@ -2455,13 +2455,12 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			DateTimeFormatter jpFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd (E)", Locale.JAPAN);
 			String date = dailyReportData.getDate().toLocalDate().format(jpFormatter);
 			String titleDate = WorkScheOutputConstants.DATE_BRACKET +"　"+ date;
-			this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
+            currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
 			
 //			// B3_2
 //			Cell dateCell = cells.get(currentRow, 2);
 //			dateCell.setValue(date);
-			
-			currentRow++;
+
 			
 			currentRow = writeDailyDetailedPerformanceDataOnWorkplace(currentRow, sheetInfo, templateSheetCollection, rootWorkplace, dataRowCount, condition, rowPageTracker, titleDate);
 		

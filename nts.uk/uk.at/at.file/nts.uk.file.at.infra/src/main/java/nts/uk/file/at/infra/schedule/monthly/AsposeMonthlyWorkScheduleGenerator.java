@@ -2280,11 +2280,14 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		// Workplace total, root workplace use gross total instead
 		if (condition.getTotalOutputSetting().isWorkplaceTotal() && rootWorkplace.getLevel() != 0 && employeeReportData != null && !employeeReportData.isEmpty()) {
 			if (rowPageTracker.checkRemainingRowSufficient(dataRowCount) <= 0) {
+                rowPageTracker.resetRemainingRow();
 				if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
 					cells = sheetInfo.getSheet().getCells();
 					currentRow = sheetInfo.getStartDataIndex();
+                    currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
+                    currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
+                    rowPageTracker.useRemainingRow(2);
 				}
-				rowPageTracker.resetRemainingRow();
 			}
 			Range workplaceTotalTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_TOTAL_ROW + dataRowCount);
 			Range workplaceTotal = cells.createRange(currentRow, 0, dataRowCount, DATA_COLUMN_INDEX[5]);
@@ -2359,11 +2362,14 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 					level = (int) levelIterator.next();
 				if (!settingTotalHierarchy.checkLevelEnabled(level)) break;
 				if (rowPageTracker.checkRemainingRowSufficient(dataRowCount) <= 0) {
+                    rowPageTracker.resetRemainingRow();
 					if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
 						cells = sheetInfo.getSheet().getCells();
 						currentRow = sheetInfo.getStartDataIndex();
+                        currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
+                        currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
+                        rowPageTracker.useRemainingRow(2);
 					}
-					rowPageTracker.resetRemainingRow();
 				}
 				Range wkpHierTotalRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_TOTAL_ROW + dataRowCount);
 				Range wkpHierTotalRange = cells.createRange(currentRow, 0, dataRowCount, DATA_COLUMN_INDEX[5]);
