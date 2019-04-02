@@ -2284,10 +2284,10 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 				if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
 					cells = sheetInfo.getSheet().getCells();
 					currentRow = sheetInfo.getStartDataIndex();
-                    currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
-                    currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
-                    rowPageTracker.useRemainingRow(2);
 				}
+                currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
+                currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
+                rowPageTracker.useRemainingRow(2);
 			}
 			Range workplaceTotalTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_TOTAL_ROW + dataRowCount);
 			Range workplaceTotal = cells.createRange(currentRow, 0, dataRowCount, DATA_COLUMN_INDEX[5]);
@@ -2366,10 +2366,10 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 					if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
 						cells = sheetInfo.getSheet().getCells();
 						currentRow = sheetInfo.getStartDataIndex();
-                        currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
-                        currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
-                        rowPageTracker.useRemainingRow(2);
 					}
+                    currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
+                    currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
+                    rowPageTracker.useRemainingRow(2);
 				}
 				Range wkpHierTotalRangeTemp = templateSheetCollection.getRangeByName(WorkScheOutputConstants.RANGE_TOTAL_ROW + dataRowCount);
 				Range wkpHierTotalRange = cells.createRange(currentRow, 0, dataRowCount, DATA_COLUMN_INDEX[5]);
