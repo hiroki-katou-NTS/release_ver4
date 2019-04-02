@@ -3459,6 +3459,7 @@ var nts;
                     .mergeRelativePath(request.WEB_APP_NAME[webAppId] + '/')
                     .mergeRelativePath(location.ajaxRootDir)
                     .mergeRelativePath(path);
+                var countRetryByDeadLock = 0;
                 function ajaxFunc() {
                     $.ajax({
                         type: options.method || 'POST',
@@ -3481,6 +3482,12 @@ var nts;
                             dfd.resolve(res);
                         }
                     }).fail(function (jqXHR, textStatus, errorThrown) {
+                        // デッドロックの場合、待機時間を少しずつ増やしながらリトライ（とりあえず10回までとする）
+                        if (jqXHR.responseJSON && jqXHR.responseJSON.deadLock === true && countRetryByDeadLock < 10) {
+                            countRetryByDeadLock++;
+                            setTimeout(ajaxFunc, 300 + countRetryByDeadLock * 100);
+                            return;
+                        }
                         AjaxErrorHandlers.main(jqXHR, textStatus, errorThrown);
                     });
                 }
@@ -18606,6 +18613,7 @@ var nts;
                                 _.defer(function () { $grid.trigger("selectChange"); });
                             }
                         }
+                        _.defer(function () { $grid.ntsGridList("scrollToSelected"); });
                         $grid.data("ui-changed", false);
                         $grid.closest('.ui-iggrid').addClass('nts-gridlist').height($grid.data("height")).attr("tabindex", $grid.data("tabindex"));
                     };
@@ -30243,6 +30251,26 @@ var nts;
                                 return setupDeleteButton($grid, param);
                             case 'setupScrollWhenBinding':
                                 return setupScrollWhenBinding($grid);
+                            case 'scrollToSelected':
+                                return scrollToSelect($grid);
+                        }
+                    }
+                    function scrollToSelect($grid) {
+                        var row = null;
+                        var selectedRows = $grid.igGrid("selectedRows");
+                        if (selectedRows) {
+                            row = selectedRows[0];
+                        }
+                        else {
+                            row = $grid.igGrid("selectedRow");
+                        }
+                        if (row) {
+                            if ($grid.igGrid("option", "virtualization") === true) {
+                                ui.ig.grid.virtual.expose(row, $grid);
+                            }
+                            else {
+                                ui.ig.grid.expose(row, $grid);
+                            }
                         }
                     }
                     function setupScrollWhenBinding($grid) {

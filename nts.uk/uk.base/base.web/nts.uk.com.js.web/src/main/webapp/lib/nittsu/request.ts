@@ -186,6 +186,8 @@ module nts.uk.request {
             .mergeRelativePath(location.ajaxRootDir)
             .mergeRelativePath(path);
         
+        var countRetryByDeadLock = 0;
+        
         function ajaxFunc() {
             $.ajax({
                 type: options.method || 'POST',
@@ -206,6 +208,12 @@ module nts.uk.request {
                     dfd.resolve(res);
                 }
             }).fail(function (jqXHR, textStatus, errorThrown) {
+                // デッドロックの場合、待機時間を少しずつ増やしながらリトライ（とりあえず10回までとする）
+                if (jqXHR.responseJSON && jqXHR.responseJSON.deadLock === true && countRetryByDeadLock < 10) {
+                    countRetryByDeadLock++;
+                    setTimeout(ajaxFunc, 300 + countRetryByDeadLock * 100);
+                    return;
+                }
                 AjaxErrorHandlers.main(jqXHR, textStatus, errorThrown);
             });
         }
