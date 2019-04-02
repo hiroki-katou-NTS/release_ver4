@@ -2664,10 +2664,10 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
                     if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
                         cells = sheetInfo.getSheet().getCells();
                         currentRow = sheetInfo.getStartDataIndex();
-                        currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
-                        currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
-                        rowPageTracker.useRemainingRow(2);
                     }
+                    currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
+                    currentRow = this.printWorkplace(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
+                    rowPageTracker.useRemainingRow(2);
 		        }
 			}
 		}
