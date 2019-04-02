@@ -8,24 +8,24 @@
 	<ui:composition>
 	
 		<div style="display: inline-block;">
-			<div class="valign-center control-group">
+			<div class="valign-center control-group-kaf004">
 				<div class="text_form_label" data-bind="ntsFormLabel: {}">#{i18n.getText('KAF004_11')}</div>
 				<label   data-bind="text: applicantName"></label>
 			</div>
-			<div class="valign-center control-group">
+			<div class="valign-center control-group-kaf004">
 				<div  class="text_form_label" data-bind="ntsFormLabel: {}">#{i18n.getText('KAF004_29')}</div>
 				<label  data-bind="text: postAtr() == 0 ? '#{i18n.getText('KAF004_30')}' : '#{i18n.getText('KAF004_31')}'">事前</label>
 			</div>
-			<div class="valign-center control-group" data-bind="visible: showScreen() == 'F'">
+			<div class="valign-center control-group-kaf004" data-bind="visible: showScreen() == 'F'">
 				<div  class="text_form_label" data-bind="ntsFormLabel: {}">#{i18n.getText('KAF004_34')}</div>
 				<label  data-bind="text: actualCancelType"></label>
 			</div>
-			<div class="valign-center control-group">
+			<div class="valign-center control-group-kaf004">
 				<div  class="text_form_label" data-bind="ntsFormLabel: { required: true}" >#{i18n.getText('KAF004_12')}</div>
 				<label data-bind="text:date"></label>
 			</div>
 			
-			<div class="valign-center control-group">
+			<div class="valign-center control-group-kaf004">
 				<div data-bind="visible: showScreen() != 'F'" style="display: inline-block; vertical-align: top;">
 					<div  class="text_form_label" data-bind="ntsFormLabel: { required: true}" >#{i18n.getText('KAF004_13')}</div>
 				</div>
@@ -34,7 +34,7 @@
 				</div>
 				<div style="display: inline-block; ">
 					<com:ko-if bind="showScreen() == 'F'">
-						<div class="valign-center control-group row 004e-div" style="margin-left: 5px;">
+						<div class="valign-center control-group-kaf004 row 004e-div" style="margin-left: 5px;">
 							<!-- 	fix cứng time -->
 							<label  class="text_form_label" data-bind="ntsFormLabel: {}" >#{i18n.getText('KAF004_21')}</label>
 							<label style="margin-left: 15px; ">08:30　 ～　12:00</label>
@@ -46,7 +46,7 @@
 							<br/>
 						</div>
 					</com:ko-if>
-					<div class="valign-center control-group row4 004e-div"
+					<div class="valign-center control-group-kaf004 row4 004e-div"
 						style="margin-top: 15px;">
 						<div class="time_div">
 							<div class="time_ckb" data-bind="ntsCheckBox: { checked: late1 }">#{i18n.getText('KAF004_14')}</div>
@@ -62,7 +62,7 @@
 						<label data-bind="ntsFormLabel: {text: txtearlyTime1}; visible: isLblTimeF" style="margin-right: 35px">1:00</label>
 						</div>
 					</div>
-					<div class="valign-center control-group row4 004e-div" style="margin-top: 20px;" data-bind="if: displayOrder() != 0">
+					<div class="valign-center control-group-kaf004 row4 004e-div" style="margin-top: 20px;" data-bind="if: displayOrder() != 0">
 					<div class="time_div">
 						<div class="time_ckb" data-bind="ntsCheckBox: { checked: late2 }">#{i18n.getText('KAF004_32')}</div>
 						<input class="col1"
@@ -79,7 +79,7 @@
 				</div>
 			</div>
 			<com:ko-if bind="appCommonSetting().appTypeDiscreteSetting().typicalReasonDisplayFlg()!=0">
-			<div class="valign-center control-group">
+			<div class="valign-center control-group-kaf004">
 				<div  class="text_form_label"  data-bind="ntsFormLabel: {}">#{i18n.getText('KAF004_17')}</div>
 				<div id="combo-box"
 					data-bind="ntsComboBox: {
@@ -98,7 +98,7 @@
 			</div>
 			</com:ko-if>
 			<com:ko-if bind="showReasonText() ">
-			<div class="valign-center control-group">
+			<div class="valign-center control-group-kaf004">
 				<div  class="text_form_label" data-bind="ntsFormLabel: {}">#{i18n.getText('KAF004_18')}</div>
 				
 					<textarea id="appReason" style="height: 85px;"

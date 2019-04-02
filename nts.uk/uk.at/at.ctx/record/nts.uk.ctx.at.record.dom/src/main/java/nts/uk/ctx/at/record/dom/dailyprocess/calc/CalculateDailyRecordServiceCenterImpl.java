@@ -181,22 +181,6 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 									  Optional.empty(),
 									  companySet,
 									  Collections.emptyList()).getLst();
-		/*ログ差し込み*/
-		org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-		log.info("return 直前です。");
-		for(IntegrationOfDaily integration : result.stream().map(ts -> ts.getIntegrationOfDaily()).collect(Collectors.toList())) {
-			if(integration.getAttendanceTimeOfDailyPerformance() != null
-			&& integration.getAttendanceTimeOfDailyPerformance().isPresent()
-			&& integration.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork() != null
-			&& integration.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().isPresent()) {
-				for(OverTimeFrameTime otFrame : integration.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get().getOverTimeWorkFrameTime()) {
-					log.info("枠Ｎｏ："+otFrame.getOverWorkFrameNo());
-					log.info("残業時間："+otFrame.getOverTimeWork().getTime());
-					log.info("計算残業時間："+otFrame.getOverTimeWork().getCalcTime());
-				}
-			}
-		}
-		/*ログ差し込み*/
 		return result.stream().map(ts -> ts.getIntegrationOfDaily()).collect(Collectors.toList()); 
 	}
 	

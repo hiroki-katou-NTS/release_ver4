@@ -211,7 +211,7 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 														boolean late,  //日別実績の計算区分.遅刻早退の自動計算設定.遅刻
 														boolean leaveEarly,  //日別実績の計算区分.遅刻早退の自動計算設定.早退
 														HolidayCalcMethodSet holidayCalcMethodSet,
-														nts.uk.ctx.at.shared.dom.PremiumAtr premiumAtr,Optional<WorkTimezoneCommonSet> commonSetting
+														PremiumAtr premiumAtr,Optional<WorkTimezoneCommonSet> commonSetting
 														) {
 		//就業時間の計算
 		AttendanceTime actualTime = calcActualTime(holidayCalcMethodSet,premiumAtr);
@@ -485,11 +485,11 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
   		if(lateDesClock.isPresent()) {//←のifはフレックスの最低勤務時間利用の場合に下記処理を走らせたくない為追加
   	  		if(holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()) {
   	   				
-  	   				TimeWithDayAttr test1 = dupTimeSheet.getTimezone().getStart();//predetermineTimeForSet.getTimeSheets(workType.getAttendanceHolidayAttr(), workNo).get().getStart();
+  	   				TimeWithDayAttr startTime = dupTimeSheet.getTimezone().getStart();//predetermineTimeForSet.getTimeSheets(workType.getAttendanceHolidayAttr(), workNo).get().getStart();
   	   				if(coreTimeSetting.isPresent()&&coreTimeSetting.get().isUseTimeSheet()) {	   				
-  	   					test1 = getDecisionCoreTimeSheet(predetermineTimeForSet,coreTimeSetting.get(),workType).getStartTime();
-  	   					if(test1.greaterThan(dupTimeSheet.getTimezone().getStart())) {
-  	   						test1 = dupTimeSheet.getTimezone().getStart();
+  	   					startTime = getDecisionCoreTimeSheet(predetermineTimeForSet,coreTimeSetting.get(),workType).getStartTime();
+  	   					if(startTime.greaterThan(dupTimeSheet.getTimezone().getStart())) {
+  	   						startTime = dupTimeSheet.getTimezone().getStart();
   	   					}
   	   				}
   	   				
@@ -498,7 +498,7 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
   	   																														   workTimezoneLateEarlySet.getOtherEmTimezoneLateEarlySet(LateEarlyAtr.LATE).getGraceTimeSet(),
   	   																														   commonSetting);
   	   				 //遅刻時間帯がそもそも存在しない　→　引数dupTimeSheetの開始をそのまま（現状維持)　控除しない場合　→　lateTimeのstart する場合　→lateTimeのEnd
-  	   				 TimeWithDayAttr startOclock = test1;
+  	   				 TimeWithDayAttr startOclock = startTime;
   	   				 if(lateTimeSheet.getForDeducationTimeSheet().isPresent() && isFirstIndex) {
   	   					 Optional<TimeWithDayAttr> correctStartOclock = deductProcessForLate(lateTimeSheet,breakTimeList,deductionTimeSheet,true);
   	   					 startOclock = isDeductLateTime && correctStartOclock.isPresent()? correctStartOclock.get()
@@ -531,11 +531,11 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
   		
   		if(leaveEarlyDesClock.isPresent()) {//←のifはフレックスの最低勤務時間利用の場合に下記処理を走らせたくない為追加
   	  		if(holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()) {
-  	  	  			TimeWithDayAttr test2 = dupTimeSheet.getTimezone().getEnd();//predetermineTimeForSet.getTimeSheets(workType.getAttendanceHolidayAttr(), workNo).get().getEnd();
+  	  	  			TimeWithDayAttr endTime = dupTimeSheet.getTimezone().getEnd();//predetermineTimeForSet.getTimeSheets(workType.getAttendanceHolidayAttr(), workNo).get().getEnd();
   	  	  			if(coreTimeSetting.isPresent()&&coreTimeSetting.get().isUseTimeSheet()) {	   				
-	   					test2 = getDecisionCoreTimeSheet(predetermineTimeForSet,coreTimeSetting.get(),workType).getEndTime();
-	   					if(test2.lessThan(dupTimeSheet.getTimezone().getEnd())) {
-	   						test2 = dupTimeSheet.getTimezone().getEnd();
+  	  	  			endTime = getDecisionCoreTimeSheet(predetermineTimeForSet,coreTimeSetting.get(),workType).getEndTime();
+	   					if(endTime.lessThan(dupTimeSheet.getTimezone().getEnd())) {
+	   						endTime = dupTimeSheet.getTimezone().getEnd();
 	   					}
 	   				}
   	  	  			//就業時間内時間帯から控除するか判断
@@ -544,7 +544,7 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
   	  	  																																				 commonSetting));
  	   				 
   	   				 //早退時間帯がそもそも存在しない　→　引数dupTimeSheetの終了をそのまま（現状維持)　控除しない場合　→　leaveearlyのend する場合　→ leaveEarlyのstart
-  	   				 TimeWithDayAttr endOclock = test2;
+  	   				 TimeWithDayAttr endOclock = endTime;
   	   				 if(LeaveEarlyTimeSheet.getForDeducationTimeSheet().isPresent() && isLastIndex) {
   	   					 Optional<TimeWithDayAttr> correctEndOclock = deductProcessForEarly(LeaveEarlyTimeSheet, breakTimeList, deductionTimeSheet, true);
   	   					 endOclock = isDeductLeaveEarly && correctEndOclock.isPresent() 
@@ -637,7 +637,7 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 	 * 遅刻早退を控除するかどうか判断
 	 * @return
 	 */
-	public boolean jugmentDeductLateEarly(nts.uk.ctx.at.shared.dom.PremiumAtr premiumAtr,HolidayCalcMethodSet holidayCalcMethodSet,Optional<WorkTimezoneCommonSet> commonSetting) {
+	public boolean jugmentDeductLateEarly(PremiumAtr premiumAtr,HolidayCalcMethodSet holidayCalcMethodSet,Optional<WorkTimezoneCommonSet> commonSetting) {
 		//就業の休暇の就業時間計算方法詳細．遅刻・早退を控除する
 //		NotUseAtr workTimeDeductLateLeaveEarly = holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()
 //																				?holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().getNotDeductLateLeaveEarly()

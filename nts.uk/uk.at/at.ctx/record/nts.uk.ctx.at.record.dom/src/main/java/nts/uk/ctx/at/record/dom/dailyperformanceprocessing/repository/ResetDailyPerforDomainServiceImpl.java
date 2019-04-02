@@ -138,6 +138,9 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 	
 	@Inject
 	private WorkingConditionService workingConditionService;
+	
+	@Inject
+	private ReflectStampDomainService reflectStampDomainServiceImpl;
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Override
@@ -383,12 +386,25 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							this.attendanceLeavingGateOfDailyRepo.removeByKey(employeeID, processingDate);
 							// 日別実績のPCログオン情報
 							this.pcLogOnInfoOfDailyRepo.removeByKey(employeeID, processingDate);
-
+							
+							// Watanabe want to edit
+							WorkStyle workStyle = basicScheduleService
+									.checkWorkDay(workInfoOfDailyPerformance.get().getRecordInfo().getWorkTypeCode().v());
+							
 							// 打刻を取得して反映する
-							stampOutput = this.reflectStampDomainService.reflectStampInfo(companyID, employeeID,
-									processingDate, workInfoOfDailyPerformanceUpdate, null, empCalAndSumExecLogID,
-									reCreateAttr, Optional.ofNullable(calAttrOfDailyPerformance),
-									affiliationInforOfDailyPerfor, Optional.empty());
+							
+							if (workStyle != WorkStyle.ONE_DAY_REST) {
+								stampOutput = this.reflectStampDomainService.reflectStampInfo(companyID, employeeID,
+										processingDate, workInfoOfDailyPerformanceUpdate, null, empCalAndSumExecLogID,
+										reCreateAttr, Optional.ofNullable(calAttrOfDailyPerformance),
+										affiliationInforOfDailyPerfor, Optional.empty());
+							}else {
+								 stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(companyID,
+										 employeeID, processingDate, workInfoOfDailyPerformance, null, empCalAndSumExecLogID, reCreateAttr,
+										 Optional.ofNullable(calAttrOfDailyPerformance),affiliationInforOfDailyPerfor, Optional.empty());
+							}
+							// ****
+							
 							if(stampOutput.getErrMesInfos().isEmpty()) {
 
 							DailyRecordToAttendanceItemConverter converter = attendanceItemConvertFactory
@@ -439,13 +455,11 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 									}								
 								}
 							}
-							
 							stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(converter2.timeLeaving().orElse(null));
 							stampOutput.getReflectStampOutput().setOutingTimeOfDailyPerformance(converter2.outingTime().orElse(null));
 							stampOutput.getReflectStampOutput().setTemporaryTimeOfDailyPerformance(converter2.temporaryTime().orElse(null));
 							stampOutput.getReflectStampOutput().setAttendanceLeavingGateOfDaily(converter2.attendanceLeavingGate().orElse(null));
 							stampOutput.getReflectStampOutput().setPcLogOnInfoOfDaily(converter2.pcLogInfo().orElse(null));
-							
 							// 社員の労働条件を取得する
 							Optional<WorkingConditionItem> workingConditionItem = this.workingConditionService.findWorkConditionByEmployee(employeeID, processingDate);
 							if(workingConditionItem.isPresent()){
@@ -454,10 +468,10 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 								TimeLeavingOfDailyPerformance timeLeavingOptionalResult = this.inforService.createStamp(companyID, workInfoOfDailyPerformanceUpdate, workingConditionItem, timeLeavingOptional, employeeID, processingDate, null);
 								stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(timeLeavingOptionalResult);
 							}
-							if(converter2.timeLeaving().isPresent()){
-							stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(converter2.timeLeaving().orElse(null));
-							}
 							
+							if(converter2.timeLeaving().isPresent()){
+								stampOutput.getReflectStampOutput().setTimeLeavingOfDailyPerformance(converter2.timeLeaving().orElse(null));
+								}
 							}
 							//---------------
 

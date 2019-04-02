@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -31,6 +32,9 @@ import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecordReposi
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.AlCheckTargetCondition;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.ErrorAlarmCondition;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.WorkRecordExtraConRepository;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.worktype.PlanActualWorkType;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.worktype.SingleWorkType;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.enums.FilterByCompare;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.otkcustomize.ContinuousHolCheckSet;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.otkcustomize.repo.ContinuousHolCheckSetRepo;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
@@ -167,36 +171,11 @@ public class ErAlWorkRecordCheckService {
 	public List<ErrorRecord> checkWithRecord(DatePeriod workingDate, Collection<String> employeeIds,
 			List<String> EACheckID) {
 		
-		List<ErrorAlarmCondition> checkConditions = getCheckConditions(EACheckID);
-		
-		if(checkConditions.isEmpty()){
-			return toEmptyResultList();
-		}
-		
-//		List<EmployeeSearchInfoDto> employees = this.filterAllEmployees(workingDate, employeeIds);
-//		
-		if(employeeIds.isEmpty()){
-			return toEmptyResultList();
-		}
-		
 		List<DailyRecordDto> record = fullFinder.find(new ArrayList<>(employeeIds), workingDate);
 			
 		if(record.isEmpty()){
 			return toEmptyResultList();
 		}
-		
-		return workingDate.datesBetween().stream().map(current -> {
-			List<DailyRecordDto> cdRecors = record.stream().filter(r -> r.workingDate().equals(current)).collect(Collectors.toList());
-			if (!cdRecors.isEmpty()) {
-				return checkConditions.stream().map(c -> {
-					return finalCheck(current, c, cdRecors, employeeIds);
-				}).flatMap(List::stream).collect(Collectors.toList());
-			}
-			return new ArrayList<ErrorRecord>();
-		}).flatMap(List::stream).collect(Collectors.toList());
-	}
-
-	private List<ErrorAlarmCondition> getCheckConditions(List<String> EACheckID) {
 		List<ErrorAlarmCondition> checkConditions = errorRecordRepo.findConditionByListErrorAlamCheckId(EACheckID);
 		if(checkConditions.isEmpty()){
 			EACheckID = workRecordExtraRepo.getAllWorkRecordExtraConByListID(EACheckID).stream()
@@ -205,8 +184,59 @@ public class ErAlWorkRecordCheckService {
 				return toEmptyResultList();
 			}
 			checkConditions = errorAlarmConditionRepo.findConditionByListErrorAlamCheckId(EACheckID);
+			return checkWithPeriod(workingDate, employeeIds, record, checkConditions, (currentRecord, condition) -> {
+				//勤務種類でフィルタする
+				if(condition.getWorkTypeCondition() != null) {
+					if(condition.getWorkTypeCondition() instanceof SingleWorkType) {
+						SingleWorkType wtConCheck = (SingleWorkType) condition.getWorkTypeCondition();
+						switch (wtConCheck.getComparePlanAndActual().value) {
+						case 0:/** 全て */
+							break;
+						case 1:/** 選択 */
+							currentRecord.removeIf(cr -> !wtConCheck.getTargetWorkType().getLstWorkType().contains(new WorkTypeCode(cr.getWorkInfo().getActualWorkInfo().getWorkTypeCode())));
+							break;
+						case 2:/** 選択以外 */
+							currentRecord.removeIf(cr -> wtConCheck.getTargetWorkType().getLstWorkType().contains(new WorkTypeCode(cr.getWorkInfo().getActualWorkInfo().getWorkTypeCode())));
+							break;
+						}
+					} else {
+						PlanActualWorkType wtConCheck = (PlanActualWorkType) condition.getWorkTypeCondition();
+						switch (wtConCheck.getComparePlanAndActual().value) {
+						case 0:/** 全て */
+							break;
+						case 1:/** 選択 */
+							currentRecord.removeIf(cr -> !wtConCheck.getWorkTypePlan().getLstWorkType().contains(new WorkTypeCode(cr.getWorkInfo().getActualWorkInfo().getWorkTypeCode())));
+							break;
+						case 2:/** 選択以外 */
+							currentRecord.removeIf(cr -> wtConCheck.getWorkTypePlan().getLstWorkType().contains(new WorkTypeCode(cr.getWorkInfo().getActualWorkInfo().getWorkTypeCode())));
+							break;
+						}
+					}
+					ErrorAlarmCondition condition2 = ErrorAlarmCondition.init();
+					condition2.referenceTo(condition);
+					condition2.createWorkTypeCondition(false, 1);
+					return condition2;
+				}
+				return condition;
+			});
+		} else {
+			return checkWithPeriod(workingDate, employeeIds, record, checkConditions, (currentRecord, condition) -> condition);
 		}
-		return checkConditions;
+	}
+
+	private List<ErrorRecord> checkWithPeriod(DatePeriod workingDate, Collection<String> employeeIds,
+			List<DailyRecordDto> record, List<ErrorAlarmCondition> checkConditions, 
+			BiFunction<List<DailyRecordDto>, ErrorAlarmCondition, ErrorAlarmCondition> beforeCheck) {
+		return workingDate.datesBetween().stream().map(current -> {
+			List<DailyRecordDto> cdRecors = record.stream().filter(r -> r.workingDate().equals(current)).collect(Collectors.toList());
+			if (!cdRecors.isEmpty()) {
+				return checkConditions.stream().map(c -> {
+					ErrorAlarmCondition checkCondition = beforeCheck.apply(cdRecors, c);
+					return finalCheck(current, checkCondition, cdRecors, employeeIds);
+				}).flatMap(List::stream).collect(Collectors.toList());
+			}
+			return new ArrayList<ErrorRecord>();
+		}).flatMap(List::stream).collect(Collectors.toList());
 	}
 	
 	

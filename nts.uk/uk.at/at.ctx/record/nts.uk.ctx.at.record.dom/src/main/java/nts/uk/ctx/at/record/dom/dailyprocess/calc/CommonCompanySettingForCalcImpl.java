@@ -66,6 +66,7 @@ public class CommonCompanySettingForCalcImpl implements CommonCompanySettingForC
 	private EmpConditionRepository empConditionRepository;
 	
 	@Inject
+	//労働時間と日数の設定の利用単位の設定
 	private UsageUnitSettingRepository usageUnitSettingRepository;
 	
 //	@Inject

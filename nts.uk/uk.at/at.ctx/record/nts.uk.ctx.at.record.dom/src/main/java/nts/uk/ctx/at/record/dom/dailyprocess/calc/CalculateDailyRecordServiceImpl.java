@@ -19,6 +19,7 @@ import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.gul.util.value.Finally;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.actualworkinghours.daily.midnight.MidnightTimeSheetRepo;
 import nts.uk.ctx.at.record.dom.adapter.personnelcostsetting.PersonnelCostSettingAdapter;
 import nts.uk.ctx.at.record.dom.adapter.personnelcostsetting.PersonnelCostSettingImport;
 import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPerfor;
@@ -218,6 +219,8 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 	// 日別作成側にあったエラーチェック処理
 	private DailyRecordCreateErrorAlermService dailyRecordCreateErrorAlermService;
 
+	@Inject
+	private MidnightTimeSheetRepo midnightTimeSheetRepo;
 	/**
 	 * 勤務情報を取得して計算
 	 * 
@@ -329,6 +332,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			
 			DailyRecordToAttendanceItemConverter converterForAllZero = attendanceItemConvertFactory.createDailyConverter();
 			DailyRecordToAttendanceItemConverter beforDailyRecordDto = converterForAllZero.setData(integrationOfDaily);
+			//複製に対してsetしないと引数：integrationOfDailyが書き換わる(※参照型)
 			val recordAllZeroValueIntegration = beforDailyRecordDto.toDomain();
 			recordAllZeroValueIntegration.setAttendanceTimeOfDailyPerformance(peform);
 			List<ItemValue> itemValueList = Collections.emptyList();
@@ -578,8 +582,11 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		// 外出時間帯
 		Optional<OutingTimeOfDailyPerformance> goOutTimeSheetList = integrationOfDaily.getOutingTime();
 
+		//深夜時間帯(2019.3.31時点ではNotマスタ参照で動作している)
 		MidNightTimeSheet midNightTimeSheet = new MidNightTimeSheet(companyId, new TimeWithDayAttr(1320),
 				new TimeWithDayAttr(1740));
+		val mid = midnightTimeSheetRepo.findByCId(companyId);
+		
 		// 短時間
 		List<ShortWorkingTimeSheet> shortTimeSheets = new ArrayList<>();
 		if (integrationOfDaily.getShortTime().isPresent()) {
@@ -825,11 +832,6 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				workType = Optional.of(ootsukaProcessService.getOotsukaWorkType(workType.get(), ootsukaFixedWorkSet,
 						oneRange.getAttendanceLeavingWork(),
 						fixedWorkSetting.get().getCommonSetting().getHolidayCalculation()));
-
-//				 if (ootsukaProcessService.getWorkTypeChangedFromSpecialHoliday()) {
-				
-				
-				
 				
 				//大塚用　勤務種類が変更になった時に
 				if (workTypeChangedFlagForOOtsuka && isSpecialHoliday) {
@@ -1339,8 +1341,6 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 		if (!itemValueList.isEmpty()) {
 			converter.setData(integrationOfDaily);
-			// List<ItemValue> itemValueList = converter.convert(attendanceItemIdList);
-			// converter.withAnyItems(result);
 			converter.merge(itemValueList);
 			// 手修正された項目の値を計算前に戻す
 			calcResultIntegrationOfDaily.setAnyItemValue(converter.anyItems());

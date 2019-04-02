@@ -70,15 +70,10 @@ public class LateLeaveEarlyTimeSheet extends CalculationTimeSheet{
 		}
 		LateLeaveEarlyTimeSheet result = new LateLeaveEarlyTimeSheet(new TimeZoneRounding(EarlyTimeSheet.getStart(), EarlyTimeSheet.getEnd(), this.getTimeSheet().getRounding()),
 																	 EarlyTimeSheet);
-		
 		//控除時間帯を保持
 		result.addDuplicatedDeductionTimeSheet(this.getDeductionTimeSheet(),DeductionAtr.Deduction,Optional.empty());
 		result.addDuplicatedDeductionTimeSheet(this.getDeductionTimeSheet(),DeductionAtr.Appropriate,Optional.empty());
 
 		return result;
 	}
-	
-	
-	
-	
 }
