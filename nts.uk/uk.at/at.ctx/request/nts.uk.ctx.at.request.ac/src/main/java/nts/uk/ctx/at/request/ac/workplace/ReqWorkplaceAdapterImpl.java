@@ -61,10 +61,16 @@ public class ReqWorkplaceAdapterImpl implements WorkplaceAdapter {
 		return wkpExport.stream().filter(w -> w.getDateRange().contains(date)).map(w -> toImport(w)).collect(Collectors.toList());
 	}
 
+	@Override
+	public List<WkpHistImport> findWkpBySidAndBaseDate(List<String> sID, GeneralDate date) {
+		return wkpPub.findBySId(sID, date).stream().map(this::toImport).collect(Collectors.toList());
+	}
+
 	private WkpHistImport toImport(SWkpHistExport export) {
 		return new WkpHistImport(export.getDateRange(), export.getEmployeeId(), export.getWorkplaceId(),
 				export.getWorkplaceCode(), export.getWorkplaceName(), export.getWkpDisplayName());
 	}
+
 
 	@Override
 	public Optional<EmploymentHistoryImported> getEmpHistBySid(String companyId, String employeeId,

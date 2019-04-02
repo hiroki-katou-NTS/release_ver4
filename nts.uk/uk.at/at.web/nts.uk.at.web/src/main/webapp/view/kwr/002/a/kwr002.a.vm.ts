@@ -7,6 +7,7 @@ module nts.uk.com.view.kwr002.a {
     import setShared = nts.uk.ui.windows.setShared;
     import getShared = nts.uk.ui.windows.getShared;
     import getMsg = nts.uk.resource.getMessage;
+    import isNullOrUndefined = nts.uk.util.isNullOrUndefined;
 
     export module viewModel {
         export class ScreenModel {
@@ -357,14 +358,15 @@ module nts.uk.com.view.kwr002.a {
                     nts.uk.ui.block.clear();
                 }).fail((res: any) => {
                     nts.uk.ui.block.clear();
-                    if (res.message !== "" && res.businessException) {
+                    nts.uk.ui.dialog.error(res);
+                    /*if (res.message !== "" && res.businessException) {
                         nts.uk.ui.dialog.caution(res).then(() => {
                             nts.uk.ui.dialog.error({ messageId: 'Msg_37' });
                         });
                     } else {
                         nts.uk.ui.dialog.error({ messageId: "Msg_37" });
 
-                    }
+                    }*/
 
                 });
             }
@@ -386,7 +388,8 @@ module nts.uk.com.view.kwr002.a {
                     nts.uk.ui.block.clear();
                 }).fail((res: any) => {
                     nts.uk.ui.block.clear();
-                    if (res.message !== "" && res.businessException) {
+                    nts.uk.ui.dialog.error(res);
+                    /*if (res.message !== "" && res.businessException) {
                         nts.uk.ui.dialog.caution(res).then(() => {
                             nts.uk.ui.dialog.error({ messageId: 'Msg_37' });
                         });
@@ -395,7 +398,7 @@ module nts.uk.com.view.kwr002.a {
                     } else {
                         nts.uk.ui.dialog.error({ messageId: "Msg_37" });
 
-                    }
+                    }*/
 
 
                 });
@@ -407,7 +410,9 @@ module nts.uk.com.view.kwr002.a {
                 let employeeIds: string[] = [];
                 let employee: Employee[] = [];
                 for (let employeeCode of employeeCodes) {
-                    employee.push(self.findEmployeeByCode(employeeCode));
+                    let emp = self.findEmployeeByCode(employeeCode);
+                    if (isNullOrUndefined(emp)) continue;
+                    employee.push(emp);
                 }
                 return employee;
             }
