@@ -199,7 +199,7 @@ module nts.uk.at.view.kaf011.shr {
             showAbsWorkTimeZone = ko.computed(() => {
                 let self = this, vm: nts.uk.at.view.kaf011.a.screenModel.ViewModel = __viewContext['viewModel'],
                     workAtr = self.wkType().workAtr();
-                if (!vm || !vm.drawalReqSet) {
+                if (!vm || !vm.drawalReqSet || workAtr == null) {
                     return false;
                 }
                     let wkTimeSelect = vm.drawalReqSet().deferredWorkTimeSelect();
@@ -250,7 +250,7 @@ module nts.uk.at.view.kaf011.shr {
             showWorkingTime1 = ko.computed(() => {
                 let self = this, vm: nts.uk.at.view.kaf011.a.screenModel.ViewModel = __viewContext['viewModel'],
                     workAtr = self.wkType().workAtr();
-                if (!vm || !vm.drawalReqSet) {
+                if (!vm || !vm.drawalReqSet || workAtr == null) {
                     return false;
                 }
                 let wkTimeSelect = vm.drawalReqSet().deferredWorkTimeSelect();
@@ -275,7 +275,6 @@ module nts.uk.at.view.kaf011.shr {
                     }
                 }
                 return true;
-
             });
 
             constructor(data) {
