@@ -2455,7 +2455,6 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			DateTimeFormatter jpFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd (E)", Locale.JAPAN);
 			String date = dailyReportData.getDate().toLocalDate().format(jpFormatter);
 			String titleDate = WorkScheOutputConstants.DATE_BRACKET +"　"+ date;
-            currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
 			
 //			// B3_2
 //			Cell dateCell = cells.get(currentRow, 2);
@@ -2537,8 +2536,9 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
                 rowPageTracker.useRemainingRow(2);
             }
 			// B4_1
+            currentRow = this.printDateBracket(currentRow, templateSheetCollection, sheetInfo, titleDate);
             currentRow = this.printWorkplaceByDate(currentRow, templateSheetCollection, sheetInfo, workplaceTitle);
-            rowPageTracker.useRemainingRow(1);
+            rowPageTracker.useRemainingRow(2);
 			Iterator<DailyPersonalPerformanceData> dataIterator = employeeReportData.iterator();
 			
 			// Employee data
