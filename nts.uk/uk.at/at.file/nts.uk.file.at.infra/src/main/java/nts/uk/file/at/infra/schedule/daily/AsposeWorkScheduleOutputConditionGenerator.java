@@ -2673,7 +2673,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		}
 		
 		// Workplace total, root workplace use gross total instead
-		if (condition.getSettingDetailTotalOutput().isWorkplaceTotal() && rootWorkplace.getLevel() != 0) {
+		if (condition.getSettingDetailTotalOutput().isWorkplaceTotal() && rootWorkplace.getLevel() != 0 && rootWorkplace.isHasData()) {
 			if (rowPageTracker.checkRemainingRowSufficient(dataRowCount) <= 0) {
                 rowPageTracker.resetRemainingRow();
                 if (this.checkLimitPageBreak(templateSheetCollection, sheetInfo, currentRow)) {
@@ -2753,7 +2753,8 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		}
 		
 		if (level != 0 && level >= settingTotalHierarchy.getHighestLevelEnabled() 
-				&& condition.getSettingDetailTotalOutput().isCumulativeWorkplace()) {
+				&& condition.getSettingDetailTotalOutput().isCumulativeWorkplace()
+				&& rootWorkplace.isHasData()) {
 			do {
 				if (levelIterator != null && levelIterator.hasNext()) 
 					level = (int) levelIterator.next();
