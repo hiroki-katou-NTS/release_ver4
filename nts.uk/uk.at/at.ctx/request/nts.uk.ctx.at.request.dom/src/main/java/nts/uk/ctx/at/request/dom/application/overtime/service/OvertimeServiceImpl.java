@@ -247,18 +247,22 @@ public class OvertimeServiceImpl implements OvertimeService {
 			
 			String wktypeCd = personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTypeCode().get()
 					.v().toString();
-			workTypeRepository.findByPK(companyID, wktypeCd).ifPresent(wktype -> {
-				workTypeOvertime.setWorkTypeName(wktype.getName().toString());
-			});
-			workTypeOvertime.setWorkTypeCode(wktypeCd);
-			workTypeAndSiftType.setWorkType(workTypeOvertime);
+			if(workTypes.stream().map(x -> x.getWorkTypeCode()).collect(Collectors.toList()).contains(wktypeCd)){
+				workTypeOvertime = workTypes.stream().filter(x -> x.getWorkTypeCode().equals(wktypeCd)).findAny().get();
+				workTypeAndSiftType.setWorkType(workTypeOvertime);
+			} else {
+				workTypeAndSiftType.setWorkType(workTypes.get(0));
+			}
+			
+			
 			String wkTimeCd = personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTimeCode().get()
 					.v().toString();
-			this.workTimeRepository.findByCode(companyID, wkTimeCd).ifPresent(wkTime -> {
-				siftType.setSiftName(wkTime.getWorkTimeDisplayName().getWorkTimeAbName().v());
-			});
-			siftType.setSiftCode(wkTimeCd);
-			workTypeAndSiftType.setSiftType(siftType);
+			if(siftTypes.stream().map(x -> x.getSiftCode()).collect(Collectors.toList()).contains(wkTimeCd)){
+				siftType = siftTypes.stream().filter(x -> x.getSiftCode().equals(wkTimeCd)).findAny().get();
+				workTypeAndSiftType.setSiftType(siftType);
+			} else {
+				workTypeAndSiftType.setSiftType(siftTypes.get(0));
+			}
 		}
 		//休憩時間帯を取得する
 		if (workTypeAndSiftType.getWorkType() != null && workTypeAndSiftType.getSiftType() != null) {
