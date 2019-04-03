@@ -976,13 +976,13 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			// 6-実施区分 → 再作成 とする
 			s.setImplementAtr(ImplementAtr.RECREATE);
 			// 7-再作成区分 → 未確定データのみ とする
-
 			reCreateContent.setReCreateAtr(ReCreateAtr.ONLY_UNCONFIRM);
 			// 8-処理実行区分 → もう一度作り直す とする
 			reCreateContent.setProcessExecutionAtr(ProcessExecutionAtr.REBUILD);
 		} else {
-			// ・実施区分 → 再作成 とする
-			s.setImplementAtr(ImplementAtr.RECREATE);
+			// #17055
+			// ・実施区分 → 通常作成
+			s.setImplementAtr(ImplementAtr.GENERALLY_CREATED);
 			// ・再作成区分 → 全件 とする
 			reCreateContent.setReCreateAtr(ReCreateAtr.ALL_CASE);
 			// ・処理実行区分 → もう一度作り直す とする
