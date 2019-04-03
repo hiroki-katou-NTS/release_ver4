@@ -72,7 +72,7 @@ public class PersonalTightCommandFacade {
 									new ClosureDate(closingPeriod.get().getClosureDate().getClosureDay(),
 											closingPeriod.get().getClosureDate().getLastDayOfMonth()),
 									date, employeeId)));
-			if(lstAppStt.isEmpty() ||  lstAppStt.get(0).getApprovalStatus() != ApprovalStatusForEmployee.UNAPPROVED) return "Msg_1501";
+			if(!lstAppStt.isEmpty() &&  lstAppStt.get(0).getApprovalStatus() != ApprovalStatusForEmployee.UNAPPROVED) return "Msg_1501";
 			if (closingPeriod.isPresent() && (closingPeriod.get().getClosureStartDate().beforeOrEquals(date)
 					&& closingPeriod.get().getClosureEndDate().afterOrEquals(date))) {
 				registerConfirmationMonth
