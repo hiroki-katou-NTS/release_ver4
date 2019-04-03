@@ -113,7 +113,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                         self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
                         return;
                     }
-                    if (value != '' && value != null && value !== undefined){
+                    if (value != '' && value != null && value !== undefined && value.length == 6){
                         self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
                     }else{
                         self.settingManager().departmentApproverId('');
@@ -133,7 +133,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                         self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
                         return;
                     }
-                    if (value != '' && value != null && value !== undefined){
+                    if (value != '' && value != null && value !== undefined && value.length == 6){
                         self.getEmployeeByCode(value, APPROVER_TYPE.DAILY_APPROVER);
                     } else {
                         self.settingManager().dailyApproverId("");
@@ -258,7 +258,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                                 let paramcheckReg = {
                                     codeA16: $vm.empDisplayCode(),
                                     codeA27: self.settingManager().departmentCode(),
-                                    codeA210: self.settingManager().dailyApprovalCode(),
+                                    codeA210: self.displayDailyApprover() ? self.settingManager().dailyApprovalCode() : "",
                                     baseDate: moment(new Date(self.settingManager().startDate())).format('YYYY/MM/DD')
                                 }
                                 block.invisible();
@@ -278,7 +278,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                                         command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
                                         command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
                                         if (command.dailyApprovalCode == null || command.dailyApprovalCode === undefined
-                                            || nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())) {
+                                            || nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim()) || !self.displayDailyApprover()) {
                                             command.dailyApproverId = '';
                                         }
                                         if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory()) {

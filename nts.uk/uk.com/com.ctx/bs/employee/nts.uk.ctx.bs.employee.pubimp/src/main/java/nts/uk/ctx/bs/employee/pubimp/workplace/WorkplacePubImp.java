@@ -100,13 +100,13 @@ public class WorkplacePubImp implements SyWorkplacePub {
 	/** The workplace repo. */
 	@Inject
 	private WorkplaceRepository workplaceRepo;
-	
+
 	@Inject
 	private EmployeeDataMngInfoRepository empDataMngRepo;
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.WorkplacePub#findWpkIds(java.lang.
 	 * String, java.lang.String, nts.arc.time.GeneralDate)
 	 */
@@ -118,7 +118,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.WorkplacePub#findByWkpId(java.lang.
 	 * String, java.lang.String, nts.arc.time.GeneralDate)
 	 */
@@ -139,7 +139,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.WorkplacePub#getWorkplaceId(java.
 	 * lang.String, java.lang.String, nts.arc.time.GeneralDate)
 	 */
@@ -175,7 +175,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#
 	 * findListSIdByCidAndWkpIdAndPeriod(java.lang.String, nts.arc.time.GeneralDate,
 	 * nts.arc.time.GeneralDate)
@@ -195,13 +195,13 @@ public class WorkplacePubImp implements SyWorkplacePub {
 				.collect(Collectors.toMap(x -> x.getPId(), x -> x));
 
 		List<AffWorkplaceExport> result = new ArrayList<>();
-		
+
 		//EA修正履歴2638 liên quan đến bug #100243, lọc ra những employee không bị xóa
 		List<EmployeeDataMngInfo> listEmpDomain = empDataMngRepo.findBySidNotDel(listSid);
 
 		Map<String, String> mapSidPid = listEmpDomain.stream()
 				.collect(Collectors.toMap(x -> x.getEmployeeId(), x -> x.getPersonId()));
-		
+
 		listSid.forEach(sid -> {
 			AffCompanyHist affCompanyHist = mapPidAndAffCompanyHist.get(mapSidPid.get(sid));
 			// check null
@@ -228,24 +228,24 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 		return result;
 	}
-	
-	
+
+
 	@Override
 	public List<AffWorkplaceExport> getByLstWkpIdAndPeriod(List<String> lstWkpId, GeneralDate startDate,
 			GeneralDate endDate) {
 		if (lstWkpId.isEmpty() ||startDate == null  || endDate == null)
 			return new ArrayList<>();
-		
+
 		List<EmployeeDataMngInfo> listEmpDomain = empDataMngRepo.findByCompanyId(AppContexts.user().companyId());
 
 		Map<String, String> mapSidPid = listEmpDomain.stream()
 				.collect(Collectors.toMap(x -> x.getEmployeeId(), x -> x.getPersonId()));
-		
+
 		List<String> listSid = affWorkplaceHistoryRepository.getByLstWplIdAndPeriod(lstWkpId, startDate, endDate);
 
 		if (listSid.isEmpty())
 			return new ArrayList<>();
-		
+
 		List<AffCompanyHist> listAffCompanyHist = new ArrayList<>();
 
 		// vidu listSid = 25100
@@ -266,7 +266,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 		} else {
 			listAffCompanyHist = affCompanyHistRepo.getAffCompanyHistoryOfEmployees(listSid);
 		}
-		
+
 		Map<String, AffCompanyHist> mapPidAndAffCompanyHist = listAffCompanyHist.stream()
 				.collect(Collectors.toMap(x -> x.getPId(), x -> x));
 
@@ -302,7 +302,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.WorkplacePub#findWpkIdsBySid(java.
 	 * lang.String, java.lang.String, nts.arc.time.GeneralDate)
 	 */
@@ -359,7 +359,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#findBySid(java.lang.
 	 * String, nts.arc.time.GeneralDate)
 	 */
@@ -394,7 +394,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 				.workplaceCode(wkpInfo.getWorkplaceCode().v()).workplaceName(wkpInfo.getWorkplaceName().v())
 				.wkpDisplayName(wkpInfo.getWkpDisplayName().v()).build());
 	}
-	
+
 
 	@Override
 	public List<SWkpHistExport> findBySId(List<String> sids) {
@@ -420,7 +420,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 //				// Return workplace id
 //				WorkplaceInfo wkpInfo = optWorkplaceInfo.get();
-				
+
 				List<SWkpHistExport> listData = new ArrayList<>();
 				for(WorkplaceInfo workplaceInfo : optWorkplaceInfo) {
 					for(AffWorkplaceHistoryItem affWorkplaceHistoryItem : affWrkPlcItem) {
@@ -433,14 +433,52 @@ public class WorkplacePubImp implements SyWorkplacePub {
 							}
 							break;
 						}
-						
+
 					}
-					
+
 				}
-				
+
 
 				return listData;
 	}
+
+	@Override
+	public List<SWkpHistExport> findBySId(List<String> sids, GeneralDate baseDate) {
+		String companyID = AppContexts.user().companyId();
+		// Get AffWorkplaceHistory
+		List<AffWorkplaceHistory> affWrkPlc = affWorkplaceHistoryRepository.getWorkplaceHistoryByEmpIdsAndDate(baseDate, sids);
+		// Check exist
+		if (affWrkPlc.isEmpty())
+			return Collections.emptyList();
+
+		// Get AffWorkplaceHistoryItem
+		List<String> historyIds = affWrkPlc.stream().map(c -> c.getHistoryItems().get(0).identifier()).collect(Collectors.toList());
+		List<AffWorkplaceHistoryItem> affWrkPlcItem = affWorkplaceHistoryItemRepository.findByHistIds(historyIds);
+		// Check exist
+		if (affWrkPlcItem.isEmpty())
+			return Collections.emptyList();
+
+		// Get workplace info.
+		List<String> workplaceIds = affWrkPlcItem.stream().map(AffWorkplaceHistoryItem::getWorkplaceId).distinct().collect(Collectors.toList());
+		List<WorkplaceInfo> list = workplaceInfoRepo.findByBaseDateWkpIds(companyID, baseDate, workplaceIds);
+		// Check exist
+		if (list.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		// Convert and get data
+		List<SWkpHistExport> listData = new ArrayList<>();
+		Map<String, AffWorkplaceHistoryItem> affWorkplaceHistItemMap = affWrkPlcItem.stream().collect(Collectors.toMap(AffWorkplaceHistoryItem::getEmployeeId, Function.identity()));
+		Map<String, WorkplaceInfo> workplaceInfoMap = list.stream().collect(Collectors.toMap(WorkplaceInfo::getWorkplaceId, Function.identity()));
+
+		affWrkPlc.forEach(w -> {
+			String workplaceId = affWorkplaceHistItemMap.get(w.getEmployeeId()).getWorkplaceId();
+			listData.add(convertToWorkplaceInfo(workplaceInfoMap.get(workplaceId), w));
+		});
+
+		return listData;
+	}
+
 	private SWkpHistExport convertToWorkplaceInfo(WorkplaceInfo wkpInfo,AffWorkplaceHistory affWrkPlc) {
 		return SWkpHistExport.builder()
 				.dateRange(affWrkPlc.getHistoryItems().get(0).span())
@@ -453,7 +491,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#
 	 * findParentWpkIdsByWkpId(java.lang.String, java.lang.String,
 	 * nts.arc.time.GeneralDate)
@@ -476,7 +514,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#
 	 * findListWorkplaceIdByBaseDate(nts.arc.time.GeneralDate)
 	 */
@@ -505,7 +543,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#
 	 * findListWorkplaceIdByCidAndWkpIdAndBaseDate(java.lang.String,
 	 * java.lang.String, nts.arc.time.GeneralDate)
@@ -528,7 +566,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#GetWplByListSidAndPeriod(
 	 * java.util.List, nts.uk.shr.com.time.calendar.period.DatePeriod)
@@ -607,7 +645,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#findByWkpIdsAtTime(java.
 	 * lang.String, nts.arc.time.GeneralDate, java.util.List)
@@ -663,7 +701,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 			return affWkp;
 		}).collect(Collectors.toList());
 	}
-	
+
 	@Override
 	public List<AffAtWorkplaceExport> findBySIdAndBaseDateV2(List<String> sids, GeneralDate baseDate) {
 
@@ -674,7 +712,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#findWkpByWkpId(java.lang.
 	 * String, nts.arc.time.GeneralDate, java.util.List)
@@ -703,7 +741,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#getWkpCdName(java.lang.
 	 * String, nts.arc.time.GeneralDate, java.util.List)
@@ -740,11 +778,11 @@ public class WorkplacePubImp implements SyWorkplacePub {
 			dateHistoryItemLst.addAll(x.getHistoryItems());
 		});
 		List<String> hisIDs = dateHistoryItemLst.stream().map(x -> x.identifier()).collect(Collectors.toList());
-		Map<String,String> wkpIDLst = new HashMap<String,String>();  
+		Map<String,String> wkpIDLst = new HashMap<String,String>();
 		affWorkplaceHistoryItemRepository.findByHistIds(hisIDs).forEach(x -> {
 			wkpIDLst.put(x.getHistoryId(), x.getWorkplaceId());
 		});
-		
+
 		List<WorkplaceInfo> wkpInfoLst = workplaceInfoRepo.findByWkpIds(companyID, wkpIDLst.entrySet().stream().map(x -> x.getValue()).collect(Collectors.toList()));
 		List<WkpInfoExport> wkpInfoExportLst = new ArrayList<>();
 		dateHistoryItemLst.forEach(x -> {
@@ -758,14 +796,14 @@ public class WorkplacePubImp implements SyWorkplacePub {
 			String wkpID = wkpIDItem.get().getValue();
 			WkpInfoExport wkpInfoExport = wkpInfoLst.stream().filter(y -> y.getWorkplaceId().equals(wkpID)).findAny()
 					.map(k -> new WkpInfoExport(
-							x.span(), 
-							k.getWorkplaceId(), 
-							k.getWorkplaceCode().toString(), 
+							x.span(),
+							k.getWorkplaceId(),
+							k.getWorkplaceCode().toString(),
 							k.getWorkplaceName().toString()))
 					.orElse(new WkpInfoExport(
-							x.span(), 
-							wkpID, 
-							"マスタ未登録", 
+							x.span(),
+							wkpID,
+							"マスタ未登録",
 							"マスタ未登録"));
 			wkpInfoExportLst.add(wkpInfoExport);
 		});
@@ -774,7 +812,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#
 	 * getLstHistByWkpsAndPeriod(java.util.List,
 	 * nts.uk.shr.com.time.calendar.period.DatePeriod)
@@ -814,22 +852,22 @@ public class WorkplacePubImp implements SyWorkplacePub {
 	@Override
 	public List<DatePeriod> getLstPeriod(String companyId, DatePeriod period){
 		List<WorkplaceConfig> wkps = this.wkpConfigRepository.findByCompanyIdAndPeriod(companyId, period);
-		
+
 		List<DatePeriod> dateList = new ArrayList<>();
-		
-		wkps.stream().map(item -> { 
+
+		wkps.stream().map(item -> {
 			List<DatePeriod> dates = new ArrayList<>();
 			dates = item.getWkpConfigHistory().stream().map(hst -> {
 				return hst.span();
 			}).collect(Collectors.toList());
 			return dates;
 		}).collect(Collectors.toList());
-		
+
 		return dateList;
 	}
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub#
 	 * findParentWpkIdsByWkpIdDesc(java.lang.String, java.lang.String,
 	 * nts.arc.time.GeneralDate)
@@ -899,5 +937,5 @@ public class WorkplacePubImp implements SyWorkplacePub {
 		});
 		return result;
 	}
-		
+
 }

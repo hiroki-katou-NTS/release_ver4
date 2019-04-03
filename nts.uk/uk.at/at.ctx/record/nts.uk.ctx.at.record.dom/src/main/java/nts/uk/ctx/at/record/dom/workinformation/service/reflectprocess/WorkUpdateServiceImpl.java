@@ -16,6 +16,11 @@ import nts.uk.ctx.at.record.dom.actualworkinghours.ActualWorkingTimeOfDaily;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.actualworkinghours.TotalWorkingTime;
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
+import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
+import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
+import nts.uk.ctx.at.record.dom.breakorgoout.primitivevalue.BreakFrameNo;
+import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.daily.ExcessOfStatutoryMidNightTime;
 import nts.uk.ctx.at.record.dom.daily.ExcessOfStatutoryTimeOfDaily;
 import nts.uk.ctx.at.record.dom.daily.TimeDivergenceWithCalculation;
@@ -28,6 +33,7 @@ import nts.uk.ctx.at.record.dom.daily.overtimework.OverTimeOfDaily;
 import nts.uk.ctx.at.record.dom.daily.remarks.RecordRemarks;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerform;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerformRepo;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.BreakTimeParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.OverTimeRecordAtr;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTime;
@@ -67,6 +73,8 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 	private RemarksOfDailyPerformRepo remarksOfDailyRepo;
 	@Inject
 	private WorkTimeSettingService workTimeSetting;
+	@Inject
+	private BreakTimeOfDailyPerformanceRepository breakTimeOfDailyRepo;
 	@Override
 	public WorkInfoOfDailyPerformance updateWorkTimeType(ReflectParameter para, boolean scheUpdate, WorkInfoOfDailyPerformance dailyInfo) {
 		WorkInformation workInfor = new WorkInformation(para.getWorkTimeCode(), para.getWorkTypeCode());
@@ -477,13 +485,25 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 					Integer item = this.lstAfterWorktimeFrameItem().get(i - 1); 
 					lstWorktimeFrameTemp.remove(item);
 				} else {
+					AttendanceTime worktimeTmp = new AttendanceTime(worktimeFrame.get(i));	
+					HolidayWorkFrameTime tmpHolidayWorkFrameTime = new HolidayWorkFrameTime(new HolidayWorkFrameNo(i),
+							Finally.of(TimeDivergenceWithCalculation.createTimeWithCalculation(worktimeTmp, new AttendanceTime(0))),
+							Finally.of(TimeDivergenceWithCalculation.createTimeWithCalculation(new AttendanceTime(0), new AttendanceTime(0))),
+							Finally.of(new AttendanceTime(0)));
 					if(lstHolidayWorkFrameTime.isEmpty()) {
-						AttendanceTime worktimeTmp = new AttendanceTime(worktimeFrame.get(i));						
-						HolidayWorkFrameTime tmpHolidayWorkFrameTime = new HolidayWorkFrameTime(new HolidayWorkFrameNo(i),
-								Finally.of(TimeDivergenceWithCalculation.createTimeWithCalculation(worktimeTmp, new AttendanceTime(0))),
-								Finally.of(TimeDivergenceWithCalculation.createTimeWithCalculation(new AttendanceTime(0), new AttendanceTime(0))),
-								Finally.of(new AttendanceTime(0)));
 						lstHolidayWorkFrameTimeTmp.add(tmpHolidayWorkFrameTime);
+					} else {
+						for (HolidayWorkFrameTime x : lstHolidayWorkFrameTime) {
+							if(x.getHolidayFrameNo().v() == i) {
+								Finally<TimeDivergenceWithCalculation> hwTime = x.getHolidayWorkTime();
+								if(hwTime.isPresent()) {
+									hwTime.get().setTime(worktimeTmp);
+								} else {
+									x.setHolidayWorkTime(Finally.of(TimeDivergenceWithCalculation.createTimeWithCalculation(worktimeTmp, new AttendanceTime(0))));
+								}
+								break;
+							}
+						}
 					}
 				}
 			}	
@@ -1053,5 +1073,177 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 		lstItem.add(314);
 		return lstItem;
 	}
-
+	@Override
+	public void updateBreakTime(Map<Integer, BreakTimeParam> mapBreakTimeFrame, boolean recordReflectBreakFlg,
+			boolean isPre, IntegrationOfDaily daily) {
+		if((!isPre && !recordReflectBreakFlg)
+			|| mapBreakTimeFrame.isEmpty()) {
+			return;
+		}
+		List<BreakTimeOfDailyPerformance> breakTime = daily.getBreakTime();
+		
+		if(breakTime.isEmpty()) {
+			List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
+			mapBreakTimeFrame.forEach((a,b) ->{
+				BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a),
+						new TimeWithDayAttr(b.getStartTime()), 
+						new TimeWithDayAttr(b.getEndTime()));
+				lstBreakTime.add(timeSheet);
+			});
+			
+			
+			if(!isPre) {
+				BreakTimeOfDailyPerformance breakTimeOfDaily = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
+						BreakType.REFER_WORK_TIME, 
+						lstBreakTime, 
+						daily.getWorkInformation().getYmd());
+				daily.getBreakTime().add(breakTimeOfDaily);
+				breakTimeOfDailyRepo.insert(breakTimeOfDaily);	
+			} else {
+				BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
+						BreakType.REFER_SCHEDULE, 
+						lstBreakTime, 
+						daily.getWorkInformation().getYmd());
+				daily.getBreakTime().add(breakTimeOfDailySche);
+				breakTimeOfDailyRepo.insert(breakTimeOfDailySche);	
+			}
+		} else {
+			if(isPre) {
+				breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE).collect(Collectors.toList());
+			} else {
+				breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_WORK_TIME).collect(Collectors.toList());
+			}
+			//休日が予定か実績は反映しました。
+			if(breakTime.isEmpty()) {
+				List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
+				mapBreakTimeFrame.forEach((a,b) ->{
+					BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a),
+							new TimeWithDayAttr(b.getStartTime()), 
+							new TimeWithDayAttr(b.getEndTime()));
+					lstBreakTime.add(timeSheet);
+				});
+				
+				if(isPre) {
+					BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
+							BreakType.REFER_SCHEDULE, 
+							lstBreakTime, 
+							daily.getWorkInformation().getYmd());
+					daily.getBreakTime().add(breakTimeOfDailySche);
+					breakTimeOfDailyRepo.update(breakTimeOfDailySche);	
+				} else {
+					BreakTimeOfDailyPerformance breakTimeOfDaily = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
+							BreakType.REFER_WORK_TIME, 
+							lstBreakTime, 
+							daily.getWorkInformation().getYmd());
+					daily.getBreakTime().add(breakTimeOfDaily);
+					breakTimeOfDailyRepo.update(breakTimeOfDaily);	
+				}
+			}
+			for (BreakTimeOfDailyPerformance breakTimeSheet : breakTime) {
+				List<BreakTimeSheet> lstBreakTimeData  = breakTimeSheet.getBreakTimeSheets();
+				mapBreakTimeFrame.forEach((a,b) ->{
+					boolean isSet = false;
+					for (BreakTimeSheet x : lstBreakTimeData) {
+						if(x.getBreakFrameNo().v() == a) {
+							x.setStartTime(new TimeWithDayAttr(b.getStartTime()));
+							x.setEndTime(new TimeWithDayAttr(b.getEndTime()));
+							isSet = true;
+							break;
+						}
+					}
+					if(!isSet) {
+						BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a), new TimeWithDayAttr(b.getStartTime()), new TimeWithDayAttr(b.getEndTime()));
+						lstBreakTimeData.add(timeSheet);
+					}
+					
+				});				
+				breakTimeOfDailyRepo.update(breakTimeSheet);
+			}
+			
+		}
+		List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
+		if(isPre) {
+			lstBreakTime = daily.getBreakTime().stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE)
+					.collect(Collectors.toList()).get(0).getBreakTimeSheets();
+		} else {
+			lstBreakTime = daily.getBreakTime().stream().filter(x -> x.getBreakType() == BreakType.REFER_WORK_TIME)
+					.collect(Collectors.toList()).get(0).getBreakTimeSheets();
+		}
+		List<Integer> lstBreakStart = new ArrayList<>();
+		List<Integer> lstBreakEnd = new ArrayList<>();
+		lstBreakTime.stream().forEach(x ->{
+			if(isPre) {
+				lstBreakStart.add(this.lstScheBreakStartTime().get(x.getBreakFrameNo().v() - 1));
+				lstBreakEnd.add(this.lstScheBreakEndTime().get(x.getBreakFrameNo().v() - 1));
+			} else {
+				lstBreakStart.add(this.lstBreakStartTime().get(x.getBreakFrameNo().v() - 1));
+				lstBreakEnd.add(this.lstBreakEndTime().get(x.getBreakFrameNo().v() - 1));	
+			}
+			
+		});
+		this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), lstBreakStart);
+		this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), lstBreakEnd);
+		
+	}
+	@Override
+	public List<Integer> lstBreakStartTime() {
+		List<Integer> lstItem = new ArrayList<>();		
+		lstItem.add(157);
+		lstItem.add(163);
+		lstItem.add(169);
+		lstItem.add(175);
+		lstItem.add(181);
+		lstItem.add(187);
+		lstItem.add(193);
+		lstItem.add(199);
+		lstItem.add(205);
+		lstItem.add(211);
+		return lstItem;
+	}
+	@Override
+	public List<Integer> lstBreakEndTime() {
+		List<Integer> lstItem = new ArrayList<>();		
+		lstItem.add(159);
+		lstItem.add(165);
+		lstItem.add(171);
+		lstItem.add(177);
+		lstItem.add(183);
+		lstItem.add(189);
+		lstItem.add(195);
+		lstItem.add(201);
+		lstItem.add(207);
+		lstItem.add(213);
+		return lstItem;
+	}
+	@Override
+	public List<Integer> lstScheBreakStartTime() {
+		List<Integer> lstItem = new ArrayList<>();		
+		lstItem.add(7);
+		lstItem.add(9);
+		lstItem.add(11);
+		lstItem.add(13);
+		lstItem.add(15);
+		lstItem.add(17);
+		lstItem.add(19);
+		lstItem.add(21);
+		lstItem.add(23);
+		lstItem.add(25);
+		return lstItem;
+	}
+	@Override
+	public List<Integer> lstScheBreakEndTime() {
+		List<Integer> lstItem = new ArrayList<>();		
+		lstItem.add(8);
+		lstItem.add(10);
+		lstItem.add(12);
+		lstItem.add(14);
+		lstItem.add(16);
+		lstItem.add(18);
+		lstItem.add(20);
+		lstItem.add(22);
+		lstItem.add(24);
+		lstItem.add(26);
+		return lstItem;
+	}
+	
 }

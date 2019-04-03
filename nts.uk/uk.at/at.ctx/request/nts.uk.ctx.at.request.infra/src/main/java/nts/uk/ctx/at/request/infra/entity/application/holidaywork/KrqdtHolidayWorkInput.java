@@ -65,7 +65,7 @@ private static final long serialVersionUID = 1L;
     })
 	public KrqdtAppHolidayWork appHolidayWork;
     
-    public KrqdtHolidayWorkInput(KrqdtHolidayWorkInputPK pk , Integer startTime, Integer endTime, int appTime){
+    public KrqdtHolidayWorkInput(KrqdtHolidayWorkInputPK pk , Integer startTime, Integer endTime, Integer appTime){
     	this.krqdtHolidayWorkInputPK = pk;
     	this.startTime = startTime;
     	this.endTime = endTime;

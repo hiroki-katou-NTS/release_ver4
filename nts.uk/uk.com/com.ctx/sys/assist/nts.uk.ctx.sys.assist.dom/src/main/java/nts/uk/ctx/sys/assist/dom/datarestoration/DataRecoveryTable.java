@@ -8,5 +8,6 @@ public class DataRecoveryTable {
 	//List<List<String>> dataRecovery;
 	String uploadId;
 	String fileNameCsv;
+	boolean hasSidInCsv;
 	
 }

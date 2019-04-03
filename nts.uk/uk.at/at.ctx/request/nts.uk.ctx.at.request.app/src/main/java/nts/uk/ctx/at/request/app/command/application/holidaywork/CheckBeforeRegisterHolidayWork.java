@@ -263,12 +263,12 @@ public class CheckBeforeRegisterHolidayWork {
 		return inputCommand.stream().filter(item -> {
 			Integer startTime = item.getStartTime() == null ? null : item.getStartTime().intValue();
 			Integer endTime = item.getEndTime() == null ? null : item.getEndTime().intValue();
-			int appTime = item.getApplicationTime() == null ? -1 : item.getApplicationTime().intValue();
-			return startTime != null || endTime != null || appTime != -1;
+			Integer appTime = item.getApplicationTime() == null ? null : item.getApplicationTime().intValue();
+			return startTime != null || endTime != null || appTime != null;
 		}).map(item -> {
 			Integer startTime = item.getStartTime() == null ? null : item.getStartTime().intValue();
 			Integer endTime = item.getEndTime() == null ? null : item.getEndTime().intValue();
-			int appTime = item.getApplicationTime() == null ? -1 : item.getApplicationTime().intValue();
+			Integer appTime = item.getApplicationTime() == null ? null : item.getApplicationTime().intValue();
 			return HolidayWorkInput.createSimpleFromJavaType(Cid, appId, attendanceId, item.getFrameNo(), startTime,
 					endTime, appTime);
 		}).collect(Collectors.toList());

@@ -59,12 +59,27 @@ module nts.uk.at.view.kaf011.b.viewmodel {
         kaf011ReasonIsEditable: KnockoutObservable<boolean> = ko.computed(() => {
                 return this.editable() ? this.appTypeSet().displayAppReason() != 0 : false;
             });
+        kaf011FixedReasonIsEditable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.editable() ;
+            });
         kdl003BtnEnable: KnockoutObservable<boolean> = ko.computed(() => {
                 return this.editable();
             });
-        recTime1SwitchEnable: KnockoutObservable<boolean> = ko.computed(() => {
+        recTimeSwitchEnable: KnockoutObservable<boolean> = ko.computed(() => {
                 return this.editable();
             });
+        recTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.editable() ? this.drawalReqSet().permissionDivision() != 0 : false;
+        });
+        absKdl003BtnEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.editable() ? this.absWk().changeWorkHoursType() : false;
+        });
+        absTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.editable() ? this.absWk().enableWkTime() == true : false;
+        });
+        changeWorkHoursTypeEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.editable();
+        });
         constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
             super(listAppMetadata, currentApp);
             let self = this;
@@ -140,12 +155,12 @@ module nts.uk.at.view.kaf011.b.viewmodel {
             self.validateControl();
             if (nts.uk.ui.errors.hasError()) { return; }
             
-            /*
+            
             let isCheckReasonError = !self.checkReason();
             if (isCheckReasonError) {
                 return;
             }
-            */
+            
 
             block.invisible();
             service.update(saveCmd).done(() => {
@@ -184,6 +199,7 @@ module nts.uk.at.view.kaf011.b.viewmodel {
         checkReason(): boolean {
             let self = this,
                 appReason = self.getReason();
+            
             let appReasonError = !nts.uk.at.view.kaf000.shr.model.CommonProcess.checkAppReason(true, self.appTypeSet().displayFixedReason() != 0, self.appTypeSet().displayAppReason() != 0, appReason);
             if (appReasonError) {
                 nts.uk.ui.dialog.alertError({ messageId: 'Msg_115' });
@@ -209,13 +225,7 @@ module nts.uk.at.view.kaf011.b.viewmodel {
             if (!nts.uk.util.isNullOrEmpty(inputReasonID)) {
                 inputReason = _.find(inputReasonList, { 'reasonID': inputReasonID }).reasonTemp;
             }
-            if (!nts.uk.util.isNullOrEmpty(inputReason) && !nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = inputReason + ":" + detailReason;
-            } else if (!nts.uk.util.isNullOrEmpty(inputReason) && nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = inputReason;
-            } else if (nts.uk.util.isNullOrEmpty(inputReason) && !nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = detailReason;
-            }
+            appReason = inputReason + ":" + detailReason;
             return appReason;
         }
 
@@ -274,6 +284,8 @@ module nts.uk.at.view.kaf011.b.viewmodel {
                 
             }
             self.firstLoad(false);
+            self.recWk().wkTimeCD.valueHasMutated();
+            self.absWk().wkTimeCD.valueHasMutated();
         }
 
         setDataCommon(data) {

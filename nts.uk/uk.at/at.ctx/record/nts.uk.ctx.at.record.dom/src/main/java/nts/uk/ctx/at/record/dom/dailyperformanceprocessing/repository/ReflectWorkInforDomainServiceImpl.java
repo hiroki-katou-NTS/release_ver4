@@ -77,6 +77,7 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.ClosureOfDaily
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.MasterList;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.NewReflectStampOutput;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.PeriodInMasterList;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.ReflectStampOutput;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.TimeActualStampOutPut;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.TimeLeavingWorkOutput;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.WorkStampOutPut;
@@ -306,6 +307,9 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 	private SessionContext scContext;
 
 	private ReflectWorkInforDomainService self;
+	
+	@Inject
+	private ReflectStampDomainService reflectStampDomainService;
 
 	@PostConstruct
 	public void init() {
@@ -467,9 +471,24 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 					WorkInfoOfDailyPerformance workInfoOfDailyPerformance = this.workInformationRepository
 							.find(employeeId, day).get();
 					Boolean existsDailyInfo = workInfoOfDailyPerformance != null;
-					NewReflectStampOutput stampOutput = this.reflectStampDomainServiceImpl.reflectStampInfo(companyId,
-							employeeId, day, workInfoOfDailyPerformance, null, empCalAndSumExecLogID, reCreateAttr,
-							Optional.empty(), Optional.empty(), Optional.empty());
+					NewReflectStampOutput stampOutput = new NewReflectStampOutput();
+					stampOutput.setErrMesInfos(new ArrayList<>());
+					stampOutput.setReflectStampOutput(new ReflectStampOutput());
+					
+					if(workInfoOfDailyPerformance != null){
+						WorkStyle workStyle = basicScheduleService
+								.checkWorkDay(workInfoOfDailyPerformance.getRecordInfo().getWorkTypeCode().v());
+						
+						if (workStyle != WorkStyle.ONE_DAY_REST) {
+							stampOutput = this.reflectStampDomainService.reflectStampInfo(companyId, employeeId,
+									day, workInfoOfDailyPerformance, null, empCalAndSumExecLogID,
+									reCreateAttr, Optional.empty(),Optional.empty(), Optional.empty());
+						}else {
+							 stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(companyId,
+									 employeeId, day, Optional.of(workInfoOfDailyPerformance), null, empCalAndSumExecLogID, reCreateAttr,
+									 Optional.empty(),Optional.empty(), Optional.empty());
+						}
+					}
 					// this.registerDailyPerformanceInfoService.registerDailyPerformanceInfo(companyId,
 					// employeeId, day,
 					// stampOutput, null, workInfoOfDailyPerformance,
@@ -1747,7 +1766,7 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 			List<TimeLeavingWork> timeLeavingWorks = new ArrayList<>();
 			if (workInfoOfDailyPerformanceUpdate.getRecordInfo() != null) {
 
-				if (workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTimeCode()
+				if (workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTimeCode() != null && workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTimeCode()
 						.equals(workInfoOfDailyPerformanceUpdate.getScheduleInfo().getWorkTimeCode())
 						&& workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTypeCode()
 								.equals(workInfoOfDailyPerformanceUpdate.getScheduleInfo().getWorkTypeCode())) {

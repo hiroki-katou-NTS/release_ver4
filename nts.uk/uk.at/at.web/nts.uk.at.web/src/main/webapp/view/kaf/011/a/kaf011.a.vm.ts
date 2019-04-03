@@ -67,7 +67,26 @@ module nts.uk.at.view.kaf011.a.screenModel {
         
         remainDays: KnockoutObservable<number> = ko.observable(null);
         
-        kaf011ReasonIsEditable: KnockoutObservable<boolean> = ko.observable(false);
+        kaf011ReasonIsEditable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.appTypeSet().displayAppReason() != 0;
+            });
+        kaf011FixedReasonIsEditable: KnockoutObservable<boolean> = ko.computed(() => {
+                return true;
+            });
+        kdl003BtnEnable: KnockoutObservable<boolean> = ko.observable(true);
+        recTimeSwitchEnable: KnockoutObservable<boolean> = ko.observable(true);
+        recTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return true;
+        });
+        absKdl003BtnEnable: KnockoutObservable<boolean> = ko.computed(() => {
+                return this.absWk().changeWorkHoursType();
+            });
+        absTimeInputEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.absWk().enableWkTime() == true;
+        });
+        changeWorkHoursTypeEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return true;
+        });
         constructor() {
             let self = this;
 
@@ -194,7 +213,6 @@ module nts.uk.at.view.kaf011.a.screenModel {
                 self.appTypeSet(new common.AppTypeSet(data.appTypeSet || null));
                 self.recWk().wkTimeName(data.wkTimeName || null);
                 self.recWk().wkTimeCD(data.wkTimeCD || null);
-                self.kaf011ReasonIsEditable(self.appTypeSet().displayAppReason() != 0);
             }
         }
         validateControl() {
@@ -265,6 +283,11 @@ module nts.uk.at.view.kaf011.a.screenModel {
             let self = this,
                 saveCmd = self.genSaveCmd();
 
+            let isCheckLengthError: boolean = !appcommon.CommonProcess.checklenghtReason(self.getReason(), "#appReason");
+            if (isCheckLengthError) {
+                return;
+            }
+            
             let isControlError = self.validateControl();
             if (isControlError) { return; }
 
@@ -346,13 +369,9 @@ module nts.uk.at.view.kaf011.a.screenModel {
             if (!nts.uk.util.isNullOrEmpty(inputReasonID)) {
                 inputReason = _.find(inputReasonList, { 'reasonID': inputReasonID }).reasonTemp;
             }
-            if (!nts.uk.util.isNullOrEmpty(inputReason) && !nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = inputReason + ":" + detailReason;
-            } else if (!nts.uk.util.isNullOrEmpty(inputReason) && nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = inputReason;
-            } else if (nts.uk.util.isNullOrEmpty(inputReason) && !nts.uk.util.isNullOrEmpty(detailReason)) {
-                appReason = detailReason;
-            }
+
+            appReason = inputReason + ":" + detailReason;
+
             return appReason;
         }
 

@@ -172,9 +172,11 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	private TargetPersonRepository targetPersonRepository;
 	
 	@Inject
+	/*並列処理*/
 	private ManagedParallelWithContext parallel;
 	
 	@Inject
+	/*暫定データ登録*/
 	private InterimRemainDataMngRegisterDateChange interimData;
 	
 	/**

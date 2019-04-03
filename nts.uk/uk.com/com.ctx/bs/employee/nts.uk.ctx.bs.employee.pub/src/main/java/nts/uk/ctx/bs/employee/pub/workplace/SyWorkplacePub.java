@@ -36,6 +36,14 @@ public interface SyWorkplacePub {
 	List<SWkpHistExport> findBySId(List<String> sids );
 
 	/**
+	 * find by sids and base date
+	 * @param sids
+	 * @param baseDate
+	 * @return
+	 */
+	List<SWkpHistExport> findBySId(List<String> sids, GeneralDate baseDate);
+
+	/**
 	 * Find wpk ids by wkp code.
 	 *
 	 * @param companyId the company id

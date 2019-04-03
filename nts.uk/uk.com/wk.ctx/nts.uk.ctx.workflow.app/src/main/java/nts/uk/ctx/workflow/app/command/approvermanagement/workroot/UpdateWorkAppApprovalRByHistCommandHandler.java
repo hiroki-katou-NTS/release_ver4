@@ -22,6 +22,8 @@ import nts.uk.ctx.workflow.dom.approvermanagement.workroot.PersonApprovalRoot;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.PersonApprovalRootRepository;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.WorkplaceApprovalRoot;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.WorkplaceApprovalRootRepository;
+import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
+import nts.uk.ctx.workflow.dom.resultrecord.service.CreateDailyApprover;
 import nts.uk.shr.com.context.AppContexts;
 /**
  * 
@@ -42,9 +44,13 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 	private ApproverRepository repoApprover;
 	@Inject
 	private ApprovalBranchRepository repoBranch;
+	@Inject
+	private CreateDailyApprover creDailyAppr;
 	private static final int COMPANY = 0;
 	private static final int WORKPLACE = 1;
 	private static final int EDIT = 1;
+	private static final int COMMON = 0;
+	private static final int PRIVATE = 1;
 	@Override
 	protected void handle(CommandHandlerContext<UpdateWorkAppApprovalRByHistCommand> context) {
 		UpdateWorkAppApprovalRByHistCommand  objUpdateItem = context.getCommand();
@@ -220,7 +226,7 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 			}
 			WorkplaceApprovalRoot wpAppRoot = WorkplaceApprovalRoot.updateSdate(wpAppRootDb.get(), startDate.replace("/","-"));
 			if(lstWpByApp.size() < 2){// history previous is not exist
-				if(objUpdateItem.getEditOrDelete()==1){//TH: edit
+				if(objUpdateItem.getEditOrDelete() == EDIT){//TH: edit
 					repoWorkplace.updateWpApprovalRoot(wpAppRoot);
 				}else{//TH: delete
 					//get all  ApprovalPhase by BranchId
@@ -344,6 +350,19 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 		String startDatePrevious = objUpdateItem.getStartDatePrevious();
 		GeneralDate sDatePrevious = GeneralDate.localDate(LocalDate.parse(startDatePrevious.replace("/","-")));
 		GeneralDate eDatePrevious = sDatePrevious.addDays(-1);//Edate to find history Previous
+		String employeeId = objUpdateItem.getEmployeeId();
+		GeneralDate dateLastest = null;
+		//ドメインモデル「就業承認ルート履歴」を取得する
+		if(objUpdateItem.getEditOrDelete() == EDIT && objUpdateItem.getCheckMode() == COMMON){//07.履歴編集を実行する(まとめて設定モード)
+			Optional<PersonApprovalRoot> histL = repoPerson.getHistLastestCom(companyId, employeeId);
+			if(histL.isPresent()) dateLastest = histL.get().getEmploymentAppHistoryItems().get(0).getDatePeriod().start();
+		}
+		if(objUpdateItem.getEditOrDelete() == EDIT && objUpdateItem.getCheckMode() == PRIVATE){//10.履歴編集を実行する(申請個別設定モード)
+			Integer employmentRootAtr = objUpdateItem.getLstUpdate().get(0).getEmployRootAtr();
+			Integer applicationType = objUpdateItem.getLstUpdate().get(0).getApplicationType();
+			Optional<PersonApprovalRoot> histL = repoPerson.getHistLastestPri(companyId, employeeId, employmentRootAtr, applicationType);
+			if(histL.isPresent()) dateLastest = histL.get().getEmploymentAppHistoryItems().get(0).getDatePeriod().start();
+		}
 		for (UpdateHistoryDto updateItem : lstHist) {
 			//find history by type and 
 			List<PersonApprovalRoot> lstPsByApp = repoPerson.getPsApprovalRootByType(companyId, objUpdateItem.getEmployeeId(), updateItem.getApplicationType(), updateItem.getEmployRootAtr());
@@ -354,9 +373,9 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 			}
 			PersonApprovalRoot psAppRoot = PersonApprovalRoot.updateSdate(psAppRootDb.get(), startDate.replace("/","-"));
 			if(lstPsByApp.size() < 2){// history previous is not exist
-				if(objUpdateItem.getEditOrDelete()==1){//TH: edit
+				if(objUpdateItem.getEditOrDelete() == EDIT){//TH: edit hist (J)
 					repoPerson.updatePsApprovalRoot(psAppRoot);
-				}else{//TH: delete
+				}else{//TH: delete hist (J)
 					//get all  ApprovalPhase by BranchId
 					List<ApprovalPhase> lstAPhase = repoAppPhase.getAllApprovalPhasebyCode(companyId, psAppRoot.getBranchId());
 					//check: if data(lstAPhase) > 0: delete
@@ -374,7 +393,7 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 					repoBranch.deleteBranch(companyId, psAppRoot.getBranchId());
 				}
 			}else{// history previous is exist
-				if(objUpdateItem.getEditOrDelete()==1){//edit
+				if(objUpdateItem.getEditOrDelete() == EDIT){//edit
 					//history previous
 					PersonApprovalRoot ps = lstPsByApp.get(1);
 					String sDatePre = ps.getEmploymentAppHistoryItems().get(0).start().toString();
@@ -383,22 +402,9 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 						//エラーメッセージ(Msg_156)(error message (Msg_156))
 						throw new BusinessException("Msg_156",sDatePre);
 					}
-//					//history previous 
-//					PersonApprovalRoot psAppRootUpdate= PersonApprovalRoot.updateEdate(ps,  endDateUpdate);
-//					//update history previous
-//					repoPerson.updatePsApprovalRoot(psAppRootUpdate);
 					//update history current
 					repoPerson.updatePsApprovalRoot(psAppRoot);
 				}else{//delete 
-//					//find history previous
-//					List<PersonApprovalRoot> lstOld= repoPerson.getPsApprovalRootByEdate(companyId, psAppRoot.getEmployeeId(), eDatePrevious, psAppRoot.getApplicationType()== null ? null : psAppRoot.getApplicationType().value, psAppRoot.getEmploymentRootAtr().value);
-//					if(!lstOld.isEmpty()){
-//						//history previous
-//						PersonApprovalRoot psOld = lstOld.get(0);
-//						PersonApprovalRoot psAppRootUpdate= PersonApprovalRoot.updateEdate(psOld, endDateDelete);
-//						//update history previous
-//						repoPerson.updatePsApprovalRoot(psAppRootUpdate);
-//					}
 					//get all  ApprovalPhase by BranchId
 					List<ApprovalPhase> lstAPhase = repoAppPhase.getAllApprovalPhasebyCode(companyId, psAppRoot.getBranchId());
 					//check: if data(lstAPhase) > 0: delete
@@ -417,7 +423,7 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 				}
 			}
 		}
-		//xu li update
+		//xu li update hist old
 		if(objUpdateItem.getCheckMode() == 0){
 			// xu li mode chung
 			List<PersonApprovalRoot> lstPsByApp = repoPerson.getPsAppRootLastest(companyId,  objUpdateItem.getEmployeeId(), eDatePrevious);
@@ -458,6 +464,27 @@ public class UpdateWorkAppApprovalRByHistCommandHandler extends CommandHandler<U
 			}
 			
 		}
+		//EA修正履歴 No.3268
+		//EA修正履歴 No.3271
+		//EA修正履歴 No.3273
+		//EA修正履歴 No.3274
+		//EA修正履歴 No.3290
+		if(objUpdateItem.getEditOrDelete() == EDIT){//Edit
+			//履歴の開始日とシステム日付をチェックする
+			if(sDate.after(GeneralDate.today()) || dateLastest == null){//履歴の開始日＞システム日付
+				return;
+			}
+			if(dateLastest.before(sDate)){//取得した開始日(1)＜新しい履歴の開始日
+				//指定社員の中間データを作成する（日別）
+				creDailyAppr.createDailyApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_DAY, dateLastest, dateLastest);
+				//指定社員の中間データを作成する（月別）
+				creDailyAppr.createDailyApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_MONTH, dateLastest, dateLastest);
+			}
+		}
+		//指定社員の中間データを作成する（日別）
+		creDailyAppr.createDailyApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_DAY, sDate, sDate);
+		//指定社員の中間データを作成する（月別）
+		creDailyAppr.createDailyApprover(objUpdateItem.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_MONTH, sDate, sDate);
 	}
 	/**
 	 * check 編集後の履歴の開始年月日 > 取得した履歴の開始年月日 が falseの場合

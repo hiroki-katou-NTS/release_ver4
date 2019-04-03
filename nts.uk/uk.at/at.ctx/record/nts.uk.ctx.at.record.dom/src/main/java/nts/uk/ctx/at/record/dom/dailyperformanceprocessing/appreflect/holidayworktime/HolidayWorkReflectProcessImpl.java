@@ -71,6 +71,14 @@ public class HolidayWorkReflectProcessImpl implements HolidayWorkReflectProcess{
 		}
 		//事前休出時間の反映
 		return workUpdate.updateWorkTimeFrame(holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate(), tmp, isPre, daily, false);
+	}
+
+	@Override
+	public void reflectBreakTimeFrame(HolidayWorktimePara holidayWorkPara, boolean isPre, IntegrationOfDaily daily) {
+		workUpdate.updateBreakTime(holidayWorkPara.getHolidayWorkPara().getMapBreakTimeFrame(), 
+				holidayWorkPara.isRecordReflectBreakFlg(), 
+				isPre, 
+				daily);
 		
 	}
 

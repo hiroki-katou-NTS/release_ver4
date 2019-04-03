@@ -30,6 +30,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -237,11 +238,9 @@ public class RecoveryStorageService {
 				// -- Tổng hợp ID Nhân viên duy nhất từ List Data
 				hashId.addAll(listSid);
 
-				if (listSid.size() >= 1) {
-					DataRecoveryTable targetData = new DataRecoveryTable(uploadId,
-							tableListByCategory.getTables().get(j).getInternalFileName());
-					targetDataByCate.add(targetData);
-				}
+				DataRecoveryTable targetData = new DataRecoveryTable(uploadId,
+						tableListByCategory.getTables().get(j).getInternalFileName(), listSid.isEmpty() ? false : true);
+				targetDataByCate.add(targetData);
 			}
 
 			// 対象社員コード＿ID
@@ -264,9 +263,17 @@ public class RecoveryStorageService {
 				}
 			}
 			// - end
-
+			
 			// check employeeId in Target of PreformDataRecovery
 			List<Target> listTarget = performDataRecoveryRepository.findByDataRecoveryId(dataRecoveryProcessId);
+						
+			// trường hợp list nhân viên tổng hợp từ các file excel băng null.
+			// thì lấy list nhân viên từ màn hình truyền lên.
+			if (hashId.isEmpty()) {
+				employeeInfos = listTarget.stream().map(i -> {
+					return new EmployeeDataReInfoImport(null, null, i.getSid(), i.getScd().orElse(""), null, null,null);
+				}).collect(Collectors.toList());
+			}
 
 			Optional<PerformDataRecovery> performDataRecovery = performDataRecoveryRepository
 					.getPerformDatRecoverById(dataRecoveryProcessId);
@@ -385,8 +392,7 @@ public class RecoveryStorageService {
 						performDataRecovery, resultsSetting, true, csvByteReadMaper);
 				long endTime = System.nanoTime();
 				long duration = (endTime - startTime) / 1000000; // ms;
-				System.out
-						.println("========= Tbl " + i++ + " " + dataRecoveryTable.getFileNameCsv() + " => " + duration);
+				System.out.println("========= Tbl " + i++ + " " + dataRecoveryTable.getFileNameCsv() + " => " + duration);
 
 			} catch (Exception e) {
 				// DELETE/INSERT error
@@ -420,7 +426,8 @@ public class RecoveryStorageService {
 		try {
 
 			System.out.println("============= employeeId " + employeeId);
-			if (employeeId != null) {
+			
+			if (employeeId != null && dataRecoveryTable.isHasSidInCsv()) {
 				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
 				reader.setCharset("Shift_JIS");
 				reader.readFilter(1000, dataRow -> {
@@ -432,6 +439,7 @@ public class RecoveryStorageService {
 
 						long startTime = System.nanoTime();
 
+						StringBuilder DELETE_INSERT_TO_TABLE = new StringBuilder("");
 						StringBuilder INSERT_TO_TABLE = new StringBuilder("");
 
 						List<Integer> listCount = new ArrayList<>();
@@ -548,7 +556,7 @@ public class RecoveryStorageService {
 							indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
 
 							for (int j = 5; j < row.columnLength(); j++) {
-
+								System.out.println("==== J " + j + " row length " + row.columnLength());
 								// add columns name
 								INSERT_BY_TABLE.append(targetDataHeader.get(j) + ", ");
 								boolean anyNonEmpty = columnNotNull.stream().anyMatch(x -> x.equals(targetDataHeader));
@@ -569,7 +577,12 @@ public class RecoveryStorageService {
 							INSERT_BY_TABLE.append(values.toString().replaceAll(",$", ")"));
 
 							// query.executeUpdate();
-							INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+							if (count == 1) {
+								DELETE_INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+							} else if (count == 0) {
+								INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+							}
+							
 							listCount.add(count);
 							check++;
 						}
@@ -577,11 +590,12 @@ public class RecoveryStorageService {
 						// insert delete data
 						if (check > 0) {
 							if (tableUse) {
+
 								crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										INSERT_TO_TABLE);
+										DELETE_INSERT_TO_TABLE , INSERT_TO_TABLE);
 							} else {
 								crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										INSERT_TO_TABLE);
+										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
 							}
 						}
 						long endTime = System.nanoTime();
@@ -601,6 +615,7 @@ public class RecoveryStorageService {
 
 						long startTime = System.nanoTime();
 
+						StringBuilder DELETE_INSERT_TO_TABLE = new StringBuilder("");
 						StringBuilder INSERT_TO_TABLE = new StringBuilder("");
 
 						List<Integer> listCount = new ArrayList<>();
@@ -740,7 +755,12 @@ public class RecoveryStorageService {
 								INSERT_BY_TABLE.append(values.toString().replaceAll(",$", ")"));
 
 								// query.executeUpdate();
-								INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+								if(count == 1) {
+									DELETE_INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+								}else if(count == 0) {
+									INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+								}
+								
 								listCount.add(count);
 								check++;
 							}
@@ -750,10 +770,10 @@ public class RecoveryStorageService {
 						if (check > 0) {
 							if (tableUse) {
 								crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										INSERT_TO_TABLE);
+										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
 							} else {
 								crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										INSERT_TO_TABLE);
+										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
 							}
 						}
 						long endTime = System.nanoTime();
@@ -793,15 +813,11 @@ public class RecoveryStorageService {
 				return DataRecoveryOperatingCondition.INTERRUPTION_END;
 			}
 
-			// List<List<String>> targetDataRecovery =
-			// CsvFileUtil.getAllRecord(uploadId,
-			// tableList.getInternalFileName());
+			Set<String> hasSidInCsv = CsvFileUtil.getListSid(uploadId, tableList.getTableEnglishName().toString());
 
-			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, tableList.getInternalFileName());
-			// 期間別データ処理
-			// Optional<TableList> tableList =
-			// performDataRecoveryRepository.getByInternal(a.getInternalFileName(),
-			// dataRecoveryProcessId);
+			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, tableList.getInternalFileName(), hasSidInCsv.isEmpty() ? false : true);
+			
+			
 			condition = exDataTabeRangeDate(dataRecoveryTable, Optional.of(tableList), dataRecoveryProcessId,
 					csvByteReadMaper);
 
@@ -865,20 +881,30 @@ public class RecoveryStorageService {
 	}
 
 	public void crudRow(List<Integer> listCount, List<Map<String, String>> lsiFiledWhere, String TABLE_NAME,
-			String namePhysicalCid, String cidCurrent, StringBuilder insertToTable) {
+			String namePhysicalCid, String cidCurrent, StringBuilder deleteInsertToTable, StringBuilder insertToTable) {
 		try {
-			List<Map<String, String>> lsiFiledWhere2 = new ArrayList<>();
+			List<Map<String, String>> listFiledWhereToDelAndInsert = new ArrayList<>();
+			List<Map<String, String>> listFiledWhereToInsert = new ArrayList<>();
 			for (int i = 0; i < listCount.size(); i++) {
 				if (listCount.get(i) == 1) {
-					lsiFiledWhere2.add(lsiFiledWhere.get(i));
+					listFiledWhereToDelAndInsert.add(lsiFiledWhere.get(i));
+				}else if(listCount.get(i) == 0){
+					listFiledWhereToInsert.add(lsiFiledWhere.get(i));
 				}
 			}
-			if (lsiFiledWhere2.size() > 0) {
-				performDataRecoveryRepository.deleteDataExitTableByVkey(lsiFiledWhere2, TABLE_NAME, namePhysicalCid,
+			if (listFiledWhereToDelAndInsert.size() > 0) {
+				// truong hop ban ghi do van con ton tai trong database : thi xoa di va insert lai
+				performDataRecoveryRepository.deleteDataExitTableByVkey(listFiledWhereToDelAndInsert, TABLE_NAME, namePhysicalCid,
 						cidCurrent);
 
+				performDataRecoveryRepository.insertDataTable(deleteInsertToTable);
+			} 
+			
+			if(listFiledWhereToInsert.size() > 0){
+				// truowng hop ban ghi do bi xoa di roi : thi chỉ cần insert vào thôi.
 				performDataRecoveryRepository.insertDataTable(insertToTable);
 			}
+			
 
 		} catch (Exception e) {
 			LOGGER.info("Error delete data for table " + TABLE_NAME);
@@ -887,18 +913,26 @@ public class RecoveryStorageService {
 	}
 
 	public void crudRowTransaction(List<Integer> listCount, List<Map<String, String>> lsiFiledWhere, String TABLE_NAME,
-			String namePhysicalCid, String cidCurrent, StringBuilder insertToTable) {
+			String namePhysicalCid, String cidCurrent, StringBuilder deleteInsertToTable, StringBuilder insertToTable) {
 		try {
-			List<Map<String, String>> lsiFiledWhere2 = new ArrayList<>();
+			List<Map<String, String>> listFiledWhereToDelAndInsert = new ArrayList<>();
+			List<Map<String, String>> listFiledWhereToInsert = new ArrayList<>();
 			for (int i = 0; i < listCount.size(); i++) {
 				if (listCount.get(i) == 1) {
-					lsiFiledWhere2.add(lsiFiledWhere.get(i));
+					listFiledWhereToDelAndInsert.add(lsiFiledWhere.get(i));
+				}else if(listCount.get(i) == 0){
+					listFiledWhereToInsert.add(lsiFiledWhere.get(i));
 				}
 			}
-			if (lsiFiledWhere2.size() > 0) {
-				performDataRecoveryRepository.deleteTransactionDataExitTableByVkey(lsiFiledWhere2, TABLE_NAME,
+			if (listFiledWhereToDelAndInsert.size() > 0) {
+				// truong hop ban ghi do van con ton tai trong database : thi xoa di va insert lai
+				performDataRecoveryRepository.deleteTransactionDataExitTableByVkey(listFiledWhereToDelAndInsert, TABLE_NAME,
 						namePhysicalCid, cidCurrent);
 
+				performDataRecoveryRepository.insertTransactionDataTable(deleteInsertToTable);
+			}
+			if(listFiledWhereToInsert.size() > 0){
+				
 				performDataRecoveryRepository.insertTransactionDataTable(insertToTable);
 			}
 

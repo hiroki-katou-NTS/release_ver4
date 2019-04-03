@@ -17,6 +17,7 @@ public class HolidayWorkFrameTime {
 	//休出枠時間No
 	private HolidayWorkFrameNo holidayFrameNo;
 	//休出時間
+	@Setter
 	private Finally<TimeDivergenceWithCalculation> holidayWorkTime;
 	//振替時間
 	private Finally<TimeDivergenceWithCalculation> transferTime;

@@ -47,7 +47,7 @@
 					        <tr>
 					            <td class="inputLabel"><div data-bind = "text: taskName" /></td>
 					            <com:ko-if bind="taskId === 5">
-					            	<td colspan="2">未実施</td>
+					            	<td colspan="2"><div data-bind = "text: status" /></td>
 					            </com:ko-if>
 					            <com:ko-if bind="taskId !== 5">
 						            <td><div data-bind = "text: status" /></td>
