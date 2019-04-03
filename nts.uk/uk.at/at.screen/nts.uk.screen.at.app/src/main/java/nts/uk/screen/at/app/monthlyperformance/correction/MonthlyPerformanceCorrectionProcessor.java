@@ -467,6 +467,15 @@ public class MonthlyPerformanceCorrectionProcessor {
 				List<MonthlyModifyResult> results = new GetDataMonthly(employeeIds, new YearMonth(yearMonth),
 						ClosureId.valueOf(screenDto.getClosureId()), screenDto.getClosureDate().toDomain(), ITEM_ID_ALL,
 						monthlyModifyQueryProcessor).call();
+				
+				//指定した年月の期間を算出する
+				DatePeriod datePeriodClosure = closureService.getClosurePeriod(screenDto.getClosureId().intValue(), new YearMonth(yearMonth));
+				//社員ID（List）と指定期間から所属会社履歴項目を取得
+				// RequestList211
+				List<AffCompanyHistImport> lstAffComHist = syCompanyRecordAdapter
+						.getAffCompanyHistByEmployee(employeeIds, datePeriodClosure);
+				
+				screenDto.setLstAffComHist(lstAffComHist);
 
 				// lay lai employeeID cua nhung nhan vien co du lieu
 				employeeIds = results.stream().map(e -> e.getEmployeeId()).collect(Collectors.toList());
@@ -794,7 +803,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 		// loc lai list item cua tung nhan vien theo cac item lay duoc truoc do
 		results.forEach(r -> {
 			r.setItems(r.getItems().stream().filter(i -> attdanceIds.contains(i.getItemId())).collect(Collectors.toList()));
-		});;
+		});
 		if (results.size() > 0) {
 			screenDto.getItemValues().addAll(results.get(0).getItems());
 		}
