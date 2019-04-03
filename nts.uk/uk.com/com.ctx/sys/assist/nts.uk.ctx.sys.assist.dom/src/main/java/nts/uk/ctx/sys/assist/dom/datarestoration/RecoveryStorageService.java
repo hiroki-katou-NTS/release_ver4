@@ -30,6 +30,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -238,7 +239,7 @@ public class RecoveryStorageService {
 				hashId.addAll(listSid);
 
 				DataRecoveryTable targetData = new DataRecoveryTable(uploadId,
-						tableListByCategory.getTables().get(j).getInternalFileName());
+						tableListByCategory.getTables().get(j).getInternalFileName(), listSid.isEmpty() ? false : true);
 				targetDataByCate.add(targetData);
 			}
 
@@ -391,8 +392,7 @@ public class RecoveryStorageService {
 						performDataRecovery, resultsSetting, true, csvByteReadMaper);
 				long endTime = System.nanoTime();
 				long duration = (endTime - startTime) / 1000000; // ms;
-				System.out
-						.println("========= Tbl " + i++ + " " + dataRecoveryTable.getFileNameCsv() + " => " + duration);
+				System.out.println("========= Tbl " + i++ + " " + dataRecoveryTable.getFileNameCsv() + " => " + duration);
 
 			} catch (Exception e) {
 				// DELETE/INSERT error
@@ -426,7 +426,8 @@ public class RecoveryStorageService {
 		try {
 
 			System.out.println("============= employeeId " + employeeId);
-			if (employeeId != null) {
+			
+			if (employeeId != null && dataRecoveryTable.isHasSidInCsv()) {
 				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
 				reader.setCharset("Shift_JIS");
 				reader.readFilter(1000, dataRow -> {
@@ -555,7 +556,7 @@ public class RecoveryStorageService {
 							indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
 
 							for (int j = 5; j < row.columnLength(); j++) {
-
+								System.out.println("==== J " + j + " row length " + row.columnLength());
 								// add columns name
 								INSERT_BY_TABLE.append(targetDataHeader.get(j) + ", ");
 								boolean anyNonEmpty = columnNotNull.stream().anyMatch(x -> x.equals(targetDataHeader));
@@ -589,6 +590,7 @@ public class RecoveryStorageService {
 						// insert delete data
 						if (check > 0) {
 							if (tableUse) {
+
 								crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
 										DELETE_INSERT_TO_TABLE , INSERT_TO_TABLE);
 							} else {
@@ -811,15 +813,11 @@ public class RecoveryStorageService {
 				return DataRecoveryOperatingCondition.INTERRUPTION_END;
 			}
 
-			// List<List<String>> targetDataRecovery =
-			// CsvFileUtil.getAllRecord(uploadId,
-			// tableList.getInternalFileName());
+			Set<String> hasSidInCsv = CsvFileUtil.getListSid(uploadId, tableList.getTableEnglishName().toString());
 
-			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, tableList.getInternalFileName());
-			// 期間別データ処理
-			// Optional<TableList> tableList =
-			// performDataRecoveryRepository.getByInternal(a.getInternalFileName(),
-			// dataRecoveryProcessId);
+			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, tableList.getInternalFileName(), hasSidInCsv.isEmpty() ? false : true);
+			
+			
 			condition = exDataTabeRangeDate(dataRecoveryTable, Optional.of(tableList), dataRecoveryProcessId,
 					csvByteReadMaper);
 
