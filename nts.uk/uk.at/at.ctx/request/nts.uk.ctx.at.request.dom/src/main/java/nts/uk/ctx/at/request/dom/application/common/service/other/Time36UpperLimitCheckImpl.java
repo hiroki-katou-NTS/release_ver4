@@ -144,10 +144,17 @@ public class Time36UpperLimitCheckImpl implements Time36UpperLimitCheck {
 				appOvertimeDetail.getLimitAlarmTime(), appOvertimeDetail.getLimitErrorTime(),
 				appOvertimeDetail.getExceptionLimitErrorTime(), appOvertimeDetail.getExceptionLimitErrorTime());
 		if (AgreementTimeStatusOfMonthly.EXCESS_LIMIT_ERROR.equals(checkAgreement)
-				|| AgreementTimeStatusOfMonthly.EXCESS_EXCEPTION_LIMIT_ERROR.equals(checkAgreement)
-				|| AgreementTimeStatusOfMonthly.EXCESS_EXCEPTION_LIMIT_ALARM.equals(checkAgreement)
-				|| AgreementTimeStatusOfMonthly.EXCESS_LIMIT_ERROR_SP.equals(checkAgreement)) {
+				|| AgreementTimeStatusOfMonthly.EXCESS_EXCEPTION_LIMIT_ERROR.equals(checkAgreement)) {
 			errorFlg = true;
+			// 「時間外時間の詳細」．年月は取得した超過月詳細に存在するかチェックする
+			if (!appOvertimeDetail.existOverMonth(appOvertimeDetail.getYearMonth())) {
+				// 「時間外時間の詳細」．36年間超過回数 += 1
+				appOvertimeDetail.plusNumOfYear36Over();
+				// 「時間外時間の詳細」．36年間超過月.Add(「時間外時間の詳細」．年月)
+				appOvertimeDetail.addOverMonth(appOvertimeDetail.getYearMonth());
+			}
+		} else if(AgreementTimeStatusOfMonthly.EXCESS_EXCEPTION_LIMIT_ALARM.equals(checkAgreement)
+				|| AgreementTimeStatusOfMonthly.EXCESS_LIMIT_ERROR_SP.equals(checkAgreement)){
 			// 「時間外時間の詳細」．年月は取得した超過月詳細に存在するかチェックする
 			if (!appOvertimeDetail.existOverMonth(appOvertimeDetail.getYearMonth())) {
 				// 「時間外時間の詳細」．36年間超過回数 += 1
@@ -189,13 +196,21 @@ public class Time36UpperLimitCheckImpl implements Time36UpperLimitCheck {
 				appOvertimeDetail.getLimitAlarmTime(), appOvertimeDetail.getLimitErrorTime(),
 				appOvertimeDetail.getExceptionLimitErrorTime(), appOvertimeDetail.getExceptionLimitErrorTime());
 		if (AgreementTimeStatusOfMonthly.EXCESS_LIMIT_ERROR.equals(checkAgreement)
-				|| AgreementTimeStatusOfMonthly.EXCESS_EXCEPTION_LIMIT_ERROR.equals(checkAgreement)
-				|| AgreementTimeStatusOfMonthly.EXCESS_EXCEPTION_LIMIT_ALARM.equals(checkAgreement)
-				|| AgreementTimeStatusOfMonthly.EXCESS_LIMIT_ERROR_SP.equals(checkAgreement)) {
+				|| AgreementTimeStatusOfMonthly.EXCESS_EXCEPTION_LIMIT_ERROR.equals(checkAgreement)) {
 			errorFlg = true;
 			// 「時間外時間の詳細」．年月は「時間外時間の詳細」．36年間超過月に存在するかチェックする
 			if (!appOvertimeDetail.existOverMonth(appOvertimeDetail.getYearMonth())) {
 				// 「時間外時間の詳細」．36年間超過回数 +=
+				appOvertimeDetail.plusNumOfYear36Over();
+				// 1、「時間外時間の詳細」．36年間超過月.Add(「時間外時間の詳細」．年月)
+				appOvertimeDetail.addOverMonth(appOvertimeDetail.getYearMonth());
+			}
+		} else if(AgreementTimeStatusOfMonthly.EXCESS_EXCEPTION_LIMIT_ALARM.equals(checkAgreement)
+				|| AgreementTimeStatusOfMonthly.EXCESS_LIMIT_ERROR_SP.equals(checkAgreement)){
+			// 「時間外時間の詳細」．年月は「時間外時間の詳細」．36年間超過月に存在するかチェックする
+			if (!appOvertimeDetail.existOverMonth(appOvertimeDetail.getYearMonth())) {
+				// 「時間外時間の詳細」．36年間超過回数 +=
+				appOvertimeDetail.plusNumOfYear36Over();
 				// 1、「時間外時間の詳細」．36年間超過月.Add(「時間外時間の詳細」．年月)
 				appOvertimeDetail.addOverMonth(appOvertimeDetail.getYearMonth());
 			}
