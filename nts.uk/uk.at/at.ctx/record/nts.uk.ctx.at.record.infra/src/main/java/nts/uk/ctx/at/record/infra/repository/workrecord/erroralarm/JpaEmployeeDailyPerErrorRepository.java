@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -419,6 +420,57 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 				.setParameter("strDate", strDate)
 				.setParameter("endDate", endDate)
 				.getList().size() > 0;
+	}
+
+	@Override
+	public List<EmployeeDailyPerError> getByEmpIDAndPeriod(List<String> employeeID, DatePeriod processingDate) {
+		if(employeeID.isEmpty())
+			return Collections.emptyList();
+		
+		String GET_BY_LIST_EMP_AND_PERIOD = "SELECT a.*,b.* FROM KRCDT_SYAIN_DP_ER_LIST a"
+				+ " LEFT JOIN KRCDT_ER_ATTENDANCE_ITEM b"
+				+ " ON b.ID = a.ID "
+				+ " WHERE a.PROCESSING_DATE <= ?"
+				+ " AND a.PROCESSING_DATE >= ?"
+				+ " AND  a.SID IN (" ;
+		
+		for(int i = 0;i<employeeID.size();i++) {
+			GET_BY_LIST_EMP_AND_PERIOD = GET_BY_LIST_EMP_AND_PERIOD+"?";
+			if(i < employeeID.size()-1) {
+				GET_BY_LIST_EMP_AND_PERIOD = GET_BY_LIST_EMP_AND_PERIOD+",";
+			}
+		}
+		GET_BY_LIST_EMP_AND_PERIOD = GET_BY_LIST_EMP_AND_PERIOD+")";
+		try (PreparedStatement statement = this.connection().prepareStatement(GET_BY_LIST_EMP_AND_PERIOD)) {
+			statement.setDate(1, Date.valueOf(processingDate.end().localDate()));
+			statement.setDate(2, Date.valueOf(processingDate.start().localDate()));
+			for(int i = 0;i<employeeID.size();i++) {
+				statement.setString(i+3, employeeID.get(i));
+			}
+			
+			List<EmployeeDailyPerError> results =  new NtsResultSet(statement.executeQuery()).getList(rs -> { 
+				return new EmployeeDailyPerError(
+						rs.getString("ID"),
+						rs.getString("CID"), 
+						rs.getString("SID"),
+						rs.getGeneralDate("PROCESSING_DATE"),
+						new ErrorAlarmWorkRecordCode(rs.getString("ERROR_CODE")),
+						Arrays.asList(rs.getInt("ATTENDANCE_ITEM_ID")),
+						rs.getInt("ERROR_CANCELABLE"),
+						rs.getString("ERROR_MESSAGE"));
+			});
+			
+			List<EmployeeDailyPerError> resultReturn = new ArrayList<>();
+			Map<String, List<EmployeeDailyPerError>> groupResult = results.stream().collect(Collectors.groupingBy(x -> x.getId()));
+			groupResult.forEach((key, value) ->{
+				 List<Integer> id = value.stream().flatMap(x -> x.getAttendanceItemList().stream()).collect(Collectors.toList());
+				 value.get(0).setAttendanceItemList(id);
+				 resultReturn.add(value.get(0));
+			});
+			return resultReturn;
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

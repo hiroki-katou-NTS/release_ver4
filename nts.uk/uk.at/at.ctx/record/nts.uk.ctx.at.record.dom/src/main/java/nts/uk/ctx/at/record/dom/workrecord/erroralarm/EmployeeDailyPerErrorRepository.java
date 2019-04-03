@@ -43,4 +43,5 @@ public interface EmployeeDailyPerErrorRepository {
 	 */
 	boolean checkErrorByPeriodDate(String companyID, String employeeID, GeneralDate strDate, GeneralDate endDate);
 	
+	List<EmployeeDailyPerError> getByEmpIDAndPeriod(List<String> employeeID, DatePeriod processingDate);
 }
