@@ -8,7 +8,7 @@ import nts.uk.ctx.at.shared.dom.attendance.util.ItemConst;
 import nts.uk.ctx.at.shared.dom.attendance.util.anno.AttendanceItemLayout;
 import nts.uk.ctx.at.shared.dom.attendance.util.anno.AttendanceItemValue;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
-import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 
 /** 乖離時間 */
 @Data
@@ -64,7 +64,7 @@ public class DivergenceTimeDto implements ItemConst {
 				domain.getDivTimeId());
 	}
 
-	private static Integer getAttendanceTime(AttendanceTime domain) {
+	private static Integer getAttendanceTime(AttendanceTimeOfExistMinus domain) {
 		return domain == null ? 0 : domain.valueAsMinutes();
 	}
 }
