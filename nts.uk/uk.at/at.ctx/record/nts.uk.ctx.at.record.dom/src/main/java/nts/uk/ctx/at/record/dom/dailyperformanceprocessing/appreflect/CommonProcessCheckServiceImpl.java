@@ -133,7 +133,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 				integrationOfDaily = timeLeavingService.correct(companyId, integrationOfDaily, optWorkingCondition, workTypeInfor, true).getData();
 				// 申請された時間を補正する
 				integrationOfDaily = overTimeService.correct(integrationOfDaily, workTypeInfor);
-				if(!this.isReflectBreakTime(integrationOfDaily.getEditState())) {
+				if(workTypeInfor.isPresent() && !workTypeInfor.get().getDailyWork().isHolidayWork()) {
 					//休憩時間帯を補正する	
 					integrationOfDaily = breakTimeDailyService.correct(companyId, integrationOfDaily, workTypeInfor, true).getData();	
 				}				
@@ -175,6 +175,11 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 			//休日出勤申請しか反映してない
 			if(this.isReflectBreakTime(lstEditState)
 					&& workTypeInfor.isPresent() && workTypeInfor.get().getDailyWork().isHolidayWork()) {
+				if(lstBeforeBreakTimeInfor.size() == 1
+						&& lstBeforeBreakTimeInfor.get(0).getBreakType() != breakTimeInfor.getBreakType()) {
+					integrationOfDaily.getBreakTime().add(breakTimeInfor);
+					breakTimeRepo.update(integrationOfDaily.getBreakTime());
+				}
 				return integrationOfDaily;
 			}
 		}
@@ -199,7 +204,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 			List<EditStateOfDailyPerformance> lstEditCheck = lstEditState.stream()
 					.filter(x -> x.getAttendanceItemId() == num_1 || x.getAttendanceItemId() == num_2)
 					.collect(Collectors.toList());
-			if(!lstEditCheck.isEmpty() && lstEditCheck.get(0).getEditStateSetting() == EditStateSetting.REFLECT_APPLICATION) {
+			if(!lstEditCheck.isEmpty() && lstEditCheck.size() == 2
+					&& lstEditCheck.get(0).getEditStateSetting() == EditStateSetting.REFLECT_APPLICATION) {
 				lstEditCheck.clear();
 				integrationOfDaily.getBreakTime().stream().forEach(x -> {
 					x.getBreakTimeSheets().remove(count);
@@ -234,9 +240,9 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	private boolean isReflectBreakTime(List<EditStateOfDailyPerformance> lstEditState) {
 		List<EditStateOfDailyPerformance> lstEditReflect = lstEditState.stream()
 				.filter(x -> (workTimeUpdate.lstBreakStartTime().contains(x.getAttendanceItemId()) 
-							|| workTimeUpdate.lstBreakEndTime().contains(x.getAttendanceItemId())
+							|| workTimeUpdate.lstBreakEndTime().contains(x.getAttendanceItemId())                            
 							|| workTimeUpdate.lstScheBreakStartTime().contains(x.getAttendanceItemId())
-							|| workTimeUpdate.lstScheBreakEndTime().contains(x.getAttendanceItemId())) 
+                            || workTimeUpdate.lstScheBreakEndTime().contains(x.getAttendanceItemId()))
 						&& x.getEditStateSetting() == EditStateSetting.REFLECT_APPLICATION)
 				.collect(Collectors.toList());
 		return lstEditReflect.isEmpty() ? false : true;
