@@ -1318,21 +1318,6 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			itemValueList = converter.convert(attendanceItemIdList);
 		}
 
-		/*ログ差し込み*/
-		org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-		log.info("任意項目計算前の残業値を出力します。");
-		if(integrationOfDaily.getAttendanceTimeOfDailyPerformance() != null
-		&& integrationOfDaily.getAttendanceTimeOfDailyPerformance().isPresent()
-		&& integrationOfDaily.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork() != null
-		&& integrationOfDaily.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().isPresent()) {
-			for(OverTimeFrameTime otFrame : integrationOfDaily.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get().getOverTimeWorkFrameTime()) {
-				log.info("枠Ｎｏ："+otFrame.getOverWorkFrameNo());
-				log.info("残業時間："+otFrame.getOverTimeWork().getTime());
-				log.info("計算残業時間："+otFrame.getOverTimeWork().getCalcTime());
-			}
-		}
-		/*ログ差し込み*/
-		
 		// 任意項目の計算
 		integrationOfDaily.setAnyItemValue(Optional.of(AnyItemValueOfDaily.caluculationAnyItem(companyId, employeeId,
 				targetDate, optionalItems, formulaList, empCondition, Optional.of(converter), bsEmploymentHistOpt)));

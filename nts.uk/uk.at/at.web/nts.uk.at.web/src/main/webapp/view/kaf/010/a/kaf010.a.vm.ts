@@ -628,6 +628,11 @@ module nts.uk.at.view.kaf010.a.viewmodel {
                     let endTimeAdd = self.restTime()[i+1].endTime();
                     let attendanceIdAdd = self.restTime()[i+1].attendanceID();
                     let frameNoAdd = self.restTime()[i+1].frameNo();
+                } else {
+                    let startTimeAdd = null;
+                    let endTimeAdd = null;
+                    let attendanceIdAdd = null;
+                    let frameNoAdd = null;    
                 }
                 if(nts.uk.util.isNullOrEmpty(startTime) && !nts.uk.util.isNullOrEmpty(endTime)){
                     dialog.alertError({messageId:"Msg_307"})

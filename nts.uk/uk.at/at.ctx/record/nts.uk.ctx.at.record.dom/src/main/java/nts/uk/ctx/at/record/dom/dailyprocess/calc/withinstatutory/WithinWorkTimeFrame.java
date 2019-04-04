@@ -650,10 +650,13 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 		}
 		
 		//割増の休暇の就業時間計算方法詳細．遅刻・早退を控除する
-		NotUseAtr premiumDeductLateLeaveEarly = holidayCalcMethodSet.getPremiumCalcMethodOfHoliday().getAdvanceSet().isPresent()
+		//2019/04/03 大塚緊急対応　通常勤務時に割増の休暇加算設定を見ないよう対応↓
+		//現時点では、割増に入る(premiumAtr=割増)ことは無いが、念には念を入れての対応 hoshina
+		//NotUseAtr premiumDeductLateLeaveEarly = holidayCalcMethodSet.getPremiumCalcMethodOfHoliday().getAdvanceSet().isPresent()
+		NotUseAtr premiumDeductLateLeaveEarly = holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()
 																				?holidayCalcMethodSet.getPremiumCalcMethodOfHoliday().getAdvanceSet().get().getCalculateIncludIntervalExemptionTime()
 																			    :NotUseAtr.NOT_USE;
-		
+		//2019/04/03 大塚緊急対応　通常勤務時に割増の休暇加算設定を見ないよう対応↑		
 		boolean result = false;
 		
 		if(premiumAtr.isRegularWork()&&workTimeDeductLateLeaveEarly == NotUseAtr.USE) {

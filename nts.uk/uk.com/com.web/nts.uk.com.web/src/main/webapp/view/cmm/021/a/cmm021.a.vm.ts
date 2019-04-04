@@ -417,7 +417,7 @@ module nts.uk.com.view.cmm021.a {
             private findListWindowAccByEmployeeId(employeeId: string): JQueryPromise<WindowAccountFinderDto[]> {
                 let _self = this;
                 let dfd = $.Deferred<any>();                           
-
+                _self.clearDataOld();
                 nts.uk.ui.block.invisible();
                 service.findListWindowAccByEmployeeId(employeeId).done((data: WindowAccountFinderDto[]) => {
                     if (data && data.length > 0) {
@@ -428,34 +428,44 @@ module nts.uk.com.view.cmm021.a {
                         let winAcc5: any = data.filter(function(o: any) { return o.no == 5; })[0];
 
                         // set no#1
-                        _self.hostName1(winAcc1.hostName);
-                        _self.userName1(winAcc1.userName);
-                        _self.enable_WinAcc1(winAcc1.useAtr == 1);
-                        _self.windowAcc1.isChange = false;
+                         if(winAcc1 != null && winAcc1 !== undefined){
+                            _self.hostName1(winAcc1.hostName);
+                            _self.userName1(winAcc1.userName);
+                            _self.enable_WinAcc1(winAcc1.useAtr == 1);
+                            _self.windowAcc1.isChange = false;
+                        }
 
                         // set no#2
-                        _self.hostName2(winAcc2.hostName);
-                        _self.userName2(winAcc2.userName);
-                        _self.enable_WinAcc2(winAcc2.useAtr == 1);
-                        _self.windowAcc2.isChange = false;
+                        if(winAcc2 != null && winAcc2 !== undefined){
+                            _self.hostName2(winAcc2.hostName);
+                            _self.userName2(winAcc2.userName);
+                            _self.enable_WinAcc2(winAcc2.useAtr == 1);
+                            _self.windowAcc2.isChange = false;
+                        }
 
                         // set no#3
-                        _self.hostName3(winAcc3.hostName);
-                        _self.userName3(winAcc3.userName);
-                        _self.enable_WinAcc3(winAcc3.useAtr == 1);
-                        _self.windowAcc3.isChange = false;
+                         if(winAcc3 != null && winAcc3 !== undefined){
+                            _self.hostName3(winAcc3.hostName);
+                            _self.userName3(winAcc3.userName);
+                            _self.enable_WinAcc3(winAcc3.useAtr == 1);
+                            _self.windowAcc3.isChange = false;
+                        }
 
                         // set no#4
-                        _self.hostName4(winAcc4.hostName);
-                        _self.userName4(winAcc4.userName);
-                        _self.enable_WinAcc4(winAcc4.useAtr == 1);
-                        _self.windowAcc4.isChange = false;
+                         if(winAcc4 != null && winAcc4 !== undefined){
+                            _self.hostName4(winAcc4.hostName);
+                            _self.userName4(winAcc4.userName);
+                            _self.enable_WinAcc4(winAcc4.useAtr == 1);
+                            _self.windowAcc4.isChange = false;
+                        }
 
                         // set no#5
-                        _self.hostName5(winAcc5.hostName);
-                        _self.userName5(winAcc5.userName);
-                        _self.enable_WinAcc5(winAcc5.useAtr == 1);
-                        _self.windowAcc5.isChange = false;
+                         if(winAcc5 != null && winAcc5 !== undefined){
+                            _self.hostName5(winAcc5.hostName);
+                            _self.userName5(winAcc5.userName);
+                            _self.enable_WinAcc5(winAcc5.useAtr == 1);
+                            _self.windowAcc5.isChange = false;
+                        }
 
                         _self.updateMode();
                     } else {
@@ -471,6 +481,35 @@ module nts.uk.com.view.cmm021.a {
                 return dfd.promise();
 
             }
+            
+                clearDataOld(){
+                    let _self = this;
+                    //clear no#1
+                    _self.hostName1('');
+                    _self.userName1('');
+                    _self.enable_WinAcc1(false);
+                    _self.windowAcc1.isChange = false;
+                    //clear no#2
+                    _self.hostName2('');
+                    _self.userName2('');
+                    _self.enable_WinAcc2(false);
+                    _self.windowAcc2.isChange = false;
+                    //clear no#3
+                    _self.hostName3('');
+                    _self.userName3('');
+                    _self.enable_WinAcc3(false);
+                    _self.windowAcc3.isChange = false;
+                    //clear no#4
+                    _self.hostName4('');
+                    _self.userName4('');
+                    _self.enable_WinAcc4(false);
+                    _self.windowAcc4.isChange = false;
+                    //clear no#5
+                    _self.hostName5('');
+                    _self.userName5('');
+                    _self.enable_WinAcc5(false);
+                    _self.windowAcc5.isChange = false;
+                }
 
             // find user dto                      
             private findUserDtoByEmployeeId(selectedEmployeeId: string) {

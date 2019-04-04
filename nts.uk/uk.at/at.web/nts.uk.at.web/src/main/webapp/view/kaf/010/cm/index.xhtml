@@ -363,7 +363,7 @@
 										value: startTime,
 										constraint:'TimeWithDayAttr',
 										option: {width: '85px', timeWithDay: true},
-										enable: false}" /></td>
+										enable: $vm.editable()}" /></td>
 							<!-- A5_7 -->
 							<td><input tabindex="17" class="right-content"
 								data-bind="attr: { id: 'restTimeEnd_'+attendanceID()+'_'+frameNo()},
@@ -372,7 +372,7 @@
 										constraint:'TimeWithDayAttr',
 										option: {width: '85px',
 										timeWithDay: true},
-										enable: false}" /></td>
+										enable: $vm.editable()}" /></td>
 						</tr>
 					</tbody>
 				</table>

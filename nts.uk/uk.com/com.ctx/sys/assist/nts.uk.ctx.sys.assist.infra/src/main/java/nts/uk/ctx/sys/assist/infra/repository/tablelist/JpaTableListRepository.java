@@ -383,7 +383,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 						Map<String, Object> rowCsv = new HashMap<>();
 						int i = 0;
 						for (String columnName : headerCsv3) {
-							rowCsv.put(columnName, objects[i] != null ? String.valueOf(objects[i]) : "");
+							rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]) + "\"" : "");
 							i++;
 						}
 						csv.writeALine(rowCsv);
@@ -405,7 +405,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 				Map<String, Object> rowCsv = new HashMap<>();
 				int i = 0;
 				for (String columnName : headerCsv3) {
-					rowCsv.put(columnName, objects[i] != null ? String.valueOf(objects[i]) : "");
+					rowCsv.put(columnName, objects[i] != null ? "\"" +String.valueOf(objects[i]) + "\"" : "");
 					i++;
 				}
 				csv.writeALine(rowCsv);

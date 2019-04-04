@@ -976,13 +976,13 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			// 6-実施区分 → 再作成 とする
 			s.setImplementAtr(ImplementAtr.RECREATE);
 			// 7-再作成区分 → 未確定データのみ とする
-
 			reCreateContent.setReCreateAtr(ReCreateAtr.ONLY_UNCONFIRM);
 			// 8-処理実行区分 → もう一度作り直す とする
 			reCreateContent.setProcessExecutionAtr(ProcessExecutionAtr.REBUILD);
 		} else {
-			// ・実施区分 → 再作成 とする
-			s.setImplementAtr(ImplementAtr.RECREATE);
+			// #17055
+			// ・実施区分 → 通常作成
+			s.setImplementAtr(ImplementAtr.GENERALLY_CREATED);
 			// ・再作成区分 → 全件 とする
 			reCreateContent.setReCreateAtr(ReCreateAtr.ALL_CASE);
 			// ・処理実行区分 → もう一度作り直す とする
@@ -2898,11 +2898,18 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			if (processExecution.getExecSetting().getAlarmExtraction().getMailAdministrator().get().booleanValue())
 				sendMailAdmin = true;
 		}
-		// アラームリスト自動実行処理を実行する
-		OutputExecAlarmListPro outputExecAlarmListPro = this.execAlarmListProcessingService.execAlarmListProcessing(
-				extraProcessStatusID, companyId, workplaceIdList, listPatternCode, GeneralDateTime.now(),
-				sendMailPerson, sendMailAdmin,
-				!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent()?"":processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v());
+		boolean checkException = false;
+		OutputExecAlarmListPro outputExecAlarmListPro = new OutputExecAlarmListPro();
+		try {
+			// アラームリスト自動実行処理を実行する
+			outputExecAlarmListPro = this.execAlarmListProcessingService.execAlarmListProcessing(
+					extraProcessStatusID, companyId, workplaceIdList, listPatternCode, GeneralDateTime.now(),
+					sendMailPerson, sendMailAdmin,
+					!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent()?"":processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v());
+		} catch (Exception e) {
+			//各処理の後のログ更新処理
+			checkException = true;
+		}
 
 		// ドメインモデル「更新処理自動実行ログ」を取得しチェックする（中断されている場合は更新されているため、最新の情報を取得する）
 		Optional<ProcessExecutionLog> processExecutionLog = procExecLogRepo.getLogByCIdAndExecCd(companyId, execItemCd,
@@ -2925,28 +2932,30 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 
 		// 実行内容 ＝ スケジュール作成
 		param.setExecutionContent(AlarmCategoryFn.ALARM_LIST_PERSONAL);
-		// IF :TRUE
-		if (outputExecAlarmListPro.isCheckExecAlarmListPro()) {
-			// ドメインモデル「更新処理自動実行ログ」を更新する
-			for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
-				ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
-				if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.AL_EXTRACTION.value) {
-					executionTaskLog.setStatus(Optional.ofNullable(EndStatus.SUCCESS));
-					this.procExecLogRepo.update(ProcessExecutionLog);
+		if(!checkException) {
+			// IF :TRUE
+			if (outputExecAlarmListPro.isCheckExecAlarmListPro()) {
+				// ドメインモデル「更新処理自動実行ログ」を更新する
+				for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
+					ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
+					if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.AL_EXTRACTION.value) {
+						executionTaskLog.setStatus(Optional.ofNullable(EndStatus.SUCCESS));
+						this.procExecLogRepo.update(ProcessExecutionLog);
+					}
 				}
+				param.setTargerEmployee(Collections.emptyList());
+				param.setExistenceError(0);
+				// アルゴリズム「実行ログ登録」を実行する 2290
+				executionLogAdapterFn.updateExecuteLog(param);
+				return true;
 			}
-			param.setTargerEmployee(Collections.emptyList());
-			param.setExistenceError(0);
-			// アルゴリズム「実行ログ登録」を実行する 2290
-			executionLogAdapterFn.updateExecuteLog(param);
-			return true;
 		}
 		// IF :FALSE
 		// ドメインモデル「更新処理自動実行ログ」を更新する
 		for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
 			ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
 			if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.AL_EXTRACTION.value) {
-				executionTaskLog.setStatus(Optional.ofNullable(EndStatus.FORCE_END));
+				executionTaskLog.setStatus(Optional.ofNullable(EndStatus.ABNORMAL_END));
 				this.procExecLogRepo.update(ProcessExecutionLog);
 			}
 		}

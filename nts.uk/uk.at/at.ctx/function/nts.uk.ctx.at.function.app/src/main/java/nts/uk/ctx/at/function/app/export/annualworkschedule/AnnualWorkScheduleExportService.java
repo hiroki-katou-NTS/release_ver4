@@ -44,6 +44,7 @@ public class AnnualWorkScheduleExportService extends ExportService<AnnualWorkSch
 		PrintFormat printFormat = EnumAdaptor.valueOf(query.getPrintFormat(), PrintFormat.class);
 		ExcludeEmp excludeEmp = EnumAdaptor.valueOf(query.getExcludeEmp(), ExcludeEmp.class);
 		List<Employee> employees = query.getEmployees().stream()
+                .distinct()
 				.map(m -> new Employee(m.getEmployeeId(), m.getCode(), m.getName(), m.getWorkplaceName()))
 				.collect(Collectors.toList());
 		Year fiscalYear = null;

@@ -133,6 +133,38 @@ public class CsvFileUtil {
 		}
 		return new HashSet<>();
 	}
+	
+	public static boolean checkHasSidInCsv(String fileId, String fileName) {
+		NtsCsvReader csvReader = NtsCsvReader.newReader().skipEmptyLines(true)
+				.withChartSet(Charset.forName("Shift_JIS"));
+		Set<String> listSid = new HashSet<>();
+		try {
+			InputStream inputStream = createInputStreamFromFile(fileId, fileName);
+			CustomCsvReader csvCustomReader = csvReader.createCustomCsvReader(inputStream);
+			csvCustomReader.setNoHeader(true);
+			Consumer<CSVParsedResult> csvResult = (c) -> {
+				if (!c.getRecords().isEmpty()) {
+					if (c.getRecords().get(0).getColumn(0) != null) {
+						listSid.add(c.getRecords().get(0).getColumn(1).toString().trim());
+					}
+				}
+			};
+
+			Function<NtsCsvRecord, Boolean> customCheckRow = (row) -> {
+				if (row.getColumn(1).equals("CMF003_H_SID") || row.getColumn(1).equals("")
+						|| row.getColumn(1).equals(" "))
+					return false;
+				return true;
+			};
+
+			csvCustomReader.readByStep(1, 1, csvResult, customCheckRow);
+			csvCustomReader.close();
+			return listSid.isEmpty()? false : true;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 
 	static InputStream createInputStreamFromFile(String fileId, String fileName) {
 		String filePath = getExtractDataStoragePath(fileId) + "//" + fileName + ".csv";

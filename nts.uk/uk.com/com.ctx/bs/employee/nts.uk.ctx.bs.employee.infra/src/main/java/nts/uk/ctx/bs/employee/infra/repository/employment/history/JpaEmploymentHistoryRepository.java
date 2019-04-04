@@ -316,10 +316,13 @@ public class JpaEmploymentHistoryRepository extends JpaRepository implements Emp
 
 	@Override
 	public Map<String, DateHistItem> getBySIdAndate(List<String> lstSID, GeneralDate date) {
-		List<DateHistItem> lst =  this.queryProxy().query(GET_BY_LSTSID_DATE, BsymtEmploymentHist.class)
-				.setParameter("lstSID", lstSID)
-				.setParameter("date", date)
-				.getList(c -> new DateHistItem(c.sid, c.hisId, new DatePeriod(c.strDate, c.endDate)));
+		List<DateHistItem> lst = new ArrayList<>();
+		CollectionUtil.split(lstSID, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
+			lst.addAll(this.queryProxy().query(GET_BY_LSTSID_DATE, BsymtEmploymentHist.class)
+					.setParameter("lstSID", splitData)
+					.setParameter("date", date)
+					.getList(c -> new DateHistItem(c.sid, c.hisId, new DatePeriod(c.strDate, c.endDate))));
+		});
 		Map<String, DateHistItem> mapResult = new HashMap<>();
 		for(String sid : lstSID){
 			List<DateHistItem> hist = lst.stream().filter(c -> c.getSid().equals(sid)).collect(Collectors.toList());
