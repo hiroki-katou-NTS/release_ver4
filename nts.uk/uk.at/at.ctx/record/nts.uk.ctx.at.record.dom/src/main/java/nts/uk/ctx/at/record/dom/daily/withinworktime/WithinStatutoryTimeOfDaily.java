@@ -162,8 +162,10 @@ public class WithinStatutoryTimeOfDaily {
 
 		//実働時間の計算
 			actualTime =  calcActualWorkTime(recordReget.getCalculationRangeOfOneDay().getWithinWorkingTimeSheet().get(),vacationClass,workType,
-					  							  recordReget.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLate(),
-					  							  recordReget.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLeaveEarly(),
+//					  							  recordReget.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLate(),
+//					  							  recordReget.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLeaveEarly(),
+												  true,
+												  true,
 					  							  recordReget.getPersonalInfo().getWorkingSystem(),
 					  							  recordReget.getWorkDeformedLaborAdditionSet(),
 					  							  recordReget.getWorkFlexAdditionSet(),

@@ -248,7 +248,7 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 			int leaveEarlyDeductTime = 0;
 			if(this.leaveEarlyTimeSheet.isPresent()) {
 				//leaveEarlyDeductTime = this.leaveEarlyTimeSheet.get().calcDedctionTime(leaveEarly,NotUseAtr.USE).getTime().valueAsMinutes();
-				leaveEarlyDeductTime = this.leaveEarlyTimeSheet.get().calcDedctionTime(late,lateEarlyMinusAtr).getTime().valueAsMinutes();
+				leaveEarlyDeductTime = this.leaveEarlyTimeSheet.get().calcDedctionTime(leaveEarly,lateEarlyMinusAtr).getTime().valueAsMinutes();
 			}
 			int lateLeaveEarlySubtraction = lateDeductTime + leaveEarlyDeductTime;
 			workTime = new AttendanceTime(workTime.valueAsMinutes() - lateLeaveEarlySubtraction);
