@@ -471,9 +471,10 @@ public class WithinStatutoryTimeOfDaily {
 					leaveLateset = regularAddSetting.getVacationCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().getNotDeductLateLeaveEarly();
 				}
 			}
-			Optional<WorkTimezoneCommonSet> leaveLatesetForWorkTime = commonSetting.isPresent() && commonSetting.get().getLateEarlySet().getCommonSet().isDelFromEmTime()
-																	?Optional.of(commonSetting.get().reverceTimeZoneLateEarlySet())
-																	:commonSetting;
+//			Optional<WorkTimezoneCommonSet> leaveLatesetForWorkTime = commonSetting.isPresent() && commonSetting.get().getLateEarlySet().getCommonSet().isDelFromEmTime()
+//																	?Optional.of(commonSetting.get().reverceTimeZoneLateEarlySet())
+//																	:commonSetting;
+			Optional<WorkTimezoneCommonSet> leaveLatesetForWorkTime = commonSetting;
 			return withinTimeSheet.calcWorkTime(PremiumAtr.RegularWork,
 																				  regularAddSetting.getVacationCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getCalculateActualOperation(),
 						  														  vacationClass,

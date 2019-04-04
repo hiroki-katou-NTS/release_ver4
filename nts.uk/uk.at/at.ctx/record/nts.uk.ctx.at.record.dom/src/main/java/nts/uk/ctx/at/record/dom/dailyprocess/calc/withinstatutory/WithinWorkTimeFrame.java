@@ -238,7 +238,7 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 
 		//遅刻、早退時間を就業時間から控除
 			//遅刻控除時間を計算
-		if(jugmentDeductLateEarly(premiumAtr,holidayCalcMethodSet,commonSetting)) {
+		if(jugmentDeductLateEarly(premiumAtr,holidayCalcMethodSet,commonSetting,lateEarlyMinusAtr)) {
 			int lateDeductTime = 0;
 			if(this.lateTimeSheet.isPresent()) {
 				//lateDeductTime = this.lateTimeSheet.get().calcDedctionTime(late,NotUseAtr.USE).getCalcTime().valueAsMinutes();
@@ -650,19 +650,36 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 
 	/**
 	 * 遅刻早退を控除するかどうか判断
+	 * @param lateEarlyMinusAtr 
 	 * @return
 	 */
-	public boolean jugmentDeductLateEarly(PremiumAtr premiumAtr,HolidayCalcMethodSet holidayCalcMethodSet,Optional<WorkTimezoneCommonSet> commonSetting) {
+	public boolean jugmentDeductLateEarly(PremiumAtr premiumAtr,HolidayCalcMethodSet holidayCalcMethodSet,Optional<WorkTimezoneCommonSet> commonSetting, NotUseAtr lateEarlyMinusAtr) {
 		//就業の休暇の就業時間計算方法詳細．遅刻・早退を控除する
 //		NotUseAtr workTimeDeductLateLeaveEarly = holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()
 //																				?holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().getNotDeductLateLeaveEarly()
 //																				:NotUseAtr.NOT_USE;	
-		NotUseAtr workTimeDeductLateLeaveEarly = NotUseAtr.NOT_USE;
-		if(holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()) {
-			if(holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().isDeductLateLeaveEarly(commonSetting)) {
-				workTimeDeductLateLeaveEarly = NotUseAtr.USE;
+		NotUseAtr workTimeDeductLateLeaveEarly = NotUseAtr.USE;
+		if(lateEarlyMinusAtr.equals(NotUseAtr.NOT_USE)) {
+			if(holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()) {
+				if(holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().isDeductLateLeaveEarly(commonSetting)) {
+					workTimeDeductLateLeaveEarly = NotUseAtr.USE;
+				}
+				else {
+					workTimeDeductLateLeaveEarly = NotUseAtr.NOT_USE;
+				}
+			}			
+		}
+		else {
+			if(holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()) {
+				if(holidayCalcMethodSet.getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().isDeductLateLeaveEarly(commonSetting)) {
+					workTimeDeductLateLeaveEarly = NotUseAtr.NOT_USE;
+				}
+				else {
+					workTimeDeductLateLeaveEarly = NotUseAtr.USE;
+				}
 			}
 		}
+
 		
 		//割増の休暇の就業時間計算方法詳細．遅刻・早退を控除する
 		NotUseAtr premiumDeductLateLeaveEarly = holidayCalcMethodSet.getPremiumCalcMethodOfHoliday().getAdvanceSet().isPresent()
@@ -671,7 +688,7 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 		
 		boolean result = false;
 		
-		if(premiumAtr.isRegularWork()&&workTimeDeductLateLeaveEarly == NotUseAtr.NOT_USE) {
+		if(premiumAtr.isRegularWork()&&workTimeDeductLateLeaveEarly == NotUseAtr.USE) {
 			return true;
 		} 
 		if(premiumAtr.isPremium()
