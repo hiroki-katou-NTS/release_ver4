@@ -211,7 +211,8 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 														boolean late,  //日別実績の計算区分.遅刻早退の自動計算設定.遅刻
 														boolean leaveEarly,  //日別実績の計算区分.遅刻早退の自動計算設定.早退
 														HolidayCalcMethodSet holidayCalcMethodSet,
-														PremiumAtr premiumAtr,Optional<WorkTimezoneCommonSet> commonSetting
+														PremiumAtr premiumAtr,Optional<WorkTimezoneCommonSet> commonSetting,
+														NotUseAtr lateEarlyMinusAtr
 														) {
 		//就業時間の計算
 		AttendanceTime actualTime = calcActualTime(holidayCalcMethodSet,premiumAtr);
@@ -241,13 +242,13 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 			int lateDeductTime = 0;
 			if(this.lateTimeSheet.isPresent()) {
 				//lateDeductTime = this.lateTimeSheet.get().calcDedctionTime(late,NotUseAtr.USE).getCalcTime().valueAsMinutes();
-				lateDeductTime = this.lateTimeSheet.get().calcDedctionTime(true,NotUseAtr.USE).getTime().valueAsMinutes();
+				lateDeductTime = this.lateTimeSheet.get().calcDedctionTime(late,lateEarlyMinusAtr).getTime().valueAsMinutes();
 			}
 			//早退控除時間を計算
 			int leaveEarlyDeductTime = 0;
 			if(this.leaveEarlyTimeSheet.isPresent()) {
 				//leaveEarlyDeductTime = this.leaveEarlyTimeSheet.get().calcDedctionTime(leaveEarly,NotUseAtr.USE).getTime().valueAsMinutes();
-				leaveEarlyDeductTime = this.leaveEarlyTimeSheet.get().calcDedctionTime(true,NotUseAtr.USE).getTime().valueAsMinutes();
+				leaveEarlyDeductTime = this.leaveEarlyTimeSheet.get().calcDedctionTime(late,lateEarlyMinusAtr).getTime().valueAsMinutes();
 			}
 			int lateLeaveEarlySubtraction = lateDeductTime + leaveEarlyDeductTime;
 			workTime = new AttendanceTime(workTime.valueAsMinutes() - lateLeaveEarlySubtraction);
