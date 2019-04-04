@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -59,7 +58,7 @@ public class ConfirmStatusMonthly {
 	private ApprovalStatusAdapter approvalStatusAdapter;
 
 	
-	public Optional<StatusConfirmMonthDto> getConfirmStatusMonthly(String companyId,Integer closureId,ClosureDate closureDate, List<String> listEmployeeId,YearMonth yearmonthInput) {
+	public Optional<StatusConfirmMonthDto> getConfirmStatusMonthly(String companyId,Integer closureId,ClosureDate closureDate, List<String> listEmployeeId,YearMonth yearmonthInput, List<MonthlyModifyResultDto> results) {
 		iFindDataDCRecord.clearAllStateless();
 		List<ConfirmStatusResult> listConfirmStatus = new ArrayList<>();
 		//ドメインモデル「本人確認処理の利用設定」を取得する
@@ -71,19 +70,18 @@ public class ConfirmStatusMonthly {
 			return Optional.empty();
 		//指定した年月の期間を算出する
 		DatePeriod datePeriod =closureService.getClosurePeriod(closureId, yearmonthInput);
-		//社員の指定期間中の所属期間を取得する RQ588
-		List<StatusOfEmployeeExport> listStatusOfEmployeeExport = syCompanyRecordAdapter.getListAffComHistByListSidAndPeriod(listEmployeeId, datePeriod)
-				.stream().filter(c->c.getEmployeeId() !=null).collect(Collectors.toList());
-		//Output「社員の会社所属状況」をチェックする
-		if(listStatusOfEmployeeExport.isEmpty())
-			return Optional.empty();
+		
 		for(String employeeId :listEmployeeId ) {
-			Optional<StatusOfEmployeeExport> statusOfEmployeeExport = listStatusOfEmployeeExport.stream().filter(c -> c.getEmployeeId().equals(employeeId)).findFirst();
-			if(!statusOfEmployeeExport.isPresent()) {
-				continue;
-			}
+			if (!results.stream().anyMatch(r -> r.getEmployeeId().equals(employeeId))) continue;
+			
+			//社員の指定期間中の所属期間を取得する RQ588
+			DatePeriod workPeriod = results.stream().filter(r -> r.getEmployeeId().equals(employeeId)).findFirst().get().getWorkDatePeriod();
+			List<StatusOfEmployeeExport> listStatusOfEmployeeExport = syCompanyRecordAdapter.getListAffComHistByListSidAndPeriod(Arrays.asList(employeeId), workPeriod);
+			//Output「社員の会社所属状況」をチェックする
+			if (listStatusOfEmployeeExport == null || listStatusOfEmployeeExport.isEmpty()) continue;
+		
 			List<GeneralDate> listDate = new ArrayList<>();
-			for(DatePeriod period : statusOfEmployeeExport.get().getListPeriod()) {
+			for(DatePeriod period : listStatusOfEmployeeExport.get(0).getListPeriod()) {
 				listDate.addAll(period.datesBetween());
 			}
 			ConfirmStatusResult confirmStatus = new ConfirmStatusResult();
