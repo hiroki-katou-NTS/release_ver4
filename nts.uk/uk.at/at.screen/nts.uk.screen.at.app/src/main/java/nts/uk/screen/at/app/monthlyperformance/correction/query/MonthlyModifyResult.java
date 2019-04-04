@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.Data;
 import nts.uk.ctx.at.record.app.find.monthly.root.common.ClosureDateDto;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Data
 public class MonthlyModifyResult {
@@ -22,6 +23,9 @@ public class MonthlyModifyResult {
 
 	/** 締め日: 日付 */
 	private ClosureDateDto closureDate;
+	
+	/** 月別実績の勤怠時間 期間: 期間  */
+	private DatePeriod workDatePeriod;
 	
 	public static MonthlyModifyResult builder(){
 		return new MonthlyModifyResult();
@@ -48,6 +52,11 @@ public class MonthlyModifyResult {
 	
 	public MonthlyModifyResult closureId(Integer closureId){
 		this.closureId = closureId;
+		return this;
+	}
+	
+	public MonthlyModifyResult workDatePeriod(DatePeriod period) {
+		this.workDatePeriod = period;
 		return this;
 	}
 	

@@ -37,6 +37,7 @@ public class MonthlyModifyQueryProcessor {
 					.yearMonth(record.getKey().getYearMonth().v())
 					.closureId(record.getKey().getClosureID())
 					.closureDate(record.getKey().getClosureDate())
+					.workDatePeriod(record.getKey().getAttendanceTime().getDatePeriod().toDomain())
 					.completed();
 		}).collect(Collectors.toList());
 //		return lstData.stream().map(recordData -> {
