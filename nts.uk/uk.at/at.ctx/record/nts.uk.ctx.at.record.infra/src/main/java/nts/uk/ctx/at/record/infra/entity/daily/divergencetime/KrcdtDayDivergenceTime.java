@@ -22,6 +22,7 @@ import nts.uk.ctx.at.record.dom.divergencetimeofdaily.DivergenceTime;
 import nts.uk.ctx.at.record.dom.divergencetimeofdaily.DivergenceTimeOfDaily;
 import nts.uk.ctx.at.record.infra.entity.daily.actualworktime.KrcdtDayAttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -257,64 +258,64 @@ public class KrcdtDayDivergenceTime extends UkJpaEntity implements Serializable{
 	
 	public DivergenceTimeOfDaily toDomain() {
 		List<DivergenceTime> divergenceTimeList = new ArrayList<>();
-		divergenceTimeList.add(new DivergenceTime(new AttendanceTime(this.afterDeductionTime1),
-				  new AttendanceTime(this.deductionTime1),
-				  new AttendanceTime(this.divergenceTime1),
+		divergenceTimeList.add(new DivergenceTime(new AttendanceTimeOfExistMinus(this.afterDeductionTime1),
+				  new AttendanceTimeOfExistMinus(this.deductionTime1),
+				  new AttendanceTimeOfExistMinus(this.divergenceTime1),
 				  1,
 				  StringUtil.isNullOrEmpty(this.reason1, true) ? null : new DivergenceReasonContent(this.reason1),
 				  StringUtil.isNullOrEmpty(this.reasonCode1, true) ? null : new DiverdenceReasonCode(this.reasonCode1)));
 
-		divergenceTimeList.add(new DivergenceTime(new AttendanceTime(this.afterDeductionTime2),
-						  new AttendanceTime(this.deductionTime2),
-						  new AttendanceTime(this.divergenceTime2),
+		divergenceTimeList.add(new DivergenceTime(new AttendanceTimeOfExistMinus(this.afterDeductionTime2),
+						  new AttendanceTimeOfExistMinus(this.deductionTime2),
+						  new AttendanceTimeOfExistMinus(this.divergenceTime2),
 						  2,
 						StringUtil.isNullOrEmpty(this.reason2, true) ? null : new DivergenceReasonContent(this.reason2),
 						StringUtil.isNullOrEmpty(this.reasonCode2, true) ? null : new DiverdenceReasonCode(this.reasonCode2)));
-		divergenceTimeList.add(new DivergenceTime(new AttendanceTime(this.afterDeductionTime3),
-						  new AttendanceTime(this.deductionTime3),
-						  new AttendanceTime(this.divergenceTime3),
+		divergenceTimeList.add(new DivergenceTime(new AttendanceTimeOfExistMinus(this.afterDeductionTime3),
+						  new AttendanceTimeOfExistMinus(this.deductionTime3),
+						  new AttendanceTimeOfExistMinus(this.divergenceTime3),
 						  3,
 						StringUtil.isNullOrEmpty(this.reason3, true) ? null : new DivergenceReasonContent(this.reason3),
 						StringUtil.isNullOrEmpty(this.reasonCode3, true) ? null : new DiverdenceReasonCode(this.reasonCode3)));
-		divergenceTimeList.add(new DivergenceTime(new AttendanceTime(this.afterDeductionTime4),
-						  new AttendanceTime(this.deductionTime4),
-						  new AttendanceTime(this.divergenceTime4),
+		divergenceTimeList.add(new DivergenceTime(new AttendanceTimeOfExistMinus(this.afterDeductionTime4),
+						  new AttendanceTimeOfExistMinus(this.deductionTime4),
+						  new AttendanceTimeOfExistMinus(this.divergenceTime4),
 						  4,
 						  StringUtil.isNullOrEmpty(this.reason4, true) ? null : new DivergenceReasonContent(this.reason4),
 						  StringUtil.isNullOrEmpty(this.reasonCode4, true) ? null : new DiverdenceReasonCode(this.reasonCode4)));
-		divergenceTimeList.add(new DivergenceTime(new AttendanceTime(this.afterDeductionTime5),
-						  new AttendanceTime(this.deductionTime5),
-						  new AttendanceTime(this.divergenceTime5),
+		divergenceTimeList.add(new DivergenceTime(new AttendanceTimeOfExistMinus(this.afterDeductionTime5),
+						  new AttendanceTimeOfExistMinus(this.deductionTime5),
+						  new AttendanceTimeOfExistMinus(this.divergenceTime5),
 						  5,
 						StringUtil.isNullOrEmpty(this.reason5, true) ? null : new DivergenceReasonContent(this.reason5),
 						StringUtil.isNullOrEmpty(this.reasonCode5, true) ? null : new DiverdenceReasonCode(this.reasonCode5)));
-		divergenceTimeList.add(new DivergenceTime(new AttendanceTime(this.afterDeductionTime6),
-						  new AttendanceTime(this.deductionTime6),
-						  new AttendanceTime(this.divergenceTime6),
+		divergenceTimeList.add(new DivergenceTime(new AttendanceTimeOfExistMinus(this.afterDeductionTime6),
+						  new AttendanceTimeOfExistMinus(this.deductionTime6),
+						  new AttendanceTimeOfExistMinus(this.divergenceTime6),
 						  6,
 						StringUtil.isNullOrEmpty(this.reason6, true) ? null : new DivergenceReasonContent(this.reason6),
 						StringUtil.isNullOrEmpty(this.reasonCode6, true) ? null : new DiverdenceReasonCode(this.reasonCode6)));
-		divergenceTimeList.add(new DivergenceTime(new AttendanceTime(this.afterDeductionTime7),
-						  new AttendanceTime(this.deductionTime7),
-						  new AttendanceTime(this.divergenceTime7),
+		divergenceTimeList.add(new DivergenceTime(new AttendanceTimeOfExistMinus(this.afterDeductionTime7),
+						  new AttendanceTimeOfExistMinus(this.deductionTime7),
+						  new AttendanceTimeOfExistMinus(this.divergenceTime7),
 						  7,
 						StringUtil.isNullOrEmpty(this.reason7, true) ? null : new DivergenceReasonContent(this.reason7),
 						StringUtil.isNullOrEmpty(this.reasonCode7, true) ? null : new DiverdenceReasonCode(this.reasonCode7)));
-		divergenceTimeList.add(new DivergenceTime(new AttendanceTime(this.afterDeductionTime8),
-						  new AttendanceTime(this.deductionTime8),
-						  new AttendanceTime(this.divergenceTime8),
+		divergenceTimeList.add(new DivergenceTime(new AttendanceTimeOfExistMinus(this.afterDeductionTime8),
+						  new AttendanceTimeOfExistMinus(this.deductionTime8),
+						  new AttendanceTimeOfExistMinus(this.divergenceTime8),
 						  8,
 						StringUtil.isNullOrEmpty(this.reason8, true) ? null : new DivergenceReasonContent(this.reason8),
 						StringUtil.isNullOrEmpty(this.reasonCode8, true) ? null : new DiverdenceReasonCode(this.reasonCode8)));
-		divergenceTimeList.add(new DivergenceTime(new AttendanceTime(this.afterDeductionTime9),
-						  new AttendanceTime(this.deductionTime9),
-						  new AttendanceTime(this.divergenceTime9),
+		divergenceTimeList.add(new DivergenceTime(new AttendanceTimeOfExistMinus(this.afterDeductionTime9),
+						  new AttendanceTimeOfExistMinus(this.deductionTime9),
+						  new AttendanceTimeOfExistMinus(this.divergenceTime9),
 						  9,
 						StringUtil.isNullOrEmpty(this.reason9, true) ? null : new DivergenceReasonContent(this.reason9),
 						StringUtil.isNullOrEmpty(this.reasonCode9, true) ? null : new DiverdenceReasonCode(this.reasonCode9)));
-		divergenceTimeList.add(new DivergenceTime(new AttendanceTime(this.afterDeductionTime10),
-						  new AttendanceTime(this.deductionTime10),
-						  new AttendanceTime(this.divergenceTime10),
+		divergenceTimeList.add(new DivergenceTime(new AttendanceTimeOfExistMinus(this.afterDeductionTime10),
+						  new AttendanceTimeOfExistMinus(this.deductionTime10),
+						  new AttendanceTimeOfExistMinus(this.divergenceTime10),
 						  10,
 						StringUtil.isNullOrEmpty(this.reason10, true) ? null : new DivergenceReasonContent(this.reason10),
 						StringUtil.isNullOrEmpty(this.reasonCode10, true) ? null : new DiverdenceReasonCode(this.reasonCode10)));
