@@ -19430,12 +19430,33 @@ var nts;
                         this.source = _.isEmpty(source) ? [] : this.cloneDeep(source);
                         this.searchField = searchField;
                     }
-                    SearchBox.prototype.search = function (searchKey) {
+                    SearchBox.prototype.filter = function (searchKey) {
                         var self = this;
-                        if (_.isEmpty(this.source)) {
+                        return self.filterWithSource(searchKey, this.source);
+                    };
+                    SearchBox.prototype.search = function (searchKey, fromIndex) {
+                        var self = this;
+                        // search in the next array
+                        var nextSource = self.source.slice(fromIndex + 1);
+                        var nextFilterdItems = self.filterWithSource(searchKey, nextSource);
+                        if (nextFilterdItems.length > 0) {
+                            return nextFilterdItems[0];
+                        }
+                        // search in the previous array
+                        var previousSource = self.source.slice(0, fromIndex + 1);
+                        var previouseFilteredItems = self.filterWithSource(searchKey, previousSource);
+                        if (previouseFilteredItems.length > 0) {
+                            return previouseFilteredItems[0];
+                        }
+                        // if not match searchKey
+                        return null;
+                    };
+                    SearchBox.prototype.filterWithSource = function (searchKey, source) {
+                        var self = this;
+                        if (_.isEmpty(source)) {
                             return [];
                         }
-                        var flatArr = nts.uk.util.flatArray(this.source, this.childField);
+                        var flatArr = nts.uk.util.flatArray(source, this.childField);
                         var filtered = _.filter(flatArr, function (item) {
                             return _.find(self.searchField, function (x) {
                                 if (x !== undefined && x !== null) {
@@ -19480,41 +19501,47 @@ var nts;
                     }
                     SearchPub.prototype.search = function (searchKey, selectedItems) {
                         var result = new SearchResult();
-                        var filtered = this.seachBox.search(searchKey);
-                        if (!_.isEmpty(filtered)) {
-                            var key_1 = this.key;
-                            if (this.mode === "highlight") {
-                                result.options = this.seachBox.getDataSource();
-                                var index = 0;
-                                if (!_.isEmpty(selectedItems)) {
-                                    var firstItemValue_1 = $.isArray(selectedItems)
-                                        ? selectedItems[0]["id"].toString() : selectedItems["id"].toString();
-                                    index = _.findIndex(filtered, function (item) {
-                                        return item[key_1].toString() === firstItemValue_1;
-                                    });
-                                    if (!_.isNil(index)) {
-                                        index++;
-                                    }
-                                }
-                                if (index >= 0) {
-                                    result.selectItems = [filtered[index >= filtered.length ? 0 : index]];
-                                }
+                        var key = this.key;
+                        if (this.mode === "highlight") {
+                            var dataSource = this.seachBox.getDataSource();
+                            var selectingIndex = this.computeSelectingIndex(dataSource, selectedItems, key);
+                            var selectItem = this.seachBox.search(searchKey, selectingIndex);
+                            if (selectItem == null) {
+                                return result;
                             }
-                            else if (this.mode === "filter") {
-                                result.options = filtered;
-                                var selectItem = _.filter(filtered, function (itemFilterd) {
-                                    return _.find(selectedItems, function (item) {
-                                        var itemVal = itemFilterd[key_1];
-                                        if (_.isNil(itemVal) || _.isNil(item["id"])) {
-                                            return false;
-                                        }
-                                        return itemVal.toString() === item["id"].toString();
-                                    }) !== undefined;
-                                });
-                                result.selectItems = selectItem;
-                            }
+                            result.options = dataSource;
+                            result.selectItems = [selectItem];
+                            return result;
                         }
-                        return result;
+                        else {
+                            var filtered = this.seachBox.filter(searchKey);
+                            if (_.isEmpty(filtered)) {
+                                return result;
+                            }
+                            var selectItem = _.filter(filtered, function (itemFilterd) {
+                                return _.find(selectedItems, function (item) {
+                                    var itemVal = itemFilterd[key];
+                                    if (_.isNil(itemVal) || _.isNil(item["id"])) {
+                                        return false;
+                                    }
+                                    return itemVal.toString() === item["id"].toString();
+                                }) !== undefined;
+                            });
+                            result.options = filtered;
+                            result.selectItems = selectItem;
+                            return result;
+                        }
+                    };
+                    SearchPub.prototype.computeSelectingIndex = function (dataSource, selectedItems, key) {
+                        var selectingIndex = 0;
+                        if (!_.isEmpty(selectedItems)) {
+                            var firstItemValue_1 = $.isArray(selectedItems)
+                                ? selectedItems[0]["id"].toString() : selectedItems["id"].toString();
+                            selectingIndex = _.findIndex(dataSource, function (item) {
+                                return item[key].toString() === firstItemValue_1;
+                            });
+                        }
+                        return selectingIndex;
                     };
                     SearchPub.prototype.setDataSource = function (source) {
                         this.seachBox.setDataSource(source);
@@ -35412,8 +35439,8 @@ var nts;
                                     var owns = $self.attr("aria-owns");
                                     if (!owns)
                                         return;
-                                    var key_2 = owns.split(" ")[0].split("_")[1];
-                                    setBackground($self, key_2, columns);
+                                    var key_1 = owns.split(" ")[0].split("_")[1];
+                                    setBackground($self, key_1, columns);
                                     return;
                                 }
                                 var key = columnId.split("_")[1];
@@ -35426,8 +35453,8 @@ var nts;
                                     var owns = $self.attr("aria-owns");
                                     if (!owns)
                                         return;
-                                    var key_3 = owns.split(" ")[0].split("_")[1];
-                                    setBackground($self, key_3, columns);
+                                    var key_2 = owns.split(" ")[0].split("_")[1];
+                                    setBackground($self, key_2, columns);
                                     return;
                                 }
                                 var key = columnId.split("_")[1];
