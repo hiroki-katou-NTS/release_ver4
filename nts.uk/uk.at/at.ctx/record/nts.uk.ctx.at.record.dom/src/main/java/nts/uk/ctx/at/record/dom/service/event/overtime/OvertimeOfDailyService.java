@@ -61,16 +61,16 @@ public class OvertimeOfDailyService {
 			itemIdList.add(565); //事前所定外深夜時間
 			itemIdList.add(563); //所定外深夜時間
 			//休日出勤申請：休憩時間しか反映してない
-			/*itemIdList.addAll(recordUpdate.lstScheBreakStartTime());
-			itemIdList.addAll(recordUpdate.lstScheBreakEndTime());*/
+			itemIdList.addAll(recordUpdate.lstScheBreakStartTime());
+			itemIdList.addAll(recordUpdate.lstScheBreakEndTime());
 			itemIdList.addAll(recordUpdate.lstBreakStartTime());
 			itemIdList.addAll(recordUpdate.lstBreakEndTime());
 		} else {
 			itemIdList.addAll(recordUpdate.lstPreWorktimeFrameItem());
 			itemIdList.addAll(recordUpdate.lstAfterWorktimeFrameItem());
 			//休日出勤申請：休憩時間しか反映してない
-			/*itemIdList.addAll(recordUpdate.lstScheBreakStartTime());
-			itemIdList.addAll(recordUpdate.lstScheBreakEndTime());*/
+			itemIdList.addAll(recordUpdate.lstScheBreakStartTime());
+			itemIdList.addAll(recordUpdate.lstScheBreakEndTime());
 			itemIdList.addAll(recordUpdate.lstBreakStartTime());
 			itemIdList.addAll(recordUpdate.lstBreakEndTime());
 		}
@@ -187,6 +187,15 @@ public class OvertimeOfDailyService {
 
 		attendanceTimeRepo.updateFlush(working.getAttendanceTimeOfDailyPerformance().get());
 		//削除
+		List<EditStateOfDailyPerformance> editState = new ArrayList<>(working.getEditState());
+		itemIdList.stream().forEach(x -> {
+			working.getEditState().stream().forEach(y -> {
+				if(x == y.getAttendanceItemId()) {
+					editState.remove(y);
+				}
+			});
+		});
+		working.setEditState(editState);
 		editStateDaily.deleteByListItemId(working.getWorkInformation().getEmployeeId(), working.getWorkInformation().getYmd(), itemIdList);
 		return working;
 	}

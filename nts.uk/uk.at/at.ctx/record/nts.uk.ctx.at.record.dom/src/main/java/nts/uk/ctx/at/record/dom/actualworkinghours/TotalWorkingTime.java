@@ -114,6 +114,7 @@ import nts.uk.ctx.at.shared.dom.worktime.predset.TimezoneUse;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
 import nts.uk.ctx.at.shared.dom.worktype.AttendanceHolidayAttr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.shr.com.enumcommon.NotUseAtr;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
 /**
@@ -416,7 +417,8 @@ public class TotalWorkingTime {
 																							 predetermineTimeSetByPersonInfo,
 																							 Collections.emptyList(),
 																							 Collections.emptyList(),
-																							 Optional.of(leaveLateSet)
+																							 Optional.of(leaveLateSet),
+																							 NotUseAtr.USE
 																							 );
 			
 			//控除用コアタイム無しの遅刻時間計算
@@ -443,7 +445,8 @@ public class TotalWorkingTime {
 					 																				  predetermineTimeSetByPersonInfo,
 					 																				  Collections.emptyList(),
 					 																				  Collections.emptyList(),
-					 																				  Optional.of(leaveLateSet)
+					 																				  Optional.of(leaveLateSet),
+					 																				  NotUseAtr.USE
 					 																				  );					
 			lateTime.add(new LateTimeOfDaily(calcedLateTime,
 											 calcedLateDeductionTime,
@@ -1085,7 +1088,8 @@ public class TotalWorkingTime {
 																														 predetermineTimeSetByPersonInfo,
 																														 recordClass.getCoreTimeSetting()
 																														 ,HolidayAdditionAtr.HolidayAddition.convertFromCalcByActualTimeToHolidayAdditionAtr(recordClass.getWorkRegularAdditionSet().getVacationCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getCalculateActualOperation()),
-																														  new DeductLeaveEarly(1, 1)
+																														  new DeductLeaveEarly(1, 1),
+																														  NotUseAtr.USE
 																														 );
 			dailyvacationAddTime = workHour.getVacationAddTime().valueAsMinutes();
 		}

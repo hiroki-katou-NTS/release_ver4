@@ -34,7 +34,7 @@ public class CheckDailyPerError {
 		String companyId = AppContexts.user().companyId();
 		
 		//ドメインモデル「社員の日別実績エラー一覧」をすべて取得する
-		List<EmployeeDailyPerError> data = employeeDailyPerErrorRepo.finds(listEmployeeId, period);
+		List<EmployeeDailyPerError> data = employeeDailyPerErrorRepo.getByEmpIDAndPeriod(listEmployeeId, period);
 		List<EmployeeDailyPerError> listDataNew = new ArrayList<>();
 		if(data.isEmpty())
 			return Collections.emptyList();

@@ -1045,7 +1045,8 @@ public class AggregateMonthlyRecordServiceProc {
 		// 期間中の年休積休残数を取得
 		val aggrResult = this.getAnnAndRsvRemNumWithinPeriod.algorithm(
 				this.companyId, this.employeeId, period, interimRemainMngMode,
-				period.end(), true, isCalcAttendanceRate,
+				//period.end(), true, isCalcAttendanceRate,
+				period.end(), false, isCalcAttendanceRate,
 				Optional.of(isOverWriteAnnual), Optional.of(tmpAnnualLeaveMngs), Optional.of(tmpReserveLeaveMngs),
 				Optional.of(false),
 				Optional.of(this.employeeSets.isNoCheckStartDate()),
@@ -1276,7 +1277,8 @@ public class AggregateMonthlyRecordServiceProc {
 			// 期間内の特別休暇残を集計する
 			ComplileInPeriodOfSpecialLeaveParam param = new ComplileInPeriodOfSpecialLeaveParam(
 					this.companyId, this.employeeId, period,
-					(interimRemainMngMode == InterimRemainMngMode.MONTHLY), period.end(), specialLeaveCode, true,
+					//(interimRemainMngMode == InterimRemainMngMode.MONTHLY), period.end(), specialLeaveCode, true,
+					(interimRemainMngMode == InterimRemainMngMode.MONTHLY), period.end(), specialLeaveCode, false,
 					this.isOverWriteRemain, interimMng, interimSpecialData);
 			InPeriodOfSpecialLeave inPeriod = this.specialLeaveMng.complileInPeriodOfSpecialLeave(param);
 			
