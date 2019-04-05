@@ -23,6 +23,8 @@ public class MonthlyModifyResult {
 	/** 締め日: 日付 */
 	private ClosureDateDto closureDate;
 	
+	private long version;
+	
 	public static MonthlyModifyResult builder(){
 		return new MonthlyModifyResult();
 	}
@@ -48,6 +50,11 @@ public class MonthlyModifyResult {
 	
 	public MonthlyModifyResult closureId(Integer closureId){
 		this.closureId = closureId;
+		return this;
+	}
+	
+	public MonthlyModifyResult version(long version){
+		this.version = version;
 		return this;
 	}
 	

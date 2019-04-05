@@ -1000,6 +1000,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 			   
 			MPDataDto mpdata = new MPDataDto(employeeId, lockStatus, "", employee.getCode(), employee.getBusinessName(),
 					employeeId, "", identify, approve, dailyConfirm, "");
+			mpdata.setVersion(rowData.getVersion());
 			// lock check box1 identify
 //			if (!employeeIdLogin.equals(employeeId) || param.getInitMenuMode() == 2 
 //					|| ((!StringUtil.isNullOrEmpty(lockStatus, true)) && (approvalProcessingUseSetting.getUseMonthApproverConfirm() && approve == true))) {
