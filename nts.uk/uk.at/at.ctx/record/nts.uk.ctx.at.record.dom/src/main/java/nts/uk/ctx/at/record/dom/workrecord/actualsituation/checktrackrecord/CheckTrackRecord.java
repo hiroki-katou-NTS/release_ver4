@@ -18,6 +18,7 @@ import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.approvalstatusmonthly.ApprovalStatusMonthly;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.approvalstatusmonthly.ApprovalStatusResult;
+import nts.uk.ctx.at.record.dom.workrecord.actualsituation.confirmstatusmonthly.AvailabilityAtr;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.shr.com.context.AppContexts;
@@ -105,8 +106,11 @@ public class CheckTrackRecord {
 						employeeId, attendanceTimeOfMonthly.getEmployeeId(), attendanceTimeOfMonthly.getYearMonth(),
 						attendanceTimeOfMonthly.getClosureId().value, attendanceTimeOfMonthly.getClosureDate(),
 						attendanceTimeOfMonthly.getDatePeriod());
-				if (approvalStatusResult.isPresent())
-					return true;
+				if (approvalStatusResult.isPresent()) {
+					if(approvalStatusResult.get().getImplementaPropriety() == AvailabilityAtr.CAN_RELEASE) {
+						return true;
+					}
+				}		
 			}
 		}
 
