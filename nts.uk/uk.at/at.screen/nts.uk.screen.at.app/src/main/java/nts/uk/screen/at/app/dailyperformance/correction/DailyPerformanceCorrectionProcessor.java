@@ -993,9 +993,12 @@ public class DailyPerformanceCorrectionProcessor {
 		return lock;
 	}
 	
-	public boolean lockHist(Map<String, DatePeriod> empHist, DPDataDto data) {
-		   if(empHist.isEmpty()) return false;
-		   val datePeriod = empHist.get(data.getEmployeeId());
+	public boolean lockHist(Pair<List<ClosureDto>, Map<Integer, DatePeriod>> empHist, DPDataDto data) {
+		Integer closureId = empHist.getLeft().stream()
+				.filter(x -> x.getSid().equals(data.getEmployeeId()) && inRange(data, x.getDatePeriod()))
+				.map(x -> x.getClosureId()).findFirst().orElse(null);
+		   if(closureId == null) return false;
+		   val datePeriod = empHist.getRight().get(closureId);
 		   if(datePeriod != null && data.getDate().after(datePeriod.end())) return false;
            if(datePeriod != null && (data.getDate().afterOrEquals(datePeriod.start()) && data.getDate().beforeOrEquals(datePeriod.end()))) return false;
            return true;
