@@ -463,11 +463,13 @@ public class MonthlyPerformanceReload {
 								//解除可否
 								if(confirmStatusResult.getWhetherToRelease() == ReleasedAtr.CAN_NOT_RELEASE) {
 									lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
+									disabled = true;
 								}
 							}else {
 								//実施可否
 								if(confirmStatusResult.getImplementaPropriety() == AvailabilityAtr.CAN_NOT_RELEASE) {
 									lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
+									disabled = true;
 								}
 							}
 						}
