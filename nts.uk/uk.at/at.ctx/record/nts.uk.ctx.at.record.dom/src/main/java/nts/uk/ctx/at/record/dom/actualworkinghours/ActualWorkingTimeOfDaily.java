@@ -38,6 +38,7 @@ import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryOccurrenceSetting;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.worktime.common.DeductionTime;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneCommonSet;
 import nts.uk.ctx.at.shared.dom.worktime.fixedset.FixRestTimezoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
@@ -351,74 +352,85 @@ public class ActualWorkingTimeOfDaily {
 									AttendanceTime acutualPredTime
 									) {
 		if(!recordClass.getCalculatable() || recordClass.getIntegrationOfDaily().getAttendanceLeave() == null || !recordClass.getIntegrationOfDaily().getAttendanceLeave().isPresent()) return totalWorkingTime;
-		if((recordClass.getPersonalInfo().getWorkingSystem().isRegularWork() || recordClass.getPersonalInfo().getWorkingSystem().isVariableWorkingTimeWork())&&recordClass.getOotsukaFixedWorkSet().isPresent()&& !workType.getDailyWork().isHolidayWork()) {
-			//休憩未取得時間の計算
-			AttendanceTime unUseBreakTime =
-					recordClass.getPersonalInfo().getWorkingSystem().isRegularWork() ?
-							totalWorkingTime.getBreakTimeOfDaily().calcUnUseBrekeTime(
-									recordClass.getFixRestTimeSetting().get(),
-									recordClass.getFixWoSetting(),
-									recordClass.getIntegrationOfDaily().getAttendanceLeave().get()) 
-							: new AttendanceTime(0);
-			unUseBreakTime = unUseBreakTime.greaterThan(0)?unUseBreakTime:new AttendanceTime(0);
-			//所てない休憩未取得時間を算出する際に使用する所定時間に加算する時間(就業時間帯マスタに設定されている所定内の休憩時間の合計)
-			int withinBreakTime = 0;
-			//就業時間帯に設定されている休憩のループ
-			for(DeductionTime breakTImeSheet : recordClass.getFixRestTimeSetting().get().getLstTimezone()) {
-				//就業時間帯に設定されている勤務時間帯のstream
-				withinBreakTime += recordClass.getFixWoSetting().stream().filter(tc -> tc.getTimezone().isOverlap(breakTImeSheet))
-													  .map(tt -> tt.getTimezone().getDuplicatedWith(breakTImeSheet.timeSpan()).get().lengthAsMinutes())
-													  .collect(Collectors.summingInt(ts -> ts));
-					
-				
-			}
-			//所定内休憩未取得時間の計算
-			AttendanceTime unUseWithinBreakTime = totalWorkingTime.getWithinStatutoryTimeOfDaily().calcUnUseWithinBreakTime(unUseBreakTime,acutualPredTime,new AttendanceTime(withinBreakTime));
-			//所定外休憩未取得時間
-			AttendanceTime unUseExcessBreakTime = unUseBreakTime.minusMinutes(unUseWithinBreakTime.valueAsMinutes());
-			
-									
-			
-			//日別実績の総労働からとってくる
-			AttendanceTime vacationAddTime = totalWorkingTime.getVacationAddTime();
-			//残業時間
-			if(totalWorkingTime.getExcessOfStatutoryTimeOfDaily().getOverTimeWork().isPresent()) {
-				//休憩未取得時間から残業時間計算
-				totalWorkingTime.getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get().calcOotsukaOverTime(
-						totalWorkingTime.getWithinStatutoryTimeOfDaily().getActualWorkTime(),
-						unUseExcessBreakTime,
-						vacationAddTime,/*休暇加算時間*/
-						recordClass.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc().getpredetermineTime(workType.getDailyWork()),
-						recordClass.getOotsukaFixedWorkSet(),
-						recordClass.getIntegrationOfDaily().getCalAttr().getOvertimeSetting(),
-						recordClass.getDailyUnit(),
-						recordClass.getFixRestTimeSetting(),
-						recordClass.getCalculationRangeOfOneDay().getWithinWorkingTimeSheet(),
-						recordClass.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc()
-						);
-				
-			}
-			
-			//就業時間から休憩未取得時間を減算(休憩未取得を残業時間として計算する　であれば差し引く)
-			if(recordClass.getOotsukaFixedWorkSet() != null
-			   && recordClass.getOotsukaFixedWorkSet().isPresent()
-			   && recordClass.getOotsukaFixedWorkSet().get().getOverTimeCalcNoBreak() != null
-			   && recordClass.getOotsukaFixedWorkSet().get().getOverTimeCalcNoBreak().getCalcMethod() != null
-			   && !recordClass.getOotsukaFixedWorkSet().get().getOverTimeCalcNoBreak().getCalcMethod().isCalcAsWorking() ) {
-				//totalWorkingTime.getWithinStatutoryTimeOfDaily().workTimeMinusUnUseBreakTimeForOotsuka(unUseBreakTime);
-				totalWorkingTime.getWithinStatutoryTimeOfDaily().workTimeMinusUnUseBreakTimeForOotsuka(unUseExcessBreakTime);
-			}
-			
-			//休暇加算を残業として計算する場合、ロジックの関係上、就業時間計算時に休暇加算が合算されてしまう
-			//ここでは、合算されてしまっている休暇加算を差し引いている
-			if(recordClass.getOotsukaFixedWorkSet() != null && recordClass.getOotsukaFixedWorkSet().isPresent() ) {
-				if(recordClass.getOotsukaFixedWorkSet().get().getExceededPredAddVacationCalc().getCalcMethod() != null
-					 && recordClass.getOotsukaFixedWorkSet().get().getExceededPredAddVacationCalc().getCalcMethod().isCalcAsOverTime()
-					 && totalWorkingTime.getWithinStatutoryTimeOfDaily().getWorkTime().greaterThan(recordClass.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc().getAdditionSet().getPredTime().getOneDay().valueAsMinutes())) {
-					totalWorkingTime.setWithinWorkTime(recordClass.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc().getAdditionSet().getPredTime().getOneDay());
-				}
-			}
+//		if((recordClass.getPersonalInfo().getWorkingSystem().isRegularWork() || recordClass.getPersonalInfo().getWorkingSystem().isVariableWorkingTimeWork()){
+//			/*緊急対応　固定勤務時　就業時間帯or計算設定で遅刻早退控除しない　なら、休憩未取得処理飛ばす*/
 
+			if(recordClass.getWorkRegularAdditionSet() != null
+			&& recordClass.getWorkRegularAdditionSet().getVacationCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getAdvancedSet().isPresent()){
+				boolean lateEarlyDeductFlag = recordClass.getWorkRegularAdditionSet().getVacationCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getAdvancedSet().get().isDeductLateLeaveEarly(recordClass.getWorkTimezoneCommonSet());
+				if(!lateEarlyDeductFlag) return totalWorkingTime; 
+			}
+		
+			if(recordClass.getOotsukaFixedWorkSet().isPresent()&& !workType.getDailyWork().isHolidayWork()) {
+//		        if((recordClass.getPersonalInfo().getWorkingSystem().isRegularWork() || recordClass.getPersonalInfo().getWorkingSystem().isVariableWorkingTimeWork())&&recordClass.getOotsukaFixedWorkSet().isPresent()&& !workType.getDailyWork().isHolidayWork()) {
+				//休憩未取得時間の計算
+				AttendanceTime unUseBreakTime =
+						recordClass.getPersonalInfo().getWorkingSystem().isRegularWork() ?
+								totalWorkingTime.getBreakTimeOfDaily().calcUnUseBrekeTime(
+										recordClass.getFixRestTimeSetting().get(),
+										recordClass.getFixWoSetting(),
+										recordClass.getIntegrationOfDaily().getAttendanceLeave().get()) 
+								: new AttendanceTime(0);
+				unUseBreakTime = unUseBreakTime.greaterThan(0)?unUseBreakTime:new AttendanceTime(0);
+				//所てない休憩未取得時間を算出する際に使用する所定時間に加算する時間(就業時間帯マスタに設定されている所定内の休憩時間の合計)
+				int withinBreakTime = 0;
+				//就業時間帯に設定されている休憩のループ
+				for(DeductionTime breakTImeSheet : recordClass.getFixRestTimeSetting().get().getLstTimezone()) {
+					//就業時間帯に設定されている勤務時間帯のstream
+					withinBreakTime += recordClass.getFixWoSetting().stream().filter(tc -> tc.getTimezone().isOverlap(breakTImeSheet))
+														  .map(tt -> tt.getTimezone().getDuplicatedWith(breakTImeSheet.timeSpan()).get().lengthAsMinutes())
+														  .collect(Collectors.summingInt(ts -> ts));
+						
+					
+				}
+				//所定内休憩未取得時間の計算
+				AttendanceTime unUseWithinBreakTime = totalWorkingTime.getWithinStatutoryTimeOfDaily().calcUnUseWithinBreakTime(unUseBreakTime,acutualPredTime,new AttendanceTime(withinBreakTime));
+				//所定外休憩未取得時間
+				AttendanceTime unUseExcessBreakTime = unUseBreakTime.minusMinutes(unUseWithinBreakTime.valueAsMinutes());
+				
+										
+				
+				//日別実績の総労働からとってくる
+				AttendanceTime vacationAddTime = totalWorkingTime.getVacationAddTime();
+				//残業時間
+				if(totalWorkingTime.getExcessOfStatutoryTimeOfDaily().getOverTimeWork().isPresent()) {
+					//休憩未取得時間から残業時間計算
+					totalWorkingTime.getExcessOfStatutoryTimeOfDaily().getOverTimeWork().get().calcOotsukaOverTime(
+							totalWorkingTime.getWithinStatutoryTimeOfDaily().getActualWorkTime(),
+							unUseExcessBreakTime,
+							vacationAddTime,/*休暇加算時間*/
+							recordClass.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc().getpredetermineTime(workType.getDailyWork()),
+							recordClass.getOotsukaFixedWorkSet(),
+							recordClass.getIntegrationOfDaily().getCalAttr().getOvertimeSetting(),
+							recordClass.getDailyUnit(),
+							recordClass.getFixRestTimeSetting(),
+							recordClass.getCalculationRangeOfOneDay().getWithinWorkingTimeSheet(),
+							recordClass.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc()
+							);
+					
+				}
+				
+				//就業時間から休憩未取得時間を減算(休憩未取得を残業時間として計算する　であれば差し引く)
+				if(recordClass.getOotsukaFixedWorkSet() != null
+				   && recordClass.getOotsukaFixedWorkSet().isPresent()
+				   && recordClass.getOotsukaFixedWorkSet().get().getOverTimeCalcNoBreak() != null
+				   && recordClass.getOotsukaFixedWorkSet().get().getOverTimeCalcNoBreak().getCalcMethod() != null
+				   && !recordClass.getOotsukaFixedWorkSet().get().getOverTimeCalcNoBreak().getCalcMethod().isCalcAsWorking() ) {
+					//totalWorkingTime.getWithinStatutoryTimeOfDaily().workTimeMinusUnUseBreakTimeForOotsuka(unUseBreakTime);
+					totalWorkingTime.getWithinStatutoryTimeOfDaily().workTimeMinusUnUseBreakTimeForOotsuka(unUseExcessBreakTime);
+				}
+				
+				//休暇加算を残業として計算する場合、ロジックの関係上、就業時間計算時に休暇加算が合算されてしまう
+				//ここでは、合算されてしまっている休暇加算を差し引いている
+				if(recordClass.getOotsukaFixedWorkSet() != null && recordClass.getOotsukaFixedWorkSet().isPresent() ) {
+					if(recordClass.getOotsukaFixedWorkSet().get().getExceededPredAddVacationCalc().getCalcMethod() != null
+						 && recordClass.getOotsukaFixedWorkSet().get().getExceededPredAddVacationCalc().getCalcMethod().isCalcAsOverTime()
+						 && totalWorkingTime.getWithinStatutoryTimeOfDaily().getWorkTime().greaterThan(recordClass.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc().getAdditionSet().getPredTime().getOneDay().valueAsMinutes())) {
+						totalWorkingTime.setWithinWorkTime(recordClass.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc().getAdditionSet().getPredTime().getOneDay());
+					}
+				}
+	
+	//		}
 		}
 		return totalWorkingTime;
 	}
