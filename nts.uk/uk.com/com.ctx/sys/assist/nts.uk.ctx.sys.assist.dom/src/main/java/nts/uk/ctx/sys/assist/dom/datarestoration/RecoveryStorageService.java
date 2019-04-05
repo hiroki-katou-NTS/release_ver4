@@ -733,11 +733,12 @@ public class RecoveryStorageService {
 								indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
 
 								for (int j = 5; j < row.columnLength(); j++) {
+									
+									String header_column_name = targetDataHeader.get(j);
 
 									// add columns name
 									INSERT_BY_TABLE.append(targetDataHeader.get(j) + ", ");
-									boolean anyNonEmpty = columnNotNull.stream()
-											.anyMatch(x -> x.equals(targetDataHeader));
+									boolean anyNonEmpty = columnNotNull.stream().anyMatch(x -> x.equals(header_column_name));
 									String value = j == indexCidOfCsv ? cidCurrent : row.getColumn(j).toString();
 									// add values
 									if (StringUtils.isEmpty(value)) {
