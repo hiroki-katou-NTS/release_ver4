@@ -65,6 +65,10 @@ public abstract class UkJpaEntity extends JpaEntity {
     
     @PreUpdate
     private void setUpdatingMetaInfo() {
+    	this.dirtying();
+    }
+    
+    public void dirtying() {
     	this.updDate = GeneralDateTime.now();
     	this.updCcd = AppContexts.user().companyCode();
     	this.updScd = AppContexts.user().employeeCode();

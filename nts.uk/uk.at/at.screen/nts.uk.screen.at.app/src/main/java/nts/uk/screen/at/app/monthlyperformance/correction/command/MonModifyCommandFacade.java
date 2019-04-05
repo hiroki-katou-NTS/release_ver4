@@ -72,11 +72,15 @@ public class MonModifyCommandFacade {
 		// insert value
 		mapItemDetail.entrySet().forEach(item -> {
 			List<MPItemDetail> rowDatas = item.getValue();
-			listQuery.add(new MonthlyModifyQuery(rowDatas.stream().map(x -> {
+			MonthlyModifyQuery query = new MonthlyModifyQuery(rowDatas.stream().map(x -> {
 				return ItemValue.builder().itemId(x.getItemId()).layout(x.getLayoutCode()).value(x.getValue())
 						.valueType(ValueType.valueOf(x.getValueType())).withPath("");
 			}).collect(Collectors.toList()), dataParent.getYearMonth(), item.getKey(), dataParent.getClosureId(),
-					dataParent.getClosureDate()));
+					dataParent.getClosureDate());
+			
+			query.setVersion(rowDatas.get(0).getVersion());
+			
+			listQuery.add(query);
 		});
 		List<MonthlyRecordWorkDto> oldDtos = getDtoFromQuery(listQuery); // lay data truoc khi update de so sanh voi data sau khi update
 		monthModifyCommandFacade.handleUpdate(listQuery,oldDtos);

@@ -25,4 +25,6 @@ public class MPItemDetail {
 	private GeneralDate date;
 	
 	private Integer typeGroup;
+	
+	private long version;
 }

@@ -11,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -142,6 +143,10 @@ public class KrcdtMonMerge extends UkJpaEntity implements Serializable {
 
 	@EmbeddedId
 	public KrcdtMonMergePk krcdtMonMergePk;
+	
+	@Version
+	@Column(name = "EXCLUS_VER")
+	public long version;
 
 	/** KRCDT_MON_AGGR_ABSN_DAYS 30 **/
 
@@ -3404,6 +3409,8 @@ public class KrcdtMonMerge extends UkJpaEntity implements Serializable {
 		/** 回数集計 */
 		val totalCount = domain.getTotalCount();
 		toEntityTotalCount(totalCount.getTotalCountList());
+		
+		this.version = domain.getVersion();
 	}
 	
 	public void resetAttendanceTime() {
@@ -4824,6 +4831,8 @@ public class KrcdtMonMerge extends UkJpaEntity implements Serializable {
 		this.lastJobTitleId = domain.getLastInfo().getJobTitleId().v();
 		this.lastClassCd = domain.getLastInfo().getClassCd().v();
 		this.lastBusinessTypeCd = domain.getLastInfo().getBusinessTypeCd().v();
+		
+		this.version = domain.getVersion();
 	}
 	
 	public void resetAffiliationInfo() {
@@ -5641,7 +5650,7 @@ public class KrcdtMonMerge extends UkJpaEntity implements Serializable {
 		// 期間別の回数集計
 		TotalCountByPeriod totalCount = toDomainTotalCountByPeriod(this.getTotalCounts());
 		
-		return AttendanceTimeOfMonthly.of(
+		AttendanceTimeOfMonthly domain = AttendanceTimeOfMonthly.of(
 				this.krcdtMonMergePk.getEmployeeId(),
 				new YearMonth(this.krcdtMonMergePk.getYearMonth()),
 				ClosureId.valueOf(this.krcdtMonMergePk.getClosureId()),
@@ -5652,6 +5661,10 @@ public class KrcdtMonMerge extends UkJpaEntity implements Serializable {
 				verticalTotal,
 				totalCount,
 				new AttendanceDaysMonth(this.aggregateDays));
+		
+		domain.setVersion(this.version);
+		
+		return domain;
 	}
 	
 	private TotalCountByPeriod toDomainTotalCountByPeriod(List<TotalCount> totalCounts) {
@@ -6126,7 +6139,7 @@ public class KrcdtMonMerge extends UkJpaEntity implements Serializable {
 	 */
 	public AffiliationInfoOfMonthly toDomainAffiliationInfoOfMonthly(){
 		
-		return AffiliationInfoOfMonthly.of(
+		AffiliationInfoOfMonthly domain = AffiliationInfoOfMonthly.of(
 				this.krcdtMonMergePk.getEmployeeId(),
 				new YearMonth(this.krcdtMonMergePk.getYearMonth()),
 				EnumAdaptor.valueOf(this.krcdtMonMergePk.getClosureId(), ClosureId.class),
@@ -6143,6 +6156,10 @@ public class KrcdtMonMerge extends UkJpaEntity implements Serializable {
 						new JobTitleId(this.lastJobTitleId),
 						new ClassificationCode(this.lastClassCd),
 						new BusinessTypeCode(this.lastBusinessTypeCd)));
+		
+		domain.setVersion(this.version);
+		
+		return domain;
 	}
 	
 	/** KRCDT_MON_AGGR_ABSN_DAYS

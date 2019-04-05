@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -307,5 +308,10 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 						.getList().stream().forEach(c -> c.resetAttendanceTime());
 	}
 
-	
+	public void dirtying(Supplier<Object> getKey) {
+		
+		this.queryProxy().find(getKey.get(), KrcdtMonMerge.class).ifPresent(entity -> {
+			entity.dirtying();
+		});
+	}
 }
