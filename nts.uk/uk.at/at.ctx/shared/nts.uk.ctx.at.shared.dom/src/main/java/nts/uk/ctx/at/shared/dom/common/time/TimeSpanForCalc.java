@@ -175,6 +175,15 @@ public class TimeSpanForCalc extends DomainObject implements ComparableRange<Int
 	}
 	
 	/**
+	 * 比較元と比較対象が接している状態か判定する
+	 * @param other　比較したい時間帯
+	 * @return　接している
+	 */
+	public boolean isContinus(TimeSpanForCalc other) {
+		val result = this.compare(other);
+		return result.isContinuousAfterBase() || result.isContinuousBeforeBase();
+	}
+	/**
 	 * 開始時刻のみ指定した時刻に移動する
 	 * @param newStart 新しい開始時刻
 	 * @return
