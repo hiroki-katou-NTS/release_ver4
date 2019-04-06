@@ -917,6 +917,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 									disabled = true;
 								}
 							}
+							break;
 						}
 					}
 					
