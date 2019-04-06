@@ -17,6 +17,7 @@ import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootSituationMo
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalActionByEmpl;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
+import nts.uk.ctx.at.shared.app.query.workrule.closure.GetCloseOnKeyDate;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.ctx.at.shared.pub.workrule.closure.PresentClosingPeriodExport;
@@ -130,5 +131,28 @@ public class KTG030QueryProcessor {
 			return true;
 		}
 		return false;
+	}
+	
+	@Inject
+	private GetCloseOnKeyDate getCloseOnKeyDate;
+	
+	/**
+	 *  月別実績確認すべきデータ有無取得
+	 * @author tutk
+	 */
+	public boolean checkDataMonPerConfirm(String employeeId) {
+		//基準日の会社の締めをすべて取得する
+		List<Closure> listClosure = getCloseOnKeyDate.getCloseOnKeyDate(GeneralDate.today());
+		
+		//取得した「締め」からチェック対象を作成する
+		List<CheckTargetItem> listCheckTargetItem = new ArrayList<>();
+		for(Closure closure : listClosure) {
+			listCheckTargetItem.add(new CheckTargetItem(closure.getClosureId().value,closure.getClosureMonth().getProcessingYm()));
+		}
+		CheckTargetOutPut checkTargetOutPut = new CheckTargetOutPut(listCheckTargetItem);
+		
+		//承認すべき月の実績があるかチェックする
+		//TODO:RQ594
+		return true;
 	}
 }
