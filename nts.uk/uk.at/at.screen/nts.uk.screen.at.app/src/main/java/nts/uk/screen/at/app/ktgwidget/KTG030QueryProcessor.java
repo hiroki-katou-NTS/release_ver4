@@ -16,9 +16,6 @@ import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
 public class KTG030QueryProcessor {
-
-	
-
 	@Inject
 	private CheckTrackRecord  checkTrackRecord;
 
