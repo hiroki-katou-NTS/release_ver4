@@ -283,18 +283,24 @@ public class DailyModifyResCommandFacade {
 				IntegrationOfMonthly domainMonth = monthModifyCommandFacade.toDto(monthQuery).toDomain(
 						month.getEmployeeId(), new YearMonth(month.getYearMonth()), month.getClosureId(),
 						month.getClosureDate());
+				domainMonth.getAffiliationInfo().ifPresent(d -> {
+					d.setVersion(dataParent.getMonthValue().getVersion());
+				});
+				domainMonth.getAttendanceTime().ifPresent(d -> {
+					d.setVersion(dataParent.getMonthValue().getVersion());
+				});
 				Optional<IntegrationOfMonthly> domainMonthOpt = Optional.of(domainMonth);
 				monthParam = new UpdateMonthDailyParam(month.getYearMonth(), month.getEmployeeId(),
 						month.getClosureId(), month.getClosureDate(), domainMonthOpt,
 						new DatePeriod(dataParent.getDateRange().getStartDate(),
 								dataParent.getDateRange().getEndDate()),
-						month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc());
+						month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc(), dataParent.getMonthValue().getVersion());
 			} else {
 				monthParam = new UpdateMonthDailyParam(month.getYearMonth(), month.getEmployeeId(),
 						month.getClosureId(), month.getClosureDate(), Optional.empty(),
 						new DatePeriod(dataParent.getDateRange().getStartDate(),
 								dataParent.getDateRange().getEndDate()),
-						month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc());
+						month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc(), dataParent.getMonthValue().getVersion());
 			}
 		}
 
@@ -857,7 +863,8 @@ public class DailyModifyResCommandFacade {
 				.items(AttendanceItemUtil.toItemValues(monthDto, Arrays.asList(18, 21, 189, 190, 191),
 						AttendanceItemUtil.AttendanceItemType.MONTHLY_ITEM))
 				.employeeId(monthValue.getEmployeeId()).yearMonth(monthValue.getYearMonth())
-				.closureId(monthValue.getClosureId()).closureDate(monthValue.getClosureDate()).completed();
+				.closureId(monthValue.getClosureId()).closureDate(monthValue.getClosureDate())
+				.version(monthValue.getVersion()).completed();
 		mapValue(result.getItems(), itemResult);
 		return itemResult;
 	}
@@ -999,7 +1006,7 @@ public class DailyModifyResCommandFacade {
 			detailEmployeeError.addAll(pairError.getDetailEmployeeError());
 			hasError =  true;
 		}
-				
+			
 		return new ErrorAfterCalcDaily(hasError, resultErrorMonth, detailEmployeeError, resultErrorDaily, dataResultAfterIU.getFlexShortage());
 	}
 	
@@ -1014,6 +1021,7 @@ public class DailyModifyResCommandFacade {
 				hasError = true;
 				if(!resultIU.getLstMonthDomain().isEmpty()) flexShortageRCDto.createDataCalc(convertMonthToItem(MonthlyRecordWorkDto.fromOnlyAttTime(resultIU.getLstMonthDomain().get(0)), monthValue));
 			}
+			flexShortageRCDto.setVersion(monthValue.getVersion());
 			dataResultAfterIU.setFlexShortage(flexShortageRCDto);
 		}
 		
@@ -1039,6 +1047,7 @@ public class DailyModifyResCommandFacade {
 				hasError = true;
 				if(!resultIU.getLstMonthDomain().isEmpty()) flexShortageRCDto.createDataCalc(convertMonthToItem(MonthlyRecordWorkDto.fromOnlyAttTime(resultIU.getLstMonthDomain().get(0)), monthValue));
 			}
+			flexShortageRCDto.setVersion(monthValue.getVersion());
 			dataResultAfterIU.setFlexShortage(flexShortageRCDto);
 		}
 		// 残数系のエラーチェック（月次集計なし）

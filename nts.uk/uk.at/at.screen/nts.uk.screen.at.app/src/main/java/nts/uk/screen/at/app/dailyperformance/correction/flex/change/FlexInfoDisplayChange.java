@@ -87,6 +87,7 @@ public class FlexInfoDisplayChange {
 
 		if (!results.isEmpty()) {
 			mapValue(results.get(0).getItems(), dataMonth);
+			dataMonth.getMonthParent().setVersion(results.get(0).getVersion());
 		} else {
 			return new FlexShortageDto().createShowFlex(false);
 		}

@@ -58,6 +58,8 @@ public class UpdateMonthAfterProcessDaily {
 							data.getYearMonth(), data.getClosureId(), data.getClosureDate(), data.getPeriod(), Optional.empty(), domainDailyGroupEmp,
 							monthlyWork);
 					if (monthDomainOpt.isPresent())
+						monthDomainOpt.get().getAffiliationInfo().ifPresent(a -> a.setVersion(month.getVersion()));
+						monthDomainOpt.get().getAttendanceTime().ifPresent(a -> a.setVersion(month.getVersion()));
 						result.add(monthDomainOpt.get());
 				});
 			}
@@ -76,7 +78,11 @@ public class UpdateMonthAfterProcessDaily {
 			Optional<IntegrationOfMonthly> monthDomainOpt = aggregateSpecifiedDailys.algorithm(companyId, month.getEmployeeId(),
 					new YearMonth(month.getYearMonth()), ClosureId.valueOf(month.getClosureId()), month.getClosureDate().toDomain(), month.getDatePeriod(), Optional.empty(), domainDailyGroupEmp,
 					monthlyWork);
-			if(monthDomainOpt.isPresent()) result.add(monthDomainOpt.get());
+			if(monthDomainOpt.isPresent()) {
+				monthDomainOpt.get().getAffiliationInfo().ifPresent(a -> a.setVersion(month.getVersion()));
+				monthDomainOpt.get().getAttendanceTime().ifPresent(a -> a.setVersion(month.getVersion()));
+				result.add(monthDomainOpt.get());
+			}
 			System.out.println("tg tinh toan thang : "+ (System.currentTimeMillis() - time));
 			if(monthDomainOpt.isPresent() && !monthDomainOpt.get().getEmployeeMonthlyPerErrorList().isEmpty()) return result;
 			//updateAllDomainMonthService.insertUpdateAll(Arrays.asList(monthDomainOpt.get()));
