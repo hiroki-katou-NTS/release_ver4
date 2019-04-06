@@ -86,7 +86,8 @@ public class CheckTrackRecord {
 		// 対応するImported「基準社員の承認対象者」を取得する RQ643
 		ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport = approvalStatusAdapter
 				.getApprovalRootOfEmloyeeNew(periord.start(), periord.end(), loginId, companyId, 2); // 2 : 月別確認
-
+		if(approvalRootOfEmployeeImport == null) 
+			return false;
 		// 対応する月別実績を取得する
 		List<TimeOfMonthly> timeOfMonthly = timeRepo.findBySidsAndYearMonths(
 				approvalRootOfEmployeeImport.getApprovalRootSituations().stream()
