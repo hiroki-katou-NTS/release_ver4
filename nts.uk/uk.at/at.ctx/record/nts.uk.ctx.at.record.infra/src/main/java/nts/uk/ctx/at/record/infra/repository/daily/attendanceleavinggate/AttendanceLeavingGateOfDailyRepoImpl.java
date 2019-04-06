@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -23,6 +24,7 @@ import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.AttendanceLeavingGate;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.AttendanceLeavingGateOfDaily;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.AttendanceLeavingGateOfDailyRepo;
+import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.daily.attendanceleavinggate.KrcdtDayLeaveGate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.infra.data.jdbc.JDBCUtil;
@@ -33,6 +35,9 @@ public class AttendanceLeavingGateOfDailyRepoImpl extends JpaRepository implemen
 
 //	private static final String REMOVE_BY_KEY;
 
+	@Inject
+	private WorkInformationRepository workInfo;
+	
 	static {
 //		StringBuilder builderString = new StringBuilder();
 //		builderString.append("DELETE ");
@@ -132,6 +137,7 @@ public class AttendanceLeavingGateOfDailyRepoImpl extends JpaRepository implemen
 					commandProxy().insert(KrcdtDayLeaveGate.from(domain.getEmployeeId(), domain.getYmd(), c));
 				}
 			});
+			this.workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		}
 	}
 
@@ -166,6 +172,7 @@ public class AttendanceLeavingGateOfDailyRepoImpl extends JpaRepository implemen
 						+ leaveTime + " )";
 				statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
 			}
+			this.workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		} catch (Exception e) {
 			
 		}
@@ -184,6 +191,7 @@ public class AttendanceLeavingGateOfDailyRepoImpl extends JpaRepository implemen
 		String sqlQuery = "Delete From KRCDT_DAY_LEAVE_GATE Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + baseDate + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
+			this.workInfo.dirtying(employeeId, baseDate);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

@@ -108,6 +108,7 @@ public class DailyCorrectCalcTimeService {
 
 		val dailyEditsResult = dailyEdits.stream().map(x -> {
 			if (equalEmpAndDate(x.getEmployeeId(), x.getDate(), itemEditCalc)) {
+				resultBaseDto.getWorkInfo().setVersion(x.getWorkInfo().getVersion());
 				return resultBaseDto;
 			} else {
 				return x;
