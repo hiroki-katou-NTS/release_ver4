@@ -111,7 +111,7 @@ public class CheckTrackRecord {
 					if(approvalStatusResult.get().getImplementaPropriety() == AvailabilityAtr.CAN_RELEASE) {
 						return true;
 					}
-				}		
+				}	
 			}
 		}
 
