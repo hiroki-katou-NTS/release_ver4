@@ -270,7 +270,6 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 		data.backStraightAttribute = domain.getBackStraightAtr().value;
 		data.goStraightAttribute = domain.getGoStraightAtr().value;
 		data.dayOfWeek = domain.getDayOfWeek().value;
-		data.version = domain.getVersion();
 		if(domain.getScheduleTimeSheets().isEmpty()){
 			data.scheduleTimes.forEach(c -> {
 				this.commandProxy().remove(getEntityManager().merge(c));
