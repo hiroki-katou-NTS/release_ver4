@@ -188,7 +188,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 				if(lstBeforeBreakTimeInfor.size() == 1 && breakTimeInfor != null
 						&& lstBeforeBreakTimeInfor.get(0).getBreakType() != breakTimeInfor.getBreakType()) {
 					integrationOfDaily.getBreakTime().add(breakTimeInfor);
-					breakTimeRepo.update(integrationOfDaily.getBreakTime());
+					breakTimeRepo.updateV2(integrationOfDaily.getBreakTime());
 				}
 				return integrationOfDaily;
 			}

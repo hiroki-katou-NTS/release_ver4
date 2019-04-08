@@ -1122,24 +1122,27 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 							new TimeWithDayAttr(b.getEndTime()));
 					lstBreakTime.add(timeSheet);
 				});
-				
+				List<BreakTimeOfDailyPerformance> lstBreakUpdate = new ArrayList<>();
 				if(isPre) {
 					BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
 							BreakType.REFER_SCHEDULE, 
 							lstBreakTime, 
 							daily.getWorkInformation().getYmd());
 					daily.getBreakTime().add(breakTimeOfDailySche);
-					breakTimeOfDailyRepo.update(breakTimeOfDailySche);	
+					lstBreakUpdate.add(breakTimeOfDailySche);
+					breakTimeOfDailyRepo.updateV2(lstBreakUpdate);	
 				} else {
 					BreakTimeOfDailyPerformance breakTimeOfDaily = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
 							BreakType.REFER_WORK_TIME, 
 							lstBreakTime, 
 							daily.getWorkInformation().getYmd());
 					daily.getBreakTime().add(breakTimeOfDaily);
-					breakTimeOfDailyRepo.update(breakTimeOfDaily);	
+					lstBreakUpdate.add(breakTimeOfDaily);
+					breakTimeOfDailyRepo.updateV2(lstBreakUpdate);	
 				}
 			}
 			for (BreakTimeOfDailyPerformance breakTimeSheet : breakTime) {
+				List<BreakTimeOfDailyPerformance> lstBreakUpdate = new ArrayList<>();
 				List<BreakTimeSheet> lstBreakTimeData  = breakTimeSheet.getBreakTimeSheets();
 				mapBreakTimeFrame.forEach((a,b) ->{
 					boolean isSet = false;
@@ -1156,8 +1159,9 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 						lstBreakTimeData.add(timeSheet);
 					}
 					
-				});				
-				breakTimeOfDailyRepo.update(breakTimeSheet);
+				});
+				lstBreakUpdate.add(breakTimeSheet);
+				breakTimeOfDailyRepo.updateV2(lstBreakUpdate);
 			}
 			
 		}
