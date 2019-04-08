@@ -686,19 +686,17 @@ module nts.uk.at.view.kmw003.a.viewmodel {
 //                        $("#dpGrid").mGrid("updateCell", data.rowId, data.columnKey, data.value, true);
 //                    });
 
+                    nts.uk.ui.block.clear();
 //                    if (self.initMode() != ScreenMode.APPROVAL) {
-                        self.loadRowScreen().done(() => {
-                            nts.uk.ui.block.clear();
-                        });
+                        self.loadRowScreen();
                         //self.showButton(new AuthorityDetailModel(self.dataAll().authorityDto, self.dataAll().actualTimeState, self.initMode(), self.dataAll().formatPerformance.settingUnitType));
                         //                           self.updateDate(self.yearMonth());  
 //                    }
                 }).fail(function(res: any) {
                     if(res.optimisticLock === true){
                         nts.uk.ui.dialog.error({ messageId: 'Msg_1528' }).then(() => {
-                            self.loadRowScreen().done(() => {
-                                nts.uk.ui.block.clear();
-                            });
+                            nts.uk.ui.block.clear();
+                            self.loadRowScreen();
                         });
                     } else {
                         nts.uk.ui.dialog.error({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() { nts.uk.ui.block.clear(); });    
