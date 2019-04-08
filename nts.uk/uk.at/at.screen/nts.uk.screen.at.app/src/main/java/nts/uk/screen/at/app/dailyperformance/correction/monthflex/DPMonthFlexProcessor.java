@@ -121,6 +121,7 @@ public class DPMonthFlexProcessor {
 						.yearMonth(firstDT.getYearMonth())
 						.employeeId(firstDT.getEmployeeId())
 						.items(new ArrayList<>(firstDT.getItems().stream().filter(c -> itemIds.contains(c.itemId())).collect(Collectors.toSet())))
+						.version(firstDT.getVersion())
 						.completed());
 			}
 
@@ -131,6 +132,7 @@ public class DPMonthFlexProcessor {
 					.yearMonth(firstDT.getYearMonth())
 					.employeeId(firstDT.getEmployeeId())
 					.items(firstDT.getItems().stream().filter(c -> DAFAULT_ITEM.contains(c.itemId())).collect(Collectors.toList()))
+					.version(firstDT.getVersion())
 					.completed());
 		}
 		
@@ -142,7 +144,10 @@ public class DPMonthFlexProcessor {
 				closureEmploymentOptional.get().getClosureId(),
 				new ClosureDateDto(closingPeriod.get().getClosureDate().getClosureDay(),
 						closingPeriod.get().getClosureDate().getLastDayOfMonth())));
-		
+		if(!mResult.isEmpty()){
+			flexShortageDto.getMonthParent().setVersion(mResult.get(0).getVersion());
+			flexShortageDto.setVersion(mResult.get(0).getVersion());
+		}
 		AgreementInfomationDto agreeDto = displayAgreementInfo.displayAgreementInfo(companyId, param.getEmployeeId(),
 				closingPeriod.get().getClosureEndDate().year(), closingPeriod.get().getClosureEndDate().month());
 		//setAgreeItem(itemMonthFlexResults, agreeDto);

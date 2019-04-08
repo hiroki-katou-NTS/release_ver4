@@ -122,7 +122,7 @@ public class TimeLeavingOfDailyService {
 						wts.getAttendanceTime() == WorkTypeSetCheck.CHECK ? NotUseAttribute.Use : NotUseAttribute.Not_use, 
 						wts.getTimeLeaveWork() == WorkTypeSetCheck.CHECK ? NotUseAttribute.Use : NotUseAttribute.Not_use, 
 						wi.getYmd(), wi.getDayOfWeek(), wi.getScheduleTimeSheets()) ;
-				
+				clonedWI.setVersion(wi.getVersion());
 				correctedTlo = updateTimeLeave(companyId, clonedWI, tl, workCondition, wi.getEmployeeId(), wi.getYmd());
 			} else {
 				return EventHandleResult.withResult(EventHandleAction.ABORT, working);
