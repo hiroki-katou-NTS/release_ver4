@@ -115,6 +115,10 @@ public class DataWorkServiceImpl implements IDataWorkService {
 			result = workTypeRepository.findWorkType(companyID, 0, allDayAtrs, halfAtrs).stream()
 					.map(x -> x.getWorkTypeCode().v()).collect(Collectors.toList());
 		}
+		if(ApplicationType.GO_RETURN_DIRECTLY_APPLICATION.value == apptype){
+			result = this.workTypeRepository.findNotDeprecated(companyID).stream()
+					.map(x -> x.getWorkTypeCode().v()).collect(Collectors.toList());
+		}
 		return result;
 	}
 
