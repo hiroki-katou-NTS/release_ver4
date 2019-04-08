@@ -142,8 +142,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 				// 申請された時間を補正する
 				integrationOfDaily = overTimeService.correct(integrationOfDaily, workTypeInfor);
 				//Neu khong phai don xin di lam vao ngay nghi va don xin di lam vao ngay nghi ko tich chon phan anh gio nghi
-				if(workTypeInfor.isPresent() && !workTypeInfor.get().getDailyWork().isHolidayWork()
-						&& !this.isReflectBreakTime(integrationOfDaily.getEditState())) {
+				if(workTypeInfor.isPresent() && (!workTypeInfor.get().getDailyWork().isHolidayWork()
+						|| (workTypeInfor.get().getDailyWork().isHolidayWork() && !this.isReflectBreakTime(integrationOfDaily.getEditState())))) {
 					//休憩時間帯を補正する	
 					integrationOfDaily = breakTimeDailyService.correct(companyId, integrationOfDaily, workTypeInfor, true).getData();	
 				}				
