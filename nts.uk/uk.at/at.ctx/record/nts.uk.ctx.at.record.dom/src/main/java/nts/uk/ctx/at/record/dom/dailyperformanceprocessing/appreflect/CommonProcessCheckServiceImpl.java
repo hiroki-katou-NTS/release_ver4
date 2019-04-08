@@ -134,7 +134,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 						.filter(x -> CorrectEventConts.LEAVE_ITEMS.contains(x.getAttendanceItemId()) 
 								|| CorrectEventConts.ATTENDANCE_ITEMS.contains(x.getAttendanceItemId()))
 						.collect(Collectors.toList());
-				if(workTypeInfor.isPresent() && !workTypeInfor.get().getDailyWork().isHolidayWork() && !lstTime.isEmpty()) {
+				if(workTypeInfor.isPresent() && (!workTypeInfor.get().getDailyWork().isHolidayWork() ||
+						(workTypeInfor.get().getDailyWork().isHolidayWork() && lstTime.isEmpty()))) {
 					//出退勤時刻を補正する
 					integrationOfDaily = timeLeavingService.correct(companyId, integrationOfDaily, optWorkingCondition, workTypeInfor, true).getData();	
 				}				
@@ -184,7 +185,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 			//休日出勤申請しか反映してない
 			if(this.isReflectBreakTime(lstEditState)
 					&& workTypeInfor.isPresent() && workTypeInfor.get().getDailyWork().isHolidayWork()) {
-				if(lstBeforeBreakTimeInfor.size() == 1
+				if(lstBeforeBreakTimeInfor.size() == 1 && breakTimeInfor != null
 						&& lstBeforeBreakTimeInfor.get(0).getBreakType() != breakTimeInfor.getBreakType()) {
 					integrationOfDaily.getBreakTime().add(breakTimeInfor);
 					breakTimeRepo.update(integrationOfDaily.getBreakTime());
