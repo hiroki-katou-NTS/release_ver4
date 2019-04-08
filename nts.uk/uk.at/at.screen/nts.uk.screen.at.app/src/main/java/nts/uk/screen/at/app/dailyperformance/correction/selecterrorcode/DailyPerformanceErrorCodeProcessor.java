@@ -336,7 +336,7 @@ public class DailyPerformanceErrorCodeProcessor {
                 
                 boolean lockDaykWpl = false, lockHist = false, lockApprovalMonth = false, lockConfirmMonth = false;
 				if (showLock == null || showLock) {
-					lockDaykWpl = dailyProcessor.checkLockAndSetState(dpLock.getLockDayAndWpl(), data);
+					lockDaykWpl = dailyProcessor.checkLockDay(dpLock.getLockDayAndWpl(), data);
 					lockHist = dailyProcessor.lockHist(dpLock.getLockHist(), data);
 					lockApprovalMonth = approvalCheckMonth == null ? false : approvalCheckMonth.isCheckApproval();
 					lockConfirmMonth = dailyProcessor.checkLockConfirmMonth(dpLock.getLockConfirmMonth(), data);

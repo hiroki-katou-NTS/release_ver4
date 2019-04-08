@@ -22,6 +22,7 @@ import nts.uk.ctx.at.shared.dom.attendance.util.anno.AttendanceItemLayout;
 import nts.uk.ctx.at.shared.dom.attendance.util.anno.AttendanceItemValue;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 
 /** 日別実績の勤務実績時間 */
 @Data
@@ -109,8 +110,8 @@ public class ActualWorkTimeDailyPerformDto implements ItemConst {
 					constraintDifferenceTime == null ? 0 : constraintDifferenceTime, 
 					timeDifferenceWorkingHours == null ? 0 : timeDifferenceWorkingHours,
 				new DivergenceTimeOfDaily(ConvertHelper.mapTo(divergenceTime,
-								c -> new DivergenceTime(toAttendanceTime(c.getDivergenceTimeAfterDeduction()),
-										toAttendanceTime(c.getDeductionTime()), toAttendanceTime(c.getDivergenceTime()),
+								c -> new DivergenceTime(toAttendanceTimeWithMinus(c.getDivergenceTimeAfterDeduction()),
+										toAttendanceTimeWithMinus(c.getDeductionTime()), toAttendanceTimeWithMinus(c.getDivergenceTime()),
 										c.getNo(),
 										c.getDivergenceReason() == null ? null : new DivergenceReasonContent(c.getDivergenceReason()),
 										c.getDivergenceReasonCode() == null ? null : new DiverdenceReasonCode(c.getDivergenceReasonCode())))),
@@ -120,5 +121,9 @@ public class ActualWorkTimeDailyPerformDto implements ItemConst {
 
 	private AttendanceTime toAttendanceTime(Integer value) {
 		return value == null ? AttendanceTime.ZERO : new AttendanceTime(value);
+	}
+
+	private AttendanceTimeOfExistMinus toAttendanceTimeWithMinus(Integer value) {
+		return value == null ? AttendanceTimeOfExistMinus.ZERO : new AttendanceTimeOfExistMinus(value);
 	}
 }

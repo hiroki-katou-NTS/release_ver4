@@ -27,8 +27,9 @@ import nts.uk.ctx.at.shared.dom.outsideot.UseClassification;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
+import nts.uk.ctx.at.shared.pub.workrule.closure.PresentClosingPeriodExport;
+import nts.uk.ctx.at.shared.pub.workrule.closure.ShClosurePub;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceScreenRepo;
-import nts.uk.screen.at.app.dailyperformance.correction.closure.FindClosureDateService;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ActualLockDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalUseSettingDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ClosureDto;
@@ -50,14 +51,14 @@ public class DPLock {
 	@Inject
 	private DailyPerformanceScreenRepo repo;
 
-//	@Inject
-//	private ShClosurePub shClosurePub;
+	@Inject
+	private ShClosurePub shClosurePub;
 	
 	@Inject
 	private ClosureService closureService;
-	
-	@Inject
-	private FindClosureDateService findClosureDateService;
+//	
+//	@Inject
+//	private FindClosureDateService findClosureDateService;
 	
 	@Inject
 	private ClosureRepository closureRepository;
@@ -119,9 +120,18 @@ public class DPLock {
 		return lock;
 	}
 
-	public Map<String, DatePeriod> lockHistMap(String companyId, List<String> lstEmployeeId) {
-		Map<String, String> employmentWithSidMap = repo.getAllEmployment(companyId, lstEmployeeId, new DateRange(GeneralDate.today(), GeneralDate.today()));
-		return findClosureDateService.findClosureDate(companyId, employmentWithSidMap, GeneralDate.today());
+	public Map<Integer, DatePeriod> lockHistMap(String companyId, List<String> lstEmployeeId, List<ClosureDto> closureDtos) {
+		//Map<String, String> employmentWithSidMap = repo.getAllEmployment(companyId, lstEmployeeId, new DateRange(GeneralDate.today(), GeneralDate.today()));
+		//return findClosureDateService.findClosureDate(companyId, employmentWithSidMap, GeneralDate.today());
+		List<Integer> lstClosureIds = closureDtos.stream().map(x -> x.getClosureId()).distinct().collect(Collectors.toList());
+		Map<Integer, DatePeriod> mapClsPeriod = new HashMap<>();
+		lstClosureIds.stream().forEach(x -> {
+			Optional<PresentClosingPeriodExport> closingPeriod = shClosurePub.find(companyId, x);
+			if (closingPeriod.isPresent())
+				mapClsPeriod.put(x, new DatePeriod(closingPeriod.get().getClosureStartDate(),
+						closingPeriod.get().getClosureEndDate()));
+		});
+		return mapClsPeriod;
 	}
 			
 	public boolean islockHist(DPDataDto data, Map<String, DatePeriod> empHist) {
@@ -235,7 +245,7 @@ public class DPLock {
 //			}
 //			if(approvalUseSettingDto.get().getUseDayApproverConfirm()) dto.setLockCheckApprovalDay(getCheckApproval(employeeIds, dateRange, employeeIdApproval, mode));
 //		}
-		dto.setLockHist(lockHistMap(companyId, employeeIds));
+		dto.setLockHist(Pair.of(closureDtos, lockHistMap(companyId, employeeIds, closureDtos)));
 		return dto;
 	}
 	

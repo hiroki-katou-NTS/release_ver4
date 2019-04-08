@@ -75,7 +75,15 @@ public class SprWebService {
 		try {
 			Integer menuCD = Integer.valueOf(menuCode);
 			if(menuCD==1||menuCD==2){
-				reasonReal = reason;
+				if(!Strings.isNullOrEmpty(reason)){
+					if(!Strings.isNullOrEmpty(reason.trim())){
+						byte[] reasonBytes = new byte[reason.length()];
+						for (int i = 0; i < reason.length(); i++) {
+							reasonBytes[i] = (byte)(reason.codePointAt(i));
+						}
+						reasonReal = new String(reasonBytes, "sjis");
+					}
+				}
 			}
 			loginUserContextSpr = sprLoginFormService.loginFromSpr(
 					menuCDReal, 
@@ -88,6 +96,13 @@ public class SprWebService {
 					applicationIDReal, 
 					reasonReal,
 					stampProtectionReal);
+		} catch (UnsupportedEncodingException e1) {
+			val html = new StringBuilder();
+		    html.append("<!DOCTYPE html>");
+		    html.append("<html><head><meta charset=\"UTF-8\"></head><body>");
+		    html.append(""+ e1.getMessage() +"");
+		    html.append("</body></html>");            
+		    return html.toString();
 		} catch (nts.arc.error.BusinessException ex){
 		    val html = new StringBuilder();
 		    html.append("<!DOCTYPE html>");

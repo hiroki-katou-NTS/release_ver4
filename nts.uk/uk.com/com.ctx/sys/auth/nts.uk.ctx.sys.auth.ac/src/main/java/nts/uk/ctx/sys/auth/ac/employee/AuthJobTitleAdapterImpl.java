@@ -54,8 +54,8 @@ public class AuthJobTitleAdapterImpl implements JobTitleAdapter {
 		if(export != null){
 		return new JobTitleValueImport(
 				null,
-				export.getEmployeeId(),
 				export.getJobTitleID(),
+				null,
 				export.getJobTitleName(),
 				null,
 				export.getStartDate(),
