@@ -152,7 +152,7 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 						param.getSid(),
 						new SpecialVacationCD(param.getSpecialLeaveCode()),
 						speInfor.getGrantDaysInfor().getYmd(),
-						speInfor.getDeadlineDate().get(),
+						speInfor.getDeadlineDate().isPresent() ? speInfor.getDeadlineDate().get() : GeneralDate.max(),
 						LeaveExpirationStatus.AVAILABLE,
 						GrantRemainRegisterType.MONTH_CLOSE,
 						new SpecialLeaveNumberInfo(new SpecialLeaveGrantNumber(new DayNumberOfGrant(granDay), Optional.empty()), 
