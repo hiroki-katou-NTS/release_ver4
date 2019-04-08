@@ -24,8 +24,6 @@ public class MonthlyModifyResult {
 	/** 締め日: 日付 */
 	private ClosureDateDto closureDate;
 	
-	private long version;
-	
 	/** 月別実績の勤怠時間 期間: 期間  */
 	private DatePeriod workDatePeriod;
 	
@@ -54,11 +52,6 @@ public class MonthlyModifyResult {
 	
 	public MonthlyModifyResult closureId(Integer closureId){
 		this.closureId = closureId;
-		return this;
-	}
-	
-	public MonthlyModifyResult version(long version){
-		this.version = version;
 		return this;
 	}
 	

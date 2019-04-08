@@ -9,15 +9,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
-import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
-import nts.uk.ctx.at.record.infra.entity.monthly.mergetable.KrcdtMonMergePk;
 import nts.uk.ctx.at.record.infra.entity.monthly.performance.KrcdtEditStateOfMothlyPer;
 import nts.uk.ctx.at.record.infra.entity.monthly.performance.KrcdtEditStateOfMothlyPerPK;
 import nts.uk.ctx.bs.employee.infra.entity.employee.mngdata.BsymtEmployeeDataMngInfo;
@@ -35,9 +32,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 public class JpaMonthlyPerformanceScreenRepo extends JpaRepository implements MonthlyPerformanceScreenRepo {
 
-	@Inject
-	private TimeOfMonthlyRepository timeMonthRepo;
-	
 	private final static String SEL_EMPLOYEE;
 	private final static String SEL_PERSON = "SELECT p FROM BpsmtPerson p WHERE p.bpsmtPersonPk.pId IN :lstPersonId";
 	private final static String SEL_WORKPLACE;
@@ -215,27 +209,26 @@ public class JpaMonthlyPerformanceScreenRepo extends JpaRepository implements Mo
 	}
 
 	@Override
-	public void insertOrUpdateEditStateOfMonthlyPer(EditStateOfMonthlyPerformanceDto dto) {
-		Optional<KrcdtEditStateOfMothlyPer> currentEntity = this.queryProxy()
-				.find(new KrcdtEditStateOfMothlyPerPK(dto.getEmployeeId(),
-						dto.getProcessDate(),
-						dto.getClosureID(),
-						dto.getClosureDate().getCloseDay(),
-						dto.getClosureDate().getLastDayOfMonth(),
-						dto.getAttendanceItemId()), KrcdtEditStateOfMothlyPer.class);
-		KrcdtEditStateOfMothlyPer newEntity = this.toEntity(dto);
-		if (currentEntity.isPresent()) {
-			KrcdtEditStateOfMothlyPer entity = currentEntity.get();
-			entity.stateOfEdit = newEntity.stateOfEdit;
-			this.commandProxy().update(entity);
+	public void insertOrUpdateEditStateOfMonthlyPer(EditStateOfMonthlyPerformanceDto editStateOfMonthlyPerformanceDto) {
+		Optional<KrcdtEditStateOfMothlyPer> optKrcdtEditStateOfMothlyPer = this.queryProxy()
+				.find(new KrcdtEditStateOfMothlyPerPK(editStateOfMonthlyPerformanceDto.getEmployeeId(),
+						editStateOfMonthlyPerformanceDto.getProcessDate(),
+						editStateOfMonthlyPerformanceDto.getClosureID(),
+						editStateOfMonthlyPerformanceDto.getClosureDate().getCloseDay(),
+						editStateOfMonthlyPerformanceDto.getClosureDate().getLastDayOfMonth(),
+						editStateOfMonthlyPerformanceDto.getAttendanceItemId()), KrcdtEditStateOfMothlyPer.class);
+		KrcdtEditStateOfMothlyPer newkrcdtEditStateOfMothlyPer = this.toEntity(editStateOfMonthlyPerformanceDto);
+		if (optKrcdtEditStateOfMothlyPer.isPresent()) {
+			KrcdtEditStateOfMothlyPer oldkrcdtEditStateOfMothlyPer = optKrcdtEditStateOfMothlyPer.get();
+			oldkrcdtEditStateOfMothlyPer.krcdtEditStateOfMothlyPerPK.processDate = newkrcdtEditStateOfMothlyPer.krcdtEditStateOfMothlyPerPK.processDate;
+			oldkrcdtEditStateOfMothlyPer.krcdtEditStateOfMothlyPerPK.closureID = newkrcdtEditStateOfMothlyPer.krcdtEditStateOfMothlyPerPK.closureID;
+			oldkrcdtEditStateOfMothlyPer.krcdtEditStateOfMothlyPerPK.closeDay = newkrcdtEditStateOfMothlyPer.krcdtEditStateOfMothlyPerPK.closeDay;
+			oldkrcdtEditStateOfMothlyPer.krcdtEditStateOfMothlyPerPK.isLastDay = newkrcdtEditStateOfMothlyPer.krcdtEditStateOfMothlyPerPK.isLastDay;
+			oldkrcdtEditStateOfMothlyPer.stateOfEdit = newkrcdtEditStateOfMothlyPer.stateOfEdit;
+			this.commandProxy().update(oldkrcdtEditStateOfMothlyPer);
 		} else {
-			this.commandProxy().insert(newEntity);
+			this.commandProxy().insert(newkrcdtEditStateOfMothlyPer);
 		}
-		this.timeMonthRepo.dirtying(() -> new KrcdtMonMergePk(	dto.getEmployeeId(), 
-																dto.getProcessDate(), 
-																dto.getClosureID(), 
-																dto.getClosureDate().getCloseDay(), 
-																dto.getClosureDate().getLastDayOfMonth()));
 	}
 
 	private KrcdtEditStateOfMothlyPer toEntity(EditStateOfMonthlyPerformanceDto editStateOfMonthlyPerformanceDto) {
