@@ -36,6 +36,9 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @EqualsAndHashCode(callSuper = false)
 @AttendanceItemRoot(rootName = ItemConst.MONTHLY_ATTENDANCE_TIME_NAME, itemType = AttendanceItemType.MONTHLY_ITEM)
 public class AttendanceTimeOfMonthlyDto extends MonthlyItemCommon {
+	
+	private long version;
+	
 	/** 会社ID */
 	private String companyId;
 
@@ -99,6 +102,7 @@ public class AttendanceTimeOfMonthlyDto extends MonthlyItemCommon {
 			dto.setAggregateDays(domain.getAggregateDays() == null ? 0 : domain.getAggregateDays().v());
 			dto.setVerticalTotal(VerticalTotalOfMonthlyDto.from(domain.getVerticalTotal()));
 			dto.setTotalCount(TotalCountByPeriodDto.from(domain.getTotalCount()));
+			dto.setVersion(domain.getVersion());
 			dto.exsistData();
 		}
 		return dto;
@@ -123,14 +127,17 @@ public class AttendanceTimeOfMonthlyDto extends MonthlyItemCommon {
 		if(closureDate == null){
 			closureDate = this.closureDate;
 		}
-		return AttendanceTimeOfMonthly.of(employeeId, ym, ConvertHelper.getEnum(closureID, ClosureId.class), 
-				closureDate == null ? null : closureDate.toDomain(), 
-				datePeriod == null ? null : new DatePeriod(datePeriod.getStart(), datePeriod.getEnd()), 
-				monthlyCalculation == null ? new MonthlyCalculation() : monthlyCalculation.toDomain(), 
-				excessOutsideWork == null ? new ExcessOutsideWorkOfMonthly() : excessOutsideWork.toDomain(), 
-				verticalTotal == null ? new VerticalTotalOfMonthly() : verticalTotal.toDomain(),
-				this.totalCount == null ? new TotalCountByPeriod() : this.totalCount.toDomain(),
-				new AttendanceDaysMonth(aggregateDays));
+		AttendanceTimeOfMonthly domain = AttendanceTimeOfMonthly.of(employeeId, ym, ConvertHelper.getEnum(closureID, ClosureId.class), 
+																	closureDate == null ? null : closureDate.toDomain(), 
+																	datePeriod == null ? null : new DatePeriod(datePeriod.getStart(), datePeriod.getEnd()), 
+																	monthlyCalculation == null ? new MonthlyCalculation() : monthlyCalculation.toDomain(), 
+																	excessOutsideWork == null ? new ExcessOutsideWorkOfMonthly() : excessOutsideWork.toDomain(), 
+																	verticalTotal == null ? new VerticalTotalOfMonthly() : verticalTotal.toDomain(),
+																	this.totalCount == null ? new TotalCountByPeriod() : this.totalCount.toDomain(),
+																	new AttendanceDaysMonth(aggregateDays));
+		domain.setVersion(this.version);
+		
+		return domain;
 	}
 
 	@Override

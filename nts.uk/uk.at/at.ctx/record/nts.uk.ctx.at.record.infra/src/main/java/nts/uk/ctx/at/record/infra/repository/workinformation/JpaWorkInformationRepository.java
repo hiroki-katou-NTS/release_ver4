@@ -99,6 +99,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 				entity.backStraightAttribute = rec.getInt("BACK_STRAIGHT_ATR");
 				entity.dayOfWeek = rec.getInt("DAY_OF_WEEK");
 				entity.scheduleTimes = scheduleTimes;
+				entity.version = rec.getLong("EXCLUS_VER");
 				return entity;
 			});
 		}
@@ -171,7 +172,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 				GeneralDate ymd = rec.getGeneralDate("YMD");
 				int calcState = rec.getInt("CALCULATION_STATE"), goStraight = rec.getInt("GO_STRAIGHT_ATR"),
 						backStraight = rec.getInt("BACK_STRAIGHT_ATR"), dayOfWeek = rec.getInt("DAY_OF_WEEK");
-				return new WorkInfoOfDailyPerformance(employeeId,
+				WorkInfoOfDailyPerformance domain = new WorkInfoOfDailyPerformance(employeeId,
 						new WorkInformation(rec.getString("RECORD_WORK_WORKTIME_CODE"),
 								rec.getString("RECORD_WORK_WORKTYPE_CODE")),
 						new WorkInformation(rec.getString("SCHEDULE_WORK_WORKTIME_CODE"),
@@ -183,6 +184,8 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 						EnumAdaptor.valueOf(dayOfWeek, DayOfWeek.class),
 						scheduleTimess.stream().filter(c -> c.krcdtWorkScheduleTimePK.ymd.equals(ymd))
 								.map(c -> c.toDomain()).collect(Collectors.toList()));
+				domain.setVersion(rec.getLong("EXCLUS_VER"));
+				return domain;
 			});
 		}
 		// return this.queryProxy().query(FIND_BY_PERIOD_ORDER_BY_YMD,
@@ -222,7 +225,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 				GeneralDate ymd = rec.getGeneralDate("YMD");
 				int calcState = rec.getInt("CALCULATION_STATE"), goStraight = rec.getInt("GO_STRAIGHT_ATR"),
 						backStraight = rec.getInt("BACK_STRAIGHT_ATR"), dayOfWeek = rec.getInt("DAY_OF_WEEK");
-				return new WorkInfoOfDailyPerformance(employeeId,
+				WorkInfoOfDailyPerformance domain = new WorkInfoOfDailyPerformance(employeeId,
 						new WorkInformation(rec.getString("RECORD_WORK_WORKTIME_CODE"),
 								rec.getString("RECORD_WORK_WORKTYPE_CODE")),
 						new WorkInformation(rec.getString("SCHEDULE_WORK_WORKTIME_CODE"),
@@ -234,6 +237,8 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 						EnumAdaptor.valueOf(dayOfWeek, DayOfWeek.class),
 						scheduleTimes.stream().filter(c -> c.krcdtWorkScheduleTimePK.ymd.equals(ymd))
 								.map(c -> c.toDomain()).collect(Collectors.toList()));
+				domain.setVersion(rec.getLong("EXCLUS_VER"));
+				return domain;
 			});
 		}
 	}
@@ -265,6 +270,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 		data.backStraightAttribute = domain.getBackStraightAtr().value;
 		data.goStraightAttribute = domain.getGoStraightAtr().value;
 		data.dayOfWeek = domain.getDayOfWeek().value;
+		data.version = domain.getVersion();
 		if(domain.getScheduleTimeSheets().isEmpty()){
 			data.scheduleTimes.forEach(c -> {
 				this.commandProxy().remove(getEntityManager().merge(c));
@@ -405,6 +411,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 		entity.goStraightAttribute = rec.getInt("GO_STRAIGHT_ATR");
 		entity.backStraightAttribute = rec.getInt("BACK_STRAIGHT_ATR");
 		entity.dayOfWeek = rec.getInt("DAY_OF_WEEK");
+		entity.version = rec.getLong("EXCLUS_VER");
 		try (PreparedStatement stmtSche = this.connection().prepareStatement(
 					"select * from KRCDT_WORK_SCHEDULE_TIME"
 					+ " where SID = ? and YMD = ?")) {
@@ -522,7 +529,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 						backStraight = c.getInt("BACK_STRAIGHT_ATR"), dayOfWeek = c.getInt("DAY_OF_WEEK");
 				String sid = c.getString("SID");
 				GeneralDate ymd = c.getGeneralDate("YMD");
-				return new WorkInfoOfDailyPerformance(sid, 
+				WorkInfoOfDailyPerformance domain = new WorkInfoOfDailyPerformance(sid, 
 						new WorkInformation(c.getString("RECORD_WORK_WORKTIME_CODE"), c.getString("RECORD_WORK_WORKTYPE_CODE")), 
 						new WorkInformation(c.getString("SCHEDULE_WORK_WORKTIME_CODE"), c.getString("SCHEDULE_WORK_WORKTYPE_CODE")), 
 						calcState == null ? null : EnumAdaptor.valueOf(calcState, CalculationState.class), 
@@ -530,6 +537,8 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 						backStraight == null ? null : EnumAdaptor.valueOf(backStraight, NotUseAttribute.class), 
 						ymd, dayOfWeek == null ? null : EnumAdaptor.valueOf(dayOfWeek, DayOfWeek.class), 
 						getScheduleTime(scheTimes, sid, ymd));
+				domain.setVersion(c.getLong("EXCLUS_VER"));
+				return domain;
 			});
 		}
 	}
@@ -572,4 +581,14 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 		return resultList;
 	}
 
+	public void dirtying(String employeeId, GeneralDate date){
+		this.queryProxy().find(new KrcdtDaiPerWorkInfoPK(employeeId, date), KrcdtDaiPerWorkInfo.class).ifPresent(entity -> {
+			entity.dirtying();
+		});
+	}
+
+	@Override
+	public void dirtying(List<String> employeeId, List<GeneralDate> date) {
+		finds(employeeId, date).forEach(entity -> entity.dirtying());
+	}
 }

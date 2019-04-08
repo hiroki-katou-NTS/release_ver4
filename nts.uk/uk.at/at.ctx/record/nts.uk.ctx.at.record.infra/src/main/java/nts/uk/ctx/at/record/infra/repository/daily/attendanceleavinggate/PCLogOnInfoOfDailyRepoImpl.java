@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -23,6 +24,7 @@ import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.LogOnInfo;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.PCLogOnInfoOfDailyRepo;
+import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.daily.attendanceleavinggate.KrcdtDayPcLogonInfo;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.infra.data.jdbc.JDBCUtil;
@@ -32,6 +34,9 @@ import nts.uk.shr.infra.data.jdbc.JDBCUtil;
 public class PCLogOnInfoOfDailyRepoImpl extends JpaRepository implements PCLogOnInfoOfDailyRepo {
 
 //	private static final String REMOVE_BY_KEY;
+
+	@Inject
+	private WorkInformationRepository workInfo;
 
 	static {
 //		StringBuilder builderString = new StringBuilder();
@@ -128,6 +133,7 @@ public class PCLogOnInfoOfDailyRepoImpl extends JpaRepository implements PCLogOn
 					commandProxy().insert(KrcdtDayPcLogonInfo.from(domain.getEmployeeId(), domain.getYmd(), c));
 				}
 			});
+			workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		}
 	}
 
@@ -149,6 +155,7 @@ public class PCLogOnInfoOfDailyRepoImpl extends JpaRepository implements PCLogOn
 						+ logOn + " )";
 				statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
 			}
+			workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 			
 		} catch (Exception e) {
 			
@@ -168,6 +175,7 @@ public class PCLogOnInfoOfDailyRepoImpl extends JpaRepository implements PCLogOn
 		String sqlQuery = "Delete From KRCDT_DAY_PC_LOGON_INFO Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + baseDate + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
+			workInfo.dirtying(employeeId, baseDate);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
