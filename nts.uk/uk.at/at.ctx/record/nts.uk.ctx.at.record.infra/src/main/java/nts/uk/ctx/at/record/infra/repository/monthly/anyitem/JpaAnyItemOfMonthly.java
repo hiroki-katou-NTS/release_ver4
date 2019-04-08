@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import lombok.val;
 import nts.arc.enums.EnumAdaptor;
@@ -18,7 +16,6 @@ import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
-import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthlyRepository;
 import nts.uk.ctx.at.record.infra.entity.monthly.mergetable.KrcdtMonAnyItemValueMerge;
@@ -36,9 +33,6 @@ import nts.uk.shr.com.time.calendar.date.ClosureDate;
  */
 @Stateless
 public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonthlyRepository {
-	
-	@Inject
-	private TimeOfMonthlyRepository timeRepo;
 
 	private static final String FIND_BY_MONTHLY_AND_CLOSURE = "SELECT a FROM KrcdtMonAnyItemValueMerge a "
 			+ "WHERE a.krcdtMonAnyItemValuePk.employeeId = :employeeId "
@@ -888,7 +882,6 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 			entity.toEntityAnyItemOfMonthly(domain);
 		}
 		this.getEntityManager().persist(entity);
-		markMonTimeDirty(key);
 	}
 	
 	/** 登録および更新 */
@@ -911,17 +904,223 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 			entity.toEntityAnyItemOfMonthly(d);
 		}
 		this.getEntityManager().persist(entity);
-		this.markMonTimeDirty(key);
 	}
 	
 	/** 削除 */
 	@Override
 	public void remove(String employeeId, YearMonth yearMonth, ClosureId closureId, ClosureDate closureDate,
 			int anyItemId) {
-		internalRemove(employeeId, yearMonth, closureId, closureDate, entity -> {
-			entity.toDomainAnyItemOfMonthly(null,null,null, anyItemId);
+		Optional<KrcdtMonAnyItemValueMerge> anyItemLst = this.queryProxy()
+				.query(FIND_BY_MONTHLY_AND_CLOSURE, KrcdtMonAnyItemValueMerge.class)
+				.setParameter("employeeId", employeeId).setParameter("yearMonth", yearMonth.v())
+				.setParameter("closureId", closureId.value).setParameter("closureDay", closureDate.getClosureDay().v())
+				.setParameter("isLastDay", (closureDate.getLastDayOfMonth() ? 1 : 0)).getSingle();
+		if (anyItemLst.isPresent()) {
+			KrcdtMonAnyItemValueMerge entity = anyItemLst.get();
+			switch (anyItemId) {
+			   case  1: entity.toDomainAnyItemOfMonthly(null,null,null, 1); break;
+			   case  2: entity.toDomainAnyItemOfMonthly(null,null,null, 2); break;
+			   case  3: entity.toDomainAnyItemOfMonthly(null,null,null, 3); break;
+			   case  4: entity.toDomainAnyItemOfMonthly(null,null,null, 4); break;
+			   case  5: entity.toDomainAnyItemOfMonthly(null,null,null, 5); break;
+			   case  6: entity.toDomainAnyItemOfMonthly(null,null,null, 6); break;
+			   case  7: entity.toDomainAnyItemOfMonthly(null,null,null, 7); break;
+			   case  8: entity.toDomainAnyItemOfMonthly(null,null,null, 8); break;
+			   case  9: entity.toDomainAnyItemOfMonthly(null,null,null, 9); break;
+			   case  10: entity.toDomainAnyItemOfMonthly(null,null,null, 10); break;
+			   case  11: entity.toDomainAnyItemOfMonthly(null,null,null, 11); break;
+			   case  12: entity.toDomainAnyItemOfMonthly(null,null,null, 12); break;
+			   case  13: entity.toDomainAnyItemOfMonthly(null,null,null, 13); break;
+			   case  14: entity.toDomainAnyItemOfMonthly(null,null,null, 14); break;
+			   case  15: entity.toDomainAnyItemOfMonthly(null,null,null, 15); break;
+			   case  16: entity.toDomainAnyItemOfMonthly(null,null,null, 16); break;
+			   case  17: entity.toDomainAnyItemOfMonthly(null,null,null, 17); break;
+			   case  18: entity.toDomainAnyItemOfMonthly(null,null,null, 18); break;
+			   case  19: entity.toDomainAnyItemOfMonthly(null,null,null, 19); break;
+			   case  20: entity.toDomainAnyItemOfMonthly(null,null,null, 20); break;
+			   case  21: entity.toDomainAnyItemOfMonthly(null,null,null, 21); break;
+			   case  22: entity.toDomainAnyItemOfMonthly(null,null,null, 22); break;
+			   case  23: entity.toDomainAnyItemOfMonthly(null,null,null, 23); break;
+			   case  24: entity.toDomainAnyItemOfMonthly(null,null,null, 24); break;
+			   case  25: entity.toDomainAnyItemOfMonthly(null,null,null, 25); break;
+			   case  26: entity.toDomainAnyItemOfMonthly(null,null,null, 26); break;
+			   case  27: entity.toDomainAnyItemOfMonthly(null,null,null, 27); break;
+			   case  28: entity.toDomainAnyItemOfMonthly(null,null,null, 28); break;
+			   case  29: entity.toDomainAnyItemOfMonthly(null,null,null, 29); break;
+			   case  30: entity.toDomainAnyItemOfMonthly(null,null,null, 30); break;
+			   case  31: entity.toDomainAnyItemOfMonthly(null,null,null, 31); break;
+			   case  32: entity.toDomainAnyItemOfMonthly(null,null,null, 32); break;
+			   case  33: entity.toDomainAnyItemOfMonthly(null,null,null, 33); break;
+			   case  34: entity.toDomainAnyItemOfMonthly(null,null,null, 34); break;
+			   case  35: entity.toDomainAnyItemOfMonthly(null,null,null, 35); break;
+			   case  36: entity.toDomainAnyItemOfMonthly(null,null,null, 36); break;
+			   case  37: entity.toDomainAnyItemOfMonthly(null,null,null, 37); break;
+			   case  38: entity.toDomainAnyItemOfMonthly(null,null,null, 38); break;
+			   case  39: entity.toDomainAnyItemOfMonthly(null,null,null, 39); break;
+			   case  40: entity.toDomainAnyItemOfMonthly(null,null,null, 40); break;
+			   case  41: entity.toDomainAnyItemOfMonthly(null,null,null, 41); break;
+			   case  42: entity.toDomainAnyItemOfMonthly(null,null,null, 42); break;
+			   case  43: entity.toDomainAnyItemOfMonthly(null,null,null, 43); break;
+			   case  44: entity.toDomainAnyItemOfMonthly(null,null,null, 44); break;
+			   case  45: entity.toDomainAnyItemOfMonthly(null,null,null, 45); break;
+			   case  46: entity.toDomainAnyItemOfMonthly(null,null,null, 46); break;
+			   case  47: entity.toDomainAnyItemOfMonthly(null,null,null, 47); break;
+			   case  48: entity.toDomainAnyItemOfMonthly(null,null,null, 48); break;
+			   case  49: entity.toDomainAnyItemOfMonthly(null,null,null, 49); break;
+			   case  50: entity.toDomainAnyItemOfMonthly(null,null,null, 50); break;
+			   case  51: entity.toDomainAnyItemOfMonthly(null,null,null, 51); break;
+			   case  52: entity.toDomainAnyItemOfMonthly(null,null,null, 52); break;
+			   case  53: entity.toDomainAnyItemOfMonthly(null,null,null, 53); break;
+			   case  54: entity.toDomainAnyItemOfMonthly(null,null,null, 54); break;
+			   case  55: entity.toDomainAnyItemOfMonthly(null,null,null, 55); break;
+			   case  56: entity.toDomainAnyItemOfMonthly(null,null,null, 56); break;
+			   case  57: entity.toDomainAnyItemOfMonthly(null,null,null, 57); break;
+			   case  58: entity.toDomainAnyItemOfMonthly(null,null,null, 58); break;
+			   case  59: entity.toDomainAnyItemOfMonthly(null,null,null, 59); break;
+			   case  60: entity.toDomainAnyItemOfMonthly(null,null,null, 60); break;
+			   case  61: entity.toDomainAnyItemOfMonthly(null,null,null, 61); break;
+			   case  62: entity.toDomainAnyItemOfMonthly(null,null,null, 62); break;
+			   case  63: entity.toDomainAnyItemOfMonthly(null,null,null, 63); break;
+			   case  64: entity.toDomainAnyItemOfMonthly(null,null,null, 64); break;
+			   case  65: entity.toDomainAnyItemOfMonthly(null,null,null, 65); break;
+			   case  66: entity.toDomainAnyItemOfMonthly(null,null,null, 66); break;
+			   case  67: entity.toDomainAnyItemOfMonthly(null,null,null, 67); break;
+			   case  68: entity.toDomainAnyItemOfMonthly(null,null,null, 68); break;
+			   case  69: entity.toDomainAnyItemOfMonthly(null,null,null, 69); break;
+			   case  70: entity.toDomainAnyItemOfMonthly(null,null,null, 70); break;
+			   case  71: entity.toDomainAnyItemOfMonthly(null,null,null, 71); break;
+			   case  72: entity.toDomainAnyItemOfMonthly(null,null,null, 72); break;
+			   case  73: entity.toDomainAnyItemOfMonthly(null,null,null, 73); break;
+			   case  74: entity.toDomainAnyItemOfMonthly(null,null,null, 74); break;
+			   case  75: entity.toDomainAnyItemOfMonthly(null,null,null, 75); break;
+			   case  76: entity.toDomainAnyItemOfMonthly(null,null,null, 76); break;
+			   case  77: entity.toDomainAnyItemOfMonthly(null,null,null, 77); break;
+			   case  78: entity.toDomainAnyItemOfMonthly(null,null,null, 78); break;
+			   case  79: entity.toDomainAnyItemOfMonthly(null,null,null, 79); break;
+			   case  80: entity.toDomainAnyItemOfMonthly(null,null,null, 80); break;
+			   case  81: entity.toDomainAnyItemOfMonthly(null,null,null, 81); break;
+			   case  82: entity.toDomainAnyItemOfMonthly(null,null,null, 82); break;
+			   case  83: entity.toDomainAnyItemOfMonthly(null,null,null, 83); break;
+			   case  84: entity.toDomainAnyItemOfMonthly(null,null,null, 84); break;
+			   case  85: entity.toDomainAnyItemOfMonthly(null,null,null, 85); break;
+			   case  86: entity.toDomainAnyItemOfMonthly(null,null,null, 86); break;
+			   case  87: entity.toDomainAnyItemOfMonthly(null,null,null, 87); break;
+			   case  88: entity.toDomainAnyItemOfMonthly(null,null,null, 88); break;
+			   case  89: entity.toDomainAnyItemOfMonthly(null,null,null, 89); break;
+			   case  90: entity.toDomainAnyItemOfMonthly(null,null,null, 90); break;
+			   case  91: entity.toDomainAnyItemOfMonthly(null,null,null, 91); break;
+			   case  92: entity.toDomainAnyItemOfMonthly(null,null,null, 92); break;
+			   case  93: entity.toDomainAnyItemOfMonthly(null,null,null, 93); break;
+			   case  94: entity.toDomainAnyItemOfMonthly(null,null,null, 94); break;
+			   case  95: entity.toDomainAnyItemOfMonthly(null,null,null, 95); break;
+			   case  96: entity.toDomainAnyItemOfMonthly(null,null,null, 96); break;
+			   case  97: entity.toDomainAnyItemOfMonthly(null,null,null, 97); break;
+			   case  98: entity.toDomainAnyItemOfMonthly(null,null,null, 98); break;
+			   case  99: entity.toDomainAnyItemOfMonthly(null,null,null, 99); break;
+			   case  100: entity.toDomainAnyItemOfMonthly(null,null,null, 100); break;
+			   case  101: entity.toDomainAnyItemOfMonthly(null,null,null, 101); break;
+			   case  102: entity.toDomainAnyItemOfMonthly(null,null,null, 102); break;
+			   case  103: entity.toDomainAnyItemOfMonthly(null,null,null, 103); break;
+			   case  104: entity.toDomainAnyItemOfMonthly(null,null,null, 104); break;
+			   case  105: entity.toDomainAnyItemOfMonthly(null,null,null, 105); break;
+			   case  106: entity.toDomainAnyItemOfMonthly(null,null,null, 106); break;
+			   case  107: entity.toDomainAnyItemOfMonthly(null,null,null, 107); break;
+			   case  108: entity.toDomainAnyItemOfMonthly(null,null,null, 108); break;
+			   case  109: entity.toDomainAnyItemOfMonthly(null,null,null, 109); break;
+			   case  110: entity.toDomainAnyItemOfMonthly(null,null,null, 110); break;
+			   case  111: entity.toDomainAnyItemOfMonthly(null,null,null, 111); break;
+			   case  112: entity.toDomainAnyItemOfMonthly(null,null,null, 112); break;
+			   case  113: entity.toDomainAnyItemOfMonthly(null,null,null, 113); break;
+			   case  114: entity.toDomainAnyItemOfMonthly(null,null,null, 114); break;
+			   case  115: entity.toDomainAnyItemOfMonthly(null,null,null, 115); break;
+			   case  116: entity.toDomainAnyItemOfMonthly(null,null,null, 116); break;
+			   case  117: entity.toDomainAnyItemOfMonthly(null,null,null, 117); break;
+			   case  118: entity.toDomainAnyItemOfMonthly(null,null,null, 118); break;
+			   case  119: entity.toDomainAnyItemOfMonthly(null,null,null, 119); break;
+			   case  120: entity.toDomainAnyItemOfMonthly(null,null,null, 120); break;
+			   case  121: entity.toDomainAnyItemOfMonthly(null,null,null, 121); break;
+			   case  122: entity.toDomainAnyItemOfMonthly(null,null,null, 122); break;
+			   case  123: entity.toDomainAnyItemOfMonthly(null,null,null, 123); break;
+			   case  124: entity.toDomainAnyItemOfMonthly(null,null,null, 124); break;
+			   case  125: entity.toDomainAnyItemOfMonthly(null,null,null, 125); break;
+			   case  126: entity.toDomainAnyItemOfMonthly(null,null,null, 126); break;
+			   case  127: entity.toDomainAnyItemOfMonthly(null,null,null, 127); break;
+			   case  128: entity.toDomainAnyItemOfMonthly(null,null,null, 128); break;
+			   case  129: entity.toDomainAnyItemOfMonthly(null,null,null, 129); break;
+			   case  130: entity.toDomainAnyItemOfMonthly(null,null,null, 130); break;
+			   case  131: entity.toDomainAnyItemOfMonthly(null,null,null, 131); break;
+			   case  132: entity.toDomainAnyItemOfMonthly(null,null,null, 132); break;
+			   case  133: entity.toDomainAnyItemOfMonthly(null,null,null, 133); break;
+			   case  134: entity.toDomainAnyItemOfMonthly(null,null,null, 134); break;
+			   case  135: entity.toDomainAnyItemOfMonthly(null,null,null, 135); break;
+			   case  136: entity.toDomainAnyItemOfMonthly(null,null,null, 136); break;
+			   case  137: entity.toDomainAnyItemOfMonthly(null,null,null, 137); break;
+			   case  138: entity.toDomainAnyItemOfMonthly(null,null,null, 138); break;
+			   case  139: entity.toDomainAnyItemOfMonthly(null,null,null, 139); break;
+			   case  140: entity.toDomainAnyItemOfMonthly(null,null,null, 140); break;
+			   case  141: entity.toDomainAnyItemOfMonthly(null,null,null, 141); break;
+			   case  142: entity.toDomainAnyItemOfMonthly(null,null,null, 142); break;
+			   case  143: entity.toDomainAnyItemOfMonthly(null,null,null, 143); break;
+			   case  144: entity.toDomainAnyItemOfMonthly(null,null,null, 144); break;
+			   case  145: entity.toDomainAnyItemOfMonthly(null,null,null, 145); break;
+			   case  146: entity.toDomainAnyItemOfMonthly(null,null,null, 146); break;
+			   case  147: entity.toDomainAnyItemOfMonthly(null,null,null, 147); break;
+			   case  148: entity.toDomainAnyItemOfMonthly(null,null,null, 148); break;
+			   case  149: entity.toDomainAnyItemOfMonthly(null,null,null, 149); break;
+			   case  150: entity.toDomainAnyItemOfMonthly(null,null,null, 150); break;
+			   case  151: entity.toDomainAnyItemOfMonthly(null,null,null, 151); break;
+			   case  152: entity.toDomainAnyItemOfMonthly(null,null,null, 152); break;
+			   case  153: entity.toDomainAnyItemOfMonthly(null,null,null, 153); break;
+			   case  154: entity.toDomainAnyItemOfMonthly(null,null,null, 154); break;
+			   case  155: entity.toDomainAnyItemOfMonthly(null,null,null, 155); break;
+			   case  156: entity.toDomainAnyItemOfMonthly(null,null,null, 156); break;
+			   case  157: entity.toDomainAnyItemOfMonthly(null,null,null, 157); break;
+			   case  158: entity.toDomainAnyItemOfMonthly(null,null,null, 158); break;
+			   case  159: entity.toDomainAnyItemOfMonthly(null,null,null, 159); break;
+			   case  160: entity.toDomainAnyItemOfMonthly(null,null,null, 160); break;
+			   case  161: entity.toDomainAnyItemOfMonthly(null,null,null, 161); break;
+			   case  162: entity.toDomainAnyItemOfMonthly(null,null,null, 162); break;
+			   case  163: entity.toDomainAnyItemOfMonthly(null,null,null, 163); break;
+			   case  164: entity.toDomainAnyItemOfMonthly(null,null,null, 164); break;
+			   case  165: entity.toDomainAnyItemOfMonthly(null,null,null, 165); break;
+			   case  166: entity.toDomainAnyItemOfMonthly(null,null,null, 166); break;
+			   case  167: entity.toDomainAnyItemOfMonthly(null,null,null, 167); break;
+			   case  168: entity.toDomainAnyItemOfMonthly(null,null,null, 168); break;
+			   case  169: entity.toDomainAnyItemOfMonthly(null,null,null, 169); break;
+			   case  170: entity.toDomainAnyItemOfMonthly(null,null,null, 170); break;
+			   case  171: entity.toDomainAnyItemOfMonthly(null,null,null, 171); break;
+			   case  172: entity.toDomainAnyItemOfMonthly(null,null,null, 172); break;
+			   case  173: entity.toDomainAnyItemOfMonthly(null,null,null, 173); break;
+			   case  174: entity.toDomainAnyItemOfMonthly(null,null,null, 174); break;
+			   case  175: entity.toDomainAnyItemOfMonthly(null,null,null, 175); break;
+			   case  176: entity.toDomainAnyItemOfMonthly(null,null,null, 176); break;
+			   case  177: entity.toDomainAnyItemOfMonthly(null,null,null, 177); break;
+			   case  178: entity.toDomainAnyItemOfMonthly(null,null,null, 178); break;
+			   case  179: entity.toDomainAnyItemOfMonthly(null,null,null, 179); break;
+			   case  180: entity.toDomainAnyItemOfMonthly(null,null,null, 180); break;
+			   case  181: entity.toDomainAnyItemOfMonthly(null,null,null, 181); break;
+			   case  182: entity.toDomainAnyItemOfMonthly(null,null,null, 182); break;
+			   case  183: entity.toDomainAnyItemOfMonthly(null,null,null, 183); break;
+			   case  184: entity.toDomainAnyItemOfMonthly(null,null,null, 184); break;
+			   case  185: entity.toDomainAnyItemOfMonthly(null,null,null, 185); break;
+			   case  186: entity.toDomainAnyItemOfMonthly(null,null,null, 186); break;
+			   case  187: entity.toDomainAnyItemOfMonthly(null,null,null, 187); break;
+			   case  188: entity.toDomainAnyItemOfMonthly(null,null,null, 188); break;
+			   case  189: entity.toDomainAnyItemOfMonthly(null,null,null, 189); break;
+			   case  190: entity.toDomainAnyItemOfMonthly(null,null,null, 190); break;
+			   case  191: entity.toDomainAnyItemOfMonthly(null,null,null, 191); break;
+			   case  192: entity.toDomainAnyItemOfMonthly(null,null,null, 192); break;
+			   case  193: entity.toDomainAnyItemOfMonthly(null,null,null, 193); break;
+			   case  194: entity.toDomainAnyItemOfMonthly(null,null,null, 194); break;
+			   case  195: entity.toDomainAnyItemOfMonthly(null,null,null, 195); break;
+			   case  196: entity.toDomainAnyItemOfMonthly(null,null,null, 196); break;
+			   case  197: entity.toDomainAnyItemOfMonthly(null,null,null, 197); break;
+			   case  198: entity.toDomainAnyItemOfMonthly(null,null,null, 198); break;
+			   case  199: entity.toDomainAnyItemOfMonthly(null,null,null, 199); break;
+			   case  200: entity.toDomainAnyItemOfMonthly(null,null,null, 200); break;
+			}
 			this.commandProxy().update(entity);
-		});
+		}
 	}
 
 	/** 削除 （月度と締め） */
@@ -929,37 +1128,18 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 	public void removeByMonthlyAndClosure(String employeeId, YearMonth yearMonth, ClosureId closureId,
 			ClosureDate closureDate) {
 
-		internalRemove(employeeId, yearMonth, closureId, closureDate, entity -> {
-			this.commandProxy().remove(entity);
-		});
+		this.getEntityManager().createQuery(DELETE_BY_MONTHLY_AND_CLOSURE).setParameter("employeeId", employeeId)
+				.setParameter("yearMonth", yearMonth.v()).setParameter("closureId", closureId.value)
+				.setParameter("closureDay", closureDate.getClosureDay().v())
+				.setParameter("isLastDay", (closureDate.getLastDayOfMonth() ? 1 : 0)).executeUpdate();
 	}
 
 	/** 削除 （月度） */
 	@Override
 	public void removeByMonthly(String employeeId, YearMonth yearMonth) {
-		this.queryProxy().query(FIND_BY_MONTHLY, KrcdtMonAnyItemValueMerge.class)
-							.setParameter("employeeId", employeeId)
-							.setParameter("yearMonth", yearMonth.v()).getList().forEach(entity -> {
-								this.commandProxy().remove(entity);
-								this.markMonTimeDirty(entity.krcdtMonAnyItemValuePk);
-							});
-//		this.getEntityManager().createQuery(DELETE_BY_MONTHLY).setParameter("employeeId", employeeId)
-//				.setParameter("yearMonth", yearMonth.v()).executeUpdate();
+
+		this.getEntityManager().createQuery(DELETE_BY_MONTHLY).setParameter("employeeId", employeeId)
+				.setParameter("yearMonth", yearMonth.v()).executeUpdate();
 	}
 
-	private void internalRemove(String employeeId, YearMonth yearMonth, ClosureId closureId, ClosureDate closureDate,
-			Consumer<KrcdtMonAnyItemValueMerge> remover) {
-		this.queryProxy()
-				.query(FIND_BY_MONTHLY_AND_CLOSURE, KrcdtMonAnyItemValueMerge.class)
-				.setParameter("employeeId", employeeId).setParameter("yearMonth", yearMonth.v())
-				.setParameter("closureId", closureId.value).setParameter("closureDay", closureDate.getClosureDay().v())
-				.setParameter("isLastDay", (closureDate.getLastDayOfMonth() ? 1 : 0)).getSingle().ifPresent(entity -> {
-					remover.accept(entity);
-					this.markMonTimeDirty(entity.krcdtMonAnyItemValuePk);
-				});
-	}
-
-	private void markMonTimeDirty(KrcdtMonMergePk entityKey){
-		this.timeRepo.dirtying(() -> entityKey);
-	}
 }

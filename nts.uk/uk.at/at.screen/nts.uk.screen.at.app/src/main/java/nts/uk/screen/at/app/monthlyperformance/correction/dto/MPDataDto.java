@@ -21,7 +21,6 @@ public class MPDataDto {
     private String dailyConfirm;
     private String dailyCorrectPerformance;
     private Set<MPCellDataDto> cellDatas;
-    private long version;
     
     public MPDataDto(String id, String state, String error, String employeeCode, String employeeName, String employeeId, String typeGroup, boolean identify, boolean approval,
 			String dailyConfirm, String dailyCorrectPerformance) {

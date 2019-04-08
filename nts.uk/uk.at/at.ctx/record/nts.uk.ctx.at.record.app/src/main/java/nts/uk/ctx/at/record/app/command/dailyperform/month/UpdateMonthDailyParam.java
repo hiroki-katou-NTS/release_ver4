@@ -36,5 +36,4 @@ public class UpdateMonthDailyParam {
 	
 	private Boolean needCallCalc;
 
-	private long version;
 }

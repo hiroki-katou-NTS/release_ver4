@@ -1,13 +1,14 @@
 package nts.uk.ctx.at.record.infra.repository.calculationattribute;
 
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,7 +27,6 @@ import nts.uk.ctx.at.record.dom.calculationattribute.AutoCalcSetOfDivergenceTime
 import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.calculationattribute.enums.DivergenceTimeAttr;
 import nts.uk.ctx.at.record.dom.calculationattribute.repo.CalAttrOfDailyPerformanceRepository;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.daily.calculationattribute.KrcstDaiCalculationSet;
 import nts.uk.ctx.at.record.infra.entity.daily.calculationattribute.KrcstDaiCalculationSetPK;
 import nts.uk.ctx.at.record.infra.entity.daily.calculationattribute.KrcstFlexAutoCalSet;
@@ -55,9 +55,6 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 //		builderString.append("AND a.krcstDaiCalculationSetPK.ymd = :ymd ");
 //		REMOVE_BY_KEY = builderString.toString();
 //	}
-	
-	@Inject
-	private WorkInformationRepository workInfo;
 
 	@Override
 	public CalAttrOfDailyPerformance find(String employeeId, GeneralDate baseDate) {
@@ -108,8 +105,7 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 			commandProxy().update(holidayCalc);
 			commandProxy().update(overtimeCalc);
 			commandProxy().update(calc);
-			this.workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
-//			this.getEntityManager().flush();
+			this.getEntityManager().flush();
 		}
 	}
 
@@ -144,8 +140,7 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 		commandProxy().insert(holidayCalc);
 		commandProxy().insert(overtimeCalc);
 		commandProxy().insert(calcSet);
-		this.workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
-//		this.getEntityManager().flush();
+		this.getEntityManager().flush();
 	}
 
 	@Override
@@ -293,28 +288,13 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 	@Override
 	public void deleteByKey(String employeeId, GeneralDate baseDate) {
 		
-		this.queryProxy().find(new KrcstDaiCalculationSetPK(employeeId, baseDate), KrcstDaiCalculationSet.class).ifPresent(entity -> {
-			this.commandProxy().remove(entity);
-			this.queryProxy().find(StringUtils.rightPad(entity.flexExcessTimeId, 36), KrcstFlexAutoCalSet.class).ifPresent(e -> {
-						this.commandProxy().remove(e);
-					});
-			this.queryProxy().find(StringUtils.rightPad(entity.holWorkTimeId, 36), KrcstHolAutoCalSet.class).ifPresent(e -> {
-						this.commandProxy().remove(e);
-					});
-			this.queryProxy().find(StringUtils.rightPad(entity.overTimeWorkId, 36), KrcstOtAutoCalSet.class).ifPresent(e -> {
-						this.commandProxy().remove(e);
-					});
-			this.workInfo.dirtying(employeeId, baseDate);
-		});
-		
-//		Connection con = this.getEntityManager().unwrap(Connection.class);
-//		String sqlQuery = "Delete From KRCST_DAI_CALCULATION_SET Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + baseDate + "'" ;
-//		try {
-//			con.createStatement().executeUpdate(sqlQuery);
-//			workInfo.dirtying(employeeId, baseDate);
-//		} catch (SQLException e) {
-//			throw new RuntimeException(e);
-//		}
+		Connection con = this.getEntityManager().unwrap(Connection.class);
+		String sqlQuery = "Delete From KRCST_DAI_CALCULATION_SET Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + baseDate + "'" ;
+		try {
+			con.createStatement().executeUpdate(sqlQuery);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 		
 //		this.getEntityManager().createQuery(REMOVE_BY_KEY).setParameter("employeeId", employeeId)
 //				.setParameter("ymd", baseDate).executeUpdate();

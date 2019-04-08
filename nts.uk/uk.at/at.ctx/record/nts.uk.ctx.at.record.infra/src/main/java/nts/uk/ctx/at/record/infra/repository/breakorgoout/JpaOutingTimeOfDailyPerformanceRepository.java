@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
@@ -25,7 +24,6 @@ import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeSheet;
 import nts.uk.ctx.at.record.dom.breakorgoout.enums.GoingOutReason;
 import nts.uk.ctx.at.record.dom.breakorgoout.primitivevalue.OutingFrameNo;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.OutingTimeOfDailyPerformanceRepository;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.worklocation.WorkLocationCD;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
@@ -54,9 +52,6 @@ public class JpaOutingTimeOfDailyPerformanceRepository extends JpaRepository
 
 	private static final String FIND_BY_KEY;
 
-	@Inject
-	private WorkInformationRepository workInfo;
-	
 	static {
 		StringBuilder builderString = new StringBuilder();
 //		builderString.append("DELETE ");
@@ -112,7 +107,6 @@ public class JpaOutingTimeOfDailyPerformanceRepository extends JpaRepository
 		String sqlQuery = "Delete From KRCDT_DAI_OUTING_TIME_TS Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + ymd + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
-			workInfo.dirtying(employeeId, ymd);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -132,7 +126,6 @@ public class JpaOutingTimeOfDailyPerformanceRepository extends JpaRepository
 					.executeUpdate();
 			});
 		});
-		workInfo.dirtying(employeeIds, ymds);
 		this.getEntityManager().flush();
 	}
 
@@ -273,7 +266,6 @@ public class JpaOutingTimeOfDailyPerformanceRepository extends JpaRepository
 						+ outingTimeSheet.getReasonForGoOut().value + " )";
 				statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
 			}
-			workInfo.dirtying(outing.getEmployeeId(), outing.getYmd());
 		} catch (Exception e) {
 
 		}
@@ -312,7 +304,6 @@ public class JpaOutingTimeOfDailyPerformanceRepository extends JpaRepository
 			KrcdtDaiOutingTime outingTime = krcdtDaiOutingTime.get();
 			setEntityValue(outingTimeSheet, outingTime);
 			this.commandProxy().update(outingTime);
-			workInfo.dirtying(employeeId, ymd);
 			this.getEntityManager().flush();
 		}
 	}
@@ -352,7 +343,6 @@ public class JpaOutingTimeOfDailyPerformanceRepository extends JpaRepository
 			}
 		});
 		this.commandProxy().updateAll(krcdtDaiOutingTimeLists);
-		workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		this.getEntityManager().flush();
 	}
 

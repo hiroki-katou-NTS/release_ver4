@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -28,7 +27,6 @@ import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.worklocation.WorkLocationCD;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
@@ -61,9 +59,6 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 
 //	private static final String FIND_BY_PERIOD_ORDER_BY_YMD;
 
-	@Inject
-	private WorkInformationRepository workInfo;
-	
 	static {
 		StringBuilder builderString = new StringBuilder();
 //		builderString.append("DELETE ");
@@ -113,7 +108,6 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 				statement.setDate(2, Date.valueOf(ymd.toLocalDate()));
 				statement.execute();
 			}
-			workInfo.dirtying(employeeId, ymd);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -200,7 +194,6 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 		}
 		
 		internalUpdate(domain, getDailyLeaving(domain.getEmployeeId(), domain.getYmd()));
-		workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		// this.getEntityManager().flush();
 	}
 
@@ -504,7 +497,6 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 						+ leaveStampLocationCode + " , " + leaveStampSource + ", " + leaveNumberReflec + " )";
 				statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTimeLeaving));
 			}
-			workInfo.dirtying(timeLeavingOfDailyPerformance.getEmployeeId(), timeLeavingOfDailyPerformance.getYmd());
 		} catch (Exception e) {
 
 		}
@@ -515,7 +507,6 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 		KrcdtDaiLeavingWork entity = KrcdtDaiLeavingWork.toEntity(timeLeaving);
 		commandProxy().insert(entity);
 		commandProxy().insertAll(entity.timeLeavingWorks);
-		workInfo.dirtying(timeLeaving.getEmployeeId(), timeLeaving.getYmd());
 	}
 	//
 	// @Override
@@ -672,8 +663,6 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 					.executeUpdate();
 			});
 		});
-
-		workInfo.dirtying(employeeIds, processingYmds);
 	}
 	
 	@Override
@@ -684,7 +673,6 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 				internalUpdate(lstEmployeeIds, ymds);
 			});
 		});
-		workInfo.dirtying(employeeIds, processingYmds);
 	}
 
 	@SneakyThrows
@@ -717,7 +705,6 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 																&& o.krcdtDaiLeavingWorkPK.ymd.equals(d.getYmd()))
 										.findFirst().orElseGet(() -> getDefault(d.getEmployeeId(), d.getYmd()));
 			internalUpdate(d, e);
-			workInfo.dirtying(d.getEmployeeId(), d.getYmd());
 		});
 	}
 	

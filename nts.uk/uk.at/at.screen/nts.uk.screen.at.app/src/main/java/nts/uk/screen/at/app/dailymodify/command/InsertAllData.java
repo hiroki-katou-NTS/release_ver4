@@ -31,7 +31,7 @@ public class InsertAllData {
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void handlerInsertAllMonth(List<IntegrationOfMonthly> lstMonthDomain, UpdateMonthDailyParam month) {
-		hander.handlerInsertAllMonth(lstMonthDomain, month); 
+		hander.handlerInsertAllMonth(lstMonthDomain, month);
 	}
 	
 }

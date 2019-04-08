@@ -35,7 +35,6 @@ public class FlexShortageDto {
 
 	private boolean error;
 	private List<MessageError> messageError = new ArrayList<>();
-	private long version;
 
 	public FlexShortageDto(ItemValue value18, ItemValue value19, ItemValue value21, ItemValue value189,
 			ItemValue value190, ItemValue value191) {

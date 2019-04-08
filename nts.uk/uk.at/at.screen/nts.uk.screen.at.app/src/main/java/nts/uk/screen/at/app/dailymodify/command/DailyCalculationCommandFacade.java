@@ -132,13 +132,6 @@ public class DailyCalculationCommandFacade {
 			editedDomains = calcService.calculatePassCompanySetting(editedDomains, Optional.ofNullable(manageComanySet),
 					dataParent.isFlagCalculation() ? ExecutionType.RERUN : ExecutionType.NORMAL_EXECUTION);
 //			editedDomains = calcService.calculate(editedDomains);
-			
-			editedDomains.stream().forEach(d -> {
-				editedDtos.stream().filter(c -> c.employeeId().equals(d.getWorkInformation().getEmployeeId()) && c.workingDate().equals(d.getWorkInformation().getYmd()))
-					.findFirst().ifPresent(dto -> {
-					d.getWorkInformation().setVersion(dto.getWorkInfo().getVersion());
-				});
-			});
 
 			List<IntegrationOfMonthly> monthlyResults = new ArrayList<>();
 			// check format display = individual
@@ -294,12 +287,6 @@ public class DailyCalculationCommandFacade {
 				domainMonth = monthModifyCommandFacade.toDto(monthQuery).toDomain(monthlyParam.getEmployeeId(),
 						new YearMonth(monthlyParam.getYearMonth()), monthlyParam.getClosureId(),
 						monthlyParam.getClosureDate());
-				domainMonth.getAffiliationInfo().ifPresent(d -> {
-					d.setVersion(monthlyParam.getVersion());
-				});
-				domainMonth.getAttendanceTime().ifPresent(d -> {
-					d.setVersion(monthlyParam.getVersion());
-				});
 			}
 		}
 		final Optional<IntegrationOfMonthly> domainMonthOpt = Optional.ofNullable(domainMonth);
@@ -313,12 +300,6 @@ public class DailyCalculationCommandFacade {
 						employeeId, data.getYearMonth(), data.getClosureId(), data.getClosureDate(), data.getPeriod(),
 						Optional.empty(), domainDailyNew, domainMonthOpt);
 				if (monthDomainOpt.isPresent())
-					monthDomainOpt.get().getAffiliationInfo().ifPresent(d -> {
-						d.setVersion(monthlyParam.getVersion());
-					});
-					monthDomainOpt.get().getAttendanceTime().ifPresent(d -> {
-						d.setVersion(monthlyParam.getVersion());
-					});
 					result.add(monthDomainOpt.get());
 			});
 		}
@@ -348,20 +329,14 @@ public class DailyCalculationCommandFacade {
 				}).collect(Collectors.toList()), month.getYearMonth(), month.getEmployeeId(), month.getClosureId(),
 						month.getClosureDate());
 				IntegrationOfMonthly domainMonth = monthModifyCommandFacade.toDto(monthQuery).toDomain(month.getEmployeeId(), new YearMonth(month.getYearMonth()), month.getClosureId(), month.getClosureDate());
-				domainMonth.getAffiliationInfo().ifPresent(d -> {
-					d.setVersion(monthlyParam.getVersion());
-				});
-				domainMonth.getAttendanceTime().ifPresent(d -> {
-					d.setVersion(monthlyParam.getVersion());
-				});
 				Optional<IntegrationOfMonthly> domainMonthOpt = Optional.of(domainMonth);
 				monthParam = new UpdateMonthDailyParam(month.getYearMonth(), month.getEmployeeId(),
 						month.getClosureId(), month.getClosureDate(), domainMonthOpt, new DatePeriod(
-								dateRange.getStartDate(), dateRange.getEndDate()), month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc(), monthlyParam.getVersion());
+								dateRange.getStartDate(), dateRange.getEndDate()), month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc());
 			}else{
 				monthParam = new UpdateMonthDailyParam(month.getYearMonth(), month.getEmployeeId(),
 						month.getClosureId(), month.getClosureDate(), Optional.empty(), new DatePeriod(
-								dateRange.getStartDate(), dateRange.getEndDate()), month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc(), monthlyParam.getVersion());
+								dateRange.getStartDate(), dateRange.getEndDate()), month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc());
 			}
 		}
 //		if (mode == 0 && monthParam.getHasFlex()) {

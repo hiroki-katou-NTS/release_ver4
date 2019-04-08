@@ -35,7 +35,6 @@ public class DPDataDto {
     private DatePeriod datePriod;
     private Set<DPCellDataDto> cellDatas;
     private boolean errorOther;
-    private long version;
     
 	public DPDataDto(String id, String state, String error, GeneralDate date, boolean sign, boolean approval, String employeeId,
 			String employeeCode, String employeeName, String workplaceId, String employmentCode, String typeGroup) {

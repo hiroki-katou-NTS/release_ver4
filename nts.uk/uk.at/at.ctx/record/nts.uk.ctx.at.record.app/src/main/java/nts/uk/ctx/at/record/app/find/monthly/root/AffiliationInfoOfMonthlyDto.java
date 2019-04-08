@@ -24,9 +24,6 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 /** 月別実績の所属情報 */
 @AttendanceItemRoot(rootName = ItemConst.MONTHLY_AFFILIATION_INFO_NAME, itemType = AttendanceItemType.MONTHLY_ITEM)
 public class AffiliationInfoOfMonthlyDto extends MonthlyItemCommon {
-	
-	private long version;
-	
 	/** 年月: 年月 */
 	private YearMonth yearMonth;
 
@@ -66,14 +63,11 @@ public class AffiliationInfoOfMonthlyDto extends MonthlyItemCommon {
 		if(closureDate == null){
 			closureDate = this.closureDate;
 		}
-		AffiliationInfoOfMonthly domain = AffiliationInfoOfMonthly.of(employeeId, yearMonth, 
-																		ConvertHelper.getEnum(closureID, ClosureId.class), 
-																		closureDate == null ? null : closureDate.toDomain(), 
-																		startMonthInfo == null ? new AggregateAffiliationInfo()  : startMonthInfo.toDomain(), 
-																		endMonthInfo == null ? new AggregateAffiliationInfo() : endMonthInfo.toDomain());
-		domain.setVersion(this.version);
-		
-		return domain;
+		return AffiliationInfoOfMonthly.of(employeeId, yearMonth, 
+									ConvertHelper.getEnum(closureID, ClosureId.class), 
+									closureDate == null ? null : closureDate.toDomain(), 
+									startMonthInfo == null ? new AggregateAffiliationInfo()  : startMonthInfo.toDomain(), 
+									endMonthInfo == null ? new AggregateAffiliationInfo() : endMonthInfo.toDomain());
 		
 	}
 
@@ -91,7 +85,6 @@ public class AffiliationInfoOfMonthlyDto extends MonthlyItemCommon {
 			dto.setEndMonthInfo(AggregateAffiliationInfoDto.from(domain.getLastInfo()));
 			dto.setStartMonthInfo(AggregateAffiliationInfoDto.from(domain.getFirstInfo()));
 			dto.setYearMonth(domain.getYearMonth());
-			dto.setVersion(domain.getVersion());
 			dto.exsistData();
 		}
 		return dto;

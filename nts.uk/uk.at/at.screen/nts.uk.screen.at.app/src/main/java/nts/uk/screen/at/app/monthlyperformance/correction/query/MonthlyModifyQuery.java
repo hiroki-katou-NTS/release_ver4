@@ -26,18 +26,6 @@ public class MonthlyModifyQuery {
 
 	/** 締め日: 日付 */
 	private ClosureDateDto closureDate;
-	
-	private long version;
-
-	public MonthlyModifyQuery(List<ItemValue> items, Integer yearMonth, String employeeId, int closureId,
-			ClosureDateDto closureDate) {
-		super();
-		this.items = items;
-		this.yearMonth = yearMonth;
-		this.employeeId = employeeId;
-		this.closureId = closureId;
-		this.closureDate = closureDate;
-	}
 	/** Data */
 //	private List<ItemValue> itemValues;
 }
