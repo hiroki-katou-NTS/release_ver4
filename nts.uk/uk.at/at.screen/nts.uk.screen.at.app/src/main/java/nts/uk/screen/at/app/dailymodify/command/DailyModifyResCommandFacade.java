@@ -401,8 +401,9 @@ public class DailyModifyResCommandFacade {
 		List<DailyItemValue> dailyItems = resultOlds.stream().map(
 				x -> DailyItemValue.build().createEmpAndDate(x.getEmployeeId(), x.getDate()).createItems(x.getItems()))
 				.collect(Collectors.toList());
-		if (querys.isEmpty() && !dataParent.isFlagCalculation()
-				&& (dataParent.getMonthValue() == null || dataParent.getMonthValue().getItems() == null)) {
+		if (querys.isEmpty() 
+				&& (dataParent.getMonthValue() == null || dataParent.getMonthValue().getItems() == null) 
+				&& (!dataParent.getDataCheckSign().isEmpty() || !dataParent.getDataCheckApproval().isEmpty() || dataParent.getSpr() != null)) {
 			errorRelease = releaseSign(dataParent.getDataCheckSign(), new ArrayList<>(), dailyEdits,
 					AppContexts.user().employeeId(), true);
 			// only insert check box
