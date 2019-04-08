@@ -24,6 +24,7 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
 import nts.uk.ctx.at.record.dom.service.event.breaktime.BreakTimeOfDailyService;
+import nts.uk.ctx.at.record.dom.service.event.common.CorrectEventConts;
 import nts.uk.ctx.at.record.dom.service.event.overtime.OvertimeOfDailyService;
 import nts.uk.ctx.at.record.dom.service.event.timeleave.TimeLeavingOfDailyService;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
@@ -129,8 +130,15 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 			//2019.02.26　渡邉から
 			//残業申請の場合は、自動打刻セットの処理を呼ばない（大塚リリースの時はこの条件で実装する（製品版では、実績の勤務種類、就業時間帯を変更した場合に自動打刻セットを実行するように修正する事（渡邉）
 			if(!isOT) {
-				//出退勤時刻を補正する
-				integrationOfDaily = timeLeavingService.correct(companyId, integrationOfDaily, optWorkingCondition, workTypeInfor, true).getData();
+				List<EditStateOfDailyPerformance> lstTime = integrationOfDaily.getEditState().stream()
+						.filter(x -> CorrectEventConts.LEAVE_ITEMS.contains(x.getAttendanceItemId()) 
+								|| CorrectEventConts.ATTENDANCE_ITEMS.contains(x.getAttendanceItemId()))
+						.collect(Collectors.toList());
+				if(workTypeInfor.isPresent() && (!workTypeInfor.get().getDailyWork().isHolidayWork() ||
+						(workTypeInfor.get().getDailyWork().isHolidayWork() && lstTime.isEmpty()))) {
+					//出退勤時刻を補正する
+					integrationOfDaily = timeLeavingService.correct(companyId, integrationOfDaily, optWorkingCondition, workTypeInfor, true).getData();	
+				}				
 				// 申請された時間を補正する
 				integrationOfDaily = overTimeService.correct(integrationOfDaily, workTypeInfor);
 				//Neu khong phai don xin di lam vao ngay nghi va don xin di lam vao ngay nghi ko tich chon phan anh gio nghi
@@ -177,7 +185,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 			//休日出勤申請しか反映してない
 			if(this.isReflectBreakTime(lstEditState)
 					&& workTypeInfor.isPresent() && workTypeInfor.get().getDailyWork().isHolidayWork()) {
-				if(lstBeforeBreakTimeInfor.size() == 1
+				if(lstBeforeBreakTimeInfor.size() == 1 && breakTimeInfor != null
 						&& lstBeforeBreakTimeInfor.get(0).getBreakType() != breakTimeInfor.getBreakType()) {
 					integrationOfDaily.getBreakTime().add(breakTimeInfor);
 					breakTimeRepo.update(integrationOfDaily.getBreakTime());
