@@ -459,6 +459,18 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 	
 	public void handlerInsertAllMonth(List<IntegrationOfMonthly> lstMonthDomain, UpdateMonthDailyParam month) {
 		if(!lstMonthDomain.isEmpty() && month!= null && month.getDatePeriod() != null ) {
+//			month.getDomainMonth().ifPresent(current -> {
+				lstMonthDomain.stream().forEach(m -> {
+					long version = month.getVersion();
+					m.getAffiliationInfo().ifPresent(ma -> {
+						ma.setVersion(version);
+					});
+					m.getAttendanceTime().ifPresent(ma -> {
+						ma.setVersion(version);
+					});
+				});
+//			});
+		
 			updateAllDomainMonthService.merge(lstMonthDomain, month.getDatePeriod().end());
 		}
 		

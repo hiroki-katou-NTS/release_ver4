@@ -6,16 +6,21 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workrecord.AttendanceTimeByWorkOfDaily;
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workrecord.repo.AttendanceTimeByWorkOfDailyRepository;
+import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class JpaAttendanceTimeByWorkOfDailyRepoImpl extends JpaRepository implements AttendanceTimeByWorkOfDailyRepository {
 
+	@Inject
+	private WorkInformationRepository workInfo;
+	
 	@Override
 	public void add(AttendanceTimeByWorkOfDaily attendanceTime) {
 		// TODO Auto-generated method stub

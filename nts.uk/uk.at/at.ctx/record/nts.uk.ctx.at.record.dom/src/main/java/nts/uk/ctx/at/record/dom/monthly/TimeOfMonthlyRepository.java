@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.monthly;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -114,4 +115,6 @@ public interface TimeOfMonthlyRepository {
 	 */
 	void removeAffiliation(String employeeId, YearMonth yearMonth);
 	void removeAttendanceTime(String employeeId, YearMonth yearMonth);
+	
+	void dirtying(Supplier<Object> getKey);
 }

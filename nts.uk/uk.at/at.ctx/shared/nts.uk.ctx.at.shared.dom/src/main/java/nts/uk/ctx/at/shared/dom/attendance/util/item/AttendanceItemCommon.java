@@ -1,7 +1,11 @@
 package nts.uk.ctx.at.shared.dom.attendance.util.item;
 
-public abstract class AttendanceItemCommon implements ConvertibleAttendanceItem {
+import java.io.Serializable;
 
+public abstract class AttendanceItemCommon implements ConvertibleAttendanceItem, Serializable {
+
+	/** */
+	private static final long serialVersionUID = 1L;
 	private boolean haveData = false;
 
 	@Override

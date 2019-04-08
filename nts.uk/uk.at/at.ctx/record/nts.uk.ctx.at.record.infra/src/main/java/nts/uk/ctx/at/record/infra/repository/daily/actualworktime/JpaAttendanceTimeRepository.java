@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
@@ -24,6 +25,7 @@ import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepo
 import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeOfDaily;
 import nts.uk.ctx.at.record.dom.daily.LateTimeOfDaily;
 import nts.uk.ctx.at.record.dom.daily.LeaveEarlyTimeOfDaily;
+import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.breakorgoout.KrcdtDayOutingTime;
 import nts.uk.ctx.at.record.infra.entity.breakorgoout.KrcdtDayOutingTimePK;
 import nts.uk.ctx.at.record.infra.entity.daily.latetime.KrcdtDayLateTime;
@@ -45,6 +47,9 @@ public class JpaAttendanceTimeRepository extends JpaRepository implements Attend
 //	private static final String REMOVE_BY_EMPLOYEEID_AND_DATE;
 	
 	private static final String FIND_BY_LABOR_TIME;
+
+	@Inject
+	private WorkInformationRepository workInfo;
 	
 //	private static final String FIND_BY_EMPLOYEEID_AND_DATES;
 
@@ -85,7 +90,7 @@ public class JpaAttendanceTimeRepository extends JpaRepository implements Attend
 //				KrcdtDayAttendanceTime.create(attendanceTime.getEmployeeId(), attendanceTime.getYmd(), attendanceTime));
 		this.commandProxy().insert(KrcdtDayTime.toEntity(attendanceTime));
 
-
+		this.workInfo.dirtying(attendanceTime.getEmployeeId(), attendanceTime.getYmd());
 
 		if (attendanceTime.getActualWorkingTimeOfDaily() != null) {
 			if(attendanceTime.getActualWorkingTimeOfDaily().getPremiumTimeOfDailyPerformance() != null) {
@@ -185,6 +190,7 @@ public class JpaAttendanceTimeRepository extends JpaRepository implements Attend
 			/* 勤怠時間 */
 			entity.get().setData(attendanceTime);
 			this.commandProxy().update(entity.get());
+			this.workInfo.dirtying(attendanceTime.getEmployeeId(), attendanceTime.getYmd());
 			
 			if (attendanceTime.getActualWorkingTimeOfDaily() != null) {
 				if(attendanceTime.getActualWorkingTimeOfDaily().getTotalWorkingTime() != null) {
@@ -333,6 +339,7 @@ public class JpaAttendanceTimeRepository extends JpaRepository implements Attend
 		String sqlQuery = "Delete From KRCDT_DAY_TIME Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + ymd + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
+			this.workInfo.dirtying(employeeId, ymd);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
