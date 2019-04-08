@@ -513,7 +513,7 @@ module nts.uk.at.view.kaf010.a.viewmodel {
                 uiType: self.uiType(),
                 calculateFlag: self.calculateFlag(),
                 appReasonID: comboBoxReason,
-                checkOver1Year: true;
+                checkOver1Year: true
             };
             //登録前エラーチェック
             service.checkBeforeRegister(overtime).done((data) => {

@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ClosureDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.checkapproval.ApproveRootStatusForEmpDto;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -32,13 +33,12 @@ public class DPLockDto {
 	private Map<String, Boolean> signDayMap;
 	
 	//過去実績
-	private Map<String, DatePeriod> lockHist;
+	private Pair<List<ClosureDto>, Map<Integer, DatePeriod>> lockHist;
 	
 	public DPLockDto(){
 		this.lockCheckMonth = new HashMap<>();
 		this.lockCheckApprovalDay = new HashMap<>();
 		this.signDayMap = new HashMap<>();
-		this.lockHist = new HashMap<>();
 		this.lockDayAndWpl = new HashMap<>();
 	}
 }

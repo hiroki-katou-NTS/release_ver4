@@ -34,6 +34,9 @@ public class LateLeaveEarlyTimeSheet extends CalculationTimeSheet{
 		for(TimeSheetOfDeductionItem deduTimeSheet:deductionTimeSheetList) {
 			//int deductTime = lateTimeSheet.getDuplicatedWith(deductionTimeSheet.getTimeSheet().getTimeSpan()).isPresent()?lateTimeSheet.getDuplicatedWith(deductionTimeSheet.getTimeSheet().getTimeSpan()).get().lengthAsMinutes():0;
 			int deductTime = lateTimeSheet.getDuplicatedWith(deduTimeSheet.getTimeSheet().getTimeSpan()).isPresent()?deduTimeSheet.calcTotalTime(DeductionAtr.Deduction).valueAsMinutes():0;
+			if(lateTimeSheet.getSpan().isContinus(deduTimeSheet.getTimeSheet().getTimeSpan())) {
+				deductTime = deduTimeSheet.calcTotalTime(DeductionAtr.Deduction).valueAsMinutes();
+			}
 			//控除時間分、終了時刻を後ろにズラす
 			lateTimeSheet = new TimeSpanForCalc(lateTimeSheet.getStart(), lateTimeSheet.getEnd().forwardByMinutes(deductTime));
 			

@@ -84,6 +84,11 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 			break;
 		}
 		if(errorFlag!=ErrorFlag.NO_ERROR){
+			// ドメインモデル「承認ルート中間データ」を削除する
+			List<AppRootInstance> opAppRootInstanceOverLst = appRootInstanceRepository.findByEmpFromDate(companyID, employeeID, recordDate, rootType);
+			for(AppRootInstance appRootInstanceOver : opAppRootInstanceOverLst){
+				appRootInstanceRepository.delete(appRootInstanceOver);
+			}
 			return new AppRootInstanceContent(appRootInstance, errorFlag, errorMsgID);
 		}
 		// ドメインモデル「承認ルート中間データ」を削除する

@@ -405,7 +405,7 @@ module nts.uk.at.view.kaf009.a.viewmodel {
                             dfd.resolve(true);
                         }).fail(function(res: any) {
                             self.checkRegFail(res);
-                        }
+                        });
                     }).ifNo(() => {
                         nts.uk.ui.block.clear();
                     });

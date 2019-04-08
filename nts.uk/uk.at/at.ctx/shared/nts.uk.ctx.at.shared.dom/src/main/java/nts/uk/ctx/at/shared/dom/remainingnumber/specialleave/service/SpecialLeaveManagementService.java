@@ -63,7 +63,8 @@ public interface SpecialLeaveManagementService {
 	 * @return
 	 */
 	InPeriodOfSpecialLeave getOffsetDay1004(String cid, String sid, DatePeriod dateData, GeneralDate baseDate, int specialCode,
-			SpecialLeaveGrantRemainingDataTotal lstGrantData, SpecialHolidayInterimMngData interimDataMng, double accumulationMaxDays,RemainDaysOfSpecialHoliday useInfor);
+			SpecialLeaveGrantRemainingDataTotal lstGrantData, SpecialHolidayInterimMngData interimDataMng, 
+			double accumulationMaxDays,RemainDaysOfSpecialHoliday useInfor, boolean isMode);
 	/**
 	 * 使用数を管理データから引く
 	 * @param lstGrantData 特別休暇付与残数データ一覧
@@ -98,7 +99,7 @@ public interface SpecialLeaveManagementService {
 	 * @return
 	 */
 	RemainDaysOfSpecialHoliday remainDaysBefore(String cid, String sid, DatePeriod shukeiDate, SpecialLeaveGrantRemainingDataTotal lstGrantData,
-			SpecialHolidayInterimMngData interimDataMng,RemainDaysOfSpecialHoliday useInfor, GeneralDate baseDate);
+			SpecialHolidayInterimMngData interimDataMng,RemainDaysOfSpecialHoliday useInfor, GeneralDate baseDate, boolean isMode);
 	/**
 	 * 付与後の残数情報をまとめる
 	 * @param lstSpeLeaveGrantDetails
