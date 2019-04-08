@@ -11,14 +11,12 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.worktime.TemporaryTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
@@ -41,9 +39,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 	private static final String DEL_BY_LIST_KEY;
 
 	private static final String FIND_BY_KEY;
-	
-	@Inject
-	private WorkInformationRepository workInfo;
 
 	static {
 		StringBuilder builderString = new StringBuilder();
@@ -86,7 +81,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
 			con.createStatement().executeUpdate(daiLeavingWorkQuery);
-			workInfo.dirtying(employeeId, ymd);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -107,7 +101,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 					.setParameter("processingYmds", lstYMD).executeUpdate();	
 			});
 		});
-		workInfo.dirtying(employeeIds, ymds);
 		this.getEntityManager().flush();
 	}
 
@@ -198,7 +191,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
  		if(!timeWorks.isEmpty()){
  			this.commandProxy().updateAll(krcdtDaiTemporaryTime.timeLeavingWorks);
  		}
- 		workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		this.getEntityManager().flush();
 	 	
 	}
@@ -221,7 +213,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 			return;
 		}
 		this.commandProxy().insert(KrcdtDaiTemporaryTime.toEntity(temporaryTimeOfDailyPerformance));
- 		workInfo.dirtying(temporaryTimeOfDailyPerformance.getEmployeeId(), temporaryTimeOfDailyPerformance.getYmd());
 		this.getEntityManager().flush();
 	}
 
@@ -230,7 +221,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 		KrcdtDaiTemporaryTime entity = KrcdtDaiTemporaryTime.toEntity(temporaryTime);
 		commandProxy().insert(entity);
 		commandProxy().insertAll(entity.timeLeavingWorks);
- 		workInfo.dirtying(temporaryTime.getEmployeeId(), temporaryTime.getYmd());
 	}
 
 	@Override

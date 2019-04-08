@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -28,7 +27,6 @@ import nts.uk.ctx.at.record.dom.raisesalarytime.SpecificDateAttrSheet;
 import nts.uk.ctx.at.record.dom.raisesalarytime.enums.SpecificDateAttr;
 import nts.uk.ctx.at.record.dom.raisesalarytime.primitivevalue.SpecificDateItemNo;
 import nts.uk.ctx.at.record.dom.raisesalarytime.repo.SpecificDateAttrOfDailyPerforRepo;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.daily.specificdatetttr.KrcdtDaiSpeDayCla;
 import nts.uk.ctx.at.record.infra.entity.daily.specificdatetttr.KrcdtDaiSpeDayClaPK;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -38,9 +36,6 @@ public class SpecificDateAttrOfDailyPerforRepoImpl extends JpaRepository impleme
 
 //	private static final String REMOVE_BY_EMPLOYEEID_AND_DATE;
 
-	@Inject
-	private WorkInformationRepository workInfo;
-	
 	static {
 //		StringBuilder builderString = new StringBuilder();
 //		builderString.append("DELETE ");
@@ -74,7 +69,6 @@ public class SpecificDateAttrOfDailyPerforRepoImpl extends JpaRepository impleme
 			}
 		});
 		commandProxy().updateAll(entities);
-		workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 	}
 
 	@Override
@@ -82,7 +76,6 @@ public class SpecificDateAttrOfDailyPerforRepoImpl extends JpaRepository impleme
 		List<KrcdtDaiSpeDayCla> entities = domain.getSpecificDateAttrSheets().stream()
 				.map(c -> newEntities(domain.getEmployeeId(), domain.getYmd(), c)).collect(Collectors.toList());
 		commandProxy().insertAll(entities);
-		workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 	}
 
 	private KrcdtDaiSpeDayCla newEntities(String employeeId, GeneralDate ymd, SpecificDateAttrSheet c) {
@@ -201,7 +194,6 @@ public class SpecificDateAttrOfDailyPerforRepoImpl extends JpaRepository impleme
 		String sqlQuery = "Delete From KRCDT_DAI_SPE_DAY_CLA Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + baseDate + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
-			workInfo.dirtying(employeeId, baseDate);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

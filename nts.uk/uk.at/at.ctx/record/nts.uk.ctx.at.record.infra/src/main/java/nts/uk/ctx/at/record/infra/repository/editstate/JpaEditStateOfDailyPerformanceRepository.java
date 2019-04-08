@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -28,7 +27,6 @@ import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.editstate.KrcdtDailyRecEditSet;
 import nts.uk.ctx.at.record.infra.entity.editstate.KrcdtDailyRecEditSetPK;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -44,9 +42,6 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 	
 //	private static final String DEL_BY_LIST_ITEM_ID;
 
-	@Inject
-	private WorkInformationRepository workInfo;
-	
 	static {
 		StringBuilder builderString = new StringBuilder();
 //		builderString.append("DELETE ");
@@ -79,7 +74,6 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 		String sqlQuery = "Delete From KRCDT_DAILY_REC_EDIT_SET Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + ymd + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
-			workInfo.dirtying(employeeId, ymd);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -98,7 +92,6 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 					.executeUpdate();
 			});
 		});
-		workInfo.dirtying(employeeIds, processingYmds);
 		this.getEntityManager().flush();
 	}
 
@@ -125,7 +118,6 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 				internalDelete(sublistEmployeeIds, sublistYMDs);
 			});
 		});
-		workInfo.dirtying(employeeIds, processingYmds);
 	}
 	
 	@SneakyThrows
@@ -159,8 +151,6 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 								.map(c -> new KrcdtDailyRecEditSet(new KrcdtDailyRecEditSetPK(c.getEmployeeId(),
 										c.getYmd(), c.getAttendanceItemId()), c.getEditStateSetting().value))
 								.collect(Collectors.toList()));
-		
-		triggerDirtying(editStates);
 	}
 
 	@Override
@@ -188,8 +178,6 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 						.map(c -> new KrcdtDailyRecEditSet(new KrcdtDailyRecEditSetPK(c.getEmployeeId(),
 								c.getYmd(), c.getAttendanceItemId()), c.getEditStateSetting().value))
 						.collect(Collectors.toList()));
-		
-		triggerDirtying(editStates);
 	}
 
 	@Override
@@ -253,20 +241,6 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 				this.commandProxy().insert(entity);
 			}
 		});
-		
-		triggerDirtying(editStates);
-	}
-
-	private void triggerDirtying(List<EditStateOfDailyPerformance> editStates) {
-		Map<String, Map<GeneralDate, List<EditStateOfDailyPerformance>>> mapped = editStates.stream().collect(Collectors.groupingBy(c -> c.getEmployeeId(), 
-				Collectors.collectingAndThen(Collectors.toList(), 
-						list -> list.stream().collect(Collectors.groupingBy(c -> c.getYmd(), Collectors.toList())))));
-		
-		mapped.entrySet().forEach(c -> {
-							c.getValue().entrySet().stream().forEach(d -> {
-								workInfo.dirtying(c.getKey(), d.getKey());
-							});
-						});
 	}
 
 	@Override

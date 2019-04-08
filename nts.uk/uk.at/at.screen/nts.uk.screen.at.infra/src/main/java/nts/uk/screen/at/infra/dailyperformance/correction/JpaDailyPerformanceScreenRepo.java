@@ -810,8 +810,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 						return new WorkInfoOfDailyPerformanceDto(e.krcdtDaiPerWorkInfoPK.employeeId, e.calculationState,
 								e.krcdtDaiPerWorkInfoPK.ymd, e.recordWorkWorktypeCode, e.recordWorkWorktimeCode,
 								e.scheduleWorkWorktypeCode, e.scheduleWorkWorktimeCode,
-								e.scheduleTimes == null ? false : true,
-								e.version);
+								e.scheduleTimes == null ? false : true);
 					}));
 		});
 		return results;
@@ -1251,8 +1250,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 											.map(s -> new ScheduleTimeSheetDto(s.krcdtWorkScheduleTimePK.workNo,
 													new TimeWithDayAttr(s.attendance),
 													new TimeWithDayAttr(s.leaveWork)))
-											.collect(Collectors.toList()),
-							c.version)));
+											.collect(Collectors.toList()))));
 		});
 		return datas;
 	}

@@ -79,7 +79,7 @@ public class JpaEmployeeMonthlyPerError extends JpaRepository implements Employe
 				.setParameter("closeDay", closureDate.getClosureDay().v())
 				.setParameter("isLastDay", closureDate.getLastDayOfMonth() ? 1 : 0).executeUpdate();
 		
-//		this.getEntityManager().flush();
+		this.getEntityManager().flush();
 	}
 
 	@Override

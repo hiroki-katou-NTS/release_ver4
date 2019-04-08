@@ -3,6 +3,7 @@ package nts.uk.ctx.at.record.infra.repository.breakorgoout;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+//import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -33,7 +33,6 @@ import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
 import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
 import nts.uk.ctx.at.record.dom.breakorgoout.primitivevalue.BreakFrameNo;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.breakorgoout.KrcdtDaiBreakTime;
 import nts.uk.ctx.at.record.infra.entity.breakorgoout.KrcdtDaiBreakTimePK;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
@@ -48,10 +47,6 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 
 	// private static final String REMOVE_BY_EMPLOYEE;
 
-
-	@Inject
-	private WorkInformationRepository workInfo;
-	
 	private static final String DEL_BY_LIST_KEY;
 
 	private static final String SELECT_BY_EMPLOYEE_AND_DATE;
@@ -107,7 +102,6 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 			statement.setString(1, employeeId);
 			statement.setDate(2, Date.valueOf(ymd.toLocalDate()));
 			statement.execute();
-			workInfo.dirtying(employeeId, ymd);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -121,7 +115,6 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 						.setParameter("ymds", sublistYMDs).executeUpdate();
 			});
 		});
-		workInfo.dirtying(employeeIds, ymds);
 		this.getEntityManager().flush();
 	}
 
@@ -147,7 +140,6 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 				internalDelete(sublistEmployeeIds, sublistYMDs);
 			});
 		});
-		workInfo.dirtying(employeeIds, ymds);
 	}
 
 	@SneakyThrows
@@ -246,7 +238,6 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 						+ breakTimeSheet.getEndTime().valueAsMinutes() + " )";
 				statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
 			}
-			workInfo.dirtying(breakTimes.getEmployeeId(), breakTimes.getYmd());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -256,7 +247,6 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 	public void insert(List<BreakTimeOfDailyPerformance> breakTimes) {
 		commandProxy().insertAll(breakTimes.stream().map(c -> KrcdtDaiBreakTime.toEntity(c)).flatMap(List::stream)
 				.collect(Collectors.toList()));
-		breakTimes.forEach(b -> workInfo.dirtying(b.getEmployeeId(), b.getYmd()));
 		this.getEntityManager().flush();
 	}
 
@@ -323,7 +313,6 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 					.setParameter("employeeId", breakTimes.get(0).getEmployeeId())
 					.setParameter("ymd", breakTimes.get(0).getYmd()).getList();
 			internalUpdate(all, krcdtDaiBreakTimes);
-			workInfo.dirtying(breakTimes.get(0).getEmployeeId(), breakTimes.get(0).getYmd());
 			// commandProxy().updateAll(toRemove);
 			// commandProxy().removeAll(toRemove);
 			// commandProxy().removeAll(toRemove);
@@ -360,7 +349,6 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 		List<KrcdtDaiBreakTime> all = breakTimes.stream().map(c -> KrcdtDaiBreakTime.toEntity(c)).flatMap(List::stream)
 				.collect(Collectors.toList());
 		if (!all.isEmpty()) {
-			breakTimes.forEach(b -> workInfo.dirtying(b.getEmployeeId(), b.getYmd()));
 			commandProxy().updateAll(all);
 		}
 	}
@@ -441,7 +429,6 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 	public void deleteByBreakType(String employeeId, GeneralDate ymd, int breakType) {
 		this.getEntityManager().createQuery(REMOVE_BY_BREAKTYPE).setParameter("employeeId", employeeId)
 				.setParameter("ymd", ymd).setParameter("breakType", breakType).executeUpdate();
-		workInfo.dirtying(employeeId, ymd);
 		this.getEntityManager().flush();
 	}
 
@@ -481,7 +468,6 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 				Statement statementU = con.createStatement();
 				statementU.executeUpdate(updateTableSQL);
 			}
-			workInfo.dirtying(breakTime.getEmployeeId(), breakTime.getYmd());
 		} catch (Exception e) {
 
 		}

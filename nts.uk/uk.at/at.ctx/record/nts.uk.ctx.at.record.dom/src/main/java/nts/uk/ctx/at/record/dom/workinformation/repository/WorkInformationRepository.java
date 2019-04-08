@@ -49,7 +49,4 @@ public interface WorkInformationRepository {
 	 * @return
 	 */
 	List<WorkInfoOfDailyPerformance> findByListDate(String employeeId, List<GeneralDate> dates);
-	
-	void dirtying(String employeeId, GeneralDate date);
-	void dirtying(List<String> employeeId, List<GeneralDate> date);
 }

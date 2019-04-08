@@ -35,8 +35,6 @@ public class WorkInfoOfDailyPerformanceDto {
 	private String scheduleWorkWorktimeCode;
 
 	private Boolean krcdtWorkScheduleTime;
-	
-	private long version;
 
 	public WorkInfoOfDailyPerformanceDto(String employeeId, int calculationState, GeneralDate ymd) {
 		super();
