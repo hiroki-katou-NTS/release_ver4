@@ -1,11 +1,13 @@
 package nts.uk.ctx.at.record.dom.workrecord.actualsituation.createapproval.dailyperformance.createperapprovaldaily;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
+import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
@@ -29,6 +31,9 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 
 	@Inject
 	private CreateDailyApproverAdapter createDailyApproverAdapter;
+	
+	@Inject
+	private ManagedParallelWithContext parallel;
 
 	@Override
 	public boolean createperApprovalDaily(String companyId, String executionId, List<String> employeeIDs,
@@ -41,10 +46,11 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 				List<AffCompanyHistImport> listAffCompanyHistImport = syCompanyRecordAdapter
 						.getAffCompanyHistByEmployee(employeeIDs,
 								new DatePeriod(startDateClosure, GeneralDate.today()));
-				int i = 0;
-				for (String employeeID : employeeIDs) {
-					log.info("承認ルート更新 実行中: " + i + " (" + employeeID + ")");
-					i++;
+				
+				AtomicInteger counter = new AtomicInteger(0);
+				this.parallel.forEach(employeeIDs, employeeID -> {
+					log.info("承認ルート更新 実行中: " + counter.get() + " (" + employeeID + ")");
+					
 					// 年月日　←「システム日付の前日」
 					GeneralDate ymd = GeneralDate.today().addDays(-1);
 					if (createNewEmp == 1) {	
@@ -79,10 +85,10 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 						appDataInfoDailyRepo.addAppDataInfoDaily(appDataInfoDaily);
 					}
 					
-				} // end for listEmployee
+				}); // end for listEmployee
 
 			} else { // 再作成の場合 : processExecType = 1(再作成)
-				for (String employeeID : employeeIDs) {
+				this.parallel.forEach(employeeIDs, employeeID -> {
 					/** アルゴリズム「指定社員の中間データを作成する」を実行する */
 					AppRootInsContentFnImport appRootInsContentFnImport = createDailyApproverAdapter
 							.createDailyApprover(employeeID, 1,endDateClosure, startDateClosure);
@@ -95,7 +101,7 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 								new ErrorMessageRC(TextResource.localize(errorMessage)));
 						appDataInfoDailyRepo.addAppDataInfoDaily(appDataInfoDaily);
 					}
-				}
+				});
 
 			}
 		}

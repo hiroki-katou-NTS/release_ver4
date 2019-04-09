@@ -63,9 +63,6 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 	@Inject
 	private CreateperApprovalDailyAdapter createperApprovalDailyAdapter;
 	
-	@Inject
-	private ManagedParallelWithContext managedParallelWithContext;
-	
 	public static int MAX_DELAY_PARALLEL = 0;
 	
 	@Override
@@ -100,10 +97,7 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 		
 		List<CheckCreateperApprovalClosure> listCheckCreateApp = new ArrayList<>();
 		//取得した就業締め日の数(so du lieu 就業締め日 lay duoc)　＝　回数
-		this.managedParallelWithContext.forEach(
-				ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
-				listClosure,
-				itemClosure -> {
+		listClosure.forEach(itemClosure -> {
 		//for(Closure closure : listClosure) {
 			/**締め開始日を取得する*/
 			PresentClosingPeriodFunImport closureData =  funClosureAdapter.getClosureById(procExec.getCompanyId(), itemClosure.getClosureId().value).get();
