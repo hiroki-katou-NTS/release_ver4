@@ -594,7 +594,7 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 		//計上用時間帯
 		List<TimeSheetOfDeductionItem> recordTimeSheet = Collections.emptyList(); 
   		if(ootsukaIWFlag) {
-  			dedTimeSheet = deductionTimeSheet.getForRecordTimeZoneList();
+  			recordTimeSheet = deductionTimeSheet.getForRecordTimeZoneList();
   		}
   		else {
   			recordTimeSheet = deductionTimeSheet.getDupliRangeTimeSheet(dupTimeSheet.getTimezone().getTimeSpan(), DeductionAtr.Appropriate);
