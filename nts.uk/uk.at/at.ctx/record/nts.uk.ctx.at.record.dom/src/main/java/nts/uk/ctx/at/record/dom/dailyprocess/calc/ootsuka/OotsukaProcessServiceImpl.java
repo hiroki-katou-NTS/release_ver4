@@ -324,8 +324,8 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 		for(TimezoneUse predSet : predetermineTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone()) {
 			if(predSet.isUsed()) {
 				Optional<TimeLeavingWork> stamp = timeLeavingOfDailyPerformance.get().getAttendanceLeavingWork(predSet.getWorkNo());
-				WorkStamp attendance = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0),new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
-				WorkStamp leaving = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0), new WorkLocationCD("01"),StampSourceInfo.CORRECTION_RECORD_SET);
+				WorkStamp attendance = new WorkStamp(predSet.getStart(), predSet.getStart(),new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
+				WorkStamp leaving = new WorkStamp(predSet.getEnd(), predSet.getEnd(), new WorkLocationCD("01"),StampSourceInfo.CORRECTION_RECORD_SET);
 				if(stamp.isPresent()) {
 					if(stamp.get().getAttendanceStamp().isPresent()) {
 						if(stamp.get().getAttendanceStamp().get().getStamp().isPresent()){
@@ -389,7 +389,8 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 	 * @param workTimeCode
 	 * @return IWカスタマイズ対象である
 	 */
-	private boolean isIWWorkTimeAndCode(WorkType workType,WorkTimeCode workTimeCode) {
+	@Override
+	public boolean isIWWorkTimeAndCode(WorkType workType,WorkTimeCode workTimeCode) {
 		if(!(workTimeCode.v().equals("100") || workTimeCode.v().equals("101")))
 			return false;
 		if(workType.getWorkTypeCode().v().equals("100")) 

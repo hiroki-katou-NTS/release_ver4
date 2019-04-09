@@ -35,5 +35,7 @@ public interface OotsukaProcessService {
 	//IW専用処理(休憩時刻補正用)
 	public Optional<BreakTimeOfDailyPerformance> convertBreakTimeSheetForOOtsuka(Optional<BreakTimeOfDailyPerformance> breakTimeOfDailyPerformance,WorkType workType,WorkTimeCode workTimeCode);
 	
+	//IWか判断処理
+	public boolean isIWWorkTimeAndCode(WorkType workType,WorkTimeCode workTimeCode);
 	
 }

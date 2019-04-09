@@ -28,6 +28,7 @@ import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
 import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
+import nts.uk.ctx.at.record.dom.breakorgoout.primitivevalue.BreakFrameNo;
 import nts.uk.ctx.at.record.dom.calculationattribute.BonusPayAutoCalcSet;
 import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.calculationattribute.HolidayTimesheetCalculationSetting;
@@ -910,6 +911,9 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 							breakTimeSheet.addAll(tc.getBreakTimeSheets());	
 						}
 					});
+					if((!breakTimeByBreakType.isPresent()) && ootsukaProcessService.isIWWorkTimeAndCode(nowWorkType, workTime.get().getWorktimeCode())) {
+						breakTimeSheet.add(new BreakTimeSheet(new BreakFrameNo(1),new TimeWithDayAttr(720), new TimeWithDayAttr(780)));
+					}
 
 					breakCount = breakTimeSheet.stream()
 							.filter(timeSheet -> (timeSheet.getStartTime() != null && timeSheet.getEndTime() != null
@@ -1238,16 +1242,14 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 		WorkInfoOfDailyPerformance toDayWorkInfo = integrationOfDaily.getWorkInformation();
 		Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance =integrationOfDaily.getAttendanceLeave();
-		if(workTimeCode != null ) {
-			/* 日別実績の出退勤時刻セット */
-			 timeLeavingOfDailyPerformance = correctStamp(integrationOfDaily.getAttendanceLeave(),
-					  employeeId,
-					  targetDate, 
-					  isOotsukaMode,
-					  predetermineTimeSet,
-					  workType,
-					  new WorkTimeCode(workTimeCode));			
-		}
+		/* 日別実績の出退勤時刻セット */
+		 timeLeavingOfDailyPerformance = correctStamp(integrationOfDaily.getAttendanceLeave(),
+				  employeeId,
+				  targetDate, 
+				  isOotsukaMode,
+				  predetermineTimeSet,
+				  workType,
+				  new WorkTimeCode(workTimeCode));			
 
 
 
@@ -1508,24 +1510,22 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 	
 	private Optional<TimeLeavingOfDailyPerformance> correctStamp(Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance, String employeeId, GeneralDate targetDate, boolean isOotuskaMode, Optional<PredetemineTimeSetting> predetermineTimeSet, WorkType workType, WorkTimeCode workTimeCode) {
 		//大塚モードの場合は、IWカスタマイズ処理に入る。
-		if(isOotuskaMode) {
-			return ootsukaProcessService.iWProcessForStamp(timeLeavingOfDailyPerformance, employeeId, targetDate, predetermineTimeSet,workType,workTimeCode);
+		if(isOotuskaMode && workTimeCode != null) {
+			timeLeavingOfDailyPerformance = ootsukaProcessService.iWProcessForStamp(timeLeavingOfDailyPerformance, employeeId, targetDate, predetermineTimeSet,workType,workTimeCode);
 		}
-		else {
-			if (!timeLeavingOfDailyPerformance.isPresent()) {
-				WorkStamp attendance = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0),
-						new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
-				WorkStamp leaving = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0), new WorkLocationCD("01"),
-						StampSourceInfo.CORRECTION_RECORD_SET);
-				TimeActualStamp stamp = new TimeActualStamp(attendance, leaving, 1);
-				TimeLeavingWork timeLeavingWork = new TimeLeavingWork(
-						new WorkNo(1), stamp, stamp);
-				List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
-				timeLeavingWorkList.add(timeLeavingWork);
-				timeLeavingOfDailyPerformance = Optional.of(
-						new TimeLeavingOfDailyPerformance(employeeId, new WorkTimes(1), timeLeavingWorkList, targetDate));
-			}			
-		}
+		if (!timeLeavingOfDailyPerformance.isPresent()) {
+			WorkStamp attendance = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0),
+					new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
+			WorkStamp leaving = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0), new WorkLocationCD("01"),
+					StampSourceInfo.CORRECTION_RECORD_SET);
+			TimeActualStamp stamp = new TimeActualStamp(attendance, leaving, 1);
+			TimeLeavingWork timeLeavingWork = new TimeLeavingWork(
+					new WorkNo(1), stamp, stamp);
+			List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
+			timeLeavingWorkList.add(timeLeavingWork);
+			timeLeavingOfDailyPerformance = Optional.of(
+					new TimeLeavingOfDailyPerformance(employeeId, new WorkTimes(1), timeLeavingWorkList, targetDate));
+		}			
 		return timeLeavingOfDailyPerformance;
 	}
 
