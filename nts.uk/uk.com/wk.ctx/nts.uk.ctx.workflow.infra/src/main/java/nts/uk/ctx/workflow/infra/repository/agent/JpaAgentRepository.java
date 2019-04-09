@@ -1,6 +1,8 @@
 package nts.uk.ctx.workflow.infra.repository.agent;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +13,7 @@ import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.workflow.dom.agent.Agent;
@@ -230,12 +233,31 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 	@Override
 	public List<Agent> find(String companyId, List<String> employeeIds, GeneralDate baseDate) {
 		List<Agent> results = new ArrayList<>();
+		
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			results.addAll(this.queryProxy().query(SELECT_AGENT_SID_DATE, CmmmtAgent.class)
-				.setParameter("companyId", companyId)
-				.setParameter("employeeIds", subList)
-				.setParameter("baseDate", baseDate)
-				.getList(c -> convertToDomain(c)));
+			String sql = "select * from CMMMT_AGENT"
+					+ " where CID = ?"
+					+ " and SID in (" + NtsStatement.In.createParamsString(subList) + ")"
+					+ " and START_DATE <= ?"
+					+ " and END_DATE >= ?";
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				stmt.setString(1, companyId);
+				
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setString(2 + i, subList.get(i));
+				}
+
+				stmt.setDate(2 + subList.size(), Date.valueOf(baseDate.localDate()));
+				stmt.setDate(3 + subList.size(), Date.valueOf(baseDate.localDate()));
+				
+				List<Agent> subResults = new NtsResultSet(stmt.executeQuery())
+						.getList(rec -> convertToDomain(CmmmtAgent.fromJdbc(rec)));
+				results.addAll(subResults);
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		});
 		return results;
 	}
@@ -294,21 +316,8 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 			stmt.setString(2, employeeId);
 			stmt.setString(3, requestId);
 			
-			return new NtsResultSet(stmt.executeQuery()).getSingle(rec -> {
-				CmmmtAgent ent = new CmmmtAgent();
-				ent.cmmmtAgentPK = new CmmmtAgentPK(companyId, employeeId, requestId);
-				ent.startDate = rec.getGeneralDate("START_DATE");
-				ent.endDate = rec.getGeneralDate("END_DATE");
-				ent.agentSid1 = rec.getString("AGENT_SID1");
-				ent.agentAppType1 = rec.getInt("AGENT_APP_TYPE1");
-				ent.agentSid2 = rec.getString("AGENT_SID2");
-				ent.agentAppType2 = rec.getInt("AGENT_APP_TYPE2");
-				ent.agentSid3 = rec.getString("AGENT_SID3");
-				ent.agentAppType3 = rec.getInt("AGENT_APP_TYPE3");
-				ent.agentSid4 = rec.getString("AGENT_SID4");
-				ent.agentAppType4 = rec.getInt("AGENT_APP_TYPE4");
-				return ent;
-			}).map(e -> convertToDomain(e));
+			return new NtsResultSet(stmt.executeQuery()).getSingle(rec -> CmmmtAgent.fromJdbc(rec))
+					.map(e -> convertToDomain(e));
 		}
 		
 	}
