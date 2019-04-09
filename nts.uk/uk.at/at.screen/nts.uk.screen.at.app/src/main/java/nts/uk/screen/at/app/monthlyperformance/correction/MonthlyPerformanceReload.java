@@ -356,8 +356,8 @@ public class MonthlyPerformanceReload {
 			MonthlyModifyResult rowData = employeeDataMap.get(employeeId);
 			if (rowData == null) continue;
 			
-			String lockStatus = lockStatusMap.isEmpty() || !lockStatusMap.containsKey(employee.getId()) || param.getInitMenuMode() == 1 ? ""
-					: lockStatusMap.get(employee.getId()).getLockStatusString();
+//			String lockStatus = lockStatusMap.isEmpty() || !lockStatusMap.containsKey(employee.getId()) || param.getInitMenuMode() == 1 ? ""
+//					: lockStatusMap.get(employee.getId()).getLockStatusString();
 
 			// set dailyConfirm
 			MonthlyPerformaceLockStatus monthlyPerformaceLockStatus = lockStatusMap.get(employeeId);
@@ -366,13 +366,13 @@ public class MonthlyPerformanceReload {
 			listCss.add("daily-confirm-color");
 			if (monthlyPerformaceLockStatus != null) {
 				if (monthlyPerformaceLockStatus.getMonthlyResultConfirm() == LockStatus.LOCK) {
-					dailyConfirm = "！";
+					dailyConfirm = "未";
 					// mau cua kiban chua dap ung duoc nen dang tu set mau
 					// set color for cell dailyConfirm
 					listCss.add("color-cell-un-approved");
 					screenDto.setListStateCell("dailyconfirm", employeeId, listCss);
 				} else {
-					dailyConfirm = "〇";
+					dailyConfirm = "済";
 					// mau cua kiban chua dap ung duoc nen dang tu set mau
 					// set color for cell dailyConfirm
 					listCss.add("color-cell-approved");
@@ -488,13 +488,22 @@ public class MonthlyPerformanceReload {
 			}
 			//*7
 
-			MPDataDto mpdata = new MPDataDto(employeeId, lockStatus, "", employee.getCode(), employee.getBusinessName(),
+			String lockStatusState = "";
+			if(monthlyPerformaceLockStatus == null || param.getInitMenuMode() == 1) {
+				lockStatusState = "";
+			}else {
+				monthlyPerformaceLockStatus.setMonthlyResultConfirm((identify || monthlyPerformaceLockStatus.getMonthlyResultConfirm() == LockStatus.LOCK) ? LockStatus.LOCK:LockStatus.UNLOCK);
+				monthlyPerformaceLockStatus.setMonthlyResultApprova(approve ? LockStatus.LOCK:LockStatus.UNLOCK);
+				lockStatusState = monthlyPerformaceLockStatus.getLockStatusString();
+			}
+			MPDataDto mpdata = new MPDataDto(employeeId, lockStatusState, "", employee.getCode(), employee.getBusinessName(),
 					employeeId, "", identify, approve, dailyConfirm, "");
 			// Setting data for dynamic column
 			List<EditStateOfMonthlyPerformanceDto> newList = editStateOfMonthlyPerformanceDtos.stream()
 					.filter(item -> item.getEmployeeId().equals(employeeId)).collect(Collectors.toList());
 			if (null != rowData) {
 				if (null != rowData.getItems()) {
+					String lockStatus = lockStatusState;
 					rowData.getItems().forEach(item -> {
 						// Cell Data
 						// TODO item.getValueType().value
