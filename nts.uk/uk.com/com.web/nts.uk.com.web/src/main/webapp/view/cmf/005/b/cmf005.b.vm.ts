@@ -359,7 +359,7 @@ module nts.uk.com.view.cmf005.b.viewmodel {
                         if (self.listDataCategory().length > 0) {
                             self.nextFromBToD();
                         } else {
-                            alertError({ messageId: 'Msg_463' });
+                            alertError({ messageId: 'Msg_471' });
                         }
                     } else {
                         alertError({ messageId: 'Msg_566' });
@@ -368,7 +368,7 @@ module nts.uk.com.view.cmf005.b.viewmodel {
                     if (self.listDataCategory().length > 0) {
                         self.nextFromBToD();
                     } else {
-                        alertError({ messageId: 'Msg_463' });
+                        alertError({ messageId: 'Msg_471' });
                     }
                 }
             }
