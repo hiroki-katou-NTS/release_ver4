@@ -12,6 +12,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import nts.uk.shr.com.context.AppContexts;
+import nts.uk.shr.com.program.ProgramIdConsts;
 
 import lombok.AllArgsConstructor;
 import lombok.val;
@@ -365,7 +367,10 @@ public class DivTimeSysFixedCheckService {
 		BusinessTypeCode bsCode = isWHis ? (BusinessTypeCode) historyR.get(WORKTYPE_CODE) : null; 
 		if(hisItem == null){
 			return new ArrayList<>();
-		}
+		}        
+		boolean isCheckToDay = AppContexts.user().employeeId().equals(empId) && isToday 
+			&& ProgramIdConsts.KDW003A.equals(AppContexts.programId());
+
 		List<DivergenceCheckResult> checkR = new ArrayList<>(); 
 		shareDivRefTime(isWHis, hisItem.identifier(), divCheckNos, bsCode, shareContainer);
 		shareDivMesTime(isWHis, comId, divCheckNos, bsCode, shareContainer);
@@ -377,7 +382,7 @@ public class DivTimeSysFixedCheckService {
             	divTimeErAls.stream().filter(d -> d.getDivergenceTimeNo() == divNo).findFirst().ifPresent(de -> {
     				divTime.stream().filter(dt -> dt.getDivTimeId() == de.getDivergenceTimeNo()).findFirst().ifPresent(dt -> {
     					// add DivResonCode to check Thanh
-    					boolean isPcLogOffDiv = dt.getDivTimeId() == LOGOFF_DIV_NO && isToday;
+    					boolean isPcLogOffDiv = dt.getDivTimeId() == LOGOFF_DIV_NO && isCheckToDay;
     					
     					InternalCheckStatus status = evaluateDivTime(divNo, isAlarm, isWHis, hisItem.identifier(), bsCode, de, shareContainer, dt,
 					 			getDivTimeValue(empId, tarD, tl, dt, isPcLogOffDiv, shareContainer));
