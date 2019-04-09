@@ -129,7 +129,8 @@ public class ConfirmStatusActualDay {
 					// list emp date unApproval
 					val approvalStatusMonth = lstApprovalStatus.isEmpty() ? null : lstApprovalStatus.get(0);
 					val lstEmpDateUnApproval = lstResultEmpTemp2.stream().filter(x -> {
-						val value = (approvalStatusMonth != null && (x.getDate().afterOrEquals(mergePeriod.start())
+						if(approvalStatusMonth == null) return true;
+						val value = ((x.getDate().afterOrEquals(mergePeriod.start())
 								&& x.getDate().beforeOrEquals(mergePeriod.end())))
 										? approvalStatusMonth.getApprovalStatus()
 										: null;
@@ -175,12 +176,17 @@ public class ConfirmStatusActualDay {
 							.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus()));
 					//lstResultEmpTemp3 = 
 					lstResultEmpTemp1.forEach(x ->{
-						val temp = mapApprovalStatus.get(Pair.of(x.getEmployeeId(), x.getDate()));
-						if(temp != null ) {
-							if(x.getPermissionRelease() == ReleasedAtr.CAN_IMPLEMENT && temp == ApprovalStatusForEmployee.UNAPPROVED) {
-								x.setPermission(true, true);
-							}else {
-								x.setPermission(true, false);
+						if (mapApprovalStatus == null) {
+							x.setPermission(true, true);
+						} else {
+							val temp = mapApprovalStatus.get(Pair.of(x.getEmployeeId(), x.getDate()));
+							if (temp != null) {
+								if (x.getPermissionRelease() == ReleasedAtr.CAN_IMPLEMENT
+										&& temp == ApprovalStatusForEmployee.UNAPPROVED) {
+									x.setPermission(true, true);
+								} else {
+									x.setPermission(true, false);
+								}
 							}
 						}
 					});
