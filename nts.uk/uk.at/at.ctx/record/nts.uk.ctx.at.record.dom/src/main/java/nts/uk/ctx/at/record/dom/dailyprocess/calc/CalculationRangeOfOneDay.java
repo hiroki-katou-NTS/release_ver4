@@ -188,6 +188,7 @@ public class CalculationRangeOfOneDay {
 	 * @param statutorySet
 	 * @param prioritySet
 	 * @param fixWoSetting 
+	 * @param ootsukaIWFlag 
 	 * @param integrationOfDaily 
 	 */
 	public void createWithinWorkTimeSheet(WorkingSystem workingSystem, WorkTimeMethodSet setMethod,
@@ -208,7 +209,7 @@ public class CalculationRangeOfOneDay {
     		WorkingConditionItem conditionItem,Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,
     		List<ShortWorkingTimeSheet> shortTimeSheets,WorkTimezoneShortTimeWorkSet workTimeShortTimeSet,
     		Optional<WorkInformation> beforeInfo, Optional<WorkInformation> afterInfo, List<EmTimeZoneSet> fixWoSetting,
-    		Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets) {
+    		Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets, boolean ootsukaIWFlag) {
 		/* 固定控除時間帯の作成 */
 		DeductionTimeSheet deductionTimeSheet = DeductionTimeSheet.createTimeSheetForFixBreakTime(
 				setMethod, clockManage, dailyGoOutSheet, this.oneDayOfRange, commonSet, attendanceLeavingWork,
@@ -230,7 +231,7 @@ public class CalculationRangeOfOneDay {
 				vacationClass, timevacationUseTimeOfDaily,  
 				siftCode, leaveEarly, leaveEarly, illegularAddSetting, 
 				flexAddSetting, regularAddSetting, holidayAddtionSet, commonSetting,conditionItem,predetermineTimeSetByPersonInfo,
-				beforeInfo,afterInfo,leaveLateSet,specificDateAttrSheets,workTimeDivision);
+				beforeInfo,afterInfo,leaveLateSet,specificDateAttrSheets,workTimeDivision,ootsukaIWFlag);
 	}
 
 	/**
@@ -275,6 +276,7 @@ public class CalculationRangeOfOneDay {
 	 * @param deductionTimeSheet
 	 *            控除時間帯
 	 * @param workTimeDivision 
+	 * @param ootsukaIWFlag 
 	 * @param integrationOfDaily 
 	 */
 	public void theDayOfWorkTimesLoop(WorkingSystem workingSystem, PredetermineTimeSetForCalc predetermineTimeSetForCalc,
@@ -292,7 +294,7 @@ public class CalculationRangeOfOneDay {
     		boolean late, boolean leaveEarly, WorkDeformedLaborAdditionSet illegularAddSetting, WorkFlexAdditionSet flexAddSetting, 
     		WorkRegularAdditionSet regularAddSetting, HolidayAddtionSet holidayAddtionSet,Optional<WorkTimezoneCommonSet> commonSetting,WorkingConditionItem conditionItem,
     		Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,Optional<WorkInformation> beforeInfo, Optional<WorkInformation> afterInfo,
-    		Optional<DeductLeaveEarly> deductLeaveEarly,Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets, WorkTimeDivision workTimeDivision) {
+    		Optional<DeductLeaveEarly> deductLeaveEarly,Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets, WorkTimeDivision workTimeDivision, boolean ootsukaIWFlag) {
 		if (workingSystem.isExcludedWorkingCalculate()) {
 			/* 計算対象外 */
 			return;
@@ -333,7 +335,7 @@ public class CalculationRangeOfOneDay {
 																				conditionItem,
 																				predetermineTimeSetByPersonInfo,
 																				deductLeaveEarly,
-																				specificDateAttrSheets);
+																				specificDateAttrSheets,ootsukaIWFlag);
 			if(withinWorkingTimeSheet.isPresent()) {
 				withinWorkingTimeSheet.get().getWithinWorkTimeFrame().addAll(createWithinWorkTimeSheet.getWithinWorkTimeFrame());
 			}
@@ -713,6 +715,7 @@ public class CalculationRangeOfOneDay {
 
 	 /**
 	 * フレ�?��スの時間帯作�?
+	 * @param ootsukaIWFlag 
 	 * @param integrationOfDaily 
 	 * @param integrationOfDaily 
 	 */
@@ -734,7 +737,7 @@ public class CalculationRangeOfOneDay {
             		WorkRegularAdditionSet regularAddSetting, HolidayAddtionSet holidayAddtionSet,Optional<WorkTimezoneCommonSet> commonSetting,WorkingConditionItem conditionItem,
             		Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,List<ShortWorkingTimeSheet> shortTimeSheets,
             		WorkTimezoneShortTimeWorkSet workTimeShortTimeSet,Optional<WorkInformation> beforeInfo, Optional<WorkInformation> afterInfo,
-            		List<EmTimeZoneSet> fixWoSetting,Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets){
+            		List<EmTimeZoneSet> fixWoSetting,Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets, boolean ootsukaIWFlag){
 
 		 //控除時間帯の作�?
 		 val deductionTimeSheet = provisionalDeterminationOfDeductionTimeSheet(goOutTimeSheetList,
@@ -755,7 +758,7 @@ public class CalculationRangeOfOneDay {
 					 deductionTimeSheet,  workTime,midNightTimeSheet,personalInfo,holidayCalcMethodSet,coreTimeSetting,dailyUnit,breakTimeList,
 					 vacationClass, timevacationUseTimeOfDaily, siftCode, 
 					  leaveEarly, leaveEarly, illegularAddSetting, flexAddSetting, regularAddSetting, holidayAddtionSet
-					 ,commonSetting,conditionItem,predetermineTimeSetByPersonInfo,beforeInfo,afterInfo,leaveLateSet,specificDateAttrSheets,workTimeDivision);
+					 ,commonSetting,conditionItem,predetermineTimeSetByPersonInfo,beforeInfo,afterInfo,leaveLateSet,specificDateAttrSheets,workTimeDivision,ootsukaIWFlag);
 		 /*コアタイ�?のセ�?��*/
 		 //this.withinWorkingTimeSheet.set(withinWorkingTimeSheet.get().createWithinFlexTimeSheet(flexWorkSetting.getCoreTimeSetting()));
 		 if(this.withinWorkingTimeSheet.isPresent())

@@ -143,6 +143,7 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 	 * @param timeVacationAdditionRemainingTime 
 	 * @param predetermineTimeForSet 
 	 * @param timeVacationAdditionRemainingTime 
+	 * @param ootsukaIWFlag 
 	 * @return 就業時間内時間帯
 	 */
 	public static WithinWorkTimeSheet createAsFixed(TimeLeavingWork timeLeavingWork,
@@ -173,7 +174,7 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 													Optional<WorkTimezoneCommonSet> commonSetting,WorkingConditionItem conditionItem,
 													Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,
 													Optional<DeductLeaveEarly> deductLeaveEarly,
-													Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets) {
+													Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets, boolean ootsukaIWFlag) {
 		
 		List<WithinWorkTimeFrame> timeFrames = new ArrayList<>();
 		List<TimeSheetOfDeductionItem> shortTimeSheets = new ArrayList<>();
@@ -234,7 +235,7 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 					 commonSetting,
 					 conditionItem,
 					 predetermineTimeSetByPersonInfo,
-					 deductLeaveEarly, specificDateAttrSheets
+					 deductLeaveEarly, specificDateAttrSheets,ootsukaIWFlag
 					 );
 			//短時間時間帯の取得
 			shortTimeSheets = toHaveShortTime(timeFrames,deductionTimeSheet);
@@ -263,6 +264,7 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 	 * @param workTimeCode 
 	 * @param preFlexTime 
 	 * @param timeVacationAdditionRemainingTime 
+	 * @param ootsukaIWFlag 
 	 * @param workType　勤務種類クラス
 	 * @param predetermineTimeSet 所定時間設定クラス
 	 * @param fixedWorkSetting  固定勤務設定クラス
@@ -301,7 +303,7 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 			Optional<WorkTimezoneCommonSet> commonSetting,WorkingConditionItem conditionItem,
 			Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,
 			Optional<DeductLeaveEarly> deductLeaveEarly,
-			Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets
+			Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets, boolean ootsukaIWFlag
 			) {
 		
 		val timeFrames = new ArrayList<WithinWorkTimeFrame>();
@@ -323,7 +325,8 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 																		 predetermineTimeForSet.getTimeSheets(workType.getDailyWork().decisionNeedPredTime(),workNo),
 																		 coreTimeSetting,breakTimeList,workType,predetermineTimeForSet,commonSetting, specificDateAttrSheets,
 																		 duplicateTimeSheet.getWorkingHoursTimeNo().v().intValue() == 1,
-																		 duplicateTimeSheet.getWorkingHoursTimeNo().v().intValue() == withinWorkTimeFrame.size()));
+																		 duplicateTimeSheet.getWorkingHoursTimeNo().v().intValue() == withinWorkTimeFrame.size(),
+																		 ootsukaIWFlag));
 		}
 		/*所定内割増時間の時間帯作成*/
 		return predetermineWithinPremiumTime(dailyUnit.getDailyTime(),predetermineTimeForSet.getAdditionSet().getPredTime().getPredetermineWorkTime(),timeFrames, 
