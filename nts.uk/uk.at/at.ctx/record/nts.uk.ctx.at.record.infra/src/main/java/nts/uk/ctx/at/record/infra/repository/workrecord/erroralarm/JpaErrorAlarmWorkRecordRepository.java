@@ -382,8 +382,15 @@ public class JpaErrorAlarmWorkRecordRepository extends JpaRepository implements 
 						return null;
 					}
 					
-					ErAlAttendanceItemCondition<V> atdItemConDomain = new ErAlAttendanceItemCondition<V>(comID, "", atdItemConNo, conditionAtr, useAtr == 1 ? true : false, conditionType);
-					atc.getLstErAlAtdItemCon().add(atdItemConDomain);
+					                    ErAlAttendanceItemCondition<V> atdItemConDomain = null;
+                    Optional<ErAlAttendanceItemCondition<?>> atdItemConDomainOpt = atc.getLstErAlAtdItemCon().stream().filter(atci -> atci.getTargetNO() == atdItemConNo).findFirst();
+                    if(atdItemConDomainOpt.isPresent()){
+                        atdItemConDomain = (ErAlAttendanceItemCondition<V>) atdItemConDomainOpt.get();
+                    } else {
+                        atdItemConDomain = new ErAlAttendanceItemCondition<V>(comID, "", atdItemConNo, conditionAtr, useAtr == 1 ? true : false, conditionType);
+                        atc.getLstErAlAtdItemCon().add(atdItemConDomain);
+                    }
+
 			        // Set Target
 			        if (conditionAtr == ConditionAtr.TIME_WITH_DAY.value && targetAtr == 2) {
 			            atdItemConDomain.setUncountableTarget(attendanceItemID);
