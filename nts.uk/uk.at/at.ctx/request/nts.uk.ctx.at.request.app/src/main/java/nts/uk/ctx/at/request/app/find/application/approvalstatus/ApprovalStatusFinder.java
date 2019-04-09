@@ -1,11 +1,13 @@
 package nts.uk.ctx.at.request.app.find.application.approvalstatus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -15,13 +17,14 @@ import javax.inject.Inject;
 import org.apache.logging.log4j.util.Strings;
 
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.i18n.I18NText;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
+import nts.gul.collection.CollectionUtil;
+import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.request.app.find.application.common.ApplicationDto_New;
 import nts.uk.ctx.at.request.app.find.setting.company.vacationapplicationsetting.HdAppSetDto;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
@@ -54,6 +57,10 @@ import nts.uk.ctx.at.request.dom.setting.company.request.applicationsetting.appt
 import nts.uk.ctx.at.shared.app.find.workrule.closure.dto.ApprovalComfirmDto;
 import nts.uk.ctx.at.shared.app.find.workrule.closure.dto.ClosureHistoryForComDto;
 import nts.uk.ctx.at.shared.app.find.workrule.closure.dto.ClosuresDto;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.WorkPlaceConfigImport;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.WorkplaceConfigAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.info.WorkplaceConfigInfoAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.info.WorkplaceHierarchyImport;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
@@ -90,6 +97,12 @@ public class ApprovalStatusFinder {
     
 	@Inject
 	private ApprovalStatusService approvalStatusSv;
+	
+	@Inject
+	private WorkplaceConfigAdapter configAdapter;
+	@Inject
+	private WorkplaceConfigInfoAdapter configInfoAdapter;
+	
 	
 	/**
 	 * アルゴリズム「承認状況本文起動」を実行する
@@ -278,6 +291,7 @@ public class ApprovalStatusFinder {
 		String companyId = AppContexts.user().companyId();
 		List<WorkplaceInfor> listWorkPlaceInfor = appStatus.getListWorkplace();
 		
+		
 		this.parallel.forEach(listWorkPlaceInfor, wkp -> {
 			// アルゴリズム「承認状況取得職場社員」を実行する
 			List<ApprovalStatusEmployeeOutput> listAppStatusEmp = appSttService.getApprovalStatusEmployee(wkp.getCode(),
@@ -287,8 +301,66 @@ public class ApprovalStatusFinder {
 			ApprovalSttAppOutput approvalSttApp = this.aggregateApprovalStatus.aggregate(companyId, wkp, listAppStatusEmp);
 			listAppSttApp.add(approvalSttApp);
 		});
+		//vì sử dụng parallel (bất đồng bộ) nên phải sắp xếp sau
+		// 「職場IDから階層コードを取得する」を実行する
+		List<String> wPIDs = listWorkPlaceInfor.stream().map(WorkplaceInfor::getCode).collect(Collectors.toList());
+		List<WorkplaceHierarchyImport> wpHis = GetHCodeByWorkPlaceID(companyId, wPIDs, GeneralDate.today());
+		// 取得した「職場ID、職場階層コード」を階層コード順に並び替える
+		List<ApprovalSttAppOutput> result = sortList(wpHis, listAppSttApp);
 
-		return listAppSttApp;
+		return result;
+	}
+
+	public List<ApprovalSttAppOutput> sortList(List<WorkplaceHierarchyImport> wpHis, List<ApprovalSttAppOutput> listAppSttApp) {
+		List<ApprovalSttAppOutput> result = new ArrayList<>();
+		List<WorkplaceHierarchyImport> sortedList = new ArrayList<>();
+		List<WorkplaceHierarchyImport> HCodeList = wpHis.stream()
+				.filter(x -> !StringUtil.isNullOrEmpty(x.getHierarchyCode(), false)).collect(Collectors.toList());
+		List<WorkplaceHierarchyImport> HCodeEmptyList = wpHis.stream()
+				.filter(x -> StringUtil.isNullOrEmpty(x.getHierarchyCode(), false)).collect(Collectors.toList());
+		HCodeList = HCodeList.stream().sorted(Comparator.comparing(WorkplaceHierarchyImport::getHierarchyCode))
+				.collect(Collectors.toList());
+		HCodeEmptyList = HCodeEmptyList.stream().sorted(Comparator.comparing(WorkplaceHierarchyImport::getWorkplaceId))
+				.collect(Collectors.toList());
+		sortedList.addAll(HCodeList);
+		sortedList.addAll(HCodeEmptyList);
+		
+		sortedList.forEach(x -> {
+			listAppSttApp.stream().filter(appStt -> appStt.getWorkplaceId().equals(x.getWorkplaceId())).findFirst()
+					.ifPresent(item -> {
+						result.add(new ApprovalSttAppOutput(item.getWorkplaceId(), item.getWorkplaceName(),
+								item.isEnabled(), item.isChecked(), item.getNumOfApp(), item.getApprovedNumOfCase(),
+								item.getNumOfUnreflected(), item.getNumOfUnapproval(), item.getNumOfDenials()));
+					});
+		});
+		
+		return result;
+	}
+
+	/**
+	 * 職場IDから階層コードを取得する
+	 * @param baseDate 
+	 * @param wPIDs 
+	 * @param companyId 
+	 * @return 
+	 */
+	public List<WorkplaceHierarchyImport> GetHCodeByWorkPlaceID(String companyId, List<String> wPIDs,
+			GeneralDate baseDate) {
+
+		List<WorkplaceHierarchyImport> result = new ArrayList<>();
+		// ドメインモデル「職場構成」を取得する
+		Optional<WorkPlaceConfigImport> configOpt = this.configAdapter.findByBaseDate(companyId, baseDate);
+		if (configOpt.isPresent()) {
+			// ドメインモデル「職場構成情報」を取得する
+			WorkPlaceConfigImport config = configOpt.get();
+			if (!CollectionUtil.isEmpty(config.getWkpConfigHistory())) {
+				String historyId = config.getWkpConfigHistory().get(0).getHistoryId();
+				result = this.configInfoAdapter.findByHistoryIdsAndWplIds(companyId, Arrays.asList(historyId), wPIDs)
+						.stream().flatMap(x -> x.getLstWkpHierarchy().stream()).collect(Collectors.toList());
+			}
+		}
+		return result;
+
 	}
 
 	/**
