@@ -801,6 +801,31 @@ public class MonthlyPerformanceCorrectionProcessor {
 			MonthlyModifyResult rowData = employeeDataMap.get(employeeId);
 			if (rowData == null) continue; //neu khong co data cua nhan vien thi bo qua
 			
+			String lockStatus = lockStatusMap.isEmpty() || !lockStatusMap.containsKey(employee.getId()) || param.getInitMenuMode() == 1 ? ""
+					: lockStatusMap.get(employee.getId()).getLockStatusString();
+			
+			
+			// set dailyConfirm
+			MonthlyPerformaceLockStatus monthlyPerformaceLockStatus = lockStatusMap.get(employeeId);
+			String dailyConfirm = null;
+			List<String> listCss = new ArrayList<>();
+			listCss.add("daily-confirm-color");
+			if (monthlyPerformaceLockStatus != null) {
+				if (monthlyPerformaceLockStatus.getMonthlyResultConfirm() == LockStatus.LOCK) {
+					dailyConfirm = "未";
+					// mau cua kiban chua dap ung duoc nen dang tu set mau
+					// set color for cell dailyConfirm
+					listCss.add("color-cell-un-approved");
+					screenDto.setListStateCell("dailyconfirm", employeeId, listCss);
+				} else {
+					dailyConfirm = "済";
+					// mau cua kiban chua dap ung duoc nen dang tu set mau
+					// set color for cell dailyConfirm
+					listCss.add("color-cell-approved");
+					screenDto.setListStateCell("dailyconfirm", employeeId, listCss);
+				}
+			}
+			
 			// check true false identify
 			//boolean identify = listConfirmationMonth.stream().filter(x->x.getEmployeeId().equals(employeeId)).findFirst().isPresent() ;
 			boolean identify = false;
@@ -905,37 +930,9 @@ public class MonthlyPerformanceCorrectionProcessor {
 				if(!checkExist) {
 					lstCellState.add(new MPCellStateDto(employeeId, "identify", Arrays.asList(STATE_DISABLE)));
 				}
-			}
-			
-			// set dailyConfirm
-			MonthlyPerformaceLockStatus monthlyPerformaceLockStatus = lockStatusMap.get(employeeId);
-			String dailyConfirm = null;
-			List<String> listCss = new ArrayList<>();
-			listCss.add("daily-confirm-color");
-			if (monthlyPerformaceLockStatus != null) {
-				if (monthlyPerformaceLockStatus.getMonthlyResultConfirm() == LockStatus.LOCK) {
-					dailyConfirm = "未";
-					// mau cua kiban chua dap ung duoc nen dang tu set mau
-					// set color for cell dailyConfirm
-					listCss.add("color-cell-un-approved");
-					screenDto.setListStateCell("dailyconfirm", employeeId, listCss);
-				} else {
-					dailyConfirm = "済";
-					// mau cua kiban chua dap ung duoc nen dang tu set mau
-					// set color for cell dailyConfirm
-					listCss.add("color-cell-approved");
-					screenDto.setListStateCell("dailyconfirm", employeeId, listCss);
-				}
-			}
-			String lockStatusState = "";
-			if(monthlyPerformaceLockStatus == null || param.getInitMenuMode() == 1) {
-				lockStatusState = "";
-			}else {
-				monthlyPerformaceLockStatus.setMonthlyResultConfirm((identify || monthlyPerformaceLockStatus.getMonthlyResultConfirm() == LockStatus.LOCK) ? LockStatus.LOCK:LockStatus.UNLOCK);
-				monthlyPerformaceLockStatus.setMonthlyResultApprova(approve ? LockStatus.LOCK:LockStatus.UNLOCK);
-				lockStatusState = monthlyPerformaceLockStatus.getLockStatusString();
-			}
-			MPDataDto mpdata = new MPDataDto(employeeId, lockStatusState, "", employee.getCode(), employee.getBusinessName(),
+			}	
+			   
+			MPDataDto mpdata = new MPDataDto(employeeId, lockStatus, "", employee.getCode(), employee.getBusinessName(),
 					employeeId, "", identify, approve, dailyConfirm, "");
 			// lock check box1 identify
 //			if (!employeeIdLogin.equals(employeeId) || param.getInitMenuMode() == 2 
@@ -947,8 +944,8 @@ public class MonthlyPerformanceCorrectionProcessor {
 			// Setting data for dynamic column
 			List<EditStateOfMonthlyPerformanceDto> newList = editStateOfMonthlyPerformanceDtos.stream()
 					.filter(item -> item.getEmployeeId().equals(employeeId)).collect(Collectors.toList());
-			String lockStatus = lockStatusState;
 			if (null != rowData) {
+				mpdata.setVersion(rowData.getVersion());
 				if (null != rowData.getItems()) {
 					rowData.getItems().forEach(item -> {
 						// Cell Data
