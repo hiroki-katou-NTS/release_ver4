@@ -185,7 +185,6 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 				// 承認者IDリストをクリアする（初期化）(clear thong tin cua list ID nguoi xac nhan)
 				
 				if(approver.getApprovalAtr().equals(ApprovalAtr.PERSON)){
-					System.out.println("fix build 04/09/2018");
 					StatusOfEmployment statusOfEmployment = employeeAdapter.getStatusOfEmployment(approver.getEmployeeId(), baseDate).getStatusOfEmployment();
 					if((statusOfEmployment==StatusOfEmployment.RETIREMENT)||
 							(statusOfEmployment==StatusOfEmployment.LEAVE_OF_ABSENCE)||
