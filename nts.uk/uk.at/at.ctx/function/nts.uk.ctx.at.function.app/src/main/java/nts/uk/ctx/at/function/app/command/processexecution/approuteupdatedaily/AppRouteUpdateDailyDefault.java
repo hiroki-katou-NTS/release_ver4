@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.task.parallel.ManagedParallelWithContext.ControlOption;
 import nts.arc.time.GeneralDate;
@@ -36,7 +37,9 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.UseClassification;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+
 @Stateless
+@Slf4j
 public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 
 	@Inject
@@ -91,6 +94,9 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 		
 		/**ドメインモデル「就業締め日」を取得する(lấy thông tin domain ル「就業締め日」)*/
 		List<Closure> listClosure = closureRepository.findAllActive(procExec.getCompanyId(),UseClassification.UseClass_Use);
+		
+		log.info("承認ルート更新 START PARALLEL (締めループ数:" + listClosure.size() + ")");
+		long startTime = System.currentTimeMillis();
 		
 		List<CheckCreateperApprovalClosure> listCheckCreateApp = new ArrayList<>();
 		//取得した就業締め日の数(so du lieu 就業締め日 lay duoc)　＝　回数
@@ -270,7 +276,10 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 			listCheckCreateApp.add(new CheckCreateperApprovalClosure(itemClosure.getClosureId().value,check));
 		
 		
-				});
+		});
+		
+
+		log.info("承認ルート更新 END PARALLEL: " + ((System.currentTimeMillis() - startTime) / 1000) + "秒");
 		
 		boolean checkError = false;
 		/*終了状態で「エラーあり」が返ってきたか確認する*/

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
@@ -17,6 +18,7 @@ import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
+@Slf4j
 public class CreateperApprovalDailyDefault implements CreateperApprovalDailyService {
 
 	@Inject
@@ -39,7 +41,10 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 				List<AffCompanyHistImport> listAffCompanyHistImport = syCompanyRecordAdapter
 						.getAffCompanyHistByEmployee(employeeIDs,
 								new DatePeriod(startDateClosure, GeneralDate.today()));
+				int i = 0;
 				for (String employeeID : employeeIDs) {
+					log.info("承認ルート更新 実行中: " + i + " (" + employeeID + ")");
+					i++;
 					// 年月日　←「システム日付の前日」
 					GeneralDate ymd = GeneralDate.today().addDays(-1);
 					if (createNewEmp == 1) {	
