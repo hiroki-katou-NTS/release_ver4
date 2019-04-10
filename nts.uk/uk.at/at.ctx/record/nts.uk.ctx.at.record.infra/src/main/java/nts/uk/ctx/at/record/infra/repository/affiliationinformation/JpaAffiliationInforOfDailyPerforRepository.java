@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -25,7 +24,6 @@ import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPerfor;
 import nts.uk.ctx.at.record.dom.affiliationinformation.primitivevalue.ClassificationCode;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.AffiliationInforOfDailyPerforRepository;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.affiliationinformation.KrcdtDaiAffiliationInf;
 import nts.uk.ctx.at.record.infra.entity.affiliationinformation.KrcdtDaiAffiliationInfPK;
 import nts.uk.ctx.at.shared.dom.bonuspay.primitives.BonusPaySettingCode;
@@ -38,9 +36,6 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 		implements AffiliationInforOfDailyPerforRepository {
 
 //	private static final String REMOVE_BY_EMPLOYEE;
-
-	@Inject
-	private WorkInformationRepository workInfo;
 	
 	private static final String FIND_BY_KEY;
 
@@ -67,7 +62,6 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 		String sqlQuery = "Delete From KRCDT_DAI_AFFILIATION_INF Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + ymd + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
-			this.workInfo.dirtying(employeeId, ymd);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -93,7 +87,6 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 					+ bonusPaycode + " )";
 			Statement statementI = con.createStatement();
 			statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
-			this.workInfo.dirtying(affiliationInforOfDailyPerfor.getEmployeeId(), affiliationInforOfDailyPerfor.getYmd());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -155,7 +148,6 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 				+ domain.getEmployeeId() + "' AND YMD = '" + domain.getYmd() + "'";
 		try {
 				con.createStatement().executeUpdate(JDBCUtil.toUpdateWithCommonField(updateTableSQL));
-				this.workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

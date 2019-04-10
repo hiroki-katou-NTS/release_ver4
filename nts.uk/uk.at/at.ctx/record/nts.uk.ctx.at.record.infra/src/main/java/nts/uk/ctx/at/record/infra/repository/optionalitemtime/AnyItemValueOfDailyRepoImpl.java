@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -31,7 +30,6 @@ import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemTimes;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValue;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.daily.anyitem.KrcdtDayAnyItemValueMerge;
 import nts.uk.ctx.at.record.infra.entity.daily.time.KrcdtDayTimePK;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -40,9 +38,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyItemValueOfDailyRepo {
 	
 	private static final String REMOVE_BY_EMPLOYEE;
-	
-	@Inject
-	private WorkInformationRepository workInfo;
 	
 	static {
 		StringBuilder builderString = new StringBuilder();
@@ -178,7 +173,6 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 			entity.clearAllValues();
 			entity.toEntityAnyItemValueOfDaily(domain);
 		}
-		workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 	}
 
 	@Override
@@ -205,7 +199,6 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 		else {
 			entity.toEntityAnyItemValueOfDaily(domain);
 		}
-		workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 	}
 	
 	@Override
@@ -221,7 +214,6 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 			statement.setString(1, employeeId);
 			statement.setDate(2, Date.valueOf(baseDate.localDate()));
 			statement.executeUpdate();
-			workInfo.dirtying(employeeId, baseDate);
 		}
 	}
 	
@@ -231,7 +223,6 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 				.setParameter("employeeId", employeeId)
 				.setParameter("processingDate", processingDate)
 				.executeUpdate();
-		workInfo.dirtying(employeeId, processingDate);
 		this.getEntityManager().flush();
 	}
 
@@ -244,7 +235,6 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 		String sqlQuery = "Delete From KRCDT_DAY_ANYITEMVALUE_MERGE Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + ymd + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
-			workInfo.dirtying(employeeId, ymd);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

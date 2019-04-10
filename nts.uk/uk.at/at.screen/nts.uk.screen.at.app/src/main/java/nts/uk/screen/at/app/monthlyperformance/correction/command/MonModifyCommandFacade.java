@@ -12,7 +12,9 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.OptimisticLockException;
 
+import nts.arc.i18n.I18NText;
 import nts.arc.task.AsyncTask;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -21,10 +23,13 @@ import nts.uk.ctx.at.record.app.find.monthly.root.MonthlyRecordWorkDto;
 import nts.uk.ctx.at.record.app.find.monthly.root.common.ClosureDateDto;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.EmpPerformMonthParamImport;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.RegisterDayApproval;
+import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.IntegrationOfMonthly;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.algorithm.ParamRegisterConfirmMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.algorithm.RegisterConfirmationMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.algorithm.SelfConfirm;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentityProcessUseSetRepository;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil.AttendanceItemType;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
@@ -65,7 +70,23 @@ public class MonModifyCommandFacade {
 	@Inject
 	private RegisterDayApproval registerDayApproval;
 	
+	@Inject
+	private TimeOfMonthlyRepository timeOfMonth;
+
+	@Inject
+	private IdentityProcessUseSetRepository identityProcessUseSetRepository;
+	
 	public Map<Integer, List<MPItemParent>> insertItemDomain(MPItemParent dataParent) {
+		YearMonth ym = new YearMonth(dataParent.getYearMonth());
+		
+		dataParent.getMPItemDetails().stream().forEach(d -> {
+			long dbVer = timeOfMonth.getVer(d.getEmployeeId(), ym, dataParent.getClosureId(), 
+					dataParent.getClosureDate().getClosureDay(), dataParent.getClosureDate().getLastDayOfMonth());
+			if(dbVer != d.getVersion()){
+				throw new OptimisticLockException(I18NText.getText("Msg_1528"));
+			}
+		});
+		
 		Map<String, List<MPItemDetail>> mapItemDetail = dataParent.getMPItemDetails().stream()
 				.collect(Collectors.groupingBy(x -> x.getEmployeeId()));
 		List<MonthlyModifyQuery> listQuery = new ArrayList<>();
@@ -100,24 +121,9 @@ public class MonModifyCommandFacade {
 		});
 		
 		// dang ki xac nhan ban than
-		this.insertSign(dataParent);
+		this.insertSign(dataParent, ym);
 		
-		List<EmpPerformMonthParamImport> listRegister = new ArrayList<>();
-		List<EmpPerformMonthParamImport> listRemove = new ArrayList<>();
-		for(MPItemCheckBox mpi :dataParent.getDataCheckApproval()) { //loc trang thai approve de dang ki
-			EmpPerformMonthParamImport p = new EmpPerformMonthParamImport(new YearMonth(dataParent.getYearMonth()), dataParent.getClosureId(),
-					dataParent.getClosureDate().toDomain(), dataParent.getEndDate(), mpi.getEmployeeId());
-			if(mpi.isValue()) {
-				listRegister.add(p);
-			}else {
-				listRemove.add(p);
-			}
-		}
-		
-		// remove approval	- no. 529	
-		this.removeMonApproval(listRemove);
-		// insert approval - no. 528
-		this.insertApproval(listRegister);
+		approval(dataParent, ym);
 		
 		// add correction log
 		ExecutorService executorService = Executors.newFixedThreadPool(1);
@@ -130,13 +136,38 @@ public class MonModifyCommandFacade {
 		executorService.submit(task);
 		return Collections.emptyMap();
 	}
+
+	private void approval(MPItemParent dataParent, YearMonth ym) {
+		
+		List<EmpPerformMonthParamImport> listRegister = new ArrayList<>();
+		List<EmpPerformMonthParamImport> listRemove = new ArrayList<>();
+		for(MPItemCheckBox mpi :dataParent.getDataCheckApproval()) { //loc trang thai approve de dang ki
+			EmpPerformMonthParamImport p = new EmpPerformMonthParamImport(ym, dataParent.getClosureId(),
+					dataParent.getClosureDate().toDomain(), dataParent.getEndDate(), mpi.getEmployeeId());
+			if(mpi.isValue()) {
+				listRegister.add(p);
+			}else {
+				listRemove.add(p);
+			}
+			timeOfMonth.verShouldUp(mpi.getEmployeeId(), ym, dataParent.getClosureId(), 
+									dataParent.getClosureDate().getClosureDay(),
+									dataParent.getClosureDate().getLastDayOfMonth());
+		}
+		// remove approval	- no. 529	
+		this.removeMonApproval(listRemove);
+		// insert approval - no. 528
+		this.insertApproval(listRegister);
+	}
 	
-	private void insertSign(MPItemParent mPItemParent) {
+	private void insertSign(MPItemParent mPItemParent, YearMonth ym) {
 		List<MPItemCheckBox> dataCheckSign = mPItemParent.getDataCheckSign();
 		if(dataCheckSign.isEmpty()) return;
+		IdentityProcessUseSet identity = identityProcessUseSetRepository.findByKey(AppContexts.user().companyId()).orElse(null);
+		if(!identity.isUseIdentityOfMonth()){
+			return;
+		}
 		List<SelfConfirm> selfConfirm = new ArrayList<>();
 		ClosureDateDto closureDate = mPItemParent.getClosureDate();
-		YearMonth ym = new YearMonth(mPItemParent.getYearMonth());
 		dataCheckSign.stream().forEach(x -> {
 			selfConfirm.add(new SelfConfirm(x.getEmployeeId(), x.isValue()));
 		});
@@ -145,6 +176,12 @@ public class MonModifyCommandFacade {
 						closureDate.getLastDayOfMonth()), GeneralDate.today());
 		
 		registerConfirmationMonth.registerConfirmationMonth(param);
+		dataCheckSign.stream().forEach(x -> {
+			timeOfMonth.verShouldUp(x.getEmployeeId(), param.getYearMonth(), param.getClosureId(), 
+					param.getClosureDate().getClosureDay().v(),
+					param.getClosureDate().getLastDayOfMonth());
+		});
+		
 	}
 
 //	private void insertApproval(List<MPItemCheckBox> dataCheckApproval) {

@@ -33,35 +33,13 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 		implements TemporaryTimeOfDailyPerformanceRepository {
-
-//	private static final String REMOVE_BY_EMPLOYEE;
-//	
-//	private static final String REMOVE_TIME_LEAVING_WORK;
 	
 	private static final String DEL_BY_LIST_KEY;
 
 	private static final String FIND_BY_KEY;
-	
-	@Inject
-	private WorkInformationRepository workInfo;
 
 	static {
 		StringBuilder builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcdtDaiTemporaryTime a ");
-//		builderString.append("WHERE a.krcdtDaiTemporaryTimePK.employeeId = :employeeId ");
-//		builderString.append("AND a.krcdtDaiTemporaryTimePK.ymd = :ymd ");
-//		REMOVE_BY_EMPLOYEE = builderString.toString();
-//		
-//		builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcdtTimeLeavingWork a ");
-//		builderString.append("WHERE a.krcdtTimeLeavingWorkPK.employeeId = :employeeId ");
-//		builderString.append("AND a.krcdtTimeLeavingWorkPK.ymd = :ymd ");
-//		builderString.append("AND a.krcdtTimeLeavingWorkPK.timeLeavingType = :timeLeavingType ");
-//		REMOVE_TIME_LEAVING_WORK = builderString.toString();
-		
-		builderString = new StringBuilder();
 		builderString.append("DELETE ");
 		builderString.append("FROM KrcdtDaiTemporaryTime a ");
 		builderString.append("WHERE a.krcdtDaiTemporaryTimePK.employeeId IN :employeeIds ");
@@ -86,7 +64,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
 			con.createStatement().executeUpdate(daiLeavingWorkQuery);
-			workInfo.dirtying(employeeId, ymd);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -96,19 +73,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 //		this.getEntityManager().createQuery(REMOVE_BY_EMPLOYEE).setParameter("employeeId", employeeId)
 //				.setParameter("ymd", ymd).executeUpdate();
 //		this.getEntityManager().flush();
-	}
-
-	@Override
-	public void deleteByListEmployeeId(List<String> employeeIds, List<GeneralDate> ymds) {
-		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstEmpIds -> {
-			CollectionUtil.split(ymds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstYMD -> {
-				this.getEntityManager().createQuery(DEL_BY_LIST_KEY)
-					.setParameter("employeeIds", lstEmpIds)
-					.setParameter("processingYmds", lstYMD).executeUpdate();	
-			});
-		});
-		workInfo.dirtying(employeeIds, ymds);
-		this.getEntityManager().flush();
 	}
 
 	@Override
@@ -198,7 +162,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
  		if(!timeWorks.isEmpty()){
  			this.commandProxy().updateAll(krcdtDaiTemporaryTime.timeLeavingWorks);
  		}
- 		workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		this.getEntityManager().flush();
 	 	
 	}
@@ -221,7 +184,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 			return;
 		}
 		this.commandProxy().insert(KrcdtDaiTemporaryTime.toEntity(temporaryTimeOfDailyPerformance));
- 		workInfo.dirtying(temporaryTimeOfDailyPerformance.getEmployeeId(), temporaryTimeOfDailyPerformance.getYmd());
 		this.getEntityManager().flush();
 	}
 
@@ -230,7 +192,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 		KrcdtDaiTemporaryTime entity = KrcdtDaiTemporaryTime.toEntity(temporaryTime);
 		commandProxy().insert(entity);
 		commandProxy().insertAll(entity.timeLeavingWorks);
- 		workInfo.dirtying(temporaryTime.getEmployeeId(), temporaryTime.getYmd());
 	}
 
 	@Override

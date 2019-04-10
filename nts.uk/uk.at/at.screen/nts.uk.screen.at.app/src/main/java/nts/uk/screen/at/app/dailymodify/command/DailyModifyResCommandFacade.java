@@ -15,11 +15,13 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.val;
+import nts.arc.i18n.I18NText;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
@@ -34,6 +36,7 @@ import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerforma
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.ContentApproval;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.ParamDayApproval;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.RegisterDayApproval;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.daily.itemvalue.DailyItemValue;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
@@ -48,6 +51,7 @@ import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
 import nts.uk.ctx.at.record.dom.service.TimeOffRemainErrorInfor;
 import nts.uk.ctx.at.record.dom.service.TimeOffRemainErrorInputParam;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.ParamIdentityConfirmDay;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.RegisterIdentityConfirmDay;
@@ -146,6 +150,12 @@ public class DailyModifyResCommandFacade {
 	
 	@Inject
 	private AnyItemValueOfDailyRepo anyItemValueOfDailyRepo;
+	
+	@Inject
+	private DailyRecordTransactionService dailyTransaction;
+	
+	@Inject
+	private WorkInformationRepository workInfo;
 
 	public RCDailyCorrectionResult handleUpdate(List<DailyRecordDto> dtoOlds,
 			List<DailyRecordDto> dtoNews, List<DailyRecordWorkCommand> commandNew, List<DailyRecordWorkCommand> commandOld, List<DailyItemValue> dailyItems, UpdateMonthDailyParam month, int mode,
@@ -265,6 +275,8 @@ public class DailyModifyResCommandFacade {
 
 	public DataResultAfterIU insertItemDomain(DPItemParent dataParent) {
 		//Map<Integer, List<DPItemValue>> resultError = new HashMap<>();
+		
+		
 		Map<Integer, List<DPItemValue>> resultErrorMonth = new HashMap<>();
 		DataResultAfterIU dataResultAfterIU = new DataResultAfterIU();
 		Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> lstResultReturnDailyError = new HashMap<>();
@@ -329,6 +341,13 @@ public class DailyModifyResCommandFacade {
 		List<DailyRecordDto> dailyOlds = new ArrayList<>(), dailyEdits = new ArrayList<>();
 
 		processDto(dailyOlds, dailyEdits, dataParent, querys, mapSidDate, queryNotChanges);
+		
+		dailyEdits.stream().forEach(dt -> {
+			long dbVer = workInfo.getVer(dt.employeeId(), dt.workingDate());
+			if(dbVer != dt.getWorkInfo().getVersion()){
+				throw new OptimisticLockException(I18NText.getText("Msg_1528"));
+			}
+		});
 
 		List<DailyModifyResult> resultOlds = AttendanceItemUtil.toItemValues(dailyOlds).entrySet().stream()
 				.map(dto -> DailyModifyResult.builder().items(dto.getValue()).employeeId(dto.getKey().getEmployeeId())
@@ -432,6 +451,7 @@ public class DailyModifyResCommandFacade {
 							d.getAnyItemValue().ifPresent(ai -> {
 								anyItemValueOfDailyRepo.persistAndUpdate(ai);
 							});
+							dailyTransaction.updated(d.getWorkInformation().getEmployeeId(), d.getWorkInformation().getYmd());
 						});
 			}
 			dataResultAfterIU.setShowErrorDialog(null);
@@ -637,12 +657,12 @@ public class DailyModifyResCommandFacade {
 		return querys;
 	}
 
-	public void insertSign(List<DPItemCheckBox> dataCheckSign) {
+	public boolean insertSign(List<DPItemCheckBox> dataCheckSign) {
 		if (dataCheckSign.isEmpty())
-			return;
+			return false;
 		ParamIdentityConfirmDay day = new ParamIdentityConfirmDay(AppContexts.user().employeeId(), dataCheckSign
 				.stream().map(x -> new SelfConfirmDay(x.getDate(), x.isValue())).collect(Collectors.toList()));
-		registerIdentityConfirmDay.registerIdentity(day);
+		return registerIdentityConfirmDay.registerIdentity(day);
 	}
 
 	public void insertApproval(List<DPItemCheckBox> dataCheckApproval) {

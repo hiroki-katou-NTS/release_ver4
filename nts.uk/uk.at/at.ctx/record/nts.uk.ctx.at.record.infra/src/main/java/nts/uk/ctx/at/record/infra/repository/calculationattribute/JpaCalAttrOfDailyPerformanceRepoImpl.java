@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,7 +25,6 @@ import nts.uk.ctx.at.record.dom.calculationattribute.AutoCalcSetOfDivergenceTime
 import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.calculationattribute.enums.DivergenceTimeAttr;
 import nts.uk.ctx.at.record.dom.calculationattribute.repo.CalAttrOfDailyPerformanceRepository;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.daily.calculationattribute.KrcstDaiCalculationSet;
 import nts.uk.ctx.at.record.infra.entity.daily.calculationattribute.KrcstDaiCalculationSetPK;
 import nts.uk.ctx.at.record.infra.entity.daily.calculationattribute.KrcstFlexAutoCalSet;
@@ -44,20 +42,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implements CalAttrOfDailyPerformanceRepository {
-
-//	private static final String REMOVE_BY_KEY;
-
-//	static {
-//		StringBuilder builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcstDaiCalculationSet a ");
-//		builderString.append("WHERE a.krcstDaiCalculationSetPK.sid = :employeeId ");
-//		builderString.append("AND a.krcstDaiCalculationSetPK.ymd = :ymd ");
-//		REMOVE_BY_KEY = builderString.toString();
-//	}
-	
-	@Inject
-	private WorkInformationRepository workInfo;
 
 	@Override
 	public CalAttrOfDailyPerformance find(String employeeId, GeneralDate baseDate) {
@@ -108,7 +92,6 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 			commandProxy().update(holidayCalc);
 			commandProxy().update(overtimeCalc);
 			commandProxy().update(calc);
-			this.workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 //			this.getEntityManager().flush();
 		}
 	}
@@ -144,7 +127,6 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 		commandProxy().insert(holidayCalc);
 		commandProxy().insert(overtimeCalc);
 		commandProxy().insert(calcSet);
-		this.workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 //		this.getEntityManager().flush();
 	}
 
@@ -304,7 +286,6 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 			this.queryProxy().find(StringUtils.rightPad(entity.overTimeWorkId, 36), KrcstOtAutoCalSet.class).ifPresent(e -> {
 						this.commandProxy().remove(e);
 					});
-			this.workInfo.dirtying(employeeId, baseDate);
 		});
 		
 //		Connection con = this.getEntityManager().unwrap(Connection.class);

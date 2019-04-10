@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -16,7 +15,6 @@ import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerform;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerformRepo;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.daily.remarks.KrcdtDayRemarksColumn;
 import nts.uk.ctx.at.record.infra.entity.daily.remarks.KrcdtDayRemarksColumnPK;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -24,9 +22,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 public class RemarksOfDailyPerformRepoImpl extends JpaRepository implements RemarksOfDailyPerformRepo {
 
-	@Inject
-	private WorkInformationRepository workInfo;
-	
 	@Override
 	public List<RemarksOfDailyPerform> getRemarks(String employeeId, GeneralDate workingDate) {
 		return findEntity(employeeId, workingDate)
@@ -91,7 +86,6 @@ public class RemarksOfDailyPerformRepoImpl extends JpaRepository implements Rema
 			KrcdtDayRemarksColumn c = remarks.get();
 			c.remarks = domain.getRemarks() == null ? null : domain.getRemarks().v();
 			commandProxy().update(c);
-			workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		} else {
 			add(domain);
 		}
@@ -100,7 +94,6 @@ public class RemarksOfDailyPerformRepoImpl extends JpaRepository implements Rema
 	@Override
 	public void add(RemarksOfDailyPerform domain) {
 		commandProxy().insert(KrcdtDayRemarksColumn.toEntity(domain));
-		workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 	}
 
 	@Override
@@ -108,7 +101,6 @@ public class RemarksOfDailyPerformRepoImpl extends JpaRepository implements Rema
 		List<KrcdtDayRemarksColumn> entities = findEntity(employeeId, workingDate).getList();
 		if(!entities.isEmpty()){
 			commandProxy().removeAll(entities);
-			workInfo.dirtying(employeeId, workingDate);
 		}
 	}
 

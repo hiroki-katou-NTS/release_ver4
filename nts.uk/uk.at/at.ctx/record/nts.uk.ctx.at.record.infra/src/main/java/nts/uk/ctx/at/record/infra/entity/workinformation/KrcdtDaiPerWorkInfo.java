@@ -72,7 +72,7 @@ public class KrcdtDaiPerWorkInfo extends UkJpaEntity implements Serializable {
 	@JoinColumn(nullable = true)
 	public List<KrcdtWorkScheduleTime> scheduleTimes;
 	
-	@Version
+//	@Version
 	@Column(name = "EXCLUS_VER")
 	public long version;
 

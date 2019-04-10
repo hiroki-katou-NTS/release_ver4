@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -24,7 +23,6 @@ import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.affiliationinformation.WorkTypeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.WorkTypeOfDailyPerforRepository;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.infra.entity.affiliationinformation.KrcdtDaiWorkType;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.infra.data.jdbc.JDBCUtil;
@@ -35,9 +33,6 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 	private static final String FIND_BY_KEY;
 
 //	private static final String REMOVE_BY_KEY;
-
-	@Inject
-	private WorkInformationRepository workInfo;
 	
 	static {
 		StringBuilder builderString = new StringBuilder();
@@ -62,7 +57,6 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 		String sqlQuery = "Delete From KRCDT_DAI_WORKTYPE Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + processingDate + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
-			workInfo.dirtying(employeeId, processingDate);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -83,7 +77,6 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 					+ workTypeOfDailyPerformance.getWorkTypeCode().v() + "' )";
 			Statement statementI = con.createStatement();
 			statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
-			workInfo.dirtying(workTypeOfDailyPerformance.getEmployeeId(), workTypeOfDailyPerformance.getDate());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -115,7 +108,6 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 					+ workTypeOfDailyPerformance.getEmployeeId() + "' AND YMD = '" + workTypeOfDailyPerformance.getDate() + "'";
 			Statement statementU = con.createStatement();
 			statementU.executeUpdate(JDBCUtil.toInsertWithCommonField(updateTableSQL));
-			workInfo.dirtying(workTypeOfDailyPerformance.getEmployeeId(), workTypeOfDailyPerformance.getDate());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

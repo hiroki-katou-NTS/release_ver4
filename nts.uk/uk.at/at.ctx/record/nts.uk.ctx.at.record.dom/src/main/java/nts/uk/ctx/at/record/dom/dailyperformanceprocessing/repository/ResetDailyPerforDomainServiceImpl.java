@@ -20,6 +20,7 @@ import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.OutingTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.AttendanceLeavingGateOfDaily;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.AttendanceLeavingGateOfDailyRepo;
@@ -49,7 +50,6 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enu
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
 import nts.uk.ctx.at.record.dom.worktime.TemporaryTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.worktime.primitivevalue.WorkTimes;
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemIdContainer;
@@ -141,6 +141,9 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 	
 	@Inject
 	private ReflectStampDomainService reflectStampDomainServiceImpl;
+	
+	@Inject
+	private DailyRecordTransactionService dailyTransaction;
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Override
@@ -184,6 +187,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							calAttrOfDailyPerformance = this.reflectWorkInforDomainService.reflectCalAttOfDaiPer(
 									companyID, employeeID, processingDate, affiliationInforOfDailyPerfor.get(),
 									periodInMasterList);
+							dailyTransaction.updated(employeeID, processingDate);
 
 						}
 						// 所属情報を再設定する
@@ -205,6 +209,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 									errMesInfos.add(errMessageInfo);
 								}
 							}
+							dailyTransaction.updated(employeeID, processingDate);
 						}
 						// 特定日を日別実績に反映する(Reflect 日別実績) 特定日を再設定する
 						if (executionLog.get().getDailyCreationSetInfo().get().getPartResetClassification().get()
@@ -218,6 +223,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							specificDateAttrOfDailyPerfor = reflectWorkInforDomainService.reflectSpecificDate(companyID,
 									employeeID, processingDate, affiliationInforOfDailyPerfor.get().getWplID(),
 									periodInMasterList);
+							dailyTransaction.updated(employeeID, processingDate);
 						}
 						// 短時間勤務時間帯を反映する(reflect 短時間勤務時間帯) 育児・介護短時間を再設定する
 						if (executionLog.get().getDailyCreationSetInfo().get().getPartResetClassification().get()
@@ -231,6 +237,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							// 日別実績の短時間勤務時間帯
 							this.shortTimeOfDailyPerformanceRepository.deleteByEmployeeIdAndDate(employeeID,
 									processingDate);
+							dailyTransaction.updated(employeeID, processingDate);
 
 							ReflectShortWorkingOutPut outPut = reflectShortWorkingTimeDomainService.reflect(
 									empCalAndSumExecLogID, companyID, processingDate, employeeID,
@@ -260,6 +267,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 									errMesInfos.add(errMessageInfo);
 								}
 							}
+							dailyTransaction.updated(employeeID, processingDate);
 						}
 						// 就業時間帯再設定(reSetting worktime)
 						if (executionLog.get().getDailyCreationSetInfo().get().getPartResetClassification().get()
@@ -270,6 +278,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							
 							this.editStateOfDailyPerformanceRepository.deleteByListItemId(employeeID, processingDate, attItemIds);
 							this.breakTimeOfDailyPerformanceRepository.deleteByBreakType(employeeID, processingDate, 0);
+							dailyTransaction.updated(employeeID, processingDate);
 							// ドメインモデル「日別実績の出退勤」を取得する
 							Optional<TimeLeavingOfDailyPerformance> timeLeavingOpt = this.timeLeavingOfDailyPerformanceRepository
 									.findByKey(employeeID, processingDate);
@@ -386,6 +395,7 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							this.attendanceLeavingGateOfDailyRepo.removeByKey(employeeID, processingDate);
 							// 日別実績のPCログオン情報
 							this.pcLogOnInfoOfDailyRepo.removeByKey(employeeID, processingDate);
+							dailyTransaction.updated(employeeID, processingDate);
 							
 							// Watanabe want to edit
 							WorkStyle workStyle = basicScheduleService

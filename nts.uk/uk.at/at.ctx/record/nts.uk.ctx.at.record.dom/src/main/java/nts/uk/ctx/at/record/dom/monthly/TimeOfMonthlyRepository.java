@@ -117,6 +117,9 @@ public interface TimeOfMonthlyRepository {
 	 * @param yearMonth 年月
 	 */
 	void removeByYearMonth(String employeeId, YearMonth yearMonth);
+	
+	void verShouldUp(String employeeId, YearMonth yearMonth, int closureId, int closureDate, boolean lastOfMonth);
+	long getVer(String employeeId, YearMonth yearMonth, int closureId, int closureDate, boolean lastOfMonth);
 
 	/**
 	 * 削除　（年月）

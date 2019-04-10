@@ -33,20 +33,6 @@ import nts.uk.shr.infra.data.jdbc.JDBCUtil;
 @Stateless
 public class AttendanceLeavingGateOfDailyRepoImpl extends JpaRepository implements AttendanceLeavingGateOfDailyRepo {
 
-//	private static final String REMOVE_BY_KEY;
-
-	@Inject
-	private WorkInformationRepository workInfo;
-	
-	static {
-//		StringBuilder builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcdtDayLeaveGate a ");
-//		builderString.append("WHERE a.id.sid = :employeeId ");
-//		builderString.append("AND a.id.ymd = :ymd ");
-//		REMOVE_BY_KEY = builderString.toString();
-	}
-
 	@Override
 	public Optional<AttendanceLeavingGateOfDaily> find(String employeeId, GeneralDate baseDate) {
 		List<AttendanceLeavingGate> alGate = findQuery(employeeId, baseDate).getList(c -> c.toDomain());
@@ -137,7 +123,6 @@ public class AttendanceLeavingGateOfDailyRepoImpl extends JpaRepository implemen
 					commandProxy().insert(KrcdtDayLeaveGate.from(domain.getEmployeeId(), domain.getYmd(), c));
 				}
 			});
-			this.workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		}
 	}
 
@@ -172,15 +157,9 @@ public class AttendanceLeavingGateOfDailyRepoImpl extends JpaRepository implemen
 						+ leaveTime + " )";
 				statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
 			}
-			this.workInfo.dirtying(domain.getEmployeeId(), domain.getYmd());
 		} catch (Exception e) {
 			
 		}
-	}
-
-	@Override
-	public void remove(AttendanceLeavingGateOfDaily domain) {
-		removeByKey(domain.getEmployeeId(), domain.getYmd());
 	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -191,7 +170,6 @@ public class AttendanceLeavingGateOfDailyRepoImpl extends JpaRepository implemen
 		String sqlQuery = "Delete From KRCDT_DAY_LEAVE_GATE Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + baseDate + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
-			this.workInfo.dirtying(employeeId, baseDate);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -201,8 +179,6 @@ public class AttendanceLeavingGateOfDailyRepoImpl extends JpaRepository implemen
 //		this.getEntityManager().flush();
 	}
 	
-
-
 	private TypedQueryWrapper<KrcdtDayLeaveGate> findQuery(String employeeId, GeneralDate baseDate){
 		StringBuilder builderString = new StringBuilder();
 		builderString.append("SELECT a ");

@@ -131,7 +131,7 @@ public class DailyCorrectEventServiceCenter {
 				});
 		//updated.getItems().addAll(Arrays.asList(a));
 		DailyRecordDto correctted = AttendanceItemUtil.fromItemValues(
-				DailyRecordDto.from(overtimeCorrectService.correct(domain, Optional.of(workType))), 
+				DailyRecordDto.from(overtimeCorrectService.correct(domain, Optional.of(workType), false)), 
 				updated.getItems());
 		correctedType.add(DailyDomainGroup.ATTENDANCE_TIME);
 		
@@ -309,7 +309,7 @@ public class DailyCorrectEventServiceCenter {
 			
 			/** TODO: need test (Tin!!!) */
 			IntegrationOfDaily domainForCorrect = dailyRecord.toDomain();
-			domainForCorrect = overtimeCorrectService.correct(domainForCorrect, Optional.ofNullable(workTypes.get(wi.getRecordInfo().getWorkTypeCode())));
+			domainForCorrect = overtimeCorrectService.correct(domainForCorrect, Optional.ofNullable(workTypes.get(wi.getRecordInfo().getWorkTypeCode())), false);
 			dailyRecord.getAttendanceTime().updateData(domainForCorrect.getAttendanceTimeOfDailyPerformance());
 			
 			return dailyRecord;

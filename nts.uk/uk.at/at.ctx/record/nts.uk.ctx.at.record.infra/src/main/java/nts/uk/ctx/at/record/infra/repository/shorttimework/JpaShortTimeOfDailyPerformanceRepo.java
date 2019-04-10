@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
@@ -24,7 +23,6 @@ import nts.uk.ctx.at.record.dom.shorttimework.ShortWorkingTimeSheet;
 import nts.uk.ctx.at.record.dom.shorttimework.enums.ChildCareAttribute;
 import nts.uk.ctx.at.record.dom.shorttimework.primitivevalue.ShortWorkTimFrameNo;
 import nts.uk.ctx.at.record.dom.shorttimework.repo.ShortTimeOfDailyPerformanceRepository;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 //import nts.uk.ctx.at.record.infra.entity.breakorgoout.KrcdtDaiBreakTime;
 import nts.uk.ctx.at.record.infra.entity.daily.shortwork.KrcdtDaiShortWorkTime;
 import nts.uk.ctx.at.record.infra.entity.daily.shortwork.KrcdtDaiShortWorkTimePK;
@@ -35,20 +33,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @Stateless
 public class JpaShortTimeOfDailyPerformanceRepo extends JpaRepository implements ShortTimeOfDailyPerformanceRepository {
-
-	@Inject
-	private WorkInformationRepository workInfo;
-	
-//	private static final String REMOVE_BY_EMPLOYEEID_AND_DATE;
-//
-//	static {
-//		StringBuilder builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcdtDaiShortWorkTime a ");
-//		builderString.append("WHERE a.krcdtDaiShortWorkTimePK.sid = :employeeId ");
-//		builderString.append("AND a.krcdtDaiShortWorkTimePK.ymd = :ymd ");
-//		REMOVE_BY_EMPLOYEEID_AND_DATE = builderString.toString();
-//	}
 
 	@Override
 	public Optional<ShortTimeOfDailyPerformance> find(String employeeId, GeneralDate ymd) {
@@ -83,7 +67,6 @@ public class JpaShortTimeOfDailyPerformanceRepo extends JpaRepository implements
 				commandProxy().remove(c);
 			});
 			commandProxy().updateAll(all);
-			workInfo.dirtying(shortWork.getEmployeeId(), shortWork.getYmd());
 			this.getEntityManager().flush();
 		} else {
 			this.deleteByEmployeeIdAndDate(shortWork.getEmployeeId(), shortWork.getYmd());
@@ -95,7 +78,6 @@ public class JpaShortTimeOfDailyPerformanceRepo extends JpaRepository implements
 		List<KrcdtDaiShortWorkTime> entities = shortWork.getShortWorkingTimeSheets().stream()
 				.map(c -> newEntities(shortWork.getEmployeeId(), shortWork.getYmd(), c)).collect(Collectors.toList());
 		commandProxy().insertAll(entities);
-		workInfo.dirtying(shortWork.getEmployeeId(), shortWork.getYmd());
 		this.getEntityManager().flush();
 	}
 
@@ -147,7 +129,6 @@ public class JpaShortTimeOfDailyPerformanceRepo extends JpaRepository implements
 		String sqlQuery = "Delete From KRCDT_DAI_SHORTTIME_TS Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + ymd + "'" ;
 		try {
 			con.createStatement().executeUpdate(sqlQuery);
-			workInfo.dirtying(employeeId, ymd);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
