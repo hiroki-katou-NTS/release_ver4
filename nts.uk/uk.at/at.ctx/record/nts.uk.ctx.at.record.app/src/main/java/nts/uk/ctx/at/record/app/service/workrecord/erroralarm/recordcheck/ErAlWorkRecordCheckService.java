@@ -227,15 +227,17 @@ public class ErAlWorkRecordCheckService {
 	private List<ErrorRecord> checkWithPeriod(DatePeriod workingDate, Collection<String> employeeIds,
 			List<DailyRecordDto> record, List<ErrorAlarmCondition> checkConditions, 
 			BiFunction<List<DailyRecordDto>, ErrorAlarmCondition, ErrorAlarmCondition> beforeCheck) {
-		return workingDate.datesBetween().stream().map(current -> {
-			List<DailyRecordDto> cdRecors = record.stream().filter(r -> r.workingDate().equals(current)).collect(Collectors.toList());
-			if (!cdRecors.isEmpty()) {
-				return checkConditions.stream().map(c -> {
-					ErrorAlarmCondition checkCondition = beforeCheck.apply(cdRecors, c);
-					return finalCheck(current, checkCondition, cdRecors, employeeIds);
-				}).flatMap(List::stream).collect(Collectors.toList());
-			}
-			return new ArrayList<ErrorRecord>();
+		return checkConditions.stream().map(c -> {
+			List<DailyRecordDto> cdRecords = new ArrayList<>(record);
+			ErrorAlarmCondition checkCondition = beforeCheck.apply(cdRecords, c);
+			List<ErrorRecord> errors = new ArrayList<>();
+			workingDate.datesBetween().stream().forEach(current -> {
+				List<DailyRecordDto> currentRecords = cdRecords.stream().filter(r -> r.workingDate().equals(current)).collect(Collectors.toList());
+				if (!currentRecords.isEmpty()) {
+					errors.addAll(finalCheck(current, checkCondition, currentRecords, employeeIds));
+				}
+			});
+			return errors;
 		}).flatMap(List::stream).collect(Collectors.toList());
 	}
 	

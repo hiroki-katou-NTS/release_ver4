@@ -103,7 +103,8 @@ public class ApplicationPubImpl implements ApplicationPub {
 				basicSchedules.addAll(scBasicScheduleAdapter.findByID(applicationExcessHoliday.stream().map(c -> c.getEmployeeID()).distinct().collect(Collectors.toList()), new DatePeriod(minD, maxD)));
 			}
 			for(Application_New app : applicationExcessHoliday){
-				if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
+				if((!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())) || 
+						app.getStartDate().get().equals(app.getEndDate().get())){
 					ApplicationExport applicationExport = new ApplicationExport();
 					applicationExport.setAppDate(app.getAppDate());
 					applicationExport.setAppType(app.getAppType().value);
@@ -151,7 +152,8 @@ public class ApplicationPubImpl implements ApplicationPub {
 				basicSchedules.addAll(scBasicScheduleAdapter.findByID(applicationHoliday.stream().map(c -> c.getEmployeeID()).distinct().collect(Collectors.toList()), new DatePeriod(minD, maxD)));
 			}
 			for(Application_New app : applicationHoliday){
-				if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
+				if((!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())) || 
+						app.getStartDate().get().equals(app.getEndDate().get())){
 					Optional<AppAbsence> optAppAbsence = apps.stream().filter(c -> c.getAppID().equals(app.getAppID())).findFirst();
 					ApplicationExport applicationExport = new ApplicationExport();
 					applicationExport.setAppDate(app.getAppDate());
@@ -206,7 +208,8 @@ public class ApplicationPubImpl implements ApplicationPub {
 				workTypes.addAll(workTypeRepo.getPossibleWorkTypeV2(companyID, basicSchedules.stream().map(c -> c.getWorkTypeCode()).distinct().collect(Collectors.toList())));
 			}
 			for(Application_New app : appWorkChangeLst){
-				if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
+				if((!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())) || 
+						app.getStartDate().get().equals(app.getEndDate().get())){
 					ApplicationExport applicationExport = new ApplicationExport();
 					applicationExport.setAppDate(app.getAppDate());
 					applicationExport.setAppType(app.getAppType().value);

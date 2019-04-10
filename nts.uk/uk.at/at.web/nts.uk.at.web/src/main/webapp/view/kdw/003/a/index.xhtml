@@ -69,9 +69,9 @@
                             data-bind="visible: showButton().available3, click: btnReCalculation_Click">#{i18n.getText('KDW003_12')}</button>
                         <button data-bind="click: employmentOk, visible:false">#{i18n.getText('KDW003_65')}</button>
                         <button
-                            data-bind="click: tighProcessShow, enable:indentityMonth().enableButton, visible: showButton().available9 &amp;&amp; indentityMonth().show26 &amp;&amp; !indentityMonth().hideAll">#{i18n.getText('KDW003_88')}</button>
+                            data-bind="click: tighProcessShow, enable:indentityMonth().enableButton, visible: showButton().available9() &amp;&amp; indentityMonth().show26 &amp;&amp; !indentityMonth().hideAll">#{i18n.getText('KDW003_88')}</button>
                         <button
-                            data-bind="click: tighProcessRelease, enable:indentityMonth().enableButton, visible: showButton().available9 &amp;&amp; !indentityMonth().show26 &amp;&amp; !indentityMonth().hideAll" >#{i18n.getText('KDW003_124')}</button>
+                            data-bind="click: tighProcessRelease, enable:indentityMonth().enableButton, visible: showButton().available9() &amp;&amp; !indentityMonth().show26 &amp;&amp; !indentityMonth().hideAll" >#{i18n.getText('KDW003_124')}</button>
                         <!-- 本人締め処理 -->
                         <button
                             data-bind="click : changeExtractionCondition, visible: showButton().available5">#{i18n.getText('KDW003_13')}</button>

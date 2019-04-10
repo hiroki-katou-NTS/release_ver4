@@ -95,7 +95,9 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 						holidayWorkPara.getBaseDate(), 
 						holidayWorkPara.getHolidayWorkPara().getNightTime(), 
 						true, daily);	
-			}			
+			}
+			//休憩時間を反映する
+			holidayWorkProcess.reflectBreakTimeFrame(holidayWorkPara, isPre, daily);			
 			attendanceTime.updateFlush(daily.getAttendanceTimeOfDailyPerformance().get());
 			
 			List<EditStateOfDailyPerformance> lstEditState = dailyReposiroty.findByKey(holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate());

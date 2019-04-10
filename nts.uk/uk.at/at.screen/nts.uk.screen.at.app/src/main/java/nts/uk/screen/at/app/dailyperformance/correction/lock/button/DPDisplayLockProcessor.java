@@ -165,30 +165,22 @@ public class DPDisplayLockProcessor {
 			// state check box sign
 			boolean disableSignApp = disableSignMap.containsKey(data.getEmployeeId() + "|" + data.getDate()) && disableSignMap.get(data.getEmployeeId() + "|" + data.getDate());
 			
-			if(dataSign == null || (!dataSign.isStatus() ? (!dataSign.notDisableForConfirm() ? true : disableSignApp) : !dataSign.notDisableForConfirm())){
-				result.setCellSate(data.getId(), DPText.LOCK_SIGN, DPText.STATE_DISABLE);
-			}
 			ApprovalStatusActualResult dataApproval = mapApprovalResults.get(Pair.of(data.getEmployeeId(), data.getDate()));
 			//set checkbox approval
 			data.setApproval(dataApproval == null ? false : mode == ScreenMode.NORMAL.value ? dataApproval.isStatusNormal() : dataApproval.isStatus());
-			if(dataApproval == null || (mode == ScreenMode.NORMAL.value ? !dataApproval.notDisableNormal() : !dataApproval.notDisableApproval())) {
-				result.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_DISABLE);
-			}
-			if(dataApproval == null) {
-				result.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_ERROR);
-				lstCellHideControl.add(new DPHideControlCell(data.getId(), DPText.LOCK_APPROVAL));
-			}
 			
 			ApproveRootStatusForEmpDto approvalCheckMonth = dpLock.getLockCheckMonth()
 					.get(data.getEmployeeId() + "|" + data.getDate());
 
 			process.lockDataCheckbox(sId, result, data, identityProcessDtoOpt, approvalUseSettingDtoOpt, mode, data.isApproval(), data.isSign());
-			boolean lockDaykWpl = false, lockHist = false, lockApprovalMonth = false, lockConfirmMonth = false;
+			boolean lockDaykWpl = false, lockDay = false, lockWork = false, lockHist = false, lockApprovalMonth = false, lockConfirmMonth = false;
 			if (param.isShowLock()) {
-				lockDaykWpl = process.checkLockAndSetState(dpLock.getLockDayAndWpl(), data);
+				lockDay = process.checkLockDay(dpLock.getLockDayAndWpl(), data);
+				lockWork = process.checkLockWork(dpLock.getLockDayAndWpl(), data);
 				lockHist = process.lockHist(dpLock.getLockHist(), data);
 				lockApprovalMonth = approvalCheckMonth == null ? false : approvalCheckMonth.isCheckApproval();
 				lockConfirmMonth = process.checkLockConfirmMonth(dpLock.getLockConfirmMonth(), data);
+				lockDaykWpl = lockDay || lockWork;
 				lockDaykWpl = process.lockAndDisable(result, data, mode, lockDaykWpl, dataApproval == null ? false : dataApproval.isStatusNormal(), lockHist,
 						data.isSign(), lockApprovalMonth, lockConfirmMonth);
 			} else {
@@ -206,7 +198,18 @@ public class DPDisplayLockProcessor {
 			if (optWorkInfoOfDailyPerformanceDto.isPresent()
 					&& optWorkInfoOfDailyPerformanceDto.get().getState() == CalculationState.No_Calculated)
 				result.setAlarmCellForFixedColumn(data.getId(), displayFormat);
-
+			
+			if(lockDay || lockWork || dataSign == null || (!dataSign.isStatus() ? (!dataSign.notDisableForConfirm() ? true : disableSignApp) : !dataSign.notDisableForConfirm())){
+				result.setCellSate(data.getId(), DPText.LOCK_SIGN, DPText.STATE_DISABLE);
+			}
+			
+			if(lockDay || lockWork || dataApproval == null || (mode == ScreenMode.NORMAL.value ? !dataApproval.notDisableNormal() : !dataApproval.notDisableApproval())) {
+				result.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_DISABLE);
+			}
+			if(dataApproval == null) {
+				result.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_ERROR);
+				lstCellHideControl.add(new DPHideControlCell(data.getId(), DPText.LOCK_APPROVAL));
+			}
 		}
 		result.setLstHideControl(lstCellHideControl);
 		result.setLstData(lstData);

@@ -77,7 +77,8 @@ module nts.uk.at.view.kdw007.a.viewmodel {
 //            { code: 12, name: "打刻申請（その他）" },
 //            { code: 13, name: "時間年休申請" },
 //            { code: 14, name: "遅刻早退取消申請" },
-            { code: 15, name: "振休振出申請" },
+            
+            { code: 14, name: "振休振出申請" },
 //            { code: 16, name: "連続出張申請" },
 //            { code: 17, name: "３６協定時間申請" }
         ]);

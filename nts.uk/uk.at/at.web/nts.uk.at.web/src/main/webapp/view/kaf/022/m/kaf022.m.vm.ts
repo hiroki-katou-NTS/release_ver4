@@ -490,7 +490,8 @@ module nts.uk.at.view.kmf022.m.viewmodel {
             self.holidayTimeAppCalFlg = ko.observable(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.holidayTimeAppCalFlg : 0);
             self.lateOrLeaveAppCancelFlg = ko.observable(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.lateOrLeaveAppCancelFlg : 0);
             self.lateOrLeaveAppSettingFlg = ko.observable(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.lateOrLeaveAppSettingFlg : 0);
-            self.breakInputFieldDisFlg = ko.observable(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.breakInputFieldDisFlg : 0);
+            //self.breakInputFieldDisFlg = ko.observable(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.breakInputFieldDisFlg : 1);
+            self.breakInputFieldDisFlg = ko.observable(1);
             self.breakTimeDisFlg = ko.observable(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.breakTimeDisFlg : 0);
             self.atworkTimeBeginDisFlg = ko.observable(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.atworkTimeBeginDisFlg : 0);
             self.goOutTimeBeginDisFlg = ko.observable(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.goOutTimeBeginDisFlg : 0);
@@ -513,7 +514,8 @@ module nts.uk.at.view.kmf022.m.viewmodel {
             self.holidayTimeAppCalFlg(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.holidayTimeAppCalFlg : 0);
             self.lateOrLeaveAppCancelFlg(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.lateOrLeaveAppCancelFlg : 0);
             self.lateOrLeaveAppSettingFlg(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.lateOrLeaveAppSettingFlg : 0);
-            self.breakInputFieldDisFlg(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.breakInputFieldDisFlg : 0);
+            //self.breakInputFieldDisFlg(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.breakInputFieldDisFlg : 0);
+            self.breakInputFieldDisFlg = ko.observable(1);
             self.breakTimeDisFlg(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.breakTimeDisFlg : 0);
             self.atworkTimeBeginDisFlg(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.atworkTimeBeginDisFlg : 0);
             self.goOutTimeBeginDisFlg(param && !nts.uk.util.isNullOrUndefined(param.appType) ? param.goOutTimeBeginDisFlg : 0);

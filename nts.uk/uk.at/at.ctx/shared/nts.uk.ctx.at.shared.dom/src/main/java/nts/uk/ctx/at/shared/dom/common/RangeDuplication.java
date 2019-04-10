@@ -32,5 +32,19 @@ public enum RangeDuplication {
 	//比較期間の開始が基準期間の間にある
 	COMPARED_START_BETWEEN_BASE,
 	//比較期間の終了が基準期間の間にある
-	COMPARED_END_BETWEEN_BASE
+	COMPARED_END_BETWEEN_BASE;
+	
+	/**
+	 * 基準時間の前に連続するか判定する
+	 */
+	public boolean isContinuousBeforeBase() {
+		return this.equals(CONTINUOUS_BEFORE_BASE);
+	}
+	
+	/**
+	 * 基準時間の後ろに連続するか判定する
+	 */
+	public boolean isContinuousAfterBase() {
+		return this.equals(CONTINUOUS_AFTER_BASE);
+	}
 }

@@ -2,6 +2,7 @@ package nts.uk.ctx.at.function.dom.attendanceitemframelinking;
 
 import java.util.Optional;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import nts.arc.enums.EnumAdaptor;
 import nts.uk.ctx.at.function.dom.attendanceitemframelinking.enums.FrameCategory;
@@ -14,6 +15,7 @@ import nts.uk.ctx.at.function.dom.attendanceitemframelinking.primitivevalue.Fram
  *勤怠項目と枠の紐付け
  */
 @Getter
+@EqualsAndHashCode
 public class AttendanceItemLinking {
 
 	/* 勤怠項目ID */

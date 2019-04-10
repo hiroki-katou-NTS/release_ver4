@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.record.pubimp.dailyperform;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 //import java.util.stream.Collectors;
 
@@ -27,6 +29,7 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.goback.Gob
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.goback.PreGoBackReflectService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.goback.PriorStampAtr;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.goback.ScheTimeReflectAtr;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.BreakTimeParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.HolidayWorktimeAppPara;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.HolidayWorktimePara;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.PreHolidayWorktimeReflectService;
@@ -47,6 +50,7 @@ import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.AppCommonPara;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.AppReflectProcessRecordPub;
+import nts.uk.ctx.at.record.pub.dailyperform.appreflect.BreakTimePubParam;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.CommonReflectPubParameter;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ConfirmStatusCheck;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.HolidayWorkReflectPubPara;
@@ -227,12 +231,18 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 
 	@Override
 	public boolean holidayWorkReflect(HolidayWorkReflectPubPara param, boolean isPre) {
+		Map<Integer, BreakTimeParam> mapBreakTimeFrame = new HashMap<>();
+		param.getHolidayWorkPara().getMapBreakTimeFrame().forEach((a,b) -> {
+			BreakTimeParam breakTime = new BreakTimeParam(b.getStartTime(), b.getEndTime());
+			mapBreakTimeFrame.put(a, breakTime);
+		});
 		HolidayWorktimeAppPara appPara = new HolidayWorktimeAppPara(param.getHolidayWorkPara().getWorkTypeCode(),
 				param.getHolidayWorkPara().getWorkTimeCode(),
 				param.getHolidayWorkPara().getMapWorkTimeFrame(),
 				param.getHolidayWorkPara().getNightTime(),
 				param.getHolidayWorkPara().getStartTime(),
-				param.getHolidayWorkPara().getEndTime());
+				param.getHolidayWorkPara().getEndTime(),
+				mapBreakTimeFrame);
 		HolidayWorktimePara para = new HolidayWorktimePara(param.getEmployeeId(),
 				param.getBaseDate(),
 				param.isHolidayWorkReflectFlg(), 
