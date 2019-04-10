@@ -327,9 +327,6 @@ module nts.uk.at.view.kal003.share {
                             );
                         con.group1.lstErAlAtdItemCon()[0].compareOperator(con.extractType());
                        }
-                      if(con.typeCheckItem() === EnumRoleType.DAYS){
-                          con.group1().lstErAlAtdItemCon()[0].conditionAtr(ConditionAtr.DAYS);
-                      }
                     }
                     
                     checkConMonthly["group1"] = mapGroup(ko.toJS(con.group1));
@@ -350,6 +347,9 @@ module nts.uk.at.view.kal003.share {
                 }
             });
             
+            if(convertExtraResultMonthly.typeCheckItem === EnumRoleType.DAYS){
+               convertExtraResultMonthly.checkConMonthly.group1.lstErAlAtdItemCon[0].conditionAtr =  ConditionAtr.DAYS;
+            }
             return convertExtraResultMonthly;
         }
         
