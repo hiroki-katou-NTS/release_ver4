@@ -310,6 +310,11 @@ public class MonthlyPerformanceCorrectionProcessor {
 				createFixedHeader(screenDto, yearMonth, closureId, optApprovalProcessingUseSetting.get(),mess);
 				return screenDto;
 			}
+			
+			List<MonthlyModifyResultDto> monthlyResults = results.stream()
+					.map(m -> new MonthlyModifyResultDto(m.getItems(), m.getYearMonth(), m.getEmployeeId(),
+							m.getClosureId(), m.getClosureDate().toDomain(), m.getWorkDatePeriod()))
+					.collect(Collectors.toList());
 
 			// lay lai employeeID cua nhung nhan vien co du lieu
 			employeeIds = results.stream().map(e -> e.getEmployeeId()).collect(Collectors.toList());
@@ -317,7 +322,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 			// アルゴリズム「表示フォーマットの取得」を実行する(Thực hiện 「Lấy format hiển thị」)
 			// TODO Data null confirm??formatPerformance
 			if (formatPerformance.isPresent()) {
-				monthlyDisplay.getDisplayFormat(employeeIds, formatPerformance.get().getSettingUnitType(), screenDto);
+				monthlyDisplay.getDisplayFormat(employeeIds, formatPerformance.get().getSettingUnitType(), screenDto, monthlyResults);
 			} else {
 				String mess = new String("Msg_1452");
 				createFixedHeader(screenDto, yearMonth, closureId, optApprovalProcessingUseSetting.get(),mess);
@@ -336,12 +341,11 @@ public class MonthlyPerformanceCorrectionProcessor {
 				screenDto.setShowRegisterButton(true);
 			
 			// アルゴリズム「月別実績を表示する」を実行する Hiển thị monthly result
-			displayMonthlyResult(screenDto, yearMonth, closureId, optApprovalProcessingUseSetting.get(), companyId, results, employeeIds);
+			displayMonthlyResult(screenDto, yearMonth, closureId, optApprovalProcessingUseSetting.get(), companyId, results, employeeIds, monthlyResults);
 		
 		} else { // 「月別実績の承認」からの場合
 			//アルゴリズム「締め情報の表示」を実行する       move 実績期間の表示
-			this.displayClosureInfo( screenDto,  companyId,  closureId,
-					yearMonth);
+			this.displayClosureInfo(screenDto, companyId, closureId, yearMonth);
 			
 			//アルゴリズム「承認モードで起動する」を実行する
 			this.startUpInApprovalMode(optApprovalProcessingUseSetting, formatPerformance,screenDto,yearMonth, companyId);
@@ -477,6 +481,11 @@ public class MonthlyPerformanceCorrectionProcessor {
 						.getAffCompanyHistByEmployee(employeeIds, datePeriodClosure);
 				
 				screenDto.setLstAffComHist(lstAffComHist);
+				
+				List<MonthlyModifyResultDto> monthlyResults = results.stream()
+						.map(m -> new MonthlyModifyResultDto(m.getItems(), m.getYearMonth(), m.getEmployeeId(),
+								m.getClosureId(), m.getClosureDate().toDomain(), m.getWorkDatePeriod()))
+						.collect(Collectors.toList());
 
 				// lay lai employeeID cua nhung nhan vien co du lieu
 				employeeIds = results.stream().map(e -> e.getEmployeeId()).collect(Collectors.toList());
@@ -485,7 +494,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 				// TODO Data null confirm??formatPerformance
 				if (formatPerformance.isPresent()) {
 					monthlyDisplay.getDisplayFormat(employeeIds, formatPerformance.get().getSettingUnitType(),
-							screenDto);
+							screenDto, monthlyResults);
 				} else {
 					throw new BusinessException("Msg_1452");
 				}
@@ -498,7 +507,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 
 				// アルゴリズム「月別実績を表示する」を実行する Hiển thị monthly result
 				displayMonthlyResult(screenDto, yearMonth, screenDto.getSelectedClosure(), approvalProcessingUseSetting,
-						companyId, results, employeeIds);
+						companyId, results, employeeIds, monthlyResults);
 
 			} else {
 				throw new BusinessException("Msg_873");
@@ -668,7 +677,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 	 */
 	private void displayMonthlyResult(MonthlyPerformanceCorrectionDto screenDto, Integer yearMonth, Integer closureId,
 			ApprovalProcessingUseSetting approvalProcessingUseSetting, String companyId,
-			List<MonthlyModifyResult> results, List<String> employeeIds) {
+			List<MonthlyModifyResult> results, List<String> employeeIds, List<MonthlyModifyResultDto> monthlyResults) {
 		/**
 		 * Create Grid Sheet DTO
 		 */
@@ -686,8 +695,6 @@ public class MonthlyPerformanceCorrectionProcessor {
 			throw new BusinessException("Msg_1450");
 		}
 		
-		List<MonthlyModifyResultDto> monthlyResults = results.stream().map(m -> new MonthlyModifyResultDto(m.getItems(), m.getYearMonth(), m.getEmployeeId(), m.getClosureId(), m.getClosureDate().toDomain(), m.getWorkDatePeriod())).collect(Collectors.toList());
-				
 		//[No.586]月の実績の確認状況を取得する
 		Optional<StatusConfirmMonthDto> statusConfirmMonthDto = confirmStatusMonthly.getConfirmStatusMonthly(companyId, closureId, screenDto.getClosureDate().toDomain(), listEmployeeIds, YearMonth.of(yearMonth), monthlyResults);
 

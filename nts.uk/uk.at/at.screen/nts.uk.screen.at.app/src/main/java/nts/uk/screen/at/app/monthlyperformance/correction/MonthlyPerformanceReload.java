@@ -219,10 +219,29 @@ public class MonthlyPerformanceReload {
 		List<AffCompanyHistImport> lstAffComHist = syCompanyRecordAdapter
 				.getAffCompanyHistByEmployee(employeeIds, datePeriodClosure);
 		
+		List<String> listEmployeeIds = param.getLstEmployees().stream().map(x -> x.getId())
+				.collect(Collectors.toList());
+		List<MonthlyModifyResult> results = new ArrayList<>();
+		List<Integer> attdanceIds = param.getLstAtdItemUnique().keySet().stream()
+				.collect(Collectors.toList());
+		results = new GetDataMonthly(listEmployeeIds, new YearMonth(param.getYearMonth()), ClosureId.valueOf(param.getClosureId()),
+				screenDto.getClosureDate().toDomain(), attdanceIds, monthlyModifyQueryProcessor).call();
+		if (results.size() > 0) {
+			screenDto.getItemValues().addAll(results.get(0).getItems());
+		}
+		Map<String, MonthlyModifyResult> employeeDataMap = results.stream()
+				.collect(Collectors.toMap(x -> x.getEmployeeId(), Function.identity(), (x, y) -> x));
+
+		List<MonthlyModifyResultDto> monthlyResults = results.stream()
+				.map(m -> new MonthlyModifyResultDto(m.getItems(), m.getYearMonth(), m.getEmployeeId(),
+						m.getClosureId(), m.getClosureDate().toDomain(), m.getWorkDatePeriod()))
+				.collect(Collectors.toList());
+		
 		// アルゴリズム「ロック状態をチェックする」を実行する - set lock
-		List<MonthlyPerformaceLockStatus> lstLockStatus = checkLockStatus(companyId, employeeIds,
-				param.getYearMonth(), param.getClosureId(),
-				new DatePeriod(param.getActualTime().getStartDate(), param.getActualTime().getEndDate()), param.getInitScreenMode(), lstAffComHist);		
+		List<MonthlyPerformaceLockStatus> lstLockStatus = checkLockStatus(companyId, employeeIds, param.getYearMonth(),
+				param.getClosureId(),
+				new DatePeriod(param.getActualTime().getStartDate(), param.getActualTime().getEndDate()),
+				param.getInitScreenMode(), lstAffComHist, monthlyResults);		
 		param.setLstLockStatus(lstLockStatus);
 		
 		// lay lai lock status vi khong the gui tu client len duoc
@@ -230,7 +249,9 @@ public class MonthlyPerformanceReload {
 		screenDto.setLstEmployee(param.getLstEmployees());
 
 		// アルゴリズム「月別実績を表示する」を実行する(Hiển thị monthly actual result)
-		displayMonthlyResult(screenDto, param.getYearMonth(), param.getClosureId(), optApprovalProcessingUseSetting.get(), companyId);
+		displayMonthlyResult(screenDto, param.getYearMonth(), param.getClosureId(),
+				optApprovalProcessingUseSetting.get(), companyId, monthlyResults, listEmployeeIds, attdanceIds,
+				employeeDataMap);
 		// set trang thai disable theo quyen chinh sua item
 		screenDto.createAccessModifierCellState();
 		return screenDto;
@@ -255,15 +276,15 @@ public class MonthlyPerformanceReload {
 	 * 月別実績を表示する
 	 */
 	private void displayMonthlyResult(MonthlyPerformanceCorrectionDto screenDto, Integer yearMonth, Integer closureId,
-			ApprovalProcessingUseSetting approvalProcessingUseSetting, String companyId) {
+			ApprovalProcessingUseSetting approvalProcessingUseSetting, String companyId,
+			List<MonthlyModifyResultDto> monthlyResults, List<String> listEmployeeIds, List<Integer> attdanceIds,
+			Map<String, MonthlyModifyResult> employeeDataMap) {
 		/**
 		 * Create Grid Sheet DTO
 		 */
 
 		MonthlyPerformanceParam param = screenDto.getParam();
-		//List<ConfirmationMonth> listConfirmationMonth = new ArrayList<>();
-		List<String> listEmployeeIds = param.getLstEmployees().stream().map(x -> x.getId())
-				.collect(Collectors.toList());
+		
 		String loginId = AppContexts.user().employeeId();
 		List<MonthlyPerformaceLockStatus> performanceLockStatus = screenDto.getParam().getLstLockStatus();
 		// アルゴリズム「対象年月に対応する月別実績を取得する」を実行する Lấy monthly result ứng với năm tháng
@@ -314,22 +335,9 @@ public class MonthlyPerformanceReload {
 			}
 		}
 
-
 		/**
 		 * Get Data
 		 */
-		List<MonthlyModifyResult> results = new ArrayList<>();
-		List<Integer> attdanceIds = param.getLstAtdItemUnique().keySet().stream()
-				.collect(Collectors.toList());
-		results = new GetDataMonthly(listEmployeeIds, new YearMonth(yearMonth), ClosureId.valueOf(closureId),
-				screenDto.getClosureDate().toDomain(), attdanceIds, monthlyModifyQueryProcessor).call();
-		if (results.size() > 0) {
-			screenDto.getItemValues().addAll(results.get(0).getItems());
-		}
-		Map<String, MonthlyModifyResult> employeeDataMap = results.stream()
-				.collect(Collectors.toMap(x -> x.getEmployeeId(), Function.identity(), (x, y) -> x));
-
-		List<MonthlyModifyResultDto> monthlyResults = results.stream().map(m -> new MonthlyModifyResultDto(m.getItems(), m.getYearMonth(), m.getEmployeeId(), m.getClosureId(), m.getClosureDate().toDomain(), m.getWorkDatePeriod())).collect(Collectors.toList());
 		//[No.586]月の実績の確認状況を取得する
 		Optional<StatusConfirmMonthDto> statusConfirmMonthDto = confirmStatusMonthly.getConfirmStatusMonthly(companyId, closureId, screenDto.getClosureDate().toDomain(), listEmployeeIds, YearMonth.of(yearMonth),monthlyResults);
 
@@ -591,7 +599,8 @@ public class MonthlyPerformanceReload {
 
 	// copy ben MonthlyPerformanceDisplay
 	public List<MonthlyPerformaceLockStatus> checkLockStatus(String cid, List<String> empIds, Integer processDateYM,
-			Integer closureId, DatePeriod closureTime, int intScreenMode, List<AffCompanyHistImport> lstAffComHist) {
+			Integer closureId, DatePeriod closureTime, int intScreenMode, List<AffCompanyHistImport> lstAffComHist,
+			List<MonthlyModifyResultDto> monthlyResults) {
 		List<MonthlyPerformaceLockStatus> monthlyLockStatusLst = new ArrayList<MonthlyPerformaceLockStatus>();
 		// ロック解除モード の場合
 		if (intScreenMode == 1) {
@@ -634,8 +643,16 @@ public class MonthlyPerformanceReload {
 
 			List<DatePeriod> periodInHist = affInHist.isPresent() ? affInHist.get().getLstAffComHistItem().stream()
 					.map(x -> x.getDatePeriod()).collect(Collectors.toList()) : new ArrayList<>();
-					
-			List<GeneralDate> lstDateCheck = mergeDatePeriod(closureTime, periodInHist);
+			// EAP chua sua, a Tuan giai thich la:
+			// lay dateperiod theo data thuc te luu trong DB, k lay theo data tu
+			// man hinh truyen xuong
+            Optional<MonthlyModifyResultDto> optMonthlyModifyResultDto = monthlyResults.stream().filter(x-> x.getEmployeeId().equals(affWorkplaceImport.getEmployeeId())).findFirst();
+            if(!optMonthlyModifyResultDto.isPresent()){
+                continue;
+            }
+            DatePeriod workDatePeriod = optMonthlyModifyResultDto.get().getWorkDatePeriod();
+            
+            List<GeneralDate> lstDateCheck = mergeDatePeriod(workDatePeriod, periodInHist);
 			
 			List<Identification> listIdenByEmpID = new ArrayList<>();
 			for(Identification iden : listIdentification) {
@@ -659,7 +676,7 @@ public class MonthlyPerformanceReload {
 			
 			// 月の実績の状況を取得する
 			AcquireActualStatus param = new AcquireActualStatus(cid, affWorkplaceImport.getEmployeeId(), processDateYM,
-					closureId, closureTime.end(), closureTime, affWorkplaceImport.getWorkplaceId());
+					closureId, workDatePeriod.end(), workDatePeriod, affWorkplaceImport.getWorkplaceId());
 			MonthlyActualSituationOutput monthlymonthlyActualStatusOutput = monthlyActualStatus
 					.getMonthlyActualSituationStatus(param,approvalProcOp,listShareAff,checkIdentityOp,listIdenByEmpID,checkExistRecordErrorListDate, lstDateCheck);
 			// Output「月の実績の状況」を元に「ロック状態一覧」をセットする
