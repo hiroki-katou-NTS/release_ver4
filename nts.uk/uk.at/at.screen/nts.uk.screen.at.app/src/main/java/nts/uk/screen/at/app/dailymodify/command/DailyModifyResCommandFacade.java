@@ -53,6 +53,7 @@ import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.ParamI
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.RegisterIdentityConfirmDay;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.SelfConfirmDay;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
+import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
@@ -190,7 +191,10 @@ public class DailyModifyResCommandFacade {
 			List<DailyRecordDto> temp = dataParent.getDailyEdits().stream()
 					.filter(x -> mapSidDate.containsKey(Pair.of(x.getEmployeeId(), x.getDate())))
 					.collect(Collectors.toList());
-			dailyEdits.addAll(queryNotChanges.isEmpty() ? temp : toDto(queryNotChanges, temp));
+			dailyEdits.addAll(queryNotChanges.isEmpty() ? temp.stream().map(x -> {
+				createStampSourceInfo(x, querys);
+				return x;
+			}).collect(Collectors.toList()) : toDto(queryNotChanges, temp));
 		} else {
 			dailyOlds.addAll(dataParent.getDailyOlds());
 			dailyEdits.addAll(dataParent.getDailyEdits());
@@ -221,9 +225,8 @@ public class DailyModifyResCommandFacade {
 			if (!itemChanges.isPresent())
 				return o;
 			List<ItemValue> itemValues = itemChanges.get().getItemValues();
-
 			AttendanceItemUtil.fromItemValues(o, itemValues);
-
+			createStampSourceInfo(o, querys);
 			o.getTimeLeaving().ifPresent(dto -> {
 				if (dto.getWorkAndLeave() != null)
 					dto.getWorkAndLeave().removeIf(tl -> tl.getWorking() == null && tl.getLeave() == null);
@@ -826,22 +829,6 @@ public class DailyModifyResCommandFacade {
 				}
 			}
 		});
-//		for (DailyModifyResult r : resultOlds) {
-//			val newR = resultNews.stream()
-//					.filter(n -> n.getEmployeeId().equals(r.getEmployeeId()) && n.getDate().equals(r.getDate()))
-//					.findFirst();
-//			if (newR.isPresent()) {
-//				List<ItemValue> oldItems = r.getItems();
-//				List<ItemValue> newItems = newR.get().getItems();
-//				oldItems.forEach(ov -> {
-//					val nv = newItems.stream().filter(n -> n.getItemId() == ov.getItemId()).findFirst();
-//					if (nv.isPresent() && nv.get().getValue() != null && !nv.get().getValue().equals(ov.getValue())
-//							&& DPText.TMP_DATA_CHECK_ITEMS.contains(nv.get().getItemId())) {
-//						editedDate.add(Pair.of(r.getEmployeeId(), r.getDate()));
-//					}
-//				});
-//			}
-//		}
 		return editedDate;
 	}
 	
@@ -1075,5 +1062,71 @@ public class DailyModifyResCommandFacade {
 		val resultFilter = parent.stream().filter(x -> !date.containsKey(x.getWorkInformation().getYmd())).collect(Collectors.toList());
 		resultFilter.addAll(child);
 		return resultFilter;
+	}
+	
+	private void createStampSourceInfo(DailyRecordDto dtoEdit, List<DailyModifyQuery> querys) {
+		val sidLogin = AppContexts.user().employeeId();
+		boolean editBySelf = sidLogin.equals(dtoEdit.getEmployeeId());
+		Integer stampSource = editBySelf ? StampSourceInfo.HAND_CORRECTION_BY_MYSELF.value
+				: StampSourceInfo.HAND_CORRECTION_BY_ANOTHER.value;
+		List<ItemValue> itemValueTempDay = querys.stream()
+				.filter(x -> x.getEmployeeId().equals(dtoEdit.getEmployeeId()) && x.getBaseDate().equals(dtoEdit.getDate()))
+				.flatMap(x -> x.getItemValues().stream())
+				.collect(Collectors.toList());
+		List<ItemValue> itemValue = itemValueTempDay.stream()
+				.filter(x -> DPText.ITEM_INSERT_STAMP_SOURCE.contains(x.getItemId())).collect(Collectors.toList());
+		itemValue.stream().forEach(x -> {
+			switch (x.getItemId()) {
+			case 75:
+			case 79:
+			case 73:
+				dtoEdit.getAttendanceLeavingGate().get().getAttendanceLeavingGateTime().get(Math.abs(75- x.getItemId())/4).getStart()
+						.setStampSourceInfo(stampSource);
+				break;
+			case 77:
+			case 81:
+			case 85:
+				dtoEdit.getAttendanceLeavingGate().get().getAttendanceLeavingGateTime().get(Math.abs(77- x.getItemId())/4).getEnd()
+						.setStampSourceInfo(StampSourceInfo.HAND_CORRECTION_BY_ANOTHER.value);
+				break;
+			case 31:
+			case 41:
+				if (x.getItemId() == 31 && dtoEdit.getTimeLeaving().get().getWorkAndLeave().get(0).getWorking().getTime()
+						.getStampSourceInfo() != StampSourceInfo.SPR.value) {
+					dtoEdit.getTimeLeaving().get().getWorkAndLeave().get(Math.abs(31 - x.getItemId())/10).getWorking().getTime()
+							.setStampSourceInfo(stampSource);
+				}else if(x.getItemId() == 41){
+					dtoEdit.getTimeLeaving().get().getWorkAndLeave().get(1).getWorking().getTime()
+							.setStampSourceInfo(stampSource);
+				}
+				break;
+			case 34:
+			case 44:
+				if (x.getItemId() == 34 && dtoEdit.getTimeLeaving().get().getWorkAndLeave().get(Math.abs(34 - x.getItemId())/10).getLeave().getTime()
+						.getStampSourceInfo() != StampSourceInfo.SPR.value) {
+					dtoEdit.getTimeLeaving().get().getWorkAndLeave().get(0).getLeave().getTime()
+							.setStampSourceInfo(stampSource);
+				}else if(x.getItemId() == 44){
+					dtoEdit.getTimeLeaving().get().getWorkAndLeave().get(1).getLeave().getTime()
+							.setStampSourceInfo(stampSource);
+				}
+				break;
+			case 51:
+			case 59:
+			case 67:
+				dtoEdit.getTemporaryTime().get().getWorkLeaveTime().get(Math.abs(51 - x.getItemId())/8).getWorking().getTime()
+						.setStampSourceInfo(stampSource);
+				break;
+			case 53:
+			case 61:
+			case 69:
+				dtoEdit.getTemporaryTime().get().getWorkLeaveTime().get(Math.abs(53 - x.getItemId())/8).getLeave().getTime()
+						.setStampSourceInfo(stampSource);
+				break;
+
+			default:
+				break;
+			}
+		});
 	}
 }

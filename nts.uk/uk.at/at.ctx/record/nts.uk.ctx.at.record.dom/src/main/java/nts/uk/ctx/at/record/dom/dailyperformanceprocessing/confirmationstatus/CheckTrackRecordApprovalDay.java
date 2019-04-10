@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -98,7 +99,8 @@ public class CheckTrackRecordApprovalDay {
 	}
 
 	private DatePeriod mergeDatePeriod(List<DatePeriod> lstDate) {
-		lstDate = lstDate.stream().sorted((x, y) -> x.start().compareTo(y.start())).collect(Collectors.toList());
-		return new DatePeriod(lstDate.get(0).start(), lstDate.get(lstDate.size() - 1).end());
+		List<GeneralDate> lstStartEnd = lstDate.stream().flatMap(x -> Arrays.asList(x.start(), x.end()).stream()).collect(Collectors.toList());
+		lstStartEnd = lstStartEnd.stream().sorted((x, y) -> x.compareTo(y)).collect(Collectors.toList());
+		return new DatePeriod(lstStartEnd.get(0), lstStartEnd.get(lstStartEnd.size() - 1));
 	}
 }
