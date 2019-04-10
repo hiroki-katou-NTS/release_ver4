@@ -331,6 +331,7 @@ module nts.uk.com.view.cmf004.b.viewmodel {
             block.invisible();
             //Get Data PerformDataRecover for Screen KCP 005
             service.findPerformDataRecover(self.recoveryProcessingId).done(function(data: any) {
+               console.log(); 
                 if (data.targets) {
                     self.employeeListScreenG.removeAll();
                     let employeeData: Array<any> = [];
@@ -340,7 +341,15 @@ module nts.uk.com.view.cmf004.b.viewmodel {
                     employeeData = _.sortBy(employeeData, ["code"]);
                     self.employeeListScreenG(employeeData);
                     $('#kcp005component .nts-gridlist').attr('tabindex', -1);
-
+                    if(self.dataContentConfirm().selectedRecoveryMethod() == 0){
+                        self.kcp005ComponentOptionScreenG.selectType = 2;
+                        self.kcp005ComponentOptionScreenG.disableSelection = true;
+                        $('#kcp005component').ntsListComponent(self.kcp005ComponentOptionScreenG);
+                    }else{
+                        self.kcp005ComponentOptionScreenG.selectType = 2;
+                        self.kcp005ComponentOptionScreenG.disableSelection = false;
+                        $('#kcp005component').ntsListComponent(self.kcp005ComponentOptionScreenG);
+                    }
                 }
             }).always(() => {
                 block.clear();
