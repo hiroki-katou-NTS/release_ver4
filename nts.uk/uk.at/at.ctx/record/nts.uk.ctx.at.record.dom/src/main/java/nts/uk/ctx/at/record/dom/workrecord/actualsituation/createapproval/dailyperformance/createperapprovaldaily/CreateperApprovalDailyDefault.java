@@ -1,12 +1,10 @@
 package nts.uk.ctx.at.record.dom.workrecord.actualsituation.createapproval.dailyperformance.createperapprovaldaily;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import lombok.extern.slf4j.Slf4j;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
@@ -20,7 +18,6 @@ import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
-@Slf4j
 public class CreateperApprovalDailyDefault implements CreateperApprovalDailyService {
 
 	@Inject
@@ -47,9 +44,7 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 						.getAffCompanyHistByEmployee(employeeIDs,
 								new DatePeriod(startDateClosure, GeneralDate.today()));
 				
-				AtomicInteger counter = new AtomicInteger(0);
 				this.parallel.forEach(employeeIDs, employeeID -> {
-					log.info("承認ルート更新(日別) 実行中: " + counter.incrementAndGet() + "/" + employeeIDs.size()  + " (" + employeeID + ")");
 					
 					// 年月日　←「システム日付の前日」
 					GeneralDate ymd = GeneralDate.today().addDays(-1);

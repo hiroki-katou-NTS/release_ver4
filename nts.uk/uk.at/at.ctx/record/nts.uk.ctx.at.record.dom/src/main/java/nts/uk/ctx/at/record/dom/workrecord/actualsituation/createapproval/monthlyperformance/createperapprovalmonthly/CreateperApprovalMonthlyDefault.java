@@ -1,12 +1,10 @@
 package nts.uk.ctx.at.record.dom.workrecord.actualsituation.createapproval.monthlyperformance.createperapprovalmonthly;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import lombok.extern.slf4j.Slf4j;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.createdailyapprover.AppRootInsContentFnImport;
@@ -17,7 +15,6 @@ import nts.uk.ctx.at.record.dom.workrecord.actualsituation.createapproval.monthl
 import nts.uk.shr.com.i18n.TextResource;
 
 @Stateless
-@Slf4j
 public class CreateperApprovalMonthlyDefault implements CreateperApprovalMonthlyService {
 	
 	@Inject 
@@ -34,9 +31,7 @@ public class CreateperApprovalMonthlyDefault implements CreateperApprovalMonthly
 			int processExecType, GeneralDate endDateClosure) {
 		
 			/**パラメータ.社員ID（List）の数だけループする*/
-			AtomicInteger counter = new AtomicInteger(0);
 			this.parallel.forEach(employeeIDs, employeeID -> {
-				log.info("承認ルート更新(月別) 実行中: " + counter.incrementAndGet() + "/" + employeeIDs.size()  + " (" + employeeID + ")");
 				
 				/**アルゴリズム「指定社員の中間データを作成する」を実行する*/
 				AppRootInsContentFnImport appRootInsContentFnImport =  createDailyApproverAdapter.createDailyApprover(employeeID, 2, endDateClosure,endDateClosure);
