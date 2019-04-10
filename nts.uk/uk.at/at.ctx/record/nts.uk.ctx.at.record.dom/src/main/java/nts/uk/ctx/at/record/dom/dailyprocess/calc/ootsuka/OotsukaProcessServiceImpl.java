@@ -312,119 +312,119 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 		return map;
 	}
 	
-	@Override
-	/**
-	 * 大塚IWカスタマイズ(打刻用)
-	 * @return
-	 */
-	public Optional<TimeLeavingOfDailyPerformance> iWProcessForStamp(Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance, String employeeId, GeneralDate targetDate,Optional<PredetemineTimeSetting> predetermineTimeSet,
-																	 WorkType workType,WorkTimeCode workTimeCode){
-		if(!predetermineTimeSet.isPresent() || !isIWWorkTimeAndCode(workType,workTimeCode)) return timeLeavingOfDailyPerformance;
-		List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
-		for(TimezoneUse predSet : predetermineTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone()) {
-			if(predSet.isUsed()) {
-				Optional<TimeLeavingWork> stamp = timeLeavingOfDailyPerformance.get().getAttendanceLeavingWork(predSet.getWorkNo());
-				WorkStamp attendance = new WorkStamp(predSet.getStart(), predSet.getStart(),new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
-				WorkStamp leaving = new WorkStamp(predSet.getEnd(), predSet.getEnd(), new WorkLocationCD("01"),StampSourceInfo.CORRECTION_RECORD_SET);
-				if(stamp.isPresent()) {
-					if(stamp.get().getAttendanceStamp().isPresent()) {
-						if(stamp.get().getAttendanceStamp().get().getStamp().isPresent()){
-							attendance = new WorkStamp(stamp.get().getAttendanceStamp().get().getStamp().get().getAfterRoundingTime(),
-													   predSet.getStart(),
-											   	       stamp.get().getAttendanceStamp().get().getStamp().get().getLocationCode().isPresent() ? stamp.get().getAttendanceStamp().get().getStamp().get().getLocationCode().get() : new WorkLocationCD("01"),
-													   stamp.get().getAttendanceStamp().get().getStamp().get().getStampSourceInfo());
-						}
-					}
-					if(stamp.get().getLeaveStamp().isPresent()) {
-						if(stamp.get().getLeaveStamp().get().getStamp().isPresent()) {
-							leaving = new WorkStamp(stamp.get().getLeaveStamp().get().getStamp().get().getAfterRoundingTime(),
-									 			    predSet.getEnd(),
-									 		        stamp.get().getLeaveStamp().get().getStamp().get().getLocationCode().isPresent() ? stamp.get().getLeaveStamp().get().getStamp().get().getLocationCode().get() : new WorkLocationCD("01"),
-									 				stamp.get().getLeaveStamp().get().getStamp().get().getStampSourceInfo());
-						}
-					}
-				}
-				TimeActualStamp newAttendanceStamp = new TimeActualStamp(attendance, attendance, predSet.getWorkNo());
-				TimeActualStamp newLeavingStamp = new TimeActualStamp(leaving, leaving, predSet.getWorkNo());
-				
-				TimeLeavingWork timeLeavingWork = new TimeLeavingWork(new WorkNo(predSet.getWorkNo()), newAttendanceStamp, newLeavingStamp);
-				timeLeavingWorkList.add(timeLeavingWork);
-			}
-		}
-		return Optional.of(
-				new TimeLeavingOfDailyPerformance(employeeId, new WorkTimes(timeLeavingWorkList.size()), timeLeavingWorkList, targetDate));
-	}
+//	@Override
+//	/**
+//	 * 大塚IWカスタマイズ(打刻用)
+//	 * @return
+//	 */
+//	public Optional<TimeLeavingOfDailyPerformance> iWProcessForStamp(Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance, String employeeId, GeneralDate targetDate,Optional<PredetemineTimeSetting> predetermineTimeSet,
+//																	 WorkType workType,WorkTimeCode workTimeCode){
+//		if(!predetermineTimeSet.isPresent() || !isIWWorkTimeAndCode(workType,workTimeCode)) return timeLeavingOfDailyPerformance;
+//		List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
+//		for(TimezoneUse predSet : predetermineTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone()) {
+//			if(predSet.isUsed()) {
+//				Optional<TimeLeavingWork> stamp = timeLeavingOfDailyPerformance.get().getAttendanceLeavingWork(predSet.getWorkNo());
+//				WorkStamp attendance = new WorkStamp(predSet.getStart(), predSet.getStart(),new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
+//				WorkStamp leaving = new WorkStamp(predSet.getEnd(), predSet.getEnd(), new WorkLocationCD("01"),StampSourceInfo.CORRECTION_RECORD_SET);
+//				if(stamp.isPresent()) {
+//					if(stamp.get().getAttendanceStamp().isPresent()) {
+//						if(stamp.get().getAttendanceStamp().get().getStamp().isPresent()){
+//							attendance = new WorkStamp(stamp.get().getAttendanceStamp().get().getStamp().get().getAfterRoundingTime(),
+//													   predSet.getStart(),
+//											   	       stamp.get().getAttendanceStamp().get().getStamp().get().getLocationCode().isPresent() ? stamp.get().getAttendanceStamp().get().getStamp().get().getLocationCode().get() : new WorkLocationCD("01"),
+//													   stamp.get().getAttendanceStamp().get().getStamp().get().getStampSourceInfo());
+//						}
+//					}
+//					if(stamp.get().getLeaveStamp().isPresent()) {
+//						if(stamp.get().getLeaveStamp().get().getStamp().isPresent()) {
+//							leaving = new WorkStamp(stamp.get().getLeaveStamp().get().getStamp().get().getAfterRoundingTime(),
+//									 			    predSet.getEnd(),
+//									 		        stamp.get().getLeaveStamp().get().getStamp().get().getLocationCode().isPresent() ? stamp.get().getLeaveStamp().get().getStamp().get().getLocationCode().get() : new WorkLocationCD("01"),
+//									 				stamp.get().getLeaveStamp().get().getStamp().get().getStampSourceInfo());
+//						}
+//					}
+//				}
+//				TimeActualStamp newAttendanceStamp = new TimeActualStamp(attendance, attendance, predSet.getWorkNo());
+//				TimeActualStamp newLeavingStamp = new TimeActualStamp(leaving, leaving, predSet.getWorkNo());
+//				
+//				TimeLeavingWork timeLeavingWork = new TimeLeavingWork(new WorkNo(predSet.getWorkNo()), newAttendanceStamp, newLeavingStamp);
+//				timeLeavingWorkList.add(timeLeavingWork);
+//			}
+//		}
+//		return Optional.of(
+//				new TimeLeavingOfDailyPerformance(employeeId, new WorkTimes(timeLeavingWorkList.size()), timeLeavingWorkList, targetDate));
+//	}
+//	
+//	@Override
+//	public Optional<BreakTimeOfDailyPerformance> convertBreakTimeSheetForOOtsuka(Optional<BreakTimeOfDailyPerformance> breakTimeOfDailyPerformance,
+//			WorkType workType,WorkTimeCode workTimeCode){
+//		if(isIWWorkTimeAndCode(workType, workTimeCode)) {
+//			if(breakTimeOfDailyPerformance.isPresent()) {
+//				if(breakTimeOfDailyPerformance.get().getBreakType().isReferWorkTime()) {
+//					return Optional.of(new BreakTimeOfDailyPerformance(breakTimeOfDailyPerformance.get().getEmployeeId(),
+//																	   breakTimeOfDailyPerformance.get().getBreakType(),
+//																	   Arrays.asList(new BreakTimeSheet(new BreakFrameNo(1), 
+//																			   							new TimeWithDayAttr(720),
+//																			   							new TimeWithDayAttr(780))),
+//																	   breakTimeOfDailyPerformance.get().getYmd()));
+//				}
+//				else {
+//					return breakTimeOfDailyPerformance;
+//				}
+//			}
+//			else {
+//				return breakTimeOfDailyPerformance;
+//			}
+//		}
+//		else {
+//			return breakTimeOfDailyPerformance;
+//		}
+//	}
+//	
 	
-	@Override
-	public Optional<BreakTimeOfDailyPerformance> convertBreakTimeSheetForOOtsuka(Optional<BreakTimeOfDailyPerformance> breakTimeOfDailyPerformance,
-			WorkType workType,WorkTimeCode workTimeCode){
-		if(isIWWorkTimeAndCode(workType, workTimeCode)) {
-			if(breakTimeOfDailyPerformance.isPresent()) {
-				if(breakTimeOfDailyPerformance.get().getBreakType().isReferWorkTime()) {
-					return Optional.of(new BreakTimeOfDailyPerformance(breakTimeOfDailyPerformance.get().getEmployeeId(),
-																	   breakTimeOfDailyPerformance.get().getBreakType(),
-																	   Arrays.asList(new BreakTimeSheet(new BreakFrameNo(1), 
-																			   							new TimeWithDayAttr(720),
-																			   							new TimeWithDayAttr(780))),
-																	   breakTimeOfDailyPerformance.get().getYmd()));
-				}
-				else {
-					return breakTimeOfDailyPerformance;
-				}
-			}
-			else {
-				return breakTimeOfDailyPerformance;
-			}
-		}
-		else {
-			return breakTimeOfDailyPerformance;
-		}
-	}
 	
-	
-	
-	/**
-	 * 大塚専用IWカスタマイズ処理を行う勤務種類And就業時間帯コードか判定する
-	 * @param workType
-	 * @param workTimeCode
-	 * @return IWカスタマイズ対象である
-	 */
-	@Override
-	public boolean isIWWorkTimeAndCode(WorkType workType,WorkTimeCode workTimeCode) {
-		if(!(workTimeCode.v().equals("100") || workTimeCode.v().equals("101")))
-			return false;
-		if(workType.getWorkTypeCode().v().equals("100")) 
-			return false;
-		
-		switch(workType.getDailyWork().decisionNeedPredTime()) {
-		case AFTERNOON:
-			if(workType.getDailyWork().getAfternoon().isHolidayWork()) {
-				return false;
-			}
-			//出勤or振出であろうという推測
-			else {
-				return true;
-			}
-		case FULL_TIME:
-			if(workType.getDailyWork().getOneDay().isHolidayWork()) {
-				return false;
-			}
-			//出勤or振出であろうという推測
-			else {
-				return true;
-			}
-		case MORNING:
-			if(workType.getDailyWork().getMorning().isHolidayWork()) {
-				return false;
-			}
-			//出勤or振出であろうという推測
-			else {
-				return true;
-			}
-		case HOLIDAY:
-			return false;
-		default:
-			throw new RuntimeException("unkwon pred need workType in IW Decision");
-		}
-	}
+//	/**
+//	 * 大塚専用IWカスタマイズ処理を行う勤務種類And就業時間帯コードか判定する
+//	 * @param workType
+//	 * @param workTimeCode
+//	 * @return IWカスタマイズ対象である
+//	 */
+//	@Override
+//	public boolean isIWWorkTimeAndCode(WorkType workType,WorkTimeCode workTimeCode) {
+//		if(!(workTimeCode.v().equals("100") || workTimeCode.v().equals("101")))
+//			return false;
+//		if(workType.getWorkTypeCode().v().equals("100")) 
+//			return false;
+//		
+//		switch(workType.getDailyWork().decisionNeedPredTime()) {
+//		case AFTERNOON:
+//			if(workType.getDailyWork().getAfternoon().isHolidayWork()) {
+//				return false;
+//			}
+//			//出勤or振出であろうという推測
+//			else {
+//				return true;
+//			}
+//		case FULL_TIME:
+//			if(workType.getDailyWork().getOneDay().isHolidayWork()) {
+//				return false;
+//			}
+//			//出勤or振出であろうという推測
+//			else {
+//				return true;
+//			}
+//		case MORNING:
+//			if(workType.getDailyWork().getMorning().isHolidayWork()) {
+//				return false;
+//			}
+//			//出勤or振出であろうという推測
+//			else {
+//				return true;
+//			}
+//		case HOLIDAY:
+//			return false;
+//		default:
+//			throw new RuntimeException("unkwon pred need workType in IW Decision");
+//		}
+//	}
 }

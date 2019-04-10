@@ -159,40 +159,51 @@ public class WithinStatutoryTimeOfDaily {
 														  Optional.empty(),
 														  NotUseAtr.NOT_USE);
 			
-
+			boolean isOOtsukaIWMode = decisionIWOOtsukaMode(workType,workTimeCode,recordReget);
 		//実働時間の計算
-			actualTime =  calcActualWorkTime(recordReget.getCalculationRangeOfOneDay().getWithinWorkingTimeSheet().get(),vacationClass,workType,
-//					  							  recordReget.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLate(),
-//					  							  recordReget.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLeaveEarly(),
-												  true,
-												  true,
-					  							  recordReget.getPersonalInfo().getWorkingSystem(),
-					  							  recordReget.getWorkDeformedLaborAdditionSet(),
-					  							  recordReget.getWorkFlexAdditionSet(),
-//					  							  new WorkFlexAdditionSet(recordReget.getWorkFlexAdditionSet().getCompanyId(),
-//					  									  				  new HolidayCalcMethodSet(new PremiumHolidayCalcMethod(CalcurationByActualTimeAtr.CALCULATION_BY_ACTUAL_TIME,recordReget.getWorkFlexAdditionSet().getVacationCalcMethodSet().getPremiumCalcMethodOfHoliday().getAdvanceSet()),
-//					  									  										   new WorkTimeHolidayCalcMethod(CalcurationByActualTimeAtr.CALCULATION_BY_ACTUAL_TIME, recordReget.getWorkFlexAdditionSet().getVacationCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getAdvancedSet()))
-//					  									  				  ),
-					  							  recordReget.getWorkRegularAdditionSet(),
-//					  							  new WorkRegularAdditionSet(recordReget.getWorkRegularAdditionSet().getCompanyId(),
-//					  									  					new HolidayCalcMethodSet(new PremiumHolidayCalcMethod(CalcurationByActualTimeAtr.CALCULATION_BY_ACTUAL_TIME,recordReget.getWorkRegularAdditionSet().getVacationCalcMethodSet().getPremiumCalcMethodOfHoliday().getAdvanceSet()),
-//					  									  											 new WorkTimeHolidayCalcMethod(CalcurationByActualTimeAtr.CALCULATION_BY_ACTUAL_TIME, recordReget.getWorkRegularAdditionSet().getVacationCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getAdvancedSet()))
-//					  									  					),
-					  							  recordReget.getHolidayAddtionSet().get(),
-					  							  recordReget.getHolidayCalcMethodSet(),
-					  							  calcMethod,
-					  							  flexCalcMethod,
-					  							  workTimeDailyAtr,
-					  							  workTimeCode,preFlexTime,
-					  							  recordReget.getCoreTimeSetting(),
-					  							recordReget.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc(),
-					  							recordReget.getCalculationRangeOfOneDay().getTimeVacationAdditionRemainingTime(),
-					  							recordReget.getDailyUnit(),
-					  							recordReget.getWorkTimezoneCommonSet(),
-					  							conditionItem,
-					  							predetermineTimeSetByPersonInfo,
-					  							Optional.of(new DeductLeaveEarly(0, 1)),
-					  							NotUseAtr.USE);
+			//大塚専用IW専用処理
+			if(isOOtsukaIWMode) {
+				if(recordReget.getPredSetForOOtsuka().isPresent()) {
+					actualTime = recordReget.getPredSetForOOtsuka().get().getAdditionSet().getPredTime().getOneDay();
+				}
+				 
+			}
+			//標準版処理
+			else {
+				actualTime =  calcActualWorkTime(recordReget.getCalculationRangeOfOneDay().getWithinWorkingTimeSheet().get(),vacationClass,workType,
+//						  recordReget.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLate(),
+//						  recordReget.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLeaveEarly(),
+						  true,
+						  true,
+						  recordReget.getPersonalInfo().getWorkingSystem(),
+						  recordReget.getWorkDeformedLaborAdditionSet(),
+						  recordReget.getWorkFlexAdditionSet(),
+//						  new WorkFlexAdditionSet(recordReget.getWorkFlexAdditionSet().getCompanyId(),
+//								  				  new HolidayCalcMethodSet(new PremiumHolidayCalcMethod(CalcurationByActualTimeAtr.CALCULATION_BY_ACTUAL_TIME,recordReget.getWorkFlexAdditionSet().getVacationCalcMethodSet().getPremiumCalcMethodOfHoliday().getAdvanceSet()),
+//								  										   new WorkTimeHolidayCalcMethod(CalcurationByActualTimeAtr.CALCULATION_BY_ACTUAL_TIME, recordReget.getWorkFlexAdditionSet().getVacationCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getAdvancedSet()))
+//								  				  ),
+						  recordReget.getWorkRegularAdditionSet(),
+//						  new WorkRegularAdditionSet(recordReget.getWorkRegularAdditionSet().getCompanyId(),
+//								  					new HolidayCalcMethodSet(new PremiumHolidayCalcMethod(CalcurationByActualTimeAtr.CALCULATION_BY_ACTUAL_TIME,recordReget.getWorkRegularAdditionSet().getVacationCalcMethodSet().getPremiumCalcMethodOfHoliday().getAdvanceSet()),
+//								  											 new WorkTimeHolidayCalcMethod(CalcurationByActualTimeAtr.CALCULATION_BY_ACTUAL_TIME, recordReget.getWorkRegularAdditionSet().getVacationCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getAdvancedSet()))
+//								  					),
+						  recordReget.getHolidayAddtionSet().get(),
+						  recordReget.getHolidayCalcMethodSet(),
+						  calcMethod,
+						  flexCalcMethod,
+						  workTimeDailyAtr,
+						  workTimeCode,preFlexTime,
+						  recordReget.getCoreTimeSetting(),
+						recordReget.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc(),
+						recordReget.getCalculationRangeOfOneDay().getTimeVacationAdditionRemainingTime(),
+						recordReget.getDailyUnit(),
+						recordReget.getWorkTimezoneCommonSet(),
+						conditionItem,
+						predetermineTimeSetByPersonInfo,
+						Optional.of(new DeductLeaveEarly(0, 1)),
+						NotUseAtr.USE);
+			}
+
 			actualTime = actualTime.minusMinutes(withinpremiumTime.valueAsMinutes());
 			
 		//所定内深夜時間の計算
@@ -202,7 +213,47 @@ public class WithinStatutoryTimeOfDaily {
 		return new WithinStatutoryTimeOfDaily(workTime,actualTime,withinpremiumTime,midNightTime);
 	}
 	
-	
+	//大塚専用IW判定処理
+	private static boolean decisionIWOOtsukaMode(WorkType workType, Optional<WorkTimeCode> workTimeCode,
+			ManageReGetClass recordReget) {
+		if(!workTimeCode.isPresent()) return false;
+		if(!(workTimeCode.get().v().equals("100") || workTimeCode.get().v().equals("101")))
+			return false;
+		if(workType.getWorkTypeCode().v().equals("100")) 
+			return false;
+		
+		switch(workType.getDailyWork().decisionNeedPredTime()) {
+		case AFTERNOON:
+			if(workType.getDailyWork().getAfternoon().isHolidayWork()) {
+				return false;
+			}
+			//出勤or振出であろうという推測
+			else {
+				return true;
+			}
+		case FULL_TIME:
+			if(workType.getDailyWork().getOneDay().isHolidayWork()) {
+				return false;
+			}
+			//出勤or振出であろうという推測
+			else {
+				return true;
+			}
+		case MORNING:
+			if(workType.getDailyWork().getMorning().isHolidayWork()) {
+				return false;
+			}
+			//出勤or振出であろうという推測
+			else {
+				return true;
+			}
+		case HOLIDAY:
+			return false;
+		default:
+			throw new RuntimeException("unkwon pred need workType in IW Decision");
+		}
+	}
+
 	/**
 	 * 日別実績の法定内時間の計算
 	 * @param dailyUnit 

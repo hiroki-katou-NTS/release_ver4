@@ -174,7 +174,7 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 													Optional<WorkTimezoneCommonSet> commonSetting,WorkingConditionItem conditionItem,
 													Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,
 													Optional<DeductLeaveEarly> deductLeaveEarly,
-													Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets, boolean ootsukaIWFlag) {
+													Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets) {
 		
 		List<WithinWorkTimeFrame> timeFrames = new ArrayList<>();
 		List<TimeSheetOfDeductionItem> shortTimeSheets = new ArrayList<>();
@@ -235,7 +235,7 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 					 commonSetting,
 					 conditionItem,
 					 predetermineTimeSetByPersonInfo,
-					 deductLeaveEarly, specificDateAttrSheets,ootsukaIWFlag
+					 deductLeaveEarly, specificDateAttrSheets
 					 );
 			//短時間時間帯の取得
 			shortTimeSheets = toHaveShortTime(timeFrames,deductionTimeSheet);
@@ -303,7 +303,7 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 			Optional<WorkTimezoneCommonSet> commonSetting,WorkingConditionItem conditionItem,
 			Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,
 			Optional<DeductLeaveEarly> deductLeaveEarly,
-			Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets, boolean ootsukaIWFlag
+			Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets
 			) {
 		
 		val timeFrames = new ArrayList<WithinWorkTimeFrame>();
@@ -325,8 +325,8 @@ public class WithinWorkTimeSheet implements LateLeaveEarlyManagementTimeSheet{
 																		 predetermineTimeForSet.getTimeSheets(workType.getDailyWork().decisionNeedPredTime(),workNo),
 																		 coreTimeSetting,breakTimeList,workType,predetermineTimeForSet,commonSetting, specificDateAttrSheets,
 																		 duplicateTimeSheet.getWorkingHoursTimeNo().v().intValue() == 1,
-																		 duplicateTimeSheet.getWorkingHoursTimeNo().v().intValue() == withinWorkTimeFrame.size(),
-																		 ootsukaIWFlag));
+																		 duplicateTimeSheet.getWorkingHoursTimeNo().v().intValue() == withinWorkTimeFrame.size()
+																		 ));
 		}
 		/*所定内割増時間の時間帯作成*/
 		return predetermineWithinPremiumTime(dailyUnit.getDailyTime(),predetermineTimeForSet.getAdditionSet().getPredTime().getPredetermineWorkTime(),timeFrames, 

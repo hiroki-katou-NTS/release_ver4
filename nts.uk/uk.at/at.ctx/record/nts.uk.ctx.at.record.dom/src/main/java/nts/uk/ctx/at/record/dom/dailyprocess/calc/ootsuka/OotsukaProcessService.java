@@ -29,13 +29,13 @@ public interface OotsukaProcessService {
 	//&大塚モード処理(計算項目を置き換え)
 	public IntegrationOfDaily integrationConverter(IntegrationOfDaily fromStamp, IntegrationOfDaily fromPcLogInfo);
 	
-	//IW専用処理(打刻補正用
-	public Optional<TimeLeavingOfDailyPerformance> iWProcessForStamp(Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance, String employeeId,GeneralDate targetDate,Optional<PredetemineTimeSetting> predetermineTimeSet,WorkType workType,WorkTimeCode workTimeCode);
-
-	//IW専用処理(休憩時刻補正用)
-	public Optional<BreakTimeOfDailyPerformance> convertBreakTimeSheetForOOtsuka(Optional<BreakTimeOfDailyPerformance> breakTimeOfDailyPerformance,WorkType workType,WorkTimeCode workTimeCode);
+//	//IW専用処理(打刻補正用
+//	public Optional<TimeLeavingOfDailyPerformance> iWProcessForStamp(Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance, String employeeId,GeneralDate targetDate,Optional<PredetemineTimeSetting> predetermineTimeSet,WorkType workType,WorkTimeCode workTimeCode);
+//
+//	//IW専用処理(休憩時刻補正用)
+//	public Optional<BreakTimeOfDailyPerformance> convertBreakTimeSheetForOOtsuka(Optional<BreakTimeOfDailyPerformance> breakTimeOfDailyPerformance,WorkType workType,WorkTimeCode workTimeCode);
 	
-	//IWか判断処理
-	public boolean isIWWorkTimeAndCode(WorkType workType,WorkTimeCode workTimeCode);
+//	//IWか判断処理
+//	public boolean isIWWorkTimeAndCode(WorkType workType,WorkTimeCode workTimeCode);
 	
 }

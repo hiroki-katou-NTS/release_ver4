@@ -468,7 +468,7 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 																List<TimeSheetOfDeductionItem> breakTimeList // マスタ側の休憩時間帯リスト
 																,WorkType workType,PredetermineTimeSetForCalc predetermineTimeForSet,
 																Optional<WorkTimezoneCommonSet> commonSetting,
-																Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets, boolean isFirstIndex, boolean isLastIndex, boolean ootsukaIWFlag) {
+																Optional<SpecificDateAttrOfDailyPerfor> specificDateAttrSheets, boolean isFirstIndex, boolean isLastIndex) {
 		
 		boolean earlyDed = true;
 		boolean lateDed = true;
@@ -576,32 +576,35 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
   	  		}
   		}
 			
+  		
 		//控除時間帯
   		List<TimeSheetOfDeductionItem> dedTimeSheet = Collections.emptyList(); 
-  		if(ootsukaIWFlag) {
-  			dedTimeSheet = deductionTimeSheet.getForDeductionTimeZoneList();
-  		}
-  		else {
+//		大塚IW限定処理(休憩を固定で入れる案)
+//  		if(ootsukaIWFlag) {
+//  			dedTimeSheet = deductionTimeSheet.getForDeductionTimeZoneList();
+//  		}
+//  		else {
   			dedTimeSheet = deductionTimeSheet.getDupliRangeTimeSheet(dupTimeSheet.getTimezone().getTimeSpan(), DeductionAtr.Deduction);
   			dedTimeSheet.forEach(tc ->{
   				tc.changeReverceRounding(tc.getTimeSheet().getRounding(), ActualWorkTimeSheetAtr.WithinWorkTime, DeductionAtr.Deduction, commonSetting);
   			});  			
-  		}
+//  		}
 		
 
 		
 		
 		//計上用時間帯
 		List<TimeSheetOfDeductionItem> recordTimeSheet = Collections.emptyList(); 
-  		if(ootsukaIWFlag) {
-  			recordTimeSheet = deductionTimeSheet.getForRecordTimeZoneList();
-  		}
-  		else {
+//		大塚IW限定処理(休憩を固定で入れる案)
+//  		if(ootsukaIWFlag) {
+//  			recordTimeSheet = deductionTimeSheet.getForRecordTimeZoneList();
+//  		}
+//  		else {
   			recordTimeSheet = deductionTimeSheet.getDupliRangeTimeSheet(dupTimeSheet.getTimezone().getTimeSpan(), DeductionAtr.Appropriate);
   			recordTimeSheet.forEach(tc ->{
   				tc.changeReverceRounding(tc.getTimeSheet().getRounding(), ActualWorkTimeSheetAtr.WithinWorkTime, DeductionAtr.Appropriate, commonSetting);
   			});  			
-  		}
+//  		}
 
 		
 		
