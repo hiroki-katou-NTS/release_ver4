@@ -266,11 +266,13 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 		if (!calculateOption.isSchedule()) {
 			// 大塚モードの処理
-			val afterOOtsukaModeCalc = replaceStampForOOtsuka(result.getIntegrationOfDaily(), companyCommonSetting,
-					personCommonSetting, tomorrowDayInfo, tomorrowDayInfo, converter);
+//			val afterOOtsukaModeCalc = replaceStampForOOtsuka(result.getIntegrationOfDaily(), companyCommonSetting,
+//					personCommonSetting, tomorrowDayInfo, tomorrowDayInfo, converter);
 
 			// 任意項目の計算
-			result.setIntegrationOfDaily(this.calcOptionalItem(afterOOtsukaModeCalc, converter, companyCommonSetting));
+//			result.setIntegrationOfDaily(this.calcOptionalItem(afterOOtsukaModeCalc, converter, companyCommonSetting));
+			
+			result.setIntegrationOfDaily(this.calcOptionalItem(result.getIntegrationOfDaily(), converter, companyCommonSetting));
 		}
 
 		if (!calculateOption.isMasterTime()) {
