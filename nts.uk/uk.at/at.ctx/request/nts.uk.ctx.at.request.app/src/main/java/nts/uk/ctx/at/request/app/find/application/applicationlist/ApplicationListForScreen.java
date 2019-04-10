@@ -309,7 +309,14 @@ public class ApplicationListForScreen {
 		mapDate.entrySet().stream().forEach(x -> {
 			Map<Object, List<AppGroupExportDto>> mapDateType = x.getValue().stream().collect(Collectors.groupingBy(y -> y.getAppType()));
 			mapDateType.entrySet().stream().forEach(y -> {
-				result.add(y.getValue().get(0));
+				if(Integer.valueOf(y.getKey().toString())==ApplicationType.ABSENCE_APPLICATION.value){
+					Map<Object, List<AppGroupExportDto>> mapDateTypeAbsence = y.getValue().stream().collect(Collectors.groupingBy(z -> z.getAppTypeName()));
+					mapDateTypeAbsence.entrySet().stream().forEach(z -> {
+						result.add(z.getValue().get(0));
+					});
+				} else {
+					result.add(y.getValue().get(0));
+				}
 			});
 		});
 		return result;
