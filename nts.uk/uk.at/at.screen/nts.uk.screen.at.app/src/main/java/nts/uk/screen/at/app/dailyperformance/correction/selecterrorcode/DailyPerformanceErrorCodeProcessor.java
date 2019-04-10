@@ -20,6 +20,7 @@ import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
+import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHisOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualDay;
@@ -46,6 +47,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.DPControlDisplayItem
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPDataDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPErrorDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPErrorSettingDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.DPHideControlCell;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyPerformanceCorrectionDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyPerformanceEmployeeDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyRecEditSetDto;
@@ -59,6 +61,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.checkapproval.Approv
 import nts.uk.screen.at.app.dailyperformance.correction.dto.checkshowbutton.DailyPerformanceAuthorityDto;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.DPLock;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.DPLockDto;
+import nts.uk.screen.at.app.dailyperformance.correction.process.CheckClosingEmployee;
 import nts.uk.screen.at.app.dailyperformance.correction.text.DPText;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
@@ -93,6 +96,9 @@ public class DailyPerformanceErrorCodeProcessor {
 	
 	@Inject
 	private IFindDataDCRecord iFindDataDCRecord;
+	
+	@Inject
+	private CheckClosingEmployee checkClosingEmployee;
 
 	private static final String LOCK_APPLICATION = "Application";
 	private static final String COLUMN_SUBMITTED = "Submitted";
@@ -141,7 +147,12 @@ public class DailyPerformanceErrorCodeProcessor {
 		// get employmentCode
 		AffEmploymentHistoryDto employment = repo.getAffEmploymentHistory(companyId, sId, dateRange.getEndDate());
 		screenDto.setEmploymentCode(employment == null ? "" : employment.getEmploymentCode());
+
 		List<String> listEmployeeId = lstEmployee.stream().map(e -> e.getId()).collect(Collectors.toList());
+		// 社員の締めをチェックする
+		Map<String, List<EmploymentHisOfEmployeeImport>> mapClosingEmpResult = checkClosingEmployee
+				.checkClosingEmployee(companyId, listEmployeeId,
+						new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId());
 		List<DPErrorDto> lstError = this.repo.getListDPError(screenDto.getDateRange(), listEmployeeId, errorCodes);
 		Map<String, String> mapIdError = new HashMap<>();
 		for (DPErrorDto dto : lstError) {
@@ -268,8 +279,15 @@ public class DailyPerformanceErrorCodeProcessor {
 		Map<Pair<String, GeneralDate>, ConfirmStatusActualResult> mapConfirmResult = confirmResults.stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x));
 		Map<Pair<String, GeneralDate>, ApprovalStatusActualResult> mapApprovalResults = approvalResults.stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x));
 		
+		//cell hide check box approval
+		List<DPHideControlCell> lstCellHideControl = new ArrayList<>();
 		Map<String, ItemValue> itemValueMap = new HashMap<>();
 		for (DPDataDto data : screenDto.getLstData()) {
+			//filter Date in Period
+			if(!dailyProcessor.checkDataInClosing(Pair.of(data.getEmployeeId(), data.getDate()), mapClosingEmpResult)) {
+				continue;
+			}
+			
 			data.setEmploymentCode(screenDto.getEmploymentCode());
 			if (!sId.equals(data.getEmployeeId())) {
 				screenDto.setCellSate(data.getId(), LOCK_APPLICATION, STATE_DISABLE);
@@ -290,17 +308,11 @@ public class DailyPerformanceErrorCodeProcessor {
 			// state check box sign
 			boolean disableSignApp = disableSignMap.containsKey(data.getEmployeeId() + "|" + data.getDate()) && disableSignMap.get(data.getEmployeeId() + "|" + data.getDate());
 			
-			if(dataSign == null || (!dataSign.isStatus() ? (!dataSign.notDisableForConfirm() ? true : disableSignApp) : !dataSign.notDisableForConfirm())){
-				screenDto.setCellSate(data.getId(), DPText.LOCK_SIGN, DPText.STATE_DISABLE);
-			}
 			ApprovalStatusActualResult dataApproval = mapApprovalResults.get(Pair.of(data.getEmployeeId(), data.getDate()));
 			//set checkbox approval
 			data.setApproval(dataApproval == null ? false : mode == ScreenMode.NORMAL.value ? dataApproval.isStatusNormal() : dataApproval.isStatus());
-			if(dataApproval == null || (mode == ScreenMode.NORMAL.value ? !dataApproval.notDisableNormal() : !dataApproval.notDisableApproval())) {
-				screenDto.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_DISABLE);
-			}
-			
 			ApproveRootStatusForEmpDto approvalCheckMonth = dpLock.getLockCheckMonth().get(data.getEmployeeId() + "|" + data.getDate());
+			
 			DailyModifyResult resultOfOneRow = dailyProcessor.getRow(resultDailyMap, data.getEmployeeId(), data.getDate());
 			if (resultOfOneRow != null && data.isErrorOther()) {
 				dailyProcessor.lockDataCheckbox(sId, screenDto, data, identityProcessDtoOpt, approvalUseSettingDtoOpt, mode, data.isApproval(), data.isSign());
@@ -312,12 +324,14 @@ public class DailyPerformanceErrorCodeProcessor {
 //                
 //                lockDaykWpl = dailyProcessor.lockAndDisable(screenDto, data, mode, lockDaykWpl, data.isApproval(), lockHist, data.isSign(), lockApprovalMonth, lockConfirmMonth);	
                 
-                boolean lockDaykWpl = false, lockHist = false, lockApprovalMonth = false, lockConfirmMonth = false;
+				boolean lockDaykWpl = false, lockDay = false, lockWpl = false, lockHist = false, lockApprovalMonth = false, lockConfirmMonth = false;
 				if (showLock == null || showLock) {
-					lockDaykWpl = dailyProcessor.checkLockAndSetState(dpLock.getLockDayAndWpl(), data);
+					lockDay = dailyProcessor.checkLockDay(dpLock.getLockDayAndWpl(), data);
+					lockWpl = dailyProcessor.checkLockWork(dpLock.getLockDayAndWpl(), data);
 					lockHist = dailyProcessor.lockHist(dpLock.getLockHist(), data);
 					lockApprovalMonth = approvalCheckMonth == null ? false : approvalCheckMonth.isCheckApproval();
 					lockConfirmMonth = dailyProcessor.checkLockConfirmMonth(dpLock.getLockConfirmMonth(), data);
+					lockDaykWpl = lockDay || lockWpl;
 					lockDaykWpl = dailyProcessor.lockAndDisable(screenDto, data, mode, lockDaykWpl, dataApproval == null ? false : dataApproval.isStatusNormal(), lockHist,
 							data.isSign(), lockApprovalMonth, lockConfirmMonth);
 				} else {
@@ -345,8 +359,22 @@ public class DailyPerformanceErrorCodeProcessor {
 				if (optWorkInfoOfDailyPerformanceDto.isPresent()
 						&& optWorkInfoOfDailyPerformanceDto.get().getState() == CalculationState.No_Calculated)
 					screenDto.setAlarmCellForFixedColumn(data.getId(), displayFormat);
+				
+				if(lockDay || lockHist || dataSign == null || (!dataSign.isStatus() ? (!dataSign.notDisableForConfirm() ? true : disableSignApp) : !dataSign.notDisableForConfirm())){
+					screenDto.setCellSate(data.getId(), DPText.LOCK_SIGN, DPText.STATE_DISABLE);
+				}
+				
+				if(lockDay || lockHist || dataApproval == null || (mode == ScreenMode.NORMAL.value ? !dataApproval.notDisableNormal() : !dataApproval.notDisableApproval())) {
+					screenDto.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_DISABLE);
+				}
+				
+				if(dataApproval == null) {
+					screenDto.setCellSate(data.getId(), DPText.LOCK_APPROVAL, DPText.STATE_ERROR);
+					lstCellHideControl.add(new DPHideControlCell(data.getId(), DPText.LOCK_APPROVAL));
+				}
 			}
 		}
+		screenDto.setLstHideControl(lstCellHideControl);
 		screenDto.setLstData(lstData);
 		return screenDto;
 	}

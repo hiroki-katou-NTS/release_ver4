@@ -34,6 +34,14 @@ function initScreen(screenModel: any, listAppMeta: Array<model.ApplicationMetada
         if (currentApp.appType == 10) {
             $("#fixed-table").ntsFixedTable({ width: 100 });
         }
+        nts.uk.ui._viewModel.errors.isEmpty.subscribe((values) => {
+            screenModel.errorEmpty(values);
+        });
+        $.get('/nts.uk.at.web/view/kaf/000/b/index2.xhtml').done(html => {
+            let htmlN = html.replace(/\<\?xml version='1\.0' encoding='UTF\-8' \?\>/, "");
+            let htmlF = htmlN.replace("<!DOCTYPE html>", "");
+            __viewContext.html = htmlF;
+            });
     });
 }
     
@@ -43,22 +51,45 @@ __viewContext.getProgramName = getProgramName;
 __viewContext.ready(function() {
     var listAppMeta: Array<model.ApplicationMetadata> = [];
     var currentApp: model.ApplicationMetadata;
-    var listValue: Array<string> = __viewContext.transferred.value.listAppMeta;
-    var currentValue: string = __viewContext.transferred.value.currentApp;
+    var listValue: Array<string> = [];
+    var currentValue: string = '';
     var screenModel: any = {};
-    nts.uk.at.view.kaf000.b.service.getAppByListID(listValue)
-        .done((data) => {
+    if (__viewContext.transferred.value == null || __viewContext.transferred.value === undefined) {
+        nts.uk.characteristics.restore('paramInitKAF000').done((paramCache) => {
+            if (paramCache != null && paramCache !== undefined) {
+                listValue = paramCache.listAppMeta;
+                currentValue = paramCache.currentApp;
+                __viewContext.transferred.value = {'listAppMeta': listValue, 'currentApp': currentValue};
+                nts.uk.at.view.kaf000.b.service.getAppByListID(listValue).done((data) => {
+                    _.forEach(listValue, (value) => {
+                        listAppMeta.push(_.find(data, (o) => { return o.appID == value; }));
+                    });
+                    currentApp = _.find(listAppMeta, x => { return x.appID == currentValue; });
+                    initScreen(screenModel, listAppMeta, currentApp);
+                }).fail((res) => {
+                    nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() {
+                        model.CommonProcess.callCMM045();
+                    });
+                });
+            }
+        });
+    } else {
+        listValue = __viewContext.transferred.value.listAppMeta;
+        currentValue = __viewContext.transferred.value.currentApp;
+        nts.uk.characteristics.save('paramInitKAF000', { 'listAppMeta': listValue, 'currentApp': currentValue });
+        nts.uk.at.view.kaf000.b.service.getAppByListID(listValue).done((data) => {
             _.forEach(listValue, (value) => {
                 listAppMeta.push(_.find(data, (o) => { return o.appID == value; }));
             });
-            currentApp = _.find(listAppMeta, x => {return x.appID == currentValue; });
+            currentApp = _.find(listAppMeta, x => { return x.appID == currentValue; });
             initScreen(screenModel, listAppMeta, currentApp);
-        }).fail((res) =>{
+        }).fail((res) => {
             nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() {
-                 model.CommonProcess.callCMM045();
+                model.CommonProcess.callCMM045();
             });
         });
     }
+}
 
 );
 

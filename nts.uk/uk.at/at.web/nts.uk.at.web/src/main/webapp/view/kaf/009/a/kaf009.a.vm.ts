@@ -392,12 +392,10 @@ module nts.uk.at.view.kaf009.a.viewmodel {
             if (nts.uk.ui.errors.hasError()) { return; }
             nts.uk.ui.block.invisible();
             let self = this;
-            let dfd = $.Deferred();
             let command = self.getCommand();
             command.checkOver1Year = true;
             service.checkInsertGoBackDirect(command).done(function() {
                 self.registry();
-                dfd.resolve(true);
             }).fail(function(res: any) {
                 if (res.messageId == "Msg_1518") {//confirm
                     dialog.confirm({ messageId: res.messageId }).ifYes(() => {
@@ -407,14 +405,13 @@ module nts.uk.at.view.kaf009.a.viewmodel {
                             dfd.resolve(true);
                         }).fail(function(res: any) {
                             self.checkRegFail(res);
-                        }
+                        });
                     }).ifNo(() => {
                         nts.uk.ui.block.clear();
                     });
                 } else
                     self.checkRegFail(res);
             });
-            return dfd.promise();
         }
 
         checkRegFail(res) {
@@ -422,7 +419,6 @@ module nts.uk.at.view.kaf009.a.viewmodel {
             if (res.messageId == "Msg_297") {
                 dialog.confirm({ messageId: 'Msg_297' }).ifYes(function() {
                     self.registry();
-                    dfd.resolve(true);
                 }).ifNo(function() {
                     let showMsg: boolean = true;
                     nts.uk.ui.block.clear();
@@ -448,10 +444,8 @@ module nts.uk.at.view.kaf009.a.viewmodel {
                     if (showMsg) {
                         dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds });
                     }
-                    dfd.resolve(false);
                 });
             } else if (res.messageId == "Msg_298") {
-                dfd.reject();
                 nts.uk.ui.block.clear();
                 let showMsg: boolean = true;
                 if (self.selectedGo() == 1 && !nts.uk.util.isNullOrEmpty(self.timeStart1())) {

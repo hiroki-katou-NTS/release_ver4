@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.DetermineActualResultLock;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.LockStatus;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.PerformanceType;
@@ -39,7 +40,7 @@ public class MonthlyActualSituationStatus {
 	 * @return «Output» 月の実績の状況
 	 */
 	public MonthlyActualSituationOutput getMonthlyActualSituationStatus(AcquireActualStatus param,Optional<ApprovalProcess> approvalProcOp,List<SharedAffJobTitleHisImport> listShareAff,boolean checkIdentityOp,List<Identification> listIdentification,
-			boolean checkExistRecordErrorListDate){		
+			boolean checkExistRecordErrorListDate, List<GeneralDate> lstDateCheck){		
 		MonthlyActualSituationOutput monthlyResult = new MonthlyActualSituationOutput();
 		//社員の締め情報
 		monthlyResult.setEmployeeClosingInfo(new EmployeeClosingInfo(param.employeeId, param.getClosureId(), param.getClosureDate(), param.getProcessDateYM(), param.getDuration()));
@@ -57,7 +58,7 @@ public class MonthlyActualSituationStatus {
 		//日の実績が存在する＝TRUE　で固定
 		dailyActualSituation.setDailyAchievementsExist(true);
 		//対象日の本人確認が済んでいるかチェックする
-		dailyActualSituation.setIdentificationCompleted(indentityStatus.identityConfirmCheck(param.getCompanyId(), param.getEmployeeId(), param.getDuration(),checkIdentityOp,listIdentification));
+		dailyActualSituation.setIdentificationCompleted(indentityStatus.identityConfirmCheck(param.getCompanyId(), param.getEmployeeId(),checkIdentityOp,listIdentification, lstDateCheck));
 		//対象期間に日別実績のエラーが発生しているかチェックする
 		dailyActualSituation.setDailyRecordError(checkExistRecordErrorListDate);
 		

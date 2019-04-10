@@ -1,7 +1,7 @@
 <div data-bind="let: { $vm: $data }">
 	<!--LEFT CONTENTS -->
 	<div class="left-contents-009">
-		<div class="valign-center control-group" data-bind = "visible: !employeeFlag()">
+		<div class="valign-center control-group-kaf009" data-bind = "visible: !employeeFlag()">
 			<div class="lblTitleKAF009" data-bind="ntsFormLabel: {}">#{i18n.getText('KAF009_7')}</div>
 			<label class="lblEmployeeName" data-bind="text : employeeName"></label>
 		</div>
@@ -23,13 +23,13 @@
 							]}">
 			</div>
 		</div>
-		<div class="cf valign-center control-group" data-bind = "visible: employeeFlag()">
+		<div class="cf valign-center control-group-kaf009" data-bind = "visible: employeeFlag()">
 			<div class="cm-column"></div>
 			<!--A3_9 申請者表示氏名-->
 			<label style ="margin-left: 139px;" data-bind="text : totalEmployee"></label>
 		</div>
 		<!--事前事後区分-->
-		<div class="valign-center control-group "
+		<div class="valign-center control-group-kaf009 "
 			data-bind="visible: prePostDisp()">
 			<div class="lblTitleKAF009"
 				data-bind="ntsFormLabel:{required : true}">#{i18n.getText('KAF009_8')}</div>
@@ -55,7 +55,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="valign-center control-group">
+		<div class="valign-center control-group-kaf009">
 			<!--申請日付 -->
 			<div class="lblTitleKAF009" data-bind="ntsFormLabel:{required:true}">#{i18n.getText('KAF009_11')}</div>
 			<div data-bind="if: screenModeNew()" class="mode-style">
@@ -72,7 +72,7 @@
 			</div>
 		</div>
 		<!--勤務時間 1-->
-		<div class="valign-center control-group">
+		<div class="valign-center control-group-kaf009">
 			<div class="table">
 				<div class="cell valign-top">
 					<div class="lblTitleKAF009"
@@ -107,7 +107,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="table">
+			<!-- <div class="table">
 				<div class="cell valign-top lblTitleKAF009"></div>
 				<div class="cell valign-center">
 					<div style="display: inline-block; width: 250px;">
@@ -138,7 +138,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> -->
 			<div class="table">
 				<div class="cell valign-top lblTitleKAF009"></div>
 				<div class="cell valign-center">
@@ -164,7 +164,7 @@
 		</div>
 
 		<!--勤務時間 2-->
-		<div class="valign-center control-group" data-bind="if: useMulti()" style="display: none">
+		<div class="valign-center control-group-kaf009" data-bind="if: useMulti()" style="display: none">
 			<div class="table">
 				<div class="cell valign-center">
 					<div class="lblTitleKAF009"
@@ -195,7 +195,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="table">
+			<!-- <div class="table">
 				<div class="cell valign-top lblTitleKAF009"></div>
 				<div class="cell valign-center">
 					<div style="display: inline-block; width: 250px;">
@@ -226,7 +226,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> -->
 			<div class="table">
 				<div class="cell valign-top lblTitleKAF009"></div>
 				<div class="cell valign-center">
@@ -248,7 +248,7 @@
 		</div>
 		<!--勤務を変更する -->
 		<!--Work Change-->
-		<div class="valign-center control-group">
+		<div class="valign-center control-group-kaf009">
 			<div data-bind="if: checkboxDisplay">
 				<div data-bind="ntsCheckBox: { checked: workChangeAtr , 
 											enable: checkboxEnable, 
@@ -257,10 +257,10 @@
 			<HR data-bind="display: typeSiftVisible() ? '' : 'none' " />
 			<div class="table clsWorkType" data-bind="if: workChangeBtnDisplay">
 				<div class="cell valign-center ">
-					<div class="valign-center control-group"
+					<div class="valign-center control-group-kaf009"
 						data-bind="ntsFormLabel:{ required: true }">#{i18n.getText('KAF009_22')}</div>
 					<BR />
-					<div class="valign-center control-group"
+					<div class="valign-center control-group-kaf009"
 						data-bind="ntsFormLabel:{ required: true }">#{i18n.getText('KAF009_23')}</div>
 				</div>
 				<div class="cell valign-center">

@@ -85,7 +85,6 @@ public class HolidayWorkTimeSheet{
 			}
 			//枠追加
 			else {
-				
 				holidayTimeFrameList.put(holidayWorkFrameTime.getFrameTime().getHolidayFrameNo().v(),
 										 holidayWorkFrameTime.getFrameTime().addHolidayTimeExistReturn(forceAtr.isCalculateEmbossing()?calcRecTime:new AttendanceTime(0),calcDedTime)
 										 );
@@ -256,7 +255,6 @@ public class HolidayWorkTimeSheet{
 	private List<HolidayWorkFrameTime> afterUpperControl(List<HolidayWorkFrameTime> calcHolidayTimeWorkTimeList,AutoCalSetting autoCalcSet) {
 		List<HolidayWorkFrameTime> returnList = new ArrayList<>();
 		for(HolidayWorkFrameTime loopHolidayTimeFrame:calcHolidayTimeWorkTimeList) {
-			
 			//時間の上限時間算出
 			AttendanceTime upperTime = desictionUseUppserTime(autoCalcSet, loopHolidayTimeFrame,loopHolidayTimeFrame.getHolidayWorkTime().get().getTime());
 			//計算時間の上限算出
@@ -264,8 +262,7 @@ public class HolidayWorkTimeSheet{
 			//振替処理
 			loopHolidayTimeFrame = loopHolidayTimeFrame.changeOverTime(TimeDivergenceWithCalculation.createTimeWithCalculation(upperTime.greaterThan(loopHolidayTimeFrame.getHolidayWorkTime().get().getTime())?loopHolidayTimeFrame.getHolidayWorkTime().get().getTime():upperTime,
 //																														 upperCalcTime.greaterThan(loopHolidayTimeFrame.getHolidayWorkTime().get().getCalcTime())?loopHolidayTimeFrame.getHolidayWorkTime().get().getCalcTime():upperCalcTime)
-																															   loopHolidayTimeFrame.getHolidayWorkTime().get().getCalcTime()));
-			
+																															   loopHolidayTimeFrame.getHolidayWorkTime().get().getCalcTime()));			
 			returnList.add(loopHolidayTimeFrame);
 		}
 		return returnList;
@@ -302,8 +299,10 @@ public class HolidayWorkTimeSheet{
 			return afterCalcUpperTimeList;
 		//代休振替設定判定
 		switch(useSettingAtr.get().getSubHolTransferSetAtr()) {
+			//一定時間を超えたら代休とする
 			case CERTAIN_TIME_EXC_SUB_HOL:
 				return periodOfTimeTransfer(useSettingAtr.get().getCertainTime(),afterCalcUpperTimeList);
+			//指定した時間を代休とする
 			case SPECIFIED_TIME_SUB_HOL:
 				return transAllTime(useSettingAtr.get().getDesignatedTime().getOneDayTime(),
 								    useSettingAtr.get().getDesignatedTime().getHalfDayTime(),
@@ -321,9 +320,11 @@ public class HolidayWorkTimeSheet{
 	 */
 	private Optional<SubHolTransferSet> getTransSet(Optional<WorkTimezoneOtherSubHolTimeSet> eachWorkTimeSet,
 										  Optional<CompensatoryOccurrenceSetting> eachCompanyTimeSet) {
+		//就業時間帯の振替設定参照
 		if(eachWorkTimeSet.isPresent() && eachWorkTimeSet.get().getSubHolTimeSet().isUseDivision()) {
 			return Optional.of(eachWorkTimeSet.get().getSubHolTimeSet());
 		}
+		//会社共通の振替設定参照
 		else {
 			if(eachCompanyTimeSet.isPresent()) {
 				if(eachCompanyTimeSet.get().getTransferSetting().isUseDivision()) {

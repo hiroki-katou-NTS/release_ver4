@@ -1,8 +1,10 @@
 package nts.uk.ctx.at.request.dom.application.appabsence.service.four;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -36,7 +38,9 @@ public class AppAbsenceFourProcessImpl implements AppAbsenceFourProcess{
 					halfAtrs.add(7);
 					List<String> workTypeCodes = new ArrayList<>();
 					workTypeCodes.add(workTypeCd);
-					List<WorkType> workTypes = this.workTypeRepository.findWorkTypeForHalfDay(companyID,halfAtrs,workTypeCodes);
+					List<WorkType> workTypes = this.workTypeRepository
+							.findWorkTypeForHalfDay(companyID, halfAtrs, workTypeCodes).stream()
+							.sorted(Comparator.comparing(WorkType::getWorkTypeCode)).collect(Collectors.toList());
 					if(!CollectionUtil.isEmpty(workTypes)){
 						return true;
 					}

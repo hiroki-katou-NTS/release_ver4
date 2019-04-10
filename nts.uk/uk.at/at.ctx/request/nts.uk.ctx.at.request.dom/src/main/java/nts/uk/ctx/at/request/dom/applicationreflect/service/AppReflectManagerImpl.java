@@ -41,6 +41,7 @@ import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.CommonRef
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.AppDegreeReflectionAtr;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.AppExecutionType;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.AppReflectRecordPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.BreakTime;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.GobackAppRequestPara;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.GobackReflectPara;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.HolidayWorkReflectPara;
@@ -138,8 +139,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			if(absenceData == null) {
 				return outData;
 			}
-		} else if (appInfor.getAppType() == ApplicationType.BREAK_TIME_APPLICATION
-				&& appInfor.getPrePostAtr() == PrePostAtr.PREDICT) {			
+		} else if (appInfor.getAppType() == ApplicationType.BREAK_TIME_APPLICATION) {			
 			Optional<AppHolidayWork> getFullAppHolidayWork = holidayWorkRepo.getFullAppHolidayWork(appInfor.getCompanyID(), appInfor.getAppID());
 			if(!getFullAppHolidayWork.isPresent()) {
 				return outData;
@@ -278,10 +278,15 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			InformationSettingOfEachApp reflectSetting) {
 		HolidayWorkReflectPara holidayPara = null;
 		Map<Integer, Integer> mapOvertimeFrame =  new HashMap<>();
+		Map<Integer, BreakTime> mapBreakTimeFrame =  new HashMap<>();
 		if(!holidayWorkData.getHolidayWorkInputs().isEmpty()) {
 			holidayWorkData.getHolidayWorkInputs().stream().forEach(x -> {
 				if(x.getAttendanceType() == AttendanceType.BREAKTIME) {
 					mapOvertimeFrame.put(x.getFrameNo(), x.getApplicationTime().v());
+				}
+				if(x.getAttendanceType() == AttendanceType.RESTTIME) {
+					BreakTime breakTime = new BreakTime(x.getStartTime().v(), x.getEndTime().v()); 
+					mapBreakTimeFrame.put(x.getFrameNo(), breakTime);
 				}
 			});
 		}
@@ -292,13 +297,16 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				appInfor.getReflectionInformation().getStateReflectionReal(), 
 				!appInfor.getReflectionInformation().getNotReasonReal().isPresent() ? null : appInfor.getReflectionInformation().getNotReasonReal().get(),
 						holidayWorkData.getWorkClock1().getStartTime() == null ? null : holidayWorkData.getWorkClock1().getStartTime().v(),
-						holidayWorkData.getWorkClock1().getEndTime() == null ? null : holidayWorkData.getWorkClock1().getEndTime().v());
+						holidayWorkData.getWorkClock1().getEndTime() == null ? null : holidayWorkData.getWorkClock1().getEndTime().v(),
+				mapBreakTimeFrame);
 		holidayPara = new HolidayWorkReflectPara(appInfor.getEmployeeID(),
 				appInfor.getAppDate(),
-				reflectSetting.isKyushutsu(),
+				reflectSetting.isHwScheReflectHwTime(),
 				reflectSetting.getScheAndWorkChange(),
 				reflectSetting.isJizenScheYusen(),
-				appPara);
+				appPara,
+				reflectSetting.isHwRecordReflectTime(),
+				reflectSetting.isHwRecordReflectBreak());
 		return holidayPara;
 		
 	}

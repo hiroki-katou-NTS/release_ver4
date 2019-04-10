@@ -1,11 +1,12 @@
 module nts.uk.com.view.cmf004.b {
     __viewContext.ready(function() {
-        let screenModel = new viewmodel.ScreenModel();
-        screenModel.start().done(()=>{
-            __viewContext.bind(screenModel);
+       __viewContext['screenModel'] = new viewmodel.ScreenModel();
+       let vm: any = __viewContext['screenModel'];
+        vm.start().done(()=>{
+            __viewContext.bind(vm);
             $('#B5_1_horizontalScrollContainer').remove();
-            $('#kcp005component').ntsListComponent(screenModel.kcp005ComponentOptionScreenG);
-            $('#kcp005component1').ntsListComponent(screenModel.kcp005ComponentOptionScreenH);
+            $('#kcp005component').ntsListComponent(vm.kcp005ComponentOptionScreenG);
+            $('#kcp005component1').ntsListComponent(vm.kcp005ComponentOptionScreenH);
             
         });
         $('#B3_1').focus();

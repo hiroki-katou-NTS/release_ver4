@@ -70,7 +70,7 @@ module nts.uk.at.view.ksc001.k {
              * define function to sort
              */
             private compareCode(a: any) {
-                return a.code.toUpperCase();
+                return _.isNil(a.code) ? a.code : a.code.toUpperCase();
                
             }
             /**

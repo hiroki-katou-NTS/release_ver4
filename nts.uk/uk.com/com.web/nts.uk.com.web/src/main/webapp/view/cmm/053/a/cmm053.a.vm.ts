@@ -107,11 +107,17 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             self.settingManager().departmentCode.subscribe(value => {
                 self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
                 setTimeout(function() {
+                    if($('#A2_7').ntsError('hasError')){
+                        self.settingManager().departmentApproverId('');
+                        self.settingManager().departmentName('');
+                        self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
+                        return;
+                    }
                     if (value != '' && value != null && value !== undefined && value.length == 6){
                         self.getEmployeeByCode(value, APPROVER_TYPE.DEPARTMENT_APPROVER);
                     }else{
                         self.settingManager().departmentApproverId('');
-                         self.settingManager().departmentName('');
+                        self.settingManager().departmentName('');
                         self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
                     }
                     self.isInitDepartment = false;
@@ -121,6 +127,12 @@ module nts.uk.com.view.cmm053.a.viewmodel {
             self.settingManager().dailyApprovalCode.subscribe(value => {
                 self.checkSubscribe(STATUS_SUBSCRIBE.PENDING);
                 setTimeout(function() {
+                    if($('#A2_10').ntsError('hasError')){
+                        self.settingManager().dailyApproverId("");
+                        self.settingManager().dailyApprovalName("");
+                        self.checkSubscribe(STATUS_SUBSCRIBE.DONE);
+                        return;
+                    }
                     if (value != '' && value != null && value !== undefined && value.length == 6){
                         self.getEmployeeByCode(value, APPROVER_TYPE.DAILY_APPROVER);
                     } else {
@@ -242,10 +254,11 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                             if (!nts.uk.ui.errors.hasError()) {
                                 let startDate = new Date(self.settingManager().startDate());
                                 let closingStartDate = new Date(self.settingManager().closingStartDate());
+                                let $vm = ko.dataFor(document.querySelector('#function-panel'))
                                 let paramcheckReg = {
-                                    codeA16: self.findA16().code,
+                                    codeA16: $vm.empDisplayCode(),
                                     codeA27: self.settingManager().departmentCode(),
-                                    codeA210: self.settingManager().dailyApprovalCode(),
+                                    codeA210: self.displayDailyApprover() ? self.settingManager().dailyApprovalCode() : "",
                                     baseDate: moment(new Date(self.settingManager().startDate())).format('YYYY/MM/DD')
                                 }
                                 block.invisible();
@@ -265,7 +278,7 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                                         command.startDate = moment.utc(self.settingManager().startDate(), "YYYY/MM/DD").toISOString();
                                         command.endDate = moment.utc(self.settingManager().endDate(), "YYYY/MM/DD").toISOString();
                                         if (command.dailyApprovalCode == null || command.dailyApprovalCode === undefined
-                                            || nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim())) {
+                                            || nts.uk.text.isNullOrEmpty(command.dailyApprovalCode.trim()) || !self.displayDailyApprover()) {
                                             command.dailyApproverId = '';
                                         }
                                         if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory()) {
@@ -275,25 +288,22 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                                             if (startDate < closingStartDate && !(self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory())) {
                                                 closingStartDate = nts.uk.time.formatDate(closingStartDate, 'yyyy/MM/dd');
                                                 //エラーメッセージ（Msg_1072）
-                                                dialog.alertError({ messageId: "Msg_1072", messageParams: [closingStartDate] });
+                                                dialog.alertError({ messageId: "Msg_1072", messageParams: [closingStartDate] }).then(() =>{
+                                                    block.clear();    
+                                                });
                                             } else {
                                                 self.callInsertHistoryService(command);
                                             }
                                         }
                                     }
+                                }).fail(()=>{
+                                    block.clear();    
                                 });
                             }
                         }
                     }
                 }, 300);
             },200);
-        }
-
-        findA16(){
-            let self = this;
-            return _.find(self.employeeInputList(), emp =>{
-                return emp.id == self.selectedItem();
-            });     
         }
 
         //削除する

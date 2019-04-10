@@ -39,14 +39,17 @@ public interface HolidayWorkReflectProcess {
 			boolean scheReflectFlg, boolean isPre,
 			ScheAndRecordSameChangeFlg scheAndRecordSameChangeFlg);
 	/**
-	 * 
-	 * @param employeeId
-	 * @param baseDate
-	 * @param mapWorkTimeFrame 休出時間1～10
+	 * 休出時間を反映
+	 * @param holidayWorkPara
+	 * @param isPre：　True：　事前申請、False：　事後申請
+	 * @param daily
 	 */
-	public IntegrationOfDaily reflectWorkTimeFrame(String employeeId, 
-			GeneralDate baseDate, 
-			Map<Integer, Integer> mapWorkTimeFrame, 
-			IntegrationOfDaily dailyData);
-
+	public IntegrationOfDaily reflectWorkTimeFrame(HolidayWorktimePara holidayWorkPara, boolean isPre, IntegrationOfDaily daily);
+	/**
+	 * 休憩時間を反映
+	 * @param holidayWorkPara
+	 * @param isPre　True：　事前申請、False：　事後申請
+	 * @param daily
+	 */
+	public void reflectBreakTimeFrame(HolidayWorktimePara holidayWorkPara, boolean isPre, IntegrationOfDaily daily);
 }

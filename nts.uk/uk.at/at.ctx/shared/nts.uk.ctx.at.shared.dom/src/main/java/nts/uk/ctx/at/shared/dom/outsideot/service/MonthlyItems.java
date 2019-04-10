@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
  */
 public enum MonthlyItems {
 	// フレックス超過時間
+	LEGAL_FLEX_TIME(15, "フレックス法定内時間", null),
+	ILLEGAL_FLEX_TIME(16, "フレックス法定外時間", null),
 	FLEX_EXCESS_TIME(17, "フレックス超過時間", null),
 	
 	// 残業時間

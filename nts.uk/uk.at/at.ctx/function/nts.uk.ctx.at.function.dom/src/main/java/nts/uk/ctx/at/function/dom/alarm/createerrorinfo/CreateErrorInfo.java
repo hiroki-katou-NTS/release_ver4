@@ -76,6 +76,9 @@ public class CreateErrorInfo {
 				for(String errorAdmItem : errorAdm) {
 					error += errorAdmItem;
 				}
+				if(listEmp.isEmpty()&&errorAdm.isEmpty()) {
+					error = "";
+				}
 			}
 			
 		}

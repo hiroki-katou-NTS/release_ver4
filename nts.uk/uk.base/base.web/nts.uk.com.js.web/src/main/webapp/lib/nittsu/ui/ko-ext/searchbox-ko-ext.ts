@@ -20,15 +20,41 @@ module nts.uk.ui.koExtentions {
             this.searchField = searchField;
         }
         
-        search(searchKey: string): Array<any>{
+        filter(searchKey: string): Array<any>{
             let self = this;
-            if(_.isEmpty(this.source)){
+            return self.filterWithSource(searchKey, this.source);
+        }
+        
+        search(searchKey: string, fromIndex: number): any {
+            let self = this;
+            
+            // search in the next array
+            let nextSource = self.source.slice(fromIndex + 1);
+            let nextFilterdItems = self.filterWithSource(searchKey, nextSource);
+            if (nextFilterdItems.length > 0 ) {
+                return nextFilterdItems[0];   
+            }
+            // search in the previous array
+            let previousSource = self.source.slice(0, fromIndex + 1);
+            let previouseFilteredItems = self.filterWithSource(searchKey, previousSource);
+            if (previouseFilteredItems.length > 0) {
+                return previouseFilteredItems[0];
+            }
+            
+            // if not match searchKey
+            return null;
+        }
+        
+        filterWithSource(searchKey: string, source: Array<any>) {
+            let self = this;
+            
+            if(_.isEmpty(source)){
                 return [];        
             }
             
-            var flatArr = nts.uk.util.flatArray(this.source, this.childField);
+            let flatArr = nts.uk.util.flatArray(source, this.childField);
             
-            var filtered = _.filter(flatArr, function(item: any) {
+            let filtered = _.filter(flatArr, function(item: any) {
                 return _.find(self.searchField, function(x: string) {
                     if(x !== undefined && x !== null){
                         let val: string = item[x].toString();
@@ -39,7 +65,7 @@ module nts.uk.ui.koExtentions {
             });
             
             return filtered;
-        }  
+        }
         
         setDataSource(source: Array<any>) {
             this.source = _.isEmpty(source) ? [] : this.cloneDeep(source);       
@@ -82,43 +108,53 @@ module nts.uk.ui.koExtentions {
         
         search (searchKey: string, selectedItems: Array<any>): SearchResult{
             let result = new SearchResult();   
+            let key = this.key;
             
-            let filtered = this.seachBox.search(searchKey);
-            
-            if(!_.isEmpty(filtered)){
-                let key = this.key;
-                if(this.mode === "highlight"){     
-                    result.options = this.seachBox.getDataSource();
-                    let index = 0;
-                    if (!_.isEmpty(selectedItems)) {
-                        let firstItemValue = $.isArray(selectedItems) 
-                            ? selectedItems[0]["id"].toString(): selectedItems["id"].toString();
-                        index = _.findIndex(filtered, function(item: any){
-                            return item[key].toString() === firstItemValue;           
-                        });   
-                        if(!_.isNil(index)){
-                            index++;        
-                        }                 
-                    }  
-                    if(index >= 0){
-                        result.selectItems = [filtered[index >= filtered.length ? 0 : index]];        
-                    }
-                } else if (this.mode === "filter") {
-                    result.options = filtered;   
-                    let selectItem = _.filter(filtered, function (itemFilterd: any){
-                        return _.find(selectedItems, function (item: any){
-                            let itemVal = itemFilterd[key];
-                            if(_.isNil(itemVal) || _.isNil(item["id"])){
-                               return false;
-                            }
-                            return itemVal.toString() === item["id"].toString();        
-                        }) !== undefined;            
-                    }); 
-                    result.selectItems = selectItem;
-                }    
+            if(this.mode === "highlight"){
+                let dataSource = this.seachBox.getDataSource();     
+                
+                let selectingIndex = this.computeSelectingIndex(dataSource, selectedItems, key);
+                
+                let selectItem = this.seachBox.search(searchKey, selectingIndex); 
+                if (selectItem == null ) {
+                    return result;    
+                }
+                
+                result.options = dataSource;
+                result.selectItems = [selectItem];
+                return result;
+            } else {
+                let filtered = this.seachBox.filter(searchKey);
+                
+                if (_.isEmpty(filtered)) {
+                    return result;    
+                }
+                let selectItem = _.filter(filtered, function (itemFilterd: any){
+                    return _.find(selectedItems, function (item: any){
+                        let itemVal = itemFilterd[key];
+                        if(_.isNil(itemVal) || _.isNil(item["id"])){
+                           return false;
+                        }
+                        return itemVal.toString() === item["id"].toString();        
+                    }) !== undefined;            
+                }); 
+                
+                result.options = filtered;
+                result.selectItems = selectItem;
+                return result;
             }
-            
-            return result;
+        }
+        
+        computeSelectingIndex(dataSource: Array<any>, selectedItems: any, key: string): number {
+            let selectingIndex = 0;
+            if (!_.isEmpty(selectedItems)) {
+                let firstItemValue = $.isArray(selectedItems)
+                    ? selectedItems[0]["id"].toString() : selectedItems["id"].toString();
+                selectingIndex = _.findIndex(dataSource, function(item: any) {
+                    return item[key].toString() === firstItemValue;
+                });
+            }
+            return selectingIndex;
         }
         
         public setDataSource(source: Array<any>) {

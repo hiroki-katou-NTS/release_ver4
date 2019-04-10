@@ -561,11 +561,14 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 	//key: sid, value: EmploymentInfo
 	@Override
 	public Map<String, EmpmInfo> getLstDetailEmpHistItem(String companyId, List<String> lstSID, GeneralDate date) {
-		List<EmpmInfo> lst =  this.queryProxy().query(GET_BY_LSTSID_DATE, Object[].class)
-			.setParameter("companyId", companyId)
-			.setParameter("lstSID", lstSID)
-			.setParameter("date", date)
-			.getList(c -> new EmpmInfo(c[0].toString(), c[1].toString(), c[2].toString()));
+		List<EmpmInfo> lst = new ArrayList<>();
+		CollectionUtil.split(lstSID, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
+			lst.addAll(this.queryProxy().query(GET_BY_LSTSID_DATE, Object[].class)
+					.setParameter("companyId", companyId)
+					.setParameter("lstSID", splitData)
+					.setParameter("date", date)
+					.getList(c -> new EmpmInfo(c[0].toString(), c[1].toString(), c[2].toString())));
+		});
 		Map<String, EmpmInfo> mapResult = new HashMap<>();
 		for(String sid : lstSID){
 			List<EmpmInfo> empInfo = lst.stream().filter(c -> c.getSid().equals(sid)).collect(Collectors.toList());
@@ -586,30 +589,28 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 		String cid = AppContexts.user().companyId();
 		List<EmploymentHistoryOfEmployee> listHistItem = new ArrayList<>();
 		CollectionUtil.split(sids, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			String sql = "SELECT a.sid, a.START_DATE, a.END_DATE, b.EMP_CD FROM BSYMT_EMPLOYMENT_HIST a INNER JOIN BSYMT_EMPLOYMENT_HIS_ITEM b ON a.HIST_ID = b.HIST_ID"
-					  + " WHERE a.CID = ? AND a.START_DATE  < ? AND a.END_DATE > ? AND  b.EMP_CD IN ("
+			String sql = "SELECT a.SID, a.START_DATE, a.END_DATE, b.EMP_CD FROM BSYMT_EMPLOYMENT_HIST a INNER JOIN BSYMT_EMPLOYMENT_HIS_ITEM b ON a.HIST_ID = b.HIST_ID"
+					  + " WHERE a.CID = ? AND a.START_DATE  <= ? AND  ? <= a.END_DATE AND  b.EMP_CD IN ("
 					  +  NtsStatement.In.createParamsString(employmentCodes) + ")"
 					  + " AND a.SID IN (" + NtsStatement.In.createParamsString(subList) + ")  ORDER BY b.EMP_CD";
 				try(PreparedStatement statement = this.connection().prepareStatement(sql)){
 					statement.setString(1, cid);
-					GeneralDate startDate = dateRange.start().addDays(1);
-					GeneralDate endDate = dateRange.end().addDays(1);
-					statement.setDate(2, Date.valueOf(startDate.localDate()));
-					statement.setDate(3, Date.valueOf(endDate.localDate()));
+					statement.setDate(2, Date.valueOf(dateRange.end().localDate()));
+					statement.setDate(3, Date.valueOf(dateRange.start().localDate()));
 					int sizeEmmCode = employmentCodes.size();
 					for (int i = 0; i < sizeEmmCode; i++) {
 						statement.setString(4 + i, employmentCodes.get(i));
 					}
 					
 					for (int i = 0; i < subList.size(); i++) {
-						statement.setString(sizeEmmCode + 1 + i , subList.get(i));
+						statement.setString(4 + sizeEmmCode + i , subList.get(i));
 					}
 					
 					List<EmploymentHistoryOfEmployee> results = new NtsResultSet(statement.executeQuery()).getList(rec -> {
 						EmploymentHistoryOfEmployee e = new EmploymentHistoryOfEmployee();
 						e.setSId(rec.getString("SID"));
 						e.setStartDate(rec.getGeneralDate("START_DATE"));
-						e.setEndDate(rec.getGeneralDate("END_DATE").addDays(-1));
+						e.setEndDate(rec.getGeneralDate("END_DATE"));
 						e.setEmploymentCD(rec.getString("EMP_CD"));						
 						return e;
 					});

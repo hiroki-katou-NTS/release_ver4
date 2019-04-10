@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
 
-import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.after.DetailAfterApproval_New;
 import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.before.DetailBeforeUpdate;
@@ -47,9 +46,9 @@ public class AppListApprovalImpl implements AppListApprovalRepository{
 		List<String> lstRefAppId = new ArrayList<>();
 		for (AppVersion app : lstApp) {
 			//アルゴリズム「承認する」を実行する
-			//共通アルゴリズム「詳細画面登録前の処理」を実行する(thực hiện xử lý 「詳細画面登録前の処理」) - 4.1(CMM045)
-			boolean checkversion = detailBefUpdate.processBefDetailScreenReg(companyID, employeeID, GeneralDate.today(), 1, app.getAppID(), 
-					PrePostAtr.PREDICT, app.getVersion());
+			//EA修正履歴 No.3254
+			//アルゴリズム「排他チェック」を実行する (thực hiện xử lý 「check version」) - (CMM045)
+			boolean checkversion = detailBefUpdate.exclusiveCheckErr(companyID, app.getAppID(), app.getVersion());
 			if(!checkversion){
 				continue;
 			}

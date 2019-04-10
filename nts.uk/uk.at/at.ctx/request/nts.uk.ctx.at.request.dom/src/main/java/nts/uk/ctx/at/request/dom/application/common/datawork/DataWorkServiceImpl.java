@@ -95,6 +95,8 @@ public class DataWorkServiceImpl implements IDataWorkService {
 			// ドメインモデル「申請別対象勤務種類」.勤務種類リストを表示する
 			List<AppEmployWorkType> lstEmploymentWorkType = appEmploymentSettings.get(0).getLstWorkType();
 			if (CollectionUtil.isEmpty(lstEmploymentWorkType)) {
+				result = this.workTypeRepository.findNotDeprecated(companyID).stream()
+				.map(x -> x.getWorkTypeCode().v()).collect(Collectors.toList());
 				return result;
 			}
 			Collections.sort(lstEmploymentWorkType, Comparator.comparing(AppEmployWorkType::getWorkTypeCode));
@@ -111,6 +113,10 @@ public class DataWorkServiceImpl implements IDataWorkService {
 			List<Integer> allDayAtrs = allDayAtrs();
 			List<Integer> halfAtrs = halfAtrs();
 			result = workTypeRepository.findWorkType(companyID, 0, allDayAtrs, halfAtrs).stream()
+					.map(x -> x.getWorkTypeCode().v()).collect(Collectors.toList());
+		}
+		if(ApplicationType.WORK_CHANGE_APPLICATION.value == apptype){
+			result = this.workTypeRepository.findNotDeprecated(companyID).stream()
 					.map(x -> x.getWorkTypeCode().v()).collect(Collectors.toList());
 		}
 		return result;
@@ -159,7 +165,7 @@ public class DataWorkServiceImpl implements IDataWorkService {
 		Optional<WorkingConditionItem> personalLablorCodition = workingConditionItemRepository.getBySidAndStandardDate(employeeId,baseDate);
 
 		if (!personalLablorCodition.isPresent()
-				|| personalLablorCodition.get().getWorkCategory().getWeekdayTime() == null) {
+				|| !personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTypeCode().isPresent()) {
 			if (!CollectionUtil.isEmpty(workTypes)) {
 				// 先頭の勤務種類を選択する
 				selectedData.setSelectedWorkTypeCd(workTypes.get(0));
@@ -177,11 +183,14 @@ public class DataWorkServiceImpl implements IDataWorkService {
 					.getWorkTypeCode();
 			if (wkTypeOpt.isPresent()) {
 				String wkTypeCd = wkTypeOpt.get().v();
-				
-				Optional<WorkType> workType = workTypeRepository.findByPK(companyId,wkTypeCd);
-				
-				selectedData.setSelectedWorkTypeCd(wkTypeCd);
-				if (workType.isPresent()) {
+				if(workTypes.contains(wkTypeCd)){
+					selectedData.setSelectedWorkTypeCd(wkTypeCd);
+					Optional<WorkType> workType = workTypeRepository.findByPK(companyId,wkTypeCd);
+					selectedData.setSelectedWorkTypeName(workType.get().getName().v());
+				} else {
+					workTypes.sort(Comparator.comparing(String::toString));
+					selectedData.setSelectedWorkTypeCd(workTypes.get(0));
+					Optional<WorkType> workType = workTypeRepository.findByPK(companyId,selectedData.getSelectedWorkTypeCd());
 					selectedData.setSelectedWorkTypeName(workType.get().getName().v());
 				}
 			}

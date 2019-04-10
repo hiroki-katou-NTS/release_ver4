@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -46,6 +45,7 @@ import nts.uk.ctx.workflow.dom.service.output.ApprovalRepresenterOutput;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootStateStatus;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalStatusOutput;
 import nts.uk.ctx.workflow.dom.service.output.ApproverPersonOutput;
+import nts.uk.ctx.workflow.dom.service.output.Request133Output;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -78,16 +78,36 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	private AppRootConfirmQueryRepository confirmQueryRepository;
 
 	@Override
-	public List<ApprovalRootStateStatus> getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType) {
-		
+	public Request133Output getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType) {
 		// Đối ứng SPR
-		String companyID = Strings.isNotBlank(AppContexts.user().companyId()) ? "000000000000-0001" : AppContexts.user().companyId();
-
+		String companyID = "000000000000-0001";
+		String loginCompanyID = AppContexts.user().companyId();
+		if(Strings.isNotBlank(loginCompanyID)){
+			companyID = loginCompanyID;
+		}
+		
 		// レスポンス改善版
 		val interms = this.confirmQueryRepository.queryInterm(companyID, employeeIDLst, period, RecordRootType.CONFIRM_WORK_BY_DAY);
 		val confirms = this.confirmQueryRepository.queryConfirm(companyID, employeeIDLst, period, rootType);
 		
-		return confirms.aggregate(interms);
+		List<ApprovalRootStateStatus> appRootStatusLst = new ArrayList<ApprovalRootStateStatus>();
+		List<String> errorEmployeeIds = new ArrayList<String>();
+		for (String employeeId : employeeIDLst) {
+			val result = confirms.aggregate(period, employeeId, interms);
+			
+			if (result.isError()) {
+				errorEmployeeIds.add(employeeId);
+				continue;
+			}
+			
+			appRootStatusLst.addAll(result.getResults());
+		};
+		
+		return new Request133Output(
+				appRootStatusLst,
+				!errorEmployeeIds.isEmpty(),
+				!errorEmployeeIds.isEmpty() ? "Msg_1430" : "",
+				errorEmployeeIds);
 	}
 
 	@Override

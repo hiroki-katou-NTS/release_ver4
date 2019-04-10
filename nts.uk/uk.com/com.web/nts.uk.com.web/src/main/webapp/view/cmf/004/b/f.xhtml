@@ -64,31 +64,31 @@
                         </com:ko-if>
                         <com:ko-if bind="recoveryPeriod() == nts.uk.com.view.cmf004.b.viewmodel.PeriodEnum.DAY">
                             <td class="halign-center date-period start-date">
-                                <div data-bind="ntsDatePicker: {name: '#[CMF004_119]', value: startOfPeriod, dateFormat: 'YYYY/MM/DD', required: true, enable: isRecover}"
+                                <div data-bind="ntsDatePicker: {name: '#[CMF004_119]', value: startOfPeriod, dateFormat: 'YYYY/MM/DD', required: true, enable: isEnablePeriod}"
                                      tabindex="2"/>
                             </td>
                             <td class="halign-center date-period end-date">
-                                <div data-bind="ntsDatePicker: {name: '#[CMF004_120]', value: endOfPeriod, dateFormat: 'YYYY/MM/DD', required: true, enable: isRecover}"
+                                <div data-bind="ntsDatePicker: {name: '#[CMF004_120]', value: endOfPeriod, dateFormat: 'YYYY/MM/DD', required: true, enable: isEnablePeriod}"
                                      tabindex="3"/>
                             </td>
                         </com:ko-if>
                         <com:ko-if bind="recoveryPeriod() == nts.uk.com.view.cmf004.b.viewmodel.PeriodEnum.MONTH">
                             <td class="halign-center date-period start-date">
-                                <div data-bind="ntsDatePicker: {name: '#[CMF004_119]', value: startOfPeriod, dateFormat: 'yearmonth', valueFormat: 'YYYYMM', required: true, enable: isRecover}"
+                                <div data-bind="ntsDatePicker: {name: '#[CMF004_119]', value: startOfPeriod, dateFormat: 'yearmonth', valueFormat: 'YYYYMM', required: true, enable: isEnablePeriod}"
                                      tabindex="2"/>
                             </td>
                             <td class="halign-center date-period end-date">
-                                <div data-bind="ntsDatePicker: {name: '#[CMF004_120]', value: endOfPeriod, dateFormat: 'yearmonth', valueFormat: 'YYYYMM', required: true, enable: isRecover}"
+                                <div data-bind="ntsDatePicker: {name: '#[CMF004_120]', value: endOfPeriod, dateFormat: 'yearmonth', valueFormat: 'YYYYMM', required: true, enable: isEnablePeriod}"
                                      tabindex="3"/>
                             </td>
                         </com:ko-if>
                         <com:ko-if bind="recoveryPeriod() == nts.uk.com.view.cmf004.b.viewmodel.PeriodEnum.YEAR">
                             <td class="halign-center date-period start-date">
-                                <div data-bind="ntsDatePicker: {name: '#[CMF004_119]', value: startOfPeriod, dateFormat: 'YYYY', valueFormat: 'YYYY', required: true, enable: isRecover}"
+                                <div data-bind="ntsDatePicker: {name: '#[CMF004_119]', value: startOfPeriod, dateFormat: 'YYYY', valueFormat: 'YYYY', required: true, enable: isEnablePeriod}"
                                      tabindex="2"/>
                             </td>
                             <td class="halign-center date-period end-date">
-                                <div data-bind="ntsDatePicker: {name: '#[CMF004_120]', value: endOfPeriod,  dateFormat: 'YYYY', valueFormat: 'YYYY', required: true, enable: isRecover}"
+                                <div data-bind="ntsDatePicker: {name: '#[CMF004_120]', value: endOfPeriod,  dateFormat: 'YYYY', valueFormat: 'YYYY', required: true, enable: isEnablePeriod}"
                                      tabindex="3"/>
                             </td>
                         </com:ko-if>

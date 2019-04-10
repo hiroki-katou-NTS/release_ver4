@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.BreakTimeParam;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.HolidayWorktimePara;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.OverTimeRecordAtr;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
@@ -146,4 +148,26 @@ public interface WorkUpdateService {
 	 * @return
 	 */
 	List<Integer> lstTransferTimeOtItem();
+	
+	public void updateBreakTime(Map<Integer, BreakTimeParam> mapBreakTimeFrame, boolean recordReflectBreakFlg, boolean isPre, IntegrationOfDaily daily);
+	/**
+	 * 休憩開始時刻
+	 * @return
+	 */
+	List<Integer> lstBreakStartTime();
+	/**
+	 * 休憩終了時刻
+	 * @return
+	 */
+	List<Integer> lstBreakEndTime();
+	/**
+	 * 予定休憩開始時刻
+	 * @return
+	 */
+	List<Integer> lstScheBreakStartTime();
+	/**
+	 * 予定休憩終了時刻
+	 * @return
+	 */
+	List<Integer> lstScheBreakEndTime();
 }

@@ -6,20 +6,20 @@ import lombok.Getter;
 import nts.uk.ctx.at.record.dom.divergencetime.DiverdenceReasonCode;
 import nts.uk.ctx.at.record.dom.divergencetime.DivergenceReasonContent;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
-import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 
 /** 乖離時間 */
 @Getter
 public class DivergenceTime {
 
 	//控除後乖離時間
-	private AttendanceTime divTimeAfterDeduction;
+	private AttendanceTimeOfExistMinus divTimeAfterDeduction;
 	
 	//控除時間
-	private AttendanceTime deductionTime;
+	private AttendanceTimeOfExistMinus deductionTime;
 	
 	//乖離時間
-	private AttendanceTime divTime;
+	private AttendanceTimeOfExistMinus divTime;
 	
 	//乖離時間NO - primitive value
 	private int divTimeId;
@@ -30,7 +30,7 @@ public class DivergenceTime {
 	//乖離理由コード
 	private Optional<DiverdenceReasonCode> divResonCode;
 
-	public DivergenceTime(AttendanceTime divTimeAfterDeduction, AttendanceTime deductionTime, AttendanceTime divTime,
+	public DivergenceTime(AttendanceTimeOfExistMinus divTimeAfterDeduction, AttendanceTimeOfExistMinus deductionTime, AttendanceTimeOfExistMinus divTime,
 			int divTimeId, DivergenceReasonContent divReason, DiverdenceReasonCode divResonCode) {
 		super();
 		this.divTimeAfterDeduction = divTimeAfterDeduction;
@@ -41,7 +41,7 @@ public class DivergenceTime {
 		this.divResonCode = Optional.ofNullable(divResonCode);
 	}
 	
-	public DivergenceTime(AttendanceTime divTimeAfterDeduction, AttendanceTime deductionTime, AttendanceTime divTime,
+	public DivergenceTime(AttendanceTimeOfExistMinus divTimeAfterDeduction, AttendanceTimeOfExistMinus deductionTime, AttendanceTimeOfExistMinus divTime,
 			int divTimeId, Optional<DivergenceReasonContent> divReason, Optional<DiverdenceReasonCode> divResonCode) {
 		super();
 		this.divTimeAfterDeduction = divTimeAfterDeduction;

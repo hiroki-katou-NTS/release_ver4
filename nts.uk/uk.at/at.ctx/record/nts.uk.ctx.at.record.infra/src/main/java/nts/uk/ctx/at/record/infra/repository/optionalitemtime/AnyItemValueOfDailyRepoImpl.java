@@ -1,8 +1,10 @@
 package nts.uk.ctx.at.record.infra.repository.optionalitemtime;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -220,5 +224,23 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 				.setParameter("processingDate", processingDate)
 				.executeUpdate();
 		this.getEntityManager().flush();
+	}
+
+	// fix bug 107004
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Override
+	public void deleteAnyItemValueOfDaily(String employeeId, GeneralDate ymd) {
+		
+		Connection con = this.getEntityManager().unwrap(Connection.class);
+		String sqlQuery = "Delete From KRCDT_DAY_ANYITEMVALUE_MERGE Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + ymd + "'" ;
+		try {
+			con.createStatement().executeUpdate(sqlQuery);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		
+//		this.getEntityManager().createQuery(REMOVE_BY_KEY).setParameter("employeeId", employeeId)
+//				.setParameter("ymd", baseDate).executeUpdate();
+//		this.getEntityManager().flush();
 	}
 }

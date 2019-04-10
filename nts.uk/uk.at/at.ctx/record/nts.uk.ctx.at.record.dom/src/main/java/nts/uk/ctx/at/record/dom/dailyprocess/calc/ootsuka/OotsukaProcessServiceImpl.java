@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.record.dom.dailyprocess.calc.ootsuka;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,20 +10,35 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.management.RuntimeErrorException;
 
-import lombok.Getter;
 import lombok.val;
+import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
+import nts.uk.ctx.at.record.dom.breakorgoout.primitivevalue.BreakFrameNo;
 import nts.uk.ctx.at.record.dom.daily.holidayworktime.HolidayWorkFrameTime;
 import nts.uk.ctx.at.record.dom.daily.holidayworktime.HolidayWorkMidNightTime;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTime;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.PredetermineTimeSetForCalc;
+import nts.uk.ctx.at.record.dom.worklocation.WorkLocationCD;
+import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
+import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
+import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
+import nts.uk.ctx.at.record.dom.worktime.primitivevalue.WorkTimes;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.holidaywork.HolidayWorkFrameNo;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.overtime.overtimeframe.OverTimeFrameNo;
 import nts.uk.ctx.at.shared.dom.worktime.common.HolidayCalculation;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktime.fixedset.FixedWorkCalcSetting;
+import nts.uk.ctx.at.shared.dom.worktime.predset.PredetemineTimeSetting;
+import nts.uk.ctx.at.shared.dom.worktime.predset.TimezoneUse;
 import nts.uk.ctx.at.shared.dom.worktype.CloseAtr;
 import nts.uk.ctx.at.shared.dom.worktype.DailyWork;
 import nts.uk.ctx.at.shared.dom.worktype.HolidayAtr;
@@ -31,6 +48,7 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeSet;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeSetCheck;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
+import nts.uk.shr.com.time.TimeWithDayAttr;
 
 /**
  * 大塚専用処理(実装)
@@ -40,8 +58,6 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 @Stateless
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class OotsukaProcessServiceImpl implements OotsukaProcessService{
-
-	private boolean workTypeChangedFromSpecialHoliday = false;
 	
 	@Override
 	public WorkType getOotsukaWorkType(WorkType workType,
@@ -63,8 +79,6 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 	 */
 	private WorkType createOotsukaWorkType(WorkType workType) {
 		
-		changeWorkTypeFlag(workType);
-		
 		if(workType.getDailyWork().getWorkTypeUnit().isOneDay()) {			
 			val workTypeSet = workType.getWorkTypeSetByAtr(WorkAtr.OneDay);
 		
@@ -72,7 +86,6 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 									  WorkTypeClassification.Attendance, 
 									  workType.getDailyWork().getMorning(), 
 									  workType.getDailyWork().getAfternoon());
-		
 		
 			val createWorkType = new WorkType(workType.getCompanyId(), 
 									workType.getWorkTypeCode(), 
@@ -95,8 +108,8 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 															WorkTypeSetCheck.NO_CHECK, 
 															WorkTypeSetCheck.NO_CHECK, 
 															workTypeSet.isPresent()?workTypeSet.get().getGenSubHodiday():WorkTypeSetCheck.NO_CHECK,
-															WorkTypeSetCheck.NO_CHECK
-														);
+															WorkTypeSetCheck.NO_CHECK);
+			
 			createWorkType.addWorkTypeSet(createWorkTypeSet);
 			return createWorkType;
 		}
@@ -108,7 +121,6 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 										  workType.getDailyWork().getOneDay(), 
 										  WorkTypeClassification.Attendance, 
 										  WorkTypeClassification.Attendance);
-
 
 			val createWorkType = new WorkType(workType.getCompanyId(), 
 											  workType.getWorkTypeCode(), 
@@ -131,8 +143,7 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 																   WorkTypeSetCheck.NO_CHECK, 
 																   WorkTypeSetCheck.NO_CHECK, 
 															       workTypeSetMorning.isPresent()?workTypeSetMorning.get().getGenSubHodiday():WorkTypeSetCheck.NO_CHECK,
-															       WorkTypeSetCheck.NO_CHECK
-				);		
+															       WorkTypeSetCheck.NO_CHECK);		
 			
 			WorkTypeSet createWorkTypeSetAfternoon = new WorkTypeSet(workTypeSetAfternoon.isPresent()?workTypeSetAfternoon.get().getCompanyId():workType.getCompanyId(), 
 					   												 workTypeSetAfternoon.isPresent()?workTypeSetAfternoon.get().getWorkTypeCd():workType.getWorkTypeCode(), 
@@ -146,22 +157,15 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 					   												 WorkTypeSetCheck.NO_CHECK, 
 					   												 WorkTypeSetCheck.NO_CHECK, 
 					   												 workTypeSetAfternoon.isPresent()?workTypeSetAfternoon.get().getGenSubHodiday():WorkTypeSetCheck.NO_CHECK,
-					   												 WorkTypeSetCheck.NO_CHECK
-				);
+					   												 WorkTypeSetCheck.NO_CHECK);
+			
 			createWorkType.addWorkTypeSet(createWorkTypeSetMorning);
 			createWorkType.addWorkTypeSet(createWorkTypeSetAfternoon);
 			return createWorkType;
 		}
 	}
 
-	/**
-	 * 内部で保持している変更前の勤務種類が何だったかフラグの変更
-	 * @param workType
-	 */
-	private void changeWorkTypeFlag(WorkType workType) {
-		if(workType.getDailyWork().isOneOrHalfDaySpecHoliday())
-			workTypeChangedFromSpecialHoliday = true;
-	}
+
 
 	/**
 	 * 大塚モード判断処理
@@ -307,9 +311,120 @@ public class OotsukaProcessServiceImpl implements OotsukaProcessService{
 		}
 		return map;
 	}
-
-	@Override
-	public boolean getWorkTypeChangedFromSpecialHoliday() {
-		return this.workTypeChangedFromSpecialHoliday;
-	}
+	
+//	@Override
+//	/**
+//	 * 大塚IWカスタマイズ(打刻用)
+//	 * @return
+//	 */
+//	public Optional<TimeLeavingOfDailyPerformance> iWProcessForStamp(Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance, String employeeId, GeneralDate targetDate,Optional<PredetemineTimeSetting> predetermineTimeSet,
+//																	 WorkType workType,WorkTimeCode workTimeCode){
+//		if(!predetermineTimeSet.isPresent() || !isIWWorkTimeAndCode(workType,workTimeCode)) return timeLeavingOfDailyPerformance;
+//		List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
+//		for(TimezoneUse predSet : predetermineTimeSet.get().getPrescribedTimezoneSetting().getLstTimezone()) {
+//			if(predSet.isUsed()) {
+//				Optional<TimeLeavingWork> stamp = timeLeavingOfDailyPerformance.get().getAttendanceLeavingWork(predSet.getWorkNo());
+//				WorkStamp attendance = new WorkStamp(predSet.getStart(), predSet.getStart(),new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
+//				WorkStamp leaving = new WorkStamp(predSet.getEnd(), predSet.getEnd(), new WorkLocationCD("01"),StampSourceInfo.CORRECTION_RECORD_SET);
+//				if(stamp.isPresent()) {
+//					if(stamp.get().getAttendanceStamp().isPresent()) {
+//						if(stamp.get().getAttendanceStamp().get().getStamp().isPresent()){
+//							attendance = new WorkStamp(stamp.get().getAttendanceStamp().get().getStamp().get().getAfterRoundingTime(),
+//													   predSet.getStart(),
+//											   	       stamp.get().getAttendanceStamp().get().getStamp().get().getLocationCode().isPresent() ? stamp.get().getAttendanceStamp().get().getStamp().get().getLocationCode().get() : new WorkLocationCD("01"),
+//													   stamp.get().getAttendanceStamp().get().getStamp().get().getStampSourceInfo());
+//						}
+//					}
+//					if(stamp.get().getLeaveStamp().isPresent()) {
+//						if(stamp.get().getLeaveStamp().get().getStamp().isPresent()) {
+//							leaving = new WorkStamp(stamp.get().getLeaveStamp().get().getStamp().get().getAfterRoundingTime(),
+//									 			    predSet.getEnd(),
+//									 		        stamp.get().getLeaveStamp().get().getStamp().get().getLocationCode().isPresent() ? stamp.get().getLeaveStamp().get().getStamp().get().getLocationCode().get() : new WorkLocationCD("01"),
+//									 				stamp.get().getLeaveStamp().get().getStamp().get().getStampSourceInfo());
+//						}
+//					}
+//				}
+//				TimeActualStamp newAttendanceStamp = new TimeActualStamp(attendance, attendance, predSet.getWorkNo());
+//				TimeActualStamp newLeavingStamp = new TimeActualStamp(leaving, leaving, predSet.getWorkNo());
+//				
+//				TimeLeavingWork timeLeavingWork = new TimeLeavingWork(new WorkNo(predSet.getWorkNo()), newAttendanceStamp, newLeavingStamp);
+//				timeLeavingWorkList.add(timeLeavingWork);
+//			}
+//		}
+//		return Optional.of(
+//				new TimeLeavingOfDailyPerformance(employeeId, new WorkTimes(timeLeavingWorkList.size()), timeLeavingWorkList, targetDate));
+//	}
+//	
+//	@Override
+//	public Optional<BreakTimeOfDailyPerformance> convertBreakTimeSheetForOOtsuka(Optional<BreakTimeOfDailyPerformance> breakTimeOfDailyPerformance,
+//			WorkType workType,WorkTimeCode workTimeCode){
+//		if(isIWWorkTimeAndCode(workType, workTimeCode)) {
+//			if(breakTimeOfDailyPerformance.isPresent()) {
+//				if(breakTimeOfDailyPerformance.get().getBreakType().isReferWorkTime()) {
+//					return Optional.of(new BreakTimeOfDailyPerformance(breakTimeOfDailyPerformance.get().getEmployeeId(),
+//																	   breakTimeOfDailyPerformance.get().getBreakType(),
+//																	   Arrays.asList(new BreakTimeSheet(new BreakFrameNo(1), 
+//																			   							new TimeWithDayAttr(720),
+//																			   							new TimeWithDayAttr(780))),
+//																	   breakTimeOfDailyPerformance.get().getYmd()));
+//				}
+//				else {
+//					return breakTimeOfDailyPerformance;
+//				}
+//			}
+//			else {
+//				return breakTimeOfDailyPerformance;
+//			}
+//		}
+//		else {
+//			return breakTimeOfDailyPerformance;
+//		}
+//	}
+//	
+	
+	
+//	/**
+//	 * 大塚専用IWカスタマイズ処理を行う勤務種類And就業時間帯コードか判定する
+//	 * @param workType
+//	 * @param workTimeCode
+//	 * @return IWカスタマイズ対象である
+//	 */
+//	@Override
+//	public boolean isIWWorkTimeAndCode(WorkType workType,WorkTimeCode workTimeCode) {
+//		if(!(workTimeCode.v().equals("100") || workTimeCode.v().equals("101")))
+//			return false;
+//		if(workType.getWorkTypeCode().v().equals("100")) 
+//			return false;
+//		
+//		switch(workType.getDailyWork().decisionNeedPredTime()) {
+//		case AFTERNOON:
+//			if(workType.getDailyWork().getAfternoon().isHolidayWork()) {
+//				return false;
+//			}
+//			//出勤or振出であろうという推測
+//			else {
+//				return true;
+//			}
+//		case FULL_TIME:
+//			if(workType.getDailyWork().getOneDay().isHolidayWork()) {
+//				return false;
+//			}
+//			//出勤or振出であろうという推測
+//			else {
+//				return true;
+//			}
+//		case MORNING:
+//			if(workType.getDailyWork().getMorning().isHolidayWork()) {
+//				return false;
+//			}
+//			//出勤or振出であろうという推測
+//			else {
+//				return true;
+//			}
+//		case HOLIDAY:
+//			return false;
+//		default:
+//			throw new RuntimeException("unkwon pred need workType in IW Decision");
+//		}
+//	}
 }

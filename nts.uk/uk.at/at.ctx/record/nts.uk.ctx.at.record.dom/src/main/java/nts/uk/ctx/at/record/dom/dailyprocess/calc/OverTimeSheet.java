@@ -87,14 +87,10 @@ public class OverTimeSheet {
 														   Optional<CompensatoryOccurrenceSetting> eachCompanyTimeSet,
 														   IntegrationOfDaily integrationOfDaily,
 														   List<OverTimeFrameNo> statutoryFrameNoList) {
-		//*調査用ログ*//
-		org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OverTimeFrameTimeSheetForCalc.class);
 		
 		Map<Integer,OverTimeFrameTime> overTimeFrameList = new HashMap<Integer, OverTimeFrameTime>();
 		List<OverTimeFrameNo> numberOrder = new ArrayList<>();
-		log.info("処理対象の残業時間枠のリストサイズ"+ frameTimeSheets.size()); 
 		val sortedFrameTimeSheet = sortFrameTime(frameTimeSheets, workType, eachWorkTimeSet, eachCompanyTimeSet);
-		log.info("処理対象の残業時間枠のリストサイズ Part2"+ sortedFrameTimeSheet.size()); 
 
 		//時間帯の計算
 		for(OverTimeFrameTimeSheetForCalc overTimeFrameTime : sortedFrameTimeSheet) {
@@ -117,8 +113,6 @@ public class OverTimeSheet {
 			}
 		}
 		List<OverTimeFrameTime> calcOverTimeWorkTimeList = new ArrayList<>(overTimeFrameList.values()); 
-		
-		log.info("処理対象の残業時間枠のリストサイズ Part3"+ calcOverTimeWorkTimeList.size());
 		
 		//staticがついていなので、4末緊急対応
 		if(integrationOfDaily.getAttendanceTimeOfDailyPerformance().isPresent()
@@ -143,9 +137,6 @@ public class OverTimeSheet {
 			}
 			calcOverTimeWorkTimeList = reOrderList;
 		}
-		//staticがついていなので、4末緊急対応	
-		log.info("処理対象の残業時間枠のリストサイズ Part4"+ calcOverTimeWorkTimeList.size());
-		
 		//事前申請を上限とする制御
 		val afterCalcUpperTimeList = afterUpperControl(calcOverTimeWorkTimeList,autoCalcSet,statutoryFrameNoList);
 		//return afterCalcUpperTimeList; 
@@ -155,7 +146,6 @@ public class OverTimeSheet {
 											  eachWorkTimeSet,
 											  eachCompanyTimeSet);
 		return aftertransTimeList;
-		
 	}
 	
 
@@ -342,10 +332,12 @@ public class OverTimeSheet {
 	 * @return　自動計算設定
 	 */
 	private AutoCalSetting getCalcSetByAtr(AutoCalOvertimeSetting autoCalcSet,StatutoryAtr statutoryAtr, boolean goEarly) {
+		//法内である
 		if(statutoryAtr.isStatutory() ) {
 			return autoCalcSet.getLegalMidOtTime();
 		}
 		else {
+			//早出である
 			if(goEarly) {
 				return autoCalcSet.getEarlyMidOtTime();
 			}
@@ -372,8 +364,10 @@ public class OverTimeSheet {
 			return afterCalcUpperTimeList;
 		//代休振替設定判定
 		switch(useSettingAtr.get().getSubHolTransferSetAtr()) {
+			//一定時間を超えたら代休とする
 			case CERTAIN_TIME_EXC_SUB_HOL:
 				return periodOfTimeTransfer(useSettingAtr.get().getCertainTime(),afterCalcUpperTimeList);
+			//指定した時間を代休とする
 			case SPECIFIED_TIME_SUB_HOL:
 				return transAllTime(useSettingAtr.get().getDesignatedTime().getOneDayTime(),
 								    useSettingAtr.get().getDesignatedTime().getHalfDayTime(),

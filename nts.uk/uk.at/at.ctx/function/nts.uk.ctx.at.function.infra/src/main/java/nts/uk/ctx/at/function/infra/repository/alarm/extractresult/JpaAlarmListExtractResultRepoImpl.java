@@ -194,7 +194,7 @@ public class JpaAlarmListExtractResultRepoImpl extends JpaRepository implements 
 		String findEmpData = "SELECT EXECUTE_ID, EMPLOYEE_ID, EMPLOYEE_CODE, EMPLOYEE_NAME, WORKPLACE_ID, WORKPLACE_NAME, "
 				+ "HIERARCHY_CD, WORKPLACE_WORK_START_DATE, WORKPLACE_WORK_END_DATE FROM KFNMT_ALEX_EMP_DATA WHERE EXECUTE_ID IN ("
 				+ executeIds.stream().map(c -> "?").collect(Collectors.joining(","))
-				+ ")";
+				+ ") ORDER BY HIERARCHY_CD, EMPLOYEE_CODE";
 		try(PreparedStatement st = this.connection().prepareStatement(findEmpData)) {
 			for(int i = 1; i <= executeIds.size(); i++){
 				st.setString(i, executeIds.get(i - 1));
@@ -210,8 +210,8 @@ public class JpaAlarmListExtractResultRepoImpl extends JpaRepository implements 
 	@SneakyThrows
 	private List<ExtractEmployeeErAlData> getExtractedErrorWithLimit(List<String> executeIds, int limit) {
 		
-		StringBuilder queryBuilder = new StringBuilder("SELECT er.EXECUTE_ID, er.ALARM_TARGET_TIME, er.CATEGORY_CODE, er.CATEGORY_NAME, er.ALARM_ITEM, er.ALARM_MESSAGE, ");
-		queryBuilder.append(" er.COMMENT, er.EMPLOYEE_ID, er.RECORD_ID FROM KFNMT_ALEX_EMP_ERAL_DATA er" );
+		StringBuilder queryBuilder = new StringBuilder("SELECT DISTINCT er.EXECUTE_ID, er.ALARM_TARGET_TIME, er.CATEGORY_CODE, er.CATEGORY_NAME, er.ALARM_ITEM, er.ALARM_MESSAGE, ");
+		queryBuilder.append(" er.COMMENT, er.EMPLOYEE_ID, er.RECORD_ID, em.HIERARCHY_CD, em.EMPLOYEE_CODE FROM KFNMT_ALEX_EMP_ERAL_DATA er" );
 		queryBuilder.append(" JOIN KFNMT_ALEX_EMP_DATA em ON er.EMPLOYEE_ID = em.EMPLOYEE_ID" );
 		queryBuilder.append(" WHERE er.EXECUTE_ID IN (");
 		queryBuilder.append(executeIds.stream().map(c -> "?").collect(Collectors.joining(",")));

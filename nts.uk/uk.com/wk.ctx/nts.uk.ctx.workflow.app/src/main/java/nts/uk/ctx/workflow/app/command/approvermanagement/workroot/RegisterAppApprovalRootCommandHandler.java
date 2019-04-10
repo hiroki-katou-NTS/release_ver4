@@ -31,6 +31,8 @@ import nts.uk.ctx.workflow.dom.approvermanagement.workroot.PersonApprovalRoot;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.PersonApprovalRootRepository;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.WorkplaceApprovalRoot;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.WorkplaceApprovalRootRepository;
+import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
+import nts.uk.ctx.workflow.dom.resultrecord.service.CreateDailyApprover;
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
@@ -50,6 +52,8 @@ public class RegisterAppApprovalRootCommandHandler  extends CommandHandler<Regis
 	private ApprovalBranchRepository repoBranch;
 	@Inject
 	private WorkplaceApproverAdapter adapterWp;
+	@Inject
+	private CreateDailyApprover creDailyAppr;
 	private static final int COMPANY = 0;
 	private static final int WORKPLACE = 1;
 	@Override
@@ -359,6 +363,7 @@ public class RegisterAppApprovalRootCommandHandler  extends CommandHandler<Regis
 			}
 		}
 		//TH: create history new
+		//履歴追加を実行する
 		if(checkAddHist){
 			//Tạo root có ls mới với appType ở dữ liệu bên phải.
 			//Update root có ls trước đó của những root mới được tạo ở trên.
@@ -405,6 +410,7 @@ public class RegisterAppApprovalRootCommandHandler  extends CommandHandler<Regis
 			repoBranch.addAllBranch(lstBranch);
 		}
 		//TH: update history old
+		//承認ルートの更新を実行する
 		else{
 			List<AppType> lstAppTypeDb = data.getLstAppType();
 			List<AppType> lstAppTypeUi = new ArrayList<>();
@@ -455,6 +461,18 @@ public class RegisterAppApprovalRootCommandHandler  extends CommandHandler<Regis
 			//update root display in screen
 			updateRoot(lstAppTypeUi, root);
 		}
+		//EA修正履歴 No.3267
+		//EA修正履歴 No.3269
+		//EA修正履歴 No.3270
+		//EA修正履歴 No.3272
+		//追加する履歴の開始日とシステム日付をチェックする
+		if(sDate.after(GeneralDate.today())){//履歴の開始日＞システム日付
+			return;
+		}
+		//指定社員の中間データを作成する（日別）
+		creDailyAppr.createDailyApprover(data.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_DAY, sDate, sDate);
+		//指定社員の中間データを作成する（月別）
+		creDailyAppr.createDailyApprover(data.getEmployeeId(), RecordRootType.CONFIRM_WORK_BY_MONTH, sDate, sDate);
 	}
 	/**
 	 * Add new history

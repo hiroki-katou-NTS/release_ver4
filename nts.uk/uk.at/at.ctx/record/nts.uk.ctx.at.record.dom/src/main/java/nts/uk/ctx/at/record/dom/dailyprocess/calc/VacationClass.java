@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-//import org.eclipse.persistence.sessions.Record;
-
 import lombok.Value;
 import lombok.val;
 import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeOfDaily;
@@ -26,8 +24,6 @@ import nts.uk.ctx.at.shared.dom.calculation.holiday.kmk013_splitdomain.ENUM.Calc
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
-//import nts.uk.ctx.at.shared.dom.workrule.addsettingofworktime.VacationAddTimeSet;
-//import nts.uk.ctx.at.shared.dom.workrule.waytowork.PersonalLaborCondition;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktime.predset.BreakDownTimeDay;
 import nts.uk.ctx.at.shared.dom.worktype.VacationCategory;
@@ -57,28 +53,31 @@ public class VacationClass {
 			 							  ManageReGetClass recordReGet,
 			 							  Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo) {
 		
-		//
 		Optional<PredetermineTimeSetForCalc> predSetting = recordReGet.getCalculatable()
 																?Optional.of(recordReGet.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc())
 																:Optional.empty();
-		//欠勤
+		//***欠勤***//
 		AttendanceTime absenceUseTime = vacationTimeOfcalcDaily(workType,VacationCategory.Absence,
 																predSetting,
 																predetermineTimeSetByPersonInfo,
 																siftCode,
 				  											    conditionItem,recordReGet.getHolidayAddtionSet());
 		val absenceOfDaily = new AbsenceOfDaily(absenceUseTime);
+		//***欠勤***//
 		
-		//時間消化休暇
+		//***時間消化休暇***//
 		AttendanceTime timeDigest = new AttendanceTime(0); 
 		val timeDigestOfDaily = new TimeDigestOfDaily(timeDigest, new AttendanceTime(0));
+		//***時間消化休暇***//
 		
-		//積立年休使用時間
+		//***積立年休使用時間***//
 		AttendanceTime yearlyReservedTime = vacationTimeOfcalcDaily(workType,VacationCategory.YearlyReserved,
 																	predSetting,predetermineTimeSetByPersonInfo,siftCode,
 				  											  		conditionItem,recordReGet.getHolidayAddtionSet());
 		val yearlyReservedOfDaily = new YearlyReservedOfDaily(yearlyReservedTime);
-		//代休
+		//***積立年休使用時間***//
+		
+		//***代休***//
 		AttendanceTime substituUseTime = vacationTimeOfcalcDaily(workType,VacationCategory.SubstituteHoliday,
 																 predSetting,predetermineTimeSetByPersonInfo,siftCode,
 																 conditionItem,recordReGet.getHolidayAddtionSet());
@@ -94,9 +93,9 @@ public class VacationClass {
 		substituUseTime = substituUseTime.addMinutes(sumSubTime);
 		
 		val substituteOfDaily = new SubstituteHolidayOfDaily(substituUseTime,new AttendanceTime(0));
+		//***代休***//
 		
-		
-		//超過有休
+		//***超過有休***//
 		AttendanceTime overSalaryTime = vacationTimeOfcalcDaily(workType,VacationCategory.TimeDigestVacation,
 																predSetting,predetermineTimeSetByPersonInfo,siftCode,
 			  	 												 conditionItem,recordReGet.getHolidayAddtionSet());
@@ -112,8 +111,9 @@ public class VacationClass {
 		overSalaryTime = overSalaryTime.addMinutes(sumOverTime);
 		
 		val overSalaryOfDaily = new OverSalaryOfDaily(overSalaryTime, new AttendanceTime(0));
+		//***超過有休***//
 		
-		//特別休暇
+		//***特別休暇***//
 		AttendanceTime specHolidayTime = vacationTimeOfcalcDaily(workType,VacationCategory.SpecialHoliday,
 																 predSetting,predetermineTimeSetByPersonInfo,siftCode,
 				 											  	 conditionItem,recordReGet.getHolidayAddtionSet());
@@ -129,8 +129,9 @@ public class VacationClass {
 		specHolidayTime = specHolidayTime.addMinutes(sumSpecTime);
 		
 		val specHolidayOfDaily = new SpecialHolidayOfDaily(specHolidayTime, new AttendanceTime(0));
+		//***特別休暇***//
 		
-		//年休
+		//***年休***//
 		AttendanceTime annualUseTime = vacationTimeOfcalcDaily(workType,VacationCategory.AnnualHoliday,
 															   predSetting,predetermineTimeSetByPersonInfo,siftCode,
 				 											   conditionItem,recordReGet.getHolidayAddtionSet());
@@ -146,7 +147,7 @@ public class VacationClass {
 		annualUseTime = annualUseTime.addMinutes(sumAnnTime);
 
 		val annualOfDaily = new AnnualOfDaily(annualUseTime, new AttendanceTime(0));
-		
+		//***年休***//
 
 		return new HolidayOfDaily(absenceOfDaily,
 								  timeDigestOfDaily,
@@ -176,14 +177,19 @@ public class VacationClass {
 			return new AttendanceTime(0);
 		BreakDownTimeDay breakDownTimeDay = getVacationAddSet(predetermineTimeSet, siftCode, holidayAdditionSet.get(),conditionItem,predetermineTimeSetByPersonInfo);
 		switch(workType.getDailyWork().decisionMatchWorkType(vacationCategory.convertWorkTypeClassification())) {
+			//1日出勤系
 			case FULL_TIME:
 				return breakDownTimeDay.getOneDay();
+			//午前出勤系
 			case MORNING:
 				return breakDownTimeDay.getMorning();
+			//午後出勤系
 			case AFTERNOON:
 				return breakDownTimeDay.getAfternoon();
+			//1日休暇
 			case HOLIDAY:
 				return new AttendanceTime(0);
+			//例外
 			default:
 				throw new RuntimeException("unknown WorkType");
 		}

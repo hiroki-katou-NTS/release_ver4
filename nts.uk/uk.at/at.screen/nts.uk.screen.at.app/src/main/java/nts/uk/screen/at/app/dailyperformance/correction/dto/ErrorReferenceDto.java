@@ -21,13 +21,15 @@ public class ErrorReferenceDto {
 	private boolean boldAtr;
 	private String messageColor;
 	private String submitedName;
+	private Boolean itemMonth = false;
 	
-	public ErrorReferenceDto(String id, String employeeId, GeneralDate date, String errorCode, String message){
+	public ErrorReferenceDto(String id, String employeeId, GeneralDate date, String errorCode, String message, Boolean itemMonth){
 		this.id = id;
 		this.employeeId = employeeId;
 		this.date = date;
 		this.errorCode = errorCode;
 		this.message = message;
+		this.itemMonth = itemMonth;
 	}
 	
 	public ErrorReferenceDto(String id, String employeeId, GeneralDate date, String errorCode, String message, boolean boldAtr, String messageColor, String submitedName){
