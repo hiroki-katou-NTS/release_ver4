@@ -7,17 +7,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+import java.util.Comparator;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
-<<<<<<< HEAD
-import nts.arc.enums.EnumAdaptor;
-=======
->>>>>>> delivery/release_ootsuka
 import nts.arc.error.BusinessException;
 import nts.arc.i18n.I18NText;
 import nts.arc.task.parallel.ManagedParallelWithContext;
@@ -91,14 +87,11 @@ public class ApprovalStatusFinder {
 	private ApprovalStatusService approvalStatusSv;
 	
 	@Inject
-<<<<<<< HEAD
 	private WorkplaceConfigAdapter configAdapter;
 	@Inject
 	private WorkplaceConfigInfoAdapter configInfoAdapter;
-	
-=======
+	@Inject
 	private AppContentDetailKAF018 contentDtail;
->>>>>>> delivery/release_ootsuka
 	
 	/**
 	 * アルゴリズム「承認状況本文起動」を実行する
