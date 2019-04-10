@@ -92,13 +92,14 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 		/**ドメインモデル「就業締め日」を取得する(lấy thông tin domain ル「就業締め日」)*/
 		List<Closure> listClosure = closureRepository.findAllActive(procExec.getCompanyId(),UseClassification.UseClass_Use);
 		
-		log.info("承認ルート更新 START PARALLEL (締めループ数:" + listClosure.size() + ")");
+		log.info("承認ルート更新(日別) START PARALLEL (締めループ数:" + listClosure.size() + ")");
 		long startTime = System.currentTimeMillis();
 		
 		List<CheckCreateperApprovalClosure> listCheckCreateApp = new ArrayList<>();
 		//取得した就業締め日の数(so du lieu 就業締め日 lay duoc)　＝　回数
 		listClosure.forEach(itemClosure -> {
 		//for(Closure closure : listClosure) {
+			log.info("承認ルート更新(日別) 締め: " + itemClosure.getClosureId());
 			/**締め開始日を取得する*/
 			PresentClosingPeriodFunImport closureData =  funClosureAdapter.getClosureById(procExec.getCompanyId(), itemClosure.getClosureId().value).get();
 			GeneralDate startDate = GeneralDate.today().addDays(-1);
@@ -273,7 +274,7 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 		});
 		
 
-		log.info("承認ルート更新 END PARALLEL: " + ((System.currentTimeMillis() - startTime) / 1000) + "秒");
+		log.info("承認ルート更新(日別) END PARALLEL: " + ((System.currentTimeMillis() - startTime) / 1000) + "秒");
 		
 		boolean checkError = false;
 		/*終了状態で「エラーあり」が返ってきたか確認する*/

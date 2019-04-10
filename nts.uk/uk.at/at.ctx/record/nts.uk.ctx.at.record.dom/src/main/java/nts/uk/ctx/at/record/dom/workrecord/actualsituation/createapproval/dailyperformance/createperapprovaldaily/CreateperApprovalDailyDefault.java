@@ -49,7 +49,7 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 				
 				AtomicInteger counter = new AtomicInteger(0);
 				this.parallel.forEach(employeeIDs, employeeID -> {
-					log.info("承認ルート更新 実行中: " + counter.get() + " (" + employeeID + ")");
+					log.info("承認ルート更新(日別) 実行中: " + counter.incrementAndGet() + "/" + employeeIDs.size()  + " (" + employeeID + ")");
 					
 					// 年月日　←「システム日付の前日」
 					GeneralDate ymd = GeneralDate.today().addDays(-1);
