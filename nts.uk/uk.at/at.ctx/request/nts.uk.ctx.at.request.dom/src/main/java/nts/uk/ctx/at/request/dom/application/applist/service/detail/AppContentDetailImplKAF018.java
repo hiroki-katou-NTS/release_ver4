@@ -82,9 +82,9 @@ public class AppContentDetailImplKAF018 implements AppContentDetailKAF018 {
 		String back1 = wkChange.getBackHomeAtr1() == 0 ? I18NText.getText("CMM045_252") + wkChange.getWorkTimeEnd1() :
 				wkChange.getWorkTimeEnd1();
 		String time1 = go1 == "" ? "" : go1 + I18NText.getText("CMM045_100") + back1;
-		String go2 = (wkChange.getGoWorkAtr2() == 1 || wkChange.getGoWorkAtr2() == null) ? wkChange.getWorkTimeStart2() : 
+		String go2 = (wkChange.getGoWorkAtr2() == null || wkChange.getGoWorkAtr2() == 1) ? wkChange.getWorkTimeStart2() : 
 				"" + I18NText.getText("CMM045_252") + wkChange.getWorkTimeStart2();
-		String back2 = (wkChange.getBackHomeAtr2() == 1 || wkChange.getBackHomeAtr2() == null) ? wkChange.getWorkTimeEnd2() :
+		String back2 = (wkChange.getBackHomeAtr2() == null || wkChange.getBackHomeAtr2() == 1) ? wkChange.getWorkTimeEnd2() :
 				I18NText.getText("CMM045_252") + wkChange.getWorkTimeEnd2();
 		String time2 = go2 == "" ? "" : go2 + I18NText.getText("CMM045_100") + back2;
 		String breakTime = wkChange.getBreakTimeStart1() == "" ? "" : I18NText.getText("CMM045_251") +
