@@ -120,6 +120,4 @@ public interface AgentRepository {
 	
 	// only for SPR
 	List<Agent> findAgentForSpr(String companyId, String approverID, GeneralDate startDate, GeneralDate endDate);
-	
-	List<Agent> findByNew512(String companyID, GeneralDate closureDate, GeneralDate inputDate);
 }

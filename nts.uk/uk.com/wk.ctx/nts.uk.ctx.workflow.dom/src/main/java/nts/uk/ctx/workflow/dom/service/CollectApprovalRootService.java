@@ -1,18 +1,12 @@
 package nts.uk.ctx.workflow.dom.service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.workflow.dom.agent.Agent;
-import nts.uk.ctx.workflow.dom.approvermanagement.setting.PrincipalApprovalFlg;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApplicationType;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApprovalPhase;
-import nts.uk.ctx.workflow.dom.approvermanagement.workroot.CompanyApprovalRoot;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ConfirmationRootType;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.EmploymentRootAtr;
-import nts.uk.ctx.workflow.dom.approvermanagement.workroot.PersonApprovalRoot;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootContentOutput;
 import nts.uk.ctx.workflow.dom.service.output.ApproverInfo;
 import nts.uk.ctx.workflow.dom.service.output.ErrorFlag;
@@ -48,9 +42,6 @@ public interface CollectApprovalRootService {
 	 * @param appPhases 承認フーズ
 	 */
 	public List<ApprovalPhase> adjustmentData(String companyID, String employeeID, GeneralDate baseDate,  List<ApprovalPhase> listApprovalPhase);
-	
-	public List<ApprovalPhase> adjustmentData512(String companyID, String employeeID, GeneralDate baseDate,  List<ApprovalPhase> listApprovalPhase,
-			Map<String, Map<GeneralDate, Boolean>> statusLst, List<Agent> agentLst, PrincipalApprovalFlg principalApprovalFlg);
 	
 	/**
 	 * 3.職位から承認者へ変換する
@@ -116,14 +107,5 @@ public interface CollectApprovalRootService {
 			String employeeID, 
 			ConfirmationRootType confirmAtr, 
 			GeneralDate standardDate);
-	
-	public ApprovalRootContentOutput getApprovalRootConfirm512(
-			String companyID, 
-			String employeeID, 
-			ConfirmationRootType confirmAtr, 
-			GeneralDate standardDate,
-			Optional<PersonApprovalRoot> opPsConfirm, Optional<PersonApprovalRoot> opPsCom, 
-			Optional<CompanyApprovalRoot> opComConfirm, Optional<CompanyApprovalRoot> opComCom,
-			Map<String, Map<GeneralDate, Boolean>> statusLst, List<Agent> agentLst, PrincipalApprovalFlg principalApprovalFlg);
 	
 }

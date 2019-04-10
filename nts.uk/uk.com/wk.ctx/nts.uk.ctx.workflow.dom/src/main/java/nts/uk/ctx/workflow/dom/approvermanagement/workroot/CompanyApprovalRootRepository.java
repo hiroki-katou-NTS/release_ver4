@@ -119,6 +119,4 @@ public interface CompanyApprovalRootRepository {
 			Integer employmentRootAtr, Integer confirmRootAtr);
 	
 	List<CompanyApprovalRoot> findEmpByConfirm(String companyID, ConfirmationRootType confirmType, GeneralDate date);
-	
-	List<CompanyApprovalRoot> findByNew512(String companyID, GeneralDate closureDate, GeneralDate inputDate);
 }

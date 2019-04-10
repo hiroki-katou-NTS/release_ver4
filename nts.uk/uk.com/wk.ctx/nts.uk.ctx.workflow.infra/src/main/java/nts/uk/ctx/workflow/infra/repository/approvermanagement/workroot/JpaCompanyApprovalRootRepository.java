@@ -81,10 +81,6 @@ public class JpaCompanyApprovalRootRepository extends JpaRepository implements C
 			 + " AND c.endDate >= :baseDate"
 			 + " AND c.confirmationRootType = :confirmationRootType"
 			 + " AND c.employmentRootAtr = 2";
-	
-	private static final String FIND_BY_NEW_512 = FIND_BY_CID
-			 + " AND c.startDate <= :inputDate"
-			 + " AND c.endDate >= :closureDate";
 	/**
 	 * get All Company Approval Root
 	 * @param companyId
@@ -351,14 +347,6 @@ public class JpaCompanyApprovalRootRepository extends JpaRepository implements C
 				.setParameter("companyId", companyID)
 				.setParameter("baseDate", date)
 				.setParameter("confirmationRootType", confirmType.value)
-				.getList(c->toDomainComApR(c));
-	}
-	@Override
-	public List<CompanyApprovalRoot> findByNew512(String companyID, GeneralDate closureDate, GeneralDate inputDate) {
-		return this.queryProxy().query(FIND_BY_NEW_512, WwfmtComApprovalRoot.class)
-				.setParameter("companyId", companyID)
-				.setParameter("closureDate", closureDate)
-				.setParameter("inputDate", inputDate)
 				.getList(c->toDomainComApR(c));
 	}
 }
