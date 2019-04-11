@@ -8,32 +8,32 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.CheckTarget;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.CheckTrackRecordApprovalDay;
-import nts.uk.ctx.at.shared.app.query.workrule.closure.GetCloseOnKeyDate;
-import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureInfo;
+import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
 public class KTG001QueryProcessor {
 
-	@Inject
-	private GetCloseOnKeyDate getCloseOnKeyDate;
 	
 	@Inject
 	private CheckTrackRecordApprovalDay checkTrackRecordApprovalDay;
+	
+	@Inject
+	private ClosureService closureService;
 
 	public boolean checkDataDayPerConfirm(String employeeId) {
 		String CID = AppContexts.user().companyId();
 		
 		//基準日の会社の締めをすべて取得する
-		List<Closure> listClosure = getCloseOnKeyDate.getCloseOnKeyDate(GeneralDate.today());
+		List<ClosureInfo> listClosure = closureService.getAllClosureInfo();
 		
 		//取得した「締め」からチェック対象を作成する
 		List<CheckTargetItem> listCheckTargetItem = new ArrayList<>();
-		for(Closure closure : listClosure) {
-			listCheckTargetItem.add(new CheckTargetItem(closure.getClosureId().value,closure.getClosureMonth().getProcessingYm()));
+		for(ClosureInfo closure : listClosure) {
+			listCheckTargetItem.add(new CheckTargetItem(closure.getClosureId().value,closure.getCurrentMonth()));
 		}
 		//CheckTargetOutPut checkTargetOutPut = new CheckTargetOutPut(listCheckTargetItem);
 		
