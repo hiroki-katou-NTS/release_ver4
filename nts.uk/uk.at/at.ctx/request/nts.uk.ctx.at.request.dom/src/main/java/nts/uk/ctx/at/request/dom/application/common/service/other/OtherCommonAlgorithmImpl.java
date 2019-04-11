@@ -23,6 +23,10 @@ import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.EmployeeRequestAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.dto.SEmpHistImport;
+import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoImport;
+import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.sys.EnvAdapter;
 import nts.uk.ctx.at.request.dom.application.common.adapter.sys.dto.MailDestinationImport;
 import nts.uk.ctx.at.request.dom.application.common.service.application.IApplicationContentService;
@@ -59,6 +63,9 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.ctx.at.shared.dom.worktime.common.AbolishAtr;
 import nts.uk.ctx.at.shared.dom.worktime.workplace.WorkTimeWorkplaceRepository;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 import nts.uk.ctx.at.shared.dom.worktype.service.WorkTypeIsClosedService;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.mail.MailSender;
@@ -121,6 +128,16 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 	
 	@Inject
 	private WorkTimeSettingRepository workTimeSettingRepository;
+	
+	@Inject
+	private RecordWorkInfoAdapter recordWorkInfoAdapter;
+	
+	@Inject
+	private ScBasicScheduleAdapter scBasicScheduleAdapter;
+	
+	@Inject
+	private WorkTypeRepository workTypeRepository;
+	
 	public PeriodCurrentMonth employeePeriodCurrentMonthCalculate(String companyID, String employeeID, GeneralDate date){
 		/*
 		アルゴリズム「社員所属雇用履歴を取得」を実行する(thực hiện xử lý 「社員所属雇用履歴を取得」)
@@ -480,5 +497,39 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 			}
 		}
 		return lstOutput;
+	}
+	@Override
+	public WorkType workTypeInconsistencyCheck(String companyID, String employeeID, GeneralDate appDate) {
+		// Imported(申請承認)「勤務実績」を取得する
+		RecordWorkInfoImport recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(employeeID, appDate);
+		if(Strings.isNotBlank(recordWorkInfoImport.getWorkTypeCode())){
+			String workTypeCd = recordWorkInfoImport.getWorkTypeCode();
+			// ドメインモデル「勤務種類」を1件取得する
+			Optional<WorkType> opWorkType = workTypeRepository.findByPK(companyID, workTypeCd);
+			if(!opWorkType.isPresent()){
+				return null;
+			}
+			WorkType workType = opWorkType.get();
+			if(workType.getDailyWork().getWorkTypeUnit()==WorkTypeUnit.OneDay){
+				return workType;
+			}
+			return null;
+		}
+		// Imported(申請承認)「勤務予定」を取得する
+		Optional<ScBasicScheduleImport> opScBasicScheduleImport = scBasicScheduleAdapter.findByID(employeeID, appDate);
+		if(opScBasicScheduleImport.isPresent()){
+			String workTypeCd = opScBasicScheduleImport.get().getWorkTypeCode();
+			// ドメインモデル「勤務種類」を1件取得する
+			Optional<WorkType> opWorkType = workTypeRepository.findByPK(companyID, workTypeCd);
+			if(!opWorkType.isPresent()){
+				return null;
+			}
+			WorkType workType = opWorkType.get();
+			if(workType.getDailyWork().getWorkTypeUnit()==WorkTypeUnit.OneDay){
+				return workType;
+			}
+			return null;
+		}
+		return null;
 	}
 }
