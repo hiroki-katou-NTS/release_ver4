@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
@@ -77,11 +77,18 @@ public class CheckTrackRecordApprovalDay {
 
 				// 集計期間
 				List<ClosurePeriod> lstClosurePeriod = getClosurePeriod.get(companyId, approvalRoot.getTargetID(),
-						GeneralDate.today(), Optional.of(target.getYearMonth()),
+						checkPeriod.end(), Optional.of(target.getYearMonth()),
 						Optional.of(ClosureId.valueOf(target.getClosureId())), Optional.empty());
 
-				List<DatePeriod> lstPeriod = lstClosurePeriod.stream()
-						.flatMap(x -> x.getAggrPeriods().stream().map(y -> y.getPeriod())).collect(Collectors.toList());
+				List<DatePeriod> lstPeriod = new ArrayList<>();
+				
+				if(lstClosurePeriod.size() > 1){
+					List<DatePeriod> test = lstPeriod.stream().filter(c -> c.start().month() == target.getYearMonth().month() && c.start().year() == target.getYearMonth().year()).collect(Collectors.toList());
+					lstPeriod.addAll(test);
+				}else{
+					lstPeriod.addAll(lstClosurePeriod.stream()
+							.flatMap(x -> x.getAggrPeriods().stream().map(y -> y.getPeriod())).collect(Collectors.toList()));
+				}
 				// 社員の日の実績の承認状況を取得する
 				List<ApprovalStatusActualResult> lstApprovalResult = approvalStatusActualDay
 						.processApprovalStatusRequest(companyId, employeeId, approvalRoot.getTargetID(),
@@ -99,6 +106,9 @@ public class CheckTrackRecordApprovalDay {
 
 	private DatePeriod mergeDatePeriod(List<DatePeriod> lstDate) {
 		lstDate = lstDate.stream().sorted((x, y) -> x.start().compareTo(y.start())).collect(Collectors.toList());
+		if(lstDate.size() == 1){
+			return new DatePeriod(lstDate.get(0).start(), lstDate.get(0).end());
+		}
 		return new DatePeriod(lstDate.get(0).start(), lstDate.get(lstDate.size() - 1).end());
 	}
 }
