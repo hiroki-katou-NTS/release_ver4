@@ -133,7 +133,7 @@ public class RegisterDayApproval {
 		
 		if(!shoudUpVer.isEmpty()){
 			shoudUpVer.stream().forEach(pair -> {
-				workInfo.verShouldUp(pair.getKey(), pair.getValue());
+				workInfo.dirtying(pair.getKey(), pair.getValue());
 			});
 		}
 	}

@@ -8,5 +8,7 @@ public interface DailyRecordTransactionService {
 
 	void updated(String empId, GeneralDate workingDate);
 
+	void updated(String empId, GeneralDate workingDate, long version);
+
 	void updated(List<String> empId, List<GeneralDate> workingDate);
 }

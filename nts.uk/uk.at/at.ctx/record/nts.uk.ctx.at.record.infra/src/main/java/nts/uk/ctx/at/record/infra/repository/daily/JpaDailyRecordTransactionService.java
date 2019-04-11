@@ -25,4 +25,10 @@ public class JpaDailyRecordTransactionService implements DailyRecordTransactionS
 		this.workInfo.dirtying(empId, workingDate);
 	}
 
+	@Override
+	public void updated(String empId, GeneralDate workingDate, long version) {
+		this.workInfo.dirtying(empId, workingDate, version);
+		
+	}
+
 }

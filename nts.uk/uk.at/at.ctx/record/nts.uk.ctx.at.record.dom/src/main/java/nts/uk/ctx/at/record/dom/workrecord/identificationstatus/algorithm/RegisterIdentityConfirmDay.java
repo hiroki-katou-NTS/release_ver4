@@ -58,7 +58,7 @@ public class RegisterIdentityConfirmDay {
 			
 			if(identityProcessOpt.get().isUseConfirmByYourself()){
 				param.getSelfConfirmDay().stream().forEach(cd -> {
-					workInfo.verShouldUp(param.getEmployeeId(), cd.getDate());
+					workInfo.dirtying(param.getEmployeeId(), cd.getDate());
 				});
 				return true;
 			}
