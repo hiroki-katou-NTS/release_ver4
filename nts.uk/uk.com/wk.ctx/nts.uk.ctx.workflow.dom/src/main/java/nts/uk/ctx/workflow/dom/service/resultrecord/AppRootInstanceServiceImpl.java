@@ -87,7 +87,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 		}
 		
 		// レスポンス改善版
-		val interms = this.confirmQueryRepository.queryInterm(companyID, employeeIDLst, period, RecordRootType.CONFIRM_WORK_BY_DAY);
+		val interms = this.confirmQueryRepository.queryInterm(companyID, employeeIDLst, period, rootType);
 		val confirms = this.confirmQueryRepository.queryConfirm(companyID, employeeIDLst, period, rootType);
 		
 		List<ApprovalRootStateStatus> appRootStatusLst = new ArrayList<ApprovalRootStateStatus>();
