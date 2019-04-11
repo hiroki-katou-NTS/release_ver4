@@ -1786,16 +1786,18 @@ module nts.uk.com.view.ccg.share.ccg {
 
                 // A：締め状態更新
                 if (self.systemType == ConfigEnumSystemType.EMPLOYMENT && self.showClosure) {
-                    service.getClosureByCurrentEmployee(self.queryParam.baseDate).done(id => {
-                        if (_.isNil(id)) {
-                            nts.uk.ui.dialog.alertError({ messageId: 'Msg_1434' });
-                            return;
-                        }
-                        if (self.selectedClosure() != id) {
-                            self.selectedClosure(id);
-                        }
-                        self.getEmployeeLogin();
-                    });
+                    self.getEmployeeLogin();
+                    //hoatt #107198
+//                    service.getClosureByCurrentEmployee(self.queryParam.baseDate).done(id => {
+//                        if (_.isNil(id)) {
+//                            nts.uk.ui.dialog.alertError({ messageId: 'Msg_1434' });
+//                            return;
+//                        }
+//                        if (self.selectedClosure() != id) {
+//                            self.selectedClosure(id);
+//                        }
+//                        self.getEmployeeLogin();
+//                    });
                 } else {
                     self.getEmployeeLogin();
                 }
