@@ -134,7 +134,6 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 					new DatePeriod(param.getComplileDate().end().addDays(1),
 							param.getComplileDate().end().addDays(1)), null);
 			if(getSpecialHolidayOfEmp.getStatus() == InforStatus.GRANTED) {
-				List<SpecialLeaveGrantDetails> lstSpeLeaveGrantDetails = new ArrayList<>();
 				//取得した特別休暇の付与データを「特別休暇の付与明細」に１行を追加する
 				List<SpecialHolidayInfor> lstInfor = getSpecialHolidayOfEmp.getSpeHolidayInfor();
 				if(lstInfor.isEmpty()) {
@@ -187,10 +186,8 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 						param.getSid(),
 						speInfor.getGrantDaysInfor().getYmd(),
 						numberInfor);
-				lstSpeLeaveGrantDetails.add(detailAdd);
-				getOffsetDay.setLstSpeLeaveGrantDetails(lstSpeLeaveGrantDetails);
+				getOffsetDay.getLstSpeLeaveGrantDetails().add(detailAdd);
 			}
-			
 		}
 		
 		return this.lstError(getOffsetDay);
