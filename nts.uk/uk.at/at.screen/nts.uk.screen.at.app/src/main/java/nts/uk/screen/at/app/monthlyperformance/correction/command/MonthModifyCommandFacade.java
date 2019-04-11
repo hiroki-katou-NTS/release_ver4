@@ -48,7 +48,17 @@ public class MonthModifyCommandFacade {
 		MonthlyRecordWorkDto oldValues = finder.find(query.getEmployeeId(), new YearMonth(query.getYearMonth()),
 				ClosureId.valueOf(query.getClosureId()),
 				new ClosureDate(query.getClosureDate().getClosureDay(), query.getClosureDate().getLastDayOfMonth()));
-		return AttendanceItemUtil.fromItemValues(oldValues, query.getItems(), AttendanceItemType.MONTHLY_ITEM);
+		oldValues = AttendanceItemUtil.fromItemValues(oldValues, query.getItems(), AttendanceItemType.MONTHLY_ITEM);
+		
+		if(oldValues.getAffiliation() != null){
+			oldValues.getAffiliation().setVersion(query.getVersion());
+		}
+		if(oldValues.getAttendanceTime() != null){
+			oldValues.getAttendanceTime().setVersion(query.getVersion());
+		}
+		
+		
+		return oldValues;
 	}
 	
 	private List<MonthlyRecordWorkCommand> createMultiCommand(List<MonthlyModifyQuery> query,List<MonthlyRecordWorkDto> values) {
@@ -71,6 +81,13 @@ public class MonthModifyCommandFacade {
 //			IntegrationOfMonthly domain = v.toDomain(v.employeeId(), v.yearMonth(), v.getClosureID(), v.getClosureDate());
 //			MonthlyRecordWorkDto dtoNew = MonthlyRecordWorkDto.fromOnlyAttTime(domain);
 			MonthlyRecordWorkDto dto = AttendanceItemUtil.fromItemValues(v, q.getItems(), AttendanceItemType.MONTHLY_ITEM);
+
+			if(dto.getAffiliation() != null){
+				dto.getAffiliation().setVersion(q.getVersion());
+			}
+			if(dto.getAttendanceTime() != null){
+				dto.getAttendanceTime().setVersion(q.getVersion());
+			}
 			return createCommand(dto, q);
 		}).filter(v -> v != null).collect(Collectors.toList());
 	}

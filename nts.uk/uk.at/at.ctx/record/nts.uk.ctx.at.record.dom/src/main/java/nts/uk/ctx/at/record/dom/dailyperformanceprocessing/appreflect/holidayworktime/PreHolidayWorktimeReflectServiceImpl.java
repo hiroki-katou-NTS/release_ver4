@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.PreOvertimeReflectService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.AdTimeAndAnyItemAdUpService;
@@ -41,6 +42,9 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 	private AttendanceTimeRepository attendanceTime;
 	@Inject
 	private CommonProcessCheckService commonService;
+	@Inject
+	private DailyRecordTransactionService dailyTransaction;
+	
 	@Override
 	public boolean preHolidayWorktimeReflect(HolidayWorktimePara holidayWorkPara, boolean isPre) {		
 		try {
@@ -121,7 +125,8 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 				|| !daily.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getWorkHolidayTime().isPresent()) {
 			AttendanceTimeOfDailyPerformance attendanceTime = AttendanceTimeOfDailyPerformance.allZeroValue(employeeId, baseDate);
 			daily.setAttendanceTimeOfDailyPerformance(Optional.of(attendanceTime));
-			timeAndAnyItemUpService.addAndUpdate(daily);	
+			timeAndAnyItemUpService.addAndUpdate(daily);
+			dailyTransaction.updated(employeeId, baseDate);
 		}				
 		return daily;
 	}

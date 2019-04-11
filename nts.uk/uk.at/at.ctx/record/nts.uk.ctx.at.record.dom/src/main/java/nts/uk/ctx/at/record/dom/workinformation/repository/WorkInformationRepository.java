@@ -27,6 +27,8 @@ public interface WorkInformationRepository {
 	
 	void updateByKey(WorkInfoOfDailyPerformance workInfoOfDailyPerformance);
 	
+	long getVer(String employeeId, GeneralDate date);
+	
 	void update(List<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance);
 	
 	void updateV2(List<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance);
@@ -49,4 +51,8 @@ public interface WorkInformationRepository {
 	 * @return
 	 */
 	List<WorkInfoOfDailyPerformance> findByListDate(String employeeId, List<GeneralDate> dates);
+
+	void dirtying(String employeeId, GeneralDate date);
+	void dirtying(String employeeId, GeneralDate date, long version);
+	void dirtying(List<String> employeeId, List<GeneralDate> date);
 }

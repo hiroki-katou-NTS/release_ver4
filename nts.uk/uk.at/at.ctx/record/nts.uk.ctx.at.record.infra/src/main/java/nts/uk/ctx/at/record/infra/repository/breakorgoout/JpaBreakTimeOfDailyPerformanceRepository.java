@@ -3,7 +3,6 @@ package nts.uk.ctx.at.record.infra.repository.breakorgoout;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
-//import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 		implements BreakTimeOfDailyPerformanceRepository {
 
 	// private static final String REMOVE_BY_EMPLOYEE;
-
+	
 	private static final String DEL_BY_LIST_KEY;
 
 	private static final String SELECT_BY_EMPLOYEE_AND_DATE;

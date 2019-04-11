@@ -152,7 +152,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 			return;
 		}
 		this.commandProxy().insertAll(errors.stream().map(e -> KrcdtSyainDpErList.toEntity(e)).collect(Collectors.toList()));
-		 this.getEntityManager().flush();
+//		 this.getEntityManager().flush();
 	}
 
 	@Override

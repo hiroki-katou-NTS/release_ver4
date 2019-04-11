@@ -116,7 +116,9 @@ public class RemarksOfDailyPerformRepoImpl extends JpaRepository implements Rema
 	@Override
 	public void add(List<RemarksOfDailyPerform> domain) {
 		if(!domain.isEmpty()){
-			commandProxy().insert(domain.stream().map(c -> KrcdtDayRemarksColumn.toEntity(c)).collect(Collectors.toList()));	
+			domain.stream().forEach(c -> {
+				add(c);
+			});
 		}
 		
 	}

@@ -258,7 +258,7 @@ ko.components.register('kaf022-b', {
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $bv.selectedIdB32,
-                            enable: false}">
+                            enable: true}">
                         </div>
                     </td>
                 </tr>

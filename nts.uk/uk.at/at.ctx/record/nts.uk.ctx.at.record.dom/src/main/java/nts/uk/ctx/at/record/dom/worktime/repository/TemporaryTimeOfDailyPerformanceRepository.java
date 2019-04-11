@@ -12,8 +12,6 @@ public interface TemporaryTimeOfDailyPerformanceRepository {
 
 	void delete(String employeeId, GeneralDate ymd);
 	
-	void deleteByListEmployeeId(List<String> employeeIds, List<GeneralDate> ymds);
-	
 	Optional<TemporaryTimeOfDailyPerformance> findByKey(String employeeId, GeneralDate ymd);
 
 	List<TemporaryTimeOfDailyPerformance> findbyPeriodOrderByYmd(String employeeId, DatePeriod datePeriod);

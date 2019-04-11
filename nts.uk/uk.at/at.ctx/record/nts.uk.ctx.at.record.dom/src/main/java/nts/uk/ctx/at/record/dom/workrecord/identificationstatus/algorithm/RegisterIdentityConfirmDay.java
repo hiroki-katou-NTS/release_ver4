@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
@@ -40,56 +41,68 @@ public class RegisterIdentityConfirmDay {
 	@Inject
 	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;
 	
+	@Inject
+	private WorkInformationRepository workInfo;
+	
 	// code old 
 //	@Inject
 //	private OpOfDailyPerformance opOfDailyPerformance;
 
-	public void registerIdentity(ParamIdentityConfirmDay param) {
+	public boolean registerIdentity(ParamIdentityConfirmDay param) {
 		String companyId = AppContexts.user().companyId();
-		GeneralDate processingYmd = GeneralDate.today();
 		Optional<IdentityProcessUseSet> identityProcessOpt = identityProcessUseSetRepository.findByKey(companyId);
 		if (identityProcessOpt.isPresent()) {
-			Optional<SelfConfirmError> canRegist = checkIdentityVerification.check(identityProcessOpt.get());
-			param.getSelfConfirmDay().forEach(data -> {
-				String employeeId = AppContexts.user().employeeId();
-				if (canRegist.isPresent()) {
-					if (canRegist.get() == SelfConfirmError.CAN_CONFIRM_WHEN_ERROR) {
+			checkIdentityVerification.check(identityProcessOpt.get()).ifPresent(canRegist -> {
+				registIdentification(param, companyId, canRegist);
+			});
+			
+			if(identityProcessOpt.get().isUseConfirmByYourself()){
+				param.getSelfConfirmDay().stream().forEach(cd -> {
+					workInfo.dirtying(param.getEmployeeId(), cd.getDate());
+				});
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private void registIdentification(ParamIdentityConfirmDay param, String companyId, SelfConfirmError canRegist) {
+		GeneralDate processingYmd = GeneralDate.today();
+		String employeeId = AppContexts.user().employeeId();
+		param.getSelfConfirmDay().forEach(data -> {
+			if (canRegist == SelfConfirmError.CAN_CONFIRM_WHEN_ERROR) {
+				if (data.getValue()) {
+					identificationRepository.insert(new Identification(companyId, employeeId, data.getDate(), processingYmd));
+				} else {
+					identificationRepository.remove(companyId, employeeId, data.getDate());
+				}
+			} else {
+				List<EmployeeDailyPerError> employeeDailyPerErrors = employeeDailyPerErrorRepository
+						.find(employeeId, data.getDate()).stream().filter(x -> !x.getErrorAlarmWorkRecordCode().v().startsWith("D")).collect(Collectors.toList());
+				if (!employeeDailyPerErrors.isEmpty()) {
+					List<ErrorAlarmWorkRecord> errorAlarmWorkRecords = errorAlarmWorkRecordRepository
+							.getListErAlByListCodeError(companyId,
+									employeeDailyPerErrors.stream()
+											.map(x -> x.getErrorAlarmWorkRecordCode().v())
+											.collect(Collectors.toList()));
+					if (errorAlarmWorkRecords.isEmpty()) {
 						if (data.getValue()) {
-							identificationRepository
-									.insert(new Identification(companyId, employeeId, data.getDate(), processingYmd));
+							identificationRepository.insert(new Identification(companyId, employeeId, data.getDate(), processingYmd));
 						} else {
 							identificationRepository.remove(companyId, employeeId, data.getDate());
 						}
+					}else {
+						   identificationRepository.remove(companyId, employeeId, data.getDate());
+					}
+				}else{
+					if (data.getValue()) {
+						identificationRepository.insert(new Identification(companyId, employeeId, data.getDate(), processingYmd));
 					} else {
-						List<EmployeeDailyPerError> employeeDailyPerErrors = employeeDailyPerErrorRepository
-								.find(employeeId, data.getDate()).stream().filter(x -> !x.getErrorAlarmWorkRecordCode().v().startsWith("D")).collect(Collectors.toList());
-						if (!employeeDailyPerErrors.isEmpty()) {
-							List<ErrorAlarmWorkRecord> errorAlarmWorkRecords = errorAlarmWorkRecordRepository
-									.getListErAlByListCodeError(companyId,
-											employeeDailyPerErrors.stream()
-													.map(x -> x.getErrorAlarmWorkRecordCode().v())
-													.collect(Collectors.toList()));
-							if (errorAlarmWorkRecords.isEmpty()) {
-								if (data.getValue()) {
-									identificationRepository.insert(
-											new Identification(companyId, employeeId, data.getDate(), processingYmd));
-								} else {
-									identificationRepository.remove(companyId, employeeId, data.getDate());
-								}
-							}else {
-								   identificationRepository.remove(companyId, employeeId, data.getDate());
-							}
-						}else{
-							if (data.getValue()) {
-								identificationRepository.insert(
-										new Identification(companyId, employeeId, data.getDate(), processingYmd));
-							} else {
-								identificationRepository.remove(companyId, employeeId, data.getDate());
-							}
-						}
+						identificationRepository.remove(companyId, employeeId, data.getDate());
 					}
 				}
-			});
-		}
+			}
+		});
 	}
 }

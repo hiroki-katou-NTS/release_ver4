@@ -31,17 +31,6 @@ import nts.uk.shr.infra.data.jdbc.JDBCUtil;
 @Stateless
 public class PCLogOnInfoOfDailyRepoImpl extends JpaRepository implements PCLogOnInfoOfDailyRepo {
 
-//	private static final String REMOVE_BY_KEY;
-
-	static {
-//		StringBuilder builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcdtDayPcLogonInfo a ");
-//		builderString.append("WHERE a.id.sid = :employeeId ");
-//		builderString.append("AND a.id.ymd = :ymd ");
-//		REMOVE_BY_KEY = builderString.toString();
-	}
-
 	@Override
 	public Optional<PCLogOnInfoOfDaily> find(String employeeId, GeneralDate baseDate) {
 		List<LogOnInfo> logOnInfo = findQuery(employeeId, baseDate).getList(c -> c.toDomain());
@@ -153,11 +142,6 @@ public class PCLogOnInfoOfDailyRepoImpl extends JpaRepository implements PCLogOn
 		} catch (Exception e) {
 			
 		}
-	}
-
-	@Override
-	public void remove(PCLogOnInfoOfDaily domain) {
-		removeByKey(domain.getEmployeeId(), domain.getYmd());
 	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)

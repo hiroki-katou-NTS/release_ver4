@@ -36,7 +36,7 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 		implements AffiliationInforOfDailyPerforRepository {
 
 //	private static final String REMOVE_BY_EMPLOYEE;
-
+	
 	private static final String FIND_BY_KEY;
 
 	static {

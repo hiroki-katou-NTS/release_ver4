@@ -647,14 +647,16 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                         startDate: moment.utc(self.actualTimeSelectedDat().startDate, "YYYY/MM/DD"),
                         endDate: moment.utc(self.actualTimeSelectedDat().endDate, "YYYY/MM/DD"),
                         dataCheckSign: [],
-                        dataCheckApproval: []
+                        dataCheckApproval: [],
+                        dataLock: []
                     };
 
                 _.each(dataChange, (data: any) => {
                     let dataTemp = _.find(dataSource, (item: any) => {
                         return item.id == data.rowId;
                     });
-
+                    let current = _.find(self.dpData, (dt) => { return dt.id ===data.rowId; });
+                    dataUpdate.dataLock.push({ rowId: data.rowId, version: current.version, employeeId: dataTemp.employeeId});
                     if (data.columnKey != "identify" && data.columnKey != "approval") {
                         //get layout , and type
                         let layoutAndType: any = _.find(self.itemValueAll(), (item: any) => {
@@ -680,19 +682,29 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 nts.uk.ui.block.invisible();
                 nts.uk.ui.block.grayout();
                 service.addAndUpdate(dataUpdate).done((data) => {
-//                    _.each(dataChange, data => {
-//                        $("#dpGrid").mGrid("updateCell", data.rowId, data.columnKey, data.value, true);
-//                    });
-
-                    nts.uk.ui.block.clear();
+                    //                    _.each(dataChange, data => {
+                    //                        $("#dpGrid").mGrid("updateCell", data.rowId, data.columnKey, data.value, true);
+                    //                    });
+                    nts.uk.ui.dialog.info({ messageId: 'Msg_15' });
+					
 //                    if (self.initMode() != ScreenMode.APPROVAL) {
-                        self.loadRowScreen();
+					self.loadRowScreen().done(() => {
+						nts.uk.ui.block.clear();
+					});
                         //self.showButton(new AuthorityDetailModel(self.dataAll().authorityDto, self.dataAll().actualTimeState, self.initMode(), self.dataAll().formatPerformance.settingUnitType));
                         //                           self.updateDate(self.yearMonth());  
 //                    }
                 }).fail(function(res: any) {
-                    nts.uk.ui.dialog.error({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() { nts.uk.ui.block.clear(); });
-                });;
+                    if(res.optimisticLock === true){
+                        nts.uk.ui.dialog.error({ messageId: 'Msg_1528' }).then(() => {
+                            self.loadRowScreen().done(() => {
+                                nts.uk.ui.block.clear();
+                            });
+                        });
+                    } else {
+                        nts.uk.ui.dialog.error({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() { nts.uk.ui.block.clear(); });    
+                    }
+                });
             }
         }
 
@@ -1842,6 +1854,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
         layoutCode: string;
         employeeId: string;
         typeGroup: number;
+        version: number;
         constructor(rowId: any, itemId: any, value: any, valueType: number, layoutCode: string, employeeId: string, typeGroup: number) {
             this.rowId = rowId;
             this.itemId = itemId;

@@ -31,6 +31,7 @@ public class InsertWorkInfoOfDailyPerforServiceImpl implements InsertWorkInfoOfD
 
 		if (workInfoOfDailyPerformance.isPresent()) {
 			// 日別実績の勤務情報を更新する - update
+			workInfoOfDailyPerformanceUpdate.setVersion(workInfoOfDailyPerformance.get().getVersion());
 			this.updateWorkInfoOfDailyPerforService.updateWorkInfoOfDailyPerforService(companyId, employeeID,
 					processingDate, workInfoOfDailyPerformanceUpdate);
 

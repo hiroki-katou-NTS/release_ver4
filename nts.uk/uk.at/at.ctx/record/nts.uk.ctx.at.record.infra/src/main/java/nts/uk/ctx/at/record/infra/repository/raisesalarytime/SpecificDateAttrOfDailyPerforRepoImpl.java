@@ -34,17 +34,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 public class SpecificDateAttrOfDailyPerforRepoImpl extends JpaRepository implements SpecificDateAttrOfDailyPerforRepo {
 
-//	private static final String REMOVE_BY_EMPLOYEEID_AND_DATE;
-
-	static {
-//		StringBuilder builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcdtDaiSpeDayCla a ");
-//		builderString.append("WHERE a.krcdtDaiSpeDayClaPK.sid = :employeeId ");
-//		builderString.append("AND a.krcdtDaiSpeDayClaPK.ymd = :ymd ");
-//		REMOVE_BY_EMPLOYEEID_AND_DATE = builderString.toString();
-	}
-
 	@Override
 	public Optional<SpecificDateAttrOfDailyPerfor> find(String employeeId, GeneralDate baseDate) {
 		List<SpecificDateAttrSheet> shortTimeSheets = findEntities(employeeId, baseDate)

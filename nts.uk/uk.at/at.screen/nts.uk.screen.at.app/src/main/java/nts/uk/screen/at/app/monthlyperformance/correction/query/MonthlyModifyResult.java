@@ -27,6 +27,8 @@ public class MonthlyModifyResult {
 	/** 月別実績の勤怠時間 期間: 期間  */
 	private DatePeriod workDatePeriod;
 	
+	private long version;
+	
 	public static MonthlyModifyResult builder(){
 		return new MonthlyModifyResult();
 	}
@@ -57,6 +59,11 @@ public class MonthlyModifyResult {
 	
 	public MonthlyModifyResult workDatePeriod(DatePeriod period) {
 		this.workDatePeriod = period;
+		return this;
+	}
+	
+	public MonthlyModifyResult version(long version){
+		this.version = version;
 		return this;
 	}
 	

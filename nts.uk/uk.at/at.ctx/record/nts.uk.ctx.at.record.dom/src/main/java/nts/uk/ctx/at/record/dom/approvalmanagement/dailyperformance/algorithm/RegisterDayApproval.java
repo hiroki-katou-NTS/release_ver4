@@ -1,9 +1,11 @@
 package nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -20,6 +22,7 @@ import nts.uk.ctx.at.record.dom.approvalmanagement.check.CheckApprovalOperation;
 import nts.uk.ctx.at.record.dom.approvalmanagement.enums.ConfirmationOfManagerOrYouself;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalStatusOfDailyPerforRepository;
+import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
@@ -47,6 +50,9 @@ public class RegisterDayApproval {
 	@Inject
 	private ApprovalStatusOfDailyPerforRepository approvalStatusOfDailyPerforRepository;
 
+	@Inject
+	private WorkInformationRepository workInfo;
+	
 	@Inject
 	private ApprovalStatusAdapter approvalStatusAdapter;
 
@@ -99,21 +105,35 @@ public class RegisterDayApproval {
 				}
 			}
 		}
+		
+		Set<Pair<String, GeneralDate>> shoudUpVer = new HashSet<>();
 		// release status == false
-		if (!employeeIdRealse.isEmpty())
+		if (!employeeIdRealse.isEmpty()) {
 			approvalStatusAdapter.releaseApproval(param.getEmployeeId(),
 					employeeIdRealse.keySet().stream().collect(Collectors.toList()), 1, companyId);
+			shoudUpVer.addAll(employeeIdRealse.keySet());
+		}
 		// register status == true
-		if (!employeeIdInsert.isEmpty())
+		if (!employeeIdInsert.isEmpty()) {
 			approvalStatusAdapter.registerApproval(param.getEmployeeId(),
 					employeeIdInsert.keySet().stream().collect(Collectors.toList()), 1, companyId);
+			shoudUpVer.addAll(employeeIdInsert.keySet());
+			
+		}
 		
 		if(!employeeIdRealseAll.isEmpty()){
 			employeeIdRealseAll.entrySet().forEach(x ->{
 				Optional<ApprovalStatusOfDailyPerfor> dailyPerforOpt= approvalStatusOfDailyPerforRepository.find(x.getKey().getLeft(), x.getKey().getRight());
 				if(dailyPerforOpt.isPresent()){
 					approvalStatusAdapter.cleanApprovalRootState(dailyPerforOpt.get().getEmployeeId(), x.getValue(), 1);
+					shoudUpVer.add(x.getKey());
 				}
+			});
+		}
+		
+		if(!shoudUpVer.isEmpty()){
+			shoudUpVer.stream().forEach(pair -> {
+				workInfo.dirtying(pair.getKey(), pair.getValue());
 			});
 		}
 	}

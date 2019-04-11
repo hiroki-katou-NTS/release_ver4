@@ -11,12 +11,14 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.worktime.TemporaryTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
@@ -31,10 +33,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 		implements TemporaryTimeOfDailyPerformanceRepository {
-
-//	private static final String REMOVE_BY_EMPLOYEE;
-//	
-//	private static final String REMOVE_TIME_LEAVING_WORK;
 	
 	private static final String DEL_BY_LIST_KEY;
 
@@ -42,21 +40,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 
 	static {
 		StringBuilder builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcdtDaiTemporaryTime a ");
-//		builderString.append("WHERE a.krcdtDaiTemporaryTimePK.employeeId = :employeeId ");
-//		builderString.append("AND a.krcdtDaiTemporaryTimePK.ymd = :ymd ");
-//		REMOVE_BY_EMPLOYEE = builderString.toString();
-//		
-//		builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcdtTimeLeavingWork a ");
-//		builderString.append("WHERE a.krcdtTimeLeavingWorkPK.employeeId = :employeeId ");
-//		builderString.append("AND a.krcdtTimeLeavingWorkPK.ymd = :ymd ");
-//		builderString.append("AND a.krcdtTimeLeavingWorkPK.timeLeavingType = :timeLeavingType ");
-//		REMOVE_TIME_LEAVING_WORK = builderString.toString();
-		
-		builderString = new StringBuilder();
 		builderString.append("DELETE ");
 		builderString.append("FROM KrcdtDaiTemporaryTime a ");
 		builderString.append("WHERE a.krcdtDaiTemporaryTimePK.employeeId IN :employeeIds ");
@@ -90,18 +73,6 @@ public class JpaTemporaryTimeOfDailyPerformanceRepository extends JpaRepository
 //		this.getEntityManager().createQuery(REMOVE_BY_EMPLOYEE).setParameter("employeeId", employeeId)
 //				.setParameter("ymd", ymd).executeUpdate();
 //		this.getEntityManager().flush();
-	}
-
-	@Override
-	public void deleteByListEmployeeId(List<String> employeeIds, List<GeneralDate> ymds) {
-		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstEmpIds -> {
-			CollectionUtil.split(ymds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstYMD -> {
-				this.getEntityManager().createQuery(DEL_BY_LIST_KEY)
-					.setParameter("employeeIds", lstEmpIds)
-					.setParameter("processingYmds", lstYMD).executeUpdate();	
-			});
-		});
-		this.getEntityManager().flush();
 	}
 
 	@Override

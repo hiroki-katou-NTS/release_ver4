@@ -33,7 +33,7 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 	private static final String FIND_BY_KEY;
 
 //	private static final String REMOVE_BY_KEY;
-
+	
 	static {
 		StringBuilder builderString = new StringBuilder();
 //		builderString.append("DELETE ");

@@ -66,8 +66,6 @@ import nts.uk.ctx.at.shared.app.find.scherec.monthlyattditem.MonthlyItemControlB
 import nts.uk.ctx.at.shared.app.find.scherec.monthlyattditem.MonthlyItemControlByAuthFinder;
 import nts.uk.ctx.at.shared.dom.adapter.jobtitle.SharedAffJobTitleHisImport;
 import nts.uk.ctx.at.shared.dom.adapter.jobtitle.SharedAffJobtitleHisAdapter;
-import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemIdContainer;
-import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil.AttendanceItemType;
 import nts.uk.ctx.at.shared.dom.monthlyattditem.MonthlyAttendanceItemAtr;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureHistory;
@@ -374,13 +372,13 @@ public class MonthlyPerformanceReload {
 			listCss.add("daily-confirm-color");
 			if (monthlyPerformaceLockStatus != null) {
 				if (monthlyPerformaceLockStatus.getMonthlyResultConfirm() == LockStatus.LOCK) {
-					dailyConfirm = "！";
+					dailyConfirm = "未";
 					// mau cua kiban chua dap ung duoc nen dang tu set mau
 					// set color for cell dailyConfirm
 					listCss.add("color-cell-un-approved");
 					screenDto.setListStateCell("dailyconfirm", employeeId, listCss);
 				} else {
-					dailyConfirm = "〇";
+					dailyConfirm = "済";
 					// mau cua kiban chua dap ung duoc nen dang tu set mau
 					// set color for cell dailyConfirm
 					listCss.add("color-cell-approved");
@@ -502,7 +500,7 @@ public class MonthlyPerformanceReload {
 			List<EditStateOfMonthlyPerformanceDto> newList = editStateOfMonthlyPerformanceDtos.stream()
 					.filter(item -> item.getEmployeeId().equals(employeeId)).collect(Collectors.toList());
 			if (null != rowData) {
-			//	mpdata.setVersion(rowData.getVersion());
+				mpdata.setVersion(rowData.getVersion());
 				if (null != rowData.getItems()) {
 					rowData.getItems().forEach(item -> {
 						// Cell Data

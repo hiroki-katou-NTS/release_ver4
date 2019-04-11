@@ -15,6 +15,7 @@ import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerforma
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.OutingTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.calculationattribute.repo.CalAttrOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.AttendanceLeavingGateOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.PCLogOnInfoOfDailyRepo;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.ReflectStampOutput;
@@ -75,6 +76,9 @@ public class RegisterDailyPerformanceInfoService {
 	
 	@Inject
 	private CreateEmployeeDailyPerError createEmployeeDailyPerError;
+	
+	@Inject
+	private DailyRecordTransactionService dailyTransaction;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void registerDailyPerformanceInfo(String companyId, String employeeID, GeneralDate day,
@@ -90,6 +94,8 @@ public class RegisterDailyPerformanceInfoService {
 		if (workInfoOfDailyPerformanceUpdate != null) {
 			this.insertWorkInfoOfDailyPerforService.updateWorkInfoOfDailyPerforService(companyId, employeeID, day,
 					workInfoOfDailyPerformanceUpdate);
+		} else {
+			dailyTransaction.updated(employeeID, day);
 		}
 
 		// ドメインモデル「日別実績の勤務種別」を更新する (Update domain 「日別実績の勤務種別」)

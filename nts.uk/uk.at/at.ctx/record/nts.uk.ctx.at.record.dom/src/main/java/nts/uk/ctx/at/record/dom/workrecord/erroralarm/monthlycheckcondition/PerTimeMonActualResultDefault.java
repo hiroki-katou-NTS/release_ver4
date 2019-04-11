@@ -17,8 +17,16 @@ import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthlyKey;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthlyRepository;
+import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthly;
+import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
+import nts.uk.ctx.at.record.dom.monthly.affiliation.AffiliationInfoOfMonthly;
+import nts.uk.ctx.at.record.dom.monthly.affiliation.AffiliationInfoOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthlyRepository;
+import nts.uk.ctx.at.record.dom.monthly.mergetable.RemainMerge;
+import nts.uk.ctx.at.record.dom.monthly.mergetable.RemainMergeRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.annualleave.AnnLeaRemNumEachMonth;
+import nts.uk.ctx.at.record.dom.monthly.vacation.annualleave.AnnLeaRemNumEachMonthRepository;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.converter.MonthlyRecordToAttendanceItemConverter;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.WorkCheckResult;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.attendanceitem.AttendanceItemCondition;
@@ -130,48 +138,119 @@ public class PerTimeMonActualResultDefault implements PerTimeMonActualResultServ
 		return results;
 	}
 	
+	@Inject
+	private TimeOfMonthlyRepository timeRepo;
+	
+	@Inject
+	private RemainMergeRepository remainRepo;
+	
 	@Override
 	public Map<String, Map<YearMonth, Map<String, Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemCondition> checkConditions) {
 		Map<String, Map<YearMonth, Map<String, Integer>>> results = new HashMap<>();
 		//締めをチェックする
 		List<YearMonth> yearmonths = yearMonth.yearMonthsBetween();
-		List<AttendanceTimeOfMonthly> attendanceTimeOfMonthlys = attendanceTimeOfMonthlyRepo.findBySidsAndYearMonths(employeeID, yearmonths);
+//		List<AttendanceTimeOfMonthly> attendanceTimeOfMonthlys = attendanceTimeOfMonthlyRepo.findBySidsAndYearMonths(employeeID, yearmonths);
 		List<AnyItemOfMonthly> anyItems = anyItemOfMonthlyRepo.findBySidsAndMonths(employeeID, yearmonths);
-
-		MonthlyRecordToAttendanceItemConverter monthly = attendanceItemConvertFactory.createMonthlyConverter();
+//		MonthlyRecordToAttendanceItemConverter monthly = attendanceItemConvertFactory.createMonthlyConverter();
 		
-		if (!CollectionUtil.isEmpty(attendanceTimeOfMonthlys)) {
-			attendanceTimeOfMonthlys.stream().forEach(atm -> {
-				
-				List<AnyItemOfMonthly> aims = anyItems.stream().filter(aim -> {
-					return aim.getEmployeeId().equals(atm.getEmployeeId()) && aim.getYearMonth().equals(atm.getYearMonth())
-							&& aim.getClosureId() == atm.getClosureId() && aim.getClosureDate().equals(atm.getClosureDate());
-				}).collect(Collectors.toList());
-				
-				monthly.withAttendanceTime(atm).withAnyItem(aims);
-				
-				checkConditions.entrySet().stream().forEach(con -> {
+		// 月別実績の所属情報を取得する
+		List<TimeOfMonthly> times = timeRepo.findBySidsAndYearMonths(employeeID, yearmonths);
+		List<RemainMerge>  remains = remainRepo.findBySidsAndYearMonths(employeeID, yearmonths);
+		
+		for (TimeOfMonthly attendanceTime : times){
+			String employeeId = attendanceTime.getEmployeeId();
+			
+			Optional<RemainMerge> currentRemain = remains.stream().filter(c -> {
+				return c.getMonthMergeKey().getEmployeeId().equals(employeeId)
+						&& c.getMonthMergeKey().getClosureDate().equals(attendanceTime.getClosureDate())
+						&& c.getMonthMergeKey().getClosureId().equals(attendanceTime.getClosureId())
+						&& c.getMonthMergeKey().getYearMonth().equals(attendanceTime.getYearMonth());
+			}).findFirst();
+			List<AnyItemOfMonthly> currentAnyItems = anyItems.stream().filter(c -> {
+				return c.getEmployeeId().equals(employeeId)
+						&& c.getClosureDate().equals(attendanceTime.getClosureDate())
+						&& c.getClosureId().equals(attendanceTime.getClosureId())
+						&& c.getYearMonth().equals(attendanceTime.getYearMonth());
+			}).collect(Collectors.toList());
+			// 勤怠項目値リストに変換する準備をする
+			MonthlyRecordToAttendanceItemConverter monthlyConverter = this.attendanceItemConvertFactory.createMonthlyConverter();
+			
+			attendanceTime.getAffiliation().ifPresent(af -> {
+				monthlyConverter.withAffiliation(af);
+			});
+			attendanceTime.getAttendanceTime().ifPresent(at -> {
+				monthlyConverter.withAttendanceTime(at);
+			});
+			monthlyConverter.withAnyItem(currentAnyItems);
+			
+			currentRemain.ifPresent(remain -> {
+				monthlyConverter.withAnnLeave(remain.getAnnLeaRemNumEachMonth());
+				monthlyConverter.withRsvLeave(remain.getRsvLeaRemNumEachMonth());
+				monthlyConverter.withAbsenceLeave(remain.getAbsenceLeaveRemainData());
+				monthlyConverter.withDayOff(remain.getMonthlyDayoffRemainData());
+				monthlyConverter.withSpecialLeave(remain.getSpecialHolidayRemainList());
+				monthlyConverter.withMonCareHd(remain.getMonCareHdRemain());
+				monthlyConverter.withMonChildHd(remain.getMonChildHdRemain());
+			});
+			
+			checkConditions.entrySet().stream().forEach(con -> {
 
-					boolean check = con.getValue().check(item->{
-						if (item.isEmpty()) {
-							return new ArrayList<>();
-						}
-						return monthly.convert(item).stream().map(iv -> getValueNew(iv))
-								.collect(Collectors.toList());
-					}) == WorkCheckResult.ERROR;
-					
-					if (check) {
-						if(!results.containsKey(atm.getEmployeeId())){
-							results.put(atm.getEmployeeId(), new HashMap<>());
-						}
-						if(!results.get(atm.getEmployeeId()).containsKey(atm.getYearMonth())){
-							results.get(atm.getEmployeeId()).put(atm.getYearMonth(), new HashMap<>());
-						}
-						results.get(atm.getEmployeeId()).get(atm.getYearMonth()).put(con.getKey(), 1);
+				boolean check = con.getValue().check(item->{
+					if (item.isEmpty()) {
+						return new ArrayList<>();
 					}
-				});
+					return monthlyConverter.convert(item).stream().map(iv -> getValueNew(iv))
+							.collect(Collectors.toList());
+				}) == WorkCheckResult.ERROR;
+				
+				if (check) {
+					if(!results.containsKey(employeeId)){
+						results.put(employeeId, new HashMap<>());
+					}
+					if(!results.get(employeeId).containsKey(attendanceTime.getYearMonth())){
+						results.get(employeeId).put(attendanceTime.getYearMonth(), new HashMap<>());
+					}
+					results.get(employeeId).get(attendanceTime.getYearMonth()).put(con.getKey(), 1);
+				}
 			});
 		}
+		
+		
+		
+		
+		
+//		if (!CollectionUtil.isEmpty(attendanceTimeOfMonthlys)) {
+//			attendanceTimeOfMonthlys.stream().forEach(atm -> {
+//				
+//				List<AnyItemOfMonthly> aims = anyItems.stream().filter(aim -> {
+//					return aim.getEmployeeId().equals(atm.getEmployeeId()) && aim.getYearMonth().equals(atm.getYearMonth())
+//							&& aim.getClosureId() == atm.getClosureId() && aim.getClosureDate().equals(atm.getClosureDate());
+//				}).collect(Collectors.toList());
+//				
+//				monthly.withAttendanceTime(atm).withAnyItem(aims);
+//				
+//				checkConditions.entrySet().stream().forEach(con -> {
+//
+//					boolean check = con.getValue().check(item->{
+//						if (item.isEmpty()) {
+//							return new ArrayList<>();
+//						}
+//						return monthly.convert(item).stream().map(iv -> getValueNew(iv))
+//								.collect(Collectors.toList());
+//					}) == WorkCheckResult.ERROR;
+//					
+//					if (check) {
+//						if(!results.containsKey(atm.getEmployeeId())){
+//							results.put(atm.getEmployeeId(), new HashMap<>());
+//						}
+//						if(!results.get(atm.getEmployeeId()).containsKey(atm.getYearMonth())){
+//							results.get(atm.getEmployeeId()).put(atm.getYearMonth(), new HashMap<>());
+//						}
+//						results.get(atm.getEmployeeId()).get(atm.getYearMonth()).put(con.getKey(), 1);
+//					}
+//				});
+//			});
+//		}
 		
 		return results;
 	}

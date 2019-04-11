@@ -1,8 +1,6 @@
 package nts.uk.ctx.at.record.infra.repository.calculationattribute;
 
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,17 +42,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implements CalAttrOfDailyPerformanceRepository {
-
-//	private static final String REMOVE_BY_KEY;
-
-//	static {
-//		StringBuilder builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcstDaiCalculationSet a ");
-//		builderString.append("WHERE a.krcstDaiCalculationSetPK.sid = :employeeId ");
-//		builderString.append("AND a.krcstDaiCalculationSetPK.ymd = :ymd ");
-//		REMOVE_BY_KEY = builderString.toString();
-//	}
 
 	@Override
 	public CalAttrOfDailyPerformance find(String employeeId, GeneralDate baseDate) {
@@ -105,7 +92,7 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 			commandProxy().update(holidayCalc);
 			commandProxy().update(overtimeCalc);
 			commandProxy().update(calc);
-			this.getEntityManager().flush();
+//			this.getEntityManager().flush();
 		}
 	}
 
@@ -140,7 +127,7 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 		commandProxy().insert(holidayCalc);
 		commandProxy().insert(overtimeCalc);
 		commandProxy().insert(calcSet);
-		this.getEntityManager().flush();
+//		this.getEntityManager().flush();
 	}
 
 	@Override
@@ -288,13 +275,27 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 	@Override
 	public void deleteByKey(String employeeId, GeneralDate baseDate) {
 		
-		Connection con = this.getEntityManager().unwrap(Connection.class);
-		String sqlQuery = "Delete From KRCST_DAI_CALCULATION_SET Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + baseDate + "'" ;
-		try {
-			con.createStatement().executeUpdate(sqlQuery);
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
+		this.queryProxy().find(new KrcstDaiCalculationSetPK(employeeId, baseDate), KrcstDaiCalculationSet.class).ifPresent(entity -> {
+			this.commandProxy().remove(entity);
+			this.queryProxy().find(StringUtils.rightPad(entity.flexExcessTimeId, 36), KrcstFlexAutoCalSet.class).ifPresent(e -> {
+						this.commandProxy().remove(e);
+					});
+			this.queryProxy().find(StringUtils.rightPad(entity.holWorkTimeId, 36), KrcstHolAutoCalSet.class).ifPresent(e -> {
+						this.commandProxy().remove(e);
+					});
+			this.queryProxy().find(StringUtils.rightPad(entity.overTimeWorkId, 36), KrcstOtAutoCalSet.class).ifPresent(e -> {
+						this.commandProxy().remove(e);
+					});
+		});
+		
+//		Connection con = this.getEntityManager().unwrap(Connection.class);
+//		String sqlQuery = "Delete From KRCST_DAI_CALCULATION_SET Where SID = " + "'" + employeeId + "'" + " and YMD = " + "'" + baseDate + "'" ;
+//		try {
+//			con.createStatement().executeUpdate(sqlQuery);
+//			workInfo.dirtying(employeeId, baseDate);
+//		} catch (SQLException e) {
+//			throw new RuntimeException(e);
+//		}
 		
 //		this.getEntityManager().createQuery(REMOVE_BY_KEY).setParameter("employeeId", employeeId)
 //				.setParameter("ymd", baseDate).executeUpdate();
