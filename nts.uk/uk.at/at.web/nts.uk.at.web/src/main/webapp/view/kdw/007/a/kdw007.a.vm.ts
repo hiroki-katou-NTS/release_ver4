@@ -133,6 +133,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     nts.uk.ui.block.clear();
                 });
             });
+            setTimeout(function() {
             self.selectedErrorAlarmCode.subscribe((code) => {
                 if (code) {
                     self.codeToSelect(null);
@@ -158,7 +159,7 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     }
                 }
             });
-
+                 },100);
             self.selectedErrorAlarm().typeAtr.subscribe((val) => {
                 if (self.screenMode() == ScreenMode.Daily && self.selectedErrorAlarm().typeAtr() == '2') {
                     self.isAtdItemColor(false);
@@ -715,7 +716,6 @@ module nts.uk.at.view.kdw007.a.viewmodel {
             nts.uk.ui.windows.sub.modal("at", "/view/kdw/007/b/index.xhtml").onClosed(() => {
                 let output = getShared("kdw007BResult");
                 if (output) {
-                    debugger;
                 }
             });
         }
