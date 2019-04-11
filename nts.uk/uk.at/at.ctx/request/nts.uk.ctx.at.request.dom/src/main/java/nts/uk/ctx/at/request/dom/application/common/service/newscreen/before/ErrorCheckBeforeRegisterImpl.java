@@ -45,6 +45,7 @@ import nts.uk.ctx.at.shared.dom.ot.frame.OvertimeWorkFrame;
 import nts.uk.ctx.at.shared.dom.ot.frame.OvertimeWorkFrameRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 
 @Stateless
 public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
@@ -425,7 +426,7 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 		if(appDateContradictionAtr==AppDateContradictionAtr.NOTCHECK){
 			return Collections.emptyList();
 		}
-		WorkType workType = otherCommonAlgorithm.workTypeInconsistencyCheck(companyID, employeeID, appDate);
+		WorkType workType = otherCommonAlgorithm.getWorkTypeScheduleSpec(companyID, employeeID, appDate);
 		if(workType==null){
 			// 「申請日矛盾区分」をチェックする
 			if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
@@ -433,10 +434,8 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 			}
 			return Arrays.asList("Msg_1520", appDate.toString("yyyy/MM/dd")); 
 		}
-		WorkTypeClassification workTypeClassification = workType.getDailyWork().getOneDay();
-		if(workTypeClassification==WorkTypeClassification.Holiday||
-			workTypeClassification==WorkTypeClassification.Pause||
-			workTypeClassification==WorkTypeClassification.HolidayWork){
+		boolean checked = this.workTypeInconsistencyCheck(workType);
+		if(!checked){
 			return Collections.emptyList();
 		}
 		String name = workType.getName().v();
@@ -446,5 +445,25 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 		}
 		return Arrays.asList("Msg_1522", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "未登録のマスタ"); 
 		
+	}
+	
+	/**
+	 * 03-08_01 休日出勤の勤務種類矛盾チェック
+	 * @param workType
+	 * @return 矛盾なし = false or 矛盾あり = true
+	 */
+	private boolean workTypeInconsistencyCheck(WorkType workType){
+		// INPUT.ドメインモデル「勤務種類.勤務の単位(WORK_ATR)」が１日であるかをチェックする
+		if(workType.getDailyWork().getWorkTypeUnit()==WorkTypeUnit.MonringAndAfternoon){
+			return true;
+		}
+		// INPUT.ドメインモデル「勤務種類.1日勤務分類(ONE_DAY_CLS)」をチェックする
+		WorkTypeClassification workTypeClassification = workType.getDailyWork().getOneDay();
+		if(workTypeClassification==WorkTypeClassification.Holiday||
+			workTypeClassification==WorkTypeClassification.Pause||
+			workTypeClassification==WorkTypeClassification.HolidayWork){
+			return false;
+		}
+		return true;
 	}
 }

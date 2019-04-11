@@ -122,5 +122,5 @@ public interface OtherCommonAlgorithm {
 	 * @param appDate
 	 * @return
 	 */
-	public WorkType workTypeInconsistencyCheck(String companyID, String employeeID, GeneralDate appDate);
+	public WorkType getWorkTypeScheduleSpec(String companyID, String employeeID, GeneralDate appDate);
 }

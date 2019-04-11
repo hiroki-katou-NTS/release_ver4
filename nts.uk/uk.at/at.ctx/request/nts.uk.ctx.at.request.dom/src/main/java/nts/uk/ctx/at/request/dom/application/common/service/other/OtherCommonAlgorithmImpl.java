@@ -65,7 +65,6 @@ import nts.uk.ctx.at.shared.dom.worktime.workplace.WorkTimeWorkplaceRepository;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
-import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 import nts.uk.ctx.at.shared.dom.worktype.service.WorkTypeIsClosedService;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.mail.MailSender;
@@ -499,7 +498,7 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 		return lstOutput;
 	}
 	@Override
-	public WorkType workTypeInconsistencyCheck(String companyID, String employeeID, GeneralDate appDate) {
+	public WorkType getWorkTypeScheduleSpec(String companyID, String employeeID, GeneralDate appDate) {
 		// Imported(申請承認)「勤務実績」を取得する
 		RecordWorkInfoImport recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(employeeID, appDate);
 		if(Strings.isNotBlank(recordWorkInfoImport.getWorkTypeCode())){
@@ -510,10 +509,7 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 				return null;
 			}
 			WorkType workType = opWorkType.get();
-			if(workType.getDailyWork().getWorkTypeUnit()==WorkTypeUnit.OneDay){
-				return workType;
-			}
-			return null;
+			return workType;
 		}
 		// Imported(申請承認)「勤務予定」を取得する
 		Optional<ScBasicScheduleImport> opScBasicScheduleImport = scBasicScheduleAdapter.findByID(employeeID, appDate);
@@ -525,10 +521,7 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 				return null;
 			}
 			WorkType workType = opWorkType.get();
-			if(workType.getDailyWork().getWorkTypeUnit()==WorkTypeUnit.OneDay){
-				return workType;
-			}
-			return null;
+			return workType;
 		}
 		return null;
 	}
