@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
@@ -88,6 +89,9 @@ public class CheckTrackRecordApprovalDay {
 				}else{
 					lstPeriod.addAll(lstClosurePeriod.stream()
 							.flatMap(x -> x.getAggrPeriods().stream().map(y -> y.getPeriod())).collect(Collectors.toList()));
+				}
+				if(lstPeriod.isEmpty()) {
+					continue;
 				}
 				// 社員の日の実績の承認状況を取得する
 				List<ApprovalStatusActualResult> lstApprovalResult = approvalStatusActualDay
