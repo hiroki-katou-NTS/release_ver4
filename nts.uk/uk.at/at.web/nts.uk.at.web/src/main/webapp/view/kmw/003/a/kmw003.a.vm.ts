@@ -647,14 +647,16 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                         startDate: moment.utc(self.actualTimeSelectedDat().startDate, "YYYY/MM/DD"),
                         endDate: moment.utc(self.actualTimeSelectedDat().endDate, "YYYY/MM/DD"),
                         dataCheckSign: [],
-                        dataCheckApproval: []
+                        dataCheckApproval: [],
+                        dataLock: []
                     };
 
                 _.each(dataChange, (data: any) => {
                     let dataTemp = _.find(dataSource, (item: any) => {
                         return item.id == data.rowId;
                     });
-
+                    let current = _.find(self.dpData, (dt) => { return dt.id ===data.rowId; });
+                    dataUpdate.dataLock.push({ rowId: data.rowId, version: current.version, employeeId: dataTemp.employeeId});
                     if (data.columnKey != "identify" && data.columnKey != "approval") {
                         //get layout , and type
                         let layoutAndType: any = _.find(self.itemValueAll(), (item: any) => {
@@ -667,8 +669,6 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                         let value: any;
                         value = self.getPrimitiveValue(data.value, item.attendanceAtr);
                         let dataMap = new InfoCellEdit(data.rowId, data.columnKey.substring(1, data.columnKey.length), value, layoutAndType == undefined ? "" : layoutAndType.valueType, layoutAndType == undefined ? "" : layoutAndType.layoutCode, dataTemp.employeeId, 0);
-                        let x = _.find(self.dpData, (dt) => { return dt.id ===data.rowId; });
-                        dataMap.version = x.version;
                         dataChangeProcess.push(dataMap);
                     } else {
                         if (data.columnKey == "identify") {

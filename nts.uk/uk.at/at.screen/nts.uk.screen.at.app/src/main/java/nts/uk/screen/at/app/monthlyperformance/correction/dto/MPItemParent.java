@@ -1,6 +1,7 @@
 package nts.uk.screen.at.app.monthlyperformance.correction.dto;
 
 import java.util.List;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,4 +36,5 @@ public class MPItemParent {
 	
 	private List<MPItemCheckBox> dataCheckApproval;
 
+	private Set<MPItemVersion> dataLock;
 }

@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.record.infra.repository.monthly;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -265,8 +264,21 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 				closureDate,
 				lastOfMonth ? 1 : 0);		
 		
-		queryProxy().find(key, KrcdtMonMerge.class).ifPresent(entity -> {
-			entity.version += 1;
+		dirtying(() -> key);
+	}
+	
+	public void verShouldUp(String employeeId, YearMonth yearMonth, int closureId, int closureDate, boolean lastOfMonth, long version) {
+		
+		// キー
+		val key = new KrcdtMonMergePk(
+				employeeId,
+				yearMonth.v(),
+				closureId,
+				closureDate,
+				lastOfMonth ? 1 : 0);		
+		
+		this.queryProxy().find(key, KrcdtMonMerge.class).ifPresent(entity -> {
+			entity.version = version;
 			this.commandProxy().update(entity);
 		});
 	}
@@ -351,6 +363,7 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 		
 		this.queryProxy().find(getKey.get(), KrcdtMonMerge.class).ifPresent(entity -> {
 			entity.dirtying();
+			this.commandProxy().update(entity);
 		});
 	}
 }

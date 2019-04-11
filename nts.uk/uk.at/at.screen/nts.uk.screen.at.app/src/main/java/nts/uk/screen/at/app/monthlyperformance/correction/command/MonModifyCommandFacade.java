@@ -23,6 +23,7 @@ import nts.uk.ctx.at.record.app.find.monthly.root.MonthlyRecordWorkDto;
 import nts.uk.ctx.at.record.app.find.monthly.root.common.ClosureDateDto;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.EmpPerformMonthParamImport;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.RegisterDayApproval;
+import nts.uk.ctx.at.record.dom.monthly.MonthlyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.IntegrationOfMonthly;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
@@ -76,16 +77,19 @@ public class MonModifyCommandFacade {
 	@Inject
 	private IdentityProcessUseSetRepository identityProcessUseSetRepository;
 	
+	@Inject
+	private MonthlyRecordTransactionService monthRecordTransaction;
+	
 	public Map<Integer, List<MPItemParent>> insertItemDomain(MPItemParent dataParent) {
 		YearMonth ym = new YearMonth(dataParent.getYearMonth());
 		
-		dataParent.getMPItemDetails().stream().forEach(d -> {
-			long dbVer = timeOfMonth.getVer(d.getEmployeeId(), ym, dataParent.getClosureId(), 
-					dataParent.getClosureDate().getClosureDay(), dataParent.getClosureDate().getLastDayOfMonth());
-			if(dbVer != d.getVersion()){
-				throw new OptimisticLockException(I18NText.getText("Msg_1528"));
-			}
-		});
+//		dataParent.getMPItemDetails().stream().forEach(d -> {
+//			long dbVer = timeOfMonth.getVer(d.getEmployeeId(), ym, dataParent.getClosureId(), 
+//					dataParent.getClosureDate().getClosureDay(), dataParent.getClosureDate().getLastDayOfMonth());
+//			if(dbVer != d.getVersion()){
+//				throw new OptimisticLockException(I18NText.getText("Msg_1528"));
+//			}
+//		});
 		
 		Map<String, List<MPItemDetail>> mapItemDetail = dataParent.getMPItemDetails().stream()
 				.collect(Collectors.groupingBy(x -> x.getEmployeeId()));
@@ -99,7 +103,7 @@ public class MonModifyCommandFacade {
 			}).collect(Collectors.toList()), dataParent.getYearMonth(), item.getKey(), dataParent.getClosureId(),
 					dataParent.getClosureDate());
 			
-			query.setVersion(rowDatas.get(0).getVersion());
+			query.setVersion(dataParent.getDataLock().stream().filter(l -> l.getEmployeeId().equals(item.getKey())).findFirst().get().getVersion());
 			
 			listQuery.add(query);
 		});
@@ -124,6 +128,11 @@ public class MonModifyCommandFacade {
 		this.insertSign(dataParent, ym);
 		
 		approval(dataParent, ym);
+		
+		dataParent.getDataLock().stream().forEach(lock -> {
+			monthRecordTransaction.updated(lock.getEmployeeId(), ym, dataParent.getClosureId(), 
+					dataParent.getClosureDate().getClosureDay(), dataParent.getClosureDate().getLastDayOfMonth(), lock.getVersion());
+		});
 		
 		// add correction log
 		ExecutorService executorService = Executors.newFixedThreadPool(1);
