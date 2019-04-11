@@ -223,7 +223,7 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 		List<SpecialLeaveGrantRemainingData> lstDataBase = speLeaveRepo.getByPeriodStatus(sid,
 				specialLeaveCode,
 				LeaveExpirationStatus.AVAILABLE,
-				complileDate.end().addDays(1),
+				complileDate.end(),
 				complileDate.start());
 		List<SpecialLeaveGrantRemainingData> lstDataSpeDataBase = lstDataBase.stream().map(c -> {
 			SpecialLeaveGrantNumber a = new SpecialLeaveGrantNumber(c.getDetails().getGrantNumber().getDayNumberOfGrant(), c.getDetails().getGrantNumber().getTimeOfGrant());
