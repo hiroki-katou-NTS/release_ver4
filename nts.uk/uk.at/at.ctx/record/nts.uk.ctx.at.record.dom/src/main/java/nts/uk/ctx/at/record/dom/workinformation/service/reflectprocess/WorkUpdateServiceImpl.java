@@ -1076,12 +1076,10 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 	@Override
 	public void updateBreakTime(Map<Integer, BreakTimeParam> mapBreakTimeFrame, boolean recordReflectBreakFlg,
 			boolean isPre, IntegrationOfDaily daily) {
-		if((!isPre && !recordReflectBreakFlg)
-			|| mapBreakTimeFrame.isEmpty()) {
+		if((!isPre && !recordReflectBreakFlg)) {
 			return;
 		}
 		List<BreakTimeOfDailyPerformance> breakTime = daily.getBreakTime();
-		
 		if(breakTime.isEmpty()) {
 			List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
 			mapBreakTimeFrame.forEach((a,b) ->{
@@ -1090,99 +1088,97 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 						new TimeWithDayAttr(b.getEndTime()));
 				lstBreakTime.add(timeSheet);
 			});
-			
-			
-			if(!isPre) {
-				BreakTimeOfDailyPerformance breakTimeOfDaily = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
-						BreakType.REFER_WORK_TIME, 
-						lstBreakTime, 
-						daily.getWorkInformation().getYmd());
-				daily.getBreakTime().add(breakTimeOfDaily);
-				breakTimeOfDailyRepo.insert(breakTimeOfDaily);	
-			} else {
-				BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
-						BreakType.REFER_SCHEDULE, 
-						lstBreakTime, 
-						daily.getWorkInformation().getYmd());
-				daily.getBreakTime().add(breakTimeOfDailySche);
-				breakTimeOfDailyRepo.insert(breakTimeOfDailySche);	
-			}
-		} else {
-			if(isPre) {
-				breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE).collect(Collectors.toList());
-			} else {
-				breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_WORK_TIME).collect(Collectors.toList());
-			}
-			//休日が予定か実績は反映しました。
-			if(breakTime.isEmpty()) {
-				List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
-				mapBreakTimeFrame.forEach((a,b) ->{
-					BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a),
-							new TimeWithDayAttr(b.getStartTime()), 
-							new TimeWithDayAttr(b.getEndTime()));
-					lstBreakTime.add(timeSheet);
-				});
-				
-				if(isPre) {
-					BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
-							BreakType.REFER_SCHEDULE, 
-							lstBreakTime, 
-							daily.getWorkInformation().getYmd());
-					daily.getBreakTime().add(breakTimeOfDailySche);
-					breakTimeOfDailyRepo.update(breakTimeOfDailySche);	
-				} else {
+			if(!lstBreakTime.isEmpty()) {
+				if(!isPre) {
 					BreakTimeOfDailyPerformance breakTimeOfDaily = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
 							BreakType.REFER_WORK_TIME, 
 							lstBreakTime, 
 							daily.getWorkInformation().getYmd());
 					daily.getBreakTime().add(breakTimeOfDaily);
-					breakTimeOfDailyRepo.update(breakTimeOfDaily);	
+					breakTimeOfDailyRepo.insert(breakTimeOfDaily);	
+				} else {
+					BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
+							BreakType.REFER_SCHEDULE, 
+							lstBreakTime, 
+							daily.getWorkInformation().getYmd());
+					daily.getBreakTime().add(breakTimeOfDailySche);
+					breakTimeOfDailyRepo.insert(breakTimeOfDailySche);	
 				}
 			}
-			for (BreakTimeOfDailyPerformance breakTimeSheet : breakTime) {
-				List<BreakTimeSheet> lstBreakTimeData  = breakTimeSheet.getBreakTimeSheets();
-				mapBreakTimeFrame.forEach((a,b) ->{
-					boolean isSet = false;
-					for (BreakTimeSheet x : lstBreakTimeData) {
-						if(x.getBreakFrameNo().v() == a) {
-							x.setStartTime(new TimeWithDayAttr(b.getStartTime()));
-							x.setEndTime(new TimeWithDayAttr(b.getEndTime()));
-							isSet = true;
-							break;
-						}
-					}
-					if(!isSet) {
-						BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a), new TimeWithDayAttr(b.getStartTime()), new TimeWithDayAttr(b.getEndTime()));
-						lstBreakTimeData.add(timeSheet);
-					}
-					
-				});				
-				breakTimeOfDailyRepo.update(breakTimeSheet);
-			}
 			
-		}
-		List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
-		if(isPre) {
-			lstBreakTime = daily.getBreakTime().stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE)
-					.collect(Collectors.toList()).get(0).getBreakTimeSheets();
 		} else {
-			lstBreakTime = daily.getBreakTime().stream().filter(x -> x.getBreakType() == BreakType.REFER_WORK_TIME)
-					.collect(Collectors.toList()).get(0).getBreakTimeSheets();
-		}
-		List<Integer> lstBreakStart = new ArrayList<>();
-		List<Integer> lstBreakEnd = new ArrayList<>();
-		lstBreakTime.stream().forEach(x ->{
-			if(isPre) {
-				lstBreakStart.add(this.lstScheBreakStartTime().get(x.getBreakFrameNo().v() - 1));
-				lstBreakEnd.add(this.lstScheBreakEndTime().get(x.getBreakFrameNo().v() - 1));
+			if(mapBreakTimeFrame.isEmpty()) {
+				breakTime.clear();
+				breakTimeOfDailyRepo.deleteByBreakType(daily.getWorkInformation().getEmployeeId(),
+						daily.getWorkInformation().getYmd(),
+						isPre ? BreakType.REFER_SCHEDULE.value : BreakType.REFER_WORK_TIME.value);
 			} else {
-				lstBreakStart.add(this.lstBreakStartTime().get(x.getBreakFrameNo().v() - 1));
-				lstBreakEnd.add(this.lstBreakEndTime().get(x.getBreakFrameNo().v() - 1));	
+				if(isPre) {
+					breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE).collect(Collectors.toList());
+				} else {
+					breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_WORK_TIME).collect(Collectors.toList());
+				}
+				
+				//休日が予定か実績は反映しました。
+				if(breakTime.isEmpty()) {
+					List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
+					mapBreakTimeFrame.forEach((a,b) ->{
+						BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a),
+								new TimeWithDayAttr(b.getStartTime()), 
+								new TimeWithDayAttr(b.getEndTime()));
+						lstBreakTime.add(timeSheet);
+					});
+					List<BreakTimeOfDailyPerformance> lstBreakUpdate = new ArrayList<>();
+					if(isPre) {
+						BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
+								BreakType.REFER_SCHEDULE, 
+								lstBreakTime, 
+								daily.getWorkInformation().getYmd());
+						daily.getBreakTime().add(breakTimeOfDailySche);
+						lstBreakUpdate.add(breakTimeOfDailySche);
+						breakTimeOfDailyRepo.updateV2(lstBreakUpdate);	
+					} else {
+						BreakTimeOfDailyPerformance breakTimeOfDaily = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
+								BreakType.REFER_WORK_TIME, 
+								lstBreakTime, 
+								daily.getWorkInformation().getYmd());
+						daily.getBreakTime().add(breakTimeOfDaily);
+						lstBreakUpdate.add(breakTimeOfDaily);
+						breakTimeOfDailyRepo.updateV2(lstBreakUpdate);	
+					}
+				}
+				for (BreakTimeOfDailyPerformance breakTimeSheet : breakTime) {
+					List<BreakTimeOfDailyPerformance> lstBreakUpdate = new ArrayList<>();
+					List<BreakTimeSheet> lstBreakTimeData  = breakTimeSheet.getBreakTimeSheets();
+					mapBreakTimeFrame.forEach((a,b) ->{
+						boolean isSet = false;
+						for (BreakTimeSheet x : lstBreakTimeData) {
+							if(x.getBreakFrameNo().v() == a) {
+								x.setStartTime(new TimeWithDayAttr(b.getStartTime()));
+								x.setEndTime(new TimeWithDayAttr(b.getEndTime()));
+								isSet = true;
+								break;
+							}
+						}
+						if(!isSet) {
+							BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a), new TimeWithDayAttr(b.getStartTime()), new TimeWithDayAttr(b.getEndTime()));
+							lstBreakTimeData.add(timeSheet);
+						}
+						
+					});
+					lstBreakUpdate.add(breakTimeSheet);
+					breakTimeOfDailyRepo.updateV2(lstBreakUpdate);
+				}
 			}
-			
-		});
-		this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), lstBreakStart);
-		this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), lstBreakEnd);
+		}
+		if(isPre) {
+			this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), this.lstScheBreakStartTime());
+			this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), this.lstScheBreakEndTime());	
+		} else {
+			this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), this.lstBreakStartTime());
+			this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), this.lstBreakEndTime());
+		}
+		
 		
 	}
 	@Override

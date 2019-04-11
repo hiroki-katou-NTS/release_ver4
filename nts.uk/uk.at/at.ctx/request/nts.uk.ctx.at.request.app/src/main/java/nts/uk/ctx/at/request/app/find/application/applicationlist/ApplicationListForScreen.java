@@ -86,7 +86,8 @@ public class ApplicationListForScreen {
 				basicSchedules.addAll(scBasicScheduleAdapter.findByID(applicationExcessHoliday.stream().map(c -> c.getEmployeeID()).distinct().collect(Collectors.toList()), new DatePeriod(minD, maxD)));
 			}
 			for(Application_New app : applicationExcessHoliday){
-				if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
+				if((!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())) || 
+					app.getStartDate().get().equals(app.getEndDate().get())){
 					ApplicationExportDto applicationExport = new ApplicationExportDto();
 					applicationExport.setAppDate(app.getAppDate());
 					applicationExport.setAppType(app.getAppType().value);
@@ -134,7 +135,8 @@ public class ApplicationListForScreen {
 				basicSchedules.addAll(scBasicScheduleAdapter.findByID(applicationHoliday.stream().map(c -> c.getEmployeeID()).distinct().collect(Collectors.toList()), new DatePeriod(minD, maxD)));
 			}
 			for(Application_New app : applicationHoliday){
-				if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
+				if((!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())) || 
+						app.getStartDate().get().equals(app.getEndDate().get())){
 					Optional<AppAbsence> optAppAbsence = apps.stream().filter(c -> c.getAppID().equals(app.getAppID())).findFirst();
 					ApplicationExportDto applicationExport = new ApplicationExportDto();
 					applicationExport.setAppDate(app.getAppDate());
@@ -189,7 +191,8 @@ public class ApplicationListForScreen {
 				workTypes.addAll(workTypeRepo.getPossibleWorkTypeV2(companyID, basicSchedules.stream().map(c -> c.getWorkTypeCode()).distinct().collect(Collectors.toList())));
 			}
 			for(Application_New app : appWorkChangeLst){
-				if(!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())){
+				if((!(app.getStartDate().isPresent()&&app.getEndDate().isPresent())) || 
+						app.getStartDate().get().equals(app.getEndDate().get())){
 					ApplicationExportDto applicationExport = new ApplicationExportDto();
 					applicationExport.setAppDate(app.getAppDate());
 					applicationExport.setAppType(app.getAppType().value);
@@ -306,7 +309,14 @@ public class ApplicationListForScreen {
 		mapDate.entrySet().stream().forEach(x -> {
 			Map<Object, List<AppGroupExportDto>> mapDateType = x.getValue().stream().collect(Collectors.groupingBy(y -> y.getAppType()));
 			mapDateType.entrySet().stream().forEach(y -> {
-				result.add(y.getValue().get(0));
+				if(Integer.valueOf(y.getKey().toString())==ApplicationType.ABSENCE_APPLICATION.value){
+					Map<Object, List<AppGroupExportDto>> mapDateTypeAbsence = y.getValue().stream().collect(Collectors.groupingBy(z -> z.getAppTypeName()));
+					mapDateTypeAbsence.entrySet().stream().forEach(z -> {
+						result.add(z.getValue().get(0));
+					});
+				} else {
+					result.add(y.getValue().get(0));
+				}
 			});
 		});
 		return result;

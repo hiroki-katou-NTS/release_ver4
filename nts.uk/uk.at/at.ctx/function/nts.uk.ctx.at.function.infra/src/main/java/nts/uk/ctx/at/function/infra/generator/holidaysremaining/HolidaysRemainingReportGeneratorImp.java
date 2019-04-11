@@ -292,8 +292,11 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 		boolean isDisplayHolidayYear = dataSource.getVariousVacationControl().isAnnualHolidaySetting() && dataSource.getHolidaysRemainingManagement()
 				.getListItemsOutput().getAnnualHoliday().isYearlyHoliday();
 		if (isDisplayHolidayYear) {
-			grantDate.ifPresent(generalDate -> cells.get(rowIndexD + 1, 0)
-					.setValue(TextResource.localize("KDR001_56", generalDate.toString("yyyy/MM/dd"))));
+			if(grantDate.isPresent()) {
+				 cells.get(rowIndexD + 1, 0).setValue(TextResource.localize("KDR001_56", grantDate.get().toString("yyyy/MM/dd")));
+			}else {
+				cells.get(rowIndexD + 1, 0).setValue(TextResource.localize("KDR001_56", TextResource.localize("KDR001_58")));
+			}
 		}
 		// merger cột D2_4, ý 2 của bug #102883
 		cells.merge(isDisplayHolidayYear== true? rowIndexD + 2: rowIndexD + 1, 0, 1, 2, true);
@@ -340,7 +343,11 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 
 		// Result RequestList281
 		val listAnnLeaGrant = hdRemainingInfor.getListAnnLeaGrantNumber();
-		if (listAnnLeaGrant != null) {
+		
+		Optional<GeneralDate> grantDate = dataSource.getMapEmployees().get(employee.getEmployeeId())
+				.getHolidayRemainingInfor().getGrantDate();
+		
+		if (listAnnLeaGrant != null && grantDate.isPresent()) {
 			for (int i = 0; i < listAnnLeaGrant.size() && i < MAX_ROW_ANNUAL_HOLIDAY; i++) {
 				if (i >= MIN_ROW_ANNUAL_HOLIDAY) {
 					totalAddRows += 1;
@@ -356,7 +363,7 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 
 		// Result RequestList265
 		AnnLeaveOfThisMonthImported annLeave = hdRemainingInfor.getAnnLeaveOfThisMonth();
-		if (annLeave != null) {
+		if (annLeave != null && grantDate.isPresent()) {
 			// E1_4
 			cells.get(firstRow, 5).setValue(annLeave.getFirstMonthRemNumDays());
 			if (annLeave.getFirstMonthRemNumDays() < 0) {
@@ -378,7 +385,7 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 		val listAnnLeaveUsage = hdRemainingInfor.getListAnnualLeaveUsage();
 
 		int maxRange = totalMonths(dataSource.getStartMonth().yearMonth(), dataSource.getEndMonth().yearMonth());
-		if (listAnnLeaveUsage != null) {
+		if (listAnnLeaveUsage != null && dataSource.getMapEmployees().get(employee.getEmployeeId()).getHolidayRemainingInfor().getGrantDate().isPresent()) {
 			for (AnnualLeaveUsageImported item : listAnnLeaveUsage) {
 				if (currentMonth.compareTo(item.getYearMonth()) <= 0) {
 					continue;
@@ -400,7 +407,7 @@ public class HolidaysRemainingReportGeneratorImp extends AsposeCellsReportGenera
 		// Result RequestList363
 		val listAnnLeaveUsageOfThisMonth = hdRemainingInfor.getListAnnLeaveUsageStatusOfThisMonth();
 		
-		if (listAnnLeaveUsageOfThisMonth != null) {
+		if (listAnnLeaveUsageOfThisMonth != null && grantDate.isPresent()) {
 			for (AnnLeaveUsageStatusOfThisMonthImported item : listAnnLeaveUsageOfThisMonth) {
 				if (currentMonth.compareTo(item.getYearMonth()) > 0) {
 					continue;

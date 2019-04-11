@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
 import nts.arc.error.BusinessException;
@@ -22,7 +21,7 @@ import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
-import nts.gul.util.value.MutableValue;
+import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeRecordAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeRecordImport;
 import nts.uk.ctx.at.record.dom.adapter.request.application.ApprovalStatusRequestAdapter;
@@ -61,6 +60,10 @@ import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentityProcessUseSetRepository;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.WorkPlaceConfigImport;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.WorkplaceConfigAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.info.WorkplaceConfigInfoAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.info.WorkplaceHierarchyImport;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -94,6 +97,12 @@ public class RealityStatusService {
 	
 	@Inject
 	private ManagedParallelWithContext parallel;
+	
+	@Inject
+	private WorkplaceConfigAdapter configAdapter;
+	
+	@Inject
+	private WorkplaceConfigInfoAdapter configInfoAdapter;
 
 	/**
 	 * 承認状況職場実績起動
@@ -128,7 +137,68 @@ public class RealityStatusService {
 
 		});
 		
-		return new SttWkpActivityOutputFull(listStatusActivity, false);
+		//vì sử dụng parallel (bất đồng bộ) nên phải sắp xếp sau
+		// 「職場IDから階層コードを取得する」を実行する
+		List<String> wPIDs = listStatusActivity.stream().map(StatusWkpActivityOutput::getWkpId)
+				.collect(Collectors.toList());
+		List<WorkplaceHierarchyImport> wpHis = GetHCodeByWorkPlaceID(cId, wPIDs, GeneralDate.today());
+		// 取得した「職場ID、職場階層コード」を階層コード順に並び替える
+		List<StatusWkpActivityOutput> result = sortList(wpHis, listStatusActivity);
+
+		return new SttWkpActivityOutputFull(result, false);
+	}
+	
+	
+	public List<StatusWkpActivityOutput> sortList(List<WorkplaceHierarchyImport> wpHis, List<StatusWkpActivityOutput> listStatusActivity) {
+		List<StatusWkpActivityOutput> result = new ArrayList<>();
+		List<WorkplaceHierarchyImport> sortedList = new ArrayList<>();
+		List<WorkplaceHierarchyImport> HCodeList = wpHis.stream()
+				.filter(x -> !StringUtil.isNullOrEmpty(x.getHierarchyCode(), false)).collect(Collectors.toList());
+		List<WorkplaceHierarchyImport> HCodeEmptyList = wpHis.stream()
+				.filter(x -> StringUtil.isNullOrEmpty(x.getHierarchyCode(), false)).collect(Collectors.toList());
+		HCodeList = HCodeList.stream().sorted(Comparator.comparing(WorkplaceHierarchyImport::getHierarchyCode))
+				.collect(Collectors.toList());
+		HCodeEmptyList = HCodeEmptyList.stream().sorted(Comparator.comparing(WorkplaceHierarchyImport::getWorkplaceId))
+				.collect(Collectors.toList());
+		sortedList.addAll(HCodeList);
+		sortedList.addAll(HCodeEmptyList);
+		
+		sortedList.forEach(x -> {
+			listStatusActivity.stream().filter(appStt -> appStt.getWkpId().equals(x.getWorkplaceId())).findFirst()
+					.ifPresent(item -> {
+						result.add(new StatusWkpActivityOutput(item.getWkpId(), item.getMonthConfirm(),
+								item.getMonthUnconfirm(), item.getPersonConfirm(), item.getPersonUnconfirm(),
+								item.getBossConfirm(), item.getBossUnconfirm()));
+					});
+		});
+		
+		return result;
+	}
+
+	/**
+	 * 職場IDから階層コードを取得する
+	 * @param baseDate 
+	 * @param wPIDs 
+	 * @param companyId 
+	 * @return 
+	 */
+	public List<WorkplaceHierarchyImport> GetHCodeByWorkPlaceID(String companyId, List<String> wPIDs,
+			GeneralDate baseDate) {
+
+		List<WorkplaceHierarchyImport> result = new ArrayList<>();
+		// ドメインモデル「職場構成」を取得する
+		Optional<WorkPlaceConfigImport> configOpt = this.configAdapter.findByBaseDate(companyId, baseDate);
+		if (configOpt.isPresent()) {
+			// ドメインモデル「職場構成情報」を取得する
+			WorkPlaceConfigImport config = configOpt.get();
+			if (!CollectionUtil.isEmpty(config.getWkpConfigHistory())) {
+				String historyId = config.getWkpConfigHistory().get(0).getHistoryId();
+				result = this.configInfoAdapter.findByHistoryIdsAndWplIds(companyId, Arrays.asList(historyId), wPIDs)
+						.stream().flatMap(x -> x.getLstWkpHierarchy().stream()).collect(Collectors.toList());
+			}
+		}
+		return result;
+
 	}
 
 	/**

@@ -95,6 +95,8 @@ public class DataWorkServiceImpl implements IDataWorkService {
 			// ドメインモデル「申請別対象勤務種類」.勤務種類リストを表示する
 			List<AppEmployWorkType> lstEmploymentWorkType = appEmploymentSettings.get(0).getLstWorkType();
 			if (CollectionUtil.isEmpty(lstEmploymentWorkType)) {
+				result = this.workTypeRepository.findNotDeprecated(companyID).stream()
+				.map(x -> x.getWorkTypeCode().v()).collect(Collectors.toList());
 				return result;
 			}
 			Collections.sort(lstEmploymentWorkType, Comparator.comparing(AppEmployWorkType::getWorkTypeCode));
@@ -111,6 +113,10 @@ public class DataWorkServiceImpl implements IDataWorkService {
 			List<Integer> allDayAtrs = allDayAtrs();
 			List<Integer> halfAtrs = halfAtrs();
 			result = workTypeRepository.findWorkType(companyID, 0, allDayAtrs, halfAtrs).stream()
+					.map(x -> x.getWorkTypeCode().v()).collect(Collectors.toList());
+		}
+		if(ApplicationType.WORK_CHANGE_APPLICATION.value == apptype){
+			result = this.workTypeRepository.findNotDeprecated(companyID).stream()
 					.map(x -> x.getWorkTypeCode().v()).collect(Collectors.toList());
 		}
 		return result;

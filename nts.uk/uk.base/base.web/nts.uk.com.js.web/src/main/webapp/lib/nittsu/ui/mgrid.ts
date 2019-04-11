@@ -3353,7 +3353,7 @@ module nts.uk.ui.mgrid {
                 _hasFixed = null; _validators = {}; _mDesc = null; _mEditor = null; _cloud = null;
                 _hr = null; _direction = null; _errors = []; _errorColumns = null; _errorsOnPage = null;
                 _$grid = null; _pk = null; _pkType = null; _summaries = null; _objId = null; _getObjId = null; dkn.allCheck = {};
-                _hasSum = null; _pageSize = null; _currentPage = null; _currentSheet = null; _start = null; _end = null; 
+                _hasSum = null; _pageSize = null; _currentPage = null; _currentSheet = null; _start = null; _end = null; dkn.controlType = {}; 
                 _headerHeight = null; _zeroHidden = null; _paging = false; _sheeting = false; _copie = false; _mafollicle = {}; 
                 _specialColumn = {}; _specialLinkColumn = {}; _fixedHiddenColumns = []; _hiddenColumns = []; _fixedColumns = null; _selected = {}; _dirties = {}; 
                 _rid = {}, _headerWrappers = null; _bodyWrappers = null; _sumWrappers = null; _fixedControlMap = {}; _cellStates = null; _features = null; 

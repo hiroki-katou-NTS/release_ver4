@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.dom.dailyprocess.calc.withinstatutory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -449,6 +450,7 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 	 * @param midNightTimeSheet
 	 * @param isLastIndex 
 	 * @param isFirstIndex 
+	 * @param ootsukaIWFlag 
 	 * @return
 	 */
 	public static WithinWorkTimeFrame createWithinWorkTimeFrame(WithinWorkTimeFrame duplicateTimeSheet,
@@ -574,18 +576,38 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
   	  		}
   		}
 			
+  		
 		//控除時間帯
-		List<TimeSheetOfDeductionItem> dedTimeSheet = deductionTimeSheet.getDupliRangeTimeSheet(dupTimeSheet.getTimezone().getTimeSpan(), DeductionAtr.Deduction);
-		dedTimeSheet.forEach(tc ->{
-			tc.changeReverceRounding(tc.getTimeSheet().getRounding(), ActualWorkTimeSheetAtr.WithinWorkTime, DeductionAtr.Deduction, commonSetting);
-		});
+  		List<TimeSheetOfDeductionItem> dedTimeSheet = Collections.emptyList(); 
+//		大塚IW限定処理(休憩を固定で入れる案)
+//  		if(ootsukaIWFlag) {
+//  			dedTimeSheet = deductionTimeSheet.getForDeductionTimeZoneList();
+//  		}
+//  		else {
+  			dedTimeSheet = deductionTimeSheet.getDupliRangeTimeSheet(dupTimeSheet.getTimezone().getTimeSpan(), DeductionAtr.Deduction);
+  			dedTimeSheet.forEach(tc ->{
+  				tc.changeReverceRounding(tc.getTimeSheet().getRounding(), ActualWorkTimeSheetAtr.WithinWorkTime, DeductionAtr.Deduction, commonSetting);
+  			});  			
+//  		}
+		
+
 		
 		
 		//計上用時間帯
-		List<TimeSheetOfDeductionItem> recordTimeSheet = deductionTimeSheet.getDupliRangeTimeSheet(dupTimeSheet.getTimezone().getTimeSpan(), DeductionAtr.Appropriate);
-		recordTimeSheet.forEach(tc ->{
-			tc.changeReverceRounding(tc.getTimeSheet().getRounding(), ActualWorkTimeSheetAtr.WithinWorkTime, DeductionAtr.Appropriate, commonSetting);
-		});
+		List<TimeSheetOfDeductionItem> recordTimeSheet = Collections.emptyList(); 
+//		大塚IW限定処理(休憩を固定で入れる案)
+//  		if(ootsukaIWFlag) {
+//  			recordTimeSheet = deductionTimeSheet.getForRecordTimeZoneList();
+//  		}
+//  		else {
+  			recordTimeSheet = deductionTimeSheet.getDupliRangeTimeSheet(dupTimeSheet.getTimezone().getTimeSpan(), DeductionAtr.Appropriate);
+  			recordTimeSheet.forEach(tc ->{
+  				tc.changeReverceRounding(tc.getTimeSheet().getRounding(), ActualWorkTimeSheetAtr.WithinWorkTime, DeductionAtr.Appropriate, commonSetting);
+  			});  			
+//  		}
+
+		
+		
 		for(TimeSheetOfDeductionItem td : addBreakListInLateEarly) {
 			if(td != null && (!earlyDed || !lateDed)) {
 				dedTimeSheet.addAll(addBreakListInLateEarly);

@@ -122,7 +122,7 @@ public class MultipleMonthAggregateProcessService {
 		parallelManager.forEach(CollectionUtil.partitionBySize(employees, 100), emps -> {
 			List<String> employeeIds = emps.stream().map(e -> e.getId()).collect(Collectors.toList());
 
-			Map<String, List<RegulationInfoEmployeeResult>> listTargetMap = erAlWorkRecordCheckAdapter.filterEmployees(new DatePeriod(period.end(),period.end()), 
+			Map<String, List<RegulationInfoEmployeeResult>> listTargetMap = erAlWorkRecordCheckAdapter.filterEmployees(period, 
 																														employeeIds, 
 																														multiMonthErAl.stream().map(c -> c.getExtractTargetCondition()).collect(Collectors.toList()));
 			

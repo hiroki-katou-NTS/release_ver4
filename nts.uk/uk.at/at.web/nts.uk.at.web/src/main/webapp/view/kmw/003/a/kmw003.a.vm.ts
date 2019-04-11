@@ -680,19 +680,19 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 nts.uk.ui.block.invisible();
                 nts.uk.ui.block.grayout();
                 service.addAndUpdate(dataUpdate).done((data) => {
-//                    _.each(dataChange, data => {
-//                        $("#dpGrid").mGrid("updateCell", data.rowId, data.columnKey, data.value, true);
-//                    });
-
+                    //                    _.each(dataChange, data => {
+                    //                        $("#dpGrid").mGrid("updateCell", data.rowId, data.columnKey, data.value, true);
+                    //                    });
+                    nts.uk.ui.dialog.info({ messageId: 'Msg_15' });
                     nts.uk.ui.block.clear();
-//                    if (self.initMode() != ScreenMode.APPROVAL) {
-                        self.loadRowScreen();
-                        //self.showButton(new AuthorityDetailModel(self.dataAll().authorityDto, self.dataAll().actualTimeState, self.initMode(), self.dataAll().formatPerformance.settingUnitType));
-                        //                           self.updateDate(self.yearMonth());  
-//                    }
+                    //                    if (self.initMode() != ScreenMode.APPROVAL) {
+                    self.loadRowScreen();
+                    //self.showButton(new AuthorityDetailModel(self.dataAll().authorityDto, self.dataAll().actualTimeState, self.initMode(), self.dataAll().formatPerformance.settingUnitType));
+                    //                           self.updateDate(self.yearMonth());  
+                    //                    }
                 }).fail(function(res: any) {
                     nts.uk.ui.dialog.error({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() { nts.uk.ui.block.clear(); });
-                });;
+                });
             }
         }
 

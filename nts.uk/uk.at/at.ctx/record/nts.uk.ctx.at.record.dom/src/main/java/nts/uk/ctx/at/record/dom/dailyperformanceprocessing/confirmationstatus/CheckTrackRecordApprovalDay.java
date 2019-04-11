@@ -1,5 +1,4 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

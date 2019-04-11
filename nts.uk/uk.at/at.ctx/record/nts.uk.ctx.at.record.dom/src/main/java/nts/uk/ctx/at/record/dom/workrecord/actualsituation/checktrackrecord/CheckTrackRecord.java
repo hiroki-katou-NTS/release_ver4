@@ -12,12 +12,15 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
+import nts.uk.ctx.at.record.dom.approvalmanagement.domainservice.narrowdownemployee.NarrowDownEmployee;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.approvalstatusmonthly.ApprovalStatusMonthly;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.approvalstatusmonthly.ApprovalStatusResult;
+import nts.uk.ctx.at.record.dom.workrecord.actualsituation.confirmstatusmonthly.AvailabilityAtr;
+import nts.uk.ctx.at.shared.dom.adapter.dailyperformance.AppEmpStatusImport;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.shr.com.context.AppContexts;
@@ -47,6 +50,9 @@ public class CheckTrackRecord {
 
 	@Inject
 	private ApprovalStatusMonthly approvalStatusMonthly;
+	
+	@Inject
+	private NarrowDownEmployee narrowDownEmployee;
 
 	public boolean checkTrackRecord(String companyId, String employeeId,
 			List<CheckTargetItemDto> listCheckTargetItemExport) {
@@ -87,16 +93,17 @@ public class CheckTrackRecord {
 				.getApprovalRootOfEmloyeeNew(periord.start(), periord.end(), loginId, companyId, 2); // 2 : 月別確認
 		if(approvalRootOfEmployeeImport == null) 
 			return false;
-		// 対応する月別実績を取得する
-		List<TimeOfMonthly> timeOfMonthly = timeRepo.findBySidsAndYearMonths(
-				approvalRootOfEmployeeImport.getApprovalRootSituations().stream()
-						.map(c -> c.getTargetID()).collect(Collectors.toList()),
-				listCheckTargetItemExport.stream().map(c -> c.getYearMonth()).collect(Collectors.toList()));
-		List<AttendanceTimeOfMonthly> listAttendanceTimeOfMonthly = timeOfMonthly.stream()
-				.filter(x -> x.getAttendanceTime().isPresent()).map(c -> c.getAttendanceTime().get())
-				.collect(Collectors.toList());
-
 		for (CheckTargetItemDto checkTargetItemExport : listCheckTargetItemExport) {
+			//画面に表示する社員に絞り込む
+			Optional<AppEmpStatusImport> appEmpStatusImport = narrowDownEmployee.narrowDownEmployee(approvalRootOfEmployeeImport, checkTargetItemExport.getClosureId(), checkTargetItemExport.getYearMonth());
+			if(!appEmpStatusImport.isPresent()) continue;
+			List<String> employeeIds = appEmpStatusImport.get().getRouteSituationLst().stream().map(c->c.getEmployeeID()).collect(Collectors.toList());
+			
+			//対応する月別実績を取得する
+			List<TimeOfMonthly> timeOfMonthly = timeRepo.findByEmployeesAndClorure(employeeIds, checkTargetItemExport.getYearMonth(), checkTargetItemExport.getClosureId());
+			List<AttendanceTimeOfMonthly> listAttendanceTimeOfMonthly = timeOfMonthly.stream()
+					.filter(x -> x.getAttendanceTime().isPresent()).map(c -> c.getAttendanceTime().get())
+					.collect(Collectors.toList());
 			List<AttendanceTimeOfMonthly> listCheckTarget = listAttendanceTimeOfMonthly.stream()
 					.filter(c -> c.getClosureId().value == checkTargetItemExport.getClosureId())
 					.collect(Collectors.toList());
@@ -106,8 +113,11 @@ public class CheckTrackRecord {
 						employeeId, attendanceTimeOfMonthly.getEmployeeId(), attendanceTimeOfMonthly.getYearMonth(),
 						attendanceTimeOfMonthly.getClosureId().value, attendanceTimeOfMonthly.getClosureDate(),
 						attendanceTimeOfMonthly.getDatePeriod());
-				if (approvalStatusResult.isPresent())
-					return true;
+				if (approvalStatusResult.isPresent()) {
+					if(approvalStatusResult.get().getImplementaPropriety() == AvailabilityAtr.CAN_RELEASE) {
+						return true;
+					}
+				}	
 			}
 		}
 
