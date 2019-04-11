@@ -92,9 +92,14 @@ public class HdRemainDetailMerPubImpl implements HdRemainDetailMerPub{
 			employeeSets.setAnnualLeaveEmpBasicInfoOpt(annualLeaveEmpBasicInfoOpt);
 			companySets = new MonAggrCompanySettings();
 			AnnualPaidLeaveSetting annualLeaveSet = annualPaidLeaveSet.findByCompanyId(companyId);
-			String grantTableCode = annualLeaveEmpBasicInfoOpt.get().getGrantRule().getGrantTableCode().v();
-			Optional<GrantHdTblSet> grantHdTblSetOpt = yearHolidayRepo.findByCode(companyId, grantTableCode);
-			Optional<List<LengthServiceTbl>> lengthServiceTblsOpt = Optional.ofNullable(this.lengthServiceRepo.findByCode(companyId, grantTableCode));
+			Optional<GrantHdTblSet> grantHdTblSetOpt = Optional.empty();
+			Optional<List<LengthServiceTbl>> lengthServiceTblsOpt = Optional.empty();
+			String grantTableCode = "";
+			if(annualLeaveEmpBasicInfoOpt.isPresent()) {
+				grantTableCode = annualLeaveEmpBasicInfoOpt.get().getGrantRule().getGrantTableCode().v();
+				grantHdTblSetOpt = yearHolidayRepo.findByCode(companyId, grantTableCode);
+				lengthServiceTblsOpt = Optional.ofNullable(this.lengthServiceRepo.findByCode(companyId, grantTableCode));
+			}
 			companySets.setAnnualLeaveSet(annualLeaveSet);
 			ConcurrentMap<String, GrantHdTblSet> grantHdTblSetMap = new ConcurrentHashMap<>();
 			if(grantHdTblSetOpt.isPresent()){
