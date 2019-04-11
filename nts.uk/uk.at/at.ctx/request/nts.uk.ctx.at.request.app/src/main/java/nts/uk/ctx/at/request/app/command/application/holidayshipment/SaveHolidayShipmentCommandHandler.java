@@ -24,6 +24,7 @@ import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.collection.CollectionUtil;
 import nts.gul.text.IdentifierUtil;
+import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.request.app.find.application.holidayshipment.HolidayShipmentScreenAFinder;
 import nts.uk.ctx.at.request.dom.application.ApplicationApprovalService_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
@@ -31,6 +32,10 @@ import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.IFactoryApplication;
 import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
+import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoImport;
+import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleAdapter;
+import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.EmploymentHistoryImported;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.WorkplaceAdapter;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.RegisterAtApproveReflectionInfoService_New;
@@ -146,6 +151,10 @@ public class SaveHolidayShipmentCommandHandler
 	private InterimRemainDataMngCheckRegister checkRegister;
 	@Inject
 	private HdAppSetRepository repoHdAppSet;
+	@Inject
+	private RecordWorkInfoAdapter recordWorkInfoAdapter;
+	@Inject
+	private ScBasicScheduleAdapter scBasicScheduleAdapter;
 
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<SaveHolidayShipmentCommand> context) {
@@ -586,7 +595,7 @@ public class SaveHolidayShipmentCommandHandler
 		// アルゴリズム「申請日関連チェック」を実行する
 		ApplicationDateRelatedCheck(command, withDrawReqSet.get(), sID, recDate, absDate, comType);
 		// アルゴリズム「勤務種類矛盾チェック」を実行する
-		checkWorkTypeConflict(command, withDrawReqSet.get());
+		checkWorkTypeConflict(sID,companyID,command, withDrawReqSet.get());
 		// アルゴリズム「終日半日矛盾チェック」を実行する
 		checkDayConflict(command, comType);
 		// アルゴリズム「法内法外矛盾チェック」を実行する
@@ -651,19 +660,84 @@ public class SaveHolidayShipmentCommandHandler
 
 	}
 
-	private void checkWorkTypeConflict(SaveHolidayShipmentCommand command, WithDrawalReqSet withDrawalReqSet) {
-		boolean isCheck = !withDrawalReqSet.getAppliDateContrac().equals(ContractCheck.DONT_CHECK);
-		if (isCheck) {
-			// アルゴリズム「振出勤務種類矛盾チェック」を実行する
-			workTypeContradictionCheck();
-			// アルゴリズム「申請前勤務種類の取得」を実行する
-		}
+	private void checkWorkTypeConflict(String Sid, String companyID, SaveHolidayShipmentCommand command,
+			WithDrawalReqSet withDrawalReqSet) {
 
+		ContractCheck checkMode = withDrawalReqSet.getAppliDateContrac();
+		boolean isCheck = !checkMode.equals(ContractCheck.DONT_CHECK);
+		if (isCheck) {
+			boolean isNotSelectYes = command.getIsNotSelectYes() == null ? true : command.getIsNotSelectYes();
+			// アルゴリズム「振出勤務種類矛盾チェック」を実行する
+			if (isSaveRec(command.getComType())) {
+				workTypeContradictionCheck(companyID, Sid, command.getRecCmd().getAppDate(), checkMode, isNotSelectYes,true);
+			}
+			// アルゴリズム「振休勤務種類矛盾チェック」を実行する
+			if (isSaveAbs(command.getComType())) {
+				workTypeContradictionCheck(companyID, Sid, command.getAbsCmd().getAppDate(), checkMode, isNotSelectYes,false);
+			}
+		}
 	}
 
-	private void workTypeContradictionCheck() {
-		// TODO tài liệu bị trống
+	private void workTypeContradictionCheck(String companyID, String sid, GeneralDate appDate, ContractCheck checkMode,
+			boolean isNotSelectYes, boolean ischeckRec) {
+		// アルゴリズム「11.指定日の勤務実績（予定）の勤務種類の分類を取得」を実行する
+		String wkTypeCd = workTypeInconsistencyCheck(companyID, sid, appDate);
+		String appDateText = appDate.toString("yyyy/MM/dd");
+		if (StringUtil.isNullOrEmpty(wkTypeCd, false)) {
+			if (checkMode.equals(ContractCheck.CHECK_IMPOSSIBLE)) {
+				throw new BusinessException("Msg_1519", appDateText);
+			}
+			if (checkMode.equals(ContractCheck.CHECK_AVAILABE) && isNotSelectYes) {
+				throw new BusinessException("Msg_1520", appDateText);
+			}
 
+		} else {
+			this.wkTypeRepo.findByPK(companyID, wkTypeCd).ifPresent(wktype -> {
+				WorkTypeClassification wkTypeClass = wktype.getDailyWork().getOneDay();
+				boolean isError ;
+				if (ischeckRec) {
+					isError = !(wkTypeClass.equals(WorkTypeClassification.Holiday)
+							|| wkTypeClass.equals(WorkTypeClassification.Shooting)
+							|| wkTypeClass.equals(WorkTypeClassification.HolidayWork));
+				} else {
+					isError = wkTypeClass.equals(WorkTypeClassification.Holiday)
+							|| wkTypeClass.equals(WorkTypeClassification.HolidayWork);
+				}
+			
+				if (isError) {
+					String wkTypeName = wktype.getName().v();
+					if (checkMode.equals(ContractCheck.CHECK_IMPOSSIBLE)) {
+						throw new BusinessException("Msg_1521", appDateText, wkTypeName);
+					}
+					if (checkMode.equals(ContractCheck.CHECK_AVAILABE) && isNotSelectYes) {
+						throw new BusinessException("Msg_1522", appDateText, wkTypeName);
+					}
+
+				}
+
+			});
+		}
+	}
+	
+	/**
+	 * 
+	 * @param companyID
+	 * @param employeeID
+	 * @param appDate
+	 * @return
+	 */
+	private String workTypeInconsistencyCheck(String companyID, String employeeID, GeneralDate appDate){
+		// Imported(申請承認)「勤務実績」を取得する
+		RecordWorkInfoImport recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(employeeID, appDate);
+		if(Strings.isNotBlank(recordWorkInfoImport.getWorkTypeCode())){
+			return recordWorkInfoImport.getWorkTypeCode();
+		}
+		// Imported(申請承認)「勤務予定」を取得する
+		Optional<ScBasicScheduleImport> opScBasicScheduleImport = scBasicScheduleAdapter.findByID(employeeID, appDate);
+		if(!opScBasicScheduleImport.isPresent()){
+			return null;
+		}
+		return opScBasicScheduleImport.get().getWorkTypeCode();
 	}
 
 	public boolean isSaveRec(int comType) {
