@@ -12,7 +12,7 @@ import nts.uk.ctx.workflow.pub.service.export.ApprovalRootContentExport;
 import nts.uk.ctx.workflow.pub.service.export.ApprovalRootOfEmployeeExport;
 import nts.uk.ctx.workflow.pub.service.export.ApproveRootStatusForEmpExport;
 import nts.uk.ctx.workflow.pub.service.export.ApproverApprovedExport;
-import nts.uk.ctx.workflow.pub.service.export.ApproverPersonExport;
+import nts.uk.ctx.workflow.pub.service.export.ApproverPersonExportNew;
 import nts.uk.ctx.workflow.pub.service.export.ApproverRemandExport;
 /**
  * 
@@ -207,7 +207,7 @@ public interface ApprovalRootStatePub {
 	 * @param employeeID 社員ID
 	 * @return
 	 */
-	public ApproverPersonExport judgmentTargetPersonCanApprove(String companyID, String rootStateID, String employeeID, Integer rootType);
+	public ApproverPersonExportNew judgmentTargetPersonCanApprove(String companyID, String rootStateID, String employeeID, Integer rootType);
 	
 	/**
 	 * RequestList No.482
