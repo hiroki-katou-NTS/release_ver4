@@ -913,50 +913,55 @@ public class SaveHolidayShipmentCommandHandler
 
 		String appReason = typicalReason + displayReason;
 
-		validateReasonText(appReason, appTypeSet, companyID);
+		validateReasonText(appReason, appTypeSet, companyID,command);
 
 		return appReason;
 	}
 
-	private void validateReasonText(String appReason, AppTypeDiscreteSetting appTypeSet, String companyID) {
+	private void validateReasonText(String appReason, AppTypeDiscreteSetting appTypeSet, String companyID, SaveHolidayShipmentCommand command) {
 		Optional<ApplicationSetting> appSetOp = appSetRepo.getApplicationSettingByComID(companyID);
 
 		ApplicationSetting appSet = appSetOp.get();
 
-		boolean isAnyReasonControlDisplay = isComboBoxReasonDisplay(appTypeSet) || isReasonTextFieldDisplay(appTypeSet);
+		boolean isAnyReasonDisplay = isComboBoxReasonDisplay(appTypeSet) || isReasonTextFieldDisplay(appTypeSet);
 
 		boolean isReasonBlankWhenRequired = appSet.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
 				&& Strings.isBlank(appReason);
 
-		if (isAnyReasonControlDisplay && isReasonBlankWhenRequired) {
-
+		if (isAnyReasonDisplay && isReasonBlankWhenRequired) {
 			throw new BusinessException("Msg_115");
-
 		}
-
 	}
 
 	private String getDisplayReason(String typicalReason, SaveHolidayShipmentCommand command,
 			AppTypeDiscreteSetting appTypeSet) {
 		String disPlayReason = Strings.EMPTY;
-		if (isReasonTextFieldDisplay(appTypeSet)) {
-
+		
+		boolean reasonTextDisplay;
+		boolean comboReasonDisplay = isComboBoxReasonDisplay(appTypeSet);
+		boolean reasonTextSettingDisplay= isReasonTextFieldDisplay(appTypeSet);
+		if (command.getIsScreenB() == true) {
+			reasonTextDisplay = comboReasonDisplay || reasonTextSettingDisplay;
+		} else {
+			reasonTextDisplay = reasonTextSettingDisplay;
+		}
+		if (reasonTextDisplay) {
 			if (Strings.isNotBlank(typicalReason)) {
-
-				disPlayReason += System.lineSeparator();
-
+				if (reasonTextSettingDisplay) {
+					disPlayReason += System.lineSeparator();
+				}
+			} 
+			if (reasonTextSettingDisplay || !Strings.isNotBlank(typicalReason)) {
+				disPlayReason += command.getAppCmd().getApplicationReason();
 			}
-
-			disPlayReason += command.getAppCmd().getApplicationReason();
-
 		}
 		return disPlayReason;
 	}
 
 	private boolean isReasonTextFieldDisplay(AppTypeDiscreteSetting appTypeSet) {
-
-		return appTypeSet.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY);
-
+		
+			return appTypeSet.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY);
+			
 	}
 
 	private String getTypicalReason(SaveHolidayShipmentCommand command, AppTypeDiscreteSetting appTypeSet) {
