@@ -116,7 +116,7 @@ public interface OtherCommonAlgorithm {
 	public List<GeneralDate> lstDateNotHoliday(String cid, String sid, DatePeriod dates);
 	
 	/**
-	 * 11.指定日の勤務実績（予定）の勤務種類の分類を取得
+	 * 11.指定日の勤務実績（予定）の勤務種類を取得
 	 * @param companyID
 	 * @param employeeID
 	 * @param appDate
