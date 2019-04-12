@@ -55,8 +55,6 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 	@Inject
 	private WorkInformationRepository workRepository;
 	@Inject
-	private StartEndTimeOffReflect startEndtimeOffReflect;
-	@Inject
 	private CalAttrOfDailyPerformanceRepository calAttrOfDaily;
 	@Inject
 	private AffiliationInforOfDailyPerforRepository affiliationInfor;
