@@ -137,9 +137,12 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 				//取得した特別休暇の付与データを「特別休暇の付与明細」に１行を追加する
 				List<SpecialHolidayInfor> lstInfor = getSpecialHolidayOfEmp.getSpeHolidayInfor();
 				if(lstInfor.isEmpty()) {
-					return  this.lstError(getOffsetDay);
+					return this.lstError(getOffsetDay);
 				}
 				SpecialHolidayInfor speInfor = lstInfor.get(0);
+				if(speInfor.getGrantDaysInfor().getErrorFlg().isPresent()) {
+					return this.lstError(getOffsetDay);
+				}
 				SpecialHolidayRemainInfor afterData = getOffsetDay.getRemainDays().getGrantDetailAfter().isPresent()
 						? getOffsetDay.getRemainDays().getGrantDetailAfter().get() : new SpecialHolidayRemainInfor(0, 0, 0);
 				double granDay = speInfor.getGrantDaysInfor().getGrantDays();
