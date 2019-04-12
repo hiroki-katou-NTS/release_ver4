@@ -701,8 +701,11 @@ public class SaveHolidayShipmentCommandHandler
 
 		} else {
 			
-				WorkTypeClassification wkTypeClass = workType.getDailyWork().getOneDay();
-				boolean isError ;
+			WorkTypeClassification wkTypeClass = workType.getDailyWork().getOneDay();
+
+			WorkTypeUnit wkTypeUnit = workType.getDailyWork().getWorkTypeUnit();
+			if (wkTypeUnit.equals(WorkTypeUnit.OneDay)) {
+				boolean isError;
 				if (ischeckRec) {
 					isError = !(wkTypeClass.equals(WorkTypeClassification.Holiday)
 							|| wkTypeClass.equals(WorkTypeClassification.Shooting)
@@ -711,7 +714,7 @@ public class SaveHolidayShipmentCommandHandler
 					isError = wkTypeClass.equals(WorkTypeClassification.Holiday)
 							|| wkTypeClass.equals(WorkTypeClassification.HolidayWork);
 				}
-			
+
 				if (isError) {
 					String wkTypeName = workType.getName().v();
 					if (checkMode.equals(ContractCheck.CHECK_IMPOSSIBLE)) {
@@ -723,7 +726,7 @@ public class SaveHolidayShipmentCommandHandler
 
 				}
 
-			
+			}
 		}
 	}
 
