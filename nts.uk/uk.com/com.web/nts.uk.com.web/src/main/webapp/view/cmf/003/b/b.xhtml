@@ -103,7 +103,7 @@
 											value: password,
 											required: isCompressPass, constraint: passwordConstraint,
 											option: {textmode: 'password',width: '230px'},
-											enable: true,
+											enable: isCompressPass,
 											readonly: false
 											}" />
 							</td>
@@ -116,7 +116,7 @@
 											value: confirmPassword,
 											required: isCompressPass, constraint: passwordConstraint, 
 											option: {textmode: 'password',width: '230px'},
-											enable: true,
+											enable: isCompressPass,
 											readonly: false
 											}" />
 							</td>
