@@ -584,10 +584,27 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                     return val != undefined ? val : value;
                 });
                 self.dpData = dpDataNew;
+                let lstCellStateMerge = [] ;
+                let checkPush =true;
+                for(let i = 0;i<data.lstCellState.length;i++){
+                    if(data.lstCellState[i].columnKey != "approval"){
+                        lstCellStateMerge.push(data.lstCellState[i]);
+                        continue; 
+                    }
+                    if(data.lstCellState[i].columnKey == "approval" && checkPush){
+                        for(let j =i+1;j<data.lstCellState.length;j++){
+                            if(data.lstCellState[j].columnKey == "approval"){
+                                data.lstCellState[i].state.push(data.lstCellState[j].state[0]);
+                            }                            
+                        }
+                        lstCellStateMerge.push(data.lstCellState[i]);
+                        checkPush = false;
+                    }
+                }
                 let cellStatesNew = _.map(self.cellStates(), (value: any) => {
-                    let val = _.find(data.lstCellState, (item: any) => {
+                    let val = _.find(lstCellStateMerge, (item: any) => {
                         return item.rowId == value.rowId && item.columnKey == value.columnKey;
-                    });
+                    }); 
                     return val != undefined ? val : value;
                 });
                 _.each(data.lstCellState, (cs: any) => {
@@ -600,12 +617,21 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 });
                 self.cellStates(cellStatesNew);
                 self.dailyPerfomanceData(dpDataNew);
+                let rowIdUpdate =  _.uniq(_.map($("#dpGrid").mGrid("updatedCells"), (itemTemp) => {return itemTemp.rowId}));
                 $("#dpGrid").mGrid("destroy");
                 $("#dpGrid").off();
                 self.loadGrid();
                 _.forEach(data.mpsateCellHideControl, (cellHide =>{
                     $('#dpGrid').mGrid("setState", cellHide.rowId, cellHide.columnKey, ["mgrid-hide"])
                 }))
+                
+                _.forEach(
+                    _.filter(self.cellStates(), (itemTemp) => { 
+                        return itemTemp.columnKey == "approval" && rowIdUpdate.indexOf(itemTemp.rowId) == -1 && itemTemp.state.indexOf("mgrid-error") != -1
+                    }),
+                    (state) => {
+                        $('#dpGrid').mGrid("setState", state.rowId, state.columnKey, ["mgrid-hide"]);
+                    });
                 dfd.resolve();
             });
             return dfd.promise();

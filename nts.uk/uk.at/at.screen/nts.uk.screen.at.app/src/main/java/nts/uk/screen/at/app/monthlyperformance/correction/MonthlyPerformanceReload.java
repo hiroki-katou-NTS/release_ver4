@@ -72,6 +72,9 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureHistory;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
+import nts.uk.screen.at.app.monthlyperformance.CheckDailyPerError;
+import nts.uk.screen.at.app.monthlyperformance.CheckEmpEralOuput;
+import nts.uk.screen.at.app.monthlyperformance.TypeErrorAlarm;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.ActualTime;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.ActualTimeState;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.EditStateOfMonthlyPerformanceDto;
@@ -177,6 +180,9 @@ public class MonthlyPerformanceReload {
 	@Inject
 	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;
 
+	@Inject
+	private CheckDailyPerError checkDailyPerError;
+	
 	public MonthlyPerformanceCorrectionDto reloadScreen(MonthlyPerformanceParam param) {
 
 		String companyId = AppContexts.user().companyId();
@@ -216,6 +222,7 @@ public class MonthlyPerformanceReload {
 		// RequestList211
 		List<AffCompanyHistImport> lstAffComHist = syCompanyRecordAdapter
 				.getAffCompanyHistByEmployee(employeeIds, datePeriodClosure);
+		screenDto.setLstAffComHist(lstAffComHist);
 		
 		List<String> listEmployeeIds = param.getLstEmployees().stream().map(x -> x.getId())
 				.collect(Collectors.toList());
@@ -346,7 +353,6 @@ public class MonthlyPerformanceReload {
 		List<MPCellStateDto> lstCellState = new ArrayList<>(); // List cell
 																// state
 		screenDto.setLstData(lstData);
-		screenDto.setLstCellState(lstCellState);
 
 		Map<String, MonthlyPerformaceLockStatus> lockStatusMap = param.getLstLockStatus().stream()
 				.collect(Collectors.toMap(x -> x.getEmployeeId(), Function.identity(), (x, y) -> x));
@@ -593,6 +599,38 @@ public class MonthlyPerformanceReload {
 			lstData.add(mpdata);
 		}
 	screenDto.setMPSateCellHideControl(mPSateCellHideControls);
+		// set state hide control
+			screenDto.setMPSateCellHideControl(mPSateCellHideControls);
+			//get histtory into company
+			List<AffCompanyHistImport> listAffCompanyHistImport = screenDto.getLstAffComHist();
+			List<CheckEmpEralOuput> listCheckEmpEralOuput = checkDailyPerError.checkDailyPerError(listEmployeeIds,new DatePeriod(screenDto.getSelectedActualTime().getStartDate(),screenDto.getSelectedActualTime().getEndDate()), listAffCompanyHistImport);
+			//取得した情報を元に月別実績を画面に表示する
+			//NOTE: ※取得した「会社所属履歴」をもとに、菜食していない期間の実績は表示しないでください
+			List<MPDataDto> listData =  new ArrayList<>();
+			screenDto.getLstData().forEach(x -> {
+				Optional<AffCompanyHistImport> optMonthlyPerformanceEmployeeDto = listAffCompanyHistImport.stream()
+						.filter(y -> x.getEmployeeId().equals(y.getEmployeeId())).findFirst();
+				
+				if (optMonthlyPerformanceEmployeeDto.isPresent()
+						&& optMonthlyPerformanceEmployeeDto.get().getLstAffComHistItem().size() > 0)
+					for(CheckEmpEralOuput checkEmpEralOuput: listCheckEmpEralOuput) {
+						if(x.getEmployeeId().equals(checkEmpEralOuput.getEmployId())) {
+							if(checkEmpEralOuput.getTypeAtr() == TypeErrorAlarm.ERROR) {
+								x.setError("ER");
+							}else if(checkEmpEralOuput.getTypeAtr() == TypeErrorAlarm.ALARM) {
+								x.setError("AL");
+							}else if(checkEmpEralOuput.getTypeAtr() == TypeErrorAlarm.ERROR_ALARM) {
+								x.setError("ER/AL");
+							}else {
+								x.setError("");
+							}
+							break;
+						}
+					}
+					listData.add(x);
+			});
+			screenDto.setLstCellState(lstCellState);
+			screenDto.setLstData(listData);
 	}
 
 	// copy ben MonthlyPerformanceDisplay

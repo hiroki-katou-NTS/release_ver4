@@ -1081,78 +1081,8 @@ public class MonthlyPerformanceCorrectionProcessor {
 		});
 		screenDto.setLstData(listData);
 
-		// screenDto.getItemValues().addAll(results.isEmpty() ? new
-		// ArrayList<>() : results.get(0).getItems());
-		// Cellstate
-		/*
-		 * List<MPCellStateDto> lstCellState = new ArrayList<>(); // //setting
-		 * data List<MPDataDto> lstData = new ArrayList<>(); boolean stateLock =
-		 * false; String empId; for (int i = 0; i <
-		 * screenDto.getLstEmployee().size(); i++) { empId =
-		 * screenDto.getLstEmployee().get(i).getId(); if(i % 2 == 0){
-		 * lstCellState.add(new MPCellStateDto("_" + empId, "dailyperformace",
-		 * Arrays.asList(STATE_DISABLE))); lstCellState.add(new
-		 * MPCellStateDto("_" + empId, "identify",
-		 * Arrays.asList(HAND_CORRECTION_MYSELF, STATE_DISABLE))); stateLock =
-		 * true; }else{ stateLock = false; }
-		 * 
-		 * lstCellState.add(new MPCellStateDto("_" + empId, "time",
-		 * Arrays.asList(STATE_ALARM, STATE_DISABLE)));
-		 * 
-		 * MPDataDto mpdata = new MPDataDto(empId, "stateLock", "",
-		 * screenDto.getLstEmployee().get(i).getCode(),screenDto.getLstEmployee(
-		 * ).get(i).getBusinessName(), "", stateLock, stateLock, stateLock, "");
-		 * mpdata.addCellData(new MPCellDataDto("time", "11:" + i, "String",
-		 * "")); lstData.add(mpdata); } screenDto.setLstCellState(lstCellState);
-		 */
-		// End dummy data
-		// 社員ID（List）から社員コードと表示名を取得
-		// Lấy employee code và tên hiển thị từ list employeeID
-		// TODO Get data from 社員データ管理情報(Employee data management information)
-		// SyEmployeePub
-
-		// ドメインモデル「月別実績の勤怠時間」の取得
-
-		// TODO ドメインモデル「月別実績の編集状態」すべて取得する
-
 	}
 
-	/**
-	 * Get List Data include:<br/>
-	 * Employee and Date
-	 **/
-//	private List<MPDataDto> getListData(List<MonthlyPerformanceEmployeeDto> listEmployee, DateRange dateRange,
-//			Integer displayFormat) {
-//		List<MPDataDto> result = new ArrayList<>();
-//		if (listEmployee.size() > 0) {
-//			List<GeneralDate> lstDate = dateRange.toListDate();
-//			int dataId = 0;
-//			for (int j = 0; j < listEmployee.size(); j++) {
-//				MonthlyPerformanceEmployeeDto employee = listEmployee.get(j);
-//				boolean stateLock = false;
-//				// set tam dailyConfirm  = "〇"
-//				String dailyConfirm = "〇";
-//				for (int i = 0; i < lstDate.size(); i++) {
-//					String key = displayFormat + "_" + convertFormatString(employee.getId()) + "_"
-//							+ convertFormatString(converDateToString(lstDate.get(i))) + "_"
-//							+ convertFormatString(converDateToString(lstDate.get(lstDate.size() - 1))) + "_" + dataId;
-//					result.add(new MPDataDto(key, "stateLock", "", employee.getCode(), employee.getBusinessName(),
-//							employee.getId(), "", stateLock, stateLock, dailyConfirm, ""));
-//					dataId++;
-//				}
-//			}
-//		}
-//		return result;
-//	}
-
-//	private String convertFormatString(String data) {
-//		return data.replace("-", "_");
-//	}
-//
-//	private String converDateToString(GeneralDate genDate) {
-//		Format formatter = new SimpleDateFormat(DATE_FORMAT);
-//		return formatter.format(genDate.date());
-//	}
 
 	private String mergeString(String... x) {
 		return StringUtils.join(x);
@@ -1164,20 +1094,6 @@ public class MonthlyPerformanceCorrectionProcessor {
 		 */
 
 		MPControlDisplayItem displayItem = screenDto.getLstControlDisplayItem();
-//		MonthlyPerformanceParam param = screenDto.getParam();
-		// アルゴリズム「対象年月に対応する月別実績を取得する」を実行する Lấy monthly result ứng với năm tháng
-//		if (param.getLstAtdItemUnique() == null || param.getLstAtdItemUnique().isEmpty()) {
-//			throw new BusinessException("Msg_1261");
-//		}
-//
-//		List<MPSheetDto> lstSheets = param.getSheets().stream().map(c -> {
-//			MPSheetDto sh = new MPSheetDto(c.getSheetNo(), c.getSheetName());
-//			for (PAttendanceItem attend : c.getDisplayItems()) {
-//				sh.addColumn(mergeString(ADD_CHARACTER, attend.getId().toString()));
-//			}
-//			return sh;
-//		}).collect(Collectors.toList());
-//		displayItem.createSheets(lstSheets);
 
 		List<MPHeaderDto> lstMPHeaderDto = MPHeaderDto.GenerateFixedHeader();
 		
