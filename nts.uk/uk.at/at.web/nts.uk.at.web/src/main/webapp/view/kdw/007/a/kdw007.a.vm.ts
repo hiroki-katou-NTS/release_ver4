@@ -202,7 +202,6 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                 block.invisible();
                 self.reSetData(self.selectedErrorAlarm(), foundItem);
                 service.findMonthlyCondition(foundItem.errorAlarmCheckID, foundItem.code).done((data) => {
-                    self.reset(self.selectedErrorAlarm());
                     self.resetMonthlyConditon(self.selectedErrorAlarm(), data);
                 }).always(() => {
                     block.clear();
@@ -282,65 +281,6 @@ module nts.uk.at.view.kdw007.a.viewmodel {
             if (self.screenMode() == ScreenMode.Daily) {
                 self.newTab();
             }
-        }
-        reset (selectedErrorAlarm) {
-            selectedErrorAlarm.companyId('');
-            selectedErrorAlarm.errorAlarmCheckID('');
-            selectedErrorAlarm.code('');
-            selectedErrorAlarm.name('');
-            selectedErrorAlarm.fixedAtr(0);
-            selectedErrorAlarm.useAtr(1);
-            selectedErrorAlarm.remarkCancelErrorInput(0);
-            selectedErrorAlarm.remarkColumnNo(833);
-            selectedErrorAlarm.typeAtr(0);
-            selectedErrorAlarm.displayMessage('');
-            selectedErrorAlarm.boldAtr(0);
-            selectedErrorAlarm.messageColor(null);
-            selectedErrorAlarm.cancelableAtr( 0);
-            selectedErrorAlarm.errorDisplayItem(null);
-            selectedErrorAlarm.errorDisplayItem.valueHasMutated();
-            selectedErrorAlarm.errorDisplayItemName("");
-            selectedErrorAlarm.alCheckTargetCondition.setData(null);
-            selectedErrorAlarm.workTypeCondition.setData(null);
-            selectedErrorAlarm.workTimeCondition.setData(null);
-            selectedErrorAlarm.operatorBetweenPlanActual(0);
-            selectedErrorAlarm.lstApplicationTypeCode([]);
-            selectedErrorAlarm.operatorBetweenGroups(0);
-            selectedErrorAlarm.operatorGroup1(0);
-            selectedErrorAlarm.operatorGroup2(0);
-            selectedErrorAlarm.group2UseAtr(false);
-            selectedErrorAlarm.erAlAtdItemConditionGroup1(null);
-            selectedErrorAlarm.erAlAtdItemConditionGroup2(null);
-        }
-
-        resetMonthlyConditon(selectedErrorAlarm, param) {
-            selectedErrorAlarm.operatorBetweenPlanActual(param && param.operatorBetweenPlanActual ? param.operatorBetweenPlanActual : 0);
-            selectedErrorAlarm.operatorBetweenGroups(param && param.operatorBetweenGroups ? param.operatorBetweenGroups : 0);
-            selectedErrorAlarm.operatorGroup1(param && param.operatorGroup1 ? param.operatorGroup1 : 0);
-            selectedErrorAlarm.operatorGroup2(param && param.operatorGroup2 ? param.operatorGroup2 : 0);
-            selectedErrorAlarm.group2UseAtr(param && param.group2UseAtr ? param.group2UseAtr : false);
-            selectedErrorAlarm.erAlAtdItemConditionGroup1.forEach((condition) => {
-                if (param && param.erAlAtdItemConditionGroup1 && param.erAlAtdItemConditionGroup1.length > 0) {
-                    param.erAlAtdItemConditionGroup1.forEach((conditionParam) => {
-                        if (conditionParam.targetNO == condition.targetNO()) {
-                            condition.setData(conditionParam.targetNO, conditionParam);
-                        }
-                    });
-                } else {
-                    condition.setData(condition.targetNO(), null);
-                }
-            });
-            selectedErrorAlarm.erAlAtdItemConditionGroup2.forEach((condition) => {
-                if (param && param.erAlAtdItemConditionGroup2 && param.erAlAtdItemConditionGroup2.length > 0) {
-                    param.erAlAtdItemConditionGroup2.forEach((conditionParam) => {
-                        if (conditionParam.targetNO == condition.targetNO()) {
-                            condition.setData(conditionParam.targetNO, conditionParam);
-                        }
-                    });
-                } else {
-                    condition.setData(condition.targetNO(), null);
-                }
-            });
         }
 
         reSetData(selectedErrorAlarm: ErrorAlarmWorkRecord, param: any) {
