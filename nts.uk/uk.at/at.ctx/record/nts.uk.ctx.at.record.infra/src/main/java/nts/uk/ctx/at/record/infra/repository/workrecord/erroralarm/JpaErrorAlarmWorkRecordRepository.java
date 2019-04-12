@@ -330,7 +330,7 @@ public class JpaErrorAlarmWorkRecordRepository extends JpaRepository implements 
 		builder.append(" whc.WORK_TIME_CD as whActualWtCD, ec.OPERATOR_BETWEEN_GROUPS, ec.GROUP2_USE_ATR ");
 		builder.append(" FROM KRCMT_ERAL_SET es ");
 		builder.append(" LEFT JOIN KRCST_ER_AL_APPLICATION ap ON ap.CID = es.CID AND es.ERROR_ALARM_CD = ap.ERROR_CD");
-		builder.append(" LEFT JOIN KRCMT_ERAL_CONDITION ec ON ec.ERAL_CHECK_ID = es.ERAL_CHECK_ID ");
+		builder.append(" LEFT JOIN KRCMT_ERAL_CONDITION ec ON ec.CID = es.CID AND ec.ERAL_CHECK_ID = es.ERAL_CHECK_ID ");
 		builder.append(" LEFT JOIN KRCST_ER_AL_BUSINESS_TYPE b ON b.CID = es.CID AND es.ERAL_CHECK_ID = b.ERAL_CHECK_ID ");
 		builder.append(" LEFT JOIN KRCST_ER_AL_JOB_TITLE jt ON jt.CID = es.CID AND es.ERAL_CHECK_ID = jt.ERAL_CHECK_ID ");
 		builder.append(" LEFT JOIN KRCST_ER_AL_EMPLOYMENT em  ON em.CID = es.CID AND es.ERAL_CHECK_ID = em.ERAL_CHECK_ID  ");
