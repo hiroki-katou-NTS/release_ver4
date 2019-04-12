@@ -7,6 +7,7 @@ import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalPhaseState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalStatusOutput;
 import nts.uk.ctx.workflow.dom.service.output.ApproverPersonOutput;
+import nts.uk.ctx.workflow.dom.service.output.ApproverPersonOutputNew;
 
 /**
  * 承認ステータスの判断
@@ -41,7 +42,7 @@ public interface JudgmentApprovalStatusService {
 	 * @param employeeID 社員ID
 	 * @return
 	 */
-	public ApproverPersonOutput judgmentTargetPersonCanApprove(String companyID, String rootStateID, String employeeID, Integer rootType);
+	public ApproverPersonOutputNew judgmentTargetPersonCanApprove(String companyID, String rootStateID, String employeeID, Integer rootType);
 	
 	/**
 	 * 1.承認フェーズ毎の承認者を取得する

@@ -23,7 +23,7 @@ import nts.uk.ctx.workflow.pub.resultrecord.EmpSprDailyConfirmExport;
 import nts.uk.ctx.workflow.pub.resultrecord.IntermediateDataPub;
 import nts.uk.ctx.workflow.pub.spr.SprApprovalSearchPub;
 import nts.uk.ctx.workflow.pub.spr.export.ApprovalRootStateSprExport;
-import nts.uk.ctx.workflow.pub.spr.export.JudgmentSprExport;
+import nts.uk.ctx.workflow.pub.spr.export.JudgmentSprExportNew;
 import nts.uk.pub.spr.approvalroot.output.ApprovalRootSpr;
 import nts.uk.pub.spr.login.paramcheck.LoginParamCheck;
 /**
@@ -137,9 +137,12 @@ public class SprApprovalRootImpl implements SprApprovalRootService {
 				}
 			}
 			// （ワークフローExport）アルゴリズム「3.指定した社員が承認できるかの判断」を実行する
-			JudgmentSprExport judgmentSprExport = sprApprovalSearchPub
+			JudgmentSprExportNew judgmentSprExport = sprApprovalSearchPub
 					.judgmentTargetPersonCanApprove(companyID, x.getRootStateID(), employeeID, rootType);
-			if(!(judgmentSprExport.getAuthorFlag()&&judgmentSprExport.getApprovalAtr()==0&&!judgmentSprExport.getExpirationAgentFlag())){
+			if(!(judgmentSprExport.getAuthorFlag()&&
+					judgmentSprExport.getApprovalAtr()==0&&
+					!judgmentSprExport.getExpirationAgentFlag()&&
+					(judgmentSprExport.getApprovalPhaseAtr()==0||judgmentSprExport.getApprovalPhaseAtr()==3))){
 				return;
 			}
 			// （基幹・社員Export）アルゴリズム「社員IDから個人社員基本情報を取得」を実行する　RequestList No.1
