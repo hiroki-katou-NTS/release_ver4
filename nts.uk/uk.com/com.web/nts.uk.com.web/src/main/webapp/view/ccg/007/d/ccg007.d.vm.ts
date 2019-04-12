@@ -36,6 +36,14 @@ module nts.uk.pr.view.ccg007.d {
             }
             start(): JQueryPromise<void> {
                 var self = this;
+                //get url
+                let url = _.toLower(_.trim(_.trim($(location).attr('href')), '%20'));
+                let isSignOn = url.indexOf('signon=on') >= 0 || url.indexOf('signon=oN') >= 0 || url.indexOf('signon=On') >= 0
+                || url.indexOf('signon=ON') >= 0;
+                self.isSignOn(isSignOn);
+                if(!isSignOn){
+                    self.displayLogin(true);
+                }
                 var dfd = $.Deferred<void>();
                 let defaultContractCode:string = "000000000000";
                 //get system config
@@ -118,8 +126,6 @@ module nts.uk.pr.view.ccg007.d {
                 var self = this;
                 var dfd = $.Deferred<void>();
                 //get check signon
-//                let url = _.toLower(_.trim(_.trim($(location).attr('href')), '%20'));
-//                let isSignOn = url.indexOf('signon=on') >= 0;
                 service.getEmployeeLoginSetting(contractCode).done(function(data:any) {
                     if (data.gotoForm1) {
                         nts.uk.request.jump("/view/ccg/007/b/index.xhtml");

@@ -23,9 +23,15 @@ module nts.uk.pr.view.ccg007.b {
             }
             start(): JQueryPromise<void> {
                 var self = this;
-                var dfd = $.Deferred<void>();
+                //get url
                 let url = _.toLower(_.trim(_.trim($(location).attr('href')), '%20'));
-                let isSignOn = url.indexOf('signon=on') >= 0;
+                let isSignOn = url.indexOf('signon=on') >= 0 || url.indexOf('signon=oN') >= 0 || url.indexOf('signon=On') >= 0
+                || url.indexOf('signon=ON') >= 0;
+                self.isSignOn(isSignOn);
+                if(!isSignOn){
+                    self.displayLogin(true);
+                }
+                var dfd = $.Deferred<void>();
                 let defaultContractCode: string = "000000000000";
                 blockUI.invisible();
                 //get system config
@@ -111,11 +117,6 @@ module nts.uk.pr.view.ccg007.b {
                     var isSubmit = nts.uk.ui.windows.getShared('isSubmit');
                     self.contractCode(contractCode);
                     self.contractPassword(contractPassword);
-                    
-                    //get url
-//                    let url = _.toLower(_.trim(_.trim($(location).attr('href')), '%20'));
-//                    let isSignOn = url.indexOf('signon=on') >= 0;
-                    
                     //Check signon
                     if (isSubmit && self.isSignOn()){
                         self.submitLogin(self.isSignOn());
