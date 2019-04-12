@@ -11,6 +11,8 @@ module nts.uk.pr.view.ccg007.b {
             contractCode: KnockoutObservable<string>;
             contractPassword: KnockoutObservable<string>;
             isSaveLoginInfo: KnockoutObservable<boolean>;
+            isSignOn: KnockoutObservable<boolean> = ko.observable(false);
+            displayLogin: KnockoutObservable<boolean> = ko.observable(false);
             constructor() {
                 var self = this;
                 self.loginId = ko.observable('');
@@ -111,12 +113,12 @@ module nts.uk.pr.view.ccg007.b {
                     self.contractPassword(contractPassword);
                     
                     //get url
-                    let url = _.toLower(_.trim(_.trim($(location).attr('href')), '%20'));
-                    let isSignOn = url.indexOf('signon=on') >= 0;
+//                    let url = _.toLower(_.trim(_.trim($(location).attr('href')), '%20'));
+//                    let isSignOn = url.indexOf('signon=on') >= 0;
                     
                     //Check signon
-                    if (isSubmit && isSignOn){
-                        self.submitLogin(isSignOn);
+                    if (isSubmit && self.isSignOn()){
+                        self.submitLogin(self.isSignOn());
                     }
                 });
             }
@@ -166,6 +168,9 @@ module nts.uk.pr.view.ccg007.b {
                     }
                     blockUI.clear();
                 }).fail(function(res:any) {
+                    if(self.isSignOn()){
+                        self.displayLogin(true);
+                    }
                     //Return Dialog Error
                     if (!_.isEqual(res.message, "can not found message id")){
                         nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds });
@@ -195,6 +200,10 @@ module nts.uk.pr.view.ccg007.b {
                     var childData = nts.uk.ui.windows.getShared('childData');
                     if (childData.submit) {
                         nts.uk.request.jump("/view/ccg/008/a/index.xhtml", { screen: 'login' });
+                    }else{
+                        if(self.isSignOn()){
+                            self.displayLogin(true);
+                        }    
                     }    
                 })
             }
