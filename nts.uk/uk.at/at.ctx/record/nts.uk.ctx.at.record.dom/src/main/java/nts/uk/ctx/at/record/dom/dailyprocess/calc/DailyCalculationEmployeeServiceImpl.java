@@ -329,7 +329,6 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	private void registAttendanceTime(String empId,GeneralDate ymd,AttendanceTimeOfDailyPerformance attendanceTime, Optional<AnyItemValueOfDaily> anyItem){
 		adTimeAndAnyItemAdUpService.addAndUpdate(empId,ymd,Optional.of(attendanceTime), anyItem);	
-		dailyTransaction.updated(empId, ymd);
 	}
 	
 	/**
