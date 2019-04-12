@@ -88,11 +88,11 @@
 					<div class="right-content">
 						<div data-bind="with: selectedAlarmCheckCondition">
 							<div class="valign-center control-group">
-								<div class="flabel" data-bind="ntsFormLabel: {required: true}">#{i18n.getText('KAL003_11')}</div>
+								<div class="flabel" data-bind="ntsFormLabel: {required: true,constraint: ['AlarmCheckConditionCode']}">#{i18n.getText('KAL003_11')}</div>
 								<input
 									tabindex="7" id="A3_2" style = "margin-right: 30px"
 									data-bind="ntsTextEditor: {name: '#[KAL003_11]', value: code, required: true, constraint: 'AlarmCheckConditionCode', enable: $parent.screenMode() == 0, option: {width: '80px'}}" />
-								<div data-bind="ntsFormLabel: {required: true}">#{i18n.getText('KAL003_12')}</div>
+								<div data-bind="ntsFormLabel: {required: true,constraint: ['AlarmCheckConditionName']}">#{i18n.getText('KAL003_12')}</div>
 								<input tabindex="8" id="A3_4"  style = "margin-left: 35px"
 									data-bind="ntsTextEditor: {name: '#[KAL003_12]', value: name, required: true, constraint: 'AlarmCheckConditionName'}" />
 							</div>
