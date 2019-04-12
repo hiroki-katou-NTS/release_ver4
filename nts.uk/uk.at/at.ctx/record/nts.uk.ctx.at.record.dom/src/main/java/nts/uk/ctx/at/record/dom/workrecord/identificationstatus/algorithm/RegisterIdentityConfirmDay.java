@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
@@ -42,7 +43,7 @@ public class RegisterIdentityConfirmDay {
 	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;
 	
 	@Inject
-	private WorkInformationRepository workInfo;
+	private DailyRecordTransactionService workInfo;
 	
 	// code old 
 //	@Inject
@@ -58,7 +59,7 @@ public class RegisterIdentityConfirmDay {
 			
 			if(identityProcessOpt.get().isUseConfirmByYourself()){
 				param.getSelfConfirmDay().stream().forEach(cd -> {
-					workInfo.dirtying(param.getEmployeeId(), cd.getDate());
+					workInfo.updated(param.getEmployeeId(), cd.getDate());
 				});
 				return true;
 			}
