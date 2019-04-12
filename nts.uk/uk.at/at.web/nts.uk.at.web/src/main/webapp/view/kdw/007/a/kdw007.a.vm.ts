@@ -283,6 +283,36 @@ module nts.uk.at.view.kdw007.a.viewmodel {
             }
         }
 
+        resetMonthlyConditon(selectedErrorAlarm, param) {
+            selectedErrorAlarm.operatorBetweenPlanActual(param && param.operatorBetweenPlanActual ? param.operatorBetweenPlanActual : 0);
+            selectedErrorAlarm.operatorBetweenGroups(param && param.operatorBetweenGroups ? param.operatorBetweenGroups : 0);
+            selectedErrorAlarm.operatorGroup1(param && param.operatorGroup1 ? param.operatorGroup1 : 0);
+            selectedErrorAlarm.operatorGroup2(param && param.operatorGroup2 ? param.operatorGroup2 : 0);
+            selectedErrorAlarm.group2UseAtr(param && param.group2UseAtr ? param.group2UseAtr : false);
+            selectedErrorAlarm.erAlAtdItemConditionGroup1.forEach((condition) => {
+                if (param && param.erAlAtdItemConditionGroup1 && param.erAlAtdItemConditionGroup1.length > 0) {
+                    param.erAlAtdItemConditionGroup1.forEach((conditionParam) => {
+                        if (conditionParam.targetNO == condition.targetNO()) {
+                            condition.setData(conditionParam.targetNO, conditionParam);
+                        }
+                    });
+                } else {
+                    condition.setData(condition.targetNO(), null);
+                }
+            });
+            selectedErrorAlarm.erAlAtdItemConditionGroup2.forEach((condition) => {
+                if (param && param.erAlAtdItemConditionGroup2 && param.erAlAtdItemConditionGroup2.length > 0) {
+                    param.erAlAtdItemConditionGroup2.forEach((conditionParam) => {
+                        if (conditionParam.targetNO == condition.targetNO()) {
+                            condition.setData(conditionParam.targetNO, conditionParam);
+                        }
+                    });
+                } else {
+                    condition.setData(condition.targetNO(), null);
+                }
+            });
+        }
+
         reSetData(selectedErrorAlarm: ErrorAlarmWorkRecord, param: any) {
             selectedErrorAlarm.companyId(param && param.companyId ? param.companyId : '');
             selectedErrorAlarm.errorAlarmCheckID(param && param.errorAlarmCheckID ? param.errorAlarmCheckID : '');
