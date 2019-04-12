@@ -33,10 +33,7 @@ import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessU
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentityProcessUseSetRepository;
-import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
-import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureHistory;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
-import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -160,7 +157,8 @@ public class ApprovalStatusMonthly {
 		//取得した「承認処理の利用設定．日の承認者確認を利用する」をチェックする
 		if (optApprovalUse.get().getUseDayApproverConfirm()) {
 			//対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
-			List<ApproveRootStatusForEmpImport> lstApprovalStatusDay = approvalStatusAdapter.getApprovalByListEmplAndListApprovalRecordDateNew(datePeriod.datesBetween(), Arrays.asList(employeeId), 1); // 1 : 日別確認
+			// fixbug 107181: lay dateperiod theo closure moi (thiet ke k viet, sua theo ý anh Tuấn bảo)
+			List<ApproveRootStatusForEmpImport> lstApprovalStatusDay = approvalStatusAdapter.getApprovalByListEmplAndListApprovalRecordDateNew(workPeriod.datesBetween(), Arrays.asList(employeeId), 1); // 1 : 日別確認
 			val checkDataNotApprovalDay = lstApprovalStatusDay.stream()
 					.filter(x -> x.getApprovalStatus() != ApprovalStatusForEmployee.APPROVED)
 					.collect(Collectors.toList());

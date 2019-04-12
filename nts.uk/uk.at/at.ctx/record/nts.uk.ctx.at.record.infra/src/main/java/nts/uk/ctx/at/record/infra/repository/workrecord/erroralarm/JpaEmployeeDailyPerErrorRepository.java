@@ -300,6 +300,59 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 //						.map(c -> c.getValue().stream().map(item -> item.toDomain()).collect(Collectors.toList()))
 //						.flatMap(List::stream).collect(Collectors.toList());
 	}
+	
+	@Override
+	public List<EmployeeDailyPerError> findsWithLeftJoin(List<String> employeeID, DatePeriod processingDate) {
+		//fix response 192
+		String GET_BY_LIST_EMP_AND_PERIOD = "SELECT a.*, b.* FROM KRCDT_SYAIN_DP_ER_LIST a"
+				+ " LEFT JOIN KRCDT_ER_ATTENDANCE_ITEM b"
+				+ " ON b.ID = a.ID "
+				+ " WHERE a.PROCESSING_DATE <= ?"
+				+ " AND a.PROCESSING_DATE >= ?"
+				+ " AND  a.SID IN (";
+
+		//fix exceeding max condition of IN statement
+		List<EmployeeDailyPerError> resultReturn = new ArrayList<>();
+		CollectionUtil.split(employeeID, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+            StringBuilder stringBuilder = new StringBuilder();
+			int size = subList.size();
+			for (int i = 0; i < size; i++) {
+				stringBuilder.append("?");
+				if (i < subList.size() - 1) {
+					stringBuilder.append(",");
+				}
+			}
+			stringBuilder.append(")");
+			String QUERY = GET_BY_LIST_EMP_AND_PERIOD + stringBuilder.toString();
+			try (PreparedStatement statement = this.connection().prepareStatement(QUERY)) {
+				statement.setDate(1, Date.valueOf(processingDate.end().localDate()));
+				statement.setDate(2, Date.valueOf(processingDate.start().localDate()));
+				for (int i = 0; i < size; i++) {
+					statement.setString(i + 3, subList.get(i));
+				}
+				List<EmployeeDailyPerError> results = new NtsResultSet(statement.executeQuery()).getList(rs ->
+						new EmployeeDailyPerError(
+								rs.getString("ID"),
+								rs.getString("CID"),
+								rs.getString("SID"),
+								rs.getGeneralDate("PROCESSING_DATE"),
+								new ErrorAlarmWorkRecordCode(rs.getString("ERROR_CODE")),
+								Arrays.asList(rs.getInt("ATTENDANCE_ITEM_ID")),
+								rs.getInt("ERROR_CANCELABLE"),
+								rs.getString("ERROR_MESSAGE")));
+
+				Map<String, List<EmployeeDailyPerError>> groupResult = results.stream().collect(Collectors.groupingBy(EmployeeDailyPerError::getId));
+				groupResult.forEach((key, value) -> {
+					List<Integer> id = value.stream().flatMap(x -> x.getAttendanceItemList().stream()).collect(Collectors.toList());
+					value.get(0).setAttendanceItemList(id);
+					resultReturn.add(value.get(0));
+				});
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return resultReturn;
+	}
 
 	@Override
 	public void removeParam(String sid, GeneralDate date) {
