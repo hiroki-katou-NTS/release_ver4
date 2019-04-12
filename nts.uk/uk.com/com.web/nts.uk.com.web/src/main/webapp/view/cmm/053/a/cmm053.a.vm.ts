@@ -246,7 +246,6 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                         if (result.errA27) {
                             $('#A2_7').ntsError('clear');
                             $('#A2_7').ntsError('set', { messageId: result.msgId });
-                            self.settingManager().departmentName('');
                         }
                         if (result.errA210) {
                             $('#A2_10').ntsError('clear');
