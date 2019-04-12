@@ -152,9 +152,7 @@ public class SaveHolidayShipmentCommandHandler
 	@Inject
 	private HdAppSetRepository repoHdAppSet;
 	@Inject
-	private RecordWorkInfoAdapter recordWorkInfoAdapter;
-	@Inject
-	private ScBasicScheduleAdapter scBasicScheduleAdapter;
+	private OtherCommonAlgorithm otherCommonAlgorithm;
 
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<SaveHolidayShipmentCommand> context) {
@@ -678,12 +676,22 @@ public class SaveHolidayShipmentCommandHandler
 		}
 	}
 
+	/**
+	 * 振出勤務種類矛盾チェック &&振休勤務種類矛盾チェック
+	 * 
+	 * @param companyID
+	 * @param sid
+	 * @param appDate
+	 * @param checkMode
+	 * @param isNotSelectYes
+	 * @param ischeckRec
+	 */
 	private void workTypeContradictionCheck(String companyID, String sid, GeneralDate appDate, ContractCheck checkMode,
 			boolean isNotSelectYes, boolean ischeckRec) {
-		// アルゴリズム「11.指定日の勤務実績（予定）の勤務種類の分類を取得」を実行する
-		String wkTypeCd = workTypeInconsistencyCheck(companyID, sid, appDate);
+		// アルゴリズム「11.指定日の勤務実績（予定）の勤務種類を取得」を実行する
+		WorkType workType = this.otherCommonAlgorithm.getWorkTypeScheduleSpec(companyID, sid, appDate);
 		String appDateText = appDate.toString("yyyy/MM/dd");
-		if (StringUtil.isNullOrEmpty(wkTypeCd, false)) {
+		if (workType == null) {
 			if (checkMode.equals(ContractCheck.CHECK_IMPOSSIBLE)) {
 				throw new BusinessException("Msg_1519", appDateText);
 			}
@@ -692,8 +700,8 @@ public class SaveHolidayShipmentCommandHandler
 			}
 
 		} else {
-			this.wkTypeRepo.findByPK(companyID, wkTypeCd).ifPresent(wktype -> {
-				WorkTypeClassification wkTypeClass = wktype.getDailyWork().getOneDay();
+			
+				WorkTypeClassification wkTypeClass = workType.getDailyWork().getOneDay();
 				boolean isError ;
 				if (ischeckRec) {
 					isError = !(wkTypeClass.equals(WorkTypeClassification.Holiday)
@@ -705,7 +713,7 @@ public class SaveHolidayShipmentCommandHandler
 				}
 			
 				if (isError) {
-					String wkTypeName = wktype.getName().v();
+					String wkTypeName = workType.getName().v();
 					if (checkMode.equals(ContractCheck.CHECK_IMPOSSIBLE)) {
 						throw new BusinessException("Msg_1521", appDateText, wkTypeName);
 					}
@@ -715,29 +723,8 @@ public class SaveHolidayShipmentCommandHandler
 
 				}
 
-			});
+			
 		}
-	}
-	
-	/**
-	 * 
-	 * @param companyID
-	 * @param employeeID
-	 * @param appDate
-	 * @return
-	 */
-	private String workTypeInconsistencyCheck(String companyID, String employeeID, GeneralDate appDate){
-		// Imported(申請承認)「勤務実績」を取得する
-		RecordWorkInfoImport recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(employeeID, appDate);
-		if(Strings.isNotBlank(recordWorkInfoImport.getWorkTypeCode())){
-			return recordWorkInfoImport.getWorkTypeCode();
-		}
-		// Imported(申請承認)「勤務予定」を取得する
-		Optional<ScBasicScheduleImport> opScBasicScheduleImport = scBasicScheduleAdapter.findByID(employeeID, appDate);
-		if(!opScBasicScheduleImport.isPresent()){
-			return null;
-		}
-		return opScBasicScheduleImport.get().getWorkTypeCode();
 	}
 
 	public boolean isSaveRec(int comType) {
