@@ -1029,6 +1029,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	private List<DPErrorSettingDto> getErrorSettingN(String companyId, List<String> listErrorCode, boolean showError,
 			boolean showAlarm, boolean showOther) {
+		if(listErrorCode.size() == 0) return Collections.emptyList();
 		List<DPErrorSettingDto> dtos = new ArrayList<>();
 		String textIn = "";
 		for (int i = 0; i < listErrorCode.size(); i++) {

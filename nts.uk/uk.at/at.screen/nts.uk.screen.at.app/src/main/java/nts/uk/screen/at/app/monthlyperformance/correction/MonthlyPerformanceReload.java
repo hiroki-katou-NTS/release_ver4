@@ -603,7 +603,11 @@ public class MonthlyPerformanceReload {
 			screenDto.setMPSateCellHideControl(mPSateCellHideControls);
 			//get histtory into company
 			List<AffCompanyHistImport> listAffCompanyHistImport = screenDto.getLstAffComHist();
-			List<CheckEmpEralOuput> listCheckEmpEralOuput = checkDailyPerError.checkDailyPerError(listEmployeeIds,new DatePeriod(screenDto.getSelectedActualTime().getStartDate(),screenDto.getSelectedActualTime().getEndDate()), listAffCompanyHistImport);
+		List<CheckEmpEralOuput> listCheckEmpEralOuput = checkDailyPerError
+				.checkDailyPerError(listEmployeeIds,
+						new DatePeriod(screenDto.getSelectedActualTime().getStartDate(),
+								screenDto.getSelectedActualTime().getEndDate()),
+						listAffCompanyHistImport, monthlyResults);
 			//取得した情報を元に月別実績を画面に表示する
 			//NOTE: ※取得した「会社所属履歴」をもとに、菜食していない期間の実績は表示しないでください
 			List<MPDataDto> listData =  new ArrayList<>();

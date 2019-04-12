@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
 import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
+import nts.uk.ctx.at.record.dom.workrecord.actualsituation.confirmstatusmonthly.MonthlyModifyResultDto;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceScreenRepo;
@@ -30,12 +31,13 @@ public class CheckDailyPerError {
 	@Inject
 	private DailyPerformanceScreenRepo dailyPerformanceScreenRepo;
 	
-	public List<CheckEmpEralOuput> checkDailyPerError(List<String> listEmployeeId,DatePeriod period,List<AffCompanyHistImport> listAffCompanyHistImport) {
+	public List<CheckEmpEralOuput> checkDailyPerError(List<String> listEmployeeId,DatePeriod period,List<AffCompanyHistImport> listAffCompanyHistImport, List<MonthlyModifyResultDto> monthlyResults) {
 		String companyId = AppContexts.user().companyId();
 		
 		//ドメインモデル「社員の日別実績エラー一覧」をすべて取得する
 		List<EmployeeDailyPerError> data = employeeDailyPerErrorRepo.getByEmpIDAndPeriod(listEmployeeId, period);
 		List<EmployeeDailyPerError> listDataNew = new ArrayList<>();
+		List<EmployeeDailyPerError> listDataAfterFilter = new ArrayList<>();
 		if(data.isEmpty())
 			return Collections.emptyList();
 		for(EmployeeDailyPerError employeeDailyPerError : data) {
@@ -51,13 +53,22 @@ public class CheckDailyPerError {
 				}
 			}
 		}
+		// can phai filter lại theo dateperiod mới cua closure
+		// fixbug 107181 #10
+		for (MonthlyModifyResultDto monthlyResult : monthlyResults) {
+			listDataNew.stream()
+					.filter(x -> x.getEmployeeID().equals(monthlyResult.getEmployeeId())
+							&& monthlyResult.getWorkDatePeriod().contains(x.getDate()))
+					.findFirst().ifPresent(y -> listDataAfterFilter.add(y));
+		}
+		
 		List<CheckEmpEralOuput> listCheckEmpEralOuput = new ArrayList<>();
 		
 		//対応するドメインモデル「勤務実績のエラーアラーム」をすべて取得する
 		List<DPErrorSettingDto> lstErrorSetting = this.dailyPerformanceScreenRepo
-				.getErrorSetting(companyId, listDataNew.stream().map(e -> e.getErrorAlarmWorkRecordCode().v()).collect(Collectors.toList()), true, true, false);
+				.getErrorSetting(companyId, listDataAfterFilter.stream().map(e -> e.getErrorAlarmWorkRecordCode().v()).collect(Collectors.toList()), true, true, false);
 		for(String empID : listEmployeeId) {
-			List<EmployeeDailyPerError> listErrorByID = listDataNew.stream().filter(c->c.getEmployeeID().equals(empID)).collect(Collectors.toList());
+			List<EmployeeDailyPerError> listErrorByID = listDataAfterFilter.stream().filter(c->c.getEmployeeID().equals(empID)).collect(Collectors.toList());
 			boolean checkError = false;
 			boolean checkAlarm = false;
 			for(EmployeeDailyPerError employeeDailyPerError : listErrorByID) {
@@ -82,9 +93,7 @@ public class CheckDailyPerError {
 			}
 		}
 		
-		
 		return listCheckEmpEralOuput;
-		
 	}
 
 }
