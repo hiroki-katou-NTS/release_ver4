@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,7 +12,6 @@ import javax.inject.Inject;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
@@ -70,31 +70,30 @@ public class CheckTrackRecordApprovalDay {
 			// 対応するImported「基準社員の承認対象者」を取得する
 			ApprovalRootOfEmployeeImport approvalImport = approvalStatusAdapter
 					.getApprovalRootOfEmloyeeNew(checkPeriod.start(), checkPeriod.end(), employeeId, companyId, 1);
-
 			if (approvalImport == null)
 				continue;
-			for (ApprovalRootSituation approvalRoot : approvalImport.getApprovalRootSituations()) {
+			List<String> listEmp =  approvalImport.getApprovalRootSituations().stream().map(x -> x.getTargetID()).distinct().collect(Collectors.toList());
+			for (String approvalRoot : listEmp) {
 
 				// 集計期間
-				List<ClosurePeriod> lstClosurePeriod = getClosurePeriod.get(companyId, approvalRoot.getTargetID(),
+				List<ClosurePeriod> lstClosurePeriod = getClosurePeriod.get(companyId, approvalRoot,
 						checkPeriod.end(), Optional.of(target.getYearMonth()),
 						Optional.of(ClosureId.valueOf(target.getClosureId())), Optional.empty());
 
 				List<DatePeriod> lstPeriod = new ArrayList<>();
+
+				lstPeriod.addAll(
+						lstClosurePeriod.stream().flatMap(x -> x.getAggrPeriods().stream().map(y -> y.getPeriod()))
+								.filter(c -> c.start().month() == target.getYearMonth().month()
+										&& c.start().year() == target.getYearMonth().year())
+								.collect(Collectors.toList()));
 				
-				if(lstClosurePeriod.size() > 1){
-					List<DatePeriod> test = lstPeriod.stream().filter(c -> c.start().month() == target.getYearMonth().month() && c.start().year() == target.getYearMonth().year()).collect(Collectors.toList());
-					lstPeriod.addAll(test);
-				}else{
-					lstPeriod.addAll(lstClosurePeriod.stream()
-							.flatMap(x -> x.getAggrPeriods().stream().map(y -> y.getPeriod())).collect(Collectors.toList()));
-				}
 				if(lstPeriod.isEmpty()) {
 					continue;
 				}
 				// 社員の日の実績の承認状況を取得する
 				List<ApprovalStatusActualResult> lstApprovalResult = approvalStatusActualDay
-						.processApprovalStatusRequest(companyId, employeeId, approvalRoot.getTargetID(),
+						.processApprovalStatusRequest(companyId, employeeId, approvalRoot,
 								mergeDatePeriod(lstPeriod), target.getClosureId());
 
 				List<ApprovalStatusActualResult> lstResult = lstApprovalResult.stream()
@@ -108,10 +107,8 @@ public class CheckTrackRecordApprovalDay {
 	}
 
 	private DatePeriod mergeDatePeriod(List<DatePeriod> lstDate) {
-		lstDate = lstDate.stream().sorted((x, y) -> x.start().compareTo(y.start())).collect(Collectors.toList());
-		if(lstDate.size() == 1){
-			return new DatePeriod(lstDate.get(0).start(), lstDate.get(0).end());
-		}
-		return new DatePeriod(lstDate.get(0).start(), lstDate.get(lstDate.size() - 1).end());
+		List<GeneralDate> lstStartEnd = lstDate.stream().flatMap(x -> Arrays.asList(x.start(), x.end()).stream()).collect(Collectors.toList());
+		lstStartEnd = lstStartEnd.stream().sorted((x, y) -> x.compareTo(y)).collect(Collectors.toList());
+		return new DatePeriod(lstStartEnd.get(0), lstStartEnd.get(lstStartEnd.size() - 1));
 	}
 }
