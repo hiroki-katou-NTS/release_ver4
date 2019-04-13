@@ -80,7 +80,7 @@ public class CheckTrackRecordApprovalDay {
 				List<ClosurePeriod> lstClosurePeriod = getClosurePeriod
 						.get(companyId, approvalRoot, checkPeriod.end(), Optional.of(target.getYearMonth()),
 								Optional.of(ClosureId.valueOf(target.getClosureId())), Optional.empty())
-						.stream().filter(c -> c.getClosureId().equals(target.getClosureId()))
+						.stream().filter(c -> c.getClosureId().value == target.getClosureId() && c.getYearMonth().equals(target.getYearMonth()))
 						.collect(Collectors.toList());
 
 				if (lstClosurePeriod.isEmpty())
@@ -89,8 +89,6 @@ public class CheckTrackRecordApprovalDay {
 
 				lstPeriod.addAll(
 						lstClosurePeriod.stream().flatMap(x -> x.getAggrPeriods().stream().map(y -> y.getPeriod()))
-								.filter(c -> c.start().month() == target.getYearMonth().month()
-										&& c.start().year() == target.getYearMonth().year())
 								.collect(Collectors.toList()));
 				
 				if(lstPeriod.isEmpty()) {
@@ -102,7 +100,7 @@ public class CheckTrackRecordApprovalDay {
 								mergeDatePeriod(lstPeriod), target.getClosureId());
 
 				List<ApprovalStatusActualResult> lstResult = lstApprovalResult.stream()
-						.filter(x -> x.getPermissionCheck() == ReleasedAtr.CAN_IMPLEMENT).collect(Collectors.toList());
+						.filter(x -> x.isStatus() ? false : x.getPermissionCheck() == ReleasedAtr.CAN_IMPLEMENT).collect(Collectors.toList());
 				if (!lstResult.isEmpty())
 					return true;
 			}
