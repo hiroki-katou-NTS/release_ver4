@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.swing.text.TabableView;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
@@ -76,10 +77,14 @@ public class CheckTrackRecordApprovalDay {
 			for (String approvalRoot : listEmp) {
 
 				// 集計期間
-				List<ClosurePeriod> lstClosurePeriod = getClosurePeriod.get(companyId, approvalRoot,
-						checkPeriod.end(), Optional.of(target.getYearMonth()),
-						Optional.of(ClosureId.valueOf(target.getClosureId())), Optional.empty());
+				List<ClosurePeriod> lstClosurePeriod = getClosurePeriod
+						.get(companyId, approvalRoot, checkPeriod.end(), Optional.of(target.getYearMonth()),
+								Optional.of(ClosureId.valueOf(target.getClosureId())), Optional.empty())
+						.stream().filter(c -> c.getClosureId().equals(target.getClosureId()))
+						.collect(Collectors.toList());
 
+				if (lstClosurePeriod.isEmpty())
+					continue;
 				List<DatePeriod> lstPeriod = new ArrayList<>();
 
 				lstPeriod.addAll(
