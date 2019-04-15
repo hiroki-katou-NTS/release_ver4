@@ -497,7 +497,7 @@ public class ActualWorkingTimeOfDaily {
 				return 0;
 			}
 		}
-		else if(workTimeSetting.getWorkTimeDivision().getWorkTimeDailyAtr().isFlex() && workTimeSetting.getWorkTimeDivision().getWorkTimeMethodSet().isFluidWork()) {
+		else if(workTimeSetting.getWorkTimeDivision().getWorkTimeDailyAtr().isFlex()) {
 			if(integrationOfDailyInDto.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getActualTime().lessThanOrEqualTo(8*60)) {
 				int breakTime = breakTimeSheet.isPresent() ? 1 * 60 : 0 ;
 				AttendanceTime calcDivTime = breakOfDaily.getToRecordTotalTime().getWithinStatutoryTotalTime().getCalcTime().minusMinutes(breakTime);
@@ -508,7 +508,7 @@ public class ActualWorkingTimeOfDaily {
 
 	}
 	public static int processNumberNight(IntegrationOfDaily integrationOfDailyInDto,List<BreakTimeSheet> breakList,BreakTimeOfDaily breakOfDaily, TotalWorkingTime calcResultOotsuka, WorkTimeSetting workTimeSetting) {
-		if(true/*固定勤務*/) {
+		if(workTimeSetting.getWorkTimeDivision().getWorkTimeDailyAtr().isRegular() && workTimeSetting.getWorkTimeDivision().getWorkTimeMethodSet().isFixedWork()) {
 			//休憩枠No2取得
 			Optional<BreakTimeSheet> breakTimeSheet = breakList.stream().filter(tc -> tc.getBreakFrameNo().v() == 2).findFirst();
 			if(!breakTimeSheet.isPresent()) return 0;
@@ -533,7 +533,7 @@ public class ActualWorkingTimeOfDaily {
 			return 0;
 			}
 		}
-		else if(false/*フレックス勤務*/) {
+		else if(workTimeSetting.getWorkTimeDivision().getWorkTimeDailyAtr().isFlex()) {
 			//実働時間
 			AttendanceTime actualTime = calcResultOotsuka.getActualTime();
 			//フレックス時間
