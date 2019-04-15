@@ -499,7 +499,7 @@ public class ActualWorkingTimeOfDaily {
 		}
 		else if(workTimeSetting.getWorkTimeDivision().getWorkTimeDailyAtr().isFlex()) {
 			if(integrationOfDailyInDto.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getActualTime().lessThanOrEqualTo(8*60)) {
-				int breakTime = breakTimeSheet.isPresent() ? 1 * 60 : 0 ;
+				int breakTime = breakTimeSheet.isPresent() ? breakTimeSheet.get().getEndTime().valueAsMinutes() - breakTimeSheet.get().getStartTime().valueAsMinutes() : 0 ;
 				AttendanceTime calcDivTime = breakOfDaily.getToRecordTotalTime().getWithinStatutoryTotalTime().getCalcTime().minusMinutes(breakTime);
 				return calcDivTime.greaterThan(0) ? calcDivTime.valueAsMinutes() : 0 ;
 			}
