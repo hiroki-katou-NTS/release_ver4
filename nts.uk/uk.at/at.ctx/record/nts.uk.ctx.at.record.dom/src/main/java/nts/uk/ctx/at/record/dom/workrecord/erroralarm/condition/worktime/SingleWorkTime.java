@@ -85,6 +85,13 @@ public class SingleWorkTime extends WorkTimeCondition {
 	}
 	
 	@Override
+	public void addWorkTime(List<WorkTimeCode> plan, List<WorkTimeCode> actual) {
+		if(this.targetWorkTime != null && plan != null){
+			this.targetWorkTime.getLstWorkTime().addAll(plan);
+		}
+	}
+	
+	@Override
 	public void setupWorkTime(boolean usePlan, boolean useActual) { 
 		this.targetWorkTime = TargetWorkTime.createFromJavaType(usePlan, new ArrayList<>());
 	}

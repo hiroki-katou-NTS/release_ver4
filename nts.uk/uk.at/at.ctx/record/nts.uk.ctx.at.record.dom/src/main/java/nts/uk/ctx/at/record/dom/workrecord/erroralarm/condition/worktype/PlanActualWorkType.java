@@ -85,6 +85,15 @@ public class PlanActualWorkType extends WorkTypeCondition {
 			this.workTypeActual.getLstWorkType().add(actual);
 		}
 	}
+	
+	public void addWorkType(List<WorkTypeCode> plan, List<WorkTypeCode> actual){
+		if (this.workTypePlan != null && plan != null) {
+			this.workTypePlan.getLstWorkType().addAll(plan);
+		}
+		if (this.workTypeActual != null && actual != null) {
+			this.workTypeActual.getLstWorkType().addAll(actual);
+		}
+	}
 
 	@Override
 	public void setupWorkType(boolean usePlan, boolean useActual){

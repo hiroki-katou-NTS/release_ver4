@@ -3,6 +3,8 @@
  */
 package nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.worktime;
 
+import java.util.List;
+
 import lombok.Getter;
 import nts.arc.layer.dom.DomainObject;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
@@ -43,6 +45,8 @@ public class WorkTimeCondition extends DomainObject {
 	public void clearDuplicate() { }
 	
 	public void addWorkTime(WorkTimeCode plan, WorkTimeCode actual) { } 
+	
+	public void addWorkTime(List<WorkTimeCode> plan, List<WorkTimeCode> actual) { }
 	
 	public void setupWorkTime(boolean usePlan, boolean useActual) { }
 	
