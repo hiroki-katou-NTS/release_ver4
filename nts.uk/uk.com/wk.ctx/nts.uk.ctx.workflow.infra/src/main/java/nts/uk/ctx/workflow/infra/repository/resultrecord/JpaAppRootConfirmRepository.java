@@ -152,6 +152,15 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			" AND appRoot.ROOT_TYPE = rootType" +
 			" AND appRoot.EMPLOYEE_ID = 'employeeID'" +
 			" AND appRoot.YEARMONTH = yearMonth";
+	
+	private final String FIND_BY_EMP_LST_MONTH = BASIC_SELECT +
+			" WHERE appRoot.CID = 'companyID'" +
+			" AND appRoot.ROOT_TYPE = rootType" +
+			" AND appRoot.EMPLOYEE_ID IN 'employeeID'" +
+			" AND appRoot.YEARMONTH = yearMonth" +
+			" AND appRoot.CLOSURE_ID = closureID" +
+			" AND appRoot.CLOSURE_DAY = closureDay" +
+			" AND appRoot.LAST_DAY_FLG = lastDayFlg";
 
 	@Override
 	public Optional<AppRootConfirm> findByID(String rootID) {
@@ -527,5 +536,40 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public List<AppRootConfirm> findByEmpLstMonth(String companyID, List<String> employeeIDLst, YearMonth yearMonth,
+			Integer closureID, ClosureDate closureDate, RecordRootType rootType) {
+		List<AppRootConfirm> results = new ArrayList<AppRootConfirm>();
+		
+		CollectionUtil.split(employeeIDLst, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, employeeIDs -> {
+			
+			String query = FIND_BY_EMP_LST_MONTH;
+			query = query.replaceAll("companyID", companyID);
+			query = query.replaceAll("rootType", String.valueOf(rootType.value));
+			String empList = "(";
+			for (int i = 0; i < employeeIDs.size(); i++) {
+				empList += employeeIDs.get(0);
+				if(i < employeeIDs.size()){
+					empList += ",";
+				}
+			}
+			empList+=")";
+			query = query.replaceAll("employeeID", empList);
+			query = query.replaceAll("yearMonth", yearMonth.v().toString());
+			query = query.replaceAll("closureID", closureID.toString());
+			query = query.replaceAll("closureDay", closureDate.getClosureDay().v().toString());
+			query = query.replaceAll("lastDayFlg", closureDate.getLastDayOfMonth() ? "1" : "0");
+			
+			try (PreparedStatement statement = this.connection().prepareStatement(query)) {
+				results.addAll(toDomain(new NtsResultSet(statement.executeQuery()).getList(rs -> createFullJoinAppRootConfirm(rs))));
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		
+		return results;
 	}
 }

@@ -50,4 +50,7 @@ public interface AppRootConfirmRepository {
 	
 	public void clearStatusFromDate(String companyID, String employeeID, GeneralDate date, RecordRootType rootType);
 	
+	public List<AppRootConfirm> findByEmpLstMonth(String companyID, List<String> employeeIDLst, YearMonth yearMonth,
+			Integer closureID, ClosureDate closureDate, RecordRootType rootType);
+	
 }

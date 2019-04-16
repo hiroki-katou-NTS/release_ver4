@@ -11,7 +11,7 @@ import nts.uk.ctx.workflow.pub.resultrecord.export.AppEmpSttMonthExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootInsContentExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootSttMonthExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.Request533Export;
-import nts.uk.ctx.workflow.pub.resultrecord.export.Request133Export;
+import nts.uk.ctx.workflow.pub.resultrecord.export.Request113Export;
 import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -26,7 +26,7 @@ public interface IntermediateDataPub {
 	 * @param rootType ルート種類（日別確認／月別確認）
 	 * @return 承認ルートの状況
 	 */
-	public default Request133Export getAppRootStatusByEmpPeriod(String employeeID, DatePeriod period, Integer rootType) throws BusinessException {
+	public default Request113Export getAppRootStatusByEmpPeriod(String employeeID, DatePeriod period, Integer rootType) throws BusinessException {
 		return this.getAppRootStatusByEmpPeriod(Arrays.asList(employeeID), period, rootType);
 	}
 
@@ -39,7 +39,7 @@ public interface IntermediateDataPub {
 	 * @param rootType ルート種類（日別確認／月別確認）
 	 * @return 承認ルートの状況
 	 */
-	public Request133Export getAppRootStatusByEmpPeriod(List<String> employeeIDs, DatePeriod period, Integer rootType) throws BusinessException;
+	public Request113Export getAppRootStatusByEmpPeriod(List<String> employeeIDs, DatePeriod period, Integer rootType) throws BusinessException;
 	
 	/**
 	 * RequestList 155
@@ -224,7 +224,7 @@ public interface IntermediateDataPub {
 	 * @return
 	 */
 	public AppEmpSttMonthExport getApprovalEmpStatusMonth(String approverID, YearMonth yearMonth, Integer closureID,
-			ClosureDate closureDate, GeneralDate baseDate);
+			ClosureDate closureDate, GeneralDate baseDate, boolean useDayApproverConfirm, DatePeriod closurePeriod);
 	
 	/**
 	 * RequestList 535
