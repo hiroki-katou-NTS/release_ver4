@@ -29,9 +29,16 @@ public class AsposeCSVGenerator extends FileGenerator implements CSVReportGenera
 		
 		writer.destroy();
 	}
-	
+
+	@Override
 	@SneakyThrows
 	public CsvReportWriter generate(FileGeneratorContext generatorContext, String fileName, List<String> headers) {
 		return new CsvReportWriter(createNewFile(generatorContext, fileName), headers);
+	}
+
+	@Override
+	@SneakyThrows
+	public CsvReportWriter generate(FileGeneratorContext generatorContext, String fileName, List<String> headers, String encode) {
+		return new CsvReportWriter(createNewFile(generatorContext, fileName), headers, encode);
 	}
 }
