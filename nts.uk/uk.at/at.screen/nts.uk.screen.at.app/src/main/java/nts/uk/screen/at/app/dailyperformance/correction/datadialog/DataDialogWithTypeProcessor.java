@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import nts.arc.enums.EnumConstant;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.function.dom.dailyfix.IAppliCalDaiCorrecRepository;
+import nts.uk.ctx.at.record.dom.algorithm.masterinfo.CodeNameInfo;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.BusinessType;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.repository.BusinessTypesRepository;
 import nts.uk.ctx.at.request.app.find.application.applicationlist.AppWithDetailExportDto;
@@ -26,6 +27,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceCorrecti
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceScreenRepo;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.AffEmploymentHistoryDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.type.TypeLink;
+import nts.uk.screen.at.app.dailyperformance.correction.text.DPText;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
 
@@ -277,7 +279,7 @@ public class DataDialogWithTypeProcessor {
 			}
 		}));
 	}
-
+	
 	private Map<String, CodeName> toMap(List<CodeName> codeNames) {
 		return codeNames.stream().filter(distinctByKey(x -> x.getCode()))
 				.collect(Collectors.toMap(x -> x.getCode(), x -> x));
@@ -338,4 +340,56 @@ public class DataDialogWithTypeProcessor {
 			return dto.getAppType() + 999;
 		}
 	}
+	
+	public Map<Integer, Map<String, CodeNameInfo>> getAllDataMaster(String companyId, GeneralDate date,
+			List<Integer> lstDivNO) {
+		return DPText.ALL_ITEM_TYPE_MASTER.stream().collect(Collectors.toMap(type -> type, type -> {
+			switch (type) {
+			case 1:
+				// KDL002
+				return toMapMaster(this.getDutyTypeAll(companyId).getCodeNames());
+			case 2:
+				// KDL001
+				return toMapMaster(this.getWorkHoursAll(companyId).getCodeNames());
+			case 3:
+				// KDL010
+				return toMapMaster(this.getServicePlace(companyId).getCodeNames());
+			case 4:
+				// KDL032
+				CodeNameType codeNameReason = this.getReason(companyId);
+				List<CodeName> codeNames = codeNameReason.getCodeNames().stream()
+						.filter(x -> lstDivNO.contains(Integer.parseInt(x.getId()))).collect(Collectors.toList());
+				return toMapIDMaster(codeNames);
+			case 5:
+				// CDL008 WPL
+				return toMapIDMaster(this.getWorkPlace(companyId, date).getCodeNames());
+			case 6:
+				// KCP002
+				return toMapMaster(this.getClassification(companyId).getCodeNames());
+			case 7:
+				// KCP003 POS
+				return toMapIDMaster(this.getPossition(companyId, date).getCodeNames());
+			case 8:
+				// KCP001
+				return toMapMaster(this.getEmployment(companyId).getCodeNames());
+			case 14:
+				// CDL024
+				return toMapMaster(this.getBussinessType(companyId).getCodeNames());
+			default:
+				return new HashMap<>();
+			}
+		}));
+	}
+	
+
+	private Map<String, CodeNameInfo> toMapMaster(List<CodeName> codeNames) {
+		return codeNames.stream().filter(distinctByKey(x -> x.getCode()))
+				.collect(Collectors.toMap(x -> x.getCode(), x -> new CodeNameInfo(x.getCode(), x.getName(), x.getId())));
+	}
+
+	private Map<String, CodeNameInfo> toMapIDMaster(List<CodeName> codeNames) {
+		return codeNames.stream().filter(distinctByKey(x -> x.getId()))
+				.collect(Collectors.toMap(x -> x.getId(), x ->  new CodeNameInfo(x.getCode(), x.getName(), x.getId())));
+	}
+	
 }
