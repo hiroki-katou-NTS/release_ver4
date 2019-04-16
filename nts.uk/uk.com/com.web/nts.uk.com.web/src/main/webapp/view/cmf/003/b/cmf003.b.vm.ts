@@ -172,7 +172,7 @@ module nts.uk.com.view.cmf003.b {
                         $(".passwordInput").trigger("validate");
                     } else {
                         nts.uk.util.value.reset($("#B4_32"), $("#B4_32").val());
-                        nts.uk.util.value.reset($("#B4_41"), $("#B4_41").val());						
+                        nts.uk.util.value.reset($("#B4_41"), $("#B4_41").val());                        
                         self.passwordConstraint("");
                         $('.passwordInput').ntsError('clear');
                     }
@@ -375,8 +375,19 @@ module nts.uk.com.view.cmf003.b {
                     isShowWorkPlaceName: true,
                     isShowSelectAllButton: false,
                     maxWidth: 550,
-                    maxRows: 15
+                    maxRows: 15,
+                    disableSelection : true
                 };
+                
+                self.selectedTitleAtr.subscribe(value => {
+                    if (value == 0) {
+                        self.lstPersonComponentOption.disableSelection = true;
+                         $('#employeeSearch').ntsListComponent(self.lstPersonComponentOption);
+                    } else {
+                        self.lstPersonComponentOption.disableSelection = false;
+                         $('#employeeSearch').ntsListComponent(self.lstPersonComponentOption);
+                    }
+                });
 
             }//end constructor
 
