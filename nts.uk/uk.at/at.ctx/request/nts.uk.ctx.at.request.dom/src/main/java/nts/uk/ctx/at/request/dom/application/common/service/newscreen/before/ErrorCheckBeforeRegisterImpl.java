@@ -455,7 +455,7 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 	private boolean workTypeInconsistencyCheck(WorkType workType){
 		// INPUT.ドメインモデル「勤務種類.勤務の単位(WORK_ATR)」が１日であるかをチェックする
 		if(workType.getDailyWork().getWorkTypeUnit()==WorkTypeUnit.MonringAndAfternoon){
-			return true;
+			return false;
 		}
 		// INPUT.ドメインモデル「勤務種類.1日勤務分類(ONE_DAY_CLS)」をチェックする
 		WorkTypeClassification workTypeClassification = workType.getDailyWork().getOneDay();
