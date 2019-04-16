@@ -3,6 +3,7 @@ module nts.uk.at.view.cdl024.viewmodel {
         columns: KnockoutObservableArray<any>;
         items: KnockoutObservableArray<IItemModel> = ko.observableArray([]);
         currentCodeList: KnockoutObservableArray<string> = ko.observableArray([]);
+        selectMultiple: KnockoutObservable<boolean> = ko.observable(true);
 
         constructor() {
             let self = this;
@@ -31,6 +32,9 @@ module nts.uk.at.view.cdl024.viewmodel {
                 data = _.orderBy(data, ["code"], ['asc']);
                 items(data);
                 let parameter: InputParam = nts.uk.ui.windows.getShared("CDL024");
+                if(parameter != null && parameter.selectMultiple != null && parameter.selectMultiple != undefined){
+                    self.selectMultiple(parameter.selectMultiple);
+                }
                 if (parameter != null && parameter.codeList != null) {
                     self.currentCodeList(parameter.codeList);
                 }

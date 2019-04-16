@@ -4494,6 +4494,41 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     })
                     dfd8.promise();
                     break;
+                 
+                case 14:
+                    let dfd14 = $.Deferred();
+                    setShared('CDL024', {
+                        codeList: [self.selectedCode()],
+                        selectMultiple: false
+                    });
+
+                    modal('com', '/view/cdl/024/index.xhtml').onClosed(function(): any {
+                        // nts.uk.ui.block.clear();
+                        let output =  nts.uk.ui.windows.getShared("currentCodeList");
+                        if (!output) {
+                            __viewContext.vm.clickCounter.clickLinkGrid = false;
+                            return;
+                        }
+
+                        if (output != "") {
+                            let param14 = {
+                                typeDialog: 14,
+                            }
+                            service.findAllCodeName(param14).done((data: any) => {
+                                nts.uk.ui.block.clear();
+                                codeName = _.find(data, (item: any) => {
+                                    return item.code == output;
+                                });
+                                self.updateCodeName(self.rowId(), self.attendenceId, codeName.name, codeName.code, self.selectedCode());
+                                dfd14.resolve();
+                            });
+                        } else {
+                            self.updateCodeName(self.rowId(), self.attendenceId, getText("KDW003_82"), "", self.selectedCode());
+                            dfd14.resolve();
+                        }
+                    })
+                    dfd14.promise();
+                    break;  
             }
             nts.uk.ui.block.clear();
         }
