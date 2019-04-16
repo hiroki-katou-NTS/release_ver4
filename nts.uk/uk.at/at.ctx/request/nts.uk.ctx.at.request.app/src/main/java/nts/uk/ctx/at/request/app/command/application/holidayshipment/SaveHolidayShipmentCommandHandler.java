@@ -951,7 +951,7 @@ public class SaveHolidayShipmentCommandHandler
 					disPlayReason += System.lineSeparator();
 				}
 			} 
-			if (reasonTextSettingDisplay || !Strings.isNotBlank(typicalReason)) {
+			if (reasonTextSettingDisplay || Strings.isBlank(typicalReason)) {
 				disPlayReason += command.getAppCmd().getApplicationReason();
 			}
 		}

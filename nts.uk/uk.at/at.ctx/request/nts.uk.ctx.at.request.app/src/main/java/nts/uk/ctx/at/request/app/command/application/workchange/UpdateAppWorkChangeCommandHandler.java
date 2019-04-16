@@ -78,14 +78,19 @@ public class UpdateAppWorkChangeCommandHandler extends CommandHandlerWithResult<
 					ApplicationType.WORK_CHANGE_APPLICATION.value).get();
 			String typicalReason = Strings.EMPTY;
 			String displayReason = Strings.EMPTY;
-			if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)){
+			boolean isFixedDisplay = appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY);
+			boolean isTextDisplay = appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY);
+			if(isFixedDisplay){
 				typicalReason += appCommand.getAppReasonID();
 			}
-			if(appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
+			//màn B có cách lấy reason khác
+			if (isTextDisplay || isFixedDisplay) {
 				if(Strings.isNotBlank(typicalReason)){
 					displayReason += System.lineSeparator();
 				}
-				displayReason += appCommand.getApplicationReason();
+				if (isTextDisplay || Strings.isBlank(typicalReason)) {
+					displayReason += appCommand.getApplicationReason();
+				}
 			}
 			Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository
 					.getApplicationSettingByComID(companyId);
@@ -93,7 +98,7 @@ public class UpdateAppWorkChangeCommandHandler extends CommandHandlerWithResult<
 			if(appTypeDiscreteSetting.getTypicalReasonDisplayFlg().equals(AppDisplayAtr.DISPLAY)
 				||appTypeDiscreteSetting.getDisplayReasonFlg().equals(AppDisplayAtr.DISPLAY)){
 				if (applicationSetting.getRequireAppReasonFlg().equals(RequiredFlg.REQUIRED)
-						&& Strings.isBlank(typicalReason+displayReason)) {
+						&& Strings.isBlank(typicalReason + displayReason)) {
 					throw new BusinessException("Msg_115");
 				}
 				appReason = typicalReason + displayReason;
