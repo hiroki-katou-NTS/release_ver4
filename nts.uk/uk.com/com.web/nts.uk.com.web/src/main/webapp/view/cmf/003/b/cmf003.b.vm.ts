@@ -526,6 +526,9 @@ module nts.uk.com.view.cmf003.b {
                         dfd.resolve();
                     }
                 }
+				
+				self.lstPersonComponentOption.disableSelection = self.selectedTitleAtr();
+                $('#employeeSearch').ntsListComponent(self.lstPersonComponentOption);
                 
                 self.employeeList(employeeSearchs);
                 return dfd.promise();
