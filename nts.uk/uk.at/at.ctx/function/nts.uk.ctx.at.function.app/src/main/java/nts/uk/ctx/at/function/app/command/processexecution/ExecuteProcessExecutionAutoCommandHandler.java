@@ -114,6 +114,7 @@ import nts.uk.ctx.at.schedule.dom.executionlog.RebuildTargetDetailsAtr;
 import nts.uk.ctx.at.schedule.dom.executionlog.ResetAtr;
 import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleCreateContent;
 import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleErrorLog;
+import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleErrorLogRepository;
 import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleExecutionLog;
 import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleExecutionLogRepository;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicScheduleRepository;
@@ -226,6 +227,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 	@Inject
 	private AppRouteUpdateMonthlyService appRouteUpdateMonthlyService;
+	
+	@Inject
+	private ScheduleErrorLogRepository scheduleErrorLogRepository;
 	
 	public static int MAX_DELAY_PARALLEL = 0;
 
@@ -889,22 +893,64 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		}
 		
 		this.procExecLogRepo.update(procExecLog);
-		ExecutionLogImportFn param = new ExecutionLogImportFn();
-		List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
-		// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
-		param.setCompanyId(companyId);
-		// 管理社員ID ＝
-		param.setManagerId(listManagementId);
-		// 実行完了日時 ＝ システム日時
-		param.setFinishDateTime(GeneralDateTime.now());
-		// 実行内容 ＝ スケジュール作成
-		param.setExecutionContent(AlarmCategoryFn.CREATE_SCHEDULE);
-		// エラーの有無 ＝ エラーなし
-		param.setExistenceError(0);
-		// 実行ログエラー詳細 ＝ NULL
-		param.setTargerEmployee(listErrorAndEmpId);
-		// アルゴリズム「実行ログ登録」を実行する 2290 Done
-		executionLogAdapterFn.updateExecuteLog(param);
+		ScheduleErrorLogGeterCommand scheduleErrorLogGeterCommand = new ScheduleErrorLogGeterCommand();
+		scheduleErrorLogGeterCommand.setCompanyId(companyId);
+		scheduleErrorLogGeterCommand.setExecutionId(execId);
+		scheduleErrorLogGeterCommand.setToDate(GeneralDate.today());
+		// ドメインモデル「スケジュール作成エラーログ」を取得する
+		List<ScheduleErrorLog> listError = this.scheduleErrorLogRepository.findByExecutionId(execId);
+		if(!listError.isEmpty()) {
+			ExecutionLogImportFn param = new ExecutionLogImportFn();
+			List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
+
+			// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
+			param.setCompanyId(companyId);
+			// 管理社員ID ＝
+			param.setManagerId(listManagementId);
+			// 実行完了日時 ＝ システム日時
+			param.setFinishDateTime(GeneralDateTime.now());
+			// エラーの有無 ＝ エラーあり
+			param.setExistenceError(1);
+			// 実行内容 ＝ スケジュール作成
+			param.setExecutionContent(AlarmCategoryFn.CREATE_SCHEDULE);
+			// 実行ログエラー詳細 ＝ 取得したエラーメッセージ情報（社員ID, エラーメッセージ ）（List）
+
+			if (listError.isEmpty()) {
+				this.scheCreExeErrorLogHandler.addError(scheduleErrorLogGeterCommand, "System", "Msg_1339");
+				for (String managementId : listManagementId) {
+					listErrorAndEmpId
+							.add(new ExecutionLogErrorDetailFn(TextResource.localize("Msg_1339"), managementId));
+				}
+			} else {
+				for (ScheduleErrorLog scheduleErrorLog : listError) {
+					listErrorAndEmpId.add(new ExecutionLogErrorDetailFn(scheduleErrorLog.getErrorContent(),
+							scheduleErrorLog.getEmployeeId()));
+				}
+			}
+			param.setTargerEmployee(listErrorAndEmpId);
+			// アルゴリズム「実行ログ登録」を実行する 2290 Done
+			executionLogAdapterFn.updateExecuteLog(param);
+		}else {
+			ExecutionLogImportFn param = new ExecutionLogImportFn();
+			List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
+			// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
+			param.setCompanyId(companyId);
+			// 管理社員ID ＝
+			param.setManagerId(listManagementId);
+			// 実行完了日時 ＝ システム日時
+			param.setFinishDateTime(GeneralDateTime.now());
+			// 実行内容 ＝ スケジュール作成
+			param.setExecutionContent(AlarmCategoryFn.CREATE_SCHEDULE);
+			// エラーの有無 ＝ エラーなし
+			param.setExistenceError(0);
+			// 実行ログエラー詳細 ＝ NULL
+			param.setTargerEmployee(listErrorAndEmpId);
+			// アルゴリズム「実行ログ登録」を実行する 2290 Done
+			executionLogAdapterFn.updateExecuteLog(param);
+		}
+		if (isInterruption) {
+			return false;
+		}
 
 		if (isInterruption) {
 			return false;
