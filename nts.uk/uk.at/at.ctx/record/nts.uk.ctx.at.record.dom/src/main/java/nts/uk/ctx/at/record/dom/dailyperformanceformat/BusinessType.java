@@ -8,7 +8,7 @@ import nts.uk.ctx.at.record.dom.dailyperformanceformat.primitivevalue.BusinessTy
 /**
  * 
  * @author nampt
- *
+ * 勤務種別
  */
 @Getter
 public class BusinessType extends AggregateRoot {
