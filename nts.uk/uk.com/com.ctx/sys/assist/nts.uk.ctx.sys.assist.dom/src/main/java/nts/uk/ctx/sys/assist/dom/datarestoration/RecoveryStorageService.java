@@ -784,7 +784,7 @@ public class RecoveryStorageService {
 					}
 				};
 				
-				reader.readChunk(csvResult, null, null);
+				reader.readChunk(100,csvResult, null, null);
 				
 			}
 		} catch (Exception e) {
@@ -812,7 +812,6 @@ public class RecoveryStorageService {
 
 			Set<String> listSid = CsvFileUtil.getListSid(uploadId,
 					tableNotUseByCategory.getTables().get(j).getInternalFileName());
-
 			// -- Tổng hợp ID Nhân viên duy nhất từ List Data
 			hashId.addAll(listSid);
 
@@ -844,7 +843,6 @@ public class RecoveryStorageService {
 			Set<String> hasSidInCsv = CsvFileUtil.getListSid(uploadId, tableList.getTableEnglishName().toString());
 
 			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, tableList.getInternalFileName(), hasSidInCsv.isEmpty() ? false : true);
-			
 			
 			condition = exDataTabeRangeDate(dataRecoveryTable, Optional.of(tableList), dataRecoveryProcessId,
 					csvByteReadMaper_TableNotUse);
