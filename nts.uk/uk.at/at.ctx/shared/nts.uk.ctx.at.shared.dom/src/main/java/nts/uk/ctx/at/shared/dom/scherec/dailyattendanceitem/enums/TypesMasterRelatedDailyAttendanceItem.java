@@ -16,7 +16,8 @@ public enum TypesMasterRelatedDailyAttendanceItem {
 	REASON_GOING_OUT(11, "外出理由"),
 	AUTO_CALC_CTG_OUTSIDE(10, "時間外の自動計算区分"),
 	REMARKS(12, "備考"),
-	TIME_LIMIT_UPPER_SET(13, "時間外の上限設定");
+	TIME_LIMIT_UPPER_SET(13, "時間外の上限設定"),
+	BUSINESS_TYPE(14,"勤務種別");
 
 	public final int value;
 	public final String name;

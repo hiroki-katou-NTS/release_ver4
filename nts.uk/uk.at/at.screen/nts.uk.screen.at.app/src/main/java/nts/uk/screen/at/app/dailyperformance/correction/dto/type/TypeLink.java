@@ -26,7 +26,9 @@ public enum TypeLink {
 
 	REMARKS(12,"備考"),
 
-	TIME_LIMIT(13,"時間外の上限設定理由");
+	TIME_LIMIT(13,"時間外の上限設定理由"),
+	
+	BUSINESS_TYPE(14,"勤務種別");
 
 	/** The value. */
 	public int value;

@@ -18,6 +18,8 @@ import javax.inject.Inject;
 import nts.arc.enums.EnumConstant;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.function.dom.dailyfix.IAppliCalDaiCorrecRepository;
+import nts.uk.ctx.at.record.dom.dailyperformanceformat.BusinessType;
+import nts.uk.ctx.at.record.dom.dailyperformanceformat.repository.BusinessTypesRepository;
 import nts.uk.ctx.at.request.app.find.application.applicationlist.AppWithDetailExportDto;
 import nts.uk.ctx.at.request.app.find.application.applicationlist.ApplicationListForScreen;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceCorrectionProcessor;
@@ -38,6 +40,9 @@ public class DataDialogWithTypeProcessor {
 	
 	@Inject
 	private IAppliCalDaiCorrecRepository iAppliCalDaiCorrecRepository;
+	
+	@Inject
+	private BusinessTypesRepository businessTypesRepository;
 
 	// 勤務種類
 	public CodeNameType getDutyType(String companyId, String workTypeCode, String employmentCode) {
@@ -107,6 +112,13 @@ public class DataDialogWithTypeProcessor {
 		return CodeNameType.create(TypeLink.EMPLOYMENT.value, codeNames);
 	}
 
+	//勤務種別
+	public CodeNameType getBussinessType(String companyId) {
+		List<BusinessType> lstBussinessType = businessTypesRepository.findAll(companyId);
+		List<CodeName> codeNames = lstBussinessType.stream().map(x -> new CodeName(x.getBusinessTypeCode().v(), x.getBusinessTypeName().v(), "")).collect(Collectors.toList());
+		return CodeNameType.create(TypeLink.BUSINESS_TYPE.value, codeNames);
+	}
+	
 	public CodeName getTypeDialog(int type, ParamDialog param) {
 		String companyId = AppContexts.user().companyId();
 		Optional<CodeName> codeName;
@@ -177,6 +189,12 @@ public class DataDialogWithTypeProcessor {
 					.filter(x -> x.getCode().equals(param.getSelectCode())).findFirst();
 			return codeName.isPresent() ? codeName.get().createError(ErrorTypeWorkType.MASTER.code) :  new CodeName(param.getSelectCode(), TextResource.localize("KDW003_81"), "")
 					.createError(ErrorTypeWorkType.NO_GROUP.code);
+		case 14:
+			// KCP001
+			codeName = this.getBussinessType(companyId).getCodeNames().stream()
+					.filter(x -> x.getCode().equals(param.getSelectCode())).findFirst();
+			return codeName.isPresent() ? codeName.get().createError(ErrorTypeWorkType.MASTER.code) :  new CodeName(param.getSelectCode(), TextResource.localize("KDW003_81"), "")
+					.createError(ErrorTypeWorkType.NO_GROUP.code);
 		default:
 			return null;
 		}
@@ -215,6 +233,10 @@ public class DataDialogWithTypeProcessor {
 		case 8:
 			// KCP001
 			return this.getEmployment(companyId).getCodeNames();
+			
+		case 14:
+			// KCP001
+			return this.getBussinessType(companyId).getCodeNames();
 		default:
 			return null;
 		}
@@ -247,6 +269,9 @@ public class DataDialogWithTypeProcessor {
 			case 8:
 				// KCP001
 				return toMap(this.getEmployment(companyId).getCodeNames());
+			case 14:
+				// CDL024
+				return toMap(this.getBussinessType(companyId).getCodeNames());
 			default:
 				return new HashMap<>();
 			}
