@@ -3490,7 +3490,8 @@ module nts.uk.ui.mgrid {
             $grid.addXEventListener(ssk.KEY_DOWN, evt => {
                 let $grid = evt.currentTarget, $tCell = evt.target;
                 if (!$grid) return;
-                if (!ti.isEnterKey(evt) && !ti.isTabKey(evt) && evt.keyCode >= 46 && evt.keyCode <= 110) {
+                if (!ti.isEnterKey(evt) && !ti.isTabKey(evt) 
+                    && ((evt.keyCode >= 46 && evt.keyCode <= 111) || (evt.keyCode >= 160 && evt.keyCode <= 223))) {
                     ssk.KeyPressed[evt.keyCode] = true;
                 }
                 
@@ -3611,7 +3612,8 @@ module nts.uk.ui.mgrid {
             });
             
             document.addXEventListener(ssk.KEY_DOWN, evt => {
-                if (!ti.isEnterKey(evt) && !ti.isTabKey(evt) && evt.keyCode >= 46 && evt.keyCode <= 110) {
+                if (!ti.isEnterKey(evt) && !ti.isTabKey(evt) 
+                    && ((evt.keyCode >= 46 && evt.keyCode <= 111) || (evt.keyCode >= 160 && evt.keyCode <= 223))) {
                     ssk.KeyPressed[evt.keyCode] = true;
                 }
             });
@@ -5171,7 +5173,7 @@ module nts.uk.ui.mgrid {
                         let grid = ti.closest($editor, "." + MGRID);
                         su.endEdit(grid);
                     }
-                } else if (evt.keyCode >= 46 && evt.keyCode <= 110) {
+                } else if ((evt.keyCode >= 46 && evt.keyCode <= 111) || (evt.keyCode >= 160 && evt.keyCode <= 223)) {
                     ssk.KeyPressed[evt.keyCode] = true;
                 }
                 
