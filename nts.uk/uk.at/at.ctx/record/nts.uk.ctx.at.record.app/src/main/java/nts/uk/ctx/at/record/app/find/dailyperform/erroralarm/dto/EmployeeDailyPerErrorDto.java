@@ -23,6 +23,9 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.AttendanceItemCommon;
 @EqualsAndHashCode(callSuper = false)
 public class EmployeeDailyPerErrorDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	//TODO: item id not map
 	
 	/** 会社ID: 会社ID */

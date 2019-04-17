@@ -26,6 +26,9 @@ import nts.uk.ctx.at.shared.dom.holidaymanagement.publicholiday.configuration.Da
 @AttendanceItemRoot(rootName = ItemConst.DAILY_WORK_INFO_NAME)
 public class WorkInformationOfDailyDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	/** 勤務実績の勤務情報: 勤務情報 */
 	@AttendanceItemLayout(layout = LAYOUT_A, jpPropertyName = ACTUAL)
 	private WorkInfoDto actualWorkInfo;

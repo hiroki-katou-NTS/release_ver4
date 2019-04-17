@@ -26,6 +26,9 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.AttendanceItemCommon;
 @AttendanceItemRoot(rootName = ItemConst.DAILY_ATTENDANCE_TIME_BY_WORK_NAME)
 public class AttendanceTimeByWorkOfDailyDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	//TODO: not map item id
 	/** 社員ID: 社員ID */
 	private String employeeId;

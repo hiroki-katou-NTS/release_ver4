@@ -25,6 +25,9 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
 @AttendanceItemRoot(rootName = ItemConst.DAILY_ATTENDACE_LEAVE_NAME)
 public class TimeLeavingOfDailyPerformanceDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	private String employeeId;
 
 	@JsonDeserialize(using = CustomGeneralDateSerializer.class)

@@ -31,6 +31,9 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 /** 月別実績の任意項目 */
 @AttendanceItemRoot(rootName = ItemConst.MONTHLY_OPTIONAL_ITEM_NAME, itemType = AttendanceItemType.MONTHLY_ITEM)
 public class AnyItemOfMonthlyDto extends MonthlyItemCommon {
+
+	/***/
+	private static final long serialVersionUID = 1L;
 	
 	/** 社員ID: 社員ID */
 	private String employeeId;

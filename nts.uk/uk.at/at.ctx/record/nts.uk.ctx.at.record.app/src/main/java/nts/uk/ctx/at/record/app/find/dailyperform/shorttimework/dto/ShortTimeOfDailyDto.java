@@ -26,6 +26,9 @@ import nts.uk.shr.com.time.TimeWithDayAttr;
 @AttendanceItemRoot(rootName = ItemConst.DAILY_SHORT_TIME_NAME)
 public class ShortTimeOfDailyDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	/** 社員ID: 社員ID */
 	private String employeeId;
 
