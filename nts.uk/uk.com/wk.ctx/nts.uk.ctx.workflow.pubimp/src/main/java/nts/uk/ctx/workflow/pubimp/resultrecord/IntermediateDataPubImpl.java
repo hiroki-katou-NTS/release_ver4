@@ -505,7 +505,8 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		List<RouteSituation> agentRouteLst = new ArrayList<>();
 		if(!CollectionUtil.isEmpty(approvalPersonInstance.getAgentRoute())){
 			// 代行者としてのルート状況を取得する
-			agentRouteLst = appRootInstanceService.getAgentRouteSituation(period, approvalPersonInstance.getAgentRoute(), agentLst, RecordRootType.CONFIRM_WORK_BY_MONTH);
+			agentRouteLst = appRootInstanceService.getAgentRouteSituation(period, approvalPersonInstance.getAgentRoute(), agentLst, RecordRootType.CONFIRM_WORK_BY_MONTH,
+					useDayApproverConfirm, closurePeriod, yearMonth, closureID, closureDate);
 		}
 		// outputの整合
 		List<RouteSituation> mergeLst = appRootInstanceService.mergeRouteSituationLst(approverRouteLst, agentRouteLst);

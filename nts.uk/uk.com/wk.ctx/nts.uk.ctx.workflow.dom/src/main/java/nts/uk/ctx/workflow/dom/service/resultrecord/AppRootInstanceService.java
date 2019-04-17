@@ -152,7 +152,8 @@ public interface AppRootInstanceService {
 	 * @param agentLst
 	 * @return
 	 */
-	public List<RouteSituation> getAgentRouteSituation(DatePeriod period, List<ApprovalRouteDetails> agentRouteLst, List<String> agentLst, RecordRootType rootType);
+	public List<RouteSituation> getAgentRouteSituation(DatePeriod period, List<ApprovalRouteDetails> agentRouteLst, List<String> agentLst, RecordRootType rootType,
+			boolean useDayApproverConfirm, DatePeriod closurePeriod, YearMonth yearMonth, Integer closureID, ClosureDate closureDate);
 	
 	/**
 	 * outputの整合
