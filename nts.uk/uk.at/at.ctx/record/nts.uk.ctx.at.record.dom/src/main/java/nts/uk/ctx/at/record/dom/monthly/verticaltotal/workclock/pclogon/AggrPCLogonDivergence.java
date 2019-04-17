@@ -8,7 +8,7 @@ import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonth;
 
 /**
  * 集計PCログオン乖離
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class AggrPCLogonDivergence {
@@ -62,7 +62,8 @@ public class AggrPCLogonDivergence {
 		if (isLogon){
 			
 			// 合計時間を集計
-			this.totalTime = this.totalTime.addMinutes(stayingTime.getBeforePCLogOnTime().v());
+			int logonMinutes = stayingTime.getBeforePCLogOnTime().v();
+			if (logonMinutes > 0) this.totalTime = this.totalTime.addMinutes(logonMinutes);
 			
 			// 日数を集計する
 			if (stayingTime.getBeforePCLogOnTime().v() > 0) this.days = this.days.addDays(1.0);
@@ -70,7 +71,8 @@ public class AggrPCLogonDivergence {
 		else {
 			
 			// 合計時間を集計
-			this.totalTime = this.totalTime.addMinutes(stayingTime.getAfterPCLogOffTime().v());
+			int logoffMinutes = stayingTime.getAfterPCLogOffTime().v();
+			if (logoffMinutes > 0) this.totalTime = this.totalTime.addMinutes(logoffMinutes);
 			
 			// 日数を集計する
 			if (stayingTime.getAfterPCLogOffTime().v() > 0) this.days = this.days.addDays(1.0);

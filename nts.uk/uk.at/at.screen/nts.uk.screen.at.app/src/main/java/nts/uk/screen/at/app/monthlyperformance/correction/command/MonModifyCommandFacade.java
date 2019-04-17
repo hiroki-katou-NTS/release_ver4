@@ -130,8 +130,10 @@ public class MonModifyCommandFacade {
 		approval(dataParent, ym);
 		
 		dataParent.getDataLock().stream().forEach(lock -> {
-			monthRecordTransaction.updated(lock.getEmployeeId(), ym, dataParent.getClosureId(), 
-					dataParent.getClosureDate().getClosureDay(), dataParent.getClosureDate().getLastDayOfMonth(), lock.getVersion());
+			if(!listQuery.stream().filter(c -> lock.getEmployeeId().equals(c.getEmployeeId())).findFirst().isPresent()) {
+				monthRecordTransaction.updated(lock.getEmployeeId(), ym, dataParent.getClosureId(), 
+						dataParent.getClosureDate().getClosureDay(), dataParent.getClosureDate().getLastDayOfMonth(), lock.getVersion());
+			}
 		});
 		
 		// add correction log

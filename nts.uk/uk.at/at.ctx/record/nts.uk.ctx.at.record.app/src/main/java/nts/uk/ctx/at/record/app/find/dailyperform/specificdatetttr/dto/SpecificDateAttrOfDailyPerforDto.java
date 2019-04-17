@@ -24,6 +24,9 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.AttendanceItemCommon;
 @AttendanceItemRoot(rootName = ItemConst.DAILY_SPECIFIC_DATE_ATTR_NAME)
 public class SpecificDateAttrOfDailyPerforDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	private String employeeId;
 
 	@JsonDeserialize(using = CustomGeneralDateSerializer.class)

@@ -26,6 +26,9 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 @EqualsAndHashCode(callSuper = false)
 @AttendanceItemRoot(rootName = ItemConst.MONTHLY_REMARKS_NAME, itemType = AttendanceItemType.MONTHLY_ITEM)
 public class MonthlyRemarksDto extends MonthlyItemCommon {
+
+	/***/
+	private static final long serialVersionUID = 1L;
 	
 	/** 社員ID: 社員ID */
 	private String employeeId;

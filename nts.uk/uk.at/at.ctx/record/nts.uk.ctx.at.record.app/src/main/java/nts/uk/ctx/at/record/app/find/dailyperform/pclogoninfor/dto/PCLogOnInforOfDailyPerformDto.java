@@ -24,6 +24,9 @@ import nts.uk.shr.com.time.TimeWithDayAttr;
 @AttendanceItemRoot(rootName = ItemConst.DAILY_PC_LOG_INFO_NAME)
 public class PCLogOnInforOfDailyPerformDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	private String employeeId;
 
 	@JsonDeserialize(using = CustomGeneralDateSerializer.class)
