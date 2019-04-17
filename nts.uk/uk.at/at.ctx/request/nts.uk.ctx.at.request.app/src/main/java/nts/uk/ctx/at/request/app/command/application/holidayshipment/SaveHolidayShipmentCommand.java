@@ -33,4 +33,6 @@ public class SaveHolidayShipmentCommand {
 	private boolean checkOver1Year;
 	
 	private Boolean isNotSelectYes;
+	
+	private Boolean isScreenB;
 }
