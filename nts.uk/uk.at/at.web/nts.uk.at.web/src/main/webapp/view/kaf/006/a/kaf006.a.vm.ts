@@ -787,7 +787,9 @@ module nts.uk.at.view.kaf006.a.viewmodel {
                 endTime2: self.timeEnd2(),
                 displayEndDateFlg: self.displayEndDateFlg(),
                 specHd: specHd,
-                checkOver1Year: true
+                checkOver1Year: true,
+                checkContradiction: false
+                
                 
             };
             service.createAbsence(paramInsert).done((data) => {
@@ -807,8 +809,22 @@ module nts.uk.at.view.kaf006.a.viewmodel {
                         });
                     
                 }else{
-                    dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
-                        .then(function() { nts.uk.ui.block.clear(); });
+                    if (res.messageId == "Msg_1520" || res.messageId == "Msg_1522") {
+                        dialog.confirm({ messageId: res.messageId, messageParams: res.parameterIds }).ifYes(() => {
+                            paramInsert.checkContradiction = true;
+                            service.createAbsence(paramInsert).done((data) => {
+                                self.sendMail(data);
+                            }).fail((res) => {
+                                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                                    .then(function() { nts.uk.ui.block.clear(); });
+                            });
+                        }).ifNo(() => {
+                            nts.uk.ui.block.clear();
+                        });
+                    } else {
+                        dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                            .then(function() { nts.uk.ui.block.clear(); });
+                    }
                 }
             });    
         }
