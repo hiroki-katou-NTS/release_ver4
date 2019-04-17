@@ -687,7 +687,8 @@ module nts.uk.at.view.kaf005.a.viewmodel {
                 calculateFlag: self.calculateFlag(),
                 appReasonID: comboBoxReason,
                 divergenceReasonArea: areaDivergenceReason,
-                checkOver1Year: true
+                checkOver1Year: true,
+                checkAppDate:false
             };
             //登録前エラーチェック
             service.checkBeforeRegister(overtime).done((data) => {
@@ -699,7 +700,7 @@ module nts.uk.at.view.kaf005.a.viewmodel {
                         overtime.checkOver1Year = false;
                         service.checkBeforeRegister(overtime).done((data) => {
                             overtime.checkOver1Year = false;
-                            self.checkBfRegDone(data, overtime)
+                            self.checkBfRegDone(data, overtime);
                         }).fail((res) => {
                             dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
                                 .then(function() { nts.uk.ui.block.clear(); });
@@ -709,8 +710,22 @@ module nts.uk.at.view.kaf005.a.viewmodel {
                     });
 
                 } else {
-                    dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
-                        .then(function() { nts.uk.ui.block.clear(); });
+                    if (res.messageId == "Msg_1520" || res.messageId == "Msg_1522") {
+                        dialog.confirm({ messageId: res.messageId, messageParams: res.parameterIds }).ifYes(() => {
+                            overtime.checkAppDate = true;
+                            service.checkBeforeRegister(overtime).done((data) => {
+                                 self.checkBfRegDone(data, overtime);
+                            }).fail((res) => {
+                                dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                                    .then(function() { nts.uk.ui.block.clear(); });
+                            });
+                        }).ifNo(() => {
+                            nts.uk.ui.block.clear();
+                        });
+                    } else {
+                        dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                            .then(function() { nts.uk.ui.block.clear(); });
+                    }
                 }
             });
         }
