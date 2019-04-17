@@ -73,6 +73,12 @@ public class SingleWorkType extends WorkTypeCondition {
 			this.targetWorkType.getLstWorkType().add(plan);
 		}
 	}
+	
+	public void addWorkType(List<WorkTypeCode> plan, List<WorkTypeCode> actual){
+		if (this.targetWorkType != null && plan != null) {
+			this.targetWorkType.getLstWorkType().addAll(plan);
+		}
+	}
 
 	@Override
 	public void setupWorkType(boolean usePlan, boolean useActual){

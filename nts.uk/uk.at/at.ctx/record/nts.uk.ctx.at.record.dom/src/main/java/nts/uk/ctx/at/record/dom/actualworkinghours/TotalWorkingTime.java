@@ -505,7 +505,15 @@ public class TotalWorkingTime {
 				   			+ tempTime.totalTemporaryFrameTime()
 				   			+ flexTime
 				   			/*変形基準内残業の時間もここにタス*/);
-		
+		//実働時間の計算
+		boolean isOOtsukaIWMode = decisionIWOOtsukaMode(workType,workTimeCode,recordClass);
+		//大塚専用IW専用処理
+		if(isOOtsukaIWMode) {
+			if(recordClass.getPredSetForOOtsuka().isPresent()) {
+				withinStatutoryTimeOfDaily.setActualWorkTime(recordClass.getPredSetForOOtsuka().get().getAdditionSet().getPredTime().getOneDay());
+			}
+			 
+		}
 		TotalWorkingTime returnTotalWorkingTimereturn = new TotalWorkingTime(totalWorkTime,
 																				totalCalcTime,
 																				actualTime,
@@ -1249,6 +1257,47 @@ public class TotalWorkingTime {
 				break;
 		}
 		return this;
+	}
+	
+	//大塚専用IW判定処理
+	private static boolean decisionIWOOtsukaMode(WorkType workType, Optional<WorkTimeCode> workTimeCode,
+			ManageReGetClass recordReget) {
+		if(!workTimeCode.isPresent()) return false;
+		if(!(workTimeCode.get().v().equals("100") || workTimeCode.get().v().equals("101")))
+			return false;
+		if(workType.getWorkTypeCode().v().equals("100")) 
+			return false;
+		
+		switch(workType.getDailyWork().decisionNeedPredTime()) {
+		case AFTERNOON:
+			if(workType.getDailyWork().getAfternoon().isHolidayWork()) {
+				return false;
+			}
+			//出勤or振出であろうという推測
+			else {
+				return true;
+			}
+		case FULL_TIME:
+			if(workType.getDailyWork().getOneDay().isHolidayWork()) {
+				return false;
+			}
+			//出勤or振出であろうという推測
+			else {
+				return true;
+			}
+		case MORNING:
+			if(workType.getDailyWork().getMorning().isHolidayWork()) {
+				return false;
+			}
+			//出勤or振出であろうという推測
+			else {
+				return true;
+			}
+		case HOLIDAY:
+			return false;
+		default:
+			throw new RuntimeException("unkwon pred need workType in IW Decision");
+		}
 	}
 	
 }

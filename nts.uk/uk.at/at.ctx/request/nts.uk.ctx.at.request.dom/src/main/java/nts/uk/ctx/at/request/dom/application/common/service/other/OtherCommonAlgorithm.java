@@ -16,6 +16,7 @@ import nts.uk.ctx.at.request.dom.application.common.service.other.output.AppComp
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.MailResult;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.PeriodCurrentMonth;
 import nts.uk.ctx.at.request.dom.setting.request.gobackdirectlycommon.primitive.InitValueAtr;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 public interface OtherCommonAlgorithm {
@@ -113,4 +114,13 @@ public interface OtherCommonAlgorithm {
 	 * @return
 	 */
 	public List<GeneralDate> lstDateNotHoliday(String cid, String sid, DatePeriod dates);
+	
+	/**
+	 * 11.指定日の勤務実績（予定）の勤務種類を取得
+	 * @param companyID
+	 * @param employeeID
+	 * @param appDate
+	 * @return
+	 */
+	public WorkType getWorkTypeScheduleSpec(String companyID, String employeeID, GeneralDate appDate);
 }

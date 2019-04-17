@@ -67,10 +67,10 @@ module nts.uk.at.view.kaf018.e.viewmodel {
                 let obj = {
                     startDate: self.startDate,
                     endDate: self.endDate,
-                    isConfirmData: self.isConfirmData,
                     listWorkplaceId: listWorkplaceId,
                     listEmpCd: self.listEmpCd,
-                    closureID: params.closureID
+                    closureID: params.closureID,
+                    confirmData: self.isConfirmData
                 };
 
                 service.getUseSetting().done(function(setting) {

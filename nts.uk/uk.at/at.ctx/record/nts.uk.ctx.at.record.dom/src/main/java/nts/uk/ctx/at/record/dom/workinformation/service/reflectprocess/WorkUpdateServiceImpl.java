@@ -35,6 +35,7 @@ import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerform;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerformRepo;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.BreakTimeParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.OverTimeRecordAtr;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.HolidayWorkTimeSheet;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTime;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
@@ -42,7 +43,6 @@ import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.workinformation.ScheduleTimeSheet;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
-//import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
@@ -53,11 +53,19 @@ import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanc
 import nts.uk.ctx.at.shared.dom.WorkInformation;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
-import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.holidaywork.HolidayWorkFrameNo;
+import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensLeaveComSetRepository;
+import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryLeaveComSetting;
+import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryOccurrenceDivision;
+import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryOccurrenceSetting;
+import nts.uk.ctx.at.shared.dom.worktime.algorithm.getcommonset.GetCommonSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneCommonSet;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneOtherSubHolTimeSet;
 import nts.uk.ctx.at.shared.dom.worktime.predset.TimezoneUse;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingService;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.internal.PredetermineTimeSetForCalc;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
@@ -75,6 +83,12 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 	private WorkTimeSettingService workTimeSetting;
 	@Inject
 	private BreakTimeOfDailyPerformanceRepository breakTimeOfDailyRepo;
+	@Inject
+	private CompensLeaveComSetRepository comSetRepo;
+	@Inject
+	private WorkTypeRepository worktypeRepo;
+	@Inject
+	private GetCommonSet workTimeCommonSet;
 	@Override
 	public WorkInfoOfDailyPerformance updateWorkTimeType(ReflectParameter para, boolean scheUpdate, WorkInfoOfDailyPerformance dailyInfo) {
 		WorkInformation workInfor = new WorkInformation(para.getWorkTimeCode(), para.getWorkTypeCode());
@@ -442,85 +456,71 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 		}
 		HolidayWorkTimeOfDaily workHolidayTime = optWorkHolidayTime.get();
 		List<HolidayWorkFrameTime> lstHolidayWorkFrameTime = workHolidayTime.getHolidayWorkFrameTime();
-		List<HolidayWorkFrameTime> lstHolidayWorkFrameTimeTmp = new ArrayList<>();		
 		List<Integer> lstWorktimeFrameTemp = new ArrayList<>();
-		if(isPre) {			
-			lstHolidayWorkFrameTime.stream().forEach(x -> {
-				if(worktimeFrame.containsKey(x.getHolidayFrameNo().v())) {
-					AttendanceTime worktimeTmp = new AttendanceTime(worktimeFrame.get(x.getHolidayFrameNo().v()));
-					x.setBeforeApplicationTime(Finally.of(worktimeTmp));
-				}
-			});	
-			lstWorktimeFrameTemp = this.lstPreWorktimeFrameItem();
-			for(int i = 1; i <= 10; i++) {
-				if(!worktimeFrame.containsKey(i)) {
-					
-					Integer item = this.lstPreWorktimeFrameItem().get(i - 1); 
-					lstWorktimeFrameTemp.remove(item);
-				} else {
-					if(lstHolidayWorkFrameTime.isEmpty()) {
-						AttendanceTime worktimeTmp = new AttendanceTime(worktimeFrame.get(i));
-						TimeDivergenceWithCalculation timeCalculation = TimeDivergenceWithCalculation.createTimeWithCalculation(new AttendanceTime(0), new AttendanceTime(0));
-						HolidayWorkFrameTime tmpHolidayWorkFrameTime = new HolidayWorkFrameTime(new HolidayWorkFrameNo(i),
-								Finally.of(timeCalculation),
-								Finally.of(timeCalculation),
-								Finally.of(worktimeTmp));
-						lstHolidayWorkFrameTimeTmp.add(tmpHolidayWorkFrameTime);
-					}
-				}
-			}	
+		String companyId = AppContexts.user().companyId();
+		CompensatoryLeaveComSetting comSetting = comSetRepo.find(companyId);
+		List<CompensatoryOccurrenceSetting> eachCompanyTimeSet = comSetting.getCompensatoryOccurrenceSetting().stream()
+				.filter(x -> x.getOccurrenceType() == CompensatoryOccurrenceDivision.WorkDayOffTime).collect(Collectors.toList());
+		Optional<CompensatoryOccurrenceSetting> optOccurenceSetting = eachCompanyTimeSet.isEmpty() ? Optional.empty() : Optional.of(eachCompanyTimeSet.get(0));
+		String workTimeCode = "";
+		if(isPre) {
+			workTimeCode = dailyData.getWorkInformation().getScheduleInfo().getWorkTimeCode().v();
 		} else {
-			lstHolidayWorkFrameTime.stream().forEach(x -> {
-				if(worktimeFrame.containsKey(x.getHolidayFrameNo().v())) {
-					Finally<TimeDivergenceWithCalculation> holidayWorkTime = x.getHolidayWorkTime();
+			workTimeCode = dailyData.getWorkInformation().getRecordInfo().getWorkTimeCode().v();
+		}
+		Optional<WorkType> workTypeInfor = worktypeRepo.findByPK(companyId, dailyData.getWorkInformation().getRecordInfo().getWorkTypeCode().v());
+		if(!workTypeInfor.isPresent()) {
+			return dailyData;
+		}
+		List<WorkTimezoneOtherSubHolTimeSet> lstWorkTime = this.subhol(companyId, workTimeCode).stream()
+				.filter(x -> x.getOriginAtr() == nts.uk.ctx.at.shared.dom.worktime.common.CompensatoryOccurrenceDivision.WorkDayOffTime)
+				.collect(Collectors.toList());
+		Optional<WorkTimezoneOtherSubHolTimeSet> subHolSet = lstWorkTime.isEmpty() ? Optional.empty() : Optional.of(lstWorkTime.get(0));
+		if(isPre) {
+			lstHolidayWorkFrameTime.stream().forEach(a -> {
+				if(worktimeFrame.containsKey(a.getHolidayFrameNo().v())) {
+					AttendanceTime worktimeTmp = new AttendanceTime(worktimeFrame.get(a.getHolidayFrameNo().v()));
+					a.setBeforeApplicationTime(Finally.of(worktimeTmp));
+				}
+			});			
+		} else {
+			lstHolidayWorkFrameTime.stream().forEach(a -> {
+				if(worktimeFrame.containsKey(a.getHolidayFrameNo().v())) {
+					Finally<TimeDivergenceWithCalculation> holidayWorkTime = a.getHolidayWorkTime();
 					if(holidayWorkTime.isPresent()) {
 						TimeDivergenceWithCalculation holidayWorkTimeData = holidayWorkTime.get();
-						holidayWorkTimeData.setTime(new AttendanceTime(worktimeFrame.get(x.getHolidayFrameNo().v())));
+						holidayWorkTimeData.setTime(new AttendanceTime(worktimeFrame.get(a.getHolidayFrameNo().v())));
 					}
 				}
 			});
-			lstWorktimeFrameTemp = this.lstAfterWorktimeFrameItem();
-			for(int i = 1; i <= 10; i++) {
-				if(!worktimeFrame.containsKey(i)) {					
-					Integer item = this.lstAfterWorktimeFrameItem().get(i - 1); 
-					lstWorktimeFrameTemp.remove(item);
-				} else {
-					AttendanceTime worktimeTmp = new AttendanceTime(worktimeFrame.get(i));	
-					HolidayWorkFrameTime tmpHolidayWorkFrameTime = new HolidayWorkFrameTime(new HolidayWorkFrameNo(i),
-							Finally.of(TimeDivergenceWithCalculation.createTimeWithCalculation(worktimeTmp, new AttendanceTime(0))),
-							Finally.of(TimeDivergenceWithCalculation.createTimeWithCalculation(new AttendanceTime(0), new AttendanceTime(0))),
-							Finally.of(new AttendanceTime(0)));
-					if(lstHolidayWorkFrameTime.isEmpty()) {
-						lstHolidayWorkFrameTimeTmp.add(tmpHolidayWorkFrameTime);
-					} else {
-						for (HolidayWorkFrameTime x : lstHolidayWorkFrameTime) {
-							if(x.getHolidayFrameNo().v() == i) {
-								Finally<TimeDivergenceWithCalculation> hwTime = x.getHolidayWorkTime();
-								if(hwTime.isPresent()) {
-									hwTime.get().setTime(worktimeTmp);
-								} else {
-									x.setHolidayWorkTime(Finally.of(TimeDivergenceWithCalculation.createTimeWithCalculation(worktimeTmp, new AttendanceTime(0))));
-								}
-								break;
-							}
-						}
-					}
-				}
-			}	
 		}
-		if(!lstHolidayWorkFrameTimeTmp.isEmpty()) {
-			attendanceTimeData
+		List<HolidayWorkFrameTime> result = HolidayWorkTimeSheet.transProcess(workTypeInfor.get(), lstHolidayWorkFrameTime, 
+				subHolSet, optOccurenceSetting);
+		attendanceTimeData
 			.getActualWorkingTimeOfDaily().getTotalWorkingTime()
-			.getExcessOfStatutoryTimeOfDaily().getWorkHolidayTime().get().setHolidayWorkFrameTime(lstHolidayWorkFrameTimeTmp);
-			
-		}
+			.getExcessOfStatutoryTimeOfDaily().getWorkHolidayTime().get().setHolidayWorkFrameTime(result);
 		dailyData.setAttendanceTimeOfDailyPerformance(Optional.of(attendanceTimeData));
 		//↓ fix bug 103077
 		if(!isRec) {
-			this.updateEditStateOfDailyPerformance(employeeId, dateData, lstWorktimeFrameTemp);	
+			if(isPre) {
+				lstWorktimeFrameTemp.addAll(this.lstPreWorktimeFrameItem());
+			} else {
+				lstWorktimeFrameTemp.addAll(this.lstAfterWorktimeFrameItem());
+				lstWorktimeFrameTemp.addAll(this.lstTranfertimeFrameItem());
+			}
+			this.updateEditStateOfDailyPerformance(employeeId, dateData, lstWorktimeFrameTemp);
 		}
 		//↑ fix bug 103077
 		return dailyData;
+	}
+	private List<WorkTimezoneOtherSubHolTimeSet> subhol(String companyId, String workTimeCode){
+		Optional<WorkTimezoneCommonSet> optWorktimezone = workTimeCommonSet.get(companyId, workTimeCode);
+		if(!optWorktimezone.isPresent()) {
+			return new ArrayList<>();
+		}
+		WorkTimezoneCommonSet commonSet = optWorktimezone.get();
+		List<WorkTimezoneOtherSubHolTimeSet> subHolTimeSet = commonSet.getSubHolTimeSet();
+		return subHolTimeSet;
 	}
 	/**
 	 * 事前休日出勤時間の項目ID
@@ -970,30 +970,27 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 
 	@Override
 	public void reflectReason(String sid, GeneralDate appDate, String appReason, OverTimeRecordAtr overTimeAtr) {
-		//申請理由の文字の長さをチェックする
-		if(appReason.length() > 50) {
-			appReason = appReason.substring(0, 50);
-		}
 		//備考の編集状態を更新する
 		List<Integer> lstItem = new ArrayList<>();
-		
 		int columnNo = 4;
 		//残業区分をチェックする
-		if(overTimeAtr == OverTimeRecordAtr.PREOVERTIME) {
-			columnNo = 3;
-			lstItem.add(835);
-		} else {
-			lstItem.add(836);	
-		}
-		
+		lstItem.add(836);	
 		//日別実績の備考を存在チェックする
 		Optional<RemarksOfDailyPerform> optRemark = remarksOfDailyRepo.getByKeys(sid, appDate, columnNo);		
 		if(optRemark.isPresent()) {
 			RemarksOfDailyPerform remarkData = optRemark.get();
-			remarkData.setRemarks(new RecordRemarks(appReason));
+			String remarkStr = remarkData.getRemarks().v() + "　" + appReason;
+			//申請理由の文字の長さをチェックする
+			if(remarkStr.length() > 50) {
+				remarkStr = remarkStr.substring(0, 50);
+			}
+			remarkData.setRemarks(new RecordRemarks(remarkStr));
 			//日別実績の備考を変更する
 			remarksOfDailyRepo.update(remarkData);
 		} else {
+			if(appReason.length() > 50) {
+				appReason = appReason.substring(0, 50);
+			}
 			RemarksOfDailyPerform remarkInfo = new RemarksOfDailyPerform(sid,
 					appDate, 
 					new RecordRemarks(appReason), 
@@ -1076,12 +1073,10 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 	@Override
 	public void updateBreakTime(Map<Integer, BreakTimeParam> mapBreakTimeFrame, boolean recordReflectBreakFlg,
 			boolean isPre, IntegrationOfDaily daily) {
-		if((!isPre && !recordReflectBreakFlg)
-			|| mapBreakTimeFrame.isEmpty()) {
+		if((!isPre && !recordReflectBreakFlg)) {
 			return;
 		}
 		List<BreakTimeOfDailyPerformance> breakTime = daily.getBreakTime();
-		
 		if(breakTime.isEmpty()) {
 			List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
 			mapBreakTimeFrame.forEach((a,b) ->{
@@ -1090,99 +1085,97 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 						new TimeWithDayAttr(b.getEndTime()));
 				lstBreakTime.add(timeSheet);
 			});
-			
-			
-			if(!isPre) {
-				BreakTimeOfDailyPerformance breakTimeOfDaily = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
-						BreakType.REFER_WORK_TIME, 
-						lstBreakTime, 
-						daily.getWorkInformation().getYmd());
-				daily.getBreakTime().add(breakTimeOfDaily);
-				breakTimeOfDailyRepo.insert(breakTimeOfDaily);	
-			} else {
-				BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
-						BreakType.REFER_SCHEDULE, 
-						lstBreakTime, 
-						daily.getWorkInformation().getYmd());
-				daily.getBreakTime().add(breakTimeOfDailySche);
-				breakTimeOfDailyRepo.insert(breakTimeOfDailySche);	
-			}
-		} else {
-			if(isPre) {
-				breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE).collect(Collectors.toList());
-			} else {
-				breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_WORK_TIME).collect(Collectors.toList());
-			}
-			//休日が予定か実績は反映しました。
-			if(breakTime.isEmpty()) {
-				List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
-				mapBreakTimeFrame.forEach((a,b) ->{
-					BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a),
-							new TimeWithDayAttr(b.getStartTime()), 
-							new TimeWithDayAttr(b.getEndTime()));
-					lstBreakTime.add(timeSheet);
-				});
-				
-				if(isPre) {
-					BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
-							BreakType.REFER_SCHEDULE, 
-							lstBreakTime, 
-							daily.getWorkInformation().getYmd());
-					daily.getBreakTime().add(breakTimeOfDailySche);
-					breakTimeOfDailyRepo.update(breakTimeOfDailySche);	
-				} else {
+			if(!lstBreakTime.isEmpty()) {
+				if(!isPre) {
 					BreakTimeOfDailyPerformance breakTimeOfDaily = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
 							BreakType.REFER_WORK_TIME, 
 							lstBreakTime, 
 							daily.getWorkInformation().getYmd());
 					daily.getBreakTime().add(breakTimeOfDaily);
-					breakTimeOfDailyRepo.update(breakTimeOfDaily);	
+					breakTimeOfDailyRepo.insert(breakTimeOfDaily);	
+				} else {
+					BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
+							BreakType.REFER_SCHEDULE, 
+							lstBreakTime, 
+							daily.getWorkInformation().getYmd());
+					daily.getBreakTime().add(breakTimeOfDailySche);
+					breakTimeOfDailyRepo.insert(breakTimeOfDailySche);	
 				}
 			}
-			for (BreakTimeOfDailyPerformance breakTimeSheet : breakTime) {
-				List<BreakTimeSheet> lstBreakTimeData  = breakTimeSheet.getBreakTimeSheets();
-				mapBreakTimeFrame.forEach((a,b) ->{
-					boolean isSet = false;
-					for (BreakTimeSheet x : lstBreakTimeData) {
-						if(x.getBreakFrameNo().v() == a) {
-							x.setStartTime(new TimeWithDayAttr(b.getStartTime()));
-							x.setEndTime(new TimeWithDayAttr(b.getEndTime()));
-							isSet = true;
-							break;
-						}
-					}
-					if(!isSet) {
-						BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a), new TimeWithDayAttr(b.getStartTime()), new TimeWithDayAttr(b.getEndTime()));
-						lstBreakTimeData.add(timeSheet);
-					}
-					
-				});				
-				breakTimeOfDailyRepo.update(breakTimeSheet);
-			}
 			
-		}
-		List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
-		if(isPre) {
-			lstBreakTime = daily.getBreakTime().stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE)
-					.collect(Collectors.toList()).get(0).getBreakTimeSheets();
 		} else {
-			lstBreakTime = daily.getBreakTime().stream().filter(x -> x.getBreakType() == BreakType.REFER_WORK_TIME)
-					.collect(Collectors.toList()).get(0).getBreakTimeSheets();
-		}
-		List<Integer> lstBreakStart = new ArrayList<>();
-		List<Integer> lstBreakEnd = new ArrayList<>();
-		lstBreakTime.stream().forEach(x ->{
-			if(isPre) {
-				lstBreakStart.add(this.lstScheBreakStartTime().get(x.getBreakFrameNo().v() - 1));
-				lstBreakEnd.add(this.lstScheBreakEndTime().get(x.getBreakFrameNo().v() - 1));
+			if(mapBreakTimeFrame.isEmpty()) {
+				breakTime.clear();
+				breakTimeOfDailyRepo.deleteByBreakType(daily.getWorkInformation().getEmployeeId(),
+						daily.getWorkInformation().getYmd(),
+						isPre ? BreakType.REFER_SCHEDULE.value : BreakType.REFER_WORK_TIME.value);
 			} else {
-				lstBreakStart.add(this.lstBreakStartTime().get(x.getBreakFrameNo().v() - 1));
-				lstBreakEnd.add(this.lstBreakEndTime().get(x.getBreakFrameNo().v() - 1));	
+				if(isPre) {
+					breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE).collect(Collectors.toList());
+				} else {
+					breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_WORK_TIME).collect(Collectors.toList());
+				}
+				
+				//休日が予定か実績は反映しました。
+				if(breakTime.isEmpty()) {
+					List<BreakTimeSheet> lstBreakTime = new ArrayList<>();
+					mapBreakTimeFrame.forEach((a,b) ->{
+						BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a),
+								new TimeWithDayAttr(b.getStartTime()), 
+								new TimeWithDayAttr(b.getEndTime()));
+						lstBreakTime.add(timeSheet);
+					});
+					List<BreakTimeOfDailyPerformance> lstBreakUpdate = new ArrayList<>();
+					if(isPre) {
+						BreakTimeOfDailyPerformance breakTimeOfDailySche = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
+								BreakType.REFER_SCHEDULE, 
+								lstBreakTime, 
+								daily.getWorkInformation().getYmd());
+						daily.getBreakTime().add(breakTimeOfDailySche);
+						lstBreakUpdate.add(breakTimeOfDailySche);
+						breakTimeOfDailyRepo.updateV2(lstBreakUpdate);	
+					} else {
+						BreakTimeOfDailyPerformance breakTimeOfDaily = new BreakTimeOfDailyPerformance(daily.getWorkInformation().getEmployeeId(),
+								BreakType.REFER_WORK_TIME, 
+								lstBreakTime, 
+								daily.getWorkInformation().getYmd());
+						daily.getBreakTime().add(breakTimeOfDaily);
+						lstBreakUpdate.add(breakTimeOfDaily);
+						breakTimeOfDailyRepo.updateV2(lstBreakUpdate);	
+					}
+				}
+				for (BreakTimeOfDailyPerformance breakTimeSheet : breakTime) {
+					List<BreakTimeOfDailyPerformance> lstBreakUpdate = new ArrayList<>();
+					List<BreakTimeSheet> lstBreakTimeData  = breakTimeSheet.getBreakTimeSheets();
+					mapBreakTimeFrame.forEach((a,b) ->{
+						boolean isSet = false;
+						for (BreakTimeSheet x : lstBreakTimeData) {
+							if(x.getBreakFrameNo().v() == a) {
+								x.setStartTime(new TimeWithDayAttr(b.getStartTime()));
+								x.setEndTime(new TimeWithDayAttr(b.getEndTime()));
+								isSet = true;
+								break;
+							}
+						}
+						if(!isSet) {
+							BreakTimeSheet timeSheet = new BreakTimeSheet(new BreakFrameNo(a), new TimeWithDayAttr(b.getStartTime()), new TimeWithDayAttr(b.getEndTime()));
+							lstBreakTimeData.add(timeSheet);
+						}
+						
+					});
+					lstBreakUpdate.add(breakTimeSheet);
+					breakTimeOfDailyRepo.updateV2(lstBreakUpdate);
+				}
 			}
-			
-		});
-		this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), lstBreakStart);
-		this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), lstBreakEnd);
+		}
+		if(isPre) {
+			this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), this.lstScheBreakStartTime());
+			this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), this.lstScheBreakEndTime());	
+		} else {
+			this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), this.lstBreakStartTime());
+			this.updateEditStateOfDailyPerformance(daily.getWorkInformation().getEmployeeId(), daily.getWorkInformation().getYmd(), this.lstBreakEndTime());
+		}
+		
 		
 	}
 	@Override

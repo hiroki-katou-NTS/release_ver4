@@ -34,6 +34,7 @@ import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerforma
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.ContentApproval;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.ParamDayApproval;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.RegisterDayApproval;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.daily.itemvalue.DailyItemValue;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
@@ -146,6 +147,9 @@ public class DailyModifyResCommandFacade {
 	
 	@Inject
 	private AnyItemValueOfDailyRepo anyItemValueOfDailyRepo;
+	
+	@Inject
+	private DailyRecordTransactionService dailyTransaction;
 
 	public RCDailyCorrectionResult handleUpdate(List<DailyRecordDto> dtoOlds,
 			List<DailyRecordDto> dtoNews, List<DailyRecordWorkCommand> commandNew, List<DailyRecordWorkCommand> commandOld, List<DailyItemValue> dailyItems, UpdateMonthDailyParam month, int mode,
@@ -265,6 +269,8 @@ public class DailyModifyResCommandFacade {
 
 	public DataResultAfterIU insertItemDomain(DPItemParent dataParent) {
 		//Map<Integer, List<DPItemValue>> resultError = new HashMap<>();
+		
+		
 		Map<Integer, List<DPItemValue>> resultErrorMonth = new HashMap<>();
 		DataResultAfterIU dataResultAfterIU = new DataResultAfterIU();
 		Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> lstResultReturnDailyError = new HashMap<>();
@@ -283,18 +289,24 @@ public class DailyModifyResCommandFacade {
 				IntegrationOfMonthly domainMonth = monthModifyCommandFacade.toDto(monthQuery).toDomain(
 						month.getEmployeeId(), new YearMonth(month.getYearMonth()), month.getClosureId(),
 						month.getClosureDate());
+				domainMonth.getAffiliationInfo().ifPresent(d -> {
+					d.setVersion(dataParent.getMonthValue().getVersion());
+				});
+				domainMonth.getAttendanceTime().ifPresent(d -> {
+					d.setVersion(dataParent.getMonthValue().getVersion());
+				});
 				Optional<IntegrationOfMonthly> domainMonthOpt = Optional.of(domainMonth);
 				monthParam = new UpdateMonthDailyParam(month.getYearMonth(), month.getEmployeeId(),
 						month.getClosureId(), month.getClosureDate(), domainMonthOpt,
 						new DatePeriod(dataParent.getDateRange().getStartDate(),
 								dataParent.getDateRange().getEndDate()),
-						month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc());
+						month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc(), dataParent.getMonthValue().getVersion());
 			} else {
 				monthParam = new UpdateMonthDailyParam(month.getYearMonth(), month.getEmployeeId(),
 						month.getClosureId(), month.getClosureDate(), Optional.empty(),
 						new DatePeriod(dataParent.getDateRange().getStartDate(),
 								dataParent.getDateRange().getEndDate()),
-						month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc());
+						month.getRedConditionMessage(), month.getHasFlex(), month.getNeedCallCalc(), dataParent.getMonthValue().getVersion());
 			}
 		}
 
@@ -323,6 +335,13 @@ public class DailyModifyResCommandFacade {
 		List<DailyRecordDto> dailyOlds = new ArrayList<>(), dailyEdits = new ArrayList<>();
 
 		processDto(dailyOlds, dailyEdits, dataParent, querys, mapSidDate, queryNotChanges);
+		
+//		dailyEdits.stream().forEach(dt -> {
+//			long dbVer = workInfo.getVer(dt.employeeId(), dt.workingDate());
+//			if(dbVer != dt.getWorkInfo().getVersion()){
+//				throw new OptimisticLockException(I18NText.getText("Msg_1528"));
+//			}
+//		});
 
 		List<DailyModifyResult> resultOlds = AttendanceItemUtil.toItemValues(dailyOlds).entrySet().stream()
 				.map(dto -> DailyModifyResult.builder().items(dto.getValue()).employeeId(dto.getKey().getEmployeeId())
@@ -404,15 +423,23 @@ public class DailyModifyResCommandFacade {
 		List<DailyItemValue> dailyItems = resultOlds.stream().map(
 				x -> DailyItemValue.build().createEmpAndDate(x.getEmployeeId(), x.getDate()).createItems(x.getItems()))
 				.collect(Collectors.toList());
-		if (querys.isEmpty() && !dataParent.isFlagCalculation()
-				&& (dataParent.getMonthValue() == null || dataParent.getMonthValue().getItems() == null)) {
+		Set<Pair<String, GeneralDate>> updated = new HashSet<>();
+		if (querys.isEmpty() 
+				&& (dataParent.getMonthValue() == null || dataParent.getMonthValue().getItems() == null) 
+				&& (!dataParent.getDataCheckSign().isEmpty() || !dataParent.getDataCheckApproval().isEmpty() || dataParent.getSpr() != null)) {
 			errorRelease = releaseSign(dataParent.getDataCheckSign(), new ArrayList<>(), dailyEdits,
 					AppContexts.user().employeeId(), true);
 			// only insert check box
 			// insert sign
 			insertSign(dataParent.getDataCheckSign());
+			if(dataParent.getDataCheckSign() != null){
+				updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
+			}
 			// insert approval
 			insertApproval(dataParent.getDataCheckApproval());
+			if(dataParent.getDataCheckApproval() != null){
+				updated.addAll(dataParent.getDataCheckApproval().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
+			}
 			
 			if (dataParent.getSpr() != null) {
 				processor.insertStampSourceInfo(dataParent.getSpr().getEmployeeId(), dataParent.getSpr().getDate(),
@@ -425,6 +452,8 @@ public class DailyModifyResCommandFacade {
 							d.getAnyItemValue().ifPresent(ai -> {
 								anyItemValueOfDailyRepo.persistAndUpdate(ai);
 							});
+							updated.add(Pair.of(d.getWorkInformation().getEmployeeId(), d.getWorkInformation().getYmd()));
+//							dailyTransaction.updated(d.getWorkInformation().getEmployeeId(), d.getWorkInformation().getYmd());
 						});
 			}
 			dataResultAfterIU.setShowErrorDialog(null);
@@ -524,14 +553,23 @@ public class DailyModifyResCommandFacade {
 				dataResultAfterIU.setFlexShortage(errorMonth.getFlexShortage());
 				
 			} else {
-				if (dataParent.getDataCheckSign() != null && !dataParent.getDataCheckSign().isEmpty())
+				if (dataParent.getDataCheckSign() != null && !dataParent.getDataCheckSign().isEmpty()) {
 					insertSign(dataParent.getDataCheckSign());
+
+					updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
+				}
 				// insert approval
-				if (dataParent.getDataCheckApproval() != null && !dataParent.getDataCheckApproval().isEmpty())
+				if (dataParent.getDataCheckApproval() != null && !dataParent.getDataCheckApproval().isEmpty()) {
 					insertApproval(dataParent.getDataCheckApproval());
+					updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
+				}
 				dataResultAfterIU.setShowErrorDialog(showError(new ArrayList<>(), dailyEdits));
 			}
 		}
+		
+		/** Finish update daily record */
+		finishDailyRecordRegis(updated, dailyEdits);
+		
 
 		if(!errorRelease.isEmpty()) {
 			Map<Integer, List<DPItemValue>> errorTempDaily = new HashMap<>();
@@ -584,6 +622,16 @@ public class DailyModifyResCommandFacade {
 		dataResultAfterIU.setLstSidDateDomainError(empSidUpdate);
 		return dataResultAfterIU;
 	}
+	
+	private void finishDailyRecordRegis(Set<Pair<String, GeneralDate>> updated, List<DailyRecordDto> dailyEdits){
+		if(!updated.isEmpty()){
+			updated.stream().forEach(up -> {
+				dailyEdits.stream().filter(d -> d.employeeId().equals(up.getKey()) && d.workingDate().equals(up.getValue())).findFirst().ifPresent(d -> {
+					dailyTransaction.updated(d.employeeId(), d.workingDate(), d.getWorkInfo().getVersion());
+				});
+			});
+		}
+	}
 
 	public Map<Integer, List<DPItemValue>> convertErrorToType(Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> lstResultReturnDailyError, Map<Integer, List<DPItemValue>> resultErrorMonth){
 		 Map<Integer, List<DPItemValue>> mapResult = new HashMap<>();
@@ -630,12 +678,12 @@ public class DailyModifyResCommandFacade {
 		return querys;
 	}
 
-	public void insertSign(List<DPItemCheckBox> dataCheckSign) {
+	public boolean insertSign(List<DPItemCheckBox> dataCheckSign) {
 		if (dataCheckSign.isEmpty())
-			return;
+			return false;
 		ParamIdentityConfirmDay day = new ParamIdentityConfirmDay(AppContexts.user().employeeId(), dataCheckSign
 				.stream().map(x -> new SelfConfirmDay(x.getDate(), x.isValue())).collect(Collectors.toList()));
-		registerIdentityConfirmDay.registerIdentity(day);
+		return registerIdentityConfirmDay.registerIdentity(day);
 	}
 
 	public void insertApproval(List<DPItemCheckBox> dataCheckApproval) {
@@ -856,7 +904,8 @@ public class DailyModifyResCommandFacade {
 				.items(AttendanceItemUtil.toItemValues(monthDto, Arrays.asList(18, 21, 189, 190, 191),
 						AttendanceItemUtil.AttendanceItemType.MONTHLY_ITEM))
 				.employeeId(monthValue.getEmployeeId()).yearMonth(monthValue.getYearMonth())
-				.closureId(monthValue.getClosureId()).closureDate(monthValue.getClosureDate()).completed();
+				.closureId(monthValue.getClosureId()).closureDate(monthValue.getClosureDate())
+				.version(monthValue.getVersion()).completed();
 		mapValue(result.getItems(), itemResult);
 		return itemResult;
 	}
@@ -998,7 +1047,7 @@ public class DailyModifyResCommandFacade {
 			detailEmployeeError.addAll(pairError.getDetailEmployeeError());
 			hasError =  true;
 		}
-				
+			
 		return new ErrorAfterCalcDaily(hasError, resultErrorMonth, detailEmployeeError, resultErrorDaily, dataResultAfterIU.getFlexShortage());
 	}
 	
@@ -1013,6 +1062,7 @@ public class DailyModifyResCommandFacade {
 				hasError = true;
 				if(!resultIU.getLstMonthDomain().isEmpty()) flexShortageRCDto.createDataCalc(convertMonthToItem(MonthlyRecordWorkDto.fromOnlyAttTime(resultIU.getLstMonthDomain().get(0)), monthValue));
 			}
+			flexShortageRCDto.setVersion(monthValue.getVersion());
 			dataResultAfterIU.setFlexShortage(flexShortageRCDto);
 		}
 		
@@ -1038,6 +1088,7 @@ public class DailyModifyResCommandFacade {
 				hasError = true;
 				if(!resultIU.getLstMonthDomain().isEmpty()) flexShortageRCDto.createDataCalc(convertMonthToItem(MonthlyRecordWorkDto.fromOnlyAttTime(resultIU.getLstMonthDomain().get(0)), monthValue));
 			}
+			flexShortageRCDto.setVersion(monthValue.getVersion());
 			dataResultAfterIU.setFlexShortage(flexShortageRCDto);
 		}
 		// 残数系のエラーチェック（月次集計なし）

@@ -188,6 +188,7 @@ public class CalculationRangeOfOneDay {
 	 * @param statutorySet
 	 * @param prioritySet
 	 * @param fixWoSetting 
+	 * @param ootsukaIWFlag 
 	 * @param integrationOfDaily 
 	 */
 	public void createWithinWorkTimeSheet(WorkingSystem workingSystem, WorkTimeMethodSet setMethod,
@@ -275,6 +276,7 @@ public class CalculationRangeOfOneDay {
 	 * @param deductionTimeSheet
 	 *            控除時間帯
 	 * @param workTimeDivision 
+	 * @param ootsukaIWFlag 
 	 * @param integrationOfDaily 
 	 */
 	public void theDayOfWorkTimesLoop(WorkingSystem workingSystem, PredetermineTimeSetForCalc predetermineTimeSetForCalc,
@@ -713,6 +715,7 @@ public class CalculationRangeOfOneDay {
 
 	 /**
 	 * フレ�?��スの時間帯作�?
+	 * @param ootsukaIWFlag 
 	 * @param integrationOfDaily 
 	 * @param integrationOfDaily 
 	 */

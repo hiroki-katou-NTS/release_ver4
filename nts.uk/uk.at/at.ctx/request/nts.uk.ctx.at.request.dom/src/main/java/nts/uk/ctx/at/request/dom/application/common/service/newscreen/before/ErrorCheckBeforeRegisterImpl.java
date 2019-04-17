@@ -23,11 +23,8 @@ import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
 import nts.uk.ctx.at.request.dom.application.UseAtr;
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.EmployeeRequestAdapter;
-import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoAdapter;
-import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoImport;
-import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleAdapter;
-import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleImport;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.output.AppCommonSettingOutput;
+import nts.uk.ctx.at.request.dom.application.common.service.other.OtherCommonAlgorithm;
 import nts.uk.ctx.at.request.dom.application.common.service.other.Time36UpperLimitCheck;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.AppTimeItem;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.Time36UpperLimitCheckResult;
@@ -48,7 +45,7 @@ import nts.uk.ctx.at.shared.dom.ot.frame.OvertimeWorkFrame;
 import nts.uk.ctx.at.shared.dom.ot.frame.OvertimeWorkFrameRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
-import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 
 @Stateless
 public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
@@ -76,16 +73,10 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 	
 	@Inject
 	private OvertimeWorkFrameRepository overtimeFrameRepository;
-	
-	@Inject
-	private RecordWorkInfoAdapter recordWorkInfoAdapter;
-	
-	@Inject
-	private ScBasicScheduleAdapter scBasicScheduleAdapter;
-	
-	@Inject
-	private WorkTypeRepository workTypeRepository;
 
+	@Inject
+	private OtherCommonAlgorithm otherCommonAlgorithm;
+	
 	// @Inject
 	// private PersonalLaborConditionRepository
 	// personalLaborConditionRepository;
@@ -435,24 +426,20 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 		if(appDateContradictionAtr==AppDateContradictionAtr.NOTCHECK){
 			return Collections.emptyList();
 		}
-		// アルゴリズム「03-08-1_勤務種類矛盾チェック」を実行する
-		String workTypeCD = this.workTypeInconsistencyCheck(companyID, employeeID, appDate);
-		// ドメインモデル「勤務種類」を1件取得する
-		Optional<WorkType> opWorkType = workTypeRepository.findByPK(companyID, workTypeCD);
-		if(Strings.isBlank(workTypeCD)||!opWorkType.isPresent()){
+		WorkType workType = otherCommonAlgorithm.getWorkTypeScheduleSpec(companyID, employeeID, appDate);
+		if(workType==null){
+			// 「申請日矛盾区分」をチェックする
 			if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
 				throw new BusinessException("Msg_1519", appDate.toString("yyyy/MM/dd"));
 			}
 			return Arrays.asList("Msg_1520", appDate.toString("yyyy/MM/dd")); 
 		}
-		WorkType workType = opWorkType.get();
-		WorkTypeClassification workTypeClassification = workType.getDailyWork().getOneDay();
-		if(workTypeClassification==WorkTypeClassification.Holiday||
-			workTypeClassification==WorkTypeClassification.Pause||
-			workTypeClassification==WorkTypeClassification.HolidayWork){
+		boolean checked = this.workTypeInconsistencyCheck(workType);
+		if(!checked){
 			return Collections.emptyList();
 		}
 		String name = workType.getName().v();
+		// 「申請日矛盾区分」をチェックする
 		if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
 			throw new BusinessException("Msg_1521", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "未登録のマスタ");
 		}
@@ -461,23 +448,22 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 	}
 	
 	/**
-	 * 
-	 * @param companyID
-	 * @param employeeID
-	 * @param appDate
-	 * @return
+	 * 03-08_01 休日出勤の勤務種類矛盾チェック
+	 * @param workType
+	 * @return 矛盾なし = false or 矛盾あり = true
 	 */
-	private String workTypeInconsistencyCheck(String companyID, String employeeID, GeneralDate appDate){
-		// Imported(申請承認)「勤務実績」を取得する
-		RecordWorkInfoImport recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(employeeID, appDate);
-		if(Strings.isNotBlank(recordWorkInfoImport.getWorkTypeCode())){
-			return recordWorkInfoImport.getWorkTypeCode();
+	private boolean workTypeInconsistencyCheck(WorkType workType){
+		// INPUT.ドメインモデル「勤務種類.勤務の単位(WORK_ATR)」が１日であるかをチェックする
+		if(workType.getDailyWork().getWorkTypeUnit()==WorkTypeUnit.MonringAndAfternoon){
+			return false;
 		}
-		// Imported(申請承認)「勤務予定」を取得する
-		Optional<ScBasicScheduleImport> opScBasicScheduleImport = scBasicScheduleAdapter.findByID(employeeID, appDate);
-		if(!opScBasicScheduleImport.isPresent()){
-			return null;
+		// INPUT.ドメインモデル「勤務種類.1日勤務分類(ONE_DAY_CLS)」をチェックする
+		WorkTypeClassification workTypeClassification = workType.getDailyWork().getOneDay();
+		if(workTypeClassification==WorkTypeClassification.Holiday||
+			workTypeClassification==WorkTypeClassification.Pause||
+			workTypeClassification==WorkTypeClassification.HolidayWork){
+			return false;
 		}
-		return opScBasicScheduleImport.get().getWorkTypeCode();
+		return true;
 	}
 }

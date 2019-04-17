@@ -2,6 +2,7 @@ package nts.uk.ctx.at.request.dom.application.gobackdirectly.service;
 
 import java.util.List;
 
+import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleImport;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
@@ -50,4 +51,13 @@ public interface GoBackDirectlyRegisterService {
 			GoBackDirectlyCommonSetting goBackCommonSet, int line, ScBasicScheduleImport scBasicScheduleImport);
 	
 	public void createThrowMsg(String msgConfirm, List<String> msgLst);
+	
+	/**
+	 * 直行直帰申請日の矛盾チェック
+	 * @param companyID
+	 * @param employeeID
+	 * @param appDate
+	 * @return
+	 */
+	public List<String> inconsistencyCheck(String companyID, String employeeID, GeneralDate appDate);
 }

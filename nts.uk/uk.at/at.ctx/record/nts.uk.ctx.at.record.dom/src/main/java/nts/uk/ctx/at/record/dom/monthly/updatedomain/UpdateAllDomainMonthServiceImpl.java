@@ -92,7 +92,15 @@ public class UpdateAllDomainMonthServiceImpl implements UpdateAllDomainMonthServ
 					if (oldClosureId.value != closureId.value) isTarget = true;
 					if (oldClosureDate.getClosureDay().v() != closureDate.getClosureDay().v()) isTarget = true;
 					if (oldClosureDate.getLastDayOfMonth() != closureDate.getLastDayOfMonth()) isTarget = true;
-					if (!isTarget) continue;
+					if (!isTarget) {
+						d.getAffiliationInfo().ifPresent(aff -> {
+							aff.setVersion(oldData.getAttendanceTime().get().getVersion());
+						});
+						d.getAttendanceTime().ifPresent(att -> {
+							att.setVersion(oldData.getAttendanceTime().get().getVersion());
+						});
+						continue;
+					}
 					
 					this.timeRepo.remove(employeeId, yearMonth, oldClosureId, oldClosureDate);
 					this.empErrorRepo.removeAll(employeeId, yearMonth, oldClosureId, oldClosureDate);

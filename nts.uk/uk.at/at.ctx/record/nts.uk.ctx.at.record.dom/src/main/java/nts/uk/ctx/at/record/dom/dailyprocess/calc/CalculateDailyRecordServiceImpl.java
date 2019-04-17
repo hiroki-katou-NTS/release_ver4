@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.dom.dailyprocess.calc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,8 @@ import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
 import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
+import nts.uk.ctx.at.record.dom.breakorgoout.enums.GoingOutReason;
+import nts.uk.ctx.at.record.dom.breakorgoout.primitivevalue.BreakFrameNo;
 import nts.uk.ctx.at.record.dom.calculationattribute.BonusPayAutoCalcSet;
 import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.calculationattribute.HolidayTimesheetCalculationSetting;
@@ -92,6 +95,9 @@ import nts.uk.ctx.at.shared.dom.calculation.holiday.kmk013_splitdomain.HolidayCa
 import nts.uk.ctx.at.shared.dom.common.CompanyId;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
+import nts.uk.ctx.at.shared.dom.common.timerounding.Rounding;
+import nts.uk.ctx.at.shared.dom.common.timerounding.TimeRoundingSetting;
+import nts.uk.ctx.at.shared.dom.common.timerounding.Unit;
 import nts.uk.ctx.at.shared.dom.ot.autocalsetting.AutoCalAtrOvertime;
 import nts.uk.ctx.at.shared.dom.ot.zerotime.ZeroTime;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryOccurrenceSetting;
@@ -109,6 +115,7 @@ import nts.uk.ctx.at.shared.dom.worktime.common.LegalOTSetting;
 import nts.uk.ctx.at.shared.dom.worktime.common.OverTimeOfTimeZoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.common.RestClockManageAtr;
 import nts.uk.ctx.at.shared.dom.worktime.common.RestTimeOfficeWorkCalcMethod;
+import nts.uk.ctx.at.shared.dom.worktime.common.TimeZoneRounding;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneCommonSet;
@@ -259,11 +266,13 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 		if (!calculateOption.isSchedule()) {
 			// 大塚モードの処理
-			val afterOOtsukaModeCalc = replaceStampForOOtsuka(result.getIntegrationOfDaily(), companyCommonSetting,
-					personCommonSetting, tomorrowDayInfo, tomorrowDayInfo, converter);
+//			val afterOOtsukaModeCalc = replaceStampForOOtsuka(result.getIntegrationOfDaily(), companyCommonSetting,
+//					personCommonSetting, tomorrowDayInfo, tomorrowDayInfo, converter);
 
 			// 任意項目の計算
-			result.setIntegrationOfDaily(this.calcOptionalItem(afterOOtsukaModeCalc, converter, companyCommonSetting));
+//			result.setIntegrationOfDaily(this.calcOptionalItem(afterOOtsukaModeCalc, converter, companyCommonSetting));
+			
+			result.setIntegrationOfDaily(this.calcOptionalItem(result.getIntegrationOfDaily(), converter, companyCommonSetting));
 		}
 
 		if (!calculateOption.isMasterTime()) {
@@ -555,20 +564,39 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		Optional<BreakTimeOfDailyPerformance> masterBreakTimeSheetList = reflectBreakTimeOfDailyDomainService
 				.getBreakTime(companyId, employeeId, targetDate, integrationOfDaily.getWorkInformation(),
 						companyCommonSetting.getErrorAlarm(), workTime);
-		
+//		boolean ootsukaIWFlag = ootsukaProcessService.isIWWorkTimeAndCode(workType.get(), workTime.get().getWorktimeCode());
 
+//		大塚IW限定処理(休憩を固定で入れる案)
 		if (masterBreakTimeSheetList.isPresent()) {
-			breakTimeSheetOfWorkTimeMaster = ootsukaProcessService.convertBreakTimeSheetForOOtsuka(masterBreakTimeSheetList,
-																								   workType.get(),
-																								   new WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().changeAllTimeSheetToDeductionItem();
+//			breakTimeSheetOfWorkTimeMaster = ootsukaProcessService.convertBreakTimeSheetForOOtsuka(masterBreakTimeSheetList,
+//																								   workType.get(),
+//																								   new WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().changeAllTimeSheetToDeductionItem();
+			breakTimeSheetOfWorkTimeMaster = masterBreakTimeSheetList.get().changeAllTimeSheetToDeductionItem();
 			Boolean OOtsukaMode = true;
 			if (OOtsukaMode) {
+//				breakTimeSheetOfWorkTimeMaster = devideBreakTimeSheetForOOtsuka(breakTimeSheetOfWorkTimeMaster,
 				breakTimeSheetOfWorkTimeMaster = devideBreakTimeSheetForOOtsuka(breakTimeSheetOfWorkTimeMaster,
 						oneRange.getAttendanceLeavingWork().getTimeLeavingWorks());
-				
-				
 			}
 		}
+//		else {
+//			if(ootsukaIWFlag) {
+//				breakTimeSheetOfWorkTimeMaster = Arrays.asList(TimeSheetOfDeductionItem.createTimeSheetOfDeductionItemAsFixed(new TimeZoneRounding(new TimeWithDayAttr(720), new TimeWithDayAttr(780), new TimeRoundingSetting(Unit.ROUNDING_TIME_1MIN, Rounding.ROUNDING_DOWN)),
+//						  new TimeSpanForCalc(new TimeWithDayAttr(720),new TimeWithDayAttr(780)),
+//						  Collections.emptyList(),
+//						  Collections.emptyList(),
+//						  Collections.emptyList(),
+//						  Collections.emptyList(),
+//						  Optional.empty(),
+//						  WorkingBreakTimeAtr.NOTWORKING,
+//						  Finally.of(GoingOutReason.PRIVATE), 
+//						  Finally.of(BreakClassification.BREAK), 
+//						  Optional.empty(),
+//						  DeductionClassification.BREAK,
+//						  Optional.empty()));				
+//			}
+//
+//		}
 		// 大塚用の固定勤務残業時間帯設定
 		List<OverTimeOfTimeZoneSet> overTimeSheetSetting = Collections.emptyList();
 
@@ -778,18 +806,19 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				}
 			}
 			final BreakType flexBreakType = nowBreakType;
-			
+//			大塚IW限定処理(休憩を固定で入れる案)
+//			final WorkType nowWorkType = workType.get();
 			if (!integrationOfDaily.getBreakTime().isEmpty()) {
-				final WorkType nowWorkType = workType.get();
+			
 				Optional<BreakTimeOfDailyPerformance> breakTimeByBreakType = integrationOfDaily.getBreakTime().stream()
 						.filter(breakTime -> breakTime.getBreakType().equals(flexBreakType)).findFirst();
 				breakTimeByBreakType.ifPresent(tc -> {
-					if(flexBreakType.isReferWorkTime()) {
-						breakTimeSheet.addAll(ootsukaProcessService.convertBreakTimeSheetForOOtsuka(Optional.of(tc),nowWorkType,new WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().getBreakTimeSheets());
-					}
-					else {
+//					if(flexBreakType.isReferWorkTime()) {
+//						breakTimeSheet.addAll(ootsukaProcessService.convertBreakTimeSheetForOOtsuka(Optional.of(tc),nowWorkType,new WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().getBreakTimeSheets());
+//					}
+//					else {
 						breakTimeSheet.addAll(tc.getBreakTimeSheets());	
-					}
+//					}
 						
 				});
 
@@ -797,6 +826,9 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 						&& timeSheet.getEndTime().greaterThan(timeSheet.getStartTime()))).collect(Collectors.toList()).size();
 			}
 
+//			if(ootsukaProcessService.isIWWorkTimeAndCode(nowWorkType, workTime.get().getWorktimeCode())) {
+//				breakTimeSheet.add(new BreakTimeSheet(new BreakFrameNo(1),new TimeWithDayAttr(720), new TimeWithDayAttr(780)));
+//			}
 			breakTimeOfDailyList
 					.add(new BreakTimeOfDailyPerformance(employeeId, nowBreakType, breakTimeSheet, targetDate));
 
@@ -898,17 +930,20 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 				}
 				final BreakType flexBreakType = nowBreakType;
+//				大塚IW限定処理(休憩を固定で入れる案)
+//				final WorkType nowWorkType = workType.get();
 				if (!integrationOfDaily.getBreakTime().isEmpty()) {
-					final WorkType nowWorkType = workType.get();
+					
 					Optional<BreakTimeOfDailyPerformance> breakTimeByBreakType = integrationOfDaily.getBreakTime()
 							.stream().filter(breakTime -> breakTime.getBreakType() == flexBreakType).findFirst();
 					breakTimeByBreakType.ifPresent(tc ->{
-						if(flexBreakType.isReferWorkTime()) {
-							breakTimeSheet.addAll(ootsukaProcessService.convertBreakTimeSheetForOOtsuka(Optional.of(tc),nowWorkType,new WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().getBreakTimeSheets());
-						}
-						else {
+//						大塚IW限定処理(休憩を固定で入れる案)
+//						if(flexBreakType.isReferWorkTime()) {
+//							breakTimeSheet.addAll(ootsukaProcessService.convertBreakTimeSheetForOOtsuka(Optional.of(tc),nowWorkType,new WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().getBreakTimeSheets());
+//						}
+//						else {
 							breakTimeSheet.addAll(tc.getBreakTimeSheets());	
-						}
+//						}
 					});
 
 					breakCount = breakTimeSheet.stream()
@@ -916,7 +951,10 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 									&& timeSheet.getEndTime().greaterThan(timeSheet.getStartTime())))
 							.collect(Collectors.toList()).size();
 				}
-
+//				大塚IW限定処理(休憩を固定で入れる案)
+//				if(ootsukaProcessService.isIWWorkTimeAndCode(nowWorkType, workTime.get().getWorktimeCode())) {
+//					breakTimeSheet.add(new BreakTimeSheet(new BreakFrameNo(1),new TimeWithDayAttr(720), new TimeWithDayAttr(780)));
+//				}
 				breakTimeOfDailyList
 						.add(new BreakTimeOfDailyPerformance(employeeId, nowBreakType, breakTimeSheet, targetDate));
 
@@ -1238,16 +1276,14 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 		WorkInfoOfDailyPerformance toDayWorkInfo = integrationOfDaily.getWorkInformation();
 		Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance =integrationOfDaily.getAttendanceLeave();
-		if(workTimeCode != null ) {
-			/* 日別実績の出退勤時刻セット */
-			 timeLeavingOfDailyPerformance = correctStamp(integrationOfDaily.getAttendanceLeave(),
-					  employeeId,
-					  targetDate, 
-					  isOotsukaMode,
-					  predetermineTimeSet,
-					  workType,
-					  new WorkTimeCode(workTimeCode));			
-		}
+		/* 日別実績の出退勤時刻セット */
+		 timeLeavingOfDailyPerformance = correctStamp(integrationOfDaily.getAttendanceLeave(),
+				  employeeId,
+				  targetDate, 
+				  isOotsukaMode,
+				  predetermineTimeSet,
+				  workType,
+				  new WorkTimeCode(workTimeCode));			
 
 
 
@@ -1508,24 +1544,22 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 	
 	private Optional<TimeLeavingOfDailyPerformance> correctStamp(Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance, String employeeId, GeneralDate targetDate, boolean isOotuskaMode, Optional<PredetemineTimeSetting> predetermineTimeSet, WorkType workType, WorkTimeCode workTimeCode) {
 		//大塚モードの場合は、IWカスタマイズ処理に入る。
-		if(isOotuskaMode) {
-			return ootsukaProcessService.iWProcessForStamp(timeLeavingOfDailyPerformance, employeeId, targetDate, predetermineTimeSet,workType,workTimeCode);
-		}
-		else {
-			if (!timeLeavingOfDailyPerformance.isPresent()) {
-				WorkStamp attendance = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0),
-						new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
-				WorkStamp leaving = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0), new WorkLocationCD("01"),
-						StampSourceInfo.CORRECTION_RECORD_SET);
-				TimeActualStamp stamp = new TimeActualStamp(attendance, leaving, 1);
-				TimeLeavingWork timeLeavingWork = new TimeLeavingWork(
-						new WorkNo(1), stamp, stamp);
-				List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
-				timeLeavingWorkList.add(timeLeavingWork);
-				timeLeavingOfDailyPerformance = Optional.of(
-						new TimeLeavingOfDailyPerformance(employeeId, new WorkTimes(1), timeLeavingWorkList, targetDate));
-			}			
-		}
+//		if(isOotuskaMode && workTimeCode != null) {
+//			timeLeavingOfDailyPerformance = ootsukaProcessService.iWProcessForStamp(timeLeavingOfDailyPerformance, employeeId, targetDate, predetermineTimeSet,workType,workTimeCode);
+//		}
+		if (!timeLeavingOfDailyPerformance.isPresent()) {
+			WorkStamp attendance = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0),
+					new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
+			WorkStamp leaving = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0), new WorkLocationCD("01"),
+					StampSourceInfo.CORRECTION_RECORD_SET);
+			TimeActualStamp stamp = new TimeActualStamp(attendance, leaving, 1);
+			TimeLeavingWork timeLeavingWork = new TimeLeavingWork(
+					new WorkNo(1), stamp, stamp);
+			List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
+			timeLeavingWorkList.add(timeLeavingWork);
+			timeLeavingOfDailyPerformance = Optional.of(
+					new TimeLeavingOfDailyPerformance(employeeId, new WorkTimes(1), timeLeavingWorkList, targetDate));
+		}			
 		return timeLeavingOfDailyPerformance;
 	}
 

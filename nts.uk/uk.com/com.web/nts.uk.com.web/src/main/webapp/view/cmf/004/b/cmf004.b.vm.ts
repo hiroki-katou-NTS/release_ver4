@@ -281,7 +281,7 @@ module nts.uk.com.view.cmf004.b.viewmodel {
                         let recoveryPeriod = x.retentionPeriodCls;
                         let startOfPeriod  = x.saveDateFrom;
                         let endOfPeriod    = x.saveDateTo;
-                        let recoveryMethod = x.storageRangeSaved == 0 ? getText('CMF004_305') : getText('CMF004_306');
+                        let recoveryMethod = x.storageRangeSaved == 1 ? getText('CMF004_305') : getText('CMF004_306');
                         listCategory.push(new CategoryInfo(rowNumber, isRecover, categoryId, categoryName, recoveryPeriod, startOfPeriod, endOfPeriod, recoveryMethod, iscanNotBeOld));
                     });
                     self.dataContentConfirm().dataContentcategoryList(listCategory);
@@ -310,6 +310,8 @@ module nts.uk.com.view.cmf004.b.viewmodel {
         initScreenF(): void {
             let self = this;
 
+            // check recovery method
+            let recoveryMethod = self.dataContentConfirm().selectedRecoveryMethod();
             let _listCategory = self.dataContentConfirm().dataContentcategoryList();
             let _itemList: Array<CategoryInfo> = [];
             _.forEach(_listCategory, (x, i) => {
@@ -317,7 +319,8 @@ module nts.uk.com.view.cmf004.b.viewmodel {
                 if (!x.iscanNotBeOld || !x.isRecover()) {
                     isRecover = false;
                 }
-                _itemList.push(new CategoryInfo(i + 1, isRecover, x.categoryId(), x.categoryName(), x.recoveryPeriod(), x.startOfPeriod(), x.endOfPeriod(), x.recoveryMethod(), isRecover));
+                let isEnablePeriod = recoveryMethod == RecoveryMethod.SELECTED_RANGE ? true : false ;
+                _itemList.push(new CategoryInfo(i + 1, isRecover, x.categoryId(), x.categoryName(), x.recoveryPeriod(), x.startOfPeriod(), x.endOfPeriod(), x.recoveryMethod(), isEnablePeriod));
             });
             self.changeDataRecoveryPeriod().changeDataCategoryList(_itemList);
             self.categoryListOld = ko.toJS(_itemList);
@@ -328,6 +331,7 @@ module nts.uk.com.view.cmf004.b.viewmodel {
             block.invisible();
             //Get Data PerformDataRecover for Screen KCP 005
             service.findPerformDataRecover(self.recoveryProcessingId).done(function(data: any) {
+               console.log(); 
                 if (data.targets) {
                     self.employeeListScreenG.removeAll();
                     let employeeData: Array<any> = [];
@@ -337,7 +341,15 @@ module nts.uk.com.view.cmf004.b.viewmodel {
                     employeeData = _.sortBy(employeeData, ["code"]);
                     self.employeeListScreenG(employeeData);
                     $('#kcp005component .nts-gridlist').attr('tabindex', -1);
-
+                    if(self.dataContentConfirm().selectedRecoveryMethod() == 0){
+                        self.kcp005ComponentOptionScreenG.selectType = 2;
+                        self.kcp005ComponentOptionScreenG.disableSelection = true;
+                        $('#kcp005component').ntsListComponent(self.kcp005ComponentOptionScreenG);
+                    }else{
+                        self.kcp005ComponentOptionScreenG.selectType = 2;
+                        self.kcp005ComponentOptionScreenG.disableSelection = false;
+                        $('#kcp005component').ntsListComponent(self.kcp005ComponentOptionScreenG);
+                    }
                 }
             }).always(() => {
                 block.clear();
@@ -453,8 +465,10 @@ module nts.uk.com.view.cmf004.b.viewmodel {
             if (checkItemE == 0) {
                 dialog.alertError({ messageId: "Msg_1265" });
             } else {
+                
                 $('#data-recovery-wizard').ntsWizard("next");
                 $("#F5_5:first-child .start-date input:first-child").focus();
+                
             }
 
         }
@@ -550,7 +564,8 @@ module nts.uk.com.view.cmf004.b.viewmodel {
         startOfPeriod: KnockoutObservable<string>;
         endOfPeriod: KnockoutObservable<string>;
         iscanNotBeOld: KnockoutObservable<boolean>;
-        constructor(rowNumber: number, isRecover: boolean, categoryId: string, categoryName: string, recoveryPeriod: string, startOfPeriod: string, endOfPeriod: string, recoveryMethod: string, iscanNotBeOld: boolean) {
+        isEnablePeriod: KnockoutObservable<boolean>;
+        constructor(rowNumber: number, isRecover: boolean, categoryId: string, categoryName: string, recoveryPeriod: string, startOfPeriod: string, endOfPeriod: string, recoveryMethod: string, isEnablePeriod: boolean) {
             let self = this;
             self.rowNumber = ko.observable(rowNumber);
             self.isRecover = ko.observable(isRecover);
@@ -560,7 +575,8 @@ module nts.uk.com.view.cmf004.b.viewmodel {
             self.startOfPeriod = ko.observable(startOfPeriod);
             self.endOfPeriod = ko.observable(endOfPeriod);
             self.recoveryMethod = ko.observable(recoveryMethod);
-            self.iscanNotBeOld = ko.observable(iscanNotBeOld);
+            self.iscanNotBeOld = ko.observable(isEnablePeriod);
+            self.isEnablePeriod = ko.observable(isEnablePeriod);
         }
     }
 

@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.request.ws.application.gobackdirectly;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -19,6 +21,8 @@ import nts.uk.ctx.at.request.app.find.application.gobackdirectly.GoBackDirectlyD
 import nts.uk.ctx.at.request.app.find.application.gobackdirectly.GoBackDirectlyFinder;
 import nts.uk.ctx.at.request.app.find.application.gobackdirectly.ParamGetAppGoBack;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
+import nts.uk.ctx.at.request.dom.application.gobackdirectly.service.GoBackDirectlyRegisterService;
+import nts.uk.shr.com.context.AppContexts;
 
 @Path("at/request/application/gobackdirectly")
 @Produces("application/json")
@@ -37,6 +41,9 @@ public class GoBackDirectlyService extends WebService {
 
 	@Inject 
 	private UpdateGoBackDirectlyCommandHandler updateGoBackHandler;
+	
+	@Inject
+	private GoBackDirectlyRegisterService goBackDirectlyRegisterService;
 
 	/**
 	 * 
@@ -102,6 +109,16 @@ public class GoBackDirectlyService extends WebService {
 	@Path("updateGoBackDirectly")
 	public ProcessResult updateGoBackData (UpdateApplicationGoBackDirectlyCommand command) {
 		return this.updateGoBackHandler.handle(command);
+	}
+	
+	@POST
+	@Path("confirmInconsistency")
+	public List<String> confirmInconsistency(InsertApplicationGoBackDirectlyCommand command) {
+		String companyID = AppContexts.user().companyId();
+		return goBackDirectlyRegisterService.inconsistencyCheck(
+				companyID, 
+				command.getAppCommand().getApplicantSID(), 
+				command.getAppCommand().getApplicationDate());
 	}
 		
 }

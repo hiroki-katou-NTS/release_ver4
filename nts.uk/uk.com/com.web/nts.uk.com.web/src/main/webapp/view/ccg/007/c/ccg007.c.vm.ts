@@ -12,6 +12,8 @@ module nts.uk.pr.view.ccg007.c {
             isSaveLoginInfo: KnockoutObservable<boolean>;
             contractCode: KnockoutObservable<string>;
             contractPassword: KnockoutObservable<string>;
+            isSignOn: KnockoutObservable<boolean> = ko.observable(false);
+            displayLogin: KnockoutObservable<boolean> = ko.observable(false);
             constructor() {
                 var self = this;
                 self.companyCode = ko.observable('');
@@ -26,7 +28,14 @@ module nts.uk.pr.view.ccg007.c {
             start(): JQueryPromise<void> {
                 var self = this;
                 var dfd = $.Deferred<void>();
-                
+                //get url
+                let url = _.toLower(_.trim(_.trim($(location).attr('href')), '%20'));
+                let isSignOn = url.indexOf('signon=on') >= 0 || url.indexOf('signon=oN') >= 0 || url.indexOf('signon=On') >= 0
+                || url.indexOf('signon=ON') >= 0;
+                self.isSignOn(isSignOn);
+                if(!isSignOn){
+                    self.displayLogin(true);
+                }
                 let defaultContractCode:string = "000000000000";
                 blockUI.invisible();
                 
@@ -82,16 +91,16 @@ module nts.uk.pr.view.ccg007.c {
             private getEmployeeLoginSetting(contractCode: string): JQueryPromise<void> {
                 var self = this;
                 var dfd = $.Deferred<void>();
-                let url = _.toLower(_.trim(_.trim($(location).attr('href')), '%20'));
-                let isSignOn = url.indexOf('signon=on') >= 0;
+//                let url = _.toLower(_.trim(_.trim($(location).attr('href')), '%20'));
+//                let isSignOn = url.indexOf('signon=on') >= 0;
                 service.getEmployeeLoginSetting(contractCode).done(function(data:any) {
                     if (data.gotoForm1) {
                         nts.uk.request.jump("/view/ccg/007/b/index.xhtml");
                     }
                     else {
                         //シングルサインオン（Active DirectorySSO）かをチェックする
-                        if (isSignOn) {
-                            self.submitLogin(isSignOn);
+                        if (self.isSignOn()) {
+                            self.submitLogin(self.isSignOn());
                         }
                         else {
                             //get login infor from local storeage 
@@ -183,6 +192,9 @@ module nts.uk.pr.view.ccg007.c {
                     }
                     blockUI.clear();
                 }).fail(function(res:any) {
+                    if(self.isSignOn()){
+                            self.displayLogin(true);
+                        }
                     //Return Dialog Error
                     if (!_.isEqual(res.message, "can not found message id")){
                         nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds });
@@ -212,7 +224,11 @@ module nts.uk.pr.view.ccg007.c {
                     var childData = nts.uk.ui.windows.getShared('childData');
                     if (childData.submit) {
                         nts.uk.request.jump("/view/ccg/008/a/index.xhtml", { screen: 'login' });
-                    }    
+                    }else{
+                        if(self.isSignOn()){
+                            self.displayLogin(true);
+                        }    
+                    }   
                 })
             }
             

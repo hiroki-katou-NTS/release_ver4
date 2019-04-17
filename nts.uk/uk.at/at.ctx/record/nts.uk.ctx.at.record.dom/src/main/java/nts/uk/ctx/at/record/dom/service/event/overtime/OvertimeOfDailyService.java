@@ -32,13 +32,14 @@ public class OvertimeOfDailyService {
 	private EditStateOfDailyPerformanceRepository editStateDaily;
 	@Inject
 	private AttendanceTimeRepository attendanceTimeRepo;
+	
 	/**
 	 * 申請された時間を補正する
 	 * @param working
 	 * @param cachedWorkType
 	 * @return
 	 */
-	public IntegrationOfDaily correct(IntegrationOfDaily working,Optional<WorkType> cachedWorkType){
+	public IntegrationOfDaily correct(IntegrationOfDaily working,Optional<WorkType> cachedWorkType, boolean isSaveDirect){
 		if(!cachedWorkType.isPresent() 
 				|| !working.getAttendanceTimeOfDailyPerformance().isPresent()) {
 			return working;
@@ -65,6 +66,8 @@ public class OvertimeOfDailyService {
 			itemIdList.addAll(recordUpdate.lstScheBreakEndTime());
 			itemIdList.addAll(recordUpdate.lstBreakStartTime());
 			itemIdList.addAll(recordUpdate.lstBreakEndTime());
+			//替時間(休出)の反映、をクリアする
+			itemIdList.addAll(recordUpdate.lstTranfertimeFrameItem());
 		} else {
 			itemIdList.addAll(recordUpdate.lstPreWorktimeFrameItem());
 			itemIdList.addAll(recordUpdate.lstAfterWorktimeFrameItem());
@@ -73,9 +76,10 @@ public class OvertimeOfDailyService {
 			itemIdList.addAll(recordUpdate.lstScheBreakEndTime());
 			itemIdList.addAll(recordUpdate.lstBreakStartTime());
 			itemIdList.addAll(recordUpdate.lstBreakEndTime());
+			//替時間(休出)の反映、をクリアする
+			itemIdList.addAll(recordUpdate.lstTranfertimeFrameItem());
 		}
-		//替時間(休出)の反映、をクリアする
-		itemIdList.addAll(recordUpdate.lstTranfertimeFrameItem());
+		
 		//編集状態を取得する
 		List<EditStateOfDailyPerformance> editItemReflect = editStateDaily.findByEditState(working.getWorkInformation().getEmployeeId(),
 				working.getWorkInformation().getYmd(),
@@ -185,7 +189,6 @@ public class OvertimeOfDailyService {
 			exMidNightTime.getTime().setTime(new AttendanceTime(0));
 		}
 
-		attendanceTimeRepo.updateFlush(working.getAttendanceTimeOfDailyPerformance().get());
 		//削除
 		List<EditStateOfDailyPerformance> editState = new ArrayList<>(working.getEditState());
 		itemIdList.stream().forEach(x -> {
@@ -196,7 +199,10 @@ public class OvertimeOfDailyService {
 			});
 		});
 		working.setEditState(editState);
-		editStateDaily.deleteByListItemId(working.getWorkInformation().getEmployeeId(), working.getWorkInformation().getYmd(), itemIdList);
+		if(isSaveDirect){
+			attendanceTimeRepo.updateFlush(working.getAttendanceTimeOfDailyPerformance().get());
+			editStateDaily.deleteByListItemId(working.getWorkInformation().getEmployeeId(), working.getWorkInformation().getYmd(), itemIdList);
+		}
 		return working;
 	}
 	

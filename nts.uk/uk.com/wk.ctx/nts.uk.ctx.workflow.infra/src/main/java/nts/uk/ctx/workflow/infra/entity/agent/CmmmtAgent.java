@@ -10,6 +10,7 @@ import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.time.GeneralDate;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
@@ -81,4 +82,22 @@ public class CmmmtAgent extends UkJpaEntity implements Serializable {
 		return this.cmmmtAgentPK;
 	}
 
+	public static CmmmtAgent fromJdbc(NtsResultSet.NtsResultRecord rec) {
+		CmmmtAgent ent = new CmmmtAgent();
+		ent.cmmmtAgentPK = new CmmmtAgentPK(
+				rec.getString("CID"),
+				rec.getString("SID"),
+				rec.getString("REQUEST_ID"));
+		ent.startDate = rec.getGeneralDate("START_DATE");
+		ent.endDate = rec.getGeneralDate("END_DATE");
+		ent.agentSid1 = rec.getString("AGENT_SID1");
+		ent.agentAppType1 = rec.getInt("AGENT_APP_TYPE1");
+		ent.agentSid2 = rec.getString("AGENT_SID2");
+		ent.agentAppType2 = rec.getInt("AGENT_APP_TYPE2");
+		ent.agentSid3 = rec.getString("AGENT_SID3");
+		ent.agentAppType3 = rec.getInt("AGENT_APP_TYPE3");
+		ent.agentSid4 = rec.getString("AGENT_SID4");
+		ent.agentAppType4 = rec.getInt("AGENT_APP_TYPE4");
+		return ent;
+	}
 }

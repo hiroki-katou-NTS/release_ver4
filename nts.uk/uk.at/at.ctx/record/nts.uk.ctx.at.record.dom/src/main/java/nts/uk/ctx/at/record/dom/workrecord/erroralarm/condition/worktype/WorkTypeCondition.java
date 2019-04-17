@@ -3,6 +3,8 @@
  */
 package nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.worktype;
 
+import java.util.List;
+
 import lombok.Getter;
 import nts.arc.layer.dom.DomainObject;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
@@ -43,6 +45,8 @@ public class WorkTypeCondition extends DomainObject {
 	public void clearDuplicate() { }
 	
 	public void addWorkType(WorkTypeCode plan, WorkTypeCode actual){ }
+	
+	public void addWorkType(List<WorkTypeCode> plan, List<WorkTypeCode> actual){ }
 	
 	public void setupWorkType(boolean usePlan, boolean useActual){ }
 	

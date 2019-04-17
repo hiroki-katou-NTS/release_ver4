@@ -269,7 +269,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 	@Inject
 	private OptionalItemRepository optionalMasterRepo;
 
-	private static final List<String> DOMAIN_CHANGED_BY_CALCULATE = Arrays.asList(DAILY_ATTENDANCE_TIME_CODE, DAILY_OPTIONAL_ITEM_CODE);
+	private static final List<String> DOMAIN_CHANGED_BY_CALCULATE = Arrays.asList(DAILY_ATTENDANCE_TIME_CODE, DAILY_OPTIONAL_ITEM_CODE, DAILY_WORK_INFO_CODE);
 	
 	private static final Map<String, String[]> DOMAIN_CHANGED_BY_EVENT = new HashMap<>();
 	{
@@ -459,6 +459,18 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 	
 	public void handlerInsertAllMonth(List<IntegrationOfMonthly> lstMonthDomain, UpdateMonthDailyParam month) {
 		if(!lstMonthDomain.isEmpty() && month!= null && month.getDatePeriod() != null ) {
+//			month.getDomainMonth().ifPresent(current -> {
+				lstMonthDomain.stream().forEach(m -> {
+					long version = month.getVersion();
+					m.getAffiliationInfo().ifPresent(ma -> {
+						ma.setVersion(version);
+					});
+					m.getAttendanceTime().ifPresent(ma -> {
+						ma.setVersion(version);
+					});
+				});
+//			});
+		
 			updateAllDomainMonthService.merge(lstMonthDomain, month.getDatePeriod().end());
 		}
 		

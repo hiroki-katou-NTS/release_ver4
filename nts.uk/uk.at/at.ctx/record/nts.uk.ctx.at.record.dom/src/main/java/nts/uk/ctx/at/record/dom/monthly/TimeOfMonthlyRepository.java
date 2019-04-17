@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.monthly;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -51,6 +52,16 @@ public interface TimeOfMonthlyRepository {
 	List<TimeOfMonthly> findByEmployees(List<String> employeeIds, YearMonth yearMonth,
 			ClosureId closureId, ClosureDate closureDate);
 
+	/**
+	 * 検索　（社員IDリスト）
+	 * @param employeeIds 社員IDリスト
+	 * @param yearMonth 年月
+	 * @param closureId 締めID
+	 * @return 該当するTimeOfMonthly
+	 */
+	List<TimeOfMonthly> findByEmployeesAndClorure(List<String> employeeIds, YearMonth yearMonth,
+			int closureId);
+	
 	/**
 	 * 検索　（社員IDリストと年月リスト）
 	 * @param employeeIds 社員IDリスト
@@ -114,4 +125,9 @@ public interface TimeOfMonthlyRepository {
 	 */
 	void removeAffiliation(String employeeId, YearMonth yearMonth);
 	void removeAttendanceTime(String employeeId, YearMonth yearMonth);
+	
+	void verShouldUp(String employeeId, YearMonth yearMonth, int closureId, int closureDate, boolean lastOfMonth);
+	void verShouldUp(String employeeId, YearMonth yearMonth, int closureId, int closureDate, boolean lastOfMonth, long version);
+	long getVer(String employeeId, YearMonth yearMonth, int closureId, int closureDate, boolean lastOfMonth);
+	void dirtying(Supplier<Object> getKey);
 }

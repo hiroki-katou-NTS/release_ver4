@@ -324,7 +324,7 @@ var nts;
                         case 'Time':
                         case 'Clock':
                         case 'Duration': // ValidatorScriptではない。DynamicConstraintで使う？
-                        case 'TimePoint':// ValidatorScriptではない。DynamicConstraintで使う？
+                        case 'TimePoint': // ValidatorScriptではない。DynamicConstraintで使う？
                             constraintText += (constraintText.length > 0) ? "/" : "";
                             constraintText += constraint.min + "～" + constraint.max;
                             break;
@@ -2356,6 +2356,7 @@ var nts;
                     milliseconds = (uk.util.isNullOrUndefined(milliseconds)) ? currentDate.getUTCMilliseconds() : milliseconds;
                     return new Date(Date.UTC(year, month, date, hours, minutes, seconds, milliseconds));
                 }
+                // Return input time in UTC
                 else {
                     month = (uk.util.isNullOrUndefined(month)) ? 0 : month;
                     date = (uk.util.isNullOrUndefined(date)) ? 1 : date;
@@ -6012,9 +6013,11 @@ var nts;
                         if (uk.util.isNullOrUndefined(data)) {
                             transferData = data;
                         }
+                        // Data or KO data
                         else if (!_.isFunction(data) || ko.isObservable(data)) {
                             transferData = JSON.parse(JSON.stringify(ko.unwrap(data))); // Complete remove reference by object
                         }
+                        // Callback function
                         else {
                             transferData = data;
                         }
@@ -8770,7 +8773,7 @@ var nts;
                                         else
                                             helper.addClass($childCells, makeup.class);
                                     }
-                                    else if (makeup.textColor) {
+                                    else if (makeup.textColor) { // Don't set textColor
                                         $cell.style.color = makeup.textColor;
                                     }
                                     else {
@@ -15587,6 +15590,7 @@ var nts;
                                 $element.attr('tabindex', 0);
                             }
                             $element
+                                // delegate event for change template (on old filter box)
                                 .on(SHOWVALUE, function (evt) {
                                 var data = $element.data(DATA), cws = data[CWIDTH], ks = _.keys(cws);
                                 var option = _.find(data[DATA], function (t) { return t[optionsValue] == data[VALUE]; }), _template = template;
@@ -15617,6 +15621,7 @@ var nts;
                                     }
                                 }
                             })
+                                // define event changed for save default data
                                 .on(CHANGED, function (evt, key, value) {
                                 if (value === void 0) { value = undefined; }
                                 var data = $element.data(DATA) || {};
@@ -15625,6 +15630,7 @@ var nts;
                                     $element.data(DATA, data);
                                 }
                             })
+                                // define event validate for check require
                                 .on(VALIDATE, function (evt, ui) {
                                 var data = $element.data(DATA), value = data[VALUE];
                                 if ((ui ? data[CHANGED] : true) && data[ENABLE] && data[REQUIRED] && (_.isEmpty(String(value).trim()) || _.isNil(value))) {
@@ -15644,6 +15650,7 @@ var nts;
                                     }
                                 }
                             })
+                                // delegate open or close event on enter key
                                 .on(KEYDOWN, function (evt, ui) {
                                 if ($element.data(IGCOMB)) {
                                     if ([13].indexOf(evt.which || evt.keyCode) > -1) {
@@ -15940,6 +15947,7 @@ var nts;
                             var sto = setTimeout(function () {
                                 if ($element.data("igCombo")) {
                                     $element
+                                        // enable or disable 
                                         .igCombo(OPTION, "disabled", !enable);
                                     clearTimeout(sto);
                                 }
@@ -15952,6 +15960,7 @@ var nts;
                                     $element.igCombo(OPTION, "dataSource", options);
                                 }
                                 $element
+                                    // set new value
                                     .igCombo("value", value);
                                 if (!enable) {
                                     $element.removeAttr(TAB_INDEX);
@@ -15971,7 +15980,7 @@ var nts;
                                     if (width != MINWIDTH) {
                                         $element.igCombo("option", "width", width);
                                     }
-                                    else {
+                                    else { // auto width
                                         $element
                                             .igCombo("option", "width", (_.sum(_.map(cws, function (c) { return c; })) * WoC + 60) + 'px');
                                     }
@@ -18230,7 +18239,7 @@ var nts;
                             ROW_HEIGHT = 24;
                             // Internet Explorer 6-11
                             var _document = document;
-                            var isIE = false || !!_document.documentMode;
+                            var isIE = /*@cc_on!@*/ false || !!_document.documentMode;
                             // Edge 20+
                             var _window = window;
                             var isEdge = !isIE && !!_window.StyleMedia;
@@ -20840,6 +20849,7 @@ var nts;
                                 var btn = $('<button>').text(text)
                                     .addClass('nts-switch-button unselectable')
                                     .data('swbtn', value)
+                                    //                        .attr('tabindex', "-1")
                                     .attr('unselectable', "on")
                                     .on('click', function () {
                                     var selectedValue = $(this).data('swbtn');
@@ -25223,7 +25233,7 @@ var nts;
                                 var check = $cell.querySelector("input[type='checkbox']");
                                 if (!check)
                                     return;
-                                if (val) {
+                                if (val) { //&& check.getAttribute("checked") !== "checked") {
                                     check.setAttribute("checked", "checked");
                                     check.checked = true;
                                     var evt = document.createEvent("HTMLEvents");
@@ -25232,7 +25242,7 @@ var nts;
                                     evt.checked = val;
                                     check.dispatchEvent(evt);
                                 }
-                                else if (!val) {
+                                else if (!val) { // && check.getAttribute("checked") === "checked") {
                                     check.removeAttribute("checked");
                                     check.checked = false;
                                     var evt = document.createEvent("HTMLEvents");
@@ -25628,39 +25638,44 @@ var nts;
                             var $grid = evt.currentTarget, $tCell = evt.target;
                             if (!$grid)
                                 return;
-                            if (ti.isEnterKey(evt)) {
-                                var direct = $.data($grid, "enterDirect");
-                                if (evt.shiftKey) {
-                                    lch.selectPrev($grid, direct);
-                                }
-                                else {
-                                    lch.selectNext($grid, direct);
-                                }
+                            if (!ti.isEnterKey(evt) && !ti.isTabKey(evt) && evt.keyCode >= 46 && evt.keyCode <= 110) {
+                                ssk.KeyPressed[evt.keyCode] = true;
                             }
-                            else if (ti.isTabKey(evt)) {
-                                evt.preventDefault();
-                                if (evt.shiftKey) {
+                            if (!_(ssk.KeyPressed).keys().filter(function (k) { return k !== "13" && k !== "9"; }).size()) {
+                                if (ti.isEnterKey(evt)) {
+                                    var direct = $.data($grid, "enterDirect");
+                                    if (evt.shiftKey) {
+                                        lch.selectPrev($grid, direct);
+                                    }
+                                    else {
+                                        lch.selectNext($grid, direct);
+                                    }
+                                }
+                                else if (ti.isTabKey(evt)) {
+                                    evt.preventDefault();
+                                    if (evt.shiftKey) {
+                                        lch.selectPrev($grid);
+                                    }
+                                    else {
+                                        lch.selectNext($grid);
+                                    }
+                                }
+                                else if (ti.isArrowLeft(evt)) {
+                                    evt.preventDefault();
                                     lch.selectPrev($grid);
                                 }
-                                else {
+                                else if (ti.isArrowRight(evt)) {
+                                    evt.preventDefault();
                                     lch.selectNext($grid);
                                 }
-                            }
-                            else if (ti.isArrowLeft(evt)) {
-                                evt.preventDefault();
-                                lch.selectPrev($grid);
-                            }
-                            else if (ti.isArrowRight(evt)) {
-                                evt.preventDefault();
-                                lch.selectNext($grid);
-                            }
-                            else if (ti.isArrowUp(evt)) {
-                                evt.preventDefault();
-                                lch.selectPrev($grid, "below");
-                            }
-                            else if (ti.isArrowDown(evt)) {
-                                evt.preventDefault();
-                                lch.selectNext($grid, "below");
+                                else if (ti.isArrowUp(evt)) {
+                                    evt.preventDefault();
+                                    lch.selectPrev($grid, "below");
+                                }
+                                else if (ti.isArrowDown(evt)) {
+                                    evt.preventDefault();
+                                    lch.selectNext($grid, "below");
+                                }
                             }
                             // Get input
                             if (!evt.ctrlKey && ti.isAlphaNumeric(evt) || ti.isMinusSymbol(evt) || ti.isDeleteKey(evt)
@@ -25744,6 +25759,17 @@ var nts;
                             else if (evt.ctrlKey && evt.keyCode === 90) {
                                 annuler();
                             }
+                        });
+                        $grid.addXEventListener(ssk.KEY_UP, function (evt) {
+                            delete ssk.KeyPressed[evt.keyCode];
+                        });
+                        document.addXEventListener(ssk.KEY_DOWN, function (evt) {
+                            if (!ti.isEnterKey(evt) && !ti.isTabKey(evt) && evt.keyCode >= 46 && evt.keyCode <= 110) {
+                                ssk.KeyPressed[evt.keyCode] = true;
+                            }
+                        });
+                        document.addXEventListener(ssk.KEY_UP, function (evt) {
+                            delete ssk.KeyPressed[evt.keyCode];
                         });
                         if (_copie) {
                             $grid.addXEventListener(ssk.FOCUS_IN, function (evt) {
@@ -26681,25 +26707,10 @@ var nts;
                     ssk.RESIZE = "resize";
                     ssk.KEY_DOWN = "keydown";
                     ssk.KEY_UP = "keyup";
-                    ssk.CM = "contextmenu";
-                    ssk.AREA_RESIZE_STARTED = "extablearearesizestarted";
-                    ssk.AREA_RESIZE = "extablearearesize";
-                    ssk.AREA_RESIZE_END = "extablearearesizeend";
-                    ssk.BODY_HEIGHT_CHANGED = "extablebodyheightchanged";
-                    ssk.OCCUPY_UPDATE = "extableoccupyupdate";
-                    ssk.START_EDIT = "extablestartedit";
-                    ssk.STOP_EDIT = "extablestopedit";
-                    ssk.CELL_UPDATED = "extablecellupdated";
-                    ssk.ROW_UPDATED = "extablerowupdated";
-                    ssk.POPUP_SHOWN = "xpopupshown";
-                    ssk.POPUP_INPUT_END = "xpopupinputend";
-                    ssk.ROUND_RETREAT = "extablecellretreat";
-                    ssk.CHECK_ALL = "extableselectallrows";
-                    ssk.CHECK_ROW = "extableselectrow";
-                    ssk.MOUSEIN_COLUMN = "extablemouseincolumn";
-                    ssk.MOUSEOUT_COLUMN = "extablemousoutcolumn";
-                    ssk.RENDERED = "extablerowsrendered";
-                    ssk.COMPLETED = "extablecompleted";
+                    ssk.RENDERED = "mgridrowsrendered";
+                    ssk.MS = "mgridms";
+                    ssk.MS_BEFORE_COMPL = "mgridmsbeforecompletion";
+                    ssk.KeyPressed = {};
                     window.addXEventListener = document.addXEventListener = Element.prototype.addXEventListener = addEventListener;
                     window.removeXEventListener = document.removeXEventListener = Element.prototype.removeXEventListener = removeEventListener;
                     /**
@@ -27298,14 +27309,20 @@ var nts;
                         dkn.controlType[dkn.TEXTBOX] = { my: $editContainer, type: dkn.TEXTBOX };
                         $editor.addXEventListener(ssk.KEY_DOWN, function (evt) {
                             if (ti.isEnterKey(evt) || ti.isTabKey(evt)) {
-                                var grid = ti.closest($editor, "." + MGRID);
-                                su.endEdit(grid);
+                                if (!_(ssk.KeyPressed).keys().filter(function (k) { return k !== "13" && k !== "9"; }).size()) {
+                                    var grid = ti.closest($editor, "." + MGRID);
+                                    su.endEdit(grid);
+                                }
+                            }
+                            else if (evt.keyCode >= 46 && evt.keyCode <= 110) {
+                                ssk.KeyPressed[evt.keyCode] = true;
                             }
                             if (ti.isArrowLeft(evt) || ti.isArrowRight(evt) || ti.isArrowUp(evt) || ti.isArrowDown(evt)) {
                                 evt.stopPropagation();
                             }
                         });
                         $editor.addXEventListener(ssk.KEY_UP, function (evt) {
+                            delete ssk.KeyPressed[evt.keyCode];
                             var $td = ti.closest($editor, "td." + v.CELL_CLS);
                             if ($td) {
                                 var coord = ti.getCellCoord($td);
@@ -29132,7 +29149,7 @@ var nts;
 /// <reference path="ui/ko-ext/legendbutton-ko-ext.ts"/>
 /// <reference path="ui/ko-ext/charset-setting-ko-ext.ts"/>
 /// <reference path="ui/function-wrap/contextmenu.ts"/>
-/// <reference path="ui/mgrid.ts"/> 
+/// <reference path="ui/mgrid.ts"/>
 /// <reference path="../reference.ts"/>
 var nts;
 (function (nts) {
@@ -30602,7 +30619,7 @@ var nts;
                             ROW_HEIGHT = 24;
                             // Internet Explorer 6-11
                             var _document = document;
-                            var isIE = false || !!_document.documentMode;
+                            var isIE = /*@cc_on!@*/ false || !!_document.documentMode;
                             // Edge 20+
                             var _window = window;
                             var isEdge = !isIE && !!_window.StyleMedia;
@@ -35999,7 +36016,7 @@ var nts;
                             if (!loader) {
                                 $grid.data(internal.LOADER, new Loader(demandLoadFt.allKeysPath, demandLoadFt.pageRecordsPath));
                             }
-                            else if (loader.keys) {
+                            else if (loader.keys) { // Switch sheet
                                 pageSize = setting.pageSize;
                                 return false;
                             }
@@ -36759,7 +36776,7 @@ var nts;
                             $(window).on("mousedown.popup", function (e) {
                                 if (!$(e.target).is(control) // Target isn't Popup
                                     && control.has(e.target).length === 0 // Target isn't Popup's children
-                                    && !$(e.target).is(setting.trigger)) {
+                                    && !$(e.target).is(setting.trigger)) { // Target isn't Trigger element
                                     hide(control);
                                 }
                             });
@@ -40139,6 +40156,7 @@ var NtsSortableBindingHandler = /** @class */ (function () {
                             if (sourceParent) {
                                 $(sourceParent === targetParent ? this : ui.sender || this).sortable("cancel");
                             }
+                            //for a draggable item just remove the element
                             else {
                                 $(el).remove();
                             }
@@ -40166,7 +40184,7 @@ var NtsSortableBindingHandler = /** @class */ (function () {
                                 //rendering is handled by manipulating the observableArray; ignore dropped element
                                 self.dataSet(el, self.ITEMKEY, null);
                             }
-                            else {
+                            else { //employ the strategy of moving items
                                 if (targetIndex >= 0) {
                                     if (sourceParent) {
                                         if (sourceParent !== targetParent) {

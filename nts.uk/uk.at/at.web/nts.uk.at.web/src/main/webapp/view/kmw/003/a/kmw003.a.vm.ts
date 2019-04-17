@@ -577,17 +577,40 @@ module nts.uk.at.view.kmw003.a.viewmodel {
             param.actualTime.endDate = moment.utc(param.actualTime.endDate, "YYYY/MM/DD").toISOString();
             let dfd = $.Deferred();
             service.updateScreen(param).done((data) => {
+                let lstRowId = [] ;
                 let dpDataNew = _.map(self.dpData, (value: any) => {
                     let val = _.find(data.lstData, (item: any) => {
                         return item.id == value.id;
                     });
                     return val != undefined ? val : value;
                 });
+                
                 self.dpData = dpDataNew;
-                let cellStatesNew = _.map(self.cellStates(), (value: any) => {
-                    let val = _.find(data.lstCellState, (item: any) => {
-                        return item.rowId == value.rowId && item.columnKey == value.columnKey;
+                let lstCellStateMerge = [] ;
+                _.forEach(dpDataNew, (item: any) => {
+                       lstRowId.push(item.rowId);
                     });
+                for(let i = 0;i<data.lstCellState.length;i++){
+                    if(data.lstCellState[i].columnKey != "approval"){
+                        lstCellStateMerge.push(data.lstCellState[i]);
+                        continue; 
+                    }
+                    if(data.lstCellState[i].columnKey == "approval" && _.indexOf(lstRowId, data.lstCellState[i].rowId) != -1 ){
+                        for(let j =i+1;j<data.lstCellState.length;j++){
+                            if(data.lstCellState[j].columnKey == "approval" && data.lstCellState[i].rowId == data.lstCellState[j].rowId){ 
+                                data.lstCellState[i].state.push(data.lstCellState[j].state[0]);
+                            }                            
+                        }
+                        _.remove(lstRowId, function(n) {
+                            return n.rowId == data.lstCellState[i].rowId;
+                        });
+                        lstCellStateMerge.push(data.lstCellState[i]);
+                    }
+                }
+                let cellStatesNew = _.map(self.cellStates(), (value: any) => {
+                    let val = _.find(lstCellStateMerge, (item: any) => {
+                        return item.rowId == value.rowId && item.columnKey == value.columnKey;
+                    }); 
                     return val != undefined ? val : value;
                 });
                 _.each(data.lstCellState, (cs: any) => {
@@ -600,12 +623,21 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 });
                 self.cellStates(cellStatesNew);
                 self.dailyPerfomanceData(dpDataNew);
+                let rowIdUpdate =  _.uniq(_.map($("#dpGrid").mGrid("updatedCells"), (itemTemp) => {return itemTemp.rowId}));
                 $("#dpGrid").mGrid("destroy");
                 $("#dpGrid").off();
                 self.loadGrid();
                 _.forEach(data.mpsateCellHideControl, (cellHide =>{
                     $('#dpGrid').mGrid("setState", cellHide.rowId, cellHide.columnKey, ["mgrid-hide"])
                 }))
+                
+                _.forEach(
+                    _.filter(self.cellStates(), (itemTemp) => { 
+                        return itemTemp.columnKey == "approval" && rowIdUpdate.indexOf(itemTemp.rowId) == -1 && itemTemp.state.indexOf("mgrid-error") != -1
+                    }),
+                    (state) => {
+                        $('#dpGrid').mGrid("setState", state.rowId, state.columnKey, ["mgrid-hide"]);
+                    });
                 dfd.resolve();
             });
             return dfd.promise();
@@ -647,14 +679,16 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                         startDate: moment.utc(self.actualTimeSelectedDat().startDate, "YYYY/MM/DD"),
                         endDate: moment.utc(self.actualTimeSelectedDat().endDate, "YYYY/MM/DD"),
                         dataCheckSign: [],
-                        dataCheckApproval: []
+                        dataCheckApproval: [],
+                        dataLock: []
                     };
 
                 _.each(dataChange, (data: any) => {
                     let dataTemp = _.find(dataSource, (item: any) => {
                         return item.id == data.rowId;
                     });
-
+                    let current = _.find(self.dpData, (dt) => { return dt.id ===data.rowId; });
+                    dataUpdate.dataLock.push({ rowId: data.rowId, version: current.version, employeeId: dataTemp.employeeId});
                     if (data.columnKey != "identify" && data.columnKey != "approval") {
                         //get layout , and type
                         let layoutAndType: any = _.find(self.itemValueAll(), (item: any) => {
@@ -680,19 +714,29 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 nts.uk.ui.block.invisible();
                 nts.uk.ui.block.grayout();
                 service.addAndUpdate(dataUpdate).done((data) => {
-//                    _.each(dataChange, data => {
-//                        $("#dpGrid").mGrid("updateCell", data.rowId, data.columnKey, data.value, true);
-//                    });
-
-                    nts.uk.ui.block.clear();
+                    //                    _.each(dataChange, data => {
+                    //                        $("#dpGrid").mGrid("updateCell", data.rowId, data.columnKey, data.value, true);
+                    //                    });
+                    nts.uk.ui.dialog.info({ messageId: 'Msg_15' });
+					
 //                    if (self.initMode() != ScreenMode.APPROVAL) {
-                        self.loadRowScreen();
+					self.loadRowScreen().done(() => {
+						nts.uk.ui.block.clear();
+					});
                         //self.showButton(new AuthorityDetailModel(self.dataAll().authorityDto, self.dataAll().actualTimeState, self.initMode(), self.dataAll().formatPerformance.settingUnitType));
                         //                           self.updateDate(self.yearMonth());  
 //                    }
                 }).fail(function(res: any) {
-                    nts.uk.ui.dialog.error({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() { nts.uk.ui.block.clear(); });
-                });;
+                    if(res.optimisticLock === true){
+                        nts.uk.ui.dialog.error({ messageId: 'Msg_1528' }).then(() => {
+                            self.loadRowScreen().done(() => {
+                                nts.uk.ui.block.clear();
+                            });
+                        });
+                    } else {
+                        nts.uk.ui.dialog.error({ messageId: res.messageId, messageParams: res.parameterIds }).then(function() { nts.uk.ui.block.clear(); });    
+                    }
+                });
             }
         }
 
@@ -1842,6 +1886,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
         layoutCode: string;
         employeeId: string;
         typeGroup: number;
+        version: number;
         constructor(rowId: any, itemId: any, value: any, valueType: number, layoutCode: string, employeeId: string, typeGroup: number) {
             this.rowId = rowId;
             this.itemId = itemId;

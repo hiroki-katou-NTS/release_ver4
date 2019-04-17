@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.task.parallel.ManagedParallelWithContext.ControlOption;
 import nts.arc.time.GeneralDate;
@@ -35,6 +36,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.UseClassification;
 
 @Stateless
+@Slf4j
 public class AppRouteUpdateMonthlyDefault implements AppRouteUpdateMonthlyService {
 
 	@Inject
@@ -87,11 +89,13 @@ public class AppRouteUpdateMonthlyDefault implements AppRouteUpdateMonthlyServic
 		/** ドメインモデル「就業締め日」を取得する(lấy thông tin domain ル「就業締め日」) */
 		List<Closure> listClosure = closureRepository.findAllActive(procExec.getCompanyId(),
 				UseClassification.UseClass_Use);
-		this.managedParallelWithContext.forEach(
-				ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
-				listClosure,
-				itemClosure -> {
-//		for (Closure closure : listClosure) {
+		
+		log.info("承認ルート更新(月別) START PARALLEL (締めループ数:" + listClosure.size() + ")");
+		long startTime = System.currentTimeMillis();
+		
+		listClosure.forEach(itemClosure -> {
+			log.info("承認ルート更新(月別) 締め: " + itemClosure.getClosureId());
+			
 			/** 締め開始日を取得する */
 			PresentClosingPeriodFunImport closureData = funClosureAdapter
 					.getClosureById(procExec.getCompanyId(), itemClosure.getClosureId().value).get();
@@ -245,7 +249,9 @@ public class AppRouteUpdateMonthlyDefault implements AppRouteUpdateMonthlyServic
 			 listCheckCreateApp.add(new CheckCreateperApprovalClosure(itemClosure.getClosureId().value,check));
 			
 //		}
-	});
+		});
+		
+		log.info("承認ルート更新(月別) END PARALLEL: " + ((System.currentTimeMillis() - startTime) / 1000) + "秒");
 		
 		boolean checkError = false;
 		/*終了状態で「エラーあり」が返ってきたか確認する*/

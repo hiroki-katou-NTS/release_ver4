@@ -54,11 +54,13 @@ public class UpdateMonthAfterProcessDaily {
 						.filter(x -> x.getWorkInformation().getEmployeeId().equals(key)).collect(Collectors.toList());
 				needCalc.getRight().forEach(data -> {
 					//月の実績を集計する
-					Optional<IntegrationOfMonthly> monthDomainOpt = aggregateSpecifiedDailys.algorithm(companyId, key,
+					aggregateSpecifiedDailys.algorithm(companyId, key,
 							data.getYearMonth(), data.getClosureId(), data.getClosureDate(), data.getPeriod(), Optional.empty(), domainDailyGroupEmp,
-							monthlyWork);
-					if (monthDomainOpt.isPresent())
-						result.add(monthDomainOpt.get());
+							monthlyWork).ifPresent(monthDomain -> {
+								monthDomain.getAffiliationInfo().ifPresent(a -> a.setVersion(month.getVersion()));
+								monthDomain.getAttendanceTime().ifPresent(a -> a.setVersion(month.getVersion()));
+								result.add(monthDomain);
+							});
 				});
 			}
 		});
@@ -76,7 +78,11 @@ public class UpdateMonthAfterProcessDaily {
 			Optional<IntegrationOfMonthly> monthDomainOpt = aggregateSpecifiedDailys.algorithm(companyId, month.getEmployeeId(),
 					new YearMonth(month.getYearMonth()), ClosureId.valueOf(month.getClosureId()), month.getClosureDate().toDomain(), month.getDatePeriod(), Optional.empty(), domainDailyGroupEmp,
 					monthlyWork);
-			if(monthDomainOpt.isPresent()) result.add(monthDomainOpt.get());
+			if(monthDomainOpt.isPresent()) {
+				monthDomainOpt.get().getAffiliationInfo().ifPresent(a -> a.setVersion(month.getVersion()));
+				monthDomainOpt.get().getAttendanceTime().ifPresent(a -> a.setVersion(month.getVersion()));
+				result.add(monthDomainOpt.get());
+			}
 			System.out.println("tg tinh toan thang : "+ (System.currentTimeMillis() - time));
 			if(monthDomainOpt.isPresent() && !monthDomainOpt.get().getEmployeeMonthlyPerErrorList().isEmpty()) return result;
 			//updateAllDomainMonthService.insertUpdateAll(Arrays.asList(monthDomainOpt.get()));

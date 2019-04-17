@@ -34,17 +34,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 public class JpaShortTimeOfDailyPerformanceRepo extends JpaRepository implements ShortTimeOfDailyPerformanceRepository {
 
-//	private static final String REMOVE_BY_EMPLOYEEID_AND_DATE;
-//
-//	static {
-//		StringBuilder builderString = new StringBuilder();
-//		builderString.append("DELETE ");
-//		builderString.append("FROM KrcdtDaiShortWorkTime a ");
-//		builderString.append("WHERE a.krcdtDaiShortWorkTimePK.sid = :employeeId ");
-//		builderString.append("AND a.krcdtDaiShortWorkTimePK.ymd = :ymd ");
-//		REMOVE_BY_EMPLOYEEID_AND_DATE = builderString.toString();
-//	}
-
 	@Override
 	public Optional<ShortTimeOfDailyPerformance> find(String employeeId, GeneralDate ymd) {
 		List<ShortWorkingTimeSheet> shortTimeSheets = findEntities(employeeId, ymd).getList(c -> shortWorkTime(c));

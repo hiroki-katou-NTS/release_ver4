@@ -77,7 +77,8 @@ module nts.uk.at.view.kdw007.a.viewmodel {
 //            { code: 12, name: "打刻申請（その他）" },
 //            { code: 13, name: "時間年休申請" },
 //            { code: 14, name: "遅刻早退取消申請" },
-            { code: 15, name: "振休振出申請" },
+            
+            { code: 14, name: "振休振出申請" },
 //            { code: 16, name: "連続出張申請" },
 //            { code: 17, name: "３６協定時間申請" }
         ]);
@@ -132,32 +133,38 @@ module nts.uk.at.view.kdw007.a.viewmodel {
                     nts.uk.ui.block.clear();
                 });
             });
+            setTimeout(function() {
             self.selectedErrorAlarmCode.subscribe((code) => {
-                if (code) {
-                    self.codeToSelect(null);
-                    let foundItem: ErrorAlarmWorkRecord = _.find(self.lstFilteredData(), (item) => {
-                        return item.code == code;
-                    });
-                    if (foundItem) {
-                        self.isNewMode(false);
-                        self.changeSelectedErrorAlarm(foundItem);
-                        if (self.screenMode() == ScreenMode.Daily && self.showTypeAtr() == 1) {
-                            self.updateTab();
+                
+                    nts.uk.ui.block.invisible();
+                    if (code) {
+                        self.codeToSelect(null);
+                        let foundItem: ErrorAlarmWorkRecord = _.find(self.lstFilteredData(), (item) => {
+                            return item.code == code;
+                        });
+                        if (foundItem) {
+                            self.isNewMode(false);
+                            self.changeSelectedErrorAlarm(foundItem);
+                            if (self.screenMode() == ScreenMode.Daily && self.showTypeAtr() == 1) {
+                                self.updateTab();
+                            }
+                            if (self.screenMode() == ScreenMode.Daily && self.showTypeAtr() == 0) {
+                                self.newTab();
+                            }
+                            if (self.screenMode() == ScreenMode.Daily && self.selectedErrorAlarm().typeAtr() == '2') {
+                                self.isAtdItemColor(false);
+                            }
                         }
-                        if (self.screenMode() == ScreenMode.Daily && self.showTypeAtr() == 0) {
+
+                        if (self.screenMode() == ScreenMode.Daily && self.isNewMode() == true) {
                             self.newTab();
                         }
-                        if (self.screenMode() == ScreenMode.Daily && self.selectedErrorAlarm().typeAtr() == '2') {
-                            self.isAtdItemColor(false);
-                        }
                     }
-
-                    if (self.screenMode() == ScreenMode.Daily && self.isNewMode() == true) {
-                        self.newTab();
-                    }
-                }
+                setTimeout(() => {
+                    nts.uk.ui.block.clear();
+                }, 500);
             });
-
+                 },100);
             self.selectedErrorAlarm().typeAtr.subscribe((val) => {
                 if (self.screenMode() == ScreenMode.Daily && self.selectedErrorAlarm().typeAtr() == '2') {
                     self.isAtdItemColor(false);
@@ -274,6 +281,36 @@ module nts.uk.at.view.kdw007.a.viewmodel {
             if (self.screenMode() == ScreenMode.Daily) {
                 self.newTab();
             }
+        }
+
+        resetMonthlyConditon(selectedErrorAlarm, param) {
+            selectedErrorAlarm.operatorBetweenPlanActual(param && param.operatorBetweenPlanActual ? param.operatorBetweenPlanActual : 0);
+            selectedErrorAlarm.operatorBetweenGroups(param && param.operatorBetweenGroups ? param.operatorBetweenGroups : 0);
+            selectedErrorAlarm.operatorGroup1(param && param.operatorGroup1 ? param.operatorGroup1 : 0);
+            selectedErrorAlarm.operatorGroup2(param && param.operatorGroup2 ? param.operatorGroup2 : 0);
+            selectedErrorAlarm.group2UseAtr(param && param.group2UseAtr ? param.group2UseAtr : false);
+            selectedErrorAlarm.erAlAtdItemConditionGroup1.forEach((condition) => {
+                if (param && param.erAlAtdItemConditionGroup1 && param.erAlAtdItemConditionGroup1.length > 0) {
+                    param.erAlAtdItemConditionGroup1.forEach((conditionParam) => {
+                        if (conditionParam.targetNO == condition.targetNO()) {
+                            condition.setData(conditionParam.targetNO, conditionParam);
+                        }
+                    });
+                } else {
+                    condition.setData(condition.targetNO(), null);
+                }
+            });
+            selectedErrorAlarm.erAlAtdItemConditionGroup2.forEach((condition) => {
+                if (param && param.erAlAtdItemConditionGroup2 && param.erAlAtdItemConditionGroup2.length > 0) {
+                    param.erAlAtdItemConditionGroup2.forEach((conditionParam) => {
+                        if (conditionParam.targetNO == condition.targetNO()) {
+                            condition.setData(conditionParam.targetNO, conditionParam);
+                        }
+                    });
+                } else {
+                    condition.setData(condition.targetNO(), null);
+                }
+            });
         }
 
         reSetData(selectedErrorAlarm: ErrorAlarmWorkRecord, param: any) {
@@ -714,7 +751,6 @@ module nts.uk.at.view.kdw007.a.viewmodel {
             nts.uk.ui.windows.sub.modal("at", "/view/kdw/007/b/index.xhtml").onClosed(() => {
                 let output = getShared("kdw007BResult");
                 if (output) {
-                    debugger;
                 }
             });
         }

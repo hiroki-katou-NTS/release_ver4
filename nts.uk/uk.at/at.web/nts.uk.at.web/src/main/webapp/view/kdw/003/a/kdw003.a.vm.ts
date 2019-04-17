@@ -1248,8 +1248,14 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     dfd.resolve(errorNoReload);
                 }).fail((data) => {
                     nts.uk.ui.block.clear();
-                    nts.uk.ui.dialog.alert(data.message);
-                    dfd.resolve(true);
+                    if(data.optimisticLock === true){
+                        nts.uk.ui.dialog.error({ messageId: 'Msg_1528' }).then(() => {
+                            self.reloadScreen();
+                        });
+                    } else {
+                        nts.uk.ui.dialog.alert(data.message);
+                        dfd.resolve(true);
+                    }
                 });
             } else {
                 nts.uk.ui.block.clear();

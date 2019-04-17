@@ -640,7 +640,7 @@ module cmm045.a.viewmodel {
             let cont1 = contentv42 == '' ? timeNo417 : timeNo417 == '' ? contentv42 : contentv42 + '　' + timeNo417;
             let setTrue = contentv4 == '' ? cont1 : cont1 == '' ? contentv4 : contentv4 + '　' + cont1;
             let appCt005: string = masterInfo.detailSet == 1 ? setTrue : cont1;
-            let appContent005Bf = appCt005 == '' ? reason : appCt005 + '<br/>'+  reason
+            let appContent005Bf = appCt005 == '' ? reason : appCt005 + '<br/>'+  reason;
             let prePost = app.prePostAtr == 0 ? '事前' : '事後';
             let prePostApp = masterInfo.checkAddNote == true ? prePost + getText('CMM045_101') : prePost;
             let a: vmbase.DataModeApp = new vmbase.DataModeApp(app.applicationID, app.applicationType, 'chi tiet', applicant,
@@ -743,7 +743,7 @@ module cmm045.a.viewmodel {
             return result;
         }
         /**
-         * convert frame time over time
+         * convert frame time holiday work
          */
         convertFrameTimeHd(lstFrame: Array<vmbase.OverTimeFrame>): any {
             let self = this;
@@ -977,10 +977,10 @@ module cmm045.a.viewmodel {
             let time2 = go2 == '' ? '' : go2 + getText('CMM045_100') + back2;
             let breakTime = wkChange.breakTimeStart1 == '' ? '' : getText('CMM045_251') + wkChange.breakTimeStart1 + getText('CMM045_100') + wkChange.breakTimeEnd1;
             let reason = self.displaySet().appReasonDisAtr == 1 ? app.applicationReason : '';
-            let workName = wkChange.workTypeName == '' ? wkChange.workTimeName : wkChange.workTimeName == '' ?  wkChange.workTypeName : wkChange.workTypeName + '　' + wkChange.workTimeName
-            let time = time1 == '' ? time2 : time2 == '' ? time1 : time1 + '　' + time2
+            let workName = wkChange.workTypeName == '' ? wkChange.workTimeName : wkChange.workTimeName == '' ?  wkChange.workTypeName : wkChange.workTypeName + '　' + wkChange.workTimeName;
+            let time = time1 == '' ? time2 : time2 == '' ? time1 : time1 + '　' + time2;
             let cont1 = workName == '' ? time : time == '' ? workName : workName + '　' + time;
-            let cont2 = cont1 == '' ? breakTime : breakTime == '' ? cont1 : cont1 + '　' + breakTime
+            let cont2 = cont1 == '' ? breakTime : breakTime == '' ? cont1 : cont1 + '　' + breakTime;
             let appContent007 = cont2 == '' ? reason : reason == '' ? cont2 : cont2 + '<br/>' + reason;
             let prePost = app.prePostAtr == 0 ? '事前' : '事後';
             let prePostApp = masterInfo.checkAddNote == true ? prePost + getText('CMM045_101') : prePost;

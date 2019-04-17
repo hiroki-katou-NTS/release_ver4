@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.List;
 import java.util.Optional;*/
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 import org.apache.logging.log4j.util.Strings;
 
 import nts.arc.error.BusinessException;
+import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.dom.application.ApplicationApprovalService_New;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.UseAtr;
@@ -25,6 +27,7 @@ import nts.uk.ctx.at.request.dom.application.common.service.newscreen.RegisterAt
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.after.NewAfterRegister_New;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.before.NewBeforeRegister_New;
 import nts.uk.ctx.at.request.dom.application.common.service.other.CollectAchievement;
+import nts.uk.ctx.at.request.dom.application.common.service.other.OtherCommonAlgorithm;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.AchievementOutput;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
 import nts.uk.ctx.at.request.dom.application.gobackdirectly.GoBackDirectly;
@@ -41,7 +44,10 @@ import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktime.predset.TimezoneUse;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingService;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.internal.PredetermineTimeSetForCalc;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 import nts.uk.shr.com.context.AppContexts;
 
 /**
@@ -77,6 +83,9 @@ public class GoBackDirectlyRegisterDefault implements GoBackDirectlyRegisterServ
 	
 	@Inject
 	private CollectAchievement collectAchievement;
+	
+	@Inject
+	private OtherCommonAlgorithm otherCommonAlgorithm;
 	
 	/**
 	 * 
@@ -302,5 +311,85 @@ public class GoBackDirectlyRegisterDefault implements GoBackDirectlyRegisterServ
 			}
 		}
 		return result;
+	}
+
+
+	@Override
+	public List<String> inconsistencyCheck(String companyID, String employeeID, GeneralDate appDate) {
+		// ドメインモデル「直行直帰申請共通設定」を取得
+		Optional<GoBackDirectlyCommonSetting> opGoBackDirectlyCommonSet = this.goBackDirectCommonSetRepo
+				.findByCompanyID(companyID);
+		if(!opGoBackDirectlyCommonSet.isPresent()){
+			return Collections.emptyList();
+		}
+		GoBackDirectlyCommonSetting goBackDirectlyCommonSet = opGoBackDirectlyCommonSet.get();
+		CheckAtr appDateContradictionAtr = goBackDirectlyCommonSet.getContraditionCheckAtr();
+		if(appDateContradictionAtr==CheckAtr.NOTCHECK){
+			return Collections.emptyList();
+		}
+		// アルゴリズム「11.指定日の勤務実績（予定）の勤務種類を取得」を実行する
+		WorkType workType = otherCommonAlgorithm.getWorkTypeScheduleSpec(companyID, employeeID, appDate);
+		if(workType==null){
+			// 「申請日矛盾区分」をチェックする
+			if(appDateContradictionAtr==CheckAtr.CHECKNOTREGISTER){
+				throw new BusinessException("Msg_1519", appDate.toString("yyyy/MM/dd"));
+			}
+			return Arrays.asList("Msg_1520", appDate.toString("yyyy/MM/dd")); 
+		}
+		// アルゴリズム「01_直行直帰_勤務種類の分類チェック」を実行する
+		boolean checked = this.workTypeInconsistencyCheck(workType);
+		if(!checked){
+			return Collections.emptyList();
+		}
+		String name = workType.getName().v();
+		// 「申請日矛盾区分」をチェックする
+		if(appDateContradictionAtr==CheckAtr.CHECKNOTREGISTER){
+			throw new BusinessException("Msg_1521", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "未登録のマスタ");
+		}
+		return Arrays.asList("Msg_1522", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "未登録のマスタ"); 
+	}
+	
+	/**
+	 * 01_直行直帰_勤務種類の分類チェック
+	 * @param workType
+	 * @return
+	 */
+	private boolean workTypeInconsistencyCheck(WorkType workType){
+		// INPUT.ドメインモデル「勤務種類.勤務の単位(WORK_ATR)」をチェックする
+		if(workType.getDailyWork().getWorkTypeUnit()==WorkTypeUnit.OneDay){
+			// INPUT.ドメインモデル「勤務種類.1日勤務分類(ONE_DAY_CLS)」をチェックする
+			WorkTypeClassification workTypeClassification = workType.getDailyWork().getOneDay();
+			if(workTypeClassification==WorkTypeClassification.Attendance||
+				workTypeClassification==WorkTypeClassification.Shooting||
+				workTypeClassification==WorkTypeClassification.HolidayWork){
+				return false;
+			}
+			return true;
+		}
+		// INPUT.ドメインモデル「勤務種類.午前の勤務分類(MORNING_CLS)」をチェックする
+		WorkTypeClassification workTypeClassMorning = workType.getDailyWork().getMorning();
+		if(workTypeClassMorning!=WorkTypeClassification.Holiday&&
+			workTypeClassMorning!=WorkTypeClassification.AnnualHoliday&&
+			workTypeClassMorning!=WorkTypeClassification.YearlyReserved&&
+			workTypeClassMorning!=WorkTypeClassification.SpecialHoliday&&
+			workTypeClassMorning!=WorkTypeClassification.Absence&&
+			workTypeClassMorning!=WorkTypeClassification.SubstituteHoliday&&
+			workTypeClassMorning!=WorkTypeClassification.Pause&&
+			workTypeClassMorning!=WorkTypeClassification.TimeDigestVacation){
+			return false;
+		}
+		// INPUT.ドメインモデル「勤務種類.午後の勤務分類(AFTERNOON_CLS)」をチェックする
+		WorkTypeClassification workTypeClassAfternoon = workType.getDailyWork().getAfternoon();
+		if(workTypeClassAfternoon!=WorkTypeClassification.Holiday&&
+			workTypeClassAfternoon!=WorkTypeClassification.AnnualHoliday&&
+			workTypeClassAfternoon!=WorkTypeClassification.YearlyReserved&&
+			workTypeClassAfternoon!=WorkTypeClassification.SpecialHoliday&&
+			workTypeClassAfternoon!=WorkTypeClassification.Absence&&
+			workTypeClassAfternoon!=WorkTypeClassification.SubstituteHoliday&&
+			workTypeClassAfternoon!=WorkTypeClassification.Pause&&
+			workTypeClassAfternoon!=WorkTypeClassification.TimeDigestVacation){
+			return false;
+		}
+		return true;
 	}
 }

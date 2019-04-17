@@ -29,6 +29,7 @@ import nts.uk.ctx.at.record.dom.affiliationinformation.repository.WorkTypeOfDail
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.OutingTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.calculationattribute.repo.CalAttrOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.AttendanceLeavingGateOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.PCLogOnInfoOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
@@ -152,6 +153,8 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	@Inject 
 	private ErAlCheckService determineErrorAlarmWorkRecordService;
 	
+	@Inject
+	private DailyRecordTransactionService dailyTransaction;
 	
 	//ドメインサービス：計算用ストアド実行用
 	@Inject

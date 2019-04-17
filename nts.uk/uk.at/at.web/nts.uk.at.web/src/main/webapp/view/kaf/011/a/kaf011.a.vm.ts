@@ -270,7 +270,8 @@ module nts.uk.at.view.kaf011.a.screenModel {
                         employeeID: self.employeeList()[0] ? self.employeeList()[0].sid : null,
                         appVersion: 0,
                         remainDays: self.remainDays()
-                    }
+                    },
+                    isNotSelectYes: true
                 }, selectedReason = self.appReasonSelectedID() ? _.find(self.appReasons(), { 'reasonID': self.appReasonSelectedID() }) : null;
             if (selectedReason) {
                 returnCmd.appCmd.appReasonText = selectedReason.reasonTemp;
@@ -287,7 +288,7 @@ module nts.uk.at.view.kaf011.a.screenModel {
             if (isCheckLengthError) {
                 return;
             }
-            
+
             let isControlError = self.validateControl();
             if (isControlError) { return; }
 
@@ -302,18 +303,40 @@ module nts.uk.at.view.kaf011.a.screenModel {
                 if (res.messageId == "Msg_1518") {//confirm
                     nts.uk.ui.dialog.confirm({ messageId: res.messageId }).ifYes(() => {
                         saveCmd.checkOver1Year = false;
+                        block.invisible();
                         service.save(saveCmd).done((data) => {
                             self.saveDone(data, checkBoxValue);
                         }).fail((res) => {
                             nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
                                 .then(function() { nts.uk.ui.block.clear(); });
-                        });
+                        }).always(() => {
+                            block.clear();
+                            $("#recDatePicker").focus();
+                        });;
                     }).ifNo(() => {
                         nts.uk.ui.block.clear();
                     });
                 } else {
-                    nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
-                        .then(function() { nts.uk.ui.block.clear(); });
+                    if (res.messageId == "Msg_1520" || res.messageId == "Msg_1522") {
+                        nts.uk.ui.dialog.confirm({ messageId: res.messageId, messageParams: res.parameterIds }).ifYes(() => {
+                            saveCmd.isNotSelectYes = false;
+                            block.invisible();
+                            service.save(saveCmd).done((data) => {
+                                self.saveDone(data, checkBoxValue);
+                            }).fail((res) => {
+                                nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                                    .then(function() { nts.uk.ui.block.clear(); });
+                            }).always(() => {
+                                block.clear();
+                                $("#recDatePicker").focus();
+                            });
+                        }).ifNo(() => {
+                            nts.uk.ui.block.clear();
+                        });
+                    } else {
+                        nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds })
+                            .then(function() { nts.uk.ui.block.clear(); });
+                    }
                 }
             }).always(() => {
                 block.clear();

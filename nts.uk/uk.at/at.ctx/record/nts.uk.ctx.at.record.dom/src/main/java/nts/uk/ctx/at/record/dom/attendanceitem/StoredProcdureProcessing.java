@@ -113,7 +113,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			AnyItemValueOfDaily optionalItem = d.getAnyItemValue().get();
 			
 			Integer logonTime, logoffTime,
-					leaveGateStartTime = null, leaveGateEndTime = null, 
+					leaveGateStartTime, leaveGateEndTime, 
 					startTime, endTime = null; 
 			
 			WorkType workType = workTypes.get(d.getWorkInformation().getRecordInfo().getWorkTypeCode());
@@ -148,7 +148,11 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 				if(gateNo1.isPresent()){
 					leaveGateStartTime = getWorkStamp(gateNo1.get().getAttendance());
 					leaveGateEndTime = getWorkStamp(gateNo1.get().getLeaving());
+				} else {
+					leaveGateStartTime = leaveGateEndTime = null;
 				}
+			} else {
+				leaveGateStartTime = leaveGateEndTime = null;
 			}
 			
 			Integer timeOff = null, timeOn = leaveGateStartTime, divergenceTime = 0;
@@ -158,6 +162,10 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 
 			/** 任意項目3: 出勤時刻が入っており、PCログオンログオフがない事が条件 */
 			processOptionalItem(() -> startTime != null && logonTime == null && logoffTime == null, 
+					optionalItem, COUNT_ON, COUNT_OFF, 3);
+			
+			/** 任意項目13: 出勤時刻が入っており、入館と退館がない事が条件 */
+			processOptionalItem(() -> startTime != null && leaveGateStartTime == null && leaveGateEndTime == null, 
 					optionalItem, COUNT_ON, COUNT_OFF, 3);
 			
 			/** 任意項目4: その日にPCログオン = null and ログオフ <> null が条件 */

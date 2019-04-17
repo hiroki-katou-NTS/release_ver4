@@ -42,6 +42,7 @@ import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
 import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
 import nts.uk.ctx.at.record.dom.breakorgoout.primitivevalue.BreakFrameNo;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.dailyimport.DailyDataImportTemp;
 import nts.uk.ctx.at.record.dom.dailyimport.DailyDataImportTempRepository;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
@@ -130,6 +131,9 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 	@Inject
 	private ManagedParallelWithContext parallelManager;
 	
+	@Inject 
+	private DailyRecordTransactionService dailyTransaction;
+	
 	@Resource
 	private SessionContext ss;
 
@@ -200,7 +204,7 @@ public class DailyDataImportServiceImpl implements DailyDataImportService {
 				dataSetter.updateData(ERROR_NUMBER, errors.size());
 				
 			});
-			
+			dailyTransaction.updated(empIds, period.datesBetween());
 			dataSetter.updateData(SUCCESSED_RECORDS_NUMBER, successRecordCount.get());
 			dataSetter.updateData(SUCCESSED_EMP_COUNT, successEmpCount.get());
 			dataSetter.updateData(ERROR_NUMBER, errors.size());
