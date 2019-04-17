@@ -353,7 +353,7 @@ public class MonthlyPerformanceReload {
 		List<MPCellStateDto> lstCellState = new ArrayList<>(); // List cell
 																// state
 		screenDto.setLstData(lstData);
-
+		screenDto.setLstCellState(lstCellState);
 		Map<String, MonthlyPerformaceLockStatus> lockStatusMap = param.getLstLockStatus().stream()
 				.collect(Collectors.toMap(x -> x.getEmployeeId(), Function.identity(), (x, y) -> x));
 		String employeeIdLogin = AppContexts.user().employeeId();
@@ -598,11 +598,9 @@ public class MonthlyPerformanceReload {
 			}
 			lstData.add(mpdata);
 		}
-	screenDto.setMPSateCellHideControl(mPSateCellHideControls);
-		// set state hide control
-			screenDto.setMPSateCellHideControl(mPSateCellHideControls);
-			//get histtory into company
-			List<AffCompanyHistImport> listAffCompanyHistImport = screenDto.getLstAffComHist();
+		screenDto.setMPSateCellHideControl(mPSateCellHideControls);
+		// get histtory into company
+		List<AffCompanyHistImport> listAffCompanyHistImport = screenDto.getLstAffComHist();
 		List<CheckEmpEralOuput> listCheckEmpEralOuput = checkDailyPerError
 				.checkDailyPerError(listEmployeeIds,
 						new DatePeriod(screenDto.getSelectedActualTime().getStartDate(),
@@ -633,7 +631,6 @@ public class MonthlyPerformanceReload {
 					}
 					listData.add(x);
 			});
-			screenDto.setLstCellState(lstCellState);
 			screenDto.setLstData(listData);
 	}
 
