@@ -39,6 +39,8 @@ public enum PrimitiveValueDaily {
 	
 	TimeWithDayAttr(15, "時刻（日区分付き）", "TimeWithDayAttr"),
 	
+	Business(21, "勤務種別", "BusinessTypeCode"),
+	
     MoneyDay(54, "日次任意金額", "AnyItemAmount"),
 	
 	MoneyMonth(55, "月次任意金額", "AnyAmountMonth"),

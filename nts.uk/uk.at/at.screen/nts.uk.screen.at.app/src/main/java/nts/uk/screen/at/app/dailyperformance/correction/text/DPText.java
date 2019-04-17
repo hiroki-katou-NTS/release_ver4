@@ -94,5 +94,7 @@ public class DPText {
 	public static final List<Integer> ITEM_COMBOBOX_CALC = Arrays.asList(628, 630, 631, 632);
 	
 	public static final List<Integer> ITEM_INSERT_STAMP_SOURCE = Arrays.asList(31, 34, 41, 44, 75, 79, 83, 77, 81, 85, 51, 59, 67, 53, 61, 69);
+	
+	public static final List<Integer> ALL_ITEM_TYPE_MASTER = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14);
 
 }

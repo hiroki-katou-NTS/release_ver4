@@ -237,8 +237,8 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 	// RequestList 534
 	@Override
 	public AppRootOfEmpMonthImport getApprovalEmpStatusMonth(String approverID, YearMonth yearMonth,
-			Integer closureID, ClosureDate closureDate, GeneralDate baseDate) {
-		val exportResult = intermediateDataPub.getApprovalEmpStatusMonth(approverID, yearMonth, closureID, closureDate, baseDate);
+			Integer closureID, ClosureDate closureDate, GeneralDate baseDate, boolean useDayApproverConfirm, DatePeriod closurePeriod) {
+		val exportResult = intermediateDataPub.getApprovalEmpStatusMonth(approverID, yearMonth, closureID, closureDate, baseDate, useDayApproverConfirm, closurePeriod);
 		return new AppRootOfEmpMonthImport(
 				exportResult.getEmployeeID(), 
 				exportResult.getRouteSituationLst().stream()

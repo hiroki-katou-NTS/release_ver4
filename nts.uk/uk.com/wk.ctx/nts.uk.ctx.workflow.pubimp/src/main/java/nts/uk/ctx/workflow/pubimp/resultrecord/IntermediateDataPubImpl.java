@@ -38,7 +38,7 @@ import nts.uk.ctx.workflow.dom.service.ApprovalRootStateStatusService;
 import nts.uk.ctx.workflow.dom.service.JudgmentApprovalStatusService;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootStateStatus;
 import nts.uk.ctx.workflow.dom.service.output.ApproverPersonOutput;
-import nts.uk.ctx.workflow.dom.service.output.Request133Output;
+import nts.uk.ctx.workflow.dom.service.output.Request113Output;
 import nts.uk.ctx.workflow.dom.service.resultrecord.AppRootConfirmService;
 import nts.uk.ctx.workflow.dom.service.resultrecord.AppRootInstancePeriod;
 import nts.uk.ctx.workflow.dom.service.resultrecord.AppRootInstanceService;
@@ -63,7 +63,7 @@ import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootInsExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootSttMonthExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.ApprovalStatusExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.Request533Export;
-import nts.uk.ctx.workflow.pub.resultrecord.export.Request133Export;
+import nts.uk.ctx.workflow.pub.resultrecord.export.Request113Export;
 import nts.uk.ctx.workflow.pub.resultrecord.export.RouteSituationExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.RouteSituationMonthExport;
 import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
@@ -108,10 +108,10 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	private EmployeeAdapter employeeAdapter;
 
 	@Override
-	public Request133Export getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period,
+	public Request113Export getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period,
 			Integer rootType) throws BusinessException {
-		Request133Output result = appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
-		return new Request133Export(
+		Request113Output result = appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
+		return new Request113Export(
 				result.getAppRootStatusLst().stream()
 					.map(x -> new AppRootStateStatusSprExport(x.getDate(), x.getEmployeeID(), x.getDailyConfirmAtr().value)).collect(Collectors.toList()), 
 				result.isErrorFlg(), 
@@ -485,7 +485,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 
 	@Override
 	public AppEmpSttMonthExport getApprovalEmpStatusMonth(String approverID, YearMonth yearMonth, Integer closureID,
-			ClosureDate closureDate, GeneralDate baseDate) {
+			ClosureDate closureDate, GeneralDate baseDate, boolean useDayApproverConfirm, DatePeriod closurePeriod) {
 		DatePeriod period = new DatePeriod(baseDate, baseDate);
 		// 承認者(承認代行を含め)と期間から承認ルート中間データを取得する
 		ApprovalPersonInstance approvalPersonInstance = appRootInstanceService.getApproverAndAgent(approverID, 
@@ -498,13 +498,15 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		List<RouteSituation> approverRouteLst = new ArrayList<>();
 		if(!CollectionUtil.isEmpty(approvalPersonInstance.getApproverRoute())){
 			// 承認者としてのルート状況を取得する
-			approverRouteLst = appRootInstanceService.getApproverRouteSituation(period, approvalPersonInstance.getApproverRoute(), agentLst, RecordRootType.CONFIRM_WORK_BY_MONTH);
+			approverRouteLst = appRootInstanceService.getApproverRouteSituation(period, approvalPersonInstance.getApproverRoute(), agentLst, RecordRootType.CONFIRM_WORK_BY_MONTH,
+					useDayApproverConfirm, closurePeriod, yearMonth, closureID, closureDate);
 		}
 		// 取得した「代行者としての承認ルート」．承認ルートの詳細の件数をチェックする
 		List<RouteSituation> agentRouteLst = new ArrayList<>();
 		if(!CollectionUtil.isEmpty(approvalPersonInstance.getAgentRoute())){
 			// 代行者としてのルート状況を取得する
-			agentRouteLst = appRootInstanceService.getAgentRouteSituation(period, approvalPersonInstance.getAgentRoute(), agentLst, RecordRootType.CONFIRM_WORK_BY_MONTH);
+			agentRouteLst = appRootInstanceService.getAgentRouteSituation(period, approvalPersonInstance.getAgentRoute(), agentLst, RecordRootType.CONFIRM_WORK_BY_MONTH,
+					useDayApproverConfirm, closurePeriod, yearMonth, closureID, closureDate);
 		}
 		// outputの整合
 		List<RouteSituation> mergeLst = appRootInstanceService.mergeRouteSituationLst(approverRouteLst, agentRouteLst);

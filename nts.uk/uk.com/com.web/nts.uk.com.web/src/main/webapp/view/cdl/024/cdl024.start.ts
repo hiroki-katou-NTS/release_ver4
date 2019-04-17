@@ -8,7 +8,7 @@ module nts.uk.at.view.cdl024 {
                 dataSource: screenModel.items,
                 optionsValue: 'code',
                 columns: screenModel.columns,
-                multiple: true,
+                multiple: screenModel.selectMultiple(),
                 value: [].slice.call(screenModel.currentCodeList)
             });
             

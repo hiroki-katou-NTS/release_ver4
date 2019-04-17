@@ -579,7 +579,7 @@ public class JpaErrorAlarmWorkRecordRepository extends JpaRepository implements 
 			                	singleValue = (V) new CheckedTimesValueDay(fixedV);
 			                }
 			            } else {
-			            	if(singleAtd.containsKey(groupId)  && singleAtd.get(groupId).containsKey(groupId) && !singleAtd.get(groupId).get(atdItemConNo).isEmpty()){
+			            	if(singleAtd.containsKey(groupId)  && singleAtd.get(groupId).containsKey(atdItemConNo) && !singleAtd.get(groupId).get(atdItemConNo).isEmpty()){
 				                singleValue = (V) new AttendanceItemId(singleAtd.get(groupId).get(atdItemConNo).get(0).get("ATTENDANCE_ITEM_ID"));
 			            	}
 			            }
