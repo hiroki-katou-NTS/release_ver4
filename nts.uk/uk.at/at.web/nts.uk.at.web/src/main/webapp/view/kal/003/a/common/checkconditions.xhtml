@@ -36,6 +36,7 @@
 			        <col width="230px"/>
 			        <col width="90px"/>
 			        <col width="230px"/>
+			        <col width="230px"/>
 			    </colgroup>
 			    <thead>
 			        <tr>
@@ -44,12 +45,13 @@
 			            <th class="ui-widget-header" >#{i18n.getText('KAL003_12')}</th>
 			            <th class="ui-widget-header" >#{i18n.getText('KAL003_23')}</th>
 			            <th class="ui-widget-header" >#{i18n.getText('KAL003_25')}</th>
+			            <th class="ui-widget-header" >#{i18n.getText('KAL003_XX')}</th>
 			        </tr>
 		        </thead>
 		       <tbody data-bind="foreach: listWorkRecordExtractingConditions()">
 		           <tr data-bind="attr: { 'data-id': rowId }">
 		               <td style ="text-align: center;">
-		                   <div data-bind="ntsCheckBox: {checked: useAtr}"></div>
+		                   <div data-bind="ntsCheckBox: {checked: deleteAtr}"></div> 
 		               </td>
 		               <td style ="text-align: center;">
 	                       <span data-bind="text: rowId"></span>
@@ -75,6 +77,15 @@
 	                   		<div data-bind="with: errorAlarmCondition">
 								<div data-bind = "text: displayMessage" class="limited-label description"></div>
  	                        </div>
+	                   </td>
+	                   <td  style="text-align: center;">
+	                   		<div class="cf" data-bind="ntsSwitchButton: {
+							name: '#[KAL003_188]',
+							options: $parent.userAtrCheck ,
+							optionsValue: 'code',
+							optionsText: 'name',
+							value: useCheckSwitch,
+							required: true }"></div>
 	                   </td>
 		           </tr>
 		       </tbody>
@@ -118,6 +129,7 @@
 			        <col width="230px"/>
 			        <col width="90px"/>
 			        <col width="230px"/>
+			        <col width="230px"/>
 			    </colgroup>
 			    <thead>
 			        <tr>
@@ -126,12 +138,13 @@
 			            <th class="ui-widget-header" >#{i18n.getText('KAL003_12')}</th>
 			            <th class="ui-widget-header" >#{i18n.getText('KAL003_23')}</th>
 			            <th class="ui-widget-header" >#{i18n.getText('KAL003_25')}</th>
+			            <th class="ui-widget-header" >#{i18n.getText('KAL003_XX')}</th>
 			        </tr>
 		        </thead>
 		       <tbody data-bind="foreach: listMulMonCheckSet()">
 		           <tr data-bind="attr: { 'data-id': rowId }">
 		               <td style ="text-align: center;">
-		                   <div data-bind="ntsCheckBox: {checked: useAtr}"></div>
+		                   <div data-bind="ntsCheckBox: {checked: deleteAtr}"></div>
 		               </td>
 		               <td style ="text-align: center;">
 	                       <span data-bind="text: rowId"></span>
@@ -157,6 +170,15 @@
 	                   		<div>
 								<div data-bind = "text: displayMessage" class="limited-label description"></div>
  	                        </div>
+	                   </td>
+	                   <td  style="text-align: center;">
+	                   		<div class="cf" data-bind="ntsSwitchButton: {
+							name: '#[KAL003_188]',
+							options: $parent.userAtrCheck ,
+							optionsValue: 'code',
+							optionsText: 'name',
+							value: useCheckSwitch,
+							required: true }"></div>
 	                   </td>
 		           </tr>
 		       </tbody>
