@@ -103,7 +103,7 @@ public class CsvFileUtil {
 	}
 
 	public static Set<String> getListSid(String fileId, String fileName) {
-		CSVBufferReader reader = new CSVBufferReader(new File("C://Users//laitv.NSVC//Documents//dowload//2.csv"));
+		CSVBufferReader reader = new CSVBufferReader(new File(getExtractDataStoragePath(fileId) + "//" + fileName + ".csv"));
 		reader.setCharset("Shift_JIS");
 		Set<String> listSid = new HashSet<>();
 		Consumer<CSVParsedResult> csvResult = (dataRow) -> {
