@@ -27,6 +27,7 @@ import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.IFactoryApplication;
 import nts.uk.ctx.at.request.dom.application.UseAtr;
+import nts.uk.ctx.at.request.dom.application.appabsence.AllDayHalfDayLeaveAtr;
 import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsence;
 import nts.uk.ctx.at.request.dom.application.appabsence.HolidayAppType;
 import nts.uk.ctx.at.request.dom.application.appabsence.appforspecleave.AppForSpecLeave;
@@ -55,6 +56,9 @@ import nts.uk.ctx.at.shared.dom.specialholiday.specialholidayevent.SpecialHolida
 import nts.uk.ctx.at.shared.dom.specialholiday.specialholidayevent.service.CheckWkTypeSpecHdEventOutput;
 import nts.uk.ctx.at.shared.dom.specialholiday.specialholidayevent.service.MaxDaySpecHdOutput;
 import nts.uk.ctx.at.shared.dom.specialholiday.specialholidayevent.service.SpecialHolidayEventAlgorithm;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -85,7 +89,7 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 	@Inject
 	private DisplayReasonRepository displayRep;
 	@Inject
-	ApplicationSettingRepository applicationSettingRepository;
+	private ApplicationSettingRepository applicationSettingRepository;
 	@Inject
 	private HdAppSetRepository repoHdAppSet;
 	@Inject
@@ -201,6 +205,7 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 	 */
 	public void checkBeforeRegister(CreatAppAbsenceCommand command,GeneralDate startDate,GeneralDate endDate,boolean isInsert){
 		String companyID = AppContexts.user().companyId();
+		String sID = AppContexts.user().employeeId();
 		//hoatt 2019.02.11
 		//EA修正履歴 No.3104
 //		int countDay = 0;
@@ -219,6 +224,17 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 //			}
 //		}
 		SpecHolidayCommand specHd = command.getSpecHd();
+		//アルゴリズム「7-1_申請日の矛盾チェック」を実行する
+		if (isInsert) {
+			for (int i = 0; startDate.compareTo(endDate) + i <= 0; i++) {
+				GeneralDate appDate = startDate.addDays(i);
+				checkContradictionAppDate(companyID, sID, appDate,
+						EnumAdaptor.valueOf(command.getAllDayHalfDayLeaveAtr(), AllDayHalfDayLeaveAtr.class),
+						command.isCheckContradiction());
+			}
+
+		}
+		
 		//選択する休暇種類をチェックする-(check holidayType đang chọn)
 		if(command.getHolidayAppType() == HolidayAppType.SPECIAL_HOLIDAY.value){//選択する休暇種類が特別休暇の場合
 			//hoatt - 2018.08.08 - doi ung specHd
@@ -370,6 +386,85 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 		}
 	}
 
+	/**
+	 * 7-1_申請日の矛盾チェック
+	 * 
+	 * @param companyID
+	 * @param sID
+	 * @param appDate
+	 * @param allDayHalfDayLeaveAtr
+	 */
+	private void checkContradictionAppDate(String companyID, String employeeID, GeneralDate appDate,
+			AllDayHalfDayLeaveAtr allDayHalfDayLeaveAtr,boolean isCheckContradiction) {
+		// ドメインモデル「休暇申請設定」を取得する
+		
+		this.repoHdAppSet.getAll().ifPresent(setting -> {
+
+			AppliedDate appliedDate = setting.getAppDateContra();
+			//「申請日矛盾区分」をチェックする
+			if (!appliedDate.equals(AppliedDate.DONT_CHECK)) {
+				//アルゴリズム「11.指定日の勤務実績（予定）の勤務種類を取得」を実行する
+				WorkType wkType = this.otherCommonAlg.getWorkTypeScheduleSpec(companyID, employeeID, appDate);
+				//＜OUTPUT＞をチェックする
+				if(wkType==null){
+					//「申請日矛盾区分」をチェックする
+					if (appliedDate.equals(AppliedDate.CHECK_IMPOSSIBLE)) {
+						// 申請日矛盾区分＝「2: チェックする（登録不可）」
+						throw new BusinessException("Msg_1519",appDate.toString("yyyy/MM/dd"));
+					}
+					
+					if (appliedDate.equals(AppliedDate.CHECK_AVAILABLE) && !isCheckContradiction) {
+						// 申請日矛盾区分＝「1: チェックする（登録可）」
+						throw new BusinessException("Msg_1520",appDate.toString("yyyy/MM/dd"));
+					}
+				}else{
+					//アルゴリズム「7-1_01 休暇申請の勤務種類矛盾チェック」を実行する
+					boolean error = workTypeCheckHolidayApp(wkType, allDayHalfDayLeaveAtr);
+					if (error) {
+						String wkTypeName = wkType.getName().v();
+						// 「申請日矛盾区分」をチェックする
+						if (appliedDate.equals(AppliedDate.CHECK_IMPOSSIBLE)) {
+							// 申請日矛盾区分＝「2: チェックする（登録不可）」
+							throw new BusinessException("Msg_1521", appDate.toString("yyyy/MM/dd"), wkTypeName);
+						}
+
+						if (appliedDate.equals(AppliedDate.CHECK_AVAILABLE) && !isCheckContradiction) {
+							// 申請日矛盾区分＝「1: チェックする（登録可）」
+							throw new BusinessException("Msg_1522", appDate.toString("yyyy/MM/dd"), wkTypeName);
+						}
+					}
+				}
+				
+			}
+			
+		});
+
+		
+	}
+
+	/**
+	 * 7-1_01 休暇申請の勤務種類矛盾チェック
+	 * 
+	 * @param wkType
+	 * @param allDayHalfDayLeaveAtr 
+	 */
+	private boolean workTypeCheckHolidayApp(WorkType wkType, AllDayHalfDayLeaveAtr allDayHalfDayLeaveAtr) {
+		boolean error = false;
+		WorkTypeUnit wkClass = wkType.getDailyWork().getWorkTypeUnit();
+		if(wkClass.equals(WorkTypeUnit.OneDay)){
+			WorkTypeClassification oneDayClass = wkType.getDailyWork().getOneDay();
+			boolean isHoliday = oneDayClass.equals(WorkTypeClassification.Holiday)
+					|| oneDayClass.equals(WorkTypeClassification.HolidayWork);
+
+			if (isHoliday) {
+				error = true;
+			}
+		}
+		
+		
+
+		return error;
+	}
 	//return エラーメッセージ-確認メッセージ
 	public void checkRegister(ParamCheckRegister param){
 		SettingNo65 setNo65 = param.getSetNo65();
