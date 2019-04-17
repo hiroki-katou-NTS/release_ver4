@@ -19,7 +19,11 @@ module nts.uk.at.view.cdl024.viewmodel {
 
         sendAttribute() {
             let selectedItems = $("#multi-list").ntsGridList("getSelected");
-            this.currentCodeList = _.map(selectedItems, 'id');
+            if (this.selectMultiple()) {
+                this.currentCodeList = _.map(selectedItems, 'id');
+            }else{
+                this.currentCodeList = selectedItems.id;
+            }
             nts.uk.ui.windows.setShared("currentCodeList", this.currentCodeList);
             nts.uk.ui.windows.close();
         }

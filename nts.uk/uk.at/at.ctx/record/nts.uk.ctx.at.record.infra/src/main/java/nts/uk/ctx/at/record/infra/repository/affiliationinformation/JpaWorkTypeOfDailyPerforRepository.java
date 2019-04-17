@@ -107,7 +107,7 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 					+ workTypeOfDailyPerformance.getWorkTypeCode().v() + "' WHERE SID = '"
 					+ workTypeOfDailyPerformance.getEmployeeId() + "' AND YMD = '" + workTypeOfDailyPerformance.getDate() + "'";
 			Statement statementU = con.createStatement();
-			statementU.executeUpdate(JDBCUtil.toInsertWithCommonField(updateTableSQL));
+			statementU.executeUpdate(JDBCUtil.toUpdateWithCommonField(updateTableSQL));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
