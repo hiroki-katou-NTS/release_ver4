@@ -412,7 +412,7 @@ module nts.uk.at.view.kbt002.b {
                     command.execItemCd = self.currentExecItem().execItemCd();
                     command.execItemName = self.currentExecItem().execItemName();
                     command.perScheduleCls = self.currentExecItem().perScheduleClsNomarl();
-                     if(self.currentExecItem().perScheduleCls()==false){
+                     if(!self.currentExecItem().perScheduleClsNomarl()){ 
                         command.targetDate = 1;                        
                         command.creationPeriod = 1;
                     }else{
