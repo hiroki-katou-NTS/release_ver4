@@ -379,14 +379,9 @@ module nts.uk.com.view.cmf003.b {
                     disableSelection : true
                 };
                 
-                self.selectedTitleAtr.subscribe(value => {
-                    if (value == 0) {
-                        self.lstPersonComponentOption.disableSelection = true;
-                         $('#employeeSearch').ntsListComponent(self.lstPersonComponentOption);
-                    } else {
-                        self.lstPersonComponentOption.disableSelection = false;
-                         $('#employeeSearch').ntsListComponent(self.lstPersonComponentOption);
-                    }
+                self.selectedTitleAtr.subscribe(function(value) {
+                    self.lstPersonComponentOption.disableSelection = value == 0 ? true : false;
+                    $('#employeeSearch').ntsListComponent(self.lstPersonComponentOption);
                 });
 
             }//end constructor
@@ -527,10 +522,10 @@ module nts.uk.com.view.cmf003.b {
                     }
                 }
 				
-				self.lstPersonComponentOption.disableSelection = self.selectedTitleAtr();
+				self.employeeList(employeeSearchs);
+				self.lstPersonComponentOption.disableSelection = self.selectedTitleAtr() == 0? true: false;
                 $('#employeeSearch').ntsListComponent(self.lstPersonComponentOption);
-                
-                self.employeeList(employeeSearchs);
+
                 return dfd.promise();
             }
 

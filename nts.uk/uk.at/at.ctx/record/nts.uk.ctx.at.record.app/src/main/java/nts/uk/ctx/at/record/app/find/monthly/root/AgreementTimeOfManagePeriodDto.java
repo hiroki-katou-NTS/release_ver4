@@ -29,6 +29,9 @@ import nts.uk.ctx.at.shared.dom.common.Year;
 /** 管理期間の36協定時間 */
 @AttendanceItemRoot(rootName = ItemConst.AGREEMENT_TIME_OF_MANAGE_PERIOD_NAME, itemType = AttendanceItemType.MONTHLY_ITEM)
 public class AgreementTimeOfManagePeriodDto extends MonthlyItemCommon{
+
+	/***/
+	private static final long serialVersionUID = 1L;
 	
 	/** 社員ID */
 	private String employeeId;

@@ -281,7 +281,7 @@ module nts.uk.com.view.cmf004.b.viewmodel {
                         let recoveryPeriod = x.retentionPeriodCls;
                         let startOfPeriod  = x.saveDateFrom;
                         let endOfPeriod    = x.saveDateTo;
-                        let recoveryMethod = x.storageRangeSaved == 1 ? getText('CMF004_305') : getText('CMF004_306');
+                        let recoveryMethod = x.storageRangeSaved == 1 ? getText('CMF004_306') : getText('CMF004_306');
                         listCategory.push(new CategoryInfo(rowNumber, isRecover, categoryId, categoryName, recoveryPeriod, startOfPeriod, endOfPeriod, recoveryMethod, iscanNotBeOld));
                     });
                     self.dataContentConfirm().dataContentcategoryList(listCategory);

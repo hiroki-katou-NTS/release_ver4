@@ -31,15 +31,8 @@
 					<div style="width: 400px"
 						data-bind="ntsSearchBox: {searchMode: 'filter',targetKey: 'code', comId: 'multi-list', 
 						items: items, selected: currentCodeList, selectedKey: 'code', fields: ['name', 'code'], mode: 'igGrid'}"></div>
-					<table id="multi-list"
-						data-bind="ntsGridList: {
-							height: 320,
-							options: items,
-							optionsValue: 'code',
-							columns: columns,
-							multiple: selectMultiple(),
-							value: currentCodeList
-						}"></table>
+
+					<table id="multi-list"></table>
 				</div>
 			</div>
 

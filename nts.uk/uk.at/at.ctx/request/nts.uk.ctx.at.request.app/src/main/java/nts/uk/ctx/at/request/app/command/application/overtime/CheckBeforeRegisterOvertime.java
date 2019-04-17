@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.error.BusinessException;
+import nts.gul.collection.CollectionUtil;
 import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.request.app.find.application.overtime.dto.AppOvertimeDetailDto;
 import nts.uk.ctx.at.request.app.find.application.overtime.dto.OvertimeCheckResultDto;
@@ -40,6 +42,8 @@ public class CheckBeforeRegisterOvertime {
 	private IFactoryOvertime factoryOvertime;
 	@Inject
 	private OvertimeRestAppCommonSetRepository overTimeSetRepo;
+	@Inject 
+	private IErrorCheckBeforeRegister checkBeforeRegister;
 
 	public OvertimeCheckResultDto CheckBeforeRegister(CreateOvertimeCommand command) {
 		// 会社ID
@@ -63,10 +67,10 @@ public class CheckBeforeRegisterOvertime {
 				CheckBeforeRegisterOvertime.getOverTimeInput(command, companyId, appID),
 				Optional.empty());
 
-		return CheckBeforeRegister(command.getCalculateFlag(), appRoot, overTimeDomain, command.isCheckOver1Year());
+		return CheckBeforeRegister(command.getCalculateFlag(), appRoot, overTimeDomain, command.isCheckOver1Year(),command.isCheckAppDate());
 	}
 
-	public OvertimeCheckResultDto CheckBeforeRegister(int calculateFlg, Application_New app, AppOverTime overtime, boolean checkOver1Year) {
+	public OvertimeCheckResultDto CheckBeforeRegister(int calculateFlg, Application_New app, AppOverTime overtime, boolean checkOver1Year, boolean checkAppDate) {
 		// 社員ID
 		String employeeId = AppContexts.user().employeeId();
 		String companyID =  app.getCompanyID();
@@ -105,8 +109,18 @@ public class CheckBeforeRegisterOvertime {
 		Optional<AppOvertimeDetail> appOvertimeDetailOtp = beforeCheck.registerOvertimeCheck36TimeLimit(
 				app.getCompanyID(), app.getEmployeeID(), app.getAppDate(), overtime.getOverTimeInput());
 		result.setAppOvertimeDetail(AppOvertimeDetailDto.fromDomain(appOvertimeDetailOtp));
-		// TODO: ３６協定時間上限チェック（年間）
 		beforeCheck.TimeUpperLimitYearCheck();
+		}
+		//申請日の矛盾チェック
+		if (!checkAppDate) {
+			List<String> errors = this.checkBeforeRegister.inconsistencyCheck(companyID, employeeId, app.getAppDate(),
+					ApplicationType.OVER_TIME_APPLICATION);
+
+			if (!CollectionUtil.isEmpty(errors)) {
+				List<String> errorParam = new ArrayList<>(errors);
+				errorParam.remove(0);
+				throw new BusinessException(errors.get(0), errorParam.toArray(new String[errorParam.size()]));
+			}
 		}
 		// 事前否認チェック
 		res = beforeCheck.preliminaryDenialCheck(app.getCompanyID(), app.getEmployeeID(), app.getAppDate(), app.getInputDate(),

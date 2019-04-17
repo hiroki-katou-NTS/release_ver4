@@ -36,6 +36,9 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @EqualsAndHashCode(callSuper = false)
 @AttendanceItemRoot(rootName = ItemConst.MONTHLY_ATTENDANCE_TIME_NAME, itemType = AttendanceItemType.MONTHLY_ITEM)
 public class AttendanceTimeOfMonthlyDto extends MonthlyItemCommon {
+
+	/***/
+	private static final long serialVersionUID = 1L;
 	
 	private long version;
 	

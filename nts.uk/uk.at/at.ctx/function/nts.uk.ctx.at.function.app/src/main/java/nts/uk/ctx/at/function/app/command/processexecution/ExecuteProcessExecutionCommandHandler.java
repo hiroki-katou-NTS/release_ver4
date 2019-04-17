@@ -117,6 +117,7 @@ import nts.uk.ctx.at.schedule.dom.executionlog.RebuildTargetDetailsAtr;
 import nts.uk.ctx.at.schedule.dom.executionlog.ResetAtr;
 import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleCreateContent;
 import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleErrorLog;
+import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleErrorLogRepository;
 import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleExecutionLog;
 import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleExecutionLogRepository;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicScheduleRepository;
@@ -230,6 +231,9 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 
 	@Inject
 	private AppRouteUpdateMonthlyService appRouteUpdateMonthlyService;
+	
+	@Inject
+	private ScheduleErrorLogRepository scheduleErrorLogRepository;
 	
 	public static int MAX_DELAY_PARALLEL = 0;
 
@@ -913,23 +917,62 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		}
 		
 		this.procExecLogRepo.update(procExecLog);
-		ExecutionLogImportFn param = new ExecutionLogImportFn();
-		List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
-		// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
-		param.setCompanyId(companyId);
-		// 管理社員ID ＝
-		param.setManagerId(listManagementId);
-		// 実行完了日時 ＝ システム日時
-		param.setFinishDateTime(GeneralDateTime.now());
-		// 実行内容 ＝ スケジュール作成
-		param.setExecutionContent(AlarmCategoryFn.CREATE_SCHEDULE);
-		// エラーの有無 ＝ エラーなし
-		param.setExistenceError(0);
-		// 実行ログエラー詳細 ＝ NULL
-		param.setTargerEmployee(listErrorAndEmpId);
-		// アルゴリズム「実行ログ登録」を実行する 2290 Done
-		executionLogAdapterFn.updateExecuteLog(param);
+		ScheduleErrorLogGeterCommand scheduleErrorLogGeterCommand = new ScheduleErrorLogGeterCommand();
+		scheduleErrorLogGeterCommand.setCompanyId(companyId);
+		scheduleErrorLogGeterCommand.setExecutionId(execId);
+		scheduleErrorLogGeterCommand.setToDate(GeneralDate.today());
+		scheduleErrorLogRepository.findByExecutionId(execId);
+		// ドメインモデル「スケジュール作成エラーログ」を取得する
+		List<ScheduleErrorLog> listError = this.scheduleErrorLogRepository.findByExecutionId(execId);
+		if(listError !=null && !listError.isEmpty()) {
+			ExecutionLogImportFn param = new ExecutionLogImportFn();
+			List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
 
+			// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
+			param.setCompanyId(companyId);
+			// 管理社員ID ＝
+			param.setManagerId(listManagementId);
+			// 実行完了日時 ＝ システム日時
+			param.setFinishDateTime(GeneralDateTime.now());
+			// エラーの有無 ＝ エラーあり
+			param.setExistenceError(1);
+			// 実行内容 ＝ スケジュール作成
+			param.setExecutionContent(AlarmCategoryFn.CREATE_SCHEDULE);
+			// 実行ログエラー詳細 ＝ 取得したエラーメッセージ情報（社員ID, エラーメッセージ ）（List）
+
+			if (listError.isEmpty()) {
+				this.scheCreExeErrorLogHandler.addError(scheduleErrorLogGeterCommand, "System", "Msg_1339");
+				for (String managementId : listManagementId) {
+					listErrorAndEmpId
+							.add(new ExecutionLogErrorDetailFn(TextResource.localize("Msg_1339"), managementId));
+				}
+			} else {
+				for (ScheduleErrorLog scheduleErrorLog : listError) {
+					listErrorAndEmpId.add(new ExecutionLogErrorDetailFn(scheduleErrorLog.getErrorContent(),
+							scheduleErrorLog.getEmployeeId()));
+				}
+			}
+			param.setTargerEmployee(listErrorAndEmpId);
+			// アルゴリズム「実行ログ登録」を実行する 2290 Done
+			executionLogAdapterFn.updateExecuteLog(param);
+		}else {
+			ExecutionLogImportFn param = new ExecutionLogImportFn();
+			List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
+			// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
+			param.setCompanyId(companyId);
+			// 管理社員ID ＝
+			param.setManagerId(listManagementId);
+			// 実行完了日時 ＝ システム日時
+			param.setFinishDateTime(GeneralDateTime.now());
+			// 実行内容 ＝ スケジュール作成
+			param.setExecutionContent(AlarmCategoryFn.CREATE_SCHEDULE);
+			// エラーの有無 ＝ エラーなし
+			param.setExistenceError(0);
+			// 実行ログエラー詳細 ＝ NULL
+			param.setTargerEmployee(listErrorAndEmpId);
+			// アルゴリズム「実行ログ登録」を実行する 2290 Done
+			executionLogAdapterFn.updateExecuteLog(param);
+		}
 		dataSetter.updateData("taskId", context.asAsync().getTaskId());
 		dataSetter.setData("createSchedule", "done");
 		if (isInterruption) {
@@ -980,7 +1023,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			// 8-処理実行区分 → もう一度作り直す とする
 			reCreateContent.setProcessExecutionAtr(ProcessExecutionAtr.REBUILD);
 		} else {
-			// #17055
+			// #107055
 			// ・実施区分 → 通常作成
 			s.setImplementAtr(ImplementAtr.GENERALLY_CREATED);
 			// ・再作成区分 → 全件 とする
@@ -1268,20 +1311,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				ExecutionType.NORMAL_EXECUTION, IdentifierUtil.randomUniqueId()));
 		this.executionLogRepository.addExecutionLog(dailyCreateLog);
 		this.executionLogRepository.addExecutionLog(dailyCalLog);
-		/*
-		 * // <--old.05 fixed // ドメインモデル「実行ログ」を新規登録する // ドメインモデル「就業計算と集計実行ログ」を新規登録する
-		 * //EmpCalAndSumExeLog empCalAndSumExeLog = null; List<ExecutionLog>
-		 * lstExecutionLog = null; Optional<EmpCalAndSumExeLog> empExeLogOpt =
-		 * this.empCalAndSumExeLogRepository .getByEmpCalAndSumExecLogID(execId); if
-		 * (empExeLogOpt.isPresent()) { empCalAndSumExeLog = empExeLogOpt.get();
-		 * lstExecutionLog = this.executionLogRepository
-		 * .getExecutionLogs(empCalAndSumExeLog.getEmpCalAndSumExecLogID()); } else {
-		 * EmpCalAndSumExeLogOutput registerEmpCalAndSumExeLog =
-		 * this.registerEmpCalAndSumExeLog(execId, procExecLog, command, period.start(),
-		 * period.end()); empCalAndSumExeLog =
-		 * registerEmpCalAndSumExeLog.getEmpCalAndSumExeLog(); lstExecutionLog =
-		 * registerEmpCalAndSumExeLog.getExecutionLogs(); } // -->old.05
-		 */
 
 		// ドメインモデル「更新処理自動実行ログ」を更新する
 		if (procExecLog.getEachProcPeriod() != null && procExecLog.getEachProcPeriod().isPresent()) {
@@ -1307,10 +1336,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 
 		try {
 			for (Closure closure : closureList) {
-				// ドメインモデル「更新処理前回実行日時」を更新する
-				// LastExecDateTime lastExecDateTime = new LastExecDateTime(companyId,
-				// procExecLog.getExecItemCd(),
-				// GeneralDateTime.now());
 
 				// 雇用コードを取得する
 				List<ClosureEmployment> employmentList = this.closureEmpRepo.findByClosureId(companyId,
@@ -3080,98 +3105,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			CommandHandlerContext<ExecuteProcessExecutionCommand> context, ProcessExecution processExecution,
 			EmpCalAndSumExeLog empCalAndSumExeLog, List<String> lstEmpId, DatePeriod period, List<String> workPlaceIds,
 			String typeExecution, ExecutionLog dailyCreateLog) throws CreateDailyException, DailyCalculateException {
-		/*
-		 * // <<Public>> 就業条件で社員を検索して並び替える RegulationInfoEmployeeAdapterImport
-		 * regulationInfoEmployeeAdapterImport = new
-		 * RegulationInfoEmployeeAdapterImport(); if
-		 * (processExecution.getExecScope().getExecScopeCls().value == 1) { //
-		 * 【更新処理自動実行.実行範囲.実行範囲区分 ＝ 職場 の場合】 // 基準日 → システム日付
-		 * regulationInfoEmployeeAdapterImport.setBaseDate(GeneralDateTime.now()); //
-		 * 検索参照範囲 → 参照範囲を考慮しない regulationInfoEmployeeAdapterImport.setReferenceRange(3);
-		 * // 雇用で絞り込む → TRUE
-		 * regulationInfoEmployeeAdapterImport.setFilterByEmployment(true); // 雇用コード一覧 →
-		 * 取得した雇用コード（List)
-		 * regulationInfoEmployeeAdapterImport.setEmploymentCodes(lstEmploymentCode); //
-		 * 部門で絞り込む → FALSE
-		 * regulationInfoEmployeeAdapterImport.setFilterByDepartment(false); // 部門ID一覧 →
-		 * なし regulationInfoEmployeeAdapterImport.setDepartmentCodes(null); // 職場で絞り込む →
-		 * TRUE regulationInfoEmployeeAdapterImport.setFilterByWorkplace(true);
-		 * 
-		 * if (workPlaceIds == null || workPlaceIds.isEmpty()) {
-		 * regulationInfoEmployeeAdapterImport.setWorkplaceCodes(null); } else { //
-		 * 職場ID一覧 → パラメータ「職場ID（List）」
-		 * regulationInfoEmployeeAdapterImport.setWorkplaceCodes(workPlaceIds); }
-		 * 
-		 * // 分類で絞り込む → FALSE
-		 * regulationInfoEmployeeAdapterImport.setFilterByClassification(false); //
-		 * 分類コード一覧 → なし
-		 * regulationInfoEmployeeAdapterImport.setClassificationCodes(null); // 職位で絞り込む
-		 * → FALSE regulationInfoEmployeeAdapterImport.setFilterByJobTitle(false); //
-		 * 職位ID一覧 → なし regulationInfoEmployeeAdapterImport.setJobTitleCodes(null); //
-		 * 在職・休職・休業のチェック期間 → 作成した期間（日別作成）※パラメータで取得
-		 * regulationInfoEmployeeAdapterImport.setPeriodStart(period.start());
-		 * regulationInfoEmployeeAdapterImport.setPeriodEnd(period.end()); // 在職者を含める →
-		 * TRUE regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true); //
-		 * 休職者を含める → FALSE
-		 * regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false); //
-		 * 休業者を含める → FALSE
-		 * regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false); //
-		 * 出向に来ている社員を含める → TRUE
-		 * regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true); //
-		 * 出向に行っている社員を含める → FALSE
-		 * regulationInfoEmployeeAdapterImport.setIncludeGoingOnLoan(false); // 退職者を含める
-		 * → FALSE regulationInfoEmployeeAdapterImport.setIncludeRetirees(false); //
-		 * 退職日のチェック期間 → 作成した期間（日別作成） ※パラメータで取得
-		 * regulationInfoEmployeeAdapterImport.setRetireStart(period.start());
-		 * regulationInfoEmployeeAdapterImport.setRetireEnd(period.end()); // 並び順NO → 1
-		 * regulationInfoEmployeeAdapterImport.setSortOrderNo(1);
-		 * regulationInfoEmployeeAdapterImport.setSystemType(2); //勤務種別で絞り込む → FALSE
-		 * regulationInfoEmployeeAdapterImport.setFilterByWorktype(false); // 氏名の種類 →
-		 * ビジネスネーム日本語 regulationInfoEmployeeAdapterImport.setNameType("ビジネスネーム日本語");
-		 * 
-		 * } else { // 【更新処理自動実行.実行範囲.実行範囲区分 ＝ 会社 の場合】 // 基準日 → システム日付
-		 * regulationInfoEmployeeAdapterImport.setBaseDate(GeneralDateTime.now()); //
-		 * 検索参照範囲 → 参照範囲を考慮しない regulationInfoEmployeeAdapterImport.setReferenceRange(3);
-		 * // 雇用で絞り込む → TRUE
-		 * regulationInfoEmployeeAdapterImport.setFilterByEmployment(true); // 雇用コード一覧 →
-		 * 取得した雇用コード（List)
-		 * regulationInfoEmployeeAdapterImport.setEmploymentCodes(lstEmploymentCode); //
-		 * 部門で絞り込む → FALSE
-		 * regulationInfoEmployeeAdapterImport.setFilterByDepartment(false); // 部門ID一覧 →
-		 * なし regulationInfoEmployeeAdapterImport.setDepartmentCodes(null); // 職場で絞り込む →
-		 * FALSE regulationInfoEmployeeAdapterImport.setFilterByWorkplace(false); //
-		 * 職場ID一覧 → なし regulationInfoEmployeeAdapterImport.setWorkplaceCodes(null); //
-		 * 分類で絞り込む → FALSE
-		 * regulationInfoEmployeeAdapterImport.setFilterByClassification(false); //
-		 * 分類コード一覧 → なし
-		 * regulationInfoEmployeeAdapterImport.setClassificationCodes(null); // 職位で絞り込む
-		 * → FALSE regulationInfoEmployeeAdapterImport.setFilterByJobTitle(false); //
-		 * 職位ID一覧 → なし regulationInfoEmployeeAdapterImport.setJobTitleCodes(null); //
-		 * 在職・休職・休業のチェック期間 → 作成した期間
-		 * regulationInfoEmployeeAdapterImport.setPeriodStart(period.start());
-		 * regulationInfoEmployeeAdapterImport.setPeriodEnd(period.end()); // 在職者を含める →
-		 * TRUE regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true); //
-		 * 休職者を含める → FALSE
-		 * regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false); //
-		 * 休業者を含める → FALSE
-		 * regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false); //
-		 * 出向に来ている社員を含める → TRUE
-		 * regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true); //
-		 * 出向に行っている社員を含める → FALSE
-		 * regulationInfoEmployeeAdapterImport.setIncludeGoingOnLoan(false); // 退職者を含める
-		 * → FALSE regulationInfoEmployeeAdapterImport.setIncludeRetirees(false); //
-		 * 退職日のチェック期間 → 作成した期間（日別作成） ※パラメータで取得
-		 * regulationInfoEmployeeAdapterImport.setRetireStart(period.start());
-		 * regulationInfoEmployeeAdapterImport.setRetireEnd(period.end()); // 並び順NO → 1
-		 * regulationInfoEmployeeAdapterImport.setSortOrderNo(1);
-		 * regulationInfoEmployeeAdapterImport.setSystemType(2); //勤務種別で絞り込む → FALSE
-		 * regulationInfoEmployeeAdapterImport.setFilterByWorktype(false); // 氏名の種類 →
-		 * ビジネスネーム日本語 regulationInfoEmployeeAdapterImport.setNameType("ビジネスネーム日本語");
-		 * 
-		 * } // <<Public>> 就業条件で社員を検索して並び替える List<RegulationInfoEmployeeAdapterDto>
-		 * lstRegulationInfoEmployee = this.regulationInfoEmployeeAdapter
-		 * .find(regulationInfoEmployeeAdapterImport);
-		 */
 		boolean isInterrupt = false;
 		List<Boolean> listIsInterrupt = new ArrayList<>();
 		List<String> listErrorTryCatch = new ArrayList<>();
@@ -3211,20 +3144,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		if(!listIsInterrupt.isEmpty()) {
 			isInterrupt = true;
 		}
-//		for (int i = 0; i < size; i++) {
-//			// アルゴリズム「開始日を入社日にする」を実行する
-//			DatePeriod employeeDatePeriod = this.makeStartDateForHiringDate(processExecution, lstEmpId.get(i), period);
-//			if (employeeDatePeriod == null && processExecution.getExecSetting().getDailyPerf()
-//					.getTargetGroupClassification().isMidJoinEmployee()) {
-//				continue;
-//			}
-//			boolean executionDaily = this.executionDaily(companyId, context, processExecution, lstEmpId.get(i),
-//					empCalAndSumExeLog, employeeDatePeriod, typeExecution, dailyCreateLog);
-//			if (executionDaily) {
-//				isInterrupt = true;
-//				break;
-//			}
-//		}
 		List<ErrMessageInfo> errMessageInfos = this.errMessageInfoRepository
 				.getAllErrMessageInfoByEmpID(empCalAndSumExeLog.getEmpCalAndSumExecLogID());
 		List<String> errorMessage = errMessageInfos.stream().map(error -> {

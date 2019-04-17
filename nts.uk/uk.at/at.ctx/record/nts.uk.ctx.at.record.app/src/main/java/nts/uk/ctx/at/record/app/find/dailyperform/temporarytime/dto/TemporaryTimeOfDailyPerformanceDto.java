@@ -27,6 +27,9 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
 @AttendanceItemRoot(rootName = ItemConst.DAILY_TEMPORARY_TIME_NAME)
 public class TemporaryTimeOfDailyPerformanceDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	private String employeeId;
 
 	@AttendanceItemLayout(layout = LAYOUT_A, jpPropertyName = COUNT)

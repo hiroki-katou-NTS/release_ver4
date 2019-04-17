@@ -271,7 +271,8 @@ module nts.uk.at.view.kaf011.a.screenModel {
                         appVersion: 0,
                         remainDays: self.remainDays()
                     },
-                    isNotSelectYes: true
+                    isNotSelectYes: true,
+                    isScreenB:false
                 }, selectedReason = self.appReasonSelectedID() ? _.find(self.appReasons(), { 'reasonID': self.appReasonSelectedID() }) : null;
             if (selectedReason) {
                 returnCmd.appCmd.appReasonText = selectedReason.reasonTemp;
@@ -338,6 +339,8 @@ module nts.uk.at.view.kaf011.a.screenModel {
                             .then(function() { nts.uk.ui.block.clear(); });
                     }
                 }
+
+
             }).always(() => {
                 block.clear();
                 $("#recDatePicker").focus();

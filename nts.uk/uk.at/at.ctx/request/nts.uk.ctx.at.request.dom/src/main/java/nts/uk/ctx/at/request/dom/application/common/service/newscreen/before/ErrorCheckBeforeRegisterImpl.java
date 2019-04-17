@@ -447,6 +447,40 @@ public class ErrorCheckBeforeRegisterImpl implements IErrorCheckBeforeRegister {
 		
 	}
 	
+	@Override
+	public List<String> inconsistencyCheck(String companyID, String employeeID, GeneralDate appDate, ApplicationType apptype) {
+		// ドメインモデル「残業休出申請共通設定」を取得
+		Optional<OvertimeRestAppCommonSetting> opOvertimeRestAppCommonSet = this.overtimeRestAppCommonSetRepository
+				.getOvertimeRestAppCommonSetting(companyID, apptype.value);
+		if(!opOvertimeRestAppCommonSet.isPresent()){
+			return Collections.emptyList();
+		}
+		OvertimeRestAppCommonSetting overtimeRestAppCommonSet = opOvertimeRestAppCommonSet.get();
+		AppDateContradictionAtr appDateContradictionAtr = overtimeRestAppCommonSet.getAppDateContradictionAtr();
+		if(appDateContradictionAtr==AppDateContradictionAtr.NOTCHECK){
+			return Collections.emptyList();
+		}
+		WorkType workType = otherCommonAlgorithm.getWorkTypeScheduleSpec(companyID, employeeID, appDate);
+		if(workType==null){
+			// 「申請日矛盾区分」をチェックする
+			if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
+				throw new BusinessException("Msg_1519", appDate.toString("yyyy/MM/dd"));
+			}
+			return Arrays.asList("Msg_1520", appDate.toString("yyyy/MM/dd")); 
+		}
+		boolean checked = this.workTypeInconsistencyCheck(workType);
+		if(!checked){
+			return Collections.emptyList();
+		}
+		String name = workType.getName().v();
+		// 「申請日矛盾区分」をチェックする
+		if(appDateContradictionAtr==AppDateContradictionAtr.CHECKNOTREGISTER){
+			throw new BusinessException("Msg_1521", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "未登録のマスタ");
+		}
+		return Arrays.asList("Msg_1522", appDate.toString("yyyy/MM/dd"), Strings.isNotBlank(name) ? name : "未登録のマスタ"); 
+		
+	}
+	
 	/**
 	 * 03-08_01 休日出勤の勤務種類矛盾チェック
 	 * @param workType

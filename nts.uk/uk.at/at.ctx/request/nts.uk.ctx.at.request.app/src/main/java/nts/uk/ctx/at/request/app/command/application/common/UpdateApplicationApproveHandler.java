@@ -105,6 +105,10 @@ public class UpdateApplicationApproveHandler extends CommandHandlerWithResult<In
 					displayReason += System.lineSeparator();
 				}
 				displayReason += context.getCommand().getTextAreaReason();
+			} else {
+				if(Strings.isBlank(typicalReason)){
+					displayReason = applicationRepository.findByID(companyID, command.getApplicationID()).get().getAppReason().v();
+				}
 			}
 			
 			if(displayFixedReason||displayAppReason){

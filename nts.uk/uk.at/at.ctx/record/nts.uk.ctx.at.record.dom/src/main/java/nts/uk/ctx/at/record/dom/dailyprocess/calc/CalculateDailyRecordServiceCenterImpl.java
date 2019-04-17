@@ -332,9 +332,9 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			ManagePerCompanySet companySet,
 			List<ClosureStatusManagement> closureList) {
 		val result = commonPerCompany(CalculateOption.asDefault(), integrationOfDaily,true,Optional.empty(),Optional.empty(),Optional.empty(),closureList);
-		result.getLst().forEach(listItem ->{
-			dailyCalculationEmployeeService.upDateCalcState(listItem);
-		});
+//		result.getLst().forEach(listItem ->{
+//			dailyCalculationEmployeeService.upDateCalcState(listItem);
+//		});
 		return result; 
 	}
 	

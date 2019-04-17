@@ -40,6 +40,10 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 /** 年休月別残数データ */
 @AttendanceItemRoot(rootName = ItemConst.MONTHLY_ANNUAL_LEAVING_REMAIN_NAME, itemType = AttendanceItemType.MONTHLY_ITEM)
 public class AnnLeaRemNumEachMonthDto extends MonthlyItemCommon {
+
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	/** 会社ID */
 	private String companyId;
 

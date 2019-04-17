@@ -225,7 +225,7 @@ module nts.uk.at.view.kaf007.b {
                 }  
                 
                 let comboBoxReason: string = appcommon.CommonProcess.getComboBoxReason(self.selectedReason(), self.reasonCombo(), self.typicalReasonDisplayFlg());
-                let textAreaReason: string = appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);
+                let textAreaReason: string = self.multilContent();//appcommon.CommonProcess.getTextAreaReason(self.multilContent(), self.displayAppReasonContentFlg(), true);
                 
                 if(!appcommon.CommonProcess.checklenghtReason(comboBoxReason+":"+textAreaReason,"#inpReasonTextarea")){
                     return;

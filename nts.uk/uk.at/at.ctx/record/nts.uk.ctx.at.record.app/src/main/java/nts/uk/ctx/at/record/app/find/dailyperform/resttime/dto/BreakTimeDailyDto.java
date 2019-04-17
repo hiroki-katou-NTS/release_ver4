@@ -28,6 +28,9 @@ import nts.uk.shr.com.time.TimeWithDayAttr;
 @AttendanceItemRoot(rootName = ItemConst.DAILY_BREAK_TIME_NAME)
 public class BreakTimeDailyDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	private String employeeId;
 	
 	@JsonDeserialize(using = CustomGeneralDateSerializer.class)

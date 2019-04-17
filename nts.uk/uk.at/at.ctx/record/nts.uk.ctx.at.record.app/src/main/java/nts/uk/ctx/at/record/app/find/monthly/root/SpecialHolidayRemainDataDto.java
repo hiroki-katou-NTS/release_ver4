@@ -29,6 +29,9 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
 @AttendanceItemRoot(rootName = ItemConst.MONTHLY_SPECIAL_HOLIDAY_REMAIN_NAME, itemType = AttendanceItemType.MONTHLY_ITEM)
 public class SpecialHolidayRemainDataDto extends MonthlyItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	/** 社員ID: 社員ID */
 	private String employeeId;
 
