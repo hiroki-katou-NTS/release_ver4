@@ -808,18 +808,8 @@ public class RecoveryStorageService {
 		Set<String> hashId = new HashSet<>();
 		List<DataRecoveryTable> targetDataByCate = new ArrayList<>();
 		HashMap<String, CSVBufferReader> csvByteReadMaper_TableNotUse = new HashMap<>();
+		
 		for (int j = 0; j < tableNotUseByCategory.getTables().size(); j++) {
-
-			Set<String> listSid = CsvFileUtil.getListSid(uploadId,
-					tableNotUseByCategory.getTables().get(j).getInternalFileName());
-			// -- Tổng hợp ID Nhân viên duy nhất từ List Data
-			hashId.addAll(listSid);
-
-			DataRecoveryTable targetData = new DataRecoveryTable(uploadId,
-					tableNotUseByCategory.getTables().get(j).getInternalFileName(), listSid.isEmpty() ? false : true);
-			
-			targetDataByCate.add(targetData);
-			
 			String filePath = getExtractDataStoragePath(uploadId) + "//"
 					+ tableNotUseByCategory.getTables().get(j).getInternalFileName() + ".csv";
 			
@@ -828,8 +818,6 @@ public class RecoveryStorageService {
 			csvByteReadMaper_TableNotUse.put(tableNotUseByCategory.getTables().get(j).getInternalFileName(), reader);
 		}
 		
-		
-
 		// テーブル一覧のカレントの1行分の項目を取得する
 		for (TableList tableList : tableNotUseByCategory.getTables()) {
 
@@ -840,9 +828,10 @@ public class RecoveryStorageService {
 				return DataRecoveryOperatingCondition.INTERRUPTION_END;
 			}
 
-			Set<String> hasSidInCsv = CsvFileUtil.getListSid(uploadId, tableList.getTableEnglishName().toString());
+			Set<String> hasSidInCsv = CsvFileUtil.getListSid(uploadId, tableList.getInternalFileName());
 
 			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, tableList.getInternalFileName(), hasSidInCsv.isEmpty() ? false : true);
+			
 			
 			condition = exDataTabeRangeDate(dataRecoveryTable, Optional.of(tableList), dataRecoveryProcessId,
 					csvByteReadMaper_TableNotUse);
@@ -852,7 +841,7 @@ public class RecoveryStorageService {
 				return condition;
 			}
 		}
-
+		
 		return condition;
 	}
 
