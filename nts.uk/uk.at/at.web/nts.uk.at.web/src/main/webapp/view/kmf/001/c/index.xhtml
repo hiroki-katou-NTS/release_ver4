@@ -148,19 +148,27 @@
 						</tr>
 						<tr>
 							<td><label class="content-label">#{i18n.getText('KMF001_34')}</label></td>
-							<td><div tabindex="10"
+							<td><!-- <div tabindex="10"
 									data-bind="ntsSwitchButton: {
 										options: manageDistinctList,
 										optionsValue: 'value',
 										optionsText: 'localizedName',
 										value: selectedMaxManageSemiVacation,
-										enable: enableAnnualVacation }"></div></td>
+										enable: enableAnnualVacation }"></div> -->
+										<div tabindex="10"
+									data-bind="ntsSwitchButton: {
+										options: manageDistinctList,
+										optionsValue: 'value',
+										optionsText: 'localizedName',
+										value: selectedMaxManageSemiVacation,
+										enable: false }"></div>
+										</td>
 							<td><div></div></td>
 							<td><div></div></td>
 						</tr>
 						<tr>
 							<td style="min-width: 364px;"><label class="content-label">#{i18n.getText('KMF001_133')}</label></td>
-							<td><div tabindex="11" id="combo-box"
+							<td><!-- <div tabindex="11" id="combo-box"
 									data-bind="ntsComboBox: {
 										options: maxDayReferenceList,
 										optionsValue: 'value',
@@ -171,10 +179,23 @@
 										enable: enableAnnualVacation,
 										columns: [
 											{prop: 'localizedName', length: 10 }
-										]}"></div></td>
+										]}"></div> -->
+										<div tabindex="11" id="combo-box"
+									data-bind="ntsComboBox: {
+										options: maxDayReferenceList,
+										optionsValue: 'value',
+										visibleItemsCount: 2,
+										value: selectedMaxNumberSemiVacation,
+										optionsText: 'localizedName',
+										editable: false,
+										enable: false,
+										columns: [
+											{prop: 'localizedName', length: 10 }
+										]}"></div>
+										</td>
 
 							<td style="min-width: 256px;"><label class="content-label">#{i18n.getText('KMF001_132')}</label></td>
-							<td><input tabindex="12" id="max-number-company"
+							<td><!-- <input tabindex="12" id="max-number-company"
 								class="nts-input" data-bind="ntsNumberEditor: {
 									value: maxNumberCompany,
 									constraint: 'AnnualNumberDay',
@@ -184,7 +205,18 @@
 										width: '70px',
 										unitID: 'TIMES'
 									},
-									enable: enableMaxNumberCompany}" /></td>
+									enable: enableMaxNumberCompany}" /> -->
+									<input tabindex="12" id="max-number-company"
+								class="nts-input" data-bind="ntsNumberEditor: {
+									value: maxNumberCompany,
+									constraint: 'AnnualNumberDay',
+									name: '#[KMF001_132]',
+									required: requiredMaxNumberCompany,
+									option: {
+										width: '70px',
+										unitID: 'TIMES'
+									},
+									enable: false}" /></td>
 						</tr>
 						<tr>
 							<td style="min-width: 364px;"><label class="content-label">#{i18n.getText('KMF001_139')}</label></td>
@@ -278,20 +310,28 @@
 						</tr>
 						<tr>
 							<td><label class="content-label">#{i18n.getText('KMF001_52')}</label></td>
-							<td><div tabindex="17"
+							<td><!-- <div tabindex="17"
 									data-bind="ntsSwitchButton: {
 										options: manageDistinctList,
 										optionsValue: 'value',
 										optionsText: 'localizedName',
 										value: selectedTimeManagement,
-										enable: enableAnnualVacation }"></div></td>
+										enable: enableAnnualVacation }"></div> -->
+										<div tabindex="17"
+									data-bind="ntsSwitchButton: {
+										options: manageDistinctList,
+										optionsValue: 'value',
+										optionsText: 'localizedName',
+										value: selectedTimeManagement,
+										enable: false }"></div>
+										</td>
 
 							<td><div></div></td>
 							<td><div></div></td>
 						</tr>
 						<tr>
 							<td><label class="content-label">#{i18n.getText('KMF001_53')}</label></td>
-							<td><div tabindex="18"
+							<td><!-- <div tabindex="18"
 									id="combo-box-time-unit"
 									data-bind="ntsComboBox: {
 										options: vacationTimeUnitList,
@@ -303,27 +343,49 @@
 										enable: enableTimeSetting,
 										columns: [
 											{prop: 'localizedName', length: 10 }
-										]}"></div></td>
+										]}"></div> -->
+										<div tabindex="18"
+									id="combo-box-time-unit"
+									data-bind="ntsComboBox: {
+										options: vacationTimeUnitList,
+										optionsValue: 'value',
+										visibleItemsCount: 5,
+										value: selectedVacationTimeUnit,
+										optionsText: 'localizedName',
+										editable: false,
+										enable: false,
+										columns: [
+											{prop: 'localizedName', length: 10 }
+										]}"></div>
+										</td>
 
 							<td><div></div></td>
 							<td><div></div></td>
 						</tr>
 						<tr>
 							<td><label class="content-label">#{i18n.getText('KMF001_54')}</label></td>
-							<td><div tabindex="19"
+							<td><!-- <div tabindex="19"
 									data-bind="ntsSwitchButton: {
 										options: manageDistinctList,
 										optionsValue: 'value',
 										optionsText: 'localizedName',
 										value: selectedManageUpperLimitDayVacation,
-										enable: enableTimeSetting }"></div></td>
+										enable: enableTimeSetting }"></div> -->
+										<div tabindex="19"
+									data-bind="ntsSwitchButton: {
+										options: manageDistinctList,
+										optionsValue: 'value',
+										optionsText: 'localizedName',
+										value: selectedManageUpperLimitDayVacation,
+										enable: false }"></div>
+										</td>
 
 							<td><div></div></td>
 							<td><div></div></td>
 						</tr>
 						<tr data-bind="if: selectedAnnualManage()">
 							<td><label class="content-label">#{i18n.getText('KMF001_134')}</label></td>
-							<td><div tabindex="20" id="combo-box"
+							<td><!-- <div tabindex="20" id="combo-box"
 									data-bind="ntsComboBox: {
 										options: maxDayReferenceList,
 										optionsValue: 'value',
@@ -334,10 +396,23 @@
 										enable: enableTimeSetting,
 										columns: [
 											{prop: 'localizedName', length: 10 }
-										]}"></div></td>
+										]}"></div> -->
+										<div tabindex="20" id="combo-box"
+									data-bind="ntsComboBox: {
+										options: maxDayReferenceList,
+										optionsValue: 'value',
+										visibleItemsCount: 2,
+										value: selectedMaxDayVacation,
+										optionsText: 'localizedName',
+										editable: false,
+										enable: false,
+										columns: [
+											{prop: 'localizedName', length: 10 }
+										]}"></div>
+										</td>
 
 							<td><label class="content-label">#{i18n.getText('KMF001_132')}</label></td>
-							<td><input tabindex="21" id="time-max-day-company"
+							<td><!-- <input tabindex="21" id="time-max-day-company"
 								class="nts-input"
 								data-bind="ntsNumberEditor: {
 									value: timeMaxNumberCompany,
@@ -348,11 +423,25 @@
 										width: '70px',
 										unitID: 'DAYS'
 									},
-									enable: enableTimeMaxNumberCompany}" /></td>
+									enable: enableTimeMaxNumberCompany}" /> -->
+									
+									<input tabindex="21" id="time-max-day-company"
+								class="nts-input"
+								data-bind="ntsNumberEditor: {
+									value: timeMaxNumberCompany,
+									constraint: 'MaxTimeDay',
+									name: '#[KMF001_132]',
+									required: requiredTimeMaxNumberCompany,
+									option: {
+										width: '70px',
+										unitID: 'DAYS'
+									},
+									enable: false}" />
+									</td>
 						</tr>
 						<tr>
 							<td><label class="content-label">#{i18n.getText('KMF001_140')}</label></td>
-							<td><div tabindex="22" id="combo-box"
+							<td><!-- <div tabindex="22" id="combo-box"
 									data-bind="ntsComboBox: {
 										options: roundProcessClassificList,
 										optionsValue: 'value',
@@ -363,7 +452,20 @@
 										enable: enableTimeMaxNumberCompany,
 										columns: [
 											{prop: 'localizedName', length: 10 }
-										]}"></div></td>
+										]}"></div> -->
+										<div tabindex="22" id="combo-box"
+									data-bind="ntsComboBox: {
+										options: roundProcessClassificList,
+										optionsValue: 'value',
+										visibleItemsCount: 2,
+										value: selectedroundProcessClassific,
+										optionsText: 'localizedName',
+										editable: false,
+										enable: false,
+										columns: [
+											{prop: 'localizedName', length: 10 }
+										]}"></div>
+										</td>
 
 							<td><div></div></td>
 							<td><div></div></td>

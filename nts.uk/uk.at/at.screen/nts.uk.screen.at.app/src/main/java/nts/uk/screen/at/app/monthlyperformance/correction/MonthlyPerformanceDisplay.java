@@ -561,8 +561,6 @@ public class MonthlyPerformanceDisplay {
 		
 		List<Identification> listIdentification = identificationRepository.findByListEmployeeID(empIds, closureTime.start(), closureTime.end());
 		
-		List<EmployeeDailyPerError> listEmployeeDailyPerError =  employeeDailyPerErrorRepo.findsWithLeftJoin(empIds, new DatePeriod(closureTime.start(), closureTime.end()));
-		
 		Optional<ApprovalProcess> approvalProcOp = approvalRepo.getApprovalProcessById(cid);
 		
 		for (AffAtWorkplaceImport affWorkplaceImport : affWorkplaceLst) {
@@ -590,17 +588,17 @@ public class MonthlyPerformanceDisplay {
 				}
 			}
 			
+			List<EmployeeDailyPerError> listEmployeeDailyPerError =  employeeDailyPerErrorRepo.findsWithLeftJoin(Arrays.asList(affWorkplaceImport.getEmployeeId()), workDatePeriod);
 			boolean checkExistRecordErrorListDate = false;
-			for(EmployeeDailyPerError employeeDailyPerError : listEmployeeDailyPerError) {
-				if(employeeDailyPerError.getEmployeeID().equals(affWorkplaceImport.getEmployeeId())) {
-					//対応するドメインモデル「勤務実績のエラーアラーム」を取得する
-					List<ErrorAlarmWorkRecord> errorAlarmWorkRecordLst =  errorAlarmWorkRecordRepository.getListErAlByListCodeError(
-							cid, Arrays.asList(employeeDailyPerError.getErrorAlarmWorkRecordCode().v()));
-					if(!errorAlarmWorkRecordLst.isEmpty()) {
-						checkExistRecordErrorListDate = true;	
-					}
-					break;
+			for (EmployeeDailyPerError employeeDailyPerError : listEmployeeDailyPerError) {
+				// 対応するドメインモデル「勤務実績のエラーアラーム」を取得する
+				List<ErrorAlarmWorkRecord> errorAlarmWorkRecordLst = errorAlarmWorkRecordRepository
+						.getListErAlByListCodeError(cid,
+								Arrays.asList(employeeDailyPerError.getErrorAlarmWorkRecordCode().v()));
+				if (!errorAlarmWorkRecordLst.isEmpty()) {
+					checkExistRecordErrorListDate = true;
 				}
+				break;
 			}
 			
 			// 月の実績の状況を取得する

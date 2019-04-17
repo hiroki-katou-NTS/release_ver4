@@ -577,28 +577,34 @@ module nts.uk.at.view.kmw003.a.viewmodel {
             param.actualTime.endDate = moment.utc(param.actualTime.endDate, "YYYY/MM/DD").toISOString();
             let dfd = $.Deferred();
             service.updateScreen(param).done((data) => {
+                let lstRowId = [] ;
                 let dpDataNew = _.map(self.dpData, (value: any) => {
                     let val = _.find(data.lstData, (item: any) => {
                         return item.id == value.id;
                     });
                     return val != undefined ? val : value;
                 });
+                
                 self.dpData = dpDataNew;
                 let lstCellStateMerge = [] ;
-                let checkPush =true;
+                _.forEach(dpDataNew, (item: any) => {
+                       lstRowId.push(item.rowId);
+                    });
                 for(let i = 0;i<data.lstCellState.length;i++){
                     if(data.lstCellState[i].columnKey != "approval"){
                         lstCellStateMerge.push(data.lstCellState[i]);
                         continue; 
                     }
-                    if(data.lstCellState[i].columnKey == "approval" && checkPush){
+                    if(data.lstCellState[i].columnKey == "approval" && _.indexOf(lstRowId, data.lstCellState[i].rowId) != -1 ){
                         for(let j =i+1;j<data.lstCellState.length;j++){
-                            if(data.lstCellState[j].columnKey == "approval"){
+                            if(data.lstCellState[j].columnKey == "approval" && data.lstCellState[i].rowId == data.lstCellState[j].rowId){ 
                                 data.lstCellState[i].state.push(data.lstCellState[j].state[0]);
                             }                            
                         }
+                        _.remove(lstRowId, function(n) {
+                            return n.rowId == data.lstCellState[i].rowId;
+                        });
                         lstCellStateMerge.push(data.lstCellState[i]);
-                        checkPush = false;
                     }
                 }
                 let cellStatesNew = _.map(self.cellStates(), (value: any) => {

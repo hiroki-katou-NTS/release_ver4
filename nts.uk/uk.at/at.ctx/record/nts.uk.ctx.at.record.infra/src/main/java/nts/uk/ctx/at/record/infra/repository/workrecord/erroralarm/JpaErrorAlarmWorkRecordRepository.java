@@ -290,6 +290,9 @@ public class JpaErrorAlarmWorkRecordRepository extends JpaRepository implements 
 						if(jobIds.containsKey(eralID)){
 							condition.getCheckTargetCondtion().getLstJobTitleId().addAll(jobIds.get(eralID));
 						}
+						if(businessTypes.containsKey(eralID)){
+							condition.getCheckTargetCondtion().getLstBusinessTypeCode().addAll(businessTypes.get(eralID));
+						}
 						if(employments.containsKey(eralID)){
 							condition.getCheckTargetCondtion().getLstEmploymentCode().addAll(employments.get(eralID));
 						}
