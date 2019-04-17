@@ -25638,7 +25638,8 @@ var nts;
                             var $grid = evt.currentTarget, $tCell = evt.target;
                             if (!$grid)
                                 return;
-                            if (!ti.isEnterKey(evt) && !ti.isTabKey(evt) && evt.keyCode >= 46 && evt.keyCode <= 110) {
+                            if (!ti.isEnterKey(evt) && !ti.isTabKey(evt)
+                                && ((evt.keyCode >= 46 && evt.keyCode <= 111) || (evt.keyCode >= 160 && evt.keyCode <= 223))) {
                                 ssk.KeyPressed[evt.keyCode] = true;
                             }
                             if (!_(ssk.KeyPressed).keys().filter(function (k) { return k !== "13" && k !== "9"; }).size()) {
@@ -25764,7 +25765,8 @@ var nts;
                             delete ssk.KeyPressed[evt.keyCode];
                         });
                         document.addXEventListener(ssk.KEY_DOWN, function (evt) {
-                            if (!ti.isEnterKey(evt) && !ti.isTabKey(evt) && evt.keyCode >= 46 && evt.keyCode <= 110) {
+                            if (!ti.isEnterKey(evt) && !ti.isTabKey(evt)
+                                && ((evt.keyCode >= 46 && evt.keyCode <= 111) || (evt.keyCode >= 160 && evt.keyCode <= 223))) {
                                 ssk.KeyPressed[evt.keyCode] = true;
                             }
                         });
@@ -27314,7 +27316,7 @@ var nts;
                                     su.endEdit(grid);
                                 }
                             }
-                            else if (evt.keyCode >= 46 && evt.keyCode <= 110) {
+                            else if ((evt.keyCode >= 46 && evt.keyCode <= 111) || (evt.keyCode >= 160 && evt.keyCode <= 223)) {
                                 ssk.KeyPressed[evt.keyCode] = true;
                             }
                             if (ti.isArrowLeft(evt) || ti.isArrowRight(evt) || ti.isArrowUp(evt) || ti.isArrowDown(evt)) {
