@@ -706,8 +706,8 @@ public class MonthlyPerformanceReload {
 							cid, Arrays.asList(employeeDailyPerError.getErrorAlarmWorkRecordCode().v()));
 					if(!errorAlarmWorkRecordLst.isEmpty()) {
 						checkExistRecordErrorListDate = true;	
+						break;
 					}
-					break;
 				}
 			}
 			
