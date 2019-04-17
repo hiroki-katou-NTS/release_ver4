@@ -239,9 +239,9 @@ public class ActualWorkingTimeOfDaily {
 	public static DivergenceTimeOfDaily createDivergenceTimeOfDaily(
 			DailyRecordToAttendanceItemConverter forCalcDivergenceDto,
 			List<DivergenceTime> divergenceTimeList,CalAttrOfDailyPerformance calcAtrOfDaily,
-			Optional<FixRestTimezoneSet> breakTimeSheets, TotalWorkingTime calcResultOotsuka, Optional<WorkTimeSetting> workTimeSetting) {
+			Optional<FixRestTimezoneSet> breakTimeSheets, TotalWorkingTime calcResultOotsuka, Optional<WorkTimeSetting> workTimeSetting, Optional<WorkType> workType) {
 		
-		val returnList = calcDivergenceTime(forCalcDivergenceDto, divergenceTimeList,calcAtrOfDaily,breakTimeSheets,calcResultOotsuka,workTimeSetting);
+		val returnList = calcDivergenceTime(forCalcDivergenceDto, divergenceTimeList,calcAtrOfDaily,breakTimeSheets,calcResultOotsuka,workTimeSetting,workType);
 		//returnする
 		return new DivergenceTimeOfDaily(returnList);
 	}
@@ -251,11 +251,13 @@ public class ActualWorkingTimeOfDaily {
 	 * @param calcAtrOfDaily
 	 * @param calcResultOotsuka 
 	 * @param workTimeSetting 
+	 * @param workType 
 	 * @param optional 就業時間帯(マスタ)側の休憩時間帯 
 	 * @return
 	 */
 	private static List<nts.uk.ctx.at.record.dom.divergencetimeofdaily.DivergenceTime>   calcDivergenceTime(DailyRecordToAttendanceItemConverter forCalcDivergenceDto,List<DivergenceTime> divergenceTimeList,
-			 																								CalAttrOfDailyPerformance calcAtrOfDaily,Optional<FixRestTimezoneSet> breakTimeSheets, TotalWorkingTime calcResultOotsuka, Optional<WorkTimeSetting> workTimeSetting) {
+			 																								CalAttrOfDailyPerformance calcAtrOfDaily,Optional<FixRestTimezoneSet> breakTimeSheets, TotalWorkingTime calcResultOotsuka,
+			 																								Optional<WorkTimeSetting> workTimeSetting, Optional<WorkType> workType) {
 		val integrationOfDailyInDto = forCalcDivergenceDto.toDomain();
 		if(integrationOfDailyInDto == null
 			|| integrationOfDailyInDto.getAttendanceTimeOfDailyPerformance() == null
@@ -311,7 +313,7 @@ public class ActualWorkingTimeOfDaily {
 											}
 											//大塚ｶｽﾀﾏｲｽﾞ(乖離No8～10は別の処理をさせる
 											else {
-												totalTime = calcDivergenceNo8910(tdi,integrationOfDailyInDto,breakTimeSheets,calcResultOotsuka,workTimeSetting);
+												totalTime = calcDivergenceNo8910(tdi,integrationOfDailyInDto,breakTimeSheets,calcResultOotsuka,workTimeSetting,workType);
 											}
 											returnList.add(new nts.uk.ctx.at.record.dom.divergencetimeofdaily.DivergenceTime(new AttendanceTimeOfExistMinus(totalTime - deductionTime), 
 													tdi.getDeductionTime(), 
@@ -443,11 +445,12 @@ public class ActualWorkingTimeOfDaily {
 	 * @param tdi  
 	 * @param calcResultOotsuka 
 	 * @param workTimeSetting 
+	 * @param workType 
 	 * @param breakList 就業時間帯側の休憩リスト
 	 * @param breakOfDaily 
 	 */
 	public static int calcDivergenceNo8910(nts.uk.ctx.at.record.dom.divergencetimeofdaily.DivergenceTime tdi, IntegrationOfDaily integrationOfDailyInDto,Optional<FixRestTimezoneSet> masterBreakList, 
-										   TotalWorkingTime calcResultOotsuka, Optional<WorkTimeSetting> workTimeSetting) {
+										   TotalWorkingTime calcResultOotsuka, Optional<WorkTimeSetting> workTimeSetting, Optional<WorkType> workType) {
 		//実績がそもそも存在しない(不正)の場合
 		if(!integrationOfDailyInDto.getAttendanceTimeOfDailyPerformance().isPresent()
 		 ||!masterBreakList.isPresent()) 
@@ -464,7 +467,7 @@ public class ActualWorkingTimeOfDaily {
 			if(!workTimeSetting.isPresent()) return 0;
 			return processNumberNight(integrationOfDailyInDto, breakList, breakOfDaily,calcResultOotsuka,workTimeSetting.get());
 		case 10:
-			return processNumberTen(integrationOfDailyInDto, breakList, breakOfDaily);
+			return processNumberTen(integrationOfDailyInDto, breakList, breakOfDaily,workType);
 		default:
 			throw new RuntimeException("exception divergence No:"+tdi.getDivTimeId());
 		}
@@ -547,7 +550,10 @@ public class ActualWorkingTimeOfDaily {
 		return 0;
 	}
 	
-	public static int processNumberTen(IntegrationOfDaily integrationOfDailyInDto,List<BreakTimeSheet> breakList,BreakTimeOfDaily breakOfDaily) {
+	public static int processNumberTen(IntegrationOfDaily integrationOfDailyInDto,List<BreakTimeSheet> breakList,BreakTimeOfDaily breakOfDaily,
+									   Optional<WorkType> workType) {
+		//乖離No10は休出では求めない
+		if(workType.isPresent() && workType.get().getDailyWork().isHolidayWork()) return 0;
 		//休憩枠No2取得
 		Optional<BreakTimeSheet> breakTimeSheet = breakList.stream().filter(tc -> tc.getBreakFrameNo().v() == 2).findFirst();
 		if(!breakTimeSheet.isPresent()) return 0;
