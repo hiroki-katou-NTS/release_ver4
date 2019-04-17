@@ -550,8 +550,8 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			query = query.replaceAll("rootType", String.valueOf(rootType.value));
 			String empList = "(";
 			for (int i = 0; i < employeeIDs.size(); i++) {
-				empList += employeeIDs.get(0);
-				if(i < employeeIDs.size()){
+				empList += "'" + employeeIDs.get(0) + "'";
+				if(i < employeeIDs.size()-1){
 					empList += ",";
 				}
 			}

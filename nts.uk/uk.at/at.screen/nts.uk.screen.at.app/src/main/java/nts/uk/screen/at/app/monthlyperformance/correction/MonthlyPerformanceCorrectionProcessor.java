@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -20,6 +21,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
+import lombok.val;
 import nts.arc.error.BusinessException;
 //import nts.arc.task.parallel.ParallelExceptions.Item;
 import nts.arc.time.GeneralDate;
@@ -35,10 +37,14 @@ import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.IdentityProcess
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.IdentityProcessFinder;
 import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
+import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistAdapter;
+import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistImport;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQuery;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryAdapter;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryR;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
+import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootOfEmpMonthImport;
+import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootSituationMonth;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
@@ -70,6 +76,8 @@ import nts.uk.ctx.at.shared.app.query.workrule.closure.WorkClosureQueryProcessor
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemIdContainer;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil.AttendanceItemType;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 //import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureHistory;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
@@ -181,6 +189,12 @@ public class MonthlyPerformanceCorrectionProcessor {
 	
 	@Inject
 	private CheckDailyPerError checkDailyPerError;
+	
+	@Inject
+	private ClosureEmploymentRepository closureEmploymentRepository;
+	
+	@Inject
+	private EmploymentHistAdapter employmentHistAdapter;
 
 	
 	private static final String STATE_DISABLE = "mgrid-disable";
@@ -416,19 +430,21 @@ public class MonthlyPerformanceCorrectionProcessor {
 			Optional<FormatPerformance> formatPerformance, MonthlyPerformanceCorrectionDto screenDto, Integer yearMonth,
 			String companyId) {
 		if (optApprovalProcessingUseSetting.isPresent()) {
+			DatePeriod datePeriod = null;
+			datePeriod = new DatePeriod(screenDto.getSelectedActualTime().getStartDate(), screenDto.getSelectedActualTime().getEndDate());
 			// 取得している「承認処理の利用設定．月の承認者確認を利用する」をチェックする
 			ApprovalProcessingUseSetting approvalProcessingUseSetting = optApprovalProcessingUseSetting.get();
 			if (approvalProcessingUseSetting.getUseMonthApproverConfirm()) {
 				// アルゴリズム「ログイン社員の承認対象者の取得」を実行する
 //				// request list 534
-//				ApprovalRootOfEmployeeImport approvalRootOfEmloyee = this.approvalStatusAdapter
-//						.getApprovalEmpStatusMonth(AppContexts.user().employeeId(), new YearMonth(yearMonth),
-//								screenDto.getClosureId(), screenDto.getClosureDate().toDomain(),
-//								screenDto.getSelectedActualTime().getEndDate());
+				AppRootOfEmpMonthImport approvalRootOfEmloyee = this.approvalStatusAdapter
+						.getApprovalEmpStatusMonth(AppContexts.user().employeeId(), new YearMonth(yearMonth),
+								screenDto.getClosureId(), screenDto.getClosureDate().toDomain(),
+								screenDto.getSelectedActualTime().getEndDate(), optApprovalProcessingUseSetting.get().getUseDayApproverConfirm(), datePeriod);
 				//Imported（就業）「基準社員の承認対象者」を取得する request list 133
-				ApprovalRootOfEmployeeImport approvalRootOfEmloyee = this.approvalStatusAdapter
-						.getApprovalRootOfEmloyeeNew(screenDto.getSelectedActualTime().getEndDate(), 
-								screenDto.getSelectedActualTime().getEndDate(), AppContexts.user().employeeId(), companyId, Integer.valueOf(2));
+//				ApprovalRootOfEmployeeImport approvalRootOfEmloyee = this.approvalStatusAdapter
+//						.getApprovalRootOfEmloyeeNew(screenDto.getSelectedActualTime().getEndDate(), 
+//								screenDto.getSelectedActualTime().getEndDate(), AppContexts.user().employeeId(), companyId, Integer.valueOf(2));
 				
 				if (approvalRootOfEmloyee == null || approvalRootOfEmloyee.getApprovalRootSituations().isEmpty()) {
 					String mess = new String("Msg_1451");
@@ -436,23 +452,32 @@ public class MonthlyPerformanceCorrectionProcessor {
 					return;
 				}
 
+				// 対象期間に対象の締めに紐付いた雇用に属しているかチェックする ↓ (Start)
+				// fix bug 107128 change EAP of 日別確認のアルゴリズム
+				// 2019/04/10 大竹 メモ
 				// 社員(list)に対応する処理締めを取得する
-				List<ApprovalRootSituation> approvalRootSituations = approvalRootOfEmloyee.getApprovalRootSituations();
-				Set<String> empIds = approvalRootSituations.stream().map(a -> a.getTargetID())
-						.collect(Collectors.toSet());
+				//				List<ApprovalRootSituation> approvalRootSituations = approvalRootOfEmloyee.getApprovalRootSituations();
+				//				Set<String> empIds = approvalRootSituations.stream().map(a -> a.getTargetID())
+				//						.collect(Collectors.toSet());
+				//				List<String> employeeIds = new ArrayList<>();
+				//				for (String empId : empIds) {
+				//					Closure closureDataByEmployee = closureService.getClosureDataByEmployee(empId,
+				//							screenDto.getSelectedActualTime().getEndDate());
+				//					if (closureDataByEmployee != null  && closureDataByEmployee.getClosureId().value ==  screenDto.getClosureId()) {
+				//						employeeIds.add(empId);
+				//					}
+				//				}
+				
 				List<String> employeeIds = new ArrayList<>();
-				for (String empId : empIds) {
-					Closure closureDataByEmployee = closureService.getClosureDataByEmployee(empId,
-							screenDto.getSelectedActualTime().getEndDate());
-					if (closureDataByEmployee != null  && closureDataByEmployee.getClosureId().value ==  screenDto.getClosureId()) {
-						employeeIds.add(empId);
-					}
-				}
+				// lay thong tin nhan vien theo empID thu duoc
+				employeeIds.addAll(approvalRootOfEmloyee.getApprovalRootSituations().stream().map(item -> item.getTargetID()).collect(Collectors.toList()));
 				if (employeeIds.isEmpty()) {
 					String mess = new String("Msg_1450");
-					createFixedHeader(screenDto, yearMonth, screenDto.getSelectedClosure(), approvalProcessingUseSetting, mess);
+					createFixedHeader(screenDto, yearMonth, screenDto.getSelectedClosure(),
+							approvalProcessingUseSetting, mess);
 					return;
 				}
+				// 対象期間に対象の締めに紐付いた雇用に属しているかチェックする ↑ (End)
 
 				// lay thong tin nhan vien theo empID thu duoc
 				EmployeeInformationQueryDtoImport params = new EmployeeInformationQueryDtoImport(employeeIds,
