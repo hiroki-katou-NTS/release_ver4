@@ -24,6 +24,9 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 /** 月別実績の所属情報 */
 @AttendanceItemRoot(rootName = ItemConst.MONTHLY_AFFILIATION_INFO_NAME, itemType = AttendanceItemType.MONTHLY_ITEM)
 public class AffiliationInfoOfMonthlyDto extends MonthlyItemCommon {
+
+	/***/
+	private static final long serialVersionUID = 1L;
 	
 	private long version;
 	

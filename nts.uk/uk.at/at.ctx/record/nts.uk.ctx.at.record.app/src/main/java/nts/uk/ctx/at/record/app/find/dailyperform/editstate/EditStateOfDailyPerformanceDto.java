@@ -21,6 +21,9 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.AttendanceItemCommon;
 @EqualsAndHashCode(callSuper = false)
 public class EditStateOfDailyPerformanceDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	// TODO: not map item id
 	/** 社員ID: 社員ID */
 	private String employeeId;

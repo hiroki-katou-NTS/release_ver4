@@ -45,9 +45,11 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.AttendanceItemCommon;
 @AttendanceItemRoot(isContainer = true)
 public class DailyRecordDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	private String employeeId;
 
-	
 	@JsonDeserialize(using = CustomGeneralDateSerializer.class)
 	private GeneralDate date;
 

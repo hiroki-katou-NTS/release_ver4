@@ -19,6 +19,9 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
 @EqualsAndHashCode(callSuper = false)
 @AttendanceItemRoot(rootName = ItemConst.DAILY_REMARKS_NAME)
 public class RemarksOfDailyDto extends AttendanceItemCommon {
+
+	/***/
+	private static final long serialVersionUID = 1L;
 	
 	private String employeeId;
 	

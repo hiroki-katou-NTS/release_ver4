@@ -23,6 +23,9 @@ import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 @AttendanceItemRoot(rootName = ItemConst.DAILY_ATTENDANCE_TIME_NAME)
 public class AttendanceTimeDailyPerformDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	/** 年月日: 年月日 */
 	@JsonDeserialize(using = CustomGeneralDateSerializer.class)
 	private GeneralDate date;

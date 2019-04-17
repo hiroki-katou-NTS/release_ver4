@@ -34,6 +34,9 @@ import nts.uk.ctx.at.shared.dom.attendance.util.anno.AttendanceItemRoot;
 @AttendanceItemRoot(isContainer = true, itemType = AttendanceItemType.MONTHLY_ITEM)
 public class MonthlyRecordWorkDto extends MonthlyItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	/** 年月: 年月 */
 	private YearMonth yearMonth;
 

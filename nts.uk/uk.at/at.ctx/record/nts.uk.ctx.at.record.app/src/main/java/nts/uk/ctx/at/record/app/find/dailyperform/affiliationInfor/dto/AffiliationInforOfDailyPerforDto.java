@@ -21,6 +21,9 @@ import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.EmploymentCod
 @AttendanceItemRoot(rootName = ItemConst.DAILY_AFFILIATION_INFO_NAME)
 public class AffiliationInforOfDailyPerforDto extends AttendanceItemCommon {
 
+	/***/
+	private static final long serialVersionUID = 1L;
+	
 	private String employeeId;
 	
 	@JsonDeserialize(using = CustomGeneralDateSerializer.class)
