@@ -49,7 +49,7 @@ module nts.uk.at.view.kbt002.b {
                         self.isNewMode(true);
                     } else {
                         // set update mode
-                        self.isNewMode(false);
+                        
                         let data = _.filter(self.execItemList(), function(o) { return o.execItemCd == execItemCd; });
                         if (data[0]) {
                             self.currentExecItem().createData(data[0]);
@@ -59,7 +59,9 @@ module nts.uk.at.view.kbt002.b {
                                 self.targetDateText(self.buildTargetDateStr(self.currentExecItem()));
                             }
                         }
+                        self.isNewMode(false);
                     }
+                    
                     setTimeout(function() { self.focusInput(); }, 100);
                     //                    self.currentExecItem().refDate(moment(new Date()).toDate());
                     nts.uk.ui.errors.clearAll();
