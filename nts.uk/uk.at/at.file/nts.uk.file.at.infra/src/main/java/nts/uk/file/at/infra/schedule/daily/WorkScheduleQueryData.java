@@ -56,6 +56,9 @@ public class WorkScheduleQueryData {
 	/** The lst employment. */
 	List<CodeName> lstEmployment;
 	
+	/** The lst employment. */
+	List<CodeName> lstBusiness;
+	
 	/** The lst optional item. */
 	List<OptionalItem> lstOptionalItem;
 	
