@@ -139,6 +139,7 @@ module nts.uk.at.view.kal003.share {
                 
                 
             });
+            extraResultMonthly.useCheckSwitch('1');
             return extraResultMonthly;
         }
         
@@ -209,6 +210,7 @@ module nts.uk.at.view.kal003.share {
                 compareOperator: 0, 
                 rowId : 0
             });
+            mulMonCheckCondSet.useCheckSwitch('1');
             return mulMonCheckCondSet;
         }
         
@@ -244,8 +246,9 @@ module nts.uk.at.view.kal003.share {
                 useAtr: false,
                 nameWKRecord: '',
                 errorAlarmCondition: getDefaultErrorAlarmCondition(),
-                rowId: 0
+                rowId: 0,
             });
+            workRecordExtractingCondition.useCheckSwitch('1'); 
             return workRecordExtractingCondition;
         }
         //monthly
