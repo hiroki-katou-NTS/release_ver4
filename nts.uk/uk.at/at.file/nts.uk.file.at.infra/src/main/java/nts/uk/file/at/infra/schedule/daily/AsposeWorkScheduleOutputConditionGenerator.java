@@ -298,6 +298,9 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 	/** The Constant MAX_PAGE_PER_SHEET. */
 	private static final int MAX_PAGE_PER_SHEET = 1000;
 	
+	/** The Constant ATTENDANCE_ID_EMPLOYMENT. */
+	private static final int ATTENDANCE_ID_BUSSINESS_TYPE = 858;
+	
 	/* (non-Javadoc)
 	 * @see nts.uk.file.at.app.export.dailyschedule.WorkScheduleOutputGenerator#generate(nts.uk.file.at.app.export.dailyschedule.WorkScheduleOutputCondition, nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfo, nts.uk.file.at.app.export.dailyschedule.WorkScheduleOutputQuery)
 	 */
@@ -687,6 +690,11 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		if (itemsId.stream().filter(x -> ATTENDANCE_ID_EMPLOYMENT == x).count() > 0) {
 			List<CodeName> lstEmployment = dataProcessor.getEmployment(companyId).getCodeNames();
 			queryData.setLstEmployment(lstEmployment);
+		}
+		//勤務種別を取得する
+		if (itemsId.stream().filter(x -> ATTENDANCE_ID_BUSSINESS_TYPE == x).count() > 0) {
+			List<CodeName> lstBusiness = dataProcessor.getBussinessType(companyId).getCodeNames();
+			queryData.setLstBusiness(lstBusiness);
 		}
 		
 		// Collect optional item from KMK002 if there is at least 1 attendance id fall into id 641 -> 740
@@ -3174,11 +3182,24 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 		List<CodeName> lstClassification = queryData.getLstClassification();
 		List<CodeName> lstPosition = queryData.getLstPosition();
 		List<CodeName> lstEmployment = queryData.getLstEmployment();
+		List<CodeName> lstBusiness = queryData.getLstBusiness();
 		
 		// Not set -> won't check master unregistered
 		if (StringUtils.isEmpty(code)) {
 			return "";
 		}
+		
+		if (attendanceId == ATTENDANCE_ID_BUSSINESS_TYPE) {
+			Optional<CodeName> optWorkplace = lstBusiness.stream()
+					.filter(workplace -> workplace.getCode().equalsIgnoreCase(code)).findFirst();
+			if (!optWorkplace.isPresent()) {
+				return MASTER_UNREGISTERED;
+			}
+
+			CodeName workplace = optWorkplace.get();
+			return workplace.getName();
+		}
+		
 		
 		if (IntStream.of(ATTENDANCE_ID_WORK_TYPE).anyMatch(id -> id == attendanceId)) {
 			Optional<WorkType> optWorkType = lstWorkType.stream()

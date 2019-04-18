@@ -392,6 +392,8 @@ module nts.uk.at.view.kal003.share.model {
         currentConditions: KnockoutObservableArray<ExtractCondition>;  
         init: boolean;  
         count: number;
+        useCheckSwitch : KnockoutObservable<string> = ko.observable('');
+        deleteAtr : KnockoutObservable<boolean> = ko.observable(false);
         constructor(param: any) {
             let self = this;
             self.typeCheckItem=ko.observable(undefined);    
@@ -498,12 +500,15 @@ module nts.uk.at.view.kal003.share.model {
                 self.errorAlarmCheckID = ko.observable(param.errorAlarmCheckID || '');
                 self.sortBy = ko.observable(param.sortBy || 0);
                 self.nameAlarmExtraCon = ko.observable(param.nameAlarmExtraCon);
-                self.useAtr = ko.observable(param.useAtr || false);
                 self.messageBold = ko.observable(param.messageBold);
                 self.messageColor = ko.observable(param.messageColor);
                 self.displayMessage = ko.observable(param.displayMessage || '');
                 self.rowId = ko.observable(param.rowId || 0);
                 self.currentConditions = ko.observableArray([]);
+                self.useCheckSwitch(param.useAtr?'1':'0');
+                self.useAtr = ko.computed(function(){
+                   return   self.useCheckSwitch() == '1' ? true : false;
+                });
                 if(param.noinit !== true){
                     let temp = [];
                     temp.push(new SpecHolidayCheckCon(ko.toJS(param.specHolidayCheckCon)));
@@ -1570,10 +1575,12 @@ module nts.uk.at.view.kal003.share.model {
         messageBold: KnockoutObservable<boolean> = ko.observable(false);
         messageColor: KnockoutObservable<string> = ko.observable('');
         sortOrderBy: number;
-        useAtr: KnockoutObservable<boolean> = ko.observable(false);
+        useAtr: KnockoutComputed<boolean>;
         nameWKRecord: KnockoutObservable<string> = ko.observable('');
         errorAlarmCondition: KnockoutObservable<ErrorAlarmCondition>;
         rowId: KnockoutObservable<number> = ko.observable(0);
+        useCheckSwitch : KnockoutObservable<string> = ko.observable('');
+        deleteAtr : KnockoutObservable<boolean> = ko.observable(false);
         constructor(param: IWorkRecordExtractingCondition) {
             let self = this;
             self.errorAlarmCheckID = param.errorAlarmCheckID || '';
@@ -1581,10 +1588,13 @@ module nts.uk.at.view.kal003.share.model {
             self.messageBold(param.messageBold);
             self.messageColor(param.messageColor);
             self.sortOrderBy = param.sortOrderBy || 0;
-            self.useAtr(param.useAtr || false);
             self.nameWKRecord(param.nameWKRecord || '');
             self.errorAlarmCondition = ko.observable(param.errorAlarmCondition);
             self.rowId(param.rowId || 0);
+            self.useCheckSwitch(param.useAtr?'1':'0');
+            self.useAtr = ko.computed(function(){
+               return   self.useCheckSwitch() == '1' ? true : false;
+            });
             
             self.checkItem.subscribe((v)=>{
                 self.errorAlarmCondition().atdItemCondition().group1(kal003utils.getDefaultAttdItemGroup3Item());
@@ -2444,11 +2454,12 @@ module nts.uk.at.view.kal003.share.model {
         times : KnockoutObservable<number> = ko.observable(0);
         compareOperator : KnockoutObservable<number> = ko.observable(0);
         rowId: KnockoutObservable<number> = ko.observable(0);
+        useCheckSwitch : KnockoutObservable<string> = ko.observable('');
+        deleteAtr : KnockoutObservable<boolean> = ko.observable(false);
         constructor(param : IMulMonCheckCondSet){
             let self = this;            
             self.errorAlarmCheckID = param.errorAlarmCheckID || '';
             self.nameAlarmMulMon(param.nameAlarmMulMon || '');
-            self.useAtr(param.useAtr || false);
             self.typeCheckItem(param.typeCheckItem || 0);
             self.messageBold(param.messageBold);
             self.messageColor(param.messageColor);
@@ -2461,6 +2472,10 @@ module nts.uk.at.view.kal003.share.model {
             self.times= ko.observable(param.times||0);
             self.compareOperator(param.compareOperator || 0);
             self.rowId(param.rowId || 0);
+            self.useCheckSwitch(param.useAtr ? '1' : '0');
+            self.useAtr = ko.computed(function() {
+                return self.useCheckSwitch() == '1' ? true : false;
+            });
         } 
     }
         //Multiple Month

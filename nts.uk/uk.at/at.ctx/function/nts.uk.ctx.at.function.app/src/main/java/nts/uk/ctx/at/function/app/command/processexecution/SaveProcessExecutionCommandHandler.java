@@ -85,8 +85,8 @@ public class SaveProcessExecutionCommandHandler extends CommandHandlerWithResult
 				);
 		
 		PersonalScheduleCreationPeriod period = new PersonalScheduleCreationPeriod(
-										/*command.getCreationPeriod() == null ? null : */new CreationPeriod(command.getCreationPeriod()),
-										/*command.getTargetDate() == null ? null : */new TargetDate(command.getTargetDate()),
+										command.getCreationPeriod() == null ? null : new CreationPeriod(command.getCreationPeriod()),
+										command.getTargetDate() == null ? null : new TargetDate(command.getTargetDate()),
 										EnumAdaptor.valueOf(command.getTargetMonth(), TargetMonth.class),
 										command.getDesignatedYear() == null ? null : EnumAdaptor.valueOf(command.getDesignatedYear(), CreateScheduleYear.class),
 										command.getStartMonthDay() == null ? null : new MonthDay(command.getStartMonthDay()/100, command.getStartMonthDay()%100),

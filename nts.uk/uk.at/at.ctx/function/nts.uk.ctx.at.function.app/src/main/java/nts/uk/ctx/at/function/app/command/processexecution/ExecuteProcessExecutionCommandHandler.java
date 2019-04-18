@@ -3183,7 +3183,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				for (int i = 0; i < size; i++) {
 					AffComHistItemImport affComHistItemImport = lstAffComHistItem.get(i);
 					if (affComHistItemImport.getDatePeriod() != null
-							&& affComHistItemImport.getDatePeriod().start().compareTo(startDate) == -1) {
+							&& affComHistItemImport.getDatePeriod().start().before(startDate)) {
 						startDate = affComHistItemImport.getDatePeriod().start();
 					}
 				}

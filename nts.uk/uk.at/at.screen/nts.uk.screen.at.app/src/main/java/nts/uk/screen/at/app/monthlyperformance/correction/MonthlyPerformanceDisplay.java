@@ -597,8 +597,8 @@ public class MonthlyPerformanceDisplay {
 								Arrays.asList(employeeDailyPerError.getErrorAlarmWorkRecordCode().v()));
 				if (!errorAlarmWorkRecordLst.isEmpty()) {
 					checkExistRecordErrorListDate = true;
+					break;
 				}
-				break;
 			}
 			
 			// 月の実績の状況を取得する
