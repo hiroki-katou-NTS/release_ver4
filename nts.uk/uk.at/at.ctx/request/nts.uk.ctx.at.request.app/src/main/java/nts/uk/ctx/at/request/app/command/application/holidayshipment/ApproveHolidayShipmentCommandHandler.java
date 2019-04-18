@@ -77,6 +77,17 @@ public class ApproveHolidayShipmentCommandHandler
 					displayReason += System.lineSeparator();
 				}
 				displayReason += context.getCommand().getTextAreaReason();
+			} else {
+				if(Strings.isBlank(typicalReason)){
+					boolean isApprovalRec = command.getRecAppID() != null;
+					boolean isApprovalAbs = command.getAbsAppID() != null;
+					if (isApprovalRec) {
+						displayReason = applicationRepository.findByID(companyID, command.getRecAppID()).get().getAppReason().v();
+					}
+					if (isApprovalAbs) {
+						displayReason = applicationRepository.findByID(companyID, command.getAbsAppID()).get().getAppReason().v();
+					}
+				}
 			}
 			Optional<ApplicationSetting> applicationSettingOp = applicationSettingRepository.getApplicationSettingByComID(companyID);
 			ApplicationSetting applicationSetting = applicationSettingOp.get();
