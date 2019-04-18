@@ -156,7 +156,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	private final String FIND_BY_EMP_LST_MONTH = BASIC_SELECT +
 			" WHERE appRoot.CID = 'companyID'" +
 			" AND appRoot.ROOT_TYPE = rootType" +
-			" AND appRoot.EMPLOYEE_ID IN 'employeeID'" +
+			" AND appRoot.EMPLOYEE_ID IN employeeID" +
 			" AND appRoot.YEARMONTH = yearMonth" +
 			" AND appRoot.CLOSURE_ID = closureID" +
 			" AND appRoot.CLOSURE_DAY = closureDay" +
