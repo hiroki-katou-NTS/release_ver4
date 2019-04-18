@@ -744,7 +744,7 @@ public class AppHolidayWorkFinder {
 				workType.setWorkTypeName(WorkTypes.getWorkTypeName());
 				result.setWorkType(workType);
 				// 5.就業時間帯を取得する
-				WorkTimeHolidayWork workTimes = this.holidayService.getWorkTimeHolidayWork(companyID, employeeID, baseDate, personalLablorCodition);
+				WorkTimeHolidayWork workTimes = this.holidayService.getWorkTimeHolidayWork(companyID, employeeID, baseDate, personalLablorCodition,isChangeDate);
 				result.setWorkTimes(workTimes.getWorkTimeCodes());
 				SiftType workTime = new SiftType();
 				workTime.setSiftCode(workTimes.getWorkTimeCode());
