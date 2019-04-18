@@ -138,7 +138,7 @@ module nts.uk.pr.view.ccg007.b {
                 submitData.contractPassword = _.escape(self.contractPassword());
 
                 blockUI.invisible();
-                service.submitLogin(submitData).done(function(messError: CheckChangePassDto) {
+                service.submitLogin(submitData, isSignOn).done(function(messError: CheckChangePassDto) {
                     if (messError.showContract) {
                         self.openContractAuthDialog();
                     }
