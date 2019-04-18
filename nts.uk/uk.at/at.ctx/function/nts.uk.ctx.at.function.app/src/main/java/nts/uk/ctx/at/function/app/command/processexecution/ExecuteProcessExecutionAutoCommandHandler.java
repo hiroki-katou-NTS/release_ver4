@@ -909,7 +909,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		scheduleErrorLogRepository.findByExecutionId(execId);
 		// ドメインモデル「スケジュール作成エラーログ」を取得する
 		List<ScheduleErrorLog> listError = this.scheduleErrorLogRepository.findByExecutionId(execId);
-		if (!listError.isEmpty()) {
+		if (listError !=null && !listError.isEmpty()) {
 			ExecutionLogImportFn param = new ExecutionLogImportFn();
 			List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
 
