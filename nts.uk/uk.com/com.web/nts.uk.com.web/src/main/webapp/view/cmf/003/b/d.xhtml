@@ -47,7 +47,7 @@
 				<!-- button -->
 				<div class="valign-center control-group button-bottom-area">
 					<button id="D5_1" tabindex="4" class="large" data-bind="click: previousB">#{i18n.getText('CMF003_101')}</button>
-					<button id="D5_2" tabindex="5" class="x-large proceed" data-bind="click: nextFromDToE, enable: selectedEmployeeCode().length > 0">#{i18n.getText('CMF003_102')}</button>	
+					<button id="D5_2" tabindex="5" class="x-large proceed" data-bind="click: nextFromDToE, enable: selectedTitleAtr() ==1? selectedEmployeeCode().length > 0: true">#{i18n.getText('CMF003_102')}</button>						
 				</div>
 				<!-- button -->
 			</div>
