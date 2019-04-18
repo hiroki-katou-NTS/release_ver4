@@ -303,14 +303,24 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 	}
 
 	@Override
+	@SneakyThrows
 	public void update(List<BreakTimeOfDailyPerformance> breakTimes) {
 		List<KrcdtDaiBreakTime> all = breakTimes.stream().map(c -> KrcdtDaiBreakTime.toEntity(c)).flatMap(List::stream)
 				.collect(Collectors.toList());
 		if (!all.isEmpty()) {
-			List<KrcdtDaiBreakTime> krcdtDaiBreakTimes = this.queryProxy()
-					.query(SELECT_BY_EMPLOYEE_AND_DATE, KrcdtDaiBreakTime.class)
-					.setParameter("employeeId", breakTimes.get(0).getEmployeeId())
-					.setParameter("ymd", breakTimes.get(0).getYmd()).getList();
+			String sql = "select * from KRCDT_DAI_BREAK_TIME_TS"
+					+ " where SID = ?"
+					+ " and YMD = ?";
+			
+			List<KrcdtDaiBreakTime> krcdtDaiBreakTimes;
+			try (val stmt = this.connection().prepareStatement(sql)) {
+				stmt.setString(1, breakTimes.get(0).getEmployeeId());
+				stmt.setDate(2, Date.valueOf(breakTimes.get(0).getYmd().localDate()));
+				
+				krcdtDaiBreakTimes = new NtsResultSet(stmt.executeQuery())
+						.getList(rec -> KrcdtDaiBreakTime.MAPPER.toEntity(rec));
+			}
+			
 			internalUpdate(all, krcdtDaiBreakTimes);
 			// commandProxy().updateAll(toRemove);
 			// commandProxy().removeAll(toRemove);

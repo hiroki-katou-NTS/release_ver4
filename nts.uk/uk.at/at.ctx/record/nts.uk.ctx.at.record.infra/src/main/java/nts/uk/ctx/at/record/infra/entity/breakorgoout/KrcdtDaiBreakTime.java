@@ -12,6 +12,7 @@ import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
@@ -55,6 +56,9 @@ public class KrcdtDaiBreakTime extends UkJpaEntity implements Serializable {
 	// @Column(name = "END_STAMP_SOURCE_INFO")
 	// public Integer endStampSourceInfo;
 
+	public static final JpaEntityMapper<KrcdtDaiBreakTime> MAPPER = 
+			new JpaEntityMapper<>(KrcdtDaiBreakTime.class);
+	
 	@Override
 	protected Object getKey() {
 		return this.krcdtDaiBreakTimePK;
