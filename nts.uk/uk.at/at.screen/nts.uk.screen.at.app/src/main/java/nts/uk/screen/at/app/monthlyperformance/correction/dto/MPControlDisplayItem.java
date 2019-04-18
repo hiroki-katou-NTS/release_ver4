@@ -6,13 +6,11 @@ package nts.uk.screen.at.app.monthlyperformance.correction.dto;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import lombok.Data;
 import nts.uk.ctx.at.record.dom.daily.dailyperformance.classification.EnumCodeName;
-import nts.uk.ctx.at.shared.dom.monthlyattditem.MonthlyAttendanceItemAtr;
 
 @Data
 public class MPControlDisplayItem {
@@ -82,33 +80,6 @@ public class MPControlDisplayItem {
 		}
 	}
 
-	public void addColumnsToSheet(List<FormatMPCorrectionDto> lstFormat, Map<Integer,MPAttendanceItem>  mapDP, boolean showButton) {
-		lstFormat.forEach(f -> {
-			this.lstSheet.forEach(s -> {
-				if (f.getSheetNo().equals(s.getName()) && !s.isExistColumn(String.valueOf(f.getAttendanceItemId()))) {
-					int attendanceAtr = mapDP.get(f.getAttendanceItemId()).getAttendanceAtr() ;
-					if(attendanceAtr == MonthlyAttendanceItemAtr.CODE.value || attendanceAtr == MonthlyAttendanceItemAtr.CLASSIFICATION.value ){
-						if(attendanceAtr == MonthlyAttendanceItemAtr.CODE.value){
-						s.addColumn("Code"+f.getAttendanceItemId());
-						}else{
-					   s.addColumn("NO"+f.getAttendanceItemId());
-						}
-						s.addColumn("Name"+f.getAttendanceItemId());
-					}else{
-						s.addColumn("A"+String.valueOf(f.getAttendanceItemId()));
-					}
-				}
-				
-			});
-		});
-		this.lstSheet.forEach(x -> {
-			if(showButton){
-				x.addColumn("Submitted");
-				x.addColumn("Application");
-			}
-		});
-	}
-	
 	public void setHeaderText(List<MPAttendanceItem> lstAttendanceItem) {
 		lstAttendanceItem.stream().forEach(i -> {
 			Optional<MPHeaderDto> header = this.getLstHeader().stream()

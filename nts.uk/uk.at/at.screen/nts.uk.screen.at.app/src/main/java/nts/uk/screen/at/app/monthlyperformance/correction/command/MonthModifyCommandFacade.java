@@ -15,7 +15,6 @@ import nts.uk.ctx.at.record.app.command.monthly.MonthlyRecordWorkCommand;
 import nts.uk.ctx.at.record.app.command.monthly.MonthlyRecordWorkCommandHandler;
 import nts.uk.ctx.at.record.app.find.monthly.finder.MonthlyRecordWorkFinder;
 import nts.uk.ctx.at.record.app.find.monthly.root.MonthlyRecordWorkDto;
-import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.IntegrationOfMonthly;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil.AttendanceItemType;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
