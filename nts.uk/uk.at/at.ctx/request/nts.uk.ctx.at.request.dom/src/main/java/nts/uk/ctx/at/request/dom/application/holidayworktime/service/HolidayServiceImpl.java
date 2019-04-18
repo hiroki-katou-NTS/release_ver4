@@ -119,20 +119,23 @@ public class HolidayServiceImpl implements HolidayService {
 				if (buOptional.isPresent()) {
 					workTypeCode = personalLablorCodition.get().getWorkCategory().getHolidayWork().getWorkTypeCode()
 							.get().toString();
-					if (buOptional.get().holidayCls.equals(HolidayClsImport.STATUTORY_HOLIDAYS)) {
+					HolidayClsImport holidayCls = buOptional.get().holidayCls;
+					if (holidayCls.equals(HolidayClsImport.STATUTORY_HOLIDAYS)) {
 						// 申請日＝＞法定内休日
 						if (personalLablorCodition.get().getWorkCategory().getInLawBreakTime().isPresent()) {
 							workTypeCode = personalLablorCodition.get().getWorkCategory().getInLawBreakTime().get()
 									.getWorkTypeCode().get().toString();
 						}
 
-					} else if (buOptional.get().holidayCls.equals(HolidayClsImport.NON_STATUTORY_HOLIDAYS)) {
+					}
+					if (holidayCls.equals(HolidayClsImport.NON_STATUTORY_HOLIDAYS)) {
 						// 申請日＝＞法定外休日
 						if (personalLablorCodition.get().getWorkCategory().getOutsideLawBreakTime().isPresent()) {
 							workTypeCode = personalLablorCodition.get().getWorkCategory().getOutsideLawBreakTime().get()
 									.getWorkTypeCode().get().toString();
 						}
-					} else if (buOptional.get().holidayCls.equals(HolidayClsImport.PUBLIC_HOLIDAY)) {
+					}
+					if (holidayCls.equals(HolidayClsImport.PUBLIC_HOLIDAY)) {
 						// 申請日＝＞祝日
 						if (personalLablorCodition.get().getWorkCategory().getHolidayAttendanceTime().isPresent()) {
 							workTypeCode = personalLablorCodition.get().getWorkCategory().getHolidayAttendanceTime()
