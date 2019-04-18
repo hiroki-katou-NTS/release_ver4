@@ -33,6 +33,18 @@ module nts.uk.pr.view.ccg007.d {
                         }
                     });
                 });
+                self.displayLogin.subscribe((value) => {
+                    if(value && self.isSignOn()){
+                        service.getAllCompany().done(function(data: Array<CompanyItemModel>) {
+                            //get list company from server 
+                            self.companyList(data);
+                            if (data.length > 0) {
+                                self.selectedCompanyCode(self.companyList()[0].companyCode);
+                                self.companyName(self.companyList()[0].companyName);
+                            }
+                        });  
+                    }  
+                });
             }
             start(): JQueryPromise<void> {
                 var self = this;

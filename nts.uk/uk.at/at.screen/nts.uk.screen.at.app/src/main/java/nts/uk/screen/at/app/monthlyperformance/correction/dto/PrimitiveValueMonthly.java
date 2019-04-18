@@ -85,7 +85,17 @@ public enum PrimitiveValueMonthly {
 	
 	CountMonth(59, "月次任意回数", "AnyTimesMonth"),
 	
-	ReasonCode(60, "乖離理由コード", "DiverdenceReasonCode");
+	ReasonCode(60, "乖離理由コード", "DiverdenceReasonCode"),
+	
+	EmploymentCode(7, "雇用区分コード", "EmploymentCode"),
+	
+	ClassificationCode(8, "分類コード", "ClassificationCode"),
+	
+	JobTitleCode(9, "職位コード", "JobTitleCode"),
+	
+	WorkplaceCode(10, "職場コード", "WorkplaceCode"),
+	
+	Business(21, "勤務種別", "BusinessTypeCode");
 	
 	
 	public final int value;

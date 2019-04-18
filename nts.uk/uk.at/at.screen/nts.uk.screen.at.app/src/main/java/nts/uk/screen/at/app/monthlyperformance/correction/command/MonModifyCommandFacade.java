@@ -12,9 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.OptimisticLockException;
 
-import nts.arc.i18n.I18NText;
 import nts.arc.task.AsyncTask;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -35,6 +33,10 @@ import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil.AttendanceItemType;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
+import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeName;
+import nts.uk.screen.at.app.dailyperformance.correction.datadialog.DataDialogWithTypeProcessor;
+import nts.uk.screen.at.app.dailyperformance.correction.datadialog.ParamDialog;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.type.TypeLink;
 import nts.uk.screen.at.app.monthlyperformance.audittrail.MonthlyCorrectionLogCommand;
 import nts.uk.screen.at.app.monthlyperformance.audittrail.MonthlyCorrectionLogCommandHandler;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.EditStateOfMonthlyPerformanceDto;
@@ -80,6 +82,9 @@ public class MonModifyCommandFacade {
 	@Inject
 	private MonthlyRecordTransactionService monthRecordTransaction;
 	
+	@Inject
+	private DataDialogWithTypeProcessor dataDialogWithTypeProcessor;
+	
 	public Map<Integer, List<MPItemParent>> insertItemDomain(MPItemParent dataParent) {
 		YearMonth ym = new YearMonth(dataParent.getYearMonth());
 		
@@ -90,7 +95,7 @@ public class MonModifyCommandFacade {
 //				throw new OptimisticLockException(I18NText.getText("Msg_1528"));
 //			}
 //		});
-		
+		getWplPosId(dataParent);
 		Map<String, List<MPItemDetail>> mapItemDetail = dataParent.getMPItemDetails().stream()
 				.collect(Collectors.groupingBy(x -> x.getEmployeeId()));
 		List<MonthlyModifyQuery> listQuery = new ArrayList<>();
@@ -256,6 +261,34 @@ public class MonModifyCommandFacade {
 			MonthlyRecordWorkDto dto = AttendanceItemUtil.fromItemValues(dtoNew, q.getItems(), AttendanceItemType.MONTHLY_ITEM);
 			return dto;
 		}).filter(v -> v != null).collect(Collectors.toList());
+	}
+	
+	private void getWplPosId(MPItemParent mPItemParent) {
+		// map id -> code possition and workplace
+		mPItemParent.getMPItemDetails().stream().map(itemEdit -> {
+			if (itemEdit.getItemId() == 193) {
+				CodeName codeName = dataDialogWithTypeProcessor.getTypeDialog(TypeLink.POSSITION.value,
+						new ParamDialog(mPItemParent.getStartDate(), itemEdit.getValue()));
+				itemEdit.setValue(codeName == null ? null : codeName.getId());
+				return itemEdit;
+			} else if (itemEdit.getItemId() == 198) {
+				CodeName codeName = dataDialogWithTypeProcessor.getTypeDialog(TypeLink.POSSITION.value,
+						new ParamDialog(mPItemParent.getEndDate(), itemEdit.getValue()));
+				itemEdit.setValue(codeName == null ? null : codeName.getId());
+				return itemEdit;
+			} else if (itemEdit.getItemId() == 194) {
+				CodeName codeName = dataDialogWithTypeProcessor.getTypeDialog(TypeLink.WORKPLACE.value,
+						new ParamDialog(mPItemParent.getStartDate(), itemEdit.getValue()));
+				itemEdit.setValue(codeName == null ? null : codeName.getId());
+				return itemEdit;
+			} else if (itemEdit.getItemId() == 199) {
+				CodeName codeName = dataDialogWithTypeProcessor.getTypeDialog(TypeLink.WORKPLACE.value,
+						new ParamDialog(mPItemParent.getEndDate(), itemEdit.getValue()));
+				itemEdit.setValue(codeName == null ? null : codeName.getId());
+				return itemEdit;
+			}
+			return itemEdit;
+		}).collect(Collectors.toList());
 	}
 	
 }

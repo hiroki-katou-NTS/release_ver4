@@ -10,9 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -21,7 +19,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
-import lombok.val;
 import nts.arc.error.BusinessException;
 //import nts.arc.task.parallel.ParallelExceptions.Item;
 import nts.arc.time.GeneralDate;
@@ -37,16 +34,11 @@ import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.IdentityProcess
 import nts.uk.ctx.at.record.app.find.workrecord.operationsetting.IdentityProcessFinder;
 import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
-import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistAdapter;
-import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistImport;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQuery;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryAdapter;
 import nts.uk.ctx.at.record.dom.adapter.query.employee.RegulationInfoEmployeeQueryR;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootOfEmpMonthImport;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootSituationMonth;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
@@ -76,8 +68,6 @@ import nts.uk.ctx.at.shared.app.query.workrule.closure.WorkClosureQueryProcessor
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemIdContainer;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil.AttendanceItemType;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
-import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
-import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 //import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureHistory;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
@@ -86,6 +76,10 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.ctx.at.shared.pub.workrule.closure.PresentClosingPeriodExport;
 import nts.uk.ctx.at.shared.pub.workrule.closure.ShClosurePub;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceScreenRepo;
+import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeName;
+import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeNameType;
+import nts.uk.screen.at.app.dailyperformance.correction.datadialog.DataDialogWithTypeProcessor;
+import nts.uk.screen.at.app.dailyperformance.correction.text.DPText;
 import nts.uk.screen.at.app.monthlyperformance.CheckDailyPerError;
 import nts.uk.screen.at.app.monthlyperformance.CheckEmpEralOuput;
 import nts.uk.screen.at.app.monthlyperformance.TypeErrorAlarm;
@@ -101,6 +95,7 @@ import nts.uk.screen.at.app.monthlyperformance.correction.dto.MPDataDto;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.MPHeaderDto;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.MPSateCellHideControl;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.MPSheetDto;
+import nts.uk.screen.at.app.monthlyperformance.correction.dto.MPText;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.MonthlyAttendanceItemDto;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.MonthlyPerformanceAuthorityDto;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.MonthlyPerformanceCorrectionDto;
@@ -159,9 +154,6 @@ public class MonthlyPerformanceCorrectionProcessor {
 	@Inject
 	private ApprovalProcessingUseSettingRepository approvalProcessingUseSettingRepo;
 	
-//	@Inject
-//	private FormatPerformanceRepository formatPerformanceRepo;
-	
 	@Inject
 	private ApprovalStatusAdapter approvalStatusAdapter;
 	
@@ -170,9 +162,6 @@ public class MonthlyPerformanceCorrectionProcessor {
 	
 	@Inject
 	private WorkClosureQueryProcessor workClosureQueryProcessor;
-	
-//	@Inject
-//	private ConfirmationMonthRepository confirmationMonthRepository;
 
 	@Inject
 	private EmployeeInformationAdapter employeeInformationAdapter;
@@ -191,10 +180,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 	private CheckDailyPerError checkDailyPerError;
 	
 	@Inject
-	private ClosureEmploymentRepository closureEmploymentRepository;
-	
-	@Inject
-	private EmploymentHistAdapter employmentHistAdapter;
+	private DataDialogWithTypeProcessor dataDialogWithTypeProcessor;
 
 	
 	private static final String STATE_DISABLE = "mgrid-disable";
@@ -730,12 +716,18 @@ public class MonthlyPerformanceCorrectionProcessor {
 		List<MPSheetDto> lstSheets = param.getSheets().stream().map(c -> {
 			MPSheetDto sh = new MPSheetDto(c.getSheetNo(), c.getSheetName());
 			for (PAttendanceItem attend : c.getDisplayItems()) {
-				sh.addColumn(mergeString(ADD_CHARACTER, attend.getId().toString()));
+				if(MPText.ITEM_CODE_LINK.contains(attend.getId())){
+					sh.addColumn(mergeString(MPText.CODE, attend.getId().toString()));
+					sh.addColumn(mergeString(MPText.NAME, attend.getId().toString()));
+				}else{
+					sh.addColumn(mergeString(ADD_CHARACTER, attend.getId().toString()));
+				}
 			}
 			return sh;
 		}).collect(Collectors.toList());
 		displayItem.createSheets(lstSheets);
-
+		
+		
 		List<MPHeaderDto> lstMPHeaderDto = MPHeaderDto.GenerateFixedHeader();
 		
 		//G7 G8 G9 hidden column identitfy, approval, dailyconfirm
@@ -827,6 +819,15 @@ public class MonthlyPerformanceCorrectionProcessor {
 		List<EditStateOfMonthlyPerformanceDto> editStateOfMonthlyPerformanceDtos = this.repo
 				.findEditStateOfMonthlyPer(new YearMonth(screenDto.getProcessDate()), listEmployeeIds, attdanceIds);
 		List<MPSateCellHideControl> mPSateCellHideControls = new ArrayList<>();
+		// get all code-name
+		CodeNameType workplaceStartCN = dataDialogWithTypeProcessor.getWorkPlace(companyId, screenDto.getSelectedActualTime().getStartDate());
+		CodeNameType workplaceEndCN = dataDialogWithTypeProcessor.getWorkPlace(companyId, screenDto.getSelectedActualTime().getEndDate());
+		CodeNameType positionStartCN = dataDialogWithTypeProcessor.getPossition(companyId, screenDto.getSelectedActualTime().getStartDate());
+		CodeNameType positionEndCN = dataDialogWithTypeProcessor.getPossition(companyId, screenDto.getSelectedActualTime().getEndDate());
+		CodeNameType classificationCN = dataDialogWithTypeProcessor.getClassification(companyId);
+		CodeNameType employmentCN = dataDialogWithTypeProcessor.getEmployment(companyId);
+		CodeNameType businessTypeCN = dataDialogWithTypeProcessor.getBussinessType(companyId);
+		
 		for (int i = 0; i < screenDto.getLstEmployee().size(); i++) {
 			MonthlyPerformanceEmployeeDto employee = screenDto.getLstEmployee().get(i);
 			String employeeId = employee.getId();
@@ -835,7 +836,6 @@ public class MonthlyPerformanceCorrectionProcessor {
 			
 			String lockStatus = lockStatusMap.isEmpty() || !lockStatusMap.containsKey(employee.getId()) || param.getInitMenuMode() == 1 ? ""
 					: lockStatusMap.get(employee.getId()).getLockStatusString();
-			
 			
 			// set dailyConfirm
 			MonthlyPerformaceLockStatus monthlyPerformaceLockStatus = lockStatusMap.get(employeeId);
@@ -978,17 +978,19 @@ public class MonthlyPerformanceCorrectionProcessor {
 			List<EditStateOfMonthlyPerformanceDto> newList = editStateOfMonthlyPerformanceDtos.stream()
 					.filter(item -> item.getEmployeeId().equals(employeeId)).collect(Collectors.toList());
 			if (null != rowData) {
-				//mpdata.setVersion(rowData.getVersion());
 				if (null != rowData.getItems()) {
 					rowData.getItems().forEach(item -> {
 						// Cell Data
 						// TODO item.getValueType().value
+						int itemId = item.getItemId();
 						String attendanceAtrAsString = String.valueOf(item.getValueType());
-						String attendanceKey = mergeString(ADD_CHARACTER, "" + item.getItemId());
-						PAttendanceItem pA = param.getLstAtdItemUnique().get(item.getItemId());
+						String attendanceKey = mergeString(ADD_CHARACTER, "" + itemId);
+						PAttendanceItem pA = param.getLstAtdItemUnique().get(itemId);
 						List<String> cellStatus = new ArrayList<>();
 
-						if (pA.getAttendanceAtr() == 1) { // neu item loai thoi gian thi format lai dinh dang
+						if (pA.getAttendanceAtr() == 1) { 
+							/*1:  時間 */
+							// neu item loai thoi gian thi format lai dinh dang
 							int minute = 0;
 							if (item.getValue() != null) {
 								minute = Integer.parseInt(item.getValue());
@@ -1000,9 +1002,76 @@ public class MonthlyPerformanceCorrectionProcessor {
 
 							mpdata.addCellData(
 									new MPCellDataDto(attendanceKey, valueConvert, attendanceAtrAsString, "label"));
-						} else
+						} else if(pA.getAttendanceAtr() == 6) {
+							/*6:  コード */
+							String itemIdAsString = String.valueOf(itemId);
+							String nameColKey = mergeString(MPText.NAME, itemIdAsString);
+							String codeColKey = mergeString(MPText.CODE, itemIdAsString);
+							String value = item.getValue();
+							if (value.isEmpty() || value.equals("null")) {
+								mpdata.addCellData(new MPCellDataDto(mergeString(DPText.CODE, itemIdAsString), "",
+										attendanceAtrAsString, DPText.TYPE_LABEL));
+								value = MPText.NAME_EMPTY;
+							} else {
+								String valueItem = value;
+								switch (itemId) {
+								case 192:
+								case 197:
+									mpdata.addCellData(new MPCellDataDto(codeColKey,
+											value, attendanceAtrAsString, MPText.TYPE_LABEL));
+									Optional<CodeName> optEmploymentCN = employmentCN.getCodeNames().stream().filter(x->x.getCode().equals(valueItem)).findFirst();
+									value = optEmploymentCN.isPresent() ? optEmploymentCN.get().getName() : MPText.NAME_EMPTY;
+									break;
+								case 195:
+								case 200:
+									mpdata.addCellData(new MPCellDataDto(codeColKey,
+											value, attendanceAtrAsString, MPText.TYPE_LABEL));
+									Optional<CodeName> optClassificationCN = classificationCN.getCodeNames().stream().filter(x->x.getCode().equals(valueItem)).findFirst();
+									value = optClassificationCN.isPresent() ? optClassificationCN.get().getName() : MPText.NAME_EMPTY;
+									break;
+									
+								case 196:
+								case 201:
+									mpdata.addCellData(new MPCellDataDto(codeColKey,
+											value, attendanceAtrAsString, MPText.TYPE_LABEL));
+									Optional<CodeName> optBusinessTypeCN = businessTypeCN.getCodeNames().stream().filter(x->x.getCode().equals(valueItem)).findFirst();
+									value = optBusinessTypeCN.isPresent() ? optBusinessTypeCN.get().getName() : MPText.NAME_EMPTY;
+									break;
+									
+								case 193:
+									Optional<CodeName> optPositionStartCN = positionStartCN.getCodeNames().stream().filter(x->x.getId().equals(valueItem)).findFirst();
+									mpdata.addCellData(new MPCellDataDto(codeColKey,
+											optPositionStartCN.isPresent() ? optPositionStartCN.get().getCode() : "", attendanceAtrAsString, MPText.TYPE_LABEL));
+									value = optPositionStartCN.isPresent() ? optPositionStartCN.get().getName() : MPText.NAME_EMPTY;
+									break;
+								
+								case 194:
+									Optional<CodeName> optWorkplaceStartCN = workplaceStartCN.getCodeNames().stream().filter(x->x.getId().equals(valueItem)).findFirst();
+									mpdata.addCellData(new MPCellDataDto(codeColKey,
+											optWorkplaceStartCN.isPresent() ? optWorkplaceStartCN.get().getCode() : "", attendanceAtrAsString, MPText.TYPE_LABEL));
+									value = optWorkplaceStartCN.isPresent() ? optWorkplaceStartCN.get().getName() : MPText.NAME_EMPTY;
+									break;
+									
+								case 198:
+									Optional<CodeName> optPositionEndCN = positionEndCN.getCodeNames().stream().filter(x->x.getId().equals(valueItem)).findFirst();
+									mpdata.addCellData(new MPCellDataDto(codeColKey,
+											optPositionEndCN.isPresent() ? optPositionEndCN.get().getCode() : "", attendanceAtrAsString, MPText.TYPE_LABEL));
+									value = optPositionEndCN.isPresent() ? optPositionEndCN.get().getName() : MPText.NAME_EMPTY;
+									break;
+									
+								case 199:
+									Optional<CodeName> optWorkplaceEndCN = workplaceEndCN.getCodeNames().stream().filter(x->x.getId().equals(valueItem)).findFirst();
+									mpdata.addCellData(new MPCellDataDto(codeColKey,
+											optWorkplaceEndCN.isPresent() ? optWorkplaceEndCN.get().getCode() : "", attendanceAtrAsString, MPText.TYPE_LABEL));
+									value = optWorkplaceEndCN.isPresent() ? optWorkplaceEndCN.get().getName() : MPText.NAME_EMPTY;
+									break;
+								}
+							}
+							mpdata.addCellData(new MPCellDataDto(nameColKey, value, attendanceAtrAsString, MPText.TYPE_LINK));
+						} else {
 							mpdata.addCellData(new MPCellDataDto(attendanceKey,
 									item.getValue() != null ? item.getValue() : "", attendanceAtrAsString, ""));
+						}
 						// *3 and *6
 						if (param.getInitMenuMode() == 2) { // mode approve disable neu co bat ki lock nao khac month approve lock
 							//if (!StringUtil.isNullOrEmpty(lockStatus, true) && !lockStatus.equals(MonthlyPerformaceLockStatus.LOCK_MONTHLY_APPROVAL))
@@ -1017,16 +1086,27 @@ public class MonthlyPerformanceCorrectionProcessor {
 						lstCellState.add(new MPCellStateDto(employeeId, attendanceKey, cellStatus));
 
 						Optional<EditStateOfMonthlyPerformanceDto> dto = newList.stream()
-								.filter(item2 -> item2.getAttendanceItemId().equals(item.getItemId())).findFirst();
+								.filter(item2 -> item2.getAttendanceItemId().equals(itemId)).findFirst();
 						if (dto.isPresent()) { // set mau sua tay cho cell
-							if (dto.get().getStateOfEdit() == 0) {
-								screenDto.setStateCell(attendanceKey, employeeId, HAND_CORRECTION_MYSELF);
+							// color for attendance Item 192->201
+							if (MPText.ITEM_CODE_LINK.contains(itemId)) {
+								if (dto.get().getStateOfEdit() == 0) {
+									screenDto.setStateCell("Code"+itemId, employeeId, HAND_CORRECTION_MYSELF);
+									screenDto.setStateCell("Name"+itemId, employeeId, HAND_CORRECTION_MYSELF);
+								} else {
+									screenDto.setStateCell("Code"+itemId, employeeId, HAND_CORRECTION_OTHER);
+									screenDto.setStateCell("Name"+itemId, employeeId, HAND_CORRECTION_OTHER);
+								}
 							} else {
-								screenDto.setStateCell(attendanceKey, employeeId, HAND_CORRECTION_OTHER);
+								if (dto.get().getStateOfEdit() == 0) {
+									screenDto.setStateCell(attendanceKey, employeeId, HAND_CORRECTION_MYSELF);
+								} else {
+									screenDto.setStateCell(attendanceKey, employeeId, HAND_CORRECTION_OTHER);
+								}
 							}
 						}
 						// color for attendance Item 202
-						if (item.getItemId() == 202) {
+						if (itemId == 202) {
 							// 月別実績の勤怠時間．月の計算．36協定時間．36協定時間のエラー状態
 							Optional<AttendanceTimeOfMonthly> optAttendanceTimeOfMonthly = this.attendanceTimeOfMonthlyRepo
 									.find(employeeId, new YearMonth(rowData.getYearMonth()),

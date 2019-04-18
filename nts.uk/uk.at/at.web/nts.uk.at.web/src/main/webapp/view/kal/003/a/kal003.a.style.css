@@ -22,13 +22,14 @@
 	vertical-align: top;
 }
 
-
 .right-content {
 	display: inline-block;
 	vertical-align: top;
 	padding-top: 20px;
 }
-
+.container {
+    width: 1384px;
+}
 div[class^="tab-content"] {
 	padding: 20px;
 }
@@ -129,4 +130,7 @@ div .tab-content-5 .nts-fixed-table .nts-fixed-body-container{
 }
 #category7 .nts-fixed-table.cf .scroll-header.nts-fixed-header{
 	    display: none;
+}
+button.nts-switch-button{
+	width: 90px !important;
 }
