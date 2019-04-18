@@ -3957,12 +3957,24 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     });
                     dataChageRow.push(dataMap);
 
+                    
                     let param = {
                         //dailyEdits: __viewContext.vm.lstDomainEdit,
                         itemEdits: dataChageRow,
                         changeSpr31: changeSpr31,
-                        changeSpr34: changeSpr34
+                        changeSpr34: changeSpr34,
+                        notChangeCell: false
                     };
+                    
+                    //check cell has update
+                    let itemSelectChange = _.find(dataChange, (itemTemp) =>{
+                        return itemTemp.columnKey == columnKey &&  itemTemp.rowId == rowId; 
+                    })
+                    
+                    if(_.isEmpty(itemSelectChange)){
+                        param.notChangeCell = true;
+                    }
+                    
                     service.calcTime(param).done((value) => {
                         //__viewContext.vm.lstDomainEdit = value.dailyEdits;
                         _.each(value.cellEdits, itemResult => {
