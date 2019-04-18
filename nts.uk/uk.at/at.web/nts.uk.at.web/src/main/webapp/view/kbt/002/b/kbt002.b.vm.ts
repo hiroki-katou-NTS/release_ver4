@@ -382,7 +382,7 @@ module nts.uk.at.view.kbt002.b {
                 $("#execItemCd").ntsEditor('validate');
                 $("#execItemName").ntsEditor('validate');
                 $(".ntsDatepicker").ntsEditor('validate');
-                if (self.currentExecItem().targetMonth() != 3) {
+                if (self.currentExecItem().targetMonth() != 3 && self.currentExecItem().perScheduleClsNomarl() && self.currentExecItem().processExecType() == 0) {
                     $("#targetDate").trigger("validate");
                     $("#creationPeriod").trigger("validate");
                 }
@@ -754,6 +754,8 @@ module nts.uk.at.view.kbt002.b {
                         self.disableYearMonthDate(true);     
                     }    
                 });
+                
+                
                 
 //                self.startMonthDay.subscribe(x=>{
 //                    nts.uk.ui.errors.clearAll();
