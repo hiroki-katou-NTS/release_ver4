@@ -8,7 +8,9 @@ import nts.uk.ctx.workflow.dom.adapter.bs.dto.ConcurrentEmployeeImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmpInfoRQ18;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmployeeImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.PersonImport;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmpImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmploymentImport;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 public interface EmployeeAdapter {
 
@@ -87,4 +89,6 @@ public interface EmployeeAdapter {
 	StatusOfEmploymentImport getStatusOfEmployment(String employeeID, GeneralDate referenceDate);
 	//adapter RQ18
 	Optional<EmpInfoRQ18> getEmpInfoByScd(String companyId, String employeeCode);
+	
+	public List<StatusOfEmpImport> getListAffComHistByListSidAndPeriod(List<String> sids, DatePeriod datePeriod);
 }

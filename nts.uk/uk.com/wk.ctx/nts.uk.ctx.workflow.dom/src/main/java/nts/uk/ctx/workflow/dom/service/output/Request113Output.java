@@ -11,7 +11,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public class Request133Output {
+public class Request113Output {
 	/**
 	 * 承認ルートの状況
 	 */

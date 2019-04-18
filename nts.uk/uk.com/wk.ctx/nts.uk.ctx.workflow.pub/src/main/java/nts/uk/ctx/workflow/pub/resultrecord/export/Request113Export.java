@@ -12,7 +12,7 @@ import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
  */
 @AllArgsConstructor
 @Getter
-public class Request133Export {
+public class Request113Export {
 	/**
 	 * 承認ルートの状況
 	 */

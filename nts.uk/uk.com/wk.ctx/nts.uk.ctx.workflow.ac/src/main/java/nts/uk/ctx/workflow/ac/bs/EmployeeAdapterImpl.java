@@ -17,6 +17,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.bs.employee.pub.company.SyCompanyPub;
 import nts.uk.ctx.bs.employee.pub.employee.ConcurrentEmployeeExport;
 import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
 import nts.uk.ctx.bs.employee.pub.employee.employeeInfo.EmployeeInfoPub;
@@ -30,8 +31,10 @@ import nts.uk.ctx.workflow.dom.adapter.bs.dto.ConcurrentEmployeeImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmpInfoRQ18;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmployeeImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.PersonImport;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmpImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmployment;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmploymentImport;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * The Class EmployeeApproveAdapterImpl.
@@ -59,6 +62,9 @@ public class EmployeeAdapterImpl implements EmployeeAdapter {
 	
 	@Inject
 	private ManagedParallelWithContext parallel;
+	
+	@Inject
+	private SyCompanyPub syCompanyPub;
 
 	/*
 	 * (non-Javadoc)
@@ -198,4 +204,13 @@ public class EmployeeAdapterImpl implements EmployeeAdapter {
 		return emInfor.getEmployeeInfo(companyId, employeeCode)
 				.map(c -> new EmpInfoRQ18(c.getCompanyId(), c.getEmployeeCode(), c.getEmployeeId(), c.getPersonId(), c.getPerName()));
 	}
+
+	@Override
+	public List<StatusOfEmpImport> getListAffComHistByListSidAndPeriod(List<String> sids, DatePeriod datePeriod) {
+		return syCompanyPub.GetListAffComHistByListSidAndPeriod(sids, datePeriod).stream()
+				.map(x -> new StatusOfEmpImport(x.getEmployeeId(), x.getListPeriod()))
+				.collect(Collectors.toList());
+	}
+	
+	
 }

@@ -158,7 +158,7 @@ public interface ApprovalStatusAdapter {
 	 * @return
 	 */
 	public AppRootOfEmpMonthImport getApprovalEmpStatusMonth(String approverID, YearMonth yearMonth, Integer closureID,
-			ClosureDate closureDate, GeneralDate baseDate);
+			ClosureDate closureDate, GeneralDate baseDate, boolean useDayApproverConfirm, DatePeriod closurePeriod);
 	
 	/**
 	 * RequestList 528
