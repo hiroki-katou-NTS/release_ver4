@@ -119,6 +119,8 @@ public class WorkRecordExtraConPubImpl implements WorkRecordExtraConPub {
 		
 		//insertErrorAlarmCondition.setCheckId(errorAlarmCheckId);
 		workRecordExtraConPubExport.setErrorAlarmCheckID(errorAlarmCheckId);
+		
+		this.setIndex(errorAlarmCondition);
 		this.errorAlarmConditionRepository.addErrorAlarmCondition(errorAlarmCondition);
 		this.repo.addWorkRecordExtraCon(
 				convertToDomainWR(workRecordExtraConPubExport)
