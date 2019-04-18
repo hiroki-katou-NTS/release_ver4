@@ -324,7 +324,7 @@ public class DailyPerformanceCorrectionWebService {
 			dailyEdits = (List<DailyRecordDto>) domain;
 		}
 		
-		val result = dailyCorrectCalcTimeService.calcTime(dailyEdits, dcTimeParam.getItemEdits(), dcTimeParam.getChangeSpr31(), dcTimeParam.getChangeSpr34());
+		val result = dailyCorrectCalcTimeService.calcTime(dailyEdits, dcTimeParam.getItemEdits(), dcTimeParam.getChangeSpr31(), dcTimeParam.getChangeSpr34(), dcTimeParam.isNotChangeCell());
 		session.setAttribute("domainEdits", result.getDailyEdits());
 		result.setDailyEdits(Collections.emptyList());
 		return result;
