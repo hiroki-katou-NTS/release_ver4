@@ -108,7 +108,7 @@ public class CheckTrackRecord {
 //			Optional<AppRootOfEmpMonthImport> appEmpStatusImport = narrowDownEmployee.narrowDownEmployee(approvalRootOfEmployeeImport, checkTargetItemExport.getClosureId(), checkTargetItemExport.getYearMonth());
 //			if(!appEmpStatusImport.isPresent()) continue;
 //			List<String> employeeIds = appEmpStatusImport.get().getRouteSituationLst().stream().map(c->c.getEmployeeID()).collect(Collectors.toList());
-			AppRootOfEmpMonthImport appRootOfEmpMonth = new AppRootOfEmpMonthImport();
+			AppRootOfEmpMonthImport appRootOfEmpMonth = null;
 			for(AppRootOfEmpMonthImport appRootOfEmpMonthImport :listApp){
 				if(!appRootOfEmpMonthImport.getApprovalRootSituations().isEmpty()){
 					if(appRootOfEmpMonthImport.getApprovalRootSituations().get(0).getClosureID().intValue() == checkTargetItemExport.getClosureId()){
@@ -117,6 +117,7 @@ public class CheckTrackRecord {
 					}
 				}
 			}
+			if(appRootOfEmpMonth == null) continue;
 			List<String> employeeIds = appRootOfEmpMonth.getApprovalRootSituations().stream().map(c->c.getTargetID()).collect(Collectors.toList());
 			if(employeeIds.isEmpty()){
 				continue;
