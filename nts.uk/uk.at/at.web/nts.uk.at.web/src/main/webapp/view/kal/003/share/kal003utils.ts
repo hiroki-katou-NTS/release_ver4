@@ -139,7 +139,7 @@ module nts.uk.at.view.kal003.share {
                 
                 
             });
-            extraResultMonthly.useCheckSwitch('1');
+            extraResultMonthly.useCheckSwitch(data.useAtr == undefined ? '1':(data.useAtr?'1':'0'));
             return extraResultMonthly;
         }
         

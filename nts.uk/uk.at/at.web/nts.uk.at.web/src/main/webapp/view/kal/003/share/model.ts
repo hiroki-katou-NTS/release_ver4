@@ -537,6 +537,7 @@ module nts.uk.at.view.kal003.share.model {
             x.rowId(data.rowId);
             x.conditions(mapExtraCondition(data.conditions));
             x.typeCheckItem(data.typeCheckItem);
+            x.useCheckSwitch(data.useAtr?'1':'0');
             //            ko.mapping.fromJS(data, mapping, x);
             //x.typeCheckItem.valueHasMutated(); 
             return x;
