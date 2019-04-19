@@ -70,6 +70,7 @@ import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionLo
 import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionRepository;
 import nts.uk.ctx.at.function.dom.processexecution.tasksetting.ExecutionTaskSetting;
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
+import nts.uk.ctx.at.record.dom.adapter.company.StatusOfEmployeeExport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployeeHistory;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.repository.BusinessTypeEmpOfHistoryRepository;
@@ -248,6 +249,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	// 実行処理
 	@Override
 	public void handle(CommandHandlerContext<ExecuteProcessExecutionCommand> context) {
+		System.out.println("Run batch service by auto run!");
 		//val asyncContext = context.asAsync();
 		ExecuteProcessExecutionCommand command = context.getCommand();
 		String execItemCd = command.getExecItemCd();
@@ -561,7 +563,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	 */
 	private boolean createSchedule(CommandHandlerContext<ExecuteProcessExecutionCommand> context, String execId,
 			ProcessExecution procExec, ProcessExecutionLog procExecLog) {
-
 		// Login user context
 		LoginUserContext loginContext = AppContexts.user();
 		// ドメインモデル「更新処理自動実行ログ」を更新する
@@ -1461,6 +1462,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						if (dailyPerformanceCreation) {
 							return false;
 						}
+						System.out.println("Run create data done !");
 					} catch (CreateDailyException ex) {
 						isHasCreateDailyException = true;
 					}
@@ -2001,15 +2003,19 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			break;
 		case FIFTH_OPT:
 			crtStartDate = closurePeriod.start();
-			crtEndDate = closurePeriod.end().addMonths(1);
+			GeneralDate closurePeriodFifth =  closurePeriod.end().addMonths(1);
+			int lastDateFifth = closurePeriodFifth.yearMonth().lastDateInMonth();
+			crtEndDate = GeneralDate.ymd(closurePeriodFifth.year(), closurePeriodFifth.month(), lastDateFifth);
 			calStartDate = closurePeriod.start();
-			calEndDate = closurePeriod.end().addMonths(1);
+			calEndDate = GeneralDate.ymd(closurePeriodFifth.year(), closurePeriodFifth.month(), lastDateFifth);
 			break;
 		case SIXTH_OPT:
+			GeneralDate closurePeriodSixth =  closurePeriod.end().addMonths(1);
+			int lastDateSixth = closurePeriodSixth.yearMonth().lastDateInMonth();
 			crtStartDate = closurePeriod.start().addMonths(1);
-			crtEndDate = closurePeriod.end().addMonths(1);
+			crtEndDate = GeneralDate.ymd(closurePeriodSixth.year(), closurePeriodSixth.month(), lastDateSixth);
 			calStartDate = closurePeriod.start().addMonths(1);
-			calEndDate = closurePeriod.end().addMonths(1);
+			calEndDate = GeneralDate.ymd(closurePeriodSixth.year(), closurePeriodSixth.month(), lastDateSixth);
 			break;
 		case SEVENTH_OPT:
 			GeneralDate todayNow = GeneralDate.today();
@@ -3065,11 +3071,13 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 								.getTargetGroupClassification().isMidJoinEmployee()) {
 							
 						}else {
+							if(employeeDatePeriod != null) {
 							boolean executionDaily = this.executionDaily(companyId, context, processExecution, empId,
 									empCalAndSumExeLog, employeeDatePeriod, typeExecution, dailyCreateLog);
 							if (executionDaily) {
 								listIsInterrupt.add(true);
 								return;
+							}
 							}
 						}
 					} catch (CreateDailyException ex) {
@@ -3123,15 +3131,20 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					.getAffCompanyHistByEmployee(lstEmployeeId, period);
 			if (affCompanyHistByEmployee != null && !affCompanyHistByEmployee.isEmpty()) {
 				List<AffComHistItemImport> lstAffComHistItem = affCompanyHistByEmployee.get(0).getLstAffComHistItem();
-				int size = lstAffComHistItem.size();
+				if(lstAffComHistItem.isEmpty()) return null;
+				List<AffComHistItemImport> lstAffComHistItemSort = lstAffComHistItem.stream().sorted((x,y)->x.getDatePeriod().start().compareTo(y.getDatePeriod().start())).collect(Collectors.toList());
+//				int size = lstAffComHistItem.size();
 				GeneralDate startDate = GeneralDate.ymd(9999, 12, 31);
-				for (int i = 0; i < size; i++) {
-					AffComHistItemImport affComHistItemImport = lstAffComHistItem.get(i);
-					if (affComHistItemImport.getDatePeriod() != null
-							&& affComHistItemImport.getDatePeriod().start().before(startDate)) {
-						startDate = affComHistItemImport.getDatePeriod().start();
-					}
+				if(lstAffComHistItemSort.get(0).getDatePeriod().start().before(period.start())) {
+					return period;
 				}
+				if(lstAffComHistItemSort.get(0).getDatePeriod().start().after(period.end())) {
+					return null;
+				}
+				if(lstAffComHistItemSort.get(0).getDatePeriod().start().afterOrEquals(period.start()) && lstAffComHistItemSort.get(0).getDatePeriod().start().beforeOrEquals(period.end())) {
+					startDate = lstAffComHistItemSort.get(0).getDatePeriod().start();
+				}
+				
 				return new DatePeriod(startDate, period.end());
 			}
 			return null;
@@ -3150,18 +3163,22 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		if ("日別作成".equals(typeExecution)) {
 			try {
 				// ⑤社員の日別実績を作成する
+				System.out.println("create data :  !"+employeeId);
 				processState = this.createDailyService.createDailyResultEmployeeWithNoInfoImport(asyContext, employeeId,
 						period, empCalAndSumExeLog.getCompanyID(), empCalAndSumExeLog.getEmpCalAndSumExecLogID(),
 						Optional.ofNullable(dailyCreateLog), processExecution.getExecSetting().getDailyPerf()
 								.getTargetGroupClassification().isRecreateTypeChangePerson() ? true : false,
 						false, false, null);
+				System.out.println("create data done :  !"+employeeId);
 			} catch (Exception e) {
 				throw new CreateDailyException();
 			}
 		} else {
 			try {
+				System.out.println("cal data :  !"+employeeId);
 				processState = this.dailyCalculationEmployeeService.calculateForOnePerson(asyContext, employeeId,
 						period, Optional.empty());
+				System.out.println("cal data done :  !"+employeeId);
 			} catch (Exception e) {
 				throw new DailyCalculateException();
 			}

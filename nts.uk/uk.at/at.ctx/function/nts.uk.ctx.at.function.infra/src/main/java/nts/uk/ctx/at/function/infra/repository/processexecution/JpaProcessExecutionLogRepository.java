@@ -75,7 +75,10 @@ public class JpaProcessExecutionLogRepository extends JpaRepository
 	@Override
 	public void update(ProcessExecutionLog domain) {
 		KfnmtProcessExecutionLog updateData = KfnmtProcessExecutionLog.toEntity(domain);
-		KfnmtProcessExecutionLog oldData = this.queryProxy().find(updateData.kfnmtProcExecLogPK, KfnmtProcessExecutionLog.class).get();
+		Optional<KfnmtProcessExecutionLog> oldDataOtp = this.queryProxy().find(updateData.kfnmtProcExecLogPK, KfnmtProcessExecutionLog.class);
+		if(!oldDataOtp.isPresent())
+			return;
+		KfnmtProcessExecutionLog oldData = oldDataOtp.get();
 		oldData.schCreateStart = updateData.schCreateStart;
 		oldData.schCreateEnd = updateData.schCreateEnd;
 		oldData.dailyCreateStart = updateData.dailyCreateStart;

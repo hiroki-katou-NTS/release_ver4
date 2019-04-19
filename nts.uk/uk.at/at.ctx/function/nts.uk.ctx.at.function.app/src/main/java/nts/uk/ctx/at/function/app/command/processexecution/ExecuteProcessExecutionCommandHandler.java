@@ -2048,15 +2048,19 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			break;
 		case FIFTH_OPT:
 			crtStartDate = closurePeriod.start();
-			crtEndDate = closurePeriod.end().addMonths(1);
+			GeneralDate closurePeriodFifth =  closurePeriod.end().addMonths(1);
+			int lastDateFifth = closurePeriodFifth.yearMonth().lastDateInMonth();
+			crtEndDate = GeneralDate.ymd(closurePeriodFifth.year(), closurePeriodFifth.month(), lastDateFifth);
 			calStartDate = closurePeriod.start();
-			calEndDate = closurePeriod.end().addMonths(1);
+			calEndDate = GeneralDate.ymd(closurePeriodFifth.year(), closurePeriodFifth.month(), lastDateFifth);
 			break;
 		case SIXTH_OPT:
+			GeneralDate closurePeriodSixth =  closurePeriod.end().addMonths(1);
+			int lastDateSixth = closurePeriodSixth.yearMonth().lastDateInMonth();
 			crtStartDate = closurePeriod.start().addMonths(1);
-			crtEndDate = closurePeriod.end().addMonths(1);
+			crtEndDate = GeneralDate.ymd(closurePeriodSixth.year(), closurePeriodSixth.month(), lastDateSixth);
 			calStartDate = closurePeriod.start().addMonths(1);
-			calEndDate = closurePeriod.end().addMonths(1);
+			calEndDate = GeneralDate.ymd(closurePeriodSixth.year(), closurePeriodSixth.month(), lastDateSixth);
 			break;
 		case SEVENTH_OPT:
 			GeneralDate todayNow = GeneralDate.today();
@@ -3116,15 +3120,18 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					// アルゴリズム「開始日を入社日にする」を実行する
 					try {
 						DatePeriod employeeDatePeriod = this.makeStartDateForHiringDate(processExecution, empId, period);
+						
 						if (employeeDatePeriod == null && processExecution.getExecSetting().getDailyPerf()
 								.getTargetGroupClassification().isMidJoinEmployee()) {
 							
 						}else {
+							if(employeeDatePeriod != null) {
 							boolean executionDaily = this.executionDaily(companyId, context, processExecution, empId,
 									empCalAndSumExeLog, employeeDatePeriod, typeExecution, dailyCreateLog);
 							if (executionDaily) {
 								listIsInterrupt.add(true);
 								return;
+							}
 							}
 						}
 					} catch (CreateDailyException ex) {
@@ -3178,15 +3185,20 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					.getAffCompanyHistByEmployee(lstEmployeeId, period);
 			if (affCompanyHistByEmployee != null && !affCompanyHistByEmployee.isEmpty()) {
 				List<AffComHistItemImport> lstAffComHistItem = affCompanyHistByEmployee.get(0).getLstAffComHistItem();
-				int size = lstAffComHistItem.size();
+				if(lstAffComHistItem.isEmpty()) return null;
+				List<AffComHistItemImport> lstAffComHistItemSort = lstAffComHistItem.stream().sorted((x,y)->x.getDatePeriod().start().compareTo(y.getDatePeriod().start())).collect(Collectors.toList());
+//				int size = lstAffComHistItem.size();
 				GeneralDate startDate = GeneralDate.ymd(9999, 12, 31);
-				for (int i = 0; i < size; i++) {
-					AffComHistItemImport affComHistItemImport = lstAffComHistItem.get(i);
-					if (affComHistItemImport.getDatePeriod() != null
-							&& affComHistItemImport.getDatePeriod().start().before(startDate)) {
-						startDate = affComHistItemImport.getDatePeriod().start();
-					}
+				if(lstAffComHistItemSort.get(0).getDatePeriod().start().before(period.start())) {
+					return period;
 				}
+				if(lstAffComHistItemSort.get(0).getDatePeriod().start().after(period.end())) {
+					return null;
+				}
+				if(lstAffComHistItemSort.get(0).getDatePeriod().start().afterOrEquals(period.start()) && lstAffComHistItemSort.get(0).getDatePeriod().start().beforeOrEquals(period.end())) {
+					startDate = lstAffComHistItemSort.get(0).getDatePeriod().start();
+				}
+				
 				return new DatePeriod(startDate, period.end());
 			}
 			return null;
