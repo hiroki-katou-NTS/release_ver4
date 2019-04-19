@@ -631,7 +631,7 @@ module nts.uk.at.view.kwr001.a {
                         return false;
                     }
                 }
-                
+                //職場階層累計をチェック
                 if (!self.checkCumulativeWorkHierarchy()) {
                     nts.uk.ui.dialog.alertError({ messageId: "Msg_1184" });
                     return false;
