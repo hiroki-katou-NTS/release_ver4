@@ -506,6 +506,8 @@ public class MonthlyPerformanceCorrectionProcessor {
 				if (formatPerformance.isPresent()) {
 					monthlyDisplay.getDisplayFormat(employeeIds, formatPerformance.get().getSettingUnitType(),
 							screenDto, monthlyResults);
+					if(screenDto.getMess() != null && screenDto.getMess().equals("Msg_1452"))
+						return;
 				} else {
 					throw new BusinessException("Msg_1452");
 				}
@@ -1195,7 +1197,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 	private String mergeString(String... x) {
 		return StringUtils.join(x);
 	}
-	private void createFixedHeader(MonthlyPerformanceCorrectionDto screenDto, Integer yearMonth, Integer closureId,
+	public void createFixedHeader(MonthlyPerformanceCorrectionDto screenDto, Integer yearMonth, Integer closureId,
 			ApprovalProcessingUseSetting approvalProcessingUseSetting, String mess) {
 		/**
 		 * Create Grid Sheet DTO

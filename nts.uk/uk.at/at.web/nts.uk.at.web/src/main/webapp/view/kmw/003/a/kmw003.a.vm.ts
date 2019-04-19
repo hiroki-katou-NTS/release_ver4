@@ -340,8 +340,12 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                     self.closureId(value);
                     self.updateDate(self.yearMonth());
                 });
+                if (self.initMode() == 0) {
                 self.initCcg001();  
                 self.loadCcg001();
+                    }
+                if (self.initMode() == 2) 
+                    $('#ccg001').hide();
                 nts.uk.ui.block.clear();
                 dfd.resolve();
             }).fail(function(error) {
@@ -453,6 +457,11 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                         nts.uk.request.jumpToTopPage();
                     });  
                  } else if(error.messageId=="Msg_916"){
+                    nts.uk.ui.dialog.error({ messageId: error.messageId, messageParams: error.parameterIds }).then(function() { 
+                        //nts.uk.request.jumpToTopPage();
+                        nts.uk.ui.block.clear();
+                    }); 
+                }else if(error.messageId=="Msg_1452"){
                     nts.uk.ui.dialog.error({ messageId: error.messageId, messageParams: error.parameterIds }).then(function() { 
                         //nts.uk.request.jumpToTopPage();
                         nts.uk.ui.block.clear();
