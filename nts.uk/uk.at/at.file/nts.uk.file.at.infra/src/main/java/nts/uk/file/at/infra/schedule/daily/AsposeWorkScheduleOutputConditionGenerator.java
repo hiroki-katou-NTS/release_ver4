@@ -104,6 +104,8 @@ import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfoRepository;
 import nts.uk.ctx.bs.employee.pub.company.StatusOfEmployee;
 import nts.uk.ctx.bs.employee.pub.company.SyCompanyPub;
 import nts.uk.ctx.bs.employee.pub.employmentstatus.EmploymentInfo;
+import nts.uk.ctx.bs.employee.pub.employmentstatus.EmploymentState;
+import nts.uk.ctx.bs.employee.pub.employmentstatus.EmploymentStatus;
 import nts.uk.ctx.bs.employee.pub.employmentstatus.EmploymentStatusPub;
 import nts.uk.file.at.app.export.dailyschedule.ActualValue;
 import nts.uk.file.at.app.export.dailyschedule.AttendanceResultImportAdapter;
@@ -124,6 +126,7 @@ import nts.uk.file.at.app.export.dailyschedule.data.DailyReportData;
 import nts.uk.file.at.app.export.dailyschedule.data.DailyWorkplaceData;
 import nts.uk.file.at.app.export.dailyschedule.data.DetailedDailyPerformanceReportData;
 import nts.uk.file.at.app.export.dailyschedule.data.EmployeeReportData;
+import nts.uk.file.at.app.export.dailyschedule.data.EmployeesStatusByDate;
 import nts.uk.file.at.app.export.dailyschedule.data.OutputItemSetting;
 import nts.uk.file.at.app.export.dailyschedule.data.WorkplaceDailyReportData;
 import nts.uk.file.at.app.export.dailyschedule.data.WorkplaceReportData;
@@ -820,13 +823,39 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			lstReportData.forEach(x -> {
 				analyzeInfoExportByDate(lstWorkplaceTemp, x.getLstWorkplaceData(), lstAddedCode);
 			});
+			List<EmployeesStatusByDate> empStatusList = new ArrayList<>();
 			//Imported(就業)「社員の在職状態」を取得する
-			this.empStatusPub.findListOfEmployee(lstEmployeeWithData, period).forEach(empStatus->{
-				//RQ433で取得した社員在職データを日付毎のデータに並び替える
-				List<EmploymentInfo> empInfos = empStatus.getEmploymentInfo().stream().sorted(Comparator.comparing(EmploymentInfo::getStandardDate)).collect(Collectors.toList());
+			List<EmploymentStatus> employmentStatus = this.empStatusPub.findListOfEmployee(lstEmployeeWithData,
+					period);
+			employmentStatus.forEach(empStatus -> {
+				// RQ433で取得した社員在職データを日付毎のデータに並び替える
+				List<EmploymentInfo> empInfos = empStatus.getEmploymentInfo().stream()
+						.filter(x -> x.getEmploymentState().equals(EmploymentState.INCUMBENT))
+						.collect(Collectors.toList());
 				empStatus.setEmploymentInfo(empInfos);
 			});
-			collectEmployeePerformanceDataByDate(reportData, queryData, dataRowCount);
+			for (int i = 0; i < period.datesBetween().size(); i++) {
+				GeneralDate targetDate = period.start().addDays(i);
+				List<String> employees = new ArrayList<>();
+				employmentStatus.forEach(emp -> {
+					Optional<EmploymentInfo> empInfoOpt = emp.getEmploymentInfo().stream()
+							.filter(x -> x.getStandardDate().equals(targetDate)).findFirst();
+					if (empInfoOpt.isPresent()) {
+						employees.add(emp.getEmployeeId());
+					}
+				});
+				empStatusList.add(new EmployeesStatusByDate(targetDate, employees));
+			}
+			empStatusList.forEach(empStatus->{
+				DateRange range = new DateRange(empStatus.getTargetDate(), empStatus.getTargetDate());
+				queryData.getQuery().setEmployeeId(empStatus.getEmployees());
+				queryData.setDatePeriod(range.toListDate());
+				//アルゴリズム「日付別の日別勤務表を作成する」を実行する
+				collectEmployeePerformanceDataByDate(reportData, queryData, dataRowCount);
+			});
+			
+			
+			
 			// Calculate workplace total
 			lstReportData.forEach(dailyData -> {
 				calculateTotalExportByDate(dailyData.getLstWorkplaceData());
