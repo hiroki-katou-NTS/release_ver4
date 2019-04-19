@@ -106,6 +106,7 @@ public class WorkRecordExtraConPubImpl implements WorkRecordExtraConPub {
 
 	@Override
 	public void addWorkRecordExtraConPub(WorkRecordExtraConPubExport workRecordExtraConPubExport) {
+		
 		String errorAlarmCheckId = IdentifierUtil.randomUniqueId();
 		
 		ErrorAlarmConditionPubExport errorAlarmConditionPubExport = workRecordExtraConPubExport.getErrorAlarmCondition();
@@ -114,22 +115,12 @@ public class WorkRecordExtraConPubImpl implements WorkRecordExtraConPub {
 		errorAlarmConditionPubExport.setErrorAlarmCheckID(errorAlarmCheckId);
 		ErrorAlarmCondition errorAlarmCondition = errorAlarmConditionPubExport.toConditionDomain();
 		
-		//ErrorAlarmCondition insertErrorAlarmCondition = ErrorAlarmCondition.init();
-		//add data for insert
-		//insertErrorAlarmCondition.setByCheckItem(workRecordExtraConPubExport.getCheckItem(), errorAlarmCondition);
-		
-		//insertErrorAlarmCondition.setCheckId(errorAlarmCheckId);
 		workRecordExtraConPubExport.setErrorAlarmCheckID(errorAlarmCheckId);
 		
-		this.setIndex(errorAlarmCondition,workRecordExtraConPubExport.isUseAtr());
+		this.setIndex(errorAlarmCondition);
 		this.errorAlarmConditionRepository.addErrorAlarmCondition(errorAlarmCondition);
 		
-		for(ErAlAtdItemConditionPubExport erAlAtdItemConditionPubExport : workRecordExtraConPubExport.getErrorAlarmCondition().getAttendanceItemCondition().getGroup1().getLstErAlAtdItemCon()) {
-			erAlAtdItemConditionPubExport.setUseAtr(workRecordExtraConPubExport.isUseAtr());
-		}
-		for(ErAlAtdItemConditionPubExport erAlAtdItemConditionPubExport : workRecordExtraConPubExport.getErrorAlarmCondition().getAttendanceItemCondition().getGroup2().getLstErAlAtdItemCon()) {
-			erAlAtdItemConditionPubExport.setUseAtr(workRecordExtraConPubExport.isUseAtr());
-		}
+		
 		this.repo.addWorkRecordExtraCon(
 				convertToDomainWR(workRecordExtraConPubExport)
 				);
@@ -152,33 +143,26 @@ public class WorkRecordExtraConPubImpl implements WorkRecordExtraConPub {
 		updateErrorAlarmCondition.setByCheckItem(checkItem, errorAlarmCondition);
 		
 		//set index an isUse group1
-		this.setIndex(updateErrorAlarmCondition,workRecordExtraConPubExport.isUseAtr());
-		
-		for(ErAlAtdItemConditionPubExport erAlAtdItemConditionPubExport : workRecordExtraConPubExport.getErrorAlarmCondition().getAttendanceItemCondition().getGroup1().getLstErAlAtdItemCon()) {
-			erAlAtdItemConditionPubExport.setUseAtr(workRecordExtraConPubExport.isUseAtr());
-		}
-		for(ErAlAtdItemConditionPubExport erAlAtdItemConditionPubExport : workRecordExtraConPubExport.getErrorAlarmCondition().getAttendanceItemCondition().getGroup2().getLstErAlAtdItemCon()) {
-			erAlAtdItemConditionPubExport.setUseAtr(workRecordExtraConPubExport.isUseAtr());
-		}
+		this.setIndex(updateErrorAlarmCondition);
 		
 		this.errorAlarmConditionRepository.updateErrorAlarmCondition(updateErrorAlarmCondition);
 		this.repo.updateWorkRecordExtraCon(convertToDomainWR(workRecordExtraConPubExport));
 	}
 	
-	private  void setIndex(ErrorAlarmCondition updateErrorAlarmCondition,boolean isUse){
+	private  void setIndex(ErrorAlarmCondition updateErrorAlarmCondition){
 		List<ErAlAttendanceItemCondition<?>> lstErAlAtdItemCon = updateErrorAlarmCondition.getAtdItemCondition().getGroup1().getLstErAlAtdItemCon();
 		int size = lstErAlAtdItemCon.size();
 		for (int i = 0; i < size; i++) {
 			ErAlAttendanceItemCondition<?> erAlAttendanceItemCondition = lstErAlAtdItemCon.get(i);
 			erAlAttendanceItemCondition.setTargetNO(i);
-			erAlAttendanceItemCondition.setUseAtr(isUse);
+			erAlAttendanceItemCondition.setUseAtr(true);
 		}
 		List<ErAlAttendanceItemCondition<?>> lstErAlAtdItemCon2 = updateErrorAlarmCondition.getAtdItemCondition().getGroup2().getLstErAlAtdItemCon();
 		int size2 = lstErAlAtdItemCon2.size();
 		for (int i = 0; i < size2; i++) {
 			ErAlAttendanceItemCondition<?> erAlAttendanceItemCondition = lstErAlAtdItemCon2.get(i);
 			erAlAttendanceItemCondition.setTargetNO(i);
-			erAlAttendanceItemCondition.setUseAtr(isUse);
+			erAlAttendanceItemCondition.setUseAtr(true);
 		}
 	}
 
