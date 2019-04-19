@@ -112,8 +112,18 @@ public class MonModifyCommandFacade {
 			
 			listQuery.add(query);
 		});
-		List<MonthlyRecordWorkDto> oldDtos = getDtoFromQuery(listQuery); // lay data truoc khi update de so sanh voi data sau khi update
-		monthModifyCommandFacade.handleUpdate(listQuery,oldDtos);
+		// lay data truoc khi update de so sanh voi data sau khi update
+		List<MonthlyRecordWorkDto> oldDtos = getDtoFromQuery(listQuery); 
+		
+		// clone array do khi chay qua monthModifyCommandFacade.handleUpdate() thi data bi thay doi gia tri
+		List<MonthlyRecordWorkDto> oldDtosClone = new ArrayList<>();
+		oldDtos.stream().forEach(x -> {
+			IntegrationOfMonthly integrationOfMonthly = x.toDomain(x.getEmployeeId(), x.getYearMonth(), x.getClosureID(), x.getClosureDate());
+			MonthlyRecordWorkDto dto = MonthlyRecordWorkDto.fromOnlyAttTime(integrationOfMonthly);
+			oldDtosClone.add(dto);
+		});
+		
+		monthModifyCommandFacade.handleUpdate(listQuery, oldDtosClone);
 
 		// insert edit state
 		dataParent.getMPItemDetails().forEach(item -> {
@@ -146,7 +156,8 @@ public class MonModifyCommandFacade {
 		AsyncTask task = AsyncTask.builder().withContexts().keepsTrack(false).threadName(this.getClass().getName())
 				.build(() -> {
 					List<MonthlyRecordWorkDto> newDtos = createDtoNews(listQuery, oldDtos);
-					//List<MonthlyRecordWorkDto> newDtos = getDtoFromQuery(listQuery); // lay lai data sau khi update de so sanh voi data truoc khi update
+					//List<MonthlyRecordWorkDto> newDtos = getDtoFromQuery(listQuery); 
+					// lay lai data sau khi update de so sanh voi data truoc khi update
 					handlerLog.handle(new MonthlyCorrectionLogCommand(oldDtos, newDtos, listQuery, dataParent.getEndDate()));
 				});
 		executorService.submit(task);

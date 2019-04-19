@@ -231,7 +231,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 		Map<String, List<TableList>> map = tableList.stream().collect(Collectors.groupingBy(TableList::getCategoryId));
 		map.forEach((k, v) -> {
 			if (v.size() > 1) {
-				lstTableListDuplicate.addAll(v.stream().filter(x -> x.getStorageRangeSaved() == StorageRangeSaved.EARCH_EMP).collect(Collectors.toList()));
+				lstTableListDuplicate.addAll(v.stream().filter(x -> x.getStorageRangeSaved() == StorageRangeSaved.ALL_EMP).collect(Collectors.toList()));
 			}
 		});
 		

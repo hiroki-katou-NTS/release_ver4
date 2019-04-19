@@ -36,10 +36,13 @@ import nts.uk.ctx.at.request.dom.application.holidayworktime.service.dto.WorkTyp
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmployWorkType;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmploymentSetting;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
+import nts.uk.ctx.at.shared.dom.workingcondition.PersonalWorkCategory;
+import nts.uk.ctx.at.shared.dom.workingcondition.SingleDaySchedule;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktype.HolidayAtr;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.context.AppContexts;
 @Stateless
@@ -91,22 +94,10 @@ public class HolidayServiceImpl implements HolidayService {
 				workTypes.setWorkTypeCode(workTypes.getWorkTypeCodes().get(0));
 			}
 		}else{
-			
-			
 			// 「申請日－法定外・法定内休日区分」をチェック　→Imported(申請承認)「対象日法定休日区分.法定休日区分」を取得する - req 253
 			String workTypeCode = personalLablorCodition.get().getWorkCategory().getHolidayWork().getWorkTypeCode().get().toString();
 			if (!isChangeDate) {
-				if (!StringUtil.isNullOrEmpty(workTypeCode, true)) {
-					boolean isInList = wptypes.indexOf(workTypeCode) != -1;
-					if (isInList) {
-						workTypes.setWorkTypeCode(workTypeCode);
-					} else {
-						workTypes.setWorkTypeCode(workTypes.getWorkTypeCodes().get(0));
-					}
-
-				} else {
-					workTypes.setWorkTypeCode(workTypes.getWorkTypeCodes().get(0));
-				}
+				workTypeCode = getCode(wptypes, workTypeCode);
 			}else{
 				//Imported(申請承認)「職場ID」を取得する 
 				//アルゴリズム「社員から職場を取得する」を実行する - req #30
@@ -115,50 +106,33 @@ public class HolidayServiceImpl implements HolidayService {
 				if(wkp !=null){
 					workplaceID = wkp.getWorkplaceId();
 				}
-			Optional<BusinessDayCalendarImport> buOptional = this.businessDayCalendarAdapter.acquiredHolidayClsOfTargetDate(companyID, workplaceID, appDate);
+				Optional<BusinessDayCalendarImport> buOptional = this.businessDayCalendarAdapter
+						.acquiredHolidayClsOfTargetDate(companyID, workplaceID, appDate);
 				if (buOptional.isPresent()) {
-					workTypeCode = personalLablorCodition.get().getWorkCategory().getHolidayWork().getWorkTypeCode()
-							.get().toString();
-					if (buOptional.get().holidayCls.equals(HolidayClsImport.STATUTORY_HOLIDAYS)) {
+					PersonalWorkCategory personCategory = personalLablorCodition.get().getWorkCategory();
+					switch (buOptional.get().holidayCls) {
+					case STATUTORY_HOLIDAYS:
 						// 申請日＝＞法定内休日
-						if (personalLablorCodition.get().getWorkCategory().getInLawBreakTime().isPresent()) {
-							workTypeCode = personalLablorCodition.get().getWorkCategory().getInLawBreakTime().get()
-									.getWorkTypeCode().get().toString();
-						}
-
-					} else if (buOptional.get().holidayCls.equals(HolidayClsImport.NON_STATUTORY_HOLIDAYS)) {
+						workTypeCode = getWorkTypeCode(personCategory.getInLawBreakTime(), workTypeCode);
+						break;
+					case NON_STATUTORY_HOLIDAYS:
 						// 申請日＝＞法定外休日
-						if (personalLablorCodition.get().getWorkCategory().getOutsideLawBreakTime().isPresent()) {
-							workTypeCode = personalLablorCodition.get().getWorkCategory().getOutsideLawBreakTime().get()
-									.getWorkTypeCode().get().toString();
-						}
-					} else if (buOptional.get().holidayCls.equals(HolidayClsImport.PUBLIC_HOLIDAY)) {
+						workTypeCode = getWorkTypeCode(personCategory.getOutsideLawBreakTime(), workTypeCode);
+						break;
+					case PUBLIC_HOLIDAY:
 						// 申請日＝＞祝日
-						if (personalLablorCodition.get().getWorkCategory().getHolidayAttendanceTime().isPresent()) {
-							workTypeCode = personalLablorCodition.get().getWorkCategory().getHolidayAttendanceTime()
-									.get().getWorkTypeCode().get().toString();
-						}
-					}
-					boolean isInList = wptypes.indexOf(workTypeCode) != -1;
-					if (isInList) {
-						workTypes.setWorkTypeCode(workTypeCode);
-					}else{
-						workTypes.setWorkTypeCode(workTypes.getWorkTypeCodes().get(0));
-					}
-				} else {
-					if (!StringUtil.isNullOrEmpty(workTypeCode, true)) {
-						boolean isInList = wptypes.indexOf(workTypeCode) != -1;
-						if (isInList) {
-							workTypes.setWorkTypeCode(workTypeCode);
-						} else {
-							workTypes.setWorkTypeCode(workTypes.getWorkTypeCodes().get(0));
-						}
+						workTypeCode = getWorkTypeCode(personCategory.getHolidayAttendanceTime(), workTypeCode);
+						break;
 
-					} else {
-						workTypes.setWorkTypeCode(workTypes.getWorkTypeCodes().get(0));
 					}
+					workTypeCode = getInList(wptypes, workTypeCode);
+
+				} else {
+					workTypeCode = getCode(wptypes, workTypeCode);
+
 				}
 			}
+			workTypes.setWorkTypeCode(workTypeCode);
 		}
 		
 		Optional<WorkType> workType = workTypeRepository.findByPK(companyID, workTypes.getWorkTypeCode());
@@ -166,33 +140,105 @@ public class HolidayServiceImpl implements HolidayService {
 			workTypes.setWorkTypeName(workType.get().getName().toString());
 		}
 	}
+
+	private String getCode(List<String> list, String defaultCode) {
+		if (!StringUtil.isNullOrEmpty(defaultCode, true)) {
+			return getInList(list, defaultCode);
+		} else {
+			return list.get(0);
+		}
+	}
+
+	private String getWorkTypeCode(Optional<SingleDaySchedule> singleDay, String wkTypeCode) {
+		if (singleDay.isPresent()) {
+			Optional<WorkTypeCode> wkTypeCodeOpt = singleDay.get().getWorkTypeCode();
+			return wkTypeCodeOpt.isPresent() ? wkTypeCodeOpt.get().v().toString() : wkTypeCode;
+		}
+		return wkTypeCode;
+	}
 	/** 5.就業時間帯を取得する */
 	@Override
 	public WorkTimeHolidayWork getWorkTimeHolidayWork(String companyID, String employeeID,
-			GeneralDate baseDate,Optional<WorkingConditionItem> personalLablorCodition) {
+			GeneralDate baseDate,Optional<WorkingConditionItem> personalLablorCodition,boolean isChangeDate) {
 		WorkTimeHolidayWork workTimeHolidayWork = new WorkTimeHolidayWork();
 		// 1.職場別就業時間帯を取得
-		List<String> listWorkTimeCodes = otherCommonAlgorithm.getWorkingHoursByWorkplace(companyID, employeeID,baseDate);
+		List<String> listWorkTimeCodes = otherCommonAlgorithm.getWorkingHoursByWorkplace(companyID, employeeID,
+				baseDate);
 		List<String> workTimes = new ArrayList<>();
-		if(!CollectionUtil.isEmpty(listWorkTimeCodes)){
+		if (!CollectionUtil.isEmpty(listWorkTimeCodes)) {
 			listWorkTimeCodes.forEach(x -> workTimes.add(x));
 		}
 		workTimeHolidayWork.setWorkTimeCodes(workTimes);
-		if(!personalLablorCodition.isPresent() || personalLablorCodition.get().getWorkCategory().getHolidayWork() == null){
+		if (!personalLablorCodition.isPresent() || personalLablorCodition.get().getWorkCategory().getHolidayWork() == null) {
 			// 先頭の勤務種類を選択する
-			if(!CollectionUtil.isEmpty(workTimeHolidayWork.getWorkTimeCodes())){
+			if (!CollectionUtil.isEmpty(workTimeHolidayWork.getWorkTimeCodes())) {
 				workTimeHolidayWork.setWorkTimeCode(workTimeHolidayWork.getWorkTimeCodes().get(0));
 			}
-		}else{
-			//ドメインモデル「個人勤務日区分別勤務.休日出勤時.就業時間帯コード」を選択する
-			workTimeHolidayWork.setWorkTimeCode(personalLablorCodition.get().getWorkCategory().getHolidayWork().getWorkTimeCode().get().toString());
+		} else {
+			// ドメインモデル「個人勤務日区分別勤務.休日出勤時.就業時間帯コード」を選択する
+			String wkTimeCode = personalLablorCodition.get().getWorkCategory().getHolidayWork().getWorkTimeCode().get()
+					.toString();
+			if (!isChangeDate) {
+				wkTimeCode = getCode(workTimes, wkTimeCode);
+			} else {
+				// Imported(申請承認)「職場ID」を取得する
+				// アルゴリズム「社員から職場を取得する」を実行する - req #30
+				WkpHistImport wkp = wkpAdapter.findWkpBySid(employeeID, baseDate);
+				String workplaceID = "";
+				if (wkp != null) {
+					workplaceID = wkp.getWorkplaceId();
+				}
+				Optional<BusinessDayCalendarImport> buOptional = this.businessDayCalendarAdapter
+						.acquiredHolidayClsOfTargetDate(companyID, workplaceID, baseDate);
+				if (buOptional.isPresent()) {
+					PersonalWorkCategory personCategory = personalLablorCodition.get().getWorkCategory();
+					switch (buOptional.get().holidayCls) {
+					case STATUTORY_HOLIDAYS:
+						// 申請日＝＞法定内休日
+						wkTimeCode = getWorkTimeCode(personCategory.getInLawBreakTime(), wkTimeCode);
+						break;
+					case NON_STATUTORY_HOLIDAYS:
+						// 申請日＝＞法定外休日
+						wkTimeCode = getWorkTimeCode(personCategory.getOutsideLawBreakTime(), wkTimeCode);
+						break;
+					case PUBLIC_HOLIDAY:
+						// 申請日＝＞祝日
+						wkTimeCode = getWorkTimeCode(personCategory.getHolidayAttendanceTime(), wkTimeCode);
+						break;
+
+					}
+					wkTimeCode = getInList(workTimes, wkTimeCode);
+				} else {
+					wkTimeCode = getCode(workTimes, wkTimeCode);
+				}
+			}
+			
+			workTimeHolidayWork.setWorkTimeCode(wkTimeCode);
 		}
-		if(workTimeHolidayWork.getWorkTimeCode() != null){
+		if (workTimeHolidayWork.getWorkTimeCode() != null) {
 			workTimeRepository.findByCode(companyID, workTimeHolidayWork.getWorkTimeCode()).ifPresent(wkTime -> {
 				workTimeHolidayWork.setWorkTimeName(wkTime.getWorkTimeDisplayName().getWorkTimeName().toString());
 			});
 		}
 		return workTimeHolidayWork;
+	}
+
+	private String getInList(List<String> list, String defaultCode) {
+		boolean isInList = list.indexOf(defaultCode) != -1;
+		if (isInList) {
+			return defaultCode;
+		} else {
+			return list.get(0);
+		}
+
+	}
+	private String getWorkTimeCode(Optional<SingleDaySchedule> singleDay, String defaultCode) {
+		if (singleDay.isPresent()) {
+			Optional<nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode> wkTimeCodeOpt = singleDay.get()
+					.getWorkTimeCode();
+			return wkTimeCodeOpt.isPresent() ? wkTimeCodeOpt.get().v().toString() : defaultCode;
+		}
+		return defaultCode;
 	}
 	@Override
 	public void createHolidayWork(AppHolidayWork domain, Application_New newApp) {

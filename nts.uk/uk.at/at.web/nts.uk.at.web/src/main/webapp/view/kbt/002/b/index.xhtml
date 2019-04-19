@@ -61,11 +61,12 @@
 	                            <td class = "pad_left_5px">
 									<input tabindex="7" class="nts-input pad_left_5px" id="execItemCd"
 													data-bind="ntsTextEditor:{
-													name: '#[KBT002_10]',
-													value: execItemCd,
-													required: true,
-	 												constraint: 'ExecutionCode'},
-	 												enable: $parent.isNewMode()" />
+														name: '#[KBT002_10]',
+														value: execItemCd,
+														required: true,
+		 												constraint: 'ExecutionCode',
+		 												enable: $parent.isNewMode()
+	 												}" />
 									<input tabindex="8" class="nts-input pad_left_5px" id="execItemName"
 													data-bind="ntsTextEditor:{
 													name: '#[KBT002_11]',

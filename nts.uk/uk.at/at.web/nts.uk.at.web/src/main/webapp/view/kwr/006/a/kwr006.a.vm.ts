@@ -379,7 +379,9 @@ module nts.uk.at.view.kwr006.a {
                     var employee = self.employeeList().filter(function(emp) {
                         return code == emp.code;
                     });
-                    self.selectedEmployee().push(employee[0].id);
+                    if(employee.length > 0){
+                        self.selectedEmployee().push(employee[0].id);
+                    }
                 });
                 return self.selectedEmployee();
             }
