@@ -731,6 +731,10 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         setSprFromItem(data: any) {
             let self = this;
             if (!_.isEmpty(self.shareObject()) && self.shareObject().initClock != null && self.initScreenSPR == 0) {
+                if(!_.isEmpty(data.changeSPR.messageIdError)){
+                   nts.uk.ui.dialog.error({ messageId: data.changeSPR.messageIdError});
+                    return;
+                }
                 if (data.showQuestionSPR == SPRCheck.SHOW_CONFIRM) {
                     let sprStamp = { employeeId: "", date: "", change31: false, change34: false };
                     // show dialog confirm 
@@ -1572,6 +1576,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         loadRowScreen(onlyLoadMonth: boolean, onlyCalc: boolean) : JQueryPromise<any> {
             var self = this;
             let lstEmployee = [];
+            self.sprStampSourceInfo(null);
             if (self.displayFormat() === 0) {
                 let lst = _.find(self.lstEmployee(), (employee) => {
                     return employee.id === self.selectedEmployee();
