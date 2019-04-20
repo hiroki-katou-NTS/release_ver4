@@ -261,7 +261,7 @@ public class MultipleMonthAggregateProcessService {
 										compareOperatorText.getCompareright(), endValueTime);
 							}
 						}
-						alarmDescription += "<br/>" + TextResource.localize("KDW006_89") + ":"
+						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
 								+ checkActualResultMulMonth.sumMulMonthCheckCond(period, companyId,
 										employee.getEmployeeId(), result, extra);
 					}
