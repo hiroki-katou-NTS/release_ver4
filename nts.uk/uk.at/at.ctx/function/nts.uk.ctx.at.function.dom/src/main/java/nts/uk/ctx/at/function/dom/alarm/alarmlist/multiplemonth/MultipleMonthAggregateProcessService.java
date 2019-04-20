@@ -132,7 +132,7 @@ public class MultipleMonthAggregateProcessService {
 						return;
 					}
 				}
-				List<RegulationInfoEmployeeResult> targetEmps = listTargetMap.get(eral.getExtractTargetCondition().getId());
+				List<RegulationInfoEmployeeResult> targetEmps = listTargetMap.get(eral.getExtractTargetCondition().getId()).stream().distinct().collect(Collectors.toList());
 
 				// 対象者の件数をチェック : 対象者 ≦ 0
 				if (!targetEmps.isEmpty()) {
