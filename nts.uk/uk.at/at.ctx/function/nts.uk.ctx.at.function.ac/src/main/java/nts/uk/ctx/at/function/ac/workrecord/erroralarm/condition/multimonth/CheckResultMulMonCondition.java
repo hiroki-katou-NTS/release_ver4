@@ -11,6 +11,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.function.dom.adapter.actualmultiplemonth.CheckActualResultMulMonth;
 import nts.uk.ctx.at.function.dom.adapter.actualmultiplemonth.MonthlyRecordValueImport;
+import nts.uk.ctx.at.function.dom.adapter.actualmultiplemonth.ResultCheckMulMonthCheckCondAverage;
 import nts.uk.ctx.at.function.dom.adapter.eralworkrecorddto.ErAlAtdItemConAdapterDto;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.daily.dailyaggregationprocess.ConditionType;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.multimonth.doevent.MulMonCheckCondDomainEventDto;
@@ -156,7 +157,7 @@ public class CheckResultMulMonCondition implements CheckActualResultMulMonth{
 	}
 
 	@Override
-	public boolean checkMulMonthCheckCondAverage(DatePeriod period, String companyId, String employeeId,
+	public ResultCheckMulMonthCheckCondAverage checkMulMonthCheckCondAverage(DatePeriod period, String companyId, String employeeId,
 			List<MonthlyRecordValueImport> results, MulMonCheckCondDomainEventDto erAlAtdItemConAdapterDto) {
 		List<YearMonth> lstYearMonth = period.yearMonthsBetween();
 //		String errorAlarmCode = "";
@@ -180,7 +181,7 @@ public class CheckResultMulMonCondition implements CheckActualResultMulMonth{
 		check = CompareDouble(bdAVG, erAlAtdItemConAdapterDto.getErAlAtdItem().getCompareStartValue(),
 				erAlAtdItemConAdapterDto.getErAlAtdItem().getCompareEndValue(),
 				erAlAtdItemConAdapterDto.getErAlAtdItem().getCompareOperator());
-		return check;
+		return new ResultCheckMulMonthCheckCondAverage(check,bdAVG);
 	}
 
 	@SuppressWarnings("unchecked")

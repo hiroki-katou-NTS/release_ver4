@@ -20,6 +20,6 @@ public interface CheckActualResultMulMonth {
 	ArrayList<Integer> checkMulMonthCheckCondCosp(DatePeriod period, String companyId, String string,
 			List<MonthlyRecordValueImport> result, MulMonCheckCondDomainEventDto erAlAtdItemConAdapterDto);
 
-	boolean checkMulMonthCheckCondAverage(DatePeriod period, String companyId, String string,
+	ResultCheckMulMonthCheckCondAverage checkMulMonthCheckCondAverage(DatePeriod period, String companyId, String string,
 			List<MonthlyRecordValueImport> result, MulMonCheckCondDomainEventDto erAlAtdItemConAdapterDto);
 }

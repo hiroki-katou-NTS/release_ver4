@@ -271,7 +271,7 @@ public class MultipleMonthAggregateProcessService {
 					break;
 					
 				case AVERAGE_TIME:
-					if (checkActualResultMulMonth.checkMulMonthCheckCondAverage(period,companyId,employee.getEmployeeId(),result,extra)) {
+					if (checkActualResultMulMonth.checkMulMonthCheckCondAverage(period,companyId,employee.getEmployeeId(),result,extra).isCheck()) {
 						checkAddAlarm = true;
 						String startValueTime = timeToString(startValue.intValue());
 						String endValueTime = "";
@@ -291,15 +291,18 @@ public class MultipleMonthAggregateProcessService {
 							}
 						}
 						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
-								+ timeToString(checkActualResultMulMonth.sumMulMonthCheckCond(period, companyId,
-										employee.getEmployeeId(), result, extra).intValue());
+								+ timeToString(
+										checkActualResultMulMonth
+												.checkMulMonthCheckCondAverage(period, companyId,
+														employee.getEmployeeId(), result, extra)
+												.getAvgValue().intValue());
 					}
 					break;
 					
 				case AVERAGE_TIMES:
 				case AVERAGE_AMOUNT:
 				case AVERAGE_DAYS:
-					if (checkActualResultMulMonth.checkMulMonthCheckCondAverage(period,companyId,employee.getEmployeeId(),result,extra)) {
+					if (checkActualResultMulMonth.checkMulMonthCheckCondAverage(period,companyId,employee.getEmployeeId(),result,extra).isCheck()) {
 						checkAddAlarm = true;
 						String startValueTime = String.valueOf(startValue.intValue());
 						String endValueTime = "";
@@ -319,8 +322,11 @@ public class MultipleMonthAggregateProcessService {
 							}
 						}
 						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
-								+ checkActualResultMulMonth.sumMulMonthCheckCond(period, companyId,
-										employee.getEmployeeId(), result, extra);
+								+ timeToString(
+										checkActualResultMulMonth
+												.checkMulMonthCheckCondAverage(period, companyId,
+														employee.getEmployeeId(), result, extra)
+												.getAvgValue().intValue());
 					}
 					break;
 					
@@ -505,7 +511,7 @@ public class MultipleMonthAggregateProcessService {
 						break;
 						
 					case AVERAGE_TIME:
-						if (checkActualResultMulMonth.checkMulMonthCheckCondAverage(period,companyId,employee.getId(),result,extra)) {
+						if (checkActualResultMulMonth.checkMulMonthCheckCondAverage(period,companyId,employee.getId(),result,extra).isCheck()) {
 							checkAddAlarm = true;
 							String startValueTime = timeToString(startValue.intValue());
 							String endValueTime = "";
@@ -530,7 +536,7 @@ public class MultipleMonthAggregateProcessService {
 					case AVERAGE_TIMES:
 					case AVERAGE_AMOUNT:
 					case AVERAGE_DAYS:
-						if (checkActualResultMulMonth.checkMulMonthCheckCondAverage(period,companyId,employee.getId(),result,extra)) {
+						if (checkActualResultMulMonth.checkMulMonthCheckCondAverage(period,companyId,employee.getId(),result,extra).isCheck()) {
 							checkAddAlarm = true;
 							String startValueTime = String.valueOf(startValue.intValue());
 							String endValueTime = "";
