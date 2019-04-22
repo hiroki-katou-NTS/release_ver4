@@ -270,4 +270,10 @@ public class WorkTypeWebService extends WebService {
 	public List<WorkTypeDto> initializeOrder(WorkTypeDispInitializeOrderCommand command) {
 		return this.workTypeDispInitializeOrderCommandHandler.handle(command);
 	}
+	
+	@POST
+	@Path("getpossiblewktypeKDL002")
+	public List<WorkTypeInfor> getPossibleWkTypeKDL002(List<String> lstPossible) {
+		return this.find.getPossibleWorkTypeKDL002(lstPossible);
+	}
 }
