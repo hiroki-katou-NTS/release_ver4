@@ -4,6 +4,7 @@ module nts.uk.pr.view.ccg007.c {
         import ContractDto = service.ContractDto;
         import blockUI = nts.uk.ui.block;
         import CheckChangePassDto = service.CheckChangePassDto;
+        import character = nts.uk.characteristics;
         export class ScreenModel {
             companyCode: KnockoutObservable<string>;
             companyName: KnockoutObservable<string>;
@@ -174,6 +175,12 @@ module nts.uk.pr.view.ccg007.c {
                             }
                         } else {
                             nts.uk.request.login.keepUsedLoginPage("/nts.uk.com.web/view/ccg/007/c/index.xhtml");
+                            //set mode login
+                            character.remove("loginMode").done(function(){
+//                                loginMode: true - sign on
+//                                loginMode: false - normal
+                                character.save("loginMode", self.isSignOn());
+                            })
                             //Remove LoginInfo
                             nts.uk.characteristics.remove("form2LoginInfo").done(function() {
                                 //check SaveLoginInfo
