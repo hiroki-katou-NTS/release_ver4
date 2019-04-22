@@ -180,12 +180,19 @@ module nts.uk.ui.menu {
                             });
                             return;
                         }
-                        $li.on(constants.CLICK, function() {
-                            // TODO: Jump to login screen and request logout to server
-                            nts.uk.request.ajax(constants.APP_ID, constants.Logout).done(function() {
-                                nts.uk.cookie.remove("nts.uk.sescon", {path: "/"});
-                                nts.uk.request.login.jumpToUsedLoginPage();
-                            });
+                        
+                        nts.uk.characteristics.restore("loginMode").done(mode => {
+                            if (mode) {
+                                $li.remove();
+                            } else {
+                                $li.on(constants.CLICK, function() {
+                                    // TODO: Jump to login screen and request logout to server
+                                    nts.uk.request.ajax(constants.APP_ID, constants.Logout).done(function() {
+                                        nts.uk.cookie.remove("nts.uk.sescon", {path: "/"});
+                                        nts.uk.request.login.jumpToUsedLoginPage();
+                                    });
+                                });
+                            }
                         });
                     });
                     $companyList.css("right", $user.outerWidth() + 30);
