@@ -18408,7 +18408,7 @@ var nts;
                                     _.forEach(_.intersection(disables, value), function (iv) {
                                         $grid.igGridSelection("selectRowById", iv);
                                     });
-                                    $grid.trigger("selectionchanged");
+                                    $grid.trigger("selectionchanged", [true]);
                                 }, 0);
                             }
                             return true;
@@ -18421,7 +18421,10 @@ var nts;
                                 $iselect.addClass("ui-igcheckbox-normal-on");
                             }
                         };
-                        $grid.bind('selectionchanged', function () {
+                        $grid.bind('selectionchanged', function (event, isUserAction) {
+                            if (isUserAction) {
+                                $grid.data('user-action', true);
+                            }
                             $grid.data("ui-changed", true);
                             if (data.multiple) {
                                 var selected_1 = $grid.ntsGridList('getSelected');
@@ -18622,7 +18625,14 @@ var nts;
                                 _.defer(function () { $grid.trigger("selectChange"); });
                             }
                         }
-                        _.defer(function () { $grid.ntsGridList("scrollToSelected"); });
+                        _.defer(function () {
+                            if ($grid.data('user-action')) {
+                                $grid.data('user-action', false);
+                            }
+                            else {
+                                $grid.ntsGridList("scrollToSelected");
+                            }
+                        });
                         $grid.data("ui-changed", false);
                         $grid.closest('.ui-iggrid').addClass('nts-gridlist').height($grid.data("height")).attr("tabindex", $grid.data("tabindex"));
                     };
@@ -30536,7 +30546,7 @@ var nts;
                                 dragSelectRange = [];
                                 $(window).unbind('pointermove.NtsGridListDragging');
                                 if ($grid.data("selectUpdated") === true) {
-                                    $grid.triggerHandler('selectionchanged');
+                                    $grid.triggerHandler('selectionchanged', [true]);
                                 }
                                 //$grid.triggerHandler('selectionchanged');  
                                 clearInterval(timerAutoScroll);
@@ -30577,7 +30587,7 @@ var nts;
                         $grid.bind('iggridselectioncellselectionchanging', function () {
                         });
                         $grid.bind('iggridselectionrowselectionchanged', function () {
-                            $grid.triggerHandler('selectionchanged');
+                            $grid.triggerHandler('selectionchanged', [true]);
                         });
                         //            $grid.on('mouseup', () => {
                         //                $grid.triggerHandler('selectionchanged');
@@ -30788,7 +30798,7 @@ var nts;
                                     _.forEach(_.intersection(disables, value), function (iv) {
                                         $grid.igGridSelection("selectRowById", iv);
                                     });
-                                    $grid.trigger("selectionchanged");
+                                    $grid.trigger("selectionchanged", [true]);
                                 }, 0);
                             }
                             return true;
