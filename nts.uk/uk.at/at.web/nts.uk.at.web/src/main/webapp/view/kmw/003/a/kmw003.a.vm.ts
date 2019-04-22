@@ -1184,44 +1184,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
             }
             return features;
         }
-        getNtsFeatures(): Array<any> {
-            let self = this;
-            //Dummy data
-
-
-            let keys = [];
-            for (let i = 0; i < 300; i++) {
-                keys.push(i);
-            }
-
-            let features: Array<any> = [{ name: 'CopyPaste' },
-                { name: 'CellEdit' },
-                {
-                    name: 'CellColor', columns: [
-                        {
-                            key: 'ruleCode',
-                            parse: function(value) {
-                                return value;
-                            },
-                            map: function(result) {
-                                if (result <= 1) return "#00b050";
-                                else if (result === 2) return "pink";
-                                else return "#0ff";
-                            }
-                        }
-                    ]
-                }
-
-            ];
-            if (self.sheetsGrid().length > 0) {
-                features.push({
-                    name: "Sheet",
-                    initialDisplay: self.sheetsGrid()[0].name,
-                    sheets: self.sheetsGrid()
-                });
-            }
-            return features;
-        }
+        
         totalDay(data) {
             if (!$("#dpGrid").data("igGridPaging")) return;
             let numberBefore = 0;
@@ -1301,34 +1264,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
             });
             return total.toLocaleString('en');
         }
-
-        /**
-         * Setting header style
-         */
-        setHeaderColor() {
-            let self = this;
-            self.headerColors([]);
-            _.forEach(self.headersGrid(), (header) => {
-                //Setting color single header
-                if (header.color) {
-                    self.headerColors.push({
-                        key: header.key,
-                        colors: [header.color]
-                    });
-                }
-                //Setting color group header
-                if (header.group != null && header.group != undefined && header.group.length > 0) {
-                    self.headerColors.push({
-                        key: header.group[0].key,
-                        colors: [header.group[0].color]
-                    });
-                    self.headerColors.push({
-                        key: header.group[1].key,
-                        colors: [header.group[1].color]
-                    });
-                }
-            });
-        }
+        
         /**
          * Create NtsControls
          */
@@ -1400,6 +1336,70 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 { name: 'TextEditor', controlType: 'TextEditor', constraint: { valueType: 'Integer', required: true, format: "Number_Separated" } }
             ];
             return ntsControls;
+        }
+        
+         getNtsFeatures(): Array<any> {
+            let self = this;
+            //Dummy data
+            let keys = [];
+            for (let i = 0; i < 300; i++) {
+                keys.push(i);
+            }
+
+            let features: Array<any> = [{ name: 'CopyPaste' },
+                { name: 'CellEdit' },
+                {
+                    name: 'CellColor', columns: [
+                        {
+                            key: 'ruleCode',
+                            parse: function(value) {
+                                return value;
+                            },
+                            map: function(result) {
+                                if (result <= 1) return "#00b050";
+                                else if (result === 2) return "pink";
+                                else return "#0ff";
+                            }
+                        }
+                    ]
+                }
+            ];
+            if (self.sheetsGrid().length > 0) {
+                features.push({
+                    name: "Sheet",
+                    initialDisplay: self.sheetsGrid()[0].name,
+                    sheets: self.sheetsGrid()
+                });
+            }
+            return features;
+        }
+        
+        /**
+         * Setting header style
+         */
+        setHeaderColor() {
+            let self = this;
+            self.headerColors([]);
+            _.forEach(self.headersGrid(), (header) => {
+                //Setting color single header
+                if (header.color) {
+                    self.headerColors.push({
+                        key: header.key,
+                        colors: [header.color]
+                    });
+                }
+                //Setting color group header
+                if (header.group != null && header.group != undefined && header.group.length > 0) {
+                    self.headerColors.push({
+                        key: header.group[0].key,
+                        colors: [header.group[0].color]
+                    });
+                    self.headerColors.push({
+                        key: header.group[1].key,
+                        colors: [header.group[1].color]
+                    });
+                }
+            });
         }
         reloadGrid() {
             let self = this;
