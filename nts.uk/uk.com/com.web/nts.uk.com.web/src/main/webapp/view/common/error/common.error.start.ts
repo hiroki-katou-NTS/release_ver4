@@ -30,7 +30,7 @@ module common.error.system {
             nts.uk.characteristics.restore("loginMode").done(mode => {
                 let rgc = nts.uk.ui.windows.rgc();
                 if (mode) {
-                    rgc.nts.uk.request.jump("com", "/view/ccg/007/d/index.xhtml?signon=on");
+                    rgc.nts.uk.request.login.jumpToUsedSSOLoginPage();
                 } else {
                     rgc.nts.uk.request.login.jumpToUsedLoginPage();
                 }

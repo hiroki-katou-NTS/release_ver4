@@ -597,6 +597,14 @@ module nts.uk.request {
             });
         }
         
+        export function jumpToUsedSSOLoginPage() {
+            uk.sessionStorage.getItem(STORAGE_KEY_USED_LOGIN_PAGE).ifPresent(path => {
+                window.location.href = path;
+            }).ifEmpty(() => {
+                request.jump('com', '/view/ccg/007/d/index.xhtml?signon=on');
+            });
+        }
+        
         export function keepSerializedSession() {
             let dfd = $.Deferred();
             dfd.resolve();
