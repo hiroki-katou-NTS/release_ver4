@@ -415,7 +415,10 @@ public abstract class LoginBaseCommandHandler<T> extends CommandHandlerWithResul
 	 *            the old password
 	 * @return true, if successful
 	 */
-	protected boolean checkAfterLogin(UserImportNew user, String oldPassword) {
+	protected boolean checkAfterLogin(UserImportNew user, String oldPassword, boolean signOn) {
+		if(signOn){
+			return true;
+		}
 		if (user.getPassStatus() != PassStatus.Reset.value) {
 			// Get PasswordPolicy
 			Optional<PasswordPolicy> passwordPolicyOpt = this.PasswordPolicyRepo

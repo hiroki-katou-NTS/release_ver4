@@ -37,9 +37,9 @@ module nts.uk.pr.view.ccg007.d {
             
         }
         
-        export function account(): JQueryPromise<any> {
-            return nts.uk.request.ajax(servicePath.account);
-        }
+//        export function account(): JQueryPromise<any> {
+//            return nts.uk.request.ajax(servicePath.account);
+//        }
         
         export function ver(): JQueryPromise<any> {
             return nts.uk.request.ajax(servicePath.ver);

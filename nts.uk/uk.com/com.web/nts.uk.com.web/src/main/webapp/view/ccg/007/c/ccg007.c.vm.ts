@@ -204,8 +204,11 @@ module nts.uk.pr.view.ccg007.c {
                     blockUI.clear();
                 }).fail(function(res:any) {
                     if(self.isSignOn()){
-                            self.displayLogin(true);
-                        }
+                        blockUI.clear();
+                        nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(()=>{
+                            nts.uk.request.jump("/view/ccg/007/sso/adsso.xhtml");
+                        });
+                    }else
                     //Return Dialog Error
                     if (!_.isEqual(res.message, "can not found message id")){
                         nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds });
@@ -235,10 +238,6 @@ module nts.uk.pr.view.ccg007.c {
                     var childData = nts.uk.ui.windows.getShared('childData');
                     if (childData.submit) {
                         nts.uk.request.jump("/view/ccg/008/a/index.xhtml", { screen: 'login' });
-                    }else{
-                        if(self.isSignOn()){
-                            self.displayLogin(true);
-                        }    
                     }   
                 })
             }
@@ -270,11 +269,11 @@ module nts.uk.pr.view.ccg007.c {
                 }
             }
             
-            private account(){
-                service.account().done(data => {
-                    alert('domain: ' + data.domain + '\n' + 'user name: ' + data.userName)
-                });
-            }
+//            private account(){
+//                service.account().done(data => {
+//                    alert('domain: ' + data.domain + '\n' + 'user name: ' + data.userName)
+//                });
+//            }
         }
         export class CompanyItemModel {
             companyId: string;

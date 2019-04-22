@@ -30,9 +30,9 @@ module nts.uk.pr.view.ccg007.c {
             return nts.uk.request.ajax(servicePath.getCompanyInfo +"/"+ companyId);
         }
         
-        export function account(): JQueryPromise<any> {
-            return nts.uk.request.ajax(servicePath.account);
-        }
+//        export function account(): JQueryPromise<any> {
+//            return nts.uk.request.ajax(servicePath.account);
+//        }
 
         /**
           * Function is used to submit login.

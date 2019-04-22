@@ -133,7 +133,7 @@ public class SubmitLoginFormTwoCommandHandler extends LoginBaseCommandHandler<Su
         this.initSessionC(user, em, companyCode);
 		
 		//アルゴリズム「ログイン記録」を実行する
-		if (!this.checkAfterLogin(user, oldPassword)){
+		if (!this.checkAfterLogin(user, oldPassword, command.isSignOn())){
 			return new CheckChangePassDto(true, null,false);
 		}
 		

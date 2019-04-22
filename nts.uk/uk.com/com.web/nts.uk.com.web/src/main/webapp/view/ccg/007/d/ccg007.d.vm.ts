@@ -61,15 +61,15 @@ module nts.uk.pr.view.ccg007.d {
                 let defaultContractCode:string = "000000000000";
                 //get system config
                 blockUI.invisible();
-                nts.uk.characteristics.restore("contractInfo").done(function(data:any) {
+                character.restore("contractInfo").done(function(data:any) {
                     self.contractCode(data ? data.contractCode : "");
                     self.contractPassword(data ? data.contractPassword : "");
                     service.checkContract({ contractCode: data ? data.contractCode : "", contractPassword: data ? data.contractPassword : "" })
                         .done(function(showContractData: any) {
                             //check ShowContract
                             if (showContractData.onpre) {
-                                nts.uk.characteristics.remove("contractInfo");
-                                nts.uk.characteristics.save("contractInfo", { contractCode:defaultContractCode, contractPassword: self.contractPassword() });
+                                character.remove("contractInfo");
+                                character.save("contractInfo", { contractCode:defaultContractCode, contractPassword: self.contractPassword() });
                                 self.contractCode(defaultContractCode);
                                 self.contractPassword(null);
                                 self.getEmployeeLoginSetting(defaultContractCode);
@@ -157,7 +157,7 @@ module nts.uk.pr.view.ccg007.d {
                                     self.companyName(self.companyList()[0].companyName);
                                 }
                                 //get local storage info and set here
-                                nts.uk.characteristics.restore("form3LoginInfo").done(function(loginInfo:any) {
+                                character.restore("form3LoginInfo").done(function(loginInfo:any) {
                                     if (loginInfo) {
                                         self.selectedCompanyCode(loginInfo.companyCode);
                                         self.employeeCode(loginInfo.employeeCode);
@@ -226,8 +226,11 @@ module nts.uk.pr.view.ccg007.d {
                     blockUI.clear();
                 }).fail(function(res:any) {
                     if(self.isSignOn()){
-                        self.displayLogin(true);
-                    }
+                        blockUI.clear();
+                        nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds }).then(()=>{
+                            nts.uk.request.jump("/view/ccg/007/sso/adsso.xhtml");
+                        });
+                    }else
                     //Return Dialog Error
                     if (!_.isEqual(res.message, "can not found message id")){
                         nts.uk.ui.dialog.alertError({ messageId: res.messageId, messageParams: res.parameterIds });
@@ -257,10 +260,6 @@ module nts.uk.pr.view.ccg007.d {
                     var childData = nts.uk.ui.windows.getShared('childData');
                     if (childData.submit) {
                         nts.uk.request.jump("/view/ccg/008/a/index.xhtml", { screen: 'login' });
-                    }else{
-                        if(self.isSignOn()){
-                            self.displayLogin(true);
-                        }    
                     }
                 })
             }
@@ -284,11 +283,11 @@ module nts.uk.pr.view.ccg007.d {
                 }).onClosed(function(): any {})
             }
             
-            private account(){
-                service.account().done(data => {
-                    alert('domain: ' + data.domain + '\n' + 'user name: ' + data.userName)
-                });
-            }
+//            private account(){
+//                service.account().done(data => {
+//                    alert('domain: ' + data.domain + '\n' + 'user name: ' + data.userName)
+//                });
+//            }
         }
         export class CompanyItemModel {
             companyId: string;
