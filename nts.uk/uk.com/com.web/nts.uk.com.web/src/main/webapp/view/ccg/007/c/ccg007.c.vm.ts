@@ -174,7 +174,11 @@ module nts.uk.pr.view.ccg007.c {
                                 self.password("");
                             }
                         } else {
-                            nts.uk.request.login.keepUsedLoginPage("/nts.uk.com.web/view/ccg/007/c/index.xhtml");
+                            if(self.isSignOn()){
+                                nts.uk.request.login.keepUsedLoginPage("/nts.uk.com.web/view/ccg/007/c/index.xhtml?signon=on");
+                            }else{
+                                nts.uk.request.login.keepUsedLoginPage("/nts.uk.com.web/view/ccg/007/c/index.xhtml");
+                            }
                             //set mode login
                             character.remove("loginMode").done(function(){
 //                                loginMode: true - sign on

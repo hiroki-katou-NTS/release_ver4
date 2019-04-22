@@ -153,7 +153,11 @@ module nts.uk.pr.view.ccg007.b {
                                 self.password("");
                             }
                         } else {
-                            nts.uk.request.login.keepUsedLoginPage("/nts.uk.com.web/view/ccg/007/b/index.xhtml");
+                            if(self.isSignOn()){
+                                nts.uk.request.login.keepUsedLoginPage("/nts.uk.com.web/view/ccg/007/b/index.xhtml?signon=on");
+                            }else{
+                                nts.uk.request.login.keepUsedLoginPage("/nts.uk.com.web/view/ccg/007/b/index.xhtml");
+                            }
                             //set mode login
                             character.remove("loginMode").done(function(){
 //                                loginMode: true - sign on
