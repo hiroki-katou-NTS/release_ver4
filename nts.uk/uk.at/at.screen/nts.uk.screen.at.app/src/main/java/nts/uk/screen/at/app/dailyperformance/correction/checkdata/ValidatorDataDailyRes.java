@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.val;
@@ -386,8 +387,10 @@ public class ValidatorDataDailyRes {
 			List<DPItemValue> divergenceErrors = new ArrayList<>();
 			List<EmployeeDailyPerError> employeeError = d.getEmployeeError();
 			for (EmployeeDailyPerError err : employeeError) {
-				if (err != null && err.getErrorAlarmWorkRecordCode().v().startsWith("D") && err.getErrorAlarmMessage().isPresent() && err.getErrorAlarmMessage().get().v().equals(TextResource.localize("Msg_1298"))) {
-					if(err.getAttendanceItemList().isEmpty()){
+				if (err != null && err.getErrorAlarmWorkRecordCode().v().startsWith("D")
+						&& err.getErrorAlarmMessage().isPresent()
+						&& err.getErrorAlarmMessage().get().v().equals(TextResource.localize("Msg_1298")) && checkErrorOdd(err.getErrorAlarmWorkRecordCode().v())) {
+					if (err.getAttendanceItemList().isEmpty()) {
 						divergenceErrors.add(new DPItemValue("", err.getEmployeeID(), err.getDate(), 0));
 					} else {
 						divergenceErrors.addAll(err.getAttendanceItemList().stream()
@@ -521,8 +524,10 @@ public class ValidatorDataDailyRes {
 		for (IntegrationOfDaily d : dailyResults) {
 			List<EmployeeDailyPerError> employeeError = d.getEmployeeError();
 			for (EmployeeDailyPerError err : employeeError) {
-				if (err != null && err.getErrorAlarmWorkRecordCode().v().startsWith("D") && (!err.getErrorAlarmMessage().isPresent() || !err.getErrorAlarmMessage().get().v().equals(TextResource.localize("Msg_1298")))) {
-					if(err.getAttendanceItemList().isEmpty()){
+				if (err != null && err.getErrorAlarmWorkRecordCode().v().startsWith("D") && checkErrorOdd(err.getErrorAlarmWorkRecordCode().v())
+						&& (!err.getErrorAlarmMessage().isPresent()
+								|| !err.getErrorAlarmMessage().get().v().equals(TextResource.localize("Msg_1298")))) {
+					if (err.getAttendanceItemList().isEmpty()) {
 						divergenceErrors.add(new DPItemValue("", err.getEmployeeID(), err.getDate(), 0));
 					} else {
 						divergenceErrors.addAll(err.getAttendanceItemList().stream()
@@ -533,6 +538,14 @@ public class ValidatorDataDailyRes {
 			}
 		}
 		return divergenceErrors;
+	}
+	
+	private boolean checkErrorOdd(String errorCode) {
+		String valueEnd = errorCode.substring(errorCode.length() - 1, errorCode.length());
+		if (StringUtils.isNumeric(valueEnd) && Integer.parseInt(valueEnd) % 2 != 0)
+			return true;
+		else
+			return false;
 	}
 	
 	public List<String> createMessageError(EmployeeMonthlyPerError errorEmployeeMonth) {
