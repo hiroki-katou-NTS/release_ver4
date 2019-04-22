@@ -58,6 +58,33 @@ public class CheckResultMulMonCondition implements CheckActualResultMulMonth{
 		return check;
 	}
 
+	//tính tam 
+
+	@Override
+	public Double sumMulMonthCheckCond(DatePeriod period, String companyId, String string,
+			List<MonthlyRecordValueImport> results, MulMonCheckCondDomainEventDto erAlAtdItemConAdapterDto) {
+		String errorAlarmCode = "";
+		MulMonthCheckCond mulMonthCheckCond = new MulMonthCheckCond(
+				erAlAtdItemConAdapterDto.getErrorAlarmCheckID(),
+				erAlAtdItemConAdapterDto.isUseAtr(),
+				convertAtdIemConToDomain(erAlAtdItemConAdapterDto.getErAlAtdItem(),companyId,errorAlarmCode)
+				) ;
+		List<ItemValue> itemValues = new ArrayList<ItemValue>();
+		Double sumAll = 0d;
+		for (MonthlyRecordValueImport result : results) {
+			itemValues.addAll(result.getItemValues());
+			Double sum = mulMonthCheckCond.getErAlAttendanceItemCondition().sumCheckTarget(item -> {
+				if (item.isEmpty()) {
+					return new ArrayList<>();
+				}
+				return itemValues.stream().map(iv -> getValue(iv)).collect(Collectors.toList());
+			});
+			if(sum != null) return sumAll += sum;
+		}
+
+		return sumAll;
+	}
+	
 	@Override
 	public boolean checkMulMonthCheckCondContinue(DatePeriod period, String companyId, String employeeId,
 			List<MonthlyRecordValueImport> results, MulMonCheckCondDomainEventDto erAlAtdItemConAdapterDto) {
@@ -270,5 +297,4 @@ public class CheckResultMulMonCondition implements CheckActualResultMulMonth{
 		}
 		return check;
 	}
-	
 }

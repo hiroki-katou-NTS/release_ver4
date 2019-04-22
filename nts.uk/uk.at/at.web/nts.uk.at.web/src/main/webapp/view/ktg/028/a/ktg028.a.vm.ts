@@ -110,8 +110,16 @@ module nts.uk.at.view.ktg028.a.viewmodel {
             let self = this;
             let dfd = $.Deferred();
             var listWidgets = _.remove(__viewContext.enums.WidgetDisplayItemType, function(n){
-                //remove 「子の看護休残数」 và 「看護休残数」, 計画年休残数
-                return (n.value != 22 && n.value != 23 && n.value != 18); 
+               //remove 「子の看護休残数」 và 「看護休残数」, 計画年休残数
+              /*・残業指示件数（A7_1）
+                                    ・休出指示件数（A7_2）
+                                    ・勤務実績参照（A7_9）
+                                    ・半日年休残数（A7_16）
+                                    ・時間年休使用可上限（A7_17）
+                                    ・公休残数（A7_21）
+                                    ・60H超休残数（A7_25）
+                bug 107377*/
+                return ( n.value != 0 && n.value != 1 && n.value != 8 && n.value != 15 &&  n.value != 16 && n.value != 21 && n.value != 25 && n.value != 22 && n.value != 23 && n.value != 18); 
                 });
             var widgets = []; 
             listWidgets.forEach(function (value) {
