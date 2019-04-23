@@ -2818,10 +2818,7 @@ module nts.uk.ui.mgrid {
                             self.disableNtsControlAt(id, key, $c);
                             disabled = true;
                             return;
-                        } else if (s === color.ManualEditTarget || s === color.ManualEditOther) {
-                            $.data($c, v.INIT_MAN_EDIT, s);
                         }
-                        
                         if (!$c.classList.contains(s))
                             $c.classList.add(s);
                     });
