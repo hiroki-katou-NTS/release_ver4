@@ -428,8 +428,18 @@ module nts.uk.ui.koExtentions {
             })
             if (!isEqual) {
                 let clickCheckBox = false;
-                if(!nts.uk.util.isNullOrEmpty(data.value()) && data.value().length == sources.length) {
-                    if($grid.igGridSelection('option', 'multipleSelection')) {
+                if(!nts.uk.util.isNullOrEmpty(data.value())) {
+                    let isSameSource = true,
+                        sortedValue = _.sortBy(data.value()),
+                        sortedSource = _.sortBy(sources, [optionsValue]);
+                    _.forEach(sortedValue, (v, i) => {
+                        if (v !== sortedSource[i][optionsValue]) {
+                            isSameSource = false;
+                            return false;
+                        }
+                    });
+                    
+                    if(isSameSource && data.value().length == sources.length && $grid.igGridSelection('option', 'multipleSelection')) {
                         let features = _.find($grid.igGrid("option", "features"), function (f){
                             return f.name === "RowSelectors";     
                         });
