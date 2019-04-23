@@ -432,12 +432,16 @@ module nts.uk.ui.koExtentions {
                     let isSameSource = true,
                         sortedValue = _.sortBy(data.value()),
                         sortedSource = _.sortBy(sources, [optionsValue]);
-                    _.forEach(sortedValue, (v, i) => {
-                        if (v !== sortedSource[i][optionsValue]) {
-                            isSameSource = false;
-                            return false;
-                        }
-                    });
+                    if (sortedValue.length === sortedSource.length) {
+                        _.forEach(sortedValue, (v, i) => {
+                            if (v !== sortedSource[i][optionsValue]) {
+                                isSameSource = false;
+                                return false;
+                            }
+                        });
+                    } else {
+                        isSameSource = false;
+                    }
                     
                     if(isSameSource && data.value().length == sources.length && $grid.igGridSelection('option', 'multipleSelection')) {
                         let features = _.find($grid.igGrid("option", "features"), function (f){

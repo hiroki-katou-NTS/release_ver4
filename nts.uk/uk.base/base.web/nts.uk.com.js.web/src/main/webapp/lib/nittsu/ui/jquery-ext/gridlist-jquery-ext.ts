@@ -806,6 +806,7 @@ module nts.uk.ui.jqueryExtentions {
         function setValue($grid: JQuery, value: any) {
             if (!value) return;
             let sources = $grid.igGrid("option", "dataSource");
+            let optionsValue = $grid.igGrid("option", "primaryKey");
             let multiple = $grid.igGridSelection('option', 'multipleSelection');
             let currentSelectedItems = $grid.ntsGridList('getSelected');
             let isEqual = _.isEqualWith(currentSelectedItems, value, function(current, newVal) {
@@ -815,8 +816,22 @@ module nts.uk.ui.jqueryExtentions {
             });
             
             if (!isEqual) {
-                let clickCheckBox = false;
-                if (_.uniq(value).length == _.uniq(sources).length) {
+                let clickCheckBox = false,
+                    isSameSource = true,
+                    sortedValue = _.sortBy(value),
+                    sortedSource = _.sortBy(sources, [optionsValue]);
+                if (sortedValue.length === sortedSource.length) {
+                    _.forEach(sortedValue, (v, i) => {
+                        if (v !== sortedSource[i][optionsValue]) {
+                            isSameSource = false;
+                            return false;
+                        }
+                    });
+                } else {
+                    isSameSource = false;
+                }
+                
+                if (isSameSource && _.uniq(value).length == _.uniq(sources).length) {
                     if (multiple) {
                         let features = _.find($grid.igGrid("option", "features"), function (f){
                             return f.name === "RowSelectors";     
