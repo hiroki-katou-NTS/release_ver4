@@ -49,6 +49,7 @@ import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
 import nts.uk.ctx.at.record.dom.service.TimeOffRemainErrorInfor;
 import nts.uk.ctx.at.record.dom.service.TimeOffRemainErrorInputParam;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.ParamIdentityConfirmDay;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.RegisterIdentityConfirmDay;
@@ -431,7 +432,9 @@ public class DailyModifyResCommandFacade {
 					AppContexts.user().employeeId(), true);
 			// only insert check box
 			// insert sign
-			insertSign(dataParent.getDataCheckSign());
+			insertSign(dataParent.getDataCheckSign(), dailyEdits.stream().map(c -> c.getErrors())
+																.flatMap(List::stream).map(c -> c.toDomain(c.getEmployeeID(), c.workingDate()))
+																.collect(Collectors.toList()));
 			if(dataParent.getDataCheckSign() != null){
 				updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
 			}
@@ -522,7 +525,7 @@ public class DailyModifyResCommandFacade {
 						resultIU.getCommandOld(), dailyItems, resultIU.isUpdate(),
 						monthParam, itemAtr);
 				// insert sign
-				insertSign(dataParent.getDataCheckSign());
+				insertSign(dataParent.getDataCheckSign(), resultIU.getLstDailyDomain().stream().map(c -> c.getEmployeeError()).flatMap(List::stream).collect(Collectors.toList()));
 				// insert approval
 				insertApproval(dataParent.getDataCheckApproval());
 
@@ -554,7 +557,9 @@ public class DailyModifyResCommandFacade {
 				
 			} else {
 				if (dataParent.getDataCheckSign() != null && !dataParent.getDataCheckSign().isEmpty()) {
-					insertSign(dataParent.getDataCheckSign());
+					insertSign(dataParent.getDataCheckSign(), dailyEdits.stream().map(c -> c.getErrors())
+																		.flatMap(List::stream).map(c -> c.toDomain(c.getEmployeeID(), c.workingDate()))
+																		.collect(Collectors.toList()));
 
 					updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
 				}
@@ -678,12 +683,12 @@ public class DailyModifyResCommandFacade {
 		return querys;
 	}
 
-	public boolean insertSign(List<DPItemCheckBox> dataCheckSign) {
+	public boolean insertSign(List<DPItemCheckBox> dataCheckSign, List<EmployeeDailyPerError> errors) {
 		if (dataCheckSign.isEmpty())
 			return false;
 		ParamIdentityConfirmDay day = new ParamIdentityConfirmDay(AppContexts.user().employeeId(), dataCheckSign
 				.stream().map(x -> new SelfConfirmDay(x.getDate(), x.isValue())).collect(Collectors.toList()));
-		return registerIdentityConfirmDay.registerIdentity(day);
+		return registerIdentityConfirmDay.registerIdentity(day, errors);
 	}
 
 	public void insertApproval(List<DPItemCheckBox> dataCheckApproval) {
@@ -954,14 +959,15 @@ public class DailyModifyResCommandFacade {
 				.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getProcessingYmd()), x -> ""));
 		
 		if (onlyCheckBox) {
-			resultError = employeeDailyPerErrorRepository
-					.findByPeriodOrderByYmd(employeeId,
-							new DatePeriod(
-									dailyTemps.get(0).getDate(), dailyTemps.get(dailyTemps.size() - 1).getDate()))
-					.stream()
-					.filter(err -> err.getErrorAlarmWorkRecordCode().v().startsWith("D")
-							&& (!err.getErrorAlarmMessage().isPresent()
-									|| !err.getErrorAlarmMessage().get().v().equals(TextResource.localize("Msg_1298"))))
+//			resultError = employeeDailyPerErrorRepository
+//					.findByPeriodOrderByYmd(employeeId,
+//							new DatePeriod(
+//									dailyTemps.get(0).getDate(), dailyTemps.get(dailyTemps.size() - 1).getDate()))
+			resultError = dailyTemps.stream().map(c -> c.getErrors()).flatMap(List::stream)
+					.filter(err -> err.getErrorCode().startsWith("D")
+							&& Integer.parseInt(err.getErrorCode().replace("D", "")) % 2 == 1
+							&& (err.getMessage() != null
+									|| !err.getMessage().equals(TextResource.localize("Msg_1298"))))
 					.map(x -> {
 						return new DPItemValue("", x.getEmployeeID(), x.getDate(), 0);
 					}).collect(Collectors.toList());

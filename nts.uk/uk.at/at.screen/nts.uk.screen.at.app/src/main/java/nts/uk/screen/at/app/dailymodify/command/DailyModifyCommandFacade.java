@@ -143,11 +143,11 @@ public class DailyModifyCommandFacade {
 //		editStateHandler.handle(command);
 	}
 
-	public void insertSign(List<DPItemCheckBox> dataCheckSign) {
-		ParamIdentityConfirmDay day = new ParamIdentityConfirmDay(AppContexts.user().employeeId(), dataCheckSign
-				.stream().map(x -> new SelfConfirmDay(x.getDate(), x.isValue())).collect(Collectors.toList()));
-		registerIdentityConfirmDay.registerIdentity(day);
-	}
+//	public void insertSign(List<DPItemCheckBox> dataCheckSign) {
+//		ParamIdentityConfirmDay day = new ParamIdentityConfirmDay(AppContexts.user().employeeId(), dataCheckSign
+//				.stream().map(x -> new SelfConfirmDay(x.getDate(), x.isValue())).collect(Collectors.toList()));
+//		registerIdentityConfirmDay.registerIdentity(day);
+//	}
 	
 	public void insertApproval(List<DPItemCheckBox> dataCheckApproval) {
 		ParamDayApproval param = new ParamDayApproval(AppContexts.user().employeeId(),
