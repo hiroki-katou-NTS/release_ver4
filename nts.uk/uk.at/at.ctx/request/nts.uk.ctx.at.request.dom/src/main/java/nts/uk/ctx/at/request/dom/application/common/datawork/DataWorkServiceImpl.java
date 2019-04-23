@@ -17,6 +17,8 @@ import nts.uk.ctx.at.request.dom.application.common.adapter.bs.EmployeeRequestAd
 import nts.uk.ctx.at.request.dom.application.common.adapter.bs.dto.SEmpHistImport;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.output.AppCommonSettingOutput;
 import nts.uk.ctx.at.request.dom.application.common.service.other.OtherCommonAlgorithm;
+import nts.uk.ctx.at.request.dom.application.overtime.service.CheckWorkingInfoResult;
+import nts.uk.ctx.at.request.dom.application.overtime.service.OvertimeService;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmployWorkType;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmploymentSetting;
 import nts.uk.ctx.at.request.dom.setting.workplace.ApprovalFunctionSetting;
@@ -47,6 +49,8 @@ public class DataWorkServiceImpl implements IDataWorkService {
 	private WorkingConditionItemRepository workingConditionItemRepository;
 	@Inject
 	private PredetemineTimeSettingRepository predetemineTimeSettingRepository;
+	
+	private OvertimeService overtimeService;
 
 	@Override
 	public DataWork getDataWork(String companyId, String sId, GeneralDate appDate,
@@ -202,7 +206,13 @@ public class DataWorkServiceImpl implements IDataWorkService {
 				selectedData.setSelectedWorkTimeName(wkTime.getWorkTimeDisplayName().getWorkTimeName().v());
 			});
 			selectedData.setSelectedWorkTimeCd(wkTimeCd);
+			//12.マスタ勤務種類、就業時間帯データをチェック
+			CheckWorkingInfoResult checkResult = this.overtimeService.checkWorkingInfo(companyId, null, wkTimeCd);
+			if (checkResult.isWkTimeError()) {
+				selectedData.setSelectedWorkTimeCd(workTimeTypes.get(0));
+			}
 		}
+		
 		// ドメイン「所定時間設定」.「所定時間帯設定」「時間帯(使用区分付き)」の開始時刻、終了時刻を取得する
 		Optional<PredetemineTimeSetting> opPredetemineTimeSetting = 
 				predetemineTimeSettingRepository.findByWorkTimeCode(companyId, selectedData.getSelectedWorkTimeCd());
