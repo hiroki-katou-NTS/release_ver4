@@ -223,7 +223,11 @@ module nts.uk.ui.jqueryExtentions {
                     }
                 } else {
                     deselectAll($grid);
-                    (<Array<string>>selectedId).forEach(id => $grid.igGridSelection('selectRowById', id));
+                    (<Array<string>>selectedId).forEach(id => {
+                        if (_.includes(baseID, id)) {
+                            $grid.igGridSelection('selectRowById', id)
+                        }
+                    });
                 }
             } else {
                 deselectAll($grid);
