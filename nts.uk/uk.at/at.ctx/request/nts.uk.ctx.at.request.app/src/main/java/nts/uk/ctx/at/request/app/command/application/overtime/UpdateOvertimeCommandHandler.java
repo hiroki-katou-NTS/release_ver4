@@ -166,14 +166,15 @@ public class UpdateOvertimeCommandHandler extends CommandHandlerWithResult<Updat
 		appOverTime.getApplication().setAppReason(new AppReason(applicationReason));
 		appOverTime.setVersion(appOverTime.getVersion());
 		appOverTime.getApplication().setVersion(command.getVersion());
-		
+		//4-1.詳細画面登録前の処理を実行する
 		detailBeforeUpdate.processBeforeDetailScreenRegistration(
 				companyID, 
 				appOverTime.getApplication().getEmployeeID(), 
 				appOverTime.getApplication().getAppDate(), 
 				1, 
 				appOverTime.getAppID(), 
-				appOverTime.getApplication().getPrePostAtr(), command.getVersion());
+				appOverTime.getApplication().getPrePostAtr(), command.getVersion(),appOverTime.getWorkTypeCode().v(),appOverTime.getSiftCode().v());
+		//ドメインモデル「残業申請」を更新する
 		overtimeRepository.update(appOverTime);
 		applicationRepository.updateWithVersion(appOverTime.getApplication());
 		// 暫定データの登録
@@ -181,6 +182,7 @@ public class UpdateOvertimeCommandHandler extends CommandHandlerWithResult<Updat
 				companyID, 
 				command.getApplicantSID(), 
 				Arrays.asList(command.getApplicationDate()));
+		//4-2.詳細画面登録後の処理を実行する
 		return detailAfterUpdate.processAfterDetailScreenRegistration(appOverTime.getApplication());
 	}
 
