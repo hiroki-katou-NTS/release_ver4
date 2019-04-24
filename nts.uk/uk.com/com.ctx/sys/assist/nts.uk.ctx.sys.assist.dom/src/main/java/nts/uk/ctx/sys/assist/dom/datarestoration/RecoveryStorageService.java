@@ -310,7 +310,7 @@ public class RecoveryStorageService {
 			String filePath = getExtractDataStoragePath(targetDataByCate.get(i).getUploadId()) + "//"
 					+ targetDataByCate.get(i).getFileNameCsv() + ".csv";
 			CSVBufferReader reader = new CSVBufferReader(new File(filePath));
-			reader.setCharset("Shift_JIS");
+			reader.setCharset("UTF-8");
 			csvByteReadMaper_TableUse.put(targetDataByCate.get(i).getFileNameCsv(), reader);
 		}
 
@@ -429,7 +429,7 @@ public class RecoveryStorageService {
 			
 			if (employeeId != null && dataRecoveryTable.isHasSidInCsv()) {
 				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
-				reader.setCharset("Shift_JIS");
+				reader.setCharset("UTF-8");
 				reader.readFilter(1000, dataRow -> {
 
 					List<NtsCsvRecord> records = dataRow.getRecords();
@@ -568,7 +568,7 @@ public class RecoveryStorageService {
 										values.append("null,");
 									}
 								} else {
-									values.append("'" + value + "',");
+									values.append("N'" + value.replaceAll("\u00A0", "\"") + "' collate Japanese_XJIS_100_CI_AS_SC,");
 								}
 							}
 
@@ -606,7 +606,7 @@ public class RecoveryStorageService {
 			} else {
 				
 				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
-				reader.setCharset("Shift_JIS");
+				reader.setCharset("UTF-8");
 
 				Consumer<CSVParsedResult> csvResult = (dataRow) -> {
 
@@ -749,7 +749,7 @@ public class RecoveryStorageService {
 											values.append("null,");
 										}
 									} else {
-										values.append("'" + value + "',");
+										values.append("N'" + value.replaceAll("\u00A0", "\"") + "' collate Japanese_XJIS_100_CI_AS_SC,");
 									}
 								}
 
@@ -784,7 +784,7 @@ public class RecoveryStorageService {
 					}
 				};
 				
-				reader.readChunk(100,csvResult, null, null);
+				reader.readChunk(csvResult, null, null);
 				
 			}
 		} catch (Exception e) {
@@ -808,16 +808,29 @@ public class RecoveryStorageService {
 		Set<String> hashId = new HashSet<>();
 		List<DataRecoveryTable> targetDataByCate = new ArrayList<>();
 		HashMap<String, CSVBufferReader> csvByteReadMaper_TableNotUse = new HashMap<>();
-		
 		for (int j = 0; j < tableNotUseByCategory.getTables().size(); j++) {
+
+			Set<String> listSid = CsvFileUtil.getListSid(uploadId,
+					tableNotUseByCategory.getTables().get(j).getInternalFileName());
+
+			// -- Tổng hợp ID Nhân viên duy nhất từ List Data
+			hashId.addAll(listSid);
+
+			DataRecoveryTable targetData = new DataRecoveryTable(uploadId,
+					tableNotUseByCategory.getTables().get(j).getInternalFileName(), listSid.isEmpty() ? false : true);
+			
+			targetDataByCate.add(targetData);
+			
 			String filePath = getExtractDataStoragePath(uploadId) + "//"
 					+ tableNotUseByCategory.getTables().get(j).getInternalFileName() + ".csv";
 			
 			CSVBufferReader reader = new CSVBufferReader(new File(filePath));
-			reader.setCharset("Shift_JIS");
+			reader.setCharset("UTF-8");
 			csvByteReadMaper_TableNotUse.put(tableNotUseByCategory.getTables().get(j).getInternalFileName(), reader);
 		}
 		
+		
+
 		// テーブル一覧のカレントの1行分の項目を取得する
 		for (TableList tableList : tableNotUseByCategory.getTables()) {
 
@@ -828,7 +841,7 @@ public class RecoveryStorageService {
 				return DataRecoveryOperatingCondition.INTERRUPTION_END;
 			}
 
-			Set<String> hasSidInCsv = CsvFileUtil.getListSid(uploadId, tableList.getInternalFileName());
+			Set<String> hasSidInCsv = CsvFileUtil.getListSid(uploadId, tableList.getTableEnglishName().toString());
 
 			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, tableList.getInternalFileName(), hasSidInCsv.isEmpty() ? false : true);
 			
@@ -841,7 +854,7 @@ public class RecoveryStorageService {
 				return condition;
 			}
 		}
-		
+
 		return condition;
 	}
 
@@ -863,7 +876,7 @@ public class RecoveryStorageService {
 		String filePath = getExtractDataStoragePath(dataRecoveryTable.getUploadId()) + "//"
 				+ dataRecoveryTable.getFileNameCsv() + ".csv";
 		CSVBufferReader reader = new CSVBufferReader(new File(filePath));
-		reader.setCharset("Shift_JIS");
+		reader.setCharset("UTF-8");
 		csvByteReadMaper.put(dataRecoveryTable.getFileNameCsv(), reader);
 
 		if (tableList.isPresent()) {

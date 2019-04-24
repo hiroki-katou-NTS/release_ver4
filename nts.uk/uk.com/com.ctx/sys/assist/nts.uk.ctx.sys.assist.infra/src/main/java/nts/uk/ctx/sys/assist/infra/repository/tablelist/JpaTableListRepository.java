@@ -353,12 +353,11 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 
 			List<String> lSid = new ArrayList<>();
 			CollectionUtil.split(targetEmployeesSid, 100, subIdList -> {
-				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ",
-						"\\', '"));
+				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ","\\', '"));
 			});
 
 			CsvReportWriter csv = generator.generate(generatorContext, AppContexts.user().companyId()
-					+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3);
+					+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3 , "UTF-8");
 
 			for (String sid : lSid) {
 
@@ -383,7 +382,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 						Map<String, Object> rowCsv = new HashMap<>();
 						int i = 0;
 						for (String columnName : headerCsv3) {
-							rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]) + "\"" : "");
+							rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
 							i++;
 						}
 						csv.writeALine(rowCsv);
@@ -398,14 +397,14 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 			}
 
 			CsvReportWriter csv = generator.generate(generatorContext, AppContexts.user().companyId()
-					+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3);
+					+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3 , "UTF-8");
 
 			List<Object[]> listObj = queryString.getResultList();
 			listObj.forEach(objects -> {
 				Map<String, Object> rowCsv = new HashMap<>();
 				int i = 0;
 				for (String columnName : headerCsv3) {
-					rowCsv.put(columnName, objects[i] != null ? "\"" +String.valueOf(objects[i]) + "\"" : "");
+					rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
 					i++;
 				}
 				csv.writeALine(rowCsv);
