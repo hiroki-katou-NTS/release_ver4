@@ -67,4 +67,13 @@ public interface OvertimeService {
 	 * @return
 	 */
 	public BreakTimeZoneSharedOutPut getBreakTimes(String companyID, String workTypeCode, String workTimeCode);
+	
+	/**
+	 * 12.マスタ勤務種類、就業時間帯データをチェック
+	 * @param companyID
+	 * @param wkTypeCode
+	 * @param wkTimeCode
+	 * @return
+	 */
+	public CheckWorkingInfoResult checkWorkingInfo(String companyID, String wkTypeCode, String wkTimeCode);
 }

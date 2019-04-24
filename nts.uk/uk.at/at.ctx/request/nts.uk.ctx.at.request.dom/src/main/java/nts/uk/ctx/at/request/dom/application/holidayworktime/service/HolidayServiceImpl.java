@@ -32,6 +32,8 @@ import nts.uk.ctx.at.request.dom.application.holidayworktime.AppHolidayWork;
 import nts.uk.ctx.at.request.dom.application.holidayworktime.AppHolidayWorkRepository;
 import nts.uk.ctx.at.request.dom.application.holidayworktime.service.dto.WorkTimeHolidayWork;
 import nts.uk.ctx.at.request.dom.application.holidayworktime.service.dto.WorkTypeHolidayWork;
+import nts.uk.ctx.at.request.dom.application.overtime.service.CheckWorkingInfoResult;
+import nts.uk.ctx.at.request.dom.application.overtime.service.OvertimeService;
 //import nts.uk.ctx.at.request.dom.application.overtime.service.OvertimeService;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmployWorkType;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmploymentSetting;
@@ -69,8 +71,8 @@ public class HolidayServiceImpl implements HolidayService {
 	private ApplicationRepository_New applicationRepository;
 	@Inject
 	private InterimRemainDataMngRegisterDateChange interimRemainDataMngRegisterDateChange;
-//	@Inject
-//	private OvertimeService overtimeService;
+	@Inject
+	private OvertimeService overtimeService;
 	@Override
 	public WorkTypeHolidayWork getWorkTypes(String companyID, String employeeID, List<AppEmploymentSetting> appEmploymentSettings,
 			GeneralDate baseDate,Optional<WorkingConditionItem> personalLablorCodition,boolean isChangeDate) {
@@ -135,7 +137,13 @@ public class HolidayServiceImpl implements HolidayService {
 			workTypes.setWorkTypeCode(workTypeCode);
 		}
 		
-		Optional<WorkType> workType = workTypeRepository.findByPK(companyID, workTypes.getWorkTypeCode());
+		String wkTypeCD = workTypes.getWorkTypeCode();
+		//12.マスタ勤務種類、就業時間帯データをチェック
+		CheckWorkingInfoResult checkResult = overtimeService.checkWorkingInfo(companyID, wkTypeCD, null);
+		if (checkResult.isWkTypeError() && !CollectionUtil.isEmpty(wptypes)) {
+			wkTypeCD = wptypes.get(0);
+		}
+		Optional<WorkType> workType = workTypeRepository.findByPK(companyID, wkTypeCD);
 		if(workType.isPresent()){
 			workTypes.setWorkTypeName(workType.get().getName().toString());
 		}
@@ -214,6 +222,12 @@ public class HolidayServiceImpl implements HolidayService {
 			}
 			
 			workTimeHolidayWork.setWorkTimeCode(wkTimeCode);
+		}
+		String wkTimeCode = workTimeHolidayWork.getWorkTimeCode();
+		// 12.マスタ勤務種類、就業時間帯データをチェック
+		CheckWorkingInfoResult checkResult = overtimeService.checkWorkingInfo(companyID, wkTimeCode, null);
+		if (checkResult.isWkTimeError()) {
+			workTimeHolidayWork.setWorkTimeCode(workTimeHolidayWork.getWorkTimeCodes().get(0));
 		}
 		if (workTimeHolidayWork.getWorkTimeCode() != null) {
 			workTimeRepository.findByCode(companyID, workTimeHolidayWork.getWorkTimeCode()).ifPresent(wkTime -> {

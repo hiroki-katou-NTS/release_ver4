@@ -32,6 +32,7 @@ import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsence;
 import nts.uk.ctx.at.request.dom.application.appabsence.HolidayAppType;
 import nts.uk.ctx.at.request.dom.application.appabsence.appforspecleave.AppForSpecLeave;
 import nts.uk.ctx.at.request.dom.application.appabsence.service.AbsenceServiceProcess;
+import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.before.DetailBeforeUpdate;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.RegisterAtApproveReflectionInfoService_New;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.after.NewAfterRegister_New;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.before.NewBeforeRegister_New;
@@ -94,6 +95,8 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 	private HdAppSetRepository repoHdAppSet;
 	@Inject
 	private OtherCommonAlgorithm otherCommonAlg;	
+	@Inject
+	private DetailBeforeUpdate detailBeforeUpdate;
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<CreatAppAbsenceCommand> context) {
 		CreatAppAbsenceCommand command = context.getCommand();
@@ -224,6 +227,9 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 //			}
 //		}
 		SpecHolidayCommand specHd = command.getSpecHd();
+		//勤務種類、就業時間帯チェックのメッセージを表示
+		this.detailBeforeUpdate.displayWorkingHourCheck(companyID, command.getWorkTypeCode(),
+				command.getWorkTimeCode());
 		//アルゴリズム「7-1_申請日の矛盾チェック」を実行する
 		if (isInsert) {
 			for (int i = 0; startDate.compareTo(endDate) + i <= 0; i++) {

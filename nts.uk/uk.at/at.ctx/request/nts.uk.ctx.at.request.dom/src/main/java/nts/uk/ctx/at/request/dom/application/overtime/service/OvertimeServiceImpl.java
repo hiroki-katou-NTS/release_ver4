@@ -14,6 +14,7 @@ import org.apache.logging.log4j.util.Strings;
 
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
+import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.request.dom.application.ApplicationApprovalService_New;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.UseAtr;
@@ -221,6 +222,7 @@ public class OvertimeServiceImpl implements OvertimeService {
 		WorkTypeOvertime workTypeOvertime = new  WorkTypeOvertime();
 		SiftType siftType = new SiftType();
 		if (baseDate != null) {
+			//実績の取得
 			AchievementOutput achievementOutput = collectAchievement.getAchievement(companyID, employeeID, baseDate);
 			if(Strings.isNotBlank(achievementOutput.getWorkType().getWorkTypeCode())){
 				workTypeAndSiftType.setWorkType(new WorkTypeOvertime(achievementOutput.getWorkType().getWorkTypeCode(), achievementOutput.getWorkType().getName()));
@@ -237,9 +239,11 @@ public class OvertimeServiceImpl implements OvertimeService {
 		Optional<WorkingConditionItem> personalLablorCodition = workingConditionItemRepository.getBySidAndStandardDate(employeeID,baseDate);
 		
 		if(!personalLablorCodition.isPresent() || personalLablorCodition.get().getWorkCategory().getWeekdayTime() == null){
+			//先頭の勤務種類を選択する
 			if(!CollectionUtil.isEmpty(workTypes)){
 				workTypeAndSiftType.setWorkType(workTypes.get(0));
 			}
+			//先頭の就業時間帯を選択する
 			if(!CollectionUtil.isEmpty(siftTypes)){
 				workTypeAndSiftType.setSiftType(siftTypes.get(0));
 			}
@@ -249,12 +253,14 @@ public class OvertimeServiceImpl implements OvertimeService {
 					.v().toString();
 			if(workTypes.stream().map(x -> x.getWorkTypeCode()).collect(Collectors.toList()).contains(wktypeCd)){
 				workTypeOvertime = workTypes.stream().filter(x -> x.getWorkTypeCode().equals(wktypeCd)).findAny().get();
+				//ドメインモデル「個人勤務日区分別勤務」．平日時．勤務種類コードを選択する
 				workTypeAndSiftType.setWorkType(workTypeOvertime);
 			} else {
+				//先頭の勤務種類を選択する
 				workTypeAndSiftType.setWorkType(workTypes.get(0));
 			}
 			
-			
+			//ドメインモデル「個人勤務日区分別勤務」．平日時．就業時間帯コードを選択する
 			String wkTimeCd = personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTimeCode().get()
 					.v().toString();
 			if(siftTypes.stream().map(x -> x.getSiftCode()).collect(Collectors.toList()).contains(wkTimeCd)){
@@ -264,17 +270,82 @@ public class OvertimeServiceImpl implements OvertimeService {
 				workTypeAndSiftType.setSiftType(siftTypes.get(0));
 			}
 		}
-		//休憩時間帯を取得する
+		
 		if (workTypeAndSiftType.getWorkType() != null && workTypeAndSiftType.getSiftType() != null) {
-			String workTypeCode = workTypeAndSiftType.getWorkType().getWorkTypeCode();
-			String siftCD = workTypeAndSiftType.getSiftType().getSiftCode();
+			//12.マスタ勤務種類、就業時間帯データをチェック
+			CheckWorkingInfoResult checkResult = checkWorkingInfo(companyID, workTypeAndSiftType.getWorkType().getWorkTypeCode(),workTypeAndSiftType.getSiftType().getSiftCode());
+			boolean wkTypeError = checkResult.isWkTypeError();
+			boolean wkTimeError = checkResult.isWkTimeError();
+			String workTypeCode = null;
+			String siftCD = null;
+			if (wkTypeError) {
+				// 先頭の勤務種類を選択する
+				workTypeAndSiftType.setWorkType(workTypes.get(0));
+			}
+
+			if (wkTimeError) {
+				// 先頭の就業時間帯を選択する
+				workTypeAndSiftType.setSiftType(siftTypes.get(0));
+			}
+				workTypeCode = workTypeAndSiftType.getWorkType().getWorkTypeCode();
+				siftCD = workTypeAndSiftType.getSiftType().getSiftCode();
+			
+			//休憩時間帯を取得する
+		
 			BreakTimeZoneSharedOutPut breakTime = getBreakTimes(companyID, workTypeCode, siftCD);
 			workTypeAndSiftType.setBreakTimes(breakTime.getLstTimezone());
 		}
 		return workTypeAndSiftType;
 	}
 	
-	
+	/**
+	 * 12.マスタ勤務種類、就業時間帯データをチェック
+	 * @param companyID
+	 * @param wkTypeCode
+	 * @param wkTimeCode
+	 * @return
+	 */
+	@Override
+	public CheckWorkingInfoResult checkWorkingInfo(String companyID, String wkTypeCode, String wkTimeCode) {
+		CheckWorkingInfoResult result = new CheckWorkingInfoResult();
+		
+		
+		// 「勤務種類CD ＝＝ Null」 をチェック
+		boolean isWkTypeCDNotEmpty = !StringUtil.isNullOrEmpty(wkTypeCode, true);
+		if (isWkTypeCDNotEmpty) {
+			String WkTypeName = null;
+			Optional<WorkType> wkTypeOpt = this.workTypeRepository.findByPK(companyID, wkTypeCode);
+			if (wkTypeOpt.isPresent()) {
+				WkTypeName = wkTypeOpt.get().getName().v();
+			}
+			// 「勤務種類名称を取得する」 ＝＝NULL をチェック
+			boolean isWkTypeNameEmpty = StringUtil.isNullOrEmpty(WkTypeName, true);
+			if (isWkTypeNameEmpty ) {
+				// 勤務種類エラーFlg ＝ True
+				result.setWkTypeError(true);
+			}
+		}
+		// 「就業時間帯CD ＝＝ NULL」をチェック
+		boolean isWkTimeCDNotEmpty = !StringUtil.isNullOrEmpty(wkTimeCode, true);
+		if (isWkTimeCDNotEmpty) {
+			// 「就業時間帯名称を取得する」＝＝ NULL をチェック
+			String WkTimeName = null;
+			Optional<WorkTimeSetting> wwktimeOpt = this.workTimeRepository.findByCode(companyID, wkTimeCode);
+			if (wwktimeOpt.isPresent()) {
+				WkTimeName = wwktimeOpt.get().getWorkTimeDisplayName().getWorkTimeName().v();
+			}
+			boolean isWkTimeNameEmpty = StringUtil.isNullOrEmpty(WkTimeName, true);
+			if (isWkTimeNameEmpty) {
+				// 就業時間帯エラーFlg ＝ True
+				result.setWkTimeError(true);
+			}
+		}
+			
+		
+		return result;
+	}
+
+
 	@Override
 	//休憩時間帯を取得する
 	public BreakTimeZoneSharedOutPut getBreakTimes(String companyID, String workTypeCode, String workTimeCode) {
