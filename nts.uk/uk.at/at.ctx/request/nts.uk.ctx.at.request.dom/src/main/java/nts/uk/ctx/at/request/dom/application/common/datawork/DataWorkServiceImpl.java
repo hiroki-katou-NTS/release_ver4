@@ -49,7 +49,7 @@ public class DataWorkServiceImpl implements IDataWorkService {
 	private WorkingConditionItemRepository workingConditionItemRepository;
 	@Inject
 	private PredetemineTimeSettingRepository predetemineTimeSettingRepository;
-	
+	@Inject
 	private OvertimeService overtimeService;
 
 	@Override
