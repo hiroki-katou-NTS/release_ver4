@@ -36,7 +36,7 @@ module nts.uk.at.view.kal003.a.tab {
             //
             self.category = ko.observable(model.CATEGORY.MONTHLY);
             
-            $("#fixed-table2").ntsFixedTable({ height: 200 });
+//            $("#fixed-table2").ntsFixedTable({ height: 200 });
             
             self.isAllCheckCondition = ko.pureComputed({
                 read: function () {

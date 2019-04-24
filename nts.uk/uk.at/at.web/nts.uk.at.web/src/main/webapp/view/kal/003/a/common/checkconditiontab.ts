@@ -65,9 +65,9 @@ module nts.uk.at.view.kal003.a.tab {
                 self.schedule4WeekCheckCondition(schedule4WeekCheckCondition);
             }
 
-            $("#check-condition-table").ntsFixedTable({ height: 300 });
+//            $("#check-condition-table").ntsFixedTable({ height: 300 });
             // MinhVV add
-            $("#check-condition-table_category9").ntsFixedTable({ height: 300 });
+//            $("#check-condition-table_category9").ntsFixedTable({ height: 300 });
 
             self.isAllCheckCondition = ko.pureComputed({
                 read: function() {
