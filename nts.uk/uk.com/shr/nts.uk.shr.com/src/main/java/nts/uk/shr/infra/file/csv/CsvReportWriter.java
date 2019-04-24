@@ -16,17 +16,24 @@ import lombok.SneakyThrows;
 public class CsvReportWriter {
 
 	private static final String COLUMN_SEPARATOR = ",";
-	private static final String DEFAULT_ENCODE = "Shift_JIS";
+	private static final String DEFAULT_ENCODE = "MS932";
 
 	private List<String> headers;
 
 	private OutputStream os;
 
 	private BufferedWriter writer;
+	
+	private String encode;
 
 	public CsvReportWriter(OutputStream os, List<String> headers) {
+		this(os, headers, DEFAULT_ENCODE);
+	}
+	
+	public CsvReportWriter(OutputStream os, List<String> headers, String encode) {
 		this.os = os;
-		this.writer = new BufferedWriter(new OutputStreamWriter(os, Charset.forName(DEFAULT_ENCODE)));
+		this.writer = new BufferedWriter(new OutputStreamWriter(os, Charset.forName(encode)));
+		this.encode = encode;
 		processNewHeaders(headers);
 	}
 
@@ -44,7 +51,11 @@ public class CsvReportWriter {
 		drawARecord(headers, writer, h -> getCellValueByColumn(line, h));
 	}
 
+	@SneakyThrows
 	private void drawHeader() {
+		if(this.encode.toLowerCase().equals("utf8") || this.encode.toLowerCase().equals("utf-8")){
+			writer.write('\uFEFF');
+		}
 		drawARecord(this.headers, writer, h -> h);
 	}
 
