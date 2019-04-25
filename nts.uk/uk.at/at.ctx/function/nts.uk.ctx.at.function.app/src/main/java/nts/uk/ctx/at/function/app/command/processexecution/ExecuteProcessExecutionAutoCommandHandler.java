@@ -2199,7 +2199,10 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				ErrorPresent.NO_ERROR, new ExecutionTime(now, now), ExecutionStatus.INCOMPLETE,
 				new ObjectPeriod(period.start(), period.end()));
 		executionLog.setReflectApprovalSetInfo(new SetInforReflAprResult(ExecutionContent.REFLRCT_APPROVAL_RESULT,
-				ExecutionType.NORMAL_EXECUTION, IdentifierUtil.randomUniqueId(), false));
+				processExecution.getProcessExecType() == ProcessExecType.NORMAL_EXECUTION
+						? ExecutionType.NORMAL_EXECUTION
+						: ExecutionType.RERUN,
+				IdentifierUtil.randomUniqueId(), false));
 		this.executionLogRepository.addExecutionLog(executionLog);
 		// ドメインモデル「更新処理自動実行ログ」を更新する
 		if (ProcessExecutionLog.getEachProcPeriod() != null && ProcessExecutionLog.getEachProcPeriod().isPresent()) {
