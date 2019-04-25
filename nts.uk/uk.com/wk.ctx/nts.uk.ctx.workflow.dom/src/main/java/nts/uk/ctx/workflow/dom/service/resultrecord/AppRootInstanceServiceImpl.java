@@ -758,7 +758,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 				// 対象日の承認ルート中間データを取得する
 				AppRootInstance appRootInstance = this.getAppRootInstanceByDate(loopDate, appRootInstanceLst);
 				if(appRootInstance==null){
-					throw new BusinessException("Msg_1430", "承認者");
+					continue;
 				}
 				ApprovalRouteDetails approvalRouteDetails = agentRouteLst.stream().filter(x -> x.getAppRootInstance().getRootID().equals(appRootInstance.getRootID())).findAny().get();
 				// ループする日は代行期間内かチェックする
