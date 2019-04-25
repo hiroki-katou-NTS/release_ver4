@@ -32,7 +32,6 @@ import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalFrame;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalPhaseState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApproverState;
-import nts.uk.ctx.workflow.dom.approverstatemanagement.DailyConfirmAtr;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.RootType;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmQueryRepository;
@@ -801,7 +800,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 		agentRouteLst.forEach(route -> {
 			// output「ルート状況」に同じ日、同じ対象者は存在するかチェックする
 			Optional<RouteSituation> opRouteSituation = routeSituationLst.stream().filter(x -> 
-				(x.getEmployeeID()==route.getEmployeeID())&&(x.getDate().equals(route.getDate()))).findAny();
+				(x.getEmployeeID().equals(route.getEmployeeID()))&&(x.getDate().equals(route.getDate()))).findAny();
 			if(opRouteSituation.isPresent()){
 				RouteSituation routeSituation = opRouteSituation.get();
 				// ループ中の「ルート状況」．基準社員の承認アクションをチェックする
