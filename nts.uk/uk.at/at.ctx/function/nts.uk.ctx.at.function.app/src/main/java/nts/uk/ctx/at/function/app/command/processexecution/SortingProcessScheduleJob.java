@@ -5,7 +5,10 @@ import javax.inject.Inject;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import nts.arc.scoped.request.thread.ThreadRequestContextHolder;
+import nts.arc.scoped.session.thread.ThreadSessionContextHolder;
 import nts.arc.time.GeneralDateTime;
+import nts.gul.serialize.ObjectSerializer;
 import nts.gul.web.communicate.typedapi.FailureCause;
 import nts.uk.ctx.at.function.dom.processexecution.repository.ExecutionTaskSettingRepository;
 import nts.uk.shr.com.communicate.PathToWebApi;
@@ -47,14 +50,22 @@ public class SortingProcessScheduleJob extends UkScheduledJob {
 				.flatMap(id -> this.scheduler.getNextFireTime(id))
 				.orElse(null);
 		s.setNextDate(nextFireTime);
-
+		
 		if (this.batchServer.exists()) {
+			
+			String session = ObjectSerializer.toBase64(ThreadSessionContextHolder.instance().get());
+			String request = ObjectSerializer.toBase64(ThreadRequestContextHolder.instance().get());
+			ScheduleExecuteCommand.ForBatchServer cmd = new ScheduleExecuteCommand.ForBatchServer();
+			cmd.setCommand(s);
+			cmd.setContexts(session + "\t" + request);
+			
 			log.info("Sent a request SortingProcessCommandHandler to Batch Server");
 			val webApi = this.batchServer.webApi(PathToWebApi.at("/batch/sorting/process"),
-					ScheduleExecuteCommand.class);
+					ScheduleExecuteCommand.ForBatchServer.class);
+			
 			this.batchServer.request(
 					webApi,
-					c -> c.entity(s).failed(f -> requestError(f)));
+					c -> c.entity(cmd).failed(f -> requestError(f)));
 		} else {
 			log.info("SortingProcessCommandHandler is executed on AP Server");
 			this.sortingProcessCommandHandler.handle(s);
