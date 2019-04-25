@@ -94,6 +94,8 @@ public class JpaWorkplaceManagerRepository extends JpaRepository implements Work
 	public List<WorkplaceManager> findByWkpDateAndManager(String wkpID, GeneralDate baseDate,
 			List<String> wkpManagerIDLst) {
 		List<WorkplaceManager> resultList = new ArrayList<>();
+		if(wkpManagerIDLst.isEmpty())
+			return resultList;
 		CollectionUtil.split(wkpManagerIDLst, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			resultList.addAll(this.queryProxy().query(FIND_BY_WKP_DATE_MANAGER, SacmtWorkplaceManager.class)
 				.setParameter("workplaceId", wkpID)

@@ -197,6 +197,9 @@ public class JpaRoleSetRepository extends JpaRepository implements RoleSetReposi
 	@Override
 	public List<RoleSet> findByCIDAndEmpRoleLst(String companyID, List<String> empRoleLst) {
 		List<RoleSet> resultList = new ArrayList<>();
+		if(empRoleLst.isEmpty())
+			return resultList;
+		
 		CollectionUtil.split(empRoleLst, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			resultList.addAll(this.queryProxy().query(FIND_BY_CID_ROLES ,SacmtRoleSet.class)
 				.setParameter("companyID", companyID)
