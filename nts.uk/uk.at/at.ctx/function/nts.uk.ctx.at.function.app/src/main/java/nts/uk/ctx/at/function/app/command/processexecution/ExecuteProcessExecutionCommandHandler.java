@@ -80,6 +80,8 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDail
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultEmployeeDomainService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.DailyCalculationEmployeeService;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.MonthlyAggregationEmployeeService;
+import nts.uk.ctx.at.record.dom.workrecord.actualsituation.createapproval.dailyperformance.AppDataInfoDaily;
+import nts.uk.ctx.at.record.dom.workrecord.actualsituation.createapproval.dailyperformance.AppDataInfoDailyRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.CalExeSettingInfor;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLog;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
@@ -447,6 +449,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		this.lastExecDateTimeRepo.update(lastExecDateTime);
 	}
 
+	@Inject
+	private AppDataInfoDailyRepository appDataInfoDailyRepo;
 	/**
 	 * 各処理を実行する
 	 * 
@@ -542,6 +546,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.APP_ROUTE_U_MON, EndStatus.NOT_IMPLEMENT);
 			return true;
 		}
+		
 		// 承認ルート更新（日次）
 		this.appRouteUpdateDailyService.checkAppRouteUpdateDaily(execId, procExec, procExecLog);
 		// 承認ルート更新（月次）
@@ -2936,7 +2941,11 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			outputExecAlarmListPro = this.execAlarmListProcessingService.execAlarmListProcessing(
 					extraProcessStatusID, companyId, workplaceIdList, listPatternCode, GeneralDateTime.now(),
 					sendMailPerson, sendMailAdmin,
-					!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent()?"":processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v());
+					!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent() ? ""
+							: processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v(),
+							execId);
+			if(outputExecAlarmListPro.isCheckStop())
+				return true;
 		} catch (Exception e) {
 			//各処理の後のログ更新処理
 			checkException = true;
@@ -2978,7 +2987,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				param.setExistenceError(0);
 				// アルゴリズム「実行ログ登録」を実行する 2290
 				executionLogAdapterFn.updateExecuteLog(param);
-				return true;
+				return false;
 			}
 		}
 		// IF :FALSE

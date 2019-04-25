@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.function.app.command.processexecution;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -109,6 +110,7 @@ public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler
 		・全体のエラー詳細　＝　「更新処理自動実行管理」.全体のエラー詳細
 		・各処理の期間　＝　「更新処理自動実行ログ」.各処理の期間
 		*/
+		procExecLog.getTaskLogList().stream().sorted((x,y)->x.getProcExecTask().value-y.getProcExecTask().value).collect(Collectors.toList());
 		ProcessExecutionLogHistory processExecutionLogHistory = new ProcessExecutionLogHistory(
 				new ExecutionCode(execItemCd), 
 				companyId, 
@@ -209,22 +211,20 @@ public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler
 		 * 【更新内容】
 		 * 就業計算と集計実行ログ．実行状況 ← 中断終了
 		 */
-		this.interupt(execId, ExeStateOfCalAndSum.END_INTERRUPTION.value);
+//		this.interupt(execId, ExeStateOfCalAndSum.END_INTERRUPTION.value);
 		
 		//ドメインモデル「更新処理自動実行ログ履歴」を更新する
 		for(ExecutionTaskLog task : processExecutionLogHistory.getTaskLogList()) {
-			if (task.getProcExecTask() != ProcessExecutionTask.APP_ROUTE_U_DAI && 
-					task.getProcExecTask() != ProcessExecutionTask.APP_ROUTE_U_MON) {
-				if(task.getStatus() == null) {
-					if(task.getProcExecTask() == statusStop) {
-						task.setStatus(Optional.of(EndStatus.NOT_IMPLEMENT));
-					}else {
-						task.setStatus(Optional.of(EndStatus.FORCE_END));
+			if(task.getStatus() == null || !task.getStatus().isPresent()) {
+				if(task.getProcExecTask() == statusStop) {
+					task.setStatus(Optional.of(EndStatus.FORCE_END));
+					for(ExecutionTaskLog taskAfter  : processExecutionLogHistory.getTaskLogList()) {
+						if(taskAfter.getProcExecTask().value >task.getProcExecTask().value) {
+							taskAfter.setStatus(Optional.of(EndStatus.NOT_IMPLEMENT));
+						}
 					}
-				}
-			}else {
-				if(task.getStatus() == null) {
-					task.setStatus(Optional.of(EndStatus.NOT_IMPLEMENT));
+					
+					break;
 				}
 			}
 		}

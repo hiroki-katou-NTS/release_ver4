@@ -70,7 +70,6 @@ import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionLo
 import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionRepository;
 import nts.uk.ctx.at.function.dom.processexecution.tasksetting.ExecutionTaskSetting;
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
-import nts.uk.ctx.at.record.dom.adapter.company.StatusOfEmployeeExport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployeeHistory;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.repository.BusinessTypeEmpOfHistoryRepository;
@@ -2879,7 +2878,11 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			outputExecAlarmListPro = this.execAlarmListProcessingService.execAlarmListProcessing(
 					extraProcessStatusID, companyId, workplaceIdList, listPatternCode, GeneralDateTime.now(),
 					sendMailPerson, sendMailAdmin,
-					!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent()?"":processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v());
+					!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent() ? ""
+							: processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v(),
+					execId);
+			if(outputExecAlarmListPro.isCheckStop())
+				return true;
 		} catch (Exception e) {
 			//各処理の後のログ更新処理
 			checkException = true;

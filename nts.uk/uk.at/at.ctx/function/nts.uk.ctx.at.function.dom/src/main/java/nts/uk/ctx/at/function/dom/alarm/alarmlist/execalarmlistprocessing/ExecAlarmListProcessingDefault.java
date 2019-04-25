@@ -19,6 +19,8 @@ import nts.uk.ctx.at.function.dom.adapter.RegulationInfoEmployeeAdapterImport;
 import nts.uk.ctx.at.function.dom.adapter.annualworkschedule.EmployeeInformationAdapter;
 import nts.uk.ctx.at.function.dom.adapter.annualworkschedule.EmployeeInformationImport;
 import nts.uk.ctx.at.function.dom.adapter.annualworkschedule.EmployeeInformationQueryDtoImport;
+import nts.uk.ctx.at.function.dom.adapter.dailymonthlyprocessing.DailyMonthlyprocessAdapterFn;
+import nts.uk.ctx.at.function.dom.adapter.dailymonthlyprocessing.ExeStateOfCalAndSumImportFn;
 import nts.uk.ctx.at.function.dom.adapter.employeebasic.SyEmployeeFnAdapter;
 import nts.uk.ctx.at.function.dom.alarm.AlarmCategory;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.EmployeeSearchDto;
@@ -69,11 +71,14 @@ public class ExecAlarmListProcessingDefault implements ExecAlarmListProcessingSe
 
 	@Inject
 	private SendAutoExeEmailService sendAutoExeEmailService;
+	
+	@Inject
+	private DailyMonthlyprocessAdapterFn dailyMonthlyprocessAdapterFn;
 
 	@Override
 	public OutputExecAlarmListPro execAlarmListProcessing(String extraProcessStatusID, String companyId,
 			List<String> workplaceIdList, List<String> listPatternCode, GeneralDateTime dateTime,
-			boolean sendMailPerson, boolean sendMailAdmin,String alarmCode) {
+			boolean sendMailPerson, boolean sendMailAdmin,String alarmCode,String empCalAndSumExecLogID) {
 		String errorMessage = "";
 		// ドメインモデル「アラームリスト抽出処理状況」を取得する
 		// TODO : ・状態＝処理中???
@@ -88,7 +93,7 @@ public class ExecAlarmListProcessingDefault implements ExecAlarmListProcessingSe
 			alarmListExtraProcessStatusRepo.addAlListExtaProcess(alarm);
 			// エラー内容にエラーメッセージ(#Msg_1432)を設定する
 			errorMessage = TextResource.localize("Msg_1432");
-			return new OutputExecAlarmListPro(false, errorMessage);
+			return new OutputExecAlarmListPro(false, errorMessage,false);
 
 		}
 
@@ -207,8 +212,13 @@ public class ExecAlarmListProcessingDefault implements ExecAlarmListProcessingSe
 				ExtractedAlarmDto extractedAlarmDto = extractAlarmListService.extractAlarm(listEmployeeSearch,
 						patternCode, listPeriodByCategory);
 				listExtractedAlarmDto.add(extractedAlarmDto);
-				// メールを送信する
-				// TODO : Chờ bên 2nf chuyển hàm từ app về dom
+				
+				//ドメインモデル「更新処理自動実行ログ」を取得しチェックする（中断されている場合は更新されているため、最新の情報を取得する）
+				Optional<ExeStateOfCalAndSumImportFn> exeStateOfCalAndSumImportFn = dailyMonthlyprocessAdapterFn.executionStatus(empCalAndSumExecLogID);
+				if(exeStateOfCalAndSumImportFn.isPresent())
+					if(exeStateOfCalAndSumImportFn.get() == ExeStateOfCalAndSumImportFn.START_INTERRUPTION) {
+						return new OutputExecAlarmListPro(true, errorMessage,true);
+					}
 			} // end for listpattencode
 
 		} // end list employmentcode
@@ -224,17 +234,17 @@ public class ExecAlarmListProcessingDefault implements ExecAlarmListProcessingSe
 				alarmListExtra.setStatus(ExtractionState.ABNORMAL_TERMI);
 				alarmListExtraProcessStatusRepo.updateAlListExtaProcess(alarmListExtra);
 				errorMessage = TextResource.localize(outputSendAutoExe.get().getErrorMessage());
-				return new OutputExecAlarmListPro(false, errorMessage);
+				return new OutputExecAlarmListPro(false, errorMessage,false);
 			}else {
 				alarmListExtra.setStatus(ExtractionState.SUCCESSFUL_COMPLE);
 				alarmListExtraProcessStatusRepo.updateAlListExtaProcess(alarmListExtra);
 				errorMessage = TextResource.localize(outputSendAutoExe.get().getErrorMessage());
-				return new OutputExecAlarmListPro(true, errorMessage);
+				return new OutputExecAlarmListPro(true, errorMessage,false);
 			}
 		}
 		alarmListExtra.setStatus(ExtractionState.SUCCESSFUL_COMPLE);
 		alarmListExtraProcessStatusRepo.updateAlListExtaProcess(alarmListExtra);
-		return new OutputExecAlarmListPro(true, errorMessage);
+		return new OutputExecAlarmListPro(true, errorMessage,false);
 	}
 
 	private EmployeeSearchDto convertToImport(RegulationInfoEmployeeAdapterDto employeeInfo) {
