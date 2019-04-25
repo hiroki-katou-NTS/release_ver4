@@ -320,7 +320,7 @@ public class AggregateMonthlyRecordServiceProc {
 			
 			// 残数処理
 			// こちらはDB書き込みをしているので非同期化できない
-			this.remainingProcess(monthPeriod);
+			this.remainingProcess(monthPeriod, datePeriod);
 	
 			// 非同期実行中の集計処理と待ち合わせ
 			try {
@@ -469,14 +469,28 @@ public class AggregateMonthlyRecordServiceProc {
 
 	/**
 	 * 残数処理
-	 * @param monthPeriod
+	 * @param monthPeriod 1か月の集計期間
+	 * @param datePeriod 期間（実行機関）
 	 */
-	private void remainingProcess(DatePeriod monthPeriod) {
+	private void remainingProcess(DatePeriod monthPeriod, DatePeriod datePeriod) {
 		
 		ConcurrentStopwatches.start("12400:残数処理：");
 		
+		// 当月の判断
+		boolean isCurrentMonth = false;
+		if (this.companySets.getCurrentMonthPeriodMap().containsKey(this.closureId.value)) {
+			DatePeriod currentPeriod = this.companySets.getCurrentMonthPeriodMap().get(this.closureId.value);
+			// 当月の締め期間と実行期間を比較し、重複した期間を取り出す
+			DatePeriod confPeriod = this.confirmProcPeriod(currentPeriod, datePeriod);
+			// 重複期間があれば、当月
+			if (confPeriod != null) isCurrentMonth = true;
+		}
+		
+		// 2019.4.25 UPD shuichi_ishida Redmine#107271(1)(EA.3359) 残数処理を実行する当月判断方法を変更
 		// 集計開始日を締め開始日をする時だけ、残数処理を実行する　（集計期間の初月（＝締めの当月）だけ実行する）
-		if (this.employeeSets.isNoCheckStartDate()){
+		//if (this.employeeSets.isNoCheckStartDate()){
+		// 実行期間が当月の締め期間に含まれる時だけ、残数処理を実行する
+		if (isCurrentMonth){
 			
 			// 残数処理
 			this.remainingProcess(monthPeriod, InterimRemainMngMode.MONTHLY, true);
