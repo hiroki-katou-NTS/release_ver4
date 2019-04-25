@@ -291,7 +291,7 @@ public class DailyAggregationProcessService {
 				if (!erals.isEmpty()) {
 					for (ValueExtractAlarm tmp : erals) {
 						no6.stream().forEach(c -> {
-							listValueExtractAlarm.add(new ValueExtractAlarm(tmp.getWorkplaceID().orElse(null), tmp.getEmployeeID(), tmp.getAlarmValueDate(), 
+							listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), tmp.getEmployeeID(), tmp.getAlarmValueDate(), 
 																			tmp.getClassification(), tmp.getAlarmItem(), tmp.getAlarmValueMessage(), c.getMessage()));
 						});	
 					}
