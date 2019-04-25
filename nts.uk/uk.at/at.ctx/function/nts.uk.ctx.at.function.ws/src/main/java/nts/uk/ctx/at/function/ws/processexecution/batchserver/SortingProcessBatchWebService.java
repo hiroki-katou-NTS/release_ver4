@@ -5,11 +5,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import lombok.extern.slf4j.Slf4j;
 import nts.uk.ctx.at.function.app.command.processexecution.ScheduleExecuteCommand;
 import nts.uk.ctx.at.function.app.command.processexecution.SortingProcessCommandHandler;
 
 @Path("batch/sorting")
 @Produces("application/json")
+@Slf4j
 public class SortingProcessBatchWebService {
 
 	@Inject
@@ -18,7 +20,7 @@ public class SortingProcessBatchWebService {
 	@POST
 	@Path("process")
 	public void processSort(ScheduleExecuteCommand command) {
-		System.out.println("SortingProcessCommandHandler is executed on Batch Server");
+		log.info("SortingProcessCommandHandler is executed on Batch Server");
 		this.sortingProcessCommandHandler.handle(command);
 	}
 	

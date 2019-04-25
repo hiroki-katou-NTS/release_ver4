@@ -133,7 +133,6 @@ import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.context.LoginUserContext;
 import nts.uk.shr.com.history.DateHistoryItem;
 import nts.uk.shr.com.i18n.TextResource;
-import nts.uk.shr.com.task.schedule.UkJobScheduler;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
@@ -201,8 +200,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	private DailyCalculationEmployeeService dailyCalculationEmployeeService;
 	@Inject
 	private SyCompanyRecordAdapter syCompanyRecordAdapter;
-	@Inject
-	private UkJobScheduler scheduler;
 	@Inject
 	private WorkplaceWorkRecordAdapter workplaceWorkRecordAdapter;
 
@@ -351,12 +348,12 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		processExecutionLogManage = this.processExecLogManaRepo.getLogByCIdAndExecCd(companyId, execItemCd).get();
 		// アルゴリズム「自動実行登録処理」を実行する
 		this.updateDomains(execItemCd, execType, companyId, execId, execSetting, procExecLog, lastExecDateTime,
-				processExecutionLogManage);
+				processExecutionLogManage, command.getNextFireTime());
 	}
 
 	private void updateDomains(String execItemCd, int execType, String companyId, String execId,
 			ExecutionTaskSetting execSetting, ProcessExecutionLog procExecLog, LastExecDateTime lastExecDateTime,
-			ProcessExecutionLogManage processExecutionLogManage) {
+			ProcessExecutionLogManage processExecutionLogManage, Optional<GeneralDateTime> nextFireTime) {
 
 		// ドメインモデル「更新処理自動実行ログ履歴」を取得する
 		Optional<ProcessExecutionLogHistory> processExecutionLogHistory = procExecLogHistRepo.getByExecId(companyId,
@@ -430,9 +427,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		 * 次回実行日時 ＝ 次回実行日時を作成する。 ※補足資料⑤参照
 		 */
 		if (execSetting != null) {
-			// execSetting.setNextExecDateTime();
-			String scheduleId = execSetting.getScheduleId();
-			Optional<GeneralDateTime> nextFireTime = this.scheduler.getNextFireTime(scheduleId);
 			execSetting.setNextExecDateTime(nextFireTime);
 			this.execSettingRepo.update(execSetting);
 		}
