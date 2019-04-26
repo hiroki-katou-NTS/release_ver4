@@ -2171,6 +2171,12 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			crtEndDate = today;
 			calStartDate = lastExecDate;
 			calEndDate = today;
+			if(lastDateTimeOpt.isPresent()) {
+				if(lastDateTimeOpt.get().getLastExecDateTime() == null) {
+					crtStartDate = GeneralDate.ymd(currentMonth.getProcessingYm().year(), currentMonth.getProcessingYm().month(), 1);
+					calStartDate = GeneralDate.ymd(currentMonth.getProcessingYm().year(), currentMonth.getProcessingYm().month(), 1);
+				}
+			}
 			break;
 		case SECOND_OPT:
 			crtStartDate = lastExecDate;
