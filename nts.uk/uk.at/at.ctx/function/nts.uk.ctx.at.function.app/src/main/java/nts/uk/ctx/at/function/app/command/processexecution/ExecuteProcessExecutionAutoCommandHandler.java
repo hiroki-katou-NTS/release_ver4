@@ -2068,7 +2068,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				year = year + 1;
 			}
 			//個人スケジュール作成期間の月日を計算する
-			endDate = GeneralDate.ymd(year, creationPeriod.getStartMonthDay().get().getMonth(), creationPeriod.getStartMonthDay().get().getDay());
+			endDate = GeneralDate.ymd(year, creationPeriod.getEndMonthDay().get().getMonth(), creationPeriod.getEndMonthDay().get().getDay());
 			if(endDate.before(startDate)) {
 				endDate = endDate.addYears(1);
 			}
