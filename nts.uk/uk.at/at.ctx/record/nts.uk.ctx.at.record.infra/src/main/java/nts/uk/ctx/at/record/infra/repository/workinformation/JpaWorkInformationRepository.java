@@ -498,12 +498,12 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 		String subIn = NtsStatement.In.createParamsString(subList);
 
 		Map<String, Map<GeneralDate, List<ScheduleTimeSheet>>> scheTimes = new HashMap<>(); 
-		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_WORK_SCHEDULE_TIME WHERE YMD >= ? AND YMD <= ? AND SID IN (" + subIn + ")")){
-			stmt.setDate(1, Date.valueOf(datePeriod.start().localDate()));
-			stmt.setDate(2, Date.valueOf(datePeriod.end().localDate()));
+		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_WORK_SCHEDULE_TIME WHERE SID IN (" + subIn + ") AND YMD >= ? AND YMD <= ?")){
 			for (int i = 0; i < subList.size(); i++) {
-				stmt.setString(i + 3, subList.get(i));
+				stmt.setString(i + 1, subList.get(i));
 			}
+			stmt.setDate(1 + subList.size(), Date.valueOf(datePeriod.start().localDate()));
+			stmt.setDate(2 + subList.size(), Date.valueOf(datePeriod.end().localDate()));
 			new NtsResultSet(stmt.executeQuery()).getList(c -> {
 				String sid = c.getString("SID");
 				GeneralDate ymd = c.getGeneralDate("YMD");
@@ -518,12 +518,12 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 				return null;
 			});
 		};
-		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_DAI_PER_WORK_INFO WHERE YMD >= ? AND YMD <= ? AND SID IN (" + subIn + ")")){
-			stmt.setDate(1, Date.valueOf(datePeriod.start().localDate()));
-			stmt.setDate(2, Date.valueOf(datePeriod.end().localDate()));
+		try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_DAI_PER_WORK_INFO WHERE SID IN (" + subIn + ") AND YMD >= ? AND YMD <= ?")){
 			for (int i = 0; i < subList.size(); i++) {
-				stmt.setString(i + 3, subList.get(i));
+				stmt.setString(i + 1, subList.get(i));
 			}
+			stmt.setDate(1 + subList.size(), Date.valueOf(datePeriod.start().localDate()));
+			stmt.setDate(2 + subList.size(), Date.valueOf(datePeriod.end().localDate()));
 			return new NtsResultSet(stmt.executeQuery()).getList(c -> {
 				Integer calcState = c.getInt("CALCULATION_STATE"), goStraight = c.getInt("GO_STRAIGHT_ATR"), 
 						backStraight = c.getInt("BACK_STRAIGHT_ATR"), dayOfWeek = c.getInt("DAY_OF_WEEK");
