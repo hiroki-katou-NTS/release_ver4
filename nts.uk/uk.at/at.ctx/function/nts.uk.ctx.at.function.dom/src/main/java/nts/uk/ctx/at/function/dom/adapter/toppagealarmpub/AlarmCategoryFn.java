@@ -16,7 +16,11 @@ public enum AlarmCategoryFn {
 	/** 月別実績の集計 */
 	AGGREGATE_RESULT_MONTH(5),
 	/** アラームリスト（個人別） */
-	ALARM_LIST_PERSONAL(6);
+	ALARM_LIST_PERSONAL(6),
+	/** 承認中間データ作成（日別実績） */
+	APPROVAL_DAILY(7),
+	/** 承認中間データ作成（月別実績） */
+	APPROVAL_MONTHLY(8);
 	public final int value;
 	private AlarmCategoryFn(int type){
 		this.value = type;

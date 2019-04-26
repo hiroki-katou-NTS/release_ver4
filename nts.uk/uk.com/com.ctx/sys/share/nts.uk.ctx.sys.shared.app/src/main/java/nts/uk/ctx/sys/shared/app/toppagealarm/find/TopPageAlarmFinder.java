@@ -69,6 +69,20 @@ public class TopPageAlarmFinder {
 						item.getExistenceError().value == 1 ? TextResource.localize("Msg_1252", size.toString()) : TextResource.localize("Msg_1253"));
 				listDto.add(dto);
 				break;
+			case APPROVAL_DAILY:
+				dto = new TopPageAlarmDto(item.getExecutionLogId(), item.getFinishDateTime(),
+						item.getExecutionContent().value, item.getExistenceError().value == 1 ? true : false, item.getRogerFlag().value ==  1 ? true : false,
+						TextResource.localize("Msg_1404"), 
+						item.getExistenceError().value == 1 ? TextResource.localize("Msg_1252", size.toString()) : TextResource.localize("Msg_1253"));
+				listDto.add(dto);
+				break;
+			case APPROVAL_MONTHLY:
+				dto = new TopPageAlarmDto(item.getExecutionLogId(), item.getFinishDateTime(),
+						item.getExecutionContent().value, item.getExistenceError().value == 1 ? true : false, item.getRogerFlag().value ==  1 ? true : false,
+						TextResource.localize("Msg_1405"), 
+						item.getExistenceError().value == 1 ? TextResource.localize("Msg_1252", size.toString()) : TextResource.localize("Msg_1253"));
+				listDto.add(dto);
+				break;
 			default:
 				break;
 			}
@@ -127,6 +141,20 @@ public class TopPageAlarmFinder {
 				dto = new TopPageAlarmDto(item.getExecutionLogId(), item.getFinishDateTime(),
 						item.getExecutionContent().value, item.getExistenceError().value == 1 ? true : false, item.getRogerFlag().value ==  1 ? true : false,
 						TextResource.localize("Msg_1326"), 
+						item.getExistenceError().value == 1 ? TextResource.localize("Msg_1252", size.toString()) : TextResource.localize("Msg_1253"));
+				listDto.add(dto);
+				break;
+			case APPROVAL_DAILY:
+				dto = new TopPageAlarmDto(item.getExecutionLogId(), item.getFinishDateTime(),
+						item.getExecutionContent().value, item.getExistenceError().value == 1 ? true : false, item.getRogerFlag().value ==  1 ? true : false,
+						TextResource.localize("Msg_1404"), 
+						item.getExistenceError().value == 1 ? TextResource.localize("Msg_1252", size.toString()) : TextResource.localize("Msg_1253"));
+				listDto.add(dto);
+				break;
+			case APPROVAL_MONTHLY:
+				dto = new TopPageAlarmDto(item.getExecutionLogId(), item.getFinishDateTime(),
+						item.getExecutionContent().value, item.getExistenceError().value == 1 ? true : false, item.getRogerFlag().value ==  1 ? true : false,
+						TextResource.localize("Msg_1405"), 
 						item.getExistenceError().value == 1 ? TextResource.localize("Msg_1252", size.toString()) : TextResource.localize("Msg_1253"));
 				listDto.add(dto);
 				break;

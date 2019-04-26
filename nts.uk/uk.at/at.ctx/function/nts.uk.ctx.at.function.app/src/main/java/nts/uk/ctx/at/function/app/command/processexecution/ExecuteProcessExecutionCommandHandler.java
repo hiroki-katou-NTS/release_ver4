@@ -82,6 +82,8 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.DailyCalculationEmployeeServic
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.MonthlyAggregationEmployeeService;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.createapproval.dailyperformance.AppDataInfoDaily;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.createapproval.dailyperformance.AppDataInfoDailyRepository;
+import nts.uk.ctx.at.record.dom.workrecord.actualsituation.createapproval.monthlyperformance.AppDataInfoMonthly;
+import nts.uk.ctx.at.record.dom.workrecord.actualsituation.createapproval.monthlyperformance.AppDataInfoMonthlyRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.CalExeSettingInfor;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLog;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
@@ -451,6 +453,9 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 
 	@Inject
 	private AppDataInfoDailyRepository appDataInfoDailyRepo;
+	
+	@Inject
+	private AppDataInfoMonthlyRepository appDataInfoMonthlyRepo;
 	/**
 	 * 各処理を実行する
 	 * 
@@ -546,12 +551,162 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.APP_ROUTE_U_MON, EndStatus.NOT_IMPLEMENT);
 			return true;
 		}
+		// 就業担当者の社員ID（List）を取得する : RQ526
+		List<String> listManagementId = employeeManageAdapter.getListEmpID(companyId, GeneralDate.today());
+		List<ExecutionTaskLog> taskLogLists = procExecLog.getTaskLogList();
+		// ドメインモデル「更新処理自動実行ログ」を取得しチェックする（中断されている場合は更新されているため、最新の情報を取得する）
+				Optional<ProcessExecutionLog> processExecutionLog = procExecLogRepo.getLogByCIdAndExecCd(companyId,
+						context.getCommand().getExecItemCd(), execId);
+				
+		boolean checkErrAppDaily = false;
+		try {
+			// 承認ルート更新（日次）
+			this.appRouteUpdateDailyService.checkAppRouteUpdateDaily(execId, procExec, procExecLog);
+		} catch (Exception e) {
+			checkErrAppDaily = true;
+		}
 		
-		// 承認ルート更新（日次）
-		this.appRouteUpdateDailyService.checkAppRouteUpdateDaily(execId, procExec, procExecLog);
-		// 承認ルート更新（月次）
-		this.appRouteUpdateMonthlyService.checkAppRouteUpdateMonthly(execId, procExec, procExecLog);
 
+		List<AppDataInfoDaily> listErrorApprovalDaily = appDataInfoDailyRepo.getAppDataInfoDailyByExeID(execId);
+		if (!listErrorApprovalDaily.isEmpty()) {
+			checkErrAppDaily = true;
+		}
+		
+
+		ExecutionLogImportFn paramDaily = new ExecutionLogImportFn();
+		List<ExecutionLogErrorDetailFn> listErrorAndEmpIdDaily = new ArrayList<>();
+		// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
+		paramDaily.setCompanyId(companyId);
+		// 管理社員ID ＝
+		paramDaily.setManagerId(listManagementId);
+		// 実行完了日時 ＝ システム日時
+		paramDaily.setFinishDateTime(GeneralDateTime.now());
+
+		// 実行内容 ＝ スケジュール作成
+		paramDaily.setExecutionContent(AlarmCategoryFn.APPROVAL_DAILY);
+		// ドメインモデル「エラーメッセージ情報」を取得する
+		if (!checkErrAppDaily) {
+			if (processExecutionLog.isPresent()) {
+				// ドメインモデル「更新処理自動実行ログ」を更新する
+				for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
+					ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
+					if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.APP_ROUTE_U_DAI.value) {
+						executionTaskLog.setStatus(Optional.ofNullable(EndStatus.SUCCESS));
+						this.procExecLogRepo.update(procExecLog);
+					}
+				}
+				paramDaily.setTargerEmployee(Collections.emptyList());
+				paramDaily.setExistenceError(0);
+				// アルゴリズム「実行ログ登録」を実行する 2290
+				executionLogAdapterFn.updateExecuteLog(paramDaily);
+			}
+		} else {
+			if (processExecutionLog.isPresent()) {
+				// ドメインモデル「更新処理自動実行ログ」を更新する
+				for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
+					ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
+					if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.APP_ROUTE_U_DAI.value) {
+						executionTaskLog.setStatus(Optional.ofNullable(EndStatus.ABNORMAL_END));
+						this.procExecLogRepo.update(procExecLog);
+					}
+				}
+				// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
+				paramDaily.setCompanyId(companyId);
+				// 管理社員ID ＝
+				paramDaily.setManagerId(listManagementId);
+				// エラーの有無 ＝ エラーあり
+				paramDaily.setExistenceError(1);
+				// 実行内容 ＝ 月別実績の集計
+				paramDaily.setExecutionContent(AlarmCategoryFn.APPROVAL_DAILY);
+				if (listErrorApprovalDaily.isEmpty()) {
+					for (String managementId : listManagementId) {
+						listErrorAndEmpIdDaily
+								.add(new ExecutionLogErrorDetailFn(TextResource.localize("Msg_1339"), managementId));
+					}
+				} else {
+					for (AppDataInfoDaily appDataInfoDaily : listErrorApprovalDaily) {
+						listErrorAndEmpIdDaily.add(new ExecutionLogErrorDetailFn(appDataInfoDaily.getErrorMessage().v(),
+								appDataInfoDaily.getEmployeeId()));
+					}
+				}
+				// アルゴリズム「実行ログ登録」を実行する 2290
+				executionLogAdapterFn.updateExecuteLog(paramDaily);
+			}
+		}
+		
+		boolean checkErrAppMonth = false;
+		try {
+			// 承認ルート更新（月次）
+			this.appRouteUpdateMonthlyService.checkAppRouteUpdateMonthly(execId, procExec, procExecLog);
+		} catch (Exception e) {
+			checkErrAppMonth = true;
+		}
+
+		List<AppDataInfoMonthly> listErrorApprovalMonthly = appDataInfoMonthlyRepo.getAppDataInfoMonthlyByExeID(execId);
+		if (!listErrorApprovalDaily.isEmpty()) {
+			checkErrAppMonth = true;
+		}
+
+		ExecutionLogImportFn paramMonthly = new ExecutionLogImportFn();
+		List<ExecutionLogErrorDetailFn> listErrorAndEmpIdMonthly = new ArrayList<>();
+		// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
+		paramMonthly.setCompanyId(companyId);
+		// 管理社員ID ＝
+		paramMonthly.setManagerId(listManagementId);
+		// 実行完了日時 ＝ システム日時
+		paramMonthly.setFinishDateTime(GeneralDateTime.now());
+
+		// 実行内容 ＝ スケジュール作成
+		paramMonthly.setExecutionContent(AlarmCategoryFn.APPROVAL_MONTHLY);
+		// ドメインモデル「エラーメッセージ情報」を取得する
+		if (!checkErrAppMonth) {
+			if (processExecutionLog.isPresent()) {
+				// ドメインモデル「更新処理自動実行ログ」を更新する
+				for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
+					ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
+					if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.APP_ROUTE_U_MON.value) {
+						executionTaskLog.setStatus(Optional.ofNullable(EndStatus.SUCCESS));
+						this.procExecLogRepo.update(procExecLog);
+					}
+				}
+				paramMonthly.setTargerEmployee(Collections.emptyList());
+				paramMonthly.setExistenceError(0);
+				// アルゴリズム「実行ログ登録」を実行する 2290
+				executionLogAdapterFn.updateExecuteLog(paramMonthly);
+			}
+		} else {
+			if (processExecutionLog.isPresent()) {
+				// ドメインモデル「更新処理自動実行ログ」を更新する
+				for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
+					ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
+					if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.APP_ROUTE_U_MON.value) {
+						executionTaskLog.setStatus(Optional.ofNullable(EndStatus.ABNORMAL_END));
+						this.procExecLogRepo.update(procExecLog);
+					}
+				}
+				// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
+				paramMonthly.setCompanyId(companyId);
+				// 管理社員ID ＝
+				paramMonthly.setManagerId(listManagementId);
+				// エラーの有無 ＝ エラーあり
+				paramMonthly.setExistenceError(1);
+				// 実行内容 ＝ 月別実績の集計
+				paramMonthly.setExecutionContent(AlarmCategoryFn.APPROVAL_MONTHLY);
+				if (listErrorApprovalMonthly.isEmpty()) {
+					for (String managementId : listManagementId) {
+						listErrorAndEmpIdMonthly
+								.add(new ExecutionLogErrorDetailFn(TextResource.localize("Msg_1339"), managementId));
+					}
+				} else {
+					for (AppDataInfoMonthly appDataInfoMonthly : listErrorApprovalMonthly) {
+						listErrorAndEmpIdMonthly.add(new ExecutionLogErrorDetailFn(appDataInfoMonthly.getErrorMessage().v(),
+								appDataInfoMonthly.getEmployeeId()));
+					}
+				}
+				// アルゴリズム「実行ログ登録」を実行する 2290
+				executionLogAdapterFn.updateExecuteLog(paramMonthly);
+			}
+		}
 		return false;
 	}
 
