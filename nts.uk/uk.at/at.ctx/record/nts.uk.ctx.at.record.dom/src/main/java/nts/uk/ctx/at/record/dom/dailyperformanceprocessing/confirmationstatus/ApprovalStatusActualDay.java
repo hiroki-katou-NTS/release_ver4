@@ -131,7 +131,7 @@ public class ApprovalStatusActualDay {
 									.stream()
 									.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x, (x, y) -> x));
 							if(approvalRoot != null) {
-								approvalRoot.getApprovalRootSituations().stream().forEach(x ->{
+								approvalRoot.getApprovalRootSituations().stream().filter(x -> x.getTargetID().equals(employeeId)).forEach(x ->{
 									if (x.getApprovalStatus().getApprovalActionByEmpl() == ApprovalActionByEmpl.APPROVALED) {
 										resultPart2.add(new ApprovalStatusActualResult(employeeId, x.getAppDate(), true, false));
 									} else {
