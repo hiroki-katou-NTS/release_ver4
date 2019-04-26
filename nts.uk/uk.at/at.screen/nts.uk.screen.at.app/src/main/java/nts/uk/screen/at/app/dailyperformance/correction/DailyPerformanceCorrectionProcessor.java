@@ -575,7 +575,7 @@ public class DailyPerformanceCorrectionProcessor {
 		System.out.println("thoi gian load checkbox 1:" + (System.currentTimeMillis()-startTime1));
 		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDay.processApprovalStatus(companyId,
 				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(),
-				Optional.of(keyFind));
+				mode, Optional.of(keyFind));
 		//approvalResults = new ArrayList<>();
 		System.out.println("thoi gian load checkbox 2:" + (System.currentTimeMillis()-startTime1));		
 		mapDataIntoGrid(screenDto, sId, appMapDateSid, listEmployeeId, resultDailyMap, mode, displayFormat, showLock,

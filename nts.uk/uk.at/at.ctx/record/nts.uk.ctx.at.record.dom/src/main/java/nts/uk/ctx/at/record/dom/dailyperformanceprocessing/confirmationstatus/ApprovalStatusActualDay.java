@@ -56,7 +56,7 @@ public class ApprovalStatusActualDay {
 	 * 日の実績の承認状況を取得する
 	 */
 	public List<ApprovalStatusActualResult> processApprovalStatus(String companyId, List<String> employeeIds,
-			DatePeriod period, Integer closureId, Optional<String> keyRandom) {
+			DatePeriod period, Integer closureId, int mode, Optional<String> keyRandom) {
 
 		String targetEmp = AppContexts.user().employeeId();
 		// ドメインモデル「承認処理の利用設定」を取得する
@@ -64,7 +64,7 @@ public class ApprovalStatusActualDay {
 		if (!optApprovalUse.isPresent() || !optApprovalUse.get().getUseDayApproverConfirm() || closureId == null)
 			return Collections.emptyList();
 
-		return processApprovalStatusCommon(companyId, targetEmp, employeeIds, period, closureId, keyRandom, optApprovalUse);
+		return processApprovalStatusCommon(companyId, targetEmp, employeeIds, period, closureId, keyRandom, optApprovalUse, mode);
 	}
 	
 	/**
@@ -77,11 +77,11 @@ public class ApprovalStatusActualDay {
 		if (!optApprovalUse.isPresent() || !optApprovalUse.get().getUseDayApproverConfirm() || closureId == null)
 			return Collections.emptyList();
 
-		return processApprovalStatusCommon(companyId, targetEmp, Arrays.asList(employeeId), period, closureId, Optional.empty(), optApprovalUse);
+		return processApprovalStatusCommon(companyId, targetEmp, Arrays.asList(employeeId), period, closureId, Optional.empty(), optApprovalUse, ModeData.APPROVAL.value);
 	}
 	
 	public List<ApprovalStatusActualResult> processApprovalStatusCommon(String companyId, String targetEmp, List<String> employeeIds,
-			DatePeriod period, Integer closureId, Optional<String> keyRandom, Optional<ApprovalProcessingUseSetting> optApprovalUseSetting) {
+			DatePeriod period, Integer closureId, Optional<String> keyRandom, Optional<ApprovalProcessingUseSetting> optApprovalUseSetting, int mode) {
 		List<ApprovalStatusActualResult> resultResult = new ArrayList<>();
 		Optional<ApprovalProcessingUseSetting> optApprovalUse = optApprovalUseSetting.isPresent() ? optApprovalUseSetting : iFindDataDCRecord.findApprovalByCompanyId(companyId);
 		// 社員の指定期間中の所属期間を取得する
@@ -110,23 +110,44 @@ public class ApprovalStatusActualDay {
 										x -> Pair.of(x.getApprovalStatus(), x.getApprovalAtr())));
 						mapApprovalRootBySId.putAll(mapApprovalRoot);
 
-						// set 承認状況： 取得した「承認対象者の承認状況．承認状況」
-						lstApprovalStatus.stream().forEach(x -> {
-							if (x.getApprovalStatus() == ApprovalStatusForEmployee.UNAPPROVED) {
-								resultPart2.add(new ApprovalStatusActualResult(employeeId, x.getAppDate(), false, false));
-							} else {
-								resultPart2.add(new ApprovalStatusActualResult(employeeId, x.getAppDate(), false, true));
+						if (mode == ModeData.NORMAL.value) {
+							// set 承認状況： 取得した「承認対象者の承認状況．承認状況」
+							lstApprovalStatus.stream().forEach(x -> {
+								if (x.getApprovalStatus() == ApprovalStatusForEmployee.UNAPPROVED) {
+									resultPart2.add(new ApprovalStatusActualResult(employeeId, x.getAppDate(), false, false));
+								} else {
+									resultPart2.add(new ApprovalStatusActualResult(employeeId, x.getAppDate(), false, true));
+								};
+							});
+							// ApprovalActionByEmpl
+							resultPart2.stream().forEach(x -> {
+								val temp = mapApprovalRoot.get(Pair.of(x.getEmployeeId(), x.getDate()));
+								if (temp != null && temp.getLeft().getApprovalActionByEmpl() == ApprovalActionByEmpl.APPROVALED)
+									x.updateApprovalStatus(true);
+							});
+		
+						}else {
+							Map<Pair<String, GeneralDate>, ApproveRootStatusForEmpImport> mapApprovalStatus = lstApprovalStatus
+									.stream()
+									.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x, (x, y) -> x));
+							if(approvalRoot != null) {
+								approvalRoot.getApprovalRootSituations().stream().filter(x -> x.getTargetID().equals(employeeId)).forEach(x ->{
+									if (x.getApprovalStatus().getApprovalActionByEmpl() == ApprovalActionByEmpl.APPROVALED) {
+										resultPart2.add(new ApprovalStatusActualResult(employeeId, x.getAppDate(), true, false));
+									} else {
+										resultPart2.add(new ApprovalStatusActualResult(employeeId, x.getAppDate(), false, false));
+									}
+								});
 							}
-							;
-						});
-
-						// ApprovalActionByEmpl
-						resultPart2.stream().forEach(x -> {
-							val temp = mapApprovalRoot.get(Pair.of(x.getEmployeeId(), x.getDate()));
-							if (temp != null && temp.getLeft().getApprovalActionByEmpl() == ApprovalActionByEmpl.APPROVALED)
-								x.updateApprovalStatus(true);
-						});
-
+							
+							resultPart2.stream().forEach(x -> {
+								val temp = mapApprovalStatus.get(Pair.of(x.getEmployeeId(), x.getDate()));
+								if (temp != null && temp.getApprovalStatus() != ApprovalStatusForEmployee.UNAPPROVED )
+									x.setStatusNormal(true);
+							});
+							
+						}
+						
 						Optional<IdentityProcessUseSet> identitySetOpt = iFindDataDCRecord.findIdentityByKey(companyId);
 						if (!identitySetOpt.isPresent() || !identitySetOpt.get().isUseConfirmByYourself()) {
 							resultPart.addAll(updatePermissionCheckWithCondition(resultPart2, true, mapApprovalRoot));
