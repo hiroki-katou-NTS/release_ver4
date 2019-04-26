@@ -142,6 +142,15 @@ public interface IntermediateDataPub {
 	public AppEmpStatusExport getApprovalEmpStatus(String employeeID, DatePeriod period, Integer rootType);
 	
 	/**
+	 * RequestList RQ595
+	 * @param approverId 承認者の社員ID
+	 * @param targetEmployeeIds 承認対象者の社員ID
+	 * @param period 期間
+	 * @return　指定した条件のルート状況
+	 */
+	public AppEmpStatusExport getDailyApprovalStatus(String approverId, List<String> targetEmployeeIds, DatePeriod period);
+	
+	/**
 	 * RequestList 403
 	 * [No.403](中間データ版)承認状態をクリアする
 	 * @param employeeID

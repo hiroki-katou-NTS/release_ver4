@@ -315,14 +315,15 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	@Override
 	public AppEmpStatusExport getApprovalEmpStatus(String employeeID, DatePeriod period, Integer rootType) {
 		ApprovalEmpStatus approvalEmpStatus = appRootInstanceService.getApprovalEmpStatus(employeeID, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
-		return new AppEmpStatusExport(
-				approvalEmpStatus.getEmployeeID(), 
-				approvalEmpStatus.getRouteSituationLst().stream().map(x -> new RouteSituationExport(
-						x.getDate(), 
-						x.getEmployeeID(), 
-						x.getApproverEmpState().value, 
-						x.getApprovalStatus().map(y -> new ApprovalStatusExport(y.getReleaseAtr().value, y.getApprovalAction().value))))
-				.collect(Collectors.toList()));
+		return convertToPub(approvalEmpStatus);
+	}
+	
+	@Override
+	public AppEmpStatusExport getDailyApprovalStatus(
+			String approverId, List<String> targetEmployeeIds, DatePeriod period) {
+		
+		// TODO:
+		return new AppEmpStatusExport(approverId, Collections.emptyList());
 	}
 
 	@Override
@@ -615,5 +616,16 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 				approverToApprove.getAuthorList().stream().map(x -> new ApproverEmpExport(x.getEmployeeID(), x.getEmployeeCD(), x.getEmployeeName()))
 				.collect(Collectors.toList()));
 	}
-	
+
+
+	private static AppEmpStatusExport convertToPub(ApprovalEmpStatus approvalEmpStatus) {
+		return new AppEmpStatusExport(
+				approvalEmpStatus.getEmployeeID(), 
+				approvalEmpStatus.getRouteSituationLst().stream().map(x -> new RouteSituationExport(
+						x.getDate(), 
+						x.getEmployeeID(), 
+						x.getApproverEmpState().value, 
+						x.getApprovalStatus().map(y -> new ApprovalStatusExport(y.getReleaseAtr().value, y.getApprovalAction().value))))
+				.collect(Collectors.toList()));
+	}
 }
