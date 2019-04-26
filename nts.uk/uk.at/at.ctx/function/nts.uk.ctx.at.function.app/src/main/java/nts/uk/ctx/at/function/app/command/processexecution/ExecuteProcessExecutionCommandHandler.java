@@ -587,14 +587,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		// ドメインモデル「エラーメッセージ情報」を取得する
 		if (!checkErrAppDaily) {
 			if (processExecutionLog.isPresent()) {
-				// ドメインモデル「更新処理自動実行ログ」を更新する
-				for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
-					ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
-					if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.APP_ROUTE_U_DAI.value) {
-						executionTaskLog.setStatus(Optional.ofNullable(EndStatus.SUCCESS));
-						this.procExecLogRepo.update(procExecLog);
-					}
-				}
 				paramDaily.setTargerEmployee(Collections.emptyList());
 				paramDaily.setExistenceError(0);
 				// アルゴリズム「実行ログ登録」を実行する 2290
@@ -661,14 +653,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		// ドメインモデル「エラーメッセージ情報」を取得する
 		if (!checkErrAppMonth) {
 			if (processExecutionLog.isPresent()) {
-				// ドメインモデル「更新処理自動実行ログ」を更新する
-				for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
-					ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
-					if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.APP_ROUTE_U_MON.value) {
-						executionTaskLog.setStatus(Optional.ofNullable(EndStatus.SUCCESS));
-						this.procExecLogRepo.update(procExecLog);
-					}
-				}
 				paramMonthly.setTargerEmployee(Collections.emptyList());
 				paramMonthly.setExistenceError(0);
 				// アルゴリズム「実行ログ登録」を実行する 2290

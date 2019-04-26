@@ -575,14 +575,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		// ドメインモデル「エラーメッセージ情報」を取得する
 		if (!checkErrAppDaily) {
 			if (processExecutionLog.isPresent()) {
-				// ドメインモデル「更新処理自動実行ログ」を更新する
-				for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
-					ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
-					if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.APP_ROUTE_U_DAI.value) {
-						executionTaskLog.setStatus(Optional.ofNullable(EndStatus.SUCCESS));
-						this.procExecLogRepo.update(procExecLog);
-					}
-				}
 				paramDaily.setTargerEmployee(Collections.emptyList());
 				paramDaily.setExistenceError(0);
 				// アルゴリズム「実行ログ登録」を実行する 2290
@@ -649,14 +641,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		// ドメインモデル「エラーメッセージ情報」を取得する
 		if (!checkErrAppMonth) {
 			if (processExecutionLog.isPresent()) {
-				// ドメインモデル「更新処理自動実行ログ」を更新する
-				for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
-					ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
-					if (executionTaskLog.getProcExecTask().value == ProcessExecutionTask.APP_ROUTE_U_MON.value) {
-						executionTaskLog.setStatus(Optional.ofNullable(EndStatus.SUCCESS));
-						this.procExecLogRepo.update(procExecLog);
-					}
-				}
 				paramMonthly.setTargerEmployee(Collections.emptyList());
 				paramMonthly.setExistenceError(0);
 				// アルゴリズム「実行ログ登録」を実行する 2290
@@ -3034,18 +3018,19 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		OutputExecAlarmListPro outputExecAlarmListPro = new OutputExecAlarmListPro();
 		try {
 			// アラームリスト自動実行処理を実行する
-			outputExecAlarmListPro = this.execAlarmListProcessingService.execAlarmListProcessing(
-					extraProcessStatusID, companyId, workplaceIdList, listPatternCode, GeneralDateTime.now(),
-					sendMailPerson, sendMailAdmin,
-					!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent() ? ""
-							: processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v(),
-					execId);
-			if(outputExecAlarmListPro.isCheckStop())
+			outputExecAlarmListPro = this.execAlarmListProcessingService
+					.execAlarmListProcessing(extraProcessStatusID, companyId, workplaceIdList, listPatternCode,
+							GeneralDateTime.now(), sendMailPerson, sendMailAdmin,
+							!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent() ? ""
+									: processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v(),
+							execId);
+			if (outputExecAlarmListPro.isCheckStop())
 				return true;
 		} catch (Exception e) {
-			//各処理の後のログ更新処理
+			// 各処理の後のログ更新処理
 			checkException = true;
 		}
+
 		// ドメインモデル「更新処理自動実行ログ」を取得しチェックする（中断されている場合は更新されているため、最新の情報を取得する）
 		Optional<ProcessExecutionLog> processExecutionLog = procExecLogRepo.getLogByCIdAndExecCd(companyId, execItemCd,
 				execId);
@@ -3067,7 +3052,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 		// 実行内容 ＝ スケジュール作成
 		param.setExecutionContent(AlarmCategoryFn.ALARM_LIST_PERSONAL);
-		if(!checkException) {
+		if (!checkException) {
 			// IF :TRUE
 			if (outputExecAlarmListPro.isCheckExecAlarmListPro()) {
 				// ドメインモデル「更新処理自動実行ログ」を更新する
@@ -3082,10 +3067,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				param.setExistenceError(0);
 				// アルゴリズム「実行ログ登録」を実行する 2290
 				executionLogAdapterFn.updateExecuteLog(param);
-				return true;
+				return false;
 			}
 		}
-		
 		// IF :FALSE
 		// ドメインモデル「更新処理自動実行ログ」を更新する
 		for (int i = 0; i < processExecutionLog.get().getTaskLogList().size(); i++) {
