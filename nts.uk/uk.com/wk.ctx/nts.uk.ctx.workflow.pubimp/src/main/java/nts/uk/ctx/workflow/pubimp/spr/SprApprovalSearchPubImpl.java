@@ -131,11 +131,11 @@ public class SprApprovalSearchPubImpl implements SprApprovalSearchPub {
 		List<ApprovalRootState> result =  new ArrayList<>();
 		List<ApprovalRootState> approverLst = approvalRootStateRepository.getByApproverPeriod(companyID, approverID, new DatePeriod(date, date));
 		result.addAll(approverLst);
-		List<Agent> agentInfoOutputs = agentRepository.findAgentForSpr(companyID, approverID, date, date);
+		GeneralDate systemDate = GeneralDate.today();
+		List<Agent> agentInfoOutputs = agentRepository.findAgentForSpr(companyID, approverID, systemDate, systemDate);
 		agentInfoOutputs.forEach(agent -> {
-			List<ApprovalRootState> approverAgentLst = approvalRootStateRepository.getByApproverAgentPeriod(companyID, approverID, 
-					new DatePeriod(date, date), 
-					new DatePeriod(agent.getStartDate(), agent.getEndDate()));
+			List<ApprovalRootState> approverAgentLst = approvalRootStateRepository.getByApproverPeriod(companyID, agent.getEmployeeId(), 
+					new DatePeriod(date, date));
 			result.addAll(approverAgentLst);
 		});
 		return result.stream().map(x -> new ApprovalRootStateSprExport(

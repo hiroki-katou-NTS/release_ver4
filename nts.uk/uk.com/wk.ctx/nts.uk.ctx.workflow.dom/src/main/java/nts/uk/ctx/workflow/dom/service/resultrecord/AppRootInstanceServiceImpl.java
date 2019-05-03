@@ -359,7 +359,8 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 			approvalPersonInstance.getApproverRoute().add(approvalRouteDetails);
 		});
 		// ドメインモデル「代行承認」を取得する
-		List<AgentInfoOutput> agentInfoOutputLst = agentRepository.findAgentByPeriod(companyID, Arrays.asList(approverID), period.start(), period.end(), 1);
+		GeneralDate systemDate = GeneralDate.today();
+		List<AgentInfoOutput> agentInfoOutputLst = agentRepository.findAgentByPeriod(companyID, Arrays.asList(approverID), systemDate, systemDate, 1);
 		// 取得した「代行承認」先頭から最後へループ
 		agentInfoOutputLst.forEach(agentInfor -> {
 			// 承認者と期間から承認ルート中間データを取得する

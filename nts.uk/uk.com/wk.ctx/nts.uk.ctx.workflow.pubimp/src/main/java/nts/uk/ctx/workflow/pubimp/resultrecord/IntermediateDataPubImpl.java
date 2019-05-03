@@ -552,7 +552,8 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		List<AppRootInstance> approverInstLst = appRootInstanceRepository.findByApproverDateCID(companyID, approverID, date, RecordRootType.CONFIRM_WORK_BY_DAY);
 		appRootInstanceLst.addAll(approverInstLst);
 		// ドメインモデル「代行承認」を取得する
-		List<Agent> agentInfoOutputs = agentRepository.findByApproverAndDate(companyID, approverID, date, date);
+		GeneralDate systemDate = GeneralDate.today();
+		List<Agent> agentInfoOutputs = agentRepository.findByApproverAndDate(companyID, approverID, systemDate, systemDate);
 		agentInfoOutputs.forEach(agent -> {
 			// ドメインモデル「承認ルート中間データ」を取得する
 			List<AppRootInstance> agentInstLst = appRootInstanceRepository.findByApproverDateCID(companyID, agent.getEmployeeId(), date, RecordRootType.CONFIRM_WORK_BY_DAY);
