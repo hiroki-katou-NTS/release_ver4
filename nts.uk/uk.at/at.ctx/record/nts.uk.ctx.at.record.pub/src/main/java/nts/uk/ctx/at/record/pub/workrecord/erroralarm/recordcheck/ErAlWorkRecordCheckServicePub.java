@@ -37,12 +37,21 @@ public interface ErAlWorkRecordCheckServicePub {
 		private String employeeId;
 		private String erAlId;
 		private final boolean error = true;
+		private String checkedValue;
 		
 		public ErrorRecordExport(GeneralDate date, String employeeId, String erAlId) {
 			super();
 			this.date = date;
 			this.employeeId = employeeId;
 			this.erAlId = erAlId;
+		}
+
+		public ErrorRecordExport(GeneralDate date, String employeeId, String erAlId, String checkedValue) {
+			super();
+			this.date = date;
+			this.employeeId = employeeId;
+			this.erAlId = erAlId;
+			this.checkedValue = checkedValue;
 		}
 
 		public GeneralDate getDate() {
@@ -60,5 +69,14 @@ public interface ErAlWorkRecordCheckServicePub {
 		public boolean isError() {
 			return error;
 		}
+
+		public String getCheckedValue() {
+			return checkedValue;
+		}
+
+		public void setCheckedValue(String checkedValue) {
+			this.checkedValue = checkedValue;
+		}
+		
 	}
 }

@@ -76,7 +76,8 @@ module nts.uk.at.view.kal001.d.service {
                                                 categoryName: item[3],
                                                 alarmItem: item[4],
                                                 alarmValueMessage: item[5],
-                                                comment: item[6]
+                                                comment: item[6],
+                                                checkedValue: item[7]
                                             }, empInfo));    
                                         }
                                         
@@ -214,6 +215,7 @@ module nts.uk.at.view.kal001.d.service {
             alarmItem : string;
             alarmValueMessage : string;
             comment : string;            
+            checkedValue : string;
         }
         
         export interface ExtractedAlarmDto{

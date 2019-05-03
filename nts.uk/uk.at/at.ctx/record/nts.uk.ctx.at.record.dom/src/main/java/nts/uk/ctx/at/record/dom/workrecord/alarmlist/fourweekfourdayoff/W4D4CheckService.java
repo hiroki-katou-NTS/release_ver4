@@ -36,12 +36,14 @@ public class W4D4CheckService {
 		}
 		
 		if (countHoliday < 4) {
-			String alarmDate = period.start().toString() + "~" + period.end().toString();
+			String checkedValue = TextResource.localize("KAL010_63",String.valueOf(countHoliday));
+//			String alarmDate = period.start().toString() + "~" + period.end().toString();
 			String W4D4 = TextResource.localize("KAL010_62");
 			String alarmComment = TextResource.localize("KAL010_64");
-			String alarmMessage = TextResource.localize("KAL010_63");
-			alarmMessage = TextResource.localize("KAL010_63",countHoliday+"日","(" +alarmDate +")");
-			AlarmExtractionValue4W4D result = new AlarmExtractionValue4W4D(workplaceID, employeeID, period, W4D4, W4D4, alarmMessage, alarmComment);
+//			String alarmMessage = TextResource.localize("KAL010_63");
+//			alarmMessage = TextResource.localize("KAL010_63",countHoliday+"日","(" +alarmDate +")");
+			String alarmMessage = "";
+			AlarmExtractionValue4W4D result = new AlarmExtractionValue4W4D(workplaceID, employeeID, period, W4D4, W4D4, alarmMessage, alarmComment,checkedValue);
 			return Optional.of(result);
 		}
 		

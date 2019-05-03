@@ -81,7 +81,7 @@ public class AggregationProcessService {
 					value.getClassification(),
 					value.getAlarmItem(),
 					value.getAlarmValueMessage(),
-					value.getComment().orElse(null));
+					value.getComment().orElse(null),null);
 			result.add(itemResult);
 		}
 		return result;
@@ -121,7 +121,9 @@ public class AggregationProcessService {
 					value.getClassification(),
 					value.getAlarmItem(),
 					value.getAlarmValueMessage(),
-					value.getComment().orElse(null));
+					value.getComment().orElse(null),
+					value.getCheckedValue().orElse(null)
+					);
 		}).collect(Collectors.toList());
 	}
 

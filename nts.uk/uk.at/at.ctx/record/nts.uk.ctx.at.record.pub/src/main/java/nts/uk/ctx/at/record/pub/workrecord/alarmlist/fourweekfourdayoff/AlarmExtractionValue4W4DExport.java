@@ -12,4 +12,5 @@ public class AlarmExtractionValue4W4DExport {
 	private String alarmItem;
 	private String alarmValueMessage;
 	private String comment;
+	private String checkedValue;
 }

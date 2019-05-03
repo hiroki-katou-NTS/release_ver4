@@ -112,6 +112,8 @@ public class AgreementCheckServiceImpl implements AgreementCheckService{
 							periodsYear, alarmChkCon36.getListCondOt());
 					for (CheckedOvertimeImport check : checkOvertimes) {
 
+						String checkedValue = String.valueOf(check.getCountAgreementOneEmp());
+						
 						String hour = check.getOt36().hour() + "";
 						if (hour.length() < 2)
 							hour = "0" + hour;
@@ -119,15 +121,16 @@ public class AgreementCheckServiceImpl implements AgreementCheckService{
 						if (minute.length() < 2)
 							minute = "0" + minute;
 						String ot36 = hour + ":" + minute;
-
-						String datePeriod = check.getDatePeriod().start().toString(ErAlConstant.DATE_FORMAT) + ErAlConstant.PERIOD_SEPERATOR
-								+ check.getDatePeriod().end().toString(ErAlConstant.DATE_FORMAT);
-
+						
+						String datePeriod = TextResource.localize("KAL010_906",check.getDatePeriod().start().toString(ErAlConstant.YM_FORMAT) + ErAlConstant.PERIOD_SEPERATOR
+								+ check.getDatePeriod().end().toString(ErAlConstant.YM_FORMAT));
 						result.add(new ValueExtractAlarm(mapEmployee.get(check.getEmployeeId()).getWorkplaceId(),
 								check.getEmployeeId(), datePeriod, TextResource.localize("KAL010_208"),
-								TextResource.localize("KAL010_201"), TextResource.localize("KAL010_202",
+								//TextResource.localize("KAL010_201")
+								TextResource.localize("KAL010_120",check.getNo()+"")
+								, TextResource.localize("KAL010_202",
 										check.getNo() + "", ot36, check.getExcessNum().v() + ""),
-								check.getMessageDisp().v()));
+								check.getMessageDisp().v(),checkedValue));
 					}
 				}
 			}
@@ -157,13 +160,14 @@ public class AgreementCheckServiceImpl implements AgreementCheckService{
 		List<ValueExtractAlarm> lstReturn = new ArrayList<>();
 		for (CheckedAgreementResult checkedAgreementResult : checkAgreementsResult) {
 			if (checkedAgreementResult.isCheckResult()) {
+				String checkedValue = formatHourData(checkedAgreementResult.getAgreementTimeByPeriod().getAgreementTime().toString());
 				// workplaceID
 				String workPlaceId = mapEmployee.get(checkedAgreementResult.getEmpId()).getWorkplaceId();
 
 				// 年月日
-				String alarmValueDate = yearmonthToString(
+				String alarmValueDate =TextResource.localize("KAL010_906", yearmonthToString(
 						checkedAgreementResult.getAgreementTimeByPeriod().getStartMonth()) + ErAlConstant.PERIOD_SEPERATOR
-						+ yearmonthToString(checkedAgreementResult.getAgreementTimeByPeriod().getEndMonth());
+						+ yearmonthToString(checkedAgreementResult.getAgreementTimeByPeriod().getEndMonth()));
 				// alarm name
 				String alarmItem = optAgreeName.isPresent() ? optAgreeName.get().getName().v() : "";
 				// カテゴリ
@@ -172,7 +176,7 @@ public class AgreementCheckServiceImpl implements AgreementCheckService{
 								checkedAgreementResult.getAgreementTimeByPeriod().getAgreementTime().toString()));
 				lstReturn.add(new ValueExtractAlarm(workPlaceId, checkedAgreementResult.getEmpId(), alarmValueDate,
 						TextResource.localize("KAL010_208"), alarmItem, alarmContent,
-						agreeConditionError.getMessageDisp().v()));
+						agreeConditionError.getMessageDisp().v(),checkedValue));
 			}
 		}
 		return lstReturn;

@@ -21,7 +21,8 @@ public interface PerTimeMonActualResultService {
 	//HoiDD No.257
 	Map<String, Integer> checkPerTimeMonActualResult(YearMonth yearMonth, String employeeID, AttendanceItemCondition attendanceItemCondition);
 	
-	Map<String, Map<YearMonth, Map<String, Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemCondition> attendanceItemCondition);
+	Map<String, Map<YearMonth, Map<String, Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemCondition> attendanceItemCondition,
+			Map<String, Map<YearMonth, Map<String,String>>> resultsData);
 			
 }
 	

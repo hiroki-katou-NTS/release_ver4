@@ -153,7 +153,7 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 						result.add(CheckedOvertimeImport.builder().employeeId(employeeId).datePeriod(period)
 								.alarmCheckId(agreeCond.getId()).error(true).no(agreeCond.getNo())
 								.ot36(agreeCond.getOt36()).excessNum(agreeCond.getExcessNum())
-								.messageDisp(agreeCond.getMessageDisp()).build());
+								.messageDisp(agreeCond.getMessageDisp()).countAgreementOneEmp(count).build());
 					}
 				
 			    }

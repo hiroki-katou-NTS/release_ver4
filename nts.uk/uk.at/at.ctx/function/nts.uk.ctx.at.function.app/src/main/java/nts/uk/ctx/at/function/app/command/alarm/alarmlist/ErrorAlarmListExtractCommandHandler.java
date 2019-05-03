@@ -124,7 +124,7 @@ public class ErrorAlarmListExtractCommandHandler extends AsyncCommandHandler<Err
 			List<ExtractEmployeeErAlData> empEralData = dto.getExtractedAlarmData().stream().map(c -> {
 				return new ExtractEmployeeErAlData(command.getStatusProcessId(), c.getEmployeeID(), c.getGuid(), 
 													c.getAlarmValueDate(), c.getCategory(), c.getCategoryName(), 
-													c.getAlarmItem(), c.getAlarmValueMessage(), c.getComment());
+													c.getAlarmItem(), c.getAlarmValueMessage(), c.getComment(), c.getCheckedValue());
 			}).collect(Collectors.toList());
 			
 			extractResultRepo.insert(Arrays.asList(new AlarmListExtractResult(AppContexts.user().employeeId(), 

@@ -394,7 +394,7 @@ public class MultipleMonthAggregateProcessService {
 				if (checkAddAlarm) {
 					ValueExtractAlarm resultMonthlyValue = new ValueExtractAlarm(employee.getWorkplaceId(),
 							employee.getEmployeeId(), tempStart.toString(ErAlConstant.YM_FORMAT), TextResource.localize("KAL010_250"),
-							checkItem.nameId, alarmDescription, extra.getDisplayMessage());
+							checkItem.nameId, alarmDescription, extra.getDisplayMessage(),null);
 					listValueExtractAlarm.add(resultMonthlyValue);
 				}
 			}
@@ -611,7 +611,7 @@ public class MultipleMonthAggregateProcessService {
 					if (checkAddAlarm) {
 						ValueExtractAlarm resultMonthlyValue = new ValueExtractAlarm(employee.getWorkplaceId(),
 								employee.getId(), tempStart.toString("yyyy/MM"), TextResource.localize("KAL010_250"),
-								checkItem.nameId, alarmDescription, extra.getDisplayMessage());
+								checkItem.nameId, alarmDescription, extra.getDisplayMessage(),null);
 						listValueExtractAlarm.add(resultMonthlyValue);
 					}
 				}

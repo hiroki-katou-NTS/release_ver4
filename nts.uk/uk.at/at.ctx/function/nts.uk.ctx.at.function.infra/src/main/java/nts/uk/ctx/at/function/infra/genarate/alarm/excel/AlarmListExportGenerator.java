@@ -115,6 +115,7 @@ public class AlarmListExportGenerator extends AsposeCellsReportGenerator impleme
 		cell.get(1, 4).setValue(KAL001_155);
 		cell.get(1, 5).setValue(KAL001_156);
 		cell.get(1, 6).setValue(KAL001_157);
-		cell.get(1, 7).setValue(KAL001_158);
+		cell.get(1, 7).setValue("チェック対象値");
+		cell.get(1, 8).setValue(KAL001_158);
 	}
 }

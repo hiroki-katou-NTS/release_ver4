@@ -35,7 +35,8 @@ module nts.uk.at.view.kal001.b {
                     { headerText: getText('KAL001_15'), key: 'alarmValueDate', width: 125},
                     { headerText: getText('KAL001_16'), key: 'categoryName', width: 60},
                     { headerText: getText('KAL001_17'), key: 'alarmItem', width: 115 },
-                    { headerText: getText('KAL001_18'), key: 'alarmValueMessage', width: 345 },
+                    { headerText: getText('KAL001_18'), key: 'alarmValueMessage', width: 245 },
+                    { headerText: 'チェック対象値', key: 'checkedValue', width: 100 },
                     { headerText: getText('KAL001_19'), key: 'comment', width: 260 }
                 ];
 
@@ -133,6 +134,7 @@ module nts.uk.at.view.kal001.b {
             alarmItem : string;
             alarmValueMessage : string;
             comment : string;            
+            checkedValue : string;
         }                
     }
     

@@ -145,7 +145,8 @@ public class PerTimeMonActualResultDefault implements PerTimeMonActualResultServ
 	private RemainMergeRepository remainRepo;
 	
 	@Override
-	public Map<String, Map<YearMonth, Map<String, Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemCondition> checkConditions) {
+	public Map<String, Map<YearMonth, Map<String, Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemCondition> checkConditions,
+			Map<String, Map<YearMonth, Map<String,String>>> resultsData) {
 		Map<String, Map<YearMonth, Map<String, Integer>>> results = new HashMap<>();
 		//締めをチェックする
 		List<YearMonth> yearmonths = yearMonth.yearMonthsBetween();
@@ -194,7 +195,13 @@ public class PerTimeMonActualResultDefault implements PerTimeMonActualResultServ
 			});
 			
 			checkConditions.entrySet().stream().forEach(con -> {
-
+				List<Double> listData = con.getValue().getGroup1().getLstErAlAtdItemCon().stream().map(c->c.sumCheckTarget(item ->{
+					if (item.isEmpty()) {
+						return new ArrayList<>();
+					}
+					return monthlyConverter.convert(item).stream().map(iv -> getValueNew(iv))
+							.collect(Collectors.toList());
+				})).collect(Collectors.toList());
 				boolean check = con.getValue().check(item->{
 					if (item.isEmpty()) {
 						return new ArrayList<>();
@@ -206,11 +213,14 @@ public class PerTimeMonActualResultDefault implements PerTimeMonActualResultServ
 				if (check) {
 					if(!results.containsKey(employeeId)){
 						results.put(employeeId, new HashMap<>());
+						resultsData.put(employeeId, new HashMap<>());
 					}
 					if(!results.get(employeeId).containsKey(attendanceTime.getYearMonth())){
 						results.get(employeeId).put(attendanceTime.getYearMonth(), new HashMap<>());
+						resultsData.get(employeeId).put(attendanceTime.getYearMonth(), new HashMap<>());
 					}
 					results.get(employeeId).get(attendanceTime.getYearMonth()).put(con.getKey(), 1);
+					resultsData.get(employeeId).get(attendanceTime.getYearMonth()).put(con.getKey(), listData.isEmpty()?null:listData.get(0).toString());
 				}
 			});
 		}

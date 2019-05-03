@@ -19,6 +19,8 @@ import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.fixedcheckitem.c
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.fixedcheckitem.checkprincipalunconfirm.ValueExtractAlarmWR;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.fixedcheckitem.worktimenotregister.WorkTimeNotRegisterService;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.fixedcheckitem.worktypenotregister.WorkTypeNotRegisterService;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.otkcustomize.ContinuousHolCheckSet;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.otkcustomize.repo.ContinuousHolCheckSetRepo;
 import nts.uk.ctx.at.record.pub.fixedcheckitem.FixedCheckItemPub;
 import nts.uk.ctx.at.record.pub.fixedcheckitem.ValueExtractAlarmWRPubExport;
 import nts.uk.shr.com.i18n.TextResource;
@@ -44,6 +46,9 @@ public class FixedCheckItemPubImpl implements FixedCheckItemPub {
 	
 	@Inject
 	private ErAlWorkRecordCheckService erAlWorkRecordCheckService; 
+	
+	@Inject
+	private ContinuousHolCheckSetRepo continuousHolCheckSetRepo;
 	
 	
 	@Override
@@ -100,7 +105,8 @@ public class FixedCheckItemPubImpl implements FixedCheckItemPub {
 				valueExtractAlarmWR.getClassification(),
 				valueExtractAlarmWR.getAlarmItem(),
 				valueExtractAlarmWR.getAlarmValueMessage(),
-				valueExtractAlarmWR.getComment().orElse(null)
+				valueExtractAlarmWR.getComment().orElse(null),
+				valueExtractAlarmWR.getCheckedValue().orElse(null)
 				);
 	}
 
@@ -131,11 +137,20 @@ public class FixedCheckItemPubImpl implements FixedCheckItemPub {
 					TextResource.localize("KAL010_1"),
 					TextResource.localize("KAL010_301"),
 					TextResource.localize("KAL010_302"),
-					"");
+					"",
+					null);
 			listResult.add(value);		
 		});
 		
 		return listResult;
+	}
+
+	@Override
+	public int getContinuousHolCheckSet(String companyId) {
+		Optional<ContinuousHolCheckSet> data = continuousHolCheckSetRepo.findSpecial(companyId);
+		if(data.isPresent())
+			return data.get().getMaxContinuousDays().v();
+		return 0;
 	}
 	
 	

@@ -42,6 +42,10 @@ public class KfnmtAlexEmpEralData extends UkJpaEntity {
 	@Column(name = "COMMENT")
 	public String comment;	
 	
+	/** コメント */
+	@Column(name = "CHECKED_VALUE")
+	public String checkedValue;	
+	
 	@Override
 	protected Object getKey() {
 		return pk;

@@ -30,7 +30,7 @@ public class W4D4CheckPubImpl implements W4D4CheckPub {
 
 			return Optional.of(new AlarmExtractionValue4W4DExport(workplaceID, employeeID, alarmExtract.getDatePeriod(),
 					alarmExtract.getClassification(), alarmExtract.getAlarmItem(), alarmExtract.getAlarmValueMessage(),
-					alarmExtract.getComment()));
+					alarmExtract.getComment(),alarmExtract.getCheckedValue()));
 		} else {
 
 			return Optional.empty();

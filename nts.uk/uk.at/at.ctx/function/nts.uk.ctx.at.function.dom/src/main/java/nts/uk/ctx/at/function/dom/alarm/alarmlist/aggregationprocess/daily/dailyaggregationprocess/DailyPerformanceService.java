@@ -185,7 +185,7 @@ public class DailyPerformanceService {
 						
 			ValueExtractAlarm data = new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), eDaily.getDate().toString(), KAL010_1,
 					alarmContentMessage.getAlarmItem(), alarmContentMessage.getAlarmContent(),
-					errAlarmCheckIDToMessage.get(errorAlarmMap.get(eDaily.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage());
+					errAlarmCheckIDToMessage.get(errorAlarmMap.get(eDaily.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage(),null);
 
 			valueExtractAlarmList.add(data);
 		}
@@ -249,10 +249,10 @@ public class DailyPerformanceService {
 											.findFirst().ifPresent(attendanceResult -> {
 												AlarmContentMessage alarmContentMessage = this.calculateAlarmContentMessage(error, holder.comId, errorAlarmMap,attendanceResult,currentAttendanceItems,currentNos);
 												EmployeeSearchDto em = employee.stream().filter(e -> e.getId().equals(error.getEmployeeID())).findAny().get();
-												
-												ValueExtractAlarm data = new ValueExtractAlarm(em.getWorkplaceId(), em.getId(), error.getDate().toString(ErAlConstant.DATE_FORMAT), 
+												String checkedValue = null;
+												ValueExtractAlarm data = new ValueExtractAlarm(em.getWorkplaceId(), em.getId(), TextResource.localize("KAL010_907",error.getDate().toString(ErAlConstant.DATE_FORMAT)), 
 														KAL010_1, alarmContentMessage.getAlarmItem(), alarmContentMessage.getAlarmContent(),
-														errAlarmCheckIDToMessage.get(errorAlarmMap.get(error.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage());
+														errAlarmCheckIDToMessage.get(errorAlarmMap.get(error.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage(),checkedValue);
 
 												valueExtractAlarmList.add(data);
 				});
@@ -357,7 +357,7 @@ public class DailyPerformanceService {
 			EmployeeSearchDto em = employee.stream().filter(e -> e.getId().equals(eDaily.getEmployeeID())).findAny().get();
 			ValueExtractAlarm data = new ValueExtractAlarm(em.getWorkplaceId(), em.getId(), eDaily.getDate().toString(), KAL010_1,
 					alarmContentMessage.getAlarmItem(), alarmContentMessage.getAlarmContent(),
-					errAlarmCheckIDToMessage.get(errorAlarmMap.get(eDaily.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage());
+					errAlarmCheckIDToMessage.get(errorAlarmMap.get(eDaily.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage(),null);
 
 			valueExtractAlarmList.add(data);
 		}	

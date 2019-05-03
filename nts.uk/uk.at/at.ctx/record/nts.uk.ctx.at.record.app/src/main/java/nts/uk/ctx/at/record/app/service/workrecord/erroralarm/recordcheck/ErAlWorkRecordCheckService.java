@@ -31,10 +31,10 @@ import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmConditionReposit
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecordRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.AlCheckTargetCondition;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.ErrorAlarmCondition;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.ResultCheckWith;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.WorkRecordExtraConRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.worktype.PlanActualWorkType;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.worktype.SingleWorkType;
-import nts.uk.ctx.at.record.dom.workrecord.erroralarm.enums.FilterByCompare;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.otkcustomize.ContinuousHolCheckSet;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.otkcustomize.repo.ContinuousHolCheckSetRepo;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
@@ -300,9 +300,11 @@ public class ErAlWorkRecordCheckService {
 					checkCondition.getCheckTargetCondtion())){
 				return null;
 			}
-			boolean result = checkErrorAlarmCondition(c, checkCondition);
-			if(result){
-				return new ErrorRecord(workingDate, c.employeeId(), checkCondition.getErrorAlarmCheckID());
+			ResultCheckWith result = checkErrorAlarmConditionAndResult(c, checkCondition);
+			if(result.isCheck()){
+				ErrorRecord errorRecord = new ErrorRecord(workingDate, c.employeeId(), checkCondition.getErrorAlarmCheckID()); 
+				errorRecord.setCheckedValue(result.getResult());
+				return errorRecord;
 			}
 			return null;
 		}).filter(c -> c != null).collect(Collectors.toList());
@@ -408,6 +410,14 @@ public class ErAlWorkRecordCheckService {
 			return false;
 		}
 		WorkInfoOfDailyPerformance workInfo = record.getWorkInfo().toDomain(record.employeeId(), record.getDate());
+		List<Double> listData = condition.getAtdItemCondition().getGroup1().getLstErAlAtdItemCon().stream().map(c->c.sumCheckTarget(item ->{
+			if (item.isEmpty()) {
+				return new ArrayList<>();
+			}
+			return AttendanceItemUtil.toItemValues(record, item).stream().map(iv -> getValue(iv))
+					.collect(Collectors.toList());
+		})).collect(Collectors.toList());
+		
 		return condition.checkWith(workInfo, item -> {
 			if (item.isEmpty()) {
 				return new ArrayList<>();
@@ -417,6 +427,33 @@ public class ErAlWorkRecordCheckService {
 					.collect(Collectors.toList());
 		});
 	}
+	private ResultCheckWith checkErrorAlarmConditionAndResult(DailyRecordDto record, ErrorAlarmCondition condition) {
+		if(condition.getCheckTargetCondtion() == null){
+			return new ResultCheckWith(false,null);
+		}
+		if(!canCheck(record.getBusinessType().orElse(new BusinessTypeOfDailyPerforDto()), record.getAffiliationInfo(), 
+				condition.getCheckTargetCondtion())){
+			return new ResultCheckWith(false,null);
+		}
+		WorkInfoOfDailyPerformance workInfo = record.getWorkInfo().toDomain(record.employeeId(), record.getDate());
+		List<Double> listData = condition.getAtdItemCondition().getGroup1().getLstErAlAtdItemCon().stream().map(c->c.sumCheckTarget(item ->{
+			if (item.isEmpty()) {
+				return new ArrayList<>();
+			}
+			return AttendanceItemUtil.toItemValues(record, item).stream().map(iv -> getValue(iv))
+					.collect(Collectors.toList());
+		})).collect(Collectors.toList());
+		
+		return new ResultCheckWith(condition.checkWith(workInfo, item -> {
+			if (item.isEmpty()) {
+				return new ArrayList<>();
+			}
+			
+			return AttendanceItemUtil.toItemValues(record, item).stream().map(iv -> getValue(iv))
+					.collect(Collectors.toList());
+		}),listData.isEmpty()?null:listData.get(0).toString());
+	}
+	
 
 	private Double getValue(ItemValue value) {
 		if (value.value() == null) {
@@ -473,6 +510,7 @@ public class ErAlWorkRecordCheckService {
 		private String employeeId;
 		private String erAlId;
 		private final boolean error = true;
+		private String checkedValue;
 		
 		public ErrorRecord(GeneralDate date, String employeeId, String erAlId) {
 			super();
@@ -495,6 +533,14 @@ public class ErAlWorkRecordCheckService {
 
 		public boolean isError() {
 			return error;
+		}
+		
+		public String getCheckedValue() {
+			return checkedValue;
+		}
+
+		public void setCheckedValue(String checkedValue) {
+			this.checkedValue = checkedValue;
 		}
 	}
 }
