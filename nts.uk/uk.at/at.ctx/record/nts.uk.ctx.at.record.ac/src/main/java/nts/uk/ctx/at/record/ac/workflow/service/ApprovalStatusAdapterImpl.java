@@ -172,6 +172,14 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 		return convertFromExportNew(export);
 	}
 	
+	@Override
+	public ApprovalRootOfEmployeeImport getDailyApprovalStatus(String approverId, List<String> targetEmployeeIds,
+			DatePeriod period) {
+		AppEmpStatusExport export = intermediateDataPub.getDailyApprovalStatus(
+				approverId, targetEmployeeIds, period);
+		return convertFromExportNew(export);
+	}
+	
 	private ApprovalRootOfEmployeeImport convertFromExportNew(AppEmpStatusExport export) {
 		//ApprovalRootOfEmployeeExport
 		if(export.getRouteSituationLst() != null && export.getEmployeeID() != null){
