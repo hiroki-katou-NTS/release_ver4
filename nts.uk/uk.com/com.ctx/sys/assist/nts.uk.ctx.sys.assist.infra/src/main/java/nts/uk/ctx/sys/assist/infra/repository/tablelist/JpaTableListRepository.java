@@ -117,7 +117,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 				.getSaveProtection(Integer.valueOf(tableList.getCategoryId()), tableList.getTableNo());
 		boolean saveProtectionByEmpCode = false;
 		String couplePidItemName = "";
-		if (!listSaveProtetion.isEmpty()) {
+		if (tableList.getSurveyPreservation() == NotUseAtr.USE && !listSaveProtetion.isEmpty()) {
 			for (SaveProtetion saveProtetion : listSaveProtetion) {
 				String rePlaceCol = saveProtetion.getReplaceColumn().trim();
 				String pidCol     = saveProtetion.getCouplePidItemName().trim();
@@ -392,7 +392,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 						Map<String, Object> rowCsv = new HashMap<>();
 						int i = 0;
 						for (String columnName : headerCsv3) {
-							rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
+							rowCsv.put(columnName, objects[i] != null ? "\"\t" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
 							i++;
 						}
 						csv.writeALine(rowCsv);
@@ -414,7 +414,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 				Map<String, Object> rowCsv = new HashMap<>();
 				int i = 0;
 				for (String columnName : headerCsv3) {
-					rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
+					rowCsv.put(columnName, objects[i] != null ? "\"\t" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
 					i++;
 				}
 				csv.writeALine(rowCsv);
