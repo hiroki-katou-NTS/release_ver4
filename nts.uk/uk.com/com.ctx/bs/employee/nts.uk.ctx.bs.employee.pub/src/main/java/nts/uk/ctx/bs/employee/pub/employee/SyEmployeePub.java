@@ -190,5 +190,19 @@ public interface SyEmployeePub {
 	 */
 	List<TempAbsenceFrameExport> getTempAbsenceFrameByCid(String cid);
 	
+	/**
+	 * RequestList596 削除された社員を取り除く
+	 * @param sids
+	 * @return
+	 */
+	List<ResultRequest596Export> getEmpDeleteedLstBySids(List<String> sids);
+	
+	/**
+	 * RequestList596 削除された社員を取り除く
+	 * @param sids
+	 * @return
+	 */
+	List<ResultRequest596Export> getEmpNotDeletedLstBySids(List<String> sids);
+	
 	
 }

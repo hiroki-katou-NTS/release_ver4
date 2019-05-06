@@ -148,4 +148,7 @@ public interface EmployeeDataMngInfoRepository {
 	 */
 	List<EmployeeDataMngInfo> getAllEmpNotDeleteByCid(String companyId);
 	
+	// request list 596
+	List<EmployeeDataMngInfo> findBySidDel(List<String> sid);
+	
 }

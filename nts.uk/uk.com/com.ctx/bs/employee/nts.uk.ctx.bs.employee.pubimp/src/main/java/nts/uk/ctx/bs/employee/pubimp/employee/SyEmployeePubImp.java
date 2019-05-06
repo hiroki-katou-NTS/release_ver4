@@ -53,6 +53,7 @@ import nts.uk.ctx.bs.employee.pub.employee.EmployeeExport;
 import nts.uk.ctx.bs.employee.pub.employee.EmployeeInfoExport;
 import nts.uk.ctx.bs.employee.pub.employee.JobClassification;
 import nts.uk.ctx.bs.employee.pub.employee.MailAddress;
+import nts.uk.ctx.bs.employee.pub.employee.ResultRequest596Export;
 import nts.uk.ctx.bs.employee.pub.employee.StatusOfEmployeeExport;
 import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
 import nts.uk.ctx.bs.employee.pub.employee.TempAbsenceFrameExport;
@@ -108,6 +109,9 @@ public class SyEmployeePubImp implements SyEmployeePub {
 	
 	@Inject
 	private TempAbsenceRepositoryFrame tempAbsenceRepoFrame;
+	
+	@Inject
+	private PersonRepository personRepo;
 
 //	@Inject
 //	private AffJobTitleHistoryRepository affJobRep;
@@ -863,5 +867,37 @@ public class SyEmployeePubImp implements SyEmployeePub {
 			return new TempAbsenceFrameExport(i.getCompanyId(), i.getTempAbsenceFrNo().v().intValue(),
 					i.getUseClassification().value, i.getTempAbsenceFrName().toString());
 		}).collect(Collectors.toList());
+	}
+	
+	@Override
+	public List<ResultRequest596Export> getEmpDeleteedLstBySids(List<String> sids) {
+		List<ResultRequest596Export> result = new ArrayList<>();
+		List<EmployeeDataMngInfo> emps = this.empDataMngRepo.findBySidDel(sids);
+		List<String> personLst = emps.parallelStream().map(c -> c.getEmployeeId()).collect(Collectors.toList());
+		List<Person> personDomainLst = personRepo.getPersonByPersonIds(personLst);
+		emps.parallelStream().forEach(c ->{
+			Optional<Person> personOpt = personDomainLst.parallelStream().filter(p -> p.getPersonId().equals(c.getEmployeeId())).findFirst();
+			if(personOpt.isPresent()) {
+				result.add(new ResultRequest596Export(c.getEmployeeId(), c.getEmployeeCode().v(),
+						personOpt.get().getPersonNameGroup().getBusinessName().v()));
+			}
+		});
+		return result;
+	}
+
+	@Override
+	public List<ResultRequest596Export> getEmpNotDeletedLstBySids(List<String> sids) {
+		List<ResultRequest596Export> result = new ArrayList<>();
+		List<EmployeeDataMngInfo> emps = this.empDataMngRepo.findBySidNotDel(sids);
+		List<String> personLst = emps.parallelStream().map(c -> c.getEmployeeId()).collect(Collectors.toList());
+		List<Person> personDomainLst = personRepo.getPersonByPersonIds(personLst);
+		emps.parallelStream().forEach(c ->{
+			Optional<Person> personOpt = personDomainLst.parallelStream().filter(p -> p.getPersonId().equals(c.getEmployeeId())).findFirst();
+			if(personOpt.isPresent()) {
+				result.add(new ResultRequest596Export(c.getEmployeeId(), c.getEmployeeCode().v(),
+						personOpt.get().getPersonNameGroup().getBusinessName().v()));
+			}
+		});
+		return result;
 	}
 }
