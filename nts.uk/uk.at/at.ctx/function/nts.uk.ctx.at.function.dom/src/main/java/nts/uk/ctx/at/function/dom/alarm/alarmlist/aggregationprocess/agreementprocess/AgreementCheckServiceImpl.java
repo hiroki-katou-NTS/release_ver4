@@ -165,9 +165,10 @@ public class AgreementCheckServiceImpl implements AgreementCheckService{
 				String workPlaceId = mapEmployee.get(checkedAgreementResult.getEmpId()).getWorkplaceId();
 
 				// 年月日
-				String alarmValueDate =TextResource.localize("KAL010_906", yearmonthToString(
-						checkedAgreementResult.getAgreementTimeByPeriod().getStartMonth()) + ErAlConstant.PERIOD_SEPERATOR
-						+ yearmonthToString(checkedAgreementResult.getAgreementTimeByPeriod().getEndMonth()));
+				String alarmValueDate =TextResource.localize("KAL010_906", 
+						yearmonthToString(checkedAgreementResult.getAgreementTimeByPeriod().getStartMonth())+"" 
+						,
+						yearmonthToString(checkedAgreementResult.getAgreementTimeByPeriod().getEndMonth())+"");
 				// alarm name
 				String alarmItem = optAgreeName.isPresent() ? optAgreeName.get().getName().v() : "";
 				// カテゴリ
