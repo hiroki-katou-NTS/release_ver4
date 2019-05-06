@@ -938,4 +938,10 @@ public class WorkplacePubImp implements SyWorkplacePub {
 		return result;
 	}
 
+	@Override
+	public List<String> getLstWorkplaceIdBySidAndPeriod(String sid, DatePeriod period) {
+		List<String> workPlaceIds = affWorkplaceHistoryItemRepository.getHistIdLstByWorkplaceIdsAndSid(sid, period);
+		return workPlaceIds;
+	}
+
 }
