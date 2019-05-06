@@ -102,8 +102,8 @@ public class ApprovalStatusActualDay {
 										Arrays.asList(employeeId), 1);
 
 						//対応するImported「基準社員の承認対象者」を取得する
-						ApprovalRootOfEmployeeImport approvalRoot = approvalStatusAdapter.getApprovalRootOfEmloyeeNew(
-								datePeriod.start(), datePeriod.end(), targetEmp, companyId, 1);
+						ApprovalRootOfEmployeeImport approvalRoot = approvalStatusAdapter.getDailyApprovalStatus(
+								targetEmp, employeeIds, datePeriod);
 						Map<Pair<String, GeneralDate>, Pair<ApprovalStatus, ApproverEmployeeState>> mapApprovalRoot = approvalRoot
 								.getApprovalRootSituations().stream()
 								.collect(Collectors.toMap(x -> Pair.of(x.getTargetID(), x.getAppDate()),
