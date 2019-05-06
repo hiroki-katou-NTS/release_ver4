@@ -13,7 +13,9 @@ import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import nts.arc.enums.EnumAdaptor;
 import nts.uk.ctx.at.function.dom.processexecution.executionlog.EndStatus;
 import nts.uk.ctx.at.function.dom.processexecution.executionlog.ExecutionTaskLog;
@@ -22,6 +24,8 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @Entity
 @Table(name="KFNMT_EXEC_TASK_LOG")
 @NoArgsConstructor
+@Getter
+@Setter
 public class KfnmtExecutionTaskLog extends UkJpaEntity implements Serializable{
 	private static final long serialVersionUID = 1L;
 	/* 主キー */

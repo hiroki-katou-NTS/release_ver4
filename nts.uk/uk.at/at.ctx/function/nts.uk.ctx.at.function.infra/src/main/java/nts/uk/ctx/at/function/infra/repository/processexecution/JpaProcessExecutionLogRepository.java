@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.function.infra.repository.processexecution;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -10,11 +12,13 @@ import javax.ejb.TransactionAttributeType;
 import javax.persistence.Query;
 
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.function.dom.processexecution.executionlog.ProcessExecutionLog;
 //import nts.uk.ctx.at.function.dom.processexecution.executionlog.ProcessExecutionLogManage;
 import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionLogRepository;
 import nts.uk.ctx.at.function.infra.entity.processexecution.KfnmtExecutionTaskLog;
+import nts.uk.ctx.at.function.infra.entity.processexecution.KfnmtExecutionTaskLogPK;
 import nts.uk.ctx.at.function.infra.entity.processexecution.KfnmtProcessExecutionLog;
 //import nts.uk.ctx.at.function.infra.entity.processexecution.KfnmtProcessExecutionLogManage;
 //import nts.uk.ctx.at.function.infra.entity.processexecution.KfnmtProcessExecutionLogPK;
@@ -53,6 +57,9 @@ public class JpaProcessExecutionLogRepository extends JpaRepository
 	private static final String DELETE_BY_EXEC_CD = " DELETE FROM KfnmtProcessExecutionLog c "
 			+ "WHERE c.kfnmtProcExecLogPK.companyId = :companyId "
 			+ "AND c.kfnmtProcExecLogPK.execItemCd = :execItemCd ";
+	private static final String SELECT_TASK_LOG_BY_JDBC = "SELECT * FROM KFNMT_EXEC_TASK_LOG "
+			+ "WHERE CID = ? "
+			+ "AND EXEC_ITEM_CD = ? ";
 	@Override
 	public List<ProcessExecutionLog> getProcessExecutionLogByCompanyId(String companyId) {
 		return this.queryProxy().query(SELECT_All_BY_CID, KfnmtProcessExecutionLog.class)
@@ -111,8 +118,27 @@ public class JpaProcessExecutionLogRepository extends JpaRepository
 
 	@Override
 	public Optional<ProcessExecutionLog> getLog(String companyId, String execItemCd) {
-		 List<KfnmtExecutionTaskLog> list = this.queryProxy().query(SELECT_TASK_LOG, KfnmtExecutionTaskLog.class)
-				.setParameter("companyId", companyId).setParameter("execItemCd", execItemCd).getList();
+//		 List<KfnmtExecutionTaskLog> list = this.queryProxy().query(SELECT_TASK_LOG, KfnmtExecutionTaskLog.class)
+//				.setParameter("companyId", companyId).setParameter("execItemCd", execItemCd).getList();
+		List<KfnmtExecutionTaskLog> list = new ArrayList<>();
+		try (PreparedStatement statement1 = this.connection().prepareStatement(SELECT_TASK_LOG_BY_JDBC)) {
+			statement1.setString(1, companyId);
+			statement1.setString(2, execItemCd);
+			list.addAll(new NtsResultSet(statement1.executeQuery()).getList(rec -> {
+				KfnmtExecutionTaskLogPK pk = new KfnmtExecutionTaskLogPK();
+						pk.setCompanyId(rec.getString("CID"));
+						pk.setExecItemCd(rec.getString("EXEC_ITEM_CD"));
+						pk.setExecId(rec.getString("EXEC_ID"));
+						pk.setTaskId(rec.getInt("TASK_ID"));
+						KfnmtExecutionTaskLog entity = new KfnmtExecutionTaskLog();
+						entity.setKfnmtExecTaskLogPK(pk);
+						entity.setStatus(rec.getInt("STATUS"));
+						entity.setUpdDate(rec.getGeneralDateTime("UPD_DATE"));
+						return entity;
+					}));
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 		if(!list.isEmpty()){
 			 List<KfnmtProcessExecutionLog> listKfnmtProcessExecutionLog= this.queryProxy().query(SELECT_BY_KEY, KfnmtProcessExecutionLog.class)
 						.setParameter("companyId", companyId).setParameter("execItemCd", execItemCd).getList();
