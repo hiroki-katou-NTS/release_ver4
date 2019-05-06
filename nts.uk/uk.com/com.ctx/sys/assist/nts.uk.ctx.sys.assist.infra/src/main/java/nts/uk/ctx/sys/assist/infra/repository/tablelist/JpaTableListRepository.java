@@ -115,19 +115,23 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 		// アルゴリズム「個人情報の保護」を実行する
 		List<SaveProtetion> listSaveProtetion = saveProtetionRepo
 				.getSaveProtection(Integer.valueOf(tableList.getCategoryId()), tableList.getTableNo());
-		if (tableList.getSurveyPreservation() == NotUseAtr.USE && !listSaveProtetion.isEmpty()) {
+		boolean saveProtectionByEmpCode = false;
+		String couplePidItemName = "";
+		if (!listSaveProtetion.isEmpty()) {
 			for (SaveProtetion saveProtetion : listSaveProtetion) {
 				String rePlaceCol = saveProtetion.getReplaceColumn().trim();
+				String pidCol     = saveProtetion.getCouplePidItemName().trim();
 				String newValue = "";
 				// Vì domain không tạo Enum nên phải fix code ngu
 				if (saveProtetion.getCorrectClasscification() == 0) {
 					newValue = "'' AS " + rePlaceCol;
 				} else if (saveProtetion.getCorrectClasscification() == 1) {
-					if (columns.contains("EMPLOYEE_CODE")) {
-						newValue = "t.EMPLOYEE_CODE AS " + rePlaceCol;
-					} else {
-						newValue = "'' AS " + rePlaceCol;
-					}
+					
+					saveProtectionByEmpCode = true;
+					couplePidItemName = listSaveProtetion.get(0).getCouplePidItemName();
+					
+					newValue = " bdm.SCD AS " +  rePlaceCol;
+					
 				} else if (saveProtetion.getCorrectClasscification() == 2) {
 					newValue = "0 AS " + rePlaceCol;
 				} else if (saveProtetion.getCorrectClasscification() == 3) {
@@ -139,6 +143,12 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 
 		// From
 		query.append(" FROM ").append(tableList.getTableEnglishName()).append(" t");
+		if(saveProtectionByEmpCode){
+			
+			query.append(" LEFT JOIN (SELECT PID, MIN(SCD) AS SCD FROM BSYMT_EMP_DTA_MNG_INFO GROUP BY PID) bdm ON bdm.PID = t." + couplePidItemName);
+			
+		}
+		
 		if (tableList.getHasParentTblFlg() == NotUseAtr.USE && tableList.getParentTblName().isPresent()) {
 			// アルゴリズム「親テーブルをJOINする」を実行する
 			query.append(" INNER JOIN ").append(tableList.getParentTblName().get()).append(" p ON ");
