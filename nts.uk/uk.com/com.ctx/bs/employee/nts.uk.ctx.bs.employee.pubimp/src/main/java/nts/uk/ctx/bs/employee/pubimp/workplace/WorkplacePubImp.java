@@ -43,6 +43,7 @@ import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfoRepos
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceHierarchy;
 import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfo;
 import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfoRepository;
+import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
 import nts.uk.ctx.bs.employee.pub.workplace.AffAtWorkplaceExport;
 import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceExport;
 import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceHistoryExport;
@@ -60,7 +61,6 @@ import nts.uk.ctx.bs.employee.pub.workplace.WkpInfoHistExport;
 import nts.uk.ctx.bs.employee.pub.workplace.WorkPlaceHistExport;
 import nts.uk.ctx.bs.employee.pub.workplace.WorkPlaceIdAndPeriod;
 import nts.uk.ctx.bs.employee.pub.workplace.WorkPlaceInfoExport;
-import nts.uk.ctx.bs.employee.pubimp.employee.SyEmployeePubImp;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.history.DateHistoryItem;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -107,7 +107,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 	private EmployeeDataMngInfoRepository empDataMngRepo;
 	
 	@Inject
-	private SyEmployeePubImp subEmp;
+	private SyEmployeePub subEmp;
 
 	/*
 	 * (non-Javadoc)

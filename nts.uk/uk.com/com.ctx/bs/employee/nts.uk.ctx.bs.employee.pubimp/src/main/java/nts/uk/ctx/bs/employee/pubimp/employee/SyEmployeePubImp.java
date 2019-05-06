@@ -889,10 +889,10 @@ public class SyEmployeePubImp implements SyEmployeePub {
 	public List<ResultRequest596Export> getEmpNotDeletedLstBySids(List<String> sids) {
 		List<ResultRequest596Export> result = new ArrayList<>();
 		List<EmployeeDataMngInfo> emps = this.empDataMngRepo.findBySidNotDel(sids);
-		List<String> personLst = emps.parallelStream().map(c -> c.getEmployeeId()).collect(Collectors.toList());
-		List<Person> personDomainLst = personRepo.getPersonByPersonIds(personLst);
+		List<String> personIds = emps.parallelStream().map(c -> c.getPersonId()).collect(Collectors.toList());
+		List<Person> personLst = personRepo.getPersonByPersonIds(personIds);
 		emps.parallelStream().forEach(c ->{
-			Optional<Person> personOpt = personDomainLst.parallelStream().filter(p -> p.getPersonId().equals(c.getEmployeeId())).findFirst();
+			Optional<Person> personOpt = personLst.parallelStream().filter(p -> p.getPersonId().equals(c.getPersonId())).findFirst();
 			if(personOpt.isPresent()) {
 				result.add(new ResultRequest596Export(c.getEmployeeId(), c.getEmployeeCode().v(),
 						personOpt.get().getPersonNameGroup().getBusinessName().v()));
