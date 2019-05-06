@@ -195,7 +195,7 @@ public interface SyEmployeePub {
 	 * @param sids
 	 * @return
 	 */
-	List<ResultRequest596Export> getEmpDeleteedLstBySids(List<String> sids);
+	List<ResultRequest596Export> getEmpDeletedLstBySids(List<String> sids);
 	
 	/**
 	 * RequestList596 削除された社員を取り除く

@@ -870,7 +870,7 @@ public class SyEmployeePubImp implements SyEmployeePub {
 	}
 	
 	@Override
-	public List<ResultRequest596Export> getEmpDeleteedLstBySids(List<String> sids) {
+	public List<ResultRequest596Export> getEmpDeletedLstBySids(List<String> sids) {
 		List<ResultRequest596Export> result = new ArrayList<>();
 		List<EmployeeDataMngInfo> emps = this.empDataMngRepo.findBySidDel(sids);
 		List<String> personLst = emps.parallelStream().map(c -> c.getEmployeeId()).collect(Collectors.toList());
