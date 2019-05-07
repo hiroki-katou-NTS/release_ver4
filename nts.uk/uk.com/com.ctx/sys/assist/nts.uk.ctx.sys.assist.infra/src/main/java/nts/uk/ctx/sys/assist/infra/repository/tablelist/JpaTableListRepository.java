@@ -1,5 +1,9 @@
 package nts.uk.ctx.sys.assist.infra.repository.tablelist;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -392,7 +396,14 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 						Map<String, Object> rowCsv = new HashMap<>();
 						int i = 0;
 						for (String columnName : headerCsv3) {
-							rowCsv.put(columnName, objects[i] != null ? "\"\t" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
+							if (objects[i] instanceof BigDecimal) {
+								
+								BigDecimal value = ((BigDecimal) objects[i]); // the value you get
+								rowCsv.put(columnName, objects[i] != null ? "\"" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
+								
+							} else {								
+								rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");								
+							}
 							i++;
 						}
 						csv.writeALine(rowCsv);
@@ -414,7 +425,17 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 				Map<String, Object> rowCsv = new HashMap<>();
 				int i = 0;
 				for (String columnName : headerCsv3) {
-					rowCsv.put(columnName, objects[i] != null ? "\"\t" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
+					if (objects[i] instanceof BigDecimal) {
+						
+						BigDecimal value = ((BigDecimal) objects[i]); // the value you get
+						
+						rowCsv.put(columnName, objects[i] != null ? "\"" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
+						
+					} else {
+						
+						rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
+						
+					}
 					i++;
 				}
 				csv.writeALine(rowCsv);
