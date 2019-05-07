@@ -103,36 +103,21 @@ public class CsvFileUtil {
 	}
 
 	public static Set<String> getListSid(String fileId, String fileName) {
-		NtsCsvReader csvReader = NtsCsvReader.newReader().skipEmptyLines(true)
-				.withChartSet(Charset.forName("UTF-8"));
-		try {
-			InputStream inputStream = createInputStreamFromFile(fileId, fileName);
-			CustomCsvReader csvCustomReader = csvReader.createCustomCsvReader(inputStream);
-			csvCustomReader.setNoHeader(true);
-			if (!Objects.isNull(inputStream)) {
-				Set<String> listSid = new HashSet<>();
-				Consumer<CSVParsedResult> csvResult = (c) -> {
-					for (int i = 0; i < c.getRecords().size(); i++) {
-						if (c.getRecords().get(i).getColumn(1) != null) {
-							listSid.add(c.getRecords().get(i).getColumn(1).toString().trim());
-						}
-					}
-				};
-
-				Function<NtsCsvRecord, Boolean> customCheckRow = (row) -> {
-					if (row.getColumn(1).equals("CMF003_H_SID") || row.getColumn(1).equals("") || row.getColumn(1).equals(" "))
-						return false;
-					return true;
-				};
-
-				csvCustomReader.readByStep(3000, csvResult, customCheckRow);
-				csvCustomReader.close();
-				return listSid;
+		CSVBufferReader reader = new CSVBufferReader(new File(getExtractDataStoragePath(fileId) + "//" + fileName + ".csv"));
+		reader.setCharset("UTF-8");
+		Set<String> listSid = new HashSet<>();
+		Consumer<CSVParsedResult> csvResult = (dataRow) -> {
+			List<NtsCsvRecord> records = dataRow.getRecords();
+			for (int i = 0; i < records.size(); i++) {
+				NtsCsvRecord record = records.get(i);
+				if (record.getRowNumber() != 0
+						&& !(record.getColumn(1) == null || record.getColumn(1) == "" || record.getColumn(1) == " ")) {
+					listSid.add(record.getColumn(1).toString().trim());
+				}
 			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		return new HashSet<>();
+		};
+		reader.readChunk(csvResult, null, null);
+		return listSid;
 	}
 	
 	

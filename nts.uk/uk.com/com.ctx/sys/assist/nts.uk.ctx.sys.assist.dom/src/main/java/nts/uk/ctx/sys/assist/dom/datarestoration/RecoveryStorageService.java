@@ -428,411 +428,364 @@ public class RecoveryStorageService {
 			System.out.println("============= employeeId " + employeeId);
 			
 			if (employeeId != null && dataRecoveryTable.isHasSidInCsv()) {
+				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
+				reader.setCharset("UTF-8");
+				reader.readFilter(1000, dataRow -> {
 
-				
-				NtsCsvReader csvReader = NtsCsvReader.newReader().skipEmptyLines(true)
-						.withChartSet(Charset.forName("UTF-8"));
-				try {
-					InputStream inputStream = createInputStreamFromFile(dataRecoveryTable.getUploadId(),
-							dataRecoveryTable.getFileNameCsv());
-					CustomCsvReader csvCustomReader = csvReader.createCustomCsvReader(inputStream);
-					csvCustomReader.setNoHeader(true);
-					if (!Objects.isNull(inputStream)) {
-						Consumer<CSVParsedResult> csvResult = (dataRow) -> {
-							
-							List<NtsCsvRecord> records = dataRow.getRecords();
+					List<NtsCsvRecord> records = dataRow.getRecords();
 
-							System.out.println("============= list record size " + records.size());
-							
-							if (!records.isEmpty()) {
+					System.out.println("============= list record size " + records.size());
+					if (!records.isEmpty()) {
 
-								long startTime = System.nanoTime();
+						long startTime = System.nanoTime();
 
-								StringBuilder DELETE_INSERT_TO_TABLE = new StringBuilder("");
-								StringBuilder INSERT_TO_TABLE = new StringBuilder("");
+						StringBuilder DELETE_INSERT_TO_TABLE = new StringBuilder("");
+						StringBuilder INSERT_TO_TABLE = new StringBuilder("");
 
-								List<Integer> listCount = new ArrayList<>();
-								String namePhysicalCid = null, TABLE_NAME = null;
-								List<Map<String, String>> listFiledWhere = new ArrayList<>();
-								String cidCurrent = AppContexts.user().companyId();
+						List<Integer> listCount = new ArrayList<>();
+						String namePhysicalCid = null, TABLE_NAME = null;
+						List<Map<String, String>> listFiledWhere = new ArrayList<>();
+						String cidCurrent = AppContexts.user().companyId();
 
-								HashMap<Integer, String> indexAndFiled = new HashMap<>();
-								// search data by employee
+						HashMap<Integer, String> indexAndFiled = new HashMap<>();
+						// search data by employee
 
-								if (tableList.isPresent()) {
-									TABLE_NAME = tableList.get().getTableEnglishName();
-									try {
-										indexAndFiled = indexMapFiledCsv(targetDataHeader, tableList);
-									} catch (NoSuchMethodException | SecurityException | IllegalAccessException
-											| IllegalArgumentException | InvocationTargetException e) {
-										e.printStackTrace();
-									}
-								}
-
-								// 対象データの会社IDをパラメータの会社IDに入れ替える - swap CID
-								// 既存データの検索
-								try {
-									namePhysicalCid = findNamePhysicalCid(tableList);
-								} catch (NoSuchMethodException | SecurityException | IllegalAccessException
-										| IllegalArgumentException | InvocationTargetException e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}
-
-								List<String> columnNotNull = checkTypeColumn(TABLE_NAME);
-								int check = 0;
-								for (int k = 0; k < records.size(); k++) {
-
-									NtsCsvRecord row = records.get(k);
-
-									int indexCidOfCsv = 0;
-									int count = 0;
-
-									// データベース復旧処理
-									if ((tableUse && employeeId != null
-											&& !row.getColumn(INDEX_SID).equals(employeeId))) {
-										continue;
-									}
-
-									// set câu insert
-									StringBuilder INSERT_BY_TABLE = new StringBuilder("INSERT INTO ");
-
-									INSERT_BY_TABLE.append(TABLE_NAME);
-									INSERT_BY_TABLE.append(" (");
-
-									StringBuilder values = new StringBuilder(" VALUES (");
-									//
-
-									String V_FILED_KEY_UPDATE = null, h_Date_Csv = null, dateSub = "";
-
-									if (dateSetting.size() == 1) {
-										h_Date_Csv = row.getColumn(INDEX_H_DATE).toString();
-									} else if (dateSetting.size() == 2) {
-										h_Date_Csv = row.getColumn(INDEX_H_START_DATE).toString();
-									}
-
-									// 履歴区分を判別する - check history division
-									try {
-										if (((tableUse && tableList.get().getHistoryCls() == HistoryDiviSion.NO_HISTORY)
-												|| !tableUse)
-												&& (performDataRecovery.isPresent()
-														&& performDataRecovery.get()
-																.getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
-														&& !checkSettingDate(dateSetting, tableList, h_Date_Csv))) {
-											continue;
-										}
-									} catch (ParseException e1) {
-										e1.printStackTrace();
-									}
-
-									// update recovery date for have history,
-									// save
-									// range
-									// none, year,
-									// year/month, year/month/day
-									if (!h_Date_Csv.isEmpty()) {
-										if (tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY && tableUse)
-											dateSub = dateTimeCutter(YEAR_MONTH_DAY, h_Date_Csv).orElse("");
-										if (tableList.get().getRetentionPeriodCls() == TimeStore.FULL_TIME) {
-											dateSub = "";
-										}
-
-										dateSub = dateTimeCutter(dateSetting.get(0), h_Date_Csv).orElse("");
-									} else {
-										dateSub = "";
-									}
-
-									dataRecoveryMngRepository.updateRecoveryDate(dataRecoveryProcessId, dateSub);
-
-									// create filed where for query
-									Map<String, String> filedWhere = new HashMap<>();
-									for (Map.Entry<Integer, String> entry : indexAndFiled.entrySet()) {
-										V_FILED_KEY_UPDATE = row.getColumn(entry.getKey()).toString();
-										filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
-									}
-									listFiledWhere.add(filedWhere);
-
-									if (tableUse) {
-										count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(
-												filedWhere, TABLE_NAME, namePhysicalCid, cidCurrent);
-									} else {
-										count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere,
-												TABLE_NAME, namePhysicalCid, cidCurrent);
-									}
-
-									if (count > 1 && tableUse) {
-										listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
-									} else if (count > 1 && !tableUse) {
-										continue;
-									}
-
-									indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
-
-									for (int j = 5; j < row.columnLength(); j++) {
-
-										String header_column_name = targetDataHeader.get(j);
-
-										// add columns name
-										INSERT_BY_TABLE.append(targetDataHeader.get(j) + ", ");
-										boolean anyNonEmpty = columnNotNull.stream()
-												.anyMatch(x -> x.equals(header_column_name));
-										String value = j == indexCidOfCsv ? cidCurrent : row.getColumn(j).toString();
-										// add values
-										if (StringUtils.isEmpty(value)) {
-											if (anyNonEmpty) {
-												values.append("'',");
-											} else {
-												values.append("null,");
-											}
-										} else {
-											values.append("N'" + value.replaceAll("\u00A0", "\"").replaceAll("'", "''") + "' collate Japanese_XJIS_100_CI_AS_SC,");
-										}
-									}
-
-									INSERT_BY_TABLE.append(")");
-									INSERT_BY_TABLE.append(values.toString().replaceAll(",$", ")"));
-
-									// query.executeUpdate();
-									if (count == 1) {
-										DELETE_INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
-									} else if (count == 0) {
-										INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
-									}
-
-									listCount.add(count);
-									check++;
-								}
-
-								// insert delete data
-								if (check > 0) {
-									if (tableUse) {
-										crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-												DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
-									} else {
-										crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-												DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
-									}
-								}
-								long endTime = System.nanoTime();
-								long duration = (endTime - startTime) / 1000000; // ms;
-								System.out.println("========= Time Retore " + duration);
+						if (tableList.isPresent()) {
+							TABLE_NAME = tableList.get().getTableEnglishName();
+							try {
+								indexAndFiled = indexMapFiledCsv(targetDataHeader, tableList);
+							} catch (NoSuchMethodException | SecurityException | IllegalAccessException
+									| IllegalArgumentException | InvocationTargetException e) {
+								e.printStackTrace();
 							}
-						};
+						}
 
-						Function<NtsCsvRecord, Boolean> customCheckRow = (row) -> {
-							if (row.getColumn(1).equals("CMF003_H_SID") || row.getColumn(1).equals("") || row.getColumn(1).equals(" "))
-								return false;
-							if (row.getColumn(1).equals(employeeId)) {
-								return true;
+						// 対象データの会社IDをパラメータの会社IDに入れ替える - swap CID
+						// 既存データの検索
+						try {
+							namePhysicalCid = findNamePhysicalCid(tableList);
+						} catch (NoSuchMethodException | SecurityException | IllegalAccessException
+								| IllegalArgumentException | InvocationTargetException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+
+						List<String> columnNotNull = checkTypeColumn(TABLE_NAME);
+						int check = 0;
+						for (int k = 0; k < records.size(); k++) {
+
+							NtsCsvRecord row = records.get(k);
+
+							int indexCidOfCsv = 0;
+							int count = 0;
+
+							// データベース復旧処理
+							if ((tableUse && employeeId != null && !row.getColumn(INDEX_SID).equals(employeeId))) {
+								continue;
 							}
-							return false;
-						};
-						csvCustomReader.readByStep(3000, csvResult, customCheckRow);
-						csvCustomReader.close();
+
+							// set câu insert
+							StringBuilder INSERT_BY_TABLE = new StringBuilder("INSERT INTO ");
+
+							INSERT_BY_TABLE.append(TABLE_NAME);
+							INSERT_BY_TABLE.append(" (");
+
+							StringBuilder values = new StringBuilder(" VALUES (");
+							//
+
+							String V_FILED_KEY_UPDATE = null, h_Date_Csv = null, dateSub = "";
+
+							if (dateSetting.size() == 1) {
+								h_Date_Csv = row.getColumn(INDEX_H_DATE).toString();
+							} else if (dateSetting.size() == 2) {
+								h_Date_Csv = row.getColumn(INDEX_H_START_DATE).toString();
+							}
+
+							// 履歴区分を判別する - check history division
+							try {
+								if (((tableUse && tableList.get().getHistoryCls() == HistoryDiviSion.NO_HISTORY) || !tableUse)
+									&& (performDataRecovery.isPresent() && performDataRecovery.get().getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
+									&& !checkSettingDate(dateSetting, tableList, h_Date_Csv))) {
+									continue;
+								}
+							} catch (ParseException e1) {
+								e1.printStackTrace();
+							}
+
+							// update recovery date for have history, save
+							// range
+							// none, year,
+							// year/month, year/month/day
+							if (!h_Date_Csv.isEmpty()) {
+								if (tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY && tableUse)
+									dateSub = dateTimeCutter(YEAR_MONTH_DAY, h_Date_Csv).orElse("");
+								if (tableList.get().getRetentionPeriodCls() == TimeStore.FULL_TIME) {
+									dateSub = "";
+								}
+
+								dateSub = dateTimeCutter(dateSetting.get(0), h_Date_Csv).orElse("");
+							} else {
+								dateSub = "";
+							}
+
+							dataRecoveryMngRepository.updateRecoveryDate(dataRecoveryProcessId, dateSub);
+
+							// create filed where for query
+							Map<String, String> filedWhere = new HashMap<>();
+							for (Map.Entry<Integer, String> entry : indexAndFiled.entrySet()) {
+								V_FILED_KEY_UPDATE = row.getColumn(entry.getKey()).toString();
+								filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
+							}
+							listFiledWhere.add(filedWhere);
+
+							if (tableUse) {
+								count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(filedWhere,
+										TABLE_NAME, namePhysicalCid, cidCurrent);
+							} else {
+								count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere, TABLE_NAME,
+										namePhysicalCid, cidCurrent);
+							}
+
+							if (count > 1 && tableUse) {
+								listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
+							} else if (count > 1 && !tableUse) {
+								continue;
+							}
+
+							indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
+
+							for (int j = 5; j < row.columnLength(); j++) {
+								String header_column_name = targetDataHeader.get(j);
+								// add columns name
+								INSERT_BY_TABLE.append(targetDataHeader.get(j) + ", ");
+								boolean anyNonEmpty = columnNotNull.stream().anyMatch(x -> x.equals(header_column_name));
+								String value = j == indexCidOfCsv ? cidCurrent : row.getColumn(j).toString();
+								// add values
+								if (StringUtils.isEmpty(value)) {
+									if (anyNonEmpty) {
+										values.append("'',");
+									} else {
+										values.append("null,");
+									}
+								} else {
+									values.append("N'" + value.replaceAll("\u00A0", "\"") + "' collate Japanese_XJIS_100_CI_AS_SC,");
+								}
+							}
+
+							INSERT_BY_TABLE.append(")");
+							INSERT_BY_TABLE.append(values.toString().replaceAll(",$", ")"));
+
+							// query.executeUpdate();
+							if (count == 1) {
+								DELETE_INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+							} else if (count == 0) {
+								INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+							}
+							
+							listCount.add(count);
+							check++;
+						}
+
+						// insert delete data
+						if (check > 0) {
+							if (tableUse) {
+
+								crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
+										DELETE_INSERT_TO_TABLE , INSERT_TO_TABLE);
+							} else {
+								crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
+										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
+							}
+						}
+						long endTime = System.nanoTime();
+						long duration = (endTime - startTime) / 1000000; // ms;
+						System.out.println("========= Time Retore " + duration);
 					}
+				}, 1, employeeId);
 
-				} catch (Exception e) {}
-				
 			} else {
 				
-				NtsCsvReader csvReader = NtsCsvReader.newReader().skipEmptyLines(true)
-						.withChartSet(Charset.forName("UTF-8"));
-				try {
-					InputStream inputStream = createInputStreamFromFile(dataRecoveryTable.getUploadId(),
-							dataRecoveryTable.getFileNameCsv());
-					CustomCsvReader csvCustomReader = csvReader.createCustomCsvReader(inputStream);
-					csvCustomReader.setNoHeader(true);
-					if (!Objects.isNull(inputStream)) {
-						Consumer<CSVParsedResult> csvResult = (dataRow) -> {
-							
-							List<NtsCsvRecord> records = dataRow.getRecords();
+				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
+				reader.setCharset("UTF-8");
 
-							System.out.println("============= list record size " + records.size());
-							
-							if (!records.isEmpty()) {
+				Consumer<CSVParsedResult> csvResult = (dataRow) -> {
 
-								long startTime = System.nanoTime();
+					List<NtsCsvRecord> records = dataRow.getRecords();
 
-								StringBuilder DELETE_INSERT_TO_TABLE = new StringBuilder("");
-								StringBuilder INSERT_TO_TABLE = new StringBuilder("");
+					System.out.println("============= list record size " + records.size());
+					if (!records.isEmpty()) {
 
-								List<Integer> listCount = new ArrayList<>();
-								String namePhysicalCid = null, TABLE_NAME = null;
-								List<Map<String, String>> listFiledWhere = new ArrayList<>();
-								String cidCurrent = AppContexts.user().companyId();
+						long startTime = System.nanoTime();
 
-								HashMap<Integer, String> indexAndFiled = new HashMap<>();
-								// search data by employee
+						StringBuilder DELETE_INSERT_TO_TABLE = new StringBuilder("");
+						StringBuilder INSERT_TO_TABLE = new StringBuilder("");
 
-								if (tableList.isPresent()) {
-									TABLE_NAME = tableList.get().getTableEnglishName();
-									try {
-										indexAndFiled = indexMapFiledCsv(targetDataHeader, tableList);
-									} catch (NoSuchMethodException | SecurityException | IllegalAccessException
-											| IllegalArgumentException | InvocationTargetException e) {
-										e.printStackTrace();
-									}
+						List<Integer> listCount = new ArrayList<>();
+						String namePhysicalCid = null, TABLE_NAME = null;
+						List<Map<String, String>> listFiledWhere = new ArrayList<>();
+						String cidCurrent = AppContexts.user().companyId();
+
+						HashMap<Integer, String> indexAndFiled = new HashMap<>();
+						// search data by employee
+
+						if (tableList.isPresent()) {
+							TABLE_NAME = tableList.get().getTableEnglishName();
+							try {
+								indexAndFiled = indexMapFiledCsv(targetDataHeader, tableList);
+							} catch (NoSuchMethodException | SecurityException | IllegalAccessException
+									| IllegalArgumentException | InvocationTargetException e) {
+								e.printStackTrace();
+							}
+						}
+
+						// 対象データの会社IDをパラメータの会社IDに入れ替える - swap CID
+						// 既存データの検索
+						try {
+							namePhysicalCid = findNamePhysicalCid(tableList);
+						} catch (NoSuchMethodException | SecurityException | IllegalAccessException
+								| IllegalArgumentException | InvocationTargetException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+
+						List<String> columnNotNull = checkTypeColumn(TABLE_NAME);
+						int check = 0;
+						for (int k = 0; k < records.size(); k++) {
+
+							NtsCsvRecord row = records.get(k);
+
+							if (row.getRowNumber() != 0) {
+								int indexCidOfCsv = 0;
+								int count = 0;
+
+								// データベース復旧処理
+								if ((tableUse && employeeId != null && !row.getColumn(INDEX_SID).equals(employeeId))) {
+									continue;
 								}
 
-								// 対象データの会社IDをパラメータの会社IDに入れ替える - swap CID
-								// 既存データの検索
+								// set câu insert
+								StringBuilder INSERT_BY_TABLE = new StringBuilder("INSERT INTO ");
+
+								INSERT_BY_TABLE.append(TABLE_NAME);
+								INSERT_BY_TABLE.append(" (");
+
+								StringBuilder values = new StringBuilder(" VALUES (");
+								//
+
+								String V_FILED_KEY_UPDATE = null, h_Date_Csv = null, dateSub = "";
+
+								if (dateSetting.size() == 1) {
+									h_Date_Csv = row.getColumn(INDEX_H_DATE).toString();
+								} else if (dateSetting.size() == 2) {
+									h_Date_Csv = row.getColumn(INDEX_H_START_DATE).toString();
+								}
+
+								// 履歴区分を判別する - check history division
 								try {
-									namePhysicalCid = findNamePhysicalCid(tableList);
-								} catch (NoSuchMethodException | SecurityException | IllegalAccessException
-										| IllegalArgumentException | InvocationTargetException e1) {
-									// TODO Auto-generated catch block
+									if (((tableUse && tableList.get().getHistoryCls() == HistoryDiviSion.NO_HISTORY) || !tableUse)
+										&& (performDataRecovery.isPresent() && performDataRecovery.get() .getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
+										&& !checkSettingDate(dateSetting, tableList, h_Date_Csv))) {
+												continue;
+									}
+								} catch (ParseException e1) {
 									e1.printStackTrace();
 								}
 
-								List<String> columnNotNull = checkTypeColumn(TABLE_NAME);
-								int check = 0;
-								for (int k = 1; k < records.size(); k++) {
-
-									NtsCsvRecord row = records.get(k);
-
-									int indexCidOfCsv = 0;
-									int count = 0;
-
-									// データベース復旧処理
-									if ((tableUse && employeeId != null
-											&& !row.getColumn(INDEX_SID).equals(employeeId))) {
-										continue;
-									}
-
-									// set câu insert
-									StringBuilder INSERT_BY_TABLE = new StringBuilder("INSERT INTO ");
-
-									INSERT_BY_TABLE.append(TABLE_NAME);
-									INSERT_BY_TABLE.append(" (");
-
-									StringBuilder values = new StringBuilder(" VALUES (");
-									//
-
-									String V_FILED_KEY_UPDATE = null, h_Date_Csv = null, dateSub = "";
-
-									if (dateSetting.size() == 1) {
-										h_Date_Csv = row.getColumn(INDEX_H_DATE).toString();
-									} else if (dateSetting.size() == 2) {
-										h_Date_Csv = row.getColumn(INDEX_H_START_DATE).toString();
-									}
-
-									// 履歴区分を判別する - check history division
-									try {
-										if (((tableUse && tableList.get().getHistoryCls() == HistoryDiviSion.NO_HISTORY)
-												|| !tableUse)
-												&& (performDataRecovery.isPresent()
-														&& performDataRecovery.get()
-																.getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
-														&& !checkSettingDate(dateSetting, tableList, h_Date_Csv))) {
-											continue;
-										}
-									} catch (ParseException e1) {
-										e1.printStackTrace();
-									}
-
-									// update recovery date for have history,
-									// save
-									// range
-									// none, year,
-									// year/month, year/month/day
-									if (!h_Date_Csv.isEmpty()) {
-										if (tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY && tableUse)
-											dateSub = dateTimeCutter(YEAR_MONTH_DAY, h_Date_Csv).orElse("");
-										if (tableList.get().getRetentionPeriodCls() == TimeStore.FULL_TIME) {
-											dateSub = "";
-										}
-
-										dateSub = dateTimeCutter(dateSetting.get(0), h_Date_Csv).orElse("");
-									} else {
+								// update recovery date for have history, save
+								// range
+								// none, year,
+								// year/month, year/month/day
+								if (!h_Date_Csv.isEmpty()) {
+									if (tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY && tableUse)
+										dateSub = dateTimeCutter(YEAR_MONTH_DAY, h_Date_Csv).orElse("");
+									if (tableList.get().getRetentionPeriodCls() == TimeStore.FULL_TIME) {
 										dateSub = "";
 									}
 
-									dataRecoveryMngRepository.updateRecoveryDate(dataRecoveryProcessId, dateSub);
+									dateSub = dateTimeCutter(dateSetting.get(0), h_Date_Csv).orElse("");
+								} else {
+									dateSub = "";
+								}
 
-									// create filed where for query
-									Map<String, String> filedWhere = new HashMap<>();
-									for (Map.Entry<Integer, String> entry : indexAndFiled.entrySet()) {
-										V_FILED_KEY_UPDATE = row.getColumn(entry.getKey()).toString();
-										filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
-									}
-									listFiledWhere.add(filedWhere);
+								dataRecoveryMngRepository.updateRecoveryDate(dataRecoveryProcessId, dateSub);
 
-									if (tableUse) {
-										count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(
-												filedWhere, TABLE_NAME, namePhysicalCid, cidCurrent);
-									} else {
-										count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere,
-												TABLE_NAME, namePhysicalCid, cidCurrent);
-									}
+								// create filed where for query
+								Map<String, String> filedWhere = new HashMap<>();
+								for (Map.Entry<Integer, String> entry : indexAndFiled.entrySet()) {
+									V_FILED_KEY_UPDATE = row.getColumn(entry.getKey()).toString();
+									filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
+								}
+								listFiledWhere.add(filedWhere);
 
-									if (count > 1 && tableUse) {
-										listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
-									} else if (count > 1 && !tableUse) {
-										continue;
-									}
+								if (tableUse) {
+									count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(
+											filedWhere, TABLE_NAME, namePhysicalCid, cidCurrent);
+								} else {
+									count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere,
+											TABLE_NAME, namePhysicalCid, cidCurrent);
+								}
 
-									indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
+								if (count > 1 && tableUse) {
+									listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
+								} else if (count > 1 && !tableUse) {
+									continue;
+								}
 
-									for (int j = 5; j < row.columnLength(); j++) {
+								indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
 
-										String header_column_name = targetDataHeader.get(j);
+								for (int j = 5; j < row.columnLength(); j++) {
+									
+									String header_column_name = targetDataHeader.get(j);
 
-										// add columns name
-										INSERT_BY_TABLE.append(targetDataHeader.get(j) + ", ");
-										boolean anyNonEmpty = columnNotNull.stream()
-												.anyMatch(x -> x.equals(header_column_name));
-										String value = j == indexCidOfCsv ? cidCurrent : row.getColumn(j).toString();
-										// add values
-										if (StringUtils.isEmpty(value)) {
-											if (anyNonEmpty) {
-												values.append("'',");
-											} else {
-												values.append("null,");
-											}
+									// add columns name
+									INSERT_BY_TABLE.append(targetDataHeader.get(j) + ", ");
+									boolean anyNonEmpty = columnNotNull.stream().anyMatch(x -> x.equals(header_column_name));
+									String value = j == indexCidOfCsv ? cidCurrent : row.getColumn(j).toString();
+									// add values
+									if (StringUtils.isEmpty(value)) {
+										if (anyNonEmpty) {
+											values.append("'',");
 										} else {
-											values.append("N'" + value.replaceAll("\u00A0", "\"").replaceAll("'", "''") + "' collate Japanese_XJIS_100_CI_AS_SC,");
+											values.append("null,");
 										}
-									}
-
-									INSERT_BY_TABLE.append(")");
-									INSERT_BY_TABLE.append(values.toString().replaceAll(",$", ")"));
-
-									// query.executeUpdate();
-									if (count == 1) {
-										DELETE_INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
-									} else if (count == 0) {
-										INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
-									}
-
-									listCount.add(count);
-									check++;
-								}
-
-								// insert delete data
-								if (check > 0) {
-									if (tableUse) {
-										crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-												DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
 									} else {
-										crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-												DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
+										values.append("N'" + value.replaceAll("\u00A0", "\"") + "' collate Japanese_XJIS_100_CI_AS_SC,");
 									}
 								}
-								long endTime = System.nanoTime();
-								long duration = (endTime - startTime) / 1000000; // ms;
-								System.out.println("========= Time Retore " + duration);
+
+								INSERT_BY_TABLE.append(")");
+								INSERT_BY_TABLE.append(values.toString().replaceAll(",$", ")"));
+
+								// query.executeUpdate();
+								if(count == 1) {
+									DELETE_INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+								}else if(count == 0) {
+									INSERT_TO_TABLE.append(INSERT_BY_TABLE.toString() + " ");
+								}
+								
+								listCount.add(count);
+								check++;
 							}
-						};
+						}
 
-						Function<NtsCsvRecord, Boolean> customCheckRow = (row) -> {
-							return true;
-						};
-						csvCustomReader.readByStep(3000, csvResult, customCheckRow);
-						csvCustomReader.close();
+						// insert delete data
+						if (check > 0) {
+							if (tableUse) {
+								crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
+										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
+							} else {
+								crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
+										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE);
+							}
+						}
+						long endTime = System.nanoTime();
+						long duration = (endTime - startTime) / 1000000; // ms;
+						System.out.println("========= Time Retore " + duration);
 					}
-
-				} catch (Exception e) {
-				}
+				};
+				
+				reader.readChunk(csvResult, null, null);
+				
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
