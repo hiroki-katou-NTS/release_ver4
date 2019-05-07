@@ -54,6 +54,7 @@ import nts.uk.ctx.bs.employee.pub.employee.EmployeeInfoExport;
 import nts.uk.ctx.bs.employee.pub.employee.JobClassification;
 import nts.uk.ctx.bs.employee.pub.employee.MailAddress;
 import nts.uk.ctx.bs.employee.pub.employee.ResultRequest596Export;
+import nts.uk.ctx.bs.employee.pub.employee.ResultRequest600Export;
 import nts.uk.ctx.bs.employee.pub.employee.StatusOfEmployeeExport;
 import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
 import nts.uk.ctx.bs.employee.pub.employee.TempAbsenceFrameExport;
@@ -886,15 +887,21 @@ public class SyEmployeePubImp implements SyEmployeePub {
 	}
 
 	@Override
-	public List<ResultRequest596Export> getEmpNotDeletedLstBySids(List<String> sids) {
-		List<ResultRequest596Export> result = new ArrayList<>();
-		List<EmployeeDataMngInfo> emps = this.empDataMngRepo.findBySidNotDel(sids);
+	public List<ResultRequest600Export> getEmpInfoLstBySids(List<String> sids,  boolean isDeleteEmp) {
+		List<ResultRequest600Export> result = new ArrayList<>();
+		List<EmployeeDataMngInfo> emps = new ArrayList<>();
+		if(isDeleteEmp == true) {
+			emps.addAll(this.empDataMngRepo.findBySidNotDel(sids));
+		}else {
+			emps.addAll(this.empDataMngRepo.findByListEmployeeId(sids));
+		}
+		
 		List<String> personIds = emps.parallelStream().map(c -> c.getPersonId()).collect(Collectors.toList());
 		List<Person> personLst = personRepo.getPersonByPersonIds(personIds);
 		emps.parallelStream().forEach(c ->{
 			Optional<Person> personOpt = personLst.parallelStream().filter(p -> p.getPersonId().equals(c.getPersonId())).findFirst();
 			if(personOpt.isPresent()) {
-				result.add(new ResultRequest596Export(c.getEmployeeId(), c.getEmployeeCode().v(),
+				result.add(new ResultRequest600Export(c.getEmployeeId(), c.getEmployeeCode().v(),
 						personOpt.get().getPersonNameGroup().getBusinessName().v()));
 			}
 		});
