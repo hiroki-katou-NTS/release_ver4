@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import nts.arc.time.GeneralDate;
+import nts.gul.util.value.Finally;
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -37,4 +39,6 @@ public class BreakDayOffRemainMngOfInPeriod {
 	 * 代休エラー
 	 */
 	private List<DayOffError> lstError;
+	/**前回集計期間の翌日 */
+	private Finally<GeneralDate> nextDay;
 }
