@@ -378,7 +378,7 @@ public class RecoveryStorageService {
 			// 履歴区分の判別する - check history division
 			if (tableList.isPresent() && tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY) {
 				try {
-					// deleteEmployeeHistory(tableList, true, employeeId);
+					 deleteEmployeeHistory(tableList, true, employeeId);
 				} catch (Exception e) {
 					LOGGER.error("SQL error rollBack transaction");
 					throw new Exception(SQL_EXCEPTION);
@@ -884,7 +884,7 @@ public class RecoveryStorageService {
 			// 履歴区分の判別する - check phân loại lịch sử
 			if (tableList.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY) {
 				try {
-					//deleteEmployeeHistory(tableList, false, null);
+					deleteEmployeeHistory(tableList, false, null);
 				} catch (Exception e) {
 					LOGGER.info("Delete data of employee have history error");
 				}

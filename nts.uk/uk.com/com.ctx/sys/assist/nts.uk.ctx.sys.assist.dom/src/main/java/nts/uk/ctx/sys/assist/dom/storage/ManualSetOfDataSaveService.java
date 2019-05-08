@@ -23,7 +23,6 @@ import nts.arc.layer.infra.file.export.FileGeneratorContext;
 import nts.arc.layer.infra.file.temp.ApplicationTemporaryFileFactory;
 import nts.arc.layer.infra.file.temp.ApplicationTemporaryFilesContainer;
 import nts.arc.time.GeneralDateTime;
-import nts.gul.collection.CollectionUtil;
 import nts.gul.security.crypt.commonkey.CommonKeyCrypt;
 import nts.uk.ctx.sys.assist.dom.category.Category;
 import nts.uk.ctx.sys.assist.dom.category.CategoryRepository;
@@ -36,7 +35,6 @@ import nts.uk.ctx.sys.assist.dom.tablelist.TableListRepository;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 import nts.uk.shr.com.i18n.TextResource;
-import nts.uk.shr.infra.file.csv.CSVFileData;
 import nts.uk.shr.infra.file.csv.CSVReportGenerator;
 import nts.uk.shr.infra.file.csv.CsvReportWriter;
 
@@ -351,7 +349,7 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 			int offset = 0;
 			List<String> categoryIds = new ArrayList<>();
 //			List<String> targetEmployeesSid = targetEmployeesRepo.getTargetEmployeesListById(storeProcessingId).stream().map(c -> c.getSid()).collect(Collectors.toList());
-			CsvReportWriter csv = generator.generate(generatorContext,FILE_NAME_CSV1 + CSV_EXTENSION, headerCsv);
+			CsvReportWriter csv = generator.generate(generatorContext,FILE_NAME_CSV1 + CSV_EXTENSION, headerCsv , "UTF-8");
 			
 			while (true) {
 				// テーブル一覧の１行分を処理する
@@ -519,7 +517,7 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 		try {
 			// Add Table to CSV2
 			List<String> headerCsv2 = this.getTextHeaderCsv2();
-			CsvReportWriter csv = generator.generate(generatorContext,FILE_NAME_CSV2 + CSV_EXTENSION, headerCsv2);
+			CsvReportWriter csv = generator.generate(generatorContext,FILE_NAME_CSV2 + CSV_EXTENSION, headerCsv2, "UTF-8");
 			for (TargetEmployees targetEmp : targetEmployees) {
 				Map<String, Object> rowCsv2 = new HashMap<>();
 				rowCsv2.put(headerCsv2.get(0), targetEmp.getSid());

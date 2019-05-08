@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.export.query;
 
 import java.util.List;
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,5 +41,9 @@ public class AbsRecMngInPeriodParamInput {
 	 * 上書き用の暫定振出管理データ
 	 */
 	private List<InterimRecMng> useRecMng;
+	/**
+	 * 前回振休の集計結果
+	 */
+	private Optional<AbsRecRemainMngOfInPeriod> optBeforeResult;
 	
 }

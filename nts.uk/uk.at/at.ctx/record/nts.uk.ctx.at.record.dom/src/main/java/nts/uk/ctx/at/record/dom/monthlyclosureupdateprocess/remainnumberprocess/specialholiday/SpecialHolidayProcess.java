@@ -48,9 +48,10 @@ public class SpecialHolidayProcess {
 	 * @param period 実締め毎集計期間
 	 * @param empId 社員ID
 	 * @param interimRemainMngMap 暫定管理データリスト
+	 * @param  isAutoGrantFlg 自動付与区分: false: しない、True：　する
 	 */
 	public void specialHolidayProcess(AggrPeriodEachActualClosure period, String empId,
-			Map<GeneralDate, DailyInterimRemainMngData> interimRemainMngMap) {
+			Map<GeneralDate, DailyInterimRemainMngData> interimRemainMngMap, boolean isAutoGrantFlg) {
 
 		String companyId = AppContexts.user().companyId();
 		
@@ -74,7 +75,7 @@ public class SpecialHolidayProcess {
 					period, empId, specialLeaveCode, interimMng, interimSpecialData);
 			
 			// 特別休暇残数更新
-			this.remainUpdate.updateRemainSpecialHoliday(output, empId, period.getPeriod(), specialLeaveCode);
+			this.remainUpdate.updateRemainSpecialHoliday(output, empId, period.getPeriod(), specialLeaveCode, isAutoGrantFlg);
 		}
 		
 		// 特別休暇暫定データ削除

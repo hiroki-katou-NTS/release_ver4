@@ -285,7 +285,7 @@ public class AbsenceServiceProcessImpl implements AbsenceServiceProcess{
 //			・基準日＝申請開始日
 //			・上書きフラグ＝false
 			AbsRecMngInPeriodParamInput paramInput = new AbsRecMngInPeriodParamInput(companyID, employeeID, new DatePeriod(closureDate, closureDate.addYears(1).addDays(-1)), 
-					baseDate, false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+					baseDate, false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty());
 			AbsRecRemainMngOfInPeriod subVaca = absRertMngInPeriod.getAbsRecMngInPeriod(paramInput);
 			//振休残数 ← 残日数　（アルゴリズム「期間内の振出振休残数を取得する」のoutput）
 			subVacaRemain = subVaca.getRemainDays();//残日数
@@ -302,7 +302,7 @@ public class AbsenceServiceProcessImpl implements AbsenceServiceProcess{
 //			・基準日＝申請開始日
 //			・上書きフラグ＝false
 			BreakDayOffRemainMngParam inputParam = new BreakDayOffRemainMngParam(companyID, employeeID, new DatePeriod(closureDate, closureDate.addYears(1).addDays(-1)), 
-					false, baseDate, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+					false, baseDate, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty());
 			BreakDayOffRemainMngOfInPeriod subHd = breakDayOffMngInPeriod.getBreakDayOffMngInPeriod(inputParam);
 			//代休残数 ← 残日数　（アルゴリズム「期間内の代休残数を取得する」のoutput）
 			subHdRemain = subHd.getRemainDays();

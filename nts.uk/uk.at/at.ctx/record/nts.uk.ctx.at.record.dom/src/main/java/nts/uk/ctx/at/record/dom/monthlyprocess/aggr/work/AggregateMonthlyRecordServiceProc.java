@@ -1167,7 +1167,8 @@ public class AggregateMonthlyRecordServiceProc {
 		AbsRecMngInPeriodParamInput paramInput = new AbsRecMngInPeriodParamInput(
 				this.companyId, this.employeeId, period, period.end(),
 				(interimRemainMngMode == InterimRemainMngMode.MONTHLY),
-				this.isOverWriteRemain, useAbsMng, interimMng, useRecMng);
+				this.isOverWriteRemain, useAbsMng, interimMng, useRecMng,
+				Optional.empty());//ソースはエラーを発生しないようにとりあえずEmptyを追加しました、指示があったら修正してください
 		val aggrResult = this.absenceRecruitMng.getAbsRecMngInPeriod(paramInput);
 		if (aggrResult != null){
 			
@@ -1226,7 +1227,8 @@ public class AggregateMonthlyRecordServiceProc {
 		BreakDayOffRemainMngParam inputParam = new BreakDayOffRemainMngParam(
 				this.companyId, this.employeeId, period,
 				(interimRemainMngMode == InterimRemainMngMode.MONTHLY), period.end(),
-				this.isOverWriteRemain, interimMng, breakMng, dayOffMng);
+				this.isOverWriteRemain, interimMng, breakMng, dayOffMng,
+				Optional.empty()); //ソースはエラーを発生しないようにとりあえずEmptyを追加しました、指示があったら修正してください
 		val aggrResult = this.breakDayoffMng.getBreakDayOffMngInPeriod(inputParam);
 		if (aggrResult != null){
 			
@@ -1293,8 +1295,9 @@ public class AggregateMonthlyRecordServiceProc {
 					this.companyId, this.employeeId, period,
 					//(interimRemainMngMode == InterimRemainMngMode.MONTHLY), period.end(), specialLeaveCode, true,
 					(interimRemainMngMode == InterimRemainMngMode.MONTHLY), period.end(), specialLeaveCode, false,
-					this.isOverWriteRemain, interimMng, interimSpecialData);
-			InPeriodOfSpecialLeave inPeriod = this.specialLeaveMng.complileInPeriodOfSpecialLeave(param);
+					this.isOverWriteRemain, interimMng, interimSpecialData,
+					Optional.empty()); //ソースがエラーを発生しないようにとりあえずEmptyを追加した、修正依頼があったら修正してください
+			InPeriodOfSpecialLeave inPeriod = this.specialLeaveMng.complileInPeriodOfSpecialLeave(param).getAggSpecialLeaveResult();
 			
 			// マイナスなしの残数・使用数を計算
 			RemainDaysOfSpecialHoliday remainDays = inPeriod.getRemainDays();
