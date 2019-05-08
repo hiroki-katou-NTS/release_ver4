@@ -68,6 +68,7 @@ import nts.uk.ctx.at.shared.dom.common.anyitem.AnyTimesMonth;
 import nts.uk.ctx.at.shared.dom.common.days.MonthlyDays;
 import nts.uk.ctx.at.shared.dom.ot.autocalsetting.JobTitleId;
 import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.export.query.AbsRecMngInPeriodParamInput;
+import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.export.query.AbsRecRemainMngOfInPeriod;
 import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.export.query.AbsenceReruitmentMngInPeriodQuery;
 import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.interim.InterimAbsMng;
 import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.interim.InterimRecMng;
@@ -79,6 +80,7 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.RecordRemainCreateInfo
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.maxdata.RemainingMinutes;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.interim.TmpAnnualLeaveMngWork;
 import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query.BreakDayOffMngInPeriodQuery;
+import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query.BreakDayOffRemainMngOfInPeriod;
 import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query.BreakDayOffRemainMngParam;
 import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.interim.InterimBreakMng;
 import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.interim.InterimDayOffMng;
@@ -87,6 +89,7 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.reserveleave.interim.TmpReserveL
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialholidaymng.interim.InterimSpecialHolidayMng;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.ComplileInPeriodOfSpecialLeaveParam;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.InPeriodOfSpecialLeave;
+import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.InPeriodOfSpecialLeaveResultInfor;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.RemainDaysOfSpecialHoliday;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.SpecialLeaveManagementService;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.SpecialLeaveRemainNoMinus;
@@ -165,6 +168,12 @@ public class AggregateMonthlyRecordServiceProc {
 	private Map<String, DatePeriod> workingConditions;
 	/** 前回集計結果　（年休積立年休の集計結果） */
 	private AggrResultOfAnnAndRsvLeave prevAggrResult;
+	/** 前回集計結果　（振休振出の集計結果） */
+	private Optional<AbsRecRemainMngOfInPeriod> prevAbsRecResultOpt;
+	/** 前回集計結果　（代休の集計結果） */
+	private Optional<BreakDayOffRemainMngOfInPeriod> prevBreakDayOffResultOpt;
+	/** 前回集計結果　（特別休暇の集計結果） */
+	private Map<Integer, InPeriodOfSpecialLeaveResultInfor> prevSpecialLeaveResultMap;
 	/** 週NO管理 */
 	private Map<YearMonth, Integer> weekNoMap;
 	/** 手修正あり */
@@ -217,6 +226,9 @@ public class AggregateMonthlyRecordServiceProc {
 	 * @param closureDate 締め日付
 	 * @param datePeriod 期間
 	 * @param prevAggrResult 前回集計結果　（年休積立年休の集計結果）
+	 * @param prevAbsRecResultOpt 前回集計結果　（振休振出の集計結果）
+	 * @param prevBreakDayOffResultOpt 前回集計結果　（代休の集計結果）
+	 * @param prevSpecialLeaveResultMap 前回集計結果　（特別休暇の集計結果）
 	 * @param companySets 月別集計で必要な会社別設定
 	 * @param employeeSets 月別集計で必要な社員別設定
 	 * @param dailyWorksOpt 日別実績(WORK)List
@@ -227,6 +239,9 @@ public class AggregateMonthlyRecordServiceProc {
 			String companyId, String employeeId, YearMonth yearMonth,
 			ClosureId closureId, ClosureDate closureDate, DatePeriod datePeriod,
 			AggrResultOfAnnAndRsvLeave prevAggrResult,
+			Optional<AbsRecRemainMngOfInPeriod> prevAbsRecResultOpt,
+			Optional<BreakDayOffRemainMngOfInPeriod> prevBreakDayOffResultOpt,
+			Map<Integer, InPeriodOfSpecialLeaveResultInfor> prevSpecialLeaveResultMap,
 			MonAggrCompanySettings companySets,
 			MonAggrEmployeeSettings employeeSets,
 			Optional<List<IntegrationOfDaily>> dailyWorksOpt,
@@ -242,6 +257,9 @@ public class AggregateMonthlyRecordServiceProc {
 		this.closureId = closureId;
 		this.closureDate = closureDate;
 		this.prevAggrResult = prevAggrResult;
+		this.prevAbsRecResultOpt = prevAbsRecResultOpt;
+		this.prevBreakDayOffResultOpt = prevBreakDayOffResultOpt;
+		this.prevSpecialLeaveResultMap = prevSpecialLeaveResultMap;
 		this.weekNoMap = new HashMap<>();
 		this.isRetouch = false;
 		this.dailyInterimRemainMngs = new HashMap<>();
@@ -1168,7 +1186,7 @@ public class AggregateMonthlyRecordServiceProc {
 				this.companyId, this.employeeId, period, period.end(),
 				(interimRemainMngMode == InterimRemainMngMode.MONTHLY),
 				this.isOverWriteRemain, useAbsMng, interimMng, useRecMng,
-				Optional.empty());//ソースはエラーを発生しないようにとりあえずEmptyを追加しました、指示があったら修正してください
+				this.prevAbsRecResultOpt);
 		val aggrResult = this.absenceRecruitMng.getAbsRecMngInPeriod(paramInput);
 		if (aggrResult != null){
 			
@@ -1192,6 +1210,9 @@ public class AggregateMonthlyRecordServiceProc {
 			// 振休エラーから月別残数エラー一覧を作成する
 			this.aggregateResult.getPerErrors().addAll(this.createPerErrorFromLeaveErrors.fromPause(
 					this.employeeId, this.yearMonth, this.closureId, this.closureDate, aggrResult.getPError()));
+			
+			// 集計結果を前回集計結果に引き継ぐ
+			this.aggregateResult.setAbsRecRemainMngOfInPeriodOpt(Optional.of(aggrResult));
 		}
 	}
 	
@@ -1228,7 +1249,7 @@ public class AggregateMonthlyRecordServiceProc {
 				this.companyId, this.employeeId, period,
 				(interimRemainMngMode == InterimRemainMngMode.MONTHLY), period.end(),
 				this.isOverWriteRemain, interimMng, breakMng, dayOffMng,
-				Optional.empty()); //ソースはエラーを発生しないようにとりあえずEmptyを追加しました、指示があったら修正してください
+				this.prevBreakDayOffResultOpt);
 		val aggrResult = this.breakDayoffMng.getBreakDayOffMngInPeriod(inputParam);
 		if (aggrResult != null){
 			
@@ -1262,6 +1283,9 @@ public class AggregateMonthlyRecordServiceProc {
 			// 代休エラーから月別残数エラー一覧を作成する
 			this.aggregateResult.getPerErrors().addAll(this.createPerErrorFromLeaveErrors.fromDayOff(
 					this.employeeId, this.yearMonth, this.closureId, this.closureDate, aggrResult.getLstError()));
+			
+			// 集計結果を前回集計結果に引き継ぐ
+			this.aggregateResult.setBreakDayOffRemainMngOfInPeriodOpt(Optional.of(aggrResult));
 		}
 	}
 	
@@ -1287,8 +1311,14 @@ public class AggregateMonthlyRecordServiceProc {
 		// 「特別休暇」を取得する
 		val specialHolidays = this.specialHolidayRepo.findByCompanyId(this.companyId);
 		for (val specialHoliday : specialHolidays){
-			int specialLeaveCode = specialHoliday.getSpecialHolidayCode().v();
+			Integer specialLeaveCode = specialHoliday.getSpecialHolidayCode().v();
 
+			// 前回集計結果を確認する
+			Optional<InPeriodOfSpecialLeaveResultInfor> prevSpecialLeaveResult = Optional.empty();
+			if (this.prevSpecialLeaveResultMap.containsKey(specialLeaveCode)) {
+				prevSpecialLeaveResult = Optional.of(this.prevSpecialLeaveResultMap.get(specialLeaveCode));
+			}
+			
 			// マイナスなしを含めた期間内の特別休暇残を集計する
 			// 期間内の特別休暇残を集計する
 			ComplileInPeriodOfSpecialLeaveParam param = new ComplileInPeriodOfSpecialLeaveParam(
@@ -1296,8 +1326,9 @@ public class AggregateMonthlyRecordServiceProc {
 					//(interimRemainMngMode == InterimRemainMngMode.MONTHLY), period.end(), specialLeaveCode, true,
 					(interimRemainMngMode == InterimRemainMngMode.MONTHLY), period.end(), specialLeaveCode, false,
 					this.isOverWriteRemain, interimMng, interimSpecialData,
-					Optional.empty()); //ソースがエラーを発生しないようにとりあえずEmptyを追加した、修正依頼があったら修正してください
-			InPeriodOfSpecialLeave inPeriod = this.specialLeaveMng.complileInPeriodOfSpecialLeave(param).getAggSpecialLeaveResult();
+					prevSpecialLeaveResult);
+			InPeriodOfSpecialLeaveResultInfor aggrResult = this.specialLeaveMng.complileInPeriodOfSpecialLeave(param);
+			InPeriodOfSpecialLeave inPeriod = aggrResult.getAggSpecialLeaveResult();
 			
 			// マイナスなしの残数・使用数を計算
 			RemainDaysOfSpecialHoliday remainDays = inPeriod.getRemainDays();
@@ -1319,6 +1350,9 @@ public class AggregateMonthlyRecordServiceProc {
 			this.aggregateResult.getPerErrors().addAll(this.createPerErrorFromLeaveErrors.fromSpecialLeave(
 					this.employeeId, this.yearMonth, this.closureId, this.closureDate, specialLeaveCode,
 					inPeriod.getLstError()));
+			
+			// 集計結果を前回集計結果に引き継ぐ
+			this.aggregateResult.getInPeriodOfSpecialLeaveResultInforMap().put(specialLeaveCode, aggrResult);
 		}
 	}
 	
