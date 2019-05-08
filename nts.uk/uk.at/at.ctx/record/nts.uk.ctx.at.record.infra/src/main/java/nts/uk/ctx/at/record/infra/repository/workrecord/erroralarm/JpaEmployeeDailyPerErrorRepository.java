@@ -241,7 +241,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 	public List<EmployeeDailyPerError> finds(List<String> employeeID, DatePeriod processingDate) {
 		//fix response 192
 		String GET_BY_LIST_EMP_AND_PERIOD = "SELECT a.*, b.* FROM KRCDT_SYAIN_DP_ER_LIST a"
-				+ " JOIN KRCDT_ER_ATTENDANCE_ITEM b"
+				+ " LEFT JOIN KRCDT_ER_ATTENDANCE_ITEM b"
 				+ " ON b.ID = a.ID "
 				+ " WHERE a.PROCESSING_DATE <= ?"
 				+ " AND a.PROCESSING_DATE >= ?"
