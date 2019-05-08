@@ -306,7 +306,7 @@ public class DailyRecordWorkFinder extends FinderFacade {
 
 	private <T extends ConvertibleAttendanceItem> List<T> getListValue(Map<GeneralDate, List<T>> data,
 			GeneralDate date) {
-		return data == null ? new ArrayList<>() : data.get(date);
+		return data == null ? new ArrayList<>() : data.get(date) == null ? new ArrayList<>() : data.get(date);
 	}
 
 	private <T extends ConvertibleAttendanceItem> Map<String, Map<GeneralDate, T>> toMap(List<T> dtos) {
