@@ -812,7 +812,7 @@ public class MonthlyPerformanceReload {
 			
 			// 月の実績の状況を取得する
 			AcquireActualStatus param = new AcquireActualStatus(cid, affWorkplaceImport.getEmployeeId(), processDateYM,
-					closureId, workDatePeriod.end(), workDatePeriod, affWorkplaceImport.getWorkplaceId());
+					closureId, closureTime.end(), workDatePeriod, affWorkplaceImport.getWorkplaceId());
 			MonthlyActualSituationOutput monthlymonthlyActualStatusOutput = monthlyActualStatus
 					.getMonthlyActualSituationStatus(param,approvalProcOp,listShareAff,checkIdentityOp,listIdenByEmpID,checkExistRecordErrorListDate, lstDateCheck);
 			// Output「月の実績の状況」を元に「ロック状態一覧」をセットする

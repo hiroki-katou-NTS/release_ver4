@@ -616,7 +616,7 @@ public class MonthlyPerformanceDisplay {
 			
 			// 月の実績の状況を取得する
 			AcquireActualStatus param = new AcquireActualStatus(cid, affWorkplaceImport.getEmployeeId(), processDateYM,
-					closureId, workDatePeriod.end(), workDatePeriod, affWorkplaceImport.getWorkplaceId());
+					closureId, closureTime.end(), workDatePeriod, affWorkplaceImport.getWorkplaceId());
 			/** TODO: */
 			MonthlyActualSituationOutput monthlymonthlyActualStatusOutput = monthlyActualStatus
 					.getMonthlyActualSituationStatus(param,approvalProcOp,listShareAff,checkIdentityOp,listIdenByEmpID,checkExistRecordErrorListDate, lstDateCheck);
