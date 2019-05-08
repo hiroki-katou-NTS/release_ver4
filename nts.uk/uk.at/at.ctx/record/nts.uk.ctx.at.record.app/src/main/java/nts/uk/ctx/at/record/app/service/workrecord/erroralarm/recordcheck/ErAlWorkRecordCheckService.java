@@ -442,7 +442,7 @@ public class ErAlWorkRecordCheckService {
 			}
 			return AttendanceItemUtil.toItemValues(record, item).stream().map(iv -> getValue(iv))
 					.collect(Collectors.toList());
-		})).collect(Collectors.toList());
+		})).filter(v -> v != null).collect(Collectors.toList());
 		
 		return new ResultCheckWith(condition.checkWith(workInfo, item -> {
 			if (item.isEmpty()) {
