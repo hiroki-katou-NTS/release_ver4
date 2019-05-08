@@ -15,13 +15,21 @@ import lombok.Setter;
 // 特別休暇使用数
 public class SpecialLeaveUsedNumber {
 
-
+	/**
+	 * 日数
+	 */
 	public DayNumberOfUse dayNumberOfUse;
-
+	/**
+	 * 時間
+	 */
 	public Optional<TimeOfUse> timeOfUse;
-
+	/**
+	 * 積み崩し日数
+	 */
 	public Optional<DayNumberOfUse> useSavingDays;
-
+	/**
+	 * 上限超過消滅日数
+	 */
 	public Optional<SpecialLeaveOverNumber> specialLeaveOverLimitNumber;
 
 	private SpecialLeaveUsedNumber(BigDecimal dayNumberOfUse, Integer timeOfUse, BigDecimal useSavingDays,

@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.dom.monthlyclosureupdateprocess.remainnumberprocess.specialholiday.calculateremainnum;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -10,6 +11,7 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.InterimRemain;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialholidaymng.interim.InterimSpecialHolidayMng;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.ComplileInPeriodOfSpecialLeaveParam;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.InPeriodOfSpecialLeave;
+import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.InPeriodOfSpecialLeaveResultInfor;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.SpecialLeaveManagementService;
 import nts.uk.shr.com.context.AppContexts;
 
@@ -43,7 +45,8 @@ public class RemainSpecialHoidayCalculation {
 		ComplileInPeriodOfSpecialLeaveParam param = new ComplileInPeriodOfSpecialLeaveParam(
 				companyId, empId, period.getPeriod(),
 				true, period.getPeriod().end(), specialLeaveCode, true,
-				true, interimMng, interimSpecialData);
-		return this.specialLeaveMng.complileInPeriodOfSpecialLeave(param);
+				true, interimMng, interimSpecialData,
+				Optional.empty()); //ソースがエラーを発生しないようにとりあえずEmptyを追加した、修正依頼があったら修正してください
+		return this.specialLeaveMng.complileInPeriodOfSpecialLeave(param).getAggSpecialLeaveResult();
 	}
 }
