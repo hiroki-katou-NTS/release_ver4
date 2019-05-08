@@ -325,7 +325,7 @@ public class MonthlyAggregateProcessService {
 							valueExractAlarm.setClassification(KAL010_100);
 							valueExractAlarm.setAlarmItem(KAL010_278);
 							String checkedValue = TextResource.localize("KAL010_305",
-									String.valueOf(deadlCheckMonth), breakDayOffDetail.getYmdData().getDayoffDate().get().toString(),
+									breakDayOffDetail.getYmdData().getDayoffDate().get().toString(),
 									String.valueOf(breakDayOffDetail.getUnUserOfBreak().get().getUnUsedDays()));
 							valueExractAlarm.setAlarmValueMessage(TextResource.localize("KAL010_279",
 									String.valueOf(deadlCheckMonth), breakDayOffDetail.getYmdData().getDayoffDate().get().toString(),
@@ -746,7 +746,7 @@ public class MonthlyAggregateProcessService {
 								);
 					}
 				}
-				
+				checkedValue = this.timeToString(Double.valueOf(checkedValue).intValue());
 				break;
 				case 5 ://日数
 					nameItem = TextResource.localize("KAL010_113");
