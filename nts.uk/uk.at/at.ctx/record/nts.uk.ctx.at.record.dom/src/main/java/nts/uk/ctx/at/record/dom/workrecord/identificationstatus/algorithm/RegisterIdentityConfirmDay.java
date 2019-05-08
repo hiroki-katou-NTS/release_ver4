@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
-import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecordRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
@@ -35,8 +34,8 @@ public class RegisterIdentityConfirmDay {
 	@Inject
 	private IdentificationRepository identificationRepository;
 
-	@Inject
-	private EmployeeDailyPerErrorRepository employeeDailyPerErrorRepository;
+//	@Inject
+//	private EmployeeDailyPerErrorRepository employeeDailyPerErrorRepository;
 
 	@Inject
 	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;

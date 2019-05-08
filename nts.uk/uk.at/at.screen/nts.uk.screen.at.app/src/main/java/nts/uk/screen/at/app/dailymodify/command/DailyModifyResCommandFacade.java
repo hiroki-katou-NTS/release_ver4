@@ -50,7 +50,6 @@ import nts.uk.ctx.at.record.dom.service.TimeOffRemainErrorInfor;
 import nts.uk.ctx.at.record.dom.service.TimeOffRemainErrorInputParam;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
-import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.ParamIdentityConfirmDay;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.RegisterIdentityConfirmDay;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.SelfConfirmDay;
@@ -131,8 +130,8 @@ public class DailyModifyResCommandFacade {
 	@Inject
 	private IdentificationRepository identificationRepository;
 	
-	@Inject
-	private EmployeeDailyPerErrorRepository employeeDailyPerErrorRepository;
+//	@Inject
+//	private EmployeeDailyPerErrorRepository employeeDailyPerErrorRepository;
 	
 	@Inject
 	private DailyPerformanceScreenRepo repo;
