@@ -275,8 +275,8 @@ public class MonthlyPerformanceCorrectionProcessor {
 				screenDto.setLstEmployee(param.getLstEmployees());
 			} else {
 				List<RegulationInfoEmployeeQueryR> regulationRs = regulationInfoEmployeePub.search(
-						createQueryEmployee(new ArrayList<>(), presentClosingPeriodExport.get().getClosureStartDate(),
-								presentClosingPeriodExport.get().getClosureEndDate()));
+						createQueryEmployee(new ArrayList<>(), screenDto.getLstActualTimes().get(0).getStartDate(),
+								screenDto.getLstActualTimes().get(0).getEndDate()));
 
 				List<MonthlyPerformanceEmployeeDto> lstEmployeeDto = regulationRs.stream().map(item -> {
 					return new MonthlyPerformanceEmployeeDto(item.getEmployeeId(), item.getEmployeeCode(),
@@ -1172,7 +1172,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 					.filter(y -> x.getEmployeeId().equals(y.getEmployeeId())).findFirst();
 			
 			if (optMonthlyPerformanceEmployeeDto.isPresent()
-					&& optMonthlyPerformanceEmployeeDto.get().getLstAffComHistItem().size() > 0)
+					&& optMonthlyPerformanceEmployeeDto.get().getLstAffComHistItem().size() > 0){
 				for(CheckEmpEralOuput checkEmpEralOuput: listCheckEmpEralOuput) {
 					if(x.getEmployeeId().equals(checkEmpEralOuput.getEmployId())) {
 						if(checkEmpEralOuput.getTypeAtr() == TypeErrorAlarm.ERROR) {
@@ -1188,6 +1188,7 @@ public class MonthlyPerformanceCorrectionProcessor {
 					}
 				}
 				listData.add(x);
+			}
 		});
 		screenDto.setLstData(listData);
 
