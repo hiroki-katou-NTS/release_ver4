@@ -300,6 +300,30 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 //						.map(c -> c.getValue().stream().map(item -> item.toDomain()).collect(Collectors.toList()))
 //						.flatMap(List::stream).collect(Collectors.toList());
 	}
+
+	@Override
+	public List<EmployeeDailyPerError> finds(Map<String, List<GeneralDate>> param) {
+		List<EmployeeDailyPerError> result = new ArrayList<>();
+		StringBuilder query = new StringBuilder("SELECT a FROM KrcdtSyainDpErList a ");
+		query.append("WHERE a.employeeId IN :employeeId ");
+		query.append("AND a.processingDate IN :date");
+		TypedQueryWrapper<KrcdtSyainDpErList> tQuery = this.queryProxy().query(query.toString(), KrcdtSyainDpErList.class);
+		
+		CollectionUtil.split(param, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, p -> {
+			result.addAll(tQuery.setParameter("employeeId", p.keySet())
+					.setParameter("date", p.values().stream().flatMap(List::stream).collect(Collectors.toSet()))
+					.getList().stream()
+					.filter(c -> p.get(c.employeeId).contains(c.processingDate))
+					.collect(Collectors.groupingBy(c -> c.employeeId + c.processingDate.toString()))
+					.entrySet().stream().map(c -> group(c.getValue())).flatMap(List::stream)
+					.collect(Collectors.toList()));
+		});
+		return result;
+	}
+	
+	private List<EmployeeDailyPerError> group(List<KrcdtSyainDpErList> entities) {
+		return entities.stream().map(c -> c.toDomain()).collect(Collectors.toList());
+	}
 	
 	@Override
 	public List<EmployeeDailyPerError> findsWithLeftJoin(List<String> employeeID, DatePeriod processingDate) {
