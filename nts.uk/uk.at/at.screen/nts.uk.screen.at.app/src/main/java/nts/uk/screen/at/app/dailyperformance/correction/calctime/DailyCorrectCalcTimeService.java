@@ -1,11 +1,15 @@
 package nts.uk.screen.at.app.dailyperformance.correction.calctime;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.val;
 import nts.arc.error.BusinessException;
@@ -50,6 +54,7 @@ public class DailyCorrectCalcTimeService {
 	public DCCalcTime calcTime(List<DailyRecordDto> dailyEdits, List<DPItemValue> itemEdits, Boolean changeSpr31,
 			Boolean changeSpr34,  boolean notChangeCell) {
 
+		String companyId = AppContexts.user().companyId();
 		DCCalcTime calcTime = new DCCalcTime();
 
 		DPItemValue itemEditCalc = itemEdits.stream().filter(x -> !x.getColumnKey().equals("USE")).findFirst().get();
@@ -57,6 +62,17 @@ public class DailyCorrectCalcTimeService {
 
 		DailyRecordDto dtoEdit = dailyEdits.stream()
 				.filter(x -> equalEmpAndDate(x.getEmployeeId(), x.getDate(), itemEditCalc)).findFirst().orElse(null);
+		
+		//セットされている勤務種類、就業時間帯が「マスタ未登録」でないかチェックする
+		val checkMaster = checkHasMasterWorkTypeTime(companyId, dtoEdit, itemEdits);
+		if(!checkMaster.getLeft() || !checkMaster.getRight()) {
+			calcTime.setCellEdits(new ArrayList<>());
+			calcTime.setDailyEdits(dailyEdits);
+			calcTime.setErrorFindMaster28(!checkMaster.getLeft());
+			calcTime.setErrorFindMaster29(!checkMaster.getRight());
+			return calcTime;
+		};
+		
 		if ((changeSpr31 != null || changeSpr34 != null) && dtoEdit.getTimeLeaving().isPresent()
 				&& !dtoEdit.getTimeLeaving().get().getWorkAndLeave().isEmpty()) {
 			dtoEdit.getTimeLeaving().get().getWorkAndLeave().stream().filter(x -> x.getNo() == 1).forEach(x -> {
@@ -95,8 +111,6 @@ public class DailyCorrectCalcTimeService {
 
 		checkInput28And1(dtoEdit, itemEdits);
 
-		String companyId = AppContexts.user().companyId();
-
 		// AttendanceItemUtil.fromItemValues(dtoEdit, Arrays.asList(itemBase));
 		AttendanceItemUtil.fromItemValues(dtoEdit, itemValues);
 
@@ -117,6 +131,8 @@ public class DailyCorrectCalcTimeService {
 		calcTime.setCellEdits(items.stream().map(x -> new DCCellEdit(itemEditCalc.getRowId(), "A" + x.getItemId(),
 				convertData(x.getValueType().value, x.getValue()))).collect(Collectors.toList()));
 		calcTime.setDailyEdits(dailyEditsResult);
+		calcTime.setErrorFindMaster28(false);
+		calcTime.setErrorFindMaster29(false);
 		return calcTime;
 	}
 
@@ -206,5 +222,55 @@ public class DailyCorrectCalcTimeService {
 		ItemValue itemValue688 = new ItemValue(item31.getValue(), ValueType.TIME, "M_A48_A", 688);
 		AttendanceItemUtil.fromItemValues(dailyEdit, Arrays.asList(itemValue688));
 		return new DPItemValue("", dailyEdit.getEmployeeId(), dailyEdit.getDate(), 688);
+	}
+	
+	//セットされている勤務種類、就業時間帯が「マスタ未登録」でないかチェックする
+	private Pair<Boolean, Boolean> checkHasMasterWorkTypeTime(String companyId, DailyRecordDto dailyEdit,  List<DPItemValue> itemEdits) {
+		boolean hasMaster28 = true, hasMaster29 = true;
+		boolean contentItem28 = itemEdits.stream().filter(x -> x.getItemId() == 28).findFirst().isPresent() ? true
+				: false;
+		boolean contentItem29 = itemEdits.stream().filter(x -> x.getItemId() == 29).findFirst().isPresent() ? true
+				: false;
+
+		List<DailyModifyResult> resultValues = AttendanceItemUtil.toItemValues(Arrays.asList(dailyEdit)).entrySet()
+				.stream().map(c -> DailyModifyResult.builder().items(c.getValue()).workingDate(c.getKey().workingDate())
+						.employeeId(c.getKey().employeeId()).completed())
+				.collect(Collectors.toList());
+		if (resultValues.isEmpty())
+			return Pair.of(false, false);
+		DailyModifyResult resultValue = resultValues.get(0);
+		if (!contentItem28) {
+			String value28 = resultValue.getItems().stream().filter(x -> x.getItemId() == 28).findFirst().orElse(null)
+					.getValue();
+			if (value28 == null || value28.isEmpty()) {
+				hasMaster28 = true;
+			}else {
+				Optional<CodeName> codeName28opt = dataDialogWithTypeProcessor.getDutyTypeAll(companyId).getCodeNames()
+						.stream().filter(x -> x.getCode().equals(value28)).findFirst();
+
+				if (!codeName28opt.isPresent())
+					hasMaster28 = false;
+			}
+			
+		}
+
+		if (!contentItem29) {
+			String value29 = resultValue.getItems().stream().filter(x -> x.getItemId() == 29).findFirst().orElse(null)
+					.getValue();
+
+			if (value29 == null || value29.isEmpty()) {
+				hasMaster29 = true;
+
+			}else {
+				Optional<CodeName> codeName29opt = dataDialogWithTypeProcessor.getWorkHoursAll(companyId).getCodeNames()
+						.stream().filter(x -> x.getCode().equals(value29)).findFirst();
+
+				if (!codeName29opt.isPresent())
+					hasMaster29 = false;
+			}
+
+		}
+		
+		return  Pair.of(hasMaster28, hasMaster29);
 	}
 }

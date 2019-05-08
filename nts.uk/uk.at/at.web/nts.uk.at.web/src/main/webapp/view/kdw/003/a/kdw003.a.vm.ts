@@ -3981,6 +3981,41 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     }
                     
                     service.calcTime(param).done((value) => {
+                        // workType, workTime not found
+                      
+                        if (value.errorFindMaster28 || value.errorFindMaster29) {
+
+                            let rowItemSelect: any = _.find($("#dpGrid").mGrid("dataSource"), function(value: any) {
+                                return value.id == rowId;
+                            })
+
+                            if (value.errorFindMaster28) {
+                                let typeError28 = _.find(__viewContext.vm.workTypeNotFound, data => {
+                                    return data.columnKey == "Code28" && data.rowId == rowId;
+                                });
+
+                                if (typeError28 == undefined) {
+                                    __viewContext.vm.workTypeNotFound.push({ columnKey: "Code28", rowId: rowId, message: nts.uk.resource.getMessage("Msg_1293"), employeeId: rowItemSelect.employeeId, date: moment(rowItemSelect.dateDetail) });
+                                } else {
+                                    typeError28.message = nts.uk.resource.getMessage("Msg_1293");
+                                }
+                            } else {
+                                let typeError29 = _.find(__viewContext.vm.workTypeNotFound, data => {
+                                    return data.columnKey == "Code29" && data.rowId == rowId;
+                                });
+
+                                if (typeError29 == undefined) {
+                                    __viewContext.vm.workTypeNotFound.push({ columnKey: "Code29", rowId: rowId, message: nts.uk.resource.getMessage("Msg_1293"), employeeId: rowItemSelect.employeeId, date: moment(rowItemSelect.dateDetail) });
+                                } else {
+                                    typeError29.message = nts.uk.resource.getMessage("Msg_1293");
+                                }
+                            }
+                        }else{
+                            _.remove(__viewContext.vm.workTypeNotFound, dataTemp => {
+                                return (dataTemp.columnKey == "Code28" ||  dataTemp.columnKey == "Code29")  && dataTemp.rowId == rowId;
+                            });
+                        } 
+                        
                         //__viewContext.vm.lstDomainEdit = value.dailyEdits;
                         _.each(value.cellEdits, itemResult => {
                             $("#dpGrid").mGrid("updateCell", itemResult.id, itemResult.item, itemResult.value, true, true);
