@@ -22,6 +22,8 @@ import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.schedule.dom.adapter.ScTimeAdapter;
+import nts.uk.ctx.at.schedule.dom.adapter.dailymonthlyprocessing.DailyMonthlyprocessAdapterSch;
+import nts.uk.ctx.at.schedule.dom.adapter.dailymonthlyprocessing.ExeStateOfCalAndSumImportSch;
 import nts.uk.ctx.at.schedule.dom.adapter.employmentstatus.EmploymentInfoImported;
 import nts.uk.ctx.at.schedule.dom.adapter.employmentstatus.EmploymentStatusAdapter;
 import nts.uk.ctx.at.schedule.dom.adapter.employmentstatus.EmploymentStatusImported;
@@ -254,6 +256,9 @@ public class ScheduleCreatorExecutionCommandHandler extends AsyncCommandHandler<
 		this.registerPersonalSchedule(command, scheduleExecutionLogAuto, context, companyId);
 	}
 
+	@Inject
+	private DailyMonthlyprocessAdapterSch dailyMonthlyprocessAdapterSch;
+	
 	/**
 	 * 個人スケジュールを登録する: register Personal Schedule
 	 * 
@@ -294,11 +299,19 @@ public class ScheduleCreatorExecutionCommandHandler extends AsyncCommandHandler<
 				scheduleCreators.stream().sorted((a,b) -> a.getEmployeeId().compareTo(b.getEmployeeId())).collect(Collectors.toList()),
 				scheduleCreator -> {
 			
-			// check is client submit cancel
-			if (asyncTask.hasBeenRequestedToCancel()) {
-				// ドメインモデル「スケジュール作成実行ログ」を更新する(update domain 「スケジュール作成実行ログ」)
-				this.updateStatusScheduleExecutionLog(scheduleExecutionLog, CompletionStatus.INTERRUPTION);
-				return;
+			if (scheduleExecutionLog.getExeAtr() == ExecutionAtr.AUTOMATIC) {
+				Optional<ExeStateOfCalAndSumImportSch> exeStateOfCalAndSumImportSch = dailyMonthlyprocessAdapterSch.executionStatus(exeId);
+				if(exeStateOfCalAndSumImportSch.isPresent())
+					if(exeStateOfCalAndSumImportSch.get() == ExeStateOfCalAndSumImportSch.START_INTERRUPTION) {
+						return;
+					}
+			}else {
+				// check is client submit cancel
+				if (asyncTask.hasBeenRequestedToCancel()) {
+					// ドメインモデル「スケジュール作成実行ログ」を更新する(update domain 「スケジュール作成実行ログ」)
+					this.updateStatusScheduleExecutionLog(scheduleExecutionLog, CompletionStatus.INTERRUPTION);
+					return;
+				}
 			}
 
 			// アルゴリズム「対象期間を締め開始日以降に補正する」を実行する

@@ -35,6 +35,8 @@ import nts.uk.ctx.at.function.dom.adapter.RegulationInfoEmployeeAdapterImport;
 import nts.uk.ctx.at.function.dom.adapter.WorkplaceWorkRecordAdapter;
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.AppReflectManagerAdapter;
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.ProcessStateReflectImport;
+import nts.uk.ctx.at.function.dom.adapter.dailymonthlyprocessing.DailyMonthlyprocessAdapterFn;
+import nts.uk.ctx.at.function.dom.adapter.dailymonthlyprocessing.ExeStateOfCalAndSumImportFn;
 import nts.uk.ctx.at.function.dom.adapter.employeemanage.EmployeeManageAdapter;
 import nts.uk.ctx.at.function.dom.adapter.toppagealarmpub.AlarmCategoryFn;
 import nts.uk.ctx.at.function.dom.adapter.toppagealarmpub.ExecutionLogAdapterFn;
@@ -239,6 +241,9 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 	
 	@Inject
 	private ScheduleErrorLogRepository scheduleErrorLogRepository;
+	
+	@Inject
+	private DailyMonthlyprocessAdapterFn dailyMonthlyprocessAdapterFn;
 	
 	public static int MAX_DELAY_PARALLEL = 0;
 
@@ -908,6 +913,9 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				
 				try {
 					handle = this.scheduleExecution.handle(scheduleCommand);
+					if(checkStop(execId)) {
+						return false;
+					}
 					runSchedule = true;
 				} catch (Exception e) {
 					//再実行の場合にExceptionが発生したかどうかを確認する。
@@ -944,7 +952,13 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 							ScheduleCreatorExecutionCommand scheduleCreatorExecutionOneEmp3 = this
 									.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
 											calculateSchedulePeriod, temporaryEmployeeList);
+							if(checkStop(execId)) {
+								return false;
+							}
 							handle = this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
+							if(checkStop(execId)) {
+								return false;
+							}
 							runSchedule = true;
 						} catch (Exception e) {
 							//再実行の場合にExceptionが発生したかどうかを確認する。
@@ -967,6 +981,9 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 								.setPeriod(new DatePeriod(periodDate.start(), endDate));
 						try {
 							handle = this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
+							if(checkStop(execId)) {
+								return false;
+							}
 							runSchedule = true;
 						} catch (Exception e) {
 							//再実行の場合にExceptionが発生したかどうかを確認する。
@@ -1133,6 +1150,15 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 //		}
 		
 		return true;
+	}
+	
+	private boolean checkStop(String execId) {
+		Optional<ExeStateOfCalAndSumImportFn> exeStateOfCalAndSumImportFn = dailyMonthlyprocessAdapterFn.executionStatus(execId);
+		if(exeStateOfCalAndSumImportFn.isPresent())
+			if(exeStateOfCalAndSumImportFn.get() == ExeStateOfCalAndSumImportFn.START_INTERRUPTION) {
+				return true;
+			}
+		return false;
 	}
 
 	private ScheduleCreatorExecutionCommand getScheduleCreatorExecutionAllEmp(String execId, ProcessExecution procExec,

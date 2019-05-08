@@ -54,7 +54,10 @@ import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagement
 import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagementRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.service.ErAlCheckService;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLog;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.TargetPersonRepository;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExeStateOfCalAndSum;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
@@ -182,6 +185,9 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	/*暫定データ登録*/
 	private InterimRemainDataMngRegisterDateChange interimData;
 	
+	@Inject
+	private EmpCalAndSumExeLogRepository empCalAndSumExeLogRepository;
+	
 	/**
 	 * 社員の日別実績を計算
 	 * @param asyncContext 同期コマンドコンテキスト
@@ -201,10 +207,23 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		this.parallel.forEach(employeeIds, employeeId -> {
 			
 			// 中断処理　（中断依頼が出されているかチェックする）
-			if (asyncContext.hasBeenRequestedToCancel()) {
+//			if (asyncContext.hasBeenRequestedToCancel()) {
+//				counter.accept(ProcessState.INTERRUPTION);
+//				return;
+//			}
+			Optional<EmpCalAndSumExeLog> exeLogOpt = this.empCalAndSumExeLogRepository.getByEmpCalAndSumExecLogID(empCalAndSumExecLogID);
+			if (!exeLogOpt.isPresent()){
 				counter.accept(ProcessState.INTERRUPTION);
 				return;
 			}
+			if (exeLogOpt.get().getExecutionStatus().isPresent()){
+				val executionStatus = exeLogOpt.get().getExecutionStatus().get();
+				if (executionStatus == ExeStateOfCalAndSum.START_INTERRUPTION){
+					counter.accept(ProcessState.INTERRUPTION);
+					return;
+				}
+			}
+			
 			
 			//日別実績(WORK取得)
 			List<IntegrationOfDaily> createList = createIntegrationOfDaily(employeeId,datePeriod);

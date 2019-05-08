@@ -32,6 +32,8 @@ import nts.uk.ctx.at.function.dom.adapter.RegulationInfoEmployeeAdapterImport;
 import nts.uk.ctx.at.function.dom.adapter.WorkplaceWorkRecordAdapter;
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.AppReflectManagerAdapter;
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.ProcessStateReflectImport;
+import nts.uk.ctx.at.function.dom.adapter.dailymonthlyprocessing.DailyMonthlyprocessAdapterFn;
+import nts.uk.ctx.at.function.dom.adapter.dailymonthlyprocessing.ExeStateOfCalAndSumImportFn;
 import nts.uk.ctx.at.function.dom.adapter.employeemanage.EmployeeManageAdapter;
 import nts.uk.ctx.at.function.dom.adapter.toppagealarmpub.AlarmCategoryFn;
 import nts.uk.ctx.at.function.dom.adapter.toppagealarmpub.ExecutionLogAdapterFn;
@@ -232,6 +234,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	
 	@Inject
 	private ScheduleErrorLogRepository scheduleErrorLogRepository;
+	
+	@Inject
+	private DailyMonthlyprocessAdapterFn dailyMonthlyprocessAdapterFn;
 	
 	public static int MAX_DELAY_PARALLEL = 0;
 
@@ -891,6 +896,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 				try {
 					this.scheduleExecution.handle(scheduleCommand);
+					if(checkStop(execId)) {
+						return false;
+					}
 					runSchedule = true;
 				} catch (Exception e) {
 					// 再実行の場合にExceptionが発生したかどうかを確認する。
@@ -927,7 +935,13 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 							ScheduleCreatorExecutionCommand scheduleCreatorExecutionOneEmp3 = this
 									.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
 											calculateSchedulePeriod, temporaryEmployeeList);
+							if(checkStop(execId)) {
+								return false;
+							}
 							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
+							if(checkStop(execId)) {
+								return false;
+							}
 							runSchedule = true;
 						} catch (Exception e) {
 							// 再実行の場合にExceptionが発生したかどうかを確認する。
@@ -950,6 +964,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 								.setPeriod(new DatePeriod(periodDate.start(), endDate));
 						try {
 							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
+							if(checkStop(execId)) {
+								return false;
+							}
 							runSchedule = true;
 						} catch (Exception e) {
 							// 再実行の場合にExceptionが発生したかどうかを確認する。
@@ -1112,6 +1129,15 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		// }
 
 		return true;
+	}
+	
+	private boolean checkStop(String execId) {
+		Optional<ExeStateOfCalAndSumImportFn> exeStateOfCalAndSumImportFn = dailyMonthlyprocessAdapterFn.executionStatus(execId);
+		if(exeStateOfCalAndSumImportFn.isPresent())
+			if(exeStateOfCalAndSumImportFn.get() == ExeStateOfCalAndSumImportFn.START_INTERRUPTION) {
+				return true;
+			}
+		return false;
 	}
 
 	private ScheduleCreatorExecutionCommand getScheduleCreatorExecutionAllEmp(String execId, ProcessExecution procExec,
@@ -3318,22 +3344,18 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		if ("日別作成".equals(typeExecution)) {
 			try {
 				// ⑤社員の日別実績を作成する
-				System.out.println("create data :  !"+employeeId);
 				processState = this.createDailyService.createDailyResultEmployeeWithNoInfoImport(asyContext, employeeId,
 						period, empCalAndSumExeLog.getCompanyID(), empCalAndSumExeLog.getEmpCalAndSumExecLogID(),
 						Optional.ofNullable(dailyCreateLog), processExecution.getExecSetting().getDailyPerf()
 								.getTargetGroupClassification().isRecreateTypeChangePerson() ? true : false,
 						false, false, null);
-				System.out.println("create data done :  !"+employeeId);
 			} catch (Exception e) {
 				throw new CreateDailyException();
 			}
 		} else {
 			try {
-				System.out.println("cal data :  !"+employeeId);
 				processState = this.dailyCalculationEmployeeService.calculateForOnePerson(asyContext, employeeId,
 						period, Optional.empty());
-				System.out.println("cal data done :  !"+employeeId);
 			} catch (Exception e) {
 				throw new DailyCalculateException();
 			}
