@@ -1120,7 +1120,7 @@ public class DailyModifyResCommandFacade {
 		return resultFilter;
 	}
 	
-	private void createStampSourceInfo(DailyRecordDto dtoEdit, List<DailyModifyQuery> querys) {
+	public void createStampSourceInfo(DailyRecordDto dtoEdit, List<DailyModifyQuery> querys) {
 		val sidLogin = AppContexts.user().employeeId();
 		boolean editBySelf = sidLogin.equals(dtoEdit.getEmployeeId());
 		Integer stampSource = editBySelf ? StampSourceInfo.HAND_CORRECTION_BY_MYSELF.value
