@@ -3354,8 +3354,10 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			}
 		} else {
 			try {
-				processState = this.dailyCalculationEmployeeService.calculateForOnePerson(asyContext, employeeId,
-						period, Optional.empty());
+				System.out.println("cal data :  !"+employeeId);
+				processState = this.dailyCalculationEmployeeService.calculateForOnePerson(employeeId,
+						period, Optional.empty(), empCalAndSumExeLog.getEmpCalAndSumExecLogID());
+				System.out.println("cal data done :  !"+employeeId);
 			} catch (Exception e) {
 				throw new DailyCalculateException();
 			}
@@ -3479,8 +3481,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 		try {
 			// 社員の日別実績を計算
-			ProcessState2 = this.dailyCalculationEmployeeService.calculateForOnePerson(asyncContext, empId, period,
-					Optional.empty());
+			ProcessState2 = this.dailyCalculationEmployeeService.calculateForOnePerson(empId, period,
+					Optional.empty(), empCalAndSumExeLogId);
 		} catch (Exception e) {
 			throw new DailyCalculateException();
 		}
