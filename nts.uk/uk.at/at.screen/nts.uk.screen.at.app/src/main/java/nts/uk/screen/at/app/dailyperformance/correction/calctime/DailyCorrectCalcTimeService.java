@@ -24,6 +24,8 @@ import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
+import nts.uk.screen.at.app.dailymodify.command.DailyModifyResCommandFacade;
+import nts.uk.screen.at.app.dailymodify.query.DailyModifyQuery;
 import nts.uk.screen.at.app.dailymodify.query.DailyModifyResult;
 import nts.uk.screen.at.app.dailyperformance.correction.checkdata.ValidatorDataDailyRes;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeName;
@@ -50,6 +52,9 @@ public class DailyCorrectCalcTimeService {
 
 	@Inject
 	private ValidatorDataDailyRes validatorDataDaily;
+	
+	@Inject
+	private DailyModifyResCommandFacade dailyModifyResFacade;
 
 	public DCCalcTime calcTime(List<DailyRecordDto> dailyEdits, List<DPItemValue> itemEdits, Boolean changeSpr31,
 			Boolean changeSpr34,  boolean notChangeCell) {
@@ -105,6 +110,8 @@ public class DailyCorrectCalcTimeService {
 		// itemEditCalc.getLayoutCode(), itemEditCalc.getItemId());
 
 		if(!notChangeCell) addEditState(dtoEdit, itemEdits);
+		
+		dailyModifyResFacade.createStampSourceInfo(dtoEdit, Arrays.asList(new DailyModifyQuery(dtoEdit.getEmployeeId(), dtoEdit.getDate(), itemValues)));
 
 		DailyModifyRCResult updated = DailyModifyRCResult.builder().employeeId(itemEditCalc.getEmployeeId())
 				.workingDate(itemEditCalc.getDate()).items(itemValues).completed();
