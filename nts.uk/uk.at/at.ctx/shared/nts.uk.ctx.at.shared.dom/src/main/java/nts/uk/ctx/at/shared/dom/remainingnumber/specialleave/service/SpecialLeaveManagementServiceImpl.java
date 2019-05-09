@@ -541,8 +541,15 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 		List<SpecialLeaveGrantRemainingData> lstTmp = new ArrayList<>(lstGrantData);
 		for (SpecialLeaveGrantRemainingData grantData : lstGrantData) {
 			//期限切れかチェックする
-			if( (!isMode && !grantData.getDeadlineDate().afterOrEquals(baseDate))
-					|| (isMode && !grantData.getDeadlineDate().after(baseDate))) {
+			//・モードがその他
+			//！（INPUT．特別休暇付与残数データ．期限日 < INPUT．集計終了日　&&　INPUT．特別休暇付与残数データ．期限切れ状態．使用可能）
+			//・モードが月次
+			//！（INPUT．特別休暇付与残数データ．期限日 <= INPUT．集計終了日　&&　INPUT．特別休暇付与残数データ．期限切れ状態．使用可能）
+			if(grantData.getExpirationStatus() != LeaveExpirationStatus.AVAILABLE) {
+				continue;
+			}
+			if( (!isMode && !grantData.getDeadlineDate().before(baseDate))
+					|| (isMode && !grantData.getDeadlineDate().beforeOrEquals(baseDate))) {
 				//未消化数+=「特別休暇数情報」．残数
 				unDisgesteDays += grantData.getDetails().getRemainingNumber().getDayNumberOfRemain().v();
 				//ループ中の「特別休暇付与残数データ」．期限切れ状態=期限切れ
