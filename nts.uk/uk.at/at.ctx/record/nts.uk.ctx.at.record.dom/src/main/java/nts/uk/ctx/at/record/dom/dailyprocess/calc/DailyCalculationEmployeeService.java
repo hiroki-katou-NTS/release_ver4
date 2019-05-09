@@ -33,7 +33,7 @@ public interface DailyCalculationEmployeeService {
 	 * @return 
 	 */
 	@SuppressWarnings("rawtypes")
-	void calculate(AsyncCommandHandlerContext asyncContext, List<String> employeeId,DatePeriod datePeriod, Consumer<ProcessState> counter, ExecutionType reCalcAtr, String empCalAndSumExecLogID);
+	void calculate(List<String> employeeId,DatePeriod datePeriod, Consumer<ProcessState> counter, ExecutionType reCalcAtr, String empCalAndSumExecLogID);
 	
 	/**
 	 * 社員の日別実績を計算(承認一覧から呼び出す用)
@@ -47,7 +47,7 @@ public interface DailyCalculationEmployeeService {
 	 * @param companyCommonSetting 
 	 */
 	@SuppressWarnings("rawtypes")
-	ProcessState calculateForOnePerson(AsyncCommandHandlerContext asyncContext, String employeeId,DatePeriod datePeriod, Optional<Consumer<ProcessState>> counter);
+	ProcessState calculateForOnePerson(String employeeId,DatePeriod datePeriod, Optional<Consumer<ProcessState>> counter,String executeLogId);
 
 	
 	/**
