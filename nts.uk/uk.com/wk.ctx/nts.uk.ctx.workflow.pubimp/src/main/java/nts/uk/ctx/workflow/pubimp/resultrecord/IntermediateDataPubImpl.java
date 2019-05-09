@@ -322,8 +322,10 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	public AppEmpStatusExport getDailyApprovalStatus(
 			String approverId, List<String> targetEmployeeIds, DatePeriod period) {
 		
-		// TODO:
-		return new AppEmpStatusExport(approverId, Collections.emptyList());
+		ApprovalEmpStatus approvalEmpStatus = appRootInstanceService.getDailyApprovalStatus(
+				AppContexts.user().companyId(), approverId, targetEmployeeIds, period);
+		
+		return convertToPub(approvalEmpStatus);
 	}
 
 	@Override

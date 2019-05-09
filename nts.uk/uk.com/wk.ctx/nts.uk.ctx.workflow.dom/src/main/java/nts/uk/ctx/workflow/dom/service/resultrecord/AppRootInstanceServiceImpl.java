@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
@@ -20,6 +21,7 @@ import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
+import nts.gul.collection.ListHashMap;
 import nts.uk.ctx.workflow.dom.adapter.bs.EmployeeAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.PersonImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmpImport;
@@ -608,6 +610,58 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 		// 「ルート状況」リスト整合処理後をoutput「基準社員の承認対象者」に追加する
 		approvalEmpStatus.getRouteSituationLst().addAll(mergeLst);
 		return approvalEmpStatus;
+	}
+	
+	@Override
+	public ApprovalEmpStatus getDailyApprovalStatus(String companyId, String approverId, List<String> targetEmployeeIds, DatePeriod period) {
+		
+		val instancesMap = appRootInstancesMap(companyId, approverId, targetEmployeeIds, period);
+		val confirms = this.appRootConfirmRepository.findByEmpDate(
+				companyId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY);
+		val representRequesterIds = representRequesterIds(companyId, approverId, period);
+		
+		List<RouteSituation> routeSituations = new ArrayList<>();
+		
+		// 実績確認状態(confirms)は承認者関係なく取得するので、実際にはapproverIdが承認者ではないものも含まれている。
+		// その場合、instancesMapには当該データが存在しないことになる。
+		// そういったデータはルート状況リストに含めずに返す仕様。
+		for (val confirm : confirms) {
+			val instance = instancesMap.apply(confirm.getEmployeeID(), confirm.getRecordDate());
+			if (!instance.isPresent()) {
+				continue;
+			}
+			
+			routeSituations.add(RouteSituation.create(confirm, instance.get(), approverId, representRequesterIds));
+		}
+		
+		return new ApprovalEmpStatus(approverId, routeSituations);
+	}
+	
+	private BiFunction<String, GeneralDate, Optional<AppRootInstance>> appRootInstancesMap(
+			String companyId, String approverId, List<String> targetEmployeeIds, DatePeriod period) {
+		
+		val instances = this.appRootInstanceRepository.findByApproverEmployeePeriod(
+				companyId, approverId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY);
+		
+		val map = ListHashMap.create(instances, i -> i.getEmployeeID());
+		
+		return (employeeId, date) -> {
+			List<AppRootInstance> instancesForEmp = map.get(employeeId);
+			if (instancesForEmp == null) {
+				return Optional.empty();
+			}
+			
+			return instancesForEmp.stream()
+					.filter(i -> i.getDatePeriod().contains(date))
+					.findFirst();
+		};
+	}
+	
+	private List<String> representRequesterIds(String companyId, String approverId, DatePeriod period) {
+		return this.agentRepository.findAgentByPeriod(companyId, Arrays.asList(approverId), period.start(), period.end(), 1)
+				.stream()
+				.map(a -> a.getApproverID())
+				.collect(Collectors.toList());
 	}
 
 	@Override
