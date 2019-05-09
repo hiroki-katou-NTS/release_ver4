@@ -428,7 +428,7 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                     .css('cursor', 'pointer')
                     .css('text-decoration', 'underline')
                     .attr('data-bind', `click: clickDateJumpToKdw003.bind($data, '${moment(index).format("YYYY/MM/DD")}')`);
-
+                 $(`#approvalSttGrid_${moment(index).format("YYYYMMDD")}i`).children().removeClass("ui-iggrid-headertext");
                 index = index.add(1, "d");
             }
         }
