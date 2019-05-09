@@ -73,7 +73,7 @@ public class ErAlWorkRecordCheckAcAdapter implements ErAlWorkRecordCheckAdapter 
 			return result;
 		else {
 			result = listErrorExport.stream()
-					.map(e -> new ErrorRecordImport(e.getDate(), e.getEmployeeId(), e.getErAlId(), e.isError()))
+					.map(e -> new ErrorRecordImport(e.getDate(), e.getEmployeeId(), e.getErAlId(), e.isError(),e.getCheckedValue()))
 					.collect(Collectors.toList());
 			return result;
 		}

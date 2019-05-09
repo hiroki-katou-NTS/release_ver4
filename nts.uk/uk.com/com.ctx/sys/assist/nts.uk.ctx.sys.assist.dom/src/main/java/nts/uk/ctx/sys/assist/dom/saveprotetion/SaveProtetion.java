@@ -22,7 +22,7 @@ public class SaveProtetion extends AggregateRoot
     */
     private int correctClasscification;
     
-    /**
+	/**
     * 置き換え列
     */
     private String replaceColumn;
@@ -31,6 +31,19 @@ public class SaveProtetion extends AggregateRoot
     * テーブルNo
     */
     private int tableNo;
+    
+     /**
+      * <<Optional>> 結合用PID項目名
+      */
+    private String couplePidItemName;
+    
+    public SaveProtetion(int categoryId, int correctClasscification, String replaceColumn, int tableNo) {
+ 		super();
+ 		this.categoryId = categoryId;
+ 		this.correctClasscification = correctClasscification;
+ 		this.replaceColumn = replaceColumn;
+ 		this.tableNo = tableNo;
+ 	}
     
     
 }

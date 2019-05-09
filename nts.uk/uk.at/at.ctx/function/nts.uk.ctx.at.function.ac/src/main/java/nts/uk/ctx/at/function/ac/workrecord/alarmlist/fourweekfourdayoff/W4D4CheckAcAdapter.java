@@ -16,6 +16,7 @@ import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.ErAlConstan
 import nts.uk.ctx.at.record.pub.workinformation.InfoCheckNotRegisterPubExport;
 import nts.uk.ctx.at.record.pub.workrecord.alarmlist.fourweekfourdayoff.AlarmExtractionValue4W4DExport;
 import nts.uk.ctx.at.record.pub.workrecord.alarmlist.fourweekfourdayoff.W4D4CheckPub;
+import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
@@ -33,9 +34,9 @@ public class W4D4CheckAcAdapter implements W4D4CheckAdapter {
 				period,listHolidayWorkTypeCode,listWorkInfoOfDailyPerByID.stream().map(c->convertToExport(c)).collect(Collectors.toList()) );
 		if (optAlarmExport.isPresent()) {			
 			AlarmExtractionValue4W4DExport alarmExport = optAlarmExport.get();
-			ValueExtractAlarm alarmImport = new ValueExtractAlarm(workplaceID, employeeID, toDateString(alarmExport.getDatePeriod()),
+			ValueExtractAlarm alarmImport = new ValueExtractAlarm(workplaceID, employeeID, TextResource.localize("KAL010_908",period.start().toString(ErAlConstant.DATE_FORMAT),period.end().toString(ErAlConstant.DATE_FORMAT)),
 					alarmExport.getClassification(), alarmExport.getAlarmItem(), alarmExport.getAlarmValueMessage(),
-					alarmExport.getComment());
+					alarmExport.getComment(),alarmExport.getCheckedValue());
 			return Optional.of(alarmImport);
 		} else {
 

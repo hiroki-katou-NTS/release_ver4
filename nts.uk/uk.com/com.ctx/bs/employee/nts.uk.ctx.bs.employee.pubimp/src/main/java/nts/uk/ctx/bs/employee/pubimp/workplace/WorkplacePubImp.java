@@ -43,10 +43,12 @@ import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfoRepos
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceHierarchy;
 import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfo;
 import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfoRepository;
+import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
 import nts.uk.ctx.bs.employee.pub.workplace.AffAtWorkplaceExport;
 import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceExport;
 import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceHistoryExport;
 import nts.uk.ctx.bs.employee.pub.workplace.AffWorkplaceHistoryItemExport;
+import nts.uk.ctx.bs.employee.pub.workplace.ResultRequest597Export;
 import nts.uk.ctx.bs.employee.pub.workplace.SWkpHistExport;
 import nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub;
 import nts.uk.ctx.bs.employee.pub.workplace.WkpByEmpExport;
@@ -103,6 +105,9 @@ public class WorkplacePubImp implements SyWorkplacePub {
 
 	@Inject
 	private EmployeeDataMngInfoRepository empDataMngRepo;
+	
+	@Inject
+	private SyEmployeePub subEmp;
 
 	/*
 	 * (non-Javadoc)
@@ -936,6 +941,21 @@ public class WorkplacePubImp implements SyWorkplacePub {
 			result.add(export);
 		});
 		return result;
+	}
+
+	@Override
+	public List<String> getLstWorkplaceIdBySidAndPeriod(String sid, DatePeriod period) {
+		List<String> workPlaceIds = affWorkplaceHistoryItemRepository.getHistIdLstBySidAndPeriod(sid, period);
+		return workPlaceIds;
+	}
+
+	@Override
+	public List<ResultRequest597Export> getLstEmpByWorkplaceIdsAndPeriod(List<String> workplaceIds, DatePeriod period) {
+		List<String> sids = affWorkplaceHistoryItemRepository.getHistIdLstByWorkplaceIdsAndPeriod(workplaceIds, period);
+		List<ResultRequest597Export> results = subEmp.getEmpNotDeletedLstBySids(sids).parallelStream()
+				.map(c -> new ResultRequest597Export(c.getSid(), c.getEmployeeCode(), c.getEmployeeName()))
+				.collect(Collectors.toList());
+		return results;
 	}
 
 }

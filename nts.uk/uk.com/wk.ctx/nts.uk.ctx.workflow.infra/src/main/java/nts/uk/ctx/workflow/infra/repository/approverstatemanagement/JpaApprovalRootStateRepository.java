@@ -281,7 +281,8 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		builderString.append(" ON a.wwfdpApprovalRootStatePK.rootStateID = b.wwfdpApproverStatePK.rootStateID ");
 		builderString.append(" WHERE (b.wwfdpApproverStatePK.approverID = :approverID");
 		builderString.append(" OR b.wwfdpApproverStatePK.approverID IN");
-		builderString.append(" (SELECT d.cmmmtAgentPK.employeeId FROM CmmmtAgent d WHERE d.agentSid1 = :approverID))");
+		builderString.append(" (SELECT d.cmmmtAgentPK.employeeId FROM CmmmtAgent d WHERE d.agentSid1 = :approverID");
+		builderString.append(" AND :systemDate <= d.endDate AND :systemDate >= d.startDate))");
 		builderString.append(" AND b.companyID = :companyID");
 		builderString.append(" AND b.recordDate >= :startDate AND b.recordDate <= :endDate)");
 		SELECT_APPS_BY_APPROVER = builderString.toString();
@@ -296,7 +297,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		builderString.append(" WHERE (b.wwfdpApproverDayPK.approverID = :approverID");
 		builderString.append(" OR b.wwfdpApproverDayPK.approverID IN");
 		builderString.append(" (SELECT d.cmmmtAgentPK.employeeId FROM CmmmtAgent d WHERE d.agentSid1 = :approverID");
-		builderString.append(" AND :startDate <= d.endDate AND :endDate >= d.startDate))");
+		builderString.append(" AND :systemDate <= d.endDate AND :systemDate >= d.startDate))");
 		builderString.append(" AND b.companyID = :companyID");
 		builderString.append(" AND b.recordDate >= :startDate AND b.recordDate <= :endDate)");
 		SELECT_CFS_DAY_BY_APPROVER = builderString.toString();
@@ -310,7 +311,8 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		builderString.append(" ON a.wwfdpApprovalRootMonthPK.rootStateID = b.wwfdpApproverMonthPK.rootStateID ");
 		builderString.append(" WHERE (b.wwfdpApproverMonthPK.approverID = :approverID");
 		builderString.append(" OR b.wwfdpApproverMonthPK.approverID IN");
-		builderString.append(" (SELECT d.cmmmtAgentPK.employeeId FROM CmmmtAgent d WHERE d.agentSid1 = :approverID))");
+		builderString.append(" (SELECT d.cmmmtAgentPK.employeeId FROM CmmmtAgent d WHERE d.agentSid1 = :approverID");
+		builderString.append(" AND :systemDate <= d.endDate AND :systemDate >= d.startDate))");
 		builderString.append(" AND b.companyID = :companyID");
 		builderString.append(" AND b.recordDate >= :startDate AND b.recordDate <= :endDate)");
 		SELECT_CFS_MONTH_BY_APPROVER = builderString.toString();
@@ -796,18 +798,21 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.setParameter("approverID", approverID)
+				.setParameter("systemDate", GeneralDate.today())
 				.getList(x -> x.toDomain()));
 		result.addAll(this.queryProxy().query(SELECT_CFS_DAY_BY_APPROVER, WwfdtApprovalRootDay.class)
 				.setParameter("companyID", companyID)
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.setParameter("approverID", approverID)
+				.setParameter("systemDate", GeneralDate.today())
 				.getList(x -> x.toDomain()));
 		result.addAll(this.queryProxy().query(SELECT_CFS_MONTH_BY_APPROVER, WwfdtApprovalRootMonth.class)
 				.setParameter("companyID", companyID)
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.setParameter("approverID", approverID)
+				.setParameter("systemDate", GeneralDate.today())
 				.getList(x -> x.toDomain()));
 		return result;
 	}
@@ -855,6 +860,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.setParameter("approverID", approverID)
+				.setParameter("systemDate", GeneralDate.today())
 				.getList(x -> x.toDomain());
 			break;
 		case 2:
@@ -863,6 +869,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.setParameter("approverID", approverID)
+				.setParameter("systemDate", GeneralDate.today())
 				.getList(x -> x.toDomain());
 			break;
 		default:
@@ -871,6 +878,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.setParameter("approverID", approverID)
+				.setParameter("systemDate", GeneralDate.today())
 				.getList(x -> x.toDomain());
 		}
 		return result;

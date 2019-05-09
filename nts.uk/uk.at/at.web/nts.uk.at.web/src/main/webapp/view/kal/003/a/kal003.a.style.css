@@ -22,13 +22,14 @@
 	vertical-align: top;
 }
 
-
 .right-content {
 	display: inline-block;
 	vertical-align: top;
 	padding-top: 20px;
 }
-
+.container {
+    display: inline;
+}
 div[class^="tab-content"] {
 	padding: 20px;
 }
@@ -85,9 +86,9 @@ label.label4w4d {
 	width: 170px !important;
 }
 
-div .tab-content-5 .nts-fixed-table .nts-fixed-body-container{
+/* div .tab-content-5 .nts-fixed-table .nts-fixed-body-container{
 	border-bottom-width:0px;
-}
+} */
 
 #multiple-months-content .nts-fixed-table.cf .nts-fixed-body-container.ui-iggrid .nts-fixed-body-wrapper{
 	height: 171px !important;
@@ -102,17 +103,11 @@ div .tab-content-5 .nts-fixed-table .nts-fixed-body-container{
 #div-fixed-table .nts-fixed-table.cf .nts-fixed-body-container.ui-iggrid .nts-fixed-body-wrapper{
 	height: 256px ! important ;
 }
-#check-condition-table_category9{
-	box-sizing: border-box;
-}
 #multiple-months-content #div_table_check_conditions .nts-fixed-table .nts-fixed-body-container{
 	box-sizing: border-box;
 }
 #multiple-months-content #div_table_check_conditions .nts-fixed-table.cf .scroll-header.nts-fixed-header{
 	    display: none;
-}
-#check-condition-table{
-	box-sizing: border-box;
 }
 #daily-content #div_table_check_conditions .nts-fixed-table .nts-fixed-body-container{
 	box-sizing: border-box;
@@ -120,13 +115,32 @@ div .tab-content-5 .nts-fixed-table .nts-fixed-body-container{
 #daily-content #div_table_check_conditions .nts-fixed-table.cf .scroll-header.nts-fixed-header{
 	    display: none;
 }
-#fixed-table2{
-	 box-sizing: border-box;
-}
-
 #category7 .nts-fixed-table .nts-fixed-body-container{
 	box-sizing: border-box;
 }
 #category7 .nts-fixed-table.cf .scroll-header.nts-fixed-header{
 	    display: none;
+}
+button.nts-switch-button{
+	width: 90px !important;
+}
+#check-condition-table, #check-condition-table tr th, #check-condition-table tr td,
+#check-condition-table_category9, #check-condition-table_category9 tr th, #check-condition-table_category9 tr td,
+#fixed-table2, #fixed-table2 tr th, #fixed-table2 tr td{
+	border:1px solid #CCC;
+	box-sizing: border-box;
+}
+#check-condition-table tbody,
+#check-condition-table_category9 tbody,
+#fixed-table2 tbody {
+    display: block;
+    height: 176px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+#check-condition-table thead, #check-condition-table tbody tr,
+#check-condition-table_category9 thead, #check-condition-table_category9 tbody tr,
+#fixed-table2 thead, #fixed-table2 tbody tr {
+    display:table;
+    width:100%;
 }

@@ -62,7 +62,7 @@ public class MonthlyUnconfirmedDefault implements MonthlyUnconfirmedService {
 				// 取得できなかった場合
 				GeneralDate date = GeneralDate.ymd(ym.year(), ym.month(), 1);
 				return Optional.of(new ValueExtractAlarmWR(null, employeeID, date, TextResource.localize("KAL010_100"),
-						TextResource.localize("KAL010_271"), TextResource.localize("KAL010_272"), null));
+						TextResource.localize("KAL010_271"), TextResource.localize("KAL010_272"), null,null));
 
 			}
 		}
@@ -99,7 +99,7 @@ public class MonthlyUnconfirmedDefault implements MonthlyUnconfirmedService {
 					GeneralDate date = GeneralDate.ymd(ym.year(), ym.month(), 1);
 					ValueExtractAlarmWR valueExtractAlarmWR = new ValueExtractAlarmWR(null, employeeID, date,
 							TextResource.localize("KAL010_100"), TextResource.localize("KAL010_102"),
-							TextResource.localize("KAL010_108"), null);
+							TextResource.localize("KAL010_108"), null,null);
 					lstDataReturn.add(valueExtractAlarmWR);
 				}
 
@@ -136,7 +136,7 @@ public class MonthlyUnconfirmedDefault implements MonthlyUnconfirmedService {
 					GeneralDate date = GeneralDate.ymd(tmp.getYearMonth().year(), tmp.getYearMonth().month(), 1);
 					ValueExtractAlarmWR valueExtractAlarmWR = new ValueExtractAlarmWR(null, tmp.getEmployeeId(), date,
 							TextResource.localize("KAL010_100"), TextResource.localize("KAL010_102"),
-							TextResource.localize("KAL010_108"), null);
+							TextResource.localize("KAL010_108"), null,null);
 					lstDataReturn.add(valueExtractAlarmWR);
 				}
 

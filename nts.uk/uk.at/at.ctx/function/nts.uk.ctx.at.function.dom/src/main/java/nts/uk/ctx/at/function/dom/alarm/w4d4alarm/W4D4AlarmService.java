@@ -216,6 +216,7 @@ public class W4D4AlarmService {
 		
 		w4d4ErAl.forEach(c -> {
 			AlarmCheckCondition4W4D fourW4DCheckCond = (AlarmCheckCondition4W4D) c.getExtractionCondition();
+			String alarmValueMessage = fourW4DCheckCond.getFourW4DCheckCond().nameId;
 			if (fourW4DCheckCond.isForActualResultsOnly()) {
 				List<RegulationInfoEmployeeResult> targetEmps = listTargetMap.get(c.getExtractTargetCondition().getId());
 				if(!targetEmps.isEmpty()) {
@@ -231,6 +232,7 @@ public class W4D4AlarmService {
 							if(valueMap.containsKey(emp.getId())){
 								List<RecordWorkInfoFunAdapterDto> currentWorkInfos = workInfos.stream().filter(wi -> emp.getId().equals(wi.getEmployeeId())).collect(Collectors.toList());
 								this.checkWithActualResults(emp, period, workTypes, currentWorkInfos).ifPresent(er -> {
+									er.setAlarmValueMessage(alarmValueMessage);
 									result.add(er);
 								});
 							}

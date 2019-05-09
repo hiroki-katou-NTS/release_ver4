@@ -155,14 +155,14 @@ public class MonthlyPerformanceCorrectionDto {
 			this.getAuthDto().getListDisplayAndInputMonthly().forEach(header -> {
 				if (!header.isYouCanChangeIt() && header.isCanBeChangedByOthers()) {
 					if (emp.isLoginUser()) {
-						setStateCell("A"+header.getItemMonthlyId(), emp.getId(), "mgrid-disable");
+						setStateCell("A"+header.getItemMonthlyId(), emp.getId(), "mgrid-disable", header.getItemMonthlyId());
 					}
 				} else if (!header.isCanBeChangedByOthers() && header.isYouCanChangeIt()) {
 					if (!emp.isLoginUser()) {
-						setStateCell("A"+header.getItemMonthlyId(), emp.getId(), "mgrid-disable");
+						setStateCell("A"+header.getItemMonthlyId(), emp.getId(), "mgrid-disable", header.getItemMonthlyId());
 					}
 				} else if (!header.isCanBeChangedByOthers() && !header.isYouCanChangeIt()) {
-					setStateCell("A"+header.getItemMonthlyId(), emp.getId(), "mgrid-disable");
+					setStateCell("A"+header.getItemMonthlyId(), emp.getId(), "mgrid-disable", header.getItemMonthlyId());
 				}
 			});
 		};
@@ -175,6 +175,15 @@ public class MonthlyPerformanceCorrectionDto {
 		}else{
 			this.lstCellState.add(new MPCellStateDto(rowId, columnKey, Arrays.asList(state)));
 		}
+	}
+	
+	public void setStateCell(String columnKey, String rowId, String state, int itemMonthlyId){
+		if(MPText.ITEM_CODE_LINK.contains(itemMonthlyId)){
+			columnKey = MPText.CODE + itemMonthlyId;
+			this.setStateCell(columnKey, rowId, state);
+			columnKey = MPText.NAME + itemMonthlyId;
+		}
+		this.setStateCell(columnKey, rowId, state);
 	}
 	
 	public void setListStateCell(String columnKey, String rowId, List<String> listState){

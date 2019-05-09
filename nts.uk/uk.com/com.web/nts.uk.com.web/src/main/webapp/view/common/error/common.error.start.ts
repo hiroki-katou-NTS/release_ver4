@@ -27,7 +27,14 @@ module common.error.system {
         }
         
         gotoLogin() {
-            nts.uk.ui.windows.rgc().nts.uk.request.login.jumpToUsedLoginPage();
+            nts.uk.characteristics.restore("loginMode").done(mode => {
+                let rgc = nts.uk.ui.windows.rgc();
+                if (mode) {
+                    rgc.nts.uk.request.login.jumpToUsedSSOLoginPage();
+                } else {
+                    rgc.nts.uk.request.login.jumpToUsedLoginPage();
+                }
+            });
         }
     }
 }

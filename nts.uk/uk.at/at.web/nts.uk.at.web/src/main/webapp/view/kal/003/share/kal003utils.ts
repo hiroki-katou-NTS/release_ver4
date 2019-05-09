@@ -139,6 +139,7 @@ module nts.uk.at.view.kal003.share {
                 
                 
             });
+            extraResultMonthly.useCheckSwitch(data.useAtr == undefined ? '1':(data.useAtr?'1':'0'));
             return extraResultMonthly;
         }
         
@@ -209,6 +210,7 @@ module nts.uk.at.view.kal003.share {
                 compareOperator: 0, 
                 rowId : 0
             });
+            mulMonCheckCondSet.useCheckSwitch('1');
             return mulMonCheckCondSet;
         }
         
@@ -246,6 +248,7 @@ module nts.uk.at.view.kal003.share {
                 errorAlarmCondition: getDefaultErrorAlarmCondition(),
                 rowId: 0
             });
+            workRecordExtractingCondition.useCheckSwitch('1'); 
             return workRecordExtractingCondition;
         }
         //monthly
@@ -254,7 +257,7 @@ module nts.uk.at.view.kal003.share {
             convertExtraResultMonthly["errorAlarmCheckID"] = vmodel.errorAlarmCheckID();
             convertExtraResultMonthly["sortBy"] = sortBy;
             convertExtraResultMonthly["nameAlarmExtraCon"] = vmodel.nameAlarmExtraCon();
-            convertExtraResultMonthly["useAtr"] = vmodel.useAtr();
+            convertExtraResultMonthly["useAtr"] = vmodel.useCheckSwitch() == '1'?true:false; 
             convertExtraResultMonthly["typeCheckItem"] = vmodel.typeCheckItem();
             convertExtraResultMonthly["messageBold"] = vmodel.messageBold();
             convertExtraResultMonthly["messageColor"] = vmodel.messageColor();

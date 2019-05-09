@@ -109,7 +109,7 @@ public class JpaAlarmListExtractResultRepoImpl extends JpaRepository implements 
 					.collect(Collectors.toList()));
 			entities.addAll(r.getEmpEralData().stream().map(ei -> new KfnmtAlexEmpEralData(new KfnmtAlexEmpEralDataPK(ei.getExecuteId(), ei.getEmployeeId(), 
 																							ei.getRecordId()), ei.getAlarmTime(), ei.getCategoryCode(), 
-																							ei.getCategoryName(), ei.getAlarmItem(), ei.getAlarmMes(), ei.getComment()))
+																							ei.getCategoryName(), ei.getAlarmItem(), ei.getAlarmMes(), ei.getComment(),ei.getCheckedValue()))
 					.collect(Collectors.toList()));
 		});
 		
@@ -211,8 +211,8 @@ public class JpaAlarmListExtractResultRepoImpl extends JpaRepository implements 
 	private List<ExtractEmployeeErAlData> getExtractedErrorWithLimit(List<String> executeIds, int limit) {
 		
 		StringBuilder queryBuilder = new StringBuilder("SELECT DISTINCT er.EXECUTE_ID, er.ALARM_TARGET_TIME, er.CATEGORY_CODE, er.CATEGORY_NAME, er.ALARM_ITEM, er.ALARM_MESSAGE, ");
-		queryBuilder.append(" er.COMMENT, er.EMPLOYEE_ID, er.RECORD_ID, em.HIERARCHY_CD, em.EMPLOYEE_CODE FROM KFNMT_ALEX_EMP_ERAL_DATA er" );
-		queryBuilder.append(" JOIN KFNMT_ALEX_EMP_DATA em ON er.EMPLOYEE_ID = em.EMPLOYEE_ID" );
+		queryBuilder.append(" er.COMMENT, er.EMPLOYEE_ID, er.RECORD_ID, em.HIERARCHY_CD, em.EMPLOYEE_CODE, er.CHECKED_VALUE FROM KFNMT_ALEX_EMP_ERAL_DATA er" );
+		queryBuilder.append(" JOIN KFNMT_ALEX_EMP_DATA em ON er.EMPLOYEE_ID = em.EMPLOYEE_ID AND er.EXECUTE_ID = em.EXECUTE_ID" );
 		queryBuilder.append(" WHERE er.EXECUTE_ID IN (");
 		queryBuilder.append(executeIds.stream().map(c -> "?").collect(Collectors.joining(",")));
 		queryBuilder.append(") ORDER BY em.HIERARCHY_CD, em.EMPLOYEE_CODE, er.ALARM_TARGET_TIME, er.CATEGORY_CODE, er.ALARM_ITEM " );
@@ -224,7 +224,7 @@ public class JpaAlarmListExtractResultRepoImpl extends JpaRepository implements 
 	@SneakyThrows
 	private List<ExtractEmployeeErAlData> getExtractedError(List<String> executeIds) {
 		String query = "SELECT EXECUTE_ID, ALARM_TARGET_TIME, CATEGORY_CODE, CATEGORY_NAME, ALARM_ITEM, ALARM_MESSAGE, "
-				+ "COMMENT, EMPLOYEE_ID, RECORD_ID FROM KFNMT_ALEX_EMP_ERAL_DATA WHERE EXECUTE_ID IN ("
+				+ "COMMENT, EMPLOYEE_ID, RECORD_ID, '','', CHECKED_VALUE FROM KFNMT_ALEX_EMP_ERAL_DATA WHERE EXECUTE_ID IN ("
 				+ executeIds.stream().map(c -> "?").collect(Collectors.joining(","))
 				+ ")";
 		
@@ -244,7 +244,7 @@ public class JpaAlarmListExtractResultRepoImpl extends JpaRepository implements 
 			
 			return new NtsResultSet(st.executeQuery()).getList(r -> {
 				return new ExtractEmployeeErAlData(r.getString(1), r.getString(8), r.getString(9), r.getString(2), r.getInt(3),
-						r.getString(4), r.getString(5), r.getString(6), r.getString(7));
+						r.getString(4), r.getString(5), r.getString(6), r.getString(7),r.getString(12));
 			});
 		}
 	}

@@ -147,7 +147,8 @@ public class SendAutoExeEmailDefault implements SendAutoExeEmailService {
 				dto.getCategoryName(),
 				dto.getAlarmItem(),
 				dto.getAlarmValueMessage(),
-				dto.getComment()
+				dto.getComment(),
+				dto.getCheckedValue()
 				);
 	}
 

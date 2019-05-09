@@ -44,10 +44,13 @@ public class AlarmExtraValueWkReDto {
 	
 	/**コメント*/
 	private String comment;
+	
+	/**チェック対象値*/
+	private String checkedValue;
 
 	public AlarmExtraValueWkReDto(String workplaceID, String hierarchyCd, String workplaceName, String employeeID,
 			String employeeCode, String employeeName, String alarmValueDate, int category, String categoryName,
-			String alarmItem, String alarmValueMessage, String comment) {
+			String alarmItem, String alarmValueMessage, String comment, String checkedValue) {
 		super();
 		this.guid= IdentifierUtil.randomUniqueId();
 		this.workplaceID = workplaceID;
@@ -62,6 +65,7 @@ public class AlarmExtraValueWkReDto {
 		this.alarmItem = alarmItem;
 		this.alarmValueMessage = alarmValueMessage;
 		this.comment = comment;
+		this.checkedValue = checkedValue;
 	}
 
 	public List<String> employeeData() {

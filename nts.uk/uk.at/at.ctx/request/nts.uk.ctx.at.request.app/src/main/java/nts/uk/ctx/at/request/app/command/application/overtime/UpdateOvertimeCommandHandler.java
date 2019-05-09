@@ -15,6 +15,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerWithResult;
+import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.request.dom.application.AppReason;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
@@ -157,23 +158,24 @@ public class UpdateOvertimeCommandHandler extends CommandHandlerWithResult<Updat
 		appOverTime.setOverTimeInput(overTimeInputs);
 		appOverTime.setAppOvertimeDetail(appOvertimeDetailOtp);
 		appOverTime.setOverTimeShiftNight(command.getOverTimeShiftNight());
-		appOverTime.setSiftCode(command.getSiftTypeCode() == null ? null : new WorkTimeCode(command.getSiftTypeCode()));
+		appOverTime.setSiftCode(StringUtil.isNullOrEmpty(command.getSiftTypeCode(), true)? null : new WorkTimeCode(command.getSiftTypeCode()));
 		appOverTime.setWorkClockFrom1(command.getWorkClockFrom1());
 		appOverTime.setWorkClockFrom2(command.getWorkClockFrom2());
 		appOverTime.setWorkClockTo1(command.getWorkClockTo1());
 		appOverTime.setWorkClockTo2(command.getWorkClockTo2());
-		appOverTime.setWorkTypeCode(command.getWorkTypeCode() == null? null : new WorkTypeCode(command.getWorkTypeCode()));
+		appOverTime.setWorkTypeCode( StringUtil.isNullOrEmpty(command.getWorkTypeCode(), true)? null : new WorkTypeCode(command.getWorkTypeCode()));
 		appOverTime.getApplication().setAppReason(new AppReason(applicationReason));
 		appOverTime.setVersion(appOverTime.getVersion());
 		appOverTime.getApplication().setVersion(command.getVersion());
-		
+		//4-1.詳細画面登録前の処理を実行する
 		detailBeforeUpdate.processBeforeDetailScreenRegistration(
 				companyID, 
 				appOverTime.getApplication().getEmployeeID(), 
 				appOverTime.getApplication().getAppDate(), 
 				1, 
 				appOverTime.getAppID(), 
-				appOverTime.getApplication().getPrePostAtr(), command.getVersion());
+				appOverTime.getApplication().getPrePostAtr(), command.getVersion(),command.getWorkTypeCode(),command.getSiftTypeCode());
+		//ドメインモデル「残業申請」を更新する
 		overtimeRepository.update(appOverTime);
 		applicationRepository.updateWithVersion(appOverTime.getApplication());
 		// 暫定データの登録
@@ -181,6 +183,7 @@ public class UpdateOvertimeCommandHandler extends CommandHandlerWithResult<Updat
 				companyID, 
 				command.getApplicantSID(), 
 				Arrays.asList(command.getApplicationDate()));
+		//4-2.詳細画面登録後の処理を実行する
 		return detailAfterUpdate.processAfterDetailScreenRegistration(appOverTime.getApplication());
 	}
 

@@ -24,7 +24,6 @@ import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.collection.CollectionUtil;
 import nts.gul.text.IdentifierUtil;
-import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.request.app.find.application.holidayshipment.HolidayShipmentScreenAFinder;
 import nts.uk.ctx.at.request.dom.application.ApplicationApprovalService_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
@@ -32,10 +31,6 @@ import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.IFactoryApplication;
 import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
-import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoAdapter;
-import nts.uk.ctx.at.request.dom.application.common.adapter.record.RecordWorkInfoImport;
-import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleAdapter;
-import nts.uk.ctx.at.request.dom.application.common.adapter.schedule.schedule.basicschedule.ScBasicScheduleImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.EmploymentHistoryImported;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workplace.WorkplaceAdapter;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.RegisterAtApproveReflectionInfoService_New;
@@ -57,6 +52,7 @@ import nts.uk.ctx.at.request.dom.application.holidayshipment.compltleavesimmng.S
 import nts.uk.ctx.at.request.dom.application.holidayshipment.recruitmentapp.RecruitmentApp;
 import nts.uk.ctx.at.request.dom.application.holidayshipment.recruitmentapp.RecruitmentAppRepository;
 import nts.uk.ctx.at.request.dom.application.holidayshipment.recruitmentapp.RecruitmentWorkingHour;
+import nts.uk.ctx.at.request.dom.application.overtime.service.OvertimeService;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.triprequestsetting.ContractCheck;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSetRepository;
@@ -153,6 +149,8 @@ public class SaveHolidayShipmentCommandHandler
 	private HdAppSetRepository repoHdAppSet;
 	@Inject
 	private OtherCommonAlgorithm otherCommonAlgorithm;
+	@Inject
+	private OvertimeService overtimeService;
 
 	@Override
 	protected ProcessResult handle(CommandHandlerContext<SaveHolidayShipmentCommand> context) {
@@ -902,17 +900,24 @@ public class SaveHolidayShipmentCommandHandler
 
 	public String preconditionCheck(SaveHolidayShipmentCommand command, String companyID, ApplicationType appType,
 			int comType) {
+		if (isSaveRec(comType)) {
+			// 勤務種類、就業時間帯チェックのメッセージを表示
+			this.overtimeService.checkWorkingInfo(companyID, command.getRecCmd().getWkTypeCD(),
+					command.getRecCmd().getWkTimeCD());
+		}
+		if (isSaveAbs(comType)) {
+			// 勤務種類、就業時間帯チェックのメッセージを表示
+			this.overtimeService.checkWorkingInfo(companyID, command.getAbsCmd().getWkTypeCD(),
+					command.getAbsCmd().getWkTimeCD());
+		}
 		// アルゴリズム「申請理由の生成と検査」を実行する
 		String reason = GenAndInspectionOfAppReason(command, companyID, appType);
 		// INPUT.振出申請に申請理由を設定する
-		boolean isSaveRec = comType == ApplicationCombination.RecAndAbs.value
-				|| comType == ApplicationCombination.Rec.value;
-		if (isSaveRec) {
+		
+		if (isSaveRec(comType)) {
 			validateRec(command.getRecCmd());
 		}
-		boolean isSaveAbs = comType == ApplicationCombination.RecAndAbs.value
-				|| comType == ApplicationCombination.Abs.value;
-		if (isSaveAbs) {
+		if (isSaveAbs(comType)) {
 			validateAbs(command.getAbsCmd());
 		}
 

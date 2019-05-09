@@ -153,7 +153,7 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 						result.add(CheckedOvertimeImport.builder().employeeId(employeeId).datePeriod(period)
 								.alarmCheckId(agreeCond.getId()).error(true).no(agreeCond.getNo())
 								.ot36(agreeCond.getOt36()).excessNum(agreeCond.getExcessNum())
-								.messageDisp(agreeCond.getMessageDisp()).build());
+								.messageDisp(agreeCond.getMessageDisp()).countAgreementOneEmp(count).build());
 					}
 				
 			    }
@@ -226,6 +226,7 @@ public class CheckRecordAgreementAcAdapter implements CheckRecordAgreementAdapte
 				Integer closureIdCheck = mapEmpIdClosureID.get(empId);
 				//Get base date 
 				DatePeriod baseDate = mapClosureIDDatePeriod.get(closureIdCheck);
+				if(baseDate ==null) continue;
 				for (Integer fiscalYear : fiscalYears) {
 					PeriodAtrOfAgreement periodAtr = mapPeriodWithPeriodAtrOfAgreement(agreeConditionError.getPeriod());
 					if (periodAtr != null) {

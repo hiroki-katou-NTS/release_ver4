@@ -30,31 +30,26 @@
 		</div>
 		<div id="div_table_check_conditions" style="padding-top: 20px;">
 		   <table id="check-condition-table">
-		       <colgroup>
-			        <col width="36px"/>
-			        <col width="36px"/>
-			        <col width="230px"/>
-			        <col width="90px"/>
-			        <col width="230px"/>
-			    </colgroup>
 			    <thead>
 			        <tr>
-			            <th class="ui-widget-header" style="text-align: center;"><div data-bind="ntsCheckBox: {checked: isAllCheckCondition}"></div></th>
-			            <th class="ui-widget-header" style="text-align: center;">#{i18n.getText('KAL003_24')}</th>
-			            <th class="ui-widget-header" >#{i18n.getText('KAL003_12')}</th>
-			            <th class="ui-widget-header" >#{i18n.getText('KAL003_23')}</th>
-			            <th class="ui-widget-header" >#{i18n.getText('KAL003_25')}</th>
+			            <th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px"><div data-bind="ntsCheckBox: { checked: isAllCheckCondition  }"></div></th>
+						<th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px">#{i18n.getText('KAL003_24')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:230px">#{i18n.getText('KAL003_12')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:90px;">#{i18n.getText('KAL003_23')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:230px">#{i18n.getText('KAL003_25')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:182px;">#{i18n.getText('KAL003_188')}</th>
+						<th class="ui-widget-header" style ="background-color: #e9e9e9;width:17px;"></th>
 			        </tr>
 		        </thead>
 		       <tbody data-bind="foreach: listWorkRecordExtractingConditions()">
 		           <tr data-bind="attr: { 'data-id': rowId }">
-		               <td style ="text-align: center;">
-		                   <div data-bind="ntsCheckBox: {checked: useAtr}"></div>
+		               <td style ="text-align: center;width:36px">
+		                   <div data-bind="ntsCheckBox: {checked: deleteAtr}"></div> 
 		               </td>
-		               <td style ="text-align: center;">
+		               <td style ="text-align: center;width:36px">
 	                       <span data-bind="text: rowId"></span>
 	                   </td>
-	                   <td>
+	                   <td style ="width:230px">
 	                       <input class ="nameAlarmDailyM" data-bind="ntsTextEditor: {
 	                       value: nameWKRecord, 
 	                       required: true,
@@ -68,13 +63,22 @@
 				            	})
 				            )}" />
 	                   </td>
-	                   <td style ="text-align: center;">
+	                   <td style ="text-align: center;width:90px">
 	                       <button data-bind="click: $parent.btnSettingCheckCondition_click.bind($parent, rowId),enable: true">#{i18n.getText('KAL003_14')}</button>
 	                   </td>
-	                   <td>
+	                   <td style ="width:230px">
 	                   		<div data-bind="with: errorAlarmCondition">
 								<div data-bind = "text: displayMessage" class="limited-label description"></div>
  	                        </div>
+	                   </td>
+	                   <td  style="text-align: center;width:182px;">
+	                   		<div class="cf" data-bind="ntsSwitchButton: {
+							name: '#[KAL003_188]',
+							options: $parent.userAtrCheck ,
+							optionsValue: 'code',
+							optionsText: 'name',
+							value: useCheckSwitch,
+							required: true }"></div>
 	                   </td>
 		           </tr>
 		       </tbody>
@@ -112,31 +116,28 @@
 		</div>
 		<div id="div_table_check_conditions" style="margin-top: 20px">
 		   <table id="check-condition-table_category9">
-		       <colgroup>
-			        <col width="36px"/>
-			        <col width="36px"/>
-			        <col width="230px"/>
-			        <col width="90px"/>
-			        <col width="230px"/>
-			    </colgroup>
 			    <thead>
 			        <tr>
-			            <th class="ui-widget-header" style="text-align: center;"><div data-bind="ntsCheckBox: {checked: isAllCheckCondition}"></div></th>
-			            <th class="ui-widget-header" style="text-align: center;">#{i18n.getText('KAL003_24')}</th>
-			            <th class="ui-widget-header" >#{i18n.getText('KAL003_12')}</th>
-			            <th class="ui-widget-header" >#{i18n.getText('KAL003_23')}</th>
-			            <th class="ui-widget-header" >#{i18n.getText('KAL003_25')}</th>
+			            <tr>
+			            <th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px"><div data-bind="ntsCheckBox: { checked: isAllCheckCondition  }"></div></th>
+						<th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px">#{i18n.getText('KAL003_24')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:230px">#{i18n.getText('KAL003_12')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:90px;">#{i18n.getText('KAL003_23')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:230px">#{i18n.getText('KAL003_25')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:182px;">#{i18n.getText('KAL003_188')}</th>
+						<th class="ui-widget-header" style ="background-color: #e9e9e9;width:17px;"></th>
+			        </tr>
 			        </tr>
 		        </thead>
 		       <tbody data-bind="foreach: listMulMonCheckSet()">
 		           <tr data-bind="attr: { 'data-id': rowId }">
-		               <td style ="text-align: center;">
-		                   <div data-bind="ntsCheckBox: {checked: useAtr}"></div>
+		               <td style ="text-align: center;width:36px">
+		                   <div data-bind="ntsCheckBox: {checked: deleteAtr}"></div>
 		               </td>
-		               <td style ="text-align: center;">
+		               <td style ="text-align: center;width:36px">
 	                       <span data-bind="text: rowId"></span>
 	                   </td>
-	                   <td>
+	                   <td style ="width:230px">
 	                       <input class ="nameWKRecordID" 
 	                       data-bind="ntsTextEditor: {value: nameAlarmMulMon,
 	                        	required: true,
@@ -150,13 +151,22 @@
 				            	})
 				            )}" />
 	                   </td>
-	                   <td style ="text-align: center;">
+	                   <td style ="text-align: center;width:90px">
 	                       <button data-bind="click: $parent.btnSettingCheckCondition_click.bind($parent, rowId),enable: true">#{i18n.getText('KAL003_14')}</button>
 	                   </td>
-	                   <td>
+	                   <td style ="width:230px">
 	                   		<div>
 								<div data-bind = "text: displayMessage" class="limited-label description"></div>
  	                        </div>
+	                   </td>
+	                   <td  style="text-align: center;width:182px">
+	                   		<div class="cf" data-bind="ntsSwitchButton: {
+							name: '#[KAL003_188]',
+							options: $parent.userAtrCheck ,
+							optionsValue: 'code',
+							optionsText: 'name',
+							value: useCheckSwitch,
+							required: true }"></div>
 	                   </td>
 		           </tr>
 		       </tbody>

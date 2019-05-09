@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.dom.monthlyprocess.aggr.export;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +22,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 実装：指定した日別実績を集計
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Stateless
 public class AggregateSpecifiedDailysImpl implements AggregateSpecifiedDailys {
@@ -58,8 +59,9 @@ public class AggregateSpecifiedDailysImpl implements AggregateSpecifiedDailys {
 		
 		// 月別実績を集計する　（アルゴリズム）
 		val value = this.aggregateMonthlyRecord.aggregate(companyId, employeeId,
-				yearMonth, closureId, closureDate, period, prevAggrResult, companySets, employeeSets,
-				Optional.of(dailyWorks), monthlyWork);
+				yearMonth, closureId, closureDate, period,
+				prevAggrResult, Optional.empty(), Optional.empty(), Collections.emptyMap(),
+				companySets, employeeSets, Optional.of(dailyWorks), monthlyWork);
 		if (value.getErrorInfos().size() > 0) {
 			// エラー発生時
 			return Optional.empty();

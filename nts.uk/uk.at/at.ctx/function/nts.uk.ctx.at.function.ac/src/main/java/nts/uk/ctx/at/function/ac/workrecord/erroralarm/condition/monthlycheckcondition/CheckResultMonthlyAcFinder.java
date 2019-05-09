@@ -174,8 +174,9 @@ public class CheckResultMonthlyAcFinder implements CheckResultMonthlyAdapter {
 	
 	//HoiDD No.257
 		@Override
-		public Map<String,Map<YearMonth,Map<String,Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemConAdapterDto> attendanceItemCondition) {
+		public Map<String,Map<YearMonth,Map<String,Integer>>> checkPerTimeMonActualResult(YearMonthPeriod yearMonth, List<String> employeeID, Map<String, AttendanceItemConAdapterDto> attendanceItemCondition,Map<String, Map<YearMonth, Map<String,String>>> resultsData) {
 			return checkResultMonthlyPub.checkPerTimeMonActualResult(yearMonth, employeeID, 
-					attendanceItemCondition.entrySet().stream().collect(Collectors.toMap(c -> c.getKey(), c -> convertToAttendanceItemCon(c.getValue()))));
+					attendanceItemCondition.entrySet().stream().collect(Collectors.toMap(c -> c.getKey(), c -> convertToAttendanceItemCon(c.getValue()))),
+					resultsData);
 		}
 }

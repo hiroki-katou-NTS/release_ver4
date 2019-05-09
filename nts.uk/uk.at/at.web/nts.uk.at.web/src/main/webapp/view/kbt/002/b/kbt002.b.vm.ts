@@ -49,7 +49,7 @@ module nts.uk.at.view.kbt002.b {
                         self.isNewMode(true);
                     } else {
                         // set update mode
-                        self.isNewMode(false);
+                        
                         let data = _.filter(self.execItemList(), function(o) { return o.execItemCd == execItemCd; });
                         if (data[0]) {
                             self.currentExecItem().createData(data[0]);
@@ -59,7 +59,9 @@ module nts.uk.at.view.kbt002.b {
                                 self.targetDateText(self.buildTargetDateStr(self.currentExecItem()));
                             }
                         }
+                        self.isNewMode(false);
                     }
+                    
                     setTimeout(function() { self.focusInput(); }, 100);
                     //                    self.currentExecItem().refDate(moment(new Date()).toDate());
                     nts.uk.ui.errors.clearAll();
@@ -134,7 +136,7 @@ module nts.uk.at.view.kbt002.b {
             // 登録 button
             saveProcExec() {
                 let self = this;
-                
+  
                 // validate
                 if (self.validate()) {
                     return;
@@ -382,6 +384,10 @@ module nts.uk.at.view.kbt002.b {
                 $("#execItemCd").ntsEditor('validate');
                 $("#execItemName").ntsEditor('validate');
                 $(".ntsDatepicker").ntsEditor('validate');
+                if (self.currentExecItem().targetMonth() != 3 && self.currentExecItem().perScheduleClsNomarl() && self.currentExecItem().processExecType() == 0) {
+                    $("#targetDate").trigger("validate");
+                    $("#creationPeriod").trigger("validate");
+                }
                 if (self.currentExecItem().perScheduleCls()) {
                     $("#targetDate").ntsEditor('validate');
                     $("#creationPeriod").ntsEditor('validate');
@@ -412,7 +418,7 @@ module nts.uk.at.view.kbt002.b {
                     command.execItemCd = self.currentExecItem().execItemCd();
                     command.execItemName = self.currentExecItem().execItemName();
                     command.perScheduleCls = self.currentExecItem().perScheduleClsNomarl();
-                     if(!self.currentExecItem().perScheduleClsNomarl()){ 
+                     if(!self.currentExecItem().perScheduleClsNomarl() || self.currentExecItem().targetMonth() == 3){ 
                         command.targetDate = 1;                        
                         command.creationPeriod = 1;
                     }else{
@@ -740,6 +746,7 @@ module nts.uk.at.view.kbt002.b {
                     3: 開始月を指定する
                  */
                 self.targetMonth.subscribe(x=>{
+                    nts.uk.ui.errors.clearAll();
                     if(x!=3){
                         self.designatedYear(0);
                         self.startMonthDay(101);
@@ -749,6 +756,8 @@ module nts.uk.at.view.kbt002.b {
                         self.disableYearMonthDate(true);     
                     }    
                 });
+                
+                
                 
 //                self.startMonthDay.subscribe(x=>{
 //                    nts.uk.ui.errors.clearAll();

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
@@ -271,6 +272,61 @@ public class JpaAffWorkplaceHistoryItemRepository extends JpaRepository implemen
 			return Collections.emptyList();
 		}
 		return lstSid;
+	}
+
+	@SneakyThrows
+	@Override
+	public List<String> getHistIdLstBySidAndPeriod(String sid, DatePeriod period) {
+		
+		List<String> lstWorkplace = new ArrayList<>();
+			try (PreparedStatement statement = this.connection().prepareStatement(
+					"SELECT h.WORKPLACE_ID from BSYMT_AFF_WPL_HIST_ITEM h"
+					+ " INNER JOIN BSYMT_AFF_WORKPLACE_HIST wh ON wh.HIST_ID = h.HIST_ID"
+					+ " WHERE wh.START_DATE <= ? and wh.END_DATE >= ? AND h.SID = ?")) {
+			statement.setDate(1, Date.valueOf(period.end().localDate()));
+			statement.setDate(2, Date.valueOf(period.start().localDate()));
+			statement.setString(3, sid);
+			lstWorkplace.addAll(new NtsResultSet(statement.executeQuery()).getList(rec -> {
+				return rec.getString("WORKPLACE_ID");
+			}));
+		}catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+			
+		if(lstWorkplace.isEmpty()){
+			return Collections.emptyList();
+		}
+		return lstWorkplace;
+	}
+
+	@Override
+	public List<String> getHistIdLstByWorkplaceIdsAndPeriod(List<String> workplaceIds, DatePeriod period) {
+
+		List<String> sids = new ArrayList<>();
+		CollectionUtil.split(workplaceIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			try (PreparedStatement statement = this.connection()
+					.prepareStatement("SELECT DISTINCT h.SID from BSYMT_AFF_WPL_HIST_ITEM h"
+							+ " INNER JOIN BSYMT_AFF_WORKPLACE_HIST wh ON wh.HIST_ID = h.HIST_ID"
+							+ " WHERE wh.START_DATE <= ? and wh.END_DATE >= ? AND  h.WORKPLACE_ID IN (" + subList.stream().map(s -> "?").collect(Collectors.joining(",")) + ")")) {
+				statement.setDate(1, Date.valueOf(period.end().localDate()));
+				statement.setDate(2, Date.valueOf(period.start().localDate()));
+				for (int i = 0; i < subList.size(); i++) {
+					statement.setString(i + 3, subList.get(i));
+				}
+				sids.addAll(new NtsResultSet(statement.executeQuery()).getList(rec -> {
+					return rec.getString("SID");
+				}));
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+			
+		});
+
+
+		if (sids.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return sids;
 	}
 
 }

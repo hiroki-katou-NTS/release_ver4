@@ -43,7 +43,7 @@ public class CheckAdminUnverifiedDefault implements CheckAdminUnverifiedService 
 			if (!stateConfirm.isState()) {
 				listValueExtractAlarmWR.add(new ValueExtractAlarmWR(workplaceID, employeeID, stateConfirm.getDate(),
 						TextResource.localize("KAL010_1"), TextResource.localize("KAL010_44"),
-						TextResource.localize("KAL010_45"), comment));
+						TextResource.localize("KAL010_45"), comment,null));
 			}
 
 		}
@@ -74,7 +74,7 @@ public class CheckAdminUnverifiedDefault implements CheckAdminUnverifiedService 
 			if (!stateConfirm.isState()) {
 				listValueExtractAlarmWR.add(new ValueExtractAlarmWR(workplaceID, employeeID, stateConfirm.getDate(),
 						TextResource.localize("KAL010_1"), TextResource.localize("KAL010_44"),
-						TextResource.localize("KAL010_45"), comment));
+						TextResource.localize("KAL010_45"), comment,null));
 			}
 
 		}

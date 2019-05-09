@@ -372,7 +372,7 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.getList(c -> { 
-					return new AgentInfoOutput(x, c.agentSid1, c.startDate, c.endDate);
+					return new AgentInfoOutput(x, c.cmmmtAgentPK.employeeId, c.startDate, c.endDate);
 				});
 				resultList.addAll(findList1);
 				break;
@@ -383,7 +383,7 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.getList(c -> { 
-					return new AgentInfoOutput(x, c.agentSid2, c.startDate, c.endDate);
+					return new AgentInfoOutput(x, c.cmmmtAgentPK.employeeId, c.startDate, c.endDate);
 				});
 				resultList.addAll(findList2);
 				break;
@@ -394,7 +394,7 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.getList(c -> { 
-					return new AgentInfoOutput(x, c.agentSid3, c.startDate, c.endDate);
+					return new AgentInfoOutput(x, c.cmmmtAgentPK.employeeId, c.startDate, c.endDate);
 				});
 				resultList.addAll(findList3);
 				break;
@@ -405,7 +405,7 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.getList(c -> { 
-					return new AgentInfoOutput(x, c.agentSid4, c.startDate, c.endDate);
+					return new AgentInfoOutput(x, c.cmmmtAgentPK.employeeId, c.startDate, c.endDate);
 				});
 				resultList.addAll(findList4);
 			}

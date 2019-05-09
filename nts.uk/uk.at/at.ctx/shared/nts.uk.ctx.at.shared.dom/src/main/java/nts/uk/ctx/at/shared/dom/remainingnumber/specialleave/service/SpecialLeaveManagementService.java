@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.InterimRemain;
@@ -17,7 +18,7 @@ public interface SpecialLeaveManagementService {
 	 * RequestList273 期間内の特別休暇残を集計する
 	 * @return
 	 */
-	InPeriodOfSpecialLeave complileInPeriodOfSpecialLeave(ComplileInPeriodOfSpecialLeaveParam param);
+	InPeriodOfSpecialLeaveResultInfor complileInPeriodOfSpecialLeave(ComplileInPeriodOfSpecialLeaveParam param);
 	/**
 	 * 管理データを取得する
 	 * @param cid
@@ -26,7 +27,7 @@ public interface SpecialLeaveManagementService {
 	 * @param complileDate ・集計開始日 ・集計終了日
 	 * @return 特別休暇付与残数データ
 	 */
-	ManagaData getMngData(String cid, String sid, int specialLeaveCode, DatePeriod complileDate);
+	ManagaData getMngData(String cid, String sid, int specialLeaveCode, DatePeriod complileDate, Optional<InPeriodOfSpecialLeaveResultInfor> beforeResult);
 
 	
 	/**

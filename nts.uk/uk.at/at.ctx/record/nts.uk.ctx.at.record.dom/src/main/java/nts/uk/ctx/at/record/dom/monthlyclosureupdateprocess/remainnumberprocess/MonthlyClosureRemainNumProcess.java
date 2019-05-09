@@ -65,6 +65,6 @@ public class MonthlyClosureRemainNumProcess {
 		compensatoryProc.compensatoryHolidayProcess(period, empId, interimRemainMngMap);
 		
 		// 特別休暇処理
-		specialProc.specialHolidayProcess(period, empId, interimRemainMngMap);
+		specialProc.specialHolidayProcess(period, empId, interimRemainMngMap, false);//自動付与区分: とりあえず固定値：　False、二次開発に対応します
 	}
 }

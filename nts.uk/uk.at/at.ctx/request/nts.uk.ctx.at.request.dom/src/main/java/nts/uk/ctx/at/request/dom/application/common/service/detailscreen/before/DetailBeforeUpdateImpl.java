@@ -9,7 +9,8 @@ import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.before.NewBeforeRegister_New;
-
+import nts.uk.ctx.at.request.dom.application.overtime.service.CheckWorkingInfoResult;
+import nts.uk.ctx.at.request.dom.application.overtime.service.OvertimeService;
 @Stateless
 public class DetailBeforeUpdateImpl implements DetailBeforeUpdate {
 
@@ -19,9 +20,14 @@ public class DetailBeforeUpdateImpl implements DetailBeforeUpdate {
 	@Inject
 	private ApplicationRepository_New applicationRepository;
 
+	@Inject
+	private OvertimeService OvertimeService;
+	
 	public void processBeforeDetailScreenRegistration(String companyID, String employeeID, GeneralDate appDate,
-			int employeeRouteAtr, String appID, PrePostAtr postAtr, Long version) {
-		
+			int employeeRouteAtr, String appID, PrePostAtr postAtr, Long version, String wkTypeCode,
+			String wkTimeCode) {
+		//勤務種類、就業時間帯チェックのメッセージを表示
+		displayWorkingHourCheck(companyID, wkTypeCode, wkTimeCode);
 		// 選択した勤務種類の矛盾チェック(check sự mâu thuẫn của worktype đã chọn)
 		// selectedWorkTypeConflictCheck();
 		
@@ -41,6 +47,32 @@ public class DetailBeforeUpdateImpl implements DetailBeforeUpdate {
 		exclusiveCheck(companyID, appID, version);
 	}
 	
+	/**
+	 * 勤務種類、就業時間帯チェックのメッセージを表示
+	 * @param companyID
+	 * @param wkTypeCode
+	 * @param wkTimeCode
+	 */
+	@Override
+	public void displayWorkingHourCheck(String companyID, String wkTypeCode, String wkTimeCode) {
+		// 12.マスタ勤務種類、就業時間帯データをチェック
+		CheckWorkingInfoResult checkResult = this.OvertimeService.checkWorkingInfo(companyID, wkTypeCode, wkTimeCode);
+		if (checkResult.isWkTypeError() || checkResult.isWkTimeError()) {
+			String text = "";
+			if (checkResult.isWkTypeError()) {
+				text = "勤務種類コード" + wkTypeCode;
+			}
+			if (checkResult.isWkTimeError()) {
+				text = "就業時間帯コード" + wkTimeCode;
+			}
+			if (checkResult.isWkTypeError() && checkResult.isWkTimeError()) {
+				text = "勤務種類コード" + wkTypeCode + "、" + "就業時間帯コード" + wkTimeCode;
+				;
+			}
+			throw new BusinessException("Msg_1530", text);
+		}
+	}
+
 	/**
 	 * 1.排他チェック
 	 */

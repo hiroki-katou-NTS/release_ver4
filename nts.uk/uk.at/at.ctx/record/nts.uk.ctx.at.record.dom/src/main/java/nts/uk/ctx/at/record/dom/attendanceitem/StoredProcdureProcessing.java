@@ -166,7 +166,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			
 			/** 任意項目13: 出勤時刻が入っており、入館と退館がない事が条件 */
 			processOptionalItem(() -> startTime != null && leaveGateStartTime == null && leaveGateEndTime == null, 
-					optionalItem, COUNT_ON, COUNT_OFF, 3);
+					optionalItem, COUNT_ON, COUNT_OFF, 13);
 			
 			/** 任意項目4: その日にPCログオン = null and ログオフ <> null が条件 */
 			processOptionalItem(() -> startTime != null && logonTime == null && logoffTime != null, 

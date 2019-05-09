@@ -2,7 +2,9 @@ package nts.uk.ctx.at.record.dom.monthlyprocess.aggr;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -34,6 +36,9 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enu
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExeStateOfCalAndSum;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionContent;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
+import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.export.query.AbsRecRemainMngOfInPeriod;
+import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query.BreakDayOffRemainMngOfInPeriod;
+import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.InPeriodOfSpecialLeaveResultInfor;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
@@ -133,8 +138,11 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 		MonthlyAggrEmpServiceValue status = new MonthlyAggrEmpServiceValue();
 		val dataSetter = asyncContext.getDataSetter();
 		
-		// 前回集計結果　（年休積立年休の集計結果）
+		// 前回集計結果を初期化する
 		AggrResultOfAnnAndRsvLeave prevAggrResult = new AggrResultOfAnnAndRsvLeave();
+		Optional<AbsRecRemainMngOfInPeriod> prevAbsRecResultOpt = Optional.empty();
+		Optional<BreakDayOffRemainMngOfInPeriod> prevBreakDayOffresultOpt = Optional.empty();
+		Map<Integer, InPeriodOfSpecialLeaveResultInfor> prevSpecialLeaveResultMap = new HashMap<>();
 
 		ConcurrentStopwatches.start("11000:集計期間の判断：");
 		
@@ -221,8 +229,9 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			
 			// 月別実績を集計する　（アルゴリズム）
 			val value = this.aggregateMonthlyRecordService.aggregate(companyId, employeeId,
-					yearMonth, closureId, closureDate, datePeriod, prevAggrResult, companySets, employeeSets,
-					Optional.empty(), Optional.empty());
+					yearMonth, closureId, closureDate, datePeriod,
+					prevAggrResult, prevAbsRecResultOpt, prevBreakDayOffresultOpt, prevSpecialLeaveResultMap,
+					companySets, employeeSets, Optional.empty(), Optional.empty());
 			
 			// 状態を確認する
 			if (value.getErrorInfos().size() > 0) {
@@ -244,6 +253,9 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			
 			// 前回集計結果の退避
 			prevAggrResult = value.getAggrResultOfAnnAndRsvLeave();
+			prevAbsRecResultOpt = value.getAbsRecRemainMngOfInPeriodOpt();
+			prevBreakDayOffresultOpt = value.getBreakDayOffRemainMngOfInPeriodOpt();
+			prevSpecialLeaveResultMap = value.getInPeriodOfSpecialLeaveResultInforMap();
 			
 			// 月別実績(WORK)を登録する
 			this.monthService.merge(Arrays.asList(value.getIntegration()), datePeriod.end());

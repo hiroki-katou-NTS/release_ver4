@@ -41,10 +41,10 @@ tbody {
 }
 
 #processingName {
-	margin-left: 50px;
-	width: 191px;
-	font-weight: bold;
-    font-size: 18px;
+	margin-left: 30px;
+    width: 218px;
+    font-weight: bold;
+    font-size: 15px;
     margin-top: 7px;
 }
 
@@ -53,7 +53,7 @@ tbody {
 }
 
 #processingResult {
-	margin-left: 30px;
+	margin-left: 20px;
 }
 
 #button2 {

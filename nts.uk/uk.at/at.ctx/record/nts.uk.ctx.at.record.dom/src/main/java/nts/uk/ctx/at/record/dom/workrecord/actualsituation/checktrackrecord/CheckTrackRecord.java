@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
+import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootOfEmpMonthImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.approvalmanagement.domainservice.narrowdownemployee.NarrowDownEmployee;
@@ -69,10 +70,19 @@ public class CheckTrackRecord {
 			return false;
 		}
 		List<DatePeriod> listDatePeriod = new ArrayList<>();
+		List<AppRootOfEmpMonthImport> listApp = new ArrayList<>();
+		AppRootOfEmpMonthImport approvalRootOfEmployeeImport  = null;
 		for (CheckTargetItemDto checkTargetItemExport : listCheckTargetItemExport) {
 			Optional<Closure> closure = closureRepository.findById(companyId, checkTargetItemExport.getClosureId());
 			if (closure.isPresent()) {
 				listDatePeriod.addAll(closure.get().getPeriodByYearMonth(checkTargetItemExport.getYearMonth()));
+				// Change 463(call 133) by 534 for Tú bro - if have bug, Tú will fix, don't call me
+				// 対応するImported「基準社員の承認対象者」を取得する RQ643
+				approvalRootOfEmployeeImport = this.approvalStatusAdapter
+						.getApprovalEmpStatusMonth(AppContexts.user().employeeId(), checkTargetItemExport.getYearMonth(),
+								checkTargetItemExport.getClosureId(), closure.get().getClosureHistories().get(0).getClosureDate(),
+								listDatePeriod.get(0).end(), optApprovalUse.get().getUseDayApproverConfirm(), listDatePeriod.get(0)); // 2 : 月別確認
+				listApp.add(approvalRootOfEmployeeImport);
 			}
 		}
 		if (listDatePeriod.isEmpty())
@@ -88,17 +98,31 @@ public class CheckTrackRecord {
 			}
 		}
 		DatePeriod periord = new DatePeriod(minDate, maxDate);
-		// 対応するImported「基準社員の承認対象者」を取得する RQ643
-		ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport = approvalStatusAdapter
-				.getApprovalRootOfEmloyeeNew(periord.start(), periord.end(), loginId, companyId, 2); // 2 : 月別確認
+		
 		if(approvalRootOfEmployeeImport == null) 
 			return false;
 		for (CheckTargetItemDto checkTargetItemExport : listCheckTargetItemExport) {
-			//画面に表示する社員に絞り込む
-			Optional<AppEmpStatusImport> appEmpStatusImport = narrowDownEmployee.narrowDownEmployee(approvalRootOfEmployeeImport, checkTargetItemExport.getClosureId(), checkTargetItemExport.getYearMonth());
-			if(!appEmpStatusImport.isPresent()) continue;
-			List<String> employeeIds = appEmpStatusImport.get().getRouteSituationLst().stream().map(c->c.getEmployeeID()).collect(Collectors.toList());
 			
+			// Change 463(call 133) by 534 for Tú bro - if have bug, Tú will fix, don't call me ↓
+			//画面に表示する社員に絞り込む
+//			Optional<AppRootOfEmpMonthImport> appEmpStatusImport = narrowDownEmployee.narrowDownEmployee(approvalRootOfEmployeeImport, checkTargetItemExport.getClosureId(), checkTargetItemExport.getYearMonth());
+//			if(!appEmpStatusImport.isPresent()) continue;
+//			List<String> employeeIds = appEmpStatusImport.get().getRouteSituationLst().stream().map(c->c.getEmployeeID()).collect(Collectors.toList());
+			AppRootOfEmpMonthImport appRootOfEmpMonth = null;
+			for(AppRootOfEmpMonthImport appRootOfEmpMonthImport :listApp){
+				if(!appRootOfEmpMonthImport.getApprovalRootSituations().isEmpty()){
+					if(appRootOfEmpMonthImport.getApprovalRootSituations().get(0).getClosureID().intValue() == checkTargetItemExport.getClosureId()){
+						appRootOfEmpMonth = appRootOfEmpMonthImport;
+						break;
+					}
+				}
+			}
+			if(appRootOfEmpMonth == null) continue;
+			List<String> employeeIds = appRootOfEmpMonth.getApprovalRootSituations().stream().map(c->c.getTargetID()).collect(Collectors.toList());
+			if(employeeIds.isEmpty()){
+				continue;
+			}
+			//End ↑	
 			//対応する月別実績を取得する
 			List<TimeOfMonthly> timeOfMonthly = timeRepo.findByEmployeesAndClorure(employeeIds, checkTargetItemExport.getYearMonth(), checkTargetItemExport.getClosureId());
 			List<AttendanceTimeOfMonthly> listAttendanceTimeOfMonthly = timeOfMonthly.stream()

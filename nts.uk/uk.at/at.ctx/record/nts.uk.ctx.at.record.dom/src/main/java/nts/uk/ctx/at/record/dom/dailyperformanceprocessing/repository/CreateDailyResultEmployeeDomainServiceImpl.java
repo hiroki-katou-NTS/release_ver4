@@ -307,7 +307,7 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 			return status;
 		}
 
-		GeneralDate processingDate = periodTime.start();
+		GeneralDate processingDate = newPeriod.start();
 
 		// lits day between startDate and endDate
 		List<GeneralDate> listDayBetween = this.getDaysBetween(newPeriod.start(), newPeriod.end());

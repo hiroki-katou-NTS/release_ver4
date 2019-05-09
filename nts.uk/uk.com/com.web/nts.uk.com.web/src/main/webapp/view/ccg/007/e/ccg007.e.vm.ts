@@ -81,7 +81,7 @@ module nts.uk.pr.view.ccg007.e {
                         };
                     nts.uk.ui.windows.setShared("childData", returnedData, false);
                     
-                    self.closeDialog();
+                    nts.uk.ui.windows.close();
                     blockUI.clear();
                 }).fail(function(res) {
                     //Return Dialog Error

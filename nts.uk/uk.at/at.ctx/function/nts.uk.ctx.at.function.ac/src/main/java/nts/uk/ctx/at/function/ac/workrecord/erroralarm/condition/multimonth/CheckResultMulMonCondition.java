@@ -11,6 +11,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.function.dom.adapter.actualmultiplemonth.CheckActualResultMulMonth;
 import nts.uk.ctx.at.function.dom.adapter.actualmultiplemonth.MonthlyRecordValueImport;
+import nts.uk.ctx.at.function.dom.adapter.actualmultiplemonth.ResultCheckMulMonthCheckCondAverage;
 import nts.uk.ctx.at.function.dom.adapter.eralworkrecorddto.ErAlAtdItemConAdapterDto;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.aggregationprocess.daily.dailyaggregationprocess.ConditionType;
 import nts.uk.ctx.at.function.dom.alarm.checkcondition.multimonth.doevent.MulMonCheckCondDomainEventDto;
@@ -58,6 +59,33 @@ public class CheckResultMulMonCondition implements CheckActualResultMulMonth{
 		return check;
 	}
 
+	//tính tam 
+
+	@Override
+	public Double sumMulMonthCheckCond(DatePeriod period, String companyId, String string,
+			List<MonthlyRecordValueImport> results, MulMonCheckCondDomainEventDto erAlAtdItemConAdapterDto) {
+		String errorAlarmCode = "";
+		MulMonthCheckCond mulMonthCheckCond = new MulMonthCheckCond(
+				erAlAtdItemConAdapterDto.getErrorAlarmCheckID(),
+				erAlAtdItemConAdapterDto.isUseAtr(),
+				convertAtdIemConToDomain(erAlAtdItemConAdapterDto.getErAlAtdItem(),companyId,errorAlarmCode)
+				) ;
+		List<ItemValue> itemValues = new ArrayList<ItemValue>();
+		Double sumAll = 0d;
+		for (MonthlyRecordValueImport result : results) {
+			itemValues.addAll(result.getItemValues());
+			Double sum = mulMonthCheckCond.getErAlAttendanceItemCondition().sumCheckTarget(item -> {
+				if (item.isEmpty()) {
+					return new ArrayList<>();
+				}
+				return itemValues.stream().map(iv -> getValue(iv)).collect(Collectors.toList());
+			});
+			if(sum != null) return sumAll += sum;
+		}
+
+		return sumAll;
+	}
+	
 	@Override
 	public boolean checkMulMonthCheckCondContinue(DatePeriod period, String companyId, String employeeId,
 			List<MonthlyRecordValueImport> results, MulMonCheckCondDomainEventDto erAlAtdItemConAdapterDto) {
@@ -129,7 +157,7 @@ public class CheckResultMulMonCondition implements CheckActualResultMulMonth{
 	}
 
 	@Override
-	public boolean checkMulMonthCheckCondAverage(DatePeriod period, String companyId, String employeeId,
+	public ResultCheckMulMonthCheckCondAverage checkMulMonthCheckCondAverage(DatePeriod period, String companyId, String employeeId,
 			List<MonthlyRecordValueImport> results, MulMonCheckCondDomainEventDto erAlAtdItemConAdapterDto) {
 		List<YearMonth> lstYearMonth = period.yearMonthsBetween();
 //		String errorAlarmCode = "";
@@ -153,7 +181,7 @@ public class CheckResultMulMonCondition implements CheckActualResultMulMonth{
 		check = CompareDouble(bdAVG, erAlAtdItemConAdapterDto.getErAlAtdItem().getCompareStartValue(),
 				erAlAtdItemConAdapterDto.getErAlAtdItem().getCompareEndValue(),
 				erAlAtdItemConAdapterDto.getErAlAtdItem().getCompareOperator());
-		return check;
+		return new ResultCheckMulMonthCheckCondAverage(check,bdAVG);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -270,5 +298,4 @@ public class CheckResultMulMonCondition implements CheckActualResultMulMonth{
 		}
 		return check;
 	}
-	
 }

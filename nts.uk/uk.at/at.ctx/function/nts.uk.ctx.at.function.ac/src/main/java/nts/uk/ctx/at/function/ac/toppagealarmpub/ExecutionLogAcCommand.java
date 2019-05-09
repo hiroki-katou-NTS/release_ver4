@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.function.ac.toppagealarmpub;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -32,7 +33,7 @@ public class ExecutionLogAcCommand implements ExecutionLogAdapterFn{
 				importFn.getManagerId(),
 				importFn.getIsCancelled() == null ? 0 : 
 				(!importFn.getIsCancelled().isPresent()?null:importFn.getIsCancelled().get()),
-				importFn.getTargerEmployee().stream().map(c->convertToExecutionLogErrorDetailFn(c)).collect(Collectors.toList())
+				importFn.getTargerEmployee()==null? new ArrayList<>() : importFn.getTargerEmployee().stream().map(c->convertToExecutionLogErrorDetailFn(c)).collect(Collectors.toList())
 				);
 	}
 	

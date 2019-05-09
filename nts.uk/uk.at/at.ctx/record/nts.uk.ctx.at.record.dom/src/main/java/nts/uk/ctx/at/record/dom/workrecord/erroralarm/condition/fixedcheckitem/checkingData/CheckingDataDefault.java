@@ -39,7 +39,7 @@ public class CheckingDataDefault implements CheckingDataService {
 			if (!data.isPresent()) {
 				listValueExtractAlarmWR
 						.add(new ValueExtractAlarmWR(workplaceID, employeeID, date, TextResource.localize("KAL010_1"),
-								TextResource.localize("KAL010_65"), TextResource.localize("KAL010_66"), comment));
+								TextResource.localize("KAL010_65"), TextResource.localize("KAL010_66"), comment,null));
 			}
 			date = date.addDays(1);
 		}

@@ -48,7 +48,7 @@ public class CheckAgreementDefault implements CheckAgreementService {
 					TextResource.localize("KAL010_100"),
 					TextResource.localize("KAL010_273"),	
 					TextResource.localize("KAL010_274"),
-					null));
+					null,null));
 		}
 		
 		return Optional.of(new ValueExtractAlarmWR(null,
@@ -57,7 +57,7 @@ public class CheckAgreementDefault implements CheckAgreementService {
 				TextResource.localize("KAL010_100"),
 				TextResource.localize("KAL010_273"),	
 				TextResource.localize("KAL010_275"),
-				null));
+				null,null));
 	}
 
 }

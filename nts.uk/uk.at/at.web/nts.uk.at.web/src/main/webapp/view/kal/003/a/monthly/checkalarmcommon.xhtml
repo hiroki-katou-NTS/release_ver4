@@ -16,31 +16,26 @@
 		</div>
 		
 		<table id="fixed-table2">
-		       <colgroup>
-			        <col width="36px"/>
-			        <col width="36px"/>
-			        <col width="200px"/>
-			        <col width="90px"/>
-			        <col width="190px"/>
-			    </colgroup>
 			    <thead>
 			        <tr>
-			            <th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;"><div data-bind="ntsCheckBox: { checked: isAllCheckCondition  }"></div></th>
-					<th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;">#{i18n.getText('KAL003_24')}</th>
-					<th class="ui-widget-header" style ="background-color: #CFF1A5;">#{i18n.getText('KAL003_12')}</th>
-					<th class="ui-widget-header" style ="background-color: #CFF1A5;">#{i18n.getText('KAL003_23')}</th>
-					<th class="ui-widget-header" style ="background-color: #CFF1A5;">#{i18n.getText('KAL003_25')}</th>
+			            <th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px"><div data-bind="ntsCheckBox: { checked: isAllCheckCondition  }"></div></th>
+						<th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px">#{i18n.getText('KAL003_24')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:200px">#{i18n.getText('KAL003_12')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:90px;">#{i18n.getText('KAL003_23')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:190px">#{i18n.getText('KAL003_25')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:182px;">#{i18n.getText('KAL003_188')}</th>
+						<th class="ui-widget-header" style ="background-color: #e9e9e9;width:17px;"></th>
 			        </tr>
 		        </thead>
 		       <tbody data-bind="foreach: listExtraResultMonthly">
 		           <tr data-bind="attr: { 'data-id': rowId }">
-		               <td style ="text-align: center;">
-		                   <div data-bind="ntsCheckBox: {checked: useAtr}"></div>
+		               <td style ="text-align: center;width:36px;">
+		                   <div data-bind="ntsCheckBox: {checked: deleteAtr}"></div>
 		               </td>
-		               <td style ="text-align: center;">
+		               <td style ="text-align: center;width:36px;">
 	                       <span data-bind="text: rowId"></span>
 	                   </td>
-	                   <td>
+	                   <td style="width:200px;">
 	                       <input class="nameAlarm" data-bind="ntsTextEditor: {value: nameAlarmExtraCon , required: true, constraint: 'NameAlarmExtractionCondition', name: '#[KAL003_12]', 
 		                       option: ko.mapping.fromJS(new nts.uk.ui.option.TextEditorOption({
 				                textmode: 'text',
@@ -49,11 +44,20 @@
 				                textalign: 'left'
 				            }))}" />
 	                   </td>
-	                   <td style ="text-align: center;">
+	                   <td style ="text-align: center;width:90px;">
 	                       <button data-bind="click: $parent.btnSettingCheckCondition_click.bind($parent, rowId),enable: true">#{i18n.getText('KAL003_14')}</button>
 	                   </td>
-	                   <td>
+	                   <td  style="width:190px;">
 							<div data-bind = "text: displayMessage" class="limited-label description"></div>
+	                   </td>
+	                   <td style="text-align: center;width:182px;">
+							<div class="cf" data-bind="ntsSwitchButton: {
+							name: '#[KAL003_188]',
+							options: $parent.userAtrCheck ,
+							optionsValue: 'code',
+							optionsText: 'name',
+							value: useCheckSwitch,
+							required: true }"></div>
 	                   </td>
 		           </tr>
 		       </tbody>

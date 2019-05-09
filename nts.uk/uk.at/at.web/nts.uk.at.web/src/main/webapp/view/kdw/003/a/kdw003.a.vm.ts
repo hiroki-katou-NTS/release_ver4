@@ -731,6 +731,10 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         setSprFromItem(data: any) {
             let self = this;
             if (!_.isEmpty(self.shareObject()) && self.shareObject().initClock != null && self.initScreenSPR == 0) {
+                if(!_.isEmpty(data.changeSPR.messageIdError)){
+                   nts.uk.ui.dialog.error({ messageId: data.changeSPR.messageIdError});
+                    return;
+                }
                 if (data.showQuestionSPR == SPRCheck.SHOW_CONFIRM) {
                     let sprStamp = { employeeId: "", date: "", change31: false, change34: false };
                     // show dialog confirm 
@@ -1572,6 +1576,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         loadRowScreen(onlyLoadMonth: boolean, onlyCalc: boolean) : JQueryPromise<any> {
             var self = this;
             let lstEmployee = [];
+            self.sprStampSourceInfo(null);
             if (self.displayFormat() === 0) {
                 let lst = _.find(self.lstEmployee(), (employee) => {
                     return employee.id === self.selectedEmployee();
@@ -3957,13 +3962,60 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     });
                     dataChageRow.push(dataMap);
 
+                    
                     let param = {
                         //dailyEdits: __viewContext.vm.lstDomainEdit,
                         itemEdits: dataChageRow,
                         changeSpr31: changeSpr31,
-                        changeSpr34: changeSpr34
+                        changeSpr34: changeSpr34,
+                        notChangeCell: false
                     };
+                    
+                    //check cell has update
+                    let itemSelectChange = _.find(dataChange, (itemTemp) =>{
+                        return itemTemp.columnKey == columnKey &&  itemTemp.rowId == rowId; 
+                    })
+                    
+                    if(_.isEmpty(itemSelectChange)){
+                        param.notChangeCell = true;
+                    }
+                    
                     service.calcTime(param).done((value) => {
+                        // workType, workTime not found
+                      
+                        if (value.errorFindMaster28 || value.errorFindMaster29) {
+
+                            let rowItemSelect: any = _.find($("#dpGrid").mGrid("dataSource"), function(value: any) {
+                                return value.id == rowId;
+                            })
+
+                            if (value.errorFindMaster28) {
+                                let typeError28 = _.find(__viewContext.vm.workTypeNotFound, data => {
+                                    return data.columnKey == "Code28" && data.rowId == rowId;
+                                });
+
+                                if (typeError28 == undefined) {
+                                    __viewContext.vm.workTypeNotFound.push({ columnKey: "Code28", rowId: rowId, message: nts.uk.resource.getMessage("Msg_1293"), employeeId: rowItemSelect.employeeId, date: moment(rowItemSelect.dateDetail) });
+                                } else {
+                                    typeError28.message = nts.uk.resource.getMessage("Msg_1293");
+                                }
+                            } else {
+                                let typeError29 = _.find(__viewContext.vm.workTypeNotFound, data => {
+                                    return data.columnKey == "Code29" && data.rowId == rowId;
+                                });
+
+                                if (typeError29 == undefined) {
+                                    __viewContext.vm.workTypeNotFound.push({ columnKey: "Code29", rowId: rowId, message: nts.uk.resource.getMessage("Msg_1293"), employeeId: rowItemSelect.employeeId, date: moment(rowItemSelect.dateDetail) });
+                                } else {
+                                    typeError29.message = nts.uk.resource.getMessage("Msg_1293");
+                                }
+                            }
+                        }else{
+                            _.remove(__viewContext.vm.workTypeNotFound, dataTemp => {
+                                return (dataTemp.columnKey == "Code28" ||  dataTemp.columnKey == "Code29")  && dataTemp.rowId == rowId;
+                            });
+                        } 
+                        
                         //__viewContext.vm.lstDomainEdit = value.dailyEdits;
                         _.each(value.cellEdits, itemResult => {
                             $("#dpGrid").mGrid("updateCell", itemResult.id, itemResult.item, itemResult.value, true, true);
@@ -4412,7 +4464,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                                     return item.code == output;
                                 });
                                 self.updateCodeName(self.rowId(), self.attendenceId, codeName.name, codeName.code, self.selectedCode());
-                                dfd.resolve()
+                                dfd6.resolve()
                             });
                         } else {
                             __viewContext.vm.clickCounter.clickLinkGrid = false;
@@ -4469,7 +4521,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     let dfd8 = $.Deferred();
                     setShared('CDL002Params', {
                         isMultiple: false,
-                        selectedCodes: self.selectedCode(),
+                        selectedCodes: [self.selectedCode()],
                         showNoSelection: false
                     }, true);
 

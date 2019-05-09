@@ -12,11 +12,16 @@ public class OutputExecAlarmListPro {
 	private boolean checkExecAlarmListPro;
 	
 	private String errorMessage;
+	
+	private boolean checkStop;
 
-	public OutputExecAlarmListPro(boolean checkExecAlarmListPro, String errorMessage) {
+	public OutputExecAlarmListPro(boolean checkExecAlarmListPro, String errorMessage, boolean checkStop) {
 		super();
 		this.checkExecAlarmListPro = checkExecAlarmListPro;
 		this.errorMessage = errorMessage;
+		this.checkStop = checkStop;
 	}
+
+	
 	
 }

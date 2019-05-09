@@ -149,6 +149,13 @@ public class ErAlAttendanceItemCondition<V> extends AggregateRoot {
 		}
 	}
 
+	public Double sumCheckTarget(Function<List<Integer>, List<Double>> getItemValue) {
+		if(checkTarget(getItemValue)) {
+			return calculateTargetValue(getItemValue);
+		}
+		return null;
+	}
+	
 	public boolean isUse() {
 		return this.useAtr;
 	}

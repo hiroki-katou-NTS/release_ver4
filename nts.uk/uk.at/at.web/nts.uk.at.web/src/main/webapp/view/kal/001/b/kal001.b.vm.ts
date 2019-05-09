@@ -30,13 +30,14 @@ module nts.uk.at.view.kal001.b {
                 self.columns = [
                     { headerText: '', key: 'guid', width: 1 ,hidden :true },
                     { headerText: getText('KAL001_20'), key: 'workplaceName', width: 100 },
-                    { headerText: getText('KAL001_13'), key: 'employeeCode', width: 110 },
-                    { headerText: getText('KAL001_14'), key: 'employeeName', width: 150 },
-                    { headerText: getText('KAL001_15'), key: 'alarmValueDate', width: 190},
-                    { headerText: getText('KAL001_16'), key: 'categoryName', width: 120},
-                    { headerText: getText('KAL001_17'), key: 'alarmItem', width: 150 },
-                    { headerText: getText('KAL001_18'), key: 'alarmValueMessage', width: 200 },
-                    { headerText: getText('KAL001_19'), key: 'comment', width: 200 }
+                    { headerText: getText('KAL001_13'), key: 'employeeCode', width: 85 },
+                    { headerText: getText('KAL001_14'), key: 'employeeName', width: 130 },
+                    { headerText: getText('KAL001_15'), key: 'alarmValueDate', width: 125},
+                    { headerText: getText('KAL001_16'), key: 'categoryName', width: 60},
+                    { headerText: getText('KAL001_17'), key: 'alarmItem', width: 115 },
+                    { headerText: getText('KAL001_18'), key: 'alarmValueMessage', width: 245 },
+                    { headerText: 'チェック対象値', key: 'checkedValue', width: 100 },
+                    { headerText: getText('KAL001_19'), key: 'comment', width: 260 }
                 ];
 
             }
@@ -133,6 +134,7 @@ module nts.uk.at.view.kal001.b {
             alarmItem : string;
             alarmValueMessage : string;
             comment : string;            
+            checkedValue : string;
         }                
     }
     

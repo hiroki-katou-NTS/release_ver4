@@ -599,23 +599,6 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 			 approvalRootStates = this.approvalRootStateRepository
 					.findByApprover(companyID, startDate, endDate, approverID, rootType);
 		}
-		// ドメインモデル「代行承認」を取得する
-		List<Agent> agents = this.agentRepository.findByApproverAndDate(companyID, approverID, startDate, endDate);
-		List<String> employeeApproverID = new ArrayList<>();
-		employeeApproverID.add(approverID);
-		if (!CollectionUtil.isEmpty(agents)) {
-			for (Agent agent : agents) {
-				// ドメインモデル「承認ルートインスタンス」を取得する
-				employeeApproverID.add(agent.getEmployeeId());
-				List<ApprovalRootState> approvalRootStateAgents = this.approvalRootStateRepository
-						.findByApprover(companyID, startDate, endDate, agent.getEmployeeId(), rootType);
-				if (!CollectionUtil.isEmpty(approvalRootStateAgents)) {
-					for (ApprovalRootState approver : approvalRootStateAgents) {
-						approvalRootStates.add(approver);
-					}
-				}
-			}
-		}
 		if(CollectionUtil.isEmpty(approvalRootStates)){
 			return false;
 		}

@@ -372,15 +372,17 @@ public class EmployeePublisherImpl implements EmployeePublisher {
 		// ②ユーザID（List） をLoopする
 		for (String userID : listUserID) {
 			Optional<User> user = userRepository.getByUserID(userID);
-			if (user.get().getAssociatedPersonID().isPresent()) {
-				String personalID = user.get().getAssociatedPersonID().get();
-				// Lay thong tin Request 101
-				Optional<EmployeeImport> empImport = employeeAdapter.getEmpInfo(companyID, personalID);
-				if (empImport.isPresent()) {
-					// OUTPUT 社員ID（List）に③社員.社員IDを追加する
-					listEmpID.add(empImport.get().getEmployeeId());
+			if(user.isPresent()) {
+				if (user.get().getAssociatedPersonID().isPresent()) {
+					String personalID = user.get().getAssociatedPersonID().get();
+					// Lay thong tin Request 101
+					Optional<EmployeeImport> empImport = employeeAdapter.getEmpInfo(companyID, personalID);
+					if (empImport.isPresent()) {
+						// OUTPUT 社員ID（List）に③社員.社員IDを追加する
+						listEmpID.add(empImport.get().getEmployeeId());
+					}
+	
 				}
-
 			}
 		}
 

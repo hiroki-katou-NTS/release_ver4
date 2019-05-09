@@ -121,7 +121,7 @@ public class UpdateHolidayWorkCommandHandler extends CommandHandlerWithResult<Up
 				appHolidayWork.getApplication().getAppDate(), 
 				1, 
 				appHolidayWork.getAppID(), 
-				appHolidayWork.getApplication().getPrePostAtr(), updateHolidayWorkCommand.getVersion());
+				appHolidayWork.getApplication().getPrePostAtr(), updateHolidayWorkCommand.getVersion(),updateHolidayWorkCommand.getWorkTypeCode(),updateHolidayWorkCommand.getSiftTypeCode());
 		appHolidayWorkRepository.update(appHolidayWork);
 		applicationRepository.updateWithVersion(appHolidayWork.getApplication());
 		

@@ -163,7 +163,8 @@ module nts.uk.at.view.kal001.a.service {
             categoryName: string;
             alarmItem : string;
             alarmValueMessage : string;
-            comment : string;            
+            comment : string;     
+            checkedValue : string;       
         }
         
         export interface ExtractedAlarmDto{

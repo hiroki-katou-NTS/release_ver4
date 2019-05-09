@@ -41,4 +41,8 @@ public interface AffWorkplaceHistoryItemRepository {
 	List<AffWorkplaceHistoryItem> getAffWkpHistItemByListWkpIdAndDatePeriod(DatePeriod basedate, List<String> workplaceId);
 	
 	List<String> getSidByListWkpIdAndDatePeriod(DatePeriod basedate, List<String> workplaceId);
+	
+	List<String> getHistIdLstBySidAndPeriod(String sid, DatePeriod period);
+	
+	List<String> getHistIdLstByWorkplaceIdsAndPeriod(List<String> workplaceIds, DatePeriod period);
 }

@@ -219,7 +219,7 @@ module nts.uk.ui.koExtentions {
                             $grid.igGridSelection("selectRowById", iv);
                         });
                         
-                        $grid.trigger("selectionchanged");
+                        $grid.trigger("selectionchanged", [true]);
                     }, 0);
                 }
                 return true;
@@ -234,7 +234,10 @@ module nts.uk.ui.koExtentions {
                 }
             };
             
-            $grid.bind('selectionchanged', () => {
+            $grid.bind('selectionchanged', (event, isUserAction) => {
+                if (isUserAction) {
+                    $grid.data('user-action', true);
+                }
                 $grid.data("ui-changed", true);
                 if (data.multiple) {
                     let selected: Array<any> = $grid.ntsGridList('getSelected');
@@ -425,8 +428,22 @@ module nts.uk.ui.koExtentions {
             })
             if (!isEqual) {
                 let clickCheckBox = false;
-                if(!nts.uk.util.isNullOrEmpty(data.value()) && data.value().length == sources.length) {
-                    if($grid.igGridSelection('option', 'multipleSelection')) {
+                if(!nts.uk.util.isNullOrEmpty(data.value())) {
+                    let isSameSource = true,
+                        sortedValue = _.sortBy(data.value()),
+                        sortedSource = _.sortBy(sources, [optionsValue]);
+                    if (sortedValue.length === sortedSource.length) {
+                        _.forEach(sortedValue, (v, i) => {
+                            if (v !== sortedSource[i][optionsValue]) {
+                                isSameSource = false;
+                                return false;
+                            }
+                        });
+                    } else {
+                        isSameSource = false;
+                    }
+                    
+                    if(isSameSource && data.value().length == sources.length && $grid.igGridSelection('option', 'multipleSelection')) {
                         let features = _.find($grid.igGrid("option", "features"), function (f){
                             return f.name === "RowSelectors";     
                         });
@@ -448,7 +465,13 @@ module nts.uk.ui.koExtentions {
                 }
             }
             
-            _.defer(() => {$grid.ntsGridList("scrollToSelected");});
+            _.defer( () => {
+                if ( $grid.data('user-action')) {
+                    $grid.data('user-action', false);
+                } else {
+                    $grid.ntsGridList("scrollToSelected");
+                }
+            });
             $grid.data("ui-changed", false);
             $grid.closest('.ui-iggrid').addClass('nts-gridlist').height($grid.data("height")).attr("tabindex", $grid.data("tabindex"));
         }

@@ -59,7 +59,9 @@ public class CheckDailyPerError {
 			listDataNew.stream()
 					.filter(x -> x.getEmployeeID().equals(monthlyResult.getEmployeeId())
 							&& monthlyResult.getWorkDatePeriod().contains(x.getDate()))
-					.findFirst().ifPresent(y -> listDataAfterFilter.add(y));
+					.forEach(empError ->{
+						listDataAfterFilter.add(empError);
+					});
 		}
 		
 		List<CheckEmpEralOuput> listCheckEmpEralOuput = new ArrayList<>();

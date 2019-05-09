@@ -73,7 +73,8 @@ public class FixedCheckItemAcFinder implements FixedCheckItemAdapter {
 				export.getClassification(),
 				export.getAlarmItem(),
 				export.getAlarmValueMessage(),
-				export.getComment().orElse(null)
+				export.getComment().orElse(null),
+				export.getCheckedValue().orElse(null)
 				);
 	}
 
@@ -92,6 +93,11 @@ public class FixedCheckItemAcFinder implements FixedCheckItemAdapter {
 	public List<ValueExtractAlarm> checkContinuousVacation(String employeeID, DatePeriod datePeriod) {
 		return fixedCheckItemPub.checkContinuousVacation(employeeID, datePeriod)
 				.stream().map(c->convertToExport(c)).collect(Collectors.toList());
+	}
+
+	@Override
+	public int getContinuousHolCheckSet(String companyId) {
+		return fixedCheckItemPub.getContinuousHolCheckSet(companyId);
 	}
 	
 

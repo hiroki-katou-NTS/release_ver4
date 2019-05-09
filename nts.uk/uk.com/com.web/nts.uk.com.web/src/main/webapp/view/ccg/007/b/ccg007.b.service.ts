@@ -17,15 +17,21 @@ module nts.uk.pr.view.ccg007.b {
             return nts.uk.request.ajax(servicePath.getContractAuth,data);
         }
         
-        export function account(): JQueryPromise<any> {
-            return nts.uk.request.ajax(servicePath.account);
-        }
+//        export function account(): JQueryPromise<any> {
+//            return nts.uk.request.ajax(servicePath.account);
+//        }
 
         /**
           * Function is used to copy new Top Page.
+          * loginMethod: true - sign on
+          * loginMethod: false - normal
           */
-        export function submitLogin(data: SubmitData): JQueryPromise<CheckChangePassDto> {
-            return nts.uk.request.ajax(servicePath.submitLogin + location.search, data);
+        export function submitLogin(data: SubmitData, loginMethod: boolean): JQueryPromise<CheckChangePassDto> {
+            if(!loginMethod){
+                return nts.uk.request.ajax(servicePath.submitLogin, data);
+            }else{
+                return nts.uk.request.ajax(servicePath.submitLogin + location.search, data);
+            }
         }
         
         export function ver(): JQueryPromise<any> {

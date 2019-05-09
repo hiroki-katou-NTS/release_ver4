@@ -41,7 +41,7 @@
 											option: {textmode: 'text',width: '222px'}, 
 											enable: true,
 											readonly: false,
-											enterkey: submitLogin}" />
+											enterkey: function(){submitLogin(false)}}" />
 								</div></td>
 						</tr>
 						<tr>
@@ -59,7 +59,7 @@
 											option: {textmode: 'password',width: '222px'},
 											enable: true,
 											readonly: false,
-											enterkey: submitLogin
+											enterkey: function(){submitLogin(false)}
 											}, valueUpdate: 'afterkeydown'" />
 								</div></td>
 						</tr>
@@ -72,17 +72,9 @@
 						<tr>
 							<td colspan="2" class="align_center"><div class="pad_5">
 									<button tabindex="4" id="login-btn"
-										data-bind="click: submitLogin"
+										data-bind="click: function(){submitLogin(false)}"
 										class="full_width proceed large">
 										<span data-bind="text: '#{i18n.getText('CCG007_3')}'"></span>
-									</button>
-								</div></td>
-						</tr>
-						<tr>
-							<td colspan="2" class="align_center"><div class="pad_5">
-									<button tabindex="4" id="login-btn" data-bind="click: account"
-										class="full_width proceed large">
-										<span>Get Windows Account</span>
 									</button>
 								</div></td>
 						</tr>

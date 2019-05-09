@@ -44,7 +44,7 @@ public class WorkChangeUpdateServiceImpl implements IWorkChangeUpdateService {
 				app.getAppDate(), 
 				ApplicationType.WORK_CHANGE_APPLICATION.value, 
 				app.getAppID(), 
-				app.getPrePostAtr(), app.getVersion());
+				app.getPrePostAtr(), app.getVersion(),workChange.getWorkTypeCd(),workChange.getWorkTimeCd());
 		
 		//ドメインモデル「勤務変更申請」の更新をする
 		appRepository.updateWithVersion(app);

@@ -63,7 +63,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 月別集計で必要な会社別設定
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Setter
 @NoArgsConstructor
@@ -82,6 +82,7 @@ public class MonAggrCompanySettings {
 	@Getter
 	private ConcurrentMap<Integer, Closure> closureMap;
 	/** 締め当月の期間 */
+	@Getter
 	private ConcurrentMap<Integer, DatePeriod> currentMonthPeriodMap;
 	/** 法定内振替順設定 */
 	@Getter

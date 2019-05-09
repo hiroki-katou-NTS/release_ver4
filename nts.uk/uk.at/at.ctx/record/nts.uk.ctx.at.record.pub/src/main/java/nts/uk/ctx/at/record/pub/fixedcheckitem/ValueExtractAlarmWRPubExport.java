@@ -24,9 +24,11 @@ public class ValueExtractAlarmWRPubExport {
 	private String alarmValueMessage;
 	
 	private Optional<String> comment;
+	
+	private Optional<String> checkedValue;
 
 	public ValueExtractAlarmWRPubExport(String workplaceID, String employeeID, GeneralDate alarmValueDate,
-			String classification, String alarmItem, String alarmValueMessage, String comment) {
+			String classification, String alarmItem, String alarmValueMessage, String comment, String checkedValue) {
 		super();
 		this.workplaceID = Optional.ofNullable(workplaceID);
 		this.employeeID = employeeID;
@@ -35,6 +37,7 @@ public class ValueExtractAlarmWRPubExport {
 		this.alarmItem = alarmItem;
 		this.alarmValueMessage = alarmValueMessage;
 		this.comment = Optional.ofNullable(comment);
+		this.checkedValue = Optional.ofNullable(checkedValue);
 	}
 	
 }

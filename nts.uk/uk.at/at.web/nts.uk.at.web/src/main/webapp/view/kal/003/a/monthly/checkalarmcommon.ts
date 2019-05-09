@@ -16,9 +16,15 @@ module nts.uk.at.view.kal003.a.tab {
         currentRowSelected: KnockoutObservable<number> = ko.observable(0);
         category: KnockoutObservable<number>;
         checkUseAtr57: KnockoutObservable<boolean> = ko.observable(false);
+        
+        userAtrCheck: KnockoutObservableArray<any>;
         constructor(category: number, listExtraResultMonthly?: Array<model.ExtraResultMonthly>) {
             let self = this;
             
+            self.userAtrCheck = ko.observableArray([
+                { code: '1', name: getText('KAL003_189'), width: 60 },
+                { code: '0', name: getText('KAL003_190'), width: 60 }
+            ]);
             if(listExtraResultMonthly){
                 self.listExtraResultMonthly(listExtraResultMonthly);    
             }
@@ -30,12 +36,12 @@ module nts.uk.at.view.kal003.a.tab {
             //
             self.category = ko.observable(model.CATEGORY.MONTHLY);
             
-            $("#fixed-table2").ntsFixedTable({ height: 200 });
+//            $("#fixed-table2").ntsFixedTable({ height: 200 });
             
             self.isAllCheckCondition = ko.pureComputed({
                 read: function () {
                     let l = self.listExtraResultMonthly().length;
-                    if (self.listExtraResultMonthly().filter((x) => {return x.useAtr()}).length == l && l > 0) {
+                    if (self.listExtraResultMonthly().filter((x) => {return x.deleteAtr()}).length == l && l > 0) {
                         return true;
                     } else {
                         return false;
@@ -43,7 +49,7 @@ module nts.uk.at.view.kal003.a.tab {
                 },
                 write: function (value) {
                     for (var i = 0; i < self.listExtraResultMonthly().length; i++) {
-                        self.listExtraResultMonthly()[i].useAtr(value);
+                        self.listExtraResultMonthly()[i].deleteAtr(value);
                     }
                 },
                 owner: self
@@ -55,7 +61,7 @@ module nts.uk.at.view.kal003.a.tab {
             //MinhVV add
             self.checkUseAtr57 = ko.pureComputed({
                 read: function() {
-                    if (self.listExtraResultMonthly().filter((x) => { return x.useAtr() }).length > 0) {
+                    if (self.listExtraResultMonthly().filter((x) => { return x.deleteAtr() }).length > 0) {
                         return true;
                     } else {
                         return false;
@@ -148,7 +154,7 @@ module nts.uk.at.view.kal003.a.tab {
                     return;
                 });
             } 
-            if (self.currentRowSelected() < 1 || self.currentRowSelected() > self.listExtraResultMonthly().length || _.filter(self.listExtraResultMonthly(), function(o) { return o.useAtr(); }).length==0 ) {
+            if (self.currentRowSelected() < 1 || self.currentRowSelected() > self.listExtraResultMonthly().length || _.filter(self.listExtraResultMonthly(), function(o) { return o.deleteAtr(); }).length==0 ) {
                 block.clear();
                 nts.uk.ui.errors.clearAll();
                 return;
@@ -156,7 +162,7 @@ module nts.uk.at.view.kal003.a.tab {
             
             self.listExtraResultMonthly.remove(function(item) { 
                 nts.uk.ui.errors.clearAll();
-                return item.useAtr(); 
+                return item.deleteAtr(); 
             })
             nts.uk.ui.errors.clearAll();
             for (var i = 0; i < self.listExtraResultMonthly().length; i++) {

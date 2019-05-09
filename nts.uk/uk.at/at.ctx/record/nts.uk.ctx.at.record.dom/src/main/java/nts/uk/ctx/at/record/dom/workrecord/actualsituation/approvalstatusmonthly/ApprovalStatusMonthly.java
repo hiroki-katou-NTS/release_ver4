@@ -16,6 +16,8 @@ import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.adapter.company.StatusOfEmployeeExport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
+import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootOfEmpMonthImport;
+import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.AppRootSituationMonth;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApproveRootStatusForEmpImport;
@@ -35,6 +37,7 @@ import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.Confi
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentityProcessUseSetRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
+import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -120,14 +123,19 @@ public class ApprovalStatusMonthly {
 		List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(datePeriod.end()), Arrays.asList(employeeId), 2); // 2 : 月別確認
 		if (lstApprovalStatus.isEmpty()) return Optional.empty();
 		
-		//対応するImported「基準社員の承認対象者」を取得する RQ643
-		ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport = approvalStatusAdapter.getApprovalRootOfEmloyeeNew(datePeriod.end(), datePeriod.end(), approverId, companyId, 2); // 2 : 月別確認
+		//対応するImported「基準社員の承認対象者」を取得する RQ463
+//		ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport = approvalStatusAdapter.getApprovalRootOfEmloyeeNew(datePeriod.end(), datePeriod.end(), approverId, companyId, 2); // 2 : 月別確認
+		// Change 463(call 133) by 534 for Tú bro - if have bug, Tú will fix, don't call Phong
+		AppRootOfEmpMonthImport approvalRootOfEmloyee = this.approvalStatusAdapter
+				.getApprovalEmpStatusMonth(AppContexts.user().employeeId(), yearMonth,
+						closureId, closureDate,
+						datePeriod.end(), optApprovalUse.get().getUseDayApproverConfirm(), datePeriod);
 		
 		// 取得した情報からパラメータ「月の実績の承認状況」を生成する
 		ApprovalStatusResult approvalStatusResult = new ApprovalStatusResult();
 		approvalStatusResult.setEmployeeId(employeeId);
 		approvalStatusResult.setYearMonth(yearMonth);
-		Optional<ApprovalRootSituation> approvalRootSituation = approvalRootOfEmployeeImport.getApprovalRootSituations().stream().filter(c -> c.getTargetID().equals(employeeId)).findFirst();
+		Optional<AppRootSituationMonth> approvalRootSituation = approvalRootOfEmloyee.getApprovalRootSituations().stream().filter(c -> c.getTargetID().equals(employeeId)).findFirst();
 		if (!approvalRootSituation.isPresent()) {
 			//・解除可否：取得した「基準社員の承認対象者．解除可否区分」
 			approvalStatusResult.setWhetherToRelease(EnumAdaptor.valueOf(ReleasedProprietyDivision.NOT_RELEASE.value, ReleasedAtr.class));

@@ -25,6 +25,7 @@ import nts.uk.ctx.at.record.dom.workrecord.erroralarm.primitivevalue.NameWKRecor
 import nts.uk.ctx.at.record.pub.workrecord.erroralarm.condition.MessageWRExtraConPubExport;
 import nts.uk.ctx.at.record.pub.workrecord.erroralarm.condition.WorkRecordExtraConPub;
 import nts.uk.ctx.at.record.pub.workrecord.erroralarm.condition.WorkRecordExtraConPubExport;
+import nts.uk.ctx.at.record.pub.workrecord.erroralarm.condition.find.ErAlAtdItemConditionPubExport;
 import nts.uk.ctx.at.record.pub.workrecord.erroralarm.condition.find.ErrorAlarmConditionPubExport;
 
 @Stateless
@@ -105,6 +106,7 @@ public class WorkRecordExtraConPubImpl implements WorkRecordExtraConPub {
 
 	@Override
 	public void addWorkRecordExtraConPub(WorkRecordExtraConPubExport workRecordExtraConPubExport) {
+		
 		String errorAlarmCheckId = IdentifierUtil.randomUniqueId();
 		
 		ErrorAlarmConditionPubExport errorAlarmConditionPubExport = workRecordExtraConPubExport.getErrorAlarmCondition();
@@ -113,13 +115,12 @@ public class WorkRecordExtraConPubImpl implements WorkRecordExtraConPub {
 		errorAlarmConditionPubExport.setErrorAlarmCheckID(errorAlarmCheckId);
 		ErrorAlarmCondition errorAlarmCondition = errorAlarmConditionPubExport.toConditionDomain();
 		
-		//ErrorAlarmCondition insertErrorAlarmCondition = ErrorAlarmCondition.init();
-		//add data for insert
-		//insertErrorAlarmCondition.setByCheckItem(workRecordExtraConPubExport.getCheckItem(), errorAlarmCondition);
-		
-		//insertErrorAlarmCondition.setCheckId(errorAlarmCheckId);
 		workRecordExtraConPubExport.setErrorAlarmCheckID(errorAlarmCheckId);
+		
+		this.setIndex(errorAlarmCondition);
 		this.errorAlarmConditionRepository.addErrorAlarmCondition(errorAlarmCondition);
+		
+		
 		this.repo.addWorkRecordExtraCon(
 				convertToDomainWR(workRecordExtraConPubExport)
 				);
@@ -144,7 +145,6 @@ public class WorkRecordExtraConPubImpl implements WorkRecordExtraConPub {
 		//set index an isUse group1
 		this.setIndex(updateErrorAlarmCondition);
 		
-		
 		this.errorAlarmConditionRepository.updateErrorAlarmCondition(updateErrorAlarmCondition);
 		this.repo.updateWorkRecordExtraCon(convertToDomainWR(workRecordExtraConPubExport));
 	}
@@ -162,6 +162,7 @@ public class WorkRecordExtraConPubImpl implements WorkRecordExtraConPub {
 		for (int i = 0; i < size2; i++) {
 			ErAlAttendanceItemCondition<?> erAlAttendanceItemCondition = lstErAlAtdItemCon2.get(i);
 			erAlAttendanceItemCondition.setTargetNO(i);
+			erAlAttendanceItemCondition.setUseAtr(true);
 		}
 	}
 

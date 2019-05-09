@@ -104,7 +104,7 @@ public class SubmitLoginFormOneCommandHandler extends LoginBaseCommandHandler<Su
 		this.initSession(user, command.isSignOn());
 		
 		//アルゴリズム「ログイン記録」を実行する
-		if (!this.checkAfterLogin(user, oldPassword)){
+		if (!this.checkAfterLogin(user, oldPassword, command.isSignOn())){
 			return new CheckChangePassDto(true, null,false);
 		}
 		

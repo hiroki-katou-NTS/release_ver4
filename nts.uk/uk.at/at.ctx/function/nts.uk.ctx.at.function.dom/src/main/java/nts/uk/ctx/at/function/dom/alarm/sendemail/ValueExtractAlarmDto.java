@@ -26,4 +26,5 @@ public class ValueExtractAlarmDto {
 	private String alarmItem;
 	private String alarmValueMessage;
 	private String comment;
+	private String checkedValue;
 }

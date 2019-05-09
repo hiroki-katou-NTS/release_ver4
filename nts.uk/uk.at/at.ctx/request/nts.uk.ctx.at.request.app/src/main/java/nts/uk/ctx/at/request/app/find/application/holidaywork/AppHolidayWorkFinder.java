@@ -245,7 +245,7 @@ public class AppHolidayWorkFinder {
 		// ドメインモデル「申請設定」．承認ルートの基準日をチェックする ( Domain model "application setting". Check base date of approval route )
 //		ApprovalFunctionSetting approvalFunctionSetting = appCommonSettingOutput.approvalFunctionSetting;
 		if(appCommonSettingOutput.applicationSetting.getBaseDateFlg().value == BaseDateFlg.APP_DATE.value){
-			getWorkTypeAndWorkTime(companyID,employeeID,appCommonSettingOutput,result,0,0);
+			getWorkTypeAndWorkTime(companyID,employeeID,appCommonSettingOutput,result,0,0,true);
 							siftCD = result.getWorkTime().getSiftCode();
 		}
 		//01-14_勤務時間取得
@@ -623,7 +623,7 @@ public class AppHolidayWorkFinder {
 		result.setApplication(applicationDto);
 		result.setPrePostCanChangeFlg(displayPrePost.isPrePostCanChangeFlg());
 		//4.勤務種類を取得する, 5.就業時間帯を取得する, 01-17_休憩時間取得
-		getWorkTypeAndWorkTime(companyID,employeeID,appCommonSettingOutput,result,uiType,payoutType);
+		getWorkTypeAndWorkTime(companyID,employeeID,appCommonSettingOutput,result,uiType,payoutType,false);
 		//01-14_勤務時間取得
 		getWorkingHour(companyID,employeeID,appDate,appCommonSettingOutput,result,"");
 		// 01-03_休出時間を取得
@@ -716,7 +716,7 @@ public class AppHolidayWorkFinder {
 	 * @param appCommonSettingOutput
 	 * @param result
 	 */
-	private void getWorkTypeAndWorkTime(String companyID,String employeeID,AppCommonSettingOutput appCommonSettingOutput,AppHolidayWorkDto result,int uiType,Integer payoutType){
+	private void getWorkTypeAndWorkTime(String companyID,String employeeID,AppCommonSettingOutput appCommonSettingOutput,AppHolidayWorkDto result,int uiType,Integer payoutType,boolean isChangeDate){
 		ApprovalFunctionSetting approvalFunctionSetting = appCommonSettingOutput.approvalFunctionSetting;
 		result.setDisplayCaculationTime(false);
 		if(approvalFunctionSetting != null){
@@ -732,7 +732,8 @@ public class AppHolidayWorkFinder {
 				WorkTypeHolidayWork WorkTypes = new WorkTypeHolidayWork();
 				if(uiType != 1){
 					// 4.勤務種類を取得する
-					 WorkTypes =  holidayService.getWorkTypes(companyID, employeeID, appEmploymentWorkType, baseDate, personalLablorCodition);
+			WorkTypes = holidayService.getWorkTypes(companyID, employeeID, appEmploymentWorkType, baseDate,
+					personalLablorCodition, isChangeDate);
 				}else{
 					// 4_a.勤務種類を取得する（法定内外休日） 
 					WorkTypes = holidayService.getWorkTypeForLeaverApp(companyID, employeeID, appEmploymentWorkType, baseDate, personalLablorCodition, payoutType);
@@ -743,7 +744,7 @@ public class AppHolidayWorkFinder {
 				workType.setWorkTypeName(WorkTypes.getWorkTypeName());
 				result.setWorkType(workType);
 				// 5.就業時間帯を取得する
-				WorkTimeHolidayWork workTimes = this.holidayService.getWorkTimeHolidayWork(companyID, employeeID, baseDate, personalLablorCodition);
+				WorkTimeHolidayWork workTimes = this.holidayService.getWorkTimeHolidayWork(companyID, employeeID, baseDate, personalLablorCodition,isChangeDate);
 				result.setWorkTimes(workTimes.getWorkTimeCodes());
 				SiftType workTime = new SiftType();
 				workTime.setSiftCode(workTimes.getWorkTimeCode());

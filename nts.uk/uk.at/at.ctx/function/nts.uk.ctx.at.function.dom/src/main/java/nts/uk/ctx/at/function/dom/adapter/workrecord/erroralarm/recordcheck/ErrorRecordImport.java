@@ -8,5 +8,6 @@ public class ErrorRecordImport {
 	private String employeeId;
 	private String erAlId;
 	private  boolean error;
+	private String checkedValue;
 	
 }
