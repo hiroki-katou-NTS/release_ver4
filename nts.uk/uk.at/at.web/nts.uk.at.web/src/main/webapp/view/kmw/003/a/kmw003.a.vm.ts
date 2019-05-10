@@ -114,6 +114,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
         
         clickCounter: CLickCount = new CLickCount();
         workTypeNotFound: any = [];
+        flagSelectEmployee: boolean = false;
         
         constructor(value:boolean) {
             let self = this;
@@ -879,7 +880,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
             self.monthlyParam().yearMonth = date; 
             // fixbug 106550: set lstEmployees = [] để lên server tim lại lstEmployees mới 
             // chỉ áp dụng cho khi next/back yearMonth
-            self.monthlyParam().lstEmployees = [];
+            self.monthlyParam().lstEmployees = self.flagSelectEmployee  ? self.lstEmployee() : [];
 
             if ($("#dpGrid").data('mGrid')) {
                 $("#dpGrid").mGrid("destroy");
@@ -888,6 +889,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
             //$("#dpGrid").off();
 
             $.when(self.initScreen()).done((processDate) => {
+                self.flagSelectEmployee = false;
                 nts.uk.ui.block.clear();
             });
 
@@ -976,6 +978,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
 
                 /** Return data */
                 returnDataFromCcg001: function(dataList: any) {
+                    self.flagSelectEmployee = true;
                     self.lstEmployee(dataList.listEmployee.map((data: EmployeeSearchDto) => {
                         return {
                             id: data.employeeId,
