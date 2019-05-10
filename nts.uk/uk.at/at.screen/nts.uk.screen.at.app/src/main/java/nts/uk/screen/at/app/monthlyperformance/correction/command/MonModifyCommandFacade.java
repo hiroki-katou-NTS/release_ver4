@@ -24,6 +24,8 @@ import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.Re
 import nts.uk.ctx.at.record.dom.monthly.MonthlyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.IntegrationOfMonthly;
+import nts.uk.ctx.at.record.dom.optitem.OptionalItem;
+import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.algorithm.ParamRegisterConfirmMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.algorithm.RegisterConfirmationMonth;
@@ -85,6 +87,9 @@ public class MonModifyCommandFacade {
 	@Inject
 	private DataDialogWithTypeProcessor dataDialogWithTypeProcessor;
 	
+	@Inject
+	private OptionalItemRepository optionalMasterRepo;
+	
 	public Map<Integer, List<MPItemParent>> insertItemDomain(MPItemParent dataParent) {
 		YearMonth ym = new YearMonth(dataParent.getYearMonth());
 		
@@ -116,10 +121,13 @@ public class MonModifyCommandFacade {
 		List<MonthlyRecordWorkDto> oldDtos = getDtoFromQuery(listQuery); 
 		
 		// clone array do khi chay qua monthModifyCommandFacade.handleUpdate() thi data bi thay doi gia tri
+		Map<Integer, OptionalItem> optionalMaster = optionalMasterRepo
+				.findAll(AppContexts.user().companyId()).stream()
+				.collect(Collectors.toMap(c -> c.getOptionalItemNo().v(), c -> c));
 		List<MonthlyRecordWorkDto> oldDtosClone = new ArrayList<>();
 		oldDtos.stream().forEach(x -> {
 			IntegrationOfMonthly integrationOfMonthly = x.toDomain(x.getEmployeeId(), x.getYearMonth(), x.getClosureID(), x.getClosureDate());
-			MonthlyRecordWorkDto dto = MonthlyRecordWorkDto.fromOnlyAttTime(integrationOfMonthly);
+			MonthlyRecordWorkDto dto = MonthlyRecordWorkDto.fromDtoWithOptional(integrationOfMonthly, optionalMaster);
 			oldDtosClone.add(dto);
 		});
 		
