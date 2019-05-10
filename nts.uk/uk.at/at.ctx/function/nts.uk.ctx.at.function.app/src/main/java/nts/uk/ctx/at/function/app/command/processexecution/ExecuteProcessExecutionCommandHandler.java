@@ -364,7 +364,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 
 		processExecutionLogManage = this.processExecLogManaRepo.getLogByCIdAndExecCd(companyId, execItemCd).get();
 		// アルゴリズム「自動実行登録処理」を実行する
-		this.updateDomains(execItemCd, execType, companyId, execId, execSetting, procExecLog, lastExecDateTime,
+		this.updateDomains(execItemCd, execType, companyId, execId,
+				execSetting, procExecLog, lastExecDateTime,
 				processExecutionLogManage);
 	}
 
@@ -445,8 +446,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		if (execSetting != null) {
 			// execSetting.setNextExecDateTime();
 			String scheduleId = execSetting.getScheduleId();
-			Optional<GeneralDateTime> nextFireTime = this.scheduler.getNextFireTime(scheduleId);
-			execSetting.setNextExecDateTime(nextFireTime);
+			if(execSetting.isRepeat()) {
+				Optional<GeneralDateTime> nextFireTime = this.scheduler.getNextFireTime(scheduleId);
+				execSetting.setNextExecDateTime(nextFireTime);
+			}
 			this.execSettingRepo.update(execSetting);
 		}
 

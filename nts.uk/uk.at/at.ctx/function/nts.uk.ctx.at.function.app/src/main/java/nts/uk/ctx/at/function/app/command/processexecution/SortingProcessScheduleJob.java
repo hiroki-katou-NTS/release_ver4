@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.function.app.command.processexecution;
 
+import java.util.Optional;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
@@ -11,6 +13,7 @@ import nts.arc.time.GeneralDateTime;
 import nts.gul.serialize.ObjectSerializer;
 import nts.gul.web.communicate.typedapi.FailureCause;
 import nts.uk.ctx.at.function.dom.processexecution.repository.ExecutionTaskSettingRepository;
+import nts.uk.ctx.at.function.dom.processexecution.tasksetting.ExecutionTaskSetting;
 import nts.uk.shr.com.communicate.PathToWebApi;
 import nts.uk.shr.com.communicate.batch.BatchServer;
 //import nts.arc.layer.app.command.AsyncCommandHandlerContext;
@@ -45,12 +48,23 @@ public class SortingProcessScheduleJob extends UkScheduledJob {
 		
 		// scheduler.getNextFireTime(id)は、Quartzから実行されたサーバ上でなければ値が返らない。
 		// そのため、ここであらかじめ取得してから渡すようにする。
-		GeneralDateTime nextFireTime = this.execSettingRepo.getByCidAndExecCd(companyId, execItemCd)
-				.map(e -> e.getScheduleId())
-				.flatMap(id -> this.scheduler.getNextFireTime(id))
-				.orElse(null);
-		s.setNextDate(nextFireTime);
+//		Optional<ExecutionTaskSetting> data = this.execSettingRepo.getByCidAndExecCd(companyId, execItemCd);
+//		GeneralDateTime nextFireTime = data
+//				.map(e -> e.getScheduleId())
+//				.flatMap(id -> this.scheduler.getNextFireTime(id))
+//				.orElse(null);
+//		s.setNextDate(nextFireTime);
 		
+		Optional<ExecutionTaskSetting> data = this.execSettingRepo.getByCidAndExecCd(companyId, execItemCd);
+		if(data.isPresent()) {
+			if(data.get().isRepeat()) {
+				GeneralDateTime nextFireTime = data
+						.map(e -> e.getScheduleId())
+						.flatMap(id -> this.scheduler.getNextFireTime(id))
+						.orElse(null);
+				s.setNextDate(nextFireTime);
+			}
+		}
 		if (this.batchServer.exists()) {
 			
 			String session = ObjectSerializer.toBase64(ThreadSessionContextHolder.instance().get());
@@ -81,5 +95,6 @@ public class SortingProcessScheduleJob extends UkScheduledJob {
 			log.error(message, failure.getException());
 		}
 	}
+	
 
 }
