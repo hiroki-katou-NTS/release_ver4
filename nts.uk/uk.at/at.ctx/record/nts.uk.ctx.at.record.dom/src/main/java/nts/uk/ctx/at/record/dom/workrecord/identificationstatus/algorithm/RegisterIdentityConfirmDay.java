@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecordRepository;
@@ -42,9 +41,6 @@ public class RegisterIdentityConfirmDay {
 
 	@Inject
 	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;
-	
-	@Inject
-	private DailyRecordTransactionService workInfo;
 	
 	// code old 
 //	@Inject
