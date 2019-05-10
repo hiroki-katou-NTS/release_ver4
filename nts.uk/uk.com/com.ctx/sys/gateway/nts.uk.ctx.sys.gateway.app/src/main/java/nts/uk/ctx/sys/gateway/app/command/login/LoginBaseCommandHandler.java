@@ -775,22 +775,32 @@ public abstract class LoginBaseCommandHandler<T> extends CommandHandlerWithResul
 		//Request No.280
 		StatusOfEmploymentImport employmentStatus = this.statusEmploymentAdapter.getStatusOfEmployment(employeeId,
 				GeneralDate.today());
-
+			int empStatus = employmentStatus.getStatusOfEmployment();
 		// check status = before_join
-		if (employmentStatus == null
-				|| employmentStatus.getStatusOfEmployment() == StatusOfEmployment.BEFORE_JOINING.value) {
+			if (employmentStatus == null || empStatus == StatusOfEmployment.BEFORE_JOINING.value
+					|| empStatus == StatusOfEmployment.RETIREMENT.value) {
+				
+				String errorCode = "";
+				if (employmentStatus == null || empStatus == StatusOfEmployment.BEFORE_JOINING.value) {
+					errorCode = "Msg_286";
+				}
+				if (empStatus == StatusOfEmployment.RETIREMENT.value) {
+					errorCode = "Msg_287";
+				}
 			Integer loginMethod = LoginMethod.NORMAL_LOGIN.value;
 			if (isSignon) {
 				loginMethod = LoginMethod.SINGLE_SIGN_ON.value;
 			}
 			ParamLoginRecord param = new ParamLoginRecord(companyId, loginMethod, LoginStatus.Fail.value,
-					TextResource.localize("Msg_286"), employeeId);
+					TextResource.localize(errorCode), employeeId);
 
 			// アルゴリズム「ログイン記録」を実行する１
 			this.service.callLoginRecord(param);
-
-			throw new BusinessException("Msg_286");
+				
+			throw new BusinessException(errorCode);
 			}
+		
+		
 		}
 		//update EA修正履歴 No.3054
 		Optional<UserImportNew> opUserImport = userAdapter.findByUserId(userId);

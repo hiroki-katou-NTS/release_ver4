@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Resource;
@@ -18,10 +19,13 @@ import nts.uk.ctx.at.record.dom.remainingnumber.annualleave.export.CreateInterim
 import nts.uk.ctx.at.record.dom.remainingnumber.annualleave.export.GetAnnAndRsvRemNumWithinPeriod;
 import nts.uk.ctx.at.record.dom.remainingnumber.annualleave.export.param.AggrResultOfAnnAndRsvLeave;
 import nts.uk.ctx.at.record.dom.service.RemainNumberCreateInformation;
+import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.export.query.AbsRecRemainMngOfInPeriod;
 import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.export.query.AbsenceReruitmentMngInPeriodQuery;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainOffMonthProcess;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainOffPeriodCreateData;
 import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query.BreakDayOffMngInPeriodQuery;
+import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query.BreakDayOffRemainMngOfInPeriod;
+import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.InPeriodOfSpecialLeaveResultInfor;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.SpecialLeaveManagementService;
 import nts.uk.ctx.at.shared.dom.specialholiday.SpecialHolidayRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
@@ -85,6 +89,9 @@ public class AggregateMonthlyRecordServiceImpl implements AggregateMonthlyRecord
 			String companyId, String employeeId, YearMonth yearMonth,
 			ClosureId closureId, ClosureDate closureDate, DatePeriod datePeriod,
 			AggrResultOfAnnAndRsvLeave prevAggrResult,
+			Optional<AbsRecRemainMngOfInPeriod> prevAbsRecResultOpt,
+			Optional<BreakDayOffRemainMngOfInPeriod> prevBreakDayOffResultOpt,
+			Map<Integer, InPeriodOfSpecialLeaveResultInfor> prevSpecialLeaveResultMap,
 			MonAggrCompanySettings companySets, MonAggrEmployeeSettings employeeSets,
 			Optional<List<IntegrationOfDaily>> dailyWorks, Optional<IntegrationOfMonthly> monthlyWork) {
 		
@@ -105,6 +112,7 @@ public class AggregateMonthlyRecordServiceImpl implements AggregateMonthlyRecord
 				this.executorService);
 		
 		return proc.aggregate(companyId, employeeId, yearMonth, closureId, closureDate,
-				datePeriod, prevAggrResult, companySets, employeeSets, dailyWorks, monthlyWork);
+				datePeriod, prevAggrResult, prevAbsRecResultOpt, prevBreakDayOffResultOpt, prevSpecialLeaveResultMap,
+				companySets, employeeSets, dailyWorks, monthlyWork);
 	}	
 }

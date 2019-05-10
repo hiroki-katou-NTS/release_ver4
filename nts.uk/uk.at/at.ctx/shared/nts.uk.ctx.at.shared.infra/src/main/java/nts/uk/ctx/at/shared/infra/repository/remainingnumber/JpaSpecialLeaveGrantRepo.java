@@ -18,12 +18,12 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.base.LeaveExpirationStatus;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.empinfo.grantremainingdata.SpecialLeaveGrantRemainingData;
 import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.empinfo.grantremainingdata.SpecialLeaveGrantRepository;
 import nts.uk.ctx.at.shared.infra.entity.remainingnumber.KrcmtSpecialLeaveReam;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class JpaSpecialLeaveGrantRepo extends JpaRepository implements SpecialLeaveGrantRepository {
 
 	private static final String GET_ALL_BY_SID_SPECIALCODE = "SELECT a FROM KrcmtSpecialLeaveReam a WHERE a.employeeId = :employeeId AND a.specialLeaCode = :specialLeaCode order by a.grantDate DESC";
-
 
 	private static final String GET_ALL_BY_SID_SPECIALCODE_STATUS = "SELECT a FROM KrcmtSpecialLeaveReam a WHERE a.employeeId = :employeeId AND a.specialLeaCode = :specialLeaCode AND a.expStatus = :expStatus order by a.grantDate";
 	private static final String GET_ALL_BY_SID_AND_GRANT_DATE = "SELECT a FROM KrcmtSpecialLeaveReam a WHERE a.employeeId = :sid AND a.grantDate =:grantDate AND a.specialLeaID !=:specialLeaID AND a.specialLeaCode =:specialLeaCode";
@@ -261,6 +261,33 @@ public class JpaSpecialLeaveGrantRepo extends JpaRepository implements SpecialLe
 			return true;
 		}		
 		return false;
+	}
+	@SneakyThrows
+	@Override
+	public List<SpecialLeaveGrantRemainingData> getByNextDate(String sid, int speCode, DatePeriod datePriod,
+			GeneralDate startDate, LeaveExpirationStatus expirationStatus) {
+		try (PreparedStatement sql = this.connection().prepareStatement("SELECT * FROM KRCMT_SPEC_LEAVE_REMAIN"
+				+ " WHERE SID = ?"
+				+ " AND SPECIAL_LEAVE_CD = ?"
+				+ " AND GRANT_DATE > ?"
+				+ " AND GRANT_DATE <= ?"
+				+ " AND DEADLINE_DATE >= ?"
+				+ " AND EXPIRED_STATE = ?"
+				+ " ORDER BY GRANT_DATE ASC")){
+
+			sql.setString(1, sid);
+			sql.setInt(2, speCode);
+			sql.setDate(3, Date.valueOf(datePriod.start().toLocalDate()));
+			sql.setDate(4, Date.valueOf(datePriod.end().toLocalDate()));
+			sql.setDate(5, Date.valueOf(startDate.toLocalDate()));
+			sql.setInt(6, expirationStatus.value);
+			List<SpecialLeaveGrantRemainingData> entities = new NtsResultSet(sql.executeQuery())
+					.getList(x -> toDomain(x));
+			if(entities.isEmpty()) {
+				return Collections.emptyList();
+			}
+			return entities;
+		}
 	}
 
 }

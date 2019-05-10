@@ -122,8 +122,7 @@ public class AgreementCheckServiceImpl implements AgreementCheckService{
 							minute = "0" + minute;
 						String ot36 = hour + ":" + minute;
 						
-						String datePeriod = TextResource.localize("KAL010_906",check.getDatePeriod().start().toString(ErAlConstant.YM_FORMAT) + ErAlConstant.PERIOD_SEPERATOR
-								+ check.getDatePeriod().end().toString(ErAlConstant.YM_FORMAT));
+						String datePeriod = TextResource.localize("KAL010_906",check.getDatePeriod().start().toString(ErAlConstant.YM_FORMAT),check.getDatePeriod().end().toString(ErAlConstant.YM_FORMAT));
 						result.add(new ValueExtractAlarm(mapEmployee.get(check.getEmployeeId()).getWorkplaceId(),
 								check.getEmployeeId(), datePeriod, TextResource.localize("KAL010_208"),
 								//TextResource.localize("KAL010_201")

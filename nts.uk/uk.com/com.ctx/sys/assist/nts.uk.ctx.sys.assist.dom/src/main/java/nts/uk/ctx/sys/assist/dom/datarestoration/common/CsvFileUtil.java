@@ -31,7 +31,7 @@ public class CsvFileUtil {
 	static List<List<String>> getAllRecord(InputStream inputStream) {
 		// get csv reader
 		NtsCsvReader csvReader = NtsCsvReader.newReader().withNoHeader().skipEmptyLines(true)
-				.withChartSet(Charset.forName("Shift_JIS"))
+				.withChartSet(Charset.forName("UTF-8"))
 				.withFormat(CSVFormat.EXCEL.withRecordSeparator(NEW_LINE_CHAR));
 		List<List<String>> result = new ArrayList<>();
 		try {
@@ -58,7 +58,7 @@ public class CsvFileUtil {
 	public static List<List<String>> getAllRecord(String fileId, String fileName) {
 		// get csv reader
 		NtsCsvReader csvReader = NtsCsvReader.newReader().withNoHeader().skipEmptyLines(true)
-				.withChartSet(Charset.forName("Shift_JIS"))
+				.withChartSet(Charset.forName("UTF-8"))
 				.withFormat(CSVFormat.EXCEL.withRecordSeparator(NEW_LINE_CHAR));
 		List<List<String>> result = new ArrayList<>();
 		try {
@@ -77,7 +77,7 @@ public class CsvFileUtil {
 	public static List<String> getCsvHeader(String fileName, String fileId) {
 		// get csv reader
 		NtsCsvReader csvReader = NtsCsvReader.newReader().skipEmptyLines(true)
-				.withChartSet(Charset.forName("Shift_JIS"));
+				.withChartSet(Charset.forName("UTF-8"));
 		try {
 			InputStream inputStream = createInputStreamFromFile(fileId, fileName);
 			if (!Objects.isNull(inputStream)) {
@@ -104,7 +104,7 @@ public class CsvFileUtil {
 
 	public static Set<String> getListSid(String fileId, String fileName) {
 		CSVBufferReader reader = new CSVBufferReader(new File(getExtractDataStoragePath(fileId) + "//" + fileName + ".csv"));
-		reader.setCharset("Shift_JIS");
+		reader.setCharset("UTF-8");
 		Set<String> listSid = new HashSet<>();
 		Consumer<CSVParsedResult> csvResult = (dataRow) -> {
 			List<NtsCsvRecord> records = dataRow.getRecords();
@@ -123,7 +123,7 @@ public class CsvFileUtil {
 	
 	public static boolean checkHasSidInCsv(String fileId, String fileName) {
 		NtsCsvReader csvReader = NtsCsvReader.newReader().skipEmptyLines(true)
-				.withChartSet(Charset.forName("Shift_JIS"));
+				.withChartSet(Charset.forName("UTF-8"));
 		Set<String> listSid = new HashSet<>();
 		try {
 			InputStream inputStream = createInputStreamFromFile(fileId, fileName);

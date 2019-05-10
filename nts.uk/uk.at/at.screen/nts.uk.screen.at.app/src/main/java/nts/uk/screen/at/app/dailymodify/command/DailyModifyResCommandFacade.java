@@ -50,7 +50,6 @@ import nts.uk.ctx.at.record.dom.service.TimeOffRemainErrorInfor;
 import nts.uk.ctx.at.record.dom.service.TimeOffRemainErrorInputParam;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
-import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.ParamIdentityConfirmDay;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.RegisterIdentityConfirmDay;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.SelfConfirmDay;
@@ -131,8 +130,8 @@ public class DailyModifyResCommandFacade {
 	@Inject
 	private IdentificationRepository identificationRepository;
 	
-	@Inject
-	private EmployeeDailyPerErrorRepository employeeDailyPerErrorRepository;
+//	@Inject
+//	private EmployeeDailyPerErrorRepository employeeDailyPerErrorRepository;
 	
 	@Inject
 	private DailyPerformanceScreenRepo repo;
@@ -432,9 +431,7 @@ public class DailyModifyResCommandFacade {
 					AppContexts.user().employeeId(), true);
 			// only insert check box
 			// insert sign
-			insertSign(dataParent.getDataCheckSign(), dailyEdits.stream().map(c -> c.getErrors())
-																.flatMap(List::stream).map(c -> c.toDomain(c.getEmployeeID(), c.workingDate()))
-																.collect(Collectors.toList()));
+			insertSign(dataParent.getDataCheckSign(), dailyEdits, dataParent.getDailyOlds());
 			if(dataParent.getDataCheckSign() != null){
 				updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
 			}
@@ -525,7 +522,7 @@ public class DailyModifyResCommandFacade {
 						resultIU.getCommandOld(), dailyItems, resultIU.isUpdate(),
 						monthParam, itemAtr);
 				// insert sign
-				insertSign(dataParent.getDataCheckSign(), resultIU.getLstDailyDomain().stream().map(c -> c.getEmployeeError()).flatMap(List::stream).collect(Collectors.toList()));
+				insertSignD(dataParent.getDataCheckSign(), resultIU.getLstDailyDomain(), dataParent.getDailyOlds());
 				// insert approval
 				insertApproval(dataParent.getDataCheckApproval());
 
@@ -557,9 +554,7 @@ public class DailyModifyResCommandFacade {
 				
 			} else {
 				if (dataParent.getDataCheckSign() != null && !dataParent.getDataCheckSign().isEmpty()) {
-					insertSign(dataParent.getDataCheckSign(), dailyEdits.stream().map(c -> c.getErrors())
-																		.flatMap(List::stream).map(c -> c.toDomain(c.getEmployeeID(), c.workingDate()))
-																		.collect(Collectors.toList()));
+					insertSign(dataParent.getDataCheckSign(), dailyEdits, dataParent.getDailyOlds());
 
 					updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
 				}
@@ -681,14 +676,37 @@ public class DailyModifyResCommandFacade {
 				querys.add(new DailyModifyQuery(x.getKey().getKey(), x.getKey().getValue(), itemCovert));
 		});
 		return querys;
-	}
+	} 
 
-	public boolean insertSign(List<DPItemCheckBox> dataCheckSign, List<EmployeeDailyPerError> errors) {
+	private boolean insertSignD(List<DPItemCheckBox> dataCheckSign, List<IntegrationOfDaily> dailyEdit, List<DailyRecordDto> dailyOlds) {
+
+		List<EmployeeDailyPerError> errors = dailyEdit.stream().map(c -> c.getEmployeeError()).flatMap(List::stream).collect(Collectors.toList());
+		
+		return insertSignInternal(dataCheckSign, errors, dailyOlds);
+	}
+	
+	private boolean insertSign(List<DPItemCheckBox> dataCheckSign, List<DailyRecordDto> dailyEdit, List<DailyRecordDto> dailyOlds) {
+
+		List<EmployeeDailyPerError> errors = dailyEdit.stream().map(c -> c.getErrors())
+														.flatMap(List::stream).map(c -> c.toDomain(c.getEmployeeID(), c.workingDate()))
+														.collect(Collectors.toList());
+		
+		return insertSignInternal(dataCheckSign, errors, dailyOlds);
+	}
+	
+	private boolean insertSignInternal(List<DPItemCheckBox> dataCheckSign, List<EmployeeDailyPerError> editErrors, List<DailyRecordDto> dailyOlds) {
 		if (dataCheckSign.isEmpty())
 			return false;
+		
+		editErrors.addAll(dailyOlds.stream().filter(ol -> !editErrors.stream().filter(e -> e.getDate().equals(ol.workingDate()) && e.getEmployeeID().equals(ol.employeeId()))
+																				.findFirst().isPresent())
+											.map(ol -> ol.getErrors()).flatMap(List::stream)
+											.map(oe -> oe.toDomain(oe.employeeId(), oe.workingDate()))
+											.collect(Collectors.toList()));
+		
 		ParamIdentityConfirmDay day = new ParamIdentityConfirmDay(AppContexts.user().employeeId(), dataCheckSign
 				.stream().map(x -> new SelfConfirmDay(x.getDate(), x.isValue())).collect(Collectors.toList()));
-		return registerIdentityConfirmDay.registerIdentity(day, errors);
+		return registerIdentityConfirmDay.registerIdentity(day, editErrors);
 	}
 
 	public void insertApproval(List<DPItemCheckBox> dataCheckApproval) {

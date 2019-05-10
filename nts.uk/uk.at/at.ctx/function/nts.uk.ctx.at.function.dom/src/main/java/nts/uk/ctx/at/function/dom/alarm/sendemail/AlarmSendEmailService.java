@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +23,6 @@ import nts.gul.mail.send.MailAttachedFilePath;
 import nts.gul.mail.send.MailContents;
 import nts.gul.mail.send.MailSendOptions;
 import nts.uk.ctx.at.function.dom.adapter.alarm.EmployeePubAlarmAdapter;
-import nts.uk.ctx.at.function.dom.adapter.alarm.EmployeeSprPubAlarmAdapter;
 import nts.uk.ctx.at.function.dom.adapter.alarm.IMailDestinationAdapter;
 import nts.uk.ctx.at.function.dom.adapter.alarm.MailDestinationAlarmImport;
 import nts.uk.ctx.at.function.dom.adapter.alarm.OutGoingMailAlarm;
@@ -33,7 +34,7 @@ import nts.uk.ctx.at.function.dom.alarm.mailsettings.MailSettings;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.mail.MailSender;
 import nts.uk.shr.com.mail.SendMailFailedException;
-
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 @Stateless
 public class AlarmSendEmailService implements SendEmailService {
 	@Inject

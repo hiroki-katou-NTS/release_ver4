@@ -134,7 +134,8 @@ public class InterimRemainDataMngCheckRegisterImpl implements InterimRemainDataM
 					true,
 					interimMngBreakDayOff, 
 					breakMng, 
-					dayOffMng);
+					dayOffMng,
+					Optional.empty());
 			BreakDayOffRemainMngOfInPeriod remainMng = breakDayOffMngService.getBreakDayOffMngInPeriod(mngParam);
 			if(!remainMng.getLstError().isEmpty()) {
 				outputData.setChkSubHoliday(true);
@@ -151,7 +152,8 @@ public class InterimRemainDataMngCheckRegisterImpl implements InterimRemainDataM
 					true,
 					useAbsMng,
 					interimMngAbsRec,
-					useRecMng);
+					useRecMng,
+					Optional.empty());
 			AbsRecRemainMngOfInPeriod remainMng = absRecMngService.getAbsRecMngInPeriod(mngParam);
 			if(!remainMng.getPError().isEmpty()) {
 				outputData.setChkPause(true);
@@ -172,8 +174,9 @@ public class InterimRemainDataMngCheckRegisterImpl implements InterimRemainDataM
 						false,
 						true,
 						interimSpecial,
-						specialHolidayData);
-				InPeriodOfSpecialLeave speOutCheck = speLeaveSevice.complileInPeriodOfSpecialLeave(speParam);
+						specialHolidayData,
+						Optional.empty());
+				InPeriodOfSpecialLeave speOutCheck = speLeaveSevice.complileInPeriodOfSpecialLeave(speParam).getAggSpecialLeaveResult();
 				if(!speOutCheck.getLstError().isEmpty()) {
 					outputData.setChkSpecial(true);
 					break;

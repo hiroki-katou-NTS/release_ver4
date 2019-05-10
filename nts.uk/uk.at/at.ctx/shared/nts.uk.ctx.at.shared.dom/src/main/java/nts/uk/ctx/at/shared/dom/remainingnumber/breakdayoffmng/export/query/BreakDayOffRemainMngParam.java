@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query;
 
 import java.util.List;
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,4 +38,8 @@ public class BreakDayOffRemainMngParam {
 	private List<InterimBreakMng> breakMng;
 	/**	上書き用の  暫定代休管理データ*/
 	private List<InterimDayOffMng> dayOffMng;
+	/**
+	 * 前回代休の集計結果
+	 */
+	private Optional<BreakDayOffRemainMngOfInPeriod> optBeforeResult;
 }

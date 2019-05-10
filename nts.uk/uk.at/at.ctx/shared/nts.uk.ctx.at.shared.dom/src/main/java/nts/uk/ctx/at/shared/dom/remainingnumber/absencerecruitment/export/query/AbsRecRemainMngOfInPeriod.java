@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import nts.arc.time.GeneralDate;
+import nts.gul.util.value.Finally;
 
 /**
  * 「期間内の振出振休残数を取得する」のOutputData
@@ -45,4 +47,8 @@ public class AbsRecRemainMngOfInPeriod {
 	 * 振休エラー
 	 */
 	private List<PauseError> pError;
+	/**
+	 * 前回の集計期間の翌日
+	 */
+	private Finally<GeneralDate> nextDay;
 }

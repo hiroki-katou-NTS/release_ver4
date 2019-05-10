@@ -1,5 +1,9 @@
 package nts.uk.ctx.sys.assist.infra.repository.tablelist;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -115,19 +119,23 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 		// アルゴリズム「個人情報の保護」を実行する
 		List<SaveProtetion> listSaveProtetion = saveProtetionRepo
 				.getSaveProtection(Integer.valueOf(tableList.getCategoryId()), tableList.getTableNo());
+		boolean saveProtectionByEmpCode = false;
+		String couplePidItemName = "";
 		if (tableList.getSurveyPreservation() == NotUseAtr.USE && !listSaveProtetion.isEmpty()) {
 			for (SaveProtetion saveProtetion : listSaveProtetion) {
 				String rePlaceCol = saveProtetion.getReplaceColumn().trim();
+				String pidCol     = saveProtetion.getCouplePidItemName().trim();
 				String newValue = "";
 				// Vì domain không tạo Enum nên phải fix code ngu
 				if (saveProtetion.getCorrectClasscification() == 0) {
 					newValue = "'' AS " + rePlaceCol;
 				} else if (saveProtetion.getCorrectClasscification() == 1) {
-					if (columns.contains("EMPLOYEE_CODE")) {
-						newValue = "t.EMPLOYEE_CODE AS " + rePlaceCol;
-					} else {
-						newValue = "'' AS " + rePlaceCol;
-					}
+					
+					saveProtectionByEmpCode = true;
+					couplePidItemName = listSaveProtetion.get(0).getCouplePidItemName();
+					
+					newValue = " bdm.SCD AS " +  rePlaceCol;
+					
 				} else if (saveProtetion.getCorrectClasscification() == 2) {
 					newValue = "0 AS " + rePlaceCol;
 				} else if (saveProtetion.getCorrectClasscification() == 3) {
@@ -139,6 +147,12 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 
 		// From
 		query.append(" FROM ").append(tableList.getTableEnglishName()).append(" t");
+		if(saveProtectionByEmpCode){
+			
+			query.append(" LEFT JOIN (SELECT PID, MIN(SCD) AS SCD FROM BSYMT_EMP_DTA_MNG_INFO GROUP BY PID) bdm ON bdm.PID = t." + couplePidItemName);
+			
+		}
+		
 		if (tableList.getHasParentTblFlg() == NotUseAtr.USE && tableList.getParentTblName().isPresent()) {
 			// アルゴリズム「親テーブルをJOINする」を実行する
 			query.append(" INNER JOIN ").append(tableList.getParentTblName().get()).append(" p ON ");
@@ -382,7 +396,14 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 						Map<String, Object> rowCsv = new HashMap<>();
 						int i = 0;
 						for (String columnName : headerCsv3) {
-							rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
+							if (objects[i] instanceof BigDecimal) {
+								
+								BigDecimal value = ((BigDecimal) objects[i]); // the value you get
+								rowCsv.put(columnName, objects[i] != null ? "\"" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+								
+							} else {								
+								rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");								
+							}
 							i++;
 						}
 						csv.writeALine(rowCsv);
@@ -404,7 +425,17 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 				Map<String, Object> rowCsv = new HashMap<>();
 				int i = 0;
 				for (String columnName : headerCsv3) {
-					rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0") + "\"" : "");
+					if (objects[i] instanceof BigDecimal) {
+						
+						BigDecimal value = ((BigDecimal) objects[i]); // the value you get
+						
+						rowCsv.put(columnName, objects[i] != null ? "\"" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+						
+					} else {
+						
+						rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+						
+					}
 					i++;
 				}
 				csv.writeALine(rowCsv);
