@@ -31,8 +31,8 @@ public class ProcessExecutionBatchWebService extends WebService {
 
 	@POST
 	@Path("batch-terminate")
-	public BatchTaskResult terminate(TerminateProcessExecutionCommand command) {
-		AsyncTaskInfo info = this.termHandler.handle(command);
-		return new BatchTaskResult(info.getId());
+	public void terminate(TerminateProcessExecutionCommand command) {
+		this.termHandler.handle(command);
+//		return new BatchTaskResult(info.getId());
 	}
 }
