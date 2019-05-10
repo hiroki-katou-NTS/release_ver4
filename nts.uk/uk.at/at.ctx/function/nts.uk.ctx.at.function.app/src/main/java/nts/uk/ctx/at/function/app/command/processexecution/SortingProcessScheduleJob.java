@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.function.app.command.processexecution;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -19,6 +21,7 @@ import nts.uk.shr.com.task.schedule.UkJobScheduler;
 import nts.uk.shr.com.task.schedule.UkScheduledJob;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 @Slf4j
 public class SortingProcessScheduleJob extends UkScheduledJob {
 

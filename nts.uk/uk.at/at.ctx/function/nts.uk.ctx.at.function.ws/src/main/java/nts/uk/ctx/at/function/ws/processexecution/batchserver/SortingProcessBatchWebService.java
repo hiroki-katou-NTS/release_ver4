@@ -10,8 +10,8 @@ import nts.arc.scoped.ScopedContext;
 import nts.arc.scoped.request.thread.ThreadRequestContextHolder;
 import nts.arc.scoped.session.thread.ThreadSessionContextHolder;
 import nts.gul.serialize.ObjectSerializer;
+import nts.uk.ctx.at.function.app.command.processexecution.AsyncSortingProcessCommandHandler;
 import nts.uk.ctx.at.function.app.command.processexecution.ScheduleExecuteCommand;
-import nts.uk.ctx.at.function.app.command.processexecution.SortingProcessCommandHandler;
 
 @Path("batch/sorting")
 @Produces("application/json")
@@ -19,7 +19,7 @@ import nts.uk.ctx.at.function.app.command.processexecution.SortingProcessCommand
 public class SortingProcessBatchWebService {
 
 	@Inject
-	private SortingProcessCommandHandler sortingProcessCommandHandler;
+	private AsyncSortingProcessCommandHandler sortingProcessCommandHandler;
 	
 	@POST
 	@Path("process")
