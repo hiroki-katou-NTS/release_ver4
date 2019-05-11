@@ -615,6 +615,7 @@ public class DailyAggregationProcessService {
 	
 	private ValueExtractAlarm checkConditionGenerateValue(EmployeeSearchDto employee, GeneralDate date, WorkRecordExtraConAdapterDto workRecordExtraCon,  
 			String companyID,String alarmItem, Map<Integer,DailyAttendanceItem> mapAtdItemName, String KAL010_1,String checkedValue) {
+		String checkedValueNew = checkedValue;
 		String alarmContent = "";
 		TypeCheckWorkRecord checkItem = EnumAdaptor.valueOf(workRecordExtraCon.getCheckItem(), TypeCheckWorkRecord.class);
 		
@@ -622,7 +623,14 @@ public class DailyAggregationProcessService {
 		if(alarmContent.length()>100) {
 			alarmContent = alarmContent.substring(0, 100);
 		}
-		return new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), date.toString(ErAlConstant.DATE_FORMAT), KAL010_1, alarmItem, alarmContent, workRecordExtraCon.getErrorAlarmCondition().getDisplayMessage(),checkedValue);
+		if(workRecordExtraCon.getCheckItem() == TypeCheckWorkRecord.CONTINUOUS_CONDITION.value ) {
+			checkedValueNew = TextResource.localize("KAL010_998");
+		} else if (workRecordExtraCon.getCheckItem() == TypeCheckWorkRecord.TIME.value
+				|| workRecordExtraCon.getCheckItem() == TypeCheckWorkRecord.TIME_OF_DAY.value) {
+			checkedValueNew = this.formatHourData(String.valueOf(Double.valueOf(checkedValueNew).intValue()),
+					EnumAdaptor.valueOf(workRecordExtraCon.getCheckItem(), TypeCheckWorkRecord.class));
+		}
+		return new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), date.toString(ErAlConstant.DATE_FORMAT), KAL010_1, workRecordExtraCon.getNameWKRecord(), alarmContent, workRecordExtraCon.getErrorAlarmCondition().getDisplayMessage(),checkedValueNew);
 	}
 	
 	private String  checkConditionGenerateAlarmContent(TypeCheckWorkRecord checkItem,  WorkRecordExtraConAdapterDto workRecordExtraCon, String companyID, Map<Integer,DailyAttendanceItem> mapAtdItemName) {

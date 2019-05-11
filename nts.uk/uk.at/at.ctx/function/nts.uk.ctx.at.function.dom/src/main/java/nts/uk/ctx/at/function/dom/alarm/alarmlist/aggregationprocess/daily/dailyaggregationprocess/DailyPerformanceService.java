@@ -250,8 +250,8 @@ public class DailyPerformanceService {
 												EmployeeSearchDto em = employee.stream().filter(e -> e.getId().equals(error.getEmployeeID())).findAny().get();
 												String checkedValue = null;
 												ValueExtractAlarm data = new ValueExtractAlarm(em.getWorkplaceId(), em.getId(), TextResource.localize("KAL010_907",error.getDate().toString(ErAlConstant.DATE_FORMAT)), 
-														KAL010_1, alarmContentMessage.getAlarmItem(), alarmContentMessage.getAlarmContent(),
-														errAlarmCheckIDToMessage.get(errorAlarmMap.get(error.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage(),checkedValue);
+														KAL010_1, alarmContentMessage.getAlarmItemNew(), alarmContentMessage.getAlarmItem(),
+														errAlarmCheckIDToMessage.get(errorAlarmMap.get(error.getErrorAlarmWorkRecordCode()).getErrorAlarmCheckID()).getDisplayMessage(),alarmContentMessage.getAlarmContent());
 
 												valueExtractAlarmList.add(data);
 				});
@@ -462,7 +462,7 @@ public class DailyPerformanceService {
 			alarmItem = errorAlarmMap.get(eDaily.getErrorAlarmWorkRecordCode()).getName();
 		}
 
-		return new AlarmContentMessage(alarmItem, alarmContent);
+		return new AlarmContentMessage(alarmItem, alarmContent,errorAlarmMap.get(eDaily.getErrorAlarmWorkRecordCode()).getName());
 	}
 	
 	private String formatValueAttendance(String attendanceValue) {
