@@ -148,12 +148,4 @@ public class DailyModifyCommandFacade {
 //				.stream().map(x -> new SelfConfirmDay(x.getDate(), x.isValue())).collect(Collectors.toList()));
 //		registerIdentityConfirmDay.registerIdentity(day);
 //	}
-	
-	public void insertApproval(List<DPItemCheckBox> dataCheckApproval) {
-		ParamDayApproval param = new ParamDayApproval(AppContexts.user().employeeId(),
-				dataCheckApproval.stream()
-						.map(x -> new ContentApproval(x.getDate(), x.isValue(), x.getEmployeeId(), x.isFlagRemoveAll()))
-						.collect(Collectors.toList()));
-		registerDayApproval.registerDayApproval(param);
-	}
 }

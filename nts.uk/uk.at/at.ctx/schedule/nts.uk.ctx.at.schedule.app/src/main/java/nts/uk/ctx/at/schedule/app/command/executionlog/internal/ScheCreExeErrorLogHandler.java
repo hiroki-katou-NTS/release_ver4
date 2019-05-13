@@ -76,7 +76,7 @@ public class ScheCreExeErrorLogHandler {
 	 * @return true, if successful
 	 */
 	public boolean checkExistError(ScheduleErrorLogGeterCommand command, String employeeId) {
-		return this.scheduleErrorLogRepository.checkExistErrorByKey(command.getExecutionId(), employeeId);
+		return this.scheduleErrorLogRepository.checkExistErrorByKey(command.getExecutionId(), employeeId, command.getToDate());
 
 	}
 	

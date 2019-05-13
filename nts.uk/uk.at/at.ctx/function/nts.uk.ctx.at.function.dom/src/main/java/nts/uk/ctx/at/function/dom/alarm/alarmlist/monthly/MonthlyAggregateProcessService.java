@@ -432,22 +432,27 @@ public class MonthlyAggregateProcessService {
 //								String itemName = TextResource.localize("KAL010_123");
 								check = checkResultRemainMonthlyAdapter.checkAnnualLeaveUsage(checkRemainNumberMonFunImport, annualLeaveUsageImport);
 								if(check){
+									String str = "";
 									checkerValue = TextResource.localize("KAL010_306",TextResource.localize("KAL010_123"), annualLeaveUsageImport.getRemainingDays().toString());
 									if(typeOperator == 0){
-										alarmMessage = itemName+compareOperatorText.getCompareLeft()+daysSingle;
+//										alarmMessage = itemName+compareOperatorText.getCompareLeft()+daysSingle;
+										str = TextResource.localize("KAL010_984",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysSingle);
 									}else {
 										if(compareRange <=7 ){
-											alarmMessage = daysRangeStart+compareOperatorText.getCompareLeft()+itemName+
-													compareOperatorText.getCompareright()+daysRangeEnd;
+//											alarmMessage = daysRangeStart+compareOperatorText.getCompareLeft()+itemName+
+//													compareOperatorText.getCompareright()+daysRangeEnd;
+											str = TextResource.localize("KAL010_985",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysRangeStart,daysRangeEnd);
 										}else {
-											alarmMessage = itemName+
-													compareOperatorText.getCompareLeft()+
-													daysRangeStart+", "+
-													daysRangeEnd+
-													compareOperatorText.getCompareright()+
-													itemName;
+//											alarmMessage = itemName+
+//													compareOperatorText.getCompareLeft()+
+//													daysRangeStart+", "+
+//													daysRangeEnd+
+//													compareOperatorText.getCompareright()+
+//													itemName;
+											str = TextResource.localize("KAL010_986",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysRangeStart,daysRangeEnd);
 										}
 									}
+									alarmMessage = TextResource.localize("KAL010_110",str,checkerValue);
 									//add to list
 									ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 											employee.getWorkplaceId(),
@@ -473,22 +478,27 @@ public class MonthlyAggregateProcessService {
 //								String itemName = TextResource.localize("KAL010_124");
 								check = checkResultRemainMonthlyAdapter.checkDayoffCurrentMonth(checkRemainNumberMonFunImport, dayoffCurrentMonthOfEmployeeImport);
 								if(check){
+									String str = "";
 									checkerValue = TextResource.localize("KAL010_306",TextResource.localize("KAL010_124"), dayoffCurrentMonthOfEmployeeImport.getRemainingDays().toString());
 									if(typeOperator == 0){
-										alarmMessage = itemName+compareOperatorText.getCompareLeft()+daysSingle;
+										//alarmMessage = itemName+compareOperatorText.getCompareLeft()+daysSingle;
+										str = TextResource.localize("KAL010_984",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysSingle);
 									}else {
 										if(compareRange <=7 ){
-										alarmMessage = daysRangeStart+compareOperatorText.getCompareLeft()+itemName+
-												compareOperatorText.getCompareright()+daysRangeEnd;
+//										alarmMessage = daysRangeStart+compareOperatorText.getCompareLeft()+itemName+
+//												compareOperatorText.getCompareright()+daysRangeEnd;
+										str = TextResource.localize("KAL010_985",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysRangeStart,daysRangeEnd);
 										}else {
-											alarmMessage = itemName+
-													compareOperatorText.getCompareLeft()+
-													daysRangeStart+", "+
-													daysRangeEnd+
-													compareOperatorText.getCompareright()+
-													itemName;
+//											alarmMessage = itemName+
+//													compareOperatorText.getCompareLeft()+
+//													daysRangeStart+", "+
+//													daysRangeEnd+
+//													compareOperatorText.getCompareright()+
+//													itemName;
+											str = TextResource.localize("KAL010_986",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysRangeStart,daysRangeEnd);
 										}
 									}
+									alarmMessage = TextResource.localize("KAL010_110",str,checkerValue);
 									//add to list
 									ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 											employee.getWorkplaceId(),
@@ -514,22 +524,27 @@ public class MonthlyAggregateProcessService {
 //								String itemName = TextResource.localize("KAL010_125");
 								check = checkResultRemainMonthlyAdapter.checkStatusOfHoliday(checkRemainNumberMonFunImport, statusOfHolidayImported);
 								if(check){
+									String str = "";
 									checkerValue = TextResource.localize("KAL010_306",TextResource.localize("KAL010_125"), statusOfHolidayImported.getRemainingDays().toString());
 									if(typeOperator == 0){
-										alarmMessage = itemName+compareOperatorText.getCompareLeft()+daysSingle;
+//										alarmMessage = itemName+compareOperatorText.getCompareLeft()+daysSingle;
+										str = TextResource.localize("KAL010_984",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysSingle);
 									}else {
 										if(compareRange <=7 ){
-										alarmMessage = daysRangeStart+compareOperatorText.getCompareLeft()+itemName+
-												compareOperatorText.getCompareright()+daysRangeEnd;
+//										alarmMessage = daysRangeStart+compareOperatorText.getCompareLeft()+itemName+
+//												compareOperatorText.getCompareright()+daysRangeEnd;
+										str = TextResource.localize("KAL010_985",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysRangeStart,daysRangeEnd);
 										}else {
-											alarmMessage = itemName+
-													compareOperatorText.getCompareLeft()+
-													daysRangeStart+", "+
-													daysRangeEnd+
-													compareOperatorText.getCompareright()+
-													itemName;
+//											alarmMessage = itemName+
+//													compareOperatorText.getCompareLeft()+
+//													daysRangeStart+", "+
+//													daysRangeEnd+
+//													compareOperatorText.getCompareright()+
+//													itemName;
+											str = TextResource.localize("KAL010_986",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysRangeStart,daysRangeEnd);
 										}
 									}
+									alarmMessage = TextResource.localize("KAL010_110",str,checkerValue);
 									//add to list
 									ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 											employee.getWorkplaceId(),
@@ -555,22 +570,27 @@ public class MonthlyAggregateProcessService {
 //								String itemName = TextResource.localize("KAL010_126");
 								check = checkResultRemainMonthlyAdapter.checkReserveLeaveUsage(checkRemainNumberMonFunImport, reserveLeaveUsageImport);
 								if(check){
+									String str = "";
 									checkerValue = TextResource.localize("KAL010_306",TextResource.localize("KAL010_126"), reserveLeaveUsageImport.getRemainingDays().toString());
 									if(typeOperator == 0){
-										alarmMessage = itemName+compareOperatorText.getCompareLeft()+daysSingle;
+//										alarmMessage = itemName+compareOperatorText.getCompareLeft()+daysSingle;
+										str = TextResource.localize("KAL010_984",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysSingle);
 									}else {
 										if(compareRange <=7 ){
-										alarmMessage = daysRangeStart+compareOperatorText.getCompareLeft()+itemName+
-												compareOperatorText.getCompareright()+daysRangeEnd;
+//										alarmMessage = daysRangeStart+compareOperatorText.getCompareLeft()+itemName+
+//												compareOperatorText.getCompareright()+daysRangeEnd;
+										str = TextResource.localize("KAL010_985",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysRangeStart,daysRangeEnd);
 										}else {
-											alarmMessage = itemName+
-													compareOperatorText.getCompareLeft()+
-													daysRangeStart+", "+
-													daysRangeEnd+
-													compareOperatorText.getCompareright()+
-													itemName;
+//											alarmMessage = itemName+
+//													compareOperatorText.getCompareLeft()+
+//													daysRangeStart+", "+
+//													daysRangeEnd+
+//													compareOperatorText.getCompareright()+
+//													itemName;
+											str = TextResource.localize("KAL010_986",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysRangeStart,daysRangeEnd);
 										}
 									}
+									alarmMessage = TextResource.localize("KAL010_110",str,checkerValue);
 									//add to list
 									ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 											employee.getWorkplaceId(),
@@ -597,22 +617,27 @@ public class MonthlyAggregateProcessService {
 //								String itemName = TextResource.localize("KAL010_115");
 								check = checkResultRemainMonthlyAdapter.checkSpecialHoliday(checkRemainNumberMonFunImport, specialHolidayImported);
 								if(check){
+									String str = "";
 									checkerValue = TextResource.localize("KAL010_306",TextResource.localize("KAL010_115"), specialHolidayImported.getRemainDays().toString()); 
 									if(typeOperator == 0){
 										alarmMessage = itemName+compareOperatorText.getCompareLeft()+daysSingle;
+										str = TextResource.localize("KAL010_984",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysSingle);
 									}else {
 										if(compareRange <=7 ){
-										alarmMessage = daysRangeStart+compareOperatorText.getCompareLeft()+itemName+
-												compareOperatorText.getCompareright()+daysRangeEnd;
+//										alarmMessage = daysRangeStart+compareOperatorText.getCompareLeft()+itemName+
+//												compareOperatorText.getCompareright()+daysRangeEnd;
+										str = TextResource.localize("KAL010_985",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysRangeStart,daysRangeEnd);
 										}else {
-											alarmMessage = itemName+
-													compareOperatorText.getCompareLeft()+
-													daysRangeStart+", "+
-													daysRangeEnd+
-													compareOperatorText.getCompareright()+
-													itemName;
+//											alarmMessage = itemName+
+//													compareOperatorText.getCompareLeft()+
+//													daysRangeStart+", "+
+//													daysRangeEnd+
+//													compareOperatorText.getCompareright()+
+//													itemName;
+											str = TextResource.localize("KAL010_986",typeCheckVacation.nameId,compareOperatorText.getCompareLeft(),daysRangeStart,daysRangeEnd);
 										}
 									}
+									alarmMessage = TextResource.localize("KAL010_110",str,checkerValue);
 									//add to list
 									ValueExtractAlarm resultCheckRemain = new ValueExtractAlarm(
 											employee.getWorkplaceId(),
@@ -718,11 +743,11 @@ public class MonthlyAggregateProcessService {
 			List<AttendanceItemName> listAttdNameSub =  listAttdNameAdds.stream().filter(c -> erAlAtdItemConAdapterDto.getCountableSubAtdItems().contains(c.getAttendanceItemId())).collect(Collectors.toList());
 			nameErrorAlarm = getNameErrorAlarm(listAttdNameSub,1,nameErrorAlarm);//1 sub atd item
 			
-			String nameItem = "";
+			String nameItem = extra.getNameAlarmExtraCon();
 			String alarmDescription = "";
 			switch(extra.getTypeCheckItem()) {
 			case 4 ://時間
-				nameItem = TextResource.localize("KAL010_47");
+				//nameItem = TextResource.localize("KAL010_47");
 				String startValueTime = this.timeToString(startValue.intValue());
 				String endValueTime = "";
 				if(compare<=5) {
@@ -749,7 +774,7 @@ public class MonthlyAggregateProcessService {
 				checkedValue = this.timeToString(Double.valueOf(checkedValue).intValue());
 				break;
 				case 5 ://日数
-					nameItem = TextResource.localize("KAL010_113");
+					//nameItem = TextResource.localize("KAL010_113");
 					String startValueDays = String.valueOf(startValue.intValue());
 					String endValueDays = "";
 					if(compare<=5) {
@@ -775,7 +800,7 @@ public class MonthlyAggregateProcessService {
 					}
 					break;
 				case 6 ://回数
-					nameItem = TextResource.localize("KAL010_50");
+					//nameItem = TextResource.localize("KAL010_50");
 					String startValueTimes = String.valueOf(startValue.intValue());
 					String endValueTimes = "";
 					if(compare<=5) {
@@ -801,7 +826,7 @@ public class MonthlyAggregateProcessService {
 					}
 					break;
 				case 7 ://金額 money
-					nameItem = TextResource.localize("KAL010_51");
+					//nameItem = TextResource.localize("KAL010_51");
 					String startValueMoney = String.valueOf(startValue.intValue());
 					String endValueMoney = "";
 					if(compare<=5) {
@@ -884,9 +909,9 @@ public class MonthlyAggregateProcessService {
 					employee.getId(),
 					this.toYMString(yearMonth),
 					KAL010_100,
-					TextResource.localize("KAL010_60"),
+					extra.getNameAlarmExtraCon(),
 					alarmDescriptionValue,	
-					extra.getDisplayMessage(),null);
+					extra.getDisplayMessage(),TextResource.localize("KAL010_998"));
 			listValueExtractAlarm.add(resultMonthlyValue);
 		}
 

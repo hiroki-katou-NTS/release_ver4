@@ -156,7 +156,7 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 						new SpecialVacationCD(param.getSpecialLeaveCode()),
 						speLeaveGrantDetails.getGrantDate(),
 						speLeaveGrantDetails.getDeadlineDate(),
-						LeaveExpirationStatus.AVAILABLE,
+						speLeaveGrantDetails.getExpirationStatus(),
 						GrantRemainRegisterType.MONTH_CLOSE,
 						new SpecialLeaveNumberInfo(new SpecialLeaveGrantNumber(new DayNumberOfGrant(speLeaveGrantDetails.getDetails().getGrantDays()), Optional.empty()), 
 								new SpecialLeaveUsedNumber(new DayNumberOfUse(speLeaveGrantDetails.getDetails().getUseDays()), Optional.empty(), Optional.empty(), Optional.empty()),
@@ -542,14 +542,14 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 		for (SpecialLeaveGrantRemainingData grantData : lstGrantData) {
 			//期限切れかチェックする
 			//・モードがその他
-			//！（INPUT．特別休暇付与残数データ．期限日 < INPUT．集計終了日　&&　INPUT．特別休暇付与残数データ．期限切れ状態．使用可能）
+			//INPUT．特別休暇付与残数データ．期限日 >= INPUT．集計終了日
 			//・モードが月次
-			//！（INPUT．特別休暇付与残数データ．期限日 <= INPUT．集計終了日　&&　INPUT．特別休暇付与残数データ．期限切れ状態．使用可能）
+			//INPUT．特別休暇付与残数データ．期限日 > INPUT．集計終了日
 			if(grantData.getExpirationStatus() != LeaveExpirationStatus.AVAILABLE) {
 				continue;
 			}
-			if( (!isMode && !grantData.getDeadlineDate().before(baseDate))
-					|| (isMode && !grantData.getDeadlineDate().beforeOrEquals(baseDate))) {
+			if( (!isMode && !grantData.getDeadlineDate().afterOrEquals(baseDate))
+					|| (isMode && !grantData.getDeadlineDate().after(baseDate))) {
 				//未消化数+=「特別休暇数情報」．残数
 				unDisgesteDays += grantData.getDetails().getRemainingNumber().getDayNumberOfRemain().v();
 				//ループ中の「特別休暇付与残数データ」．期限切れ状態=期限切れ

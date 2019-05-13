@@ -138,7 +138,8 @@ public class FixedCheckItemPubImpl implements FixedCheckItemPub {
 					TextResource.localize("KAL010_301"),
 					TextResource.localize("KAL010_302"),
 					"",
-					null);
+					null,
+					v);
 			listResult.add(value);		
 		});
 		

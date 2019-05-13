@@ -338,7 +338,7 @@ public class ErAlWorkRecordCheckService {
 	private void processCheckContinuous(GeneralDate endMark, DatePeriod range, Map<GeneralDate, Integer> result,
 			ContinuousHolCheckSet setting, String employeeId, GeneralDate markDate, int count,
 			boolean markPreviousDate, Set<WorkInfoOfDailyPerformance> workInfos) {
-		boolean finishing = false;
+		boolean finishing = false, nextCount = false;
 		List<WorkInfoOfDailyPerformance> subWorkInfos = getWorkInfoInRange(range, employeeId, workInfos);
 
 		if (subWorkInfos.isEmpty()) {
@@ -348,38 +348,90 @@ public class ErAlWorkRecordCheckService {
 			return;	
 		}
 		
-		for (WorkInfoOfDailyPerformance info : subWorkInfos) {
+		for (int i = 0; i < subWorkInfos.size(); i++){
+			WorkInfoOfDailyPerformance info = subWorkInfos.get(i);
 			WorkTypeCode currentWTC = info.getRecordInfo().getWorkTypeCode();
-			if (setting.getTargetWorkType().contains(currentWTC)) {
+			
+			if(setting.getTargetWorkType().contains(currentWTC) || !markPreviousDate) {
+				
 				if (markPreviousDate) {
 					markDate = info.getYmd();
 					markPreviousDate = false;
 				}
-				count++;
-			} else if (setting.getIgnoreWorkType().contains(currentWTC)) {
-				if (endMark.afterOrEquals(info.getYmd())) {
-					if (count >= setting.getMaxContinuousDays().v()) {
-						result.put(markDate, count);
-					}
-					finishing = true;
-					break;
-				}
-			} else {
-				if (count >= setting.getMaxContinuousDays().v()) {
-					result.put(markDate, count);
-				}
-				markPreviousDate = true;
-				count = 0;
 				
-				if (count <= 0 && endMark.afterOrEquals(info.getYmd())) {
-					finishing = true;
-					break;
+				if(setting.getTargetWorkType().contains(currentWTC)){
+					count++;	
+				}
+				
+				for(int j = i + 1; j < subWorkInfos.size(); j++){
+					WorkInfoOfDailyPerformance info2 = subWorkInfos.get(j);
+					WorkTypeCode currentWTC2 = info2.getRecordInfo().getWorkTypeCode();
+
+					if(!setting.getTargetWorkType().contains(currentWTC2) && !setting.getIgnoreWorkType().contains(currentWTC2)){
+						nextCount = true;
+						break;
+					}
+					
+					if(setting.getTargetWorkType().contains(currentWTC2)){
+						count++;
+					}
+					
+					i++;
+					
+					if(info2.getYmd().before(endMark.addDays(-7))){
+						finishing = true;
+						break;
+					}
 				}
 			}
-		}
-		if(finishing) { return; }
 
-		DatePeriod perviousRange = new DatePeriod(range.start().addDays(-4), range.start().addDays(-1));
+			if(count >= setting.getMaxContinuousDays().v()){
+				result.put(markDate, count);
+			}
+			
+			if (finishing || (count <= 0 && info.getYmd().before(endMark))) {
+				return;
+			}
+			
+			if(nextCount) {
+				markPreviousDate = true;
+				count = 0;
+				nextCount = false;
+			}
+			
+		}
+		
+//		for (WorkInfoOfDailyPerformance info : subWorkInfos) {
+//			WorkTypeCode currentWTC = info.getRecordInfo().getWorkTypeCode();
+//			if (setting.getTargetWorkType().contains(currentWTC)) {
+//				if (markPreviousDate) {
+//					markDate = info.getYmd();
+//					markPreviousDate = false;
+//				}
+//				count++;
+//			} else if (setting.getIgnoreWorkType().contains(currentWTC)) {
+//				if (endMark.afterOrEquals(info.getYmd())) {
+//					if (count >= setting.getMaxContinuousDays().v()) {
+//						result.put(markDate, count);
+//					}
+//					finishing = true;
+//					break;
+//				}
+//			} else {
+//				if (count >= setting.getMaxContinuousDays().v()) {
+//					result.put(markDate, count);
+//				}
+//				markPreviousDate = true;
+//				count = 0;
+//				
+//				if (count <= 0 && endMark.afterOrEquals(info.getYmd())) {
+//					finishing = true;
+//					break;
+//				}
+//			}
+//		}
+
+		DatePeriod perviousRange = new DatePeriod(range.start().addDays(-7), range.start().addDays(-1));
 		
 		workInfos.removeAll(subWorkInfos);
 		

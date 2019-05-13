@@ -287,13 +287,12 @@ module nts.uk.at.view.kbt002.f {
                 block.grayout();
 //                var dfd = $.Deferred();
                 let command: any = self.toJsonObject();
-                service.terminate(command).done(function() {
-                        ko.cleanNode(igrid);
-                        $.when(self.getProcExecLogList()).done(()=>{
-                             ko.applyBindings(self,igrid);
-                             block.clear();
-                        });  
-                });
+                service.terminate(command);
+                ko.cleanNode(igrid);
+                $.when(self.getProcExecLogList()).done(()=>{
+                     ko.applyBindings(self,igrid);
+                     block.clear();
+                });  
 //                return dfd.promise();
             }
             

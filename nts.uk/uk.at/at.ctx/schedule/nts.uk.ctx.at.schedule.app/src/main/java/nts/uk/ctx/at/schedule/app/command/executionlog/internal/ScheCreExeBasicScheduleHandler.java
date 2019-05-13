@@ -75,8 +75,8 @@ public class ScheCreExeBasicScheduleHandler {
 	private BasicScheduleRepository basicScheduleRepository;
 
 	/** The sche cre exe error log handler. */
-	@Inject
-	private ScheCreExeErrorLogHandler scheCreExeErrorLogHandler;
+//	@Inject
+//	private ScheCreExeErrorLogHandler scheCreExeErrorLogHandler;
 
 	/** The sche cre exe work time handler. */
 	@Inject
@@ -166,21 +166,21 @@ public class ScheCreExeBasicScheduleHandler {
 			return;
 
 		// check not exist error
-		if (!this.scheCreExeErrorLogHandler.checkExistError(command.toBaseCommand(dateInPeriod), employeeId)) {
+//		if (!this.scheCreExeErrorLogHandler.checkExistError(command.toBaseCommand(dateInPeriod), employeeId)) {
 
-			WorkTimeSetGetterCommand commandGetter = new WorkTimeSetGetterCommand();
-			commandGetter.setWorktypeCode(worktypeDto.getWorktypeCode());
-			commandGetter.setCompanyId(command.getCompanyId());
-			commandGetter.setWorkingCode(workTimeCode);
-			
-			Optional<PrescribedTimezoneSetting> optionalWorkTimeSet = this.scheCreExeWorkTimeHandler
-					.getScheduleWorkHour(commandGetter);
-			if (optionalWorkTimeSet.isPresent()) {
-				// update scheTimeZone
-				PrescribedTimezoneSetting workTimeSet = optionalWorkTimeSet.get();
-				commandSave.updateWorkScheduleTimeZones(workTimeSet);
-			}
+		WorkTimeSetGetterCommand commandGetter = new WorkTimeSetGetterCommand();
+		commandGetter.setWorktypeCode(worktypeDto.getWorktypeCode());
+		commandGetter.setCompanyId(command.getCompanyId());
+		commandGetter.setWorkingCode(workTimeCode);
+
+		Optional<PrescribedTimezoneSetting> optionalWorkTimeSet = this.scheCreExeWorkTimeHandler
+				.getScheduleWorkHour(commandGetter);
+		if (optionalWorkTimeSet.isPresent()) {
+			// update scheTimeZone
+			PrescribedTimezoneSetting workTimeSet = optionalWorkTimeSet.get();
+			commandSave.updateWorkScheduleTimeZones(workTimeSet);
 		}
+//		}
 
 		if (worktypeDto.getWorktypeSet() != null && commandSave.getWorkScheduleTimeZones() != null
 				&& !commandSave.getWorkScheduleTimeZones().isEmpty()) {
