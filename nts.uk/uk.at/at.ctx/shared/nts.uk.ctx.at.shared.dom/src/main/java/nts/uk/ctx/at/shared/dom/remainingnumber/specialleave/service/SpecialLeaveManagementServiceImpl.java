@@ -142,9 +142,50 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 		//「特別休暇の集計結果情報」に集計結果を格納する
 		getOffsetDay.setLstError(lstError);
 		outputData.setAggSpecialLeaveResult(getOffsetDay);
-		InPeriodOfSpecialLeave speTmp = new InPeriodOfSpecialLeave(getOffsetDay.getLstSpeLeaveGrantDetails(), 
-				getOffsetDay.getRemainDays(),
-				getOffsetDay.getUseOutPeriod(),
+		List<SpecialLeaveGrantDetails> lstSpeLeaveGrantDetailsAfter = getOffsetDay.getLstSpeLeaveGrantDetails().stream().map(x -> {
+			SpecialLeaveNumberInfoService detailsAfer = new SpecialLeaveNumberInfoService(x.getDetails().getRemainDays(),
+					x.getDetails().getUseDays(),
+					x.getDetails().getGrantDays(),
+					x.getDetails().getRemainTimes(),
+					x.getDetails().getUseTimes(),
+					x.getDetails().getLimitDays(),
+					x.getDetails().getGrantTimes());
+			return new SpecialLeaveGrantDetails(x.getCode(),
+					x.getDataAtr(),
+					x.getExpirationStatus(),
+					x.getDeadlineDate(),
+					x.getSid(),
+					x.getGrantDate(),
+					detailsAfer); 
+		}).collect(Collectors.toList());
+		RemainDaysOfSpecialHoliday remainDaysBefore = getOffsetDay.getRemainDays();
+		Optional<SpecialHolidayRemainInfor> optgrantDetailAfterOfBefore = Optional.empty();
+		if(remainDaysBefore.getGrantDetailAfter().isPresent()) {
+			SpecialHolidayRemainInfor tmp = remainDaysBefore.getGrantDetailAfter().get();
+			SpecialHolidayRemainInfor tmpAfter = new SpecialHolidayRemainInfor(tmp.getRemainDays(),
+					tmp.getUseDays(),
+					tmp.getGrantDays());
+			optgrantDetailAfterOfBefore = Optional.of(tmpAfter);
+		}
+		List<UseDaysOfPeriodSpeHoliday> useDaysOutPeriodAfter = remainDaysBefore.getUseDaysOutPeriod().stream().map(y -> {
+			return new UseDaysOfPeriodSpeHoliday(y.getYmd(),
+					y.getUseDays(),
+					y.getUseTimes());
+		}).collect(Collectors.toList());
+		RemainDaysOfSpecialHoliday remainDaysAfter = new RemainDaysOfSpecialHoliday(new SpecialHolidayRemainInfor(remainDaysBefore.getGrantDetailBefore().getRemainDays(),
+				remainDaysBefore.getGrantDetailBefore().getUseDays(),
+				remainDaysBefore.getGrantDetailBefore().getGrantDays()),
+				remainDaysBefore.getUnDisgesteDays(),
+				optgrantDetailAfterOfBefore,
+				useDaysOutPeriodAfter);
+		List<UseDaysOfPeriodSpeHoliday> useOutPeriodAfter = getOffsetDay.getUseOutPeriod().stream().map(z -> {
+			return new UseDaysOfPeriodSpeHoliday(z.getYmd(),
+					z.getUseDays(),
+					z.getUseTimes());
+		}).collect(Collectors.toList());
+		InPeriodOfSpecialLeave speTmp = new InPeriodOfSpecialLeave(lstSpeLeaveGrantDetailsAfter, 
+				remainDaysAfter,
+				useOutPeriodAfter,
 				getOffsetDay.getLstError());
 		//集計終了日の翌日開始時点の未消化数をもとめる
 		if(!getOffsetDay.getLstSpeLeaveGrantDetails().isEmpty()) {			
