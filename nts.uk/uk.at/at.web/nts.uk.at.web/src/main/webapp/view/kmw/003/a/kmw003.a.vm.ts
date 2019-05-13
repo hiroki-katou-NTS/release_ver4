@@ -889,7 +889,6 @@ module nts.uk.at.view.kmw003.a.viewmodel {
             //$("#dpGrid").off();
 
             $.when(self.initScreen()).done((processDate) => {
-                self.flagSelectEmployee = false;
                 nts.uk.ui.block.clear();
             });
 
