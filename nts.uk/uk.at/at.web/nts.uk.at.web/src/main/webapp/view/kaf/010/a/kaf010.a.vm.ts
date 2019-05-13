@@ -291,11 +291,15 @@ module nts.uk.at.view.kaf010.a.viewmodel {
             self.employeeID(data.employeeID);
             if (data.workTime != null) {
                 self.siftCD(data.workTime.siftCode);
-                self.siftName(data.workTime.siftName|| text("KAL003_120"));
+                if (data.workTime.siftCode) {
+                    self.siftName(data.workTime.siftName || text("KAL003_120"));
+                }
             }
             if (data.workType != null) {
                 self.workTypeCd(data.workType.workTypeCode);
-                self.workTypeName(data.workType.workTypeName|| text("KAL003_120"));
+                if (data.workType.workTypeCode) {
+                    self.workTypeName(data.workType.workTypeName || text("KAL003_120"));
+                }
             }
             self.workTypecodes(data.workTypes);
             self.workTimecodes(data.workTimes);
