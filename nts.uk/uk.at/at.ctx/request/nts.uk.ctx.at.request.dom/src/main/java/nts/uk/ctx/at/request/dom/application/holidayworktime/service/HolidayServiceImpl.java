@@ -142,6 +142,7 @@ public class HolidayServiceImpl implements HolidayService {
 		CheckWorkingInfoResult checkResult = overtimeService.checkWorkingInfo(companyID, wkTypeCD, null);
 		if (checkResult.isWkTypeError() && !CollectionUtil.isEmpty(wptypes)) {
 			wkTypeCD = wptypes.get(0);
+			workTypes.setWorkTypeCode(wkTypeCD);
 		}
 		Optional<WorkType> workType = workTypeRepository.findByPK(companyID, wkTypeCD);
 		if(workType.isPresent()){

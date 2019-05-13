@@ -190,6 +190,7 @@ module nts.uk.at.view.kaf011.shr {
             wkTypeCD: KnockoutObservable<string> = ko.observable(null);
             wkTimeCD: KnockoutObservable<string> = ko.observable(null);
             wkTimeName: KnockoutObservable<string> = ko.observable('');
+            workTimeCDs: KnockoutObservableArray<IWorkType> = ko.observableArray([]);
             wkTime1: KnockoutObservable<WorkingHour> = ko.observable(new WorkingHour());
             wkTime2: KnockoutObservable<WorkingHour> = ko.observable(new WorkingHour());
             wkText: KnockoutObservable<string> = ko.observable('');
@@ -482,7 +483,7 @@ module nts.uk.at.view.kaf011.shr {
                 nts.uk.ui.windows.setShared('parentCodes', {
                     workTypeCodes: [selectedWorkTypeCode],
                     selectedWorkTypeCode: selectedWorkTypeCode,
-                    workTimeCodes: [],
+                    workTimeCodes: self.workTimeCDs(),
                     selectedWorkTimeCode: WorkTimeCd,
                 }, true);
 
