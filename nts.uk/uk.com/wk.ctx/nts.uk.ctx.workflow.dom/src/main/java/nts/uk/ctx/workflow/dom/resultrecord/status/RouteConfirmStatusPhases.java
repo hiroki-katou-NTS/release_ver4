@@ -94,9 +94,9 @@ public class RouteConfirmStatusPhases {
 	 * @param approverId
 	 * @return
 	 */
-	public boolean canConfirm(String approverId, List<String> representRequesterIds) {
+	public boolean canApprove(String approverId, List<String> representRequesterIds) {
 		return phases.stream()
-				.anyMatch(p -> p.canConfirm(approverId, representRequesterIds));
+				.anyMatch(p -> p.canApprove(approverId, representRequesterIds));
 	}
 	
 	/**

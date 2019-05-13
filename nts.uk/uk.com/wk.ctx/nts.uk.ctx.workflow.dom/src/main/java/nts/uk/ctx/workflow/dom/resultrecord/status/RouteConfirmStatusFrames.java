@@ -66,13 +66,13 @@ public class RouteConfirmStatusFrames {
 	}
 	
 	/**
-	 * 指定した代行依頼者が承認枠に存在するか
-	 * @param representRequesterIds
+	 * 指定した社員が承認枠に存在するか
+	 * @param approverIds
 	 * @return
 	 */
-	public boolean isRepresenter(List<String> representRequesterIds) {
+	public boolean isApprover(List<String> approverIds) {
 		return frames.stream()
-				.anyMatch(f -> f.isRepresenter(representRequesterIds));
+				.anyMatch(f -> f.isApprover(approverIds));
 	}
 	
 	/**
@@ -80,7 +80,8 @@ public class RouteConfirmStatusFrames {
 	 */
 	public boolean hasConcludedByOther(String approverId) {
 		return frames.stream()
-				.anyMatch(f -> f.isConclusive() && f.isApprover(approverId));
+				.filter(f -> f.isConclusive())
+				.anyMatch(f -> f.hasApprovedByOther(approverId));
 	}
 	
 	/**
