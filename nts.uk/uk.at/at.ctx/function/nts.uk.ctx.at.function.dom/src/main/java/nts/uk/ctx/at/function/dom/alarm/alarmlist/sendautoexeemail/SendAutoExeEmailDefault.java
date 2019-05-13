@@ -11,6 +11,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDateTime;
+import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.function.dom.adapter.mailserver.MailServerAdapter;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.AlarmExtraValueWkReDto;
 import nts.uk.ctx.at.function.dom.alarm.alarmlist.ExtractedAlarmDto;
@@ -67,7 +68,7 @@ public class SendAutoExeEmailDefault implements SendAutoExeEmailService {
 		//メール設定(管理者宛)：アラームリスト通常用メール設定.管理者宛メール設定
 		Optional<MailSettings> mailSettingAdmins = mailSettingAutomatic.get().getMailSettingAdmins();
 		boolean checkErrorSendMail = false;
-		
+		String error = "";
 		try {
 			for(ExtractedAlarmDto extractedAlarmDto :listExtractedAlarmDto) {
 				
@@ -105,7 +106,7 @@ public class SendAutoExeEmailDefault implements SendAutoExeEmailService {
 						);
 				
 				//アルゴリズム「メール送信処理」を実行する
-				sendEmailService.alarmSendEmail(
+				error = sendEmailService.alarmSendEmail(
 						companyId,
 						executionDate.toDate(),
 						listEmpPersonID,
@@ -124,6 +125,10 @@ public class SendAutoExeEmailDefault implements SendAutoExeEmailService {
 			checkErrorSendMail = true;
 		}
 		
+		if(!StringUtil.isNullOrEmpty(error, true)){
+			outputSendAutoExe.setExtractionState(ExtractionState.ABNORMAL_TERMI);
+			checkErrorSendMail = true;
+		}
 		if(checkErrorSendMail) {
 			return Optional.of(outputSendAutoExe);
 		}

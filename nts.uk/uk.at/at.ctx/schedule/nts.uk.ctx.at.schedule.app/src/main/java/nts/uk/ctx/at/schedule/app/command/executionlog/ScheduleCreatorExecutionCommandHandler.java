@@ -353,13 +353,20 @@ public class ScheduleCreatorExecutionCommandHandler extends AsyncCommandHandler<
 				this.scheduleCreatorRepository.update(scheduleCreator);
 			}
 		});
-		
 		scTimeAdapter.clearCompanySettingShareContainer(companySetting);
 		
-		if (asyncTask.hasBeenRequestedToCancel()) {
-			asyncTask.finishedAsCancelled();
+		if (scheduleExecutionLog.getExeAtr() == ExecutionAtr.AUTOMATIC) {
+			Optional<ExeStateOfCalAndSumImportSch> exeStateOfCalAndSumImportSch = dailyMonthlyprocessAdapterSch.executionStatus(exeId);
+			if(exeStateOfCalAndSumImportSch.isPresent())
+				if(exeStateOfCalAndSumImportSch.get() == ExeStateOfCalAndSumImportSch.START_INTERRUPTION) {
+					return;
+				}
+		}else {
+			if (asyncTask.hasBeenRequestedToCancel()) {
+				asyncTask.finishedAsCancelled();
+			}
 		}
-
+		
 		// EA修正履歴　No2378
 		// ドメインモデル「スケジュール作成実行ログ」を取得する find execution log by id
 		ScheduleExecutionLog scheExeLog = this.scheduleExecutionLogRepository

@@ -24,7 +24,6 @@ import nts.uk.ctx.at.function.app.export.alarm.AlarmExportService;
 import nts.uk.ctx.at.function.app.find.alarm.AlarmPatternSettingFinder;
 import nts.uk.ctx.at.function.app.find.alarm.CheckConditionTimeFinder;
 import nts.uk.ctx.at.function.app.find.alarm.CodeNameAlarmDto;
-import nts.uk.ctx.at.function.app.find.alarm.alarmlist.EmployeeInfoFunFinder;
 import nts.uk.ctx.at.function.app.find.alarm.alarmlist.EmployeeSendEmail;
 import nts.uk.ctx.at.function.app.find.alarm.alarmlist.ErAlExtractResultFinder;
 import nts.uk.ctx.at.function.app.find.alarm.alarmlist.ErAlExtractViewResult;
@@ -52,8 +51,8 @@ public class KAL001WebService {
 	@Inject
 	private ErrorAlarmListExtractCommandHandler extractAlarmHandler;
 	
-	@Inject
-	private EmployeeInfoFunFinder employeeInfoFunFinder;
+//	@Inject
+//	private EmployeeInfoFunFinder employeeInfoFunFinder;
 	
 	@Inject
 	private AlarmListExtraProcessStatusRepository alListExtraProcessStatusRepo;

@@ -15,6 +15,7 @@ public class UkJobScheduleOptions {
 
 	private final Class<? extends ScheduledJob> jobClass;
 	private final Optional<Class<? extends ScheduledJob>> cleanupJobClass;
+	private final String scheduleId;
 	private final SchedulingMethod schedulingMethod;
 	private final ScheduledJobUserData userData;
 	private final Optional<GeneralDate> startDate;
@@ -40,12 +41,13 @@ public class UkJobScheduleOptions {
 		});
 	}
 	
-	public static Builder builder(Class<? extends ScheduledJob> jobClass, SchedulingMethod schedulingMethod) {
-		return new Builder(jobClass, schedulingMethod);
+	public static Builder builder(Class<? extends ScheduledJob> jobClass, String scheduleId, SchedulingMethod schedulingMethod) {
+		return new Builder(jobClass, scheduleId, schedulingMethod);
 	}
 	
 	public static class Builder {
 		final Class<? extends ScheduledJob> jobClass;
+		final String scheduleId;
 		final SchedulingMethod schedulingMethod;
 		final ScheduledJobUserData userData = new ScheduledJobUserData();
 		Class<? extends ScheduledJob> cleanupJobClass;
@@ -54,8 +56,9 @@ public class UkJobScheduleOptions {
 		TimeClockPrimitiveValue<?> startClock = null;
 		TimeClockPrimitiveValue<?> endClock = null;
 		
-		public Builder(Class<? extends ScheduledJob> jobClass, SchedulingMethod schedulingMethod) {
+		public Builder(Class<? extends ScheduledJob> jobClass, String scheduleId, SchedulingMethod schedulingMethod) {
 			this.jobClass = jobClass;
+			this.scheduleId = scheduleId;
 			this.schedulingMethod = schedulingMethod;
 		}
 		
@@ -93,6 +96,7 @@ public class UkJobScheduleOptions {
 			return new UkJobScheduleOptions(
 					jobClass,
 					Optional.ofNullable(cleanupJobClass),
+					scheduleId,
 					schedulingMethod,
 					userData,
 					Optional.ofNullable(startDate),

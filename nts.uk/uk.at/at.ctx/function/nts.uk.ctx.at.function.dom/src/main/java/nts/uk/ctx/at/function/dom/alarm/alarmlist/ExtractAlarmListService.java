@@ -7,14 +7,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import javax.transaction.TransactionSynchronizationRegistry;
-
-import org.apache.log4j.Logger;
 
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
