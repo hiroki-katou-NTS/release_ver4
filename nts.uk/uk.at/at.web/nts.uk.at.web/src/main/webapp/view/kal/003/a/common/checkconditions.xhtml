@@ -30,15 +30,14 @@
 		</div>
 		<div id="div_table_check_conditions" style="padding-top: 20px;">
 		   <table id="check-condition-table">
-			    <thead>
+			    <thead style="display: block;overflow-x: hidden; overflow-y: visible;background: #e9e9e9">
 			        <tr>
 			            <th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px"><div data-bind="ntsCheckBox: { checked: isAllCheckCondition  }"></div></th>
 						<th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px">#{i18n.getText('KAL003_24')}</th>
-						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:230px">#{i18n.getText('KAL003_12')}</th>
-						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:90px;">#{i18n.getText('KAL003_23')}</th>
-						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:230px">#{i18n.getText('KAL003_25')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:200px">#{i18n.getText('KAL003_12')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:80px;">#{i18n.getText('KAL003_23')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:200px">#{i18n.getText('KAL003_25')}</th>
 						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:182px;">#{i18n.getText('KAL003_188')}</th>
-						<th class="ui-widget-header" style ="background-color: #e9e9e9;width:17px;"></th>
 			        </tr>
 		        </thead>
 		       <tbody data-bind="foreach: listWorkRecordExtractingConditions()">
@@ -49,7 +48,7 @@
 		               <td style ="text-align: center;width:36px">
 	                       <span data-bind="text: rowId"></span>
 	                   </td>
-	                   <td style ="width:230px">
+	                   <td style ="width:200px">
 	                       <input class ="nameAlarmDailyM" data-bind="ntsTextEditor: {
 	                       value: nameWKRecord, 
 	                       required: true,
@@ -58,17 +57,17 @@
 		                       option: ko.mapping.fromJS(new nts.uk.ui.option.TextEditorOption({
 				                	textmode: 'text',
 				                	placeholder: '',
-				                	width: '203px',
+				                	width: '173px',
 				                	textalign: 'left'
 				            	})
 				            )}" />
 	                   </td>
-	                   <td style ="text-align: center;width:90px">
+	                   <td style ="text-align: center;width:80px">
 	                       <button data-bind="click: $parent.btnSettingCheckCondition_click.bind($parent, rowId),enable: true">#{i18n.getText('KAL003_14')}</button>
 	                   </td>
-	                   <td style ="width:230px">
+	                   <td style ="width:200px">
 	                   		<div data-bind="with: errorAlarmCondition">
-								<div data-bind = "text: displayMessage" class="limited-label description"></div>
+								<div style ="width:200px" data-bind = "text: displayMessage" class="limited-label description"></div>
  	                        </div>
 	                   </td>
 	                   <td  style="text-align: center;width:182px;">
@@ -116,17 +115,16 @@
 		</div>
 		<div id="div_table_check_conditions" style="margin-top: 20px">
 		   <table id="check-condition-table_category9">
-			    <thead>
+			    <thead style="display: block;overflow-x: hidden; overflow-y: visible;background: #e9e9e9">
 			        <tr>
 			            <tr>
 			            <th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px"><div data-bind="ntsCheckBox: { checked: isAllCheckCondition  }"></div></th>
 						<th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px">#{i18n.getText('KAL003_24')}</th>
-						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:230px">#{i18n.getText('KAL003_12')}</th>
-						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:90px;">#{i18n.getText('KAL003_23')}</th>
-						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:230px">#{i18n.getText('KAL003_25')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:200px">#{i18n.getText('KAL003_12')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:80px;">#{i18n.getText('KAL003_23')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:200px">#{i18n.getText('KAL003_25')}</th>
 						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:182px;">#{i18n.getText('KAL003_188')}</th>
-						<th class="ui-widget-header" style ="background-color: #e9e9e9;width:17px;"></th>
-			        </tr>
+			        	</tr>
 			        </tr>
 		        </thead>
 		       <tbody data-bind="foreach: listMulMonCheckSet()">
@@ -137,7 +135,7 @@
 		               <td style ="text-align: center;width:36px">
 	                       <span data-bind="text: rowId"></span>
 	                   </td>
-	                   <td style ="width:230px">
+	                   <td style ="width:200px">
 	                       <input class ="nameWKRecordID" 
 	                       data-bind="ntsTextEditor: {value: nameAlarmMulMon,
 	                        	required: true,
@@ -146,17 +144,17 @@
 		                       	option: ko.mapping.fromJS(new nts.uk.ui.option.TextEditorOption({
 				                	textmode: 'text',
 				                	placeholder: '',
-				                	width: '203px',
+				                	width: '173px',
 				                	textalign: 'left'
 				            	})
 				            )}" />
 	                   </td>
-	                   <td style ="text-align: center;width:90px">
+	                   <td style ="text-align: center;width:80px">
 	                       <button data-bind="click: $parent.btnSettingCheckCondition_click.bind($parent, rowId),enable: true">#{i18n.getText('KAL003_14')}</button>
 	                   </td>
-	                   <td style ="width:230px">
+	                   <td style ="width:200px">
 	                   		<div>
-								<div data-bind = "text: displayMessage" class="limited-label description"></div>
+								<div style ="width:200px" data-bind = "text: displayMessage" class="limited-label description"></div>
  	                        </div>
 	                   </td>
 	                   <td  style="text-align: center;width:182px">
