@@ -44,6 +44,16 @@ public class SortingProcessCommandHandler extends CommandHandler<ScheduleExecute
 		String companyId = command.getCompanyId();
 		String execItemCd = command.getExecItemCd();
 		GeneralDateTime nextDate = command.getNextDate();
+		//ドメインモデル「実行タスク設定」を取得する
+		Optional<ExecutionTaskSetting> executionTaskSettingOpt = execSettingRepo.getByCidAndExecCd(companyId, command.getExecItemCd());
+		if(!executionTaskSettingOpt.isPresent()) {
+			return;
+		}
+		//ドメインモデル「実行タスク設定.更新処理有効設定」をチェックする
+		if(!executionTaskSettingOpt.get().isEnabledSetting()) {
+			//無効の場合
+			return;//フロー終了
+		}
 		//ドメインモデル「更新処理自動実行管理」取得する
 		Optional<ProcessExecutionLogManage> logManageOpt = this.processExecLogManaRepo.getLogByCIdAndExecCd(companyId, execItemCd);
 		if(!logManageOpt.isPresent()){
