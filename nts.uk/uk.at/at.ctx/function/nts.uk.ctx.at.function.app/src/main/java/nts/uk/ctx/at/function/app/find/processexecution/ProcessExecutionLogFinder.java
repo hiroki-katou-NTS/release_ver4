@@ -28,7 +28,12 @@ import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionLo
 import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionRepository;
 import nts.uk.ctx.at.function.dom.processexecution.tasksetting.ExecutionTaskSetting;
 import nts.uk.shr.com.context.AppContexts;
-
+import nts.uk.shr.com.i18n.TextResource;
+/**
+ * 起動時処理 - KBT002	
+ * @author tutk
+ *
+ */
 @Stateless
 public class ProcessExecutionLogFinder {
 
@@ -48,8 +53,10 @@ public class ProcessExecutionLogFinder {
 	
 	public List<ProcessExecutionLogDto> findAll() {
 		String companyId = AppContexts.user().companyId();
+		String KBT002_165 = TextResource.localize("KBT002_165");
 			return this.processExecLogManRepo.getProcessExecutionLogByCompanyId(companyId).stream().map(a -> {
 				ProcessExecutionLogDto dto = null;
+				//ドメインモデル「更新処理自動実行ログ」を取得する
 				Optional<ProcessExecutionLog> processExecutionLogOpt = this.procExecLogRepo.getLog(companyId, a.getExecItemCd().v());
 				if(processExecutionLogOpt!=null && processExecutionLogOpt.isPresent()){
 					dto = ProcessExecutionLogDto.fromDomain(processExecutionLogOpt.get(),a);
@@ -62,9 +69,9 @@ public class ProcessExecutionLogFinder {
 					ExecutionTaskSetting setting = Optional.of(taskSettingOpt.get()).get();
 					dto.setNextExecDateTime(
 							(setting.getNextExecDateTime() == null || !setting.getNextExecDateTime().isPresent()) ? 
-									"設定されていません" : setting.getNextExecDateTime().get().toString("yyyy/MM/dd HH:mm:ss"));
+									KBT002_165 : setting.getNextExecDateTime().get().toString("yyyy/MM/dd HH:mm:ss"));
 				}else{
-					dto.setNextExecDateTime("設定されていません");
+					dto.setNextExecDateTime(KBT002_165);
 				}
 				Optional<ProcessExecution> procExecOpt = this.procExecRepo.getProcessExecutionByCidAndExecCd(companyId, a.getExecItemCd().v());
 				if (procExecOpt.isPresent()) {
