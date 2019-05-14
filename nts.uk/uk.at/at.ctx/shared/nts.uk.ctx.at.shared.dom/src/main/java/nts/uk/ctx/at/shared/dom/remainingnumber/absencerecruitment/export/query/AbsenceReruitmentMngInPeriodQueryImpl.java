@@ -79,6 +79,7 @@ public class AbsenceReruitmentMngInPeriodQueryImpl implements AbsenceReruitmentM
 			if(paramInput.getOptBeforeResult().get().getNextDay().isPresent()
 					&& paramInput.getOptBeforeResult().get().getNextDay().get().equals(paramInput.getDateData().start())) {
 				carryForwardDays.setRerultDays(beforeResult.getCarryForwardDays());
+				lstAbsRec.addAll(beforeResult.getLstAbsRecMng());
 			}
 		}
 		
