@@ -2,8 +2,6 @@ package nts.uk.ctx.at.request.dom.application.holidayworktime.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -276,11 +274,16 @@ public class HolidayServiceImpl implements HolidayService {
 			List<AppEmployWorkType> lstEmploymentWorkType = appSet.getLstWorkType();
 			boolean isDisplay = appSet.isDisplayFlag();
 			if(!CollectionUtil.isEmpty(lstEmploymentWorkType) && isDisplay) {
-				Collections.sort(lstEmploymentWorkType, Comparator.comparing(AppEmployWorkType :: getWorkTypeCode));
-				lstEmploymentWorkType.forEach(x -> {
-					
-					workTypeCodes.add(x.getWorkTypeCode());
-					});
+				List<String> sortedCodes = this.workTypeRepository
+						.getPossibleWorkTypeAndOrder(companyID,
+								lstEmploymentWorkType.stream().map(x -> x.getWorkTypeCode())
+										.collect(Collectors.toList()))
+						.stream().map(x -> x.getWorkTypeCode()).collect(Collectors.toList());
+				//Collections.sort(lstEmploymentWorkType, Comparator.comparing(AppEmployWorkType :: getWorkTypeCode));
+				sortedCodes.forEach(x -> {
+					workTypeCodes.add(x);
+				});
+				
 				workTypeHolidayWorks.setWorkTypeCodes(workTypeCodes);
 				return workTypeHolidayWorks;
 			}
@@ -289,9 +292,14 @@ public class HolidayServiceImpl implements HolidayService {
 		int breakDay = 11;
 		// ドメインモデル「勤務種類」を取得
 		List<WorkType> workrTypes = this.workTypeRepository.findWorkOneDay(companyID, 0, breakDay);
-		if(!CollectionUtil.isEmpty(workrTypes)){
-			workrTypes.forEach(x -> {
-				workTypeCodes.add(x.getWorkTypeCode().toString());
+		List<String> sortedCodes = this.workTypeRepository
+				.getPossibleWorkTypeAndOrder(companyID,
+						workrTypes.stream().map(x -> x.getWorkTypeCode().v())
+								.collect(Collectors.toList()))
+				.stream().map(x -> x.getWorkTypeCode()).collect(Collectors.toList());
+		if(!CollectionUtil.isEmpty(sortedCodes)){
+			sortedCodes.forEach(x -> {
+				workTypeCodes.add(x);
 			});
 			workTypeHolidayWorks.setWorkTypeCodes(workTypeCodes);
 			return workTypeHolidayWorks;
