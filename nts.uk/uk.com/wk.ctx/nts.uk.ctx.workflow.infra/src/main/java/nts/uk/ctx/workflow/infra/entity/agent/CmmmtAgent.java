@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
@@ -22,6 +23,8 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 public class CmmmtAgent extends UkJpaEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final JpaEntityMapper<CmmmtAgent> MAPPER = new JpaEntityMapper<>(CmmmtAgent.class);
 
 	@EmbeddedId
 	public CmmmtAgentPK cmmmtAgentPK;
