@@ -113,7 +113,7 @@ public interface IOvertimePreProcess {
 	 * @param appDate
 	 * @param requestAppDetailSetting
 	 */
-	public RecordWorkOutput getWorkingHours(String companyID,String employeeID,String appDate,ApprovalFunctionSetting approvalFunctionSetting, String siftCD, boolean isOverTime);
+	public RecordWorkOutput getWorkingHours(String companyID,String employeeID, String changeEmployee, String appDate,ApprovalFunctionSetting approvalFunctionSetting, String siftCD, boolean isOverTime);
 	/**
 	 *  01-17_休憩時間取得
 	 * @param requestAppDetailSetting

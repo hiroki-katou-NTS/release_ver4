@@ -30,7 +30,7 @@ public class ParamChangeAppDate {
 	private Integer endTime;
 	private List<Integer> startTimeRests;
 	private List<Integer> endTimeRests;
-	private String selectedEmplCodes;
+	private String changeEmployee;
 	
 	
 	private int overtimeAtr;
