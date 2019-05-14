@@ -1,16 +1,19 @@
 package nts.uk.shr.com.time.calendar.period;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
+import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 
 public class DatePeriod extends GeneralPeriod<DatePeriod, GeneralDate> {
 	
 	private static final GeneralDate MAX = GeneralDate.ymd(9999, 12, 31);
-
+	
 	public DatePeriod(GeneralDate start, GeneralDate end) {
 		super(start, end);
 	}
@@ -19,6 +22,34 @@ public class DatePeriod extends GeneralPeriod<DatePeriod, GeneralDate> {
 		return new DatePeriod(
 				GeneralDate.ymd(yearMonth.year(), yearMonth.month(), 1),
 				GeneralDate.ymd(yearMonth.year(), yearMonth.month(), yearMonth.lastDateInMonth()));
+	}
+
+	public static List<DatePeriod> create(List<GeneralDate> dates) {
+		
+		if (dates.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
+		val sortedDates = dates.stream().sorted().collect(Collectors.toList());
+		val periods = new ArrayList<DatePeriod>();
+		GeneralDate curStart = sortedDates.get(0);
+		GeneralDate curEnd = curStart;
+		
+		for (int i = 1; i < sortedDates.size(); i++) {
+			val cur = sortedDates.get(i);
+			
+			if (curEnd.increase().equals(cur)) {
+				curEnd = cur;
+				continue;
+			}
+			
+			periods.add(new DatePeriod(curStart, curEnd));
+			curStart = curEnd = cur;
+		}
+
+		periods.add(new DatePeriod(curStart, curEnd));
+		
+		return periods;
 	}
 
 	@Override
