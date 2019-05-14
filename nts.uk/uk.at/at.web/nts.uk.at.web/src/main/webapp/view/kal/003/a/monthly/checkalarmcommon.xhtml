@@ -20,10 +20,10 @@
 			        <tr>
 			            <th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px"><div data-bind="ntsCheckBox: { checked: isAllCheckCondition  }"></div></th>
 						<th class="ui-widget-header" style ="text-align: center; background-color: #CFF1A5;width:36px">#{i18n.getText('KAL003_24')}</th>
-						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:200px">#{i18n.getText('KAL003_12')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:190px">#{i18n.getText('KAL003_12')}</th>
 						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:90px;">#{i18n.getText('KAL003_23')}</th>
 						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:190px">#{i18n.getText('KAL003_25')}</th>
-						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:182px;">#{i18n.getText('KAL003_188')}</th>
+						<th class="ui-widget-header" style ="background-color: #CFF1A5;width:162px;">#{i18n.getText('KAL003_188')}</th>
 			        </tr>
 		        </thead>
 		       <tbody data-bind="foreach: listExtraResultMonthly">
@@ -34,12 +34,12 @@
 		               <td style ="text-align: center;width:36px;">
 	                       <span data-bind="text: rowId"></span>
 	                   </td>
-	                   <td style="width:200px;">
+	                   <td style="width:190px;">
 	                       <input class="nameAlarm" data-bind="ntsTextEditor: {value: nameAlarmExtraCon , required: true, constraint: 'NameAlarmExtractionCondition', name: '#[KAL003_12]', 
 		                       option: ko.mapping.fromJS(new nts.uk.ui.option.TextEditorOption({
 				                textmode: 'text',
 				                placeholder: '',
-				                width: '150px',
+				                width: '163px',
 				                textalign: 'left'
 				            }))}" />
 	                   </td>
@@ -49,7 +49,7 @@
 	                   <td  style="width:190px;">
 							<div style="width:190px;" data-bind = "text: displayMessage" class="limited-label description"></div>
 	                   </td>
-	                   <td style="text-align: center;width:182px;">
+	                   <td style="text-align: center;width:162px;">
 							<div class="cf" data-bind="ntsSwitchButton: {
 							name: '#[KAL003_188]',
 							options: $parent.userAtrCheck ,
