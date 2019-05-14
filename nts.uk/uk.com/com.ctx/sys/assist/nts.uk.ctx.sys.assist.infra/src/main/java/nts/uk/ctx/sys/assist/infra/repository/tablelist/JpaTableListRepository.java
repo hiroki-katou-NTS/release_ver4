@@ -399,10 +399,10 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 							if (objects[i] instanceof BigDecimal) {
 								
 								BigDecimal value = ((BigDecimal) objects[i]); // the value you get
-								rowCsv.put(columnName, objects[i] != null ? "\"" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+								rowCsv.put(columnName, objects[i] != null ? "\"\t" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
 								
 							} else {								
-								rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");								
+								rowCsv.put(columnName, objects[i] != null ? "\"\t" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");								
 							}
 							i++;
 						}
@@ -429,11 +429,11 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 						
 						BigDecimal value = ((BigDecimal) objects[i]); // the value you get
 						
-						rowCsv.put(columnName, objects[i] != null ? "\"" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+						rowCsv.put(columnName, objects[i] != null ? "\"\t" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
 						
 					} else {
 						
-						rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+						rowCsv.put(columnName, objects[i] != null ? "\"\t" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
 						
 					}
 					i++;

@@ -1081,11 +1081,15 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             self.employeeName(overtimeDto.employeeName);
             if (overtimeDto.siftType != null) {
                 self.siftCD(overtimeDto.siftType.siftCode);
-                self.siftName(overtimeDto.siftType.siftName|| text("KAL003_120"));
+                if (overtimeDto.siftType.siftCode) {
+                    self.siftName(overtimeDto.siftType.siftName || text("KAL003_120"));
+                }
             }
             if (overtimeDto.workType != null) {
                 self.workTypeCd(overtimeDto.workType.workTypeCode);
-                self.workTypeName(overtimeDto.workType.workTypeName|| text("KAL003_120"));
+                if (overtimeDto.siftType.siftCode) {
+                    self.workTypeName(overtimeDto.workType.workTypeName || text("KAL003_120"));
+                }
             }
             $("#inpStartTime1").ntsError("clear"); 
             $("#inpEndTime1").ntsError("clear");
@@ -1194,12 +1198,18 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             if(data.appOvertimeReference != null){
                 self.appDateReference(data.appOvertimeReference.appDateRefer);
                 if(data.appOvertimeReference.workTypeRefer != null){
-                    self.workTypeCodeReference(data.appOvertimeReference.workTypeRefer.workTypeCode);
-                    self.workTypeNameReference(data.appOvertimeReference.workTypeRefer.workTypeName);
+                    let wkTypeCD = data.appOvertimeReference.workTypeRefer.workTypeCode;
+                    self.workTypeCodeReference(wkTypeCD);
+                    if (wkTypeCD) {
+                        self.workTypeNameReference(data.appOvertimeReference.workTypeRefer.workTypeName || text("KAL003_120"));
+                    }
                 }
                 if(data.appOvertimeReference.siftTypeRefer != null){
+                    let wkTimeCD = data.appOvertimeReference.siftTypeRefer.siftCode;
                     self.siftCodeReference(data.appOvertimeReference.siftTypeRefer.siftCode);
-                    self.siftNameReference(data.appOvertimeReference.siftTypeRefer.siftName);
+                    if (wkTimeCD) {
+                        self.siftNameReference(data.appOvertimeReference.siftTypeRefer.siftName || text("KAL003_120"));
+                    }
                 }
                 self.workClockFrom1To1Reference(data.appOvertimeReference.workClockFromTo1Refer);
                 self.workClockFrom2To2Reference(data.appOvertimeReference.workClockFromTo2Refer);

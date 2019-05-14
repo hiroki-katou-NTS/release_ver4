@@ -57,7 +57,6 @@ import nts.uk.ctx.at.function.dom.dailyattendanceitem.DailyAttendanceItem;
 import nts.uk.ctx.at.function.dom.dailyattendanceitem.repository.DailyAttendanceItemNameDomainService;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
-import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -290,12 +289,11 @@ public class DailyAggregationProcessService {
 			List<FixedConWorkRecordAdapterDto> listFixed, DatePeriod datePeriod) {
 		List<FixedConWorkRecordAdapterDto> no6 = listFixed.stream().filter(c -> c.getFixConWorkRecordNo() == 6).collect(Collectors.toList());
 		if(!no6.isEmpty()){
-			int continuousHolCheckSet = fixedCheckItemAdapter.getContinuousHolCheckSet(AppContexts.user().companyId());
-			String checkedValue = TextResource.localize("KAL010_75",String.valueOf(continuousHolCheckSet));
 			employee.stream().forEach(emp -> {
 				List<ValueExtractAlarm> erals = fixedCheckItemAdapter.checkContinuousVacation(emp.getId(), datePeriod);
 				if (!erals.isEmpty()) {
 					for (ValueExtractAlarm tmp : erals) {
+						String checkedValue = TextResource.localize("KAL010_75",String.valueOf(tmp.getConsecutiveDays()));
 						no6.stream().forEach(c -> {
 							listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), tmp.getEmployeeID(), TextResource.localize("KAL010_907",tmp.getAlarmValueDate()), 
 																			tmp.getClassification(), tmp.getAlarmItem(), tmp.getAlarmValueMessage(), c.getMessage(),checkedValue));
@@ -369,7 +367,7 @@ public class DailyAggregationProcessService {
 						if(!no2.isEmpty() && rw.getWorkTimeCode() != null) {
 							if(!workTimes.containsKey(rw.getWorkTimeCode())) {
 								String KAL010_9 = TextResource.localize("KAL010_9", rw.getWorkTimeCode());
-								String checkedValue = TextResource.localize("KAL010_77", rw.getWorkTypeCode());
+								String checkedValue = TextResource.localize("KAL010_77", rw.getWorkTimeCode());
 								no2.stream().forEach(fixed -> {
 									listValueExtractAlarm.add(new ValueExtractAlarm(emp.getWorkplaceId(), emp.getId(), date.toString(ErAlConstant.DATE_FORMAT),
 																					KAL010_1, KAL010_8, KAL010_9, fixed.getMessage(),checkedValue));
@@ -617,6 +615,7 @@ public class DailyAggregationProcessService {
 	
 	private ValueExtractAlarm checkConditionGenerateValue(EmployeeSearchDto employee, GeneralDate date, WorkRecordExtraConAdapterDto workRecordExtraCon,  
 			String companyID,String alarmItem, Map<Integer,DailyAttendanceItem> mapAtdItemName, String KAL010_1,String checkedValue) {
+		String checkedValueNew = checkedValue;
 		String alarmContent = "";
 		TypeCheckWorkRecord checkItem = EnumAdaptor.valueOf(workRecordExtraCon.getCheckItem(), TypeCheckWorkRecord.class);
 		
@@ -624,7 +623,14 @@ public class DailyAggregationProcessService {
 		if(alarmContent.length()>100) {
 			alarmContent = alarmContent.substring(0, 100);
 		}
-		return new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), date.toString(ErAlConstant.DATE_FORMAT), KAL010_1, alarmItem, alarmContent, workRecordExtraCon.getErrorAlarmCondition().getDisplayMessage(),checkedValue);
+		if(workRecordExtraCon.getCheckItem() == TypeCheckWorkRecord.CONTINUOUS_CONDITION.value ) {
+			checkedValueNew = TextResource.localize("KAL010_998");
+		} else if (workRecordExtraCon.getCheckItem() == TypeCheckWorkRecord.TIME.value
+				|| workRecordExtraCon.getCheckItem() == TypeCheckWorkRecord.TIME_OF_DAY.value) {
+			checkedValueNew = this.formatHourData(String.valueOf(Double.valueOf(checkedValueNew).intValue()),
+					EnumAdaptor.valueOf(workRecordExtraCon.getCheckItem(), TypeCheckWorkRecord.class));
+		}
+		return new ValueExtractAlarm(employee.getWorkplaceId(), employee.getId(), date.toString(ErAlConstant.DATE_FORMAT), KAL010_1, workRecordExtraCon.getNameWKRecord(), alarmContent, workRecordExtraCon.getErrorAlarmCondition().getDisplayMessage(),checkedValueNew);
 	}
 	
 	private String  checkConditionGenerateAlarmContent(TypeCheckWorkRecord checkItem,  WorkRecordExtraConAdapterDto workRecordExtraCon, String companyID, Map<Integer,DailyAttendanceItem> mapAtdItemName) {

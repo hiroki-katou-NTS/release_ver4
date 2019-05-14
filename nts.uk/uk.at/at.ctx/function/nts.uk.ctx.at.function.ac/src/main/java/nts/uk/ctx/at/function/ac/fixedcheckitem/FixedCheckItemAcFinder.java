@@ -74,7 +74,8 @@ public class FixedCheckItemAcFinder implements FixedCheckItemAdapter {
 				export.getAlarmItem(),
 				export.getAlarmValueMessage(),
 				export.getComment().orElse(null),
-				export.getCheckedValue().orElse(null)
+				export.getCheckedValue().orElse(null),
+				export.getConsecutiveDays()
 				);
 	}
 

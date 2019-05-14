@@ -263,10 +263,14 @@ module nts.uk.at.view.kaf009.a.viewmodel {
                     //Setting data works
                     //勤務種類
                     self.workTypeCd(settingData.dataWorkDto.selectedWorkTypeCd);
-                    self.workTypeName(settingData.dataWorkDto.selectedWorkTypeName || text("KAL003_120"));
+                    if (settingData.dataWorkDto.selectedWorkTypeCd) {
+                        self.workTypeName(settingData.dataWorkDto.selectedWorkTypeName || text("KAL003_120"));
+                    }
                     //勤務種類
                     self.siftCD(settingData.dataWorkDto.selectedWorkTimeCd);
-                    self.siftName(settingData.dataWorkDto.selectedWorkTimeName || text("KAL003_120"));
+                    if (settingData.dataWorkDto.selectedWorkTimeCd) {
+                        self.siftName(settingData.dataWorkDto.selectedWorkTimeName || text("KAL003_120"));
+                    }
                     //dataWorkDto
                     self.workTypeCodes = settingData.dataWorkDto.workTypeCodes;
                     self.workTimeCodes = settingData.dataWorkDto.workTimeCodes;

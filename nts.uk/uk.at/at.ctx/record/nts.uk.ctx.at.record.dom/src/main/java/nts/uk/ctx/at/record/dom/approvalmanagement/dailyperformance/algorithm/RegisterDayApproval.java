@@ -22,8 +22,6 @@ import nts.uk.ctx.at.record.dom.approvalmanagement.check.CheckApprovalOperation;
 import nts.uk.ctx.at.record.dom.approvalmanagement.enums.ConfirmationOfManagerOrYouself;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalStatusOfDailyPerforRepository;
-import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
@@ -50,14 +48,11 @@ public class RegisterDayApproval {
 	
 	@Inject
 	private ApprovalStatusOfDailyPerforRepository approvalStatusOfDailyPerforRepository;
-
-	@Inject
-	private DailyRecordTransactionService workInfo;
 	
 	@Inject
 	private ApprovalStatusAdapter approvalStatusAdapter;
 
-	public void registerDayApproval(ParamDayApproval param) {
+	public void registerDayApproval(ParamDayApproval param, Set<Pair<String, GeneralDate>> updated) {
 		if(param.getContentApproval().isEmpty()) return;
 		String companyId = AppContexts.user().companyId();
 		Map<Pair<String, GeneralDate>, GeneralDate> employeeIdInsert = new HashMap<>();
@@ -112,13 +107,13 @@ public class RegisterDayApproval {
 		if (!employeeIdRealse.isEmpty()) {
 			approvalStatusAdapter.releaseApproval(param.getEmployeeId(),
 					employeeIdRealse.keySet().stream().collect(Collectors.toList()), 1, companyId);
-			shoudUpVer.addAll(employeeIdRealse.keySet());
+			updated.addAll(employeeIdRealse.keySet());
 		}
 		// register status == true
 		if (!employeeIdInsert.isEmpty()) {
 			approvalStatusAdapter.registerApproval(param.getEmployeeId(),
 					employeeIdInsert.keySet().stream().collect(Collectors.toList()), 1, companyId);
-			shoudUpVer.addAll(employeeIdInsert.keySet());
+			updated.addAll(employeeIdInsert.keySet());
 			
 		}
 		
@@ -132,11 +127,11 @@ public class RegisterDayApproval {
 			});
 		}
 		
-		if(!shoudUpVer.isEmpty()){
-			shoudUpVer.stream().forEach(pair -> {
-				workInfo.updated(pair.getKey(), pair.getValue());
-			});
-		}
+//		if(!shoudUpVer.isEmpty()){
+//			shoudUpVer.stream().forEach(pair -> {
+//				workInfo.updated(pair.getKey(), pair.getValue());
+//			});
+//		}
 	}
 	
 	public void registerMonApproval(String approverID, List<EmpPerformMonthParamImport> listParamApproval) {

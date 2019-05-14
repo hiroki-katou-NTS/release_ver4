@@ -8,8 +8,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
-import lombok.val;
-import nts.arc.layer.app.command.AsyncCommandHandler;
+import nts.arc.layer.app.command.CommandHandler;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.task.AsyncTaskService;
 import nts.uk.ctx.at.function.dom.processexecution.ExecutionCode;
@@ -29,7 +28,7 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enu
 
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 @Stateless
-public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler<TerminateProcessExecutionCommand> {
+public class TerminateProcessExecutionCommandHandler extends CommandHandler<TerminateProcessExecutionCommand> {
 
 	@Inject
 	private ProcessExecutionLogRepository procExecLogRepo;
@@ -48,8 +47,8 @@ public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler
 	//終了ボタン押下時処理
 	@Override
 	public void handle(CommandHandlerContext<TerminateProcessExecutionCommand> context) {
-		val asyncContext = context.asAsync();
-		val dataSetter = asyncContext.getDataSetter();
+//		val asyncContext = context.asAsync();
+//		val dataSetter = asyncContext.getDataSetter();
 		TerminateProcessExecutionCommand command = context.getCommand();
 		String execItemCd = command.getExecItemCd();
 		String companyId = command.getCompanyId();
@@ -63,10 +62,10 @@ public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler
 		ProcessExecutionLogManage processExecLogMan =processExecLogManOpt.get();
 		
 		//「待機中」 or 「無効」の場合
-		if(processExecLogMan.getCurrentStatus().value==1 || processExecLogMan.getCurrentStatus().value==2){
-			dataSetter.setData("currentStatusIsOneOrTwo", "Msg_1102");
-			return;
-		}
+//		if(processExecLogMan.getCurrentStatus().value==1 || processExecLogMan.getCurrentStatus().value==2){
+//			dataSetter.setData("currentStatusIsOneOrTwo", "Msg_1102");
+//			return;
+//		}
 		
 		// ドメインモデル「更新処理自動実行ログ」を取得する
 		ProcessExecutionLog procExecLog = null;
@@ -136,13 +135,15 @@ public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler
 		for(ExecutionTaskLog task : procExecLog.getTaskLogList()) {
 		//procExecLog.getTaskLogList().forEach(task ->{
 			if (task.getProcExecTask().value == ProcessExecutionTask.SCH_CREATION.value) {
+				
 				if (task.getStatus() == null || !task.getStatus().isPresent()) {
 					if(taskTerminate!=null&& !"".equals(taskTerminate)){
 						service.requestToCancel(taskTerminate);	
 					}
+					System.out.println("update trang thai dung xu ly tao schdule cua anh Son");
 					this.interupt(execId, ExeStateOfCalAndSum.START_INTERRUPTION.value);
 					statusStop = task.getProcExecTask();
-					break;
+					//break;
 				}
 			}
 			 //日別作成の処理が完了しているか確認する
@@ -151,9 +152,11 @@ public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler
 					if(taskTerminate!=null&& !"".equals(taskTerminate)){
 						service.requestToCancel(taskTerminate);	
 					}
+					//TU_DEBUG
+					System.out.println("update trang thai dung xu ly tao data cua anh Nam");
 					this.interupt(execId, ExeStateOfCalAndSum.START_INTERRUPTION.value);
 					statusStop = task.getProcExecTask();
-					break;
+//					break;
 				}
 			//日別計算の処理が完了しているか確認する	
 			} else if (task.getProcExecTask().value == ProcessExecutionTask.DAILY_CALCULATION.value) {
@@ -161,9 +164,11 @@ public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler
 					if(taskTerminate!=null&& !"".equals(taskTerminate)){
 						service.requestToCancel(taskTerminate);
 						}
+					//TU_DEBUG
+					System.out.println("update trang thai dung xu ly tinh toan data");
 					this.interupt(execId, ExeStateOfCalAndSum.START_INTERRUPTION.value);
 					statusStop = task.getProcExecTask();
-					break;
+//					break;
 				}
 			//承認結果反映の処理が完了しているか確認する	
 			} else if (task.getProcExecTask().value == ProcessExecutionTask.RFL_APR_RESULT.value) {
@@ -173,7 +178,7 @@ public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler
 						}
 					this.interupt(execId, ExeStateOfCalAndSum.START_INTERRUPTION.value);
 					statusStop = task.getProcExecTask();
-					break;
+//					break;
 				}
 			//月別集計の処理が完了しているか確認する	
 			} else if (task.getProcExecTask().value == ProcessExecutionTask.MONTHLY_AGGR.value) {
@@ -183,7 +188,7 @@ public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler
 					}
 					this.interupt(execId, ExeStateOfCalAndSum.START_INTERRUPTION.value);
 					statusStop = task.getProcExecTask();
-					break;
+//					break;
 				}
 			//アラーム抽出を中断する
 			} else if (task.getProcExecTask().value == ProcessExecutionTask.AL_EXTRACTION.value) {
@@ -193,12 +198,12 @@ public class TerminateProcessExecutionCommandHandler extends AsyncCommandHandler
 					}
 					this.interupt(execId, ExeStateOfCalAndSum.START_INTERRUPTION.value);
 					statusStop = task.getProcExecTask();
-					break;
+//					break;
 				}
 			} else{
-				if(execType == 1){ 
-					dataSetter.setData("interupt", "true");
-				}
+//				if(execType == 1){ 
+//					dataSetter.setData("interupt", "true");
+//				}
 			} 
 		}
 		/*

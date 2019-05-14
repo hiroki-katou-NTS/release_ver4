@@ -202,15 +202,18 @@ public class DataWorkServiceImpl implements IDataWorkService {
 			
 			String wkTimeCd = personalLablorCodition.get().getWorkCategory().getWeekdayTime().getWorkTimeCode().get()
 					.toString();
-			workTimeSettingRepository.findByCode(companyId, wkTimeCd).ifPresent(wkTime -> {
-				selectedData.setSelectedWorkTimeName(wkTime.getWorkTimeDisplayName().getWorkTimeName().v());
-			});
 			selectedData.setSelectedWorkTimeCd(wkTimeCd);
 			//12.マスタ勤務種類、就業時間帯データをチェック
 			CheckWorkingInfoResult checkResult = this.overtimeService.checkWorkingInfo(companyId, null, wkTimeCd);
 			if (checkResult.isWkTimeError()) {
 				selectedData.setSelectedWorkTimeCd(workTimeTypes.get(0));
 			}
+			
+			wkTimeCd = selectedData.getSelectedWorkTimeCd();
+			workTimeSettingRepository.findByCode(companyId, wkTimeCd).ifPresent(wkTime -> {
+				selectedData.setSelectedWorkTimeName(wkTime.getWorkTimeDisplayName().getWorkTimeName().v());
+			});
+			
 		}
 		
 		// ドメイン「所定時間設定」.「所定時間帯設定」「時間帯(使用区分付き)」の開始時刻、終了時刻を取得する
