@@ -311,15 +311,17 @@ module nts.uk.at.view.kaf011.shr {
                 });
                 self.wkTypeCD.subscribe((newWkType) => {
                     let vm: nts.uk.at.view.kaf011.a.screenModel.ViewModel = __viewContext['viewModel'];
-                    if (!_.isEmpty(newWkType) && !vm.firstLoad()) {
+                    if (!_.isEmpty(newWkType)) {
                         let changeWkTypeParam = {
                             wkTypeCD: newWkType,
                             wkTimeCD: self.wkTimeCD()
                         };
-                        block.invisible();
-                        service.changeWkType(changeWkTypeParam).done((data: IChangeWorkType) => {
-                            self.setDataFromWkDto(data);
-                        }).always(() => { block.clear(); });
+                        if (newWkType && !vm.firstLoad()) {
+                            block.invisible();
+                            service.changeWkType(changeWkTypeParam).done((data: IChangeWorkType) => {
+                                self.setDataFromWkDto(data);
+                            }).always(() => { block.clear(); });
+                        }
                     }
                 });
 

@@ -332,6 +332,14 @@ module nts.uk.at.view.kaf005.a.viewmodel {
                     return self.displayAppReasonContentFlg() || self.typicalReasonDisplayFlg();
             }
         }
+        
+        getName(code, name) {
+            let result = "";
+            if (code) {
+                result = name || text("KAL003_120");
+            }
+            return result;
+        }
 
         initData(data: any) {
             var self = this;
@@ -352,11 +360,11 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             self.employeeID(data.employeeID);
             if (data.siftType != null) {
                 self.siftCD(data.siftType.siftCode);
-                self.siftName(data.siftType.siftName || text("KAL003_120"));
+                self.siftName(self.getName(data.siftType.siftCode, data.siftType.siftName));
             }
             if (data.workType != null) {
                 self.workTypeCd(data.workType.workTypeCode);
-                self.workTypeName(data.workType.workTypeName || text("KAL003_120"));
+                self.workTypeName(self.getName(data.workType.workTypeCode,data.workType.workTypeName));
             }
             self.workTypecodes(data.workTypes);
             self.workTimecodes(data.siftTypes);
