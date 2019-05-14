@@ -431,15 +431,15 @@ public class DailyModifyResCommandFacade {
 					AppContexts.user().employeeId(), true);
 			// only insert check box
 			// insert sign
-			insertSign(dataParent.getDataCheckSign(), dailyEdits, dataParent.getDailyOlds());
-			if(dataParent.getDataCheckSign() != null){
-				updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
-			}
+			insertSign(dataParent.getDataCheckSign(), dailyEdits, dataParent.getDailyOlds(), updated);
+//			if(dataParent.getDataCheckSign() != null){
+//				updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
+//			}
 			// insert approval
-			insertApproval(dataParent.getDataCheckApproval());
-			if(dataParent.getDataCheckApproval() != null){
-				updated.addAll(dataParent.getDataCheckApproval().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
-			}
+			insertApproval(dataParent.getDataCheckApproval(), updated);
+//			if(dataParent.getDataCheckApproval() != null){
+//				updated.addAll(dataParent.getDataCheckApproval().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
+//			}
 			
 			if (dataParent.getSpr() != null) {
 				processor.insertStampSourceInfo(dataParent.getSpr().getEmployeeId(), dataParent.getSpr().getDate(),
@@ -522,9 +522,9 @@ public class DailyModifyResCommandFacade {
 						resultIU.getCommandOld(), dailyItems, resultIU.isUpdate(),
 						monthParam, itemAtr);
 				// insert sign
-				insertSignD(dataParent.getDataCheckSign(), resultIU.getLstDailyDomain(), dataParent.getDailyOlds());
+				insertSignD(dataParent.getDataCheckSign(), resultIU.getLstDailyDomain(), dataParent.getDailyOlds(), updated);
 				// insert approval
-				insertApproval(dataParent.getDataCheckApproval());
+				insertApproval(dataParent.getDataCheckApproval(), updated);
 
 				if (dataParent.getSpr() != null && !lstResultReturnDailyError.containsKey(Pair.of(dataParent.getSpr().getEmployeeId(), dataParent.getSpr().getDate()))) {
 					processor.insertStampSourceInfo(dataParent.getSpr().getEmployeeId(), dataParent.getSpr().getDate(),
@@ -554,21 +554,21 @@ public class DailyModifyResCommandFacade {
 				
 			} else {
 				if (dataParent.getDataCheckSign() != null && !dataParent.getDataCheckSign().isEmpty()) {
-					insertSign(dataParent.getDataCheckSign(), dailyEdits, dataParent.getDailyOlds());
+					insertSign(dataParent.getDataCheckSign(), dailyEdits, dataParent.getDailyOlds(), updated);
 
-					updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
+//					updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
 				}
 				// insert approval
 				if (dataParent.getDataCheckApproval() != null && !dataParent.getDataCheckApproval().isEmpty()) {
-					insertApproval(dataParent.getDataCheckApproval());
-					updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
+					insertApproval(dataParent.getDataCheckApproval(), updated);
+//					updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
 				}
 				dataResultAfterIU.setShowErrorDialog(showError(new ArrayList<>(), dailyEdits));
 			}
 		}
 		
 		/** Finish update daily record */
-		finishDailyRecordRegis(updated, dailyEdits);
+		finishDailyRecordRegis(updated, dataParent.getDailyOlds(), querys);
 		
 
 		if(!errorRelease.isEmpty()) {
@@ -618,14 +618,16 @@ public class DailyModifyResCommandFacade {
 //		if(dataParent.isFlagCalculation() && !dataParent.getLstSidDateDomainError().isEmpty()) {
 //			dataResultAfterIU.setMessageAlert("Msg_1489");
 //		}
-		val empSidUpdate = dailyEdits.stream().map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toList());
-		dataResultAfterIU.setLstSidDateDomainError(empSidUpdate);
+		val empSidUpdate = dailyEdits.stream().map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toSet());
+		empSidUpdate.addAll(updated);
+		dataResultAfterIU.setLstSidDateDomainError(new ArrayList<>(empSidUpdate));
 		return dataResultAfterIU;
 	}
 	
-	private void finishDailyRecordRegis(Set<Pair<String, GeneralDate>> updated, List<DailyRecordDto> dailyEdits){
+	private void finishDailyRecordRegis(Set<Pair<String, GeneralDate>> updated, List<DailyRecordDto> dailyEdits, List<DailyModifyQuery> querys){
 		if(!updated.isEmpty()){
-			updated.stream().forEach(up -> {
+			updated.stream().filter(u -> !querys.stream().filter(q -> q.getBaseDate().equals(u.getValue()) && q.getEmployeeId().equals(u.getKey()))
+					.findFirst().isPresent()).forEach(up -> {
 				dailyEdits.stream().filter(d -> d.employeeId().equals(up.getKey()) && d.workingDate().equals(up.getValue())).findFirst().ifPresent(d -> {
 					dailyTransaction.updated(d.employeeId(), d.workingDate(), d.getWorkInfo().getVersion());
 				});
@@ -678,23 +680,23 @@ public class DailyModifyResCommandFacade {
 		return querys;
 	} 
 
-	private boolean insertSignD(List<DPItemCheckBox> dataCheckSign, List<IntegrationOfDaily> dailyEdit, List<DailyRecordDto> dailyOlds) {
+	private boolean insertSignD(List<DPItemCheckBox> dataCheckSign, List<IntegrationOfDaily> dailyEdit, List<DailyRecordDto> dailyOlds, Set<Pair<String, GeneralDate>> updated) {
 
 		List<EmployeeDailyPerError> errors = dailyEdit.stream().map(c -> c.getEmployeeError()).flatMap(List::stream).collect(Collectors.toList());
 		
-		return insertSignInternal(dataCheckSign, errors, dailyOlds);
+		return insertSignInternal(dataCheckSign, errors, dailyOlds, updated);
 	}
 	
-	private boolean insertSign(List<DPItemCheckBox> dataCheckSign, List<DailyRecordDto> dailyEdit, List<DailyRecordDto> dailyOlds) {
+	private boolean insertSign(List<DPItemCheckBox> dataCheckSign, List<DailyRecordDto> dailyEdit, List<DailyRecordDto> dailyOlds, Set<Pair<String, GeneralDate>> updated) {
 
 		List<EmployeeDailyPerError> errors = dailyEdit.stream().map(c -> c.getErrors())
 														.flatMap(List::stream).map(c -> c.toDomain(c.getEmployeeID(), c.workingDate()))
 														.collect(Collectors.toList());
 		
-		return insertSignInternal(dataCheckSign, errors, dailyOlds);
+		return insertSignInternal(dataCheckSign, errors, dailyOlds, updated);
 	}
 	
-	private boolean insertSignInternal(List<DPItemCheckBox> dataCheckSign, List<EmployeeDailyPerError> editErrors, List<DailyRecordDto> dailyOlds) {
+	private boolean insertSignInternal(List<DPItemCheckBox> dataCheckSign, List<EmployeeDailyPerError> editErrors, List<DailyRecordDto> dailyOlds, Set<Pair<String, GeneralDate>> updated) {
 		if (dataCheckSign.isEmpty())
 			return false;
 		
@@ -706,17 +708,17 @@ public class DailyModifyResCommandFacade {
 		
 		ParamIdentityConfirmDay day = new ParamIdentityConfirmDay(AppContexts.user().employeeId(), dataCheckSign
 				.stream().map(x -> new SelfConfirmDay(x.getDate(), x.isValue())).collect(Collectors.toList()));
-		return registerIdentityConfirmDay.registerIdentity(day, editErrors);
+		return registerIdentityConfirmDay.registerIdentity(day, editErrors, updated);
 	}
 
-	public void insertApproval(List<DPItemCheckBox> dataCheckApproval) {
+	public void insertApproval(List<DPItemCheckBox> dataCheckApproval, Set<Pair<String, GeneralDate>> updated) {
 		if (dataCheckApproval.isEmpty())
 			return;
 		ParamDayApproval param = new ParamDayApproval(AppContexts.user().employeeId(),
 				dataCheckApproval.stream()
 						.map(x -> new ContentApproval(x.getDate(), x.isValue(), x.getEmployeeId(), x.isFlagRemoveAll()))
 						.collect(Collectors.toList()));
-		registerDayApproval.registerDayApproval(param);
+		registerDayApproval.registerDayApproval(param, updated);
 	}
 
 	public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
@@ -1138,7 +1140,7 @@ public class DailyModifyResCommandFacade {
 		return resultFilter;
 	}
 	
-	private void createStampSourceInfo(DailyRecordDto dtoEdit, List<DailyModifyQuery> querys) {
+	public void createStampSourceInfo(DailyRecordDto dtoEdit, List<DailyModifyQuery> querys) {
 		val sidLogin = AppContexts.user().employeeId();
 		boolean editBySelf = sidLogin.equals(dtoEdit.getEmployeeId());
 		Integer stampSource = editBySelf ? StampSourceInfo.HAND_CORRECTION_BY_MYSELF.value

@@ -94,6 +94,7 @@ public class JpaProcessExecutionLogRepository extends JpaRepository
 		oldData.dailyCalcEnd = updateData.dailyCalcEnd;
 		oldData.reflectApprovalResultStart = updateData.reflectApprovalResultStart;
 		oldData.reflectApprovalResultEnd = updateData.reflectApprovalResultEnd;
+		oldData.taskLogList = updateData.taskLogList;
 		this.commandProxy().update(oldData);
 	}
 

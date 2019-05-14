@@ -100,7 +100,7 @@ public class DailyCalculationServiceImpl implements DailyCalculationService {
 			}
 		};
 		
-		this.dailyCalculationEmployeeService.calculate(asyncContext,employeeIds, datePeriod, counter, reCalcAtr,empCalAndSumExecLogID);
+		this.dailyCalculationEmployeeService.calculate(employeeIds, datePeriod, counter, reCalcAtr,empCalAndSumExecLogID);
 		/** end 並列処理、PARALLELSTREAM */
 //		
 		// 中断処理　（中断依頼が出されているかチェックする）

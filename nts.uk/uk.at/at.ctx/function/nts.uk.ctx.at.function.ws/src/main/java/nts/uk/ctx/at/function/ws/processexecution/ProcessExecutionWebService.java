@@ -162,23 +162,23 @@ public class ProcessExecutionWebService extends WebService {
 	
 	@POST
 	@Path("terminate")
-	public AsyncTaskInfo terminate(TerminateProcessExecutionCommand command) {
-		MutableValue<AsyncTaskInfo> result = new MutableValue<>();
-		
-		if (this.batchServer.exists()) {
-			val webApi = this.batchServer.webApi(PathToWebApi.at("/batch/batch-terminate"), 
-					TerminateProcessExecutionCommand.class, BatchTaskResult.class);
-			this.batchServer.request(webApi, c -> c.entity(command)
-					.succeeded(x -> {
-						String taskId = x.getId();
-						AsyncTaskInfo taskInfo = asyncTaskInfoRepository.find(taskId).get();
-						result.set(taskInfo);
-			}));
-		} else {
-			result.set(this.termHandler.handle(command));
-		}
-		
-		return result.get();
+	public void terminate(TerminateProcessExecutionCommand command) {
+//		MutableValue<AsyncTaskInfo> result = new MutableValue<>();
+//		
+//		if (this.batchServer.exists()) {
+//			val webApi = this.batchServer.webApi(PathToWebApi.at("/batch/batch-terminate"), 
+//					TerminateProcessExecutionCommand.class, BatchTaskResult.class);
+//			this.batchServer.request(webApi, c -> c.entity(command)
+//					.succeeded(x -> {
+//						String taskId = x.getId();
+//						AsyncTaskInfo taskInfo = asyncTaskInfoRepository.find(taskId).get();
+//						result.set(taskInfo);
+//			}));
+//		} else {
+//			this.termHandler.handle(command);
+//		}
+		this.termHandler.handle(command);
+		//return result.get();
 	}
 	
 	@POST

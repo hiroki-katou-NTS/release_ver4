@@ -173,6 +173,7 @@ public class MultipleMonthAggregateProcessService {
 			ErAlAtdItemConAdapterDto erAlAtdItemConAdapterDto = extra.getErAlAtdItem();
 			if(erAlAtdItemConAdapterDto == null) continue;
 			int typeCheckItem = extra.getTypeCheckItem();
+			String checkItemName = extra.getNameAlarmMulMon();
 			TypeCheckWorkRecordMultipleMonthImport checkItem = EnumAdaptor.valueOf(typeCheckItem,
 					TypeCheckWorkRecordMultipleMonthImport.class);
 			List<Integer> tmp = extra.getErAlAtdItem().getCountableAddAtdItems();
@@ -210,10 +211,10 @@ public class MultipleMonthAggregateProcessService {
 			String alarmDescription = "";
 			for (RegulationInfoEmployeeResult employee : employees) {
 				boolean checkAddAlarm = false;
+				String checkedValue = null;
 				List<MonthlyRecordValueImport> result = resultActuals.get(employee.getEmployeeId());
 				if (CollectionUtil.isEmpty(result)) continue;
 				switch (checkItem) {
-				
 				case TIME:
 					if (checkActualResultMulMonth.checkMulMonthCheckCond(period,companyId,employee.getEmployeeId(),result,extra)) {
 
@@ -235,7 +236,7 @@ public class MultipleMonthAggregateProcessService {
 										compareOperatorText.getCompareright(), endValueTime);
 							}
 						}
-						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
+						checkedValue = TextResource.localize("KDW006_89") + ":"
 								+ timeToString(checkActualResultMulMonth.sumMulMonthCheckCond(period, companyId,
 										employee.getEmployeeId(), result, extra).intValue());
 					}
@@ -264,7 +265,7 @@ public class MultipleMonthAggregateProcessService {
 										compareOperatorText.getCompareright(), endValueTime);
 							}
 						}
-						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
+						checkedValue = TextResource.localize("KDW006_89") + ":"
 								+ checkActualResultMulMonth.sumMulMonthCheckCond(period, companyId,
 										employee.getEmployeeId(), result, extra);
 					}
@@ -290,7 +291,7 @@ public class MultipleMonthAggregateProcessService {
 										compareOperatorText.getCompareright(), endValueTime);
 							}
 						}
-						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
+						checkedValue = TextResource.localize("KDW006_89") + ":"
 								+ timeToString(
 										checkActualResultMulMonth
 												.checkMulMonthCheckCondAverage(period, companyId,
@@ -321,7 +322,7 @@ public class MultipleMonthAggregateProcessService {
 										compareOperatorText.getCompareright(), endValueTime);
 							}
 						}
-						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
+						checkedValue = TextResource.localize("KDW006_89") + ":"
 								+ timeToString(
 										checkActualResultMulMonth
 												.checkMulMonthCheckCondAverage(period, companyId,
@@ -337,7 +338,7 @@ public class MultipleMonthAggregateProcessService {
 						alarmDescription = TextResource.localize("KAL010_260", periodYearMonth, nameErrorAlarm,
 								compareOperatorText.getCompareLeft(), startValueTime,
 								String.valueOf(extra.getContinuousMonths()));
-						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
+						checkedValue = TextResource.localize("KDW006_89") + ":"
 								+ timeToString(checkActualResultMulMonth.sumMulMonthCheckCond(period, companyId,
 										employee.getEmployeeId(), result, extra).intValue());
 					}
@@ -352,7 +353,7 @@ public class MultipleMonthAggregateProcessService {
 						alarmDescription = TextResource.localize("KAL010_260", periodYearMonth, nameErrorAlarm,
 								compareOperatorText.getCompareLeft(), startValueTime,
 								String.valueOf(extra.getContinuousMonths()));
-						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
+						checkedValue = TextResource.localize("KDW006_89") + ":"
 								+ checkActualResultMulMonth.sumMulMonthCheckCond(period, companyId,
 										employee.getEmployeeId(), result, extra);
 					}
@@ -366,7 +367,7 @@ public class MultipleMonthAggregateProcessService {
 						alarmDescription = TextResource.localize("KAL010_270", periodYearMonth, nameErrorAlarm,
 								convertCompareType(extra.getCompareOperator()).getCompareLeft(), startValueTime,
 								listMonthNumberTime.toString(), String.valueOf(extra.getTimes()));
-						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
+						checkedValue = TextResource.localize("KDW006_89") + ":"
 								+ timeToString(checkActualResultMulMonth.sumMulMonthCheckCond(period, companyId,
 										employee.getEmployeeId(), result, extra).intValue());
 
@@ -383,7 +384,7 @@ public class MultipleMonthAggregateProcessService {
 						alarmDescription = TextResource.localize("KAL010_270", periodYearMonth, nameErrorAlarm,
 								convertCompareType(extra.getCompareOperator()).getCompareLeft(), startValueTime,
 								listMonthNumber.toString(), String.valueOf(extra.getTimes()));
-						alarmDescription += "      " + TextResource.localize("KDW006_89") + ":"
+						checkedValue = TextResource.localize("KDW006_89") + ":"
 								+ checkActualResultMulMonth.sumMulMonthCheckCond(period, companyId,
 										employee.getEmployeeId(), result, extra);
 					}
@@ -394,7 +395,7 @@ public class MultipleMonthAggregateProcessService {
 				if (checkAddAlarm) {
 					ValueExtractAlarm resultMonthlyValue = new ValueExtractAlarm(employee.getWorkplaceId(),
 							employee.getEmployeeId(), tempStart.toString(ErAlConstant.YM_FORMAT), TextResource.localize("KAL010_250"),
-							checkItem.nameId, alarmDescription, extra.getDisplayMessage(),null);
+							checkItemName, alarmDescription, extra.getDisplayMessage(),checkedValue);
 					listValueExtractAlarm.add(resultMonthlyValue);
 				}
 			}

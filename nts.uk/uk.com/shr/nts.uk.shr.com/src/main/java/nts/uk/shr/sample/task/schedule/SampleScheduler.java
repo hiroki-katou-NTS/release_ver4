@@ -26,7 +26,7 @@ public class SampleScheduler {
 		// http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html
 		val cron = new CronSchedule(Arrays.asList("0/5 * * * * ?"));
 		
-		val options = UkJobScheduleOptions.builder(SampleScheduledJob.class, cron)
+		val options = UkJobScheduleOptions.builder(SampleScheduledJob.class, "sample", cron)
 				.userData(scheduletimeData)
 				.startDate(GeneralDate.ymd(2018, 4, 1))
 				.build();

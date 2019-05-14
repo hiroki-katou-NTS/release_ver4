@@ -35,5 +35,21 @@ public enum ExeStateOfCalAndSum {
 		this.value = value;
 		this.nameId = nameId;
 	}
+	
+	/**
+	 * now value is Processing 
+	 * @return now value == procesing。
+	 */
+	public boolean isProcessing() {
+		return this.equals(PROCESSING);
+	}
+	
+	/**
+	 * now value is START_INTERRUPTION
+	 * @return now value == START_INTERRUPTION。
+	 */
+	public boolean isStartInterruption() {
+		return this.equals(START_INTERRUPTION);
+	}
 
 }

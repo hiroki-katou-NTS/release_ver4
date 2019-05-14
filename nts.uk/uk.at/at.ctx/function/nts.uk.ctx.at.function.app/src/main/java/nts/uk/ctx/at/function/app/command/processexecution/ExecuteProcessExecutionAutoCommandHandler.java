@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 //import lombok.val;
 import nts.arc.layer.app.command.AsyncCommandHandler;
 import nts.arc.layer.app.command.AsyncCommandHandlerContext;
@@ -142,6 +143,7 @@ import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
+@Slf4j
 public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandler<ExecuteProcessExecutionCommand> {
 
 	@Inject
@@ -255,11 +257,13 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	// 実行処理
 	@Override
 	public void handle(CommandHandlerContext<ExecuteProcessExecutionCommand> context) {
-		System.out.println("Run batch service by auto run!");
 		//val asyncContext = context.asAsync();
 		ExecuteProcessExecutionCommand command = context.getCommand();
 		String execItemCd = command.getExecItemCd();
 		String companyId = command.getCompanyId();
+		
+		log.info("Run batch service by auto run! (" + execItemCd + "@" + companyId + ")");
+		
 		// String execId = command.getExecId();
 		// vi ExecuteProcessExecCommandHandler dang loi nen dung tam random execId
 		String execId = IdentifierUtil.randomUniqueId();
@@ -3354,8 +3358,10 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			}
 		} else {
 			try {
-				processState = this.dailyCalculationEmployeeService.calculateForOnePerson(asyContext, employeeId,
-						period, Optional.empty());
+				System.out.println("cal data :  !"+employeeId);
+				processState = this.dailyCalculationEmployeeService.calculateForOnePerson(employeeId,
+						period, Optional.empty(), empCalAndSumExeLog.getEmpCalAndSumExecLogID());
+				System.out.println("cal data done :  !"+employeeId);
 			} catch (Exception e) {
 				throw new DailyCalculateException();
 			}
@@ -3479,8 +3485,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 		try {
 			// 社員の日別実績を計算
-			ProcessState2 = this.dailyCalculationEmployeeService.calculateForOnePerson(asyncContext, empId, period,
-					Optional.empty());
+			ProcessState2 = this.dailyCalculationEmployeeService.calculateForOnePerson(empId, period,
+					Optional.empty(), empCalAndSumExeLogId);
 		} catch (Exception e) {
 			throw new DailyCalculateException();
 		}

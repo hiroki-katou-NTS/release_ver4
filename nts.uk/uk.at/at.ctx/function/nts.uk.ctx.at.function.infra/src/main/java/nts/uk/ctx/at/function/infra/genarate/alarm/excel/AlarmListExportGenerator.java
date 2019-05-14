@@ -30,16 +30,6 @@ public class AlarmListExportGenerator extends AsposeCellsReportGenerator impleme
 
 	private static final String TEMPLATE_FILE = "report/KAL001-アラームリスト(個人別).xlsx";
 	private static final String COMPANY_ERROR = "Company is not found!!!!";
-	private static final String KAL001_151 = TextResource.localize("KAL001_151");
-	private static final String KAL001_152 = TextResource.localize("KAL001_152");
-	private static final String KAL001_153 = TextResource.localize("KAL001_153");
-	private static final String KAL001_154 = TextResource.localize("KAL001_154");
-	private static final String KAL001_155 = TextResource.localize("KAL001_155");
-	private static final String KAL001_156 = TextResource.localize("KAL001_156");
-	private static final String KAL001_157 = TextResource.localize("KAL001_157");
-	private static final String KAL001_158 = TextResource.localize("KAL001_158");
-	private static final String KAL001_101 = TextResource.localize("KAL001_101");
-	private static final String KAL001_102 = TextResource.localize("KAL001_102");
 	
 	@Inject
 	private CompanyAdapter company;
@@ -102,20 +92,20 @@ public class AlarmListExportGenerator extends AsposeCellsReportGenerator impleme
 		String companyName = company.getCurrentCompany().orElseThrow(() -> new RuntimeException(COMPANY_ERROR))
 				.getCompanyName();
 		reportContext.getWorkbook().getWorksheets().get(0).getPageSetup().setHeader(0, "&9&\"MS ゴシック\"" + companyName);
-		reportContext.getWorkbook().getWorksheets().get(0).getPageSetup().setHeader(1, "&16&\"MS ゴシック\"" + KAL001_101);
+		reportContext.getWorkbook().getWorksheets().get(0).getPageSetup().setHeader(1, "&16&\"MS ゴシック\"" + TextResource.localize("KAL001_101"));
 		DateTimeFormatter fullDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd  H:mm", Locale.JAPAN);
 		reportContext.getWorkbook().getWorksheets().get(0).getPageSetup().setHeader(2,
-				"&9&\"MS ゴシック\"" + LocalDateTime.now().format(fullDateTimeFormatter) + "\n"+KAL001_102+" &P");
+				"&9&\"MS ゴシック\"" + LocalDateTime.now().format(fullDateTimeFormatter) + "\n"+TextResource.localize("KAL001_102")+" &P");
 		val cell = reportContext.getWorkbook().getWorksheets().get(0).getCells();
 		cell.get(0, 0).setValue(TextResource.localize("KAL001_103",codeAlarm,nameAlarm));
-		cell.get(1, 0).setValue(KAL001_151);
-		cell.get(1, 1).setValue(KAL001_152);
-		cell.get(1, 2).setValue(KAL001_153);
-		cell.get(1, 3).setValue(KAL001_154);
-		cell.get(1, 4).setValue(KAL001_155);
-		cell.get(1, 5).setValue(KAL001_156);
-		cell.get(1, 6).setValue(KAL001_157);
-		cell.get(1, 7).setValue("チェック対象値");
-		cell.get(1, 8).setValue(KAL001_158);
+		cell.get(1, 0).setValue(TextResource.localize("KAL001_151"));
+		cell.get(1, 1).setValue(TextResource.localize("KAL001_152"));
+		cell.get(1, 2).setValue(TextResource.localize("KAL001_153"));
+		cell.get(1, 3).setValue(TextResource.localize("KAL001_154"));
+		cell.get(1, 4).setValue(TextResource.localize("KAL001_155"));
+		cell.get(1, 5).setValue(TextResource.localize("KAL001_156"));
+		cell.get(1, 6).setValue(TextResource.localize("KAL001_157"));
+		cell.get(1, 7).setValue(TextResource.localize("KAL001_161"));
+		cell.get(1, 8).setValue(TextResource.localize("KAL001_158"));
 	}
 }

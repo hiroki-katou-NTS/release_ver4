@@ -364,7 +364,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 
 		processExecutionLogManage = this.processExecLogManaRepo.getLogByCIdAndExecCd(companyId, execItemCd).get();
 		// アルゴリズム「自動実行登録処理」を実行する
-		this.updateDomains(execItemCd, execType, companyId, execId, execSetting, procExecLog, lastExecDateTime,
+		this.updateDomains(execItemCd, execType, companyId, execId,
+				execSetting, procExecLog, lastExecDateTime,
 				processExecutionLogManage);
 	}
 
@@ -445,8 +446,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		if (execSetting != null) {
 			// execSetting.setNextExecDateTime();
 			String scheduleId = execSetting.getScheduleId();
-			Optional<GeneralDateTime> nextFireTime = this.scheduler.getNextFireTime(scheduleId);
-			execSetting.setNextExecDateTime(nextFireTime);
+			if(execSetting.isRepeat()) {
+				Optional<GeneralDateTime> nextFireTime = this.scheduler.getNextFireTime(scheduleId);
+				execSetting.setNextExecDateTime(nextFireTime);
+			}
 			this.execSettingRepo.update(execSetting);
 		}
 
@@ -2776,8 +2779,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 
 		boolean isHasException = false;
 		//boolean endStatusIsInterrupt = false;
-		List<Boolean> listCheck = new ArrayList<>();
 		// 就業担当者の社員ID（List）を取得する : RQ526
+		List<Boolean> listCheck = new ArrayList<>();
 		List<String> listManagementId = employeeManageAdapter.getListEmpID(companyId, GeneralDate.today());
 		try {
 			int sizeClosure = lstClosure.size();
@@ -3312,12 +3315,12 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 							
 						}else {
 							if(employeeDatePeriod != null) {
-							boolean executionDaily = this.executionDaily(companyId, context, processExecution, empId,
+								boolean executionDaily = this.executionDaily(companyId, context, processExecution, empId,
 									empCalAndSumExeLog, employeeDatePeriod, typeExecution, dailyCreateLog);
-							if (executionDaily) {
-								listIsInterrupt.add(true);
-								return;
-							}
+								if (executionDaily) {
+									listIsInterrupt.add(true);
+									return;
+								}
 							}
 						}
 					} catch (CreateDailyException ex) {
@@ -3414,8 +3417,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			}
 		} else {
 			try {
-				processState = this.dailyCalculationEmployeeService.calculateForOnePerson(asyContext, employeeId,
-						period, Optional.empty());
+				processState = this.dailyCalculationEmployeeService.calculateForOnePerson(employeeId,
+						period, Optional.empty(), empCalAndSumExeLog.getEmpCalAndSumExecLogID());
 			} catch (Exception e) {
 				throw new DailyCalculateException();
 			}
@@ -3551,8 +3554,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 
 		try {
 			// 社員の日別実績を計算
-			ProcessState2 = this.dailyCalculationEmployeeService.calculateForOnePerson(asyncContext, empId, period,
-					Optional.empty());
+			ProcessState2 = this.dailyCalculationEmployeeService.calculateForOnePerson(empId, period,
+					Optional.empty(),empCalAndSumExeLogId);
 		} catch (Exception e) {
 			throw new DailyCalculateException();
 		}

@@ -2,13 +2,15 @@ package nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecordRepository;
@@ -40,14 +42,11 @@ public class RegisterIdentityConfirmDay {
 	@Inject
 	private ErrorAlarmWorkRecordRepository errorAlarmWorkRecordRepository;
 	
-	@Inject
-	private DailyRecordTransactionService workInfo;
-	
 	// code old 
 //	@Inject
 //	private OpOfDailyPerformance opOfDailyPerformance;
 
-	public boolean registerIdentity(ParamIdentityConfirmDay param, List<EmployeeDailyPerError> employeeDailyPerErrors) {
+	public boolean registerIdentity(ParamIdentityConfirmDay param, List<EmployeeDailyPerError> employeeDailyPerErrors, Set<Pair<String, GeneralDate>> updated) {
 		String companyId = AppContexts.user().companyId();
 		Optional<IdentityProcessUseSet> identityProcessOpt = identityProcessUseSetRepository.findByKey(companyId);
 		if (identityProcessOpt.isPresent()) {
@@ -57,7 +56,8 @@ public class RegisterIdentityConfirmDay {
 			
 			if(identityProcessOpt.get().isUseConfirmByYourself()){
 				param.getSelfConfirmDay().stream().forEach(cd -> {
-					workInfo.updated(param.getEmployeeId(), cd.getDate());
+					updated.add(Pair.of(param.getEmployeeId(), cd.getDate()));
+//					workInfo.updated(param.getEmployeeId(), cd.getDate());
 				});
 				return true;
 			}
