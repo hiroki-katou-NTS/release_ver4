@@ -68,6 +68,14 @@ module nts.uk.at.view.kaf007.b {
                 self.targetDate = currentApp.appDate;
                 self.startPage( self.appID() );               
             }
+            
+            getName(code, name) {
+                let result = "";
+                if (code) {
+                    result = name || text("KAL003_120");
+                }
+                return result;
+            }
             /**
              * 起動する
              */
@@ -130,9 +138,9 @@ module nts.uk.at.view.kaf007.b {
                             let timeCd = self.appWorkChange().workChange().workTimeCd;
                             let timeName = self.appWorkChange().workChange().workTimeName;
                             typeCd(typeCd() === null ? '' : typeCd());
-                            typeName(typeName() || text("KAL003_120"));
+                            typeName(self.getName(typeCd(), typeName()));
                             timeCd(timeCd() === null ? '' : timeCd());
-                            timeName(timeName() || text("KAL003_120"));
+                            timeName(self.getName(timeCd(), timeName()));
                             //application data
                             ko.mapping.fromJS( detailData.applicationDto, {}, self.appWorkChange().application );
                             //setting reason content

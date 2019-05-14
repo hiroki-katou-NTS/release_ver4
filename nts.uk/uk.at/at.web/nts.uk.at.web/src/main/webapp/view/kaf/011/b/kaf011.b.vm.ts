@@ -285,8 +285,6 @@ module nts.uk.at.view.kaf011.b.viewmodel {
                 
             }
             self.firstLoad(false);
-            self.recWk().wkTimeCD.valueHasMutated();
-            self.absWk().wkTimeCD.valueHasMutated();
         }
 
         setDataCommon(data) {
