@@ -22,7 +22,7 @@ public class RouteConfirmStatusFrame {
 	private final List<String> employeeIds;
 	
 	/** 承認済みの社員 */
-	private final Optional<String> confirmedEmployeeId;
+	private final Optional<String> approvedEmployeeId;
 	
 	/** 代行者に承認された */
 	private final boolean isRepresent;
@@ -61,11 +61,12 @@ public class RouteConfirmStatusFrame {
 	
 	/**
 	 * 代行依頼している社員が枠内に存在するか
-	 * @param representRequesterIds
+	 * @param approverIds
 	 * @return
 	 */
-	public boolean isRepresenter(List<String> representRequesterIds) {
-		return employeeIds.stream().anyMatch(e -> representRequesterIds.contains(e));
+	public boolean isApprover(List<String> approverIds) {
+		return employeeIds.stream()
+				.anyMatch(e -> approverIds.contains(e));
 	}
 	
 	/**
@@ -73,7 +74,7 @@ public class RouteConfirmStatusFrame {
 	 * @return
 	 */
 	public boolean hasConfirmed() {
-		return confirmedEmployeeId.isPresent();
+		return approvedEmployeeId.isPresent();
 	}
 	
 	/**
@@ -90,8 +91,14 @@ public class RouteConfirmStatusFrame {
 	 * @return
 	 */
 	public boolean hasConfirmedBy(String approverId) {
-		return confirmedEmployeeId
+		return approvedEmployeeId
 				.filter(e -> e.equals(approverId))
+				.isPresent();
+	}
+	
+	public boolean hasApprovedByOther(String approverId) {
+		return approvedEmployeeId
+				.filter(e -> !e.equals(approverId))
 				.isPresent();
 	}
 }

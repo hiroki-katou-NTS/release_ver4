@@ -72,9 +72,9 @@ public class RouteConfirmStatusPhase {
 	 * @param approverId
 	 * @return
 	 */
-	public boolean canConfirm(String approverId, List<String> representRequesterIds) {
-		return isInProgress()
-				&& (isApprover(approverId) || frames.isRepresenter(representRequesterIds))
+	public boolean canApprove(String approverId, List<String> representRequesterIds) {
+		return state == State.IN_PROGRESS
+				&& (frames.isApprover(approverId) || frames.isApprover(representRequesterIds))
 				&& !frames.hasConcludedByOther(approverId);
 	}
 	
@@ -84,7 +84,7 @@ public class RouteConfirmStatusPhase {
 	 * @return
 	 */
 	public boolean canRelease(String approverId, List<String> representRequesterIds) {
-		return canConfirm(approverId, representRequesterIds)
+		return canApprove(approverId, representRequesterIds)
 				&& hasConfirmedBy(approverId);
 	}
 	
