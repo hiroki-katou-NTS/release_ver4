@@ -72,12 +72,17 @@ public class ProcessExecutionLogFinder {
 				Optional<ExecutionTaskSetting> taskSettingOpt = this.execSettingRepo.getByCidAndExecCd(companyId, a.getExecItemCd().v());
 				//次回実行日時作成処理
 				if(taskSettingOpt.isPresent()) {
-					if(taskSettingOpt.get().isRepeat() && taskSettingOpt.get().isEnabledSetting()) {
-						nextFireTime = taskSettingOpt
-								.map(e -> e.getScheduleId())
-								.flatMap(id -> this.scheduler.getNextFireTime(id))
-								.orElse(null);
+					try {
+						if(taskSettingOpt.get().isEnabledSetting()) {
+							nextFireTime = taskSettingOpt
+									.map(e -> e.getScheduleId())
+									.flatMap(id -> this.scheduler.getNextFireTime(id))
+									.orElse(null);
+						}
+					} catch (Exception e2) {
+						nextFireTime = null;
 					}
+					
 				}
 				if (taskSettingOpt.isPresent()) {
 					ExecutionTaskSetting setting = Optional.of(taskSettingOpt.get()).get();
