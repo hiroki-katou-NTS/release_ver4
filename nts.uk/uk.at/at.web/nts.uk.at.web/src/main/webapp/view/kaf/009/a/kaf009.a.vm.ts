@@ -162,6 +162,13 @@ module nts.uk.at.view.kaf009.a.viewmodel {
         /**
          * 
          */
+        getName(code, name) {
+            let result = "";
+            if (code) {
+                result = name || text("KAL003_120");
+            }
+            return result;
+        }
         startPage(): JQueryPromise<any> {
             nts.uk.ui.block.invisible();
             var self = this;
@@ -263,14 +270,10 @@ module nts.uk.at.view.kaf009.a.viewmodel {
                     //Setting data works
                     //勤務種類
                     self.workTypeCd(settingData.dataWorkDto.selectedWorkTypeCd);
-                    if (settingData.dataWorkDto.selectedWorkTypeCd) {
-                        self.workTypeName(settingData.dataWorkDto.selectedWorkTypeName || text("KAL003_120"));
-                    }
+                    self.workTypeName(self.getName(settingData.dataWorkDto.selectedWorkTypeCd, settingData.dataWorkDto.selectedWorkTypeName));
                     //勤務種類
                     self.siftCD(settingData.dataWorkDto.selectedWorkTimeCd);
-                    if (settingData.dataWorkDto.selectedWorkTimeCd) {
-                        self.siftName(settingData.dataWorkDto.selectedWorkTimeName || text("KAL003_120"));
-                    }
+                    self.siftName(self.getName(settingData.dataWorkDto.selectedWorkTimeCd, settingData.dataWorkDto.selectedWorkTimeName));
                     //dataWorkDto
                     self.workTypeCodes = settingData.dataWorkDto.workTypeCodes;
                     self.workTimeCodes = settingData.dataWorkDto.workTimeCodes;
@@ -298,6 +301,8 @@ module nts.uk.at.view.kaf009.a.viewmodel {
             });
             return dfd.promise();
         }
+    
+    
         /**
          * insert//登録ボタンをクリックする
          */

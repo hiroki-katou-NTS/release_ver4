@@ -37,8 +37,7 @@ public class IntegrationOfMonthly {
 	/** 月別実績の任意項目 */
 	private List<AnyItemOfMonthly> anyItemList;
 	/** 管理期間の36協定時間 */
-	@Setter
-	private Optional<AgreementTimeOfManagePeriod> agreementTime;
+	private List<AgreementTimeOfManagePeriod> agreementTimeList;
 	/** 年休月別残数データ */
 	@Setter
 	private Optional<AnnLeaRemNumEachMonth> annualLeaveRemain;
@@ -72,7 +71,7 @@ public class IntegrationOfMonthly {
 		this.attendanceTime = Optional.empty();
 		this.affiliationInfo = Optional.empty();
 		this.anyItemList = new ArrayList<>();
-		this.agreementTime = Optional.empty();
+		this.agreementTimeList = new ArrayList<>();
 		this.annualLeaveRemain = Optional.empty();
 		this.reserveLeaveRemain = Optional.empty();
 		this.absenceLeaveRemain = Optional.empty();
@@ -117,7 +116,51 @@ public class IntegrationOfMonthly {
 		this.attendanceTime = attendanceTime;
 		this.affiliationInfo = affiliationInfo;
 		this.anyItemList = anyItemList;
-		this.agreementTime = agreementTime;
+		this.agreementTimeList = new ArrayList<>();
+		if (agreementTime.isPresent()) this.agreementTimeList.add(agreementTime.get()); 
+		this.annualLeaveRemain = annualLeaveRemain;
+		this.reserveLeaveRemain = reserveLeaveRemain;
+		this.absenceLeaveRemain = absenceLeaveRemain;
+		this.monthlyDayoffRemain = monthlyDayoffRemain;
+		this.specialLeaveRemainList = specialLeaveRemainList;
+		this.remarks = remarks;
+		this.care = care;
+		this.childCare = childCare;
+	}
+	
+	/**
+	 * コンストラクタ
+	 * @param attendanceTime 月別実績の勤怠時間
+	 * @param affiliationInfo 月別実績の所属情報
+	 * @param anyItemList 月別実績の任意項目
+	 * @param agreementTimeList 管理期間の36協定時間
+	 * @param annualLeaveRemain 年休月別残数データ
+	 * @param reserveLeaveRemain 積立年休月別残数データ
+	 * @param absenceLeaveRemain 振休月別残数データ
+	 * @param monthlyDayoffRemain 代休月別残数データ
+	 * @param specialLeaveRemainList 特別休暇月別残数データ
+	 * @param remarks 月別実績の備考
+	 * @param care 介護休暇月別残数データ
+	 * @param childCare 子の看護月別残数データ
+	 */
+	public IntegrationOfMonthly(
+			Optional<AttendanceTimeOfMonthly> attendanceTime,
+			Optional<AffiliationInfoOfMonthly> affiliationInfo,
+			List<AnyItemOfMonthly> anyItemList,
+			List<AgreementTimeOfManagePeriod> agreementTimeList,
+			Optional<AnnLeaRemNumEachMonth> annualLeaveRemain,
+			Optional<RsvLeaRemNumEachMonth> reserveLeaveRemain,
+			Optional<AbsenceLeaveRemainData> absenceLeaveRemain,
+			Optional<MonthlyDayoffRemainData> monthlyDayoffRemain,
+			List<SpecialHolidayRemainData> specialLeaveRemainList,
+			List<RemarksMonthlyRecord> remarks,
+			Optional<MonCareHdRemain> care,
+			Optional<MonChildHdRemain> childCare){
+	
+		this.attendanceTime = attendanceTime;
+		this.affiliationInfo = affiliationInfo;
+		this.anyItemList = anyItemList;
+		this.agreementTimeList = agreementTimeList;
 		this.annualLeaveRemain = annualLeaveRemain;
 		this.reserveLeaveRemain = reserveLeaveRemain;
 		this.absenceLeaveRemain = absenceLeaveRemain;

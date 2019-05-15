@@ -52,8 +52,7 @@ public class AggregateMonthlyRecordValue {
 	@Setter
 	private List<AnyItemOfMonthly> anyItemList;
 	/** 管理時間の36協定時間 */
-	@Setter
-	private Optional<AgreementTimeOfManagePeriod> agreementTime;
+	private List<AgreementTimeOfManagePeriod> agreementTimeList;
 	/** 年休月別残数データ */
 	private List<AnnLeaRemNumEachMonth> annLeaRemNumEachMonthList;
 	/** 積立年休月別残数データ */
@@ -97,7 +96,7 @@ public class AggregateMonthlyRecordValue {
 		this.attendanceTimeWeeks = new ArrayList<>();
 		this.affiliationInfo = Optional.empty();
 		this.anyItemList = new ArrayList<>();
-		this.agreementTime = Optional.empty();
+		this.agreementTimeList = new ArrayList<>();
 		this.annLeaRemNumEachMonthList = new ArrayList<>();
 		this.rsvLeaRemNumEachMonthList = new ArrayList<>();
 		this.absenceLeaveRemainList = new ArrayList<>();
@@ -228,7 +227,7 @@ public class AggregateMonthlyRecordValue {
 		result.setAttendanceTime(this.attendanceTime);
 		result.setAffiliationInfo(this.affiliationInfo);
 		result.getAnyItemList().addAll(this.anyItemList);
-		result.setAgreementTime(this.agreementTime);
+		result.getAgreementTimeList().addAll(this.agreementTimeList);
 		AnnLeaRemNumEachMonth annualLeaveRemain = null;
 		if (this.annLeaRemNumEachMonthList.size() > 0) annualLeaveRemain = this.annLeaRemNumEachMonthList.get(0);
 		result.setAnnualLeaveRemain(Optional.ofNullable(annualLeaveRemain));

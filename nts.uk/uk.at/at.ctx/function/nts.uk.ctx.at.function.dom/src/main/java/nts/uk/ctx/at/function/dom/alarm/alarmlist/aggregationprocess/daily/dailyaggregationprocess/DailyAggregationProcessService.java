@@ -660,8 +660,8 @@ public class DailyAggregationProcessService {
 					alarmContent = TextResource.localize("KAL010_49", wktypeText, this.formatHourData( atdItemCon.getCompareStartValue().toString(), checkItem), coupleOperator.getOperatorStart(), attendanceText,
 							coupleOperator.getOperatorEnd(), this.formatHourData(atdItemCon.getCompareEndValue().toString(), checkItem));
 				}else {
-					alarmContent = TextResource.localize("KAL010_121", wktypeText, attendanceText, coupleOperator.getOperatorStart(), atdItemCon.getCompareStartValue().toString(),
-							atdItemCon.getCompareEndValue().toString(), coupleOperator.getOperatorEnd(), attendanceText);
+					alarmContent = TextResource.localize("KAL010_121", wktypeText, attendanceText, coupleOperator.getOperatorStart(), this.formatHourData(atdItemCon.getCompareStartValue().toString(),checkItem),
+							this.formatHourData(atdItemCon.getCompareEndValue().toString(), checkItem), coupleOperator.getOperatorEnd(), attendanceText);
 				}
 				
 			} else {
