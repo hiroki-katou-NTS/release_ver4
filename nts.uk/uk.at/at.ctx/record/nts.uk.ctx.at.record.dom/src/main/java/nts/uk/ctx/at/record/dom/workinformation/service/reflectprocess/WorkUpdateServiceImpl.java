@@ -94,8 +94,9 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 		WorkInformation workInfor = new WorkInformation(para.getWorkTimeCode(), para.getWorkTypeCode());
 		List<Integer> lstItem = new ArrayList<>();
 		if(scheUpdate) {
-			dailyInfo = this.dailyInfo(para.getWorkTimeCode(), para.getWorkTypeCode(), dailyInfo);
-			
+			if(para.isWorkChange()) {
+				dailyInfo = this.dailyInfo(para.getWorkTimeCode(), para.getWorkTypeCode(), dailyInfo);
+			}
 			dailyInfo.setScheduleInfo(workInfor);
 			
 			lstItem.add(2);	
