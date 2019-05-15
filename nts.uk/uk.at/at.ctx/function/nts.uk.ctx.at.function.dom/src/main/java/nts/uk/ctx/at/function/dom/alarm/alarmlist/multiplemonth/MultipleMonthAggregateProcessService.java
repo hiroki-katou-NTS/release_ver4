@@ -138,9 +138,10 @@ public class MultipleMonthAggregateProcessService {
 				if (!targetEmps.isEmpty()) {
 					// list alarmPartem
 					MulMonAlarmCond mulMonAlarmCond = (MulMonAlarmCond) eral.getExtractionCondition();
-					List<MulMonCheckCondDomainEventDto> listExtra = multiMonthFucAdapter
-							.getListMultiMonCondByListEralID(mulMonAlarmCond.getErrorAlarmCondIds());
-					
+					List<MulMonCheckCondDomainEventDto> listExtra = new ArrayList<>();
+					if(mulMonAlarmCond !=null) {
+						listExtra = multiMonthFucAdapter.getListMultiMonCondByListEralID(mulMonAlarmCond.getErrorAlarmCondIds());
+					}
 					YearMonthPeriod yearMonthPeriod = new YearMonthPeriod(period.start().yearMonth(), period.end().yearMonth());
 
 					// tab1
