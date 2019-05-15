@@ -62,10 +62,11 @@ public class TerminateProcessExecutionCommandHandler extends CommandHandler<Term
 		ProcessExecutionLogManage processExecLogMan =processExecLogManOpt.get();
 		
 		//「待機中」 or 「無効」の場合
-//		if(processExecLogMan.getCurrentStatus().value==1 || processExecLogMan.getCurrentStatus().value==2){
+		if(processExecLogMan.getCurrentStatus().value==1 || processExecLogMan.getCurrentStatus().value==2){
 //			dataSetter.setData("currentStatusIsOneOrTwo", "Msg_1102");
-//			return;
-//		}
+			return;
+		}
+		
 		
 		// ドメインモデル「更新処理自動実行ログ」を取得する
 		ProcessExecutionLog procExecLog = null;
@@ -122,7 +123,6 @@ public class TerminateProcessExecutionCommandHandler extends CommandHandler<Term
 		
 		//ドメインモデル「更新処理自動実行ログ履歴」を追加する
 		processExecutionLogHistRepo.insert(processExecutionLogHistory);
-		
 		String execId = procExecLog.getExecId();
 		//スケジュールの作成の処理が完了しているか確認する
 		//TODO NO3  fixed da tao schedule
