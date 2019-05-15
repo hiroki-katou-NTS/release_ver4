@@ -17,6 +17,7 @@ import nts.uk.ctx.at.record.dom.calculationattribute.repo.CalAttrOfDailyPerforma
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.AttendanceLeavingGateOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.PCLogOnInfoOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
+import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerformRepo;
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.raisesalarytime.repo.SpecificDateAttrOfDailyPerforRepo;
 import nts.uk.ctx.at.record.dom.shorttimework.repo.ShortTimeOfDailyPerformanceRepository;
@@ -96,6 +97,9 @@ public class DeleteWorkInfoOfDaiPerService {
 	
 //	@Inject
 //	private AppRootStateConfirmAdapter appRootStateConfirmAdapter;
+	
+	@Inject 
+	private RemarksOfDailyPerformRepo remarksOfDailyPerformRepo;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void deleteWorkInfoOfDaiPerService(String employeeId, GeneralDate day) {
@@ -123,7 +127,7 @@ public class DeleteWorkInfoOfDaiPerService {
 //		this.appRootStateConfirmAdapter.deleteApprovalByEmployeeIdAndDate(employeeId, day);
 		this.anyItemValueOfDailyRepo.deleteAnyItemValueOfDaily(employeeId, day);
 		
-		
+		this.remarksOfDailyPerformRepo.removeWithJdbc(employeeId, day);
 	}
 
 }
