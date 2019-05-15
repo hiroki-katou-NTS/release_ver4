@@ -156,7 +156,8 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 					x.getDeadlineDate(),
 					x.getSid(),
 					x.getGrantDate(),
-					detailsAfer); 
+					detailsAfer,
+					x.getSpecialID()); 
 		}).collect(Collectors.toList());
 		RemainDaysOfSpecialHoliday remainDaysBefore = getOffsetDay.getRemainDays();
 		Optional<SpecialHolidayRemainInfor> optgrantDetailAfterOfBefore = Optional.empty();
@@ -187,11 +188,12 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 				remainDaysAfter,
 				useOutPeriodAfter,
 				getOffsetDay.getLstError());
+		DataMngOfDeleteExpired expiredData = new DataMngOfDeleteExpired(0.0, new ArrayList<>(), new HashMap<>());
 		//集計終了日の翌日開始時点の未消化数をもとめる
 		if(!getOffsetDay.getLstSpeLeaveGrantDetails().isEmpty()) {			
 			List<SpecialLeaveGrantDetails> lstSpeLeaveGrantDetails = speTmp.getLstSpeLeaveGrantDetails();
 			List<SpecialLeaveGrantRemainingData> lstRemainTmp = lstSpeLeaveGrantDetails.stream().map(speLeaveGrantDetails -> {
-				return new SpecialLeaveGrantRemainingData("",
+				return new SpecialLeaveGrantRemainingData(speLeaveGrantDetails.getSpecialID(),
 						param.getCid(),
 						param.getSid(),
 						new SpecialVacationCD(param.getSpecialLeaveCode()),
@@ -204,19 +206,19 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 								new SpecialLeaveRemainingNumber(new DayNumberOfRemain(speLeaveGrantDetails.getDetails().getRemainDays()), Optional.empty())));
 			}).collect(Collectors.toList());
 			//期限切れの管理データを期限切れに変更する
-			DataMngOfDeleteExpired expiredData = this.unDigestedDay(lstRemainTmp, param.getComplileDate().end().addDays(1), param.isMode());
+			expiredData = this.unDigestedDay(lstRemainTmp, param.getComplileDate().end().addDays(1), param.isMode());
 			//「特別休暇の残数」．未消化数 += 未消化数(output)
 			speTmp.getRemainDays().setUnDisgesteDays(speTmp.getRemainDays().getUnDisgesteDays() + expiredData.getUnDigestedDay());
-			
-			//集計終了日の翌日開始時点の残数情報をまとめる
-			speTmp = this.speRemainNextInfor(param.getCid(),
-					param.getSid(),
-					param.getSpecialLeaveCode(),
-					param.getComplileDate().end().addDays(1),
-					expiredData.getLstGrantData(),
-					speTmp,
-					grantRemainData.limitDays.isPresent() ? grantRemainData.limitDays.get() : 0);
-		}
+		}	
+		//集計終了日の翌日開始時点の残数情報をまとめる
+		speTmp = this.speRemainNextInfor(param.getCid(),
+				param.getSid(),
+				param.getSpecialLeaveCode(),
+				param.getComplileDate().end().addDays(1),
+				expiredData.getLstGrantData(),
+				speTmp,
+				grantRemainData.limitDays.isPresent() ? grantRemainData.limitDays.get() : 0);
+		
 		outputData.setAggSpecialLeaveNextResult(Finally.of(speTmp));
 		//翌月管理データ取得区分をチェックする
 		if(param.isMngAtr()) {
@@ -287,13 +289,15 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 				Optional.empty(),
 				Optional.empty(),
 				Optional.empty());
+		String mngId = IdentifierUtil.randomUniqueId();
 		SpecialLeaveGrantDetails detailAdd = new SpecialLeaveGrantDetails(speCode,
 				DataAtr.GRANTSCHE,
 				LeaveExpirationStatus.AVAILABLE,
 				speInfor.getDeadlineDate().isPresent() ? speInfor.getDeadlineDate().get() : GeneralDate.max(),
 				sid,
 				speInfor.getGrantDaysInfor().getYmd(),
-				numberInfor);
+				numberInfor,
+				mngId);
 		speTmp.getLstSpeLeaveGrantDetails().add(detailAdd);
 		return speTmp;
 	}
@@ -340,6 +344,7 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 									detailBefore.getUseTimes().isPresent() ? Optional.of(new TimeOfUse(detailBefore.getUseTimes().get())) : Optional.empty(),
 									Optional.empty(),
 									Optional.of(limitData)));
+							remainDataBefore.setSpecialId(x.getSpecialID());							
 							remainDataBefore.setEmployeeId(x.getSid());
 							remainDataBefore.setSpecialLeaveCode(new SpecialVacationCD(x.getCode()));
 							remainDataBefore.setGrantDate(x.getGrantDate());
@@ -719,7 +724,7 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 			} else {
 				grantDetail.setDataAtr(DataAtr.GRANTSCHE);
 			}
-			
+			grantDetail.setSpecialID(x.getSpecialId());
 			grantDetail.setExpirationStatus(x.getExpirationStatus());
 			grantDetail.setSid(x.getEmployeeId());
 			grantDetail.setDeadlineDate(x.getDeadlineDate());
