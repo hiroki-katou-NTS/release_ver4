@@ -207,9 +207,9 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 			}).collect(Collectors.toList());
 			//期限切れの管理データを期限切れに変更する
 			expiredData = this.unDigestedDay(lstRemainTmp, param.getComplileDate().end().addDays(1), param.isMode());
-			//「特別休暇の残数」．未消化数 += 未消化数(output)
-			speTmp.getRemainDays().setUnDisgesteDays(speTmp.getRemainDays().getUnDisgesteDays() + expiredData.getUnDigestedDay());
 		}	
+		//「特別休暇の残数」．未消化数 += 未消化数(output)
+		speTmp.getRemainDays().setUnDisgesteDays(speTmp.getRemainDays().getUnDisgesteDays() + expiredData.getUnDigestedDay());
 		//集計終了日の翌日開始時点の残数情報をまとめる
 		speTmp = this.speRemainNextInfor(param.getCid(),
 				param.getSid(),
