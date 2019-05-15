@@ -111,8 +111,6 @@ public class DailyCorrectCalcTimeService {
 
 		if(!notChangeCell) addEditState(dtoEdit, itemEdits);
 		
-		dailyModifyResFacade.createStampSourceInfo(dtoEdit, Arrays.asList(new DailyModifyQuery(dtoEdit.getEmployeeId(), dtoEdit.getDate(), itemValues)));
-
 		DailyModifyRCResult updated = DailyModifyRCResult.builder().employeeId(itemEditCalc.getEmployeeId())
 				.workingDate(itemEditCalc.getDate()).items(itemValues).completed();
 
@@ -120,6 +118,8 @@ public class DailyCorrectCalcTimeService {
 
 		// AttendanceItemUtil.fromItemValues(dtoEdit, Arrays.asList(itemBase));
 		AttendanceItemUtil.fromItemValues(dtoEdit, itemValues);
+		
+		dailyModifyResFacade.createStampSourceInfo(dtoEdit, Arrays.asList(new DailyModifyQuery(dtoEdit.getEmployeeId(), dtoEdit.getDate(), itemValues)));
 
 		EventCorrectResult result = dailyCorrectEventServiceCenter.correctRunTime(dtoEdit, updated, companyId);
 		List<ItemValue> items = result.getCorrectedItemsWithStrict();
