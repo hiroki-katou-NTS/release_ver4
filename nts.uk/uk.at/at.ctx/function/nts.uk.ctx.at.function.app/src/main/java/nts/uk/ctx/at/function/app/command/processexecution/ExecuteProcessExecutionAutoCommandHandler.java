@@ -728,7 +728,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			this.execTaskLogRepo.updateAll(companyId, execItemCd, execId, procExecLog.getTaskLogList());
 		}
 		this.procExecLogRepo.update(procExecLog);
-
 		// 就業担当者の社員ID（List）を取得する : RQ526
 		List<String> listManagementId = employeeManageAdapter.getListEmpID(companyId, GeneralDate.today());
 		boolean runSchedule = false;
@@ -739,6 +738,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				this.procExecLogRepo.update(procExecLog);
 				return true;
 			}
+			log.info("更新処理自動実行_個人スケジュール作成_START_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 
 			// 新入社員作成区分（Boolean）←属性「新入社員を作成」
 			boolean checkCreateEmployee = procExec.getExecSetting().getPerSchedule().getTarget().getTargetSetting()
@@ -900,6 +900,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 				try {
 					this.scheduleExecution.handle(scheduleCommand);
+					log.info("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 					if(checkStop(execId)) {
 						return false;
 					}
@@ -940,9 +941,11 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 									.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
 											calculateSchedulePeriod, temporaryEmployeeList);
 							if(checkStop(execId)) {
+								log.info("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 								return false;
 							}
 							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
+							log.info("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 							if(checkStop(execId)) {
 								return false;
 							}
@@ -968,6 +971,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 								.setPeriod(new DatePeriod(periodDate.start(), endDate));
 						try {
 							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
+							log.info("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 							if(checkStop(execId)) {
 								return false;
 							}
@@ -1423,6 +1427,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			this.procExecLogRepo.update(procExecLog);
 			return true;
 		}
+		log.info("更新処理自動実行_日別実績の作成_START_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
 		String execItemCd = context.getCommand().getExecItemCd();
 		List<ExecutionTaskLog> taskLogList = this.execTaskLogRepo.getAllByCidExecCdExecId(companyId, execItemCd,
 				execId);
@@ -1634,7 +1639,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						if (dailyPerformanceCreation) {
 							return false;
 						}
-						System.out.println("Run create data done !");
 					} catch (CreateDailyException ex) {
 						isHasCreateDailyException = true;
 					}
@@ -1646,6 +1650,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					// if(dailyPerformanceCreation){
 					// return false;
 					// }
+					log.info("更新処理自動実行_日別実績の作成_END_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
+					log.info("更新処理自動実行_日別実績の計算_START_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
 
 					typeExecution = "日別計算";
 					// 日別実績の計算
@@ -1815,6 +1821,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		log.info("更新処理自動実行_日別実績の計算_END_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
 		// exceptionがあるか確認する（日別作成）
 		// ドメインモデル「エラーメッセージ情報」を取得する
 		List<ErrMessageInfo> listErrDailyCreation = errMessageInfoRepository.getAllErrMessageInfoByID(execId,
@@ -2351,7 +2358,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			taskLogLists.add(new ExecutionTaskLog(ProcessExecutionTask.RFL_APR_RESULT, null));
 		}
 		this.procExecLogRepo.update(ProcessExecutionLog);
-
 		boolean reflectResultCls = processExecution.getExecSetting().isReflectResultCls();
 		// 承認結果反映の判定
 		if (!reflectResultCls) {
@@ -2367,6 +2373,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			this.procExecLogRepo.update(ProcessExecutionLog);
 			return false; // chua confirm
 		}
+		log.info("更新処理自動実行_承認結果の反映_START_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		// ドメインモデル「就業締め日」を取得する
 		List<Closure> lstClosure = this.closureRepo.findAllUse(companyId);
 
@@ -2571,7 +2578,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		} catch (Exception e) {
 			isHasException = true;
 		}
-
+		log.info("更新処理自動実行_承認結果の反映_END_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		if (endStatusIsInterrupt) {
 			return true; // 終了状態 ＝ 中断
 		}
@@ -2703,6 +2710,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			this.procExecLogRepo.update(ProcessExecutionLog);
 			return false; // chua confirm
 		}
+		log.info("更新処理自動実行_月別実績の集計_START_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		// ドメインモデル「就業締め日」を取得する
 		List<Closure> lstClosure = this.closureRepo.findAllUse(companyId);
 
@@ -2896,6 +2904,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		} catch (Exception e) {
 			isHasException = true;
 		}
+		log.info("更新処理自動実行_月別実績の集計_END_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		if(!listCheck.isEmpty()) {
 			if (listCheck.get(0)) {
 				return true; // 終了状態 ＝ 中断
@@ -3032,6 +3041,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			this.procExecLogRepo.update(ProcessExecutionLog);
 			return false;
 		}
+		log.info("更新処理自動実行_アラーム抽出_START_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		// アルゴリズム「抽出処理状況を作成する」を実行する
 		String extraProcessStatusID = createExtraProcessService.createExtraProcess(companyId);
 		// 実行 :
@@ -3066,6 +3076,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 							!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent() ? ""
 									: processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v(),
 							execId);
+			log.info("更新処理自動実行_アラーム抽出_END_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 			if (outputExecAlarmListPro.isCheckStop())
 				return true;
 		} catch (Exception e) {
@@ -3358,10 +3369,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			}
 		} else {
 			try {
-				System.out.println("cal data :  !"+employeeId);
 				processState = this.dailyCalculationEmployeeService.calculateForOnePerson(employeeId,
 						period, Optional.empty(), empCalAndSumExeLog.getEmpCalAndSumExecLogID());
-				System.out.println("cal data done :  !"+employeeId);
 			} catch (Exception e) {
 				throw new DailyCalculateException();
 			}
@@ -3481,6 +3490,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		} catch (Exception e) {
 			throw new CreateDailyException();
 		}
+		log.info("更新処理自動実行_日別実績の作成_END_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
+		log.info("更新処理自動実行_日別実績の計算_START_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
 		ProcessState ProcessState2;
 
 		try {
