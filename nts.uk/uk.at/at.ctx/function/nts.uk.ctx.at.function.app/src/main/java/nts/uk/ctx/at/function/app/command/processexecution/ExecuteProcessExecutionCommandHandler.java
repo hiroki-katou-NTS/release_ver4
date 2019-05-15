@@ -754,6 +754,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				this.procExecLogRepo.update(procExecLog);
 				return true;
 			}
+			System.out.println("更新処理自動実行_個人スケジュール作成_START_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 
 			//新入社員作成区分（Boolean）←属性「新入社員を作成」
 			boolean checkCreateEmployee = procExec.getExecSetting().getPerSchedule().getTarget().getTargetSetting().isCreateEmployee();
@@ -916,6 +917,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				
 				try {
 					handle = this.scheduleExecution.handle(scheduleCommand);
+					System.out.println("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 					if(checkStop(execId)) {
 						return false;
 					}
@@ -956,9 +958,11 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 									.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
 											calculateSchedulePeriod, temporaryEmployeeList);
 							if(checkStop(execId)) {
+								System.out.println("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 								return false;
 							}
 							handle = this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
+							System.out.println("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 							if(checkStop(execId)) {
 								return false;
 							}
@@ -984,6 +988,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 								.setPeriod(new DatePeriod(periodDate.start(), endDate));
 						try {
 							handle = this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
+							System.out.println("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 							if(checkStop(execId)) {
 								return false;
 							}
@@ -1461,6 +1466,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			this.procExecLogRepo.update(procExecLog);
 			return true;
 		}
+		System.out.println("更新処理自動実行_日別実績の作成_START_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
 		String execItemCd = context.getCommand().getExecItemCd();
 		List<ExecutionTaskLog> taskLogList = this.execTaskLogRepo.getAllByCidExecCdExecId(companyId, execItemCd,
 				execId);
@@ -1684,6 +1690,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					// if(dailyPerformanceCreation){
 					// return false;
 					// }
+					System.out.println("更新処理自動実行_日別実績の作成_END_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now() + "closure : "+closure.getClosureId().value);
+					System.out.println("更新処理自動実行_日別実績の計算_START_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now()+ "closure : "+closure.getClosureId().value);
 
 					typeExecution = "日別計算";
 					// 日別実績の計算
@@ -1863,6 +1871,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		System.out.println("更新処理自動実行_日別実績の計算_END_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
 		// exceptionがあるか確認する（日別作成）
 		// ドメインモデル「エラーメッセージ情報」を取得する
 		List<ErrMessageInfo> listErrDailyCreation = errMessageInfoRepository.getAllErrMessageInfoByID(execId,
@@ -2426,6 +2435,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			this.procExecLogRepo.update(ProcessExecutionLog);
 			return false; // chua confirm
 		}
+		System.out.println("更新処理自動実行_承認結果の反映_START_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		// ドメインモデル「就業締め日」を取得する
 		List<Closure> lstClosure = this.closureRepo.findAllUse(companyId);
 
@@ -2630,7 +2640,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		} catch (Exception e) {
 			isHasException = true;
 		}
-
+		System.out.println("更新処理自動実行_承認結果の反映_END_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		if (endStatusIsInterrupt) {
 			return true;
 			// 終了状態 ＝ 中断
@@ -2764,6 +2774,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			this.procExecLogRepo.update(ProcessExecutionLog);
 			return false; // chua confirm
 		}
+		System.out.println("更新処理自動実行_月別実績の集計_START_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		// ドメインモデル「就業締め日」を取得する
 		List<Closure> lstClosure = this.closureRepo.findAllUse(companyId);
 
@@ -2954,7 +2965,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		} catch (Exception e) {
 			isHasException = true;
 		}
-		
+		System.out.println("更新処理自動実行_月別実績の集計_END_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		if(!listCheck.isEmpty()) {
 			if (listCheck.get(0)) {
 				return true; // 終了状態 ＝ 中断
@@ -3074,7 +3085,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			this.execTaskLogRepo.updateAll(companyId, execItemCd, execId, ProcessExecutionLog.getTaskLogList());
 		}
 		this.procExecLogRepo.update(ProcessExecutionLog);
-
 		// アラーム抽出区分の判定
 		boolean alarmAtr = processExecution.getExecSetting().getAlarmExtraction().isAlarmAtr();
 		if (!alarmAtr) {
@@ -3088,6 +3098,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			this.procExecLogRepo.update(ProcessExecutionLog);
 			return false;
 		}
+		System.out.println("更新処理自動実行_アラーム抽出_START_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		// アルゴリズム「抽出処理状況を作成する」を実行する
 		String extraProcessStatusID = createExtraProcessService.createExtraProcess(companyId);
 		// 実行 :
@@ -3122,6 +3133,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					!processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().isPresent() ? ""
 							: processExecution.getExecSetting().getAlarmExtraction().getAlarmCode().get().v(),
 							execId);
+			System.out.println("更新処理自動実行_アラーム抽出_END_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 			if(outputExecAlarmListPro.isCheckStop())
 				return true;
 		} catch (Exception e) {
@@ -3550,8 +3562,9 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		} catch (Exception e) {
 			throw new CreateDailyException();
 		}
+		System.out.println("更新処理自動実行_日別実績の作成_END_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
+		System.out.println("更新処理自動実行_日別実績の計算_START_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
 		ProcessState ProcessState2;
-
 		try {
 			// 社員の日別実績を計算
 			ProcessState2 = this.dailyCalculationEmployeeService.calculateForOnePerson(empId, period,

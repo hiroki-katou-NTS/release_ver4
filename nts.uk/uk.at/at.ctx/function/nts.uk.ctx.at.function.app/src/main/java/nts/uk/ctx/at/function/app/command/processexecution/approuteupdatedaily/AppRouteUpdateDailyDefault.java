@@ -87,6 +87,7 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 			processExecutionLogRepo.update(procExecLog);
 			return;
 		}
+		System.out.println("更新処理自動実行_承認ルート更新（日次）_START_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
 		
 		
 		/**ドメインモデル「就業締め日」を取得する(lấy thông tin domain ル「就業締め日」)*/
@@ -275,7 +276,7 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 		
 
 		log.info("承認ルート更新(日別) END PARALLEL: " + ((System.currentTimeMillis() - startTime) / 1000) + "秒");
-		
+		System.out.println("更新処理自動実行_承認ルート更新（日次）_END_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
 		boolean checkError = false;
 		/*終了状態で「エラーあり」が返ってきたか確認する*/
 		for(CheckCreateperApprovalClosure checkCreateperApprovalClosure :listCheckCreateApp) {
