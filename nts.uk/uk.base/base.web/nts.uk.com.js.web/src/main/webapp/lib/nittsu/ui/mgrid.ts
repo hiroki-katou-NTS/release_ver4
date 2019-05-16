@@ -2721,87 +2721,127 @@ module nts.uk.ui.mgrid {
                 return _.cloneDeep(_errors);
             },
             disableNtsControlAt: function(id, key, $cell) {
+                let dc = [];
                 if (!$cell) {
                     let idx = _.findIndex(_dataSource, r => r[_pk] === id);
                     if (_.isNil(idx)) return;
-                    $cell = lch.cellAt(_$grid[0], idx, key);
-                }
-                if (_.isNil($cell) || $cell.classList.contains(color.Disable)) return;
-                $cell.classList.add(color.Disable);
-                switch (dkn.controlType[key]) {
-                    case dkn.LINK_LABEL:
-                        let link = $cell.querySelector(".mlink-button");
-                        if (link) {
-                            link.removeXEventListener(ssk.CLICK_EVT);
-                            link.style.color = "#333";
-                            link.style.cursor = "default";
-                        }
-                        break;
-                    case dkn.BUTTON:
-                    case dkn.DELETE_BUTTON:
-                        let btn = $cell.querySelector(".mbutton");
-                        if (btn) btn.disabled = true;
-                        break;
-                    case dkn.FLEX_IMAGE:
-                        let img = $cell.querySelector("span");
-                        if (img) {
-                            img.removeXEventListener(ssk.CLICK_EVT);
-                            img.style.cursor = "default";
-                        }
-                        break;
-                    case dkn.CHECKBOX:
-                        let check = $cell.querySelector("input");
-                        if (check) {
-                            check.setAttribute("disabled", "disabled");
-                        }
-                        break;
-                }
+                    _.forEach(_.keys(_mafollicle), k => {
+                        if (k === SheetDef) return;
+                        _.forEach(_.keys(_mafollicle[SheetDef]), d => {
+                            let f = _mafollicle[k][d], c;
+                            if (f) {
+                                c = lch.cellAt(_$grid[0], idx, key, f.desc);
+                                if (c) dc.push(c);
+                            }
+                        });
+                        
+                        if (dc.length > 0) return false;
+                    });
+                } else dc.push($cell);
+                
+                if (dc.length === 0) {
+                    color.pushState(id, key, color.Disable);
+                    return;
+                } 
+                
+                dc.forEach($cell => {
+                    if ($cell.classList.contains(color.Disable)) return;
+                    $cell.classList.add(color.Disable);
+                    switch (dkn.controlType[key]) {
+                        case dkn.LINK_LABEL:
+                            let link = $cell.querySelector(".mlink-button");
+                            if (link) {
+                                link.removeXEventListener(ssk.CLICK_EVT);
+                                link.style.color = "#333";
+                                link.style.cursor = "default";
+                            }
+                            break;
+                        case dkn.BUTTON:
+                        case dkn.DELETE_BUTTON:
+                            let btn = $cell.querySelector(".mbutton");
+                            if (btn) btn.disabled = true;
+                            break;
+                        case dkn.FLEX_IMAGE:
+                            let img = $cell.querySelector("span");
+                            if (img) {
+                                img.removeXEventListener(ssk.CLICK_EVT);
+                                img.style.cursor = "default";
+                            }
+                            break;
+                        case dkn.CHECKBOX:
+                            let check = $cell.querySelector("input");
+                            if (check) {
+                                check.setAttribute("disabled", "disabled");
+                            }
+                            break;
+                    }
+                });
                 
                 color.pushState(id, key, color.Disable);
             },
             enableNtsControlAt: function(id, key, $cell) {
+                let dc = [];
                 if (!$cell) {
                     let idx = _.findIndex(_dataSource, r => r[_pk] === id);
                     if (_.isNil(idx)) return;
-                    $cell = lch.cellAt(_$grid[0], idx, key);
-                }
-                if (_.isNil($cell) || !$cell.classList.contains(color.Disable)) return;
-                $cell.classList.remove(color.Disable);
-                switch (dkn.controlType[key]) {
-                    case dkn.LINK_LABEL:
-                        let link = $cell.querySelector(".mlink-button");
-                        if (link) {
-                            link.addXEventListener(ssk.CLICK_EVT, $.data(link, ssk.CLICK_EVT));
-                            link.style.color = "#0066CC";
-                            link.style.cursor = "pointer";
-                        }
-                        break;
-                    case dkn.BUTTON:
-                    case dkn.DELETE_BUTTON:
-                        let btn = $cell.querySelector(".mbutton");
-                        if (btn) {
-                            btn.disabled = false;
-                            let hdl = $.data(btn, ssk.CLICK_EVT);
-                            if (hdl) {
-                                btn.removeXEventListener(ssk.CLICK_EVT);
-                                btn.addXEventListener(ssk.CLICK_EVT, hdl);
+                    _.forEach(_.keys(_mafollicle), k => {
+                        if (k === SheetDef) return;
+                        _.forEach(_.keys(_mafollicle[SheetDef]), d => {
+                            let f = _mafollicle[k][d], c;
+                            if (f) {
+                                c = lch.cellAt(_$grid[0], idx, key, f.desc);
+                                if (c) dc.push(c);
                             }
-                        }
-                        break;
-                    case dkn.FLEX_IMAGE:
-                        let img = $cell.querySelector("span");
-                        if (img) {
-                            img.addXEventListener(ssk.CLICK_EVT, $.data(img, ssk.CLICK_EVT));
-                            img.style.cursor = "pointer";
-                        }
-                        break;
-                    case dkn.CHECKBOX:
-                        let check = $cell.querySelector("input");
-                        if (check) {
-                            check.removeAttribute("disabled");
-                        }
-                        break;
+                        });
+                        
+                        if (dc.length > 0) return false;
+                    });
+                } else dc.push($cell);
+                
+                if (dc.length === 0) {
+                    color.popState(id, key, color.Disable);
+                    return;
                 }
+                
+                dc.forEach($cell => {
+                    if (!$cell.classList.contains(color.Disable)) return;
+                    $cell.classList.remove(color.Disable);
+                    switch (dkn.controlType[key]) {
+                        case dkn.LINK_LABEL:
+                            let link = $cell.querySelector(".mlink-button");
+                            if (link) {
+                                link.addXEventListener(ssk.CLICK_EVT, $.data(link, ssk.CLICK_EVT));
+                                link.style.color = "#0066CC";
+                                link.style.cursor = "pointer";
+                            }
+                            break;
+                        case dkn.BUTTON:
+                        case dkn.DELETE_BUTTON:
+                            let btn = $cell.querySelector(".mbutton");
+                            if (btn) {
+                                btn.disabled = false;
+                                let hdl = $.data(btn, ssk.CLICK_EVT);
+                                if (hdl) {
+                                    btn.removeXEventListener(ssk.CLICK_EVT);
+                                    btn.addXEventListener(ssk.CLICK_EVT, hdl);
+                                }
+                            }
+                            break;
+                        case dkn.FLEX_IMAGE:
+                            let img = $cell.querySelector("span");
+                            if (img) {
+                                img.addXEventListener(ssk.CLICK_EVT, $.data(img, ssk.CLICK_EVT));
+                                img.style.cursor = "pointer";
+                            }
+                            break;
+                        case dkn.CHECKBOX:
+                            let check = $cell.querySelector("input");
+                            if (check) {
+                                check.removeAttribute("disabled");
+                            }
+                            break;
+                    }
+                });
                 
                 color.popState(id, key, color.Disable);
             },
