@@ -237,6 +237,9 @@ public class HolidayServiceImpl implements HolidayService {
 	}
 
 	private String getInList(List<String> list, String defaultCode) {
+		if(CollectionUtil.isEmpty(list)){
+			return defaultCode;
+		}
 		boolean isInList = list.indexOf(defaultCode) != -1;
 		if (isInList) {
 			return defaultCode;
