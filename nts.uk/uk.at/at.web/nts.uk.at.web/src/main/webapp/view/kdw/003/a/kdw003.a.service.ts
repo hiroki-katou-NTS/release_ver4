@@ -12,6 +12,7 @@ module nts.uk.at.view.kdw003.a.service {
         releaseClosure: "screen/at/correctionofdailyperformance/releaseClosure",
         findFlexCheck: "screen/at/correctionofdailyperformance/getFlexCheck",
         loadRow: "screen/at/correctionofdailyperformance/loadRow",
+        loadVerRow: "screen/at/correctionofdailyperformance/loadVerData",
         getNameMonthlyAttItem: "screen/at/correctionofdailyperformance/getNameMonthlyAttItem",
         searchEmployee: 'screen/at/correctionofdailyperformance/get-info',
         calcTime: 'screen/at/correctionofdailyperformance/calcTime',
@@ -66,6 +67,10 @@ module nts.uk.at.view.kdw003.a.service {
 
     export function loadRow(param) {
         return nts.uk.request.ajax(paths.loadRow, param);
+    }
+    
+     export function loadVerRow(param) {
+        return nts.uk.request.ajax(paths.loadVerRow, param);
     }
 
     export function getNameMonthlyAttItem(data: any) {

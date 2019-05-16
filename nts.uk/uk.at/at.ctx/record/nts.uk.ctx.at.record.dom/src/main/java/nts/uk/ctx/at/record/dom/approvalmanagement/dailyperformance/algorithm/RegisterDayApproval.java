@@ -52,19 +52,20 @@ public class RegisterDayApproval {
 	@Inject
 	private ApprovalStatusAdapter approvalStatusAdapter;
 
-	public void registerDayApproval(ParamDayApproval param, Set<Pair<String, GeneralDate>> updated) {
-		if(param.getContentApproval().isEmpty()) return;
+	public Set<Pair<String, GeneralDate>> registerDayApproval(ParamDayApproval param, Set<Pair<String, GeneralDate>> updated) {
+		if(param.getContentApproval().isEmpty()) return new HashSet<>();
 		String companyId = AppContexts.user().companyId();
 		Map<Pair<String, GeneralDate>, GeneralDate> employeeIdInsert = new HashMap<>();
 		Map<Pair<String, GeneralDate>, GeneralDate> employeeIdRealse = new HashMap<>();
 		Map<Pair<String, GeneralDate>, GeneralDate> employeeIdRealseAll = new HashMap<>();
+		Set<Pair<String, GeneralDate>> insertApproval = new HashSet<>();
 		Optional<ApprovalProcessingUseSetting> approvalSetting = approvalProcessingRepository
 				.findByCompanyId(companyId);
 		if (!approvalSetting.isPresent())
-			return;
+			return new HashSet<>();
 		Optional<ConfirmationOfManagerOrYouself> checkOpt = checkApprovalOperation.checkApproval(approvalSetting.get());
 		if (!checkOpt.isPresent())
-			return;
+			return new HashSet<>();
 		if (checkOpt.get().value == ConfirmationOfManagerOrYouself.CAN_CHECK.value) {
 			param.getContentApproval().forEach(x -> {
 				if(x.isFlagRemmoveAll()){
@@ -114,7 +115,7 @@ public class RegisterDayApproval {
 			approvalStatusAdapter.registerApproval(param.getEmployeeId(),
 					employeeIdInsert.keySet().stream().collect(Collectors.toList()), 1, companyId);
 			updated.addAll(employeeIdInsert.keySet());
-			
+			insertApproval.addAll(employeeIdInsert.keySet());
 		}
 		
 		if(!employeeIdRealseAll.isEmpty()){
@@ -132,6 +133,7 @@ public class RegisterDayApproval {
 //				workInfo.updated(pair.getKey(), pair.getValue());
 //			});
 //		}
+		return insertApproval;
 	}
 	
 	public void registerMonApproval(String approverID, List<EmpPerformMonthParamImport> listParamApproval) {

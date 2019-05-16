@@ -49,6 +49,8 @@ import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
 import nts.uk.ctx.at.record.dom.service.TimeOffRemainErrorInfor;
 import nts.uk.ctx.at.record.dom.service.TimeOffRemainErrorInputParam;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.workrecord.actualsituation.CheckShortage;
+import nts.uk.ctx.at.record.dom.workrecord.actualsituation.CheckShortageFlex;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.ParamIdentityConfirmDay;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.algorithm.RegisterIdentityConfirmDay;
@@ -79,6 +81,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.DPItemParent;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPItemValue;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DataResultAfterIU;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.EmpAndDate;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.OperationOfDailyPerformanceDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ResultReturnDCUpdateData;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.TypeError;
@@ -150,6 +153,9 @@ public class DailyModifyResCommandFacade {
 	
 	@Inject
 	private DailyRecordTransactionService dailyTransaction;
+	
+	@Inject
+	private CheckShortageFlex checkShortageFlex;
 
 	public RCDailyCorrectionResult handleUpdate(List<DailyRecordDto> dtoOlds,
 			List<DailyRecordDto> dtoNews, List<DailyRecordWorkCommand> commandNew, List<DailyRecordWorkCommand> commandOld, List<DailyItemValue> dailyItems, UpdateMonthDailyParam month, int mode,
@@ -269,8 +275,6 @@ public class DailyModifyResCommandFacade {
 
 	public DataResultAfterIU insertItemDomain(DPItemParent dataParent) {
 		//Map<Integer, List<DPItemValue>> resultError = new HashMap<>();
-		
-		
 		Map<Integer, List<DPItemValue>> resultErrorMonth = new HashMap<>();
 		DataResultAfterIU dataResultAfterIU = new DataResultAfterIU();
 		Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> lstResultReturnDailyError = new HashMap<>();
@@ -425,7 +429,7 @@ public class DailyModifyResCommandFacade {
 				.collect(Collectors.toList());
 		Set<Pair<String, GeneralDate>> updated = new HashSet<>();
 		if (querys.isEmpty() 
-				&& (dataParent.getMonthValue() == null || dataParent.getMonthValue().getItems() == null) 
+				&& (dataParent.getMonthValue() == null || dataParent.getMonthValue().getItems() == null || dataParent.getMonthValue().getItems().isEmpty()) 
 				&& (!dataParent.getDataCheckSign().isEmpty() || !dataParent.getDataCheckApproval().isEmpty() || dataParent.getSpr() != null)) {
 			errorRelease = releaseSign(dataParent.getDataCheckSign(), new ArrayList<>(), dailyEdits,
 					AppContexts.user().employeeId(), true);
@@ -436,7 +440,7 @@ public class DailyModifyResCommandFacade {
 //				updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
 //			}
 			// insert approval
-			insertApproval(dataParent.getDataCheckApproval(), updated);
+			Set<Pair<String, GeneralDate>> dataApprovalCheck = insertApproval(dataParent.getDataCheckApproval(), updated);
 //			if(dataParent.getDataCheckApproval() != null){
 //				updated.addAll(dataParent.getDataCheckApproval().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
 //			}
@@ -455,6 +459,20 @@ public class DailyModifyResCommandFacade {
 							updated.add(Pair.of(d.getWorkInformation().getEmployeeId(), d.getWorkInformation().getYmd()));
 //							dailyTransaction.updated(d.getWorkInformation().getEmployeeId(), d.getWorkInformation().getYmd());
 						});
+			}
+			List<String> empList = updated.stream().map(x -> x.getLeft()).distinct().collect(Collectors.toList());
+			List<GeneralDate> empDate = updated.stream().map(x -> x.getRight()).sorted((x, y) -> x.compareTo(y)).distinct().collect(Collectors.toList());
+			Set<EmpAndDate> indentityChecked = dataParent.getDataCheckSign().isEmpty() ? new HashSet<>() : identificationRepository.findByListEmployeeID(new ArrayList<>(empList),
+					empDate.get(0), empDate.get(empDate.size() - 1)).stream().map(x -> new EmpAndDate(x.getEmployeeId(), x.getProcessingYmd()))
+					.collect(Collectors.toSet()); 
+			dataResultAfterIU.setMapIndentityCheck(indentityChecked);
+			dataResultAfterIU.setMapApprovalCheck(dataApprovalCheck.stream().map(x -> new EmpAndDate(x.getLeft(), x.getRight())).collect(Collectors.toSet()));
+			if(!dataParent.getDataCheckSign().isEmpty() || !dataParent.getDataCheckApproval().isEmpty()) dataResultAfterIU.setOnlyLoadCheckBox(true);
+			if (dataParent.isShowFlex() && !dataParent.getDataCheckSign().isEmpty()) {
+				CheckShortage checkShortage = checkShortageFlex.checkShortageFlex(dataParent.getDataCheckSign().get(0).getEmployeeId(), dataParent.getDateRange().getEndDate());
+				boolean checkFlex = checkShortage.isCheckShortage()
+						&& dataParent.getDataCheckSign().get(0).getEmployeeId().equals(AppContexts.user().employeeId());
+				dataResultAfterIU.setCanFlex(checkFlex);
 			}
 			dataResultAfterIU.setShowErrorDialog(null);
 
@@ -518,7 +536,7 @@ public class DailyModifyResCommandFacade {
 
 				//日次登録処理
 				dailyItems = dailyItems.stream().filter(x -> !lstResultReturnDailyError.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList());
-				this.insertAllData.handlerInsertAllDaily(resultIU.getCommandNew(), resultIU.getLstDailyDomain(),
+				if(dataParent.isCheckDailyChange()) this.insertAllData.handlerInsertAllDaily(resultIU.getCommandNew(), resultIU.getLstDailyDomain(),
 						resultIU.getCommandOld(), dailyItems, resultIU.isUpdate(),
 						monthParam, itemAtr);
 				// insert sign
@@ -711,14 +729,14 @@ public class DailyModifyResCommandFacade {
 		return registerIdentityConfirmDay.registerIdentity(day, editErrors, updated);
 	}
 
-	public void insertApproval(List<DPItemCheckBox> dataCheckApproval, Set<Pair<String, GeneralDate>> updated) {
+	public Set<Pair<String, GeneralDate>> insertApproval(List<DPItemCheckBox> dataCheckApproval, Set<Pair<String, GeneralDate>> updated) {
 		if (dataCheckApproval.isEmpty())
-			return;
+			return new HashSet<>();
 		ParamDayApproval param = new ParamDayApproval(AppContexts.user().employeeId(),
 				dataCheckApproval.stream()
 						.map(x -> new ContentApproval(x.getDate(), x.isValue(), x.getEmployeeId(), x.isFlagRemoveAll()))
 						.collect(Collectors.toList()));
-		registerDayApproval.registerDayApproval(param, updated);
+		return registerDayApproval.registerDayApproval(param, updated);
 	}
 
 	public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {

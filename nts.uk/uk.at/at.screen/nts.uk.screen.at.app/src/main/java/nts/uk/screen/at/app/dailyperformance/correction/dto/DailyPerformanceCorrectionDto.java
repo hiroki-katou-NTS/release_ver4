@@ -23,6 +23,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.style.TextStyle;
 import nts.uk.screen.at.app.dailyperformance.correction.error.DCErrorInfomation;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityMonthResult;
 import nts.uk.screen.at.app.dailyperformance.correction.monthflex.DPMonthResult;
+import nts.uk.screen.at.app.dailyperformance.correction.text.DPText;
 
 /**
  * @author hungnm
@@ -100,6 +101,8 @@ public class DailyPerformanceCorrectionDto {
 	private int errorInfomation;
 	
 	private List<DPHideControlCell> lstHideControl = new ArrayList<>();
+	
+	private List<DPHideControlCell> lstCellDisByLock = new ArrayList<>();
 	
 	public DailyPerformanceCorrectionDto() {
 		super();
@@ -326,6 +329,25 @@ public class DailyPerformanceCorrectionDto {
 			List<String> states = new ArrayList<>();
 			states.add(state);
 			DPCellStateDto dto = new DPCellStateDto("_" + rowId, columnKey, states);
+			this.lstCellState.add(dto);
+		}
+
+	}
+	
+	/** Set AlarmCell state for Fixed cell */
+	public void setCellSate(String rowId, String columnKey, String state, boolean lock) {
+		Optional<DPCellStateDto> existedCellState = findExistCellState(rowId, columnKey);
+		if (existedCellState.isPresent()) {
+			List<String> stateCell = existedCellState.get().getState();
+			if(!stateCell.contains(DPText.STATE_DISABLE)) {
+				lstCellDisByLock.add(new DPHideControlCell(rowId, columnKey));
+			}
+			existedCellState.get().addState(state);
+		} else {
+			List<String> states = new ArrayList<>();
+			states.add(state);
+			DPCellStateDto dto = new DPCellStateDto("_" + rowId, columnKey, states);
+			lstCellDisByLock.add(new DPHideControlCell(rowId, columnKey));
 			this.lstCellState.add(dto);
 		}
 
