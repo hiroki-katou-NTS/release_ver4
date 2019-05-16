@@ -782,7 +782,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 					// 中間データから承認ルートインスタンスに変換する
 					ApprovalRootState approvalRootState = this.convertFromAppRootInstance(appRootInstance, appRootConfirm);
 					// 基準社員を元にルート状況を取得する
-					RouteSituation routeSituation = this.getRouteSituationByEmp(approvalRootState, approvalRouteDetails.getEmployeeID(), agentLst);
+					RouteSituation routeSituation = this.getRouteSituationByEmp(approvalRootState, approvalRouteDetails.getAgentID().get(), agentLst);
 					// 実行結果をoutput「ルート状況」に追加する
 					routeSituationLst.add(routeSituation);
 				}
