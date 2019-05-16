@@ -221,8 +221,8 @@ public class OvertimeServiceImpl implements OvertimeService {
 			//申請日の入力があり
 			//勤務種類と就業時間帯を取得できた
 			workTypeAndSiftType = getDataDateExists(companyID, employeeID, baseDate);
-			if (!StringUtil.isNullOrEmpty(workTypeAndSiftType.getWorkType().getWorkTypeCode(), true)
-					|| !StringUtil.isNullOrEmpty(workTypeAndSiftType.getSiftType().getSiftCode(), true)) {
+			if (StringUtil.isNullOrEmpty(workTypeAndSiftType.getWorkType().getWorkTypeCode(), true)
+					|| StringUtil.isNullOrEmpty(workTypeAndSiftType.getSiftType().getSiftCode(), true)) {
 				//取得できなかった
 				workTypeAndSiftType = getDataNoDateExists(companyID, employeeID, workTypes, siftTypes);
 			}
