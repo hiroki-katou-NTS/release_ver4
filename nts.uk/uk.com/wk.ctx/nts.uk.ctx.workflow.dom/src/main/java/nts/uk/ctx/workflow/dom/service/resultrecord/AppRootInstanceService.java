@@ -136,6 +136,15 @@ public interface AppRootInstanceService {
 	public ApprovalEmpStatus getApprovalEmpStatus(String employeeID, DatePeriod period, RecordRootType rootType);
 	
 	/**
+	 * [No.595]
+	 * @param approverId
+	 * @param targetEmployeeIds
+	 * @param period
+	 * @return
+	 */
+	public ApprovalEmpStatus getDailyApprovalStatus(String companyId, String approverId, List<String> targetEmployeeIds, DatePeriod period);
+	
+	/**
 	 * 承認者としてのルート状況を取得する
 	 * @param period
 	 * @param appRootInstanceLst

@@ -14,6 +14,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -47,6 +48,9 @@ public class KclmtAcquisitionEmp extends UkJpaEntity implements Serializable {
     @Column(name = "DEADL_CHECK_MONTH")
     private Integer deadlCheckMonth;
 
+    public static final JpaEntityMapper<KclmtAcquisitionEmp> MAPPER =
+    		new JpaEntityMapper<>(KclmtAcquisitionEmp.class);
+    
     /**
      * Instantiates a new kclmt acquisition emp.
      */

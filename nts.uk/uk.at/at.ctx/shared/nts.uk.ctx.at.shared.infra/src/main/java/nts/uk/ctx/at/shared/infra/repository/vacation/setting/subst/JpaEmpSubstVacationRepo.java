@@ -16,8 +16,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import lombok.SneakyThrows;
+import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.gul.collection.CollectionUtil;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.uk.ctx.at.shared.dom.vacation.setting.subst.EmpSubstVacation;
 import nts.uk.ctx.at.shared.dom.vacation.setting.subst.EmpSubstVacationRepository;
 import nts.uk.ctx.at.shared.infra.entity.vacation.setting.subst.KsvstEmpSubstVacation;
@@ -87,29 +89,21 @@ public class JpaEmpSubstVacationRepo extends JpaRepository implements EmpSubstVa
 	 * EmpSubstVacationRepository#findById(java.lang.String)
 	 */
 	@Override
+	@SneakyThrows
 	public Optional<EmpSubstVacation> findById(String companyId, String contractTypeCode) {
-		EntityManager em = this.getEntityManager();
-
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<KsvstEmpSubstVacation> cq = builder.createQuery(KsvstEmpSubstVacation.class);
-		Root<KsvstEmpSubstVacation> root = cq.from(KsvstEmpSubstVacation.class);
-
-		List<Predicate> predicateList = new ArrayList<Predicate>();
-
-		predicateList.add(builder.equal(root.get(KsvstEmpSubstVacation_.kclstEmpSubstVacationPK)
-				.get(KsvstEmpSubstVacationPK_.cid), companyId));
-		predicateList.add(builder.equal(root.get(KsvstEmpSubstVacation_.kclstEmpSubstVacationPK)
-				.get(KsvstEmpSubstVacationPK_.contractTypeCd), contractTypeCode));
-
-		cq.where(predicateList.toArray(new Predicate[] {}));
-
-		List<KsvstEmpSubstVacation> results = em.createQuery(cq).getResultList();
-
-		if (CollectionUtil.isEmpty(results)) {
-			return Optional.empty();
-		}
-
-		return Optional.of(new EmpSubstVacation(new JpaEmpSubstVacationGetMemento(results.get(0))));
+		
+		String sql = "select * from KSVST_EMP_SUBST_VACATION"
+    			+ " where CID = ?"
+    			+ " and EMPCD = ?";
+    	try (val stmt = this.connection().prepareStatement(sql)) {
+	    	stmt.setString(1, companyId);
+	    	stmt.setString(2, contractTypeCode);
+	    	
+	    	val entity = new NtsResultSet(stmt.executeQuery())
+	    			.getSingle(rec -> KsvstEmpSubstVacation.MAPPER.toEntity(rec));
+	
+	    	return entity.map(e -> new EmpSubstVacation(new JpaEmpSubstVacationGetMemento(e)));
+    	}
 	}
 
 	/*
