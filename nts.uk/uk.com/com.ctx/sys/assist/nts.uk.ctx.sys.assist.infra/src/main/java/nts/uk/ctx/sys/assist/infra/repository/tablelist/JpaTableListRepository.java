@@ -133,7 +133,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 				if (listSaveProtetion.get(i).getCorrectClasscification() == 1) {
 					
 					saveProtectionByEmpCode = true;
-					couplePidItemName = listSaveProtetion.get(0).getCouplePidItemName();
+					couplePidItemName = listSaveProtetion.get(i).getCouplePidItemName();
 					newValue = " bdm.SCD AS " +  rePlaceCol;
 				}  
 				if (listSaveProtetion.get(i).getCorrectClasscification() == 2) {
