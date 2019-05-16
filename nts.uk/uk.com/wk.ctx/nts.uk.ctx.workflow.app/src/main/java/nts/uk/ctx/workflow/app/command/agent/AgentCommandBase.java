@@ -10,7 +10,7 @@ import nts.arc.time.GeneralDate;
  */
 @Value
 public class AgentCommandBase {
-
+	//A1_010
 	private String employeeId;
 
 	private String requestId;
@@ -21,7 +21,7 @@ public class AgentCommandBase {
 	private GeneralDate endDate;
 	
 	/** 就業承認: 社員ID */
-	private String agentSid1;
+	private String agentSid1;//A4_004
 	
 	/** 就業承認: 代行承認種類1 */
 	private int agentAppType1;

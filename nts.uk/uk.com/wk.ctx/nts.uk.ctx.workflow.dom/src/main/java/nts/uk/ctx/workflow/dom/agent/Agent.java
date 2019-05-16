@@ -13,11 +13,11 @@ import nts.gul.collection.CollectionUtil;
 import nts.gul.text.StringUtil;
 
 @Getter
-
+//代行承認
 public class Agent extends AggregateRoot {
 
 	private String companyId;
-
+	/**代行依頼者: A1_010*/
 	private String employeeId;
 	
 	private UUID requestId;
@@ -29,6 +29,7 @@ public class Agent extends AggregateRoot {
 	private GeneralDate endDate;
 
 	/**就業承認: 社員ID*/
+	/** 就業承認．基本設定.承認代行者: A4_004*/
 	private String agentSid1;
 
 	/**就業承認: 代行承認種類1*/
@@ -179,7 +180,6 @@ public class Agent extends AggregateRoot {
 	 * @param rangeDateList4
 	 */
 	public void checkAgentSid(List<Agent> agentSidList){
-		
 		this.checkSameAgentRequest();
 		this.checkAgentRequest();
 		
@@ -240,7 +240,7 @@ public class Agent extends AggregateRoot {
 	/**
 	 * check same agentAppType 
 	 */
-	private void checkSameAgentRequest() {
+	public void checkSameAgentRequest() {
 		if (this.agentAppType1 == AgentAppType.NO_SETTINGS 
 		&&  this.agentAppType2 == AgentAppType.NO_SETTINGS
 		&&  this.agentAppType3 == AgentAppType.NO_SETTINGS
@@ -250,9 +250,10 @@ public class Agent extends AggregateRoot {
 	}
 	
 	/**
+	 * 代行承認種類が代行者指定の場合、承認代行者を指定しなければならない。（ID:Msg_141） - DOM
 	 * check agentAppType by agentSid
 	 */
-	private void checkAgentRequest() {
+	public void checkAgentRequest() {
 		if ((this.agentAppType1 == AgentAppType.SUBSTITUTE_DESIGNATION &&  this.agentSid1 == "")
 		|| ( this.agentAppType2 == AgentAppType.SUBSTITUTE_DESIGNATION &&  this.agentSid2 == "")
 		|| (this.agentAppType3 == AgentAppType.SUBSTITUTE_DESIGNATION &&  this.agentSid3 == "")
