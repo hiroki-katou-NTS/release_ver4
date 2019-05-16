@@ -108,7 +108,7 @@ public interface AgentRepository {
 	public List<Agent> findByApproverAndDate(String companyId, String approverID, GeneralDate startDate, GeneralDate endDate);
 	
 	public List<AgentInfoOutput> findAgentByPeriod(String companyID, List<String> listApprover, 
-			GeneralDate startDate, GeneralDate endDate, Integer agentType);
+			GeneralDate startDate, GeneralDate endDate, int agentType);
 	
 	/**
 	 * get agent by agentSid

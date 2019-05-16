@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import nts.arc.enums.EnumAdaptor;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.ctx.at.record.dom.workrecord.operationsetting.ApprovalProcess;
 import nts.uk.ctx.at.record.dom.workrecord.operationsetting.YourselfConfirmError;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
@@ -25,6 +26,8 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 public class KrcmtApprovalProcess extends UkJpaEntity implements Serializable
 {
     private static final long serialVersionUID = 1L;
+    
+    public static final JpaEntityMapper<KrcmtApprovalProcess> MAPPER = new JpaEntityMapper<>(KrcmtApprovalProcess.class);
     
     /**
     * ID

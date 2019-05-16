@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import nts.arc.layer.infra.data.entity.type.GeneralDateToDBConverter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
@@ -24,6 +25,8 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 public class BsymtAffCompanyHist extends UkJpaEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final JpaEntityMapper<BsymtAffCompanyHist> MAPPER = new JpaEntityMapper<>(BsymtAffCompanyHist.class); 
 
 	@EmbeddedId
 	public BsymtAffCompanyHistPk bsymtAffCompanyHistPk;

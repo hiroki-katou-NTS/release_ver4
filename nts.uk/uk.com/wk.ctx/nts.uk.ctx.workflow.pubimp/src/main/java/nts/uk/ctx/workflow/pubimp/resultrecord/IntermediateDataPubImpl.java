@@ -123,8 +123,8 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsDates(List<String> employeeIDLst,
 			List<GeneralDate> dateLst, Integer rootType) {
 		List<AppRootStateStatusSprExport> result = new ArrayList<>();
-		dateLst.forEach(date -> {
-			DatePeriod period = new DatePeriod(date, date);
+		List<DatePeriod> periods = DatePeriod.create(dateLst);
+		periods.forEach(period -> {
 			result.addAll(appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class)).getAppRootStatusLst()
 			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList()));
 		});

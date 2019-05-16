@@ -478,13 +478,26 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		List<BsymtAffCompanyHist> entities = new ArrayList<>();
 		// Split employeeId List if size of employeeId List is greater than 1000
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
-			List<BsymtAffCompanyHist> lstBsymtAffCompanyHist = this.queryProxy()
-					.query(SELECT_BY_EMPLOYEE_ID_LIST_FOR_REQ588, BsymtAffCompanyHist.class)
-					.setParameter("sIdList", subList)
-					.setParameter("startDate", datePeriod.start())
-					.setParameter("endDate", datePeriod.end())
-					.getList();
-			entities.addAll(lstBsymtAffCompanyHist);
+			String sql = "select * from BSYMT_AFF_COM_HIST"
+					+ " where SID in (" + NtsStatement.In.createParamsString(subList) + ")"
+					+ " and START_DATE <= ?"
+					+ " and END_DATE >= ?";
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setString(1 + i, subList.get(i));
+				}
+				stmt.setDate(1 + subList.size(), Date.valueOf(datePeriod.end().localDate()));
+				stmt.setDate(2 + subList.size(), Date.valueOf(datePeriod.start().localDate()));
+				
+				List<BsymtAffCompanyHist> lstBsymtAffCompanyHist = new NtsResultSet(stmt.executeQuery())
+						.getList(rec -> BsymtAffCompanyHist.MAPPER.toEntity(rec));
+				entities.addAll(lstBsymtAffCompanyHist);
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		});
 
 		// Convert Result List to Map
