@@ -24851,91 +24851,135 @@ var nts;
                             return _.cloneDeep(_errors);
                         },
                         disableNtsControlAt: function (id, key, $cell) {
+                            var dc = [];
                             if (!$cell) {
-                                var idx = _.findIndex(_dataSource, function (r) { return r[_pk] === id; });
-                                if (_.isNil(idx))
+                                var idx_1 = _.findIndex(_dataSource, function (r) { return r[_pk] === id; });
+                                if (_.isNil(idx_1))
                                     return;
-                                $cell = lch.cellAt(_$grid[0], idx, key);
+                                _.forEach(_.keys(_mafollicle), function (k) {
+                                    if (k === SheetDef)
+                                        return;
+                                    _.forEach(_.keys(_mafollicle[SheetDef]), function (d) {
+                                        var f = _mafollicle[k][d], c;
+                                        if (f) {
+                                            c = lch.cellAt(_$grid[0], idx_1, key, f.desc);
+                                            if (c)
+                                                dc.push(c);
+                                        }
+                                    });
+                                    if (dc.length > 0)
+                                        return false;
+                                });
                             }
-                            if (_.isNil($cell) || $cell.classList.contains(color.Disable))
+                            else
+                                dc.push($cell);
+                            if (dc.length === 0) {
+                                color.pushState(id, key, color.Disable);
                                 return;
-                            $cell.classList.add(color.Disable);
-                            switch (dkn.controlType[key]) {
-                                case dkn.LINK_LABEL:
-                                    var link = $cell.querySelector(".mlink-button");
-                                    if (link) {
-                                        link.removeXEventListener(ssk.CLICK_EVT);
-                                        link.style.color = "#333";
-                                        link.style.cursor = "default";
-                                    }
-                                    break;
-                                case dkn.BUTTON:
-                                case dkn.DELETE_BUTTON:
-                                    var btn = $cell.querySelector(".mbutton");
-                                    if (btn)
-                                        btn.disabled = true;
-                                    break;
-                                case dkn.FLEX_IMAGE:
-                                    var img = $cell.querySelector("span");
-                                    if (img) {
-                                        img.removeXEventListener(ssk.CLICK_EVT);
-                                        img.style.cursor = "default";
-                                    }
-                                    break;
-                                case dkn.CHECKBOX:
-                                    var check = $cell.querySelector("input");
-                                    if (check) {
-                                        check.setAttribute("disabled", "disabled");
-                                    }
-                                    break;
                             }
+                            dc.forEach(function ($cell) {
+                                if ($cell.classList.contains(color.Disable))
+                                    return;
+                                $cell.classList.add(color.Disable);
+                                switch (dkn.controlType[key]) {
+                                    case dkn.LINK_LABEL:
+                                        var link = $cell.querySelector(".mlink-button");
+                                        if (link) {
+                                            link.removeXEventListener(ssk.CLICK_EVT);
+                                            link.style.color = "#333";
+                                            link.style.cursor = "default";
+                                        }
+                                        break;
+                                    case dkn.BUTTON:
+                                    case dkn.DELETE_BUTTON:
+                                        var btn = $cell.querySelector(".mbutton");
+                                        if (btn)
+                                            btn.disabled = true;
+                                        break;
+                                    case dkn.FLEX_IMAGE:
+                                        var img = $cell.querySelector("span");
+                                        if (img) {
+                                            img.removeXEventListener(ssk.CLICK_EVT);
+                                            img.style.cursor = "default";
+                                        }
+                                        break;
+                                    case dkn.CHECKBOX:
+                                        var check = $cell.querySelector("input");
+                                        if (check) {
+                                            check.setAttribute("disabled", "disabled");
+                                        }
+                                        break;
+                                }
+                            });
                             color.pushState(id, key, color.Disable);
                         },
                         enableNtsControlAt: function (id, key, $cell) {
+                            var dc = [];
                             if (!$cell) {
-                                var idx = _.findIndex(_dataSource, function (r) { return r[_pk] === id; });
-                                if (_.isNil(idx))
+                                var idx_2 = _.findIndex(_dataSource, function (r) { return r[_pk] === id; });
+                                if (_.isNil(idx_2))
                                     return;
-                                $cell = lch.cellAt(_$grid[0], idx, key);
-                            }
-                            if (_.isNil($cell) || !$cell.classList.contains(color.Disable))
-                                return;
-                            $cell.classList.remove(color.Disable);
-                            switch (dkn.controlType[key]) {
-                                case dkn.LINK_LABEL:
-                                    var link = $cell.querySelector(".mlink-button");
-                                    if (link) {
-                                        link.addXEventListener(ssk.CLICK_EVT, $.data(link, ssk.CLICK_EVT));
-                                        link.style.color = "#0066CC";
-                                        link.style.cursor = "pointer";
-                                    }
-                                    break;
-                                case dkn.BUTTON:
-                                case dkn.DELETE_BUTTON:
-                                    var btn = $cell.querySelector(".mbutton");
-                                    if (btn) {
-                                        btn.disabled = false;
-                                        var hdl = $.data(btn, ssk.CLICK_EVT);
-                                        if (hdl) {
-                                            btn.removeXEventListener(ssk.CLICK_EVT);
-                                            btn.addXEventListener(ssk.CLICK_EVT, hdl);
+                                _.forEach(_.keys(_mafollicle), function (k) {
+                                    if (k === SheetDef)
+                                        return;
+                                    _.forEach(_.keys(_mafollicle[SheetDef]), function (d) {
+                                        var f = _mafollicle[k][d], c;
+                                        if (f) {
+                                            c = lch.cellAt(_$grid[0], idx_2, key, f.desc);
+                                            if (c)
+                                                dc.push(c);
                                         }
-                                    }
-                                    break;
-                                case dkn.FLEX_IMAGE:
-                                    var img = $cell.querySelector("span");
-                                    if (img) {
-                                        img.addXEventListener(ssk.CLICK_EVT, $.data(img, ssk.CLICK_EVT));
-                                        img.style.cursor = "pointer";
-                                    }
-                                    break;
-                                case dkn.CHECKBOX:
-                                    var check = $cell.querySelector("input");
-                                    if (check) {
-                                        check.removeAttribute("disabled");
-                                    }
-                                    break;
+                                    });
+                                    if (dc.length > 0)
+                                        return false;
+                                });
                             }
+                            else
+                                dc.push($cell);
+                            if (dc.length === 0) {
+                                color.popState(id, key, color.Disable);
+                                return;
+                            }
+                            dc.forEach(function ($cell) {
+                                if (!$cell.classList.contains(color.Disable))
+                                    return;
+                                $cell.classList.remove(color.Disable);
+                                switch (dkn.controlType[key]) {
+                                    case dkn.LINK_LABEL:
+                                        var link = $cell.querySelector(".mlink-button");
+                                        if (link) {
+                                            link.addXEventListener(ssk.CLICK_EVT, $.data(link, ssk.CLICK_EVT));
+                                            link.style.color = "#0066CC";
+                                            link.style.cursor = "pointer";
+                                        }
+                                        break;
+                                    case dkn.BUTTON:
+                                    case dkn.DELETE_BUTTON:
+                                        var btn = $cell.querySelector(".mbutton");
+                                        if (btn) {
+                                            btn.disabled = false;
+                                            var hdl = $.data(btn, ssk.CLICK_EVT);
+                                            if (hdl) {
+                                                btn.removeXEventListener(ssk.CLICK_EVT);
+                                                btn.addXEventListener(ssk.CLICK_EVT, hdl);
+                                            }
+                                        }
+                                        break;
+                                    case dkn.FLEX_IMAGE:
+                                        var img = $cell.querySelector("span");
+                                        if (img) {
+                                            img.addXEventListener(ssk.CLICK_EVT, $.data(img, ssk.CLICK_EVT));
+                                            img.style.cursor = "pointer";
+                                        }
+                                        break;
+                                    case dkn.CHECKBOX:
+                                        var check = $cell.querySelector("input");
+                                        if (check) {
+                                            check.removeAttribute("disabled");
+                                        }
+                                        break;
+                                }
+                            });
                             color.popState(id, key, color.Disable);
                         },
                         setState: function (id, key, states) {
