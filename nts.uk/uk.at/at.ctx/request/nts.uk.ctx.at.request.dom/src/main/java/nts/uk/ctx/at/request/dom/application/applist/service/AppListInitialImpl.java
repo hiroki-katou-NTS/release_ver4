@@ -1701,8 +1701,8 @@ public class AppListInitialImpl implements AppListInitialRepository{
 		List<String> lstId = new ArrayList<>();
 		String idAppr = null;
 		for(AgentDataRequestPubImport agent : lstAgent){
-			if(agent.getStartDate().beforeOrEquals(app.getAppDate()) && agent.getEndDate().afterOrEquals(app.getAppDate())
-					&& this.checkExistEmp(frame.getListApprover(), agent.getEmployeeId())){
+			//2019/05/14　EA修正履歴 No.3436 #107724
+			if(this.checkExistEmp(frame.getListApprover(), agent.getEmployeeId())){
 				lstId.add(agent.getAgentSid1());
 				idAppr = agent.getEmployeeId();
 			}
