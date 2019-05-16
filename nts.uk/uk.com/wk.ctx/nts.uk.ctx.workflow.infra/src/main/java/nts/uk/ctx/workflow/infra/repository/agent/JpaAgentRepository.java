@@ -150,7 +150,13 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 		builderString.append(" AND e.endDate >= :endDate");
 		SELECT_AGENT_BY_SID_DATE = builderString.toString();
 		}
-	
+	private static final String GET_LST_BY_AGENT_TYPE1 = "SELECT c  FROM CmmmtAgent c"
+			+ " WHERE c.cmmmtAgentPK.companyId = :companyId"
+			+ " AND c.agentSid1 = :agentId";
+	private static final String GET_LST_BY_SID_REQID = "SELECT c  FROM CmmmtAgent c"
+			+ " WHERE c.cmmmtAgentPK.companyId = :companyId"
+			+ " AND c.cmmmtAgentPK.employeeId = :employeeId"
+			+ " AND c.cmmmtAgentPK.requestId != :requestId";
 		
 	/**
 	 * Convert Data to Domain
@@ -431,6 +437,23 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 				.setParameter("employeeId", approverID)
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
+				.getList(c -> convertToDomain(c));
+	}
+
+	@Override
+	public List<Agent> getListByAgentType1(String companyId, String agentId) {
+		return this.queryProxy().query(GET_LST_BY_AGENT_TYPE1, CmmmtAgent.class)
+				.setParameter("companyId", companyId)
+				.setParameter("agentId", agentId)
+				.getList(c -> convertToDomain(c));
+	}
+
+	@Override
+	public List<Agent> getListAgentBySidReqId(String companyId, String employeeId, String requestId) {
+		return this.queryProxy().query(GET_LST_BY_SID_REQID, CmmmtAgent.class)
+				.setParameter("companyId", companyId)
+				.setParameter("employeeId", employeeId)
+				.setParameter("requestId", requestId)
 				.getList(c -> convertToDomain(c));
 	}
 
