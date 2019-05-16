@@ -157,12 +157,16 @@ public class DailyPerformanceCorrectionDto {
 			if (attendanceAtr == DailyAttendanceAtr.Code.value || attendanceAtr == DailyAttendanceAtr.Classification.value) {
 				if (attendanceAtr == DailyAttendanceAtr.Classification.value) {
 					this.lstCellState.add(new DPCellStateDto("_" + data.getId(), "NO" + getID(header.getKey()), toList("mgrid-disable")));
+				    lstCellDisByLock.add(new DPHideControlCell("_" + data.getId(), "NO" + getID(header.getKey())));
 				} else {
 					this.lstCellState.add(new DPCellStateDto("_" + data.getId(), "Code" + getID(header.getKey()), toList("mgrid-disable")));
+					 lstCellDisByLock.add(new DPHideControlCell("_" + data.getId(), "Code" + getID(header.getKey())));
 				}
 				this.lstCellState.add(new DPCellStateDto("_" + data.getId(), "Name" + getID(header.getKey()), toList("mgrid-disable")));
+				 lstCellDisByLock.add(new DPHideControlCell("_" + data.getId(), "Name" + getID(header.getKey())));
 			} else {
 				this.lstCellState.add(new DPCellStateDto("_" + data.getId(), header.getKey(), toList("mgrid-disable")));
+				 lstCellDisByLock.add(new DPHideControlCell("_" + data.getId(), header.getKey()));
 			}
 		   }
 //		}
@@ -325,12 +329,20 @@ public class DailyPerformanceCorrectionDto {
 		Optional<DPCellStateDto> existedCellState = findExistCellState(rowId, columnKey);
 		if (existedCellState.isPresent()) {
 			existedCellState.get().addState(state);
+			List<String> stateCell = existedCellState.get().getState();
+			if(stateCell.contains(DPText.STATE_DISABLE)) {
+				lstCellDisByLock.add(new DPHideControlCell(rowId, columnKey));
+			}
 		} else {
 			List<String> states = new ArrayList<>();
 			states.add(state);
 			DPCellStateDto dto = new DPCellStateDto("_" + rowId, columnKey, states);
 			this.lstCellState.add(dto);
+			if(states.contains(DPText.STATE_DISABLE)) {
+				lstCellDisByLock.add(new DPHideControlCell("_" + rowId, columnKey));
+			}
 		}
+		
 
 	}
 	
@@ -347,7 +359,7 @@ public class DailyPerformanceCorrectionDto {
 			List<String> states = new ArrayList<>();
 			states.add(state);
 			DPCellStateDto dto = new DPCellStateDto("_" + rowId, columnKey, states);
-			lstCellDisByLock.add(new DPHideControlCell(rowId, columnKey));
+			lstCellDisByLock.add(new DPHideControlCell("_" + rowId, columnKey));
 			this.lstCellState.add(dto);
 		}
 

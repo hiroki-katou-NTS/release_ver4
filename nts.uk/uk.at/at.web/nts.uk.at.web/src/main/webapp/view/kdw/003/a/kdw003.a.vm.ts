@@ -1645,7 +1645,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                                 _.forEach(findRow, (value2, key2) => {
                                     if ((key2.indexOf("A") != -1 || key2.indexOf("NO") != -1
                                         || key2.indexOf("Name") != -1 || key2.indexOf("Code") != -1) && key2.indexOf("Application") == -1
-                                        && _.find(self.lstCellDisByLock, tempp => { return "_" + tempp.rowId == findRow.id && tempp.columnKey == key2 }) != undefined) {
+                                        && !(_.find(self.lstCellDisByLock, tempp => { return tempp.rowId == findRow.id && tempp.columnKey == key2 }) != undefined)) {
                                         //enable
                                         $("#dpGrid").mGrid("enableNtsControlAt", findRow.id, key2);
                                     }
@@ -1702,7 +1702,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                                 _.forEach(findRow, (value2, key2) => {
                                     if ((key2.indexOf("A") != -1 || key2.indexOf("NO") != -1
                                         || key2.indexOf("Name") != -1 || key2.indexOf("Code") != -1) && key2.indexOf("Application") == -1
-                                        && _.find(self.lstCellDisByLock, tempp => { return "_" + tempp.rowId == findRow.id && tempp.columnKey == key2 }) != undefined) {
+                                        && !(_.find(self.lstCellDisByLock, tempp => { return tempp.rowId == findRow.id && tempp.columnKey == key2 }) != undefined)) {
                                         //enable
                                         $("#dpGrid").mGrid("enableNtsControlAt", findRow.id, key2);
                                     }
