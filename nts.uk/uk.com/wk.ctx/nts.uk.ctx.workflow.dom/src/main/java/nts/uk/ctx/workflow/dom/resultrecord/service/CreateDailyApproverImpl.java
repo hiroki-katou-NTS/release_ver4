@@ -126,7 +126,7 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 				appRootInstNewest.setDatePeriod(new DatePeriod(oldPeriod.start(), startHistDate.addDays(-1)));
 				appRootInstanceRepository.update(appRootInstNewest);
 				//承認状態をクリアする
-				appRootConfirmRepository.clearStatusFromDate(companyID, employeeID, recordDate, rootType);
+				// appRootConfirmRepository.clearStatusFromDate(companyID, employeeID, recordDate, rootType);
 			}
 		}
 		// 取得した承認ルートをドメインモデル「承認ルート中間データ」にINSERTする
