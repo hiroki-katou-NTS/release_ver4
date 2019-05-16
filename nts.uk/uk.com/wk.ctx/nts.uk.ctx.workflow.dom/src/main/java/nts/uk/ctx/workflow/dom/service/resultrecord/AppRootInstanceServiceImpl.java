@@ -615,10 +615,15 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	@Override
 	public ApprovalEmpStatus getDailyApprovalStatus(String companyId, String approverId, List<String> targetEmployeeIds, DatePeriod period) {
 		
-		val instancesMap = appRootInstancesMap(companyId, approverId, targetEmployeeIds, period);
 		val confirms = this.appRootConfirmRepository.findByEmpDate(
 				companyId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY);
-		val representRequesterIds = representRequesterIds(companyId, approverId, period);
+		
+		// システム日付時点で代行依頼があれば、承認できる
+		val representRequests = this.agentRepository.findAgentByPeriod(
+				companyId, Arrays.asList(approverId), GeneralDate.today(), GeneralDate.today(), 1);
+		val representRequesterIds = representRequests.stream().map(a -> a.getAgentID()).collect(Collectors.toList());
+		
+		val instancesMap = appRootInstancesMap(companyId, approverId, representRequests, targetEmployeeIds, period);
 		
 		List<RouteSituation> routeSituations = new ArrayList<>();
 		
@@ -637,33 +642,44 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 		return new ApprovalEmpStatus(approverId, routeSituations);
 	}
 	
+	/**
+	 * getting AppRootInstance for getDailyApprovalStatus
+	 */
 	private BiFunction<String, GeneralDate, Optional<AppRootInstance>> appRootInstancesMap(
-			String companyId, String approverId, List<String> targetEmployeeIds, DatePeriod period) {
+			String companyId,
+			String approverId,
+			List<AgentInfoOutput> representRequests,
+			List<String> targetEmployeeIds,
+			DatePeriod period) {
 		
-		val instances = this.appRootInstanceRepository.findByApproverEmployeePeriod(
+		val instancesApprover = this.appRootInstanceRepository.findByApproverEmployeePeriod(
 				companyId, approverId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY);
+		val mapApprover = ListHashMap.create(instancesApprover, i -> i.getEmployeeID());
 		
-		val map = ListHashMap.create(instances, i -> i.getEmployeeID());
+		// 代行依頼している承認者達の中間データ
+		val instancesRepresent = representRequests.stream()
+				.flatMap(request -> this.appRootInstanceRepository.findByApproverEmployeePeriod(
+							companyId, request.getAgentID(), targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY).stream())
+				.collect(Collectors.toList());
+		val mapRepresent = ListHashMap.create(instancesRepresent, i -> i.getEmployeeID());
 		
 		return (employeeId, date) -> {
-			List<AppRootInstance> instancesForEmp = map.get(employeeId);
-			if (instancesForEmp == null) {
-				return Optional.empty();
+			Optional<AppRootInstance> result = mapApprover.getOrDefault(employeeId, Collections.emptyList()).stream()
+					.filter(i -> i.getDatePeriod().contains(date))
+					.findFirst();
+			
+			// 承認者自身のものがあればそれを返す
+			if (result.isPresent()) {
+				return result;
 			}
 			
-			return instancesForEmp.stream()
+			// 無ければ代行依頼者のものを探す
+			return mapRepresent.getOrDefault(employeeId, Collections.emptyList()).stream()
 					.filter(i -> i.getDatePeriod().contains(date))
 					.findFirst();
 		};
 	}
 	
-	private List<String> representRequesterIds(String companyId, String approverId, DatePeriod period) {
-		return this.agentRepository.findAgentByPeriod(companyId, Arrays.asList(approverId), period.start(), period.end(), 1)
-				.stream()
-				.map(a -> a.getApproverID())
-				.collect(Collectors.toList());
-	}
-
 	@Override
 	public List<RouteSituation> getApproverRouteSituation(DatePeriod period, List<ApprovalRouteDetails> approverRouteLst, List<String> agentLst, RecordRootType rootType,
 			boolean useDayApproverConfirm, DatePeriod closurePeriod, YearMonth yearMonth, Integer closureID, ClosureDate closureDate) {

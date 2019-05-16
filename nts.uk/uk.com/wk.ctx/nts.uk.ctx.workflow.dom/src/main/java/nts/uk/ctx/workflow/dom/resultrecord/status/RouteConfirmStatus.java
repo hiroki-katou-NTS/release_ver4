@@ -51,7 +51,7 @@ public class RouteConfirmStatus {
 	public RouteConfirmStatusForOneApprover getStatusFor(String approverId, List<String> representRequesterId) {
 		
 		return RouteConfirmStatusForOneApprover.create(
-				stateFor(approverId),
+				stateFor(approverId, representRequesterId),
 				releaseAtr(approverId, representRequesterId),
 				actionFor(approverId, representRequesterId));
 	}
@@ -87,7 +87,7 @@ public class RouteConfirmStatus {
 	 * @param approverId
 	 * @return
 	 */
-	private ApproverEmpState stateFor(String approverId) {
+	private ApproverEmpState stateFor(String approverId, List<String> representRequesterIds) {
 		// 最終フェーズが承認済み
 		if (phases.finalPhase().hasConfirmed()) {
 			return ApproverEmpState.COMPLETE;
@@ -97,7 +97,7 @@ public class RouteConfirmStatus {
 		val progressingPhases = phases.progressingPhases();
 		
 		// 承認中のフェーズではなくその前後いずれか
-		if (!progressingPhases.isApprover(approverId)) {
+		if (!progressingPhases.canApprove(approverId, representRequesterIds)) {
 			return phases.isApproverInUnreachedPhase(approverId)
 					? ApproverEmpState.PHASE_LESS
 					: ApproverEmpState.PHASE_PASS;

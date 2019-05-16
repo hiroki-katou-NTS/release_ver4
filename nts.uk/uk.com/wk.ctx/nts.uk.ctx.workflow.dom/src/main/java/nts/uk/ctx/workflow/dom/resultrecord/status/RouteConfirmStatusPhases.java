@@ -155,13 +155,13 @@ public class RouteConfirmStatusPhases {
 		private final List<RouteConfirmStatusPhase> phases;
 		
 		/**
-		 * 指定した社員はいずれかのフェーズの承認者か
+		 * 指定した社員はいずれかのフェーズを承認できるか
 		 * @param approverId
 		 * @return
 		 */
-		public boolean isApprover(String approverId) {
+		public boolean canApprove(String approverId, List<String> representRequesterIds) {
 			return phases.stream()
-					.anyMatch(p -> p.isApprover(approverId));
+					.anyMatch(p -> p.canApprove(approverId, representRequesterIds));
 		}
 		
 		/**
