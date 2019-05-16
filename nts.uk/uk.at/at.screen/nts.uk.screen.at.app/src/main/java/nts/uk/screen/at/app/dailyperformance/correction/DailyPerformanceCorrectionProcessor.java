@@ -833,8 +833,8 @@ public class DailyPerformanceCorrectionProcessor {
 						typeGroup = typeGroup
 								+ mergeString(String.valueOf(item.getId()), ":", String.valueOf(groupType), "|");
 						if (lock) {
-							screenDto.setCellSate(data.getId(), codeColKey, DPText.STATE_DISABLE);
-							screenDto.setCellSate(data.getId(), nameColKey, DPText.STATE_DISABLE);
+							screenDto.setCellSate(data.getId(), codeColKey, DPText.STATE_DISABLE, true);
+							screenDto.setCellSate(data.getId(), nameColKey, DPText.STATE_DISABLE, true);
 						}
 						if (value.isEmpty() || value.equals("null")) {
 							cellDatas.add(new DPCellDataDto(mergeString(DPText.CODE, itemIdAsString), "",
@@ -870,8 +870,8 @@ public class DailyPerformanceCorrectionProcessor {
 					} else {
 						String noColKey = mergeString(DPText.NO, itemIdAsString);
 						if (lock) {
-							screenDto.setCellSate(data.getId(), noColKey, DPText.STATE_DISABLE);
-							screenDto.setCellSate(data.getId(), nameColKey, DPText.STATE_DISABLE);
+							screenDto.setCellSate(data.getId(), noColKey, DPText.STATE_DISABLE, true);
+							screenDto.setCellSate(data.getId(), nameColKey, DPText.STATE_DISABLE, true);
 						}
 						cellDatas.add(new DPCellDataDto(noColKey, Integer.parseInt(value), attendanceAtrAsString, DPText.TYPE_LABEL));
 						cellDatas.add(new DPCellDataDto(nameColKey, Integer.parseInt(value), attendanceAtrAsString, DPText.TYPE_LINK));
@@ -884,7 +884,7 @@ public class DailyPerformanceCorrectionProcessor {
 					// set color edit
 					cellEditColor(screenDto, data.getId(), anyChar, cellEdit);
 					if (lock) {
-						screenDto.setCellSate(data.getId(), anyChar, DPText.STATE_DISABLE);
+						screenDto.setCellSate(data.getId(), anyChar, DPText.STATE_DISABLE, true);
 					}
 					if (attendanceAtr == DailyAttendanceAtr.Time.value
 							|| attendanceAtr == DailyAttendanceAtr.TimeOfDay.value) {

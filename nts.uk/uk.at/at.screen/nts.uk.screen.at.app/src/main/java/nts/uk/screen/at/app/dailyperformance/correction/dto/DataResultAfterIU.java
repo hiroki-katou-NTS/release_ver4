@@ -1,8 +1,10 @@
 package nts.uk.screen.at.app.dailyperformance.correction.dto;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -26,8 +28,16 @@ public class DataResultAfterIU {
 	String messageAlert;
 	
 	List<Pair<String, GeneralDate>> lstSidDateDomainError = new ArrayList<>();
+	
+	Set<EmpAndDate> mapIndentityCheck = new HashSet<>(); 
+	
+	Set<EmpAndDate> mapApprovalCheck = new HashSet<>(); 
+	
+	boolean onlyLoadCheckBox = false;
 		
 	boolean errorAllSidDate = false;
+	
+	boolean canFlex = false;
 
 	public DataResultAfterIU(Map<Integer, List<DPItemValue>> errorMap, FlexShortageRCDto flexShortage,
 			Boolean showErrorDialog, String messageAlert) {

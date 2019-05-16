@@ -51,4 +51,8 @@ public class DPItemParent {
 	private List<DPItemValue> lstNotFoundWorkType = new ArrayList<>();
 	
 	private Boolean showDialogError;
+	
+	private boolean showFlex;
+	
+	private boolean checkDailyChange;
 }
