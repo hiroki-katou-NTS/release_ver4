@@ -1620,133 +1620,153 @@ module nts.uk.at.view.kdw003.a.viewmodel {
 
             // only load checkBox
                 if (onlyCheckBox === true) {
-                    setTimeout(() => {
-                    let paramVer = {lstDataChange: {}}, lstDataChange = [];
-                    let modeApprovalOrNormal = _.isEmpty(self.shareObject()) ? 0 : self.shareObject().screenMode;
-                    let dataChangeApproval: any = _.filter(dataChange, temp => {
-                        return temp.columnKey == "approval"
-                    }),
-                        dataChangeSign: any = _.filter(dataChange, temp => {
-                            return temp.columnKey == "sign"
+                        let paramVer = { lstDataChange: {} }, lstDataChange = [];
+                        let modeApprovalOrNormal = _.isEmpty(self.shareObject()) ? 0 : self.shareObject().screenMode;
+                        let dataChangeApproval: any = _.filter(dataChange, temp => {
+                            return temp.columnKey == "approval"
+                        }),
+                            dataChangeSign: any = _.filter(dataChange, temp => {
+                                return temp.columnKey == "sign"
+                            });
+                      setTimeout(() => {
+                        // xu ly sign
+                        _.forEach(dataChangeSign, temp => {
+                            let findRow: any = _.find(dataSource, temp2 => {
+                                return temp.rowId == temp2.id;
+                            });
+                            //                        if (!lstDataChange.includes({ employeeId: findRow.employeeId, date: findRow.dateDetail})){
+                            //                             lstDataChange.push({ employeeId: findRow.employeeId, date: findRow.dateDetail});
+                            //                        }
+                            let checkBoxSignChange = temp.value;
+
+                            let checkBoxResult = _.find(self.mapIndentityCheck, (value) => { return value.employeeId == findRow.employeeId && findRow.dateDetail._i == value.date });
+                            if (!checkBoxSignChange) {
+                                // da check va bo check
+                                _.forEach(findRow, (value2, key2) => {
+                                    if ((key2.indexOf("A") != -1 || key2.indexOf("NO") != -1
+                                        || key2.indexOf("Name") != -1 || key2.indexOf("Code") != -1) && key2.indexOf("Application") == -1
+                                        && _.find(self.lstCellDisByLock, tempp => { return "_" + tempp.rowId == findRow.id && tempp.columnKey == key2 }) != undefined) {
+                                        //enable
+                                        $("#dpGrid").mGrid("enableNtsControlAt", findRow.id, key2);
+                                    }
+                                })
+                                $("#dpGrid").mGrid("updateCell", findRow.id, "sign", false, true, true)
+                                let stateLock = "";
+                                if (findRow.state != "lock|S" && findRow.state != "") {
+                                    stateLock = findRow.state.replace("|S", '');
+                                }
+                                $("#dpGrid").mGrid("updateCell", findRow.id, "state", stateLock, true, true)
+                            } else {
+                                // ko check -> check 
+                                if (checkBoxResult) {
+                                    //check ok 
+                                    if (modeApprovalOrNormal == 0 && self.showLock()) {
+                                        _.forEach(findRow, (value2, key2) => {
+                                            if ((key2.indexOf("A") != -1 || key2.indexOf("NO") != -1
+                                                || key2.indexOf("Name") != -1 || key2.indexOf("Code") != -1) && key2.indexOf("Application") == -1) {
+                                                //disable
+                                                $("#dpGrid").mGrid("disableNtsControlAt", findRow.id, key2);
+                                            }
+                                        })
+                                    }
+                                    $("#dpGrid").mGrid("updateCell", findRow.id, "sign", true, true, true);
+                                    let stateLock = findRow.state;
+                                    if (findRow.state != "" && findRow.state != "lock|S") {
+                                        stateLock += "|S";
+                                    } else {
+                                        stateLock = "lock|S";
+                                    }
+                                    if (self.showLock()) $("#dpGrid").mGrid("updateCell", findRow.id, "state", stateLock, true, true)
+                                } else {
+                                    // khong check duoc 
+                                    $("#dpGrid").mGrid("updateCell", findRow.id, "sign", false, true, true)
+                                }
+                            }
                         });
-                    // xu ly sign
+
+                        //xu ly approval
+                        _.forEach(dataChangeApproval, temp => {
+                            let findRow: any = _.find(dataSource, temp2 => {
+                                return temp.rowId == temp2.id;
+                            }),
+
+                                checkBoxAppChange = temp.value,
+
+                                checkBoxResult = _.find(self.mapApprovalCheck, (value) => { return value.employeeId == findRow.employeeId && findRow.dateDetail._i == value.date });
+
+                            if (!lstDataChange.includes({ employeeId: findRow.employeeId, date: findRow.dateDetail })) {
+                                lstDataChange.push({ employeeId: findRow.employeeId, date: findRow.dateDetail });
+                            }
+                            if (!checkBoxAppChange) {
+                                // da check va bo check
+                                _.forEach(findRow, (value2, key2) => {
+                                    if ((key2.indexOf("A") != -1 || key2.indexOf("NO") != -1
+                                        || key2.indexOf("Name") != -1 || key2.indexOf("Code") != -1) && key2.indexOf("Application") == -1
+                                        && _.find(self.lstCellDisByLock, tempp => { return "_" + tempp.rowId == findRow.id && tempp.columnKey == key2 }) != undefined) {
+                                        //enable
+                                        $("#dpGrid").mGrid("enableNtsControlAt", findRow.id, key2);
+                                    }
+                                })
+                                $("#dpGrid").mGrid("updateCell", findRow.id, "approval", false, true, true);
+                                let stateLock = "";
+                                if (findRow.state != "lock|A" && findRow.state != "") {
+                                    stateLock = findRow.state.replace("|A", '');
+                                }
+                                $("#dpGrid").mGrid("updateCell", findRow.id, "state", stateLock, true, true);
+                            } else {
+                                // ko check -> check 
+                                if (checkBoxResult) {
+                                    //check ok 
+                                    if (self.showLock()) {
+                                        _.forEach(findRow, (value2, key2) => {
+                                            if ((key2.indexOf("A") != -1 || key2.indexOf("NO") != -1
+                                                || key2.indexOf("Name") != -1 || key2.indexOf("Code") != -1) && key2.indexOf("Application") == -1) {
+                                                //disable
+                                                $("#dpGrid").mGrid("disableNtsControlAt", findRow.id, key2);
+                                            }
+                                        })
+                                    }
+                                    $("#dpGrid").mGrid("updateCell", findRow.id, "approval", true, true, true);
+                                    if (self.showLock()) {
+                                        let stateLock = findRow.state;
+                                        if (findRow.state != "" && findRow.state != "|A") {
+                                            stateLock += "|A";
+                                        } else {
+                                            stateLock = "lock|A";
+                                        }
+                                        $("#dpGrid").mGrid("updateCell", findRow.id, "state", stateLock, true, true);
+                                    }
+                                } else {
+                                    // khong check duoc 
+                                    $("#dpGrid").mGrid("updateCell", findRow.id, "approval", false, true, true);
+                                }
+                            }
+                        });
+                    }, 100);
+                    
                     _.forEach(dataChangeSign, temp => {
                         let findRow: any = _.find(dataSource, temp2 => {
                             return temp.rowId == temp2.id;
                         });
-                        if (!lstDataChange.includes({ employeeId: findRow.employeeId, date: findRow.dateDetail})){
-                             lstDataChange.push({ employeeId: findRow.employeeId, date: findRow.dateDetail});
-                        }
-                        let checkBoxSignChange = temp.value;
-
-                        let checkBoxResult = _.find(self.mapIndentityCheck, (value) => { return value.employeeId == findRow.employeeId && findRow.dateDetail._i == value.date });
-                        if (!checkBoxSignChange) {
-                            // da check va bo check
-                            _.forEach(findRow, (value2, key2) => {
-                                if ((key2.indexOf("A") != -1 || key2.indexOf("NO") != -1
-                                    || key2.indexOf("Name") != -1 || key2.indexOf("Code") != -1) && key2.indexOf("Application") == -1 
-                                    && _.find(self.lstCellDisByLock, tempp => { return "_" + tempp.rowId == findRow.id && tempp.columnKey == key2 }) != undefined) {
-                                    //enable
-                                    $("#dpGrid").mGrid("enableNtsControlAt", findRow.id, key2);
-                                }
-                            })
-                             $("#dpGrid").mGrid("updateCell", findRow.id, "sign", false, true, true)
-                             let stateLock = "";
-                             if(findRow.state != "lock|S" && findRow.state != "" ){
-                                 stateLock = findRow.state.replace("|S", '');
-                             }
-                             $("#dpGrid").mGrid("updateCell", findRow.id, "state", stateLock, true, true)
-                        } else {
-                            // ko check -> check 
-                            if (checkBoxResult) {
-                                //check ok 
-                                if (modeApprovalOrNormal == 0 && self.showLock()){
-                                    _.forEach(findRow, (value2, key2) => {
-                                        if ((key2.indexOf("A") != -1 || key2.indexOf("NO") != -1
-                                            || key2.indexOf("Name") != -1 || key2.indexOf("Code") != -1) && key2.indexOf("Application") == -1) {
-                                            //disable
-                                            $("#dpGrid").mGrid("disableNtsControlAt", findRow.id, key2);
-                                        }
-                                    })
-                                }
-                                $("#dpGrid").mGrid("updateCell", findRow.id, "sign", true, true, true);
-                                 let stateLock = findRow.state;
-                                    if (findRow.state != "" && findRow.state != "lock|S") {
-                                        stateLock += "|S";
-                                    }else{
-                                        stateLock = "lock|S";
-                                    }
-                                if(self.showLock()) $("#dpGrid").mGrid("updateCell", findRow.id, "state", stateLock, true, true)
-                            } else {
-                                // khong check duoc 
-                                $("#dpGrid").mGrid("updateCell", findRow.id, "sign", false, true, true)
-                            }
-                        }
-                    });
-                    
-                    //xu ly approval
-                    _.forEach(dataChangeApproval, temp => {
-                        let findRow: any = _.find(dataSource, temp2 => {
-                            return temp.rowId == temp2.id;
-                        }),
-                            
-                        checkBoxAppChange = temp.value,
-
-                        checkBoxResult = _.find(self.mapApprovalCheck, (value) => { return value.employeeId == findRow.employeeId && findRow.dateDetail._i == value.date });
-                        
                         if (!lstDataChange.includes({ employeeId: findRow.employeeId, date: findRow.dateDetail })) {
                             lstDataChange.push({ employeeId: findRow.employeeId, date: findRow.dateDetail });
                         }
-                        if (!checkBoxAppChange) {
-                            // da check va bo check
-                            _.forEach(findRow, (value2, key2) => {
-                                if ((key2.indexOf("A") != -1 || key2.indexOf("NO") != -1
-                                    || key2.indexOf("Name") != -1 || key2.indexOf("Code") != -1) && key2.indexOf("Application") == -1 
-                                 && _.find(self.lstCellDisByLock, tempp => { return "_" + tempp.rowId == findRow.id && tempp.columnKey == key2 }) != undefined) {
-                                    //enable
-                                    $("#dpGrid").mGrid("enableNtsControlAt", findRow.id, key2);
-                                }
-                            })
-                             $("#dpGrid").mGrid("updateCell", findRow.id, "approval", false, true, true);
-                             let stateLock = "";
-                             if(findRow.state != "lock|A" && findRow.state != "" ){
-                                 stateLock = findRow.state.replace("|A", '');
-                             }
-                             $("#dpGrid").mGrid("updateCell", findRow.id, "state", stateLock, true, true);
-                        } else {
-                            // ko check -> check 
-                            if (checkBoxResult) {
-                                //check ok 
-                                if (self.showLock()){
-                                    _.forEach(findRow, (value2, key2) => {
-                                        if ((key2.indexOf("A") != -1 || key2.indexOf("NO") != -1
-                                            || key2.indexOf("Name") != -1 || key2.indexOf("Code") != -1) && key2.indexOf("Application") == -1) {
-                                            //disable
-                                            $("#dpGrid").mGrid("disableNtsControlAt", findRow.id, key2);
-                                        }
-                                    })
-                                }
-                                $("#dpGrid").mGrid("updateCell", findRow.id, "approval", true, true, true);
-                                if(self.showLock()) {
-                                    let stateLock = findRow.state;
-                                    if (findRow.state != "" && findRow.state != "|A") {
-                                        stateLock += "|A";
-                                    }else{
-                                        stateLock = "lock|A";
-                                    }
-                                   $("#dpGrid").mGrid("updateCell", findRow.id, "state", stateLock, true, true); 
-                                }
-                            } else {
-                                // khong check duoc 
-                                $("#dpGrid").mGrid("updateCell", findRow.id, "approval", false, true, true);
-                            }
+                    })
+                    _.forEach(dataChangeApproval, temp => {
+                        let findRow: any = _.find(dataSource, temp2 => {
+                            return temp.rowId == temp2.id;
+                        });
+                        if (!lstDataChange.includes({ employeeId: findRow.employeeId, date: findRow.dateDetail })) {
+                            lstDataChange.push({ employeeId: findRow.employeeId, date: findRow.dateDetail });
                         }
-                    });
+                    })
+
                     paramVer.lstDataChange = lstDataChange;
                     service.loadVerRow(paramVer).done((data) => {
                         dfd.resolve();
                     });
-                }, 100);}
+                    return dfd.promise();
+                }
 
             let rowIds = _.map(_.cloneDeep(rowIdsTemp), (value) => {
                 return value.rowId.substring(1, value.rowId.length);
