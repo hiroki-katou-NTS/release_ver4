@@ -1620,6 +1620,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
 
             // only load checkBox
                 if (onlyCheckBox === true) {
+                    setTimeout(() => {
                     let paramVer = {lstDataChange: {}}, lstDataChange = [];
                     let modeApprovalOrNormal = _.isEmpty(self.shareObject()) ? 0 : self.shareObject().screenMode;
                     let dataChangeApproval: any = _.filter(dataChange, temp => {
@@ -1745,8 +1746,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     service.loadVerRow(paramVer).done((data) => {
                         dfd.resolve();
                     });
-                    return dfd.resolve();
-                }
+                }, 100);}
 
             let rowIds = _.map(_.cloneDeep(rowIdsTemp), (value) => {
                 return value.rowId.substring(1, value.rowId.length);
