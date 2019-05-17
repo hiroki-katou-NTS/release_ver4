@@ -206,7 +206,7 @@ public class OvertimePreProcessImpl implements IOvertimePreProcess {
 	}
 
 	@Override
-	public RecordWorkOutput getWorkingHours(String companyID, String employeeID, String appDate,
+	public RecordWorkOutput getWorkingHours(String companyID, String employeeID, String changeEmployee, String appDate,
 			ApprovalFunctionSetting approvalFunctionSetting, String siftCD, boolean isOverTime) {
 		UseAtr recordWorkDisplay = UseAtr.NOTUSE;
 		Integer startTime1 = null;
@@ -228,8 +228,14 @@ public class OvertimePreProcessImpl implements IOvertimePreProcess {
 		}
 		case DISPLAY: {
 			// 01-14-2_実績から出退勤を初期表示
-			RecordWorkInfoImport recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(employeeID,
-					GeneralDate.fromString(appDate, DATE_FORMAT));
+			RecordWorkInfoImport recordWorkInfoImport = null; 
+			if (changeEmployee == null) {
+			    recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(employeeID,
+						GeneralDate.fromString(appDate, DATE_FORMAT));
+			} else {
+				recordWorkInfoImport = recordWorkInfoAdapter.getRecordWorkInfo(changeEmployee,
+						GeneralDate.fromString(appDate, DATE_FORMAT));
+			}
 			startTime1 = recordWorkInfoImport.getAttendanceStampTimeFirst();
 			endTime1 = recordWorkInfoImport.getLeaveStampTimeFirst();
 			startTime2 = recordWorkInfoImport.getAttendanceStampTimeSecond();
