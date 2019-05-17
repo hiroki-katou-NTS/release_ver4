@@ -710,8 +710,8 @@ module nts.uk.at.view.kaf009.a.viewmodel {
         setRealData(data: any){
             let self = this;
             self.realTimeDate(data.achievementOutput.date);
-            self.realTimeWorkType(data.achievementOutput.workType.workTypeCode+"   "+data.achievementOutput.workType.name);
-            self.realTimeWorkTime(data.achievementOutput.workTime.workTimeCD+"   "+data.achievementOutput.workTime.workTimeName);
+            self.realTimeWorkType(data.achievementOutput.workType.workTypeCode+"   "+self.getName(data.achievementOutput.workType.workTypeCode,data.achievementOutput.workType.name));
+            self.realTimeWorkTime(data.achievementOutput.workTime.workTimeCD+"   "+self.getName(data.achievementOutput.workTime.workTimeCD,data.achievementOutput.workTime.workTimeName));
             let startTime1 = data.achievementOutput.startTime1;
             let endTime1 = data.achievementOutput.endTime1;
             let startTime2 = data.achievementOutput.startTime2;
