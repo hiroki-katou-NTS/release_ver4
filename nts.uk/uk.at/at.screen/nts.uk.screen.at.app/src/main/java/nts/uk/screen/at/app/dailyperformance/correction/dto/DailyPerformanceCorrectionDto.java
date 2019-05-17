@@ -350,16 +350,11 @@ public class DailyPerformanceCorrectionDto {
 	public void setCellSate(String rowId, String columnKey, String state, boolean lock) {
 		Optional<DPCellStateDto> existedCellState = findExistCellState(rowId, columnKey);
 		if (existedCellState.isPresent()) {
-			List<String> stateCell = existedCellState.get().getState();
-			if(!stateCell.contains(DPText.STATE_DISABLE)) {
-				lstCellDisByLock.add(new DPHideControlCell(rowId, columnKey));
-			}
 			existedCellState.get().addState(state);
 		} else {
 			List<String> states = new ArrayList<>();
 			states.add(state);
 			DPCellStateDto dto = new DPCellStateDto("_" + rowId, columnKey, states);
-			lstCellDisByLock.add(new DPHideControlCell("_" + rowId, columnKey));
 			this.lstCellState.add(dto);
 		}
 
