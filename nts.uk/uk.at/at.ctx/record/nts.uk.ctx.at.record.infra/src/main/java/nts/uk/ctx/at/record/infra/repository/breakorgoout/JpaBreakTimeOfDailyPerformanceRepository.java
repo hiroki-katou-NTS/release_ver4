@@ -318,7 +318,7 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 				stmt.setDate(2, Date.valueOf(breakTimes.get(0).getYmd().localDate()));
 				
 				krcdtDaiBreakTimes = new NtsResultSet(stmt.executeQuery())
-						.getList(rec -> KrcdtDaiBreakTime.MAPPER.toEntity(rec));
+						.getList(rec -> this.getEntityManager().merge(KrcdtDaiBreakTime.MAPPER.toEntity(rec)));
 			}
 			
 			internalUpdate(all, krcdtDaiBreakTimes);
