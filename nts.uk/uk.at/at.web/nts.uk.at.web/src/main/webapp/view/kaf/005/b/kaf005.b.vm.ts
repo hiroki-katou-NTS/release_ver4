@@ -922,11 +922,11 @@ module nts.uk.at.view.kaf005.b {
                     self.appDateReference(data.appOvertimeReference.appDateRefer);
                     if(data.appOvertimeReference.workTypeRefer != null){
                         self.workTypeCodeReference(data.appOvertimeReference.workTypeRefer.workTypeCode);
-                        self.workTypeNameReference(data.appOvertimeReference.workTypeRefer.workTypeName);
+                        self.workTypeNameReference(self.getName(data.appOvertimeReference.workTypeRefer.workTypeCode, data.appOvertimeReference.workTypeRefer.workTypeName));
                     }
                     if(data.appOvertimeReference.siftTypeRefer != null){
                         self.siftCodeReference(data.appOvertimeReference.siftTypeRefer.siftCode);
-                        self.siftNameReference(data.appOvertimeReference.siftTypeRefer.siftName);
+                        self.siftNameReference(self.getName(data.appOvertimeReference.siftTypeRefer.siftCode, data.appOvertimeReference.siftTypeRefer.siftName));
                     }
                     self.workClockFrom1To1Reference(data.appOvertimeReference.workClockFromTo1Refer);
                     self.workClockFrom2To2Reference(data.appOvertimeReference.workClockFromTo2Refer);
@@ -952,6 +952,7 @@ module nts.uk.at.view.kaf005.b {
                      self.flexExessTimeRefer(data.appOvertimeReference.flexExessTimeRefer == -1? null : self.convertIntToTime(data.appOvertimeReference.flexExessTimeRefer));
                 }
             }
+            
             convertIntToTime(data : number) : string{
                 let hourMinute : string = "";
                 if(nts.uk.util.isNullOrEmpty(data)){
