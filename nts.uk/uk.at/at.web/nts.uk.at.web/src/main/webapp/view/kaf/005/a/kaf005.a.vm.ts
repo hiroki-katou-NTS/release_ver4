@@ -1206,11 +1206,17 @@ module nts.uk.at.view.kaf005.a.viewmodel {
                     self.workTypeCodeReference(wkTypeCD);
                     self.workTypeNameReference(self.getName(wkTypeCD, data.appOvertimeReference.workTypeRefer.workTypeName));
                     
+                }else{
+                    self.workTypeCodeReference("");
+                    self.workTypeNameReference("");
                 }
                 if(data.appOvertimeReference.siftTypeRefer != null){
                     let wkTimeCD = data.appOvertimeReference.siftTypeRefer.siftCode;
                     self.siftCodeReference(data.appOvertimeReference.siftTypeRefer.siftCode);
                     self.siftNameReference(self.getName(data.appOvertimeReference.siftTypeRefer.siftCode, data.appOvertimeReference.siftTypeRefer.siftName));
+                }else{
+                    self.siftCodeReference("");
+                    self.siftNameReference("");
                 }
                 self.workClockFrom1To1Reference(data.appOvertimeReference.workClockFromTo1Refer);
                 self.workClockFrom2To2Reference(data.appOvertimeReference.workClockFromTo2Refer);
