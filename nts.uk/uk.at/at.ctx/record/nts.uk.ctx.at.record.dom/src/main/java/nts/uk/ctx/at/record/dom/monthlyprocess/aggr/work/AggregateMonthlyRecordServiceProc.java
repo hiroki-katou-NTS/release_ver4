@@ -449,7 +449,7 @@ public class AggregateMonthlyRecordServiceProc {
 					
 					// 集計期間を一ヶ月手前にずらす
 					YearMonth prevYM = this.yearMonth.addMonths(-1);
-					GeneralDate prevEnd = monthPeriod.end().addDays(-1);
+					GeneralDate prevEnd = monthPeriod.start().addDays(-1);
 					GeneralDate prevStart = prevEnd.addMonths(-1).addDays(1);
 					DatePeriod prevPeriod = new DatePeriod(prevStart, prevEnd);
 					
