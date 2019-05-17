@@ -923,10 +923,16 @@ module nts.uk.at.view.kaf005.b {
                     if(data.appOvertimeReference.workTypeRefer != null){
                         self.workTypeCodeReference(data.appOvertimeReference.workTypeRefer.workTypeCode);
                         self.workTypeNameReference(self.getName(data.appOvertimeReference.workTypeRefer.workTypeCode, data.appOvertimeReference.workTypeRefer.workTypeName));
+                    } else {
+                        self.workTypeCodeReference("");
+                        self.workTypeNameReference("");
                     }
-                    if(data.appOvertimeReference.siftTypeRefer != null){
+                    if (data.appOvertimeReference.siftTypeRefer != null) {
                         self.siftCodeReference(data.appOvertimeReference.siftTypeRefer.siftCode);
                         self.siftNameReference(self.getName(data.appOvertimeReference.siftTypeRefer.siftCode, data.appOvertimeReference.siftTypeRefer.siftName));
+                    } else {
+                        self.siftCodeReference("");
+                        self.siftNameReference("");
                     }
                     self.workClockFrom1To1Reference(data.appOvertimeReference.workClockFromTo1Refer);
                     self.workClockFrom2To2Reference(data.appOvertimeReference.workClockFromTo2Refer);
