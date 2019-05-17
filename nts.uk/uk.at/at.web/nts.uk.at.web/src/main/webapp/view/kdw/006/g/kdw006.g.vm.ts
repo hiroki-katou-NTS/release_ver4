@@ -300,6 +300,9 @@ module nts.uk.at.view.kdw006.g.viewmodel {
             nts.uk.ui.windows.sub.modal('/view/kdl/002/a/index.xhtml', { title: '' }).onClosed(function(): any {
                 nts.uk.ui.block.clear();
                 var data = nts.uk.ui.windows.getShared('KDL002_SelectedNewItem');
+                var isCancel = nts.uk.ui.windows.getShared('KDL002_IsCancel');
+                if(isCancel != null && isCancel == true)
+                return;
                 var name = [];
                 _.forEach(data, function(item: any) {
                     name.push(item.name);
