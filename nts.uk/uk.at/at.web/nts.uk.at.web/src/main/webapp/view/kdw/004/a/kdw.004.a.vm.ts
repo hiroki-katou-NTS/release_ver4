@@ -96,7 +96,12 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                     nts.uk.ui.dialog.alert({ messageId: result.messageID  });
                 }
                 self.generateColumns();
-                self.loadGrid();
+                let dataLocal = nts.uk.localStorage.getItem('approvalSize');
+                if(dataLocal.isPresent()){
+                        self.loadGrid(dataLocal.get());
+                    } else {
+                        self.loadGrid();
+                    }
                 self.addClickEventDateHeader();
 
                 dfd.resolve();
@@ -133,7 +138,13 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                     nts.uk.ui.dialog.alert({ messageId: result.messageID  });
                 }
                 self.generateColumns();
-                self.loadGrid();
+                let dataLocal = nts.uk.localStorage.getItem('approvalSize');
+                if(dataLocal.isPresent()){
+                        self.loadGrid(dataLocal.get());
+                    } else {
+                        self.loadGrid();
+                    }
+                
                 self.setHeadersColor();
                 self.addClickEventDateHeader();
 
@@ -290,37 +301,54 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                         currentPageIndex: pageIndex || 0,
                         pageSize: index || 12,
                         pageSizeChanging: (ui, args) => {
-                            let approvalSttGrid = document.getElementById('approvalSttGrid'),
-                                approvalSttGrid_headers = document.getElementById('approvalSttGrid_headers');
-
-                            ko.cleanNode(approvalSttGrid);
-
-                            self.currentPageSize(args.newPageSize);
-                            self.loadGrid(args.newPageSize);
-
-                            self.setHeadersColor();
-                            self.addClickEventDateHeader();
-
-                            ko.applyBindings(self, approvalSttGrid);
-                            ko.applyBindings(self, approvalSttGrid_headers);
+                           setTimeout(() => {self.loadSize(args.newPageSize) 
+                                }, 300);
                         },
                         pageIndexChanging: (ui, args) => {
-                            let approvalSttGrid = document.getElementById('approvalSttGrid'),
-                                approvalSttGrid_headers = document.getElementById('approvalSttGrid_headers');
-
-                            ko.cleanNode(approvalSttGrid);
-
-                            self.loadGrid(self.currentPageSize(), args.newPageIndex);
-                            self.setHeadersColor();
-                            self.addClickEventDateHeader();
-
-                            ko.applyBindings(self, approvalSttGrid);
-                            ko.applyBindings(self, approvalSttGrid_headers);
+                            setTimeout(() => {self.loadIndex(args.newPageIndex) 
+                                }, 300);
                         }
                     }
                 ]
             });
         }
+        
+        loadSize=(newPageSize)=>{
+            let self = this;
+             let approvalSttGrid = document.getElementById('approvalSttGrid');
+                                //approvalSttGrid_headers = document.getElementById('approvalSttGrid_headers');
+                            nts.uk.localStorage.setItem('approvalSize', newPageSize);
+                            ko.cleanNode(approvalSttGrid_headers);
+                            ko.cleanNode(approvalSttGrid);
+                    
+                            self.currentPageSize(newPageSize);
+                            self.loadGrid(newPageSize);
+                              
+                            self.setHeadersColor();
+                            self.addClickEventDateHeader();
+
+                            ko.applyBindings(self, approvalSttGrid);
+                            ko.applyBindings(self, approvalSttGrid_headers);
+                       
+        }
+        
+        loadIndex=(newPageIndex)=>{
+            let self = this;
+             let approvalSttGrid = document.getElementById('approvalSttGrid');
+                               // approvalSttGrid_headers = document.getElementById('approvalSttGrid_headers');
+
+                            ko.cleanNode(approvalSttGrid_headers);
+                            ko.cleanNode(approvalSttGrid);
+
+                            self.loadGrid(self.currentPageSize(), newPageIndex);
+                            self.setHeadersColor();
+                            self.addClickEventDateHeader();
+
+                            ko.applyBindings(self, approvalSttGrid);
+                            ko.applyBindings(self, approvalSttGrid_headers);
+                       
+        }
+        
 
         generateColumns = () => {
             let self = this,
