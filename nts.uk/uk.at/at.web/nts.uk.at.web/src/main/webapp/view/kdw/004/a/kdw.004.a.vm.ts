@@ -98,6 +98,7 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                 self.generateColumns();
                 let dataLocal = nts.uk.localStorage.getItem('approvalSize');
                 if(dataLocal.isPresent()){
+                        self.currentPageSize(dataLocal.get());
                         self.loadGrid(dataLocal.get());
                     } else {
                         self.loadGrid();
@@ -140,6 +141,7 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                 self.generateColumns();
                 let dataLocal = nts.uk.localStorage.getItem('approvalSize');
                 if(dataLocal.isPresent()){
+                        self.currentPageSize(dataLocal.get());
                         self.loadGrid(dataLocal.get());
                     } else {
                         self.loadGrid();
