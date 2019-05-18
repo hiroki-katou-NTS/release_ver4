@@ -746,17 +746,26 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 				// 対象日の就業実績確認状態を取得する
 				List<AppRootConfirm> appRootConfirmPeriod = appRootConfirmLst.stream()
 						.filter(x -> x.getEmployeeID().equals(empLoop)).collect(Collectors.toList());
-				Optional<AppRootConfirm> opAppRootConfirm = Optional.empty();
-				for(AppRootConfirm appRootConfirmParam : appRootConfirmPeriod){
-					if(appRootConfirmParam.getRecordDate().compareTo(loopDate)==0){
-						opAppRootConfirm = Optional.of(appRootConfirmParam);
-						break;
+				AppRootConfirm appRootConfirm = null;
+				if(rootType==RecordRootType.CONFIRM_WORK_BY_DAY){
+					Optional<AppRootConfirm> opAppRootConfirm = Optional.empty();
+					for(AppRootConfirm appRootConfirmParam : appRootConfirmPeriod){
+						if(appRootConfirmParam.getRecordDate().compareTo(loopDate)==0){
+							opAppRootConfirm = Optional.of(appRootConfirmParam);
+							break;
+						}
+					}
+					if(!opAppRootConfirm.isPresent()){
+						continue;
+					}
+					appRootConfirm = opAppRootConfirm.get();
+				} else {
+					if(!CollectionUtil.isEmpty(appRootConfirmPeriod)){
+						appRootConfirm = appRootConfirmPeriod.get(0);
+					} else {
+						continue;
 					}
 				}
-				if(!opAppRootConfirm.isPresent()){
-					continue;
-				}
-				AppRootConfirm appRootConfirm = opAppRootConfirm.get();
 				// 中間データから承認ルートインスタンスに変換する
 				ApprovalRootState approvalRootState = this.convertFromAppRootInstance(appRootInstance, appRootConfirm);
 				// 基準社員を元にルート状況を取得する
@@ -838,17 +847,26 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 					// 対象日の就業実績確認状態を取得する
 					List<AppRootConfirm> appRootConfirmPeriod = appRootConfirmLst.stream()
 							.filter(x -> x.getEmployeeID().equals(empLoop)).collect(Collectors.toList());
-					Optional<AppRootConfirm> opAppRootConfirm = Optional.empty();
-					for(AppRootConfirm appRootConfirmParam : appRootConfirmPeriod){
-						if(appRootConfirmParam.getRecordDate().compareTo(loopDate)==0){
-							opAppRootConfirm = Optional.of(appRootConfirmParam);
-							break;
+					AppRootConfirm appRootConfirm = null;
+					if(rootType==RecordRootType.CONFIRM_WORK_BY_DAY){
+						Optional<AppRootConfirm> opAppRootConfirm = Optional.empty();
+						for(AppRootConfirm appRootConfirmParam : appRootConfirmPeriod){
+							if(appRootConfirmParam.getRecordDate().compareTo(loopDate)==0){
+								opAppRootConfirm = Optional.of(appRootConfirmParam);
+								break;
+							}
+						}
+						if(!opAppRootConfirm.isPresent()){
+							continue;
+						}
+						appRootConfirm = opAppRootConfirm.get();
+					} else {
+						if(!CollectionUtil.isEmpty(appRootConfirmPeriod)){
+							appRootConfirm = appRootConfirmPeriod.get(0);
+						} else {
+							continue;
 						}
 					}
-					if(!opAppRootConfirm.isPresent()){
-						continue;
-					}
-					AppRootConfirm appRootConfirm = opAppRootConfirm.get();
 					// 中間データから承認ルートインスタンスに変換する
 					ApprovalRootState approvalRootState = this.convertFromAppRootInstance(appRootInstance, appRootConfirm);
 					// 基準社員を元にルート状況を取得する
