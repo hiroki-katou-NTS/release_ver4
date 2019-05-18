@@ -3,6 +3,7 @@
  */
 package nts.uk.ctx.sys.assist.infra.repository.deletedata;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import javax.persistence.Query;
 import com.google.common.base.Strings;
 
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.file.export.FileGeneratorContext;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.assist.dom.category.TimeStore;
@@ -30,6 +32,8 @@ import nts.uk.ctx.sys.assist.dom.saveprotetion.SaveProtetion;
 import nts.uk.ctx.sys.assist.dom.saveprotetion.SaveProtetionRepository;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
+import nts.uk.shr.infra.file.csv.CSVReportGenerator;
+import nts.uk.shr.infra.file.csv.CsvReportWriter;
 
 /**
  * @author hiep.th
@@ -72,8 +76,11 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 	private static final String YEAR_MONTH = "7";
 	private static final String YEAR_MONTH_DAY = "8";
 	
-	@Inject
-	private SaveProtetionRepository saveProtetionRepo;
+	@Inject 
+	private CSVReportGenerator generatorContext;
+	
+	private static final String CSV_EXTENSION = ".csv";
+
 	
 	@Override
 	public List<TableDeletionDataCsv> getTableDelDataCsvById(String delId) {
@@ -238,42 +245,17 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 		return dataDeletionCsv;
 	}
 	
-	
-
-	/**
-	 * 
-	 */
 	@Override
-	public List<List<String>> getDataForEachCaegory(TableDeletionDataCsv tableDelData, List<EmployeeDeletion> employeeDeletions) {
+	public void backupCsvFile(TableDeletionDataCsv tableList, List<EmployeeDeletion> employeeDeletions,  List<String> header, FileGeneratorContext generator) {
 		
-//		Map<String, Object> parrams = new HashMap<>();
-//		String sqlStr = buildGetDataForEachCatSql(tableDelData, employeeDeletions, parrams);
-//		Query query = this.getEntityManager().createNativeQuery(sqlStr);
-//		for(Entry<String, Object> entry : parrams.entrySet()) {
-//			query.setParameter(entry.getKey(), entry.getValue());
-//		}
-//		
-//		@SuppressWarnings("unchecked")
-//		List<Object[]> listTemp = (List<Object[]>)query.getResultList();
-//		return listTemp.stream().map(objects -> {
-//			List<String> record = new ArrayList<String>();
-//			for (Object field : objects) {
-//				record.add(String.valueOf(field == null ? "" : field));
-//			}
-//			return record;
-//        }).collect(Collectors.toList());
 		List targetEmployeesSid = employeeDeletions.stream().map(emp -> emp.getEmployeeId()).collect(Collectors.toList());
-		List<List<String>> result =  this.getDataDynamic(tableDelData, targetEmployeesSid);
-		return result;
-	}
-	
-	public List<List<String>> getDataDynamic(TableDeletionDataCsv tableList, List<String> targetEmployeesSid) {
+		
 		StringBuffer query = new StringBuffer("");
 		// All Column
 		List<String> columns = getAllColumnName(tableList.getTableEnglishName());
 		// Select
 		query.append("SELECT ");
-		
+
 		query.append(getFieldAcq(columns, tableList.getFieldAcqCid(), "H_CID"));
 		query.append(getFieldAcq(columns, tableList.getFieldAcqEmployeeId(), "H_SID"));
 		query.append(getFieldAcq(columns, tableList.getFieldAcqDateTime(), "H_DATE"));
@@ -287,9 +269,10 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 				query.append(",");
 			}
 		}
-		
+
 		// From
 		query.append(" FROM ").append(tableList.getTableEnglishName()).append(" t");
+		
 		if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value && tableList.getParentTblName().isPresent()) {
 			// アルゴリズム「親テーブルをJOINする」を実行する
 			query.append(" INNER JOIN ").append(tableList.getParentTblName().get()).append(" p ON ");
@@ -328,7 +311,7 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 				tableList.getClsKeyQuery5().orElse(""), tableList.getClsKeyQuery6().orElse(""),
 				tableList.getClsKeyQuery7().orElse(""), tableList.getClsKeyQuery8().orElse(""),
 				tableList.getClsKeyQuery9().orElse(""), tableList.getClsKeyQuery10().orElse("") };
-		
+
 		// Where
 		query.append(" WHERE 1 = 1 ");
 
@@ -384,16 +367,16 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 		}
 
 		// 履歴区分を判別する。履歴なしの場合
+		List<Integer> indexs = new ArrayList<Integer>();
 		if (tableList.getHistoryCls() == HistoryDiviSion.NO_HISTORY.value) {
-			List<Integer> indexs = new ArrayList<Integer>();
 			switch (tableList.getTimeStore()) {
-			case 3: // ANNUAL
+			case 3: //ANNUAL
 				indexs = yearIndexs;
 				break;
-			case 2: // MONTHLY
+			case 2: //MONTHLY
 				indexs = yearMonthIndexs;
 				break;
-			case 1: // DAILY
+			case 1: //DAILY
 				indexs = yearMonthDayIndexs;
 				break;
 
@@ -402,58 +385,59 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 			}
 
 			if (indexs.size() > 0) {
-				indexs.add(99);
 				query.append(" AND ( ");
 				boolean isFirstOrStatement = true;
-				for (int i = 0; i <= indexs.size(); i++) {
+				for (int i = 0; i < indexs.size(); i++) {
 					if (!isFirstOrStatement) {
 						query.append(" OR ");
 					}
 					isFirstOrStatement = false;
-					if ((i != (indexs.size() - 1)) && (i < indexs.size())) {
+					// Start Date
+					if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
+						query.append(" (t.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					} else {
+						query.append(" (p.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					}
+
+					query.append(" >= ?startDate ");
+					query.append(" AND ");
+
+					// End Date
+					if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
+						query.append(" t.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					} else {
+						query.append(" p.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					}
+
+					query.append(" <= ?endDate) ");
+					
+					// fix bug #103051
+					if ((indexs.size() > 1) && (i == indexs.size() - 1)
+							&& (tableList.getTimeStore() == TimeStore.DAILY.value) && indexs.size() >= 2) {
+						query.append(" OR ");
 						// Start Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
+						if (columns.contains(fieldKeyQuerys[indexs.get(i - 1)])) {
 							query.append(" (t.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
+							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
 						} else {
 							query.append(" (p.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
-						}
-
-						query.append(" >= ?startDate ");
-						query.append(" AND ");
-
-						// End Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
-							query.append(" t.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
-						} else {
-							query.append(" p.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
-						}
-
-						query.append(" <= ?endDate) ");
-					} else if (i == (indexs.size() - 1)) {
-						// fix bug #103051
-						// Start Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i - 2)])) {
-							query.append(" (t.");
-							query.append(fieldKeyQuerys[indexs.get(i - 2)]);
-						} else {
-							query.append(" (p.");
-							query.append(fieldKeyQuerys[indexs.get(i - 2)]);
+							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
 						}
 
 						query.append(" <= ?startDate ");
 						query.append(" AND ");
 
 						// End Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i - 1)])) {
+						if (columns.contains(fieldKeyQuerys[indexs.get(i - 0)])) {
 							query.append(" t.");
-							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
+							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
 						} else {
 							query.append(" p.");
-							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
+							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
 						}
 
 						isFirstOrStatement = true;
@@ -462,18 +446,17 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 					}
 
 					switch (tableList.getTimeStore()) {
-					case 1 : //DAILY
-						params.put("startDate", tableList.getStartDateOfDaily());
-						params.put("endDate", tableList.getEndDateOfDaily());
+					case 1: //DAILY
+						params.put("startDate", tableList.getStartDateOfDaily() + " 00:00:00");
+						params.put("endDate", tableList.getEndDateOfDaily() + " 23:59:59");
 						break;
-					case 2 : //MONTHLY
-						params.put("startDate",
-								Integer.valueOf(tableList.getStartDateOfDaily().replaceAll("\\/", "")));
-						params.put("endDate", Integer.valueOf(tableList.getEndDateOfDaily().replaceAll("\\/", "")));
+					case 2: //MONTHLY
+						params.put("startDate", Integer.valueOf(tableList.getStartMonthOfMonthly().replaceAll("\\/", "")));
+						params.put("endDate", Integer.valueOf(tableList.getEndMonthOfMonthly().replaceAll("\\/", "")));
 						break;
-					case 3 : // ANNUAL
-						params.put("startDate", Integer.valueOf(tableList.getStartDateOfDaily()));
-						params.put("endDate", Integer.valueOf(tableList.getEndDateOfDaily()));
+					case 3: //ANNUAL
+						params.put("startDate", Integer.valueOf(tableList.getStartYearOfMonthly()));
+						params.put("endDate", Integer.valueOf(tableList.getEndYearOfMonthly()));
 						break;
 
 					default:
@@ -495,44 +478,98 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 				}
 			}
 		}
-		
+
 		// Order By
 		query.append(" ORDER BY H_CID, H_SID, H_DATE, H_DATE_START");
 		String querySql = query.toString();
-		List<Object[]> listTemp = new ArrayList<>();
-		if(!targetEmployeesSid.isEmpty()) {
+
+		if (!targetEmployeesSid.isEmpty() && query.toString().contains("?listTargetSid")) {
+
 			List<String> lSid = new ArrayList<>();
-			CollectionUtil.split(targetEmployeesSid, 1000, subIdList -> {
+			CollectionUtil.split(targetEmployeesSid, 100, subIdList -> {
 				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ","\\', '"));
 			});
+
+			CsvReportWriter csv = generatorContext.generate(generator, AppContexts.user().companyId()
+					+ tableList.getCategoryName() + tableList.getTableJapanName() + CSV_EXTENSION, header , "UTF-8");
+
 			for (String sid : lSid) {
-				Query queryString = getEntityManager().createNativeQuery(querySql.replaceAll("\\?listTargetSid", sid));
+
+				int offset = 0;
+
+				Query queryString = getEntityManager().createNativeQuery(querySql);
+
+				if (query.toString().contains("?listTargetSid")) {
+					queryString = getEntityManager().createNativeQuery(querySql.replaceAll("\\?listTargetSid", sid));
+				}
 				for (Entry<String, Object> entry : params.entrySet()) {
 					queryString.setParameter(entry.getKey(), entry.getValue());
 				}
-				listTemp.addAll((List<Object[]>) queryString.getResultList());
+				
+				List<Object[]> listObjs = new ArrayList<>();
+
+				while ((listObjs = queryString.setFirstResult(offset).setMaxResults(10000).getResultList())
+						.size() > 0) {
+					this.getEntityManager().clear(); // 一次キャッシュのクリア
+					offset += listObjs.size();
+					listObjs.forEach(objects -> {
+						Map<String, Object> rowCsv = new HashMap<>();
+						int i = 0;
+						for (String columnName : header) {
+							if (objects[i] instanceof BigDecimal) {
+								
+								BigDecimal value = ((BigDecimal) objects[i]); // the value you get
+								rowCsv.put(columnName, objects[i] != null ? "\"" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+								
+							} else {								
+								rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");								
+							}
+							i++;
+						}
+						csv.writeALine(rowCsv);
+					});
+				}
 			}
-		}else {
+			csv.destroy();
+		} else {
 			Query queryString = getEntityManager().createNativeQuery(querySql);
 			for (Entry<String, Object> entry : params.entrySet()) {
 				queryString.setParameter(entry.getKey(), entry.getValue());
 			}
-			listTemp.addAll((List<Object[]>) queryString.getResultList());
+
+			CsvReportWriter csv = generatorContext.generate(generator, AppContexts.user().companyId()
+					+ tableList.getCategoryName() + tableList.getTableJapanName() + CSV_EXTENSION, header , "UTF-8");
+
+			List<Object[]> listObj = queryString.getResultList();
+			listObj.forEach(objects -> {
+				Map<String, Object> rowCsv = new HashMap<>();
+				int i = 0;
+				for (String columnName : header) {
+					if (objects[i] instanceof BigDecimal) {
+						
+						BigDecimal value = ((BigDecimal) objects[i]); // the value you get
+						
+						rowCsv.put(columnName, objects[i] != null ? "\"" +  value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+						
+					} else {
+						
+						rowCsv.put(columnName, objects[i] != null ? "\"" +  String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+						
+					}
+					i++;
+				}
+				csv.writeALine(rowCsv);
+			});
+			csv.destroy();
+			listObj.clear();
 		}
-		return listTemp.stream().map(objects -> {
-			List<String> record = new ArrayList<String>();
-			for (Object field : objects) {
-				record.add(field != null ? String.valueOf(field) : "");
-			}
-			return record;
-		}).collect(Collectors.toList());
 	}
 	
 	public void delelteDataDynamic(TableDeletionDataCsv tableList, List<String> targetEmployeesSid) {
 		StringBuffer query = new StringBuffer("");
 		// All Column
 		List<String> columns = getAllColumnName(tableList.getTableEnglishName());
-		// Select
+		
 		query.append(" DELETE "  + tableList.getTableEnglishName());
 		
 		// From
@@ -649,58 +686,59 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 			}
 
 			if (indexs.size() > 0) {
-				indexs.add(99);
 				query.append(" AND ( ");
 				boolean isFirstOrStatement = true;
-				for (int i = 0; i <= indexs.size(); i++) {
+				for (int i = 0; i < indexs.size(); i++) {
 					if (!isFirstOrStatement) {
 						query.append(" OR ");
 					}
 					isFirstOrStatement = false;
-					if ((i != (indexs.size() - 1)) && (i < indexs.size())) {
+					// Start Date
+					if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
+						query.append(" (t.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					} else {
+						query.append(" (p.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					}
+
+					query.append(" >= ?startDate ");
+					query.append(" AND ");
+
+					// End Date
+					if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
+						query.append(" t.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					} else {
+						query.append(" p.");
+						query.append(fieldKeyQuerys[indexs.get(i)]);
+					}
+
+					query.append(" <= ?endDate) ");
+					
+					// fix bug #103051
+					if ((indexs.size() > 1) && (i == indexs.size() - 1)
+							&& (tableList.getTimeStore() == TimeStore.DAILY.value) && indexs.size() >= 2) {
+						query.append(" OR ");
 						// Start Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
+						if (columns.contains(fieldKeyQuerys[indexs.get(i - 1)])) {
 							query.append(" (t.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
+							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
 						} else {
 							query.append(" (p.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
-						}
-
-						query.append(" >= ?startDate ");
-						query.append(" AND ");
-
-						// End Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i)])) {
-							query.append(" t.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
-						} else {
-							query.append(" p.");
-							query.append(fieldKeyQuerys[indexs.get(i)]);
-						}
-
-						query.append(" <= ?endDate) ");
-					} else if (i == (indexs.size() - 1)) {
-						// fix bug #103051
-						// Start Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i - 2)])) {
-							query.append(" (t.");
-							query.append(fieldKeyQuerys[indexs.get(i - 2)]);
-						} else {
-							query.append(" (p.");
-							query.append(fieldKeyQuerys[indexs.get(i - 2)]);
+							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
 						}
 
 						query.append(" <= ?startDate ");
 						query.append(" AND ");
 
 						// End Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i - 1)])) {
+						if (columns.contains(fieldKeyQuerys[indexs.get(i - 0)])) {
 							query.append(" t.");
-							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
+							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
 						} else {
 							query.append(" p.");
-							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
+							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
 						}
 
 						isFirstOrStatement = true;
@@ -709,18 +747,17 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 					}
 
 					switch (tableList.getTimeStore()) {
-					case 1 : //DAILY
-						params.put("startDate", tableList.getStartDateOfDaily());
-						params.put("endDate", tableList.getEndDateOfDaily());
+					case 1: // DAILY
+						params.put("startDate", tableList.getStartDateOfDaily() + " 00:00:00");
+						params.put("endDate", tableList.getEndDateOfDaily() + " 23:59:59");
 						break;
-					case 2 : //MONTHLY
-						params.put("startDate",
-								Integer.valueOf(tableList.getStartDateOfDaily().replaceAll("\\/", "")));
-						params.put("endDate", Integer.valueOf(tableList.getEndDateOfDaily().replaceAll("\\/", "")));
+					case 2: // MONTHLY
+						params.put("startDate", Integer.valueOf(tableList.getStartMonthOfMonthly().replaceAll("\\/", "")));
+						params.put("endDate", Integer.valueOf(tableList.getEndMonthOfMonthly().replaceAll("\\/", "")));
 						break;
-					case 3 : // ANNUAL
-						params.put("startDate", Integer.valueOf(tableList.getStartDateOfDaily()));
-						params.put("endDate", Integer.valueOf(tableList.getEndDateOfDaily()));
+					case 3: // ANNUAL
+						params.put("startDate", Integer.valueOf(tableList.getStartYearOfMonthly()));
+						params.put("endDate", Integer.valueOf(tableList.getEndYearOfMonthly()));
 						break;
 
 					default:
@@ -745,7 +782,7 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 		
 		
 		String querySql = query.toString();
-		if(!targetEmployeesSid.isEmpty()) {
+		if(!targetEmployeesSid.isEmpty() && query.toString().contains("?listTargetSid")) {
 			List<String> lSid = new ArrayList<>();
 			CollectionUtil.split(targetEmployeesSid, 1000, subIdList -> {
 				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ","\\', '"));
