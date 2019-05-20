@@ -208,7 +208,7 @@ public class AppHolidayWorkFinder {
 	 * @param breakTime
 	 * @return
 	 */
-	public AppHolidayWorkDto findChangeAppDate(String appDate,int prePostAtr,String siftCD, List<CaculationTime> breakTime){
+	public AppHolidayWorkDto findChangeAppDate(String appDate,int prePostAtr,String siftCD, List<CaculationTime> breakTime, String changeEmployee){
 		String companyID = AppContexts.user().companyId();
 		String employeeID = AppContexts.user().employeeId();
 		int rootAtr = 1;
@@ -249,7 +249,7 @@ public class AppHolidayWorkFinder {
 							siftCD = result.getWorkTime().getSiftCode();
 		}
 		//01-14_勤務時間取得
-		getWorkingHour(companyID,employeeID,appDate,appCommonSettingOutput,result,siftCD);
+		getWorkingHour(companyID,employeeID,appDate,appCommonSettingOutput,result,siftCD,changeEmployee);
 		return result;
 	}
 	/**
@@ -625,7 +625,7 @@ public class AppHolidayWorkFinder {
 		//4.勤務種類を取得する, 5.就業時間帯を取得する, 01-17_休憩時間取得
 		getWorkTypeAndWorkTime(companyID,employeeID,appCommonSettingOutput,result,uiType,payoutType,false);
 		//01-14_勤務時間取得
-		getWorkingHour(companyID,employeeID,appDate,appCommonSettingOutput,result,"");
+		getWorkingHour(companyID,employeeID,appDate,appCommonSettingOutput,result,"", null);
 		// 01-03_休出時間を取得
 		getBreaktime(companyID, holidayWorkInputDtos);
 		Optional<OvertimeRestAppCommonSetting> overtimeRestAppCommonSet = this.overtimeRestAppCommonSetRepository.getOvertimeRestAppCommonSetting(companyID, ApplicationType.BREAK_TIME_APPLICATION.value);
@@ -769,7 +769,7 @@ public class AppHolidayWorkFinder {
 	 * @param result
 	 * @param workTimeCode
 	 */
-	private void getWorkingHour(String companyID,String employeeID,String appDate,AppCommonSettingOutput appCommonSettingOutput,AppHolidayWorkDto result,String workTimeCode){
+	private void getWorkingHour(String companyID,String employeeID,String appDate,AppCommonSettingOutput appCommonSettingOutput,AppHolidayWorkDto result,String workTimeCode, String changeEmployee){
 		ApprovalFunctionSetting approvalFunctionSetting = appCommonSettingOutput.approvalFunctionSetting;
 		if(approvalFunctionSetting != null){
 			result.setDisplayCaculationTime(approvalFunctionSetting.getApplicationDetailSetting().get().getTimeCalUse().equals(UseAtr.USE));
@@ -778,7 +778,7 @@ public class AppHolidayWorkFinder {
 //				result.setDisplayCaculationTime(true);
 				// 01-14_勤務時間取得(lay thoi gian): chua xong  Imported(申請承認)「勤務実績」を取得する(lay domain 「勤務実績」): to do
 				RecordWorkOutput recordWorkOutput = iOvertimePreProcess.getWorkingHours(companyID, 
-						employeeID, null, appDate,approvalFunctionSetting,result.getWorkTime() == null ? 
+						employeeID, changeEmployee, appDate,approvalFunctionSetting,result.getWorkTime() == null ? 
 								workTimeCode : result.getWorkTime().getSiftCode(), false);
 				result.setWorkClockStart1(recordWorkOutput.getStartTime1());
 				result.setWorkClockStart2(recordWorkOutput.getStartTime2());
