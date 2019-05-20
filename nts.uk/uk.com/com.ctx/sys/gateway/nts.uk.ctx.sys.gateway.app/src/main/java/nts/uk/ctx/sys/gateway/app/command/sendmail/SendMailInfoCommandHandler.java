@@ -116,7 +116,7 @@ public class SendMailInfoCommandHandler extends CommandHandlerWithResult<SendMai
 		String url = this.registerEmbededURL.embeddedUrlInfoRegis(programId, screenId, timePeriod, numberPeriod, employeeId,
 				command.getContractCode(), command.getLoginId(), employeeCode, 1, new ArrayList<>());
 		// sendMail
-		MailContents contents = new MailContents("", I18NText.getText("CCG007_21") +" \n" + url);
+		MailContents contents = new MailContents(I18NText.getText("CCG007_40"), I18NText.getText("CCG007_21") +" \n" + url);
 
 		try {
 			mailSender.sendFromAdmin(mailto, contents);
