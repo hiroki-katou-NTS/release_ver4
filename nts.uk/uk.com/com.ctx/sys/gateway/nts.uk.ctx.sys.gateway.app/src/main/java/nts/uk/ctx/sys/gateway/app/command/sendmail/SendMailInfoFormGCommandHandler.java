@@ -108,8 +108,7 @@ public class SendMailInfoFormGCommandHandler
 	}
 
 	/**
-	 * Send mail.
-	 *
+	 * CCG007_ログイン (Login).メール送信実行
 	 * @param mailto
 	 *            the mailto
 	 * @param command
@@ -122,8 +121,8 @@ public class SendMailInfoFormGCommandHandler
 		// get URL from CCG033
 		String url = this.registerEmbededURL.embeddedUrlInfoRegis("CCG007", "H", 3, 24, employee.getEmployeeId(),
 				command.getContractCode(), loginId, employee.getEmployeeCode(), 1, new ArrayList<>());
-		// sendMail
-		MailContents contents = new MailContents("", I18NText.getText("CCG007_21") + " \n" + url);
+		//hoatt 2019.05.20 EA3451 #107795
+		MailContents contents = new MailContents(I18NText.getText("CCG007_40"), I18NText.getText("CCG007_21") + " \n" + url);
 		List<SendMailReturnDto> dtos = new ArrayList<>();
 		try {
 			toMails.stream().forEach(item -> {
