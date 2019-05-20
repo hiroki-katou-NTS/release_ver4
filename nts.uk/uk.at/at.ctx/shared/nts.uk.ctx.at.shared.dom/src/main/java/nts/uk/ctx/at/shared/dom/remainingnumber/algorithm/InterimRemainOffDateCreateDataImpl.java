@@ -410,6 +410,7 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 			if(timeSetting == null) {
 				//アルゴリズム「所定時間を取得」を実行する
 				timeSetting = workTimeService.getTimeByWorkTimeTypeCode(workTimeCode, workTypeInfor.getWorkTypeCode());
+				transferBreak.setTranferTime(timeSetting);
 			}
 			if(timeOverSetting != null && dayOffTimeIsUse) {
 				//振替残業時間を作成する
