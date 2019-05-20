@@ -58,10 +58,13 @@ module nts.uk.pr.view.ccg007.g {
                 
                 //sendMail
                 service.submitSendMail(command).done(function (data) {
-                    if (!nts.uk.util.isNullOrEmpty(data.url)){
-                        nts.uk.ui.dialog.info({ messageId: "Msg_207" });
+                    if (data.length > 0 && !nts.uk.util.isNullOrEmpty(data[0].url)){
+                        nts.uk.ui.dialog.info({ messageId: "Msg_207" }).then(() =>{
+                            nts.uk.ui.windows.close();
+                        });
+                    }else{
+                        nts.uk.ui.windows.close();
                     }
-                    self.closeDialog();
                     blockUI.clear();
                 }).fail(function(res) {
                     //Return Dialog Error
