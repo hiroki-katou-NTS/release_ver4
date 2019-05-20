@@ -131,7 +131,6 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 					newValue = "'' AS " + rePlaceCol;
 				} 
 				if (listSaveProtetion.get(i).getCorrectClasscification() == 1) {
-					
 					saveProtectionByEmpCode = true;
 					couplePidItemName = listSaveProtetion.get(i).getCouplePidItemName();
 					newValue = " bdm.SCD AS " +  rePlaceCol;
@@ -143,10 +142,13 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 					newValue = "'0' AS " + rePlaceCol;
 				}
 				
-				System.out.println("newValue " + newValue);
-				query = new StringBuffer(query.toString().replaceAll("t." + rePlaceCol + ","  ,  newValue + ","));
-				if(i == (listSaveProtetion.size() - 1))
+				String subString = "t." + rePlaceCol + ",";
+				if (query.indexOf(subString) > 0) {
+					query = new StringBuffer(query.toString().replaceAll("t." + rePlaceCol + ","  ,  newValue + ","));
+				} else {
 					query = new StringBuffer(query.toString().replaceAll("t." + rePlaceCol,  newValue));
+				}
+					
 			}
 		}
 
