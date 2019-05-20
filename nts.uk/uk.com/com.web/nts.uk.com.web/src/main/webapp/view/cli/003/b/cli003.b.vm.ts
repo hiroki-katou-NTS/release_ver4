@@ -1291,110 +1291,26 @@ module nts.uk.com.view.cli003.b.viewmodel {
 
             let dfd = $.Deferred<any>();
             nts.uk.ui.windows.sub.modal("/view/cli/003/i/index.xhtml").onClosed(() => {
-
-                block.grayout();
-                let dataSelect = nts.uk.ui.windows.getShared("datacli003");
-                let selectCancel = nts.uk.ui.windows.getShared("selectCancel");
+                let dataSelect = nts.uk.ui.windows.getShared("datacli003"),
+                    selectCancel = nts.uk.ui.windows.getShared("selectCancel");
+                paramLog.logDisplaySettingCode = dataSelect;
                 // function get logdisplaysetting by code
                 self.listItemNo = ko.observableArray([]);
                 self.listLogBasicInforAllModel = [];
                 self.listLogSetItemDetailDto = ko.observableArray([]);
                 self.listHeaderSort = ko.observableArray([]);
                 if (selectCancel == false) {
-
-                    service.getLogDisplaySettingByCodeAndFlag(dataSelect).done(function(dataLogDisplaySetting: Array<any>) {
-                        if (dataLogDisplaySetting) {
-                            // function get logoutputItem by recordType and itemNo 
-                            let dataOutPutItem = dataLogDisplaySetting.logSetOutputItems;
-                            paramLog.targetDataType = dataLogDisplaySetting.dataType;
-
-                            if (dataOutPutItem.length > 0) {
-                                _.forEach(dataOutPutItem, function(dataItemNo: any) {
-                                    let dataOupPutItemdetail = dataItemNo.logSetItemDetails;
-                                    if (dataOupPutItemdetail && dataOupPutItemdetail.length > 0) {
-                                        _.forEach(dataOupPutItemdetail, function(datatemDetail: any) {
-                                            if (datatemDetail.isUseCondFlg == '1') {
-                                                self.listLogSetItemDetailDto.push(datatemDetail);
-                                            }
-                                        });
-                                    }
-                                    self.listItemNo.push(dataItemNo.itemNo);
-                                });
-                                paramOutputItem.itemNos = self.listItemNo();
-
-                            }
-                            if (self.listItemNo() && self.listItemNo().length > 0) {
-
-                                service.getLogOutputItemsByRecordTypeItemNosAll(paramOutputItem).done(function(dataOutputItems: Array<any>) {
-                                    if (dataOutputItems && dataOutputItems.length > 0) {
-
-                                        // Get Log basic infor
-                                        service.getLogBasicInfoDataByModifyDate(paramLog).done(function(data: Array<LogBasicInforAllModel>) {
-                                            // sort by displayOrder
-                                            _.forEach(dataOutPutItem, function(dataItemNoOrder: any) {
-                                                _.forEach(dataOutputItems, function(listdataName: any) {
-                                                    if (dataItemNoOrder.itemNo == listdataName.itemNo) {
-                                                        self.listHeaderSort.push(listdataName);
-                                                    }
-                                                });
-
-                                            });
-                                            // generate columns header                              
-                                            self.setListColumnHeaderLogScreenI(Number(self.logTypeSelectedCode()), self.listHeaderSort());
-                                            if (data && data.length > 0) {
-                                                self.listLogBasicInforAllModel = data;
-                                                self.filterDataExport();
-                                            } else {
-                                                alertError({ messageId: "Msg_1220" }).then(function() {
-                                                    nts.uk.ui.block.clear();
-                                                });
-                                                block.clear();
-                                                errors.clearAll();
-                                                dfd.resolve();
-
-                                            }
-
-                                        }).fail(function(error) {
-                                            alertError(error);
-                                        });
-                                    } else {
-                                        alertError({ messageId: "Msg_1221" }).then(function() {
-                                            nts.uk.ui.block.clear();
-                                        });
-                                        block.clear();
-                                        errors.clearAll();
-                                        dfd.resolve();
-                                    }
-
-                                }).fail(function(error) {
-                                    alertError(error);
-                                });
-                            } else {
-                                alertError({ messageId: "Msg_1221" }).then(function() {
-                                    nts.uk.ui.block.clear();
-                                });
-                                block.clear();
-                                errors.clearAll();
-                                dfd.resolve();
-                            }
-                            //
-                        } else {
-                            if (selectCancel == false) {
-                                alertError({ messageId: "Msg_1215" }).then(function() {
-                                    nts.uk.ui.block.clear();
-                                });
-                                block.clear();
-                                errors.clearAll();
-                                dfd.resolve();
-                            }
-
-                        }
+                    block.grayout();
+                    service.logSettingExportCsvScreenI(paramLog).done(() => {
                     }).fail(function(error) {
                         alertError(error);
+                        dfd.resolve();
+                    }).always(() => {
+                        block.clear();
+                        errors.clearAll();
+
                     });
-                    return dfd.promise();
                 }
-                block.clear();
                 errors.clearAll();
                 dfd.resolve();
             });
@@ -1896,57 +1812,12 @@ module nts.uk.com.view.cli003.b.viewmodel {
                 }
             }
         }
-
-        // filter
-        filterDataExport() {
-            let self = this;
-            let dfd = $.Deferred<any>();
-            block.grayout();
-            self.listLogDataExport = ko.observableArray([]);;
-            let recordType = Number(self.logTypeSelectedCode());
-
-            let params = {
-                recordType: Number(self.logTypeSelectedCode()),
-                listLogBasicInfoAllDto: self.listLogBasicInforAllModel,
-                lstHeaderDto: self.columnsIgAllGrid(),
-                listLogSetItemDetailDto: self.listLogSetItemDetailDto()
-            };
-
-            service.filterLogDataExport(params).done(function(dataLogExport: Array<any>) {
-                if (dataLogExport && dataLogExport.length > 0) {
-                    self.listLogDataExport = dataLogExport;
-                    self.exportCsvI();
-                } else {
-                    alertError({ messageId: "Msg_1220" }).then(function() {
-                        nts.uk.ui.block.clear();
-                    });
-                    block.clear();
-                    errors.clearAll();
-                    dfd.resolve();
-
-                }
-            }).fail(function(error) {
-                alertError(error);
-                dfd.resolve();
-            }).always(() => {
-                block.clear();
-                errors.clearAll();
-            });
-            return dfd.promise();
-
-        }
+        
         // export 
-        exportCsvI() {
+        exportCsvI(params: any) {
             let self = this;
             let dfd = $.Deferred<any>();
             block.grayout();
-
-            let recordType = Number(self.logTypeSelectedCode());
-
-            let params = {
-                lstHeaderDto: self.columnsIgAllGrid(),
-                listDataExport: self.listLogDataExport
-            };
             service.logSettingExportCsvScreenI(params).done(() => {
             }).fail(function(error) {
                 alertError(error);
