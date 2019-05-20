@@ -19,6 +19,7 @@ import javax.transaction.Transactional.TxType;
 //import org.eclipse.persistence.jpa.jpql.parser.WhenClause;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.layer.app.command.CommandHandlerContext;
@@ -57,6 +58,7 @@ import nts.uk.shr.com.task.schedule.UkJobScheduler;
 //import nts.uk.shr.sample.task.schedule.SampleScheduledJob;
 
 @Stateless
+@Slf4j
 public class SaveExecutionTaskSettingCommandHandler
 		extends CommandHandlerWithResult<SaveExecutionTaskSettingCommand, String> {
 
@@ -358,6 +360,7 @@ public class SaveExecutionTaskSettingCommandHandler
 			scheduleId = self.scheduleOnCurrentCompany(options);
 			nextFireTime = this.scheduler.getNextFireTime(scheduleId);
 		} catch (Exception e) {
+			log.error("error: options", e);
 			scheduleId = "";
 			nextFireTime = Optional.empty();
 		}
@@ -370,6 +373,7 @@ public class SaveExecutionTaskSettingCommandHandler
 			try {
 				endScheduleId = self.scheduleOnCurrentCompany(optionsEnd);
 			} catch (Exception e) {
+				log.error("error: optionsEnd", e);
 			}
 		}
 		taskSetting.setEndScheduleId(endScheduleId);
@@ -377,6 +381,7 @@ public class SaveExecutionTaskSettingCommandHandler
 		try {
 			self.saveTaskSetting(command, taskSetting, companyId, days, scheduleId, endScheduleId);
 		} catch (Exception e) {
+			log.error("error: saveTaskSetting", e);
 			throw new BusinessException("Msg_1110");
 		}
 
@@ -392,6 +397,7 @@ public class SaveExecutionTaskSettingCommandHandler
 				this.execTaskSettingRepo.insert(taskSetting);
 				this.repMonthDayRepo.insert(companyId, command.getExecItemCd(), days);
 			} catch (Exception e) {
+				log.error("error: isNewMode=true", e);
 				this.scheduler.unscheduleOnCurrentCompany(SortingProcessScheduleJob.class, scheduleId);
 
 				if (endScheduleId != null) {
@@ -409,6 +415,7 @@ public class SaveExecutionTaskSettingCommandHandler
 				this.repMonthDayRepo.insert(companyId, command.getExecItemCd(), days);
 				// this.execTaskSettingRepo.update(taskSetting);
 			} catch (Exception e) {
+				log.error("error: isNewMode=false", e);
 				this.scheduler.unscheduleOnCurrentCompany(SortingProcessScheduleJob.class, scheduleId);
 
 				if (endScheduleId != null) {
