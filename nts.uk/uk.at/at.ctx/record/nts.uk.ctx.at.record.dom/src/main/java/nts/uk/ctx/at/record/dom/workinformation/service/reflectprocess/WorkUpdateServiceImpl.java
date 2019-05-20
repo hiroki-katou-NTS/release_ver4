@@ -973,6 +973,7 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 	public void reflectReason(String sid, GeneralDate appDate, String appReason, OverTimeRecordAtr overTimeAtr) {
 		//備考の編集状態を更新する
 		List<Integer> lstItem = new ArrayList<>();
+		appReason = appReason.replaceAll(System.lineSeparator(), "　").replaceAll("\n", "　");
 		int columnNo = 4;
 		//残業区分をチェックする
 		lstItem.add(836);	
