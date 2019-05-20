@@ -209,7 +209,8 @@ module nts.uk.at.view.kaf010.a.viewmodel {
                             appDate: moment(value).format(self.DATE_FORMAT),
                             prePostAtr: self.prePostSelected(),
                             siftCD: self.siftCD(),
-                            overtimeHours: ko.toJS(self.overtimeHours)    
+                            overtimeHours: ko.toJS(self.overtimeHours),
+                            changeEmployee: nts.uk.util.isNullOrEmpty(self.employeeList()) ? null : self.employeeList()[0].id
                         }).done((data) =>{
                             self.findBychangeAppDateData(data);
                             self.kaf000_a.getAppDataDate(6, moment(value).format(self.DATE_FORMAT), false,self.employeeID());
