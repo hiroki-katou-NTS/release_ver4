@@ -90,8 +90,11 @@ public class RouteConfirmStatusFrames {
 	 * @return
 	 */
 	public boolean hasConfirmedBy(String approverId) {
-		return frames.stream()
-				.anyMatch(f -> f.hasConfirmedBy(approverId));
+		
+		return frames.stream().anyMatch(f -> f.isApprover(approverId) && f.hasConfirmed());
+		
+		//return frames.stream()
+		//		.anyMatch(f -> f.hasConfirmedBy(approverId));
 	}
 	
 	/**
