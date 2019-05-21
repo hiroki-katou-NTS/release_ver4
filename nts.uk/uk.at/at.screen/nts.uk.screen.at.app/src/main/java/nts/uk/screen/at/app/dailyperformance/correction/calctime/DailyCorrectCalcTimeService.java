@@ -78,6 +78,13 @@ public class DailyCorrectCalcTimeService {
 			return calcTime;
 		};
 		
+		val itemValues = itemEdits.stream()
+				.map(x -> new ItemValue(x.getValue(),
+						x.getValueType() == null ? ValueType.UNKNOWN : ValueType.valueOf(x.getValueType()),
+						x.getLayoutCode(), x.getItemId()))
+				.collect(Collectors.toList());
+		
+		AttendanceItemUtil.fromItemValues(dtoEdit, itemValues);
 		if ((changeSpr31 != null || changeSpr34 != null) && dtoEdit.getTimeLeaving().isPresent()
 				&& !dtoEdit.getTimeLeaving().get().getWorkAndLeave().isEmpty()) {
 			dtoEdit.getTimeLeaving().get().getWorkAndLeave().stream().filter(x -> x.getNo() == 1).forEach(x -> {
@@ -100,11 +107,6 @@ public class DailyCorrectCalcTimeService {
 			if(item34 != null) addEditState(dtoEdit, Arrays.asList(val689));
 		}
 		
-		val itemValues = itemEdits.stream()
-				.map(x -> new ItemValue(x.getValue(),
-						x.getValueType() == null ? ValueType.UNKNOWN : ValueType.valueOf(x.getValueType()),
-						x.getLayoutCode(), x.getItemId()))
-				.collect(Collectors.toList());
 		// val itemBase = new ItemValue(itemEditCalc.getValue(),
 		// ValueType.valueOf(itemEditCalc.getValueType()),
 		// itemEditCalc.getLayoutCode(), itemEditCalc.getItemId());
@@ -117,7 +119,7 @@ public class DailyCorrectCalcTimeService {
 		checkInput28And1(dtoEdit, itemEdits);
 
 		// AttendanceItemUtil.fromItemValues(dtoEdit, Arrays.asList(itemBase));
-		AttendanceItemUtil.fromItemValues(dtoEdit, itemValues);
+		//AttendanceItemUtil.fromItemValues(dtoEdit, itemValues);
 		
 		dailyModifyResFacade.createStampSourceInfo(dtoEdit, Arrays.asList(new DailyModifyQuery(dtoEdit.getEmployeeId(), dtoEdit.getDate(), itemValues)));
 
