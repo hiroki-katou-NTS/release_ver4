@@ -273,4 +273,6 @@ public interface IntermediateDataPub {
 	 * @param date
 	 */
 	public void deleteRootConfirmDay(String employeeID, GeneralDate date);
+	
+	public void deleteRootConfirmMonth(String employeeID, List<ConfirmDeleteParam> confirmDeleteParamLst);
 }

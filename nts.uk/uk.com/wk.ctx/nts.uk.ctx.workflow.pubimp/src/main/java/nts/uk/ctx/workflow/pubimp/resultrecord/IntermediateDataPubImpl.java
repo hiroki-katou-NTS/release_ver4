@@ -50,6 +50,7 @@ import nts.uk.ctx.workflow.dom.service.resultrecord.RouteSituation;
 import nts.uk.ctx.workflow.pub.resultrecord.ApproveDoneExport;
 import nts.uk.ctx.workflow.pub.resultrecord.ApproverApproveExport;
 import nts.uk.ctx.workflow.pub.resultrecord.ApproverEmpExport;
+import nts.uk.ctx.workflow.pub.resultrecord.ConfirmDeleteParam;
 import nts.uk.ctx.workflow.pub.resultrecord.EmpPerformMonthParam;
 import nts.uk.ctx.workflow.pub.resultrecord.EmpSprDailyConfirmExport;
 import nts.uk.ctx.workflow.pub.resultrecord.EmployeePerformParam;
@@ -638,6 +639,18 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpDate(companyID, employeeID, date, RecordRootType.CONFIRM_WORK_BY_DAY);
 		if(opAppRootConfirm.isPresent()){
 			appRootConfirmRepository.delete(opAppRootConfirm.get());
+		}
+	}
+
+	@Override
+	public void deleteRootConfirmMonth(String employeeID, List<ConfirmDeleteParam> confirmDeleteParamLst) {
+		String companyID = AppContexts.user().companyId();
+		for(ConfirmDeleteParam confirmDeleteParam : confirmDeleteParamLst){
+			Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpMonth(companyID, employeeID, confirmDeleteParam.getYearMonth(),
+					confirmDeleteParam.getClosureID(), confirmDeleteParam.getClosureDate(), RecordRootType.CONFIRM_WORK_BY_MONTH);
+			if(opAppRootConfirm.isPresent()){
+				appRootConfirmRepository.delete(opAppRootConfirm.get());
+			}
 		}
 	}
 }
