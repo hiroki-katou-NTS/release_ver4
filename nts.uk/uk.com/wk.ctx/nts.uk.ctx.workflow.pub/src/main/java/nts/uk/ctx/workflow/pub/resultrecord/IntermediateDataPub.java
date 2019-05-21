@@ -265,4 +265,12 @@ public interface IntermediateDataPub {
 	 * @return
 	 */
 	public ApproverApproveExport getApproverByPeriodMonth(String employeeID, Integer closureID, YearMonth yearMonth, ClosureDate closureDate, GeneralDate date); 
+	
+	/**
+	 * RequestList 601
+	 * [No.601]日別の承認をクリアする
+	 * @param employeeID
+	 * @param date
+	 */
+	public void deleteRootConfirmDay(String employeeID, GeneralDate date);
 }
