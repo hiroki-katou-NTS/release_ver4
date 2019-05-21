@@ -239,17 +239,24 @@ module nts.uk.at.view.kaf007.a.viewmodel {
             //Setting default value data work:
             self.appWorkChange().dataWork(settingData.dataWorkDto);
             self.appWorkChange().workChange().workTypeCd(settingData.dataWorkDto.selectedWorkTypeCd === null ? '' : settingData.dataWorkDto.selectedWorkTypeCd);
-            self.appWorkChange().workChange().workTypeName(settingData.dataWorkDto.selectedWorkTypeName || text("KAL003_120"));
+            self.appWorkChange().workChange().workTypeName(self.getName(settingData.dataWorkDto.selectedWorkTypeCd,settingData.dataWorkDto.selectedWorkTypeName));
             self.appWorkChange().workChange().workTimeCd(settingData.dataWorkDto.selectedWorkTimeCd === null ? '' : settingData.dataWorkDto.selectedWorkTimeCd);
-            self.appWorkChange().workChange().workTimeName(settingData.dataWorkDto.selectedWorkTimeName || text("KAL003_120"));
-            if(!nts.uk.util.isNullOrUndefined(settingData.dataWorkDto.startTime1)){
-                self.appWorkChange().workChange().workTimeStart1(settingData.dataWorkDto.startTime1);    
+            self.appWorkChange().workChange().workTimeName(self.getName(settingData.dataWorkDto.selectedWorkTimeCd, settingData.dataWorkDto.selectedWorkTimeName));
+            if (!nts.uk.util.isNullOrUndefined(settingData.dataWorkDto.startTime1)) {
+                self.appWorkChange().workChange().workTimeStart1(settingData.dataWorkDto.startTime1);
             }
             if(!nts.uk.util.isNullOrUndefined(settingData.dataWorkDto.endTime1)){
                 self.appWorkChange().workChange().workTimeEnd1(settingData.dataWorkDto.endTime1);    
             }
             self.requiredCheckTime(self.isWorkChange() && settingData.timeRequired);
             self.timeRequired(settingData.timeRequired);
+        }
+        getName(code, name) {
+            let result = "";
+            if (code) {
+                result = name || text("KAL003_120");
+            }
+            return result;
         }
 
         /**
@@ -438,6 +445,8 @@ module nts.uk.at.view.kaf007.a.viewmodel {
             //実績の内容
             service.getRecordWorkInfoByDate({appDate : moment(!endDate ? startDate : endDate).format(self.dateFormat), employeeID : null}).done((recordWorkInfo) => {
                 //Binding data
+                recordWorkInfo.workTimeName = self.getName(recordWorkInfo.workTimeCode, recordWorkInfo.workTimeName);
+                recordWorkInfo.workTypeName = self.getName(recordWorkInfo.workTypeCode, recordWorkInfo.workTypeName);
                 ko.mapping.fromJS(recordWorkInfo, {}, self.recordWorkInfo);
                 if(self.appChangeSetting().initDisplayWorktime()===0 && self.enableTime()){
                     self.appWorkChange().workChange().workTimeStart1(recordWorkInfo.startTime1);

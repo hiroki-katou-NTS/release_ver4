@@ -114,5 +114,37 @@ public class AggregateMonthlyRecordServiceImpl implements AggregateMonthlyRecord
 		return proc.aggregate(companyId, employeeId, yearMonth, closureId, closureDate,
 				datePeriod, prevAggrResult, prevAbsRecResultOpt, prevBreakDayOffResultOpt, prevSpecialLeaveResultMap,
 				companySets, employeeSets, dailyWorks, monthlyWork);
-	}	
+	}
+	
+	/** 集計処理　（アルゴリズム） */
+	@Override
+	public AggregateMonthlyRecordValue aggregate(String companyId, String employeeId, YearMonth yearMonth,
+			ClosureId closureId, ClosureDate closureDate, DatePeriod datePeriod,
+			AggrResultOfAnnAndRsvLeave prevAggrResult, Optional<AbsRecRemainMngOfInPeriod> prevAbsRecResultOpt,
+			Optional<BreakDayOffRemainMngOfInPeriod> prevBreakDayOffResultOpt,
+			Map<Integer, InPeriodOfSpecialLeaveResultInfor> prevSpecialLeaveResultMap,
+			MonAggrCompanySettings companySets, MonAggrEmployeeSettings employeeSets,
+			Optional<List<IntegrationOfDaily>> dailyWorks, Optional<IntegrationOfMonthly> monthlyWork,
+			Boolean remainingProcAtr) {
+		
+		AggregateMonthlyRecordServiceProc proc = new AggregateMonthlyRecordServiceProc(
+				this.repositories,
+				this.interimRemOffMonth,
+				this.remNumCreateInfo,
+				this.periodCreateData,
+				this.createInterimAnnual,
+				this.getAnnAndRsvRemNumWithinPeriod,
+				this.absenceRecruitMng,
+				this.breakDayoffMng,
+				this.getDaysForCalcAttdRate,
+				this.specialHolidayRepo,
+				this.specialLeaveMng,
+				this.createPerErrorFromLeaveErrors,
+				this.editStateRepo,
+				this.executorService);
+		
+		return proc.aggregate(companyId, employeeId, yearMonth, closureId, closureDate,
+				datePeriod, prevAggrResult, prevAbsRecResultOpt, prevBreakDayOffResultOpt, prevSpecialLeaveResultMap,
+				companySets, employeeSets, dailyWorks, monthlyWork, remainingProcAtr);
+	}
 }

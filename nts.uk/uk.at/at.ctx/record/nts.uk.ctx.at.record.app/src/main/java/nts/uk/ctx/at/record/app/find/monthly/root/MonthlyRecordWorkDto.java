@@ -267,7 +267,12 @@ public class MonthlyRecordWorkDto extends MonthlyItemCommon {
 			dto.setAttendanceTime(AttendanceTimeOfMonthlyDto.from(domain.getAttendanceTime().orElse(null)));
 			dto.setAffiliation(AffiliationInfoOfMonthlyDto.from(domain.getAffiliationInfo().orElse(null)));
 			dto.setAbsenceLeave(AbsenceLeaveRemainDataDto.from(domain.getAbsenceLeaveRemain().orElse(null)));
-			dto.setAgreementTime(AgreementTimeOfManagePeriodDto.from(domain.getAgreementTime().orElse(null)));
+			if (domain.getAgreementTimeList().size() > 0) {
+				dto.setAgreementTime(AgreementTimeOfManagePeriodDto.from(domain.getAgreementTimeList().get(0)));
+			}
+			else {
+				dto.setAgreementTime(AgreementTimeOfManagePeriodDto.from(null));
+			}
 			dto.setAnnLeave(AnnLeaRemNumEachMonthDto.from(domain.getAnnualLeaveRemain().orElse(null)));
 			dto.setAnyItem(AnyItemOfMonthlyDto.from(domain.getAnyItemList()));
 			dto.setCare(MonthlyCareHdRemainDto.from(domain.getCare().orElse(null)));
@@ -291,7 +296,12 @@ public class MonthlyRecordWorkDto extends MonthlyItemCommon {
 			dto.setAttendanceTime(AttendanceTimeOfMonthlyDto.from(domain.getAttendanceTime().orElse(null)));
 			dto.setAffiliation(AffiliationInfoOfMonthlyDto.from(domain.getAffiliationInfo().orElse(null)));
 			dto.setAbsenceLeave(AbsenceLeaveRemainDataDto.from(domain.getAbsenceLeaveRemain().orElse(null)));
-			dto.setAgreementTime(AgreementTimeOfManagePeriodDto.from(domain.getAgreementTime().orElse(null)));
+			if (domain.getAgreementTimeList().size() > 0) {
+				dto.setAgreementTime(AgreementTimeOfManagePeriodDto.from(domain.getAgreementTimeList().get(0)));
+			}
+			else {
+				dto.setAgreementTime(AgreementTimeOfManagePeriodDto.from(null));
+			}
 			dto.setAnnLeave(AnnLeaRemNumEachMonthDto.from(domain.getAnnualLeaveRemain().orElse(null)));
 			dto.setAnyItem(AnyItemOfMonthlyDto.from(domain.getAnyItemList(), optionalMaster));
 			dto.setCare(MonthlyCareHdRemainDto.from(domain.getCare().orElse(null)));

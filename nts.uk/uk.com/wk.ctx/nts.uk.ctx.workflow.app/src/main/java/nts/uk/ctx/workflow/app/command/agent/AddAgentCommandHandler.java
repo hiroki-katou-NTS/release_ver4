@@ -1,8 +1,6 @@
 package nts.uk.ctx.workflow.app.command.agent;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -11,12 +9,10 @@ import javax.transaction.Transactional;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerWithResult;
-import nts.uk.ctx.workflow.app.find.agent.AgentDto;
-import nts.uk.ctx.workflow.app.find.agent.AgentFinder;
 import nts.uk.ctx.workflow.dom.agent.Agent;
 import nts.uk.ctx.workflow.dom.agent.AgentAppType;
+import nts.uk.ctx.workflow.dom.agent.AgentApprovalService;
 import nts.uk.ctx.workflow.dom.agent.AgentRepository;
-import nts.uk.ctx.workflow.dom.agent.RangeDate;
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
@@ -26,14 +22,17 @@ public class AddAgentCommandHandler extends CommandHandlerWithResult<AgentComman
 	@Inject
 	private AgentRepository agentRepository;
 	@Inject
-	private AgentFinder finder;
+	private AgentApprovalService agentApprSv;
 
+	/**
+	 * 7.代行者の登録_新規登録処理
+	 */
 	@Override
 	protected String handle(CommandHandlerContext<AgentCommandBase> context) {
 
 		AgentCommandBase agentCommandBase = context.getCommand();
 
-		String employeeId = agentCommandBase.getEmployeeId();
+		String employeeId = agentCommandBase.getEmployeeId();//A1_010
 		String companyId = AppContexts.user().companyId();
 		UUID requestId = Agent.createRequestId();	
 
@@ -51,21 +50,13 @@ public class AddAgentCommandHandler extends CommandHandlerWithResult<AgentComman
 				EnumAdaptor.valueOf(agentCommandBase.getAgentAppType3(), AgentAppType.class),
 				agentCommandBase.getAgentSid4(),
 				EnumAdaptor.valueOf(agentCommandBase.getAgentAppType4(), AgentAppType.class));
-	
-		//validate date
-		List<AgentDto> agents = finder.findAllEmploy(employeeId);
-		List<RangeDate> rangeDateList = agents.stream()
-				.map(a -> new RangeDate(a.getStartDate(), a.getEndDate()))
-				.collect(Collectors.toList());
-
-		agentInfor.validateDate(rangeDateList);
+		//就業、人事、給与、経理の代行承認種類が「設定しない（待ってもらう）」かチェックする
+		agentInfor.checkSameAgentRequest();
+		agentInfor.checkAgentRequest();
+		//期間のチェック
+		agentApprSv.checkPeriodRegAgent(agentInfor, true);
 		
-		//validate agent of approval
-		List<Agent> agentSidList = agentRepository.findByCid(companyId);
-		
-		agentInfor.checkAgentSid(agentSidList);
-		
-		//add agent
+		//ドメインモデル「代行承認」を登録する
 		agentRepository.add(agentInfor);
 		
 		return requestId.toString();

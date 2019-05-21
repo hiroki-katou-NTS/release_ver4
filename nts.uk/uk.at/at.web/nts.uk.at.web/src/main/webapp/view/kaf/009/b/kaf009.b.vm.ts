@@ -255,6 +255,14 @@ module nts.uk.at.view.kaf009.b {
                 });                               
                 return dfd.promise();
             }
+            
+            getName(code, name) {
+                let result = "";
+                if (code) {
+                    result = name || text("KAL003_120");
+                }
+                return result;
+            }
 
             /**
              * 
@@ -664,8 +672,8 @@ module nts.uk.at.view.kaf009.b {
             setRealData(data: any){
                 let self = this;
                 self.realTimeDate(data.date);
-                self.realTimeWorkType(data.workType.workTypeCode+"   "+data.workType.name);
-                self.realTimeWorkTime(data.workTime.workTimeCD+"   "+data.workTime.workTimeName);
+                self.realTimeWorkType(data.workType.workTypeCode+"   "+self.getName(data.workType.workTypeCode,data.workType.name));
+                self.realTimeWorkTime(data.workTime.workTimeCD + "   " + self.getName(data.workTime.workTimeCD, data.workTime.workTimeName));
                 let startTime1 = data.startTime1;
                 let endTime1 = data.endTime1;
                 let startTime2 = data.startTime2;

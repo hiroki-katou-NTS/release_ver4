@@ -57,7 +57,7 @@ public class HolidayWorkWebService extends WebService{
 	@POST
 	@Path("findChangeAppDate")
 	public AppHolidayWorkDto findChangeAppDate(ParamChangeAppDate param) {
-		return this.appHolidayWorkFinder.findChangeAppDate(param.getAppDate(), param.getPrePostAtr(),param.getSiftCD(),param.getOvertimeHours());
+		return this.appHolidayWorkFinder.findChangeAppDate(param.getAppDate(), param.getPrePostAtr(),param.getSiftCD(),param.getOvertimeHours(),param.getChangeEmployee());
 	}
 	@POST
 	@Path("getcalculationresult")

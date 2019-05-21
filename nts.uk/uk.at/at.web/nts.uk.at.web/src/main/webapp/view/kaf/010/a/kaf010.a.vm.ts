@@ -209,7 +209,8 @@ module nts.uk.at.view.kaf010.a.viewmodel {
                             appDate: moment(value).format(self.DATE_FORMAT),
                             prePostAtr: self.prePostSelected(),
                             siftCD: self.siftCD(),
-                            overtimeHours: ko.toJS(self.overtimeHours)    
+                            overtimeHours: ko.toJS(self.overtimeHours),
+                            changeEmployee: nts.uk.util.isNullOrEmpty(self.employeeList()) ? null : self.employeeList()[0].id
                         }).done((data) =>{
                             self.findBychangeAppDateData(data);
                             self.kaf000_a.getAppDataDate(6, moment(value).format(self.DATE_FORMAT), false,self.employeeID());
@@ -272,6 +273,14 @@ module nts.uk.at.view.kaf010.a.viewmodel {
                     return self.typicalReasonDisplayFlg() || self.displayAppReasonContentFlg();
             }
         }
+        
+        getName(code, name) {
+            let result = "";
+            if (code) {
+                result = name || text("KAL003_120");
+            }
+            return result;
+        }
 
         initData(data: any) {
             var self = this;
@@ -291,11 +300,13 @@ module nts.uk.at.view.kaf010.a.viewmodel {
             self.employeeID(data.employeeID);
             if (data.workTime != null) {
                 self.siftCD(data.workTime.siftCode);
-                self.siftName(data.workTime.siftName|| text("KAL003_120"));
+                if (data.workTime.siftCode) {
+                    self.siftName(self.getName(data.workTime.siftCode, data.workTime.siftName));
+                }
             }
             if (data.workType != null) {
                 self.workTypeCd(data.workType.workTypeCode);
-                self.workTypeName(data.workType.workTypeName|| text("KAL003_120"));
+                self.workTypeName(self.getName(data.workType.workTypeCode, data.workType.workTypeName));
             }
             self.workTypecodes(data.workTypes);
             self.workTimecodes(data.workTimes);

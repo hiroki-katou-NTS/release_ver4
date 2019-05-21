@@ -125,7 +125,7 @@ module nts.uk.at.view.kaf005.a.viewmodel {
         flexExessTimePre: KnockoutObservable<string> = ko.observable(null);
         
         // AppOvertimeReference
-        appDateReference: KnockoutObservable<string> = ko.observable(moment().format(this.DATE_FORMAT));
+        appDateReference: KnockoutObservable<string> = ko.observable("");
         workTypeCodeReference:  KnockoutObservable<string> = ko.observable("");
         workTypeNameReference:  KnockoutObservable<string> = ko.observable("");
         siftCodeReference:  KnockoutObservable<string> = ko.observable("");
@@ -224,7 +224,8 @@ module nts.uk.at.view.kaf005.a.viewmodel {
                             endTimeRests:nts.uk.util.isNullOrEmpty(self.restTime())? [] : _.map(self.restTime(), x=>{return x.endTime()}) ,
                             startTime: nts.uk.util.isNullOrEmpty(self.timeStart1()) ? null : self.timeStart1(),
                             endTime: nts.uk.util.isNullOrEmpty(self.timeEnd1()) ? null : self.timeEnd1(),
-                            overtimeAtr: self.overtimeAtr()    
+                            overtimeAtr: self.overtimeAtr(),
+                            changeEmployee: nts.uk.util.isNullOrEmpty(self.employeeList()) ? null : self.employeeList()[0].id
                         }).done((data) =>{
                             self.findBychangeAppDateData(data);
                             self.kaf000_a.getAppDataDate(0, moment(value).format(self.DATE_FORMAT), false,nts.uk.util.isNullOrEmpty(self.employeeID()) ? null : self.employeeID());
@@ -332,6 +333,14 @@ module nts.uk.at.view.kaf005.a.viewmodel {
                     return self.displayAppReasonContentFlg() || self.typicalReasonDisplayFlg();
             }
         }
+        
+        getName(code, name) {
+            let result = "";
+            if (code) {
+                result = name || text("KAL003_120");
+            }
+            return result;
+        }
 
         initData(data: any) {
             var self = this;
@@ -352,11 +361,11 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             self.employeeID(data.employeeID);
             if (data.siftType != null) {
                 self.siftCD(data.siftType.siftCode);
-                self.siftName(data.siftType.siftName || text("KAL003_120"));
+                self.siftName(self.getName(data.siftType.siftCode, data.siftType.siftName));
             }
             if (data.workType != null) {
                 self.workTypeCd(data.workType.workTypeCode);
-                self.workTypeName(data.workType.workTypeName || text("KAL003_120"));
+                self.workTypeName(self.getName(data.workType.workTypeCode,data.workType.workTypeName));
             }
             self.workTypecodes(data.workTypes);
             self.workTimecodes(data.siftTypes);
@@ -1080,11 +1089,12 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             self.employeeName(overtimeDto.employeeName);
             if (overtimeDto.siftType != null) {
                 self.siftCD(overtimeDto.siftType.siftCode);
-                self.siftName(overtimeDto.siftType.siftName|| text("KAL003_120"));
+                self.siftName(self.getName(overtimeDto.siftType.siftCode, overtimeDto.siftType.siftName));
             }
             if (overtimeDto.workType != null) {
                 self.workTypeCd(overtimeDto.workType.workTypeCode);
-                self.workTypeName(overtimeDto.workType.workTypeName|| text("KAL003_120"));
+                self.workTypeName(self.getName(overtimeDto.workType.workTypeCode, overtimeDto.workType.workTypeName));
+              
             }
             $("#inpStartTime1").ntsError("clear"); 
             $("#inpEndTime1").ntsError("clear");
@@ -1193,12 +1203,21 @@ module nts.uk.at.view.kaf005.a.viewmodel {
             if(data.appOvertimeReference != null){
                 self.appDateReference(data.appOvertimeReference.appDateRefer);
                 if(data.appOvertimeReference.workTypeRefer != null){
-                    self.workTypeCodeReference(data.appOvertimeReference.workTypeRefer.workTypeCode);
-                    self.workTypeNameReference(data.appOvertimeReference.workTypeRefer.workTypeName);
+                    let wkTypeCD = data.appOvertimeReference.workTypeRefer.workTypeCode;
+                    self.workTypeCodeReference(wkTypeCD);
+                    self.workTypeNameReference(self.getName(wkTypeCD, data.appOvertimeReference.workTypeRefer.workTypeName));
+                    
+                }else{
+                    self.workTypeCodeReference("");
+                    self.workTypeNameReference("");
                 }
                 if(data.appOvertimeReference.siftTypeRefer != null){
+                    let wkTimeCD = data.appOvertimeReference.siftTypeRefer.siftCode;
                     self.siftCodeReference(data.appOvertimeReference.siftTypeRefer.siftCode);
-                    self.siftNameReference(data.appOvertimeReference.siftTypeRefer.siftName);
+                    self.siftNameReference(self.getName(data.appOvertimeReference.siftTypeRefer.siftCode, data.appOvertimeReference.siftTypeRefer.siftName));
+                }else{
+                    self.siftCodeReference("");
+                    self.siftNameReference("");
                 }
                 self.workClockFrom1To1Reference(data.appOvertimeReference.workClockFromTo1Refer);
                 self.workClockFrom2To2Reference(data.appOvertimeReference.workClockFromTo2Refer);

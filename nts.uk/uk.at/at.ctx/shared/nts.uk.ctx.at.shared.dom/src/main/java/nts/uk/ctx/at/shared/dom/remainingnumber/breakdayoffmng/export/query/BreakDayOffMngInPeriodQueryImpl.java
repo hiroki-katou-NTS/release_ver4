@@ -84,6 +84,7 @@ public class BreakDayOffMngInPeriodQueryImpl implements BreakDayOffMngInPeriodQu
 					&& beforeResult.getNextDay().get().equals(inputParam.getDateData().start())) {
 				calcCarryForwardDays.setCarryForwardDays(beforeResult.getCarryForwardDays());
 				calcCarryForwardDays.setCarryForwardTime(beforeResult.getCarryForwardTimes());
+				lstDetailData.addAll(beforeResult.getLstDetailData());
 			}
 		}
 		//3.未相殺の代休(暫定)を取得する

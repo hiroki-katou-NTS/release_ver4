@@ -152,6 +152,9 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 				Optional.empty(), Optional.empty(), Optional.empty());
 		for (val closurePeriod : closurePeriods) aggrPeriods.addAll(closurePeriod.getAggrPeriods());
 		
+		// 残数処理を行う期間を計算　（Redmine#107271、EA#3434）
+		DatePeriod remainPeriod = this.calcPeriodForRemainingProc(companySets, aggrPeriods);
+		
 		// 全体の期間を求める
 		DatePeriod allPeriod = new DatePeriod(GeneralDate.today(), GeneralDate.today());
 		if (aggrPeriods.size() > 0){
@@ -164,6 +167,9 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 				if (endYmd.before(aggrPeriod.getPeriod().end())) endYmd = aggrPeriod.getPeriod().end();
 				allPeriod = new DatePeriod(startYmd, endYmd);
 			}
+			
+			// 前月の36協定の集計があり得るため、1か月前まで読み込む　（Redmine#107701）
+			allPeriod = new DatePeriod(allPeriod.start().addMonths(-1), allPeriod.end());
 		}
 		
 		// 月別集計で必要な社員別設定を取得
@@ -227,11 +233,15 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 				this.editStateRepo.remove(employeeId, yearMonth, closureId, closureDate);
 			}
 			
+			// 残数処理を行う必要があるかどうか判断　（Redmine#107271、EA#3434）
+			Boolean isRemainProc = false;
+			if (remainPeriod.contains(datePeriod.start())) isRemainProc = true;
+			
 			// 月別実績を集計する　（アルゴリズム）
 			val value = this.aggregateMonthlyRecordService.aggregate(companyId, employeeId,
 					yearMonth, closureId, closureDate, datePeriod,
 					prevAggrResult, prevAbsRecResultOpt, prevBreakDayOffresultOpt, prevSpecialLeaveResultMap,
-					companySets, employeeSets, Optional.empty(), Optional.empty());
+					companySets, employeeSets, Optional.empty(), Optional.empty(), isRemainProc);
 			
 			// 状態を確認する
 			if (value.getErrorInfos().size() > 0) {
@@ -265,6 +275,47 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			//ConcurrentStopwatches.stop("12000:集計期間ごと：" + aggrPeriod.getYearMonth().toString());
 		}
 		return status;
+	}
+	
+	/**
+	 * 残数処理を行う期間を計算
+	 * @param companySets 月別集計で必要な会社別設定
+	 * @param aggrPeriods 集計期間リスト
+	 * @return 期間
+	 */
+	private DatePeriod calcPeriodForRemainingProc(
+			MonAggrCompanySettings companySets,
+			List<AggrPeriodEachActualClosure> aggrPeriods){
+		
+		DatePeriod result = new DatePeriod(GeneralDate.min(), GeneralDate.min());
+		
+		// 集計期間を取得
+		aggrPeriods.sort((a, b) -> a.getPeriod().start().compareTo(b.getPeriod().start()));
+		for (AggrPeriodEachActualClosure aggrPeriod : aggrPeriods) {
+			
+			// 処理年月と締め期間を取得する　（会社別設定内に既に算出してある期間を使う）
+			int closureId = aggrPeriod.getClosureId().value;
+			if (companySets.getCurrentMonthPeriodMap().containsKey(closureId)) {
+				
+				// 処理中の期間が当月かどうか判断
+				DatePeriod currentPeriod = companySets.getCurrentMonthPeriodMap().get(closureId);
+				if (this.periodCompareEx(currentPeriod, aggrPeriod.getPeriod()) == true) {
+					
+					// 残数処理を行う期間を更新
+					if (result.start() == GeneralDate.min()) {
+						// 1回目は、開始日・終了日をセット
+						result = new DatePeriod(aggrPeriod.getPeriod().start(), aggrPeriod.getPeriod().end());
+					}
+					else {
+						// 2回目以降は、終了日のみセット
+						result = new DatePeriod(result.start(), aggrPeriod.getPeriod().end());
+					}
+				}
+			}
+		}
+		
+		// 残数処理を行う期間を返す
+		return result;
 	}
 	
 	/**
@@ -304,10 +355,10 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 	 * @param period2 期間2
 	 * @return true：重複あり、false：重複なし
 	 */
-//	private boolean periodCompareEx(DatePeriod period1, DatePeriod period2){
-//		
-//		if (period1.start().after(period2.end())) return false;
-//		if (period1.end().before(period2.start())) return false;
-//		return true;
-//	}
+	private boolean periodCompareEx(DatePeriod period1, DatePeriod period2){
+		
+		if (period1.start().after(period2.end())) return false;
+		if (period1.end().before(period2.start())) return false;
+		return true;
+	}
 }

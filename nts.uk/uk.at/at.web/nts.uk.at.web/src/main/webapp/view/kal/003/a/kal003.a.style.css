@@ -27,9 +27,9 @@
 	vertical-align: top;
 	padding-top: 20px;
 }
-.container {
+/* .container {
     display: inline;
-}
+} */
 div[class^="tab-content"] {
 	padding: 20px;
 }
@@ -122,7 +122,7 @@ label.label4w4d {
 	    display: none;
 }
 button.nts-switch-button{
-	width: 90px !important;
+	width: 70px !important;
 }
 #check-condition-table, #check-condition-table tr th, #check-condition-table tr td,
 #check-condition-table_category9, #check-condition-table_category9 tr th, #check-condition-table_category9 tr td,

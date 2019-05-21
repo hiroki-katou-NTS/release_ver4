@@ -4,6 +4,8 @@
  *****************************************************************/
 package nts.uk.ctx.at.record.infra.repository.optitem.applicable;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +21,8 @@ import javax.persistence.criteria.Root;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.optitem.applicable.EmpCondition;
 import nts.uk.ctx.at.record.dom.optitem.applicable.EmpConditionRepository;
@@ -110,33 +114,27 @@ public class JpaEmpConditionRepository extends JpaRepository implements EmpCondi
 			return Collections.emptyList();
 		}
 		
-		// Get entity manager
-		EntityManager em = this.getEntityManager();
-
-		// Create builder
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-
-		// Create query
-		CriteriaQuery<KrcstApplEmpCon> cq = builder.createQuery(KrcstApplEmpCon.class);
-
-		// From table
-		Root<KrcstApplEmpCon> root = cq.from(KrcstApplEmpCon.class);
-
 		List<KrcstApplEmpCon> result = new ArrayList<>();
 		CollectionUtil.split(optionalItemNoList, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			List<Predicate> predicateList = new ArrayList<Predicate>();
-
-			// Add where condition
-			predicateList.add(builder.equal(
-					root.get(KrcstApplEmpCon_.krcstApplEmpConPK).get(KrcstApplEmpConPK_.cid),
-					companyId));
-			predicateList.add(root.get(KrcstApplEmpCon_.krcstApplEmpConPK)
-					.get(KrcstApplEmpConPK_.optionalItemNo).in(subList));
-
-			cq.where(predicateList.toArray(new Predicate[] {}));
-
-			// Get results
-			result.addAll(em.createQuery(cq).getResultList());
+			
+			String sql = "select * from KRCST_APPL_EMP_CON"
+					+ " where CID = ?"
+					+ " and OPTIONAL_ITEM_NO in (" + NtsStatement.In.createParamsString(subList) + ")";
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				stmt.setString(1, companyId);
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setInt(2 + i, subList.get(i));
+				}
+				
+				List<KrcstApplEmpCon> subResult = new NtsResultSet(stmt.executeQuery())
+						.getList(rec -> KrcstApplEmpCon.MAPPER.toEntity(rec));
+				result.addAll(subResult);
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+			
 		});
 		
 		// Group by item NO

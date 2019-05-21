@@ -19,6 +19,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
@@ -428,6 +429,38 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			e.printStackTrace();
 			return Collections.emptyList();
 		}
+	}
+	
+	public List<AppRootInstance> findByApproverEmployeePeriod(
+			String companyId, String approverID, List<String> employeeIDs, DatePeriod period, RecordRootType rootType) {
+	
+		return NtsStatement.In.split(employeeIDs, subEmpIds -> {
+			
+			String sql = BASIC_SELECT
+					+ " where appRoot.CID = ?" 
+					+ " and appRoot.ROOT_TYPE = ?"
+					+ " and appRoot.EMPLOYEE_ID in (" + NtsStatement.In.createParamsString(subEmpIds) + ")"
+					+ " and appRoot.START_DATE <= ?"
+					+ " and appRoot.END_DATE >= ?"
+					+ " and appApprover.APPROVER_CHILD_ID = ?";
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				stmt.setString(1, companyId);
+				stmt.setInt(2, rootType.value);
+				for (int i = 0; i < subEmpIds.size(); i++) {
+					stmt.setString(3 + i, subEmpIds.get(i));
+				}
+				stmt.setDate(3 + subEmpIds.size(), Date.valueOf(period.end().localDate()));
+				stmt.setDate(4 + subEmpIds.size(), Date.valueOf(period.start().localDate()));
+				stmt.setString(5 + subEmpIds.size(), approverID);
+				
+				ResultSet rs = stmt.executeQuery();
+				return toDomain(createFullJoinAppRootInstance(rs));
+				
+			} catch (SQLException ex) {
+				throw new RuntimeException(ex);
+			}
+		});
 	}
 
 	@Override

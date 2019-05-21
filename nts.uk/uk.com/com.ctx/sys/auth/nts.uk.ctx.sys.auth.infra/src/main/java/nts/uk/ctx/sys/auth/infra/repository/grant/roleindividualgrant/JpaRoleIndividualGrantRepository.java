@@ -157,6 +157,8 @@ public class JpaRoleIndividualGrantRepository extends JpaRepository implements R
 	@Override
 	public Optional<RoleIndividualGrant> findByDetail(String userId, String companyId, int roleType,
 			List<String> roleIDLst, GeneralDate date) {
+		if(roleIDLst.isEmpty())
+			return Optional.empty();
 		return this.queryProxy().query(FIND_BY_DETAIL, SacmtRoleIndiviGrant.class)
 				.setParameter("companyId", companyId)
 				.setParameter("userId", userId)
@@ -184,6 +186,8 @@ public class JpaRoleIndividualGrantRepository extends JpaRepository implements R
 	public List<RoleIndividualGrant> findRoleIndividual(String companyId, int roleType, List<String> roleIDLst,
 			GeneralDate date) {
 		List<RoleIndividualGrant> resultList = new ArrayList<>();
+		if(roleIDLst.isEmpty())
+			return resultList;
 		CollectionUtil.split(roleIDLst, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			resultList.addAll(this.queryProxy().query(FIND, SacmtRoleIndiviGrant.class)
 				.setParameter("companyId", companyId)

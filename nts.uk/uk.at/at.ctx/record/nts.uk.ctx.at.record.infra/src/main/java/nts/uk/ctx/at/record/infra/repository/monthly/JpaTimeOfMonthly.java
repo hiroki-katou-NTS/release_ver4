@@ -95,11 +95,20 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 
 	/** 検索　（年月） */
 	@Override
+	@SneakyThrows
 	public List<TimeOfMonthly> findByYearMonthOrderByStartYmd(String employeeId, YearMonth yearMonth) {
-		return this.queryProxy().query(FIND_BY_YEAR_MONTH, KrcdtMonMerge.class)
-				.setParameter("employeeId", employeeId)
-				.setParameter("yearMonth", yearMonth.v())
-				.getList( c -> toDomain(c));
+
+		String sql = "select * from KRCDT_MON_MERGE"
+				+ " where SID = ?"
+				+ " and YM = ?"
+				+ " order by START_YMD";
+		try (val stmt = this.connection().prepareStatement(sql)) {
+			stmt.setString(1, employeeId);
+			stmt.setInt(2, yearMonth.v());
+			
+			List<KrcdtMonMerge> entities = new NtsResultSet(stmt.executeQuery()).getList(rec -> KrcdtMonMerge.MAPPER.toEntity(rec));
+			return entities.stream().map(e -> toDomain(e)).collect(Collectors.toList());
+		}
 	}
 	
 	/** 検索　（年月と締めID） */

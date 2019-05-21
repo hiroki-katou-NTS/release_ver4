@@ -16,7 +16,7 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.base.LeaveExpirationStatus;
 @NoArgsConstructor
 @Setter
 @Getter
-public class SpecialLeaveGrantDetails {
+public class SpecialLeaveGrantDetails {	
 	/**
 	 * 特別休暇コード
 	 */
@@ -45,5 +45,7 @@ public class SpecialLeaveGrantDetails {
 	 * 明細
 	 */
 	private SpecialLeaveNumberInfoService details;
+	
+	private String specialID;
 	
 }

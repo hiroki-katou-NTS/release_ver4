@@ -213,6 +213,8 @@ module nts.uk.at.view.kaf011.a.screenModel {
                 self.appTypeSet(new common.AppTypeSet(data.appTypeSet || null));
                 self.recWk().wkTimeName(data.wkTimeName || null);
                 self.recWk().wkTimeCD(data.wkTimeCD || null);
+                self.recWk().wkTimeCD(data.wkTimeCD || null);
+                self.recWk().workTimeCDs(data.workTimeCDs || null);
             }
         }
         validateControl() {

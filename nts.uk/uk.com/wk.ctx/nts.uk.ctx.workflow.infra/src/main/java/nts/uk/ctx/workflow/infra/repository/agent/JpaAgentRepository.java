@@ -150,7 +150,13 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 		builderString.append(" AND e.endDate >= :endDate");
 		SELECT_AGENT_BY_SID_DATE = builderString.toString();
 		}
-	
+	private static final String GET_LST_BY_AGENT_TYPE1 = "SELECT c  FROM CmmmtAgent c"
+			+ " WHERE c.cmmmtAgentPK.companyId = :companyId"
+			+ " AND c.agentSid1 = :agentId";
+	private static final String GET_LST_BY_SID_REQID = "SELECT c  FROM CmmmtAgent c"
+			+ " WHERE c.cmmmtAgentPK.companyId = :companyId"
+			+ " AND c.cmmmtAgentPK.employeeId = :employeeId"
+			+ " AND c.cmmmtAgentPK.requestId != :requestId";
 		
 	/**
 	 * Convert Data to Domain
@@ -361,56 +367,39 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 
 	@Override
 	public List<AgentInfoOutput> findAgentByPeriod(String companyID, List<String> listApprover, GeneralDate startDate,
-			GeneralDate endDate, Integer agentType) {
-		List<AgentInfoOutput> resultList = new ArrayList<>();
-		listApprover.forEach(x -> {
-			switch (agentType) {
-			case 1:
-				List<AgentInfoOutput> findList1 = this.queryProxy().query(SELECT_AGENT_BY_TYPE1, CmmmtAgent.class)
-				.setParameter("companyId", companyID)
-				.setParameter("employeeId", x)
-				.setParameter("startDate", startDate)
-				.setParameter("endDate", endDate)
-				.getList(c -> { 
-					return new AgentInfoOutput(x, c.cmmmtAgentPK.employeeId, c.startDate, c.endDate);
+			GeneralDate endDate, int agentType) {
+		
+		return NtsStatement.In.split(listApprover, approverIds -> {
+			
+			String agentSidColumn = "AGENT_SID" + agentType;
+			String sql = "select * from CMMMT_AGENT"
+					+ " where CID = ?"
+					+ " and " + agentSidColumn + " in (" + NtsStatement.In.createParamsString(approverIds) + ")"
+					+ " and START_DATE <= ?"
+					+ " and END_DATE >= ?";
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				
+				stmt.setString(1, companyID);
+				for (int i = 0; i < approverIds.size(); i++) {
+					stmt.setString(2 + i, approverIds.get(i));
+				}
+				stmt.setDate(2 + approverIds.size(), Date.valueOf(endDate.localDate()));
+				stmt.setDate(3 + approverIds.size(), Date.valueOf(startDate.localDate()));
+				
+				return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+					CmmmtAgent c = CmmmtAgent.MAPPER.toEntity(rec);
+					return new AgentInfoOutput(
+							rec.getString(agentSidColumn),
+							c.cmmmtAgentPK.employeeId,
+							c.startDate,
+							c.endDate);
 				});
-				resultList.addAll(findList1);
-				break;
-			case 2:
-				List<AgentInfoOutput> findList2 = this.queryProxy().query(SELECT_AGENT_BY_TYPE2, CmmmtAgent.class)
-				.setParameter("companyId", companyID)
-				.setParameter("employeeId", x)
-				.setParameter("startDate", startDate)
-				.setParameter("endDate", endDate)
-				.getList(c -> { 
-					return new AgentInfoOutput(x, c.cmmmtAgentPK.employeeId, c.startDate, c.endDate);
-				});
-				resultList.addAll(findList2);
-				break;
-			case 3:
-				List<AgentInfoOutput> findList3 = this.queryProxy().query(SELECT_AGENT_BY_TYPE3, CmmmtAgent.class)
-				.setParameter("companyId", companyID)
-				.setParameter("employeeId", x)
-				.setParameter("startDate", startDate)
-				.setParameter("endDate", endDate)
-				.getList(c -> { 
-					return new AgentInfoOutput(x, c.cmmmtAgentPK.employeeId, c.startDate, c.endDate);
-				});
-				resultList.addAll(findList3);
-				break;
-			default:
-				List<AgentInfoOutput> findList4 = this.queryProxy().query(SELECT_AGENT_BY_TYPE4, CmmmtAgent.class)
-				.setParameter("companyId", companyID)
-				.setParameter("employeeId", x)
-				.setParameter("startDate", startDate)
-				.setParameter("endDate", endDate)
-				.getList(c -> { 
-					return new AgentInfoOutput(x, c.cmmmtAgentPK.employeeId, c.startDate, c.endDate);
-				});
-				resultList.addAll(findList4);
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
 			}
 		});
-		return resultList;
 	}
 
 	@Override
@@ -431,6 +420,23 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 				.setParameter("employeeId", approverID)
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
+				.getList(c -> convertToDomain(c));
+	}
+
+	@Override
+	public List<Agent> getListByAgentType1(String companyId, String agentId) {
+		return this.queryProxy().query(GET_LST_BY_AGENT_TYPE1, CmmmtAgent.class)
+				.setParameter("companyId", companyId)
+				.setParameter("agentId", agentId)
+				.getList(c -> convertToDomain(c));
+	}
+
+	@Override
+	public List<Agent> getListAgentBySidReqId(String companyId, String employeeId, String requestId) {
+		return this.queryProxy().query(GET_LST_BY_SID_REQID, CmmmtAgent.class)
+				.setParameter("companyId", companyId)
+				.setParameter("employeeId", employeeId)
+				.setParameter("requestId", requestId)
 				.getList(c -> convertToDomain(c));
 	}
 

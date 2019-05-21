@@ -324,7 +324,7 @@ var nts;
                         case 'Time':
                         case 'Clock':
                         case 'Duration': // ValidatorScriptではない。DynamicConstraintで使う？
-                        case 'TimePoint':// ValidatorScriptではない。DynamicConstraintで使う？
+                        case 'TimePoint': // ValidatorScriptではない。DynamicConstraintで使う？
                             constraintText += (constraintText.length > 0) ? "/" : "";
                             constraintText += constraint.min + "～" + constraint.max;
                             break;
@@ -2356,6 +2356,7 @@ var nts;
                     milliseconds = (uk.util.isNullOrUndefined(milliseconds)) ? currentDate.getUTCMilliseconds() : milliseconds;
                     return new Date(Date.UTC(year, month, date, hours, minutes, seconds, milliseconds));
                 }
+                // Return input time in UTC
                 else {
                     month = (uk.util.isNullOrUndefined(month)) ? 0 : month;
                     date = (uk.util.isNullOrUndefined(date)) ? 1 : date;
@@ -6027,9 +6028,11 @@ var nts;
                         if (uk.util.isNullOrUndefined(data)) {
                             transferData = data;
                         }
+                        // Data or KO data
                         else if (!_.isFunction(data) || ko.isObservable(data)) {
                             transferData = JSON.parse(JSON.stringify(ko.unwrap(data))); // Complete remove reference by object
                         }
+                        // Callback function
                         else {
                             transferData = data;
                         }
@@ -8785,7 +8788,7 @@ var nts;
                                         else
                                             helper.addClass($childCells, makeup.class);
                                     }
-                                    else if (makeup.textColor) {
+                                    else if (makeup.textColor) { // Don't set textColor
                                         $cell.style.color = makeup.textColor;
                                     }
                                     else {
@@ -15602,6 +15605,7 @@ var nts;
                                 $element.attr('tabindex', 0);
                             }
                             $element
+                                // delegate event for change template (on old filter box)
                                 .on(SHOWVALUE, function (evt) {
                                 var data = $element.data(DATA), cws = data[CWIDTH], ks = _.keys(cws);
                                 var option = _.find(data[DATA], function (t) { return t[optionsValue] == data[VALUE]; }), _template = template;
@@ -15632,6 +15636,7 @@ var nts;
                                     }
                                 }
                             })
+                                // define event changed for save default data
                                 .on(CHANGED, function (evt, key, value) {
                                 if (value === void 0) { value = undefined; }
                                 var data = $element.data(DATA) || {};
@@ -15640,6 +15645,7 @@ var nts;
                                     $element.data(DATA, data);
                                 }
                             })
+                                // define event validate for check require
                                 .on(VALIDATE, function (evt, ui) {
                                 var data = $element.data(DATA), value = data[VALUE];
                                 if ((ui ? data[CHANGED] : true) && data[ENABLE] && data[REQUIRED] && (_.isEmpty(String(value).trim()) || _.isNil(value))) {
@@ -15659,6 +15665,7 @@ var nts;
                                     }
                                 }
                             })
+                                // delegate open or close event on enter key
                                 .on(KEYDOWN, function (evt, ui) {
                                 if ($element.data(IGCOMB)) {
                                     if ([13].indexOf(evt.which || evt.keyCode) > -1) {
@@ -15955,6 +15962,7 @@ var nts;
                             var sto = setTimeout(function () {
                                 if ($element.data("igCombo")) {
                                     $element
+                                        // enable or disable 
                                         .igCombo(OPTION, "disabled", !enable);
                                     clearTimeout(sto);
                                 }
@@ -15967,6 +15975,7 @@ var nts;
                                     $element.igCombo(OPTION, "dataSource", options);
                                 }
                                 $element
+                                    // set new value
                                     .igCombo("value", value);
                                 if (!enable) {
                                     $element.removeAttr(TAB_INDEX);
@@ -15986,7 +15995,7 @@ var nts;
                                     if (width != MINWIDTH) {
                                         $element.igCombo("option", "width", width);
                                     }
-                                    else {
+                                    else { // auto width
                                         $element
                                             .igCombo("option", "width", (_.sum(_.map(cws, function (c) { return c; })) * WoC + 60) + 'px');
                                     }
@@ -18245,7 +18254,7 @@ var nts;
                             ROW_HEIGHT = 24;
                             // Internet Explorer 6-11
                             var _document = document;
-                            var isIE = false || !!_document.documentMode;
+                            var isIE = /*@cc_on!@*/ false || !!_document.documentMode;
                             // Edge 20+
                             var _window = window;
                             var isEdge = !isIE && !!_window.StyleMedia;
@@ -20877,6 +20886,7 @@ var nts;
                                 var btn = $('<button>').text(text)
                                     .addClass('nts-switch-button unselectable')
                                     .data('swbtn', value)
+                                    //                        .attr('tabindex', "-1")
                                     .attr('unselectable', "on")
                                     .on('click', function () {
                                     var selectedValue = $(this).data('swbtn');
@@ -24841,91 +24851,135 @@ var nts;
                             return _.cloneDeep(_errors);
                         },
                         disableNtsControlAt: function (id, key, $cell) {
+                            var dc = [];
                             if (!$cell) {
-                                var idx = _.findIndex(_dataSource, function (r) { return r[_pk] === id; });
-                                if (_.isNil(idx))
+                                var idx_1 = _.findIndex(_dataSource, function (r) { return r[_pk] === id; });
+                                if (_.isNil(idx_1))
                                     return;
-                                $cell = lch.cellAt(_$grid[0], idx, key);
+                                _.forEach(_.keys(_mafollicle), function (k) {
+                                    if (k === SheetDef)
+                                        return;
+                                    _.forEach(_.keys(_mafollicle[SheetDef]), function (d) {
+                                        var f = _mafollicle[k][d], c;
+                                        if (f) {
+                                            c = lch.cellAt(_$grid[0], idx_1, key, f.desc);
+                                            if (c)
+                                                dc.push(c);
+                                        }
+                                    });
+                                    if (dc.length > 0)
+                                        return false;
+                                });
                             }
-                            if (_.isNil($cell) || $cell.classList.contains(color.Disable))
+                            else
+                                dc.push($cell);
+                            if (dc.length === 0) {
+                                color.pushState(id, key, color.Disable);
                                 return;
-                            $cell.classList.add(color.Disable);
-                            switch (dkn.controlType[key]) {
-                                case dkn.LINK_LABEL:
-                                    var link = $cell.querySelector(".mlink-button");
-                                    if (link) {
-                                        link.removeXEventListener(ssk.CLICK_EVT);
-                                        link.style.color = "#333";
-                                        link.style.cursor = "default";
-                                    }
-                                    break;
-                                case dkn.BUTTON:
-                                case dkn.DELETE_BUTTON:
-                                    var btn = $cell.querySelector(".mbutton");
-                                    if (btn)
-                                        btn.disabled = true;
-                                    break;
-                                case dkn.FLEX_IMAGE:
-                                    var img = $cell.querySelector("span");
-                                    if (img) {
-                                        img.removeXEventListener(ssk.CLICK_EVT);
-                                        img.style.cursor = "default";
-                                    }
-                                    break;
-                                case dkn.CHECKBOX:
-                                    var check = $cell.querySelector("input");
-                                    if (check) {
-                                        check.setAttribute("disabled", "disabled");
-                                    }
-                                    break;
                             }
+                            dc.forEach(function ($cell) {
+                                if ($cell.classList.contains(color.Disable))
+                                    return;
+                                $cell.classList.add(color.Disable);
+                                switch (dkn.controlType[key]) {
+                                    case dkn.LINK_LABEL:
+                                        var link = $cell.querySelector(".mlink-button");
+                                        if (link) {
+                                            link.removeXEventListener(ssk.CLICK_EVT);
+                                            link.style.color = "#333";
+                                            link.style.cursor = "default";
+                                        }
+                                        break;
+                                    case dkn.BUTTON:
+                                    case dkn.DELETE_BUTTON:
+                                        var btn = $cell.querySelector(".mbutton");
+                                        if (btn)
+                                            btn.disabled = true;
+                                        break;
+                                    case dkn.FLEX_IMAGE:
+                                        var img = $cell.querySelector("span");
+                                        if (img) {
+                                            img.removeXEventListener(ssk.CLICK_EVT);
+                                            img.style.cursor = "default";
+                                        }
+                                        break;
+                                    case dkn.CHECKBOX:
+                                        var check = $cell.querySelector("input");
+                                        if (check) {
+                                            check.setAttribute("disabled", "disabled");
+                                        }
+                                        break;
+                                }
+                            });
                             color.pushState(id, key, color.Disable);
                         },
                         enableNtsControlAt: function (id, key, $cell) {
+                            var dc = [];
                             if (!$cell) {
-                                var idx = _.findIndex(_dataSource, function (r) { return r[_pk] === id; });
-                                if (_.isNil(idx))
+                                var idx_2 = _.findIndex(_dataSource, function (r) { return r[_pk] === id; });
+                                if (_.isNil(idx_2))
                                     return;
-                                $cell = lch.cellAt(_$grid[0], idx, key);
-                            }
-                            if (_.isNil($cell) || !$cell.classList.contains(color.Disable))
-                                return;
-                            $cell.classList.remove(color.Disable);
-                            switch (dkn.controlType[key]) {
-                                case dkn.LINK_LABEL:
-                                    var link = $cell.querySelector(".mlink-button");
-                                    if (link) {
-                                        link.addXEventListener(ssk.CLICK_EVT, $.data(link, ssk.CLICK_EVT));
-                                        link.style.color = "#0066CC";
-                                        link.style.cursor = "pointer";
-                                    }
-                                    break;
-                                case dkn.BUTTON:
-                                case dkn.DELETE_BUTTON:
-                                    var btn = $cell.querySelector(".mbutton");
-                                    if (btn) {
-                                        btn.disabled = false;
-                                        var hdl = $.data(btn, ssk.CLICK_EVT);
-                                        if (hdl) {
-                                            btn.removeXEventListener(ssk.CLICK_EVT);
-                                            btn.addXEventListener(ssk.CLICK_EVT, hdl);
+                                _.forEach(_.keys(_mafollicle), function (k) {
+                                    if (k === SheetDef)
+                                        return;
+                                    _.forEach(_.keys(_mafollicle[SheetDef]), function (d) {
+                                        var f = _mafollicle[k][d], c;
+                                        if (f) {
+                                            c = lch.cellAt(_$grid[0], idx_2, key, f.desc);
+                                            if (c)
+                                                dc.push(c);
                                         }
-                                    }
-                                    break;
-                                case dkn.FLEX_IMAGE:
-                                    var img = $cell.querySelector("span");
-                                    if (img) {
-                                        img.addXEventListener(ssk.CLICK_EVT, $.data(img, ssk.CLICK_EVT));
-                                        img.style.cursor = "pointer";
-                                    }
-                                    break;
-                                case dkn.CHECKBOX:
-                                    var check = $cell.querySelector("input");
-                                    if (check) {
-                                        check.removeAttribute("disabled");
-                                    }
-                                    break;
+                                    });
+                                    if (dc.length > 0)
+                                        return false;
+                                });
                             }
+                            else
+                                dc.push($cell);
+                            if (dc.length === 0) {
+                                color.popState(id, key, color.Disable);
+                                return;
+                            }
+                            dc.forEach(function ($cell) {
+                                if (!$cell.classList.contains(color.Disable))
+                                    return;
+                                $cell.classList.remove(color.Disable);
+                                switch (dkn.controlType[key]) {
+                                    case dkn.LINK_LABEL:
+                                        var link = $cell.querySelector(".mlink-button");
+                                        if (link) {
+                                            link.addXEventListener(ssk.CLICK_EVT, $.data(link, ssk.CLICK_EVT));
+                                            link.style.color = "#0066CC";
+                                            link.style.cursor = "pointer";
+                                        }
+                                        break;
+                                    case dkn.BUTTON:
+                                    case dkn.DELETE_BUTTON:
+                                        var btn = $cell.querySelector(".mbutton");
+                                        if (btn) {
+                                            btn.disabled = false;
+                                            var hdl = $.data(btn, ssk.CLICK_EVT);
+                                            if (hdl) {
+                                                btn.removeXEventListener(ssk.CLICK_EVT);
+                                                btn.addXEventListener(ssk.CLICK_EVT, hdl);
+                                            }
+                                        }
+                                        break;
+                                    case dkn.FLEX_IMAGE:
+                                        var img = $cell.querySelector("span");
+                                        if (img) {
+                                            img.addXEventListener(ssk.CLICK_EVT, $.data(img, ssk.CLICK_EVT));
+                                            img.style.cursor = "pointer";
+                                        }
+                                        break;
+                                    case dkn.CHECKBOX:
+                                        var check = $cell.querySelector("input");
+                                        if (check) {
+                                            check.removeAttribute("disabled");
+                                        }
+                                        break;
+                                }
+                            });
                             color.popState(id, key, color.Disable);
                         },
                         setState: function (id, key, states) {
@@ -24941,6 +24995,9 @@ var nts;
                                         self.disableNtsControlAt(id, key, $c);
                                         disabled = true;
                                         return;
+                                    }
+                                    else if (s === color.ManualEditTarget || s === color.ManualEditOther) {
+                                        $.data($c, v.INIT_MAN_EDIT, s);
                                     }
                                     if (!$c.classList.contains(s))
                                         $c.classList.add(s);
@@ -25260,7 +25317,7 @@ var nts;
                                 var check = $cell.querySelector("input[type='checkbox']");
                                 if (!check)
                                     return;
-                                if (val) {
+                                if (val) { //&& check.getAttribute("checked") !== "checked") {
                                     check.setAttribute("checked", "checked");
                                     check.checked = true;
                                     var evt = document.createEvent("HTMLEvents");
@@ -25269,7 +25326,7 @@ var nts;
                                     evt.checked = val;
                                     check.dispatchEvent(evt);
                                 }
-                                else if (!val) {
+                                else if (!val) { // && check.getAttribute("checked") === "checked") {
                                     check.removeAttribute("checked");
                                     check.checked = false;
                                     var evt = document.createEvent("HTMLEvents");
@@ -29178,7 +29235,7 @@ var nts;
 /// <reference path="ui/ko-ext/legendbutton-ko-ext.ts"/>
 /// <reference path="ui/ko-ext/charset-setting-ko-ext.ts"/>
 /// <reference path="ui/function-wrap/contextmenu.ts"/>
-/// <reference path="ui/mgrid.ts"/> 
+/// <reference path="ui/mgrid.ts"/>
 /// <reference path="../reference.ts"/>
 var nts;
 (function (nts) {
@@ -30652,7 +30709,7 @@ var nts;
                             ROW_HEIGHT = 24;
                             // Internet Explorer 6-11
                             var _document = document;
-                            var isIE = false || !!_document.documentMode;
+                            var isIE = /*@cc_on!@*/ false || !!_document.documentMode;
                             // Edge 20+
                             var _window = window;
                             var isEdge = !isIE && !!_window.StyleMedia;
@@ -36061,7 +36118,7 @@ var nts;
                             if (!loader) {
                                 $grid.data(internal.LOADER, new Loader(demandLoadFt.allKeysPath, demandLoadFt.pageRecordsPath));
                             }
-                            else if (loader.keys) {
+                            else if (loader.keys) { // Switch sheet
                                 pageSize = setting.pageSize;
                                 return false;
                             }
@@ -36821,7 +36878,7 @@ var nts;
                             $(window).on("mousedown.popup", function (e) {
                                 if (!$(e.target).is(control) // Target isn't Popup
                                     && control.has(e.target).length === 0 // Target isn't Popup's children
-                                    && !$(e.target).is(setting.trigger)) {
+                                    && !$(e.target).is(setting.trigger)) { // Target isn't Trigger element
                                     hide(control);
                                 }
                             });
@@ -40201,6 +40258,7 @@ var NtsSortableBindingHandler = /** @class */ (function () {
                             if (sourceParent) {
                                 $(sourceParent === targetParent ? this : ui.sender || this).sortable("cancel");
                             }
+                            //for a draggable item just remove the element
                             else {
                                 $(el).remove();
                             }
@@ -40228,7 +40286,7 @@ var NtsSortableBindingHandler = /** @class */ (function () {
                                 //rendering is handled by manipulating the observableArray; ignore dropped element
                                 self.dataSet(el, self.ITEMKEY, null);
                             }
-                            else {
+                            else { //employ the strategy of moving items
                                 if (targetIndex >= 0) {
                                     if (sourceParent) {
                                         if (sourceParent !== targetParent) {

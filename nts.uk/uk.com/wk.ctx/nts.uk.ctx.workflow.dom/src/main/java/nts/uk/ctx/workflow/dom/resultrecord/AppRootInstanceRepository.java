@@ -31,6 +31,8 @@ public interface AppRootInstanceRepository {
 	
 	public List<AppRootInstance> findByApproverPeriod(String approverID, DatePeriod period, RecordRootType rootType);
 	
+	public List<AppRootInstance> findByApproverEmployeePeriod(String companyId, String approverID, List<String> employeeIDs, DatePeriod period, RecordRootType rootType);
+	
 	public List<AppRootInstance> findByEmpFromDate(String companyID, String employeeID, GeneralDate recordDate, RecordRootType rootType);
 	
 	public Optional<AppRootInstance> findByEmpDateNewestBelow(String companyID, String employeeID, GeneralDate recordDate, RecordRootType rootType);

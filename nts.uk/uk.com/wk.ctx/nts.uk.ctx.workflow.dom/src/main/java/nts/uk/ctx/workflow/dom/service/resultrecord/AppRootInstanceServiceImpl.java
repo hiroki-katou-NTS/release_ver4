@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
@@ -20,6 +21,7 @@ import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
+import nts.gul.collection.ListHashMap;
 import nts.uk.ctx.workflow.dom.adapter.bs.EmployeeAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.PersonImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmpImport;
@@ -609,7 +611,75 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 		approvalEmpStatus.getRouteSituationLst().addAll(mergeLst);
 		return approvalEmpStatus;
 	}
-
+	
+	@Override
+	public ApprovalEmpStatus getDailyApprovalStatus(String companyId, String approverId, List<String> targetEmployeeIds, DatePeriod period) {
+		
+		val confirms = this.appRootConfirmRepository.findByEmpDate(
+				companyId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY);
+		
+		// システム日付時点で代行依頼があれば、承認できる
+		val representRequests = this.agentRepository.findAgentByPeriod(
+				companyId, Arrays.asList(approverId), GeneralDate.today(), GeneralDate.today(), 1);
+		val representRequesterIds = representRequests.stream().map(a -> a.getAgentID()).collect(Collectors.toList());
+		
+		val instancesMap = appRootInstancesMap(companyId, approverId, representRequests, targetEmployeeIds, period);
+		
+		List<RouteSituation> routeSituations = new ArrayList<>();
+		
+		// 実績確認状態(confirms)は承認者関係なく取得するので、実際にはapproverIdが承認者ではないものも含まれている。
+		// その場合、instancesMapには当該データが存在しないことになる。
+		// そういったデータはルート状況リストに含めずに返す仕様。
+		for (val confirm : confirms) {
+			val instance = instancesMap.apply(confirm.getEmployeeID(), confirm.getRecordDate());
+			if (!instance.isPresent()) {
+				continue;
+			}
+			
+			routeSituations.add(RouteSituation.create(confirm, instance.get(), approverId, representRequesterIds));
+		}
+		
+		return new ApprovalEmpStatus(approverId, routeSituations);
+	}
+	
+	/**
+	 * getting AppRootInstance for getDailyApprovalStatus
+	 */
+	private BiFunction<String, GeneralDate, Optional<AppRootInstance>> appRootInstancesMap(
+			String companyId,
+			String approverId,
+			List<AgentInfoOutput> representRequests,
+			List<String> targetEmployeeIds,
+			DatePeriod period) {
+		
+		val instancesApprover = this.appRootInstanceRepository.findByApproverEmployeePeriod(
+				companyId, approverId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY);
+		val mapApprover = ListHashMap.create(instancesApprover, i -> i.getEmployeeID());
+		
+		// 代行依頼している承認者達の中間データ
+		val instancesRepresent = representRequests.stream()
+				.flatMap(request -> this.appRootInstanceRepository.findByApproverEmployeePeriod(
+							companyId, request.getAgentID(), targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY).stream())
+				.collect(Collectors.toList());
+		val mapRepresent = ListHashMap.create(instancesRepresent, i -> i.getEmployeeID());
+		
+		return (employeeId, date) -> {
+			Optional<AppRootInstance> result = mapApprover.getOrDefault(employeeId, Collections.emptyList()).stream()
+					.filter(i -> i.getDatePeriod().contains(date))
+					.findFirst();
+			
+			// 承認者自身のものがあればそれを返す
+			if (result.isPresent()) {
+				return result;
+			}
+			
+			// 無ければ代行依頼者のものを探す
+			return mapRepresent.getOrDefault(employeeId, Collections.emptyList()).stream()
+					.filter(i -> i.getDatePeriod().contains(date))
+					.findFirst();
+		};
+	}
+	
 	@Override
 	public List<RouteSituation> getApproverRouteSituation(DatePeriod period, List<ApprovalRouteDetails> approverRouteLst, List<String> agentLst, RecordRootType rootType,
 			boolean useDayApproverConfirm, DatePeriod closurePeriod, YearMonth yearMonth, Integer closureID, ClosureDate closureDate) {
@@ -782,7 +852,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 					// 中間データから承認ルートインスタンスに変換する
 					ApprovalRootState approvalRootState = this.convertFromAppRootInstance(appRootInstance, appRootConfirm);
 					// 基準社員を元にルート状況を取得する
-					RouteSituation routeSituation = this.getRouteSituationByEmp(approvalRootState, approvalRouteDetails.getEmployeeID(), agentLst);
+					RouteSituation routeSituation = this.getRouteSituationByEmp(approvalRootState, approvalRouteDetails.getAgentID().get(), agentLst);
 					// 実行結果をoutput「ルート状況」に追加する
 					routeSituationLst.add(routeSituation);
 				}

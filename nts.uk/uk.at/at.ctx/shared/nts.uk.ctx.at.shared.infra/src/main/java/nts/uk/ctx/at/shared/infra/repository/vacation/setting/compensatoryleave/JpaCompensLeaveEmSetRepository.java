@@ -15,22 +15,26 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
+import lombok.SneakyThrows;
+import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensLeaveEmSetRepository;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryLeaveEmSetting;
+import nts.uk.ctx.at.shared.infra.entity.vacation.setting.compensatoryleave.KclmtAcquisitionEmp;
 import nts.uk.ctx.at.shared.infra.entity.vacation.setting.compensatoryleave.KclmtCompensLeaveEmp;
 import nts.uk.ctx.at.shared.infra.entity.vacation.setting.compensatoryleave.KclmtCompensLeaveEmpPK;
 import nts.uk.ctx.at.shared.infra.entity.vacation.setting.compensatoryleave.KclmtCompensLeaveEmpPK_;
 import nts.uk.ctx.at.shared.infra.entity.vacation.setting.compensatoryleave.KclmtCompensLeaveEmp_;
+import nts.uk.ctx.at.shared.infra.entity.vacation.setting.compensatoryleave.KctmtDigestTimeEmp;
 
 /**
  * The Class JpaCompensLeaveEmSetRepository.
  */
 @Stateless
 public class JpaCompensLeaveEmSetRepository extends JpaRepository implements CompensLeaveEmSetRepository {
-    
-    /** The element first. */
-    private static final int ELEMENT_FIRST = 0;
     
     /*
      * (non-Javadoc)
@@ -79,27 +83,30 @@ public class JpaCompensLeaveEmSetRepository extends JpaRepository implements Com
      */
     @Override
     public CompensatoryLeaveEmSetting find(String companyId, String employmentCode) {
-        EntityManager em = this.getEntityManager();
         
-        CriteriaBuilder builder = em.getCriteriaBuilder();
-        CriteriaQuery<KclmtCompensLeaveEmp> query = builder.createQuery(KclmtCompensLeaveEmp.class);
-        Root<KclmtCompensLeaveEmp> root = query.from(KclmtCompensLeaveEmp.class);
-        
-        List<Predicate> predicateList = new ArrayList<>();
-        
-        predicateList.add(builder.equal(root.get(KclmtCompensLeaveEmp_.kclmtCompensLeaveEmpPK).get(
-                KclmtCompensLeaveEmpPK_.cid), companyId));
-        predicateList.add(builder.equal(root.get(KclmtCompensLeaveEmp_.kclmtCompensLeaveEmpPK).get(
-                KclmtCompensLeaveEmpPK_.empcd), employmentCode));
-        
-        query.where(predicateList.toArray(new Predicate[]{}));
-        
-        List<KclmtCompensLeaveEmp> result = em.createQuery(query).getResultList();
-        if (result.isEmpty()) {
-            return null;
-        }
-        KclmtCompensLeaveEmp entity = result.get(ELEMENT_FIRST);
+    	val entity = this.findEntity("KCLMT_COMPENS_LEAVE_EMP", companyId, employmentCode, KclmtCompensLeaveEmp.MAPPER);
+    	if (entity == null) return null;
+    	
+    	entity.setKclmtAcquisitionEmp(
+    			this.findEntity("KCLMT_ACQUISITION_EMP", companyId, employmentCode, KclmtAcquisitionEmp.MAPPER));
+    	entity.setKctmtDigestTimeEmp(
+    			this.findEntity("KCTMT_DIGEST_TIME_EMP", companyId, employmentCode, KctmtDigestTimeEmp.MAPPER));
+    	
         return new CompensatoryLeaveEmSetting(new JpaCompensLeaveEmSettingGetMemento(entity));
+    }
+    
+    @SneakyThrows
+    private <E> E findEntity(String tableName, String cid, String empcd, JpaEntityMapper<E> mapper) {
+    	String sql = "select * from " + tableName
+    			+ " where CID = ?"
+    			+ " and EMPCD = ?";
+    	try (val stmt = this.connection().prepareStatement(sql)) {
+	    	stmt.setString(1, cid);
+	    	stmt.setString(2, empcd);
+	    	
+	    	return new NtsResultSet(stmt.executeQuery())
+	    			.getSingle(rec -> mapper.toEntity(rec)).orElse(null);
+    	}
     }
 
 	/*

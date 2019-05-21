@@ -123,8 +123,8 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsDates(List<String> employeeIDLst,
 			List<GeneralDate> dateLst, Integer rootType) {
 		List<AppRootStateStatusSprExport> result = new ArrayList<>();
-		dateLst.forEach(date -> {
-			DatePeriod period = new DatePeriod(date, date);
+		List<DatePeriod> periods = DatePeriod.create(dateLst);
+		periods.forEach(period -> {
 			result.addAll(appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class)).getAppRootStatusLst()
 			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList()));
 		});
@@ -315,14 +315,17 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	@Override
 	public AppEmpStatusExport getApprovalEmpStatus(String employeeID, DatePeriod period, Integer rootType) {
 		ApprovalEmpStatus approvalEmpStatus = appRootInstanceService.getApprovalEmpStatus(employeeID, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
-		return new AppEmpStatusExport(
-				approvalEmpStatus.getEmployeeID(), 
-				approvalEmpStatus.getRouteSituationLst().stream().map(x -> new RouteSituationExport(
-						x.getDate(), 
-						x.getEmployeeID(), 
-						x.getApproverEmpState().value, 
-						x.getApprovalStatus().map(y -> new ApprovalStatusExport(y.getReleaseAtr().value, y.getApprovalAction().value))))
-				.collect(Collectors.toList()));
+		return convertToPub(approvalEmpStatus);
+	}
+	
+	@Override
+	public AppEmpStatusExport getDailyApprovalStatus(
+			String approverId, List<String> targetEmployeeIds, DatePeriod period) {
+		
+		ApprovalEmpStatus approvalEmpStatus = appRootInstanceService.getDailyApprovalStatus(
+				AppContexts.user().companyId(), approverId, targetEmployeeIds, period);
+		
+		return convertToPub(approvalEmpStatus);
 	}
 
 	@Override
@@ -581,14 +584,14 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 				if(personImport==null || Strings.isBlank(personImport.getEmployeeCode())){
 					return;
 				}
-				result.add(new EmpSprDailyConfirmExport(personImport.getEmployeeCode(), 1));
+				result.add(new EmpSprDailyConfirmExport(personImport.getSID(), personImport.getEmployeeCode(), 1));
 			} else if(approverPersonOutput.getApprovalAtr()==ApprovalBehaviorAtr.APPROVED){
 				// （基幹・社員Export）アルゴリズム「社員IDから個人社員基本情報を取得」を実行する　RequestList No.1
 				PersonImport personImport = employeeAdapter.getEmployeeInformation(approvalRootState.getEmployeeID());
 				if(personImport==null || Strings.isBlank(personImport.getEmployeeCode())){
 					return;
 				}
-				result.add(new EmpSprDailyConfirmExport(personImport.getEmployeeCode(), 0));
+				result.add(new EmpSprDailyConfirmExport(personImport.getSID(), personImport.getEmployeeCode(), 0));
 			}
 		});
 		return result;
@@ -616,5 +619,16 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 				approverToApprove.getAuthorList().stream().map(x -> new ApproverEmpExport(x.getEmployeeID(), x.getEmployeeCD(), x.getEmployeeName()))
 				.collect(Collectors.toList()));
 	}
-	
+
+
+	private static AppEmpStatusExport convertToPub(ApprovalEmpStatus approvalEmpStatus) {
+		return new AppEmpStatusExport(
+				approvalEmpStatus.getEmployeeID(), 
+				approvalEmpStatus.getRouteSituationLst().stream().map(x -> new RouteSituationExport(
+						x.getDate(), 
+						x.getEmployeeID(), 
+						x.getApproverEmpState().value, 
+						x.getApprovalStatus().map(y -> new ApprovalStatusExport(y.getReleaseAtr().value, y.getApprovalAction().value))))
+				.collect(Collectors.toList()));
+	}
 }

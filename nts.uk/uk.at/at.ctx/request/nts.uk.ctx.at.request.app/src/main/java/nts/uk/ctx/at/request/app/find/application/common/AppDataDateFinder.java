@@ -80,7 +80,7 @@ public class AppDataDateFinder {
 		}
 		String authorCmt = Strings.EMPTY;
 		GeneralDate appGeneralDate = GeneralDate.fromString(appDate, DATE_FORMAT);
-		AchievementOutput achievementOutput = new AchievementOutput(appGeneralDate, null, null, null, null, null, null);
+		AchievementOutput achievementOutput = collectAchievement.getAchievement(companyID, employeeID, appGeneralDate); 
 		ApprovalRootContentImport_New approvalRootContentImport = null;
 		ApplicationDto_New applicationDto = null;
 		PrePostAtr defaultPrePostAtr = otherCommonAlgorithm.preliminaryJudgmentProcessing(EnumAdaptor.valueOf(appTypeValue, ApplicationType.class), appGeneralDate,0);
@@ -124,7 +124,7 @@ public class AppDataDateFinder {
 					.build();
 			authorCmt = detailScreenAppDataService.getDetailScreenAppData(appID).getAuthorComment();
 		} else {
-			achievementOutput = collectAchievement.getAchievement(companyID, employeeID, appGeneralDate);
+			//achievementOutput = collectAchievement.getAchievement(companyID, employeeID, appGeneralDate);
 			if(isStartUp.equals(Boolean.TRUE)){
 				approvalRootContentImport = approvalRootPatternService.getApprovalRootPatternService(
 						companyID, 

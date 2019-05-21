@@ -110,7 +110,7 @@ module nts.uk.at.view.kaf005.b {
             workTypeChangeFlg: KnockoutObservable<boolean> = ko.observable(false);
             
             // AppOvertimeReference
-            appDateReference: KnockoutObservable<string> = ko.observable(moment().format(this.DATE_FORMAT));
+            appDateReference: KnockoutObservable<string> = ko.observable("");
             workTypeCodeReference:  KnockoutObservable<string> = ko.observable("");
             workTypeNameReference:  KnockoutObservable<string> = ko.observable("");
             siftCodeReference:  KnockoutObservable<string> = ko.observable("");
@@ -191,14 +191,23 @@ module nts.uk.at.view.kaf005.b {
                 return dfd.promise();
             }
             
-            isShowReason(){
-            let self =this;
-            if(self.screenModeNew()){
+            isShowReason() {
+                let self = this;
+                if (self.screenModeNew()) {
                     return self.displayAppReasonContentFlg();
-                }else{
+                } else {
                     return self.displayAppReasonContentFlg() || self.typicalReasonDisplayFlg();
+                }
             }
-        }
+            
+            getName(code, name) {
+                let result = "";
+                if (code) {
+                    result = name || text("KAL003_120");
+                }
+                return result;
+            }
+
             
             initData(data: any) {
                 var self = this;
@@ -219,11 +228,11 @@ module nts.uk.at.view.kaf005.b {
                 self.employeeID(data.application.applicantSID);
                 if (data.siftType != null) {
                     self.siftCD(data.siftType.siftCode);
-                    self.siftName(data.siftType.siftName || text("KAL003_120"));
+                    self.siftName(self.getName(data.siftType.siftCode,data.siftType.siftName));
                 }
                 if (data.workType != null) {
                     self.workTypeCd(data.workType.workTypeCode);
-                    self.workTypeName(data.workType.workTypeName || text("KAL003_120"));
+                    self.workTypeName(self.getName(data.workType.workTypeCode, data.workType.workTypeName));
                 }
                 
                 self.workTypecodes(data.workTypes);
@@ -913,11 +922,17 @@ module nts.uk.at.view.kaf005.b {
                     self.appDateReference(data.appOvertimeReference.appDateRefer);
                     if(data.appOvertimeReference.workTypeRefer != null){
                         self.workTypeCodeReference(data.appOvertimeReference.workTypeRefer.workTypeCode);
-                        self.workTypeNameReference(data.appOvertimeReference.workTypeRefer.workTypeName);
+                        self.workTypeNameReference(self.getName(data.appOvertimeReference.workTypeRefer.workTypeCode, data.appOvertimeReference.workTypeRefer.workTypeName));
+                    } else {
+                        self.workTypeCodeReference("");
+                        self.workTypeNameReference("");
                     }
-                    if(data.appOvertimeReference.siftTypeRefer != null){
+                    if (data.appOvertimeReference.siftTypeRefer != null) {
                         self.siftCodeReference(data.appOvertimeReference.siftTypeRefer.siftCode);
-                        self.siftNameReference(data.appOvertimeReference.siftTypeRefer.siftName);
+                        self.siftNameReference(self.getName(data.appOvertimeReference.siftTypeRefer.siftCode, data.appOvertimeReference.siftTypeRefer.siftName));
+                    } else {
+                        self.siftCodeReference("");
+                        self.siftNameReference("");
                     }
                     self.workClockFrom1To1Reference(data.appOvertimeReference.workClockFromTo1Refer);
                     self.workClockFrom2To2Reference(data.appOvertimeReference.workClockFromTo2Refer);
@@ -943,6 +958,7 @@ module nts.uk.at.view.kaf005.b {
                      self.flexExessTimeRefer(data.appOvertimeReference.flexExessTimeRefer == -1? null : self.convertIntToTime(data.appOvertimeReference.flexExessTimeRefer));
                 }
             }
+            
             convertIntToTime(data : number) : string{
                 let hourMinute : string = "";
                 if(nts.uk.util.isNullOrEmpty(data)){

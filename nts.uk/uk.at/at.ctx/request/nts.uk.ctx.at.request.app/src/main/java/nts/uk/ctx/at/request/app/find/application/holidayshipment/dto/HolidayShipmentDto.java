@@ -104,6 +104,8 @@ public class HolidayShipmentDto {
 	 * 申請種類別設定
 	 */
 	private AppTypeSetDto appTypeSet;
+	
+	private List<String> workTimeCDs;
 
 	/**
 	 * 就業時間帯コード

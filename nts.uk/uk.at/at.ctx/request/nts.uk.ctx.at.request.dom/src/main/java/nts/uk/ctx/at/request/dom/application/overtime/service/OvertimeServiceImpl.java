@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import org.apache.logging.log4j.util.Strings;
-
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.gul.text.StringUtil;
@@ -219,22 +217,54 @@ public class OvertimeServiceImpl implements OvertimeService {
 	public WorkTypeAndSiftType getWorkTypeAndSiftTypeByPersonCon(String companyID,String employeeID, GeneralDate baseDate,
 			List<WorkTypeOvertime> workTypes, List<SiftType> siftTypes) {
 		WorkTypeAndSiftType workTypeAndSiftType = new WorkTypeAndSiftType();
+		if (baseDate != null) {
+			//申請日の入力があり
+			//勤務種類と就業時間帯を取得できた
+			workTypeAndSiftType = getDataDateExists(companyID, employeeID, baseDate);
+			if (StringUtil.isNullOrEmpty(workTypeAndSiftType.getWorkType().getWorkTypeCode(), true)
+					|| StringUtil.isNullOrEmpty(workTypeAndSiftType.getSiftType().getSiftCode(), true)) {
+				//取得できなかった
+				workTypeAndSiftType = getDataNoDateExists(companyID, employeeID, workTypes, siftTypes);
+			}
+		} else {
+			//申請日の入力がない
+			workTypeAndSiftType = getDataNoDateExists(companyID, employeeID, workTypes, siftTypes);
+		}
+		
+		if (workTypeAndSiftType.getWorkType() != null && workTypeAndSiftType.getSiftType() != null) {
+			// 12.マスタ勤務種類、就業時間帯データをチェック
+			CheckWorkingInfoResult checkResult = checkWorkingInfo(companyID,
+					workTypeAndSiftType.getWorkType().getWorkTypeCode(),
+					workTypeAndSiftType.getSiftType().getSiftCode());
+			boolean wkTypeError = checkResult.isWkTypeError();
+			boolean wkTimeError = checkResult.isWkTimeError();
+			String workTypeCode = null;
+			String siftCD = null;
+			if (wkTypeError) {
+				// 先頭の勤務種類を選択する
+				workTypeAndSiftType.setWorkType(workTypes.get(0));
+			}
+
+			if (wkTimeError) {
+				// 先頭の就業時間帯を選択する
+				workTypeAndSiftType.setSiftType(siftTypes.get(0));
+			}
+			workTypeCode = workTypeAndSiftType.getWorkType().getWorkTypeCode();
+			siftCD = workTypeAndSiftType.getSiftType().getSiftCode();
+
+			// 休憩時間帯を取得する
+
+			BreakTimeZoneSharedOutPut breakTime = getBreakTimes(companyID, workTypeCode, siftCD);
+			workTypeAndSiftType.setBreakTimes(breakTime.getLstTimezone());
+		}
+		return workTypeAndSiftType;
+	}
+	
+	private WorkTypeAndSiftType getDataNoDateExists(String companyID, String employeeID, List<WorkTypeOvertime> workTypes, List<SiftType> siftTypes) {
+		WorkTypeAndSiftType workTypeAndSiftType = new WorkTypeAndSiftType();
 		WorkTypeOvertime workTypeOvertime = new  WorkTypeOvertime();
 		SiftType siftType = new SiftType();
-		if (baseDate != null) {
-			//実績の取得
-			AchievementOutput achievementOutput = collectAchievement.getAchievement(companyID, employeeID, baseDate);
-			if(Strings.isNotBlank(achievementOutput.getWorkType().getWorkTypeCode())){
-				workTypeAndSiftType.setWorkType(new WorkTypeOvertime(achievementOutput.getWorkType().getWorkTypeCode(), achievementOutput.getWorkType().getName()));
-				workTypeAndSiftType.setSiftType(new SiftType(achievementOutput.getWorkTime().getWorkTimeCD(), achievementOutput.getWorkTime().getWorkTimeName()));
-				String workTypeCode = workTypeAndSiftType.getWorkType().getWorkTypeCode();
-				String siftCD = workTypeAndSiftType.getSiftType().getSiftCode();
-				BreakTimeZoneSharedOutPut breakTime = getBreakTimes(companyID, workTypeCode, siftCD);
-				workTypeAndSiftType.setBreakTimes(breakTime.getLstTimezone());
-				return workTypeAndSiftType;
-			}
-		}
-		baseDate = GeneralDate.today();
+		GeneralDate baseDate = GeneralDate.today();
 		//ドメインモデル「個人労働条件」を取得する(lay dieu kien lao dong ca nhan(個人労働条件))
 		Optional<WorkingConditionItem> personalLablorCodition = workingConditionItemRepository.getBySidAndStandardDate(employeeID,baseDate);
 		
@@ -270,34 +300,22 @@ public class OvertimeServiceImpl implements OvertimeService {
 				workTypeAndSiftType.setSiftType(siftTypes.get(0));
 			}
 		}
-		
-		if (workTypeAndSiftType.getWorkType() != null && workTypeAndSiftType.getSiftType() != null) {
-			//12.マスタ勤務種類、就業時間帯データをチェック
-			CheckWorkingInfoResult checkResult = checkWorkingInfo(companyID, workTypeAndSiftType.getWorkType().getWorkTypeCode(),workTypeAndSiftType.getSiftType().getSiftCode());
-			boolean wkTypeError = checkResult.isWkTypeError();
-			boolean wkTimeError = checkResult.isWkTimeError();
-			String workTypeCode = null;
-			String siftCD = null;
-			if (wkTypeError) {
-				// 先頭の勤務種類を選択する
-				workTypeAndSiftType.setWorkType(workTypes.get(0));
-			}
-
-			if (wkTimeError) {
-				// 先頭の就業時間帯を選択する
-				workTypeAndSiftType.setSiftType(siftTypes.get(0));
-			}
-				workTypeCode = workTypeAndSiftType.getWorkType().getWorkTypeCode();
-				siftCD = workTypeAndSiftType.getSiftType().getSiftCode();
-			
-			//休憩時間帯を取得する
-		
-			BreakTimeZoneSharedOutPut breakTime = getBreakTimes(companyID, workTypeCode, siftCD);
-			workTypeAndSiftType.setBreakTimes(breakTime.getLstTimezone());
-		}
 		return workTypeAndSiftType;
 	}
-	
+
+	private WorkTypeAndSiftType getDataDateExists(String companyID, String employeeID, GeneralDate baseDate) {
+		WorkTypeAndSiftType workTypeAndSiftType = new WorkTypeAndSiftType();
+		//実績の取得
+		AchievementOutput achievementOutput = collectAchievement.getAchievement(companyID, employeeID, baseDate);
+			workTypeAndSiftType.setWorkType(new WorkTypeOvertime(achievementOutput.getWorkType().getWorkTypeCode(), achievementOutput.getWorkType().getName()));
+			workTypeAndSiftType.setSiftType(new SiftType(achievementOutput.getWorkTime().getWorkTimeCD(), achievementOutput.getWorkTime().getWorkTimeName()));
+			String workTypeCode = workTypeAndSiftType.getWorkType().getWorkTypeCode();
+			String siftCD = workTypeAndSiftType.getSiftType().getSiftCode();
+			BreakTimeZoneSharedOutPut breakTime = getBreakTimes(companyID, workTypeCode, siftCD);
+			workTypeAndSiftType.setBreakTimes(breakTime.getLstTimezone());
+			return workTypeAndSiftType;
+	}
+
 	/**
 	 * 12.マスタ勤務種類、就業時間帯データをチェック
 	 * @param companyID

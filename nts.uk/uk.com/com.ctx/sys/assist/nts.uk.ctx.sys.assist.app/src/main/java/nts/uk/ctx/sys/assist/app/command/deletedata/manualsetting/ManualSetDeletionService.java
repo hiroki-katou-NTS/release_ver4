@@ -424,7 +424,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 								int errorCount = managementDeletion.getErrorCount();
 								managementDeletion.setErrorCount(errorCount + 1);
 								repoManagementDel.update(managementDeletion);
-//								return ResultState.ABNORMAL_END;
+								return ResultState.ABNORMAL_END;
 							}
 						}
 					}
@@ -473,33 +473,11 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	private ResultState generalDataForCategoryToCsv(FileGeneratorContext generatorContext, ManualSetDeletion domain,
 			List<EmployeeDeletion> employeeDeletions, TableDeletionDataCsv tableDataDel) {
 		try {
-			String nameFile = tableDataDel.getCompanyId() + tableDataDel.getCategoryName()
-					+ tableDataDel.getTableJapanName() + FILE_EXTENSION;
-			
-			List<List<String>> dataRecords = repoCsv.getDataForEachCaegory(tableDataDel, employeeDeletions);
-			
 			List<String> columNames = repoCsv.getColumnName(tableDataDel.getTableEnglishName());
 			List<String> header = getHeaderForDataFile(columNames);
-
-			List<Map<String, Object>> dataSourceCsv = new ArrayList<>();
-			for (List<String> record : dataRecords) {
-				Map<String, Object> rowCsv = new HashMap<>();
-				int i = 0;
-				for (String columnName : header) {
-					if (record.size() > i) {
-						rowCsv.put(columnName, record.get(i));
-					}
-					else {
-						rowCsv.put(columnName, "");
-					}
-					i++;
-				}
-				dataSourceCsv.add(rowCsv);
-			}
-
-			CSVFileData fileData = new CSVFileData(nameFile, header, dataSourceCsv);
-			generator.generate(generatorContext, fileData);
-
+			
+			repoCsv.backupCsvFile(tableDataDel, employeeDeletions, header , generatorContext);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResultState.ABNORMAL_END;

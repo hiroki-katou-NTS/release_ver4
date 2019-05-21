@@ -12,6 +12,7 @@ import nts.uk.ctx.at.record.dom.attendanceitem.StoredProcdureProcess;
 import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.affiliation.AffiliationInfoOfMonthly;
+import nts.uk.ctx.at.record.dom.monthly.agreement.AgreementTimeOfManagePeriod;
 import nts.uk.ctx.at.record.dom.monthly.agreement.AgreementTimeOfManagePeriodRepository;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.erroralarm.EmployeeMonthlyPerErrorRepository;
@@ -135,7 +136,9 @@ public class UpdateAllDomainMonthServiceImpl implements UpdateAllDomainMonthServ
 				
 //				anyItemRepo.persistAndUpdate(d.getAnyItemList());
 				
-				d.getAgreementTime().ifPresent(at -> agreementRepo.persistAndUpdate(at));
+				for (AgreementTimeOfManagePeriod agreementTime : d.getAgreementTimeList()) {
+					this.agreementRepo.persistAndUpdate(agreementTime);
+				}
 				
 				MonthMergeKey key = createKey(d.getAffiliationInfo().get());
 				remainRepo.persistAndUpdate(key, getRemains(d, key));

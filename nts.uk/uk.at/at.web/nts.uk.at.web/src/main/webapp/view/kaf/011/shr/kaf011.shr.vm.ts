@@ -190,6 +190,7 @@ module nts.uk.at.view.kaf011.shr {
             wkTypeCD: KnockoutObservable<string> = ko.observable(null);
             wkTimeCD: KnockoutObservable<string> = ko.observable(null);
             wkTimeName: KnockoutObservable<string> = ko.observable('');
+            workTimeCDs: KnockoutObservableArray<IWorkType> = ko.observableArray([]);
             wkTime1: KnockoutObservable<WorkingHour> = ko.observable(new WorkingHour());
             wkTime2: KnockoutObservable<WorkingHour> = ko.observable(new WorkingHour());
             wkText: KnockoutObservable<string> = ko.observable('');
@@ -310,15 +311,17 @@ module nts.uk.at.view.kaf011.shr {
                 });
                 self.wkTypeCD.subscribe((newWkType) => {
                     let vm: nts.uk.at.view.kaf011.a.screenModel.ViewModel = __viewContext['viewModel'];
-                    if (!_.isEmpty(newWkType) && !vm.firstLoad()) {
+                    if (!_.isEmpty(newWkType)) {
                         let changeWkTypeParam = {
                             wkTypeCD: newWkType,
                             wkTimeCD: self.wkTimeCD()
                         };
-                        block.invisible();
-                        service.changeWkType(changeWkTypeParam).done((data: IChangeWorkType) => {
-                            self.setDataFromWkDto(data);
-                        }).always(() => { block.clear(); });
+                        if (newWkType && !vm.firstLoad()) {
+                            block.invisible();
+                            service.changeWkType(changeWkTypeParam).done((data: IChangeWorkType) => {
+                                self.setDataFromWkDto(data);
+                            }).always(() => { block.clear(); });
+                        }
                     }
                 });
 
@@ -482,7 +485,7 @@ module nts.uk.at.view.kaf011.shr {
                 nts.uk.ui.windows.setShared('parentCodes', {
                     workTypeCodes: [selectedWorkTypeCode],
                     selectedWorkTypeCode: selectedWorkTypeCode,
-                    workTimeCodes: [],
+                    workTimeCodes: self.workTimeCDs(),
                     selectedWorkTimeCode: WorkTimeCd,
                 }, true);
 

@@ -13,6 +13,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -35,6 +36,9 @@ public class KrcstApplEmpCon extends UkJpaEntity implements Serializable {
 	@Column(name = "EMP_APPL_ATR")
 	private int empApplAtr;
 
+	public static final JpaEntityMapper<KrcstApplEmpCon> MAPPER =
+			new JpaEntityMapper<>(KrcstApplEmpCon.class);
+	
 	/**
 	 * Instantiates a new krcst appl emp con.
 	 */

@@ -23,11 +23,10 @@ public class DefaultUkJobScheduler implements UkJobScheduler {
 
 	@Override
 	public ScheduleInfo scheduleOnCurrentCompany(UkJobScheduleOptions options) {
-		val scheduleInfo = ScheduleInfo.createNew();
 		
 		val ntsOptions = new JobScheduleOptions(
 				options.getJobClass(),
-				createJobContextKey(scheduleInfo.getScheduleId()),
+				createJobContextKey(options.getScheduleId()),
 				options.getUserData(),
 				options.getSchedulingMethod(),
 				options.getStartDateTime(),
@@ -35,7 +34,7 @@ public class DefaultUkJobScheduler implements UkJobScheduler {
 		
 		this.scheduler.schedule(ntsOptions);
 		
-		return scheduleInfo;
+		return new ScheduleInfo(options.getScheduleId());
 	}
 
 	@Override

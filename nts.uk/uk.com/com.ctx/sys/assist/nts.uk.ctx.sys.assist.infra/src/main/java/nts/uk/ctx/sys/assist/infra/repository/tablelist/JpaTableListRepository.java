@@ -122,26 +122,33 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 		boolean saveProtectionByEmpCode = false;
 		String couplePidItemName = "";
 		if (tableList.getSurveyPreservation() == NotUseAtr.USE && !listSaveProtetion.isEmpty()) {
-			for (SaveProtetion saveProtetion : listSaveProtetion) {
-				String rePlaceCol = saveProtetion.getReplaceColumn().trim();
-				String pidCol     = saveProtetion.getCouplePidItemName().trim();
+			for (int i = 0; i < listSaveProtetion.size(); i++) {
+				String rePlaceCol = listSaveProtetion.get(i).getReplaceColumn().trim();
+				String pidCol     = listSaveProtetion.get(i).getCouplePidItemName().trim();
 				String newValue = "";
 				// Vì domain không tạo Enum nên phải fix code ngu
-				if (saveProtetion.getCorrectClasscification() == 0) {
+				if (listSaveProtetion.get(i).getCorrectClasscification() == 0) {
 					newValue = "'' AS " + rePlaceCol;
-				} else if (saveProtetion.getCorrectClasscification() == 1) {
-					
+				} 
+				if (listSaveProtetion.get(i).getCorrectClasscification() == 1) {
 					saveProtectionByEmpCode = true;
-					couplePidItemName = listSaveProtetion.get(0).getCouplePidItemName();
-					
+					couplePidItemName = listSaveProtetion.get(i).getCouplePidItemName();
 					newValue = " bdm.SCD AS " +  rePlaceCol;
-					
-				} else if (saveProtetion.getCorrectClasscification() == 2) {
+				}  
+				if (listSaveProtetion.get(i).getCorrectClasscification() == 2) {
 					newValue = "0 AS " + rePlaceCol;
-				} else if (saveProtetion.getCorrectClasscification() == 3) {
+				}  
+				if (listSaveProtetion.get(i).getCorrectClasscification() == 3) {
 					newValue = "'0' AS " + rePlaceCol;
 				}
-				query = new StringBuffer(query.toString().replaceAll("t." + rePlaceCol, newValue));
+				
+				String subString = "t." + rePlaceCol + ",";
+				if (query.indexOf(subString) > 0) {
+					query = new StringBuffer(query.toString().replaceAll("t." + rePlaceCol + ","  ,  newValue + ","));
+				} else {
+					query = new StringBuffer(query.toString().replaceAll("t." + rePlaceCol,  newValue));
+				}
+					
 			}
 		}
 
@@ -429,11 +436,11 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 						
 						BigDecimal value = ((BigDecimal) objects[i]); // the value you get
 						
-						rowCsv.put(columnName, objects[i] != null ? "\"" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+						rowCsv.put(columnName, objects[i] != null ? "\"" +  value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
 						
 					} else {
 						
-						rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+						rowCsv.put(columnName, objects[i] != null ? "\"" +  String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
 						
 					}
 					i++;
