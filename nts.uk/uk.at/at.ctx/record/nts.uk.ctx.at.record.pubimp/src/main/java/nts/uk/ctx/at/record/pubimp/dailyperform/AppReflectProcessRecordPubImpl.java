@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
-//import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootStateStatusImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApproveRootStatusForEmpImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCheckParameter;
@@ -50,7 +49,6 @@ import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.AppCommonPara;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.AppReflectProcessRecordPub;
-import nts.uk.ctx.at.record.pub.dailyperform.appreflect.BreakTimePubParam;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.CommonReflectPubParameter;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ConfirmStatusCheck;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.HolidayWorkReflectPubPara;
@@ -101,7 +99,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 	@Inject
 	private IdentificationRepository identificationRepository;
 	@Override
-	public boolean appReflectProcess(AppCommonPara para) {
+	public boolean appReflectProcess(AppCommonPara para, ExecutionType executionType) {
 		boolean output = true;		
 		ScheRemainCreateInfor scheInfor = null;
 		if(para.isChkRecord()) {
@@ -123,7 +121,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 		//WorkInfoOfDailyPerformance dailyInfor = optDaily.get();
 		//反映状況によるチェック
 		CommonCheckParameter checkPara = new CommonCheckParameter(para.isChkRecord() ? DegreeReflectionAtr.RECORD : DegreeReflectionAtr.SCHEDULE,
-				ExecutionType.EXCECUTION,
+				executionType,
 				EnumAdaptor.valueOf(para.getStateReflectionReal().value, ReflectedStateRecord.class),
 				EnumAdaptor.valueOf(para.getStateReflection().value, ReflectedStateRecord.class));
 		boolean chkProcess = processCheckService.commonProcessCheck(checkPara);
@@ -156,7 +154,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 					para.isChkRecord() ? false : scheInfor.isConfirmedAtr());
 			return this.checkConfirmStatus(chkParam);
 		}
-		return output;
+		return chkProcess;
 	}
 
 	@Override
@@ -307,17 +305,11 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 			if(chkParam.isRecordReflect()) {
 				return output;
 			}
-			List<ApproveRootStatusForEmpImport> lstRootStatus = appAdapter.getApprovalByEmplAndDate(chkParam.getAppDate(), chkParam.getAppDate(),
-					chkParam.getSid(), chkParam.getCid(), 1);
-			if(lstRootStatus.isEmpty() 
-					|| lstRootStatus.get(0).getApprovalStatus() == ApprovalStatusForEmployee.UNAPPROVED) {
-				List<Identification> findByEmployeeID = identificationRepository.findByEmployeeID(chkParam.getSid(), chkParam.getAppDate(), chkParam.getAppDate());
-				if(!findByEmployeeID.isEmpty()) {
-					return false; 
-				}
-				return output;
+			//対象期間内で本人確認をした日をチェックする
+			List<Identification> findByEmployeeID = identificationRepository.findByEmployeeID(chkParam.getSid(), chkParam.getAppDate(), chkParam.getAppDate());
+			if(!findByEmployeeID.isEmpty()) {
+				return false; 
 			}
-			return false;
 		} else {
 			//ドメインモデル「反映情報」．予定強制反映をチェックする
 			if(chkParam.isScheReflect()) {

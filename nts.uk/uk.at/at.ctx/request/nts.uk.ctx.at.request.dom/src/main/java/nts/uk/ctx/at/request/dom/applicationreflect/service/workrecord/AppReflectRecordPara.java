@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.WorkChangeCommonReflectPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionTypeExImport;
 
 @AllArgsConstructor
 @Setter
@@ -41,5 +42,9 @@ public class AppReflectRecordPara {
 	 * 振出申請
 	 */
 	private CommonReflectPara recruitmentInfor;
+	/**
+	 * 実行種別
+	 */
+	private ExecutionTypeExImport execuTionType;
 
 }

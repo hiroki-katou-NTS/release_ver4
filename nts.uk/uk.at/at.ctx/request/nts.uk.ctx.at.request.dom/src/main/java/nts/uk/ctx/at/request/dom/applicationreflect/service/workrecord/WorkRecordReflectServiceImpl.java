@@ -18,7 +18,8 @@ public class WorkRecordReflectServiceImpl implements WorkRecordReflectService{
 	public ReflectInformationResult workRecordreflect(AppReflectRecordPara appRecordInfor) {
 		ReflectRecordInfor recordInfor = appRecordInfor.getRecordInfor();
 		//事前チェック処理
-		boolean checkReflect = reflectRecord.appReflectProcessRecord(appRecordInfor.getRecordInfor().getAppInfor(), true);
+		boolean checkReflect = reflectRecord.appReflectProcessRecord(appRecordInfor.getRecordInfor().getAppInfor(), true,
+				appRecordInfor.getExecuTionType());
 		if (!checkReflect) {
 			return ReflectInformationResult.CHECKFALSE;
 		}

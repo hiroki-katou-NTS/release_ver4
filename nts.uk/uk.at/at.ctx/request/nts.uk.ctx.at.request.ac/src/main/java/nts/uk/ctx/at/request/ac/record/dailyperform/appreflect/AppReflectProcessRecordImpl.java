@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.ExecutionType;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.AppCommonPara;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.AppReflectProcessRecordPub;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.BreakTimePubParam;
@@ -39,6 +40,7 @@ import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.GobackRef
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.HolidayWorkReflectPara;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.OvertimeAppParameter;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.OvertimeReflectPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionTypeExImport;
 import nts.uk.ctx.at.request.dom.setting.company.request.RequestSetting;
 import nts.uk.ctx.at.request.dom.setting.company.request.RequestSettingRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
@@ -50,7 +52,7 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 	@Inject
 	private RequestSettingRepository requestSetting;
 	@Override
-	public boolean appReflectProcessRecord(Application_New appInfor, boolean chkRecord) {
+	public boolean appReflectProcessRecord(Application_New appInfor, boolean chkRecord, ExecutionTypeExImport executionType) {
 		Optional<RequestSetting> settingData = requestSetting.findByCompany(appInfor.getCompanyID());
 		if(appInfor.getStartDate().isPresent() && appInfor.getEndDate().isPresent()) {
 			for(int i = 0; appInfor.getStartDate().get().daysTo(appInfor.getEndDate().get()) - i >= 0; i++){
@@ -68,7 +70,7 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 						EnumAdaptor.valueOf(appInfor.getAppType().value, ApplicationType.class),
 						appInfor.getReflectionInformation().getForcedReflection() == DisabledSegment_New.TODO ? true : false,
 								chkRecord);
-				if(!recordPub.appReflectProcess(para)) {
+				if(!recordPub.appReflectProcess(para, EnumAdaptor.valueOf(executionType.value, ExecutionType.class))) {
 					return false;
 				}
 			}	
@@ -85,7 +87,7 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 					EnumAdaptor.valueOf(appInfor.getAppType().value, ApplicationType.class),
 					appInfor.getReflectionInformation().getForcedReflection() == DisabledSegment_New.TODO ? true : false,
 							chkRecord);
-			return recordPub.appReflectProcess(para);
+			return recordPub.appReflectProcess(para, EnumAdaptor.valueOf(executionType.value, ExecutionType.class));
 		}
 		return true;
 	}
