@@ -54,8 +54,15 @@ public class ClearConfirmApprovalService {
 	/**
 	 * 確認、承認のクリア
 	 */
-	@SuppressWarnings("unchecked")
 	public void clearConfirmApproval(String employeeId, List<GeneralDate> lstDate) {
+		clearConfirmApproval(employeeId, lstDate, Optional.empty());
+	}
+	
+	/**
+	 * 確認、承認のクリア
+	 */
+	@SuppressWarnings("unchecked")
+	public void clearConfirmApproval(String employeeId, List<GeneralDate> lstDate, Optional<ApprovalProcessingUseSetting> approvalSetOpt) {
 		String companyId = AppContexts.user().companyId();
 		// ドメインモデル「本人確認処理の利用設定」を取得する
 		Optional<IdentityProcessUseSet> indenUseSetOpt = identityProcessUseSetRepository.findByKey(companyId);
@@ -65,7 +72,7 @@ public class ClearConfirmApprovalService {
 		}
 
 		// ドメインモデル「承認確認処理の利用設定」を取得する
-		Optional<ApprovalProcessingUseSetting> approvalSettingOpt = approvalUseSetRepo.findByCompanyId(companyId);
+		Optional<ApprovalProcessingUseSetting> approvalSettingOpt = approvalSetOpt.isPresent() ? approvalSetOpt : approvalUseSetRepo.findByCompanyId(companyId);
 		if (approvalSettingOpt.isPresent() && approvalSettingOpt.get().getUseDayApproverConfirm()) {
 			// [No.601]日別の承認をクリアする
 			lstDate.forEach(date -> {
