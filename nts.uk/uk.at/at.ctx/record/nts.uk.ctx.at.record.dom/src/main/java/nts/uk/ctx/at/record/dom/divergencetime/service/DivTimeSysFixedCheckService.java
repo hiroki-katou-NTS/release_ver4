@@ -48,6 +48,7 @@ import nts.uk.ctx.at.record.dom.divergence.time.message.DivergenceTimeErrorAlarm
 import nts.uk.ctx.at.record.dom.divergence.time.message.ErrorAlarmMessage;
 import nts.uk.ctx.at.record.dom.divergence.time.message.WorkTypeDivergenceTimeErrorAlarmMessage;
 import nts.uk.ctx.at.record.dom.divergence.time.message.WorkTypeDivergenceTimeErrorAlarmMessageRepository;
+import nts.uk.ctx.at.record.dom.workrecord.actualsituation.approvalsituationmanagement.export.clearapprovalconfirm.ClearConfirmApprovalService;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecordRepository;
@@ -133,6 +134,9 @@ public class DivTimeSysFixedCheckService {
 	
 	@Inject
 	private BusinessTypeOfEmployeeRepository bteRepo;
+	
+	@Inject
+	private ClearConfirmApprovalService approvalService;
 	
 	public final static List<String> SYSTEM_FIXED_DIVERGENCE_CHECK_CODE = Arrays.asList("D001", "D002", "D003", "D004", "D005", 
 			"D006", "D007", "D008", "D009", "D010", "D011", "D012", "D013", "D014", "D015", "D016", "D017", "D018", "D019", "D020");
@@ -313,14 +317,15 @@ public class DivTimeSysFixedCheckService {
 			}
 			shareContainer.getShared(join(APPROVAL_SETTING_KEY, SEPERATOR, comId),
 					() -> approvalSettingRepo.findByCompanyId(comId)).ifPresent(as -> {
-				if (as.getUseDayApproverConfirm() != null && as.getUseDayApproverConfirm()
-						&& as.getSupervisorConfirmErrorAtr() != null
-						&& !as.getSupervisorConfirmErrorAtr().equals(ConfirmationOfManagerOrYouself.CAN_CHECK)) {
-					approvalStateRepo.find(empId, tarD).ifPresent(asd -> {
-						/** 承認状態をすべてクリアする */
-						appRootStateAdapter.clearAppRootstate(asd.getRootInstanceID());
-					});
-				}
+						approvalService.clearConfirmApproval(empId, divEr67.stream().map(c -> c.getDate()).collect(Collectors.toList()), Optional.of(as));
+//				if (as.getUseDayApproverConfirm() != null && as.getUseDayApproverConfirm()
+//						&& as.getSupervisorConfirmErrorAtr() != null
+//						&& !as.getSupervisorConfirmErrorAtr().equals(ConfirmationOfManagerOrYouself.CAN_CHECK)) {
+//					approvalStateRepo.find(empId, tarD).ifPresent(asd -> {
+//						/** 承認状態をすべてクリアする */
+//						appRootStateAdapter.clearAppRootstate(asd.getRootInstanceID());
+//					});
+//				}
 			});
 		}
 		return errors;
