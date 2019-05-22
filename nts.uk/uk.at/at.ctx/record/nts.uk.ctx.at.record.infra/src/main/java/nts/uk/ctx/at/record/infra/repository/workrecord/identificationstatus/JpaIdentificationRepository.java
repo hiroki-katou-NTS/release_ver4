@@ -167,4 +167,20 @@ public class JpaIdentificationRepository extends JpaRepository implements Identi
 		return entities.stream().map(c -> c.toDomain()).collect(Collectors.toList());
 	}
 
+	@Override
+	public void removeByEmpListDate(String employeeId, List<GeneralDate> lstProcessingYmd) {
+		try {
+			PreparedStatement statement = this.connection().prepareStatement(
+					"Delete From KRCDT_CONFIRMATION_DAY" + " Where SID = ?" + " AND PROCESSING_YMD IN ("
+							+ lstProcessingYmd.stream().map(s -> "?").collect(Collectors.joining(",")) + ")");
+			statement.setString(1, employeeId);
+			for (int i = 0; i < lstProcessingYmd.size(); i++) {
+				statement.setDate(i + 2, Date.valueOf(lstProcessingYmd.get(i).localDate()));
+			}
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

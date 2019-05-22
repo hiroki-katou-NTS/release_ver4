@@ -23,6 +23,8 @@ public interface IdentificationRepository {
 	List<Identification> findByEmployeeIDSortDate(String employeeID,GeneralDate startDate,GeneralDate endDate);
 
 	void removeByEmployeeIdAndDate(String employeeId, GeneralDate processingYmd);
+	
+	void removeByEmpListDate(String employeeId, List<GeneralDate> lstProcessingYmd);
 
 
 }
