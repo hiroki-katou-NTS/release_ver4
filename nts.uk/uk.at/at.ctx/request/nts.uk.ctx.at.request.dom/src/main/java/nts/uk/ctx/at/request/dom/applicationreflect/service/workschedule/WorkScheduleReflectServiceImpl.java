@@ -22,7 +22,7 @@ public class WorkScheduleReflectServiceImpl implements WorkScheduleReflectServic
 			return ReflectInformationResult.CHECKFALSE;
 		}
 		//反映チェック処理(Xử lý check phản ánh)		
-		if(!checkReflect.appReflectProcessRecord(application, false)) {
+		if(!checkReflect.appReflectProcessRecord(application, false, reflectParam.getExecutionType())) {
 			return ReflectInformationResult.CHECKFALSE;
 		}
 		boolean isReflect = true;

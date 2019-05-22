@@ -48,7 +48,7 @@ public class ApplicationReflectProcessScheImpl implements ApplicationReflectProc
 		CommonReflectSchePubParam leavePra = new CommonReflectSchePubParam(reflectSche.getEmployeeId(),
 				reflectSche.getDatePara(),
 				reflectSche.getForLeave().getWorkTypeCode() != null ? reflectSche.getForLeave().getWorkTypeCode().v() : null, //勤務種類=INPUT．勤務種類コード chi update workType
-				null,
+				reflectSche.getForLeave().getWorkTimeCode() != null ? reflectSche.getForLeave().getWorkTimeCode().v() : null,
 				reflectSche.getAppInfor().getStartDate().isPresent() ? reflectSche.getAppInfor().getStartDate().get() : null,
 				reflectSche.getAppInfor().getEndDate().isPresent() ? reflectSche.getAppInfor().getEndDate().get() : null,
 						forLeave.getStartTime1() != null ? forLeave.getStartTime1().v() : null,

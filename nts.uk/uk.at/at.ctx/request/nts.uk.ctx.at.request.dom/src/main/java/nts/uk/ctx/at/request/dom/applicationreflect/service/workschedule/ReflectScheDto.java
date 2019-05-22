@@ -12,6 +12,7 @@ import nts.uk.ctx.at.request.dom.application.holidayshipment.recruitmentapp.Recr
 import nts.uk.ctx.at.request.dom.application.holidayworktime.AppHolidayWork;
 import nts.uk.ctx.at.request.dom.application.workchange.AppWorkChange;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.InformationSettingOfEachApp;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionTypeExImport;
 @AllArgsConstructor
 @Setter
 @Getter
@@ -21,7 +22,7 @@ public class ReflectScheDto {
 	/**	年月日 */
 	private GeneralDate datePara;
 	/**	実行種別 */
-	private ExecutionType executionType;
+	private ExecutionTypeExImport executionType;
 	/** 振出・休出時反映する区分	 */
 	private boolean reflectAtr;
 	/**	時刻の反映*/

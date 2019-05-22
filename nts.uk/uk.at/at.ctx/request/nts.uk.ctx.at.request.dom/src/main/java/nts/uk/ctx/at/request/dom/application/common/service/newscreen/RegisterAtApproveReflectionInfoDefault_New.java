@@ -12,6 +12,7 @@ import nts.uk.ctx.at.request.dom.application.common.adapter.workflow.ApprovalRoo
 import nts.uk.ctx.at.request.dom.applicationreflect.service.AppReflectManager;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.InformationSettingOfAppForReflect;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.InformationSettingOfEachApp;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionTypeExImport;
 
 /**
  * 2-2.新規画面登録時承認反映情報の整理
@@ -65,7 +66,7 @@ public class RegisterAtApproveReflectionInfoDefault_New implements RegisterAtApp
 				|| application.getAppType().equals(ApplicationType.COMPLEMENT_LEAVE_APPLICATION)){
 				Application_New application_New1 = applicationRepository.findByID(application.getCompanyID(), application.getAppID()).get();
 				InformationSettingOfEachApp reflectSetting = appSetting.getSettingOfEachApp();
-				appReflectManager.reflectEmployeeOfApp(application_New1, reflectSetting);
+				appReflectManager.reflectEmployeeOfApp(application_New1, reflectSetting, ExecutionTypeExImport.NORMAL_EXECUTION);
 			}
 		}
 	}

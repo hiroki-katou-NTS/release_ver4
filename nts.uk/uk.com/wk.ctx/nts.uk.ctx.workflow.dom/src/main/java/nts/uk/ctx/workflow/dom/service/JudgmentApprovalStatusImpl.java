@@ -199,7 +199,7 @@ public class JudgmentApprovalStatusImpl implements JudgmentApprovalStatusService
 		// 代行期限切れフラグ
 		Boolean subExpFlag = false;
 		for(ApprovalFrame approvalFrame : approvalPhaseState.getListApprovalFrame()){
-			if(Strings.isNotBlank(approvalFrame.getApproverID()) && approvalFrame.getApproverID().equals(employeeID)){
+			if(Strings.isNotBlank(approvalFrame.getApproverID()) && approvalFrame.getApproverID().equals(employeeID) && approvalFrame.getApprovalAtr()==ApprovalBehaviorAtr.APPROVED){
 				approvalFlag = true;
 				approvalAtr = approvalFrame.getApprovalAtr();
 				approvableFlag = true;
@@ -304,7 +304,7 @@ public class JudgmentApprovalStatusImpl implements JudgmentApprovalStatusService
 		Boolean approvableFlag = false;
 		Boolean subExpFlag = false;
 		for(ApprovalFrame approvalFrame : approvalPhaseState.getListApprovalFrame()){
-			if(Strings.isNotBlank(approvalFrame.getApproverID()) && approvalFrame.getApproverID().equals(employeeID)){
+			if(Strings.isNotBlank(approvalFrame.getApproverID()) && approvalFrame.getApproverID().equals(employeeID) && approvalFrame.getApprovalAtr()==ApprovalBehaviorAtr.APPROVED){
 				approvalFlag = true;
 				approvalAtr = approvalFrame.getApprovalAtr();
 				approvableFlag = true;

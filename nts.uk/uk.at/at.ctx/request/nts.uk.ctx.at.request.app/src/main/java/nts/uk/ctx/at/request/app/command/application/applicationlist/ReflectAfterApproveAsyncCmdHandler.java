@@ -14,6 +14,7 @@ import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.AppReflectManager;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.InformationSettingOfAppForReflect;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.InformationSettingOfEachApp;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionTypeExImport;
 import nts.uk.shr.com.context.AppContexts;
 @Stateless
 public class ReflectAfterApproveAsyncCmdHandler extends AsyncCommandHandler<List<String>>{
@@ -39,7 +40,7 @@ public class ReflectAfterApproveAsyncCmdHandler extends AsyncCommandHandler<List
 				|| application.getAppType().equals(ApplicationType.ABSENCE_APPLICATION)
 				|| application.getAppType().equals(ApplicationType.COMPLEMENT_LEAVE_APPLICATION)){
 				InformationSettingOfEachApp reflectSetting = appSetting.getSettingOfEachApp();
-				appReflectManager.reflectEmployeeOfApp(application, reflectSetting);
+				appReflectManager.reflectEmployeeOfApp(application, reflectSetting, ExecutionTypeExImport.NORMAL_EXECUTION);
 			}
 		}
 	}

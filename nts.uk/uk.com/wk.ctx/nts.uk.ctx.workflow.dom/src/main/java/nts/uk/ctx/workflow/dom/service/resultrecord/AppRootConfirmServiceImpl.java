@@ -156,6 +156,18 @@ public class AppRootConfirmServiceImpl implements AppRootConfirmService {
 			if(!this.canCancelCheck(approvalPhaseState, approverID)){
 				break;
 			}
+			List<ApprovalFrame> confirmFrameLst = approvalPhaseState.getListApprovalFrame().stream().filter(x -> x.getConfirmAtr()==ConfirmPerson.CONFIRM).collect(Collectors.toList());
+			// 承認形態と確定区分をチェックする
+			if((approvalPhaseState.getApprovalForm()==ApprovalForm.SINGLE_APPROVED)&&confirmFrameLst.isEmpty()){
+				appRootConfirm.getListAppPhase().remove(appPhaseConfirm);
+				// 解除を実行したかフラグ=true
+				cleanComplete = true;
+				// ループ終了フラグをチェックする
+				if(loopCompleteFlg){
+					break;
+				} 
+				continue;
+			}
 			// ループ終了フラグ=false(初期化)
 			loopCompleteFlg = false;
 			for(AppFrameInstance appFrameInstance : appPhaseInstance.getListAppFrame()){

@@ -55,6 +55,7 @@ import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.Reflect
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.WorkScheduleReflectService;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.WorkRecordReflectService;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionTypeExImport;
 
 @Stateless
 public class AppReflectManagerImpl implements AppReflectManager {
@@ -82,7 +83,8 @@ public class AppReflectManagerImpl implements AppReflectManager {
 	private InterimRemainDataMngRegisterDateChange interimRegister;
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public ReflectResult reflectEmployeeOfApp(Application_New appInfor, InformationSettingOfEachApp reflectSetting) {
+	public ReflectResult reflectEmployeeOfApp(Application_New appInfor, InformationSettingOfEachApp reflectSetting,
+			ExecutionTypeExImport execuTionType) {
 		ReflectResult outData = new ReflectResult(true, true);
 		GobackReflectPara appGobackTmp = null;
 		OvertimeReflectPara overTimeTmp = null;
@@ -93,7 +95,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 		CommonReflectPara recruitmentInfor = null;
 		ReflectScheDto reflectScheParam = new ReflectScheDto(appInfor.getEmployeeID(), 
 				appInfor.getAppDate(),
-				ExecutionType.NORMALECECUTION, 
+				execuTionType, 
 				true,
 				ApplyTimeRequestAtr.START,
 				appInfor,
@@ -194,7 +196,8 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				holidayworkInfor, 
 				absenceData,
 				absenceLeaveAppInfor,
-				recruitmentInfor);
+				recruitmentInfor,
+				execuTionType);
 		ReflectInformationResult recordResult = workRecordReflect.workRecordreflect(appPara);
 		if(recordResult == ReflectInformationResult.DONE) {
 			appInfor.getReflectionInformation().setStateReflectionReal(ReflectedState_New.REFLECTED);
