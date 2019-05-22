@@ -72,6 +72,9 @@ import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionLo
 import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionLogRepository;
 import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionRepository;
 import nts.uk.ctx.at.function.dom.processexecution.tasksetting.ExecutionTaskSetting;
+import nts.uk.ctx.at.function.dom.processexecution.updateprocessexecsetting.changepersionlist.ChangePersionList;
+import nts.uk.ctx.at.function.dom.processexecution.updateprocessexecsetting.changepersionlist.ListLeaderOrNotEmp;
+import nts.uk.ctx.at.function.dom.processexecution.updateprocessexecsetting.changepersionlistforsche.ChangePersionListForSche;
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployeeHistory;
@@ -208,8 +211,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	private DailyCalculationEmployeeService dailyCalculationEmployeeService;
 	@Inject
 	private SyCompanyRecordAdapter syCompanyRecordAdapter;
-	@Inject
-	private WorkplaceWorkRecordAdapter workplaceWorkRecordAdapter;
+//	@Inject
+//	private WorkplaceWorkRecordAdapter workplaceWorkRecordAdapter;
 
 	@Inject
 	private ScheCreExeErrorLogHandler scheCreExeErrorLogHandler;
@@ -239,6 +242,12 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	
 	@Inject
 	private DailyMonthlyprocessAdapterFn dailyMonthlyprocessAdapterFn;
+	
+	@Inject
+	private ChangePersionList changePersionList;
+	
+	@Inject
+	private ChangePersionListForSche changePersionListForSche;
 	
 	public static int MAX_DELAY_PARALLEL = 0;
 
@@ -914,16 +923,17 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			}
 			// 異動者・新入社員のみ作成の場合
 			else {
-				DatePeriod period = procExecLog.getEachProcPeriod().get().getScheduleCreationPeriod().get();
+				//DatePeriod period = procExecLog.getEachProcPeriod().get().getScheduleCreationPeriod().get();
 				// ・社員ID（異動者、勤務種別変更者、休職者・休業者）（List）
 				List<String> reEmployeeList = new ArrayList<>();
 				// 社員ID（新入社員）（List）
 				List<String> newEmployeeList = new ArrayList<>();
 				// 社員ID（休職者・休業者）（List）
 				List<String> temporaryEmployeeList = new ArrayList<>();
-				// 対象社員を絞り込み
-				this.filterEmployeeList(procExec, empIds, period, reEmployeeList, newEmployeeList,
-						temporaryEmployeeList);
+				// 対象社員を絞り込み  -> Đổi tên (異動者・勤務種別変更者リスト作成処理（スケジュール用）)
+//				this.filterEmployeeList(procExec, empIds, reEmployeeList, newEmployeeList,
+//						temporaryEmployeeList);
+				changePersionListForSche.filterEmployeeList(procExec, empIds, reEmployeeList, newEmployeeList, temporaryEmployeeList);
 				if (!CollectionUtil.isEmpty(reEmployeeList) && !CollectionUtil.isEmpty(newEmployeeList)) {
 
 				} else {
@@ -1786,12 +1796,13 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						empIds.add(x.getEmployeeId());
 					});
 					// 異動者・勤務種別変更者リスト作成処理
-					ListLeaderOrNotEmpOutput createProcessForChangePerOrWorktype = this
-							.createProcessForChangePerOrWorktype(closure.getClosureId().value, companyId, empIds,
-									calculateDate, procExec);
+//					ListLeaderOrNotEmpOutput createProcessForChangePerOrWorktype = this
+//							.createProcessForChangePerOrWorktype( companyId, empIds,
+//									calculateDate, procExec);
+					ListLeaderOrNotEmp listLeaderOrNotEmp = changePersionList.createProcessForChangePerOrWorktype(companyId, empIds, calculateDate, procExec);
 
 					boolean isHasInterrupt = false;
-					for (String empLeader : createProcessForChangePerOrWorktype.getLeaderEmpIdList()) {
+					for (String empLeader : listLeaderOrNotEmp.getLeaderEmpIdList()) {
 						// ドメインモデル「日別実績の勤務情報」を取得する
 						List<WorkInfoOfDailyPerFnImport> listWorkInfo = recordWorkInfoFunAdapter
 								.findByPeriodOrderByYmd(empLeader);
@@ -1965,37 +1976,37 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 //	}
 
 	// 異動者・勤務種別変更者リスト作成処理
-	private ListLeaderOrNotEmpOutput createProcessForChangePerOrWorktype(int closureId, String companyId,
-			List<String> empIds, GeneralDate startDate, ProcessExecution procExec) {
-		// 期間を計算
-		// GeneralDate p = this.calculatePeriod(closureId, period, companyId);
-		List<String> newEmpIdList = new ArrayList<>();
-		// ・社員ID（異動者、勤務種別変更者のみ）（List）
-		Set<String> setEmpIds = new HashSet<String>();
-		// ・社員ID（異動者、勤務種別変更者のみ）（List）
-		List<String> noLeaderEmpIdList = empIds;
-		// check 異動者を再作成する
-		if (procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTransfer()) {
-			// 異動者の絞り込み todo request list 590
-			List<AffWorkplaceHistoryImport> list = workplaceWorkRecordAdapter.getWorkplaceBySidsAndBaseDate(empIds,
-					startDate);
-			list.forEach(emp -> {
-				emp.getHistoryItems().forEach(x -> {
-					if (x.start().afterOrEquals(startDate)) {
-						setEmpIds.add(emp.getSid());
-						return;
-					}
-				});
-			});
-		}
-		if (procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTypeChangePerson()) {
-			// 勤務種別の絞り込み
-			newEmpIdList = this.refineWorkType(companyId, empIds, startDate);
-		}
-		setEmpIds.addAll(newEmpIdList);
-		noLeaderEmpIdList.removeAll(new ArrayList<>(newEmpIdList));
-		return new ListLeaderOrNotEmpOutput(new ArrayList<>(setEmpIds), noLeaderEmpIdList);
-	}
+//	private ListLeaderOrNotEmpOutput createProcessForChangePerOrWorktype(String companyId,
+//			List<String> empIds, GeneralDate startDate, ProcessExecution procExec) {
+//		// 期間を計算
+//		// GeneralDate p = this.calculatePeriod(closureId, period, companyId);
+//		List<String> newEmpIdList = new ArrayList<>();
+//		// ・社員ID（異動者、勤務種別変更者のみ）（List）
+//		Set<String> setEmpIds = new HashSet<String>();
+//		// ・社員ID（異動者、勤務種別変更者のみ）（List）
+//		List<String> noLeaderEmpIdList = empIds;
+//		// check 異動者を再作成する
+//		if (procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTransfer()) {
+//			// 異動者の絞り込み todo request list 590
+//			List<AffWorkplaceHistoryImport> list = workplaceWorkRecordAdapter.getWorkplaceBySidsAndBaseDate(empIds,
+//					startDate);
+//			list.forEach(emp -> {
+//				emp.getHistoryItems().forEach(x -> {
+//					if (x.start().afterOrEquals(startDate)) {
+//						setEmpIds.add(emp.getSid());
+//						return;
+//					}
+//				});
+//			});
+//		}
+//		if (procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTypeChangePerson()) {
+//			// 勤務種別の絞り込み
+//			newEmpIdList = this.refineWorkType(companyId, empIds, startDate);
+//		}
+//		setEmpIds.addAll(newEmpIdList);
+//		noLeaderEmpIdList.removeAll(new ArrayList<>(newEmpIdList));
+//		return new ListLeaderOrNotEmpOutput(new ArrayList<>(setEmpIds), noLeaderEmpIdList);
+//	}
 
 	private DatePeriod findClosureMinMaxPeriod(String companyId, List<Closure> closureList) {
 		GeneralDate startYearMonth = null;
@@ -2252,92 +2263,92 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	 * @param employeeIdList
 	 * @param period
 	 */
-	private DatePeriod filterEmployeeList(ProcessExecution procExec, List<String> employeeIdList, DatePeriod datePeriod,
-			List<String> reEmployeeList, List<String> newEmployeeList, List<String> temporaryEmployeeList) {
-
-		String companyId = AppContexts.user().companyId();
-		/** 作成対象の判定 */
-		if (procExec.getExecSetting().getPerSchedule().getTarget()
-				.getCreationTarget().value == TargetClassification.ALL.value) {
-			return null;
-		} else {
-			Set<String> listSetReEmployeeList = new HashSet<>();
-			// ドメインモデル「就業締め日」を取得する
-			List<Closure> closureList = this.closureRepo.findAllActive(companyId, UseClassification.UseClass_Use);
-			DatePeriod closurePeriod = this.findClosureMinMaxPeriod(companyId, closureList);
-
-			DatePeriod newClosurePeriod = new DatePeriod(closurePeriod.start(), GeneralDate.ymd(9999, 12, 31));
-
-			TargetSetting setting = procExec.getExecSetting().getPerSchedule().getTarget().getTargetSetting();
-			// 異動者を再作成するか判定
-			if (setting.isRecreateTransfer()) {
-				// Imported(勤務実績)「所属職場履歴」を取得する : 異動者の絞り込み
-//				List<WorkPlaceHistImport> wkpImportList = this.workplaceAdapter.getWplByListSidAndPeriod(employeeIdList,
-//						newClosurePeriod);
-
-				List<AffWorkplaceHistoryImport> list = workplaceWorkRecordAdapter
-						.getWorkplaceBySidsAndBaseDate(employeeIdList, closurePeriod.start());
-				list.forEach(emp -> {
-					emp.getHistoryItems().forEach(x -> {
-						if (x.start().afterOrEquals(closurePeriod.start())) {
-							listSetReEmployeeList.add(emp.getSid());
-							return;
-						}
-					});
-				});
-			}
-
-			// 勤務種別変更者を再作成するか判定
-			if (setting.isRecreateWorkType()) {
-				employeeIdList.forEach(x -> {
-					// ドメインモデル「社員の勤務種別の履歴」を取得する
-					Optional<BusinessTypeOfEmployeeHistory> optional = this.typeEmployeeOfHistoryRepos
-							.findByEmployeeDesc(AppContexts.user().companyId(), x);
-					if (optional.isPresent()) {
-						for (DateHistoryItem history : optional.get().getHistory()) {
-							// 「全締めの期間.開始日年月日」以降に「社員の勤務種別の履歴.履歴.期間.開始日」が存在する
-							if (history.start().afterOrEquals(closurePeriod.start())) {
-								// 取得したImported（勤務実績）「所属職場履歴」.社員IDを異動者とする
-								listSetReEmployeeList.add(optional.get().getEmployeeId());
-								break;
-							}
-						}
-					}
-				});
-			}
-			// 休職者・休業者を再作成するか判定
-			// TODO:chua lam
-			// 新入社員を作成するか判定
-			if (setting.isCreateEmployee()) {
-				// request list 211
-				// Imported「所属会社履歴（社員別）」を取得する
-				List<nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport> employeeHistList = this.syCompanyRecordAdapter
-						.getAffCompanyHistByEmployee(employeeIdList, newClosurePeriod);
-				// 取得したドメインモデル「所属開始履歴（社員別）」.社員IDを新入社員とする
-				employeeHistList.forEach(x -> newEmployeeList.add(x.getEmployeeId()));
-
-				// 社員ID（新入社員以外）（List）
-				for (String empID : employeeIdList) {
-					boolean checkNotExist = true;
-					for (String newEmpID : newEmployeeList) {
-						if (empID.equals(newEmpID)) {
-							checkNotExist = false;
-							break;
-						}
-					}
-					if (checkNotExist) {
-						temporaryEmployeeList.add(empID);
-					}
-				}
-
-			}
-			// 社員ID（異動者、勤務種別変更者、休職者・休業者）（List）から重複している社員IDを1つになるよう削除する
-			List<String> temp = new ArrayList<String>(listSetReEmployeeList);
-			reEmployeeList.addAll(temp);
-			return closurePeriod;
-		}
-
-	}
+//	private DatePeriod filterEmployeeList(ProcessExecution procExec, List<String> employeeIdList,
+//			List<String> reEmployeeList, List<String> newEmployeeList, List<String> temporaryEmployeeList) {
+//
+//		String companyId = AppContexts.user().companyId();
+//		/** 作成対象の判定 */
+//		if (procExec.getExecSetting().getPerSchedule().getTarget()
+//				.getCreationTarget().value == TargetClassification.ALL.value) {
+//			return null;
+//		} else {
+//			Set<String> listSetReEmployeeList = new HashSet<>();
+//			// ドメインモデル「就業締め日」を取得する
+//			List<Closure> closureList = this.closureRepo.findAllActive(companyId, UseClassification.UseClass_Use);
+//			DatePeriod closurePeriod = this.findClosureMinMaxPeriod(companyId, closureList);
+//
+//			DatePeriod newClosurePeriod = new DatePeriod(closurePeriod.start(), GeneralDate.ymd(9999, 12, 31));
+//
+//			TargetSetting setting = procExec.getExecSetting().getPerSchedule().getTarget().getTargetSetting();
+//			// 異動者を再作成するか判定
+//			if (setting.isRecreateTransfer()) {
+//				// Imported(勤務実績)「所属職場履歴」を取得する : 異動者の絞り込み
+////				List<WorkPlaceHistImport> wkpImportList = this.workplaceAdapter.getWplByListSidAndPeriod(employeeIdList,
+////						newClosurePeriod);
+//
+//				List<AffWorkplaceHistoryImport> list = workplaceWorkRecordAdapter
+//						.getWorkplaceBySidsAndBaseDate(employeeIdList, closurePeriod.start());
+//				list.forEach(emp -> {
+//					emp.getHistoryItems().forEach(x -> {
+//						if (x.start().afterOrEquals(closurePeriod.start())) {
+//							listSetReEmployeeList.add(emp.getSid());
+//							return;
+//						}
+//					});
+//				});
+//			}
+//
+//			// 勤務種別変更者を再作成するか判定
+//			if (setting.isRecreateWorkType()) {
+//				employeeIdList.forEach(x -> {
+//					// ドメインモデル「社員の勤務種別の履歴」を取得する
+//					Optional<BusinessTypeOfEmployeeHistory> optional = this.typeEmployeeOfHistoryRepos
+//							.findByEmployeeDesc(AppContexts.user().companyId(), x);
+//					if (optional.isPresent()) {
+//						for (DateHistoryItem history : optional.get().getHistory()) {
+//							// 「全締めの期間.開始日年月日」以降に「社員の勤務種別の履歴.履歴.期間.開始日」が存在する
+//							if (history.start().afterOrEquals(closurePeriod.start())) {
+//								// 取得したImported（勤務実績）「所属職場履歴」.社員IDを異動者とする
+//								listSetReEmployeeList.add(optional.get().getEmployeeId());
+//								break;
+//							}
+//						}
+//					}
+//				});
+//			}
+//			// 休職者・休業者を再作成するか判定
+//			// TODO:chua lam
+//			// 新入社員を作成するか判定
+//			if (setting.isCreateEmployee()) {
+//				// request list 211
+//				// Imported「所属会社履歴（社員別）」を取得する
+//				List<nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport> employeeHistList = this.syCompanyRecordAdapter
+//						.getAffCompanyHistByEmployee(employeeIdList, newClosurePeriod);
+//				// 取得したドメインモデル「所属開始履歴（社員別）」.社員IDを新入社員とする
+//				employeeHistList.forEach(x -> newEmployeeList.add(x.getEmployeeId()));
+//
+//				// 社員ID（新入社員以外）（List）
+//				for (String empID : employeeIdList) {
+//					boolean checkNotExist = true;
+//					for (String newEmpID : newEmployeeList) {
+//						if (empID.equals(newEmpID)) {
+//							checkNotExist = false;
+//							break;
+//						}
+//					}
+//					if (checkNotExist) {
+//						temporaryEmployeeList.add(empID);
+//					}
+//				}
+//
+//			}
+//			// 社員ID（異動者、勤務種別変更者、休職者・休業者）（List）から重複している社員IDを1つになるよう削除する
+//			List<String> temp = new ArrayList<String>(listSetReEmployeeList);
+//			reEmployeeList.addAll(temp);
+//			return closurePeriod;
+//		}
+//
+//	}
 
 	// 承認結果反映
 	private boolean reflectApprovalResult(String execId, ProcessExecution processExecution,
@@ -2427,6 +2438,13 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				employmentList.forEach(x -> {
 					lstEmploymentCode.add(x.getEmploymentCD());
 				});
+				
+				// 指定した年月の期間を算出する
+				DatePeriod datePeriodClosure = closureService.getClosurePeriod(closure.getClosureId().value,
+						closure.getClosureMonth().getProcessingYm());
+				// 取得した「締め期間」から「期間」を計算する
+				DatePeriod newDatePeriod = new DatePeriod(datePeriodClosure.start(), GeneralDate.ymd(9999, 12, 31));
+				
 				// 対象社員を取得
 				// <<Public>> 就業条件で社員を検索して並び替える
 				RegulationInfoEmployeeAdapterImport regulationInfoEmployeeAdapterImport = new RegulationInfoEmployeeAdapterImport();
@@ -2546,17 +2564,40 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				// <<Public>> 就業条件で社員を検索して並び替える
 				List<RegulationInfoEmployeeAdapterDto> lstRegulationInfoEmployee = this.regulationInfoEmployeeAdapter
 						.find(regulationInfoEmployeeAdapterImport);
-
-				int sizeEmployee = lstRegulationInfoEmployee.size();
+				Set<String> emps = new HashSet<>();
+				lstRegulationInfoEmployee.stream().forEach(q -> {
+					emps.add(q.getEmployeeId());
+				});
+				List<String> leaderEmpIdList = new ArrayList<>();
+				if (processExecution.getProcessExecType() == ProcessExecType.RE_CREATE) {
+					// 異動者・勤務種別変更者リスト作成処理
+					ListLeaderOrNotEmp listLeaderOrNotEmp = changePersionList.createProcessForChangePerOrWorktype(
+							companyId, new ArrayList<>(emps), newDatePeriod.start(), processExecution);
+					leaderEmpIdList = listLeaderOrNotEmp.getLeaderEmpIdList();
+				}
+				List<RegulationInfoEmployeeAdapterDto> lstRegulationInfoEmployeeNew = new ArrayList<>();
+				if(leaderEmpIdList.isEmpty()){
+					lstRegulationInfoEmployeeNew = lstRegulationInfoEmployee;
+				}else {
+					for(RegulationInfoEmployeeAdapterDto regulationInfoEmployeeAdapterDto :lstRegulationInfoEmployee) {
+						for(String empId :leaderEmpIdList) {
+							if(regulationInfoEmployeeAdapterDto.getEmployeeId().equals(empId)) {
+								lstRegulationInfoEmployeeNew.add(regulationInfoEmployeeAdapterDto);
+								break;
+							}
+						}
+					}
+				}
+				int sizeEmployee = lstRegulationInfoEmployeeNew.size();
 				for (int j = 0; j < sizeEmployee; j++) {
-					RegulationInfoEmployeeAdapterDto regulationInfoEmployeeAdapterDto = lstRegulationInfoEmployee
+					RegulationInfoEmployeeAdapterDto regulationInfoEmployeeAdapterDto = lstRegulationInfoEmployeeNew
 							.get(j);
 					// 期間を作成する
 					// 社員に対応する締め期間を取得す
-					DatePeriod datePeriod = this.closureEmploymentService
-							.findClosurePeriod(regulationInfoEmployeeAdapterDto.getEmployeeId(), GeneralDate.today());
-					// outputされた期間の終了日を「9999/12/31」に変更する
-					DatePeriod newDatePeriod = new DatePeriod(datePeriod.start(), GeneralDate.ymd(9999, 12, 31));
+//					DatePeriod datePeriod = this.closureEmploymentService
+//							.findClosurePeriod(regulationInfoEmployeeAdapterDto.getEmployeeId(), GeneralDate.today());
+//					// outputされた期間の終了日を「9999/12/31」に変更する
+//					DatePeriod newDatePeriod = new DatePeriod(datePeriod.start(), GeneralDate.ymd(9999, 12, 31));
 
 					// 社員の申請を反映 cua chi du
 					// AppReflectManager.reflectEmployeeOfApp
