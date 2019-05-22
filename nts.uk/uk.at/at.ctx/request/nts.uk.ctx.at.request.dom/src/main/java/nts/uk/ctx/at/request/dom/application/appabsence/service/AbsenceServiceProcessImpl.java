@@ -275,7 +275,7 @@ public class AbsenceServiceProcessImpl implements AbsenceServiceProcess{
 		GeneralDate closureDate = closure.get();
 		
 		//1
-		if(!subVacaTypeUseFlg && checkDis.isSubVacaManage()){//ドメインモデル「休暇申請対象勤務種類」．休暇種類を利用しないがfalse && output．振休管理区分が管理する
+		if(checkDis.isSubVacaManage()){//ドメインモデル「休暇申請対象勤務種類」．休暇種類を利用しないがfalse && output．振休管理区分が管理する
 			//アルゴリズム「期間内の振出振休残数を取得する」を実行する - RQ204
 			//・会社ID＝ログイン会社ID
 //			・社員ID＝申請者社員ID
@@ -292,7 +292,7 @@ public class AbsenceServiceProcessImpl implements AbsenceServiceProcess{
 		}
 		
 		//2
-		if(!subHdTypeUseFlg && checkDis.isSubHdManage()){//ドメインモデル「休暇申請対象勤務種類」．休暇種類を利用しないがfalse && output．代休管理区分が管理する
+		if(checkDis.isSubHdManage()){//ドメインモデル「休暇申請対象勤務種類」．休暇種類を利用しないがfalse && output．代休管理区分が管理する
 			//アルゴリズム「期間内の休出代休残数を取得する」を実行する - RQ203
 			//・会社ID＝ログイン会社ID
 //			・社員ID＝申請者社員ID
@@ -309,7 +309,7 @@ public class AbsenceServiceProcessImpl implements AbsenceServiceProcess{
 		}
 		
 		//3
-		if(!retentionTypeUseFlg && checkDis.isRetentionManage()){//ドメインモデル「休暇申請対象勤務種類」．休暇種類を利用しないがfalse && output．積休管理区分が管理する
+		if(checkDis.isRetentionManage()){//ドメインモデル「休暇申請対象勤務種類」．休暇種類を利用しないがfalse && output．積休管理区分が管理する
 			//基準日時点の積立年休残数を取得する - RQ201
 			Optional<RsvLeaManagerImport> stock = rsvLeaMngApdater.getRsvLeaveManager(employeeID, baseDate);
 			if(stock.isPresent()){
@@ -325,7 +325,7 @@ public class AbsenceServiceProcessImpl implements AbsenceServiceProcess{
 		}
 		
 		//4
-		if(!yearTypeUseFlg && checkDis.isYearManage()){//ドメインモデル「休暇申請対象勤務種類」．休暇種類を利用しないがfalse && output．年休管理区分が管理する
+		if(checkDis.isYearManage()){//ドメインモデル「休暇申請対象勤務種類」．休暇種類を利用しないがfalse && output．年休管理区分が管理する
 
 			//基準日時点の年休残数を取得する - RQ198
 			ReNumAnnLeaReferenceDateImport year = annLeaRemNumberAdapter.getReferDateAnnualLeaveRemainNumber(employeeID, baseDate);
