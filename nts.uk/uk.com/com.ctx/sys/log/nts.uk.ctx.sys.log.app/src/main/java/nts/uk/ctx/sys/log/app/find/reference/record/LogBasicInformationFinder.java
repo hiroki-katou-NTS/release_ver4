@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -32,7 +31,6 @@ import nts.uk.shr.com.security.audittrail.correction.content.DataCorrectionLog;
 import nts.uk.shr.com.security.audittrail.correction.content.TargetDataType;
 import nts.uk.shr.com.security.audittrail.correction.content.UserInfo;
 import nts.uk.shr.com.security.audittrail.correction.content.pereg.CategoryCorrectionLog;
-import nts.uk.shr.com.security.audittrail.correction.content.pereg.ItemInfo;
 import nts.uk.shr.com.security.audittrail.correction.content.pereg.PersonInfoCorrectionLog;
 import nts.uk.shr.com.security.audittrail.start.StartPageLog;
 import nts.uk.shr.com.security.audittrail.start.StartPageLogRepository;
@@ -110,8 +108,7 @@ public class LogBasicInformationFinder {
 					if(!CollectionUtil.isEmpty(loginRecords)){
 						// Get list employeeCode operator by list information operator
 						mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo,loginRecords,null,null,null);
-						
-						for (LoginRecord loginRecord : loginRecords) {
+						List<LogBasicInfoDto> logBasicLst = loginRecords.parallelStream().map(loginRecord ->{
 							// Convert log basic info to DTO
 							LogBasicInformation logBasicInformation = mapLogBasicInfo.get(loginRecord.getOperationId());
 							LogBasicInfoDto logBasicInfoDto = LogBasicInfoDto.fromDomain(logBasicInformation);
@@ -125,52 +122,13 @@ public class LogBasicInformationFinder {
 							logBasicInfoDto.setLoginStatus(loginRecord.getLoginStatus().description);
 							logBasicInfoDto
 									.setNote(loginRecord.getRemarks().isPresent() ? loginRecord.getRemarks().get() : "");
-							lstLogBacsicInfo.add(logBasicInfoDto);
-						}
+							return logBasicInfoDto;
+							
+						}).collect(Collectors.toList());
+						lstLogBacsicInfo.addAll(logBasicLst);
 					}
 				break;
 			case START_UP:
-				// Get list ProgramName
-//				Map<String, String> mapProgramNames = webMenuAdapter.getWebMenuByCId(cid);
-//				// get start page log
-//				List<StartPageLog> startPageLogs = this.startPageLogRepository.find(operationIds);
-//				if (!CollectionUtil.isEmpty(startPageLogs)) {
-//					if(startPageLogs.size() > maxSize){
-//						isDisplayText = true;
-//					}
-//					countCheck = 1;
-//					for (StartPageLog startPageLog : startPageLogs) {
-//						if(countCheck > maxSize){
-//							break;
-//						}
-//						// Convert log basic info to DTO
-//						LogBasicInformation logBasicInformation = mapLogBasicInfo.get(startPageLog.getBasicInfo().getOperationId());
-//						LogBasicInfoDto logBasicInfoDto = LogBasicInfoDto.fromDomain(logBasicInformation);
-//						UserInfo userDto = logBasicInformation.getUserInfo();
-//						// convert log basic info to DTO
-//						String programName = "";
-//						if (startPageLog.getStartPageBeforeInfo().isPresent()) {
-//							ScreenIdentifier screenIdentifier = startPageLog.getStartPageBeforeInfo().get();
-//							String key = screenIdentifier.getProgramId() + screenIdentifier.getScreenId()
-//									+ screenIdentifier.getQueryString();
-//							programName = mapProgramNames.get(key);
-//						}
-//						// Get employee code user login
-//						if (userDto != null) {
-//							logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()));
-//						}
-//						// get user login name
-//						logBasicInfoDto.setUserNameLogin(userDto.getUserName());
-//						logBasicInfoDto.setMenuName(programName);
-//						logBasicInfoDto.setNote(
-//								logBasicInformation.getNote().isPresent() ? logBasicInformation.getNote().get() : "");
-//						logBasicInfoDto.setDisplayText(isDisplayText);
-//						// add to list
-//						lstLogBacsicInfo.add(logBasicInfoDto);
-//						countCheck++;
-//					}
-//				}
-
 				break;
 			case UPDATE_PERSION_INFO:
 				String[] listSubHeaderText = { "23", "24", "29", "31", "33" };
@@ -179,32 +137,39 @@ public class LogBasicInformationFinder {
 						.findByTargetAndDate(operationIds,logParams.getListTagetEmployeeId());
 				
 				// Get list employeeCode operator by list information operator
-				mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo,null,listPersonInfoCorrectionLog,null,null);
+				mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo, null, listPersonInfoCorrectionLog, null, null);
 				
 				// Get Map Order list
-				List<String> itemDefinitionIds = new ArrayList<>();
 				List<String> categoryIds = new ArrayList<>();
-				
+				List<String> itemDefinitionIds = new ArrayList<>();
 				List<PersonInfoCorrectionLog> listDataPersionInforReturn = new ArrayList<>();
-				for (PersonInfoCorrectionLog personInfoCorrectionLog:listPersonInfoCorrectionLog) {
-					listDataPersionInforReturn.add(personInfoCorrectionLog);
-					List<CategoryCorrectionLog> lstCate = personInfoCorrectionLog.getCategoryCorrections();
-					if(!CollectionUtil.isEmpty(lstCate)){
-						for (CategoryCorrectionLog cate : lstCate) {
-							List<ItemInfo> itemInfros = cate.getItemInfos();
-							if (!CollectionUtil.isEmpty(itemInfros)) {
-								for (ItemInfo itemInfro : itemInfros) {
-									itemDefinitionIds.add(itemInfro.getItemId());
-								}
-							}
-							categoryIds.add(cate.getCategoryId());
-						}
-					}
+				
+				List<String> ctgIds = listPersonInfoCorrectionLog == null? new ArrayList<>(): listPersonInfoCorrectionLog.parallelStream().filter(c -> !CollectionUtil.isEmpty(c.getCategoryCorrections()))
+						.map(perCorrectLog ->{
+							listDataPersionInforReturn.add(perCorrectLog);
+							List<CategoryCorrectionLog> lstCate = perCorrectLog.getCategoryCorrections();
+								  return  lstCate.parallelStream().filter(c -> !CollectionUtil.isEmpty(c.getItemInfos())).map(c -> {
+									List<String> itemIds = c.getItemInfos().parallelStream().map(item -> item.getItemId()).collect(Collectors.toList());
+									itemDefinitionIds.addAll(itemIds);
+									return c.getCategoryId();
+								}).collect(Collectors.toList());
+								
+						})
+						.flatMap(c -> c.stream())
+						.distinct()
+						.collect(Collectors.toList());
+				
+				if(!CollectionUtil.isEmpty(ctgIds)) {
+					categoryIds.addAll(ctgIds);
 				}
+				
 				HashMap<Integer, HashMap<String, Integer>> mapCheckOrder = iPerInfoCtgOrderByComAdapter.getOrderList(categoryIds, itemDefinitionIds);
 				
 					Map<String, LogBasicInfoDto> mapCheck = new HashMap<>();
-					for (PersonInfoCorrectionLog personInfoCorrectionLog : listDataPersionInforReturn) {
+					// Get list subHeader
+					List<LogOutputItemDto> lstHeaderTemp = new ArrayList<>();
+					List<LogOutputItemDto> lstHeader = logOuputItemFinder.getLogOutputItemByItemNosAndRecordType(Arrays.asList(listSubHeaderText),logParams.getRecordType());
+					listDataPersionInforReturn.parallelStream().forEach(personInfoCorrectionLog ->{
 						// Convert log basic info to DTO
 						LogBasicInformation logBasicInformation = mapLogBasicInfo.get(personInfoCorrectionLog.getOperationId());
 						LogBasicInfoDto logBasicInfoDto = LogBasicInfoDto.fromDomain(logBasicInformation);
@@ -236,23 +201,20 @@ public class LogBasicInformationFinder {
 							logBasicInfoDto.setUserNameLogin(userDto.getUserName());
 
 							logTemp.setLstLogPerCateCorrectRecordDto(logPerCateCorrectRecordDtos);
-							// Get list subHeader
-							List<LogOutputItemDto> lstHeaderTemp = new ArrayList<>();
-							List<LogOutputItemDto> lstHeader = logOuputItemFinder.getLogOutputItemByItemNosAndRecordType(Arrays.asList(listSubHeaderText),logParams.getRecordType());
-							for (LogOutputItemDto logOutputItemDto : lstHeader) {
+							lstHeader.stream().forEach(logOutputItemDto ->{
 								if (logOutputItemDto.getItemNo() == ItemNoEnum.ITEM_NO_23.code) {
 									lstHeaderTemp.add(logOutputItemDto);
 									lstHeaderTemp.add(new LogOutputItemDto(99, TextResource.localize("CLI003_61"),logParams.getRecordType()));
 								} else {
 									lstHeaderTemp.add(logOutputItemDto);
 								}
-							}
+							});
 							logTemp.setLstLogOutputItemDto(lstHeaderTemp);
 							logTemp.setNote(personInfoCorrectionLog.getRemark());
 							logTemp.setProcessAttr(LogPerCateCorrectRecordDto.getPersonInfoProcessAttr(personInfoCorrectionLog.getProcessAttr().value));
 							mapCheck.put(keyCheck, logTemp);
-						}
-					}
+						}						
+					});
 					// Convert data to list
 					lstLogBacsicInfo = new ArrayList<LogBasicInfoDto>(mapCheck.values());
 				break;
@@ -265,10 +227,7 @@ public class LogBasicInformationFinder {
 					if (!CollectionUtil.isEmpty(lstDataCorectLog)) {
 						// Get list employeeCode operator by list information operator
 						mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo,null,null,lstDataCorectLog,null);
-						
-						// convert list data corect log to DTO
-						List<LogDataCorrectRecordRefeDto> lstLogDataCorecRecordRefeDto = new ArrayList<>();
-						for (DataCorrectionLog dataCorrectionLog : lstDataCorectLog) {
+						lstDataCorectLog.stream().forEach(dataCorrectionLog ->{
 							// convert log basic info to DTO
 							LogBasicInformation logBasicInformation = mapLogBasicInfo.get(dataCorrectionLog.getOperationId());
 							LogBasicInfoDto logBasicInfoDto = LogBasicInfoDto.fromDomain(logBasicInformation);
@@ -292,7 +251,8 @@ public class LogBasicInformationFinder {
 								// get user login name
 								logBasicInfoDto.setUserNameLogin(userDto.getUserName());
 								
-								lstLogDataCorecRecordRefeDto = new ArrayList<>();
+								// convert list data corect log to DTO
+								List<LogDataCorrectRecordRefeDto> lstLogDataCorecRecordRefeDto = new ArrayList<>();
 								LogBasicInfoDto logTemp = getEmpCodeByEmpId(logBasicInfoDto,logDataCorrectRecordRefeDto.getEmployeeIdtaget(),logDataCorrectRecordRefeDto.getUserNameTaget());
 								logDataCorrectRecordRefeDto.setParentKey(keyEmploy);
 								lstLogDataCorecRecordRefeDto.add(logDataCorrectRecordRefeDto);
@@ -302,10 +262,10 @@ public class LogBasicInformationFinder {
 								logTemp.setLstLogOutputItemDto(listSubHeader);
 								mapCheckLogBasic.put(keyEmploy, logTemp);
 							}
-						}
-						
+							
+						});
 					}
-				// xử lý input map to list
+				// xử lý input map to lists
 				lstLogBacsicInfo = new ArrayList<LogBasicInfoDto>(mapCheckLogBasic.values());
 				break;
 			default:
@@ -319,33 +279,15 @@ public class LogBasicInformationFinder {
 						logParams.getListOperatorEmployeeId(), logParams.getStartDateOperator(),
 						logParams.getEndDateOperator());
 				if (!CollectionUtil.isEmpty(startPageLogs)) {
-					List<String> employeeIds = new ArrayList<>();
-					for(StartPageLog startPageLog : startPageLogs){
-						LogBasicInformation	lgBasicInformation=startPageLog.getBasicInfo();
-						if(!Objects.isNull(lgBasicInformation) && !Objects.isNull(lgBasicInformation.getUserInfo()) &&
-								!Objects.isNull(lgBasicInformation.getUserInfo().getEmployeeId())  ){
-							employeeIds.add(lgBasicInformation.getUserInfo().getEmployeeId());
-							
-						}
-					}
 					// Get list employee code
 					mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,null,null,null,null,startPageLogs);
-					for (StartPageLog startPageLog : startPageLogs) {
-						
+					List<LogBasicInfoDto> logBasicInfoDtoInter = startPageLogs.stream().map(startPageLog -> {
 						// Convert log basic info to DTO
-						LogBasicInformation	logBasicInformation=startPageLog.getBasicInfo();
+						LogBasicInformation logBasicInformation = startPageLog.getBasicInfo();
 						LogBasicInfoDto logBasicInfoDto = LogBasicInfoDto.fromDomain(logBasicInformation);
 						// Set user login name
 						UserInfo userDto = logBasicInformation.getUserInfo();
-						
-						// convert log basic info to DTO
-					//	String programName = "";
-						/*if (startPageLog.getStartPageBeforeInfo().isPresent()) {
-							ScreenIdentifier screenIdentifier = startPageLog.getStartPageBeforeInfo().get();
-							String key = screenIdentifier.getProgramId() + screenIdentifier.getScreenId()
-									+ screenIdentifier.getQueryString();
-							programName = mapProgramNames.get(key);
-						}*/
+
 						String key = logBasicInformation.getTargetProgram().getProgramId()
 								+ logBasicInformation.getTargetProgram().getScreenId()
 								+ logBasicInformation.getTargetProgram().getQueryString();
@@ -356,12 +298,12 @@ public class LogBasicInformationFinder {
 						}
 						// get user login name
 						logBasicInfoDto.setUserNameLogin(userDto.getUserName());
-					//	logBasicInfoDto.setMenuName(programName);
+						// logBasicInfoDto.setMenuName(programName);
 						logBasicInfoDto.setNote(
 								logBasicInformation.getNote().isPresent() ? logBasicInformation.getNote().get() : "");
-						// add to list
-						lstLogBacsicInfo.add(logBasicInfoDto);
-					}
+						return logBasicInfoDto;
+					}).collect(Collectors.toList());
+					lstLogBacsicInfo.addAll(logBasicInfoDtoInter);
 				}
 			}
 		}
