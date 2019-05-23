@@ -78,9 +78,14 @@ public class RegisterDayApproval {
 				}
 			});
 		} else {
+			Map<String, List<GeneralDate>> mapEmpErrorDate = param.getContentApproval()
+					.stream().collect(Collectors.groupingBy(ContentApproval::getEmployeeId, 
+							Collectors.collectingAndThen(Collectors.toList(), list -> list.stream().map(x -> x.getDate()).collect(Collectors.toList()))));
+			List<EmployeeDailyPerError> lstEmpError = employeeDailyPerErrorRepository.finds(mapEmpErrorDate);
 			for (ContentApproval data : param.getContentApproval()) {
-				List<EmployeeDailyPerError> employeeDailyPerErrors = employeeDailyPerErrorRepository
-						.find(param.getEmployeeId(), data.getDate());
+				List<EmployeeDailyPerError> employeeDailyPerErrors = lstEmpError.stream().filter(
+						x -> x.getEmployeeID().equals(data.getEmployeeId()) && x.getDate().equals(data.getDate()))
+						.collect(Collectors.toList());
 				boolean isNotError = true;
 				if (!employeeDailyPerErrors.isEmpty()) {
 					List<ErrorAlarmWorkRecord> errorAlarmWorkRecords = errorAlarmWorkRecordRepository

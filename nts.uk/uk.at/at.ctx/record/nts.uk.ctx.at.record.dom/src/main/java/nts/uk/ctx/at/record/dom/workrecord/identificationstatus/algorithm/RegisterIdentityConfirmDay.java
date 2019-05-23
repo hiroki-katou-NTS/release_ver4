@@ -68,7 +68,7 @@ public class RegisterIdentityConfirmDay {
 
 	private void registIdentification(ParamIdentityConfirmDay param, String companyId, SelfConfirmError canRegist, List<EmployeeDailyPerError> errors) {
 		GeneralDate processingYmd = GeneralDate.today();
-		String employeeId = AppContexts.user().employeeId();
+		String employeeId = param.getEmployeeId();
 		param.getSelfConfirmDay().forEach(data -> {
 			if (canRegist == SelfConfirmError.CAN_CONFIRM_WHEN_ERROR) {
 				if (data.getValue()) {
