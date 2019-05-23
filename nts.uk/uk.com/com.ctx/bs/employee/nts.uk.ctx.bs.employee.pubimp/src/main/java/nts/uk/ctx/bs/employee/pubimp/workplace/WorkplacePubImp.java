@@ -952,7 +952,8 @@ public class WorkplacePubImp implements SyWorkplacePub {
 	@Override
 	public List<ResultRequest597Export> getLstEmpByWorkplaceIdsAndPeriod(List<String> workplaceIds, DatePeriod period) {
 		List<String> sids = affWorkplaceHistoryItemRepository.getHistIdLstByWorkplaceIdsAndPeriod(workplaceIds, period);
-		List<ResultRequest597Export> results = subEmp.getEmpInfoLstBySids(sids, true).parallelStream()
+		if(CollectionUtil.isEmpty(sids)) { return new ArrayList<>();}
+		List<ResultRequest597Export> results = subEmp.getEmpInfoLstBySids(sids, period, true, true).parallelStream()
 				.map(c -> new ResultRequest597Export(c.getSid(), c.getEmployeeCode(), c.getEmployeeName()))
 				.collect(Collectors.toList());
 		return results;
