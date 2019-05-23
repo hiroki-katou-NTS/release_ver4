@@ -2781,6 +2781,12 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				employmentList.forEach(x -> {
 					lstEmploymentCode.add(x.getEmploymentCD());
 				});
+				
+				// 指定した年月の期間を算出する
+				DatePeriod datePeriodClosure = closureService.getClosurePeriod(closure.getClosureId().value,
+						closure.getClosureMonth().getProcessingYm());
+				// 取得した「締め期間」から「期間」を計算する
+				DatePeriod newDatePeriod = new DatePeriod(datePeriodClosure.start(), GeneralDate.ymd(9999, 12, 31));
 
 				// <<Public>> 就業条件で社員を検索して並び替える
 				RegulationInfoEmployeeAdapterImport regulationInfoEmployeeAdapterImport = new RegulationInfoEmployeeAdapterImport();
@@ -2818,8 +2824,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					// 職位ID一覧 → なし
 					regulationInfoEmployeeAdapterImport.setJobTitleCodes(null);
 					// 在職・休職・休業のチェック期間 → 作成した期間
-					regulationInfoEmployeeAdapterImport.setPeriodStart(period.start());
-					regulationInfoEmployeeAdapterImport.setPeriodEnd(period.end());
+					regulationInfoEmployeeAdapterImport.setPeriodStart(newDatePeriod.start());
+					regulationInfoEmployeeAdapterImport.setPeriodEnd(newDatePeriod.end());
 					// 在職者を含める → TRUE
 					regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
 					// 休職者を含める → FALSE
@@ -2833,8 +2839,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					// 退職者を含める → FALSE
 					regulationInfoEmployeeAdapterImport.setIncludeRetirees(false);
 					// 退職日のチェック期間 → 作成した期間
-					regulationInfoEmployeeAdapterImport.setRetireStart(period.start());
-					regulationInfoEmployeeAdapterImport.setRetireEnd(period.end());
+					regulationInfoEmployeeAdapterImport.setRetireStart(newDatePeriod.start());
+					regulationInfoEmployeeAdapterImport.setRetireEnd(newDatePeriod.end());
 					// 並び順NO → 1
 					regulationInfoEmployeeAdapterImport.setSortOrderNo(1);
 					regulationInfoEmployeeAdapterImport.setSystemType(2);
@@ -2870,8 +2876,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					// 職位ID一覧 → なし
 					regulationInfoEmployeeAdapterImport.setJobTitleCodes(null);
 					// 在職・休職・休業のチェック期間 → 作成した期間
-					regulationInfoEmployeeAdapterImport.setPeriodStart(period.start());
-					regulationInfoEmployeeAdapterImport.setPeriodEnd(period.end());
+					regulationInfoEmployeeAdapterImport.setPeriodStart(newDatePeriod.start());
+					regulationInfoEmployeeAdapterImport.setPeriodEnd(newDatePeriod.end());
 					// 在職者を含める → TRUE
 					regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
 					// 休職者を含める → FALSE
@@ -2885,8 +2891,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					// 退職者を含める → FALSE
 					regulationInfoEmployeeAdapterImport.setIncludeRetirees(false);
 					// 退職日のチェック期間 → 作成した期間
-					regulationInfoEmployeeAdapterImport.setRetireStart(period.start());
-					regulationInfoEmployeeAdapterImport.setRetireEnd(period.end());
+					regulationInfoEmployeeAdapterImport.setRetireStart(newDatePeriod.start());
+					regulationInfoEmployeeAdapterImport.setRetireEnd(newDatePeriod.end());
 					// 並び順NO → 1
 					regulationInfoEmployeeAdapterImport.setSortOrderNo(1);
 					regulationInfoEmployeeAdapterImport.setSystemType(2);
@@ -2901,10 +2907,35 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				List<RegulationInfoEmployeeAdapterDto> lstRegulationInfoEmployee = this.regulationInfoEmployeeAdapter
 						.find(regulationInfoEmployeeAdapterImport);
 
+				Set<String> emps = new HashSet<>();
+				lstRegulationInfoEmployee.stream().forEach(q -> {
+					emps.add(q.getEmployeeId());
+				});
+				List<String> leaderEmpIdList = new ArrayList<>();
+				if (processExecution.getProcessExecType() == ProcessExecType.RE_CREATE) {
+					// 異動者・勤務種別変更者リスト作成処理
+					ListLeaderOrNotEmp listLeaderOrNotEmp = changePersionList.createProcessForChangePerOrWorktype(
+							companyId, new ArrayList<>(emps), newDatePeriod.start(), processExecution);
+					leaderEmpIdList = listLeaderOrNotEmp.getLeaderEmpIdList();
+				}
+				List<RegulationInfoEmployeeAdapterDto> lstRegulationInfoEmployeeNew = new ArrayList<>();
+				if(leaderEmpIdList.isEmpty()){
+					lstRegulationInfoEmployeeNew = lstRegulationInfoEmployee;
+				}else {
+					for(RegulationInfoEmployeeAdapterDto regulationInfoEmployeeAdapterDto :lstRegulationInfoEmployee) {
+						for(String empId :leaderEmpIdList) {
+							if(regulationInfoEmployeeAdapterDto.getEmployeeId().equals(empId)) {
+								lstRegulationInfoEmployeeNew.add(regulationInfoEmployeeAdapterDto);
+								break;
+							}
+						}
+					}
+				}
+				
 				// int sizeEmployee = lstRegulationInfoEmployee.size();
 				this.managedParallelWithContext.forEach(
 						ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
-						lstRegulationInfoEmployee,
+						lstRegulationInfoEmployeeNew,
 						item -> {
 							RegulationInfoEmployeeAdapterDto regulationInfoEmployeeAdapterDto = item;
 							AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> asyContext = (AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>) context;
