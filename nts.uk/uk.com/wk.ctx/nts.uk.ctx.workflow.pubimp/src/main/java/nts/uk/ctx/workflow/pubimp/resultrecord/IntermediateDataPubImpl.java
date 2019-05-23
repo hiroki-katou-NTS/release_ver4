@@ -638,7 +638,9 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 		String companyID = AppContexts.user().companyId();
 		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpDate(companyID, employeeID, date, RecordRootType.CONFIRM_WORK_BY_DAY);
 		if(opAppRootConfirm.isPresent()){
-			appRootConfirmRepository.delete(opAppRootConfirm.get());
+			AppRootConfirm appRootConfirm = opAppRootConfirm.get();
+			appRootConfirm.setListAppPhase(new ArrayList<>());
+			appRootConfirmRepository.update(appRootConfirm);
 		}
 	}
 
@@ -649,7 +651,9 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 			Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findByEmpMonth(companyID, employeeID, confirmDeleteParam.getYearMonth(),
 					confirmDeleteParam.getClosureID(), confirmDeleteParam.getClosureDate(), RecordRootType.CONFIRM_WORK_BY_MONTH);
 			if(opAppRootConfirm.isPresent()){
-				appRootConfirmRepository.delete(opAppRootConfirm.get());
+				AppRootConfirm appRootConfirm = opAppRootConfirm.get();
+				appRootConfirm.setListAppPhase(new ArrayList<>());
+				appRootConfirmRepository.update(appRootConfirm);
 			}
 		}
 	}

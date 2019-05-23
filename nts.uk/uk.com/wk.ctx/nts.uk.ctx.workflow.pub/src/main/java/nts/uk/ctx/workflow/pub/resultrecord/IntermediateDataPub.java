@@ -10,8 +10,8 @@ import nts.uk.ctx.workflow.pub.resultrecord.export.AppEmpStatusExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppEmpSttMonthExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootInsContentExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootSttMonthExport;
-import nts.uk.ctx.workflow.pub.resultrecord.export.Request533Export;
 import nts.uk.ctx.workflow.pub.resultrecord.export.Request113Export;
+import nts.uk.ctx.workflow.pub.resultrecord.export.Request533Export;
 import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -274,5 +274,11 @@ public interface IntermediateDataPub {
 	 */
 	public void deleteRootConfirmDay(String employeeID, GeneralDate date);
 	
+	/**
+	 * RequestList 602
+	 * [No.602]月別の承認をクリアする
+	 * @param employeeID
+	 * @param confirmDeleteParamLst
+	 */
 	public void deleteRootConfirmMonth(String employeeID, List<ConfirmDeleteParam> confirmDeleteParamLst);
 }
