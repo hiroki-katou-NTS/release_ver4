@@ -121,7 +121,6 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	@Override
 	protected void handle(ExportServiceContext<Object> context) {
 		ManualSetDeletion domain = (ManualSetDeletion) context.getQuery();
-//		String delId = domain.getDelId();
 		serverManualDelProcessing(domain, context.getGeneratorContext());
 	}
 
