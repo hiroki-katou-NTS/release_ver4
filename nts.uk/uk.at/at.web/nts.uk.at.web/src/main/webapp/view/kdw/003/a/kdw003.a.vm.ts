@@ -1618,9 +1618,24 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 });
             //}
 
+            let rowIds = _.map(_.cloneDeep(rowIdsTemp), (value) => {
+                return value.rowId.substring(1, value.rowId.length);
+            });
+            let lstData = _.map(_.sortBy(_.filter(self.dailyPerfomanceData(), (v) => _.includes(rowIds, v.id)), (sort) => {
+                return new Date(sort.date);
+            }), (map) => {
+                map.date = moment(map.date).utc().toISOString();
+                map.state = "";
+                map.error = "";
+                map.sign = false;
+                map.approval = false;
+                map.typeGroup = "";
+                return map;
+            });
+
             // only load checkBox
                 if (onlyCheckBox === true) {
-                        let paramVer = { lstDataChange: {} }, lstDataChange = [];
+                        let paramVer = { lstDataChange: {}, dateRange: {},  displayFormat: 0 }, lstDataChange = [];
                         let modeApprovalOrNormal = _.isEmpty(self.shareObject()) ? 0 : self.shareObject().screenMode;
                         let dataChangeApproval: any = _.filter(dataChange, temp => {
                             return temp.columnKey == "approval"
@@ -1762,27 +1777,17 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     })
 
                     paramVer.lstDataChange = lstDataChange;
+                    paramVer.dateRange = {
+                        startDate: lstData[0].date,
+                        endDate: lstData[lstData.length - 1].date
+                    };
+                    paramVer.displayFormat = self.displayFormat();
                     service.loadVerRow(paramVer).done((data) => {
+                        self.indentityMonth(data.indentityMonthResult);
                         dfd.resolve();
                     });
                     return dfd.promise();
                 }
-
-            let rowIds = _.map(_.cloneDeep(rowIdsTemp), (value) => {
-                return value.rowId.substring(1, value.rowId.length);
-            });
-
-            let lstData = _.map(_.sortBy(_.filter(self.dailyPerfomanceData(), (v) => _.includes(rowIds, v.id)), (sort) => {
-                return new Date(sort.date);
-            }), (map) => {
-                map.date = moment(map.date).utc().toISOString();
-                map.state = "";
-                map.error = "";
-                map.sign = false;
-                map.approval = false;
-                map.typeGroup = "";
-                return map;
-            });
 
             // get cell Edit
             let dataChageUI = _.map(_.filter(dataChange, row => {

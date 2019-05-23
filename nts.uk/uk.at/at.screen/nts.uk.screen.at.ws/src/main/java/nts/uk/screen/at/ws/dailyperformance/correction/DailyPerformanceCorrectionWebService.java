@@ -64,6 +64,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.loadupdate.DPLoadRowProc
 import nts.uk.screen.at.app.dailyperformance.correction.loadupdate.DPPramLoadRow;
 import nts.uk.screen.at.app.dailyperformance.correction.loadupdate.onlycheckbox.DPLoadVerProcessor;
 import nts.uk.screen.at.app.dailyperformance.correction.loadupdate.onlycheckbox.LoadVerData;
+import nts.uk.screen.at.app.dailyperformance.correction.loadupdate.onlycheckbox.LoadVerDataResult;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.button.DPDisplayLockParam;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.button.DPDisplayLockProcessor;
 import nts.uk.screen.at.app.dailyperformance.correction.searchemployee.DPEmployeeSearchData;
@@ -276,7 +277,7 @@ public class DailyPerformanceCorrectionWebService {
 	@POST
 	@Path("loadVerData")
 	@SuppressWarnings("unchecked")
-	public void addAndUpdate(LoadVerData loadVerData) {
+	public LoadVerDataResult addAndUpdate(LoadVerData loadVerData) {
 		HttpSession session = httpRequest.getSession();
 		val domain = session.getAttribute("domainEdits");
 		List<DailyRecordDto> dailyEdits = new ArrayList<>();
@@ -289,7 +290,8 @@ public class DailyPerformanceCorrectionWebService {
 		val result = dPLoadVerProcessor.loadVerAfterCheckbox(loadVerData);
 		session.setAttribute("domainEdits", null);
 		session.setAttribute("domainOlds", result.getLstDomainOld());
-		return;
+		result.setLstDomainOld(new ArrayList<>());
+		return result;
 	}
 	
 	@POST
