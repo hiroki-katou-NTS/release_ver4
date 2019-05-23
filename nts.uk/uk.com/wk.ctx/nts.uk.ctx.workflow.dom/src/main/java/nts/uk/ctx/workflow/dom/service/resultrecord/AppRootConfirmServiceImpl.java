@@ -284,7 +284,9 @@ public class AppRootConfirmServiceImpl implements AppRootConfirmService {
 						.filter(frame -> frame.getApprovalAtr()==ApprovalBehaviorAtr.APPROVED).findAny();
 				if(opFrameApproved.isPresent()){
 					ApprovalFrame frameApproved = opFrameApproved.get();
-					if(frameApproved.getApproverID().equals(employeeID) || frameApproved.getRepresenterID().equals(employeeID)){
+					List<String> approverIDLst = frameApproved.getListApproverState().stream().map(x -> x.getApproverID()).collect(Collectors.toList());
+					if((approverIDLst.contains(employeeID) || frameApproved.getRepresenterID().equals(employeeID))
+						&& frameApproved.getApprovalAtr() == ApprovalBehaviorAtr.APPROVED){
 						canCancel = true;
 					}
 				}
