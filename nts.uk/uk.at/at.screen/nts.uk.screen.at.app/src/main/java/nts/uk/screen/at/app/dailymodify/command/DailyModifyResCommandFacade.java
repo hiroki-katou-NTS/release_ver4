@@ -284,7 +284,7 @@ public class DailyModifyResCommandFacade {
 		UpdateMonthDailyParam monthParam = null;
 		if (dataParent.getMonthValue() != null) {
 			val month = dataParent.getMonthValue();
-			if (month != null && month.getItems() != null) {
+			if (month != null && month.getItems() != null && !month.getItems().isEmpty()) {
 				MonthlyModifyQuery monthQuery = new MonthlyModifyQuery(month.getItems().stream().map(x -> {
 					return ItemValue.builder().itemId(x.getItemId()).layout(x.getLayoutCode()).value(x.getValue())
 							.valueType(ValueType.valueOf(x.getValueType())).withPath("");
