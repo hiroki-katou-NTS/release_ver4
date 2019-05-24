@@ -5,9 +5,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -588,21 +590,29 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 
 			List<String> mapped = command.itemValues().stream().map(c -> getGroup(c)).distinct()
 					.collect(Collectors.toList());
-
+			Set<String> layoutAll = new HashSet<>();
 			mapped.stream().filter(c -> !DOMAIN_CHANGED_BY_CALCULATE.contains(c)).forEach(c -> {
-				CommandFacade<T> handler = (CommandFacade<T>) getHandler(c, isUpdate);
-				if (handler != null) {
-					handler.handle((T) command.getCommand(c));
-				}
+				layoutAll.add(c);
+				// CommandFacade<T> handler = (CommandFacade<T>) getHandler(c, isUpdate);
+				// if (handler != null) {
+				// handler.handle((T) command.getCommand(c));
+				// }
 			});
 
 			DOMAIN_CHANGED_BY_EVENT.entrySet().stream().filter(entry -> mapped.contains(entry.getKey()))
 					.map(entry -> entry.getValue()).flatMap(x -> Arrays.stream(x)).distinct().forEach(layout -> {
-						CommandFacade<T> handler = (CommandFacade<T>) getHandler(layout, isUpdate);
-						if (handler != null) {
-							handler.handle((T) command.getCommand(layout));
-						}
+						layoutAll.add(layout);
+						// CommandFacade<T> handler = (CommandFacade<T>) getHandler(layout, isUpdate);
+						// if (handler != null) {
+						// handler.handle((T) command.getCommand(layout));
+						// }
 					});
+			layoutAll.forEach(layout -> {
+				CommandFacade<T> handler = (CommandFacade<T>) getHandler(layout, isUpdate);
+				if (handler != null) {
+					handler.handle((T) command.getCommand(layout));
+				}
+			});
 		});
 	}
 
