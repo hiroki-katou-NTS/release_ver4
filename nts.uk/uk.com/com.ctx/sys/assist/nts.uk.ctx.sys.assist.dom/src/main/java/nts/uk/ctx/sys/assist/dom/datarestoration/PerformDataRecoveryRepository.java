@@ -46,9 +46,9 @@ public interface PerformDataRecoveryRepository {
 
 	List<TableList> getAllTableList();
 
-	void deleteEmployeeHis(String tableName, String whereCid, String whereSid, String cid, String employeeId);
+	void deleteEmployeeHis(TableList tableList, String whereCid, String whereSid, String cid, String employeeId);
 	
-	void deleteTransactionEmployeeHis(String tableName, String whereCid, String whereSid, String cid, String employeeId);
+	void deleteTransactionEmployeeHis(TableList tableList, String whereCid, String whereSid, String cid, String employeeId);
 
 	void addTargetEmployee(Target domain);
 

@@ -16,6 +16,8 @@ import javax.transaction.Transactional.TxType;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.Strings;
+
 import nts.arc.error.BusinessException;
 import nts.arc.error.ErrorMessage;
 import nts.arc.layer.infra.data.DbConsts;
@@ -31,6 +33,7 @@ import nts.uk.ctx.sys.assist.infra.entity.datarestoration.SspmtPerformDataRecove
 import nts.uk.ctx.sys.assist.infra.entity.datarestoration.SspmtRestorationTarget;
 import nts.uk.ctx.sys.assist.infra.entity.datarestoration.SspmtTarget;
 import nts.uk.ctx.sys.assist.infra.entity.tablelist.SspmtTableList;
+import nts.uk.shr.com.enumcommon.NotUseAtr;
 
 @Stateless
 public class JpaPerformDataRecoveryRepository extends JpaRepository implements PerformDataRecoveryRepository {
@@ -244,22 +247,60 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 
 	@Override
 	@Transactional(value = TxType.REQUIRES_NEW)
-	public void deleteEmployeeHis(String tableName, String whereCid, String whereSid, String cid, String employeeId) {
+	public void deleteEmployeeHis(TableList table, String whereCid, String whereSid, String cid, String employeeId) {
 
 		EntityManager em = this.getEntityManager();
 
-		if (tableName != null) {
-			StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE FROM ");
-			DELETE_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1  ");
-			if (!StringUtils.isBlank(whereCid) && !StringUtils.isBlank(cid)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(whereCid).append(" = '").append(cid).append("'");
+		if (table.getTableEnglishName() != null) {
+			StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE t FROM ");
+			DELETE_BY_TABLE_SQL.append(table.getTableEnglishName()).append(" t");
+			boolean hasParentTblFlg = false;
+			
+			// アルゴリズム「親テーブルをJOINする」を実行する
+			if (table.getHasParentTblFlg() == NotUseAtr.USE && table.getParentTblName().isPresent()) {
+				hasParentTblFlg = true;
+				DELETE_BY_TABLE_SQL.append(" INNER JOIN ").append(table.getParentTblName().get()).append(" p ON ");
+
+				String[] parentFields = { table.getFieldParent1().orElse(""), table.getFieldParent2().orElse(""),
+						table.getFieldParent3().orElse(""), table.getFieldParent4().orElse(""),
+						table.getFieldParent5().orElse(""), table.getFieldParent6().orElse(""),
+						table.getFieldParent7().orElse(""), table.getFieldParent8().orElse(""),
+						table.getFieldParent9().orElse(""), table.getFieldParent10().orElse("") };
+
+				String[] childFields = { table.getFieldChild1().orElse(""), table.getFieldChild2().orElse(""),
+						table.getFieldChild3().orElse(""), table.getFieldChild4().orElse(""),
+						table.getFieldChild5().orElse(""), table.getFieldChild6().orElse(""),
+						table.getFieldChild7().orElse(""), table.getFieldChild8().orElse(""),
+						table.getFieldChild9().orElse(""), table.getFieldChild10().orElse("") };
+
+				boolean isFirstOnStatement = true;
+				for (int i = 0; i < parentFields.length; i++) {
+					if (!Strings.isNullOrEmpty(parentFields[i]) && !Strings.isNullOrEmpty(childFields[i])) {
+						if (!isFirstOnStatement) {
+							DELETE_BY_TABLE_SQL.append(" AND ");
+						}
+						isFirstOnStatement = false;
+						DELETE_BY_TABLE_SQL.append("p." + parentFields[i] + "=" + "t." + childFields[i]);
+					}
+				}
 			}
-			if (!StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(whereSid).append(" = '").append(employeeId).append("'");
+			
+			DELETE_BY_TABLE_SQL.append(" WHERE 1=1  ");
+			
+			if (hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereSid).append(" = '").append(employeeId).append("'");
+			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereSid).append(" = '").append(employeeId).append("'");
 			}
+			
+			if (hasParentTblFlg && !StringUtils.isBlank(whereCid) && !StringUtils.isBlank(cid)) {
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereCid).append(" = '").append(cid).append("'");
+			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereCid).append(" = '").append(cid).append("'");
+			}
+			
 			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
 			query.executeUpdate();
-
 		}
 
 	}
@@ -350,22 +391,60 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 
 	@Override
-	public void deleteTransactionEmployeeHis(String tableName, String whereCid, String whereSid, String cid,
+	public void deleteTransactionEmployeeHis(TableList table, String whereCid, String whereSid, String cid,
 			String employeeId) {
 		EntityManager em = this.getEntityManager();
 
-		if (tableName != null) {
-			StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE FROM ");
-			DELETE_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1  ");
-			if (!StringUtils.isBlank(whereCid) && !StringUtils.isBlank(cid)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(whereCid).append(" = '").append(cid).append("'");
+		if (table.getTableEnglishName() != null) {
+			StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE t FROM ");
+			DELETE_BY_TABLE_SQL.append(table.getTableEnglishName()).append(" t");
+			boolean hasParentTblFlg = false;
+			
+			// アルゴリズム「親テーブルをJOINする」を実行する
+			if (table.getHasParentTblFlg() == NotUseAtr.USE && table.getParentTblName().isPresent()) {
+				hasParentTblFlg = true;
+				DELETE_BY_TABLE_SQL.append(" INNER JOIN ").append(table.getParentTblName().get()).append(" p ON ");
+
+				String[] parentFields = { table.getFieldParent1().orElse(""), table.getFieldParent2().orElse(""),
+						table.getFieldParent3().orElse(""), table.getFieldParent4().orElse(""),
+						table.getFieldParent5().orElse(""), table.getFieldParent6().orElse(""),
+						table.getFieldParent7().orElse(""), table.getFieldParent8().orElse(""),
+						table.getFieldParent9().orElse(""), table.getFieldParent10().orElse("") };
+
+				String[] childFields = { table.getFieldChild1().orElse(""), table.getFieldChild2().orElse(""),
+						table.getFieldChild3().orElse(""), table.getFieldChild4().orElse(""),
+						table.getFieldChild5().orElse(""), table.getFieldChild6().orElse(""),
+						table.getFieldChild7().orElse(""), table.getFieldChild8().orElse(""),
+						table.getFieldChild9().orElse(""), table.getFieldChild10().orElse("") };
+
+				boolean isFirstOnStatement = true;
+				for (int i = 0; i < parentFields.length; i++) {
+					if (!Strings.isNullOrEmpty(parentFields[i]) && !Strings.isNullOrEmpty(childFields[i])) {
+						if (!isFirstOnStatement) {
+							DELETE_BY_TABLE_SQL.append(" AND ");
+						}
+						isFirstOnStatement = false;
+						DELETE_BY_TABLE_SQL.append("p." + parentFields[i] + "=" + "t." + childFields[i]);
+					}
+				}
 			}
-			if (!StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(whereSid).append(" = '").append(employeeId).append("'");
+			
+			DELETE_BY_TABLE_SQL.append(" WHERE 1=1  ");
+			
+			if (hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereSid).append(" = '").append(employeeId).append("'");
+			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereSid).append(" = '").append(employeeId).append("'");
 			}
+			
+			if (hasParentTblFlg && !StringUtils.isBlank(whereCid) && !StringUtils.isBlank(cid)) {
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereCid).append(" = '").append(cid).append("'");
+			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereCid).append(" = '").append(cid).append("'");
+			}
+			
 			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
 			query.executeUpdate();
-
 		}
 	}
 	

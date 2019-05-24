@@ -1026,10 +1026,10 @@ public class RecoveryStorageService {
 		String cidCurrent = AppContexts.user().companyId();
 		String tableName = tableList.get().getTableEnglishName();
 		if (tableNotUse) {
-			performDataRecoveryRepository.deleteTransactionEmployeeHis(tableName, whereCid[0], whereSid[0], cidCurrent,
+			performDataRecoveryRepository.deleteTransactionEmployeeHis(tableList.get(), whereCid[0], whereSid[0], cidCurrent,
 					employeeId);
 		} else {
-			performDataRecoveryRepository.deleteEmployeeHis(tableName, whereCid[0], whereSid[0], cidCurrent,
+			performDataRecoveryRepository.deleteEmployeeHis(tableList.get(), whereCid[0], whereSid[0], cidCurrent,
 					employeeId);
 		}
 	}
