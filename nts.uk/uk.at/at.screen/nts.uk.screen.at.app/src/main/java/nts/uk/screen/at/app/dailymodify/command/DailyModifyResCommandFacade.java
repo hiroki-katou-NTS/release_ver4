@@ -625,7 +625,7 @@ public class DailyModifyResCommandFacade {
 		}else {
 			Map<Integer, List<DPItemValue>> errorMapTemp = dataResultAfterIU.getErrorMap().entrySet().stream()
 					.filter(x -> x.getKey() != TypeError.CONTINUOUS.value && x.getKey() != TypeError.RELEASE_CHECKBOX.value)
-					.collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+					.collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue(), (x, y) -> x));
 			if (errorMapTemp.values().isEmpty() && (dataResultAfterIU.getFlexShortage() == null || !dataResultAfterIU.getFlexShortage().isError())) {
 				dataResultAfterIU.setMessageAlert("Msg_15");
 			} else {
@@ -994,7 +994,7 @@ public class DailyModifyResCommandFacade {
 		val lstEmployeeId = dailys.stream().map(x -> x.getEmployeeId()).collect(Collectors.toSet());
 		val indentity = identificationRepository.findByListEmployeeID(new ArrayList<>(lstEmployeeId),
 				dailyTemps.get(0).getDate(), dailyTemps.get(dailyTemps.size() - 1).getDate()).stream()
-				.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getProcessingYmd()), x -> ""));
+				.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getProcessingYmd()), x -> "", (x, y) -> x));
 		
 		if (onlyCheckBox) {
 //			resultError = employeeDailyPerErrorRepository
@@ -1029,7 +1029,7 @@ public class DailyModifyResCommandFacade {
 		}).collect(Collectors.toList());
 		
 		val dateEmp = dataCheckApproval.stream()
-				.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> ""));
+				.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> "", (x, y) -> x));
 		val itemNotUiRelease = dailyTemps.stream()
 				.filter(x -> mapRelease.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))
 						&& !dateEmp.containsKey(Pair.of(x.getEmployeeId(), x.getDate())))
