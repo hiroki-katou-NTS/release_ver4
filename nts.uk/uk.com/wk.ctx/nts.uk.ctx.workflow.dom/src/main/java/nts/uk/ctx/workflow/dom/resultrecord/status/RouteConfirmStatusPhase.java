@@ -85,7 +85,7 @@ public class RouteConfirmStatusPhase {
 	 */
 	public boolean canRelease(String approverId, List<String> representRequesterIds) {
 		return canApprove(approverId, representRequesterIds)
-				&& hasConfirmedBy(approverId);
+				&& hasApprovedBy(approverId);
 	}
 	
 	/**
@@ -93,18 +93,19 @@ public class RouteConfirmStatusPhase {
 	 * @param approverId
 	 * @return
 	 */
-	public boolean hasConfirmedBy(String approverId) {
-		return frames.hasConfirmedBy(approverId);
+	public boolean hasApprovedBy(String approverId) {
+		return (hasApproved() && frames.isApprover(approverId))
+				|| frames.hasApprovedByRepresenter(approverId);
 	}
 	
 	/**
 	 * フェーズが承認済みか
 	 * @return
 	 */
-	public boolean hasConfirmed() {
+	public boolean hasApproved() {
 		switch (approvalForm) {
-		case EVERYONE_APPROVED: return frames.hasConfirmedByAll();
-		case SINGLE_APPROVED: return frames.hasConfirmedByAnyone();
+		case EVERYONE_APPROVED: return frames.hasApprovedByAll();
+		case SINGLE_APPROVED: return frames.hasApprovedByAnyone();
 		default: throw new RuntimeException("unknown approvalForm: " + approvalForm);
 		}
 	}

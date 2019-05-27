@@ -73,7 +73,7 @@ public class RouteConfirmStatusFrame {
 	 * この承認枠は承認済みか
 	 * @return
 	 */
-	public boolean hasConfirmed() {
+	public boolean hasApproved() {
 		return approvedEmployeeId.isPresent();
 	}
 	
@@ -81,8 +81,12 @@ public class RouteConfirmStatusFrame {
 	 * 代行者に承認された
 	 * @return
 	 */
-	public boolean hasConfirmedByRepresenter() {
-		return hasConfirmed() && isRepresent;
+	public boolean hasConfirmedByRepresenter(String representerId) {
+		return isRepresent && hasApprovedBy(representerId);
+	}
+	
+	public boolean hasApprovedByOther(String approverId) {
+		return hasApproved() && !employeeIds.contains(approverId);
 	}
 	
 	/**
@@ -90,15 +94,7 @@ public class RouteConfirmStatusFrame {
 	 * @param approverId
 	 * @return
 	 */
-	public boolean hasConfirmedBy(String approverId) {
-		return approvedEmployeeId
-				.filter(e -> e.equals(approverId))
-				.isPresent();
-	}
-	
-	public boolean hasApprovedByOther(String approverId) {
-		return approvedEmployeeId
-				.filter(e -> !e.equals(approverId))
-				.isPresent();
+	private boolean hasApprovedBy(String approverId) {
+		return hasApproved() && employeeIds.contains(approverId);
 	}
 }

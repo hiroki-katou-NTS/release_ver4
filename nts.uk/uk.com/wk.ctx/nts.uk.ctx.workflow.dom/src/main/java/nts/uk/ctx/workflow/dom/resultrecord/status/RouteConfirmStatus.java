@@ -77,7 +77,7 @@ public class RouteConfirmStatus {
 			return ApprovalActionByEmp.NOT_APPROVAL;
 		}
 		
-		return phases.hasConfirmedBy(approverId)
+		return phases.hasApprovedBy(approverId)
 				? ApprovalActionByEmp.APPROVALED
 				: ApprovalActionByEmp.APPROVAL_REQUIRE;
 	}
@@ -89,7 +89,7 @@ public class RouteConfirmStatus {
 	 */
 	private ApproverEmpState stateFor(String approverId, List<String> representRequesterIds) {
 		// 最終フェーズが承認済み
-		if (phases.finalPhase().hasConfirmed()) {
+		if (phases.finalPhase().hasApproved()) {
 			return ApproverEmpState.COMPLETE;
 		}
 		

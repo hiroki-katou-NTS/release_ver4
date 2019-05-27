@@ -279,16 +279,9 @@ public class AppRootConfirmServiceImpl implements AppRootConfirmService {
 					canCancel = true;
 				}
 			} else {
-				// 指定する社員が承認を行った承認者かチェックする
-				Optional<ApprovalFrame> opFrameApproved = approvalPhaseState.getListApprovalFrame().stream()
-						.filter(frame -> frame.getApprovalAtr()==ApprovalBehaviorAtr.APPROVED).findAny();
-				if(opFrameApproved.isPresent()){
-					ApprovalFrame frameApproved = opFrameApproved.get();
-					List<String> approverIDLst = frameApproved.getListApproverState().stream().map(x -> x.getApproverID()).collect(Collectors.toList());
-					if((approverIDLst.contains(employeeID) || frameApproved.getRepresenterID().equals(employeeID))
-						&& frameApproved.getApprovalAtr() == ApprovalBehaviorAtr.APPROVED){
-						canCancel = true;
-					}
+				// 指定する社員が承認を解除できるか
+				if (approvalPhaseState.canRelease(employeeID)) {
+					canCancel = true;
 				}
 			}
 		}

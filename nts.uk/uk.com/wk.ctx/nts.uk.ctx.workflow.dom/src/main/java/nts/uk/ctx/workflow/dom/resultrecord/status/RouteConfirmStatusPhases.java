@@ -114,9 +114,9 @@ public class RouteConfirmStatusPhases {
 	 * @param approverId
 	 * @return
 	 */
-	public boolean hasConfirmedBy(String approverId) {
+	public boolean hasApprovedBy(String approverId) {
 		return phases.stream()
-				.anyMatch(p -> p.hasConfirmedBy(approverId));
+				.anyMatch(p -> p.hasApprovedBy(approverId));
 	}
 	
 	/**

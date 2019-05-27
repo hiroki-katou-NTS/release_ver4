@@ -434,7 +434,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	public List<AppRootInstance> findByApproverEmployeePeriod(
 			String companyId, String approverID, List<String> employeeIDs, DatePeriod period, RecordRootType rootType) {
 	
-		return NtsStatement.In.split(employeeIDs, subEmpIds -> {
+		List<String> rootIds = NtsStatement.In.split(employeeIDs, subEmpIds -> {
 			
 			String sql = BASIC_SELECT
 					+ " where appRoot.CID = ?" 
@@ -454,6 +454,23 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 				stmt.setDate(4 + subEmpIds.size(), Date.valueOf(period.start().localDate()));
 				stmt.setString(5 + subEmpIds.size(), approverID);
 				
+				return new NtsResultSet(stmt.executeQuery()).getList(rs -> rs.getString("ROOT_ID"));
+				
+			} catch (SQLException ex) {
+				throw new RuntimeException(ex);
+			}
+		});
+		
+		return NtsStatement.In.split(rootIds, subRootIds -> {
+			
+			String sql = BASIC_SELECT
+					+ " where appRoot.ROOT_ID in (" + NtsStatement.In.createParamsString(subRootIds) + ")";
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				for (int i = 0; i < subRootIds.size(); i++) {
+					stmt.setString(1 + i, subRootIds.get(i));
+				}
+
 				ResultSet rs = stmt.executeQuery();
 				return toDomain(createFullJoinAppRootInstance(rs));
 				

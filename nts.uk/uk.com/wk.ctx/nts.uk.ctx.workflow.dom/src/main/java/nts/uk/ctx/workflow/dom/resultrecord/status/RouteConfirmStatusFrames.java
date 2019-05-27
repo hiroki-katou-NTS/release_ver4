@@ -85,34 +85,31 @@ public class RouteConfirmStatusFrames {
 	}
 	
 	/**
-	 * 指定した社員によって承認済みか
-	 * @param approverId
-	 * @return
-	 */
-	public boolean hasConfirmedBy(String approverId) {
-		
-		return frames.stream().anyMatch(f -> f.isApprover(approverId) && f.hasConfirmed());
-		
-		//return frames.stream()
-		//		.anyMatch(f -> f.hasConfirmedBy(approverId));
-	}
-	
-	/**
 	 * 少なくとも一人は承認済みか
 	 * @return
 	 */
-	public boolean hasConfirmedByAnyone() {
+	public boolean hasApprovedByAnyone() {
 		return frames.stream()
-				.anyMatch(f -> f.hasConfirmed());
+				.anyMatch(f -> f.hasApproved());
 	}
 	
 	/**
 	 * 全員が承認済みか
 	 * @return
 	 */
-	public boolean hasConfirmedByAll() {
+	public boolean hasApprovedByAll() {
 		return frames.stream()
-				.allMatch(f -> f.hasConfirmed());
+				.allMatch(f -> f.hasApproved());
+	}
+	
+	/**
+	 * 指定した社員が代行者として承認したか
+	 * @param representerId
+	 * @return
+	 */
+	public boolean hasApprovedByRepresenter(String representerId) {
+		return frames.stream()
+				.anyMatch(f -> f.hasConfirmedByRepresenter(representerId));
 	}
 	
 	/**

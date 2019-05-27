@@ -59,4 +59,26 @@ public class ApprovalPhaseState extends DomainObject {
 				EnumAdaptor.valueOf(approvalForm, ApprovalForm.class),
 				listApprovalFrame);
 	}
+	
+	public boolean canRelease(String approverId) {
+		return hasApprovedBy(approverId) || isRepresenter(approverId);
+	}
+	
+	public boolean hasApprovedBy(String approverId) {
+		return hasApproved() && isApprover(approverId);
+	}
+	
+	private boolean hasApproved() {
+		return approvalAtr == ApprovalBehaviorAtr.APPROVED;
+	}
+	
+	private boolean isApprover(String employeeId) {
+		return listApprovalFrame.stream()
+				.anyMatch(f -> f.isApprover(employeeId));
+	}
+	
+	private boolean isRepresenter(String employeeId) {
+		return listApprovalFrame.stream()
+				.anyMatch(f -> f.isRepresenter(employeeId));
+	}
 }
