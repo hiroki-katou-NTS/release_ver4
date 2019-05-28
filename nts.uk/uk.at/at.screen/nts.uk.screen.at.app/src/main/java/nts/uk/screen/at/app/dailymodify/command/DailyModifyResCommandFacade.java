@@ -192,14 +192,15 @@ public class DailyModifyResCommandFacade {
 	}
 
 	private void processDto(List<DailyRecordDto> dailyOlds, List<DailyRecordDto> dailyEdits, DPItemParent dataParent,
-			List<DailyModifyQuery> querys, Map<Pair<String, GeneralDate>, List<DPItemValue>> mapSidDate,
+			List<DailyModifyQuery> querys, Map<Pair<String, GeneralDate>, List<DPItemValue>> mapSidDate, Set<Pair<String, GeneralDate>> pairSidDateCheck,
 			List<DailyModifyQuery> queryNotChanges) {
+		// list cell change by checkbox
 		if (!querys.isEmpty() && !dataParent.isFlagCalculation()) {
 			dailyOlds.addAll(dataParent.getDailyOlds().stream()
-					.filter(x -> mapSidDate.containsKey(Pair.of(x.getEmployeeId(), x.getDate())))
+					.filter(x -> mapSidDate.containsKey(Pair.of(x.getEmployeeId(), x.getDate())) || pairSidDateCheck.contains(Pair.of(x.getEmployeeId(), x.getDate())))
 					.collect(Collectors.toList()));
 			List<DailyRecordDto> temp = dataParent.getDailyEdits().stream()
-					.filter(x -> mapSidDate.containsKey(Pair.of(x.getEmployeeId(), x.getDate())))
+					.filter(x -> mapSidDate.containsKey(Pair.of(x.getEmployeeId(), x.getDate())) || pairSidDateCheck.contains(Pair.of(x.getEmployeeId(), x.getDate())))
 					.collect(Collectors.toList());
 			dailyEdits.addAll(queryNotChanges.isEmpty() ? temp.stream().map(x -> {
 				createStampSourceInfo(x, querys);
@@ -259,7 +260,7 @@ public class DailyModifyResCommandFacade {
 	}
 
 	private List<DailyRecordWorkCommand> createCommands(String sid, List<DailyRecordDto> lstDto,
-			List<DailyModifyQuery> querys) {
+			List<DailyModifyQuery> querys, Set<Pair<String, GeneralDate>> pairSidDateCheck) {
 		if (querys.isEmpty())
 			return lstDto.stream().map(o -> {
 				return createCommand(sid, o, null);
@@ -279,6 +280,7 @@ public class DailyModifyResCommandFacade {
 		DataResultAfterIU dataResultAfterIU = new DataResultAfterIU();
 		Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> lstResultReturnDailyError = new HashMap<>();
 		boolean hasErrorRow = false;
+		boolean flagTempCalc = dataParent.isFlagCalculation();
 		dataParent.setFlagCalculation(false);
 		// insert flex
 		UpdateMonthDailyParam monthParam = null;
@@ -338,7 +340,15 @@ public class DailyModifyResCommandFacade {
 		// map to list result -> check error;
 		List<DailyRecordDto> dailyOlds = new ArrayList<>(), dailyEdits = new ArrayList<>();
 
-		processDto(dailyOlds, dailyEdits, dataParent, querys, mapSidDate, queryNotChanges);
+		Set<Pair<String, GeneralDate>> pairSidDateCheck = new HashSet<>();
+		dataParent.getDataCheckSign().stream().forEach(x ->{
+			pairSidDateCheck.add(Pair.of(x.getEmployeeId(), x.getDate()));
+		});
+		
+		dataParent.getDataCheckApproval().stream().forEach(x ->{
+			pairSidDateCheck.add(Pair.of(x.getEmployeeId(), x.getDate()));
+		});
+		processDto(dailyOlds, dailyEdits, dataParent, querys, mapSidDate, pairSidDateCheck, queryNotChanges);
 		
 //		dailyEdits.stream().forEach(dt -> {
 //			long dbVer = workInfo.getVer(dt.employeeId(), dt.workingDate());
@@ -484,9 +494,9 @@ public class DailyModifyResCommandFacade {
 			
 			//日別実績の修正からの計算
 			String sid = AppContexts.user().employeeId();
-			List<DailyRecordWorkCommand> commandNew = createCommands(sid, dailyEdits, querys);
+			List<DailyRecordWorkCommand> commandNew = createCommands(sid, dailyEdits, querys, pairSidDateCheck);
 
-			List<DailyRecordWorkCommand> commandOld = createCommands(sid, dailyOlds, querys);
+			List<DailyRecordWorkCommand> commandOld = createCommands(sid, dailyOlds, querys, pairSidDateCheck);
 			
 			resultIU = handleUpdate(dailyOlds, dailyEdits, commandNew, commandOld, dailyItems, monthParam, dataParent.getMode(),
 					dataParent.isFlagCalculation(), itemAtr);
@@ -536,7 +546,7 @@ public class DailyModifyResCommandFacade {
 
 				//日次登録処理
 				dailyItems = dailyItems.stream().filter(x -> !lstResultReturnDailyError.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList());
-				if(dataParent.isCheckDailyChange()) this.insertAllData.handlerInsertAllDaily(resultIU.getCommandNew(), resultIU.getLstDailyDomain(),
+				if(dataParent.isCheckDailyChange() || flagTempCalc) this.insertAllData.handlerInsertAllDaily(resultIU.getCommandNew(), resultIU.getLstDailyDomain(),
 						resultIU.getCommandOld(), dailyItems, resultIU.isUpdate(),
 						monthParam, itemAtr);
 				// insert sign
@@ -586,7 +596,7 @@ public class DailyModifyResCommandFacade {
 		}
 		
 		/** Finish update daily record */
-		finishDailyRecordRegis(updated, dataParent.getDailyOlds(), querys);
+		//finishDailyRecordRegis(updated, dataParent.getDailyOlds(), querys);
 		
 
 		if(!errorRelease.isEmpty()) {
@@ -642,7 +652,7 @@ public class DailyModifyResCommandFacade {
 		return dataResultAfterIU;
 	}
 	
-	private void finishDailyRecordRegis(Set<Pair<String, GeneralDate>> updated, List<DailyRecordDto> dailyEdits, List<DailyModifyQuery> querys){
+	public void finishDailyRecordRegis(Set<Pair<String, GeneralDate>> updated, List<DailyRecordDto> dailyEdits, List<DailyModifyQuery> querys){
 		if(!updated.isEmpty()){
 			updated.stream().filter(u -> !querys.stream().filter(q -> q.getBaseDate().equals(u.getValue()) && q.getEmployeeId().equals(u.getKey()))
 					.findFirst().isPresent()).forEach(up -> {
