@@ -282,10 +282,12 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 								}
 							}
 							//出勤時刻
-							TimeWithDayAttr attendanceOclock = startTime != null ? new TimeWithDayAttr(startTime.intValue()) : new TimeWithDayAttr(0);
-							
-							TimeWithDayAttr calcTime = startOclock.backByMinutes(attendanceOclock.valueAsMinutes());
-							processOptionalItem(() -> calcTime.valueAsMinutes() > 0, optionalItem, calcTime.valueAsMinutes(), 0, 26);
+							if(startTime != null) {
+								TimeWithDayAttr attendanceOclock = new TimeWithDayAttr(startTime.intValue());
+								
+								TimeWithDayAttr calcTime = startOclock.backByMinutes(attendanceOclock.valueAsMinutes());
+								processOptionalItem(() -> calcTime.valueAsMinutes() > 0, optionalItem, calcTime.valueAsMinutes(), 0, 26);								
+							}
 						}
 					}
 				}
