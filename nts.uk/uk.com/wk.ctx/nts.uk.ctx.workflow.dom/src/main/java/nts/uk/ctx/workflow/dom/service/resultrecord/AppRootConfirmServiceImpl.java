@@ -132,7 +132,7 @@ public class AppRootConfirmServiceImpl implements AppRootConfirmService {
 		for(AppPhaseInstance appPhaseInstance : appPhaseInstanceLst){
 			// (中間データ版)承認フェーズ中間データ毎の承認者を取得する
 			List<String> approverLst = this.getApproverFromPhase(appPhaseInstance);
-			if(!approverLst.contains(approverID)){
+			if(approverLst.isEmpty()){
 				// ループ終了フラグをチェックする
 				if(loopCompleteFlg){
 					break;
