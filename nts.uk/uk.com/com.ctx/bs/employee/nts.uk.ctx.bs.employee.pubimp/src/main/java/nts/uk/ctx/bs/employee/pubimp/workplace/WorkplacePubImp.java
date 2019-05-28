@@ -959,4 +959,25 @@ public class WorkplacePubImp implements SyWorkplacePub {
 		return results;
 	}
 
+	@Override
+	public List<WorkPlaceInfoExport> findWkpByWkpIdRQ324Ver2(String companyId, GeneralDate baseDate,
+			List<String> wkpIds) {
+		List<Workplace> workplace = workplaceRepo.findByWkpIds(wkpIds);
+		List<String> lstHistID = new ArrayList<>();
+		for (Workplace wkp : workplace) {
+			if(!wkp.getCompanyId().equals(companyId)){
+				continue;
+			}
+			List<WorkplaceHistory> workplaceHistory = wkp.getWorkplaceHistory();
+			for (WorkplaceHistory wkpHist : workplaceHistory) {
+				if(wkpHist.start().beforeOrEquals(baseDate) && wkpHist.end().afterOrEquals(baseDate)){
+					lstHistID.add(wkpHist.identifier());
+				}
+			}
+		}
+		List<WorkplaceInfo> wkpInfors = workplaceInfoRepo.findByHistory(lstHistID, companyId);
+		return wkpInfors.stream().map(item -> WorkPlaceInfoExport.builder().workplaceId(item.getWorkplaceId())
+				.workPlaceName(item.getWorkplaceName().v()).build()).collect(Collectors.toList());
+	}
+
 }
