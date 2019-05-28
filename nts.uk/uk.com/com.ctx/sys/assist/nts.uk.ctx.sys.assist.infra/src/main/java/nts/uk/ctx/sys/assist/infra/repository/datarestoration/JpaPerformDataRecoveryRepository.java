@@ -1,7 +1,7 @@
 package nts.uk.ctx.sys.assist.infra.repository.datarestoration;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
@@ -18,12 +19,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Strings;
 
-import nts.arc.error.BusinessException;
-import nts.arc.error.ErrorMessage;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.assist.dom.category.StorageRangeSaved;
+import nts.uk.ctx.sys.assist.dom.datarestoration.DataRecoveryLog;
+import nts.uk.ctx.sys.assist.dom.datarestoration.DataRecoveryLogRepository;
 import nts.uk.ctx.sys.assist.dom.datarestoration.PerformDataRecovery;
 import nts.uk.ctx.sys.assist.dom.datarestoration.PerformDataRecoveryRepository;
 import nts.uk.ctx.sys.assist.dom.datarestoration.RestorationTarget;
@@ -34,6 +36,7 @@ import nts.uk.ctx.sys.assist.infra.entity.datarestoration.SspmtRestorationTarget
 import nts.uk.ctx.sys.assist.infra.entity.datarestoration.SspmtTarget;
 import nts.uk.ctx.sys.assist.infra.entity.tablelist.SspmtTableList;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
+import nts.uk.shr.com.i18n.TextResource;
 
 @Stateless
 public class JpaPerformDataRecoveryRepository extends JpaRepository implements PerformDataRecoveryRepository {
@@ -61,6 +64,9 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	private static final String UPDATE_DATE_FROM_TO_BY_LIST_CATEGORY_ID = "UPDATE SspmtTableList t SET t.saveDateFrom =:startOfPeriod, t.saveDateTo =:endOfPeriod  WHERE t.dataRecoveryProcessId =:dataRecoveryProcessId AND t.tableListPk.categoryId =:checkCate ";
 	
 	private static final String DELETE_TABLE_LIST = "DELETE FROM SspmtTableList  t where t.dataRecoveryProcessId =:dataRecoveryProcessId";
+	
+	@Inject
+	private DataRecoveryLogRepository repoDataRecoveryLog;
 	
 	/*@PersistenceContext(unitName = "UK")
     private EntityManager entityManager;*/
@@ -124,13 +130,45 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	@Override
 	@Transactional(value = TxType.REQUIRES_NEW)
 	public Integer countDataExitTableByVKeyUp(Map<String, String> filedWhere, String tableName, String namePhysicalCid,
-			String cidCurrent) {
+			String cidCurrent, String dataRecoveryProcessId,String employeeCode) {
 		
 		if (tableName != null) {
 			StringBuilder COUNT_BY_TABLE_SQL = new StringBuilder("SELECT count(*) from ");
 			COUNT_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
 			COUNT_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
-			return (Integer) this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult();
+			Integer x = (Integer) this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult();
+			if (x > 1) {
+				String target            = employeeCode;
+				String errorContent      = null;
+				GeneralDate targetDate   = GeneralDate.today();
+				String contentSql        = COUNT_BY_TABLE_SQL.toString();
+				String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
+				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+				// #9008_1
+			}
+			return x;
+		}
+		return 0;
+	}
+	
+	@Override
+	public Integer countDataTransactionExitTableByVKeyUp(Map<String, String> filedWhere, String tableName,
+			String namePhysicalCid, String cidCurrent, String dataRecoveryProcessId,String employeeCode) {
+		if (tableName != null) {
+			StringBuilder COUNT_BY_TABLE_SQL = new StringBuilder("SELECT count(*) from ");
+			COUNT_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
+			COUNT_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
+			Integer x = (Integer) this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult();
+			if (x > 1) {
+				String target            = employeeCode;
+				String errorContent      = null;
+				GeneralDate targetDate   = GeneralDate.today();
+				String contentSql        = COUNT_BY_TABLE_SQL.toString();
+				String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
+				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+				// #9008_1
+			}
+			return x;
 		}
 		return 0;
 	}
@@ -175,21 +213,40 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	
 	@Override
 	public void deleteTransactionDataExitTableByVkey(List<Map<String, String>> listFiledWhere2, String tableName, String namePhysicalCid,
-			String cidCurrent) {
+			String cidCurrent, String employeeCode, String dataRecoveryProcessId) {
 
 		EntityManager em = this.getEntityManager();
 
 		if (tableName != null) {
 			StringBuilder DELETE_DATA_TABLE_SQL = new StringBuilder("");
-			for (int i = 0; i < listFiledWhere2.size(); i++) {
-				StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE FROM ");
-				DELETE_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
-				DELETE_BY_TABLE_SQL.append(makeWhereClause(listFiledWhere2.get(i), namePhysicalCid, cidCurrent));
-
-				DELETE_DATA_TABLE_SQL.append(DELETE_BY_TABLE_SQL.toString() +"; ");
+			try {
+				for (int i = 0; i < listFiledWhere2.size(); i++) {
+					StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE FROM ");
+					DELETE_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
+					DELETE_BY_TABLE_SQL.append(makeWhereClause(listFiledWhere2.get(i), namePhysicalCid, cidCurrent));
+					DELETE_DATA_TABLE_SQL.append(DELETE_BY_TABLE_SQL.toString() + "; ");
+				}
+				Query query = em.createNativeQuery(DELETE_DATA_TABLE_SQL.toString());
+				query.executeUpdate();
+			} catch (Exception e) {
+				if (employeeCode != null) {
+					String target            = employeeCode;
+					String errorContent      = e.getMessage();
+					GeneralDate targetDate   = GeneralDate.today();
+					String contentSql        = DELETE_DATA_TABLE_SQL.toString();
+					String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
+					saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+					//#9008_2
+				} else {
+					String target            = null;
+					String errorContent      = e.getMessage();
+					GeneralDate targetDate   = null;
+					String contentSql        = DELETE_DATA_TABLE_SQL.toString();
+					String processingContent = "履歴データ削除   "+ TextResource.localize("CMF004_462") ; 
+					saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+					//#9010_2
+				}
 			}
-			Query query = em.createNativeQuery(DELETE_DATA_TABLE_SQL.toString());
-			query.executeUpdate();
 			
 		}
 	}
@@ -247,7 +304,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 
 	@Override
 	@Transactional(value = TxType.REQUIRES_NEW)
-	public void deleteEmployeeHis(TableList table, String whereCid, String whereSid, String cid, String employeeId) {
+	public void deleteEmployeeHis(TableList table, String whereCid, String whereSid, String cid, String employeeId  ) {
 
 		EntityManager em = this.getEntityManager();
 
@@ -374,17 +431,6 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 
 	@Override
-	public Integer countDataTransactionExitTableByVKeyUp(Map<String, String> filedWhere, String tableName,
-			String namePhysicalCid, String cidCurrent) {
-		if (tableName != null) {
-			StringBuilder COUNT_BY_TABLE_SQL = new StringBuilder("SELECT count(*) from ");
-			COUNT_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
-			COUNT_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
-			return (Integer) this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult();
-		}
-		return 0;
-	}
-	@Override
 	public void addRestorationTarget(RestorationTarget domain) {
 		this.commandProxy().insert(SspmtRestorationTarget.toEntity(domain));
 
@@ -392,7 +438,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 
 	@Override
 	public void deleteTransactionEmployeeHis(TableList table, String whereCid, String whereSid, String cid,
-			String employeeId) {
+			String employeeId ) {
 		EntityManager em = this.getEntityManager();
 
 		if (table.getTableEnglishName() != null) {
@@ -442,7 +488,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
 				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereCid).append(" = '").append(cid).append("'");
 			}
-			
+		
 			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
 			query.executeUpdate();
 		}
@@ -466,5 +512,13 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			data = this.getEntityManager().createNativeQuery(SELECT_BY_TABLE_SQL.toString()).getResultList();
 		}
 		return data;
+	}
+	
+	private void saveErrorLogDataRecover(String recoveryProcessId, String target, String errorContent,
+			GeneralDate targetDate, String processingContent, String contentSql) {
+		int logSequenceNumber = repoDataRecoveryLog.getMaxSeqId(recoveryProcessId) + 1;
+		DataRecoveryLog dataRecoveryLog = new DataRecoveryLog(recoveryProcessId, target, errorContent, targetDate,
+				logSequenceNumber, processingContent, contentSql);
+		repoDataRecoveryLog.add(dataRecoveryLog);
 	}
 }
