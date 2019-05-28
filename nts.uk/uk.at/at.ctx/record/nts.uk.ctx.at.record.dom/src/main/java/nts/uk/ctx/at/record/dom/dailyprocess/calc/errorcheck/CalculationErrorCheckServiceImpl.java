@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -13,7 +14,9 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
+import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory;
+import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerform;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CheckExcessAtr;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.ManagePerCompanySet;
@@ -24,7 +27,12 @@ import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.service.ErAlCheckService;
 import nts.uk.ctx.at.record.dom.workrecord.errorsetting.SystemFixedErrorAlarm;
+import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemIdContainer;
+import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil.AttendanceItemType;
+import nts.uk.ctx.at.shared.dom.attendance.util.ItemConst;
+import nts.uk.ctx.at.shared.dom.attendance.util.enu.DailyDomainGroup;
 import nts.uk.shr.com.context.AppContexts;
+import nts.uk.shr.com.enumcommon.NotUseAtr;
 
 /**
  * 日別計算用のエラーチェック
@@ -81,8 +89,31 @@ public class CalculationErrorCheckServiceImpl implements CalculationErrorCheckSe
 		//乖離系のエラーはここでまとめてチェック(レスポンス対応のため)
 		addItemList.addAll(divergenceErrorCheck(integrationOfDaily, master, divergenceError));
 		addItemList = addItemList.stream().filter(tc -> tc != null).collect(Collectors.toList());
+		
+		clearErrorByRemarks(integrationOfDaily.getRemarks(), master.getErrorAlarm(), addItemList);
+		
 		integrationOfDaily.setEmployeeError(addItemList);
 		return integrationOfDaily;
+	}
+
+	/** 備考入力でエラー解除 */
+	private void clearErrorByRemarks(List<RemarksOfDailyPerform> remarks, List<ErrorAlarmWorkRecord> errorList,
+			List<EmployeeDailyPerError> addItemList) {
+		List<Integer> ids = AttendanceItemIdContainer.getItemIdByDailyDomains(DailyDomainGroup.REMARKS);
+		Map<Integer, Integer> noToIds = AttendanceItemIdContainer.getIds(ids, AttendanceItemType.DAILY_ITEM)
+				.stream().collect(Collectors.toMap(c -> { 
+					String pathNoIdx = c.path().replaceAll(ItemConst.DEFAULT_NUMBER_REGEX, "");
+					String idx = c.path().replaceAll(pathNoIdx, "");
+					return StringUtil.isNullOrEmpty(idx, true) ? -1 : Integer.parseInt(idx);
+				}, c -> c.itemId()));
+		
+		errorList.stream().filter(e -> e.getRemarkCancelErrorInput() == NotUseAtr.USE).forEach(er -> {
+			remarks.stream().filter(r -> noToIds.get(r.getRemarkNo()) == er.getRemarkColumnNo()).findFirst().ifPresent(r -> {
+				if(r.getRemarks() != null && !StringUtil.isNullOrEmpty(r.getRemarks().v(), true)){
+					addItemList.removeIf(eral -> er.getCode().equals( eral.getErrorAlarmWorkRecordCode()));
+				}
+			});
+		});
 	}
 	
 
