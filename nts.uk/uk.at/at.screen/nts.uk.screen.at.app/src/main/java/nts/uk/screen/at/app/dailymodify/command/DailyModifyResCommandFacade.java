@@ -349,7 +349,8 @@ public class DailyModifyResCommandFacade {
 			pairSidDateCheck.add(Pair.of(x.getEmployeeId(), x.getDate()));
 		});
 		processDto(dailyOlds, dailyEdits, dataParent, querys, mapSidDate, pairSidDateCheck, queryNotChanges);
-		
+		// row data will insert
+		Set<Pair<String, GeneralDate>> rowWillInsert = dailyEdits.stream().map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toSet());
 //		dailyEdits.stream().forEach(dt -> {
 //			long dbVer = workInfo.getVer(dt.employeeId(), dt.workingDate());
 //			if(dbVer != dt.getWorkInfo().getVersion()){
@@ -549,6 +550,10 @@ public class DailyModifyResCommandFacade {
 				if(dataParent.isCheckDailyChange() || flagTempCalc) this.insertAllData.handlerInsertAllDaily(resultIU.getCommandNew(), resultIU.getLstDailyDomain(),
 						resultIU.getCommandOld(), dailyItems, resultIU.isUpdate(),
 						monthParam, itemAtr);
+				Set<Pair<String, GeneralDate>> rowAfterCheck = dailyEdits.stream().map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toSet());
+				Set<Pair<String, GeneralDate>> rowRemoveInsert = rowWillInsert.stream().filter(x -> !rowAfterCheck.contains(x)).collect(Collectors.toSet());
+				dataParent.setDataCheckSign(dataParent.getDataCheckSign().stream().filter(x -> !rowRemoveInsert.contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
+				dataParent.setDataCheckApproval(dataParent.getDataCheckApproval().stream().filter(x -> !rowRemoveInsert.contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
 				// insert sign
 				insertSignD(dataParent.getDataCheckSign(), resultIU.getLstDailyDomain(), dataParent.getDailyOlds(), updated);
 				// insert approval
