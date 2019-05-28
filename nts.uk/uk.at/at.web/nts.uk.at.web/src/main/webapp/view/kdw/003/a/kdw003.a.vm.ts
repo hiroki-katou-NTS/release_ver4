@@ -196,6 +196,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         itemValueMonthParent: any = {};
         valueUpdateMonth: any = null;
         valueFlexCheck: any;
+        errorBackGroundFlex: boolean = false;
 
         textStyles: any = [];
         showTextStyle: boolean = true;
@@ -1084,6 +1085,11 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         self.mapApprovalCheck = dataAfter.mapApprovalCheck;
                         self.mapIndentityCheck = dataAfter.mapIndentityCheck;
                         self.canFlex(dataAfter.canFlex);
+                        if (self.errorBackGroundFlex && self.canFlex()) {
+                            $("#next-month").attr('style', 'background-color: red !important');
+                        } else {
+                            $("#next-month").attr('style', 'background-color: white !important');
+                        }                            
                     }
                     let errorNoReload: boolean  = false;
                     //dataChange = {};
@@ -5054,6 +5060,11 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             self.noOfHolidays(Number(val189));
             //欠勤控除
             self.absentDeductionTime(Number(val190));
+            if(error){
+               __viewContext.vm.errorBackGroundFlex = true; 
+            }else{
+                __viewContext.vm.errorBackGroundFlex = false; 
+            }
             if (error && __viewContext.vm.canFlex()) {
                 $("#next-month").attr('style', 'background-color: red !important');
             } else {
