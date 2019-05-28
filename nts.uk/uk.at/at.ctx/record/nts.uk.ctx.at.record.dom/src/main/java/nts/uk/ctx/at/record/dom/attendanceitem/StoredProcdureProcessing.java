@@ -274,13 +274,11 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 						if(dailyWork.isWeekDayAttendance() && !(workTime.get().getWorkTimeDivision().getWorkTimeDailyAtr().isFlex())) {
 							//所定の開始時刻
 							TimeWithDayAttr startOclock = new TimeWithDayAttr(0);
-							if(d.getWorkInformation().getRecordInfo().getWorkTypeCode() != null) {
-								Optional<PredetemineTimeSetting> predSet = predetermineRepo.findByWorkTimeCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTypeCode().v());
-								if(predSet.isPresent()) {
-									Optional<TimezoneUse> firstTimeZone =  predSet.get().getPrescribedTimezoneSetting().getLstTimezone().stream().filter(tc -> tc.getWorkNo() == 1).findFirst();
-									if(firstTimeZone.isPresent()) {
-										startOclock = firstTimeZone.get().getStart();
-									}
+							Optional<PredetemineTimeSetting> predSet = predetermineRepo.findByWorkTimeCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
+							if(predSet.isPresent()) {
+								Optional<TimezoneUse> firstTimeZone =  predSet.get().getPrescribedTimezoneSetting().getLstTimezone().stream().filter(tc -> tc.getWorkNo() == 1).findFirst();
+								if(firstTimeZone.isPresent()) {
+									startOclock = firstTimeZone.get().getStart();
 								}
 							}
 							//出勤時刻
