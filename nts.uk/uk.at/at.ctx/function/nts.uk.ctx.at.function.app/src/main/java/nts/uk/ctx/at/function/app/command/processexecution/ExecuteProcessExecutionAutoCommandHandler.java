@@ -2,6 +2,7 @@ package nts.uk.ctx.at.function.app.command.processexecution;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -82,8 +83,13 @@ import nts.uk.ctx.at.function.dom.processexecution.tasksetting.ExecutionTaskSett
 import nts.uk.ctx.at.function.dom.processexecution.updateprocessexecsetting.changepersionlist.ChangePersionList;
 import nts.uk.ctx.at.function.dom.processexecution.updateprocessexecsetting.changepersionlist.ListLeaderOrNotEmp;
 import nts.uk.ctx.at.function.dom.processexecution.updateprocessexecsetting.changepersionlistforsche.ChangePersionListForSche;
+import nts.uk.ctx.at.function.dom.statement.EmployeeGeneralInfoAdapter;
+import nts.uk.ctx.at.function.dom.statement.dtoimport.EmployeeGeneralInfoImport;
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
+import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExWorkplaceHistItemImport;
+import nts.uk.ctx.at.record.dom.affiliationinformation.wkplaceinfochangeperiod.WkplaceInfoChangePeriod;
+import nts.uk.ctx.at.record.dom.affiliationinformation.wktypeinfochangeperiod.WkTypeInfoChangePeriod;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployeeHistory;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.repository.BusinessTypeEmpOfHistoryRepository;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultDomainServiceImpl.ProcessState;
@@ -137,6 +143,8 @@ import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleExecutionLogRepository;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicScheduleRepository;
 import nts.uk.ctx.at.shared.app.service.workrule.closure.ClosureEmploymentService;
 import nts.uk.ctx.at.shared.dom.common.CompanyId;
+import nts.uk.ctx.at.shared.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmpDto;
+import nts.uk.ctx.at.shared.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmpHisAdaptor;
 import nts.uk.ctx.at.shared.dom.ot.frame.NotUseAtr;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
@@ -256,6 +264,18 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	
 	@Inject
 	private ChangePersionListForSche changePersionListForSche;
+	
+	@Inject
+	private EmployeeGeneralInfoAdapter employeeGeneralInfoAdapter;
+	
+	@Inject
+	private WkplaceInfoChangePeriod wkplaceInfoChangePeriod;
+	
+	@Inject
+	private WkTypeInfoChangePeriod wkTypeInfoChangePeriod;
+	
+	@Inject
+	private BusinessTypeOfEmpHisAdaptor businessTypeOfEmpHisAdaptor;
 	
 	public static int MAX_DELAY_PARALLEL = 0;
 
@@ -1821,11 +1841,49 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						// 「作成した開始日」～「取得した日別実績の勤務情報.年月日」を対象期間とする
 						GeneralDate maxDate = listWorkInfo.stream().map(u -> u.getYmd()).max(GeneralDate::compareTo)
 								.get();
-						isHasInterrupt = this.RedoDailyPerformanceProcessing(context, companyId, empLeader,
-								new DatePeriod(calculateDate, maxDate), empCalAndSumExeLog.getEmpCalAndSumExecLogID(),
-								dailyCreateLog, procExec);
-						if (isHasInterrupt) {
-							break;
+						if (calculateDate.beforeOrEquals(maxDate)) {
+							DatePeriod datePeriod = new DatePeriod(calculateDate, maxDate);
+							List<DatePeriod> listDatePeriodWorkplace = new ArrayList<>();
+							List<DatePeriod> listDatePeriodWorktype = new ArrayList<>();
+							List<DatePeriod> listDatePeriodAll = new ArrayList<>();
+							//INPUT．「異動時に再作成」をチェックする
+							if(procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTransfer()) {
+								//社員ID（List）と期間から個人情報を取得する - RQ401	
+								EmployeeGeneralInfoImport employeeGeneralInfoImport = employeeGeneralInfoAdapter.getEmployeeGeneralInfo(Arrays.asList(empLeader), datePeriod, false, false, false, true, false); //職場を取得するか　=　True
+								if(!employeeGeneralInfoImport.getExWorkPlaceHistoryImports().isEmpty()) {
+									nts.uk.ctx.at.function.dom.statement.dtoimport.ExWorkPlaceHistoryImport exWorkPlaceHistoryImportFn = employeeGeneralInfoImport.getExWorkPlaceHistoryImports().get(0);
+									List<ExWorkplaceHistItemImport> workplaceItems = exWorkPlaceHistoryImportFn
+											.getWorkplaceItems().stream()
+											.map(c -> new ExWorkplaceHistItemImport(c.getHistoryId(), c.getPeriod(),
+													c.getWorkplaceId()))
+											.collect(Collectors.toList());
+									//職場情報変更期間を求める
+									listDatePeriodWorkplace =  wkplaceInfoChangePeriod.getWkplaceInfoChangePeriod(empLeader, datePeriod, workplaceItems, true);
+								}else {
+									listDatePeriodWorkplace.add(datePeriod);
+								}
+							}
+							boolean check =  false;
+							if(listDatePeriodWorkplace.size() == 1 && listDatePeriodWorkplace.get(0).equals(datePeriod)) {
+								listDatePeriodAll.addAll(listDatePeriodWorkplace);
+								check = true;
+							}
+							//INPUT．「勤務種別変更時に再作成」をチェックする
+							if(procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTypeChangePerson() && !check ) {
+								//<<Public>> 社員ID(List)、期間で期間分の勤務種別情報を取得する
+								List<BusinessTypeOfEmpDto> listBusinessTypeOfEmpDto = businessTypeOfEmpHisAdaptor.findByCidSidBaseDate(companyId, Arrays.asList(empLeader), datePeriod);
+								//勤務種別情報変更期間を求める
+								listDatePeriodWorktype = wkTypeInfoChangePeriod.getWkTypeInfoChangePeriod(empLeader, datePeriod, listBusinessTypeOfEmpDto, true);
+							}
+							listDatePeriodAll.addAll(createListAllPeriod(listDatePeriodWorkplace,listDatePeriodWorktype));
+							for(DatePeriod p : listDatePeriodAll) {
+								isHasInterrupt = this.RedoDailyPerformanceProcessing(context, companyId, empLeader,
+									p,
+									empCalAndSumExeLog.getEmpCalAndSumExecLogID(), dailyCreateLog, procExec);
+							}
+							if (isHasInterrupt) {
+								break;
+							}
 						}
 					}
 
@@ -1966,55 +2024,31 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 		return true;
 	}
+	private List<DatePeriod> createListAllPeriod(List<DatePeriod> list1,List<DatePeriod> list2){
+		List<DatePeriod> listResult = new ArrayList<>();
+		List<DatePeriod> listAll = new ArrayList<>();
+		listAll.addAll(list1);
+		listAll.addAll(list2);
+		listAll.sort((x, y) -> x.start().compareTo(y.start()));
+		
+		for(int i = 0;i< listAll.size();i++) {
+			DatePeriod merged = new DatePeriod(listAll.get(i).start(),listAll.get(i).end());
+			for (int j = i + 1; j < listAll.size(); j++) {
+				DatePeriod next = listAll.get(j);
+				if (merged.contains(next.start()) && merged.contains(next.end())){
+					i++;
+				}else if(merged.contains(next.start())||merged.end().addDays(1).equals(next.start())) {
+					merged = merged.cutOffWithNewEnd(next.end());
+					i++;
+				}else {
+					break;
+				}
+			}
+			listResult.add(merged);
+		}
+		return listResult;
+	}
 
-//	private DatePeriod getMaxPeriodBetweenCalAndCreate(DatePeriod dailyCreate, DatePeriod dailyCalculate) {
-//		GeneralDate startDate;
-//		GeneralDate endDate;
-//		if (dailyCreate.start().compareTo(dailyCalculate.start()) == -1) {
-//			startDate = dailyCreate.start();
-//		} else {
-//			startDate = dailyCalculate.start();
-//		}
-//		if (dailyCreate.end().compareTo(dailyCalculate.end()) == 1) {
-//			endDate = dailyCreate.end();
-//		} else {
-//			endDate = dailyCalculate.end();
-//		}
-//		return new DatePeriod(startDate, endDate);
-//	}
-
-	// 異動者・勤務種別変更者リスト作成処理
-//	private ListLeaderOrNotEmpOutput createProcessForChangePerOrWorktype(String companyId,
-//			List<String> empIds, GeneralDate startDate, ProcessExecution procExec) {
-//		// 期間を計算
-//		// GeneralDate p = this.calculatePeriod(closureId, period, companyId);
-//		List<String> newEmpIdList = new ArrayList<>();
-//		// ・社員ID（異動者、勤務種別変更者のみ）（List）
-//		Set<String> setEmpIds = new HashSet<String>();
-//		// ・社員ID（異動者、勤務種別変更者のみ）（List）
-//		List<String> noLeaderEmpIdList = empIds;
-//		// check 異動者を再作成する
-//		if (procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTransfer()) {
-//			// 異動者の絞り込み todo request list 590
-//			List<AffWorkplaceHistoryImport> list = workplaceWorkRecordAdapter.getWorkplaceBySidsAndBaseDate(empIds,
-//					startDate);
-//			list.forEach(emp -> {
-//				emp.getHistoryItems().forEach(x -> {
-//					if (x.start().afterOrEquals(startDate)) {
-//						setEmpIds.add(emp.getSid());
-//						return;
-//					}
-//				});
-//			});
-//		}
-//		if (procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTypeChangePerson()) {
-//			// 勤務種別の絞り込み
-//			newEmpIdList = this.refineWorkType(companyId, empIds, startDate);
-//		}
-//		setEmpIds.addAll(newEmpIdList);
-//		noLeaderEmpIdList.removeAll(new ArrayList<>(newEmpIdList));
-//		return new ListLeaderOrNotEmpOutput(new ArrayList<>(setEmpIds), noLeaderEmpIdList);
-//	}
 
 	private DatePeriod findClosureMinMaxPeriod(String companyId, List<Closure> closureList) {
 		GeneralDate startYearMonth = null;
