@@ -547,9 +547,18 @@ public class DailyModifyResCommandFacade {
 
 				//日次登録処理
 				dailyItems = dailyItems.stream().filter(x -> !lstResultReturnDailyError.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList());
-				if(dataParent.isCheckDailyChange() || flagTempCalc) this.insertAllData.handlerInsertAllDaily(resultIU.getCommandNew(), resultIU.getLstDailyDomain(),
-						resultIU.getCommandOld(), dailyItems, resultIU.isUpdate(),
-						monthParam, itemAtr);
+				if (dataParent.isCheckDailyChange() || flagTempCalc) {
+					List<DailyItemValue> dailyItemForLog = AttendanceItemUtil
+							.toItemValues(dataParent.getDailyOldForLog()).entrySet().stream()
+							.map(c -> DailyItemValue.build()
+									.createEmpAndDate(c.getKey().employeeId(), c.getKey().workingDate())
+									.createItems(c.getValue()))
+							.collect(Collectors.toList());
+
+					this.insertAllData.handlerInsertAllDaily(resultIU.getCommandNew(), resultIU.getLstDailyDomain(),
+							resultIU.getCommandOld(), dailyItemForLog, resultIU.isUpdate(), monthParam, itemAtr);
+				}
+				
 				Set<Pair<String, GeneralDate>> rowAfterCheck = dailyEdits.stream().map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toSet());
 				Set<Pair<String, GeneralDate>> rowRemoveInsert = rowWillInsert.stream().filter(x -> !rowAfterCheck.contains(x)).collect(Collectors.toSet());
 				dataParent.setDataCheckSign(dataParent.getDataCheckSign().stream().filter(x -> !rowRemoveInsert.contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
@@ -640,7 +649,7 @@ public class DailyModifyResCommandFacade {
 		}else {
 			Map<Integer, List<DPItemValue>> errorMapTemp = dataResultAfterIU.getErrorMap().entrySet().stream()
 					.filter(x -> x.getKey() != TypeError.CONTINUOUS.value && x.getKey() != TypeError.RELEASE_CHECKBOX.value)
-					.collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue(), (x, y) -> x));
+					.collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
 			if (errorMapTemp.values().isEmpty() && (dataResultAfterIU.getFlexShortage() == null || !dataResultAfterIU.getFlexShortage().isError())) {
 				dataResultAfterIU.setMessageAlert("Msg_15");
 			} else {
@@ -1009,7 +1018,7 @@ public class DailyModifyResCommandFacade {
 		val lstEmployeeId = dailys.stream().map(x -> x.getEmployeeId()).collect(Collectors.toSet());
 		val indentity = identificationRepository.findByListEmployeeID(new ArrayList<>(lstEmployeeId),
 				dailyTemps.get(0).getDate(), dailyTemps.get(dailyTemps.size() - 1).getDate()).stream()
-				.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getProcessingYmd()), x -> "", (x, y) -> x));
+				.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getProcessingYmd()), x -> ""));
 		
 		if (onlyCheckBox) {
 //			resultError = employeeDailyPerErrorRepository
@@ -1044,7 +1053,7 @@ public class DailyModifyResCommandFacade {
 		}).collect(Collectors.toList());
 		
 		val dateEmp = dataCheckApproval.stream()
-				.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> "", (x, y) -> x));
+				.collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> ""));
 		val itemNotUiRelease = dailyTemps.stream()
 				.filter(x -> mapRelease.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))
 						&& !dateEmp.containsKey(Pair.of(x.getEmployeeId(), x.getDate())))

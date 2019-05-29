@@ -36,6 +36,8 @@ public class DPItemParent {
 	
 	private List<DailyRecordDto> dailyEdits;
 	
+	private List<DailyRecordDto> dailyOldForLog;
+	
 	private boolean flagCalculation;
 	
 	private List<CellEdit> cellEdits;
