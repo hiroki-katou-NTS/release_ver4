@@ -33,14 +33,14 @@ public interface PerformDataRecoveryRepository {
 			String cidCurrent, String dataRecoveryProcessId,String employeeCode);
 
 	void deleteDataExitTableByVkey(List<Map<String, String>> lsiFiledWhere2, String tableName, String namePhysicalCid,
-			String cidCurrent);
+			String cidCurrent,String employeeCode, String dataRecoveryProcessId);
 	
 	void deleteTransactionDataExitTableByVkey(List<Map<String, String>> lsiFiledWhere2, String tableName, String namePhysicalCid,
 			String cidCurrent,String employeeCode, String dataRecoveryProcessId);
 	
-	void insertDataTable( StringBuilder insertToTable);
+	void insertDataTable( StringBuilder insertToTable , String employeeCode, String dataRecoveryProcessId);
 	
-	void insertTransactionDataTable(StringBuilder insertToTable);
+	void insertTransactionDataTable(StringBuilder insertToTable, String employeeCode, String dataRecoveryProcessId);
 
 	List<TableList> getByRecoveryProcessingId(String dataRecoveryProcessId);
 

@@ -112,7 +112,6 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 
 	@Override
-	@Transactional(value = TxType.REQUIRES_NEW)
 	public List<Target> findByDataRecoveryId(String dataRecoveryProcessId) {
 		List<SspmtTarget> listTarget = this.getEntityManager().createQuery(SELECT_ALL_TARGET, SspmtTarget.class)
 				.setParameter("dataRecoveryProcessId", dataRecoveryProcessId).getResultList();
@@ -128,7 +127,6 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 
 	@Override
-	@Transactional(value = TxType.REQUIRES_NEW)
 	public Integer countDataExitTableByVKeyUp(Map<String, String> filedWhere, String tableName, String namePhysicalCid,
 			String cidCurrent, String dataRecoveryProcessId,String employeeCode) {
 		
@@ -136,7 +134,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			StringBuilder COUNT_BY_TABLE_SQL = new StringBuilder("SELECT count(*) from ");
 			COUNT_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
 			COUNT_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
-			Integer x = (Integer) this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult();
+			Integer x = (Integer) (this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult());
 			if (x > 1) {
 				String target            = employeeCode;
 				String errorContent      = null;
@@ -145,6 +143,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 				String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
 				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 				// #9008_1
+				throw new RuntimeException();
 			}
 			return x;
 		}
@@ -158,7 +157,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			StringBuilder COUNT_BY_TABLE_SQL = new StringBuilder("SELECT count(*) from ");
 			COUNT_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
 			COUNT_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
-			Integer x = (Integer) this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult();
+			Integer x = (Integer) (this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult());
 			if (x > 1) {
 				String target            = employeeCode;
 				String errorContent      = null;
@@ -167,6 +166,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 				String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
 				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 				// #9008_1
+				throw new RuntimeException();
 			}
 			return x;
 		}
@@ -191,23 +191,44 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 
 	@Override
-	@Transactional(value = TxType.REQUIRES_NEW)
 	public void deleteDataExitTableByVkey(List<Map<String, String>> listFiledWhere2, String tableName,
-			String namePhysicalCid, String cidCurrent) {
+			String namePhysicalCid, String cidCurrent, String employeeCode, String dataRecoveryProcessId) {
 
 		EntityManager em = this.getEntityManager();
 
 		if (tableName != null) {
 			StringBuilder DELETE_DATA_TABLE_SQL = new StringBuilder("");
-			for (int i = 0; i < listFiledWhere2.size(); i++) {
-				StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE FROM ");
-				DELETE_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
-				DELETE_BY_TABLE_SQL.append(makeWhereClause(listFiledWhere2.get(i), namePhysicalCid, cidCurrent));
-				
-				DELETE_DATA_TABLE_SQL.append(DELETE_BY_TABLE_SQL.toString() +"; ");
+			try {
+				for (int i = 0; i < listFiledWhere2.size(); i++) {
+					StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE FROM ");
+					DELETE_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
+					DELETE_BY_TABLE_SQL.append(makeWhereClause(listFiledWhere2.get(i), namePhysicalCid, cidCurrent));
+					
+					DELETE_DATA_TABLE_SQL.append(DELETE_BY_TABLE_SQL.toString() +"; ");
+				}
+				Query query = em.createNativeQuery(DELETE_DATA_TABLE_SQL.toString());
+				query.executeUpdate();
+			} catch (Exception e) {
+				if (employeeCode != null) {
+					String target            = employeeCode;
+					String errorContent      = e.getMessage();
+					GeneralDate targetDate   = GeneralDate.today();
+					String contentSql        = DELETE_DATA_TABLE_SQL.toString();
+					String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
+					saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+					throw e;
+					//#9008_2
+				} else {
+					String target            = null;
+					String errorContent      = e.getMessage();
+					GeneralDate targetDate   = null;
+					String contentSql        = DELETE_DATA_TABLE_SQL.toString();
+					String processingContent = "履歴データ削除   "+ TextResource.localize("CMF004_462") ; 
+					saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+					throw e;
+					//#9010_2
+				}
 			}
-			Query query = em.createNativeQuery(DELETE_DATA_TABLE_SQL.toString());
-			query.executeUpdate();
 		}
 	}
 	
@@ -236,6 +257,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 					String contentSql        = DELETE_DATA_TABLE_SQL.toString();
 					String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
 					saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+					throw e;
 					//#9008_2
 				} else {
 					String target            = null;
@@ -244,6 +266,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 					String contentSql        = DELETE_DATA_TABLE_SQL.toString();
 					String processingContent = "履歴データ削除   "+ TextResource.localize("CMF004_462") ; 
 					saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+					throw e;
 					//#9010_2
 				}
 			}
@@ -252,21 +275,67 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 	
 	@Override
-	@Transactional(value = TxType.REQUIRES_NEW)
-	public void insertDataTable( StringBuilder insertToTable) {
-		
-		EntityManager em = this.getEntityManager();
-		Query query = em.createNativeQuery(insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
-		query.executeUpdate();
+	public void insertDataTable( StringBuilder insertToTable,String employeeCode,String dataRecoveryProcessId) {
+		String logQuery = "";
+		try {
+			EntityManager em = this.getEntityManager();
+			Query query = em.createNativeQuery(insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
+			logQuery = query.toString();
+			query.executeUpdate();
+		} catch (Exception e) {
+			if (employeeCode != null) {
+				String target            = employeeCode;
+				String errorContent      = e.getMessage();
+				GeneralDate targetDate   = GeneralDate.today();
+				String contentSql        = logQuery;
+				String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
+				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+				throw e;
+				//#9008_2
+			} else {
+				String target            = null;
+				String errorContent      = e.getMessage();
+				GeneralDate targetDate   = null;
+				String contentSql        = logQuery;
+				String processingContent = "履歴データ削除   "+ TextResource.localize("CMF004_462") ; 
+				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+				throw e;
+				//#9010_2
+			}
+		}
 	}
 	
 	
 	@Override
-	public void insertTransactionDataTable(StringBuilder insertToTable) {
+	public void insertTransactionDataTable(StringBuilder insertToTable,String employeeCode,String dataRecoveryProcessId) {
 		
-		EntityManager em = this.getEntityManager();
-		Query query = em.createNativeQuery(insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
-		query.executeUpdate();
+		String logQuery = "";
+		try {
+			EntityManager em = this.getEntityManager();
+			Query query = em.createNativeQuery(insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
+			query.executeUpdate();
+			
+		} catch (Exception e) {
+			if (employeeCode != null) {
+				String target            = employeeCode;
+				String errorContent      = e.getMessage();
+				GeneralDate targetDate   = GeneralDate.today();
+				String contentSql        = logQuery;
+				String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
+				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+				throw e;
+				//#9008_2
+			} else {
+				String target            = null;
+				String errorContent      = e.getMessage();
+				GeneralDate targetDate   = null;
+				String contentSql        = logQuery;
+				String processingContent = "履歴データ削除   "+ TextResource.localize("CMF004_462") ; 
+				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+				throw e;
+				//#9010_2
+			}
+		}
 	}
 	
 
@@ -303,7 +372,6 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 
 	@Override
-	@Transactional(value = TxType.REQUIRES_NEW)
 	public void deleteEmployeeHis(TableList table, String whereCid, String whereSid, String cid, String employeeId  ) {
 
 		EntityManager em = this.getEntityManager();

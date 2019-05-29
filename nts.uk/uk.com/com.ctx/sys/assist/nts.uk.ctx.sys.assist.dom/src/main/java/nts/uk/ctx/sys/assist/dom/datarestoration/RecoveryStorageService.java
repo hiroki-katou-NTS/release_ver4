@@ -222,6 +222,9 @@ public class RecoveryStorageService {
 		return condition;
 	}
 
+	/**
+	 * Xử lý những table không phải dạng lịch sử 
+	 */
 	public DataRecoveryOperatingCondition exTableUse(TableListByCategory tableListByCategory,
 			String dataRecoveryProcessId, String uploadId) throws Exception {
 
@@ -343,11 +346,9 @@ public class RecoveryStorageService {
 				NUMBER_ERROR++;
 				dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
 			}
-
 			if (errorCode.equals(SETTING_EXCEPTION)) {
 				return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
 			}
-
 			// check interruption [中断]
 			Optional<DataRecoveryMng> dataRecovery = dataRecoveryMngRepository
 					.getDataRecoveryMngById(dataRecoveryProcessId);
@@ -358,7 +359,6 @@ public class RecoveryStorageService {
 		return condition;
 	}
 
-	@Transactional(value = TxType.REQUIRES_NEW, rollbackOn = Exception.class)
 	public DataRecoveryOperatingCondition recoveryDataByEmployee(String dataRecoveryProcessId, String employeeId,
 			List<DataRecoveryTable> targetDataByCate, List<Target> listTarget,
 			HashMap<String, CSVBufferReader> csvByteReadMaper, String employeeCode) throws Exception {
@@ -409,12 +409,8 @@ public class RecoveryStorageService {
 
 			try {
 				// 対象社員の日付順の処理
-				long startTime = System.nanoTime();
-				condition = crudDataByTable(dataRecoveryTable, employeeId, dataRecoveryProcessId, tableList,
-						performDataRecovery, resultsSetting, true, csvByteReadMaper, employeeCode);
-				long endTime = System.nanoTime();
-				long duration = (endTime - startTime) / 1000000; // ms;
-				System.out.println("========= Tbl " + i++ + " " + dataRecoveryTable.getFileNameCsv() + " => " + duration);
+				condition = crudDataByTable(dataRecoveryTable, employeeId, dataRecoveryProcessId, tableList,performDataRecovery, 
+											resultsSetting, true, csvByteReadMaper, employeeCode);
 			} catch (Exception e) {
 				// GHI LOG
 				String target            = employeeCode;
@@ -443,7 +439,7 @@ public class RecoveryStorageService {
 			String dataRecoveryProcessId, Optional<TableList> tableList,
 			Optional<PerformDataRecovery> performDataRecovery, List<String> dateSetting, Boolean tableUse,
 			HashMap<String, CSVBufferReader> csvByteReadMaper, String employeeCode) throws ParseException, NoSuchMethodException,
-			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException , Exception{
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 
@@ -453,9 +449,7 @@ public class RecoveryStorageService {
 
 		List<DataRecoveryOperatingCondition> listCondition = new ArrayList<>();
 		try {
-
 			System.out.println("============= employeeId " + employeeId);
-
 			if (employeeId != null && dataRecoveryTable.isHasSidInCsv()) {
 				CSVBufferReader reader = csvByteReadMaper.get(dataRecoveryTable.getFileNameCsv());
 				reader.setCharset("UTF-8");
@@ -465,8 +459,6 @@ public class RecoveryStorageService {
 
 					System.out.println("============= list record size " + records.size());
 					if (!records.isEmpty()) {
-
-						long startTime = System.nanoTime();
 
 						StringBuilder DELETE_INSERT_TO_TABLE = new StringBuilder("");
 						StringBuilder INSERT_TO_TABLE = new StringBuilder("");
@@ -495,7 +487,6 @@ public class RecoveryStorageService {
 							namePhysicalCid = findNamePhysicalCid(tableList);
 						} catch (NoSuchMethodException | SecurityException | IllegalAccessException
 								| IllegalArgumentException | InvocationTargetException e1) {
-							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 
@@ -538,7 +529,7 @@ public class RecoveryStorageService {
 									&& !checkSettingDate(dateSetting, tableList, h_Date_Csv))) {
 									continue;
 								}
-							} catch (ParseException e1) {
+							} catch (Exception e) {
 								String target            = employeeCode;
 								String errorContent      = null;
 								GeneralDate targetDate   = null;
@@ -546,6 +537,8 @@ public class RecoveryStorageService {
 								String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464"); 
 								saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 								// #9007_1
+								LOGGER.error("SQL error rollBack transaction " + employeeId);
+								throw new RuntimeException(e);
 							}
 
 							// update recovery date for have history, save
@@ -625,17 +618,25 @@ public class RecoveryStorageService {
 
 						// insert delete data
 						if (check > 0) {
-							if (tableUse) {
-								crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE, employeeCode, dataRecoveryProcessId, tableList.get());
-							} else {
-								crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE, employeeCode, dataRecoveryProcessId, tableList.get());
+							try {
+								if (tableUse) {
+									crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid,cidCurrent, DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE, employeeCode,
+											dataRecoveryProcessId, tableList.get());
+								} else {
+									crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE, employeeCode,
+											dataRecoveryProcessId, tableList.get());
+								}
+							} catch (Exception e) {
+								String target = employeeCode;
+								String errorContent = e.getMessage();
+								GeneralDate targetDate = GeneralDate.today();
+								String contentSql = e.getLocalizedMessage();
+								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " "+ tableList.get().getTableJapaneseName();
+								saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
+								LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
+								throw new RuntimeException(e);
 							}
 						}
-						long endTime = System.nanoTime();
-						long duration = (endTime - startTime) / 1000000; // ms;
-						System.out.println("========= Time Retore " + duration);
 					}
 				}, 1, employeeId);
 
@@ -650,8 +651,6 @@ public class RecoveryStorageService {
 
 					System.out.println("============= list record size " + records.size());
 					if (!records.isEmpty()) {
-
-						long startTime = System.nanoTime();
 
 						StringBuilder DELETE_INSERT_TO_TABLE = new StringBuilder("");
 						StringBuilder INSERT_TO_TABLE = new StringBuilder("");
@@ -680,7 +679,6 @@ public class RecoveryStorageService {
 							namePhysicalCid = findNamePhysicalCid(tableList);
 						} catch (NoSuchMethodException | SecurityException | IllegalAccessException
 								| IllegalArgumentException | InvocationTargetException e1) {
-							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 
@@ -723,7 +721,7 @@ public class RecoveryStorageService {
 										&& !checkSettingDate(dateSetting, tableList, h_Date_Csv))) {
 											continue;
 									}
-								} catch (ParseException e1) {
+								} catch (Exception e) {
 									String target            = null;
 									String errorContent      = null;
 									GeneralDate targetDate   = null;
@@ -731,6 +729,7 @@ public class RecoveryStorageService {
 									String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464"); 
 									saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 									// #9007_1
+									throw new RuntimeException(e);
 								}
 
 								// update recovery date for have history, save
@@ -813,22 +812,28 @@ public class RecoveryStorageService {
 
 						// insert delete data
 						if (check > 0) {
-							if (tableUse) {
-								crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE ,null,dataRecoveryProcessId,tableList.get() );
-							} else {
-								crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,
-										DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE,null,dataRecoveryProcessId,tableList.get());
+							try {
+								if (tableUse) {
+									crudRowTransaction(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid,cidCurrent, DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE, null,
+													   dataRecoveryProcessId, tableList.get());
+								} else {
+									crudRow(listCount, listFiledWhere, TABLE_NAME, namePhysicalCid, cidCurrent,DELETE_INSERT_TO_TABLE, INSERT_TO_TABLE, null, dataRecoveryProcessId,
+											tableList.get());
+								}
+							} catch (Exception e) {
+								String target = employeeCode;
+								String errorContent = e.getMessage();
+								GeneralDate targetDate = GeneralDate.today();
+								String contentSql = e.getLocalizedMessage();
+								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " " + tableList.get().getTableJapaneseName();
+								saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
+								LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
+								throw new RuntimeException(e);
 							}
 						}
-						long endTime = System.nanoTime();
-						long duration = (endTime - startTime) / 1000000; // ms;
-						System.out.println("========= Time Retore " + duration);
 					}
 				};
-
 				reader.readChunk(csvResult, null, null);
-
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -936,6 +941,7 @@ public class RecoveryStorageService {
 					// #9010_1
 					
 					LOGGER.info("Delete data of employee have history error");
+					throw new Exception(SQL_EXCEPTION);
 				}
 			}
 
@@ -954,6 +960,8 @@ public class RecoveryStorageService {
 				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 				// #9010_2
 				// DELETE/INSERT error
+				throw new Exception(SQL_EXCEPTION);
+
 			}
 		}
 		return condition;
@@ -963,7 +971,7 @@ public class RecoveryStorageService {
 		List<String> data = performDataRecoveryRepository.getTypeColumnNotNull(TABLE_NAME);
 		return data;
 	}
-
+	
 	public void crudRow(List<Integer> listCount, List<Map<String, String>> lsiFiledWhere, String TABLE_NAME,
 			String namePhysicalCid, String cidCurrent, StringBuilder deleteInsertToTable, StringBuilder insertToTable,
 			String employeeCode, String dataRecoveryProcessId, TableList tableList) {
@@ -981,22 +989,23 @@ public class RecoveryStorageService {
 				// truong hop ban ghi do van con ton tai trong database : thi
 				// xoa di va insert lai
 				performDataRecoveryRepository.deleteDataExitTableByVkey(listFiledWhereToDelAndInsert, TABLE_NAME,
-						namePhysicalCid, cidCurrent);
+						namePhysicalCid, cidCurrent, employeeCode, dataRecoveryProcessId);
 
-				performDataRecoveryRepository.insertDataTable(deleteInsertToTable);
+				performDataRecoveryRepository.insertDataTable(deleteInsertToTable, employeeCode, dataRecoveryProcessId);
 			}
 			if (listFiledWhereToInsert.size() > 0) {
 				// truong hop ban ghi do bi xoa di roi : thi chỉ cần insert vào thôi.
-				performDataRecoveryRepository.insertDataTable(insertToTable);
+				performDataRecoveryRepository.insertDataTable(insertToTable, employeeCode, dataRecoveryProcessId);
 			}
 		} catch (Exception e) {
 			String target = employeeCode;
 			String errorContent = e.getMessage();
 			GeneralDate targetDate = GeneralDate.today();
 			String contentSql = e.getLocalizedMessage();
-			String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " "+ tableList.getTableJapaneseName();
+			String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465");
 			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-			LOGGER.info("Error delete data for table " + TABLE_NAME);
+			LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
+			throw e;
 		}
 	}
 
@@ -1019,11 +1028,11 @@ public class RecoveryStorageService {
 				performDataRecoveryRepository.deleteTransactionDataExitTableByVkey(listFiledWhereToDelAndInsert,
 						TABLE_NAME, namePhysicalCid, cidCurrent, employeeCode, dataRecoveryProcessId);
 
-				performDataRecoveryRepository.insertTransactionDataTable(deleteInsertToTable);
+				performDataRecoveryRepository.insertTransactionDataTable(deleteInsertToTable, employeeCode, dataRecoveryProcessId);
 			}
 			if (listFiledWhereToInsert.size() > 0) {
 
-				performDataRecoveryRepository.insertTransactionDataTable(insertToTable);
+				performDataRecoveryRepository.insertTransactionDataTable(insertToTable, employeeCode, dataRecoveryProcessId);
 			}
 
 		} catch (Exception e) {
@@ -1031,9 +1040,9 @@ public class RecoveryStorageService {
 			String errorContent = e.getMessage();
 			GeneralDate targetDate = GeneralDate.today();
 			String contentSql = e.getLocalizedMessage();
-			String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " "+ tableList.getTableJapaneseName();
+			String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465");
 			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-			LOGGER.info("Error delete data for table " + TABLE_NAME);
+			LOGGER.info("Error delete  or insert data for table " + TABLE_NAME);
 			throw e;
 		}
 	}
@@ -1066,7 +1075,7 @@ public class RecoveryStorageService {
 	@SuppressWarnings("unchecked")
 	public void deleteDataEmpTableHistory(Optional<TableList> tableList, Boolean tableNotUse, String employeeId,
 			String dataRecoveryProcessId, String employeeCode) throws NoSuchMethodException, SecurityException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException {
+			IllegalArgumentException, InvocationTargetException, Exception {
 		if (!tableList.isPresent()) {
 			return;
 		}
@@ -1109,13 +1118,15 @@ public class RecoveryStorageService {
 			String processingContent = "履歴データ削除  " +TextResource.localize("CMF004_462"); 
 			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 			// #9006
+			LOGGER.error("SQL error rollBack transaction");
+			throw new Exception(SQL_EXCEPTION);
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	public void deleteDataTableHistory(Optional<TableList> tableList, Boolean tableNotUse, String employeeId,
 			String dataRecoveryProcessId) throws NoSuchMethodException, SecurityException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException {
+			IllegalArgumentException, InvocationTargetException, Exception {
 		if (!tableList.isPresent()) {
 			return;
 		}
@@ -1158,6 +1169,8 @@ public class RecoveryStorageService {
 			String processingContent = "履歴データ削除  " +TextResource.localize("CMF004_462") + " " + tableList.get().getTableJapaneseName(); 
 			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 			// #9011
+			LOGGER.error("SQL error rollBack transaction");
+			throw new Exception(SQL_EXCEPTION);
 		}
 	}
 
