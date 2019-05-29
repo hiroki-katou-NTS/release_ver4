@@ -12,12 +12,12 @@ import nts.arc.time.GeneralDate;
 @Getter
 public class AgentInfoOutput {
 	/**
-	 * 承認者社員ID
+	 * 承認者社員ID / 代行者社員ID
 	 */
 	private String approverID;
 	
 	/**
-	 * 代行者社員ID
+	 * 代行依頼者
 	 */
 	private String agentID;
 	
