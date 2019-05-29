@@ -72,7 +72,8 @@ public class RegisterIdentityConfirmDay {
 		param.getSelfConfirmDay().forEach(data -> {
 			if (canRegist == SelfConfirmError.CAN_CONFIRM_WHEN_ERROR) {
 				if (data.getValue()) {
-					identificationRepository.insert(new Identification(companyId, employeeId, data.getDate(), processingYmd));
+					Optional<Identification> indenOpt = identificationRepository.findByCode(employeeId, data.getDate());
+					if(!indenOpt.isPresent()) identificationRepository.insert(new Identification(companyId, employeeId, data.getDate(), processingYmd));
 				} else {
 					identificationRepository.remove(companyId, employeeId, data.getDate());
 				}
@@ -90,7 +91,8 @@ public class RegisterIdentityConfirmDay {
 											.collect(Collectors.toList()));
 					if (errorAlarmWorkRecords.isEmpty()) {
 						if (data.getValue()) {
-							identificationRepository.insert(new Identification(companyId, employeeId, data.getDate(), processingYmd));
+							Optional<Identification> indenOpt = identificationRepository.findByCode(employeeId, data.getDate());
+							if(!indenOpt.isPresent()) identificationRepository.insert(new Identification(companyId, employeeId, data.getDate(), processingYmd));
 						} else {
 							identificationRepository.remove(companyId, employeeId, data.getDate());
 						}
@@ -99,7 +101,8 @@ public class RegisterIdentityConfirmDay {
 					}
 				}else{
 					if (data.getValue()) {
-						identificationRepository.insert(new Identification(companyId, employeeId, data.getDate(), processingYmd));
+						Optional<Identification> indenOpt = identificationRepository.findByCode(employeeId, data.getDate());
+						if(!indenOpt.isPresent()) identificationRepository.insert(new Identification(companyId, employeeId, data.getDate(), processingYmd));
 					} else {
 						identificationRepository.remove(companyId, employeeId, data.getDate());
 					}
