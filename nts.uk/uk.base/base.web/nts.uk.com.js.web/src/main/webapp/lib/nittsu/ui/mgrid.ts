@@ -3943,7 +3943,7 @@ module nts.uk.ui.mgrid {
             
             let osht = function(inoth) {
                 _.forEach(_.keys(_mafollicle[SheetDef]), s => {
-                    if (s === _currentSheet || !some(_mafollicle[SheetDef][s].columns)) return;
+                    if (s === _currentSheet || (!some(_mafollicle[SheetDef][s].columns) && !_.find(_fixedColumns, fc => fc.key === coord.columnKey))) return;
                     let t, formatted, disFormat, maf = _mafollicle[_currentPage][s];
                     if (maf && maf.desc) {
                         t = transe(s, maf.zeroHidden, maf.dirties, maf.desc);

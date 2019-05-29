@@ -257,4 +257,6 @@ public interface SyWorkplacePub {
 	 * @return
 	 */
 	List<String> getLstWorkplaceIdBySidAndPeriod(String sid, DatePeriod period);
+	// RequestList324 ver2 CCG007を対応する為
+	List<WorkPlaceInfoExport> findWkpByWkpIdRQ324Ver2(String companyId, GeneralDate baseDate, List<String> wkpIds);
 }

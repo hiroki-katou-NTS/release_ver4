@@ -193,6 +193,9 @@ public class DPLoadRowProcessor {
 		result.setDomainOld(param.getDailys().stream().map(x ->{
 			return param.getLstSidDateDomainError().contains(Pair.of(x.getEmployeeId(), x.getDate())) ? mapDtoChange.getOrDefault(Pair.of(x.getEmployeeId(), x.getDate()), x) : x;
 		}).collect(Collectors.toList()));
+		result.setDomainOldForLog(param.getDailys().stream().map(x ->{
+			return mapDtoChange.getOrDefault(Pair.of(x.getEmployeeId(), x.getDate()), x).clone();
+		}).collect(Collectors.toList()));
 		
 		Map<Pair<String, GeneralDate>, DailyRecordDto> mapDtoOld = param.getDailys().stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x));
 		result.setLstCellStateCalc(itemCalcScreen(mapDtoChange, mapDtoOld, param.getLstData(), param.getLstAttendanceItem().stream().collect(Collectors.toMap(x -> x.getId(), x -> x)), param.getCellEdits()).getLeft());

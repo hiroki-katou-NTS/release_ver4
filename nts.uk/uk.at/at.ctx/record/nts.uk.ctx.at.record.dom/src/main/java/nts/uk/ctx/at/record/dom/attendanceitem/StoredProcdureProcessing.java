@@ -53,7 +53,12 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.ctx.at.shared.dom.workrule.outsideworktime.overtime.overtimeframe.OverTimeFrameNo;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
+import nts.uk.ctx.at.shared.dom.worktime.predset.PredetemineTimeSetting;
+import nts.uk.ctx.at.shared.dom.worktime.predset.PredetemineTimeSettingRepository;
+import nts.uk.ctx.at.shared.dom.worktime.predset.TimezoneUse;
 import nts.uk.ctx.at.shared.dom.worktime.predset.WorkTimeNightShift;
+import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSetting;
+import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktype.DailyWork;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeClassification;
@@ -61,6 +66,7 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 import nts.uk.shr.com.context.AppContexts;
+import nts.uk.shr.com.time.TimeWithDayAttr;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 
 @Stateless
@@ -78,13 +84,21 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	private WorkTypeRepository workTypeRepo;
 	
 	@Inject
+	private PredetemineTimeSettingRepository predetermineRepo;
+	
+	@Inject
 	private AttendanceTimeOfMonthlyRepository attendanceTimeOfMonthly;
+	
+	@Inject
+	private WorkTimeSettingRepository workTimeRepository;
 	
 	@Inject
 	private AnyItemValueOfDailyRepo dailyOptionalItem;
 	
 	@Inject
 	private AnyItemOfMonthlyRepository monthlyOptionalItem;
+	
+	/*所定時間帯再取得*/
 	
 	private final BigDecimal COUNT_ON = BigDecimal.ONE;
 	private final BigDecimal COUNT_OFF = BigDecimal.ZERO;
@@ -250,6 +264,33 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 				processOptionalItem(() -> (timePreFlex <= 0 && timeFlex > 0) || 
 								checkOnPair(overTime, preOver, (ot, pot) -> ot > 0 && pot <= 0),
 						optionalItem, COUNT_ON, COUNT_OFF, 23);
+				
+				/** 任意項目29：  */
+				processOptionalItem(() -> true , optionalItem, 0, 0, 29);
+				if(d.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
+					Optional<WorkTimeSetting>  workTime = workTimeRepository.findByCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
+					if(workTime.isPresent()) {
+						
+						if(dailyWork.isWeekDayAttendance() && !(workTime.get().getWorkTimeDivision().getWorkTimeDailyAtr().isFlex())) {
+							//所定の開始時刻
+							TimeWithDayAttr startOclock = new TimeWithDayAttr(0);
+							Optional<PredetemineTimeSetting> predSet = predetermineRepo.findByWorkTimeCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
+							if(predSet.isPresent()) {
+								Optional<TimezoneUse> firstTimeZone =  predSet.get().getPrescribedTimezoneSetting().getLstTimezone().stream().filter(tc -> tc.getWorkNo() == 1).findFirst();
+								if(firstTimeZone.isPresent()) {
+									startOclock = firstTimeZone.get().getStart();
+								}
+							}
+							//出勤時刻
+							if(startTime != null) {
+								TimeWithDayAttr attendanceOclock = new TimeWithDayAttr(startTime.intValue());
+								
+								TimeWithDayAttr calcTime = startOclock.backByMinutes(attendanceOclock.valueAsMinutes());
+								processOptionalItem(() -> calcTime.valueAsMinutes() > 0, optionalItem, calcTime.valueAsMinutes(), 0, 29);								
+							}
+						}
+					}
+				}
 				
 				/** 任意項目27: 残業あり かつ 事前残業なし　が条件 */
 				processOptionalItem(() -> time > 0, optionalItem, COUNT_ON, COUNT_OFF, 27);

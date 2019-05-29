@@ -37,7 +37,7 @@ public class GwSyWorkplaceAdapterImpl implements GwSyWorkplaceAdapter{
 		List<String> listWkpId = lstWkp.stream().map(item->{
 			return item.getWorkplaceId();
 		}).collect(Collectors.toList());
-		List<WorkPlaceInfoExport> lstInfoExport = this.syWorkplacePub.findWkpByWkpId(companyId,baseDate,listWkpId);
+		List<WorkPlaceInfoExport> lstInfoExport = this.syWorkplacePub.findWkpByWkpIdRQ324Ver2(companyId,baseDate,listWkpId);
 		if (!lstInfoExport.isEmpty()) {
 			return lstInfoExport.stream().map(wkp -> {
 				return new SWkpHistImport(wkp.getWorkplaceId(), wkp.getWorkPlaceName());

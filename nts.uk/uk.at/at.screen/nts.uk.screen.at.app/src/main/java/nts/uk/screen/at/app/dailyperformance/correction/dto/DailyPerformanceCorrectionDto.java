@@ -90,6 +90,8 @@ public class DailyPerformanceCorrectionDto {
 	
 	private List<DailyRecordDto> domainOld;
 	
+	private List<DailyRecordDto> domainOldForLog;
+	
 	private boolean showTighProcess;
 	
 	private IndentityMonthResult indentityMonthResult;
