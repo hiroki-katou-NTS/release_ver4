@@ -265,8 +265,8 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 								checkOnPair(overTime, preOver, (ot, pot) -> ot > 0 && pot <= 0),
 						optionalItem, COUNT_ON, COUNT_OFF, 23);
 				
-				/** 任意項目26：  */
-				processOptionalItem(() -> true , optionalItem, 0, 0, 26);
+				/** 任意項目29：  */
+				processOptionalItem(() -> true , optionalItem, 0, 0, 29);
 				if(d.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
 					Optional<WorkTimeSetting>  workTime = workTimeRepository.findByCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
 					if(workTime.isPresent()) {
@@ -286,7 +286,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 								TimeWithDayAttr attendanceOclock = new TimeWithDayAttr(startTime.intValue());
 								
 								TimeWithDayAttr calcTime = startOclock.backByMinutes(attendanceOclock.valueAsMinutes());
-								processOptionalItem(() -> calcTime.valueAsMinutes() > 0, optionalItem, calcTime.valueAsMinutes(), 0, 26);								
+								processOptionalItem(() -> calcTime.valueAsMinutes() > 0, optionalItem, calcTime.valueAsMinutes(), 0, 29);								
 							}
 						}
 					}
