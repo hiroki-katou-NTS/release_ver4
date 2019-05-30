@@ -118,8 +118,9 @@ public class LogBasicInformationAllFinder {
 					
 				}
 			}
-			// Get list employee code
-			Map<String, String> mapEmployeeCodes = personEmpBasicInfoAdapter.getEmployeeCodesByEmpIds(employeeIds);
+			// Get list employee code - request list 228
+			Map<String, String> mapEmployeeCodes = personEmpBasicInfoAdapter
+					.getEmployeeCodesByEmpIds(employeeIds.stream().distinct().collect(Collectors.toList()));
 			switch (recordTypeEnum) {
 			case LOGIN:
 			List<LoginRecord> rsLoginRecord	=this.loginRecordRepository.logRecordInfor(listOperationId);
@@ -1197,7 +1198,7 @@ public class LogBasicInformationAllFinder {
 			if (dataOutPutItem.size() > 0) {
 				dataOutPutItem.stream().forEach(dataItemNo -> {
 					List<LogSetItemDetailDto> logSetItemDetails = dataItemNo.getLogSetItemDetails();
-					if (logSetItemDetails != null && !logSetItemDetails.isEmpty()) {
+					if (!CollectionUtil.isEmpty(logSetItemDetails)) {
 						logSetItemDetails.stream().forEach(datatemDetail -> {
 							if (datatemDetail.getIsUseCondFlg() == 1) {
 								listLogSetItemDetailDto.add(datatemDetail);
@@ -1232,7 +1233,6 @@ public class LogBasicInformationAllFinder {
 					if (data != null && !data.isEmpty()) {
 						logParams.setListLogBasicInfoAllDto(data);
 						List<Map<String, Object>> lstData = getDataLog(logParams);
-						System.out.println(lstData.stream().filter(c -> c == null).collect(Collectors.toList()).size());
 						logParams.setListDataExport(lstData);
 					} else {
 						throw new BusinessException("Msg_1220");
