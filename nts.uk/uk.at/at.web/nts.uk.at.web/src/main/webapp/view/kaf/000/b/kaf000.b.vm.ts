@@ -357,6 +357,19 @@ module nts.uk.at.view.kaf000.b.viewmodel {
                     screenModel.errorEmpty(values);
                 });
             });
+            // fix bug #107493
+            var content_height=20;
+            if ($("#header").length != 0) {
+                content_height += $("#header").outerHeight();//header height+ content area botton padding,top padding
+            }
+            if ($("#functions-area").length != 0) {
+                content_height += $("#functions-area").outerHeight();//top function area height
+            }
+            if ($("#functions-area-bottom").length != 0) {
+                content_height += $("#functions-area-bottom").outerHeight();//bottom function area height
+            }
+            
+            $("#contents-area").css("height", "calc(100vh - " + content_height + "px)");
 //                });
         }
         getScreenModel(listAppMeta: any,currentApp:any){
