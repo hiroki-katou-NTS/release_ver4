@@ -139,22 +139,22 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 					para.getYmd(),
 					closureData.getClosureId().value,
 					PerformanceType.DAILY);
-			if(lockStatus == LockStatus.LOCK) {
-				return false;
+			if(lockStatus == LockStatus.UNLOCK) {
+				return output;
 			}
-			//確定状態によるチェック
-			ConfirmStatusCheck chkParam = new ConfirmStatusCheck(para.getCid(), 
-					para.getSid(),
-					para.getYmd(), 
-					para.getPrePostAtr(),
-					para.getAppType(), 
-					para.isChkRecord() ? ObjectCheck.DAILY : ObjectCheck.SCHE, 
-					para.isRecordReflect(),
-					para.isScheReflect(),
-					para.isChkRecord() ? false : scheInfor.isConfirmedAtr());
-			return this.checkConfirmStatus(chkParam);
+			
 		}
-		return chkProcess;
+		//確定状態によるチェック
+		ConfirmStatusCheck chkParam = new ConfirmStatusCheck(para.getCid(), 
+				para.getSid(),
+				para.getYmd(), 
+				para.getPrePostAtr(),
+				para.getAppType(), 
+				para.isChkRecord() ? ObjectCheck.DAILY : ObjectCheck.SCHE, 
+				para.isRecordReflect(),
+				para.isScheReflect(),
+				para.isChkRecord() ? false : scheInfor.isConfirmedAtr());
+		return this.checkConfirmStatus(chkParam);
 	}
 
 	@Override
