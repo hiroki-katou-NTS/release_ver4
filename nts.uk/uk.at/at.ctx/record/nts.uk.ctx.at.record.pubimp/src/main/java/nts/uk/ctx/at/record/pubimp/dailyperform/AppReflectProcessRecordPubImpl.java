@@ -125,24 +125,24 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 				EnumAdaptor.valueOf(para.getStateReflectionReal().value, ReflectedStateRecord.class),
 				EnumAdaptor.valueOf(para.getStateReflection().value, ReflectedStateRecord.class));
 		boolean chkProcess = processCheckService.commonProcessCheck(checkPara);
-		if(chkProcess) {
-			//ドメインモデル「申請承認設定」.データが確立されている場合の承認済申請の反映のチェックをする
-			if(para.getReflectAtr() == ReflectRecordAtr.REFLECT) {
-				return output;
-			}
-			//アルゴリズム「実績ロックされているか判定する」を実行する
-			Closure closureData = closureService.getClosureDataByEmployee(para.getSid(), para.getYmd());
-			if(closureData == null) {
-				return false;
-			}
-			LockStatus lockStatus = resultLock.getDetermineActualLocked(para.getCid(),
-					para.getYmd(),
-					closureData.getClosureId().value,
-					PerformanceType.DAILY);
-			if(lockStatus == LockStatus.UNLOCK) {
-				return output;
-			}
-			
+		if(!chkProcess) {
+			return false;
+		}
+		//ドメインモデル「申請承認設定」.データが確立されている場合の承認済申請の反映のチェックをする
+		/*if(para.getReflectAtr() == ReflectRecordAtr.REFLECT) {
+			return output;
+		}*/
+		//アルゴリズム「実績ロックされているか判定する」を実行する
+		Closure closureData = closureService.getClosureDataByEmployee(para.getSid(), para.getYmd());
+		if(closureData == null) {
+			return false;
+		}
+		LockStatus lockStatus = resultLock.getDetermineActualLocked(para.getCid(),
+				para.getYmd(),
+				closureData.getClosureId().value,
+				PerformanceType.DAILY);
+		if(lockStatus == LockStatus.LOCK) {
+			return false;
 		}
 		//確定状態によるチェック
 		ConfirmStatusCheck chkParam = new ConfirmStatusCheck(para.getCid(), 
@@ -305,19 +305,16 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 			if(chkParam.isRecordReflect()) {
 				return output;
 			}
-			//対象期間内で本人確認をした日をチェックする
-			List<Identification> findByEmployeeID = identificationRepository.findByEmployeeID(chkParam.getSid(), chkParam.getAppDate(), chkParam.getAppDate());
-			if(!findByEmployeeID.isEmpty()) {
-				return false; 
-			}
 		} else {
 			//ドメインモデル「反映情報」．予定強制反映をチェックする
 			if(chkParam.isScheReflect()) {
 				return output;
 			} 
-			if(chkParam.isConfirmedAtr()) {
-				return false;
-			}
+		}
+		//対象期間内で本人確認をした日をチェックする
+		List<Identification> findByEmployeeID = identificationRepository.findByEmployeeID(chkParam.getSid(), chkParam.getAppDate(), chkParam.getAppDate());
+		if(!findByEmployeeID.isEmpty()) {
+			return false; 
 		}
 		return output;
 	}

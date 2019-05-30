@@ -75,6 +75,8 @@ public class DetailAfterApprovalImpl_New implements DetailAfterApproval_New {
 		if(allApprovalFlg.equals(Boolean.TRUE)){
 			// 実績反映状態 = 反映状態．反映待ち
 			application.getReflectionInformation().setStateReflectionReal(ReflectedState_New.WAITREFLECTION);
+			//予定反映状態 = 反映状態．反映待ち
+			application.getReflectionInformation().setStateReflection(ReflectedState_New.WAITREFLECTION);
 			applicationRepository.update(application);
 			reflectAppId = application.getAppID();
 //			if((application.getPrePostAtr().equals(PrePostAtr.PREDICT)&&
