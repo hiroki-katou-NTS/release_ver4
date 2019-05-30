@@ -17,10 +17,10 @@ public class EditStateOfDailyPerformCommandUpdateHandler extends CommandFacade<E
 	protected void handle(CommandHandlerContext<EditStateOfDailyPerformCommand> context) {
 		EditStateOfDailyPerformCommand command = context.getCommand();
 		
-		repo.delete(command.getEmployeeId(), command.getWorkDate());
-		
 		if(!command.getData().isEmpty()){
 			repo.updateByKey(command.toDomain());
+		}else {
+			//repo.delete(command.getEmployeeId(), command.getWorkDate());
 		}
 	}
 

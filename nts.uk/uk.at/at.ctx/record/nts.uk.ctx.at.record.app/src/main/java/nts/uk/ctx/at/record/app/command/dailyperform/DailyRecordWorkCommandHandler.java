@@ -71,6 +71,7 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.CalculateDailyRecordServiceCen
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CommonCompanySettingForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.ManagePerCompanySet;
+import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.monthly.erroralarm.EmployeeMonthlyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.monthly.updatedomain.UpdateAllDomainMonthService;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.IntegrationOfMonthly;
@@ -619,6 +620,11 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 	@SuppressWarnings({ "unchecked" })
 	private <T extends DailyWorkCommonCommand> void handleEditStates(boolean isUpdate, DailyRecordWorkCommand command) {
 		CommandFacade<T> handler = (CommandFacade<T>) getHandler(DAILY_EDIT_STATE_CODE, isUpdate);
+		List<ItemValue> itemValues = command.itemValues();
+		List<Integer> itemIds = itemValues.stream().map(x -> x.getItemId()).collect(Collectors.toList());
+		List<EditStateOfDailyPerformance> data = command.getEditState().getData().stream().filter(x -> itemIds.contains(x.getAttendanceItemId())).collect(Collectors.toList());
+		command.getEditState().getData().clear();
+		command.getEditState().updateDatas(data);
 		if (handler != null) {
 			handler.handle((T) command.getCommand(DAILY_EDIT_STATE_CODE));
 		}
