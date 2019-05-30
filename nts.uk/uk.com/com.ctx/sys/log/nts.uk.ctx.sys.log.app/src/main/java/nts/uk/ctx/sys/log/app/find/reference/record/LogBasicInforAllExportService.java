@@ -48,14 +48,10 @@ public class LogBasicInforAllExportService extends ExportService<LogParamsVer1> 
 
 		CollectionUtil.split(params.getListDataExport(), 10000, sub ->{
 			sub.forEach(s->{
-				if(s== null) {
-					System.out.println(s);
-				}else {
+				if(s != null) {
 					csv.writeALine(s);
 				}
-				
 			});
-			
 		});
 		csv.destroy();
 	}

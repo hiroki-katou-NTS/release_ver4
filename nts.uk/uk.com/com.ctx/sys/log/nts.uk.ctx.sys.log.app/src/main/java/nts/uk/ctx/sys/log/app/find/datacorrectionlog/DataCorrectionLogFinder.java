@@ -65,8 +65,9 @@ public class DataCorrectionLogFinder {
 		if (listCorrectionLog.isEmpty())
 			throw new BusinessException("Msg_37");
 
-		// lay employee code de sap xep
-		Map<String, String> empIdCode = personEmpInfo.getEmployeeCodesByEmpIds(params.getListEmployeeId());
+		// lay employee code de sap xep - request list 228
+		Map<String, String> empIdCode = personEmpInfo
+				.getEmployeeCodesByEmpIds(params.getListEmployeeId().stream().distinct().collect(Collectors.toList()));
 		
 		// fix performance
 		List<String> operationIds = listCorrectionLog.stream().map(i -> i.getOperationId()).collect(Collectors.toList());
