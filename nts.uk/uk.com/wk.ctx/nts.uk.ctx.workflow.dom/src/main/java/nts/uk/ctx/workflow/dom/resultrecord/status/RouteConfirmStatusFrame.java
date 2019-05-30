@@ -82,7 +82,7 @@ public class RouteConfirmStatusFrame {
 	 * @return
 	 */
 	public boolean hasConfirmedByRepresenter(String representerId) {
-		return isRepresent && hasApprovedBy(representerId);
+		return isRepresent && approvedEmployeeId.get().equals(representerId);
 	}
 	
 	public boolean hasApprovedByOther(String approverId) {
