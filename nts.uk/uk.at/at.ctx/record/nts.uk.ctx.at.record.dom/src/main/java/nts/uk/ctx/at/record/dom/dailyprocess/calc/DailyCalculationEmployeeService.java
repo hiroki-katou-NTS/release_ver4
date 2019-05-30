@@ -30,10 +30,10 @@ public interface DailyCalculationEmployeeService {
 	 * @param empCalAndSumExecLogID 就業計算と集計実行ログID
 	 * @param executionType 実行種別　（通常、再実行）
 	 * @param companyCommonSetting 
-	 * @return 
+	 * @return 排他エラーが発生したフラグ
 	 */
 	@SuppressWarnings("rawtypes")
-	void calculate(List<String> employeeId,DatePeriod datePeriod, Consumer<ProcessState> counter, ExecutionType reCalcAtr, String empCalAndSumExecLogID);
+	List<Boolean> calculate(List<String> employeeId,DatePeriod datePeriod, Consumer<ProcessState> counter, ExecutionType reCalcAtr, String empCalAndSumExecLogID);
 	
 	/**
 	 * 社員の日別実績を計算(承認一覧から呼び出す用)
