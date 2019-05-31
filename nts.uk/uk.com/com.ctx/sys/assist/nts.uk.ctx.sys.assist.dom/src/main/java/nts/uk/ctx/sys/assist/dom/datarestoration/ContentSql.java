@@ -4,11 +4,17 @@ import nts.arc.primitive.StringPrimitiveValue;
 import nts.arc.primitive.constraint.StringMaxLength;
 
 @StringMaxLength(2000)
-public class RecoveryErrDescript extends StringPrimitiveValue<RecoveryErrDescript> {
-
+public class ContentSql extends StringPrimitiveValue<ContentSql> {
+	
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
-
-	public RecoveryErrDescript(String rawValue) {
+	
+	/**
+	 * Instantiates a new error content.
+	 *
+	 * @param rawValue the raw value
+	 */
+	public ContentSql(String rawValue) {
 		super(rawValue);
 	}
 }
