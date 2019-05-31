@@ -83,7 +83,7 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 			if(isPre) {
 				daily = scheWork.updateScheStartEndTimeHoliday(timeData, daily);
 			}
-			workRepository.updateByKeyFlush(daily.getWorkInformation());
+			workRepository.updateByKey(daily.getWorkInformation());
 			//開始時刻と終了時刻の反映
 			if(holidayWorkPara.getHolidayWorkPara().getStartTime() != null
 					&& holidayWorkPara.getHolidayWorkPara().getEndTime() != null
@@ -126,7 +126,7 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 			AttendanceTimeOfDailyPerformance attendanceTime = AttendanceTimeOfDailyPerformance.allZeroValue(employeeId, baseDate);
 			daily.setAttendanceTimeOfDailyPerformance(Optional.of(attendanceTime));
 			timeAndAnyItemUpService.addAndUpdate(daily);
-			dailyTransaction.updated(employeeId, baseDate);
+			//dailyTransaction.updated(employeeId, baseDate);
 		}				
 		return daily;
 	}

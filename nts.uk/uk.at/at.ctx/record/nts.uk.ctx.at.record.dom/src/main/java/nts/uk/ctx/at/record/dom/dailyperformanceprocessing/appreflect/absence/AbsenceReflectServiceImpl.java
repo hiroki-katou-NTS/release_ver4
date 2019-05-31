@@ -7,11 +7,20 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.eclipse.persistence.exceptions.OptimisticLockException;
+
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.workchange.WorkChangeCommonReflectPara;
+import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageContent;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfo;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfoRepository;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageResource;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionContent;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
@@ -25,6 +34,7 @@ import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.ctx.at.shared.dom.worktype.algorithm.JudgmentWorkTypeService;
 import nts.uk.ctx.at.shared.dom.worktype.service.WorkTypeIsClosedService;
+import nts.uk.shr.com.i18n.TextResource;
 @Stateless
 public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	
@@ -42,6 +52,8 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	private WorkTypeIsClosedService workTypeRepo;
 	@Inject
 	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDailyRepos;
+	@Inject
+	private ErrMessageInfoRepository errMessInfo;
 	@Override
 	public boolean absenceReflect(WorkChangeCommonReflectPara param, boolean isPre) {
 		try {
@@ -79,7 +91,18 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 				commonService.calculateOfAppReflect(null, absencePara.getEmployeeId(), loopDate, false);
 			}
 			return true;
-		} catch (Exception e) {
+		} catch (Exception ex) {
+			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
+			if(!isError) {
+				throw ex;
+			}
+			ErrMessageInfo errMes = new ErrMessageInfo(param.getCommon().getEmployeeId(), 
+					"",
+					new ErrMessageResource("024"),
+					EnumAdaptor.valueOf(1, ExecutionContent.class),
+					param.getCommon().getBaseDate(),
+					new ErrMessageContent(TextResource.localize("Msg_1541")));
+			this.errMessInfo.add(errMes);
 			return false;
 		}
 	}
