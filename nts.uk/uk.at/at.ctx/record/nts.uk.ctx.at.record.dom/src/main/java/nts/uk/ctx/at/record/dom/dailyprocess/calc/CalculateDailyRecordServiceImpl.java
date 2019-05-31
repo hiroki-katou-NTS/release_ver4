@@ -1180,6 +1180,10 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				}
 			}
 		}
+		else {
+			schePred = Optional.of(PredetermineTimeSetForCalc.convertMastarToCalc(predetemineTimeSetRepository.findByWorkTimeCode(companyId, scheduleReGetClass.getIntegrationOfDaily().getWorkInformation().getScheduleInfo()
+										.getWorkTimeCode().v()).get()));
+		}
 
 		List<PersonnelCostSettingImport> personalSetting = getPersonalSetting(companyId, targetDate,
 				companyCommonSetting);
@@ -1325,8 +1329,14 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		IntegrationOfDaily afterScheduleIntegration = SchedulePerformance
 				.createScheduleTimeSheet(integrationOfDailyForSchedule);
 		// 予定時間2 ここで、「時間帯を作成」を実施 Returnとして１日の計算範囲を受け取る
-		return this.createRecord(afterScheduleIntegration, TimeSheetAtr.SCHEDULE, companyCommonSetting,
-				personCommonSetting, yesterDayInfo, tomorrowDayInfo);
+		val returnResult = this.createRecord(afterScheduleIntegration, TimeSheetAtr.SCHEDULE, companyCommonSetting,
+												personCommonSetting, yesterDayInfo, tomorrowDayInfo);
+		if(!returnResult.getWorkType().isPresent()) {
+			if(returnResult.getIntegrationOfDaily().getWorkInformation().getScheduleInfo().getWorkTypeCode() != null)
+				returnResult.setWorkType(this.workTypeRepository.findByPK(AppContexts.user().companyId(), returnResult.getIntegrationOfDaily().getWorkInformation().getScheduleInfo().getWorkTypeCode().v()));
+		}
+
+		return returnResult; 
 	}
 
 	/**
