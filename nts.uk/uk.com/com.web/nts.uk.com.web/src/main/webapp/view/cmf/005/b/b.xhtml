@@ -113,13 +113,13 @@
 									<div tabindex="10" class ="validate_form" data-bind="ntsCheckBox: { checked: isExistCompressPasswordFlg, enable: true, text: '#{i18n.getText('CMF005_38')}' }" />
 								</td>
 								<td>
-									<input id="B8_2_2" class="validate_form passwordInput" tabindex="11" data-bind="ntsTextEditor: {name: '#[CMF005_37]', value: passwordForCompressFile, required: isExistCompressPasswordFlg, constraint:passwordConstraint, enable:isExistCompressPasswordFlg, option: {width: '120px',textmode: 'password'}}" />
+									<input id="B8_2_2" class="validate_form passwordInput" tabindex="11" data-bind="ntsTextEditor: {name: '#[CMF005_37]', value: passwordForCompressFile, required: isDelete, constraint:passwordConstraint, enable:isExistCompressPasswordFlg, option: {width: '120px',textmode: 'password'}}" />
 								</td>
 							</tr>
 							<tr>
 								<td><div id="B8_3_1">#{i18n.getText('CMF005_138')}</div></td>
 								<td>
-									<input id="B8_3_2" class="validate_form passwordInput" tabindex="12" data-bind="ntsTextEditor: {name: '#[CMF005_139]', value: confirmPasswordForCompressFile, required: isExistCompressPasswordFlg, constraint: passwordConstraint, enable:isExistCompressPasswordFlg, option: {width: '120px',textmode: 'password'}}" />
+									<input id="B8_3_2" class="validate_form passwordInput" tabindex="12" data-bind="ntsTextEditor: {name: '#[CMF005_139]', value: confirmPasswordForCompressFile, required: isDelete, constraint: passwordConstraint, enable:isExistCompressPasswordFlg, option: {width: '120px',textmode: 'password'}}" />
 								</td>
 							</tr>
 						</table>
