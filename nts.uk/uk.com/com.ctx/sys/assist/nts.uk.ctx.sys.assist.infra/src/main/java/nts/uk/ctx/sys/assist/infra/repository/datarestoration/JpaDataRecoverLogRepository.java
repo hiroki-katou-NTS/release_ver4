@@ -46,7 +46,7 @@ public class JpaDataRecoverLogRepository extends JpaRepository implements DataRe
 	@Override
 	public void add(DataRecoveryLog data) {
 		this.commandProxy().insert(SspmtDataRecoverLog.toEntity(data));
-
+		this.getEntityManager().flush();
 	}
 	
 }

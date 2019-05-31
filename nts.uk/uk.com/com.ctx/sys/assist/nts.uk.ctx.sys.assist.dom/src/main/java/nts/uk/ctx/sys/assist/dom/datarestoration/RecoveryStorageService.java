@@ -68,10 +68,10 @@ public class RecoveryStorageService {
 	@Inject
 	private DataRecoveryResultRepository dataRecoveryResultRepository;
 
-	@Inject
-	private DataRecoveryLogRepository repoDataRecoveryLog;
-
 	private RecoveryStorageService self;
+	
+	@Inject
+	private SaveLogDataRecoverServices saveLogDataRecoverServices; 
 
 	@PostConstruct
 	public void init() {
@@ -153,7 +153,7 @@ public class RecoveryStorageService {
 		int numberCateSucess = 0;
 
 		// ログ連番をZeroクリア
-		saveStartDataRecoverLog(dataRecoveryProcessId);
+		saveLogDataRecoverServices.saveStartDataRecoverLog(dataRecoveryProcessId);
 
 		// 処理対象のカテゴリを処理する
 		for (Category category : listCategory) {
@@ -192,13 +192,6 @@ public class RecoveryStorageService {
 		performDataRecoveryRepository.deleteTableListByDataStorageProcessingId(dataRecoveryProcessId);
 		performDataRecoveryRepository.remove(dataRecoveryProcessId);
 
-	}
-
-	private void saveStartDataRecoverLog(String dataRecoveryProcessId) {
-		GeneralDate logTime = GeneralDate.today();
-		DataRecoveryLog resultLogDomain = DataRecoveryLog.createFromJavatype(dataRecoveryProcessId, null, null, logTime,
-				0, null, null);
-		repoDataRecoveryLog.add(resultLogDomain);
 	}
 
 	public DataRecoveryOperatingCondition exCurrentCategory(TableListByCategory tableListByCategory,
@@ -383,7 +376,7 @@ public class RecoveryStorageService {
 				GeneralDate targetDate   = GeneralDate.today();
 				String contentSql        = null;
 				String processingContent = "日付処理の設定  "+TextResource.localize("CMF004_463") + " "+tableList.get().getTableJapaneseName();
-				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+				saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 				// #9005_2
 				LOGGER.error("Setting error rollBack transaction");
 				throw new Exception(SETTING_EXCEPTION);
@@ -394,16 +387,15 @@ public class RecoveryStorageService {
 				try {
 					deleteDataEmpTableHistory(tableList, true, employeeId, dataRecoveryProcessId, employeeCode);
 				} catch (Exception err) {
-					// GHI LOG
 					String target			 = employeeCode;
 					String errorContent		 = err.getMessage();
 					GeneralDate targetDate   = GeneralDate.today();
-					String contentSql        = err.getLocalizedMessage();
+					String contentSql        = err.getMessage();
 					String processingContent = "履歴データ削除";
-					saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+					saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 					// #9005_1
-					LOGGER.error("SQL error rollBack transaction");
-					throw new Exception(SQL_EXCEPTION);
+					LOGGER.error("Setting error rollBack transaction");
+					throw new Exception(SETTING_EXCEPTION);
 				}
 			}
 
@@ -416,13 +408,12 @@ public class RecoveryStorageService {
 				String target            = employeeCode;
 				String errorContent      = e.getMessage();
 				GeneralDate targetDate   = GeneralDate.today();
-				String contentSql        = e.getLocalizedMessage();
+				String contentSql        = e.getMessage();
 				String processingContent = "データベース復旧処理  " + tableList.get().getTableJapaneseName();
-				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+				saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 				// #9005_3
-				// DELETE/INSERT error
-				LOGGER.error("SQL error rollBack transaction " + employeeId);
-				throw new Exception(SQL_EXCEPTION);
+				LOGGER.error("Setting error rollBack transaction");
+				throw new Exception(SETTING_EXCEPTION);
 			}
 
 			// Setting error
@@ -534,8 +525,8 @@ public class RecoveryStorageService {
 								String errorContent      = null;
 								GeneralDate targetDate   = null;
 								String contentSql        = null;
-								String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464"); 
-								saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+								String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464") + tableList.get().getTableJapaneseName(); 
+								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 								// #9007_1
 								LOGGER.error("SQL error rollBack transaction " + employeeId);
 								throw new RuntimeException(e);
@@ -630,9 +621,9 @@ public class RecoveryStorageService {
 								String target = employeeCode;
 								String errorContent = e.getMessage();
 								GeneralDate targetDate = GeneralDate.today();
-								String contentSql = e.getLocalizedMessage();
+								String contentSql = e.getMessage();
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " "+ tableList.get().getTableJapaneseName();
-								saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
+								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
 								LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
 								throw new RuntimeException(e);
 							}
@@ -726,8 +717,8 @@ public class RecoveryStorageService {
 									String errorContent      = null;
 									GeneralDate targetDate   = null;
 									String contentSql        = null;
-									String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464"); 
-									saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+									String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464") + tableList.get().getTableJapaneseName(); 
+									saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 									// #9007_1
 									throw new RuntimeException(e);
 								}
@@ -824,9 +815,9 @@ public class RecoveryStorageService {
 								String target = employeeCode;
 								String errorContent = e.getMessage();
 								GeneralDate targetDate = GeneralDate.today();
-								String contentSql = e.getLocalizedMessage();
+								String contentSql = e.getMessage();
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " " + tableList.get().getTableJapaneseName();
-								saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
+								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
 								LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
 								throw new RuntimeException(e);
 							}
@@ -935,11 +926,10 @@ public class RecoveryStorageService {
 					String target            = null;
 					String errorContent      = e.getMessage();
 					GeneralDate targetDate   = null;
-					String contentSql        = e.getLocalizedMessage();
+					String contentSql        = e.getMessage();
 					String processingContent = "履歴データ削除 " +TextResource.localize("CMF004_462") + " " + tableList.get().getTableJapaneseName(); 
-					saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+					saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 					// #9010_1
-					
 					LOGGER.info("Delete data of employee have history error");
 					throw new Exception(SQL_EXCEPTION);
 				}
@@ -948,6 +938,7 @@ public class RecoveryStorageService {
 			Optional<PerformDataRecovery> performDataRecovery = performDataRecoveryRepository
 					.getPerformDatRecoverById(dataRecoveryProcessId);
 			try {
+				//int x = 10/0;
 				condition = this.crudDataByTable(dataRecoveryTable, null, dataRecoveryProcessId, tableList,
 						performDataRecovery, dateSetting, false, csvByteReadMaper, null);
 			} catch (Exception e) {
@@ -955,9 +946,9 @@ public class RecoveryStorageService {
 				String target            = null;
 				String errorContent      = e.getMessage();
 				GeneralDate targetDate   = GeneralDate.today();
-				String contentSql        = e.getLocalizedMessage();
-				String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465") + " " + tableList.get().getTableJapaneseName();
-				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+				String contentSql        = e.getMessage();
+				String processingContent = "データベース復旧処理  " +TextResource.localize("CMF004_465") + " " + tableList.get().getTableJapaneseName();
+				saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 				// #9010_2
 				// DELETE/INSERT error
 				throw new Exception(SQL_EXCEPTION);
@@ -1001,9 +992,9 @@ public class RecoveryStorageService {
 			String target = employeeCode;
 			String errorContent = e.getMessage();
 			GeneralDate targetDate = GeneralDate.today();
-			String contentSql = e.getLocalizedMessage();
+			String contentSql = e.getMessage();
 			String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465");
-			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
+			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
 			LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
 			throw e;
 		}
@@ -1039,9 +1030,9 @@ public class RecoveryStorageService {
 			String target = employeeCode;
 			String errorContent = e.getMessage();
 			GeneralDate targetDate = GeneralDate.today();
-			String contentSql = e.getLocalizedMessage();
+			String contentSql = e.getMessage();
 			String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465");
-			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
+			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
 			LOGGER.info("Error delete  or insert data for table " + TABLE_NAME);
 			throw e;
 		}
@@ -1104,22 +1095,19 @@ public class RecoveryStorageService {
 		String cidCurrent = AppContexts.user().companyId();
 		try {
 			if (tableNotUse) {
-				performDataRecoveryRepository.deleteTransactionEmployeeHis(tableList.get(), whereCid[0], whereSid[0],
-						cidCurrent, employeeId);
+				performDataRecoveryRepository.deleteTransactionEmployeeHis(tableList.get(), whereCid[0], whereSid[0],cidCurrent, employeeId);
 			} else {
-				performDataRecoveryRepository.deleteEmployeeHis(tableList.get(), whereCid[0], whereSid[0], cidCurrent,
-						employeeId);
+				performDataRecoveryRepository.deleteEmployeeHis(tableList.get(), whereCid[0], whereSid[0], cidCurrent,employeeId);
 			}
 		} catch (Exception err) {
 			String target            = employeeCode;
 			String errorContent      = err.getMessage();
 			GeneralDate targetDate   = null;
-			String contentSql        = err.getLocalizedMessage();
+			String contentSql        = err.getMessage();
 			String processingContent = "履歴データ削除  " +TextResource.localize("CMF004_462"); 
-			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 			// #9006
-			LOGGER.error("SQL error rollBack transaction");
-			throw new Exception(SQL_EXCEPTION);
+			throw err;
 		}
 	}
 	
@@ -1152,36 +1140,25 @@ public class RecoveryStorageService {
 			}
 		}
 
-		String cidCurrent = AppContexts.user().companyId();
+		String cidCurrent  = AppContexts.user().companyId();
 		try {
 			if (tableNotUse) {
-				performDataRecoveryRepository.deleteTransactionEmployeeHis(tableList.get(), whereCid[0], whereSid[0],
-						cidCurrent, employeeId);
+				performDataRecoveryRepository.deleteTransactionEmployeeHis(tableList.get(), whereCid[0], whereSid[0],cidCurrent, employeeId);
 			} else {
-				performDataRecoveryRepository.deleteEmployeeHis(tableList.get(), whereCid[0], whereSid[0], cidCurrent,
-						employeeId);
+				performDataRecoveryRepository.deleteEmployeeHis(tableList.get(), whereCid[0], whereSid[0], cidCurrent,employeeId);
 			}
 		} catch (Exception err) {
 			String target            = null;
 			String errorContent      = err.getMessage();
 			GeneralDate targetDate   = null;
-			String contentSql        = err.getLocalizedMessage();
+			String contentSql        = err.getMessage();
 			String processingContent = "履歴データ削除  " +TextResource.localize("CMF004_462") + " " + tableList.get().getTableJapaneseName(); 
-			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
 			// #9011
-			LOGGER.error("SQL error rollBack transaction");
-			throw new Exception(SQL_EXCEPTION);
+			throw err;
 		}
 	}
-
-	private void saveErrorLogDataRecover(String recoveryProcessId, String target, String errorContent,
-			GeneralDate targetDate, String processingContent, String contentSql) {
-		int logSequenceNumber = repoDataRecoveryLog.getMaxSeqId(recoveryProcessId) + 1;
-		DataRecoveryLog dataRecoveryLog = new DataRecoveryLog(recoveryProcessId, target, errorContent, targetDate,
-				logSequenceNumber, processingContent, contentSql);
-		repoDataRecoveryLog.add(dataRecoveryLog);
-	}
-
+	
 	@SuppressWarnings("unchecked")
 	public List<String> settingDate(Optional<TableList> tableList) throws NoSuchMethodException, SecurityException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException {

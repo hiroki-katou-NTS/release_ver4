@@ -131,20 +131,23 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			String cidCurrent, String dataRecoveryProcessId,String employeeCode) {
 		
 		if (tableName != null) {
-			StringBuilder COUNT_BY_TABLE_SQL = new StringBuilder("SELECT count(*) from ");
-			COUNT_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
-			COUNT_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
-			Integer x = (Integer) (this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult());
-			if (x > 1) {
-				String target            = employeeCode;
-				String errorContent      = null;
-				GeneralDate targetDate   = GeneralDate.today();
-				String contentSql        = COUNT_BY_TABLE_SQL.toString();
-				String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
-				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-				// #9008_1
-				throw new RuntimeException();
-			}
+			Integer x = 0;
+			try {
+				StringBuilder COUNT_BY_TABLE_SQL = new StringBuilder("SELECT count(*) from ");
+				COUNT_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
+				COUNT_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
+				x = (Integer) (this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult());
+				if (x > 1) {
+					String target            = employeeCode;
+					String errorContent      = null;
+					GeneralDate targetDate   = GeneralDate.today();
+					String contentSql        = COUNT_BY_TABLE_SQL.toString();
+					String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
+					saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+					// #9008_1
+				}
+			} catch (Exception e) {}
+			
 			return x;
 		}
 		return 0;
@@ -154,19 +157,23 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	public Integer countDataTransactionExitTableByVKeyUp(Map<String, String> filedWhere, String tableName,
 			String namePhysicalCid, String cidCurrent, String dataRecoveryProcessId,String employeeCode) {
 		if (tableName != null) {
-			StringBuilder COUNT_BY_TABLE_SQL = new StringBuilder("SELECT count(*) from ");
-			COUNT_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
-			COUNT_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
-			Integer x = (Integer) (this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult());
-			if (x > 1) {
-				String target            = employeeCode;
-				String errorContent      = null;
-				GeneralDate targetDate   = GeneralDate.today();
-				String contentSql        = COUNT_BY_TABLE_SQL.toString();
-				String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
-				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-				// #9008_1
-				throw new RuntimeException();
+			Integer x = 0;
+			try {
+				StringBuilder COUNT_BY_TABLE_SQL = new StringBuilder("SELECT count(*) from ");
+				COUNT_BY_TABLE_SQL.append(tableName).append(" WHERE 1=1 ");
+				COUNT_BY_TABLE_SQL.append(makeWhereClause(filedWhere, namePhysicalCid, cidCurrent));
+				x = (Integer) (this.getEntityManager().createNativeQuery(COUNT_BY_TABLE_SQL.toString()).getSingleResult());
+				if (x > 1) {
+					String target            = employeeCode;
+					String errorContent      = null;
+					GeneralDate targetDate   = GeneralDate.today();
+					String contentSql        = COUNT_BY_TABLE_SQL.toString();
+					String processingContent = "データベース復旧処理  "+ TextResource.localize("CMF004_465"); 
+					saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+					// #9008_1
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			return x;
 		}
@@ -372,15 +379,13 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 
 	@Override
-	public void deleteEmployeeHis(TableList table, String whereCid, String whereSid, String cid, String employeeId  ) {
-
+	public void deleteEmployeeHis(TableList table, String whereCid, String whereSid, String cid, String employeeId) {
 		EntityManager em = this.getEntityManager();
-
 		if (table.getTableEnglishName() != null) {
-			StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE t FROM ");
+			StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE t FROM  ");
 			DELETE_BY_TABLE_SQL.append(table.getTableEnglishName()).append(" t");
 			boolean hasParentTblFlg = false;
-			
+
 			// アルゴリズム「親テーブルをJOINする」を実行する
 			if (table.getHasParentTblFlg() == NotUseAtr.USE && table.getParentTblName().isPresent()) {
 				hasParentTblFlg = true;
@@ -409,25 +414,28 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 					}
 				}
 			}
-			
+
 			DELETE_BY_TABLE_SQL.append(" WHERE 1=1  ");
-			
+
 			if (hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereSid).append(" = '").append(employeeId).append("'");
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereSid).append(" = '").append(employeeId)
+						.append("'");
 			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereSid).append(" = '").append(employeeId).append("'");
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereSid).append(" = '").append(employeeId)
+						.append("'");
 			}
-			
+
 			if (hasParentTblFlg && !StringUtils.isBlank(whereCid) && !StringUtils.isBlank(cid)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereCid).append(" = '").append(cid).append("'");
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereCid).append(" = '").append(cid)
+						.append("'");
 			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereCid).append(" = '").append(cid).append("'");
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereCid).append(" = '").append(cid)
+						.append("'");
 			}
-			
+
 			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
 			query.executeUpdate();
 		}
-
 	}
 
 	public void addTargetEmployee(Target domain) {
@@ -506,14 +514,14 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 
 	@Override
 	public void deleteTransactionEmployeeHis(TableList table, String whereCid, String whereSid, String cid,
-			String employeeId ) {
+			String employeeId) {
 		EntityManager em = this.getEntityManager();
 
 		if (table.getTableEnglishName() != null) {
 			StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE t FROM ");
-			DELETE_BY_TABLE_SQL.append(table.getTableEnglishName()).append(" t");
+			DELETE_BY_TABLE_SQL.append(table.getTableEnglishName()).append(" t ");
 			boolean hasParentTblFlg = false;
-			
+
 			// アルゴリズム「親テーブルをJOINする」を実行する
 			if (table.getHasParentTblFlg() == NotUseAtr.USE && table.getParentTblName().isPresent()) {
 				hasParentTblFlg = true;
@@ -542,21 +550,25 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 					}
 				}
 			}
-			
+
 			DELETE_BY_TABLE_SQL.append(" WHERE 1=1  ");
-			
+
 			if (hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereSid).append(" = '").append(employeeId).append("'");
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereSid).append(" = '").append(employeeId)
+						.append("'");
 			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereSid).append(" = '").append(employeeId).append("'");
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereSid).append(" = '").append(employeeId)
+						.append("'");
 			}
-			
+
 			if (hasParentTblFlg && !StringUtils.isBlank(whereCid) && !StringUtils.isBlank(cid)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereCid).append(" = '").append(cid).append("'");
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereCid).append(" = '").append(cid)
+						.append("'");
 			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
-				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereCid).append(" = '").append(cid).append("'");
+				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereCid).append(" = '").append(cid)
+						.append("'");
 			}
-		
+
 			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
 			query.executeUpdate();
 		}
