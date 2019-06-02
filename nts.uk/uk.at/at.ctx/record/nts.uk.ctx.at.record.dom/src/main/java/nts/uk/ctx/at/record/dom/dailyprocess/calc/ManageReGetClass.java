@@ -54,6 +54,7 @@ public class ManageReGetClass {
 	private Optional<WorkTimeSetting> workTimeSetting;
 	
 	//勤務種類
+	@Setter
 	private Optional<WorkType> workType;
 	
 	//就業時間帯別代休時間設定
