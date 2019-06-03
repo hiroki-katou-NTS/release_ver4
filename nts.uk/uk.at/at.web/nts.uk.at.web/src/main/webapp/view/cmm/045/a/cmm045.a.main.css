@@ -78,3 +78,10 @@
 	vertical-align: middle;
 	margin-top: -24px !important;
 }
+#master-content{
+    height: 85%;
+}
+#content-area{
+	overflow-y: auto;
+    height: 91%;
+}
