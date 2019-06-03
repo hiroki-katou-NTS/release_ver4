@@ -415,36 +415,6 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 
 					query.append(" <= ?endDate) ");
 					
-					// fix bug #103051
-					if ((indexs.size() > 1) && (i == indexs.size() - 1)
-							&& (tableList.getTimeStore() == TimeStore.DAILY.value) && indexs.size() >= 2) {
-						query.append(" OR ");
-						// Start Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i - 1)])) {
-							query.append(" (t.");
-							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
-						} else {
-							query.append(" (p.");
-							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
-						}
-
-						query.append(" <= ?startDate ");
-						query.append(" AND ");
-
-						// End Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i - 0)])) {
-							query.append(" t.");
-							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
-						} else {
-							query.append(" p.");
-							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
-						}
-
-						isFirstOrStatement = true;
-
-						query.append(" >= ?endDate) ");
-					}
-
 					switch (tableList.getTimeStore()) {
 					case 1: //DAILY
 						params.put("startDate", tableList.getStartDateOfDaily() + " 00:00:00");
@@ -716,36 +686,6 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 
 					query.append(" <= ?endDate) ");
 					
-					// fix bug #103051
-					if ((indexs.size() > 1) && (i == indexs.size() - 1)
-							&& (tableList.getTimeStore() == TimeStore.DAILY.value) && indexs.size() >= 2) {
-						query.append(" OR ");
-						// Start Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i - 1)])) {
-							query.append(" (t.");
-							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
-						} else {
-							query.append(" (p.");
-							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
-						}
-
-						query.append(" <= ?startDate ");
-						query.append(" AND ");
-
-						// End Date
-						if (columns.contains(fieldKeyQuerys[indexs.get(i - 0)])) {
-							query.append(" t.");
-							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
-						} else {
-							query.append(" p.");
-							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
-						}
-
-						isFirstOrStatement = true;
-
-						query.append(" >= ?endDate) ");
-					}
-
 					switch (tableList.getTimeStore()) {
 					case 1: // DAILY
 						params.put("startDate", tableList.getStartDateOfDaily() + " 00:00:00");
