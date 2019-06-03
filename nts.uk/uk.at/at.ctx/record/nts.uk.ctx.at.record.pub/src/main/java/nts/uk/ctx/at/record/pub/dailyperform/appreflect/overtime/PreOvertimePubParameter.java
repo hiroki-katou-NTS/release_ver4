@@ -51,4 +51,5 @@ public class PreOvertimePubParameter {
 	 * 残業申請
 	 */
 	private OvertimeAppPubParameter overtimePara;
+	private String excLogId;
 }

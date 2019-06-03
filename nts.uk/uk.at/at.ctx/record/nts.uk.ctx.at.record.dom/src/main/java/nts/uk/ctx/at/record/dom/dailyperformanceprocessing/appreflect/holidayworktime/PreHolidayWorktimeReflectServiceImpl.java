@@ -6,10 +6,12 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.eclipse.persistence.exceptions.OptimisticLockException;
+
 import nts.arc.time.GeneralDate;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
-import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.PreOvertimeReflectService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.AdTimeAndAnyItemAdUpService;
@@ -42,9 +44,6 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 	private AttendanceTimeRepository attendanceTime;
 	@Inject
 	private CommonProcessCheckService commonService;
-	@Inject
-	private DailyRecordTransactionService dailyTransaction;
-	
 	@Override
 	public boolean preHolidayWorktimeReflect(HolidayWorktimePara holidayWorkPara, boolean isPre) {		
 		try {
@@ -109,7 +108,12 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 			
 			commonService.calculateOfAppReflect(daily, holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate(), false);
 			return true;
-		} catch (Exception e) {
+		} catch (Exception ex) {
+			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
+			if(!isError) {
+				throw ex;
+			}
+			commonService.createLogError(holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate(), holidayWorkPara.getExcLogId());
 			return false;
 		}
 		

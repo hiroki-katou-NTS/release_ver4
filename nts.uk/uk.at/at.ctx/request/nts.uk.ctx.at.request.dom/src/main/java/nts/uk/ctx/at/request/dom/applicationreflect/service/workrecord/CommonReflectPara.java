@@ -42,4 +42,5 @@ public class CommonReflectPara {
 	
 	private Integer startTime;
 	private Integer endTime;
+	private String excLogId;
 }

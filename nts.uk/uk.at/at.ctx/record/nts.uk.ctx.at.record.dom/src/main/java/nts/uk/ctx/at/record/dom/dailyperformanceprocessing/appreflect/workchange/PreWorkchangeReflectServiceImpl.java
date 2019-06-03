@@ -2,7 +2,11 @@ package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.workchang
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+
+import org.eclipse.persistence.exceptions.OptimisticLockException;
+
 import nts.arc.time.GeneralDate;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
@@ -24,8 +28,8 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 	private WorkTypeIsClosedService workTypeRepo;
 	@Override
 	public boolean workchangeReflect(WorkChangeCommonReflectPara param, boolean isPre) {
-		try {
-			CommonReflectParameter workchangePara = param.getCommon();
+		CommonReflectParameter workchangePara = param.getCommon();
+		try {			
 			for(int i = 0; workchangePara.getStartDate().daysTo(workchangePara.getEndDate()) - i >= 0; i++){
 				GeneralDate loopDate = workchangePara.getStartDate().addDays(i);
 				workchangePara.setBaseDate(loopDate);
@@ -70,7 +74,12 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 				commonService.calculateOfAppReflect(null, workchangePara.getEmployeeId(), loopDate, false);
 			}			
 			return true;	
-		}catch (Exception e) {
+		}catch (Exception ex) {
+			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
+			if(!isError) {
+				throw ex;
+			}
+			commonService.createLogError(workchangePara.getEmployeeId(), workchangePara.getBaseDate(), workchangePara.getExcLogId());
 			return false;
 		}
 	}
