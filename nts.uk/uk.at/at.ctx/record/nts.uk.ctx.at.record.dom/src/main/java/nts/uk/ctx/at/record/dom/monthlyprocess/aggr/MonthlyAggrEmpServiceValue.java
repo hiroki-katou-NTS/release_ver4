@@ -10,7 +10,7 @@ import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.AggrPeriodEachActualClo
 
 /**
  * 戻り値：ドメインサービス：月別集計　（社員の月別実績を集計する）
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class MonthlyAggrEmpServiceValue {
