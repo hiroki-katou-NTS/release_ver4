@@ -29,6 +29,14 @@ public class TableDeletionDataCsv {
 	private String tableJapanName; //テーブル日本語名
 	private int tableNo;//テーブルNo
 	
+	private Optional<String> defaultCondKeyQuery;//抽出キー条件固定
+	private Optional<String> fieldAcqCid;//付加取得項目_会社ID
+	private Optional<String> fieldAcqDateTime;//付加取得項目_日付
+	private Optional<String> fieldAcqEmployeeId;//付加取得項目_社員ID
+	private Optional<String> fieldAcqEndDate; //付加取得項目_終了日付
+	private Optional<String> fieldAcqStartDate; //付加取得項目_開始日付
+
+	
 	private Optional<String> clsKeyQuery1;//抽出キー区分1
 	private Optional<String> clsKeyQuery2;//抽出キー区分2
 	private Optional<String> clsKeyQuery3;//抽出キー区分3
@@ -40,12 +48,27 @@ public class TableDeletionDataCsv {
 	private Optional<String> clsKeyQuery9;//抽出キー区分9
 	private Optional<String> clsKeyQuery10;//抽出キー区分10
 	
-	private Optional<String> defaultCondKeyQuery;//抽出キー条件固定
-	private Optional<String> fieldAcqCid;//付加取得項目_会社ID
-	private Optional<String> fieldAcqDateTime;//付加取得項目_日付
-	private Optional<String> fieldAcqEmployeeId;//付加取得項目_社員ID
-	private Optional<String> fieldAcqEndDate; //付加取得項目_終了日付
-	private Optional<String> fieldAcqStartDate; //付加取得項目_開始日付
+	private Optional<String> fieldKeyQuery1; //抽出キー項目1
+	private Optional<String> fieldKeyQuery2;//抽出キー項目2
+	private Optional<String> fieldKeyQuery3;//抽出キー項目3
+	private Optional<String> fieldKeyQuery4;//抽出キー項目4
+	private Optional<String> fieldKeyQuery5;//抽出キー項目5
+	private Optional<String> fieldKeyQuery6;//抽出キー項目6
+	private Optional<String> fieldKeyQuery7;//抽出キー項目7
+	private Optional<String> fieldKeyQuery8;//抽出キー項目8
+	private Optional<String> fieldKeyQuery9;//抽出キー項目9
+	private Optional<String> fieldKeyQuery10;//抽出キー項目10
+	
+	private Optional<String> fieldParent1;//親側結合キー1
+	private Optional<String> fieldParent2;//親側結合キー2
+	private Optional<String> fieldParent3;//親側結合キー3
+	private Optional<String> fieldParent4;//親側結合キー4
+	private Optional<String> fieldParent5;//親側結合キー5
+	private Optional<String> fieldParent6;//親側結合キー6
+	private Optional<String> fieldParent7;//親側結合キー7
+	private Optional<String> fieldParent8;//親側結合キー8
+	private Optional<String> fieldParent9;//親側結合キー9
+	private Optional<String> fieldParent10;//親側結合キー10
 	
 	private Optional<String> fieldChild1;//子側結合キー1
 	private Optional<String> fieldChild2;//子側結合キー2
@@ -79,18 +102,7 @@ public class TableDeletionDataCsv {
 	private Optional<String> fieldDate18; //日付項目18
 	private Optional<String> fieldDate19; //日付項目19
 	private Optional<String> fieldDate20; //日付項目20
-	
-	private Optional<String> fieldKeyQuery1; //抽出キー項目1
-	private Optional<String> fieldKeyQuery2;//抽出キー項目2
-	private Optional<String> fieldKeyQuery3;//抽出キー項目3
-	private Optional<String> fieldKeyQuery4;//抽出キー項目4
-	private Optional<String> fieldKeyQuery5;//抽出キー項目5
-	private Optional<String> fieldKeyQuery6;//抽出キー項目6
-	private Optional<String> fieldKeyQuery7;//抽出キー項目7
-	private Optional<String> fieldKeyQuery8;//抽出キー項目8
-	private Optional<String> fieldKeyQuery9;//抽出キー項目9
-	private Optional<String> fieldKeyQuery10;//抽出キー項目10
-	
+		
 	private Optional<String> filedKeyUpdate1;//更新キー項目1
 	private Optional<String> filedKeyUpdate2;//更新キー項目2
 	private Optional<String> filedKeyUpdate3;//更新キー項目3
@@ -112,16 +124,6 @@ public class TableDeletionDataCsv {
 	private Optional<String> filedKeyUpdate19;//更新キー項目19
 	private Optional<String> filedKeyUpdate20;//更新キー項目20
 	
-	private Optional<String> fieldParent1;//親側結合キー1
-	private Optional<String> fieldParent2;//親側結合キー2
-	private Optional<String> fieldParent3;//親側結合キー3
-	private Optional<String> fieldParent4;//親側結合キー4
-	private Optional<String> fieldParent5;//親側結合キー5
-	private Optional<String> fieldParent6;//親側結合キー6
-	private Optional<String> fieldParent7;//親側結合キー7
-	private Optional<String> fieldParent8;//親側結合キー8
-	private Optional<String> fieldParent9;//親側結合キー9
-	private Optional<String> fieldParent10;//親側結合キー10
 	
 	private Optional<String> parentTblName; //テーブル物理名
 	private Optional<String> parentTblJapanName;//テーブル日本語名

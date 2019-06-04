@@ -28,8 +28,6 @@ import nts.uk.ctx.sys.assist.dom.categoryfieldmt.HistoryDiviSion;
 import nts.uk.ctx.sys.assist.dom.deletedata.DataDeletionCsvRepository;
 import nts.uk.ctx.sys.assist.dom.deletedata.EmployeeDeletion;
 import nts.uk.ctx.sys.assist.dom.deletedata.TableDeletionDataCsv;
-import nts.uk.ctx.sys.assist.dom.saveprotetion.SaveProtetion;
-import nts.uk.ctx.sys.assist.dom.saveprotetion.SaveProtetionRepository;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 import nts.uk.shr.infra.file.csv.CSVReportGenerator;
@@ -365,6 +363,35 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 			}
 			query.append(" ) ");
 		}
+		
+		Optional<String> acqDateTimeField = tableList.getFieldAcqDateTime();
+		if (acqDateTimeField.isPresent()) {
+			if (acqDateTimeField.get() != null && !"null".equals(acqDateTimeField.get()) && !acqDateTimeField.get().isEmpty()) {
+				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
+					query.append(" AND p." + acqDateTimeField.get() + " >= ?startDate ");
+					query.append(" AND p." + acqDateTimeField.get() + " <= ?endDate ");
+				} else {
+					query.append(" AND t." + acqDateTimeField.get() + " >= ?startDate ");
+					query.append(" AND t." + acqDateTimeField.get() + " <= ?endDate ");
+				}
+			}
+		}
+		
+		//period date
+		Optional<String> acqStartDateField = tableList.getFieldAcqStartDate();
+		Optional<String> acqEndDateField = tableList.getFieldAcqEndDate();
+		if (acqStartDateField.isPresent() && acqEndDateField.isPresent()) {
+			if (acqStartDateField.get() != null && !"null".equals(acqStartDateField.get()) && !acqStartDateField.get().isEmpty()
+				&& acqEndDateField.get() != null && !"null".equals(acqEndDateField.get()) && !acqEndDateField.get().isEmpty()) {
+				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
+					query.append(" AND p." + acqStartDateField.get() + " >= ?startDate ");
+					query.append(" AND p." + acqEndDateField.get() + " <= ?endDate ");
+				} else {
+					query.append(" AND t." + acqStartDateField.get() + " >= ?startDate ");
+					query.append(" AND t." + acqEndDateField.get() + " <= ?endDate ");
+				}
+			}
+		}
 
 		// 履歴区分を判別する。履歴なしの場合
 		List<Integer> indexs = new ArrayList<Integer>();
@@ -414,6 +441,36 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 					}
 
 					query.append(" <= ?endDate) ");
+					
+					// fix bug #103051
+					if ((indexs.size() > 1) && (i == indexs.size() - 1)
+							&& (tableList.getTimeStore() == TimeStore.DAILY.value) && indexs.size() >= 2) {
+						query.append(" OR ");
+						// Start Date
+						if (columns.contains(fieldKeyQuerys[indexs.get(i - 1)])) {
+							query.append(" (t.");
+							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
+						} else {
+							query.append(" (p.");
+							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
+						}
+
+						query.append(" <= ?startDate ");
+						query.append(" AND ");
+
+						// End Date
+						if (columns.contains(fieldKeyQuerys[indexs.get(i - 0)])) {
+							query.append(" t.");
+							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
+						} else {
+							query.append(" p.");
+							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
+						}
+
+						isFirstOrStatement = true;
+
+						query.append(" >= ?endDate) ");
+					}
 					
 					switch (tableList.getTimeStore()) {
 					case 1: //DAILY
@@ -636,7 +693,36 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 			}
 			query.append(" ) ");
 		}
-
+		
+		Optional<String> acqDateTimeField = tableList.getFieldAcqDateTime();
+		if (acqDateTimeField.isPresent()) {
+			if (acqDateTimeField.get() != null && !"null".equals(acqDateTimeField.get()) && !acqDateTimeField.get().isEmpty()) {
+				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
+					query.append(" AND p." + acqDateTimeField.get() + " >= ?startDate ");
+					query.append(" AND p." + acqDateTimeField.get() + " <= ?endDate ");
+				} else {
+					query.append(" AND t." + acqDateTimeField.get() + " >= ?startDate ");
+					query.append(" AND t." + acqDateTimeField.get() + " <= ?endDate ");
+				}
+			}
+		}
+		
+		//period date
+		Optional<String> acqStartDateField = tableList.getFieldAcqStartDate();
+		Optional<String> acqEndDateField = tableList.getFieldAcqEndDate();
+		if (acqStartDateField.isPresent() && acqEndDateField.isPresent()) {
+			if (acqStartDateField.get() != null && !"null".equals(acqStartDateField.get())&& !acqStartDateField.get().isEmpty() 
+					&& acqEndDateField.get() != null && !"null".equals(acqEndDateField.get()) && !acqEndDateField.get().isEmpty()) {
+				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
+					query.append(" AND p." + acqStartDateField.get() + " >= ?startDate ");
+					query.append(" AND p." + acqEndDateField.get() + " <= ?endDate ");
+				} else {
+					query.append(" AND t." + acqStartDateField.get() + " >= ?startDate ");
+					query.append(" AND t." + acqEndDateField.get() + " <= ?endDate ");
+				}
+			}
+		}
+		
 		// 履歴区分を判別する。履歴なしの場合
 		if (tableList.getHistoryCls() == HistoryDiviSion.NO_HISTORY.value) {
 			List<Integer> indexs = new ArrayList<Integer>();
@@ -686,6 +772,36 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 
 					query.append(" <= ?endDate) ");
 					
+					// fix bug #103051
+					if ((indexs.size() > 1) && (i == indexs.size() - 1)
+							&& (tableList.getTimeStore() == TimeStore.DAILY.value) && indexs.size() >= 2) {
+						query.append(" OR ");
+						// Start Date
+						if (columns.contains(fieldKeyQuerys[indexs.get(i - 1)])) {
+							query.append(" (t.");
+							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
+						} else {
+							query.append(" (p.");
+							query.append(fieldKeyQuerys[indexs.get(i - 1)]);
+						}
+
+						query.append(" <= ?startDate ");
+						query.append(" AND ");
+
+						// End Date
+						if (columns.contains(fieldKeyQuerys[indexs.get(i - 0)])) {
+							query.append(" t.");
+							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
+						} else {
+							query.append(" p.");
+							query.append(fieldKeyQuerys[indexs.get(i - 0)]);
+						}
+
+						isFirstOrStatement = true;
+
+						query.append(" >= ?endDate) ");
+					}
+					
 					switch (tableList.getTimeStore()) {
 					case 1: // DAILY
 						params.put("startDate", tableList.getStartDateOfDaily() + " 00:00:00");
@@ -710,6 +826,8 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 
 		// 抽出条件キー固定
 		query.append(tableList.getDefaultCondKeyQuery().orElse(""));
+		
+		
 		for (int i = 0; i < clsKeyQuerys.length; i++) {
 			if (EMPLOYEE_CD.equals(clsKeyQuerys[i]) && !targetEmployeesSid.isEmpty()) {
 				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
@@ -719,7 +837,6 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 				}
 			}
 		}
-		
 		
 		String querySql = query.toString();
 		if(!targetEmployeesSid.isEmpty() && query.toString().contains("?listTargetSid")) {
