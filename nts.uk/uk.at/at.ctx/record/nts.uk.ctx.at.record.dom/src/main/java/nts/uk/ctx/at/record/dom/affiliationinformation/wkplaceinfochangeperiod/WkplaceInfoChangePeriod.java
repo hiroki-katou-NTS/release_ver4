@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.val;
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExWorkPlaceHistoryImport;
 import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExWorkplaceHistItemImport;
 import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPerfor;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.AffiliationInforOfDailyPerforRepository;
@@ -37,18 +37,35 @@ public class WkplaceInfoChangePeriod {
 		List<AffiliationInforOfDailyPerfor> listAffiliationInforOfDailyPerfor = affInforOfDailyPerforRepo.finds(Arrays.asList(employeeId) , datePeriod);
 		Map<String, List<AffiliationInforOfDailyPerfor>> mappedByWp = listAffiliationInforOfDailyPerfor.stream()
 				.collect(Collectors.groupingBy(c -> c.getWplID()));
-		
+		Map<String, List<ExWorkplaceHistItemImport>> mapDateWpl = workplaceItems.stream()
+				.collect(Collectors.groupingBy(c -> c.getWorkplaceId()));
 		List<GeneralDate> lstDateAll = new ArrayList<>();
-		for(ExWorkplaceHistItemImport exWorkplaceHistItemImport : workplaceItems) {
-			 List<AffiliationInforOfDailyPerfor> lstWplDate = 
-					 mappedByWp.get(exWorkplaceHistItemImport.getWorkplaceId());
-			 if(lstWplDate == null) continue;
-			 List<GeneralDate> lstDateWpl = lstWplDate.stream().map(x -> x.getYmd()).sorted((x, y) -> x.compareTo(y)).collect(Collectors.toList());
-			 DatePeriod dateTarget =  intersectPeriod(datePeriod, exWorkplaceHistItemImport.getPeriod());
-			 if(dateTarget == null) continue;
-			 List<GeneralDate> lstDateNeedCheck = dateTarget.datesBetween();
-			 lstDateWpl.removeAll(lstDateNeedCheck);
-			 lstDateAll.addAll(lstDateWpl);
+		for (val itemData : mapDateWpl.entrySet()) {
+			String wpl = itemData.getKey();
+			List<DatePeriod> lstPeriod = itemData.getValue().stream().map(x -> x.getPeriod())
+					.collect(Collectors.toList());
+			// for (ExWorkplaceHistItemImport exWorkplaceHistItemImport : workplaceItems) {
+			List<DatePeriod> afterMerge = new ArrayList<>();
+			for (DatePeriod dateTemp : lstPeriod) {
+				DatePeriod dateTarget = intersectPeriod(datePeriod, dateTemp);
+				if (dateTarget != null)
+					afterMerge.add(dateTarget);
+			}
+			if (afterMerge.isEmpty())
+				continue;
+			List<GeneralDate> lstDateNeedCheck = afterMerge.stream().flatMap(x -> x.datesBetween().stream())
+					.collect(Collectors.toList());
+			
+			List<AffiliationInforOfDailyPerfor> lstWplDate = mappedByWp.get(wpl);
+			if (lstWplDate == null) {
+				lstDateAll.addAll(lstDateNeedCheck);
+				continue;
+			}
+			List<GeneralDate> lstDateWpl = lstWplDate.stream().map(x -> x.getYmd()).sorted((x, y) -> x.compareTo(y))
+					.collect(Collectors.toList());
+			lstDateWpl.removeAll(lstDateNeedCheck);
+			lstDateAll.addAll(lstDateWpl);
+			// }
 		}
 		
 		List<GeneralDate> lstDateAllSort = lstDateAll.stream().sorted((x, y) -> x.compareTo(y)).collect(Collectors.toList());

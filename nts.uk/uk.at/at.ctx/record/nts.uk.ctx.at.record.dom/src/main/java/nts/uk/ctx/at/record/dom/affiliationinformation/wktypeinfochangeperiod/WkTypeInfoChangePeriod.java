@@ -10,9 +10,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.val;
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExWorkplaceHistItemImport;
-import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPerfor;
 import nts.uk.ctx.at.record.dom.affiliationinformation.WorkTypeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.WorkTypeOfDailyPerforRepository;
 import nts.uk.ctx.at.shared.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmpDto;
@@ -37,21 +36,31 @@ public class WkTypeInfoChangePeriod {
 		
 		Map<String, List<WorkTypeOfDailyPerformance>> mappedByWkType = listWorkTypeOfDailyPerformance.stream()
 				.collect(Collectors.groupingBy(c -> c.getWorkTypeCode().v()));
-		
+		Map<String, List<BusinessTypeOfEmpDto>> mapDateWtype = listBusinessTypeOfEmp.stream()
+				.collect(Collectors.groupingBy(c -> c.getBusinessTypeCd()));
 		List<GeneralDate> lstDateAll = new ArrayList<>();
-		
-		for(BusinessTypeOfEmpDto businessTypeOfEmpDto : listBusinessTypeOfEmp) {
+		for (val itemData : mapDateWtype.entrySet()) {
+			String wtype = itemData.getKey();
+			List<DatePeriod> lstPeriod = itemData.getValue().stream().map(x -> new DatePeriod(x.getStartDate(),x.getEndDate()))
+					.collect(Collectors.toList());
+			 List<DatePeriod> afterMerge = new ArrayList<>();
+			 for(DatePeriod dateTemp : lstPeriod) {
+					DatePeriod dateTarget = intersectPeriod(datePeriod, dateTemp);
+					if(dateTarget != null) afterMerge.add(dateTarget);
+				}
+			 if(afterMerge.isEmpty()) continue;
+			 List<GeneralDate> lstDateNeedCheck = afterMerge.stream().flatMap(x -> x.datesBetween().stream()).collect(Collectors.toList());
 			 List<WorkTypeOfDailyPerformance> lstWpTypeDate = 
-					 mappedByWkType.get(businessTypeOfEmpDto.getBusinessTypeCd());
-			 if(lstWpTypeDate == null) continue;
+					 mappedByWkType.get(wtype);
+			 if(lstWpTypeDate == null) {
+				 lstDateAll.addAll(lstDateNeedCheck);
+				 continue;
+			 }
 			 List<GeneralDate> lstDateWpl = lstWpTypeDate.stream().map(x -> x.getDate()).sorted((x, y) -> x.compareTo(y)).collect(Collectors.toList());
-			 DatePeriod dateTarget =  intersectPeriod(datePeriod, new DatePeriod(businessTypeOfEmpDto.getStartDate(),businessTypeOfEmpDto.getEndDate()));
-			 if(dateTarget == null) continue;
-			 List<GeneralDate> lstDateNeedCheck = dateTarget.datesBetween();
 			 lstDateWpl.removeAll(lstDateNeedCheck);
 			 lstDateAll.addAll(lstDateWpl);
+			 
 		}
-		
 		List<GeneralDate> lstDateAllSort = lstDateAll.stream().sorted((x, y) -> x.compareTo(y)).collect(Collectors.toList());
 		if(lstDateAllSort.isEmpty()) {
 			return Collections.emptyList();
