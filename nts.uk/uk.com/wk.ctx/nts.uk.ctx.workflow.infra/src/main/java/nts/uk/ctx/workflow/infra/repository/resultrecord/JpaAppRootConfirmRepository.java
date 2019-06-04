@@ -163,6 +163,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			" AND appRoot.LAST_DAY_FLG = lastDayFlg";
 
 	@Override
+	@SneakyThrows
 	public Optional<AppRootConfirm> findByID(String rootID) {
 		Connection con = this.getEntityManager().unwrap(Connection.class);
 		String query = FIND_BY_ID;
@@ -175,9 +176,6 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			} else {
 				return Optional.of(listResult.get(0));
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return Optional.empty();
 		}
 	}
 
@@ -305,36 +303,32 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 				}).collect(Collectors.toList());
 	}
 	
+	@SneakyThrows
 	private List<FullJoinAppRootConfirm> createFullJoinAppRootConfirm(ResultSet rs){
 		List<FullJoinAppRootConfirm> listFullData = new ArrayList<>();
-		try {
-			while (rs.next()) {
-				listFullData.add(new FullJoinAppRootConfirm(
-						rs.getString("ROOT_ID"), 
-						rs.getString("CID"), 
-						rs.getString("EMPLOYEE_ID"), 
-						GeneralDate.fromString(rs.getString("RECORD_DATE"), "yyyy-MM-dd HH:mm:ss"), 
-						Strings.isNotBlank(rs.getString("ROOT_TYPE")) ? Integer.valueOf(rs.getString("ROOT_TYPE")) : null, 
-						Strings.isNotBlank(rs.getString("YEARMONTH")) ? Integer.valueOf(rs.getString("YEARMONTH")) : null, 
-						Strings.isNotBlank(rs.getString("CLOSURE_ID")) ? Integer.valueOf(rs.getString("CLOSURE_ID")) : null, 
-						Strings.isNotBlank(rs.getString("CLOSURE_DAY")) ? Integer.valueOf(rs.getString("CLOSURE_DAY")) : null, 
-						Strings.isNotBlank(rs.getString("LAST_DAY_FLG")) ? Integer.valueOf(rs.getString("LAST_DAY_FLG")) : null, 
-						Strings.isNotBlank(rs.getString("PHASE_ORDER")) ? Integer.valueOf(rs.getString("PHASE_ORDER")) : null, 
-						Strings.isNotBlank(rs.getString("APP_PHASE_ATR")) ? Integer.valueOf(rs.getString("APP_PHASE_ATR")) : null, 
-						Strings.isNotBlank(rs.getString("FRAME_ORDER")) ? Integer.valueOf(rs.getString("FRAME_ORDER")) : null, 
-						rs.getString("APPROVER_ID"), 
-						rs.getString("REPRESENTER_ID"), 
-						Strings.isNotBlank(rs.getString("APPROVAL_DATE")) ? GeneralDate.fromString(rs.getString("APPROVAL_DATE"), "yyyy-MM-dd HH:mm:ss") : null ));
-			}
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
+		while (rs.next()) {
+			listFullData.add(new FullJoinAppRootConfirm(
+					rs.getString("ROOT_ID"), 
+					rs.getString("CID"), 
+					rs.getString("EMPLOYEE_ID"), 
+					GeneralDate.fromString(rs.getString("RECORD_DATE"), "yyyy-MM-dd HH:mm:ss"), 
+					Strings.isNotBlank(rs.getString("ROOT_TYPE")) ? Integer.valueOf(rs.getString("ROOT_TYPE")) : null, 
+					Strings.isNotBlank(rs.getString("YEARMONTH")) ? Integer.valueOf(rs.getString("YEARMONTH")) : null, 
+					Strings.isNotBlank(rs.getString("CLOSURE_ID")) ? Integer.valueOf(rs.getString("CLOSURE_ID")) : null, 
+					Strings.isNotBlank(rs.getString("CLOSURE_DAY")) ? Integer.valueOf(rs.getString("CLOSURE_DAY")) : null, 
+					Strings.isNotBlank(rs.getString("LAST_DAY_FLG")) ? Integer.valueOf(rs.getString("LAST_DAY_FLG")) : null, 
+					Strings.isNotBlank(rs.getString("PHASE_ORDER")) ? Integer.valueOf(rs.getString("PHASE_ORDER")) : null, 
+					Strings.isNotBlank(rs.getString("APP_PHASE_ATR")) ? Integer.valueOf(rs.getString("APP_PHASE_ATR")) : null, 
+					Strings.isNotBlank(rs.getString("FRAME_ORDER")) ? Integer.valueOf(rs.getString("FRAME_ORDER")) : null, 
+					rs.getString("APPROVER_ID"), 
+					rs.getString("REPRESENTER_ID"), 
+					Strings.isNotBlank(rs.getString("APPROVAL_DATE")) ? GeneralDate.fromString(rs.getString("APPROVAL_DATE"), "yyyy-MM-dd HH:mm:ss") : null ));
 		}
 		return listFullData;
 	}
 
 	@Override
+	@SneakyThrows
 	public void clearStatus(String companyID, String employeeID, GeneralDate date, RecordRootType rootType) {
 		String query1 = DELETE_PHASE_APPROVER.replaceAll("employeeID", employeeID);
 		query1 = query1.replaceAll("companyID", companyID);
@@ -347,16 +341,12 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		Connection con = this.getEntityManager().unwrap(Connection.class);
 		try (PreparedStatement pstatement1 = con.prepareStatement(query1)) {
 			pstatement1.execute();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new BusinessException(e.getMessage());
-		}
+		} 
+
 		try (PreparedStatement pstatement2 = con.prepareStatement(query2)) {
 			pstatement2.execute();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new BusinessException(e.getMessage());
-		}
+		} 
+
 	}
 
 	@Override
@@ -397,38 +387,43 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		
 		CollectionUtil.split(employeeIDLst, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, employeeIDs -> {
 			
-			StringBuilder sql = new StringBuilder();
-			sql.append("SELECT appRoot.ROOT_ID, appRoot.CID, appRoot.EMPLOYEE_ID, appRoot.RECORD_DATE, appRoot.ROOT_TYPE, ");
-			sql.append(" appRoot.YEARMONTH, appRoot.CLOSURE_ID, appRoot.CLOSURE_DAY, appRoot.LAST_DAY_FLG, ");
-			sql.append(" phase.PHASE_ORDER, phase.APP_PHASE_ATR, frame.FRAME_ORDER, frame.APPROVER_ID, frame.REPRESENTER_ID, frame.APPROVAL_DATE ");
-			sql.append(" FROM WWFDT_APP_ROOT_CONFIRM appRoot LEFT JOIN WWFDT_APP_PHASE_CONFIRM phase ");
-			sql.append(" ON appRoot.ROOT_ID = phase.ROOT_ID ");
-			sql.append(" LEFT JOIN WWFDT_APP_FRAME_CONFIRM frame ");
-			sql.append(" ON phase.ROOT_ID = frame.ROOT_ID and phase.PHASE_ORDER = frame.PHASE_ORDER");
-			sql.append(" WHERE appRoot.CID = ? AND appRoot.ROOT_TYPE = ? AND appRoot.RECORD_DATE <= ? AND appRoot.RECORD_DATE >= ?");
-			sql.append(" AND appRoot.EMPLOYEE_ID IN (");
-			sql.append(employeeIDs.stream().map(s -> "?").collect(Collectors.joining(",")));
-			sql.append(" )");
-			
-			try (PreparedStatement statement = this.connection().prepareStatement(sql.toString())) {
-				statement.setString(1, companyID);
-				statement.setInt(2, rootType.value);
-				statement.setDate(3, Date.valueOf(date.end().localDate()));
-				statement.setDate(4, Date.valueOf(date.start().localDate()));
-				for (int i = 0; i < employeeIDs.size(); i++) {
-					statement.setString(i + 5, employeeIDs.get(i));
-				}
-				results.addAll(toDomain(new NtsResultSet(statement.executeQuery()).getList(rs -> createFullJoinAppRootConfirm(rs))));
-				
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
+			internalQuery(companyID, date, rootType, results, employeeIDs); 
 		});
 		
 		return results;
 	}
 
+	@SneakyThrows
+	private void internalQuery(String companyID, DatePeriod date, RecordRootType rootType, List<AppRootConfirm> results,
+			List<String> employeeIDs) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT appRoot.ROOT_ID, appRoot.CID, appRoot.EMPLOYEE_ID, appRoot.RECORD_DATE, appRoot.ROOT_TYPE, ");
+		sql.append(" appRoot.YEARMONTH, appRoot.CLOSURE_ID, appRoot.CLOSURE_DAY, appRoot.LAST_DAY_FLG, ");
+		sql.append(" phase.PHASE_ORDER, phase.APP_PHASE_ATR, frame.FRAME_ORDER, frame.APPROVER_ID, frame.REPRESENTER_ID, frame.APPROVAL_DATE ");
+		sql.append(" FROM WWFDT_APP_ROOT_CONFIRM appRoot LEFT JOIN WWFDT_APP_PHASE_CONFIRM phase ");
+		sql.append(" ON appRoot.ROOT_ID = phase.ROOT_ID ");
+		sql.append(" LEFT JOIN WWFDT_APP_FRAME_CONFIRM frame ");
+		sql.append(" ON phase.ROOT_ID = frame.ROOT_ID and phase.PHASE_ORDER = frame.PHASE_ORDER");
+		sql.append(" WHERE appRoot.CID = ? AND appRoot.ROOT_TYPE = ? AND appRoot.RECORD_DATE <= ? AND appRoot.RECORD_DATE >= ?");
+		sql.append(" AND appRoot.EMPLOYEE_ID IN (");
+		sql.append(employeeIDs.stream().map(s -> "?").collect(Collectors.joining(",")));
+		sql.append(" )");
+		
+		try (PreparedStatement statement = this.connection().prepareStatement(sql.toString())) {
+			statement.setString(1, companyID);
+			statement.setInt(2, rootType.value);
+			statement.setDate(3, Date.valueOf(date.end().localDate()));
+			statement.setDate(4, Date.valueOf(date.start().localDate()));
+			for (int i = 0; i < employeeIDs.size(); i++) {
+				statement.setString(i + 5, employeeIDs.get(i));
+			}
+			results.addAll(toDomain(new NtsResultSet(statement.executeQuery()).getList(rs -> createFullJoinAppRootConfirm(rs))));
+			
+		}
+	}
+
 	@Override
+	@SneakyThrows
 	public Optional<AppRootConfirm> findByEmpMonth(String companyID, String employeeID, YearMonth yearMonth,
 			Integer closureID, ClosureDate closureDate, RecordRootType rootType) {
 		Connection con = this.getEntityManager().unwrap(Connection.class);
@@ -448,13 +443,11 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			} else {
 				return Optional.of(listResult.get(0));
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return Optional.empty();
-		}
+		} 
 	}
 
 	@Override
+	@SneakyThrows
 	public Optional<AppRootConfirm> findByEmpPeriodMonth(String companyID, String employeeID, DatePeriod period) {
 		Connection con = this.getEntityManager().unwrap(Connection.class);
 		String query = FIND_BY_EMP_PERIOD_MONTH;
@@ -471,13 +464,11 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			} else {
 				return Optional.of(listResult.get(0));
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return Optional.empty();
-		}
+		} 
 	}
 
 	@Override
+	@SneakyThrows
 	public List<AppRootConfirm> findByEmpYearMonth(String companyID, String employeeID, YearMonth yearMonth) {
 		Connection con = this.getEntityManager().unwrap(Connection.class);
 		String query = FIND_BY_EMP_YEARMONTH;
@@ -493,10 +484,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			} else {
 				return listResult;
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return Collections.emptyList();
-		}
+		} 
 	}
 	
 	private FullJoinAppRootConfirm createFullJoinAppRootConfirm(NtsResultRecord rs){

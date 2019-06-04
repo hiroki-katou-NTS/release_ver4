@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -80,6 +81,7 @@ public class JpaApprovalPhaseRepository extends JpaRepository implements Approva
 	 * @return
 	 */
 	@Override
+	@SneakyThrows
 	public List<ApprovalPhase> getAllIncludeApprovers(String companyId, String branchId) {
 		/*List<WwfmtApprovalPhase> enPhases = this.queryProxy().query(SELECT_FROM_APPHASE,WwfmtApprovalPhase.class)
 				.setParameter("companyId", companyId)
@@ -112,10 +114,8 @@ public class JpaApprovalPhaseRepository extends JpaRepository implements Approva
 			} else {
 				result = listResult;
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			result = Collections.emptyList();
-		}
+		} 
+
 		return result;
 	}
 	
@@ -235,29 +235,26 @@ public class JpaApprovalPhaseRepository extends JpaRepository implements Approva
 				.getSingle(c->toDomainApPhase(c));
 	}	
 	
+	@SneakyThrows
 	private List<FullJoinWwfmtApprovalPhase> createFullJoinAppRootInstance(ResultSet rs){
 		List<FullJoinWwfmtApprovalPhase> listFullData = new ArrayList<>();
-		try {
-			while (rs.next()) {
-				listFullData.add(new FullJoinWwfmtApprovalPhase(
-						rs.getString("CID"), 
-						rs.getString("BRANCH_ID"), 
-						rs.getString("APPROVAL_PHASE_ID"), 
-						rs.getInt("APPROVAL_FORM"), 
-						rs.getInt("BROWSING_PHASE"), 
-						rs.getInt(6),  
-						rs.getString("APPROVER_ID"), 
-						rs.getString("JOB_ID"), 
-						rs.getString("SID"), 
-						rs.getInt(10), 
-						rs.getInt("APPROVAL_ATR"), 
-						rs.getInt("CONFIRM_PERSON")));
-			}
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
+
+		while (rs.next()) {
+			listFullData.add(new FullJoinWwfmtApprovalPhase(
+					rs.getString("CID"), 
+					rs.getString("BRANCH_ID"), 
+					rs.getString("APPROVAL_PHASE_ID"), 
+					rs.getInt("APPROVAL_FORM"), 
+					rs.getInt("BROWSING_PHASE"), 
+					rs.getInt(6),  
+					rs.getString("APPROVER_ID"), 
+					rs.getString("JOB_ID"), 
+					rs.getString("SID"), 
+					rs.getInt(10), 
+					rs.getInt("APPROVAL_ATR"), 
+					rs.getInt("CONFIRM_PERSON")));
 		}
+
 		return listFullData;
 	}
 	
