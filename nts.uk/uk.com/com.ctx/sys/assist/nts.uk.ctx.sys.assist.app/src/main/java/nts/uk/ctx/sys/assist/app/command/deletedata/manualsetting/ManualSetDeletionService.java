@@ -53,6 +53,7 @@ import nts.uk.ctx.sys.assist.dom.deletedata.TableDeletionDataCsv;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.infra.file.csv.CSVFileData;
 import nts.uk.shr.infra.file.csv.CSVReportGenerator;
+import nts.uk.shr.infra.file.csv.CsvReportWriter;
 
 /**
  * @author hiep.th
@@ -533,166 +534,164 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	 * @param dataDeletionCsvs
 	 * @return
 	 */
-	private CSVFileData generalTableDeletionToCsv(FileGeneratorContext generatorContext,
+	private ResultState generalTableDeletionToCsv(FileGeneratorContext generatorContext,
 			List<TableDeletionDataCsv> dataDeletionCsvs) {
-		List<String> headerCsv = this.getHeaderForTableDelFile();
-		// Get data from Manual Setting table
-		List<Map<String, Object>> dataSourceCsv = new ArrayList<>();
-		for (TableDeletionDataCsv dataTarget : dataDeletionCsvs) {
-			Map<String, Object> rowCsv = new HashMap<>();
-			rowCsv.put(headerCsv.get(0), dataTarget.getDelId());
-			rowCsv.put(headerCsv.get(1), dataTarget.getDelType());
-			rowCsv.put(headerCsv.get(2), dataTarget.getDelCode());
-			rowCsv.put(headerCsv.get(3), dataTarget.getDelName());
-			rowCsv.put(headerCsv.get(4), dataTarget.getSupplementExplanation());
-			rowCsv.put(headerCsv.get(5), dataTarget.getCategoryId());
-			rowCsv.put(headerCsv.get(6), dataTarget.getCategoryName());
-			rowCsv.put(headerCsv.get(7), dataTarget.getTimeStore());
-			rowCsv.put(headerCsv.get(8), dataTarget.getRecoveryStorageRange());
+		try {
+			List<String> headerCsv = this.getHeaderForTableDelFile();
 			
-			// CMF003_509,CMF003_510, CMF003_511 missing
-			if(dataTarget.getTimeStore() == TimeStore.DAILY.value){
-				rowCsv.put(headerCsv.get(9), dataTarget.getStartDateOfDaily() + "~" + dataTarget.getEndDateOfDaily());
-				rowCsv.put(headerCsv.get(107), dataTarget.getStartDateOfDaily());
-				rowCsv.put(headerCsv.get(108), dataTarget.getEndDateOfDaily());
-			}else if(dataTarget.getTimeStore() == TimeStore.MONTHLY.value){
-				rowCsv.put(headerCsv.get(9), dataTarget.getStartMonthOfMonthly() + "~" + dataTarget.getEndMonthOfMonthly());
-				rowCsv.put(headerCsv.get(107), dataTarget.getStartMonthOfMonthly());
-				rowCsv.put(headerCsv.get(108), dataTarget.getEndMonthOfMonthly());
-			}else if(dataTarget.getTimeStore() == TimeStore.ANNUAL.value){
-				rowCsv.put(headerCsv.get(9), dataTarget.getStartYearOfMonthly() + "~" + dataTarget.getEndYearOfMonthly());
-				rowCsv.put(headerCsv.get(107), dataTarget.getStartYearOfMonthly());
-				rowCsv.put(headerCsv.get(108), dataTarget.getEndYearOfMonthly());
-			}else {
-				rowCsv.put(headerCsv.get(9), "");
-				rowCsv.put(headerCsv.get(107), "");
-				rowCsv.put(headerCsv.get(108), "");
+			CsvReportWriter csvFile = generator.generate(generatorContext,TABLE_NAME_FILE + FILE_EXTENSION, headerCsv , "UTF-8");
+			
+			for (TableDeletionDataCsv dataTarget : dataDeletionCsvs) {
+				Map<String, Object> rowCsv = new HashMap<>();
+				rowCsv.put(headerCsv.get(0), dataTarget.getDelId());
+				rowCsv.put(headerCsv.get(1), dataTarget.getDelType());
+				rowCsv.put(headerCsv.get(2), dataTarget.getDelCode());
+				rowCsv.put(headerCsv.get(3), dataTarget.getDelName());
+				rowCsv.put(headerCsv.get(4), dataTarget.getSupplementExplanation());
+				rowCsv.put(headerCsv.get(5), dataTarget.getCategoryId());
+				rowCsv.put(headerCsv.get(6), dataTarget.getCategoryName());
+				rowCsv.put(headerCsv.get(7), dataTarget.getTimeStore());
+				rowCsv.put(headerCsv.get(8), dataTarget.getRecoveryStorageRange());
+				
+				// CMF003_509,CMF003_510, CMF003_511 missing
+				if(dataTarget.getTimeStore() == TimeStore.DAILY.value){
+					rowCsv.put(headerCsv.get(9), dataTarget.getStartDateOfDaily() + "~" + dataTarget.getEndDateOfDaily());
+					rowCsv.put(headerCsv.get(107), dataTarget.getStartDateOfDaily());
+					rowCsv.put(headerCsv.get(108), dataTarget.getEndDateOfDaily());
+				}else if(dataTarget.getTimeStore() == TimeStore.MONTHLY.value){
+					rowCsv.put(headerCsv.get(9), dataTarget.getStartMonthOfMonthly() + "~" + dataTarget.getEndMonthOfMonthly());
+					rowCsv.put(headerCsv.get(107), dataTarget.getStartMonthOfMonthly());
+					rowCsv.put(headerCsv.get(108), dataTarget.getEndMonthOfMonthly());
+				}else if(dataTarget.getTimeStore() == TimeStore.ANNUAL.value){
+					rowCsv.put(headerCsv.get(9), dataTarget.getStartYearOfMonthly() + "~" + dataTarget.getEndYearOfMonthly());
+					rowCsv.put(headerCsv.get(107), dataTarget.getStartYearOfMonthly());
+					rowCsv.put(headerCsv.get(108), dataTarget.getEndYearOfMonthly());
+				}else {
+					rowCsv.put(headerCsv.get(9), "");
+					rowCsv.put(headerCsv.get(107), "");
+					rowCsv.put(headerCsv.get(108), "");
+				}
+				rowCsv.put(headerCsv.get(10), "");
+				rowCsv.put(headerCsv.get(11), "");
+				
+				rowCsv.put(headerCsv.get(12), dataTarget.getSaveForInvest());
+				rowCsv.put(headerCsv.get(13), dataTarget.getOtherCompanyCls());
+				rowCsv.put(headerCsv.get(14), dataTarget.getTableNo());
+				rowCsv.put(headerCsv.get(15), dataTarget.getTableJapanName());
+				rowCsv.put(headerCsv.get(16), dataTarget.getTableEnglishName());
+				rowCsv.put(headerCsv.get(17), dataTarget.getHistoryCls());
+				
+				rowCsv.put(headerCsv.get(18), dataTarget.getHasParentTblFlg());
+				rowCsv.put(headerCsv.get(19), dataTarget.getParentTblJapanName().orElse(""));
+				rowCsv.put(headerCsv.get(20), dataTarget.getParentTblName().orElse(""));
+				
+				rowCsv.put(headerCsv.get(21), dataTarget.getFieldParent1().orElse(""));
+				rowCsv.put(headerCsv.get(22), dataTarget.getFieldParent2().orElse(""));
+				rowCsv.put(headerCsv.get(23), dataTarget.getFieldParent3().orElse(""));
+				rowCsv.put(headerCsv.get(24), dataTarget.getFieldParent4().orElse(""));
+				rowCsv.put(headerCsv.get(25), dataTarget.getFieldParent5().orElse(""));
+				rowCsv.put(headerCsv.get(26), dataTarget.getFieldParent6().orElse(""));
+				rowCsv.put(headerCsv.get(27), dataTarget.getFieldParent7().orElse(""));
+				rowCsv.put(headerCsv.get(28), dataTarget.getFieldParent8().orElse(""));
+				rowCsv.put(headerCsv.get(29), dataTarget.getFieldParent9().orElse(""));
+				rowCsv.put(headerCsv.get(30), dataTarget.getFieldParent10().orElse(""));
+				rowCsv.put(headerCsv.get(31), dataTarget.getFieldChild1().orElse(""));
+				rowCsv.put(headerCsv.get(32), dataTarget.getFieldChild2().orElse(""));
+				rowCsv.put(headerCsv.get(33), dataTarget.getFieldChild3().orElse(""));
+				rowCsv.put(headerCsv.get(34), dataTarget.getFieldChild4().orElse(""));
+				rowCsv.put(headerCsv.get(35), dataTarget.getFieldChild5().orElse(""));
+				rowCsv.put(headerCsv.get(36), dataTarget.getFieldChild6().orElse(""));
+				rowCsv.put(headerCsv.get(37), dataTarget.getFieldChild7().orElse(""));
+				rowCsv.put(headerCsv.get(38), dataTarget.getFieldChild8().orElse(""));
+				rowCsv.put(headerCsv.get(39), dataTarget.getFieldChild9().orElse(""));
+				rowCsv.put(headerCsv.get(40), dataTarget.getFieldChild10().orElse(""));
+				
+				rowCsv.put(headerCsv.get(41), dataTarget.getFieldAcqCid().orElse(""));
+				rowCsv.put(headerCsv.get(42), dataTarget.getFieldAcqEmployeeId().orElse(""));
+				rowCsv.put(headerCsv.get(43), dataTarget.getFieldAcqDateTime().orElse(""));
+				rowCsv.put(headerCsv.get(44), dataTarget.getFieldAcqStartDate().orElse(""));
+				rowCsv.put(headerCsv.get(45), dataTarget.getFieldAcqEndDate().orElse(""));
+				rowCsv.put(headerCsv.get(46), dataTarget.getDefaultCondKeyQuery().orElse(""));
+				
+				rowCsv.put(headerCsv.get(47), dataTarget.getFieldKeyQuery1().orElse(""));
+				rowCsv.put(headerCsv.get(48), dataTarget.getFieldKeyQuery2().orElse(""));
+				rowCsv.put(headerCsv.get(49), dataTarget.getFieldKeyQuery3().orElse(""));
+				rowCsv.put(headerCsv.get(50), dataTarget.getFieldKeyQuery4().orElse(""));
+				rowCsv.put(headerCsv.get(51), dataTarget.getFieldKeyQuery5().orElse(""));
+				rowCsv.put(headerCsv.get(52), dataTarget.getFieldKeyQuery6().orElse(""));
+				rowCsv.put(headerCsv.get(53), dataTarget.getFieldKeyQuery7().orElse(""));
+				rowCsv.put(headerCsv.get(54), dataTarget.getFieldKeyQuery8().orElse(""));
+				rowCsv.put(headerCsv.get(55), dataTarget.getFieldKeyQuery9().orElse(""));
+				rowCsv.put(headerCsv.get(56), dataTarget.getFieldKeyQuery10().orElse(""));
+
+				rowCsv.put(headerCsv.get(57), dataTarget.getClsKeyQuery1().orElse(""));
+				rowCsv.put(headerCsv.get(58), dataTarget.getClsKeyQuery2().orElse(""));
+				rowCsv.put(headerCsv.get(59), dataTarget.getClsKeyQuery3().orElse(""));
+				rowCsv.put(headerCsv.get(60), dataTarget.getClsKeyQuery4().orElse(""));
+				rowCsv.put(headerCsv.get(61), dataTarget.getClsKeyQuery5().orElse(""));
+				rowCsv.put(headerCsv.get(62), dataTarget.getClsKeyQuery6().orElse(""));
+				rowCsv.put(headerCsv.get(63), dataTarget.getClsKeyQuery7().orElse(""));
+				rowCsv.put(headerCsv.get(64), dataTarget.getClsKeyQuery8().orElse(""));
+				rowCsv.put(headerCsv.get(65), dataTarget.getClsKeyQuery9().orElse(""));
+				rowCsv.put(headerCsv.get(66), dataTarget.getClsKeyQuery10().orElse(""));
+
+				rowCsv.put(headerCsv.get(67), dataTarget.getFiledKeyUpdate1().orElse(""));
+				rowCsv.put(headerCsv.get(68), dataTarget.getFiledKeyUpdate2().orElse(""));
+				rowCsv.put(headerCsv.get(69), dataTarget.getFiledKeyUpdate3().orElse(""));
+				rowCsv.put(headerCsv.get(70), dataTarget.getFiledKeyUpdate4().orElse(""));
+				rowCsv.put(headerCsv.get(71), dataTarget.getFiledKeyUpdate5().orElse(""));
+				rowCsv.put(headerCsv.get(72), dataTarget.getFiledKeyUpdate6().orElse(""));
+				rowCsv.put(headerCsv.get(73), dataTarget.getFiledKeyUpdate7().orElse(""));
+				rowCsv.put(headerCsv.get(74), dataTarget.getFiledKeyUpdate8().orElse(""));
+				rowCsv.put(headerCsv.get(75), dataTarget.getFiledKeyUpdate9().orElse(""));
+				rowCsv.put(headerCsv.get(76), dataTarget.getFiledKeyUpdate10().orElse(""));
+				rowCsv.put(headerCsv.get(77), dataTarget.getFiledKeyUpdate11().orElse(""));
+				rowCsv.put(headerCsv.get(78), dataTarget.getFiledKeyUpdate12().orElse(""));
+				rowCsv.put(headerCsv.get(79), dataTarget.getFiledKeyUpdate13().orElse(""));
+				rowCsv.put(headerCsv.get(80), dataTarget.getFiledKeyUpdate14().orElse(""));
+				rowCsv.put(headerCsv.get(81), dataTarget.getFiledKeyUpdate15().orElse(""));
+				rowCsv.put(headerCsv.get(82), dataTarget.getFiledKeyUpdate16().orElse(""));
+				rowCsv.put(headerCsv.get(83), dataTarget.getFiledKeyUpdate17().orElse(""));
+				rowCsv.put(headerCsv.get(84), dataTarget.getFiledKeyUpdate18().orElse(""));
+				rowCsv.put(headerCsv.get(85), dataTarget.getFiledKeyUpdate19().orElse(""));
+				rowCsv.put(headerCsv.get(86), dataTarget.getFiledKeyUpdate20().orElse(""));
+
+				rowCsv.put(headerCsv.get(87), dataTarget.getFieldDate1().orElse(""));
+				rowCsv.put(headerCsv.get(88), dataTarget.getFieldDate2().orElse(""));
+				rowCsv.put(headerCsv.get(89), dataTarget.getFieldDate3().orElse(""));
+				rowCsv.put(headerCsv.get(90), dataTarget.getFieldDate4().orElse(""));
+				rowCsv.put(headerCsv.get(91), dataTarget.getFieldDate5().orElse(""));
+				rowCsv.put(headerCsv.get(92), dataTarget.getFieldDate6().orElse(""));
+				rowCsv.put(headerCsv.get(93), dataTarget.getFieldDate7().orElse(""));
+				rowCsv.put(headerCsv.get(94), dataTarget.getFieldDate8().orElse(""));
+				rowCsv.put(headerCsv.get(95), dataTarget.getFieldDate9().orElse(""));
+				rowCsv.put(headerCsv.get(96), dataTarget.getFieldDate10().orElse(""));
+				rowCsv.put(headerCsv.get(97), dataTarget.getFieldDate11().orElse(""));
+				rowCsv.put(headerCsv.get(98), dataTarget.getFieldDate12().orElse(""));
+				rowCsv.put(headerCsv.get(99), dataTarget.getFieldDate13().orElse(""));
+				rowCsv.put(headerCsv.get(100), dataTarget.getFieldDate14().orElse(""));
+				rowCsv.put(headerCsv.get(101), dataTarget.getFieldDate15().orElse(""));
+				rowCsv.put(headerCsv.get(102), dataTarget.getFieldDate16().orElse(""));
+				rowCsv.put(headerCsv.get(103), dataTarget.getFieldDate17().orElse(""));
+				rowCsv.put(headerCsv.get(104), dataTarget.getFieldDate18().orElse(""));
+				rowCsv.put(headerCsv.get(105), dataTarget.getFieldDate19().orElse(""));
+				rowCsv.put(headerCsv.get(106), dataTarget.getFieldDate20().orElse(""));
+				
+				rowCsv.put(headerCsv.get(109), dataTarget.getCompressedFileName());
+				rowCsv.put(headerCsv.get(110), dataTarget.getInternalFileName());
+				rowCsv.put(headerCsv.get(111), "");
+				rowCsv.put(headerCsv.get(112), 1);
+				rowCsv.put(headerCsv.get(113), 1);
+				
+				csvFile.writeALine(rowCsv);
 			}
-			rowCsv.put(headerCsv.get(10), "");
-			rowCsv.put(headerCsv.get(11), "");
-			
-			rowCsv.put(headerCsv.get(12), dataTarget.getSaveForInvest());
-			rowCsv.put(headerCsv.get(13), dataTarget.getOtherCompanyCls());
-			rowCsv.put(headerCsv.get(14), dataTarget.getTableNo());
-			rowCsv.put(headerCsv.get(15), dataTarget.getTableJapanName());
-			rowCsv.put(headerCsv.get(16), dataTarget.getTableEnglishName());
-			rowCsv.put(headerCsv.get(17), dataTarget.getHistoryCls());
-			
-			rowCsv.put(headerCsv.get(18), dataTarget.getHasParentTblFlg());
-			rowCsv.put(headerCsv.get(19), dataTarget.getParentTblJapanName().orElse(""));
-			rowCsv.put(headerCsv.get(20), dataTarget.getParentTblName().orElse(""));
-			
-			rowCsv.put(headerCsv.get(21), dataTarget.getFieldParent1().orElse(""));
-			rowCsv.put(headerCsv.get(22), dataTarget.getFieldParent2().orElse(""));
-			rowCsv.put(headerCsv.get(23), dataTarget.getFieldParent3().orElse(""));
-			rowCsv.put(headerCsv.get(24), dataTarget.getFieldParent4().orElse(""));
-			rowCsv.put(headerCsv.get(25), dataTarget.getFieldParent5().orElse(""));
-			rowCsv.put(headerCsv.get(26), dataTarget.getFieldParent6().orElse(""));
-			rowCsv.put(headerCsv.get(27), dataTarget.getFieldParent7().orElse(""));
-			rowCsv.put(headerCsv.get(28), dataTarget.getFieldParent8().orElse(""));
-			rowCsv.put(headerCsv.get(29), dataTarget.getFieldParent9().orElse(""));
-			rowCsv.put(headerCsv.get(30), dataTarget.getFieldParent10().orElse(""));
-			rowCsv.put(headerCsv.get(31), dataTarget.getFieldChild1().orElse(""));
-			rowCsv.put(headerCsv.get(32), dataTarget.getFieldChild2().orElse(""));
-			rowCsv.put(headerCsv.get(33), dataTarget.getFieldChild3().orElse(""));
-			rowCsv.put(headerCsv.get(34), dataTarget.getFieldChild4().orElse(""));
-			rowCsv.put(headerCsv.get(35), dataTarget.getFieldChild5().orElse(""));
-			rowCsv.put(headerCsv.get(36), dataTarget.getFieldChild6().orElse(""));
-			rowCsv.put(headerCsv.get(37), dataTarget.getFieldChild7().orElse(""));
-			rowCsv.put(headerCsv.get(38), dataTarget.getFieldChild8().orElse(""));
-			rowCsv.put(headerCsv.get(39), dataTarget.getFieldChild9().orElse(""));
-			rowCsv.put(headerCsv.get(40), dataTarget.getFieldChild10().orElse(""));
-			
-			rowCsv.put(headerCsv.get(41), dataTarget.getFieldAcqCid().orElse(""));
-			rowCsv.put(headerCsv.get(42), dataTarget.getFieldAcqEmployeeId().orElse(""));
-			rowCsv.put(headerCsv.get(43), dataTarget.getFieldAcqDateTime().orElse(""));
-			rowCsv.put(headerCsv.get(44), dataTarget.getFieldAcqStartDate().orElse(""));
-			rowCsv.put(headerCsv.get(45), dataTarget.getFieldAcqEndDate().orElse(""));
-			rowCsv.put(headerCsv.get(46), dataTarget.getDefaultCondKeyQuery().orElse(""));
-			
-			rowCsv.put(headerCsv.get(47), dataTarget.getFieldKeyQuery1().orElse(""));
-			rowCsv.put(headerCsv.get(48), dataTarget.getFieldKeyQuery2().orElse(""));
-			rowCsv.put(headerCsv.get(49), dataTarget.getFieldKeyQuery3().orElse(""));
-			rowCsv.put(headerCsv.get(50), dataTarget.getFieldKeyQuery4().orElse(""));
-			rowCsv.put(headerCsv.get(51), dataTarget.getFieldKeyQuery5().orElse(""));
-			rowCsv.put(headerCsv.get(52), dataTarget.getFieldKeyQuery6().orElse(""));
-			rowCsv.put(headerCsv.get(53), dataTarget.getFieldKeyQuery7().orElse(""));
-			rowCsv.put(headerCsv.get(54), dataTarget.getFieldKeyQuery8().orElse(""));
-			rowCsv.put(headerCsv.get(55), dataTarget.getFieldKeyQuery9().orElse(""));
-			rowCsv.put(headerCsv.get(56), dataTarget.getFieldKeyQuery10().orElse(""));
+			csvFile.destroy();
 
-			rowCsv.put(headerCsv.get(57), dataTarget.getClsKeyQuery1().orElse(""));
-			rowCsv.put(headerCsv.get(58), dataTarget.getClsKeyQuery2().orElse(""));
-			rowCsv.put(headerCsv.get(59), dataTarget.getClsKeyQuery3().orElse(""));
-			rowCsv.put(headerCsv.get(60), dataTarget.getClsKeyQuery4().orElse(""));
-			rowCsv.put(headerCsv.get(61), dataTarget.getClsKeyQuery5().orElse(""));
-			rowCsv.put(headerCsv.get(62), dataTarget.getClsKeyQuery6().orElse(""));
-			rowCsv.put(headerCsv.get(63), dataTarget.getClsKeyQuery7().orElse(""));
-			rowCsv.put(headerCsv.get(64), dataTarget.getClsKeyQuery8().orElse(""));
-			rowCsv.put(headerCsv.get(65), dataTarget.getClsKeyQuery9().orElse(""));
-			rowCsv.put(headerCsv.get(66), dataTarget.getClsKeyQuery10().orElse(""));
-
-			rowCsv.put(headerCsv.get(67), dataTarget.getFiledKeyUpdate1().orElse(""));
-			rowCsv.put(headerCsv.get(68), dataTarget.getFiledKeyUpdate2().orElse(""));
-			rowCsv.put(headerCsv.get(69), dataTarget.getFiledKeyUpdate3().orElse(""));
-			rowCsv.put(headerCsv.get(70), dataTarget.getFiledKeyUpdate4().orElse(""));
-			rowCsv.put(headerCsv.get(71), dataTarget.getFiledKeyUpdate5().orElse(""));
-			rowCsv.put(headerCsv.get(72), dataTarget.getFiledKeyUpdate6().orElse(""));
-			rowCsv.put(headerCsv.get(73), dataTarget.getFiledKeyUpdate7().orElse(""));
-			rowCsv.put(headerCsv.get(74), dataTarget.getFiledKeyUpdate8().orElse(""));
-			rowCsv.put(headerCsv.get(75), dataTarget.getFiledKeyUpdate9().orElse(""));
-			rowCsv.put(headerCsv.get(76), dataTarget.getFiledKeyUpdate10().orElse(""));
-			rowCsv.put(headerCsv.get(77), dataTarget.getFiledKeyUpdate11().orElse(""));
-			rowCsv.put(headerCsv.get(78), dataTarget.getFiledKeyUpdate12().orElse(""));
-			rowCsv.put(headerCsv.get(79), dataTarget.getFiledKeyUpdate13().orElse(""));
-			rowCsv.put(headerCsv.get(80), dataTarget.getFiledKeyUpdate14().orElse(""));
-			rowCsv.put(headerCsv.get(81), dataTarget.getFiledKeyUpdate15().orElse(""));
-			rowCsv.put(headerCsv.get(82), dataTarget.getFiledKeyUpdate16().orElse(""));
-			rowCsv.put(headerCsv.get(83), dataTarget.getFiledKeyUpdate17().orElse(""));
-			rowCsv.put(headerCsv.get(84), dataTarget.getFiledKeyUpdate18().orElse(""));
-			rowCsv.put(headerCsv.get(85), dataTarget.getFiledKeyUpdate19().orElse(""));
-			rowCsv.put(headerCsv.get(86), dataTarget.getFiledKeyUpdate20().orElse(""));
-
-			rowCsv.put(headerCsv.get(87), dataTarget.getFieldDate1().orElse(""));
-			rowCsv.put(headerCsv.get(88), dataTarget.getFieldDate2().orElse(""));
-			rowCsv.put(headerCsv.get(89), dataTarget.getFieldDate3().orElse(""));
-			rowCsv.put(headerCsv.get(90), dataTarget.getFieldDate4().orElse(""));
-			rowCsv.put(headerCsv.get(91), dataTarget.getFieldDate5().orElse(""));
-			rowCsv.put(headerCsv.get(92), dataTarget.getFieldDate6().orElse(""));
-			rowCsv.put(headerCsv.get(93), dataTarget.getFieldDate7().orElse(""));
-			rowCsv.put(headerCsv.get(94), dataTarget.getFieldDate8().orElse(""));
-			rowCsv.put(headerCsv.get(95), dataTarget.getFieldDate9().orElse(""));
-			rowCsv.put(headerCsv.get(96), dataTarget.getFieldDate10().orElse(""));
-			rowCsv.put(headerCsv.get(97), dataTarget.getFieldDate11().orElse(""));
-			rowCsv.put(headerCsv.get(98), dataTarget.getFieldDate12().orElse(""));
-			rowCsv.put(headerCsv.get(99), dataTarget.getFieldDate13().orElse(""));
-			rowCsv.put(headerCsv.get(100), dataTarget.getFieldDate14().orElse(""));
-			rowCsv.put(headerCsv.get(101), dataTarget.getFieldDate15().orElse(""));
-			rowCsv.put(headerCsv.get(102), dataTarget.getFieldDate16().orElse(""));
-			rowCsv.put(headerCsv.get(103), dataTarget.getFieldDate17().orElse(""));
-			rowCsv.put(headerCsv.get(104), dataTarget.getFieldDate18().orElse(""));
-			rowCsv.put(headerCsv.get(105), dataTarget.getFieldDate19().orElse(""));
-			rowCsv.put(headerCsv.get(106), dataTarget.getFieldDate20().orElse(""));
-			
-			rowCsv.put(headerCsv.get(109), dataTarget.getCompressedFileName());
-			rowCsv.put(headerCsv.get(110), dataTarget.getInternalFileName());
-			rowCsv.put(headerCsv.get(111), "");
-			rowCsv.put(headerCsv.get(112), 1);
-			rowCsv.put(headerCsv.get(113), 1);
-
-
-			// set time of deletion
-			//setFromToTimeDel(rowCsv, headerCsv, dataTarget);
-
-			// set name file
-			//setNameFileDel(rowCsv, headerCsv, dataTarget);
-
-			dataSourceCsv.add(rowCsv);
+			return ResultState.NORMAL_END;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResultState.ABNORMAL_END;
 		}
-
-		CSVFileData fileData = new CSVFileData(TABLE_NAME_FILE + FILE_EXTENSION, headerCsv, dataSourceCsv);
-		generator.generate(generatorContext, fileData);
-		return fileData;
 	}
 
 	/**
@@ -701,27 +700,28 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	 * @param delId
 	 * @return
 	 */
-	private CSVFileData generalEmployeesToCsv(FileGeneratorContext generatorContext, String delId) {
-		List<EmployeeDeletion> employeeDeletions = repoEmployeesDel.getEmployeesDeletionListById(delId);
-		// Add Table to CSV2
-		List<String> headerCsv2 = this.getHeaderForEmployeeFile();
-		List<Map<String, Object>> dataSourceCsv2 = new ArrayList<>();
-		for (EmployeeDeletion employeeDeletion : employeeDeletions) {
-			Map<String, Object> rowCsv2 = new HashMap<>();
-			rowCsv2.put(headerCsv2.get(0), employeeDeletion.getEmployeeId());
-			rowCsv2.put(headerCsv2.get(1), employeeDeletion.getEmployeeCode());
-			rowCsv2.put(headerCsv2.get(2), employeeDeletion.getBusinessName() != null
-					? CommonKeyCrypt.encrypt(employeeDeletion.getBusinessName().v()) : "");
-			
-//			rowCsv2.put(headerCsv2.get(2), Base64.getEncoder().encodeToString(employeeDeletion.getBusinessName().v().getBytes()));
-//			rowCsv2.put(headerCsv2.get(2), CommonKeyCrypt.encrypt(employeeDeletion.getBusinessName().v()));  << error Illegal key size
-			dataSourceCsv2.add(rowCsv2);
+	private ResultState generalEmployeesToCsv(FileGeneratorContext generatorContext, String delId) {
+		try {
+			List<EmployeeDeletion> employeeDeletions = repoEmployeesDel.getEmployeesDeletionListById(delId);
+			List<String> headerCsvListEmp = this.getHeaderForEmployeeFile();
+			CsvReportWriter csvFile = generator.generate(generatorContext,EMPLOYEE_NAME_FILE + FILE_EXTENSION, headerCsvListEmp, "UTF-8");
+			for (EmployeeDeletion employeeDeletion : employeeDeletions) {
+				Map<String, Object> rowCsv = new HashMap<>();
+				rowCsv.put(headerCsvListEmp.get(0), employeeDeletion.getEmployeeId());
+				rowCsv.put(headerCsvListEmp.get(1), employeeDeletion.getEmployeeCode());
+				rowCsv.put(headerCsvListEmp.get(2), employeeDeletion.getBusinessName() != null
+						? CommonKeyCrypt.encrypt(employeeDeletion.getBusinessName().v()) : "");
+				
+				csvFile.writeALine(rowCsv);
+			}
+			csvFile.destroy();
+
+			return ResultState.NORMAL_END;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResultState.ABNORMAL_END;
 		}
-
-		CSVFileData fileData = new CSVFileData(EMPLOYEE_NAME_FILE + FILE_EXTENSION, headerCsv2, dataSourceCsv2);
-		generator.generate(generatorContext, fileData);
-
-		return fileData;
+		
 	}
 
 	/**
