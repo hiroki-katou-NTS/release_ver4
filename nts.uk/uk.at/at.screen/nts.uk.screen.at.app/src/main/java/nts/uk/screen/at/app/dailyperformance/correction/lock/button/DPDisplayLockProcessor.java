@@ -41,6 +41,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.WorkInfoOfDailyPerfo
 import nts.uk.screen.at.app.dailyperformance.correction.dto.checkapproval.ApproveRootStatusForEmpDto;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.CheckIndentityMonth;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityMonthParam;
+import nts.uk.screen.at.app.dailyperformance.correction.lock.CheckLockDataDaily;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.DPLock;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.DPLockDto;
 import nts.uk.screen.at.app.dailyperformance.correction.text.DPText;
@@ -70,6 +71,9 @@ public class DPDisplayLockProcessor {
 	
 	@Inject
 	private IFindDataDCRecord iFindDataDCRecord;
+	
+	@Inject
+	private CheckLockDataDaily checkLockDataDaily;
 
 	public DailyPerformanceCorrectionDto processDisplayLock(DPDisplayLockParam param) {
 		DailyPerformanceCorrectionDto result = new DailyPerformanceCorrectionDto();
@@ -213,6 +217,16 @@ public class DPDisplayLockProcessor {
 		}
 		result.setLstHideControl(lstCellHideControl);
 		result.setLstData(lstData);
+		// bug 107966 disable edit flex in case lock
+		if (displayFormat == 0) {
+			if (param.isShowLock()) {
+				boolean disableFlex = checkLockDataDaily.checkLockInPeriod(result.getLstData(),
+						param.getPeriodLock() == null ? null : new DatePeriod(param.getPeriodLock().getStartDate(), param.getPeriodLock().getEndDate()));
+				result.setLockDisableFlex(disableFlex);
+			} else {
+				result.setLockDisableFlex(false);
+			}
+		}
 		return result;
 	}
 	

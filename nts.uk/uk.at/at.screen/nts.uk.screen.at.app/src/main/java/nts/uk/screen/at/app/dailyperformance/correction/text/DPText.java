@@ -53,6 +53,8 @@ public class DPText {
 	
 	public static final String LOCK_HIST = "H";
 	
+	public static final List<String> LIST_LOCK_EDIT_FLEX = Arrays.asList(LOCK_EDIT_CELL_DAY, LOCK_EDIT_CELL_MONTH, LOCK_EDIT_CELL_WORK, LOCK_CHECK_MONTH, LOCK_CONFIRM_MONTH, LOCK_HIST);
+	
 	public static final String DATE_FORMAT = "yyyy-MM-dd";
 	
 	public static final String LOCK_APPLICATION = "Application";
@@ -96,5 +98,5 @@ public class DPText {
 	public static final List<Integer> ITEM_INSERT_STAMP_SOURCE = Arrays.asList(31, 34, 41, 44, 75, 79, 83, 77, 81, 85, 51, 59, 67, 53, 61, 69);
 	
 	public static final List<Integer> ALL_ITEM_TYPE_MASTER = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14);
-
+	
 }

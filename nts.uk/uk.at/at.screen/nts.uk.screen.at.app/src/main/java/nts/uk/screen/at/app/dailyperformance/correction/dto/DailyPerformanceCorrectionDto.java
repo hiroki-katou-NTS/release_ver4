@@ -106,6 +106,10 @@ public class DailyPerformanceCorrectionDto {
 	
 	private List<DPHideControlCell> lstCellDisByLock = new ArrayList<>();
 	
+	private boolean lockDisableFlex;
+	
+	private DateRange rangeLock;
+	
 	public DailyPerformanceCorrectionDto() {
 		super();
 		this.lstFixedHeader = DPHeaderDto.GenerateFixedHeader();
@@ -122,6 +126,7 @@ public class DailyPerformanceCorrectionDto {
 		this.indentityMonthResult = new IndentityMonthResult(false, false, true);
 		this.errors = new ArrayList<>();
 		this.errorInfomation = DCErrorInfomation.NORMAL.value;
+		this.lockDisableFlex = false;
 	}
 
 	/** Check if employeeId is login user */
