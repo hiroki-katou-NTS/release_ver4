@@ -11,6 +11,7 @@ import java.util.Optional;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureInfo;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -83,4 +84,10 @@ public interface ClosureService {
 	List<Closure> getClosureDataByEmployees(List<String> employeeIds, GeneralDate baseDate);
 	
 	Map<String, Closure> getClosureByEmployees(List<String> employeeIds, GeneralDate baseDate);
+	/**
+	 * 指定した年月の期間を算出する
+	 * @param baseDate
+	 * @return True: 含まれている　を返す, False: 含まれていない　を返す
+	 */
+	boolean includeDate(GeneralDate baseDate, Closure closure);
 }

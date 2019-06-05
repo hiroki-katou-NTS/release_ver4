@@ -108,6 +108,8 @@ public class FlexInfoDisplayChange {
 		//checkShortage.createRetiredFlag(checkShortage.isRetiredFlag());
 		//if (condition.equals("0:00") && !checkFlex) {
 		dataMonth.createNotForward(messageE22(conditionResult.getMessage()));
+		dataMonth.createPeriodCheck(
+				checkShortage.getPeriodCheckLock().isPresent() ? checkShortage.getPeriodCheckLock().get() : null);
 		//}
 		return dataMonth.createCanFlex(checkFlex).createShowFlex(showFlex()).createCalcFlex(calcFlex);
 	}

@@ -122,10 +122,13 @@ public class UpdateAllDomainMonthServiceImpl implements UpdateAllDomainMonthServ
 							employeeId, targetDate, yearMonth, closureId.value, closureDate);
 				}
 				
+				// anh lẩu bảo fix
+				this.empErrorRepo.removeAll(employeeId, yearMonth, closureId, closureDate);
+				// 
 				d.getEmployeeMonthlyPerErrorList().forEach(x -> empErrorRepo.insertAll(x));
-				if (d.getEmployeeMonthlyPerErrorList().isEmpty()){
-					this.empErrorRepo.removeAll(employeeId, yearMonth, closureId, closureDate);
-				}
+				//if (d.getEmployeeMonthlyPerErrorList().isEmpty()){
+				// this.empErrorRepo.removeAll(employeeId, yearMonth, closureId, closureDate);
+				//}
 				
 				// 上で全削除しているので、INSERTのみ
 				d.getAttendanceTimeOfWeekList().stream().forEach(atw -> this.timeWeekRepo.persist(atw));

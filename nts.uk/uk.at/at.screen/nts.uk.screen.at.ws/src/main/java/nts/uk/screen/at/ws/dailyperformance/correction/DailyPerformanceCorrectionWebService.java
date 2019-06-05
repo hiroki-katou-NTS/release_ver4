@@ -404,6 +404,7 @@ public class DailyPerformanceCorrectionWebService {
 	}
 
 	private List<DailyRecordDto> cloneListDto(List<DailyRecordDto> dtos){
+		if(dtos == null) return new ArrayList<>();
 		return dtos.stream().map(x -> x.clone()).collect(Collectors.toList());
 	}
 	

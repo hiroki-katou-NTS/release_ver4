@@ -230,6 +230,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         showLock: KnockoutObservable<boolean> = ko.observable(true);
         unLock: KnockoutObservable<boolean> = ko.observable(false);
         hideLock: KnockoutObservable<boolean> = ko.observable(true);
+        lockDisableFlex : KnockoutObservable<boolean> = ko.observable(true);
+        periodCheckLock : any = null;
 
         itemChange: any = [];
 
@@ -662,6 +664,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             self.hideLock(self.showButton().available12());
             self.showLock(true);
             self.unLock(false);
+            self.lockDisableFlex(data.lockDisableFlex);
+            self.periodCheckLock = data.rangeLock;
             //            self.referenceVacation(new ReferenceVacation(data.yearHolidaySettingDto == null ? false : data.yearHolidaySettingDto.manageAtr, data.substVacationDto == null ? false : data.substVacationDto.manageAtr, data.compensLeaveComDto == null ? false : data.compensLeaveComDto.manageAtr, data.com60HVacationDto == null ? false : data.com60HVacationDto.manageAtr, self.showButton()));
             // Fixed Header
             self.fixHeaders(data.lstFixedHeader);
@@ -2138,6 +2142,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 nts.uk.ui.block.invisible();
                 nts.uk.ui.block.grayout();
                 service.startScreen(param).done((data) => {
+                    self.lockDisableFlex(data.lockDisableFlex);
+                    self.periodCheckLock = data.rangeLock;
                     self.lstCellDisByLock = data.lstCellDisByLock;
                     if (!_.isEmpty(data.errors)) {
                         let errors = [];
@@ -2631,6 +2637,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             //self.lstDomainOld = data.domainOld;
                             //self.lstDomainEdit = _.cloneDeep(data.domainOld);
                             self.lstCellDisByLock = data.lstCellDisByLock;
+                            self.lockDisableFlex(data.lockDisableFlex);
                             self.dataAll(data);
                             self.removeErrorRefer();
                             self.createSumColumn(data);
@@ -2870,12 +2877,14 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 displayFormat: self.displayFormat(),
                 lstData: lstData,
                 lstHeader: self.lstHeaderReceive,
-                showLock: showLock
+                showLock: showLock,
+                periodLock: self.periodCheckLock == null ? null : {startDate: moment(self.periodCheckLock.startDate), endDate: moment(self.periodCheckLock.endDate)}
             }
 
             let dfd = $.Deferred();
             service.lock(param).done((data) => {
                 nts.uk.ui.block.clear();
+                self.lockDisableFlex(data.lockDisableFlex);
                 self.indentityMonth(data.indentityMonthResult);
                 let dataUpdate = $("#dpGrid").mGrid("updatedCells");
                 let dataSourceRow = _.cloneDeep(self.formatDate(data.lstData));

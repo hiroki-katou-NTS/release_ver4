@@ -88,6 +88,8 @@ public class CheckShortageFlex {
 				}
 			}
 		}
+		//bug 107966 disable edit flex
+		resultCheck.createPeriodCheck(datePeriod);
 		// TODO 対象期間の日の承認が済んでいるかチェックする
 		Optional<ApprovalDayComplete> approvalOpt = checkApprovalDayComplete.checkApprovalDayComplete(employeeId, datePeriod);
 		if (approvalOpt.isPresent() && !approvalOpt.get().isApproved()) {

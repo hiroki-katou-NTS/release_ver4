@@ -7,9 +7,12 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.eclipse.persistence.exceptions.OptimisticLockException;
+
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.workchange.WorkChangeCommonReflectPara;
 import nts.arc.time.GeneralDate;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
@@ -44,8 +47,8 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDailyRepos;
 	@Override
 	public boolean absenceReflect(WorkChangeCommonReflectPara param, boolean isPre) {
+		CommonReflectParameter absencePara = param.getCommon();
 		try {
-			CommonReflectParameter absencePara = param.getCommon();
 			for(int i = 0; absencePara.getStartDate().daysTo(absencePara.getEndDate()) - i >= 0; i++){
 				GeneralDate loopDate = absencePara.getStartDate().addDays(i);
 				WorkInfoOfDailyPerformance dailyInfor = workRepository.find(absencePara.getEmployeeId(), loopDate).get();
@@ -79,10 +82,21 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 				commonService.calculateOfAppReflect(null, absencePara.getEmployeeId(), loopDate, false);
 			}
 			return true;
-		} catch (Exception e) {
+		} catch (Exception ex) {
+			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
+			if(!isError) {
+				throw ex;
+			}
+			commonService.createLogError(absencePara.getEmployeeId(), absencePara.getBaseDate(), absencePara.getExcLogId());
 			return false;
 		}
 	}
+
+
+
+	
+
+	
 
 	@Override
 	public WorkInfoOfDailyPerformance reflectScheStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode, boolean isReflect, WorkInfoOfDailyPerformance dailyInfor) {

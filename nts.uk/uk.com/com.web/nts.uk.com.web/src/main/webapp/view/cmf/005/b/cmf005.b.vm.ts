@@ -64,7 +64,8 @@ module nts.uk.com.view.cmf005.b.viewmodel {
         //B7_1
         saveBeforDeleteOption: KnockoutObservableArray<model.ItemModel>;
         isSaveBeforeDeleteFlg: number;
-
+        isDelete : KnockoutObservableArray<boolean>;
+        
         //B8_1
         isExistCompressPasswordFlg: KnockoutObservable<boolean>;
         passwordForCompressFile: KnockoutObservable<string>;
@@ -252,7 +253,7 @@ module nts.uk.com.view.cmf005.b.viewmodel {
                 startDate: moment.utc().subtract(1, "M").add(1, "d").format("YYYY/MM/DD"),
                 endDate: moment.utc().format("YYYY/MM/DD")
             });
-            self.monthValue = ko.observable({ startDate: moment.utc().subtract(1, "M").format("YYYY/MM"), endDate: moment.utc().format("YYYY/MM") });
+            self.monthValue = ko.observable({ startDate: moment.utc().subtract(1, "M").format("YYYY/MM"), endDate: moment.utc().subtract(1, "M").format("YYYY/MM") });
             self.yearValue = ko.observable({ startDate: moment.utc().format("YYYY"), endDate: moment.utc().format("YYYY") });
 
             //B7_2_1
@@ -260,6 +261,7 @@ module nts.uk.com.view.cmf005.b.viewmodel {
             //B8_2_1
             self.isExistCompressPasswordFlg = ko.observable(true);
             self.passwordConstraint = ko.observable("");
+            self.isDelete = ko.observable(self.isSaveBeforeDeleteFlg() && self.isExistCompressPasswordFlg());
             /**
             * Clear validate
              */
@@ -289,6 +291,22 @@ module nts.uk.com.view.cmf005.b.viewmodel {
                  nts.uk.ui.errors.clearAll();
                  $(".validate_form .ntsDatepicker").trigger("validate");
              }); 
+            
+             self.isSaveBeforeDeleteFlg.subscribe(function(value) {
+                 if (value == 0) {
+                     $("#B8_3_2").ntsError('clear');
+                     $('#B8_2_2').ntsError('clear');
+                 }
+                 self.isDelete((value == 1 ? true : false) && self.isExistCompressPasswordFlg());
+
+             });
+            self.isExistCompressPasswordFlg.subscribe(function(value) {
+                if (value == false) {
+                    $("#B8_3_2").ntsError('clear');
+                    $('#B8_2_2').ntsError('clear');
+                }
+                self.isDelete(value && self.isSaveBeforeDeleteFlg());
+             });
         }
 
         /**
@@ -835,5 +853,3 @@ module nts.uk.com.view.cmf005.b.viewmodel {
         }
     }
 }
-
-

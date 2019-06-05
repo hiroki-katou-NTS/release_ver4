@@ -6,7 +6,10 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.eclipse.persistence.exceptions.OptimisticLockException;
+
 import nts.arc.time.GeneralDate;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workrecord.AttendanceTimeByWorkOfDaily;
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workrecord.repo.AttendanceTimeByWorkOfDailyRepository;
@@ -137,6 +140,11 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 			return true;
 	
 		} catch (Exception ex) {
+			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
+			if(!isError) {
+				throw ex;
+			}
+			commonService.createLogError(param.getEmployeeId(), param.getDateInfo(), param.getExcLogId());
 			return false;
 		}
 	}

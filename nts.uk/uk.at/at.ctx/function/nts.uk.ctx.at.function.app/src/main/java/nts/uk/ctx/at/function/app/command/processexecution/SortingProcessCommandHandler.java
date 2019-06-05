@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ import nts.uk.ctx.at.function.dom.processexecution.tasksetting.ExecutionTaskSett
 //import nts.uk.shr.com.task.schedule.UkJobScheduler;
 @Stateless
 @Slf4j
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class SortingProcessCommandHandler extends CommandHandler<ScheduleExecuteCommand> {
 	@Inject
 	private ExecuteProcessExecutionAutoCommandHandler execHandler;

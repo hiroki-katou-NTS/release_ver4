@@ -32,6 +32,6 @@ public class SspmtDataRecoverLogPk implements Serializable {
 	 * 対象者
 	 */
 	@Basic(optional = false)
-	@Column(name = "TARGET")
-	public String target;
+	@Column(name = "LOG_SEQUENCE_NUMBER")
+	public int logSequenceNumber;
 }

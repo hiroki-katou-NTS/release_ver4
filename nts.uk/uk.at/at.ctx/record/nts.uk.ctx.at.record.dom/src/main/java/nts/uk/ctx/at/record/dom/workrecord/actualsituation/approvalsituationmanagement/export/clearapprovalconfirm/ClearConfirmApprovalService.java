@@ -61,11 +61,18 @@ public class ClearConfirmApprovalService {
 	/**
 	 * 確認、承認のクリア
 	 */
-	@SuppressWarnings("unchecked")
 	public void clearConfirmApproval(String employeeId, List<GeneralDate> lstDate, Optional<ApprovalProcessingUseSetting> approvalSetOpt) {
+		clearConfirmApproval(employeeId, lstDate, Optional.empty(), Optional.empty());
+	}
+	
+	/**
+	 * 確認、承認のクリア
+	 */
+	@SuppressWarnings("unchecked")
+	public void clearConfirmApproval(String employeeId, List<GeneralDate> lstDate, Optional<ApprovalProcessingUseSetting> approvalSetOpt, Optional<IdentityProcessUseSet> iPUS) {
 		String companyId = AppContexts.user().companyId();
 		// ドメインモデル「本人確認処理の利用設定」を取得する
-		Optional<IdentityProcessUseSet> indenUseSetOpt = identityProcessUseSetRepository.findByKey(companyId);
+		Optional<IdentityProcessUseSet> indenUseSetOpt = iPUS.isPresent() ? iPUS : identityProcessUseSetRepository.findByKey(companyId);
 		if (indenUseSetOpt.isPresent() && indenUseSetOpt.get().isUseConfirmByYourself()) {
 			// ドメインモデル「日の本人確認」を削除する
 			identificationRepo.removeByEmpListDate(employeeId, lstDate);

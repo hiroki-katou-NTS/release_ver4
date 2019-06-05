@@ -28,6 +28,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureClassification;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureHistory;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureInfo;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.CurrentMonth;
@@ -493,5 +494,20 @@ public class DefaultClosureServiceImpl implements ClosureService {
 			}
 			return null;
 		}));
+	}
+
+	@Override
+	public boolean includeDate(GeneralDate baseDate, Closure closure) {
+		//アルゴリズム「当月の期間を算出する」を実行する
+		DatePeriod getClosurePeriod = this.getClosurePeriod(closure.getClosureId().value, 
+				closure.getClosureMonth().getProcessingYm(), Optional.of(closure));
+		//基準日が当月に含まれているかチェックする
+		//開始日＜＝基準日＜＝終了日(start date<=base date <= end date)
+		if(getClosurePeriod.start().beforeOrEquals(baseDate)
+				&& getClosurePeriod.end().afterOrEquals(baseDate)) {
+			//含まれている　を返す
+			return true;
+		}
+		return false;
 	}
 }

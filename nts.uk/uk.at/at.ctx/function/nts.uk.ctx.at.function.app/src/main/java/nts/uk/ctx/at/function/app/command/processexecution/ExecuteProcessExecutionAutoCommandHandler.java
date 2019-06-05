@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.function.app.command.processexecution;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +15,9 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.eclipse.persistence.exceptions.DatabaseException;
+
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 //import lombok.val;
 import nts.arc.layer.app.command.AsyncCommandHandler;
@@ -25,6 +30,7 @@ import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.function.app.command.processexecution.approuteupdatedaily.AppRouteUpdateDailyService;
 import nts.uk.ctx.at.function.app.command.processexecution.approuteupdatemonthly.AppRouteUpdateMonthlyService;
@@ -77,8 +83,13 @@ import nts.uk.ctx.at.function.dom.processexecution.tasksetting.ExecutionTaskSett
 import nts.uk.ctx.at.function.dom.processexecution.updateprocessexecsetting.changepersionlist.ChangePersionList;
 import nts.uk.ctx.at.function.dom.processexecution.updateprocessexecsetting.changepersionlist.ListLeaderOrNotEmp;
 import nts.uk.ctx.at.function.dom.processexecution.updateprocessexecsetting.changepersionlistforsche.ChangePersionListForSche;
+import nts.uk.ctx.at.function.dom.statement.EmployeeGeneralInfoAdapter;
+import nts.uk.ctx.at.function.dom.statement.dtoimport.EmployeeGeneralInfoImport;
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
+import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExWorkplaceHistItemImport;
+import nts.uk.ctx.at.record.dom.affiliationinformation.wkplaceinfochangeperiod.WkplaceInfoChangePeriod;
+import nts.uk.ctx.at.record.dom.affiliationinformation.wktypeinfochangeperiod.WkTypeInfoChangePeriod;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployeeHistory;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.repository.BusinessTypeEmpOfHistoryRepository;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultDomainServiceImpl.ProcessState;
@@ -132,6 +143,8 @@ import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleExecutionLogRepository;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicScheduleRepository;
 import nts.uk.ctx.at.shared.app.service.workrule.closure.ClosureEmploymentService;
 import nts.uk.ctx.at.shared.dom.common.CompanyId;
+import nts.uk.ctx.at.shared.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmpDto;
+import nts.uk.ctx.at.shared.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmpHisAdaptor;
 import nts.uk.ctx.at.shared.dom.ot.frame.NotUseAtr;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
@@ -251,6 +264,18 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	
 	@Inject
 	private ChangePersionListForSche changePersionListForSche;
+	
+	@Inject
+	private EmployeeGeneralInfoAdapter employeeGeneralInfoAdapter;
+	
+	@Inject
+	private WkplaceInfoChangePeriod wkplaceInfoChangePeriod;
+	
+	@Inject
+	private WkTypeInfoChangePeriod wkTypeInfoChangePeriod;
+	
+	@Inject
+	private BusinessTypeOfEmpHisAdaptor businessTypeOfEmpHisAdaptor;
 	
 	public static int MAX_DELAY_PARALLEL = 0;
 
@@ -1816,11 +1841,49 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						// 「作成した開始日」～「取得した日別実績の勤務情報.年月日」を対象期間とする
 						GeneralDate maxDate = listWorkInfo.stream().map(u -> u.getYmd()).max(GeneralDate::compareTo)
 								.get();
-						isHasInterrupt = this.RedoDailyPerformanceProcessing(context, companyId, empLeader,
-								new DatePeriod(calculateDate, maxDate), empCalAndSumExeLog.getEmpCalAndSumExecLogID(),
-								dailyCreateLog, procExec);
-						if (isHasInterrupt) {
-							break;
+						if (calculateDate.beforeOrEquals(maxDate)) {
+							DatePeriod datePeriod = new DatePeriod(calculateDate, maxDate);
+							List<DatePeriod> listDatePeriodWorkplace = new ArrayList<>();
+							List<DatePeriod> listDatePeriodWorktype = new ArrayList<>();
+							List<DatePeriod> listDatePeriodAll = new ArrayList<>();
+							//INPUT．「異動時に再作成」をチェックする
+							if(procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTransfer()) {
+								//社員ID（List）と期間から個人情報を取得する - RQ401	
+								EmployeeGeneralInfoImport employeeGeneralInfoImport = employeeGeneralInfoAdapter.getEmployeeGeneralInfo(Arrays.asList(empLeader), datePeriod, false, false, false, true, false); //職場を取得するか　=　True
+								if(!employeeGeneralInfoImport.getExWorkPlaceHistoryImports().isEmpty()) {
+									nts.uk.ctx.at.function.dom.statement.dtoimport.ExWorkPlaceHistoryImport exWorkPlaceHistoryImportFn = employeeGeneralInfoImport.getExWorkPlaceHistoryImports().get(0);
+									List<ExWorkplaceHistItemImport> workplaceItems = exWorkPlaceHistoryImportFn
+											.getWorkplaceItems().stream()
+											.map(c -> new ExWorkplaceHistItemImport(c.getHistoryId(), c.getPeriod(),
+													c.getWorkplaceId()))
+											.collect(Collectors.toList());
+									//職場情報変更期間を求める
+									listDatePeriodWorkplace =  wkplaceInfoChangePeriod.getWkplaceInfoChangePeriod(empLeader, datePeriod, workplaceItems, true);
+								}else {
+									listDatePeriodWorkplace.add(datePeriod);
+								}
+							}
+							boolean check =  false;
+							if(listDatePeriodWorkplace.size() == 1 && listDatePeriodWorkplace.get(0).equals(datePeriod)) {
+								listDatePeriodAll.addAll(listDatePeriodWorkplace);
+								check = true;
+							}
+							//INPUT．「勤務種別変更時に再作成」をチェックする
+							if(procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTypeChangePerson() && !check ) {
+								//<<Public>> 社員ID(List)、期間で期間分の勤務種別情報を取得する
+								List<BusinessTypeOfEmpDto> listBusinessTypeOfEmpDto = businessTypeOfEmpHisAdaptor.findByCidSidBaseDate(companyId, Arrays.asList(empLeader), datePeriod);
+								//勤務種別情報変更期間を求める
+								listDatePeriodWorktype = wkTypeInfoChangePeriod.getWkTypeInfoChangePeriod(empLeader, datePeriod, listBusinessTypeOfEmpDto, true);
+							}
+							listDatePeriodAll.addAll(createListAllPeriod(listDatePeriodWorkplace,listDatePeriodWorktype));
+							for(DatePeriod p : listDatePeriodAll) {
+								isHasInterrupt = this.RedoDailyPerformanceProcessing(context, companyId, empLeader,
+									p,
+									empCalAndSumExeLog.getEmpCalAndSumExecLogID(), dailyCreateLog, procExec);
+							}
+							if (isHasInterrupt) {
+								break;
+							}
 						}
 					}
 
@@ -1961,55 +2024,31 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 
 		return true;
 	}
+	private List<DatePeriod> createListAllPeriod(List<DatePeriod> list1,List<DatePeriod> list2){
+		List<DatePeriod> listResult = new ArrayList<>();
+		List<DatePeriod> listAll = new ArrayList<>();
+		listAll.addAll(list1);
+		listAll.addAll(list2);
+		listAll.sort((x, y) -> x.start().compareTo(y.start()));
+		
+		for(int i = 0;i< listAll.size();i++) {
+			DatePeriod merged = new DatePeriod(listAll.get(i).start(),listAll.get(i).end());
+			for (int j = i + 1; j < listAll.size(); j++) {
+				DatePeriod next = listAll.get(j);
+				if (merged.contains(next.start()) && merged.contains(next.end())){
+					i++;
+				}else if(merged.contains(next.start())||merged.end().addDays(1).equals(next.start())) {
+					merged = merged.cutOffWithNewEnd(next.end());
+					i++;
+				}else {
+					break;
+				}
+			}
+			listResult.add(merged);
+		}
+		return listResult;
+	}
 
-//	private DatePeriod getMaxPeriodBetweenCalAndCreate(DatePeriod dailyCreate, DatePeriod dailyCalculate) {
-//		GeneralDate startDate;
-//		GeneralDate endDate;
-//		if (dailyCreate.start().compareTo(dailyCalculate.start()) == -1) {
-//			startDate = dailyCreate.start();
-//		} else {
-//			startDate = dailyCalculate.start();
-//		}
-//		if (dailyCreate.end().compareTo(dailyCalculate.end()) == 1) {
-//			endDate = dailyCreate.end();
-//		} else {
-//			endDate = dailyCalculate.end();
-//		}
-//		return new DatePeriod(startDate, endDate);
-//	}
-
-	// 異動者・勤務種別変更者リスト作成処理
-//	private ListLeaderOrNotEmpOutput createProcessForChangePerOrWorktype(String companyId,
-//			List<String> empIds, GeneralDate startDate, ProcessExecution procExec) {
-//		// 期間を計算
-//		// GeneralDate p = this.calculatePeriod(closureId, period, companyId);
-//		List<String> newEmpIdList = new ArrayList<>();
-//		// ・社員ID（異動者、勤務種別変更者のみ）（List）
-//		Set<String> setEmpIds = new HashSet<String>();
-//		// ・社員ID（異動者、勤務種別変更者のみ）（List）
-//		List<String> noLeaderEmpIdList = empIds;
-//		// check 異動者を再作成する
-//		if (procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTransfer()) {
-//			// 異動者の絞り込み todo request list 590
-//			List<AffWorkplaceHistoryImport> list = workplaceWorkRecordAdapter.getWorkplaceBySidsAndBaseDate(empIds,
-//					startDate);
-//			list.forEach(emp -> {
-//				emp.getHistoryItems().forEach(x -> {
-//					if (x.start().afterOrEquals(startDate)) {
-//						setEmpIds.add(emp.getSid());
-//						return;
-//					}
-//				});
-//			});
-//		}
-//		if (procExec.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTypeChangePerson()) {
-//			// 勤務種別の絞り込み
-//			newEmpIdList = this.refineWorkType(companyId, empIds, startDate);
-//		}
-//		setEmpIds.addAll(newEmpIdList);
-//		noLeaderEmpIdList.removeAll(new ArrayList<>(newEmpIdList));
-//		return new ListLeaderOrNotEmpOutput(new ArrayList<>(setEmpIds), noLeaderEmpIdList);
-//	}
 
 	private DatePeriod findClosureMinMaxPeriod(String companyId, List<Closure> closureList) {
 		GeneralDate startYearMonth = null;
@@ -3328,43 +3367,36 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			EmpCalAndSumExeLog empCalAndSumExeLog, List<String> lstEmpId, DatePeriod period, List<String> workPlaceIds,
 			String typeExecution, ExecutionLog dailyCreateLog) throws CreateDailyException, DailyCalculateException {
 		boolean isInterrupt = false;
-		List<Boolean> listIsInterrupt = new ArrayList<>();
-		List<String> listErrorTryCatch = new ArrayList<>();
+		List<Boolean> listIsInterrupt = Collections.synchronizedList(new ArrayList<>());
+//		List<String> listErrorTryCatch = new ArrayList<>();
 		//int size = lstEmpId.size();
-		this.managedParallelWithContext.forEach(
-				ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
-				lstEmpId,
-				empId -> {
-					// アルゴリズム「開始日を入社日にする」を実行する
-					try {
-						DatePeriod employeeDatePeriod = this.makeStartDateForHiringDate(processExecution, empId, period);
-						if (employeeDatePeriod == null && processExecution.getExecSetting().getDailyPerf()
-								.getTargetGroupClassification().isMidJoinEmployee()) {
-							
-						}else {
-							if(employeeDatePeriod != null) {
-							boolean executionDaily = this.executionDaily(companyId, context, processExecution, empId,
-									empCalAndSumExeLog, employeeDatePeriod, typeExecution, dailyCreateLog);
-							if (executionDaily) {
-								listIsInterrupt.add(true);
-								return;
-							}
-							}
+		try {
+			this.managedParallelWithContext.forEach(ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL), lstEmpId, empId -> {
+				// アルゴリズム「開始日を入社日にする」を実行する
+				DatePeriod employeeDatePeriod = this.makeStartDateForHiringDate(processExecution, empId, period);
+				if (employeeDatePeriod == null && processExecution.getExecSetting().getDailyPerf()
+						.getTargetGroupClassification().isMidJoinEmployee()) {
+					
+				}else {
+					if(employeeDatePeriod != null) {
+						boolean executionDaily = this.executionDaily(companyId, context, processExecution, empId,
+								empCalAndSumExeLog, employeeDatePeriod, typeExecution, dailyCreateLog);
+						if (executionDaily) {
+							listIsInterrupt.add(true);
+							return;
 						}
-					} catch (CreateDailyException ex) {
-						listErrorTryCatch.add("errCreateDailyException");
-					} catch (DailyCalculateException ex) {
-						listErrorTryCatch.add("errDailyCalculateException");
 					}
-				});
-		if(!listErrorTryCatch.isEmpty()) {
-			if(listErrorTryCatch.get(0).equals("errCreateDailyException")) {
-				throw new CreateDailyException();
-			}
-			if(listErrorTryCatch.get(0).equals("errDailyCalculateException")) {
-				throw new DailyCalculateException();
+				}
+			});
+		} catch (Exception e) {
+			val analyzer = new ThrowableAnalyzer(e);
+			if(analyzer.findByClass(CreateDailyException.class).isPresent()){
+				throw new CreateDailyException(e);
+			} else if (analyzer.findByClass(DailyCalculateException.class).isPresent()) {
+				throw new DailyCalculateException(e);
 			}
 		}
+
 		if(!listIsInterrupt.isEmpty()) {
 			isInterrupt = true;
 		}
@@ -3376,11 +3408,11 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		
 		if ("日別作成".equals(typeExecution)) {
 			if(!errorMessage.isEmpty()) {
-				throw new CreateDailyException();
+				throw new CreateDailyException(null);
 			}
 		} else {
 			if (isInterrupt) {
-				throw new DailyCalculateException();
+				throw new DailyCalculateException(null);
 			}
 		}
 		if (isInterrupt) {
@@ -3426,8 +3458,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	// true is interrupt
 	private boolean executionDaily(String companyId, CommandHandlerContext<ExecuteProcessExecutionCommand> context,
 			ProcessExecution processExecution, String employeeId, EmpCalAndSumExeLog empCalAndSumExeLog,
-			DatePeriod period, String typeExecution, ExecutionLog dailyCreateLog)
-			throws CreateDailyException, DailyCalculateException {
+			DatePeriod period, String typeExecution, ExecutionLog dailyCreateLog) {
 		AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> asyContext = (AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>) context;
 		ProcessState processState;
 		// 受け取った期間が「作成した期間（日別作成）」の場合
@@ -3440,14 +3471,14 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 								.getTargetGroupClassification().isRecreateTypeChangePerson() ? true : false,
 						false, false, null);
 			} catch (Exception e) {
-				throw new CreateDailyException();
+				throw new CreateDailyException(e);
 			}
 		} else {
 			try {
 				processState = this.dailyCalculationEmployeeService.calculateForOnePerson(employeeId,
 						period, Optional.empty(), empCalAndSumExeLog.getEmpCalAndSumExecLogID());
 			} catch (Exception e) {
-				throw new DailyCalculateException();
+				throw new DailyCalculateException(e);
 			}
 
 		}
@@ -3563,7 +3594,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					period, companyId, empCalAndSumExeLogId, Optional.ofNullable(dailyCreateLog), reCreateWorkType,
 					reCreateWorkPlace, reCreateRestTime, null);
 		} catch (Exception e) {
-			throw new CreateDailyException();
+			throw new CreateDailyException(e);
 		}
 		log.info("更新処理自動実行_日別実績の作成_END_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
 		log.info("更新処理自動実行_日別実績の計算_START_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
@@ -3574,7 +3605,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			ProcessState2 = this.dailyCalculationEmployeeService.calculateForOnePerson(empId, period,
 					Optional.empty(), empCalAndSumExeLogId);
 		} catch (Exception e) {
-			throw new DailyCalculateException();
+			throw new DailyCalculateException(e);
 		}
 
 		// 社員の申請を反映 cua chi du

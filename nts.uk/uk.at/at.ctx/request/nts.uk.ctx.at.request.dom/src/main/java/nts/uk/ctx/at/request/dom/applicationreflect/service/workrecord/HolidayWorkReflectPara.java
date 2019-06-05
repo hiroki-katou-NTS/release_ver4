@@ -43,4 +43,5 @@ public class HolidayWorkReflectPara {
 	 * 休出事後反映の休憩時間を反映
 	 */
 	private boolean recordReflectBreakFlg;
+	private String excLogId;
 }
