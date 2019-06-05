@@ -1181,8 +1181,11 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			}
 		}
 		else {
-			schePred = Optional.of(PredetermineTimeSetForCalc.convertMastarToCalc(predetemineTimeSetRepository.findByWorkTimeCode(companyId, scheduleReGetClass.getIntegrationOfDaily().getWorkInformation().getScheduleInfo()
-										.getWorkTimeCode().v()).get()));
+			Optional<PredetemineTimeSetting> predfromScheWtCode = predetemineTimeSetRepository.findByWorkTimeCode(companyId, scheduleReGetClass.getIntegrationOfDaily().getWorkInformation().getScheduleInfo()
+				.getWorkTimeCode().v());
+			if(predfromScheWtCode.isPresent()) {
+				schePred = Optional.of(PredetermineTimeSetForCalc.convertMastarToCalc(predfromScheWtCode.get()));
+			}
 		}
 
 		List<PersonnelCostSettingImport> personalSetting = getPersonalSetting(companyId, targetDate,
