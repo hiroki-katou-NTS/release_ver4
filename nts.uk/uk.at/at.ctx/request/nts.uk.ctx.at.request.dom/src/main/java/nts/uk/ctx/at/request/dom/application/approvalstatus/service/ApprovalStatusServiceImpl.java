@@ -469,7 +469,7 @@ public class ApprovalStatusServiceImpl implements ApprovalStatusService {
 			List<UrlTaskIncre> listTask = new ArrayList<>();
 			listTask.add(new UrlTaskIncre("", "", "", "activeMode", "approval", UrlParamAtr.URL_PARAM));
 			// アルゴリズム「埋込URL情報登録」を実行する
-			String url1 = registerEmbededURL.embeddedUrlInfoRegis("CMM045", "A", 1, 1, eid, contractCD, "", employeeCD, 0, listTask);
+			String url1 = registerEmbededURL.embeddedUrlInfoRegis("CMM045", "A", 1, 1, eid, contractCD, "", employeeCD, 0, listTask, Optional.empty());
 			listUrl.add(url1);
 		}
 		// 承認状況メールテンプレート.URL日別埋込
@@ -477,14 +477,14 @@ public class ApprovalStatusServiceImpl implements ApprovalStatusService {
 			List<UrlTaskIncre> listTask = new ArrayList<>();
 			if (ApprovalStatusMailType.DAILY_UNCONFIRM_BY_CONFIRMER.equals(mailType)) {
 				// アルゴリズム「埋込URL情報登録」を実行する
-				String url2 = registerEmbededURL.embeddedUrlInfoRegis("KDW004", "A", 1, 1, eid, contractCD, "", employeeCD, 0, listTask);
+				String url2 = registerEmbededURL.embeddedUrlInfoRegis("KDW004", "A", 1, 1, eid, contractCD, "", employeeCD, 0, listTask, Optional.empty());
 				listUrl.add(url2);
 			} else if (ApprovalStatusMailType.DAILY_UNCONFIRM_BY_PRINCIPAL.equals(mailType)){
 				listTask.add(UrlTaskIncre.createFromJavaType("", "", "", "screenMode", "normal"));
 				listTask.add(UrlTaskIncre.createFromJavaType("", "", "", "errorRef", "true"));
 				listTask.add(UrlTaskIncre.createFromJavaType("", "", "", "changePeriod", "true"));
 				// アルゴリズム「埋込URL情報登録」を実行する
-				String url2 = registerEmbededURL.embeddedUrlInfoRegis("KDW003", "A", 1, 1, eid, contractCD, "", employeeCD, 0, listTask);
+				String url2 = registerEmbededURL.embeddedUrlInfoRegis("KDW003", "A", 1, 1, eid, contractCD, "", employeeCD, 0, listTask, Optional.empty());
 				listUrl.add(url2);
 			}
 		}
@@ -493,7 +493,7 @@ public class ApprovalStatusServiceImpl implements ApprovalStatusService {
 			List<UrlTaskIncre> listTask = new ArrayList<>();
 			listTask.add(new UrlTaskIncre("", "", "", "activeMode", "approval", UrlParamAtr.URL_PARAM));
 			// アルゴリズム「埋込URL情報登録」を実行する
-			String url3 = registerEmbededURL.embeddedUrlInfoRegis("KMW003", "A", 1, 1, eid, contractCD, "", employeeCD, 0, listTask);
+			String url3 = registerEmbededURL.embeddedUrlInfoRegis("KMW003", "A", 1, 1, eid, contractCD, "", employeeCD, 0, listTask, Optional.empty());
 			listUrl.add(url3);
 		}
 		if (listUrl.size() == 0) {
