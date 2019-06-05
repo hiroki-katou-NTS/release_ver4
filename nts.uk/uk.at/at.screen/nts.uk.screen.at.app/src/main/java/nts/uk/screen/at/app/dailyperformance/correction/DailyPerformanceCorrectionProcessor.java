@@ -1792,6 +1792,8 @@ public class DailyPerformanceCorrectionProcessor {
 			if (lstInfoEmp.isEmpty())
 				return Arrays.asList(employeeIdLogin);
 			lstEmployeeId = lstInfoEmp.stream().map(x -> x.getSid()).distinct().collect(Collectors.toList());
+			lstEmployeeId.add(employeeIdLogin);
+			lstEmployeeId = lstEmployeeId.stream().distinct().collect(Collectors.toList());
 			if (closureId != null) {
 				Map<String, String> employmentWithSidMap = repo.getAllEmployment(companyId, lstEmployeeId,
 						new DateRange(range.getEndDate(), range.getEndDate()));
