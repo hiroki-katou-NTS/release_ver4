@@ -258,6 +258,11 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	private ChangePersionListForSche changePersionListForSche;
 	
 	public static int MAX_DELAY_PARALLEL = 0;
+	
+	@Override
+	public boolean keepsTrack(){
+		return false;
+	}
 
 	/**
 	 * 更新処理を開始する
