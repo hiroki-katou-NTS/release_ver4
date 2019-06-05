@@ -538,8 +538,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         } else if (data.errorInfomation == DCErrorInfomation.ITEM_HIDE_ALL) {
                             messageId = "Msg_1452";
                             self.hasErrorBuss = true;
-                        } else {
-                            self.hasEmployee = false;
+                        } else if (data.errorInfomation == DCErrorInfomation.NOT_EMP_IN_HIST){
+                            messageId = "Msg_1543";
+                            self.hasErrorBuss = true;
                         }
                         nts.uk.ui.dialog.alert({ messageId: messageId }).then(function() {
                             //self.hasEmployee = false;
@@ -703,6 +704,24 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             if (!_.isEmpty(data.errors) || data.errorInfomation != 0) return;
             self.extractionData();
             console.log("khoi tao Object: " + (performance.now() - startTime));
+            if ((_.isEmpty(data.lstControlDisplayItem.lstHeader)) || data.errorInfomation != 0) {
+                let messageId = "Msg_1342";
+                if (data.errorInfomation == DCErrorInfomation.APPROVAL_NOT_EMP) {
+                    messageId = "Msg_916";
+                    self.hasErrorBuss = true;
+                } else if (data.errorInfomation == DCErrorInfomation.ITEM_HIDE_ALL) {
+                    messageId = "Msg_1452";
+                    self.hasErrorBuss = true;
+                } else if (data.errorInfomation == DCErrorInfomation.NOT_EMP_IN_HIST) {
+                    messageId = "Msg_1543";
+                    self.hasErrorBuss = true;
+                }
+                nts.uk.ui.dialog.alert({ messageId: messageId }).then(function() {
+                    //self.hasEmployee = false;
+                    nts.uk.ui.block.clear();
+                     return ;
+                });
+            }
             self.loadGrid();
             console.log("thoi gian load grid: " + (performance.now() - startTime));
             //  self.extraction();
@@ -2170,6 +2189,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             self.hasErrorBuss = true;
                         } else if (data.errorInfomation == DCErrorInfomation.ITEM_HIDE_ALL) {
                             messageId = "Msg_1452";
+                            self.hasErrorBuss = true;
+                        } else if (data.errorInfomation == DCErrorInfomation.NOT_EMP_IN_HIST){
+                            messageId = "Msg_1543";
                             self.hasErrorBuss = true;
                         }
                         self.destroyGrid();
@@ -5341,6 +5363,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
 
         APPROVAL_NOT_EMP = 1,
 
-        ITEM_HIDE_ALL = 2
+        ITEM_HIDE_ALL = 2,
+        
+        NOT_EMP_IN_HIST = 3
     }
 }
