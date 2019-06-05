@@ -1,5 +1,6 @@
 package nts.uk.ctx.workflow.dom.resultrecord.status;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,6 +52,20 @@ public class RouteConfirmStatusFrames {
 							.orElseGet(() -> RouteConfirmStatusFrame.unConfirmed(instance));
 				})
 				.collect(Collectors.toList());
+
+		
+		// 中間データに定義されている最後の承認枠番号
+		int definedLastFrameOrder = appFrameInstances.stream()
+				.map(f -> f.getFrameOrder())
+				.sorted(Comparator.reverseOrder())
+				.findFirst().get();
+		
+		// 中間データに存在しないが、実績は承認済みのケース
+		appFrameConfirms.stream()
+				.filter(f -> f.getFrameOrder() > definedLastFrameOrder)
+				.forEach(f -> {
+					frames.add(RouteConfirmStatusFrame.confirmedButUndefined(f));
+				});
 		
 		return new RouteConfirmStatusFrames(frames);
 	}

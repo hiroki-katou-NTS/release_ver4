@@ -1,5 +1,6 @@
 package nts.uk.ctx.workflow.dom.resultrecord.status;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,6 +52,25 @@ public class RouteConfirmStatusFrame {
 	}
 	
 	/**
+	 * 中間データには存在しないが、実績確認状態には存在するケース（２枠目承認後に、中間データが１枠のみになったとか）に対応
+	 * @param confirm
+	 * @return
+	 */
+	public static RouteConfirmStatusFrame confirmedButUndefined(AppFrameConfirm confirm) {
+
+		boolean isRepresent = confirm.getRepresenterID().isPresent();
+		String employeeId = isRepresent
+				? confirm.getRepresenterID().get()
+				: confirm.getApproverID().get();
+				
+		return new RouteConfirmStatusFrame(
+				false,
+				Collections.emptyList(),
+				Optional.of(employeeId),
+				isRepresent);
+	}
+	
+	/**
 	 * 指定した社員が枠内に存在するか
 	 * @param approverId
 	 * @return
@@ -87,14 +107,5 @@ public class RouteConfirmStatusFrame {
 	
 	public boolean hasApprovedByOther(String approverId) {
 		return hasApproved() && !employeeIds.contains(approverId);
-	}
-	
-	/**
-	 * この承認枠は指定した社員によって承認済みか
-	 * @param approverId
-	 * @return
-	 */
-	private boolean hasApprovedBy(String approverId) {
-		return hasApproved() && employeeIds.contains(approverId);
 	}
 }
