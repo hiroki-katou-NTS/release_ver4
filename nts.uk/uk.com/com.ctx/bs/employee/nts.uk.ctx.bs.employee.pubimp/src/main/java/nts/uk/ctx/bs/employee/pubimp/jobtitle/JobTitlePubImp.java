@@ -42,6 +42,8 @@ import nts.uk.ctx.bs.employee.pub.jobtitle.AffJobTitleBasicExport;
 import nts.uk.ctx.bs.employee.pub.jobtitle.AffJobTitleHistoryExport;
 import nts.uk.ctx.bs.employee.pub.jobtitle.EmployeeJobHistExport;
 import nts.uk.ctx.bs.employee.pub.jobtitle.JobTitleExport;
+import nts.uk.ctx.bs.employee.pub.jobtitle.JobTitleInfoExport;
+import nts.uk.ctx.bs.employee.pub.jobtitle.SequenceMasterExport;
 import nts.uk.ctx.bs.employee.pub.jobtitle.SimpleJobTitleExport;
 import nts.uk.ctx.bs.employee.pub.jobtitle.SyJobTitlePub;
 import nts.uk.shr.com.context.AppContexts;
@@ -74,6 +76,9 @@ public class JobTitlePubImp implements SyJobTitlePub {
 
 	@Inject
 	private AffJobTitleHistoryItemRepository affJobTitleHisItemRepo;
+	
+	@Inject
+	private SequenceMasterRepository repo;
 
 	/*
 	 * (non-Javadoc)
@@ -466,5 +471,23 @@ public class JobTitlePubImp implements SyJobTitlePub {
         return listEmployeeJobHistExport;
     }
 
+    @Override
+    public List<JobTitleInfoExport> findByJobIds(String companyId, List<String> jobIds,
+			String historyId) {
+				return this.jobTitleInfoRepository.findByJobIds(companyId, jobIds, historyId)
+						.stream().map(x ->{ 
+						return new JobTitleInfoExport(x.getCompanyId().v(), x.getJobTitleHistoryId(), x.isManager(), 
+								x.getJobTitleId(), x.getJobTitleCode().v(), x.getJobTitleName().v(), x.getSequenceCode().v());})
+						.collect(Collectors.toList());
+    }
+
+	@Override
+	public List<SequenceMasterExport> findAllSequen(String companyId, String sequenceCode) {
+		// TODO Auto-generated method stub
+		return this.repo.findAll(companyId, sequenceCode).stream()
+				.map(x -> {
+			return new SequenceMasterExport(x.getCompanyId().v(), x.getOrder(), x.getSequenceCode().v(), x.getSequenceName().v());
+		}).collect(Collectors.toList());
+	}
 
 }

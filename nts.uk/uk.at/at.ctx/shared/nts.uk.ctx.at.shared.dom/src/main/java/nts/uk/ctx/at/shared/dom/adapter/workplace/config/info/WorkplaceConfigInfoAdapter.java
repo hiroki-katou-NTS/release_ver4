@@ -2,6 +2,8 @@ package nts.uk.ctx.at.shared.dom.adapter.workplace.config.info;
 
 import java.util.List;
 
+import nts.arc.time.GeneralDate;
+
 
 public interface WorkplaceConfigInfoAdapter {
 	/**
@@ -18,4 +20,6 @@ public interface WorkplaceConfigInfoAdapter {
 	 */
 	List<WorkPlaceConfigInfoImport> findByHistoryIdsAndWplIds(String companyId, List<String> historyIds,
 			List<String> workplaceIds);
+	
+	List<JobTitleExport> findAllById(String companyId,List<String> positionIds ,GeneralDate baseDate );
 }

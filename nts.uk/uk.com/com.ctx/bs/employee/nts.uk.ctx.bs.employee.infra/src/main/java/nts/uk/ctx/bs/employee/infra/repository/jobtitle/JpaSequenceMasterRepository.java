@@ -24,6 +24,8 @@ import nts.arc.layer.infra.data.JpaRepository;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.dom.jobtitle.sequence.SequenceMaster;
 import nts.uk.ctx.bs.employee.dom.jobtitle.sequence.SequenceMasterRepository;
+import nts.uk.ctx.bs.employee.infra.entity.jobtitle.BsymtJobInfoPK_;
+import nts.uk.ctx.bs.employee.infra.entity.jobtitle.BsymtJobInfo_;
 import nts.uk.ctx.bs.employee.infra.entity.jobtitle.BsymtJobSeqMaster;
 import nts.uk.ctx.bs.employee.infra.entity.jobtitle.BsymtJobSeqMasterPK;
 import nts.uk.ctx.bs.employee.infra.entity.jobtitle.BsymtJobSeqMasterPK_;
@@ -223,5 +225,35 @@ public class JpaSequenceMasterRepository extends JpaRepository implements Sequen
 		this.commandProxy().updateAll(listSequenceMaster.stream()
 				.map(domain -> this.toEntity(domain))
 				.collect(Collectors.toList()));
+	}
+	
+	@Override
+	public List<SequenceMaster> findAll(String companyId, String sequenceCode) {
+
+		// Check empty
+		if (StringUtils.isEmpty(companyId)) {
+			return Collections.<SequenceMaster>emptyList();
+		}
+
+		// Get entity manager
+		EntityManager em = this.getEntityManager();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<BsymtJobSeqMaster> cq = criteriaBuilder.createQuery(BsymtJobSeqMaster.class);
+		Root<BsymtJobSeqMaster> root = cq.from(BsymtJobSeqMaster.class);
+
+		// Build query
+		cq.select(root);
+
+		// Add where conditions
+		List<Predicate> predicateList = new ArrayList<>();
+		Expression<String> exp = root.get(BsymtJobSeqMaster_.bsymtJobSeqMasterPK).get(BsymtJobSeqMasterPK_.cid);
+		predicateList.add(exp.in(companyId));
+		predicateList.add(criteriaBuilder
+				.equal(root.get(BsymtJobSeqMaster_.bsymtJobSeqMasterPK).get(BsymtJobSeqMasterPK_.cid), companyId));
+
+		cq.where(predicateList.toArray(new Predicate[] {}));
+		cq.orderBy(criteriaBuilder.asc(root.get(BsymtJobSeqMaster_.disporder)));
+
+		return em.createQuery(cq).getResultList().stream().map(entity -> toDomain(entity)).collect(Collectors.toList());
 	}
 }

@@ -2,6 +2,8 @@ package nts.uk.ctx.bs.employee.pub.workplace.config.info;
 
 import java.util.List;
 
+import nts.arc.time.GeneralDate;
+
 public interface WorkPlaceConfigInfoPub {
 	/**
 	 * Find by history ids and wpl ids.
@@ -17,4 +19,6 @@ public interface WorkPlaceConfigInfoPub {
 	 */
 	List<WorkPlaceConfigInfoExport> findByHistoryIdsAndWplIds(String companyId, List<String> historyIds,
 			List<String> workplaceIds);
+	
+	List<JobTitleExport> findAllById(String companyId,List<String> positionIds ,GeneralDate baseDate );
 }

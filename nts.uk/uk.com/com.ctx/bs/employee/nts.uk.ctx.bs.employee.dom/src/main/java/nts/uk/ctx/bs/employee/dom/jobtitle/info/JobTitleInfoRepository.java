@@ -135,5 +135,7 @@ public interface JobTitleInfoRepository {
 	 */
 	Map<GeneralDate, List<JobTitleInfo>> findByIds(String companyId, List<String> jobIds,
 			List<GeneralDate> baseDates);
+
+	List<JobTitleInfo> findByJobIds(String companyId, List<String> jobIds, String historyId);
 	
 }

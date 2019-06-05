@@ -117,4 +117,8 @@ public interface SyJobTitlePub {
 	 */
 	Map<Pair<String, GeneralDate>, Pair<String, String>> getJobTitleMapIdBaseDateName(String companyId,List<String> jobIds, List<GeneralDate> baseDates);
 
+	List<JobTitleInfoExport> findByJobIds(String companyId, List<String> jobIds, String historyId);
+	
+	List<SequenceMasterExport> findAllSequen(String companyId, String sequenceCode);
+
 }

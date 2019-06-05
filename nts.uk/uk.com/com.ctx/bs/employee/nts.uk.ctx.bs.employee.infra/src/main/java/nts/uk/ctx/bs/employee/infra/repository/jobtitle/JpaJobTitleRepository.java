@@ -17,6 +17,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
@@ -255,6 +256,46 @@ public class JpaJobTitleRepository extends JpaRepository implements JobTitleRepo
 		// Get result
 		List<BsymtJobHist> listBsymtJobHist = em.createQuery(cq).getResultList();
 
+		// Create map
+		Map<String, List<BsymtJobHist>> mapBsymtJobHist = listBsymtJobHist.stream()
+				.collect(Collectors.groupingBy(item -> item.getBsymtJobHistPK().getJobId()));
+
+		// Return
+		return mapBsymtJobHist.keySet().stream()
+				.map(item -> new JobTitle(
+						new JpaJobTitleGetMemento(companyId, item, mapBsymtJobHist.get(item))))
+				.collect(Collectors.toList());
+
+	}
+	//ドメインモデル「職位」を取得する
+	@Override
+	public List<JobTitle> findAllById(String companyId,List<String> positionIds ,GeneralDate baseDate) {
+		// Get entity manager
+		EntityManager em = this.getEntityManager();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<BsymtJobHist> cq = criteriaBuilder.createQuery(BsymtJobHist.class);
+		Root<BsymtJobHist> root = cq.from(BsymtJobHist.class);
+
+		// select root
+		cq.select(root);
+
+		List<BsymtJobHist> listBsymtJobHist = new ArrayList<>();
+		CollectionUtil.split(positionIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
+		// add where
+		List<Predicate> lstpredicateWhere = new ArrayList<>();
+		lstpredicateWhere.add(criteriaBuilder
+				.equal(root.get(BsymtJobHist_.bsymtJobHistPK).get(BsymtJobHistPK_.cid), companyId));
+		lstpredicateWhere.add(root.get(BsymtJobHist_.bsymtJobHistPK).get(BsymtJobHistPK_.jobId).in(splitData));
+		lstpredicateWhere.add(
+				criteriaBuilder.lessThanOrEqualTo(root.get(BsymtJobHist_.startDate), baseDate));
+		lstpredicateWhere.add(
+				criteriaBuilder.greaterThanOrEqualTo(root.get(BsymtJobHist_.endDate), baseDate));
+
+		cq.where(lstpredicateWhere.toArray(new Predicate[] {}));
+		// Get result
+		listBsymtJobHist.addAll(em.createQuery(cq).getResultList());
+		});
+		
 		// Create map
 		Map<String, List<BsymtJobHist>> mapBsymtJobHist = listBsymtJobHist.stream()
 				.collect(Collectors.groupingBy(item -> item.getBsymtJobHistPK().getJobId()));

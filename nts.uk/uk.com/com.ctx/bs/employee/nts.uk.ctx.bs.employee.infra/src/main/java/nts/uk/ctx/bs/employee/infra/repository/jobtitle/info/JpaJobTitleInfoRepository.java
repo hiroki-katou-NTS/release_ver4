@@ -552,4 +552,63 @@ public class JpaJobTitleInfoRepository extends JpaRepository implements JobTitle
 		// Return
 		return mapItem;
 	}
+	
+	@Override
+	public List<JobTitleInfo> findByJobIds(String companyId, List<String> jobIds,
+			String historyId) {
+		// Get entity manager
+		EntityManager em = this.getEntityManager();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<BsymtJobInfo> cq = criteriaBuilder.createQuery(BsymtJobInfo.class);
+		Root<BsymtJobInfo> root = cq.from(BsymtJobInfo.class);
+		Join<BsymtJobInfo, BsymtJobSeqMaster> joinRoot = root.join(BsymtJobInfo_.bsymtJobSeqMaster, JoinType.LEFT);
+
+		// Build query
+		cq.select(root);
+		
+		List<BsymtJobInfo> resultList = new ArrayList<>();
+		
+		CollectionUtil.split(jobIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			// add where
+			List<Predicate> listPredicate = new ArrayList<>();
+			listPredicate.add(criteriaBuilder
+					.equal(root.get(BsymtJobInfo_.bsymtJobInfoPK).get(BsymtJobInfoPK_.cid), companyId));
+			listPredicate.add(
+					root.get(BsymtJobInfo_.bsymtJobInfoPK).get(BsymtJobInfoPK_.jobId).in(subList));
+			listPredicate.add(criteriaBuilder
+					.equal(root.get(BsymtJobInfo_.bsymtJobInfoPK).get(BsymtJobInfoPK_.histId), companyId));
+
+
+			cq.where(listPredicate.toArray(new Predicate[] {}));
+			
+			// Sort by disporder
+			Expression<Object> queryCase = criteriaBuilder.selectCase()
+					.when(criteriaBuilder.isNull(joinRoot.get(BsymtJobSeqMaster_.disporder)),
+							Integer.MAX_VALUE)
+					.otherwise(joinRoot.get(BsymtJobSeqMaster_.disporder));
+			cq.orderBy(criteriaBuilder.asc(queryCase),
+					criteriaBuilder.asc(root.get(BsymtJobInfo_.jobCd)));
+			
+			resultList.addAll(em.createQuery(cq).getResultList());
+		});
+		resultList.sort((o1, o2) -> {
+			BsymtJobSeqMaster seqMst1 = o1.getBsymtJobSeqMaster();
+			BsymtJobSeqMaster seqMst2 = o2.getBsymtJobSeqMaster();
+			Integer order1 = seqMst1 != null ? seqMst1.getDisporder() : null;
+			Integer order2 = seqMst2 != null ? seqMst2.getDisporder() : null;
+			if (order1 != null && order2 != null) return order1.compareTo(order2);
+			if (order1 != null && order2 == null) return 1;
+			if (order1 == null && order2 != null) return -1;
+			return o1.getJobCd().compareTo(o2.getJobCd());
+		});
+		
+		// Check exist
+		if (CollectionUtil.isEmpty(resultList)) {
+			return Collections.emptyList();
+		}
+
+		// Return
+		return resultList.stream().map(item -> new JobTitleInfo(new JpaJobTitleInfoGetMemento(item)))
+				.collect(Collectors.toList());
+	}
 }

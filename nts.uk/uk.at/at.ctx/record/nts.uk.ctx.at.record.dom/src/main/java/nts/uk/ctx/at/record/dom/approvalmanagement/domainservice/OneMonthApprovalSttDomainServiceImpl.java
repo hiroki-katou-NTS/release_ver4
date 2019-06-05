@@ -4,8 +4,10 @@
 package nts.uk.ctx.at.record.dom.approvalmanagement.domainservice;
 
 import java.util.ArrayList;
+import java.util.Collections;
 //import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +30,11 @@ import nts.uk.ctx.at.record.dom.adapter.employee.RegulationInfoEmployeeAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employee.SortingConditionOrderImport;
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistImport;
+import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.EmployeeGeneralInfoImport;
+import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExClassificationHistoryImport;
+import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExEmploymentHistoryImport;
+import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExJobTitleHistoryImport;
+import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExWorkPlaceHistoryImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
@@ -38,10 +45,17 @@ import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dtos.ApprovalEmployeeDto;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dtos.ClosureDto;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dtos.DateApprovalStatusDto;
+import nts.uk.ctx.at.record.dom.approvalmanagement.dtos.EmployeeAffiliationInforDto;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dtos.OneMonthApprovalStatusDto;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.EmployeeGeneralInfoService;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
+import nts.uk.ctx.at.shared.dom.adapter.jobtitle.JobTitleInfoAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.jobtitle.JobTitleInfoImport;
+import nts.uk.ctx.at.shared.dom.adapter.jobtitle.SequenceMasterImport;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.info.JobTitleExport;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.info.WorkplaceConfigInfoAdapter;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
@@ -87,7 +101,16 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 	
 	@Inject
 	private EmploymentHistAdapter employmentHistAdapter;
+	
+	@Inject
+	private EmployeeGeneralInfoService employeeGeneralInfoService;
 
+	@Inject
+	private WorkplaceConfigInfoAdapter configInfoAdapter;
+	
+	@Inject
+	private JobTitleInfoAdapter infoAdapter;
+	
 	private List<ApprovalEmployeeDto> buildApprovalEmployeeData(List<Identification> listIdentification,List<EmployeeDto> lstEmployee,
 			ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport) {
 
@@ -302,6 +325,69 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			// list order conditions
 			lstEmployees = this.regulationInfoEmployeeAdapter.sortEmployees(companyId, employeeList,
 					this.createListConditions(), this.convertFromDateToDateTime(datePeriod.end()));
+			//[No.401]社員ID（List）と期間から個人情報を取得する - fix bug 107962
+			EmployeeGeneralInfoImport employeeGeneralInfoImport = this.employeeGeneralInfoService
+					.getEmployeeGeneralInfo(employeeList, new DatePeriod(datePeriod.end(), datePeriod.end()));
+			
+			//社員ID（List）から社員コードと表示名を取得
+			// RequestList228
+			List<EmployeeDto> listEmployeeInfo = atEmployeeAdapter.getByListSID(employeeList);
+
+			//取得した社員所属情報と社員コード情報から「社員所属情報」＜List＞を作成する			
+			List<EmployeeAffiliationInforDto> listEmpAffInfo = new ArrayList<>();
+			for (EmployeeDto empQ : listEmployeeInfo) {
+				EmployeeAffiliationInforDto approvalEmployee = new EmployeeAffiliationInforDto();
+						
+				approvalEmployee.setClassificationCode(empQ.getScd());
+				approvalEmployee.setEmployeeID(empQ.getSid()); 
+				ExEmploymentHistoryImport exEmploymentHistoryImport =  employeeGeneralInfoImport.getEmploymentHistoryImports().stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
+				approvalEmployee.setEmploymentInforCode(exEmploymentHistoryImport.getEmploymentItems().get(0).getEmploymentCode());
+				ExClassificationHistoryImport classificationHistoryImport = employeeGeneralInfoImport.getExClassificationHistoryImports().stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
+				approvalEmployee.setClassificationCode(classificationHistoryImport.getClassificationItems().get(0).getClassificationCode());
+				ExJobTitleHistoryImport exJobTitleHistoryImport =  employeeGeneralInfoImport.getExJobTitleHistoryImports().stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
+				approvalEmployee.setPositionID(exJobTitleHistoryImport.getJobTitleItems().get(0).getJobTitleId());
+				ExWorkPlaceHistoryImport exWorkPlaceHistoryImport = employeeGeneralInfoImport.getExWorkPlaceHistoryImports().stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
+				approvalEmployee.setWorkPlaceID(exWorkPlaceHistoryImport.getWorkplaceItems().get(0).getWorkplaceId());
+				
+				listEmpAffInfo.add(approvalEmployee);
+			}
+			
+    		//社員を並び替える
+			
+			//[No.560]職場IDから職場の情報をすべて取得する
+			
+			//職位IDから職位を取得する
+				//ドメインモデル「職位」を取得する
+			List<String> lstPositionIds = new ArrayList<>();
+			for(EmployeeAffiliationInforDto approvalId  : listEmpAffInfo) {
+				String positionId = approvalId.positionID;
+				lstPositionIds.add(positionId);
+			}
+			List<JobTitleExport> jobTitleExport =  this.configInfoAdapter.findAllById(companyId, lstPositionIds, datePeriod.end());
+			if(!jobTitleExport.isEmpty()){
+				//ドメインモデル「職位情報」を取得する
+				String historyId = jobTitleExport.get(0).getJobTitleHistories().get(0).getHistoryId(); 
+				List<JobTitleInfoImport> jobTitleInfoImports = this.infoAdapter.findByJobIds(companyId, lstPositionIds, historyId);
+				
+					//ドメインモデル「序列」をすべて取得する(Lấy tất cả Domain Model 「序列」)
+				if(!jobTitleInfoImports.isEmpty()){
+					String sequenceCode = jobTitleInfoImports.get(0).getSequenceCode();
+					Map<String,Integer> masterImports = this.infoAdapter.findAll(companyId, sequenceCode).stream()
+							.collect(Collectors.toMap(SequenceMasterImport::getSequenceCode, SequenceMasterImport::getOrder));
+					//取得したドメインモデル「職位情報」をドメインモデル「序列．並び順」で並び替える
+					jobTitleInfoImports.forEach(e-> {
+						if (masterImports.containsKey(e.getSequenceCode())){
+							e.setOrder(masterImports.get(e.getSequenceCode()));
+						}
+					});
+					jobTitleInfoImports.sort((e1,e2)-> e2.getOrder() - e1.getOrder());
+					//List<JobTitleInfoImport> sortByCode = this.sortByOder(jobTitleInfoImports, masterImports);
+					
+					
+				}
+					
+			}
+			
 			
 			// アルゴリズム「表示する承認者の集計」を実行する
 			// 対応するImported「（就業）社員」をすべて取得する -requestList31-2
@@ -337,9 +423,9 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 				}
 			});
 			approvalRootOfEmployeeImportTemp.setApprovalRootSituations(approvalRootSituationsTemp);
-			//  
+			// Fix bug 107962 - comment vi da goi 228 o phia tren
 			// RequestList228
-			List<EmployeeDto> listEmployeeInfo = atEmployeeAdapter.getByListSID(lstEmployees);
+			//List<EmployeeDto> listEmployeeInfo = atEmployeeAdapter.getByListSID(lstEmployees);
 			
 			List<ApprovalEmployeeDto> buildApprovalEmployeeData = buildApprovalEmployeeData(listIdentification,listEmployeeInfo,
 					approvalRootOfEmployeeImportTemp);
