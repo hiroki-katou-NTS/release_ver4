@@ -62,7 +62,7 @@ public class DetailAfterDenyImpl implements DetailAfterDeny {
 			for(GeneralDate loopDate = startDate; loopDate.beforeOrEquals(endDate); loopDate = loopDate.addDays(1)){
 				dateLst.add(loopDate);
 			}
-			interimRemainDataMngRegisterDateChange.registerDateChange(companyID, employeeID, dateLst);
+			interimRemainDataMngRegisterDateChange.registerDateChange(companyID, application.getEmployeeID(), dateLst);
 			
 			AppTypeDiscreteSetting discreteSetting = discreteRepo.getAppTypeDiscreteSettingByAppType(companyID, application.getAppType().value).get();
 			if (discreteSetting.getSendMailWhenApprovalFlg().equals(AppCanAtr.CAN)) {
