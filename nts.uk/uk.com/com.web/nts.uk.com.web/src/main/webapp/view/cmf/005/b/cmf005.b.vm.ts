@@ -253,8 +253,8 @@ module nts.uk.com.view.cmf005.b.viewmodel {
                 startDate: moment.utc().subtract(1, "M").add(1, "d").format("YYYY/MM/DD"),
                 endDate: moment.utc().format("YYYY/MM/DD")
             });
-            self.monthValue = ko.observable({ startDate: moment.utc().subtract(1, "M").format("YYYY/MM"), endDate: moment.utc().subtract(1, "M").format("YYYY/MM") });
-            self.yearValue = ko.observable({ startDate: moment.utc().format("YYYY"), endDate: moment.utc().format("YYYY") });
+            self.monthValue = ko.observable({ startDate: moment.utc().subtract(1, "M").add(1, "d").format("YYYY/MM"), endDate: moment.utc().subtract(1, "M").add(1, "d").format("YYYY/MM") });
+            self.yearValue = ko.observable({ startDate:  moment.utc().subtract(1, "M").add(1, "d").format("YYYY"), endDate: moment.utc().subtract(1, "M").add(1, "d").format("YYYY") });
 
             //B7_2_1
             self.isSaveBeforeDeleteFlg = ko.observable(model.SAVE_BEFOR_DELETE_ATR.YES);
