@@ -9,5 +9,8 @@ public class DataRecoveryTable {
 	String uploadId;
 	String fileNameCsv;
 	boolean hasSidInCsv;
+	String tableEnglishName;
+	String tableJapaneseName;
+	Integer tableNo;
 	
 }
