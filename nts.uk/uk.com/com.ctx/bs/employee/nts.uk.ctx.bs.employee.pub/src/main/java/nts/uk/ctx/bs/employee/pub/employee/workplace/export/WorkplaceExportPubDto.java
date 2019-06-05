@@ -1,4 +1,4 @@
-package nts.uk.ctx.bs.employee.dom.workplace.export;
+package nts.uk.ctx.bs.employee.pub.employee.workplace.export;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class WorkplaceExportDto {
+public class WorkplaceExportPubDto {
 	/** The workplace id. */
 	//職場ID
 	private String workplaceId;

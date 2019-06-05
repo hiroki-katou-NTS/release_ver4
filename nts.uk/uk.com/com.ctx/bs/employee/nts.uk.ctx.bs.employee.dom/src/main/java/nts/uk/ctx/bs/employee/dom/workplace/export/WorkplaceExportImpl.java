@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -24,6 +25,7 @@ import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceName;
  * @author sonnh1
  *
  */
+@Stateless
 public class WorkplaceExportImpl implements WorkplaceExport {
 
 	@Inject
@@ -33,7 +35,7 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 	private WorkplaceInfoRepository workplaceInfoRepository;
 
 	@Override
-	public List<WorkplaceExportDto> getAllWkpConfig(String companyId, List<String> listWkpId, GeneralDate baseDate) {
+	public List<WorkplaceInfo> getAllWkpConfig(String companyId, List<String> listWkpId, GeneralDate baseDate) {
 		// ドメインモデル「職場構成」を取得する
 		Optional<WorkplaceConfig> optWorkplaceConfig = this.workplaceConfigRepository.findByBaseDate(companyId,
 				baseDate);
@@ -47,7 +49,7 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 				Arrays.asList(histId));
 		if (listWkpId.size() == lstWorkplaceInfo.size()) {
 			// すべての職場の情報が取得できた場合 / TH get được thông tin của tất cả workplace
-			return this.convertDto(lstWorkplaceInfo);
+			return lstWorkplaceInfo;
 		}
 		// 情報が取得できていない職場が存在する場合 / TH tồn tại workplace chưa get được thông tin
 		// get wkpId chua lay dc info
@@ -58,17 +60,15 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 			}
 		});
 		// [No.561]過去の職場の情報を取得する
-		List<WorkplaceExportDto> lstWorkplaceExportDto = this.getPastWkpInfo(companyId, lstWkpIdNoInfo, histId);
-		// convert to Dto
-		List<WorkplaceExportDto> results = this.convertDto(lstWorkplaceInfo);
-		results.addAll(lstWorkplaceExportDto);
+		List<WorkplaceInfo> lstWkpInfo = this.getPastWkpInfo(companyId, lstWkpIdNoInfo, histId);
+		lstWorkplaceInfo.addAll(lstWkpInfo);
 		// 階層コード ASC - Do k co 階層コード nen k sap xep
 
-		return results;
+		return lstWorkplaceInfo;
 	}
 
 	@Override
-	public List<WorkplaceExportDto> getPastWkpInfo(String companyId, List<String> listWkpId, String histId) {
+	public List<WorkplaceInfo> getPastWkpInfo(String companyId, List<String> listWkpId, String histId) {
 		// ドメインモデル「職場構成」を取得する
 		Optional<WorkplaceConfig> optWorkplaceConfig = this.workplaceConfigRepository.findByHistId(companyId, histId);
 		if (!optWorkplaceConfig.isPresent()) {
@@ -104,20 +104,6 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 			});
 		}
 		// 階層コード ASC - Do k co 階層コード nen k sap xep
-		return this.convertDto(results);
+		return results;
 	}
-
-	/**
-	 * @param domains
-	 * @return
-	 */
-	private List<WorkplaceExportDto> convertDto(List<WorkplaceInfo> domains) {
-		// set hierarchyCd = null
-		String hierarchyCd = null;
-		return domains.stream()
-				.map(x -> new WorkplaceExportDto(x.getWorkplaceId(), x.getWorkplaceCode().v(), x.getWorkplaceName().v(),
-						x.getWkpGenericName().v(), x.getWkpDisplayName().v(), x.getOutsideWkpCode().v(), hierarchyCd))
-				.collect(Collectors.toList());
-	}
-
 }

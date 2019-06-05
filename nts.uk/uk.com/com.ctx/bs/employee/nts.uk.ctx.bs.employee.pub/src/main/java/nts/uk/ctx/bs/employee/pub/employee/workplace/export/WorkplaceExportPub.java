@@ -1,16 +1,15 @@
-package nts.uk.ctx.bs.employee.dom.workplace.export;
+package nts.uk.ctx.bs.employee.pub.employee.workplace.export;
 
 import java.util.List;
 
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfo;
 
 /**
  * 
  * @author sonnh1
  *
  */
-public interface WorkplaceExport {
+public interface WorkplaceExportPub {
 	/**
 	 * [No.560]職場IDから職場の情報をすべて取得する
 	 * 
@@ -21,7 +20,7 @@ public interface WorkplaceExport {
 	 * @param listWkpId
 	 * @param baseDate
 	 */
-	public List<WorkplaceInfo> getAllWkpConfig(String companyId, List<String> listWkpId, GeneralDate baseDate);
+	public List<WorkplaceExportPubDto> getAllWkpConfig(String companyId, List<String> listWkpId, GeneralDate baseDate);
 
 	/**
 	 * [No.561]過去の職場の情報を取得する
@@ -32,5 +31,5 @@ public interface WorkplaceExport {
 	 * @param listWkpId
 	 * @param histId
 	 */
-	public List<WorkplaceInfo> getPastWkpInfo(String companyId, List<String> listWkpId, String histId);
+	public List<WorkplaceExportPubDto> getPastWkpInfo(String companyId, List<String> listWkpId, String histId);
 }
