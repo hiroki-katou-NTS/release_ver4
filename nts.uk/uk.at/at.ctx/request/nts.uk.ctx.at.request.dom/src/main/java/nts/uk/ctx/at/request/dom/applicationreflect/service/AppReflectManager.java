@@ -12,8 +12,9 @@ public interface AppReflectManager {
 	/**
 	 * 社員の申請を反映
 	 * @param appInfor
+	 * @param excLogId 実行ID
 	 */
 	public ReflectResult reflectEmployeeOfApp(Application_New appInfor, InformationSettingOfEachApp reflectSetting,
-			ExecutionTypeExImport execuTionType);
+			ExecutionTypeExImport execuTionType, String excLogId);
 
 }

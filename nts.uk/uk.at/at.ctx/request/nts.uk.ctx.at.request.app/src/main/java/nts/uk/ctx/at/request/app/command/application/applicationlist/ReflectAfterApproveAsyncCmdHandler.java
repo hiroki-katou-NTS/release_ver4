@@ -40,7 +40,7 @@ public class ReflectAfterApproveAsyncCmdHandler extends AsyncCommandHandler<List
 				|| application.getAppType().equals(ApplicationType.ABSENCE_APPLICATION)
 				|| application.getAppType().equals(ApplicationType.COMPLEMENT_LEAVE_APPLICATION)){
 				InformationSettingOfEachApp reflectSetting = appSetting.getSettingOfEachApp();
-				appReflectManager.reflectEmployeeOfApp(application, reflectSetting, ExecutionTypeExImport.NORMAL_EXECUTION);
+				appReflectManager.reflectEmployeeOfApp(application, reflectSetting, ExecutionTypeExImport.NORMAL_EXECUTION,"");
 			}
 		}
 	}

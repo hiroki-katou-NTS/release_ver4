@@ -35,14 +35,20 @@ public class AttendanceLeavingGateOfDaily {
 	
 	/**
 	 * 出退勤前時間の計算
+	 * 出勤前時間の計算　と　退勤後時間の計算
 	 * @return
 	 */
 	public AttendanceTimeOfExistMinus calcBeforeAttendanceTime(Optional<TimeLeavingOfDailyPerformance> attendanceLeave,GoLeavingWorkAtr goLeavingWorkAtr) {
 		if(!attendanceLeave.isPresent()) return new AttendanceTimeOfExistMinus(0);
 		List<AttendanceTimeOfExistMinus> resultList = new ArrayList<>();
 		for(AttendanceLeavingGate attendanceLeavingGate : this.attendanceLeavingGates) {
-			if(!attendanceLeavingGate.getAttendance().isPresent()){
-				continue;
+			if(goLeavingWorkAtr.isGO_WORK()) {
+				if(!attendanceLeavingGate.getAttendance().isPresent())
+					continue;
+			}
+			else {
+				if(!attendanceLeavingGate.getLeaving().isPresent())
+					continue;
 			}
 			
 			Optional<WorkStamp> attendanceLeaveWorkStamp = goLeavingWorkAtr.isGO_WORK()?attendanceLeavingGate.getAttendance():

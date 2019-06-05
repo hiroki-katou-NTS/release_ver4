@@ -965,8 +965,13 @@ public class FlexTimeOfMonthly {
 					}
 					
 					// 休暇加算時間を取得する
-					val vacationAddTime = GetVacationAddTime.getTime(
+					AttendanceTimeMonth vacationAddTime = GetVacationAddTime.getTime(
 							datePeriod, aggregateTotalWorkingTime.getVacationUseTime(), addSetWhenOnlyLegal);
+					
+					// 特別休暇使用時間を休暇加算時間に加算する
+					int specialLeaveUseMinutes = aggregateTotalWorkingTime.getVacationUseTime()
+							.getSpecialHoliday().getTotalUseTime(datePeriod).v();
+					vacationAddTime = vacationAddTime.addMinutes(specialLeaveUseMinutes);
 					
 					// 「フレックス時間」と「休暇加算時間」を比較する
 					if (this.flexTime.getFlexTime().getTime().greaterThan(vacationAddTime.v())){

@@ -137,6 +137,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.finddata.IFindData;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.CheckIndentityMonth;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityMonthParam;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityMonthResult;
+import nts.uk.screen.at.app.dailyperformance.correction.lock.CheckLockDataDaily;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.ClosureSidDto;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.ConfirmationMonthDto;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.DPLock;
@@ -241,6 +242,9 @@ public class DailyPerformanceCorrectionProcessor {
 	
 	@Inject
 	private SyWorkplacePub syWorkplacePub;
+	
+	@Inject
+	private CheckLockDataDaily checkLockDataDaily;
 	
     static final Integer[] DEVIATION_REASON  = {436, 438, 439, 441, 443, 444, 446, 448, 449, 451, 453, 454, 456, 458, 459, 799, 801, 802, 804, 806, 807, 809, 811, 812, 814, 816, 817, 819, 821, 822};
 	public static final Map<Integer, Integer> DEVIATION_REASON_MAP = IntStream.range(0, DEVIATION_REASON.length-1).boxed().collect(Collectors.toMap(x -> DEVIATION_REASON[x], x -> x/3 +1));
@@ -599,7 +603,13 @@ public class DailyPerformanceCorrectionProcessor {
 		exceptionAsync.optional().ifPresent(ex -> {
 			throw new RuntimeException(ex);
 		});
-		
+		//bug 107966 disable edit flex in case lock
+		if(displayFormat == 0 && screenDto.getMonthResult() != null && screenDto.getMonthResult().getFlexShortage() != null) {
+			boolean disableFlex = checkLockDataDaily.checkLockInPeriod(screenDto.getLstData(),
+					screenDto.getMonthResult().getFlexShortage().getPeriodCheckLock());
+			screenDto.setLockDisableFlex(disableFlex);
+			screenDto.setRangeLock(screenDto.getMonthResult().getFlexShortage().getRangeLock());
+		}
 		screenDto.setShowErrorDialog(showDialogError.showDialogError(lstError, showError, dailyPerformanceDto));
 		screenDto.setDateRange(datePeriodResult);
 		return screenDto;

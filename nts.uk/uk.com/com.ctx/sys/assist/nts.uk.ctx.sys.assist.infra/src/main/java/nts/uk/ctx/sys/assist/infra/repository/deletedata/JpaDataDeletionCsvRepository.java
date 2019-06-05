@@ -28,8 +28,6 @@ import nts.uk.ctx.sys.assist.dom.categoryfieldmt.HistoryDiviSion;
 import nts.uk.ctx.sys.assist.dom.deletedata.DataDeletionCsvRepository;
 import nts.uk.ctx.sys.assist.dom.deletedata.EmployeeDeletion;
 import nts.uk.ctx.sys.assist.dom.deletedata.TableDeletionDataCsv;
-import nts.uk.ctx.sys.assist.dom.saveprotetion.SaveProtetion;
-import nts.uk.ctx.sys.assist.dom.saveprotetion.SaveProtetionRepository;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 import nts.uk.shr.infra.file.csv.CSVReportGenerator;
@@ -365,6 +363,35 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 			}
 			query.append(" ) ");
 		}
+		
+		Optional<String> acqDateTimeField = tableList.getFieldAcqDateTime();
+		if (acqDateTimeField.isPresent()) {
+			if (acqDateTimeField.get() != null && !"null".equals(acqDateTimeField.get()) && !acqDateTimeField.get().isEmpty()) {
+				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
+					query.append(" AND p." + acqDateTimeField.get() + " >= ?startDate ");
+					query.append(" AND p." + acqDateTimeField.get() + " <= ?endDate ");
+				} else {
+					query.append(" AND t." + acqDateTimeField.get() + " >= ?startDate ");
+					query.append(" AND t." + acqDateTimeField.get() + " <= ?endDate ");
+				}
+			}
+		}
+		
+		//period date
+		Optional<String> acqStartDateField = tableList.getFieldAcqStartDate();
+		Optional<String> acqEndDateField = tableList.getFieldAcqEndDate();
+		if (acqStartDateField.isPresent() && acqEndDateField.isPresent()) {
+			if (acqStartDateField.get() != null && !"null".equals(acqStartDateField.get()) && !acqStartDateField.get().isEmpty()
+				&& acqEndDateField.get() != null && !"null".equals(acqEndDateField.get()) && !acqEndDateField.get().isEmpty()) {
+				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
+					query.append(" AND p." + acqStartDateField.get() + " >= ?startDate ");
+					query.append(" AND p." + acqEndDateField.get() + " <= ?endDate ");
+				} else {
+					query.append(" AND t." + acqStartDateField.get() + " >= ?startDate ");
+					query.append(" AND t." + acqEndDateField.get() + " <= ?endDate ");
+				}
+			}
+		}
 
 		// 履歴区分を判別する。履歴なしの場合
 		List<Integer> indexs = new ArrayList<Integer>();
@@ -444,7 +471,7 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 
 						query.append(" >= ?endDate) ");
 					}
-
+					
 					switch (tableList.getTimeStore()) {
 					case 1: //DAILY
 						params.put("startDate", tableList.getStartDateOfDaily() + " 00:00:00");
@@ -468,7 +495,14 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 		}
 
 		// 抽出条件キー固定
-		query.append(tableList.getDefaultCondKeyQuery().orElse(""));
+		Optional<String> defaultCondKeyQuery = tableList.getDefaultCondKeyQuery();
+		if (defaultCondKeyQuery.isPresent()) {
+			if (defaultCondKeyQuery.get() != null && !"null".equals(defaultCondKeyQuery.get()) && !defaultCondKeyQuery.get().isEmpty()) {
+				query.append(" AND " + tableList.getDefaultCondKeyQuery().get() + " ");
+				System.out.println("========== "  + defaultCondKeyQuery.get());
+			}
+		}
+		
 		for (int i = 0; i < clsKeyQuerys.length; i++) {
 			if (EMPLOYEE_CD.equals(clsKeyQuerys[i]) && !targetEmployeesSid.isEmpty()) {
 				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
@@ -666,7 +700,36 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 			}
 			query.append(" ) ");
 		}
-
+		
+		Optional<String> acqDateTimeField = tableList.getFieldAcqDateTime();
+		if (acqDateTimeField.isPresent()) {
+			if (acqDateTimeField.get() != null && !"null".equals(acqDateTimeField.get()) && !acqDateTimeField.get().isEmpty()) {
+				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
+					query.append(" AND p." + acqDateTimeField.get() + " >= ?startDate ");
+					query.append(" AND p." + acqDateTimeField.get() + " <= ?endDate ");
+				} else {
+					query.append(" AND t." + acqDateTimeField.get() + " >= ?startDate ");
+					query.append(" AND t." + acqDateTimeField.get() + " <= ?endDate ");
+				}
+			}
+		}
+		
+		//period date
+		Optional<String> acqStartDateField = tableList.getFieldAcqStartDate();
+		Optional<String> acqEndDateField = tableList.getFieldAcqEndDate();
+		if (acqStartDateField.isPresent() && acqEndDateField.isPresent()) {
+			if (acqStartDateField.get() != null && !"null".equals(acqStartDateField.get())&& !acqStartDateField.get().isEmpty() 
+					&& acqEndDateField.get() != null && !"null".equals(acqEndDateField.get()) && !acqEndDateField.get().isEmpty()) {
+				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
+					query.append(" AND p." + acqStartDateField.get() + " >= ?startDate ");
+					query.append(" AND p." + acqEndDateField.get() + " <= ?endDate ");
+				} else {
+					query.append(" AND t." + acqStartDateField.get() + " >= ?startDate ");
+					query.append(" AND t." + acqEndDateField.get() + " <= ?endDate ");
+				}
+			}
+		}
+		
 		// 履歴区分を判別する。履歴なしの場合
 		if (tableList.getHistoryCls() == HistoryDiviSion.NO_HISTORY.value) {
 			List<Integer> indexs = new ArrayList<Integer>();
@@ -745,7 +808,7 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 
 						query.append(" >= ?endDate) ");
 					}
-
+					
 					switch (tableList.getTimeStore()) {
 					case 1: // DAILY
 						params.put("startDate", tableList.getStartDateOfDaily() + " 00:00:00");
@@ -769,7 +832,14 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 		}
 
 		// 抽出条件キー固定
-		query.append(tableList.getDefaultCondKeyQuery().orElse(""));
+		Optional<String> defaultCondKeyQuery = tableList.getDefaultCondKeyQuery();
+		if (defaultCondKeyQuery.isPresent()) {
+			if (defaultCondKeyQuery.get() != null && !"null".equals(defaultCondKeyQuery.get()) && !defaultCondKeyQuery.get().isEmpty()) {
+				query.append(" AND " + tableList.getDefaultCondKeyQuery().get() + " ");
+				System.out.println("========== "  + defaultCondKeyQuery.get());
+			}
+		}
+		
 		for (int i = 0; i < clsKeyQuerys.length; i++) {
 			if (EMPLOYEE_CD.equals(clsKeyQuerys[i]) && !targetEmployeesSid.isEmpty()) {
 				if (tableList.getHasParentTblFlg() == NotUseAtr.USE.value) {
@@ -779,7 +849,6 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 				}
 			}
 		}
-		
 		
 		String querySql = query.toString();
 		if(!targetEmployeesSid.isEmpty() && query.toString().contains("?listTargetSid")) {
@@ -801,32 +870,6 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 			}
 			queryString.executeUpdate();
 		}
-	}
-
-
-
-	/**
-	 * 
-	 * @param tableDelData
-	 * @param employeeDeletions
-	 * @param parrams
-	 * @return
-	 */
-	private String buildGetDataForEachCatSql(TableDeletionDataCsv tableDelData, 
-			List<EmployeeDeletion> employeeDeletions, Map<String, Object> parrams) {
-		boolean hasParentTbl = tableDelData.hasParentTblFlg();
-		StringBuffer query = new StringBuffer();
-		// build select part
-		buildSelectPart(query, tableDelData, hasParentTbl);
-		//build form part
-		buildFromPart(query, tableDelData.getTableEnglishName());
-		//build inner joint
-		if (hasParentTbl && tableDelData.getParentTblName().isPresent()) {
-			buildInnerJoint(query, tableDelData);
-		}
-		//build where part
-		buildWherePart(query, tableDelData, employeeDeletions, parrams);
-		return query.toString();
 	}
 	
 	private String getFieldAcq(List<String> allColumns, Optional<String> fieldName, String fieldAcqName) {
@@ -859,292 +902,6 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 	}
 
 	/**
-	 * build the select part
-	 * @param buffer
-	 * @param tblName
-	 * @param parentTblName
-	 * @param acqCidField
-	 * @param acqEmployeeField
-	 * @param acqDateField
-	 * @param acqStartDateField
-	 * @param acqEndDateField
-	 * @param hasParentTbl
-	 */
-	private void buildSelectPart(StringBuffer buffer, TableDeletionDataCsv tableDelData,
-			boolean hasParentTbl) {
-		String acqCidField = tableDelData.getFieldAcqCid().get();
-		String acqEmployeeField = tableDelData.getFieldAcqEmployeeId().get();
-		String acqDateField = tableDelData.getFieldAcqDateTime().get();
-		String acqStartDateField = tableDelData.getFieldAcqStartDate().get();
-		String acqEndDateField = tableDelData.getFieldAcqEndDate().get();
-		String tblName = tableDelData.getTableEnglishName();
-		String parentTblName = tableDelData.getParentTblName().get();
-		String tblAcq = tblName;
-		if (hasParentTbl) {
-			tblAcq = parentTblName;
-		}
-
-		buffer.append("SELECT ");
-		// acqCidField
-		if (acqCidField != null && !"null".equals(acqCidField) && !acqCidField.isEmpty()) {
-			buffer.append(tblAcq + "." + acqCidField + " AS H_CID, ");
-		} else {
-			buffer.append(" NULL AS H_CID, ");
-		}
-		
-		// acqEmployeeField
-		if (acqEmployeeField != null && !"null".equals(acqEmployeeField) && !acqEmployeeField.isEmpty()) {
-			buffer.append(tblAcq + "." + acqEmployeeField + " AS H_SID, ");
-		} else {
-			buffer.append(" NULL AS H_SID, ");
-		}
-		// acqDateField
-		if (acqDateField != null && !"null".equals(acqDateField) && !acqDateField.isEmpty()) {
-			buffer.append(tblAcq + "." + acqDateField + " AS H_DATE, ");
-		} else {
-			buffer.append(" NULL AS H_DATE, ");
-		}
-		// acqStartDateField
-		if (acqStartDateField != null && !"null".equals(acqStartDateField) && !acqStartDateField.isEmpty()) {
-			buffer.append(tblAcq + "." + acqStartDateField + " AS H_DATE_START, ");
-		} else {
-			buffer.append(" NULL AS H_DATE_START, ");
-		}
-		// acqEndDateField
-		if (acqEndDateField != null && !"null".equals(acqEndDateField) && !acqEndDateField.isEmpty()) {
-			buffer.append(tblAcq + "." + acqEndDateField + " AS H_DATE_END, ");
-		} else {
-			buffer.append(" NULL AS H_DATE_END, ");
-		}
-		
-		buffer.append(tblName + ".* ");
-	}
-	
-	/**
-	 * 
-	 * @param buffer
-	 * @param tblName
-	 */
-	private void buildFromPart(StringBuffer buffer, String tblName) {
-		buffer.append(" FROM " + tblName + " AS " + tblName);
-	}
-	
-	/**
-	 * build inner joint in case: the having parrent table
-	 * @param buffer
-	 * @param tableDelData
-	 */
-	private void buildInnerJoint(StringBuffer buffer, TableDeletionDataCsv tableDelData) {
-		String tblName = tableDelData.getTableEnglishName();
-		String parentTblName = tableDelData.getParentTblName().get();
-		buffer.append(" INNER　JOIN " + parentTblName + " ON ");
-		
-		String prefix = "";
-		String fieldChild1 = tableDelData.getFieldChild1().get();
-		String fieldParent1 = tableDelData.getFieldParent1().get();
-		if (fieldChild1 != null && !"null".equals(fieldChild1) && !fieldChild1.isEmpty() 
-				&& fieldParent1 != null && !"null".equals(fieldParent1) && !fieldParent1.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild1 
-				+ " = " + parentTblName + "." + fieldParent1);
-		}
-		
-		String fieldChild2 = tableDelData.getFieldChild2().get();
-		String fieldParent2 = tableDelData.getFieldParent2().get();
-		if (fieldChild2 != null && !"null".equals(fieldChild2) && !fieldChild2.isEmpty() 
-				&& fieldParent2 != null && !"null".equals(fieldParent2) && !fieldParent2.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild2 
-				+ " = " + parentTblName + "." + fieldParent2);
-		}
-		
-		String fieldChild3 = tableDelData.getFieldChild3().get();
-		String fieldParent3 = tableDelData.getFieldParent3().get();
-		if (fieldChild3 != null && !"null".equals(fieldChild3) && !fieldChild3.isEmpty() 
-				&& fieldParent3 != null && !"null".equals(fieldParent3) && !fieldParent3.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild3 
-				+ " = " + parentTblName + "." + fieldParent3);
-		}
-		
-		String fieldChild4 = tableDelData.getFieldChild4().get();
-		String fieldParent4 = tableDelData.getFieldParent4().get();
-		if (fieldChild4 != null && !"null".equals(fieldChild4) && !fieldChild4.isEmpty() 
-				&& fieldParent4 != null && !"null".equals(fieldParent4) && !fieldParent4.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild4 
-				+ " = " + parentTblName + "." + fieldParent4);
-		}
-		
-		String fieldChild5 = tableDelData.getFieldChild5().get();
-		String fieldParent5 = tableDelData.getFieldParent5().get();
-		if (fieldChild5 != null && !"null".equals(fieldChild5) && !fieldChild5.isEmpty() 
-				&& fieldParent5 != null && !"null".equals(fieldParent5) && !fieldParent5.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild5 
-				+ " = " + parentTblName + "." + fieldParent5);
-		}
-		
-		String fieldChild6 = tableDelData.getFieldChild6().get();
-		String fieldParent6 = tableDelData.getFieldParent6().get();
-		if (fieldChild6 != null && !"null".equals(fieldChild6) && !fieldChild6.isEmpty() 
-				&& fieldParent6 != null && !"null".equals(fieldParent6) && !fieldParent6.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild6 
-				+ " = " + parentTblName + "." + fieldParent6);
-		}
-		
-		String fieldChild7 = tableDelData.getFieldChild7().get();
-		String fieldParent7 = tableDelData.getFieldParent7().get();
-		if (fieldChild7 != null && !"null".equals(fieldChild7) && !fieldChild7.isEmpty() 
-				&& fieldParent7 != null && !"null".equals(fieldParent7) && !fieldParent7.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild7 
-				+ " = " + parentTblName + "." + fieldParent7);
-		}
-		
-		String fieldChild8 = tableDelData.getFieldChild8().get();
-		String fieldParent8 = tableDelData.getFieldParent8().get();
-		if (fieldChild8 != null && !"null".equals(fieldChild8) && !fieldChild8.isEmpty() 
-				&& fieldParent8 != null && !"null".equals(fieldParent8) && !fieldParent8.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild8 
-				+ " = " + parentTblName + "." + fieldParent8);
-		}
-		
-		String fieldChild9 = tableDelData.getFieldChild9().get();
-		String fieldParent9 = tableDelData.getFieldParent9().get();
-		if (fieldChild9 != null && !"null".equals(fieldChild9) && !fieldChild9.isEmpty() 
-				&& fieldParent9 != null && !"null".equals(fieldParent9) && !fieldParent9.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild9 
-				+ " = " + parentTblName + "." + fieldParent9);
-		}
-		
-		String fieldChild10 = tableDelData.getFieldChild10().get();
-		String fieldParent10 = tableDelData.getFieldParent10().get();
-		if (fieldChild10 != null && !"null".equals(fieldChild10) && !fieldChild10.isEmpty() 
-				&& fieldParent10 != null && !"null".equals(fieldParent10) && !fieldParent10.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild10 
-				+ " = " + parentTblName + "." + fieldParent10);
-		}
-	}
-	
-	/**
-	 * 
-	 * @param buffer
-	 * @param tableDelData
-	 * @param employeeDeletions
-	 * @param parrams
-	 */
-	private void buildWherePart(StringBuffer buffer, TableDeletionDataCsv tableDelData, 
-			List<EmployeeDeletion> employeeDeletions, Map<String, Object> parrams) {
-//		int timeStore = tableDelData.getTimeStore();
-		String tblAcq = tableDelData.getTableEnglishName();
-		if (tableDelData.hasParentTblFlg()) {
-			tblAcq = tableDelData.getParentTblName().get();
-		}
-		
-		List lstEmployeeIds = employeeDeletions.stream().map(emp -> emp.getEmployeeId()).collect(Collectors.toList());
-		
-		buffer.append(" WHERE 1 = 1 ");
-		
-		//company id
-		String acqCidField = tableDelData.getFieldAcqCid().get();
-		if (acqCidField != null && !"null".equals(acqCidField) && !acqCidField.isEmpty()) {
-			buffer.append(" AND " + tblAcq + "." + acqCidField + " = ?cid ");
-			parrams.put("cid", tableDelData.getCompanyId());
-		}
-		
-		//employee id
-		String acqEmployeeField = tableDelData.getFieldAcqEmployeeId().get();
-		if (acqEmployeeField != null && !"null".equals(acqEmployeeField) && !acqEmployeeField.isEmpty()) {
-			if (lstEmployeeIds != null && !lstEmployeeIds.isEmpty()) {
-				buffer.append(" AND " + tblAcq + "." + acqEmployeeField + " IN (");
-				
-				for (int i = 0; i < lstEmployeeIds.size(); i++) {
-					if (i <= lstEmployeeIds.size() - 2) {
-						buffer.append("?employeeId" + i + ",");
-					}
-					else {
-						buffer.append("?employeeId" + i + ")");
-					}
-					parrams.put("employeeId" + i, lstEmployeeIds.get(i));
-				}
-			}
-		}
-		
-		//date
-		String acqDateTimeField = tableDelData.getFieldAcqDateTime().get();
-		if (acqDateTimeField != null && !"null".equals(acqDateTimeField) && !acqDateTimeField.isEmpty()) {
-//			if (!isDateFieldInOracle(acqDateTimeField, tableDelData)) {
-				buffer.append(" AND " + tblAcq + "." + acqDateTimeField + " >= ?startDate ");
-				buffer.append(" AND " + tblAcq + "." + acqDateTimeField + " <= ?endDate ");
-//			} else {
-//				buffer.append(" AND " + tblAcq + "." + acqDateTimeField + " >= " + toDateOracle(timeStore, " ?startDate "));
-//				buffer.append(" AND " + tblAcq + "." + acqDateTimeField + " <= " + toDateOracle(timeStore, " ?endDate "));
-//			}
-			setDateParrams(tableDelData, parrams);
-		}
-		
-		//period date
-		String acqStartDateField = tableDelData.getFieldAcqStartDate().get();
-		String acqEndDateField = tableDelData.getFieldAcqEndDate().get();
-		
-		if (acqStartDateField != null && !"null".equals(acqStartDateField) && !acqStartDateField.isEmpty()
-				&& acqEndDateField != null && !"null".equals(acqEndDateField) && !acqEndDateField.isEmpty()) {
-//			if (!isDateFieldInOracle(acqStartDateField, tableDelData)) {
-				buffer.append(" AND " + tblAcq + "." + acqStartDateField + " >= ?startDate ");
-				buffer.append(" AND " + tblAcq + "." + acqEndDateField + " <= ?endDate ");
-//			} else {
-//				buffer.append(" AND " + tblAcq + "." + acqStartDateField + " >= " + toDateOracle(timeStore, " ?startDate "));
-//				buffer.append(" AND " + tblAcq + "." + acqEndDateField + " <= " + toDateOracle(timeStore, " ?endDate "));
-//			}
-			setDateParrams(tableDelData, parrams);
-		}
-		
-		//condition default
-		String defaultCondKeyQuery = tableDelData.getDefaultCondKeyQuery().get();
-		if (defaultCondKeyQuery != null && !"null".equals(defaultCondKeyQuery) && !defaultCondKeyQuery.isEmpty()) {
-			buffer.append(" " + defaultCondKeyQuery);
-		}
-	}
-
-	/**
-	 * 
-	 * @param tableDelData
-	 * @param parrams
-	 */
-	private void setDateParrams(TableDeletionDataCsv tableDelData, Map<String, Object> parrams) {
-		TimeStore timeStore = TimeStore.valueOf(tableDelData.getTimeStore());
-		if (timeStore == TimeStore.DAILY) {
-			parrams.put("startDate", tableDelData.getStartDateOfDaily());
-			parrams.put("endDate", tableDelData.getEndDateOfDaily());
-		} else if (timeStore == TimeStore.MONTHLY) {
-			Optional<Integer> startMonthly = Optional.of(Integer.parseInt(tableDelData.getStartMonthOfMonthly()));
-			Optional<Integer> endMonthly = Optional.of(Integer.parseInt(tableDelData.getEndMonthOfMonthly()));
-			
-			parrams.put("startDate", startMonthly.get());
-			parrams.put("endDate", endMonthly.get());
-			
-		} else if (timeStore == TimeStore.ANNUAL) {
-			parrams.put("startDate", tableDelData.getStartYearOfMonthly());
-			parrams.put("endDate", tableDelData.getEndYearOfMonthly());
-		}
-	}
-
-	/**
 	 * 
 	 */
 	@Override
@@ -1169,163 +926,5 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 		
 		List targetEmployeesSid = employeeDeletions.stream().map(emp -> emp.getEmployeeId()).collect(Collectors.toList());
 		delelteDataDynamic(tableDelData, targetEmployeesSid);
-	}
-	
-	/**
-	 * 
-	 * @param tableDelData
-	 * @param employeeDeletions
-	 * @param parrams
-	 * @return
-	 */
-	private String buildDelDataForEachCatSql(TableDeletionDataCsv tableDelData, 
-			List<EmployeeDeletion> employeeDeletions, Map<String, Object> parrams) {
-		StringBuffer buffer = new StringBuffer();
-		//build form part
-		buildFromDelPart(buffer, tableDelData.getTableEnglishName());
-		//build where part
-		buildWhereDelPart(buffer, tableDelData, employeeDeletions, parrams);
-		return buffer.toString();
-	}
-	
-	/**
-	 * 
-	 * @param buffer
-	 * @param tblName
-	 */
-	private void buildFromDelPart(StringBuffer buffer, String tblName) {
-		buffer.append(" DELETE "  + tblName + " FROM " + tblName );
-	}
-	
-	/**
-	 * 
-	 * @param buffer
-	 * @param tableDelData
-	 * @param employeeDeletions
-	 * @param parrams
-	 */
-	private void buildWhereDelPart(StringBuffer buffer, TableDeletionDataCsv tableDelData, 
-			List<EmployeeDeletion> employeeDeletions, Map<String, Object> parrams) {
-		if (!tableDelData.hasParentTblFlg()) {
-			buildWherePart(buffer, tableDelData, employeeDeletions, parrams);
-		}
-		else {
-			buildWhereExist(buffer, tableDelData, employeeDeletions, parrams);
-		}
-	}
-	
-	/**
-	 * 
-	 * @param buffer
-	 * @param tableDelData
-	 * @param employeeDeletions
-	 * @param parrams
-	 */
-	private void buildWhereExist(StringBuffer buffer, TableDeletionDataCsv tableDelData, 
-			List<EmployeeDeletion> employeeDeletions, Map<String, Object> parrams) {
-		
-		String tblName = tableDelData.getTableEnglishName();
-		String parentTblName = tableDelData.getParentTblName().get();
-		
-		String fieldChild1 = tableDelData.getFieldChild1().get();
-		String fieldParent1 = tableDelData.getFieldParent1().get();
-		String fieldChild2 = tableDelData.getFieldChild2().get();
-		String fieldParent2 = tableDelData.getFieldParent2().get();
-		String fieldChild3 = tableDelData.getFieldChild3().get();
-		String fieldParent3 = tableDelData.getFieldParent3().get();
-		String fieldChild4 = tableDelData.getFieldChild4().get();
-		String fieldParent4 = tableDelData.getFieldParent4().get();
-		String fieldChild5 = tableDelData.getFieldChild5().get();
-		String fieldParent5 = tableDelData.getFieldParent5().get();
-		String fieldChild6 = tableDelData.getFieldChild6().get();
-		String fieldParent6 = tableDelData.getFieldParent6().get();
-		String fieldChild7 = tableDelData.getFieldChild7().get();
-		String fieldParent7 = tableDelData.getFieldParent7().get();
-		String fieldChild8 = tableDelData.getFieldChild8().get();
-		String fieldParent8 = tableDelData.getFieldParent8().get();
-		String fieldChild9 = tableDelData.getFieldChild9().get();
-		String fieldParent9 = tableDelData.getFieldParent9().get();
-		String fieldChild10 = tableDelData.getFieldChild10().get();
-		String fieldParent10 = tableDelData.getFieldParent10().get();
-		
-		//build inner joint
-		String prefix = "";
-		buffer.append(" INNER JOIN " + parentTblName + " ON ");
-		prefix = "";
-		if (fieldChild1 != null && !"null".equals(fieldChild1) && !fieldChild1.isEmpty() && fieldParent1 != null
-				&& !"null".equals(fieldParent1) && !fieldParent1.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild1 + " = " + parentTblName + "." + fieldParent1);
-		}
-
-		if (fieldChild2 != null && !"null".equals(fieldChild2) && !fieldChild2.isEmpty() && fieldParent2 != null
-				&& !"null".equals(fieldParent2) && !fieldParent2.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild2 + " = " + parentTblName + "." + fieldParent2);
-		}
-
-		if (fieldChild3 != null && !"null".equals(fieldChild3) && !fieldChild3.isEmpty() && fieldParent3 != null
-				&& !"null".equals(fieldParent3) && !fieldParent3.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild3 + " = " + parentTblName + "." + fieldParent3);
-		}
-
-		if (fieldChild4 != null && !"null".equals(fieldChild4) && !fieldChild4.isEmpty() && fieldParent4 != null
-				&& !"null".equals(fieldParent4) && !fieldParent4.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild4 + " = " + parentTblName + "." + fieldParent4);
-		}
-
-		if (fieldChild5 != null && !"null".equals(fieldChild5) && !fieldChild5.isEmpty() && fieldParent5 != null
-				&& !"null".equals(fieldParent5) && !fieldParent5.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild5 + " = " + parentTblName + "." + fieldParent5);
-		}
-
-		if (fieldChild6 != null && !"null".equals(fieldChild6) && !fieldChild6.isEmpty() && fieldParent6 != null
-				&& !"null".equals(fieldParent6) && !fieldParent6.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild6 + " = " + parentTblName + "." + fieldParent6);
-		}
-
-		if (fieldChild7 != null && !"null".equals(fieldChild7) && !fieldChild7.isEmpty() && fieldParent7 != null
-				&& !"null".equals(fieldParent7) && !fieldParent7.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild7 + " = " + parentTblName + "." + fieldParent7);
-		}
-
-		if (fieldChild8 != null && !"null".equals(fieldChild8) && !fieldChild8.isEmpty() && fieldParent8 != null
-				&& !"null".equals(fieldParent8) && !fieldParent8.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild8 + " = " + parentTblName + "." + fieldParent8);
-		}
-
-		if (fieldChild9 != null && !"null".equals(fieldChild9) && !fieldChild9.isEmpty() && fieldParent9 != null
-				&& !"null".equals(fieldParent9) && !fieldParent9.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild9 + " = " + parentTblName + "." + fieldParent9);
-		}
-
-		if (fieldChild10 != null && !"null".equals(fieldChild10) && !fieldChild10.isEmpty() && fieldParent10 != null
-				&& !"null".equals(fieldParent10) && !fieldParent10.isEmpty()) {
-			buffer.append(prefix);
-			prefix = " AND ";
-			buffer.append(tblName + "." + fieldChild10 + " = " + parentTblName + "." + fieldParent10);
-		}
-		
-		//where for select
-		buildWherePart(buffer, tableDelData, employeeDeletions, parrams);
-		
-		
-//		buffer.append(" )");
 	}
 }

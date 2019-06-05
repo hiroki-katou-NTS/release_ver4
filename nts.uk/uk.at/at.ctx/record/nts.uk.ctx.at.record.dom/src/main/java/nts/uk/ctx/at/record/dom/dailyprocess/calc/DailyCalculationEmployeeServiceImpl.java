@@ -238,7 +238,9 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 
 				//データ更新
 				for(ManageCalcStateAndResult stateInfo : afterCalcRecord.getLst()) {
+					
 					try {
+						//update record
 						updateRecord(stateInfo.integrationOfDaily);
 						upDateCalcState(stateInfo);
 					} catch (Exception ex) {
@@ -246,11 +248,15 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 						if (!isOptimisticLock) {
 							throw ex;
 						}
+						//create error message
 						ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
 								new ErrMessageResource("024"), EnumAdaptor.valueOf(1, ExecutionContent.class), 
 								stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(),
-								new ErrMessageContent(TextResource.localize("Msg_1528")));
+								new ErrMessageContent(TextResource.localize("Msg_1541")));
+						//regist error message 
 						this.errMessageInfoRepository.add(employmentErrMes);
+						
+						
 						isHappendOptimistLockError.add(true);
 					}
 				}
@@ -311,7 +317,8 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		//データ更新
 		for(ManageCalcStateAndResult stateInfo : afterCalcRecord.getLst()) {
 			try {
-				updateRecord(stateInfo.integrationOfDaily);
+				//実績登録
+				updateRecord(stateInfo.integrationOfDaily); 
 				upDateCalcState(stateInfo);
 			} catch (Exception ex) {
 				boolean isOptimisticLock = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
@@ -323,6 +330,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 						stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(),
 						new ErrMessageContent(TextResource.localize("Msg_1541")));
 				this.errMessageInfoRepository.add(employmentErrMes);
+				
 			}
 		}
 //		//計算状態更新

@@ -33,5 +33,7 @@ public class DPDisplayLockParam {
 	private boolean showLock;
 	
 	private Integer closureId;
+	
+	private DateRange periodLock;
 
 }

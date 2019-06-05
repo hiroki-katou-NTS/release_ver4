@@ -9,7 +9,10 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.eclipse.persistence.exceptions.OptimisticLockException;
+
 import nts.arc.time.GeneralDate;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
@@ -71,7 +74,12 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 			daily = this.reflectRecordStartEndTime(param, daily);			
 			commonService.calculateOfAppReflect(daily, param.getEmployeeId(), param.getBaseDate(), false);
 			return true;
-		} catch (Exception e) {
+		} catch (Exception ex) {
+			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
+			if(!isError) {
+				throw ex;
+			}
+			commonService.createLogError(param.getEmployeeId(), param.getBaseDate(), param.getExcLogId());
 			return false;
 		}
 	}

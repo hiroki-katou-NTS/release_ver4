@@ -11,18 +11,21 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.persistence.OptimisticLockException;
 
 import lombok.val;
 import nts.arc.diagnose.stopwatch.concurrent.ConcurrentStopwatches;
 import nts.arc.layer.app.command.AsyncCommandHandlerContext;
 import nts.arc.task.data.TaskDataSetter;
 import nts.arc.time.GeneralDate;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultDomainServiceImpl.ProcessState;
 import nts.uk.ctx.at.record.dom.monthly.performance.EditStateOfMonthlyPerRepository;
 import nts.uk.ctx.at.record.dom.monthly.updatedomain.UpdateAllDomainMonthService;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.AggrPeriodEachActualClosure;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.GetClosurePeriod;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.AggregateMonthlyRecordService;
+import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.AggregateMonthlyRecordValue;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.MonAggrCompanySettings;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.MonAggrEmployeeSettings;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.RepositoriesRequiredByMonthlyAggr;
@@ -97,6 +100,9 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 	/** 月別実績(WORK)を登録する */
 	@Inject
 	private UpdateAllDomainMonthService monthService;
+	/** 月別集計エラー処理 */
+	@Inject
+	private MonthlyAggregationErrorService monthError;
 	
 	/** 社員の月別実績を集計する */
 	@SuppressWarnings("rawtypes")
@@ -237,11 +243,24 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			Boolean isRemainProc = false;
 			if (remainPeriod.contains(datePeriod.start())) isRemainProc = true;
 			
-			// 月別実績を集計する　（アルゴリズム）
-			val value = this.aggregateMonthlyRecordService.aggregate(companyId, employeeId,
-					yearMonth, closureId, closureDate, datePeriod,
-					prevAggrResult, prevAbsRecResultOpt, prevBreakDayOffresultOpt, prevSpecialLeaveResultMap,
-					companySets, employeeSets, Optional.empty(), Optional.empty(), isRemainProc);
+			AggregateMonthlyRecordValue value = new AggregateMonthlyRecordValue();
+			try {
+				// 月別実績を集計する　（アルゴリズム）
+				value = this.aggregateMonthlyRecordService.aggregate(companyId, employeeId,
+						yearMonth, closureId, closureDate, datePeriod,
+						prevAggrResult, prevAbsRecResultOpt, prevBreakDayOffresultOpt, prevSpecialLeaveResultMap,
+						companySets, employeeSets, Optional.empty(), Optional.empty(), isRemainProc);
+			}
+			catch (Exception ex) {
+				boolean isOptimisticLock = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
+				if (!isOptimisticLock) {
+					throw ex;
+				}
+				this.monthError.errorProcForOptimisticLock(dataSetter, employeeId, empCalAndSumExecLogID, datePeriod.end());
+				aggrPeriod.setHappendOptimistLockError(true);
+				status.getOutAggrPeriod().add(aggrPeriod);
+				continue;
+			}
 			
 			// 状態を確認する
 			if (value.getErrorInfos().size() > 0) {
@@ -267,10 +286,21 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			prevBreakDayOffresultOpt = value.getBreakDayOffRemainMngOfInPeriodOpt();
 			prevSpecialLeaveResultMap = value.getInPeriodOfSpecialLeaveResultInforMap();
 			
-			// 月別実績(WORK)を登録する
-			this.monthService.merge(Arrays.asList(value.getIntegration()), datePeriod.end());
-			
-			status.getOutAggrPeriod().add(aggrPeriod);
+			try {
+				// 月別実績(WORK)を登録する
+				this.monthService.merge(Arrays.asList(value.getIntegration()), datePeriod.end());
+			}
+			catch (Exception ex) {
+				boolean isOptimisticLock = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
+				if (!isOptimisticLock) {
+					throw ex;
+				}
+				this.monthError.errorProcForOptimisticLock(dataSetter, employeeId, empCalAndSumExecLogID, datePeriod.end());
+				aggrPeriod.setHappendOptimistLockError(true);
+			}
+			finally {
+				status.getOutAggrPeriod().add(aggrPeriod);
+			}
 			
 			//ConcurrentStopwatches.stop("12000:集計期間ごと：" + aggrPeriod.getYearMonth().toString());
 		}

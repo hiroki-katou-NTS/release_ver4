@@ -51,4 +51,5 @@ public class OvertimeParameter {
 	 * 残業申請
 	 */
 	private OvertimeAppParameter overtimePara;
+	private String excLogId;
 }

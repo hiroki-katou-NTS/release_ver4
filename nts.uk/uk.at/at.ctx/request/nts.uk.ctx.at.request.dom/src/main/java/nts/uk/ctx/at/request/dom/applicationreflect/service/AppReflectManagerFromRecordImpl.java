@@ -160,7 +160,7 @@ public class AppReflectManagerFromRecordImpl implements AppReflectManagerFromRec
 		
 		for (Application_New appData : lstApp) {			
 			//ReflectResult reflectResult = 
-					appRefMng.reflectEmployeeOfApp(appData, reflectSetting, refAppResult);
+					appRefMng.reflectEmployeeOfApp(appData, reflectSetting, refAppResult, workId);
 			
 			/*if(reflectResult.isRecordResult() || reflectResult.isScheResult()) {
 				

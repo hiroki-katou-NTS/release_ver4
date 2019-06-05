@@ -110,7 +110,8 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				EnumAdaptor.valueOf(para.getScheAndRecordSameChangeFlg().value, ScheAndRecordSameChangePubFlg.class),
 				EnumAdaptor.valueOf(para.getScheTimeReflectAtr().value, ScheTimeReflectPubAtr.class),
 				para.isScheReflectAtr(),
-				gobackPra);
+				gobackPra,
+				para.getExcLogId());
 		if(isPre) {
 			 return recordPub.preGobackReflect(pubPara);
 		} else {
@@ -142,7 +143,8 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				para.isAutoClearStampFlg(), 
 				EnumAdaptor.valueOf(para.getScheAndRecordSameChangeFlg().value, ScheAndRecordSameChangePubFlg.class), 
 				para.isScheTimeOutFlg(), 
-				overtimePara);
+				overtimePara,
+				para.getExcLogId());
 		if(isPre) {
 			return recordPub.preOvertimeReflect(preOvertimePara);	
 		} else {
@@ -178,7 +180,8 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				para.isScheReflectFlg(),
 				para.isRecordReflectTimeFlg(),
 				para.isRecordReflectBreakFlg(),
-				appPara);
+				appPara,
+				para.getExcLogId());
 		
 		return recordPub.holidayWorkReflect(pubPara, isPre);		
 	}
@@ -198,7 +201,8 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				para.getStartDate(),
 				para.getEndDate(),
 				para.getStartTime(),
-				para.getEndTime());
+				para.getEndTime(),
+				para.getExcLogId());
 		return pubPara;
 	}
 

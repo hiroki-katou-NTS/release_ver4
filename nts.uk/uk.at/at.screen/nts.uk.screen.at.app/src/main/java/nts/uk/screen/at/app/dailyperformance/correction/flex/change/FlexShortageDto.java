@@ -8,8 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.record.dom.monthly.flex.CalcFlexChangeDto;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.month.DPMonthParent;
 import nts.uk.shr.com.i18n.TextResource;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Data
 @AllArgsConstructor
@@ -36,6 +38,7 @@ public class FlexShortageDto {
 	private boolean error;
 	private List<MessageError> messageError = new ArrayList<>();
 	private long version;
+	private DatePeriod periodCheckLock;
 
 	public FlexShortageDto(ItemValue value18, ItemValue value19, ItemValue value21, ItemValue value189,
 			ItemValue value190, ItemValue value191) {
@@ -117,6 +120,14 @@ public class FlexShortageDto {
 		return this;
 	}
 	
+	public FlexShortageDto createPeriodCheck(DatePeriod period) {
+		this.periodCheckLock = period;
+		return this;
+	}
+	
+	public DateRange getRangeLock() {
+		return periodCheckLock == null ? null : new DateRange(periodCheckLock.start(), periodCheckLock.end());
+	}
 	@AllArgsConstructor
 	@Data
 	public class MessageError{

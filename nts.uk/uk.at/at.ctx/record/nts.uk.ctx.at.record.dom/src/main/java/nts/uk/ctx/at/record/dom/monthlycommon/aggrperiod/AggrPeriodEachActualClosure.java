@@ -27,6 +27,10 @@ public class AggrPeriodEachActualClosure {
 	/** 本来の締め期間 */
 	private DatePeriod originalClosurePeriod;
 	
+	/** 排他エラー */
+	@Setter
+	private Boolean happendOptimistLockError;
+	
 	/**
 	 * コンストラクタ
 	 */
@@ -37,6 +41,8 @@ public class AggrPeriodEachActualClosure {
 		this.yearMonth = YearMonth.of(GeneralDate.today().year(), GeneralDate.today().month());
 		this.period = new DatePeriod(GeneralDate.today(), GeneralDate.today());
 		this.originalClosurePeriod = new DatePeriod(GeneralDate.today(), GeneralDate.today());
+		
+		this.happendOptimistLockError = false;
 	}
 	
 	/**
