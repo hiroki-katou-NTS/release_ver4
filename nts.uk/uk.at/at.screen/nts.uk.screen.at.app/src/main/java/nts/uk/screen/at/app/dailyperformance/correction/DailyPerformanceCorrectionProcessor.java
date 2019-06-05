@@ -406,7 +406,8 @@ public class DailyPerformanceCorrectionProcessor {
 		/// 対応する「日別実績」をすべて取得する | Acquire all corresponding "daily performance"
 		List<String> listEmployeeId = screenDto.getLstData().stream().map(e -> e.getEmployeeId()).collect(Collectors.toSet()).stream().collect(Collectors.toList());
 		if(listEmployeeId.isEmpty()) {
-			screenDto.setLstEmployee(Collections.emptyList());
+			//screenDto.setLstEmployee(Collections.emptyList());
+			screenDto.setErrorInfomation(DCErrorInfomation.NOT_EMP_IN_HIST.value);
 			return screenDto;
 		}
 		System.out.println("time map data wplhis, date:" + (System.currentTimeMillis() - timeStart3));
