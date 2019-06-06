@@ -344,7 +344,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			for (EmployeeDto empQ : listEmployeeInfo) {
 				EmployeeAffiliationInforDto approvalEmployee = new EmployeeAffiliationInforDto();
 						
-				approvalEmployee.setClassificationCode(empQ.getScd());
+				approvalEmployee.setEmployeeCode(empQ.getScd());
 				approvalEmployee.setEmployeeID(empQ.getSid()); 
 				ExEmploymentHistoryImport exEmploymentHistoryImport =  employeeGeneralInfoImport.getEmploymentHistoryImports()
 						.stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
@@ -433,14 +433,15 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 					}
 				});
 			}
+			Comparator<String> strcmp = Comparator.nullsLast(Comparator.naturalOrder());
 			// INPUT．「並び替える条件」を並び替える
-			listEmpAffInfo.stream()
-					.sorted(Comparator.comparing(EmployeeAffiliationInforDto::getHierarchyCd)
-							.thenComparing(EmployeeAffiliationInforDto::getEmploymentInforCode)
-							.thenComparing(EmployeeAffiliationInforDto::getClassificationCode)
-							.thenComparing(EmployeeAffiliationInforDto::getSequenceCode)
-							.thenComparing(EmployeeAffiliationInforDto::getEmployeeCode));
-			listEmpAffInfo.forEach(x -> {
+			List<EmployeeAffiliationInforDto> listEmpAffInfos = listEmpAffInfo.stream()
+					.sorted(Comparator.comparing(EmployeeAffiliationInforDto::getHierarchyCd, strcmp)
+							.thenComparing(EmployeeAffiliationInforDto::getEmploymentInforCode, strcmp)
+							.thenComparing(EmployeeAffiliationInforDto::getClassificationCode, strcmp)
+							.thenComparing(EmployeeAffiliationInforDto::getSequenceCode, strcmp)
+							.thenComparing(EmployeeAffiliationInforDto::getEmployeeCode, strcmp)).collect(Collectors.toList());
+			listEmpAffInfos.forEach(x -> {
 				lstEmployees.add(x.getEmployeeID());
 			});
 			
