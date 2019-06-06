@@ -24,21 +24,17 @@ public class WorkplaceExportPubImpl implements WorkplaceExportPub {
 
 	@Override
 	public List<WorkplaceExportPubDto> getAllWkpConfig(String companyId, List<String> listWkpId, GeneralDate baseDate) {
-		String hierarchyCd = null;
 		return this.workplaceExport.getAllWkpConfig(companyId, listWkpId, baseDate).stream()
-				.map(x -> new WorkplaceExportPubDto(x.getWorkplaceId(), x.getWorkplaceCode().v(),
-						x.getWorkplaceName().v(), x.getWkpGenericName().v(), x.getWkpDisplayName().v(),
-						x.getOutsideWkpCode().v(), hierarchyCd))
+				.map(x -> new WorkplaceExportPubDto(x.getWorkplaceId(), x.getWorkplaceCode(), x.getWorkplaceName(),
+						x.getWkpGenericName(), x.getWkpDisplayName(), x.getOutsideWkpCode(), x.getHierarchyCd()))
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<WorkplaceExportPubDto> getPastWkpInfo(String companyId, List<String> listWkpId, String histId) {
-		String hierarchyCd = null;
 		return this.workplaceExport.getPastWkpInfo(companyId, listWkpId, histId).stream()
-				.map(x -> new WorkplaceExportPubDto(x.getWorkplaceId(), x.getWorkplaceCode().v(),
-						x.getWorkplaceName().v(), x.getWkpGenericName().v(), x.getWkpDisplayName().v(),
-						x.getOutsideWkpCode().v(), hierarchyCd))
+				.map(x -> new WorkplaceExportPubDto(x.getWorkplaceId(), x.getWorkplaceCode(), x.getWorkplaceName(),
+						x.getWkpGenericName(), x.getWkpDisplayName(), x.getOutsideWkpCode(), x.getHierarchyCd()))
 				.collect(Collectors.toList());
 	}
 

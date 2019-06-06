@@ -3,7 +3,6 @@ package nts.uk.ctx.bs.employee.dom.workplace.export;
 import java.util.List;
 
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfo;
 
 /**
  * 
@@ -21,7 +20,7 @@ public interface WorkplaceExport {
 	 * @param listWkpId
 	 * @param baseDate
 	 */
-	public List<WorkplaceInfo> getAllWkpConfig(String companyId, List<String> listWkpId, GeneralDate baseDate);
+	public List<WkpInfoDto> getAllWkpConfig(String companyId, List<String> listWkpId, GeneralDate baseDate);
 
 	/**
 	 * [No.561]過去の職場の情報を取得する
@@ -32,5 +31,5 @@ public interface WorkplaceExport {
 	 * @param listWkpId
 	 * @param histId
 	 */
-	public List<WorkplaceInfo> getPastWkpInfo(String companyId, List<String> listWkpId, String histId);
+	public List<WkpInfoDto> getPastWkpInfo(String companyId, List<String> listWkpId, String histId);
 }
