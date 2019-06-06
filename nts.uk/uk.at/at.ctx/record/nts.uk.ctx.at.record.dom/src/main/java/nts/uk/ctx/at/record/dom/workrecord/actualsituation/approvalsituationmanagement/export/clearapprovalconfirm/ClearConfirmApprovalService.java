@@ -18,12 +18,14 @@ import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ConfirmDeleteParamImport;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
-import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
-import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.GetClosurePeriod;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentityProcessUseSetRepository;
+import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosurePeriod;
+import nts.uk.ctx.at.shared.dom.workrule.closure.UseClassification;
+import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.shr.com.context.AppContexts;
 
 /**
@@ -42,14 +44,17 @@ public class ClearConfirmApprovalService {
 	@Inject
 	private ApprovalProcessingUseSettingRepository approvalUseSetRepo;
 
-	@Inject
-	private GetClosurePeriod getClosurePeriod;
+//	@Inject
+//	private GetClosurePeriod getClosurePeriod;
 
 	@Inject
 	private ConfirmationMonthRepository confirmationMonthRepo;
 
 	@Inject
 	private ApprovalStatusAdapter approvalStatusAdapter;
+	
+	@Inject
+	private ClosureService closureService;
 
 	/**
 	 * 確認、承認のクリア
@@ -89,12 +94,21 @@ public class ClearConfirmApprovalService {
 
 		List<ClosurePeriod> lstClosureAll = new ArrayList<>();
 		for (GeneralDate dateRefer : lstDate) {
-			// 集計期間
-			List<ClosurePeriod> closurePeriods = getClosurePeriod.get(companyId, employeeId, dateRefer,
-					Optional.empty(), Optional.empty(), Optional.empty());
-			lstClosureAll.addAll(closurePeriods);
-		}
-		;
+			// 集計期間 slow response 
+			Closure closure = closureService.getClosureDataByEmployee(employeeId, dateRefer);
+			//指定した年月日時点の締め期間を取得する
+			// Check exist and active
+			if (closure == null || closure.getUseClassification()
+					.equals(UseClassification.UseClass_NotUse)) {
+				continue;
+			}
+
+			Optional<ClosurePeriod> cPeriod = closure.getClosurePeriodByYmd(dateRefer);
+			if(!cPeriod.isPresent()) continue;
+//			List<ClosurePeriod> closurePeriods = getClosurePeriod.get(companyId, employeeId, dateRefer,
+//					Optional.empty(), Optional.empty(), Optional.empty());
+			lstClosureAll.add(cPeriod.get());
+		};
 
 		lstClosureAll = lstClosureAll.stream().filter(
 				distinctByKeys(ClosurePeriod::getClosureId, ClosurePeriod::getClosureDate, ClosurePeriod::getYearMonth))
