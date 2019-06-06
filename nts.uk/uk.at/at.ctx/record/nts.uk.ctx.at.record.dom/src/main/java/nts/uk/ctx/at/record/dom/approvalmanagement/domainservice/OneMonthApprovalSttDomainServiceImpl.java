@@ -4,7 +4,7 @@
 package nts.uk.ctx.at.record.dom.approvalmanagement.domainservice;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 //import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +54,10 @@ import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.Ident
 import nts.uk.ctx.at.shared.dom.adapter.jobtitle.JobTitleInfoAdapter;
 import nts.uk.ctx.at.shared.dom.adapter.jobtitle.JobTitleInfoImport;
 import nts.uk.ctx.at.shared.dom.adapter.jobtitle.SequenceMasterImport;
+import nts.uk.ctx.at.shared.dom.adapter.jobtitle.WorkplaceExportAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.jobtitle.WorkplaceExportImport;
 import nts.uk.ctx.at.shared.dom.adapter.workplace.config.info.JobTitleExport;
+import nts.uk.ctx.at.shared.dom.adapter.workplace.config.info.JobTitleHistoryExport;
 import nts.uk.ctx.at.shared.dom.adapter.workplace.config.info.WorkplaceConfigInfoAdapter;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
@@ -89,30 +92,33 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 
 	@Inject
 	private RegulationInfoEmployeeAdapter regulationInfoEmployeeAdapter;
-	
+
 	@Inject
 	private SyCompanyRecordAdapter syCompanyRecordAdapter;
-	
-//	@Inject
-//	private ShareEmploymentAdapter shareEmploymentAdapter;
-	
+
+	// @Inject
+	// private ShareEmploymentAdapter shareEmploymentAdapter;
+
 	@Inject
 	private EmployeeAdapter atEmployeeAdapter;
-	
+
 	@Inject
 	private EmploymentHistAdapter employmentHistAdapter;
-	
+
 	@Inject
 	private EmployeeGeneralInfoService employeeGeneralInfoService;
 
 	@Inject
 	private WorkplaceConfigInfoAdapter configInfoAdapter;
-	
+
 	@Inject
 	private JobTitleInfoAdapter infoAdapter;
-	
-	private List<ApprovalEmployeeDto> buildApprovalEmployeeData(List<Identification> listIdentification,List<EmployeeDto> lstEmployee,
-			ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport) {
+
+	@Inject
+	private WorkplaceExportAdapter workplaceExportAdapter;
+
+	private List<ApprovalEmployeeDto> buildApprovalEmployeeData(List<Identification> listIdentification,
+			List<EmployeeDto> lstEmployee, ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport) {
 
 		List<ApprovalEmployeeDto> lstApprovalEmployee = new ArrayList<>();
 		List<ApprovalRootSituation> lstApproval = approvalRootOfEmployeeImport.getApprovalRootSituations();
@@ -123,8 +129,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			approvalEmployee.setEmployeeId(empQ.getSid());
 			approvalEmployee.setEmployeeCode(empQ.getScd());
 			approvalEmployee.setEmployeeName(empQ.getBussinessName());
-			
-			
+
 			List<DateApprovalStatusDto> lstDateApprovalStatusDto = lstApproval.stream()
 					.filter(f -> empQ.getSid().equals(f.getTargetID())).map(apv -> {
 						ApprovalStatus status = apv.getApprovalStatus();
@@ -136,32 +141,33 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 						dateApvS.setStatus(3);
 						dateApvS.setDate(apv.getAppDate());
 						boolean check = false;
-						for(Identification identification : listIdentification) {
-							if(apv.getAppDate().equals(identification.getProcessingYmd()) && apv.getTargetID().equals(identification.getEmployeeId()) ) {
+						for (Identification identification : listIdentification) {
+							if (apv.getAppDate().equals(identification.getProcessingYmd())
+									&& apv.getTargetID().equals(identification.getEmployeeId())) {
 								check = true;
 								break;
 							}
 						}
-						if(check) {
-							if (ApproverEmployeeState.COMPLETE.equals(state) 
-									|| ApproverEmployeeState.PHASE_PASS.equals(state)){
+						if (check) {
+							if (ApproverEmployeeState.COMPLETE.equals(state)
+									|| ApproverEmployeeState.PHASE_PASS.equals(state)) {
 								dateApvS.setStatus(0);
-							}else if(ApproverEmployeeState.PHASE_DURING.equals(state)) {
-								if(ApprovalActionByEmpl.APPROVALED.equals(aproval)) {
+							} else if (ApproverEmployeeState.PHASE_DURING.equals(state)) {
+								if (ApprovalActionByEmpl.APPROVALED.equals(aproval)) {
 									dateApvS.setStatus(0);
-								}else if(ApprovalActionByEmpl.APPROVAL_REQUIRE.equals(aproval) ) {
+								} else if (ApprovalActionByEmpl.APPROVAL_REQUIRE.equals(aproval)) {
 									dateApvS.setStatus(1);
-								}else {
+								} else {
 									dateApvS.setStatus(2);
 								}
-								
-							}else if(ApproverEmployeeState.PHASE_LESS.equals(state)) {
+
+							} else if (ApproverEmployeeState.PHASE_LESS.equals(state)) {
 								dateApvS.setStatus(2);
 							}
-						}else {
+						} else {
 							dateApvS.setStatus(4);
 						}
-						
+
 						return dateApvS;
 					}).collect(Collectors.toList());
 
@@ -323,8 +329,8 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 				return item.getTargetID();
 			}).collect(Collectors.toList());
 			// list order conditions
-			lstEmployees = this.regulationInfoEmployeeAdapter.sortEmployees(companyId, employeeList,
-					this.createListConditions(), this.convertFromDateToDateTime(datePeriod.end()));
+//			lstEmployees = this.regulationInfoEmployeeAdapter.sortEmployees(companyId, employeeList,
+//					this.createListConditions(), this.convertFromDateToDateTime(datePeriod.end()));
 			//[No.401]社員ID（List）と期間から個人情報を取得する - fix bug 107962
 			EmployeeGeneralInfoImport employeeGeneralInfoImport = this.employeeGeneralInfoService
 					.getEmployeeGeneralInfo(employeeList, new DatePeriod(datePeriod.end(), datePeriod.end()));
@@ -340,13 +346,17 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 						
 				approvalEmployee.setClassificationCode(empQ.getScd());
 				approvalEmployee.setEmployeeID(empQ.getSid()); 
-				ExEmploymentHistoryImport exEmploymentHistoryImport =  employeeGeneralInfoImport.getEmploymentHistoryImports().stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
+				ExEmploymentHistoryImport exEmploymentHistoryImport =  employeeGeneralInfoImport.getEmploymentHistoryImports()
+						.stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
 				approvalEmployee.setEmploymentInforCode(exEmploymentHistoryImport.getEmploymentItems().get(0).getEmploymentCode());
-				ExClassificationHistoryImport classificationHistoryImport = employeeGeneralInfoImport.getExClassificationHistoryImports().stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
+				ExClassificationHistoryImport classificationHistoryImport = employeeGeneralInfoImport.getExClassificationHistoryImports()
+						.stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
 				approvalEmployee.setClassificationCode(classificationHistoryImport.getClassificationItems().get(0).getClassificationCode());
-				ExJobTitleHistoryImport exJobTitleHistoryImport =  employeeGeneralInfoImport.getExJobTitleHistoryImports().stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
+				ExJobTitleHistoryImport exJobTitleHistoryImport =  employeeGeneralInfoImport.getExJobTitleHistoryImports()
+						.stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
 				approvalEmployee.setPositionID(exJobTitleHistoryImport.getJobTitleItems().get(0).getJobTitleId());
-				ExWorkPlaceHistoryImport exWorkPlaceHistoryImport = employeeGeneralInfoImport.getExWorkPlaceHistoryImports().stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
+				ExWorkPlaceHistoryImport exWorkPlaceHistoryImport = employeeGeneralInfoImport.getExWorkPlaceHistoryImports()
+						.stream().filter(o -> o.getEmployeeId().equals(empQ.getSid())).findFirst().get();
 				approvalEmployee.setWorkPlaceID(exWorkPlaceHistoryImport.getWorkplaceItems().get(0).getWorkplaceId());
 				
 				listEmpAffInfo.add(approvalEmployee);
@@ -355,6 +365,12 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
     		//社員を並び替える
 			
 			//[No.560]職場IDから職場の情報をすべて取得する
+			List<String> lstWorkplaceIds = new ArrayList<>();
+			for(EmployeeAffiliationInforDto approvalId  : listEmpAffInfo) {
+				String workplaceId = approvalId.workPlaceID;
+				lstWorkplaceIds.add(workplaceId);
+			}
+			List<WorkplaceExportImport> exportImports = workplaceExportAdapter.getAllWkpConfig(companyId, lstWorkplaceIds, datePeriod.end());
 			
 			//職位IDから職位を取得する
 				//ドメインモデル「職位」を取得する
@@ -364,30 +380,69 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 				lstPositionIds.add(positionId);
 			}
 			List<JobTitleExport> jobTitleExport =  this.configInfoAdapter.findAllById(companyId, lstPositionIds, datePeriod.end());
-			if(!jobTitleExport.isEmpty()){
 				//ドメインモデル「職位情報」を取得する
-				String historyId = jobTitleExport.get(0).getJobTitleHistories().get(0).getHistoryId(); 
-				List<JobTitleInfoImport> jobTitleInfoImports = this.infoAdapter.findByJobIds(companyId, lstPositionIds, historyId);
-				
-					//ドメインモデル「序列」をすべて取得する(Lấy tất cả Domain Model 「序列」)
-				if(!jobTitleInfoImports.isEmpty()){
-					String sequenceCode = jobTitleInfoImports.get(0).getSequenceCode();
-					Map<String,Integer> masterImports = this.infoAdapter.findAll(companyId, sequenceCode).stream()
-							.collect(Collectors.toMap(SequenceMasterImport::getSequenceCode, SequenceMasterImport::getOrder));
-					//取得したドメインモデル「職位情報」をドメインモデル「序列．並び順」で並び替える
-					jobTitleInfoImports.forEach(e-> {
-						if (masterImports.containsKey(e.getSequenceCode())){
-							e.setOrder(masterImports.get(e.getSequenceCode()));
-						}
-					});
-					jobTitleInfoImports.sort((e1,e2)-> e2.getOrder() - e1.getOrder());
-					//List<JobTitleInfoImport> sortByCode = this.sortByOder(jobTitleInfoImports, masterImports);
-					
-					
+				List<JobTitleHistoryExport> lstJobHis = new ArrayList<>();
+				jobTitleExport.forEach(x ->{
+					lstJobHis.addAll(x.getJobTitleHistories());
+				});
+				List<JobTitleInfoImport> jobTitleInfoImports = new ArrayList<>();
+				for(JobTitleHistoryExport jobtitle : lstJobHis){
+					String historyId = jobtitle.getHistoryId();
+					List<JobTitleInfoImport> jobTitleInfos = this.infoAdapter.findByJobIds(companyId, lstPositionIds, historyId);
+					jobTitleInfoImports.addAll(jobTitleInfos);
 				}
-					
+				
+				//ドメインモデル「序列」をすべて取得する(Lấy tất cả Domain Model 「序列」)
+			if (!jobTitleInfoImports.isEmpty()) {
+				String sequenceCode = jobTitleInfoImports.get(0).getSequenceCode();
+				Map<String, Integer> masterImports = this.infoAdapter.findAll(companyId, sequenceCode).stream().collect(
+						Collectors.toMap(SequenceMasterImport::getSequenceCode, SequenceMasterImport::getOrder));
+				// 取得したドメインモデル「職位情報」をドメインモデル「序列．並び順」で並び替える
+				jobTitleInfoImports.forEach(e -> {
+					if (masterImports.containsKey(e.getSequenceCode())) {
+						e.setOrder(masterImports.get(e.getSequenceCode()));
+					}
+				});
+				jobTitleInfoImports.sort((e1, e2) -> e2.getOrder() - e1.getOrder());
+				// List<JobTitleInfoImport> sortByCode =
+				// this.sortByOder(jobTitleInfoImports, masterImports);
+
+				Map<String, String> jobTitleCD = jobTitleInfoImports.stream().collect(
+						Collectors.toMap(JobTitleInfoImport::getJobTitleId, JobTitleInfoImport::getSequenceCode));
+				listEmpAffInfo.forEach(e -> {
+					if (jobTitleCD.containsKey(e.getPositionID())) {
+						e.setSequenceCode(jobTitleCD.get(e.getPositionID()));
+					}
+				});
 			}
 			
+			List<String> lsthierarchyCD = new ArrayList<>();
+			for(WorkplaceExportImport hierarchyCD  : exportImports) {
+				String positionId = hierarchyCD.getHierarchyCd();
+				if(positionId != null){
+				lsthierarchyCD.add(positionId);
+				}
+			}
+			
+			if(!lsthierarchyCD.isEmpty()){
+				Map<String, String> hierarchyCD = exportImports.stream().collect(
+						Collectors.toMap(WorkplaceExportImport::getWorkplaceId, WorkplaceExportImport::getHierarchyCd));
+				listEmpAffInfo.forEach(e -> {
+					if (hierarchyCD.containsKey(e.getPositionID())) {
+						e.setHierarchyCd(hierarchyCD.get(e.getWorkPlaceID()));
+					}
+				});
+			}
+			// INPUT．「並び替える条件」を並び替える
+			listEmpAffInfo.stream()
+					.sorted(Comparator.comparing(EmployeeAffiliationInforDto::getHierarchyCd)
+							.thenComparing(EmployeeAffiliationInforDto::getEmploymentInforCode)
+							.thenComparing(EmployeeAffiliationInforDto::getClassificationCode)
+							.thenComparing(EmployeeAffiliationInforDto::getSequenceCode)
+							.thenComparing(EmployeeAffiliationInforDto::getEmployeeCode));
+			listEmpAffInfo.forEach(x -> {
+				lstEmployees.add(x.getEmployeeID());
+			});
 			
 			// アルゴリズム「表示する承認者の集計」を実行する
 			// 対応するImported「（就業）社員」をすべて取得する -requestList31-2
@@ -448,29 +503,30 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 		}
 		return oneMonthApprovalStatusDto;
 	}
-	
+
 	@Inject
-	private IdentificationRepository identificationRepo; 
-	
-	/**日の本人確認を取得する*/
-	public List<Identification> getIdentification(List<String> employeeId,DatePeriod datePeriod) {
-		List<Identification> listIdentificationRepo = identificationRepo.findByListEmployeeID(employeeId, datePeriod.start(), datePeriod.end());
+	private IdentificationRepository identificationRepo;
+
+	/** 日の本人確認を取得する */
+	public List<Identification> getIdentification(List<String> employeeId, DatePeriod datePeriod) {
+		List<Identification> listIdentificationRepo = identificationRepo.findByListEmployeeID(employeeId,
+				datePeriod.start(), datePeriod.end());
 		return listIdentificationRepo;
 	}
-	
-	//並び替え条件　=<職場(inlevel)、1>、<分類コード(ASC)、2>、<職位(序列)、3>、<社員コード(ASC)、4>
-	private List<SortingConditionOrderImport> createListConditions()
-	{
+
+	// 並び替え条件 =<職場(inlevel)、1>、<分類コード(ASC)、2>、<職位(序列)、3>、<社員コード(ASC)、4>
+	private List<SortingConditionOrderImport> createListConditions() {
 		List<SortingConditionOrderImport> lstCondition = new ArrayList<>();
-		lstCondition.add(new SortingConditionOrderImport(1,RegularSortingTypeImport.WORKPLACE));
-		lstCondition.add(new SortingConditionOrderImport(2,RegularSortingTypeImport.CLASSIFICATION));
-		lstCondition.add(new SortingConditionOrderImport(3,RegularSortingTypeImport.POSITION));
-		//fix bug 101289
-		//lstCondition.add(new SortingConditionOrderImport(4,RegularSortingTypeImport.EMPLOYMENT));
+		lstCondition.add(new SortingConditionOrderImport(1, RegularSortingTypeImport.WORKPLACE));
+		lstCondition.add(new SortingConditionOrderImport(2, RegularSortingTypeImport.CLASSIFICATION));
+		lstCondition.add(new SortingConditionOrderImport(3, RegularSortingTypeImport.POSITION));
+		// fix bug 101289
+		// lstCondition.add(new
+		// SortingConditionOrderImport(4,RegularSortingTypeImport.EMPLOYMENT));
 		return lstCondition;
 	}
-	
-	//convert from Date to DateTime
+
+	// convert from Date to DateTime
 	private GeneralDateTime convertFromDateToDateTime(GeneralDate date) {
 		return GeneralDateTime.ymdhms(date.year(), date.month(), date.day(), 0, 0, 0);
 	}

@@ -27,5 +27,21 @@ public class EmployeeAffiliationInforDto {
 	/** 分類コード */
 	public String classificationCode;
 	
+	/** 職位 */
+	public String sequenceCode;
+	
+	/** 階層コード */
+	public String hierarchyCd;
+
+	public EmployeeAffiliationInforDto(String employeeID, String employeeCode, String workPlaceID, String positionID,
+			String employmentInforCode, String classificationCode) {
+		super();
+		this.employeeID = employeeID;
+		this.employeeCode = employeeCode;
+		this.workPlaceID = workPlaceID;
+		this.positionID = positionID;
+		this.employmentInforCode = employmentInforCode;
+		this.classificationCode = classificationCode;
+	}
 	
 }
