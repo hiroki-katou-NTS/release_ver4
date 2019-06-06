@@ -843,10 +843,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				regulationInfoEmployeeAdapterImport.setPeriodEnd(calculateSchedulePeriod.end());
 				// 在職者を含める → TRUE
 				regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
-				// 休職者を含める → FALSE
-				regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false);
-				// 休業者を含める → FALSE
-				regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false);
+				// 休職者を含める → TRUE
+				regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(true);
+				// 休業者を含める → TRUE
+				regulationInfoEmployeeAdapterImport.setIncludeOccupancy(true);
 				// 出向に来ている社員を含める → TRUE
 				regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true);
 				// 出向に行っている社員を含める → FALSE
@@ -901,10 +901,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				regulationInfoEmployeeAdapterImport.setPeriodEnd(calculateSchedulePeriod.end());
 				// 在職者を含める → TRUE
 				regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
-				// 休職者を含める → FALSE
-				regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false);
-				// 休業者を含める → FALSE
-				regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false);
+				// 休職者を含める → TRUE
+				regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(true);
+				// 休業者を含める → TRUE
+				regulationInfoEmployeeAdapterImport.setIncludeOccupancy(true);
 				// 出向に来ている社員を含める → TRUE
 				regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true);
 				// 出向に行っている社員を含める → FALSE
@@ -1623,10 +1623,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 								.setPeriodEnd(calculateDailyPeriod.getDailyCreationPeriod().end());
 						// 在職者を含める → TRUE
 						regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
-						// 休職者を含める → FALSE
-						regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false);
-						// 休業者を含める → FALSE
-						regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false);
+						// 休職者を含める → TRUE
+						regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(true);
+						// 休業者を含める → TRUE
+						regulationInfoEmployeeAdapterImport.setIncludeOccupancy(true);
 						// 出向に来ている社員を含める → TRUE
 						regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true);
 						// 出向に行っている社員を含める → FALSE
@@ -1680,10 +1680,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 								.setPeriodEnd(calculateDailyPeriod.getDailyCreationPeriod().end());
 						// 在職者を含める → TRUE
 						regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
-						// 休職者を含める → FALSE
-						regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false);
-						// 休業者を含める → FALSE
-						regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false);
+						// 休職者を含める → TRUE
+						regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(true);
+						// 休業者を含める → TRUE
+						regulationInfoEmployeeAdapterImport.setIncludeOccupancy(true);
 						// 出向に来ている社員を含める → TRUE
 						regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true);
 						// 出向に行っている社員を含める → FALSE
@@ -1793,10 +1793,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 						regulationInfoEmployeeAdapterImport.setPeriodEnd(GeneralDate.ymd(9999, 12, 31));
 						// 在職者を含める → TRUE
 						regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
-						// 休職者を含める → FALSE
-						regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false);
-						// 休業者を含める → FALSE
-						regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false);
+						// 休職者を含める → TRUE
+						regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(true);
+						// 休業者を含める → TRUE
+						regulationInfoEmployeeAdapterImport.setIncludeOccupancy(true);
 						// 出向に来ている社員を含める → TRUE
 						regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true);
 						// 出向に行っている社員を含める → FALSE
@@ -1846,10 +1846,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 						regulationInfoEmployeeAdapterImport.setPeriodEnd(GeneralDate.ymd(9999, 12, 31));
 						// 在職者を含める → TRUE
 						regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
-						// 休職者を含める → FALSE
-						regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false);
-						// 休業者を含める → FALSE
-						regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false);
+						// 休職者を含める → TRUE
+						regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(true);
+						// 休業者を含める → TRUE
+						regulationInfoEmployeeAdapterImport.setIncludeOccupancy(true);
 						// 出向に来ている社員を含める → TRUE
 						regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true);
 						// 出向に行っている社員を含める → FALSE
@@ -2645,10 +2645,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					regulationInfoEmployeeAdapterImport.setPeriodEnd(newDatePeriod.end());
 					// 在職者を含める → TRUE
 					regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
-					// 休職者を含める → FALSE
-					regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false);
-					// 休業者を含める → FALSE
-					regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false);
+					// 休職者を含める → TRUE
+					regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(true);
+					// 休業者を含める → TRUE
+					regulationInfoEmployeeAdapterImport.setIncludeOccupancy(true);
 					// 出向に来ている社員を含める → TRUE
 					regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true);
 					// 出向に行っている社員を含める → FALSE
@@ -2698,10 +2698,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					regulationInfoEmployeeAdapterImport.setPeriodEnd(newDatePeriod.end());
 					// 在職者を含める → TRUE
 					regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
-					// 休職者を含める → FALSE
-					regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false);
-					// 休業者を含める → FALSE
-					regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false);
+					// 休職者を含める → TRUE
+					regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(true);
+					// 休業者を含める → TRUE
+					regulationInfoEmployeeAdapterImport.setIncludeOccupancy(true);
 					// 出向に来ている社員を含める → TRUE
 					regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true);
 					// 出向に行っている社員を含める → FALSE
@@ -2991,10 +2991,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					regulationInfoEmployeeAdapterImport.setPeriodEnd(newDatePeriod.end());
 					// 在職者を含める → TRUE
 					regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
-					// 休職者を含める → FALSE
-					regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false);
-					// 休業者を含める → FALSE
-					regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false);
+					// 休職者を含める → TRUE
+					regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(true);
+					// 休業者を含める → TRUE
+					regulationInfoEmployeeAdapterImport.setIncludeOccupancy(true);
 					// 出向に来ている社員を含める → TRUE
 					regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true);
 					// 出向に行っている社員を含める → FALSE
@@ -3043,10 +3043,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					regulationInfoEmployeeAdapterImport.setPeriodEnd(newDatePeriod.end());
 					// 在職者を含める → TRUE
 					regulationInfoEmployeeAdapterImport.setIncludeIncumbents(true);
-					// 休職者を含める → FALSE
-					regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(false);
-					// 休業者を含める → FALSE
-					regulationInfoEmployeeAdapterImport.setIncludeOccupancy(false);
+					// 休職者を含める → TRUE
+					regulationInfoEmployeeAdapterImport.setIncludeWorkersOnLeave(true);
+					// 休業者を含める → TRUE
+					regulationInfoEmployeeAdapterImport.setIncludeOccupancy(true);
 					// 出向に来ている社員を含める → TRUE
 					regulationInfoEmployeeAdapterImport.setIncludeAreOnLoan(true);
 					// 出向に行っている社員を含める → FALSE
