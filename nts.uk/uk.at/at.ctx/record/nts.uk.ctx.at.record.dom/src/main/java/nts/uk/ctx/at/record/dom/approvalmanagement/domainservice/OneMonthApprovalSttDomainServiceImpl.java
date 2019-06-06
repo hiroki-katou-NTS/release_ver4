@@ -367,17 +367,20 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			//[No.560]職場IDから職場の情報をすべて取得する
 			List<String> lstWorkplaceIds = new ArrayList<>();
 			for(EmployeeAffiliationInforDto approvalId  : listEmpAffInfo) {
-				String workplaceId = approvalId.workPlaceID;
-				lstWorkplaceIds.add(workplaceId);
+				if (!lstWorkplaceIds.contains(approvalId.workPlaceID)) {
+					lstWorkplaceIds.add(approvalId.workPlaceID);
+				}
 			}
+			
 			List<WorkplaceExportImport> exportImports = workplaceExportAdapter.getAllWkpConfig(companyId, lstWorkplaceIds, datePeriod.end());
 			
 			//職位IDから職位を取得する
 				//ドメインモデル「職位」を取得する
 			List<String> lstPositionIds = new ArrayList<>();
 			for(EmployeeAffiliationInforDto approvalId  : listEmpAffInfo) {
-				String positionId = approvalId.positionID;
-				lstPositionIds.add(positionId);
+				if (!lstPositionIds.contains(approvalId.positionID)) {
+					lstPositionIds.add(approvalId.positionID);
+				}
 			}
 			List<JobTitleExport> jobTitleExport =  this.configInfoAdapter.findAllById(companyId, lstPositionIds, datePeriod.end());
 				//ドメインモデル「職位情報」を取得する
