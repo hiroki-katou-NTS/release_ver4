@@ -16,11 +16,8 @@ public class WorkScheduleReflectServiceImpl implements WorkScheduleReflectServic
 	@Override
 	public void workscheReflect(ReflectScheDto reflectParam) {
 		Application_New application = reflectParam.getAppInfor();
-		
-		if(application.getPrePostAtr() != PrePostAtr.PREDICT
-				||application.getAppType() == ApplicationType.OVER_TIME_APPLICATION
-				|| !checkReflect.appReflectProcessRecord(application, false, reflectParam.getExecutionType()) //反映チェック処理(Xử lý check phản ánh)
-				) {
+		//反映チェック処理(Xử lý check phản ánh)
+		if(!checkReflect.appReflectProcessRecord(application, false, reflectParam.getExecutionType())) {
 			return;
 		}
 		switch (application.getAppType()) {

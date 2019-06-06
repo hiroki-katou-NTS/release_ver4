@@ -196,10 +196,12 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			
 			//TODO 反映するかどうか判断 (Xác định để phản ánh)
 			//勤務予定へ反映処理	(Xử lý phản ánh đến kế hoạch công việc)
-			scheReflect.workscheReflect(reflectScheParam);
-			//
-			appInfor.getReflectionInformation().setStateReflection(ReflectedState_New.REFLECTED);
-			appInfor.getReflectionInformation().setNotReason(Optional.of(ReasonNotReflect_New.WORK_CONFIRMED));
+			if(appInfor.getPrePostAtr() == PrePostAtr.PREDICT) {
+				scheReflect.workscheReflect(reflectScheParam);
+				//
+				appInfor.getReflectionInformation().setStateReflection(ReflectedState_New.REFLECTED);
+				appInfor.getReflectionInformation().setNotReason(Optional.of(ReasonNotReflect_New.WORK_CONFIRMED));
+			}
 			//勤務実績へ反映処理(xử lý phản ảnh thành tích thực chuyên cần)
 			ReflectRecordInfor reflectRecordInfor = new ReflectRecordInfor(AppDegreeReflectionAtr.RECORD, AppExecutionType.EXCECUTION, appInfor);		
 			AppReflectRecordPara appPara = new AppReflectRecordPara(reflectRecordInfor, 
