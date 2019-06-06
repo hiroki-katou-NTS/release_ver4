@@ -42,7 +42,7 @@ public class AppReflectProcessSchePubImpl implements AppReflectProcessSchePub{
 	@Inject
 	private BasicScheduleRepository basicSche;
 	@Override
-	public boolean goBackDirectlyReflectSch(ApplicationReflectParamScheDto reflectPara) {
+	public void goBackDirectlyReflectSch(ApplicationReflectParamScheDto reflectPara) {
 		ApplicationGobackScheInfor gobackInfo = new ApplicationGobackScheInfor(EnumAdaptor.valueOf(reflectPara.getGobackInfor().getChangeAtrAppGoback().value, ChangeAtrAppGoback.class),
 				reflectPara.getGobackInfor().getWorkType(),
 				reflectPara.getGobackInfor().getWorkTime(),
@@ -56,18 +56,18 @@ public class AppReflectProcessSchePubImpl implements AppReflectProcessSchePub{
 				gobackInfo, 
 				EnumAdaptor.valueOf(reflectPara.getApplyTimeAtr().value, ApplyTimeAtr.class)); 
 			
-		return  goBackReflect.goBackDirectlyReflectSch(data);
+		goBackReflect.goBackDirectlyReflectSch(data);
 	}
 
 	@Override
-	public boolean appForLeaveSche(WorkChangeCommonReflectSchePubParam appForleaverPara) {
-		return leaveReflect.forlearveReflectSche(new WorkChangecommonReflectParamSche(this.toParamSche(appForleaverPara.getCommon()),
+	public void appForLeaveSche(WorkChangeCommonReflectSchePubParam appForleaverPara) {
+		leaveReflect.forlearveReflectSche(new WorkChangecommonReflectParamSche(this.toParamSche(appForleaverPara.getCommon()),
 				appForleaverPara.getExcludeHolidayAtr()));
 	}
 
 	@Override
-	public boolean appWorkChangeReflect(WorkChangeCommonReflectSchePubParam workChangeParam) {
-		return workchangeReflect.reflectWorkChange(new WorkChangecommonReflectParamSche(this.toParamSche(workChangeParam.getCommon()),
+	public void appWorkChangeReflect(WorkChangeCommonReflectSchePubParam workChangeParam) {
+		workchangeReflect.reflectWorkChange(new WorkChangecommonReflectParamSche(this.toParamSche(workChangeParam.getCommon()),
 				workChangeParam.getExcludeHolidayAtr()));
 	}
 	
@@ -84,28 +84,17 @@ public class AppReflectProcessSchePubImpl implements AppReflectProcessSchePub{
 	}
 
 	@Override
-	public boolean holidayWorkReflectSche(CommonReflectSchePubParam holidayWorkParam) {		
-		return holidayWorkReflect.holidayWorkReflect(this.toParamSche(holidayWorkParam));
+	public void holidayWorkReflectSche(CommonReflectSchePubParam holidayWorkParam) {		
+		holidayWorkReflect.holidayWorkReflect(this.toParamSche(holidayWorkParam));
 	}
 
 	@Override
-	public boolean absenceLeaveReflectSche(CommonReflectSchePubParam absenceLeaverParam) {		
-		return absenceLeaveReflect.absenceLeaveReflect(this.toParamSche(absenceLeaverParam));
+	public void absenceLeaveReflectSche(CommonReflectSchePubParam absenceLeaverParam) {		
+		absenceLeaveReflect.absenceLeaveReflect(this.toParamSche(absenceLeaverParam));
 	}
 
 	@Override
-	public boolean recruitmentReflectSche(CommonReflectSchePubParam recruitmentParam) {
-		return recruitmentReflect.recruitmentReflect(this.toParamSche(recruitmentParam));
+	public void recruitmentReflectSche(CommonReflectSchePubParam recruitmentParam) {
+		recruitmentReflect.recruitmentReflect(this.toParamSche(recruitmentParam));
 	}
-
-	@Override
-	public boolean isSche(String employeeId, GeneralDate baseDate) {
-		Optional<BasicSchedule> optBasicScheOpt = basicSche.find(employeeId, baseDate);		
-		if(!optBasicScheOpt.isPresent()) {
-			return false;
-		}
-		return true;
-	}
-
-
 }

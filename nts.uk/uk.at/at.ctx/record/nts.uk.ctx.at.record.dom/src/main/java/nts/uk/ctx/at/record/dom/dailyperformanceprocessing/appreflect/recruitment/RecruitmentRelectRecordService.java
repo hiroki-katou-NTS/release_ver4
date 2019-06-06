@@ -16,7 +16,7 @@ public interface RecruitmentRelectRecordService {
 	 * @param isPre
 	 * @return
 	 */
-	public boolean recruitmentReflect(CommonReflectParameter param, boolean isPre);
+	public void recruitmentReflect(CommonReflectParameter param, boolean isPre);
 	/**
 	 * 予定勤種就時の反映
 	 * @param param

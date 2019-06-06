@@ -159,27 +159,7 @@ public class AppReflectManagerFromRecordImpl implements AppReflectManagerFromRec
 		}
 		
 		for (Application_New appData : lstApp) {			
-			//ReflectResult reflectResult = 
-					appRefMng.reflectEmployeeOfApp(appData, reflectSetting, refAppResult, workId);
-			
-			/*if(reflectResult.isRecordResult() || reflectResult.isScheResult()) {
-				
-				
-				//状態確認
-				Optional<ExeStateOfCalAndSumImport> optState = execuLog.executionStatus(workId);
-				//処理した社員の実行状況を「完了」にする
-				execuLog.updateLogInfo(sid, workId, 2, 0);
-				dataSetter.updateData("reflectApprovalStatus", ExecutionStatusReflect.DONE.nameId);
-				if(optState.isPresent() && optState.get() == ExeStateOfCalAndSumImport.START_INTERRUPTION) {
-					return false;
-				}
-				
-			} else {
-				if(!countError) {
-					dataSetter.updateData("reflectApprovalHasError", ErrorPresent.HAS_ERROR.nameId);
-					countError = true;
-				}
-			}*/
+			appRefMng.reflectEmployeeOfApp(appData, reflectSetting, refAppResult, workId, 0);
 		}
 		return true;
 	}

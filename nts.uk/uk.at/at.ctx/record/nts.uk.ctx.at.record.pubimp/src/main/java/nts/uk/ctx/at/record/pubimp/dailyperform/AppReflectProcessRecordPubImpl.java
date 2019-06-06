@@ -10,9 +10,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApproveRootStatusForEmpImport;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCheckParameter;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
@@ -54,7 +51,6 @@ import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ConfirmStatusCheck;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.HolidayWorkReflectPubPara;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ObjectCheck;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.PrePostRecordAtr;
-import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ReflectRecordAtr;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.WorkChangeCommonReflectPubPara;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.goback.GobackReflectPubParameter;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.overtime.OvertimeAppPubParameter;
@@ -65,7 +61,6 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.work.service.RemainCreateInforBy
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
-
 @Stateless
 public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPub{
 	@Inject
@@ -95,12 +90,10 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 	@Inject
 	private RemainCreateInforByScheData scheData;
 	@Inject
-	private ApprovalStatusAdapter appAdapter;
-	@Inject
 	private IdentificationRepository identificationRepository;
+	
 	@Override
 	public boolean appReflectProcess(AppCommonPara para, ExecutionType executionType) {
-		boolean output = true;		
 		ScheRemainCreateInfor scheInfor = null;
 		if(para.isChkRecord()) {
 			//ドメインモデル「日別実績の勤務情報」を取得する
@@ -158,13 +151,13 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 	}
 
 	@Override
-	public boolean preGobackReflect(GobackReflectPubParameter para) {
-		return preGobackReflect.gobackReflect(this.toDomainGobackReflect(para));		
+	public void preGobackReflect(GobackReflectPubParameter para) {
+		preGobackReflect.gobackReflect(this.toDomainGobackReflect(para));		
 	}
 
 	@Override
-	public boolean afterGobackReflect(GobackReflectPubParameter para) {		
-		return preGobackReflect.afterGobackReflect(this.toDomainGobackReflect(para));		
+	public void afterGobackReflect(GobackReflectPubParameter para) {		
+		preGobackReflect.afterGobackReflect(this.toDomainGobackReflect(para));		
 	}
 	private GobackReflectParameter toDomainGobackReflect(GobackReflectPubParameter para) {
 		GobackAppParameter appPara = new GobackAppParameter(EnumAdaptor.valueOf(para.getGobackData().getChangeAppGobackAtr().value, ChangeAppGobackAtr.class),
@@ -188,13 +181,13 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 	}
 
 	@Override
-	public boolean preOvertimeReflect(PreOvertimePubParameter param) {
-		return preOvertimeReflect.overtimeReflect(this.toDomainOvertimeReflect(param));		
+	public void preOvertimeReflect(PreOvertimePubParameter param) {
+		preOvertimeReflect.overtimeReflect(this.toDomainOvertimeReflect(param));		
 	}
 
 	@Override
-	public boolean afterOvertimeReflect(PreOvertimePubParameter param) {
-		return afterOvertimeReflect.reflectAfterOvertime(this.toDomainOvertimeReflect(param));		
+	public void afterOvertimeReflect(PreOvertimePubParameter param) {
+		afterOvertimeReflect.reflectAfterOvertime(this.toDomainOvertimeReflect(param));		
 	}
 
 	private OvertimeParameter toDomainOvertimeReflect(PreOvertimePubParameter param) {
@@ -225,12 +218,12 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 	}
 
 	@Override
-	public boolean absenceReflect(WorkChangeCommonReflectPubPara param, boolean isPre) {
-		return absenceReflect.absenceReflect(new WorkChangeCommonReflectPara(this.toRecordPara(param.getCommon()), param.getExcludeHolidayAtr()), isPre);		
+	public void absenceReflect(WorkChangeCommonReflectPubPara param, boolean isPre) {
+		absenceReflect.absenceReflect(new WorkChangeCommonReflectPara(this.toRecordPara(param.getCommon()), param.getExcludeHolidayAtr()), isPre);		
 	}
 
 	@Override
-	public boolean holidayWorkReflect(HolidayWorkReflectPubPara param, boolean isPre) {
+	public void holidayWorkReflect(HolidayWorkReflectPubPara param, boolean isPre) {
 		Map<Integer, BreakTimeParam> mapBreakTimeFrame = new HashMap<>();
 		param.getHolidayWorkPara().getMapBreakTimeFrame().forEach((a,b) -> {
 			BreakTimeParam breakTime = new BreakTimeParam(b.getStartTime(), b.getEndTime());
@@ -252,13 +245,13 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 				param.isRecordReflectBreakFlg(),
 				appPara,
 				param.getExcLogId());
-		return holidayworkService.preHolidayWorktimeReflect(para, isPre);
+		holidayworkService.preHolidayWorktimeReflect(para, isPre);
 	}
 
 	@Override
-	public boolean workChangeReflect(WorkChangeCommonReflectPubPara param, boolean isPre) {
+	public void workChangeReflect(WorkChangeCommonReflectPubPara param, boolean isPre) {
 		
-		return workChangeService.workchangeReflect(new WorkChangeCommonReflectPara(this.toRecordPara(param.getCommon()), param.getExcludeHolidayAtr()), isPre);
+		workChangeService.workchangeReflect(new WorkChangeCommonReflectPara(this.toRecordPara(param.getCommon()), param.getExcludeHolidayAtr()), isPre);
 		
 	}
 	
@@ -276,23 +269,13 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 	}
 
 	@Override
-	public boolean absenceLeaveReflect(CommonReflectPubParameter param, boolean isPre) {
-		return absenceLeaveService.reflectAbsenceLeave(this.toRecordPara(param), isPre);
+	public void absenceLeaveReflect(CommonReflectPubParameter param, boolean isPre) {
+		absenceLeaveService.reflectAbsenceLeave(this.toRecordPara(param), isPre);
 	}
 
 	@Override
-	public boolean recruitmentReflect(CommonReflectPubParameter param, boolean isPre) {
-		return recruitmentService.recruitmentReflect(this.toRecordPara(param), isPre);
-	}
-
-	@Override
-	public boolean isRecordData(String employeeId, GeneralDate baseDate) {
-		//日別実績の勤務情報
-		Optional<WorkInfoOfDailyPerformance> optDailyPerfor = workRepository.find(employeeId, baseDate); 
-		if(!optDailyPerfor.isPresent()) {
-			return false;
-		}
-		return true;
+	public void recruitmentReflect(CommonReflectPubParameter param, boolean isPre) {
+		recruitmentService.recruitmentReflect(this.toRecordPara(param), isPre);
 	}
 
 	@Override
@@ -321,5 +304,10 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 			return false; 
 		}
 		return output;
+	}
+
+	@Override
+	public void createLogError(String sid, GeneralDate ymd, String excLogId) {
+		processCheckService.createLogError(sid, ymd, excLogId);
 	}
 }

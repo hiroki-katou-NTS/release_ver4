@@ -10,17 +10,12 @@ public class GoBackDirectlyReflectScheImpl implements GoBackDirectlyReflectSche{
 	@Inject
 	private TimeOfDayReflectGoBackSche gobackSche;
 	@Override
-	public boolean goBackDirectlyReflectSch(GobackReflectParam reflectPara) {
-		try {
-			//勤種・就時の反映
-			boolean workTypeReflect = workTypeHoursReflectSche.isReflectFlag(reflectPara);
-			//時刻の反映
-			reflectPara.setOutsetBreakReflectAtr(workTypeReflect);
-			gobackSche.stampReflectGobackSche(reflectPara);
-			return true;
-		} catch (Exception ex) {
-			return false;
-		}
+	public void goBackDirectlyReflectSch(GobackReflectParam reflectPara) {
+		//勤種・就時の反映
+		boolean workTypeReflect = workTypeHoursReflectSche.isReflectFlag(reflectPara);
+		//時刻の反映
+		reflectPara.setOutsetBreakReflectAtr(workTypeReflect);
+		gobackSche.stampReflectGobackSche(reflectPara);
 	}
 
 }

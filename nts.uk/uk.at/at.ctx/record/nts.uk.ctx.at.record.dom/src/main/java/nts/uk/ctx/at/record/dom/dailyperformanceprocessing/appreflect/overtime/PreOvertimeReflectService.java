@@ -14,7 +14,7 @@ public interface PreOvertimeReflectService {
 	 * @param param
 	 * @return
 	 */
-	public boolean overtimeReflect(OvertimeParameter param);
+	public void overtimeReflect(OvertimeParameter param);
 	/**
 	 * 日別実績の修正からの計算
 	 * @param dailyData

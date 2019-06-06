@@ -45,7 +45,7 @@ public class ReflectAplicationCommmandHandler extends CommandHandler<List<String
 					|| application.getAppType().equals(ApplicationType.ABSENCE_APPLICATION)
 					|| application.getAppType().equals(ApplicationType.COMPLEMENT_LEAVE_APPLICATION))
 			{
-				appReflectManager.reflectEmployeeOfApp(application, reflectSetting, ExecutionTypeExImport.NORMAL_EXECUTION, "");
+				appReflectManager.reflectEmployeeOfApp(application, reflectSetting, ExecutionTypeExImport.NORMAL_EXECUTION, "", 0);
 			}
 		}
 	}

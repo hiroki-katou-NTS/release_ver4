@@ -5,11 +5,7 @@ import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-
-import org.eclipse.persistence.exceptions.OptimisticLockException;
-
 import nts.arc.time.GeneralDate;
-import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workrecord.AttendanceTimeByWorkOfDaily;
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workrecord.repo.AttendanceTimeByWorkOfDailyRepository;
@@ -96,57 +92,46 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 	@Inject
 	private CommonProcessCheckService commonService;
 	@Override
-	public boolean overtimeReflect(OvertimeParameter param) {
-		try {
+	public void overtimeReflect(OvertimeParameter param) {
 			
-			//予定勤種・就時反映後の予定勤種・就時を取得する
-			//勤種・就時反映後の予定勤種・就時を取得する
-			WorkInfoOfDailyPerformance dailyInfor = workRepository.find(param.getEmployeeId(), param.getDateInfo()).get();
-			//予定勤種・就時の反映
-			dailyInfor = priorProcess.workTimeWorkTimeUpdate(param, dailyInfor);
-			//勤種・就時の反映
-			AppReflectRecordWork changeFlg = priorProcess.changeFlg(param, dailyInfor);
-			//予定開始終了時刻の反映 phai lay du lieu cua 日別実績の勤務情報 sau khi update
-			dailyInfor = priorProcess.startAndEndTimeReflectSche(param, changeFlg.chkReflect, changeFlg.getDailyInfo());
-			//日別実績の勤務情報  変更
-			workRepository.updateByKeyFlush(dailyInfor);
-			
-			//開始終了時刻の反映 phai lay du lieu cua 日別実績の勤務情報 sau khi update
-			//startEndtimeOffReflect.startEndTimeOffReflect(param, dailyInfor);
+		//予定勤種・就時反映後の予定勤種・就時を取得する
+		//勤種・就時反映後の予定勤種・就時を取得する
+		WorkInfoOfDailyPerformance dailyInfor = workRepository.find(param.getEmployeeId(), param.getDateInfo()).get();
+		//予定勤種・就時の反映
+		dailyInfor = priorProcess.workTimeWorkTimeUpdate(param, dailyInfor);
+		//勤種・就時の反映
+		AppReflectRecordWork changeFlg = priorProcess.changeFlg(param, dailyInfor);
+		//予定開始終了時刻の反映 phai lay du lieu cua 日別実績の勤務情報 sau khi update
+		dailyInfor = priorProcess.startAndEndTimeReflectSche(param, changeFlg.chkReflect, changeFlg.getDailyInfo());
+		//日別実績の勤務情報  変更
+		workRepository.updateByKeyFlush(dailyInfor);
+		
+		//開始終了時刻の反映 phai lay du lieu cua 日別実績の勤務情報 sau khi update
+		//startEndtimeOffReflect.startEndTimeOffReflect(param, dailyInfor);
 
-			//残業時間を反映する
-			//残業枠時間
-			Optional<AttendanceTimeOfDailyPerformance> optAttendanceTime = attendanceTime.find(param.getEmployeeId(), param.getDateInfo());
-			if(optAttendanceTime.isPresent()) {
-				AttendanceTimeOfDailyPerformance attendanceTimeData = optAttendanceTime.get();
-				//残業時間の反映
-				attendanceTimeData = priorProcess.getReflectOfOvertime(param, attendanceTimeData);
-				//所定外深夜時間の反映
-				attendanceTimeData = priorProcess.overTimeShiftNight(param.getEmployeeId(), param.getDateInfo(), param.isTimeReflectFlg(),
-						param.getOvertimePara().getOverTimeShiftNight(), attendanceTimeData);
-				//フレックス時間の反映
-				attendanceTimeData = priorProcess.reflectOfFlexTime(param.getEmployeeId(), param.getDateInfo(), param.isTimeReflectFlg(),
-						param.getOvertimePara().getFlexExessTime(), attendanceTimeData);
-				attendanceTime.updateFlush(attendanceTimeData);
-				
-			}
+		//残業時間を反映する
+		//残業枠時間
+		Optional<AttendanceTimeOfDailyPerformance> optAttendanceTime = attendanceTime.find(param.getEmployeeId(), param.getDateInfo());
+		if(optAttendanceTime.isPresent()) {
+			AttendanceTimeOfDailyPerformance attendanceTimeData = optAttendanceTime.get();
+			//残業時間の反映
+			attendanceTimeData = priorProcess.getReflectOfOvertime(param, attendanceTimeData);
+			//所定外深夜時間の反映
+			attendanceTimeData = priorProcess.overTimeShiftNight(param.getEmployeeId(), param.getDateInfo(), param.isTimeReflectFlg(),
+					param.getOvertimePara().getOverTimeShiftNight(), attendanceTimeData);
+			//フレックス時間の反映
+			attendanceTimeData = priorProcess.reflectOfFlexTime(param.getEmployeeId(), param.getDateInfo(), param.isTimeReflectFlg(),
+					param.getOvertimePara().getFlexExessTime(), attendanceTimeData);
+			attendanceTime.updateFlush(attendanceTimeData);
 			
-			//申請理由の反映
-			updateService.reflectReason(param.getEmployeeId(), param.getDateInfo(), 
-					param.getOvertimePara().getAppReason(),param.getOvertimePara().getOvertimeAtr());
-			//日別実績の修正からの計算
-			//○日別実績を置き換える Replace daily performance	
-			commonService.calculateOfAppReflect(null, param.getEmployeeId(), param.getDateInfo(), true);
-			return true;
-	
-		} catch (Exception ex) {
-			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
-			if(!isError) {
-				throw ex;
-			}
-			commonService.createLogError(param.getEmployeeId(), param.getDateInfo(), param.getExcLogId());
-			return false;
 		}
+		
+		//申請理由の反映
+		updateService.reflectReason(param.getEmployeeId(), param.getDateInfo(), 
+				param.getOvertimePara().getAppReason(),param.getOvertimePara().getOvertimeAtr());
+		//日別実績の修正からの計算
+		//○日別実績を置き換える Replace daily performance	
+		commonService.calculateOfAppReflect(null, param.getEmployeeId(), param.getDateInfo(), true);
 	}
 
 

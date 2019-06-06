@@ -10,7 +10,7 @@ public interface AbsenceLeaveReflectService {
 	 * 振休申請
 	 * @param parama
 	 */
-	public boolean reflectAbsenceLeave(CommonReflectParameter param, boolean isPre);
+	public void reflectAbsenceLeave(CommonReflectParameter param, boolean isPre);
 	/**
 	 * 予定勤種就時開始終了の反映
 	 * @param param

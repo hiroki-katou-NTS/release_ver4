@@ -13,5 +13,5 @@ public interface RecruitmentAppReflectSche {
 	 * @param param
 	 * @return
 	 */
-	public boolean recruitmentReflect(CommonReflectParamSche param);
+	public void recruitmentReflect(CommonReflectParamSche param);
 }

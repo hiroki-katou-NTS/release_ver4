@@ -8,7 +8,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.absenceleave.AbsenceLeaveReflectService;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
@@ -42,8 +41,6 @@ public class ScheStartEndTimeReflectImpl implements ScheStartEndTimeReflect {
 	private EditStateOfDailyPerformanceRepository editDailyPerforRespository;
 	@Inject
 	private WorkInformationRepository workInforRepository;
-	@Inject
-	private AbsenceLeaveReflectService absService;
 	@Override
 	public WorkInfoOfDailyPerformance reflectScheStartEndTime(OvertimeParameter para,
 			WorkTimeTypeOutput timeTypeData, WorkInfoOfDailyPerformance dailyInfor) {

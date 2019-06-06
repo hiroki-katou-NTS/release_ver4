@@ -15,28 +15,22 @@ public class HolidayWorkReflectScheImpl implements HolidayWorkReflectSche{
 	@Inject
 	private StartEndTimeReflectScheService startEndTimeScheService;
 	@Override
-	public boolean holidayWorkReflect(CommonReflectParamSche holidayWorkPara) {
-		try {
-			//勤種・就時の反映
-			scheCommon.updateScheWorkTimeType(holidayWorkPara.getEmployeeId(), 
-					holidayWorkPara.getDatePara(), 
-					holidayWorkPara.getWorktypeCode(),
-					holidayWorkPara.getWorkTimeCode());
-			//開始・終了時刻
-			if(holidayWorkPara.getStartTime() != null
-					&& holidayWorkPara.getEndTime() != null) {
-				startEndTimeScheService.updateStartTimeRflect(new TimeReflectScheDto(holidayWorkPara.getEmployeeId(),
-						holidayWorkPara.getDatePara(),
-						holidayWorkPara.getStartTime(),
-						holidayWorkPara.getEndTime(),
-						1,
-						true,
-						true));	
-			}
-			
-			return true;	
-		}catch (Exception e) {
-			return false;
+	public void holidayWorkReflect(CommonReflectParamSche holidayWorkPara) {
+		//勤種・就時の反映
+		scheCommon.updateScheWorkTimeType(holidayWorkPara.getEmployeeId(), 
+				holidayWorkPara.getDatePara(), 
+				holidayWorkPara.getWorktypeCode(),
+				holidayWorkPara.getWorkTimeCode());
+		//開始・終了時刻
+		if(holidayWorkPara.getStartTime() != null
+				&& holidayWorkPara.getEndTime() != null) {
+			startEndTimeScheService.updateStartTimeRflect(new TimeReflectScheDto(holidayWorkPara.getEmployeeId(),
+					holidayWorkPara.getDatePara(),
+					holidayWorkPara.getStartTime(),
+					holidayWorkPara.getEndTime(),
+					1,
+					true,
+					true));	
 		}
 		
 	}

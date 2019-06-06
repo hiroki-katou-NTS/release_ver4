@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
-import nts.uk.ctx.at.request.dom.applicationreflect.service.ReflectInformationResult;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.AppReflectProcessRecord;
 @Stateless
 public class WorkScheduleReflectServiceImpl implements WorkScheduleReflectService{
@@ -15,41 +14,38 @@ public class WorkScheduleReflectServiceImpl implements WorkScheduleReflectServic
 	@Inject
 	private AppReflectProcessRecord checkReflect;
 	@Override
-	public ReflectInformationResult workscheReflect(ReflectScheDto reflectParam) {
+	public void workscheReflect(ReflectScheDto reflectParam) {
 		Application_New application = reflectParam.getAppInfor();
 		
-		if(application.getPrePostAtr() != PrePostAtr.PREDICT) {
-			return ReflectInformationResult.CHECKFALSE;
+		if(application.getPrePostAtr() != PrePostAtr.PREDICT
+				||application.getAppType() == ApplicationType.OVER_TIME_APPLICATION
+				|| !checkReflect.appReflectProcessRecord(application, false, reflectParam.getExecutionType()) //反映チェック処理(Xử lý check phản ánh)
+				) {
+			return;
 		}
-		//反映チェック処理(Xử lý check phản ánh)		
-		if(!checkReflect.appReflectProcessRecord(application, false, reflectParam.getExecutionType())) {
-			return ReflectInformationResult.CHECKFALSE;
-		}
-		boolean isReflect = true;
-		if(application.getAppType() == ApplicationType.OVER_TIME_APPLICATION) {			
-			return ReflectInformationResult.CHECKFALSE;
-		}  else if (application.getAppType() == ApplicationType.GO_RETURN_DIRECTLY_APPLICATION){
-			return processScheReflect.goBackDirectlyReflect(reflectParam)
-					? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-		} else if(application.getAppType() == ApplicationType.WORK_CHANGE_APPLICATION) {
-			return processScheReflect.workChangeReflect(reflectParam)
-					? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-		} else if(application.getAppType() == ApplicationType.ABSENCE_APPLICATION) {
-			return processScheReflect.forleaveReflect(reflectParam)
-					? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-		} else if (application.getAppType() == ApplicationType.BREAK_TIME_APPLICATION) {
-			return processScheReflect.holidayWorkReflect(reflectParam) ? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
-		} else if (application.getAppType() == ApplicationType.COMPLEMENT_LEAVE_APPLICATION) {
+		switch (application.getAppType()) {
+		case GO_RETURN_DIRECTLY_APPLICATION:
+			processScheReflect.goBackDirectlyReflect(reflectParam);
+			break;
+		case WORK_CHANGE_APPLICATION:
+			processScheReflect.workChangeReflect(reflectParam);
+			break;
+		case ABSENCE_APPLICATION:
+			processScheReflect.forleaveReflect(reflectParam);
+			break;
+		case BREAK_TIME_APPLICATION:
+			processScheReflect.holidayWorkReflect(reflectParam);
+			break;
+		case COMPLEMENT_LEAVE_APPLICATION:
 			if(reflectParam.getAbsenceLeave() != null) {
-				return processScheReflect.ebsenceLeaveReflect(reflectParam)
-						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
+				processScheReflect.ebsenceLeaveReflect(reflectParam);
 			} 
 			if(reflectParam.getRecruitment() != null) {
-				return processScheReflect.recruitmentReflect(reflectParam)
-						? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
+				processScheReflect.recruitmentReflect(reflectParam);
 			}
+			break;
+		default:
+			break;
 		}
-		return isReflect ? ReflectInformationResult.DONE : ReflectInformationResult.NOTDONE;
 	}
-
 }

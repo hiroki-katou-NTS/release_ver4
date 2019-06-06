@@ -14,25 +14,20 @@ public class RecruitmentAppReflectScheImpl implements RecruitmentAppReflectSche{
 	@Inject
 	private StartEndTimeReflectScheService startEndTimeScheService;
 	@Override
-	public boolean recruitmentReflect(CommonReflectParamSche param) {
-		try {
-			// 勤務種類・就業時間帯の変更
-			scheCommon.updateScheWorkTimeType(param.getEmployeeId(), 
-					param.getDatePara(), 
-					param.getWorktypeCode(),
-					param.getWorkTimeCode());
-			// 開始・終了時刻
-			startEndTimeScheService.updateStartTimeRflect(new TimeReflectScheDto(param.getEmployeeId(),
-					param.getDatePara(),
-					param.getStartTime(),
-					param.getEndTime(),
-					1,
-					true,
-					true));
-			return true;
-		}catch (Exception e) {			
-			return false;
-		}
+	public void recruitmentReflect(CommonReflectParamSche param) {
+		// 勤務種類・就業時間帯の変更
+		scheCommon.updateScheWorkTimeType(param.getEmployeeId(), 
+				param.getDatePara(), 
+				param.getWorktypeCode(),
+				param.getWorkTimeCode());
+		// 開始・終了時刻
+		startEndTimeScheService.updateStartTimeRflect(new TimeReflectScheDto(param.getEmployeeId(),
+				param.getDatePara(),
+				param.getStartTime(),
+				param.getEndTime(),
+				1,
+				true,
+				true));
 	}
 
 }

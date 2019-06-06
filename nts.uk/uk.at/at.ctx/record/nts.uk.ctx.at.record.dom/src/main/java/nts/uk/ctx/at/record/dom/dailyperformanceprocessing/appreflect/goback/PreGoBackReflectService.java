@@ -11,7 +11,7 @@ public interface PreGoBackReflectService {
 	 * @param para
 	 * @return
 	 */
-	public boolean gobackReflect(GobackReflectParameter para);
+	public void gobackReflect(GobackReflectParameter para);
 	/**
 	 * 事後申請の処理
 	 * @param para

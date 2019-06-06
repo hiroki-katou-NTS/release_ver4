@@ -12,7 +12,7 @@ public interface PreWorkchangeReflectService {
 	 * @param workchangePara
 	 * @return
 	 */
-	public boolean workchangeReflect(WorkChangeCommonReflectPara param, boolean isPre); 
+	public void workchangeReflect(WorkChangeCommonReflectPara param, boolean isPre); 
 	
 	
 

@@ -7,10 +7,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import org.eclipse.persistence.exceptions.OptimisticLockException;
-
 import nts.arc.time.GeneralDate;
-import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.HolidayWorkReflectProcess;
@@ -59,24 +56,14 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 	@Inject
 	private CommonProcessCheckService commonService;
 	@Override
-	public boolean reflectAbsenceLeave(CommonReflectParameter param, boolean isPre) {
-		try {
-			//予定勤種就時開始終了の反映
-			WorkInfoOfDailyPerformance dailyInfor =  this.reflectScheStartEndTime(param, isPre);
-			//勤種就時開始終了の反映
-			dailyInfor = this.reflectRecordStartEndTime(param, dailyInfor);
-			workRepository.updateByKeyFlush(dailyInfor);
-			
-			commonService.calculateOfAppReflect(null, param.getEmployeeId(), param.getBaseDate(),false);
-			return true;
-		}catch (Exception ex) {
-			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
-			if(!isError) {
-				throw ex;
-			}
-			commonService.createLogError(param.getEmployeeId(), param.getBaseDate(), param.getExcLogId());
-			return false;
-		}
+	public void reflectAbsenceLeave(CommonReflectParameter param, boolean isPre) {
+		//予定勤種就時開始終了の反映
+		WorkInfoOfDailyPerformance dailyInfor =  this.reflectScheStartEndTime(param, isPre);
+		//勤種就時開始終了の反映
+		dailyInfor = this.reflectRecordStartEndTime(param, dailyInfor);
+		workRepository.updateByKeyFlush(dailyInfor);
+		
+		commonService.calculateOfAppReflect(null, param.getEmployeeId(), param.getBaseDate(),false);
 	}
 
 	@Override

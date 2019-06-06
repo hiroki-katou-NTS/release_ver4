@@ -12,6 +12,6 @@ public interface WorkChangeReflectServiceSche {
 	 * @param param
 	 * @return
 	 */
-	public boolean reflectWorkChange(WorkChangecommonReflectParamSche workchangeParam);
+	public void reflectWorkChange(WorkChangecommonReflectParamSche workchangeParam);
 
 }

@@ -24,7 +24,7 @@ public class ApplicationReflectProcessScheImpl implements ApplicationReflectProc
 	private AppReflectProcessSchePub appReflectSchePub;
 
 	@Override
-	public boolean goBackDirectlyReflect(ReflectScheDto reflectSche) {
+	public void goBackDirectlyReflect(ReflectScheDto reflectSche) {
 		ApplicationGobackScheInforDto appInfo = new ApplicationGobackScheInforDto(
 				reflectSche.getGoBackDirectly().getWorkChangeAtr().isPresent() ? EnumAdaptor.valueOf(reflectSche.getGoBackDirectly().getWorkChangeAtr().get().value, ChangeAtrAppGobackPub.class) : null,
 				reflectSche.getGoBackDirectly().getWorkTypeCD().isPresent() ? reflectSche.getGoBackDirectly().getWorkTypeCD().get().v() : null,
@@ -39,11 +39,11 @@ public class ApplicationReflectProcessScheImpl implements ApplicationReflectProc
 				appInfo, 
 				EnumAdaptor.valueOf(reflectSche.getTimeAtr().value,
 						ApplyTimeAtrPub.class)); 
-		return appReflectSchePub.goBackDirectlyReflectSch(dto);
+		appReflectSchePub.goBackDirectlyReflectSch(dto);
 	}
 
 	@Override
-	public boolean forleaveReflect(ReflectScheDto reflectSche) {
+	public void forleaveReflect(ReflectScheDto reflectSche) {
 		AppAbsence forLeave = reflectSche.getForLeave();
 		CommonReflectSchePubParam leavePra = new CommonReflectSchePubParam(reflectSche.getEmployeeId(),
 				reflectSche.getDatePara(),
@@ -54,11 +54,11 @@ public class ApplicationReflectProcessScheImpl implements ApplicationReflectProc
 						forLeave.getStartTime1() != null ? forLeave.getStartTime1().v() : null,
 								forLeave.getEndTime1() != null ? forLeave.getEndTime1().v() : null);
 		WorkChangeCommonReflectSchePubParam paraInput = new WorkChangeCommonReflectSchePubParam(leavePra, forLeave.isChangeWorkHour() == true ? 1 : 0);
-		return appReflectSchePub.appForLeaveSche(paraInput);
+		appReflectSchePub.appForLeaveSche(paraInput);
 	}
 
 	@Override
-	public boolean workChangeReflect(ReflectScheDto reflectSche) {
+	public void workChangeReflect(ReflectScheDto reflectSche) {
 		AppWorkChange workChange = reflectSche.getWorkChange();
 		CommonReflectSchePubParam workChangePara = new CommonReflectSchePubParam(reflectSche.getEmployeeId(), 
 				reflectSche.getDatePara(), 
@@ -69,11 +69,11 @@ public class ApplicationReflectProcessScheImpl implements ApplicationReflectProc
 				null,
 				null);
 		WorkChangeCommonReflectSchePubParam paramInput = new WorkChangeCommonReflectSchePubParam(workChangePara, workChange.getExcludeHolidayAtr());
-		return appReflectSchePub.appWorkChangeReflect(paramInput);
+		appReflectSchePub.appWorkChangeReflect(paramInput);
 	}
 
 	@Override
-	public boolean holidayWorkReflect(ReflectScheDto relectSche) {
+	public void holidayWorkReflect(ReflectScheDto relectSche) {
 		CommonReflectSchePubParam holidayWork = new CommonReflectSchePubParam(relectSche.getEmployeeId(), 
 				relectSche.getDatePara(), 
 				relectSche.getHolidayWork().getWorkTypeCode().v(),
@@ -82,11 +82,11 @@ public class ApplicationReflectProcessScheImpl implements ApplicationReflectProc
 				null,
 				relectSche.getHolidayWork().getWorkClock1().getStartTime() != null ? relectSche.getHolidayWork().getWorkClock1().getStartTime().v() : null,
 				relectSche.getHolidayWork().getWorkClock1().getEndTime() != null ? relectSche.getHolidayWork().getWorkClock1().getEndTime().v() : null);
-		return appReflectSchePub.holidayWorkReflectSche(holidayWork);
+		appReflectSchePub.holidayWorkReflectSche(holidayWork);
 	}
 
 	@Override
-	public boolean ebsenceLeaveReflect(ReflectScheDto relectSche) {
+	public void ebsenceLeaveReflect(ReflectScheDto relectSche) {
 		CommonReflectSchePubParam absenceLeave = new CommonReflectSchePubParam(relectSche.getEmployeeId(),
 				relectSche.getDatePara(),
 				relectSche.getAbsenceLeave().getWorkTypeCD() == null ? null : relectSche.getAbsenceLeave().getWorkTypeCD().v(),
@@ -95,11 +95,11 @@ public class ApplicationReflectProcessScheImpl implements ApplicationReflectProc
 				relectSche.getAppInfor().getEndDate().isPresent() ? relectSche.getAppInfor().getEndDate().get() : null,
 				relectSche.getAbsenceLeave().getWorkTime1().getStartTime() != null ? relectSche.getAbsenceLeave().getWorkTime1().getStartTime().v() : null,
 				relectSche.getAbsenceLeave().getWorkTime1().getEndTime() != null ? relectSche.getAbsenceLeave().getWorkTime1().getEndTime().v() : null);
-		return appReflectSchePub.absenceLeaveReflectSche(absenceLeave);
+		appReflectSchePub.absenceLeaveReflectSche(absenceLeave);
 	}
 
 	@Override
-	public boolean recruitmentReflect(ReflectScheDto relectSche) {
+	public void recruitmentReflect(ReflectScheDto relectSche) {
 		RecruitmentApp recruitmentData = relectSche.getRecruitment();
 		CommonReflectSchePubParam recruitment = new CommonReflectSchePubParam(relectSche.getEmployeeId(), 
 				relectSche.getDatePara(), 
@@ -109,15 +109,6 @@ public class ApplicationReflectProcessScheImpl implements ApplicationReflectProc
 				relectSche.getAppInfor().getEndDate().isPresent() ? relectSche.getAppInfor().getEndDate().get() : null, 
 				recruitmentData.getWorkTime1().getStartTime() != null ? recruitmentData.getWorkTime1().getStartTime().v() : null, 
 				recruitmentData.getWorkTime1().getEndTime() != null ? recruitmentData.getWorkTime1().getEndTime().v() : null);
-		return appReflectSchePub.recruitmentReflectSche(recruitment);
+		appReflectSchePub.recruitmentReflectSche(recruitment);
 	}
-
-	@Override
-	public boolean isSche(String employeeId, GeneralDate baseDate) {
-		
-		return appReflectSchePub.isSche(employeeId, baseDate);
-	}
-	
-	
-
 }

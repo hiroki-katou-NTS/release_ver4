@@ -40,18 +40,13 @@ public class AbsenceLeaveReflectScheImpl implements AbsenceLeaveReflectSche{
 	@Inject
 	private PredetemineTimeSettingRepository predetemineTimeRepo;
 	@Override
-	public boolean absenceLeaveReflect(CommonReflectParamSche param) {
-		try {
-			//勤種・就時の反映 
-			updateSche.updateScheWorkType(param.getEmployeeId(), 
-					param.getDatePara(), 
-					param.getWorktypeCode());
-			//開始予定・終了予定の置き換え
-			this.absenceLeaveStartEndTimeReflect(param);
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
+	public void absenceLeaveReflect(CommonReflectParamSche param) {
+		//勤種・就時の反映 
+		updateSche.updateScheWorkType(param.getEmployeeId(), 
+				param.getDatePara(), 
+				param.getWorktypeCode());
+		//開始予定・終了予定の置き換え
+		this.absenceLeaveStartEndTimeReflect(param);
 	}
 
 	@Override

@@ -66,7 +66,7 @@ public class RegisterAtApproveReflectionInfoDefault_New implements RegisterAtApp
 				|| application.getAppType().equals(ApplicationType.COMPLEMENT_LEAVE_APPLICATION)){
 				Application_New application_New1 = applicationRepository.findByID(application.getCompanyID(), application.getAppID()).get();
 				InformationSettingOfEachApp reflectSetting = appSetting.getSettingOfEachApp();
-				appReflectManager.reflectEmployeeOfApp(application_New1, reflectSetting, ExecutionTypeExImport.NORMAL_EXECUTION, "");
+				appReflectManager.reflectEmployeeOfApp(application_New1, reflectSetting, ExecutionTypeExImport.NORMAL_EXECUTION, "", 0);
 			}
 		}
 	}

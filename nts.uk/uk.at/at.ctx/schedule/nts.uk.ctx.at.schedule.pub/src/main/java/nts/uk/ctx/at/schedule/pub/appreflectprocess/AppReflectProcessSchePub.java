@@ -8,35 +8,33 @@ public interface AppReflectProcessSchePub {
 	 * @param reflectPara
 	 * @return
 	 */
-	public boolean goBackDirectlyReflectSch(ApplicationReflectParamScheDto reflectPara);
+	public void goBackDirectlyReflectSch(ApplicationReflectParamScheDto reflectPara);
 	/**
 	 * 休暇申請
 	 * @param reflectPara
 	 */
-	public boolean appForLeaveSche(WorkChangeCommonReflectSchePubParam appForleaverPara);
+	public void appForLeaveSche(WorkChangeCommonReflectSchePubParam appForleaverPara);
 	/**
 	 * 勤務変更申請
 	 * @param workChangeParam
 	 */
-	public boolean appWorkChangeReflect(WorkChangeCommonReflectSchePubParam workChangeParam);
+	public void appWorkChangeReflect(WorkChangeCommonReflectSchePubParam workChangeParam);
 	/**
 	 * 休日出勤申請
 	 * @param holidayWorkParam
 	 * @return
 	 */
-	public boolean holidayWorkReflectSche(CommonReflectSchePubParam holidayWorkParam);
+	public void holidayWorkReflectSche(CommonReflectSchePubParam holidayWorkParam);
 	/**
 	 * 振休申請の反映
 	 * @param absenceLeaverParam
 	 * @return
 	 */
-	public boolean absenceLeaveReflectSche(CommonReflectSchePubParam absenceLeaverParam);
+	public void absenceLeaveReflectSche(CommonReflectSchePubParam absenceLeaverParam);
 	/**
 	 * 振出申請の反映
 	 * @param absenceLeaverParam
 	 * @return
 	 */
-	public boolean recruitmentReflectSche(CommonReflectSchePubParam absenceLeaverParam);
-
-	public boolean isSche(String employeeId, GeneralDate baseDate);
+	public void recruitmentReflectSche(CommonReflectSchePubParam absenceLeaverParam);
 }

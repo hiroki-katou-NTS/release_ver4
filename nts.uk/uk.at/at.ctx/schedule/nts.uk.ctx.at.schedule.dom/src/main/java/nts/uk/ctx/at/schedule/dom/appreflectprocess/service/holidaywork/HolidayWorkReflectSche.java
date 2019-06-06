@@ -8,5 +8,5 @@ public interface HolidayWorkReflectSche {
 	 * @param holidayWorkPara
 	 * @return
 	 */
-	public boolean holidayWorkReflect(CommonReflectParamSche holidayWorkPara);
+	public void holidayWorkReflect(CommonReflectParamSche holidayWorkPara);
 }

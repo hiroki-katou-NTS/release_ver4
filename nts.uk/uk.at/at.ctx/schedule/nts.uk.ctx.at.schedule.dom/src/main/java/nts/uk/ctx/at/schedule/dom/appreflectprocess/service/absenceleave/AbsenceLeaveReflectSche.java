@@ -15,7 +15,7 @@ public interface AbsenceLeaveReflectSche {
 	 * @param param
 	 * @return
 	 */
-	public boolean absenceLeaveReflect(CommonReflectParamSche param);
+	public void absenceLeaveReflect(CommonReflectParamSche param);
 	/**
 	 * 時刻の反映
 	 * @param employeeId

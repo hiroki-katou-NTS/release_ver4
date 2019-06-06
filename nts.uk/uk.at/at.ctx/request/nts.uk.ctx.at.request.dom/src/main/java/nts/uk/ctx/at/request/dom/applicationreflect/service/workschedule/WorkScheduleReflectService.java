@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule;
 
-import nts.uk.ctx.at.request.dom.applicationreflect.service.ReflectInformationResult;
 
 /**
  * 勤務予定に反映
@@ -13,5 +12,5 @@ public interface WorkScheduleReflectService {
 	 * @param executionTupe
 	 * @return
 	 */
-	public ReflectInformationResult workscheReflect(ReflectScheDto reflectParam);
+	public void workscheReflect(ReflectScheDto reflectParam);
 }

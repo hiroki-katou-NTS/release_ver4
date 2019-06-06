@@ -1,18 +1,11 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.recruitment;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-
-import org.eclipse.persistence.exceptions.OptimisticLockException;
-
 import nts.arc.time.GeneralDate;
-import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
@@ -27,14 +20,7 @@ import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationReposi
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
-import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
-import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
-import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
-import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
-import nts.uk.ctx.at.shared.dom.worktype.service.AttendanceOfficeAtr;
-import nts.uk.ctx.at.shared.dom.worktype.service.WorkTypeIsClosedService;
 
 @Stateless
 public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectRecordService {
@@ -47,41 +33,27 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 	@Inject
 	private PreHolidayWorktimeReflectService holidayWorktimeService;
 	@Inject
-	private WorkTypeIsClosedService workTypeService;
-	@Inject
-	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDailyRepos;
-	@Inject
 	private WorkInformationRepository workRepository;
 	@Inject
 	private CommonProcessCheckService commonService;
 	@Override
-	public boolean recruitmentReflect(CommonReflectParameter param, boolean isPre) {
-		try {
-			IntegrationOfDaily daily = holidayWorktimeService.createIntegrationOfDailyStart(param.getEmployeeId(), param.getBaseDate(), 
-					param.getWorkTimeCode(), param.getWorkTypeCode(), param.getStartTime(), param.getEndTime(),isPre);
-			WorkInfoOfDailyPerformance dailyInfor = daily.getWorkInformation();
-			//予定勤種就時の反映
-			//予定開始終了の反映
-			dailyInfor = this.reflectScheWorkTimeType(param, isPre, dailyInfor);
-			//勤種・就時の反映
-			ReflectParameter reflectData = new ReflectParameter(param.getEmployeeId(), param.getBaseDate(), param.getWorkTimeCode(),
-					param.getWorkTypeCode(), false);		
-			dailyInfor = workUpdate.updateWorkTimeType(reflectData, false, dailyInfor);
-			//日別実績の勤務情報  変更
-			workRepository.updateByKeyFlush(dailyInfor);
-			daily.setWorkInformation(dailyInfor);
-			//開始終了時刻の反映
-			daily = this.reflectRecordStartEndTime(param, daily);			
-			commonService.calculateOfAppReflect(daily, param.getEmployeeId(), param.getBaseDate(), false);
-			return true;
-		} catch (Exception ex) {
-			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
-			if(!isError) {
-				throw ex;
-			}
-			commonService.createLogError(param.getEmployeeId(), param.getBaseDate(), param.getExcLogId());
-			return false;
-		}
+	public void recruitmentReflect(CommonReflectParameter param, boolean isPre) {
+		IntegrationOfDaily daily = holidayWorktimeService.createIntegrationOfDailyStart(param.getEmployeeId(), param.getBaseDate(), 
+				param.getWorkTimeCode(), param.getWorkTypeCode(), param.getStartTime(), param.getEndTime(),isPre);
+		WorkInfoOfDailyPerformance dailyInfor = daily.getWorkInformation();
+		//予定勤種就時の反映
+		//予定開始終了の反映
+		dailyInfor = this.reflectScheWorkTimeType(param, isPre, dailyInfor);
+		//勤種・就時の反映
+		ReflectParameter reflectData = new ReflectParameter(param.getEmployeeId(), param.getBaseDate(), param.getWorkTimeCode(),
+				param.getWorkTypeCode(), false);		
+		dailyInfor = workUpdate.updateWorkTimeType(reflectData, false, dailyInfor);
+		//日別実績の勤務情報  変更
+		workRepository.updateByKeyFlush(dailyInfor);
+		daily.setWorkInformation(dailyInfor);
+		//開始終了時刻の反映
+		daily = this.reflectRecordStartEndTime(param, daily);			
+		commonService.calculateOfAppReflect(daily, param.getEmployeeId(), param.getBaseDate(), false);
 	}
 
 	@Override
