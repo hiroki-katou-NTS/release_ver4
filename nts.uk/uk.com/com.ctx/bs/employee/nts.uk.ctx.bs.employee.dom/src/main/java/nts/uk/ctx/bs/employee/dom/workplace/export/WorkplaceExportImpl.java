@@ -69,6 +69,8 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 		results.sort((s1, s2) -> {
 			if (s1.getHierarchyCd() == null) {
 				return -1;
+			} else if (s2.getHierarchyCd() == null) {
+				return 1;
 			}
 			return s1.getHierarchyCd().compareTo(s2.getHierarchyCd());
 		});
@@ -120,6 +122,8 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 		results.sort((s1, s2) -> {
 			if (s1.getHierarchyCd() == null) {
 				return -1;
+			} else if (s2.getHierarchyCd() == null) {
+				return 1;
 			}
 			return s1.getHierarchyCd().compareTo(s2.getHierarchyCd());
 		});

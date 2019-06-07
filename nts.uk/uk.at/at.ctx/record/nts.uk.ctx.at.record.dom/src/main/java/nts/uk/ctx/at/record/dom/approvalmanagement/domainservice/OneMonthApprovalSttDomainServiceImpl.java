@@ -426,11 +426,11 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			}
 			
 			if(!lsthierarchyCD.isEmpty()){
-				Map<String, String> hierarchyCD = exportImports.stream().collect(
-						Collectors.toMap(WorkplaceExportImport::getWorkplaceId, WorkplaceExportImport::getHierarchyCd));
+				Map<String, List<WorkplaceExportImport>> hierarchyCD = exportImports.stream().collect(
+						Collectors.groupingBy(x->x.getWorkplaceId()));
 				listEmpAffInfo.forEach(e -> {
 					if (hierarchyCD.containsKey(e.getPositionID())) {
-						e.setHierarchyCd(hierarchyCD.get(e.getWorkPlaceID()));
+						e.setHierarchyCd(hierarchyCD.get(e.getWorkPlaceID()).get(0).getHierarchyCd());
 					}
 				});
 			}
