@@ -19,11 +19,8 @@ public class WorkplaceExportAdapterImpl implements WorkplaceExportAdapter{
 	
 	@Override
 	public List<WorkplaceExportImport> getAllWkpConfig(String companyId, List<String> listWkpId, GeneralDate baseDate) {
-		String hierarchyCd = null;
 		return this.pub.getAllWkpConfig(companyId, listWkpId, baseDate).stream()
-				.map(x -> new WorkplaceExportImport(x.getWorkplaceId(), x.getWorkplaceCode(),
-						x.getWorkplaceName(), x.getWkpGenericName(), x.getWkpDisplayName(),
-						x.getOutsideWkpCode(), hierarchyCd))
+				.map(x -> new WorkplaceExportImport(x.getWorkplaceId(), x.getHierarchyCd()))
 				.collect(Collectors.toList());
 	}
 }

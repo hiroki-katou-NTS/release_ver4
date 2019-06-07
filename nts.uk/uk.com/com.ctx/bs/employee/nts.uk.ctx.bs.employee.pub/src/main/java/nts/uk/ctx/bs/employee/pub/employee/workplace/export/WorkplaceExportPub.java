@@ -11,10 +11,9 @@ import nts.arc.time.GeneralDate;
  */
 public interface WorkplaceExportPub {
 	/**
-	 * [No.560]職場IDから職場の情報をすべて取得する
+	 * 職場IDから職場の階層コードを取得する
 	 * 
-	 * 
-	 * RequestList 560
+	 * tuong tu RQ560
 	 * 
 	 * @param companyId
 	 * @param listWkpId
@@ -23,9 +22,9 @@ public interface WorkplaceExportPub {
 	public List<WorkplaceExportPubDto> getAllWkpConfig(String companyId, List<String> listWkpId, GeneralDate baseDate);
 
 	/**
-	 * [No.561]過去の職場の情報を取得する
+	 * 過去の職場の階層コードを取得する
 	 * 
-	 * RequestList 561
+	 * tuong tu RQ561
 	 * 
 	 * @param companyId
 	 * @param listWkpId

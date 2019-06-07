@@ -26,7 +26,6 @@ import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeDto;
 import nts.uk.ctx.at.record.dom.adapter.employee.RegularSortingTypeImport;
-import nts.uk.ctx.at.record.dom.adapter.employee.RegulationInfoEmployeeAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employee.SortingConditionOrderImport;
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistAdapter;
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHistImport;
@@ -89,9 +88,6 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 
 	@Inject
 	private ClosureEmploymentRepository closureEmploymentRepository;
-
-	@Inject
-	private RegulationInfoEmployeeAdapter regulationInfoEmployeeAdapter;
 
 	@Inject
 	private SyCompanyRecordAdapter syCompanyRecordAdapter;
@@ -365,6 +361,8 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
     		//社員を並び替える
 			
 			//[No.560]職場IDから職場の情報をすべて取得する
+			// hien tai dang goi den xu ly chung gan giong voi RQ560
+			// 職場IDから職場の階層コードを取得する
 			List<String> lstWorkplaceIds = new ArrayList<>();
 			for(EmployeeAffiliationInforDto approvalId  : listEmpAffInfo) {
 				if (!lstWorkplaceIds.contains(approvalId.workPlaceID)) {

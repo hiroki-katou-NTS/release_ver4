@@ -15,8 +15,6 @@ import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfigRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfo;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfoRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceHierarchy;
-import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfo;
-import nts.uk.ctx.bs.employee.dom.workplace.info.WorkplaceInfoRepository;
 
 /**
  * 
@@ -28,9 +26,6 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 
 	@Inject
 	private WorkplaceConfigRepository workplaceConfigRepository;
-
-	@Inject
-	private WorkplaceInfoRepository workplaceInfoRepository;
 
 	@Inject
 	private WorkplaceConfigInfoRepository workplaceConfigInfoRepository;
@@ -51,16 +46,14 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 		// List<WorkplaceConfigInfo> se chi co toi da 1 data
 		List<WorkplaceConfigInfo> lstWorkplaceConfigInfo = this.workplaceConfigInfoRepository
 				.findByHistoryIdsAndWplIds(companyId, Arrays.asList(histId), listWkpId);
-		// ドメインモデル「職場情報」を取得する
-		List<WorkplaceInfo> lstWorkplaceInfo = this.workplaceInfoRepository.findByWkpIdsAndHistIds(companyId, listWkpId,
-				Arrays.asList(histId));
+		List<WorkplaceHierarchy> lstWkpHierarchy = lstWorkplaceConfigInfo.get(0).getLstWkpHierarchy();
 
-		if (listWkpId.size() != lstWorkplaceInfo.size()) {
+		if (listWkpId.size() != lstWkpHierarchy.size()) {
 			// 情報が取得できていない職場が存在する場合 TH tồn tại workplace chưa get được thông tin
-			// get wkpId chua lay dc info
+			// get wkpId chua lay dc configInfo
 			List<String> lstWkpIdNoInfo = new ArrayList<>();
 			listWkpId.forEach(wkpId -> {
-				if (!lstWorkplaceInfo.stream().filter(x -> x.getWorkplaceId().equals(wkpId)).findFirst().isPresent()) {
+				if (!lstWkpHierarchy.stream().filter(x -> x.getWorkplaceId().equals(wkpId)).findFirst().isPresent()) {
 					lstWkpIdNoInfo.add(wkpId);
 				}
 			});
@@ -69,15 +62,8 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 			results.addAll(lstWkpInfoDto);
 		}
 
-		lstWorkplaceInfo.forEach(wkpInfo -> {
-			Optional<WorkplaceHierarchy> optWorkplaceHierarchy = lstWorkplaceConfigInfo.get(0).getLstWkpHierarchy()
-					.stream().filter(x -> x.getWorkplaceId().equals(wkpInfo.getWorkplaceId())).findFirst();
-			String hierarchyCd = optWorkplaceHierarchy.isPresent() ? optWorkplaceHierarchy.get().getHierarchyCode().v()
-					: null;
-			WkpInfoDto wkpInfoDto = new WkpInfoDto(wkpInfo.getWorkplaceId(), wkpInfo.getWorkplaceCode().v(),
-					wkpInfo.getWorkplaceName().v(), wkpInfo.getWkpGenericName().v(), wkpInfo.getWkpDisplayName().v(),
-					wkpInfo.getOutsideWkpCode().v(), hierarchyCd);
-			results.add(wkpInfoDto);
+		lstWkpHierarchy.forEach(wkpInfo -> {
+			results.add(new WkpInfoDto(wkpInfo.getWorkplaceId(), wkpInfo.getHierarchyCode().v()));
 		});
 		// 階層コード ASC
 		results.sort((s1, s2) -> {
@@ -93,7 +79,7 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 	@Override
 	public List<WkpInfoDto> getPastWkpInfo(String companyId, List<String> listWkpId, String histId) {
 		List<WkpInfoDto> results = new ArrayList<>();
-		List<WorkplaceInfo> lstWorkplaceInfoAll = new ArrayList<>();
+		List<WorkplaceHierarchy> lstWorkplaceHierarchyAll = new ArrayList<>();
 		// ドメインモデル「職場構成」を取得する
 		Optional<WorkplaceConfig> optWorkplaceConfig = this.workplaceConfigRepository.findByHistId(companyId, histId);
 		if (!optWorkplaceConfig.isPresent()) {
@@ -103,45 +89,31 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 		optWorkplaceConfig.get().getWkpConfigHistory().sort((s1, s2) -> s1.span().isAfter(s2.span()) ? 1 : -1);
 		List<String> listHistId = optWorkplaceConfig.get().getWkpConfigHistory().stream().map(x -> x.identifier())
 				.collect(Collectors.toList());
-		// query WorkplaceConfigInfo de lay hierarchyCd
-		List<WorkplaceConfigInfo> lstWorkplaceConfigInfo = this.workplaceConfigInfoRepository
-				.findByHistoryIdsAndWplIds(companyId, listHistId, listWkpId);
 
 		for (String hId : listHistId) {
-			// ドメインモデル「職場情報」を取得する
-			List<WorkplaceInfo> lstWorkplaceInfo = this.workplaceInfoRepository.findByWkpIdsAndHistIds(companyId,
-					listWkpId, Arrays.asList(hId));
-			lstWorkplaceInfoAll.addAll(lstWorkplaceInfo);
+			// query WorkplaceConfigInfo de lay hierarchyCd
+			List<WorkplaceConfigInfo> lstWorkplaceConfigInfo = this.workplaceConfigInfoRepository
+					.findByHistoryIdsAndWplIds(companyId, Arrays.asList(hId), listWkpId);
+			List<WorkplaceHierarchy> lstWkpHierarchy = lstWorkplaceConfigInfo.get(0).getLstWkpHierarchy();
+			lstWorkplaceHierarchyAll.addAll(lstWkpHierarchy);
 			// remove nhung wkpId da lay dc info
-			lstWorkplaceInfo.forEach(wkpInfo -> {
-				listWkpId.remove(wkpInfo.getWorkplaceId());
+			lstWkpHierarchy.forEach(wkpHierarchy -> {
+				listWkpId.remove(wkpHierarchy.getWorkplaceId());
 			});
 			if (listWkpId.size() == 0) {
 				break; // すべて取得できた / Get được tất cả
 			}
 		}
 		// convert to WkpInfoDto
-		lstWorkplaceInfoAll.forEach(wkpInfo -> {
-			lstWorkplaceConfigInfo.forEach(x -> {
-				if (x.getHistoryId().equals(wkpInfo.getHistoryId())) {
-					// get hierarchyCd
-					Optional<WorkplaceHierarchy> optWorkplaceHierarchy = x.getLstWkpHierarchy().stream()
-							.filter(y -> y.getWorkplaceId().equals(wkpInfo.getWorkplaceId())).findFirst();
-					String hierarchyCd = optWorkplaceHierarchy.isPresent()
-							? optWorkplaceHierarchy.get().getHierarchyCode().v() : null;
-					WkpInfoDto wkpInfoDto = new WkpInfoDto(wkpInfo.getWorkplaceId(), wkpInfo.getWorkplaceCode().v(),
-							wkpInfo.getWorkplaceName().v(), wkpInfo.getWkpGenericName().v(),
-							wkpInfo.getWkpDisplayName().v(), wkpInfo.getOutsideWkpCode().v(), hierarchyCd);
-					results.add(wkpInfoDto);
-				}
-			});
+		lstWorkplaceHierarchyAll.forEach(wkpHierarchy -> {
+			results.add(new WkpInfoDto(wkpHierarchy.getWorkplaceId(), wkpHierarchy.getHierarchyCode().v()));
 		});
 
 		if (listWkpId.size() > 0) {
 			listWkpId.forEach(wkpId -> {
 				// 職場名称、職場表示名、職場総称には「マスタ未登録」を固定でセットする
 				// この処理でも取得できなかった職場には「コード削除済」を固定でセットする
-				results.add(new WkpInfoDto(wkpId, "コード削除済", "マスタ未登録", "マスタ未登録", "マスタ未登録", "コード削除済", null));
+				results.add(new WkpInfoDto(wkpId, null));
 			});
 		}
 		// 階層コード ASC
