@@ -835,22 +835,4 @@ public class TimeSheetOfDeductionItem extends CalculationTimeSheet{
 		returnList.addAll(this.collectShortTimeSheet());
 		return returnList;
 	}
-	
-	public static TimeSheetOfDeductionItem createFromDeductionTimeSheet(nts.uk.ctx.at.shared.dom.worktime.common.DeductionTime dTimeSheet) {
-		return TimeSheetOfDeductionItem.createTimeSheetOfDeductionItemAsFixed(new TimeZoneRounding(dTimeSheet.getStart(),dTimeSheet.getEnd(), new TimeRoundingSetting(Unit.ROUNDING_TIME_1MIN, Rounding.ROUNDING_DOWN)),
-				  new TimeSpanForCalc(dTimeSheet.getStart(), dTimeSheet.getEnd()),
-				  Collections.emptyList(),
-				  Collections.emptyList(),
-				  Collections.emptyList(),
-				  Collections.emptyList(),
-				  Optional.empty(),
-				  WorkingBreakTimeAtr.NOTWORKING,
-				  Finally.empty(),
-				  Finally.of(BreakClassification.BREAK),
-				  Optional.empty(),
-				  DeductionClassification.BREAK,
-				  Optional.empty()
-				  );
-				
-	}
 }

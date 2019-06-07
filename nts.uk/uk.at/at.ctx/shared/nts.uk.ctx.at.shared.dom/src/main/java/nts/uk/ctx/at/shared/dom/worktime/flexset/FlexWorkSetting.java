@@ -107,24 +107,6 @@ public class FlexWorkSetting extends WorkTimeAggregateRoot {
 		memento.setCalculateSetting(this.calculateSetting);
 	}
 	
-	public FlexWorkSetting(String companyId, WorkTimeCode workTimeCode, CoreTimeSetting coreTimeSetting,
-			FlowWorkRestSetting restSetting, FlexOffdayWorkTime offdayWorkTime, WorkTimezoneCommonSet commonSetting,
-			boolean useHalfDayShift, List<FlexHalfDayWorkTime> lstHalfDayWorkTimezone,
-			List<StampReflectTimezone> lstStampReflectTimezone, FlexCalcSetting calculateSetting) {
-		super();
-		this.companyId = companyId;
-		this.workTimeCode = workTimeCode;
-		this.coreTimeSetting = coreTimeSetting;
-		this.restSetting = restSetting;
-		this.offdayWorkTime = offdayWorkTime;
-		this.commonSetting = commonSetting;
-		this.useHalfDayShift = useHalfDayShift;
-		this.lstHalfDayWorkTimezone = lstHalfDayWorkTimezone;
-		this.lstStampReflectTimezone = lstStampReflectTimezone;
-		this.calculateSetting = calculateSetting;
-	}
-	
-	
 	/**
 	 * Restore data.
 	 *
@@ -168,15 +150,5 @@ public class FlexWorkSetting extends WorkTimeAggregateRoot {
 		this.restSetting.correctDefaultData(screenMode,this.getLstHalfDayWorkTimezone().size() > 0
 				? this.getLstHalfDayWorkTimezone().get(0).getRestTimezone().isFixRestTime() : false);
 	}
-
-	/**
- 	 * create this Instance
-	 * @return new Instance
-	 */
-	public FlexWorkSetting cloneByCreateNewInstance() {
-		return new FlexWorkSetting(companyId, workTimeCode, coreTimeSetting, restSetting, offdayWorkTime, commonSetting, useHalfDayShift, lstHalfDayWorkTimezone, lstStampReflectTimezone, calculateSetting);
-	}
-
-
 	
 }

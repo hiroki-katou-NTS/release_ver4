@@ -301,11 +301,5 @@ public class PredetemineTimeSetting extends WorkTimeAggregateRoot {
 		} 		
 	}
 
-	/**
- 	 * create this Instance
-	 * @return new Instance
-	 */
-	public PredetemineTimeSetting cloneByCreateNewInstance() {
-		return new PredetemineTimeSetting(companyId, rangeTimeDay, workTimeCode, predTime, nightShift, prescribedTimezoneSetting, startDateClock, predetermine);
-	}
+	
 }

@@ -31,7 +31,7 @@ public interface CalculateDailyRecordServiceCenter{//
 	
 	//計算(就業計算と集計用)
 	@SuppressWarnings("rawtypes")
-	public ManageProcessAndCalcStateResult calculateForManageState(List<IntegrationOfDaily> integrationOfDaily,List<ClosureStatusManagement> closureList,ExecutionType reCalcAtr, String empCalAndSumExecLogID,ManagePerCompanySet setting);
+	public ManageProcessAndCalcStateResult calculateForManageState(List<IntegrationOfDaily> integrationOfDaily,List<ClosureStatusManagement> closureList,ExecutionType reCalcAtr, String empCalAndSumExecLogID);
 	
 	//エラーチェック
 	public List<IntegrationOfDaily> errorCheck(List<IntegrationOfDaily> integrationList);

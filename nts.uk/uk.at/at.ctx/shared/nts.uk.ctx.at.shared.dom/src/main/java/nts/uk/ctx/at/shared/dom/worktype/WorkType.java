@@ -13,7 +13,6 @@ import lombok.Getter;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.layer.dom.AggregateRoot;
-import nts.gul.serialize.json.JsonMapping;
 
 /**
  * The Class WorkType.
@@ -134,28 +133,6 @@ public class WorkType extends AggregateRoot {
 		this.dailyWork = dailyWork;
 		this.deprecate = deprecate;
 		this.calculateMethod = calculateMethod;
-	}
-	
-	public WorkType(String companyId, WorkTypeCode workTypeCode, WorkTypeSymbolicName symbolicName, WorkTypeName name,
-			WorkTypeAbbreviationName abbreviationName, WorkTypeMemo memo, DailyWork dailyWork,
-			DeprecateClassification deprecate, CalculateMethod calculateMethod, List<WorkTypeSet> workTypeSetList,
-			Integer dispOrder) {
-		super();
-		this.companyId = companyId;
-		this.workTypeCode = workTypeCode;
-		this.symbolicName = symbolicName;
-		this.name = name;
-		this.abbreviationName = abbreviationName;
-		this.memo = memo;
-		this.dailyWork = dailyWork;
-		this.deprecate = deprecate;
-		this.calculateMethod = calculateMethod;
-		this.workTypeSetList = workTypeSetList;
-		this.dispOrder = dispOrder;
-	}
-	
-	public WorkType() {
-		super();
 	}
 	
 	public WorkType(WorkTypeCode workTypeCode, WorkTypeSymbolicName symbolicName, WorkTypeName name,
@@ -444,14 +421,4 @@ public class WorkType extends AggregateRoot {
 			return new ArrayList<>();
 		}
 	}
-	
-	/**
-	 * create this Instance
-	 * @return new Instance
-	 */
-	public WorkType cloneByCreateNewInstance() {
-		return new WorkType(companyId, workTypeCode, symbolicName, name, abbreviationName, memo, dailyWork, deprecate, calculateMethod, workTypeSetList, dispOrder);
-	}
-
-
 }

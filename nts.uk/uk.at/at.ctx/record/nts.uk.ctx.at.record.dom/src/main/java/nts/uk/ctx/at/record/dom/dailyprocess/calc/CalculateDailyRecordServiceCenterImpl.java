@@ -285,8 +285,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			List<IntegrationOfDaily> integrationOfDailys,
 			List<ClosureStatusManagement> closureList,
 			ExecutionType reCalcAtr,
-			String executeLogId,
-			ManagePerCompanySet companyCommonSetting){
+			String executeLogId){
 		
 		if(reCalcAtr.isRerun()) {
 
@@ -294,9 +293,11 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			val beforeChangeItemId = new ArrayList<ItemValue>(itemId);
 			List<EditStateOfDailyPerformance> notReCalcItems = new ArrayList<>();
 			
-			val optionalItems = companyCommonSetting.getOptionalItems();
-			val empConds = companyCommonSetting.getEmpCondition();
-			val formula = companyCommonSetting.getFormulaList();
+			val setting = Optional.of(commonCompanySettingForCalc.getCompanySetting());
+			
+			val optionalItems = getOptionalItemsFromRepository(setting);
+			val empConds = getEmpConditions(setting,optionalItems);
+			val formula = getFormula(setting);
 			
 			integrationOfDailys.forEach(integrationOfDaily -> {
 				notReCalcItems.clear();
@@ -324,7 +325,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			});
 
 		}
-		return commonPerCompany(CalculateOption.asDefault(), integrationOfDailys,true,Optional.empty(),Optional.of(companyCommonSetting),closureList,Optional.of(executeLogId));
+		return commonPerCompany(CalculateOption.asDefault(), integrationOfDailys,true,Optional.empty(),Optional.empty(),closureList,Optional.of(executeLogId));
 	}
 
 
@@ -337,7 +338,7 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			ManagePerCompanySet companySet,
 			List<ClosureStatusManagement> closureList,
 			String logId) {
-		val result = commonPerCompany(CalculateOption.asDefault(), integrationOfDaily,true,Optional.empty(),Optional.of(companySet),closureList,Optional.of(logId));
+		val result = commonPerCompany(CalculateOption.asDefault(), integrationOfDaily,true,Optional.empty(),Optional.empty(),closureList,Optional.of(logId));
 //		result.getLst().forEach(listItem ->{
 //			dailyCalculationEmployeeService.upDateCalcState(listItem);
 //		});
@@ -407,7 +408,6 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 		}
 
 		if (mustCleanShareContainer) {
-//		if(companyCommonSetting.getShareContainer() != null) {
 			companyCommonSetting.getShareContainer().clearAll();
 			companyCommonSetting.setShareContainer(null);
 		}
