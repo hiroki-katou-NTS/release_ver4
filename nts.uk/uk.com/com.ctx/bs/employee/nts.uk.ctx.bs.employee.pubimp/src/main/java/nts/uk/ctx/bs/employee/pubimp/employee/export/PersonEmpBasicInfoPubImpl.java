@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -81,9 +85,10 @@ public class PersonEmpBasicInfoPubImpl implements PersonEmpBasicInfoPub {
 			}
 		}
 
-		List<String> personIds = employeeDataInfoList.stream().map(e -> e.getPersonId()).collect(Collectors.toList());
+		Set<String> personIds = employeeDataInfoList.stream().map(e -> e.getPersonId()).collect(Collectors.toSet());
 
-		Map<String, Person> personMap = personRepo.getPersonByPersonIds(personIds).stream()
+		Map<String, Person> personMap =  personRepo.getPersonByPersonIds(personIds.stream().collect(Collectors.toList())).stream()
+				.filter(distinctByKey( p -> p.getPersonId()))
 				.collect(Collectors.toMap(x -> x.getPersonId(), x -> x));
 
 		return employeeDataInfoList.stream()
@@ -129,6 +134,12 @@ public class PersonEmpBasicInfoPubImpl implements PersonEmpBasicInfoPub {
 							person.getPersonNameGroup().getBusinessName().v(), person.getGender().value,
 							person.getBirthDate(), emp.getEmployeeCode().v(), period.start(), period.end());
 				}).collect(Collectors.toList());
+	}
+	
+	public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+
+		Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+		return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
 	}
 
 }

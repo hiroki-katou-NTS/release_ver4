@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *  author: thuongtv
@@ -43,7 +44,7 @@ public class PersonEmpBasicInfoAdapterImpl implements PersonEmpBasicInfoAdapter 
 	@Override
 	public Map<String,String> getEmployeeCodesByEmpIds(List<String> empIds) {
 		//request list 228
-		List<EmployeeInfoExport> lstEmp = sysEmpPub.getByListSid(empIds);
+		List<EmployeeInfoExport> lstEmp = sysEmpPub.getByListSid(empIds.stream().distinct().collect(Collectors.toList()));
 		Map<String,String> mapReturn = new HashMap<>();
 		if (!CollectionUtil.isEmpty(lstEmp)) {
 			for (EmployeeInfoExport emp : lstEmp) {
