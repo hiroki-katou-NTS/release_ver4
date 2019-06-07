@@ -76,11 +76,4 @@ public class SspmtDataRecoverLog extends UkJpaEntity implements Serializable {
 				this.errorContent, this.targetDate, this.dataRecoverLogPk.logSequenceNumber, 
 				this.processingContent, this.contentSql);
 	}
-
-	public static SspmtDataRecoverLog toEntity(DataRecoveryLog domain) {
-		return new SspmtDataRecoverLog(
-				new SspmtDataRecoverLogPk(domain.getRecoveryProcessId(), domain.getLogSequenceNumber()),
-				domain.getProcessingContent().v(), domain.getTarget(), domain.getTargetDate(),
-				domain.getErrorContent().v(), domain.getContentSql().v());
-	}
 }

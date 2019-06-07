@@ -51,7 +51,6 @@ import nts.uk.ctx.sys.assist.dom.deletedata.ResultState;
 import nts.uk.ctx.sys.assist.dom.deletedata.SaveStatus;
 import nts.uk.ctx.sys.assist.dom.deletedata.TableDeletionDataCsv;
 import nts.uk.shr.com.i18n.TextResource;
-import nts.uk.shr.infra.file.csv.CSVFileData;
 import nts.uk.shr.infra.file.csv.CSVReportGenerator;
 import nts.uk.shr.infra.file.csv.CsvReportWriter;
 
@@ -65,7 +64,6 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	private static final String MSG_END_NORMAL_DEL_LOG = "CMF005_214";
 	private static final String MSG_END_ABNORMAL_DEL_LOG = "CMF005_215";
 	private static final String MSG_END_TERMINATE_DEL_LOG = "CMF005_216";
-	private static final String MSG_DEL_ERROR_LOG = "CMF005_223";
 
 	private static final List<String> LST_NAME_ID_HEADER_TABLE_FILE = Arrays.asList("CMF003_500", "CMF003_501",
 			"CMF003_502", "CMF003_503", "CMF003_504", "CMF003_505", "CMF003_506", "CMF003_507", "CMF003_508",
@@ -100,14 +98,10 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	private EmployeesDeletionRepository repoEmployeesDel;
 	@Inject
 	private CategoryDeletionRepository repoCategoryDel;
-//	@Inject
-//	private ManualSetDeletionRepository repoManualSetDel;
 	@Inject
 	private CategoryForDeleteRepository repoCategoryForDel;
-	
 	@Inject
 	private CategoryFieldMtForDelRepository repoCtgFieldMtForDelRep;
-	
 	@Inject
 	private ResultDeletionRepository repoResultDel;
 	@Inject
@@ -118,6 +112,8 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	private ApplicationTemporaryFileFactory applicationTemporaryFileFactory;
 	@Inject
 	private CSVReportGenerator generator;
+	@Inject 
+	private SaveErrorLogDeleteResult saveErrLogDel;
 	
 	@Override
 	protected void handle(ExportServiceContext<Object> context) {
@@ -388,10 +384,10 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			repoManagementDel.updateCatCountAnCond(delId, 0, OperatingCondition.SAVING);
 
 			// テーブル一覧の内容をCSVファイルに書き出す Add Table to CSV
-			generalTableDeletionToCsv(generatorContext, tableDeletionDataCsvs);
+			generalTableDeletionToCsv(generatorContext, tableDeletionDataCsvs, domain);
 
 			// 対象社員の内容をCSVファイルに暗号化して書き出す
-			generalEmployeesToCsv(generatorContext, delId);
+			generalEmployeesToCsv(generatorContext, delId, domain);
 
 			Map<String, List<TableDeletionDataCsv>> mapCatWithDatas = mapCatWithDataDel(tableDeletionDataCsvs);
 			if (mapCatWithDatas != null) {
@@ -480,6 +476,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			saveErrLogDel.saveErrorWhenCreFileCsv(domain, e.getMessage());		
 			return ResultState.ABNORMAL_END;
 		}
 		return ResultState.NORMAL_END;
@@ -535,7 +532,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	 * @return
 	 */
 	private ResultState generalTableDeletionToCsv(FileGeneratorContext generatorContext,
-			List<TableDeletionDataCsv> dataDeletionCsvs) {
+			List<TableDeletionDataCsv> dataDeletionCsvs, ManualSetDeletion domain) {
 		try {
 			List<String> headerCsv = this.getHeaderForTableDelFile();
 			
@@ -690,6 +687,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			return ResultState.NORMAL_END;
 		} catch (Exception e) {
 			e.printStackTrace();
+			saveErrLogDel.saveErrorWhenCreFileCsv(domain, e.getMessage());	
 			return ResultState.ABNORMAL_END;
 		}
 	}
@@ -700,7 +698,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	 * @param delId
 	 * @return
 	 */
-	private ResultState generalEmployeesToCsv(FileGeneratorContext generatorContext, String delId) {
+	private ResultState generalEmployeesToCsv(FileGeneratorContext generatorContext, String delId, ManualSetDeletion domain) {
 		try {
 			List<EmployeeDeletion> employeeDeletions = repoEmployeesDel.getEmployeesDeletionListById(delId);
 			List<String> headerCsvListEmp = this.getHeaderForEmployeeFile();
@@ -719,6 +717,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			return ResultState.NORMAL_END;
 		} catch (Exception e) {
 			e.printStackTrace();
+			saveErrLogDel.saveErrorWhenCreFileCsv(domain, e.getMessage());	
 			return ResultState.ABNORMAL_END;
 		}
 		
@@ -822,7 +821,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 								managementDeletion.setErrorCount(errorCount + 1);
 								repoManagementDel.update(managementDeletion);
 								// ドメインモデル「データ削除の結果ログ」を追加する
-								saveErrorLogResult(domain, msgError);
+								saveErrLogDel.saveErrorWhenDelData(domain, msgError);
 //								return ResultState.ABNORMAL_END;
 							}
 						}
@@ -837,7 +836,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 								managementDeletion.setErrorCount(errorCount + 1);
 								repoManagementDel.update(managementDeletion);
 								// ドメインモデル「データ削除の結果ログ」を追加する
-								saveErrorLogResult(domain, msgError);
+								saveErrLogDel.saveErrorWhenDelData(domain, msgError);
 //								return ResultState.ABNORMAL_END;
 							}
 						}
@@ -846,7 +845,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			saveErrorLogResult(domain, e.getMessage());
+			saveErrLogDel.saveErrorWhenDelData(domain, e.getMessage());
 			return ResultState.ABNORMAL_END;
 		}
 
@@ -865,18 +864,5 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			return e.getMessage();
 		}
 		return null;
-	}
-	
-	
-	/**
-	 * ドメインモデル「データ削除の結果ログ」を追加する
-	 */
-	private void saveErrorLogResult(ManualSetDeletion domain, String msgError) {
-		String msgId = MSG_DEL_ERROR_LOG;
-		GeneralDateTime logTime = GeneralDateTime.now();
-		int seqId = repoResultLogDel.getMaxSeqId(domain.getDelId()) + 1;
-		ResultLogDeletion resultLogDomain = ResultLogDeletion.createFromJavatype(seqId, domain.getDelId(),
-				domain.getCompanyId(), logTime, TextResource.localize(msgId), msgError, null, null);
-		repoResultLogDel.add(resultLogDomain);
 	}
 }

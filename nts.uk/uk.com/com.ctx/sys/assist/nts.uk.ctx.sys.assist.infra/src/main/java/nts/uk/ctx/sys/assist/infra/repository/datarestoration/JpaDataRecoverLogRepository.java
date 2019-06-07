@@ -5,10 +5,12 @@ import java.util.Optional;
 
 import javax.ejb.Stateless;
 
+import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.uk.ctx.sys.assist.dom.datarestoration.DataRecoveryLog;
 import nts.uk.ctx.sys.assist.dom.datarestoration.DataRecoveryLogRepository;
 import nts.uk.ctx.sys.assist.infra.entity.datarestoration.SspmtDataRecoverLog;
+import nts.uk.ctx.sys.assist.infra.entity.datarestoration.SspmtDataRecoverLogPk;
 
 @Stateless
 public class JpaDataRecoverLogRepository extends JpaRepository implements DataRecoveryLogRepository  {
@@ -45,8 +47,23 @@ public class JpaDataRecoverLogRepository extends JpaRepository implements DataRe
 
 	@Override
 	public void add(DataRecoveryLog data) {
-		this.commandProxy().insert(SspmtDataRecoverLog.toEntity(data));
+		SspmtDataRecoverLog entity = toEntity(data);
+		this.commandProxy().insert(entity);
 		this.getEntityManager().flush();
+	}
+	
+	private static SspmtDataRecoverLog toEntity(DataRecoveryLog domain){
+		val entity = new SspmtDataRecoverLog();
+		val key = new SspmtDataRecoverLogPk();
+		key.recoveryProcessId = domain.getRecoveryProcessId();
+		key.logSequenceNumber = domain.getLogSequenceNumber();
+		entity.dataRecoverLogPk = key;
+		entity.contentSql = domain.getContentSql() == null ? "" : domain.getContentSql().v();
+		entity.errorContent = domain.getErrorContent() == null ? "" : domain.getErrorContent().v();
+		entity.processingContent = domain.getProcessingContent() == null ? "" : domain.getProcessingContent().v();
+		entity.target = domain.getTarget();
+		entity.targetDate = domain.getTargetDate();
+		return entity;
 	}
 	
 }
