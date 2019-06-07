@@ -42,11 +42,11 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 		// tai 1 ngay nhat dinh se chi lay duoc 1 histId
 		String histId = optWorkplaceConfig.get().getWkpConfigHistory().get(0).identifier();
 		// get WorkplaceConfigInfo de lay ra hierarchyCd
-		// query theo companyId, histId va listWkpId nen
-		// List<WorkplaceConfigInfo> se chi co toi da 1 data
 		List<WorkplaceConfigInfo> lstWorkplaceConfigInfo = this.workplaceConfigInfoRepository
 				.findByHistoryIdsAndWplIds(companyId, Arrays.asList(histId), listWkpId);
-		List<WorkplaceHierarchy> lstWkpHierarchy = lstWorkplaceConfigInfo.get(0).getLstWkpHierarchy();
+
+		List<WorkplaceHierarchy> lstWkpHierarchy = new ArrayList<>();
+		lstWorkplaceConfigInfo.forEach(x -> lstWkpHierarchy.addAll(x.getLstWkpHierarchy()));
 
 		if (listWkpId.size() != lstWkpHierarchy.size()) {
 			// 情報が取得できていない職場が存在する場合 TH tồn tại workplace chưa get được thông tin
@@ -96,7 +96,8 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 			// query WorkplaceConfigInfo de lay hierarchyCd
 			List<WorkplaceConfigInfo> lstWorkplaceConfigInfo = this.workplaceConfigInfoRepository
 					.findByHistoryIdsAndWplIds(companyId, Arrays.asList(hId), listWkpId);
-			List<WorkplaceHierarchy> lstWkpHierarchy = lstWorkplaceConfigInfo.get(0).getLstWkpHierarchy();
+			List<WorkplaceHierarchy> lstWkpHierarchy = new ArrayList<>();
+			lstWorkplaceConfigInfo.forEach(x -> lstWkpHierarchy.addAll(x.getLstWkpHierarchy()));
 			lstWorkplaceHierarchyAll.addAll(lstWkpHierarchy);
 			// remove nhung wkpId da lay dc info
 			lstWkpHierarchy.forEach(wkpHierarchy -> {
