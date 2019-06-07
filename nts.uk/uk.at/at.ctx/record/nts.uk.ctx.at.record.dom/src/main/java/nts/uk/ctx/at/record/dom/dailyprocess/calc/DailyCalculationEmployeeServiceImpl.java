@@ -55,6 +55,8 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enu
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
+import nts.uk.ctx.at.shared.dom.attendance.MasterShareBus;
+import nts.uk.ctx.at.shared.dom.attendance.MasterShareBus.MasterShareContainer;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
@@ -196,7 +198,20 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	public List<Boolean> calculate(List<String> employeeIds,DatePeriod datePeriod, Consumer<ProcessState> counter,ExecutionType reCalcAtr, String empCalAndSumExecLogID) {
 		
 		String cid = AppContexts.user().companyId();
+		//会社共通の設定取得
+		ManagePerCompanySet setting = commonCompanySettingForCalc.getCompanySetting();
+		
+		//マスタシェアークラスオープン
+		boolean mustCleanShareContainer = false;
+		if (setting.getShareContainer() == null) {
+			mustCleanShareContainer = true;
+			MasterShareContainer<String> shareContainer = MasterShareBus.open();
+			setting.setShareContainer(shareContainer);
+		}
+		
+		
 		List<Boolean> isHappendOptimistLockError = new ArrayList<>();
+		
 		this.parallel.forEach(employeeIds, employeeId -> {
 			
 //			// 中断処理　（中断依頼が出されているかチェックする）
@@ -231,7 +246,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 				targetPersonRepository.updateWithContent(employeeId, empCalAndSumExecLogID, 1, 0);
 			} else {
 				//計算処理を呼ぶ
-				afterCalcRecord = calculateDailyRecordServiceCenter.calculateForManageState(createList,closureList,reCalcAtr,empCalAndSumExecLogID);
+				afterCalcRecord = calculateDailyRecordServiceCenter.calculateForManageState(createList,closureList,reCalcAtr,empCalAndSumExecLogID,setting);
 				//１：日別計算(ENUM)
 				//0:計算完了
 				targetPersonRepository.updateWithContent(employeeId, empCalAndSumExecLogID, 1, 0);
@@ -267,6 +282,12 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 				counter.accept(afterCalcRecord.getPs() == ProcessState.SUCCESS?ProcessState.SUCCESS:ProcessState.INTERRUPTION);
 			}
 		});
+		
+		//マスターシェアークラスクローズ
+		if (mustCleanShareContainer) {
+			setting.getShareContainer().clearAll();
+			setting.setShareContainer(null);
+		}
 		return isHappendOptimistLockError;
 	}
 	
@@ -299,8 +320,9 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		return closureStatusManagementRepository.getByIdListAndDatePeriod(employeeId, datePeriod);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public ProcessState calculateForOnePerson(String employeeId,DatePeriod datePeriod,Optional<Consumer<ProcessState>> counter,String executeLogId) {
+	@SuppressWarnings("rawtypes") 
+	public ProcessState calculateForOnePerson(String employeeId,DatePeriod datePeriod,Optional<Consumer<ProcessState>> counter,String executeLogId,
+											  ManagePerCompanySet companySet) {
 		//実績取得
 		List<IntegrationOfDaily> createList = createIntegrationList(Arrays.asList(employeeId),datePeriod);
 		//実績が無かった時用のカウントアップ
@@ -310,7 +332,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		//締め一覧取得
 		List<ClosureStatusManagement> closureList = getClosureList(Arrays.asList(employeeId),datePeriod);
 		
-		ManagePerCompanySet companySet =  commonCompanySettingForCalc.getCompanySetting(); 
+
 		//計算処理
 		val afterCalcRecord = calculateDailyRecordServiceCenter.calculateForclosure(createList,companySet ,closureList,executeLogId);
 		

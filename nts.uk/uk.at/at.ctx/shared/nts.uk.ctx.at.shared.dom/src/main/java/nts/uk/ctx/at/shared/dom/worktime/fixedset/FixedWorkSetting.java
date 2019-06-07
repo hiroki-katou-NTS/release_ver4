@@ -110,6 +110,23 @@ public class FixedWorkSetting extends WorkTimeAggregateRoot {
 		memento.setCalculationSetting(this.calculationSetting);
 	}
 
+	public FixedWorkSetting(String companyId, WorkTimeCode workTimeCode, FixOffdayWorkTimezone offdayWorkTimezone,
+			WorkTimezoneCommonSet commonSetting, Boolean useHalfDayShift, FixedWorkRestSet fixedWorkRestSetting,
+			List<FixHalfDayWorkTimezone> lstHalfDayWorkTimezone, List<StampReflectTimezone> lstStampReflectTimezone,
+			LegalOTSetting legalOTSetting, Optional<FixedWorkCalcSetting> calculationSetting) {
+		super();
+		this.companyId = companyId;
+		this.workTimeCode = workTimeCode;
+		this.offdayWorkTimezone = offdayWorkTimezone;
+		this.commonSetting = commonSetting;
+		this.useHalfDayShift = useHalfDayShift;
+		this.fixedWorkRestSetting = fixedWorkRestSetting;
+		this.lstHalfDayWorkTimezone = lstHalfDayWorkTimezone;
+		this.lstStampReflectTimezone = lstStampReflectTimezone;
+		this.legalOTSetting = legalOTSetting;
+		this.calculationSetting = calculationSetting;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -211,5 +228,13 @@ public class FixedWorkSetting extends WorkTimeAggregateRoot {
 		if (screenMode == ScreenMode.SIMPLE || this.legalOTSetting == LegalOTSetting.OUTSIDE_LEGAL_TIME) {
 			this.lstHalfDayWorkTimezone.forEach(item -> item.correctDefaultData());
 		}
+	}
+
+	/**
+ 	 * create this Instance
+	 * @return new Instance
+	 */
+	public FixedWorkSetting cloneByCreateNewInstance() {
+		return new FixedWorkSetting(companyId, workTimeCode, offdayWorkTimezone, commonSetting, useHalfDayShift, fixedWorkRestSetting, lstHalfDayWorkTimezone, lstStampReflectTimezone, legalOTSetting, calculationSetting);
 	}
 }

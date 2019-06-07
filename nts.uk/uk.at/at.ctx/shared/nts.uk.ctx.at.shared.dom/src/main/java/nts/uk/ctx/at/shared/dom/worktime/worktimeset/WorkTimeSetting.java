@@ -134,4 +134,26 @@ public class WorkTimeSetting extends WorkTimeAggregateRoot {
 		return true;
 	}
 
+	public WorkTimeSetting(String companyId, WorkTimeCode worktimeCode, WorkTimeDivision workTimeDivision,
+			AbolishAtr abolishAtr, ColorCode colorCode, WorkTimeDisplayName workTimeDisplayName, Memo memo,
+			WorkTimeNote note) {
+		super();
+		this.companyId = companyId;
+		this.worktimeCode = worktimeCode;
+		this.workTimeDivision = workTimeDivision;
+		this.abolishAtr = abolishAtr;
+		this.colorCode = colorCode;
+		this.workTimeDisplayName = workTimeDisplayName;
+		this.memo = memo;
+		this.note = note;
+	}
+	
+	/**
+	 * create this Instance
+	 * @return new Instance
+	 */
+	public WorkTimeSetting cloneByCreateNewInstance() {
+		return new WorkTimeSetting(companyId, worktimeCode, workTimeDivision, abolishAtr, colorCode, workTimeDisplayName, memo, note);
+	}
+
 }
