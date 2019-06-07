@@ -275,7 +275,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		ErrMessageInfo errMes = new ErrMessageInfo(sid, 
 				excLogId,
 				new ErrMessageResource("024"),
-				EnumAdaptor.valueOf(1, ExecutionContent.class),
+				EnumAdaptor.valueOf(2, ExecutionContent.class),
 				ymd,
 				new ErrMessageContent(TextResource.localize("Msg_1541")));
 		this.errMessInfo.add(errMes);
