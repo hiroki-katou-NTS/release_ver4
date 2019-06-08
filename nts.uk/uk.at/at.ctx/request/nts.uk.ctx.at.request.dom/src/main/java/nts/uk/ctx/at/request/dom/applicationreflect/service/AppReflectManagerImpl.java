@@ -233,15 +233,17 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			if(!isError) {
 				throw ex;
 			}
-			proRecord.createLogError(appInfor.getEmployeeID(), appInfor.getAppDate(), excLogId);
+			if(excLogId != "") {
+				proRecord.createLogError(appInfor.getEmployeeID(), appInfor.getAppDate(), excLogId);	
+			}			
 			int newCountRerun = currentRecord + 1;
 			if (newCountRerun == 10) {
 				throw ex;
 			}
 			try {
 				Thread.sleep(newCountRerun * 50);
-			} catch (InterruptedException e){}
-			reflectEmployeeOfApp(appInfor, reflectSetting, execuTionType, excLogId, newCountRerun);
+				reflectEmployeeOfApp(appInfor, reflectSetting, execuTionType, excLogId, newCountRerun);
+			} catch (InterruptedException e){}			
 		}
 	}	
 	private WorkChangeCommonReflectPara getWorkChange(Application_New appInfor, AppWorkChange workChange,
