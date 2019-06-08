@@ -196,11 +196,14 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			
 			//TODO 反映するかどうか判断 (Xác định để phản ánh)
 			//勤務予定へ反映処理	(Xử lý phản ánh đến kế hoạch công việc)
+			boolean scheRef = false;
 			if(appInfor.getPrePostAtr() == PrePostAtr.PREDICT) {
-				scheReflect.workscheReflect(reflectScheParam);
+				scheRef = scheReflect.workscheReflect(reflectScheParam);
 				//
-				appInfor.getReflectionInformation().setStateReflection(ReflectedState_New.REFLECTED);
-				appInfor.getReflectionInformation().setNotReason(Optional.of(ReasonNotReflect_New.WORK_CONFIRMED));
+				if(scheRef) {
+					appInfor.getReflectionInformation().setStateReflection(ReflectedState_New.REFLECTED);
+					appInfor.getReflectionInformation().setNotReason(Optional.of(ReasonNotReflect_New.WORK_CONFIRMED));	
+				}
 			}
 			//勤務実績へ反映処理(xử lý phản ảnh thành tích thực chuyên cần)
 			ReflectRecordInfor reflectRecordInfor = new ReflectRecordInfor(AppDegreeReflectionAtr.RECORD, AppExecutionType.EXCECUTION, appInfor);		
@@ -212,22 +215,26 @@ public class AppReflectManagerImpl implements AppReflectManager {
 					absenceLeaveAppInfor,
 					recruitmentInfor,
 					execuTionType);
-			workRecordReflect.workRecordreflect(appPara);
+			boolean isWorkRecor = workRecordReflect.workRecordreflect(appPara);
+			if(isWorkRecor) {
+				appInfor.getReflectionInformation().setStateReflectionReal(ReflectedState_New.REFLECTED);
+				appInfor.getReflectionInformation().setNotReasonReal(Optional.of(ReasonNotReflectDaily_New.ACTUAL_CONFIRMED));
+			}
+			if(isWorkRecor || scheRef) {
+				List<GeneralDate> lstDate = new ArrayList<>();
+				if(appInfor.getStartDate().isPresent() && appInfor.getEndDate().isPresent()) {
+					for(int i = 0; appInfor.getStartDate().get().daysTo(appInfor.getEndDate().get()) - i >= 0; i++){
+						GeneralDate loopDate = appInfor.getStartDate().get().addDays(i);
+						lstDate.add(loopDate);
+					}
+				} else {
+					lstDate.add(appInfor.getAppDate());	
+				}	
+				appRepo.updateWithVersion(appInfor);
+				//暫定データの登録
+				interimRegister.registerDateChange(appInfor.getCompanyID(), appInfor.getEmployeeID(), lstDate);	
+			}
 			
-			appInfor.getReflectionInformation().setStateReflectionReal(ReflectedState_New.REFLECTED);
-			appInfor.getReflectionInformation().setNotReasonReal(Optional.of(ReasonNotReflectDaily_New.ACTUAL_CONFIRMED));
-			List<GeneralDate> lstDate = new ArrayList<>();
-			if(appInfor.getStartDate().isPresent() && appInfor.getEndDate().isPresent()) {
-				for(int i = 0; appInfor.getStartDate().get().daysTo(appInfor.getEndDate().get()) - i >= 0; i++){
-					GeneralDate loopDate = appInfor.getStartDate().get().addDays(i);
-					lstDate.add(loopDate);
-				}
-			} else {
-				lstDate.add(appInfor.getAppDate());	
-			}	
-			appRepo.updateWithVersion(appInfor);
-			//暫定データの登録
-			interimRegister.registerDateChange(appInfor.getCompanyID(), appInfor.getEmployeeID(), lstDate);	
 		} catch(Exception ex) {
 			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
 			if(!isError) {

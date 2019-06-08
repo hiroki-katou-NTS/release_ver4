@@ -14,25 +14,25 @@ public class WorkScheduleReflectServiceImpl implements WorkScheduleReflectServic
 	@Inject
 	private AppReflectProcessRecord checkReflect;
 	@Override
-	public void workscheReflect(ReflectScheDto reflectParam) {
+	public boolean workscheReflect(ReflectScheDto reflectParam) {
 		Application_New application = reflectParam.getAppInfor();
 		//反映チェック処理(Xử lý check phản ánh)
 		if(!checkReflect.appReflectProcessRecord(application, false, reflectParam.getExecutionType())) {
-			return;
+			return false;
 		}
 		switch (application.getAppType()) {
 		case GO_RETURN_DIRECTLY_APPLICATION:
 			processScheReflect.goBackDirectlyReflect(reflectParam);
-			break;
+			return true;
 		case WORK_CHANGE_APPLICATION:
 			processScheReflect.workChangeReflect(reflectParam);
-			break;
+			return true;
 		case ABSENCE_APPLICATION:
 			processScheReflect.forleaveReflect(reflectParam);
-			break;
+			return true;
 		case BREAK_TIME_APPLICATION:
 			processScheReflect.holidayWorkReflect(reflectParam);
-			break;
+			return true;
 		case COMPLEMENT_LEAVE_APPLICATION:
 			if(reflectParam.getAbsenceLeave() != null) {
 				processScheReflect.ebsenceLeaveReflect(reflectParam);
@@ -40,9 +40,9 @@ public class WorkScheduleReflectServiceImpl implements WorkScheduleReflectServic
 			if(reflectParam.getRecruitment() != null) {
 				processScheReflect.recruitmentReflect(reflectParam);
 			}
-			break;
+			return true;
 		default:
-			break;
+			return false;
 		}
 	}
 }

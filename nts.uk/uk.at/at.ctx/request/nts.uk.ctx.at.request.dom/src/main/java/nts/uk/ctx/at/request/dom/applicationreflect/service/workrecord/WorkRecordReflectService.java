@@ -10,6 +10,6 @@ public interface WorkRecordReflectService {
 	 * 勤務実績に反映
 	 * @return
 	 */
-	public void workRecordreflect(AppReflectRecordPara recordInfor);
+	public boolean workRecordreflect(AppReflectRecordPara recordInfor);
 
 }

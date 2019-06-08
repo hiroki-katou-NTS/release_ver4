@@ -12,5 +12,5 @@ public interface WorkScheduleReflectService {
 	 * @param executionTupe
 	 * @return
 	 */
-	public void workscheReflect(ReflectScheDto reflectParam);
+	public boolean workscheReflect(ReflectScheDto reflectParam);
 }
