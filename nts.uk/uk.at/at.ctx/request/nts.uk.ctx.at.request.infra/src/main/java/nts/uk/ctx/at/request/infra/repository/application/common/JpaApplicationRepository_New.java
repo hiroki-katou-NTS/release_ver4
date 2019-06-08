@@ -69,7 +69,10 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 			+ " OR (a.endDate IS null and a.startDate >= :startDate AND a.startDate <= :endDate))" 
 			+ " AND a.appType IN (0,1,2,4,6,10)";
 	//hoatt
-	private static final String SELECT_APP_BY_REFLECT = SELECT_FROM_APPLICATION + " AND a.stateReflectionReal != 5"
+	private static final String SELECT_APP_BY_REFLECT = "SELECT a FROM KrqdtApplication_New a"
+			+ " WHERE a.krqdpApplicationPK.companyID = :companyID" 
+			+ " AND a.krqdpApplicationPK.appID in :lstAppId"
+			+ " AND a.stateReflectionReal != 5"
 			+ " AND a.endDate >= :startDate and a.startDate <= :endDate"
 			+ " AND a.appType IN (0,1,2,4,6,10)";
 	private static final String SELECT_APP_BY_SIDS = "SELECT a FROM KrqdtApplication_New a" + " WHERE a.employeeID IN :employeeID" + " AND a.appDate >= :startDate AND a.appDate <= :endDate";
@@ -250,9 +253,13 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 	 * phuc vu CMM045
 	 */
 	@Override
-	public List<Application_New> getListAppByReflect(String companyId, GeneralDate startDate, GeneralDate endDate) {
+	public List<Application_New> getListAppByReflectandListID(String companyId, GeneralDate startDate, GeneralDate endDate, List<String> lstAppId) {
+		if(lstAppId.isEmpty()){
+			return new ArrayList<>();
+		}
 		return this.queryProxy().query(SELECT_APP_BY_REFLECT, KrqdtApplication_New.class)
 				.setParameter("companyID", companyId)
+				.setParameter("lstAppId", lstAppId)
 				.setParameter("startDate", startDate)
 				.setParameter("endDate", endDate)
 				.getList(c -> c.toDomain());

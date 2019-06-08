@@ -2,6 +2,7 @@ package nts.uk.ctx.at.request.dom.application.applist.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,6 @@ import org.apache.logging.log4j.util.Strings;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
-import nts.gul.collection.CollectionUtil;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
@@ -353,20 +353,28 @@ public class AppListInitialImpl implements AppListInitialRepository{
 //			lstEmployeeIdSub = employeeAdapter.getListSid(sID, baseDate);
 //		}
 		//申請一覧抽出条件.申請表示対象が「事前通知」または「検討指示」が指定
-		List<Application_New> lstApp = new ArrayList<>();
-			//ドメインモデル「代行者管理」を取得する-(Lấy dữ liệu domain 代行者管理) - wait request 244
-			List<AgentDataRequestPubImport> lstAgent = agentAdapter.lstAgentData(companyId, sID, sysDate, sysDate);
-			List<String> lstEmp = new ArrayList<>();
-			for (AgentDataRequestPubImport agent : lstAgent) {
-				lstEmp.add(agent.getEmployeeId());
-			}
-			//ドメインモデル「申請」を取得する-(Lấy dữ liệu domain 申請) - get List App By Reflect
-			lstApp = repoApp.getListAppByReflect(companyId, param.getStartDate(), param.getEndDate());
+		//ドメインモデル「代行者管理」を取得する-(Lấy dữ liệu domain 代行者管理) - wait request 244
+		List<AgentDataRequestPubImport> lstAgent = agentAdapter.lstAgentData(companyId, sID, sysDate, sysDate);
+		List<String> lstEmp = new ArrayList<>();
+		for (AgentDataRequestPubImport agent : lstAgent) {
+			lstEmp.add(agent.getEmployeeId());
+		}
+		List<ApplicationFullOutput> lstAppFull = new ArrayList<>();
+		//imported（申請承認）「承認ルートの内容」を取得する - RequestList309
+		System.out.println("before merger: "+ LocalDateTime.now());
+		Map<String,List<ApprovalPhaseStateImport_New>> mapApprInfo = this.mergeAppAndPhase_New(companyId, lstEmp);
+		System.out.println("after merger: "+ LocalDateTime.now());
+		List<String> lstAppId = new ArrayList<>();
+		for(Map.Entry<String,List<ApprovalPhaseStateImport_New>> entry : mapApprInfo.entrySet()){
+			lstAppId.add(entry.getKey());
+		}
+		//ドメインモデル「申請」を取得する-(Lấy dữ liệu domain 申請) - get List App By Reflect
+		List<Application_New> lstApp = repoApp.getListAppByReflectandListID(companyId, param.getStartDate(), param.getEndDate(), lstAppId);
+		for(Application_New app : lstApp){
+			lstAppFull.add(new ApplicationFullOutput(app, mapApprInfo.get(app.getAppID()),-1,"", null));
+		}
+			
 			//loc du lieu
-			//imported（申請承認）「承認ルートの内容」を取得する - RequestList309
-			System.out.println("before merger: "+ LocalDateTime.now());
-			List<ApplicationFullOutput> lstAppFull = this.mergeAppAndPhase(lstApp, companyId);
-			System.out.println("after merger: "+ LocalDateTime.now());
 			//条件１： ログイン者の表示対象の基本条件
 			List<ApplicationFullOutput> lstAppFullFil1 = new ArrayList<>();
 			for (ApplicationFullOutput appFull : lstAppFull) {
@@ -1039,6 +1047,9 @@ public class AppListInitialImpl implements AppListInitialRepository{
 	 */
 	@Override
 	public DataMasterOutput getListAppMasterInfo(List<Application_New> lstApp, String companyId, DatePeriod period) {
+		if(lstApp.isEmpty()){
+			return new DataMasterOutput(Collections.emptyList(), Collections.emptyList(), new HashMap<>());
+		}
 		//ドメインモデル「申請一覧共通設定」を取得する-(Lấy domain Application list common settings)
 		Optional<AppCommonSet> appCommonSet = repoAppCommonSet.find();
 		ShowName displaySet = appCommonSet.get().getShowWkpNameBelong();
@@ -1316,26 +1327,31 @@ public class AppListInitialImpl implements AppListInitialRepository{
 	 * @param lstApp
 	 * @return
 	 */
-	private List<ApplicationFullOutput> mergeAppAndPhase(List<Application_New> lstApp, String companyID){
-		List<ApplicationFullOutput> lstAppFull = new ArrayList<>();
-		List<String> appIDs = lstApp.stream().map(x -> x.getAppID()).collect(Collectors.toList());
-//		for (Application_New app : lstApp) {
-//			List<ApprovalPhaseStateImport_New> lstPhase = approvalRootStateAdapter.getApprovalRootContent(companyID, 
-//					app.getEmployeeID(), app.getAppType().value, app.getAppDate(), app.getAppID(), false).getApprovalRootState().getListApprovalPhaseState();
-//			lstAppFull.add(new ApplicationFullOutput(app, lstPhase,-1,""));
+//	private List<ApplicationFullOutput> mergeAppAndPhase(List<Application_New> lstApp, String companyID, List<String> lstAgent){
+//		List<ApplicationFullOutput> lstAppFull = new ArrayList<>();
+//		List<String> appIDs = lstApp.stream().map(x -> x.getAppID()).collect(Collectors.toList());
+////		for (Application_New app : lstApp) {
+////			List<ApprovalPhaseStateImport_New> lstPhase = approvalRootStateAdapter.getApprovalRootContent(companyID, 
+////					app.getEmployeeID(), app.getAppType().value, app.getAppDate(), app.getAppID(), false).getApprovalRootState().getListApprovalPhaseState();
+////			lstAppFull.add(new ApplicationFullOutput(app, lstPhase,-1,""));
+////		}
+//		if(!CollectionUtil.isEmpty(appIDs)){
+//			Map<String,List<ApprovalPhaseStateImport_New>> approvalRootContentImport_News = approvalRootStateAdapter.getApprovalRootContents(appIDs, companyID, lstAgent);
+//			for(Map.Entry<String,List<ApprovalPhaseStateImport_New>> entry : approvalRootContentImport_News.entrySet()){
+//				for (Application_New app : lstApp) {
+//					if(entry.getKey().equals(app.getAppID())){
+//						lstAppFull.add(new ApplicationFullOutput(app, entry.getValue(),-1,"", null));
+//					}
+//				}
+//				
+//			}
 //		}
-		if(!CollectionUtil.isEmpty(appIDs)){
-			Map<String,List<ApprovalPhaseStateImport_New>> approvalRootContentImport_News = approvalRootStateAdapter.getApprovalRootContents(appIDs, companyID);
-			for(Map.Entry<String,List<ApprovalPhaseStateImport_New>> entry : approvalRootContentImport_News.entrySet()){
-				for (Application_New app : lstApp) {
-					if(entry.getKey().equals(app.getAppID())){
-						lstAppFull.add(new ApplicationFullOutput(app, entry.getValue(),-1,"", null));
-					}
-				}
-				
-			}
-		}
-		return lstAppFull;
+//		return lstAppFull;
+//	}
+	//key: appId, values: appr
+	private Map<String,List<ApprovalPhaseStateImport_New>> mergeAppAndPhase_New(String companyID, List<String> lstAgent){
+		Map<String,List<ApprovalPhaseStateImport_New>> mapApprInfo = approvalRootStateAdapter.getApprovalRootContentCMM045(companyID, lstAgent);
+		return mapApprInfo;
 	}
 	/**
 	 * find status phase and frame

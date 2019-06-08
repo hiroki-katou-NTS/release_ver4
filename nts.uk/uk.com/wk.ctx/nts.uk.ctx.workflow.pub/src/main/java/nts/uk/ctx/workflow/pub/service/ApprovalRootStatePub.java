@@ -270,4 +270,12 @@ public interface ApprovalRootStatePub {
 　				false：指定する承認フェーズの承認がまだ未完了
 	 */
 	public Boolean isApproveApprovalPhaseStateComplete(String companyID, String rootStateID, Integer phaseNumber);
+	/**
+	 * 承認ルートを取得する
+	 * CMM045 response
+	 * @param appID
+	 * @param companyID
+	 * @return
+	 */
+	public Map<String,List<ApprovalPhaseStateExport>> getApprovalRootCMM045(String companyID, List<String> lstAgent);
 }
