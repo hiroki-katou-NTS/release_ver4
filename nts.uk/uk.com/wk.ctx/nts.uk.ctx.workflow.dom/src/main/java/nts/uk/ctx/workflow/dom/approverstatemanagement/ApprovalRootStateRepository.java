@@ -92,4 +92,11 @@ public interface ApprovalRootStateRepository {
 	
 	// only for SPR
 	public List<ApprovalRootState> getByApproverAgentPeriod(String companyID, String approverID, DatePeriod period, DatePeriod agentPeriod); 
+	/**
+	 * RQ309 -> doi ung cho CMM045
+	 * @param rootStateIDs
+	 * @param approverID
+	 * @return
+	 */
+	public List<ApprovalRootState> findEmploymentAppCMM045(List<String> lstApproverID);
 }
