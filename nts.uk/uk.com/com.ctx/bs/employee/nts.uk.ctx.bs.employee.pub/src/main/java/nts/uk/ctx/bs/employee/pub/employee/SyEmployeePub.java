@@ -207,6 +207,14 @@ public interface SyEmployeePub {
 	 */
 	List<ResultRequest600Export> getEmpInfoLstBySids(List<String> sids, DatePeriod period, boolean isDelete, boolean isGetAffCompany);
 	
+	/**
+	 * RequestList493
+	 * 社員（List）と期間から１日でも在職している社員を取得する
+	 * @param sids
+	 * @param period
+	 * @return
+	 */
+	List<String> filterSidLstByDatePeriodAndSids(List<String> sids, DatePeriod period);
 	
 	/**
 	 * 期間内に特定の会社に所属している社員一覧を取得する
