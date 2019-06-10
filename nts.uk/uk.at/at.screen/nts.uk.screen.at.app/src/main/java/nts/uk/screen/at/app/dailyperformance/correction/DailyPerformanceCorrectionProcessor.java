@@ -579,15 +579,30 @@ public class DailyPerformanceCorrectionProcessor {
 		DPLockDto dpLockDto = findLock.checkLockAll(companyId, listEmployeeId, dateRangeTemp, sId, mode, identityProcessDtoOpt, approvalUseSettingDtoOpt);
 		String keyFind = IdentifierUtil.randomUniqueId();
 		long startTime1 = System.currentTimeMillis();
-		List<ConfirmStatusActualResult> confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId,
-				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(),
-				Optional.of(keyFind));
-		System.out.println("thoi gian load checkbox 1:" + (System.currentTimeMillis()-startTime1));
-		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDay.processApprovalStatus(companyId,
-				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(),
-				mode, Optional.of(keyFind));
-		//approvalResults = new ArrayList<>();
-		System.out.println("thoi gian load checkbox 2:" + (System.currentTimeMillis()-startTime1));		
+		List<ConfirmStatusActualResult> confirmResults = new ArrayList<>();
+		List<ApprovalStatusActualResult> approvalResults = new ArrayList<>();
+		
+		if (displayFormat != 1) {
+			confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId, listEmployeeId,
+					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(),
+					Optional.of(keyFind));
+			System.out.println("thoi gian load checkbox 1:" + (System.currentTimeMillis() - startTime1));
+
+			approvalResults = approvalStatusActualDay.processApprovalStatus(companyId, listEmployeeId,
+					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(), mode,
+					Optional.of(keyFind));
+			// approvalResults = new ArrayList<>();
+			System.out.println("thoi gian load checkbox 2:" + (System.currentTimeMillis() - startTime1));
+		} else {
+			confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId, listEmployeeId,
+					dateRange.getStartDate(), screenDto.getClosureId());
+			System.out.println("thoi gian load checkbox 1:" + (System.currentTimeMillis() - startTime1));
+
+			approvalResults = approvalStatusActualDay.processApprovalStatus(companyId, listEmployeeId,
+					dateRange.getStartDate(), screenDto.getClosureId(), mode);
+			// approvalResults = new ArrayList<>();
+			System.out.println("thoi gian load checkbox 2:" + (System.currentTimeMillis() - startTime1));
+		}
 		mapDataIntoGrid(screenDto, sId, appMapDateSid, listEmployeeId, resultDailyMap, mode, displayFormat, showLock,
 				identityProcessDtoOpt, approvalUseSettingDtoOpt, dateRange, objectShare,
 				companyId, disItem, dPControlDisplayItem, dailyRecEditSetsMap,

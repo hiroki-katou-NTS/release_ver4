@@ -98,6 +98,35 @@ public class JpaIdentificationRepository extends JpaRepository implements Identi
 		
 		return data;
 	}
+	
+	@Override
+	public List<Identification> findByListEmpDate(List<String> employeeIDs,GeneralDate dateRefer) {
+		List<Identification> data = new ArrayList<>();
+		CollectionUtil.split(employeeIDs, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			try (PreparedStatement statement = this.connection().prepareStatement(
+						"SELECT * from KRCDT_CONFIRMATION_DAY h"
+						+ " WHERE h.PROCESSING_YMD = ?"
+						+ " AND h.CID = ?"
+						+ " AND h.SID IN (" + subList.stream().map(s -> "?").collect(Collectors.joining(",")) + ")")) {
+				statement.setDate(1, Date.valueOf(dateRefer.localDate()));
+				statement.setString(2, AppContexts.user().companyId());
+				for (int i = 0; i < subList.size(); i++) {
+					statement.setString(i + 3, subList.get(i));
+				}
+				data.addAll(new NtsResultSet(statement.executeQuery()).getList(rec -> {
+					return new Identification(
+							rec.getString("CID"),
+							rec.getString("SID"),
+							rec.getGeneralDate("PROCESSING_YMD"),
+							rec.getGeneralDate("INDENTIFICATION_YMD"));
+				}));
+			}catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
+		
+		return data;
+	}
 
 	@Override
 	public Optional<Identification> findByCode(String employeeID, GeneralDate processingYmd) {
