@@ -299,7 +299,7 @@ module nts.uk.at.view.kdw004.a.viewmodel {
             $("#approvalSttGrid").igGrid({
                 primaryKey: "employeeCode",
                 dataSource: self.lstData,
-                width: 1245,
+                width: 1247,
                 height: 426,
                 autofitLastColumn: false,
                 autoGenerateColumns: false,
@@ -375,14 +375,14 @@ module nts.uk.at.view.kdw004.a.viewmodel {
 
             self.lstColumns = [{
                 key: "employeeId",
-                width: "115px",
+                width: "100px",
                 headerText: text('KDW004_7'),
                 dataType: "string",
                 hidden: true
             },
                 {
                     key: "employeeCode",
-                    width: "115px",
+                    width: "100px",
                     headerText: text('KDW004_13'),
                     dataType: "string"
                 },
