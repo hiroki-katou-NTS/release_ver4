@@ -576,7 +576,7 @@ public class JpaJobTitleInfoRepository extends JpaRepository implements JobTitle
 			listPredicate.add(
 					root.get(BsymtJobInfo_.bsymtJobInfoPK).get(BsymtJobInfoPK_.jobId).in(subList));
 			listPredicate.add(criteriaBuilder
-					.equal(root.get(BsymtJobInfo_.bsymtJobInfoPK).get(BsymtJobInfoPK_.histId), companyId));
+					.equal(root.get(BsymtJobInfo_.bsymtJobInfoPK).get(BsymtJobInfoPK_.histId), historyId));
 
 
 			cq.where(listPredicate.toArray(new Predicate[] {}));
