@@ -266,8 +266,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             // show/hide header number
             self.showHeaderNumber.subscribe((val) => {
                 if (!self.loadFirst) {
-                    self.characteristics.showNumberHeader = val;
-                    character.save('characterKdw003a', self.characteristics);
+//                    self.characteristics.showNumberHeader = val;
+//                    character.save('characterKdw003a', self.characteristics);
                     self.dislayNumberHeaderText();
                 }
             });
@@ -275,8 +275,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             self.showProfileIcon.subscribe((val) => {
                 //if (self.displayFormat() == 1 || self.displayFormat() ==2) {
                 if (!self.loadFirst) {
-                    self.characteristics.showProfile = val;
-                    character.save('characterKdw003a', self.characteristics);
+//                    self.characteristics.showProfile = val;
+//                    character.save('characterKdw003a', self.characteristics);
                     self.displayProfileIcon(self.displayFormat());
                     // }
                 }
@@ -285,8 +285,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             self.displayWhenZero.subscribe(val => {
                 //self.displayWhenZero();
                 if (!self.loadFirst) {
-                    self.characteristics.showZero = val;
-                    character.save('characterKdw003a', self.characteristics);
+//                    self.characteristics.showZero = val;
+//                    character.save('characterKdw003a', self.characteristics);
                     self.displayNumberZero();
                 }
             });
@@ -295,12 +295,12 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 if (!self.loadFirst) {
                     if (value == 0) {
                         $("#dpGrid").mGrid("directEnter", "below");
-                        self.characteristics.moveMouse = 0;
+//                        self.characteristics.moveMouse = 0;
                     } else {
                         $("#dpGrid").mGrid("directEnter", "right");
-                        self.characteristics.moveMouse = 1;
+//                        self.characteristics.moveMouse = 1;
                     }
-                    character.save('characterKdw003a', self.characteristics);
+//                    character.save('characterKdw003a', self.characteristics);
                 }
             });
             //$("#fixed-table").ntsFixedTable({ height: 50, width: 300 });
@@ -513,17 +513,6 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 }
                 self.hideComponent();
                 self.showTextStyle = true;
-                character.restore("characterKdw003a").done((obj: Characteristics) => {
-                    self.characteristics.employeeId = __viewContext.user.employeeId;
-                    self.characteristics.companyId = __viewContext.user.companyId;
-                    self.characteristics.showZero = self.displayWhenZero();
-                    self.characteristics.showProfile = self.showProfileIcon();
-                    self.characteristics.showNumberHeader = self.showHeaderNumber();
-                    self.characteristics.formatExtract = param.displayFormat;
-                    self.characteristics.authenSelectFormat = param.formatCodes;
-                    self.characteristics.moveMouse = self.selectedDirection();
-                    character.save('characterKdw003a', self.characteristics);
-                });
                 nts.uk.ui.block.invisible();
                 nts.uk.ui.block.grayout();
                 self.hasErrorBuss = false;
@@ -2367,6 +2356,17 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             }
             self.flagCalculation = false;
             self.listErrorMonth = [];
+            character.restore("characterKdw003a").done((obj: Characteristics) => {
+                self.characteristics.employeeId = __viewContext.user.employeeId;
+                self.characteristics.companyId = __viewContext.user.companyId;
+                self.characteristics.showZero = self.displayWhenZero();
+                self.characteristics.showProfile = self.showProfileIcon();
+                self.characteristics.showNumberHeader = self.showHeaderNumber();
+                self.characteristics.formatExtract = self.displayFormat();
+                self.characteristics.authenSelectFormat = self.formatCodes();
+                self.characteristics.moveMouse = self.selectedDirection();
+                character.save('characterKdw003a', self.characteristics);
+            });
             self.reloadScreen();
         }
 
