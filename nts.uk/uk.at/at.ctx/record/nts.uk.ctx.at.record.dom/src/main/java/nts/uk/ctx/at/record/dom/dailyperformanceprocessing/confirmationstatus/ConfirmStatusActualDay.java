@@ -260,6 +260,9 @@ public class ConfirmStatusActualDay {
 //	  GeneralDate endDate = periodNeedMerge.end().beforeOrEquals(periodCheck.end()) ? periodNeedMerge.end() : periodCheck.end();
 //      return new DatePeriod(startDate, endDate);
 //  }
+	/**
+	 * [No.606]社員リストと基準日から日の実績の確認状況を取得する
+	 */
 	public List<ConfirmStatusActualResult> processConfirmStatus(String companyId, List<String> employeeIds,
 			GeneralDate dateRefer, Integer closureId) {
 		// ドメインモデル「本人確認処理の利用設定」を取得する

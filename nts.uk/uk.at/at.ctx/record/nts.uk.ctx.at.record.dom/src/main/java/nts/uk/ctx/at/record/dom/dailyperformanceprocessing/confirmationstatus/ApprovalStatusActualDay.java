@@ -225,6 +225,9 @@ public class ApprovalStatusActualDay {
 		}).collect(Collectors.toList());
 	}
 	
+	/**
+	 * [No.607]社員リストと基準日から日の実績の承認状況を取得する
+	 */
 	public List<ApprovalStatusActualResult> processApprovalStatus(String companyId, List<String> employeeIds,
 			GeneralDate dateRefer, Integer closureId, int mode) {
 		List<ApprovalStatusActualResult> resultResult = new ArrayList<>();
