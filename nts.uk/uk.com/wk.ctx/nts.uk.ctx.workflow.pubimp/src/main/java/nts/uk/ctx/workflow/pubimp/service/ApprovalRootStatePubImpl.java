@@ -587,8 +587,8 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 	}
 	@Override
 	public boolean checkDataApproveed(GeneralDate startDate, GeneralDate endDate, String approverID, Integer rootType,
-			String companyID) {
-		List<ApprovalRootState> approvalRootStates = new ArrayList<>();
+			String companyID ) {
+	/*	List<ApprovalRootState> approvalRootStates = new ArrayList<>();
 		if(rootType == null){
 			// xử lí 承認者と期間から承認ルートインスタンスを取得する（ルート種類指定なし）
 			 approvalRootStates = this.approvalRootStateRepository
@@ -614,10 +614,10 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 			}else{
 				result = false;
 			}
-		}
+		}*/
+		//Phan code comment là xử lý cũ của RQ 190 - Update theo bug http://192.168.50.4:3000/issues/108043
 		
-		
-		
+		boolean result = approvalRootStateRepository.resultKTG002(startDate, endDate, approverID, rootType, companyID); 
 		return result;
 	}
 	@Override
