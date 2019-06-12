@@ -91,7 +91,9 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 												y.getApproverName(),"",
 												y.getRepresenterID(),
 												y.getRepresenterName(),"",
-												y.getApprovalReason(), 0);
+												y.getApprovalReason(), 
+												y.getConfirmAtr(),
+												y.getApprovalDate());
 									}).collect(Collectors.toList()));
 						}).collect(Collectors.toList());
 			approvalPhaseImport_NewMap.put(approvalRootContentExport.getKey(), appRootContentImport_News);
@@ -181,7 +183,9 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 												y.getRepresenterID(),
 												y.getRepresenterName(),
 												representerPhaseMail,
-												y.getApprovalReason(), y.getConfirmAtr());
+												y.getApprovalReason(), 
+												y.getConfirmAtr(),
+												y.getApprovalDate());
 									}).collect(Collectors.toList()));
 						}).collect(Collectors.toList())),
 					EnumAdaptor.valueOf(approvalRootContentExport.getErrorFlag().value, ErrorFlagImport.class));
@@ -368,7 +372,9 @@ public class ApprovalRootStateAdapterImpl implements ApprovalRootStateAdapter {
 												y.getApproverName(),"",
 												y.getRepresenterID(),
 												y.getRepresenterName(),"",
-												y.getApprovalReason(), 0);
+												y.getApprovalReason(),
+												y.getConfirmAtr(),
+												y.getApprovalDate());
 									}).collect(Collectors.toList()));
 						}).collect(Collectors.toList());
 			approvalPhaseImport_NewMap.put(approvalRootContentExport.getKey(), appRootContentImport_News);

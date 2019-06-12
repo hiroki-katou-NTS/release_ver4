@@ -33,6 +33,8 @@ private Integer phaseOrder;
 	
 	private String approvalReason;
 	
+	private String approvalDate;
+	
 	public static ApprovalFrameForAppDto fromApprovalFrameImport(ApprovalFrameImport_New approvalFrameImport){
 		return new ApprovalFrameForAppDto(
 				approvalFrameImport.getPhaseOrder(), 
@@ -54,6 +56,7 @@ private Integer phaseOrder;
 				approvalFrameImport.getRepresenterID(),
 				approvalFrameImport.getRepresenterName(),
 				approvalFrameImport.getRepresenterMail(),
-				approvalFrameImport.getApprovalReason());
+				approvalFrameImport.getApprovalReason(),
+				approvalFrameImport.getApprovalDate() == null ? null : approvalFrameImport.getApprovalDate().toString("yyyy/MM/dd"));
 	}
 }
