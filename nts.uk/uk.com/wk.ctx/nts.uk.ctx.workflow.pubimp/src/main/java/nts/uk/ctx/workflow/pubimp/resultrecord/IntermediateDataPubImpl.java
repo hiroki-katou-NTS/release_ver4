@@ -223,7 +223,6 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 
 	@Override
 	public boolean cancel(String approverID, List<EmployeePerformParam> employeePerformLst, Integer rootType) {
-		boolean result = false;
 		String companyID = AppContexts.user().companyId();
 		RecordRootType rootTypeEnum = EnumAdaptor.valueOf(rootType, RecordRootType.class);
 		for(EmployeePerformParam employee : employeePerformLst){
@@ -240,12 +239,9 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 			// 対象日の就業実績確認状態を取得する
 			AppRootConfirm appRootConfirm = appRootInstanceService.getAppRootConfirmByDate(companyID, employeeID, date, rootTypeEnum);
 			// (中間データ版)解除する
-			result = appRootConfirmService.cleanStatus(approverID, employeeID, date, appRootInstance, appRootConfirm);
-			if(!result){
-				break;
-			}
+			appRootConfirmService.cleanStatus(approverID, employeeID, date, appRootInstance, appRootConfirm);
 		};
-		return result;
+		return true;
 	}
 
 	@Override
