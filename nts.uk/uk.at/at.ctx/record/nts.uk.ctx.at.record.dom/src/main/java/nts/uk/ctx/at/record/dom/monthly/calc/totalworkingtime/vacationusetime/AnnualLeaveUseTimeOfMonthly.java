@@ -124,4 +124,17 @@ public class AnnualLeaveUseTimeOfMonthly implements Cloneable {
 	public void addMinuteToUseTime(int minutes){
 		this.useTime = this.useTime.addMinutes(minutes);
 	}
+	
+	/**
+	 * 年休使用時間を取得する　（日指定）
+	 * @param ymd 対象日
+	 * @return 年休使用時間
+	 */
+	public AttendanceTimeMonth getUseTimeDaily(GeneralDate ymd){
+		int result = 0;
+		if (this.timeSeriesWorks.containsKey(ymd)) {
+			result = this.timeSeriesWorks.get(ymd).getAnnualLeaveUseTime().getUseTime().v();
+		}
+		return new AttendanceTimeMonth(result);
+	}
 }

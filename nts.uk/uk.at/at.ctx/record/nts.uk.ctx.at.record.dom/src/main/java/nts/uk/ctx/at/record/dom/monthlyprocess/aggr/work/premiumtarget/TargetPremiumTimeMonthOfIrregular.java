@@ -49,7 +49,8 @@ public class TargetPremiumTimeMonthOfIrregular {
 		this.targetPremiumTimeMonth = this.targetPremiumTimeMonth.addMinutes(legalTime.v());
 		
 		// 法定内残業時間を取得する
-		val legalOverTime = aggregateTotalWorkingTime.getOverTime().getLegalOverTime(datePeriod);
+		val legalOverTime = aggregateTotalWorkingTime.getOverTime().calcOverTimeForPremium(
+				datePeriod, aggregateTotalWorkingTime);
 		
 		// 変形労働勤務の月割増対象時間に残業時間を加算する
 		this.targetPremiumTimeMonth = this.targetPremiumTimeMonth.addMinutes(legalOverTime.v());

@@ -16,6 +16,7 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.OverTimeFrameTime;
 import nts.uk.ctx.at.record.dom.monthly.TimeMonthWithCalculation;
 import nts.uk.ctx.at.record.dom.monthly.calc.MonthlyAggregateAtr;
 import nts.uk.ctx.at.record.dom.monthly.calc.flex.FlexTime;
+import nts.uk.ctx.at.record.dom.monthly.calc.totalworkingtime.AggregateTotalWorkingTime;
 import nts.uk.ctx.at.record.dom.monthlyaggrmethod.legaltransferorder.LegalOverTimeTransferOrderOfAggrMonthly;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.MonAggrCompanySettings;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.MonAggrEmployeeSettings;
@@ -528,6 +529,59 @@ public class OverTimeOfMonthly implements Cloneable {
 		}
 		
 		return returnTime;
+	}
+	
+	/**
+	 * 割増対象残業時間を計算
+	 * @param datePeriod 期間
+	 * @param aggregateTotalWorkingTime 集計総労働時間
+	 * @return 法定内残業時間
+	 */
+	public AttendanceTimeMonth calcOverTimeForPremium(
+			DatePeriod datePeriod,
+			AggregateTotalWorkingTime aggregateTotalWorkingTime){
+		
+		int returnMinutes = 0;
+
+		for (val aggregateOverTime : this.aggregateOverTimeMap.values()){
+			for (val timeSeriesWork : aggregateOverTime.getTimeSeriesWorks().values()){
+				if (!datePeriod.contains(timeSeriesWork.getYmd())) continue;
+				
+				// 残業時間を合計する　（法定内残業時間．残業時間　＋　法定内残業時間．振替時間　の合計）
+				val legalOverTime = timeSeriesWork.getLegalOverTime();
+				int totalLegalOverMinutes = legalOverTime.getOverTimeWork().getTime().v();
+				totalLegalOverMinutes += legalOverTime.getTransferTime().getTime().v();
+				
+				// 大塚モードの確認
+				if (true) {
+					
+					// 法定内残業内訳年休時間の計算
+					int detailAnnualMinutes = 0;
+					{
+						// 年休と積立年休の使用時間を取得
+						int totalLeaveMinutes = 0;
+						GeneralDate ymd = timeSeriesWork.getYmd();
+						val annualLeaveUseTime = aggregateTotalWorkingTime.getVacationUseTime().getAnnualLeave();
+						totalLeaveMinutes += annualLeaveUseTime.getUseTimeDaily(ymd).v();
+						val retentionYearly = aggregateTotalWorkingTime.getVacationUseTime().getRetentionYearly();
+						totalLeaveMinutes += retentionYearly.getUseTimeDaily(ymd).v();
+						
+						// 法定内残業時間と取得した休暇時間を比較　→　比較した時間の小さい方を返す
+						detailAnnualMinutes = totalLeaveMinutes;
+						if (detailAnnualMinutes > totalLegalOverMinutes) detailAnnualMinutes = totalLegalOverMinutes;
+					}
+					
+					// 残業合計時間から計算した時間を減算する
+					totalLegalOverMinutes -= detailAnnualMinutes;
+				}
+				
+				// 残業合計時間に合計する
+				returnMinutes += totalLegalOverMinutes;
+			}
+		}
+		
+		// 残業合計時間を返す
+		return new AttendanceTimeMonth(returnMinutes);
 	}
 	
 	/**
