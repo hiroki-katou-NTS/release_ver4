@@ -98,7 +98,7 @@ module nts.uk.com.view.cmf005.b.viewmodel {
         currentCodeList: KnockoutObservableArray<any>;
         categoryDeletionList: KnockoutObservableArray<CategoryDeletion>;
         delId: KnockoutObservable<string>;
-
+        
         constructor() {
             var self = this;
             console.log("constructor");
@@ -236,7 +236,6 @@ module nts.uk.com.view.cmf005.b.viewmodel {
         public startPage(): JQueryPromise<any> {
             var self = this;
             var dfd = $.Deferred();
-
             dfd.resolve(self);
             return dfd.promise();
         }
@@ -249,25 +248,26 @@ module nts.uk.com.view.cmf005.b.viewmodel {
             //set B3_1 "ON"
             self.rdSelected = ko.observable(1);
             console.log("setDefault");
-            var date = "";
+            
             service.getSystemDate().done(function(dateToday: any) {
-                date = dateToday.referenceDate;
+                let date = dateToday.referenceDate;
                 //B6_2_2
                 self.dateValue = ko.observable({
-                    startDate: moment(date).subtract(1, "M").add(1, "d").format("YYYY/MM/DD"),
-                    endDate: moment(date).format("YYYY/MM/DD")
+                    startDate: moment.utc(date).subtract(1, "M").add(1, "d").format("YYYY/MM/DD"),
+                    endDate: moment.utc(date).format("YYYY/MM/DD")
                 });
-                self.monthValue = ko.observable({ startDate: moment(date).subtract(1, "M").add(1, "d").format("YYYY/MM"), endDate: moment(date).subtract(1, "M").add(1, "d").format("YYYY/MM") });
-                self.yearValue = ko.observable({ startDate: moment(date).subtract(1, "M").add(1, "d").format("YYYY"), endDate: moment(date).subtract(1, "M").add(1, "d").format("YYYY") });
+                self.monthValue = ko.observable({ startDate: moment.utc(date).subtract(1, "M").add(1, "d").format("YYYY/MM"), endDate: moment.utc(date).subtract(1, "M").add(1, "d").format("YYYY/MM") });
+                self.yearValue = ko.observable({ startDate: moment.utc(date).subtract(1, "M").add(1, "d").format("YYYY"), endDate: moment.utc(date).subtract(1, "M").add(1, "d").format("YYYY") });
+
             });
             
             //B6_2_2
             self.dateValue = ko.observable({
-                startDate: moment(date).subtract(1, "M").add(1, "d").format("YYYY/MM/DD"),
-                endDate: moment(date).format("YYYY/MM/DD")
+                startDate: moment.utc().subtract(1, "M").add(1, "d").format("YYYY/MM/DD"),
+                endDate: moment.utc().format("YYYY/MM/DD")
             });
-            self.monthValue = ko.observable({ startDate: moment(date).subtract(1, "M").add(1, "d").format("YYYY/MM"), endDate: moment(date).subtract(1, "M").add(1, "d").format("YYYY/MM") });
-            self.yearValue = ko.observable({ startDate: moment(date).subtract(1, "M").add(1, "d").format("YYYY"), endDate: moment(date).subtract(1, "M").add(1, "d").format("YYYY") });
+            self.monthValue = ko.observable({ startDate: moment.utc().subtract(1, "M").add(1, "d").format("YYYY/MM"), endDate: moment.utc().subtract(1, "M").add(1, "d").format("YYYY/MM") });
+            self.yearValue = ko.observable({ startDate: moment.utc().subtract(1, "M").add(1, "d").format("YYYY"), endDate: moment.utc().subtract(1, "M").add(1, "d").format("YYYY") });
             
             //B7_2_1
             self.isSaveBeforeDeleteFlg = ko.observable(model.SAVE_BEFOR_DELETE_ATR.YES);
@@ -291,16 +291,31 @@ module nts.uk.com.view.cmf005.b.viewmodel {
             });
 
             self.dateValue.subscribe(function(value) {
+                console.log(value);
+                self.dateValue = ko.observable({
+                    startDate: moment.utc(value.startDate).format("YYYY/MM/DD"),
+                    endDate: moment.utc(value.endDate).format("YYYY/MM/DD")
+                });
+                self.dateValue.valueHasMutated();
+                
                 nts.uk.ui.errors.clearAll();
                 $(".validate_form .ntsDatepicker").trigger("validate");
             });
 
             self.monthValue.subscribe(function(value) {
+                self.monthValue = ko.observable({ 
+                    startDate: moment.utc(value.startDate).format("YYYY/MM"), 
+                    endDate: moment.utc(value.endDate).format("YYYY/MM") });
+            
                 nts.uk.ui.errors.clearAll();
                 $(".validate_form .ntsDatepicker").trigger("validate");
             });
 
             self.yearValue.subscribe(function(value) {
+                self.yearValue = ko.observable({ 
+                    startDate: moment.utc(value.startDate).format("YYYY"), 
+                    endDate: moment.utc(value.endDate).format("YYYY") });
+            
                 nts.uk.ui.errors.clearAll();
                 $(".validate_form .ntsDatepicker").trigger("validate");
             });
