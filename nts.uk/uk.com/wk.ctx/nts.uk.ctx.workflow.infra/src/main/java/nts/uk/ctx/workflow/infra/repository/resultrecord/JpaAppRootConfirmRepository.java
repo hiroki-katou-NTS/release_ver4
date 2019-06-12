@@ -18,9 +18,9 @@ import org.apache.logging.log4j.util.Strings;
 
 import lombok.SneakyThrows;
 import nts.arc.enums.EnumAdaptor;
-import nts.arc.error.BusinessException;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.database.DatabaseProduct;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.time.GeneralDate;
@@ -387,7 +387,12 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		
 		CollectionUtil.split(employeeIDLst, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, employeeIDs -> {
 			
-			internalQuery(companyID, date, rootType, results, employeeIDs); 
+			if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
+			    // SQLServerの場合の処理
+				internalQueryWithIndex(companyID, date, rootType, results, employeeIDs); 
+			} else {
+				internalQuery(companyID, date, rootType, results, employeeIDs); 
+			}
 		});
 		
 		return results;
@@ -400,9 +405,40 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		sql.append("SELECT appRoot.ROOT_ID, appRoot.CID, appRoot.EMPLOYEE_ID, appRoot.RECORD_DATE, appRoot.ROOT_TYPE, ");
 		sql.append(" appRoot.YEARMONTH, appRoot.CLOSURE_ID, appRoot.CLOSURE_DAY, appRoot.LAST_DAY_FLG, ");
 		sql.append(" phase.PHASE_ORDER, phase.APP_PHASE_ATR, frame.FRAME_ORDER, frame.APPROVER_ID, frame.REPRESENTER_ID, frame.APPROVAL_DATE ");
-		sql.append(" FROM WWFDT_APP_ROOT_CONFIRM appRoot LEFT JOIN WWFDT_APP_PHASE_CONFIRM phase ");
+		sql.append(" FROM WWFDT_APP_ROOT_CONFIRM appRoot LEFT JOIN WWFDT_APP_PHASE_CONFIRM phase ");  
 		sql.append(" ON appRoot.ROOT_ID = phase.ROOT_ID ");
 		sql.append(" LEFT JOIN WWFDT_APP_FRAME_CONFIRM frame ");
+		sql.append(" ON phase.ROOT_ID = frame.ROOT_ID and phase.PHASE_ORDER = frame.PHASE_ORDER");
+		sql.append(" WHERE appRoot.CID = ? AND appRoot.ROOT_TYPE = ? AND appRoot.RECORD_DATE <= ? AND appRoot.RECORD_DATE >= ?");
+		sql.append(" AND appRoot.EMPLOYEE_ID IN (");
+		sql.append(employeeIDs.stream().map(s -> "?").collect(Collectors.joining(",")));
+		sql.append(" )");
+		
+		try (PreparedStatement statement = this.connection().prepareStatement(sql.toString())) {
+			statement.setString(1, companyID);
+			statement.setInt(2, rootType.value);
+			statement.setDate(3, Date.valueOf(date.end().localDate()));
+			statement.setDate(4, Date.valueOf(date.start().localDate()));
+			for (int i = 0; i < employeeIDs.size(); i++) {
+				statement.setString(i + 5, employeeIDs.get(i));
+			}
+			results.addAll(toDomain(new NtsResultSet(statement.executeQuery()).getList(rs -> createFullJoinAppRootConfirm(rs))));
+			
+		}
+	}
+	
+	@SneakyThrows
+	private void internalQueryWithIndex(String companyID, DatePeriod date, RecordRootType rootType, List<AppRootConfirm> results,
+			List<String> employeeIDs) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT appRoot.ROOT_ID, appRoot.CID, appRoot.EMPLOYEE_ID, appRoot.RECORD_DATE, appRoot.ROOT_TYPE, ");
+		sql.append(" appRoot.YEARMONTH, appRoot.CLOSURE_ID, appRoot.CLOSURE_DAY, appRoot.LAST_DAY_FLG, ");
+		sql.append(" phase.PHASE_ORDER, phase.APP_PHASE_ATR, frame.FRAME_ORDER, frame.APPROVER_ID, frame.REPRESENTER_ID, frame.APPROVAL_DATE ");
+		sql.append(" FROM WWFDT_APP_ROOT_CONFIRM appRoot LEFT JOIN WWFDT_APP_PHASE_CONFIRM phase ");  
+		sql.append(" with (index(WWFDP_APP_PHASE_CONFIRM)) ");
+		sql.append(" ON appRoot.ROOT_ID = phase.ROOT_ID ");
+		sql.append(" LEFT JOIN WWFDT_APP_FRAME_CONFIRM frame ");
+		sql.append(" with (index(WWFDP_APP_FRAME_CONFIRM)) ");
 		sql.append(" ON phase.ROOT_ID = frame.ROOT_ID and phase.PHASE_ORDER = frame.PHASE_ORDER");
 		sql.append(" WHERE appRoot.CID = ? AND appRoot.ROOT_TYPE = ? AND appRoot.RECORD_DATE <= ? AND appRoot.RECORD_DATE >= ?");
 		sql.append(" AND appRoot.EMPLOYEE_ID IN (");
