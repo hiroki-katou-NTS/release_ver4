@@ -64,5 +64,13 @@ public class SyEmployeeFnAcFinder implements SyEmployeeFnAdapter {
 				export.getBussinessName()
 				);
 	}
+	@Override
+	public List<String> filterSidLstByDatePeriodAndSids(List<String> sids, DatePeriod period) {
+		return syEmployeePub.filterSidLstByDatePeriodAndSids(sids, period);
+	}
+	@Override
+	public List<String> filterSidByCidAndPeriod(String cid, DatePeriod period) {
+		return syEmployeePub.filterSidByCidAndPeriod(cid, period);
+	}
 
 }

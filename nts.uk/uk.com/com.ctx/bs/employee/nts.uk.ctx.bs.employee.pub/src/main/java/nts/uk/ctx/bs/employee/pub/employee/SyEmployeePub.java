@@ -208,4 +208,11 @@ public interface SyEmployeePub {
 	List<ResultRequest600Export> getEmpInfoLstBySids(List<String> sids, DatePeriod period, boolean isDelete, boolean isGetAffCompany);
 	
 	
+	/**
+	 * 期間内に特定の会社に所属している社員一覧を取得する
+	 * @param cid
+	 * @param period
+	 * @return
+	 */
+	List<String> filterSidByCidAndPeriod(String cid, DatePeriod period);
 }

@@ -22,7 +22,7 @@ public interface EmployeeInfoPub {
 
 	/**
 	 * Get List Employee by companyId,baseDate For RequestList60
-	 *
+	 * ログイン者の会社IDの一致する全社員を取得する
 	 */
 
 	List<EmployeeInfoDtoExport> getEmployeesAtWorkByBaseDate(String companyId, GeneralDate baseDate);

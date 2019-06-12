@@ -10,4 +10,8 @@ public interface SyEmployeeFnAdapter {
 	List<String> getListEmployeeId(List<String> wkpIds, DatePeriod dateperiod);
 	
 	List<EmployeeInfoImport> getByListSid(List<String> sIds);
+	
+	List<String> filterSidLstByDatePeriodAndSids(List<String> sids, DatePeriod period);
+	
+	List<String> filterSidByCidAndPeriod(String cid, DatePeriod period);
 }

@@ -1,7 +1,9 @@
 package nts.uk.ctx.at.function.ac.employment;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -11,7 +13,10 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.function.dom.adapter.employment.EmploymentAdapter;
 import nts.uk.ctx.at.function.dom.adapter.employment.EmploymentHistoryImported;
 import nts.uk.ctx.bs.employee.pub.employee.SyEmployeePub;
+import nts.uk.ctx.bs.employee.pub.employment.EmploymentHisOfEmployee;
+import nts.uk.ctx.bs.employee.pub.employment.IEmploymentHistoryPub;
 import nts.uk.ctx.bs.employee.pub.employment.SyEmploymentPub;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class EmploymentAcFinder implements EmploymentAdapter {
@@ -23,6 +28,8 @@ public class EmploymentAcFinder implements EmploymentAdapter {
 	@Inject
 	private SyEmploymentPub empPub;
 
+	@Inject
+	private IEmploymentHistoryPub employmentHistoryPub;
 	
 	@Override
 	public String getClosure(String employeeId, GeneralDate baseDate) {
@@ -40,5 +47,18 @@ public class EmploymentAcFinder implements EmploymentAdapter {
 			return this.empPub.findSEmpHistBySid(companyId, employeeId, baseDate)
 					.map(f -> new EmploymentHistoryImported(f.getEmployeeId(), f.getEmploymentCode(), f.getPeriod()));
 	}
+
+	@Override
+	public List<String> getEmploymentBySidsAndEmploymentCds(List<String> sids,
+			List<String> employmentCodes, DatePeriod dateRange) {
+		List<EmploymentHisOfEmployee> listData = employmentHistoryPub
+				.getEmploymentBySidsAndEmploymentCds(sids, employmentCodes, dateRange).values().stream()
+				.flatMap(x -> x.stream()).collect(Collectors.toList());
+		if(listData.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return listData.stream().map(c->c.getSId()).collect(Collectors.toList());
+	}
+	
 
 }
