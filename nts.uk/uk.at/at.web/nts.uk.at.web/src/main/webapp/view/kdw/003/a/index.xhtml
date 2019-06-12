@@ -284,7 +284,7 @@
 																							constraint: 'AnnualLeaveGrantDay', 
 																							option:  optionNoOfHolidays, 
 																							required: true, 
-																							enable: canFlex() &amp;&amp; !lockDisableFlex(), 
+																							enable: canFlex() &amp;&amp; !lockDisableFlex() &amp;&amp; indentityMonth().show26, 
 																							readonly: false 
 																						} ">
                                                                 </input>
@@ -297,7 +297,7 @@
 																						value: fst.absentDeductionTime, 
 																						inputFormat: 'time', 
 																						mode: 'time', 
-																						enable: canFlex() &amp;&amp; !lockDisableFlex(), 
+																						enable: canFlex() &amp;&amp; !lockDisableFlex() &amp;&amp; indentityMonth().show26, 
 																						readonly: false, 
 																						required: true
 																					}"></input>

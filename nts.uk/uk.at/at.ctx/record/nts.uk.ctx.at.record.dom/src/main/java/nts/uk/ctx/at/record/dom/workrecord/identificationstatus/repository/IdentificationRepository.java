@@ -12,6 +12,8 @@ public interface IdentificationRepository {
 	
 	List<Identification> findByListEmployeeID(List<String> employeeIDs,GeneralDate startDate,GeneralDate endDate);
 	
+	List<Identification> findByListEmpDate(List<String> employeeIDs,GeneralDate dateRefer);
+	
 	List<Identification> findByEmployeeID(String employeeID, List<GeneralDate> dates);
 	
 	Optional<Identification> findByCode(String employeeID,GeneralDate processingYmd);

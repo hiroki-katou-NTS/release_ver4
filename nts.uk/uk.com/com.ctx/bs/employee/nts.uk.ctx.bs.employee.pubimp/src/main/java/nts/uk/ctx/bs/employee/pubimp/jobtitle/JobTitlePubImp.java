@@ -477,7 +477,7 @@ public class JobTitlePubImp implements SyJobTitlePub {
 				return this.jobTitleInfoRepository.findByJobIds(companyId, jobIds, historyId)
 						.stream().map(x ->{ 
 						return new JobTitleInfoExport(x.getCompanyId().v(), x.getJobTitleHistoryId(), x.isManager(), 
-								x.getJobTitleId(), x.getJobTitleCode().v(), x.getJobTitleName().v(), x.getSequenceCode().v());})
+								x.getJobTitleId(), x.getJobTitleCode().v(), x.getJobTitleName().v(), x.getSequenceCode() != null ? x.getSequenceCode().v() : null);})
 						.collect(Collectors.toList());
     }
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,7 @@ public class ConfirmStatusActualDay {
 	
 	@Inject
 	private IFindDataDCRecord iFindDataDCRecord;
-
+	
 	/**
 	 * 日の実績の確認状況を取得する
 	 */
@@ -259,4 +260,157 @@ public class ConfirmStatusActualDay {
 //	  GeneralDate endDate = periodNeedMerge.end().beforeOrEquals(periodCheck.end()) ? periodNeedMerge.end() : periodCheck.end();
 //      return new DatePeriod(startDate, endDate);
 //  }
+	/**
+	 * [No.606]社員リストと基準日から日の実績の確認状況を取得する
+	 */
+	public List<ConfirmStatusActualResult> processConfirmStatus(String companyId, List<String> employeeIds,
+			GeneralDate dateRefer, Integer closureId) {
+		// ドメインモデル「本人確認処理の利用設定」を取得する
+		List<ConfirmStatusActualResult> lstResult = new ArrayList<>();
+		Optional<IdentityProcessUseSet> optIndentity = iFindDataDCRecord.findIdentityByKey(companyId);
+		if (!optIndentity.isPresent() || !optIndentity.get().isUseConfirmByYourself() || closureId == null)
+			return new ArrayList<>();
+
+		List<ConfirmStatusActualResult> lstResultEmpTemp = new ArrayList<>(), lstResultEmpTemp1 = new ArrayList<>(),
+				lstResultEmpTemp2 = new ArrayList<>();
+
+		List<Identification> indentities = identificationRepository.findByListEmpDate(employeeIds, dateRefer);
+		// set checkbox
+		// 取得した情報からパラメータ「日の実績の確認状況」を生成する
+		List<ConfirmStatusActualResult> lstResultChild = indentities.stream().map(x -> {
+			return new ConfirmStatusActualResult(x.getEmployeeId(), x.getProcessingYmd(), true);
+		}).collect(Collectors.toList());
+
+		lstResultEmpTemp.addAll(lstResultChild);
+
+		List<String> lstEmpId = new ArrayList<>();
+		lstEmpId.addAll(lstResultChild.stream().map(y -> y.getEmployeeId()).collect(Collectors.toList()));
+		// indentities.
+		employeeIds.stream().filter(emp -> !lstEmpId.contains(emp)).forEach(z -> {
+			lstResultEmpTemp.add(new ConfirmStatusActualResult(z, dateRefer, false));
+		});
+
+		// ドメインモデル「締め」を取得する
+		Optional<Closure> closure = closureRepo.findById(companyId, closureId);
+		if (!closure.isPresent())
+			return new ArrayList<>();
+
+		// 指定した年月日時点の締め期間を取得する
+		Optional<ClosurePeriod> closurePeriodOpt = closure.get().getClosurePeriodByYmd(dateRefer);
+		if (!closurePeriodOpt.isPresent())
+			return new ArrayList<>();
+
+		// ドメインモデル「承認処理の利用設定」を取得する
+		Optional<ApprovalProcessingUseSetting> approvalUseSettingOpt = iFindDataDCRecord
+				.findApprovalByCompanyId(companyId);
+
+		lstResultEmpTemp2 = lstResultEmpTemp;
+
+		if (!approvalUseSettingOpt.isPresent() || !approvalUseSettingOpt.get().getUseMonthApproverConfirm()) {
+			lstResultEmpTemp2 = lstResultEmpTemp2.stream().map(x -> {
+				x.setPermission(true, true);
+				return x;
+			}).collect(Collectors.toList());
+			// 取得した「本人確認処理の利用設定．月の本人確認を利用する」をチェックする
+			lstResultEmpTemp1.addAll(updatePermission(companyId, employeeIds, optIndentity.get(),
+					closurePeriodOpt.get(), lstResultEmpTemp2));
+		} else {
+			DatePeriod mergePeriod = closurePeriodOpt.get().getPeriod();
+			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
+			List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
+					.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(mergePeriod.end()), employeeIds,
+							2);
+            Map<String, ApproveRootStatusForEmpImport> mapApprovalStatus  = lstApprovalStatus.stream().collect(Collectors.toMap(x -> x.getEmployeeID(), x -> x, (x, y) -> x));
+			//val approvalStatusMonth = lstApprovalStatus.isEmpty() ? null : lstApprovalStatus.stream().get(0);
+			val lstEmpDateUnApproval = lstResultEmpTemp2.stream().filter(x -> {
+				val approvalStatusMonth = mapApprovalStatus.isEmpty() ? null : mapApprovalStatus.get(x.getEmployeeId());
+				if (approvalStatusMonth == null)
+					return true;
+				val value = x.getEmployeeId().equals(approvalStatusMonth.getEmployeeID())
+						? approvalStatusMonth.getApprovalStatus()
+						: null;
+				if (value != null && value == ApprovalStatusForEmployee.UNAPPROVED)
+					return true;
+				else
+					return false;
+			}).map(x -> {
+				x.setPermission(true, true);
+				return x;
+			}).collect(Collectors.toList());
+
+			lstResultEmpTemp1.addAll(updatePermission(companyId, employeeIds, optIndentity.get(),
+					closurePeriodOpt.get(), lstEmpDateUnApproval));
+
+			// list emp date Approval
+			val lstEmpDateApproval = lstResultEmpTemp2.stream().filter(x -> {
+				val approvalStatusMonth = mapApprovalStatus.isEmpty() ? null : mapApprovalStatus.get(x.getEmployeeId());
+				val value = (approvalStatusMonth != null
+						&& x.getEmployeeId().equals(approvalStatusMonth.getEmployeeID()))
+								? approvalStatusMonth.getApprovalStatus()
+								: null;
+				if (value != null && value != ApprovalStatusForEmployee.UNAPPROVED)
+					return true;
+				else
+					return false;
+			}).map(x -> {
+				x.setPermission(true, false);
+				return x;
+			}).collect(Collectors.toList());
+
+			lstResultEmpTemp1.addAll(lstEmpDateApproval);
+		}
+
+		// 取得した「承認処理の利用設定．日の承認者確認を利用する」をチェックする true
+		if (approvalUseSettingOpt.isPresent() && approvalUseSettingOpt.get().getUseDayApproverConfirm()) {
+			List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
+					.getApprovalByListEmplAndListApprovalRecordDateNew(
+							closurePeriodOpt.get().getPeriod().datesBetween(), employeeIds, 1);
+			val mapApprovalStatus = lstApprovalStatus.stream().collect(
+					Collectors.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus()));
+			// lstResultEmpTemp3 =
+			lstResultEmpTemp1.forEach(x -> {
+				if (mapApprovalStatus == null) {
+					x.setPermission(true, true);
+				} else {
+					val temp = mapApprovalStatus.get(Pair.of(x.getEmployeeId(), x.getDate()));
+					if (temp != null) {
+						if (x.getPermissionRelease() == ReleasedAtr.CAN_IMPLEMENT
+								&& temp == ApprovalStatusForEmployee.UNAPPROVED) {
+							x.setPermission(true, true);
+						} else {
+							x.setPermission(true, false);
+						}
+					}
+				}
+			});
+		}
+
+		lstResult.addAll(lstResultEmpTemp1);
+
+		return lstResult;
+	}
+
+	private List<ConfirmStatusActualResult> updatePermission(String companyId, List<String> employeeIds,
+			IdentityProcessUseSet identityProcessUseSet, ClosurePeriod mergePeriodClr,
+			List<ConfirmStatusActualResult> lstResult) {
+		lstResult = lstResult.stream().filter(x -> x.getDate().afterOrEquals(mergePeriodClr.getPeriod().start())
+				&& x.getDate().beforeOrEquals(mergePeriodClr.getPeriod().end())).collect(Collectors.toList());
+		if (!identityProcessUseSet.isUseIdentityOfMonth()) {
+			return lstResult.stream().map(x -> {
+				x.setPermission(true, true);
+				return x;
+			}).collect(Collectors.toList());
+		} else {
+
+			List<ConfirmationMonth> lstConfirmMonth = confirmationMonthRepository.findBySomeProperty(employeeIds,
+					mergePeriodClr.getYearMonth().v(), mergePeriodClr.getClosureDate().getClosureDay().v(),
+					mergePeriodClr.getClosureDate().getLastDayOfMonth(), mergePeriodClr.getClosureId().value);
+			Map<String, ConfirmationMonth> mapConfirmMonth = lstConfirmMonth.stream()
+					.collect(Collectors.toMap(x -> x.getEmployeeId(), x -> x, (x, y) -> x));
+			return lstResult.stream().map(x -> {
+				x.setPermission(true, !mapConfirmMonth.containsKey(x.getEmployeeId()));
+				return x;
+			}).collect(Collectors.toList());
+		}
+	}
 }

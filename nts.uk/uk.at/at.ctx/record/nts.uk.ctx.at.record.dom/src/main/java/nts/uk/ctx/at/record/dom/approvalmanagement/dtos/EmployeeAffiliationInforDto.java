@@ -32,6 +32,10 @@ public class EmployeeAffiliationInforDto {
 	
 	/** 階層コード */
 	public String hierarchyCd;
+	
+	public String positionCd;
+	
+	public int order;
 
 	public EmployeeAffiliationInforDto(String employeeID, String employeeCode, String workPlaceID, String positionID,
 			String employmentInforCode, String classificationCode) {

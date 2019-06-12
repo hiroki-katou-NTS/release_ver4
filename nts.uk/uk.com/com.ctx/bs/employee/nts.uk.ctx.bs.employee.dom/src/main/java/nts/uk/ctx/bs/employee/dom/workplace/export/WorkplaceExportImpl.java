@@ -2,6 +2,7 @@ package nts.uk.ctx.bs.employee.dom.workplace.export;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,16 +67,11 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 			results.add(new WkpInfoDto(wkpInfo.getWorkplaceId(), wkpInfo.getHierarchyCode().v()));
 		});
 		// 階層コード ASC
-		results.sort((s1, s2) -> {
-			if (s1.getHierarchyCd() == null) {
-				return -1;
-			} else if (s2.getHierarchyCd() == null) {
-				return 1;
-			}
-			return s1.getHierarchyCd().compareTo(s2.getHierarchyCd());
-		});
+		List<WkpInfoDto> newResults = results.stream()
+				.sorted(Comparator.comparing(WkpInfoDto::getHierarchyCd, Comparator.nullsLast(String::compareTo)))
+				.collect(Collectors.toList());
 
-		return results;
+		return newResults;
 	}
 
 	@Override
@@ -120,15 +116,10 @@ public class WorkplaceExportImpl implements WorkplaceExport {
 			});
 		}
 		// 階層コード ASC
-		results.sort((s1, s2) -> {
-			if (s1.getHierarchyCd() == null) {
-				return -1;
-			} else if (s2.getHierarchyCd() == null) {
-				return 1;
-			}
-			return s1.getHierarchyCd().compareTo(s2.getHierarchyCd());
-		});
+		List<WkpInfoDto> newResults = results.stream()
+				.sorted(Comparator.comparing(WkpInfoDto::getHierarchyCd, Comparator.nullsLast(String::compareTo)))
+				.collect(Collectors.toList());
 
-		return results;
+		return newResults;
 	}
 }

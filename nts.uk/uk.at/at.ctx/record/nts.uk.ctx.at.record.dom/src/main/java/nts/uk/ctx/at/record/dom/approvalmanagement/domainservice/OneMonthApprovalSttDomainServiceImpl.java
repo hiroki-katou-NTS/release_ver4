@@ -5,6 +5,7 @@ package nts.uk.ctx.at.record.dom.approvalmanagement.domainservice;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 //import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -343,6 +344,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			List<EmployeeDto> listEmployeeInfo = atEmployeeAdapter.getByListSID(employeeList);
 
 			// 取得した社員所属情報と社員コード情報から「社員所属情報」＜List＞を作成する
+			// 取得した社員所属情報と社員コード情報から「社員所属情報」＜List＞を作成する Start ↓
 			List<EmployeeAffiliationInforDto> listEmpAffInfo = new ArrayList<>();
 			for (EmployeeDto empQ : listEmployeeInfo) {
 				EmployeeAffiliationInforDto approvalEmployee = new EmployeeAffiliationInforDto();
@@ -367,9 +369,10 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 						.getExWorkPlaceHistoryImports().stream().filter(o -> o.getEmployeeId().equals(empQ.getSid()))
 						.findFirst().get();
 				approvalEmployee.setWorkPlaceID(exWorkPlaceHistoryImport.getWorkplaceItems().get(0).getWorkplaceId());
-
+				 
 				listEmpAffInfo.add(approvalEmployee);
 			}
+			// End ↑
 
 			// 社員を並び替える
 
@@ -387,7 +390,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 					lstWorkplaceIds, datePeriod.end());
 
 			// 職位IDから職位を取得する
-			// ドメインモデル「職位」を取得する
+			// ドメインモデル「職位」を取得する Start ↓
 			List<String> lstPositionIds = new ArrayList<>();
 			for (EmployeeAffiliationInforDto approvalId : listEmpAffInfo) {
 				if (!lstPositionIds.contains(approvalId.positionID)) {
@@ -396,7 +399,9 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			}
 			List<JobTitleExport> jobTitleExport = this.configInfoAdapter.findAllById(companyId, lstPositionIds,
 					datePeriod.end());
-			// ドメインモデル「職位情報」を取得する
+			// End ↑
+			
+			// ドメインモデル「職位情報」を取得する Start ↓
 			List<JobTitleHistoryExport> lstJobHis = new ArrayList<>();
 			jobTitleExport.forEach(x -> {
 				lstJobHis.addAll(x.getJobTitleHistories());
@@ -408,31 +413,59 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 						historyId);
 				jobTitleInfoImports.addAll(jobTitleInfos);
 			}
+			// End ↑
 
-			// ドメインモデル「序列」をすべて取得する(Lấy tất cả Domain Model 「序列」)
+			// ドメインモデル「序列」をすべて取得する(Lấy tất cả Domain Model 「序列」) Start ↓
 			if (!jobTitleInfoImports.isEmpty()) {
-				String sequenceCode = jobTitleInfoImports.get(0).getSequenceCode();
-				Map<String, Integer> masterImports = this.infoAdapter.findAll(companyId, sequenceCode).stream().collect(
-						Collectors.toMap(SequenceMasterImport::getSequenceCode, SequenceMasterImport::getOrder));
+				Map<String, Integer> lstMasterImports = new HashMap<>();
+				for (JobTitleInfoImport jobTitleInfo : jobTitleInfoImports) {
+					String sequenceCode = jobTitleInfo.getSequenceCode();
+					Map<String, Integer> masterImports = this.infoAdapter.findAll(companyId, sequenceCode).stream()
+							.collect(Collectors.toMap(SequenceMasterImport::getSequenceCode,
+									SequenceMasterImport::getOrder));
+					lstMasterImports.putAll(masterImports);
+				}
+				// End ↑
 				// 取得したドメインモデル「職位情報」をドメインモデル「序列．並び順」で並び替える
 				jobTitleInfoImports.forEach(e -> {
-					if (masterImports.containsKey(e.getSequenceCode())) {
-						e.setOrder(masterImports.get(e.getSequenceCode()));
+					if (lstMasterImports.containsKey(e.getSequenceCode())) {
+						e.setOrder(lstMasterImports.get(e.getSequenceCode()));
 					}
 				});
 				jobTitleInfoImports.sort((e1, e2) -> e2.getOrder() - e1.getOrder());
-				// List<JobTitleInfoImport> sortByCode =
 				// this.sortByOder(jobTitleInfoImports, masterImports);
-
-				Map<String, String> jobTitleCD = jobTitleInfoImports.stream().collect(
-						Collectors.toMap(JobTitleInfoImport::getJobTitleId, JobTitleInfoImport::getSequenceCode));
+				// Set SequenceCode from positionID
+				List<String> lstSequenceCode = new ArrayList<>();
+				for (EmployeeAffiliationInforDto affiliationInforDto : listEmpAffInfo){
+					String sequenceCd = affiliationInforDto.getSequenceCode();
+					if(sequenceCd != null){
+						lstSequenceCode.add(sequenceCd);
+					}
+				}
+				
+				
+				Map<String, List<JobTitleInfoImport>> sequenceCode = jobTitleInfoImports.stream().collect(Collectors.groupingBy(x -> x.getJobTitleId()));
 				listEmpAffInfo.forEach(e -> {
-					if (jobTitleCD.containsKey(e.getPositionID())) {
-						e.setSequenceCode(jobTitleCD.get(e.getPositionID()));
+						e.setSequenceCode(sequenceCode.get(e.getPositionID()).get(0).getSequenceCode());
+				});
+				
+				listEmpAffInfo.forEach(e -> {
+					if (lstMasterImports.containsKey(e.getSequenceCode())) {
+						e.setOrder(lstMasterImports.get(e.getSequenceCode()));
+					}
+				});
+				listEmpAffInfo.sort((e1, e2) -> e2.getOrder() - e1.getOrder());
+				// Set PositionCode from positionID
+				Map<String, String> positionCode = jobTitleInfoImports.stream().collect(
+						Collectors.toMap(JobTitleInfoImport::getJobTitleId, JobTitleInfoImport::getJobTitleCode));
+				listEmpAffInfo.forEach(e -> {
+					if (positionCode.containsKey(e.getPositionID())) {
+						e.setPositionCd(positionCode.get(e.getPositionID()));
 					}
 				});
 			}
 
+			// Get HierarchyCD
 			List<String> lsthierarchyCD = new ArrayList<>();
 			for (WorkplaceExportImport hierarchyCD : exportImports) {
 				String positionId = hierarchyCD.getHierarchyCd();
@@ -450,13 +483,20 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			}
 			Comparator<String> strcmp = Comparator.nullsLast(Comparator.naturalOrder());
 			// INPUT．「並び替える条件」を並び替える
+				// 1.職場：階層コード（ASC）
+				// 2.雇用：雇用コード（ASC）
+				// 3.分類：分類コード（ASC）
+				// 4.職位：序列．並び順（ASC）　⇒　職位コード（ASC）
+				// 5.社員コード：社員コード（ASC）
 			List<EmployeeAffiliationInforDto> listEmpAffInfos = listEmpAffInfo.stream()
 					.sorted(Comparator.comparing(EmployeeAffiliationInforDto::getHierarchyCd, strcmp)
 							.thenComparing(EmployeeAffiliationInforDto::getEmploymentInforCode, strcmp)
 							.thenComparing(EmployeeAffiliationInforDto::getClassificationCode, strcmp)
 							.thenComparing(EmployeeAffiliationInforDto::getSequenceCode, strcmp)
+							.thenComparing(EmployeeAffiliationInforDto::getPositionCd, strcmp)
 							.thenComparing(EmployeeAffiliationInforDto::getEmployeeCode, strcmp))
 					.collect(Collectors.toList());
+			// 並び替えた後の「社員所属情報」を返す
 			listEmpAffInfos.forEach(x -> {
 				lstEmployees.add(x.getEmployeeID());
 			});
