@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -280,6 +281,7 @@ public class DailyModifyResCommandFacade {
 		DataResultAfterIU dataResultAfterIU = new DataResultAfterIU();
 		Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> lstResultReturnDailyError = new HashMap<>();
 		boolean hasErrorRow = false;
+		boolean errorBeforeCalc = false, errorAfterCalc = false, errorMonthAfterCalc = false;
 		boolean flagTempCalc = dataParent.isFlagCalculation();
 		dataParent.setFlagCalculation(false);
 		// insert flex
@@ -325,7 +327,10 @@ public class DailyModifyResCommandFacade {
 			dataParent.setDataCheckSign(dataParent.getDataCheckSign().stream().filter(x -> dataParent.getLstSidDateDomainError().contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
 			dataParent.setDataCheckApproval(dataParent.getDataCheckApproval().stream().filter(x -> dataParent.getLstSidDateDomainError().contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
 			int sizeAllAfter = dataParent.getDailyEdits().size();
-			if(sizeAll > sizeAllAfter) hasErrorRow = true;
+			if(sizeAll > sizeAllAfter) {
+				hasErrorRow = true;
+				errorBeforeCalc = true;
+			}
 		}
 		
 		Map<Pair<String, GeneralDate>, List<DPItemValue>> mapSidDate = dataParent.getItemValues().stream()
@@ -375,7 +380,8 @@ public class DailyModifyResCommandFacade {
 		//計算フラグをチェックする
 		if (!dataParent.isFlagCalculation() || (dataParent.isFlagCalculation()  && dataParent.isErrorAllSidDate())) {
 			Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> lstResultTemp = new HashMap<>();
-			mapSidDate.entrySet().forEach(x -> {
+//			mapSidDate.entrySet().forEach(x -> {
+			for(Entry<Pair<String, GeneralDate>, List<DPItemValue>> x : mapSidDate.entrySet()) {
 				//計算前エラーチェック
 				// check error care item
 				List<DPItemValue> itemErrors = new ArrayList<>();
@@ -405,9 +411,11 @@ public class DailyModifyResCommandFacade {
 					if(!itemInputErors.isEmpty()) errorTemp.put(TypeError.COUPLE.value, itemInputErors);
 					if(!itemInputError28.isEmpty()) errorTemp.put(TypeError.ITEM28.value, itemInputError28);
 					if(!itemInputWorkType.isEmpty()) errorTemp.put(TypeError.NOT_FOUND_WORKTYPE.value, itemInputWorkType);
+					errorBeforeCalc = true;
 					lstResultTemp.put(x.getKey(), new ResultReturnDCUpdateData(x.getKey().getLeft(), x.getKey().getRight(), errorTemp));
 				}
-			});
+//			});
+			}
 			lstResultReturnDailyError.putAll(lstResultTemp);
 		}
 		
@@ -513,6 +521,7 @@ public class DailyModifyResCommandFacade {
 							                                                  dataParent.getItemValues().stream().filter(x -> !lstResultReturnDailyError.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
 					boolean hasError = errorCheck.getHasError();
 					if(hasError) {
+						errorAfterCalc = true;
 						resultErrorMonth = errorCheck.getResultErrorMonth();
 						lstResultReturnDailyError.putAll(errorCheck.getResultError());
 						dataResultAfterIU.setErrorMap(resultErrorMonth);
@@ -587,10 +596,11 @@ public class DailyModifyResCommandFacade {
 				//processCalcMonth
 				RCDailyCorrectionResult resultMonth = this.handler.processCalcMonth(commandNew, commandOld, resultIU.getLstDailyDomain(), dailyItems, true, monthParam, dataParent.getMode());
 				
-				//月次登録処理
-				this.insertAllData.handlerInsertAllMonth(resultMonth.getLstMonthDomain(), monthParam);
-				
 				ErrorAfterCalcDaily errorMonth = checkErrorAfterCalcMonth(resultMonth, monthParam, resultOlds, dataParent.getMode(), dataParent.getMonthValue(), dataParent.getDateRange());
+				
+				//月次登録処理
+				errorMonthAfterCalc = errorMonth.getHasError();
+				if(!errorBeforeCalc && !errorAfterCalc && !errorMonthAfterCalc) this.insertAllData.handlerInsertAllMonth(resultMonth.getLstMonthDomain(), monthParam);
 				//dataResultAfterIU.setErrorMap(errorMonth.getResultError());
 				dataResultAfterIU.setFlexShortage(errorMonth.getFlexShortage());
 				
