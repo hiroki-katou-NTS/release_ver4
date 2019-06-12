@@ -37,22 +37,17 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 	}
 
 	@Override
-	public boolean afterGobackReflect(GobackReflectParameter para) {
-		try {
-			WorkInfoOfDailyPerformance dailyInfor = workRepository.find(para.getEmployeeId(), para.getDateData()).get();
-			//予定勤種・就時の反映
-			AppReflectRecordWork chkTimeTypeChe = afterWorkTimeType.workTimeAndTypeScheReflect(para, dailyInfor);
-			//予定時刻の反映
-			dailyInfor = afterScheTime.reflectScheTime(para, chkTimeTypeChe.isChkReflect(), chkTimeTypeChe.getDailyInfo());
-			//勤種・就時の反映
-			AppReflectRecordWork reflectWorkTypeTime = timeTypeSche.reflectRecordWorktimetype(para, dailyInfor);
-			workRepository.updateByKeyFlush(reflectWorkTypeTime.getDailyInfo());
-			//時刻の反映
-			scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect());
-			commonService.calculateOfAppReflect(null, para.getEmployeeId(), para.getDateData(), false);
-			return true;
-		} catch (Exception ex) {
-			return false;
-		}
+	public void afterGobackReflect(GobackReflectParameter para) {
+		WorkInfoOfDailyPerformance dailyInfor = workRepository.find(para.getEmployeeId(), para.getDateData()).get();
+		//予定勤種・就時の反映
+		AppReflectRecordWork chkTimeTypeChe = afterWorkTimeType.workTimeAndTypeScheReflect(para, dailyInfor);
+		//予定時刻の反映
+		dailyInfor = afterScheTime.reflectScheTime(para, chkTimeTypeChe.isChkReflect(), chkTimeTypeChe.getDailyInfo());
+		//勤種・就時の反映
+		AppReflectRecordWork reflectWorkTypeTime = timeTypeSche.reflectRecordWorktimetype(para, dailyInfor);
+		workRepository.updateByKeyFlush(reflectWorkTypeTime.getDailyInfo());
+		//時刻の反映
+		scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect());
+		commonService.calculateOfAppReflect(null, para.getEmployeeId(), para.getDateData(), false);
 	}
 }

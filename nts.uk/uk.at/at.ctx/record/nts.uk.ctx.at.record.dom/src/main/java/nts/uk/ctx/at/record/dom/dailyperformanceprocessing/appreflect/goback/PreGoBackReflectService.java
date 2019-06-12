@@ -17,6 +17,6 @@ public interface PreGoBackReflectService {
 	 * @param para
 	 * @return
 	 */
-	public boolean afterGobackReflect(GobackReflectParameter para);
+	public void afterGobackReflect(GobackReflectParameter para);
 
 }

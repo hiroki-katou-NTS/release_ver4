@@ -148,7 +148,7 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 		if(isPre) {
 			recordPub.preOvertimeReflect(preOvertimePara);	
 		} else {
-			recordPub.afterOvertimeReflect(preOvertimePara);
+			//recordPub.afterOvertimeReflect(preOvertimePara);
 		}
 	}
 

@@ -27,8 +27,7 @@ public class AfterOvertimeReflectServiceImpl implements AfterOvertimeReflectServ
 	@Inject
 	private CommonProcessCheckService commonService;
 	@Override
-	public boolean reflectAfterOvertime(OvertimeParameter overtimePara) {
-		try {
+	public void reflectAfterOvertime(OvertimeParameter overtimePara) {
 			WorkInfoOfDailyPerformance dailyInfor = workRepository.find(overtimePara.getEmployeeId(), overtimePara.getDateInfo()).get();
 			//予定勤種・就時の反映
 			dailyInfor = afterOverTimeReflect.checkScheReflect(overtimePara, dailyInfor);
@@ -69,11 +68,6 @@ public class AfterOvertimeReflectServiceImpl implements AfterOvertimeReflectServ
 			//日別実績の修正からの計算
 			//○日別実績を置き換える Replace daily performance		
 			commonService.calculateOfAppReflect(null, overtimePara.getEmployeeId(), overtimePara.getDateInfo(), false);
-			return true;
-			
-		} catch (Exception e) {
-			return false;
-		}
 		
 	}
 }

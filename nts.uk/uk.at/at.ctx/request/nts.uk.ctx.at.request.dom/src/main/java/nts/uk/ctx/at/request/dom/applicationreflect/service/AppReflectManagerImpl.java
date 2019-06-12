@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.eclipse.persistence.exceptions.OptimisticLockException;
 import nts.arc.time.GeneralDate;
+import nts.arc.time.GeneralDateTime;
 import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.Application_New;
@@ -203,6 +204,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				if(scheRef) {
 					appInfor.getReflectionInformation().setStateReflection(ReflectedState_New.REFLECTED);
 					appInfor.getReflectionInformation().setNotReason(Optional.of(ReasonNotReflect_New.WORK_CONFIRMED));	
+					appInfor.getReflectionInformation().setDateTimeReflection(Optional.of(GeneralDateTime.now()));
 				}
 			}
 			//勤務実績へ反映処理(xử lý phản ảnh thành tích thực chuyên cần)
@@ -219,6 +221,8 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			if(isWorkRecor) {
 				appInfor.getReflectionInformation().setStateReflectionReal(ReflectedState_New.REFLECTED);
 				appInfor.getReflectionInformation().setNotReasonReal(Optional.of(ReasonNotReflectDaily_New.ACTUAL_CONFIRMED));
+				appInfor.getReflectionInformation().setDateTimeReflectionReal(Optional.of(GeneralDateTime.now()));
+				
 			}
 			if(isWorkRecor || scheRef) {
 				List<GeneralDate> lstDate = new ArrayList<>();
@@ -239,18 +243,20 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
 			if(!isError) {
 				throw ex;
-			}
+			}		
 			if(excLogId != "") {
 				proRecord.createLogError(appInfor.getEmployeeID(), appInfor.getAppDate(), excLogId);	
-			}			
+			}
 			int newCountRerun = currentRecord + 1;
 			if (newCountRerun == 10) {
 				throw ex;
 			}
 			try {
-				Thread.sleep(newCountRerun * 50);
-				reflectEmployeeOfApp(appInfor, reflectSetting, execuTionType, excLogId, newCountRerun);
-			} catch (InterruptedException e){}			
+				Thread.sleep(newCountRerun * 50);				
+			} catch (InterruptedException e){
+				throw ex;
+			}	
+			reflectEmployeeOfApp(appInfor, reflectSetting, execuTionType, excLogId, newCountRerun);
 		}
 	}	
 	private WorkChangeCommonReflectPara getWorkChange(Application_New appInfor, AppWorkChange workChange,

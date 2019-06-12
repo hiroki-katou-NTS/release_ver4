@@ -165,7 +165,12 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		krqdtApplication.appReason = application.getAppReason().v();
 		krqdtApplication.stateReflection = application.getReflectionInformation().getStateReflection().value;
 		krqdtApplication.stateReflectionReal = application.getReflectionInformation().getStateReflectionReal().value;
-		krqdtApplication.notReasonReal = application.getReflectionInformation().getNotReasonReal().isPresent() ? application.getReflectionInformation().getNotReasonReal().get().value : null;
+		krqdtApplication.notReasonReal = application.getReflectionInformation().getNotReasonReal().isPresent() ? 
+				application.getReflectionInformation().getNotReasonReal().get().value : krqdtApplication.notReasonReal;
+		krqdtApplication.dateTimeReflection = application.getReflectionInformation().getDateTimeReflection().isPresent() ?
+						application.getReflectionInformation().getDateTimeReflection().get() : krqdtApplication.dateTimeReflection;
+		krqdtApplication.dateTimeReflectionReal = application.getReflectionInformation().getDateTimeReflectionReal().isPresent() ?
+						application.getReflectionInformation().getDateTimeReflectionReal().get() : krqdtApplication.dateTimeReflectionReal;
 		this.commandProxy().update(krqdtApplication);
 		this.getEntityManager().flush();
 	}
