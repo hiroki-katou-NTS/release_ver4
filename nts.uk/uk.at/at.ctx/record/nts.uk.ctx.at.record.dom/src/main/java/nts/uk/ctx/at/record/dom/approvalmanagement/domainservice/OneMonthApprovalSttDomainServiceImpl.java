@@ -428,11 +428,14 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 				// End ↑
 				// 取得したドメインモデル「職位情報」をドメインモデル「序列．並び順」で並び替える
 				jobTitleInfoImports.forEach(e -> {
-					if (lstMasterImports.containsKey(e.getSequenceCode())) {
-						e.setOrder(lstMasterImports.get(e.getSequenceCode()));
-					}
+						if(lstMasterImports.containsKey(e.getSequenceCode()) && e.getSequenceCode() != null){
+							e.setOrder(lstMasterImports.get(e.getSequenceCode()));	
+						} else {
+							// If can't find then set order is last
+							e.setOrder(999);
+						}
 				});
-				jobTitleInfoImports.sort((e1, e2) -> e2.getOrder() - e1.getOrder());
+				jobTitleInfoImports.sort((e1, e2) -> e1.getOrder() - e2.getOrder());
 				// this.sortByOder(jobTitleInfoImports, masterImports);
 				// Set SequenceCode from positionID
 				List<String> lstSequenceCode = new ArrayList<>();
@@ -450,11 +453,13 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 				});
 				
 				listEmpAffInfo.forEach(e -> {
-					if (lstMasterImports.containsKey(e.getSequenceCode())) {
+					if (lstMasterImports.containsKey(e.getSequenceCode()) && e.getSequenceCode() != null ) {
 						e.setOrder(lstMasterImports.get(e.getSequenceCode()));
+					} else {
+						e.setOrder(999);
 					}
 				});
-				listEmpAffInfo.sort((e1, e2) -> e2.getOrder() - e1.getOrder());
+				listEmpAffInfo.sort((e1, e2) -> e1.getOrder() - e2.getOrder());
 				// Set PositionCode from positionID
 				Map<String, String> positionCode = jobTitleInfoImports.stream().collect(
 						Collectors.toMap(JobTitleInfoImport::getJobTitleId, JobTitleInfoImport::getJobTitleCode));
@@ -492,7 +497,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 					.sorted(Comparator.comparing(EmployeeAffiliationInforDto::getHierarchyCd, strcmp)
 							.thenComparing(EmployeeAffiliationInforDto::getEmploymentInforCode, strcmp)
 							.thenComparing(EmployeeAffiliationInforDto::getClassificationCode, strcmp)
-							.thenComparing(EmployeeAffiliationInforDto::getSequenceCode, strcmp)
+							.thenComparing(EmployeeAffiliationInforDto::getOrder)
 							.thenComparing(EmployeeAffiliationInforDto::getPositionCd, strcmp)
 							.thenComparing(EmployeeAffiliationInforDto::getEmployeeCode, strcmp))
 					.collect(Collectors.toList());
