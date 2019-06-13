@@ -1071,7 +1071,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 			String companyID) {
 		String loginSID = AppContexts.user().employeeId();
 		GeneralDate baseDate = GeneralDate.today();
-		String SELECT = "SELECT * FROM ( " + "SELECT APS.ROOT_STATE_ID AS ROOT_STATE_ID,APS.PHASE_ORDER AS PHASE_ORDER "
+		String SELECT = "SELECT COUNT (*) FROM ( " + "SELECT APS.ROOT_STATE_ID AS ROOT_STATE_ID,APS.PHASE_ORDER AS PHASE_ORDER "
 				+ "FROM WWFDT_APPROVER_STATE APS " + "INNER JOIN " + "WWFDT_APPROVAL_FRAME AF "
 				+ "ON APS.ROOT_STATE_ID = AF.ROOT_STATE_ID " + "AND APS.PHASE_ORDER = AF.PHASE_ORDER "
 				+ "AND APS.FRAME_ORDER = AF.FRAME_ORDER " + "WHERE APS.CID = ? " + "AND APS.APPROVER_CHILD_ID = ? "
