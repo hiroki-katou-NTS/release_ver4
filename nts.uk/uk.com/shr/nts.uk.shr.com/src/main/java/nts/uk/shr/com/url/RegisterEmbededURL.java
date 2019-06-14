@@ -1,6 +1,7 @@
 package nts.uk.shr.com.url;
 
 import java.util.List;
+import java.util.Optional;
 
 import nts.arc.time.GeneralDateTime;
 
@@ -46,10 +47,12 @@ public interface RegisterEmbededURL {
 	 * @param employeeId
 	 * @param loginId
 	 * @param taskIncidental
+	 * @param companyId 会社ID（Optional）
 	 * @return 埋込用URL
 	 */
 	public String embeddedUrlInfoRegis(String programId, String screenId, Integer periodCls, Integer numOfPeriod, 
-			String employeeId, String contractCD, String loginId, String employeeCD, Integer isCompanyNotLogin, List<UrlTaskIncre> taskIncidental);
+			String employeeId, String contractCD, String loginId, String employeeCD, Integer isCompanyNotLogin,
+			List<UrlTaskIncre> taskIncidental, Optional<String> companyId);
 	// アルゴリズム「埋込URL有効期限取得」を実行する
 	/**
 	 * アルゴリズム「埋込URL有効期限取得」を実行する

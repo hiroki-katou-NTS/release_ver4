@@ -13,6 +13,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.apache.logging.log4j.util.Strings;
+
 import nts.arc.error.BusinessException;
 import nts.arc.i18n.I18NText;
 import nts.arc.layer.app.command.CommandHandlerContext;
@@ -59,12 +61,8 @@ public class SendMailInfoFormGCommandHandler
 	
 	/** The Constant LOGIN_FUNCTION_ID. */
 	private static final Integer LOGIN_FUNCTION_ID =1;
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * nts.arc.layer.app.command.CommandHandler#handle(nts.arc.layer.app.command
-	 * .CommandHandlerContext)
+	/**
+	 * パスワード再設定メール送信（形式２、形式３）
 	 */
 	@Override
 	protected List<SendMailReturnDto> handle(CommandHandlerContext<SendMailInfoFormGCommand> context) {
@@ -120,7 +118,8 @@ public class SendMailInfoFormGCommandHandler
 			EmployeeInfoDtoImport employee,String companyId) {
 		// get URL from CCG033
 		String url = this.registerEmbededURL.embeddedUrlInfoRegis("CCG007", "H", 3, 24, employee.getEmployeeId(),
-				command.getContractCode(), loginId, employee.getEmployeeCode(), 1, new ArrayList<>());
+				command.getContractCode(), loginId, employee.getEmployeeCode(), 1, new ArrayList<>(),
+				Strings.isBlank(companyId) ? Optional.empty() : Optional.of(companyId));
 		//hoatt 2019.05.20 EA3451 #107795
 		MailContents contents = new MailContents(I18NText.getText("CCG007_40"), I18NText.getText("CCG007_21") + " \n" + url);
 		List<SendMailReturnDto> dtos = new ArrayList<>();
