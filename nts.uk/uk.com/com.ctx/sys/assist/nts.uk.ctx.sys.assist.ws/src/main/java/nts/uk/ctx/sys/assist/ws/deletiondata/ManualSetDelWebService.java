@@ -11,10 +11,12 @@ import javax.ws.rs.Produces;
 
 import nts.arc.layer.app.command.JavaTypeResult;
 import nts.arc.layer.ws.WebService;
+import nts.arc.time.GeneralDate;
 import nts.uk.ctx.sys.assist.app.command.deletedata.manualsetting.AddManualSetDelHandler;
 import nts.uk.ctx.sys.assist.app.command.deletedata.manualsetting.ManualSetDelCommand;
 import nts.uk.ctx.sys.assist.app.find.deletedata.ManualSetDelDto;
 import nts.uk.ctx.sys.assist.app.find.deletedata.ManualSetDelFinder;
+import nts.uk.ctx.sys.assist.app.find.deletedata.SystemDateDto;
 
 /**
  * @author hiep.th
@@ -40,5 +42,12 @@ public class ManualSetDelWebService extends WebService {
 	@Path("findManualSetDel/{delId}")
 	public ManualSetDelDto findManualSetDel(@PathParam("delId") String delId) {
 		return manualSetDelFinder.findManualSetDelById(delId);
+	}
+	
+	@POST
+	@Path("getSystemDate")
+	public SystemDateDto getSystemDate() {
+		SystemDateDto result = new SystemDateDto(GeneralDate.today());
+		return result;
 	}
 }
