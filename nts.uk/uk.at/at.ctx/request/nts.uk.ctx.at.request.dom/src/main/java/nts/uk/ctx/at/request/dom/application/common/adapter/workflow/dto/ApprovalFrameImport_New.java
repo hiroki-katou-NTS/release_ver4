@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Value;
+import nts.arc.time.GeneralDate;
 /**
  * 
  * @author Doan Duy Hung
@@ -36,4 +37,6 @@ public class ApprovalFrameImport_New {
 	private String approvalReason;
 	
 	private int confirmAtr;
+	
+	private GeneralDate approvalDate;
 }

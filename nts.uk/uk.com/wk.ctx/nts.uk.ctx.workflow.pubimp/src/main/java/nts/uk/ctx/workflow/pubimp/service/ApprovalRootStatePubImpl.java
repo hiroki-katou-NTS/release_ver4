@@ -179,7 +179,9 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 												"", 
 												y.getRepresenterID(),		
 												"",
-												y.getApprovalReason(), y.getConfirmAtr().value);
+												y.getApprovalReason(), 
+												y.getConfirmAtr().value,
+												y.getApprovalDate());
 									}).collect(Collectors.toList()));
 						}).collect(Collectors.toList());
 			mapApprPhsStateEx.put(approvalRootState.getRootStateID(), lstApprPhsStateEx);
@@ -237,7 +239,9 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 											Strings.isBlank(y.getApproverID()) ? "" : personAdapter.getPersonInfo(y.getApproverID()).getEmployeeName(), 
 											y.getRepresenterID(),		
 											Strings.isBlank(y.getRepresenterID()) ? "" : personAdapter.getPersonInfo(y.getRepresenterID()).getEmployeeName(),
-											y.getApprovalReason(), y.getConfirmAtr().value);
+											y.getApprovalReason(), 
+											y.getConfirmAtr().value,
+											y.getApprovalDate());
 								}).collect(Collectors.toList()));
 					}).collect(Collectors.toList())
 				), 
@@ -831,7 +835,9 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 												"", 
 												y.getRepresenterID(),		
 												"",
-												y.getApprovalReason(), y.getConfirmAtr().value);
+												y.getApprovalReason(), 
+												y.getConfirmAtr().value,
+												y.getApprovalDate());
 									}).collect(Collectors.toList()));
 						}).collect(Collectors.toList());
 			mapApprPhsStateEx.put(approvalRootState.getRootStateID(), lstApprPhsStateEx);

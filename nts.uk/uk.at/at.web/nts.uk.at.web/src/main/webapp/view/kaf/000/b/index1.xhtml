@@ -19,6 +19,7 @@
 								<th class="phase-app" style="width: 111px;"></th>
 								<th class="phase-app" style="width: 230px;">#{i18n.getText('KAF000_3')}</th>
 								<th class="phase-app" style="width: 111px;">#{i18n.getText('KAF000_29')}</th>
+								<th class="phase-app" style="width: 111px;">#{i18n.getText('KAF000_42')}</th>
 								<th class="phase-app" style="width: 111px;">#{i18n.getText('KAF000_30')}</th>
 							</tr>
 						</thead>
@@ -73,6 +74,15 @@
 										<span class="limited-label" 
 										style="width: 111px;" 
 										data-bind="text: $data.approvalAtrName"></span>
+									</td>
+									<td >
+										<span class="limited-label" 
+										style="width: 111px;" 
+										data-bind="text: ko.pureComputed(function(){
+											if($data.approvalAtrValue()!=0){
+												return $data.approvalDate();
+											}
+										})"></span>
 									</td>
 									<td>
 										<span class="limited-label" 
