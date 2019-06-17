@@ -825,7 +825,7 @@ public class AttendanceItemUtil implements ItemConst {
 		return newValue;
 	}
 
-	private static final Map<String, String> cacheForGetCurrentPath = new HashMap<>();
+	private static final Map<String, String> cacheForGetCurrentPath = Collections.synchronizedMap(new HashMap<>());
 	
 	private static String getCurrentPath(int layoutIdx, String text, boolean isList) {
 
