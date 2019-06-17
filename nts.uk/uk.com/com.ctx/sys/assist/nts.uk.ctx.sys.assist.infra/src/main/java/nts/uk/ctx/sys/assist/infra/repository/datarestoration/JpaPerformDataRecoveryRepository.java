@@ -1,6 +1,5 @@
 package nts.uk.ctx.sys.assist.infra.repository.datarestoration;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +82,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 		return Optional.ofNullable(this.getEntityManager().find(SspmtPerformDataRecovery.class, dataRecoveryProcessId)
 				.toDomain(targetData, restorationTarget));
 	}
-
+	
 	@Override
 	public void add(PerformDataRecovery domain) {
 		this.commandProxy().insert(SspmtPerformDataRecovery.toEntity(domain));
@@ -120,6 +119,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 
 	@Override
+	@Transactional(value = TxType.REQUIRES_NEW)
 	public Optional<TableList> getByInternal(String internalFileName, String dataRecoveryProcessId) {
 		return this.queryProxy().query(SELECT_INTERNAL_FILE_NAME, SspmtTableList.class)
 				.setParameter("internalFileName", internalFileName)
@@ -320,6 +320,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 		try {
 			EntityManager em = this.getEntityManager();
 			Query query = em.createNativeQuery(insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
+			logQuery = query.toString();
 			query.executeUpdate();
 			
 		} catch (Exception e) {
@@ -601,4 +602,5 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 				logSequenceNumber, processingContent, contentSql);
 		repoDataRecoveryLog.add(dataRecoveryLog);
 	}
+
 }

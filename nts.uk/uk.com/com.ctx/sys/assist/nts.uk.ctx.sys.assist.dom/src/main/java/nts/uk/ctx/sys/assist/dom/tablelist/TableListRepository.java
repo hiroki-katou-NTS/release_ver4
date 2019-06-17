@@ -1,7 +1,6 @@
 package nts.uk.ctx.sys.assist.dom.tablelist;
 
 import java.util.List;
-import java.util.Map;
 
 import nts.arc.layer.infra.file.export.FileGeneratorContext;
 

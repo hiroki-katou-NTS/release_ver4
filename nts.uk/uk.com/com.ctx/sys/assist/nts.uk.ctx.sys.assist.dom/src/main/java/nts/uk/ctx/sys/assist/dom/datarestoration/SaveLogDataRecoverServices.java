@@ -21,8 +21,9 @@ public class SaveLogDataRecoverServices {
 	
 	public void saveErrorLogDataRecover(String recoveryProcessId, String target, String errorContent,
 			GeneralDate targetDate, String processingContent, String contentSql) {
+		GeneralDate logTime = GeneralDate.today();
 		int logSequenceNumber = repoDataRecoveryLog.getMaxSeqId(recoveryProcessId) + 1;
-		DataRecoveryLog dataRecoveryLog = new DataRecoveryLog(recoveryProcessId, target, errorContent, targetDate,
+		DataRecoveryLog dataRecoveryLog = new DataRecoveryLog(recoveryProcessId, target, errorContent, logTime,
 				logSequenceNumber, processingContent, contentSql);
 		repoDataRecoveryLog.add(dataRecoveryLog);
 	}
