@@ -7,6 +7,7 @@ package nts.uk.ctx.at.shared.dom.common.timerounding;
 import java.math.BigDecimal;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 //import lombok.val;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.dom.DomainObject;
@@ -17,7 +18,8 @@ import nts.arc.layer.dom.DomainObject;
  */
 // 時間丸め設定
 @Getter
-public class TimeRoundingSetting extends DomainObject {
+@NoArgsConstructor
+public class TimeRoundingSetting extends DomainObject implements Cloneable{
 
 	/** The rounding time. */
 	// 単位
@@ -162,6 +164,19 @@ public class TimeRoundingSetting extends DomainObject {
 	 */
 	public TimeRoundingSetting getReverseRounding() {
 		return new TimeRoundingSetting(this.roundingTime, this.rounding.getReverseRounding());
+	}
+	
+	@Override
+	public TimeRoundingSetting clone() {
+		TimeRoundingSetting cloned = new TimeRoundingSetting();
+		try {
+			cloned.rounding = Rounding.valueOf(this.rounding.value);
+			cloned.roundingTime = Unit.valueOf(this.roundingTime.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("TimeRoundingSetting clone error.");
+		}
+		return cloned;
 	}
 	
 }

@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.timerounding.TimeRoundingSetting;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
@@ -14,7 +15,8 @@ import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
  */
 //インターバル時間
 @Getter
-public class IntervalTime extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class IntervalTime extends WorkTimeDomainObject implements Cloneable{
 	
 	/** The interval time. */
 	//インターバル時間
@@ -42,5 +44,18 @@ public class IntervalTime extends WorkTimeDomainObject {
 	public void saveToMemento(IntervalTimeSetMemento memento){
 		memento.setIntervalTime(this.intervalTime);
 		memento.setRounding(this.rounding);
+	}
+	
+	@Override
+	public IntervalTime clone() {
+		IntervalTime cloned = new IntervalTime();
+		try {
+			cloned.intervalTime = new AttendanceTime(this.intervalTime.v());
+			cloned.rounding = rounding.clone();
+		}
+		catch (Exception e){
+			throw new RuntimeException("IntervalTime clone error.");
+		}
+		return cloned;
 	}
 }

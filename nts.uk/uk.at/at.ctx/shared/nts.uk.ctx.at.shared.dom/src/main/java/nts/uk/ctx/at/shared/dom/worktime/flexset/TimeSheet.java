@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.flexset;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
@@ -13,7 +14,8 @@ import nts.uk.shr.com.time.TimeWithDayAttr;
  */
 // 時間帯
 @Getter
-public class TimeSheet extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class TimeSheet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The start time. */
 	// 開始時刻
@@ -65,5 +67,18 @@ public class TimeSheet extends WorkTimeDomainObject {
 	 */
 	public static TimeSheet createDefault() {
 		return new TimeSheet(TimeWithDayAttr.THE_PRESENT_DAY_0000, TimeWithDayAttr.THE_PRESENT_DAY_0000);
+	}
+	
+	@Override
+	public TimeSheet clone() {
+		TimeSheet cloned = new TimeSheet();
+		try {
+			cloned.startTime = new TimeWithDayAttr(this.startTime.valueAsMinutes());
+			cloned.endTime = new TimeWithDayAttr(this.endTime.valueAsMinutes());
+		}
+		catch (Exception e){
+			throw new RuntimeException("TimeSheet clone error.");
+		}
+		return cloned;
 	}
 }

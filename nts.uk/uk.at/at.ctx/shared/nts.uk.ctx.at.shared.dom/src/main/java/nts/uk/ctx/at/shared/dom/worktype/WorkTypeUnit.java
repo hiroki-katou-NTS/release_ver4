@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktype;
 
 import lombok.AllArgsConstructor;
+import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
 
 /**
  * The Enum WorkTypeUnit.
@@ -25,6 +26,9 @@ public enum WorkTypeUnit {
 	public final int value;
 	public final String nameId;
 	
+	/** The Constant values. */
+	private final static WorkTypeUnit[] values = WorkTypeUnit.values();
+	
 	/**
 	 * 1日であるか判定する
 	 * @return　1日である
@@ -39,5 +43,29 @@ public enum WorkTypeUnit {
 	 */
 	public boolean isMonringAndAfternoon() {
 		return MonringAndAfternoon.equals(this);
+	}
+	
+	/**
+	 * Value of.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the time day WorkTypeUnit
+	 */
+	public static WorkTypeUnit valueOf(Integer value) {
+		// Invalid object.
+		if (value == null) {
+			return null;
+		}
+
+		// Find value.
+		for (WorkTypeUnit val : WorkTypeUnit.values) {
+			if (val.value == value) {
+				return val;
+			}
+		}
+
+		// Not found.
+		return null;
 	}
 }

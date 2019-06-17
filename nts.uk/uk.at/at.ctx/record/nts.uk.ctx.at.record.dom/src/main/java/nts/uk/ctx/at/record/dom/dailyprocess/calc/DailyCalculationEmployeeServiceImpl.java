@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -15,7 +14,6 @@ import javax.persistence.OptimisticLockException;
 
 import lombok.val;
 import nts.arc.enums.EnumAdaptor;
-import nts.arc.layer.app.command.AsyncCommandHandlerContext;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.gul.error.ThrowableAnalyzer;
@@ -144,8 +142,8 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	@Inject 
 	private ErAlCheckService determineErrorAlarmWorkRecordService;
 	
-	@Inject
-	private DailyRecordTransactionService dailyTransaction;
+//	@Inject
+//	private DailyRecordTransactionService dailyTransaction;
 	
 	//ドメインサービス：計算用ストアド実行用
 	@Inject

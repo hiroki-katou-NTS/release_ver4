@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 
 /**
@@ -12,7 +13,8 @@ import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
  */
 // 丸め設定
 @Getter
-public class RoundingSet extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class RoundingSet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The rounding set. */
 	// 時刻丸め
@@ -44,4 +46,16 @@ public class RoundingSet extends WorkTimeDomainObject {
 		memento.setSection(this.section);
 	}
 
+	@Override
+	public RoundingSet clone() {
+		RoundingSet cloned = new RoundingSet();
+		try {
+			cloned.roundingSet = this.roundingSet.clone();
+			cloned.section = Superiority.valueOf(this.section.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("AggregateTotalTimeSpentAtWork clone error.");
+		}
+		return cloned;
+	}
 }

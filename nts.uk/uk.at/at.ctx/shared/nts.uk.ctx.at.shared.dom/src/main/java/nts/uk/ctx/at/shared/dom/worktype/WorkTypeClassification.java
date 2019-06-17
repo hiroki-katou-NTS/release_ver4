@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktype;
 
 import lombok.AllArgsConstructor;
+import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
 
 /**
  * The Enum WorkTypeClassification
@@ -73,6 +74,9 @@ public enum WorkTypeClassification {
 	/** The value. */
 	public final int value;
 	public final String nameId;
+	
+	/** The Constant values. */
+	private final static WorkTypeClassification[] values = WorkTypeClassification.values();
 	
 //	WorkTypeClassification(int arg1, String arg0) {
 //		this.value = arg1;
@@ -267,5 +271,29 @@ public enum WorkTypeClassification {
 	 */
 	public boolean isPause() {
 		return Pause.equals(this);
+	}
+	
+	/**
+	 * Value of.
+	 *
+	 * @param value
+	 *            the value
+	 * @return the time day atr
+	 */
+	public static WorkTypeClassification valueOf(Integer value) {
+		// Invalid object.
+		if (value == null) {
+			return null;
+		}
+
+		// Find value.
+		for (WorkTypeClassification val : WorkTypeClassification.values) {
+			if (val.value == value) {
+				return val;
+			}
+		}
+
+		// Not found.
+		return null;
 	}
 }

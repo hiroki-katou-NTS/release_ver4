@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
@@ -19,7 +20,7 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  */
 // 流動休憩時間帯
 @Getter
-public class FlowRestTimezone extends WorkTimeDomainObject {
+public class FlowRestTimezone extends WorkTimeDomainObject implements Cloneable{
 
 	/** The flow rest sets. */
 	// 流動休憩設定
@@ -146,5 +147,19 @@ public class FlowRestTimezone extends WorkTimeDomainObject {
 		if (!this.useHereAfterRestSet) {
 			this.hereAfterRestSet = new FlowRestSetting();
 		}
+	}
+	
+	@Override
+	public FlowRestTimezone clone() {
+		FlowRestTimezone cloned = new FlowRestTimezone();
+		try {
+			cloned.flowRestSets = this.flowRestSets.stream().map(c -> c.clone()).collect(Collectors.toList());
+			cloned.useHereAfterRestSet = this.useHereAfterRestSet ? true : false ;
+			cloned.hereAfterRestSet = this.hereAfterRestSet.clone();
+		}
+		catch (Exception e){
+			throw new RuntimeException("FlowRestTimezone clone error.");
+		}
+		return cloned;
 	}
 }

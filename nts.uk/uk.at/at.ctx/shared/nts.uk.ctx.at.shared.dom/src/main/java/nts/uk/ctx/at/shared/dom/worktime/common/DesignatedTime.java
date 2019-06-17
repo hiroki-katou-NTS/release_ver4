@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 
 /**
@@ -12,7 +13,8 @@ import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
  */
 // 指定時間
 @Getter
-public class DesignatedTime extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class DesignatedTime extends WorkTimeDomainObject implements Cloneable{
 
 	/** The one day time. */
 	// 1日の時間
@@ -72,4 +74,16 @@ public class DesignatedTime extends WorkTimeDomainObject {
 		this.halfDayTime = new OneDayTime(0);
 	}
 
+	@Override
+	public DesignatedTime clone() {
+		DesignatedTime cloned = new DesignatedTime();
+		try {
+			cloned.oneDayTime = new OneDayTime(this.oneDayTime.v());
+			cloned.halfDayTime = new OneDayTime(this.halfDayTime.v());
+		}
+		catch (Exception e){
+			throw new RuntimeException("DesignatedTime clone error.");
+		}
+		return cloned;
+	}
 }

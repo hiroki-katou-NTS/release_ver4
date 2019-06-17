@@ -713,12 +713,12 @@ public class WithinWorkTimeFrame extends CalculationTimeSheet{// implements Late
 		//2019/04/03 大塚緊急対応　通常勤務時に割増の休暇加算設定を見ないよう対応↑		
 		boolean result = false;
 		
-		if(premiumAtr.isRegularWork()&&workTimeDeductLateLeaveEarly == NotUseAtr.USE) {
+		if(premiumAtr.isRegularWork() && workTimeDeductLateLeaveEarly == NotUseAtr.USE) {
 			return true;
 		} 
 		if(premiumAtr.isPremium()
-				 &&workTimeDeductLateLeaveEarly == NotUseAtr.USE
-				 &&premiumDeductLateLeaveEarly==NotUseAtr.NOT_USE){
+				 && workTimeDeductLateLeaveEarly == NotUseAtr.USE
+				 && premiumDeductLateLeaveEarly==NotUseAtr.NOT_USE){
 			return true;
 		}
 		return result;

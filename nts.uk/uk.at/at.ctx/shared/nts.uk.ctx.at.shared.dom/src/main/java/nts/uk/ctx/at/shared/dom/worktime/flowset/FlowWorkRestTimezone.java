@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.flowset;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.common.TimezoneOfFixedRestTimeSet;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
@@ -14,7 +15,8 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  */
 // 流動勤務の休憩時間帯
 @Getter
-public class FlowWorkRestTimezone extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class FlowWorkRestTimezone extends WorkTimeDomainObject implements Cloneable{
 
 	/** The fix rest time. */
 	// 休憩時間帯を固定にする
@@ -108,5 +110,19 @@ public class FlowWorkRestTimezone extends WorkTimeDomainObject {
 	
 	public void restoreFixRestTime(boolean fixRestTime) {
 		this.fixRestTime = fixRestTime;
+	}
+	
+	@Override
+	public FlowWorkRestTimezone clone() {
+		FlowWorkRestTimezone cloned = new FlowWorkRestTimezone();
+		try {
+			cloned.fixRestTime = this.fixRestTime ? true : false ;
+			cloned.fixedRestTimezone = this.fixedRestTimezone.clone();
+			cloned.flowRestTimezone = this.flowRestTimezone.clone();
+		}
+		catch (Exception e){
+			throw new RuntimeException("FlowWorkRestTimezone clone error.");
+		}
+		return cloned;
 	}
 }

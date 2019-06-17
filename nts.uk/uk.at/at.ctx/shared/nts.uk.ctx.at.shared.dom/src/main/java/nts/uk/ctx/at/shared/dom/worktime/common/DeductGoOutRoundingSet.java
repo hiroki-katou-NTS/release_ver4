@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
 
@@ -13,7 +14,8 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  */
 // 計上控除別外出丸め設定
 @Getter
-public class DeductGoOutRoundingSet extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class DeductGoOutRoundingSet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The deduct time rounding setting. */
 	// 控除時間の丸め設定
@@ -82,5 +84,17 @@ public class DeductGoOutRoundingSet extends WorkTimeDomainObject {
 	public void correctDefaultData(ScreenMode screenMode) {
 		this.deductTimeRoundingSetting.correctDefaultData(screenMode);
 		this.approTimeRoundingSetting.correctDefaultData(screenMode);
+	}
+	
+	public DeductGoOutRoundingSet clone() {
+		DeductGoOutRoundingSet cloned = new DeductGoOutRoundingSet();
+		try {
+			cloned.deductTimeRoundingSetting = this.deductTimeRoundingSetting.clone();
+			cloned.approTimeRoundingSetting = this.approTimeRoundingSetting.clone();
+		}
+		catch (Exception e){
+			throw new RuntimeException("DeductGoOutRoundingSet clone error.");
+		}
+		return cloned;
 	}
 }

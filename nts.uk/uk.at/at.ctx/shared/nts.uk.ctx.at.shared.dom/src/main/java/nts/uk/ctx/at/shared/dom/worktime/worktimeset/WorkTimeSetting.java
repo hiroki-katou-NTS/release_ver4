@@ -18,7 +18,7 @@ import nts.uk.shr.com.primitive.Memo;
 // 就業時間帯の設定
 @Getter
 @NoArgsConstructor
-public class WorkTimeSetting extends WorkTimeAggregateRoot {
+public class WorkTimeSetting extends WorkTimeAggregateRoot implements Cloneable{
 
 	/** The company id. */
 	// 会社ID
@@ -132,6 +132,43 @@ public class WorkTimeSetting extends WorkTimeAggregateRoot {
 		} else if (!worktimeCode.equals(other.worktimeCode))
 			return false;
 		return true;
+	}
+
+	public WorkTimeSetting(String companyId, WorkTimeCode worktimeCode, WorkTimeDivision workTimeDivision,
+			AbolishAtr abolishAtr, ColorCode colorCode, WorkTimeDisplayName workTimeDisplayName, Memo memo,
+			WorkTimeNote note) {
+		super();
+		this.companyId = companyId;
+		this.worktimeCode = worktimeCode;
+		this.workTimeDivision = workTimeDivision;
+		this.abolishAtr = abolishAtr;
+		this.colorCode = colorCode;
+		this.workTimeDisplayName = workTimeDisplayName;
+		this.memo = memo;
+		this.note = note;
+	}
+	
+	/**
+	 * create this Instance
+	 * @return new Instance
+	 */
+	@Override
+	public WorkTimeSetting clone() {
+		WorkTimeSetting cloned = new WorkTimeSetting();
+		try {
+			cloned.companyId = this.companyId;
+			cloned.worktimeCode = new WorkTimeCode(this.worktimeCode.v());
+			cloned.workTimeDivision = this.workTimeDivision.clone();
+			cloned.abolishAtr = AbolishAtr.valueOf(this.abolishAtr.value);
+			cloned.colorCode = new ColorCode(this.colorCode.v());
+			cloned.workTimeDisplayName = this.workTimeDisplayName.clone();
+			cloned.memo = new Memo(this.memo.v());
+			cloned.note = new WorkTimeNote(this.note.v());
+		}	
+		catch (Exception e){
+			throw new RuntimeException("WorkTimeSetting clone error.");
+		}
+		return cloned;
 	}
 
 }

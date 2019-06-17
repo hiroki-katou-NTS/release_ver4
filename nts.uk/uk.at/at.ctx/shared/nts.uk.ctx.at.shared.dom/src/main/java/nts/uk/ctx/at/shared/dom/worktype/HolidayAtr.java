@@ -14,4 +14,29 @@ public enum HolidayAtr {
 
 	public final int value;
 	public final String nameId;
+	/** The Constant values. */
+	private final static HolidayAtr[] values = HolidayAtr.values();
+	
+	/**
+	 * Value of.
+	 *
+	 * @param value the value
+	 * @return the workAtr
+	 */
+	public static HolidayAtr valueOf(Integer value) {
+		// Invalid object.
+		if (value == null) {
+			return null;
+		}
+
+		// Find value.
+		for (HolidayAtr val : HolidayAtr.values) {
+			if (val.value == value) {
+				return val;
+			}
+		}
+
+		// Not found.
+		return null;
+	}
 }

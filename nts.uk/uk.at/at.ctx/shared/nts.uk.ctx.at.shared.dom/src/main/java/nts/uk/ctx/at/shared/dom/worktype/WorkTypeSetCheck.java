@@ -23,6 +23,8 @@ public enum WorkTypeSetCheck {
 	
 	public final int value;
 
+	/** The Constant values. */
+	private final static WorkTypeSetCheck[] values = WorkTypeSetCheck.values();
 	
 	/**
 	 * チェックしないであるか判定する
@@ -39,4 +41,28 @@ public enum WorkTypeSetCheck {
 	public boolean isCheck() {
 		return this.equals(CHECK);
 	}
+	
+	/**
+	 * Value of.
+	 *
+	 * @param value the value
+	 * @return the workTypeSetCheck
+	 */
+	public static WorkTypeSetCheck valueOf(Integer value) {
+		// Invalid object.
+		if (value == null) {
+			return null;
+		}
+
+		// Find value.
+		for (WorkTypeSetCheck val : WorkTypeSetCheck.values) {
+			if (val.value == value) {
+				return val;
+			}
+		}
+
+		// Not found.
+		return null;
+	}
+	
 }

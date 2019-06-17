@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
 
@@ -13,7 +14,8 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  */
 // 代休振替設定
 @Getter
-public class SubHolTransferSet extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class SubHolTransferSet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The certain time. */
 	// 一定時間
@@ -165,5 +167,20 @@ public class SubHolTransferSet extends WorkTimeDomainObject {
 		default:
 			throw new RuntimeException("SubHolTransferType not found.");
 		}
+	}
+	
+	@Override
+	public SubHolTransferSet clone() {
+		SubHolTransferSet cloned = new SubHolTransferSet();
+		try {
+			cloned.certainTime = new OneDayTime(this.certainTime.v());
+			cloned.useDivision = this.useDivision ? true : false ;
+			cloned.designatedTime = this.designatedTime.clone();
+			cloned.subHolTransferSetAtr = SubHolTransferSetAtr.valueOf(this.subHolTransferSetAtr.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("SubHolTransferSet clone error.");
+		}
+		return cloned;
 	}
 }

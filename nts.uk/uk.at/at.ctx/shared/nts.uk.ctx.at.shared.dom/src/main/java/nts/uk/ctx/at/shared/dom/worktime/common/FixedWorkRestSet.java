@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 
 /**
@@ -12,7 +13,8 @@ import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
  */
 //固定勤務の休憩設定
 @Getter
-public class FixedWorkRestSet extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class FixedWorkRestSet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The common rest set. */
 	//共通の休憩設定
@@ -53,5 +55,19 @@ public class FixedWorkRestSet extends WorkTimeDomainObject {
 	 */
 	public void changeCalcMethodToSche() {
 		this.calculateMethod = FixedRestCalculateMethod.PLAN_REF;
+	}
+	
+	@Override
+	public FixedWorkRestSet clone() {
+		FixedWorkRestSet cloned = new FixedWorkRestSet();
+		try {
+			cloned.commonRestSet = this.commonRestSet.clone();
+			cloned.isPlanActualNotMatchMasterRefer = isPlanActualNotMatchMasterRefer ? true : false;
+			cloned.calculateMethod = FixedRestCalculateMethod.valueOf(this.calculateMethod.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("FixedWorkRestSet clone error.");
+		}
+		return cloned;
 	}
 }

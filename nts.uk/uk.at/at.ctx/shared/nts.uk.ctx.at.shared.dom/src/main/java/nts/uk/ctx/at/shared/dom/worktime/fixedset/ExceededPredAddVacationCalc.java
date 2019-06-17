@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.fixedset;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.common.CalcMethodExceededPredAddVacation;
 import nts.uk.ctx.at.shared.dom.worktime.common.OTFrameNo;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
@@ -14,8 +15,9 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  * The Class ExceededPredAddVacationCalc.
  */
 @Getter
+@NoArgsConstructor
 // 休暇加算時間が所定を超過した場合の計算
-public class ExceededPredAddVacationCalc extends WorkTimeDomainObject {
+public class ExceededPredAddVacationCalc extends WorkTimeDomainObject implements Cloneable{
 
 	/** The calc method. */
 	// 計算方法
@@ -96,5 +98,18 @@ public class ExceededPredAddVacationCalc extends WorkTimeDomainObject {
 		if (CalcMethodExceededPredAddVacation.CALC_AS_WORKING.equals(this.calcMethod)) {
 			this.otFrameNo = new OTFrameNo(1);
 		}
+	}
+	
+	@Override
+	public ExceededPredAddVacationCalc clone() {
+		ExceededPredAddVacationCalc cloned = new ExceededPredAddVacationCalc();
+		try {
+			cloned.calcMethod = CalcMethodExceededPredAddVacation.valueOf(this.calcMethod.value);
+			cloned.otFrameNo = new OTFrameNo(this.otFrameNo.v());
+		}
+		catch (Exception e){
+			throw new RuntimeException("ExceededPredAddVacationCalc clone error.");
+		}
+		return cloned;
 	}
 }

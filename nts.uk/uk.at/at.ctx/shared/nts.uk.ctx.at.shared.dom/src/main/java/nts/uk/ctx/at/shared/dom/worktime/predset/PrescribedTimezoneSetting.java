@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
@@ -20,7 +21,8 @@ import nts.uk.shr.com.time.TimeWithDayAttr;
  */
 // 所定時間帯設定
 @Getter
-public class PrescribedTimezoneSetting extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class PrescribedTimezoneSetting extends WorkTimeDomainObject implements Cloneable{
 
 	/** The morning end time. */
 	// 午前終了時刻
@@ -431,6 +433,20 @@ public class PrescribedTimezoneSetting extends WorkTimeDomainObject {
 	 */
 	public void updateAfternoonStartTime(TimeWithDayAttr afternoonStartTime) {
 		this.afternoonStartTime = afternoonStartTime;
+	}
+	
+	@Override
+	public PrescribedTimezoneSetting clone() {
+		PrescribedTimezoneSetting cloned = new PrescribedTimezoneSetting();
+		try {
+			cloned.morningEndTime = new TimeWithDayAttr(this.morningEndTime.valueAsMinutes());
+			cloned.afternoonStartTime = new TimeWithDayAttr(this.afternoonStartTime.valueAsMinutes());
+			cloned.lstTimezone = this.lstTimezone.stream().map(c -> c.clone()).collect(Collectors.toList());
+		}
+		catch (Exception e){
+			throw new RuntimeException("PrescribedTimezoneSetting clone error.");
+		}
+		return cloned;
 	}
 	
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.common.HDWorkTimeSheetSetting;
 import nts.uk.ctx.at.shared.dom.worktime.common.TimeZoneRounding;
 import nts.uk.ctx.at.shared.dom.worktime.flowset.FlowWorkRestTimezone;
@@ -19,8 +20,9 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  * The Class FlexOffdayWorkTime.
  */
 @Getter
+@NoArgsConstructor
 // フレックス勤務の休日出勤用勤務時間帯
-public class FlexOffdayWorkTime extends WorkTimeDomainObject {
+public class FlexOffdayWorkTime extends WorkTimeDomainObject implements Cloneable{
 
 	/** The lst work timezone. */
 	// 勤務時間帯
@@ -135,5 +137,18 @@ public class FlexOffdayWorkTime extends WorkTimeDomainObject {
 		this.lstWorkTimezone = this.lstWorkTimezone.stream()
 				.sorted((obj1, obj2) -> obj1.getTimezone().getStart().compareTo(obj2.getTimezone().getStart()))
 				.collect(Collectors.toList());
+	}
+	
+	@Override
+	public FlexOffdayWorkTime clone() {
+		FlexOffdayWorkTime cloned = new FlexOffdayWorkTime();
+		try {
+			cloned.lstWorkTimezone = this.lstWorkTimezone.stream().map(c -> c.clone()).collect(Collectors.toList());
+			cloned.restTimezone = this.restTimezone.clone();;
+		}
+		catch (Exception e){
+			throw new RuntimeException("FlexOffdayWorkTime clone error.");
+		}
+		return cloned;
 	}
 }

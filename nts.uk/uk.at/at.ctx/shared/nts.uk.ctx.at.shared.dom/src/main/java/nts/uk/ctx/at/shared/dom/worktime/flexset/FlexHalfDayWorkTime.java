@@ -7,6 +7,7 @@ package nts.uk.ctx.at.shared.dom.worktime.flexset;
 import java.util.Optional;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.val;
 import nts.uk.ctx.at.shared.dom.worktime.common.AmPmAtr;
 import nts.uk.ctx.at.shared.dom.worktime.common.FixedWorkTimezoneSet;
@@ -19,7 +20,8 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  */
 //フレックス勤務の平日出勤用勤務時間帯
 @Getter
-public class FlexHalfDayWorkTime extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class FlexHalfDayWorkTime extends WorkTimeDomainObject implements Cloneable{
 
 	/** The rest timezone. */
 	// 休憩時間帯
@@ -168,5 +170,19 @@ public class FlexHalfDayWorkTime extends WorkTimeDomainObject {
 		} else {
 			this.restTimezone.correctData(screenMode, oldDomain.getRestTimezone());
 		}
+	}
+	
+	@Override
+	public FlexHalfDayWorkTime clone() {
+		FlexHalfDayWorkTime cloned = new FlexHalfDayWorkTime();
+		try {
+			cloned.restTimezone = this.restTimezone.clone();
+			cloned.workTimezone = this.workTimezone.clone();
+			cloned.ampmAtr = AmPmAtr.valueOf(this.ampmAtr.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("FlexHalfDayWorkTime clone error.");
+		}
+		return cloned;
 	}
 }

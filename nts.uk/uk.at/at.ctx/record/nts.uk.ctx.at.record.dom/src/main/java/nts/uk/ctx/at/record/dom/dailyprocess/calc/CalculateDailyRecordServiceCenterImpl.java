@@ -16,7 +16,6 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
-import nts.arc.layer.app.command.AsyncCommandHandlerContext;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.personnelcostsetting.PersonnelCostSettingAdapter;
 import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemService;
@@ -94,8 +93,8 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 	@Inject
 	private EditStateOfDailyPerformanceRepository editStateOfDailyPerformanceRepository;
 	
-	@Inject
-	private DailyCalculationEmployeeService dailyCalculationEmployeeService;
+//	@Inject
+//	private DailyCalculationEmployeeService dailyCalculationEmployeeService;
 	
 	// 任意項目の計算の為に追加
 	@Inject

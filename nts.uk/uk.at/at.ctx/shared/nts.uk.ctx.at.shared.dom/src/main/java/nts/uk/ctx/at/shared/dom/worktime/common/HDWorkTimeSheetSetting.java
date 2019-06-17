@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktype.HolidayAtr;
 
@@ -13,7 +14,8 @@ import nts.uk.ctx.at.shared.dom.worktype.HolidayAtr;
  */
 // 休出時間の時間帯設定
 @Getter
-public class HDWorkTimeSheetSetting extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class HDWorkTimeSheetSetting extends WorkTimeDomainObject implements Cloneable{
 	
 	/** The work time no. */
 	//就業時間帯NO
@@ -97,4 +99,23 @@ public class HDWorkTimeSheetSetting extends WorkTimeDomainObject {
 		}
 	}
 		
+	
+	@Override
+	public HDWorkTimeSheetSetting clone() {
+		HDWorkTimeSheetSetting cloned = new HDWorkTimeSheetSetting();
+		try {
+			cloned.workTimeNo = new Integer(this.workTimeNo.intValue());
+			cloned.timezone = this.timezone.clone();
+			cloned.isLegalHolidayConstraintTime = this.isLegalHolidayConstraintTime ? true : false ;
+			cloned.inLegalBreakFrameNo = new BreakFrameNo(this.inLegalBreakFrameNo.v());
+			cloned.isNonStatutoryDayoffConstraintTime = this.isNonStatutoryDayoffConstraintTime ? true : false ;
+			cloned.outLegalBreakFrameNo = new BreakFrameNo(this.outLegalBreakFrameNo.v());
+			cloned.isNonStatutoryHolidayConstraintTime = this.isNonStatutoryHolidayConstraintTime ? true : false ;
+			cloned.outLegalPubHDFrameNo = new BreakFrameNo(this.outLegalPubHDFrameNo.v());
+		}
+		catch (Exception e){
+			throw new RuntimeException("HDWorkTimeSheetSetting clone error.");
+		}
+		return cloned;	
+	}
 }

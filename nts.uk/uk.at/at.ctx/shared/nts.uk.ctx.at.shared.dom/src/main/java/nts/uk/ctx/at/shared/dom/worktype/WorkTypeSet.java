@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.shared.dom.worktype;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.arc.enums.EnumAdaptor;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;
 /**
@@ -10,7 +11,8 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;
  *
  */
 @Getter
-public class WorkTypeSet {
+@NoArgsConstructor
+public class WorkTypeSet implements Cloneable{
     
 	/**
 	 * 会社ID
@@ -162,5 +164,30 @@ public class WorkTypeSet {
 	 */
 	public void changeCloseAtr(CloseAtr closeAtr) {
 		this.closeAtr = closeAtr;
+	}
+	
+	@Override
+	public WorkTypeSet clone() {
+		WorkTypeSet cloned = new WorkTypeSet();
+		try {
+			cloned.companyId = this.companyId;
+			cloned.workTypeCd = new WorkTypeCode(this.workTypeCd.v());
+			cloned.workAtr = WorkAtr.valueOf(this.workAtr.value);
+			cloned.digestPublicHd = WorkTypeSetCheck.valueOf(this.digestPublicHd.value);
+			cloned.holidayAtr = HolidayAtr.valueOf(this.holidayAtr.value); 
+			cloned.countHodiday = WorkTypeSetCheck.valueOf(this.countHodiday.value);
+			if(this.closeAtr != null)
+				cloned.closeAtr = CloseAtr.valueOf(this.closeAtr.value);
+			cloned.sumAbsenseNo = this.sumAbsenseNo;
+			cloned.sumSpHodidayNo = this.sumSpHodidayNo;
+			cloned.timeLeaveWork = WorkTypeSetCheck.valueOf(this.timeLeaveWork.value);
+			cloned.attendanceTime = WorkTypeSetCheck.valueOf(this.attendanceTime.value);
+			cloned.genSubHodiday = WorkTypeSetCheck.valueOf(this.genSubHodiday.value);
+			cloned.dayNightTimeAsk = WorkTypeSetCheck.valueOf(this.dayNightTimeAsk.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("WorkTypeSet clone error.");
+		}
+		return cloned;
 	}
 }

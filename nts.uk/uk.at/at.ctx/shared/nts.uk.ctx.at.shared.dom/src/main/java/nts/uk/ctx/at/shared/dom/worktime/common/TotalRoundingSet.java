@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 
 /**
@@ -12,7 +13,8 @@ import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
  */
 // 合計丸め設定
 @Getter
-public class TotalRoundingSet extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class TotalRoundingSet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The set same frame rounding. */
 	// 同じ枠内での丸め設定
@@ -81,4 +83,16 @@ public class TotalRoundingSet extends WorkTimeDomainObject {
 		this.frameStraddRoundingSet = GoOutTimeRoundingMethod.TOTAL_AND_ROUNDING;
 	}
 
+	@Override
+	public TotalRoundingSet clone() {
+		TotalRoundingSet cloned = new TotalRoundingSet();
+		try {
+			cloned.setSameFrameRounding = GoOutTimeRoundingMethod.valueOf(this.setSameFrameRounding.value);
+			cloned.frameStraddRoundingSet = GoOutTimeRoundingMethod.valueOf(this.frameStraddRoundingSet.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("TotalRoundingSet clone error.");
+		}
+		return cloned;
+	}
 }

@@ -14,6 +14,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 //import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.common.GoLeavingWorkAtr;
 import nts.uk.ctx.at.shared.dom.worktime.common.StampReflectTimezone;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
@@ -28,8 +29,9 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDivision;
  * The Class FlexWorkSetting.
  */
 @Getter
+@NoArgsConstructor
 // フレックス勤務設定
-public class FlexWorkSetting extends WorkTimeAggregateRoot {
+public class FlexWorkSetting extends WorkTimeAggregateRoot implements Cloneable{
 
 	/** The company id. */
 	// 会社ID
@@ -149,6 +151,31 @@ public class FlexWorkSetting extends WorkTimeAggregateRoot {
 		//for dialog H
 		this.restSetting.correctDefaultData(screenMode,this.getLstHalfDayWorkTimezone().size() > 0
 				? this.getLstHalfDayWorkTimezone().get(0).getRestTimezone().isFixRestTime() : false);
+	}
+
+	/**
+ 	 * create this Instance
+	 * @return new Instance
+	 */
+	@Override
+	public FlexWorkSetting clone() {
+		FlexWorkSetting cloned = new FlexWorkSetting();
+		try {
+			cloned.companyId = this.companyId;
+			cloned.workTimeCode = new WorkTimeCode(this.workTimeCode.v());
+			cloned.coreTimeSetting = this.coreTimeSetting.clone();
+			cloned.restSetting = this.restSetting.clone();
+			cloned.offdayWorkTime = this.offdayWorkTime.clone();
+			cloned.commonSetting = this.commonSetting.clone();
+			cloned.useHalfDayShift = this.useHalfDayShift ? true : false ;
+			cloned.lstHalfDayWorkTimezone = this.lstHalfDayWorkTimezone.stream().map(c -> c.clone()).collect(Collectors.toList());
+			cloned.lstStampReflectTimezone = this.lstStampReflectTimezone.stream().map(c -> c.clone()).collect(Collectors.toList());
+			cloned.calculateSetting = this.calculateSetting.clone();
+		}
+		catch (Exception e){
+			throw new RuntimeException("AggregateTotalTimeSpentAtWork clone error.");
+		}
+		return cloned;
 	}
 	
 }

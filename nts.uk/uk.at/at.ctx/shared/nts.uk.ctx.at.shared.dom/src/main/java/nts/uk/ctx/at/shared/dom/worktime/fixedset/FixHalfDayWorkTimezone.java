@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.fixedset;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.common.AmPmAtr;
 import nts.uk.ctx.at.shared.dom.worktime.common.FixedWorkTimezoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
@@ -14,8 +15,9 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  * The Class FixHalfDayWorkTimezone.
  */
 @Getter
+@NoArgsConstructor
 // 固定勤務の平日出勤用勤務時間帯
-public class FixHalfDayWorkTimezone extends WorkTimeDomainObject {
+public class FixHalfDayWorkTimezone extends WorkTimeDomainObject implements Cloneable{
 
 	/** The rest timezone. */
 	// 休憩時間帯
@@ -153,6 +155,20 @@ public class FixHalfDayWorkTimezone extends WorkTimeDomainObject {
 	public boolean isInFixedWork() {
 		return this.restTimezone.getLstTimezone().stream().allMatch(
 				dedTime -> this.workTimezone.isInEmTimezone(dedTime) || this.workTimezone.isInOverTimezone(dedTime));
+	}
+	
+	@Override
+	public FixHalfDayWorkTimezone clone() {
+		FixHalfDayWorkTimezone cloned = new FixHalfDayWorkTimezone();
+		try {
+			cloned.restTimezone = this.restTimezone.clone();
+			cloned.workTimezone = this.workTimezone.clone();
+			cloned.dayAtr = AmPmAtr.valueOf(this.dayAtr.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("FixHalfDayWorkTimezone clone error.");
+		}
+		return cloned;
 	}
 
 }

@@ -19,7 +19,7 @@ import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
  */
 // 固定休憩時間の時間帯設定
 @Getter
-public class TimezoneOfFixedRestTimeSet extends WorkTimeDomainObject {
+public class TimezoneOfFixedRestTimeSet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The timezones. */
 	// 時間帯
@@ -93,5 +93,17 @@ public class TimezoneOfFixedRestTimeSet extends WorkTimeDomainObject {
 		return new AttendanceTime(this.timezones.stream()
 							 					.map(tc -> tc.timeSpan().lengthAsMinutes())
 							 					.collect(Collectors.summingInt(tc -> tc)));
+	}
+	
+	@Override
+	public TimezoneOfFixedRestTimeSet clone() {
+		TimezoneOfFixedRestTimeSet cloned = new TimezoneOfFixedRestTimeSet();
+		try {
+			cloned.timezones = this.timezones.stream().map(c -> c.clone()).collect(Collectors.toList());
+		}
+		catch (Exception e){
+			throw new RuntimeException("TimezoneOfFixedRestTimeSet clone error.");
+		}
+		return cloned;
 	}
 }

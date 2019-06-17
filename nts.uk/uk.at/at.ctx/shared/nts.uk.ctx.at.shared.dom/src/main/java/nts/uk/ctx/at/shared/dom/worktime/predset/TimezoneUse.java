@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.predset;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.common.TimeZone;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
@@ -13,7 +14,8 @@ import nts.uk.shr.com.time.TimeWithDayAttr;
  */
 //時間帯(使用区分付き)
 @Getter
-public class TimezoneUse extends TimeZone {
+@NoArgsConstructor
+public class TimezoneUse extends TimeZone implements Cloneable{
 
 	/** The use atr. */
 	// 使用区分
@@ -172,4 +174,18 @@ public class TimezoneUse extends TimeZone {
 		return this.useAtr == UseSetting.USE;
 	}
 
+	@Override
+	public TimezoneUse clone() {
+		TimezoneUse cloned = new TimezoneUse();
+		try {
+			cloned.start = new TimeWithDayAttr(this.start.valueAsMinutes());
+			cloned.end = new TimeWithDayAttr(this.end.valueAsMinutes());;
+			cloned.useAtr = UseSetting.valueOf(this.useAtr.value);
+			cloned.workNo = this.workNo;
+		}
+		catch (Exception e){
+			throw new RuntimeException("TimezoneUse clone error.");
+		}
+		return cloned;
+	}
 }

@@ -5,12 +5,14 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
 /**
  * The Class DeductionTime.
  */
 @Getter
+@NoArgsConstructor
 // 控除時間帯(丸め付き)
 public class DeductionTime extends TimeZone {
 	
@@ -98,6 +100,19 @@ public class DeductionTime extends TimeZone {
 		} else if (!start.equals(other.start))
 			return false;
 		return true;
+	}
+	
+	@Override
+	public DeductionTime clone() {
+		DeductionTime cloned = new DeductionTime();
+		try {
+			cloned.start = new TimeWithDayAttr(this.start.valueAsMinutes());
+			cloned.end = new TimeWithDayAttr(this.end.valueAsMinutes());
+		}
+		catch (Exception e){
+			throw new RuntimeException("DeductionTime clone error.");
+		}
+		return cloned;
 	}
 
 }

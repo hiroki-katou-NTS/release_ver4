@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.common.timerounding.TimeRoundingSetting;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 
@@ -13,7 +14,8 @@ import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
  */
 //インターバル時間設定
 @Getter
-public class IntervalTimeSetting extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class IntervalTimeSetting extends WorkTimeDomainObject implements Cloneable{
 
 	/** The use interval exemption time. */
 	// インターバル免除時間を使用する
@@ -54,5 +56,20 @@ public class IntervalTimeSetting extends WorkTimeDomainObject {
 		memento.setIntervalExemptionTimeRound(this.intervalExemptionTimeRound);
 		memento.setIntervalTime(this.intervalTime);
 		memento.setUseIntervalTime(this.useIntervalTime);
+	}
+	
+	@Override
+	public IntervalTimeSetting clone() {
+		IntervalTimeSetting cloned = new IntervalTimeSetting();
+		try {
+			cloned.useIntervalExemptionTime = this.useIntervalExemptionTime ? true : false ;
+			cloned.intervalExemptionTimeRound = this.intervalExemptionTimeRound.clone();
+			cloned.intervalTime = this.intervalTime.clone();
+			cloned.useIntervalTime = this.useIntervalTime ? true : false ;
+		}
+		catch (Exception e){
+			throw new RuntimeException("IntervalTimeSetting clone error.");
+		}
+		return cloned;
 	}
 }

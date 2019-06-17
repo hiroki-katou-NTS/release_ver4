@@ -7,6 +7,7 @@ package nts.uk.ctx.at.shared.dom.worktime.fixedset;
 import java.util.Optional;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
 
@@ -14,8 +15,9 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  * The Class FixedWorkCalcSetting.
  */
 @Getter
+@NoArgsConstructor
 // 固定勤務の計算設定
-public class FixedWorkCalcSetting extends WorkTimeDomainObject {
+public class FixedWorkCalcSetting extends WorkTimeDomainObject implements Cloneable{
 
 	/** The exceeded pred add vacation calc. */
 	// 休暇加算時間が所定を超過した場合の計算
@@ -81,4 +83,18 @@ public class FixedWorkCalcSetting extends WorkTimeDomainObject {
 		this.exceededPredAddVacationCalc.correctDefaultData(screenMode);
 		this.overTimeCalcNoBreak.correctDefaultData(screenMode);
 	}
+	
+	@Override
+	public FixedWorkCalcSetting clone() {
+		FixedWorkCalcSetting cloned = new FixedWorkCalcSetting();
+		try {
+			cloned.exceededPredAddVacationCalc = this.exceededPredAddVacationCalc.clone();
+			cloned.overTimeCalcNoBreak = this.overTimeCalcNoBreak.clone();
+		}
+		catch (Exception e){
+			throw new RuntimeException("FixedWorkSetting clone error.");
+		}
+		return cloned;
+	}
 }
+

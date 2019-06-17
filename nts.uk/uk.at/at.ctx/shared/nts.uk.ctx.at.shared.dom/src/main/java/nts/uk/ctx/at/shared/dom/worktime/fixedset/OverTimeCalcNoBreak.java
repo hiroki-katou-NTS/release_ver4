@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.fixedset;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.common.CalcMethodNoBreak;
 import nts.uk.ctx.at.shared.dom.worktime.common.OTFrameNo;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
@@ -14,8 +15,9 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  * The Class OverTimeCalcNoBreak.
  */
 @Getter
+@NoArgsConstructor
 // 休憩未取得時の残業計算
-public class OverTimeCalcNoBreak extends WorkTimeDomainObject {
+public class OverTimeCalcNoBreak extends WorkTimeDomainObject implements Cloneable{
 
 	/** The calc method. */
 	// 計算方法
@@ -105,5 +107,19 @@ public class OverTimeCalcNoBreak extends WorkTimeDomainObject {
 			this.inLawOT = new OTFrameNo(1);
 			this.notInLawOT = new OTFrameNo(1);
 		}
+	}
+	
+	@Override
+	public OverTimeCalcNoBreak clone() {
+		OverTimeCalcNoBreak cloned = new OverTimeCalcNoBreak();
+		try {
+			cloned.calcMethod = CalcMethodNoBreak.valueOf(this.calcMethod.value);
+			cloned.inLawOT = new OTFrameNo(this.inLawOT.v());
+			cloned.notInLawOT = new OTFrameNo(this.notInLawOT.v());
+		}
+		catch (Exception e){
+			throw new RuntimeException("OverTimeCalcNoBreak clone error.");
+		}
+		return cloned;
 	}
 }

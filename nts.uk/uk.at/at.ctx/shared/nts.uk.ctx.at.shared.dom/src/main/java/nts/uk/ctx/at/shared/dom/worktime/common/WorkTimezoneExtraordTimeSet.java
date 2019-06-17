@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.common.timerounding.TimeRoundingSetting;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
@@ -14,7 +15,8 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  */
 // 就業時間帯の臨時時間設定
 @Getter
-public class WorkTimezoneExtraordTimeSet extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class WorkTimezoneExtraordTimeSet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The holiday frame set. */
 	// 休出枠設定
@@ -68,5 +70,20 @@ public class WorkTimezoneExtraordTimeSet extends WorkTimeDomainObject {
 		if (ScreenMode.SIMPLE.equals(screenMode)) {
 			this.timeRoundingSet.setDefaultDataRoundingDown();
 		}
+	}
+	
+	@Override
+	public WorkTimezoneExtraordTimeSet clone() {
+		WorkTimezoneExtraordTimeSet cloned = new WorkTimezoneExtraordTimeSet();
+		try {
+			cloned.holidayFrameSet = this.holidayFrameSet.clone();
+			cloned.timeRoundingSet = this.timeRoundingSet.clone();
+			cloned.oTFrameSet = this.oTFrameSet.clone();
+			cloned.calculateMethod = ExtraordTimeCalculateMethod.valueOf(this.calculateMethod.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("AggregateTotalTimeSpentAtWork clone error.");
+		}
+		return cloned;
 	}
 }

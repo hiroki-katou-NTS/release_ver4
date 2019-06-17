@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.common.timerounding.TimeRoundingSetting;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 
@@ -13,7 +14,8 @@ import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
  */
 //就業時間帯の遅刻・早退別設定
 @Getter
-public class OtherEmTimezoneLateEarlySet extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class OtherEmTimezoneLateEarlySet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The del time rounding set. */
 	//控除時間丸め設定
@@ -74,5 +76,21 @@ public class OtherEmTimezoneLateEarlySet extends WorkTimeDomainObject {
 		else {
 			return recordTimeRoundingSet;
 		}
+	}
+	
+	@Override
+	public OtherEmTimezoneLateEarlySet clone() {
+		OtherEmTimezoneLateEarlySet cloned = new OtherEmTimezoneLateEarlySet();
+		try {
+			cloned.delTimeRoundingSet = this.delTimeRoundingSet.clone();
+			cloned.stampExactlyTimeIsLateEarly = this.stampExactlyTimeIsLateEarly ? true : false ;
+			cloned.graceTimeSet = this.graceTimeSet.clone();
+			cloned.recordTimeRoundingSet = this.recordTimeRoundingSet.clone();
+			cloned.lateEarlyAtr = LateEarlyAtr.valueOf(this.lateEarlyAtr.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("OtherEmTimezoneLateEarlySet clone error.");
+		}
+		return cloned;
 	}
 }

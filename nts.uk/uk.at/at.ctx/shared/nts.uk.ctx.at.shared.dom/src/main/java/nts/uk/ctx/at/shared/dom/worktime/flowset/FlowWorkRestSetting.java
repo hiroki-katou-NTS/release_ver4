@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.flowset;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.common.CommonRestSetting;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
@@ -14,7 +15,8 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  */
 // 流動勤務の休憩設定
 @Getter
-public class FlowWorkRestSetting extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class FlowWorkRestSetting extends WorkTimeDomainObject implements Cloneable{
 
 	/** The common rest setting. */
 	// 共通の休憩設定
@@ -50,5 +52,18 @@ public class FlowWorkRestSetting extends WorkTimeDomainObject {
 
 	public void correctDefaultData(ScreenMode screenMode,boolean fixRestTime) {
 		this.flowRestSetting.correctDefaultData(screenMode,fixRestTime);
+	}
+	
+	@Override
+	public FlowWorkRestSetting clone() {
+		FlowWorkRestSetting cloned = new FlowWorkRestSetting();
+		try {
+			cloned.commonRestSetting = this.commonRestSetting.clone();
+			cloned.flowRestSetting = this.flowRestSetting.clone();
+		}
+		catch (Exception e){
+			throw new RuntimeException("FlowWorkRestSetting clone error.");
+		}
+		return cloned;
 	}
 }

@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.common.timerounding.TimeRoundingSetting;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
@@ -14,7 +15,8 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
  */
 // 就業時間帯の医療設定
 @Getter
-public class WorkTimezoneMedicalSet extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class WorkTimezoneMedicalSet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The rounding set. */
 	// 丸め設定
@@ -63,5 +65,19 @@ public class WorkTimezoneMedicalSet extends WorkTimeDomainObject {
 			this.applicationTime = new OneDayTime(0);
 			this.roundingSet.setDefaultDataRoundingDown();
 		}
+	}
+	
+	@Override
+	public WorkTimezoneMedicalSet clone() {
+		WorkTimezoneMedicalSet cloned = new WorkTimezoneMedicalSet();
+		try {
+			cloned.roundingSet = this.roundingSet.clone();
+			cloned.workSystemAtr = WorkSystemAtr.valueOf(this.workSystemAtr.value);
+			cloned.applicationTime = new OneDayTime(this.applicationTime.v());
+		}
+		catch (Exception e){
+			throw new RuntimeException("AggregateTotalTimeSpentAtWork clone error.");
+		}
+		return cloned;
 	}
 }

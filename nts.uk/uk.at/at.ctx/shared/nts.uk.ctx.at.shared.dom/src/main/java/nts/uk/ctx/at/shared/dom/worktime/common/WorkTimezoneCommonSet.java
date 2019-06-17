@@ -6,9 +6,11 @@ package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.bonuspay.primitives.BonusPaySettingCode;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
@@ -19,7 +21,8 @@ import nts.uk.ctx.at.shared.dom.worktime.worktimeset.ScreenMode;
 // 就業時間帯の共通設定
 @Getter
 @AllArgsConstructor
-public class WorkTimezoneCommonSet extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class WorkTimezoneCommonSet extends WorkTimeDomainObject implements Cloneable{
 
 	/** The zero H stradd calculate set. */
 	// 0時跨ぎ計算設定
@@ -196,6 +199,34 @@ public class WorkTimezoneCommonSet extends WorkTimeDomainObject {
 				 this.lateEarlySet.changeCommonSet(this.getLateEarlySet().getCommonSet().isDelFromEmTime()?false:true),
 				 this.holidayCalculation,
 				 this.raisingSalarySet);
+	}
+	
+	@Override
+	public WorkTimezoneCommonSet clone() {
+		WorkTimezoneCommonSet cloned = new WorkTimezoneCommonSet();
+		try {
+			cloned.zeroHStraddCalculateSet = this.zeroHStraddCalculateSet ? true : false;
+			cloned.intervalSet = this.intervalSet.clone();
+			cloned.subHolTimeSet = this.subHolTimeSet.stream().map(c -> c.clone()).collect(Collectors.toList());
+			cloned.medicalSets = this.medicalSets.stream().map(c -> c.clone()).collect(Collectors.toList());
+			cloned.goOutSet = this.goOutSet.clone();
+			cloned.stampSet = this.stampSet.clone();
+			cloned.lateNightTimeSet = this.lateNightTimeSet.clone();
+			cloned.shortTimeWorkSet = this.shortTimeWorkSet.clone();
+			cloned.extraordTimeSet = this.extraordTimeSet.clone();
+			cloned.lateEarlySet = this.lateEarlySet.clone();
+			cloned.holidayCalculation = this.holidayCalculation.clone();
+			if(this.raisingSalarySet.isPresent()) {
+				cloned.raisingSalarySet = this.raisingSalarySet.map(c -> new BonusPaySettingCode(c.v()));
+			}
+			else {
+				cloned.raisingSalarySet = Optional.empty();
+			}
+		}
+		catch (Exception e){
+			throw new RuntimeException("WorkTimezoneCommonSet clone error.");
+		}
+		return cloned;
 	}
 	
 }

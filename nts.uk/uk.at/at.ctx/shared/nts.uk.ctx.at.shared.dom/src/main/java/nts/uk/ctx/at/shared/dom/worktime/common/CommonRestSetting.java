@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.common;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
 
 /**
@@ -12,7 +13,8 @@ import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeDomainObject;
  */
 // 共通の休憩設定
 @Getter
-public class CommonRestSetting extends WorkTimeDomainObject {
+@NoArgsConstructor
+public class CommonRestSetting extends WorkTimeDomainObject implements Cloneable{
 
 	/** The calculate method. */
 	// 休憩時間中に退勤した場合の計算方法
@@ -55,5 +57,15 @@ public class CommonRestSetting extends WorkTimeDomainObject {
 		this.calculateMethod = RestTimeOfficeWorkCalcMethod.OFFICE_WORK_APPROP_ALL;
 	}
 
-	
+	@Override
+	public CommonRestSetting clone() {
+		CommonRestSetting cloned = new CommonRestSetting();
+		try {
+			cloned.calculateMethod = RestTimeOfficeWorkCalcMethod.valueOf(this.calculateMethod.value);
+		}
+		catch (Exception e){
+			throw new RuntimeException("CommonRestSetting clone error.");
+		}
+		return cloned;
+	}
 }
