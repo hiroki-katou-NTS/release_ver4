@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.error.BusinessException;
 import nts.arc.layer.dom.AggregateRoot;
@@ -19,6 +20,7 @@ import nts.arc.layer.dom.AggregateRoot;
  */
 // 勤務種類
 @Getter
+@NoArgsConstructor
 public class WorkType extends AggregateRoot implements Cloneable{
 
 	/** The company id. */
