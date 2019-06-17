@@ -239,7 +239,9 @@ public class RecoveryStorageService {
 						tableListByCategory.getTables().get(j).getInternalFileName(), listSid.isEmpty() ? false : true,
 						tableListByCategory.getTables().get(j).getTableEnglishName(), 
 						tableListByCategory.getTables().get(j).getTableJapaneseName(),
-						tableListByCategory.getTables().get(j).getTableNo());
+						tableListByCategory.getTables().get(j).getTableNo(),
+						tableListByCategory.getTables().get(j).getHasParentTblFlg()
+						);
 					tableList.add(targetData);
 			}
 			
@@ -315,7 +317,11 @@ public class RecoveryStorageService {
 
 		// Create [対象データ] TargetData
 		Set<String> hashId = new HashSet<>();
-		List<DataRecoveryTable> listTables = new ArrayList<>();
+		
+		List<DataRecoveryTable> listTablesOrder = new ArrayList<>();
+		List<DataRecoveryTable> parentTables = new ArrayList<>();
+		List<DataRecoveryTable> childTables= new ArrayList<>();
+		
 		HashMap<String, CSVBufferReader> csvByteReadMaper_TableNotUse = new HashMap<>();
 		for (int j = 0; j < tableNotUseByCategory.getTables().size(); j++) {
 
@@ -325,24 +331,40 @@ public class RecoveryStorageService {
 			// -- Tổng hợp ID Nhân viên duy nhất từ List Data
 			hashId.addAll(listSid);
 
-			DataRecoveryTable targetData = new DataRecoveryTable(uploadId,
-					tableNotUseByCategory.getTables().get(j).getInternalFileName(), listSid.isEmpty() ? false : true,
-							tableNotUseByCategory.getTables().get(j).getTableEnglishName(),
-							tableNotUseByCategory.getTables().get(j).getTableJapaneseName(),
-							tableNotUseByCategory.getTables().get(j).getTableNo());
-
-				listTables.add(targetData);
-
 			String filePath = getExtractDataStoragePath(uploadId) + "//"
 					+ tableNotUseByCategory.getTables().get(j).getInternalFileName() + ".csv";
 
 			CSVBufferReader reader = new CSVBufferReader(new File(filePath));
 			reader.setCharset("UTF-8");
 			csvByteReadMaper_TableNotUse.put(tableNotUseByCategory.getTables().get(j).getInternalFileName(), reader);
+			
+			DataRecoveryTable targetData = new DataRecoveryTable(uploadId,
+					tableNotUseByCategory.getTables().get(j).getInternalFileName(), listSid.isEmpty() ? false : true,
+							tableNotUseByCategory.getTables().get(j).getTableEnglishName(),
+							tableNotUseByCategory.getTables().get(j).getTableJapaneseName(),
+							tableNotUseByCategory.getTables().get(j).getTableNo(),
+							tableNotUseByCategory.getTables().get(j).getHasParentTblFlg());
+			
+			if (tableNotUseByCategory.getTables().get(j).getHasParentTblFlg() == NotUseAtr.USE) {
+				childTables.add(targetData);
+			} else {
+				parentTables.add(targetData);
+			}
 		}
 		
+		parentTables.sort((o2, o1) -> {
+			return o1.getTableNo().compareTo(o2.getTableNo());
+		});
+
+		childTables.sort((o2, o1) -> {
+			return o1.getTableNo().compareTo(o2.getTableNo());
+		});
+		
+		listTablesOrder.addAll(childTables);
+		listTablesOrder.addAll(parentTables);
+		
 		// テーブル一覧のカレントの1行分の項目を取得する
-		for (DataRecoveryTable tableC : listTables) {
+		for (DataRecoveryTable tableC : listTablesOrder) {
 			
 			//Optional<TableList> table = performDataRecoveryRepository.getByInternal(tableC.getFileNameCsv(), dataRecoveryProcessId);
 			
@@ -363,7 +385,7 @@ public class RecoveryStorageService {
 
 			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, table.get().getInternalFileName(),
 																		hasSidInCsv.isEmpty() ? false : true, table.get().getTableEnglishName(), table.get().getTableJapaneseName(),
-																		table.get().getTableNo());
+																		table.get().getTableNo(), table.get().getHasParentTblFlg());
 
 			condition = exDataTabeRangeDate(dataRecoveryTable, table , dataRecoveryProcessId,
 					csvByteReadMaper_TableNotUse);
