@@ -1119,8 +1119,9 @@ public class DailyModifyResCommandFacade {
 	    Map<Integer, List<DPItemValue>> errorMonth = validatorDataDaily.errorMonthNew(pairError.getErrorMonth());
 		// val errorMonth = validatorDataDaily.errorMonth(resultIU.getLstMonthDomain(),
 		// monthParam);
+	    List<EmployeeMonthlyPerError> errorYearHoliday = pairError.getErrorMonth().stream().filter(x -> x.getAnnualHoliday().isPresent()).collect(Collectors.toList());
 	    Set<Pair<String, GeneralDate>> detailEmployeeError = new HashSet<>();
-		if (!errorMonth.isEmpty() && !pairError.isOnlyErrorOldDb()) {
+		if (!errorMonth.isEmpty() && (!pairError.isOnlyErrorOldDb() || (mode == 0 && !errorYearHoliday.isEmpty() && monthValue.getItems() != null && !monthValue.getItems().isEmpty()))) {
 			resultErrorMonth.putAll(errorMonth);
 			detailEmployeeError.addAll(pairError.getDetailEmployeeError());
 			hasError =  true;
