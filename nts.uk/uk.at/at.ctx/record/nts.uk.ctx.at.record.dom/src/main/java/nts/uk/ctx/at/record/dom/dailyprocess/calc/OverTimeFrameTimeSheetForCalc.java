@@ -537,11 +537,13 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
         	val beforeRec = this.getRecordedTimeSheet().stream()
         										.filter(tc -> tc.createDuplicateRange(new TimeSpanForCalc(this.calcrange.getStart(), baseTime)).isPresent())
         										.map(tc -> tc.createDuplicateRange(new TimeSpanForCalc(this.calcrange.getStart(), baseTime)).get())
+        										.map(tc -> tc.reCreateOwn(baseTime, true))
         										.collect(Collectors.toList());
         	//控除の控除時間帯
         	val beforeDed = this.getDeductionTimeSheet().stream()
 												.filter(tc -> tc.createDuplicateRange(new TimeSpanForCalc(this.calcrange.getStart(), baseTime)).isPresent())
 												.map(tc -> tc.createDuplicateRange(new TimeSpanForCalc(this.calcrange.getStart(), baseTime)).get())
+												.map(tc -> tc.reCreateOwn(baseTime, true))
 												.collect(Collectors.toList());
         	val beforeBp = this.getBonusPayTimeSheet().stream()
 												.filter(tc -> tc.createDuplicateRange(new TimeSpanForCalc(this.calcrange.getStart(), baseTime)).isPresent())
@@ -552,9 +554,15 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 												.map(tc -> tc.createDuplicateRange(new TimeSpanForCalc(this.calcrange.getStart(), baseTime)).get())
 												.collect(Collectors.toList());
         	//深夜時間帯
-        	Optional<MidNightTimeSheetForCalc> beforeMid = this.getMidNightTimeSheet().isPresent()
-        													?this.getMidNightTimeSheet().get().getDuplicateRangeTimeSheet(new TimeSpanForCalc(this.calcrange.getStart(), baseTime))
-        													:Optional.empty();
+        	Optional<MidNightTimeSheetForCalc> beforeMid = Optional.empty();
+        	if(this.getMidNightTimeSheet().isPresent()) {
+        		beforeMid = this.getMidNightTimeSheet().get().getDuplicateRangeTimeSheet(new TimeSpanForCalc(this.calcrange.getStart(), baseTime));
+        		if(beforeMid.isPresent()) {
+        			beforeMid = beforeMid.get().reCreateOwn(baseTime, true);
+        		}
+        	}
+        	
+        													
         	
             returnList.add(new OverTimeFrameTimeSheetForCalc(new TimeZoneRounding(this.calcrange.getStart(), baseTime, new TimeRoundingSetting(Unit.ROUNDING_TIME_1MIN, Rounding.ROUNDING_DOWN))
                                                          ,new TimeSpanForCalc(this.calcrange.getStart(), baseTime)
@@ -576,11 +584,13 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
         	val afterRec = this.getRecordedTimeSheet().stream()
         										.filter(tc -> tc.createDuplicateRange(new TimeSpanForCalc(baseTime, this.calcrange.getEnd())).isPresent())
         										.map(tc -> tc.createDuplicateRange(new TimeSpanForCalc(baseTime, this.calcrange.getEnd())).get())
+        										.map(tc -> tc.reCreateOwn(baseTime, false))
         										.collect(Collectors.toList());
         	//控除の控除時間帯
         	val afterDed = this.getDeductionTimeSheet().stream()
 												.filter(tc -> tc.createDuplicateRange(new TimeSpanForCalc(baseTime, this.calcrange.getEnd())).isPresent())
 												.map(tc -> tc.createDuplicateRange(new TimeSpanForCalc(baseTime, this.calcrange.getEnd())).get())
+												.map(tc -> tc.reCreateOwn(baseTime, false))
 												.collect(Collectors.toList());
         	val afterBp = this.getBonusPayTimeSheet().stream()
 												.filter(tc -> tc.createDuplicateRange(new TimeSpanForCalc(baseTime, this.calcrange.getEnd())).isPresent())
@@ -591,9 +601,13 @@ public class OverTimeFrameTimeSheetForCalc extends CalculationTimeSheet{
 												.map(tc -> tc.createDuplicateRange(new TimeSpanForCalc( baseTime, this.calcrange.getEnd())).get())
 												.collect(Collectors.toList());
         	//深夜時間帯
-        	Optional<MidNightTimeSheetForCalc> afterMid = this.getMidNightTimeSheet().isPresent()
-        													?this.getMidNightTimeSheet().get().getDuplicateRangeTimeSheet(new TimeSpanForCalc(baseTime, this.calcrange.getEnd()))
-        													:Optional.empty();
+        	Optional<MidNightTimeSheetForCalc> afterMid = Optional.empty();
+        	if(this.getMidNightTimeSheet().isPresent()) {
+        		afterMid = this.getMidNightTimeSheet().get().getDuplicateRangeTimeSheet(new TimeSpanForCalc(baseTime, this.calcrange.getEnd()));
+        		if(afterMid.isPresent()) {
+        			afterMid = afterMid.get().reCreateOwn(baseTime, false);
+        		}
+        	}												
             
             returnList.add(new OverTimeFrameTimeSheetForCalc(new TimeZoneRounding(baseTime, this.calcrange.getEnd(), this.timeSheet.getRounding())
                                                           ,new TimeSpanForCalc(baseTime, this.calcrange.getEnd())
