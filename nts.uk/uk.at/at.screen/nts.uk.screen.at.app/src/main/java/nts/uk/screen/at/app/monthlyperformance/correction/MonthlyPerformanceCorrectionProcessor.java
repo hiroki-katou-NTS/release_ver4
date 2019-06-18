@@ -271,20 +271,30 @@ public class MonthlyPerformanceCorrectionProcessor {
 		if (param.getInitMenuMode() == 0 || param.getInitMenuMode() == 1) {// normal mode hoac unlock mode
 			// 7. アルゴリズム「通常モードで起動する」を実行する
 			// アルゴリズム「<<Public>> 就業条件で社員を検索して並び替える」を実行する
-			if (param.getLstEmployees() != null && !param.getLstEmployees().isEmpty()) {
-				screenDto.setLstEmployee(param.getLstEmployees());
-			} else {
-				List<RegulationInfoEmployeeQueryR> regulationRs = regulationInfoEmployeePub.search(
-						createQueryEmployee(new ArrayList<>(), screenDto.getLstActualTimes().get(0).getStartDate(),
-								screenDto.getLstActualTimes().get(0).getEndDate()));
+			List<RegulationInfoEmployeeQueryR> regulationRs = regulationInfoEmployeePub
+					.search(createQueryEmployee(new ArrayList<>(), screenDto.getLstActualTimes().get(0).getStartDate(),
+							screenDto.getLstActualTimes().get(0).getEndDate()));
 
-				List<MonthlyPerformanceEmployeeDto> lstEmployeeDto = regulationRs.stream().map(item -> {
-					return new MonthlyPerformanceEmployeeDto(item.getEmployeeId(), item.getEmployeeCode(),
-							item.getEmployeeName(), item.getWorkplaceName(), item.getWorkplaceId(), "", false);
-				}).collect(Collectors.toList());
-				screenDto.setLstEmployee(lstEmployeeDto);
-				param.setLstEmployees(lstEmployeeDto);
+			List<MonthlyPerformanceEmployeeDto> lstEmployeeDto = regulationRs.stream().map(item -> {
+				return new MonthlyPerformanceEmployeeDto(item.getEmployeeId(), item.getEmployeeCode(),
+						item.getEmployeeName(), item.getWorkplaceName(), item.getWorkplaceId(), "", false);
+			}).collect(Collectors.toList());
+			
+			List<String> lstSId = lstEmployeeDto.stream().map(x->x.getId()).collect(Collectors.toList());
+			List<MonthlyPerformanceEmployeeDto> lstEmployee = new ArrayList<>();
+			
+			if (param.getLstEmployees() != null && !param.getLstEmployees().isEmpty()) {
+				param.getLstEmployees().forEach(x -> {
+					if (lstSId.contains(x.getId())) {
+						lstEmployee.add(x);
+					}
+				});
+			} else {
+				lstEmployee.addAll(lstEmployeeDto);
 			}
+			screenDto.setLstEmployee(lstEmployee);
+			param.setLstEmployees(lstEmployee);
+			
 			screenDto.setLoginUser(employeeId);
 
 			List<String> employeeIds = screenDto.getLstEmployee().stream().map(e -> e.getId())

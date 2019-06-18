@@ -878,9 +878,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
             //            self.monthlyParam().initMenuMode = self.initMode();
             self.monthlyParam().closureId = self.closureId(); 
             self.monthlyParam().yearMonth = date; 
-            // fixbug 106550: set lstEmployees = [] để lên server tim lại lstEmployees mới 
-            // chỉ áp dụng cho khi next/back yearMonth
-            self.monthlyParam().lstEmployees = self.flagSelectEmployee  ? self.lstEmployee() : [];
+            self.monthlyParam().lstEmployees = self.lstEmployee();
 
             if ($("#dpGrid").data('mGrid')) {
                 $("#dpGrid").mGrid("destroy");
