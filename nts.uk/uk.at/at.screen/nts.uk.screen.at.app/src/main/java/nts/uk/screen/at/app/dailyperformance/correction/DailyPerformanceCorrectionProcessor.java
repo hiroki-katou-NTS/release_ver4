@@ -322,7 +322,7 @@ public class DailyPerformanceCorrectionProcessor {
 		//保持パラメータを生成する(Tạo retentionParam-Param lưu giữ )
 		//<<Public>> パラメータに初期値を設定する
 		///期間を変更する
-		dateRange = changeDateRange(dateRange, objectShare, companyId, sId, screenDto);
+		dateRange = changeDateRange(dateRange, objectShare, companyId, sId, screenDto, mode);
 		
 		///TODO 表示形式を変更する -- get from Characteristic 
 		DateRange datePeriodResult = dateRange;
@@ -1942,7 +1942,7 @@ public class DailyPerformanceCorrectionProcessor {
 		return new ChangeSPR(change31, change34);
 	}
 	
-	public DateRange changeDateRange(DateRange dateRange, ObjectShare objectShare, String companyId, String sId, DailyPerformanceCorrectionDto screenDto){
+	public DateRange changeDateRange(DateRange dateRange, ObjectShare objectShare, String companyId, String sId, DailyPerformanceCorrectionDto screenDto, Integer mode){
 		
 		if (dateRange != null){
 			screenDto.setEmploymentCode(getEmploymentCode(companyId, dateRange.getEndDate(), sId));
@@ -1978,6 +1978,11 @@ public class DailyPerformanceCorrectionProcessor {
 				if (closingPeriod.isPresent()) {
 					dateRange = new DateRange(closingPeriod.get().getClosureStartDate(),
 							closingPeriod.get().getClosureEndDate());
+					//システム日付を含む期間に変更する（暫定処理）
+					if(mode == ScreenMode.NORMAL.value && dateRange.inRange(GeneralDate.today())) {
+						//Delay the parameter "Status of daily achievement correction. Period covered" by 1 month
+						return dateRange.changeMonth(+1);
+					}
 					return dateRange;
 				}
 			}
