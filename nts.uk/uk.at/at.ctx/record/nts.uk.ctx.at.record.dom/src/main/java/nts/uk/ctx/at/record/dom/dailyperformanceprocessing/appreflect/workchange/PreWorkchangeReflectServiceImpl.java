@@ -75,7 +75,7 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 			CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
 					workchangePara.getEmployeeId(), workchangePara.getBaseDate(),
 					ApplicationType.WORK_CHANGE_APPLICATION,
-					workchangePara.getWorkTimeCode(),
+					workchangePara.getWorkTypeCode(),
 					workchangePara.getWorkTimeCode() == null ? Optional.empty() : Optional.of(workchangePara.getWorkTimeCode()),
 					workchangePara.getStartTime() == null ? Optional.empty() : Optional.of(workchangePara.getStartTime()),
 					workchangePara.getEndTime() == null ? Optional.empty() : Optional.of(workchangePara.getEndTime()));

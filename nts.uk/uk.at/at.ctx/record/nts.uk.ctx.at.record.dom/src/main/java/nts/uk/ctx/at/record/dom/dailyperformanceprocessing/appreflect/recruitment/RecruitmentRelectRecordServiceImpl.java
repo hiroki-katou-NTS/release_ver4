@@ -54,7 +54,7 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(daily,
 				param.getEmployeeId(), param.getBaseDate(),
 				ApplicationType.COMPLEMENT_LEAVE_APPLICATION,
-				param.getWorkTimeCode(),
+				param.getWorkTypeCode(),
 				param.getWorkTimeCode() == null ? Optional.empty() : Optional.of(param.getWorkTimeCode()),
 				param.getStartTime() == null ? Optional.empty() : Optional.of(param.getStartTime()),
 				param.getEndTime() == null ? Optional.empty() : Optional.of(param.getEndTime()));

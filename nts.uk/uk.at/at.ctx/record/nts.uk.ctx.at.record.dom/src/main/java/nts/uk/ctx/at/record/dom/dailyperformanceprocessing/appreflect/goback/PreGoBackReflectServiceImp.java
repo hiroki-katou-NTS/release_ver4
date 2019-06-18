@@ -46,7 +46,7 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
 				para.getEmployeeId(), para.getDateData(),
 				ApplicationType.GO_RETURN_DIRECTLY_APPLICATION,
-				para.getGobackData().getWorkTimeCode(),
+				para.getGobackData().getWorkTypeCode(),
 				para.getGobackData().getWorkTimeCode() == null ? Optional.empty() : Optional.of(para.getGobackData().getWorkTimeCode()),
 				para.getGobackData().getStartTime1() == null ? Optional.empty() : Optional.of(para.getGobackData().getStartTime1()),
 				para.getGobackData().getEndTime1() == null ? Optional.empty() : Optional.of(para.getGobackData().getEndTime1()));
@@ -69,7 +69,7 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
 				para.getEmployeeId(), para.getDateData(),
 				ApplicationType.GO_RETURN_DIRECTLY_APPLICATION,
-				para.getGobackData().getWorkTimeCode(),
+				para.getGobackData().getWorkTypeCode(),
 				para.getGobackData().getWorkTimeCode() == null ? Optional.empty() : Optional.of(para.getGobackData().getWorkTimeCode()),
 				para.getGobackData().getStartTime1() == null ? Optional.empty() : Optional.of(para.getGobackData().getStartTime1()),
 				para.getGobackData().getEndTime1() == null ? Optional.empty() : Optional.of(para.getGobackData().getEndTime1()));

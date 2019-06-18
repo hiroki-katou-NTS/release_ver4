@@ -135,7 +135,7 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
 				param.getEmployeeId(), param.getDateInfo(),
 				ApplicationType.OVER_TIME_APPLICATION,
-				param.getOvertimePara().getWorkTimeCode(),
+				param.getOvertimePara().getWorkTypeCode(),
 				param.getOvertimePara().getWorkTimeCode() == null ? Optional.empty() : Optional.of(param.getOvertimePara().getWorkTimeCode()),
 				param.getOvertimePara().getStartTime1() == null ? Optional.empty() : Optional.of(param.getOvertimePara().getStartTime1()),
 				param.getOvertimePara().getEndTime1() == null ? Optional.empty() : Optional.of(param.getOvertimePara().getEndTime1()));
