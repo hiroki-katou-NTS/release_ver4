@@ -35,7 +35,7 @@ public interface CommonProcessCheckService {
 	 * @param integrationOfDaily
 	 * @param isOT: True 残業申請, False：　残業申請じゃない
 	 */
-	public void calculateOfAppReflect(IntegrationOfDaily integrationOfDaily, String sid, GeneralDate ymd, boolean isOT);
+	public void calculateOfAppReflect(CommonCalculateOfAppReflectParam commonPara);
 	/**
 	 * 就業時間帯の休憩時間帯を日別実績に反映する
 	 * @param sid

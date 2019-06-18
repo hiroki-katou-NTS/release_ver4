@@ -167,19 +167,16 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 		return reflectOutput;
 	}
 	@Override
-	public Optional<TimeLeavingOfDailyPerformance> reflectTime(GobackReflectParameter para, boolean workTypeTimeReflect) {
+	public void reflectTime(GobackReflectParameter para, boolean workTypeTimeReflect,WorkInfoOfDailyPerformance dailyInfor,
+			Optional<TimeLeavingOfDailyPerformance> attendanceLeave) {
 		String tmpWorkTimeCode;
 		//INPUT．勤種・就時の反映できるフラグをチェックする
 		if(workTypeTimeReflect) {
 			tmpWorkTimeCode = para.getGobackData().getWorkTimeCode();
 		} else {
 			//ドメインモデル「日別実績の勤務情報」を取得する
-			Optional<WorkInfoOfDailyPerformance> optWorkData = workInfor.find(para.getEmployeeId(), para.getDateData());
-			if(!optWorkData.isPresent()) {
-				return Optional.empty();
-			} 
-			WorkInfoOfDailyPerformance workData = optWorkData.get();
-			tmpWorkTimeCode = workData.getRecordInfo().getWorkTimeCode() == null ? null : workData.getRecordInfo().getWorkTimeCode().v();
+			
+			tmpWorkTimeCode = dailyInfor.getRecordInfo().getWorkTimeCode() == null ? null : dailyInfor.getRecordInfo().getWorkTimeCode().v();
 		}
 		//出勤時刻を反映できるかチェックする
 		boolean isStart1 = this.checkAttendenceReflect(para, 1, true);
@@ -192,7 +189,7 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 		//終了時刻の反映
 		Integer endTime1 = isEnd1 ? this.justTimeLateLeave(tmpWorkTimeCode, para.getGobackData().getEndTime1(), 1, false) : null;		
 		TimeReflectPara timePara1 = new TimeReflectPara(para.getEmployeeId(), para.getDateData(), startTime1, endTime1, 1, isStart1, isEnd1);
-		TimeLeavingOfDailyPerformance timeDaily = scheUpdateService.updateRecordStartEndTimeReflect(timePara1);		
+		scheUpdateService.updateRecordStartEndTimeReflect(timePara1, attendanceLeave);		
 		/*//出勤時刻２を反映できるか
 		boolean startTime2 = this.checkAttendenceReflect(para, 2, true);
 		//ジャスト遅刻により時刻を編集する
@@ -203,7 +200,6 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 		Integer timeLeave2 = endTime2 ? this.justTimeLateLeave(tmpWorkTimeCode, para.getGobackData().getEndTime2(), 2, false) : null;
 		TimeReflectPara timePara2 = new TimeReflectPara(para.getEmployeeId(), para.getDateData(), timeLate2, timeLeave2, 2, startTime2, endTime2);
 		scheUpdateService.updateRecordStartEndTimeReflect(timePara2);*/
-		return Optional.of(timeDaily);				
 	}
 	@Override
 	public boolean checkAttendenceReflect(GobackReflectParameter para, Integer frameNo, boolean isPre) {

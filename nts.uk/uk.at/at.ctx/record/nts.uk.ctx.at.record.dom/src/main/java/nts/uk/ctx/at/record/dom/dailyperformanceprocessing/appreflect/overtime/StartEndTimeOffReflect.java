@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime;
 
+import java.util.Optional;
+
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
@@ -30,7 +32,8 @@ public interface StartEndTimeOffReflect {
 	 * @param workInfo
 	 * @return
 	 */
-	public TimeLeavingOfDailyPerformance startEndTimeOutput(StartEndTimeRelectCheck param, WorkInfoOfDailyPerformance workInfo);
+	public TimeLeavingOfDailyPerformance startEndTimeOutput(StartEndTimeRelectCheck param, WorkInfoOfDailyPerformance workInfo,
+			Optional<TimeLeavingOfDailyPerformance> attendanceLeave);
 	/**
 	 * ジャスト遅刻早退により時刻を編集する
 	 * @param startEndTime

@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCalculateOfAppReflectParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.HolidayWorkReflectProcess;
@@ -16,11 +17,10 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.S
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.StartEndTimeOutput;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
-import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
+import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 
 @Stateless
 public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectRecordService {
@@ -32,8 +32,6 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 	private StartEndTimeOffReflect startEndTimeOffReflect;
 	@Inject
 	private PreHolidayWorktimeReflectService holidayWorktimeService;
-	@Inject
-	private WorkInformationRepository workRepository;
 	@Inject
 	private CommonProcessCheckService commonService;
 	@Override
@@ -49,11 +47,18 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 				param.getWorkTypeCode(), false);		
 		dailyInfor = workUpdate.updateWorkTimeType(reflectData, false, dailyInfor);
 		//日別実績の勤務情報  変更
-		workRepository.updateByKeyFlush(dailyInfor);
-		daily.setWorkInformation(dailyInfor);
+		//workRepository.updateByKeyFlush(dailyInfor);
+		//daily.setWorkInformation(dailyInfor);
 		//開始終了時刻の反映
-		daily = this.reflectRecordStartEndTime(param, daily);			
-		commonService.calculateOfAppReflect(daily, param.getEmployeeId(), param.getBaseDate(), false);
+		daily = this.reflectRecordStartEndTime(param, daily);	
+		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(daily,
+				param.getEmployeeId(), param.getBaseDate(),
+				ApplicationType.COMPLEMENT_LEAVE_APPLICATION,
+				param.getWorkTimeCode(),
+				param.getWorkTimeCode() == null ? Optional.empty() : Optional.of(param.getWorkTimeCode()),
+				param.getStartTime() == null ? Optional.empty() : Optional.of(param.getStartTime()),
+				param.getEndTime() == null ? Optional.empty() : Optional.of(param.getEndTime()));
+		commonService.calculateOfAppReflect(calcParam);
 	}
 
 	@Override
@@ -84,14 +89,14 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 		
 		boolean isEndTime = this.checkReflectRecordStartEndTime(param.getWorkTypeCode(), 1, false, param.getEmployeeId(), param.getBaseDate());
 
-		TimeLeavingOfDailyPerformance dailyPerformance = null;
+		//TimeLeavingOfDailyPerformance dailyPerformance = null;
 		if(isStartTime || isEndTime) {			
 			//開始時刻の反映
 			////終了時刻の反映
 			TimeReflectPara startTimeData = new TimeReflectPara(param.getEmployeeId(), param.getBaseDate(), justLateEarly.getStart1(), 
 					justLateEarly.getEnd1(), 1, isStartTime, isEndTime);
-			dailyPerformance =  workUpdate.updateRecordStartEndTimeReflectRecruitment(startTimeData);
-			daily.setAttendanceLeave(Optional.of(dailyPerformance));
+			workUpdate.updateRecordStartEndTimeReflectRecruitment(startTimeData, daily.getAttendanceLeave());
+			//daily.setAttendanceLeave(Optional.of(dailyPerformance));
 			
 		}		
 		//休出時間振替時間をクリアする

@@ -40,7 +40,8 @@ public interface ScheTimeReflect {
 	 * 時刻の反映
 	 * @param para
 	 */
-	public Optional<TimeLeavingOfDailyPerformance> reflectTime(GobackReflectParameter para, boolean workTypeTimeReflect);
+	public void reflectTime(GobackReflectParameter para, boolean workTypeTimeReflect,WorkInfoOfDailyPerformance dailyInfor, 
+			Optional<TimeLeavingOfDailyPerformance> attendanceLeave);
 	/**
 	 * 1.出勤時刻を反映できるか
 	 * 2.退勤時刻を反映できるか
