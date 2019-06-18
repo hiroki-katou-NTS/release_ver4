@@ -63,7 +63,7 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 		afterScheTime.reflectScheTime(para, chkTimeTypeChe.isChkReflect(), chkTimeTypeChe.getDailyInfo());
 		//勤種・就時の反映
 		AppReflectRecordWork reflectWorkTypeTime = timeTypeSche.reflectRecordWorktimetype(para, workInfor);
-		workRepository.updateByKeyFlush(reflectWorkTypeTime.getDailyInfo());
+		//workRepository.updateByKeyFlush(reflectWorkTypeTime.getDailyInfo());
 		//時刻の反映
 		scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect(), workInfor, dailyInfor.getAttendanceLeave());
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
