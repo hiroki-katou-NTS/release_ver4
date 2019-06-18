@@ -449,6 +449,14 @@ public class WorkType extends AggregateRoot implements Cloneable{
 		}
 		return cloned;
 	}
-
-
+	
+	/**
+	 * Web終業時刻計算対象の判断
+	 * @return true:対象,false:対象外
+	 */
+	public boolean isCalcTargetForEndClock() {
+		if (this.workTypeCode.v().compareTo("002") == 0) return false;	// 半出＋プレミアム
+		if (this.workTypeCode.v().compareTo("105") == 0) return false;	// プレミアムデー
+		return true;
+	}
 }
