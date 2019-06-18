@@ -136,6 +136,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	@Override
 	public void calculateOfAppReflect(CommonCalculateOfAppReflectParam commonPara) {
 		Optional<WorkingConditionItem> optWorkingCondition = workingCondition.getBySidAndStandardDate(commonPara.getSid(), commonPara.getYmd());
+		List<EditStateOfDailyPerformance> lstEditState = dailyReposiroty.findByKey(commonPara.getSid(), commonPara.getYmd());
+		commonPara.getIntegrationOfDaily().setEditState(lstEditState);
 		String companyId = AppContexts.user().companyId();
 		//就業時間帯の休憩時間帯を日別実績に反映する
 		this.updateBreakTimeInfor(commonPara.getSid(),

@@ -67,7 +67,7 @@ public class ScheTimeLeavingOfDailyService {
 		TimezoneUse timeZone = lstTimeZone.get(0);
 		List<ScheduleTimeSheet> scheduleTimeSheets = dailyInfor.getWorkInformation().getScheduleTimeSheets().stream()
 				.filter(x -> x.getWorkNo().v() == 1).collect(Collectors.toList());
-		scheduleTimeSheets.stream().map(y -> {
+		scheduleTimeSheets = scheduleTimeSheets.stream().map(y -> {
 			//パラメータ「補正後日別実績．日別実績(Work)．勤務情報．勤務予定の勤務情報．勤務予定時間帯．出勤」　←　取得した「時間帯(使用区分付き)．開始」
 			return new ScheduleTimeSheet(y.getWorkNo().v(), timeZone.getStart().v(), timeZone.getEnd().v());
 		}).collect(Collectors.toList());
@@ -75,6 +75,7 @@ public class ScheTimeLeavingOfDailyService {
 			ScheduleTimeSheet scheTime = new ScheduleTimeSheet(1, timeZone.getStart().v(), timeZone.getEnd().v());
 			dailyInfor.getWorkInformation().getScheduleTimeSheets().add(scheTime);
 		}
+		dailyInfor.getWorkInformation().setScheduleTimeSheets(scheduleTimeSheets);
 		//マージした出退勤時刻の「編集状態」を更新するする
 		List<EditStateOfDailyPerformance> lstEditScheStartTime = dailyInfor.getEditState().stream()
 				.filter(x -> x.getAttendanceItemId() == 3)
@@ -85,7 +86,7 @@ public class ScheTimeLeavingOfDailyService {
 					EditStateSetting.REFLECT_APPLICATION);
 			dailyInfor.getEditState().add(editScheStartTime);
 		} else {
-			lstEditScheStartTime.stream().map(x -> new EditStateOfDailyPerformance(x.getEmployeeId(),
+			lstEditScheStartTime = lstEditScheStartTime.stream().map(x -> new EditStateOfDailyPerformance(x.getEmployeeId(),
 					x.getAttendanceItemId(),
 					x.getYmd(),
 					EditStateSetting.REFLECT_APPLICATION)).collect(Collectors.toList());
@@ -99,7 +100,7 @@ public class ScheTimeLeavingOfDailyService {
 					EditStateSetting.REFLECT_APPLICATION);
 			dailyInfor.getEditState().add(editScheEndTime);
 		} else {
-			lstEditScheEndTime.stream().map(x -> new EditStateOfDailyPerformance(x.getEmployeeId(),
+			lstEditScheEndTime = lstEditScheEndTime.stream().map(x -> new EditStateOfDailyPerformance(x.getEmployeeId(),
 					x.getAttendanceItemId(),
 					x.getYmd(),
 					EditStateSetting.REFLECT_APPLICATION)).collect(Collectors.toList());
