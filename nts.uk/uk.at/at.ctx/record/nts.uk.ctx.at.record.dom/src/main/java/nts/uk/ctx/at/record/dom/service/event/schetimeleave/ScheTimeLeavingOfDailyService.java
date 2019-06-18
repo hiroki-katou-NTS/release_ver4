@@ -49,7 +49,7 @@ public class ScheTimeLeavingOfDailyService {
 				return;
 		}
 		//INPUT．「開始時刻」とINPUT．「終了時刻」をチェックする
-		if(!startTime.isPresent() && !endTime.isPresent()) {
+		if(startTime.isPresent() || endTime.isPresent()) {
 			return;
 		}
 		//所定時間帯を取得する
