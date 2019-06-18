@@ -71,6 +71,10 @@ public class ScheTimeLeavingOfDailyService {
 			//パラメータ「補正後日別実績．日別実績(Work)．勤務情報．勤務予定の勤務情報．勤務予定時間帯．出勤」　←　取得した「時間帯(使用区分付き)．開始」
 			return new ScheduleTimeSheet(y.getWorkNo().v(), timeZone.getStart().v(), timeZone.getEnd().v());
 		}).collect(Collectors.toList());
+		if(scheduleTimeSheets.isEmpty()) {
+			ScheduleTimeSheet scheTime = new ScheduleTimeSheet(1, timeZone.getStart().v(), timeZone.getEnd().v());
+			dailyInfor.getWorkInformation().getScheduleTimeSheets().add(scheTime);
+		}
 		//マージした出退勤時刻の「編集状態」を更新するする
 		List<EditStateOfDailyPerformance> lstEditScheStartTime = dailyInfor.getEditState().stream()
 				.filter(x -> x.getAttendanceItemId() == 3)
