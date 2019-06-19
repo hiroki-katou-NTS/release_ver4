@@ -417,6 +417,14 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			}
 
 			DELETE_BY_TABLE_SQL.append(" WHERE 1=1  ");
+			
+			// fix bug #108095 - add defaultCondKeyQuery
+			Optional<String> defaultCondKeyQuery = table.getDefaultCondKeyQuery();
+			if (defaultCondKeyQuery.isPresent()) {
+				if (defaultCondKeyQuery.get() != null && !"null".equals(defaultCondKeyQuery.get()) && !defaultCondKeyQuery.get().isEmpty()) {
+					DELETE_BY_TABLE_SQL.append(" AND " + table.getDefaultCondKeyQuery().get() + " ");
+				}
+			}
 
 			if (hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
 				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereSid).append(" = '").append(employeeId)
@@ -553,6 +561,14 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			}
 
 			DELETE_BY_TABLE_SQL.append(" WHERE 1=1  ");
+			
+			// fix bug #108095 - add defaultCondKeyQuery
+			Optional<String> defaultCondKeyQuery = table.getDefaultCondKeyQuery();
+			if (defaultCondKeyQuery.isPresent()) {
+				if (defaultCondKeyQuery.get() != null && !"null".equals(defaultCondKeyQuery.get()) && !defaultCondKeyQuery.get().isEmpty()) {
+					DELETE_BY_TABLE_SQL.append(" AND " + table.getDefaultCondKeyQuery().get() + " ");
+				}
+			}
 
 			if (hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
 				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereSid).append(" = '").append(employeeId)
