@@ -79,7 +79,7 @@
 										<span class="limited-label" 
 										style="width: 111px;" 
 										data-bind="text: ko.pureComputed(function(){
-											if($data.approvalAtrValue()!=0){
+											if($data.approvalAtrValue()==1){
 												return $data.approvalDate();
 											}
 										})"></span>
