@@ -1979,7 +1979,7 @@ public class DailyPerformanceCorrectionProcessor {
 					dateRange = new DateRange(closingPeriod.get().getClosureStartDate(),
 							closingPeriod.get().getClosureEndDate());
 					//システム日付を含む期間に変更する（暫定処理）
-					if(mode == ScreenMode.NORMAL.value && dateRange.inRange(GeneralDate.today())) {
+					if(!dateRange.inRange(GeneralDate.today())) {
 						//Delay the parameter "Status of daily achievement correction. Period covered" by 1 month
 						return dateRange.changeMonth(+1);
 					}
