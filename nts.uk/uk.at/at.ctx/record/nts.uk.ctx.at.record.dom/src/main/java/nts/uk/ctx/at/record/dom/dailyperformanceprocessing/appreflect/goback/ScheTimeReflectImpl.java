@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import lombok.val;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.ScheAndRecordSameChangeFlg;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
@@ -167,8 +168,7 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 		return reflectOutput;
 	}
 	@Override
-	public void reflectTime(GobackReflectParameter para, boolean workTypeTimeReflect,WorkInfoOfDailyPerformance dailyInfor,
-			Optional<TimeLeavingOfDailyPerformance> attendanceLeave) {
+	public void reflectTime(GobackReflectParameter para, boolean workTypeTimeReflect,IntegrationOfDaily dailyInfor) {
 		String tmpWorkTimeCode;
 		//INPUT．勤種・就時の反映できるフラグをチェックする
 		if(workTypeTimeReflect) {
@@ -176,7 +176,8 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 		} else {
 			//ドメインモデル「日別実績の勤務情報」を取得する
 			
-			tmpWorkTimeCode = dailyInfor.getRecordInfo().getWorkTimeCode() == null ? null : dailyInfor.getRecordInfo().getWorkTimeCode().v();
+			tmpWorkTimeCode = dailyInfor.getWorkInformation().getRecordInfo().getWorkTimeCode() == null ? null 
+					: dailyInfor.getWorkInformation().getRecordInfo().getWorkTimeCode().v();
 		}
 		//出勤時刻を反映できるかチェックする
 		boolean isStart1 = this.checkAttendenceReflect(para, 1, true);
@@ -189,7 +190,7 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 		//終了時刻の反映
 		Integer endTime1 = isEnd1 ? this.justTimeLateLeave(tmpWorkTimeCode, para.getGobackData().getEndTime1(), 1, false) : null;		
 		TimeReflectPara timePara1 = new TimeReflectPara(para.getEmployeeId(), para.getDateData(), startTime1, endTime1, 1, isStart1, isEnd1);
-		scheUpdateService.updateRecordStartEndTimeReflect(timePara1, attendanceLeave);		
+		scheUpdateService.updateRecordStartEndTimeReflect(timePara1, dailyInfor);		
 		/*//出勤時刻２を反映できるか
 		boolean startTime2 = this.checkAttendenceReflect(para, 2, true);
 		//ジャスト遅刻により時刻を編集する

@@ -37,11 +37,11 @@ public interface WorkUpdateService {
 	 * 開始時刻の反映, 終了時刻を反映
 	 * @param data
 	 */
-	public void updateRecordStartEndTimeReflect(TimeReflectPara data, Optional<TimeLeavingOfDailyPerformance> optTimeLeaving);
+	public void updateRecordStartEndTimeReflect(TimeReflectPara data, IntegrationOfDaily dailyData);
 	
 	public void updateTimeNotReflect(String employeeId, GeneralDate dateData);
 	
-	public void updateRecordStartEndTimeReflectRecruitment(TimeReflectPara data, Optional<TimeLeavingOfDailyPerformance> optTimeLeaving);
+	public void updateRecordStartEndTimeReflectRecruitment(TimeReflectPara data, IntegrationOfDaily dailyData);
 	/**
 	 * 残業時間の反映
 	 * @param employeeId

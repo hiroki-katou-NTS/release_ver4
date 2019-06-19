@@ -79,7 +79,7 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 			//workRepository.updateByKeyFlush(workInfor);
 			//開始終了時刻の反映
 			this.reflectRecordStartEndTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode(),
-					dailyInfor.getAttendanceLeave());
+					dailyInfor);
 			CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
 					absencePara.getEmployeeId(), loopDate,
 					ApplicationType.ABSENCE_APPLICATION,
@@ -110,11 +110,11 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	}
 	@Override
 	public void reflectRecordStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode,
-			Optional<TimeLeavingOfDailyPerformance> optTimeLeaving) {
+			IntegrationOfDaily dailyInfor) {
 		boolean isCheckClean =  this.checkTimeClean(employeeId, baseDate, workTypeCode);
 		//開始終了時刻をクリアするかチェックする 値：０になる。		
 		TimeReflectPara timeData = new TimeReflectPara(employeeId, baseDate, null, null, 1, isCheckClean, isCheckClean);
-		workTimeUpdate.updateRecordStartEndTimeReflect(timeData, optTimeLeaving);
+		workTimeUpdate.updateRecordStartEndTimeReflect(timeData, dailyInfor);
 	}
 	@Override
 	public boolean checkTimeClean(String employeeId, GeneralDate baseDate, String workTypeCode) {

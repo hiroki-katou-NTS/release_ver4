@@ -68,7 +68,7 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 			//TODO 開始終了時刻の反映
 			if(param.getCommon().getStartTime() != null 
 					&& param.getCommon().getEndTime() != null) {
-				workTimeUpdate.updateRecordStartEndTimeReflect(timeReflect, dailyInfor.getAttendanceLeave());
+				workTimeUpdate.updateRecordStartEndTimeReflect(timeReflect, dailyInfor);
 			}
 			//日別実績の勤務情報  変更
 			//workRepository.updateByKeyFlush(dailyInfor);

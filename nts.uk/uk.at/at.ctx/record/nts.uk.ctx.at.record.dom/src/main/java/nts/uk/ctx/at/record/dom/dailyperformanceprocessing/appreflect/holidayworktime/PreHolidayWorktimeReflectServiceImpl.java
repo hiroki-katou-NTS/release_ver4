@@ -85,7 +85,7 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 		if(holidayWorkPara.getHolidayWorkPara().getStartTime() != null
 				&& holidayWorkPara.getHolidayWorkPara().getEndTime() != null
 				&& (isPre || (!isPre && holidayWorkPara.isRecordReflectTimeFlg()))) {
-			workUpdate.updateRecordStartEndTimeReflect(timeData, daily.getAttendanceLeave());
+			workUpdate.updateRecordStartEndTimeReflect(timeData, daily);
 		}
 		//休出時間の反映			
 		daily = holidayWorkProcess.reflectWorkTimeFrame(holidayWorkPara, isPre, daily);

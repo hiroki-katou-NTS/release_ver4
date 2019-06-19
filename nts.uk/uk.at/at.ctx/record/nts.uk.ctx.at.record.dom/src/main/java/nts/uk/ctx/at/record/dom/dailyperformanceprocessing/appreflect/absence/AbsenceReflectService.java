@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.absence;
 
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.workchange.WorkChangeCommonReflectPara;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 
@@ -37,7 +38,7 @@ public interface AbsenceReflectService {
 	 * @param workTypeCode
 	 */
 	public void reflectRecordStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode,
-			Optional<TimeLeavingOfDailyPerformance> optTimeLeaving);
+			IntegrationOfDaily dailyInfor);
 	/**
 	 * 開始終了時刻をクリアするかチェックする
 	 * @param workTypeCode

@@ -42,7 +42,7 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 		AppReflectRecordWork reflectWorkTypeTime = timeTypeSche.reflectRecordWorktimetype(para, workInfor);
 		//workRepository.updateByKeyFlush(reflectWorkTypeTime.getDailyInfo());
 		//時刻の反映
-		scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect(), workInfor, dailyInfor.getAttendanceLeave());
+		scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect(), dailyInfor);
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
 				para.getEmployeeId(), para.getDateData(),
 				ApplicationType.GO_RETURN_DIRECTLY_APPLICATION,
@@ -65,7 +65,7 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 		AppReflectRecordWork reflectWorkTypeTime = timeTypeSche.reflectRecordWorktimetype(para, workInfor);
 		//workRepository.updateByKeyFlush(reflectWorkTypeTime.getDailyInfo());
 		//時刻の反映
-		scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect(), workInfor, dailyInfor.getAttendanceLeave());
+		scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect(), dailyInfor);
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
 				para.getEmployeeId(), para.getDateData(),
 				ApplicationType.GO_RETURN_DIRECTLY_APPLICATION,
