@@ -153,6 +153,13 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 						.filter(x -> CorrectEventConts.LEAVE_ITEMS.contains(x.getAttendanceItemId()) 
 								|| CorrectEventConts.ATTENDANCE_ITEMS.contains(x.getAttendanceItemId()))
 						.collect(Collectors.toList());
+				//予定出退勤時刻を反映する
+				scheTimeService.correct(companyId,
+						commonPara.getWorkTypeCode(),
+						commonPara.getWorkTimeCode(),
+						commonPara.getStartTime(),
+						commonPara.getEndTime(),
+						commonPara.getIntegrationOfDaily());
 				if(commonPara.getAppType() != ApplicationType.BREAK_TIME_APPLICATION ||
 						(commonPara.getAppType() == ApplicationType.BREAK_TIME_APPLICATION && lstTime.isEmpty())) {
 					//出退勤時刻を補正する
@@ -166,13 +173,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 					//休憩時間帯を補正する	
 					breakTimeDailyService.correct(companyId, commonPara.getIntegrationOfDaily(), workTypeInfor, true).getData();	
 				}				
-				//予定出退勤時刻を反映する
-				scheTimeService.correct(companyId,
-						commonPara.getWorkTypeCode(),
-						commonPara.getWorkTimeCode(),
-						commonPara.getStartTime(),
-						commonPara.getEndTime(),
-						commonPara.getIntegrationOfDaily());
+
 			}			
 		}
 		
