@@ -35,7 +35,7 @@ import nts.uk.shr.com.enumcommon.NotUseAtr;
 import nts.uk.shr.com.i18n.TextResource;
 
 @Stateless
-@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 public class ProcessRecoverOneEmpHandle {
 	public static final String DATE_FORMAT = "yyyyMMdd";
 
@@ -105,17 +105,36 @@ public class ProcessRecoverOneEmpHandle {
 		String errorCode = "";
 
 		HashMap<String, CSVBufferReader> csvByteReadMaper_TableUse = new HashMap<>();
+		List<DataRecoveryTable> parentTables = new ArrayList<>();
+		List<DataRecoveryTable> childTables= new ArrayList<>();
 
 		// khởi tạo csv Reader
+		// order lại danh sách table trước khi restore.
 		for (int i = 0; i < tableList.size(); i++) {
 			String filePath = getExtractDataStoragePath(tableList.get(i).getUploadId()) + "//"
 					+ tableList.get(i).getFileNameCsv() + ".csv";
 			CSVBufferReader reader = new CSVBufferReader(new File(filePath));
 			reader.setCharset("UTF-8");
 			csvByteReadMaper_TableUse.put(tableList.get(i).getFileNameCsv(), reader);
+			
+			if (tableList.get(i).getHasParentTblFlg() == NotUseAtr.USE) {
+				childTables.add(tableList.get(i));
+			} else {
+				parentTables.add(tableList.get(i));
+			}
 		}
+		parentTables.sort((o2, o1) -> {
+			return o1.getTableNo().compareTo(o2.getTableNo());
+		});
+
+		childTables.sort((o2, o1) -> {
+			return o1.getTableNo().compareTo(o2.getTableNo());
+		});
 		
-		// TODO 19921: order lai list table truoc khi restore
+		List<DataRecoveryTable> listTableOrder = new ArrayList<>();
+		
+		listTableOrder.addAll(childTables);
+		listTableOrder.addAll(parentTables);
 		
 		// Foreach 対象社員コード＿ID
 		for (EmployeeDataReInfoImport employeeData : empsOrderByScd) {
@@ -126,7 +145,7 @@ public class ProcessRecoverOneEmpHandle {
 			// 対象社員データ処理
 			try {
 				condition = this.recoveryDataByEmployee(dataRecoveryProcessId,
-						employeeData.getEmployeeId(), tableList,
+						employeeData.getEmployeeId(), listTableOrder,
 						csvByteReadMaper_TableUse,employeeData.getEmployeeCode(), listTbl);
 			} catch (Exception e) {
 				errorCode = e.getMessage();
@@ -152,18 +171,15 @@ public class ProcessRecoverOneEmpHandle {
 	
 	
 	public DataRecoveryOperatingCondition recoveryDataByEmployee(String dataRecoveryProcessId, String employeeId,
-			List<DataRecoveryTable> tableList,
+			List<DataRecoveryTable> listTableOrder,
 			HashMap<String, CSVBufferReader> csvByteReadMaper, String employeeCode,List<TableList> listTbl) throws Exception {
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 		
 		Optional<PerformDataRecovery> performDataRecovery = performDataRecoveryRepository.getPerformDatRecoverById(dataRecoveryProcessId);
-
+		
 		// current target Data [カレント対象データ]
-		for (DataRecoveryTable dataRecoveryTable : tableList) {
-			//Optional<TableList> table = Optional.empty();
-			
-			//table = performDataRecoveryRepository.getByInternal(dataRecoveryTable.getFileNameCsv(), dataRecoveryProcessId);
+		for (DataRecoveryTable dataRecoveryTable : listTableOrder) {
 			
 			Optional<TableList> table =  listTbl.stream().filter(tbl -> tbl.getTableEnglishName().equals(dataRecoveryTable.getTableEnglishName())).findFirst();
 			
