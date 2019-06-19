@@ -536,10 +536,12 @@ public class TimeSheetOfDeductionItem extends CalculationTimeSheet{
 	 */
 	public TimeSpanForCalc decisionNewSpan(TimeSpanForCalc timeSpan,TimeWithDayAttr baseTime,boolean isDateBefore) {
 		if(isDateBefore) {
-			return new TimeSpanForCalc(timeSpan.getStart(),baseTime);
+			val endOclock = timeSpan.getEnd().lessThan(baseTime) ? timeSpan.getEnd() : baseTime; 
+			return new TimeSpanForCalc(timeSpan.getStart(),endOclock);
 		}
 		else {
-			return new TimeSpanForCalc(baseTime,timeSpan.getEnd());
+			val startOclock = baseTime.lessThan(timeSpan.getStart()) ? baseTime : timeSpan.getStart();
+			return new TimeSpanForCalc(startOclock,timeSpan.getEnd());
 		}
 	}
 	
