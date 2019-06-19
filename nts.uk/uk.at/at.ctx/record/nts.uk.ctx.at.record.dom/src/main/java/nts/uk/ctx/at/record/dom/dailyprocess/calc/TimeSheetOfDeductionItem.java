@@ -540,7 +540,7 @@ public class TimeSheetOfDeductionItem extends CalculationTimeSheet{
 			return new TimeSpanForCalc(timeSpan.getStart(),endOclock);
 		}
 		else {
-			val startOclock = baseTime.lessThan(timeSpan.getStart()) ? baseTime : timeSpan.getStart();
+			val startOclock = baseTime.lessThan(timeSpan.getStart()) ? timeSpan.getStart() : baseTime;
 			return new TimeSpanForCalc(startOclock,timeSpan.getEnd());
 		}
 	}
