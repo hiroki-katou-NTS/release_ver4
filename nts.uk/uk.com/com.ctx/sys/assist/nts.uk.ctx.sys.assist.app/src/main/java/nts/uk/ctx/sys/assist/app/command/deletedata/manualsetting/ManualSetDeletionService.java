@@ -157,7 +157,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 					//ドメインモデル「データ削除の結果ログ」へ追加する
 					saveEndLogResult(domain, state);
 					//ドメインモデル「データ削除の保存結果」を更新する
-					saveEndResultDel(domain, resultSave);
+					saveEndResultDel(domain, resultSave,domain.isSaveBeforeDeleteFlg());
 					//ドメインモデル「データ削除動作管理」を更新する
 					saveEndManagementDel(delId, state);
 					
@@ -184,7 +184,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			//ドメインモデル「データ削除の結果ログ」へ追加する
 			saveEndLogResult(domain, resultDel.getState());
 			//ドメインモデル「データ削除の保存結果」を更新する
-			saveEndResultDel(domain, resultDel);
+			saveEndResultDel(domain, resultDel,domain.isSaveBeforeDeleteFlg());
 			//ドメインモデル「データ削除動作管理」を更新する
 			saveEndManagementDel(delId, resultDelState);
 		} else {
@@ -280,7 +280,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	 * ドメインモデル「データ削除の保存結果」を更新する
 	 * Update domain model 「データ削除の保存結果」
 	 */
-	private void saveEndResultDel(ManualSetDeletion domain, Result result) {
+	private void saveEndResultDel(ManualSetDeletion domain, Result result,Boolean isSaveBeforeDeleteFlg) {
 		Optional<ResultDeletion> optResultDel = repoResultDel.getResultDeletionById(domain.getDelId());
 		if (optResultDel.isPresent()) {
 			String fileName = null;
@@ -309,6 +309,11 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			resultDel.setFileName(new FileName(fileName));
 			resultDel.setFileSize(fileSize);
 			resultDel.setFileId(fileId);
+			if (isSaveBeforeDeleteFlg) {
+				resultDel.setDeletedFilesFlg(false);
+			} else {
+				resultDel.setDeletedFilesFlg(true);
+			}
 			repoResultDel.update(resultDel);
 		}
 	}

@@ -196,8 +196,8 @@ public class RecoveryStorageService {
 			TableListByCategory tableNotUseByCategory, String uploadId, String dataRecoveryProcessId, List<TableList> listTbl) throws Exception {
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
-		// カテゴリの中の社員単位の処理
-
+		
+		// カテゴリの中の社員単位の処理 
 		condition = processEmpInCategory(tableListByCategory, dataRecoveryProcessId, uploadId, listTbl);
 
 		if (condition == DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS) {
@@ -212,9 +212,7 @@ public class RecoveryStorageService {
 		return condition;
 	}
 
-	/**
-	 * Xử lý những table không phải dạng lịch sử 
-	 */
+	// Xử lý những table StorageRangeSaved = EARCH_EMP
 	public DataRecoveryOperatingCondition processEmpInCategory(TableListByCategory tableListByCategory,
 			String dataRecoveryProcessId, String uploadId, List<TableList> listTbl) throws Exception {
 
@@ -306,7 +304,7 @@ public class RecoveryStorageService {
 		return condition;
 	}
 
-
+	// Xử lý những table StorageRangeSaved = ALL_EMP 
 	public DataRecoveryOperatingCondition processByDateInCategory(TableListByCategory tableNotUseByCategory,
 			String dataRecoveryProcessId, String uploadId, List<TableList> listTbl) throws Exception {
 
@@ -366,7 +364,7 @@ public class RecoveryStorageService {
 		// テーブル一覧のカレントの1行分の項目を取得する
 		for (DataRecoveryTable tableC : listTablesOrder) {
 			
-			//Optional<TableList> table = performDataRecoveryRepository.getByInternal(tableC.getFileNameCsv(), dataRecoveryProcessId);
+			System.out.println("=== Table: " + tableC.getTableEnglishName() + " Table No: " + tableC.getTableNo());
 			
 			Optional<TableList> table = listTbl.stream().filter(tbl -> tbl.getTableEnglishName().equals(tableC.getTableEnglishName())).findFirst();
 			
