@@ -7,6 +7,10 @@ import javax.inject.Inject;
 
 import nts.gul.security.crypt.commonkey.CommonKeyCrypt;
 import nts.uk.ctx.sys.assist.dom.datarestoration.common.ServerPreparationService;
+import nts.uk.ctx.sys.assist.dom.deletedata.ManualSetDeletion;
+import nts.uk.ctx.sys.assist.dom.deletedata.ManualSetDeletionRepository;
+import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletion;
+import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletionRepository;
 import nts.uk.ctx.sys.assist.dom.storage.ResultOfSaving;
 import nts.uk.ctx.sys.assist.dom.storage.ResultOfSavingRepository;
 
@@ -18,13 +22,45 @@ public class ServerZipFileTempService {
 	private ResultOfSavingRepository repoResultOfSaving;
 	@Inject
 	private ServerPreparationService serverPreparationService;
-	public ServerPrepareMng handleServerZipFile(String recoveryProcessingId, String storeProcessingId){
+	@Inject
+	private ResultDeletionRepository repoResultOfDelete;
+	@Inject
+	private ManualSetDeletionRepository manualSetDeletionRepo;
+
+	public ServerPrepareMng handleServerZipFile(String recoveryProcessingId, String storeProcessingId) {
 		Optional<ResultOfSaving> optResultOfSaving = repoResultOfSaving.getResultOfSavingById(storeProcessingId);
+
+		Optional<ResultDeletion> optResultOfDelete = repoResultOfDelete.getResultDeletionById(storeProcessingId);
+
 		if (optResultOfSaving.isPresent()) {
 			String fileId = optResultOfSaving.get().getFileId().orElse(null);
 			String uploadFileName = optResultOfSaving.get().getSaveFileName().map(i -> i.v()).orElse(null);
 			Integer doNotUpload = 0;
-			String password = optResultOfSaving.get().getCompressedPassword().map(i -> CommonKeyCrypt.decrypt(i.v())).orElse(null);
+			String password = optResultOfSaving.get().getCompressedPassword().map(i -> CommonKeyCrypt.decrypt(i.v()))
+					.orElse(null);
+			Integer operatingCondition = 13;
+			ServerPrepareMng serverPrepareMng = new ServerPrepareMng(recoveryProcessingId, storeProcessingId, fileId,
+					uploadFileName, doNotUpload, password, operatingCondition);
+			repoServerPrepare.add(serverPrepareMng);
+			// サーバー準備処理
+			serverPrepareMng = serverPreparationService.serverPreparationProcessing(serverPrepareMng);
+			return serverPrepareMng;
+		}
+		if (optResultOfDelete.isPresent()) {
+			Optional<ManualSetDeletion> manualSetting = manualSetDeletionRepo
+					.getManualSetDeletionById(storeProcessingId);
+			String fileId = optResultOfDelete.get().getFileId();
+			String uploadFileName = optResultOfDelete.get().getFileName().v();
+			Integer doNotUpload = 0;
+			String password = "";
+			if (manualSetting.isPresent()) {
+				if ((manualSetting.get().getPasswordCompressFileEncrypt().isPresent())
+						&& (!manualSetting.get().getPasswordCompressFileEncrypt().get().v().isEmpty())
+						&& (!manualSetting.get().getPasswordCompressFileEncrypt().get().v().equals(""))) {
+					password = manualSetting.get().getPasswordCompressFileEncrypt()
+							.map(i -> CommonKeyCrypt.decrypt(i.v())).orElse(null);
+				}
+			}
 			Integer operatingCondition = 13;
 			ServerPrepareMng serverPrepareMng = new ServerPrepareMng(recoveryProcessingId, storeProcessingId, fileId,
 					uploadFileName, doNotUpload, password, operatingCondition);
