@@ -14,12 +14,9 @@ import lombok.Value;
  */
 @Value
 public class InitDisplayPeriodSwitchSetDto {
-	@Value
-	public class DateProcessed {
-		
+	
 		private int currentOrNextMonth;
 		private List<DateProcessed> listDateProcessed;
 		
-	}
-
+	
 }

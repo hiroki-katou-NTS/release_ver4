@@ -12,5 +12,6 @@ import java.util.Optional;
  */
 
 public interface InitDisplayPeriodSwitchSetPub {
-	 Optional<InitDisplayPeriodSwitchSetDto> targetDateFromLogin();
+	/** [RQ609]ログイン社員のシステム日時点の処理対象年月を取得する **/
+	 InitDisplayPeriodSwitchSetDto targetDateFromLogin();
 }
