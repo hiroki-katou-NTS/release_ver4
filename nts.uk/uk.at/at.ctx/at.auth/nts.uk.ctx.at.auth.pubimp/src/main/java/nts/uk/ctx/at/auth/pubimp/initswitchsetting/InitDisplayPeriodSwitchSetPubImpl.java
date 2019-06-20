@@ -64,7 +64,6 @@ public class InitDisplayPeriodSwitchSetPubImpl implements InitDisplayPeriodSwitc
 			  data = new InitDisplayPeriodSwitchSetDto(1, listDateProcessed);
 			 return data;
 		}else{
-			Closure closure = closureService.getClosureDataByEmployee(employeeID, GeneralDate.today());
 			//当月・翌月を判断する
 			for(ClosureInfo item : listClosureInfo){
 				int endDate = item.getPeriod().end().day();
