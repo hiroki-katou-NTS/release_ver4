@@ -582,15 +582,15 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 	}
 	
 	@Override
-	public TimeLeavingOfDailyPerformance updateRecordStartEndTimeReflect(TimeReflectPara data) {
-		Optional<TimeLeavingOfDailyPerformance> optTimeLeaving = timeLeavingOfDaily.findByKey(data.getEmployeeId(), data.getDateData());
+	public void updateRecordStartEndTimeReflect(TimeReflectPara data, IntegrationOfDaily dailyData) {
+		Optional<TimeLeavingOfDailyPerformance> optTimeLeaving = dailyData.getAttendanceLeave();
 		TimeLeavingOfDailyPerformance timeDaily = null;
 		if(optTimeLeaving.isPresent()) {
 			timeDaily = optTimeLeaving.get();
 		}
 		if(!data.isStart()
 				&& !data.isEnd()) {
-			return timeDaily;
+			return;
 		}
 		//開始時刻を反映する
 		List<TimeLeavingWork> lstTimeLeavingWorks = new ArrayList<>();
@@ -617,7 +617,7 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 					}
 				}
 				this.updateEditStateOfDailyPerformance(data.getEmployeeId(), data.getDateData(), lstItem);
-				return timeDaily;
+				return;
 			}
 			WorkStamp workStamp = new WorkStamp(new TimeWithDayAttr(data.getStartTime()),
                     new TimeWithDayAttr(data.getStartTime()),
@@ -693,6 +693,7 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 			timeDaily = new TimeLeavingOfDailyPerformance(data.getEmployeeId(), new WorkTimes(1), Arrays.asList(timeLeavingWorkTmp), data.getDateData());
 		}
 		timeLeavingOfDaily.updateFlush(timeDaily);
+		dailyData.setAttendanceLeave(Optional.of(timeDaily));
 		//開始時刻の編集状態を更新する
 		//予定項目ID=出勤の項目ID	
 		List<Integer> lstItem = new ArrayList<Integer>();
@@ -711,7 +712,7 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 			}
 		}
 		this.updateEditStateOfDailyPerformance(data.getEmployeeId(), data.getDateData(), lstItem);
-		return timeDaily;
+		return;
 	}
 	@Override
 	public IntegrationOfDaily updateWorkTimeTypeHoliwork(ReflectParameter para, boolean scheUpdate,
@@ -874,15 +875,16 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 		return attendanceTimeData;
 	}
 	@Override
-	public TimeLeavingOfDailyPerformance updateRecordStartEndTimeReflectRecruitment(TimeReflectPara data) {
-		Optional<TimeLeavingOfDailyPerformance> optTimeLeaving = timeLeavingOfDaily.findByKey(data.getEmployeeId(), data.getDateData());
+	public void updateRecordStartEndTimeReflectRecruitment(TimeReflectPara data
+			, IntegrationOfDaily dailyData) {
+		Optional<TimeLeavingOfDailyPerformance> optTimeLeaving = dailyData.getAttendanceLeave();
 		TimeLeavingOfDailyPerformance timeDaily = null;
 		if(optTimeLeaving.isPresent()) {
 			timeDaily = optTimeLeaving.get();
 		}
 		if(!data.isStart()
 				&& !data.isEnd()) {
-			return timeDaily;
+			return;
 		}
 		//開始時刻を反映する
 		List<TimeLeavingWork> lstTimeLeavingWorks = new ArrayList<>();
@@ -948,6 +950,7 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 			timeDaily = new TimeLeavingOfDailyPerformance(data.getEmployeeId(), new WorkTimes(1), Arrays.asList(timeLeavingWorkTmp), data.getDateData());
 		}
 		timeLeavingOfDaily.updateFlush(timeDaily);
+		dailyData.setAttendanceLeave(Optional.of(timeDaily));
 		//開始時刻の編集状態を更新する
 		//予定項目ID=出勤の項目ID	
 		List<Integer> lstItem = new ArrayList<Integer>();
@@ -966,7 +969,6 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 			}
 		}
 		this.updateEditStateOfDailyPerformance(data.getEmployeeId(), data.getDateData(), lstItem);
-		return timeDaily;
 	}
 
 	@Override

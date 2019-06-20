@@ -57,11 +57,14 @@ public class MidNightTimeSheetForCalc extends CalculationTimeSheet{
 	 */
 	public TimeSpanForCalc decisionNewSpan(TimeSpanForCalc timeSpan,TimeWithDayAttr baseTime,boolean isDateBefore) {
 		if(isDateBefore) {
-			return new TimeSpanForCalc(timeSpan.getStart(),baseTime);
+			val endOclock = timeSpan.getEnd().lessThan(baseTime) ? timeSpan.getEnd() : baseTime; 
+			return new TimeSpanForCalc(timeSpan.getStart(),endOclock);
 		}
 		else {
-			return new TimeSpanForCalc(baseTime,timeSpan.getEnd());
+			val startOclock = baseTime.lessThan(timeSpan.getStart()) ? timeSpan.getStart() : baseTime ;
+			return new TimeSpanForCalc(startOclock,timeSpan.getEnd());
 		}
+		
 	}
 	/**
 	 * 再帰中に自分自身を作り直す処理

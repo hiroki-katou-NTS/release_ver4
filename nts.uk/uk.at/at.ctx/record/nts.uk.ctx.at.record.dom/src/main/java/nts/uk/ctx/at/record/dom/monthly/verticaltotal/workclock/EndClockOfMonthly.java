@@ -6,7 +6,6 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.PredetermineTimeSetForCalc;
 import nts.uk.ctx.at.shared.dom.common.times.AttendanceTimesMonth;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonth;
-import nts.uk.ctx.at.shared.dom.worktime.predset.UseSetting;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 
 /**
@@ -76,15 +75,18 @@ public class EndClockOfMonthly {
 			val stamp = leaveStamp.getStamp().get();
 			if (stamp.getTimeWithDay() == null) continue;
 			
-			// 時間帯　確認
-			val workNo = timeLeavingWork.getWorkNo();
-			val timezoneUseOpt = predTimeSetForCalc.getTimeSheets(workType.getAttendanceHolidayAttr(), workNo.v());
-			if (!timezoneUseOpt.isPresent()) continue;
-			val timezoneUse = timezoneUseOpt.get();
-			if (timezoneUse.getUseAtr() == UseSetting.NOT_USE) continue;
+// 2019.6.18 DEL shuichi ishida Redmine #108120
+//			// 時間帯　確認
+//			val workNo = timeLeavingWork.getWorkNo();
+//			val timezoneUseOpt = predTimeSetForCalc.getTimeSheets(workType.getAttendanceHolidayAttr(), workNo.v());
+//			if (!timezoneUseOpt.isPresent()) continue;
+//			val timezoneUse = timezoneUseOpt.get();
+//			if (timezoneUse.getUseAtr() == UseSetting.NOT_USE) continue;
 			
-			// 判断
-			if (stamp.getTimeWithDay().v() <= timezoneUse.getEnd().v()) continue;
+			// 終業時刻計算対象の判断
+			if (workType.isCalcTargetForEndClock() == false) continue;				// Web終業時刻計算対象の判断
+// 2019.6.18 DEL shuichi ishida Redmine #108120
+//			if (stamp.getTimeWithDay().v() <= timezoneUse.getEnd().v()) continue;	// 終業時刻が対象日内の時刻か判断
 			
 			// 退勤時刻を合計
 			this.totalClock = this.totalClock.addMinutes(stamp.getTimeWithDay().v());

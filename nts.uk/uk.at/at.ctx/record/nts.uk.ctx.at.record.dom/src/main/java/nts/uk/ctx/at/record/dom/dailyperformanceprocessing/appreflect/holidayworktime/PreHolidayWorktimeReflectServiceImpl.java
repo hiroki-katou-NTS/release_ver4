@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCalculateOfAppReflectParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.PreOvertimeReflectService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.AdTimeAndAnyItemAdUpService;
@@ -20,6 +21,7 @@ import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectPa
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
+import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 
 @Stateless
 public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeReflectService{
@@ -44,9 +46,7 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 	@Override
 	public void preHolidayWorktimeReflect(HolidayWorktimePara holidayWorkPara, boolean isPre) {		
 		IntegrationOfDaily daily = this.createIntegrationOfDailyStart(holidayWorkPara.getEmployeeId(), 
-				holidayWorkPara.getBaseDate(), holidayWorkPara.getHolidayWorkPara().getWorkTimeCode(), 
-				holidayWorkPara.getHolidayWorkPara().getWorkTypeCode(), holidayWorkPara.getHolidayWorkPara().getStartTime(), 
-				holidayWorkPara.getHolidayWorkPara().getEndTime(), isPre);
+				holidayWorkPara.getBaseDate());
 		if(isPre) {
 			// 予定勤種・就時の反映
 			daily = holidayWorkProcess.updateScheWorkTimeType(holidayWorkPara.getEmployeeId(),
@@ -78,13 +78,12 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 		if(isPre) {
 			daily = scheWork.updateScheStartEndTimeHoliday(timeData, daily);
 		}
-		workRepository.updateByKey(daily.getWorkInformation());
+		//workRepository.updateByKey(daily.getWorkInformation());
 		//開始時刻と終了時刻の反映
 		if(holidayWorkPara.getHolidayWorkPara().getStartTime() != null
 				&& holidayWorkPara.getHolidayWorkPara().getEndTime() != null
 				&& (isPre || (!isPre && holidayWorkPara.isRecordReflectTimeFlg()))) {
-			TimeLeavingOfDailyPerformance timeLeaving = workUpdate.updateRecordStartEndTimeReflect(timeData);
-			daily.setAttendanceLeave(Optional.of(timeLeaving));
+			workUpdate.updateRecordStartEndTimeReflect(timeData, daily);
 		}
 		//休出時間の反映			
 		daily = holidayWorkProcess.reflectWorkTimeFrame(holidayWorkPara, isPre, daily);
@@ -101,12 +100,17 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 		
 		List<EditStateOfDailyPerformance> lstEditState = dailyReposiroty.findByKey(holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate());
 		daily.setEditState(lstEditState);
-		
-		commonService.calculateOfAppReflect(daily, holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate(), false);
+		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(daily,
+				holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate(),
+				ApplicationType.BREAK_TIME_APPLICATION,
+				holidayWorkPara.getHolidayWorkPara().getWorkTypeCode(),
+				holidayWorkPara.getHolidayWorkPara().getWorkTimeCode() == null ? Optional.empty() : Optional.of(holidayWorkPara.getHolidayWorkPara().getWorkTimeCode()),
+				holidayWorkPara.getHolidayWorkPara().getStartTime() == null ? Optional.empty() : Optional.of(holidayWorkPara.getHolidayWorkPara().getStartTime()),
+				holidayWorkPara.getHolidayWorkPara().getEndTime() == null ? Optional.empty() : Optional.of(holidayWorkPara.getHolidayWorkPara().getEndTime()));
+		commonService.calculateOfAppReflect(calcParam);
 	}
 	@Override
-	public IntegrationOfDaily createIntegrationOfDailyStart(String employeeId, GeneralDate baseDate
-			, String workTimeCode, String workTypeCode, Integer startTime, Integer endTime, boolean isPre) {
+	public IntegrationOfDaily createIntegrationOfDailyStart(String employeeId, GeneralDate baseDate) {
 		IntegrationOfDaily daily =overTimeService.calculateForAppReflect(employeeId, baseDate);
 		if(daily == null) {
 			return null;

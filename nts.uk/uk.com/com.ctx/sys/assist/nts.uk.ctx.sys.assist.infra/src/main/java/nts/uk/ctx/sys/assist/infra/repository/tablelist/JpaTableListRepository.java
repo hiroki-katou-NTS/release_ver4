@@ -354,8 +354,13 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 			}
 		}
 
-		// 抽出条件キー固定
-		query.append(tableList.getDefaultCondKeyQuery().orElse(""));
+		// 抽出条件キー固定 - fix bug #108094
+		Optional<String> defaultCondKeyQuery = tableList.getDefaultCondKeyQuery();
+		if (defaultCondKeyQuery.isPresent()) {
+			if (defaultCondKeyQuery.get() != null && !"null".equals(defaultCondKeyQuery.get()) && !defaultCondKeyQuery.get().isEmpty()) {
+				query.append(" AND " + tableList.getDefaultCondKeyQuery().get());
+			}
+		}
 		for (int i = 0; i < clsKeyQuerys.length; i++) {
 			if (EMPLOYEE_CD.equals(clsKeyQuerys[i]) && !targetEmployeesSid.isEmpty()) {
 				if (tableList.getHasParentTblFlg() == NotUseAtr.USE) {

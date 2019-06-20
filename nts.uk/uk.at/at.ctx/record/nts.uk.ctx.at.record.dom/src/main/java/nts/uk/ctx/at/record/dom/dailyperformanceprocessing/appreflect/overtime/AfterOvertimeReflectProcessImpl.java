@@ -109,7 +109,7 @@ public class AfterOvertimeReflectProcessImpl implements AfterOvertimeReflectProc
 
 	@Override
 	public void reflectStartEndtime(OvertimeParameter para, WorkTimeTypeOutput timeTypeData) {
-		//反映する開始終了時刻を求める
+		/*//反映する開始終了時刻を求める
 		StartEndTimeRelectCheck startEndTimeCheck = new StartEndTimeRelectCheck(para.getEmployeeId(), para.getDateInfo(), para.getOvertimePara().getStartTime1(), 
 				para.getOvertimePara().getEndTime1(), para.getOvertimePara().getStartTime2(), 
 				para.getOvertimePara().getEndTime2(), 
@@ -161,7 +161,7 @@ public class AfterOvertimeReflectProcessImpl implements AfterOvertimeReflectProc
 				TimeReflectPara timePara2 = new TimeReflectPara(para.getEmployeeId(), para.getDateInfo(), startEndTimeData.getStart2(), startEndTimeData.getEnd2(), 2, isStart, isEnd);
 				scheWorkUpdate.updateRecordStartEndTimeReflect(timePara2);
 			}
-		}
+		}*/
 	}
 
 	@Override

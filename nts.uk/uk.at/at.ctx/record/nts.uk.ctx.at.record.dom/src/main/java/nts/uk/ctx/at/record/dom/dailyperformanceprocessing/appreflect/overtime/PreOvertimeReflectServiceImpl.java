@@ -28,6 +28,7 @@ import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerform;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerformRepo;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCalculateOfAppReflectParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
@@ -45,6 +46,7 @@ import nts.uk.ctx.at.record.dom.worktime.TemporaryTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
+import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
@@ -93,25 +95,24 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 	private CommonProcessCheckService commonService;
 	@Override
 	public void overtimeReflect(OvertimeParameter param) {
-			
+		IntegrationOfDaily dailyInfor = this.calculateForAppReflect(param.getEmployeeId(), param.getDateInfo());
 		//予定勤種・就時反映後の予定勤種・就時を取得する
 		//勤種・就時反映後の予定勤種・就時を取得する
-		WorkInfoOfDailyPerformance dailyInfor = workRepository.find(param.getEmployeeId(), param.getDateInfo()).get();
 		//予定勤種・就時の反映
-		dailyInfor = priorProcess.workTimeWorkTimeUpdate(param, dailyInfor);
+		priorProcess.workTimeWorkTimeUpdate(param, dailyInfor.getWorkInformation());
 		//勤種・就時の反映
-		AppReflectRecordWork changeFlg = priorProcess.changeFlg(param, dailyInfor);
+		AppReflectRecordWork changeFlg = priorProcess.changeFlg(param, dailyInfor.getWorkInformation());
 		//予定開始終了時刻の反映 phai lay du lieu cua 日別実績の勤務情報 sau khi update
-		dailyInfor = priorProcess.startAndEndTimeReflectSche(param, changeFlg.chkReflect, changeFlg.getDailyInfo());
+		priorProcess.startAndEndTimeReflectSche(param, changeFlg.chkReflect, dailyInfor.getWorkInformation());
 		//日別実績の勤務情報  変更
-		workRepository.updateByKeyFlush(dailyInfor);
+		//workRepository.updateByKeyFlush(dailyInfor);
 		
 		//開始終了時刻の反映 phai lay du lieu cua 日別実績の勤務情報 sau khi update
 		//startEndtimeOffReflect.startEndTimeOffReflect(param, dailyInfor);
 
 		//残業時間を反映する
 		//残業枠時間
-		Optional<AttendanceTimeOfDailyPerformance> optAttendanceTime = attendanceTime.find(param.getEmployeeId(), param.getDateInfo());
+		Optional<AttendanceTimeOfDailyPerformance> optAttendanceTime = dailyInfor.getAttendanceTimeOfDailyPerformance();
 		if(optAttendanceTime.isPresent()) {
 			AttendanceTimeOfDailyPerformance attendanceTimeData = optAttendanceTime.get();
 			//残業時間の反映
@@ -131,7 +132,14 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 				param.getOvertimePara().getAppReason(),param.getOvertimePara().getOvertimeAtr());
 		//日別実績の修正からの計算
 		//○日別実績を置き換える Replace daily performance	
-		commonService.calculateOfAppReflect(null, param.getEmployeeId(), param.getDateInfo(), true);
+		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
+				param.getEmployeeId(), param.getDateInfo(),
+				ApplicationType.OVER_TIME_APPLICATION,
+				param.getOvertimePara().getWorkTypeCode(),
+				param.getOvertimePara().getWorkTimeCode() == null ? Optional.empty() : Optional.of(param.getOvertimePara().getWorkTimeCode()),
+				param.getOvertimePara().getStartTime1() == null ? Optional.empty() : Optional.of(param.getOvertimePara().getStartTime1()),
+				param.getOvertimePara().getEndTime1() == null ? Optional.empty() : Optional.of(param.getOvertimePara().getEndTime1()));
+		commonService.calculateOfAppReflect(calcParam);
 	}
 
 
