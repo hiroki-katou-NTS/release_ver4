@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
 import nts.arc.enums.EnumAdaptor;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.monthly.information.care.MonCareHdMinutes;
@@ -102,6 +103,8 @@ public class KrcdtMonRemain extends UkJpaEntity implements Serializable {
 
 	/** serialVersionUID */
 	private static final long serialVersionUID = 1L;
+	
+	public static final JpaEntityMapper<KrcdtMonRemain> MAPPER = new JpaEntityMapper<>(KrcdtMonRemain.class);
 
 	/** プライマリキー */
 	@EmbeddedId
