@@ -46,9 +46,7 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 	@Override
 	public void preHolidayWorktimeReflect(HolidayWorktimePara holidayWorkPara, boolean isPre) {		
 		IntegrationOfDaily daily = this.createIntegrationOfDailyStart(holidayWorkPara.getEmployeeId(), 
-				holidayWorkPara.getBaseDate(), holidayWorkPara.getHolidayWorkPara().getWorkTimeCode(), 
-				holidayWorkPara.getHolidayWorkPara().getWorkTypeCode(), holidayWorkPara.getHolidayWorkPara().getStartTime(), 
-				holidayWorkPara.getHolidayWorkPara().getEndTime(), isPre);
+				holidayWorkPara.getBaseDate());
 		if(isPre) {
 			// 予定勤種・就時の反映
 			daily = holidayWorkProcess.updateScheWorkTimeType(holidayWorkPara.getEmployeeId(),
@@ -112,8 +110,7 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 		commonService.calculateOfAppReflect(calcParam);
 	}
 	@Override
-	public IntegrationOfDaily createIntegrationOfDailyStart(String employeeId, GeneralDate baseDate
-			, String workTimeCode, String workTypeCode, Integer startTime, Integer endTime, boolean isPre) {
+	public IntegrationOfDaily createIntegrationOfDailyStart(String employeeId, GeneralDate baseDate) {
 		IntegrationOfDaily daily =overTimeService.calculateForAppReflect(employeeId, baseDate);
 		if(daily == null) {
 			return null;

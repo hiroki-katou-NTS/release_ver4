@@ -36,8 +36,7 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 	private CommonProcessCheckService commonService;
 	@Override
 	public void recruitmentReflect(CommonReflectParameter param, boolean isPre) {
-		IntegrationOfDaily daily = holidayWorktimeService.createIntegrationOfDailyStart(param.getEmployeeId(), param.getBaseDate(), 
-				param.getWorkTimeCode(), param.getWorkTypeCode(), param.getStartTime(), param.getEndTime(),isPre);
+		IntegrationOfDaily daily = holidayWorktimeService.createIntegrationOfDailyStart(param.getEmployeeId(), param.getBaseDate());
 		WorkInfoOfDailyPerformance dailyInfor = daily.getWorkInformation();
 		//予定勤種就時の反映
 		//予定開始終了の反映

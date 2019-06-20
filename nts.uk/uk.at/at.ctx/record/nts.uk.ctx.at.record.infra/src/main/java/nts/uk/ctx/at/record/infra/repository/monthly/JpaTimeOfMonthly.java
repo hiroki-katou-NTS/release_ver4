@@ -16,6 +16,7 @@ import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
@@ -164,14 +165,17 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 		
 		val yearMonthValues = yearMonths.stream().map(c -> c.v()).collect(Collectors.toList());
 		
-		// List<TimeOfMonthly> results = new ArrayList<>();
-		List<KrcdtMonMerge> results = new ArrayList<>();
-		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {			
-			results.addAll(this.queryProxy().query(FIND_BY_SIDS_AND_YEARMONTHS, KrcdtMonMerge.class)
-					.setParameter("employeeIds", splitData)
-					.setParameter("yearMonths", yearMonthValues)
-					.getList());
+		String sql = "select * from KRCDT_MON_MERGE"
+				+ " where SID in @emps"
+				+ " and YM in @yms";
+		
+		val results = NtsStatement.In.split(employeeIds, emps -> {
+			return new NtsStatement(sql, this.jdbcProxy())
+					.paramString("emps", emps)
+					.paramInt("yms", yearMonthValues)
+					.getList(rec -> KrcdtMonMerge.MAPPER.toEntity(rec));
 		});
+		
 		results.sort((o1, o2) -> {
 			int tmp = o1.getKrcdtMonMergePk().getEmployeeId().compareTo(o2.getKrcdtMonMergePk().getEmployeeId());
 			if (tmp != 0) return tmp;

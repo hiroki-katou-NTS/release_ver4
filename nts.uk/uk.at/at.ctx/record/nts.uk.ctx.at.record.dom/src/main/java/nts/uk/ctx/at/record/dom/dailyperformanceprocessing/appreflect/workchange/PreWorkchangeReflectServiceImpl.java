@@ -8,6 +8,7 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCalculateOfAppReflectParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.PreHolidayWorktimeReflectService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.PreOvertimeReflectService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
@@ -27,13 +28,13 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 	@Inject
 	private WorkTypeIsClosedService workTypeRepo;
 	@Inject
-	private PreOvertimeReflectService preOTService;
+	private PreHolidayWorktimeReflectService preOTService;
 	@Override
 	public void workchangeReflect(WorkChangeCommonReflectPara param, boolean isPre) {
 		CommonReflectParameter workchangePara = param.getCommon();
 		for(int i = 0; workchangePara.getStartDate().daysTo(workchangePara.getEndDate()) - i >= 0; i++){
 			GeneralDate loopDate = workchangePara.getStartDate().addDays(i);
-			IntegrationOfDaily dailyInfor = preOTService.calculateForAppReflect(workchangePara.getEmployeeId(), loopDate);
+			IntegrationOfDaily dailyInfor = preOTService.createIntegrationOfDailyStart(workchangePara.getEmployeeId(), loopDate);
 			workchangePara.setBaseDate(loopDate);
 			WorkInfoOfDailyPerformance workInfor = dailyInfor.getWorkInformation();
 			//1日休日の判断

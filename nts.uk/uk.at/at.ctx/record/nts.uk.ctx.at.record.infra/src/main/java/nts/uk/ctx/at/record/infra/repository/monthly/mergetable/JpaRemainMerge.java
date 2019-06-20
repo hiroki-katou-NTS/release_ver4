@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.monthly.TimeOfMonthlyRepository;
@@ -28,6 +29,7 @@ import nts.uk.ctx.at.record.dom.monthly.vacation.annualleave.AnnLeaRemNumEachMon
 import nts.uk.ctx.at.record.dom.monthly.vacation.dayoff.monthremaindata.MonthlyDayoffRemainData;
 import nts.uk.ctx.at.record.dom.monthly.vacation.reserveleave.RsvLeaRemNumEachMonth;
 import nts.uk.ctx.at.record.dom.monthly.vacation.specialholiday.monthremaindata.SpecialHolidayRemainData;
+import nts.uk.ctx.at.record.infra.entity.monthly.mergetable.KrcdtMonMerge;
 import nts.uk.ctx.at.record.infra.entity.monthly.mergetable.KrcdtMonMergePk;
 import nts.uk.ctx.at.record.infra.entity.monthly.mergetable.KrcdtMonRemain;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
@@ -118,13 +120,17 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 		
 		val yearMonthValues = yearMonths.stream().map(c -> c.v()).collect(Collectors.toList());
 		
-		List<RemainMerge> results = new ArrayList<>();
-		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
-			results.addAll(this.queryProxy().query(FIND_BY_SIDS_AND_MONTHS, KrcdtMonRemain.class)
-											.setParameter("employeeIds", splitData)
-											.setParameter("yearMonths", yearMonthValues)
-											.getList(c -> c.toDomain()));
+		String sql = "select * from KRCDT_MON_REMAIN"
+				+ " where SID in @emps"
+				+ " and YM in @yms";
+		
+		val results = NtsStatement.In.split(employeeIds, emps -> {
+			return new NtsStatement(sql, this.jdbcProxy())
+					.paramString("emps", emps)
+					.paramInt("yms", yearMonthValues)
+					.getList(rec -> KrcdtMonRemain.MAPPER.toEntity(rec).toDomain());
 		});
+		
 		return results;
 	}
 	

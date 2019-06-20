@@ -22,6 +22,5 @@ public interface PreHolidayWorktimeReflectService {
 	 * @param baseDate
 	 * @return
 	 */
-	public IntegrationOfDaily createIntegrationOfDailyStart(String employeeId, GeneralDate baseDate, String workTimeCode, String workTypeCode,
-			Integer startTime, Integer endTime, boolean isPre);
+	public IntegrationOfDaily createIntegrationOfDailyStart(String employeeId, GeneralDate baseDate);
 }

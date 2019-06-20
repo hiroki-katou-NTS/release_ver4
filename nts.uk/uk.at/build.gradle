@@ -175,11 +175,13 @@ project (':at.ctx:at.auth:nts.uk.ctx.at.auth.app') {
 	dependencies {
 		compile group: 'com.shr', name: 'nts.uk.shr.find', version: version
 		compile project(':at.ctx:at.auth:nts.uk.ctx.at.auth.dom')
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.dom')
 	}
 }
 
 project (':at.ctx:at.auth:nts.uk.ctx.at.auth.dom') {
 	dependencies {
+		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.dom')
 	}
 }
 
@@ -224,14 +226,11 @@ project (':at.ctx:shared:nts.uk.ctx.at.shared.app') {
 	dependencies {
 		compile group: 'com.shr', name: 'nts.uk.shr.find', version: version
 		compile project(':at.ctx:shared:nts.uk.ctx.at.shared.dom')
-		compile project(':at.ctx:at.auth:nts.uk.ctx.at.auth.dom')
-		compile project(':at.ctx:at.auth:nts.uk.ctx.at.auth.app')
 	}
 }
 
 project (':at.ctx:shared:nts.uk.ctx.at.shared.dom') {
 	dependencies {
-		compile project(':at.ctx:at.auth:nts.uk.ctx.at.auth.dom')
 	}
 }
 
