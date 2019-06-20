@@ -331,7 +331,7 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 		}
 
 		// 対象社員の内容をcsvファイルに暗号化して書き出す
-		resultState = generalCsv2(generatorContext, targetEmployees);
+		resultState = generalEmployeesToCsv(generatorContext, targetEmployees);
 
 		if (resultState != ResultState.NORMAL_END) {
 			return resultState;
@@ -357,11 +357,11 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 						NUM_OF_TABLE_EACH_PROCESS);
 				int i = 0;
 				for (TableList tableList : tableLists) {
-					rowCsv = getDataSourceCsv1(rowCsv, headerCsv, tableList);
+					rowCsv = getDataTableListeCsv(rowCsv, headerCsv, tableList);
 					csv.writeALine(rowCsv);
 					i++;
 					// Add Table to CSV Auto
-					resultState = generalCsvAuto(generatorContext, storeProcessingId, tableList, targetEmployeesSid , i);
+					resultState = generalDataTableCsvAuto(generatorContext, storeProcessingId, tableList, targetEmployeesSid , i);
 					if (resultState != ResultState.NORMAL_END) {
 						return resultState;
 					}
@@ -382,8 +382,6 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 					break;
 			}
 
-			//CSVFileData fileData = new CSVFileData(FILE_NAME_CSV1 + CSV_EXTENSION, headerCsv, dataSourceCsv);
-			//generator.generate(generatorContext, fileData);
 			return ResultState.NORMAL_END;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -392,7 +390,7 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 
 	}
 
-	private Map<String, Object> getDataSourceCsv1(Map<String, Object> dataSourceCsv, List<String> headerCsv,
+	private Map<String, Object> getDataTableListeCsv(Map<String, Object> dataSourceCsv, List<String> headerCsv,
 			TableList tableList) {
 		Map<String, Object> rowCsv = new HashMap<>();
 		rowCsv.put(headerCsv.get(0), tableList.getDataStorageProcessingId());
@@ -513,9 +511,8 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 		return rowCsv;
 	}
 
-	private ResultState generalCsv2(FileGeneratorContext generatorContext, List<TargetEmployees> targetEmployees) {
+	private ResultState generalEmployeesToCsv(FileGeneratorContext generatorContext, List<TargetEmployees> targetEmployees) {
 		try {
-			// Add Table to CSV2
 			List<String> headerCsv2 = this.getTextHeaderCsv2();
 			CsvReportWriter csv = generator.generate(generatorContext,FILE_NAME_CSV2 + CSV_EXTENSION, headerCsv2, "UTF-8");
 			for (TargetEmployees targetEmp : targetEmployees) {
@@ -537,7 +534,7 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 
 	}
 
-	private ResultState generalCsvAuto(FileGeneratorContext generatorContext, String storeProcessingId,
+	private ResultState generalDataTableCsvAuto(FileGeneratorContext generatorContext, String storeProcessingId,
 			TableList tableList, List<String> targetEmployeesSid, int index) {
 		try {
 			// ドメインモデル「データ保存動作管理」を取得し「中断終了」を判別

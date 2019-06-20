@@ -283,7 +283,6 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	private void saveEndResultDel(ManualSetDeletion domain, Result result,Boolean isSaveBeforeDeleteFlg) {
 		Optional<ResultDeletion> optResultDel = repoResultDel.getResultDeletionById(domain.getDelId());
 		if (optResultDel.isPresent()) {
-			String fileName = null;
 			int fileSize = 0;
 			String fileId = null;
 			
@@ -298,15 +297,15 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			GeneralDateTime endDateTimeDel = GeneralDateTime.now();
 			File file = result.getFile();
 			if (file != null) {
-				fileName = file.getName();
 				fileSize = (int)file.length();
 				fileId = result.getFileId();
 			}
-			
+			String datetimenow = GeneralDateTime.now().toString("yyyyMMddHHmmss");
+			String nameFile = domain.getCompanyId() + domain.getDelName()  + datetimenow;	
 			ResultDeletion resultDel = optResultDel.get();
 			resultDel.setStatus(status);
 			resultDel.setEndDateTimeDel(endDateTimeDel);
-			resultDel.setFileName(new FileName(fileName));
+			resultDel.setFileName(new FileName(nameFile));
 			resultDel.setFileSize(fileSize);
 			resultDel.setFileId(fileId);
 			if (isSaveBeforeDeleteFlg) {
@@ -387,7 +386,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 		try {
 			// Update domain model 「データ削除動作管理」
 			repoManagementDel.updateCatCountAnCond(delId, 0, OperatingCondition.SAVING);
-
+			
 			// テーブル一覧の内容をCSVファイルに書き出す Add Table to CSV
 			generalTableDeletionToCsv(generatorContext, tableDeletionDataCsvs, domain);
 
@@ -499,9 +498,8 @@ public class ManualSetDeletionService extends ExportService<Object>{
 		
 		// ファイル圧縮実行
 		boolean isExistCompressPassFlg = domain.isExistCompressPassFlg();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		String executeDate = sdf.format(new Date()); 
-		String nameFile = domain.getCompanyId()+"_" + domain.getDelName() + "_" + executeDate + ZIP_FILE_EXTENSION;
+		String datetimenow = GeneralDateTime.now().toString("yyyyMMddHHmmss"); 
+		String nameFile = domain.getCompanyId() + domain.getDelName()  + datetimenow + ZIP_FILE_EXTENSION;
 		
 		Path compressedFile = null;
 		if (!isExistCompressPassFlg) {
