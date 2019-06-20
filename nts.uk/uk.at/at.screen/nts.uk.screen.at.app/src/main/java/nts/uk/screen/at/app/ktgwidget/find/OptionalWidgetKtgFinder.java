@@ -233,12 +233,16 @@ public class OptionalWidgetKtgFinder {
 					int timeOT = 0;
 					List<ApplicationTimeImport> applicationOvertimeImport = optionalWidgetAdapter.acquireTotalApplicationOverTimeHours(employeeId, startDate, endDate);
 					List<DailyExcessTotalTimeImport> dailyTotalTime = new ArrayList<>();
-					for (ApplicationTimeImport applicationOvertime : applicationOvertimeImport) {
-						dailyTotalTime = dailyExcessTotalTimeImport.stream().
-								filter(c -> !c.getDate().equals(applicationOvertime.getDate())).collect(Collectors.toList());
-					}
-					for (ApplicationTimeImport OvertimeImport : applicationOvertimeImport) {
-						timeOT += OvertimeImport.getTotalOtHours();
+					if(applicationOvertimeImport.size() == 0){
+						dailyTotalTime = dailyExcessTotalTimeImport;
+					}else{
+						for (ApplicationTimeImport applicationOvertime : applicationOvertimeImport) {
+							dailyTotalTime = dailyExcessTotalTimeImport.stream().
+									filter(c -> !c.getDate().equals(applicationOvertime.getDate())).collect(Collectors.toList());
+						}
+						for (ApplicationTimeImport applicationOvertime : applicationOvertimeImport) {
+							timeOT += applicationOvertime.getTotalOtHours();
+						}
 					}
 					for (DailyExcessTotalTimeImport dailyExcessTotalTime : dailyTotalTime) {
 						timeOT += dailyExcessTotalTime.getOverTime().getTime();
@@ -249,12 +253,16 @@ public class OptionalWidgetKtgFinder {
 					int time = 0;
 					List<ApplicationTimeImport> applicationflexTimeImport = optionalWidgetAdapter.acquireTotalApplicationTimeUnreflected(employeeId, startDate, endDate);
 					List<DailyExcessTotalTimeImport> dailyTotalTime = new ArrayList<>();
-					for (ApplicationTimeImport applicationOvertime : applicationflexTimeImport) {
-						dailyTotalTime = dailyExcessTotalTimeImport.stream().
-								filter(c -> !c.getDate().equals(applicationOvertime.getDate())).collect(Collectors.toList());
-					}
-					for (ApplicationTimeImport OvertimeImport : applicationflexTimeImport) {
-						time += OvertimeImport.getTotalOtHours();
+					if(applicationflexTimeImport.size() == 0){
+						dailyTotalTime = dailyExcessTotalTimeImport;
+					}else{
+						for (ApplicationTimeImport applicationOvertime : applicationflexTimeImport) {
+							dailyTotalTime = dailyExcessTotalTimeImport.stream().
+									filter(c -> !c.getDate().equals(applicationOvertime.getDate())).collect(Collectors.toList());
+						}
+						for (ApplicationTimeImport OvertimeImport : applicationflexTimeImport) {
+							time += OvertimeImport.getTotalOtHours();
+						}
 					}
 					for (DailyExcessTotalTimeImport dailyExcessTotalTime : dailyTotalTime) {
 						time += dailyExcessTotalTime.getFlexOverTime().getTime();
@@ -265,12 +273,16 @@ public class OptionalWidgetKtgFinder {
 					int time = 0;
 					List<ApplicationTimeImport> applicationflexTimeImport = optionalWidgetAdapter.acquireTotalAppHdTimeNotReflected(employeeId, startDate, endDate);
 					List<DailyExcessTotalTimeImport> dailyTotalTime = new ArrayList<>();
-					for (ApplicationTimeImport applicationOvertime : applicationflexTimeImport) {
-						dailyTotalTime = dailyExcessTotalTimeImport.stream().
-								filter(c -> !c.getDate().equals(applicationOvertime.getDate())).collect(Collectors.toList());
-					}
-					for (ApplicationTimeImport OvertimeImport : applicationflexTimeImport) {
-						time += OvertimeImport.getTotalOtHours();
+					if(applicationflexTimeImport.size() == 0){
+						dailyTotalTime = dailyExcessTotalTimeImport;
+					}else{
+						for (ApplicationTimeImport applicationOvertime : applicationflexTimeImport) {
+							dailyTotalTime = dailyExcessTotalTimeImport.stream().
+									filter(c -> !c.getDate().equals(applicationOvertime.getDate())).collect(Collectors.toList());
+						}
+						for (ApplicationTimeImport OvertimeImport : applicationflexTimeImport) {
+							time += OvertimeImport.getTotalOtHours();
+						}
 					}
 					for (DailyExcessTotalTimeImport dailyExcessTotalTime : dailyTotalTime) {
 						time += dailyExcessTotalTime.getHolidayWorkTime().getTime();
@@ -281,12 +293,16 @@ public class OptionalWidgetKtgFinder {
 					int time = 0;
 					List<ApplicationTimeImport> applicationflexTimeImport = optionalWidgetAdapter.acquireAppNotReflected(employeeId, startDate, endDate);
 					List<DailyExcessTotalTimeImport> dailyTotalTime = new ArrayList<>();
-					for (ApplicationTimeImport applicationOvertime : applicationflexTimeImport) {
-						dailyTotalTime = dailyExcessTotalTimeImport.stream().
-								filter(c -> !c.getDate().equals(applicationOvertime.getDate())).collect(Collectors.toList());
-					}
-					for (ApplicationTimeImport OvertimeImport : applicationflexTimeImport) {
-						time += OvertimeImport.getTotalOtHours();
+					if(applicationflexTimeImport.size() == 0){
+						dailyTotalTime = dailyExcessTotalTimeImport;
+					}else{
+						for (ApplicationTimeImport applicationOvertime : applicationflexTimeImport) {
+							dailyTotalTime = dailyExcessTotalTimeImport.stream().
+									filter(c -> !c.getDate().equals(applicationOvertime.getDate())).collect(Collectors.toList());
+						}
+						for (ApplicationTimeImport OvertimeImport : applicationflexTimeImport) {
+							time += OvertimeImport.getTotalOtHours();
+						}
 					}
 					for (DailyExcessTotalTimeImport dailyExcessTotalTime : dailyTotalTime) {
 						time += dailyExcessTotalTime.getExcessMidNightTime().getTime();
