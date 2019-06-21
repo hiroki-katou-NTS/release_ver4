@@ -31,6 +31,7 @@ import nts.uk.ctx.workflow.dom.adapter.bs.dto.ConcurrentEmployeeImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmpInfoRQ18;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.EmployeeImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.PersonImport;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.ResultRequest596Import;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmpImport;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmployment;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmploymentImport;
@@ -210,6 +211,12 @@ public class EmployeeAdapterImpl implements EmployeeAdapter {
 		return syCompanyPub.GetListAffComHistByListSidAndPeriod(sids, datePeriod).stream()
 				.map(x -> new StatusOfEmpImport(x.getEmployeeId(), x.getListPeriod()))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<ResultRequest596Import> getEmpDeletedLstBySids(List<String> sids) {
+		return employeePub.getEmpDeletedLstBySids(sids).stream()
+				.map(x -> new ResultRequest596Import(x.getSid(), x.getEmployeeCode(), x.getEmployeeName())).collect(Collectors.toList());
 	}
 	
 	
