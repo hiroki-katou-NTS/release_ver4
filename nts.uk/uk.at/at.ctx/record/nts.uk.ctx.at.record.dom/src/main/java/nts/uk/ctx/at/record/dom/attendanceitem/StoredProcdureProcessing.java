@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -18,6 +17,7 @@ import javax.inject.Inject;
 
 import nts.arc.time.YearMonth;
 import nts.gul.util.value.Finally;
+import nts.gul.util.value.MutableValue;
 import nts.uk.ctx.at.record.dom.actualworkinghours.ActualWorkingTimeOfDaily;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.medical.MedicalCareTimeOfDaily;
@@ -78,7 +78,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	/**Iﾜｰｸ*/
 	private static final List<WorkTimeCode> DEFAULT_WORK_TIME = Arrays.asList(new WorkTimeCode("100"), new WorkTimeCode("101"));
 	
-	private static final List<Integer> MONTHKY_ANYITEM_TO_PROCESS = Arrays.asList(20, 22, 24, 46, 1, 2);
+	private static final List<Integer> MONTHKY_ANYITEM_TO_PROCESS = Arrays.asList(51, 52, 53, 45, 46, 1, 2);
 	
 	@Inject
 	private WorkTypeRepository workTypeRepo;
@@ -128,7 +128,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			
 			Integer logonTime, logoffTime,
 					leaveGateStartTime, leaveGateEndTime, 
-					startTime, endTime = null; 
+					startTime, endTime; 
 			
 			WorkType workType = workTypes.get(d.getWorkInformation().getRecordInfo().getWorkTypeCode());
 			if(workType == null){
@@ -136,6 +136,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			}
 			WorkTypeUnit atr = workType.getDailyWork().getWorkTypeUnit();
 			DailyWork dailyWork = workType.getDailyWork();
+			Optional<PredetemineTimeSetting> predSet = Optional.empty();
 			
 			if(d.getAttendanceLeave().isPresent()){
 				Optional<TimeLeavingWork> timeLeaveNo1 = d.getAttendanceLeave().get().getAttendanceLeavingWork(1);
@@ -143,10 +144,10 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 					startTime = getTimeStamp(timeLeaveNo1.get().getAttendanceStamp());
 					endTime =  getTimeStamp(timeLeaveNo1.get().getLeaveStamp());
 				} else {
-					startTime = null;
+					endTime = startTime = null;
 				}
 			} else {
-				startTime = null;
+				endTime = startTime = null;
 			}
 			
 			if(d.getPcLogOnInfo().isPresent()){
@@ -228,7 +229,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			
 			timeOn = 1; timeOff = 0;
 			Optional<OverTimeOfDaily> overTimeD = Optional.empty();
-			if(d.getAttendanceTimeOfDailyPerformance().isPresent()){
+			if(d.getAttendanceTimeOfDailyPerformance().isPresent()) {
 				
 				/** 任意項目11: 実働就業時間 = 0 かつ 勤務種類が(年休、特休、代休) である事が条件 */
 				processOptionalItem(() -> isNotActualWork(d, atr, dailyWork.getOneDay(), dailyWork.getMorning(), dailyWork.getAfternoon()), 
@@ -261,20 +262,20 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 						optionalItem, COUNT_ON, COUNT_OFF, 21);
 				
 				/** 任意項目23: 残業あり かつ 事前残業なし　が条件 */
-				processOptionalItem(() -> (timePreFlex <= 0 && timeFlex > 0) || 
-								checkOnPair(overTime, preOver, (ot, pot) -> ot > 0 && pot <= 0),
-						optionalItem, COUNT_ON, COUNT_OFF, 23);
-				
+//				processOptionalItem(() -> (timePreFlex <= 0 && timeFlex > 0) || 
+//								checkOnPair(overTime, preOver, (ot, pot) -> ot > 0 && pot <= 0),
+//						optionalItem, COUNT_ON, COUNT_OFF, 23);
 				/** 任意項目29：  */
 				processOptionalItem(() -> true , optionalItem, 0, 0, 29);
 				if(d.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
 					Optional<WorkTimeSetting>  workTime = workTimeRepository.findByCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
 					if(workTime.isPresent()) {
 						
+						predSet = predetermineRepo.findByWorkTimeCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
+						
 						if(dailyWork.isWeekDayAttendance() && !(workTime.get().getWorkTimeDivision().getWorkTimeDailyAtr().isFlex())) {
 							//所定の開始時刻
 							TimeWithDayAttr startOclock = new TimeWithDayAttr(0);
-							Optional<PredetemineTimeSetting> predSet = predetermineRepo.findByWorkTimeCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
 							if(predSet.isPresent()) {
 								Optional<TimezoneUse> firstTimeZone =  predSet.get().getPrescribedTimezoneSetting().getLstTimezone().stream().filter(tc -> tc.getWorkNo() == 1).findFirst();
 								if(firstTimeZone.isPresent()) {
@@ -352,6 +353,66 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 				/** 任意項目90 */
 				updateOptionalItemWithNo(optionalItem, COUNT_OFF, 90);
 			}
+			
+			Optional<AnyItemValue> no18 = optionalItem.getNo(18);
+			MutableValue<Boolean> flag19 = new MutableValue<>(false), flag21 = new MutableValue<>(false), flag37 = new MutableValue<>(false),
+					flag35 = new MutableValue<>(false), flag36 = new MutableValue<>(false);
+			
+			if(d.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
+				if(!predSet.isPresent()) {
+					predSet = predetermineRepo.findByWorkTimeCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
+				}
+				predSet.ifPresent(pr -> {
+					int preSetAtten01 = pr.getTimeSheetOf(1).getStart().valueAsMinutes(),
+							preSetLeave01 = pr.getTimeSheetOf(1).getEnd().valueAsMinutes();
+					
+					if(startTime != null && startTime < preSetAtten01) {
+						flag35.set(true);
+					}
+					
+					if(endTime != null && endTime > preSetLeave01) {
+						flag36.set(true);
+					}
+				});
+			}
+			
+			/** 任意項目35 */
+			processOptionalItem(() -> flag35.get(), optionalItem, COUNT_ON, COUNT_OFF, 35);
+			
+			/** 任意項目36 */
+			processOptionalItem(() -> flag36.get(), optionalItem, COUNT_ON, COUNT_OFF, 36);
+			
+			if(no18.isPresent()) {
+				if(no18.get().getTimes().get().v().equals(COUNT_ON)) {
+					if(d.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
+						int scheWorkAtten = d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).getAttendance().valueAsMinutes();
+						int scheWorkLeave = d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).getLeaveWork().valueAsMinutes();
+						if(startTime != null && endTime != null) {
+							if(startTime >= scheWorkAtten && endTime <= scheWorkLeave) {
+								flag19.set(true);
+							}
+							if(startTime < scheWorkAtten && endTime > scheWorkLeave) {
+								flag21.set(true);
+							}
+						}
+					}
+				} else {
+					Optional<AnyItemValue> no35 = optionalItem.getNo(35), no36 = optionalItem.getNo(36);
+					if (no35.get().getTimes().get().v().equals(COUNT_ON) || no36.get().getTimes().get().v().equals(COUNT_ON)) {
+						flag37.set(true);
+					}
+				}
+				
+			} 
+			
+			/** 任意項目19 */
+			processOptionalItem(() -> flag19.get(), optionalItem, COUNT_ON, COUNT_OFF, 19);
+			
+			/** 任意項目21 */
+			processOptionalItem(() -> flag21.get(), optionalItem, COUNT_ON, COUNT_OFF, 21);
+			
+			/** 任意項目37 */
+			processOptionalItem(() -> flag37.get(), optionalItem, COUNT_ON, COUNT_OFF, 37);
 			
 			if(d.getAnyItemValue().get().getItems().isEmpty()){
 				d.setAnyItemValue(Optional.empty());
@@ -440,9 +501,6 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		/** 任意項目の件数を取得 */
 		List<AnyItemValueOfDaily> optionalItemsInMonth = dailyOptionalItem.finds(Arrays.asList(employeeId), attendanceTime.get().getDatePeriod());
 		List<AnyItemValue> items = optionalItemsInMonth.stream().map(o -> o.getItems()).flatMap(List::stream).collect(Collectors.toList());
-		double count18 = sumCountItem(items, 18), count19 = sumCountItem(items, 19), 
-				count21 = sumCountItem(items, 21), count23 = sumCountItem(items, 23),
-				count27 = sumCountItem(items, 27);
 		
 		
 		List<AnyItemOfMonthly> dataToProcess = new ArrayList<>(monthlyOptionalItems);
@@ -459,14 +517,18 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			}
 		}
 		
-		/** 任意項目20: 割合を計算 */
-		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 20, getOnDefault(count18, count19), dataToProcess);
+		double count19 = sumCountItem(items, 19), count21 = sumCountItem(items, 21), 
+				count37 = sumCountItem(items, 37), count45 = dataToProcess.stream().filter(c -> c.getAnyItemId() == 45)
+											.mapToDouble(c -> c.getTimes().orElseGet(() -> new AnyTimesMonth(0d)).v().doubleValue()).sum();
 		
-		/** 任意項目22: 割合を計算 */
-		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 22, getOnDefault(count18, count21), dataToProcess);
+		/** 任意項目51: 割合を計算 */
+		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 51, getOnDefault(count19, count45), dataToProcess);
 		
-		/** 任意項目24: 割合を計算 */
-		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 24, getOnDefault(count27, count23), dataToProcess);
+		/** 任意項目52: 割合を計算 */
+		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 52, getOnDefault(count21, count45), dataToProcess);
+		
+		/** 任意項目53: 割合を計算 */
+		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 53, getOnDefault(count37, count45), dataToProcess);
 		
 		/** 任意項目46: 割合を計算 */
 		accessMonthlyItem(employeeId, yearMonth, closureId, closureDate, 46, sumFor46(dataToProcess), dataToProcess);
@@ -529,7 +591,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		if(downer == 0 || upper == 0){
 			return 0;
 		}
-		return BigDecimal.valueOf(upper).divide(BigDecimal.valueOf(downer), new MathContext(5, RoundingMode.HALF_UP)).multiply(V100).setScale(0, RoundingMode.HALF_UP).doubleValue();
+		return BigDecimal.valueOf(upper).divide(BigDecimal.valueOf(downer), new MathContext(5, RoundingMode.HALF_UP)).multiply(V100).setScale(1, RoundingMode.HALF_UP).doubleValue();
 	}
 	
 	private boolean isWeekday(WorkTypeUnit atr, WorkTypeClassification oneDay, WorkTypeClassification morning,
@@ -654,20 +716,20 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		}
 	}
 	
-	private boolean checkOnPair(List<Integer> list1, List<Integer> list2, BiFunction<Integer, Integer, Boolean> onCheck){
-		for(int i = 0; i < list1.size(); i++){
-			int val1 = getOnDefault(list1, i);
-			int val2 = getOnDefault(list2, i);
-			if(onCheck.apply(val1, val2)){
-				return true;
-			}
-		}
-		return false;
-	}
+//	private boolean checkOnPair(List<Integer> list1, List<Integer> list2, BiFunction<Integer, Integer, Boolean> onCheck){
+//		for(int i = 0; i < list1.size(); i++){
+//			int val1 = getOnDefault(list1, i);
+//			int val2 = getOnDefault(list2, i);
+//			if(onCheck.apply(val1, val2)){
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
-	private Integer getOnDefault(List<Integer> overTime, int idx) {
-		return idx >= overTime.size() || overTime.get(idx) == null ? 0 : overTime.get(idx);
-	}
+//	private Integer getOnDefault(List<Integer> overTime, int idx) {
+//		return idx >= overTime.size() || overTime.get(idx) == null ? 0 : overTime.get(idx);
+//	}
 
 }
 
