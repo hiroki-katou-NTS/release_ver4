@@ -1,0 +1,56 @@
+package nts.uk.file.at.app.export.schedule;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+
+import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.workrecord.export.WorkRecordExport;
+import nts.uk.ctx.at.record.dom.workrecord.export.dto.AffiliationStatus;
+import nts.uk.ctx.at.record.dom.workrecord.export.dto.EmpAffInfoExport;
+import nts.uk.ctx.at.record.dom.workrecord.export.dto.PeriodInformation;
+import nts.uk.screen.at.app.schedule.service.ScreenService;
+import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
+
+@Stateless
+public class FileServiceImpl implements FileService{
+
+	@Inject
+	private ScreenService service;
+	
+	@Inject
+	private WorkRecordExport workRecordExport;
+	
+	@Override
+	public Optional<GeneralDate> getProcessingYM(String cId, int closureId) {
+		return service.getProcessingYM(cId, closureId);
+	}
+
+	@Override
+	public Map<String, YearMonthPeriod> getAffiliationPeriod(List<String> listSid, YearMonthPeriod period, GeneralDate baseDate) {
+		EmpAffInfoExport e = workRecordExport.getAffiliationPeriod(listSid, period, baseDate);
+		Map<String, YearMonthPeriod> result = new HashMap<>();
+		for (AffiliationStatus emp : e.getAffiliationStatus()) {
+			nts.arc.time.YearMonth start = emp.getPeriodInformation().get(0).getYearMonthPeriod().start();
+			nts.arc.time.YearMonth end = emp.getPeriodInformation().get(0).getYearMonthPeriod().end();
+			for (PeriodInformation infor : emp.getPeriodInformation()) {
+				if(infor.getYearMonthPeriod().start().lessThan(start)) {
+					start = infor.getYearMonthPeriod().start();
+				}
+				if(infor.getYearMonthPeriod().end().lessThan(end)) {
+					end = infor.getYearMonthPeriod().end();
+				}
+			}
+			result.put(emp.getEmployeeID(), new YearMonthPeriod(start, end));
+		}
+		
+		return result;
+	}
+	
+	
+
+}

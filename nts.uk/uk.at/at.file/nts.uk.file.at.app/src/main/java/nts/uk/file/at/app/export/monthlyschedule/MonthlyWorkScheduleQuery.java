@@ -37,4 +37,6 @@ public class MonthlyWorkScheduleQuery {
 	private FileOutputType fileType;
 	
 	private GeneralDate baseDate;
+	
+	private Integer closureId;
 }
