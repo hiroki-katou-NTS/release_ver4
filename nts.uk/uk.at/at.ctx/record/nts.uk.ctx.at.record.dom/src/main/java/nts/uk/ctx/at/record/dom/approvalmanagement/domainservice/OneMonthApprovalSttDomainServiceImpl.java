@@ -35,6 +35,8 @@ import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExClassificationHi
 import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExEmploymentHistoryImport;
 import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExJobTitleHistoryImport;
 import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.ExWorkPlaceHistoryImport;
+import nts.uk.ctx.at.record.dom.adapter.initswitchsetting.InitSwitchSetAdapter;
+import nts.uk.ctx.at.record.dom.adapter.initswitchsetting.InitSwitchSetDto;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootSituation;
@@ -113,6 +115,9 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 
 	@Inject
 	private WorkplaceExportAdapter workplaceExportAdapter;
+	
+	@Inject
+	private InitSwitchSetAdapter initSwitchSetAdapter;
 
 	private List<ApprovalEmployeeDto> buildApprovalEmployeeData(List<Identification> listIdentification,
 			List<EmployeeDto> lstEmployee, ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport) {
@@ -185,10 +190,17 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 		result.setEndDate(datePeriod.end());
 		return result;
 	}
-
+	
+	/**
+	 * 期間を変更する
+	 */
 	public OneMonthApprovalStatusDto getDatePeriod(int closureId, int currentYearMonth) {
 		OneMonthApprovalStatusDto result = new OneMonthApprovalStatusDto();
-		DatePeriod datePeriod = closureService.getClosurePeriod(closureId, YearMonth.of(currentYearMonth));
+		// [No.609]ログイン社員のシステム日時点の処理対象年月を取得する
+		InitSwitchSetDto initSwitchSetDto = this.initSwitchSetAdapter.targetDateFromLogin();
+		// 画面項目「A1_5：期間」に取得した期間を取得する
+		DatePeriod datePeriod = initSwitchSetDto.getListDateProcessed().stream()
+				.filter(x -> x.getClosureID() == closureId).findFirst().get().getDatePeriod();
 		result.setStartDate(datePeriod.start());
 		result.setEndDate(datePeriod.end());
 		return result;
@@ -237,9 +249,12 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 			}
 			DatePeriod datePeriod = null;
 			if (startDateParam == null) {
-				// アルゴリズム「当月の期間を算出する」を実行する
-				datePeriod = closureService.getClosurePeriod(currentClosure,
-						lstYearMonth.isEmpty() ? currentYearMonth : lstYearMonth.get(0));
+				// [No.609]ログイン社員のシステム日時点の処理対象年月を取得する
+				InitSwitchSetDto initSwitchSetDto = this.initSwitchSetAdapter.targetDateFromLogin();
+				// 画面項目「A1_5：期間」に取得した期間を取得する
+				int closureId = currentClosure;
+				datePeriod = initSwitchSetDto.getListDateProcessed().stream().filter(x -> x.getClosureID() == closureId)
+						.findFirst().get().getDatePeriod();
 			} else {
 				datePeriod = new DatePeriod(startDateParam, endDateParam);
 			}
