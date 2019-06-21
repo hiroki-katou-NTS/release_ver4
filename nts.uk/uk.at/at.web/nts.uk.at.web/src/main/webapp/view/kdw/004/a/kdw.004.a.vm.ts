@@ -47,11 +47,17 @@ module nts.uk.at.view.kdw004.a.viewmodel {
         currentPageSize: KnockoutObservable<any> = ko.observable(50);
         selectedClosure: KnockoutObservable<any> = ko.observable(null);
         lstClosure: KnockoutObservableArray<any> = ko.observableArray([]);
+        isStartInProcess: boolean = true;
 
         constructor() {
             let self = this;
 
             self.selectedClosure.subscribe(val => {
+                if (self.isStartInProcess) {
+                    self.isStartInProcess = false;
+                    return;
+                } 
+                
                 if (val) {
                     let currentYearMonth,
                         closures = self.lstClosure();
@@ -83,7 +89,8 @@ module nts.uk.at.view.kdw004.a.viewmodel {
 
             service.startscreen().done((result: OneMonthApprovalStatus) => {
                 self.lstClosure(result.lstClosure);
-
+                
+                self.isStartInProcess = true;
                 self.selectedClosure(result.lstClosure[0].closureId);
 
                 self.datePeriod({
