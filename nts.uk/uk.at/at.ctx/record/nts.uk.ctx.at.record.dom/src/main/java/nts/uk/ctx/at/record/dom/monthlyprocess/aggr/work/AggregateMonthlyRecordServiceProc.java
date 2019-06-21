@@ -807,6 +807,11 @@ public class AggregateMonthlyRecordServiceProc {
 			this.aggregateResult.putAnyItemOrUpdate(AnyItemOfMonthly.of(
 					this.employeeId, this.yearMonth, this.closureId, this.closureDate, monthResult));
 		}
+
+		// 計画所定労働日数（任意項目69：大塚カスタマイズ）
+		AnyItemAggrResult anyItem69Result = this.getPredWorkingDays(monthPeriod);
+		this.aggregateResult.putAnyItemOrUpdate(AnyItemOfMonthly.of(
+				this.employeeId, this.yearMonth, this.closureId, this.closureDate, anyItem69Result));
 	}
 	
 	/**
@@ -883,6 +888,20 @@ public class AggregateMonthlyRecordServiceProc {
 		}
 		
 		return results;
+	}
+	
+	/**
+	 * 計画所定労働日数
+	 * @return 任意項目集計結果
+	 */
+	private AnyItemAggrResult getPredWorkingDays(DatePeriod period){
+
+		// RQ608：指定期間の所定労働日数を取得する(大塚用)
+		double predWorkingDays = this.repositories.getPredWorkingDaysAdaptor().byPeriod(
+				period, this.companySets.getAllWorkTypeMap()).v();
+		
+		// 任意項目69へ格納
+		return AnyItemAggrResult.of(69, null, new AnyTimesMonth(predWorkingDays), null);
 	}
 	
 	/**

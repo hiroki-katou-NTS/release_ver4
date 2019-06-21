@@ -459,4 +459,12 @@ public class WorkType extends AggregateRoot implements Cloneable{
 		if (this.workTypeCode.v().compareTo("105") == 0) return false;	// プレミアムデー
 		return true;
 	}
+	
+	/**
+	 * 1日半日出勤・1日休日系の判定（休出判定あり）
+	 * @return 出勤日区分
+	 */
+	public AttendanceDayAttr chechAttendanceDay() {
+		return this.dailyWork.chechAttendanceDay();
+	}
 }

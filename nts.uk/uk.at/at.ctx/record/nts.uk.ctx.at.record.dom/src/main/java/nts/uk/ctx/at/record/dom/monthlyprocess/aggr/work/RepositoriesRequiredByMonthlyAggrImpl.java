@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import lombok.Getter;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
+import nts.uk.ctx.at.record.dom.adapter.shift.pattern.GetPredWorkingDaysAdaptor;
 import nts.uk.ctx.at.record.dom.adapter.workplace.affiliate.AffWorkplaceAdapter;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.AffiliationInforOfDailyPerforRepository;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.WorkTypeOfDailyPerforRepository;
@@ -360,4 +361,8 @@ public class RepositoriesRequiredByMonthlyAggrImpl implements RepositoriesRequir
 	/** 日別実績から回数集計結果を取得する */
 	@Inject
 	private GetTotalTimesFromDailyRecord timeAndCountFromDailyRecord;
+
+	/** 所定労働日数を取得する */
+	@Inject
+	private GetPredWorkingDaysAdaptor predWorkingDaysAdaptor;
 }
