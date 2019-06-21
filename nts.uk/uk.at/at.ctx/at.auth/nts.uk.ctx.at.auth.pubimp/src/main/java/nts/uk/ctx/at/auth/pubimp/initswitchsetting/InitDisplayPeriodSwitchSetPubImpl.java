@@ -35,11 +35,13 @@ public class InitDisplayPeriodSwitchSetPubImpl implements InitDisplayPeriodSwitc
 	
 	@Inject
 	private ClosureService closureService;
+	
 	@Override
 	public InitDisplayPeriodSwitchSetDto targetDateFromLogin() {
 		String companyID = AppContexts.user().companyId();
-		String employeeID = AppContexts.user().employeeId();
+        String employeeID = AppContexts.user().employeeId();
 		String attendanceID = AppContexts.user().roles().forAttendance();
+		GeneralDate systemDate = GeneralDate.today();
 		InitDisplayPeriodSwitchSetDto data = new InitDisplayPeriodSwitchSetDto(1, new ArrayList<>());
 		//全締めの当月と期間を取得する
 	//	InitDisplayPeriodSwitchSetDto data = new InitDisplayPeriodSwitchSetDto();
@@ -64,26 +66,45 @@ public class InitDisplayPeriodSwitchSetPubImpl implements InitDisplayPeriodSwitc
 			  data = new InitDisplayPeriodSwitchSetDto(1, listDateProcessed);
 			 return data;
 		}else{
+			// 社員に対応する処理締めを取得する
+			Closure closure = this.closureService.getClosureDataByEmployee(employeeID, systemDate);
 			//当月・翌月を判断する
-			for(ClosureInfo item : listClosureInfo){
-				int endDate = item.getPeriod().end().day();
-				int switchDate = optDisSwitchSet.get().getDay();
-				if(endDate + switchDate <= GeneralDate.today().day() ){
-					/** 取得した締め情報をループする **/
-					/** Chỗ này EA đang lấy Closure nhưng có vẻ ko đúng
-					 * Đang lấy theo Closure Info - Hieu LT
-					 */
-					/**DatePeriod getClosurePeriod(int closureId, YearMonth processingYm); */
-					DatePeriod datePeriod = closureService.getClosurePeriod(item.getClosureId().value, item.getCurrentMonth().addMonths(1));
-					DateProcessed endDateNextMonth = new DateProcessed(item.getClosureId().value, item.getCurrentMonth().addMonths(1), datePeriod);
+			int endDate = listClosureInfo.stream().filter(x -> x.getClosureId().value == closure.getClosureId().value)
+					.findFirst().get().getPeriod().end().day();
+			int switchDate = optDisSwitchSet.get().getDay();
+			
+			if (endDate + switchDate <= systemDate.day()) {
+				for (ClosureInfo item : listClosureInfo) {
+					DatePeriod datePeriod = closureService.getClosurePeriod(item.getClosureId().value,
+							item.getCurrentMonth().addMonths(1));
+					DateProcessed endDateNextMonth = new DateProcessed(item.getClosureId().value,
+							item.getCurrentMonth().addMonths(1), datePeriod);
 					listDate.add(endDateNextMonth);
-					 data = new InitDisplayPeriodSwitchSetDto(2, listDate);
 				}
-				else{
-					data = new InitDisplayPeriodSwitchSetDto(1, listDateProcessed);
-				}
+				data = new InitDisplayPeriodSwitchSetDto(2, listDate);
+			} else {
+				data = new InitDisplayPeriodSwitchSetDto(1, listDateProcessed);
 			}
+			
+//			for(ClosureInfo item : listClosureInfo){
+//				int endDate = item.getPeriod().end().day();
+//				int switchDate = optDisSwitchSet.get().getDay();
+//				if(endDate + switchDate <= systemDate.day()){
+//					/** 取得した締め情報をループする **/
+//					/** Chỗ này EA đang lấy Closure nhưng có vẻ ko đúng
+//					 * Đang lấy theo Closure Info - Hieu LT
+//					 */
+//					/**DatePeriod getClosurePeriod(int closureId, YearMonth processingYm); */
+//					DatePeriod datePeriod = closureService.getClosurePeriod(item.getClosureId().value, item.getCurrentMonth().addMonths(1));
+//					DateProcessed endDateNextMonth = new DateProcessed(item.getClosureId().value, item.getCurrentMonth().addMonths(1), datePeriod);
+//					listDate.add(endDateNextMonth);
+//					data = new InitDisplayPeriodSwitchSetDto(2, listDate);
+//				}
+//				else{
+//					data = new InitDisplayPeriodSwitchSetDto(1, listDateProcessed);
+//				}
+//			}
 			return data;
 		}
-	};
+	}
 }
