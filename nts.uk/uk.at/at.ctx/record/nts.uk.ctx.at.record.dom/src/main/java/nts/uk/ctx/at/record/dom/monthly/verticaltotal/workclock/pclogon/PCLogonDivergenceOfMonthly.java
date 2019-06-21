@@ -1,7 +1,12 @@
 package nts.uk.ctx.at.record.dom.monthly.verticaltotal.workclock.pclogon;
 
+import java.util.Optional;
+
 import lombok.Getter;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
+import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
+import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 
 /**
  * 月別実績のPCログオン乖離
@@ -42,15 +47,22 @@ public class PCLogonDivergenceOfMonthly {
 	
 	/**
 	 * 集計
+	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
 	 * @param attendanceTimeOfDaily 日別実績の勤怠時間
+	 * @param timeLeavingOfDaily 日別実績の出退勤
+	 * @param anyItemValueOpt 日別実績の任意項目
 	 */
-	public void aggregate(AttendanceTimeOfDailyPerformance attendanceTimeOfDaily){
+	public void aggregate(
+			Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt,
+			AttendanceTimeOfDailyPerformance attendanceTimeOfDaily,
+			TimeLeavingOfDailyPerformance timeLeavingOfDaily,
+			Optional<AnyItemValueOfDaily> anyItemValueOpt){
 
 		// ログオンの集計
-		this.logonDivergence.aggregate(attendanceTimeOfDaily, true);
+		this.logonDivergence.aggregateLogon(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily, anyItemValueOpt);
 		
 		// ログオフの集計
-		this.logoffDivergence.aggregate(attendanceTimeOfDaily, false);
+		this.logoffDivergence.aggregateLogoff(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily);
 	}
 	
 	/**
