@@ -69,7 +69,8 @@ public class WorkClockOfMonthly {
 		this.endClock.aggregate(workType, timeLeavingOfDaily, predTimeSetForCalc);
 		
 		// PCログオン情報の集計
-		this.logonInfo.aggregate(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily, anyItemValueOpt);
+		this.logonInfo.aggregate(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily, anyItemValueOpt,
+				workType, predTimeSetForCalc);
 	}
 	
 	/**

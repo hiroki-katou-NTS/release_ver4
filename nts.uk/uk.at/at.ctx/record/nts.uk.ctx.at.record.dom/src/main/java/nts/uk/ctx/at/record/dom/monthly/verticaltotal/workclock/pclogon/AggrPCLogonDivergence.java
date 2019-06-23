@@ -10,11 +10,14 @@ import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnNo;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValue;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.PredetermineTimeSetForCalc;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
 import nts.uk.ctx.at.shared.dom.common.days.AttendanceDaysMonth;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonth;
+import nts.uk.ctx.at.shared.dom.worktime.predset.UseSetting;
+import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.shr.com.time.TimeWithDayAttr;
 
 /**
@@ -136,14 +139,19 @@ public class AggrPCLogonDivergence {
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
 	 * @param attendanceTimeOfDaily 日別実績の勤怠時間
 	 * @param timeLeavingOfDaily 日別実績の出退勤
+	 * @param workType 勤務種類
+	 * @param predTimeSetForCalc 計算用所定時間設定
 	 */
 	public void aggregateLogoff(
 			Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt,
 			AttendanceTimeOfDailyPerformance attendanceTimeOfDaily,
-			TimeLeavingOfDailyPerformance timeLeavingOfDaily){
+			TimeLeavingOfDailyPerformance timeLeavingOfDaily,
+			WorkType workType,
+			PredetermineTimeSetForCalc predTimeSetForCalc){
 
 		// 対象とするかどうかの判断
 		if (attendanceTimeOfDaily == null) return;
+		if (predTimeSetForCalc == null) return;
 		val stayingTime =  attendanceTimeOfDaily.getStayingTime();
 		{
 			// 退勤時刻<>NULL
@@ -168,6 +176,15 @@ public class AggrPCLogonDivergence {
 			
 			// 退勤時刻>=ログオフ時刻　なら対象外
 			if (leaveStamp.compareTo(logoffStamp.v()) >= 0) return;
+
+			// 時間帯　確認
+			val timezoneUseOpt = predTimeSetForCalc.getTimeSheets(workType.getAttendanceHolidayAttr(), targetWorkNo);
+			if (!timezoneUseOpt.isPresent()) return;
+			val timezoneUse = timezoneUseOpt.get();
+			if (timezoneUse.getUseAtr() == UseSetting.NOT_USE) return;
+			
+			// 所定時間内の退勤の場合、対象外
+			if (leaveStamp.compareTo(timezoneUse.getEnd().v()) <= 0) return;
 		}
 
 		// 合計時間を集計
