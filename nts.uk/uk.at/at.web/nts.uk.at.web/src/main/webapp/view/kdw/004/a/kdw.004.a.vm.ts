@@ -81,13 +81,13 @@ module nts.uk.at.view.kdw004.a.viewmodel {
             });
         }
 
-        startPage = (): JQueryPromise<any> => {
+        startPage = (param): JQueryPromise<any> => {
             let self = this,
                 dfd = $.Deferred();
 
             nts.uk.ui.block.grayout();
 
-            service.startscreen().done((result: OneMonthApprovalStatus) => {
+            service.startscreen(param).done((result: OneMonthApprovalStatus) => {
                 self.lstClosure(result.lstClosure);
                 
                 self.isStartInProcess = true;

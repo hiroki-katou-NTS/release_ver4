@@ -4289,14 +4289,22 @@ module nts.uk.at.view.kdw003.a.viewmodel {
 
         navigateView() {
             //
-            var self = this;
-            let isKmwCall = false;
-            if(self.shareObject().transitionDesScreen.indexOf("kmw") >0){
-                isKmwCall = true;
+            let self = this;
+            let dataTransfer = {
+                isKmwCall: false,
+                closureId: self.closureId,
+                datePeriod: self.dateRanger()
+            };
+            if (self.shareObject().transitionDesScreen.indexOf("kmw") > 0) {
+                dataTransfer = {
+                    isKmwCall: true,
+                    closureId: self.closureId,
+                    datePeriod: self.dateRanger()
+                };
                 localStorage.setItem('isKmw', true);
             }
             let path: any = _.isEmpty(self.shareObject()) ? "" : self.shareObject().transitionDesScreen;
-            nts.uk.request.jump("at", path,isKmwCall);
+            nts.uk.request.jump("at", path, dataTransfer);
         }
 
         openKDL020Dialog() {

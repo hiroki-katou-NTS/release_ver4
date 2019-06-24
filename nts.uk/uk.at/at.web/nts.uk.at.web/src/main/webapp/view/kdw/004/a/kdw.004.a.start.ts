@@ -1,7 +1,23 @@
 module nts.uk.at.view.kdw004.a {
     __viewContext.ready(function() {
-        var screenModel = new viewmodel.ScreenModelKDW004A();
-        screenModel.startPage().done(function() {
+        let screenModel = new viewmodel.ScreenModelKDW004A();
+        let value = __viewContext.transferred.value,
+            param = null;
+        if (_.isNil(value) || typeof(value) != 'object') {
+            param = {
+                closureIdParam: null,
+                startDateParam: null,
+                endDateParam: null
+            };
+        } else {
+            param = {
+                closureIdParam: value.closureId,
+                startDateParam: moment(value.datePeriod.startDate).utc().toISOString(),
+                endDateParam: moment(value.datePeriod.endDate).utc().toISOString(),
+            };
+        }
+        
+        screenModel.startPage(param).done(function() {
             __viewContext.bind(screenModel);
             screenModel.setHeadersColor();
             let img = document.createElement("span");

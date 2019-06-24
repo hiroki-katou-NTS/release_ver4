@@ -4,6 +4,8 @@ module nts.uk.at.view.kmw003.a {
         let value = __viewContext.transferred.value;
         if(value == undefined || value == null){
            value = false; 
+        } else {
+           value =  value.isKmwCall;
         }
         let screenModel = __viewContext.vm = new nts.uk.at.view.kmw003.a.viewmodel.ScreenModel(value);
         // set pg-name if pg-name = ''

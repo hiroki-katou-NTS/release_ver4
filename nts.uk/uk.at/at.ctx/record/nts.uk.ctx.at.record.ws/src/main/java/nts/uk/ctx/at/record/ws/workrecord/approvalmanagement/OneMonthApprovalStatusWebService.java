@@ -28,8 +28,9 @@ public class OneMonthApprovalStatusWebService extends WebService {
 
 	@POST
 	@Path("startscreen")
-	public OneMonthApprovalStatusDto startScreen() {
-		return oneMonthApprovalStatusFinder.getOneMonthApprovalStatus(null, null, null);
+	public OneMonthApprovalStatusDto startScreen(OneMonthApprovalStatusRequest param) {
+		return oneMonthApprovalStatusFinder.getOneMonthApprovalStatus(param.getClosureIdParam(),
+				param.getStartDateParam(), param.getEndDateParam());
 	}
 
 	@POST

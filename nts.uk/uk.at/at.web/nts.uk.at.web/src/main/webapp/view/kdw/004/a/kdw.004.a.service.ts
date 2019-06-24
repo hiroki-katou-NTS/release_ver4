@@ -5,8 +5,8 @@ module nts.uk.at.view.kdw004.a.service {
         getDateRange: "at/record/workrecord/approvalmanagement/getdaterange/"
     }
     
-    export function startscreen() {
-        return nts.uk.request.ajax(paths.startscreen);
+    export function startscreen(param) {
+        return nts.uk.request.ajax(paths.startscreen, param);
     }
     
     export function extractApprovalStatusData(param) {
