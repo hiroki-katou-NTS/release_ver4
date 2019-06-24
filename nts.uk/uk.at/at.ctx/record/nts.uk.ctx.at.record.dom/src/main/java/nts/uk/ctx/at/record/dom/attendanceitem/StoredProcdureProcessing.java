@@ -587,7 +587,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 							.stream().collect(Collectors.toMap(wt -> wt.getWorkTypeCode(), wt -> wt));
 	}	
 	
-	private double getOnDefault(double downer, double upper) {
+	private double getOnDefault(double upper, double downer) {
 		if(downer == 0 || upper == 0){
 			return 0;
 		}
