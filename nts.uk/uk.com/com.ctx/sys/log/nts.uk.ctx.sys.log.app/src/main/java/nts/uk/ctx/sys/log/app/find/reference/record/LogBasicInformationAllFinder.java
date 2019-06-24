@@ -1174,11 +1174,9 @@ public class LogBasicInformationAllFinder {
 		}
 		
 		List<String> roleIds = roleIdInters.stream().distinct().collect(Collectors.toList());
-		
 		if(!roleIds.isEmpty()) {
 			return  roleExportAdapter.getNameLstByRoleIds(cid, roleIds);
 		}
-		
 		return result;
 	}
 	

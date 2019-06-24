@@ -4,9 +4,13 @@
  *****************************************************************/
 package nts.uk.ctx.sys.auth.infra.repository.role;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -19,6 +23,8 @@ import javax.persistence.criteria.Root;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.auth.dom.role.Role;
 import nts.uk.ctx.sys.auth.dom.role.RoleRepository;
@@ -216,6 +222,27 @@ public class JpaRoleRepository extends JpaRepository implements RoleRepository {
 		if (entities != null && entities.size() !=0) {
 			return entities.stream().map(x->new Role(new JpaRoleGetMemento(x))).collect(Collectors.toList());
 		}
+		return result;
+	}
+
+	@Override
+	public Map<String, String> findRoleIdAndNameByListRoleId(String cid, List<String> roleIds) {
+		Map<String, String> result = new HashMap<>();
+		CollectionUtil.split(roleIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			String sql ="SELECT ROLE_ID, ROLE_NAME FROM SACMT_ROLE WHERE CID = ? AND ROLE_ID IN ("+ NtsStatement.In.createParamsString(subList) + ")";
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				stmt.setString(1, cid);
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setString(i + 2, subList.get(i));
+				}
+				new NtsResultSet(stmt.executeQuery()).getList(r -> {
+					result.put(r.getString("ROLE_ID"), r.getString("ROLE_NAME"));
+					return null;
+				});
+			}catch(SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
 		return result;
 	}
 

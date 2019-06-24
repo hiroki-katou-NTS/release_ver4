@@ -5,6 +5,7 @@
 package nts.uk.ctx.bs.employee.dom.employee.mgndata;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
@@ -150,5 +151,7 @@ public interface EmployeeDataMngInfoRepository {
 	
 	// request list 596
 	List<EmployeeDataMngInfo> findBySidDel(List<String> sid);
+	
+	Map<String, String> getAllSidAndScdBySids(List<String> sids);
 	
 }

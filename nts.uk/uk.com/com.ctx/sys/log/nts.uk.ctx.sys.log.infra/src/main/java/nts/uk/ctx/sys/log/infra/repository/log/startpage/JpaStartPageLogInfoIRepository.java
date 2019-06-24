@@ -1,5 +1,7 @@
 package nts.uk.ctx.sys.log.infra.repository.log.startpage;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -8,6 +10,8 @@ import javax.ejb.Stateless;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.collection.CollectionUtil;
@@ -97,40 +101,87 @@ public class JpaStartPageLogInfoIRepository extends JpaRepository
 		if(CollectionUtil.isEmpty(listEmployeeId)){
 			return findBy(companyId, start, end);
 		}
-		List<StartPageLog> res = new ArrayList<>();
-		
-		StringBuilder qb = new StringBuilder("SELECT l FROM SrcdtStartPageLogInfo l WHERE ");
-		qb.append(" l.employeeId IN :employeeIds");
-		qb.append(" AND l.companyId = :cid");
-		qb.append(" AND l.startDateTime >= :start");
-		qb.append(" AND l.startDateTime <= :end");
-		
-		CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, sub -> {
-			res.addAll(this.queryProxy().query(qb.toString(), SrcdtStartPageLogInfo.class)
-										.setParameter("cid", companyId)
-										.setParameter("employeeIds", sub)
-										.setParameter("start", start)
-										.setParameter("end", end)
-										.getList(r -> r.toDomain()));
+		List<StartPageLog> result = new ArrayList<>();
+		CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			String sql = "SELECT * FROM SRCDT_START_PAGE_LOG_INFO  WHERE "
+					+ " CID = ?"
+					+ " AND START_DT >= ?"
+					+ " AND START_DT <= ?"
+					+ " SID IN ("+  NtsStatement.In.createParamsString(subList) + ")";
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				stmt.setString(1, companyId);
+				stmt.setTimestamp(2,  java.sql.Timestamp.valueOf(start.localDateTime()));
+				stmt.setTimestamp(3,  java.sql.Timestamp.valueOf(end.localDateTime()));
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setString(4 + i, subList.get(i));
+				}
+				
+				List<StartPageLog> startLog  = new NtsResultSet(stmt.executeQuery())
+						.getList(r -> {
+							SrcdtStartPageLogInfo entity = new SrcdtStartPageLogInfo(r.getString("OPERATION_ID"),
+									r.getString("START_BEFORE_PGID"), r.getString("START_BEFORE_SCREEN_ID"),
+									r.getString("START_BEFORE_QUERY_STRING"), r.getString("CID"),
+									r.getString("USER_ID"), r.getString("USER_NAME"),
+									r.getString("SID"), r.getString("IP_ADDRESS"),
+									r.getString("PC_NAME"), r.getString("ACCOUNT"),
+									r.getGeneralDateTime("START_DT"), r.getString("PGID"),
+									r.getString("SCREEN_ID"), r.getString("QUERY_STRING"),
+									r.getString("OFFICE_HELPER_ROLE"), r.getString("GROUP_COM_ADMIN_ROLE"),
+									r.getString("SYS_ADMIN_ROLE"), r.getString("MY_NUMBER_ROLE"),
+									r.getString("PERSONNEL_ROLE"), r.getString("COM_ADMIN_ROLE"),
+									r.getString("ACCOUNTING_ROLE"), r.getString("PERSON_INFO_ROLE"),
+									r.getString("ATTENDANCE_ROLE"), r.getString("PAYROLL_ROLE"),
+									r.getString("NOTE"));
+							return entity.toDomain();
+						});
+				if(!CollectionUtil.isEmpty(startLog)) {
+					result.addAll(startLog);
+				}
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}			
 		});
-		
-		return res;
+		return result;
 	}
 
 	@Override
 	public List<StartPageLog> findBy(String companyId, GeneralDateTime start, GeneralDateTime end) {
-		
-		StringBuilder qb = new StringBuilder("SELECT l FROM SrcdtStartPageLogInfo l WHERE ");
-		qb.append(" l.companyId = :cid");
-		qb.append(" AND l.startDateTime >= :start");
-		qb.append(" AND l.startDateTime <= :end");
-		
-		
-		return this.queryProxy().query(qb.toString(), SrcdtStartPageLogInfo.class)
-				.setParameter("cid", companyId)
-				.setParameter("start", start)
-				.setParameter("end", end)
-				.getList(r -> r.toDomain());
+			List<StartPageLog> result = new ArrayList<>();
+			String sql = "SELECT * FROM SRCDT_START_PAGE_LOG_INFO  WHERE "
+					+ " CID = ?"
+					+ " AND START_DT >= ?"
+					+ " AND START_DT <= ?";
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				stmt.setString(1, companyId);
+				stmt.setTimestamp(2,  java.sql.Timestamp.valueOf(start.localDateTime()));
+				stmt.setTimestamp(3,  java.sql.Timestamp.valueOf(end.localDateTime()));
+				List<StartPageLog> startLog  = new NtsResultSet(stmt.executeQuery())
+						.getList(r -> {
+							SrcdtStartPageLogInfo entity = new SrcdtStartPageLogInfo(r.getString("OPERATION_ID"),
+									r.getString("START_BEFORE_PGID"), r.getString("START_BEFORE_SCREEN_ID"),
+									r.getString("START_BEFORE_QUERY_STRING"), r.getString("CID"),
+									r.getString("USER_ID"), r.getString("USER_NAME"),
+									r.getString("SID"), r.getString("IP_ADDRESS"),
+									r.getString("PC_NAME"), r.getString("ACCOUNT"),
+									r.getGeneralDateTime("START_DT"), r.getString("PGID"),
+									r.getString("SCREEN_ID"), r.getString("QUERY_STRING"),
+									r.getString("OFFICE_HELPER_ROLE"), r.getString("GROUP_COM_ADMIN_ROLE"),
+									r.getString("SYS_ADMIN_ROLE"), r.getString("MY_NUMBER_ROLE"),
+									r.getString("PERSONNEL_ROLE"), r.getString("COM_ADMIN_ROLE"),
+									r.getString("ACCOUNTING_ROLE"), r.getString("PERSON_INFO_ROLE"),
+									r.getString("ATTENDANCE_ROLE"), r.getString("PAYROLL_ROLE"),
+									r.getString("NOTE"));
+							return entity.toDomain();
+						});
+				if(!CollectionUtil.isEmpty(startLog)) {
+					result.addAll(startLog);
+				}
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}	
+		return result;
 	}
 
 	@Override

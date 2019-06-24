@@ -5,6 +5,7 @@
 package nts.uk.ctx.sys.auth.pub.role;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -102,4 +103,14 @@ public interface RoleExportRepo {
 	 */
 	//	RequestList525
 	RoleWhetherLoginPubExport  getCurrentLoginerRole();
+	
+	
+	/**
+	 * 	đối ứng cho bug 109119- CLI003
+	 *  getNameLstByRoleIds
+	 * @param companyId the company id
+	 * @param lstRoleId the lst role id
+	 * @return the list
+	 */
+	Map<String, String> getNameLstByRoleIds(String cid, List<String> roleIds);
 }

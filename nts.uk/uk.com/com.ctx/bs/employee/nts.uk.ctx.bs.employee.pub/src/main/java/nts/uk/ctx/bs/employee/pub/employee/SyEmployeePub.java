@@ -5,6 +5,7 @@
 package nts.uk.ctx.bs.employee.pub.employee;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
@@ -223,4 +224,6 @@ public interface SyEmployeePub {
 	 * @return
 	 */
 	List<String> filterSidByCidAndPeriod(String cid, DatePeriod period);
+	
+	Map<String, String> getAllSidAndScdBySids(List<String> sid);
 }
