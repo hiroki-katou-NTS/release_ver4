@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.monthly.erroralarm.EmployeeMonthlyPerError;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPItemValue;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ResultReturnDCUpdateData;
 
@@ -25,5 +26,7 @@ public class ErrorAfterCalcDaily {
 	private Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> resultError;
 	
 	private FlexShortageRCDto flexShortage;
+	
+	private List<EmployeeMonthlyPerError> errorMonth;
 
 }

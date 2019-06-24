@@ -1,6 +1,7 @@
 package nts.uk.screen.at.app.dailyperformance.correction.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.checkdata.dto.FlexShorta
 @AllArgsConstructor
 public class DataResultAfterIU {
 	
-	Map<Integer, List<DPItemValue>> errorMap;
+	Map<Integer, List<DPItemValue>> errorMap = new HashMap<>();
 	
 	FlexShortageRCDto flexShortage;
 	

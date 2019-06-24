@@ -416,7 +416,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 
 		}
 
-		return new RCDailyCorrectionResult(domainDailyNew, null, commandNew, commandOld, dailyItems, isUpdate);
+		return new RCDailyCorrectionResult(domainDailyNew, (month == null || !month.getDomainMonth().isPresent()) ? null : Arrays.asList(month.getDomainMonth().get()), commandNew, commandOld, dailyItems, isUpdate);
 	}
 	
 	//月の実績を集計する
@@ -535,7 +535,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 //
 //		excuteLog(lastDt, lstAttendanceItem, commandOld, commandNew, dailyItems);
 		
-		return new RCDailyCorrectionResult(domainDailyNew, null, commandNew, commandOld, dailyItems, isUpdate);
+		return new RCDailyCorrectionResult(domainDailyNew, (month == null || !month.getDomainMonth().isPresent()) ? null : Arrays.asList(month.getDomainMonth().get()), commandNew, commandOld, dailyItems, isUpdate);
 	}
 
 	private <T extends DailyWorkCommonCommand> List<IntegrationOfDaily> updateDomainAfterCalc(List<IntegrationOfDaily> calced) {
