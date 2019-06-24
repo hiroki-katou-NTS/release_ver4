@@ -58,7 +58,7 @@ import nts.uk.screen.at.app.ktgwidget.find.dto.YearlyHolidayInfo;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
-
+import nts.uk.ctx.at.auth.app.find.employmentrole.InitDisplayPeriodSwitchSetFinder;
 @Stateless
 public class OptionalWidgetKtgFinder {
 	
@@ -106,6 +106,9 @@ public class OptionalWidgetKtgFinder {
 	
 	@Inject
 	private SpecialHolidayRepository specialHolidayRepository;
+	
+	@Inject
+	private InitDisplayPeriodSwitchSetFinder initDisplayPeriodSwitchSetFinder;
 	
 
 	public DatePeriodDto getCurrentMonth() {
@@ -161,9 +164,18 @@ public class OptionalWidgetKtgFinder {
 	}
 	
 	public OptionalWidgetDisplay getOptionalWidgetDisplay(String topPagePartCode) {
+		// アルゴリズム「処理年月と締め期間を取得する」を実行する
 		DatePeriodDto datePeriodDto = getCurrentMonth();
+		// request list 609 Enum 当月 = 1 翌月 = 2
+		int currentorNext = initDisplayPeriodSwitchSetFinder.targetDateFromLogin().getCurrentOrNextMonth();
 		OptionalWidgetImport optionalWidgetImport = findOptionalWidgetByCode(topPagePartCode);
-		return new OptionalWidgetDisplay(datePeriodDto, optionalWidgetImport);
+		if(currentorNext == 1){
+			return new OptionalWidgetDisplay(datePeriodDto, optionalWidgetImport);
+		}else{
+			DatePeriodDto dateChange = new DatePeriodDto(datePeriodDto.getStrNextMonth(), datePeriodDto.getEndNextMonth(), 
+														datePeriodDto.getStrCurrentMonth(), datePeriodDto.getEndCurrentMonth());
+			return new OptionalWidgetDisplay(dateChange, optionalWidgetImport);
+		}
 	}
 	
 	
