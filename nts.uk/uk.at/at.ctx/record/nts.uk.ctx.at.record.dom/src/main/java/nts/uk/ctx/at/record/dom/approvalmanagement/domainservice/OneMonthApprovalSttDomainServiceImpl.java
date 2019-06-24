@@ -119,6 +119,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 	@Inject
 	private InitSwitchSetAdapter initSwitchSetAdapter;
 
+	
 	private List<ApprovalEmployeeDto> buildApprovalEmployeeData(List<Identification> listIdentification,
 			List<EmployeeDto> lstEmployee, ApprovalRootOfEmployeeImport approvalRootOfEmployeeImport) {
 
