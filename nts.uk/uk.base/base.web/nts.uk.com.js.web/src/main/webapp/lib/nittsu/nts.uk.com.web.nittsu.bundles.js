@@ -22690,6 +22690,8 @@ var nts;
                     v_1.CELL_CLS = "mcell";
                     v_1.DATA = "md";
                     v_1.INIT_MAN_EDIT = "init-man-edit";
+                    v_1.ALIGN_LEFT = "halign-left";
+                    v_1.ALIGN_RIGHT = "halign-right";
                     /**
                      * Process.
                      */
@@ -23252,8 +23254,12 @@ var nts;
                             var col = visibleColumnsMap[key];
                             if (!col)
                                 tdStyle += "; display: none;";
-                            else if (col[0].columnCssClass === hpl.CURRENCY_CLS || col[0].columnCssClass === "halign-right") {
-                                td.classList.add(col[0].columnCssClass);
+                            else if (!_.isNil(col[0].columnCssClass)) {
+                                col[0].columnCssClass.split(' ').forEach(function (clz) {
+                                    if (clz === hpl.CURRENCY_CLS || clz === "halign-right") {
+                                        td.classList.add(clz);
+                                    }
+                                });
                             }
                             var controlDef = self.controlMap[key];
                             var id = rData[self.primaryKey];
@@ -23506,8 +23512,12 @@ var nts;
                             var col = self.visibleColumnsMap[key];
                             if (!col)
                                 tdStyle += "; display: none;";
-                            else if (col[0].columnCssClass === hpl.CURRENCY_CLS || col[0].columnCssClass === "halign-right") {
-                                td.classList.add(col[0].columnCssClass);
+                            else if (!_.isNil(col[0].columnCssClass)) {
+                                col[0].columnCssClass.split(' ').forEach(function (clz) {
+                                    if (clz === hpl.CURRENCY_CLS || clz === "halign-right") {
+                                        td.classList.add(clz);
+                                    }
+                                });
                             }
                             var controlDef = self.controlMap[key];
                             var id = rData[self.primaryKey];
@@ -25656,6 +25666,12 @@ var nts;
                                 setTimeout(function () {
                                     $input.select();
                                 }, 0);
+                                if ($tCell.classList.contains(v.ALIGN_RIGHT)) {
+                                    $input.classList.remove(v.ALIGN_LEFT);
+                                }
+                                else {
+                                    $input.classList.add(v.ALIGN_LEFT);
+                                }
                                 var coord_1 = ti.getCellCoord($tCell);
                                 $input.style.imeMode = "inactive";
                                 if (coord_1) {
@@ -25805,6 +25821,12 @@ var nts;
                                         var data = $.data($tCell, v.DATA);
                                         $input.value = !_.isNil(data) ? data : "";
                                         $input.select();
+                                    }
+                                    if ($tCell.classList.contains(v.ALIGN_RIGHT)) {
+                                        $input.classList.remove(v.ALIGN_LEFT);
+                                    }
+                                    else {
+                                        $input.classList.add(v.ALIGN_LEFT);
                                     }
                                     cType.type = dkn.TEXTBOX;
                                     var coord_2 = ti.getCellCoord($tCell);
