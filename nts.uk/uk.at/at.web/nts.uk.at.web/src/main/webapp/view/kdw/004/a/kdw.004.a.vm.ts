@@ -83,15 +83,16 @@ module nts.uk.at.view.kdw004.a.viewmodel {
 
         startPage = (param): JQueryPromise<any> => {
             let self = this,
-                dfd = $.Deferred();
+                dfd = $.Deferred(),
+                data: any = param;
 
             nts.uk.ui.block.grayout();
 
-            service.startscreen(param).done((result: OneMonthApprovalStatus) => {
+            service.startscreen(data).done((result: OneMonthApprovalStatus) => {
                 self.lstClosure(result.lstClosure);
                 
                 self.isStartInProcess = true;
-                self.selectedClosure(result.lstClosure[0].closureId);
+                self.selectedClosure(_.isNil(data.closureIdParam) ? result.lstClosure[0].closureId : data.closureIdParam);
 
                 self.datePeriod({
                     startDate: moment(result.startDate).format("YYYY/MM/DD"),
