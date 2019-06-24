@@ -50,6 +50,8 @@ public class MPHeaderDto {
 	private String headerCssClass;
 
 	private Boolean grant;
+	
+	private String columnCssClass;
 
 	private static final String ADD_CHARACTER = "A";
 	private static final String PX = "px";
@@ -217,6 +219,8 @@ public class MPHeaderDto {
 		if (null != ctrOfMonthlyDto) {
 			dto.setColor(ctrOfMonthlyDto.getHeaderBgColorOfMonthlyPer());
 		}
+		
+		setAlignData(dto, attendanceAtr);
 		return dto;
 	}
 
@@ -246,5 +250,20 @@ public class MPHeaderDto {
 	private static boolean isRequired(PAttendanceItem item){
 		if(MPText.ITEM_CODE_LINK.contains(item.getId())) return true;
 		return false;
+	}
+	
+	private static void setAlignData(MPHeaderDto dto, int attendanceAtr) {
+		switch (MonthlyAttendanceItemAtr.valueOf(attendanceAtr)) {
+		case TIME:
+		case NUMBER:
+		case DAYS:
+		case AMOUNT:
+			dto.setColumnCssClass("halign-right");
+			break;
+
+		default:
+			dto.setColumnCssClass("halign-left");
+			break;
+		}
 	}
 }
