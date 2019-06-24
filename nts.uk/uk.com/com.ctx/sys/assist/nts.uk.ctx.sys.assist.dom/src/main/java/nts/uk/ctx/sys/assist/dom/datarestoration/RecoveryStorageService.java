@@ -34,7 +34,10 @@ import nts.gul.text.StringUtil;
 import nts.uk.ctx.sys.assist.dom.category.Category;
 import nts.uk.ctx.sys.assist.dom.category.CategoryRepository;
 import nts.uk.ctx.sys.assist.dom.category.StorageRangeSaved;
+import nts.uk.ctx.sys.assist.dom.categoryfordelete.CategoryForDelete;
+import nts.uk.ctx.sys.assist.dom.categoryfordelete.CategoryForDeleteRepository;
 import nts.uk.ctx.sys.assist.dom.datarestoration.common.CsvFileUtil;
+import nts.uk.ctx.sys.assist.dom.deletedata.CategoryDeletion;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 
@@ -48,6 +51,9 @@ public class RecoveryStorageService {
 
 	@Inject
 	private CategoryRepository categoryRepository;
+	
+	@Inject
+	private CategoryForDeleteRepository categoryForDeleteRepository;
 
 	@Inject
 	private DataRecoveryMngRepository dataRecoveryMngRepository;
@@ -129,7 +135,10 @@ public class RecoveryStorageService {
 		Optional<PerformDataRecovery> performRecoveries = performDataRecoveryRepository
 				.getPerformDatRecoverById(dataRecoveryProcessId);
 		String uploadId = performRecoveries.get().getUploadfileId();
+		
 		List<Category> listCategory = categoryRepository.findById(dataRecoveryProcessId, SELECTION_TARGET_FOR_RES);
+		
+		List<CategoryForDelete> listCategoryDel = categoryForDeleteRepository.findById(dataRecoveryProcessId, SELECTION_TARGET_FOR_RES);
 
 		Optional<DataRecoveryMng> dataRecoveryMng = dataRecoveryMngRepository
 				.getDataRecoveryMngById(dataRecoveryProcessId);
@@ -155,26 +164,52 @@ public class RecoveryStorageService {
 		saveLogDataRecoverServices.saveStartDataRecoverLog(dataRecoveryProcessId);
 
 		// 処理対象のカテゴリを処理する
-		for (Category category : listCategory) {
+		if (!listCategory.isEmpty()) {
+			for (Category category : listCategory) {
 
-			List<TableList> tableUse = performDataRecoveryRepository.getByStorageRangeSaved(
-					category.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.EARCH_EMP);
-			List<TableList> tableNotUse = performDataRecoveryRepository.getByStorageRangeSaved(
-					category.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.ALL_EMP);
+				List<TableList> tableUse = performDataRecoveryRepository.getByStorageRangeSaved(
+						category.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.EARCH_EMP);
+				List<TableList> tableNotUse = performDataRecoveryRepository.getByStorageRangeSaved(
+						category.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.ALL_EMP);
 
-			TableListByCategory tableListByCategory = new TableListByCategory(category.getCategoryId().v(), tableUse);
-			TableListByCategory tableNotUseCategory = new TableListByCategory(category.getCategoryId().v(), tableNotUse);
+				TableListByCategory tableListByCategory = new TableListByCategory(category.getCategoryId().v(), tableUse);
+				TableListByCategory tableNotUseCategory = new TableListByCategory(category.getCategoryId().v(), tableNotUse);
 
-			// カテゴリ単位の復旧
-			condition = exCurrentCategory(tableListByCategory, tableNotUseCategory, uploadId, dataRecoveryProcessId, listTbl);
+				// カテゴリ単位の復旧
+				condition = exCurrentCategory(tableListByCategory, tableNotUseCategory, uploadId, dataRecoveryProcessId, listTbl);
 
-			// のカテゴリカウントをカウントアップ
+				// のカテゴリカウントをカウントアップ
 
-			if (condition != DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS) {
-				break;
+				if (condition != DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS) {
+					break;
+				}
+				numberCateSucess++;
+				dataRecoveryMngRepository.updateCategoryCnt(dataRecoveryProcessId, numberCateSucess);
 			}
-			numberCateSucess++;
-			dataRecoveryMngRepository.updateCategoryCnt(dataRecoveryProcessId, numberCateSucess);
+		}
+		
+		if (!listCategoryDel.isEmpty()) {
+			for (CategoryForDelete categoryForDel : listCategoryDel) {
+
+				List<TableList> tableUse = performDataRecoveryRepository.getByStorageRangeSaved(
+						categoryForDel.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.EARCH_EMP);
+				List<TableList> tableNotUse = performDataRecoveryRepository.getByStorageRangeSaved(
+						categoryForDel.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.ALL_EMP);
+
+				TableListByCategory tableListByCategory = new TableListByCategory(categoryForDel.getCategoryId().v(), tableUse);
+				TableListByCategory tableNotUseCategory = new TableListByCategory(categoryForDel.getCategoryId().v(), tableNotUse);
+
+				// カテゴリ単位の復旧
+				condition = exCurrentCategory(tableListByCategory, tableNotUseCategory, uploadId, dataRecoveryProcessId, listTbl);
+
+				// のカテゴリカウントをカウントアップ
+
+				if (condition != DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS) {
+					break;
+				}
+				numberCateSucess++;
+				dataRecoveryMngRepository.updateCategoryCnt(dataRecoveryProcessId, numberCateSucess);
+			}
 		}
 
 		if (condition == DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS) {
