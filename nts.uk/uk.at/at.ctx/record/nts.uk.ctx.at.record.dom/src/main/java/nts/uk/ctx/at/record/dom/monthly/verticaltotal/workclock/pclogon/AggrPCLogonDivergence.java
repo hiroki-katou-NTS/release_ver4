@@ -98,8 +98,10 @@ public class AggrPCLogonDivergence {
 					TimeActualStamp leaveStamp = timeLeavingWork.getLeaveStamp().get();
 					if (attendanceStamp.getStamp().isPresent() &&
 						leaveStamp.getStamp().isPresent()) {
-						if (attendanceStamp.getStamp().get().getTimeWithDay().compareTo(
-								leaveStamp.getStamp().get().getTimeWithDay().v()) == 0) {
+						// 出勤＝退勤なら、対象外
+						int attendanceMinutes = attendanceStamp.getStamp().get().getTimeWithDay().valueAsMinutes();
+						int leaveMinutes = leaveStamp.getStamp().get().getTimeWithDay().valueAsMinutes();
+						if (attendanceMinutes == leaveMinutes) {
 							return;
 						}
 					}
@@ -111,8 +113,8 @@ public class AggrPCLogonDivergence {
 			if (anyItemValueOpt.isPresent()) {
 				AnyItemValueOfDaily anyItemValue = anyItemValueOpt.get();
 				for (AnyItemValue item : anyItemValue.getItems()) {
-					if (item.getItemNo().v() != 12) continue;		// 任意項目12以外は無視
-					if (item.getTimes().isPresent()) {				// 回数=1 なら平日
+					if (item.getItemNo().v().intValue() != 12) continue;	// 任意項目12以外は無視
+					if (item.getTimes().isPresent()) {						// 回数=1 なら平日
 						if (item.getTimes().get().v().doubleValue() == 1.0) isWeekday = true; 
 					}
 				}
@@ -121,16 +123,16 @@ public class AggrPCLogonDivergence {
 		}
 
 		// 合計時間を集計
-		int logonMinutes = stayingTime.getBeforePCLogOnTime().v();
+		int logonMinutes = stayingTime.getBeforePCLogOnTime().valueAsMinutes();
 		if (logonMinutes > 0) this.totalTime = this.totalTime.addMinutes(logonMinutes);
 		
 		// 日数を集計する
-		if (stayingTime.getBeforePCLogOnTime().v() > 0) this.days = this.days.addDays(1.0);
+		if (stayingTime.getBeforePCLogOnTime().valueAsMinutes() != 0) this.days = this.days.addDays(1.0);
 		
 		// 平均時間を計算する
 		this.averageTime = new AttendanceTimeMonth(0);
-		if (this.days.v() != 0.0){
-			this.averageTime = new AttendanceTimeMonth(this.totalTime.v() / this.days.v().intValue());
+		if (this.days.v().doubleValue() != 0.0){
+			this.averageTime = new AttendanceTimeMonth(this.totalTime.valueAsMinutes() / this.days.v().intValue());
 		}
 	}
 	
@@ -175,7 +177,9 @@ public class AggrPCLogonDivergence {
 			TimeWithDayAttr logoffStamp = logonInfoOpt.get().getLogOff().get();
 			
 			// 退勤時刻>=ログオフ時刻　なら対象外
-			if (leaveStamp.compareTo(logoffStamp.v()) >= 0) return;
+			int leaveMinutes = leaveStamp.valueAsMinutes();
+			int logoffMinutes = logoffStamp.valueAsMinutes();
+			if (leaveMinutes >= logoffMinutes) return;
 
 			// 時間帯　確認
 			val timezoneUseOpt = predTimeSetForCalc.getTimeSheets(workType.getAttendanceHolidayAttr(), targetWorkNo);
@@ -184,20 +188,21 @@ public class AggrPCLogonDivergence {
 			if (timezoneUse.getUseAtr() == UseSetting.NOT_USE) return;
 			
 			// 所定時間内の退勤の場合、対象外
-			if (leaveStamp.compareTo(timezoneUse.getEnd().v()) <= 0) return;
+			int timezoneUseEndMinutes = timezoneUse.getEnd().valueAsMinutes();
+			if (leaveMinutes <= timezoneUseEndMinutes) return;
 		}
 
 		// 合計時間を集計
-		int logoffMinutes = stayingTime.getAfterPCLogOffTime().v();
+		int logoffMinutes = stayingTime.getAfterPCLogOffTime().valueAsMinutes();
 		if (logoffMinutes > 0) this.totalTime = this.totalTime.addMinutes(logoffMinutes);
 		
 		// 日数を集計する
-		if (stayingTime.getAfterPCLogOffTime().v() > 0) this.days = this.days.addDays(1.0);
+		if (stayingTime.getAfterPCLogOffTime().valueAsMinutes() > 0) this.days = this.days.addDays(1.0);
 		
 		// 平均時間を計算する
 		this.averageTime = new AttendanceTimeMonth(0);
-		if (this.days.v() != 0.0){
-			this.averageTime = new AttendanceTimeMonth(this.totalTime.v() / this.days.v().intValue());
+		if (this.days.v().doubleValue() != 0.0){
+			this.averageTime = new AttendanceTimeMonth(this.totalTime.valueAsMinutes() / this.days.v().intValue());
 		}
 	}
 	
