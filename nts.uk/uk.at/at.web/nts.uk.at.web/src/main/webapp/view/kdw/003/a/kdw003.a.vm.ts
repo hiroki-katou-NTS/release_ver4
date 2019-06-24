@@ -4292,16 +4292,31 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         navigateView() {
             //
             let self = this;
+            // パラメータ「日別実績の修正の起動．表示期間」の有無をチェックする(check có hay không parameter)
+            let startDateKDW004, endDateKDW004 : any = null;
+            if (_.isNil(self.shareObject().startDateKDW004)) {
+                // パラメータ「日別実績の修正の状態．対象期間」 -> パラメータ「日別実績の修正の状態．表示形式」
+                startDateKDW004 = self.dateRanger().startDate;
+                endDateKDW004 = self.dateRanger().endDate;
+            } else {
+                // パラメータ「日別実績の修正の起動．表示期間」 -> パラメータ「日別実績の修正の状態．表示期間」
+                startDateKDW004 = self.shareObject().startDateKDW004,
+                endDateKDW004 = self.shareObject().endDateKDW004
+            }
+            
             let dataTransfer = {
                 isKmwCall: false,
                 closureId: self.closureId,
-                datePeriod: self.dateRanger()
+                startDateKDW004: startDateKDW004,
+                endDateKDW004: endDateKDW004
             };
+            
             if (self.shareObject().transitionDesScreen.indexOf("kmw") > 0) {
                 dataTransfer = {
                     isKmwCall: true,
                     closureId: self.closureId,
-                    datePeriod: self.dateRanger()
+                    startDateKDW004: startDateKDW004,
+                    endDateKDW004: endDateKDW004
                 };
                 localStorage.setItem('isKmw', true);
             }
@@ -4995,6 +5010,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         lstExtractedEmployee: any;//抽出した社員一覧
         startDate: any;//期間 khoảng thời gian
         endDate: any;//期間 khoảng thời gian
+        startDateKDW004: any;//期間 khoảng thời gian KDW004
+        endDateKDW004: any;//期間 khoảng thời gian KDW004
         constructor() {
         }
         mapDataShare(dataInit: any, dataExtract: any, dataSPR: any) {
@@ -5018,6 +5035,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 self.lstExtractedEmployee = null//dataExtract.lstExtractedEmployee;
                 self.startDate = moment(dataExtract.startDate, "YYYY/MM/DD");
                 self.endDate = moment(dataExtract.endDate, "YYYY/MM/DD");
+                self.startDateKDW004 =  dataExtract.startDateKDW004;
+                self.endDateKDW004 =  dataExtract.endDateKDW004;
             }
 
             if (dataSPR != undefined) {

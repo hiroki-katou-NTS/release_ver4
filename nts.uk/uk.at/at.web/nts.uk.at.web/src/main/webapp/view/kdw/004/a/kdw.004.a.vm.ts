@@ -212,7 +212,9 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                     //Optional
                     //日付別で起動
                     dateTarget: date,
-                    individualTarget: undefined
+                    individualTarget: undefined,
+                    startDateKDW004: self.datePeriod().startDate,
+                    endDateKDW004: self.datePeriod().endDate
                 };
 
             nts.uk.request.jump("at", "/view/kdw/003/a/index.xhtml", {
@@ -240,7 +242,9 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                     endDate: startDate,
                     lstExtractedEmployee: [employeeId],
                     dateTarget: startDate,
-                    individualTarget: employeeId
+                    individualTarget: employeeId,
+                    startDateKDW004: self.datePeriod().startDate,
+                    endDateKDW004: self.datePeriod().endDate
                 };
 
             nts.uk.request.jump("at", "/view/kdw/003/a/index.xhtml", {
@@ -281,7 +285,9 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                     //初期表示年月日
                     dateTarget: null,
                     //初期表示社員
-                    individualTarget: employeeId
+                    individualTarget: employeeId,
+                    startDateKDW004: self.datePeriod().startDate,
+                    endDateKDW004: self.datePeriod().endDate
                 };
 
             nts.uk.request.jump("at", "/view/kdw/003/a/index.xhtml", {

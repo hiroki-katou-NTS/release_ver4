@@ -12,8 +12,8 @@ module nts.uk.at.view.kdw004.a {
         } else {
             param = {
                 closureIdParam: value.closureId,
-                startDateParam: moment(value.datePeriod.startDate).utc().toISOString(),
-                endDateParam: moment(value.datePeriod.endDate).utc().toISOString(),
+                startDateParam: moment(value.startDateKDW004).utc().toISOString(),
+                endDateParam: moment(value.endDateKDW004).utc().toISOString(),
             };
         }
         
