@@ -1116,7 +1116,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             $("#next-month").attr('style', 'background-color: red !important');
                             errorFlex = true;
                             errorNoReload = true;
-                            //self.flexShortage().binDataChangeError(dataAfter.flexShortage.dataCalc);
+                            self.flexShortage().binDataChangeError(dataAfter.flexShortage.dataCalc);
                         } else {
                             $("#next-month").attr('style', 'background-color: white !important');
                             $("#next-month").ntsError("clear");
@@ -1163,7 +1163,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         if (!self.flagCalculation) {
                             if (checkDailyChange) {
                                 // self.reloadScreen();
-                                self.loadRowScreen(false, false, onlyCheckBox).done(() =>{
+                                self.loadRowScreen(false, false, onlyCheckBox, errorFlex).done(() =>{
                                     nts.uk.ui.block.clear();
                                     if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15" && _.isEmpty(confirmMonth)) {
                                         nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
@@ -1177,7 +1177,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                                     }
                                 });
                             } else {
-                                self.loadRowScreen(true, false, onlyCheckBox).done(() =>{
+                                self.loadRowScreen(true, false, onlyCheckBox, errorFlex).done(() =>{
                                     nts.uk.ui.block.clear();
                                     if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15" && _.isEmpty(confirmMonth)) {
                                         nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
@@ -1193,7 +1193,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                                 //nts.uk.ui.block.clear();
                             }
                         } else {
-                            self.loadRowScreen(false, true, onlyCheckBox).done(() =>{
+                            self.loadRowScreen(false, true, onlyCheckBox, errorFlex).done(() =>{
                                 nts.uk.ui.block.clear();
                                 if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15" && _.isEmpty(confirmMonth)) {
                                     nts.uk.ui.dialog.info({ messageId: "Msg_15" }).then(() => {
@@ -1224,7 +1224,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                        // nts.uk.ui.block.clear();
                     } else {
                         let errorAll = false,
-                            errorReleaseCheckbox = false;
+                            errorReleaseCheckbox = false, errorMonth = false;
                         errorNoReload = true;
                         if (dataAfter.errorMap[6] != undefined) {
                             errorReleaseCheckbox = true;
@@ -1264,13 +1264,14 @@ module nts.uk.at.view.kdw003.a.viewmodel {
 
                         if (dataAfter.errorMap[5] != undefined) {
                             self.listErrorMonth = dataAfter.errorMap[5];
+                            errorMonth = true;
                             errorAll = true;
                         }
                        
                         if (dataAfter.errorMap[7] != undefined) {
                             errorAll = true;
                         }
-                        self.loadRowScreen(false, self.flagCalculation, onlyCheckBox).done(() => {
+                        self.loadRowScreen(false, self.flagCalculation, onlyCheckBox, errorFlex || errorMonth).done(() => {
                             nts.uk.ui.block.clear();
                             if (!_.isEmpty(dataAfter.messageAlert) && dataAfter.messageAlert == "Msg_15" && _.isEmpty(confirmMonth)) {
                                 if (errorReleaseCheckbox) {
@@ -1630,7 +1631,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             return itemId;
         }
 
-        loadRowScreen(onlyLoadMonth: boolean, onlyCalc: boolean, onlyCheckBox ?: boolean) : JQueryPromise<any> {
+        loadRowScreen(onlyLoadMonth: boolean, onlyCalc: boolean, onlyCheckBox ?: boolean, errorFlex ?: boolean) : JQueryPromise<any> {
             var self = this;
             let dfd = $.Deferred();
             let lstEmployee = [];
@@ -1864,7 +1865,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             }
 
             service.loadRow(param).done((data) => {
-                if (onlyLoadMonth) {
+                if (onlyLoadMonth && errorFlex == false) {
                     self.processFlex(data, true);
                     nts.uk.ui.block.clear();
                     return dfd.resolve();
@@ -1873,7 +1874,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 self.indentityMonth(data.indentityMonthResult);
                 //self.lstDomainEdit = data.domainOld;
                 //self.lstDomainOld = _.cloneDeep(data.domainOld);
-                self.processFlex(data, true);
+                if(errorFlex == false) self.processFlex(data, true);
                 let dataSourceRow, dataSource, dataSourceNew, dataRowTemp = [];
                 dataSourceRow = _.cloneDeep(self.formatDate(data.lstData));
                 _.forEach(dataSourceRow, (valueUpate) => {
@@ -2555,7 +2556,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 setShared("errorValidate", errorValidateScreeen);
                 setShared("messageKdw003a", (_.isEmpty(messageAlert) || !_.isString(messageAlert)) ? null : messageAlert);
                 self.openedScreenB = true;
-                self.dialogShow = nts.uk.ui.windows.sub.modeless("/view/kdw/003/b/index.xhtml").onClosed(() =>{
+                let dialogSize = (_.isEmpty(messageAlert) || !_.isString(messageAlert)) ? {width : 1190, height : 530} : {width : 900, height : 550}
+                self.dialogShow = nts.uk.ui.windows.sub.modeless("/view/kdw/003/b/index.xhtml", dialogSize).onClosed(() =>{
                      self.openedScreenB = false;
                      dfd.resolve();
                 });
