@@ -24,6 +24,7 @@ import nts.gul.collection.CollectionUtil;
 import nts.gul.collection.ListHashMap;
 import nts.uk.ctx.workflow.dom.adapter.bs.EmployeeAdapter;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.PersonImport;
+import nts.uk.ctx.workflow.dom.adapter.bs.dto.ResultRequest596Import;
 import nts.uk.ctx.workflow.dom.adapter.bs.dto.StatusOfEmpImport;
 import nts.uk.ctx.workflow.dom.agent.AgentRepository;
 import nts.uk.ctx.workflow.dom.agent.output.AgentInfoOutput;
@@ -355,8 +356,14 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 		ApprovalPersonInstance approvalPersonInstance = new ApprovalPersonInstance(new ArrayList<>(), new ArrayList<>());
 		// 承認者と期間から承認ルート中間データを取得する
 		List<AppRootInstance> appRootInstanceLst = appRootInstanceRepository.findByApproverPeriod(approverID, period, rootType);
+		// [No.596]削除された社員を取り除く
+		List<String> empInsLst = appRootInstanceLst.stream().map(x -> x.getEmployeeID()).collect(Collectors.toList());
+		List<ResultRequest596Import> importResult = employeeAdapter.getEmpDeletedLstBySids(empInsLst);
+		List<String> empDelLst = importResult.stream().map(x -> x.getSid()).collect(Collectors.toList());
+		List<AppRootInstance> appRootInsNotDelLst = appRootInstanceLst.stream().filter(x -> !empDelLst.contains(x.getEmployeeID())).collect(Collectors.toList());
+		
 		// 取得した「承認ルート中間データ」をOUTPUTに追加する
-		appRootInstanceLst.forEach(appRootInstance -> {
+		appRootInsNotDelLst.forEach(appRootInstance -> {
 			ApprovalRouteDetails approvalRouteDetails = new ApprovalRouteDetails(appRootInstance, approverID, Optional.empty(), Optional.empty(), Optional.empty());
 			approvalPersonInstance.getApproverRoute().add(approvalRouteDetails);
 		});
@@ -370,8 +377,14 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 					agentInfor.getAgentID(), 
 					new DatePeriod(agentInfor.getStartDate(), agentInfor.getEndDate()), 
 					rootType);
+			// [No.596]削除された社員を取り除く
+			List<String> empInsAgentLst = appRootInstanceAgentLst.stream().map(x -> x.getEmployeeID()).collect(Collectors.toList());
+			List<ResultRequest596Import> importAgentResult = employeeAdapter.getEmpDeletedLstBySids(empInsAgentLst);
+			List<String> empAgentDelLst = importAgentResult.stream().map(x -> x.getSid()).collect(Collectors.toList());
+			List<AppRootInstance> appRootInsAgentNotDelLst = appRootInstanceAgentLst.stream().filter(x -> !empAgentDelLst.contains(x.getEmployeeID())).collect(Collectors.toList());
+			
 			// 取得した「承認ルート中間データ」をOUTPUTに追加する
-			appRootInstanceAgentLst.forEach(appRootInstanceAgent -> {
+			appRootInsAgentNotDelLst.forEach(appRootInstanceAgent -> {
 				ApprovalRouteDetails approvalRouteDetailAgent = new ApprovalRouteDetails(
 						appRootInstanceAgent, 
 						approverID, 
