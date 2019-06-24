@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -376,7 +375,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 					.map(x -> x.getAttendanceDisplay()).collect(Collectors.toList());
 			String companyID = AppContexts.user().companyId();
 			String roleId = AppContexts.user().roles().forAttendance();
-			List<AttItemName> lstDailyAttendanceItem = companyDailyItemService.getDailyItems(companyID, Optional.of(roleId),
+			List<AttItemName> lstDailyAttendanceItem = companyDailyItemService.getDailyItems(companyID, roleId != null ? Optional.of(roleId) : Optional.empty(),
 					lstAttendanceId, Arrays.asList(DailyAttendanceAtr.values()));
 			int nListOutputCode = lstDailyAttendanceItem.size();
 			int nSize;
@@ -1896,7 +1895,7 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 
 		List<Integer> lstAttendanceId = lstItem.stream().sorted((o1, o2) -> (o1.getOrderNo() - o2.getOrderNo()))
 				.map(x -> x.getAttendanceDisplay()).collect(Collectors.toList());
-		List<AttItemName> lstDailyAttendanceItem = companyDailyItemService.getDailyItems(companyId, Optional.of(roleId),
+		List<AttItemName> lstDailyAttendanceItem = companyDailyItemService.getDailyItems(companyId, roleId != null ? Optional.of(roleId) : Optional.empty(),
 				lstAttendanceId, Arrays.asList(DailyAttendanceAtr.values()));
 		if (lstDailyAttendanceItem.isEmpty())
 			throw new BusinessException(new RawErrorMessage("Msg_1417"));
