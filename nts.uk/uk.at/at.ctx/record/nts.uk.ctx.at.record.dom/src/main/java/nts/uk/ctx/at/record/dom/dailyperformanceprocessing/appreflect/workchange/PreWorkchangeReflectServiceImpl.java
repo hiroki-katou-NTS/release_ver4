@@ -9,10 +9,8 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCalc
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonReflectParameter;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.PreHolidayWorktimeReflectService;
-import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.PreOvertimeReflectService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
@@ -52,11 +50,11 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 					param.getCommon().getEndTime(),
 					1, true, true);
 			if(isScheReflect) {
-				commonService.reflectScheWorkTimeWorkType(workchangePara, isPre, workInfor);
+				commonService.reflectScheWorkTimeWorkType(workchangePara, isPre, dailyInfor);
 				//TODO 予定開始終了時刻の反映
 				if(param.getCommon().getStartTime() != null 
 						&& param.getCommon().getEndTime() != null) {
-					workTimeUpdate.updateScheStartEndTime(timeReflect, workInfor);	
+					workTimeUpdate.updateScheStartEndTime(timeReflect, dailyInfor);	
 				}
 			}
 			ReflectParameter reflectPara = new ReflectParameter(workchangePara.getEmployeeId(),
@@ -65,7 +63,7 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 					workchangePara.getWorkTypeCode(),
 					true);
 			//勤種・就時の反映
-			workTimeUpdate.updateWorkTimeType(reflectPara, false, workInfor);
+			workTimeUpdate.updateWorkTimeType(reflectPara, false, dailyInfor);
 			//TODO 開始終了時刻の反映
 			if(param.getCommon().getStartTime() != null 
 					&& param.getCommon().getEndTime() != null) {

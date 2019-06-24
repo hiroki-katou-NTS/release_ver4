@@ -17,11 +17,11 @@ public interface ScheTimeReflect {
 	/**
 	 * 予定時刻の反映
 	 * @param para
-	 * @param timeTypeScheReflect: 予定勤種・就時の反映
+	 * @param timeTypeScheReflect: 予定勤種・就時の反IntegrationOfDaily映
 	 * @return
 	 */
-	public WorkInfoOfDailyPerformance reflectScheTime(GobackReflectParameter para, boolean timeTypeScheReflect,
-			WorkInfoOfDailyPerformance dailyInfor);
+	public void reflectScheTime(GobackReflectParameter para, boolean timeTypeScheReflect,
+			IntegrationOfDaily dailyInfor);
 	
 	/**
 	 * 

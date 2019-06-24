@@ -5,6 +5,7 @@ import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.ScheAndRecordSameChangeFlg;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.AppReflectRecordWork;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
@@ -20,9 +21,9 @@ public class AfterWorkTimeTypeReflectImpl implements AfterWorkTimeTypeReflect{
 	private WorkUpdateService workUpdate;
 	
 	@Override
-	public AppReflectRecordWork workTimeAndTypeScheReflect(GobackReflectParameter para, WorkInfoOfDailyPerformance dailyInfor) {
-		if(!this.checkReflectWorkTimeType(para, dailyInfor)) {
-			return new AppReflectRecordWork(false, dailyInfor);
+	public AppReflectRecordWork workTimeAndTypeScheReflect(GobackReflectParameter para, IntegrationOfDaily dailyInfor) {
+		if(!this.checkReflectWorkTimeType(para, dailyInfor.getWorkInformation())) {
+			return new AppReflectRecordWork(false, dailyInfor.getWorkInformation());
 		}
 		//予定勤種・就時の反映
 		ReflectParameter reflectInfo = new ReflectParameter(para.getEmployeeId(), para.getDateData(), 
@@ -30,7 +31,7 @@ public class AfterWorkTimeTypeReflectImpl implements AfterWorkTimeTypeReflect{
 				para.getGobackData().getWorkTypeCode(), false); 
 		workUpdate.updateWorkTimeType(reflectInfo, true, dailyInfor);
 		
-		return new AppReflectRecordWork(true, dailyInfor);
+		return new AppReflectRecordWork(true, dailyInfor.getWorkInformation());
 	}
 
 	@Override

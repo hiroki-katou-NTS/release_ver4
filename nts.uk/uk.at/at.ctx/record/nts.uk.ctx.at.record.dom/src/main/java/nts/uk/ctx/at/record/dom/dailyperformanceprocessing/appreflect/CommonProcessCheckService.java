@@ -22,8 +22,8 @@ public interface CommonProcessCheckService {
 	 * 予定勤種の反映
 	 * @param absencePara
 	 */
-	public WorkInfoOfDailyPerformance reflectScheWorkTimeWorkType(CommonReflectParameter commonPara, boolean isPre,
-			WorkInfoOfDailyPerformance dailyInfo);
+	public void reflectScheWorkTimeWorkType(CommonReflectParameter commonPara, boolean isPre,
+			IntegrationOfDaily dailyInfo);
 	/**
 	 * 予定勤種を反映できるかチェックする
 	 * @param absencePara

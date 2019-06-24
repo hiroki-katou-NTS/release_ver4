@@ -3,6 +3,7 @@ package nts.uk.ctx.at.record.dom.editstate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import nts.arc.layer.dom.AggregateRoot;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
@@ -28,6 +29,7 @@ public class EditStateOfDailyPerformance extends AggregateRoot {
 	private GeneralDate ymd;
 	
 	/** 編集状態: 日別実績の編集状態 */
+	@Setter
 	private EditStateSetting editStateSetting;
 
 }

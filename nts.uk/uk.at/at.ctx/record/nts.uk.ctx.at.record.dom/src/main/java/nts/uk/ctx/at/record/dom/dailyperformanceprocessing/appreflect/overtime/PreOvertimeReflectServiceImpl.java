@@ -99,11 +99,11 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 		//予定勤種・就時反映後の予定勤種・就時を取得する
 		//勤種・就時反映後の予定勤種・就時を取得する
 		//予定勤種・就時の反映
-		priorProcess.workTimeWorkTimeUpdate(param, dailyInfor.getWorkInformation());
+		priorProcess.workTimeWorkTimeUpdate(param, dailyInfor);
 		//勤種・就時の反映
 		AppReflectRecordWork changeFlg = priorProcess.changeFlg(param, dailyInfor.getWorkInformation());
 		//予定開始終了時刻の反映 phai lay du lieu cua 日別実績の勤務情報 sau khi update
-		priorProcess.startAndEndTimeReflectSche(param, changeFlg.chkReflect, dailyInfor.getWorkInformation());
+		priorProcess.startAndEndTimeReflectSche(param, changeFlg.chkReflect, dailyInfor);
 		//日別実績の勤務情報  変更
 		//workRepository.updateByKeyFlush(dailyInfor);
 		
@@ -114,22 +114,21 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 		//残業枠時間
 		Optional<AttendanceTimeOfDailyPerformance> optAttendanceTime = dailyInfor.getAttendanceTimeOfDailyPerformance();
 		if(optAttendanceTime.isPresent()) {
-			AttendanceTimeOfDailyPerformance attendanceTimeData = optAttendanceTime.get();
 			//残業時間の反映
-			attendanceTimeData = priorProcess.getReflectOfOvertime(param, attendanceTimeData);
+			priorProcess.getReflectOfOvertime(param, dailyInfor);
 			//所定外深夜時間の反映
-			attendanceTimeData = priorProcess.overTimeShiftNight(param.getEmployeeId(), param.getDateInfo(), param.isTimeReflectFlg(),
-					param.getOvertimePara().getOverTimeShiftNight(), attendanceTimeData);
+			priorProcess.overTimeShiftNight(param.getEmployeeId(), param.getDateInfo(), param.isTimeReflectFlg(),
+					param.getOvertimePara().getOverTimeShiftNight(), dailyInfor);
 			//フレックス時間の反映
-			attendanceTimeData = priorProcess.reflectOfFlexTime(param.getEmployeeId(), param.getDateInfo(), param.isTimeReflectFlg(),
-					param.getOvertimePara().getFlexExessTime(), attendanceTimeData);
-			attendanceTime.updateFlush(attendanceTimeData);
+			priorProcess.reflectOfFlexTime(param.getEmployeeId(), param.getDateInfo(), param.isTimeReflectFlg(),
+					param.getOvertimePara().getFlexExessTime(), dailyInfor);
+			attendanceTime.updateFlush(dailyInfor.getAttendanceTimeOfDailyPerformance().get());
 			
 		}
 		
 		//申請理由の反映
 		updateService.reflectReason(param.getEmployeeId(), param.getDateInfo(), 
-				param.getOvertimePara().getAppReason(),param.getOvertimePara().getOvertimeAtr());
+				param.getOvertimePara().getAppReason(),param.getOvertimePara().getOvertimeAtr(), dailyInfor);
 		//日別実績の修正からの計算
 		//○日別実績を置き換える Replace daily performance	
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,

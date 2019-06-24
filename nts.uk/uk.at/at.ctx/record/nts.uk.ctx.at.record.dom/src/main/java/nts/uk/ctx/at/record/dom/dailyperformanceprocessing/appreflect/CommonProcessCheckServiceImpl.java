@@ -29,7 +29,6 @@ import nts.uk.ctx.at.record.dom.service.event.common.CorrectEventConts;
 import nts.uk.ctx.at.record.dom.service.event.overtime.OvertimeOfDailyService;
 import nts.uk.ctx.at.record.dom.service.event.schetimeleave.ScheTimeLeavingOfDailyService;
 import nts.uk.ctx.at.record.dom.service.event.timeleave.TimeLeavingOfDailyService;
-import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
@@ -105,8 +104,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	}
 	
 	@Override
-	public WorkInfoOfDailyPerformance reflectScheWorkTimeWorkType(CommonReflectParameter commonPara, boolean isPre,
-			WorkInfoOfDailyPerformance dailyInfor) {
+	public void reflectScheWorkTimeWorkType(CommonReflectParameter commonPara, boolean isPre,
+			IntegrationOfDaily dailyInfor) {
 		//予定勤種を反映できるかチェックする
 		/*if(!this.checkReflectScheWorkTimeType(commonPara, isPre, commonPara.getWorkTimeCode())) {
 			return dailyInfor;
@@ -114,7 +113,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		//予定勤種の反映		
 		ReflectParameter para = new ReflectParameter(commonPara.getEmployeeId(), commonPara.getBaseDate(), commonPara.getWorkTimeCode(), 
 				commonPara.getWorkTypeCode(), false);
-		return workTimeUpdate.updateWorkTimeType(para, true, dailyInfor);
+		workTimeUpdate.updateWorkTimeType(para, true, dailyInfor);
 	}
 
 	@Override
@@ -136,8 +135,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	@Override
 	public void calculateOfAppReflect(CommonCalculateOfAppReflectParam commonPara) {
 		Optional<WorkingConditionItem> optWorkingCondition = workingCondition.getBySidAndStandardDate(commonPara.getSid(), commonPara.getYmd());
-		List<EditStateOfDailyPerformance> lstEditState = dailyReposiroty.findByKey(commonPara.getSid(), commonPara.getYmd());
-		commonPara.getIntegrationOfDaily().setEditState(lstEditState);
+		//List<EditStateOfDailyPerformance> lstEditState = dailyReposiroty.findByKey(commonPara.getSid(), commonPara.getYmd());
+		//commonPara.getIntegrationOfDaily().setEditState(lstEditState);
 		String companyId = AppContexts.user().companyId();
 		//就業時間帯の休憩時間帯を日別実績に反映する
 		this.updateBreakTimeInfor(commonPara.getSid(),

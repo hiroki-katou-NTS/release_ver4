@@ -10,8 +10,6 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProc
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.AppReflectRecordWork;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.PreOvertimeReflectService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
-import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 
 @Stateless
@@ -25,21 +23,18 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 	@Inject
 	private AfterScheTimeReflect afterScheTime;
 	@Inject
-	private WorkInformationRepository workRepository;
-	@Inject
 	private CommonProcessCheckService commonService;
 	@Inject
 	private PreOvertimeReflectService preOTService;
 	@Override
 	public void gobackReflect(GobackReflectParameter para) {
 		IntegrationOfDaily dailyInfor = preOTService.calculateForAppReflect(para.getEmployeeId(), para.getDateData());
-		WorkInfoOfDailyPerformance workInfor = dailyInfor.getWorkInformation();
 		//予定勤種・就時の反映
-		AppReflectRecordWork chkTimeTypeSche = timeTypeSche.reflectScheWorkTimeType(para, workInfor);
+		AppReflectRecordWork chkTimeTypeSche = timeTypeSche.reflectScheWorkTimeType(para, dailyInfor);
 		//予定時刻の反映
-		scheTimeReflect.reflectScheTime(para, chkTimeTypeSche.isChkReflect(), workInfor);
+		scheTimeReflect.reflectScheTime(para, chkTimeTypeSche.isChkReflect(), dailyInfor);
 		//勤種・就時の反映
-		AppReflectRecordWork reflectWorkTypeTime = timeTypeSche.reflectRecordWorktimetype(para, workInfor);
+		AppReflectRecordWork reflectWorkTypeTime = timeTypeSche.reflectRecordWorktimetype(para, dailyInfor);
 		//workRepository.updateByKeyFlush(reflectWorkTypeTime.getDailyInfo());
 		//時刻の反映
 		scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect(), dailyInfor);
@@ -56,13 +51,12 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 	@Override
 	public void afterGobackReflect(GobackReflectParameter para) {
 		IntegrationOfDaily dailyInfor = preOTService.calculateForAppReflect(para.getEmployeeId(), para.getDateData());
-		WorkInfoOfDailyPerformance workInfor = dailyInfor.getWorkInformation();
 		//予定勤種・就時の反映
-		AppReflectRecordWork chkTimeTypeChe = afterWorkTimeType.workTimeAndTypeScheReflect(para, workInfor);
+		AppReflectRecordWork chkTimeTypeChe = afterWorkTimeType.workTimeAndTypeScheReflect(para, dailyInfor);
 		//予定時刻の反映
-		afterScheTime.reflectScheTime(para, chkTimeTypeChe.isChkReflect(), chkTimeTypeChe.getDailyInfo());
+		afterScheTime.reflectScheTime(para, chkTimeTypeChe.isChkReflect(), dailyInfor);
 		//勤種・就時の反映
-		AppReflectRecordWork reflectWorkTypeTime = timeTypeSche.reflectRecordWorktimetype(para, workInfor);
+		AppReflectRecordWork reflectWorkTypeTime = timeTypeSche.reflectRecordWorktimetype(para, dailyInfor);
 		//workRepository.updateByKeyFlush(reflectWorkTypeTime.getDailyInfo());
 		//時刻の反映
 		scheTimeReflect.reflectTime(para, reflectWorkTypeTime.isChkReflect(), dailyInfor);

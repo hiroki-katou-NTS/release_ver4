@@ -28,7 +28,7 @@ public class AfterOvertimeReflectProcessImpl implements AfterOvertimeReflectProc
 	private WorkUpdateService scheWorkUpdate;
 	@Override
 	public WorkInfoOfDailyPerformance checkScheReflect(OvertimeParameter overtimePara, WorkInfoOfDailyPerformance dailyInfor) {
-		//ＩNPUT．勤務種類コードとＩNPUT．就業時間帯コードをチェックする
+		/*//ＩNPUT．勤務種類コードとＩNPUT．就業時間帯コードをチェックする
 		if((overtimePara.getOvertimePara().getWorkTimeCode().isEmpty()
 				|| overtimePara.getOvertimePara().getWorkTypeCode().isEmpty())
 				//INPUT．勤種反映フラグをチェックする (勤種反映フラグ(実績))
@@ -57,18 +57,20 @@ public class AfterOvertimeReflectProcessImpl implements AfterOvertimeReflectProc
 				overtimePara.getDateInfo(),
 				overtimePara.getOvertimePara().getWorkTimeCode(), 
 				overtimePara.getOvertimePara().getWorkTypeCode(), false);
-		return scheWorkUpdateService.updateWorkTimeType(reflectPara, true, dailyInfor);
+		return scheWorkUpdateService.updateWorkTimeType(reflectPara, true, dailyInfor);*/
+		return null;
 	}
 
 	@Override
 	public WorkInfoOfDailyPerformance checkScheWorkStarEndReflect(OvertimeParameter overtimePara, 
 			boolean workReflect, WorkTimeTypeOutput workTimeType, WorkInfoOfDailyPerformance dailyInfor) {
-		//設定による予定開始終了時刻を反映できるかチェックする
+		/*//設定による予定開始終了時刻を反映できるかチェックする
 		if(!this.checkReflectStartEndForSetting(overtimePara, workReflect)) {
 			return dailyInfor;
 		}
 		//予定開始終了時刻の反映(事前事後共通部分)
-		return scheStartEndTimeReflect.reflectScheStartEndTime(overtimePara, workTimeType, dailyInfor);
+		return scheStartEndTimeReflect.reflectScheStartEndTime(overtimePara, workTimeType, dailyInfor);*/
+		return null;
 	}
 
 	@Override
@@ -166,7 +168,7 @@ public class AfterOvertimeReflectProcessImpl implements AfterOvertimeReflectProc
 
 	@Override
 	public AttendanceTimeOfDailyPerformance reflectOvertimeFrame(OvertimeParameter para, AttendanceTimeOfDailyPerformance attendanceTimeData) {
-		Map<Integer, Integer> tmp = new HashMap<>();
+		/*Map<Integer, Integer> tmp = new HashMap<>();
 		for(Map.Entry<Integer,Integer> entry : para.getOvertimePara().getMapOvertimeFrame().entrySet()){
 			//INPUT．残業時間のループ中の番をチェックする
 			//INPUT．残業時間のループ中の番を、残業時間(反映用)に追加する
@@ -174,13 +176,14 @@ public class AfterOvertimeReflectProcessImpl implements AfterOvertimeReflectProc
 				tmp.put(entry.getKey(), entry.getValue());
 			}
 		}
-		return scheWorkUpdate.reflectOffOvertime(para.getEmployeeId(), para.getDateInfo(), tmp, false, attendanceTimeData);
+		return scheWorkUpdate.reflectOffOvertime(para.getEmployeeId(), para.getDateInfo(), tmp, false, attendanceTimeData);*/
+		return null;
 	}
 
 	@Override
 	public AttendanceTimeOfDailyPerformance reflectTimeShiftNight(String employeeId, GeneralDate baseDate, Integer timeNight, 
 			AttendanceTimeOfDailyPerformance attendanceTimeData) {
-		//INPUT．外深夜時間をチェックする
+		/*//INPUT．外深夜時間をチェックする
 		if(timeNight <= 0) {
 			return attendanceTimeData;
 		}
@@ -190,7 +193,8 @@ public class AfterOvertimeReflectProcessImpl implements AfterOvertimeReflectProc
 		//休出時間(深夜)(法内)の反映
 		//休出時間(深夜)(法外)の反映
 		//休出時間(深夜)(祝日)の反映
-		return scheWorkUpdate.updateBreakNight(employeeId, baseDate, attendanceTimeData);
+		return scheWorkUpdate.updateBreakNight(employeeId, baseDate, attendanceTimeData);*/
+		return null;
 		
 	}
 

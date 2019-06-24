@@ -21,7 +21,7 @@ public interface RecruitmentRelectRecordService {
 	 * 予定勤種就時の反映
 	 * @param param
 	 */
-	public WorkInfoOfDailyPerformance reflectScheWorkTimeType(CommonReflectParameter param, boolean isPre, WorkInfoOfDailyPerformance dailyInfo);
+	public void reflectScheWorkTimeType(CommonReflectParameter param, boolean isPre, IntegrationOfDaily dailyInfo);
 	/**
 	 * 開始終了時刻の反映
 	 * @param param

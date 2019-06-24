@@ -10,8 +10,6 @@ import javax.inject.Inject;
 import lombok.val;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.ScheAndRecordSameChangeFlg;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
-import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
@@ -44,8 +42,6 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 	@Inject
 	private WorkUpdateService scheUpdateService;
 	@Inject
-	private WorkInformationRepository workInfor;
-	@Inject
 	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDaily;
 	@Inject
 	private WorkTimeIsFluidWork workTimeisFluidWork;
@@ -64,11 +60,11 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 	@Inject
 	private DiffTimeWorkSettingRepository diffTimeWorkSettingRepository;
 	@Override
-	public WorkInfoOfDailyPerformance reflectScheTime(GobackReflectParameter para, boolean timeTypeScheReflect,
-			WorkInfoOfDailyPerformance dailyInfor) {
+	public void reflectScheTime(GobackReflectParameter para, boolean timeTypeScheReflect,
+			IntegrationOfDaily dailyInfor) {
 		//予定時刻反映できるかチェックする
 		if(!this.checkScheReflect(para.getGobackData().getWorkTimeCode(), para.isScheReflectAtr(), para.getScheAndRecordSameChangeFlg())) {
-			return dailyInfor;
+			return;
 		}
 		//(開始時刻)反映する時刻を求める
 		TimeOfDayReflectOutput startTimeReflect = this.getTimeOfDayReflect(timeTypeScheReflect, 
@@ -83,7 +79,7 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 				para.getGobackData().getWorkTimeCode(), 
 				para.getScheTimeReflectAtr());
 		TimeReflectPara timeData1 = new TimeReflectPara(para.getEmployeeId(), para.getDateData(), startTimeReflect.getTimeOfDay(), endTimeReflect.getTimeOfDay(), 1, startTimeReflect.isReflectFlg(), endTimeReflect.isReflectFlg());
-		return scheUpdateService.updateScheStartEndTime(timeData1, dailyInfor);		
+		scheUpdateService.updateScheStartEndTime(timeData1, dailyInfor);		
 		/*//(開始時刻2)反映する時刻を求める
 		TimeOfDayReflectOutput startTime2Reflect = this.getTimeOfDayReflect(timeTypeScheReflect, 
 				para.getGobackData().getStartTime2(), 

@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.goback;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.AppReflectRecordWork;
+import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 
 /**
@@ -15,7 +16,7 @@ public interface WorkTimeTypeScheReflect {
 	 * @param para
 	 * @return
 	 */
-	public AppReflectRecordWork reflectScheWorkTimeType(GobackReflectParameter para, WorkInfoOfDailyPerformance dailyInfor);
+	public AppReflectRecordWork reflectScheWorkTimeType(GobackReflectParameter para, IntegrationOfDaily dailyInfor);
 	/**
 	 * 予定勤務種類による勤種・就時を反映できるかチェックする
 	 * @param para
@@ -35,7 +36,7 @@ public interface WorkTimeTypeScheReflect {
 	 * @param para
 	 * @return
 	 */
-	public AppReflectRecordWork reflectRecordWorktimetype(GobackReflectParameter para, WorkInfoOfDailyPerformance dailyInfor);
+	public AppReflectRecordWork reflectRecordWorktimetype(GobackReflectParameter para, IntegrationOfDaily dailyInfor);
 	/**
 	 * 実績勤務種類による勤種・就時を反映できるかチェックする
 	 * @param employeeId

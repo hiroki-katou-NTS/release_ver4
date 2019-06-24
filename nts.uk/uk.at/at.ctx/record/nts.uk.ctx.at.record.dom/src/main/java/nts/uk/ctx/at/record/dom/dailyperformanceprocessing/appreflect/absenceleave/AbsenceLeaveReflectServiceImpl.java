@@ -63,7 +63,7 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 	public void reflectAbsenceLeave(CommonReflectParameter param, boolean isPre) {
 		IntegrationOfDaily dailyInfor = preOTService.calculateForAppReflect(param.getEmployeeId(), param.getBaseDate());
 		//予定勤種就時開始終了の反映
-		this.reflectScheStartEndTime(param, isPre, dailyInfor.getWorkInformation());
+		this.reflectScheStartEndTime(param, isPre, dailyInfor);
 		//勤種就時開始終了の反映
 		this.reflectRecordStartEndTime(param, dailyInfor);
 		//workRepository.updateByKeyFlush(dailyInfor);
@@ -78,14 +78,14 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 	}
 
 	@Override
-	public void reflectScheStartEndTime(CommonReflectParameter param, boolean isPre, WorkInfoOfDailyPerformance dailyInfor) {
+	public void reflectScheStartEndTime(CommonReflectParameter param, boolean isPre, IntegrationOfDaily dailyInfor) {
 		//予定を反映できるかチェックする(事前)
 		if(!holidayProcess.checkScheWorkTimeReflect(param.getEmployeeId(), param.getBaseDate(), 
 				param.getWorkTimeCode(), param.isScheTimeReflectAtr(), isPre, param.getScheAndRecordSameChangeFlg())) {
 			return;
 		}
 		//予定勤種の反映
-		dailyInfor = workUpdate.updateRecordWorkType(param.getEmployeeId(), param.getBaseDate(), param.getWorkTypeCode(), true, dailyInfor);
+		workUpdate.updateRecordWorkType(param.getEmployeeId(), param.getBaseDate(), param.getWorkTypeCode(), true, dailyInfor);
 		//1日半日出勤・1日休日系の判定
 		WorkStyle checkworkDay = basicService.checkWorkDay(param.getWorkTypeCode());
 		
@@ -118,7 +118,6 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 				workUpdate.updateScheStartEndTime(timePara, dailyInfor);
 			}
 		}
-		return;
 	}
 
 	@Override
@@ -203,7 +202,7 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 	public void reflectRecordStartEndTime(CommonReflectParameter param, IntegrationOfDaily dailyInfor) {
 		//勤種の反映
 		workUpdate.updateRecordWorkType(param.getEmployeeId(), param.getBaseDate(), 
-				param.getWorkTypeCode(), false, dailyInfor.getWorkInformation());
+				param.getWorkTypeCode(), false, dailyInfor);
 		//1日半日出勤・1日休日系の判定
 		WorkStyle checkworkDay = basicService.checkWorkDay(param.getWorkTypeCode());
 		if(checkworkDay == WorkStyle.ONE_DAY_REST) {
@@ -211,7 +210,7 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 			SetupType checkNeededOfWorkTimeSetting = basicService.checkNeededOfWorkTimeSetting(param.getWorkTypeCode());
 			if(checkNeededOfWorkTimeSetting == SetupType.NOT_REQUIRED) {
 				//就時の反映: 就業時間帯コードをクリア
-				workUpdate.updateRecordWorkTime(param.getEmployeeId(), param.getBaseDate(), null, false, dailyInfor.getWorkInformation());
+				workUpdate.updateRecordWorkTime(param.getEmployeeId(), param.getBaseDate(), null, false, dailyInfor);
 			}
 			//開始終了時刻が反映できるか(1日休日)
 			if(this.checkReflectRecordStartEndTime(param.getEmployeeId(), param.getBaseDate(), 1, true)) {
@@ -228,7 +227,7 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 			if(isWorkTimeReflect.isChkReflect()) {
 				//就時の反映
 				workUpdate.updateRecordWorkTime(param.getEmployeeId(), param.getBaseDate(),
-						isWorkTimeReflect.getWorkTimeCode(), false, dailyInfor.getWorkInformation());
+						isWorkTimeReflect.getWorkTimeCode(), false, dailyInfor);
 			}
 			//開始終了時刻の反映(事前)
 			StartEndTimeRelectCheck startEndTimeData = new StartEndTimeRelectCheck(param.getEmployeeId(), param.getBaseDate(), param.getStartTime(), param.getEndTime(), 

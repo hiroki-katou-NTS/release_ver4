@@ -30,7 +30,7 @@ public interface AbsenceReflectService {
 	 * @param workTypeCode
 	 * @param isReflect
 	 */
-	public WorkInfoOfDailyPerformance reflectScheStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode, boolean isReflect, WorkInfoOfDailyPerformance dailyInfor);
+	public void reflectScheStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode, boolean isReflect, IntegrationOfDaily dailyInfor);
 	/**
 	 * 開始終了時刻の反映
 	 * @param employeeId

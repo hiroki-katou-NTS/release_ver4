@@ -62,19 +62,19 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 					|| workInfor.getScheduleInfo().getWorkTimeCode() == null
 					|| commonService.checkReflectScheWorkTimeType(absencePara, isPre, workInfor.getScheduleInfo().getWorkTimeCode().v())) {
 				isRecordWorkType = true;
-				workTimeUpdate.updateRecordWorkType(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode(), true, workInfor);
+				workTimeUpdate.updateRecordWorkType(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode(), true, dailyInfor);
 			}				
 			//予定開始終了時刻の反映
 			this.reflectScheStartEndTime(absencePara.getEmployeeId(), loopDate, 
-					absencePara.getWorkTypeCode(), isRecordWorkType, workInfor);			
+					absencePara.getWorkTypeCode(), isRecordWorkType, dailyInfor);			
 			//勤種の反映
-			workTimeUpdate.updateRecordWorkType(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode(), false, workInfor);
+			workTimeUpdate.updateRecordWorkType(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTypeCode(), false, dailyInfor);
 			//就業時間帯
 			if(param.getExcludeHolidayAtr() != 0) {
 				if(isRecordWorkType) {
-					workTimeUpdate.updateRecordWorkTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTimeCode(), true, workInfor);	
+					workTimeUpdate.updateRecordWorkTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTimeCode(), true, dailyInfor);	
 				}					
-				workTimeUpdate.updateRecordWorkTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTimeCode(), false, workInfor);
+				workTimeUpdate.updateRecordWorkTime(absencePara.getEmployeeId(), loopDate, absencePara.getWorkTimeCode(), false, dailyInfor);
 			}
 			//workRepository.updateByKeyFlush(workInfor);
 			//開始終了時刻の反映
@@ -92,10 +92,10 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	}
 
 	@Override
-	public WorkInfoOfDailyPerformance reflectScheStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode, boolean isReflect, WorkInfoOfDailyPerformance dailyInfor) {
+	public void reflectScheStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode, boolean isReflect, IntegrationOfDaily dailyInfor) {
 		//INPUT．予定勤務種類変更フラグをチェックする
 		if(!isReflect) {
-			return dailyInfor;
+			return;
 		}
 		//予定開始終了時刻をクリアするかチェックする
 		//1日半日出勤・1日休日系の判定
@@ -103,10 +103,9 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 			//予定開始時刻の反映
 			//予定終了時刻の反映
 			TimeReflectPara timeData = new TimeReflectPara(employeeId, baseDate, null, null, 1, true, true);
-			dailyInfor = workTimeUpdate.updateScheStartEndTime(timeData, dailyInfor);
+			workTimeUpdate.updateScheStartEndTime(timeData, dailyInfor);
 			
 		}
-		return dailyInfor;
 	}
 	@Override
 	public void reflectRecordStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode,
