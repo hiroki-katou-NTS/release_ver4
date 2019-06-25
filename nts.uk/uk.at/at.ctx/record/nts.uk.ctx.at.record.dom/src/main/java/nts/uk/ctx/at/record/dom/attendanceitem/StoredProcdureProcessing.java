@@ -250,8 +250,8 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 						timePre = preOver.stream().mapToInt(t -> t).sum() + timePreFlex,
 						time = overTime.stream().mapToInt(t -> t).sum() + preOver.stream().mapToInt(t -> t).sum() + flexTime;
 				
-				/** 任意項目18, 任意項目28: 事前残業時間 > 0 である事が条件 */
-				processOptionalItem(() -> timePre > 0, optionalItem, COUNT_ON, COUNT_OFF, 18, 28);
+				/** 任意項目28: 事前残業時間 > 0 である事が条件 */
+				processOptionalItem(() -> timePre > 0, optionalItem, COUNT_ON, COUNT_OFF, 28);
 				
 				/** 任意項目19: 事前残業1~10 > 0 かつ　乖離時間が発生していない事が条件 */
 				processOptionalItem(() -> timePre > 0 && overTime.stream().allMatch(t -> t <= 0) && timeFlex <= 0, 
@@ -302,8 +302,8 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 				/** 任意項目41: フレックス時間がプラスである事が条件 */
 				processOptionalItem(() -> flexTime >= 0, optionalItem, flexTime, timeOff, 41);
 			} else {
-				/** 任意項目18, 19, 21, 23, 28 */
-				updateOptionalItemWithNo(optionalItem, COUNT_OFF, 18, 19, 21, 23, 27, 28);
+				/** 任意項目 19, 21, 23, 28 */
+				updateOptionalItemWithNo(optionalItem, COUNT_OFF, 19, 21, 23, 27, 28);
 
 				/** 任意項目40, 41 */
 				updateOptionalItemWithNo(optionalItem, timeOff, 40, 41);
@@ -354,7 +354,6 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 				updateOptionalItemWithNo(optionalItem, COUNT_OFF, 90);
 			}
 			
-			Optional<AnyItemValue> no18 = optionalItem.getNo(18);
 			MutableValue<Integer> flag19 = new MutableValue<>(0), flag21 = new MutableValue<>(0), flag37 = new MutableValue<>(0);
 			MutableValue<Boolean> flag35 = new MutableValue<>(false), flag36 = new MutableValue<>(false);
 			
@@ -373,6 +372,36 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 					if(endTime != null && endTime > preSetLeave01) {
 						flag36.set(true);
 					}
+					if(d.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
+						int scheWorkAtten = d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).getAttendance().valueAsMinutes();
+						int scheWorkLeave = d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).getLeaveWork().valueAsMinutes();
+						
+						if(startTime != null && preSetAtten01 > scheWorkAtten) {
+							if(startTime >= scheWorkAtten) {
+								flag19.set(flag19.get() + 1);
+							}
+							if(startTime < scheWorkAtten) {
+								flag21.set(flag21.get() + 1);
+							}
+						}
+						
+						if(endTime != null && preSetLeave01 < scheWorkLeave) {
+							if(endTime <= scheWorkLeave) {
+								flag19.set(flag19.get() + 1);
+							}
+							if(endTime > scheWorkLeave) {
+								flag21.set(flag21.get() + 1);
+							}
+						}
+						
+						if (flag35.get() && preSetAtten01 <= scheWorkAtten) {
+							flag37.set(flag37.get() + 1);
+						}
+						if(flag36.get() && preSetLeave01 >= scheWorkLeave) {
+							flag37.set(flag37.get() + 1);
+						}
+					}
+					
 				});
 			}
 			
@@ -381,40 +410,6 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			
 			/** 任意項目36 */
 			processOptionalItem(() -> flag36.get(), optionalItem, COUNT_ON, COUNT_OFF, 36);
-			
-			if(no18.isPresent()) {
-				if(no18.get().getTimes().get().v().equals(COUNT_ON)) {
-					if(d.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
-						int scheWorkAtten = d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).getAttendance().valueAsMinutes();
-						int scheWorkLeave = d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).getLeaveWork().valueAsMinutes();
-						if(startTime != null) {
-							if(startTime >= scheWorkAtten) {
-								flag19.set(flag19.get() + 1);
-							}
-							if(startTime < scheWorkAtten) {
-								flag21.set(flag21.get() + 1);
-							}
-						}
-						if(endTime != null) {
-							if(endTime <= scheWorkLeave) {
-								flag19.set(flag19.get() + 1);
-							}
-							if(endTime > scheWorkLeave) {
-								flag21.set(flag21.get() + 1);
-							}
-						}
-					}
-				} else {
-					Optional<AnyItemValue> no35 = optionalItem.getNo(35), no36 = optionalItem.getNo(36);
-					if (no35.get().getTimes().get().v().equals(COUNT_ON)) {
-						flag37.set(flag37.get() + 1);
-					}
-					if(no36.get().getTimes().get().v().equals(COUNT_ON)) {
-						flag37.set(flag37.get() + 1);
-					}
-				}
-				
-			} 
 			
 			/** 任意項目19 */
 			processOptionalItem(() -> flag19.get() > 0, optionalItem, BigDecimal.valueOf(flag19.get()), COUNT_OFF, 19);
