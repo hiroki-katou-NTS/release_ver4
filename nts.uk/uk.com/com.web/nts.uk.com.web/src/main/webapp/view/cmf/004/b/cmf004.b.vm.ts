@@ -521,7 +521,8 @@ module nts.uk.com.view.cmf004.b.viewmodel {
                 recoverySourceName: self.recoverySourceName(),
                 supplementaryExplanation: self.supplementaryExplanation(),
                 recoveryMethodOptions: self.dataContentConfirm().selectedRecoveryMethod(),
-                recoveryProcessingId: self.recoveryProcessingId
+                recoveryProcessingId: self.recoveryProcessingId,
+                store_del_ProcessingId: self.dataRecoverySelection().selectedRecoveryFile()
             });
             nts.uk.ui.windows.sub.modal("/view/cmf/004/i/index.xhtml").onClosed(() => {
                 self.buton_I_enable(false);
