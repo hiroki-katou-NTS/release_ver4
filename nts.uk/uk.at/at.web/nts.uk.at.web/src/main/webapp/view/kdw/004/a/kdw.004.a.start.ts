@@ -3,7 +3,7 @@ module nts.uk.at.view.kdw004.a {
         let screenModel = new viewmodel.ScreenModelKDW004A();
         let value = __viewContext.transferred.value,
             param = null;
-        if (_.isNil(value) || typeof(value) != 'object') {
+        if (_.isNil(value) || _.isNil(value.closureId) || typeof(value) != 'object') {
             param = {
                 closureIdParam: null,
                 startDateParam: null,
