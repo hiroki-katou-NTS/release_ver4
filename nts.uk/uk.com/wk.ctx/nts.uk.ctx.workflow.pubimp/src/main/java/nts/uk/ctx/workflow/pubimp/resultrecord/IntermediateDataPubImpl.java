@@ -657,4 +657,9 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 			}
 		}
 	}
+
+	@Override
+	public List<String> findEmpRequest610(String approverID, DatePeriod period, Integer rootType) {
+		return appRootInstanceRepository.findEmpLstByRq610(approverID, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
+	}
 }

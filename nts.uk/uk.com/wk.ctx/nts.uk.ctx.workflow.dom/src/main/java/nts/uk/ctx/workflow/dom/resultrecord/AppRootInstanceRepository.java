@@ -41,4 +41,6 @@ public interface AppRootInstanceRepository {
 	
 	public List<AppRootInstance> findByApproverDateCID(String companyID, String approverID, GeneralDate date, RecordRootType rootType);
 	
+	public List<String> findEmpLstByRq610(String approverID, DatePeriod period, RecordRootType rootType);
+	
 }

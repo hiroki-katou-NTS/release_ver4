@@ -128,6 +128,23 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			" AND appRoot.ROOT_TYPE = rootType" +
 			" AND appRoot.START_DATE <= 'recordDate'" +
 			" AND appRoot.END_DATE >= 'recordDate'";
+	
+	private final String FIND_EMP_RQ610 = 
+			" BASIC_SELECT"+
+			" WHERE appApprover.APPROVER_CHILD_ID = 'approverID'"+
+			" AND appRoot.CID = 'companyID'"+
+			" AND appRoot.ROOT_TYPE = rootType"+
+			" AND appRoot.END_DATE >= 'startDate'"+
+			" AND appRoot.START_DATE <= 'endDate'"+
+			" UNION"+
+			" BASIC_SELECT"+
+			" WHERE appApprover.APPROVER_CHILD_ID IN"+
+			" (SELECT c.SID FROM CMMMT_AGENT c where c.AGENT_SID1 = 'approverID' and c.START_DATE <= 'sysDate' and c.END_DATE >= 'sysDate')"+
+			" AND appRoot.CID = 'companyID'"+
+			" AND appRoot.ROOT_TYPE = rootType"+
+			" AND appRoot.END_DATE >= 'startDate'"+
+			" AND appRoot.START_DATE <= 'endDate'";
+			
 
 	@Override
 	@SneakyThrows
@@ -543,6 +560,28 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 				return Collections.emptyList();
 			}
 		}
+	}
+
+	@Override
+	@SneakyThrows
+	public List<String> findEmpLstByRq610(String approverID, DatePeriod period, RecordRootType rootType) {
+		String companyID =  AppContexts.user().companyId();
+		String query = FIND_EMP_RQ610;
+		query = query.replaceAll("companyID", companyID);
+		query = query.replaceAll("approverID", approverID);
+		query = query.replaceAll("startDate", period.start().toString("yyyy-MM-dd"));
+		query = query.replaceAll("endDate", period.end().toString("yyyy-MM-dd"));
+		query = query.replaceAll("sysDate", GeneralDate.today().toString("yyyy-MM-dd"));
+		query = query.replaceAll("rootType", String.valueOf(rootType.value));
+		try (PreparedStatement pstatement = this.connection().prepareStatement(query)) {
+			ResultSet rs = pstatement.executeQuery();
+			List<AppRootInstance> listResult = toDomain(createFullJoinAppRootInstance(rs));
+			if(!CollectionUtil.isEmpty(listResult)){
+				return listResult.stream().map(x -> x.getEmployeeID()).distinct().collect(Collectors.toList());
+			} else {
+				return Collections.emptyList();
+			}
+		} 
 	}
 
 }
