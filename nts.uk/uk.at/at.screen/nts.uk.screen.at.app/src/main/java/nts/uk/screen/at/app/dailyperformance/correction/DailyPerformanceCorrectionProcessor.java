@@ -33,11 +33,15 @@ import nts.arc.error.BusinessException;
 //import nts.arc.task.AsyncTask;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
+import nts.gul.collection.CollectionUtil;
 import nts.gul.text.IdentifierUtil;
 //import nts.gul.util.value.MutableValue;
 import nts.uk.ctx.at.function.dom.adapter.person.EmployeeInfoFunAdapterDto;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHisOfEmployeeImport;
+import nts.uk.ctx.at.record.dom.adapter.initswitchsetting.DateProcessedRecord;
+import nts.uk.ctx.at.record.dom.adapter.initswitchsetting.InitSwitchSetAdapter;
+import nts.uk.ctx.at.record.dom.adapter.initswitchsetting.InitSwitchSetDto;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApproveRootStatusForEmpImport;
@@ -246,6 +250,9 @@ public class DailyPerformanceCorrectionProcessor {
 	@Inject
 	private CheckLockDataDaily checkLockDataDaily;
 	
+	@Inject
+	private InitSwitchSetAdapter initSwitchSetAdapter;
+	
     static final Integer[] DEVIATION_REASON  = {436, 438, 439, 441, 443, 444, 446, 448, 449, 451, 453, 454, 456, 458, 459, 799, 801, 802, 804, 806, 807, 809, 811, 812, 814, 816, 817, 819, 821, 822};
 	public static final Map<Integer, Integer> DEVIATION_REASON_MAP = IntStream.range(0, DEVIATION_REASON.length-1).boxed().collect(Collectors.toMap(x -> DEVIATION_REASON[x], x -> x/3 +1));
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DPText.DATE_FORMAT);
@@ -318,8 +325,16 @@ public class DailyPerformanceCorrectionProcessor {
 		// アルゴリズム「社員の日別実績の権限をすべて取得する」を実行する | Execute "Acquire all permissions of
 		// ログイン社員の日別実績の権限を取得する(Lấy tất cả quyền về 日別実績 của nhân viên)
 		screenDto.setAuthorityDto(getAuthority(screenDto));
-		
+
 		//保持パラメータを生成する(Tạo retentionParam-Param lưu giữ )
+		
+		// 社員に対応する処理締めを取得する
+		if (closureId == null) {
+			screenDto.setClosureId(getClosureId(companyId, sId, GeneralDate.today()));
+		} else {
+			screenDto.setClosureId(closureId);
+		}
+
 		//<<Public>> パラメータに初期値を設定する
 		///期間を変更する
 		dateRange = changeDateRange(dateRange, objectShare, companyId, sId, screenDto, mode);
@@ -334,12 +349,6 @@ public class DailyPerformanceCorrectionProcessor {
 		}
 		screenDto.setDateRange(dateRange);
 		
-		//社員に対応する処理締めを取得する
-		if(closureId == null) {
-			screenDto.setClosureId(getClosureId(companyId, sId, GeneralDate.today()));
-		}else {
-			screenDto.setClosureId(closureId);
-		}
 		/// 社員一覧を変更する -- Lấy nhân viên từ màn hinh khác hoặc lấy từ lần khởi động đầu tiên
 		List<String> changeEmployeeIds = new ArrayList<>();
 		if (lstEmployee.isEmpty()) {
@@ -1958,35 +1967,34 @@ public class DailyPerformanceCorrectionProcessor {
 			screenDto.setEmploymentCode(getEmploymentCode(companyId, dateRange.getEndDate(), sId));
 			return dateRange;
 		} else {
-
 			GeneralDate dateRefer = GeneralDate.today();
 			if (isObjectShare && objectShare.getInitClock() != null) {
+				// <<Public>> SPR日報から起動する
 				dateRefer = objectShare.getEndDate();
-			}
-            
-			screenDto.setEmploymentCode( getEmploymentCode(companyId, dateRefer, sId));
-			Optional<ClosureEmployment> closureEmploymentOptional = this.closureEmploymentRepository
-					.findByEmploymentCD(companyId, screenDto.getEmploymentCode());
-
-			if (closureEmploymentOptional.isPresent()) {
-				//screenDto.setClosureId(closureEmploymentOptional.get().getClosureId());
-				Optional<PresentClosingPeriodExport> closingPeriod = (isObjectShare
-						&& objectShare.getInitClock() != null)
-								? shClosurePub.find(companyId, closureEmploymentOptional.get().getClosureId(),
-										dateRefer)
-								: shClosurePub.find(companyId, closureEmploymentOptional.get().getClosureId());
-				if (closingPeriod.isPresent()) {
+				screenDto.setEmploymentCode(getEmploymentCode(companyId, dateRefer, sId));
+				Optional<ClosureEmployment> closureEmploymentOptional = this.closureEmploymentRepository
+						.findByEmploymentCD(companyId, screenDto.getEmploymentCode());
+				if (closureEmploymentOptional.isPresent()) {
+					// screenDto.setClosureId(closureEmploymentOptional.get().getClosureId());
+					Optional<PresentClosingPeriodExport> closingPeriod = (isObjectShare
+							&& objectShare.getInitClock() != null)
+									? shClosurePub.find(companyId, closureEmploymentOptional.get().getClosureId(),
+											dateRefer)
+									: shClosurePub.find(companyId, closureEmploymentOptional.get().getClosureId());
 					dateRange = new DateRange(closingPeriod.get().getClosureStartDate(),
 							closingPeriod.get().getClosureEndDate());
-					//システム日付を含む期間に変更する（暫定処理）
-					if(!dateRange.inRange(GeneralDate.today())) {
-						//Delay the parameter "Status of daily achievement correction. Period covered" by 1 month
-						return dateRange.changeMonth(+1);
-					}
 					return dateRange;
 				}
+			} else {
+				InitSwitchSetDto initSwitch = initSwitchSetAdapter.targetDateFromLogin();
+				if(initSwitch != null &&  !CollectionUtil.isEmpty(initSwitch.getListDateProcessed())) {
+					Optional<DateProcessedRecord> dateRecordOpt = initSwitch.getListDateProcessed().stream().filter(x -> x.getClosureID() == screenDto.getClosureId()).findFirst();
+					if(dateRecordOpt.isPresent() && dateRecordOpt.get().getDatePeriod() != null) {
+						return new DateRange(dateRecordOpt.get().getDatePeriod().start(), dateRecordOpt.get().getDatePeriod().end());
+					}
+				}
 			}
-
+            
 			return new DateRange(GeneralDate.legacyDate(new Date()).addMonths(-1).addDays(+1),
 					GeneralDate.legacyDate(new Date()));
 		}
