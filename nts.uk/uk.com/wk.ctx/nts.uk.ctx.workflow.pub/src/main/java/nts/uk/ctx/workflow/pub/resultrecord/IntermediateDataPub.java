@@ -281,4 +281,14 @@ public interface IntermediateDataPub {
 	 * @param confirmDeleteParamLst
 	 */
 	public void deleteRootConfirmMonth(String employeeID, List<ConfirmDeleteParam> confirmDeleteParamLst);
+	
+	/**
+	 * RequestList 610
+	 * [No.610]基準社員から指定期間の対象者を取得する
+	 * @param approverID
+	 * @param period
+	 * @param rootType
+	 * @return
+	 */
+	public List<String> findEmpRequest610(String approverID, DatePeriod period, Integer rootType);
 }
