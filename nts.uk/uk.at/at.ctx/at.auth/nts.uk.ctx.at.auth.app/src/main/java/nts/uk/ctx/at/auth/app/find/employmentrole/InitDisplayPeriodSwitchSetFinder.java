@@ -60,11 +60,10 @@ public class InitDisplayPeriodSwitchSetFinder {
 			// 社員に対応する処理締めを取得する
 			Closure closure = this.closureService.getClosureDataByEmployee(employeeID, systemDate);
 			// 当月・翌月を判断する
-			int endDate = listClosureInfo.stream().filter(x -> x.getClosureId().value == closure.getClosureId().value)
-					.findFirst().get().getPeriod().end().day();
+			GeneralDate endDate = listClosureInfo.stream().filter(x -> x.getClosureId().value == closure.getClosureId().value)
+					.findFirst().get().getPeriod().end();
 			int switchDate = optDisSwitchSet.get().getDay();
-
-			if (endDate + switchDate <= systemDate.day()) {
+			if (endDate.addDays(switchDate).beforeOrEquals(systemDate)) {
 				for (ClosureInfo item : listClosureInfo) {
 					DatePeriod datePeriod = closureService.getClosurePeriod(item.getClosureId().value,
 							item.getCurrentMonth().addMonths(1));
@@ -76,30 +75,6 @@ public class InitDisplayPeriodSwitchSetFinder {
 			} else {
 				data = new InitDisplayPeriodSwitchSetDto(1, listDateProcessed);
 			}
-
-			// for(ClosureInfo item : listClosureInfo){
-			// int endDate = item.getPeriod().end().day();
-			// int switchDate = optDisSwitchSet.get().getDay();
-			// if(endDate + switchDate <= systemDate.day()){
-			// /** 取得した締め情報をループする **/
-			// /** Chỗ này EA đang lấy Closure nhưng có vẻ ko đúng
-			// * Đang lấy theo Closure Info - Hieu LT
-			// */
-			// /**DatePeriod getClosurePeriod(int closureId, YearMonth
-			// processingYm); */
-			// DatePeriod datePeriod =
-			// closureService.getClosurePeriod(item.getClosureId().value,
-			// item.getCurrentMonth().addMonths(1));
-			// DateProcessed endDateNextMonth = new
-			// DateProcessed(item.getClosureId().value,
-			// item.getCurrentMonth().addMonths(1), datePeriod);
-			// listDate.add(endDateNextMonth);
-			// data = new InitDisplayPeriodSwitchSetDto(2, listDate);
-			// }
-			// else{
-			// data = new InitDisplayPeriodSwitchSetDto(1, listDateProcessed);
-			// }
-			// }
 			return data;
 		}
 	}
