@@ -844,6 +844,7 @@ public class AggregateMonthlyRecordServiceProc {
 			// 計画所定労働日数（任意項目69：大塚カスタマイズ）
 			if (optionalItemNo == 69) {
 				AnyItemAggrResult anyItem69Result = this.getPredWorkingDays(period);
+				results.put(optionalItemNo, anyItem69Result);
 				anyItems.add(AnyItemOfMonthly.of(
 						this.employeeId, this.yearMonth, this.closureId, this.closureDate, anyItem69Result));
 				continue;
