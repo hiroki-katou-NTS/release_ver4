@@ -93,6 +93,9 @@ module nts.uk.at.view.ktg029.a.viewmodel {
             }            
             new service.Service().getOptionalWidgetDisplay(topPagePartCode).done(function(data: any){
                 if(data!=null){
+                    if(data.currentorNext == 2){
+                        self.switchDate(false);
+                    }
                     self.excuteDisplay(data.optionalWidgetImport);
                     self.excuteDate(data.datePeriodDto);
                     self.switchMonth();
