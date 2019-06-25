@@ -355,8 +355,8 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			}
 			
 			Optional<AnyItemValue> no18 = optionalItem.getNo(18);
-			MutableValue<Boolean> flag19 = new MutableValue<>(false), flag21 = new MutableValue<>(false), flag37 = new MutableValue<>(false),
-					flag35 = new MutableValue<>(false), flag36 = new MutableValue<>(false);
+			MutableValue<Integer> flag19 = new MutableValue<>(0), flag21 = new MutableValue<>(0), flag37 = new MutableValue<>(0);
+			MutableValue<Boolean> flag35 = new MutableValue<>(false), flag36 = new MutableValue<>(false);
 			
 			if(d.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
 				if(!predSet.isPresent()) {
@@ -387,32 +387,43 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 					if(d.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
 						int scheWorkAtten = d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).getAttendance().valueAsMinutes();
 						int scheWorkLeave = d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).getLeaveWork().valueAsMinutes();
-						if(startTime != null && endTime != null) {
-							if(startTime >= scheWorkAtten && endTime <= scheWorkLeave) {
-								flag19.set(true);
+						if(startTime != null) {
+							if(startTime >= scheWorkAtten) {
+								flag19.set(flag19.get() + 1);
 							}
-							if(startTime < scheWorkAtten && endTime > scheWorkLeave) {
-								flag21.set(true);
+							if(startTime < scheWorkAtten) {
+								flag21.set(flag21.get() + 1);
+							}
+						}
+						if(endTime != null) {
+							if(endTime <= scheWorkLeave) {
+								flag19.set(flag19.get() + 1);
+							}
+							if(endTime > scheWorkLeave) {
+								flag21.set(flag21.get() + 1);
 							}
 						}
 					}
 				} else {
 					Optional<AnyItemValue> no35 = optionalItem.getNo(35), no36 = optionalItem.getNo(36);
-					if (no35.get().getTimes().get().v().equals(COUNT_ON) || no36.get().getTimes().get().v().equals(COUNT_ON)) {
-						flag37.set(true);
+					if (no35.get().getTimes().get().v().equals(COUNT_ON)) {
+						flag37.set(flag37.get() + 1);
+					}
+					if(no36.get().getTimes().get().v().equals(COUNT_ON)) {
+						flag37.set(flag37.get() + 1);
 					}
 				}
 				
 			} 
 			
 			/** 任意項目19 */
-			processOptionalItem(() -> flag19.get(), optionalItem, COUNT_ON, COUNT_OFF, 19);
+			processOptionalItem(() -> flag19.get() > 0, optionalItem, BigDecimal.valueOf(flag19.get()), COUNT_OFF, 19);
 			
 			/** 任意項目21 */
-			processOptionalItem(() -> flag21.get(), optionalItem, COUNT_ON, COUNT_OFF, 21);
+			processOptionalItem(() -> flag21.get() > 0, optionalItem, BigDecimal.valueOf(flag21.get()), COUNT_OFF, 21);
 			
 			/** 任意項目37 */
-			processOptionalItem(() -> flag37.get(), optionalItem, COUNT_ON, COUNT_OFF, 37);
+			processOptionalItem(() -> flag37.get() > 0, optionalItem, BigDecimal.valueOf(flag37.get()), COUNT_OFF, 37);
 			
 			if(d.getAnyItemValue().get().getItems().isEmpty()){
 				d.setAnyItemValue(Optional.empty());
