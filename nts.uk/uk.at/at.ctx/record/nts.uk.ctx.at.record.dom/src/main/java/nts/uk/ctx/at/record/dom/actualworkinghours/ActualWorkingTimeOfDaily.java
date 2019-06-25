@@ -499,18 +499,18 @@ public class ActualWorkingTimeOfDaily {
 			if((calcResultOotsuka.getActualTime().greaterThan(60*8))) {
 				if(workType.isPresent()) {
 					int divergenceTime = 0;
-					//出退勤取得
-					TimeSpanForCalc attendanceLeave = new TimeSpanForCalc(new TimeWithDayAttr(0), new TimeWithDayAttr(0));
-					if(integrationOfDailyInDto.getAttendanceLeave().isPresent()) {
-						val attendanceTimeByWorkNo = integrationOfDailyInDto.getAttendanceLeave().get().getAttendanceLeavingWork(1);
-						if(attendanceTimeByWorkNo.isPresent()) {
-							attendanceLeave = attendanceTimeByWorkNo.get().getTimespan();
-						}
-					}
-					if(breakTimeSheet.isPresent()) {
-						List<BreakTimeSheet> bt = containsBreakTime(attendanceLeave, Arrays.asList(breakTimeSheet.get()));
-						breakTime = bt.stream().collect(Collectors.summingInt(tc -> tc.getEndTime().valueAsMinutes() - tc.getStartTime().valueAsMinutes()));
-					}
+//					//出退勤取得
+//					TimeSpanForCalc attendanceLeave = new TimeSpanForCalc(new TimeWithDayAttr(0), new TimeWithDayAttr(0));
+//					if(integrationOfDailyInDto.getAttendanceLeave().isPresent()) {
+//						val attendanceTimeByWorkNo = integrationOfDailyInDto.getAttendanceLeave().get().getAttendanceLeavingWork(1);
+//						if(attendanceTimeByWorkNo.isPresent()) {
+//							attendanceLeave = attendanceTimeByWorkNo.get().getTimespan();
+//						}
+//					}
+//					if(breakTimeSheet.isPresent()) {
+//						List<BreakTimeSheet> bt = containsBreakTime(attendanceLeave, Arrays.asList(breakTimeSheet.get()));
+//						breakTime = bt.stream().collect(Collectors.summingInt(tc -> tc.getEndTime().valueAsMinutes() - tc.getStartTime().valueAsMinutes()));
+//					}
 					if(workType.get().getDailyWork().isHolidayWork()) {
 						divergenceTime = calcResultOotsuka.getBreakTimeOfDaily().getToRecordTotalTime().getExcessOfStatutoryTotalTime().getCalcTime().valueAsMinutes()
 													- breakTime;
