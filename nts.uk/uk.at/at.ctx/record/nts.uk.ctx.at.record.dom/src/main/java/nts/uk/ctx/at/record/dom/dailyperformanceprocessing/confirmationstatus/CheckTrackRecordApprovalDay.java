@@ -11,7 +11,6 @@ import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApprovalRootOfEmployeeImport;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
@@ -68,11 +67,12 @@ public class CheckTrackRecordApprovalDay {
 				continue;
 			DatePeriod checkPeriod = mergeDatePeriod(lstClosureHist);
 			// 対応するImported「基準社員の承認対象者」を取得する
-			ApprovalRootOfEmployeeImport approvalImport = approvalStatusAdapter
-					.getApprovalRootOfEmloyeeNew(checkPeriod.start(), checkPeriod.end(), employeeId, companyId, 1);
-			if (approvalImport == null)
-				continue;
-			List<String> listEmp =  approvalImport.getApprovalRootSituations().stream().map(x -> x.getTargetID()).distinct().collect(Collectors.toList());
+//			ApprovalRootOfEmployeeImport approvalImport = approvalStatusAdapter
+//					.getApprovalRootOfEmloyeeNew(checkPeriod.start(), checkPeriod.end(), employeeId, companyId, 1);
+//			if (approvalImport == null)
+//				continue;
+			//[No.610]基準社員から指定期間の対象者を取得する
+			List<String> listEmp =  approvalStatusAdapter.findEmpRequest610(employeeId, checkPeriod, 1).stream().distinct().collect(Collectors.toList());
 			for (String approvalRoot : listEmp) {
 
 				// 集計期間

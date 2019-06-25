@@ -208,4 +208,13 @@ public interface ApprovalStatusAdapter {
 	public void deleteRootConfirmDay(String employeeID, GeneralDate date);
 	
 	public void deleteRootConfirmMonth(String employeeID, List<ConfirmDeleteParamImport> confirmDeleteParamLst);
+	
+	/**
+	 * [No.610]基準社員から指定期間の対象者を取得する
+	 * @param approverID
+	 * @param period
+	 * @param rootType
+	 * @return
+	 */
+	public List<String> findEmpRequest610(String approverID, DatePeriod period, Integer rootType);
 }

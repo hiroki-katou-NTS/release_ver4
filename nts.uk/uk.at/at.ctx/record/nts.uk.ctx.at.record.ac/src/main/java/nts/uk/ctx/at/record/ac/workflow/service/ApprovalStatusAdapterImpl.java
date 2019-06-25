@@ -324,4 +324,9 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 						.map(x -> new ConfirmDeleteParam(x.getYearMonth(), x.getClosureID(), x.getClosureDate()))
 						.collect(Collectors.toList()));
 	}
+
+	@Override
+	public List<String> findEmpRequest610(String approverID, DatePeriod period, Integer rootType) {
+		return intermediateDataPub.findEmpRequest610(approverID, period, rootType);
+	}
 }
