@@ -1865,10 +1865,13 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             }
 
             service.loadRow(param).done((data) => {
+                
                 if (onlyLoadMonth && errorFlex == false) {
                     self.processFlex(data, true);
                     nts.uk.ui.block.clear();
                     return dfd.resolve();
+                }else if(onlyLoadMonth && errorFlex == true){
+                     return dfd.resolve();
                 }
                 self.showTighProcess(data.showTighProcess);
                 self.indentityMonth(data.indentityMonthResult);
