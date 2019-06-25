@@ -16,4 +16,5 @@ public class PerformDataRecoveryCommand {
 	private List<RecoveryCategoryCommand> recoveryCategoryList;
 	private String recoveryFile;
 	private int recoveryMethodOptions;
+	private String store_del_ProcessingId;
 }

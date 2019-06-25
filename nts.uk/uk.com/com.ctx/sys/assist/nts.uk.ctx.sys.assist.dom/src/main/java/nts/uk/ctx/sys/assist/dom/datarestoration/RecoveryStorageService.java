@@ -37,7 +37,10 @@ import nts.uk.ctx.sys.assist.dom.category.StorageRangeSaved;
 import nts.uk.ctx.sys.assist.dom.categoryfordelete.CategoryForDelete;
 import nts.uk.ctx.sys.assist.dom.categoryfordelete.CategoryForDeleteRepository;
 import nts.uk.ctx.sys.assist.dom.datarestoration.common.CsvFileUtil;
-import nts.uk.ctx.sys.assist.dom.deletedata.CategoryDeletion;
+import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletion;
+import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletionRepository;
+import nts.uk.ctx.sys.assist.dom.storage.ResultOfSaving;
+import nts.uk.ctx.sys.assist.dom.storage.ResultOfSavingRepository;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 
@@ -74,6 +77,12 @@ public class RecoveryStorageService {
 	
 	@Inject
 	private ProcessRecoverListTblByCompanyHandle processRecoverListTblByCompanyHandle;
+	
+	@Inject
+	private ResultOfSavingRepository resultOfSavingRepo;
+	
+	@Inject
+	private ResultDeletionRepository resultDeletionRepo;
 
 	@PostConstruct
 	public void init() {
@@ -130,7 +139,7 @@ public class RecoveryStorageService {
 		datetimeRange.put(YEAR, 4);
 	}
 
-	public void recoveryStorage(String dataRecoveryProcessId) throws Exception {
+	public void recoveryStorage(String dataRecoveryProcessId,String store_del_ProcessingId) throws Exception {
 		NUMBER_ERROR = 0;
 		Optional<PerformDataRecovery> performRecoveries = performDataRecoveryRepository
 				.getPerformDatRecoverById(dataRecoveryProcessId);
@@ -140,6 +149,11 @@ public class RecoveryStorageService {
 		
 		List<CategoryForDelete> listCategoryDel = categoryForDeleteRepository.findById(dataRecoveryProcessId, SELECTION_TARGET_FOR_RES);
 
+		// start : code doan nay khong co trong EA
+		Optional<ResultOfSaving> saveOpt =  resultOfSavingRepo.getResultOfSavingById(store_del_ProcessingId);
+		Optional<ResultDeletion> delOpt  = resultDeletionRepo.getResultDeletionById(store_del_ProcessingId);
+		// end
+		
 		Optional<DataRecoveryMng> dataRecoveryMng = dataRecoveryMngRepository
 				.getDataRecoveryMngById(dataRecoveryProcessId);
 		if (dataRecoveryMng.isPresent() && dataRecoveryMng.get().getSuspendedState() == NotUseAtr.USE) {
@@ -164,7 +178,7 @@ public class RecoveryStorageService {
 		saveLogDataRecoverServices.saveStartDataRecoverLog(dataRecoveryProcessId);
 
 		// 処理対象のカテゴリを処理する
-		if (!listCategory.isEmpty()) {
+		if (!listCategory.isEmpty() && saveOpt.isPresent()) {
 			for (Category category : listCategory) {
 
 				List<TableList> tableUse = performDataRecoveryRepository.getByStorageRangeSaved(
@@ -188,9 +202,8 @@ public class RecoveryStorageService {
 			}
 		}
 		
-		if (!listCategoryDel.isEmpty()) {
+		if (!listCategoryDel.isEmpty() && delOpt.isPresent()) {
 			for (CategoryForDelete categoryForDel : listCategoryDel) {
-
 				List<TableList> tableUse = performDataRecoveryRepository.getByStorageRangeSaved(
 						categoryForDel.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.EARCH_EMP);
 				List<TableList> tableNotUse = performDataRecoveryRepository.getByStorageRangeSaved(
