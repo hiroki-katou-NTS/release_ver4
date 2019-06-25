@@ -130,14 +130,14 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			" AND appRoot.END_DATE >= 'recordDate'";
 	
 	private final String FIND_EMP_RQ610 = 
-			" BASIC_SELECT"+
+			BASIC_SELECT+
 			" WHERE appApprover.APPROVER_CHILD_ID = 'approverID'"+
 			" AND appRoot.CID = 'companyID'"+
 			" AND appRoot.ROOT_TYPE = rootType"+
 			" AND appRoot.END_DATE >= 'startDate'"+
 			" AND appRoot.START_DATE <= 'endDate'"+
-			" UNION"+
-			" BASIC_SELECT"+
+			" UNION "+
+			BASIC_SELECT+
 			" WHERE appApprover.APPROVER_CHILD_ID IN"+
 			" (SELECT c.SID FROM CMMMT_AGENT c where c.AGENT_SID1 = 'approverID' and c.START_DATE <= 'sysDate' and c.END_DATE >= 'sysDate')"+
 			" AND appRoot.CID = 'companyID'"+
