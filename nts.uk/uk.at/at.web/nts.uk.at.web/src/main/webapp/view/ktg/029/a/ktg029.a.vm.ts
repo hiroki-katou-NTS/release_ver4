@@ -236,7 +236,7 @@ module nts.uk.at.view.ktg029.a.viewmodel {
                 } 
                 self.txtDatePeriod(strMonth+'/'+strDay+getText('KTG029_3')+endMonth+'/'+endDay+getText('KTG029_5'));
                 self.getInfor(code, self.currentMonth().strMonth, self.currentMonth().endMonth);
-                self.btnSwitch(getText('KTG029_8'));
+                self.btnSwitch(getText('KTG029_7'));
                 self.switchDate(false);
             }else{
                 var strMonth = self.nextMonth().strMonth.getMonth()+1;
@@ -257,7 +257,7 @@ module nts.uk.at.view.ktg029.a.viewmodel {
                 } 
                 self.txtDatePeriod(strMonth+'/'+strDay+getText('KTG029_3')+endMonth+'/'+endDay+getText('KTG029_5'));
                 self.getInfor(code, self.nextMonth().strMonth, self.nextMonth().endMonth);
-                self.btnSwitch(getText('KTG029_7'));
+                self.btnSwitch(getText('KTG029_8'));
                 self.switchDate(true);
             }
         }
