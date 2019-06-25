@@ -1986,6 +1986,7 @@ public class DailyPerformanceCorrectionProcessor {
 					return dateRange;
 				}
 			} else {
+				screenDto.setEmploymentCode(getEmploymentCode(companyId, dateRefer, sId));
 				InitSwitchSetDto initSwitch = initSwitchSetAdapter.targetDateFromLogin();
 				if(initSwitch != null &&  !CollectionUtil.isEmpty(initSwitch.getListDateProcessed())) {
 					Optional<DateProcessedRecord> dateRecordOpt = initSwitch.getListDateProcessed().stream().filter(x -> x.getClosureID() == screenDto.getClosureId()).findFirst();
