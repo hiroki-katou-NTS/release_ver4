@@ -169,13 +169,7 @@ public class OptionalWidgetKtgFinder {
 		// request list 609 Enum 当月 = 1 翌月 = 2
 		int currentorNext = initDisplayPeriodSwitchSetFinder.targetDateFromLogin().getCurrentOrNextMonth();
 		OptionalWidgetImport optionalWidgetImport = findOptionalWidgetByCode(topPagePartCode);
-		if(currentorNext == 1){
-			return new OptionalWidgetDisplay(datePeriodDto, optionalWidgetImport, 1);
-		}else{
-			DatePeriodDto dateChange = new DatePeriodDto(datePeriodDto.getStrNextMonth(), datePeriodDto.getEndNextMonth(), 
-														datePeriodDto.getStrCurrentMonth(), datePeriodDto.getEndCurrentMonth());
-			return new OptionalWidgetDisplay(dateChange, optionalWidgetImport, 2);
-		}
+		return new OptionalWidgetDisplay(datePeriodDto, optionalWidgetImport, currentorNext);
 	}
 	
 	
