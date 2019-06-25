@@ -170,11 +170,11 @@ public class OptionalWidgetKtgFinder {
 		int currentorNext = initDisplayPeriodSwitchSetFinder.targetDateFromLogin().getCurrentOrNextMonth();
 		OptionalWidgetImport optionalWidgetImport = findOptionalWidgetByCode(topPagePartCode);
 		if(currentorNext == 1){
-			return new OptionalWidgetDisplay(datePeriodDto, optionalWidgetImport);
+			return new OptionalWidgetDisplay(datePeriodDto, optionalWidgetImport, 1);
 		}else{
 			DatePeriodDto dateChange = new DatePeriodDto(datePeriodDto.getStrNextMonth(), datePeriodDto.getEndNextMonth(), 
 														datePeriodDto.getStrCurrentMonth(), datePeriodDto.getEndCurrentMonth());
-			return new OptionalWidgetDisplay(dateChange, optionalWidgetImport);
+			return new OptionalWidgetDisplay(dateChange, optionalWidgetImport, 2);
 		}
 	}
 	
