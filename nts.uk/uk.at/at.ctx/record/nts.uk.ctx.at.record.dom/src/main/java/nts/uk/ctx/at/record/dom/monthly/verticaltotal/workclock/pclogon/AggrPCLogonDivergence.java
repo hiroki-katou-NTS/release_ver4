@@ -127,7 +127,7 @@ public class AggrPCLogonDivergence {
 		if (logonMinutes > 0) this.totalTime = this.totalTime.addMinutes(logonMinutes);
 		
 		// 日数を集計する
-		if (stayingTime.getBeforePCLogOnTime().valueAsMinutes() != 0) this.days = this.days.addDays(1.0);
+		this.days = this.days.addDays(1.0);
 		
 		// 平均時間を計算する
 		this.averageTime = new AttendanceTimeMonth(0);
@@ -189,7 +189,7 @@ public class AggrPCLogonDivergence {
 			
 			// 所定時間内の退勤の場合、対象外
 			int timezoneUseEndMinutes = timezoneUse.getEnd().valueAsMinutes();
-			if (leaveMinutes <= timezoneUseEndMinutes) return;
+			if (leaveMinutes < timezoneUseEndMinutes) return;
 		}
 
 		// 合計時間を集計
