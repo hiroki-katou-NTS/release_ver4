@@ -11,4 +11,6 @@ public class OptionalWidgetDisplay {
 	private DatePeriodDto datePeriodDto;
 	
 	private OptionalWidgetImport optionalWidgetImport;
+	// 0: current month; 1: next month
+	private int currentorNext;
 }
