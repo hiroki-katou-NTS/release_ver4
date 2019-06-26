@@ -149,7 +149,7 @@ public class RecoveryStorageService {
 		
 		List<CategoryForDelete> listCategoryDel = categoryForDeleteRepository.findById(dataRecoveryProcessId, SELECTION_TARGET_FOR_RES);
 
-		// start : code doan nay khong co trong EA
+		// start : code doan nay khong co trong EA (xác định xem restore file từ màn cmf003, hay cmf005)
 		Optional<ResultOfSaving> saveOpt =  resultOfSavingRepo.getResultOfSavingById(store_del_ProcessingId);
 		Optional<ResultDeletion> delOpt  = resultDeletionRepo.getResultDeletionById(store_del_ProcessingId);
 		// end
@@ -178,7 +178,7 @@ public class RecoveryStorageService {
 		saveLogDataRecoverServices.saveStartDataRecoverLog(dataRecoveryProcessId);
 
 		// 処理対象のカテゴリを処理する
-		if (!listCategory.isEmpty() && saveOpt.isPresent()) {
+		if (!listCategory.isEmpty()) {
 			for (Category category : listCategory) {
 
 				List<TableList> tableUse = performDataRecoveryRepository.getByStorageRangeSaved(
@@ -202,7 +202,7 @@ public class RecoveryStorageService {
 			}
 		}
 		
-		if (!listCategoryDel.isEmpty() && delOpt.isPresent()) {
+		/*if (!listCategoryDel.isEmpty() && delOpt.isPresent()) {
 			for (CategoryForDelete categoryForDel : listCategoryDel) {
 				List<TableList> tableUse = performDataRecoveryRepository.getByStorageRangeSaved(
 						categoryForDel.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.EARCH_EMP);
@@ -223,7 +223,9 @@ public class RecoveryStorageService {
 				numberCateSucess++;
 				dataRecoveryMngRepository.updateCategoryCnt(dataRecoveryProcessId, numberCateSucess);
 			}
-		}
+		}*/
+		
+		
 
 		if (condition == DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS) {
 			dataRecoveryMngRepository.updateByOperatingCondition(dataRecoveryProcessId,
