@@ -437,11 +437,11 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			if (hasParentTblFlg && !StringUtils.isBlank(whereCid) && !StringUtils.isBlank(cid)) {
 				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereCid).append(" = '").append(cid)
 						.append("'");
-			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
+			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereCid) && !StringUtils.isBlank(cid)) {
 				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereCid).append(" = '").append(cid)
 						.append("'");
 			}
-
+			System.out.println("QUERY:  " + DELETE_BY_TABLE_SQL.toString());
 			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
 			query.executeUpdate();
 		}
@@ -581,11 +581,13 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			if (hasParentTblFlg && !StringUtils.isBlank(whereCid) && !StringUtils.isBlank(cid)) {
 				DELETE_BY_TABLE_SQL.append(" AND ").append(" p.").append(whereCid).append(" = '").append(cid)
 						.append("'");
-			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereSid) && !StringUtils.isBlank(employeeId)) {
+			} else if (!hasParentTblFlg && !StringUtils.isBlank(whereCid) && !StringUtils.isBlank(cid)) {
 				DELETE_BY_TABLE_SQL.append(" AND ").append(" t.").append(whereCid).append(" = '").append(cid)
 						.append("'");
 			}
-
+			
+			System.out.println("QUERY:  " + DELETE_BY_TABLE_SQL.toString());
+			
 			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
 			query.executeUpdate();
 		}
