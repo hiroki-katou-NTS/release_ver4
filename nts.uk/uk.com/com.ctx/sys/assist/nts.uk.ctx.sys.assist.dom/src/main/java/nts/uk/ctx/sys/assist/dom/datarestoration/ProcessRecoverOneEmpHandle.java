@@ -69,7 +69,6 @@ public class ProcessRecoverOneEmpHandle {
 	public static final Integer INDEX_H_DATE = 2;
 
 	public static final Integer INDEX_H_START_DATE = 3;
-	public static Integer NUMBER_ERROR = 0;
 	
 	public static final String SQL_EXCEPTION = "113";
 
@@ -103,6 +102,7 @@ public class ProcessRecoverOneEmpHandle {
 		
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 		String errorCode = "";
+		int NUMBER_ERROR = 0;
 
 		HashMap<String, CSVBufferReader> csvByteReadMaper_TableUse = new HashMap<>();
 		List<DataRecoveryTable> parentTables = new ArrayList<>();

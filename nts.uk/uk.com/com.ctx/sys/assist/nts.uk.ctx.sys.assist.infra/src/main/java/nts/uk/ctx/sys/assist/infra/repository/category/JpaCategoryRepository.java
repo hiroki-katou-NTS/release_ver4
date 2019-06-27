@@ -3,6 +3,8 @@ package nts.uk.ctx.sys.assist.infra.repository.category;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
@@ -52,6 +54,7 @@ public class JpaCategoryRepository extends JpaRepository implements CategoryRepo
 	
 	private static final String SELECT_BY_ID = "SELECT f FROM SspmtCategory f WHERE f.categoryId IN ( SELECT t.tableListPk.categoryId FROM SspmtTableList t WHERE  t.dataRecoveryProcessId =:storeProcessingId AND t.selectionTargetForRes =:selectionTargetForRes )";
 	
+	private static final String GET_LIST_CATEGORYID = "SELECT t.tableListPk.categoryId FROM SspmtTableList t WHERE  t.dataRecoveryProcessId =:storeProcessingId AND t.selectionTargetForRes =:selectionTargetForRes ";
 
 	@Override
 	public List<Category> getAllCategory() {
@@ -246,6 +249,20 @@ public class JpaCategoryRepository extends JpaRepository implements CategoryRepo
 				.setParameter("storeProcessingId", storeProcessingId)
 				.setParameter("selectionTargetForRes", selectionTargetForRes)
 				.getList(c -> c.toDomain());
+	}
+	
+	@Override
+	public Set<String> getListCategoryId(String storeProcessingId, int selectionTargetForRes) {
+		List<Object> objects =  this.queryProxy().query(GET_LIST_CATEGORYID, Object.class)
+				.setParameter("storeProcessingId", storeProcessingId)
+				.setParameter("selectionTargetForRes", selectionTargetForRes)
+				.getQuery().getResultList();
+		 
+		return objects.stream().map(x -> {
+			Object values = (Object)x;
+			String ctgId = String.valueOf(values);
+			return ctgId;
+		}).collect(Collectors.toSet());
 	}
 
 }
