@@ -374,6 +374,10 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 							flag36.set(true);
 						}
 						
+						if(!flag35.get() && !flag36.get()) {
+							return;
+						}
+						
 						if(d.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
 							d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).ifPresent(scheTimeSheet -> {
 								int scheWorkAtten = scheTimeSheet.getAttendance().valueAsMinutes(),
