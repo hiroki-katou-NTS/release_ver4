@@ -443,7 +443,7 @@ module nts.uk.com.view.cmf003.b {
                 self.ccgcomponent = {
                     /** Common properties */
                     systemType: self.systemType(), // システム区分
-                    showEmployeeSelection: self.isSelectAllEmployee(), // 検索タイプ
+                    showEmployeeSelection: false, // 検索タイプ
                     showQuickSearchTab: self.isQuickSearchTab(), // クイック検索
                     showAdvancedSearchTab: self.isAdvancedSearchTab(), // 詳細検索
                     showBaseDate: self.showBaseDate(), // 基準日利用
