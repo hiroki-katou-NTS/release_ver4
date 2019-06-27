@@ -35,8 +35,10 @@ public class ServerPreparationService {
 	// アルゴリズム「サーバー準備処理」を実行する
 	@SuppressWarnings("unchecked")
 	public ServerPrepareMng serverPreparationProcessing(ServerPrepareMng serverPrepareMng) {
+		// アルゴリズム「ファイル解凍処理」を実行する
 		serverPrepareMng = dataExtractionService.extractData(serverPrepareMng);
 		if (checkNormalFile(serverPrepareMng)) {
+			// ドメインモデル「データ復旧の実行」に新規に書き出す
 			PerformDataRecovery performDataRecovery = new PerformDataRecovery(
 					serverPrepareMng.getDataRecoveryProcessId(), AppContexts.user().companyId(),
 					serverPrepareMng.getFileId().get(), serverPrepareMng.getUploadFileName().get());

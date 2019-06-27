@@ -1,9 +1,6 @@
 package nts.uk.ctx.sys.assist.infra.repository.tablelist;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +26,7 @@ import nts.uk.ctx.sys.assist.dom.saveprotetion.SaveProtetionRepository;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableListRepository;
 import nts.uk.ctx.sys.assist.infra.entity.tablelist.SspmtTableList;
+import nts.uk.ctx.sys.assist.infra.entity.tablelist.SspmtTableListPk;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 import nts.uk.shr.infra.file.csv.CSVReportGenerator;
@@ -48,10 +46,10 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 
 	@Inject
 	private SaveProtetionRepository saveProtetionRepo;
-	
-	@Inject 
+
+	@Inject
 	private CSVReportGenerator generator;
-	
+
 	private static final String CSV_EXTENSION = ".csv";
 
 	@Override
@@ -61,7 +59,39 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 
 	@Override
 	public void update(TableList domain) {
-		this.commandProxy().update(SspmtTableList.toEntity(domain));
+		this.commandProxy().update(SspmtTableList.toEntity(domain));		
+	}
+	
+	@Override
+	public void add2(TableList domain) {
+		// Get entity by key
+		Optional<SspmtTableList> entityOpt = this.queryProxy().find(
+				new SspmtTableListPk(domain.getCategoryId(), domain.getTableNo(), domain.getDataStorageProcessingId()),
+				SspmtTableList.class);
+		if (!entityOpt.isPresent()) {
+			this.commandProxy().insert(SspmtTableList.toEntity(domain));
+		}
+	}
+
+	@Override
+	public void update2(TableList domain) {
+		// Get entity by key
+		Optional<SspmtTableList> entityOpt = this.queryProxy().find(new SspmtTableListPk(domain.getCategoryId(), domain.getTableNo(), domain.getDataStorageProcessingId()),SspmtTableList.class);
+		if (entityOpt.isPresent()) {
+			SspmtTableList entity = entityOpt.get();
+			updateEntity(entity,domain);
+			this.commandProxy().update(entity);
+		}		
+	}
+
+	@Override
+	public void remove(TableList domain) {
+		// Get entity by key
+		Optional<SspmtTableList> entityOpt = this.queryProxy().find(new SspmtTableListPk(domain.getCategoryId(), domain.getTableNo(), domain.getDataStorageProcessingId()),SspmtTableList.class);
+		if (entityOpt.isPresent()) {
+			this.commandProxy().remove(SspmtTableList.class, new SspmtTableListPk(domain.getCategoryId(),
+					domain.getTableNo(), domain.getDataStorageProcessingId()));
+		}
 	}
 
 	@Override
@@ -124,42 +154,44 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 		if (tableList.getSurveyPreservation() == NotUseAtr.USE && !listSaveProtetion.isEmpty()) {
 			for (int i = 0; i < listSaveProtetion.size(); i++) {
 				String rePlaceCol = listSaveProtetion.get(i).getReplaceColumn().trim();
-				String pidCol     = listSaveProtetion.get(i).getCouplePidItemName().trim();
+				String pidCol = listSaveProtetion.get(i).getCouplePidItemName().trim();
 				String newValue = "";
 				// Vì domain không tạo Enum nên phải fix code ngu
 				if (listSaveProtetion.get(i).getCorrectClasscification() == 0) {
 					newValue = "'' AS " + rePlaceCol;
-				} 
+				}
 				if (listSaveProtetion.get(i).getCorrectClasscification() == 1) {
 					saveProtectionByEmpCode = true;
 					couplePidItemName = listSaveProtetion.get(i).getCouplePidItemName();
-					newValue = " bdm.SCD AS " +  rePlaceCol;
-				}  
+					newValue = " bdm.SCD AS " + rePlaceCol;
+				}
 				if (listSaveProtetion.get(i).getCorrectClasscification() == 2) {
 					newValue = "0 AS " + rePlaceCol;
-				}  
+				}
 				if (listSaveProtetion.get(i).getCorrectClasscification() == 3) {
 					newValue = "'0' AS " + rePlaceCol;
 				}
-				
+
 				String subString = "t." + rePlaceCol + ",";
 				if (query.indexOf(subString) > 0) {
-					query = new StringBuffer(query.toString().replaceAll("t." + rePlaceCol + ","  ,  newValue + ","));
+					query = new StringBuffer(query.toString().replaceAll("t." + rePlaceCol + ",", newValue + ","));
 				} else {
-					query = new StringBuffer(query.toString().replaceAll("t." + rePlaceCol,  newValue));
+					query = new StringBuffer(query.toString().replaceAll("t." + rePlaceCol, newValue));
 				}
-					
+
 			}
 		}
 
 		// From
 		query.append(" FROM ").append(tableList.getTableEnglishName()).append(" t");
-		if(saveProtectionByEmpCode){
-			
-			query.append(" LEFT JOIN (SELECT PID, MIN(SCD) AS SCD FROM BSYMT_EMP_DTA_MNG_INFO GROUP BY PID) bdm ON bdm.PID = t." + couplePidItemName);
-			
+		if (saveProtectionByEmpCode) {
+
+			query.append(
+					" LEFT JOIN (SELECT PID, MIN(SCD) AS SCD FROM BSYMT_EMP_DTA_MNG_INFO GROUP BY PID) bdm ON bdm.PID = t."
+							+ couplePidItemName);
+
 		}
-		
+
 		if (tableList.getHasParentTblFlg() == NotUseAtr.USE && tableList.getParentTblName().isPresent()) {
 			// アルゴリズム「親テーブルをJOINする」を実行する
 			query.append(" INNER JOIN ").append(tableList.getParentTblName().get()).append(" p ON ");
@@ -301,7 +333,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 					}
 
 					query.append(" <= ?endDate) ");
-					
+
 					// fix bug #103051
 					if ((indexs.size() > 1) && (i == indexs.size() - 1)
 							&& (tableList.getRetentionPeriodCls() == TimeStore.DAILY) && indexs.size() >= 2) {
@@ -338,7 +370,8 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 						params.put("endDate", tableList.getSaveDateTo().get() + " 23:59:59");
 						break;
 					case MONTHLY:
-						params.put("startDate", Integer.valueOf(tableList.getSaveDateFrom().get().replaceAll("\\/", "")));
+						params.put("startDate",
+								Integer.valueOf(tableList.getSaveDateFrom().get().replaceAll("\\/", "")));
 						params.put("endDate", Integer.valueOf(tableList.getSaveDateTo().get().replaceAll("\\/", "")));
 						break;
 					case ANNUAL:
@@ -357,7 +390,8 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 		// 抽出条件キー固定 - fix bug #108094
 		Optional<String> defaultCondKeyQuery = tableList.getDefaultCondKeyQuery();
 		if (defaultCondKeyQuery.isPresent()) {
-			if (defaultCondKeyQuery.get() != null && !"null".equals(defaultCondKeyQuery.get()) && !defaultCondKeyQuery.get().isEmpty()) {
+			if (defaultCondKeyQuery.get() != null && !"null".equals(defaultCondKeyQuery.get())
+					&& !defaultCondKeyQuery.get().isEmpty()) {
 				query.append(" AND " + tableList.getDefaultCondKeyQuery().get());
 			}
 		}
@@ -379,11 +413,13 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 
 			List<String> lSid = new ArrayList<>();
 			CollectionUtil.split(targetEmployeesSid, 100, subIdList -> {
-				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ","\\', '"));
+				lSid.add(subIdList.toString().replaceAll("\\[", "\\'").replaceAll("\\]", "\\'").replaceAll(", ",
+						"\\', '"));
 			});
 
 			CsvReportWriter csv = generator.generate(generatorContext, AppContexts.user().companyId()
-					+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3 , "UTF-8");
+					+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3,
+					"UTF-8");
 
 			for (String sid : lSid) {
 
@@ -397,7 +433,7 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 				for (Entry<String, Object> entry : params.entrySet()) {
 					queryString.setParameter(entry.getKey(), entry.getValue());
 				}
-				
+
 				List<Object[]> listObjs = new ArrayList<>();
 
 				while ((listObjs = queryString.setFirstResult(offset).setMaxResults(10000).getResultList())
@@ -409,12 +445,19 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 						int i = 0;
 						for (String columnName : headerCsv3) {
 							if (objects[i] instanceof BigDecimal) {
-								
-								BigDecimal value = ((BigDecimal) objects[i]); // the value you get
-								rowCsv.put(columnName, objects[i] != null ? "\"" + value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
-								
-							} else {								
-								rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");								
+
+								BigDecimal value = ((BigDecimal) objects[i]); // the
+																				// value
+																				// you
+																				// get
+								rowCsv.put(columnName,
+										objects[i] != null ? "\"" + value.toPlainString().replaceAll("\n", "\r\n")
+												.replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+
+							} else {
+								rowCsv.put(columnName,
+										objects[i] != null ? "\"" + String.valueOf(objects[i]).replaceAll("\n", "\r\n")
+												.replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
 							}
 							i++;
 						}
@@ -430,7 +473,8 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 			}
 
 			CsvReportWriter csv = generator.generate(generatorContext, AppContexts.user().companyId()
-					+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3 , "UTF-8");
+					+ tableList.getCategoryName() + tableList.getTableJapaneseName() + CSV_EXTENSION, headerCsv3,
+					"UTF-8");
 
 			List<Object[]> listObj = queryString.getResultList();
 			listObj.forEach(objects -> {
@@ -438,15 +482,20 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 				int i = 0;
 				for (String columnName : headerCsv3) {
 					if (objects[i] instanceof BigDecimal) {
-						
-						BigDecimal value = ((BigDecimal) objects[i]); // the value you get
-						
-						rowCsv.put(columnName, objects[i] != null ? "\"" +  value.toPlainString().replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
-						
+
+						BigDecimal value = ((BigDecimal) objects[i]); // the
+																		// value
+																		// you
+																		// get
+
+						rowCsv.put(columnName, objects[i] != null ? "\"" + value.toPlainString()
+								.replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+
 					} else {
-						
-						rowCsv.put(columnName, objects[i] != null ? "\"" +  String.valueOf(objects[i]).replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
-						
+
+						rowCsv.put(columnName, objects[i] != null ? "\"" + String.valueOf(objects[i])
+								.replaceAll("\n", "\r\n").replaceAll("\"", "\u00A0").replaceAll("'", "''") + "\"" : "");
+
 					}
 					i++;
 				}
@@ -469,4 +518,131 @@ public class JpaTableListRepository extends JpaRepository implements TableListRe
 		}).collect(Collectors.toList());
 
 	}
+	
+	private void updateEntity(SspmtTableList entity, TableList domain) {
+		entity.tableListPk.categoryId = domain.getCategoryId();
+		entity.tableListPk.tableNo    = domain.getTableNo(); 
+		entity.tableListPk.dataStorageProcessingId = domain.getDataStorageProcessingId();
+		entity.categoryName =  domain.getCategoryName();
+		entity.dataRecoveryProcessId = 	domain.getDataRecoveryProcessId().orElse(null);
+		entity.tableJapaneseName =		domain.getTableJapaneseName();
+		entity.tableEnglishName =		domain.getTableEnglishName();
+		entity.fieldAcqCid =		domain.getFieldAcqCid().orElse(null);
+		entity.fieldAcqDateTime = 		domain.getFieldAcqDateTime().orElse(null);
+		entity.fieldAcqEmployeeId =		domain.getFieldAcqEmployeeId().orElse(null);
+		entity.fieldAcqEndDate = 		domain.getFieldAcqEndDate().orElse(null);
+		entity.fieldAcqStartDate = 		domain.getFieldAcqStartDate().orElse(null);
+		entity.saveSetCode	=	domain.getSaveSetCode().orElse(null);
+		entity.saveSetName = 		domain.getSaveSetName();
+		entity.saveForm = domain.getSaveForm();
+		entity.saveDateFrom =		domain.getSaveDateFrom().orElse(null);
+		entity.saveDateTo =		domain.getSaveDateTo().orElse(null);
+		entity.storageRangeSaved =		domain.getStorageRangeSaved().value; 
+		entity.retentionPeriodCls =		domain.getRetentionPeriodCls().value;
+		entity.internalFileName =		domain.getInternalFileName();
+		entity.anotherComCls =		domain.getAnotherComCls().value;
+		entity.referenceYear =		domain.getReferenceYear().orElse(null);
+		entity.referenceMonth=		domain.getReferenceMonth().orElse(null);
+		entity.compressedFileName = 		domain.getCompressedFileName();
+		entity.fieldChild1 =	domain.getFieldChild1().orElse(null);
+		entity.fieldChild2 = 	domain.getFieldChild2().orElse(null);
+		entity.fieldChild3 =	domain.getFieldChild3().orElse(null);
+		entity.fieldChild4 =	domain.getFieldChild4().orElse(null);
+		entity.fieldChild5	=	domain.getFieldChild5().orElse(null);
+		entity.fieldChild6	=	domain.getFieldChild6().orElse(null);
+		entity.fieldChild7	=	domain.getFieldChild7().orElse(null);
+		entity.fieldChild8	=	domain.getFieldChild8().orElse(null);
+		entity.fieldChild9	=	domain.getFieldChild9().orElse(null); 
+		entity.fieldChild10	=	domain.getFieldChild10().orElse(null);
+		entity.historyCls   =	domain.getHistoryCls().value;
+		entity.	canNotBeOld =	domain.getCanNotBeOld().orElse(null);
+		entity.	selectionTargetForRes =	domain.getSelectionTargetForRes().orElse(null);
+		entity.clsKeyQuery1 =		domain.getClsKeyQuery1().orElse(null);
+		entity.clsKeyQuery2 =		domain.getClsKeyQuery2().orElse(null); 
+		entity.clsKeyQuery3 =		domain.getClsKeyQuery3().orElse(null);
+		entity.clsKeyQuery4 =	    domain.getClsKeyQuery4().orElse(null);
+		entity.clsKeyQuery5 =		domain.getClsKeyQuery5().orElse(null);
+		entity.clsKeyQuery6 =		domain.getClsKeyQuery6().orElse(null);
+		entity.clsKeyQuery7 =		domain.getClsKeyQuery7().orElse(null);
+		entity.clsKeyQuery8 =		domain.getClsKeyQuery8().orElse(null); 
+		entity.clsKeyQuery9 =		domain.getClsKeyQuery9().orElse(null);
+		entity.clsKeyQuery10 =		domain.getClsKeyQuery10().orElse(null); 
+		entity.fieldKeyQuery1 =	    domain.getFieldKeyQuery1().orElse(null);
+		entity.fieldKeyQuery2 =		domain.getFieldKeyQuery2().orElse(null); 
+		entity.fieldKeyQuery3 =		domain.getFieldKeyQuery3().orElse(null);
+		entity.fieldKeyQuery4 =		domain.getFieldKeyQuery4().orElse(null); 
+		entity.fieldKeyQuery5 =		domain.getFieldKeyQuery5().orElse(null);
+		entity.fieldKeyQuery6 =		domain.getFieldKeyQuery6().orElse(null);
+		entity.fieldKeyQuery7 =		domain.getFieldKeyQuery7().orElse(null);
+		entity.fieldKeyQuery8 =		domain.getFieldKeyQuery8().orElse(null); 
+		entity.fieldKeyQuery9 =		domain.getFieldKeyQuery9().orElse(null);
+		entity.fieldKeyQuery10 =	domain.getFieldKeyQuery10().orElse(null); 
+		entity.defaultCondKeyQuery =	domain.getDefaultCondKeyQuery().orElse(null);
+		entity.fieldDate1 =		domain.getFieldDate1().orElse(null);
+		entity.fieldDate2 =		domain.getFieldDate2().orElse(null);
+		entity.fieldDate3 =		domain.getFieldDate3().orElse(null); 
+		entity.fieldDate4 =		domain.getFieldDate4().orElse(null);
+		entity.fieldDate5 =		domain.getFieldDate5().orElse(null); 
+		entity.fieldDate6 =		domain.getFieldDate6().orElse(null);
+		entity.fieldDate7 =		domain.getFieldDate7().orElse(null);
+		entity.fieldDate8 =		domain.getFieldDate8().orElse(null);
+		entity.fieldDate9 =		domain.getFieldDate9().orElse(null); 
+		entity.fieldDate10 =	domain.getFieldDate10().orElse(null);
+		entity.fieldDate11 =	domain.getFieldDate11().orElse(null); 
+		entity.fieldDate12 =	domain.getFieldDate12().orElse(null);
+		entity.fieldDate13 =	domain.getFieldDate13().orElse(null);
+		entity.fieldDate14 =	domain.getFieldDate14().orElse(null);
+		entity.fieldDate15 =	domain.getFieldDate15().orElse(null);
+		entity.fieldDate16 =	domain.getFieldDate16().orElse(null);
+		entity.fieldDate17 =	domain.getFieldDate17().orElse(null);
+		entity.fieldDate18 = 	domain.getFieldDate18().orElse(null);
+		entity.fieldDate19 =	domain.getFieldDate19().orElse(null); 
+		entity.fieldDate20 =	domain.getFieldDate20().orElse(null);
+		entity.filedKeyUpdate1 =	    domain.getFiledKeyUpdate1().orElse(null);
+		entity.filedKeyUpdate2 =		domain.getFiledKeyUpdate2().orElse(null);
+		entity.filedKeyUpdate3 =		domain.getFiledKeyUpdate3().orElse(null);
+		entity.filedKeyUpdate4 =		domain.getFiledKeyUpdate4().orElse(null);
+		entity.filedKeyUpdate5 =		domain.getFiledKeyUpdate5().orElse(null);
+		entity.filedKeyUpdate6 =		domain.getFiledKeyUpdate6().orElse(null);
+		entity.filedKeyUpdate7 =		domain.getFiledKeyUpdate7().orElse(null);
+		entity.filedKeyUpdate8 =		domain.getFiledKeyUpdate8().orElse(null);
+		entity.filedKeyUpdate9 =		domain.getFiledKeyUpdate9().orElse(null);
+		entity.filedKeyUpdate10 =		domain.getFiledKeyUpdate10().orElse(null);
+		entity.filedKeyUpdate11 =		domain.getFiledKeyUpdate11().orElse(null);
+		entity.filedKeyUpdate12 =		domain.getFiledKeyUpdate12().orElse(null);
+		entity.filedKeyUpdate13 =		domain.getFiledKeyUpdate13().orElse(null); 
+		entity.filedKeyUpdate14 =		domain.getFiledKeyUpdate14().orElse(null);
+		entity.filedKeyUpdate15 =		domain.getFiledKeyUpdate15().orElse(null); 
+		entity.filedKeyUpdate16 =		domain.getFiledKeyUpdate16().orElse(null);
+		entity.filedKeyUpdate17 =		domain.getFiledKeyUpdate17().orElse(null);
+		entity.filedKeyUpdate18 =		domain.getFiledKeyUpdate18().orElse(null);
+		entity.filedKeyUpdate19 =		domain.getFiledKeyUpdate19().orElse(null); 
+		entity.filedKeyUpdate20 =		domain.getFiledKeyUpdate20().orElse(null);
+		entity.screenRetentionPeriod    =		domain.getScreenRetentionPeriod().orElse(null);
+		entity.supplementaryExplanation =		domain.getSupplementaryExplanation().orElse(null);
+		entity.parentTblJpName =		domain.getParentTblJpName().orElse(null);
+		entity.hasParentTblFlg =		domain.getHasParentTblFlg().value;
+		entity.parentTblName =		domain.getParentTblName().orElse(null); 
+		entity.fieldParent1 = 		domain.getFieldParent1().orElse(null);
+		entity.fieldParent2 =		domain.getFieldParent2().orElse(null); 
+		entity.fieldParent3 =		domain.getFieldParent3().orElse(null);
+		entity.fieldParent4 =		domain.getFieldParent4().orElse(null); 
+		entity.fieldParent5 =		domain.getFieldParent5().orElse(null);
+		entity.fieldParent6 =		domain.getFieldParent6().orElse(null); 
+		entity.fieldParent7 =		domain.getFieldParent7().orElse(null);
+		entity.fieldParent8 =		domain.getFieldParent8().orElse(null); 
+		entity.fieldParent9 =	   domain.getFieldParent9().orElse(null);
+		entity.fieldParent10 =		domain.getFieldParent10().orElse(null); 
+		entity.surveyPreservation =		domain.getSurveyPreservation().value;
+	}
+
+	@Override
+	public boolean isPresent(TableList domain) {
+		// Get entity by key
+		Optional<SspmtTableList> entityOpt = this.queryProxy().find(
+				new SspmtTableListPk(domain.getCategoryId(), domain.getTableNo(), domain.getDataStorageProcessingId()),
+				SspmtTableList.class);
+		return entityOpt.isPresent() ? true : false;
+	}
+
 }

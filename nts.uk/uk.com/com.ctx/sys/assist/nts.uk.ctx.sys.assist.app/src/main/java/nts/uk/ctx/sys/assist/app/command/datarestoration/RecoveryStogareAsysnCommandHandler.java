@@ -20,10 +20,9 @@ public class RecoveryStogareAsysnCommandHandler extends CommandHandler<PerformDa
 	public void handle(CommandHandlerContext<PerformDataRecoveryCommand> context) {
 		PerformDataRecoveryCommand performDataCommand = context.getCommand();
 		String dataRecoveryProcessId = performDataCommand.getRecoveryProcessingId();
-		String store_del_ProcessingId = performDataCommand.getStore_del_ProcessingId();
 		// サーバー復旧処理
 		try {
-			recoveryStorageService.recoveryStorage(dataRecoveryProcessId,store_del_ProcessingId);
+			recoveryStorageService.recoveryStorage(dataRecoveryProcessId);
 		} catch (Exception e) {
 			repoDataRecoveryMng.updateByOperatingCondition(dataRecoveryProcessId, DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
 		}

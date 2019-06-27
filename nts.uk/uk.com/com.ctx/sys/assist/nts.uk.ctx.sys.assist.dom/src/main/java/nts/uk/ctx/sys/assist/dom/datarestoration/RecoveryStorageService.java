@@ -139,20 +139,13 @@ public class RecoveryStorageService {
 		datetimeRange.put(YEAR, 4);
 	}
 
-	public void recoveryStorage(String dataRecoveryProcessId,String store_del_ProcessingId) throws Exception {
+	public void recoveryStorage(String dataRecoveryProcessId) throws Exception {
 		NUMBER_ERROR = 0;
 		Optional<PerformDataRecovery> performRecoveries = performDataRecoveryRepository
 				.getPerformDatRecoverById(dataRecoveryProcessId);
 		String uploadId = performRecoveries.get().getUploadfileId();
 		
-		List<Category> listCategory = categoryRepository.findById(dataRecoveryProcessId, SELECTION_TARGET_FOR_RES);
-		
-		List<CategoryForDelete> listCategoryDel = categoryForDeleteRepository.findById(dataRecoveryProcessId, SELECTION_TARGET_FOR_RES);
-
-		// start : code doan nay khong co trong EA (xác định xem restore file từ màn cmf003, hay cmf005)
-		Optional<ResultOfSaving> saveOpt =  resultOfSavingRepo.getResultOfSavingById(store_del_ProcessingId);
-		Optional<ResultDeletion> delOpt  = resultDeletionRepo.getResultDeletionById(store_del_ProcessingId);
-		// end
+		Set<String> listCtgId = categoryRepository.getListCategoryId(dataRecoveryProcessId, SELECTION_TARGET_FOR_RES);
 		
 		Optional<DataRecoveryMng> dataRecoveryMng = dataRecoveryMngRepository
 				.getDataRecoveryMngById(dataRecoveryProcessId);
@@ -178,16 +171,16 @@ public class RecoveryStorageService {
 		saveLogDataRecoverServices.saveStartDataRecoverLog(dataRecoveryProcessId);
 
 		// 処理対象のカテゴリを処理する
-		if (!listCategory.isEmpty()) {
-			for (Category category : listCategory) {
+		if (!listCtgId.isEmpty()) {
+			for (String categoryId : listCtgId) {
 
 				List<TableList> tableUse = performDataRecoveryRepository.getByStorageRangeSaved(
-						category.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.EARCH_EMP);
+						categoryId, dataRecoveryProcessId, StorageRangeSaved.EARCH_EMP);
 				List<TableList> tableNotUse = performDataRecoveryRepository.getByStorageRangeSaved(
-						category.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.ALL_EMP);
+						categoryId, dataRecoveryProcessId, StorageRangeSaved.ALL_EMP);
 
-				TableListByCategory tableListByCategory = new TableListByCategory(category.getCategoryId().v(), tableUse);
-				TableListByCategory tableNotUseCategory = new TableListByCategory(category.getCategoryId().v(), tableNotUse);
+				TableListByCategory tableListByCategory = new TableListByCategory(categoryId, tableUse);
+				TableListByCategory tableNotUseCategory = new TableListByCategory(categoryId, tableNotUse);
 
 				// カテゴリ単位の復旧
 				condition = exCurrentCategory(tableListByCategory, tableNotUseCategory, uploadId, dataRecoveryProcessId, listTbl);
@@ -202,31 +195,6 @@ public class RecoveryStorageService {
 			}
 		}
 		
-		/*if (!listCategoryDel.isEmpty() && delOpt.isPresent()) {
-			for (CategoryForDelete categoryForDel : listCategoryDel) {
-				List<TableList> tableUse = performDataRecoveryRepository.getByStorageRangeSaved(
-						categoryForDel.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.EARCH_EMP);
-				List<TableList> tableNotUse = performDataRecoveryRepository.getByStorageRangeSaved(
-						categoryForDel.getCategoryId().v(), dataRecoveryProcessId, StorageRangeSaved.ALL_EMP);
-
-				TableListByCategory tableListByCategory = new TableListByCategory(categoryForDel.getCategoryId().v(), tableUse);
-				TableListByCategory tableNotUseCategory = new TableListByCategory(categoryForDel.getCategoryId().v(), tableNotUse);
-
-				// カテゴリ単位の復旧
-				condition = exCurrentCategory(tableListByCategory, tableNotUseCategory, uploadId, dataRecoveryProcessId, listTbl);
-
-				// のカテゴリカウントをカウントアップ
-
-				if (condition != DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS) {
-					break;
-				}
-				numberCateSucess++;
-				dataRecoveryMngRepository.updateCategoryCnt(dataRecoveryProcessId, numberCateSucess);
-			}
-		}*/
-		
-		
-
 		if (condition == DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS) {
 			dataRecoveryMngRepository.updateByOperatingCondition(dataRecoveryProcessId,
 					DataRecoveryOperatingCondition.DONE);
