@@ -105,7 +105,7 @@ public class ProcessRecoverListTblByCompanyHandle {
 		if (table.getHistoryCls() == HistoryDiviSion.HAVE_HISTORY) {
 			try {
 				deleteDataTableHistory(table, false, null, dataRecoveryProcessId);
-				System.out.println("DELETE TABLE : " + table.getTableEnglishName());
+				System.out.println("DELETE TABLE BY COMPANY : " + table.getTableEnglishName());
 			} catch (Exception e) {
 				String target            = null;
 				String errorContent      = e.getMessage();

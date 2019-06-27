@@ -206,7 +206,7 @@ public class ProcessRecoverOneEmpHandle {
 			if (table.isPresent() && table.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY) {
 				try {
 					deleteDataEmpTableHistory(table, true, employeeId, dataRecoveryProcessId, employeeCode);
-					System.out.println("DELETE TABLE : " + table.get().getTableEnglishName());
+					System.out.println("DELETE TABLE BY ANY EMP : " + table.get().getTableEnglishName());
 				} catch (Exception err) {
 					String target			 = employeeCode;
 					String errorContent		 = err.getMessage();
