@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.shared.dom.worktime.predset;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
@@ -348,13 +349,9 @@ public class PrescribedTimezoneSetting extends WorkTimeDomainObject implements C
 	 *            the work no
 	 * @return the match work no time sheet
 	 */
-	public TimezoneUse getMatchWorkNoTimeSheet(int workNo) {
-		List<TimezoneUse> timeSheetWithUseAtrList = this.lstTimezone.stream().filter(tc -> tc.getWorkNo() == workNo)
-				.collect(Collectors.toList());
-		if (timeSheetWithUseAtrList.size() > 1) {
-			throw new RuntimeException("Exist duplicate workNo : " + workNo);
-		}
-		return timeSheetWithUseAtrList.get(0);
+	public Optional<TimezoneUse> getMatchWorkNoTimeSheet(int workNo) {
+		return this.lstTimezone.stream().filter(tc -> tc.getWorkNo() == workNo)
+				.findFirst();
 	}
 
 	/**

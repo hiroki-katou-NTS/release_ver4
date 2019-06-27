@@ -362,46 +362,50 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 					predSet = predetermineRepo.findByWorkTimeCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
 				}
 				predSet.ifPresent(pr -> {
-					int preSetAtten01 = pr.getTimeSheetOf(1).getStart().valueAsMinutes(),
-							preSetLeave01 = pr.getTimeSheetOf(1).getEnd().valueAsMinutes();
-					
-					if(startTime != null && startTime < preSetAtten01) {
-						flag35.set(true);
-					}
-					
-					if(endTime != null && endTime > preSetLeave01) {
-						flag36.set(true);
-					}
-					if(d.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
-						int scheWorkAtten = d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).getAttendance().valueAsMinutes();
-						int scheWorkLeave = d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).getLeaveWork().valueAsMinutes();
+					pr.getTimeSheetOf(1).ifPresent(timeSheet -> {
+						int preSetAtten01 = timeSheet.getStart().valueAsMinutes(),
+								preSetLeave01 = timeSheet.getEnd().valueAsMinutes();
 						
-						if(startTime != null && preSetAtten01 > scheWorkAtten) {
-							if(startTime >= scheWorkAtten) {
-								flag19.set(flag19.get() + 1);
-							}
-							if(startTime < scheWorkAtten) {
-								flag21.set(flag21.get() + 1);
-							}
+						if(startTime != null && startTime < preSetAtten01) {
+							flag35.set(true);
 						}
 						
-						if(endTime != null && preSetLeave01 < scheWorkLeave) {
-							if(endTime <= scheWorkLeave) {
-								flag19.set(flag19.get() + 1);
-							}
-							if(endTime > scheWorkLeave) {
-								flag21.set(flag21.get() + 1);
-							}
+						if(endTime != null && endTime > preSetLeave01) {
+							flag36.set(true);
 						}
 						
-						if (flag35.get() && preSetAtten01 <= scheWorkAtten) {
-							flag37.set(flag37.get() + 1);
+						if(d.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
+							d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).ifPresent(scheTimeSheet -> {
+								int scheWorkAtten = scheTimeSheet.getAttendance().valueAsMinutes(),
+										scheWorkLeave = scheTimeSheet.getLeaveWork().valueAsMinutes();
+								
+								if(startTime != null && preSetAtten01 > scheWorkAtten) {
+									if(startTime >= scheWorkAtten) {
+										flag19.set(flag19.get() + 1);
+									}
+									if(startTime < scheWorkAtten) {
+										flag21.set(flag21.get() + 1);
+									}
+								}
+								
+								if(endTime != null && preSetLeave01 < scheWorkLeave) {
+									if(endTime <= scheWorkLeave) {
+										flag19.set(flag19.get() + 1);
+									}
+									if(endTime > scheWorkLeave) {
+										flag21.set(flag21.get() + 1);
+									}
+								}
+								
+								if (flag35.get() && preSetAtten01 <= scheWorkAtten) {
+									flag37.set(flag37.get() + 1);
+								}
+								if(flag36.get() && preSetLeave01 >= scheWorkLeave) {
+									flag37.set(flag37.get() + 1);
+								}
+							});
 						}
-						if(flag36.get() && preSetLeave01 >= scheWorkLeave) {
-							flag37.set(flag37.get() + 1);
-						}
-					}
-					
+					});
 				});
 			}
 			

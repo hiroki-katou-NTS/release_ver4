@@ -124,7 +124,7 @@ public class WorkTimeSettingServiceImpl implements WorkTimeSettingService {
 
 		List<TimezoneUse> timeZones = new ArrayList<>();
 		if (workNo != null) {
-			timeZones.add(presTime.getMatchWorkNoTimeSheet(workNo));
+			presTime.getMatchWorkNoTimeSheet(workNo).ifPresent(pt -> timeZones.add(pt));
 		} else {
 			timeZones.addAll(presTime.getLstTimezone());
 		}

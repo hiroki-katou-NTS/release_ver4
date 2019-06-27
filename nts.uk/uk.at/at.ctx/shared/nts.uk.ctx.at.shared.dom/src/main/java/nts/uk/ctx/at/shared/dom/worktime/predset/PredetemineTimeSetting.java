@@ -4,6 +4,8 @@
  *****************************************************************/
 package nts.uk.ctx.at.shared.dom.worktime.predset;
 
+import java.util.Optional;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -263,7 +265,7 @@ public class PredetemineTimeSetting extends WorkTimeAggregateRoot implements Clo
 	 * @param workNo the work no
 	 * @return the time sheet of
 	 */
-	public TimezoneUse getTimeSheetOf(int workNo) {
+	public Optional<TimezoneUse> getTimeSheetOf(int workNo) {
 		return this.prescribedTimezoneSetting.getMatchWorkNoTimeSheet(workNo);
 	}
 

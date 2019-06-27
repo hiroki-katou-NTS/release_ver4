@@ -1,7 +1,7 @@
 package nts.uk.ctx.at.record.dom.workinformation;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -107,13 +107,9 @@ public class WorkInfoOfDailyPerformance extends AggregateRoot {
 	 * @param workNo
 	 * @return　予定時間帯
 	 */
-	public ScheduleTimeSheet getScheduleTimeSheet(WorkNo workNo) {
-		List<ScheduleTimeSheet> scheduleTimeSheetList = this.scheduleTimeSheets.stream()
-				.filter(ts -> ts.getWorkNo().equals(workNo)).collect(Collectors.toList());
-		if(scheduleTimeSheetList.size()>1) {
-			throw new RuntimeException("Exist duplicate workNo : " + workNo);
-		}	
-		return scheduleTimeSheetList.get(0);	
+	public Optional<ScheduleTimeSheet> getScheduleTimeSheet(WorkNo workNo) {
+		return this.scheduleTimeSheets.stream()
+				.filter(ts -> ts.getWorkNo().equals(workNo)).findFirst();	
 	}
 
 	public WorkInfoOfDailyPerformance(String employeeId, WorkInformation recordWorkInformation,

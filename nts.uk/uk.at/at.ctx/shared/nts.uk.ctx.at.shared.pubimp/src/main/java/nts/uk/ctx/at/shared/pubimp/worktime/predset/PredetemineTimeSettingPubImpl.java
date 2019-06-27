@@ -48,14 +48,16 @@ public class PredetemineTimeSettingPubImpl implements PredetemineTimeSettingPub{
 		}
 		
 		// 所定時間帯．時間帯を取得
-		TimezoneUse abc =  optPredetemineTimeSetting.get().getPrescribedTimezoneSetting().getMatchWorkNoTimeSheet(WORK_TWO);
+		Optional<TimezoneUse> timeSheet = optPredetemineTimeSetting.get().getTimeSheetOf(WORK_TWO);
+//		TimezoneUse abc =  optPredetemineTimeSetting.get().getPrescribedTimezoneSetting().getMatchWorkNoTimeSheet(WORK_TWO);
 		
 		// 使用区分を判断
-		if (abc.getUseAtr().value == UseSetting.USE.value) {
-			return true;
-		}else {
-			return false;
-		}
+		return timeSheet.isPresent() && timeSheet.get().getUseAtr() == UseSetting.USE;
+//		if (abc.getUseAtr().value == UseSetting.USE.value) {
+//			return true;
+//		}else {
+//			return false;
+//		}
 	}
 	
 	@Override
@@ -66,8 +68,10 @@ public class PredetemineTimeSettingPubImpl implements PredetemineTimeSettingPub{
 
 		return predetemineTimeSettingList.stream()
 				.collect(Collectors.toMap(ptSetting -> ptSetting.getWorkTimeCode().v(),
-						ptSetting -> ptSetting.getPrescribedTimezoneSetting().getMatchWorkNoTimeSheet(WORK_TWO)
-								.getUseAtr() == UseSetting.USE));
+						ptSetting -> { 
+							Optional<TimezoneUse> timeSheet = ptSetting.getTimeSheetOf(WORK_TWO);
+							return timeSheet.isPresent() && timeSheet.get().getUseAtr() == UseSetting.USE;
+						}));
 
 	}
 	
