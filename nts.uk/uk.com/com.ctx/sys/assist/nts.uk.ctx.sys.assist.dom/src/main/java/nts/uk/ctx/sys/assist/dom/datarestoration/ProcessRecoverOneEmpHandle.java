@@ -13,8 +13,11 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import lombok.val;
 import nts.arc.system.ServerSystemProperties;
 import nts.gul.csv.CSVBufferReader;
+import nts.gul.error.ThrowableAnalyzer;
+import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.SettingException;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 
@@ -79,6 +82,8 @@ public class ProcessRecoverOneEmpHandle {
 	private SaveLogDataRecoverServices saveLogDataRecoverServices; 
 	@Inject
 	private ProcessRecoverTable processRecoverOneTable;
+	@Inject
+	private RecoveryDataByEmployee recoveryDataByEmployee;
 	
 	
 
@@ -131,18 +136,19 @@ public class ProcessRecoverOneEmpHandle {
 
 			// アルゴリズム「対象社員データ処理」を実行する (Xử lý data nhân viên đối tượng)
 			try {
-				condition = this.recoveryDataByEmployee(dataRecoveryProcessId,
+				condition = recoveryDataByEmployee.recoveryDataByEmployee(dataRecoveryProcessId,
 						employeeData.getEmployeeId(), listTableOrder,
 						csvByteReadMaper_TableUse,employeeData.getEmployeeCode(), listTbl);
 			} catch (Exception e) {
-				errorCode = e.getMessage();
 				NUMBER_ERROR++;
 				dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
+				
+				val analyzer = new ThrowableAnalyzer(e);
+				if(analyzer.findByClass(SettingException.class).isPresent()){
+					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
+				} 
 			}
 			
-			if (errorCode.equals(SETTING_EXCEPTION)) {
-				return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
-			}
 			// check interruption [中断]
 			Optional<DataRecoveryMng> dataRecovery = dataRecoveryMngRepository
 					.getDataRecoveryMngById(dataRecoveryProcessId);
@@ -153,29 +159,6 @@ public class ProcessRecoverOneEmpHandle {
 		return condition;
 	}
 	
-	public DataRecoveryOperatingCondition recoveryDataByEmployee(String dataRecoveryProcessId, String employeeId,
-			List<DataRecoveryTable> listTableOrder,HashMap<String, CSVBufferReader> csvByteReadMaper, String employeeCode,List<TableList> listTbl) throws Exception {
-
-		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
-		
-		Optional<PerformDataRecovery> performDataRecovery = performDataRecoveryRepository.getPerformDatRecoverById(dataRecoveryProcessId);
-		
-		// current target Data [カレント対象データ]
-		for (DataRecoveryTable dataRecoveryTable : listTableOrder) {
-			Optional<TableList> table = listTbl.stream().filter(tbl -> tbl.getTableEnglishName().equals(dataRecoveryTable.getTableEnglishName())).findFirst();
-			if (!table.isPresent())
-				return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
-
-			// start of transaction
-			try {
-				condition = processRecoverOneTable.recoverTable(table, employeeCode, employeeId, dataRecoveryProcessId,
-						dataRecoveryTable, performDataRecovery, csvByteReadMaper);
-			} catch (Exception e) {
-				throw e;
-			}
-		}
-		return condition;
-	}
 	
 	public static String getExtractDataStoragePath(String fileId) {
 		return DATA_STORE_PATH + "//packs//" + fileId;

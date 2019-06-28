@@ -11,20 +11,25 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import lombok.val;
 import nts.arc.system.ServerSystemProperties;
 import nts.arc.time.GeneralDate;
 import nts.gul.csv.CSVBufferReader;
 import nts.gul.csv.CSVParsedResult;
 import nts.gul.csv.NtsCsvRecord;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.sys.assist.dom.category.TimeStore;
 import nts.uk.ctx.sys.assist.dom.categoryfieldmt.HistoryDiviSion;
+import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.SettingException;
 import nts.uk.ctx.sys.assist.dom.datarestoration.common.CsvFileUtil;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.shr.com.context.AppContexts;
@@ -105,7 +110,7 @@ public class ProcessRecoverTable {
 			String contentSql = null;
 			String processingContent = "日付処理の設定  " + TextResource.localize("CMF004_463") + " " + table.get().getTableJapaneseName();
 			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
-			throw new Exception(SETTING_EXCEPTION);
+			throw new SettingException(null);
 		}
 
 		// 履歴区分の判別する - check history division
@@ -120,7 +125,7 @@ public class ProcessRecoverTable {
 			String contentSql = resultDel.get(0);
 			String processingContent = "履歴データ削除";
 			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent,targetDate, processingContent, contentSql);
-			throw new Exception(SQL_EXCEPTION);
+			throw new SqlException(null);
 		}	
 		
 
@@ -135,12 +140,18 @@ public class ProcessRecoverTable {
 			String contentSql = e.getMessage();
 			String processingContent = "データベース復旧処理  " + table.get().getTableJapaneseName();
 			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
-			throw new Exception(SETTING_EXCEPTION);
+			
+			val analyzer = new ThrowableAnalyzer(e);
+			if(analyzer.findByClass(SettingException.class).isPresent()){
+				throw new SettingException(null);
+			} else if(analyzer.findByClass(SqlException.class).isPresent()){
+				throw new SqlException(null);
+			}
 		}
 
 		// Setting error
 		if (condition == DataRecoveryOperatingCondition.ABNORMAL_TERMINATION) {
-				throw new Exception(SETTING_EXCEPTION);
+				throw new SettingException(null);
 			}
 		}
 		return condition;
@@ -386,7 +397,7 @@ public class ProcessRecoverTable {
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " "+ table.get().getTableJapaneseName();
 								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
 								LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
-								throw e;
+								throw new SqlException(null);
 							}
 						}
 					}
@@ -565,11 +576,7 @@ public class ProcessRecoverTable {
 								String contentSql = e.getMessage();
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " " + table.get().getTableJapaneseName();
 								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
-								try {
-									throw new Exception(SQL_EXCEPTION);
-								} catch (Exception e1) {
-									e1.printStackTrace();
-								}
+								throw new SqlException(null);
 							}
 						}
 					}
@@ -666,7 +673,6 @@ public class ProcessRecoverTable {
 	}
 	
 	public Boolean checkSettingDate(List<String> resultsSetting, Optional<TableList> tableList, String h_Date_Csv,String employeeCode, String dataRecoveryProcessId){
-
 		if (StringUtil.isNullOrEmpty(h_Date_Csv, true)) {
 			return false;
 		}
@@ -697,13 +703,8 @@ public class ProcessRecoverTable {
 			String contentSql        = null;
 			String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464") + tableList.get().getTableJapaneseName(); 
 			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-			try {
-				throw new Exception(SETTING_EXCEPTION);
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
+			throw new SettingException(null);
 		}
-		return false;
 	}
 	
 	private GeneralDate stringToGenaralDate(String datetime) {
@@ -835,5 +836,28 @@ public class ProcessRecoverTable {
 	public static String getExtractDataStoragePath(String fileId) {
 		return DATA_STORE_PATH + "//packs//" + fileId;
 	}
+	
+	class SettingException extends RuntimeException {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public SettingException(Throwable cause) {
+			super(cause);
+		}
+	}
+
+	class SqlException extends RuntimeException {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public SqlException(Throwable cause) {
+			super(cause);
+		}
+	}
+
 
 }
