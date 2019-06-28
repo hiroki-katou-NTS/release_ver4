@@ -405,7 +405,7 @@ module nts.uk.com.view.cmf003.b {
                 self.baseDate = ko.observable(moment());
                 self.periodStartDate = ko.observable(moment());
                 self.periodEndDate = ko.observable(moment());
-                self.showEmployment = ko.observable(true); // 雇用条件
+                self.showEmployment = ko.observable(false); // 雇用条件
                 self.showWorkplace = ko.observable(true); // 職場条件
                 self.showClassification = ko.observable(true); // 分類条件
                 self.showJobTitle = ko.observable(true); // 職位条件
