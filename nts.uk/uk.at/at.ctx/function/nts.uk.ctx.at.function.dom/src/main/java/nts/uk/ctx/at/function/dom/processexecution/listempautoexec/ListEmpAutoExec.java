@@ -44,8 +44,8 @@ public class ListEmpAutoExec {
 			listEmpByEmpCode = employmentAdapter.getEmploymentBySidsAndEmploymentCds(listEmp, listEmploymentCode.get(), datePeriod);
 			listEmp = listEmpByEmpCode;
 		}
-		//【No.493】社員（List）と期間から１日でも在職している社員を取得する
-		List<String> listResult = syEmployeeFnAdapter.filterSidLstByDatePeriodAndSids(listEmp,datePeriod);
-		return listResult;
+//		//【No.493】社員（List）と期間から１日でも在職している社員を取得する
+//		List<String> listResult = syEmployeeFnAdapter.filterSidLstByDatePeriodAndSids(listEmp,datePeriod);
+		return listEmp;
 	}
 }
