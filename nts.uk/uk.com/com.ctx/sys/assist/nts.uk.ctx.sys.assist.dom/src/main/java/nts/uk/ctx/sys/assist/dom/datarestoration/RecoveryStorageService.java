@@ -31,15 +31,11 @@ import nts.arc.system.ServerSystemProperties;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.csv.CSVBufferReader;
 import nts.gul.text.StringUtil;
-import nts.uk.ctx.sys.assist.dom.category.Category;
 import nts.uk.ctx.sys.assist.dom.category.CategoryRepository;
 import nts.uk.ctx.sys.assist.dom.category.StorageRangeSaved;
-import nts.uk.ctx.sys.assist.dom.categoryfordelete.CategoryForDelete;
 import nts.uk.ctx.sys.assist.dom.categoryfordelete.CategoryForDeleteRepository;
 import nts.uk.ctx.sys.assist.dom.datarestoration.common.CsvFileUtil;
-import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletion;
 import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletionRepository;
-import nts.uk.ctx.sys.assist.dom.storage.ResultOfSaving;
 import nts.uk.ctx.sys.assist.dom.storage.ResultOfSavingRepository;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
@@ -126,8 +122,6 @@ public class RecoveryStorageService {
 
 	public static final Integer INDEX_H_START_DATE = 3;
 
-	public static Integer NUMBER_ERROR = 0;
-
 	private static final String DATA_STORE_PATH = ServerSystemProperties.fileStoragePath();
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RecoveryStorageService.class);
@@ -140,7 +134,6 @@ public class RecoveryStorageService {
 	}
 
 	public void recoveryStorage(String dataRecoveryProcessId) throws Exception {
-		NUMBER_ERROR = 0;
 		Optional<PerformDataRecovery> performRecoveries = performDataRecoveryRepository
 				.getPerformDatRecoverById(dataRecoveryProcessId);
 		String uploadId = performRecoveries.get().getUploadfileId();

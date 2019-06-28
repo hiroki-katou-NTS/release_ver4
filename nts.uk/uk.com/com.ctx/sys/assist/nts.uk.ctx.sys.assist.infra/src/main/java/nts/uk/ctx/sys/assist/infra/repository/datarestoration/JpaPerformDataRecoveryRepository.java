@@ -380,7 +380,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 
 	@Override
-	public void deleteEmployeeHis(TableList table, String whereCid, String whereSid, String cid, String employeeId) {
+	public String deleteEmployeeHis(TableList table, String whereCid, String whereSid, String cid, String employeeId) {
 		EntityManager em = this.getEntityManager();
 		if (table.getTableEnglishName() != null) {
 			StringBuilder DELETE_BY_TABLE_SQL = new StringBuilder("DELETE t FROM  ");
@@ -444,7 +444,9 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			System.out.println("QUERY:  " + DELETE_BY_TABLE_SQL.toString());
 			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
 			query.executeUpdate();
+			return DELETE_BY_TABLE_SQL.toString();
 		}
+		return null;
 	}
 
 	public void addTargetEmployee(Target domain) {
@@ -522,7 +524,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	}
 
 	@Override
-	public void deleteTransactionEmployeeHis(TableList table, String whereCid, String whereSid, String cid,
+	public String deleteTransactionEmployeeHis(TableList table, String whereCid, String whereSid, String cid,
 			String employeeId) {
 		EntityManager em = this.getEntityManager();
 
@@ -590,7 +592,9 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			
 			Query query = em.createNativeQuery(DELETE_BY_TABLE_SQL.toString());
 			query.executeUpdate();
+			return DELETE_BY_TABLE_SQL.toString();
 		}
+		return null;
 	}
 	
 	@Override
