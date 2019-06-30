@@ -36,25 +36,22 @@ public class GetNextAnnualLeaveGrantProcKdm002 {
 	/** 年休付与テーブル設定 */
 	@Inject
 	private YearHolidayRepository yearHolidayRepo;
-	
 	/** 勤続年数テーブル */
 	@Inject
 	private LengthServiceRepository lengthServiceRepo;
-	
 	/** 年休付与テーブル */
 	@Inject
 	private GrantYearHolidayRepository grantYearHolidayRepo;
 
 	/**
-	 * 
-	 * @param companyId
-	 * @param employeeIds
-	 * @param annualLeaveEmpBasicInfoMap
-	 * @param entryDateMap
-	 * @param period
-	 * @param isSingleDay
-	 * @param grantHdTblSetMap
-	 * @return
+	 * 次回年休付与を取得する
+	 * @param companyId 会社ID
+	 * @param employeeIds 社員ID
+	 * @param annualLeaveEmpBasicInfoMap 年休社員基本情報マップ
+	 * @param entryDateMap 入社年月日マップ
+	 * @param period 期間
+	 * @param isSingleDay 単一日フラグ
+	 * @return 次回年休付与マップ
 	 */
 	public Map<String, List<NextAnnualLeaveGrant>> algorithm(String companyId, List<String> employeeIds,
 			Map<String, AnnualLeaveEmpBasicInfo> annualLeaveEmpBasicInfoMap, Map<String, GeneralDate> entryDateMap,
@@ -118,39 +115,57 @@ public class GetNextAnnualLeaveGrantProcKdm002 {
 
 	/**
 	 * 年休付与年月日を計算
+	 * @param entryDate 入社年月日
+	 * @param criteriaDate 年休付与基準日
+	 * @param simultaneousGrantMDOpt 一斉付与年月
+	 * @param lengthServiceTbls 勤続年数テーブルリスト
+	 * @param period 期間
+	 * @param isSingleDay 単一日フラグ
+	 * @param nextAnnualLeaveGrantList 次回年休付与リスト
 	 */
-	private void calcAnnualLeaveGrantDate(GeneralDate entryDate, GeneralDate criteriaDate,
+	public void calcAnnualLeaveGrantDate(GeneralDate entryDate, GeneralDate criteriaDate,
 			Optional<Integer> simultaneousGrantMDOpt, List<LengthServiceTbl> lengthServiceTbls, DatePeriod period,
 			boolean isSingleDay, List<NextAnnualLeaveGrant> nextAnnualLeaveGrantList) {
 
 		GeneralDate previousDate = null;
 		for (val lengthServiceTbl : lengthServiceTbls) {
 
-			// 勤続年数から付与日を計算
-			val nextAnnualLeaveGrant = this.calcGrantDateFromLengthService(lengthServiceTbl, Optional.empty(),
+			// 付与日を計算
+			val nextAnnualLeaveGrant = this.calcGrantDate(lengthServiceTbl, Optional.empty(),
 					entryDate, criteriaDate, simultaneousGrantMDOpt, previousDate);
 
-			// 前回付与日 ← 次回年休付与．付与年月日
-			if (previousDate == null) {
-				previousDate = nextAnnualLeaveGrant.getGrantDate();
-			} else if (previousDate.before(nextAnnualLeaveGrant.getGrantDate())) {
-				previousDate = nextAnnualLeaveGrant.getGrantDate();
+			// 次回付与日が前回付与日を超えているかどうかチェック
+			boolean isExceed = true;
+			if (previousDate != null) {
+				if (nextAnnualLeaveGrant.getGrantDate().beforeOrEquals(previousDate)) {
+					isExceed = false;
+				}
 			}
-
-			// 期間中の年休付与かチェック
-			val grantDate = nextAnnualLeaveGrant.getGrantDate();
-			if (grantDate.after(period.end())) {
-				// 期間より後
-				return;
-			} else if (period.contains(grantDate)) {
-				// 期間内
-
-				// 「次回年休付与リスト」に追加
-				nextAnnualLeaveGrantList.add(nextAnnualLeaveGrant);
-
-				// 「単一日フラグ」をチェック
-				if (isSingleDay)
+			if (isExceed == true) {
+				
+				// 期間中の年休付与かチェック
+				val grantDate = nextAnnualLeaveGrant.getGrantDate();
+				if (grantDate.after(period.end())) {
+					// 期間より後
 					return;
+				}
+				else if (period.contains(grantDate)) {
+					// 期間内
+
+					// 「次回年休付与リスト」に追加
+					nextAnnualLeaveGrantList.add(nextAnnualLeaveGrant);
+
+					// 「単一日フラグ」をチェック
+					if (isSingleDay) return;
+				}
+
+				// 前回付与日 ← 次回年休付与．付与年月日
+				if (previousDate == null) {
+					previousDate = nextAnnualLeaveGrant.getGrantDate();
+				}
+				else if (previousDate.before(nextAnnualLeaveGrant.getGrantDate())) {
+					previousDate = nextAnnualLeaveGrant.getGrantDate();
+				}
 			}
 		}
 
@@ -159,104 +174,170 @@ public class GetNextAnnualLeaveGrantProcKdm002 {
 		Integer calcYears = lastLengthServiceTbl.getYear().v();
 		while (calcYears < 100) {
 
-			// 勤続年数から付与日を計算
-			val nextAnnualLeaveGrant = calcGrantDateFromLengthService(lastLengthServiceTbl, Optional.of(calcYears),
+			// 付与日を計算
+			val nextAnnualLeaveGrant = this.calcGrantDate(lastLengthServiceTbl, Optional.of(calcYears),
 					entryDate, criteriaDate, simultaneousGrantMDOpt, previousDate);
 
-			// 前回付与日 ← 次回年休付与．付与年月日
-			if (previousDate == null) {
-				previousDate = nextAnnualLeaveGrant.getGrantDate();
-			} else if (previousDate.before(nextAnnualLeaveGrant.getGrantDate())) {
-				previousDate = nextAnnualLeaveGrant.getGrantDate();
+			// 次回付与日が前回付与日を超えているかどうかチェック
+			boolean isExceed = true;
+			if (previousDate != null) {
+				if (nextAnnualLeaveGrant.getGrantDate().beforeOrEquals(previousDate)) {
+					isExceed = false;
+				}
 			}
+			if (isExceed == true) {
 
-			// 期間中の年休付与かチェック
-			val grantDate = nextAnnualLeaveGrant.getGrantDate();
-			if (grantDate.after(period.end())) {
-				// 期間より後
-				return;
-			} else if (period.contains(grantDate)) {
-				// 期間内
-
-				// 「次回年休付与リスト」に追加
-				nextAnnualLeaveGrantList.add(nextAnnualLeaveGrant);
-
-				// 「単一日フラグ」をチェック
-				if (isSingleDay)
+				// 期間中の年休付与かチェック
+				val grantDate = nextAnnualLeaveGrant.getGrantDate();
+				if (grantDate.after(period.end())) {
+					// 期間より後
 					return;
+				}
+				else if (period.contains(grantDate)) {
+					// 期間内
+
+					// 「次回年休付与リスト」に追加
+					nextAnnualLeaveGrantList.add(nextAnnualLeaveGrant);
+
+					// 「単一日フラグ」をチェック
+					if (isSingleDay) return;
+				}
+
+				// 前回付与日 ← 次回年休付与．付与年月日
+				if (previousDate == null) {
+					previousDate = nextAnnualLeaveGrant.getGrantDate();
+				}
+				else if (previousDate.before(nextAnnualLeaveGrant.getGrantDate())) {
+					previousDate = nextAnnualLeaveGrant.getGrantDate();
+				}
 			}
 
+			// 処理中の年数を+1して再度ループ
 			calcYears++;
 		}
 	}
 
 	/**
-	 * 勤続年数から付与日を計算
-	 * 
-	 * @param lengthServiceTbl
-	 *            勤続年数
-	 * @param calcYears
-	 *            計算年数
+	 * 付与日を計算
+	 * @param lengthServiceTbl 勤続年数
+	 * @param calcYears 計算年数
+	 * @param entryDate 入社年月日
+	 * @param criteriaDate 基準年月日
+	 * @param simultaneousGrantMDOpt 一斉付与年月
+	 * @param previousDate 前回付与日
 	 * @return 次回年休付与
 	 */
-	private NextAnnualLeaveGrant calcGrantDateFromLengthService(LengthServiceTbl lengthServiceTbl,
+	private NextAnnualLeaveGrant calcGrantDate(LengthServiceTbl lengthServiceTbl,
 			Optional<Integer> calcYears, GeneralDate entryDate, GeneralDate criteriaDate,
 			Optional<Integer> simultaneousGrantMDOpt, GeneralDate previousDate) {
 
 		NextAnnualLeaveGrant nextAnnualLeaveGrant = new NextAnnualLeaveGrant();
 
-		// 「付与基準日」をチェック → 付与計算基準日
-		GeneralDate calcCriteria = entryDate;
-		if (lengthServiceTbl.getStandGrantDay() == GrantReferenceDate.YEAR_HD_REFERENCE_DATE) {
-			calcCriteria = criteriaDate;
-		}
-
-		// 年休付与日を計算 → 付与年月日（＝勤続年月の年休付与日）
-		GeneralDate grantDate = calcCriteria.addYears(lengthServiceTbl.getYear().v());
-		if (calcYears.isPresent())
-			grantDate = calcCriteria.addYears(calcYears.get());
-		grantDate = grantDate.addMonths(lengthServiceTbl.getMonth().v());
+		// 勤続年数から付与日を計算
+		NextAnnualLeaveGrant calcResult = this.calcGrantDateFromLengthService(
+				entryDate, lengthServiceTbl.getStandGrantDay(), criteriaDate, lengthServiceTbl, calcYears);
+		GeneralDate grantDate = calcResult.getGrantDate();
+		GrantNum grantNum = new GrantNum(calcResult.getTimes().v());
 
 		// 「一斉付与する」をチェック および 「一斉付与日」が存在するかチェック
 		if (lengthServiceTbl.getAllowStatus() == GrantSimultaneity.USE && simultaneousGrantMDOpt.isPresent()) {
 
-			// 「前回付与日」が存在するかチェック → 計算開始日を計算
-			GeneralDate calcStart = entryDate.addDays(1);
-			if (previousDate != null) {
-				calcStart = previousDate.addDays(1);
-			}
-
-			// 一斉付与年月を取得
-			val simultaneousGrantMD = simultaneousGrantMDOpt.get();
-			Integer simulMonth = simultaneousGrantMD / 100;
-			Integer simulDay = simultaneousGrantMD % 100;
-
-			// 勤続年月時点の当年一斉付与日・前年一斉付与日の計算
-			GeneralDate currentSimul = GeneralDate.ymd(grantDate.year(), simulMonth, 1).addMonths(1);
-			GeneralDate previousSimul = currentSimul.addYears(-1);
-			currentSimul = currentSimul.addDays(-1);
-			previousSimul = previousSimul.addDays(-1);
-			if (currentSimul.day() > simulDay) {
-				currentSimul = GeneralDate.ymd(currentSimul.year(), currentSimul.month(), simulDay);
-			}
-			if (previousSimul.day() > simulDay) {
-				previousSimul = GeneralDate.ymd(previousSimul.year(), previousSimul.month(), simulDay);
-			}
-
-			// 「計算開始日」～「勤続年月の年休付与日」に「一斉付与日」があるかチェック →
-			// ある時、一斉付与の年休付与日を計算（該当の最も遅い日）
-			DatePeriod checkPeriod = new DatePeriod(calcStart, grantDate);
-			if (checkPeriod.contains(currentSimul)) {
-				grantDate = currentSimul;
-			} else if (checkPeriod.contains(previousSimul)) {
-				grantDate = previousSimul;
-			}
+			// 一斉付与の計算
+			NextAnnualLeaveGrant simulResult = this.calcSimultaneousGrant(
+					previousDate, entryDate, grantDate, lengthServiceTbl, simultaneousGrantMDOpt);
+			grantDate = simulResult.getGrantDate();
+			grantNum = new GrantNum(simulResult.getTimes().v());
 		}
 
-		// 次回年休付与にセット（付与年月日、回数）
+		// 次回年休付与を返す
 		nextAnnualLeaveGrant.setGrantDate(grantDate);
-		nextAnnualLeaveGrant.setTimes(new GrantNum(lengthServiceTbl.getGrantNum().v()));
-
+		nextAnnualLeaveGrant.setTimes(grantNum);
 		return nextAnnualLeaveGrant;
+	}
+	
+	/**
+	 * 勤続年数から付与日を計算
+	 * @param entryDate 入社年月日
+	 * @param grantReferenceDate 付与基準日（年休付与テーブル）
+	 * @param criteriaDate 基準年月日
+	 * @param lengthServiceTbl 勤続年数
+	 * @param calcYears 計算年数
+	 * @return 次回年休付与
+	 */
+	private NextAnnualLeaveGrant calcGrantDateFromLengthService(
+			GeneralDate entryDate,
+			GrantReferenceDate grantReferenceDate,
+			GeneralDate criteriaDate,
+			LengthServiceTbl lengthServiceTbl,
+			Optional<Integer> calcYears){
+		
+		NextAnnualLeaveGrant result = new NextAnnualLeaveGrant();
+		
+		// 「付与基準日」をチェック → 付与計算基準日
+		GeneralDate calcCriteria = entryDate;
+		if (grantReferenceDate == GrantReferenceDate.YEAR_HD_REFERENCE_DATE) {
+			calcCriteria = criteriaDate;
+		}
+
+		// 年休付与日を計算
+		GeneralDate grantDate = calcCriteria.addYears(lengthServiceTbl.getYear().v());
+		if (calcYears.isPresent()) grantDate = calcCriteria.addYears(calcYears.get());
+		grantDate = grantDate.addMonths(lengthServiceTbl.getMonth().v());
+		result.setGrantDate(grantDate);
+		result.setTimes(lengthServiceTbl.getGrantNum());
+		
+		return result;
+	}
+	
+	/**
+	 * 一斉付与の計算
+	 * @param previousDate 前回付与日
+	 * @param entryDate 入社年月日
+	 * @param lengthGrantDate 勤続年月の年休付与日
+	 * @param lengthServiceTbl 勤続年数
+	 * @param simultaneousGrantMDOpt 一斉付与年月
+	 * @return 次回年休付与
+	 */
+	private NextAnnualLeaveGrant calcSimultaneousGrant(
+			GeneralDate previousDate,
+			GeneralDate entryDate,
+			GeneralDate lengthGrantDate,
+			LengthServiceTbl lengthServiceTbl,
+			Optional<Integer> simultaneousGrantMDOpt){
+		
+		NextAnnualLeaveGrant result = new NextAnnualLeaveGrant();
+		
+		// 「前回付与日」が存在するかチェック → 計算開始日を計算
+		GeneralDate calcStart = entryDate.addDays(1);
+		if (previousDate != null) {
+			calcStart = previousDate.addDays(1);
+		}
+
+		// 一斉付与年月を取得
+		val simultaneousGrantMD = simultaneousGrantMDOpt.get();
+		Integer simulMonth = simultaneousGrantMD / 100;
+		Integer simulDay = simultaneousGrantMD % 100;
+
+		// 勤続年月の年の、当年と前年の一斉付与日の計算
+		GeneralDate currentSimul = GeneralDate.ymd(lengthGrantDate.year(), simulMonth, 1).addMonths(1);
+		GeneralDate previousSimul = currentSimul.addYears(-1);
+		currentSimul = currentSimul.addDays(-1);
+		previousSimul = previousSimul.addDays(-1);
+		if (currentSimul.day() > simulDay) {
+			currentSimul = GeneralDate.ymd(currentSimul.year(), currentSimul.month(), simulDay);
+		}
+		if (previousSimul.day() > simulDay) {
+			previousSimul = GeneralDate.ymd(previousSimul.year(), previousSimul.month(), simulDay);
+		}
+
+		// 一斉付与日<=勤続年月の年休付与日 となる一番遅い年月日
+		GeneralDate grantDate = currentSimul;
+		if (grantDate.after(lengthGrantDate)) {
+			grantDate = previousSimul;
+		}
+		result.setGrantDate(grantDate);
+		result.setTimes(lengthServiceTbl.getGrantNum());
+		
+		return result;
 	}
 }
