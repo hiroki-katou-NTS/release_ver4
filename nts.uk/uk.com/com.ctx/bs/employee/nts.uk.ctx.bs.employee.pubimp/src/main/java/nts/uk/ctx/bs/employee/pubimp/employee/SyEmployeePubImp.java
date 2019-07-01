@@ -534,12 +534,13 @@ public class SyEmployeePubImp implements SyEmployeePub {
 				.collect(Collectors.toMap(x -> x.getPersonId(), x -> x));
 		List<EmpOfLoginCompanyExport> lstresult = new ArrayList<>();
 		lstEmp.forEach(m -> {
+			if(personMap.get(m.getPersonId()) != null){
 			EmpOfLoginCompanyExport emp = new EmpOfLoginCompanyExport();
 			emp.setScd(m.getEmployeeCode().v());
 			emp.setSid(m.getEmployeeId());
 			emp.setBussinesName(personMap.get(m.getPersonId()).getPersonNameGroup().getBusinessName().v());
 			lstresult.add(emp);
-
+			}
 		});
 		return lstresult;
 	}
