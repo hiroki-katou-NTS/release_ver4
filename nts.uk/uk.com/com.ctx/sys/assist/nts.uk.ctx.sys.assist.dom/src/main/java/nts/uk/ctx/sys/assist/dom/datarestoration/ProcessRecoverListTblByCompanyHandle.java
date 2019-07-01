@@ -141,7 +141,7 @@ public class ProcessRecoverListTblByCompanyHandle {
 				String contentSql        = e.getMessage();
 				String processingContent = "履歴データ削除 " +TextResource.localize("CMF004_462") + " " + table.getTableJapaneseName(); 
 				saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-				throw new SettingException2(null);
+				throw new SettingException2(e);
 			}
 		}
 
@@ -382,7 +382,7 @@ public class ProcessRecoverListTblByCompanyHandle {
 								String contentSql = e.getMessage();
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " "+ table.getTableJapaneseName();
 								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-								throw new SqlException2(null);
+								throw new SqlException2(e);
 							}
 						}
 					}
@@ -563,7 +563,7 @@ public class ProcessRecoverListTblByCompanyHandle {
 								String contentSql = e.getMessage();
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " " + table.getTableJapaneseName();
 								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
-								throw new SqlException2(null);
+								throw new SqlException2(e);
 							}
 						}
 					}
@@ -679,7 +679,7 @@ public class ProcessRecoverListTblByCompanyHandle {
 			String contentSql = null;
 			String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464") + " " + tableList.getTableJapaneseName();
 			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
-			throw new SettingException2(null);
+			throw new SettingException2(e);
 		}
 	}
 	
