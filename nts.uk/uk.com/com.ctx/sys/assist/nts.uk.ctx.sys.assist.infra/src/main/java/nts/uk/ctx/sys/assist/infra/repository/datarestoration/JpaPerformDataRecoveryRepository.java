@@ -257,17 +257,17 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	
 	@Override
 	public void insertDataTable( StringBuilder insertToTable,String employeeCode,String dataRecoveryProcessId, TableList tableList) {
-		String logQuery = "";
+		String insertDb = "";
 		try {
 			EntityManager em = this.getEntityManager();
-			Query query = em.createNativeQuery(insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
-			logQuery = query.toString();
+			insertDb = insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\(");
+			Query query = em.createNativeQuery(insertDb);
 			query.executeUpdate();
 		} catch (Exception e) {
 			String target = employeeCode;
 			String errorContent = e.getMessage();
 			GeneralDate targetDate = GeneralDate.today();
-			String contentSql = logQuery;
+			String contentSql = insertDb;
 			String processingContent = "データベース復旧処理  " + TextResource.localize("CMF004_465" + " " + tableList.getTableJapaneseName());
 			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,
 					contentSql);
@@ -279,18 +279,18 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	@Override
 	public void insertTransactionDataTable(StringBuilder insertToTable,String employeeCode,String dataRecoveryProcessId,TableList tableList) {
 		
-		String logQuery = "";
+		String insertDb = "";
 		try {
 			EntityManager em = this.getEntityManager();
-			Query query = em.createNativeQuery(insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\("));
-			logQuery = query.toString();
+			insertDb = insertToTable.toString().replaceAll(", \\) VALUES \\(" , ") VALUES (").replaceAll("\\]", "\\)").replaceAll("\\[", "\\(");
+			Query query = em.createNativeQuery(insertDb);
 			query.executeUpdate();
 			
 		} catch (Exception e) {
 			String target = employeeCode;
 			String errorContent = e.getMessage();
 			GeneralDate targetDate = GeneralDate.today();
-			String contentSql = logQuery;
+			String contentSql = insertDb;
 			String processingContent = "データベース復旧処理  " + TextResource.localize("CMF004_465") + " " + tableList.getTableJapaneseName();
 			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
 			throw e;
