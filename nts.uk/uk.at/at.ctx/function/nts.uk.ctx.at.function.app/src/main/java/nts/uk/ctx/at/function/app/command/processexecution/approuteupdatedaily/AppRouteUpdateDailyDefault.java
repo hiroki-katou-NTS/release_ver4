@@ -73,8 +73,9 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 	public static int MAX_DELAY_PARALLEL = 0;
 	
 	@Override
-	public void checkAppRouteUpdateDaily(String execId, ProcessExecution procExec, ProcessExecutionLog procExecLog) {
+	public boolean checkAppRouteUpdateDaily(String execId, ProcessExecution procExec, ProcessExecutionLog procExecLog) {
 		String companyId = AppContexts.user().companyId();
+		boolean checkError1552 = false;
 		/**ドメインモデル「更新処理自動実行ログ」を更新する*/
 		for(ExecutionTaskLog executionTaskLog :procExecLog.getTaskLogList() ) {
 			if(executionTaskLog.getProcExecTask() == ProcessExecutionTask.APP_ROUTE_U_DAI) {
@@ -93,10 +94,9 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 				}
 			}
 			processExecutionLogRepo.update(procExecLog);
-			return;
+			return checkError1552;
 		}
 		System.out.println("更新処理自動実行_承認ルート更新（日次）_START_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
-		
 		
 		/**ドメインモデル「就業締め日」を取得する(lấy thông tin domain ル「就業締め日」)*/
 		List<Closure> listClosure = closureRepository.findAllActive(procExec.getCompanyId(),UseClassification.UseClass_Use);
@@ -133,10 +133,8 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 						procExec.getExecScope().getExecScopeCls(), Optional.of(workplaceIds),
 						Optional.of(listClosureEmploymentCode));
 			} catch (Exception e) {
-				List<String> listManagementId = employeeManageAdapter.getListEmpID(companyId, GeneralDate.today());
-				for(String employeeId : listManagementId) {
-					appDataInfoDailyRepo.addAppDataInfoDaily(new AppDataInfoDaily(employeeId, execId, new ErrorMessageRC(TextResource.localize("Msg_1552"))));
-				}
+				appDataInfoDailyRepo.addAppDataInfoDaily(new AppDataInfoDaily("System", execId, new ErrorMessageRC(TextResource.localize("Msg_1552"))));
+				checkError1552 = true;
 				break;
 			}
 			
@@ -195,6 +193,7 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 		}
 		//ドメインモデル「更新処理自動実行ログ」を更新する( domain 「更新処理自動実行ログ」)
 		processExecutionLogRepo.update(procExecLog);
+		return checkError1552;
 		
 	}
 		
