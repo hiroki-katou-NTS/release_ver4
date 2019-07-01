@@ -159,7 +159,7 @@
 	text-align: center;
 	padding: 0 2px;
 	/* width: auto;  */
-	width: 300px;
+	max-width: 300px;
 }
 
 #numberHoliday {

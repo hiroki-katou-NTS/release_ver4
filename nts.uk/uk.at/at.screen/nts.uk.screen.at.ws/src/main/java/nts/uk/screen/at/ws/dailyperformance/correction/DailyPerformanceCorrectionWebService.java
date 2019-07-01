@@ -39,6 +39,7 @@ import nts.uk.screen.at.app.dailymodify.command.PersonalTightCommandFacade;
 import nts.uk.screen.at.app.dailyperformance.correction.DPUpdateColWidthCommandHandler;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceCorrectionProcessor;
 import nts.uk.screen.at.app.dailyperformance.correction.DisplayRemainingHolidayNumber;
+import nts.uk.screen.at.app.dailyperformance.correction.InfomationInitScreenProcess;
 import nts.uk.screen.at.app.dailyperformance.correction.UpdateColWidthCommand;
 import nts.uk.screen.at.app.dailyperformance.correction.calctime.DailyCorrectCalcTimeService;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeName;
@@ -67,6 +68,8 @@ import nts.uk.screen.at.app.dailyperformance.correction.loadupdate.onlycheckbox.
 import nts.uk.screen.at.app.dailyperformance.correction.loadupdate.onlycheckbox.LoadVerDataResult;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.button.DPDisplayLockParam;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.button.DPDisplayLockProcessor;
+import nts.uk.screen.at.app.dailyperformance.correction.month.asynctask.ParamCommonAsync;
+import nts.uk.screen.at.app.dailyperformance.correction.month.asynctask.ProcessMonthScreen;
 import nts.uk.screen.at.app.dailyperformance.correction.searchemployee.DPEmployeeSearchData;
 import nts.uk.screen.at.app.dailyperformance.correction.searchemployee.FindEmployeeBase;
 import nts.uk.screen.at.app.dailyperformance.correction.selecterrorcode.DailyPerformanceErrorCodeProcessor;
@@ -141,18 +144,26 @@ public class DailyPerformanceCorrectionWebService {
 	@Inject
 	private DPLoadVerProcessor dPLoadVerProcessor;
 	
+	@Inject
+	private InfomationInitScreenProcess infomationInit;
+	@Inject
+	private ProcessMonthScreen processMonthScreen;
+	
 	@POST
 	@Path("startScreen")
 	public DailyPerformanceCorrectionDto startScreen(DPParams params ) throws InterruptedException{
 		HttpSession session = httpRequest.getSession();
 		Integer closureId = params.closureId;
-		DailyPerformanceCorrectionDto dtoResult = this.processor.generateData(params.dateRange, params.lstEmployee, params.initScreen, params.mode, params.displayFormat, params.correctionOfDaily, params.formatCodes, params.showError, params.showLock, params.objectShare, closureId);
+		DailyPerformanceCorrectionDto screenDto = (DailyPerformanceCorrectionDto) session.getAttribute("resultReturn");
+		DailyPerformanceCorrectionDto dtoResult = this.processor.generateData(screenDto, params.lstEmployee, params.initScreen, params.mode, params.displayFormat, params.correctionOfDaily, params.formatCodes, params.showError, params.showLock, params.objectShare, closureId);
 		session.setAttribute("domainOlds", dtoResult.getDomainOld());
 		session.setAttribute("domainOldForLog", cloneListDto(dtoResult.getDomainOld()));
 		session.setAttribute("domainEdits", null);
 		session.setAttribute("itemIdRCs", dtoResult.getLstControlDisplayItem() == null ? null : dtoResult.getLstControlDisplayItem().getMapDPAttendance());
 		session.setAttribute("dataSource", dtoResult.getLstData());
 		session.setAttribute("closureId", dtoResult.getClosureId());
+		session.setAttribute("dataSource1", dtoResult.getLstData());
+		session.setAttribute("resultReturn", null);
 		removeSession(session);
 		dtoResult.setDomainOld(Collections.emptyList());
 		return dtoResult;
@@ -172,6 +183,27 @@ public class DailyPerformanceCorrectionWebService {
 		removeSession(session);
 		results.setDomainOld(Collections.emptyList());
 		return results;
+	}
+	
+	@POST
+	@Path("initParam")
+	public DailyPerformanceCorrectionDto initScreen(DPParams params ) throws InterruptedException{
+		HttpSession session = httpRequest.getSession();
+		Integer closureId = params.closureId;
+		Pair<DailyPerformanceCorrectionDto, ParamCommonAsync> dtoResult = this.infomationInit.initGetParam(params.dateRange, params.lstEmployee, params.initScreen, params.mode, params.displayFormat, params.correctionOfDaily, params.formatCodes, params.showError, params.showLock, params.objectShare, closureId);
+		session.setAttribute("resultReturn", dtoResult.getLeft());
+		session.setAttribute("resultMonthReturn", dtoResult.getRight());
+		return dtoResult.getLeft();
+	}
+	
+	@POST
+	@Path("loadMonth")
+	public DailyPerformanceCorrectionDto loadMonth() throws InterruptedException{
+		HttpSession session = httpRequest.getSession();
+		ParamCommonAsync paramCommonAsync = (ParamCommonAsync) session.getAttribute("resultMonthReturn");
+		DailyPerformanceCorrectionDto result = this.processMonthScreen.processMonth(paramCommonAsync);
+		session.setAttribute("resultMonthReturn", null);
+		return result;
 	}
 	
 	@POST

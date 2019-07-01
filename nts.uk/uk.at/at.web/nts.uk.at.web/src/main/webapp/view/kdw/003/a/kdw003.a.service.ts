@@ -18,7 +18,9 @@ module nts.uk.at.view.kdw003.a.service {
         calcTime: 'screen/at/correctionofdailyperformance/calcTime',
         calculation: 'screen/at/correctionofdailyperformance/calculation',
         getRemainNum: 'screen/at/correctionofdailyperformance/getRemainNum',
-        lock: 'screen/at/correctionofdailyperformance/lock'
+        lock: 'screen/at/correctionofdailyperformance/lock',
+        loadMonth: "screen/at/correctionofdailyperformance/loadMonth",
+        initParam: "screen/at/correctionofdailyperformance/initParam"
     }
 
     export function startScreen(param) {
@@ -56,7 +58,7 @@ module nts.uk.at.view.kdw003.a.service {
     export function addClosure(param) {
         return nts.uk.request.ajax(paths.addClosure, param);
     }
-    
+
     export function releaseClosure(param) {
         return nts.uk.request.ajax(paths.releaseClosure, param);
     }
@@ -68,8 +70,8 @@ module nts.uk.at.view.kdw003.a.service {
     export function loadRow(param) {
         return nts.uk.request.ajax(paths.loadRow, param);
     }
-    
-     export function loadVerRow(param) {
+
+    export function loadVerRow(param) {
         return nts.uk.request.ajax(paths.loadVerRow, param);
     }
 
@@ -80,21 +82,29 @@ module nts.uk.at.view.kdw003.a.service {
     export function searchEmployee(employeeId: string) {
         return nts.uk.request.ajax(paths.searchEmployee + "/" + employeeId);
     }
-    
+
     export function calcTime(param: any) {
         return nts.uk.request.ajax(paths.calcTime, param);
     }
-    
+
     export function calculation(param: any) {
         return nts.uk.request.ajax(paths.calculation, param);
     }
-    
+
     export function getRemainNum(employeeId: string) {
         return nts.uk.request.ajax(paths.getRemainNum + "/" + employeeId);
-        }
+    }
 
     export function lock(param: any) {
         return nts.uk.request.ajax(paths.lock, param);
 
+    }
+
+    export function loadMonth() {
+        return nts.uk.request.ajax(paths.loadMonth);
+    }
+
+    export function initParam(param) {
+        return nts.uk.request.ajax(paths.initParam, param);
     }
 }

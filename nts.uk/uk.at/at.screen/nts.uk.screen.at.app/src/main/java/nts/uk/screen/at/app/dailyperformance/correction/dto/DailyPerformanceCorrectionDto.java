@@ -3,6 +3,7 @@
  */
 package nts.uk.screen.at.app.dailyperformance.correction.dto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
@@ -31,7 +33,9 @@ import nts.uk.screen.at.app.dailyperformance.correction.text.DPText;
  */
 @Getter
 @Setter
-public class DailyPerformanceCorrectionDto {
+@AllArgsConstructor
+public class DailyPerformanceCorrectionDto implements Serializable{
+	private static final long serialVersionUID = 1L;
 
 	private YearHolidaySettingDto yearHolidaySettingDto;
 
@@ -110,6 +114,20 @@ public class DailyPerformanceCorrectionDto {
 	
 	private DateRange rangeLock;
 	
+	private List<String> employeeIds;
+	
+	private List<String> changeEmployeeIds;
+	
+	private Optional<IdentityProcessUseSetDto> identityProcessDtoOpt;
+	
+	private Optional<ApprovalUseSettingDto> approvalUseSettingDtoOpt;
+	
+	private DateRange datePeriodResult;
+	
+	private List<DPErrorDto> lstError;
+	
+	private DisplayItem disItem;
+	
 	public DailyPerformanceCorrectionDto() {
 		super();
 		this.lstFixedHeader = DPHeaderDto.GenerateFixedHeader();
@@ -127,6 +145,12 @@ public class DailyPerformanceCorrectionDto {
 		this.errors = new ArrayList<>();
 		this.errorInfomation = DCErrorInfomation.NORMAL.value;
 		this.lockDisableFlex = false;
+		this.employeeIds = new ArrayList<>();
+		this.changeEmployeeIds = new ArrayList<>();
+		this.identityProcessDtoOpt = Optional.empty();
+		this.approvalUseSettingDtoOpt = Optional.empty();
+		this.lstError = new ArrayList<>();
+		this.disItem = new DisplayItem();
 	}
 
 	/** Check if employeeId is login user */
@@ -371,5 +395,15 @@ public class DailyPerformanceCorrectionDto {
 		this.showTighProcess = identityProcessDto.isUseIdentityOfMonth() && displayMode == 0 && userLogin && indentityMonthResult.getEnableButton();
 		indentityMonthResult.setShow26(indentityMonthResult.getShow26() && identityProcessDto.isUseIdentityOfMonth() && displayMode == 0 && userLogin);
 		indentityMonthResult.setHideAll(displayMode != 0 || !identityProcessDto.isUseIdentityOfMonth());
+	}
+	
+	public void resetDailyInit() {
+		this.employeeIds = null;
+		this.changeEmployeeIds = null;
+		this.identityProcessDtoOpt = null;
+		this.approvalUseSettingDtoOpt = null;
+		this.datePeriodResult = null;
+		this.lstError = null;
+		this.disItem = null;
 	}
 }
