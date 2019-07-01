@@ -69,7 +69,9 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	@Inject
 	private DataRecoveryLogRepository repoDataRecoveryLog;
 	@Inject
-	private SaveLogDataRecoverServices saveLogDataRecoverServices; 
+	private SaveLogDataRecoverServices saveLogDataRecoverServices;
+
+	
 	
 	/*@PersistenceContext(unitName = "UK")
     private EntityManager entityManager;*/
@@ -244,8 +246,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 				String errorContent = e.getMessage();
 				GeneralDate targetDate = GeneralDate.today();
 				String contentSql = DELETE_DATA_TABLE_SQL.toString();
-				String processingContent = "データベース復旧処理  " + TextResource.localize("CMF004_465") + " "
-						+ tableList.getTableJapaneseName();
+				String processingContent = "データベース復旧処理  " + TextResource.localize("CMF004_465") + " " + tableList.getTableJapaneseName();
 				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,
 						contentSql);
 				throw e;
@@ -404,8 +405,8 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			String errorContent = error.getMessage();
 			GeneralDate targetDate = null;
 			String contentSql = sqlContent;
-			String processingContent = "履歴データ削除  " + TextResource.localize("CMF004_462");
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,
+			String processingContent = "履歴データ削除  " + TextResource.localize("CMF004_462") + " " + table.getTableJapaneseName();
+			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,
 					processingContent, contentSql);
 			throw error;
 		}
@@ -427,10 +428,6 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 
 	@Override
 	public void deleteEmployeeDataRecovery(String dataRecoveryProcessId, List<String> employeeIdList) {
-		/*this.getEntityManager().createQuery(DELETE_BY_LIST_ID_EMPLOYEE, SspmtTarget.class)
-				.setParameter("dataRecoveryProcessId", dataRecoveryProcessId)
-				.setParameter("employeeIdList", employeeIdList).executeUpdate();*/
-		
 		CollectionUtil.split(employeeIdList, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subEmployeeIdList -> {
 			this.getEntityManager().createQuery(DELETE_BY_LIST_ID_EMPLOYEE, SspmtTarget.class)
 			.setParameter("dataRecoveryProcessId", dataRecoveryProcessId)
@@ -563,8 +560,8 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			String errorContent = error.getMessage();
 			GeneralDate targetDate = null;
 			String contentSql = sqlContent;
-			String processingContent = "履歴データ削除  " + TextResource.localize("CMF004_462") + employeeCode == null ?  table.getTableJapaneseName() : "" ;
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,
+			String processingContent = "履歴データ削除  " + TextResource.localize("CMF004_462") + " " +  table.getTableJapaneseName();
+			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,
 					processingContent, contentSql);
 			throw error;
 		}
@@ -592,10 +589,8 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	
 	private void saveErrorLogDataRecover(String recoveryProcessId, String target, String errorContent,
 			GeneralDate targetDate, String processingContent, String contentSql) {
-		int logSequenceNumber = repoDataRecoveryLog.getMaxSeqId(recoveryProcessId) + 1;
-		DataRecoveryLog dataRecoveryLog = new DataRecoveryLog(recoveryProcessId, target, errorContent, targetDate,
-				logSequenceNumber, processingContent, contentSql);
-		repoDataRecoveryLog.add(dataRecoveryLog);
+		saveLogDataRecoverServices.saveErrorLogDataRecover(recoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
+		
 	}
 
 }
