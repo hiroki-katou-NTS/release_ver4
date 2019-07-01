@@ -17,7 +17,9 @@ import lombok.val;
 import nts.arc.system.ServerSystemProperties;
 import nts.gul.csv.CSVBufferReader;
 import nts.gul.error.ThrowableAnalyzer;
+import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.DelEmpException;
 import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.SettingException;
+import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.SqlException;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 
@@ -77,12 +79,6 @@ public class ProcessRecoverOneEmpHandle {
 	@Inject
 	private DataRecoveryMngRepository dataRecoveryMngRepository;
 	@Inject
-	private PerformDataRecoveryRepository performDataRecoveryRepository;
-	@Inject
-	private SaveLogDataRecoverServices saveLogDataRecoverServices; 
-	@Inject
-	private ProcessRecoverTable processRecoverOneTable;
-	@Inject
 	private RecoveryDataByEmployee recoveryDataByEmployee;
 	
 	
@@ -140,13 +136,17 @@ public class ProcessRecoverOneEmpHandle {
 						employeeData.getEmployeeId(), listTableOrder,
 						csvByteReadMaper_TableUse,employeeData.getEmployeeCode(), listTbl);
 			} catch (Exception e) {
-				NUMBER_ERROR++;
-				dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
-				
 				val analyzer = new ThrowableAnalyzer(e);
 				if(analyzer.findByClass(SettingException.class).isPresent()){
+					NUMBER_ERROR++;
+					dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
 					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
-				} 
+				}else if (analyzer.findByClass(SqlException.class).isPresent()) {
+					NUMBER_ERROR++;
+					dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
+				}else if (analyzer.findByClass(DelEmpException.class).isPresent()) {
+					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
+				}  
 			}
 			
 			// check interruption [中断]

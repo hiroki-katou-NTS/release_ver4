@@ -11,8 +11,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +27,6 @@ import nts.gul.error.ThrowableAnalyzer;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.sys.assist.dom.category.TimeStore;
 import nts.uk.ctx.sys.assist.dom.categoryfieldmt.HistoryDiviSion;
-import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.SettingException;
 import nts.uk.ctx.sys.assist.dom.datarestoration.common.CsvFileUtil;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.shr.com.context.AppContexts;
@@ -115,22 +112,21 @@ public class ProcessRecoverTable {
 
 		// 履歴区分の判別する - check history division
 		if (table.isPresent() && table.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY) {
-			List<String> resultDel = new ArrayList<>();
-			resultDel = deleteDataEmpTableHistory(table, true, employeeId, dataRecoveryProcessId, employeeCode);
-			System.out.println("DELETE TABLE BY ANY EMP : " + table.get().getTableEnglishName());
-		if (!resultDel.isEmpty()) {
-			String target = employeeCode;
-			String errorContent = resultDel.get(1);
-			GeneralDate targetDate = GeneralDate.today();
-			String contentSql = resultDel.get(0);
-			String processingContent = "履歴データ削除";
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent,targetDate, processingContent, contentSql);
-			throw new SqlException(null);
-		}	
-		
+			try {
+				deleteDataEmpTableHistory(table, true, employeeId, dataRecoveryProcessId, employeeCode);
+				System.out.println("DELETE TABLE BY ANY EMP : " + table.get().getTableEnglishName());
+			} catch (Exception e) {
+				String target = employeeCode;
+				String errorContent = e.getMessage();
+				GeneralDate targetDate = GeneralDate.today();
+				String contentSql = e.getMessage();
+				String processingContent = "履歴データ削除";
+				saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent,
+						targetDate, processingContent, contentSql);
+				throw new DelEmpException(null);
+			}
 
-		try {
-			// 対象社員の日付順の処理
+		try {// 対象社員の日付順の処理
 			condition = crudDataByTable(dataRecoveryTable, employeeId, dataRecoveryProcessId, table,
 					performDataRecovery, resultsSetting, true, csvByteReadMaper, employeeCode);
 		} catch (Exception e) {
@@ -188,24 +184,11 @@ public class ProcessRecoverTable {
 		}
 
 		String cidCurrent = AppContexts.user().companyId();
-		String sqlContent = "";
-		try {
 			if (tableNotUse) {
-				sqlContent = performDataRecoveryRepository.deleteTransactionEmployeeHis(tableList.get(), whereCid[0], whereSid[0],cidCurrent, employeeId);
+				  performDataRecoveryRepository.deleteTransactionEmployeeHis(tableList.get(), whereCid[0], whereSid[0],cidCurrent, employeeId, employeeCode, dataRecoveryProcessId);
 			} else {
-				sqlContent = performDataRecoveryRepository.deleteEmployeeHis(tableList.get(), whereCid[0], whereSid[0], cidCurrent,employeeId);
+				  performDataRecoveryRepository.deleteEmployeeHis(tableList.get(), whereCid[0], whereSid[0], cidCurrent,employeeId, employeeCode, dataRecoveryProcessId);
 			}
-		} catch (Exception error) {
-			String target            = employeeCode;
-			String errorContent      = error.getMessage();
-			GeneralDate targetDate   = null;
-			String contentSql        = sqlContent;
-			String processingContent = "履歴データ削除  " +TextResource.localize("CMF004_462"); 
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-			 result.add(sqlContent);
-			 result.add(error.getMessage());
-			 return result;
-		}
 		return result;
 	}
 	
@@ -217,7 +200,6 @@ public class ProcessRecoverTable {
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 
-		// dieu chinh
 		List<String> targetDataHeader = CsvFileUtil.getCsvHeader(dataRecoveryTable.getFileNameCsv(),
 				dataRecoveryTable.getUploadId());
 
@@ -338,10 +320,8 @@ public class ProcessRecoverTable {
 										namePhysicalCid, cidCurrent, dataRecoveryProcessId, employeeCode);
 							}
 
-							if (count > 1 && tableUse) {
-								listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
-							} else if (count > 1 && !tableUse) {
-								continue;
+							if (count > 1) {
+								throw new SettingException(null);
 							}
 
 							indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
@@ -396,7 +376,6 @@ public class ProcessRecoverTable {
 								String contentSql = e.getMessage();
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " "+ table.get().getTableJapaneseName();
 								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-								LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
 								throw new SqlException(null);
 							}
 						}
@@ -515,10 +494,8 @@ public class ProcessRecoverTable {
 											TABLE_NAME, namePhysicalCid, cidCurrent,dataRecoveryProcessId, employeeCode);
 								}
 
-								if (count > 1 && tableUse) {
-									listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
-								} else if (count > 1 && !tableUse) {
-									continue;
+								if (count > 1) {
+									throw new SettingException(null);
 								}
 
 								indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
@@ -584,7 +561,12 @@ public class ProcessRecoverTable {
 				reader.readChunk(csvResult, null, null);
 			}
 		} catch (Exception e) {
-			throw e;
+			val analyzer = new ThrowableAnalyzer(e);
+			if(analyzer.findByClass(SettingException.class).isPresent()){
+				throw new SettingException(null);
+			} else if(analyzer.findByClass(SqlException.class).isPresent()){
+				throw new SqlException(null);
+			}
 		}
 
 		return listCondition.isEmpty() ? condition : listCondition.get(0);
@@ -607,22 +589,15 @@ public class ProcessRecoverTable {
 				// truong hop ban ghi do van con ton tai trong database : thi
 				// xoa di va insert lai
 				performDataRecoveryRepository.deleteDataExitTableByVkey(listFiledWhereToDelAndInsert, TABLE_NAME,
-						namePhysicalCid, cidCurrent, employeeCode, dataRecoveryProcessId);
+						namePhysicalCid, cidCurrent, employeeCode, dataRecoveryProcessId,tableList);
 
-				performDataRecoveryRepository.insertDataTable(deleteInsertToTable, employeeCode, dataRecoveryProcessId);
+				performDataRecoveryRepository.insertDataTable(deleteInsertToTable, employeeCode, dataRecoveryProcessId,tableList);
 			}
 			if (listFiledWhereToInsert.size() > 0) {
 				// truong hop ban ghi do bi xoa di roi : thi chỉ cần insert vào thôi.
-				performDataRecoveryRepository.insertDataTable(insertToTable, employeeCode, dataRecoveryProcessId);
+				performDataRecoveryRepository.insertDataTable(insertToTable, employeeCode, dataRecoveryProcessId,tableList);
 			}
 		} catch (Exception e) {
-			String target = employeeCode;
-			String errorContent = e.getMessage();
-			GeneralDate targetDate = GeneralDate.today();
-			String contentSql = e.getMessage();
-			String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465");
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-			LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
 			throw e;
 		}
 	}
@@ -644,23 +619,16 @@ public class ProcessRecoverTable {
 				// truong hop ban ghi do van con ton tai trong database : thi
 				// xoa di va insert lai
 				performDataRecoveryRepository.deleteTransactionDataExitTableByVkey(listFiledWhereToDelAndInsert,
-						TABLE_NAME, namePhysicalCid, cidCurrent, employeeCode, dataRecoveryProcessId);
+						TABLE_NAME, namePhysicalCid, cidCurrent, employeeCode, dataRecoveryProcessId,tableList);
 
-				performDataRecoveryRepository.insertTransactionDataTable(deleteInsertToTable, employeeCode, dataRecoveryProcessId);
+				performDataRecoveryRepository.insertTransactionDataTable(deleteInsertToTable, employeeCode, dataRecoveryProcessId,tableList);
 			}
 			if (listFiledWhereToInsert.size() > 0) {
 
-				performDataRecoveryRepository.insertTransactionDataTable(insertToTable, employeeCode, dataRecoveryProcessId);
+				performDataRecoveryRepository.insertTransactionDataTable(insertToTable, employeeCode, dataRecoveryProcessId,tableList);
 			}
 
 		} catch (Exception e) {
-			String target = employeeCode;
-			String errorContent = e.getMessage();
-			GeneralDate targetDate = GeneralDate.today();
-			String contentSql = e.getMessage();
-			String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465");
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-			LOGGER.info("Error delete  or insert data for table " + TABLE_NAME);
 			throw e;
 		}
 	}
@@ -847,7 +815,7 @@ public class ProcessRecoverTable {
 			super(cause);
 		}
 	}
-
+	
 	class SqlException extends RuntimeException {
 		/**
 		 * 
@@ -858,6 +826,15 @@ public class ProcessRecoverTable {
 			super(cause);
 		}
 	}
+	
+	class DelEmpException extends RuntimeException {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
-
+		public DelEmpException(Throwable cause) {
+			super(cause);
+		}
+	}
 }

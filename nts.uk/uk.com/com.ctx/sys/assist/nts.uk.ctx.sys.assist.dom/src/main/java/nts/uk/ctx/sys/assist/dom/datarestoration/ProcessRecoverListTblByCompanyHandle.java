@@ -19,11 +19,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import lombok.val;
 import nts.arc.system.ServerSystemProperties;
 import nts.arc.time.GeneralDate;
 import nts.gul.csv.CSVBufferReader;
 import nts.gul.csv.CSVParsedResult;
 import nts.gul.csv.NtsCsvRecord;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.sys.assist.dom.category.TimeStore;
 import nts.uk.ctx.sys.assist.dom.categoryfieldmt.HistoryDiviSion;
@@ -99,7 +101,33 @@ public class ProcessRecoverListTblByCompanyHandle {
 
 	
 	public DataRecoveryOperatingCondition recoverDataOneTable(TableList table, String dataRecoveryProcessId,DataRecoveryOperatingCondition condition,
-			DataRecoveryTable dataRecoveryTable,List<String> dateSetting,HashMap<String, CSVBufferReader> csvByteReadMaper) throws Exception {
+			DataRecoveryTable dataRecoveryTable,HashMap<String, CSVBufferReader> csvByteReadMaper) throws Exception {
+
+		// アルゴリズム「日付処理の設定」を実行し日付設定を取得する
+		List<String> dateSetting = new ArrayList<>();
+		try {
+			dateSetting = this.settingDate(table);
+		} catch (Exception e) {
+			String target = null;
+			String errorContent = null;
+			GeneralDate targetDate = null;
+			String contentSql = null;
+			String processingContent = "日付処理の設定  " + TextResource.localize("CMF004_463") + " " + table.getTableJapaneseName();
+			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,
+					processingContent, contentSql);
+			throw new SettingException2(null);
+		}
+
+		if (dateSetting.isEmpty()) {
+			String target = null;
+			String errorContent = null;
+			GeneralDate targetDate = null;
+			String contentSql = null;
+			String processingContent = "日付処理の設定  " + TextResource.localize("CMF004_463") + " " + table.getTableJapaneseName();
+			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,
+					processingContent, contentSql);
+			throw new SettingException2(null);
+		}
 
 		// 履歴区分の判別する - check phân loại lịch sử
 		if (table.getHistoryCls() == HistoryDiviSion.HAVE_HISTORY) {
@@ -113,9 +141,7 @@ public class ProcessRecoverListTblByCompanyHandle {
 				String contentSql        = e.getMessage();
 				String processingContent = "履歴データ削除 " +TextResource.localize("CMF004_462") + " " + table.getTableJapaneseName(); 
 				saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-				// #9010_1
-				LOGGER.info("Delete data of employee have history error");
-				throw new Exception(SQL_EXCEPTION);
+				throw new SettingException2(null);
 			}
 		}
 
@@ -125,19 +151,20 @@ public class ProcessRecoverListTblByCompanyHandle {
 			condition = this.crudDataByTable(dataRecoveryTable, null, dataRecoveryProcessId, table,
 					performDataRecovery, dateSetting, false, csvByteReadMaper, null);
 		} catch (Exception e) {
-			// GHI LOG
 			String target            = null;
 			String errorContent      = e.getMessage();
 			GeneralDate targetDate   = GeneralDate.today();
 			String contentSql        = e.getMessage();
 			String processingContent = "データベース復旧処理  " +TextResource.localize("CMF004_465") + " " + table.getTableJapaneseName();
 			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-			// #9010_2
 			// DELETE/INSERT error
-			throw new Exception(SQL_EXCEPTION);
-
+			val analyzer = new ThrowableAnalyzer(e);
+			if(analyzer.findByClass(SettingException2.class).isPresent()){
+				throw new SettingException2(null);
+			} else if(analyzer.findByClass(SqlException2.class).isPresent()){
+				throw new SqlException2(null);
+			}
 		}
-		
 		return condition;	
 	}
 	
@@ -166,22 +193,11 @@ public class ProcessRecoverListTblByCompanyHandle {
 			}
 		}
 
-		String cidCurrent  = AppContexts.user().companyId();
-		try {
-			if (tableNotUse) {
-				performDataRecoveryRepository.deleteTransactionEmployeeHis(tableList, whereCid[0], whereSid[0],cidCurrent, employeeId);
-			} else {
-				performDataRecoveryRepository.deleteEmployeeHis(tableList, whereCid[0], whereSid[0], cidCurrent,employeeId);
-			}
-		} catch (Exception err) {
-			String target            = null;
-			String errorContent      = err.getMessage();
-			GeneralDate targetDate   = null;
-			String contentSql        = err.getMessage();
-			String processingContent = "履歴データ削除  " +TextResource.localize("CMF004_462") + " " + tableList.getTableJapaneseName(); 
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-			// #9011
-			throw err;
+		String cidCurrent = AppContexts.user().companyId();
+		if (tableNotUse) {
+			performDataRecoveryRepository.deleteTransactionEmployeeHis(tableList, whereCid[0], whereSid[0], cidCurrent, employeeId, null, dataRecoveryProcessId);
+		} else {
+			performDataRecoveryRepository.deleteEmployeeHis(tableList, whereCid[0], whereSid[0], cidCurrent, employeeId, null, dataRecoveryProcessId);
 		}
 	}
 	
@@ -189,11 +205,10 @@ public class ProcessRecoverListTblByCompanyHandle {
 			String dataRecoveryProcessId, TableList table,
 			Optional<PerformDataRecovery> performDataRecovery, List<String> dateSetting, Boolean tableUse,
 			HashMap<String, CSVBufferReader> csvByteReadMaper, String employeeCode) throws ParseException, NoSuchMethodException,
-			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException , Exception{
+			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, Exception{
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 
-		// dieu chinh
 		List<String> targetDataHeader = CsvFileUtil.getCsvHeader(dataRecoveryTable.getFileNameCsv(),
 				dataRecoveryTable.getUploadId());
 
@@ -271,23 +286,10 @@ public class ProcessRecoverListTblByCompanyHandle {
 							}
 
 							// 履歴区分を判別する - check history division
-							try {
-								if (((tableUse && table.getHistoryCls() == HistoryDiviSion.NO_HISTORY)
-									|| !tableUse) && (performDataRecovery.isPresent()
-									&& performDataRecovery.get().getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
-									&& !checkSettingDate(dateSetting, table, h_Date_Csv))) {
-									continue;
-								}
-							} catch (Exception e) {
-								String target            = employeeCode;
-								String errorContent      = null;
-								GeneralDate targetDate   = null;
-								String contentSql        = null;
-								String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464") + table.getTableJapaneseName(); 
-								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-								// #9007_1
-								LOGGER.error("SQL error rollBack transaction " + employeeId);
-								throw new RuntimeException(e);
+							if (((tableUse && table.getHistoryCls() == HistoryDiviSion.NO_HISTORY) || !tableUse)
+								&& (performDataRecovery.isPresent()&& performDataRecovery.get().getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
+								&& !checkSettingDate(dateSetting, table, h_Date_Csv,employeeCode , dataRecoveryProcessId))) {
+								continue;
 							}
 
 							// update recovery date for have history, save
@@ -324,10 +326,8 @@ public class ProcessRecoverListTblByCompanyHandle {
 										namePhysicalCid, cidCurrent, dataRecoveryProcessId, employeeCode);
 							}
 
-							if (count > 1 && tableUse) {
-								listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
-							} else if (count > 1 && !tableUse) {
-								continue;
+							if (count > 1) {
+								throw new SettingException2(null);
 							}
 
 							indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
@@ -382,8 +382,7 @@ public class ProcessRecoverListTblByCompanyHandle {
 								String contentSql = e.getMessage();
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " "+ table.getTableJapaneseName();
 								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-								LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
-								throw new RuntimeException(e);
+								throw new SqlException2(null);
 							}
 						}
 					}
@@ -459,21 +458,10 @@ public class ProcessRecoverListTblByCompanyHandle {
 								}
 
 								// 履歴区分を判別する - check history division
-								try {
-									if (((tableUse && table.getHistoryCls() == HistoryDiviSion.NO_HISTORY)
-										|| !tableUse)&& (performDataRecovery.isPresent() && performDataRecovery.get().getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
-										&& !checkSettingDate(dateSetting, table, h_Date_Csv))) {
-											continue;
-									}
-								} catch (Exception e) {
-									String target            = null;
-									String errorContent      = null;
-									GeneralDate targetDate   = null;
-									String contentSql        = null;
-									String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464") + table.getTableJapaneseName(); 
-									saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-									// #9007_1
-									throw new RuntimeException(e);
+								if (((tableUse && table.getHistoryCls() == HistoryDiviSion.NO_HISTORY) || !tableUse)
+									&& (performDataRecovery.isPresent()&& performDataRecovery.get().getRecoveryMethod() == RecoveryMethod.RESTORE_SELECTED_RANGE
+									&& !checkSettingDate(dateSetting, table, h_Date_Csv,employeeCode , dataRecoveryProcessId ))) {
+									continue;
 								}
 
 								// update recovery date for have history, save
@@ -510,10 +498,14 @@ public class ProcessRecoverListTblByCompanyHandle {
 											TABLE_NAME, namePhysicalCid, cidCurrent,dataRecoveryProcessId, employeeCode);
 								}
 
-								if (count > 1 && tableUse) {
-									listCondition.add(DataRecoveryOperatingCondition.ABNORMAL_TERMINATION);
-								} else if (count > 1 && !tableUse) {
-									continue;
+								if (count > 1) {
+									String target = employeeCode;
+									String errorContent = null;
+									GeneralDate targetDate = GeneralDate.today();
+									String contentSql = null;
+									String processingContent = TextResource.localize("CMF004_465");
+									saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
+									throw new SettingException2(null);
 								}
 
 								indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
@@ -571,8 +563,7 @@ public class ProcessRecoverListTblByCompanyHandle {
 								String contentSql = e.getMessage();
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " " + table.getTableJapaneseName();
 								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
-								LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
-								throw new RuntimeException(e);
+								throw new SqlException2(null);
 							}
 						}
 					}
@@ -603,22 +594,15 @@ public class ProcessRecoverListTblByCompanyHandle {
 				// truong hop ban ghi do van con ton tai trong database : thi
 				// xoa di va insert lai
 				performDataRecoveryRepository.deleteDataExitTableByVkey(listFiledWhereToDelAndInsert, TABLE_NAME,
-						namePhysicalCid, cidCurrent, employeeCode, dataRecoveryProcessId);
+						namePhysicalCid, cidCurrent, employeeCode, dataRecoveryProcessId, tableList);
 
-				performDataRecoveryRepository.insertDataTable(deleteInsertToTable, employeeCode, dataRecoveryProcessId);
+				performDataRecoveryRepository.insertDataTable(deleteInsertToTable, employeeCode, dataRecoveryProcessId,tableList);
 			}
 			if (listFiledWhereToInsert.size() > 0) {
 				// truong hop ban ghi do bi xoa di roi : thi chỉ cần insert vào thôi.
-				performDataRecoveryRepository.insertDataTable(insertToTable, employeeCode, dataRecoveryProcessId);
+				performDataRecoveryRepository.insertDataTable(insertToTable, employeeCode, dataRecoveryProcessId, tableList);
 			}
 		} catch (Exception e) {
-			String target = employeeCode;
-			String errorContent = e.getMessage();
-			GeneralDate targetDate = GeneralDate.today();
-			String contentSql = e.getMessage();
-			String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465");
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-			LOGGER.info("Error delete or insert data for table " + TABLE_NAME);
 			throw e;
 		}
 	}
@@ -640,23 +624,16 @@ public class ProcessRecoverListTblByCompanyHandle {
 				// truong hop ban ghi do van con ton tai trong database : thi
 				// xoa di va insert lai
 				performDataRecoveryRepository.deleteTransactionDataExitTableByVkey(listFiledWhereToDelAndInsert,
-						TABLE_NAME, namePhysicalCid, cidCurrent, employeeCode, dataRecoveryProcessId);
+						TABLE_NAME, namePhysicalCid, cidCurrent, employeeCode, dataRecoveryProcessId, tableList);
 
-				performDataRecoveryRepository.insertTransactionDataTable(deleteInsertToTable, employeeCode, dataRecoveryProcessId);
+				performDataRecoveryRepository.insertTransactionDataTable(deleteInsertToTable, employeeCode, dataRecoveryProcessId,tableList);
 			}
 			if (listFiledWhereToInsert.size() > 0) {
 
-				performDataRecoveryRepository.insertTransactionDataTable(insertToTable, employeeCode, dataRecoveryProcessId);
+				performDataRecoveryRepository.insertTransactionDataTable(insertToTable, employeeCode, dataRecoveryProcessId,tableList);
 			}
 
 		} catch (Exception e) {
-			String target = employeeCode;
-			String errorContent = e.getMessage();
-			GeneralDate targetDate = GeneralDate.today();
-			String contentSql = e.getMessage();
-			String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465");
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-			LOGGER.info("Error delete  or insert data for table " + TABLE_NAME);
 			throw e;
 		}
 	}
@@ -668,32 +645,42 @@ public class ProcessRecoverListTblByCompanyHandle {
 				: Optional.empty();
 	}
 	
-	public Boolean checkSettingDate(List<String> resultsSetting, TableList tableList, String h_Date_Csv)
-			throws ParseException {
+	public Boolean checkSettingDate(List<String> resultsSetting, TableList tableList, String h_Date_Csv,
+			String employeeCode, String dataRecoveryProcessId) {
 
 		if (StringUtil.isNullOrEmpty(h_Date_Csv, true)) {
 			return false;
 		}
 
-		GeneralDate hDateCsv = stringToGenaralDate(h_Date_Csv);
-		GeneralDate dateFrom = stringToGenaralDate(tableList.getSaveDateFrom().get());
-		GeneralDate dateTo = stringToGenaralDate(tableList.getSaveDateTo().get());
+		try {
+			GeneralDate hDateCsv = stringToGenaralDate(h_Date_Csv);
+			GeneralDate dateFrom = stringToGenaralDate(tableList.getSaveDateFrom().get());
+			GeneralDate dateTo = stringToGenaralDate(tableList.getSaveDateTo().get());
 
-		if (YEAR.equals(resultsSetting.get(0))
-				&& (hDateCsv.year() < dateFrom.year() || hDateCsv.year() > dateTo.year())) {
-			return false;
-		} else if (YEAR_MONTH.equals(resultsSetting.get(0))) {
-			if ((dateFrom.year() > hDateCsv.year()
-					|| (dateFrom.year() == hDateCsv.year() && hDateCsv.month() < dateFrom.month()))
-					|| (dateTo.year() < hDateCsv.year()
-							|| (dateTo.year() == hDateCsv.year() && hDateCsv.month() > dateTo.month()))) {
+			if (YEAR.equals(resultsSetting.get(0))
+					&& (hDateCsv.year() < dateFrom.year() || hDateCsv.year() > dateTo.year())) {
+				return false;
+			} else if (YEAR_MONTH.equals(resultsSetting.get(0))) {
+				if ((dateFrom.year() > hDateCsv.year()
+						|| (dateFrom.year() == hDateCsv.year() && hDateCsv.month() < dateFrom.month()))
+						|| (dateTo.year() < hDateCsv.year()
+								|| (dateTo.year() == hDateCsv.year() && hDateCsv.month() > dateTo.month()))) {
+					return false;
+				}
+			} else if (YEAR_MONTH_DAY.equals(resultsSetting.get(0))
+					&& (dateFrom.after(hDateCsv) || dateTo.before(hDateCsv))) {
 				return false;
 			}
-		} else if (YEAR_MONTH_DAY.equals(resultsSetting.get(0))
-				&& (dateFrom.after(hDateCsv) || dateTo.before(hDateCsv))) {
-			return false;
+			return true;
+		} catch (Exception e) {
+			String target = employeeCode;
+			String errorContent = null;
+			GeneralDate targetDate = null;
+			String contentSql = null;
+			String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464") + " " + tableList.getTableJapaneseName();
+			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
+			throw new SettingException2(null);
 		}
-		return true;
 	}
 	
 	private GeneralDate stringToGenaralDate(String datetime) {
@@ -821,6 +808,28 @@ public class ProcessRecoverListTblByCompanyHandle {
 	
 	public static String getExtractDataStoragePath(String fileId) {
 		return DATA_STORE_PATH + "//packs//" + fileId;
+	}
+	
+	public class SettingException2 extends RuntimeException {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public SettingException2(Throwable cause) {
+			super(cause);
+		}
+	}
+	
+	public class SqlException2 extends RuntimeException {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public SqlException2(Throwable cause) {
+			super(cause);
+		}
 	}
 
 }

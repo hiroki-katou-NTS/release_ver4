@@ -27,18 +27,24 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import lombok.val;
 import nts.arc.system.ServerSystemProperties;
+import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.csv.CSVBufferReader;
+import nts.gul.error.ThrowableAnalyzer;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.sys.assist.dom.category.CategoryRepository;
 import nts.uk.ctx.sys.assist.dom.category.StorageRangeSaved;
 import nts.uk.ctx.sys.assist.dom.categoryfordelete.CategoryForDeleteRepository;
+import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverListTblByCompanyHandle.SettingException2;
+import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.SettingException;
 import nts.uk.ctx.sys.assist.dom.datarestoration.common.CsvFileUtil;
 import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletionRepository;
 import nts.uk.ctx.sys.assist.dom.storage.ResultOfSavingRepository;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
+import nts.uk.shr.com.i18n.TextResource;
 
 @Stateless
 public class RecoveryStorageService {
@@ -306,10 +312,10 @@ public class RecoveryStorageService {
 				if (empSelectRange.isEmpty())
 					return DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 				
-				this.processRecoverOneEmpHandle.recoverDataOneEmp(dataRecoveryProcessId, empSelectRange, tableList, listTarget, listTbl);
+				condition = this.processRecoverOneEmpHandle.recoverDataOneEmp(dataRecoveryProcessId, empSelectRange, tableList, listTarget, listTbl);
 				
 			} else {
-				this.processRecoverOneEmpHandle.recoverDataOneEmp(dataRecoveryProcessId, empsOrderByScd, tableList, listTarget, listTbl);
+				condition = this.processRecoverOneEmpHandle.recoverDataOneEmp(dataRecoveryProcessId, empsOrderByScd, tableList, listTarget, listTbl);
 			}
 		 }
 		return condition;
@@ -371,11 +377,11 @@ public class RecoveryStorageService {
 		
 		listTablesOrder.addAll(childTables);
 		listTablesOrder.addAll(parentTables);
-		
+		 int i =0 ;
 		// テーブル一覧のカレントの1行分の項目を取得する
 		for (DataRecoveryTable tableC : listTablesOrder) {
 			
-			System.out.println("=== Table: " + tableC.getTableEnglishName() + " Table No: " + tableC.getTableNo());
+			System.out.println("=== Table: " + i++ +" " + tableC.getTableEnglishName() + " Table No: " + tableC.getTableNo());
 			
 			Optional<TableList> table = listTbl.stream().filter(tbl -> tbl.getTableEnglishName().equals(tableC.getTableEnglishName())).findFirst();
 			
@@ -383,7 +389,7 @@ public class RecoveryStorageService {
 				return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
 			}
 			
-			// Get trạng thái domain データ復旧動作管理
+			// get trạng thái domain データ復旧動作管理
 			Optional<DataRecoveryMng> dataRecoveryMng = dataRecoveryMngRepository
 					.getDataRecoveryMngById(dataRecoveryProcessId);
 			if (dataRecoveryMng.isPresent() && dataRecoveryMng.get().getSuspendedState() == NotUseAtr.USE) {
@@ -394,10 +400,16 @@ public class RecoveryStorageService {
 
 			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, table.get().getInternalFileName(),
 																		hasSidInCsv.isEmpty() ? false : true, table.get().getTableEnglishName(), table.get().getTableJapaneseName(),
-																		table.get().getTableNo(), table.get().getHasParentTblFlg());
-
-			condition = exDataTabeRangeDate(dataRecoveryTable, table , dataRecoveryProcessId,
-					csvByteReadMaper_TableNotUse);
+					table.get().getTableNo(), table.get().getHasParentTblFlg());
+			try {
+				condition = exDataTabeRangeDate(dataRecoveryTable, table, dataRecoveryProcessId,
+						csvByteReadMaper_TableNotUse);
+			} catch (Exception e) {
+				val analyzer = new ThrowableAnalyzer(e);
+				if (analyzer.findByClass(SettingException2.class).isPresent()) {
+					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
+				}
+			}
 
 			// Xác định trạng thái error
 			if (condition == DataRecoveryOperatingCondition.ABNORMAL_TERMINATION) {
@@ -413,17 +425,6 @@ public class RecoveryStorageService {
 			HashMap<String, CSVBufferReader> csvByteReadMaper) throws ParseException, NoSuchMethodException,
 			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, Exception {
 
-		// アルゴリズム「日付処理の設定」を実行し日付設定を取得する
-		List<String> dateSetting = new ArrayList<>();
-		try {
-			dateSetting = this.settingDate(table);
-		} catch (Exception e) {
-			return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
-		}
-		
-		if (dateSetting.isEmpty()) {
-			return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
-		}
 
 		DataRecoveryOperatingCondition condition = DataRecoveryOperatingCondition.FILE_READING_IN_PROGRESS;
 
@@ -432,8 +433,9 @@ public class RecoveryStorageService {
 		CSVBufferReader reader = new CSVBufferReader(new File(filePath));
 		reader.setCharset("UTF-8");
 		csvByteReadMaper.put(dataRecoveryTable.getFileNameCsv(), reader);
-
-		condition = this.processRecoverListTblByCompanyHandle.recoverDataOneTable(table.get(),dataRecoveryProcessId,condition,dataRecoveryTable,dateSetting,csvByteReadMaper);
+		
+		condition = this.processRecoverListTblByCompanyHandle.recoverDataOneTable(table.get(),
+				dataRecoveryProcessId,condition,dataRecoveryTable,csvByteReadMaper);
 		
 		return condition;
 	}
@@ -529,4 +531,5 @@ public class RecoveryStorageService {
 	public static String getExtractDataStoragePath(String fileId) {
 		return DATA_STORE_PATH + "//packs//" + fileId;
 	}
+	
 }

@@ -16,9 +16,7 @@ import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 public class RecoveryDataByEmployee {
 	@Inject
-	private PerformDataRecoveryRepository performDataRecoveryRepository;
-	@Inject
-	private SaveLogDataRecoverServices saveLogDataRecoverServices; 
+	private PerformDataRecoveryRepository performDataRecoveryRepository; 
 	@Inject
 	private ProcessRecoverTable processRecoverOneTable;
 	public DataRecoveryOperatingCondition recoveryDataByEmployee(String dataRecoveryProcessId, String employeeId,

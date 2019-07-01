@@ -33,22 +33,22 @@ public interface PerformDataRecoveryRepository {
 			String cidCurrent, String dataRecoveryProcessId,String employeeCode);
 
 	void deleteDataExitTableByVkey(List<Map<String, String>> lsiFiledWhere2, String tableName, String namePhysicalCid,
-			String cidCurrent,String employeeCode, String dataRecoveryProcessId);
+			String cidCurrent,String employeeCode, String dataRecoveryProcessId,TableList tableList);
 	
 	void deleteTransactionDataExitTableByVkey(List<Map<String, String>> lsiFiledWhere2, String tableName, String namePhysicalCid,
-			String cidCurrent,String employeeCode, String dataRecoveryProcessId);
+			String cidCurrent,String employeeCode, String dataRecoveryProcessId, TableList tableList);
 	
-	void insertDataTable( StringBuilder insertToTable , String employeeCode, String dataRecoveryProcessId);
+	void insertDataTable( StringBuilder insertToTable , String employeeCode, String dataRecoveryProcessId, TableList tableList);
 	
-	void insertTransactionDataTable(StringBuilder insertToTable, String employeeCode, String dataRecoveryProcessId);
+	void insertTransactionDataTable(StringBuilder insertToTable, String employeeCode, String dataRecoveryProcessId, TableList tableList);
 
 	List<TableList> getByRecoveryProcessingId(String dataRecoveryProcessId);
 
 	List<TableList> getAllTableList();
 
-	String deleteEmployeeHis(TableList tableList, String whereCid, String whereSid, String cid, String employeeId );
+	void deleteEmployeeHis(TableList tableList, String whereCid, String whereSid, String cid, String employeeId,String employeeCode,String dataRecoveryProcessId );
 	
-	String deleteTransactionEmployeeHis(TableList tableList, String whereCid, String whereSid, String cid, String employeeId );
+	void deleteTransactionEmployeeHis(TableList tableList, String whereCid, String whereSid, String cid, String employeeId,String employeeCode, String dataRecoveryProcessId );
 
 	void addTargetEmployee(Target domain);
 
