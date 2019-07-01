@@ -123,7 +123,7 @@ public class ProcessRecoverTable {
 				String processingContent = "履歴データ削除";
 				saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent,
 						targetDate, processingContent, contentSql);
-				throw new DelEmpException(null);
+				throw new DelEmpException(e);
 			}
 
 		try {// 対象社員の日付順の処理
@@ -139,9 +139,9 @@ public class ProcessRecoverTable {
 			
 			val analyzer = new ThrowableAnalyzer(e);
 			if(analyzer.findByClass(SettingException.class).isPresent()){
-				throw new SettingException(null);
+				throw new SettingException(e);
 			} else if(analyzer.findByClass(SqlException.class).isPresent()){
-				throw new SqlException(null);
+				throw new SqlException(e);
 			}
 		}
 
@@ -376,7 +376,7 @@ public class ProcessRecoverTable {
 								String contentSql = e.getMessage();
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " "+ table.get().getTableJapaneseName();
 								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-								throw new SqlException(null);
+								throw new SqlException(e);
 							}
 						}
 					}
@@ -553,7 +553,7 @@ public class ProcessRecoverTable {
 								String contentSql = e.getMessage();
 								String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465") + " " + table.get().getTableJapaneseName();
 								saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
-								throw new SqlException(null);
+								throw new SqlException(e);
 							}
 						}
 					}
@@ -563,9 +563,9 @@ public class ProcessRecoverTable {
 		} catch (Exception e) {
 			val analyzer = new ThrowableAnalyzer(e);
 			if(analyzer.findByClass(SettingException.class).isPresent()){
-				throw new SettingException(null);
+				throw new SettingException(e);
 			} else if(analyzer.findByClass(SqlException.class).isPresent()){
-				throw new SqlException(null);
+				throw new SqlException(e);
 			}
 		}
 
