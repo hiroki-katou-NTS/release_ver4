@@ -2428,11 +2428,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						}
 					}
 				}
-				AtomicBoolean check = new AtomicBoolean(false);
-				// int sizeEmployee = lstRegulationInfoEmployee.size();
-				this.managedParallelWithContext.forEach(ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
-						lstRegulationInfoEmployeeNew, item -> {
-							try {
+				try {
+					this.managedParallelWithContext.forEach(ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
+							lstRegulationInfoEmployeeNew, item -> {
 								AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> asyContext = (AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>) context;
 								ProcessState aggregate = monthlyService.aggregate(asyContext, companyId,
 										item,
@@ -2444,11 +2442,10 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 									// break;
 									return;
 								}
-							} catch (Exception e) {
-								check.set(true);
-							}
 						});
-				isHasException = check.get();
+				} catch (Exception e) {
+					isHasException = true;
+				}
 				if (!listCheck.isEmpty()) {
 					if (listCheck.get(0)) {
 						break;

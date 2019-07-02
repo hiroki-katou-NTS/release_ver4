@@ -2518,26 +2518,24 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 						}
 					}
 				}
-				AtomicBoolean check = new AtomicBoolean(false);
-				// int sizeEmployee = lstRegulationInfoEmployee.size();
-				this.managedParallelWithContext.forEach(ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
+				try {
+					this.managedParallelWithContext.forEach(ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
 						lstRegulationInfoEmployeeNew, item -> {
-							try {
-								AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> asyContext = (AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>) context;
-								ProcessState aggregate = monthlyService.aggregate(asyContext, companyId,
-										item,
-										GeneralDate.legacyDate(now.date()), execId, ExecutionType.NORMAL_EXECUTION);
-								// 中断
-								if (aggregate.value == 0) {
-									// endStatusIsInterrupt = true;
-									listCheck.add(true);
-									// break;
-									return;
-								}
-							} catch (Exception e) {
-								check.set(true);
+							AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> asyContext = (AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>) context;
+							ProcessState aggregate = monthlyService.aggregate(asyContext, companyId,
+									item,
+									GeneralDate.legacyDate(now.date()), execId, ExecutionType.NORMAL_EXECUTION);
+							// 中断
+							if (aggregate.value == 0) {
+								// endStatusIsInterrupt = true;
+								listCheck.add(true);
+								// break;
+								return;
 							}
-						});
+					});
+				} catch (Exception e) {
+					isHasException = true;
+				}
 				if (!listCheck.isEmpty()) {
 					if (listCheck.get(0)) {
 						break;
