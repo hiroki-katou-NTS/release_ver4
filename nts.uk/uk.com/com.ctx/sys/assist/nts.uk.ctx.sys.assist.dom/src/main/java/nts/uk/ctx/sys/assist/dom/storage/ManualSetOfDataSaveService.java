@@ -144,6 +144,12 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 				evaluateInterruption(storeProcessingId, targetEmployees.size());
 				return;
 			}
+			
+			// ドメインモデル「データ保存動作管理」を登録する
+			if (!repoDataSto.update(storeProcessingId, manualSetting.getCategory().size(), 0,
+					OperatingCondition.SAVING)) {
+				return;
+			}
 
 			// アルゴリズム「対象データの保存」を実行
 			resultState = saveTargetData(storeProcessingId, generatorContext, manualSetting, targetEmployees);
