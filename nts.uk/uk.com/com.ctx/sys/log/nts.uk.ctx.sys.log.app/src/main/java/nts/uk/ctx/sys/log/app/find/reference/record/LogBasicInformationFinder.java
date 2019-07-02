@@ -88,6 +88,7 @@ public class LogBasicInformationFinder {
 			logParams.getEndDateOperator());*/
 			DatePeriod datePeriodTaget = new DatePeriod(logParams.getStartDateTaget(), logParams.getEndDateTaget());
 			List<LogBasicInformation> lstLogBasicInformation = new ArrayList<>();
+
 			if(recordTypeEnum.code != RecordTypeEnum.START_UP.code){
 			 lstLogBasicInformation = this.logBasicInfoRepository.findByOperatorsAndDate(cid,
 						logParams.getListOperatorEmployeeId(), logParams.getStartDateOperator(),
@@ -113,7 +114,7 @@ public class LogBasicInformationFinder {
 						if(!CollectionUtil.isEmpty(loginRecords)){
 							// Get list employeeCode operator by list information operator
 							mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo,loginRecords,null,null,null);
-							List<LogBasicInfoDto> logBasicLst = loginRecords.parallelStream().map(loginRecord ->{
+							List<LogBasicInfoDto> logBasicLst = loginRecords.stream().map(loginRecord ->{
 								// Convert log basic info to DTO
 								LogBasicInformation logBasicInformation = mapLogBasicInfo.get(loginRecord.getOperationId());
 								LogBasicInfoDto logBasicInfoDto = LogBasicInfoDto.fromDomain(logBasicInformation);
@@ -140,7 +141,6 @@ public class LogBasicInformationFinder {
 					// Get persion info log
 					List<PersonInfoCorrectionLog> listPersonInfoCorrectionLog = this.iPersonInfoCorrectionLogRepository
 							.findByTargetAndDate(operationIds,logParams.getListTagetEmployeeId());
-					
 					// Get list employeeCode operator by list information operator
 					mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo, null, listPersonInfoCorrectionLog, null, null);
 					
@@ -148,12 +148,12 @@ public class LogBasicInformationFinder {
 					List<String> itemDefinitionIds = new ArrayList<>();
 					List<PersonInfoCorrectionLog> listDataPersionInforReturn = new ArrayList<>();
 					
-					List<String> categoryIds = listPersonInfoCorrectionLog == null? new ArrayList<>(): listPersonInfoCorrectionLog.parallelStream().filter(c -> !CollectionUtil.isEmpty(c.getCategoryCorrections()))
+					List<String> categoryIds = listPersonInfoCorrectionLog == null? new ArrayList<>(): listPersonInfoCorrectionLog.stream().filter(c -> !CollectionUtil.isEmpty(c.getCategoryCorrections()))
 							.map(perCorrectLog ->{
 								listDataPersionInforReturn.add(perCorrectLog);
 								List<CategoryCorrectionLog> lstCate = perCorrectLog.getCategoryCorrections();
-									  return  lstCate.parallelStream().filter(c -> !CollectionUtil.isEmpty(c.getItemInfos())).map(c -> {
-										List<String> itemIds = c.getItemInfos().parallelStream().map(item -> item.getItemId()).collect(Collectors.toList());
+									  return  lstCate.stream().filter(c -> !CollectionUtil.isEmpty(c.getItemInfos())).map(c -> {
+										List<String> itemIds = c.getItemInfos().stream().map(item -> item.getItemId()).collect(Collectors.toList());
 										itemDefinitionIds.addAll(itemIds);
 										return c.getCategoryId();
 									}).collect(Collectors.toList());
@@ -169,7 +169,7 @@ public class LogBasicInformationFinder {
 						// Get list subHeader
 						List<LogOutputItemDto> lstHeaderTemp = new ArrayList<>();
 						List<LogOutputItemDto> lstHeader = logOuputItemFinder.getLogOutputItemByItemNosAndRecordType(Arrays.asList(listSubHeaderText),logParams.getRecordType());
-						listDataPersionInforReturn.parallelStream().forEach(personInfoCorrectionLog ->{
+						listDataPersionInforReturn.stream().forEach(personInfoCorrectionLog ->{
 							// Convert log basic info to DTO
 							LogBasicInformation logBasicInformation = mapLogBasicInfo.get(personInfoCorrectionLog.getOperationId());
 							LogBasicInfoDto logBasicInfoDto = LogBasicInfoDto.fromDomain(logBasicInformation);
@@ -336,7 +336,7 @@ public class LogBasicInformationFinder {
 		targetDataCorrect.entrySet().forEach(c ->{
 			if (c.getValue().getTargetKey() == TargetDataType.SCHEDULE.value
 					|| c.getValue().getTargetKey() == TargetDataType.DAILY_RECORD.value) {
-				List<LogOutputItemDto> lstHeader1 = lstHeader.parallelStream()
+				List<LogOutputItemDto> lstHeader1 = lstHeader.stream()
 						.filter(h -> listHeaderDateTimeText.contains(String.valueOf(h.getItemNo())))
 						.collect(Collectors.toList());
 				result.put(String.valueOf(c.getValue().getTargetKey()), lstHeader1);
@@ -346,7 +346,7 @@ public class LogBasicInformationFinder {
 					|| c.getValue().getTargetKey() == TargetDataType.ANY_PERIOD_SUMMARY.value
 					|| c.getValue().getTargetKey() == TargetDataType.SALARY_DETAIL.value
 					|| c.getValue().getTargetKey() == TargetDataType.BONUS_DETAIL.value) {
-				List<LogOutputItemDto> lstHeader1 = lstHeader.parallelStream()
+				List<LogOutputItemDto> lstHeader1 = lstHeader.stream()
 						.filter(h -> listHeaderMothText.contains(String.valueOf(h.getItemNo())))
 						.collect(Collectors.toList());
 				result.put(String.valueOf(c.getValue().getTargetKey()), lstHeader1);
@@ -355,7 +355,7 @@ public class LogBasicInformationFinder {
 			if (c.getValue().getTargetKey() == TargetDataType.YEAR_END_ADJUSTMENT.value
 					|| c.getValue().getTargetKey() == TargetDataType.MONTHLY_CALCULATION.value
 					|| c.getValue().getTargetKey() == TargetDataType.RISING_SALARY_BACK.value) {
-				List<LogOutputItemDto> lstHeader1 = lstHeader.parallelStream()
+				List<LogOutputItemDto> lstHeader1 = lstHeader.stream()
 						.filter(h -> listHeaderYearText.contains(String.valueOf(h.getItemNo())))
 						.collect(Collectors.toList());
 				result.put(String.valueOf(c.getValue().getTargetKey()), lstHeader1);

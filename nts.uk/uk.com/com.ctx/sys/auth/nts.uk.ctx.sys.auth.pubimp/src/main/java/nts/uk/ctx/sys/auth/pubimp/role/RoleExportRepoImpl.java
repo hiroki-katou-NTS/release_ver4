@@ -5,6 +5,7 @@
 package nts.uk.ctx.sys.auth.pubimp.role;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
@@ -242,6 +243,12 @@ public class RoleExportRepoImpl implements RoleExportRepo {
 				data.isOfficeHelperPersonne(),
 				data.isPersonalInformation());
 		return exData;
+	}
+
+	@Override
+	public Map<String, String> getNameLstByRoleIds(String cid, List<String> roleIds) {
+		Map<String, String> result = this.roleRepo.findRoleIdAndNameByListRoleId(cid, roleIds.stream().distinct().collect(Collectors.toList()));
+		return result;
 	}
 
 }

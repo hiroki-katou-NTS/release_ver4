@@ -8,7 +8,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
@@ -657,6 +659,32 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 				});
 				
 				resultList.addAll(subResults);
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return resultList;
+	}
+
+	@Override
+	public Map<String, String> getAllSidAndScdBySids(List<String> sids) {
+		Map<String, String> resultList = new HashMap<>();
+		CollectionUtil.split(sids, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			
+			String sql = "SELECT SID, SCD"
+					+ " FROM BSYMT_EMP_DTA_MNG_INFO"
+					+ " WHERE SID IN (" + NtsStatement.In.createParamsString(subList) + ")";
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setString(i + 1, subList.get(i));
+				}
+				
+				new NtsResultSet(stmt.executeQuery()).getList(r -> {
+					resultList.put(r.getString("SID"), r.getString("SCD"));
+					return null;
+				});
+				
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
 			}

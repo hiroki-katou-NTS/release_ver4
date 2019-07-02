@@ -6,6 +6,7 @@ package nts.uk.ctx.sys.auth.dom.role;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface RoleRepository {
@@ -124,4 +125,13 @@ public interface RoleRepository {
 	default List<Role> findById(String roleId) {
 		return this.findByListId(Arrays.asList(roleId));
 	}
+	
+	/**
+	 * đối ứng bug 108119- CLI003
+	 * findRoleIdAndNameByListRoleId
+	 * @param cid
+	 * @param roleIds
+	 * @return
+	 */
+	Map<String, String> findRoleIdAndNameByListRoleId(String cid, List<String> roleIds);
 }

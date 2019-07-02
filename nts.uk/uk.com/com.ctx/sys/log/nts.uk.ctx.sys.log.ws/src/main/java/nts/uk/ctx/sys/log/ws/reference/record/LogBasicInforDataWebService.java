@@ -34,14 +34,6 @@ public class LogBasicInforDataWebService extends WebService {
 		List<LogBasicInfoAllDto> lstLoginBasicInfor = logBasicInformationAllFinder.findByOperatorsAndDate(logParams);
 		return lstLoginBasicInfor;
 	}
-	
-//	@POST
-//	@Path("filterLogData")
-//	public List<Map<String, Object>> filterDataLog(LogParams logParams) {
-//		
-//		
-//		return lstData;
-//	}
 
 	@POST
 	@Path("export-csv-screeni")

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -981,6 +982,17 @@ public class SyEmployeePubImp implements SyEmployeePub {
 		//取得できた「所属会社履歴（社員別）」の社員IDを返す
 		List<String> lstSidResult = affComHistRepo.getLstSidByLstSidAndPeriod(listEmp, period);
 		return lstSidResult;
+	}
+
+	@Override
+	public Map<String, String> getAllSidAndScdBySids(List<String> sids) {
+		if (CollectionUtil.isEmpty(sids)) {
+			return new HashMap<>();
+		}
+		// Lấy toàn bộ domain「社員データ管理情報」, convert sid, scd
+		Map<String, String> empMaps = this.empDataMngRepo
+				.getAllSidAndScdBySids(sids.stream().distinct().collect(Collectors.toList()));
+		return empMaps;
 	}
 	
 }
