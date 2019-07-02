@@ -639,12 +639,14 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		
 		GeneralDate finalDate = query.getBaseDate();
 
-        List<WkpHistImport> workplaceList;
+        List<WkpHistImport> workplaceList = new ArrayList<>();
         {
             List<WkpHistImport> workplaceListSync = Collections.synchronizedList(new ArrayList<>());
             this.parallel.forEach(query.getEmployeeId(), sid -> {
                 WkpHistImport workplaceImport = workplaceAdapter.findWkpBySid(sid, finalDate);
-                workplaceListSync.add(workplaceImport);
+                if(workplaceImport != null) {
+                	workplaceListSync.add(workplaceImport);
+                }
             });
             workplaceList = new ArrayList<>(workplaceListSync);
         }
