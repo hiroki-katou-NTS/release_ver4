@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.function.app.export.holidaysremaining;
 
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +30,6 @@ import nts.uk.ctx.at.function.dom.adapter.RegulationInfoEmployeeAdapter;
 import nts.uk.ctx.at.function.dom.adapter.annualworkschedule.EmployeeInformationAdapter;
 import nts.uk.ctx.at.function.dom.adapter.annualworkschedule.EmployeeInformationImport;
 import nts.uk.ctx.at.function.dom.adapter.annualworkschedule.EmployeeInformationQueryDtoImport;
-import nts.uk.ctx.at.function.dom.adapter.holidaysremaining.AbsenceReruitmentManaAdapter;
 import nts.uk.ctx.at.function.dom.adapter.holidaysremaining.AnnLeaGrantNumberImported;
 import nts.uk.ctx.at.function.dom.adapter.holidaysremaining.AnnLeaveOfThisMonthImported;
 import nts.uk.ctx.at.function.dom.adapter.holidaysremaining.AnnLeaveRemainingAdapter;
@@ -68,9 +66,6 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query.Brea
 import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query.BreakDayOffRemainMngOfInPeriod;
 import nts.uk.ctx.at.shared.dom.remainingnumber.breakdayoffmng.export.query.BreakDayOffRemainMngParam;
 import nts.uk.ctx.at.shared.dom.specialholiday.SpecialHoliday;
-import nts.uk.ctx.at.shared.dom.vacation.setting.ManageDistinct;
-import nts.uk.ctx.at.shared.dom.vacation.setting.annualpaidleave.AnnualPaidLeaveSetting;
-import nts.uk.ctx.at.shared.dom.vacation.setting.annualpaidleave.AnnualPaidLeaveSettingRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
@@ -110,8 +105,8 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 	// private GetReserveLeaveNumbersAdpter reserveLeaveAdpter;
 	// @Inject
 	// private MonthlyDayoffRemainAdapter monthlyDayoffAdapter;
-	@Inject
-	private AbsenceReruitmentManaAdapter absenceReruitmentAdapter;
+//	@Inject
+//	private AbsenceReruitmentManaAdapter absenceReruitmentAdapter;
 	@Inject
 	private ComplileInPeriodOfSpecialLeaveAdapter specialLeaveAdapter;
 	@Inject
@@ -127,8 +122,8 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 	@Inject
 	private HolidayRemainMergeAdapter hdRemainAdapter;
 	@Inject
-	private AnnualPaidLeaveSettingRepository annualPaidLeaveSettingRepository;
-	@Inject
+//	private AnnualPaidLeaveSettingRepository annualPaidLeaveSettingRepository;
+//	@Inject
 	private AbsenceReruitmentMngInPeriodQuery absenceReruitmentMngInPeriodQuery;
 	@Inject
 	private BreakDayOffMngInPeriodQuery breakDayOffMngInPeriodQuery;
