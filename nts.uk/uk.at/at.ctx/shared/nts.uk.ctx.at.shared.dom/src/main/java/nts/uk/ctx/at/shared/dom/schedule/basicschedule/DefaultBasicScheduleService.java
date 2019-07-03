@@ -475,12 +475,12 @@ public class DefaultBasicScheduleService implements BasicScheduleService {
 	            closeAtr = 4;
 	            break;
 	        }
-            if (wTypeCd != null) {
+            if (tempAbsenceFrNo == 1) {
                 return wTypeCd;
             }
 	        
 			// 休業区分の勤務種類コードを取得する
-			List<WorkTypeSet> lstWorkTypeSet = this.workTypeRepo.findWorkTypeSetCloseAtrDeprecateAtr(companyId,
+			List<WorkTypeSet> lstWorkTypeSet = this.workTypeRepo.findWorkTypeByClosure(companyId,
 					closeAtr, DeprecateClassification.NotDeprecated.value);
 			if(!lstWorkTypeSet.isEmpty()){
 				return lstWorkTypeSet.get(FIRST_DATA).getWorkTypeCd().v();
