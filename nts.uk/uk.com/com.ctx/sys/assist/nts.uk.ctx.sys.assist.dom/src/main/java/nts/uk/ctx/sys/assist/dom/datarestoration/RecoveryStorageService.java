@@ -36,7 +36,6 @@ import nts.gul.text.StringUtil;
 import nts.uk.ctx.sys.assist.dom.category.CategoryRepository;
 import nts.uk.ctx.sys.assist.dom.category.StorageRangeSaved;
 import nts.uk.ctx.sys.assist.dom.categoryfordelete.CategoryForDeleteRepository;
-import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverListTblByCompanyHandle.SettingException2;
 import nts.uk.ctx.sys.assist.dom.datarestoration.common.CsvFileUtil;
 import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletionRepository;
 import nts.uk.ctx.sys.assist.dom.storage.ResultOfSavingRepository;
@@ -162,9 +161,6 @@ public class RecoveryStorageService {
 		
 		// get list table by dataRecoveryProcessId (khg co trong eap)
 		List<TableList> listTbl = performDataRecoveryRepository.getByDataRecoveryId(dataRecoveryProcessId);
-
-		// ログ連番をZeroクリア
-		saveLogDataRecoverServices.saveStartDataRecoverLog(dataRecoveryProcessId);
 
 		// 処理対象のカテゴリを処理する
 		if (!listCtgId.isEmpty()) {
@@ -374,15 +370,15 @@ public class RecoveryStorageService {
 		
 		listTablesOrder.addAll(childTables);
 		listTablesOrder.addAll(parentTables);
-		 int i =0 ;
+		 int NUMBER_ERROR = 0;
 		// テーブル一覧のカレントの1行分の項目を取得する
-		for (DataRecoveryTable tableC : listTablesOrder) {
+		for (DataRecoveryTable table : listTablesOrder) {
 			
-			System.out.println("=== Table: " + i++ +" " + tableC.getTableEnglishName() + " Table No: " + tableC.getTableNo());
+			System.out.println("=== Table: "  + table.getTableEnglishName() + " Table No: " + table.getTableNo());
 			
-			Optional<TableList> table = listTbl.stream().filter(tbl -> tbl.getTableEnglishName().equals(tableC.getTableEnglishName())).findFirst();
+			Optional<TableList> tableOpt = listTbl.stream().filter(tbl -> tbl.getTableEnglishName().equals(table.getTableEnglishName())).findFirst();
 			
-			if (!table.isPresent()) {
+			if (!tableOpt.isPresent()) {
 				return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
 			}
 			
@@ -393,17 +389,24 @@ public class RecoveryStorageService {
 				return DataRecoveryOperatingCondition.INTERRUPTION_END;
 			}
 
-			Set<String> hasSidInCsv = CsvFileUtil.getListSid(uploadId, table.get().getInternalFileName().toString());
+			Set<String> hasSidInCsv = CsvFileUtil.getListSid(uploadId, tableOpt.get().getInternalFileName().toString());
 
-			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, table.get().getInternalFileName(),
-																		hasSidInCsv.isEmpty() ? false : true, table.get().getTableEnglishName(), table.get().getTableJapaneseName(),
-					table.get().getTableNo(), table.get().getHasParentTblFlg());
+			DataRecoveryTable dataRecoveryTable = new DataRecoveryTable(uploadId, tableOpt.get().getInternalFileName(),
+																		hasSidInCsv.isEmpty() ? false : true, tableOpt.get().getTableEnglishName(), tableOpt.get().getTableJapaneseName(),
+					tableOpt.get().getTableNo(), tableOpt.get().getHasParentTblFlg());
 			try {
-				condition = exDataTabeRangeDate(dataRecoveryTable, table, dataRecoveryProcessId,
+				condition = exDataTabeRangeDate(dataRecoveryTable, tableOpt, dataRecoveryProcessId,
 						csvByteReadMaper_TableNotUse);
 			} catch (Exception e) {
 				val analyzer = new ThrowableAnalyzer(e);
-				if (analyzer.findByClass(SettingException2.class).isPresent()) {
+				if (analyzer.findByClass(SettingExceptionByCom.class).isPresent()) {
+					NUMBER_ERROR++;
+					dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
+					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
+				}else if (analyzer.findByClass(SqlExceptionByCom.class).isPresent()) {
+					NUMBER_ERROR++;
+					dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
+				}else if (analyzer.findByClass(DelDataTableHisExceptionByCom.class).isPresent()) {
 					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
 				}
 			}
@@ -431,8 +434,7 @@ public class RecoveryStorageService {
 		reader.setCharset("UTF-8");
 		csvByteReadMaper.put(dataRecoveryTable.getFileNameCsv(), reader);
 		
-		condition = this.processRecoverListTblByCompanyHandle.recoverDataOneTable(table.get(),
-				dataRecoveryProcessId,condition,dataRecoveryTable,csvByteReadMaper);
+		condition = this.processRecoverListTblByCompanyHandle.recoverDataOneTable(table.get(),dataRecoveryProcessId,condition,dataRecoveryTable,csvByteReadMaper);
 		
 		return condition;
 	}
