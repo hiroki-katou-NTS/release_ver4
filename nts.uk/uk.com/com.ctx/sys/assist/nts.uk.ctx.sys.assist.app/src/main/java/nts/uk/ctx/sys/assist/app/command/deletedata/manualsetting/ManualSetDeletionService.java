@@ -5,11 +5,9 @@ package nts.uk.ctx.sys.assist.app.command.deletedata.manualsetting;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +40,7 @@ import nts.uk.ctx.sys.assist.dom.deletedata.ManagementDeletion;
 import nts.uk.ctx.sys.assist.dom.deletedata.ManagementDeletionRepository;
 import nts.uk.ctx.sys.assist.dom.deletedata.ManualSetDeletion;
 import nts.uk.ctx.sys.assist.dom.deletedata.OperatingCondition;
+import nts.uk.ctx.sys.assist.dom.deletedata.PasswordCompressFileEncrypt;
 import nts.uk.ctx.sys.assist.dom.deletedata.Result;
 import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletion;
 import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletionRepository;
@@ -208,7 +207,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 		ResultDeletion resultDomain = ResultDeletion.createFromJavatype(domain.getDelId(), domain.getCompanyId(),
 				domain.getDelName().v(), delType, domain.isSaveBeforeDeleteFlg(), null, numberEmployees,
 				domain.getSystemType(), domain.getSId(), SaveStatus.SUCCESS.value, startDateTimeDel, null, null, null,
-				fileSize);
+				fileSize, null);
 		repoResultDel.add(resultDomain);
 	}
 
@@ -308,10 +307,17 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			resultDel.setFileName(new FileName(nameFile));
 			resultDel.setFileSize(fileSize);
 			resultDel.setFileId(fileId);
-			if (isSaveBeforeDeleteFlg) {
-				resultDel.setDeletedFilesFlg(false);
-			} else {
+			if (fileId == null || fileId == "") {
 				resultDel.setDeletedFilesFlg(true);
+			} else {
+				resultDel.setDeletedFilesFlg(false);
+			}
+			
+			// redmine #108204
+			if (domain.isExistCompressPassFlg()) {
+				resultDel.setPasswordCompressFileEncrypt(domain.getPasswordCompressFileEncrypt());
+			} else {
+				resultDel.setPasswordCompressFileEncrypt(null);
 			}
 			repoResultDel.update(resultDel);
 		}
