@@ -271,29 +271,20 @@ public class MonthlyPerformanceCorrectionProcessor {
 		if (param.getInitMenuMode() == 0 || param.getInitMenuMode() == 1) {// normal mode hoac unlock mode
 			// 7. アルゴリズム「通常モードで起動する」を実行する
 			// アルゴリズム「<<Public>> 就業条件で社員を検索して並び替える」を実行する
-			List<RegulationInfoEmployeeQueryR> regulationRs = regulationInfoEmployeePub
-					.search(createQueryEmployee(new ArrayList<>(), screenDto.getLstActualTimes().get(0).getStartDate(),
-							screenDto.getLstActualTimes().get(0).getEndDate()));
-
-			List<MonthlyPerformanceEmployeeDto> lstEmployeeDto = regulationRs.stream().map(item -> {
-				return new MonthlyPerformanceEmployeeDto(item.getEmployeeId(), item.getEmployeeCode(),
-						item.getEmployeeName(), item.getWorkplaceName(), item.getWorkplaceId(), "", false);
-			}).collect(Collectors.toList());
-			
-			List<String> lstSId = lstEmployeeDto.stream().map(x->x.getId()).collect(Collectors.toList());
-			List<MonthlyPerformanceEmployeeDto> lstEmployee = new ArrayList<>();
-			
 			if (param.getLstEmployees() != null && !param.getLstEmployees().isEmpty()) {
-				param.getLstEmployees().forEach(x -> {
-					if (lstSId.contains(x.getId())) {
-						lstEmployee.add(x);
-					}
-				});
+				screenDto.setLstEmployee(param.getLstEmployees());
 			} else {
-				lstEmployee.addAll(lstEmployeeDto);
+				List<RegulationInfoEmployeeQueryR> regulationRs = regulationInfoEmployeePub.search(
+						createQueryEmployee(new ArrayList<>(), presentClosingPeriodExport.get().getClosureStartDate(),
+								presentClosingPeriodExport.get().getClosureEndDate()));
+
+				List<MonthlyPerformanceEmployeeDto> lstEmployeeDto = regulationRs.stream().map(item -> {
+					return new MonthlyPerformanceEmployeeDto(item.getEmployeeId(), item.getEmployeeCode(),
+							item.getEmployeeName(), item.getWorkplaceName(), item.getWorkplaceId(), "", false);
+				}).collect(Collectors.toList());
+				screenDto.setLstEmployee(lstEmployeeDto);
+				param.setLstEmployees(lstEmployeeDto);
 			}
-			screenDto.setLstEmployee(lstEmployee);
-			param.setLstEmployees(lstEmployee);
 			
 			screenDto.setLoginUser(employeeId);
 
