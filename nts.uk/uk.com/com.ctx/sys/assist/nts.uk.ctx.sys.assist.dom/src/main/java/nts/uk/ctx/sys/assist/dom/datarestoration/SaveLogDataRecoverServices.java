@@ -23,16 +23,31 @@ public class SaveLogDataRecoverServices {
 			GeneralDate targetDate, String processingContent, String contentSql) {
 		GeneralDate logTime = GeneralDate.today();
 		int logSequenceNumber = repoDataRecoveryLog.getMaxSeqId(recoveryProcessId) + 1;
-		DataRecoveryLog dataRecoveryLog = new DataRecoveryLog(recoveryProcessId, target, errorContent, logTime,
-				logSequenceNumber, processingContent, contentSql);
+		String errorContent_ = "";
+		if (errorContent.length() > 1999) {
+			errorContent_ = errorContent.substring(0,1990);
+		}else{
+			errorContent_ = errorContent;
+		}
+		
+		String processingContent_ = "";
+		if (processingContent.length() > 100) {
+			processingContent_ = processingContent.substring(0, 95);
+		}else{
+			processingContent_ = processingContent;
+		}
+		
+		String contentSql_ = "";
+		if (contentSql.length() > 1999) {
+			contentSql_ = contentSql.substring(0, 1990);
+		}else{
+			contentSql_ = contentSql;
+		}
+		 
+		
+		DataRecoveryLog dataRecoveryLog = new DataRecoveryLog(recoveryProcessId, target, errorContent_, logTime,
+				logSequenceNumber, processingContent_, contentSql_);
 		repoDataRecoveryLog.add(dataRecoveryLog);
+		System.out.println("testtt");
 	}
-	
-	public void saveStartDataRecoverLog(String dataRecoveryProcessId) {
-		GeneralDate logTime = GeneralDate.today();
-		DataRecoveryLog resultLogDomain = DataRecoveryLog.createFromJavatype(dataRecoveryProcessId, null, null, logTime,
-				0, null, null);
-		repoDataRecoveryLog.add(resultLogDomain);
-	}
-
 }

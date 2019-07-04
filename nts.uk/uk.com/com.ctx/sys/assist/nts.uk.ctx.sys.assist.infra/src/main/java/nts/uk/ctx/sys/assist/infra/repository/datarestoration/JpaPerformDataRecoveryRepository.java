@@ -23,14 +23,12 @@ import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.assist.dom.category.StorageRangeSaved;
-import nts.uk.ctx.sys.assist.dom.datarestoration.DataRecoveryLog;
 import nts.uk.ctx.sys.assist.dom.datarestoration.DataRecoveryLogRepository;
 import nts.uk.ctx.sys.assist.dom.datarestoration.PerformDataRecovery;
 import nts.uk.ctx.sys.assist.dom.datarestoration.PerformDataRecoveryRepository;
 import nts.uk.ctx.sys.assist.dom.datarestoration.RestorationTarget;
 import nts.uk.ctx.sys.assist.dom.datarestoration.SaveLogDataRecoverServices;
 import nts.uk.ctx.sys.assist.dom.datarestoration.Target;
-import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverListTblByCompanyHandle.SettingException2;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.ctx.sys.assist.infra.entity.datarestoration.SspmtPerformDataRecovery;
 import nts.uk.ctx.sys.assist.infra.entity.datarestoration.SspmtRestorationTarget;
@@ -247,8 +245,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 				GeneralDate targetDate = GeneralDate.today();
 				String contentSql = DELETE_DATA_TABLE_SQL.toString();
 				String processingContent = "データベース復旧処理  " + TextResource.localize("CMF004_465") + " " + tableList.getTableJapaneseName();
-				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,
-						contentSql);
+				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
 				throw e;
 			}
 			
