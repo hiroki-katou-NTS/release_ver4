@@ -274,24 +274,7 @@ module kcp009.viewmodel {
             //Acquire Employee from key
             
             // System
-            let system: string;
-            switch (self.systemType) {
-                case SystemType.EMPLOYMENT:
-                    system = 'emp';
-                    break;
-
-                case SystemType.PERSONNEL:
-                    system = 'hrm';
-                    break;
-
-                case SystemType.SALARY:
-                    system = 'sal';
-                    break;
-
-                case SystemType.ACCOUNTING:
-                    system = 'acc';
-                    break;
-            }
+            let system: any = self.systemType;
             // Search
             service.searchEmployee(self.keySearch(), system, self.baseDate()).done(function(employee: service.model.EmployeeSearchData) {
                 // find Exist Employee in List
@@ -303,10 +286,6 @@ module kcp009.viewmodel {
                     // Set Selected Item
                     self.selectedItem(existItem.id);
                     self.empDisplayCode(existItem.code);
-//                    self.empBusinessName(existItem.businessName);
-                    // Set OrganizationName
-//                    self.organizationName((self.systemType == SystemType.EMPLOYMENT) ?
-//                        existItem.workplaceName : existItem.depName);
                     self.empBusinessName(employee.businessName);
                     self.organizationName((self.systemType == SystemType.EMPLOYMENT) ?
                         employee.wkpDisplayName : employee.deptDisplayName);
