@@ -727,6 +727,8 @@ project (':com.ctx:bs:employee:nts.uk.ctx.bs.employee.ac') {
 		compile project(':com.ctx:bs:company:nts.uk.ctx.bs.company.pub')
 		compile project(':com.ctx:sys:auth:nts.uk.ctx.sys.auth.pub')
 		compile project(':com.ctx:sys:assist:nts.uk.ctx.sys.assist.pub')
+		compile project(':query:nts.uk.query.pub')
+		
 	}
 }
 
