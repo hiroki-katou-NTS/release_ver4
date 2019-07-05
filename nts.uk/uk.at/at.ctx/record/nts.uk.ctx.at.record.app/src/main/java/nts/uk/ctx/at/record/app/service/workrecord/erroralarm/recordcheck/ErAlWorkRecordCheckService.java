@@ -389,7 +389,7 @@ public class ErAlWorkRecordCheckService {
 				result.put(markDate, count);
 			}
 			
-			if (finishing || (count <= 0 && info.getYmd().before(endMark))) {
+			if (finishing || (count <= 0 && info.getYmd().beforeOrEquals(endMark))) {
 				return;
 			}
 			
