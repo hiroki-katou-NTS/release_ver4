@@ -339,12 +339,11 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 				if (closureDate.getClosureDay().v() != 0 || closureDate.getLastDayOfMonth()) {
 
 					// Get start time - end time
-					YearMonth startYearMonth = closureDate.getLastDayOfMonth() ? request.getStartDate().yearMonth()
-							: request.getStartDate().yearMonth().previousMonth();
-					YearMonth endYearMonth = closureDate.getLastDayOfMonth() ? request.getEndDate().yearMonth()
-							: request.getEndDate().yearMonth().previousMonth();
-					YearMonth yearMonth = startYearMonth;
-
+					DatePeriod datePeriod = employeePeriod.get(employee.employeeId);
+					
+					YearMonth endYearMonth = datePeriod.end().yearMonth();
+					YearMonth yearMonth = datePeriod.start().yearMonth();
+					
 					if (attendanceTypeList.isEmpty()) {
 						attendanceTypeList.addAll(attendanceRepo.getItemByAtrandType(AppContexts.user().companyId(),
 								screenUseAtrList, 1));
