@@ -207,6 +207,7 @@ public class ValidatorDataDailyRes {
 		return checkContinuousHolidays(employeeId, date, new ArrayList<>());
 	}
 	
+	//大塚カスタマイズチェック処理
 	public List<DPItemValue> checkContinuousHolidays(String employeeId, DateRange date, List<WorkInfoOfDailyPerformance> workInfos) {
 		List<DPItemValue> r = new ArrayList<>();
 		

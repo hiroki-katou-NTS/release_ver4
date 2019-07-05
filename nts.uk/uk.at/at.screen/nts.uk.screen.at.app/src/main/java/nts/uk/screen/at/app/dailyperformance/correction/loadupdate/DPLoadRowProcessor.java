@@ -169,7 +169,7 @@ public class DPLoadRowProcessor {
 						x -> x.getEditState()));
 		/// アルゴリズム「実績エラーをすべて取得する」を実行する | Execute "Acquire all actual errors"
 		List<DPErrorDto> lstError = listEmployeeId.isEmpty() ? new ArrayList<>()
-				: repo.getListDPError(dateRange, listEmployeeId);
+				: repo.getListDPError(dateRange, listEmployeeId).stream().distinct().collect(Collectors.toList());
 				
 		Map<String, String> listEmployeeError = lstError.stream()
 				.collect(Collectors.toMap(e -> e.getEmployeeId(), e -> "", (x, y) -> x));

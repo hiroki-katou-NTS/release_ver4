@@ -646,6 +646,7 @@ public class DailyModifyResCommandFacade {
 			});
 		}
 		
+		//大塚カスタマイズチェック処理
 		if (dataParent.getMode() == 0) {
 			List<DPItemValue> dataCheck = new ArrayList<>();
 			if (!dataParent.isFlagCalculation() && resultIU.getCommandNew() != null) {

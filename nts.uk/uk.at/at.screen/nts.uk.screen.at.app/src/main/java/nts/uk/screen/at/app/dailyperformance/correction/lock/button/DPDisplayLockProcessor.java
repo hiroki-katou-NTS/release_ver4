@@ -98,7 +98,7 @@ public class DPDisplayLockProcessor {
 								x -> x.getEditState()));
 
 		List<DPErrorDto> lstError = listEmployeeId.isEmpty() ? new ArrayList<>()
-				: repo.getListDPError(dateRange, listEmployeeId);
+				: repo.getListDPError(dateRange, listEmployeeId).stream().distinct().collect(Collectors.toList());
 
 		Map<Integer, DPAttendanceItem> mapDP = param.getLstAttendanceItem().stream()
 				.collect(Collectors.toMap(DPAttendanceItem::getId, x -> x));

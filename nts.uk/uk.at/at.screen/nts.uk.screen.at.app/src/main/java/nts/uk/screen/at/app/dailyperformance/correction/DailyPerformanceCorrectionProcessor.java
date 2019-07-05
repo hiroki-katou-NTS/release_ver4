@@ -1006,7 +1006,7 @@ public class DailyPerformanceCorrectionProcessor {
 			/// list" + "work error error alarm" | lay loi thanh tich trong
 			/// khoang thoi gian
 			return listEmployeeId.isEmpty() ? new ArrayList<>()
-					: repo.getListDPError(screenDto.getDateRange(), listEmployeeId);
+					: repo.getListDPError(screenDto.getDateRange(), listEmployeeId).stream().distinct().collect(Collectors.toList());
 		} else {
 			return lstError;
 		}
@@ -1127,7 +1127,7 @@ public class DailyPerformanceCorrectionProcessor {
 		List<ErrorReferenceDto> lstErrorRefer = new ArrayList<>();
 		String companyId = AppContexts.user().companyId();
 		List<DPErrorDto> lstError = this.repo.getListDPError(dateRange,
-				lstEmployee.stream().map(e -> e.getId()).collect(Collectors.toList()));
+				lstEmployee.stream().map(e -> e.getId()).collect(Collectors.toList())).stream().distinct().collect(Collectors.toList());
 		Map<String, String> appMapDateSid = getApplication(new ArrayList<>(lstEmployee.stream().map(x -> x.getId()).collect(Collectors.toSet())), dateRange, null);
 		int rowId = 0;
 		if (lstError.size() > 0) {
