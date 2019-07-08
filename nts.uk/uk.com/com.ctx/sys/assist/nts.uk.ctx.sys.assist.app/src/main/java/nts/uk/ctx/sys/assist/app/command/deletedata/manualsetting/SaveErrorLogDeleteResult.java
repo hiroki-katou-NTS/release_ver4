@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import nts.arc.time.GeneralDateTime;
 import nts.uk.ctx.sys.assist.dom.deletedata.FileName;
 import nts.uk.ctx.sys.assist.dom.deletedata.ManualSetDeletion;
-import nts.uk.ctx.sys.assist.dom.deletedata.Result;
 import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletion;
 import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletionRepository;
 import nts.uk.ctx.sys.assist.dom.deletedata.ResultLogDeletion;
@@ -64,7 +63,7 @@ public class SaveErrorLogDeleteResult {
 		GeneralDateTime logTime = GeneralDateTime.now();
 		int seqId = repoResultLogDel.getMaxSeqId(domain.getDelId()) + 1;
 		ResultLogDeletion resultLogDomain = ResultLogDeletion.createFromJavatype(seqId, domain.getDelId(),
-				domain.getCompanyId(), logTime, TextResource.localize("CMF005_34") + " 失敗  " + TextResource.localize("CMF005_205") ,
+				domain.getCompanyId(), logTime, TextResource.localize("CMF005_34") + " " + TextResource.localize("CMF005_205") ,
 				errorContent, null, null);
 		repoResultLogDel.add(resultLogDomain);
 	}
