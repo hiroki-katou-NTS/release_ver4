@@ -383,7 +383,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 								int scheWorkAtten = scheTimeSheet.getAttendance().valueAsMinutes(),
 										scheWorkLeave = scheTimeSheet.getLeaveWork().valueAsMinutes();
 								
-								if(startTime != null && preSetAtten01 > scheWorkAtten) {
+								if(flag35.get() && startTime != null && preSetAtten01 > scheWorkAtten) {
 									if(startTime >= scheWorkAtten) {
 										flag19.set(flag19.get() + 1);
 									}
@@ -392,7 +392,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 									}
 								}
 								
-								if(endTime != null && preSetLeave01 < scheWorkLeave) {
+								if(flag36.get() && endTime != null && preSetLeave01 < scheWorkLeave) {
 									if(endTime <= scheWorkLeave) {
 										flag19.set(flag19.get() + 1);
 									}
@@ -656,8 +656,9 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 
 	private boolean isGotoWork(WorkTypeUnit atr, WorkTypeClassification oneDay, WorkTypeClassification morning,
 			WorkTypeClassification afternoon) {
-		return (atr == WorkTypeUnit.OneDay && oneDay == WorkTypeClassification.Attendance) || 
-				(atr == WorkTypeUnit.MonringAndAfternoon && (morning == WorkTypeClassification.Attendance || afternoon == WorkTypeClassification.Attendance));
+		return (atr == WorkTypeUnit.OneDay && (oneDay == WorkTypeClassification.Attendance || oneDay == WorkTypeClassification.Shooting)) || 
+				(atr == WorkTypeUnit.MonringAndAfternoon && (morning == WorkTypeClassification.Attendance || afternoon == WorkTypeClassification.Attendance
+				|| morning == WorkTypeClassification.Shooting || afternoon == WorkTypeClassification.Shooting));
 	}
 
 	private boolean isNotActualWork(IntegrationOfDaily d, WorkTypeUnit atr, WorkTypeClassification oneDay,
