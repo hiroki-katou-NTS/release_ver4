@@ -46,20 +46,14 @@ public class PCLogonClockOfMonthly {
 	}
 	
 	/**
-	 * ログオンの集計
-	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
-	 */
-	public void aggregateLogOn(Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt){
-		
-		this.logonClock.aggregateLogOn(pcLogonInfoOpt);
-	}
-	
-	/**
 	 * ログオフの集計
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
 	 */
-	public void aggregateLogOff(Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt, TimeLeavingOfDailyPerformance timeLeavingOfDaily,
+	public void aggregate(Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt, TimeLeavingOfDailyPerformance timeLeavingOfDaily,
 			WorkType workType, PredetermineTimeSetForCalc predTimeSetForCalc) {
+
+		// ログオンの集計
+		this.logonClock.aggregateLogOn(pcLogonInfoOpt, workType, timeLeavingOfDaily);
 		
 		// ログオフの集計
 		this.logoffClock.aggregateLogOff(pcLogonInfoOpt, timeLeavingOfDaily, workType, predTimeSetForCalc);

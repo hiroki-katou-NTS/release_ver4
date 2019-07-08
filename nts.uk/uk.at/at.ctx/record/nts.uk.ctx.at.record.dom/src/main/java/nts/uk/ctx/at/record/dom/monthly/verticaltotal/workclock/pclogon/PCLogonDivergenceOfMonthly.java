@@ -65,7 +65,7 @@ public class PCLogonDivergenceOfMonthly {
 			PredetermineTimeSetForCalc predTimeSetForCalc){
 
 		// ログオンの集計
-		this.logonDivergence.aggregateLogon(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily, anyItemValueOpt);
+		this.logonDivergence.aggregateLogon(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily, anyItemValueOpt, workType);
 		
 		// ログオフの集計
 		this.logoffDivergence.aggregateLogoff(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily,

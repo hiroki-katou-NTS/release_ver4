@@ -74,10 +74,13 @@ public class AggrPCLogonDivergence {
 			Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt,
 			AttendanceTimeOfDailyPerformance attendanceTimeOfDaily,
 			TimeLeavingOfDailyPerformance timeLeavingOfDaily,
-			Optional<AnyItemValueOfDaily> anyItemValueOpt){
+			Optional<AnyItemValueOfDaily> anyItemValueOpt,
+			WorkType workType){
 
 		// 対象とするかどうかの判断
 		if (attendanceTimeOfDaily == null) return;
+		if (workType.getWorkTypeCode().equals(AggrPCLogonClock.PREMIUM_DAY)) return;
+		
 		val stayingTime =  attendanceTimeOfDaily.getStayingTime();		// 日別実績の滞在時間
 		{
 			// ログオン時刻<>NULLを判断
@@ -90,21 +93,23 @@ public class AggrPCLogonDivergence {
 			// ログオン乖離時間の計算対象かどうか判断
 			if (timeLeavingOfDaily == null) return;
 			Optional<TimeLeavingWork> timeLeavingWorkOpt = timeLeavingOfDaily.getAttendanceLeavingWork(1);	// 勤務No=1
-			if (timeLeavingWorkOpt.isPresent()) {
-				TimeLeavingWork timeLeavingWork = timeLeavingWorkOpt.get();
-				if (timeLeavingWork.getAttendanceStamp().isPresent() &&
-					timeLeavingWork.getLeaveStamp().isPresent()) {
-					TimeActualStamp attendanceStamp = timeLeavingWork.getAttendanceStamp().get();
-					TimeActualStamp leaveStamp = timeLeavingWork.getLeaveStamp().get();
-					if (attendanceStamp.getStamp().isPresent() &&
-						leaveStamp.getStamp().isPresent()) {
-						// 出勤＝退勤なら、対象外
-						int attendanceMinutes = attendanceStamp.getStamp().get().getTimeWithDay().valueAsMinutes();
-						int leaveMinutes = leaveStamp.getStamp().get().getTimeWithDay().valueAsMinutes();
-						if (attendanceMinutes == leaveMinutes) {
-							return;
-						}
+			if (!timeLeavingWorkOpt.isPresent()) return;
+			
+			TimeLeavingWork timeLeavingWork = timeLeavingWorkOpt.get();
+			if (timeLeavingWork.getAttendanceStamp().isPresent() &&
+				timeLeavingWork.getLeaveStamp().isPresent()) {
+				TimeActualStamp attendanceStamp = timeLeavingWork.getAttendanceStamp().get();
+				TimeActualStamp leaveStamp = timeLeavingWork.getLeaveStamp().get();
+				if (attendanceStamp.getStamp().isPresent() &&
+					leaveStamp.getStamp().isPresent()) {
+					// 出勤＝退勤なら、対象外
+					int attendanceMinutes = attendanceStamp.getStamp().get().getTimeWithDay().valueAsMinutes();
+					int leaveMinutes = leaveStamp.getStamp().get().getTimeWithDay().valueAsMinutes();
+					if (attendanceMinutes == leaveMinutes) {
+						return;
 					}
+				} else {
+					return;
 				}
 			}
 			
@@ -124,7 +129,9 @@ public class AggrPCLogonDivergence {
 
 		// 合計時間を集計
 		int logonMinutes = stayingTime.getBeforePCLogOnTime().valueAsMinutes();
-		if (logonMinutes > 0) this.totalTime = this.totalTime.addMinutes(logonMinutes);
+		if (logonMinutes <= 0) return; 
+			
+		this.totalTime = this.totalTime.addMinutes(logonMinutes);
 		
 		// 日数を集計する
 		this.days = this.days.addDays(1.0);

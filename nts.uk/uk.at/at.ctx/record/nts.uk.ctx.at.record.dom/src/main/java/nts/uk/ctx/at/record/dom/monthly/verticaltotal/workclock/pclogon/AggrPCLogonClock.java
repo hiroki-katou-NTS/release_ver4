@@ -66,17 +66,19 @@ public class AggrPCLogonClock {
 	 * 集計
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
 	 */
-	public void aggregateLogOn(Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt){
+	public void aggregateLogOn(Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt, WorkType workType, TimeLeavingOfDailyPerformance timeLeavingOfDaily){
 		
-		if (!pcLogonInfoOpt.isPresent()) return;
+		if (!pcLogonInfoOpt.isPresent() || workType.getWorkTypeCode().equals(PREMIUM_DAY)) return;
 		val pcLogonInfo = pcLogonInfoOpt.get();
 
 		boolean isExistLogon = false;
+		Integer timeAttendance = getTimeAttendance(timeLeavingOfDaily);
+		if(timeAttendance == null) return;
 		
 		// ログオン時刻を合計
 		for (val logonInfo : pcLogonInfo.getLogOnInfo()){
 			if (!logonInfo.getLogOn().isPresent()) continue;
-			this.totalClock = this.totalClock.addMinutes(logonInfo.getLogOn().get().v());
+			this.totalClock = this.totalClock.addMinutes(getLogOnClock(logonInfo.getLogOn().get().v(), timeAttendance));
 			isExistLogon = true;
 		}
 		
@@ -94,8 +96,8 @@ public class AggrPCLogonClock {
 			WorkType workType, PredetermineTimeSetForCalc predTimeSetForCalc) {
 		
 		if (!pcLogonInfoOpt.isPresent()) return;
-		Integer timeLeave = isLeaved(timeLeavingOfDaily);
-		if(timeLeave != null) return;
+		Integer timeLeave = getTimeLeave(timeLeavingOfDaily);
+		if(timeLeave == null) return;
 		
 		if(!workType.getWorkTypeCode().equals(HALF_WORK_PREMIUM) 
 				&& !workType.getWorkTypeCode().equals(PREMIUM_DAY)) {
@@ -128,6 +130,15 @@ public class AggrPCLogonClock {
 		}
 	}
 	
+	private int getLogOnClock(int logOn, Integer timeAttendance) {
+		
+		if(logOn > timeAttendance){
+			return timeAttendance;
+		}
+		
+		return logOn;
+	}
+	
 	private int getLogOffClock(int logOff, Integer timeLeave, PredetermineTimeSetForCalc predTimeSetForCalc) {
 		
 		boolean shouldUseLogOff = predTimeSetForCalc.getTimeSheets().stream().anyMatch(ts -> ts.getUseAtr() == UseSetting.USE
@@ -144,19 +155,33 @@ public class AggrPCLogonClock {
 		
 		return timeLeave;
 	}
-
-	private Integer isLeaved(TimeLeavingOfDailyPerformance timeLeavingOfDaily) {
-		MutableValue<Integer> isLeaved = new MutableValue<>(null);
+	
+	private Integer getTimeAttendance(TimeLeavingOfDailyPerformance timeLeavingOfDaily) {
+		MutableValue<Integer> timeAttendance = new MutableValue<>(null);
 		
 		timeLeavingOfDaily.getAttendanceLeavingWork(1).ifPresent(tl -> {
-			tl.getLeaveStamp().ifPresent(leave -> {
+			tl.getAttendanceStamp().ifPresent(leave -> {
 				leave.getStamp().ifPresent(ls -> {
-					if (ls.getTimeWithDay() != null) isLeaved.set(ls.getTimeWithDay().valueAsMinutes());
+					if (ls.getTimeWithDay() != null) timeAttendance.set(ls.getTimeWithDay().valueAsMinutes());
 				});
 			});
 		});
 		
-		return isLeaved.get();
+		return timeAttendance.optional().isPresent() ? timeAttendance.get() : null;
+	}
+
+	private Integer getTimeLeave(TimeLeavingOfDailyPerformance timeLeavingOfDaily) {
+		MutableValue<Integer> timeLeave = new MutableValue<>(null);
+		
+		timeLeavingOfDaily.getAttendanceLeavingWork(1).ifPresent(tl -> {
+			tl.getLeaveStamp().ifPresent(leave -> {
+				leave.getStamp().ifPresent(ls -> {
+					if (ls.getTimeWithDay() != null) timeLeave.set(ls.getTimeWithDay().valueAsMinutes());
+				});
+			});
+		});
+		
+		return timeLeave.optional().isPresent() ? timeLeave.get() : null;
 	}
 	
 	/**
