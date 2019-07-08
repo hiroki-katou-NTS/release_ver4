@@ -154,6 +154,8 @@ public class AggrPCLogonDivergence {
 		// 対象とするかどうかの判断
 		if (attendanceTimeOfDaily == null) return;
 		if (predTimeSetForCalc == null) return;
+		if (workType.getWorkTypeCode().equals(AggrPCLogonClock.HALF_WORK_PREMIUM) 
+				&& workType.getWorkTypeCode().equals(AggrPCLogonClock.PREMIUM_DAY)) return;
 		val stayingTime =  attendanceTimeOfDaily.getStayingTime();
 		{
 			// 退勤時刻<>NULL
