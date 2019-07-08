@@ -124,7 +124,7 @@ public class DailyPerformanceCorrectionDto implements Serializable{
 	
 	private DateRange datePeriodResult;
 	
-	private List<DPErrorDto> lstError;
+//	private List<DPErrorDto> lstError;
 	
 	private DisplayItem disItem;
 	
@@ -149,7 +149,7 @@ public class DailyPerformanceCorrectionDto implements Serializable{
 		this.changeEmployeeIds = new ArrayList<>();
 		this.identityProcessDtoOpt = Optional.empty();
 		this.approvalUseSettingDtoOpt = Optional.empty();
-		this.lstError = new ArrayList<>();
+//		this.lstError = new ArrayList<>();
 		this.disItem = new DisplayItem();
 	}
 
@@ -403,7 +403,7 @@ public class DailyPerformanceCorrectionDto implements Serializable{
 		this.identityProcessDtoOpt = null;
 		this.approvalUseSettingDtoOpt = null;
 		this.datePeriodResult = null;
-		this.lstError = null;
+//		this.lstError = null;
 		this.disItem = null;
 	}
 }

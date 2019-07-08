@@ -271,7 +271,7 @@ public class DailyPerformanceCorrectionProcessor {
 		
 		Optional<IdentityProcessUseSetDto> identityProcessDtoOpt = screenDto.getIdentityProcessDtoOpt();
 		Optional<ApprovalUseSettingDto> approvalUseSettingDtoOpt = screenDto.getApprovalUseSettingDtoOpt();
-		List<DPErrorDto> lstError = screenDto.getLstError();
+		List<DPErrorDto> lstError = screenDto.getDPErrorDto();
 		DisplayItem disItem = screenDto.getDisItem();
 		
 		Map<Integer, DPAttendanceItem> mapDP = screenDto.getLstControlDisplayItem().getMapDPAttendance();
