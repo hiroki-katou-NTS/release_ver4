@@ -251,7 +251,7 @@ public class WorkplaceConfigInfoFinder {
 			}
 		} else {
 			String searchCode = preCode.isEmpty() ? preCode + hierarchyCode.substring(0, highestHierarchy)
-					: preCode + hierarchyCode.substring(0, HIERARCHY_LENGTH);
+					: preCode + hierarchyCode.substring(hierarchyCode.length() - HIERARCHY_LENGTH, hierarchyCode.length());
 
 			Optional<WorkplaceHierarchyDto> optWorkplaceFindDto = lstReturn.stream()
 					.filter(item -> item.getHierarchyCode().equals(searchCode)).findFirst();
@@ -262,7 +262,7 @@ public class WorkplaceConfigInfoFinder {
 
 			List<WorkplaceHierarchyDto> currentItemChilds = optWorkplaceFindDto.get().getChilds();
 
-			pushToList(currentItemChilds, dto, hierarchyCode.substring(HIERARCHY_LENGTH, hierarchyCode.length()),
+			pushToList(currentItemChilds, dto, hierarchyCode.substring(0, hierarchyCode.length() - HIERARCHY_LENGTH),
 					searchCode, highestHierarchy);
 		}
 	}
