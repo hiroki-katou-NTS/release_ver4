@@ -4,7 +4,6 @@
  *****************************************************************/
 package nts.uk.ctx.at.record.app.command.workrecord.actuallock;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -12,7 +11,6 @@ import javax.inject.Inject;
 
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerWithResult;
-import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.ActualLock;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.ActualLockHistory;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.ActualLockHistoryRepository;
@@ -54,23 +52,11 @@ public class ActualLockSaveCommandHandler extends CommandHandlerWithResult<Actua
 
 		// Check exist actualLock
 		if (optionActualLock.isPresent()) {
-			
-			// FindAll ActualLock By ClosureId
-			List<ActualLockHistory> histList = this.lockHistRepo.findByClosureId(companyId,
-					command.getClosureId().value);
-			
-			// Check Empty
-			if (!CollectionUtil.isEmpty(histList)) {
-				// Get Last Update ActualLock by ActualLockHist
-				ActualLockHistory firstItem = histList.get(0);
-				
-				// Compare Setting of last Update to selected value on screen
-				if ((firstItem.getDailyLockState().value == command.getDailyLockState().value)
-						&& (firstItem.getMonthlyLockState().value == command.getMonthyLockState().value)) {
-					return false;
-				} 
+			// Compare Setting of last Update to selected value on screen
+			if ((optionActualLock.get().getDailyLockState().value == command.getDailyLockState().value)
+					&& (optionActualLock.get().getMonthlyLockState().value == command.getMonthyLockState().value)) {
+				return false;
 			}
-			
 		} else {
 			// Create ActualLock
 			this.repository.add(actualLock);
