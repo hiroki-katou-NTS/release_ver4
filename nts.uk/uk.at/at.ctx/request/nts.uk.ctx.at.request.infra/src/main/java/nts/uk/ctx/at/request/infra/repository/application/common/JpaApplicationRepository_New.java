@@ -64,10 +64,10 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 				+ " AND a.employeeID IN :lstSID"
 				+ " AND a.endDate >= :startDate AND a.startDate <= :endDate and a.appType IN (0,1,2,4,6,10)";
 	//hoatt
-	private static final String SELECT_APP_BY_SID = SELECT_FROM_APPLICATION + " AND ( a.employeeID = :employeeID Or a.enteredPersonID = :employeeID )"
-			+ " AND ((a.startDate >= :startDate and a.endDate <= :endDate)"
-			+ " OR (a.endDate IS null and a.startDate >= :startDate AND a.startDate <= :endDate))" 
-			+ " AND a.appType IN (0,1,2,4,6,10)";
+//	private static final String SELECT_APP_BY_SID = SELECT_FROM_APPLICATION + " AND ( a.employeeID = :employeeID Or a.enteredPersonID = :employeeID )"
+//			+ " AND ((a.startDate >= :startDate and a.endDate <= :endDate)"
+//			+ " OR (a.endDate IS null and a.startDate >= :startDate AND a.startDate <= :endDate))" 
+//			+ " AND a.appType IN (0,1,2,4,6,10)";
 	//hoatt
 	private static final String SELECT_APP_BY_REFLECT = "SELECT a FROM KrqdtApplication_New a"
 			+ " WHERE a.krqdpApplicationPK.companyID = :companyID" 
@@ -262,12 +262,16 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		if(lstAppId.isEmpty()){
 			return new ArrayList<>();
 		}
-		return this.queryProxy().query(SELECT_APP_BY_REFLECT, KrqdtApplication_New.class)
-				.setParameter("companyID", companyId)
-				.setParameter("lstAppId", lstAppId)
-				.setParameter("startDate", startDate)
-				.setParameter("endDate", endDate)
-				.getList(c -> c.toDomain());
+		List<Application_New> lstResult = new ArrayList<>();
+		CollectionUtil.split(lstAppId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subListId -> {
+			lstResult.addAll(this.queryProxy().query(SELECT_APP_BY_REFLECT, KrqdtApplication_New.class)
+					.setParameter("companyID", companyId)
+					.setParameter("lstAppId", subListId)
+					.setParameter("startDate", startDate)
+					.setParameter("endDate", endDate)
+					.getList(c -> c.toDomain()));
+		});
+		return lstResult;
 	}
 	/**
 	 * get List Application Pre
