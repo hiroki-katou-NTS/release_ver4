@@ -100,9 +100,10 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	
 	/*所定時間帯再取得*/
 	
-	private final BigDecimal COUNT_ON = BigDecimal.ONE;
-	private final BigDecimal COUNT_OFF = BigDecimal.ZERO;
-	private final BigDecimal V100 = BigDecimal.valueOf(100);
+	private static final BigDecimal COUNT_ON = BigDecimal.ONE;
+	private static final BigDecimal COUNT_OFF = BigDecimal.ZERO;
+	private static final BigDecimal V100 = BigDecimal.valueOf(100);
+	private static final WorkTypeCode PREMIUM_CODE = new WorkTypeCode("105");
 	
 	@Override
 	public List<IntegrationOfDaily> dailyProcessing(List<IntegrationOfDaily> dailies) {
@@ -126,9 +127,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			
 			AnyItemValueOfDaily optionalItem = d.getAnyItemValue().get();
 			
-			Integer logonTime, logoffTime,
-					leaveGateStartTime, leaveGateEndTime, 
-					startTime, endTime; 
+			Integer logonTime, logoffTime, leaveGateStartTime, leaveGateEndTime, startTime, endTime; 
 			
 			WorkType workType = workTypes.get(d.getWorkInformation().getRecordInfo().getWorkTypeCode());
 			if(workType == null){
@@ -172,7 +171,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			
 			Integer timeOff = null, timeOn = leaveGateStartTime, divergenceTime = 0;
 			List<Integer> overTime = new ArrayList<>(), preOver = new ArrayList<>();
-			boolean isGotoWork = isGotoWork(atr, dailyWork.getOneDay(), dailyWork.getMorning(), dailyWork.getAfternoon());
+			boolean shouldCopy = checkWorkType(atr, dailyWork.getOneDay(), dailyWork.getMorning(), dailyWork.getAfternoon());
 			/** データ準備エンド　*/
 
 			/** 任意項目3: 出勤時刻が入っており、PCログオンログオフがない事が条件 */
@@ -203,12 +202,12 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 					optionalItem, COUNT_ON, COUNT_OFF, 16);
 			
 			/** 任意項目7: 出勤の判断 */
-			processOptionalItem(() -> isGotoWork, optionalItem, timeOn, timeOff, 7);
+			processOptionalItem(() -> shouldCopy, optionalItem, timeOn, timeOff, 7);
 			
 			timeOn = leaveGateEndTime;
 			
 			/** 任意項目9: 出勤の判断 */
-			processOptionalItem(() -> isGotoWork, optionalItem, timeOn, timeOff, 9);
+			processOptionalItem(() -> shouldCopy, optionalItem, timeOn, timeOff, 9);
 			
 			timeOff = 0;
 			/** 任意項目8: 両方時刻が入っている場合のみ乖離時間を計算する */
@@ -340,7 +339,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 				updateOptionalItemWithNo(optionalItem, timeOff, 17);
 			}
 			
-			if(startTime != null){
+			if(startTime != null && !d.getWorkInformation().getRecordInfo().getWorkTypeCode().equals(PREMIUM_CODE)) {
 				/** 任意項目89 */
 				mergeOptionalItemWithNo(optionalItem, startTime, 89);
 				
@@ -654,11 +653,15 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		return actual.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork();
 	}
 
-	private boolean isGotoWork(WorkTypeUnit atr, WorkTypeClassification oneDay, WorkTypeClassification morning,
+	private boolean checkWorkType(WorkTypeUnit atr, WorkTypeClassification oneDay, WorkTypeClassification morning,
 			WorkTypeClassification afternoon) {
-		return (atr == WorkTypeUnit.OneDay && (oneDay == WorkTypeClassification.Attendance || oneDay == WorkTypeClassification.Shooting)) || 
-				(atr == WorkTypeUnit.MonringAndAfternoon && (morning == WorkTypeClassification.Attendance || afternoon == WorkTypeClassification.Attendance
-				|| morning == WorkTypeClassification.Shooting || afternoon == WorkTypeClassification.Shooting));
+		return (atr == WorkTypeUnit.OneDay && checkWorkType(oneDay)) || 
+				(atr == WorkTypeUnit.MonringAndAfternoon && (checkWorkType(morning) || checkWorkType(afternoon)));
+	}
+	
+	private boolean checkWorkType(WorkTypeClassification atr) {
+		return atr == WorkTypeClassification.Attendance || atr == WorkTypeClassification.Shooting
+				|| atr == WorkTypeClassification.SpecialHoliday || atr == WorkTypeClassification.AnnualHoliday;
 	}
 
 	private boolean isNotActualWork(IntegrationOfDaily d, WorkTypeUnit atr, WorkTypeClassification oneDay,

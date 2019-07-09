@@ -78,7 +78,7 @@ public class AggrPCLogonClock {
 		// ログオン時刻を合計
 		for (val logonInfo : pcLogonInfo.getLogOnInfo()){
 			if (!logonInfo.getLogOn().isPresent()) continue;
-			this.totalClock = this.totalClock.addMinutes(getLogOnClock(logonInfo.getLogOn().get().v(), timeAttendance));
+			this.totalClock = this.totalClock.addMinutes(logonInfo.getLogOn().get().v());
 			isExistLogon = true;
 		}
 		
@@ -128,15 +128,6 @@ public class AggrPCLogonClock {
 		if (this.totalDays.v() != 0.0){
 			this.averageClock = new AttendanceTimeMonth(this.totalClock.v() / this.totalDays.v().intValue());
 		}
-	}
-	
-	private int getLogOnClock(int logOn, Integer timeAttendance) {
-		
-		if(logOn > timeAttendance){
-			return timeAttendance;
-		}
-		
-		return logOn;
 	}
 	
 	private int getLogOffClock(int logOff, Integer timeLeave, PredetermineTimeSetForCalc predTimeSetForCalc) {
