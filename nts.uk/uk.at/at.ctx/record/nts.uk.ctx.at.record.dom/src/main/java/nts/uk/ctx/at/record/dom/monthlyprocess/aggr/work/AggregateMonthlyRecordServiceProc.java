@@ -472,8 +472,12 @@ public class AggregateMonthlyRecordServiceProc {
 		ConcurrentStopwatches.stop("12300:36協定時間：");
 		ConcurrentStopwatches.start("12500:任意項目：");
 		
+		// 大塚カスタマイズの集計
+		Map<Integer, Map<Integer, AnyItemAggrResult>> anyItemCustomizeValue =
+				this.aggregateCustomizeForOtsuka(datePeriod);
+		
 		// 月別実績の任意項目を集計
-		this.aggregateAnyItem(monthPeriod);
+		this.aggregateAnyItem(monthPeriod, anyItemCustomizeValue);
 		
 		// 手修正された項目を元に戻す　（任意項目用）
 		this.undoRetouchValuesForAnyItems(this.monthlyOldDatas);
@@ -778,8 +782,11 @@ public class AggregateMonthlyRecordServiceProc {
 	/**
 	 * 月別実績の任意項目を集計
 	 * @param monthPeriod 月の期間
+	 * @param anyItemCustomizeValue 任意項目カスタマイズ値
 	 */
-	private void aggregateAnyItem(DatePeriod monthPeriod){
+	private void aggregateAnyItem(
+			DatePeriod monthPeriod,
+			Map<Integer, Map<Integer, AnyItemAggrResult>> anyItemCustomizeValue){
 
 		// 週単位の期間を取得
 		ListIterator<AttendanceTimeOfWeekly> itrWeeks =
@@ -788,7 +795,8 @@ public class AggregateMonthlyRecordServiceProc {
 			AttendanceTimeOfWeekly attendanceTimeWeek = itrWeeks.next();
 			
 			// 週ごとの集計
-			val weekResults = this.aggregateAnyItemPeriod(attendanceTimeWeek.getPeriod(), true);
+			val weekResults = this.aggregateAnyItemPeriod(attendanceTimeWeek.getPeriod(), true,
+					anyItemCustomizeValue.get(attendanceTimeWeek.getWeekNo()));
 			for (val weekResult : weekResults.values()){
 				attendanceTimeWeek.getAnyItem().getAnyItemValues().put(
 						weekResult.getOptionalItemNo(),
@@ -802,7 +810,7 @@ public class AggregateMonthlyRecordServiceProc {
 		}
 		
 		// 月ごとの集計
-		val monthResults = this.aggregateAnyItemPeriod(monthPeriod, false);
+		val monthResults = this.aggregateAnyItemPeriod(monthPeriod, false, anyItemCustomizeValue.get(0));
 		for (val monthResult : monthResults.values()){
 			this.aggregateResult.putAnyItemOrUpdate(AnyItemOfMonthly.of(
 					this.employeeId, this.yearMonth, this.closureId, this.closureDate, monthResult));
@@ -810,12 +818,35 @@ public class AggregateMonthlyRecordServiceProc {
 	}
 	
 	/**
+	 * 大塚カスタマイズ　（任意項目集計）
+	 * @param period 集計期間　（入退職前後の期間を除いていない集計期間）
+	 * @return　任意項目カスタマイズ値
+	 */
+	private Map<Integer, Map<Integer, AnyItemAggrResult>> aggregateCustomizeForOtsuka(DatePeriod period){
+
+		// 任意項目カスタマイズ値　※　最初のInteger=0（月結果）、1～（各週結果（週No））
+		Map<Integer, Map<Integer, AnyItemAggrResult>> results = new HashMap<>();
+		results.put(0, new HashMap<>());	// 月結果
+
+		// 月ごとの集計
+		AnyItemAggrResult monthResult = this.getPredWorkingDays(period);
+		results.get(0).putIfAbsent(monthResult.getOptionalItemNo(), monthResult);
+		
+		// 任意項目カスタマイズ値を返す
+		return results;
+	}
+	
+	/**
 	 * 任意項目期間集計
 	 * @param period 期間
 	 * @param isWeek 週間集計
+	 * @param anyItemCustomizeValue 任意項目カスタマイズ値
 	 * @return 任意項目集計結果
 	 */
-	private Map<Integer, AnyItemAggrResult> aggregateAnyItemPeriod(DatePeriod period, boolean isWeek){
+	private Map<Integer, AnyItemAggrResult> aggregateAnyItemPeriod(
+			DatePeriod period,
+			boolean isWeek,
+			Map<Integer, AnyItemAggrResult> anyItemCustomizeValue){
 		
 		Map<Integer, AnyItemAggrResult> results = new HashMap<>();
 		List<AnyItemOfMonthly> anyItems = new ArrayList<>();
@@ -841,13 +872,14 @@ public class AggregateMonthlyRecordServiceProc {
 		for (val optionalItem : this.companySets.getOptionalItemMap().values()){
 			Integer optionalItemNo = optionalItem.getOptionalItemNo().v();
 
-			// 計画所定労働日数（任意項目69：大塚カスタマイズ）
-			if (optionalItemNo == 69) {
-				AnyItemAggrResult anyItem69Result = this.getPredWorkingDays(period);
-				results.put(optionalItemNo, anyItem69Result);
-				anyItems.add(AnyItemOfMonthly.of(
-						this.employeeId, this.yearMonth, this.closureId, this.closureDate, anyItem69Result));
-				continue;
+			// 大塚カスタマイズ　（月別実績の任意項目←任意項目カスタマイズ値）
+			if (anyItemCustomizeValue != null) {
+				if (anyItemCustomizeValue.containsKey(optionalItemNo)) {
+					results.put(optionalItemNo, anyItemCustomizeValue.get(optionalItemNo));
+					anyItems.add(AnyItemOfMonthly.of(this.employeeId, this.yearMonth,
+							this.closureId, this.closureDate, anyItemCustomizeValue.get(optionalItemNo)));
+					continue;
+				}
 			}
 			
 			// 利用条件の判定
