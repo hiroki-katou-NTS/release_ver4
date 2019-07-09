@@ -137,7 +137,7 @@ public class AggrPCLogonClock {
 				&& ts.getEnd().valueAsMinutes() >= logOff);
 		
 		if(shouldUseLogOff){
-			return logOff;
+			return timeLeave;
 		}
 		
 		if(logOff > timeLeave){
@@ -148,6 +148,8 @@ public class AggrPCLogonClock {
 	}
 	
 	private Integer getTimeAttendance(TimeLeavingOfDailyPerformance timeLeavingOfDaily) {
+		if(timeLeavingOfDaily == null) return null;
+		
 		MutableValue<Integer> timeAttendance = new MutableValue<>(null);
 		
 		timeLeavingOfDaily.getAttendanceLeavingWork(1).ifPresent(tl -> {
@@ -162,6 +164,8 @@ public class AggrPCLogonClock {
 	}
 
 	private Integer getTimeLeave(TimeLeavingOfDailyPerformance timeLeavingOfDaily) {
+		if(timeLeavingOfDaily == null) return null;
+		
 		MutableValue<Integer> timeLeave = new MutableValue<>(null);
 		
 		timeLeavingOfDaily.getAttendanceLeavingWork(1).ifPresent(tl -> {
