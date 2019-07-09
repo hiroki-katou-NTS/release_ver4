@@ -132,11 +132,11 @@ public class AggrPCLogonClock {
 	
 	private int getLogOffClock(int logOff, Integer timeLeave, PredetermineTimeSetForCalc predTimeSetForCalc) {
 		
-		boolean shouldUseLogOff = predTimeSetForCalc.getTimeSheets().stream().anyMatch(ts -> ts.getUseAtr() == UseSetting.USE
+		boolean isLogOffInPredTimeSet = predTimeSetForCalc.getTimeSheets().stream().anyMatch(ts -> ts.getUseAtr() == UseSetting.USE
 				&& ts.getStart().valueAsMinutes() <= logOff 
 				&& ts.getEnd().valueAsMinutes() >= logOff);
 		
-		if(shouldUseLogOff){
+		if(isLogOffInPredTimeSet){
 			return timeLeave;
 		}
 		
