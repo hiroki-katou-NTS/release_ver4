@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.pubimp.monthly.agreement;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -19,6 +20,7 @@ import nts.uk.ctx.at.shared.dom.common.Month;
 import nts.uk.ctx.at.shared.dom.common.Year;
 import nts.uk.ctx.at.shared.dom.monthly.agreement.PeriodAtrOfAgreement;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
 
 /**
  * 指定期間36協定時間の取得
@@ -75,9 +77,10 @@ public class AgreementTimeByPeriodPubImpl implements AgreementTimeByPeriodPub {
 		
 	}
 	
+	@Override
 	public List<AgreementTimeByEmpExport> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
-													Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs) {
-		return this.getAgreTimeByPeriod.algorithmImprove(companyId, employeeIds, criteria, startMonth, year, periodAtrs)
+													Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs,  Map<String, YearMonthPeriod> periodWorking) {
+		return this.getAgreTimeByPeriod.algorithmImprove(companyId, employeeIds, criteria, startMonth, year, periodAtrs,   periodWorking)
 				.stream().map(AgreementTimeByEmpExport::fromDomain).collect(Collectors.toList());
 	}
 }

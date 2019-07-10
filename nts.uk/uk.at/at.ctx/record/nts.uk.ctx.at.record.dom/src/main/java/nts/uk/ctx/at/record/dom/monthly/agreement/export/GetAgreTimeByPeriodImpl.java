@@ -28,6 +28,7 @@ import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemCustom;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
+import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
 
 /**
  * 実装：指定期間36協定時間の取得
@@ -204,16 +205,19 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
 	
 	@Override
 	public List<AgreementTimeByEmp> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
-                                                     Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs) {
+                                                     Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs,  Map<String, YearMonthPeriod> periodWorking) {
         YearMonth startYm = YearMonth.of(year.v(), startMonth.v());
         List<YearMonth> periodYmAll = new ArrayList<>();
         for (int i = 0; i < 12; i++) {
             periodYmAll.add(startYm.addMonths(i));
         }
         // 36協定時間を取得
-        Map<String, List<AgreementTimeOfManagePeriod>> agreementTimeAll =
-                this.agreementTimeOfMngPrdRepo.findBySidsAndYearMonths(employeeIds, periodYmAll).stream()
-                        .collect(Collectors.groupingBy(AgreementTimeOfManagePeriod::getEmployeeId));
+        
+        List<AgreementTimeOfManagePeriod> listAgreementTimeOfManagePeriod = this.agreementTimeOfMngPrdRepo.findBySidsAndYearMonths(employeeIds, periodYmAll).stream().filter(c-> {
+        	return periodWorking.get(c.getEmployeeId()).contains(c.getYearMonth());
+        }).collect(Collectors.toList());
+        
+        Map<String, List<AgreementTimeOfManagePeriod>> agreementTimeAll = listAgreementTimeOfManagePeriod.stream().collect(Collectors.groupingBy(AgreementTimeOfManagePeriod::getEmployeeId));
 
         // 「労働条件項目」を取得
         Map<String, WorkingConditionItemCustom> workingConditionItemAll =
@@ -230,8 +234,12 @@ public class GetAgreTimeByPeriodImpl implements GetAgreTimeByPeriod {
         Map<String, List<AgreementMonthSetting>> monthSetAll = new HashMap<>();
         if (periodAtrs.contains(PeriodAtrOfAgreement.ONE_MONTH)) {
             // 36協定年月設定を取得する
-            monthSetAll = this.agreementMonthSetRepo.findByKey(employeeIds, periodYmAll).stream()
-                    .collect(Collectors.groupingBy(AgreementMonthSetting::getEmployeeId));
+        	
+        	List<AgreementMonthSetting> agreementMonthSettings = this.agreementMonthSetRepo.findByKey(employeeIds, periodYmAll).stream().filter(c-> {
+            	return periodWorking.get(c.getEmployeeId()).contains(c.getYearMonthValue());
+            }).collect(Collectors.toList());
+        	
+            monthSetAll = agreementMonthSettings.stream().collect(Collectors.groupingBy(AgreementMonthSetting::getEmployeeId));
         }
 
         Map<String, AgreementYearSetting> finalYearSetAll = yearSetAll;
