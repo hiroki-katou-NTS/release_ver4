@@ -317,7 +317,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			if (domain.isExistCompressPassFlg()) {
 				resultDel.setPasswordCompressFileEncrypt(domain.getPasswordCompressFileEncrypt());
 			} else {
-				resultDel.setPasswordCompressFileEncrypt(null);
+				resultDel.setPasswordCompressFileEncrypt(Optional.empty());
 			}
 			repoResultDel.update(resultDel);
 		}
