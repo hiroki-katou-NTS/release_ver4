@@ -49,15 +49,16 @@ public class DataRecoveryLog extends DomainObject {
 			int logSequenceNumber, String processingContent, String contentSql) {
 		this.recoveryProcessId = recoveryProcessId;
 		this.target = target;
-		this.errorContent = new RecoveryErrDescript(errorContent);
+		this.errorContent = new RecoveryErrDescript(errorContent.length() > 1995 ? errorContent.substring(0,1995) : errorContent);
 		this.targetDate = targetDate;
 		this.logSequenceNumber = logSequenceNumber;
-		this.processingContent = new ProcessingRecoverContent(processingContent);
-		this.contentSql = new ContentSql(contentSql);
+		this.processingContent = new ProcessingRecoverContent(processingContent.length() > 95 ? processingContent.substring(0,95) : processingContent);
+		this.contentSql = new ContentSql(contentSql.length() > 1995 ? contentSql.substring(0,1995) : contentSql);
 	}
 
 	public static DataRecoveryLog createFromJavatype(String recoveryProcessId, String target, String errorContent,
 			GeneralDate targetDate, int logSequenceNumber, String processingContent, String contentSql) {
+		
 		return new DataRecoveryLog(recoveryProcessId, target, errorContent, targetDate, logSequenceNumber,
 				processingContent, contentSql);
 	}

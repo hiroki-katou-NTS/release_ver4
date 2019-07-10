@@ -48,7 +48,6 @@ public class JpaDataRecoverLogRepository extends JpaRepository implements DataRe
 	}
 
 	@Override
-	@Transactional(value = TxType.REQUIRES_NEW)
 	public void add(DataRecoveryLog data) {
 		SspmtDataRecoverLog entity = toEntity(data);
 		this.commandProxy().insert(entity);
