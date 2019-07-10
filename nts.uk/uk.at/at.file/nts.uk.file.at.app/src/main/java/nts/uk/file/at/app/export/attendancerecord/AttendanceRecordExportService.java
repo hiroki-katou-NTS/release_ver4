@@ -296,7 +296,7 @@ public class AttendanceRecordExportService extends ExportService<AttendanceRecor
 					syncResultsDaily.addAll(attendanceService.getValueOf(Arrays.asList(emp.getKey()), emp.getValue(), singleId));
 				}
 				if (!monthlyId.isEmpty()) {
-                    syncResultsMonthly.addAll(attendanceService.getMonthlyValueOf(Arrays.asList(emp.getKey()), periodMonthly, monthlyId));
+                    syncResultsMonthly.addAll(attendanceService.getMonthlyValueOf(Arrays.asList(emp.getKey()), emp.getValue(), monthlyId));
                 }
 			});
 			dailyValues = new ArrayList<>(syncResultsDaily);
