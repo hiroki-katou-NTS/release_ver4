@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.function.ac.monthly.agreement;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -14,6 +15,7 @@ import nts.uk.ctx.at.record.pub.monthly.agreement.AgreementTimeByPeriodPub;
 import nts.uk.ctx.at.shared.dom.common.Month;
 import nts.uk.ctx.at.shared.dom.common.Year;
 import nts.uk.ctx.at.shared.dom.monthly.agreement.PeriodAtrOfAgreement;
+import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
 
 /**
  * @author dat.lh
@@ -37,8 +39,8 @@ public class AgreementTimeByPeriodAcFinder implements AgreementTimeByPeriodAdapt
 
 	@Override
 	public List<AgreementTimeByEmpImport> algorithmImprove(String companyId, List<String> employeeIds, GeneralDate criteria,
-														   Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs) {
-		return agreementTimeByPeriodPub.algorithmImprove(companyId, employeeIds, criteria, startMonth, year, periodAtrs).stream()
+														   Month startMonth, Year year, List<PeriodAtrOfAgreement> periodAtrs, Map<String, YearMonthPeriod> periodWorking) {
+		return agreementTimeByPeriodPub.algorithmImprove(companyId, employeeIds, criteria, startMonth, year, periodAtrs, periodWorking).stream()
 				.map(x -> new AgreementTimeByEmpImport(x.getEmployeeId(), x.getPeriodAtr(),
 						new AgreementTimeByPeriodImport(x.getAgreementTime().getStartMonth(), x.getAgreementTime().getEndMonth(),
 								x.getAgreementTime().getAgreementTime(),

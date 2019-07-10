@@ -464,13 +464,29 @@ public class AnnualWorkScheduleExportService extends ExportService<AnnualWorkSch
                 // RequestList458
                 monthsExceededAll = getExcessTimesYearAdapter.algorithm(employeeIds, fiscalYear);
             }
-
+            
+            EmpAffInfoExport EmpAffInfoExport = workRecordExport.getAffiliationPeriod(employeeIds, yearMonthPeriod, GeneralDate.today());
+    		Map<String, YearMonthPeriod> employees = new HashMap<>();
+    		for (AffiliationStatus emp : EmpAffInfoExport.getAffiliationStatus()) {
+    			nts.arc.time.YearMonth start = emp.getPeriodInformation().get(0).getYearMonthPeriod().start();
+    			nts.arc.time.YearMonth end = emp.getPeriodInformation().get(0).getYearMonthPeriod().end();
+    			for (PeriodInformation infor : emp.getPeriodInformation()) {
+    				if(infor.getYearMonthPeriod().start().lessThan(start)) {
+    					start = infor.getYearMonthPeriod().start();
+    				}
+    				if(infor.getYearMonthPeriod().end().lessThan(end)) {
+    					end = infor.getYearMonthPeriod().end();
+    				}
+    			}
+    			employees.put(emp.getEmployeeID(), new YearMonthPeriod(start, end));
+    		}
+            
             // RequestList453
             // 36協定時間を取得する
             Map<String, List<AgreementTimeByEmpImport>> agreementTimeAll =
-                    agreementTimeByPeriodAdapter.algorithmImprove(cid, employeeIds, criteria, startMonth, fiscalYear, periodAtrs)
+                    agreementTimeByPeriodAdapter.algorithmImprove(cid, employeeIds, criteria, startMonth, fiscalYear, periodAtrs, employees)
                             .stream().collect(Collectors.groupingBy(AgreementTimeByEmpImport::getEmployeeId));
-
+            
             for (Map.Entry<String, List<AgreementTimeByEmpImport>> entry : agreementTimeAll.entrySet()) {
                 EmployeeData empData = exportData.getEmployees().get(entry.getKey());
                 Integer monthsExceeded = 0;

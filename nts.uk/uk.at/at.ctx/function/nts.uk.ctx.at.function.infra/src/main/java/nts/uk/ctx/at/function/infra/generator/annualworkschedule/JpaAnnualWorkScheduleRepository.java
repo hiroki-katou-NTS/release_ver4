@@ -347,7 +347,7 @@ public class JpaAnnualWorkScheduleRepository implements AnnualWorkScheduleReposi
             // RequestList453
             // 36協定時間を取得する
             Map<String, List<AgreementTimeByEmpImport>> agreementTimeAll =
-                    agreementTimeByPeriodAdapter.algorithmImprove(cid, employeeIds, criteria, startMonth, fiscalYear, periodAtrs)
+                    agreementTimeByPeriodAdapter.algorithmImprove(cid, employeeIds, criteria, startMonth, fiscalYear, periodAtrs, new HashMap<>())
                             .stream().collect(Collectors.groupingBy(AgreementTimeByEmpImport::getEmployeeId));
 
             for (Map.Entry<String, List<AgreementTimeByEmpImport>> entry : agreementTimeAll.entrySet()) {
