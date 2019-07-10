@@ -41,8 +41,8 @@ public class SaveErrorLogDeleteResult {
 	public void saveErrorWhenDelData(ManualSetDeletion domain, String msgError) {
 		String msgId = MSG_DEL_ERROR_LOG;
 		String errorContent = "";
-		if(msgError.length() > 2000){
-			errorContent = msgError.substring(0, 1995) + "...";
+		if(msgError.length() > 1995){
+			errorContent = subStringContent(msgError, 1995);
 		}else{
 			errorContent = msgError;
 		}
@@ -55,8 +55,8 @@ public class SaveErrorLogDeleteResult {
 	
 	public void saveErrorWhenCreFileCsv(ManualSetDeletion domain, String msgError) {
 		String errorContent = "";
-		if(msgError.length() > 2000){
-			errorContent = msgError.substring(0, 1995) + "...";
+		if(msgError.length() > 1995){
+			errorContent = subStringContent(msgError, 1995);
 		}else{
 			errorContent = msgError;
 		}
@@ -98,5 +98,44 @@ public class SaveErrorLogDeleteResult {
 			repoResultDel.update(resultDel);
 		}
 	
+	}
+	
+	private String subStringContent (String text , int length){
+		String content = text.substring(0, length);
+		int lengthByKiban = lengthHalf(content);
+		if (content.length() != lengthByKiban) {
+			int chenhlech = Math.abs(lengthByKiban - content.length());
+			return content.substring(0, length-chenhlech);
+		}
+		return content;
+	}
+	
+	public static int lengthHalf(String text) {
+		int count = 0;
+		for (int i = 0, len = text.length(); i < len; i++) {
+			int code = text.codePointAt(i);
+			count += lengthHalf(code);
+		}
+		return count;
+	}
+
+	/**
+	 * Returns character length as half width characters.
+	 * 
+	 * @param codeOfCharacter
+	 *            code of character
+	 * @return length
+	 */
+	public static int lengthHalf(int codeOfCharacter) {
+		// 0x20 ～ 0x80: 半角記号と半角英数字
+		// 0xff61 ～ 0xff9f: 半角カタカナ
+		// 0x0a,0x0d: CR,LF
+		if ((0x20 <= codeOfCharacter && codeOfCharacter <= 0x7e)
+				|| (0xff61 <= codeOfCharacter && codeOfCharacter <= 0xff9f) || codeOfCharacter == 0x0a
+				|| codeOfCharacter == 0x0d) {
+			return 1;
+		} else {
+			return 2;
+		}
 	}
 }
