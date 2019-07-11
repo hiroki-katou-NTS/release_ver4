@@ -51,13 +51,10 @@ public class EmploymentAcFinder implements EmploymentAdapter {
 	@Override
 	public List<String> getEmploymentBySidsAndEmploymentCds(List<String> sids,
 			List<String> employmentCodes, DatePeriod dateRange) {
-		List<EmploymentHisOfEmployee> listData = employmentHistoryPub
-				.getEmploymentBySidsAndEmploymentCds(sids, employmentCodes, dateRange).values().stream()
-				.flatMap(x -> x.stream()).collect(Collectors.toList());
-		if(listData.isEmpty()) {
-			return Collections.emptyList();
-		}
-		return listData.stream().map(c->c.getSId()).collect(Collectors.toList());
+		return employmentHistoryPub.getEmploymentBySidsAndEmploymentCds(sids, employmentCodes, dateRange)
+				.keySet()
+				.stream()
+				.collect(Collectors.toList());
 	}
 	
 
