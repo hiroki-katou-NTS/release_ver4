@@ -98,6 +98,7 @@ public class AggrPCLogonClock {
 		if (!pcLogonInfoOpt.isPresent()) return;
 		Integer timeLeave = getTimeLeave(timeLeavingOfDaily);
 		if(timeLeave == null) return;
+		if (predTimeSetForCalc == null) return;
 		
 		if(!workType.getWorkTypeCode().equals(HALF_WORK_PREMIUM) 
 				&& !workType.getWorkTypeCode().equals(PREMIUM_DAY)) {
