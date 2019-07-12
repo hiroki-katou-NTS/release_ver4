@@ -811,7 +811,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			List<String> listEmp = listEmpAutoExec.getListEmpAutoExec(companyId, calculateSchedulePeriod,
 					procExec.getExecScope().getExecScopeCls(), Optional.of(workplaceIds), Optional.empty());
 			
-
+			System.out.println("対象者-スケ作成: " + listEmp);
+			
 			/*
 			 * 作成対象の判定
 			 */
@@ -1430,7 +1431,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					List<String> listEmp = listEmpAutoExec.getListEmpAutoExec(companyId,
 							calculateDailyPeriod.getDailyCreationPeriod(), procExec.getExecScope().getExecScopeCls(),
 							Optional.of(workPlaceIds), Optional.of(lstEmploymentCode));
-
+					
+					System.out.println("対象者-日別作成計算: " + listEmp);
+					
 					String typeExecution = "日別作成";
 					// 日別実績の作成
 					// boolean dailyPerformanceCreation = this.dailyPerformanceCreation(
@@ -1483,6 +1486,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 							new DatePeriod(calculateDate, GeneralDate.ymd(9999, 12, 31)),
 							procExec.getExecScope().getExecScopeCls(), Optional.of(workPlaceIds),
 							Optional.of(lstEmploymentCode));
+					
+					System.out.println("対象者-日別作成計算: " + listEmp);
 					
 					// 異動者・勤務種別変更者リスト作成処理
 //					ListLeaderOrNotEmpOutput createProcessForChangePerOrWorktype = this
@@ -2176,6 +2181,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						processExecution.getExecScope().getExecScopeCls(), Optional.of(workplaceIds),
 						Optional.of(lstEmploymentCode));
 				
+				System.out.println("対象者-承認反映: " + listEmp);
+					
 				List<String> leaderEmpIdList = new ArrayList<>();
 				if (processExecution.getProcessExecType() == ProcessExecType.RE_CREATE) {
 					// 異動者・勤務種別変更者リスト作成処理
@@ -2408,6 +2415,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				List<String> listEmp  = listEmpAutoExec.getListEmpAutoExec(companyId, newDatePeriod,
 						processExecution.getExecScope().getExecScopeCls(), Optional.of(workplaceIds),
 						Optional.of(lstEmploymentCode));
+				
+				System.out.println("対象者-月次集計: " + listEmp);
+				
 				List<String> leaderEmpIdList = new ArrayList<>();
 				if (processExecution.getProcessExecType() == ProcessExecType.RE_CREATE) {
 					// 異動者・勤務種別変更者リスト作成処理

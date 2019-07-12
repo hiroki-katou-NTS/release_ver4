@@ -137,6 +137,7 @@ public class AppRouteUpdateDailyDefault implements AppRouteUpdateDailyService {
 				checkError1552 = true;
 				break;
 			}
+			System.out.println("対象者-承認ルート日次: " + listEmp);
 			
 			if(procExec.getProcessExecType() == ProcessExecType.NORMAL_EXECUTION) {
 				//通常実行の場合

@@ -129,6 +129,8 @@ public class AppRouteUpdateMonthlyDefault implements AppRouteUpdateMonthlyServic
 				checkError1552 = true;
 				break;
 			}
+			System.out.println("対象者-承認ルート月次: " + listEmp);
+
 			/** アルゴリズム「日別実績の承認ルート中間データの作成」を実行する */
 			boolean check = createperApprovalMonthlyAdapter.createperApprovalMonthly(procExec.getCompanyId(),
 			 procExecLog.getExecId(),
