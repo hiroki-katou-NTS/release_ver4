@@ -12,7 +12,7 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 
 /**
  * 月別実績のPCログオン乖離
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class PCLogonDivergenceOfMonthly {
@@ -48,7 +48,7 @@ public class PCLogonDivergenceOfMonthly {
 	}
 	
 	/**
-	 * 集計
+	 * PCログオン乖離
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
 	 * @param attendanceTimeOfDaily 日別実績の勤怠時間
 	 * @param timeLeavingOfDaily 日別実績の出退勤
@@ -64,10 +64,10 @@ public class PCLogonDivergenceOfMonthly {
 			WorkType workType,
 			PredetermineTimeSetForCalc predTimeSetForCalc){
 
-		// ログオンの集計
+		// ログオン乖離の集計
 		this.logonDivergence.aggregateLogon(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily, anyItemValueOpt, workType);
 		
-		// ログオフの集計
+		// ログオフ乖離の集計
 		this.logoffDivergence.aggregateLogoff(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily,
 				workType, predTimeSetForCalc);
 	}

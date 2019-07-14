@@ -10,7 +10,7 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 
 /**
  * 月別実績のPCログオン時刻
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class PCLogonClockOfMonthly {
@@ -46,16 +46,16 @@ public class PCLogonClockOfMonthly {
 	}
 	
 	/**
-	 * ログオフの集計
+	 * PCログオン時刻
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
 	 */
 	public void aggregate(Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt, TimeLeavingOfDailyPerformance timeLeavingOfDaily,
 			WorkType workType, PredetermineTimeSetForCalc predTimeSetForCalc) {
 
-		// ログオンの集計
+		// ログオン時刻の集計
 		this.logonClock.aggregateLogOn(pcLogonInfoOpt, workType, timeLeavingOfDaily);
 		
-		// ログオフの集計
+		// ログオフ時刻の集計
 		this.logoffClock.aggregateLogOff(pcLogonInfoOpt, timeLeavingOfDaily, workType, predTimeSetForCalc);
 	}
 	

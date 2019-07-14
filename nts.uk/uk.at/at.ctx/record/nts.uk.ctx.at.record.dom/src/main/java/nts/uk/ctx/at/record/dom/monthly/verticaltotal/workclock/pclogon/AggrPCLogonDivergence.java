@@ -79,68 +79,63 @@ public class AggrPCLogonDivergence {
 
 		// 対象とするかどうかの判断
 		if (attendanceTimeOfDaily == null) return;
+		val stayingTime =  attendanceTimeOfDaily.getStayingTime();		// 日別実績の滞在時間
+		
+		// プレミアムデーを除く
 		if (workType.getWorkTypeCode().equals(AggrPCLogonClock.PREMIUM_DAY)) return;
 		
-		val stayingTime =  attendanceTimeOfDaily.getStayingTime();		// 日別実績の滞在時間
-		{
-			// ログオン時刻<>NULLを判断
-			if (!pcLogonInfoOpt.isPresent()) return;
-			PCLogOnInfoOfDaily pcLogonInfo = pcLogonInfoOpt.get();
-			Optional<LogOnInfo> logonInfoOpt = pcLogonInfo.getLogOnInfo(new PCLogOnNo(1));	// 勤務No=1
-			if (!logonInfoOpt.isPresent()) return;
-			if (!logonInfoOpt.get().getLogOn().isPresent()) return;
-			
-			// ログオン乖離時間の計算対象かどうか判断
-			if (timeLeavingOfDaily == null) return;
-			Optional<TimeLeavingWork> timeLeavingWorkOpt = timeLeavingOfDaily.getAttendanceLeavingWork(1);	// 勤務No=1
-			if (!timeLeavingWorkOpt.isPresent()) return;
-			
-			TimeLeavingWork timeLeavingWork = timeLeavingWorkOpt.get();
-			if (timeLeavingWork.getAttendanceStamp().isPresent() &&
-				timeLeavingWork.getLeaveStamp().isPresent()) {
-				TimeActualStamp attendanceStamp = timeLeavingWork.getAttendanceStamp().get();
-				TimeActualStamp leaveStamp = timeLeavingWork.getLeaveStamp().get();
-				if (attendanceStamp.getStamp().isPresent() &&
-					leaveStamp.getStamp().isPresent()) {
-					// 出勤＝退勤なら、対象外
-					int attendanceMinutes = attendanceStamp.getStamp().get().getTimeWithDay().valueAsMinutes();
-					int leaveMinutes = leaveStamp.getStamp().get().getTimeWithDay().valueAsMinutes();
-					if (attendanceMinutes == leaveMinutes) {
-						return;
-					}
-				} else {
+		// ログオン時刻<>NULLを判断
+		if (!pcLogonInfoOpt.isPresent()) return;
+		PCLogOnInfoOfDaily pcLogonInfo = pcLogonInfoOpt.get();
+		Optional<LogOnInfo> logonInfoOpt = pcLogonInfo.getLogOnInfo(new PCLogOnNo(1));	// 勤務No=1
+		if (!logonInfoOpt.isPresent()) return;
+		if (!logonInfoOpt.get().getLogOn().isPresent()) return;
+		
+		// ログオン乖離時間の計算対象かどうか判断
+		if (timeLeavingOfDaily == null) return;
+		Optional<TimeLeavingWork> timeLeavingWorkOpt = timeLeavingOfDaily.getAttendanceLeavingWork(1);	// 勤務No=1
+		if (!timeLeavingWorkOpt.isPresent()) return;
+		
+		TimeLeavingWork timeLeavingWork = timeLeavingWorkOpt.get();
+		if (timeLeavingWork.getAttendanceStamp().isPresent() &&
+			timeLeavingWork.getLeaveStamp().isPresent()) {
+			TimeActualStamp attendanceStamp = timeLeavingWork.getAttendanceStamp().get();
+			TimeActualStamp leaveStamp = timeLeavingWork.getLeaveStamp().get();
+			if (attendanceStamp.getStamp().isPresent() &&
+				leaveStamp.getStamp().isPresent()) {
+				// 出勤＝退勤なら、対象外
+				int attendanceMinutes = attendanceStamp.getStamp().get().getTimeWithDay().valueAsMinutes();
+				int leaveMinutes = leaveStamp.getStamp().get().getTimeWithDay().valueAsMinutes();
+				if (attendanceMinutes == leaveMinutes) {
 					return;
 				}
+			} else {
+				return;
 			}
-			
-			// 平日の判断
-			boolean isWeekday = false;
-			if (anyItemValueOpt.isPresent()) {
-				AnyItemValueOfDaily anyItemValue = anyItemValueOpt.get();
-				for (AnyItemValue item : anyItemValue.getItems()) {
-					if (item.getItemNo().v().intValue() != 12) continue;	// 任意項目12以外は無視
-					if (item.getTimes().isPresent()) {						// 回数=1 なら平日
-						if (item.getTimes().get().v().doubleValue() == 1.0) isWeekday = true; 
-					}
+		}
+		
+		// 平日の判断
+		boolean isWeekday = false;
+		if (anyItemValueOpt.isPresent()) {
+			AnyItemValueOfDaily anyItemValue = anyItemValueOpt.get();
+			for (AnyItemValue item : anyItemValue.getItems()) {
+				if (item.getItemNo().v().intValue() != 12) continue;	// 任意項目12以外は無視
+				if (item.getTimes().isPresent()) {						// 回数=1 なら平日
+					if (item.getTimes().get().v().doubleValue() == 1.0) isWeekday = true; 
 				}
 			}
-			if (isWeekday == false) return;
 		}
+		if (isWeekday == false) return;
 
 		// 合計時間を集計
 		int logonMinutes = stayingTime.getBeforePCLogOnTime().valueAsMinutes();
-		if (logonMinutes <= 0) return; 
-			
-		this.totalTime = this.totalTime.addMinutes(logonMinutes);
+		if (logonMinutes > 0) this.totalTime = this.totalTime.addMinutes(logonMinutes);
 		
 		// 日数を集計する
 		this.days = this.days.addDays(1.0);
 		
 		// 平均時間を計算する
-		this.averageTime = new AttendanceTimeMonth(0);
-		if (this.days.v().doubleValue() != 0.0){
-			this.averageTime = new AttendanceTimeMonth(this.totalTime.valueAsMinutes() / this.days.v().intValue());
-		}
+		this.calcAverageClock();
 	}
 	
 	/**
@@ -161,54 +156,65 @@ public class AggrPCLogonDivergence {
 		// 対象とするかどうかの判断
 		if (attendanceTimeOfDaily == null) return;
 		if (predTimeSetForCalc == null) return;
-		if (workType.getWorkTypeCode().equals(AggrPCLogonClock.HALF_WORK_PREMIUM) 
-				&& workType.getWorkTypeCode().equals(AggrPCLogonClock.PREMIUM_DAY)) return;
 		val stayingTime =  attendanceTimeOfDaily.getStayingTime();
-		{
-			// 退勤時刻<>NULL
-			if (timeLeavingOfDaily == null) return;
-			TimeWithDayAttr leaveStamp = null;
-			Integer targetWorkNo = timeLeavingOfDaily.getWorkTimes().v();	// 勤務No ← 勤務回数
-			Optional<TimeActualStamp> leavingWorkOpt = timeLeavingOfDaily.getLeavingWork();		// 2回勤務があれば2回目
-			if (leavingWorkOpt.isPresent()) {
-				if (leavingWorkOpt.get().getStamp().isPresent()) {
-					leaveStamp = leavingWorkOpt.get().getStamp().get().getTimeWithDay();
-				}
-			}
-			if (leaveStamp == null) return;
-			
-			// ログオフ時刻<>NULL
-			if (!pcLogonInfoOpt.isPresent()) return;
-			PCLogOnInfoOfDaily pcLogonInfo = pcLogonInfoOpt.get();
-			Optional<LogOnInfo> logonInfoOpt = pcLogonInfo.getLogOnInfo(new PCLogOnNo(targetWorkNo));
-			if (!logonInfoOpt.isPresent()) return;
-			if (!logonInfoOpt.get().getLogOff().isPresent()) return;
-			TimeWithDayAttr logoffStamp = logonInfoOpt.get().getLogOff().get();
-			
-			// 退勤時刻>=ログオフ時刻　なら対象外
-			int leaveMinutes = leaveStamp.valueAsMinutes();
-			int logoffMinutes = logoffStamp.valueAsMinutes();
-			if (leaveMinutes >= logoffMinutes) return;
 
-			// 時間帯　確認
-			val timezoneUseOpt = predTimeSetForCalc.getTimeSheets(workType.getAttendanceHolidayAttr(), targetWorkNo);
-			if (!timezoneUseOpt.isPresent()) return;
-			val timezoneUse = timezoneUseOpt.get();
-			if (timezoneUse.getUseAtr() == UseSetting.NOT_USE) return;
-			
-			// 所定時間内の退勤の場合、対象外
-			int timezoneUseEndMinutes = timezoneUse.getEnd().valueAsMinutes();
-			if (leaveMinutes < timezoneUseEndMinutes) return;
+		// Web終業時刻計算対象の判断
+		if (workType.isCalcTargetForEndClock() == false) return;
+		
+		// 退勤時刻<>NULL
+		if (timeLeavingOfDaily == null) return;
+		TimeWithDayAttr leaveStamp = null;
+		Integer targetWorkNo = timeLeavingOfDaily.getWorkTimes().v();	// 勤務No ← 勤務回数
+		Optional<TimeActualStamp> leavingWorkOpt = timeLeavingOfDaily.getLeavingWork();		// 2回勤務があれば2回目
+		if (leavingWorkOpt.isPresent()) {
+			if (leavingWorkOpt.get().getStamp().isPresent()) {
+				leaveStamp = leavingWorkOpt.get().getStamp().get().getTimeWithDay();
+			}
 		}
+		if (leaveStamp == null) return;
+		
+		// ログオフ時刻<>NULL
+		if (!pcLogonInfoOpt.isPresent()) return;
+		PCLogOnInfoOfDaily pcLogonInfo = pcLogonInfoOpt.get();
+		Optional<LogOnInfo> logonInfoOpt = pcLogonInfo.getLogOnInfo(new PCLogOnNo(targetWorkNo));
+		if (!logonInfoOpt.isPresent()) return;
+		if (!logonInfoOpt.get().getLogOff().isPresent()) return;
+		TimeWithDayAttr logoffStamp = logonInfoOpt.get().getLogOff().get();
+		
+		// 退勤時刻>=ログオフ時刻　なら対象外
+		int leaveMinutes = leaveStamp.valueAsMinutes();
+		int logoffMinutes = logoffStamp.valueAsMinutes();
+		if (leaveMinutes >= logoffMinutes) return;
+
+		// 指定した時刻が所定内に含まれているかどうか確認
+		val timezoneUseOpt = predTimeSetForCalc.getTimeSheets(workType.getAttendanceHolidayAttr(), targetWorkNo);
+		if (!timezoneUseOpt.isPresent()) return;
+		val timezoneUse = timezoneUseOpt.get();
+		if (timezoneUse.getUseAtr() == UseSetting.NOT_USE) return;
+		int timezoneUseEndMinutes = timezoneUse.getEnd().valueAsMinutes();
+		if (leaveMinutes < timezoneUseEndMinutes) return;
 
 		// 合計時間を集計
-		int logoffMinutes = stayingTime.getAfterPCLogOffTime().valueAsMinutes();
-		if (logoffMinutes > 0) this.totalTime = this.totalTime.addMinutes(logoffMinutes);
+		// 補正後PCログオフ時刻を計算
+		// 2019.7.14 UPD shuichi_ishida Redmine #108353
+		//int logoffMinutes = stayingTime.getAfterPCLogOffTime().valueAsMinutes();
+		int adjustMinutes = AggrPCLogonClock.getLogOffClock(logoffMinutes, leaveMinutes, predTimeSetForCalc);
+		
+		// 乖離時間の計算
+		if (adjustMinutes > 0) this.totalTime = this.totalTime.addMinutes(adjustMinutes);
 		
 		// 日数を集計する
-		if (stayingTime.getAfterPCLogOffTime().valueAsMinutes() > 0) this.days = this.days.addDays(1.0);
+		//if (stayingTime.getAfterPCLogOffTime().valueAsMinutes() > 0) this.days = this.days.addDays(1.0);
+		if (adjustMinutes > 0) this.days = this.days.addDays(1.0);
 		
 		// 平均時間を計算する
+		this.calcAverageClock();
+	}
+	
+	/**
+	 * 平均時刻を計算
+	 */
+	private void calcAverageClock() {
 		this.averageTime = new AttendanceTimeMonth(0);
 		if (this.days.v().doubleValue() != 0.0){
 			this.averageTime = new AttendanceTimeMonth(this.totalTime.valueAsMinutes() / this.days.v().intValue());
