@@ -98,6 +98,7 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.specialleave.service.SpecialLeav
 import nts.uk.ctx.at.shared.dom.remainingnumber.work.CompanyHolidayMngSetting;
 import nts.uk.ctx.at.shared.dom.specialholiday.SpecialHolidayRepository;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
+import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
@@ -474,7 +475,7 @@ public class AggregateMonthlyRecordServiceProc {
 		
 		// 大塚カスタマイズの集計
 		Map<Integer, Map<Integer, AnyItemAggrResult>> anyItemCustomizeValue =
-				this.aggregateCustomizeForOtsuka(datePeriod);
+				this.aggregateCustomizeForOtsuka(this.yearMonth, this.closureId, this.companySets);
 		
 		// 月別実績の任意項目を集計
 		this.aggregateAnyItem(monthPeriod, anyItemCustomizeValue);
@@ -819,17 +820,22 @@ public class AggregateMonthlyRecordServiceProc {
 	
 	/**
 	 * 大塚カスタマイズ　（任意項目集計）
-	 * @param period 集計期間　（入退職前後の期間を除いていない集計期間）
+	 * @param yearMonth 年月
+	 * @param closureId 締めID
+	 * @param companySets 月別集計で必要な会社別設定
 	 * @return　任意項目カスタマイズ値
 	 */
-	private Map<Integer, Map<Integer, AnyItemAggrResult>> aggregateCustomizeForOtsuka(DatePeriod period){
+	private Map<Integer, Map<Integer, AnyItemAggrResult>> aggregateCustomizeForOtsuka(
+			YearMonth yearMonth,
+			ClosureId closureId,
+			MonAggrCompanySettings companySets){
 
 		// 任意項目カスタマイズ値　※　最初のInteger=0（月結果）、1～（各週結果（週No））
 		Map<Integer, Map<Integer, AnyItemAggrResult>> results = new HashMap<>();
 		results.put(0, new HashMap<>());	// 月結果
 
 		// 月ごとの集計
-		AnyItemAggrResult monthResult = this.getPredWorkingDays(period);
+		AnyItemAggrResult monthResult = this.getPredWorkingDays(yearMonth, closureId, companySets);
 		results.get(0).putIfAbsent(monthResult.getOptionalItemNo(), monthResult);
 		
 		// 任意項目カスタマイズ値を返す
@@ -928,10 +934,40 @@ public class AggregateMonthlyRecordServiceProc {
 	
 	/**
 	 * 計画所定労働日数
+	 * @param yearMonth 年月
+	 * @param closureId 締めID
+	 * @param companySets 月別集計で必要な会社別設定
 	 * @return 任意項目集計結果
 	 */
-	private AnyItemAggrResult getPredWorkingDays(DatePeriod period){
+	private AnyItemAggrResult getPredWorkingDays(
+			YearMonth yearMonth,
+			ClosureId closureId,
+			MonAggrCompanySettings companySets){
 
+		AnyItemAggrResult emptyResult = AnyItemAggrResult.of(69, null, new AnyTimesMonth(0.0), null);
+		
+		// 指定した年月の締め期間を取得する
+		DatePeriod period = null;
+		{
+			// 対象の締めを取得する
+			if (!companySets.getClosureMap().containsKey(closureId.value)) return emptyResult;
+			Closure closure = companySets.getClosureMap().get(closureId.value);
+			
+			// 指定した年月の期間をすべて取得する
+			List<DatePeriod> periods = closure.getPeriodByYearMonth(yearMonth);
+			if (periods.size() == 0) return emptyResult;
+			
+			// 期間を合算する
+			GeneralDate startDate = periods.get(0).start();
+			GeneralDate endDate = periods.get(0).end();
+			if (periods.size() == 2) {
+				if (startDate.after(periods.get(1).start())) startDate = periods.get(1).start();
+				if (endDate.before(periods.get(1).end())) endDate = periods.get(1).end();
+			}
+			period = new DatePeriod(startDate, endDate);
+		}
+		if (period == null) return emptyResult;
+		
 		// RQ608：指定期間の所定労働日数を取得する(大塚用)
 		double predWorkingDays = this.repositories.getPredWorkingDaysAdaptor().byPeriod(
 				period, this.companySets.getAllWorkTypeMap()).v();
