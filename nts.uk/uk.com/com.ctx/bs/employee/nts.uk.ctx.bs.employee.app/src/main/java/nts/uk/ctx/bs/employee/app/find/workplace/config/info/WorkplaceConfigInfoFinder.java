@@ -6,16 +6,17 @@ package nts.uk.ctx.bs.employee.app.find.workplace.config.info;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
+import java.util.Optional;import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import org.apache.logging.log4j.util.Strings;
-
+import lombok.Getter;
+import lombok.Setter;
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
@@ -27,6 +28,7 @@ import nts.uk.ctx.bs.employee.dom.workplace.Workplace;
 import nts.uk.ctx.bs.employee.dom.workplace.WorkplaceRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfig;
 import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfigRepository;
+import nts.uk.ctx.bs.employee.dom.workplace.config.info.HierarchyCode;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfo;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfoRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceHierarchy;
@@ -174,6 +176,28 @@ public class WorkplaceConfigInfoFinder {
 		return this.createTree(lstHierarchy, lstWkpInfo);
 	}
 
+	@Getter
+	@Setter
+	class HierWorkplaceHierarchyDto extends WorkplaceHierarchyDto {
+		private HierWorkplaceHierarchyDto parent;
+		
+		private List<HierWorkplaceHierarchyDto> childrends;
+		
+		public WorkplaceHierarchyDto toDto() {
+			WorkplaceHierarchyDto dto = new WorkplaceHierarchyDto();
+			
+			dto.setCode(this.code);
+			dto.setName(this.name);
+			
+			dto.setWorkplaceId(this.workplaceId);
+			dto.setHierarchyCode(new HierarchyCode(this.hierarchyCode));
+			
+			dto.setChilds(this.childrends.stream().map(m -> m.toDto()).collect(Collectors.toList()));
+			
+			return dto;
+		}		
+	}
+	
 	/**
 	 * Creates the tree.
 	 *
@@ -188,25 +212,23 @@ public class WorkplaceConfigInfoFinder {
 	private List<WorkplaceHierarchyDto> createTree(List<WorkplaceHierarchy> lstHierarchy,
 			List<WorkplaceInfo> lstHWkpInfo) {
 
-		List<WorkplaceHierarchyDto> lstReturn = new ArrayList<>();
-		// Higher hierarchyCode has shorter length
-		int highestHierarchy = lstHierarchy.stream()
-				.min((a, b) -> a.getHierarchyCode().v().length() - b.getHierarchyCode().v().length()).get()
-				.getHierarchyCode().v().length();
-		Iterator<WorkplaceHierarchy> iteratorWkpHierarchy = lstHierarchy.iterator();
+		List<HierWorkplaceHierarchyDto> lstReturn = new ArrayList<>();
 
+		Iterator<WorkplaceHierarchy> iteratorWkpHierarchy = lstHierarchy.iterator();
+		
 		// while have workplace
 		while (iteratorWkpHierarchy.hasNext()) {
 			// pop 1 item
 			WorkplaceHierarchy wkpHierarchy = iteratorWkpHierarchy.next();
 
 			// convert
-			WorkplaceHierarchyDto dto = new WorkplaceHierarchyDto();
+			HierWorkplaceHierarchyDto dto = new HierWorkplaceHierarchyDto();
 			wkpHierarchy.saveToMemento(dto);
 
 			// get workplace hierarchy by wkpId
 			Optional<WorkplaceInfo> opWkpInfo = lstHWkpInfo.stream()
 					.filter(w -> w.getWorkplaceId().equals(wkpHierarchy.getWorkplaceId())).findFirst();
+
 			if (opWkpInfo.isPresent()) {
 				WorkplaceInfo wkpInfo = opWkpInfo.get();
 				dto.setCode(wkpInfo.getWorkplaceCode().v());
@@ -216,10 +238,45 @@ public class WorkplaceConfigInfoFinder {
 				continue;
 			}
 
-			// build List
-			this.pushToList(lstReturn, dto, wkpHierarchy.getHierarchyCode().v(), Strings.EMPTY, highestHierarchy);
+			dto.setChilds(new ArrayList<>());
+
+			lstReturn.add(dto);
 		}
-		return lstReturn;
+		
+		lstReturn.stream()
+			.sorted(Comparator.comparing(HierWorkplaceHierarchyDto::getHierarchyCode))
+			.map(m -> {
+				// Lọc đối tượng con và loại bỏ chính đối tượng đó
+				List<HierWorkplaceHierarchyDto> childs = lstReturn.stream().filter(f -> {
+					boolean notSelf = !f.getHierarchyCode().equals(m.getHierarchyCode());
+					boolean isChilds = f.getHierarchyCode().startsWith(m.getHierarchyCode());
+					
+					return notSelf && isChilds;
+				}).collect(Collectors.toList());
+				
+				// lập quan hệ cha - com
+				childs.forEach(f -> f.setParent(m));
+				
+				// lập quan hệ con cha
+				m.setChildrends(childs);
+				
+				return m;
+			})
+			.collect(Collectors.toList());
+		
+		lstReturn.forEach(m -> { 
+			// Lọc bỏ những đối tượng con không hợp lệ
+			List<HierWorkplaceHierarchyDto> childs = m.getChildrends()
+					.stream()
+					.filter(c -> c.getParent().getHierarchyCode().equals(m.getHierarchyCode()))
+					.collect(Collectors.toList());
+			
+			m.setChildrends(childs);
+		});
+
+		return lstReturn.stream()
+				.filter(f -> f.getParent() == null)
+				.map(f -> f.toDto()).collect(Collectors.toList());
 	}
 
 	/**
@@ -251,7 +308,8 @@ public class WorkplaceConfigInfoFinder {
 			}
 		} else {
 			String searchCode = preCode.isEmpty() ? preCode + hierarchyCode.substring(0, highestHierarchy)
-					: preCode + hierarchyCode.substring(hierarchyCode.length() - HIERARCHY_LENGTH, hierarchyCode.length());
+			: preCode + hierarchyCode.substring(0, HIERARCHY_LENGTH); 
+			//: preCode + hierarchyCode.substring(hierarchyCode.length() - HIERARCHY_LENGTH, hierarchyCode.length());
 
 			Optional<WorkplaceHierarchyDto> optWorkplaceFindDto = lstReturn.stream()
 					.filter(item -> item.getHierarchyCode().equals(searchCode)).findFirst();
@@ -262,8 +320,13 @@ public class WorkplaceConfigInfoFinder {
 
 			List<WorkplaceHierarchyDto> currentItemChilds = optWorkplaceFindDto.get().getChilds();
 
-			pushToList(currentItemChilds, dto, hierarchyCode.substring(0, hierarchyCode.length() - HIERARCHY_LENGTH),
-					searchCode, highestHierarchy);
+			if (preCode.isEmpty()) {
+				pushToList(currentItemChilds, dto, hierarchyCode.substring(highestHierarchy, hierarchyCode.length()),
+						searchCode, highestHierarchy);
+			} else {
+				pushToList(currentItemChilds, dto, hierarchyCode.substring(HIERARCHY_LENGTH, hierarchyCode.length()),
+						searchCode, highestHierarchy);
+			}
 		}
 	}
 	
