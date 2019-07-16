@@ -669,14 +669,18 @@ public class DailyModifyResCommandFacade {
 		dataResultAfterIU.setErrorMap(convertErrorToType(lstResultReturnDailyError, resultErrorMonth));
 		
 		//登録確認メッセージ
-		if((dataResultAfterIU.getErrorMap().isEmpty() && dataResultAfterIU.getErrorMap().values().isEmpty() && !hasErrorRow 
-				                                      && (dataResultAfterIU.getFlexShortage() == null || !dataResultAfterIU.getFlexShortage().isError()))) {
+		if ((dataResultAfterIU.getErrorMap().isEmpty() && dataResultAfterIU.getErrorMap().values().isEmpty()
+				&& !hasErrorRow
+				&& (dataResultAfterIU.getFlexShortage() == null || (!dataResultAfterIU.getFlexShortage().isError()
+						|| (dataResultAfterIU.getFlexShortage().isError() && !editFlex))))) {
 			dataResultAfterIU.setMessageAlert("Msg_15");
-		}else {
-			Map<Integer, List<DPItemValue>> errorMapTemp = dataResultAfterIU.getErrorMap().entrySet().stream()
-					.filter(x -> x.getKey() != TypeError.CONTINUOUS.value && x.getKey() != TypeError.RELEASE_CHECKBOX.value)
+		} else {
+			Map<Integer, List<DPItemValue>> errorMapTemp = dataResultAfterIU.getErrorMap().entrySet().stream().filter(
+					x -> x.getKey() != TypeError.CONTINUOUS.value && x.getKey() != TypeError.RELEASE_CHECKBOX.value)
 					.collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue(), (x, y) -> x));
-			if (errorMapTemp.values().isEmpty() && (dataResultAfterIU.getFlexShortage() == null || !dataResultAfterIU.getFlexShortage().isError())) {
+			if (errorMapTemp.values().isEmpty()
+					&& (dataResultAfterIU.getFlexShortage() == null || (!dataResultAfterIU.getFlexShortage().isError()
+							|| (dataResultAfterIU.getFlexShortage().isError() && !editFlex)))) {
 				dataResultAfterIU.setMessageAlert("Msg_15");
 			} else {
 				dataResultAfterIU.setMessageAlert("Msg_1489");
@@ -1153,17 +1157,17 @@ public class DailyModifyResCommandFacade {
 		DataResultAfterIU dataResultAfterIU = new DataResultAfterIU();
 		boolean editFlex = (mode == 0 && monthValue != null
 				&& !CollectionUtil.isEmpty(monthValue.getItems())); 
-		if (editFlex) {
+		//if (editFlex) {
 			//フレックス繰越時間が正しい範囲で入力されているかチェックする
-			val flexShortageRCDto = validatorDataDaily.errorCheckFlex(resultIU.getLstMonthDomain(),
-					monthlyParam);
-			if (flexShortageRCDto.isError() || !flexShortageRCDto.getMessageError().isEmpty()) {
-				hasError = true;
-				if(!resultIU.getLstMonthDomain().isEmpty()) flexShortageRCDto.createDataCalc(convertMonthToItem(MonthlyRecordWorkDto.fromOnlyAttTime(resultIU.getLstMonthDomain().get(0)), monthValue));
-			}
-			flexShortageRCDto.setVersion(monthValue.getVersion());
-			dataResultAfterIU.setFlexShortage(flexShortageRCDto);
+		val flexShortageRCDto = validatorDataDaily.errorCheckFlex(resultIU.getLstMonthDomain(),
+				monthlyParam);
+		if ((flexShortageRCDto.isError() || !flexShortageRCDto.getMessageError().isEmpty()) && editFlex) {
+			hasError = true;
+			if(!resultIU.getLstMonthDomain().isEmpty()) flexShortageRCDto.createDataCalc(convertMonthToItem(MonthlyRecordWorkDto.fromOnlyAttTime(resultIU.getLstMonthDomain().get(0)), monthValue));
 		}
+		flexShortageRCDto.setVersion(monthValue.getVersion());
+		dataResultAfterIU.setFlexShortage(flexShortageRCDto);
+		//}
 		//フレ補填によって年休残数のエラーが発生していないかチェックする
 		if(mode == 0) {
 			List<EmployeeMonthlyPerError> errorHoliday = errorMonths.stream()
