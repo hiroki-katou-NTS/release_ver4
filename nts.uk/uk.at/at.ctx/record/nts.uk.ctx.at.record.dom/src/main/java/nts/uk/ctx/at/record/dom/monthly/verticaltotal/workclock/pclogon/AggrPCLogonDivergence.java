@@ -198,7 +198,8 @@ public class AggrPCLogonDivergence {
 		// 補正後PCログオフ時刻を計算
 		// 2019.7.14 UPD shuichi_ishida Redmine #108353
 		//int logoffMinutes = stayingTime.getAfterPCLogOffTime().valueAsMinutes();
-		int adjustMinutes = AggrPCLogonClock.getLogOffClock(logoffMinutes, leaveMinutes, predTimeSetForCalc);
+		int adjustMinutes =
+				AggrPCLogonClock.getLogOffClock(logoffMinutes, leaveMinutes, predTimeSetForCalc) - leaveMinutes;
 		
 		// 乖離時間の計算
 		if (adjustMinutes > 0) this.totalTime = this.totalTime.addMinutes(adjustMinutes);
