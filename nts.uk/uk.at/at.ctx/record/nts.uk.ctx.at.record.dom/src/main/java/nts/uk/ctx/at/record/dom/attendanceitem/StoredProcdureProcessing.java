@@ -209,6 +209,9 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			/** 任意項目9: 出勤の判断 */
 			processOptionalItem(() -> shouldCopy, optionalItem, timeOn, timeOff, 9);
 			
+			/** 任意項目12 */
+			processOptionalItem(() -> shouldCopy, optionalItem, COUNT_ON, COUNT_OFF, 12);
+			
 			timeOff = 0;
 			/** 任意項目8: 両方時刻が入っている場合のみ乖離時間を計算する */
 			if(startTime != null && leaveGateStartTime != null){
@@ -324,20 +327,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			}
 			
 			/** 平日か*/
-			timeOn = divergenceTime;
-			if(isWeekday(atr, dailyWork.getOneDay(), dailyWork.getMorning(), dailyWork.getAfternoon())){
-				/** 任意項目12 */
-				mergeOptionalItemWithNo(optionalItem, COUNT_ON, 12);
-				
-				/** 任意項目17 */
-				mergeOptionalItemWithNo(optionalItem, timeOn, 17);
-			} else {
-				/** 任意項目12 */
-				updateOptionalItemWithNo(optionalItem, COUNT_OFF, 12);
-				
-				/** 任意項目17 */
-				updateOptionalItemWithNo(optionalItem, timeOff, 17);
-			}
+			processOptionalItem(() -> shouldCopy, optionalItem, divergenceTime, timeOff, 17);
 			
 			if(startTime != null && !d.getWorkInformation().getRecordInfo().getWorkTypeCode().equals(PREMIUM_CODE)) {
 				/** 任意項目89 */
