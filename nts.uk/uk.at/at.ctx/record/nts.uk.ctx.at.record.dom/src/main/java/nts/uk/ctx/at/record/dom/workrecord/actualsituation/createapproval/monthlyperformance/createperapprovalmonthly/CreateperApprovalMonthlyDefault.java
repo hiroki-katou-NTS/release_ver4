@@ -34,7 +34,7 @@ public class CreateperApprovalMonthlyDefault implements CreateperApprovalMonthly
 			this.parallel.forEach(employeeIDs, employeeID -> {
 				
 				/**アルゴリズム「指定社員の中間データを作成する」を実行する*/
-				AppRootInsContentFnImport appRootInsContentFnImport =  createDailyApproverAdapter.createDailyApprover(employeeID, 2, endDateClosure,endDateClosure);
+				AppRootInsContentFnImport appRootInsContentFnImport =  createDailyApproverAdapter.createDailyApprover(employeeID, 2, GeneralDate.today(),endDateClosure);
 				
 				boolean flagError = appRootInsContentFnImport.getErrorFlag().intValue()==0?false:true;
 				String errorMessage = appRootInsContentFnImport.getErrorMsgID();

@@ -36,69 +36,49 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 	public boolean createperApprovalDaily(String companyId, String executionId, List<String> employeeIDs,
 			int processExecType, Integer createNewEmp, GeneralDate startDateClosure,GeneralDate endDateClosure) {
 		/** パラメータ.実行種別をチェック */
-		// 通常実行の場合 : processExecType = 0(通常実行)
-		if (!employeeIDs.isEmpty()) {
-			if (processExecType == 0) {
-				// RequestList211
-				List<AffCompanyHistImport> listAffCompanyHistImport = syCompanyRecordAdapter
-						.getAffCompanyHistByEmployee(employeeIDs,
-								new DatePeriod(startDateClosure, GeneralDate.today()));
+		// 通常実行の場合 : processExecType = 0(通常実行) - // 再作成の場合 : processExecType = 1(再作成)
+		if (processExecType == 0) {
+			// RequestList211
+			List<AffCompanyHistImport> listAffCompanyHistImport = syCompanyRecordAdapter
+					.getAffCompanyHistByEmployee(employeeIDs,
+							new DatePeriod(startDateClosure, GeneralDate.today()));
+			
+			this.parallel.forEach(employeeIDs, employeeID -> {
 				
-				this.parallel.forEach(employeeIDs, employeeID -> {
-					
-					// 年月日　←「システム日付の前日」
-					GeneralDate ymd = GeneralDate.today().addDays(-1);
-					if (createNewEmp == 1) {	
-						/** Imported「所属会社履歴（社員別）」を取得する(lấy thông tin Imported「所属会社履歴（社員別）」) */
-						AffCompanyHistImport affComHist = new AffCompanyHistImport();
-						boolean checkAffComHist = false;
-						for (AffCompanyHistImport affCompanyHistImport : listAffCompanyHistImport) {
-							if (affCompanyHistImport.getEmployeeId().equals(employeeID)) {
-								affComHist = affCompanyHistImport;
-								checkAffComHist = true;
-								break;
-							}
-						}
-						// 年月日 ← 取得した「所属会社履歴（社員別）.所属期間.開始日」
-						if (checkAffComHist) {
-							if(!affComHist.getLstAffComHistItem().isEmpty()) {
-								ymd = affComHist.getLstAffComHistItem().get(0).getDatePeriod().start();
-							}
+				// 年月日　←「システム日付の前日」
+				GeneralDate ymd = GeneralDate.today().addDays(-1);
+				if (createNewEmp == 1) {	
+					/** Imported「所属会社履歴（社員別）」を取得する(lấy thông tin Imported「所属会社履歴（社員別）」) */
+					AffCompanyHistImport affComHist = new AffCompanyHistImport();
+					boolean checkAffComHist = false;
+					for (AffCompanyHistImport affCompanyHistImport : listAffCompanyHistImport) {
+						if (affCompanyHistImport.getEmployeeId().equals(employeeID)) {
+							affComHist = affCompanyHistImport;
+							checkAffComHist = true;
+							break;
 						}
 					}
-					/** アルゴリズム「指定社員の中間データを作成する」を実行する */
-					AppRootInsContentFnImport appRootInsContentFnImport = createDailyApproverAdapter
-							.createDailyApprover(employeeID, 1, ymd,startDateClosure);
-
-					boolean flagError = appRootInsContentFnImport.getErrorFlag().intValue() == 0 ? false:true;
-					String errorMessage = appRootInsContentFnImport.getErrorMsgID();
-					// 取得したエラーフラグ != エラーなし
-					if (flagError) {
-						/** ドメインモデル「承認中間データエラーメッセージ情報（日別実績）」を追加する */
-						AppDataInfoDaily appDataInfoDaily = new AppDataInfoDaily(employeeID, executionId,
-								new ErrorMessageRC(TextResource.localize(errorMessage)));
-						appDataInfoDailyRepo.addAppDataInfoDaily(appDataInfoDaily);
+					// 年月日 ← 取得した「所属会社履歴（社員別）.所属期間.開始日」
+					if (checkAffComHist) {
+						if(!affComHist.getLstAffComHistItem().isEmpty()) {
+							ymd = affComHist.getLstAffComHistItem().get(0).getDatePeriod().start();
+						}
 					}
-					
-				}); // end for listEmployee
+				}
+				/** アルゴリズム「指定社員の中間データを作成する」を実行する */
+				AppRootInsContentFnImport appRootInsContentFnImport = createDailyApproverAdapter
+						.createDailyApprover(employeeID, 1, ymd,startDateClosure);
 
-			} else { // 再作成の場合 : processExecType = 1(再作成)
-				this.parallel.forEach(employeeIDs, employeeID -> {
-					/** アルゴリズム「指定社員の中間データを作成する」を実行する */
-					AppRootInsContentFnImport appRootInsContentFnImport = createDailyApproverAdapter
-							.createDailyApprover(employeeID, 1,endDateClosure, startDateClosure);
-
-					boolean flagError = appRootInsContentFnImport.getErrorFlag().intValue() == 0 ? false:true;
-					String errorMessage = appRootInsContentFnImport.getErrorMsgID();
-					if (flagError) {
-						/** ドメインモデル「承認中間データエラーメッセージ情報（日別実績）」を追加する */
-						AppDataInfoDaily appDataInfoDaily = new AppDataInfoDaily(employeeID, executionId,
-								new ErrorMessageRC(TextResource.localize(errorMessage)));
-						appDataInfoDailyRepo.addAppDataInfoDaily(appDataInfoDaily);
-					}
-				});
-
-			}
+				boolean flagError = appRootInsContentFnImport.getErrorFlag().intValue() == 0 ? false:true;
+				String errorMessage = appRootInsContentFnImport.getErrorMsgID();
+				// 取得したエラーフラグ != エラーなし
+				if (flagError) {
+					/** ドメインモデル「承認中間データエラーメッセージ情報（日別実績）」を追加する */
+					AppDataInfoDaily appDataInfoDaily = new AppDataInfoDaily(employeeID, executionId,
+							new ErrorMessageRC(TextResource.localize(errorMessage)));
+					appDataInfoDailyRepo.addAppDataInfoDaily(appDataInfoDaily);
+				}
+			}); // end for listEmployee
 		}
 
 		/** ドメインモデル「承認中間データエラーメッセージ情報（日別実績）」を取得する */
