@@ -13,11 +13,13 @@ module nts.uk.ui.koExtentions {
         childField: string;
         searchField: Array<string>;
         source: Array<any>;
+        key: string;
         
-        constructor(source: Array<any>, searchField: Array<string>, childField?: string) {
+        constructor(source: Array<any>, searchField: Array<string>, childField?: string, key?: string) {
             this.childField = childField;    
             this.source = _.isEmpty(source) ? [] : this.cloneDeep(source);
             this.searchField = searchField;
+            this.key = key;
         }
         
         filter(searchKey: string): Array<any>{
@@ -25,20 +27,35 @@ module nts.uk.ui.koExtentions {
             return self.filterWithSource(searchKey, this.source);
         }
         
-        search(searchKey: string, fromIndex: number): any {
+        computeSelectingIndex(dataSource: Array<any>, selectedItems: any, key: string): number {
+            let selectingIndex = -1;
+            if (!_.isEmpty(selectedItems)) {
+                let firstItemValue = $.isArray(selectedItems)
+                    ? selectedItems[0]["id"].toString() : selectedItems["id"].toString();
+                selectingIndex = _.findIndex(dataSource, function(item: any) {
+                    return item[key].toString() === firstItemValue;
+                });
+            }
+            return selectingIndex;
+        }
+        
+        search(searchKey: string, selectedItems: Array<any>): any {
             let self = this;
             
+            let flatArr = nts.uk.util.flatArray(self.source, this.childField);
+            
+            let fromIndex = this.computeSelectingIndex(flatArr, selectedItems, self.key);
             // search in the next array
-            let nextSource = self.source.slice(fromIndex + 1);
+            let nextSource = flatArr.slice(fromIndex + 1);
             let nextFilterdItems = self.filterWithSource(searchKey, nextSource);
             if (nextFilterdItems.length > 0 ) {
                 return nextFilterdItems[0];   
             }
             // search in the previous array
-            let previousSource = self.source.slice(0, fromIndex + 1);
+            let previousSource = flatArr.slice(0, fromIndex + 1);
             let previouseFilteredItems = self.filterWithSource(searchKey, previousSource);
             if (previouseFilteredItems.length > 0) {
-                return previouseFilteredItems[0];
+                return previouseFilteredItems[0]; 
             }
             
             // if not match searchKey
@@ -52,9 +69,7 @@ module nts.uk.ui.koExtentions {
                 return [];        
             }
             
-            let flatArr = nts.uk.util.flatArray(source, this.childField);
-            
-            let filtered = _.filter(flatArr, function(item: any) {
+            let filtered = _.filter(source, function(item: any) {
                 return _.find(self.searchField, function(x: string) {
                     if(x !== undefined && x !== null){
                         let val: string = item[x].toString();
@@ -101,7 +116,7 @@ module nts.uk.ui.koExtentions {
         key: string;
         
         constructor(key: string, mode: string, source: Array<any>, searchField: Array<string>, childField?: string) {
-            this.seachBox = new SearchBox(source, searchField, childField);;    
+            this.seachBox = new SearchBox(source, searchField, childField, key);    
             this.mode = _.isEmpty(mode) ? "highlight" : mode;
             this.key = key;
         }
@@ -113,9 +128,7 @@ module nts.uk.ui.koExtentions {
             if(this.mode === "highlight"){
                 let dataSource = this.seachBox.getDataSource();     
                 
-                let selectingIndex = this.computeSelectingIndex(dataSource, selectedItems, key);
-                
-                let selectItem = this.seachBox.search(searchKey, selectingIndex); 
+                let selectItem = this.seachBox.search(searchKey, selectedItems); 
                 if (selectItem == null ) {
                     return result;    
                 }
@@ -143,18 +156,6 @@ module nts.uk.ui.koExtentions {
                 result.selectItems = selectItem;
                 return result;
             }
-        }
-        
-        computeSelectingIndex(dataSource: Array<any>, selectedItems: any, key: string): number {
-            let selectingIndex = 0;
-            if (!_.isEmpty(selectedItems)) {
-                let firstItemValue = $.isArray(selectedItems)
-                    ? selectedItems[0]["id"].toString() : selectedItems["id"].toString();
-                selectingIndex = _.findIndex(dataSource, function(item: any) {
-                    return item[key].toString() === firstItemValue;
-                });
-            }
-            return selectingIndex;
         }
         
         public setDataSource(source: Array<any>) {

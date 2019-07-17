@@ -155,7 +155,7 @@ module nts.uk.ui.jqueryExtentions {
                 }  
                 selectedId.forEach(id => {
                     let $node = $tree.igTree("nodesByValue", id);
-                    $tree.igTree("toggleCheckstate", $node);
+                    $tree.igTree("select", $node);
                 });      
             } else {
                 let $node = $tree.igTree("nodesByValue", selectedId);
