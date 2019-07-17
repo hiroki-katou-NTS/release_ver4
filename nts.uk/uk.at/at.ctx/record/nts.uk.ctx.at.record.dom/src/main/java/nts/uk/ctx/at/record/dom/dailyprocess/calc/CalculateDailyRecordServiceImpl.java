@@ -1560,7 +1560,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 	private Optional<PredetermineTimeSetForCalc> getPredetermineTimeSetForCalcFromShareContainer(MasterShareContainer<String> shareContainer,String companyId,String workTimeCode){
 		val predSet = getPredetermineTimeSetFromShareContainer(shareContainer, companyId, workTimeCode);
 		if(predSet.isPresent()) {
-			return Optional.of(PredetermineTimeSetForCalc.convertFromAggregatePremiumTime(predSet.get().clone()));
+			return Optional.of(PredetermineTimeSetForCalc.convertFromAggregatePremiumTime(predSet.get()));
 		}
 		return Optional.empty();
 	}
@@ -1573,7 +1573,11 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 	 * @return
 	 */
 	private Optional<PredetemineTimeSetting> getPredetermineTimeSetFromShareContainer(MasterShareContainer<String> shareContainer,String companyId,String workTimeCode){
-		return shareContainer.getShared("PredetemineSet" + workTimeCode, () -> predetemineTimeSetRepository.findByWorkTimeCode(companyId, workTimeCode));
+		val predSet = shareContainer.getShared("PredetemineSet" + workTimeCode, () -> predetemineTimeSetRepository.findByWorkTimeCode(companyId, workTimeCode));
+		if(predSet.isPresent()) {
+			return Optional.of(predSet.get().clone());
+		}
+		return Optional.empty();
 	}
 	
 	
