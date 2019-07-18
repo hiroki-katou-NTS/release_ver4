@@ -1861,9 +1861,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     _.each(self.lstErOldHoliday, valueTemp => {
                         let dataCon = _.find(dataSource, (item: any) => {
                             return item.employeeId == valueTemp.employeeId && item.dateDetail._i == valueTemp.date;
-                        }),
-                            stateErrAl = valueTemp.errorCode == ErrorAlarmClassification.ERROR ? "mgrid-error" : "mgrid-alarm",
-                            typeErrAl = valueTemp.layoutCode == ErrorAlarmClassification.ERROR ? "ER" : "AL";
+                        })
+                            stateErrAl = (valueTemp.errorCode == ErrorAlarmClassification.ERROR ? "mgrid-error" : "mgrid-alarm"),
+                            typeErrAl = (valueTemp.errorCode == ErrorAlarmClassification.ERROR ? "ER" : "AL");
                         if (valueTemp.onlyErrorHoliday) {
                             $("#dpGrid").mGrid("clearState", dataCon.id, "Code28", [stateErrAl]);
                             $("#dpGrid").mGrid("clearState", dataCon.id, "Name28", [stateErrAl]);
@@ -1879,7 +1879,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         let dataCon = _.find(dataSource, (item: any) => {
                             return item.employeeId == valueTemp.employeeId && item.dateDetail._i == valueTemp.date;
                         });
-                        let typeErrAl = valueTemp.layoutCode == ErrorAlarmClassification.ERROR ? "ER" : "AL";
+                        let typeErrAl = (valueTemp.layoutCode == ErrorAlarmClassification.ERROR ? "ER" : "AL");
                         let typeErrorGrid = dataCon.error;
                         $("#dpGrid").mGrid("updateCell", dataCon.id, "error", self.appendTextError(typeErrorGrid, typeErrAl), true, true);
                         $("#dpGrid").mGrid("setState", dataCon.id, "Code28", [typeErrAl == "ER" ? "mgrid-error" : "mgrid-alarm"]);
