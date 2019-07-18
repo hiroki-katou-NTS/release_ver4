@@ -32,6 +32,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyPerformanceEmpl
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyRecEditSetDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DivergenceTimeDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.EmpErrorCode;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.EmploymentDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.FormatDPCorrectionDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.IdentityProcessUseSetDto;
@@ -134,8 +135,12 @@ public interface DailyPerformanceScreenRepo {
 	/** Get list daily performance error with error list code */
 	List<DPErrorDto> getListDPError(DateRange dateRange, List<String> lstEmployee, List<String>errorCodes);
 	
+	List<EmpErrorCode> getListErAlItem28(String companyId, int errorType, DateRange range, String empId);
+	
 	/** Get error settings */
 	List<DPErrorSettingDto> getErrorSetting(String companyId, List<String> listErrorCode, boolean showError, boolean showAlarm, boolean showOther);
+	
+	int getTypeAtrErrorSet(String companyId, String errorCode);
 	
 	/** Get list sheet */
 	List<DPSheetDto> getFormatSheets(List<String> lstBusinessType);

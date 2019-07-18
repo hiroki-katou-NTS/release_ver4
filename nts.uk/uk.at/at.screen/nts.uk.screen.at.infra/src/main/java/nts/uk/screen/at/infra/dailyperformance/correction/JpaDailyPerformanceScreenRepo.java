@@ -108,6 +108,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyPerformanceEmpl
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyRecEditSetDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DivergenceTimeDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.EmpErrorCode;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.EmploymentDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.FormatDPCorrectionDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.IdentityProcessUseSetDto;
@@ -1001,6 +1002,34 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		});
 		return dpErrors;
 	}
+	
+	@Override
+	public List<EmpErrorCode> getListErAlItem28(String companyId, int errorType, DateRange range, String empId) {
+		Connection con = this.getEntityManager().unwrap(Connection.class);
+		List<EmpErrorCode> lstResult = new ArrayList<>();
+		String query = "select e.SID, e.PROCESSING_DATE, e.ERROR_CODE, i.ATTENDANCE_ITEM_ID from KRCDT_SYAIN_DP_ER_LIST e "
+				+ "join KRCDT_ER_ATTENDANCE_ITEM i on e.ID = i.ID "
+				+ "left join KRCMT_ERAL_SET s on e.ERROR_CODE = s.ERROR_ALARM_CD and s.CID = e.CID "
+				+ "where s.ERAL_ATR = ? " + " and e.CID =  ? "
+				+ "and e.PROCESSING_DATE BETWEEN ? AND ? " + " and e.SID = ? ";
+
+		try (PreparedStatement pstatement = con.prepareStatement(query)) {
+			pstatement.setInt(1, errorType);
+			pstatement.setString(2, companyId);
+			pstatement.setDate(3, Date.valueOf(range.getStartDate().localDate()));
+			pstatement.setDate(4, Date.valueOf(range.getEndDate().localDate()));
+			pstatement.setString(5, empId);
+			ResultSet rs = pstatement.executeQuery();
+
+			while (rs.next()) {
+				lstResult.add(new EmpErrorCode(rs.getString(1), GeneralDate.localDate(rs.getDate(2).toLocalDate()), rs.getString(3), rs.getString(4) == null ? null : Integer.parseInt(rs.getString(4))));
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return lstResult;
+	}
 
 	@Override
 	public List<DPErrorSettingDto> getErrorSetting(String companyId, List<String> listErrorCode, boolean showError,
@@ -1100,7 +1129,27 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		}
 		return dtos;
 	}
+	
+	@Override
+	public int getTypeAtrErrorSet(String companyId, String errorCode) {
+		Connection con = this.getEntityManager().unwrap(Connection.class);
+		String query = "SELECT s.ERAL_ATR FROM KRCMT_ERAL_SET as s WHERE s.CID = ? AND s.ERROR_ALARM_CD = ? ";
+		int errorType = 0;
+		try (PreparedStatement pstatement = con.prepareStatement(query)) {
+			pstatement.setString(1, companyId);
+			pstatement.setString(2, errorCode);
+			ResultSet rs = pstatement.executeQuery();
 
+			while (rs.next()) {
+				errorType = rs.getInt(1);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return errorType;
+	}
+	
 	@Override
 	public List<DPSheetDto> getFormatSheets(List<String> lstBusinessType) {
 		return this.queryProxy().query(SEL_FORMAT_SHEET, KrcmtBusinessFormatSheet.class)

@@ -39,6 +39,8 @@ public class DataResultAfterIU {
 	boolean errorAllSidDate = false;
 	
 	boolean canFlex = false;
+	
+	List<EmpErrorCode> lstErOldHoliday;
 
 	public DataResultAfterIU(Map<Integer, List<DPItemValue>> errorMap, FlexShortageRCDto flexShortage,
 			Boolean showErrorDialog, String messageAlert) {

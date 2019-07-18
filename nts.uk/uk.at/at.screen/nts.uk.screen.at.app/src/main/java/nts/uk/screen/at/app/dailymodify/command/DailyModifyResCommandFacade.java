@@ -31,6 +31,7 @@ import nts.uk.ctx.at.record.app.command.dailyperform.checkdata.RCDailyCorrection
 import nts.uk.ctx.at.record.app.command.dailyperform.month.UpdateMonthDailyParam;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
 import nts.uk.ctx.at.record.app.find.monthly.root.MonthlyRecordWorkDto;
+import nts.uk.ctx.at.record.app.service.workrecord.erroralarm.recordcheck.ErAlWorkRecordCheckService;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.ContentApproval;
 import nts.uk.ctx.at.record.dom.approvalmanagement.dailyperformance.algorithm.ParamDayApproval;
@@ -84,6 +85,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.DPItemValue;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DataResultAfterIU;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.EmpAndDate;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.EmpErrorCode;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.OperationOfDailyPerformanceDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ResultReturnDCUpdateData;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.TypeError;
@@ -290,6 +292,7 @@ public class DailyModifyResCommandFacade {
 		dataParent.setFlagCalculation(false);
 		boolean editFlex = (dataParent.getMode() == 0 && dataParent.getMonthValue() != null
 				&& !CollectionUtil.isEmpty(dataParent.getMonthValue().getItems()));
+		boolean notCalcDaiMon = false;
 		// insert flex
 		UpdateMonthDailyParam monthParam = null;
 		if (dataParent.getMonthValue() != null) {
@@ -498,6 +501,7 @@ public class DailyModifyResCommandFacade {
 				dataResultAfterIU.setCanFlex(checkFlex);
 			}
 			dataResultAfterIU.setShowErrorDialog(null);
+			notCalcDaiMon = true;
 
 		} else {
 			// if (querys.isEmpty() ? !dataParent.isFlagCalculation() :
@@ -665,6 +669,27 @@ public class DailyModifyResCommandFacade {
 				dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
 						dataParent.getDateRange(), dailyEdits.stream().map(c -> c.getWorkInfo().toDomain(null, null))
 								.filter(c -> c != null).collect(Collectors.toList()));
+			}else if(notCalcDaiMon) {
+				long startTime = System.currentTimeMillis();
+				int type = repo.getTypeAtrErrorSet(AppContexts.user().companyId(),
+						ErAlWorkRecordCheckService.CONTINUOUS_CHECK_CODE);
+				List<EmpErrorCode> lstEmpError = repo.getListErAlItem28(AppContexts.user().companyId(), type,
+						dataParent.getDateRange(), dataParent.getEmployeeId());
+				Map<GeneralDate, List<EmpErrorCode>> mapEmpError = lstEmpError.stream()
+						.collect(Collectors.groupingBy(x -> x.getDate()));
+				dataResultAfterIU.setLstErOldHoliday(getRemoveState(dataParent.getEmployeeId(), type, mapEmpError));
+
+				System.out.println("tg get error: " + (System.currentTimeMillis() - startTime));
+				dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
+						dataParent.getDateRange(),
+						dailyEdits.stream().map(c -> c.getWorkInfo().toDomain(c.getEmployeeId(), c.getDate()))
+								.filter(c -> c != null).collect(Collectors.toList()));
+				dataCheck = dataCheck.stream().map(x -> {
+					x.setLayoutCode(String.valueOf(type));
+					return x;
+				}).collect(Collectors.toList());
+				System.out.println("tg load check holiday: " + (System.currentTimeMillis() - startTime));
+				
 			}
 			val temHoliday = dataCheck;
 			dataCheck.stream().forEach(x -> {
@@ -1297,5 +1322,24 @@ public class DailyModifyResCommandFacade {
 				break;
 			}
 		});
+	}
+	
+	private List<EmpErrorCode> getRemoveState(String employeeId, int typeError, Map<GeneralDate, List<EmpErrorCode>> mapErrorCode){
+		List<EmpErrorCode> lstResult = new ArrayList<>();
+		mapErrorCode.forEach((key, values) ->{
+			List<EmpErrorCode> lstError28 = values.stream().filter(x -> x.getItemId() != null && x.getItemId() == 28)
+					.collect(Collectors.toList());
+			List<EmpErrorCode> lstErrorOtherHoliday28 = values.stream()
+					.filter(x -> x.getItemId() == null || (x.getItemId() != 28) ||
+							(x.getItemId() == 28 && !x.getErrorCode().equals(ErAlWorkRecordCheckService.CONTINUOUS_CHECK_CODE)))
+					.collect(Collectors.toList());
+			Optional<EmpErrorCode> errorCheck = lstError28.stream()
+					.filter(y -> y.getErrorCode().equals(ErAlWorkRecordCheckService.CONTINUOUS_CHECK_CODE)).findFirst();
+			if (errorCheck.isPresent()) {
+				lstResult.add(new EmpErrorCode(employeeId, key, String.valueOf(typeError),
+						!lstErrorOtherHoliday28.isEmpty() ? 1 : 0, lstError28.size() == 1));
+			}
+		});
+		return lstResult;
 	}
 }

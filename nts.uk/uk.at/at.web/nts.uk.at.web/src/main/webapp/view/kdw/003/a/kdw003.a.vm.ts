@@ -160,6 +160,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         listCheckDeviation: any = [];
         listErrorMonth: any = [];
         lstErrorFlex: any = [];
+        listErAlHolidays: any = [];
+        lstErOldHoliday: any = [];
         hasErrorCalc: boolean = false;
         
         employIdLogin: any;
@@ -1000,7 +1002,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             //if (errorGrid == undefined || errorGrid.length == 0) {
             nts.uk.ui.block.invisible();
             nts.uk.ui.block.grayout();
-            
+            self.listErAlHolidays = [];
             if (!self.flagCalculation) {
                 self.listCareError([]);
                 self.listCareInputError([]);
@@ -1127,7 +1129,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             $("#next-month").attr('style', 'background-color: red !important');
                         } else {
                             $("#next-month").attr('style', 'background-color: white !important');
-                        }                            
+                        }  
+                        self.lstErOldHoliday  =  dataAfter.lstErOldHoliday;                         
                     }
                     let errorNoReload: boolean  = false;
                     //dataChange = {};
@@ -1274,6 +1277,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         }
                         if (dataAfter.errorMap[2] != undefined) {
                             //self.listCheckHolidays(dataAfter.errorMap[2]);
+                            self.listErAlHolidays = dataAfter.errorMap[2];
                             if (self.valueUpdateMonth != null || self.valueUpdateMonth != undefined) {
                                 self.valueUpdateMonth.items = [];
                             }
@@ -1851,6 +1855,37 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         }
                     })
 
+                    //set ERROR holiday
+                    //_.forEach(self.listErAlHolidays, 
+                    //error holiday old
+                    _.each(self.lstErOldHoliday, valueTemp => {
+                        let dataCon = _.find(dataSource, (item: any) => {
+                            return item.employeeId == valueTemp.employeeId && item.dateDetail._i == valueTemp.date;
+                        }),
+                            stateErrAl = valueTemp.errorCode == ErrorAlarmClassification.ERROR ? "mgrid-error" : "mgrid-alarm",
+                            typeErrAl = valueTemp.layoutCode == ErrorAlarmClassification.ERROR ? "ER" : "AL";
+                        if (valueTemp.onlyErrorHoliday) {
+                            $("#dpGrid").mGrid("clearState", dataCon.id, "Code28", [stateErrAl]);
+                            $("#dpGrid").mGrid("clearState", dataCon.id, "Name28", [stateErrAl]);
+                        }
+                        if (valueTemp.itemId == 0 && dataCon.error == typeErrAl) {
+                            $("#dpGrid").mGrid("updateCell", dataCon.id, "error", "", true, true);
+                        } else if (valueTemp.itemId == 0 && dataCon.error != typeErrAl) {
+                            $("#dpGrid").mGrid("updateCell", dataCon.id, "error", valueTemp.layoutCode == ErrorAlarmClassification.ERROR ? "AL" : "ER", true, true);
+                        }
+                    });
+                    // update error holiday new
+                    _.each(self.listErAlHolidays, (valueTemp: any) => {
+                        let dataCon = _.find(dataSource, (item: any) => {
+                            return item.employeeId == valueTemp.employeeId && item.dateDetail._i == valueTemp.date;
+                        });
+                        let typeErrAl = valueTemp.layoutCode == ErrorAlarmClassification.ERROR ? "ER" : "AL";
+                        let typeErrorGrid = dataCon.error;
+                        $("#dpGrid").mGrid("updateCell", dataCon.id, "error", self.appendTextError(typeErrorGrid, typeErrAl), true, true);
+                        $("#dpGrid").mGrid("setState", dataCon.id, "Code28", [typeErrAl == "ER" ? "mgrid-error" : "mgrid-alarm"]);
+                        $("#dpGrid").mGrid("setState", dataCon.id, "Name28", [typeErrAl == "ER" ? "mgrid-error" : "mgrid-alarm"]);
+                    });
+                    
                     paramVer.lstDataChange = lstDataChange;
                     paramVer.dateRange = {
                         startDate: lstData[0].date,
@@ -1959,6 +1994,16 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 //nts.uk.ui.block.clear();
             });
             return dfd.promise();
+        }
+        
+        appendTextError(textOld: string, textNew: string): any {
+            if(_.isEmpty(textNew)) return textOld;
+            if(_.isEmpty(textOld)) return textNew;
+            if(textOld.indexOf(textNew) != -1){
+               return textOld;
+            }else{
+               return "ER/AL" 
+            }
         }
 
         getNameMonthly(): JQueryPromise<any> {
@@ -5442,5 +5487,14 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         ITEM_HIDE_ALL = 2,
         
         NOT_EMP_IN_HIST = 3
+    }
+    
+     enum ErrorAlarmClassification {
+         /* エラー */
+         ERROR = 0,
+         /* アラーム */
+         ALARM = 1,
+         /* その他 */
+         OTHER = 2
     }
 }
