@@ -39,7 +39,6 @@ public class UkRequestFilterCollector implements RequestFilterCollector {
 				FILTERS.add(RequestFilterMapping.map(PathPattern.ALL_REQUESTS, new RequestPerformancePoolFilter()));
 			}
 			
-			FILTERS.add(RequestFilterMapping.map(PathPattern.SPR_LOGIN, new Utf8FormRequestFilter()));
 			//RequestFilterMapping.map(PathPattern.ALL_SCREENS, new ScreenLoginSessionValidator()),
 			FILTERS.add(RequestFilterMapping.map(PathPattern.ALL_WEB_APIS, new WebApiLoginSessionValidator()));
 			FILTERS.add(RequestFilterMapping.map(PathPattern.LOGIN_SCREENS, new WindowsAccountCatcher()));
