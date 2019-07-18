@@ -68,24 +68,34 @@ public class SortingProcessCommandHandler extends CommandHandler<ScheduleExecute
 		ProcessExecutionLogManage processExecutionLogManage = logManageOpt.get();
 		//実行IDを新規採番する
 		String execItemId = IdentifierUtil.randomUniqueId();
-		//「実行中」
-		if(processExecutionLogManage.getCurrentStatus().value==0){
-			this.DistributionRegistProcess(companyId, execItemCd, execItemId,  nextDate);
-			
-		}
-		//「待機中」	
-		else if(processExecutionLogManage.getCurrentStatus().value==1){
-			ExecuteProcessExecutionCommand executeProcessExecutionCommand = new ExecuteProcessExecutionCommand();
-			executeProcessExecutionCommand.setCompanyId(companyId);
-			executeProcessExecutionCommand.setExecItemCd(execItemCd);
-			executeProcessExecutionCommand.setExecId(execItemId);
-			executeProcessExecutionCommand.setExecType(0);
-			executeProcessExecutionCommand.setNextFireTime(Optional.ofNullable(nextDate));
-			//AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> ctxNew = new AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>(executeProcessExecutionCommand);
-			this.execHandler.handle(executeProcessExecutionCommand);
+		// ドメインモデル「更新処理自動実行管理.現在の実行状態」をチェックする
+		// 「実行中」
+		if (processExecutionLogManage.getCurrentStatus().value == 0) {
+			// ドメインモデル「更新処理自動実行管理．前回実行日時」から5時間を経っているかチェックする
+			boolean checkLastTime = checkLastDateTimeLessthanNow5h(processExecutionLogManage.getLastExecDateTime());
+			if (checkLastTime) {
+				this.DistributionRegistProcess(companyId, execItemCd, execItemId, nextDate);
+			} else {
+				this.executeHandler(companyId, execItemCd, execItemId, nextDate);
+			}
+		} 
+		// 「待機中」
+		else if (processExecutionLogManage.getCurrentStatus().value == 1) {
+			this.executeHandler(companyId, execItemCd, execItemId, nextDate);
 		}
 		
 	}
+	private void executeHandler(String companyId,String execItemCd, String execItemId, GeneralDateTime nextDate ) {
+		ExecuteProcessExecutionCommand executeProcessExecutionCommand = new ExecuteProcessExecutionCommand();
+		executeProcessExecutionCommand.setCompanyId(companyId);
+		executeProcessExecutionCommand.setExecItemCd(execItemCd);
+		executeProcessExecutionCommand.setExecId(execItemId);
+		executeProcessExecutionCommand.setExecType(0);
+		executeProcessExecutionCommand.setNextFireTime(Optional.ofNullable(nextDate));
+		//AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> ctxNew = new AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>(executeProcessExecutionCommand);
+		this.execHandler.handle(executeProcessExecutionCommand);
+	}
+	
 	//振り分け登録処理
 	private void DistributionRegistProcess(String companyId, String execItemCd,String execItemId, GeneralDateTime nextDate ){
 		//ドメインモデル「更新処理自動実行管理」を更新する
@@ -110,6 +120,17 @@ public class SortingProcessCommandHandler extends CommandHandler<ScheduleExecute
 			executionTaskSetting.setNextExecDateTime(nextDate);
 			this.execSettingRepo.update(executionTaskSetting);
 		}
+	}
+	//No.3604
+	private boolean checkLastDateTimeLessthanNow5h(GeneralDateTime dateTime) {
+		GeneralDateTime today = GeneralDateTime.now();	
+		GeneralDateTime newDateTime = dateTime.addHours(5);
+		if(today.beforeOrEquals(newDateTime)) {
+			//システム日時 - 前回実行日時 <= 5時間
+			return true;
+		}
+		//システム日時 - 前回実行日時 > 5時間
+		return false;
 	}
 
 }
