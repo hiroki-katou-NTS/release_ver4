@@ -485,6 +485,8 @@ public class DailyModifyResCommandFacade {
 							updated.add(Pair.of(d.getWorkInformation().getEmployeeId(), d.getWorkInformation().getYmd()));
 //							dailyTransaction.updated(d.getWorkInformation().getEmployeeId(), d.getWorkInformation().getYmd());
 						});
+				//SPR連携時の確認承認解除
+				clearConfirmApprovalService.clearConfirmApproval(dataParent.getSpr().getEmployeeId(), Arrays.asList(dataParent.getSpr().getDate()));
 			}
 			List<String> empList = updated.stream().map(x -> x.getLeft()).distinct().collect(Collectors.toList());
 			List<GeneralDate> empDate = updated.stream().map(x -> x.getRight()).sorted((x, y) -> x.compareTo(y)).distinct().collect(Collectors.toList());
