@@ -89,7 +89,7 @@ public class OptionalItemValueDto implements ItemConst {
 	}
 
 	public void value(Object val) {
-		if(val == null){
+		if(val == null || val == ""){
 			this.value = "0";
 		} else {
 			this.value = val.toString();
