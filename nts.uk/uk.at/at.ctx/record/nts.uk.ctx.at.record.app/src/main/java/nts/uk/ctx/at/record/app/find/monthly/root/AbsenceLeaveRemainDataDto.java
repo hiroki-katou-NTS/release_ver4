@@ -97,7 +97,7 @@ public class AbsenceLeaveRemainDataDto extends MonthlyItemCommon {
 				usedDays == null ? null : new RemainDataDaysMonth(usedDays),
 				remainingDays == null ? null : new AttendanceDaysMonthToTal(remainingDays), 
 				carryforwardDays == null ? null : new AttendanceDaysMonthToTal(carryforwardDays),
-				unUsedDays == null ? null : new RemainDataDaysMonth(unUsedDays));
+				unUsedDays == null ? new RemainDataDaysMonth(0.0) : new RemainDataDaysMonth(unUsedDays));
 	}
 	@Override
 	public YearMonth yearMonth() {
