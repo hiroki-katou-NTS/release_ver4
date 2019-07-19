@@ -93,10 +93,10 @@ public class AbsenceLeaveRemainDataDto extends MonthlyItemCommon {
 				closureStatus == ClosureStatus.PROCESSED.value ? ClosureStatus.PROCESSED : ClosureStatus.UNTREATED,
 				datePeriod == null ? null : datePeriod.getStart(), 
 				datePeriod == null ? null : datePeriod.getEnd(), 
-				occurredDay == null ? null : new RemainDataDaysMonth(occurredDay), 
-				usedDays == null ? null : new RemainDataDaysMonth(usedDays),
-				remainingDays == null ? null : new AttendanceDaysMonthToTal(remainingDays), 
-				carryforwardDays == null ? null : new AttendanceDaysMonthToTal(carryforwardDays),
+				occurredDay == null ? new RemainDataDaysMonth(0.0) : new RemainDataDaysMonth(occurredDay), 
+				usedDays == null ? new RemainDataDaysMonth(0.0) : new RemainDataDaysMonth(usedDays),
+				remainingDays == null ? new AttendanceDaysMonthToTal(0.0) : new AttendanceDaysMonthToTal(remainingDays), 
+				carryforwardDays == null ? new AttendanceDaysMonthToTal(0.0) : new AttendanceDaysMonthToTal(carryforwardDays),
 				unUsedDays == null ? new RemainDataDaysMonth(0.0) : new RemainDataDaysMonth(unUsedDays));
 	}
 	@Override
