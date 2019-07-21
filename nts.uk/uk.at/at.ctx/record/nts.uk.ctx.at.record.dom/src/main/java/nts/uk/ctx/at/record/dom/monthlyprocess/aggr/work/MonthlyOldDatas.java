@@ -9,13 +9,18 @@ import lombok.val;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthly;
+import nts.uk.ctx.at.record.dom.monthly.vacation.absenceleave.monthremaindata.AbsenceLeaveRemainData;
+import nts.uk.ctx.at.record.dom.monthly.vacation.annualleave.AnnLeaRemNumEachMonth;
+import nts.uk.ctx.at.record.dom.monthly.vacation.dayoff.monthremaindata.MonthlyDayoffRemainData;
+import nts.uk.ctx.at.record.dom.monthly.vacation.reserveleave.RsvLeaRemNumEachMonth;
+import nts.uk.ctx.at.record.dom.monthly.vacation.specialholiday.monthremaindata.SpecialHolidayRemainData;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.IntegrationOfMonthly;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 
 /**
  * 集計前の月別実績データ
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class MonthlyOldDatas {
@@ -24,10 +29,25 @@ public class MonthlyOldDatas {
 	private Optional<AttendanceTimeOfMonthly> attendanceTime;
 	/** 月別実績の任意項目 */
 	private List<AnyItemOfMonthly> anyItemList;
+	/** 年休月別残数データ */
+	private Optional<AnnLeaRemNumEachMonth> annualLeaveRemain;
+	/** 積立年休残数月別データ */
+	private Optional<RsvLeaRemNumEachMonth> reserveLeaveRemain;
+	/** 振休月別残数データ */
+	private Optional<AbsenceLeaveRemainData> absenceLeaveRemain;
+	/** 代休月別残数データ */
+	private Optional<MonthlyDayoffRemainData> monthlyDayoffRemain;
+	/** 特別休暇月別残数データ */
+	private List<SpecialHolidayRemainData> specialLeaveRemainList;
 	
 	public MonthlyOldDatas(){
 		this.attendanceTime = Optional.empty();
 		this.anyItemList = new ArrayList<>();
+		this.annualLeaveRemain = Optional.empty();
+		this.reserveLeaveRemain = Optional.empty();
+		this.absenceLeaveRemain = Optional.empty();
+		this.monthlyDayoffRemain = Optional.empty();
+		this.specialLeaveRemainList = new ArrayList<>();
 	}
 
 	/**
@@ -53,23 +73,25 @@ public class MonthlyOldDatas {
 		result.anyItemList = repositories.getAnyItemOfMonthly().findByMonthlyAndClosure(
 				employeeId, yearMonth, closureId, closureDate);
 		
-		return result;
-	}
-
-	/**
-	 * データ取得
-	 * @param attendanceTime 月別実績の勤怠時間
-	 * @param repositories 月別集計が必要とするリポジトリ
-	 * @return 集計前の月別実績データ
-	 */
-	public static MonthlyOldDatas loadData(
-			Optional<AttendanceTimeOfMonthly> attendanceTime,
-			RepositoriesRequiredByMonthlyAggr repositories){
-
-		MonthlyOldDatas result = new MonthlyOldDatas();
+		// 年休月別残数データ
+		result.annualLeaveRemain = repositories.getAnnLeaRemNumEachMonth().find(
+				employeeId, yearMonth, closureId, closureDate);
 		
-		// 月別実績の勤怠時間
-		result.attendanceTime = attendanceTime;
+		// 積立年休月別残数データ
+		result.reserveLeaveRemain = repositories.getRsvLeaRemNumEachMonth().find(
+				employeeId, yearMonth, closureId, closureDate);
+		
+		// 振休月別残数データ
+		result.absenceLeaveRemain = repositories.getAbsenceLeaveRemainData().find(
+				employeeId, yearMonth, closureId, closureDate);
+		
+		// 代休月別残数データ
+		result.monthlyDayoffRemain = repositories.getMonthlyDayoffRemainData().find(
+				employeeId, yearMonth, closureId, closureDate);
+		
+		// 特別休暇月別残数データ
+		result.specialLeaveRemainList = repositories.getSpecialHolidayRemainData().find(
+				employeeId, yearMonth, closureId, closureDate);
 		
 		return result;
 	}
@@ -102,6 +124,21 @@ public class MonthlyOldDatas {
 		
 		// 月別実績の任意項目
 		result.anyItemList = monthlyWork.getAnyItemList();
+		
+		// 年休月別残数データ
+		result.annualLeaveRemain = monthlyWork.getAnnualLeaveRemain();
+		
+		// 積立年休月別残数データ
+		result.reserveLeaveRemain = monthlyWork.getReserveLeaveRemain();
+		
+		// 振休月別残数データ
+		result.absenceLeaveRemain = monthlyWork.getAbsenceLeaveRemain();
+		
+		// 代休月別残数データ
+		result.monthlyDayoffRemain = monthlyWork.getMonthlyDayoffRemain();
+		
+		// 特別休暇月別残数データ
+		result.specialLeaveRemainList = monthlyWork.getSpecialLeaveRemainList();
 		
 		return result;
 	}

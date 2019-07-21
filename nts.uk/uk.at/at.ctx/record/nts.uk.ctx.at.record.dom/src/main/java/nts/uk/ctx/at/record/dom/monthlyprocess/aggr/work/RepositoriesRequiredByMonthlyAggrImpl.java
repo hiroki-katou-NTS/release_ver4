@@ -17,6 +17,11 @@ import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.flex.CheckBeforeCalcFlexChangeService;
 import nts.uk.ctx.at.record.dom.monthly.roundingset.RoundingSetOfMonthlyRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.absenceleave.monthremaindata.AbsenceLeaveRemainDataRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.annualleave.AnnLeaRemNumEachMonthRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.dayoff.monthremaindata.MonthlyDayoffRemainDataRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.reserveleave.RsvLeaRemNumEachMonthRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.specialholiday.monthremaindata.SpecialHolidayRemainDataRepository;
 import nts.uk.ctx.at.record.dom.monthly.verticaltotal.GetVacationAddSet;
 import nts.uk.ctx.at.record.dom.monthly.vtotalmethod.PayItemCountOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.workform.flex.MonthlyAggrSetOfFlexRepository;
@@ -236,6 +241,21 @@ public class RepositoriesRequiredByMonthlyAggrImpl implements RepositoriesRequir
 	/** 月別実績の任意項目 */
 	@Inject
 	private AnyItemOfMonthlyRepository anyItemOfMonthly;
+	/** 年休月別残数データ */
+	@Inject
+	private AnnLeaRemNumEachMonthRepository annLeaRemNumEachMonth;
+	/** 積立年休残数月別データ */
+	@Inject
+	private RsvLeaRemNumEachMonthRepository rsvLeaRemNumEachMonth;
+	/** 振休月別残数データ */
+	@Inject
+	private AbsenceLeaveRemainDataRepository absenceLeaveRemainData;
+	/** 代休残数月別データ */
+	@Inject
+	private MonthlyDayoffRemainDataRepository monthlyDayoffRemainData;
+	/** 特別休暇残数月別データ */
+	@Inject
+	private SpecialHolidayRemainDataRepository specialHolidayRemainData;
 	
 	/** 集計設定の取得（通常勤務） */
 	@Inject

@@ -13,6 +13,11 @@ import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.flex.CheckBeforeCalcFlexChangeService;
 import nts.uk.ctx.at.record.dom.monthly.roundingset.RoundingSetOfMonthlyRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.absenceleave.monthremaindata.AbsenceLeaveRemainDataRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.annualleave.AnnLeaRemNumEachMonthRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.dayoff.monthremaindata.MonthlyDayoffRemainDataRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.reserveleave.RsvLeaRemNumEachMonthRepository;
+import nts.uk.ctx.at.record.dom.monthly.vacation.specialholiday.monthremaindata.SpecialHolidayRemainDataRepository;
 import nts.uk.ctx.at.record.dom.monthly.verticaltotal.GetVacationAddSet;
 import nts.uk.ctx.at.record.dom.monthly.vtotalmethod.PayItemCountOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.workform.flex.MonthlyAggrSetOfFlexRepository;
@@ -186,6 +191,16 @@ public interface RepositoriesRequiredByMonthlyAggr {
 	AttendanceTimeOfMonthlyRepository getAttendanceTimeOfMonthly();
 	/** 月別実績の任意項目 */
 	AnyItemOfMonthlyRepository getAnyItemOfMonthly();
+	/** 年休月別残数データ */
+	AnnLeaRemNumEachMonthRepository getAnnLeaRemNumEachMonth();
+	/** 積立年休残数月別データ */
+	RsvLeaRemNumEachMonthRepository getRsvLeaRemNumEachMonth();
+	/** 振休月別残数データ */
+	AbsenceLeaveRemainDataRepository getAbsenceLeaveRemainData();
+	/** 代休残数月別データ */
+	MonthlyDayoffRemainDataRepository getMonthlyDayoffRemainData();
+	/** 特別休暇残数月別データ */
+	SpecialHolidayRemainDataRepository getSpecialHolidayRemainData();
 	
 	/** 集計設定の取得（通常勤務） */
 	GetRegularAggrSet getRegularAggrSet();

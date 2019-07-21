@@ -966,7 +966,6 @@ public class AggregateMonthlyRecordServiceProc {
 			}
 			period = new DatePeriod(startDate, endDate);
 		}
-		if (period == null) return emptyResult;
 		
 		// RQ608：指定期間の所定労働日数を取得する(大塚用)
 		double predWorkingDays = this.repositories.getPredWorkingDaysAdaptor().byPeriod(
@@ -1029,11 +1028,39 @@ public class AggregateMonthlyRecordServiceProc {
 		val oldDataOpt = monthlyOldDatas.getAttendanceTime();
 		if (!oldDataOpt.isPresent()) return attendanceTime;
 		val oldConverter = this.repositories.getAttendanceItemConverter().createMonthlyConverter();
-		val oldItemConvert = oldConverter.withAttendanceTime(oldDataOpt.get());
+		MonthlyRecordToAttendanceItemConverter oldItemConvert = oldConverter.withAttendanceTime(oldDataOpt.get());
+		if (monthlyOldDatas.getAnnualLeaveRemain().isPresent()) {
+			oldItemConvert = oldItemConvert.withAnnLeave(monthlyOldDatas.getAnnualLeaveRemain().get());
+		}
+		if (monthlyOldDatas.getReserveLeaveRemain().isPresent()) {
+			oldItemConvert = oldItemConvert.withRsvLeave(monthlyOldDatas.getReserveLeaveRemain().get());
+		}
+		if (monthlyOldDatas.getAbsenceLeaveRemain().isPresent()) {
+			oldItemConvert = oldItemConvert.withAbsenceLeave(monthlyOldDatas.getAbsenceLeaveRemain().get());
+		}
+		if (monthlyOldDatas.getMonthlyDayoffRemain().isPresent()) {
+			oldItemConvert = oldItemConvert.withDayOff(monthlyOldDatas.getMonthlyDayoffRemain().get());
+		}
+		oldItemConvert = oldItemConvert.withSpecialLeave(monthlyOldDatas.getSpecialLeaveRemainList());
 
 		// 計算後データを確認
 		val monthlyConverter = this.repositories.getAttendanceItemConverter().createMonthlyConverter();
-		val convert = monthlyConverter.withAttendanceTime(attendanceTime);
+		MonthlyRecordToAttendanceItemConverter convert = monthlyConverter.withAttendanceTime(attendanceTime);
+		if (this.aggregateResult.getAnnLeaRemNumEachMonthList().size() > 0) {
+			convert = convert.withAnnLeave(this.aggregateResult.getAnnLeaRemNumEachMonthList().get(0));
+		}
+		if (this.aggregateResult.getRsvLeaRemNumEachMonthList().size() > 0) {
+			convert = convert.withRsvLeave(this.aggregateResult.getRsvLeaRemNumEachMonthList().get(0));
+		}
+		if (this.aggregateResult.getAbsenceLeaveRemainList().size() > 0) {
+			convert = convert.withAbsenceLeave(this.aggregateResult.getAbsenceLeaveRemainList().get(0));
+		}
+		if (this.aggregateResult.getMonthlyDayoffRemainList().size() > 0) {
+			convert = convert.withDayOff(this.aggregateResult.getMonthlyDayoffRemainList().get(0));
+		}
+		if (this.aggregateResult.getSpecialLeaveRemainList().size() > 0) {
+			convert = convert.withSpecialLeave(this.aggregateResult.getSpecialLeaveRemainList());
+		}
 		
 		// 月別実績の編集状態を取得
 		for (val editState : this.editStates){
@@ -1056,6 +1083,31 @@ public class AggregateMonthlyRecordServiceProc {
 				val retouchedTime = convertedOpt.get();
 				retouchedTime.getMonthlyCalculation().copySettings(attendanceTime.getMonthlyCalculation());
 				return retouchedTime;
+			}
+			val convertedAnnLeaveOpt = convert.toAnnLeave();
+			if (convertedAnnLeaveOpt.isPresent()) {
+				this.aggregateResult.getAnnLeaRemNumEachMonthList().clear();
+				this.aggregateResult.getAnnLeaRemNumEachMonthList().add(convertedAnnLeaveOpt.get());
+			}
+			val convertedRsvLeaveOpt = convert.toRsvLeave();
+			if (convertedRsvLeaveOpt.isPresent()) {
+				this.aggregateResult.getRsvLeaRemNumEachMonthList().clear();
+				this.aggregateResult.getRsvLeaRemNumEachMonthList().add(convertedRsvLeaveOpt.get());
+			}
+			val convertedAbsLeaveOpt = convert.toAbsenceLeave();
+			if (convertedAbsLeaveOpt.isPresent()) {
+				this.aggregateResult.getAbsenceLeaveRemainList().clear();
+				this.aggregateResult.getAbsenceLeaveRemainList().add(convertedAbsLeaveOpt.get());
+			}
+			val convertedDayOffOpt = convert.toDayOff();
+			if (convertedDayOffOpt.isPresent()) {
+				this.aggregateResult.getMonthlyDayoffRemainList().clear();
+				this.aggregateResult.getMonthlyDayoffRemainList().add(convertedDayOffOpt.get());
+			}
+			val convertedSpcLeaveList = convert.toSpecialHoliday();
+			if (convertedSpcLeaveList.size() > 0) {
+				this.aggregateResult.getSpecialLeaveRemainList().clear();
+				this.aggregateResult.getSpecialLeaveRemainList().addAll(convertedSpcLeaveList);
 			}
 		}
 		return attendanceTime;
