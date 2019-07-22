@@ -26,7 +26,7 @@ public class ExcessOutsideWorkOfMonthlyDto implements ItemConst {
 	private int monthlyTotalPremiumTime;
 	
 	/** 時間: 時間外超過 */
-	@AttendanceItemLayout(jpPropertyName = TIME, layout = LAYOUT_B, listMaxLength = 50, indexField = DEFAULT_INDEX_FIELD_NAME)
+	@AttendanceItemLayout(jpPropertyName = TIME, layout = LAYOUT_B, listMaxLength = 50, indexField = DEFAULT_INDEX_FIELD_NAME, defaultIdx = "LIST_FAKE_NO")
 	private List<ExcessOutsideWorkDto> time;
 	
 	/** 週割増合計時間: 勤怠月間時間 */

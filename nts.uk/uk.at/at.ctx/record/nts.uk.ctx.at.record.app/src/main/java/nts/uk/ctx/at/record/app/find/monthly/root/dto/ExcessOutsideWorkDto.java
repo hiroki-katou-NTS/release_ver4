@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.app.find.monthly.root.dto;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,12 @@ import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonth;
 @NoArgsConstructor
 public class ExcessOutsideWorkDto implements ItemConst {
 
+	public final static List<Integer> LIST_FAKE_NO = Arrays.asList(11, 12, 13, 14, 15, 16, 17, 18, 19, 110, 
+																	21, 22, 23, 24, 25, 26, 27, 28, 29, 210, 
+																	31, 32, 33, 34, 35, 36, 37, 38, 39, 310, 
+																	41, 42, 43, 44, 45, 46, 47, 48, 49, 410, 
+																	51, 52, 53, 54, 55, 56, 57, 58, 59, 510);
+	
 	/** 超過NO: int */
 	private int excessNo;
 
