@@ -637,8 +637,16 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		List<String> lstWorkplaceId = new ArrayList<>();
 		List<String> lstEmployeeNoWorkplace = new ArrayList<>();
 		
-		GeneralDate finalDate = query.getBaseDate();
+		// 帳票用の基準日取得
+		int closureId = query.getClosureId() == 0 ? 1 : query.getClosureId();
 
+		Optional<GeneralDate> baseDate = service.getProcessingYM(companyId, closureId);
+		if (!baseDate.isPresent()) {
+			throw new BusinessException("Uchida bảo là lỗi hệ thống _ ThànhPV");
+		}
+
+		GeneralDate finalDate = baseDate.get();
+		
         List<WkpHistImport> workplaceList = new ArrayList<>();
         {
             List<WkpHistImport> workplaceListSync = Collections.synchronizedList(new ArrayList<>());
@@ -717,13 +725,7 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		}
 		
 		List<MonthlyAttendanceItemValueResult> itemValues;
-		// 帳票用の基準日取得
-		int closureId = query.getClosureId() == 0 ? 1 : query.getClosureId();
 
-		Optional<GeneralDate> baseDate = service.getProcessingYM(companyId, closureId);
-		if (!baseDate.isPresent()) {
-			throw new BusinessException("Uchida bảo là lỗi hệ thống _ ThànhPV");
-		}
 		Map<String, YearMonthPeriod> employeePeriod = service.getAffiliationPeriod(query.getEmployeeId(), new YearMonthPeriod(query.getStartYearMonth(), query.getEndYearMonth()), baseDate.get());
 		{
 			
