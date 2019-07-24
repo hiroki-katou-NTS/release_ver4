@@ -563,7 +563,7 @@ module nts.uk.at.view.kwr001.a {
                                 endDate: self.toDate(self.datepickerValue().endDate),
                                 fileType: 1,
                                 condition: data,
-                                baseDate: self.ccg001ComponentOption.baseDate
+                                baseDate: self.toDate(self.datepickerValue().endDate)
                             };
                             nts.uk.ui.block.grayout();
                             service.exportExcel(dto).done(function(response){
