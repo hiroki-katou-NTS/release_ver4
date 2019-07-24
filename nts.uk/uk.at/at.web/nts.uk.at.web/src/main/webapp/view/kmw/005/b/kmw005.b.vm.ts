@@ -140,7 +140,7 @@ module nts.uk.at.view.kmw005.b {
          */
         function lockIcon(value, row) {
             if (value == '1')
-                return "<i class='icon icon-2'></i>";
+                return "<i class='icon icon-2 icon-style'></i>";
             return '';
         }
         
