@@ -112,8 +112,17 @@ module nts.uk.ui.errors {
                     }
 
                 }
-                this.errors.push(error);
+
+                // if exist, push error to list
+                if (document.body.contains(error.$control[0])) {
+                    this.errors.push(error);
+                }
             }
+            
+            // remove all error not match with any control
+            setTimeout(() => {
+                this.errors.remove(e => !document.body.contains(e.$control[0]));
+            }, 100);
         }
 
         hasError() {
