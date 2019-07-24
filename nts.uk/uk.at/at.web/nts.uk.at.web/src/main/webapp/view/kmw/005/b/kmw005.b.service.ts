@@ -3,9 +3,8 @@ module nts.uk.at.view.kmw005.b {
         /**
          * Paths
          */
-        var paths = {
-            findHistByTargetYM: "ctx/at/record/workrecord/actuallock/findHistByTargetYM",
-            findHistByClosure: "ctx/at/record/workrecord/actuallock/findHistByClosure"
+        let paths = {
+            findHistByTargetYM: "ctx/at/record/workrecord/actuallock/findHistByTargetYM"
         }
         
         /**
@@ -15,15 +14,6 @@ module nts.uk.at.view.kmw005.b {
             return nts.uk.request.ajax(paths.findHistByTargetYM + "/" + closureId + "/" + targetYM);
         }
         
-        /**
-         * Find ActualLockHistory by Closure
-         */
-        export function findHistByClosure(closureId: number): JQueryPromise<Array<model.ActualLockHistFindDto>> {
-            return nts.uk.request.ajax(paths.findHistByClosure + "/" + closureId);
-        }
-
-        
-
         /**
          * Model
          */

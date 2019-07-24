@@ -17,6 +17,7 @@ module nts.uk.at.view.kmw005.b {
             lockHistList: KnockoutObservableArray<ActualLockHistFind>;
             lockHist: ActualLockHist;
             lockHistColumn: KnockoutObservableArray<any>;
+            isFirstTime: boolean = true;
             
             constructor() {
                 let self = this;
@@ -24,14 +25,14 @@ module nts.uk.at.view.kmw005.b {
                     { headerText: getText(''), key: 'closureId', hide: true },
                     { headerText: getText('KMW005_18'), key: 'closureName', width: 100 }
                 ]);
-                var closures: ClosureDto[] = getShared('ActualLock');
+                let closures: ClosureDto[] = getShared('ActualLock');
                 self.closureList = ko.observableArray(closures);
                 self.selectedClosure = ko.observable(0);
-                self.selectedClosure.subscribe(function(data: number) {
-                    self.bindLockHist(data);
+                self.selectedClosure.subscribe(()=> {
+                    self.bindLockHistByYM();
                 });
                 // Initialize yearMonth value: current system YearMonth.
-                self.yearMonth = ko.observable(parseInt(moment().format('YYYYMM')));
+                self.yearMonth = ko.observable(self.closureList()[0].yearMonth);
                 self.yearMonth.subscribe(function(){
                     self.bindLockHistByYM();
                 });
@@ -45,6 +46,8 @@ module nts.uk.at.view.kmw005.b {
                     { headerText: getText('KMW005_22'), key: 'dailyLockState', width: 120, formatter: lockIcon },
                     { headerText: getText('KMW005_23'), key: 'monthlyLockState', width: 120, formatter: lockIcon }
                 ]);
+                
+                
             }
             
             /**
@@ -74,29 +77,15 @@ module nts.uk.at.view.kmw005.b {
             }
             
             /**
-             * Bindding Lock History By Closure Selected
-             */
-            private bindLockHist(closureId: number): void {
-                let self = this;
-                self.yearMonth(parseInt(moment().format('YYYYMM')));
-                service.findHistByClosure(closureId).done(function(data: Array<ActualLockHistFindDto>) {
-                    self.setLockHistList(data);
-                    self.addLockIcon();
-                }).fail(function() {
-                    return;
-                });
-            }
-            
-            /**
              * Bindding Lock History By Target YearMonth Selected
              */
             private bindLockHistByYM(): void {
                 let self = this;
-                if(nts.uk.ui.errors.hasError()){
+                if(!self.isFirstTime && nts.uk.ui.errors.hasError()){
                    return; 
                 }
-                service.findHistByTargetYM(self.selectedClosure(), 
-                    self.yearMonth()).done(function(data: Array<ActualLockHistFindDto>) {
+                self.isFirstTime = false;
+                service.findHistByTargetYM(self.selectedClosure(),self.yearMonth()).done(function(data: Array<ActualLockHistFindDto>) {
                         self.setLockHistList(data);
                         self.addLockIcon();
                     }).fail(function() {

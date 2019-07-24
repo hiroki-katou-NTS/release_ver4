@@ -33,6 +33,8 @@ public class ActualLockFinderDto  implements ActualLockSetMemento {
 	
 	/** The end date. */
 	private String endDate;
+	
+	private int yearMonth;
 
 	/*
 	 * (non-Javadoc)

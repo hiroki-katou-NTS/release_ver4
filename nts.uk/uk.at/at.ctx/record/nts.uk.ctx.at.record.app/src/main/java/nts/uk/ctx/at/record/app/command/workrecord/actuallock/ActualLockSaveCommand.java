@@ -28,6 +28,8 @@ public class ActualLockSaveCommand implements ActualLockHistoryGetMemento, Actua
 	/** The monthly lock state. */
 	private int monthlyLockState;
 	
+	private int yearMonth;
+	
 	
 	/* (non-Javadoc)
 	 * @see nts.uk.ctx.at.record.dom.workrecord.actuallock.ActualLockHistoryGetMemento#getCompanyId()
@@ -66,7 +68,7 @@ public class ActualLockSaveCommand implements ActualLockHistoryGetMemento, Actua
 	 */
 	@Override
 	public YearMonth getTargetMonth() {
-		return GeneralDateTime.now().yearMonth();
+		return new YearMonth(this.yearMonth);
 	}
 
 	/* (non-Javadoc)

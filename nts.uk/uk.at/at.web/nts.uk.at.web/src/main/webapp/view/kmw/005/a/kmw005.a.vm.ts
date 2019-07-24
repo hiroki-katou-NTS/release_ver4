@@ -16,15 +16,21 @@ module nts.uk.at.view.kmw005.a {
             monthlyActualLockOpt: KnockoutObservableArray<any>;
             selectedClosureText: KnockoutObservable<string>;
             closureName: KnockoutObservable<string>;
-
+            yearMonth: number = 0;
 
             constructor() {
                 var self = this;
                 self.actualLock = new ActualLock();
                 self.actualLockList = ko.observableArray<ActualLockFind>([]);
-                self.actualLock.closureId.subscribe(function(data: number) {
-                    if (data) {
-                        self.bindActualLock(data);
+                self.actualLock.closureId.subscribe(function(closureId: number) {
+                    if (closureId) {
+                        // ClosureName
+                        let currentClosure = self.actualLockList().filter((item) => {
+                            return item.closureId == closureId;
+                        })[0];
+                        self.closureName(currentClosure.closureName);
+                        self.yearMonth = currentClosure.yearMonth;
+                        self.bindActualLock(closureId);
                     }
                 });
                 self.actualLockColumn = ko.observableArray([
@@ -70,6 +76,7 @@ module nts.uk.at.view.kmw005.a {
                         actualLock.startDate = item.startDate;
                         actualLock.endDate = item.endDate;
                         actualLock.period = item.startDate + " ~ " + item.endDate;
+                        actualLock.yearMonth = item.yearMonth;
                         dataRes.push(actualLock);
                     })
 
@@ -100,11 +107,6 @@ module nts.uk.at.view.kmw005.a {
                 service.findLockByClosureId(closureId).done(function(data: ActualLockFindDto) {
                     if (data) {
                         self.actualLock.updateLock(data);
-                        // ClosureName
-                        var currentClosure = self.actualLockList().filter((item) => {
-                            return item.closureId == closureId;
-                        })[0];
-                        self.closureName(currentClosure.closureName);
                     } else {
                         self.actualLock.dailyLockState(0);
                         self.actualLock.monthlyLockState(0);
@@ -138,6 +140,7 @@ module nts.uk.at.view.kmw005.a {
                 command.closureId = self.actualLock.closureId();
                 command.dailyLockState = self.actualLock.dailyLockState();
                 command.monthlyLockState = self.actualLock.monthlyLockState();
+                command.yearMonth = self.yearMonth;
 
                 blockUI.invisible();
                 service.saveActualLock(command).done(function(res) {
@@ -159,6 +162,7 @@ module nts.uk.at.view.kmw005.a {
                             actualLock.startDate = item.startDate;
                             actualLock.endDate = item.endDate;
                             actualLock.period = item.startDate + " ~ " + item.endDate;
+                            actualLock.yearMonth = item.yearMonth;
                             dataRes.push(actualLock);
                         })
 
@@ -222,6 +226,7 @@ module nts.uk.at.view.kmw005.a {
             startDate: string;
             endDate: string;
             period: string;
+            yearMonth: number;
 
             constructor() {
                 this.closureId = 0;
@@ -231,10 +236,11 @@ module nts.uk.at.view.kmw005.a {
                 this.startDate = '';
                 this.endDate = '';
                 this.period = '';
+                this.yearMonth = 0;
             }
             // convert to ClosureDto
             public toClosureDto(): ClosureDto {
-                return new ClosureDto(this.closureId, this.closureName);
+                return new ClosureDto(this.closureId, this.closureName, this.yearMonth);
             }
         }
 
@@ -244,10 +250,12 @@ module nts.uk.at.view.kmw005.a {
         export class ClosureDto {
             closureId: number;
             closureName: string;
+            yearMonth: number;
 
-            constructor(closureId: number, closureName: string) {
+            constructor(closureId: number, closureName: string, yearMonth: number) {
                 this.closureId = closureId;
                 this.closureName = closureName;
+                this.yearMonth = yearMonth;
             }
         }
 
