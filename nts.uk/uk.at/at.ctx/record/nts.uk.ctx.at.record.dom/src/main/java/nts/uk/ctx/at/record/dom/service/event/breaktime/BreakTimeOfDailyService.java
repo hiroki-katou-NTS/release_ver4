@@ -208,7 +208,8 @@ public class BreakTimeOfDailyService {
 	/** 手修正の勤怠項目を判断する */
 	private boolean isInputByHands(EditStateSetting es) {
 
-		return es == EditStateSetting.HAND_CORRECTION_MYSELF || es == EditStateSetting.HAND_CORRECTION_OTHER;
+		//return es == EditStateSetting.HAND_CORRECTION_MYSELF || es == EditStateSetting.HAND_CORRECTION_OTHER;
+		return true;
 	}
 
 	private List<EditStateOfDailyPerformance> getEditStateByItems(String empId, GeneralDate targetDate,
