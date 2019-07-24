@@ -625,12 +625,21 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			itemsId.add(outputItem.getRemarkInputNo().value + 833); // Remark no (0~4) -> attendanceId (833~837)
 		
 		List<AttendanceResultImport> lstAttendanceResultImport;
+		
+		//社員の指定期間中の所属期間を取得する RequestList 588
+		List<StatusOfEmployee> statusEmps = this.symCompany.GetListAffComHistByListSidAndPeriod(query.getEmployeeId(), new DatePeriod(query.getStartDate(), query.getEndDate()));
+		
 		{
 			List<AttendanceResultImport> resultsSync = Collections.synchronizedList(new ArrayList<>());
 			this.parallel.forEach(query.getEmployeeId(), employeeId -> {
-				// Request list #332
-				List<AttendanceResultImport> result = attendaceAdapter.getValueOf(Arrays.asList(employeeId), new DatePeriod(query.getStartDate(), query.getEndDate()), itemsId);
-				resultsSync.addAll(result);
+				Optional<StatusOfEmployee> statusOfEmployee = statusEmps.stream().filter(c-> c.getEmployeeId().equals(employeeId)).findFirst();
+				if(statusOfEmployee.isPresent()){
+					statusOfEmployee.get().getListPeriod().forEach(c-> {
+						// Request list #332
+						List<AttendanceResultImport> result = attendaceAdapter.getValueOf(Arrays.asList(employeeId), c, itemsId);
+						resultsSync.addAll(result);
+					});
+				}
 			});
 			lstAttendanceResultImport = new ArrayList<>(resultsSync);
 		}
@@ -756,9 +765,6 @@ public class AsposeWorkScheduleOutputConditionGenerator extends AsposeCellsRepor
 			reportData.setWorkplaceReportData(data);
 			
 			DatePeriod datePeriod = new DatePeriod(query.getStartDate(), query.getEndDate());
-			//社員の指定期間中の所属期間を取得する RequestList 588
-			List<StatusOfEmployee> statusEmps = this.symCompany.GetListAffComHistByListSidAndPeriod(lstEmployeeWithData, datePeriod);
-			
 			
 			analyzeInfoExportByEmployee(lstWorkplace, data);
 			
