@@ -422,7 +422,7 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 		List<AffWorkplaceHistory> result = new ArrayList<>();
 		CollectionUtil.split(sids, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
 
-			String sql = "SELECT * FROM  BSYMT_AFF_WORKPLACE_HIST h" + " WHERE h.START_DATE > ? AND SID IN (" +  NtsStatement.In.createParamsString(sids) + ")";
+			String sql = "SELECT * FROM  BSYMT_AFF_WORKPLACE_HIST h" + " WHERE h.START_DATE > ? AND SID IN (" +  NtsStatement.In.createParamsString(subList) + ")";
 			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
 				stmt.setDate(1, Date.valueOf(baseDate.addDays(1).toLocalDate()));
 				for (int i = 0; i < subList.size(); i++) {
