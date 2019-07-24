@@ -1,22 +1,24 @@
 package nts.uk.ctx.at.shared.dom.workrule.closure.service;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.shared.dom.adapter.employee.EmpEmployeeAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.employment.AffPeriodEmpCodeImport;
 import nts.uk.ctx.at.shared.dom.adapter.employment.ShareEmploymentAdapter;
+import nts.uk.ctx.at.shared.dom.adapter.employment.SharedSidPeriodDateEmploymentImport;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureInfo;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.context.LoginUserContext;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 処理：社員に対応する締め開始日を取得する
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 public class GetClosureStartForEmployeeProc {
 
@@ -70,16 +72,37 @@ public class GetClosureStartForEmployeeProc {
 		this.calcCheckStartAndEnd();
 		if (this.checkStart == null || this.checkEnd == null) return Optional.empty();
 
+		// 社員IDからチェック開始日以後の期間が含まれる雇用履歴を取得
+		List<String> employeeIds = new ArrayList<>();
+		employeeIds.add(employeeId);
+		DatePeriod empPeriod = new DatePeriod(this.checkStart, GeneralDate.max());	// チェック開始日～最大年月日
+		List<SharedSidPeriodDateEmploymentImport> employmentList =
+				this.shareEmploymentAdapter.getEmpHistBySidAndPeriod(employeeIds, empPeriod);
+		if (employmentList == null) return Optional.empty();
+		if (employmentList.size() == 0) return Optional.empty();
+		List<AffPeriodEmpCodeImport> empCodeList = employmentList.get(0).getAffPeriodEmpCodeExports();
+		if (empCodeList.size() == 0) return Optional.empty();
+		empCodeList.sort((a, b)->a.getPeriod().start().compareTo(b.getPeriod().start()));
+		
 		// 「検索開始日」←「チェック開始日」
 		GeneralDate searchStart = this.checkStart;
+		
+		// 「チェック開始日」←該当する雇用履歴の最小開始日
+		this.checkStart = empCodeList.get(0).getPeriod().start();
+		
 		while (true){
-
-			// 「所属雇用履歴」を取得する
-			val bsEmploymentHistOpt = this.shareEmploymentAdapter.findEmploymentHistory(
-					companyId, employeeId, searchStart);
-			if (!bsEmploymentHistOpt.isPresent()) break;
-			val bsEmploymentHist = bsEmploymentHistOpt.get();
-			val employmentCd = bsEmploymentHist.getEmploymentCode();
+			
+			// 検索開始日を基に、使用する雇用履歴を取得
+			AffPeriodEmpCodeImport empCode = null;
+			for (AffPeriodEmpCodeImport checkEmpCode : empCodeList) {
+				if (checkEmpCode.getPeriod().start().after(searchStart)) break;
+				if (checkEmpCode.getPeriod().contains(searchStart)) {
+					empCode = checkEmpCode;
+					break;
+				}
+			}
+			if (empCode == null) break;
+			String employmentCd = empCode.getEmploymentCode();
 			
 			// 雇用に紐づく締めを取得する
 			Integer closureId = 1;
@@ -100,23 +123,23 @@ public class GetClosureStartForEmployeeProc {
 			if (targetClosureInfo == null) break;
 			
 			// 既に締められた雇用履歴かチェック
-			if (bsEmploymentHist.getPeriod().end().afterOrEquals(targetClosureInfo.getPeriod().start())){
+			if (empCode.getPeriod().end().afterOrEquals(targetClosureInfo.getPeriod().start())){
 				// 雇用履歴の途中まで締められたかチェック
-				if (bsEmploymentHist.getPeriod().start().before(targetClosureInfo.getPeriod().start())){
+				if (empCode.getPeriod().start().before(targetClosureInfo.getPeriod().start())){
 					// チェック開始日　←　「締め情報．期間．開始日」
 					this.checkStart = targetClosureInfo.getPeriod().start();
 				}
 			}
 			else {
 				// チェック開始日　←　「所属雇用履歴．期間．終了日」の翌日
-				this.checkStart = bsEmploymentHist.getPeriod().end().addDays(1);
+				this.checkStart = empCode.getPeriod().end().addDays(1);
 			}
 			
 			// チェック終了日までチェックが完了したかチェック
-			if (this.checkEnd.beforeOrEquals(bsEmploymentHist.getPeriod().end())) break;
+			if (this.checkEnd.beforeOrEquals(empCode.getPeriod().end())) break;
 			
 			// 検索開始日　←　所属雇用履歴．期間．終了日の翌日
-			searchStart = bsEmploymentHist.getPeriod().end().addDays(1);
+			searchStart = empCode.getPeriod().end().addDays(1);
 		}
 		
 		// チェック開始日を返す
