@@ -1007,9 +1007,15 @@ module nts.uk.at.view.kmk002.a {
                 
                 this.upperCheck.subscribe(vl => {
                     if (vl) {
-                        $('#inp-upper-amount').ntsEditor('validate');
-                        $('#inp-upper-number').ntsEditor('validate');
-                        $('#inp-upper-time').ntsEditor('validate');
+                        if($('#inp-upper-amount').is(':enabled')){
+                            $('#inp-upper-amount').ntsEditor('validate');
+                        }
+                        if($('#inp-upper-number').is(':enabled')){
+                            $('#inp-upper-number').ntsEditor('validate');
+                        }
+                        if($('#inp-upper-time').is(':enabled')){
+                            $('#inp-upper-time').ntsEditor('validate');
+                        }
                     } else {
                         $('#inp-upper-amount').ntsError('clear');
                         $('#inp-upper-number').ntsError('clear');
@@ -1018,9 +1024,15 @@ module nts.uk.at.view.kmk002.a {
                 });
                 this.lowerCheck.subscribe(vl => {
                     if (vl) {
-                        $('#inp-lower-amount').ntsEditor('validate');
-                        $('#inp-lower-number').ntsEditor('validate');
-                        $('#inp-lower-time').ntsEditor('validate');
+                        if($('#inp-upper-amount').is(':enabled')){
+                            $('#inp-lower-amount').ntsEditor('validate');
+                        }
+                        if($('#inp-lower-number').is(':enabled')){
+                            $('#inp-lower-number').ntsEditor('validate');
+                        }
+                        if($('#inp-lower-time').is(':enabled')){
+                            $('#inp-lower-time').ntsEditor('validate');
+                        }
                     } else {
                         $('#inp-lower-amount').ntsError('clear');
                         $('#inp-lower-number').ntsError('clear');
