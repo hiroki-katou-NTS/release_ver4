@@ -78,7 +78,7 @@ public class ApplicationApprovalImpl_New implements ApplicationApprovalService_N
 				.map(x -> x.getBaseDateFlg()).orElse(BaseDateFlg.SYSTEM_DATE);
 		GeneralDate targetDate = baseDateFlg.equals(BaseDateFlg.SYSTEM_DATE) ? GeneralDate.today() : application.getAppDate();
 		approvalRootStateAdapter.insertByAppType(application.getCompanyID(), application.getEmployeeID(),
-				application.getAppType().value, targetDate, application.getAppID());
+				application.getAppType().value, application.getAppDate(), application.getAppID(), targetDate);
 	}
 
 	@Override
