@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -13,9 +14,13 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProc
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.PreOvertimeReflectService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.AdTimeAndAnyItemAdUpService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
+import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
+import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 
 @Stateless
@@ -27,7 +32,11 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 	@Inject
 	private PreOvertimeReflectService overTimeService;
 	@Inject
+	private WorkInformationRepository workRepository;
+	@Inject
 	private WorkUpdateService scheWork;
+	@Inject
+	private EditStateOfDailyPerformanceRepository dailyReposiroty;
 	@Inject
 	private AdTimeAndAnyItemAdUpService timeAndAnyItemUpService;
 	@Inject
@@ -100,6 +109,9 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 	@Override
 	public IntegrationOfDaily createIntegrationOfDailyStart(String employeeId, GeneralDate baseDate) {
 		IntegrationOfDaily daily =overTimeService.calculateForAppReflect(employeeId, baseDate);
+		if(daily == null) {
+			return null;
+		}
 		if(!daily.getAttendanceTimeOfDailyPerformance().isPresent()
 				|| !daily.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getWorkHolidayTime().isPresent()) {
 			AttendanceTimeOfDailyPerformance attendanceTime = AttendanceTimeOfDailyPerformance.allZeroValue(employeeId, baseDate);

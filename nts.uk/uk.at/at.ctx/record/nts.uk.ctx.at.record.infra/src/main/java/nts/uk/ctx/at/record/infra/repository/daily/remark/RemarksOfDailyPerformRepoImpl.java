@@ -1,7 +1,6 @@
 package nts.uk.ctx.at.record.infra.repository.daily.remark;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,15 +10,12 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
-import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
-import nts.uk.ctx.at.record.dom.daily.remarks.RecordRemarks;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerform;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerformRepo;
 import nts.uk.ctx.at.record.infra.entity.daily.remarks.KrcdtDayRemarksColumn;
@@ -28,6 +24,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class RemarksOfDailyPerformRepoImpl extends JpaRepository implements RemarksOfDailyPerformRepo {
+
 	@Override
 	public List<RemarksOfDailyPerform> getRemarks(String employeeId, GeneralDate workingDate) {
 		return findEntity(employeeId, workingDate)
@@ -156,24 +153,5 @@ public class RemarksOfDailyPerformRepoImpl extends JpaRepository implements Rema
 			return Optional.of(optData.get().toDomain());
 		} 
 		return Optional.empty();
-	}
-
-	@Override
-	@SneakyThrows
-	public List<RemarksOfDailyPerform> getRemarksBykey(String sid, GeneralDate ymd) {
-		try (PreparedStatement stmt = this.connection().prepareStatement(
-				"SELECT * FROM KRCDT_DAY_REMARKSCOLUMN op" 
-				+" WHERE SID = ?"
-				+" AND YMD = ?")
-		) {
-			stmt.setString(1, sid);
-			stmt.setDate(2, Date.valueOf(ymd.toLocalDate()));
-			return new NtsResultSet(stmt.executeQuery()).getList(rec ->{				
-				return new RemarksOfDailyPerform(rec.getString("SID"),
-						rec.getGeneralDate("YMD"),
-						new RecordRemarks(rec.getString("REMARKS")),
-								rec.getInt("REMARKS_COLUMN_NO"));
-			});
-		}
 	}
 }

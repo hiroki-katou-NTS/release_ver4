@@ -2,9 +2,7 @@ package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,6 +14,7 @@ import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
 import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.ReflectBreakTimeOfDailyDomainService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.AdTimeAndAnyItemAdUpService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CalculateDailyRecordServiceCenter;
@@ -44,11 +43,9 @@ import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeIsFluidWork;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
-import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
-import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
@@ -80,6 +77,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	private EmployeeDailyPerErrorRepository employeeError;
 	@Inject
 	private WorkInformationRepository workRepository;
+	@Inject
+	private DailyRecordTransactionService dailyTransaction;
 	@Inject
 	private ErrMessageInfoRepository errMessInfo;
 	@Inject
@@ -135,14 +134,16 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 
 	@Override
 	public void calculateOfAppReflect(CommonCalculateOfAppReflectParam commonPara) {
+		Optional<WorkingConditionItem> optWorkingCondition = workingCondition.getBySidAndStandardDate(commonPara.getSid(), commonPara.getYmd());
+		//List<EditStateOfDailyPerformance> lstEditState = dailyReposiroty.findByKey(commonPara.getSid(), commonPara.getYmd());
+		//commonPara.getIntegrationOfDaily().setEditState(lstEditState);
 		String companyId = AppContexts.user().companyId();
 		//就業時間帯の休憩時間帯を日別実績に反映する
 		this.updateBreakTimeInfor(commonPara.getSid(),
 				commonPara.getYmd(),
 				commonPara.getIntegrationOfDaily(), companyId);
-		Optional<WorkType> workTypeInfor = Optional.empty();
 		if(commonPara.getIntegrationOfDaily().getWorkInformation().getRecordInfo().getWorkTypeCode() != null) {
-			workTypeInfor = worktypeRepo.findByPK(companyId, 
+			Optional<WorkType> workTypeInfor = worktypeRepo.findByPK(companyId, 
 					commonPara.getIntegrationOfDaily().getWorkInformation().getRecordInfo().getWorkTypeCode().v());
 			//2019.02.26　渡邉から
 			//残業申請の場合は、自動打刻セットの処理を呼ばない（大塚リリースの時はこの条件で実装する（製品版では、実績の勤務種類、就業時間帯を変更した場合に自動打刻セットを実行するように修正する事（渡邉）
@@ -160,8 +161,6 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 						commonPara.getIntegrationOfDaily());
 				if(commonPara.getAppType() != ApplicationType.BREAK_TIME_APPLICATION ||
 						(commonPara.getAppType() == ApplicationType.BREAK_TIME_APPLICATION && lstTime.isEmpty())) {
-					Optional<WorkingConditionItem> optWorkingCondition = workingCondition.getBySidAndPeriodOrderByStrD(commonPara.getSid(),
-							new DatePeriod(commonPara.getYmd(),commonPara.getYmd())).stream().findFirst();
 					//出退勤時刻を補正する
 					timeLeavingService.correct(companyId, commonPara.getIntegrationOfDaily(), optWorkingCondition, workTypeInfor, true).getData();	
 				}				
@@ -180,19 +179,16 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		List<IntegrationOfDaily> lstCal = calService.calculateForSchedule(CalculateOption.asDefault(),
 				Arrays.asList(commonPara.getIntegrationOfDaily()) , 
 				Optional.of(commonComSetting.getCompanySetting()));
-		IntegrationOfDaily x = lstCal.get(0);
-		workRepository.updateByKeyFlush(x.getWorkInformation());
-		Map<WorkTypeCode, WorkType> workTypes = new HashMap<WorkTypeCode, WorkType>();
-		workTypeInfor.ifPresent(wti -> {
-			workTypes.put(wti.getWorkTypeCode(), wti);
+		lstCal.stream().forEach(x -> {
+			workRepository.updateByKeyFlush(x.getWorkInformation());
+			timeAndAnyItemUpService.addAndUpdate(x);
+			employeeError.removeParam(commonPara.getSid(), commonPara.getYmd());
+			dailyReposiroty.addAndUpdate(commonPara.getIntegrationOfDaily().getEditState());
+			if(!x.getEmployeeError().isEmpty()) {
+				employeeError.insert(x.getEmployeeError());	
+			}
+			dailyTransaction.updated(x.getWorkInformation().getEmployeeId(), x.getWorkInformation().getYmd());
 		});
-		timeAndAnyItemUpService.addAndUpdate(lstCal, workTypes);
-		dailyReposiroty.updateByKey(commonPara.getIntegrationOfDaily().getEditState());
-		
-		employeeError.removeParam(commonPara.getSid(), commonPara.getYmd());
-		if(!x.getEmployeeError().isEmpty()) {
-			employeeError.insert(x.getEmployeeError());	
-		}
 	}
 
 	@Override
