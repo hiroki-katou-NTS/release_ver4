@@ -87,8 +87,6 @@ public class SortingProcessCommandHandler extends CommandHandler<ScheduleExecute
 		} 
 		// 「待機中」
 		else if (processExecutionLogManage.getCurrentStatus().value == 1) {
-			log.info("前回実行日時_"+command.getExecItemCd()+"_TimeLastExec(4) : "+processExecutionLogManage.getLastExecDateTime().toString());
-			log.info("前回実行日時_"+command.getExecItemCd()+"_TimeNow(4) : "+GeneralDateTime.now());
 			this.executeHandler(companyId, execItemCd, execItemId, nextDate);
 		}
 		
