@@ -72,15 +72,23 @@ public class SortingProcessCommandHandler extends CommandHandler<ScheduleExecute
 		// 「実行中」
 		if (processExecutionLogManage.getCurrentStatus().value == 0) {
 			// ドメインモデル「更新処理自動実行管理．前回実行日時」から5時間を経っているかチェックする
+			log.info("前回実行日時_"+command.getExecItemCd()+"_TimeLastExec(1) : "+processExecutionLogManage.getLastExecDateTime());
+			log.info("前回実行日時_"+command.getExecItemCd()+"_TimeNow(1) : "+GeneralDateTime.now());
 			boolean checkLastTime = checkLastDateTimeLessthanNow5h(processExecutionLogManage.getLastExecDateTime());
 			if (checkLastTime) {
+				log.info("前回実行日時_"+command.getExecItemCd()+"_TimeLastExec(2) : "+processExecutionLogManage.getLastExecDateTime());
+				log.info("前回実行日時_"+command.getExecItemCd()+"_TimeNow(2) : "+GeneralDateTime.now());
 				this.DistributionRegistProcess(companyId, execItemCd, execItemId, nextDate);
 			} else {
+				log.info("前回実行日時_"+command.getExecItemCd()+"_TimeLastExec(3) : "+processExecutionLogManage.getLastExecDateTime());
+				log.info("前回実行日時_"+command.getExecItemCd()+"_TimeNow(3) : "+GeneralDateTime.now());
 				this.executeHandler(companyId, execItemCd, execItemId, nextDate);
 			}
 		} 
 		// 「待機中」
 		else if (processExecutionLogManage.getCurrentStatus().value == 1) {
+			log.info("前回実行日時_"+command.getExecItemCd()+"_TimeLastExec(4) : "+processExecutionLogManage.getLastExecDateTime().toString());
+			log.info("前回実行日時_"+command.getExecItemCd()+"_TimeNow(4) : "+GeneralDateTime.now());
 			this.executeHandler(companyId, execItemCd, execItemId, nextDate);
 		}
 		
