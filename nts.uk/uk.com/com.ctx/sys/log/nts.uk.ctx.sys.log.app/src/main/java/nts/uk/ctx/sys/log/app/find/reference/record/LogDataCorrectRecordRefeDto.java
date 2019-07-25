@@ -78,16 +78,7 @@ public class LogDataCorrectRecordRefeDto {
 	
 	private static String getCorrectionAttr(int attr) {
 		CorrectionAttr correctionAttr = CorrectionAttr.of(attr);
-		switch (correctionAttr) {
-		case EDIT:
-			return TextResource.localize("Enum_CorrectionAttr_EDIT");
-		case CALCULATE:
-			return TextResource.localize("Enum_CorrectionAttr_CALCULATE");
-		case REFLECT:
-			return TextResource.localize("Enum_CorrectionAttr_REFLECT");
-		default:
-			return "";
-		}
+		return correctionAttr.localize();
 	}
 	
 }

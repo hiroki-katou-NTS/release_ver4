@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.Getter;
@@ -46,6 +48,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  */
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class LogBasicInformationFinder {
 
 	@Inject
@@ -78,7 +81,6 @@ public class LogBasicInformationFinder {
 
 	public List<LogBasicInfoDto> findByOperatorsAndDate(LogParams logParams) {
 			List<LogBasicInfoDto> lstLogBacsicInfo = new ArrayList<>();
-			Map<String, String> mapEmployeeCodes;
 			// get login info
 			LoginUserContext loginUserContext = AppContexts.user();
 			RecordTypeEnum recordTypeEnum = RecordTypeEnum.valueOf(logParams.getRecordType());
@@ -107,13 +109,32 @@ public class LogBasicInformationFinder {
 					return x.getOperationId();
 				}).collect(Collectors.toList());
 
+				
+				Map<Integer,List<String>> operationListPerOneHundred = new HashMap<>();
+				int insertTimes = 1;
+				List<String> operationIdInsertListToMap = new ArrayList<>();
+				for(String operationId : operationIds){
+					operationIdInsertListToMap.add(operationId);
+					if(operationIdInsertListToMap.size() == 1000) {
+						operationListPerOneHundred.put(insertTimes, new ArrayList<>(operationIdInsertListToMap));
+						insertTimes ++;
+						operationIdInsertListToMap.clear();
+					}
+				}
+				//ループ終了時点でlistに保持していたoperationIdのinsert
+				if(operationIdInsertListToMap.size() > 0) {
+					operationListPerOneHundred.put(operationListPerOneHundred.size() + 1, new ArrayList<>(operationIdInsertListToMap));
+				}
+				
+				
 				switch (recordTypeEnum) {
 				case LOGIN:
 						// Set data of login record
 						List<LoginRecord> loginRecords = this.loginRecordRepository.logRecordInfor(operationIds);
 						if(!CollectionUtil.isEmpty(loginRecords)){
+							
 							// Get list employeeCode operator by list information operator
-							mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo,loginRecords,null,null,null);
+							Map<String, String> mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo,loginRecords,null,null,null);
 							List<LogBasicInfoDto> logBasicLst = loginRecords.stream().map(loginRecord ->{
 								// Convert log basic info to DTO
 								LogBasicInformation logBasicInformation = mapLogBasicInfo.get(loginRecord.getOperationId());
@@ -137,12 +158,13 @@ public class LogBasicInformationFinder {
 				case START_UP:
 					break;
 				case UPDATE_PERSION_INFO:
+				{
 					String[] listSubHeaderText = { "23", "24", "29", "31", "33" };
 					// Get persion info log
 					List<PersonInfoCorrectionLog> listPersonInfoCorrectionLog = this.iPersonInfoCorrectionLogRepository
 							.findByTargetAndDate(operationIds,logParams.getListTagetEmployeeId());
 					// Get list employeeCode operator by list information operator
-					mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo, null, listPersonInfoCorrectionLog, null, null);
+					final Map<String, String> mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo, null, listPersonInfoCorrectionLog, null, null);
 					
 					// Get Map Order list
 					List<String> itemDefinitionIds = new ArrayList<>();
@@ -218,15 +240,23 @@ public class LogBasicInformationFinder {
 						// Convert data to list
 						lstLogBacsicInfo = new ArrayList<LogBasicInfoDto>(mapCheck.values());
 					break;
+				}
 				case DATA_CORRECT:
 					TargetDataType targetDataType= TargetDataType.of(logParams.getTargetDataType()) ;
 					Map<String,LogBasicInfoDto> mapCheckLogBasic = new HashMap<>();
+					
+					CollectionUtil.split(operationIds, 1000, operationIdSubList -> {
+
+						if(mapCheckLogBasic.size() > 1000) {
+							return;
+						}
+						
 						// get data correct log
 						List<DataCorrectionLog> lstDataCorectLog = this.dataCorrectionLogRepository.findByTargetAndDate(
-								operationIds, logParams.getListTagetEmployeeId(), datePeriodTaget,targetDataType);
+								operationIdSubList, logParams.getListTagetEmployeeId(), datePeriodTaget,targetDataType);
 						if (!CollectionUtil.isEmpty(lstDataCorectLog)) {
 							// Get list employeeCode operator by list information operator
-							mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo,null,null,lstDataCorectLog,null);
+							Map<String, String> mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo,null,null,lstDataCorectLog,null);
 							// tối ưu lấy header
 							Map<String, TargetDataCorrect> itemOutHeaders = lstDataCorectLog.stream()
 									.filter(distinctByKey(DataCorrectionLog::getTargetDataType))
@@ -271,6 +301,7 @@ public class LogBasicInformationFinder {
 								
 							});
 						}
+					});
 					// xử lý input map to lists
 					lstLogBacsicInfo = new ArrayList<LogBasicInfoDto>(mapCheckLogBasic.values());
 					break;
@@ -286,7 +317,7 @@ public class LogBasicInformationFinder {
 							logParams.getEndDateOperator());
 					if (!CollectionUtil.isEmpty(startPageLogs)) {
 						// Get list employee code
-						mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,null,null,null,null,startPageLogs);
+						Map<String, String> mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,null,null,null,null,startPageLogs);
 						List<LogBasicInfoDto> logBasicInfoDtoInter = startPageLogs.stream().map(startPageLog -> {
 							// Convert log basic info to DTO
 							LogBasicInformation logBasicInformation = startPageLog.getBasicInfo();
