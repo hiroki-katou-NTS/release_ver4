@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.uk.ctx.at.auth.app.find.employmentrole.InitDisplayPeriodSwitchSetFinder;
+import nts.uk.ctx.at.auth.app.find.employmentrole.dto.DateProcessed;
+import nts.uk.ctx.at.auth.app.find.employmentrole.dto.InitDisplayPeriodSwitchSetDto;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.CheckTarget;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.CheckTrackRecordApprovalDay;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureInfo;
@@ -23,17 +26,19 @@ public class KTG001QueryProcessor {
 	
 	@Inject
 	private ClosureService closureService;
+	
+	@Inject
+	private InitDisplayPeriodSwitchSetFinder initDisplayPeriodSwitchSetFinder; 
 
 	public boolean checkDataDayPerConfirm(String employeeId) {
 		String CID = AppContexts.user().companyId();
-		
-		//基準日の会社の締めをすべて取得する
-		List<ClosureInfo> listClosure = closureService.getAllClosureInfo();
-		
+		//[RQ609]ログイン社員のシステム日時点の処理対象年月を取得する
+		InitDisplayPeriodSwitchSetDto initDisplayPeriodSwitchSetDto = initDisplayPeriodSwitchSetFinder.targetDateFromLogin();
+		List<DateProcessed> listDateProcessed = initDisplayPeriodSwitchSetDto.getListDateProcessed();
 		//取得した「締め」からチェック対象を作成する
 		List<CheckTargetItem> listCheckTargetItem = new ArrayList<>();
-		for(ClosureInfo closure : listClosure) {
-			listCheckTargetItem.add(new CheckTargetItem(closure.getClosureId().value,closure.getCurrentMonth()));
+		for(DateProcessed dateProcess : listDateProcessed) {
+			listCheckTargetItem.add(new CheckTargetItem(dateProcess.getClosureID(),dateProcess.getTargetDate()));
 		}
 		//CheckTargetOutPut checkTargetOutPut = new CheckTargetOutPut(listCheckTargetItem);
 		
