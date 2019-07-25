@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +48,7 @@ import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
-import nts.uk.shr.com.context.AppContexts;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService {
@@ -145,46 +146,44 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 	@Override
 	public IntegrationOfDaily calculateForAppReflect(String employeeId,
 			GeneralDate dateData) {
-		String companyId = AppContexts.user().companyId();
 		Optional<WorkInfoOfDailyPerformance> optWorkInfor = workRepository.find(employeeId, dateData);
-		if(!optWorkInfor.isPresent()) {
-			return null;
-		}
-		WorkInfoOfDailyPerformance workInfor = workRepository.find(employeeId, dateData).get();
+		WorkInfoOfDailyPerformance workInfor = optWorkInfor.get();
+		List<String> emps = Arrays.asList(employeeId);
+		DatePeriod dates =  new DatePeriod(dateData, dateData);
 		//日別実績の計算区分
-		CalAttrOfDailyPerformance calAtrrOfDailyData = calAttrOfDaily.find(employeeId, dateData);
+		CalAttrOfDailyPerformance calAtrrOfDailyData = calAttrOfDaily.finds(emps, dates).get(0);
 		//日別実績の所属情報
-		Optional<AffiliationInforOfDailyPerfor> findByKey = affiliationInfor.findByKey(employeeId, dateData);
+		Optional<AffiliationInforOfDailyPerfor> findByKey = affiliationInfor.finds(emps, dates).stream().findFirst();
 		//日別実績の勤務種別
-		Optional<WorkTypeOfDailyPerformance> workType = workTypeOfDailyPerforRepository.findByKey(employeeId, dateData);
+		Optional<WorkTypeOfDailyPerformance> workType = workTypeOfDailyPerforRepository.finds(emps, dates).stream().findFirst();
 		//日別実績のPCログオン情報
-		Optional<PCLogOnInfoOfDaily> pcLogOnDarta = pcLogOnInfo.find(employeeId, dateData);
+		Optional<PCLogOnInfoOfDaily> pcLogOnDarta = pcLogOnInfo.finds(emps, dates).stream().findFirst();
 		//社員の日別実績エラー一覧
-		List<EmployeeDailyPerError> findEror = employeeDailyPerError.findList(companyId, employeeId);
+		List<EmployeeDailyPerError> findEror = employeeDailyPerError.getByEmpIDAndPeriod(emps, dates);
 		//日別実績の外出時間帯
-		Optional<OutingTimeOfDailyPerformance> findByEmployeeIdAndDate = outingTime.findByEmployeeIdAndDate(employeeId, dateData);		
+		Optional<OutingTimeOfDailyPerformance> findByEmployeeIdAndDate = outingTime.finds(emps, dates).stream().findFirst();		
 		//日別実績の休憩時間帯
-		List<BreakTimeOfDailyPerformance> lstBreakTime = breakTimeOfDaily.findByKey(employeeId, dateData);
+		List<BreakTimeOfDailyPerformance> lstBreakTime = breakTimeOfDaily.finds(emps, dates);
 		//日別実績の勤怠時間
-		Optional<AttendanceTimeOfDailyPerformance> findAttendanceTime = attendanceTime.find(employeeId, dateData);
+		Optional<AttendanceTimeOfDailyPerformance> findAttendanceTime = attendanceTime.finds(emps, dates).stream().findFirst();
 		//日別実績の作業別勤怠時間
-		Optional<AttendanceTimeByWorkOfDaily> findTimeByWork = attendanceTimeByWork.find(employeeId, dateData);
+		Optional<AttendanceTimeByWorkOfDaily> findTimeByWork = attendanceTimeByWork.finds(emps, dates).stream().findFirst();
 		//日別実績の出退勤
-		Optional<TimeLeavingOfDailyPerformance> findByKeyTimeLeaving = timeLeaningOfDaily.findByKey(employeeId, dateData);
+		Optional<TimeLeavingOfDailyPerformance> findByKeyTimeLeaving = timeLeaningOfDaily.finds(emps, dates).stream().findFirst();
 		//日別実績の短時間勤務時間帯
-		Optional<ShortTimeOfDailyPerformance> findShortTimeOfDaily = shortTimeOfDaily.find(employeeId, dateData);
+		Optional<ShortTimeOfDailyPerformance> findShortTimeOfDaily = shortTimeOfDaily.finds(emps, dates).stream().findFirst();
 		//日別実績の特定日区分
-		Optional<SpecificDateAttrOfDailyPerfor> findSpecificData = specificDate.find(employeeId, dateData);
+		Optional<SpecificDateAttrOfDailyPerfor> findSpecificData = specificDate.finds(emps, dates).stream().findFirst();
 		//日別実績の入退門
-		Optional<AttendanceLeavingGateOfDaily> findLeavingGate = attendanceLeaving.find(employeeId, dateData);
+		Optional<AttendanceLeavingGateOfDaily> findLeavingGate = attendanceLeaving.finds(emps, dates).stream().findFirst();
 		//日別実績の任意項目
-		Optional<AnyItemValueOfDaily> findAnyItem = anyItemValue.find(employeeId, dateData);
+		Optional<AnyItemValueOfDaily> findAnyItem = anyItemValue.finds(emps, dates).stream().findFirst();
 		//日別実績の編集状態
-		List<EditStateOfDailyPerformance> lstEditState = editState.findByKey(employeeId, dateData);
+		List<EditStateOfDailyPerformance> lstEditState = editState.finds(emps, dates);
 		//日別実績の備考
-		List<RemarksOfDailyPerform> remark = remarks.getRemarks(employeeId, dateData);
+		List<RemarksOfDailyPerform> remark = remarks.getRemarksBykey(employeeId, dateData);
 		//日別実績の臨時出退勤
-		Optional<TemporaryTimeOfDailyPerformance> temporaryData = temporary.findByKey(employeeId, dateData);
+		Optional<TemporaryTimeOfDailyPerformance> temporaryData = temporary.finds(emps, dates).stream().findFirst();
 		IntegrationOfDaily integration = new IntegrationOfDaily(workInfor, 
 				calAtrrOfDailyData, 
 				findByKey.isPresent() ? findByKey.get() : null,
