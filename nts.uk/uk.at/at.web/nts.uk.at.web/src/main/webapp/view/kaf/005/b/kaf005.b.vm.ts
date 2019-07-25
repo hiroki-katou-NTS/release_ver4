@@ -791,6 +791,16 @@ module nts.uk.at.view.kaf005.b {
                      $(elementId).focus();
                     return false;
                 }
+                if(startTime < 300){
+                    dialog.alertError({messageId:"Msg_307"})
+                     $(elementId).focus();
+                    return false;    
+                }
+                if(endTime > 1740){
+                    dialog.alertError({messageId:"Msg_307"})
+                     $(elementId).focus();
+                    return false;    
+                }
                 return true;
             }
             CaculationTime(){

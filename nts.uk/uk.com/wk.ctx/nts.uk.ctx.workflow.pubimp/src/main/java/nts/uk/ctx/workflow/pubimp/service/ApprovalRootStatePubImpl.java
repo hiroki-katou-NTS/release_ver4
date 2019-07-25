@@ -252,14 +252,15 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 	
 	@Override
 	public void insertAppRootType(String companyID, String employeeID, 
-			Integer appTypeValue, GeneralDate date, String appID, Integer rootType) {
+			Integer appTypeValue, GeneralDate appDate, String appID, Integer rootType, GeneralDate baseDate) {
 		approvalRootStateService.insertAppRootType(
 				companyID, 
 				employeeID, 
 				EnumAdaptor.valueOf(appTypeValue, ApplicationType.class), 
-				date, 
+				appDate, 
 				appID,
-				rootType);
+				rootType,
+				baseDate);
 	}
 
 	@Override

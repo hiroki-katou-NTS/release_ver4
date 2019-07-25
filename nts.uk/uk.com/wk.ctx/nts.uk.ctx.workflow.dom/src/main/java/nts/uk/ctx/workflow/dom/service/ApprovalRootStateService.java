@@ -14,7 +14,7 @@ import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 public interface ApprovalRootStateService {
 	
 	public void insertAppRootType(String companyID, String employeeID, ApplicationType appType, 
-			GeneralDate date, String appID, Integer rootType);
+			GeneralDate appDate, String appID, Integer rootType, GeneralDate baseDate);
 	
 	public void delete(String rootStateID, Integer rootType); 
 	
