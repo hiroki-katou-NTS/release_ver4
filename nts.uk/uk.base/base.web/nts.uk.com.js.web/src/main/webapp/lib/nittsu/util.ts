@@ -567,7 +567,7 @@
         }
         
         containsKey(key: string) {
-            return this.getItem(key) !== null;
+            return this.getItem(key).isPresent();
         };
 
         getItem(key: string): util.optional.Optional<string> {

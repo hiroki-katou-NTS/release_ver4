@@ -10,6 +10,7 @@ import nts.arc.layer.ws.preprocess.RequestFilterMapping;
 import nts.arc.layer.ws.preprocess.filters.RequestPerformanceLogFilter;
 import nts.arc.layer.ws.preprocess.filters.RequestPerformancePoolFilter;
 import nts.arc.system.ServerSystemProperties;
+import nts.arc.web.session.HttpSubSessionFilter;
 import nts.uk.shr.infra.application.auth.WindowsAccountCatcher;
 import nts.uk.shr.infra.web.session.BatchRequestProcessor;
 import nts.uk.shr.infra.web.session.SharingSessionFilter;
@@ -43,6 +44,7 @@ public class UkRequestFilterCollector implements RequestFilterCollector {
 			FILTERS.add(RequestFilterMapping.map(PathPattern.ALL_WEB_APIS, new WebApiLoginSessionValidator()));
 			FILTERS.add(RequestFilterMapping.map(PathPattern.LOGIN_SCREENS, new WindowsAccountCatcher()));
 			FILTERS.add(RequestFilterMapping.map(PathPattern.ALL_SCREENS, new StartPageLogWriter()));
+			FILTERS.add(RequestFilterMapping.map(PathPattern.ALL_WEB_APIS, new HttpSubSessionFilter()));
 //			RequestFilterMapping.map(PathPattern.ALL_WEB_APIS, new CsrfProtectionFilter(PathsNoSession.WEB_APIS)),
 		
 			// This must be executed last
