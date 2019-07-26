@@ -1082,32 +1082,33 @@ public class AggregateMonthlyRecordServiceProc {
 			if (convertedOpt.isPresent()) {
 				val retouchedTime = convertedOpt.get();
 				retouchedTime.getMonthlyCalculation().copySettings(attendanceTime.getMonthlyCalculation());
+				
+				val convertedAnnLeaveOpt = convert.toAnnLeave();
+				if (convertedAnnLeaveOpt.isPresent()) {
+					this.aggregateResult.getAnnLeaRemNumEachMonthList().clear();
+					this.aggregateResult.getAnnLeaRemNumEachMonthList().add(convertedAnnLeaveOpt.get());
+				}
+				val convertedRsvLeaveOpt = convert.toRsvLeave();
+				if (convertedRsvLeaveOpt.isPresent()) {
+					this.aggregateResult.getRsvLeaRemNumEachMonthList().clear();
+					this.aggregateResult.getRsvLeaRemNumEachMonthList().add(convertedRsvLeaveOpt.get());
+				}
+				val convertedAbsLeaveOpt = convert.toAbsenceLeave();
+				if (convertedAbsLeaveOpt.isPresent()) {
+					this.aggregateResult.getAbsenceLeaveRemainList().clear();
+					this.aggregateResult.getAbsenceLeaveRemainList().add(convertedAbsLeaveOpt.get());
+				}
+				val convertedDayOffOpt = convert.toDayOff();
+				if (convertedDayOffOpt.isPresent()) {
+					this.aggregateResult.getMonthlyDayoffRemainList().clear();
+					this.aggregateResult.getMonthlyDayoffRemainList().add(convertedDayOffOpt.get());
+				}
+				val convertedSpcLeaveList = convert.toSpecialHoliday();
+				if (convertedSpcLeaveList.size() > 0) {
+					this.aggregateResult.getSpecialLeaveRemainList().clear();
+					this.aggregateResult.getSpecialLeaveRemainList().addAll(convertedSpcLeaveList);
+				}
 				return retouchedTime;
-			}
-			val convertedAnnLeaveOpt = convert.toAnnLeave();
-			if (convertedAnnLeaveOpt.isPresent()) {
-				this.aggregateResult.getAnnLeaRemNumEachMonthList().clear();
-				this.aggregateResult.getAnnLeaRemNumEachMonthList().add(convertedAnnLeaveOpt.get());
-			}
-			val convertedRsvLeaveOpt = convert.toRsvLeave();
-			if (convertedRsvLeaveOpt.isPresent()) {
-				this.aggregateResult.getRsvLeaRemNumEachMonthList().clear();
-				this.aggregateResult.getRsvLeaRemNumEachMonthList().add(convertedRsvLeaveOpt.get());
-			}
-			val convertedAbsLeaveOpt = convert.toAbsenceLeave();
-			if (convertedAbsLeaveOpt.isPresent()) {
-				this.aggregateResult.getAbsenceLeaveRemainList().clear();
-				this.aggregateResult.getAbsenceLeaveRemainList().add(convertedAbsLeaveOpt.get());
-			}
-			val convertedDayOffOpt = convert.toDayOff();
-			if (convertedDayOffOpt.isPresent()) {
-				this.aggregateResult.getMonthlyDayoffRemainList().clear();
-				this.aggregateResult.getMonthlyDayoffRemainList().add(convertedDayOffOpt.get());
-			}
-			val convertedSpcLeaveList = convert.toSpecialHoliday();
-			if (convertedSpcLeaveList.size() > 0) {
-				this.aggregateResult.getSpecialLeaveRemainList().clear();
-				this.aggregateResult.getSpecialLeaveRemainList().addAll(convertedSpcLeaveList);
 			}
 		}
 		return attendanceTime;
