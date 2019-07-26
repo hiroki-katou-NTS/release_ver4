@@ -405,6 +405,16 @@ module nts.uk.at.view.kaf007.a.viewmodel {
                     }
                 }
             }
+            if(workchange.workTimeStart1() < 300){
+                dialog.alertError({ messageId: "Msg_307" }).then(function() { nts.uk.ui.block.clear(); });
+                $('#inpStartTime1').focus();
+                return false;    
+            } 
+            if(workchange.workTimeEnd1() > 1740){
+                dialog.alertError({ messageId: "Msg_307" }).then(function() { nts.uk.ui.block.clear(); });
+                $('#inpEndTime1').focus();   
+                return false;  
+            }
             //３．休憩時間１（開始時刻：終了時刻）大小チェック
             if (!nts.uk.util.isNullOrEmpty(workchange.breakTimeStart1())) {
                 //開始時刻　＞　終了時刻
