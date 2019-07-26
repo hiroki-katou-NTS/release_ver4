@@ -1,12 +1,15 @@
 package nts.uk.ctx.at.request.infra.repository.setting.request.gobackdirectlycommon;
 
+import java.sql.PreparedStatement;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.uk.ctx.at.request.dom.application.UseAtr;
 import nts.uk.ctx.at.request.dom.setting.request.application.comment.CommentContent;
 import nts.uk.ctx.at.request.dom.setting.request.application.comment.CommentFontColor;
@@ -105,6 +108,19 @@ public class JpaGoBackDirectlyCommonSettingRepository extends JpaRepository impl
 	@Override
 	public void delete(GoBackDirectlyCommonSetting goBackDirectlyCommonSettingItem) {
 		this.commandProxy().remove(toEntity(goBackDirectlyCommonSettingItem));
+	}
+
+	@Override
+	@SneakyThrows
+	public Optional<UseAtr> getWorkChangeTimeAtr(String cid) {
+		String sql = "SELECT WORK_CHANGE_TIME_ATR"
+				+ " FROM KRQST_GO_BACK_DIRECT_SET"
+				+ " WHERE CID = ?";
+		try (PreparedStatement stmt = this.connection().prepareStatement(sql)){
+			stmt.setString(1, cid);
+			return new NtsResultSet(stmt.executeQuery())
+					.getSingle(x -> EnumAdaptor.valueOf(x.getInt("WORK_CHANGE_TIME_ATR"), UseAtr.class));
+		}
 	}
 
 }

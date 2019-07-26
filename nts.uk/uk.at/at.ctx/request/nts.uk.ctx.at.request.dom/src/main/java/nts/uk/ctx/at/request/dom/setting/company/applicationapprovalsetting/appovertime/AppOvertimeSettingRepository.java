@@ -24,4 +24,5 @@ public interface AppOvertimeSettingRepository {
 	 * @param appOverTime
 	 * @author yennth
 	 */
-	void insert(AppOvertimeSetting appOverTime);}
+	void insert(AppOvertimeSetting appOverTime);
+	Optional<AppOvertimeSetting> getByCid(String cid);}

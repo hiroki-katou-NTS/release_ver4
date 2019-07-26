@@ -2,6 +2,8 @@ package nts.uk.ctx.at.request.dom.setting.request.gobackdirectlycommon;
 
 import java.util.Optional;
 
+import nts.uk.ctx.at.request.dom.application.UseAtr;
+
 public interface GoBackDirectlyCommonSettingRepository {
 	/***/
 	/**
@@ -24,4 +26,6 @@ public interface GoBackDirectlyCommonSettingRepository {
 	 * @param goBackDirectlyCommonSettingItem
 	 */
 	public void delete(GoBackDirectlyCommonSetting goBackDirectlyCommonSettingItem);
+	
+	Optional<UseAtr> getWorkChangeTimeAtr(String cid);
 }

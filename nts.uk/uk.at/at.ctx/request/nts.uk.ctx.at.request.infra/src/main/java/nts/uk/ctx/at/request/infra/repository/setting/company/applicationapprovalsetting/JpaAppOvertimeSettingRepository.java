@@ -1,11 +1,14 @@
 package nts.uk.ctx.at.request.infra.repository.setting.company.applicationapprovalsetting;
 
+import java.sql.PreparedStatement;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.appovertime.AppOvertimeSetting;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.appovertime.AppOvertimeSettingRepository;
 import nts.uk.ctx.at.request.infra.entity.setting.company.applicationapprovalsetting.appovertime.KrqstAppOvertimeSet;
@@ -99,6 +102,35 @@ public class JpaAppOvertimeSettingRepository extends JpaRepository implements Ap
 	public void insert(AppOvertimeSetting appOverTime) {
 		KrqstAppOvertimeSet entity = toEntity(appOverTime);
 		this.commandProxy().insert(entity);
+	}
+	@Override
+	@SneakyThrows
+	public Optional<AppOvertimeSetting> getByCid(String cid) {
+		String sql = "SELECT * FROM KRQST_APP_OVERTIME_SET"
+				+ " WHERE CID = ?";
+		try (PreparedStatement stmt = this.connection().prepareStatement(sql)){
+			stmt.setString(1, cid);
+			return new NtsResultSet(stmt.executeQuery())
+					.getSingle(x -> {
+						return AppOvertimeSetting.createFromJavaType(x.getString("CID"),
+								x.getInt("FLEX_EXCESS_USE_SET_ATR"),
+								x.getInt("PRE_TYPE_SIFT_REFLECT_FLG"),
+								x.getInt("PRE_OVERTIME_REFLECT_FLG"),
+								x.getInt("POST_TYPESIFT_REFLECT_FLG"),
+								x.getInt("POST_BREAK_REFLECT_FLG"),
+								x.getInt("POST_WORKTIME_REFLECT_FLG"),
+								x.getInt("CALENDAR_DISP_ATR"),
+								x.getInt("EARLY_OVER_TIME_USE_ATR"),
+								x.getInt("INSTRUCT_EXCESS_OT_ATR"),
+								x.getInt("PRIORITY_STAMP_SET_ATR"),
+								x.getInt("UNIT_ASSIGNMENT_OVERTIME"),
+								x.getInt("NORMAL_OVERTIME_USE_ATR"),
+								x.getInt("DATTENDANCE_ID"),
+								x.getInt("USE_OT_WORK"),
+								x.getInt("REST_ATR"),
+								x.getInt("WORKTYPE_PERMISSION_FLAG"));
+					});
+		}
 	}
 
 }
