@@ -98,7 +98,7 @@ public interface ApprovalRootStateRepository {
 	 * @param approverID
 	 * @return
 	 */
-	public List<ApprovalRootState> findEmploymentAppCMM045(List<String> lstApproverID);
+	public List<ApprovalRootState> findEmploymentAppCMM045(List<String> lstApproverID, DatePeriod period, boolean isCMM045Start);
 	
 	public boolean resultKTG002 (GeneralDate startDate, GeneralDate endDate, String approverID, Integer rootType,
 			String companyID );

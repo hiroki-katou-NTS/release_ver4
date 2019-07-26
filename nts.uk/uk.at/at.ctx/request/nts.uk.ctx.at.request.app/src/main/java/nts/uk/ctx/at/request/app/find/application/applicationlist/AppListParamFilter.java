@@ -12,4 +12,5 @@ public class AppListParamFilter {
 	private AppListExtractConditionDto condition;
 	private boolean spr;
 	private int extractCondition;
+	private boolean startFlag;
 }

@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.request.dom.application.applist.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -169,7 +168,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 	 * 1 - 申請一覧リスト取得
 	 */
 	@Override
-	public AppListOutPut getApplicationList(AppListExtractCondition param, ApprovalListDisplaySetting displaySet) {
+	public AppListOutPut getApplicationList(AppListExtractCondition param, ApprovalListDisplaySetting displaySet, boolean startFlag) {
 		//申請一覧区分が申請 OR 承認-(Check xem là application hay aprove)
 		AppListOutPut appFull = null;
 		if(param.getAppListAtr().equals(ApplicationListAtr.APPLICATION)){//申請
@@ -177,7 +176,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 			appFull = this.getApplicationListByApp(param);
 		}else{//承認
 			//アルゴリズム「申請一覧リスト取得承認」を実行する - 3
-			appFull = this.getAppListByApproval(param,displaySet);
+			appFull = this.getAppListByApproval(param, displaySet, startFlag);
 		}
 		return appFull;
 	}
@@ -339,7 +338,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 	 * 3 - 申請一覧リスト取得承認
 	 */
 	@Override
-	public AppListOutPut getAppListByApproval(AppListExtractCondition param, ApprovalListDisplaySetting displaySet) {
+	public AppListOutPut getAppListByApproval(AppListExtractCondition param, ApprovalListDisplaySetting displaySet, boolean startFlag) {
 		String companyId = AppContexts.user().companyId();
 		String sID = AppContexts.user().employeeId();
 		GeneralDate sysDate = GeneralDate.today();
@@ -360,16 +359,19 @@ public class AppListInitialImpl implements AppListInitialRepository{
 			lstEmp.add(agent.getEmployeeId());
 		}
 		List<ApplicationFullOutput> lstAppFull = new ArrayList<>();
+		//hoatt 2019.07.24
+		//#108408 レスポンス対応
+		Map<String,List<ApprovalPhaseStateImport_New>> mapApprInfo = new HashMap<>();
 		//imported（申請承認）「承認ルートの内容」を取得する - RequestList309
-		System.out.println("before merger: "+ LocalDateTime.now());
-		Map<String,List<ApprovalPhaseStateImport_New>> mapApprInfo = this.mergeAppAndPhase_New(companyId, lstEmp);
-		System.out.println("after merger: "+ LocalDateTime.now());
+		mapApprInfo= this.mergeAppAndPhase_New(companyId, lstEmp, new DatePeriod(param.getStartDate(), param.getEndDate()), startFlag);
 		List<String> lstAppId = new ArrayList<>();
 		for(Map.Entry<String,List<ApprovalPhaseStateImport_New>> entry : mapApprInfo.entrySet()){
 			lstAppId.add(entry.getKey());
 		}
 		//ドメインモデル「申請」を取得する-(Lấy dữ liệu domain 申請) - get List App By Reflect
-		List<Application_New> lstApp = repoApp.getListAppByReflectandListID(companyId, param.getStartDate(), param.getEndDate(), lstAppId);
+		List<Application_New> lstApp = new ArrayList<>();
+		lstApp = repoApp.getListAppByReflectandListID(companyId, new DatePeriod(param.getStartDate(), param.getEndDate()), lstAppId);
+		
 		for(Application_New app : lstApp){
 			lstAppFull.add(new ApplicationFullOutput(app, mapApprInfo.get(app.getAppID()),-1,"", null));
 		}
@@ -1169,55 +1171,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 	private Integer finSetByWpkIDAppType(Map<String, Integer> mapWpkSet, String wpk){
 		return mapWpkSet.containsKey(wpk)? mapWpkSet.get(wpk) : -1;
 	}
-//	public List<AppMasterInfo> getListAppMasterInfo(List<Application_New> lstApp, String companyId, DatePeriod period) {
-//		//ドメインモデル「申請一覧共通設定」を取得する-(Lấy domain Application list common settings) - wait YenNTH
-//		Optional<AppCommonSet> appCommonSet = repoAppCommonSet.find();
-//		ShowName displaySet = appCommonSet.get().getShowWkpNameBelong();
-//		List<AppMasterInfo> lstAppMasterInfo = new ArrayList<>();
-//		//申請一覧リスト　繰返し実行
-//		for (Application_New app : lstApp) {
-//			//ドメインモデル「申請表示名」より申請表示名称を取得する-(Lấy Application display name) - wait YenNTH
-//			Optional<AppDispName> appDispName = repoAppDispName.getDisplay(app.getAppType().value);
-//			//アルゴリズム「社員IDから個人社員基本情報を取得」を実行する - req #1
-//			String empName = "";
-//			String inpEmpName = null;
-////			if(displaySet.equals(ShowName.SHOW)){
-//				 empName = empRequestAdapter.getEmployeeName(app.getEmployeeID());
-//				 inpEmpName = app.getEmployeeID().equals(app.getEnteredPersonID()) ? null : empRequestAdapter.getEmployeeName(app.getEnteredPersonID());
-////			}
-//			
-//			// TODO Auto-generated method stub
-//			//アルゴリズム「社員から職場を取得する」を実行する - req #30
-//			WkpHistImport wkp = wkpAdapter.findWkpBySid(app.getEmployeeID(), app.getAppDate());
-//			String wkpID = "";
-//			String wkpName = "";
-//			if(wkp != null){
-//				wkpID = wkp.getWorkplaceId();
-//			}
-//			
-//			if(displaySet.equals(ShowName.SHOW) && wkp != null){
-//				wkpName = wkp.getWkpDisplayName();
-//			}
-////			String wkpID = wkp == null ? "" : wkp.getWorkplaceId();
-//			//アルゴリズム「申請一覧事前必須チェック」を実行する- (check App Predict Require): 0 - 申請一覧事前必須チェック
-////			Boolean check = this.checkAppPredictRequire(app.getAppType().value, wkpID, companyId);
-//			boolean checkAddNote = false;
-////			if(check == true){//必須(True)
-////				//事前、事後の後ろに#CMM045_101(※)を追加
-////				// TODO Auto-generated method stub
-////				checkAddNote = true;
-////			}
-//			String appDispNameStr = "";
-//			if(appDispName.isPresent()){
-//				appDispNameStr = appDispName.get().getDispName().v();
-//			}
-//			
-//			Integer detailSet = app.isAppOverTime() ? this.detailSet(companyId, wkpID, app.getAppType().value) : null;
-//			lstAppMasterInfo.add(new AppMasterInfo(app.getAppID(), app.getAppType().value, appDispNameStr,
-//					empName, inpEmpName, wkpName, false, null, checkAddNote, 0, detailSet));
-//		}
-//		return lstAppMasterInfo;
-//	}
+
 	//ver14 + EA1360
 	////Bug #97415 - EA2161、2162
 	private Integer detailSet(String companyId, String wkpId, Integer appType, GeneralDate date){
@@ -1290,67 +1244,15 @@ public class AppListInitialImpl implements AppListInitialRepository{
 		GeneralDate endDate = closure.get().getClosureEndDate().addMonths(3);
 		return new DatePeriod(startDate, endDate);
 	}
-	/**
-	 * find closure history min
-	 * @param lstClosureHist
-	 * @return
-	 */
-//	private Closure findHistMin(List<Closure> lstClosure){
-//		lstClosure.sort((hist1, hist2)
-//				-> hist1.getClosureHistories().get(0).getClosureDate().getClosureDay().compareTo(hist2.getClosureHistories().get(0).getClosureDate().getClosureDay()));
-//		Closure histMin = null;
-//		for (Closure closure : lstClosure) {
-//			if(closure.getClosureHistories().get(0).getClosureDate().getLastDayOfMonth() != true){
-//				histMin = closure;
-//				break;
-//			}
-//		}
-//		return histMin == null? lstClosure.get(0) : histMin;
-//	}
-	/**
-	 * find closure history by period
-	 * @param closureHistories
-	 * @param closureMonth
-	 * @return
-	 */
-//	private ClosureHistory findHistClosure(List<ClosureHistory> closureHistories, CurrentMonth closureMonth){
-//		for (ClosureHistory closureHist : closureHistories) {
-//			if(closureHist.getStartYearMonth().lessThanOrEqualTo(closureMonth.getProcessingYm()) &&
-//					closureHist.getEndYearMonth().greaterThanOrEqualTo(closureMonth.getProcessingYm())){
-//				return closureHist;
-//			}
-//		}
-//		return null;
-//	}
+
 	/**
 	 * merge App And Phase
 	 * @param lstApp
 	 * @return
 	 */
-//	private List<ApplicationFullOutput> mergeAppAndPhase(List<Application_New> lstApp, String companyID, List<String> lstAgent){
-//		List<ApplicationFullOutput> lstAppFull = new ArrayList<>();
-//		List<String> appIDs = lstApp.stream().map(x -> x.getAppID()).collect(Collectors.toList());
-////		for (Application_New app : lstApp) {
-////			List<ApprovalPhaseStateImport_New> lstPhase = approvalRootStateAdapter.getApprovalRootContent(companyID, 
-////					app.getEmployeeID(), app.getAppType().value, app.getAppDate(), app.getAppID(), false).getApprovalRootState().getListApprovalPhaseState();
-////			lstAppFull.add(new ApplicationFullOutput(app, lstPhase,-1,""));
-////		}
-//		if(!CollectionUtil.isEmpty(appIDs)){
-//			Map<String,List<ApprovalPhaseStateImport_New>> approvalRootContentImport_News = approvalRootStateAdapter.getApprovalRootContents(appIDs, companyID, lstAgent);
-//			for(Map.Entry<String,List<ApprovalPhaseStateImport_New>> entry : approvalRootContentImport_News.entrySet()){
-//				for (Application_New app : lstApp) {
-//					if(entry.getKey().equals(app.getAppID())){
-//						lstAppFull.add(new ApplicationFullOutput(app, entry.getValue(),-1,"", null));
-//					}
-//				}
-//				
-//			}
-//		}
-//		return lstAppFull;
-//	}
 	//key: appId, values: appr
-	private Map<String,List<ApprovalPhaseStateImport_New>> mergeAppAndPhase_New(String companyID, List<String> lstAgent){
-		Map<String,List<ApprovalPhaseStateImport_New>> mapApprInfo = approvalRootStateAdapter.getApprovalRootContentCMM045(companyID, lstAgent);
+	private Map<String,List<ApprovalPhaseStateImport_New>> mergeAppAndPhase_New(String companyID, List<String> lstAgent, DatePeriod period, boolean isCMM045Start){
+		Map<String,List<ApprovalPhaseStateImport_New>> mapApprInfo = approvalRootStateAdapter.getApprovalRootContentCMM045(companyID, lstAgent, period, isCMM045Start);
 		return mapApprInfo;
 	}
 	/**

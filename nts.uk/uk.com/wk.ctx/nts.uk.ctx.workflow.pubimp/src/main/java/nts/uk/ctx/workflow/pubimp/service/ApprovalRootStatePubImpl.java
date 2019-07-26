@@ -77,6 +77,7 @@ import nts.uk.ctx.workflow.pub.service.export.ApproverWithFlagExport;
 import nts.uk.ctx.workflow.pub.service.export.ErrorFlagExport;
 import nts.uk.ctx.workflow.pub.service.export.ReleasedProprietyDivision;
 import nts.uk.shr.com.context.AppContexts;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 /**
  * 
  * @author Doan Duy Hung
@@ -786,13 +787,13 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 		return approveService.isApproveApprovalPhaseStateComplete(companyID, opCurrentPhase.get());
 	}
 	@Override
-	public Map<String,List<ApprovalPhaseStateExport>> getApprovalRootCMM045(String companyID, List<String> lstAgent){ 
+	public Map<String,List<ApprovalPhaseStateExport>> getApprovalRootCMM045(String companyID, List<String> lstAgent, DatePeriod period, boolean isCMM045Start){ 
 		String approverID = AppContexts.user().employeeId();
 		lstAgent.add(approverID);
 		Map<String,List<ApprovalPhaseStateExport>> mapApprPhsStateEx = new LinkedHashMap<>();
 		ApprovalRootContentOutput apprRootContentOut =  null;
 		//ドメインモデル「承認ルートインスタンス」を取得する
-		List<ApprovalRootState> approvalRootStates = approvalRootStateRepository.findEmploymentAppCMM045(lstAgent);
+		List<ApprovalRootState> approvalRootStates = approvalRootStateRepository.findEmploymentAppCMM045(lstAgent, period, isCMM045Start);
 		if(approvalRootStates.isEmpty()){
 			return mapApprPhsStateEx;
 		}

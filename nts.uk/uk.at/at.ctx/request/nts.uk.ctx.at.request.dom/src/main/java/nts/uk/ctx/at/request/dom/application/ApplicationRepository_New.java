@@ -60,7 +60,7 @@ public interface ApplicationRepository_New {
 	 * @param endDate
 	 * @return
 	 */
-	public List<Application_New> getListAppByReflectandListID(String companyId, GeneralDate startDate, GeneralDate endDate, List<String> lstAppId);
+	public List<Application_New> getListAppByReflectandListID(String companyId, DatePeriod period, List<String> lstAppId);
 	/**
 	 * get List Application Pre
 	 * @param companyId
