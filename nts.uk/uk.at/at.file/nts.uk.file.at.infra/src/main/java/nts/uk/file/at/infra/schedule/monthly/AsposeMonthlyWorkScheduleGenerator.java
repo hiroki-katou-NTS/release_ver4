@@ -69,6 +69,7 @@ import nts.uk.ctx.at.shared.dom.attendance.util.item.ValueType;
 import nts.uk.ctx.at.shared.dom.monthlyattditem.MonthlyAttendanceItemAtr;
 import nts.uk.ctx.at.shared.dom.scherec.dailyattendanceitem.adapter.attendanceitemname.AttItemName;
 import nts.uk.ctx.at.shared.dom.scherec.monthlyattendanceitem.service.CompanyMonthlyItemService;
+import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.ctx.bs.company.dom.company.Company;
 import nts.uk.ctx.bs.company.dom.company.CompanyRepository;
 import nts.uk.ctx.bs.employee.dom.employment.Employment;
@@ -105,6 +106,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeName;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.DataDialogWithTypeProcessor;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
 import nts.uk.shr.infra.file.report.aspose.cells.AsposeCellsReportContext;
 import nts.uk.shr.infra.file.report.aspose.cells.AsposeCellsReportGenerator;
@@ -170,6 +172,9 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 
 	@Inject
 	private FileService service;
+	
+	@Inject
+	private ClosureService closureService;
 
 	/** The Constant TEMPLATE_DATE. */
 	private static final String TEMPLATE_DATE= MonthlyReportConstant.TEMPLATE_DATE;
@@ -636,16 +641,10 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		Map<String, WorkplaceInfo> lstWorkplace = new TreeMap<>(); // Automatically sort by code, will need to check hierarchy later
 		List<String> lstWorkplaceId = new ArrayList<>();
 		List<String> lstEmployeeNoWorkplace = new ArrayList<>();
-		
-		// 帳票用の基準日取得
-		int closureId = query.getClosureId() == 0 ? 1 : query.getClosureId();
-
-		Optional<GeneralDate> baseDate = service.getProcessingYM(companyId, closureId);
-		if (!baseDate.isPresent()) {
-			throw new BusinessException("Uchida bảo là lỗi hệ thống _ ThànhPV");
-		}
-
-		GeneralDate finalDate = baseDate.get();
+		//マスタの取得（月次）
+		DatePeriod DatePeriod = closureService.getClosurePeriod(query.getClosureId(), query.getEndYearMonth());
+		//締め期間．終了年月日
+		GeneralDate finalDate = DatePeriod.end();
 		
         List<WkpHistImport> workplaceList = new ArrayList<>();
         {
@@ -725,7 +724,13 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		}
 		
 		List<MonthlyAttendanceItemValueResult> itemValues;
+		// 帳票用の基準日取得
+		int closureId = query.getClosureId() == 0 ? 1 : query.getClosureId();
 
+		Optional<GeneralDate> baseDate = service.getProcessingYM(companyId, closureId);
+		if (!baseDate.isPresent()) {
+			throw new BusinessException("Uchida bảo là lỗi hệ thống _ ThànhPV");
+		}
 		Map<String, YearMonthPeriod> employeePeriod = service.getAffiliationPeriod(query.getEmployeeId(), new YearMonthPeriod(query.getStartYearMonth(), query.getEndYearMonth()), baseDate.get());
 		{
 			
