@@ -1004,7 +1004,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		String lstPhaseQry = "";
 		for (int i = 0; i < lstPhaseStt.size(); i++) {
 			lstPhaseQry += lstPhaseStt.get(i);
-			if (i != (lstApproverID.size() - 1)) {
+			if (i != (lstPhaseStt.size() - 1)) {
 				lstPhaseQry += ",";
 			}
 		}
@@ -1023,8 +1023,8 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		}
 		String lstFrameQry = "";
 		for (int i = 0; i < lstFrameStt.size(); i++) {
-			lstFrameQry += lstFrameStt.get(i).toString();
-			if (i != (lstApproverID.size() - 1)) {
+			lstFrameQry += lstFrameStt.get(i);
+			if (i != (lstFrameStt.size() - 1)) {
 				lstFrameQry += ",";
 			}
 		}
@@ -1060,7 +1060,8 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				+"		SELECT DISTINCT c.ROOT_STATE_ID FROM "
 				+"		( "
 				+"			SELECT a.ROOT_STATE_ID FROM WWFDT_APPROVER_STATE a "
-				+ "			WHERE (a.APPROVER_CHILD_ID IN (lstId) and phaseJoin.APP_FRAME_ATR IN (lstPhaseQry) and phaseJoin.APP_PHASE_ATR IN (lstFrameQry))"
+				+ "			WHERE (a.APPROVER_CHILD_ID IN (lstId) and phaseJoin.APP_PHASE_ATR IN (lstPhaseQry) "
+				+ "			and phaseJoin.APP_FRAME_ATR IN (lstFrameQry))"
 				+"		)"
 				+"		c"
 				+"	)";
