@@ -963,18 +963,22 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	}
 
 	@Override
-	public List<ApprovalRootState> findEmploymentAppCMM045(List<String> lstApproverID, DatePeriod period, boolean isCMM045Start) {
+	public List<ApprovalRootState> findEmploymentAppCMM045(List<String> lstApproverID, DatePeriod period, boolean unapprovalStatus,
+			boolean approvalStatus, boolean denialStatus, 
+			boolean agentApprovalStatus, boolean remandStatus, boolean cancelStatus) {
 		String companyID = AppContexts.user().companyId();
 		List<ApprovalRootState> result = new ArrayList<>();
 		CollectionUtil.split(lstApproverID, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			internalQuery045(companyID, result, subList, period, isCMM045Start);
+			internalQuery045(companyID, result, subList, period, unapprovalStatus, approvalStatus, denialStatus, 
+					agentApprovalStatus, remandStatus, cancelStatus);
 		});
 		return result;
 	}
 
 	@SneakyThrows
 	private void internalQuery045(String companyID, List<ApprovalRootState> result, List<String> lstApproverID,
-			DatePeriod period, boolean isCMM045Start) {
+			DatePeriod period, boolean unapprovalStatus, boolean approvalStatus, boolean denialStatus, 
+			boolean agentApprovalStatus, boolean remandStatus, boolean cancelStatus) {
 		String lstId = "";
 		for (int i = 0; i < lstApproverID.size(); i++) {
 			lstId += "'" + lstApproverID.get(i) + "'";
@@ -982,82 +986,89 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				lstId += ",";
 			}
 		}
-		String query = "";
-		if (isCMM045Start) {//承認モードの起動する場合
-			query = "SELECT root.ROOT_STATE_ID, root.HIST_ID, root.EMPLOYEE_ID, root.APPROVAL_RECORD_DATE, "
-					+"phaseJoin.PHASE_ORDER, phaseJoin.APPROVAL_FORM, phaseJoin.APP_PHASE_ATR, "
-					+"phaseJoin.FRAME_ORDER, phaseJoin.APP_FRAME_ATR, phaseJoin.CONFIRM_ATR, phaseJoin.APPROVER_ID, phaseJoin.REPRESENTER_ID, "
-					+"phaseJoin.APPROVAL_DATE, phaseJoin.APPROVAL_REASON, phaseJoin.APPROVER_CHILD_ID "
-					+"FROM WWFDT_APPROVAL_ROOT_STATE root "
-					+"LEFT JOIN "
-					+"	("
-					+"		SELECT phase.ROOT_STATE_ID, phase.PHASE_ORDER, phase.APPROVAL_FORM, phase.APP_PHASE_ATR, "
-					+"		frameJoin.FRAME_ORDER, frameJoin.APP_FRAME_ATR, frameJoin.CONFIRM_ATR, frameJoin.APPROVER_ID, frameJoin.REPRESENTER_ID, "
-					+"		frameJoin.APPROVAL_DATE, frameJoin.APPROVAL_REASON, frameJoin.APPROVER_CHILD_ID "
-					+"		FROM WWFDT_APPROVAL_PHASE_ST phase "
-					+"		LEFT JOIN "
-					+"		( "
-					+"			SELECT frame.ROOT_STATE_ID, frame.PHASE_ORDER, frame.FRAME_ORDER, frame.APP_FRAME_ATR, frame.CONFIRM_ATR, frame.APPROVER_ID, "
-					+"			frame.REPRESENTER_ID, frame.APPROVAL_DATE, frame.APPROVAL_REASON, approver.APPROVER_CHILD_ID "
-					+"			FROM WWFDT_APPROVAL_FRAME frame "
-					+"			LEFT JOIN WWFDT_APPROVER_STATE approver "
-					+"				ON frame.ROOT_STATE_ID = approver.ROOT_STATE_ID AND frame.PHASE_ORDER = approver.PHASE_ORDER "
-					+"				AND frame.FRAME_ORDER = approver.FRAME_ORDER "
-					+"		) "
-					+"		AS frameJoin "
-					+"		ON phase.ROOT_STATE_ID = frameJoin.ROOT_STATE_ID AND phase.PHASE_ORDER = frameJoin.PHASE_ORDER "
-					+"	)"
-					+"	AS phaseJoin "
-					+"	ON root.ROOT_STATE_ID = phaseJoin.ROOT_STATE_ID "
-					+"	WHERE root.APPROVAL_RECORD_DATE >= 'startDate'  and root.APPROVAL_RECORD_DATE <= 'endDate' "
-					+"	and root.ROOT_STATE_ID IN" 
-					+"	( "
-					+"		SELECT DISTINCT c.ROOT_STATE_ID FROM "
-					+"		( "
-					+"			SELECT a.ROOT_STATE_ID FROM WWFDT_APPROVER_STATE a "
-					+ "			WHERE (a.APPROVER_CHILD_ID IN (lstId) and phaseJoin.APP_FRAME_ATR = 0 and phaseJoin.APP_PHASE_ATR = 0)"
-					+"		)"
-					+"		c"
-					+"	)";
-		} else {//検索するの場合
-			query = "SELECT root.ROOT_STATE_ID, root.HIST_ID, root.EMPLOYEE_ID, root.APPROVAL_RECORD_DATE, "
-					+"phaseJoin.PHASE_ORDER, phaseJoin.APPROVAL_FORM, phaseJoin.APP_PHASE_ATR, "
-					+"phaseJoin.FRAME_ORDER, phaseJoin.APP_FRAME_ATR, phaseJoin.CONFIRM_ATR, phaseJoin.APPROVER_ID, phaseJoin.REPRESENTER_ID, "
-					+"phaseJoin.APPROVAL_DATE, phaseJoin.APPROVAL_REASON, phaseJoin.APPROVER_CHILD_ID "
-					+"FROM WWFDT_APPROVAL_ROOT_STATE root "
-					+"LEFT JOIN "
-					+"	("
-					+"		SELECT phase.ROOT_STATE_ID, phase.PHASE_ORDER, phase.APPROVAL_FORM, phase.APP_PHASE_ATR, "
-					+"		frameJoin.FRAME_ORDER, frameJoin.APP_FRAME_ATR, frameJoin.CONFIRM_ATR, frameJoin.APPROVER_ID, frameJoin.REPRESENTER_ID, "
-					+"		frameJoin.APPROVAL_DATE, frameJoin.APPROVAL_REASON, frameJoin.APPROVER_CHILD_ID "
-					+"		FROM WWFDT_APPROVAL_PHASE_ST phase "
-					+"		LEFT JOIN "
-					+"		( "
-					+"			SELECT frame.ROOT_STATE_ID, frame.PHASE_ORDER, frame.FRAME_ORDER, frame.APP_FRAME_ATR, frame.CONFIRM_ATR, frame.APPROVER_ID, "
-					+"			frame.REPRESENTER_ID, frame.APPROVAL_DATE, frame.APPROVAL_REASON, approver.APPROVER_CHILD_ID "
-					+"			FROM WWFDT_APPROVAL_FRAME frame "
-					+"			LEFT JOIN WWFDT_APPROVER_STATE approver "
-					+"				ON frame.ROOT_STATE_ID = approver.ROOT_STATE_ID AND frame.PHASE_ORDER = approver.PHASE_ORDER "
-					+"				AND frame.FRAME_ORDER = approver.FRAME_ORDER "
-					+"		) "
-					+"		AS frameJoin "
-					+"		ON phase.ROOT_STATE_ID = frameJoin.ROOT_STATE_ID AND phase.PHASE_ORDER = frameJoin.PHASE_ORDER "
-					+"	)"
-					+"	AS phaseJoin "
-					+"	ON root.ROOT_STATE_ID = phaseJoin.ROOT_STATE_ID "
-					+"	WHERE root.APPROVAL_RECORD_DATE >= 'startDate'  and root.APPROVAL_RECORD_DATE <= 'endDate' "
-					+"	and root.ROOT_STATE_ID IN" 
-					+"	( "
-					+"		SELECT DISTINCT c.ROOT_STATE_ID FROM "
-					+"		( "
-					+"			SELECT a.ROOT_STATE_ID FROM WWFDT_APPROVER_STATE a "
-					+ "			WHERE a.APPROVER_CHILD_ID IN (lstId)"
-					+"		)"
-					+"		c"
-					+"	)";
+		//Phase
+		List<Integer> lstPhaseStt = new ArrayList<>();
+		if(unapprovalStatus || approvalStatus || denialStatus || agentApprovalStatus){
+			lstPhaseStt.add(0);
 		}
+		if(approvalStatus || agentApprovalStatus || denialStatus){
+			lstPhaseStt.add(1);
+		}
+		if(denialStatus || remandStatus){
+			lstPhaseStt.add(3);
+		}
+		if(denialStatus || cancelStatus){
+			lstPhaseStt.add(2);
+			lstPhaseStt.add(4);
+		}
+		String lstPhaseQry = "";
+		for (int i = 0; i < lstPhaseStt.size(); i++) {
+			lstPhaseQry += lstPhaseStt.get(i);
+			if (i != (lstApproverID.size() - 1)) {
+				lstPhaseQry += ",";
+			}
+		}
+		//Frame
+		List<Integer> lstFrameStt = new ArrayList<>();
+		if(unapprovalStatus || denialStatus || remandStatus || cancelStatus){
+			lstFrameStt.add(0);
+		}
+		if(approvalStatus || agentApprovalStatus || denialStatus || remandStatus || cancelStatus){
+			lstFrameStt.add(1);
+		}
+		if(denialStatus || remandStatus || cancelStatus){
+			lstFrameStt.add(2);
+			lstFrameStt.add(3);
+			lstFrameStt.add(4);
+		}
+		String lstFrameQry = "";
+		for (int i = 0; i < lstFrameStt.size(); i++) {
+			lstFrameQry += lstFrameStt.get(i);
+			if (i != (lstApproverID.size() - 1)) {
+				lstFrameQry += ",";
+			}
+		}
+		String query = "";
+		query = "SELECT root.ROOT_STATE_ID, root.HIST_ID, root.EMPLOYEE_ID, root.APPROVAL_RECORD_DATE, "
+				+"phaseJoin.PHASE_ORDER, phaseJoin.APPROVAL_FORM, phaseJoin.APP_PHASE_ATR, "
+				+"phaseJoin.FRAME_ORDER, phaseJoin.APP_FRAME_ATR, phaseJoin.CONFIRM_ATR, phaseJoin.APPROVER_ID, phaseJoin.REPRESENTER_ID, "
+				+"phaseJoin.APPROVAL_DATE, phaseJoin.APPROVAL_REASON, phaseJoin.APPROVER_CHILD_ID "
+				+"FROM WWFDT_APPROVAL_ROOT_STATE root "
+				+"LEFT JOIN "
+				+"	("
+				+"		SELECT phase.ROOT_STATE_ID, phase.PHASE_ORDER, phase.APPROVAL_FORM, phase.APP_PHASE_ATR, "
+				+"		frameJoin.FRAME_ORDER, frameJoin.APP_FRAME_ATR, frameJoin.CONFIRM_ATR, frameJoin.APPROVER_ID, frameJoin.REPRESENTER_ID, "
+				+"		frameJoin.APPROVAL_DATE, frameJoin.APPROVAL_REASON, frameJoin.APPROVER_CHILD_ID "
+				+"		FROM WWFDT_APPROVAL_PHASE_ST phase "
+				+"		LEFT JOIN "
+				+"		( "
+				+"			SELECT frame.ROOT_STATE_ID, frame.PHASE_ORDER, frame.FRAME_ORDER, frame.APP_FRAME_ATR, frame.CONFIRM_ATR, frame.APPROVER_ID, "
+				+"			frame.REPRESENTER_ID, frame.APPROVAL_DATE, frame.APPROVAL_REASON, approver.APPROVER_CHILD_ID "
+				+"			FROM WWFDT_APPROVAL_FRAME frame "
+				+"			LEFT JOIN WWFDT_APPROVER_STATE approver "
+				+"				ON frame.ROOT_STATE_ID = approver.ROOT_STATE_ID AND frame.PHASE_ORDER = approver.PHASE_ORDER "
+				+"				AND frame.FRAME_ORDER = approver.FRAME_ORDER "
+				+"		) "
+				+"		AS frameJoin "
+				+"		ON phase.ROOT_STATE_ID = frameJoin.ROOT_STATE_ID AND phase.PHASE_ORDER = frameJoin.PHASE_ORDER "
+				+"	)"
+				+"	AS phaseJoin "
+				+"	ON root.ROOT_STATE_ID = phaseJoin.ROOT_STATE_ID "
+				+"	WHERE root.APPROVAL_RECORD_DATE >= 'startDate'  and root.APPROVAL_RECORD_DATE <= 'endDate' "
+				+"	and root.ROOT_STATE_ID IN" 
+				+"	( "
+				+"		SELECT DISTINCT c.ROOT_STATE_ID FROM "
+				+"		( "
+				+"			SELECT a.ROOT_STATE_ID FROM WWFDT_APPROVER_STATE a "
+				+ "			WHERE (a.APPROVER_CHILD_ID IN (lstId) and phaseJoin.APP_FRAME_ATR IN ('lstPhaseQry') and phaseJoin.APP_PHASE_ATR IN ('lstFrameQry'))"
+				+"		)"
+				+"		c"
+				+"	)";
+
 		query = query.replaceAll("startDate", period.start().toString("yyyy-MM-dd"));
 		query = query.replaceAll("endDate", period.end().toString("yyyy-MM-dd"));
+		query = query.replaceAll("lstPhaseQry", lstPhaseQry);
+		query = query.replaceAll("lstFrameQry", lstFrameQry);
 		query = query.replaceAll("lstId", lstId);
 		List<WwfdtFullJoinState> listFullData = new ArrayList<>();
 		try (PreparedStatement pstatement = this.connection().prepareStatement(query)) {

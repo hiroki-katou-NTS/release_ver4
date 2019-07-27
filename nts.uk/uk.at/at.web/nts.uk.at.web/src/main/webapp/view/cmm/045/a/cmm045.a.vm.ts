@@ -186,8 +186,7 @@ module cmm045.a.viewmodel {
                     self.findcheck(self.selectedIds(), 4), self.findcheck(self.selectedIds(), 5), self.findcheck(self.selectedIds(), 6), 0, self.lstSidFilter(), '');
                 let param: vmbase.AppListParamFilter = {condition: condition,
                                                         spr: self.isSpr(),
-                                                        extractCondition: self.extractCondition(),
-                                                        startFlag: true}
+                                                        extractCondition: self.extractCondition()}
                 service.getApplicationDisplayAtr().done(function(data1) {
                     _.each(data1, function(obj) {
                         self.roundingRules.push(new vmbase.ApplicationDisplayAtr(obj.value, obj.localizedName));
@@ -1509,8 +1508,7 @@ module cmm045.a.viewmodel {
                 self.findcheck(self.selectedIds(), 4), self.findcheck(self.selectedIds(), 5), self.findcheck(self.selectedIds(), 6), 0, self.lstSidFilter(), '');
             let param: vmbase.AppListParamFilter = {condition: condition,
                                                     spr: false,
-                                                    extractCondition: 0,
-                                                    startFlag: false};
+                                                    extractCondition: 0};
             service.getApplicationList(param).done(function(data) {
                 console.log(data);
                 //reset data

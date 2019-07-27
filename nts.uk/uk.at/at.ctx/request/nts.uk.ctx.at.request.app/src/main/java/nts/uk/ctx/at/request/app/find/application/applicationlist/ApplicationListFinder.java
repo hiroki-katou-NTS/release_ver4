@@ -82,7 +82,7 @@ public class ApplicationListFinder {
 		//ドメインモデル「申請一覧共通設定フォーマット.表の列幅」を取得-(Lấy 表の列幅)//xu ly o ui
 		//アルゴリズム「申請一覧リスト取得」を実行する-(Thực hiện thuật toán Application List get): 1-申請一覧リスト取得
 		AppListExtractCondition appListExCon = condition.convertDtotoDomain(condition);
-		AppListOutPut lstApp = repoAppListInit.getApplicationList(appListExCon, appDisplaySet, param.isStartFlag());
+		AppListOutPut lstApp = repoAppListInit.getApplicationList(appListExCon, appDisplaySet);
 		List<ApplicationDto_New> lstAppDto = new ArrayList<>();
 		for (Application_New app : lstApp.getLstApp()) {
 			lstAppDto.add(ApplicationDto_New.fromDomain(app));

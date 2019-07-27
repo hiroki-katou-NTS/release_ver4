@@ -168,7 +168,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 	 * 1 - 申請一覧リスト取得
 	 */
 	@Override
-	public AppListOutPut getApplicationList(AppListExtractCondition param, ApprovalListDisplaySetting displaySet, boolean startFlag) {
+	public AppListOutPut getApplicationList(AppListExtractCondition param, ApprovalListDisplaySetting displaySet) {
 		//申請一覧区分が申請 OR 承認-(Check xem là application hay aprove)
 		AppListOutPut appFull = null;
 		if(param.getAppListAtr().equals(ApplicationListAtr.APPLICATION)){//申請
@@ -176,7 +176,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 			appFull = this.getApplicationListByApp(param);
 		}else{//承認
 			//アルゴリズム「申請一覧リスト取得承認」を実行する - 3
-			appFull = this.getAppListByApproval(param, displaySet, startFlag);
+			appFull = this.getAppListByApproval(param, displaySet);
 		}
 		return appFull;
 	}
@@ -338,7 +338,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 	 * 3 - 申請一覧リスト取得承認
 	 */
 	@Override
-	public AppListOutPut getAppListByApproval(AppListExtractCondition param, ApprovalListDisplaySetting displaySet, boolean startFlag) {
+	public AppListOutPut getAppListByApproval(AppListExtractCondition param, ApprovalListDisplaySetting displaySet) {
 		String companyId = AppContexts.user().companyId();
 		String sID = AppContexts.user().employeeId();
 		GeneralDate sysDate = GeneralDate.today();
@@ -361,16 +361,19 @@ public class AppListInitialImpl implements AppListInitialRepository{
 		List<ApplicationFullOutput> lstAppFull = new ArrayList<>();
 		//hoatt 2019.07.24
 		//#108408 レスポンス対応
-		Map<String,List<ApprovalPhaseStateImport_New>> mapApprInfo = new HashMap<>();
 		//imported（申請承認）「承認ルートの内容」を取得する - RequestList309
-		mapApprInfo= this.mergeAppAndPhase_New(companyId, lstEmp, new DatePeriod(param.getStartDate(), param.getEndDate()), startFlag);
+		Map<String,List<ApprovalPhaseStateImport_New>> mapApprInfo = this.mergeAppAndPhase_New(companyId, lstEmp, 
+				new DatePeriod(param.getStartDate(), param.getEndDate()), param.isUnapprovalStatus(), param.isApprovalStatus(),
+				param.isDenialStatus(), param.isAgentApprovalStatus(), param.isRemandStatus(), param.isCancelStatus());
 		List<String> lstAppId = new ArrayList<>();
 		for(Map.Entry<String,List<ApprovalPhaseStateImport_New>> entry : mapApprInfo.entrySet()){
 			lstAppId.add(entry.getKey());
 		}
 		//ドメインモデル「申請」を取得する-(Lấy dữ liệu domain 申請) - get List App By Reflect
 		List<Application_New> lstApp = new ArrayList<>();
-		lstApp = repoApp.getListAppByReflectandListID(companyId, new DatePeriod(param.getStartDate(), param.getEndDate()), lstAppId);
+		lstApp = repoApp.getListAppModeApprCMM045(companyId, new DatePeriod(param.getStartDate(), param.getEndDate()), lstAppId,
+				param.isUnapprovalStatus(), param.isApprovalStatus(),
+				param.isDenialStatus(), param.isAgentApprovalStatus(), param.isRemandStatus(), param.isCancelStatus());
 		
 		for(Application_New app : lstApp){
 			lstAppFull.add(new ApplicationFullOutput(app, mapApprInfo.get(app.getAppID()),-1,"", null));
@@ -429,7 +432,6 @@ public class AppListInitialImpl implements AppListInitialRepository{
 						continue;
 				}
 				//申請一覧共通設定.承認状況＿未承認がチェックあり(True)の場合 - A4_1_1: check
-				//「承認する申請」の場合
 				if(param.isUnapprovalStatus() && state.equals(ReflectedState_New.NOTREFLECTED) || param.getAppDisplayAtr().equals(ApplicationDisplayAtr.APP_APPROVED)){
 					if(status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.UNAPPROVED)
 							&& status.getFrameStatus().equals(ApprovalBehaviorAtrImport_New.UNAPPROVED)){
@@ -438,7 +440,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 				}
 				//申請一覧共通設定.承認状況＿承認がチェックあり(True)の場合 - A4_1_2: check
 				if(param.isApprovalStatus()){
-					if(( state.equals(ReflectedState_New.NOTREFLECTED)|| state.equals(ReflectedState_New.WAITREFLECTION) || state.equals(ReflectedState_New.REFLECTED))
+					if((state.equals(ReflectedState_New.NOTREFLECTED)|| state.equals(ReflectedState_New.WAITREFLECTION) || state.equals(ReflectedState_New.REFLECTED))
 							&& (status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.APPROVED) || status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.UNAPPROVED)) 
 							&& status.getFrameStatus().equals(ApprovalBehaviorAtrImport_New.APPROVED)){
 						check = true;
@@ -449,8 +451,9 @@ public class AppListInitialImpl implements AppListInitialRepository{
 					check = true;
 				}
 				//申請一覧共通設定.承認状況＿代行承認済がチェックあり(True)の場合 - A4_1_4: check
-				if(param.isAgentApprovalStatus()&& (status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.APPROVED) 
-						|| status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.UNAPPROVED))){//承認フェーズ.承認区分　＝　未承認または承認済
+				if(param.isAgentApprovalStatus()&& 
+						(status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.APPROVED) || status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.UNAPPROVED))
+				){//承認フェーズ.承認区分　＝　未承認または承認済
 					if(status.getFrameStatus().equals(ApprovalBehaviorAtrImport_New.APPROVED)
 							&& Strings.isNotBlank(status.getAgentId()) && !status.getAgentId().equals(sID)){
 						check = true;
@@ -463,8 +466,9 @@ public class AppListInitialImpl implements AppListInitialRepository{
 					}
 				}
 				//申請一覧共通設定.承認状況＿取消がチェックあり(True)の場合 - A4_1_6: check
-				if(param.isCancelStatus() && (state.equals(ReflectedState_New.CANCELED) ||
-								state.equals(ReflectedState_New.WAITCANCEL))){//反映状態.実績反映状態　＝　取消または取消待ち
+				if(param.isCancelStatus() && 
+						(state.equals(ReflectedState_New.CANCELED) || state.equals(ReflectedState_New.WAITCANCEL))
+				){//反映状態.実績反映状態　＝　取消または取消待ち
 					check = true;
 				}
 				if(check){
@@ -1251,8 +1255,12 @@ public class AppListInitialImpl implements AppListInitialRepository{
 	 * @return
 	 */
 	//key: appId, values: appr
-	private Map<String,List<ApprovalPhaseStateImport_New>> mergeAppAndPhase_New(String companyID, List<String> lstAgent, DatePeriod period, boolean isCMM045Start){
-		Map<String,List<ApprovalPhaseStateImport_New>> mapApprInfo = approvalRootStateAdapter.getApprovalRootContentCMM045(companyID, lstAgent, period, isCMM045Start);
+	private Map<String,List<ApprovalPhaseStateImport_New>> mergeAppAndPhase_New(String companyID, List<String> lstAgent, 
+			DatePeriod period, boolean unapprovalStatus, boolean approvalStatus, boolean denialStatus, 
+			boolean agentApprovalStatus, boolean remandStatus, boolean cancelStatus){
+		Map<String,List<ApprovalPhaseStateImport_New>> mapApprInfo = approvalRootStateAdapter.getApprovalRootContentCMM045(companyID, lstAgent,
+				period, unapprovalStatus, approvalStatus, denialStatus, 
+				agentApprovalStatus, remandStatus, cancelStatus);
 		return mapApprInfo;
 	}
 	/**
