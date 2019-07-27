@@ -1060,7 +1060,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				+"		SELECT DISTINCT c.ROOT_STATE_ID FROM "
 				+"		( "
 				+"			SELECT a.ROOT_STATE_ID FROM WWFDT_APPROVER_STATE a "
-				+ "			WHERE (a.APPROVER_CHILD_ID IN (lstId) and phaseJoin.APP_FRAME_ATR IN ('lstPhaseQry') and phaseJoin.APP_PHASE_ATR IN ('lstFrameQry'))"
+				+ "			WHERE (a.APPROVER_CHILD_ID IN (lstId) and phaseJoin.APP_FRAME_ATR IN (lstPhaseQry) and phaseJoin.APP_PHASE_ATR IN (lstFrameQry))"
 				+"		)"
 				+"		c"
 				+"	)";
