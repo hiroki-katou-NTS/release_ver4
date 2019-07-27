@@ -1023,7 +1023,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		}
 		String lstFrameQry = "";
 		for (int i = 0; i < lstFrameStt.size(); i++) {
-			lstFrameQry += lstFrameStt.get(i);
+			lstFrameQry += lstFrameStt.get(i).toString();
 			if (i != (lstApproverID.size() - 1)) {
 				lstFrameQry += ",";
 			}
