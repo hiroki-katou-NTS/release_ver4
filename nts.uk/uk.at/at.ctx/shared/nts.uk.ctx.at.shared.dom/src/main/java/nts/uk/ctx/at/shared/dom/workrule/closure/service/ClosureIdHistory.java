@@ -1,4 +1,4 @@
-package nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod;
+package nts.uk.ctx.at.shared.dom.workrule.closure.service;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +9,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 締めID履歴
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class ClosureIdHistory {

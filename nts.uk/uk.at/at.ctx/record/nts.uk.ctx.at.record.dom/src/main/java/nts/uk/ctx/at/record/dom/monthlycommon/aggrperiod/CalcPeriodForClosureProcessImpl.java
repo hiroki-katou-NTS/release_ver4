@@ -18,7 +18,7 @@ import nts.uk.shr.com.time.calendar.date.ClosureDate;
 
 /**
  * 実装：締め処理すべき集計期間を計算
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Stateless
 public class CalcPeriodForClosureProcessImpl implements CalcPeriodForClosureProcess {
@@ -59,7 +59,7 @@ public class CalcPeriodForClosureProcessImpl implements CalcPeriodForClosureProc
 		
 		// 集計すべき期間を計算
 		List<ClosurePeriod> periodForAggregateList =
-				this.calcPeriodForAggregate.algorithm(companyId, employeeId, currentPeriod.end());
+				this.calcPeriodForAggregate.algorithm(employeeId, currentPeriod.end());
 
 		// 締め処理すべき締め期間に絞り込む
 		val closurePeriodOpt = this.refineClosurePeriod(closureId, currentDate, currentYm, periodForAggregateList);

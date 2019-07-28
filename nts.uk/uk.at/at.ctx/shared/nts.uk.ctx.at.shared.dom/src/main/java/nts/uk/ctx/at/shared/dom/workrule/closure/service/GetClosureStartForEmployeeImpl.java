@@ -1,7 +1,5 @@
 package nts.uk.ctx.at.shared.dom.workrule.closure.service;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -14,7 +12,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 
 /**
  * 実装：社員に対応する締め開始日を取得する
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Stateless
 public class GetClosureStartForEmployeeImpl implements GetClosureStartForEmployee {

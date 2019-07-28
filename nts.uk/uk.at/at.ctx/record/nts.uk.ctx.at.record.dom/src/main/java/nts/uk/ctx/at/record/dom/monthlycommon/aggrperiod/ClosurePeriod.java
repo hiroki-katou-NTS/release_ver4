@@ -14,7 +14,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 締め処理期間
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 public class ClosurePeriod {

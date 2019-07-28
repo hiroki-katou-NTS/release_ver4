@@ -2,7 +2,7 @@ package nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod;
 
 /**
  * 締め処理すべき集計期間を計算
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 public interface CalcPeriodForClosureProcess {
 
