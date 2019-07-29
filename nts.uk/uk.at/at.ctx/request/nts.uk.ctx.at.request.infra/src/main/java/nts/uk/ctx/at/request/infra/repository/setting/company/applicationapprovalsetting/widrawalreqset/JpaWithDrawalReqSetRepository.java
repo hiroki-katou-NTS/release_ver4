@@ -1,13 +1,19 @@
 package nts.uk.ctx.at.request.infra.repository.setting.company.applicationapprovalsetting.widrawalreqset;
 
+import java.sql.PreparedStatement;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import lombok.val;
+import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.task.AsyncTaskStatus;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.withdrawalrequestset.WithDrawalReqSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.withdrawalrequestset.WithDrawalReqSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.withdrawalrequestset.WorkUse;
 import nts.uk.ctx.at.request.infra.entity.setting.company.applicationapprovalsetting.withdrawalrequestset.KrqstWithDrawalReqSet;
 import nts.uk.shr.com.context.AppContexts;
 /**
@@ -88,6 +94,19 @@ public class JpaWithDrawalReqSetRepository extends JpaRepository implements With
 		entity.setSimulAppliReq(withDrawalReqSet.getSimulAppliReq().value);
 		entity.setLettleSuperLeave(withDrawalReqSet.getLettleSuperLeave().value);
 		return entity;
+	}
+
+	@Override
+	@SneakyThrows
+	public Optional<WorkUse> getDeferredWorkTimeSelect(String cid) {
+		String sql = "SELECT DEFERRED_WORKTIME_SELECT "
+				+ "FROM KRQST_WITHDRAWAL_REQ_SET "
+				+ "WHERE CID = ?";
+		try (PreparedStatement stmt = this.connection().prepareStatement(sql)){
+			stmt.setString(1, cid);
+			return new NtsResultSet(stmt.executeQuery())
+					.getSingle(r -> EnumAdaptor.valueOf(r.getInt("DEFERRED_WORKTIME_SELECT"),WorkUse.class));
+		}
 	}
 
 }

@@ -13,6 +13,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
+import lombok.SneakyThrows;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -113,6 +114,7 @@ public class JpaOutingTimeOfDailyPerformanceRepository extends JpaRepository
 	}
 
 	@Override
+	@SneakyThrows
 	public void add(OutingTimeOfDailyPerformance outing) {
 		// commandProxy().insertAll(outing.getOutingTimeSheets().stream()
 		// .map(c -> KrcdtDaiOutingTime.toEntity(outing.getEmployeeId(),
@@ -120,7 +122,6 @@ public class JpaOutingTimeOfDailyPerformanceRepository extends JpaRepository
 		// .collect(Collectors.toList()));
 		// this.getEntityManager().flush();
 
-		try {
 			Connection con = this.getEntityManager().unwrap(Connection.class);
 			Statement statementI = con.createStatement();
 			for (OutingTimeSheet outingTimeSheet : outing.getOutingTimeSheets()) {
@@ -233,9 +234,6 @@ public class JpaOutingTimeOfDailyPerformanceRepository extends JpaRepository
 						+ outingTimeSheet.getReasonForGoOut().value + " )";
 				statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
 			}
-		} catch (Exception e) {
-
-		}
 	}
 
 	@Override

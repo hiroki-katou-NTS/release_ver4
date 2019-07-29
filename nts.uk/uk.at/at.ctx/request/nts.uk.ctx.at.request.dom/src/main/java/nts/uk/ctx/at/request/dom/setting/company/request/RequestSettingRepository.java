@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import nts.uk.ctx.at.request.dom.setting.company.request.applicationsetting.apptypesetting.AppTypeSetting;
 import nts.uk.ctx.at.request.dom.setting.company.request.applicationsetting.apptypesetting.ReceptionRestrictionSetting;
+import nts.uk.ctx.at.request.dom.setting.company.request.appreflect.AppReflectionSetting;
 
 /**
  * 
@@ -23,4 +24,6 @@ public interface RequestSettingRepository {
 	 * @param req
 	 */
 	public void update(List<ReceptionRestrictionSetting> receiption, List<AppTypeSetting> appType);
+	
+	public Optional<AppReflectionSetting> getAppReflectionSetting(String cid);
 }

@@ -919,16 +919,16 @@ public class WorkplacePubImp implements SyWorkplacePub {
 	public List< AffWorkplaceHistoryExport> getWorkplaceBySidsAndBaseDate(List<String> sids, GeneralDate baseDate) {
 		List<String> histIds =  new ArrayList<>();
 		List<AffWorkplaceHistoryExport>  result = new ArrayList<>();
-		Map<String, List<AffWorkplaceHistory>> workplaceHistMap = affWorkplaceHistoryRepository.getWorkplaceHistoryBySidsAndDateV2( baseDate, sids).parallelStream().collect(Collectors.groupingBy(c -> c.getEmployeeId()));
-		workplaceHistMap.values().parallelStream().forEach(c -> {
+		Map<String, List<AffWorkplaceHistory>> workplaceHistMap = affWorkplaceHistoryRepository.getWorkplaceHistoryBySidsAndDateV2( baseDate, sids).stream().collect(Collectors.groupingBy(c -> c.getEmployeeId()));
+		workplaceHistMap.values().stream().forEach(c -> {
 			histIds.addAll(c.get(0).getHistoryIds());
 		});
 		List<AffWorkplaceHistoryItem> histItemMaps = affWorkplaceHistoryItemRepository.findByHistIds(histIds);
-		workplaceHistMap.entrySet().parallelStream().forEach(c -> {
+		workplaceHistMap.entrySet().stream().forEach(c -> {
 			AffWorkplaceHistory value = c.getValue().get(0);
 			Map<String, AffWorkplaceHistoryItemExport> workplaceHistItems = new HashMap<>();
-			value.getHistoryItems().parallelStream().forEach(hist -> {
-				Optional<AffWorkplaceHistoryItem> workplacehistItemOpt = histItemMaps.parallelStream()
+			value.getHistoryItems().stream().forEach(hist -> {
+				Optional<AffWorkplaceHistoryItem> workplacehistItemOpt = histItemMaps.stream()
 						.filter(item -> item.getHistoryId().equals(hist.identifier())).findFirst();
 				if (workplacehistItemOpt.isPresent()) {
 					AffWorkplaceHistoryItem histItem = workplacehistItemOpt.get();

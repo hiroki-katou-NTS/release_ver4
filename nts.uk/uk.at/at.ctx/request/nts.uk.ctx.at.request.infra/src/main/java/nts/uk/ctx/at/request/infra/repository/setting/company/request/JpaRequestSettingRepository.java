@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.request.infra.repository.setting.company.request;
 
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 //import java.util.Comparator;
 import java.util.List;
@@ -8,8 +9,10 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.setting.company.request.AuthorizationSetting;
 import nts.uk.ctx.at.request.dom.setting.company.request.RequestSetting;
@@ -25,12 +28,9 @@ import nts.uk.ctx.at.request.dom.setting.company.request.applicationsetting.disp
 import nts.uk.ctx.at.request.dom.setting.company.request.appreflect.AppReflectionSetting;
 import nts.uk.ctx.at.request.dom.setting.company.request.approvallistsetting.AppReflectAfterConfirm;
 import nts.uk.ctx.at.request.dom.setting.company.request.approvallistsetting.ApprovalListDisplaySetting;
-//import nts.uk.ctx.at.request.infra.entity.setting.request.application.KrqstAppDeadline;
-//import nts.uk.ctx.at.request.infra.entity.setting.request.application.KrqstAppDeadlinePK;
 import nts.uk.ctx.at.request.infra.entity.setting.request.application.KrqstAppTypeDiscrete;
 import nts.uk.ctx.at.request.infra.entity.setting.request.application.KrqstAppTypeDiscretePK;
 import nts.uk.ctx.at.request.infra.entity.setting.request.application.KrqstApplicationSetting;
-//import nts.uk.ctx.at.request.infra.entity.setting.request.application.KrqstApplicationSettingPK;
 import nts.uk.shr.com.context.AppContexts;
 /**
  * 
@@ -314,6 +314,25 @@ public class JpaRequestSettingRepository extends JpaRepository implements Reques
 			// 事前事後区分を変更できる - prePostCanChangeFlg - PRE_POST_CAN_CHANGE_FLG
 			oldEntity2.prePostCanChangeFlg = app.getCanClassificationChange() ? 1 : 0;
 			this.commandProxy().update(oldEntity2);
+		}
+	}
+
+	@Override
+	@SneakyThrows
+	public Optional<AppReflectionSetting> getAppReflectionSetting(String cid) {
+		String sql = "SELECT SCHE_REFLECT_FLG,PRIORITY_TIME_REFLECT_FLG,ATTENDENT_TIME_REFLECT_FLG,CLASSIFY_SCHE_ACHIEVE_SAMEATR,REFLEC_TIMEOF_SCHEDULED"
+				+ " FROM KRQST_APPLICATION_SETTING"
+				+ " WHERE CID = ?";
+		try (PreparedStatement stmt = this.connection().prepareStatement(sql)){
+			stmt.setString(1, cid);
+			return new NtsResultSet(stmt.executeQuery())
+					.getSingle(x ->{
+						return AppReflectionSetting.toDomain(x.getInt("SCHE_REFLECT_FLG"),
+								x.getInt("PRIORITY_TIME_REFLECT_FLG"),
+								x.getInt("ATTENDENT_TIME_REFLECT_FLG"), 
+								x.getInt("CLASSIFY_SCHE_ACHIEVE_SAMEATR"),
+								x.getInt("REFLEC_TIMEOF_SCHEDULED"));
+					});
 		}
 	}
 }

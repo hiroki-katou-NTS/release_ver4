@@ -156,6 +156,7 @@ var nts;
                     .mergeRelativePath(request.WEB_APP_NAME[webAppId] + '/')
                     .mergeRelativePath(location.ajaxRootDir)
                     .mergeRelativePath(path);
+                var countRetryByDeadLock = 0;
                 function ajaxFunc() {
                     $.ajax({
                         type: options.method || 'POST',
@@ -178,6 +179,12 @@ var nts;
                             dfd.resolve(res);
                         }
                     }).fail(function (jqXHR, textStatus, errorThrown) {
+                        // デッドロックの場合、待機時間を少しずつ増やしながらリトライ（とりあえず10回までとする）
+                        if (jqXHR.responseJSON && jqXHR.responseJSON.deadLock === true && countRetryByDeadLock < 10) {
+                            countRetryByDeadLock++;
+                            setTimeout(ajaxFunc, 300 + countRetryByDeadLock * 100);
+                            return;
+                        }
                         AjaxErrorHandlers.main(jqXHR, textStatus, errorThrown);
                     });
                 }
@@ -499,7 +506,8 @@ var nts;
                 }
                 var d = new Date();
                 d.setTime(d.getTime() + (10 * 60 * 1000));
-                $.cookie('startfrommenu', "true", { expires: d });
+                //        $.cookie('startfrommenu', "true", { expires: d });
+                document.cookie = "startfrommenu=true";
                 jump(appId, path.substr(end));
             }
             request.jumpToMenu = jumpToMenu;
@@ -526,11 +534,18 @@ var nts;
                     uk.sessionStorage.getItem(STORAGE_KEY_USED_LOGIN_PAGE).ifPresent(function (path) {
                         window.location.href = path;
                     }).ifEmpty(function () {
-                        //request.jump('/view/ccg/007/a/index.xhtml');
-                        request.jump('/view/ccg/007/b/index.xhtml');
+                        request.jump('com', '/view/ccg/007/d/index.xhtml');
                     });
                 }
                 login.jumpToUsedLoginPage = jumpToUsedLoginPage;
+                function jumpToUsedSSOLoginPage() {
+                    uk.sessionStorage.getItem(STORAGE_KEY_USED_LOGIN_PAGE).ifPresent(function (path) {
+                        window.location.href = path;
+                    }).ifEmpty(function () {
+                        request.jump('com', '/view/ccg/007/d/index.xhtml?signon=on');
+                    });
+                }
+                login.jumpToUsedSSOLoginPage = jumpToUsedSSOLoginPage;
                 function keepSerializedSession() {
                     var dfd = $.Deferred();
                     dfd.resolve();

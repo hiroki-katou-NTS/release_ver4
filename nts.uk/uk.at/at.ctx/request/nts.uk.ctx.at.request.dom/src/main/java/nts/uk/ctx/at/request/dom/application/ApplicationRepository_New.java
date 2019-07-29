@@ -54,13 +54,16 @@ public interface ApplicationRepository_New {
 	 */
 	public List<Application_New> getListAppBySID(String companyId, String sID, GeneralDate startDate, GeneralDate endDate);
 	/**
-	 * get List Application By Reflect
+	 * get List Application
+	 * Phuc vu CMM045
 	 * @param companyId
 	 * @param startDate
 	 * @param endDate
 	 * @return
 	 */
-	public List<Application_New> getListAppByReflectandListID(String companyId, GeneralDate startDate, GeneralDate endDate, List<String> lstAppId);
+	public List<Application_New> getListAppModeApprCMM045(String companyId, DatePeriod period, List<String> lstAppId,
+			boolean unapprovalStatus, boolean approvalStatus, boolean denialStatus, 
+			boolean agentApprovalStatus, boolean remandStatus, boolean cancelStatus);
 	/**
 	 * get List Application Pre
 	 * @param companyId

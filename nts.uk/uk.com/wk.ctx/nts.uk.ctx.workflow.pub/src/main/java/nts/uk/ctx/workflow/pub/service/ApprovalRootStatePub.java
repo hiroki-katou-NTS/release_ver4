@@ -14,6 +14,7 @@ import nts.uk.ctx.workflow.pub.service.export.ApproveRootStatusForEmpExport;
 import nts.uk.ctx.workflow.pub.service.export.ApproverApprovedExport;
 import nts.uk.ctx.workflow.pub.service.export.ApproverPersonExportNew;
 import nts.uk.ctx.workflow.pub.service.export.ApproverRemandExport;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 /**
  * 
  * @author Doan Duy Hung
@@ -277,5 +278,7 @@ public interface ApprovalRootStatePub {
 	 * @param companyID
 	 * @return
 	 */
-	public Map<String,List<ApprovalPhaseStateExport>> getApprovalRootCMM045(String companyID, List<String> lstAgent);
+	public Map<String,List<ApprovalPhaseStateExport>> getApprovalRootCMM045(String companyID, List<String> lstAgent,
+			DatePeriod period, boolean unapprovalStatus, boolean approvalStatus, boolean denialStatus, 
+			boolean agentApprovalStatus, boolean remandStatus, boolean cancelStatus);
 }

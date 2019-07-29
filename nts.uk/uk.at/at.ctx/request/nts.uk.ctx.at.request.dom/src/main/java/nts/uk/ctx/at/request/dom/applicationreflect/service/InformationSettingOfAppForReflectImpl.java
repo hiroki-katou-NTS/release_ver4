@@ -11,16 +11,13 @@ import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.appo
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.hdworkapplicationsetting.UnitTime;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.hdworkapplicationsetting.WithdrawalAppSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.hdworkapplicationsetting.WithdrawalAppSetRepository;
-import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.withdrawalrequestset.WithDrawalReqSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.withdrawalrequestset.WithDrawalReqSetRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.withdrawalrequestset.WorkUse;
-import nts.uk.ctx.at.request.dom.setting.company.request.RequestSetting;
 import nts.uk.ctx.at.request.dom.setting.company.request.RequestSettingRepository;
 import nts.uk.ctx.at.request.dom.setting.company.request.appreflect.AppReflectionSetting;
 import nts.uk.ctx.at.request.dom.setting.company.request.appreflect.ApplyTimeSchedulePriority;
 import nts.uk.ctx.at.request.dom.setting.company.request.appreflect.ClassifyScheAchieveAtr;
 import nts.uk.ctx.at.request.dom.setting.company.request.appreflect.PriorityTimeReflectAtr;
-import nts.uk.ctx.at.request.dom.setting.request.gobackdirectlycommon.GoBackDirectlyCommonSetting;
 import nts.uk.ctx.at.request.dom.setting.request.gobackdirectlycommon.GoBackDirectlyCommonSettingRepository;
 import nts.uk.shr.com.context.AppContexts;
 
@@ -39,17 +36,17 @@ public class InformationSettingOfAppForReflectImpl implements InformationSetting
 	@Override
 	public InformationSettingOfEachApp getSettingOfEachApp() {
 		String cid = AppContexts.user().companyId();
-		Optional<WithDrawalReqSet> recAbsSetting = furiSetting.getWithDrawalReqSet();
+		Optional<WorkUse> recAbsSetting = furiSetting.getDeferredWorkTimeSelect(cid);
 		//振休振出申請設定: 就業時間帯選択の利用
 		WorkUse furikyuFurishutsu = WorkUse.USE;
 		if(recAbsSetting.isPresent()) {
-			furikyuFurishutsu = recAbsSetting.get().getDeferredWorkTimeSelect();
+			furikyuFurishutsu = recAbsSetting.get();
 		}
-		Optional<GoBackDirectlyCommonSetting> optGobackSetting = chokochoki.findByCompanyID(cid);
+		Optional<UseAtr> optGobackSetting = chokochoki.getWorkChangeTimeAtr(cid);
 		//直行直帰申請共通設定．勤務の変更申請時
 		boolean chokochoki = true;
 		if(optGobackSetting.isPresent()) {
-			chokochoki = optGobackSetting.get().getWorkChangeTimeAtr() == UseAtr.USE ? true : false;
+			chokochoki = optGobackSetting.get() == UseAtr.USE ? true : false;
 		}
 		//残業申請設定．残業事後反映設定．勤務種類、就業時間帯
 		boolean zangyouRecordReflect = true;
@@ -57,7 +54,7 @@ public class InformationSettingOfAppForReflectImpl implements InformationSetting
 		boolean zangyouScheReflect = true;
 		//残業申請設定．残業事前反映設定．残業時間
 		boolean zangyouWorktime = true;
-		Optional<AppOvertimeSetting> optOvertimeSetting = overtimeSetting.getAppOver();
+		Optional<AppOvertimeSetting> optOvertimeSetting = overtimeSetting.getByCid(cid);
 		if(optOvertimeSetting.isPresent()) {
 			AppOvertimeSetting overSetting = optOvertimeSetting.get();
 			zangyouRecordReflect = overSetting.getPostTypeSiftReflectFlg() == UseAtr.USE ? true : false;
@@ -65,7 +62,7 @@ public class InformationSettingOfAppForReflectImpl implements InformationSetting
 			zangyouWorktime = overSetting.getPreOvertimeReflectFlg() == UseAtr.USE ? true : false;
 		}
 		
-		Optional<RequestSetting> optRequestSetting = requestSetting.findByCompany(cid);
+		Optional<AppReflectionSetting> optRequestSetting = requestSetting.getAppReflectionSetting(cid);
 		//申請反映設定．予定時刻の反映時刻優先
 		ApplyTimeSchedulePriority scheJikokuYusen = ApplyTimeSchedulePriority.PRIORITY_FIX_TIME_SCHEDULED_WORK;
 		//申請反映設定．反映時刻優先
@@ -75,7 +72,7 @@ public class InformationSettingOfAppForReflectImpl implements InformationSetting
 		//申請反映設定．予定と実績を同じに変更する区分
 		ClassifyScheAchieveAtr scheAndWorkChange = ClassifyScheAchieveAtr.ALWAYS_CHANGE_AUTO;
 		if(optRequestSetting.isPresent()) {
-			AppReflectionSetting requestSetting = optRequestSetting.get().getAppReflectionSetting();
+			AppReflectionSetting requestSetting = optRequestSetting.get();
 			scheJikokuYusen = requestSetting.getReflecTimeofSche();
 			workJikokuYusen = requestSetting.getPriorityTimeReflectFlag();
 			jizenScheYusen = requestSetting.getScheReflectFlg();
@@ -85,7 +82,7 @@ public class InformationSettingOfAppForReflectImpl implements InformationSetting
 		boolean isHwScheReflect = true;
 		boolean isHwRecordReflectTime = true;
 		boolean isHwRecordReflectBreak = true;
-		Optional<WithdrawalAppSet> optBreackOfWork = kyushutsuSetting.getWithDraw();
+		Optional<WithdrawalAppSet> optBreackOfWork = kyushutsuSetting.getByCid(cid);
 		if(optBreackOfWork.isPresent()) {
 			WithdrawalAppSet holidayWorkReflectSetting = optBreackOfWork.get();
 			isHwScheReflect = holidayWorkReflectSetting.getRestTime() == UnitTime.ONEMIN ? false : true;
