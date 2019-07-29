@@ -65,6 +65,7 @@ import nts.uk.ctx.at.record.app.command.dailyperform.workrecord.AttendanceTimeBy
 import nts.uk.ctx.at.record.app.command.dailyperform.workrecord.TimeLeavingOfDailyPerformanceCommandAddHandler;
 import nts.uk.ctx.at.record.app.command.dailyperform.workrecord.TimeLeavingOfDailyPerformanceCommandUpdateHandler;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordAdUpService;
 import nts.uk.ctx.at.record.dom.daily.itemvalue.DailyItemValue;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.AdTimeAndAnyItemAdUpService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CalculateDailyRecordServiceCenter;
@@ -271,6 +272,9 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 	
 	@Inject
 	private OptionalItemRepository optionalMasterRepo;
+	
+	@Inject
+	private DailyRecordAdUpService dailyRecordAdUpService;
 
 	private static final List<String> DOMAIN_CHANGED_BY_CALCULATE = Arrays.asList(DAILY_ATTENDANCE_TIME_CODE, DAILY_OPTIONAL_ITEM_CODE, DAILY_WORK_INFO_CODE);
 	
@@ -438,8 +442,10 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 		// get error after caculator
 		// update data
 		long time = System.currentTimeMillis();
+		boolean hasRemoveError = false;
 		if (month == null || !month.getDomainMonth().isPresent()) {
-			employeeErrorRepo.removeParam(toMapParam(commandNew));
+			//employeeErrorRepo.removeParam(toMapParam(commandNew));
+			hasRemoveError = true;
 		}
 		registerNotCalcDomain(commandNew, isUpdate);
 		List<IntegrationOfDaily> lastDt =  updateDomainAfterCalc(domainDailyNew);
@@ -453,7 +459,10 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 		
 		//if(!lstMonthDomain.isEmpty() && month!= null && month.getDatePeriod() != null ) updateAllDomainMonthService.merge(lstMonthDomain, month.getDatePeriod().end());
 		
-		registerErrorWhenCalc(domainDailyNew);
+		//registerErrorWhenCalc(domainDailyNew);
+		dailyRecordAdUpService.adUpEmpError(
+				domainDailyNew.stream().flatMap(x -> x.getEmployeeError().stream()).collect(Collectors.toList()),
+				toMapParam(commandNew), hasRemoveError);
 
 		System.out.print("time insert: " + (System.currentTimeMillis() - time));
 		
@@ -541,7 +550,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 	private <T extends DailyWorkCommonCommand> List<IntegrationOfDaily> updateDomainAfterCalc(List<IntegrationOfDaily> calced) {
 		updateWorkInfoAfterCalc(calced);
 
-		return registerCalcedService.saveOnly(calced);
+		return dailyRecordAdUpService.adTimeAndAnyItemAdUp(calced);
 	}
 	
 	private <T extends DailyWorkCommonCommand> List<IntegrationOfDaily> updateDomainAfterCalcAndRunStored(List<IntegrationOfDaily> calced, CorrectResult correctResult) {

@@ -550,4 +550,34 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 		}
 	}
 
+	@Override
+	public void removeNotOTK(Map<String, List<GeneralDate>> param) {
+		List<KrcdtSyainDpErList> result = new ArrayList<>();
+		StringBuilder query = new StringBuilder("SELECT a FROM KrcdtSyainDpErList a");
+		query.append(" WHERE a.employeeId IN :employeeId");
+		query.append(" AND a.processingDate IN :date");
+		query.append(" AND a.errorCode 	<> 'OTK1' ");
+		TypedQueryWrapper<KrcdtSyainDpErList> tQuery = this.queryProxy().query(query.toString(),
+				KrcdtSyainDpErList.class);
+		CollectionUtil.split(param, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, p -> {
+			result.addAll(tQuery.setParameter("employeeId", p.keySet())
+					.setParameter("date", p.values().stream().flatMap(List::stream).collect(Collectors.toSet()))
+					.getList().stream().filter(c -> p.get(c.employeeId).contains(c.processingDate))
+					.collect(Collectors.toList()));
+		});
+		if (!result.isEmpty()) {
+			commandProxy().removeAll(result);
+		}
+
+	}
+
+	@Override
+	public void update(List<EmployeeDailyPerError> employeeDailyPerformanceError) {
+		if (employeeDailyPerformanceError.isEmpty()) {
+			return;
+		}
+		this.commandProxy().updateAll(employeeDailyPerformanceError.stream().map(e -> KrcdtSyainDpErList.toEntity(e))
+				.collect(Collectors.toList()));
+	}
+
 }
