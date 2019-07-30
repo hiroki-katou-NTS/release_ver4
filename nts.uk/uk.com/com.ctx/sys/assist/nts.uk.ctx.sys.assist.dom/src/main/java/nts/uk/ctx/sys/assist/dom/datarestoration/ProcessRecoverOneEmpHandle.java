@@ -17,9 +17,6 @@ import lombok.val;
 import nts.arc.system.ServerSystemProperties;
 import nts.gul.csv.CSVBufferReader;
 import nts.gul.error.ThrowableAnalyzer;
-import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.DelEmpException;
-import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.SettingException;
-import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.SqlException;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.shr.com.enumcommon.NotUseAtr;
 
@@ -80,6 +77,8 @@ public class ProcessRecoverOneEmpHandle {
 	private DataRecoveryMngRepository dataRecoveryMngRepository;
 	@Inject
 	private RecoveryDataByEmployee recoveryDataByEmployee;
+	@Inject
+	private SaveLogDataRecoverServices saveLogDataRecoverServices; 
 	
 	
 
@@ -137,15 +136,26 @@ public class ProcessRecoverOneEmpHandle {
 			} catch (Exception e) {
 				val analyzer = new ThrowableAnalyzer(e);
 				if(analyzer.findByClass(SettingException.class).isPresent()){
+					SettingException settingException = (SettingException) analyzer.findByClass(SettingException.class).get();
+					// ghi log
+					saveLogDataRecoverServices.saveErrorLogDataRecover(settingException.dataRecoveryProcessId, settingException.target, settingException.errorContent, settingException.targetDate,
+							settingException.processingContent, settingException.contentSql);
 					NUMBER_ERROR++;
 					dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
+				}else if(analyzer.findByClass(DelDataException.class).isPresent()){
+					DelDataException delDataException = (DelDataException) analyzer.findByClass(DelDataException.class).get();
+					// ghi log
+					saveLogDataRecoverServices.saveErrorLogDataRecover(delDataException.dataRecoveryProcessId, delDataException.target, delDataException.errorContent, delDataException.targetDate,
+							delDataException.processingContent, delDataException.contentSql);
 					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
 				}else if (analyzer.findByClass(SqlException.class).isPresent()) {
+					SqlException sqlException = (SqlException) analyzer.findByClass(SqlException.class).get();
+					// ghi log
+					saveLogDataRecoverServices.saveErrorLogDataRecover(sqlException.dataRecoveryProcessId, sqlException.target, sqlException.errorContent, sqlException.targetDate,
+							sqlException.processingContent, sqlException.contentSql);
 					NUMBER_ERROR++;
 					dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
-				}else if (analyzer.findByClass(DelEmpException.class).isPresent()) {
-					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
-				}  
+				}
 			}
 			
 			// check interruption [中断]

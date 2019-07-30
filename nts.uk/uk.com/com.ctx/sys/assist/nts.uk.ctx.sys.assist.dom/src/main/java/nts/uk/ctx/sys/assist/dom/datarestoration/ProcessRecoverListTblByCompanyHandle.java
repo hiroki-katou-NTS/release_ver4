@@ -108,9 +108,7 @@ public class ProcessRecoverListTblByCompanyHandle {
 			GeneralDate targetDate = null;
 			String contentSql = null;
 			String processingContent = "日付処理の設定  " + TextResource.localize("CMF004_463") + " " + table.getTableJapaneseName();
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,
-					processingContent, contentSql);
-			throw new SettingExceptionByCom(null);
+			throw new SettingException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 		}
 
 		if (dateSetting.isEmpty()) {
@@ -119,9 +117,7 @@ public class ProcessRecoverListTblByCompanyHandle {
 			GeneralDate targetDate = null;
 			String contentSql = null;
 			String processingContent = "日付処理の設定  " + TextResource.localize("CMF004_463") + " " + table.getTableJapaneseName();
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,
-					processingContent, contentSql);
-			throw new SettingExceptionByCom(null);
+			throw new SettingException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 		}
 
 		// 履歴区分の判別する - check phân loại lịch sử
@@ -130,7 +126,11 @@ public class ProcessRecoverListTblByCompanyHandle {
 				deleteDataTableHistory(table, false, null, dataRecoveryProcessId);
 				System.out.println("DELETE TABLE BY COMPANY : " + table.getTableEnglishName());
 			} catch (Exception e) {
-				throw new DelDataTableHisExceptionByCom(null);
+				val analyzer = new ThrowableAnalyzer(e);
+				if(analyzer.findByClass(DelDataException.class).isPresent()){
+					DelDataException delDataException = (DelDataException) analyzer.findByClass(DelDataException.class).get();
+					throw delDataException;
+				}
 			}
 		}
 
@@ -140,12 +140,13 @@ public class ProcessRecoverListTblByCompanyHandle {
 			condition = this.crudDataByTable.crudDataByTable(dataRecoveryTable, null, dataRecoveryProcessId, table,
 					performDataRecovery, dateSetting, false, csvByteReadMaper, null);
 		} catch (Exception e) {
-			// DELETE/INSERT error
 			val analyzer = new ThrowableAnalyzer(e);
-			if(analyzer.findByClass(SettingExceptionByCom.class).isPresent()){
-				throw new SettingExceptionByCom(null);
-			} else if(analyzer.findByClass(SqlExceptionByCom.class).isPresent()){
-				throw new SqlExceptionByCom(null);
+			if(analyzer.findByClass(SettingException.class).isPresent()){
+				SettingException settingException = (SettingException) analyzer.findByClass(SettingException.class).get();
+				throw settingException;
+			}else if (analyzer.findByClass(SqlException.class).isPresent()) {
+				SqlException sqlException = (SqlException) analyzer.findByClass(SqlException.class).get();
+				throw sqlException;
 			}
 		}
 		return condition;	

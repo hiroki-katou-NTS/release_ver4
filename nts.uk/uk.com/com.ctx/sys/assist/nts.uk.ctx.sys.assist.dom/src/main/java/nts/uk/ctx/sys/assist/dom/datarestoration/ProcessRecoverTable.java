@@ -88,8 +88,6 @@ public class ProcessRecoverTable {
 	private DataRecoveryMngRepository dataRecoveryMngRepository;
 	@Inject
 	private PerformDataRecoveryRepository performDataRecoveryRepository;
-	@Inject
-	private SaveLogDataRecoverServices saveLogDataRecoverServices; 
 
 	public DataRecoveryOperatingCondition recoverTable(Optional<TableList>table, String employeeCode,String employeeId, String dataRecoveryProcessId,
 			DataRecoveryTable dataRecoveryTable, Optional<PerformDataRecovery> performDataRecovery, HashMap<String, CSVBufferReader> csvByteReadMaper)throws Exception {
@@ -106,8 +104,7 @@ public class ProcessRecoverTable {
 			GeneralDate targetDate = GeneralDate.today();
 			String contentSql = null;
 			String processingContent = "日付処理の設定  " + TextResource.localize("CMF004_463") + " " + table.get().getTableJapaneseName();
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
-			throw new SettingException(null);
+			throw new SettingException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 		}
 
 		// 履歴区分の判別する - check history division
@@ -116,7 +113,11 @@ public class ProcessRecoverTable {
 				deleteDataEmpTableHistory(table, true, employeeId, dataRecoveryProcessId, employeeCode);
 				System.out.println("DELETE TABLE BY ANY EMP : " + table.get().getTableEnglishName());
 			} catch (Exception e) {
-				throw new DelEmpException(e);
+				val analyzer = new ThrowableAnalyzer(e);
+				if(analyzer.findByClass(DelDataException.class).isPresent()){
+					DelDataException eDataException = (DelDataException) analyzer.findByClass(DelDataException.class).get();
+					throw eDataException;
+				}
 			}
 
 		try {// 対象社員の日付順の処理
@@ -125,15 +126,17 @@ public class ProcessRecoverTable {
 		} catch (Exception e) {
 			val analyzer = new ThrowableAnalyzer(e);
 			if(analyzer.findByClass(SettingException.class).isPresent()){
-				throw new SettingException(e);
-			} else if(analyzer.findByClass(SqlException.class).isPresent()){
-				throw new SqlException(e);
+				SettingException settingException = (SettingException) analyzer.findByClass(SettingException.class).get();
+				throw settingException;
+			}else if (analyzer.findByClass(SqlException.class).isPresent()) {
+				SqlException sqlException = (SqlException) analyzer.findByClass(SqlException.class).get();
+				throw sqlException;
 			}
 		}
-
+		
 		// Setting error
 		if (condition == DataRecoveryOperatingCondition.ABNORMAL_TERMINATION) {
-				throw new SettingException(null);
+				throw new SettingException();
 			}
 		}
 		return condition;
@@ -297,19 +300,22 @@ public class ProcessRecoverTable {
 								filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
 							}
 							listFiledWhere.add(filedWhere);
-
-							if (tableUse) {
-								count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(filedWhere,
-										TABLE_NAME, namePhysicalCid, cidCurrent, dataRecoveryProcessId, employeeCode);
-							} else {
-								count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere, TABLE_NAME,
-										namePhysicalCid, cidCurrent, dataRecoveryProcessId, employeeCode);
+							try {
+								if (tableUse) {
+									count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(filedWhere,
+											TABLE_NAME, namePhysicalCid, cidCurrent, dataRecoveryProcessId, employeeCode);
+								} else {
+									count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere, TABLE_NAME,
+											namePhysicalCid, cidCurrent, dataRecoveryProcessId, employeeCode);
+								}
+							} catch (Exception ex) {
+								val analyzer = new ThrowableAnalyzer(ex);
+								if(analyzer.findByClass(SettingException.class).isPresent()){
+									SettingException settingException = (SettingException) analyzer.findByClass(SettingException.class).get();
+									throw settingException;
+								}
 							}
-
-							if (count > 1) {
-								throw new SettingException(null);
-							}
-
+							
 							indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
 
 							for (int j = 5; j < row.columnLength(); j++) {
@@ -356,7 +362,11 @@ public class ProcessRecoverTable {
 											dataRecoveryProcessId, table.get());
 								}
 							} catch (Exception e) {
-								throw new SqlException(e);
+								val analyzer = new ThrowableAnalyzer(e);
+								if(analyzer.findByClass(SqlException.class).isPresent()){
+									SqlException sqlException = (SqlException) analyzer.findByClass(SqlException.class).get();
+									throw sqlException;
+								}
 							}
 						}
 					}
@@ -465,19 +475,23 @@ public class ProcessRecoverTable {
 									filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
 								}
 								listFiledWhere.add(filedWhere);
-
-								if (tableUse) {
-									count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(
-											filedWhere, TABLE_NAME, namePhysicalCid, cidCurrent,dataRecoveryProcessId, employeeCode);
-								} else {
-									count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere,
-											TABLE_NAME, namePhysicalCid, cidCurrent,dataRecoveryProcessId, employeeCode);
+								
+								try {
+									if (tableUse) {
+										count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(
+												filedWhere, TABLE_NAME, namePhysicalCid, cidCurrent,dataRecoveryProcessId, employeeCode);
+									} else {
+										count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere,
+												TABLE_NAME, namePhysicalCid, cidCurrent,dataRecoveryProcessId, employeeCode);
+									}
+								} catch (Exception ex) {
+									val analyzer = new ThrowableAnalyzer(ex);
+									if(analyzer.findByClass(SettingException.class).isPresent()){
+										SettingException settingException = (SettingException) analyzer.findByClass(SettingException.class).get();
+										throw settingException;
+									}
 								}
-
-								if (count > 1) {
-									throw new SettingException(null);
-								}
-
+								
 								indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
 
 								for (int j = 5; j < row.columnLength(); j++) {
@@ -527,7 +541,11 @@ public class ProcessRecoverTable {
 											table.get());
 								}
 							} catch (Exception e) {
-								throw new SqlException(e);
+								val analyzer = new ThrowableAnalyzer(e);
+								if(analyzer.findByClass(SqlException.class).isPresent()){
+									SqlException sqlException = (SqlException) analyzer.findByClass(SqlException.class).get();
+									throw sqlException;
+								}
 							}
 						}
 					}
@@ -536,20 +554,22 @@ public class ProcessRecoverTable {
 			}
 		} catch (Exception e) {
 			val analyzer = new ThrowableAnalyzer(e);
-			if(analyzer.findByClass(SettingException.class).isPresent()){
-				throw new SettingException(e);
-			} else if(analyzer.findByClass(SqlException.class).isPresent()){
-				throw new SqlException(e);
+			if(analyzer.findByClass(SqlException.class).isPresent()){
+				SqlException sqlException = (SqlException) analyzer.findByClass(SqlException.class).get();
+				throw sqlException;
+			}else if (analyzer.findByClass(SettingException.class).isPresent()) {
+				SettingException settingException = (SettingException) analyzer.findByClass(SettingException.class).get();
+				throw settingException;
 			}
-		}
-
+		} 
+		
 		return listCondition.isEmpty() ? condition : listCondition.get(0);
 	}
 	
 	public void crudRow(List<Integer> listCount, List<Map<String, String>> lsiFiledWhere, String TABLE_NAME,
 			String namePhysicalCid, String cidCurrent, StringBuilder deleteInsertToTable, StringBuilder insertToTable,
 			String employeeCode, String dataRecoveryProcessId, TableList tableList) {
-		try {
+		
 			List<Map<String, String>> listFiledWhereToDelAndInsert = new ArrayList<>();
 			List<Map<String, String>> listFiledWhereToInsert = new ArrayList<>();
 			for (int i = 0; i < listCount.size(); i++) {
@@ -571,15 +591,12 @@ public class ProcessRecoverTable {
 				// truong hop ban ghi do bi xoa di roi : thi chỉ cần insert vào thôi.
 				performDataRecoveryRepository.insertDataTable(insertToTable, employeeCode, dataRecoveryProcessId,tableList);
 			}
-		} catch (Exception e) {
-			throw e;
-		}
 	}
 
 	public void crudRowTransaction(List<Integer> listCount, List<Map<String, String>> lsiFiledWhere, String TABLE_NAME,
 			String namePhysicalCid, String cidCurrent, StringBuilder deleteInsertToTable, StringBuilder insertToTable,
 			String employeeCode, String dataRecoveryProcessId, TableList tableList) {
-		try {
+		
 			List<Map<String, String>> listFiledWhereToDelAndInsert = new ArrayList<>();
 			List<Map<String, String>> listFiledWhereToInsert = new ArrayList<>();
 			for (int i = 0; i < listCount.size(); i++) {
@@ -601,10 +618,6 @@ public class ProcessRecoverTable {
 
 				performDataRecoveryRepository.insertTransactionDataTable(insertToTable, employeeCode, dataRecoveryProcessId,tableList);
 			}
-
-		} catch (Exception e) {
-			throw e;
-		}
 	}
 	
 	
@@ -644,8 +657,7 @@ public class ProcessRecoverTable {
 			GeneralDate targetDate   = null;
 			String contentSql        = null;
 			String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464") + tableList.get().getTableJapaneseName(); 
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-			throw new SettingException(null);
+			throw new SettingException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 		}
 	}
 	
@@ -777,38 +789,5 @@ public class ProcessRecoverTable {
 	
 	public static String getExtractDataStoragePath(String fileId) {
 		return DATA_STORE_PATH + "//packs//" + fileId;
-	}
-	
-	class SettingException extends RuntimeException {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public SettingException(Throwable cause) {
-			super(cause);
-		}
-	}
-	
-	class SqlException extends RuntimeException {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public SqlException(Throwable cause) {
-			super(cause);
-		}
-	}
-	
-	class DelEmpException extends RuntimeException {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public DelEmpException(Throwable cause) {
-			super(cause);
-		}
 	}
 }

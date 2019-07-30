@@ -53,7 +53,6 @@ public class RecoveryStorageService {
 	@Inject
 	private CategoryRepository categoryRepository;
 	
-	@Inject
 	private CategoryForDeleteRepository categoryForDeleteRepository;
 
 	@Inject
@@ -397,20 +396,32 @@ public class RecoveryStorageService {
 			try {
 				condition = exDataTabeRangeDate(dataRecoveryTable, tableOpt, dataRecoveryProcessId,
 						csvByteReadMaper_TableNotUse);
-			} catch (Exception e) {
+			}  catch (Exception e) {
 				val analyzer = new ThrowableAnalyzer(e);
-				if (analyzer.findByClass(SettingExceptionByCom.class).isPresent()) {
+				if(analyzer.findByClass(SettingException.class).isPresent()){
+					SettingException settingException = (SettingException) analyzer.findByClass(SettingException.class).get();
+					// ghi log
+					saveLogDataRecoverServices.saveErrorLogDataRecover(settingException.dataRecoveryProcessId, settingException.target, settingException.errorContent, settingException.targetDate,
+							settingException.processingContent, settingException.contentSql);
 					NUMBER_ERROR++;
 					dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
 					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
-				}else if (analyzer.findByClass(SqlExceptionByCom.class).isPresent()) {
+				}else if (analyzer.findByClass(DelDataException.class).isPresent()) {
+					DelDataException delDataException = (DelDataException) analyzer.findByClass(DelDataException.class).get();
+					// ghi log
+					saveLogDataRecoverServices.saveErrorLogDataRecover(delDataException.dataRecoveryProcessId, delDataException.target, delDataException.errorContent, delDataException.targetDate,
+							delDataException.processingContent, delDataException.contentSql);
+					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
+				}else if (analyzer.findByClass(SqlException.class).isPresent()) {
+					SqlException sqlException = (SqlException) analyzer.findByClass(SqlException.class).get();
+					// ghi log
+					saveLogDataRecoverServices.saveErrorLogDataRecover(sqlException.dataRecoveryProcessId, sqlException.target, sqlException.errorContent, sqlException.targetDate,
+							sqlException.processingContent, sqlException.contentSql);
 					NUMBER_ERROR++;
 					dataRecoveryMngRepository.updateErrorCount(dataRecoveryProcessId, NUMBER_ERROR);
-				}else if (analyzer.findByClass(DelDataTableHisExceptionByCom.class).isPresent()) {
-					return DataRecoveryOperatingCondition.ABNORMAL_TERMINATION;
 				}
 			}
-
+			
 			// Xác định trạng thái error
 			if (condition == DataRecoveryOperatingCondition.ABNORMAL_TERMINATION) {
 				return condition;

@@ -27,8 +27,6 @@ import nts.gul.error.ThrowableAnalyzer;
 import nts.gul.text.StringUtil;
 import nts.uk.ctx.sys.assist.dom.category.TimeStore;
 import nts.uk.ctx.sys.assist.dom.categoryfieldmt.HistoryDiviSion;
-import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.SettingException;
-import nts.uk.ctx.sys.assist.dom.datarestoration.ProcessRecoverTable.SqlException;
 import nts.uk.ctx.sys.assist.dom.datarestoration.common.CsvFileUtil;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.shr.com.context.AppContexts;
@@ -213,19 +211,22 @@ public class ProcesscrudDataByTable {
 								filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
 							}
 							listFiledWhere.add(filedWhere);
-
-							if (tableUse) {
-								count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(filedWhere,
-										TABLE_NAME, namePhysicalCid, cidCurrent, dataRecoveryProcessId, employeeCode);
-							} else {
-								count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere, TABLE_NAME,
-										namePhysicalCid, cidCurrent, dataRecoveryProcessId, employeeCode);
+							try {
+								if (tableUse) {
+									count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(filedWhere,
+											TABLE_NAME, namePhysicalCid, cidCurrent, dataRecoveryProcessId, employeeCode);
+								} else {
+									count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere, TABLE_NAME,
+											namePhysicalCid, cidCurrent, dataRecoveryProcessId, employeeCode);
+								}
+							} catch (Exception ex) {
+								val analyzer = new ThrowableAnalyzer(ex);
+								if(analyzer.findByClass(SettingException.class).isPresent()){
+									SettingException settingException = (SettingException) analyzer.findByClass(SettingException.class).get();
+									throw settingException;
+								}
 							}
-
-							if (count > 1) {
-								throw new SettingExceptionByCom(null);
-							}
-
+							
 							indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
 
 							for (int j = 5; j < row.columnLength(); j++) {
@@ -272,7 +273,11 @@ public class ProcesscrudDataByTable {
 											dataRecoveryProcessId, table);
 								}
 							} catch (Exception e) {
-								throw new SqlExceptionByCom(null);
+								val analyzer = new ThrowableAnalyzer(e);
+								if(analyzer.findByClass(SqlException.class).isPresent()){
+									SqlException sqlException = (SqlException) analyzer.findByClass(SqlException.class).get();
+									throw sqlException;
+								}
 							}
 						}
 					}
@@ -379,17 +384,20 @@ public class ProcesscrudDataByTable {
 									filedWhere.put(entry.getValue(), V_FILED_KEY_UPDATE);
 								}
 								listFiledWhere.add(filedWhere);
-
-								if (tableUse) {
-									count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(
-											filedWhere, TABLE_NAME, namePhysicalCid, cidCurrent,dataRecoveryProcessId, employeeCode);
-								} else {
-									count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere,
-											TABLE_NAME, namePhysicalCid, cidCurrent,dataRecoveryProcessId, employeeCode);
-								}
-
-								if (count > 1) {
-									throw new SettingExceptionByCom(null);
+								try {
+									if (tableUse) {
+										count = performDataRecoveryRepository.countDataTransactionExitTableByVKeyUp(
+												filedWhere, TABLE_NAME, namePhysicalCid, cidCurrent,dataRecoveryProcessId, employeeCode);
+									} else {
+										count = performDataRecoveryRepository.countDataExitTableByVKeyUp(filedWhere,
+												TABLE_NAME, namePhysicalCid, cidCurrent,dataRecoveryProcessId, employeeCode);
+									}
+								} catch (Exception ex) {
+									val analyzer = new ThrowableAnalyzer(ex);
+									if(analyzer.findByClass(SettingException.class).isPresent()){
+										SettingException settingException = (SettingException) analyzer.findByClass(SettingException.class).get();
+										throw settingException;
+									}
 								}
 
 								indexCidOfCsv = targetDataHeader.indexOf(namePhysicalCid);
@@ -441,7 +449,11 @@ public class ProcesscrudDataByTable {
 											table);
 								}
 							} catch (Exception e) {
-								throw new SqlExceptionByCom(null);
+								val analyzer = new ThrowableAnalyzer(e);
+								if(analyzer.findByClass(SqlException.class).isPresent()){
+									SqlException sqlException = (SqlException) analyzer.findByClass(SqlException.class).get();
+									throw sqlException;
+								}
 							}
 						}
 					}
@@ -450,12 +462,14 @@ public class ProcesscrudDataByTable {
 			}
 		} catch (Exception e) {
 			val analyzer = new ThrowableAnalyzer(e);
-			if(analyzer.findByClass(SettingExceptionByCom.class).isPresent()){
-				throw new SettingExceptionByCom(e);
-			} else if(analyzer.findByClass(SqlExceptionByCom.class).isPresent()){
-				throw new SqlExceptionByCom(e);
+			if(analyzer.findByClass(SqlException.class).isPresent()){
+				SqlException sqlException = (SqlException) analyzer.findByClass(SqlException.class).get();
+				throw sqlException;
+			}else if (analyzer.findByClass(SettingException.class).isPresent()) {
+				SettingException settingException = (SettingException) analyzer.findByClass(SettingException.class).get();
+				throw settingException;
 			}
-		}
+		} 
 
 		return listCondition.isEmpty() ? condition : listCondition.get(0);
 	}
@@ -463,7 +477,7 @@ public class ProcesscrudDataByTable {
 	public void crudRow(List<Integer> listCount, List<Map<String, String>> lsiFiledWhere, String TABLE_NAME,
 			String namePhysicalCid, String cidCurrent, StringBuilder deleteInsertToTable, StringBuilder insertToTable,
 			String employeeCode, String dataRecoveryProcessId, TableList tableList) {
-		try {
+		
 			List<Map<String, String>> listFiledWhereToDelAndInsert = new ArrayList<>();
 			List<Map<String, String>> listFiledWhereToInsert = new ArrayList<>();
 			for (int i = 0; i < listCount.size(); i++) {
@@ -485,15 +499,12 @@ public class ProcesscrudDataByTable {
 				// truong hop ban ghi do bi xoa di roi : thi chỉ cần insert vào thôi.
 				performDataRecoveryRepository.insertDataTable(insertToTable, employeeCode, dataRecoveryProcessId, tableList);
 			}
-		} catch (Exception e) {
-			throw e;
-		}
 	}
 
 	public void crudRowTransaction(List<Integer> listCount, List<Map<String, String>> lsiFiledWhere, String TABLE_NAME,
 			String namePhysicalCid, String cidCurrent, StringBuilder deleteInsertToTable, StringBuilder insertToTable,
 			String employeeCode, String dataRecoveryProcessId, TableList tableList) {
-		try {
+		
 			List<Map<String, String>> listFiledWhereToDelAndInsert = new ArrayList<>();
 			List<Map<String, String>> listFiledWhereToInsert = new ArrayList<>();
 			for (int i = 0; i < listCount.size(); i++) {
@@ -515,10 +526,6 @@ public class ProcesscrudDataByTable {
 
 				performDataRecoveryRepository.insertTransactionDataTable(insertToTable, employeeCode, dataRecoveryProcessId,tableList);
 			}
-
-		} catch (Exception e) {
-			throw e;
-		}
 	}
 	
 	
@@ -547,7 +554,7 @@ public class ProcesscrudDataByTable {
 				if ((dateFrom.year() > hDateCsv.year()
 						|| (dateFrom.year() == hDateCsv.year() && hDateCsv.month() < dateFrom.month()))
 						|| (dateTo.year() < hDateCsv.year()
-								|| (dateTo.year() == hDateCsv.year() && hDateCsv.month() > dateTo.month()))) {
+						|| (dateTo.year() == hDateCsv.year() && hDateCsv.month() > dateTo.month()))) {
 					return false;
 				}
 			} else if (YEAR_MONTH_DAY.equals(resultsSetting.get(0))
@@ -561,8 +568,7 @@ public class ProcesscrudDataByTable {
 			GeneralDate targetDate = null;
 			String contentSql = null;
 			String processingContent = "データの日付判別  " + TextResource.localize("CMF004_464") + " " + tableList.getTableJapaneseName();
-			saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
-			throw new SettingExceptionByCom(e);
+			throw new SettingException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 		}
 	}
 	

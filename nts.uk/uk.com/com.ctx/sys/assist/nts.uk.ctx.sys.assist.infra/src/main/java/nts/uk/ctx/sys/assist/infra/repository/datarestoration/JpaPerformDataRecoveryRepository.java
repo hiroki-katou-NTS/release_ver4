@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
@@ -23,11 +22,12 @@ import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.assist.dom.category.StorageRangeSaved;
-import nts.uk.ctx.sys.assist.dom.datarestoration.DataRecoveryLogRepository;
+import nts.uk.ctx.sys.assist.dom.datarestoration.DelDataException;
 import nts.uk.ctx.sys.assist.dom.datarestoration.PerformDataRecovery;
 import nts.uk.ctx.sys.assist.dom.datarestoration.PerformDataRecoveryRepository;
 import nts.uk.ctx.sys.assist.dom.datarestoration.RestorationTarget;
-import nts.uk.ctx.sys.assist.dom.datarestoration.SaveLogDataRecoverServices;
+import nts.uk.ctx.sys.assist.dom.datarestoration.SettingException;
+import nts.uk.ctx.sys.assist.dom.datarestoration.SqlException;
 import nts.uk.ctx.sys.assist.dom.datarestoration.Target;
 import nts.uk.ctx.sys.assist.dom.tablelist.TableList;
 import nts.uk.ctx.sys.assist.infra.entity.datarestoration.SspmtPerformDataRecovery;
@@ -64,15 +64,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 	
 	private static final String DELETE_TABLE_LIST = "DELETE FROM SspmtTableList  t where t.dataRecoveryProcessId =:dataRecoveryProcessId";
 	
-	@Inject
-	private DataRecoveryLogRepository repoDataRecoveryLog;
-	@Inject
-	private SaveLogDataRecoverServices saveLogDataRecoverServices;
-
 	
-	
-	/*@PersistenceContext(unitName = "UK")
-    private EntityManager entityManager;*/
 	
 	@Override
 	@Transactional(value = TxType.REQUIRES_NEW)
@@ -146,7 +138,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 				GeneralDate targetDate = GeneralDate.today();
 				String contentSql = COUNT_BY_TABLE_SQL.toString();
 				String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465");
-				saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
+				throw new SettingException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 			}
 			return x;
 		}
@@ -168,7 +160,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 				GeneralDate targetDate = GeneralDate.today();
 				String contentSql = COUNT_BY_TABLE_SQL.toString();
 				String processingContent = "データベース復旧処理 " + TextResource.localize("CMF004_465");
-				saveLogDataRecoverServices.saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,processingContent, contentSql);
+				throw new SettingException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 			}
 			return x;
 		}
@@ -216,8 +208,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 				GeneralDate targetDate = GeneralDate.today();
 				String contentSql = DELETE_DATA_TABLE_SQL.toString();
 				String processingContent = "データベース復旧処理  " + TextResource.localize("CMF004_465") + " " + tableList.getTableJapaneseName();
-				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-				throw e;
+				throw new SqlException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent) ;
 			}
 		}
 	}
@@ -245,10 +236,8 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 				GeneralDate targetDate = GeneralDate.today();
 				String contentSql = DELETE_DATA_TABLE_SQL.toString();
 				String processingContent = "データベース復旧処理  " + TextResource.localize("CMF004_465") + " " + tableList.getTableJapaneseName();
-				saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-				throw e;
+				throw new SqlException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 			}
-			
 		}
 	}
 	
@@ -266,9 +255,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			GeneralDate targetDate = GeneralDate.today();
 			String contentSql = insertDb;
 			String processingContent = "データベース復旧処理  " + TextResource.localize("CMF004_465" + " " + tableList.getTableJapaneseName());
-			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,
-					contentSql);
-			throw e;
+			throw new SqlException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 		}
 	}
 	
@@ -289,8 +276,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			GeneralDate targetDate = GeneralDate.today();
 			String contentSql = insertDb;
 			String processingContent = "データベース復旧処理  " + TextResource.localize("CMF004_465") + " " + tableList.getTableJapaneseName();
-			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate, processingContent,contentSql);
-			throw e;
+			throw new SqlException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 		}
 	}
 	
@@ -403,9 +389,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			GeneralDate targetDate = null;
 			String contentSql = sqlContent;
 			String processingContent = "履歴データ削除  " + TextResource.localize("CMF004_462") + " " + table.getTableJapaneseName();
-			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,
-					processingContent, contentSql);
-			throw error;
+			throw new DelDataException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 		}
 	}
 
@@ -558,9 +542,7 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 			GeneralDate targetDate = null;
 			String contentSql = sqlContent;
 			String processingContent = "履歴データ削除  " + TextResource.localize("CMF004_462") + " " +  table.getTableJapaneseName();
-			saveErrorLogDataRecover(dataRecoveryProcessId, target, errorContent, targetDate,
-					processingContent, contentSql);
-			throw error;
+			throw new DelDataException(dataRecoveryProcessId, target, errorContent, targetDate, contentSql, processingContent);
 		}
 	}
 	
@@ -583,11 +565,4 @@ public class JpaPerformDataRecoveryRepository extends JpaRepository implements P
 		}
 		return data;
 	}
-	
-	private void saveErrorLogDataRecover(String recoveryProcessId, String target, String errorContent,
-			GeneralDate targetDate, String processingContent, String contentSql) {
-		saveLogDataRecoverServices.saveErrorLogDataRecover(recoveryProcessId, target, errorContent, targetDate, processingContent, contentSql);
-		
-	}
-
 }
