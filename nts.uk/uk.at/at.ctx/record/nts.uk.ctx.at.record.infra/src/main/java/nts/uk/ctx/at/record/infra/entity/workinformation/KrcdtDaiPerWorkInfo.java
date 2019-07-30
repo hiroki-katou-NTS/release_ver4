@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.infra.entity.workinformation;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,6 +80,7 @@ public class KrcdtDaiPerWorkInfo extends UkJpaEntity implements Serializable {
 	public KrcdtDaiPerWorkInfo(KrcdtDaiPerWorkInfoPK krcdtDaiPerWorkInfoPK) {
 		super();
 		this.krcdtDaiPerWorkInfoPK = krcdtDaiPerWorkInfoPK;
+		this.scheduleTimes = new ArrayList<>();
 	}
 	
 	@Override

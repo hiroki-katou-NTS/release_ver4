@@ -6,6 +6,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordAdUpService;
 //import nts.uk.ctx.at.record.dom.workinformation.WorkInfoChangeEvent;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
@@ -22,6 +23,9 @@ public class UpdateWorkInfoOfDailyPerforServiceImpl implements UpdateWorkInfoOfD
 	
 	@Inject
 	private WorkInformationRepository workInformationRepository;
+
+	@Inject
+	private DailyRecordAdUpService dailyRecordAdUpService;
 
 	@Override
 	public void updateWorkInfoOfDailyPerforService(String companyId, String employeeID, GeneralDate processingDate,
@@ -40,7 +44,8 @@ public class UpdateWorkInfoOfDailyPerforServiceImpl implements UpdateWorkInfoOfD
 			}
 			
 			// ドメインモデル「日別実績の勤務情報」を更新する(Update domain 「日別実績の勤務情報」)
-			this.workInformationRepository.updateByKeyFlush(workInfoOfDailyPerformance);
+			//this.workInformationRepository.updateByKeyFlush(workInfoOfDailyPerformance);
+			dailyRecordAdUpService.adUpWorkInfo(workInfoOfDailyPerformance);
 			
 			// domain event 
 			workInfoOfDailyPerformance.workInfoChanged();

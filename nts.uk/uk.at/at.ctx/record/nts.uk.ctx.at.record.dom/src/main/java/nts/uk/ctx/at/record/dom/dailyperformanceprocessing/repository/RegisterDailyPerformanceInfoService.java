@@ -1,9 +1,16 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPerfor;
@@ -15,6 +22,7 @@ import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerforma
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.OutingTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.calculationattribute.CalAttrOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.calculationattribute.repo.CalAttrOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordAdUpService;
 import nts.uk.ctx.at.record.dom.daily.DailyRecordTransactionService;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.AttendanceLeavingGateOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.PCLogOnInfoOfDailyRepo;
@@ -79,6 +87,9 @@ public class RegisterDailyPerformanceInfoService {
 	
 	@Inject
 	private DailyRecordTransactionService dailyTransaction;
+	
+	@Inject
+	private DailyRecordAdUpService dailyRecordAdUpService;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void registerDailyPerformanceInfo(String companyId, String employeeID, GeneralDate day,
@@ -94,6 +105,7 @@ public class RegisterDailyPerformanceInfoService {
 		if (workInfoOfDailyPerformanceUpdate != null) {
 			this.insertWorkInfoOfDailyPerforService.updateWorkInfoOfDailyPerforService(companyId, employeeID, day,
 					workInfoOfDailyPerformanceUpdate);
+			//dailyRecordAdUpService.adUpWorkInfo(workInfoOfDailyPerformanceUpdate);
 		} else {
 			dailyTransaction.updated(employeeID, day);
 		}
@@ -101,21 +113,23 @@ public class RegisterDailyPerformanceInfoService {
 		// ドメインモデル「日別実績の勤務種別」を更新する (Update domain 「日別実績の勤務種別」)
 		// workTypeOfDailyPerformance
 		if (workTypeOfDailyPerformance != null) {
-			if (this.workTypeOfDailyPerforRepository.findByKey(employeeID, day).isPresent()) {
-				this.workTypeOfDailyPerforRepository.update(workTypeOfDailyPerformance);
-			} else {
-				this.workTypeOfDailyPerforRepository.add(workTypeOfDailyPerformance);
-			}
+//			if (this.workTypeOfDailyPerforRepository.findByKey(employeeID, day).isPresent()) {
+//				this.workTypeOfDailyPerforRepository.update(workTypeOfDailyPerformance);
+//			} else {
+//				this.workTypeOfDailyPerforRepository.add(workTypeOfDailyPerformance);
+//			}
+			dailyRecordAdUpService.adUpWorkType(Optional.of(workTypeOfDailyPerformance));
 		}
 
 		// ドメインモデル「日別実績の所属情報」を更新する - update
 		// AffiliationInforOfDailyPerformance
 		if (affiliationInforOfDailyPerfor != null) {
-			if (this.affiliationInforOfDailyPerforRepository.findByKey(employeeID, day).isPresent()) {
-				this.affiliationInforOfDailyPerforRepository.updateByKey(affiliationInforOfDailyPerfor);
-			} else {
-				this.affiliationInforOfDailyPerforRepository.add(affiliationInforOfDailyPerfor);
-			}
+//			if (this.affiliationInforOfDailyPerforRepository.findByKey(employeeID, day).isPresent()) {
+//				this.affiliationInforOfDailyPerforRepository.updateByKey(affiliationInforOfDailyPerfor);
+//			} else {
+//				this.affiliationInforOfDailyPerforRepository.add(affiliationInforOfDailyPerfor);
+//			}
+			dailyRecordAdUpService.adUpAffilicationInfo(affiliationInforOfDailyPerfor);
 		}
 
 		// ドメインモデル「日別実績の休憩時間帯」を更新する
@@ -124,80 +138,90 @@ public class RegisterDailyPerformanceInfoService {
 			if (this.breakTimeOfDailyPerformanceRepository.find(employeeID, day, 1).isPresent()) {
 				this.breakTimeOfDailyPerformanceRepository.updateForEachOfType(breakTimeOfDailyPerformance);
 			} else {
-				this.breakTimeOfDailyPerformanceRepository.insert(breakTimeOfDailyPerformance);
+				//this.breakTimeOfDailyPerformanceRepository.insert(breakTimeOfDailyPerformance);
+				dailyRecordAdUpService.adUpBreakTime(Arrays.asList(breakTimeOfDailyPerformance));
 			}
 		}
 
 		// ドメインモデル「日別実績の特定日区分」を更新する (Update 「日別実績の特定日区分」)
 		// specificDateAttrOfDailyPerfor - JDBC - new wave
 		if (specificDateAttrOfDailyPerfor != null) {
-			if (this.specificDateAttrOfDailyPerforRepo.find(employeeID, day).isPresent()) {
-				this.specificDateAttrOfDailyPerforRepo.update(specificDateAttrOfDailyPerfor);
-			} else {
-				this.specificDateAttrOfDailyPerforRepo.add(specificDateAttrOfDailyPerfor);
-			}
+//			if (this.specificDateAttrOfDailyPerforRepo.find(employeeID, day).isPresent()) {
+//				this.specificDateAttrOfDailyPerforRepo.update(specificDateAttrOfDailyPerfor);
+//			} else {
+//				this.specificDateAttrOfDailyPerforRepo.add(specificDateAttrOfDailyPerfor);
+//			}
+			dailyRecordAdUpService.adUpSpecificDate(Optional.of(specificDateAttrOfDailyPerfor));
 		}
 
 		// ドメインモデル「日別実績の計算区分」を更新する (Update 「日別実績の計算区分」)
 		// calAttrOfDailyPerformance - JDBC newwave
 		if (calAttrOfDailyPerformance != null) {
-			if (this.calAttrOfDailyPerformanceRepository.find(employeeID, day) != null) {
-				this.calAttrOfDailyPerformanceRepository.update(calAttrOfDailyPerformance);
-			} else {
-				this.calAttrOfDailyPerformanceRepository.add(calAttrOfDailyPerformance);
-			}
+//			if (this.calAttrOfDailyPerformanceRepository.find(employeeID, day) != null) {
+//				this.calAttrOfDailyPerformanceRepository.update(calAttrOfDailyPerformance);
+//			} else {
+//				this.calAttrOfDailyPerformanceRepository.add(calAttrOfDailyPerformance);
+//			}
+			dailyRecordAdUpService.adUpCalAttr(calAttrOfDailyPerformance);
 		}
-
+		
+		//ドメインモデル「日別実績の休憩時間帯」を更新する
 		if (stampOutput != null) {
-
 			// breakTimeOfDailyPerformance - JDBC only insert
 			if (stampOutput.getBreakTimeOfDailyPerformance() != null
 					&& !stampOutput.getBreakTimeOfDailyPerformance().getBreakTimeSheets().isEmpty()) {
 				if (this.breakTimeOfDailyPerformanceRepository.find(employeeID, day, 0).isPresent()) {
 					this.breakTimeOfDailyPerformanceRepository.updateForEachOfType(stampOutput.getBreakTimeOfDailyPerformance());
 				} else {
-					this.breakTimeOfDailyPerformanceRepository.insert(stampOutput.getBreakTimeOfDailyPerformance());
+					//this.breakTimeOfDailyPerformanceRepository.insert(stampOutput.getBreakTimeOfDailyPerformance());
+					dailyRecordAdUpService.adUpBreakTime(Arrays.asList(stampOutput.getBreakTimeOfDailyPerformance()));
 				}
+				//dailyRecordAdUpService.adUpBreakTime(Arrays.asList(stampOutput.getBreakTimeOfDailyPerformance()));
 			}
 
 			// ドメインモデル「日別実績の外出時間帯」を更新する (Update 「日別実績の外出時間帯」) - JDBC only insert
 			if (stampOutput.getOutingTimeOfDailyPerformance() != null) {
-				if (this.outingTimeOfDailyPerformanceRepository.findByEmployeeIdAndDate(employeeID, day).isPresent()) {
-					this.outingTimeOfDailyPerformanceRepository.update(stampOutput.getOutingTimeOfDailyPerformance());
-				} else {
-					this.outingTimeOfDailyPerformanceRepository.add(stampOutput.getOutingTimeOfDailyPerformance());
-				}
+//				if (this.outingTimeOfDailyPerformanceRepository.findByEmployeeIdAndDate(employeeID, day).isPresent()) {
+//					this.outingTimeOfDailyPerformanceRepository.update(stampOutput.getOutingTimeOfDailyPerformance());
+//				} else {
+//					this.outingTimeOfDailyPerformanceRepository.add(stampOutput.getOutingTimeOfDailyPerformance());
+//				}
+				dailyRecordAdUpService.adUpOutTime(Optional.of(stampOutput.getOutingTimeOfDailyPerformance()));
 			}
 
 			// ドメインモデル「日別実績の臨時出退勤」を更新する (Update 「日別実績の臨時出退勤」) - JDBC - tín
 			if (stampOutput.getTemporaryTimeOfDailyPerformance() != null) {
-				if (this.temporaryTimeOfDailyPerformanceRepository.findByKey(employeeID, day).isPresent()) {
-					this.temporaryTimeOfDailyPerformanceRepository
-							.update(stampOutput.getTemporaryTimeOfDailyPerformance());
-				} else {
-					this.temporaryTimeOfDailyPerformanceRepository
-							.insert(stampOutput.getTemporaryTimeOfDailyPerformance());
-				}
+//				if (this.temporaryTimeOfDailyPerformanceRepository.findByKey(employeeID, day).isPresent()) {
+//					this.temporaryTimeOfDailyPerformanceRepository
+//							.update(stampOutput.getTemporaryTimeOfDailyPerformance());
+//				} else {
+//					this.temporaryTimeOfDailyPerformanceRepository
+//							.insert(stampOutput.getTemporaryTimeOfDailyPerformance());
+//				}
+				dailyRecordAdUpService.adUpTemporaryTime(Optional.of(stampOutput.getTemporaryTimeOfDailyPerformance()));
 			}
 
 			// ドメインモデル「日別実績の出退勤」を更新する (Update 「日別実績の出退勤」) - JDBC only insert - tín
 			if (stampOutput.getTimeLeavingOfDailyPerformance() != null
 					&& stampOutput.getTimeLeavingOfDailyPerformance().getTimeLeavingWorks() != null
 					&& !stampOutput.getTimeLeavingOfDailyPerformance().getTimeLeavingWorks().isEmpty()) {
-				if (this.timeLeavingOfDailyPerformanceRepository.findByKey(employeeID, day).isPresent()) {
-					this.timeLeavingOfDailyPerformanceRepository.update(stampOutput.getTimeLeavingOfDailyPerformance());
-				} else {
-					this.timeLeavingOfDailyPerformanceRepository.insert(stampOutput.getTimeLeavingOfDailyPerformance());
-				}
+//				if (this.timeLeavingOfDailyPerformanceRepository.findByKey(employeeID, day).isPresent()) {
+//					this.timeLeavingOfDailyPerformanceRepository.update(stampOutput.getTimeLeavingOfDailyPerformance());
+//				} else {
+//					this.timeLeavingOfDailyPerformanceRepository.insert(stampOutput.getTimeLeavingOfDailyPerformance());
+//				}
+				dailyRecordAdUpService.adUpTimeLeaving(Optional.of(stampOutput.getTimeLeavingOfDailyPerformance()));
 			}
-			// - JDBC - newwave
+			
+			// ドメインモデル「日別実績の短時間勤務時間帯」を更新する - JDBC - newwave
 			if (stampOutput.getShortTimeOfDailyPerformance() != null) {
-				if (this.shortTimeOfDailyPerformanceRepository.find(employeeID, day).isPresent()) {
-					this.shortTimeOfDailyPerformanceRepository
-							.updateByKey(stampOutput.getShortTimeOfDailyPerformance());
-				} else {
-					this.shortTimeOfDailyPerformanceRepository.insert(stampOutput.getShortTimeOfDailyPerformance());
-				}
+//				if (this.shortTimeOfDailyPerformanceRepository.find(employeeID, day).isPresent()) {
+//					this.shortTimeOfDailyPerformanceRepository
+//							.updateByKey(stampOutput.getShortTimeOfDailyPerformance());
+//				} else {
+//					this.shortTimeOfDailyPerformanceRepository.insert(stampOutput.getShortTimeOfDailyPerformance());
+//				}
+				dailyRecordAdUpService.adUpShortTime(Optional.of(stampOutput.getShortTimeOfDailyPerformance()));
 			}
 
 			// ドメインモデル「打刻」を更新する (Update 「打刻」) - JDBC
@@ -214,31 +238,39 @@ public class RegisterDailyPerformanceInfoService {
 			if (stampOutput.getAttendanceLeavingGateOfDaily() != null
 					&& stampOutput.getAttendanceLeavingGateOfDaily().getAttendanceLeavingGates() != null
 					&& !stampOutput.getAttendanceLeavingGateOfDaily().getAttendanceLeavingGates().isEmpty()) {
-				if (this.attendanceLeavingGateOfDailyRepo.find(employeeID, day).isPresent()) {
-					this.attendanceLeavingGateOfDailyRepo.update(stampOutput.getAttendanceLeavingGateOfDaily());
-				} else {
-					this.attendanceLeavingGateOfDailyRepo.add(stampOutput.getAttendanceLeavingGateOfDaily());
-				}
+//				if (this.attendanceLeavingGateOfDailyRepo.find(employeeID, day).isPresent()) {
+//					this.attendanceLeavingGateOfDailyRepo.update(stampOutput.getAttendanceLeavingGateOfDaily());
+//				} else {
+//					this.attendanceLeavingGateOfDailyRepo.add(stampOutput.getAttendanceLeavingGateOfDaily());
+//				}
+				dailyRecordAdUpService.adUpAttendanceLeavingGate(Optional.of(stampOutput.getAttendanceLeavingGateOfDaily()));
 			}
 
 			// ドメインモデル「日別実績のPCログオン情報」を更新する (Update 「日別実績のPCログオン情報」)) - JDBC only insert - tín
 			if (stampOutput.getPcLogOnInfoOfDaily() != null
 					&& stampOutput.getPcLogOnInfoOfDaily().getLogOnInfo() != null
 					&& !stampOutput.getPcLogOnInfoOfDaily().getLogOnInfo().isEmpty()) {
-				if (this.pCLogOnInfoOfDailyRepo.find(employeeID, day).isPresent()) {
-					this.pCLogOnInfoOfDailyRepo.update(stampOutput.getPcLogOnInfoOfDaily());
-				} else {
-					this.pCLogOnInfoOfDailyRepo.add(stampOutput.getPcLogOnInfoOfDaily());
-				}
+//				if (this.pCLogOnInfoOfDailyRepo.find(employeeID, day).isPresent()) {
+//					this.pCLogOnInfoOfDailyRepo.update(stampOutput.getPcLogOnInfoOfDaily());
+//				} else {
+//					this.pCLogOnInfoOfDailyRepo.add(stampOutput.getPcLogOnInfoOfDaily());
+//				}
+				dailyRecordAdUpService.adUpPCLogOn(Optional.of(stampOutput.getPcLogOnInfoOfDaily()));
 			}
 			
+			//ドメインモデル「社員の日別実績エラー一覧」を更新する
 			if (stampOutput.getEmployeeDailyPerErrorList() != null && !stampOutput.getEmployeeDailyPerErrorList().isEmpty()) {
-				for(EmployeeDailyPerError dailyPerError : stampOutput.getEmployeeDailyPerErrorList()){
-					if (dailyPerError != null) {
-						this.createEmployeeDailyPerError.createEmployeeError(dailyPerError);
-					}
-					
-				}
+				List<EmployeeDailyPerError> errors = stampOutput.getEmployeeDailyPerErrorList().stream()
+						.filter(x -> x != null).collect(Collectors.toList());
+				dailyRecordAdUpService.adUpEmpError(stampOutput.getEmployeeDailyPerErrorList(),
+						errors.stream().map(x -> Pair.of(x.getEmployeeID(), x.getDate())).collect(Collectors.toList()),
+						true);
+//				for(EmployeeDailyPerError dailyPerError : stampOutput.getEmployeeDailyPerErrorList()){
+//					if (dailyPerError != null) {
+//						this.createEmployeeDailyPerError.createEmployeeError(dailyPerError);
+//					}
+//					
+//				}
 			}
 		}
 	}
