@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workrecord.AttendanceTimeByWorkOfDaily;
@@ -115,7 +117,11 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 
 	@Override
 	public void adUpAffilicationInfo(AffiliationInforOfDailyPerfor affiliationInfor) {
-		affInfoRepo.updateByKey(affiliationInfor);
+		if(affInfoRepo.findByKey(affiliationInfor.getEmployeeId(), affiliationInfor.getYmd()).isPresent()) {
+			affInfoRepo.updateByKey(affiliationInfor);
+		}else {
+			affInfoRepo.add(affiliationInfor);
+		}
 	}
 
 	@Override
@@ -127,7 +133,11 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	public void adUpWorkType(Optional<WorkTypeOfDailyPerformance> businessType) {
 		if (!businessType.isPresent())
 			return;
-		workTypeRepo.update(businessType.get());
+		if(workTypeRepo.findByKey(businessType.get().getEmployeeId(), businessType.get().getDate()).isPresent()) {
+			workTypeRepo.update(businessType.get());
+		}else {
+			workTypeRepo.add(businessType.get());
+		}
 	}
 
 	@Override
@@ -214,6 +224,7 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	public void adUpAttendanceTimeByWork(Optional<AttendanceTimeByWorkOfDaily> attendancetimeByWork) {
 		if (!attendancetimeByWork.isPresent())
 			return;
+		//TODO:****
 		attendanceTimeWorkRepo.update(attendancetimeByWork.get());
 	}
 
@@ -235,11 +246,14 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	}
 
 	@Override
-	public void adUpEmpError(List<EmployeeDailyPerError> errors, Map<String, List<GeneralDate>> mapEmpDateError, boolean hasRemoveError) {
+	public void adUpEmpError(List<EmployeeDailyPerError> errors, List<Pair<String, GeneralDate>> lstPairRemove, boolean hasRemoveError) {
 		if (hasRemoveError) {
 //			Map<String, List<GeneralDate>> mapError = errors.stream().collect(
 //					Collectors.groupingBy(c -> c.getEmployeeID(), Collectors.collectingAndThen(Collectors.toList(),
 //							c -> c.stream().map(q -> q.getDate()).collect(Collectors.toList()))));
+			Map<String, List<GeneralDate>> mapEmpDateError = lstPairRemove.stream().collect(
+					Collectors.groupingBy(c -> c.getLeft(), Collectors.collectingAndThen(Collectors.toList(),
+					c -> c.stream().map(q -> q.getRight()).collect(Collectors.toList()))));
 			employeeErrorRepo.removeNotOTK(mapEmpDateError);
 		}
 		
