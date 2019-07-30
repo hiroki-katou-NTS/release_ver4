@@ -396,7 +396,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 
 		}
 		
-		domainDailyNew = registerCalcedService.runStoredProcess(domainDailyNew);
+//		domainDailyNew = registerCalcedService.runStoredProcess(domainDailyNew);
 		
 		if (mode == 0 && month != null && month.getNeedCallCalc() != null && month.getNeedCallCalc()) {
 			lstMonthDomain = updateMonthAfterProcessDaily.updateMonth(commandNew,
@@ -418,7 +418,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 			// caculator
 			domainDailyNew = calcService.calculate(domainDailyNew);
 			
-			domainDailyNew = registerCalcedService.runStoredProcess(domainDailyNew);
+//			domainDailyNew = registerCalcedService.runStoredProcess(domainDailyNew);
 
 		}
 
@@ -558,9 +558,9 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 	private <T extends DailyWorkCommonCommand> List<IntegrationOfDaily> updateDomainAfterCalcAndRunStored(List<IntegrationOfDaily> calced, CorrectResult correctResult) {
 		updateWorkInfoAfterCalc(calced);
 		
-		if(correctResult != null){
-			return registerCalcedService.addAndUpdate(calced, correctResult.getWorkType());
-		}
+//		if(correctResult != null){
+//			return registerCalcedService.addAndUpdate(calced, correctResult.getWorkType());
+//		}
 		return registerCalcedService.addAndUpdate(calced);
 	}
 

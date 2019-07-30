@@ -6,28 +6,21 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import lombok.AllArgsConstructor;
 import nts.arc.time.YearMonth;
-import nts.gul.util.value.Finally;
 import nts.gul.util.value.MutableValue;
 import nts.uk.ctx.at.record.dom.actualworkinghours.ActualWorkingTimeOfDaily;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.actualworkinghours.daily.medical.MedicalCareTimeOfDaily;
-import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workingtime.StayingTimeOfDaily;
-import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workschedule.WorkScheduleTimeOfDaily;
-import nts.uk.ctx.at.record.dom.daily.ExcessOverTimeWorkMidNightTime;
 import nts.uk.ctx.at.record.dom.daily.TimeDivergenceWithCalculation;
 import nts.uk.ctx.at.record.dom.daily.TimeDivergenceWithCalculationMinusExist;
-import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.AttendanceLeavingGate;
-import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.LogOnInfo;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnNo;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemNo;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemTime;
@@ -43,9 +36,6 @@ import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.AttendanceTimeOfMonthlyRepository;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthly;
 import nts.uk.ctx.at.record.dom.monthly.anyitem.AnyItemOfMonthlyRepository;
-import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
-import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
-import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
 import nts.uk.ctx.at.shared.dom.common.anyitem.AnyTimesMonth;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
@@ -56,7 +46,6 @@ import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktime.predset.PredetemineTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.predset.PredetemineTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktime.predset.TimezoneUse;
-import nts.uk.ctx.at.shared.dom.worktime.predset.WorkTimeNightShift;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSetting;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSettingRepository;
 import nts.uk.ctx.at.shared.dom.worktype.DailyWork;
@@ -106,376 +95,189 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	private static final WorkTypeCode PREMIUM_CODE = new WorkTypeCode("105");
 	
 	@Override
-	public List<IntegrationOfDaily> dailyProcessing(List<IntegrationOfDaily> dailies) {
-		return dailyProcessing(dailies, null);
-	}
+	public Optional<DailyStoredProcessResult> dailyProcessing(IntegrationOfDaily daily, Optional<WorkType> workTypeOpt, 
+			Optional<WorkTimeSetting>  workTimeOpt, Optional<PredetemineTimeSetting> predSetOpt) {
 
-	public List<IntegrationOfDaily> dailyProcessing(List<IntegrationOfDaily> dailies, Map<WorkTypeCode, WorkType> workTypeMap) {
 		String companyId = AppContexts.user().companyId();
-		//勤怠時間更新
-		Set<String> workTypeCode = dailies.stream().map(s -> s.getWorkInformation().getRecordInfo().getWorkTypeCode().v())
-												.collect(Collectors.toSet());
-		
-		Map<WorkTypeCode, WorkType> workTypes = getWorkType(companyId, workTypeCode, workTypeMap);
-		
-		dailies.stream().forEach(d -> {
-			
-			/** データ準備スタート　*/
-			if(!d.getAnyItemValue().isPresent()){
-				d.setAnyItemValue(Optional.of(new AnyItemValueOfDaily(d.getWorkInformation().getEmployeeId(), d.getWorkInformation().getYmd(), new ArrayList<>())));
-			}
-			
-			AnyItemValueOfDaily optionalItem = d.getAnyItemValue().get();
-			
-			Integer logonTime, logoffTime, leaveGateStartTime, leaveGateEndTime, startTime, endTime; 
-			
-			WorkType workType = workTypes.get(d.getWorkInformation().getRecordInfo().getWorkTypeCode());
-			if(workType == null){
-				return;
-			}
-			WorkTypeUnit atr = workType.getDailyWork().getWorkTypeUnit();
-			DailyWork dailyWork = workType.getDailyWork();
-			Optional<PredetemineTimeSetting> predSet = Optional.empty();
-			
-			if(d.getAttendanceLeave().isPresent()){
-				Optional<TimeLeavingWork> timeLeaveNo1 = d.getAttendanceLeave().get().getAttendanceLeavingWork(1);
-				if(timeLeaveNo1.isPresent()){
-					startTime = getTimeStamp(timeLeaveNo1.get().getAttendanceStamp());
-					endTime =  getTimeStamp(timeLeaveNo1.get().getLeaveStamp());
-				} else {
-					endTime = startTime = null;
-				}
-			} else {
-				endTime = startTime = null;
-			}
-			
-			if(d.getPcLogOnInfo().isPresent()){
-				LogOnInfo logonInfo = d.getPcLogOnInfo().get().getLogOnInfo(new PCLogOnNo(1)).orElse(null);
-				logonTime = logonInfo != null && logonInfo.getLogOn().isPresent() ? logonInfo.getLogOn().get().v() : null;
-				logoffTime = logonInfo != null &&  logonInfo.getLogOff().isPresent() ? logonInfo.getLogOff().get().v() : null;
-			} else {
-				logonTime = logoffTime = null;
-			}
-			
-			if(d.getAttendanceLeavingGate().isPresent()){
-				Optional<AttendanceLeavingGate> gateNo1 = d.getAttendanceLeavingGate().get().getAttendanceLeavingGate(new WorkNo(1));
-				if(gateNo1.isPresent()){
-					leaveGateStartTime = getWorkStamp(gateNo1.get().getAttendance());
-					leaveGateEndTime = getWorkStamp(gateNo1.get().getLeaving());
-				} else {
-					leaveGateStartTime = leaveGateEndTime = null;
-				}
-			} else {
-				leaveGateStartTime = leaveGateEndTime = null;
-			}
-			
-			Integer timeOff = null, timeOn = leaveGateStartTime, divergenceTime = 0;
-			List<Integer> overTime = new ArrayList<>(), preOver = new ArrayList<>();
-			boolean shouldCopy = checkWorkType(atr, dailyWork.getOneDay(), dailyWork.getMorning(), dailyWork.getAfternoon());
-			/** データ準備エンド　*/
+		WorkType workType = getWorkType(companyId, daily.getWorkInformation().getRecordInfo().getWorkTypeCode().v(), workTypeOpt);
 
-			/** 任意項目3: 出勤時刻が入っており、PCログオンログオフがない事が条件 */
-			processOptionalItem(() -> startTime != null && logonTime == null && logoffTime == null, 
-					optionalItem, COUNT_ON, COUNT_OFF, 3);
-			
-			/** 任意項目13: 出勤時刻が入っており、入館と退館がない事が条件 */
-			processOptionalItem(() -> startTime != null && leaveGateStartTime == null && leaveGateEndTime == null, 
-					optionalItem, COUNT_ON, COUNT_OFF, 13);
-			
-			/** 任意項目4: その日にPCログオン = null and ログオフ <> null が条件 */
-			processOptionalItem(() -> startTime != null && logonTime == null && logoffTime != null, 
-					optionalItem, COUNT_ON, COUNT_OFF, 4);
-			
-			/** 任意項目5: その日にPCログオン = null and ログオフ <> null が条件 */
-			processOptionalItem(() -> startTime != null && logonTime != null && logoffTime == null, 
-					optionalItem, COUNT_ON, COUNT_OFF, 5);
-			
-			/** 任意項目14: その日にPCログオン = null が条件 */
-			processOptionalItem(() -> startTime != null && logonTime == null, optionalItem, COUNT_ON, COUNT_OFF, 14);
-			
-			/** 任意項目15: その日にPCログオフ = null が条件 */
-			processOptionalItem(() -> startTime != null && logoffTime == null, optionalItem, COUNT_ON, COUNT_OFF, 15);
-			
-			/** TODO: update*/
-			/** 任意項目16: 出勤時刻が入っており、PCログオンログオフのどちらかが無い事が条件 */
-			processOptionalItem(() -> startTime != null && (logonTime == null || logoffTime == null), 
-					optionalItem, COUNT_ON, COUNT_OFF, 16);
-			
-			/** 任意項目7: 出勤の判断 */
-			processOptionalItem(() -> shouldCopy, optionalItem, timeOn, timeOff, 7);
-			
-			timeOn = leaveGateEndTime;
-			
-			/** 任意項目9: 出勤の判断 */
-			processOptionalItem(() -> shouldCopy, optionalItem, timeOn, timeOff, 9);
-			
-			/** 任意項目12 */
-			processOptionalItem(() -> shouldCopy, optionalItem, COUNT_ON, COUNT_OFF, 12);
-			
-			timeOff = 0;
-			/** 任意項目8: 両方時刻が入っている場合のみ乖離時間を計算する */
-			if(startTime != null && leaveGateStartTime != null){
-				divergenceTime = timeOn = startTime < leaveGateStartTime ? 0 : startTime - leaveGateStartTime;
-				mergeOptionalItemWithNo(optionalItem, timeOn, 8);
-			} else {
-				updateOptionalItemWithNo(optionalItem, timeOff, 8);
-			}
-			
-			/** 任意項目10 */
-			if(endTime != null && leaveGateEndTime != null){
-				timeOn = leaveGateEndTime - endTime; 
-				mergeOptionalItemWithNo(optionalItem, timeOn < 0 ? 0 : timeOn, 10);
-			} else {
-				updateOptionalItemWithNo(optionalItem, timeOff, 10);
-			}
-			
-			timeOn = 1; timeOff = 0;
-			Optional<OverTimeOfDaily> overTimeD = Optional.empty();
-			if(d.getAttendanceTimeOfDailyPerformance().isPresent()) {
-				
-				/** 任意項目11: 実働就業時間 = 0 かつ 勤務種類が(年休、特休、代休) である事が条件 */
-				processOptionalItem(() -> isNotActualWork(d, atr, dailyWork.getOneDay(), dailyWork.getMorning(), dailyWork.getAfternoon()), 
-						optionalItem, COUNT_ON, COUNT_OFF, 11);
-				
-				overTimeD = getOverTime(d.getAttendanceTimeOfDailyPerformance().get());
-				overTimeD.ifPresent(ot -> {
-					ot.getOverTimeWorkFrameTime().stream().forEach(o -> {
-						overTime.add(sumActualOvertime(o) - getAttendanceTime(o.getBeforeApplicationTime()));
-						preOver.add(getAttendanceTime(o.getBeforeApplicationTime()));
-					});
-				});
-				FlexTime flex = getFlexTime(overTimeD);
-				
-				int timePreFlex = getAttendanceTime(flex.getBeforeApplicationTime()),
-						flexTime = flex.getFlexTime().getTime().valueAsMinutes(), 
-						timeFlex = flexTime > 0 ? flexTime - timePreFlex : 0,
-						timePre = preOver.stream().mapToInt(t -> t).sum() + timePreFlex,
-						time = overTime.stream().mapToInt(t -> t).sum() + preOver.stream().mapToInt(t -> t).sum() + flexTime;
-				
-				/** 任意項目28: 事前残業時間 > 0 である事が条件 */
-				processOptionalItem(() -> timePre > 0, optionalItem, COUNT_ON, COUNT_OFF, 28);
-				
-				/** 任意項目19: 事前残業1~10 > 0 かつ　乖離時間が発生していない事が条件 */
-				processOptionalItem(() -> timePre > 0 && overTime.stream().allMatch(t -> t <= 0) && timeFlex <= 0, 
-						optionalItem, COUNT_ON, COUNT_OFF, 19);
-				
-				/** 任意項目21: 事前残業1~10 > 0 かつ　乖離時間が発生している事が条件 */
-				processOptionalItem(() -> timePre > 0 && (timeFlex > 0 || overTime.stream().anyMatch(t -> t > 0)),
-						optionalItem, COUNT_ON, COUNT_OFF, 21);
-				
-				/** 任意項目23: 残業あり かつ 事前残業なし　が条件 */
-//				processOptionalItem(() -> (timePreFlex <= 0 && timeFlex > 0) || 
-//								checkOnPair(overTime, preOver, (ot, pot) -> ot > 0 && pot <= 0),
-//						optionalItem, COUNT_ON, COUNT_OFF, 23);
-				/** 任意項目29：  */
-				processOptionalItem(() -> true , optionalItem, 0, 0, 29);
-				if(d.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
-					Optional<WorkTimeSetting>  workTime = workTimeRepository.findByCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
-					if(workTime.isPresent()) {
-						
-						predSet = predetermineRepo.findByWorkTimeCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
-						
-						if(dailyWork.isWeekDayAttendance() && !(workTime.get().getWorkTimeDivision().getWorkTimeDailyAtr().isFlex())) {
-							//所定の開始時刻
-							TimeWithDayAttr startOclock = new TimeWithDayAttr(0);
-							if(predSet.isPresent()) {
-								Optional<TimezoneUse> firstTimeZone =  predSet.get().getPrescribedTimezoneSetting().getLstTimezone().stream().filter(tc -> tc.getWorkNo() == 1).findFirst();
-								if(firstTimeZone.isPresent()) {
-									startOclock = firstTimeZone.get().getStart();
-								}
-							}
-							//出勤時刻
-							if(startTime != null) {
-								TimeWithDayAttr attendanceOclock = new TimeWithDayAttr(startTime.intValue());
-								
-								TimeWithDayAttr calcTime = startOclock.backByMinutes(attendanceOclock.valueAsMinutes());
-								processOptionalItem(() -> calcTime.valueAsMinutes() > 0, optionalItem, calcTime.valueAsMinutes(), 0, 29);								
-							}
-						}
-					}
-				}
-				
-				/** 任意項目27: 残業あり かつ 事前残業なし　が条件 */
-				processOptionalItem(() -> time > 0, optionalItem, COUNT_ON, COUNT_OFF, 27);
-				
-				/** 任意項目40: フレックス時間がマイナスである事が条件 */
-				processOptionalItem(() -> flexTime < 0, optionalItem, flexTime * -1, timeOff, 40);
-				
-				/** 任意項目41: フレックス時間がプラスである事が条件 */
-				processOptionalItem(() -> flexTime >= 0, optionalItem, flexTime, timeOff, 41);
-			} else {
-				/** 任意項目 19, 21, 23, 28 */
-				updateOptionalItemWithNo(optionalItem, COUNT_OFF, 19, 21, 23, 27, 28);
-
-				/** 任意項目40, 41 */
-				updateOptionalItemWithNo(optionalItem, timeOff, 40, 41);
-			}
-			
-			if(d.getPcLogOnInfo().isPresent()){
-				
-				/** 任意項目1: ログオン時刻がnullではない事が条件 */
-				processOptionalItem(() -> logonTime != null, optionalItem, COUNT_ON, COUNT_OFF, 1);
-
-				/** 任意項目2: ログオフ時刻 > 0 である事が条件 */
-				processOptionalItem(() -> logoffTime != null, optionalItem, COUNT_ON, COUNT_OFF, 2);
-				
-				/** 任意項目6: ログオン、ログオフが両方入っている事が条件 */
-				processOptionalItem(() -> logonTime != null && logoffTime != null, optionalItem, COUNT_ON, COUNT_OFF, 6);
-			} else {
-				/** 任意項目1, 2, 6 */
-				updateOptionalItemWithNo(optionalItem, COUNT_OFF, 1, 2, 6);
-			}
-			
-			/** 平日か*/
-			processOptionalItem(() -> shouldCopy, optionalItem, divergenceTime, timeOff, 17);
-			
-			if(startTime != null && !d.getWorkInformation().getRecordInfo().getWorkTypeCode().equals(PREMIUM_CODE)) {
-				/** 任意項目89 */
-				mergeOptionalItemWithNo(optionalItem, startTime, 89);
-				
-				/** 任意項目90 */
-				mergeOptionalItemWithNo(optionalItem, COUNT_ON, 90);
-			} else {
-				/** 任意項目89 */
-				updateOptionalItemWithNo(optionalItem, timeOff, 89);
-
-				/** 任意項目90 */
-				updateOptionalItemWithNo(optionalItem, COUNT_OFF, 90);
-			}
-			
-			MutableValue<Integer> flag19 = new MutableValue<>(0), flag21 = new MutableValue<>(0), flag37 = new MutableValue<>(0);
-			MutableValue<Boolean> flag35 = new MutableValue<>(false), flag36 = new MutableValue<>(false);
-			
-			if(d.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
-				if(!predSet.isPresent()) {
-					predSet = predetermineRepo.findByWorkTimeCode(companyId, d.getWorkInformation().getRecordInfo().getWorkTimeCode().v());
-				}
-				predSet.ifPresent(pr -> {
-					pr.getTimeSheetOf(1).ifPresent(timeSheet -> {
-						int preSetAtten01 = timeSheet.getStart().valueAsMinutes(),
-								preSetLeave01 = timeSheet.getEnd().valueAsMinutes();
-						
-						if(startTime != null && startTime < preSetAtten01) {
-							flag35.set(true);
-						}
-						
-						if(endTime != null && endTime > preSetLeave01) {
-							flag36.set(true);
-						}
-						
-						if(!flag35.get() && !flag36.get()) {
-							return;
-						}
-						
-						if(d.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
-							d.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).ifPresent(scheTimeSheet -> {
-								int scheWorkAtten = scheTimeSheet.getAttendance().valueAsMinutes(),
-										scheWorkLeave = scheTimeSheet.getLeaveWork().valueAsMinutes();
-								
-								if(flag35.get() && startTime != null && preSetAtten01 > scheWorkAtten) {
-									if(startTime >= scheWorkAtten) {
-										flag19.set(flag19.get() + 1);
-									}
-									if(startTime < scheWorkAtten) {
-										flag21.set(flag21.get() + 1);
-									}
-								}
-								
-								if(flag36.get() && endTime != null && preSetLeave01 < scheWorkLeave) {
-									if(endTime <= scheWorkLeave) {
-										flag19.set(flag19.get() + 1);
-									}
-									if(endTime > scheWorkLeave) {
-										flag21.set(flag21.get() + 1);
-									}
-								}
-								
-								if (flag35.get() && preSetAtten01 <= scheWorkAtten) {
-									flag37.set(flag37.get() + 1);
-								}
-								if(flag36.get() && preSetLeave01 >= scheWorkLeave) {
-									flag37.set(flag37.get() + 1);
-								}
-							});
-						}
-					});
-				});
-			}
-			
-			/** 任意項目35 */
-			processOptionalItem(() -> flag35.get(), optionalItem, COUNT_ON, COUNT_OFF, 35);
-			
-			/** 任意項目36 */
-			processOptionalItem(() -> flag36.get(), optionalItem, COUNT_ON, COUNT_OFF, 36);
-			
-			/** 任意項目19 */
-			processOptionalItem(() -> flag19.get() > 0, optionalItem, BigDecimal.valueOf(flag19.get()), COUNT_OFF, 19);
-			
-			/** 任意項目21 */
-			processOptionalItem(() -> flag21.get() > 0, optionalItem, BigDecimal.valueOf(flag21.get()), COUNT_OFF, 21);
-			
-			/** 任意項目37 */
-			processOptionalItem(() -> flag37.get() > 0, optionalItem, BigDecimal.valueOf(flag37.get()), COUNT_OFF, 37);
-			
-			if(d.getAnyItemValue().get().getItems().isEmpty()){
-				d.setAnyItemValue(Optional.empty());
-			}
-			
-//			if(atdStampTime != null){
-				if(DEFAULT_WORK_TYPE.equals(d.getWorkInformation().getRecordInfo().getWorkTypeCode())  
-						|| DEFAULT_WORK_TIME.contains(d.getWorkInformation().getRecordInfo().getWorkTimeCode())){
-					if(!d.getAttendanceTimeOfDailyPerformance().isPresent()){
-						d.setAttendanceTimeOfDailyPerformance(Optional.of(createDefaultAttendanceTime(d)));
-					}
-					if(DEFAULT_WORK_TYPE.equals(d.getWorkInformation().getRecordInfo().getWorkTypeCode())  ){
-						setOverTime(d, 30, 60);
-					} else if(DEFAULT_WORK_TIME.contains(d.getWorkInformation().getRecordInfo().getWorkTimeCode())) {
-						WorkType wt = workTypes.get(d.getWorkInformation().getRecordInfo().getWorkTypeCode());
-						if(wt != null){
-							if(wt.getDailyWork().getOneDay() == WorkTypeClassification.HolidayWork 
-									|| wt.getDailyWork().getAfternoon() == WorkTypeClassification.HolidayWork 
-									|| wt.getDailyWork().getMorning() == WorkTypeClassification.HolidayWork){
-								setOverTime(d, 0, 0);
-							} else {
-								setOverTime(d, startTime == null ? 0 : 30, startTime == null ? 0 : 60);
-							}
-						}
-					}
-				}
-//			}
-			
-		});
-		
-		return dailies;
-	}
-
-	private void setOverTime(IntegrationOfDaily d, int timeFor4, int timeFor5) {
-		Optional<OverTimeOfDaily>  ot = d.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily()
-			.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork();
-		if(ot.isPresent()){
-			processOverTime(ot.get(), 4, timeFor4);
-			
-			processOverTime(ot.get(), 5, timeFor5);
-		} else {
-			OverTimeOfDaily otn = new OverTimeOfDaily(new ArrayList<>(), new ArrayList<>(), 
-					Finally.of(new ExcessOverTimeWorkMidNightTime(TimeDivergenceWithCalculation.sameTime(AttendanceTime.ZERO))));
-			
-			processOverTime(otn, 4, timeFor4);
-			
-			processOverTime(otn, 5, timeFor5);
-			
-			d.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily()
-					.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().updateOverTime(otn);
+		if(workType == null){
+			return Optional.empty();
 		}
+		
+		DailyTimeForCalc dailyTime = new DailyTimeForCalc(companyId, daily, workType, workTimeOpt, predSetOpt);
+		
+		List<AnyItemValue> optionalItems = calcOptionalItem(workType, dailyTime);
+		List<OverTimeFrameTime> overTimes = calcOverTime(daily, workType, dailyTime.have(t -> t.startTime));
+		
+		return Optional.of(new DailyStoredProcessResult(optionalItems, overTimes));
+	}
+	
+	private List<AnyItemValue> calcOptionalItem(WorkType workType, DailyTimeForCalc dailyTime) {
+		List<AnyItemValue> result = new ArrayList<>();  
+		WorkTypeUnit atr = workType.getDailyWork().getWorkTypeUnit();
+		DailyWork dailyWork = workType.getDailyWork();
+		
+		boolean isWorkType = checkWorkType(atr, dailyWork.getOneDay(), dailyWork.getMorning(), dailyWork.getAfternoon()),
+				isGoToWork = dailyTime.have(t -> t.startTime), isLogoned = dailyTime.have(t -> t.logonTime), 
+				isLogoffed = dailyTime.have(t -> t.logoffTime), isLeaveGateStart = dailyTime.have(t -> t.leaveGateStartTime),
+				isLeaveGateEnd = dailyTime.have(t -> t.leaveGateEndTime), isLeaved = dailyTime.have(t -> t.endTime),
+				isActualWork = dailyTime.have(t -> t.actualWorkTime) && dailyTime.value(t -> t.actualWorkTime) > 0,
+				isNotWorkInStatutory = !dailyTime.have(t -> t.withinStatutoryTime) || dailyTime.value(t -> t.withinStatutoryTime) == 0;
+		
+		/** 任意項目1: ログオン時刻がnullではない事が条件 */
+		processOptionalItem(() -> isLogoned && isWorkType && isActualWork, result, COUNT_ON, COUNT_OFF, 1);
+
+		/** 任意項目2: ログオフ時刻 > 0 である事が条件 */
+		processOptionalItem(() -> isLogoffed && isWorkType && isActualWork, result, COUNT_ON, COUNT_OFF, 2);
+		
+		/** 任意項目3: 出勤時刻が入っており、PCログオンログオフがない事が条件 */
+		processOptionalItem(() -> isGoToWork && !isLogoned && !isLogoffed, result, COUNT_ON, COUNT_OFF, 3);
+		
+		/** 任意項目4: その日にPCログオン = null and ログオフ <> null が条件 */
+		processOptionalItem(() -> isGoToWork && !isLogoned && isLogoffed, result, COUNT_ON, COUNT_OFF, 4);
+		
+		/** 任意項目5: その日にPCログオン = null and ログオフ <> null が条件 */
+		processOptionalItem(() -> isGoToWork && isLogoned && !isLogoffed, result, COUNT_ON, COUNT_OFF, 5);
+		
+		/** 任意項目6: ログオン、ログオフが両方入っている事が条件 */
+		processOptionalItem(() -> isLogoned && isLogoffed, result, COUNT_ON, COUNT_OFF, 6);
+		
+		/** 任意項目7: 出勤の判断 */
+		processOptionalItem(() -> isWorkType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 7);
+		
+		dailyTime.value(t -> t.timeOn, dailyTime.value(t -> t.leaveGateEndTime));
+		
+		/** 任意項目9: 出勤の判断 */
+		processOptionalItem(() -> isWorkType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 9);
+
+		/** 任意項目11: 実働就業時間 = 0 かつ 勤務種類が(年休、特休、代休) である事が条件 */
+		processOptionalItem(() -> isNotWorkInStatutory && isWorkType, result, COUNT_ON, COUNT_OFF, 11);
+		
+		/** 任意項目12 */
+		processOptionalItem(() -> isWorkType, result, COUNT_ON, COUNT_OFF, 12);
+		
+		/** 任意項目13: 出勤時刻が入っており、入館と退館がない事が条件 */
+		processOptionalItem(() -> isGoToWork && !isLeaveGateStart && !isLeaveGateEnd, result, COUNT_ON, COUNT_OFF, 13);
+		
+		/** 任意項目14: その日にPCログオン = null が条件 */
+		processOptionalItem(() -> isGoToWork && !isLogoned, result, COUNT_ON, COUNT_OFF, 14);
+		
+		/** 任意項目15: その日にPCログオフ = null が条件 */
+		processOptionalItem(() -> isGoToWork && !isLogoffed, result, COUNT_ON, COUNT_OFF, 15);
+		
+		/** 任意項目16: 出勤時刻が入っており、PCログオンログオフのどちらかが無い事が条件 */
+		processOptionalItem(() -> isGoToWork && (!isLogoned || !isLogoffed), result, COUNT_ON, COUNT_OFF, 16);
+		
+		dailyTime.value(t -> t.timeOff, 0);
+		
+		/** 任意項目8: 両方時刻が入っている場合のみ乖離時間を計算する */
+		if(isGoToWork && isLeaveGateStart) {
+			int divergenceTime = dailyTime.value(t -> t.startTime) < dailyTime.value(t -> t.leaveGateStartTime) 
+					? 0 : dailyTime.value(t -> t.startTime) - dailyTime.value(t -> t.leaveGateStartTime);
+			dailyTime.value(t -> t.divergenceTime, divergenceTime);
+			dailyTime.value(t -> t.timeOn, divergenceTime);
+		} 
+		processOptionalItem(() -> isGoToWork && isLeaveGateStart, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 8);
+		
+		/** 任意項目10 */
+		if(isLeaved && isLeaveGateEnd) {
+			dailyTime.value(t -> t.timeOn, dailyTime.value(t -> t.leaveGateEndTime) - dailyTime.value(t -> t.endTime));
+		}
+		processOptionalItem(() -> isLeaved && isLeaveGateEnd, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 10);
+		
+		dailyTime.value(t -> t.timeOn, 1);
+		
+		/** 任意項目17: 平日か*/
+		processOptionalItem(() -> isWorkType, result, dailyTime.value(t -> t.divergenceTime), dailyTime.value(t -> t.timeOff), 17);
+		
+		/** 任意項目19: 事前残業1~10 > 0 かつ　乖離時間が発生していない事が条件 */
+		processOptionalItem(() -> dailyTime.value(t -> t.timePre) > 0 && dailyTime.overTime.stream().allMatch(t -> t <= 0) && dailyTime.value(t -> t.timeFlex) <= 0, 
+				result, COUNT_ON, COUNT_OFF, 19);
+		
+		/** 任意項目21: 事前残業1~10 > 0 かつ　乖離時間が発生している事が条件 */
+		processOptionalItem(() -> dailyTime.value(t -> t.timePre) > 0 && (dailyTime.value(t -> t.timeFlex) > 0 || dailyTime.overTime.stream().anyMatch(t -> t > 0)),
+				result, COUNT_ON, COUNT_OFF, 21);	
+		
+		/** 任意項目27: 残業あり かつ 事前残業なし　が条件 */
+		processOptionalItem(() -> dailyTime.value(t -> t.totalOverTime) > 0, result, COUNT_ON, COUNT_OFF, 27);
+		
+		/** 任意項目28: 事前残業時間 > 0 である事が条件 */
+		processOptionalItem(() -> dailyTime.value(t -> t.timePre) > 0, result, COUNT_ON, COUNT_OFF, 28);
+		
+		/** 任意項目29：  ??? */
+		processOptionalItem(() -> dailyTime.value(t -> t.preSetDivergence) > 0, result, dailyTime.value(t -> t.preSetDivergence), 0, 29);
+		
+		/** 任意項目35 */
+		processOptionalItem(() -> dailyTime.value(t -> t.flag35), result, COUNT_ON, COUNT_OFF, 35);
+		
+		/** 任意項目36 */
+		processOptionalItem(() -> dailyTime.value(t -> t.flag36), result, COUNT_ON, COUNT_OFF, 36);
+		
+		boolean isItem12On = result.parallelStream().anyMatch(c -> c.getItemNo().v() == 12 && c.getTimes().get().v().equals(COUNT_ON));
+
+		dailyTime.calcSomeItemByPredetemineTime(isItem12On);
+		
+		/** 任意項目19 */
+		processOptionalItem(() -> dailyTime.value(t -> t.flag19) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag19)), COUNT_OFF, 19);
+		
+		/** 任意項目21 */
+		processOptionalItem(() -> dailyTime.value(t -> t.flag21) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag21)), COUNT_OFF, 21);
+		
+		/** 任意項目37 
+		processOptionalItem(() -> dailyTime.value(t -> t.flag37) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag37)), COUNT_OFF, 37);
+		*/
+		
+		/** 任意項目40: フレックス時間がマイナスである事が条件 */
+		processOptionalItem(() -> dailyTime.value(t -> t.flexTime) < 0, result, dailyTime.value(t -> t.flexTime) * -1, dailyTime.value(t -> t.timeOff), 40);
+		
+		/** 任意項目41: フレックス時間がプラスである事が条件 */
+		processOptionalItem(() -> dailyTime.value(t -> t.flexTime) >= 0, result, dailyTime.value(t -> t.flexTime), dailyTime.value(t -> t.timeOff), 41);
+		
+		/** 任意項目89 */
+		processOptionalItem(() -> isGoToWork && !dailyTime.value(t -> t.isPremiumWorkType), result, dailyTime.value(t -> t.startTime), dailyTime.value(t -> t.timeOff), 89);
+		
+		/** 任意項目90 */
+		processOptionalItem(() -> isGoToWork && !dailyTime.value(t -> t.isPremiumWorkType), result, COUNT_ON, COUNT_OFF, 90);
+		
+		return result;
 	}
 
-	private AttendanceTimeOfDailyPerformance createDefaultAttendanceTime(IntegrationOfDaily d) {
-		return new AttendanceTimeOfDailyPerformance(d.getWorkInformation().getEmployeeId(), 
-				d.getWorkInformation().getYmd(), WorkScheduleTimeOfDaily.defaultValue(), 
-				ActualWorkingTimeOfDaily.defaultValue(), 
-				new StayingTimeOfDaily(AttendanceTime.ZERO, AttendanceTime.ZERO, AttendanceTime.ZERO, AttendanceTime.ZERO, AttendanceTime.ZERO), 
-				AttendanceTimeOfExistMinus.ZERO, AttendanceTimeOfExistMinus.ZERO, 
-				new MedicalCareTimeOfDaily(WorkTimeNightShift.DAY_SHIFT, AttendanceTime.ZERO, AttendanceTime.ZERO, AttendanceTime.ZERO));
+	private List<OverTimeFrameTime> calcOverTime(IntegrationOfDaily daily, WorkType workType, boolean isGoToWork) {
+		if(DEFAULT_WORK_TYPE.equals(daily.getWorkInformation().getRecordInfo().getWorkTypeCode())) {
+			return setOverTime(30, 60);
+			
+		}
+		
+		if(DEFAULT_WORK_TIME.contains(daily.getWorkInformation().getRecordInfo().getWorkTimeCode()) && workType != null) {
+			if(workType.getDailyWork().getOneDay() == WorkTypeClassification.HolidayWork 
+					|| workType.getDailyWork().getAfternoon() == WorkTypeClassification.HolidayWork 
+					|| workType.getDailyWork().getMorning() == WorkTypeClassification.HolidayWork){
+				return setOverTime(0, 0);
+			} else {
+				setOverTime(!isGoToWork ? 0 : 30, !isGoToWork ? 0 : 60);
+			}
+		}
+		
+		return new ArrayList<>();
+	}
+	
+	
+
+	private List<OverTimeFrameTime> setOverTime(int timeFor4, int timeFor5) {
+		List<OverTimeFrameTime> overTimes = new ArrayList<>();
+		
+		overTimes.add(createOverTimeFrame(4, timeFor4));
+		overTimes.add(createOverTimeFrame(5, timeFor5));
+		
+		return overTimes;
+	}
+
+	private OverTimeFrameTime createOverTimeFrame(int no, int val){
+		return new OverTimeFrameTime(new OverTimeFrameNo(no), 
+				TimeDivergenceWithCalculation.sameTime(new AttendanceTime(val)), 
+				TimeDivergenceWithCalculation.sameTime(AttendanceTime.ZERO), 
+				AttendanceTime.ZERO, AttendanceTime.ZERO);
 	}
 	
 	@Override
@@ -503,7 +305,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		
 		/** 任意項目の件数を取得 */
 		List<AnyItemValueOfDaily> optionalItemsInMonth = dailyOptionalItem.finds(Arrays.asList(employeeId), attendanceTime.get().getDatePeriod());
-		List<AnyItemValue> items = optionalItemsInMonth.stream().map(o -> o.getItems()).flatMap(List::stream).collect(Collectors.toList());
+		List<AnyItemValue> items = optionalItemsInMonth.stream().map(AnyItemValueOfDaily::getItems).flatMap(List::stream).collect(Collectors.toList());
 		
 		
 		List<AnyItemOfMonthly> dataToProcess = new ArrayList<>(monthlyOptionalItems);
@@ -513,15 +315,17 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		} else {
 			List<Integer> notExist = new ArrayList<>(MONTHKY_ANYITEM_TO_PROCESS);
 			
-			notExist.removeAll(dataToProcess.stream().map(c -> c.getAnyItemId()).distinct().collect(Collectors.toList()));
+			notExist.removeAll(dataToProcess.stream().map(AnyItemOfMonthly::getAnyItemId).distinct().collect(Collectors.toList()));
 			
 			if(!notExist.isEmpty()){
 				dataToProcess.addAll(monthlyOptionalItem.find(employeeId, yearMonth, closureId, closureDate, notExist));
 			}
 		}
 		
-		double count19 = sumCountItem(items, 19), count21 = sumCountItem(items, 21), 
-				count37 = sumCountItem(items, 37), count45 = dataToProcess.stream().filter(c -> c.getAnyItemId() == 45)
+		double count19 = sumCountItem(items, 19); 
+		double count21 = sumCountItem(items, 21); 
+		double count37 = sumCountItem(items, 37);
+		double count45 = dataToProcess.stream().filter(c -> c.getAnyItemId() == 45)
 											.mapToDouble(c -> c.getTimes().orElseGet(() -> new AnyTimesMonth(0d)).v().doubleValue()).sum();
 		
 		/** 任意項目51: 割合を計算 */
@@ -545,9 +349,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			ClosureDate closureDate, int itemNo, double val, List<AnyItemOfMonthly> monthlyOptionalItems){
 		AnyTimesMonth value = new AnyTimesMonth(val);
 		if(monthlyOptionalItems.stream().anyMatch(m -> m.getAnyItemId() == itemNo)){
-			monthlyOptionalItems.stream().filter(mi -> mi.getAnyItemId() == itemNo).findFirst().ifPresent(mi -> {
-				mi.updateTimes(value);
-			});
+			monthlyOptionalItems.stream().filter(mi -> mi.getAnyItemId() == itemNo).findFirst().ifPresent(mi -> mi.updateTimes(value));
 		} else {
 			monthlyOptionalItems.add(AnyItemOfMonthly.of(employeeId, yearMonth, closureId, 
 					closureDate, itemNo, Optional.empty(), Optional.of(value), Optional.empty()));
@@ -565,29 +367,8 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 					.sum();
 	}
 
-	private int sumActualOvertime(OverTimeFrameTime otf) {
-		return getTimefrom(otf.getOverTimeWork()) + getTimefrom(otf.getTransferTime());
-	}
-
-	private void processOverTime(OverTimeOfDaily ot, int no, int val){
-		Optional<OverTimeFrameTime> frame = ot.getOverTimeWorkFrameTime().stream()
-				.filter(otf -> otf.getOverWorkFrameNo().v() == no).findFirst();
-		if(frame.isPresent()){
-			frame.get().getOverTimeWork().setTime(new AttendanceTime(val));
-		} else {
-			ot.getOverTimeWorkFrameTime().add(new OverTimeFrameTime(new OverTimeFrameNo(no), 
-					TimeDivergenceWithCalculation.sameTime(new AttendanceTime(val)), 
-					TimeDivergenceWithCalculation.sameTime(AttendanceTime.ZERO), 
-					AttendanceTime.ZERO, AttendanceTime.ZERO));
-		}
-	}
-
-	private Map<WorkTypeCode, WorkType> getWorkType(String companyId, Set<String> workTypeCode, Map<WorkTypeCode, WorkType> workTypeMap) {
-		if(workTypeMap != null && !workTypeMap.isEmpty()){
-			return workTypeMap;
-		}
-		return workTypeRepo.getPossibleWorkTypeV2(companyId, new ArrayList<>(workTypeCode))
-							.stream().collect(Collectors.toMap(wt -> wt.getWorkTypeCode(), wt -> wt));
+	private WorkType getWorkType(String companyId, String workTypeCode, Optional<WorkType> workType) {
+		return workType.orElseGet(() -> workTypeRepo.findByPK(companyId, workTypeCode).orElse(null));
 	}	
 	
 	private double getOnDefault(double upper, double downer) {
@@ -595,52 +376,6 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			return 0;
 		}
 		return BigDecimal.valueOf(upper).divide(BigDecimal.valueOf(downer), new MathContext(5, RoundingMode.HALF_UP)).multiply(V100).setScale(1, RoundingMode.HALF_UP).doubleValue();
-	}
-	
-	private boolean isWeekday(WorkTypeUnit atr, WorkTypeClassification oneDay, WorkTypeClassification morning,
-			WorkTypeClassification afternoon) {
-		return (atr ==WorkTypeUnit.OneDay && (oneDay == WorkTypeClassification.Attendance || oneDay == WorkTypeClassification.Shooting))
-				|| (atr == WorkTypeUnit.MonringAndAfternoon && (morning == WorkTypeClassification.Attendance || morning == WorkTypeClassification.Shooting
-															|| afternoon == WorkTypeClassification.Attendance || afternoon == WorkTypeClassification.Shooting));
-	}
-
-	private Integer getTimeStamp(Optional<TimeActualStamp> stamp){
-		if(stamp.isPresent()){
-			return getWorkStamp(stamp.get().getStamp());
-		}
-		return null;
-	}
-	
-	private Integer getWorkStamp(Optional<WorkStamp> stamp){
-		if(stamp.isPresent() && stamp.get().getTimeWithDay() != null){
-			return stamp.get().getTimeWithDay().valueAsMinutes();
-		}
-		return null;
-	}
-	
-	private int getAttendanceTime(AttendanceTime time) {
-		return time == null ? 0 : time.valueAsMinutes();
-	}
-	
-	private int getTimefrom(TimeDivergenceWithCalculation time){
-		return time == null ? 0 : getAttendanceTime(time.getTime());
-	}
-	
-	private FlexTime getFlexTime(Optional<OverTimeOfDaily> overTimeD){ 
-		if(overTimeD.isPresent() && overTimeD.get().getFlexTime() != null ){
-				return overTimeD.get().getFlexTime();
-		}
-		return new FlexTime(TimeDivergenceWithCalculationMinusExist.sameTime(AttendanceTimeOfExistMinus.ZERO), 
-							AttendanceTime.ZERO);
-	}
-	
-	private Optional<OverTimeOfDaily> getOverTime(AttendanceTimeOfDailyPerformance attendanceTime){
-		ActualWorkingTimeOfDaily actual = attendanceTime.getActualWorkingTimeOfDaily();
-		if(actual == null || actual.getTotalWorkingTime() == null
-			|| actual.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily() == null){
-					return Optional.empty();
-		}
-		return actual.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork();
 	}
 
 	private boolean checkWorkType(WorkTypeUnit atr, WorkTypeClassification oneDay, WorkTypeClassification morning,
@@ -654,90 +389,279 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 				|| atr == WorkTypeClassification.SpecialHoliday || atr == WorkTypeClassification.AnnualHoliday;
 	}
 
-	private boolean isNotActualWork(IntegrationOfDaily d, WorkTypeUnit atr, WorkTypeClassification oneDay,
-			WorkTypeClassification morning, WorkTypeClassification afternoon) {
-		AttendanceTime actualWork = d.getAttendanceTimeOfDailyPerformance().get().getActualWorkingTimeOfDaily()
-				.getTotalWorkingTime().getWithinStatutoryTimeOfDaily().getActualWorkTime();
-		return ((atr == WorkTypeUnit.OneDay && (oneDay == WorkTypeClassification.AnnualHoliday 
-				|| oneDay == WorkTypeClassification.SpecialHoliday || oneDay == WorkTypeClassification.SubstituteHoliday))
-			|| (atr == WorkTypeUnit.MonringAndAfternoon && 
-						((morning == WorkTypeClassification.AnnualHoliday && afternoon == WorkTypeClassification.SpecialHoliday) ||
-						(morning == WorkTypeClassification.AnnualHoliday && afternoon == WorkTypeClassification.SubstituteHoliday) ||
-						(morning == WorkTypeClassification.SpecialHoliday && afternoon == WorkTypeClassification.AnnualHoliday) ||
-						(morning == WorkTypeClassification.SpecialHoliday && afternoon == WorkTypeClassification.SubstituteHoliday) ||
-						(morning == WorkTypeClassification.SubstituteHoliday && afternoon == WorkTypeClassification.AnnualHoliday) ||
-						(morning == WorkTypeClassification.SubstituteHoliday && afternoon == WorkTypeClassification.SpecialHoliday))))
-			&&  (actualWork == null || actualWork.valueAsMinutes() == 0);
-	}
-
-	private void processOptionalItem(Supplier<Boolean> condition, AnyItemValueOfDaily optionalItem,
+	private void processOptionalItem(BooleanSupplier condition, List<AnyItemValue> items,
 			BigDecimal valueOn, BigDecimal valueOff, int... itemNo){
-		if(condition.get()){
-			mergeOptionalItemWithNo(optionalItem, valueOn, itemNo);
+		if(condition.getAsBoolean()){
+			addOptionalItemWithNo(items, valueOn, itemNo);
 		} else {
-			updateOptionalItemWithNo(optionalItem, valueOff, itemNo);
+			addOptionalItemWithNo(items, valueOff, itemNo);
 		}
 	}
 	
-	private void processOptionalItem(Supplier<Boolean> condition, AnyItemValueOfDaily optionalItem,
+	private void processOptionalItem(BooleanSupplier condition, List<AnyItemValue> items,
 			Integer valueOn, Integer valueOff, int... itemNo){
-		if(condition.get()){
-			mergeOptionalItemWithNo(optionalItem, valueOn, itemNo);
+		if(condition.getAsBoolean()){
+			addOptionalItemWithNo(items, valueOn, itemNo);
 		} else {
-			updateOptionalItemWithNo(optionalItem, valueOff, itemNo);
+			addOptionalItemWithNo(items, valueOff, itemNo);
 		}
 	}
 	
-	private void mergeOptionalItemWithNo(AnyItemValueOfDaily d, BigDecimal count, int... itemNo) {
+	private void addOptionalItemWithNo(List<AnyItemValue> items, BigDecimal count, int... itemNo) {
 		AnyItemTimes val = count == null ? null : new AnyItemTimes(count);
 		for (int no : itemNo) {
-			if(d.getNo(no).isPresent()){
-				d.getNo(no).get().updateTimes(val);
-			} else {
-				d.getItems().add(new AnyItemValue(new AnyItemNo(no), Optional.ofNullable(val), Optional.empty(), Optional.empty()));
-			}
+			items.add(new AnyItemValue(new AnyItemNo(no), Optional.ofNullable(val), Optional.empty(), Optional.empty()));
 		}
 	}
 	
-	private void updateOptionalItemWithNo(AnyItemValueOfDaily d, BigDecimal count, int... itemNo) {
-		AnyItemTimes val = count == null ? null : new AnyItemTimes(count);
-		for (int no : itemNo) {
-			d.getNo(no).ifPresent(oi -> oi.updateTimes(val));
-		}
-	}
-	
-	private void mergeOptionalItemWithNo(AnyItemValueOfDaily d, Integer time, int... itemNo) {
+	private void addOptionalItemWithNo(List<AnyItemValue> items, Integer time, int... itemNo) {
 		AnyItemTime val = time == null ? null : new AnyItemTime(time);
 		for (int no : itemNo) {
-			if(d.getNo(no).isPresent()){
-				d.getNo(no).get().updateTime(val);
-			} else {
-				d.getItems().add(new AnyItemValue(new AnyItemNo(no), Optional.empty(), Optional.empty(), Optional.ofNullable(val)));
-			}
+			items.add(new AnyItemValue(new AnyItemNo(no), Optional.empty(), Optional.empty(), Optional.ofNullable(val)));
 		}
 	}
 	
-	private void updateOptionalItemWithNo(AnyItemValueOfDaily d, Integer time, int... itemNo) {
-		AnyItemTime val = time == null ? null : new AnyItemTime(time);
-		for (int no : itemNo) {
-			d.getNo(no).ifPresent(oi -> oi.updateTime(val));
-		}
+	@AllArgsConstructor
+	public class DailyStoredProcessResult {
+		List<AnyItemValue> optionalItems;
+		List<OverTimeFrameTime> overTimes;
 	}
 	
-//	private boolean checkOnPair(List<Integer> list1, List<Integer> list2, BiFunction<Integer, Integer, Boolean> onCheck){
-//		for(int i = 0; i < list1.size(); i++){
-//			int val1 = getOnDefault(list1, i);
-//			int val2 = getOnDefault(list2, i);
-//			if(onCheck.apply(val1, val2)){
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
+	private class DailyTimeForCalc {
+		private MutableValue<Integer> actualWorkTime = new MutableValue<>(); 
+		private MutableValue<Integer> withinStatutoryTime = new MutableValue<>(); 
+		private MutableValue<Integer> logonTime = new MutableValue<>(); 
+		private MutableValue<Integer> logoffTime = new MutableValue<>(); 
+		private MutableValue<Integer> leaveGateStartTime = new MutableValue<>(); 
+		private MutableValue<Integer> leaveGateEndTime = new MutableValue<>();
+		private MutableValue<Integer> startTime = new MutableValue<>();
+		private MutableValue<Integer> endTime = new MutableValue<>();
+		private MutableValue<Integer> timeOff = new MutableValue<>();
+		private MutableValue<Integer> timeOn = new MutableValue<>();
+		private MutableValue<Integer> divergenceTime = new MutableValue<>(0);  
+		private MutableValue<Integer> timePreFlex = new MutableValue<>(0);
+		private MutableValue<Integer> flexTime = new MutableValue<>(0); 
+		private MutableValue<Integer> timeFlex = new MutableValue<>(0);
+		private MutableValue<Integer> timePre = new MutableValue<>(0);
+		private MutableValue<Integer> totalOverTime = new MutableValue<>(0);
+		private MutableValue<Integer> preSetDivergence = new MutableValue<>(0); 
+		private MutableValue<Integer> flag19 = new MutableValue<>(0);
+		private MutableValue<Integer> flag21 = new MutableValue<>(0);
+		/** MutableValue<Integer> flag37 = new MutableValue<>(0); */
+		private MutableValue<Boolean> flag35 = new MutableValue<>(false);
+		private MutableValue<Boolean> flag36 = new MutableValue<>(false);
+		private MutableValue<Boolean> isPremiumWorkType = new MutableValue<>(false);
 
-//	private Integer getOnDefault(List<Integer> overTime, int idx) {
-//		return idx >= overTime.size() || overTime.get(idx) == null ? 0 : overTime.get(idx);
-//	}
+		private List<Integer> overTime = new ArrayList<>();
+		private List<Integer> preOver = new ArrayList<>();
+		
+		private String companyId; 
+		private IntegrationOfDaily daily; 
+		private WorkType workType; 
+		private Optional<WorkTimeSetting>  workTimeOpt; 
+		private Optional<PredetemineTimeSetting> predSetOpt;
+		
+		DailyTimeForCalc(String companyId, IntegrationOfDaily daily, WorkType workType, Optional<WorkTimeSetting>  workTimeOpt, Optional<PredetemineTimeSetting> predSetOpt) {
+			this.isPremiumWorkType.set(daily.getWorkInformation().getRecordInfo().getWorkTypeCode().equals(PREMIUM_CODE));
+			this.daily = daily;
+			this.workType = workType;
+			this.workTimeOpt = workTimeOpt;
+			this.predSetOpt = predSetOpt;
+			
+			calcAttendanceLeave(daily);
+			
+			calcPCLogOnInfo(daily);
+			
+			calcAttendanceLeaveGate(daily);
+			
+			calcAttendanceTime(daily);
+			/** calcSomeItemByPredetemineTime(daily, companyId, workTimeOpt, predSetOpt, workType.getDailyWork()); */
+		}
+	
+		<T> T value(Function<DailyTimeForCalc, MutableValue<T>> time) {
+			MutableValue<T> value = time.apply(this);
+			return value.optional().isPresent() ? value.get() : null;
+		}
+		
+		<T> boolean have(Function<DailyTimeForCalc, MutableValue<T>> time) {
+			MutableValue<T> value = time.apply(this);
+			return value.optional().isPresent();
+		}
+		
+		<T> void value(Function<DailyTimeForCalc, MutableValue<T>> time, T val) {
+			MutableValue<T> value = time.apply(this);
+			value.set(val);
+		}
+
+		private void calcAttendanceTime(IntegrationOfDaily daily) {
+			daily.getAttendanceTimeOfDailyPerformance().ifPresent(at -> {
+				actualWorkTime.set(at.getActualWorkingTimeOfDaily().getTotalWorkingTime().getActualTime().valueAsMinutes());
+				withinStatutoryTime.set(at.getActualWorkingTimeOfDaily().getTotalWorkingTime().getWithinStatutoryTimeOfDaily().getActualWorkTime().valueAsMinutes());
+				
+				getOverTime(at).ifPresent(ot -> {
+					ot.getOverTimeWorkFrameTime().stream().forEach(o -> {
+						overTime.add(sumActualOvertime(o) - getAttendanceTime(o.getBeforeApplicationTime()));
+						preOver.add(getAttendanceTime(o.getBeforeApplicationTime()));
+					});
+					
+					FlexTime flex = getFlexTime(ot.getFlexTime());
+					
+					timePreFlex.set(getAttendanceTime(flex.getBeforeApplicationTime()));
+					flexTime.set(getAttendanceTime(flex.getFlexTime().getTime())); 
+					timeFlex.set(flexTime.get() > 0 ? flexTime.get() - timePreFlex.get() : 0);
+					timePre.set(preOver.stream().mapToInt(t -> t).sum() + timePreFlex.get());
+					totalOverTime.set(overTime.stream().mapToInt(t -> t).sum() + preOver.stream().mapToInt(t -> t).sum() + flexTime.get());
+				});
+			});
+		}
+
+		private void calcAttendanceLeaveGate(IntegrationOfDaily daily) {
+			daily.getAttendanceLeavingGate().ifPresent(alg -> 
+				alg.getAttendanceLeavingGate(new WorkNo(1)).ifPresent(alw -> {
+					alw.getAttendance().ifPresent(as -> { 
+						int time = as.getTimeWithDay() == null ? 0 : as.getTimeWithDay().valueAsMinutes();
+						leaveGateStartTime.set(time); 
+						timeOn.set(time);
+					});
+					alw.getLeaving().ifPresent(as -> leaveGateEndTime.set(as.getTimeWithDay() == null ? 0 : as.getTimeWithDay().valueAsMinutes()));
+				})
+			);
+		}
+
+		private void calcPCLogOnInfo(IntegrationOfDaily daily) {
+			daily.getPcLogOnInfo().ifPresent(al -> 
+				al.getLogOnInfo(new PCLogOnNo(1)).ifPresent(loi -> {
+					loi.getLogOn().ifPresent(s -> logonTime.set(s.valueAsMinutes()));
+					loi.getLogOff().ifPresent(s -> logoffTime.set(s.valueAsMinutes()));
+				})
+			);
+		}
+
+		private void calcAttendanceLeave(IntegrationOfDaily daily) {
+			daily.getAttendanceLeave().ifPresent(al -> 
+				al.getAttendanceLeavingWork(1).ifPresent(alw -> {
+					alw.getAttendanceStamp().ifPresent(as -> as.getStamp().ifPresent(s -> startTime.set(s.getTimeWithDay() == null ? 0 : s.getTimeWithDay().valueAsMinutes())));
+					alw.getLeaveStamp().ifPresent(as -> as.getStamp().ifPresent(s -> endTime.set(s.getTimeWithDay() == null ? 0 : s.getTimeWithDay().valueAsMinutes())));
+				})
+			);
+		}
+		
+		public void calcSomeItemByPredetemineTime(boolean isItem12On) {
+			if(daily.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
+				WorkTimeSetting wtime = workTimeOpt.orElseGet(() -> workTimeRepository.findByCode(companyId, daily.getWorkInformation().getRecordInfo().getWorkTimeCode().v()).orElse(null));
+				PredetemineTimeSetting predSet = predSetOpt.orElseGet(() -> predetermineRepo.findByWorkTimeCode(companyId, daily.getWorkInformation().getRecordInfo().getWorkTimeCode().v()).orElse(null));
+				if(wtime != null && predSet != null) {
+					calcValueForSomeItem(daily, predSet, isItem12On);
+					
+					calcPreSetDiverence(wtime, workType.getDailyWork(), predSet);
+				}		
+			}
+		}
+		
+		private void calcPreSetDiverence(WorkTimeSetting wtime, DailyWork dailyWork, PredetemineTimeSetting predSet) {
+					
+			if(dailyWork.isWeekDayAttendance() && !(wtime.getWorkTimeDivision().getWorkTimeDailyAtr().isFlex())) {
+				//所定の開始時刻
+				TimeWithDayAttr startOclock = new TimeWithDayAttr(0);
+				Optional<TimezoneUse> firstTimeZone =  predSet.getPrescribedTimezoneSetting().getLstTimezone().stream().filter(tc -> tc.getWorkNo() == 1).findFirst();
+				if(firstTimeZone.isPresent()) {
+					startOclock = firstTimeZone.get().getStart();
+				}
+				//出勤時刻
+				if(have(t -> t.startTime)) {
+					preSetDivergence.set(startOclock.backByMinutes(startTime.get()).valueAsMinutes());
+				}
+			}
+		}
+
+		private void calcValueForSomeItem(IntegrationOfDaily daily, PredetemineTimeSetting predSet, boolean isItem12On) {
+			predSet.getTimeSheetOf(1).ifPresent(timeSheet -> {
+				int preSetAtten01 = timeSheet.getStart().valueAsMinutes();
+				int preSetLeave01 = timeSheet.getEnd().valueAsMinutes();
+				
+				if(have(t -> t.startTime) && startTime.get() < preSetAtten01 && isItem12On) {
+					flag35.set(true);
+				}
+				
+				if(have(t -> t.endTime) && endTime.get() > preSetLeave01 && isItem12On) {
+					flag36.set(true);
+				}
+				
+				if(!flag35.get() && !flag36.get()) {
+					return;
+				}
+				
+				calc19And21Item(daily, preSetAtten01, preSetLeave01);
+			});
+		}
+
+		private void calc19And21Item(IntegrationOfDaily daily, int preSetAtten01, int preSetLeave01) {
+			if(daily.getWorkInformation().getScheduleInfo().getWorkTimeCode() != null) {
+				daily.getWorkInformation().getScheduleTimeSheet(new WorkNo(1)).ifPresent(scheTimeSheet -> {
+					int scheWorkAtten = scheTimeSheet.getAttendance().valueAsMinutes();
+					int scheWorkLeave = scheTimeSheet.getLeaveWork().valueAsMinutes();
+					
+					if(flag35.get() && have(t -> t.startTime) && preSetAtten01 > scheWorkAtten) {
+						if(startTime.get() >= scheWorkAtten) {
+							flag19.set(flag19.get() + 1);
+						}
+						if(startTime.get() < scheWorkAtten) {
+							flag21.set(flag21.get() + 1);
+						}
+					}
+					
+					if(flag36.get() && have(t -> t.endTime) && preSetLeave01 < scheWorkLeave) {
+						if(endTime.get() <= scheWorkLeave) {
+							flag19.set(flag19.get() + 1);
+						}
+						if(endTime.get() > scheWorkLeave) {
+							flag21.set(flag21.get() + 1);
+						}
+					}
+					/**
+					if (flag35.get() && preSetAtten01 <= scheWorkAtten) {
+						flag37.set(flag37.get() + 1);
+					}
+					if(flag36.get() && preSetLeave01 >= scheWorkLeave) {
+						flag37.set(flag37.get() + 1);
+					}
+					*/
+				});
+			}
+		}
+
+		private int sumActualOvertime(OverTimeFrameTime otf) {
+			return getTimefrom(otf.getOverTimeWork()) + getTimefrom(otf.getTransferTime());
+		}
+		
+		private int getAttendanceTime(AttendanceTime time) {
+			return time == null ? 0 : time.valueAsMinutes();
+		}
+		
+		private int getAttendanceTime(AttendanceTimeOfExistMinus time) {
+			return time == null ? 0 : time.valueAsMinutes();
+		}
+		
+		private int getTimefrom(TimeDivergenceWithCalculation time){
+			return time == null ? 0 : getAttendanceTime(time.getTime());
+		}
+		
+		private FlexTime getFlexTime(FlexTime flexTime){ 
+			if(flexTime != null ){
+				return flexTime;
+			}
+			return new FlexTime(TimeDivergenceWithCalculationMinusExist.sameTime(AttendanceTimeOfExistMinus.ZERO), AttendanceTime.ZERO);
+		}
+		
+		private Optional<OverTimeOfDaily> getOverTime(AttendanceTimeOfDailyPerformance attendanceTime){
+			ActualWorkingTimeOfDaily actual = attendanceTime.getActualWorkingTimeOfDaily();
+			if(actual == null || actual.getTotalWorkingTime() == null
+				|| actual.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily() == null){
+						return Optional.empty();
+			}
+			return actual.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork();
+		}
+	}
 
 }
 

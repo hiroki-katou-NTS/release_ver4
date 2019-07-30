@@ -1,14 +1,11 @@
 package nts.uk.ctx.at.record.dom.dailyprocess.calc;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
-import nts.uk.ctx.at.shared.dom.worktype.WorkType;
-import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;
 
 /**
  * 日別実績の勤怠時間と任意項目を同時更新し、ストアドを実行するためのサービス
@@ -21,13 +18,7 @@ public interface AdTimeAndAnyItemAdUpService {
 	
 	List<IntegrationOfDaily> addAndUpdate(List<IntegrationOfDaily> daily);
 	
-	List<IntegrationOfDaily> runStoredProcess(List<IntegrationOfDaily> daily, Map<WorkTypeCode, WorkType> workTypes);
-	
-	List<IntegrationOfDaily> runStoredProcess(List<IntegrationOfDaily> daily);
-	
 	List<IntegrationOfDaily> saveOnly(List<IntegrationOfDaily> daily);
-	
-	List<IntegrationOfDaily> addAndUpdate(List<IntegrationOfDaily> daily, Map<WorkTypeCode, WorkType> workTypes);
 	
 	IntegrationOfDaily addAndUpdate(IntegrationOfDaily daily);
 }

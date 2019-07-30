@@ -182,11 +182,11 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 				Optional.of(commonComSetting.getCompanySetting()));
 		IntegrationOfDaily x = lstCal.get(0);
 		workRepository.updateByKeyFlush(x.getWorkInformation());
-		Map<WorkTypeCode, WorkType> workTypes = new HashMap<WorkTypeCode, WorkType>();
-		workTypeInfor.ifPresent(wti -> {
-			workTypes.put(wti.getWorkTypeCode(), wti);
-		});
-		timeAndAnyItemUpService.addAndUpdate(lstCal, workTypes);
+//		Map<WorkTypeCode, WorkType> workTypes = new HashMap<WorkTypeCode, WorkType>();
+//		workTypeInfor.ifPresent(wti -> {
+//			workTypes.put(wti.getWorkTypeCode(), wti);
+//		});
+		timeAndAnyItemUpService.addAndUpdate(lstCal);
 		dailyReposiroty.updateByKey(commonPara.getIntegrationOfDaily().getEditState());
 		
 		employeeError.removeParam(commonPara.getSid(), commonPara.getYmd());
