@@ -87,8 +87,6 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	@Inject
 	private AnyItemOfMonthlyRepository monthlyOptionalItem;
 	
-	/*所定時間帯再取得*/
-	
 	private static final BigDecimal COUNT_ON = BigDecimal.ONE;
 	private static final BigDecimal COUNT_OFF = BigDecimal.ZERO;
 	private static final BigDecimal V100 = BigDecimal.valueOf(100);
@@ -115,15 +113,17 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	
 	private List<AnyItemValue> calcOptionalItem(WorkType workType, DailyTimeForCalc dailyTime) {
 		List<AnyItemValue> result = new ArrayList<>();  
-		WorkTypeUnit atr = workType.getDailyWork().getWorkTypeUnit();
-		DailyWork dailyWork = workType.getDailyWork();
 		
-		boolean isWorkType = checkWorkType(atr, dailyWork.getOneDay(), dailyWork.getMorning(), dailyWork.getAfternoon()),
-				isGoToWork = dailyTime.have(t -> t.startTime), isLogoned = dailyTime.have(t -> t.logonTime), 
-				isLogoffed = dailyTime.have(t -> t.logoffTime), isLeaveGateStart = dailyTime.have(t -> t.leaveGateStartTime),
-				isLeaveGateEnd = dailyTime.have(t -> t.leaveGateEndTime), isLeaved = dailyTime.have(t -> t.endTime),
-				isActualWork = dailyTime.have(t -> t.actualWorkTime) && dailyTime.value(t -> t.actualWorkTime) > 0,
-				isNotWorkInStatutory = !dailyTime.have(t -> t.withinStatutoryTime) || dailyTime.value(t -> t.withinStatutoryTime) == 0;
+		boolean isWorkType = checkWorkType(workType.getDailyWork().getWorkTypeUnit(), workType.getDailyWork().getOneDay(),
+											workType.getDailyWork().getMorning(), workType.getDailyWork().getAfternoon());
+		boolean isGoToWork = dailyTime.have(t -> t.startTime);
+		boolean isLogoned = dailyTime.have(t -> t.logonTime);
+		boolean isLogoffed = dailyTime.have(t -> t.logoffTime);
+		boolean isLeaveGateStart = dailyTime.have(t -> t.leaveGateStartTime);
+		boolean isLeaveGateEnd = dailyTime.have(t -> t.leaveGateEndTime);
+		boolean isLeaved = dailyTime.have(t -> t.endTime);
+		boolean isActualWork = dailyTime.have(t -> t.actualWorkTime) && dailyTime.value(t -> t.actualWorkTime) > 0;
+		boolean isNotWorkInStatutory = !dailyTime.have(t -> t.withinStatutoryTime) || dailyTime.value(t -> t.withinStatutoryTime) == 0;
 		
 		/** 任意項目1: ログオン時刻がnullではない事が条件 */
 		processOptionalItem(() -> isLogoned && isWorkType && isActualWork, result, COUNT_ON, COUNT_OFF, 1);
@@ -152,7 +152,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		processOptionalItem(() -> isWorkType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 9);
 
 		/** 任意項目11: 実働就業時間 = 0 かつ 勤務種類が(年休、特休、代休) である事が条件 */
-		processOptionalItem(() -> isNotWorkInStatutory && isWorkType, result, COUNT_ON, COUNT_OFF, 11);
+		processOptionalItem(() -> isWorkType && isNotWorkInStatutory, result, COUNT_ON, COUNT_OFF, 11);
 		
 		/** 任意項目12 */
 		processOptionalItem(() -> isWorkType, result, COUNT_ON, COUNT_OFF, 12);
@@ -172,18 +172,11 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		dailyTime.value(t -> t.timeOff, 0);
 		
 		/** 任意項目8: 両方時刻が入っている場合のみ乖離時間を計算する */
-		if(isGoToWork && isLeaveGateStart) {
-			int divergenceTime = dailyTime.value(t -> t.startTime) < dailyTime.value(t -> t.leaveGateStartTime) 
-					? 0 : dailyTime.value(t -> t.startTime) - dailyTime.value(t -> t.leaveGateStartTime);
-			dailyTime.value(t -> t.divergenceTime, divergenceTime);
-			dailyTime.value(t -> t.timeOn, divergenceTime);
-		} 
+		dailyTime.calcStartDivergenceTime();
 		processOptionalItem(() -> isGoToWork && isLeaveGateStart, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 8);
 		
 		/** 任意項目10 */
-		if(isLeaved && isLeaveGateEnd) {
-			dailyTime.value(t -> t.timeOn, dailyTime.value(t -> t.leaveGateEndTime) - dailyTime.value(t -> t.endTime));
-		}
+		dailyTime.calcEndDivergenceTime();
 		processOptionalItem(() -> isLeaved && isLeaveGateEnd, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 10);
 		
 		dailyTime.value(t -> t.timeOn, 1);
@@ -208,15 +201,13 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		/** 任意項目29：  ??? */
 		processOptionalItem(() -> dailyTime.value(t -> t.preSetDivergence) > 0, result, dailyTime.value(t -> t.preSetDivergence), 0, 29);
 		
+		dailyTime.calcSomeItemByPredetemineTime(result.parallelStream().anyMatch(c -> c.getItemNo().v() == 12 && c.getTimes().get().v().equals(COUNT_ON)));
+		
 		/** 任意項目35 */
 		processOptionalItem(() -> dailyTime.value(t -> t.flag35), result, COUNT_ON, COUNT_OFF, 35);
 		
 		/** 任意項目36 */
 		processOptionalItem(() -> dailyTime.value(t -> t.flag36), result, COUNT_ON, COUNT_OFF, 36);
-		
-		boolean isItem12On = result.parallelStream().anyMatch(c -> c.getItemNo().v() == 12 && c.getTimes().get().v().equals(COUNT_ON));
-
-		dailyTime.calcSomeItemByPredetemineTime(isItem12On);
 		
 		/** 任意項目19 */
 		processOptionalItem(() -> dailyTime.value(t -> t.flag19) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag19)), COUNT_OFF, 19);
@@ -224,9 +215,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		/** 任意項目21 */
 		processOptionalItem(() -> dailyTime.value(t -> t.flag21) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag21)), COUNT_OFF, 21);
 		
-		/** 任意項目37 
-		processOptionalItem(() -> dailyTime.value(t -> t.flag37) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag37)), COUNT_OFF, 37);
-		*/
+		/** 任意項目37 processOptionalItem(() -> dailyTime.value(t -> t.flag37) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag37)), COUNT_OFF, 37); */
 		
 		/** 任意項目40: フレックス時間がマイナスである事が条件 */
 		processOptionalItem(() -> dailyTime.value(t -> t.flexTime) < 0, result, dailyTime.value(t -> t.flexTime) * -1, dailyTime.value(t -> t.timeOff), 40);
@@ -246,7 +235,6 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	private List<OverTimeFrameTime> calcOverTime(IntegrationOfDaily daily, WorkType workType, boolean isGoToWork) {
 		if(DEFAULT_WORK_TYPE.equals(daily.getWorkInformation().getRecordInfo().getWorkTypeCode())) {
 			return setOverTime(30, 60);
-			
 		}
 		
 		if(DEFAULT_WORK_TIME.contains(daily.getWorkInformation().getRecordInfo().getWorkTimeCode()) && workType != null) {
@@ -262,8 +250,6 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		return new ArrayList<>();
 	}
 	
-	
-
 	private List<OverTimeFrameTime> setOverTime(int timeFor4, int timeFor5) {
 		List<OverTimeFrameTime> overTimes = new ArrayList<>();
 		
@@ -493,6 +479,21 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			value.set(val);
 		}
 
+		public void calcStartDivergenceTime() {
+			if (!have(t -> t.startTime) || !have(t -> leaveGateStartTime)) return;
+			
+			int divergence = startTime.get() < leaveGateStartTime.get() ? 0 : startTime.get() - leaveGateStartTime.get();
+			
+			this.divergenceTime.set(divergence);
+			this.timeOn.set(divergence);
+		}
+		
+		public void calcEndDivergenceTime() {
+			if (!have(t -> t.endTime) || !have(t -> leaveGateEndTime)) return;
+			
+			this.timeOn.set(leaveGateEndTime.get() - endTime.get());
+		}
+		
 		private void calcAttendanceTime(IntegrationOfDaily daily) {
 			daily.getAttendanceTimeOfDailyPerformance().ifPresent(at -> {
 				actualWorkTime.set(at.getActualWorkingTimeOfDaily().getTotalWorkingTime().getActualTime().valueAsMinutes());
