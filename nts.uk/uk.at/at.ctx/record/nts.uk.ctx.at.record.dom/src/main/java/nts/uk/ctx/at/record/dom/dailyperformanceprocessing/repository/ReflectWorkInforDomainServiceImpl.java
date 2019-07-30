@@ -330,7 +330,7 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 		// start --
 		// パラメータ「再作成区分」を確認する - rerun
 		if (reCreateAttr == ExecutionType.RERUN) {
-			this.deleteWorkInfoOfDaiPerService.deleteWorkInfoOfDaiPerService(employeeId, day);
+			//this.deleteWorkInfoOfDaiPerService.deleteWorkInfoOfDaiPerService(employeeId, day);
 
 			this.self.reflect(companyId, employeeId, day, empCalAndSumExecLogID, reCreateAttr, reCreateWorkType,
 					employeeGeneralInfoImport, stampReflectionManagement, mapWorkingConditionItem, mapDateHistoryItem,

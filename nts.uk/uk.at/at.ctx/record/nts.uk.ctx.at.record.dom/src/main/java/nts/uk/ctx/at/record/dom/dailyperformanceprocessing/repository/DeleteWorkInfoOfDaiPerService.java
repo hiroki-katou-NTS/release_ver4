@@ -122,7 +122,7 @@ public class DeleteWorkInfoOfDaiPerService {
 		this.shortTimeOfDailyPerformanceRepository.deleteByEmployeeIdAndDate(employeeId, day);
 		// AttendanceTimeByWorkOfDailyRepository
 		this.specificDateAttrOfDailyPerforRepo.deleteByEmployeeIdAndDate(employeeId, day);
-		this.employeeDailyPerErrorRepository.removeParam(employeeId, day);
+//		this.employeeDailyPerErrorRepository.removeParam(employeeId, day);
 		// remove approval State from workflow
 //		this.appRootStateConfirmAdapter.deleteApprovalByEmployeeIdAndDate(employeeId, day);
 		this.anyItemValueOfDailyRepo.deleteAnyItemValueOfDaily(employeeId, day);
