@@ -20,7 +20,6 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.ReflectBre
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.AdTimeAndAnyItemAdUpService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CalculateDailyRecordServiceCenter;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CalculateOption;
-import nts.uk.ctx.at.record.dom.dailyprocess.calc.CommonCompanySettingForCalc;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.editstate.enums.EditStateSetting;
@@ -40,15 +39,12 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.Err
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageResource;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionContent;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
-import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
-import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeIsFluidWork;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
-import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
@@ -59,15 +55,11 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	@Inject
 	private CalculateDailyRecordServiceCenter calService;
 	@Inject
-	private CommonCompanySettingForCalc commonComSetting;
-	@Inject
 	private AdTimeAndAnyItemAdUpService timeAndAnyItemUpService;
 	@Inject
 	private ReflectBreakTimeOfDailyDomainService breaktimeSevice;
 	@Inject
 	private BreakTimeOfDailyPerformanceRepository breakTimeRepo;
-	@Inject
-	private WorkingConditionItemRepository workingCondition;
 	@Inject
 	private TimeLeavingOfDailyService timeLeavingService;
 	@Inject
@@ -107,10 +99,6 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	@Override
 	public void reflectScheWorkTimeWorkType(CommonReflectParameter commonPara, boolean isPre,
 			IntegrationOfDaily dailyInfor) {
-		//予定勤種を反映できるかチェックする
-		/*if(!this.checkReflectScheWorkTimeType(commonPara, isPre, commonPara.getWorkTimeCode())) {
-			return dailyInfor;
-		}*/
 		//予定勤種の反映		
 		ReflectParameter para = new ReflectParameter(commonPara.getEmployeeId(), commonPara.getBaseDate(), commonPara.getWorkTimeCode(), 
 				commonPara.getWorkTypeCode(), false);
@@ -160,10 +148,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 						commonPara.getIntegrationOfDaily());
 				if(commonPara.getAppType() != ApplicationType.BREAK_TIME_APPLICATION ||
 						(commonPara.getAppType() == ApplicationType.BREAK_TIME_APPLICATION && lstTime.isEmpty())) {
-					Optional<WorkingConditionItem> optWorkingCondition = workingCondition.getBySidAndPeriodOrderByStrD(commonPara.getSid(),
-							new DatePeriod(commonPara.getYmd(),commonPara.getYmd())).stream().findFirst();
 					//出退勤時刻を補正する
-					timeLeavingService.correct(companyId, commonPara.getIntegrationOfDaily(), optWorkingCondition, workTypeInfor, true).getData();	
+					timeLeavingService.correct(companyId, commonPara.getIntegrationOfDaily(), Optional.empty(), workTypeInfor, true).getData();	
 				}				
 				// 申請された時間を補正する
 				overTimeService.correct(commonPara.getIntegrationOfDaily(), workTypeInfor, true);
@@ -171,16 +157,16 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 				if(workTypeInfor.isPresent() && (!workTypeInfor.get().getDailyWork().isHolidayWork()
 						|| (workTypeInfor.get().getDailyWork().isHolidayWork() && !this.isReflectBreakTime(commonPara.getIntegrationOfDaily().getEditState())))) {
 					//休憩時間帯を補正する	
-					breakTimeDailyService.correct(companyId, commonPara.getIntegrationOfDaily(), workTypeInfor, true).getData();	
-				}				
-
-			}			
+					breakTimeDailyService.correct(companyId, commonPara.getIntegrationOfDaily(), workTypeInfor, false).getData();
+				}
+			}
 		}
 		
 		List<IntegrationOfDaily> lstCal = calService.calculateForSchedule(CalculateOption.asDefault(),
 				Arrays.asList(commonPara.getIntegrationOfDaily()) , 
-				Optional.of(commonComSetting.getCompanySetting()));
+				Optional.empty());
 		IntegrationOfDaily x = lstCal.get(0);
+		breakTimeRepo.update(commonPara.getIntegrationOfDaily().getBreakTime());
 		workRepository.updateByKeyFlush(x.getWorkInformation());
 //		Map<WorkTypeCode, WorkType> workTypes = new HashMap<WorkTypeCode, WorkType>();
 //		workTypeInfor.ifPresent(wti -> {
@@ -188,11 +174,9 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 //		});
 		timeAndAnyItemUpService.addAndUpdate(lstCal);
 		dailyReposiroty.updateByKey(commonPara.getIntegrationOfDaily().getEditState());
-		
-		employeeError.removeParam(commonPara.getSid(), commonPara.getYmd());
-		if(!x.getEmployeeError().isEmpty()) {
-			employeeError.insert(x.getEmployeeError());	
-		}
+		Map<String, List<GeneralDate>> param = new HashMap<>();
+		param.put(commonPara.getSid(), Arrays.asList(commonPara.getYmd()));
+		employeeError.repeatInsertNotOTK(param, x.getEmployeeError());
 	}
 
 	@Override
@@ -220,7 +204,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 				if(lstBeforeBreakTimeInfor.size() == 1 && breakTimeInfor != null
 						&& lstBeforeBreakTimeInfor.get(0).getBreakType() != breakTimeInfor.getBreakType()) {
 					integrationOfDaily.getBreakTime().add(breakTimeInfor);
-					breakTimeRepo.updateV2(integrationOfDaily.getBreakTime());
+					//breakTimeRepo.updateV2(integrationOfDaily.getBreakTime());
 				}
 				return integrationOfDaily;
 			}
@@ -270,12 +254,18 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 					}
 				}
 			}
-		}			
-				
-		beforBTWork.setBreakTimeSheets(lstBreakOutput);
-		breakTimeRepo.update(beforBTWork);
-		beforeBreakTime.add(beforBTWork);
-		integrationOfDaily.setBreakTime(beforeBreakTime);
+		}
+		lstBeforeBreakTimeInfor.add(beforBTWork);
+		if(!beforeBreakTime.isEmpty()) {
+			integrationOfDaily.setBreakTime(lstBeforeBreakTimeInfor);
+		} else {
+			integrationOfDaily.setBreakTime(integrationOfDaily.getBreakTime().stream().map(x -> {
+				if(x.getBreakType() == BreakType.REFER_WORK_TIME) {
+					return new BreakTimeOfDailyPerformance(x.getEmployeeId(), x.getBreakType(), lstBreakOutput, x.getYmd());
+				}
+				return x;
+			}).collect(Collectors.toList()));
+		}
 		return integrationOfDaily;
 	}
 
