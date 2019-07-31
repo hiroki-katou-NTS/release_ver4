@@ -36,7 +36,7 @@ public class RemainCreateInforByScheDataImpl implements RemainCreateInforByScheD
 
 	private List<ScheRemainCreateInfor> lstResult(List<BasicSchedule> lstScheData, String sid){
 		List<ScheRemainCreateInfor> lstOutputData = new ArrayList<>();
-		for (BasicSchedule scheData : lstScheData) {
+		lstScheData.stream().forEach(scheData -> {
 			ScheRemainCreateInfor outData = new ScheRemainCreateInfor(sid,
 					scheData.getDate(),
 					scheData.getWorkTypeCode(),
@@ -45,7 +45,7 @@ public class RemainCreateInforByScheDataImpl implements RemainCreateInforByScheD
 					false,
 					scheData.getConfirmedAtr() == ConfirmedAtr.CONFIRMED ? true : false); //TODO xac nhna lai
 			lstOutputData.add(outData);
-		}
+		});		
 		return lstOutputData;
 	}
 }

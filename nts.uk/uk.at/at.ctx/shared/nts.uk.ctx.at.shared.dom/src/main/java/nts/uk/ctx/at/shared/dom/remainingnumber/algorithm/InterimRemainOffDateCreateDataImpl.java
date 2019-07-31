@@ -158,7 +158,8 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 		if(workTypeData.getDailyWork().isOneDay()) {
 			workTypeClass = workTypeData.getDailyWork().getOneDay();
 			outputData.setWorkTypeClass(workTypeClass);
-			lstOutputData.add(this.createWithOneDayWorkType(cid, workTypeData, outputData));
+			this.createWithOneDayWorkType(cid, workTypeData, outputData);
+			lstOutputData.add(outputData);
 			//勤務区分をチェックする
 			return lstOutputData;
 		} else {
@@ -167,7 +168,7 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 			if(this.lstZansu().contains(workTypeMorning)) {
 				WorkTypeRemainInfor morning = new WorkTypeRemainInfor(outputData.getWorkTypeCode(), workTypeMorning, createAtr, 
 						outputData.getOccurrenceDetailData(), outputData.getSpeHolidayDetailData()); 
-				morning = this.createWithOneDayWorkType(cid, workTypeData, morning);
+				this.createWithOneDayWorkType(cid, workTypeData, morning);
 				lstOutputData.add(morning);
 			}
 			//午後
@@ -175,7 +176,7 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 			if(this.lstZansu().contains(workTypAfternoon)) {
 				WorkTypeRemainInfor after =  new WorkTypeRemainInfor(outputData.getWorkTypeCode(), workTypAfternoon, createAtr,
 						outputData.getOccurrenceDetailData(), outputData.getSpeHolidayDetailData());
-				after = this.createWithOneDayWorkType(cid, workTypeData, after);
+				this.createWithOneDayWorkType(cid, workTypeData, after);
 				lstOutputData.add(after);
 			}
 		}
@@ -184,11 +185,11 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 	}
 
 	@Override
-	public WorkTypeRemainInfor createWithOneDayWorkType(String cid, WorkType workType, WorkTypeRemainInfor dataOutput) {
+	public void createWithOneDayWorkType(String cid, WorkType workType, WorkTypeRemainInfor dataOutput) {
 		//アルゴリズム「残数発生使用対象の勤務種類の分類かを判定」を実行する
 		JudgmentTypeOfWorkType judmentType = this.judgmentType(dataOutput.getWorkTypeClass());
 		if(judmentType == JudgmentTypeOfWorkType.REMAINOCCNOTCOVER) {
-			return dataOutput;
+			return;
 		}
 		List<WorkTypeSet> workTypeSetList = workType.getWorkTypeSetList();
 		double days = 0;
@@ -210,19 +211,16 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 				}
 			}
 			dataOutput.setSpeHolidayDetailData(lstSpeUseDetail);
-			return dataOutput;
+			return;
 		} else if(dataOutput.getWorkTypeClass() == WorkTypeClassification.HolidayWork) {
 			//代休を発生させるかをチェックする
-			for (WorkTypeSet workTypeSet : workTypeSetList) {
-				if(workTypeSet.getGenSubHodiday() == WorkTypeSetCheck.NO_CHECK) {
-					return dataOutput;
-				}
-			}
+			if(!workTypeSetList.stream().filter(x -> x.getGenSubHodiday() == WorkTypeSetCheck.NO_CHECK)
+					.collect(Collectors.toList()).isEmpty()) {
+				return;
+			}			
 		}
 
-		return this.setData(dataOutput, days, dataOutput.getWorkTypeClass());
-
-		
+		this.setData(dataOutput, days, dataOutput.getWorkTypeClass());
 	}	
 	/**
 	 * 残数発生使用対象の勤務種類の分類かを判定
@@ -292,7 +290,7 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 			return dataOutput;
 		}
 		//勤務種類の分類に対応する残数発生使用明細を設定する		
-		dataOutput = this.setData(dataOutput, 0.5, workType.getDailyWork().getMorning());
+		this.setData(dataOutput, 0.5, workType.getDailyWork().getMorning());
 		//午後
 		//アルゴリズム「残数発生使用対象の勤務種類の分類かを判定」を実行する
 		JudgmentTypeOfWorkType judgmentTypePM = this.judgmentType(workType.getDailyWork().getAfternoon());
@@ -300,7 +298,7 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 			return dataOutput;
 		}
 		//勤務種類の分類に対応する残数発生使用明細を設定する
-		dataOutput = this.setData(dataOutput, 0.5, workType.getDailyWork().getAfternoon());
+		this.setData(dataOutput, 0.5, workType.getDailyWork().getAfternoon());
 		return dataOutput;
 	}
 	/**
@@ -310,8 +308,14 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 	 * @param workTypeClass
 	 * @return
 	 */
-	private WorkTypeRemainInfor setData(WorkTypeRemainInfor dataOutput, double days, WorkTypeClassification workTypeClass) {
-		for (OccurrenceUseDetail detail : dataOutput.getOccurrenceDetailData()) {
+	private void setData(WorkTypeRemainInfor dataOutput, double days, WorkTypeClassification workTypeClass) {
+		dataOutput.setOccurrenceDetailData(dataOutput.getOccurrenceDetailData().stream().map(x -> {
+			if(x.getWorkTypeAtr() == workTypeClass) {
+				return new OccurrenceUseDetail(days, true, x.getWorkTypeAtr());
+			} 
+			return x;
+		}).collect(Collectors.toList()));
+		/*for (OccurrenceUseDetail detail : dataOutput.getOccurrenceDetailData()) {
 			if(detail.getWorkTypeAtr() == workTypeClass) {
 				dataOutput.getOccurrenceDetailData().remove(detail);
 				detail.setDays(days);
@@ -319,8 +323,7 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 				dataOutput.getOccurrenceDetailData().add(detail);
 				break;
 			}
-		}
-		return dataOutput;
+		}*/
 	}
 
 	@Override

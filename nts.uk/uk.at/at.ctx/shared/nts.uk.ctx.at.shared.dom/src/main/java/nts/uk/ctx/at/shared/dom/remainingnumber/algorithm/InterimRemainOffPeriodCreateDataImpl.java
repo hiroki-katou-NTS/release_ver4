@@ -83,7 +83,7 @@ public class InterimRemainOffPeriodCreateDataImpl implements InterimRemainOffPer
 					&& inputParam.getAppData().get(0).getLstAppDate().contains(loopDate)) {
 				continue;
 			}
-			if(employmentHolidaySetting.getEmploymentCode() == null) {
+			if(employmentHolidaySetting == null || employmentHolidaySetting.getEmploymentCode() == null) {
 				lstDateEmployment = lstEmployment.stream()
 						.filter(x -> x.getPeriod().start().beforeOrEquals(loopDate) && x.getPeriod().end().afterOrEquals(loopDate))
 						.collect(Collectors.toList());			
@@ -157,14 +157,14 @@ public class InterimRemainOffPeriodCreateDataImpl implements InterimRemainOffPer
 	public List<EmploymentHolidayMngSetting> lstEmpHolidayMngSetting(String cid, List<AffPeriodEmpCodeImport> lstEmployment) {
 		List<EmploymentHolidayMngSetting> lstEmplSetting = new ArrayList<>();
 		//雇用別休暇管理設定(List)を作成する
-		for (AffPeriodEmpCodeImport emplData : lstEmployment) {
+		lstEmployment.stream().forEach(emplData -> {
 			//ドメインモデル「雇用振休管理設定」を取得する
 			Optional<EmpSubstVacation> optEmpSubData = empSubsRepos.findById(cid, emplData.getEmploymentCode());
 			//ドメインモデル「雇用代休管理設定」を取得する
 			CompensatoryLeaveEmSetting empSetting = empLeaveSetRepos.find(cid, emplData.getEmploymentCode());
 			EmploymentHolidayMngSetting employmentSetting = new EmploymentHolidayMngSetting(emplData.getEmploymentCode(), optEmpSubData, empSetting);
 			lstEmplSetting.add(employmentSetting);
-		}
+		});
 		return lstEmplSetting;
 	}
 
