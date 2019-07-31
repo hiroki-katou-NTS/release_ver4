@@ -86,6 +86,7 @@ public class OverTimeOfDaily {
 	//残業枠時間帯
 	private List<OverTimeFrameTimeSheet> overTimeWorkFrameTimeSheet;
 	//残業枠時間
+	@Setter
 	private List<OverTimeFrameTime> overTimeWorkFrameTime;
 	//法定外深夜時間
 	private Finally<ExcessOverTimeWorkMidNightTime> excessOverTimeWorkMidNightTime; 

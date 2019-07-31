@@ -23,6 +23,7 @@ import nts.uk.ctx.at.record.dom.actualworkinghours.daily.midnight.MidnightTimeSh
 import nts.uk.ctx.at.record.dom.adapter.personnelcostsetting.PersonnelCostSettingAdapter;
 import nts.uk.ctx.at.record.dom.adapter.personnelcostsetting.PersonnelCostSettingImport;
 import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPerfor;
+import nts.uk.ctx.at.record.dom.attendanceitem.StoredProcdureProcess;
 import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
@@ -215,6 +216,9 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 	@Inject
 	private MidnightTimeSheetRepo midnightTimeSheetRepo;
+	
+	@Inject
+	private StoredProcdureProcess storedProcdureProcess;
 	/**
 	 * 勤務情報を取得して計算
 	 * 
@@ -1378,6 +1382,41 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		// 項目選択による計算時に必要なので取得
 		converter.setData(integrationOfDaily);
 
+		
+		
+		
+		Optional<WorkTimeSetting> workTime = Optional.empty();
+		Optional<PredetemineTimeSetting> predSet = Optional.empty();
+		Optional<WorkType> workType = Optional.empty();
+		MasterShareContainer<String> shareContainer = companyCommonSetting.getShareContainer();
+		if(integrationOfDaily != null
+		&& integrationOfDaily.getWorkInformation() != null
+		&& integrationOfDaily.getWorkInformation().getRecordInfo() != null) {
+			if(integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
+				workTime = getWorkTimeSettingFromShareContainer(shareContainer, companyId, integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode().toString());
+				predSet = getPredetermineTimeSetFromShareContainer(shareContainer, companyId, integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode().toString());
+			}
+			
+			if(integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode() != null) {
+				workType = getWorkTypeFromShareContainer(shareContainer, companyId, integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode().toString());
+			}
+		}
+		
+		
+		val resultProcedure = storedProcdureProcess.dailyProcessing(integrationOfDaily,
+											  workType,
+											  workTime,
+											  predSet);
+		resultProcedure.ifPresent(tt ->{
+			integrationOfDaily.getAttendanceTimeOfDailyPerformance().ifPresent(tc -> {
+				tc.getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().ifPresent(ts -> {
+					ts.setOverTimeWorkFrameTime(tt.getOverTimes());
+				});
+			});			
+		});
+
+		
+		
 		// 編集状態を取得（日別実績の編集状態が持つ勤怠項目IDのみのList作成）
 		List<Integer> attendanceItemIdList = integrationOfDaily.getEditState().stream()
 				.filter(editState -> editState.getEmployeeId().equals(employeeId)
@@ -1390,7 +1429,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 		// 任意項目の計算
 		integrationOfDaily.setAnyItemValue(Optional.of(AnyItemValueOfDaily.caluculationAnyItem(companyId, employeeId,
-				targetDate, optionalItems, formulaList, empCondition, Optional.of(converter), bsEmploymentHistOpt)));
+				targetDate, optionalItems, formulaList, empCondition, Optional.of(converter), bsEmploymentHistOpt,resultProcedure)));
 
 		IntegrationOfDaily calcResultIntegrationOfDaily = integrationOfDaily;
 

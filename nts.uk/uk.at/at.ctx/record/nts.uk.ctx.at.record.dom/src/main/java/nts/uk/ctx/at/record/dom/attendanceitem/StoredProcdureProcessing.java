@@ -15,6 +15,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import nts.arc.time.YearMonth;
 import nts.gul.util.value.MutableValue;
 import nts.uk.ctx.at.record.dom.actualworkinghours.ActualWorkingTimeOfDaily;
@@ -412,7 +413,16 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	@AllArgsConstructor
 	public class DailyStoredProcessResult {
 		List<AnyItemValue> optionalItems;
+		@Getter
 		List<OverTimeFrameTime> overTimes;
+		
+		public Optional<AnyItemValue>  getOptionalItemBySearchNo(String searchNo){
+			return optionalItems.stream().filter(itm -> itm.getItemNo().toString().equals(searchNo)).findFirst();
+		}
+		
+		public boolean isInclude(String searchNo) {
+			return this.getOptionalItemBySearchNo(searchNo).isPresent();
+		}
 	}
 	
 	private class DailyTimeForCalc {
