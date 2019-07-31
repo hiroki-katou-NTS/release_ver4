@@ -2,6 +2,7 @@ package nts.uk.ctx.at.schedule.infra.repository.schedule.workschedulestate;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
@@ -65,5 +66,14 @@ public class JpaWorkScheduleState extends JpaRepository implements WorkScheduleS
 			this.commandProxy().insert(entity);
 		}
 		this.getEntityManager().flush();
+	}
+
+	@Override
+	public void updateOrInsert(List<WorkScheduleState> lstState) {
+		this.commandProxy().updateAll(
+				lstState.stream().map(domain -> 
+					new KscdtScheState(new KscdtScheStatePK(domain.getSId(), domain.getScheduleItemId(), domain.getYmd()),
+							domain.getScheduleEditState().value)
+				).collect(Collectors.toList()));
 	}
 }
