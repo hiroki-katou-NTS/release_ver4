@@ -53,7 +53,7 @@ public interface InterimRemainOffDateCreateData {
 	 * @param dataOutput
 	 * @return
 	 */
-	public WorkTypeRemainInfor createWithOneDayWorkType(String cid, WorkType workType, WorkTypeRemainInfor dataOutput);
+	public void createWithOneDayWorkType(String cid, WorkType workType, WorkTypeRemainInfor dataOutput);
 	/**
 	 * 午前と午後勤務時の残数発生使用明細を作成する
 	 * @param workType

@@ -1,7 +1,6 @@
 package nts.uk.ctx.at.record.dom.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,12 +22,9 @@ public class RemainNumberCreateInformationImpl implements RemainNumberCreateInfo
 	@Override
 	public List<RecordRemainCreateInfor> createRemainInfor(List<AttendanceTimeOfDailyPerformance> lstAttendanceTimeData,
 			List<WorkInfoOfDailyPerformance> lstWorkInfor) {
-		if(lstWorkInfor.isEmpty()) {
-			return Collections.emptyList();
-		}
 		List<RecordRemainCreateInfor> lstOutputData = new ArrayList<>();
 		//残数作成元情報を作成する
-		for (WorkInfoOfDailyPerformance workInfor : lstWorkInfor) {
+		lstWorkInfor.stream().forEach(workInfor -> {
 			List<AttendanceTimeOfDailyPerformance> lstAttendance = lstAttendanceTimeData.stream()
 					.filter(x -> x.getEmployeeId().equals(workInfor.getEmployeeId()) && x.getYmd().equals(workInfor.getYmd()))
 					.collect(Collectors.toList());
@@ -37,8 +33,7 @@ public class RemainNumberCreateInformationImpl implements RemainNumberCreateInfo
 				RecordRemainCreateInfor outPutData = this.remainDataFromRecord(workInfor, attendanceInfor);
 				lstOutputData.add(outPutData);
 			}
-		}
-		
+		});		
 		return lstOutputData;
 	}
 	@Override

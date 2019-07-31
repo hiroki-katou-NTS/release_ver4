@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.schedule.infra.repository.schedule.basicschedule;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -27,9 +28,13 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import lombok.SneakyThrows;
+import lombok.val;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 //import nts.gul.text.StringUtil;
@@ -1169,18 +1174,36 @@ public class JpaBasicScheduleRepository extends JpaRepository implements BasicSc
 	}
 
 	@Override
+	@SneakyThrows
 	public List<BasicSchedule> getBasicScheduleBySidPeriodDate(String employeeId, List<GeneralDate> dates) {
 		if(dates.isEmpty()) {
 			return Collections.emptyList();
 		}
-		List<BasicSchedule> result = new ArrayList<>();
+		List<BasicSchedule> lstOutput = new ArrayList<>();
 		CollectionUtil.split(dates, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			result.addAll(this.queryProxy().query(GET_BY_LIST_DATE, KscdtBasicSchedule.class)
-				.setParameter("employeeId", employeeId)
-				.setParameter("dates", subList)
-				.getList(x -> toDomain(x)));
+			String subIn = NtsStatement.In.createParamsString(subList);
+			String sql = "SELECT * FROM KSCDT_SCHE_BASIC "
+					+ " WHERE YMD IN (" + subIn + ") "
+							+ "AND SID = ?";
+			try(val stmt = this.connection().prepareStatement(sql)){
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setDate(i + 1, Date.valueOf(subList.get(i).localDate()));
+				}
+				stmt.setString(1  + subList.size(), employeeId);
+				List<BasicSchedule> lstOutputTmp =  new NtsResultSet(stmt.executeQuery()).getList(x -> {
+					return BasicSchedule.createFromJavaType(x.getString("SID"),
+							x.getGeneralDate("YMD"),
+							x.getString("WORKTYPE_CD"),
+							x.getString("WORKTIME_CD"),
+							x.getInt("CONFIRMED_ATR"));
+				});
+				lstOutput.addAll(lstOutputTmp);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		});
-		return result;
+		return lstOutput;
 	}
 
 	@Override

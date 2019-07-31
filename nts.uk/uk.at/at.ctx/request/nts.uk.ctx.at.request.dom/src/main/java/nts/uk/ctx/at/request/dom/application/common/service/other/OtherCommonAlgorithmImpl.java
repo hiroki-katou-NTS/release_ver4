@@ -482,7 +482,7 @@ public class OtherCommonAlgorithmImpl implements OtherCommonAlgorithm {
 		return new MailResult(successList, failList);
 	}
 	@Override
-	public List<GeneralDate> lstDateNotHoliday(String cid, String sid, DatePeriod dates) {
+	public List<GeneralDate> lstDateIsHoliday(String cid, String sid, DatePeriod dates) {
 		List<GeneralDate> lstOutput = new ArrayList<>();
 		for(int i = 0; dates.start().daysTo(dates.end()) - i >= 0; i++){
 			GeneralDate loopDate = dates.start().addDays(i);

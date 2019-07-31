@@ -1,7 +1,11 @@
 package nts.uk.ctx.at.schedule.dom.appreflectprocess.service.absenceleave;
 
+import java.util.List;
+
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.schedule.dom.appreflectprocess.service.CommonReflectParamSche;
+import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicSchedule;
+import nts.uk.ctx.at.schedule.dom.schedule.workschedulestate.WorkScheduleState;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 
 /**
@@ -24,7 +28,7 @@ public interface AbsenceLeaveReflectSche {
 	 * @param startTime
 	 * @param endTime
 	 */
-	public void absenceLeaveStartEndTimeReflect(CommonReflectParamSche param);
+	public void absenceLeaveStartEndTimeReflect(CommonReflectParamSche param, BasicSchedule scheData, List<WorkScheduleState> lstState);
 	/**
 	 * 就業時間帯が反映できるか
 	 * @param employeeId

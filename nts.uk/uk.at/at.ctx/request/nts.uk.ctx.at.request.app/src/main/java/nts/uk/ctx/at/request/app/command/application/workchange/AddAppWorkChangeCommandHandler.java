@@ -146,7 +146,7 @@ public class AddAppWorkChangeCommandHandler extends CommandHandlerWithResult<Add
 
 			GeneralDate endDate = addCommand.getApplication().getEndDate();
 			
-			List<GeneralDate> dateClears = otherCommonAlgorithm.lstDateNotHoliday(companyId, applicantSID,
+			List<GeneralDate> dateClears = otherCommonAlgorithm.lstDateIsHoliday(companyId, applicantSID,
 					new DatePeriod(startDate, endDate));
 
 			

@@ -1,7 +1,9 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -170,8 +172,10 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 		Optional<AttendanceTimeByWorkOfDaily> findTimeByWork = attendanceTimeByWork.finds(emps, dates).stream().findFirst();
 		//日別実績の出退勤
 		Optional<TimeLeavingOfDailyPerformance> findByKeyTimeLeaving = timeLeaningOfDaily.finds(emps, dates).stream().findFirst();
+		Map<String, List<GeneralDate>> param = new HashMap<String, List<GeneralDate>>();
+		param.put(employeeId, Arrays.asList(dateData));
 		//日別実績の短時間勤務時間帯
-		Optional<ShortTimeOfDailyPerformance> findShortTimeOfDaily = shortTimeOfDaily.finds(emps, dates).stream().findFirst();
+		Optional<ShortTimeOfDailyPerformance> findShortTimeOfDaily = shortTimeOfDaily.finds(param).stream().findFirst();
 		//日別実績の特定日区分
 		Optional<SpecificDateAttrOfDailyPerfor> findSpecificData = specificDate.finds(emps, dates).stream().findFirst();
 		//日別実績の入退門

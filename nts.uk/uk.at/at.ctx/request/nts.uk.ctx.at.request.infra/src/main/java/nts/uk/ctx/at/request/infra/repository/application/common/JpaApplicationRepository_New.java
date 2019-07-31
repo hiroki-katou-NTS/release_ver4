@@ -2,6 +2,7 @@ package nts.uk.ctx.at.request.infra.repository.application.common;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,14 +13,25 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 
 import lombok.SneakyThrows;
+import lombok.val;
+import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.at.request.dom.application.AppReason;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
+import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
+import nts.uk.ctx.at.request.dom.application.DisabledSegment_New;
+import nts.uk.ctx.at.request.dom.application.PrePostAtr;
+import nts.uk.ctx.at.request.dom.application.ReasonNotReflectDaily_New;
+import nts.uk.ctx.at.request.dom.application.ReasonNotReflect_New;
+import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
+import nts.uk.ctx.at.request.dom.application.ReflectionInformation_New;
 import nts.uk.ctx.at.request.infra.entity.application.common.KrqdpApplicationPK_New;
 import nts.uk.ctx.at.request.infra.entity.application.common.KrqdtApplication_New;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -109,13 +121,6 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 			+ " AND c.appType IN :appTypes"
 			+ " AND (c.stateReflectionReal IN :stateReflectionReals"			
 			+ " OR c.stateReflection IN :stateReflection)";
-	
-	private static final String SELECT_BY_SID_LISTDATE_APPTYPE = "SELECT c FROM KrqdtApplication_New c "
-			+ " WHERE c.employeeID = :employeeID"
-			+ " AND c.appDate IN :dates"
-			+ " AND c.stateReflectionReal IN :stateReflectionReals"
-			+ " AND c.appType IN :appTypes";
-	
 	@Override
 	public Optional<Application_New> findByID(String companyID, String appID) {
 		return this.queryProxy().query(SELECT_APPLICATION_BY_ID, KrqdtApplication_New.class)
@@ -498,18 +503,64 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		return resultList;
 	}
 	@Override
+	@SneakyThrows
 	public List<Application_New> getByListDateReflectType(String sid, List<GeneralDate> dateData, List<Integer> reflect,
 			List<Integer> appType) {
 		List<Application_New> resultList = new ArrayList<>();
 		CollectionUtil.split(dateData, SPLIT_650, lstDate -> {
+			String subIn1 = NtsStatement.In.createParamsString(lstDate);
 			CollectionUtil.split(reflect, SPLIT_650, lstRef -> {
+				String subIn2 = NtsStatement.In.createParamsString(lstRef);
 				CollectionUtil.split(appType, SPLIT_650, lstApp -> {
-					resultList.addAll(this.queryProxy().query(SELECT_BY_SID_LISTDATE_APPTYPE, KrqdtApplication_New.class)
-										  .setParameter("employeeID", sid)
-										  .setParameter("dates", lstDate)
-										  .setParameter("stateReflectionReals", lstRef)
-										  .setParameter("appTypes", lstApp)
-										  .getList(x -> x.toDomain()));
+					String subIn3 = NtsStatement.In.createParamsString(lstApp);
+					String sql = "SELECT * FROM KRQDT_APPLICATION "
+							+ "WHERE APP_DATE IN (" + subIn1 + ") "
+									+ " AND REFLECT_PER_STATE IN (" + subIn2 + ")"
+									+ " AND APP_TYPE IN (" + subIn3 + ") "
+											+ " AND APPLICANTS_SID = ?";
+					try(val stmt = this.connection().prepareStatement(sql)){
+						for (int i = 0; i < lstDate.size(); i++) {
+							stmt.setDate(i + 1, Date.valueOf(lstDate.get(i).localDate()));
+						}
+						for (int i = 0; i < lstRef.size(); i++) {
+							stmt.setInt(lstDate.size() + i + 1, lstRef.get(i));
+						}
+						int inCount = lstDate.size() + lstRef.size();
+						for (int i = 0; i < lstApp.size(); i++) {
+							stmt.setInt(inCount + i + 1, lstApp.get(i));
+						}
+						stmt.setString(1  + lstApp.size() + inCount, sid);
+						List<Application_New> resultListTmp =  new NtsResultSet(stmt.executeQuery()).getList(x -> {
+							ReflectionInformation_New reflectInfor = new ReflectionInformation_New(EnumAdaptor.valueOf(x.getInt("REFLECT_PLAN_STATE"), ReflectedState_New.class),
+									EnumAdaptor.valueOf(x.getInt("REFLECT_PER_STATE"), ReflectedState_New.class), 
+									EnumAdaptor.valueOf(x.getInt("REFLECT_PLAN_ENFORCE_ATR"), DisabledSegment_New.class),
+									EnumAdaptor.valueOf(x.getInt("REFLECT_PER_ENFORCE_ATR"), DisabledSegment_New.class),
+									x.getInt("REFLECT_PLAN_SCHE_REASON") == null ? Optional.empty() :
+										Optional.ofNullable(EnumAdaptor.valueOf(x.getInt("REFLECT_PLAN_SCHE_REASON"), ReasonNotReflect_New.class)), 
+									x.getInt("REFLECT_PER_SCHE_REASON") == null ? Optional.empty() :
+										Optional.ofNullable(EnumAdaptor.valueOf(x.getInt("REFLECT_PER_SCHE_REASON"), ReasonNotReflectDaily_New.class)),
+									Optional.ofNullable(x.getGeneralDateTime("REFLECT_PLAN_TIME")),
+									Optional.ofNullable(x.getGeneralDateTime("REFLECT_PER_TIME"))); 
+							return new Application_New(x.getLong("EXCLUS_VER"),
+									x.getString("CID"),
+									x.getString("APP_ID"),
+									EnumAdaptor.valueOf(x.getInt("PRE_POST_ATR"), PrePostAtr.class),
+									x.getGeneralDateTime("INPUT_DATE"),
+									x.getString("ENTERED_PERSON_SID"),
+									new AppReason(x.getString("REASON_REVERSION")),
+									x.getGeneralDate("APP_DATE"),
+									new AppReason(x.getString("APP_REASON")),
+									EnumAdaptor.valueOf(x.getInt("APP_TYPE"), ApplicationType.class),
+									x.getString("APPLICANTS_SID"),
+									Optional.ofNullable(x.getGeneralDate("APP_START_DATE")),
+									Optional.ofNullable(x.getGeneralDate("APP_END_DATE")),
+									reflectInfor);
+						});
+						resultList.addAll(resultListTmp);
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}					
 				});
 			});
 		});

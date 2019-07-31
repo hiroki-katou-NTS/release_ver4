@@ -160,7 +160,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			if(appInfor.getPrePostAtr() != PrePostAtr.PREDICT) {
 				return;
 			}
-			Optional<AppOverTime> getFullAppOvertime = overTimeRepo.getFullAppOvertime(appInfor.getCompanyID(), appInfor.getAppID());
+			Optional<AppOverTime> getFullAppOvertime = overTimeRepo.getAppOvertimeFrame(appInfor.getCompanyID(), appInfor.getAppID());
 			if(!getFullAppOvertime.isPresent()) {
 				return;
 			}
@@ -183,7 +183,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			}
 			break;
 		case ABSENCE_APPLICATION:
-			Optional<AppAbsence> optAbsence = absenceRepo.getAbsenceByAppId(appInfor.getCompanyID(), appInfor.getAppID());
+			Optional<AppAbsence> optAbsence = absenceRepo.getAbsenceById(appInfor.getCompanyID(), appInfor.getAppID());
 			if(!optAbsence.isPresent()) {
 				return;
 			}
@@ -195,7 +195,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			}
 			break;
 		case BREAK_TIME_APPLICATION:
-			Optional<AppHolidayWork> getFullAppHolidayWork = holidayWorkRepo.getFullAppHolidayWork(appInfor.getCompanyID(), appInfor.getAppID());
+			Optional<AppHolidayWork> getFullAppHolidayWork = holidayWorkRepo.getAppHolidayWorkFrame(appInfor.getCompanyID(), appInfor.getAppID());
 			if(!getFullAppHolidayWork.isPresent()) {
 				return;
 			}

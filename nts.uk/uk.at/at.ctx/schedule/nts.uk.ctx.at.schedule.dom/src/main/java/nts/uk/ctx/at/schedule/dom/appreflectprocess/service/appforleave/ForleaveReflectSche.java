@@ -1,7 +1,10 @@
 package nts.uk.ctx.at.schedule.dom.appreflectprocess.service.appforleave;
 
-import nts.arc.time.GeneralDate;
+import java.util.List;
+
 import nts.uk.ctx.at.schedule.dom.appreflectprocess.service.workchange.WorkChangecommonReflectParamSche;
+import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicSchedule;
+import nts.uk.ctx.at.schedule.dom.schedule.workschedulestate.WorkScheduleState;
 
 /**
  * (休暇申請)勤務予定への反映
@@ -20,6 +23,6 @@ public interface ForleaveReflectSche {
 	 * @param dateData
 	 * @param workTypeCode
 	 */
-	public void reflectTime(String employeeId, GeneralDate dateData, String workTypeCode, Integer startTime, Integer endTime);
+	public void reflectTime(BasicSchedule scheData, List<WorkScheduleState> lstState, String workTypeCode, Integer startTime, Integer endTime);
 
 }

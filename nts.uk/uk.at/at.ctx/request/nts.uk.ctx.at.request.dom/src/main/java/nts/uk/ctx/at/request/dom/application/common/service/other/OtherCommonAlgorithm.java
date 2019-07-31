@@ -113,7 +113,7 @@ public interface OtherCommonAlgorithm {
 	 * @param dates
 	 * @return
 	 */
-	public List<GeneralDate> lstDateNotHoliday(String cid, String sid, DatePeriod dates);
+	public List<GeneralDate> lstDateIsHoliday(String cid, String sid, DatePeriod dates);
 	
 	/**
 	 * 11.指定日の勤務実績（予定）の勤務種類を取得

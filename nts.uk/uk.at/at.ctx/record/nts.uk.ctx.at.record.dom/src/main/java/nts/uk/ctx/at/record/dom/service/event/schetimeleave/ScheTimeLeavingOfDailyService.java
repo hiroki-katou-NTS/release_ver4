@@ -31,7 +31,11 @@ public class ScheTimeLeavingOfDailyService {
 	 */
 	public void correct(String cid, String workTypeCd, Optional<String> workTimeCd,
 			Optional<Integer> startTime, Optional<Integer> endTime,	IntegrationOfDaily dailyInfor) {
-
+		if(dailyInfor.getWorkInformation().getScheduleInfo() == null
+				|| dailyInfor.getWorkInformation().getScheduleInfo().getWorkTimeCode() == null
+				|| dailyInfor.getWorkInformation().getScheduleInfo().getWorkTypeCode() == null) {
+			return;
+		}
 		//勤務種類を取得する
 		Optional<WorkType> workTypeInfor = worktypeRepo.findByPK(cid, workTypeCd);
 		//キャッシュ「日別実績（Edit）．日別実績（Work)．編集状態」をチェックする
