@@ -114,75 +114,74 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	private List<AnyItemValue> calcOptionalItem(WorkType workType, DailyTimeForCalc dailyTime) {
 		List<AnyItemValue> result = new ArrayList<>();  
 		
-		boolean isWorkType = checkWorkType(workType.getDailyWork().getWorkTypeUnit(), workType.getDailyWork().getOneDay(),
+		boolean isWorkingType = checkWorkType(workType.getDailyWork().getWorkTypeUnit(), workType.getDailyWork().getOneDay(),
 											workType.getDailyWork().getMorning(), workType.getDailyWork().getAfternoon());
-		boolean isGoToWork = dailyTime.have(t -> t.startTime);
-		boolean isLogoned = dailyTime.have(t -> t.logonTime);
-		boolean isLogoffed = dailyTime.have(t -> t.logoffTime);
-		boolean isLeaveGateStart = dailyTime.have(t -> t.leaveGateStartTime);
-		boolean isLeaveGateEnd = dailyTime.have(t -> t.leaveGateEndTime);
-		boolean isLeaved = dailyTime.have(t -> t.endTime);
+		boolean hasAttendanceTime = dailyTime.have(t -> t.startTime);
+		boolean pcLogoned = dailyTime.have(t -> t.logonTime);
+		boolean pcLogoffed = dailyTime.have(t -> t.logoffTime);
+		boolean hasAttendanceLeaveGateStartTime = dailyTime.have(t -> t.leaveGateStartTime);
+		boolean hasAttendanceLeaveGateEndTime = dailyTime.have(t -> t.leaveGateEndTime);
 		boolean isActualWork = dailyTime.have(t -> t.actualWorkTime) && dailyTime.value(t -> t.actualWorkTime) > 0;
-		boolean isNotWorkInStatutory = !dailyTime.have(t -> t.withinStatutoryTime) || dailyTime.value(t -> t.withinStatutoryTime) == 0;
+		boolean isNotWorkWithinStatutory = !dailyTime.have(t -> t.withinStatutoryTime) || dailyTime.value(t -> t.withinStatutoryTime) == 0;
 		
 		/** 任意項目1: ログオン時刻がnullではない事が条件 */
-		processOptionalItem(() -> isLogoned && isWorkType && isActualWork, result, COUNT_ON, COUNT_OFF, 1);
+		processOptionalItem(() -> pcLogoned && isWorkingType && isActualWork, result, COUNT_ON, COUNT_OFF, 1);
 
 		/** 任意項目2: ログオフ時刻 > 0 である事が条件 */
-		processOptionalItem(() -> isLogoffed && isWorkType && isActualWork, result, COUNT_ON, COUNT_OFF, 2);
+		processOptionalItem(() -> pcLogoffed && isWorkingType && isActualWork, result, COUNT_ON, COUNT_OFF, 2);
 		
 		/** 任意項目3: 出勤時刻が入っており、PCログオンログオフがない事が条件 */
-		processOptionalItem(() -> isGoToWork && !isLogoned && !isLogoffed, result, COUNT_ON, COUNT_OFF, 3);
+		processOptionalItem(() -> hasAttendanceTime && !pcLogoned && !pcLogoffed, result, COUNT_ON, COUNT_OFF, 3);
 		
 		/** 任意項目4: その日にPCログオン = null and ログオフ <> null が条件 */
-		processOptionalItem(() -> isGoToWork && !isLogoned && isLogoffed, result, COUNT_ON, COUNT_OFF, 4);
+		processOptionalItem(() -> hasAttendanceTime && !pcLogoned && pcLogoffed, result, COUNT_ON, COUNT_OFF, 4);
 		
 		/** 任意項目5: その日にPCログオン = null and ログオフ <> null が条件 */
-		processOptionalItem(() -> isGoToWork && isLogoned && !isLogoffed, result, COUNT_ON, COUNT_OFF, 5);
+		processOptionalItem(() -> hasAttendanceTime && pcLogoned && !pcLogoffed, result, COUNT_ON, COUNT_OFF, 5);
 		
 		/** 任意項目6: ログオン、ログオフが両方入っている事が条件 */
-		processOptionalItem(() -> isLogoned && isLogoffed, result, COUNT_ON, COUNT_OFF, 6);
+		processOptionalItem(() -> pcLogoned && pcLogoffed, result, COUNT_ON, COUNT_OFF, 6);
 		
 		/** 任意項目7: 出勤の判断 */
-		processOptionalItem(() -> isWorkType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 7);
+		processOptionalItem(() -> isWorkingType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 7);
 		
 		dailyTime.value(t -> t.timeOn, dailyTime.value(t -> t.leaveGateEndTime));
 		
 		/** 任意項目9: 出勤の判断 */
-		processOptionalItem(() -> isWorkType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 9);
+		processOptionalItem(() -> isWorkingType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 9);
 
 		/** 任意項目11: 実働就業時間 = 0 かつ 勤務種類が(年休、特休、代休) である事が条件 */
-		processOptionalItem(() -> isWorkType && isNotWorkInStatutory, result, COUNT_ON, COUNT_OFF, 11);
+		processOptionalItem(() -> isWorkingType && isNotWorkWithinStatutory, result, COUNT_ON, COUNT_OFF, 11);
 		
 		/** 任意項目12 */
-		processOptionalItem(() -> isWorkType, result, COUNT_ON, COUNT_OFF, 12);
+		processOptionalItem(() -> isWorkingType, result, COUNT_ON, COUNT_OFF, 12);
 		
 		/** 任意項目13: 出勤時刻が入っており、入館と退館がない事が条件 */
-		processOptionalItem(() -> isGoToWork && !isLeaveGateStart && !isLeaveGateEnd, result, COUNT_ON, COUNT_OFF, 13);
+		processOptionalItem(() -> hasAttendanceTime && !hasAttendanceLeaveGateStartTime && !hasAttendanceLeaveGateEndTime, result, COUNT_ON, COUNT_OFF, 13);
 		
 		/** 任意項目14: その日にPCログオン = null が条件 */
-		processOptionalItem(() -> isGoToWork && !isLogoned, result, COUNT_ON, COUNT_OFF, 14);
+		processOptionalItem(() -> hasAttendanceTime && !pcLogoned, result, COUNT_ON, COUNT_OFF, 14);
 		
 		/** 任意項目15: その日にPCログオフ = null が条件 */
-		processOptionalItem(() -> isGoToWork && !isLogoffed, result, COUNT_ON, COUNT_OFF, 15);
+		processOptionalItem(() -> hasAttendanceTime && !pcLogoffed, result, COUNT_ON, COUNT_OFF, 15);
 		
 		/** 任意項目16: 出勤時刻が入っており、PCログオンログオフのどちらかが無い事が条件 */
-		processOptionalItem(() -> isGoToWork && (!isLogoned || !isLogoffed), result, COUNT_ON, COUNT_OFF, 16);
+		processOptionalItem(() -> hasAttendanceTime && (!pcLogoned || !pcLogoffed), result, COUNT_ON, COUNT_OFF, 16);
 		
 		dailyTime.value(t -> t.timeOff, 0);
 		
 		/** 任意項目8: 両方時刻が入っている場合のみ乖離時間を計算する */
 		dailyTime.calcStartDivergenceTime();
-		processOptionalItem(() -> isGoToWork && isLeaveGateStart, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 8);
+		processOptionalItem(() -> isWorkingType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 8);
 		
 		/** 任意項目10 */
 		dailyTime.calcEndDivergenceTime();
-		processOptionalItem(() -> isLeaved && isLeaveGateEnd, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 10);
+		processOptionalItem(() -> isWorkingType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 10);
 		
 		dailyTime.value(t -> t.timeOn, 1);
 		
 		/** 任意項目17: 平日か*/
-		processOptionalItem(() -> isWorkType, result, dailyTime.value(t -> t.divergenceTime), dailyTime.value(t -> t.timeOff), 17);
+		processOptionalItem(() -> isWorkingType, result, dailyTime.value(t -> t.divergenceTime), dailyTime.value(t -> t.timeOff), 17);
 		
 		/** 任意項目19: 事前残業1~10 > 0 かつ　乖離時間が発生していない事が条件 */
 		processOptionalItem(() -> dailyTime.value(t -> t.timePre) > 0 && dailyTime.overTime.stream().allMatch(t -> t <= 0) && dailyTime.value(t -> t.timeFlex) <= 0, 
@@ -201,7 +200,9 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		/** 任意項目29：  ??? */
 		processOptionalItem(() -> dailyTime.value(t -> t.preSetDivergence) > 0, result, dailyTime.value(t -> t.preSetDivergence), 0, 29);
 		
-		dailyTime.calcSomeItemByPredetemineTime(result.parallelStream().anyMatch(c -> c.getItemNo().v() == 12 && c.getTimes().get().v().equals(COUNT_ON)));
+		boolean isItem12on = result.parallelStream().anyMatch(c -> c.getItemNo().v() == 12 && c.getTimes().get().v().equals(COUNT_ON));
+		
+		dailyTime.calcSomeItemByPredetemineTime(isItem12on);
 		
 		/** 任意項目35 */
 		processOptionalItem(() -> dailyTime.value(t -> t.flag35), result, COUNT_ON, COUNT_OFF, 35);
@@ -223,11 +224,12 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		/** 任意項目41: フレックス時間がプラスである事が条件 */
 		processOptionalItem(() -> dailyTime.value(t -> t.flexTime) >= 0, result, dailyTime.value(t -> t.flexTime), dailyTime.value(t -> t.timeOff), 41);
 		
+		boolean flagFor89And90 = hasAttendanceTime && !dailyTime.value(t -> t.isPremiumWorkType) && isItem12on;
 		/** 任意項目89 */
-		processOptionalItem(() -> isGoToWork && !dailyTime.value(t -> t.isPremiumWorkType), result, dailyTime.value(t -> t.startTime), dailyTime.value(t -> t.timeOff), 89);
+		processOptionalItem(() -> flagFor89And90, result, dailyTime.value(t -> t.startTime), dailyTime.value(t -> t.timeOff), 89);
 		
 		/** 任意項目90 */
-		processOptionalItem(() -> isGoToWork && !dailyTime.value(t -> t.isPremiumWorkType), result, COUNT_ON, COUNT_OFF, 90);
+		processOptionalItem(() -> flagFor89And90, result, COUNT_ON, COUNT_OFF, 90);
 		
 		return result;
 	}
@@ -480,7 +482,11 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		}
 
 		public void calcStartDivergenceTime() {
-			if (!have(t -> t.startTime) || !have(t -> leaveGateStartTime)) return;
+			if (!have(t -> t.startTime) || !have(t -> leaveGateStartTime)) {
+				this.divergenceTime.set(0);
+				this.timeOn.set(0);
+				return;	
+			}
 			
 			int divergence = startTime.get() < leaveGateStartTime.get() ? 0 : startTime.get() - leaveGateStartTime.get();
 			
@@ -489,7 +495,10 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		}
 		
 		public void calcEndDivergenceTime() {
-			if (!have(t -> t.endTime) || !have(t -> leaveGateEndTime)) return;
+			if (!have(t -> t.endTime) || !have(t -> leaveGateEndTime)) {
+				this.timeOn.set(0);
+				return;
+			}
 			
 			this.timeOn.set(leaveGateEndTime.get() - endTime.get());
 		}
