@@ -64,7 +64,7 @@ public class WorkChangeRegisterServiceImpl implements IWorkChangeRegisterService
 		GeneralDate startDateParam = app.getStartDate().orElse(app.getAppDate());
 		GeneralDate endDateParam = app.getEndDate().orElse(app.getAppDate());
 		List<GeneralDate> listDate = new ArrayList<>();
-		List<GeneralDate> lstHoliday = otherCommonAlg.lstDateNotHoliday(app.getCompanyID(), app.getEmployeeID(), new DatePeriod(startDateParam, endDateParam));
+		List<GeneralDate> lstHoliday = otherCommonAlg.lstDateIsHoliday(app.getCompanyID(), app.getEmployeeID(), new DatePeriod(startDateParam, endDateParam));
 		
 		for(GeneralDate loopDate = startDateParam; loopDate.beforeOrEquals(endDateParam); loopDate = loopDate.addDays(1)){
 			if(workChange.getExcludeHolidayAtr() == 0
