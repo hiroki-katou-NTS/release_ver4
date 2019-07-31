@@ -176,7 +176,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		dailyReposiroty.updateByKey(commonPara.getIntegrationOfDaily().getEditState());
 		Map<String, List<GeneralDate>> param = new HashMap<>();
 		param.put(commonPara.getSid(), Arrays.asList(commonPara.getYmd()));
-		employeeError.repeatInsertNotOTK(param, x.getEmployeeError());
+		employeeError.removeNotOTK(param);
+		employeeError.update(x.getEmployeeError());	
 	}
 
 	@Override
