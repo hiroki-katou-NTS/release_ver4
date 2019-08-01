@@ -5,7 +5,6 @@ import javax.inject.Inject;
 
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
-import nts.uk.ctx.at.record.dom.daily.DailyRecordAdUpService;
 import nts.uk.ctx.at.shared.app.util.attendanceitem.CommandFacade;
 
 @Stateless
@@ -13,9 +12,6 @@ public class BreakTimeOfDailyPerformanceCommandUpdateHandler extends CommandFaca
 
 	@Inject
 	private BreakTimeOfDailyPerformanceRepository repo;
-	
-	@Inject
-	private DailyRecordAdUpService adUpRepo;
 
 	@Override
 	protected void handle(CommandHandlerContext<BreakTimeOfDailyPerformanceCommand> context) {
@@ -26,7 +22,7 @@ public class BreakTimeOfDailyPerformanceCommandUpdateHandler extends CommandFaca
 			return;
 		}
 		if (!command.getData().isEmpty()) {
-			adUpRepo.adUpBreakTime(command.toDomain());
+			repo.update(command.toDomain());
 		}
 	}
 
