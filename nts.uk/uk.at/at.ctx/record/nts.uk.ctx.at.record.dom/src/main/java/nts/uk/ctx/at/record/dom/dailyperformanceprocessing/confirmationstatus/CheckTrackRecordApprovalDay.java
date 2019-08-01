@@ -10,9 +10,11 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
+import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.approval.ApprovalStatusActualDayChange;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.GetClosurePeriod;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
@@ -40,10 +42,13 @@ public class CheckTrackRecordApprovalDay {
 	@Inject
 	private GetClosurePeriod getClosurePeriod;
 
+//	@Inject
+//	private ApprovalStatusActualDay approvalStatusActualDay;
+	
 	@Inject
-	private ApprovalStatusActualDay approvalStatusActualDay;
+	private ApprovalStatusActualDayChange approvalActualDayChange;
 
-	public boolean checkTrackRecordApprovalDay(String companyId, String employeeId, List<CheckTarget> lstCheckTarget) {
+	public boolean checkTrackRecordApprovalDay(String companyId, String employeeId, Integer closureId, YearMonth yearMonth) {
 
 		// ドメインモデル「承認処理の利用設定」を取得する
 		Optional<ApprovalProcessingUseSetting> approvalUseSetting = approvalProcessingUseSettingRepository
@@ -56,15 +61,15 @@ public class CheckTrackRecordApprovalDay {
 				.collect(Collectors.toMap(x -> x.getClosureId().value, x -> x));
 
 		//
-		for (CheckTarget target : lstCheckTarget) {
-			Closure closureTaget = mapClosureId.get(target.getClosureId());
+		//for (CheckTarget target : lstCheckTarget) {
+			Closure closureTaget = mapClosureId.get(closureId);
 			if (closureTaget == null)
-				continue;
+				return false;
 
 			// 指定した年月の期間をすべて取得する
-			List<DatePeriod> lstClosureHist = closureTaget.getPeriodByYearMonth(target.getYearMonth());
+			List<DatePeriod> lstClosureHist = closureTaget.getPeriodByYearMonth(yearMonth);
 			if (lstClosureHist.isEmpty())
-				continue;
+				return false;
 			DatePeriod checkPeriod = mergeDatePeriod(lstClosureHist);
 			// 対応するImported「基準社員の承認対象者」を取得する
 //			ApprovalRootOfEmployeeImport approvalImport = approvalStatusAdapter
@@ -77,9 +82,9 @@ public class CheckTrackRecordApprovalDay {
 
 				// 集計期間
 				List<ClosurePeriod> lstClosurePeriod = getClosurePeriod
-						.get(companyId, approvalRoot, checkPeriod.end(), Optional.of(target.getYearMonth()),
-								Optional.of(ClosureId.valueOf(target.getClosureId())), Optional.empty())
-						.stream().filter(c -> c.getClosureId().value == target.getClosureId() && c.getYearMonth().equals(target.getYearMonth()))
+						.get(companyId, approvalRoot, checkPeriod.end(), Optional.of(yearMonth),
+								Optional.of(ClosureId.valueOf(closureId)), Optional.empty())
+						.stream().filter(c -> c.getClosureId().value == closureId && c.getYearMonth().equals(yearMonth))
 						.collect(Collectors.toList());
 
 				if (lstClosurePeriod.isEmpty())
@@ -94,17 +99,19 @@ public class CheckTrackRecordApprovalDay {
 					continue;
 				}
 				// 社員の日の実績の承認状況を取得する
-				List<ApprovalStatusActualResult> lstApprovalResult = approvalStatusActualDay
-						.processApprovalStatusRequest(companyId, employeeId, approvalRoot,
-								mergeDatePeriod(lstPeriod), target.getClosureId());
-
-				List<ApprovalStatusActualResult> lstResult = lstApprovalResult.stream()
+//				List<ApprovalStatusActualResult> lstApprovalResult = approvalStatusActualDay
+//						.processApprovalStatusRequest(companyId, employeeId, approvalRoot,
+//								mergeDatePeriod(lstPeriod), closureId);
+			List<ApprovalStatusActualResult> lstApprovalResult = approvalActualDayChange.processApprovalStatus(
+					companyId, approvalRoot, Arrays.asList(employeeId), Optional.empty(), Optional.of(yearMonth),
+					ModeData.APPROVAL.value);
+			List<ApprovalStatusActualResult> lstResult = lstApprovalResult.stream()
 						.filter(x -> x.isStatus() ? false : x.getPermissionCheck() == ReleasedAtr.CAN_IMPLEMENT).collect(Collectors.toList());
 				if (!lstResult.isEmpty())
 					return true;
 			}
 
-		}
+//		}
 		return false;
 	}
 

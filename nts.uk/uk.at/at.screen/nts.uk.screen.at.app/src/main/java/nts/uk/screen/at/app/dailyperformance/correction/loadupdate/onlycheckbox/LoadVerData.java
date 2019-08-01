@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalConfirmCache;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.EmpAndDate;
 
@@ -17,4 +18,5 @@ public class LoadVerData {
    DateRange dateRange;
    List<DailyRecordDto> lstDomainOld;
    int  displayFormat;
+   ApprovalConfirmCache approvalConfirmCache;
 }

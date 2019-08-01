@@ -2,6 +2,7 @@ package nts.uk.screen.at.app.dailyperformance.correction.loadupdate.onlycheckbox
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -11,10 +12,15 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.approval.ApprovalStatusActualDayChange;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmStatusActualDayChange;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.screen.at.app.dailymodify.query.DailyModifyQueryProcessor;
 import nts.uk.screen.at.app.dailymodify.query.DailyModifyResult;
 import nts.uk.screen.at.app.dailyperformance.correction.GetDataDaily;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalConfirmCache;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.EmpAndDate;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.CheckIndentityMonth;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityMonthParam;
@@ -33,6 +39,12 @@ public class DPLoadVerProcessor {
 
 	@Inject
 	private ClosureService closureService;
+	
+	@Inject
+	private ApprovalStatusActualDayChange approvalStatusActualDayChange;
+	
+	@Inject
+	private ConfirmStatusActualDayChange confirmStatusActualDayChange;
 
 	public LoadVerDataResult loadVerAfterCheckbox(LoadVerData loadVerData) {
 		LoadVerDataResult result = new LoadVerDataResult();
@@ -74,6 +86,12 @@ public class DPLoadVerProcessor {
 		} else {
 			result.setIndentityMonthResult(new IndentityMonthResult(false, false, true));
 		}
+		
+		ApprovalConfirmCache cache = loadVerData.getApprovalConfirmCache();
+		List<ConfirmStatusActualResult> confirmResults = confirmStatusActualDayChange.processConfirmStatus(companyId, sId, cache.getEmployeeIds(), Optional.of(cache.getPeriod()), Optional.empty());
+
+		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDayChange.processApprovalStatus(companyId, sId, cache.getEmployeeIds(), Optional.of(cache.getPeriod()), Optional.empty(), cache.getMode());
+        result.setApprovalConfirmCache(new ApprovalConfirmCache(sId,  cache.getEmployeeIds(), cache.getPeriod(), cache.getMode(), confirmResults, approvalResults));
 		return result;
 	}
 }

@@ -128,6 +128,8 @@ public class DailyPerformanceCorrectionDto implements Serializable{
 	
 	private DisplayItem disItem;
 	
+	private ApprovalConfirmCache approvalConfirmCache;
+	
 	public DailyPerformanceCorrectionDto() {
 		super();
 		this.lstFixedHeader = DPHeaderDto.GenerateFixedHeader();

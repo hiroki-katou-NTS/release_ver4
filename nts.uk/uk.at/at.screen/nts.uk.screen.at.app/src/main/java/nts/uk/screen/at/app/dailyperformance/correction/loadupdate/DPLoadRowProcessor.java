@@ -18,13 +18,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.val;
 import nts.arc.time.GeneralDate;
-import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
 import nts.uk.ctx.at.record.dom.daily.itemvalue.DailyItemValue;
-import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
-import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.approval.ApprovalStatusActualDayChange;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmStatusActualDayChange;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.workinformation.enums.CalculationState;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
@@ -38,6 +37,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.GetDataDaily;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeName;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeNameType;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.DataDialogWithTypeProcessor;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalConfirmCache;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalUseSettingDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.CellEdit;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPAttendanceItem;
@@ -101,14 +101,14 @@ public class DPLoadRowProcessor {
     @Inject
 	private ClosureService closureService;
     
-    @Inject
-	private ConfirmStatusActualDay confirmApprovalStatusActualDay;
-	
-	@Inject
-	private ApprovalStatusActualDay approvalStatusActualDay;
-	
 	@Inject
 	private IFindDataDCRecord iFindDataDCRecord;
+	
+	@Inject
+	private ApprovalStatusActualDayChange approvalStatusActualDayChange;
+	
+	@Inject
+	private ConfirmStatusActualDayChange confirmStatusActualDayChange;
     
 	public DailyPerformanceCorrectionDto reloadGrid(DPPramLoadRow param){
 		DailyPerformanceCorrectionDto result = new DailyPerformanceCorrectionDto();
@@ -251,13 +251,18 @@ public class DPLoadRowProcessor {
 		List<DPDataDto> lstData = new ArrayList<DPDataDto>();
 		//get status check box 
 		DPLockDto dpLock = findLock.checkLockAll(companyId, listEmployeeId, dateRange, sId, mode, identityProcessDtoOpt, approvalUseSettingDtoOpt);
-		String keyFind = IdentifierUtil.randomUniqueId();
-		List<ConfirmStatusActualResult> confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId,
-				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), result.getClosureId(),
-				Optional.of(keyFind));
-		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDay.processApprovalStatus(companyId,
-				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), result.getClosureId(),
-				mode, Optional.of(keyFind));
+//		String keyFind = IdentifierUtil.randomUniqueId();
+//		List<ConfirmStatusActualResult> confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId,
+//				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), result.getClosureId(),
+//				Optional.of(keyFind));
+//		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDay.processApprovalStatus(companyId,
+//				listEmployeeId, new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), result.getClosureId(),
+//				mode, Optional.of(keyFind));
+		
+		List<ConfirmStatusActualResult> confirmResults = confirmStatusActualDayChange.processConfirmStatus(companyId, sId, listEmployeeId, Optional.of( new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty());
+
+		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDayChange.processApprovalStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty(), mode);
+
 		Map<Pair<String, GeneralDate>, ConfirmStatusActualResult> mapConfirmResult = confirmResults.stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x));
 		Map<Pair<String, GeneralDate>, ApprovalStatusActualResult> mapApprovalResults = approvalResults.stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x , (x, y) -> x));
 		//cell hide check box approval
@@ -341,6 +346,8 @@ public class DPLoadRowProcessor {
 		}
 		result.setLstHideControl(lstCellHideControl);
 		result.setLstData(lstData);
+		ApprovalConfirmCache cache = param.getApprovalConfirmCache();
+        result.setApprovalConfirmCache(new ApprovalConfirmCache(sId,  cache.getEmployeeIds(), cache.getPeriod(), cache.getMode(), confirmResults, approvalResults));
 		return result;
 	}
 	

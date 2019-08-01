@@ -32,7 +32,6 @@ import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
-import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.function.dom.adapter.person.EmployeeInfoFunAdapterDto;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHisOfEmployeeImport;
@@ -45,10 +44,10 @@ import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApproveRootStatusF
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalActionByEmpl;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
 import nts.uk.ctx.at.record.dom.daily.dailyperformance.classification.EnumCodeName;
-import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
-import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.approval.ApprovalStatusActualDayChange;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmStatusActualDayChange;
 import nts.uk.ctx.at.record.dom.divergence.time.DivergenceTimeUseSet;
 import nts.uk.ctx.at.record.dom.optitem.OptionalItemAtr;
 import nts.uk.ctx.at.record.dom.workinformation.enums.CalculationState;
@@ -89,6 +88,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeNameType;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.DataDialogWithTypeProcessor;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ActualLockDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.AffEmploymentHistoryDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalConfirmCache;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalUseSettingDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.AuthorityFomatDailyDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.AuthorityFormatInitialDisplayDto;
@@ -198,12 +198,6 @@ public class DailyPerformanceCorrectionProcessor {
 	private PublicHolidayRepository publicHolidayRepository;
 	
 	@Inject
-	private ConfirmStatusActualDay confirmApprovalStatusActualDay;
-	
-	@Inject
-	private ApprovalStatusActualDay approvalStatusActualDay;
-
-	@Inject
 	private CheckClosingEmployee checkClosingEmployee;
 	
 	@Inject
@@ -217,6 +211,12 @@ public class DailyPerformanceCorrectionProcessor {
 	
 	@Inject
 	private InitSwitchSetAdapter initSwitchSetAdapter;
+	
+	@Inject
+	private ApprovalStatusActualDayChange approvalStatusActualDayChange;
+	
+	@Inject
+	private ConfirmStatusActualDayChange confirmStatusActualDayChange;
 	
     static final Integer[] DEVIATION_REASON  = {436, 438, 439, 441, 443, 444, 446, 448, 449, 451, 453, 454, 456, 458, 459, 799, 801, 802, 804, 806, 807, 809, 811, 812, 814, 816, 817, 819, 821, 822};
 	public static final Map<Integer, Integer> DEVIATION_REASON_MAP = IntStream.range(0, DEVIATION_REASON.length-1).boxed().collect(Collectors.toMap(x -> DEVIATION_REASON[x], x -> x/3 +1));
@@ -326,32 +326,34 @@ public class DailyPerformanceCorrectionProcessor {
 		});
 		
 		DPLockDto dpLockDto = findLock.checkLockAll(companyId, listEmployeeId, dateRangeTemp, sId, mode, identityProcessDtoOpt, approvalUseSettingDtoOpt);
-		String keyFind = IdentifierUtil.randomUniqueId();
+//		String keyFind = IdentifierUtil.randomUniqueId();
 		long startTime1 = System.currentTimeMillis();
 		List<ConfirmStatusActualResult> confirmResults = new ArrayList<>();
 		List<ApprovalStatusActualResult> approvalResults = new ArrayList<>();
 		
-		if (displayFormat != 1) {
-			confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId, listEmployeeId,
-					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(),
-					Optional.of(keyFind));
+//		if (displayFormat != 1) {
+//			confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId, listEmployeeId,
+//					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(),
+//					Optional.of(keyFind));
+			confirmResults = confirmStatusActualDayChange.processConfirmStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty());
 			System.out.println("thoi gian load checkbox 1:" + (System.currentTimeMillis() - startTime1));
 
-			approvalResults = approvalStatusActualDay.processApprovalStatus(companyId, listEmployeeId,
-					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(), mode,
-					Optional.of(keyFind));
+			approvalResults = approvalStatusActualDayChange.processApprovalStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty(), mode);
+//			approvalResults = approvalStatusActualDay.processApprovalStatus(companyId, listEmployeeId,
+//					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(), mode,
+//					Optional.of(keyFind));
 			// approvalResults = new ArrayList<>();
 			System.out.println("thoi gian load checkbox 2:" + (System.currentTimeMillis() - startTime1));
-		} else {
-			confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId, listEmployeeId,
-					dateRange.getStartDate(), screenDto.getClosureId());
-			System.out.println("thoi gian load checkbox 1:" + (System.currentTimeMillis() - startTime1));
-
-			approvalResults = approvalStatusActualDay.processApprovalStatus(companyId, listEmployeeId,
-					dateRange.getStartDate(), screenDto.getClosureId(), mode);
-			// approvalResults = new ArrayList<>();
-			System.out.println("thoi gian load checkbox 2:" + (System.currentTimeMillis() - startTime1));
-		}
+//		} else {
+//			confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId, listEmployeeId,
+//					dateRange.getStartDate(), screenDto.getClosureId());
+//			System.out.println("thoi gian load checkbox 1:" + (System.currentTimeMillis() - startTime1));
+//
+//			approvalResults = approvalStatusActualDay.processApprovalStatus(companyId, listEmployeeId,
+//					dateRange.getStartDate(), screenDto.getClosureId(), mode);
+//			// approvalResults = new ArrayList<>();
+//			System.out.println("thoi gian load checkbox 2:" + (System.currentTimeMillis() - startTime1));
+//		}
 		
 		// 社員の締めをチェックする
 		Map<String, List<EmploymentHisOfEmployeeImport>> mapClosingEmpResult = checkClosingEmployee
@@ -381,6 +383,9 @@ public class DailyPerformanceCorrectionProcessor {
 		screenDto.setDateRange(screenDto.getDatePeriodResult());
 		screenDto.resetDailyInit();
 		System.out.println("end daily"+ (System.currentTimeMillis() - startTime));
+		screenDto.setApprovalConfirmCache(new ApprovalConfirmCache(sId, listEmployeeId,
+				new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), mode, confirmResults,
+				approvalResults));
 		return screenDto;
 	}
 

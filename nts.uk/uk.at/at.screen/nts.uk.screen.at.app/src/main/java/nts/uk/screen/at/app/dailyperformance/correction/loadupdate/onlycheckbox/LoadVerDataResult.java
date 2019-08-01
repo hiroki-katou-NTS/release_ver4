@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalConfirmCache;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityMonthResult;
 
 @Data
@@ -14,4 +15,5 @@ import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityM
 public class LoadVerDataResult {
 	private List<DailyRecordDto> lstDomainOld;
 	private IndentityMonthResult indentityMonthResult;
+	private ApprovalConfirmCache approvalConfirmCache;
 }

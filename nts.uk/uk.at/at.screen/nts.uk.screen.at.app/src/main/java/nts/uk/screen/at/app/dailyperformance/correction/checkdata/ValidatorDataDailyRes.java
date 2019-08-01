@@ -23,6 +23,10 @@ import nts.uk.ctx.at.record.app.command.dailyperform.month.UpdateMonthDailyParam
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
 import nts.uk.ctx.at.record.app.service.workrecord.erroralarm.recordcheck.ErAlWorkRecordCheckService;
 import nts.uk.ctx.at.record.app.service.workrecord.erroralarm.recordcheck.result.ContinuousHolidayCheckResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.approval.ApprovalStatusActualDayChange;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmStatusActualDayChange;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.monthly.erroralarm.EmployeeMonthlyPerError;
 import nts.uk.ctx.at.record.dom.monthly.erroralarm.ErrorType;
@@ -44,6 +48,7 @@ import nts.uk.ctx.at.shared.dom.specialholiday.SpecialHoliday;
 import nts.uk.ctx.at.shared.dom.specialholiday.SpecialHolidayRepository;
 import nts.uk.screen.at.app.dailymodify.query.DailyModifyResult;
 import nts.uk.screen.at.app.dailyperformance.correction.checkdata.dto.FlexShortageRCDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalConfirmCache;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPItemValue;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DateRange;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ResultReturnDCUpdateData;
@@ -72,6 +77,12 @@ public class ValidatorDataDailyRes {
 	
 	@Inject
 	private ErrorAlarmWorkRecordRepository errorAlarmWRRepo;
+	
+	@Inject
+	private ApprovalStatusActualDayChange approvalStatusActualDayChange;
+	
+	@Inject
+	private ConfirmStatusActualDayChange confirmStatusActualDayChange;
 
 	private static final Integer[] CHILD_CARE = { 759, 760, 761, 762 };
 	private static final Integer[] CARE = { 763, 764, 765, 766 };
@@ -665,6 +676,16 @@ public class ValidatorDataDailyRes {
 			}
 		}).collect(Collectors.toList());
 		return lstError;
+	}
+	
+	//日の確認承認の排他チェック
+	public void checkVerConfirmApproval(ApprovalConfirmCache cacheOld) {
+		String companyId = AppContexts.user().companyId();
+		String sId = AppContexts.user().employeeId();
+		List<ConfirmStatusActualResult> confirmResults = confirmStatusActualDayChange.processConfirmStatus(companyId, sId, cacheOld.getEmployeeIds(), Optional.of(cacheOld.getPeriod()), Optional.empty());
+		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDayChange.processApprovalStatus(companyId, sId, cacheOld.getEmployeeIds(), Optional.of(cacheOld.getPeriod()), Optional.empty(), cacheOld.getMode());
+		ApprovalConfirmCache cacheNew = new ApprovalConfirmCache(sId,  cacheOld.getEmployeeIds(), cacheOld.getPeriod(), cacheOld.getMode(), confirmResults, approvalResults);
+		cacheOld.checkVer(cacheNew);
 	}
     
 }

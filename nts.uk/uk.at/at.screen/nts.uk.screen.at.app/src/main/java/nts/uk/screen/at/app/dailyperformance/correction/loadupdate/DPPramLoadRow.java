@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalConfirmCache;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.CellEdit;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPAttendanceItem;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPDataDto;
@@ -59,5 +60,7 @@ public class DPPramLoadRow {
 	private boolean errorAllSidDate = false;
 	
 	private Integer closureId;
+	
+	private ApprovalConfirmCache approvalConfirmCache;
 	
 }

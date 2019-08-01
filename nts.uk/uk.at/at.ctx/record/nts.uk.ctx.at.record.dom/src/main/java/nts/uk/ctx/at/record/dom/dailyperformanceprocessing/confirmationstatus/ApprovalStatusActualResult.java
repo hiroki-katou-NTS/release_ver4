@@ -27,4 +27,11 @@ public class ApprovalStatusActualResult extends ConfirmStatusActualResult{
 		if(statusNormal) return this.permissionRelease == ReleasedAtr.CAN_IMPLEMENT;
 		return permissionCheck == ReleasedAtr.CAN_IMPLEMENT;
 	}
+
+	@Override
+	public boolean equals(Object other) {
+          return super.equals(other) && ((ApprovalStatusActualResult)other).statusNormal == this.statusNormal;
+	}
+	
+	
 }

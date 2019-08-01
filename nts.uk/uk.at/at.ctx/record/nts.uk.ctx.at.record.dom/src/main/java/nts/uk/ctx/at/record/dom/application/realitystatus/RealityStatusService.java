@@ -746,7 +746,7 @@ public class RealityStatusService {
 	/**
 	 * Request list 303
 	 */
-	private List<EmployeeErrorOuput> checkEmployeeErrorOnProcessingDate(String employeeId, GeneralDate startDate,
+	public List<EmployeeErrorOuput> checkEmployeeErrorOnProcessingDate(String employeeId, GeneralDate startDate,
 			GeneralDate endDate) {
 		List<EmployeeErrorOuput> listEmpErrorOutput = new ArrayList<>();
 		

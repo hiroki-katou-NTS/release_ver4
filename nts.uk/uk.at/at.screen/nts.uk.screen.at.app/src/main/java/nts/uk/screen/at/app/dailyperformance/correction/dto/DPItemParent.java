@@ -57,4 +57,6 @@ public class DPItemParent {
 	private boolean showFlex;
 	
 	private boolean checkDailyChange;
+	
+	private ApprovalConfirmCache approvalConfirmCache;
 }

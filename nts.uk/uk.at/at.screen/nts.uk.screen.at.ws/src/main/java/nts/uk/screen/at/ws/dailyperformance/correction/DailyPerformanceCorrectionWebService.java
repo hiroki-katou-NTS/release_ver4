@@ -42,6 +42,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.UpdateColWidthCommand;
 import nts.uk.screen.at.app.dailyperformance.correction.calctime.DailyCorrectCalcTimeService;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeName;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.DataDialogWithTypeProcessor;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalConfirmCache;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPAttendanceItem;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPDataDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPItemParent;
@@ -158,8 +159,9 @@ public class DailyPerformanceCorrectionWebService {
 		session.setAttribute("itemIdRCs", dtoResult.getLstControlDisplayItem() == null ? null : dtoResult.getLstControlDisplayItem().getMapDPAttendance());
 		session.setAttribute("dataSource", dtoResult.getLstData());
 		session.setAttribute("closureId", dtoResult.getClosureId());
-		session.setAttribute("dataSource1", dtoResult.getLstData());
 		session.setAttribute("resultReturn", null);
+		session.setAttribute("approvalConfirm", dtoResult.getApprovalConfirmCache());
+		dtoResult.setApprovalConfirmCache(null);
 		removeSession();
 		dtoResult.setDomainOld(Collections.emptyList());
 		return dtoResult;
@@ -175,6 +177,10 @@ public class DailyPerformanceCorrectionWebService {
 		session.setAttribute("domainEdits", null);
 		session.setAttribute("itemIdRCs", results.getLstControlDisplayItem() == null ? null : results.getLstControlDisplayItem().getMapDPAttendance());
 		session.setAttribute("dataSource", results.getLstData());
+		session.setAttribute("closureId", results.getClosureId());
+		session.setAttribute("resultReturn", null);
+		session.setAttribute("approvalConfirm", results.getApprovalConfirmCache());
+		results.setApprovalConfirmCache(null);
 		removeSession();
 		results.setDomainOld(Collections.emptyList());
 		return results;
@@ -241,6 +247,7 @@ public class DailyPerformanceCorrectionWebService {
 		dataParent.setLstAttendanceItem((Map<Integer, DPAttendanceItem>) session.getAttribute("itemIdRCs"));
 		dataParent.setErrorAllSidDate((Boolean)session.getAttribute("errorAllCalc"));
 		dataParent.setLstSidDateDomainError((List<Pair<String, GeneralDate>>)session.getAttribute("lstSidDateErrorCalc"));
+		dataParent.setApprovalConfirmCache((ApprovalConfirmCache)session.getAttribute("approvalConfirm"));
 		DataResultAfterIU dataResultAfterIU =  dailyModifyResCommandFacade.insertItemDomain(dataParent);
 		session.setAttribute("lstSidDateErrorCalc", dataResultAfterIU.getLstSidDateDomainError());
 		session.setAttribute("errorAllCalc", dataResultAfterIU.isErrorAllSidDate());
@@ -292,8 +299,11 @@ public class DailyPerformanceCorrectionWebService {
 		param.setErrorAllSidDate((Boolean)session.getAttribute("errorAllCalc"));
 		Integer closureId = (Integer) session.getAttribute("closureId");
 		param.setClosureId(closureId);
+		param.setApprovalConfirmCache((ApprovalConfirmCache)session.getAttribute("approvalConfirm"));
 		val result = loadRowProcessor.reloadGrid(param);
 		session.setAttribute("domainEdits", null);
+		session.setAttribute("approvalConfirm", result.getApprovalConfirmCache());
+		result.setApprovalConfirmCache(null);
 		if(!param.getOnlyLoadMonth()) {
 			session.setAttribute("domainOlds", result.getDomainOld());
 			session.setAttribute("domainOldForLog", result.getDomainOldForLog());
@@ -314,10 +324,13 @@ public class DailyPerformanceCorrectionWebService {
 			dailyEdits = (List<DailyRecordDto>) domain;
 		}
 		loadVerData.setLstDomainOld(dailyEdits);
+		loadVerData.setApprovalConfirmCache((ApprovalConfirmCache)session.getAttribute("approvalConfirm"));
 		val result = dPLoadVerProcessor.loadVerAfterCheckbox(loadVerData);
 		session.setAttribute("domainEdits", null);
 		session.setAttribute("domainOlds", result.getLstDomainOld());
 		result.setLstDomainOld(new ArrayList<>());
+		session.setAttribute("approvalConfirm", result.getApprovalConfirmCache());
+		result.setApprovalConfirmCache(null);
 		return result;
 	}
 	
