@@ -1,9 +1,8 @@
 package nts.uk.ctx.at.record.dom.daily;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
@@ -81,10 +80,10 @@ public interface DailyRecordAdUpService {
 	/**
 	 * ドメインモデル「社員の日別実績エラー一覧」を更新する
 	 * @param errors domain error
-	 * @param lstPairRemove List<Pair<employeeId, date>>
+	 * @param mapEmpDateError map<employeeId, list date>
 	 * @param hasRemoveError has remove error
 	 */
-	public void adUpEmpError(List<EmployeeDailyPerError> errors, List<Pair<String, GeneralDate>> lstPairRemove, boolean hasRemoveError);
+	public void adUpEmpError(List<EmployeeDailyPerError> errors, Map<String, List<GeneralDate>> mapEmpDateError, boolean hasRemoveError);
 	
 	public List<IntegrationOfDaily> adTimeAndAnyItemAdUp(List<IntegrationOfDaily> dailys);
 }
