@@ -2,15 +2,12 @@ package nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.holidayworktime.BreakTimeParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.OverTimeRecordAtr;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
-import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 
 /**
  * 反映処理
@@ -31,7 +28,8 @@ public interface WorkUpdateService {
 	 * @param data
 	 */
 	public void updateScheStartEndTime(TimeReflectPara data, IntegrationOfDaily dailyInfo);
-	
+	void editStateOfDailyPerformance(String sid, GeneralDate ymd, 
+			List<EditStateOfDailyPerformance> lstEditState, List<Integer> lstItem);
 	public IntegrationOfDaily updateScheStartEndTimeHoliday(TimeReflectPara data, IntegrationOfDaily dailyData);
 	/**
 	 * 開始時刻の反映, 終了時刻を反映

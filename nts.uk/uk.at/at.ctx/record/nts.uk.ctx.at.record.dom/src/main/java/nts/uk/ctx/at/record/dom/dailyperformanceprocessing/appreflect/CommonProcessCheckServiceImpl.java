@@ -38,10 +38,10 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.Err
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfoRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageResource;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionContent;
+import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 import nts.uk.ctx.at.shared.dom.worktime.service.WorkTimeIsFluidWork;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
-import nts.uk.ctx.at.shared.dom.worktype.WorkTypeCode;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
@@ -78,6 +78,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	private ScheTimeLeavingOfDailyService scheTimeService;
 	@Inject
 	private EditStateOfDailyPerformanceRepository dailyReposiroty;
+	@Inject
+	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDaily;
 	@Override
 	public boolean commonProcessCheck(CommonCheckParameter para) {
 		ReflectedStateRecord state = ReflectedStateRecord.CANCELED;
@@ -149,7 +151,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 				if(commonPara.getAppType() != ApplicationType.BREAK_TIME_APPLICATION ||
 						(commonPara.getAppType() == ApplicationType.BREAK_TIME_APPLICATION && lstTime.isEmpty())) {
 					//出退勤時刻を補正する
-					timeLeavingService.correct(companyId, commonPara.getIntegrationOfDaily(), Optional.empty(), workTypeInfor, true).getData();	
+					timeLeavingService.correct(companyId, commonPara.getIntegrationOfDaily(), Optional.empty(), workTypeInfor, false).getData();	
 				}				
 				// 申請された時間を補正する
 				overTimeService.correct(commonPara.getIntegrationOfDaily(), workTypeInfor, true);
@@ -170,12 +172,9 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 			breakTimeRepo.delete(commonPara.getSid(), commonPara.getYmd());
 		} else {
 			breakTimeRepo.update(commonPara.getIntegrationOfDaily().getBreakTime());	
-		}		
+		}
+		commonPara.getIntegrationOfDaily().getAttendanceLeave().ifPresent(a -> timeLeavingOfDaily.updateFlush(a));
 		workRepository.updateByKeyFlush(x.getWorkInformation());
-//		Map<WorkTypeCode, WorkType> workTypes = new HashMap<WorkTypeCode, WorkType>();
-//		workTypeInfor.ifPresent(wti -> {
-//			workTypes.put(wti.getWorkTypeCode(), wti);
-//		});
 		timeAndAnyItemUpService.addAndUpdate(lstCal);
 		dailyReposiroty.updateByKey(commonPara.getIntegrationOfDaily().getEditState());
 		Map<String, List<GeneralDate>> param = new HashMap<>();

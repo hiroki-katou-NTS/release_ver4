@@ -135,27 +135,8 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 	 * @param dateData
 	 * @param lstItem
 	 */
-	/*private void updateEditStateOfDailyPerformance(String employeeId, GeneralDate dateData, List<Integer> lstItem) {
-		List<EditStateOfDailyPerformance> lstDaily = new ArrayList<>();
-		lstItem.stream().forEach(z -> {
-			Optional<EditStateOfDailyPerformance> optItemData = dailyReposiroty.findByKeyId(employeeId, dateData, z);
-			if(optItemData.isPresent()) {
-				EditStateOfDailyPerformance itemData = optItemData.get();
-				EditStateOfDailyPerformance data = new EditStateOfDailyPerformance(itemData.getEmployeeId(), 
-						itemData.getAttendanceItemId(), itemData.getYmd(), 
-						EditStateSetting.REFLECT_APPLICATION);
-				lstDaily.add(data);
-			}else {
-				EditStateOfDailyPerformance insertData = new EditStateOfDailyPerformance(employeeId, z, dateData, EditStateSetting.REFLECT_APPLICATION);
-				lstDaily.add(insertData);
-			}
-		});
-		
-		if(!lstDaily.isEmpty()) {
-			dailyReposiroty.updateByKeyFlush(lstDaily);
-		}
-	}*/
-	private List<EditStateOfDailyPerformance> editStateOfDailyPerformance(String sid, GeneralDate ymd, 
+	@Override
+	public void editStateOfDailyPerformance(String sid, GeneralDate ymd, 
 			List<EditStateOfDailyPerformance> lstEditState, List<Integer> lstItem) {		
 		lstItem.stream().forEach(z -> {
 			List<EditStateOfDailyPerformance> optItemData = lstEditState.stream().filter(a -> a.getAttendanceItemId() == z)
@@ -168,8 +149,6 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 				lstEditState.add(insertData);
 			}
 		});
-		
-		return lstEditState;
 	}
 	
 	@Override
@@ -642,53 +621,35 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 		}
 		Optional<TimeActualStamp> optTimeAttendanceStart = timeLeavingWork.getAttendanceStamp();
 		Optional<TimeActualStamp> optTimeAttendanceEnd = timeLeavingWork.getLeaveStamp();
-		if(data.isStart() && optTimeAttendanceStart.isPresent()) {
-			TimeActualStamp timeAttendanceStart= optTimeAttendanceStart.get();
-			Optional<WorkStamp> optStamp = timeAttendanceStart.getStamp();
-			WorkStamp stampTmp = null;
-			if(optStamp.isPresent()) {
-				WorkStamp stamp = optStamp.get();
-				stampTmp = new WorkStamp(data.getStartTime() != null ? new TimeWithDayAttr(data.getStartTime()) : null,
-						data.getStartTime() != null ? new TimeWithDayAttr(data.getStartTime()) : null,
-						stamp.getLocationCode().isPresent() ? stamp.getLocationCode().get() : null,
-								StampSourceInfo.GO_STRAIGHT_APPLICATION);
-				
-			} else {
-				if(data.getStartTime() != null) {
-					stampTmp = new WorkStamp(new TimeWithDayAttr(data.getStartTime()),
+		if(data.isStart()) {
+			optTimeAttendanceStart.ifPresent(x -> {
+				x.getStamp().ifPresent(y -> {
+					y.setTimeWithDay(data.getStartTime() != null ? new TimeWithDayAttr(data.getStartTime()) : null);
+					y.setAfterRoundingTime(data.getStartTime() != null ? new TimeWithDayAttr(data.getStartTime()) : null);
+					y.setStampSourceInfo(StampSourceInfo.GO_STRAIGHT_APPLICATION);
+				});
+				if(!x.getStamp().isPresent() && data.getStartTime() != null) {
+					x.setStamp(Optional.ofNullable(new WorkStamp(new TimeWithDayAttr(data.getStartTime()),
 							new TimeWithDayAttr(data.getStartTime()),
 							null,
-							StampSourceInfo.GO_STRAIGHT_APPLICATION);
+							StampSourceInfo.GO_STRAIGHT_APPLICATION)));
 				}
-				
-			}
-			TimeActualStamp timeActualStam = new TimeActualStamp(timeAttendanceStart.getActualStamp().isPresent() ? timeAttendanceStart.getActualStamp().get() : null,
-					stampTmp,
-					timeAttendanceStart.getNumberOfReflectionStamp());
-			optTimeAttendanceStart = Optional.of(timeActualStam);
+			});
 		}
-		if(data.isEnd() && optTimeAttendanceEnd.isPresent()) {			
-			TimeActualStamp timeAttendanceEnd = optTimeAttendanceEnd.get();
-			Optional<WorkStamp> optStamp = timeAttendanceEnd.getStamp();
-			WorkStamp stampTmp = null;
-			if(optStamp.isPresent()) {				
-				WorkStamp stamp = optStamp.get();
-				stampTmp = new WorkStamp(data.getEndTime() != null ? new TimeWithDayAttr(data.getEndTime()) : null,
-						data.getEndTime() != null ? new TimeWithDayAttr(data.getEndTime()) : null,
-						stamp.getLocationCode().isPresent() ? stamp.getLocationCode().get() : null,
-								StampSourceInfo.GO_STRAIGHT_APPLICATION);
-			} else {
-				if(data.getEndTime() != null) {
-					stampTmp = new WorkStamp(new TimeWithDayAttr(data.getEndTime()),
+		if(data.isEnd() && optTimeAttendanceEnd.isPresent()) {
+			optTimeAttendanceEnd.ifPresent(x -> {
+				x.getStamp().ifPresent(y -> {
+					y.setTimeWithDay(data.getEndTime() != null ? new TimeWithDayAttr(data.getEndTime()) : null);
+					y.setAfterRoundingTime(data.getEndTime() != null ? new TimeWithDayAttr(data.getEndTime()) : null);
+					y.setStampSourceInfo(StampSourceInfo.GO_STRAIGHT_APPLICATION);
+				});
+				if(!x.getStamp().isPresent() && data.getEndTime() != null) {
+					x.setStamp(Optional.ofNullable(new WorkStamp(new TimeWithDayAttr(data.getEndTime()),
 							new TimeWithDayAttr(data.getEndTime()),
 							null,
-							StampSourceInfo.GO_STRAIGHT_APPLICATION);
+							StampSourceInfo.GO_STRAIGHT_APPLICATION)));
 				}
-			}
-			TimeActualStamp timeActualStam = new TimeActualStamp(timeAttendanceEnd.getActualStamp().isPresent() ? timeAttendanceEnd.getActualStamp().get() : null,
-					stampTmp,
-					timeAttendanceEnd.getNumberOfReflectionStamp());
-			optTimeAttendanceEnd = Optional.of(timeActualStam);
+			});
 		}
 		TimeLeavingWork timeLeavingWorkTmp = new TimeLeavingWork(timeLeavingWork.getWorkNo(),
 				optTimeAttendanceStart.get(),
@@ -699,7 +660,7 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 		} else {
 			timeDaily = new TimeLeavingOfDailyPerformance(data.getEmployeeId(), new WorkTimes(1), Arrays.asList(timeLeavingWorkTmp), data.getDateData());
 		}
-		timeLeavingOfDaily.updateFlush(timeDaily);
+		//timeLeavingOfDaily.updateFlush(timeDaily);
 		dailyData.setAttendanceLeave(Optional.of(timeDaily));
 		//開始時刻の編集状態を更新する
 		//予定項目ID=出勤の項目ID	

@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.absence;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -13,9 +14,10 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCalculateOfAppReflectParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
-import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
-import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
+import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
+import nts.uk.ctx.at.record.dom.workinformation.ScheduleTimeSheet;
+import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
@@ -27,6 +29,7 @@ import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.ctx.at.shared.dom.worktype.algorithm.JudgmentWorkTypeService;
 import nts.uk.ctx.at.shared.dom.worktype.service.WorkTypeIsClosedService;
+import nts.uk.shr.com.time.TimeWithDayAttr;
 @Stateless
 public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	
@@ -102,8 +105,17 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 		if(basicScheService.checkWorkDay(workTypeCode) == WorkStyle.ONE_DAY_REST) {
 			//予定開始時刻の反映
 			//予定終了時刻の反映
-			TimeReflectPara timeData = new TimeReflectPara(employeeId, baseDate, null, null, 1, true, true);
-			workTimeUpdate.updateScheStartEndTime(timeData, dailyInfor);
+			List<ScheduleTimeSheet> lstScheduleTimeSheet = dailyInfor.getWorkInformation().getScheduleTimeSheets();
+			List<ScheduleTimeSheet> lstScheduleTimeSheetNo1 = lstScheduleTimeSheet.stream()
+					.filter(x -> x.getWorkNo().v() == 1).collect(Collectors.toList());
+			if(!lstScheduleTimeSheetNo1.isEmpty()) {
+				lstScheduleTimeSheet.remove(0);
+				dailyInfor.getWorkInformation().setScheduleTimeSheets(lstScheduleTimeSheet);
+			}
+			List<Integer> lstItem = new ArrayList<Integer>();
+			lstItem.add(3);
+			lstItem.add(4);
+			workTimeUpdate.editStateOfDailyPerformance(employeeId, baseDate, dailyInfor.getEditState(), lstItem);
 			
 		}
 	}
@@ -111,9 +123,40 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	public void reflectRecordStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode,
 			IntegrationOfDaily dailyInfor) {
 		boolean isCheckClean =  this.checkTimeClean(employeeId, baseDate, workTypeCode);
-		//開始終了時刻をクリアするかチェックする 値：０になる。		
-		TimeReflectPara timeData = new TimeReflectPara(employeeId, baseDate, null, null, 1, isCheckClean, isCheckClean);
-		workTimeUpdate.updateRecordStartEndTimeReflect(timeData, dailyInfor);
+		//開始終了時刻をクリアするかチェックする 値：０になる。	
+		if(!isCheckClean) return;
+		Optional<TimeLeavingOfDailyPerformance> optTimeLeaving = dailyInfor.getAttendanceLeave();
+		TimeLeavingOfDailyPerformance timeDaily = null;
+		if(optTimeLeaving.isPresent()) {
+			timeDaily = optTimeLeaving.get();
+		}
+		
+		List<TimeLeavingWork> lstTimeLeavingWorks = new ArrayList<>();
+		if(timeDaily != null) {
+			lstTimeLeavingWorks = timeDaily.getTimeLeavingWorks().stream()
+					.filter(x -> x.getWorkNo().v() == 1).collect(Collectors.toList());
+		}
+		lstTimeLeavingWorks.stream().forEach(c -> {
+			c.getAttendanceStamp().ifPresent(a -> {
+				a.getStamp().ifPresent(x -> {
+					x.setTimeWithDay(null);
+					x.setAfterRoundingTime(null);
+					x.setStampSourceInfo(StampSourceInfo.GO_STRAIGHT_APPLICATION);
+				});
+			});
+			c.getLeaveStamp().ifPresent(y -> {
+				y.getStamp().ifPresent(z -> {
+					z.setTimeWithDay(null);
+					z.setAfterRoundingTime(null);
+					z.setStampSourceInfo(StampSourceInfo.GO_STRAIGHT_APPLICATION);
+				});
+			});
+		});
+		
+		List<Integer> lstItem = new ArrayList<Integer>();
+		lstItem.add(31);
+		lstItem.add(34);			
+		workTimeUpdate.editStateOfDailyPerformance(employeeId, baseDate, dailyInfor.getEditState(), lstItem);
 	}
 	@Override
 	public boolean checkTimeClean(String employeeId, GeneralDate baseDate, String workTypeCode) {
