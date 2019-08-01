@@ -4,8 +4,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.layer.app.command.CommandHandlerContext;
-import nts.uk.ctx.at.record.dom.daily.DailyRecordAdUpService;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.shared.app.util.attendanceitem.CommandFacade;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.context.AppContexts;
@@ -13,14 +13,11 @@ import nts.uk.shr.com.context.AppContexts;
 @Stateless
 public class WorkInformationOfDailyPerformCommandUpdateHandler extends CommandFacade<WorkInformationOfDailyPerformCommand> {
 
-//	@Inject
-//	private WorkInformationRepository repo;
+	@Inject
+	private WorkInformationRepository repo;
 	
 	@Inject
 	private WorkTypeRepository workTypeRepo;
-	
-	@Inject
-	private DailyRecordAdUpService repo;
 
 	@Override
 	protected void handle(CommandHandlerContext<WorkInformationOfDailyPerformCommand> context) {
@@ -29,7 +26,7 @@ public class WorkInformationOfDailyPerformCommandUpdateHandler extends CommandFa
 		checkWorkType(domain);
 		
 		/** update domain */
-		repo.adUpWorkInfo(domain);
+		repo.updateByKey(domain);
 		
 		/** fire changed event */
 		if(context.getCommand().isTriggerEvent()){

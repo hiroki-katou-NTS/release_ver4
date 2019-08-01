@@ -92,6 +92,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 	private static final BigDecimal COUNT_OFF = BigDecimal.ZERO;
 	private static final BigDecimal V100 = BigDecimal.valueOf(100);
 	private static final WorkTypeCode PREMIUM_CODE = new WorkTypeCode("105");
+	private static final WorkTypeCode WORKTYPE_NO2 = new WorkTypeCode("002");
 	
 	@Override
 	public Optional<DailyStoredProcessResult> dailyProcessing(IntegrationOfDaily daily, Optional<WorkType> workTypeOpt, 
@@ -124,6 +125,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		boolean hasAttendanceLeaveGateEndTime = dailyTime.have(t -> t.leaveGateEndTime);
 		boolean isActualWork = dailyTime.have(t -> t.actualWorkTime) && dailyTime.value(t -> t.actualWorkTime) > 0;
 		boolean isNotWorkWithinStatutory = !dailyTime.have(t -> t.withinStatutoryTime) || dailyTime.value(t -> t.withinStatutoryTime) == 0;
+		boolean isNotSpecialWorkType = !dailyTime.value(t -> t.isPremiumWorkType) && !workType.getWorkTypeCode().equals(WORKTYPE_NO2);
 		
 		/** 任意項目1: ログオン時刻がnullではない事が条件 */
 		processCountOptionalItem(() -> pcLogoned && isWorkingType && isActualWork, result, COUNT_ON, COUNT_OFF, 1);
@@ -149,7 +151,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		dailyTime.value(t -> t.timeOn, dailyTime.value(t -> t.leaveGateEndTime));
 		
 		/** 任意項目9: 出勤の判断 */
-		processTimeOptionalItem(() -> isWorkingType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 9);
+		processTimeOptionalItem(() -> isWorkingType && isActualWork && isNotSpecialWorkType, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 9);
 
 		/** 任意項目11: 実働就業時間 = 0 かつ 勤務種類が(年休、特休、代休) である事が条件 */
 		processCountOptionalItem(() -> isWorkingType && isNotWorkWithinStatutory, result, COUNT_ON, COUNT_OFF, 11);
@@ -177,7 +179,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		
 		/** 任意項目10 */
 		dailyTime.calcEndDivergenceTime();
-		processTimeOptionalItem(() -> isWorkingType && isActualWork, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 10);
+		processTimeOptionalItem(() -> isWorkingType && isActualWork && isNotSpecialWorkType, result, dailyTime.value(t -> t.timeOn), dailyTime.value(t -> t.timeOff), 10);
 		
 		dailyTime.value(t -> t.timeOn, 1);
 		
@@ -224,6 +226,17 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		
 		/** 任意項目41: フレックス時間がプラスである事が条件 */
 		processTimeOptionalItem(() -> dailyTime.value(t -> t.flexTime) >= 0, result, dailyTime.value(t -> t.flexTime), dailyTime.value(t -> t.timeOff), 41);
+		
+		/** 任意項目59: */
+		processTimeOptionalItem(() -> hasAttendanceLeaveGateEndTime && dailyTime.value(t -> t.leaveGateEndTime) > 0 && isItem12on, result, dailyTime.value(t -> t.leaveGateEndTime), 0, 59);
+		
+		/** 任意項目72: */
+		processCountOptionalItem(() -> pcLogoffed && dailyTime.value(t -> t.logoffTime) > 0 && isNotSpecialWorkType, result, COUNT_ON, COUNT_OFF, 72);
+
+		dailyTime.calcBreakTime();
+		
+		/** 任意項目82: */
+		processTimeOptionalItem(() -> isItem12on, result, dailyTime.value(t -> t.timeOn), 0, 82);
 		
 		boolean flagFor89And90 = hasAttendanceTime && !dailyTime.value(t -> t.isPremiumWorkType) && isItem12on;
 		/** 任意項目89 */
@@ -511,6 +524,23 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 			}
 			
 			this.timeOn.set(leaveGateEndTime.get() - endTime.get());
+		}
+		
+		public void calcBreakTime(){
+			if (have(t -> t.actualWorkTime)) {
+				this.daily.getAttendanceTimeOfDailyPerformance().ifPresent(atd -> {
+					AttendanceTime breakTime = atd.getActualWorkingTimeOfDaily().getTotalWorkingTime()
+							.getBreakTimeOfDaily().getToRecordTotalTime().getWithinStatutoryTotalTime().getTime();
+					if(this.actualWorkTime.get() > AttendanceTime.ZERO.addHours(8).valueAsMinutes()) {
+						this.timeOn.set(breakTime.addHours(-1).addMinutes(-30).valueAsMinutes());
+					} else {
+						this.timeOn.set(breakTime.addHours(-1).valueAsMinutes());
+					}
+				});
+				return;
+			}
+			
+			this.timeOn.set(0);
 		}
 		
 		private void calcAttendanceTime(IntegrationOfDaily daily) {

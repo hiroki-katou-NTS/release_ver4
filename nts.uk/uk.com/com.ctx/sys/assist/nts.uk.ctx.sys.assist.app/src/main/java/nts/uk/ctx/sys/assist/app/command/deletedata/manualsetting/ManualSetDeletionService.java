@@ -7,7 +7,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,6 @@ import nts.uk.ctx.sys.assist.dom.deletedata.ManagementDeletion;
 import nts.uk.ctx.sys.assist.dom.deletedata.ManagementDeletionRepository;
 import nts.uk.ctx.sys.assist.dom.deletedata.ManualSetDeletion;
 import nts.uk.ctx.sys.assist.dom.deletedata.OperatingCondition;
-import nts.uk.ctx.sys.assist.dom.deletedata.PasswordCompressFileEncrypt;
 import nts.uk.ctx.sys.assist.dom.deletedata.Result;
 import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletion;
 import nts.uk.ctx.sys.assist.dom.deletedata.ResultDeletionRepository;
@@ -113,6 +111,8 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	private CSVReportGenerator generator;
 	@Inject 
 	private SaveErrorLogDeleteResult saveErrLogDel;
+	@Inject
+	private DeleteDataForCategory deleteDataForCategory;
 	
 	@Override
 	protected void handle(ExportServiceContext<Object> context) {
@@ -156,7 +156,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 					//ドメインモデル「データ削除の結果ログ」へ追加する
 					saveEndLogResult(domain, state);
 					//ドメインモデル「データ削除の保存結果」を更新する
-					saveEndResultDel(domain, resultSave,domain.isSaveBeforeDeleteFlg());
+					saveEndResultDel(domain, resultSave,domain.isSaveBeforeDeleteFlg(), employeeDeletions.size());
 					//ドメインモデル「データ削除動作管理」を更新する
 					saveEndManagementDel(delId, state);
 					
@@ -183,7 +183,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			//ドメインモデル「データ削除の結果ログ」へ追加する
 			saveEndLogResult(domain, resultDel.getState());
 			//ドメインモデル「データ削除の保存結果」を更新する
-			saveEndResultDel(domain, resultDel,domain.isSaveBeforeDeleteFlg());
+			saveEndResultDel(domain, resultDel,domain.isSaveBeforeDeleteFlg(),employeeDeletions.size() );
 			//ドメインモデル「データ削除動作管理」を更新する
 			saveEndManagementDel(delId, resultDelState);
 		} else {
@@ -279,7 +279,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 	 * ドメインモデル「データ削除の保存結果」を更新する
 	 * Update domain model 「データ削除の保存結果」
 	 */
-	private void saveEndResultDel(ManualSetDeletion domain, Result result,Boolean isSaveBeforeDeleteFlg) {
+	private void saveEndResultDel(ManualSetDeletion domain, Result result,Boolean isSaveBeforeDeleteFlg, int numberEmployees) {
 		Optional<ResultDeletion> optResultDel = repoResultDel.getResultDeletionById(domain.getDelId());
 		if (optResultDel.isPresent()) {
 			int fileSize = 0;
@@ -304,22 +304,18 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			ResultDeletion resultDel = optResultDel.get();
 			resultDel.setStatus(status);
 			resultDel.setEndDateTimeDel(endDateTimeDel);
-			resultDel.setFileName(new FileName(nameFile));
 			resultDel.setFileSize(fileSize);
 			resultDel.setFileId(fileId);
 			if (fileId == null || fileId == "") {
 				resultDel.setDeletedFilesFlg(true);
+				resultDel.setFileName(new FileName(""));
 			} else {
 				resultDel.setDeletedFilesFlg(false);
+				resultDel.setFileName(new FileName(nameFile));
 			}
-			
-			// redmine #108204
-			if (domain.isExistCompressPassFlg()) {
-				resultDel.setPasswordCompressFileEncrypt(domain.getPasswordCompressFileEncrypt());
-			} else {
-				resultDel.setPasswordCompressFileEncrypt(Optional.empty());
-			}
-			repoResultDel.update(resultDel);
+		
+			resultDel.setNumberEmployees(numberEmployees);
+			repoResultDel.update(resultDel, domain);
 		}
 	}
 
@@ -373,8 +369,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			file = zipFolderDataAgth(generatorContext, domain);
 			if (file == null) {
 				return new Result(ResultState.ABNORMAL_END, null, null);
-			}
-			else {
+			}else {
 				String fileId = generatorContext.getTaskId();
 				return new Result(ResultState.NORMAL_END, file, fileId);
 			}
@@ -512,8 +507,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			compressedFile = applicationTemporaryFilesContainer.zipWithName(generatorContext, nameFile, false);
 		} else {
 			String password = domain.getPasswordCompressFileEncrypt().get().v();
-			compressedFile = applicationTemporaryFilesContainer.zipWithName(generatorContext, nameFile,
-					new String(Base64.getDecoder().decode(password)), false);
+			compressedFile = applicationTemporaryFilesContainer.zipWithName(generatorContext, nameFile, password, false);
 		}
 		
 		applicationTemporaryFilesContainer.removeContainer();
@@ -776,20 +770,18 @@ public class ManualSetDeletionService extends ExportService<Object>{
 
 	/**
 	 * アルゴリズム「サーバデータ削除実行」を実行する execute the deletion data
-	 * 
-	 * @param delId
 	 */
 	private ResultState deleteDataAgth(String delId, ManualSetDeletion domain,
 			List<TableDeletionDataCsv> tableDeletionDataCsvs, List<EmployeeDeletion> employeeDeletions,
 			List<CategoryForDelete> categories) {
 
-		try {
 			// Update domain model 「データ削除動作管理」
 			repoManagementDel.updateCatCountAnCond(delId, 0, OperatingCondition.DELETING);
 
 			Map<String, List<TableDeletionDataCsv>> mapCatWithDatas = mapCatWithDataDel(tableDeletionDataCsvs);
 			if (mapCatWithDatas != null) {
 				int categoryCount = 0;
+				
 				for (CategoryForDelete category : categories) {
 					categoryCount++;
 
@@ -819,59 +811,16 @@ public class ManualSetDeletionService extends ExportService<Object>{
 								parentTables.add(tableDataDel);
 							}
 						}
-						
-						//delete child
-						for (TableDeletionDataCsv tableDataDel : childTables) {
-							// アルゴリズム「サーバデータ削除実行カテゴリ」を実行する
-							String msgError = deleteDataForCategory(tableDataDel, employeeDeletions);
-							if (msgError != null) {
-								ManagementDeletion managementDeletion = maOptional.get();
-								int errorCount = managementDeletion.getErrorCount();
-								managementDeletion.setErrorCount(errorCount + 1);
-								repoManagementDel.update(managementDeletion);
-								// ドメインモデル「データ削除の結果ログ」を追加する
-								saveErrLogDel.saveErrorWhenDelData(domain, msgError);
-//								return ResultState.ABNORMAL_END;
-							}
-						}
-						
-						//delete parent
-						for (TableDeletionDataCsv tableDataDel : parentTables) {
-							// アルゴリズム「サーバデータ削除実行カテゴリ」を実行する
-							String msgError = deleteDataForCategory(tableDataDel, employeeDeletions);
-							if (msgError != null) {
-								ManagementDeletion managementDeletion = maOptional.get();
-								int errorCount = managementDeletion.getErrorCount();
-								managementDeletion.setErrorCount(errorCount + 1);
-								repoManagementDel.update(managementDeletion);
-								// ドメインモデル「データ削除の結果ログ」を追加する
-								saveErrLogDel.saveErrorWhenDelData(domain, msgError);
-//								return ResultState.ABNORMAL_END;
-							}
+						try {
+							deleteDataForCategory.deleteProcess(childTables, parentTables, employeeDeletions, 
+									maOptional.get(), domain);
+						} catch (Exception e) {
+							e.printStackTrace();
+							saveErrLogDel.saveErrorWhenDelData(domain, e.getMessage());
 						}
 					}
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			saveErrLogDel.saveErrorWhenDelData(domain, e.getMessage());
-			return ResultState.ABNORMAL_END;
-		}
-
 		return ResultState.NORMAL_END;
-	}
-
-	/**
-	 * アルゴリズム「サーバデータ削除実行カテゴリ」を実行する
-	 */
-	private String deleteDataForCategory(TableDeletionDataCsv tableDataDel,
-			List<EmployeeDeletion> employeeDeletions) {
-		try {
-			repoCsv.deleteData(tableDataDel, employeeDeletions);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return e.getMessage();
-		}
-		return null;
 	}
 }

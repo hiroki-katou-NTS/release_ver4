@@ -94,9 +94,6 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 	@Inject
 	private ApplicationTemporaryFileFactory applicationTemporaryFileFactory;
 	
-	@Inject
-	private TargetEmployeesRepository targetEmployeesRepo;
-	
 	@Override
 	protected void handle(ExportServiceContext<Object> context) {
 		ManualSetOfDataSave domain = (ManualSetOfDataSave) context.getQuery();
@@ -354,7 +351,6 @@ public class ManualSetOfDataSaveService extends ExportService<Object> {
 			Map<String, Object> rowCsv = new HashMap<>();
 			int offset = 0;
 			List<String> categoryIds = new ArrayList<>();
-//			List<String> targetEmployeesSid = targetEmployeesRepo.getTargetEmployeesListById(storeProcessingId).stream().map(c -> c.getSid()).collect(Collectors.toList());
 			CsvReportWriter csv = generator.generate(generatorContext,FILE_NAME_CSV1 + CSV_EXTENSION, headerCsv , "UTF-8");
 			
 			while (true) {

@@ -4,7 +4,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.layer.app.command.CommandHandlerContext;
-import nts.uk.ctx.at.record.dom.daily.DailyRecordAdUpService;
+import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workrecord.repo.AttendanceTimeByWorkOfDailyRepository;
 import nts.uk.ctx.at.shared.app.util.attendanceitem.CommandFacade;
 
 @Stateless
@@ -12,13 +12,13 @@ public class AttendanceTimeByWorkOfDailyCommandUpdateHandler extends CommandFaca
 
 	// TODO: create table and write repo
 	@Inject
-	private DailyRecordAdUpService adUpRepo;
+	private AttendanceTimeByWorkOfDailyRepository repo;
 
 	@Override
 	protected void handle(CommandHandlerContext<AttendanceTimeByWorkOfDailyCommand> context) {
 		AttendanceTimeByWorkOfDailyCommand command = context.getCommand();
 		if(command.getData().isPresent()){
-			adUpRepo.adUpAttendanceTimeByWork(command.toDomain());
+			repo.update(command.toDomain().get());
 		}
 	}
 }
