@@ -51,10 +51,6 @@ public class AddManualSetDelHandler extends CommandHandlerWithResult<ManualSetDe
 	protected String handle(CommandHandlerContext<ManualSetDelCommand> context) {
 		ManualSetDelCommand manualSetCmd = context.getCommand();
 		String delId = IdentifierUtil.randomUniqueId();
-		// encrypt password
-		if(manualSetCmd.getPasswordForCompressFile()!=null){
-			manualSetCmd.setPasswordForCompressFile(Base64.getEncoder().encodeToString(manualSetCmd.getPasswordForCompressFile().getBytes()));
-		}
 		
 		 // get login info
         LoginUserContext loginUserContext = AppContexts.user();

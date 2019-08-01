@@ -861,14 +861,22 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 				for (Entry<String, Object> entry : params.entrySet()) {
 					queryString.setParameter(entry.getKey(), entry.getValue());
 				}
-				queryString.executeUpdate();
+				try {
+					queryString.executeUpdate();
+				} catch (Exception e) {
+					throw e;
+				}
 			}
 		}else {
 			Query queryString = getEntityManager().createNativeQuery(querySql);
 			for (Entry<String, Object> entry : params.entrySet()) {
 				queryString.setParameter(entry.getKey(), entry.getValue());
 			}
-			queryString.executeUpdate();
+			try {
+				queryString.executeUpdate();
+			} catch (Exception e) {
+				throw e;
+			}
 		}
 	}
 	
@@ -923,8 +931,11 @@ public class JpaDataDeletionCsvRepository extends JpaRepository implements DataD
 	 */
 	@Override
 	public void deleteData(TableDeletionDataCsv tableDelData, List<EmployeeDeletion> employeeDeletions) {
-		
-		List targetEmployeesSid = employeeDeletions.stream().map(emp -> emp.getEmployeeId()).collect(Collectors.toList());
-		delelteDataDynamic(tableDelData, targetEmployeesSid);
+		List<String> targetEmployeesSid = employeeDeletions.stream().map(emp -> emp.getEmployeeId()).collect(Collectors.toList());
+		try {
+			delelteDataDynamic(tableDelData, targetEmployeesSid);
+		} catch (Exception e) {
+			throw e;
+		}
 	}
 }
