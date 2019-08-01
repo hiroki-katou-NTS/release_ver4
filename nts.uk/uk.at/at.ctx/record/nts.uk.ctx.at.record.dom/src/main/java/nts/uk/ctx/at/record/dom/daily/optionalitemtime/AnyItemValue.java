@@ -60,7 +60,7 @@ public class AnyItemValue {
 	}
 
 	public int getRowAmount() {
-		if(this.times.isPresent()) {
+		if(this.amount.isPresent()) {
 			return this.amount.get().v();
 		}
 		return 0;
