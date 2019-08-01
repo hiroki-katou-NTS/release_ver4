@@ -166,7 +166,11 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 				Arrays.asList(commonPara.getIntegrationOfDaily()) , 
 				Optional.empty());
 		IntegrationOfDaily x = lstCal.get(0);
-		breakTimeRepo.update(commonPara.getIntegrationOfDaily().getBreakTime());
+		if(commonPara.getIntegrationOfDaily().getBreakTime().isEmpty()) {
+			breakTimeRepo.delete(commonPara.getSid(), commonPara.getYmd());
+		} else {
+			breakTimeRepo.update(commonPara.getIntegrationOfDaily().getBreakTime());	
+		}		
 		workRepository.updateByKeyFlush(x.getWorkInformation());
 //		Map<WorkTypeCode, WorkType> workTypes = new HashMap<WorkTypeCode, WorkType>();
 //		workTypeInfor.ifPresent(wti -> {
