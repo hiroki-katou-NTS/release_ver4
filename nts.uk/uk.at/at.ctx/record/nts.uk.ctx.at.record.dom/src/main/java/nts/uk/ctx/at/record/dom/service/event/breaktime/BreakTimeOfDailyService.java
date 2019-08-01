@@ -148,10 +148,10 @@ public class BreakTimeOfDailyService {
 		BreakTimeOfDailyPerformance breakTime = reflectBreakTimeService.reflectBreakTime(companyId, wi.getEmployeeId(),
 				wi.getYmd(), null, timeLeave, wi);
 
-		if (breakTimeRecord != null) {
+// 		if (breakTimeRecord != null) {
 			return mergeWithEditStates(wi.getEmployeeId(), wi.getYmd(), editState, breakTime, breakTimeRecord);
-		}
-		return breakTime;
+// 		}
+// 		return breakTime;
 	}
 	
 
