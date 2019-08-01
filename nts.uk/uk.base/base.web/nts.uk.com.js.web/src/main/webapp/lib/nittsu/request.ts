@@ -165,11 +165,45 @@ module nts.uk.request {
         return dfd.promise();
     }
     
-    let SubSessionIdKey = "nts.uk.request.subSessionId";
-    if (!uk.sessionStorage.containsKey(SubSessionIdKey)) {
-        uk.sessionStorage.setItem(SubSessionIdKey, uk.util.randomId());
+    module subSession {
+        const SubSessionIdKey = "nts.uk.request.subSessionId.";
+        const SecondsToKeepSubSession = 30;
+        const SecondsIntervalToReportAlive = 3;
+        export let currentId = uk.util.randomId();
+        
+        // keep alive sub sessions
+        function keepAliveSubSessionId() {
+            window.localStorage.setItem(SubSessionIdKey + currentId, +new Date());
+        }
+        keepAliveSubSessionId();
+        setInterval(keepAliveSubSessionId, SecondsIntervalToReportAlive * 1000);
+        
+        export function getAliveIds() {
+            let aliveIds = [];
+            let deadIds = [];
+            for (let i = 0; ; i++) {
+                let key = window.localStorage.key(i);
+                if (key == null) break;
+                if (key.indexOf(SubSessionIdKey) !== 0) continue;
+                
+                let id = key.slice(SubSessionIdKey.length);
+                let lastReportTime = window.localStorage.getItem(SubSessionIdKey + id);
+                let duration = +new Date() - lastReportTime;
+                if (duration <= SecondsToKeepSubSession * 1000) {
+                    aliveIds.push(id);
+                } else {
+                    deadIds.push(id);
+                }
+            }
+            
+            // prune dead IDs
+            deadIds.forEach(deadId => {
+                window.localStorage.removeItem(SubSessionIdKey + deadId);
+            });
+            
+            return aliveIds;
+        }
     }
-    let subSessionId = uk.sessionStorage.getItem(SubSessionIdKey).get();
 
     export function ajax(path: string, data?: any, options?: any);
     export function ajax(webAppId: WebAppId, path: string, data?: any, options?: any, restoresSession?: boolean) {
@@ -204,7 +238,8 @@ module nts.uk.request {
                 headers: {
                     'PG-Path': location.current.serialize(),
                     "X-CSRF-TOKEN": csrf.getToken(),
-                    "X-SubSessionId": subSessionId
+                    "X-SubSessionId": subSession.currentId,
+                    "X-AliveSubSessionIds": subSession.getAliveIds()
                 }
             }).done(function(res) {
                 if (nts.uk.util.exception.isErrorToReject(res)) {
@@ -263,7 +298,8 @@ module nts.uk.request {
                 headers: {
                     'PG-Path': location.current.serialize(),
                     "X-CSRF-TOKEN": csrf.getToken(),
-                    "X-SubSessionId": subSessionId
+                    "X-SubSessionId": subSession.currentId,
+                    "X-AliveSubSessionIds": subSession.getAliveIds()
                 },
                 success: function(res) {
                     if (nts.uk.util.exception.isErrorToReject(res)) {
