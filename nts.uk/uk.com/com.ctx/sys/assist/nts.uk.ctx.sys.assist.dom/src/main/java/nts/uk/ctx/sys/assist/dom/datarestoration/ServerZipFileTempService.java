@@ -47,20 +47,16 @@ public class ServerZipFileTempService {
 			return serverPrepareMng;
 		}
 		if (optResultOfDelete.isPresent()) {
-			Optional<ManualSetDeletion> manualSetting = manualSetDeletionRepo
-					.getManualSetDeletionById(storeProcessingId);
 			String fileId = optResultOfDelete.get().getFileId();
 			String uploadFileName = optResultOfDelete.get().getFileName().v();
 			Integer doNotUpload = 0;
 			String password = "";
-			if (manualSetting.isPresent()) {
-				if ((manualSetting.get().getPasswordCompressFileEncrypt().isPresent())
-						&& (!manualSetting.get().getPasswordCompressFileEncrypt().get().v().isEmpty())
-						&& (!manualSetting.get().getPasswordCompressFileEncrypt().get().v().equals(""))) {
-					password = manualSetting.get().getPasswordCompressFileEncrypt()
+				if ((optResultOfDelete.get().getPasswordCompressFileEncrypt().isPresent())
+						&& (!optResultOfDelete.get().getPasswordCompressFileEncrypt().get().v().isEmpty())
+						&& (!optResultOfDelete.get().getPasswordCompressFileEncrypt().get().v().equals(""))) {
+					password = optResultOfDelete.get().getPasswordCompressFileEncrypt()
 							.map(i -> CommonKeyCrypt.decrypt(i.v())).orElse(null);
 				}
-			}
 			Integer operatingCondition = 13;
 			ServerPrepareMng serverPrepareMng = new ServerPrepareMng(recoveryProcessingId, storeProcessingId, fileId,
 					uploadFileName, doNotUpload, password, operatingCondition);
