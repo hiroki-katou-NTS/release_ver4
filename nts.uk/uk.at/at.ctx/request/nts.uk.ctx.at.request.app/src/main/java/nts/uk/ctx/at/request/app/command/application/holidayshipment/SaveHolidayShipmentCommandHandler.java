@@ -912,12 +912,14 @@ public class SaveHolidayShipmentCommandHandler
 		}
 		// アルゴリズム「申請理由の生成と検査」を実行する
 		String reason = GenAndInspectionOfAppReason(command, companyID, appType);
-		// INPUT.振出申請に申請理由を設定する
 		
 		if (isSaveRec(comType)) {
+			// INPUT.振出申請に申請理由を設定する
 			validateRec(command.getRecCmd());
 		}
+		
 		if (isSaveAbs(comType)) {
+			//INPUT.振休申請に申請理由を設定する
 			validateAbs(command.getAbsCmd());
 		}
 
@@ -947,6 +949,7 @@ public class SaveHolidayShipmentCommandHandler
 			checkTime(wkTime1.getStartTime(), wkTime1.getEndTime());
 			//checkTime(wkTime2.getStartTime(), wkTime2.getEndTime());
 			// reason check trước đó ở hàm GenAndInspectionOfAppReason rồi
+			this.checkMsg307(wkTime1.getStartTime(), wkTime1.getEndTime());
 		}
 
 	}
@@ -958,7 +961,7 @@ public class SaveHolidayShipmentCommandHandler
 		checkTime(wkTime1.getStartTime(), wkTime1.getEndTime());
 		//checkTime(wkTime2.getStartTime(), wkTime2.getEndTime());
 		// reason check trước đó ở hàm GenAndInspectionOfAppReason rồi
-
+		this.checkMsg307(wkTime1.getStartTime(), wkTime1.getEndTime());
 	}
 
 	private void checkTime(Integer startTime, Integer endTime) {
@@ -970,7 +973,15 @@ public class SaveHolidayShipmentCommandHandler
 
 		}
 	}
-
+	private void checkMsg307(Integer startTime, Integer endTime){
+		if(startTime != null && endTime != null){
+//			「5:00～29:00」の中に入力すれば、OKです。
+//			「5:00～29:00」の外に入力すれば、Msg307表示です。
+			if(startTime < 300 || endTime > 1740){
+				throw new BusinessException("Msg_307");
+			}
+		}
+	}
 	private String GenAndInspectionOfAppReason(SaveHolidayShipmentCommand command, String companyID,
 			ApplicationType appType) {
 		AppTypeDiscreteSetting appTypeSet = appTypeSetRepo.getAppTypeDiscreteSettingByAppType(companyID, appType.value)
