@@ -382,6 +382,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 				}
 			} catch (SQLException e) {
 				exception.set(e);
+				throw new RuntimeException(e);
 			}
 		});
 		

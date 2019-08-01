@@ -389,7 +389,7 @@ public class JpaWorkingConditionItemRepository extends JpaRepository
 								return entity;
 							}));
 				} catch (SQLException e1) {
-					e1.printStackTrace();
+					throw new RuntimeException(e1);
 				}
 			});
 

@@ -209,7 +209,8 @@ public class JpaPersonalLaborConditionRepository extends JpaRepository
 			// exclude select
 			return Optional.of(query.getSingleResult());
 		} catch (NoResultException e) {
-			return Optional.empty();
+			//return Optional.empty();
+			throw new RuntimeException(e);
 		}
 		
 	}

@@ -597,8 +597,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 					return null;
 				});
 			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				throw new RuntimeException(e1);
 			}
 			try (val stmt = this.connection().prepareStatement("SELECT * FROM KRCDT_DAI_PER_WORK_INFO "
 					+ "WHERE YMD IN (" + subIn + ") AND SID = ?")){
@@ -624,8 +623,7 @@ public class JpaWorkInformationRepository extends JpaRepository implements WorkI
 				});
 				lstOutput.addAll(lstOuputTmp);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		});
 		return lstOutput;

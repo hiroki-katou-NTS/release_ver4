@@ -470,7 +470,7 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 				statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTimeLeaving));
 			}
 		} catch (Exception e) {
-
+			throw new RuntimeException(e);
 		}
 	}
 

@@ -1027,6 +1027,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		return lstResult;
 	}
@@ -1126,8 +1127,8 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 			return dtos;
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-		return dtos;
+			throw new RuntimeException(e);
+		}		
 	}
 	
 	@Override
@@ -1145,7 +1146,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 			}
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		return errorType;
 	}
@@ -1798,8 +1799,8 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 			return dtos;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return dtos;
 	}
 
 	@Override
@@ -1842,6 +1843,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 				});
 			} catch (SQLException e) {
 				exception.set(e);
+				throw new RuntimeException(e);
 			}
 		});
 		if (exception.optional().isPresent()) {
@@ -1876,6 +1878,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 						});
 					} catch (SQLException e) {
 						exception.set(e);
+						throw new RuntimeException(e);
 					}
 				});
 		List<ClosureDto> result = new ArrayList<>();
@@ -1932,11 +1935,12 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 						processYM);
 				resultFind.add(month);
 			}
-
+			return resultFind;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return resultFind;
+		
 	}
 
 	@Override

@@ -479,7 +479,7 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 				statementU.executeUpdate(updateTableSQL);
 			}
 		} catch (Exception e) {
-
+			throw new RuntimeException(e);
 		}
 	}
 

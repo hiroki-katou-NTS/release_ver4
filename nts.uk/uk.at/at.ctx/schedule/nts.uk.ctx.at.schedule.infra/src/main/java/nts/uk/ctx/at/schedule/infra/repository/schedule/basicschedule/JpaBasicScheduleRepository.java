@@ -1199,8 +1199,7 @@ public class JpaBasicScheduleRepository extends JpaRepository implements BasicSc
 				});
 				lstOutput.addAll(lstOutputTmp);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		});
 		return lstOutput;

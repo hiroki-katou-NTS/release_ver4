@@ -158,7 +158,7 @@ public class AttendanceLeavingGateOfDailyRepoImpl extends JpaRepository implemen
 				statementI.executeUpdate(JDBCUtil.toInsertWithCommonField(insertTableSQL));
 			}
 		} catch (Exception e) {
-			
+			throw new RuntimeException(e);
 		}
 	}
 

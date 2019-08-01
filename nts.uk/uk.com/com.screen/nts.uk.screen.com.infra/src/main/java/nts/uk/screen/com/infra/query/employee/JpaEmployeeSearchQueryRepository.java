@@ -68,7 +68,7 @@ public class JpaEmployeeSearchQueryRepository extends JpaRepository implements E
 				.setParameter("delStatus", EmployeeDeletionAttr_NOTDELETED)
 				.getSingleResult();
 		} catch (NoResultException e) {
-			return Optional.empty();
+			throw new RuntimeException(e);
 		}
 		
 		// Convert query data.

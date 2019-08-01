@@ -140,7 +140,7 @@ public class PCLogOnInfoOfDailyRepoImpl extends JpaRepository implements PCLogOn
 			}
 			
 		} catch (Exception e) {
-			
+			throw new RuntimeException(e);
 		}
 	}
 
