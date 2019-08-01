@@ -262,13 +262,18 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 					+ " SID, YM_KEY, Y_KEY, STRING_KEY, CORRECTION_ATTR,  ITEM_NAME, VIEW_VALUE_BEFORE, VIEW_VALUE_AFTER, VALUE_DATA_TYPE, SHOW_ORDER" // other
 					+ " from SRCDT_DATA_CORRECTION_LOG" //table name
 					+ " with(index(SRCDI_DATA_CORRECTION_LOG2))";//hint
+			//TODO：ログ照会レスポンス改善
+			//一時対応として、出力するログ自体を減らすため、修正区分を指定
+			String correctAttrOneCondition = " and CORRECTION_ATTR = '0'";
+//			String correctAttrOneCondition = "";
 
 			
 			if (targetDataType == null) {
 				if (listEmployeeId == null || listEmployeeId.isEmpty()) {
 					if (period.start() == null) {
 //						sql += " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
-						sql +=  " where OPERATION_ID in @operationIds"// condition
+						sql +=  " where OPERATION_ID in @operationIds "// condition
+							+   correctAttrOneCondition
 							+	" order by YMD_KEY, SID,  SHOW_ORDER";
 						final String executeSQL = sql; 
 						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
@@ -307,6 +312,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 					}
 					else {
 						sql +=  " where YMD_KEY between @startYmd and @endYmd and OPERATION_ID in @operationIds"// condition
+							+   correctAttrOneCondition
 //							+  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
 							+  " order by YMD_KEY, SID,  SHOW_ORDER";
 						final String executeSQL = sql; 
@@ -350,6 +356,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 				else {
 					if (period.start() == null) {
 						sql += " where OPERATION_ID in @operationIds and SID in @listEmployeeId"
+							+  correctAttrOneCondition
 //							+  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
 								+  " order by YMD_KEY, SID, SHOW_ORDER";
 						final String executeSQL = sql; 
@@ -390,6 +397,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 					} else {
 						sql += " where YMD_KEY between @startYmd and @endYmd and OPERATION_ID in @operationIds and SID in @listEmployeeId"
 //							+  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
+							+  correctAttrOneCondition
 							+  " order by YMD_KEY, SID, SHOW_ORDER";
 						final String executeSQL = sql; 
 						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
@@ -437,6 +445,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 				if (listEmployeeId == null || listEmployeeId.isEmpty()) {
 					if (period.start() == null) {
 						sql += " where OPERATION_ID in @operationIds and TARGET_DATA_TYPE = @targetDataType"
+							+  correctAttrOneCondition
 //							+  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
 							+  " order by YMD_KEY, SID, SHOW_ORDER";
 						final String executeSQL = sql;
@@ -477,6 +486,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 //						results.addAll(entities.stream().map(c -> c.toDomain()).collect(Collectors.toList()));
 					} else {
 						sql += " where YMD_KEY between @startYmd and @endYmd and OPERATION_ID in @operationIds and TARGET_DATA_TYPE = @targetDataType"
+							+  correctAttrOneCondition
 //							+  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
 							+  " order by YMD_KEY, SID, SHOW_ORDER";
 						final String executeSQL = sql; 
@@ -527,6 +537,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 				} else {
 					if (period.start() == null) {
 						sql += " where OPERATION_ID in @operationIds and TARGET_DATA_TYPE = @targetDataType and SID in @listEmployeeId"
+							+  correctAttrOneCondition
 //						    +  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
 							+  " order by YMD_KEY, SID, SHOW_ORDER";
 						final String executeSQL = sql; 
@@ -569,6 +580,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 //						results.addAll(entities.stream().map(c -> c.toDomain()).collect(Collectors.toList()));
 					} else {
 						sql += " where YMD_KEY between @startYmd and @endYmd and OPERATION_ID in @operationIds and TARGET_DATA_TYPE = @targetDataType and SID in @listEmployeeId"
+							+  correctAttrOneCondition
 //							 + " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
 							 + " order by YMD_KEY, SID, SHOW_ORDER";
 						final String executeSQL = sql; 
