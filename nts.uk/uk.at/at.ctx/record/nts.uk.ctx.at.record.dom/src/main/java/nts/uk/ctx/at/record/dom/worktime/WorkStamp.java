@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import nts.arc.layer.dom.DomainObject;
 //import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.LogOnInfo;
 import nts.uk.ctx.at.record.dom.worklocation.WorkLocationCD;
@@ -17,6 +18,7 @@ import nts.uk.shr.com.time.TimeWithDayAttr;
  *
  */
 @Getter
+@Setter
 @NoArgsConstructor
 public class WorkStamp extends DomainObject{
 	

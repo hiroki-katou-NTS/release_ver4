@@ -3,6 +3,7 @@ package nts.uk.ctx.at.record.dom.worktime;
 import java.util.Optional;
 
 import lombok.Getter;
+import lombok.Setter;
 //import lombok.NoArgsConstructor;
 //import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.LogOnInfo;
 import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
@@ -19,7 +20,7 @@ import nts.uk.shr.com.time.TimeWithDayAttr;
 public class TimeActualStamp {
 	
 	private Optional<WorkStamp> actualStamp;
-	
+	@Setter
 	private Optional<WorkStamp> stamp = Optional.empty();
 	
 	private Integer numberOfReflectionStamp;
