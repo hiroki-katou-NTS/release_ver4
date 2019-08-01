@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import nts.arc.task.AsyncTask;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -464,7 +462,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 		//registerErrorWhenCalc(domainDailyNew);
 		dailyRecordAdUpService.adUpEmpError(
 				domainDailyNew.stream().flatMap(x -> x.getEmployeeError().stream()).collect(Collectors.toList()),
-				commandNew.stream().map(x -> Pair.of(x.getEmployeeId(), x.getWorkDate())).collect(Collectors.toList()), hasRemoveError);
+				toMapParam(commandNew), hasRemoveError);
 
 		System.out.print("time insert: " + (System.currentTimeMillis() - time));
 		
