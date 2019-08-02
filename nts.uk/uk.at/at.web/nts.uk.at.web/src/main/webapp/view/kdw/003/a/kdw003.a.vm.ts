@@ -4087,7 +4087,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 if (header.headerText != "提出済みの申請" && header.headerText != "申請" && header.headerText != "申請一覧") {
                     if (header.group == undefined && header.group == null) {
                         if (self.showHeaderNumber()) {
-                            headerText = header.headerText + " " + header.key.substring(1, header.key.length);
+                            headerText = "[" + header.key.substring(1, header.key.length) + "]" + " " + header.headerText ;
                             $("#dpGrid").mGrid("headerText", header.key, headerText, false);
                         } else {
                            // headerText = header.headerText.split(" ")[0];
@@ -4095,12 +4095,12 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         }
                     } else {
                         if (self.showHeaderNumber()) {
-                            headerText = header.headerText + " " + header.group[1].key.substring(4, header.group[1].key.length);
+                            headerText =  "[" + header.group[1].key.substring(4, header.group[1].key.length) + "]" + " " + header.headerText;
                             $("#dpGrid").mGrid("headerText", header.headerText, headerText, true);
                         } else {
                           //  headerText = header.headerText.split(" ")[0];
                             headerText = header.headerText;
-                            $("#dpGrid").mGrid("headerText", headerText + " " + header.group[1].key.substring(4, header.group[1].key.length), headerText, true);
+                            $("#dpGrid").mGrid("headerText", "[" + header.group[1].key.substring(4, header.group[1].key.length) + "]" + " " + headerText, headerText, true);
                         }
                     }
                 }
