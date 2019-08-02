@@ -53,6 +53,7 @@ public class SyncCsvExecuteImportDataCommandHandler extends AsyncCommandHandler<
 				TimeUnit.SECONDS.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 		// TODO	End -- Dump data for testing. they will be deleted after process at phrase 2

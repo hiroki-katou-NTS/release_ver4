@@ -162,6 +162,7 @@ public class JpaInterimRemainRepository extends JpaRepository  implements Interi
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		});
 		return resultList;
