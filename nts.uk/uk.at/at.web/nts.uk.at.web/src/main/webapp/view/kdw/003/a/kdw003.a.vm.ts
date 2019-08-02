@@ -5245,8 +5245,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             } else {
                 $("#next-month").attr('style', 'background-color: white !important');
             }
-            if (showLstError) {
-                self.displayListError(lstError);
+            if (showLstError || !_.isEmpty(lstError)) {
+                self.displayListError(lstError, showLstError);
             }
             self.initLoad = 1;
         }
@@ -5312,7 +5312,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             return hours + ":" + minutes;
         }
 
-        displayListError(lstError: any) {
+        displayListError(lstError: any, showLstError: boolean) {
             if (lstError.length == 0) {
                 $("#next-month").ntsError("clear");
             } else {
