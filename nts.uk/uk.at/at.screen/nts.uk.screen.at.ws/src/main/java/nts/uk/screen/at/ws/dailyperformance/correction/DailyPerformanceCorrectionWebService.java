@@ -257,13 +257,18 @@ public class DailyPerformanceCorrectionWebService {
 	@POST
 	@Path("insertClosure")
 	public void insertClosure(EmpAndDate empAndDate){
-		personalTightCommandFacade.insertPersonalTight(empAndDate.getEmployeeId(), empAndDate.getDate());
+		ApprovalConfirmCache approvalConfirmCache = (ApprovalConfirmCache)session.getAttribute("approvalConfirm");
+		ApprovalConfirmCache result = personalTightCommandFacade.insertPersonalTight(empAndDate.getEmployeeId(), empAndDate.getDate(), approvalConfirmCache);
+		session.setAttribute("approvalConfirm", result);
 	}
 	
 	@POST
 	@Path("releaseClosure")
 	public JavaTypeResult<String> releaseClosure(EmpAndDate empAndDate){
-		return new JavaTypeResult<String>(personalTightCommandFacade.releasePersonalTight(empAndDate.getEmployeeId(), empAndDate.getDate()));
+		ApprovalConfirmCache approvalConfirmCache = (ApprovalConfirmCache)session.getAttribute("approvalConfirm");
+		Pair<String, ApprovalConfirmCache> result = personalTightCommandFacade.releasePersonalTight(empAndDate.getEmployeeId(), empAndDate.getDate(), approvalConfirmCache);
+		session.setAttribute("approvalConfirm", result.getRight());
+		return new JavaTypeResult<String>(result.getLeft());
 	}
 	
 	public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {

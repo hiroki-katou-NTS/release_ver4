@@ -20,7 +20,9 @@ import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHisOfEmployeeImport;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualDay;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.approval.ApprovalStatusActualDayChange;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmStatusActualDayChange;
@@ -94,11 +96,17 @@ public class DailyPerformanceErrorCodeProcessor {
 	@Inject
 	private CheckClosingEmployee checkClosingEmployee;
 	
-	@Inject
-	private ConfirmStatusActualDayChange confirmStatusActualDayChange;
+//	@Inject
+//	private ConfirmStatusActualDayChange confirmStatusActualDayChange;
+//	
+//	@Inject
+//	private ApprovalStatusActualDayChange approvalStatusActualDayChange;
 	
 	@Inject
-	private ApprovalStatusActualDayChange approvalStatusActualDayChange;
+	private ConfirmStatusActualDay confirmApprovalStatusActualDay;
+	
+	@Inject
+	private ApprovalStatusActualDay approvalStatusActualDay;
 
 	private static final String LOCK_APPLICATION = "Application";
 	private static final String COLUMN_SUBMITTED = "Submitted";
@@ -271,9 +279,33 @@ public class DailyPerformanceErrorCodeProcessor {
 				.map(x -> x.getDate()).collect(Collectors.toList());
 //		String keyFind = IdentifierUtil.randomUniqueId();
 		
-		List<ConfirmStatusActualResult> confirmResults = confirmStatusActualDayChange.processConfirmStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty());
+//		List<ConfirmStatusActualResult> confirmResults = confirmStatusActualDayChange.processConfirmStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty());
+//
+//		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDayChange.processApprovalStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty(), mode);
+		
+		List<ConfirmStatusActualResult> confirmResults = new ArrayList<>();
+		List<ApprovalStatusActualResult> approvalResults = new ArrayList<>();
+		
+		if (displayFormat != 1) {
+			confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId, listEmployeeId,
+					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(),
+					Optional.empty());
+//			confirmResults = confirmStatusActualDayChange.processConfirmStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty());
+//			System.out.println("thoi gian load checkbox 1:" + (System.currentTimeMillis() - startTime1));
+//
+//			approvalResults = approvalStatusActualDayChange.processApprovalStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty(), mode);
+			approvalResults = approvalStatusActualDay.processApprovalStatus(companyId, listEmployeeId,
+					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), screenDto.getClosureId(), mode,
+					Optional.empty());
+			// approvalResults = new ArrayList<>();
+		} else {
+			confirmResults = confirmApprovalStatusActualDay.processConfirmStatus(companyId, listEmployeeId,
+					dateRange.getStartDate(), screenDto.getClosureId());
 
-		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDayChange.processApprovalStatus(companyId, sId, listEmployeeId, Optional.of(new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate())), Optional.empty(), mode);
+			approvalResults = approvalStatusActualDay.processApprovalStatus(companyId, listEmployeeId,
+					dateRange.getStartDate(), screenDto.getClosureId(), mode);
+			// approvalResults = new ArrayList<>();
+		}
 		
 		Map<Pair<String, GeneralDate>, ConfirmStatusActualResult> mapConfirmResult = confirmResults.stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x));
 		Map<Pair<String, GeneralDate>, ApprovalStatusActualResult> mapApprovalResults = approvalResults.stream().collect(Collectors.toMap(x -> Pair.of(x.getEmployeeId(), x.getDate()), x -> x));
@@ -377,7 +409,7 @@ public class DailyPerformanceErrorCodeProcessor {
 		screenDto.setLstData(lstData);
 		screenDto.setApprovalConfirmCache(new ApprovalConfirmCache(sId, listEmployeeId,
 				new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), mode, confirmResults,
-				approvalResults));
+				approvalResults, screenDto.getClosureId()));
 		return screenDto;
 	}
 

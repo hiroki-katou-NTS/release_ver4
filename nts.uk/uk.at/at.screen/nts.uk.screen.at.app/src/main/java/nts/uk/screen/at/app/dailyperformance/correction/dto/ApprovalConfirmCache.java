@@ -32,6 +32,8 @@ public class ApprovalConfirmCache implements Serializable{
 	
 	private List<ApprovalStatusActualResult> lstApproval;
 	
+	private Integer closureId;
+	
 	public void checkVer(ApprovalConfirmCache cacheNew) {
 		
 		List<ConfirmStatusActualResult> lstConfirmNew = cacheNew.getLstConfirm();
