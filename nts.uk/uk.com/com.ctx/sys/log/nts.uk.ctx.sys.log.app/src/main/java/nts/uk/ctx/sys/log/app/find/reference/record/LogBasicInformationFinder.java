@@ -109,24 +109,6 @@ public class LogBasicInformationFinder {
 					return x.getOperationId();
 				}).collect(Collectors.toList());
 
-				
-				Map<Integer,List<String>> operationListPerOneHundred = new HashMap<>();
-				int insertTimes = 1;
-				List<String> operationIdInsertListToMap = new ArrayList<>();
-				for(String operationId : operationIds){
-					operationIdInsertListToMap.add(operationId);
-					if(operationIdInsertListToMap.size() == 1000) {
-						operationListPerOneHundred.put(insertTimes, new ArrayList<>(operationIdInsertListToMap));
-						insertTimes ++;
-						operationIdInsertListToMap.clear();
-					}
-				}
-				//ループ終了時点でlistに保持していたoperationIdのinsert
-				if(operationIdInsertListToMap.size() > 0) {
-					operationListPerOneHundred.put(operationListPerOneHundred.size() + 1, new ArrayList<>(operationIdInsertListToMap));
-				}
-				
-				
 				switch (recordTypeEnum) {
 				case LOGIN:
 						// Set data of login record
