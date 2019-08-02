@@ -65,7 +65,7 @@ public class ConfirmStatusInfoEmp {
 		List<ClosurePeriod> lstClosure = new ArrayList<>();
 		if (periodOpt.isPresent()) {
 			// 期間を指定して集計期間を求める
-			lstClosure = calcPeriodForAggregate.algorithm(companyId, employeeId, periodOpt.get().end());
+			lstClosure = calcPeriodForAggregate.algorithm(employeeId, periodOpt.get().end());
 		} else {
 			// TODO: 年月を指定して集計期間を求める
 		}
@@ -141,7 +141,7 @@ public class ConfirmStatusInfoEmp {
 			List<ClosurePeriod> lstClosure = new ArrayList<>();
 			if (periodOpt.isPresent()) {
 				// 期間を指定して集計期間を求める
-				lstClosure = calcPeriodForAggregate.algorithm(companyId, employeeId, periodOpt.get().end());
+				lstClosure = calcPeriodForAggregate.algorithm(employeeId, periodOpt.get().end());
 			} else {
 				// TODO: 年月を指定して集計期間を求める
 			}
