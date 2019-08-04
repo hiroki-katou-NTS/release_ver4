@@ -5,6 +5,7 @@ import java.util.Optional;
 import lombok.Getter;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
+import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValue;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.PredetermineTimeSetForCalc;
 import nts.uk.ctx.at.record.dom.monthly.verticaltotal.workclock.pclogon.PCLogonOfMonthly;
@@ -65,11 +66,23 @@ public class WorkClockOfMonthly {
 			PredetermineTimeSetForCalc predTimeSetForCalc,
 			Optional<AnyItemValueOfDaily> anyItemValueOpt){
 		
+		// 平日の判断
+		boolean isWeekday = false;
+		if (anyItemValueOpt.isPresent()) {
+			AnyItemValueOfDaily anyItemValue = anyItemValueOpt.get();
+			for (AnyItemValue item : anyItemValue.getItems()) {
+				if (item.getItemNo().v().intValue() != 12) continue;	// 任意項目12以外は無視
+				if (item.getTimes().isPresent()) {						// 回数=1 なら平日
+					if (item.getTimes().get().v().doubleValue() == 1.0) isWeekday = true; 
+				}
+			}
+		}
+		
 		// 終業時刻の集計
-		this.endClock.aggregate(workType, timeLeavingOfDaily, predTimeSetForCalc);
+		this.endClock.aggregate(workType, timeLeavingOfDaily, predTimeSetForCalc, isWeekday);
 		
 		// PCログオン情報の集計
-		this.logonInfo.aggregate(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily, anyItemValueOpt,
+		this.logonInfo.aggregate(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily, isWeekday,
 				workType, predTimeSetForCalc);
 	}
 	

@@ -56,11 +56,13 @@ public class EndClockOfMonthly {
 	 * @param workType 勤務種類
 	 * @param timeLeavingOfDaily 日別実績の出退勤
 	 * @param predTimeSetForCalc 計算用所定時間設定
+	 * @param isWeekday 平日かどうか
 	 */
 	public void aggregate(
 			WorkType workType,
 			TimeLeavingOfDailyPerformance timeLeavingOfDaily,
-			PredetermineTimeSetForCalc predTimeSetForCalc){
+			PredetermineTimeSetForCalc predTimeSetForCalc,
+			boolean isWeekday){
 		
 		if (timeLeavingOfDaily == null) return;
 		if (predTimeSetForCalc == null) return;
@@ -83,10 +85,13 @@ public class EndClockOfMonthly {
 //			val timezoneUse = timezoneUseOpt.get();
 //			if (timezoneUse.getUseAtr() == UseSetting.NOT_USE) continue;
 			
-			// 終業時刻計算対象の判断
-			if (workType.isCalcTargetForEndClock() == false) continue;				// Web終業時刻計算対象の判断
+			// Web終業時刻計算対象の判断
+			if (workType.isCalcTargetForEndClock() == false) continue;
 // 2019.6.18 DEL shuichi ishida Redmine #108120
 //			if (stamp.getTimeWithDay().v() <= timezoneUse.getEnd().v()) continue;	// 終業時刻が対象日内の時刻か判断
+			
+			// 平日の判断
+			if (isWeekday == false) continue;
 			
 			// 退勤時刻を合計
 			this.totalClock = this.totalClock.addMinutes(stamp.getTimeWithDay().v());
