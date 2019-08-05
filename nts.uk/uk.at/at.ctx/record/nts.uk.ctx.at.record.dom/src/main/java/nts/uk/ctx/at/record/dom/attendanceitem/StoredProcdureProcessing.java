@@ -529,8 +529,8 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		public void calcBreakTime(){
 			if (have(t -> t.actualWorkTime)) {
 				this.daily.getAttendanceTimeOfDailyPerformance().ifPresent(atd -> {
-					AttendanceTime breakTime = atd.getActualWorkingTimeOfDaily().getTotalWorkingTime()
-							.getBreakTimeOfDaily().getToRecordTotalTime().getWithinStatutoryTotalTime().getTime();
+					AttendanceTimeOfExistMinus breakTime = new AttendanceTimeOfExistMinus(atd.getActualWorkingTimeOfDaily().getTotalWorkingTime()
+							.getBreakTimeOfDaily().getToRecordTotalTime().getWithinStatutoryTotalTime().getTime().valueAsMinutes());
 					if(this.actualWorkTime.get() > AttendanceTime.ZERO.addHours(8).valueAsMinutes()) {
 						this.timeOn.set(breakTime.addHours(-1).addMinutes(-30).valueAsMinutes());
 					} else {
