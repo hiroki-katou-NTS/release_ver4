@@ -1200,8 +1200,8 @@ public class DailyModifyResCommandFacade {
 		if ((flexShortageRCDto.isError() || !flexShortageRCDto.getMessageError().isEmpty()) && editFlex) {
 			hasError = true;
 			if(!resultIU.getLstMonthDomain().isEmpty()) flexShortageRCDto.createDataCalc(convertMonthToItem(MonthlyRecordWorkDto.fromOnlyAttTime(resultIU.getLstMonthDomain().get(0)), monthValue));
+			flexShortageRCDto.setVersion(monthValue.getVersion());
 		}
-		flexShortageRCDto.setVersion(monthValue.getVersion());
 		dataResultAfterIU.setFlexShortage(flexShortageRCDto);
 		//}
 		//フレ補填によって年休残数のエラーが発生していないかチェックする

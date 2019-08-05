@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.YearMonth;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmInfoResult;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
@@ -18,7 +19,7 @@ public class ApprovalInfoAcqProcess {
 	@Inject
 	private ApprovalStatusInfoEmp approvalStatusInfoEmp;
 	
-	public ApprovalInfoResult getApprovalInfoAcp(String companyId, String empTarget, List<String> employeeIds,
+	public List<ConfirmInfoResult> getApprovalInfoAcp(String companyId, String empTarget, List<String> employeeIds,
 			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt) {
 		if (periodOpt.isPresent()) {
 			return processModeAll(companyId, empTarget, employeeIds, periodOpt, yearMonthOpt);
@@ -28,7 +29,7 @@ public class ApprovalInfoAcqProcess {
 
 	}
 
-	private ApprovalInfoResult processModeAll(String companyId, String empTarget, List<String> employeeIds,
+	private List<ConfirmInfoResult> processModeAll(String companyId, String empTarget, List<String> employeeIds,
 			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt) {
 		if (employeeIds.size() == 1) {
 			return approvalStatusInfoEmp.approvalStatusInfoOneEmp(companyId, empTarget, employeeIds.get(0), periodOpt, yearMonthOpt, false);

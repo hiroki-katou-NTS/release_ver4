@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.adapter.application.ApplicationRecordAdapter;
 import nts.uk.ctx.at.record.dom.adapter.application.ApplicationRecordImport;
@@ -21,10 +22,12 @@ import nts.uk.ctx.at.record.dom.application.realitystatus.RealityStatusService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.CommonProcess;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmInfoResult;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.EmployeeDateErrorOuput;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.InformationDay;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.InformationMonth;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.AggrPeriodEachActualClosure;
-import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.CalcPeriodForAggregate;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
+import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.GetClosurePeriod;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
@@ -37,9 +40,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  */
 @Stateless
 public class ApprovalStatusInfoEmp {
-
-	@Inject
-	private CalcPeriodForAggregate calcPeriodForAggregate;
 
 	@Inject
 	private IFindDataDCRecord iFindDataDCRecord;
@@ -58,19 +58,22 @@ public class ApprovalStatusInfoEmp {
 
 	@Inject
 	private RealityStatusService realityStatusService;
+	
+	@Inject
+	private GetClosurePeriod getClosurePeriod;
 
-	public ApprovalInfoResult approvalStatusInfoOneEmp(String companyId, String empTarget, String employeeId,
+	public List<ConfirmInfoResult> approvalStatusInfoOneEmp(String companyId, String empTarget, String employeeId,
 			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt, boolean isCallBy587) {
 		List<ClosurePeriod> lstClosure = new ArrayList<>();
-		List<ApproveRootStatusForEmpImport> lstApprovalMonthStatusAll = new ArrayList<>();
-		List<ConfirmationMonth> lstConfirmMonthAll = new ArrayList<>();
 		List<AppRootOfEmpMonthImport> lstAppRootOfEmpMonth = new ArrayList<>();
-		List<StatusOfEmployeeExport> lstStatusOfEmpAll = new ArrayList<>();
+		
 		if (periodOpt.isPresent()) {
 			// 期間を指定して集計期間を求める
-			lstClosure = calcPeriodForAggregate.algorithm(employeeId, periodOpt.get().end());
+			lstClosure = getClosurePeriod.fromPeriod(employeeId, periodOpt.get().end(), periodOpt.get());
 		} else {
-			// TODO: 年月を指定して集計期間を求める
+			// 年月を指定して集計期間を求める
+			GeneralDate dateRefer = GeneralDate.ymd(yearMonthOpt.get().year(), yearMonthOpt.get().month(), yearMonthOpt.get().lastDateInMonth());
+			lstClosure = getClosurePeriod.fromYearMonth(employeeId, dateRefer, yearMonthOpt.get());
 		}
 
 		// Output「締め処理期間．集計期間．期間」のMAX期間を求める
@@ -83,7 +86,6 @@ public class ApprovalStatusInfoEmp {
 		List<StatusOfEmployeeExport> statusOfEmps = iFindDataDCRecord
 				.getListAffComHistByListSidAndPeriod(Optional.empty(), Arrays.asList(employeeId), dateMax).stream()
 				.filter(x -> x.getEmployeeId() != null).collect(Collectors.toList());
-		lstStatusOfEmpAll.addAll(statusOfEmps);
 		if (statusOfEmps.isEmpty())
 			return null;
 		// Output「社員の会社所属状況．所属状況．期間」のMAX期間を求める
@@ -108,6 +110,7 @@ public class ApprovalStatusInfoEmp {
 		// TODO: Output「締め処理期間．実締め毎集計期間」の件数ループする
 		List<AggrPeriodEachActualClosure> aggrPeriods = lstClosure.stream().flatMap(x -> x.getAggrPeriods().stream())
 				.collect(Collectors.toList());
+		List<InformationMonth> inforMonths = new ArrayList<>();
 		for (AggrPeriodEachActualClosure mergePeriodClr : aggrPeriods) {
 
 			List<ConfirmationMonth> lstConfirmMonth = confirmationMonthRepository.findBySomeProperty(
@@ -129,8 +132,8 @@ public class ApprovalStatusInfoEmp {
 				lstAppRootOfEmpMonth.add(appRootOfEmpMonth);
 
 			}
-			lstConfirmMonthAll.addAll(lstConfirmMonth);
-			lstApprovalMonthStatusAll.addAll(lstApprovalMonthStatus);
+			inforMonths.add(new InformationMonth(mergePeriodClr, lstConfirmMonth, lstApprovalMonthStatus,
+					lstAppRootOfEmpMonth));
 		}
 
 		// [No.303]対象期間に日別実績のエラーが発生している年月日を取得する
@@ -140,16 +143,18 @@ public class ApprovalStatusInfoEmp {
 					return new EmployeeDateErrorOuput(employeeId, x.getDate(), x.getHasError());
 				}).collect(Collectors.toList());
 
-		ConfirmInfoResult confirmResult = ConfirmInfoResult.builder().indentities(indentities)
-				.lstApprovalDayStatus(lstApprovalDayStatus).aggrPeriods(aggrPeriods)
-				.lstApprovalMonthStatus(lstApprovalMonthStatusAll).lstConfirmMonth(lstConfirmMonthAll)
-				.lstApplication(lstApplication).lstOut(lstOut).statusOfEmps(lstStatusOfEmpAll).build();
-		return new ApprovalInfoResult(confirmResult, Arrays.asList(approvalRootDaily), lstAppRootOfEmpMonth);
+		return Arrays.asList(ConfirmInfoResult.builder().employeeId(employeeId).period(dateMax)
+				.informationDay(new InformationDay(indentities, lstApprovalDayStatus, Arrays.asList(approvalRootDaily)))
+				.lstApplication(lstApplication).lstOut(lstOut).statusOfEmp(statusOfEmps.get(0))
+				.informationMonths(inforMonths).build());
 
 	}
 
-	public ApprovalInfoResult approvalStatusInfoMulEmp(String companyId, String empTarget, List<String> employeeIds,
-			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt, boolean isCallBy587) {
+	public List<ConfirmInfoResult> approvalStatusInfoMulEmp(String companyId, String empTarget,
+			List<String> employeeIds, Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt,
+			boolean isCallBy587) {
+		List<ConfirmInfoResult> results = new ArrayList<>();
+		List<ApprovalRootOfEmployeeImport> lstApprovalRootDaily = new ArrayList<>();
 		List<ApproveRootStatusForEmpImport> lstApprovalMonthStatusAll = new ArrayList<>();
 		List<ConfirmationMonth> lstConfirmMonthAll = new ArrayList<>();
 		List<Identification> indentityAll = new ArrayList<>();
@@ -159,14 +164,15 @@ public class ApprovalStatusInfoEmp {
 		List<AggrPeriodEachActualClosure> aggrPeriodAll = new ArrayList<>();
 		List<AppRootOfEmpMonthImport> lstAppRootOfEmpMonth = new ArrayList<>();
 		List<StatusOfEmployeeExport> lstStatusOfEmpAll = new ArrayList<>();
-		List<ApprovalRootOfEmployeeImport> lstApprovalRootDaily = new ArrayList<>();
 		employeeIds.forEach(employeeId -> {
 			List<ClosurePeriod> lstClosure = new ArrayList<>();
 			if (periodOpt.isPresent()) {
 				// 期間を指定して集計期間を求める
-				lstClosure = calcPeriodForAggregate.algorithm(employeeId, periodOpt.get().end());
+				lstClosure = getClosurePeriod.fromPeriod(employeeId, periodOpt.get().end(), periodOpt.get());
 			} else {
 				// TODO: 年月を指定して集計期間を求める
+				GeneralDate dateRefer = GeneralDate.ymd(yearMonthOpt.get().year(), yearMonthOpt.get().month(), yearMonthOpt.get().lastDateInMonth());
+				lstClosure = getClosurePeriod.fromYearMonth(employeeId, dateRefer, yearMonthOpt.get());
 			}
 
 			// Output「締め処理期間．集計期間．期間」のMAX期間を求める
@@ -205,6 +211,7 @@ public class ApprovalStatusInfoEmp {
 			List<AggrPeriodEachActualClosure> aggrPeriods = lstClosure.stream()
 					.flatMap(x -> x.getAggrPeriods().stream()).collect(Collectors.toList());
 			aggrPeriodAll.addAll(aggrPeriods);
+			List<InformationMonth> inforMonths = new ArrayList<>();
 			for (AggrPeriodEachActualClosure mergePeriodClr : aggrPeriods) {
 
 				List<ConfirmationMonth> lstConfirmMonth = confirmationMonthRepository.findBySomeProperty(
@@ -218,9 +225,9 @@ public class ApprovalStatusInfoEmp {
 								Arrays.asList(mergePeriodClr.getPeriod().end()), Arrays.asList(employeeId), 2);
 
 				// [No.534](中間データ版)承認状況を取得する （月別）
-				if(isCallBy587) {
-					AppRootOfEmpMonthImport appRootOfEmpMonth = approvalStatusAdapter.getApprovalEmpStatusMonth(employeeId,
-							mergePeriodClr.getYearMonth(), mergePeriodClr.getClosureId().value,
+				if (isCallBy587) {
+					AppRootOfEmpMonthImport appRootOfEmpMonth = approvalStatusAdapter.getApprovalEmpStatusMonth(
+							employeeId, mergePeriodClr.getYearMonth(), mergePeriodClr.getClosureId().value,
 							mergePeriodClr.getClosureDate(), mergePeriodClr.getPeriod().end(), true,
 							mergePeriodClr.getOriginalClosurePeriod());
 					lstAppRootOfEmpMonth.add(appRootOfEmpMonth);
@@ -228,6 +235,8 @@ public class ApprovalStatusInfoEmp {
 
 				lstApprovalMonthStatusAll.addAll(lstApprovalMonthStatus);
 				lstConfirmMonthAll.addAll(lstConfirmMonth);
+				inforMonths.add(new InformationMonth(mergePeriodClr, lstConfirmMonth, lstApprovalMonthStatus,
+						lstAppRootOfEmpMonth));
 			}
 			// [No.303]対象期間に日別実績のエラーが発生している年月日を取得する
 			List<EmployeeDateErrorOuput> lstOut = realityStatusService
@@ -236,12 +245,12 @@ public class ApprovalStatusInfoEmp {
 						return new EmployeeDateErrorOuput(employeeId, x.getDate(), x.getHasError());
 					}).collect(Collectors.toList());
 			lstOutAll.addAll(lstOut);
+			ConfirmInfoResult result = ConfirmInfoResult.builder().employeeId(employeeId).period(dateMax)
+					.informationDay(new InformationDay(indentities, lstApprovalDayStatus, lstApprovalRootDaily))
+					.lstApplication(lstApplication).lstOut(lstOut).statusOfEmp(statusOfEmps.get(0))
+					.informationMonths(inforMonths).build();
+			results.add(result);
 		});
-
-		ConfirmInfoResult confirmResult = ConfirmInfoResult.builder().indentities(indentityAll)
-				.lstApprovalDayStatus(lstApprovalDayStatuAll).aggrPeriods(aggrPeriodAll)
-				.lstApprovalMonthStatus(lstApprovalMonthStatusAll).lstConfirmMonth(lstConfirmMonthAll)
-				.lstApplication(lstApplicationAll).lstOut(lstOutAll).statusOfEmps(lstStatusOfEmpAll).build();
-		return new ApprovalInfoResult(confirmResult, lstApprovalRootDaily, lstAppRootOfEmpMonth);
+		return results;
 	}
 }

@@ -199,15 +199,15 @@ public class InfomationInitScreenProcess {
 		List<DPErrorDto> lstError = processor.getErrorList(screenDto, listEmployeeId);
 		screenDto.setDPErrorDto(lstError);
 		//TODO: List<DPErrorDto>
-		Map<String, String> listEmployeeError = lstError.stream()
-				.collect(Collectors.toMap(e -> e.getEmployeeId(), e -> "", (x, y) -> x));
+//		Map<String, String> listEmployeeError = lstError.stream()
+//				.collect(Collectors.toMap(e -> e.getEmployeeId(), e -> "", (x, y) -> x));
 		if (displayFormat == 2) {
 			// only filter data error
-			if(listEmployeeError.isEmpty()) throw new BusinessException("Msg_672");
-			listEmployeeId = listEmployeeId.stream().filter(x -> listEmployeeError.containsKey(x))
-					.collect(Collectors.toList());
-			screenDto.setLstData(screenDto.getLstData().stream()
-					.filter(x -> listEmployeeError.containsKey(x.getEmployeeId())).collect(Collectors.toList()));
+//			if(listEmployeeError.isEmpty()) throw new BusinessException("Msg_672");
+//			listEmployeeId = listEmployeeId.stream().filter(x -> listEmployeeError.containsKey(x))
+//					.collect(Collectors.toList());
+//			screenDto.setLstData(screenDto.getLstData().stream()
+//					.filter(x -> listEmployeeError.containsKey(x.getEmployeeId())).collect(Collectors.toList()));
 		}
 		
 		List<DPDataDto> listData = new ArrayList<>();

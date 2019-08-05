@@ -18,7 +18,7 @@ public class ConfirmInfoAcqProcess {
 	@Inject
 	private ConfirmStatusInfoEmp confirmStatusInfoEmp;
 
-	public ConfirmInfoResult getConfirmInfoAcp(String companyId, List<String> employeeIds,
+	public List<ConfirmInfoResult> getConfirmInfoAcp(String companyId, List<String> employeeIds,
 			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt) {
 		if (periodOpt.isPresent()) {
 			return processModeAll(companyId, employeeIds, periodOpt, yearMonthOpt);
@@ -28,7 +28,7 @@ public class ConfirmInfoAcqProcess {
 
 	}
 
-	private ConfirmInfoResult processModeAll(String companyId, List<String> employeeIds,
+	private List<ConfirmInfoResult> processModeAll(String companyId, List<String> employeeIds,
 			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt) {
 		if (employeeIds.size() == 1) {
 			return confirmStatusInfoEmp.confirmStatusInfoOneEmp(companyId, employeeIds.get(0), periodOpt, yearMonthOpt);
