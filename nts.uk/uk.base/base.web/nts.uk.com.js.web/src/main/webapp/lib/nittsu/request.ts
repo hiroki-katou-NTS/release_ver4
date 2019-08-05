@@ -165,12 +165,17 @@ module nts.uk.request {
         return dfd.promise();
     }
     
-    module subSession {
+    export module subSession {
         const SubSessionIdKey = "nts.uk.request.subSessionId.";
         const SecondsToKeepSubSession = 30;
         const SecondsIntervalToReportAlive = 3;
-        export let currentId = uk.util.randomId();
-        
+        export let currentId;
+        if (uk.util.isInFrame()) {
+            currentId = parent.window.nts.uk.request.subSession.currentId;
+        } else {
+            currentId = uk.util.randomId();
+        }
+         
         // keep alive sub sessions
         function keepAliveSubSessionId() {
             window.localStorage.setItem(SubSessionIdKey + currentId, +new Date());
