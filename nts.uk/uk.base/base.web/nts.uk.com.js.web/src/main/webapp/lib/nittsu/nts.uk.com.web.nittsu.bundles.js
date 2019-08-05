@@ -3451,7 +3451,12 @@ var nts;
                 var SubSessionIdKey = "nts.uk.request.subSessionId.";
                 var SecondsToKeepSubSession = 30;
                 var SecondsIntervalToReportAlive = 3;
-                subSession.currentId = uk.util.randomId();
+                if (uk.util.isInFrame()) {
+                    subSession.currentId = parent.window.nts.uk.request.subSession.currentId;
+                }
+                else {
+                    subSession.currentId = uk.util.randomId();
+                }
                 // keep alive sub sessions
                 function keepAliveSubSessionId() {
                     window.localStorage.setItem(SubSessionIdKey + subSession.currentId, +new Date());
@@ -3484,7 +3489,7 @@ var nts;
                     return aliveIds;
                 }
                 subSession.getAliveIds = getAliveIds;
-            })(subSession || (subSession = {}));
+            })(subSession = request.subSession || (request.subSession = {}));
             function ajax(webAppId, path, data, options, restoresSession) {
                 if (typeof arguments[1] !== 'string') {
                     return ajax.apply(null, _.concat(location.currentAppId, arguments));
