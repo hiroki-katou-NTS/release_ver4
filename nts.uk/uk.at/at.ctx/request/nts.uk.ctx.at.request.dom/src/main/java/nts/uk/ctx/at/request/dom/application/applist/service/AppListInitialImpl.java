@@ -441,8 +441,9 @@ public class AppListInitialImpl implements AppListInitialRepository{
 				//申請一覧共通設定.承認状況＿承認がチェックあり(True)の場合 - A4_1_2: check
 				if(param.isApprovalStatus()){
 					if((state.equals(ReflectedState_New.NOTREFLECTED)|| state.equals(ReflectedState_New.WAITREFLECTION) || state.equals(ReflectedState_New.REFLECTED))
-							&& (status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.APPROVED) || status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.UNAPPROVED)) 
-							&& status.getFrameStatus().equals(ApprovalBehaviorAtrImport_New.APPROVED)){
+							&&((status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.UNAPPROVED) && status.getFrameStatus().equals(ApprovalBehaviorAtrImport_New.APPROVED)) 
+									|| (status.getPhaseStatus().equals(ApprovalBehaviorAtrImport_New.APPROVED))))
+							{
 						check = true;
 					}
 				}
@@ -1569,6 +1570,7 @@ public class AppListInitialImpl implements AppListInitialRepository{
 		List<ApprovalPhaseStateImport_New> lstPhase = app.getLstPhaseState();
 		ApproverStt check = new ApproverStt(false, null);
 		for (ApprovalPhaseStateImport_New appPhase : lstPhase) {
+			int frameCount = appPhase.getListApprovalFrame().size();
 			for (ApprovalFrameImport_New frame : appPhase.getListApprovalFrame()) {
 				//承認枠.承認区分!=未承認 
 				if(!frame.getApprovalAtr().equals(ApprovalBehaviorAtrImport_New.UNAPPROVED)){
@@ -1576,8 +1578,8 @@ public class AppListInitialImpl implements AppListInitialRepository{
 						check = new ApproverStt(true, null);;
 						break;
 					}
-				}else{
-					ApproverStt checkNotAppv = this.checkNotAppv(frame, lstAgent, appPhase.getApprovalAtr(), app.getApplication(), sID);
+				}else{//承認枠.承認区分 = 未承認 
+					ApproverStt checkNotAppv = this.checkNotAppv(frame, lstAgent, appPhase.getApprovalAtr(), app.getApplication(), sID, frameCount);
 					if(checkNotAppv.isCheck()){
 						check = new ApproverStt(true, checkNotAppv.getApprId());;
 						break;
@@ -1612,10 +1614,10 @@ public class AppListInitialImpl implements AppListInitialRepository{
 	 * @return
 	 */
 	private ApproverStt checkNotAppv(ApprovalFrameImport_New frame, List<AgentDataRequestPubImport> lstAgent,
-			ApprovalBehaviorAtrImport_New phaseAtr, Application_New app, String sID){
+			ApprovalBehaviorAtrImport_New phaseAtr, Application_New app, String sID, int frameCount){
 		//※前提条件：「申請.反映情報　＝　未反映」且　「自身の承認フェーズ　＝　未承認/差し戻し」の場合
-		if(!app.getReflectionInformation().getStateReflectionReal().equals(ReflectedState_New.NOTREFLECTED) || (!phaseAtr.equals(ApprovalBehaviorAtrImport_New.UNAPPROVED)
-				&& !phaseAtr.equals(ApprovalBehaviorAtrImport_New.REMAND))){
+		if(frameCount <= 1 && (!app.getReflectionInformation().getStateReflectionReal().equals(ReflectedState_New.NOTREFLECTED) || (!phaseAtr.equals(ApprovalBehaviorAtrImport_New.UNAPPROVED)
+				&& !phaseAtr.equals(ApprovalBehaviorAtrImport_New.REMAND)))){
 			return new ApproverStt(false, null);
 		}
 		//１．承認予定者より取得（自身が承認する申請）
@@ -1633,10 +1635,6 @@ public class AppListInitialImpl implements AppListInitialRepository{
 				idAppr = agent.getEmployeeId();
 			}
 		}
-//		List<AgentDataRequestPubImport> lstAgentFilter = lstAgent.stream()
-//				.filter(c -> c.getStartDate().beforeOrEquals(app.getAppDate()) && c.getEndDate().equals(app.getAppDate()) && this.checkExistEmp(frame.getListApprover(), c.getAgentSid1()))
-//				.collect(Collectors.toList());
-//		 lstId = lstAgentFilter.stream().map(c -> c.getAgentSid1()).collect(Collectors.toList());
 		if(lstId.contains(sID)){//代行承認.承認代行者　＝　ログイン者社員ID
 			return new ApproverStt(true, idAppr);
 		}

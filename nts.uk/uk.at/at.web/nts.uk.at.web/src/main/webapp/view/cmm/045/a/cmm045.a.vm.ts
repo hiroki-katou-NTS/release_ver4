@@ -511,7 +511,7 @@ module cmm045.a.viewmodel {
                 virtualizationMode: 'continuous',
                 columns: [
                     { headerText: getText('CMM045_49'), key: 'check', dataType: 'boolean', width: '35px', 
-                            showHeaderCheckbox: true, ntsControl: 'Checkbox',  hiddenRows: lstHidden},
+                            showHeaderCheckbox: lstHidden.length < self.items().length, ntsControl: 'Checkbox',  hiddenRows: lstHidden},
                     { headerText: getText('CMM045_50'), key: 'details', dataType: 'string', width: '55px', unbound: false, ntsControl: 'Button' },
                     { headerText: getText('CMM045_51'), key: 'applicant', dataType: 'string', width: '120px' },
                     { headerText: getText('CMM045_52'), key: 'appName', dataType: 'string', width: '90px'},
@@ -1642,7 +1642,7 @@ module cmm045.a.viewmodel {
         findRowHidden(lstItem: Array<vmbase.DataModeApp>): any{
             let lstHidden = []
             _.each(lstItem, function(item){
-                if(item.checkAtr == false){
+                if(item.appStatusNo != 5){
                     lstHidden.push(item.appId);
                 }
             });

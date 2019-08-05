@@ -1010,7 +1010,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		}
 		//Frame
 		List<Integer> lstFrameStt = new ArrayList<>();
-		if(unapprovalStatus || denialStatus || remandStatus || cancelStatus){
+		if(unapprovalStatus || denialStatus || remandStatus || cancelStatus || approvalStatus){
 			lstFrameStt.add(0);
 		}
 		if(approvalStatus || agentApprovalStatus || denialStatus || remandStatus || cancelStatus){
