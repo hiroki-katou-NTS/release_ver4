@@ -157,7 +157,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		processCountOptionalItem(() -> isWorkingType && isNotWorkWithinStatutory, result, COUNT_ON, COUNT_OFF, 11);
 		
 		/** 任意項目12 */
-		processCountOptionalItem(() -> isWorkingType, result, COUNT_ON, COUNT_OFF, 12);
+		processCountOptionalItem(() -> isWorkingType && isActualWork, result, COUNT_ON, COUNT_OFF, 12);
 		
 		/** 任意項目13: 出勤時刻が入っており、入館と退館がない事が条件 */
 		processCountOptionalItem(() -> hasAttendanceTime && !hasAttendanceLeaveGateStartTime && !hasAttendanceLeaveGateEndTime, result, COUNT_ON, COUNT_OFF, 13);
@@ -187,12 +187,12 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		processTimeOptionalItem(() -> isWorkingType, result, dailyTime.value(t -> t.divergenceTime), dailyTime.value(t -> t.timeOff), 17);
 		
 		/** 任意項目19: 事前残業1~10 > 0 かつ　乖離時間が発生していない事が条件 */
-		processCountOptionalItem(() -> dailyTime.value(t -> t.timePre) > 0 && dailyTime.overTime.stream().allMatch(t -> t <= 0) && dailyTime.value(t -> t.timeFlex) <= 0, 
-				result, COUNT_ON, COUNT_OFF, 19);
+//		processCountOptionalItem(() -> dailyTime.value(t -> t.timePre) > 0 && dailyTime.overTime.stream().allMatch(t -> t <= 0) && dailyTime.value(t -> t.timeFlex) <= 0, 
+//				result, COUNT_ON, COUNT_OFF, 19);
 		
 		/** 任意項目21: 事前残業1~10 > 0 かつ　乖離時間が発生している事が条件 */
-		processCountOptionalItem(() -> dailyTime.value(t -> t.timePre) > 0 && (dailyTime.value(t -> t.timeFlex) > 0 || dailyTime.overTime.stream().anyMatch(t -> t > 0)),
-				result, COUNT_ON, COUNT_OFF, 21);	
+//		processCountOptionalItem(() -> dailyTime.value(t -> t.timePre) > 0 && (dailyTime.value(t -> t.timeFlex) > 0 || dailyTime.overTime.stream().anyMatch(t -> t > 0)),
+//				result, COUNT_ON, COUNT_OFF, 21);	
 		
 		/** 任意項目27: 残業あり かつ 事前残業なし　が条件 */
 		processCountOptionalItem(() -> dailyTime.value(t -> t.totalOverTime) > 0, result, COUNT_ON, COUNT_OFF, 27);
@@ -231,7 +231,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		processTimeOptionalItem(() -> hasAttendanceLeaveGateEndTime && dailyTime.value(t -> t.leaveGateEndTime) > 0 && isItem12on, result, dailyTime.value(t -> t.leaveGateEndTime), 0, 59);
 		
 		/** 任意項目72: */
-		processCountOptionalItem(() -> pcLogoffed && dailyTime.value(t -> t.logoffTime) > 0 && isNotSpecialWorkType, result, COUNT_ON, COUNT_OFF, 72);
+		processCountOptionalItem(() -> pcLogoffed && dailyTime.value(t -> t.logoffTime) > 0 && isNotSpecialWorkType && isItem12on, result, COUNT_ON, COUNT_OFF, 72);
 
 		dailyTime.calcBreakTime();
 		

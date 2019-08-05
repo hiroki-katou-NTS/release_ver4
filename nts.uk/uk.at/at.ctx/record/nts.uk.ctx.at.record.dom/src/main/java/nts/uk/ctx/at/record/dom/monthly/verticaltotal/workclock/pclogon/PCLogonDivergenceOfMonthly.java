@@ -5,7 +5,6 @@ import java.util.Optional;
 import lombok.Getter;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
-import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.PredetermineTimeSetForCalc;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
@@ -52,7 +51,7 @@ public class PCLogonDivergenceOfMonthly {
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
 	 * @param attendanceTimeOfDaily 日別実績の勤怠時間
 	 * @param timeLeavingOfDaily 日別実績の出退勤
-	 * @param anyItemValueOpt 日別実績の任意項目
+	 * @param isWeekday 平日かどうか
 	 * @param workType 勤務種類
 	 * @param predTimeSetForCalc 計算用所定時間設定
 	 */
@@ -60,16 +59,17 @@ public class PCLogonDivergenceOfMonthly {
 			Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt,
 			AttendanceTimeOfDailyPerformance attendanceTimeOfDaily,
 			TimeLeavingOfDailyPerformance timeLeavingOfDaily,
-			Optional<AnyItemValueOfDaily> anyItemValueOpt,
+			boolean isWeekday,
 			WorkType workType,
 			PredetermineTimeSetForCalc predTimeSetForCalc){
 
 		// ログオン乖離の集計
-		this.logonDivergence.aggregateLogon(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily, anyItemValueOpt, workType);
+		this.logonDivergence.aggregateLogon(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily,
+				isWeekday, workType);
 		
 		// ログオフ乖離の集計
 		this.logoffDivergence.aggregateLogoff(pcLogonInfoOpt, attendanceTimeOfDaily, timeLeavingOfDaily,
-				workType, predTimeSetForCalc);
+				isWeekday, workType, predTimeSetForCalc);
 	}
 	
 	/**

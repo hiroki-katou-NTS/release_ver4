@@ -8,8 +8,6 @@ import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerforma
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.LogOnInfo;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnNo;
-import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValue;
-import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.PredetermineTimeSetForCalc;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
@@ -68,13 +66,14 @@ public class AggrPCLogonDivergence {
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
 	 * @param attendanceTimeOfDaily 日別実績の勤怠時間
 	 * @param timeLeavingOfDaily 日別実績の出退勤
-	 * @param anyItemValueOpt 日別実績の任意項目
+	 * @param isWeekday 平日かどうか
+	 * @param workType 勤務種類
 	 */
 	public void aggregateLogon(
 			Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt,
 			AttendanceTimeOfDailyPerformance attendanceTimeOfDaily,
 			TimeLeavingOfDailyPerformance timeLeavingOfDaily,
-			Optional<AnyItemValueOfDaily> anyItemValueOpt,
+			boolean isWeekday,
 			WorkType workType){
 
 		// 対象とするかどうかの判断
@@ -83,6 +82,9 @@ public class AggrPCLogonDivergence {
 		
 		// プレミアムデーを除く
 		if (workType.getWorkTypeCode().equals(AggrPCLogonClock.PREMIUM_DAY)) return;
+		
+		// 平日の判断
+		if (isWeekday == false) return;
 		
 		// ログオン時刻<>NULLを判断
 		if (!pcLogonInfoOpt.isPresent()) return;
@@ -113,19 +115,6 @@ public class AggrPCLogonDivergence {
 				return;
 			}
 		}
-		
-		// 平日の判断
-		boolean isWeekday = false;
-		if (anyItemValueOpt.isPresent()) {
-			AnyItemValueOfDaily anyItemValue = anyItemValueOpt.get();
-			for (AnyItemValue item : anyItemValue.getItems()) {
-				if (item.getItemNo().v().intValue() != 12) continue;	// 任意項目12以外は無視
-				if (item.getTimes().isPresent()) {						// 回数=1 なら平日
-					if (item.getTimes().get().v().doubleValue() == 1.0) isWeekday = true; 
-				}
-			}
-		}
-		if (isWeekday == false) return;
 
 		// 合計時間を集計
 		int logonMinutes = stayingTime.getBeforePCLogOnTime().valueAsMinutes();
@@ -143,6 +132,7 @@ public class AggrPCLogonDivergence {
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
 	 * @param attendanceTimeOfDaily 日別実績の勤怠時間
 	 * @param timeLeavingOfDaily 日別実績の出退勤
+	 * @param isWeekday 平日かどうか
 	 * @param workType 勤務種類
 	 * @param predTimeSetForCalc 計算用所定時間設定
 	 */
@@ -150,16 +140,20 @@ public class AggrPCLogonDivergence {
 			Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt,
 			AttendanceTimeOfDailyPerformance attendanceTimeOfDaily,
 			TimeLeavingOfDailyPerformance timeLeavingOfDaily,
+			boolean isWeekday,
 			WorkType workType,
 			PredetermineTimeSetForCalc predTimeSetForCalc){
 
 		// 対象とするかどうかの判断
 		if (attendanceTimeOfDaily == null) return;
 		if (predTimeSetForCalc == null) return;
-		val stayingTime =  attendanceTimeOfDaily.getStayingTime();
+		//val stayingTime =  attendanceTimeOfDaily.getStayingTime();
 
 		// Web終業時刻計算対象の判断
 		if (workType.isCalcTargetForEndClock() == false) return;
+		
+		// 平日の判断
+		if (isWeekday == false) return;
 		
 		// 退勤時刻<>NULL
 		if (timeLeavingOfDaily == null) return;
