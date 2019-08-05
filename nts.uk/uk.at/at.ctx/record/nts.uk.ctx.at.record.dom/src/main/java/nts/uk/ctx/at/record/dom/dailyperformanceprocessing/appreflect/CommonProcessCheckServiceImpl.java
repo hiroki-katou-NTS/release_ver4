@@ -29,6 +29,7 @@ import nts.uk.ctx.at.record.dom.service.event.common.CorrectEventConts;
 import nts.uk.ctx.at.record.dom.service.event.overtime.OvertimeOfDailyService;
 import nts.uk.ctx.at.record.dom.service.event.schetimeleave.ScheTimeLeavingOfDailyService;
 import nts.uk.ctx.at.record.dom.service.event.timeleave.TimeLeavingOfDailyService;
+import nts.uk.ctx.at.record.dom.service.event.worktime.WorkTimeOfDailyService;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
@@ -80,6 +81,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	private EditStateOfDailyPerformanceRepository dailyReposiroty;
 	@Inject
 	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDaily;
+	@Inject
+	private WorkTimeOfDailyService workTimeDailyService;
 	@Override
 	public boolean commonProcessCheck(CommonCheckParameter para) {
 		ReflectedStateRecord state = ReflectedStateRecord.CANCELED;
@@ -102,7 +105,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	public void reflectScheWorkTimeWorkType(CommonReflectParameter commonPara, boolean isPre,
 			IntegrationOfDaily dailyInfor) {
 		//予定勤種の反映		
-		ReflectParameter para = new ReflectParameter(commonPara.getEmployeeId(), commonPara.getBaseDate(), commonPara.getWorkTimeCode(), 
+        ReflectParameter para = new ReflectParameter(commonPara.getEmployeeId(), commonPara.getBaseDate(), commonPara.getWorkTimeCode(), 
 				commonPara.getWorkTypeCode(), false);
 		workTimeUpdate.updateWorkTimeType(para, true, dailyInfor);
 	}
@@ -134,6 +137,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		if(commonPara.getIntegrationOfDaily().getWorkInformation().getRecordInfo().getWorkTypeCode() != null) {
 			workTypeInfor = worktypeRepo.findByPK(companyId, 
 					commonPara.getIntegrationOfDaily().getWorkInformation().getRecordInfo().getWorkTypeCode().v());
+			//就業時間帯の補正処理
+			workTimeDailyService.correct(companyId, commonPara.getIntegrationOfDaily());
 			//2019.02.26　渡邉から
 			//残業申請の場合は、自動打刻セットの処理を呼ばない（大塚リリースの時はこの条件で実装する（製品版では、実績の勤務種類、就業時間帯を変更した場合に自動打刻セットを実行するように修正する事（渡邉）
 			if(commonPara.getAppType() != ApplicationType.OVER_TIME_APPLICATION) {

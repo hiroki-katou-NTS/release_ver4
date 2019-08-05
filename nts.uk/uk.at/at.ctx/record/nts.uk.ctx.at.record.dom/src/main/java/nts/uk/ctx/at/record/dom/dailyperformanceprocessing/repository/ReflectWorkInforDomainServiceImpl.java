@@ -1833,94 +1833,97 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 						timeLeavingWorkTemps.add(timeLeavingWorkOutput);
 					});
 				} else {
-					// 出勤休日区分を確認する (Xác nhận 出勤休日区分)
-					Optional<WorkType> workTypeOptional = this.workTypeRepository.findByPK(companyId,
-							workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTypeCode().v());
-					WorkStyle workStyle = this.basicScheduleService
-							.checkWorkDay(workTypeOptional.get().getWorkTypeCode().v());
-					if (!(workStyle == WorkStyle.ONE_DAY_REST)) {
+					if(workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTimeCode() != null) {
+						// 出勤休日区分を確認する (Xác nhận 出勤休日区分)
+						Optional<WorkType> workTypeOptional = this.workTypeRepository.findByPK(companyId,
+								workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTypeCode().v());
+						WorkStyle workStyle = this.basicScheduleService
+								.checkWorkDay(workTypeOptional.get().getWorkTypeCode().v());
+						if (!(workStyle == WorkStyle.ONE_DAY_REST)) {
 
-						// 所定時間帯を取得する
-						PredetermineTimeSetForCalc predetemineTimeSetting = workTimeSettingService
-								.getPredeterminedTimezone(companyId,
-										workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTimeCode().v(),
-										workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTypeCode().v(), null);
+							// 所定時間帯を取得する
+							PredetermineTimeSetForCalc predetemineTimeSetting = workTimeSettingService
+									.getPredeterminedTimezone(companyId,
+											workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTimeCode().v(),
+											workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTypeCode().v(), null);
 
-						if (!predetemineTimeSetting.getTimezones().isEmpty()) {
-							List<TimezoneUse> lstTimezone = predetemineTimeSetting.getTimezones();
-							for (TimezoneUse timezone : lstTimezone) {
-								if (timezone.getUseAtr() == UseSetting.USE) {
-									TimeLeavingWorkOutput timeLeavingWorkOutput = new TimeLeavingWorkOutput();
-									timeLeavingWorkOutput.setWorkNo(new WorkNo(timezone.getWorkNo()));
+							if (!predetemineTimeSetting.getTimezones().isEmpty()) {
+								List<TimezoneUse> lstTimezone = predetemineTimeSetting.getTimezones();
+								for (TimezoneUse timezone : lstTimezone) {
+									if (timezone.getUseAtr() == UseSetting.USE) {
+										TimeLeavingWorkOutput timeLeavingWorkOutput = new TimeLeavingWorkOutput();
+										timeLeavingWorkOutput.setWorkNo(new WorkNo(timezone.getWorkNo()));
 
-									TimeActualStampOutPut attendanceTimeActualStampOutPut = new TimeActualStampOutPut();
-									WorkStampOutPut actualStamp = new WorkStampOutPut();
-									actualStamp.setTimeWithDay(timezone.getStart());
+										TimeActualStampOutPut attendanceTimeActualStampOutPut = new TimeActualStampOutPut();
+										WorkStampOutPut actualStamp = new WorkStampOutPut();
+										actualStamp.setTimeWithDay(timezone.getStart());
 
-									TimeActualStampOutPut leaveTimeActualStampOutPut = new TimeActualStampOutPut();
-									WorkStampOutPut leaveActualStamp = new WorkStampOutPut();
-									leaveActualStamp.setTimeWithDay(timezone.getEnd());
+										TimeActualStampOutPut leaveTimeActualStampOutPut = new TimeActualStampOutPut();
+										WorkStampOutPut leaveActualStamp = new WorkStampOutPut();
+										leaveActualStamp.setTimeWithDay(timezone.getEnd());
 
-									// 出勤系時刻を丸める
-									Optional<WorkTimezoneCommonSet> workTimezoneCommonSet = this.getCommonSet.get(
-											companyId,
-											workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTimeCode().v());
-									WorkTimezoneStampSet stampSet = workTimezoneCommonSet.get().getStampSet();
+										// 出勤系時刻を丸める
+										Optional<WorkTimezoneCommonSet> workTimezoneCommonSet = this.getCommonSet.get(
+												companyId,
+												workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTimeCode().v());
+										WorkTimezoneStampSet stampSet = workTimezoneCommonSet.get().getStampSet();
 
-									// 出勤
-									RoundingSet atendanceRoundingSet = stampSet.getRoundingSets().stream()
-											.filter(item -> item.getSection() == Superiority.ATTENDANCE).findFirst()
-											.isPresent()
-													? stampSet.getRoundingSets().stream()
-															.filter(item -> item.getSection() == Superiority.ATTENDANCE)
-															.findFirst().get()
-													: null;
+										// 出勤
+										RoundingSet atendanceRoundingSet = stampSet.getRoundingSets().stream()
+												.filter(item -> item.getSection() == Superiority.ATTENDANCE).findFirst()
+												.isPresent()
+														? stampSet.getRoundingSets().stream()
+																.filter(item -> item.getSection() == Superiority.ATTENDANCE)
+																.findFirst().get()
+														: null;
 
-									int attendanceTimeAfterRouding = atendanceRoundingSet != null
-											? this.roudingTime(timezone.getStart().v(),
-													atendanceRoundingSet.getRoundingSet().getFontRearSection().value,
-													new Integer(atendanceRoundingSet.getRoundingSet()
-															.getRoundingTimeUnit().description).intValue())
-											: timezone.getStart().v();
+										int attendanceTimeAfterRouding = atendanceRoundingSet != null
+												? this.roudingTime(timezone.getStart().v(),
+														atendanceRoundingSet.getRoundingSet().getFontRearSection().value,
+														new Integer(atendanceRoundingSet.getRoundingSet()
+																.getRoundingTimeUnit().description).intValue())
+												: timezone.getStart().v();
 
-									actualStamp.setAfterRoundingTime(new TimeWithDayAttr(attendanceTimeAfterRouding));
+										actualStamp.setAfterRoundingTime(new TimeWithDayAttr(attendanceTimeAfterRouding));
 
-									// 退勤
-									RoundingSet leavingRoundingSet = stampSet.getRoundingSets().stream()
-											.filter(item -> item.getSection() == Superiority.OFFICE_WORK).findFirst()
-											.isPresent() ? stampSet.getRoundingSets().stream()
-													.filter(item -> item.getSection() == Superiority.OFFICE_WORK)
-													.findFirst().get() : null;
+										// 退勤
+										RoundingSet leavingRoundingSet = stampSet.getRoundingSets().stream()
+												.filter(item -> item.getSection() == Superiority.OFFICE_WORK).findFirst()
+												.isPresent() ? stampSet.getRoundingSets().stream()
+														.filter(item -> item.getSection() == Superiority.OFFICE_WORK)
+														.findFirst().get() : null;
 
-									int leaveTimeAfterRounding = leavingRoundingSet != null
-											? this.roudingTime(timezone.getEnd().v(),
-													leavingRoundingSet.getRoundingSet().getFontRearSection().value,
-													new Integer(leavingRoundingSet.getRoundingSet()
-															.getRoundingTimeUnit().description).intValue())
-											: timezone.getEnd().v();
+										int leaveTimeAfterRounding = leavingRoundingSet != null
+												? this.roudingTime(timezone.getEnd().v(),
+														leavingRoundingSet.getRoundingSet().getFontRearSection().value,
+														new Integer(leavingRoundingSet.getRoundingSet()
+																.getRoundingTimeUnit().description).intValue())
+												: timezone.getEnd().v();
 
-									leaveActualStamp.setAfterRoundingTime(new TimeWithDayAttr(leaveTimeAfterRounding));
+										leaveActualStamp.setAfterRoundingTime(new TimeWithDayAttr(leaveTimeAfterRounding));
 
-									Optional<AffWorkplaceDto> affWorkplaceDto = this.affWorkplaceAdapter
-											.findBySid(employeeID, day);
+										Optional<AffWorkplaceDto> affWorkplaceDto = this.affWorkplaceAdapter
+												.findBySid(employeeID, day);
 
-									if (affWorkplaceDto.isPresent()) {
-										actualStamp.setLocationCode(null);
-										leaveActualStamp.setLocationCode(null);
+										if (affWorkplaceDto.isPresent()) {
+											actualStamp.setLocationCode(null);
+											leaveActualStamp.setLocationCode(null);
+										}
+										actualStamp.setStampSourceInfo(automaticStampSetDetailDto.getAttendanceStamp());
+										leaveActualStamp.setStampSourceInfo(automaticStampSetDetailDto.getLeavingStamp());
+
+										attendanceTimeActualStampOutPut.setStamp(actualStamp);
+										leaveTimeActualStampOutPut.setStamp(leaveActualStamp);
+										timeLeavingWorkOutput.setAttendanceStamp(attendanceTimeActualStampOutPut);
+										timeLeavingWorkOutput.setLeaveStamp(leaveTimeActualStampOutPut);
+										timeLeavingWorkTemps.add(timeLeavingWorkOutput);
 									}
-									actualStamp.setStampSourceInfo(automaticStampSetDetailDto.getAttendanceStamp());
-									leaveActualStamp.setStampSourceInfo(automaticStampSetDetailDto.getLeavingStamp());
-
-									attendanceTimeActualStampOutPut.setStamp(actualStamp);
-									leaveTimeActualStampOutPut.setStamp(leaveActualStamp);
-									timeLeavingWorkOutput.setAttendanceStamp(attendanceTimeActualStampOutPut);
-									timeLeavingWorkOutput.setLeaveStamp(leaveTimeActualStampOutPut);
-									timeLeavingWorkTemps.add(timeLeavingWorkOutput);
 								}
-							}
 
+							}
 						}
 					}
+					
 				}
 			}
 			timeLeavingWorks = timeLeavingWorkTemps.stream().map(item -> {
