@@ -48,15 +48,23 @@ public class PCLogonClockOfMonthly {
 	/**
 	 * PCログオン時刻
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
+	 * @param timeLeavingOfDaily 日別実績の出退勤
+	 * @param isWeekday 平日かどうか
+	 * @param workType 勤務種類
+	 * @param predTimeSetForCalc 計算用所定時間設定
 	 */
-	public void aggregate(Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt, TimeLeavingOfDailyPerformance timeLeavingOfDaily,
-			WorkType workType, PredetermineTimeSetForCalc predTimeSetForCalc) {
+	public void aggregate(
+			Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt,
+			TimeLeavingOfDailyPerformance timeLeavingOfDaily,
+			boolean isWeekday,
+			WorkType workType,
+			PredetermineTimeSetForCalc predTimeSetForCalc) {
 
 		// ログオン時刻の集計
-		this.logonClock.aggregateLogOn(pcLogonInfoOpt, workType, timeLeavingOfDaily);
+		this.logonClock.aggregateLogOn(pcLogonInfoOpt, isWeekday, workType, timeLeavingOfDaily);
 		
 		// ログオフ時刻の集計
-		this.logoffClock.aggregateLogOff(pcLogonInfoOpt, timeLeavingOfDaily, workType, predTimeSetForCalc);
+		this.logoffClock.aggregateLogOff(pcLogonInfoOpt, timeLeavingOfDaily, isWeekday, workType, predTimeSetForCalc);
 	}
 	
 	/**

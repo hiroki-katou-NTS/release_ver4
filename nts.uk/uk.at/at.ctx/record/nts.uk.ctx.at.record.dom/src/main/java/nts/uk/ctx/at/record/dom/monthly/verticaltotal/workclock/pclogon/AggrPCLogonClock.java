@@ -65,29 +65,44 @@ public class AggrPCLogonClock {
 	/**
 	 * 集計PCログオン時刻
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
+	 * @param isWeekday 平日かどうか
+	 * @param workType 勤務種類
+	 * @param timeLeavingOfDaily 日別実績の出退勤
 	 */
-	public void aggregateLogOn(Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt, WorkType workType, TimeLeavingOfDailyPerformance timeLeavingOfDaily){
+	public void aggregateLogOn(
+			Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt,
+			boolean isWeekday,
+			WorkType workType,
+			TimeLeavingOfDailyPerformance timeLeavingOfDaily){
 		
 		if (!pcLogonInfoOpt.isPresent()) return;
 		val pcLogonInfo = pcLogonInfoOpt.get();
 		
-		// プレミアムデー を除く
-		if (workType.getWorkTypeCode().equals(PREMIUM_DAY)) return;
-
-		// 出勤=NULL を除く
+		// 出勤時刻<>NULL
 		Integer timeAttendance = this.getTimeAttendance(timeLeavingOfDaily);
 		if (timeAttendance == null) return;
+
+		// 平日の判断
+		if (isWeekday == false) return;
 		
-		// ログオン時刻を合計
-		boolean isExistLogon = false;
-		for (val logonInfo : pcLogonInfo.getLogOnInfo()){
-			if (!logonInfo.getLogOn().isPresent()) continue;
-			this.totalClock = this.totalClock.addMinutes(logonInfo.getLogOn().get().v());
-			isExistLogon = true;
+		// Web終業時刻計算対象の判断
+		if (workType.isCalcTargetForEndClock() == true) {
+			boolean isExistLogon = false;
+			
+			// ログオン時刻を合計
+			for (val logonInfo : pcLogonInfo.getLogOnInfo()){
+				
+				// ログ時刻<>NULL
+				if (!logonInfo.getLogOn().isPresent()) continue;
+				
+				// ログオン時刻を合計
+				this.totalClock = this.totalClock.addMinutes(logonInfo.getLogOn().get().v());
+				isExistLogon = true;
+			}
+			
+			// 合計日数を計算
+			if (isExistLogon) this.totalDays = this.totalDays.addDays(1.0);
 		}
-		
-		// 合計日数を計算
-		if (isExistLogon) this.totalDays = this.totalDays.addDays(1.0);
 		
 		// 平均時刻を計算
 		this.calcAverageClock();
@@ -96,9 +111,17 @@ public class AggrPCLogonClock {
 	/**
 	 * 集計PCログオフ時刻
 	 * @param pcLogonInfoOpt 日別実績のPCログオン情報 
+	 * @param timeLeavingOfDaily 日別実績の出退勤
+	 * @param isWeekday 平日かどうか
+	 * @param workType 勤務種類
+	 * @param predTimeSetForCalc 計算用所定時間設定
 	 */
-	public void aggregateLogOff(Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt, TimeLeavingOfDailyPerformance timeLeavingOfDaily,
-			WorkType workType, PredetermineTimeSetForCalc predTimeSetForCalc) {
+	public void aggregateLogOff(
+			Optional<PCLogOnInfoOfDaily> pcLogonInfoOpt,
+			TimeLeavingOfDailyPerformance timeLeavingOfDaily,
+			boolean isWeekday,
+			WorkType workType,
+			PredetermineTimeSetForCalc predTimeSetForCalc) {
 		
 		if (!pcLogonInfoOpt.isPresent()) return;
 		val pcLogonInfo = pcLogonInfoOpt.get();
@@ -106,6 +129,9 @@ public class AggrPCLogonClock {
 		// 退勤時刻<>NULL
 		Integer timeLeave = this.getTimeLeave(timeLeavingOfDaily);
 		if (timeLeave == null) return;
+
+		// 平日の判断
+		if (isWeekday == false) return;
 		
 		if (predTimeSetForCalc == null) return;
 		
