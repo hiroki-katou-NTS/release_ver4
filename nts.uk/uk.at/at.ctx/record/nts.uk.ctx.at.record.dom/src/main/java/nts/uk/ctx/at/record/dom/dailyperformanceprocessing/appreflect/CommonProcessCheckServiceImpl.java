@@ -183,10 +183,10 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		timeAndAnyItemUpService.addAndUpdate(lstCal);
 		dailyReposiroty.updateByKey(commonPara.getIntegrationOfDaily().getEditState());
 		Map<String, List<GeneralDate>> param = new HashMap<>();
-		param.put(commonPara.getSid(), Arrays.asList(commonPara.getYmd()));
-		employeeError.removeParam(commonPara.getSid(), commonPara.getYmd());
+		param.put(commonPara.getSid(), Arrays.asList(commonPara.getYmd()));		
+		employeeError.removeNotOTK(param);
 		if(!x.getEmployeeError().isEmpty()) {
-			employeeError.insert(x.getEmployeeError());	
+			employeeError.update(x.getEmployeeError());	
 		}
 	}
 
