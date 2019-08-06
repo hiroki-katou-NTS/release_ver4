@@ -39,16 +39,23 @@ module cps001.c.vm {
                     block();
                     service.getDetail(x).done((data: IEmployee) => {
                         if (data) {
-                            emp.id(iem.id);
+                            if(iem){
+                                 emp.id(iem.id);
+                            }
                             emp.code(data.code);
                             emp.name(data.name);
-
-                            emp.reason(data.reason || '');
-                            emp.dateDelete(data.dateDelete || undefined);
+                            if(data.reason){
+                                emp.reason(data.reason || '');}
+                            if(data.dateDelete){
+                                emp.dateDelete(data.dateDelete || undefined);
+                            }
+                            
                             $('#code').focus();
                             unblock();
                             nts.uk.ui.errors.clearAll();
-                        }
+                        }else{
+                            unblock();
+                            nts.uk.ui.errors.clearAll();}
                     });
                 } else {
                     self.newMode();
