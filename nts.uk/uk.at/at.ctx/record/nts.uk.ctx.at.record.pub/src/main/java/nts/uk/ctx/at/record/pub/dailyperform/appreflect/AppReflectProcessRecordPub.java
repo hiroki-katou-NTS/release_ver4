@@ -16,19 +16,13 @@ public interface AppReflectProcessRecordPub {
 	 * @return True 反映する、
 	 * False：反映しない
 	 */
-	public boolean appReflectProcess(AppCommonPara para, ExecutionType reflectSetting);
+	public ScheAndRecordIsReflectPub appReflectProcess(AppCommonPara para, ExecutionType reflectSetting);
 	/**
 	 * 事前申請の処理(Xử lý xin trước) 　直行直帰
 	 * @param para
 	 * @return
 	 */
-	public void preGobackReflect(GobackReflectPubParameter para);
-	/**
-	 * 事後申請の処理 　直行直帰
-	 * @param para
-	 * @return
-	 */
-	public void afterGobackReflect(GobackReflectPubParameter para);
+	public void preGobackReflect(GobackReflectPubParameter para, boolean isPre);
 	/**
 	 * 	勤務実績に反映
 	 * 事前申請の処理　残業申請

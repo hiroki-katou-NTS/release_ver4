@@ -11,36 +11,29 @@ public class WorkRecordReflectServiceImpl implements WorkRecordReflectService{
 	@Inject
 	private AppReflectProcessRecord reflectRecord;
 	@Override
-	public boolean workRecordreflect(AppReflectRecordPara appRecordInfor) {
-		ReflectRecordInfor recordInfor = appRecordInfor.getRecordInfor();
-		//事前チェック処理
-		boolean checkReflect = reflectRecord.appReflectProcessRecord(appRecordInfor.getRecordInfor().getAppInfor(), true,
-				appRecordInfor.getExecuTionType());
-		if (!checkReflect) {
-			return false;
-		}
-		boolean isPre = recordInfor.getAppInfor().getPrePostAtr() == PrePostAtr.PREDICT ? true : false;
+	public void workRecordreflect(AppReflectRecordPara appRecordInfor) {
+		boolean isPre = appRecordInfor.getPrePosAtr() == PrePostAtr.PREDICT ? true : false;
 		//申請種類
-		switch (recordInfor.getAppInfor().getAppType()) {
+		switch (appRecordInfor.getAppType()) {
 		case OVER_TIME_APPLICATION:
 			reflectRecord.overtimeReflectRecord(appRecordInfor.getOvertimeInfor(), true); 
-			return true;
+			break;
 		case GO_RETURN_DIRECTLY_APPLICATION:
 			GobackReflectPara gobackpara = appRecordInfor.getGobackInfor();
 			reflectRecord.gobackReflectRecord(gobackpara, isPre);
-			return true;
+			break;
 		case ABSENCE_APPLICATION:
 			WorkChangeCommonReflectPara absenceInfor = appRecordInfor.getAbsenceInfor();
 			reflectRecord.absenceReflectRecor(absenceInfor, isPre);
-			return true;
+			break;
 		case BREAK_TIME_APPLICATION:
 			HolidayWorkReflectPara holidayworkData = appRecordInfor.getHolidayworkInfor();
 			reflectRecord.holidayWorkReflectRecord(holidayworkData, isPre);
-			return true;
+			break;
 		case WORK_CHANGE_APPLICATION:
 			WorkChangeCommonReflectPara workChangeData = appRecordInfor.getWorkchangeInfor();
 			reflectRecord.workChangeReflectRecord(workChangeData, isPre);
-			return true;
+			break;
 		case COMPLEMENT_LEAVE_APPLICATION:
 			CommonReflectPara absenceLeaveData = appRecordInfor.getAbsenceLeaveAppInfor();
 			CommonReflectPara recruitmentData = appRecordInfor.getRecruitmentInfor();
@@ -50,9 +43,9 @@ public class WorkRecordReflectServiceImpl implements WorkRecordReflectService{
 			if(recruitmentData != null) {
 				reflectRecord.recruitmentReflectRecord(recruitmentData, isPre);
 			}
-			return true;
+			break;
 		default:
-			return false;
+			break;
 		}
 	}
 }

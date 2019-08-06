@@ -42,8 +42,8 @@ public class AbsenceLeaveReflectScheImpl implements AbsenceLeaveReflectSche{
 	private WorkScheduleStateRepository workScheReposi;
 	@Override
 	public void absenceLeaveReflect(CommonReflectParamSche param) {
-		BasicSchedule scheData = basicScheRepo.find(param.getEmployeeId(), param.getDatePara()).get();
-		List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(param.getEmployeeId(), param.getDatePara());
+		BasicSchedule scheData = basicScheRepo.find(param.getEmployeeId(), param.getAppDate()).get();
+		List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(param.getEmployeeId(), param.getAppDate());
 		//勤種・就時の反映 
 		updateSche.updateScheWorkType(scheData, 
 				lstState, 
@@ -71,12 +71,12 @@ public class AbsenceLeaveReflectScheImpl implements AbsenceLeaveReflectSche{
 			}
 			//勤務開始終了のクリア
 			updateSche.updateStartTimeRflect(new TimeReflectScheDto(param.getEmployeeId(),
-					param.getDatePara(), 0, 0, 1, true, true), scheData, lstState);
+					param.getAppDate(), 0, 0, 1, true, true), scheData, lstState);
 		} else if(checkworkDay == WorkStyle.AFTERNOON_WORK
 				|| checkworkDay == WorkStyle.MORNING_WORK){ //出勤休日区分が午前出勤系又は、午後出勤系
 			//就業時間帯が反映できるか
 			WorkTimeIsReflect workTimeReflect = this.workTimeIsReflect(param.getEmployeeId(), 
-					param.getDatePara(),
+					param.getAppDate(),
 					param.getWorkTimeCode());
 			if(workTimeReflect.isReflect()) {
 				//就時の反映
@@ -86,7 +86,7 @@ public class AbsenceLeaveReflectScheImpl implements AbsenceLeaveReflectSche{
 			}
 			//開始終了時刻が反映できるか
 			StartEndTimeIsReflect chkReflect = this.startEndTimeIsReflect(param.getEmployeeId(), 
-					param.getDatePara(), 
+					param.getAppDate(), 
 					checkworkDay, 
 					param.getStartTime(), 
 					param.getEndTime(), 
@@ -95,7 +95,7 @@ public class AbsenceLeaveReflectScheImpl implements AbsenceLeaveReflectSche{
 				//開始時刻の反映
 				//終了時刻の反映
 				updateSche.updateStartTimeRflect(new TimeReflectScheDto(param.getEmployeeId(),
-						param.getDatePara(), chkReflect.getStartTime(), chkReflect.getEndTime(), 1, true, true), scheData, lstState);
+						param.getAppDate(), chkReflect.getStartTime(), chkReflect.getEndTime(), 1, true, true), scheData, lstState);
 			}
 		}
 			

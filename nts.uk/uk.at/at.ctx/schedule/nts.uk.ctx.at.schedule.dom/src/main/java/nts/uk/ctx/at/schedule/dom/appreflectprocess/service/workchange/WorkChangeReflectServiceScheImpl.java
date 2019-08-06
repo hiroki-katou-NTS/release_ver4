@@ -26,20 +26,18 @@ public class WorkChangeReflectServiceScheImpl implements WorkChangeReflectServic
 	public void reflectWorkChange(WorkChangecommonReflectParamSche workchangeParam) {		
 		CommonReflectParamSche param = workchangeParam.getCommon();
 		//勤種・就時の反映
-		for(int i = 0; param.getStartDate().daysTo(param.getEndDate()) - i >= 0; i++){
-			GeneralDate loopDate = param.getStartDate().addDays(i);
-			BasicSchedule scheData = scheRepo.find(param.getEmployeeId(), loopDate).get();
-			List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(param.getEmployeeId(), loopDate);			
-			//1日休日の判断
-			if(scheData.getWorkTypeCode() != null
-					&& workchangeParam.getExcludeHolidayAtr() == 1
-					&& workTypeRepo.checkHoliday(scheData.getWorkTypeCode())) {
-				continue;
-			}
-			updateSche.updateScheWorkTimeType(scheData, lstState, param.getWorktypeCode(), param.getWorkTimeCode());	
-			scheRepo.update(scheData);
-			workScheReposi.updateOrInsert(lstState);
-		}			
+		GeneralDate loopDate = param.getAppDate();
+		BasicSchedule scheData = scheRepo.find(param.getEmployeeId(), loopDate).get();
+		List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(param.getEmployeeId(), loopDate);			
+		//1日休日の判断
+		if(scheData.getWorkTypeCode() != null
+				&& workchangeParam.getExcludeHolidayAtr() == 1
+				&& workTypeRepo.checkHoliday(scheData.getWorkTypeCode())) {
+			return;
+		}
+		updateSche.updateScheWorkTimeType(scheData, lstState, param.getWorktypeCode(), param.getWorkTimeCode());	
+		scheRepo.update(scheData);
+		workScheReposi.updateOrInsert(lstState);
 	}
 
 }

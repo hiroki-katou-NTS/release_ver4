@@ -27,22 +27,20 @@ public class ForleaveReflectScheImpl implements ForleaveReflectSche{
 	@Override
 	public void forlearveReflectSche(WorkChangecommonReflectParamSche param) {
 		CommonReflectParamSche reflectParam = param.getCommon();
-		for(int i = 0; reflectParam.getStartDate().daysTo(reflectParam.getEndDate()) - i >= 0; i++){
-			GeneralDate loopDate = reflectParam.getStartDate().addDays(i);
-			BasicSchedule scheData = basicScheRepo.find(reflectParam.getEmployeeId(), loopDate).get();
-			List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(reflectParam.getEmployeeId(), loopDate);			
-			//勤種の反映
-			//勤務種類を反映する
-			updateRelect.updateScheWorkType(scheData, lstState, reflectParam.getWorktypeCode());
-			//就業時間帯を変更する
-			if(param.getExcludeHolidayAtr() != 0) {
-				updateRelect.updateScheWorkTime(scheData, lstState, reflectParam.getWorkTimeCode());
-			}
-			//時刻の反映
-			this.reflectTime(scheData, lstState, reflectParam.getWorktypeCode(), reflectParam.getStartTime(), reflectParam.getEndTime());
-			basicScheRepo.update(scheData);
-			workScheReposi.updateOrInsert(lstState);
+		GeneralDate appDate = reflectParam.getAppDate();
+		BasicSchedule scheData = basicScheRepo.find(reflectParam.getEmployeeId(), appDate).get();
+		List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(reflectParam.getEmployeeId(), appDate);			
+		//勤種の反映
+		//勤務種類を反映する
+		updateRelect.updateScheWorkType(scheData, lstState, reflectParam.getWorktypeCode());
+		//就業時間帯を変更する
+		if(param.getExcludeHolidayAtr() != 0) {
+			updateRelect.updateScheWorkTime(scheData, lstState, reflectParam.getWorkTimeCode());
 		}
+		//時刻の反映
+		this.reflectTime(scheData, lstState, reflectParam.getWorktypeCode(), reflectParam.getStartTime(), reflectParam.getEndTime());
+		basicScheRepo.update(scheData);
+		workScheReposi.updateOrInsert(lstState);
 	}
 	@Override
 	public void reflectTime(BasicSchedule scheData, List<WorkScheduleState> lstState, String workTypeCode, Integer startTime, Integer endTime) {

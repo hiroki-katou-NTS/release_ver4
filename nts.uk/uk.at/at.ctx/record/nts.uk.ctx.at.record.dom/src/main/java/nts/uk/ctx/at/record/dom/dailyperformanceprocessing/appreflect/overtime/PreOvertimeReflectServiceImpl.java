@@ -107,11 +107,6 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 		AppReflectRecordWork changeFlg = priorProcess.changeFlg(param, dailyInfor.getWorkInformation());
 		//予定開始終了時刻の反映 phai lay du lieu cua 日別実績の勤務情報 sau khi update
 		priorProcess.startAndEndTimeReflectSche(param, changeFlg.chkReflect, dailyInfor);
-		//日別実績の勤務情報  変更
-		//workRepository.updateByKeyFlush(dailyInfor);
-		
-		//開始終了時刻の反映 phai lay du lieu cua 日別実績の勤務情報 sau khi update
-		//startEndtimeOffReflect.startEndTimeOffReflect(param, dailyInfor);
 
 		//残業時間を反映する
 		//残業枠時間

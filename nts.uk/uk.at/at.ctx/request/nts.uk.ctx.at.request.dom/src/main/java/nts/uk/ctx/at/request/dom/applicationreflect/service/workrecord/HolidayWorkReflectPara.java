@@ -16,7 +16,7 @@ public class HolidayWorkReflectPara {
 	/**
 	 * 年月日
 	 */
-	private GeneralDate baseDate;
+	private GeneralDate appDate;
 	/**
 	 * 休出時間反映フラグ
 	 */

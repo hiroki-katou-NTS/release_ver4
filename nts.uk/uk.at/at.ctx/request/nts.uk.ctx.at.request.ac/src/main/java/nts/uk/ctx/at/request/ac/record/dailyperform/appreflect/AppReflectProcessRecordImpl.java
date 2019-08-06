@@ -18,9 +18,9 @@ import nts.uk.ctx.at.record.pub.dailyperform.appreflect.HolidayWorkReflectPubPar
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.HolidayWorktimeAppPubPara;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.PrePostRecordAtr;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ReasonNotReflectDailyPubRecord;
-import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ReasonNotReflectPubRecord;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ReflectRecordAtr;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ReflectedStatePubRecord;
+import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ScheAndRecordIsReflectPub;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ScheAndRecordSameChangePubFlg;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.WorkChangeCommonReflectPubPara;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.goback.ChangeAppGobackPubAtr;
@@ -40,6 +40,7 @@ import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.GobackRef
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.HolidayWorkReflectPara;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.OvertimeAppParameter;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.OvertimeReflectPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.ScheAndRecordIsReflect;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionTypeExImport;
 import nts.uk.ctx.at.request.dom.setting.company.request.RequestSetting;
 import nts.uk.ctx.at.request.dom.setting.company.request.RequestSettingRepository;
@@ -52,44 +53,23 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 	@Inject
 	private RequestSettingRepository requestSetting;
 	@Override
-	public boolean appReflectProcessRecord(Application_New appInfor, boolean chkRecord, ExecutionTypeExImport executionType) {
-		Optional<RequestSetting> settingData = requestSetting.findByCompany(appInfor.getCompanyID());
-		if(appInfor.getStartDate().isPresent() && appInfor.getEndDate().isPresent()) {
-			for(int i = 0; appInfor.getStartDate().get().daysTo(appInfor.getEndDate().get()) - i >= 0; i++){
-				GeneralDate loopDate = appInfor.getStartDate().get().addDays(i);
-				AppCommonPara para = new AppCommonPara(appInfor.getCompanyID(), 
-						appInfor.getEmployeeID(),
-						loopDate, 
-						settingData.isPresent() ?
-								EnumAdaptor.valueOf(settingData.get().getAppReflectAfterConfirm().getAchievementConfirmedAtr().value, ReflectRecordAtr.class) 
-								: ReflectRecordAtr.NOT_RFFLECT_CANNOT_REF,
-						appInfor.getReflectionInformation().getForcedReflectionReal() == DisabledSegment_New.TODO ? true : false,
-						EnumAdaptor.valueOf(appInfor.getReflectionInformation().getStateReflectionReal().value, ReflectedStatePubRecord.class),
-						EnumAdaptor.valueOf(appInfor.getReflectionInformation().getStateReflection().value,  ReflectedStatePubRecord.class),
-						EnumAdaptor.valueOf(appInfor.getPrePostAtr().value, PrePostRecordAtr.class),
-						EnumAdaptor.valueOf(appInfor.getAppType().value, ApplicationType.class),
-						appInfor.getReflectionInformation().getForcedReflection() == DisabledSegment_New.TODO ? true : false,
-								chkRecord);
-				if(!recordPub.appReflectProcess(para, EnumAdaptor.valueOf(executionType.value, ExecutionType.class))) {
-					return false;
-				}
-			}	
-		} else {
-			AppCommonPara para = new AppCommonPara(appInfor.getCompanyID(), 
-					appInfor.getEmployeeID(),
-					appInfor.getAppDate(), 
-					settingData.isPresent() ? EnumAdaptor.valueOf(settingData.get().getAppReflectAfterConfirm().getAchievementConfirmedAtr().value, ReflectRecordAtr.class) 
-							: ReflectRecordAtr.NOT_RFFLECT_CANNOT_REF,
-					appInfor.getReflectionInformation().getForcedReflectionReal() == DisabledSegment_New.TODO ? true : false,
-					EnumAdaptor.valueOf(appInfor.getReflectionInformation().getStateReflectionReal().value, ReflectedStatePubRecord.class),
-					EnumAdaptor.valueOf(appInfor.getReflectionInformation().getStateReflection().value,  ReflectedStatePubRecord.class),
-					EnumAdaptor.valueOf(appInfor.getPrePostAtr().value, PrePostRecordAtr.class),
-					EnumAdaptor.valueOf(appInfor.getAppType().value, ApplicationType.class),
-					appInfor.getReflectionInformation().getForcedReflection() == DisabledSegment_New.TODO ? true : false,
-							chkRecord);
-			return recordPub.appReflectProcess(para, EnumAdaptor.valueOf(executionType.value, ExecutionType.class));
-		}
-		return true;
+	public ScheAndRecordIsReflect appReflectProcessRecord(Application_New appInfor, ExecutionTypeExImport executionType, GeneralDate appDate) {
+		//Optional<RequestSetting> settingData = requestSetting.findByCompany(appInfor.getCompanyID());
+		/*settingData.isPresent() ?
+				EnumAdaptor.valueOf(settingData.get().getAppReflectAfterConfirm().getAchievementConfirmedAtr().value, ReflectRecordAtr.class) 
+				: ReflectRecordAtr.NOT_RFFLECT_CANNOT_REF*/
+		AppCommonPara para = new AppCommonPara(appInfor.getCompanyID(), 
+				appInfor.getEmployeeID(),
+				appDate, 
+				ReflectRecordAtr.REFLECT,
+				appInfor.getReflectionInformation().getForcedReflectionReal() == DisabledSegment_New.TODO ? true : false,
+				EnumAdaptor.valueOf(appInfor.getReflectionInformation().getStateReflectionReal().value, ReflectedStatePubRecord.class),
+				EnumAdaptor.valueOf(appInfor.getReflectionInformation().getStateReflection().value,  ReflectedStatePubRecord.class),
+				EnumAdaptor.valueOf(appInfor.getPrePostAtr().value, PrePostRecordAtr.class),
+				EnumAdaptor.valueOf(appInfor.getAppType().value, ApplicationType.class),
+				appInfor.getReflectionInformation().getForcedReflection() == DisabledSegment_New.TODO ? true : false);
+		ScheAndRecordIsReflectPub checkResult = recordPub.appReflectProcess(para, EnumAdaptor.valueOf(executionType.value, ExecutionType.class));
+		return new ScheAndRecordIsReflect(checkResult.isScheReflect(), checkResult.isRecordReflect());
 	}
 
 	@Override
@@ -100,11 +80,9 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				para.getGobackData().getStartTime1(),
 				para.getGobackData().getEndTime1(), 
 				para.getGobackData().getStartTime2(),
-				para.getGobackData().getEndTime2(),
-				EnumAdaptor.valueOf(para.getGobackData().getReflectState().value, ReflectedStatePubRecord.class), 
-				para.getGobackData().getReasoNotReflect() == null ? null : EnumAdaptor.valueOf(para.getGobackData().getReasoNotReflect().value, ReasonNotReflectPubRecord.class));
+				para.getGobackData().getEndTime2());
 		GobackReflectPubParameter pubPara = new GobackReflectPubParameter(para.getEmployeeId(), 
-				para.getDateData(),
+				para.getAppDate(),
 				para.isOutResReflectAtr(),
 				EnumAdaptor.valueOf(para.getPriorStampAtr().value, PriorStampPubAtr.class),
 				EnumAdaptor.valueOf(para.getScheAndRecordSameChangeFlg().value, ScheAndRecordSameChangePubFlg.class),
@@ -113,18 +91,16 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				gobackPra,
 				para.getExcLogId());
 		if(isPre) {
-			 recordPub.preGobackReflect(pubPara);
+			 recordPub.preGobackReflect(pubPara, true);
 		} else {
-			recordPub.afterGobackReflect(pubPara);
+			recordPub.preGobackReflect(pubPara, false);
 		}
 	}
 
 	@Override
 	public void overtimeReflectRecord(OvertimeReflectPara para, boolean isPre) {
 		OvertimeAppParameter overtimeInfo = para.getOvertimePara();
-		OvertimeAppPubParameter overtimePara = new OvertimeAppPubParameter(EnumAdaptor.valueOf(overtimeInfo.getReflectedState().value, ReflectedStatePubRecord.class),
-				EnumAdaptor.valueOf(overtimeInfo.getReasonNotReflect() == null ? 0 : overtimeInfo.getReasonNotReflect().value, ReasonNotReflectPubRecord.class),
-				overtimeInfo.getWorkTypeCode(),
+		OvertimeAppPubParameter overtimePara = new OvertimeAppPubParameter(overtimeInfo.getWorkTypeCode(),
 				overtimeInfo.getWorkTimeCode(),
 				overtimeInfo.getStartTime1(),
 				overtimeInfo.getEndTime1(),
@@ -174,7 +150,7 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				para.getHolidayWorkPara().getEndTime(),
 				mapBreakTimeFrame); 
 		HolidayWorkReflectPubPara pubPara = new HolidayWorkReflectPubPara(para.getEmployeeId(), 
-				para.getBaseDate(),
+				para.getAppDate(),
 				para.isHolidayWorkReflectFlg(),
 			 	EnumAdaptor.valueOf(para.getScheAndRecordSameChangeFlg().value, ScheAndRecordSameChangePubFlg.class), 
 				para.isScheReflectFlg(),
@@ -193,13 +169,11 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 	
 	private CommonReflectPubParameter toPubPara(CommonReflectPara para) {
 		CommonReflectPubParameter pubPara = new CommonReflectPubParameter(para.getEmployeeId(),
-				para.getBaseDate(), 
+				para.getAppDate(), 
 				EnumAdaptor.valueOf(para.getScheAndRecordSameChangeFlg().value, ScheAndRecordSameChangePubFlg.class),
 				para.isScheTimeReflectAtr(),
-				para.getWorkTypeCode(), 
+				para.getWorktypeCode(), 
 				para.getWorkTimeCode(),
-				para.getStartDate(),
-				para.getEndDate(),
 				para.getStartTime(),
 				para.getEndTime(),
 				para.getExcLogId());

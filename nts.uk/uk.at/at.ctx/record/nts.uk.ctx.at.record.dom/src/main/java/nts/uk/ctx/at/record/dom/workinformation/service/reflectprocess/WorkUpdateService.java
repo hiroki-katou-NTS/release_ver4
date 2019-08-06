@@ -169,4 +169,6 @@ public interface WorkUpdateService {
 	 * @return
 	 */
 	List<Integer> lstScheBreakEndTime();
+	void cleanRecordTimeData(String employeeId, GeneralDate baseDate, IntegrationOfDaily dailyInfor);
+	void cleanScheTime(String employeeId, GeneralDate baseDate, IntegrationOfDaily dailyInfor);
 }

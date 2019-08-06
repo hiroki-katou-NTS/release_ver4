@@ -22,8 +22,8 @@ public class RecruitmentAppReflectScheImpl implements RecruitmentAppReflectSche{
 	private WorkScheduleStateRepository workScheReposi;
 	@Override
 	public void recruitmentReflect(CommonReflectParamSche param) {
-		BasicSchedule scheData = basicScheRepo.find(param.getEmployeeId(), param.getDatePara()).get();
-		List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(param.getEmployeeId(), param.getDatePara());
+		BasicSchedule scheData = basicScheRepo.find(param.getEmployeeId(), param.getAppDate()).get();
+		List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(param.getEmployeeId(), param.getAppDate());
 		// 勤務種類・就業時間帯の変更
 		scheCommon.updateScheWorkTimeType(scheData, 
 				lstState, 
@@ -31,7 +31,7 @@ public class RecruitmentAppReflectScheImpl implements RecruitmentAppReflectSche{
 				param.getWorkTimeCode());
 		// 開始・終了時刻
 		scheCommon.updateStartTimeRflect(new TimeReflectScheDto(param.getEmployeeId(),
-				param.getDatePara(),
+				param.getAppDate(),
 				param.getStartTime(),
 				param.getEndTime(),
 				1,

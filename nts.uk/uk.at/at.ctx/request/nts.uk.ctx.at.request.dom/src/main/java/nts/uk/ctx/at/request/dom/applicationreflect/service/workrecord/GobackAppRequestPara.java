@@ -1,12 +1,7 @@
 package nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord;
-
-/*import nts.uk.ctx.at.request.dom.application.ReasonNotReflect_New;*/
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import nts.uk.ctx.at.request.dom.application.ReasonNotReflectDaily_New;
-
-import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
 import nts.uk.ctx.at.request.dom.application.UseAtr;
 @AllArgsConstructor
 @Setter
@@ -40,12 +35,4 @@ public class GobackAppRequestPara {
 	 * 直行直帰申請．勤務時間終了2
 	 */
 	private Integer endTime2;
-	/**
-	 * 反映状態
-	 */
-	private ReflectedState_New reflectState;
-	/**
-	 * 予定反映不可理由
-	 */
-	private ReasonNotReflectDaily_New reasoNotReflect;
 }

@@ -11,14 +11,27 @@ import nts.uk.ctx.at.request.dom.setting.company.request.appreflect.ClassifySche
 @Getter
 @Setter
 public class CommonReflectPara {
-	/**
-	 * 社員ID
-	 */
+    /**	社員ID */
 	private String employeeId;
+	/**	年月日 */
+	private GeneralDate appDate;
 	/**
-	 * 年月日
+	 * 勤務種類コード
 	 */
-	private GeneralDate baseDate;
+	private String worktypeCode;
+	/**
+    * 就業時間帯コード
+    */
+	private String workTimeCode;
+	/**
+    * 勤務時間開始1
+    */
+	private Integer startTime;
+	/**
+    * 勤務時間終了1
+    */
+	private Integer endTime;
+	private String excLogId;
 	/**
 	 * 予定と実績を同じに変更する区分
 	 */
@@ -27,20 +40,5 @@ public class CommonReflectPara {
 	 * 予定反映区分
 	 */
 	private boolean scheTimeReflectAtr;
-	/**
-	 *勤務種類コード
-	 */
-	private String workTypeCode;
-	/**
-	 * 就業時間帯コード
-	 */
-	private String workTimeCode;
 	
-	private GeneralDate startDate;
-	
-	private GeneralDate endDate;
-	
-	private Integer startTime;
-	private Integer endTime;
-	private String excLogId;
 }

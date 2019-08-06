@@ -2,6 +2,7 @@ package nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.dom.application.Application_New;
@@ -16,6 +17,7 @@ import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymont
 @AllArgsConstructor
 @Setter
 @Getter
+@NoArgsConstructor
 public class ReflectScheDto {
 	/**社員ID	 */
 	private String employeeId;

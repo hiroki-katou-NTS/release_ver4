@@ -4,13 +4,14 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
-import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.schedule.pub.appreflectprocess.ApplicationGobackScheInforDto;
-import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsence;
-import nts.uk.ctx.at.request.dom.application.holidayshipment.recruitmentapp.RecruitmentApp;
-import nts.uk.ctx.at.request.dom.application.workchange.AppWorkChange;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.WorkChangeCommonReflectPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.CommonReflectPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.GobackAppRequestPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.GobackReflectPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.HolidayWorkReflectPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.HolidayWorktimeAppRequestPara;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.ApplicationReflectProcessSche;
-import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.ReflectScheDto;
 import nts.uk.ctx.at.schedule.pub.appreflectprocess.CommonReflectSchePubParam;
 import nts.uk.ctx.at.schedule.pub.appreflectprocess.WorkChangeCommonReflectSchePubParam;
 import nts.uk.ctx.at.schedule.pub.appreflectprocess.AppReflectProcessSchePub;
@@ -24,91 +25,80 @@ public class ApplicationReflectProcessScheImpl implements ApplicationReflectProc
 	private AppReflectProcessSchePub appReflectSchePub;
 
 	@Override
-	public void goBackDirectlyReflect(ReflectScheDto reflectSche) {
-		ApplicationGobackScheInforDto appInfo = new ApplicationGobackScheInforDto(
-				reflectSche.getGoBackDirectly().getWorkChangeAtr().isPresent() ? EnumAdaptor.valueOf(reflectSche.getGoBackDirectly().getWorkChangeAtr().get().value, ChangeAtrAppGobackPub.class) : null,
-				reflectSche.getGoBackDirectly().getWorkTypeCD().isPresent() ? reflectSche.getGoBackDirectly().getWorkTypeCD().get().v() : null,
-				reflectSche.getGoBackDirectly().getSiftCD().isPresent() ? reflectSche.getGoBackDirectly().getSiftCD().get().v() : null,
-				reflectSche.getGoBackDirectly().getWorkTimeStart1().isPresent() ? reflectSche.getGoBackDirectly().getWorkTimeStart1().get().v() : null,
-				reflectSche.getGoBackDirectly().getWorkTimeEnd1().isPresent() ? reflectSche.getGoBackDirectly().getWorkTimeEnd1().get().v() : null,
-				reflectSche.getGoBackDirectly().getWorkTimeStart2().isPresent() ? reflectSche.getGoBackDirectly().getWorkTimeStart2().get().v() : null,
-				reflectSche.getGoBackDirectly().getWorkTimeEnd2().isPresent() ? reflectSche.getGoBackDirectly().getWorkTimeEnd2().get().v() : null);
-		ApplicationReflectParamScheDto dto = new ApplicationReflectParamScheDto(reflectSche.getEmployeeId(), 
-				reflectSche.getDatePara(),
-				reflectSche.getReflectSetting().isChokochoki(),
-				appInfo, 
-				EnumAdaptor.valueOf(reflectSche.getTimeAtr().value,
-						ApplyTimeAtrPub.class)); 
+	public void goBackDirectlyReflect(GobackReflectPara gobackInfor) {
+		GobackAppRequestPara gobackData = gobackInfor.getGobackData();
+		ApplicationGobackScheInforDto appInfor = new ApplicationGobackScheInforDto(EnumAdaptor.valueOf(gobackData.getChangeAppGobackAtr().value, ChangeAtrAppGobackPub.class) ,
+				gobackData.getWorkTypeCode(),
+				gobackData.getWorkTimeCode(),
+				gobackData.getStartTime1(),
+				gobackData.getEndTime1(),
+				gobackData.getStartTime2(),
+				gobackData.getEndTime2());
+		ApplicationReflectParamScheDto dto = new ApplicationReflectParamScheDto(gobackInfor.getEmployeeId(), 
+				gobackInfor.getAppDate(),
+				gobackInfor.isOutResReflectAtr(),
+				appInfor, 
+				EnumAdaptor.valueOf(gobackInfor.getApplyTimeAtr().value, ApplyTimeAtrPub.class)); 
 		appReflectSchePub.goBackDirectlyReflectSch(dto);
 	}
 
 	@Override
-	public void forleaveReflect(ReflectScheDto reflectSche) {
-		AppAbsence forLeave = reflectSche.getForLeave();
-		CommonReflectSchePubParam leavePra = new CommonReflectSchePubParam(reflectSche.getEmployeeId(),
-				reflectSche.getDatePara(),
-				reflectSche.getForLeave().getWorkTypeCode() != null ? reflectSche.getForLeave().getWorkTypeCode().v() : null, //勤務種類=INPUT．勤務種類コード chi update workType
-				reflectSche.getForLeave().getWorkTimeCode() != null ? reflectSche.getForLeave().getWorkTimeCode().v() : null,
-				reflectSche.getAppInfor().getStartDate().isPresent() ? reflectSche.getAppInfor().getStartDate().get() : null,
-				reflectSche.getAppInfor().getEndDate().isPresent() ? reflectSche.getAppInfor().getEndDate().get() : null,
-						forLeave.getStartTime1() != null ? forLeave.getStartTime1().v() : null,
-								forLeave.getEndTime1() != null ? forLeave.getEndTime1().v() : null);
-		WorkChangeCommonReflectSchePubParam paraInput = new WorkChangeCommonReflectSchePubParam(leavePra, forLeave.isChangeWorkHour() == true ? 1 : 0);
+	public void forleaveReflect(WorkChangeCommonReflectPara absenceInfor) {
+		CommonReflectPara commonPara = absenceInfor.getCommonPara();
+		CommonReflectSchePubParam leavePra = new CommonReflectSchePubParam(commonPara.getEmployeeId(),
+				commonPara.getAppDate(),
+				commonPara.getWorktypeCode(), //勤務種類=INPUT．勤務種類コード chi update workType
+				commonPara.getWorkTimeCode(),
+				commonPara.getStartTime(),
+				commonPara.getEndTime());
+		WorkChangeCommonReflectSchePubParam paraInput = new WorkChangeCommonReflectSchePubParam(leavePra, absenceInfor.getExcludeHolidayAtr());
 		appReflectSchePub.appForLeaveSche(paraInput);
 	}
 
 	@Override
-	public void workChangeReflect(ReflectScheDto reflectSche) {
-		AppWorkChange workChange = reflectSche.getWorkChange();
-		CommonReflectSchePubParam workChangePara = new CommonReflectSchePubParam(reflectSche.getEmployeeId(), 
-				reflectSche.getDatePara(), 
-				workChange.getWorkTypeCd(), 
-				workChange.getWorkTimeCd(),
-				reflectSche.getAppInfor().getStartDate() == null ? null : reflectSche.getAppInfor().getStartDate().get(),
-				reflectSche.getAppInfor().getEndDate() == null ? null : reflectSche.getAppInfor().getEndDate().get(),
-				null,
-				null);
-		WorkChangeCommonReflectSchePubParam paramInput = new WorkChangeCommonReflectSchePubParam(workChangePara, workChange.getExcludeHolidayAtr());
+	public void workChangeReflect(WorkChangeCommonReflectPara workchangeInfor) {
+		CommonReflectPara commonPara = workchangeInfor.getCommonPara();
+		CommonReflectSchePubParam workChangePara = new CommonReflectSchePubParam(commonPara.getEmployeeId(), 
+				commonPara.getAppDate(), 
+				commonPara.getWorktypeCode(), 
+				commonPara.getWorkTimeCode(),
+				commonPara.getStartTime(),
+				commonPara.getEndTime());
+		WorkChangeCommonReflectSchePubParam paramInput = new WorkChangeCommonReflectSchePubParam(workChangePara, workchangeInfor.getExcludeHolidayAtr());
 		appReflectSchePub.appWorkChangeReflect(paramInput);
 	}
 
 	@Override
-	public void holidayWorkReflect(ReflectScheDto relectSche) {
-		CommonReflectSchePubParam holidayWork = new CommonReflectSchePubParam(relectSche.getEmployeeId(), 
-				relectSche.getDatePara(), 
-				relectSche.getHolidayWork().getWorkTypeCode().v(),
-				relectSche.getHolidayWork().getWorkTimeCode().v(),
-				null, 
-				null,
-				relectSche.getHolidayWork().getWorkClock1().getStartTime() != null ? relectSche.getHolidayWork().getWorkClock1().getStartTime().v() : null,
-				relectSche.getHolidayWork().getWorkClock1().getEndTime() != null ? relectSche.getHolidayWork().getWorkClock1().getEndTime().v() : null);
+	public void holidayWorkReflect(HolidayWorkReflectPara holidayworkInfor) {
+		HolidayWorktimeAppRequestPara holidayWorkPara = holidayworkInfor.getHolidayWorkPara();
+		CommonReflectSchePubParam holidayWork = new CommonReflectSchePubParam(holidayworkInfor.getEmployeeId(), 
+				holidayworkInfor.getAppDate(), 
+				holidayWorkPara.getWorkTypeCode(),
+				holidayWorkPara.getWorkTimeCode(),
+				holidayWorkPara.getStartTime(),
+				holidayWorkPara.getEndTime());
 		appReflectSchePub.holidayWorkReflectSche(holidayWork);
 	}
 
 	@Override
-	public void ebsenceLeaveReflect(ReflectScheDto relectSche) {
-		CommonReflectSchePubParam absenceLeave = new CommonReflectSchePubParam(relectSche.getEmployeeId(),
-				relectSche.getDatePara(),
-				relectSche.getAbsenceLeave().getWorkTypeCD() == null ? null : relectSche.getAbsenceLeave().getWorkTypeCD().v(),
-				relectSche.getAbsenceLeave().getWorkTimeCD(), 
-				relectSche.getAppInfor().getStartDate().isPresent() ? relectSche.getAppInfor().getStartDate().get() : null,
-				relectSche.getAppInfor().getEndDate().isPresent() ? relectSche.getAppInfor().getEndDate().get() : null,
-				relectSche.getAbsenceLeave().getWorkTime1().getStartTime() != null ? relectSche.getAbsenceLeave().getWorkTime1().getStartTime().v() : null,
-				relectSche.getAbsenceLeave().getWorkTime1().getEndTime() != null ? relectSche.getAbsenceLeave().getWorkTime1().getEndTime().v() : null);
+	public void ebsenceLeaveReflect(CommonReflectPara absenceLeaveAppInfor) {
+		CommonReflectSchePubParam absenceLeave = new CommonReflectSchePubParam(absenceLeaveAppInfor.getEmployeeId(),
+				absenceLeaveAppInfor.getAppDate(),
+				absenceLeaveAppInfor.getWorktypeCode(),
+				absenceLeaveAppInfor.getWorkTimeCode(), 
+				absenceLeaveAppInfor.getStartTime(),
+				absenceLeaveAppInfor.getEndTime());
 		appReflectSchePub.absenceLeaveReflectSche(absenceLeave);
 	}
 
 	@Override
-	public void recruitmentReflect(ReflectScheDto relectSche) {
-		RecruitmentApp recruitmentData = relectSche.getRecruitment();
-		CommonReflectSchePubParam recruitment = new CommonReflectSchePubParam(relectSche.getEmployeeId(), 
-				relectSche.getDatePara(), 
-				recruitmentData.getWorkTypeCD() != null ? recruitmentData.getWorkTypeCD().v() : null, 
-				recruitmentData.getWorkTimeCD() != null ? recruitmentData.getWorkTimeCD().v() : null, 
-				relectSche.getAppInfor().getStartDate().isPresent() ? relectSche.getAppInfor().getStartDate().get() : null, 
-				relectSche.getAppInfor().getEndDate().isPresent() ? relectSche.getAppInfor().getEndDate().get() : null, 
-				recruitmentData.getWorkTime1().getStartTime() != null ? recruitmentData.getWorkTime1().getStartTime().v() : null, 
-				recruitmentData.getWorkTime1().getEndTime() != null ? recruitmentData.getWorkTime1().getEndTime().v() : null);
+	public void recruitmentReflect(CommonReflectPara recruitmentInfor) {
+		CommonReflectSchePubParam recruitment = new CommonReflectSchePubParam(recruitmentInfor.getEmployeeId(), 
+				recruitmentInfor.getAppDate(), 
+				recruitmentInfor.getWorktypeCode(), 
+				recruitmentInfor.getWorkTimeCode(), 
+				recruitmentInfor.getStartTime(), 
+				recruitmentInfor.getEndTime());
 		appReflectSchePub.recruitmentReflectSche(recruitment);
 	}
 }
