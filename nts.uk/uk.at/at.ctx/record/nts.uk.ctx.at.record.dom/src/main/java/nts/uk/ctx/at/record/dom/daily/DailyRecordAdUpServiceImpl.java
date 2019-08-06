@@ -144,15 +144,19 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	public void adUpTimeLeaving(Optional<TimeLeavingOfDailyPerformance> attendanceLeave) {
 		if (!attendanceLeave.isPresent())
 			return;
-		timeLeavingRepo.update(attendanceLeave.get());
+		if(timeLeavingRepo.findByKey(attendanceLeave.get().getEmployeeId(), attendanceLeave.get().getYmd()).isPresent()) {
+			timeLeavingRepo.update(attendanceLeave.get());
+		}else {
+			timeLeavingRepo.insert(attendanceLeave.get());
+		}
 
 	}
 
 	@Override
 	public void adUpBreakTime(List<BreakTimeOfDailyPerformance> breakTime) {
-		breakTime.stream().forEach(domain -> {
-			breakTimeRepo.update(domain);
-		});
+		//breakTime.stream().forEach(domain -> {
+			breakTimeRepo.update(breakTime);
+		//});
 
 	}
 
@@ -206,9 +210,9 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	public void adUpEditState(List<EditStateOfDailyPerformance> editState) {
 		if (editState.isEmpty())
 			return;
-		editState.stream().forEach(domain -> {
-			editStateRepo.updateByKey(editState);
-		});
+		//editState.stream().forEach(domain -> {
+		editStateRepo.updateByKey(editState);
+		//});
 
 	}
 
@@ -240,9 +244,9 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	public void adUpRemark(List<RemarksOfDailyPerform> remarks) {
 		if (remarks.isEmpty())
 			return;
-		remarks.stream().forEach(domain -> {
-			remarksOfDailyRepo.update(domain);
-		});
+		//remarks.stream().forEach(domain -> {
+		remarksOfDailyRepo.update(remarks);
+		//});
 	}
 
 	@Override
