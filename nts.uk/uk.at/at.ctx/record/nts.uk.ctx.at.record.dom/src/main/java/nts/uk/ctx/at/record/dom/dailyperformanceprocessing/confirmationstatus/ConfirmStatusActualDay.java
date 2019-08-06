@@ -30,6 +30,7 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.ReflectedS
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.enums.SelfConfirmError;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
@@ -211,7 +212,7 @@ public class ConfirmStatusActualDay {
 			lstResult.addAll(lstResultEmpTemp1);
 		});
 		List<ConfirmStatusActualResult> results = new ArrayList<>();
-		 Set<Pair<String, GeneralDate>> setErrorAndApp = getErrorAndApplication(employeeIds, period);
+		 Set<Pair<String, GeneralDate>> setErrorAndApp = getErrorAndApplication(employeeIds, period, optIndentity);
 		 results = lstResult.stream().map(x ->{
 			if(setErrorAndApp.contains(Pair.of(x.getEmployeeId(), x.getDate()))) {
 				x.setPermissionChecked(false);
@@ -433,15 +434,18 @@ public class ConfirmStatusActualDay {
 		}
 	}
 	
-	public Set<Pair<String, GeneralDate>> getErrorAndApplication(List<String> employeeIds, DatePeriod datePeriod){
+	public Set<Pair<String, GeneralDate>> getErrorAndApplication(List<String> employeeIds, DatePeriod datePeriod, Optional<IdentityProcessUseSet> optIndentity){
 		 Set<Pair<String, GeneralDate>> result = new HashSet<>();
 
-		employeeIds.stream().forEach(error -> {
-			List<EmployeeErrorOuput> lstOut = realityStatusService.checkEmployeeErrorOnProcessingDate(error,
-					datePeriod.start(), datePeriod.end());
-			result.addAll(lstOut.stream().filter(x -> x.getHasError()).map(x -> Pair.of(error, x.getDate())).collect(Collectors.toSet()));
-		});
-
+		if (optIndentity.isPresent() && optIndentity.get().getYourSelfConfirmError().isPresent() && optIndentity.get()
+				.getYourSelfConfirmError().get().value == SelfConfirmError.CAN_NOT_CHECK_WHEN_ERROR.value) {
+			employeeIds.stream().forEach(error -> {
+				List<EmployeeErrorOuput> lstOut = realityStatusService.checkEmployeeErrorOnProcessingDate(error,
+						datePeriod.start(), datePeriod.end());
+				result.addAll(lstOut.stream().filter(x -> x.getHasError()).map(x -> Pair.of(error, x.getDate()))
+						.collect(Collectors.toSet()));
+			});
+		}
 		List<ApplicationRecordImport> lstAppRecord = applicationRecordAdapter.getApplicationBySID(employeeIds,
 				datePeriod.start(), datePeriod.end());
 		lstAppRecord.forEach(x -> {
