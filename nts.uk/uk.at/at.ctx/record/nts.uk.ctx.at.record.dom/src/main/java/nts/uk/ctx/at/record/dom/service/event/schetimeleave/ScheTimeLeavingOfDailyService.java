@@ -34,6 +34,16 @@ public class ScheTimeLeavingOfDailyService {
 		if(dailyInfor.getWorkInformation().getScheduleInfo() == null
 				|| dailyInfor.getWorkInformation().getScheduleInfo().getWorkTimeCode() == null
 				|| dailyInfor.getWorkInformation().getScheduleInfo().getWorkTypeCode() == null) {
+			if(dailyInfor.getWorkInformation().getScheduleInfo() != null 
+					&& dailyInfor.getWorkInformation().getScheduleInfo().getWorkTimeCode() == null) {
+				List<ScheduleTimeSheet> lstScheduleTimeSheet = dailyInfor.getWorkInformation().getScheduleTimeSheets();
+				List<ScheduleTimeSheet> lstScheduleTimeSheetNo1 = lstScheduleTimeSheet.stream()
+						.filter(x -> x.getWorkNo().v() == 1).collect(Collectors.toList());
+				if(!lstScheduleTimeSheetNo1.isEmpty()) {
+					lstScheduleTimeSheet.remove(0);
+					dailyInfor.getWorkInformation().setScheduleTimeSheets(lstScheduleTimeSheet);
+				}
+			}
 			return;
 		}
 		//勤務種類を取得する
