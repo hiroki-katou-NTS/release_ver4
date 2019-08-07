@@ -817,15 +817,6 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 			}
 		});		
 		dailyPerfor.setAttendanceTimeOfDailyPerformance(Optional.of(attendanceTimeData));
-		List<Integer> lstWorktimeFrameTemp = new ArrayList<>();
-		lstWorktimeFrameTemp = this.lstTranfertimeFrameItem();
-		for(int i = 1; i <= 10; i++) {
-			if(!transferTimeFrame.containsKey(i)) {
-				Integer item = this.lstTranfertimeFrameItem().get(i - 1); 
-				lstWorktimeFrameTemp.remove(item);
-			}
-		}
-		this.editStateOfDailyPerformance(employeeId, dateData, dailyPerfor.getEditState(), lstWorktimeFrameTemp);
 	}
 	@Override
 	public void updateRecordStartEndTimeReflectRecruitment(TimeReflectPara data
