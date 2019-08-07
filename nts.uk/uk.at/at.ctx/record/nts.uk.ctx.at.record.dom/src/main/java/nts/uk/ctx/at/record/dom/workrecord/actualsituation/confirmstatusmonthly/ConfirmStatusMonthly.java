@@ -1,149 +1,136 @@
 package nts.uk.ctx.at.record.dom.workrecord.actualsituation.confirmstatusmonthly;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
-import nts.uk.ctx.at.record.dom.adapter.company.StatusOfEmployeeExport;
-import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.ApprovalStatusAdapter;
-import nts.uk.ctx.at.record.dom.adapter.workflow.service.dtos.ApproveRootStatusForEmpImport;
 import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmInfoAcqProcess;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmInfoResult;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.InformationMonth;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
-import nts.uk.ctx.at.record.dom.workrecord.actualsituation.identificationstatus.export.CheckIndentityDayConfirm;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
-import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
-import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentityProcessUseSetRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
-import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
-import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * RQ586 : 月の実績の確認状況を取得する
+ * 
  * @author tutk
  *
  */
 @Stateless
 public class ConfirmStatusMonthly {
-	
+
 	@Inject
 	private IdentityProcessUseSetRepository identityProcessUseSetRepo;
-	
-	@Inject
-	private ClosureService closureService;
-	
-	@Inject
-	private SyCompanyRecordAdapter syCompanyRecordAdapter;
-	
-	@Inject
-	private ConfirmationMonthRepository confirmationMonthRepo; 
-	
-	@Inject
-	private CheckIndentityDayConfirm checkIndentityDayConfirm;
-	
+
 	@Inject
 	private IFindDataDCRecord iFindDataDCRecord;
-	
-	@Inject
-	private ApprovalStatusAdapter approvalStatusAdapter;
 
-	
-	public Optional<StatusConfirmMonthDto> getConfirmStatusMonthly(String companyId,Integer closureId,ClosureDate closureDate, List<String> listEmployeeId,YearMonth yearmonthInput, List<MonthlyModifyResultDto> results) {
+	@Inject
+	private ConfirmInfoAcqProcess confirmInfoAcqProcess;
+
+	public Optional<StatusConfirmMonthDto> getConfirmStatusMonthly(String companyId, Integer closureId,
+			ClosureDate closureDate, List<String> listEmployeeId, YearMonth yearmonthInput,
+			List<MonthlyModifyResultDto> results) {
 		iFindDataDCRecord.clearAllStateless();
-		List<ConfirmStatusResult> listConfirmStatus = new ArrayList<>();
-		//ドメインモデル「本人確認処理の利用設定」を取得する
+		// ドメインモデル「本人確認処理の利用設定」を取得する
 		Optional<IdentityProcessUseSet> identityProcessUseSet = identityProcessUseSetRepo.findByKey(companyId);
-		if(!identityProcessUseSet.isPresent())
+		if (!identityProcessUseSet.isPresent())
 			return Optional.empty();
-		//取得した「本人確認処理の利用設定．月の本人確認を利用する」をチェックする
-		if(!identityProcessUseSet.get().isUseIdentityOfMonth())
+		// 取得した「本人確認処理の利用設定．月の本人確認を利用する」をチェックする
+		if (!identityProcessUseSet.get().isUseIdentityOfMonth()) {
 			return Optional.empty();
-		//指定した年月の期間を算出する
-		DatePeriod datePeriod =closureService.getClosurePeriod(closureId, yearmonthInput);
-		
-		for(String employeeId :listEmployeeId ) {
-			if (!results.stream().anyMatch(r -> r.getEmployeeId().equals(employeeId))) continue;
-			
-			//社員の指定期間中の所属期間を取得する RQ588
-			DatePeriod workPeriod = results.stream().filter(r -> r.getEmployeeId().equals(employeeId)).findFirst().get().getWorkDatePeriod();
-			List<StatusOfEmployeeExport> listStatusOfEmployeeExport = syCompanyRecordAdapter.getListAffComHistByListSidAndPeriod(Arrays.asList(employeeId), workPeriod);
-			//Output「社員の会社所属状況」をチェックする
-			if (listStatusOfEmployeeExport == null || listStatusOfEmployeeExport.isEmpty()) continue;
-		
-			List<GeneralDate> listDate = new ArrayList<>();
-			for(DatePeriod period : listStatusOfEmployeeExport.get(0).getListPeriod()) {
-				listDate.addAll(period.datesBetween());
-			}
-			ConfirmStatusResult confirmStatus = new ConfirmStatusResult();
-			//ドメインモデル「月の本人確認」を取得する
-			Optional<ConfirmationMonth> confirmationMonth =  confirmationMonthRepo.findByKey(companyId, employeeId,EnumAdaptor.valueOf(closureId, ClosureId.class), closureDate, yearmonthInput);
-			confirmStatus.setEmployeeId(employeeId);
-			confirmStatus.setYearMonth(yearmonthInput);
-			
-			if(confirmationMonth.isPresent()) {
-				confirmStatus.setConfirmStatus(true);
-			}else {
-				confirmStatus.setConfirmStatus(false);
-			}
-			
-			//取得した「本人確認処理の利用設定．日の本人確認を利用する」をチェックする
-			if(identityProcessUseSet.get().isUseConfirmByYourself()) {
-				//対象日の本人確認が済んでいるかチェックする
-				boolean checkConfirm = checkIndentityDayConfirm.checkIndentityDay(employeeId, listDate);
-				if(checkConfirm) {
-					//・実施可否：実施できる
-					confirmStatus.setImplementaPropriety(AvailabilityAtr.CAN_RELEASE);
-				}else {
-					//・実施可否：実施できない
-					confirmStatus.setImplementaPropriety(AvailabilityAtr.CAN_NOT_RELEASE);
-				}
-			}else {
-				//実施可否：実施できる
-				confirmStatus.setImplementaPropriety(AvailabilityAtr.CAN_RELEASE);
-			}
-			
-			//ドメインモデル「承認処理の利用設定」を取得する
-			Optional<ApprovalProcessingUseSetting> optApprovalUse = iFindDataDCRecord.findApprovalByCompanyId(companyId);
-			if(!optApprovalUse.isPresent()) {
-				//解除可否：解除できる
-				confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_RELEASE);
-			}else {
-				//取得した「承認処理の利用設定．月の承認者確認を利用する」をチェックする
-				if(!optApprovalUse.get().getUseMonthApproverConfirm()) {
-					confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_RELEASE);
-				}else {
-					//対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する : RQ462
-					List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-							.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(datePeriod.end()),
-									Arrays.asList(employeeId), 2); // 2 : 月別確認
-					if(lstApprovalStatus.isEmpty()) {
-						confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_RELEASE);
-					}else {
-						//取得した「承認対象者の承認状況」をチェックする
-						if(lstApprovalStatus.get(0).getApprovalStatus() == ApprovalStatusForEmployee.UNAPPROVED) {
-							confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_RELEASE);
-						}else {
-							confirmStatus.setWhetherToRelease(ReleasedAtr.CAN_NOT_RELEASE);
-						}
-					}
-					
-					
-				}
-			}
-			listConfirmStatus.add(confirmStatus);
-			
 		}
-		
-		return Optional.of(new StatusConfirmMonthDto(listConfirmStatus));
+		// ドメインモデル「承認処理の利用設定」を取得する
+		Optional<ApprovalProcessingUseSetting> optApprovalUse = iFindDataDCRecord.findApprovalByCompanyId(companyId);
+		// 確認情報取得処理
+		List<ConfirmInfoResult> confirmInfoResults = this.confirmInfoAcqProcess.getConfirmInfoAcp(companyId,
+				listEmployeeId, Optional.empty(), Optional.of(yearmonthInput));
+		if(confirmInfoResults.isEmpty()){
+			return Optional.empty();
+		}
+		// チェック処理（月の確認）
+		Optional<StatusConfirmMonthDto> result = this.checkProcessMonthConfirm(listEmployeeId, confirmInfoResults,
+				optApprovalUse, identityProcessUseSet.get());
+
+		return result;
+	}
+
+	/**
+	 * チェック処理（月の確認）
+	 * 
+	 * @param listEmployeeId
+	 * @param confirmInfoResults
+	 * @param optApprovalUse
+	 * @param identityProcessUseSet
+	 * @return
+	 */
+	private Optional<StatusConfirmMonthDto> checkProcessMonthConfirm(List<String> listEmployeeId,
+			List<ConfirmInfoResult> confirmInfoResults, Optional<ApprovalProcessingUseSetting> optApprovalUse,
+			IdentityProcessUseSet identityProcessUseSet) {
+		List<ConfirmStatusResult> confirmStatusResults = new ArrayList<>();
+		// 取得している「承認処理の利用設定．月の承認者確認を利用する」をチェックする- k can cho vao vong loop
+		boolean useMonthApproverConfirm = (optApprovalUse.isPresent()
+				&& optApprovalUse.get().getUseMonthApproverConfirm()) ? true : false;
+		// Input「社員一覧」でループ
+		for (String employeeId : listEmployeeId) {
+			Optional<ConfirmInfoResult> optConfirmInfoResult = confirmInfoResults.stream()
+					.filter(x -> x.getEmployeeId().equals(employeeId)).findFirst();
+			if(!optConfirmInfoResult.isPresent()) continue;
+			ConfirmInfoResult confirmInfoResult = optConfirmInfoResult.get();
+			for (InformationMonth infoMonth : confirmInfoResult.getInformationMonths()) {
+				// 対象締め
+				ClosureId closureId = infoMonth.getActualClosure().getClosureId();
+				// 対象年月
+				YearMonth yearMonth = infoMonth.getActualClosure().getYearMonth();
+				// 確認状況
+				boolean confirmStatus = !infoMonth.getLstConfirmMonth().isEmpty();
+				// 取得した情報からパラメータ「月の実績の確認状況」を生成する
+				ConfirmStatusResult confirmStatusResult = new ConfirmStatusResult(employeeId, yearMonth, closureId,
+						confirmStatus, AvailabilityAtr.CAN_RELEASE, ReleasedAtr.CAN_RELEASE);
+
+				// Input「社員の実績の確認状況情報．月の情報．締め期間」の件数ループ
+				// trong EA ghi la loop theo 締め期間 nhung hien tai chi loop dc theo 月の情報
+				// Input「社員の実績の確認状況情報．月の情報．月の承認」をチェックする
+				int approvalStatus = infoMonth.getLstApprovalMonthStatus().get(0).getApprovalStatus().value;
+				if (useMonthApproverConfirm && (approvalStatus == ApprovalStatusForEmployee.APPROVED.value
+						|| approvalStatus == ApprovalStatusForEmployee.DURING_APPROVAL.value)) {
+					// パラメータ「月の実績の確認状況」をセットする
+					confirmStatusResult.setWhetherToRelease(ReleasedAtr.CAN_NOT_RELEASE);
+				}
+				// 取得している「本人確認処理の利用設定．日の本人確認を利用する」をチェックする
+				if (identityProcessUseSet.isUseConfirmByYourself()) {
+					// Input「社員の実績の確認状況情報．日の情報．日の本人確認」をチェックする
+					// lay ra list date can confirm
+					List<GeneralDate> listDateConfirm = new ArrayList<>();
+					confirmInfoResult.getStatusOfEmp().getListPeriod().stream().forEach(period -> {
+						listDateConfirm.addAll(period.datesBetween());
+					});
+					// lay ra listDate da confirm
+					List<GeneralDate> listDateConfirmed = confirmInfoResult.getInformationDay().getIndentities()
+							.stream().map(x -> x.getProcessingYmd()).collect(Collectors.toList());
+					// 締め期間分1件でも存在しない
+					if (!listDateConfirmed.containsAll(listDateConfirm)) {
+						confirmStatusResult.setImplementaPropriety(AvailabilityAtr.CAN_NOT_RELEASE);
+					}
+				}
+
+				// Input「ロック状態」をチェックする - Theo nhu Thanhnx thi da lam o xu ly ngoai
+				// パラメータ「月の実績の確認状況」をセットする
+				confirmStatusResults.add(confirmStatusResult);
+			}
+		}
+
+		return Optional.of(new StatusConfirmMonthDto(confirmStatusResults));
 	}
 }

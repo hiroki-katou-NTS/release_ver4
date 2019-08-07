@@ -1,9 +1,11 @@
 package nts.uk.ctx.at.record.dom.workrecord.actualsituation.confirmstatusmonthly;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nts.arc.time.YearMonth;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 /**
  * 確認状況 : 
  * @author tutk
@@ -12,6 +14,7 @@ import nts.arc.time.YearMonth;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ConfirmStatusResult {
 	
 	/**対象社員*/
@@ -19,6 +22,9 @@ public class ConfirmStatusResult {
 	
 	/**対象年月*/
 	private YearMonth yearMonth;
+	
+	/**対象締め*/
+	private ClosureId closureId;
 	
 	/**確認状況*/
 	private boolean confirmStatus;

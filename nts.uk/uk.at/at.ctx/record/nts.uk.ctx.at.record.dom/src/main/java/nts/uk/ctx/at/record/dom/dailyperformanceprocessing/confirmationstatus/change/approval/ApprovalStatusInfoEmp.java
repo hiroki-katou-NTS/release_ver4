@@ -125,10 +125,10 @@ public class ApprovalStatusInfoEmp {
 
 			// [No.534](中間データ版)承認状況を取得する （月別）
 			if (isCallBy587) {
-				AppRootOfEmpMonthImport appRootOfEmpMonth = approvalStatusAdapter.getApprovalEmpStatusMonth(employeeId,
+				AppRootOfEmpMonthImport appRootOfEmpMonth = approvalStatusAdapter.getApprovalEmpStatusMonth(empTarget,
 						mergePeriodClr.getYearMonth(), mergePeriodClr.getClosureId().value,
 						mergePeriodClr.getClosureDate(), mergePeriodClr.getPeriod().end(), true,
-						mergePeriodClr.getOriginalClosurePeriod());
+						mergePeriodClr.getPeriod());
 				lstAppRootOfEmpMonth.add(appRootOfEmpMonth);
 
 			}
@@ -227,9 +227,9 @@ public class ApprovalStatusInfoEmp {
 				// [No.534](中間データ版)承認状況を取得する （月別）
 				if (isCallBy587) {
 					AppRootOfEmpMonthImport appRootOfEmpMonth = approvalStatusAdapter.getApprovalEmpStatusMonth(
-							employeeId, mergePeriodClr.getYearMonth(), mergePeriodClr.getClosureId().value,
+							empTarget, mergePeriodClr.getYearMonth(), mergePeriodClr.getClosureId().value,
 							mergePeriodClr.getClosureDate(), mergePeriodClr.getPeriod().end(), true,
-							mergePeriodClr.getOriginalClosurePeriod());
+							mergePeriodClr.getPeriod());
 					lstAppRootOfEmpMonth.add(appRootOfEmpMonth);
 				}
 
