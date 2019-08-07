@@ -78,13 +78,13 @@ public class ConfirmStatusInfoEmp {
 				.collect(Collectors.toList());
 		DatePeriod dateMax = CommonProcess.getMaxPeriod(periods);
 		if (dateMax == null)
-			return null;
+			return new ArrayList<>();
 		List<StatusOfEmployeeExport> statusOfEmps = iFindDataDCRecord
 				.getListAffComHistByListSidAndPeriod(Optional.empty(), Arrays.asList(employeeId), dateMax).stream()
 				.filter(x -> x.getEmployeeId() != null).collect(Collectors.toList());
 
 		if (statusOfEmps.isEmpty())
-			return null;
+			return new ArrayList<>();
 		// Output「社員の会社所属状況．所属状況．期間」のMAX期間を求める
 		DatePeriod dateEmpExport = CommonProcess.getMaxPeriod(statusOfEmps.get(0).getListPeriod());
 		// ドメインモデル「日の本人確認」を取得する
@@ -158,7 +158,7 @@ public class ConfirmStatusInfoEmp {
 					.filter(x -> x.getEmployeeId() != null).collect(Collectors.toList());
 
 			if (statusOfEmps.isEmpty())
-				return null;
+			    continue;
 			// Output「社員の会社所属状況．所属状況．期間」のMAX期間を求める
 			DatePeriod dateEmpExport = CommonProcess.getMaxPeriod(statusOfEmps.get(0).getListPeriod());
 			// ドメインモデル「日の本人確認」を取得する

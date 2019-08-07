@@ -29,6 +29,7 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCR
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.AggrPeriodEachActualClosure;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.enums.SelfConfirmError;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -168,7 +169,7 @@ public class ConfirmStatusActualDayChange {
 						// .getApprovalByListEmplAndListApprovalRecordDateNew(periodTemp.datesBetween(),
 						// Arrays.asList(employeeId), 1);
 						val mapApprovalStatus = lstApprovalStatus.stream().collect(Collectors
-								.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus()));
+								.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus(), (x, y) -> x));
 						// lstResultEmpTemp3 =
 						lstResultEmpTemp1.forEach(x -> {
 							if (mapApprovalStatus == null) {
@@ -194,7 +195,7 @@ public class ConfirmStatusActualDayChange {
 		});
 
 		List<ConfirmStatusActualResult> results = new ArrayList<>();
-		Set<Pair<String, GeneralDate>> setErrorAndApp = getErrorAndApplication(confirmInfoResults);
+		Set<Pair<String, GeneralDate>> setErrorAndApp = getErrorAndApplication(confirmInfoResults, optIndentity);
 		results = lstResult.stream().map(x -> {
 			if (setErrorAndApp.contains(Pair.of(x.getEmployeeId(), x.getDate()))) {
 				x.setPermissionChecked(false);
@@ -230,13 +231,16 @@ public class ConfirmStatusActualDayChange {
 		}
 	}
 
-	public Set<Pair<String, GeneralDate>> getErrorAndApplication(List<ConfirmInfoResult> confirmInfoResults) {
+	public Set<Pair<String, GeneralDate>> getErrorAndApplication(List<ConfirmInfoResult> confirmInfoResults,  Optional<IdentityProcessUseSet> optIndentity) {
 		Set<Pair<String, GeneralDate>> result = new HashSet<>();
+		boolean checkError = optIndentity.isPresent() && optIndentity.get().getYourSelfConfirmError().isPresent() && optIndentity.get()
+				.getYourSelfConfirmError().get().value == SelfConfirmError.CAN_NOT_CHECK_WHEN_ERROR.value;
+				
 		confirmInfoResults.stream().forEach(confirmInfoResult -> {
-
-			result.addAll(confirmInfoResult.getLstOut().stream().filter(x -> x.getHasError())
-					.map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toSet()));
-
+			if (checkError) {
+				result.addAll(confirmInfoResult.getLstOut().stream().filter(x -> x.getHasError())
+						.map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toSet()));
+			}
 			List<ApplicationRecordImport> lstAppRecord = confirmInfoResult.getLstApplication();
 			lstAppRecord.forEach(x -> {
 				boolean disable = (x.getReflectState() == ReflectedStateRecord.NOTREFLECTED.value

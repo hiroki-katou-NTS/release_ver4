@@ -81,13 +81,13 @@ public class ApprovalStatusInfoEmp {
 				.collect(Collectors.toList());
 		DatePeriod dateMax = CommonProcess.getMaxPeriod(periods);
 		if (dateMax == null)
-			return null;
+			return new ArrayList<>();
 
 		List<StatusOfEmployeeExport> statusOfEmps = iFindDataDCRecord
 				.getListAffComHistByListSidAndPeriod(Optional.empty(), Arrays.asList(employeeId), dateMax).stream()
 				.filter(x -> x.getEmployeeId() != null).collect(Collectors.toList());
 		if (statusOfEmps.isEmpty())
-			return null;
+			return new ArrayList<>();
 		// Output「社員の会社所属状況．所属状況．期間」のMAX期間を求める
 		DatePeriod dateEmpExport = CommonProcess.getMaxPeriod(statusOfEmps.get(0).getListPeriod());
 		// ドメインモデル「日の本人確認」を取得する
@@ -164,7 +164,7 @@ public class ApprovalStatusInfoEmp {
 		List<AggrPeriodEachActualClosure> aggrPeriodAll = new ArrayList<>();
 		List<AppRootOfEmpMonthImport> lstAppRootOfEmpMonth = new ArrayList<>();
 		List<StatusOfEmployeeExport> lstStatusOfEmpAll = new ArrayList<>();
-		employeeIds.forEach(employeeId -> {
+		for (String employeeId : employeeIds) {
 			List<ClosurePeriod> lstClosure = new ArrayList<>();
 			if (periodOpt.isPresent()) {
 				// 期間を指定して集計期間を求める
@@ -180,14 +180,14 @@ public class ApprovalStatusInfoEmp {
 					.map(x -> x.getPeriod()).collect(Collectors.toList());
 			DatePeriod dateMax = CommonProcess.getMaxPeriod(periods);
 			if (dateMax == null)
-				return;
+				continue;
 
 			List<StatusOfEmployeeExport> statusOfEmps = iFindDataDCRecord
 					.getListAffComHistByListSidAndPeriod(Optional.empty(), Arrays.asList(employeeId), dateMax).stream()
 					.filter(x -> x.getEmployeeId() != null).collect(Collectors.toList());
 			lstStatusOfEmpAll.addAll(statusOfEmps);
 			if (statusOfEmps.isEmpty())
-				return;
+				continue;
 			// Output「社員の会社所属状況．所属状況．期間」のMAX期間を求める
 			DatePeriod dateEmpExport = CommonProcess.getMaxPeriod(statusOfEmps.get(0).getListPeriod());
 			// ドメインモデル「日の本人確認」を取得する
@@ -250,7 +250,7 @@ public class ApprovalStatusInfoEmp {
 					.lstApplication(lstApplication).lstOut(lstOut).statusOfEmp(statusOfEmps.get(0))
 					.informationMonths(inforMonths).build();
 			results.add(result);
-		});
+		};
 		return results;
 	}
 }
