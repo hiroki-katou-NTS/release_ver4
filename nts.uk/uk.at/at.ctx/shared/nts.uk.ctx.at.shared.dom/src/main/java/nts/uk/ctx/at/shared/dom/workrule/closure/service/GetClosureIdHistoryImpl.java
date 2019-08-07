@@ -78,6 +78,8 @@ public class GetClosureIdHistoryImpl implements GetClosureIdHistory {
 		
 		List<ClosureIdHistory> results = new ArrayList<>();
 		
+		String companyId = AppContexts.user().companyId();		// 処理中の会社ID
+		
 		// 社員IDリストと指定期間から社員の雇用履歴を取得
 		List<String> employeeIds = new ArrayList<>();
 		employeeIds.add(employeeId);
@@ -86,6 +88,15 @@ public class GetClosureIdHistoryImpl implements GetClosureIdHistory {
 		if (employments.size() == 0) return results;
 		List<AffPeriodEmpCodeImport> periodEmpCodes = employments.get(0).getAffPeriodEmpCodeExports();
 		if (periodEmpCodes.size() == 0) return results;
+		
+		// 雇用期間から対象期間外を除く
+		for (AffPeriodEmpCodeImport periodEmpCode : periodEmpCodes) {
+			GeneralDate startDate = periodEmpCode.getPeriod().start();
+			GeneralDate endDate = periodEmpCode.getPeriod().end();
+			if (startDate.before(period.start())) startDate = period.start();
+			if (endDate.after(period.end())) endDate = period.end();
+			periodEmpCode.setPeriod(new DatePeriod(startDate, endDate));
+		}
 		periodEmpCodes.sort((a, b) -> a.getPeriod().start().compareTo(b.getPeriod().start()));
 		
 		// 「雇用に紐づく就業締め」を取得する
@@ -96,7 +107,7 @@ public class GetClosureIdHistoryImpl implements GetClosureIdHistory {
 			}
 		}
 		List<ClosureEmployment> closureEmployments =
-				this.closureEmploymentRepo.findListEmployment(employeeId, employmentCds);
+				this.closureEmploymentRepo.findListEmployment(companyId, employmentCds);
 		Map<String, ClosureEmployment> closureEmploymentMap = new HashMap<>();
 		for (ClosureEmployment closureEmployment : closureEmployments) {
 			closureEmploymentMap.putIfAbsent(closureEmployment.getEmploymentCD(), closureEmployment);
