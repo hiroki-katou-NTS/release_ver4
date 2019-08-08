@@ -125,17 +125,19 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 		}
 		
 		//申請理由の反映
-		updateService.reflectReason(param.getEmployeeId(), param.getDateInfo(), 
-				param.getOvertimePara().getAppReason(),param.getOvertimePara().getOvertimeAtr(), dailyInfor);
+		if(!param.getOvertimePara().getAppReason().isEmpty()) {
+			updateService.reflectReason(param.getEmployeeId(), param.getDateInfo(), 
+					param.getOvertimePara().getAppReason(),param.getOvertimePara().getOvertimeAtr(), dailyInfor);	
+		}		
 		//日別実績の修正からの計算
 		//○日別実績を置き換える Replace daily performance	
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
 				param.getEmployeeId(), param.getDateInfo(),
 				ApplicationType.OVER_TIME_APPLICATION,
 				param.getOvertimePara().getWorkTypeCode(),
-				param.getOvertimePara().getWorkTimeCode() == null ? Optional.empty() : Optional.of(param.getOvertimePara().getWorkTimeCode()),
-				param.getOvertimePara().getStartTime1() == null ? Optional.empty() : Optional.of(param.getOvertimePara().getStartTime1()),
-				param.getOvertimePara().getEndTime1() == null ? Optional.empty() : Optional.of(param.getOvertimePara().getEndTime1()));
+				Optional.ofNullable(param.getOvertimePara().getWorkTimeCode()),
+				Optional.ofNullable(param.getOvertimePara().getStartTime1()),
+				Optional.ofNullable(param.getOvertimePara().getEndTime1()));
 		commonService.calculateOfAppReflect(calcParam);
 	}
 
