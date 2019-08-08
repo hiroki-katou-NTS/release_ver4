@@ -293,8 +293,8 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				appInfor.getAppDate(), 
 				absenceLeaveApp.getWorkTypeCD().v(), 
 				absenceLeaveApp.getWorkTimeCD(), 
-				absenceLeaveApp.getWorkTime1().getStartTime().v(),
-				absenceLeaveApp.getWorkTime1().getEndTime().v(),
+				absenceLeaveApp.getWorkTime1().getStartTime() != null ? absenceLeaveApp.getWorkTime1().getStartTime().v() : null,
+				absenceLeaveApp.getWorkTime1().getEndTime() != null ? absenceLeaveApp.getWorkTime1().getEndTime().v() : null,
 				excLogId, 
 				reflectSetting.getScheAndWorkChange(), 
 				reflectSetting.isJizenScheYusen());
@@ -308,8 +308,8 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				appInfor.getAppDate(),
 				recuitmentApp.getWorkTypeCD().v(), 
 				recuitmentApp.getWorkTimeCD().v(), 
-				recuitmentApp.getWorkTime1().getStartTime().v(), 
-				recuitmentApp.getWorkTime1().getEndTime().v(),
+				recuitmentApp.getWorkTime1().getStartTime() != null ? recuitmentApp.getWorkTime1().getStartTime().v() : null, 
+				recuitmentApp.getWorkTime1().getEndTime() != null ? recuitmentApp.getWorkTime1().getEndTime().v() : null,
 				excLogId,
 				reflectSetting.getScheAndWorkChange(), 
 				reflectSetting.isJizenScheYusen());
@@ -338,8 +338,8 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				holidayWorkData.getHolidayShiftNight(),
 				appInfor.getReflectionInformation().getStateReflectionReal(), 
 				!appInfor.getReflectionInformation().getNotReasonReal().isPresent() ? null : appInfor.getReflectionInformation().getNotReasonReal().get(),
-						holidayWorkData.getWorkClock1().getStartTime() == null ? null : holidayWorkData.getWorkClock1().getStartTime().v(),
-						holidayWorkData.getWorkClock1().getEndTime() == null ? null : holidayWorkData.getWorkClock1().getEndTime().v(),
+				holidayWorkData.getWorkClock1().getStartTime() == null ? null : holidayWorkData.getWorkClock1().getStartTime().v(),
+				holidayWorkData.getWorkClock1().getEndTime() == null ? null : holidayWorkData.getWorkClock1().getEndTime().v(),
 				mapBreakTimeFrame);
 		holidayPara = new HolidayWorkReflectPara(appInfor.getEmployeeID(),
 				appInfor.getAppDate(),
@@ -425,7 +425,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 						appOvertimeInfor.getOverTimeShiftNight(),
 						appOvertimeInfor.getFlexExessTime(),
 						appOvertimeInfor.getOverTimeAtr(),
-						appInfor.getAppReason() == null ? "" : appInfor.getAppReason().v()); 
+						(appInfor.getAppReason() == null || appInfor.getReflectionInformation().getStateReflectionReal() == ReflectedState_New.REFLECTED) ? "" : appInfor.getAppReason().v()); 
 		overTimeTmp = new OvertimeReflectPara(appInfor.getEmployeeID(), 
 				appInfor.getAppDate(), 
 				reflectSetting.isZangyouRecordReflect(),
