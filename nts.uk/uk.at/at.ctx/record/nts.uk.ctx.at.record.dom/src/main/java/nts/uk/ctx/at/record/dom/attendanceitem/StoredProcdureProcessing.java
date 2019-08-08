@@ -259,7 +259,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 					|| workType.getDailyWork().getMorning() == WorkTypeClassification.HolidayWork){
 				return setOverTime(0, 0);
 			} else {
-				setOverTime(!isGoToWork ? 0 : 30, !isGoToWork ? 0 : 60);
+				return setOverTime(!isGoToWork ? 0 : 30, !isGoToWork ? 0 : 60);
 			}
 		}
 		
