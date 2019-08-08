@@ -13,6 +13,7 @@ import nts.uk.ctx.at.record.dom.divergence.time.DivergenceTime;
 import nts.uk.ctx.at.record.dom.optitem.OptionalItem;
 import nts.uk.ctx.at.record.dom.optitem.applicable.EmpCondition;
 import nts.uk.ctx.at.record.dom.optitem.calculation.Formula;
+import nts.uk.ctx.at.record.dom.optitem.calculation.disporder.FormulaDispOrder;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
 import nts.uk.ctx.at.record.dom.workrule.specific.CalculateOfTotalConstraintTime;
 import nts.uk.ctx.at.record.dom.workrule.specific.UpperLimitTotalWorkingHour;
@@ -62,6 +63,9 @@ public class ManagePerCompanySet {
 	// 任意項目計算式
 	List<Formula> formulaList;
 	
+	// 任意項目計算式の並び順
+	List<FormulaDispOrder> formulaOrderList;
+	
 	//適用する雇用条件
 	List<EmpCondition> empCondition;
 	
@@ -87,6 +91,7 @@ public class ManagePerCompanySet {
 			Optional<BPUnitUseSetting> bpUnitSetting,
 			List<OptionalItem> optionalItems,
 			List<Formula> formulaList,
+			List<FormulaDispOrder> formulaOrderList,
 			List<EmpCondition> empCondition,
 			Optional<ZeroTime> zeroTime,
 			Optional<UpperLimitTotalWorkingHour> upperControl,
@@ -102,6 +107,7 @@ public class ManagePerCompanySet {
 		this.bpUnitSetting = bpUnitSetting;
 		this.optionalItems = optionalItems;
 		this.formulaList = formulaList;
+		this.formulaOrderList = formulaOrderList;
 		this.empCondition = empCondition;
 		this.zeroTime = zeroTime;
 		this.personnelCostSettings = Collections.emptyList();

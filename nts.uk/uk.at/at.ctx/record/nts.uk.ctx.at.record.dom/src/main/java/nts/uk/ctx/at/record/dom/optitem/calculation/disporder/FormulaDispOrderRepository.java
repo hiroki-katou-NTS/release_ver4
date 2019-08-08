@@ -34,4 +34,11 @@ public interface FormulaDispOrderRepository {
 	 * @return the list
 	 */
 	List<FormulaDispOrder> findByOptItemNo(String companyId, Integer optItemNo);
+	
+	/**
+	 * Find all.
+	 * @param companyId the company id
+	 * @return the list
+	 */
+	List<FormulaDispOrder> findAll(String companyId);
 }
