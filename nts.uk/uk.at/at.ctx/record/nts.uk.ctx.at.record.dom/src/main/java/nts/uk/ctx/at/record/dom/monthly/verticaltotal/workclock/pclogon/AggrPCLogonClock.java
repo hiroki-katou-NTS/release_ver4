@@ -181,7 +181,7 @@ public class AggrPCLogonClock {
 		// 指定した時刻が所定内に含まれているかどうか確認
 		boolean isLogOffInPredTimeSet = predTimeSetForCalc.getTimeSheets().stream().anyMatch(ts ->
 				ts.getUseAtr() == UseSetting.USE
-				&& ts.getStart().valueAsMinutes() <= logOff && ts.getEnd().valueAsMinutes() >= logOff);
+				&& ts.getStart().valueAsMinutes() < logOff && ts.getEnd().valueAsMinutes() > logOff);
 		
 		// 所定内に含まれている時、退勤時刻を返す
 		if (isLogOffInPredTimeSet) return timeLeave;

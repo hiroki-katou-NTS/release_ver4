@@ -180,13 +180,19 @@ public class AggrPCLogonDivergence {
 		int logoffMinutes = logoffStamp.valueAsMinutes();
 		if (leaveMinutes >= logoffMinutes) return;
 
-		// 指定した時刻が所定内に含まれているかどうか確認　※　含まれていると、対象外
+		// 指定した時刻が所定内に含まれているかどうか確認
+		boolean isIncludePred = false;
 		val timezoneUseOpt = predTimeSetForCalc.getTimeSheets(workType.getAttendanceHolidayAttr(), targetWorkNo);
-		if (!timezoneUseOpt.isPresent()) return;
-		val timezoneUse = timezoneUseOpt.get();
-		if (timezoneUse.getUseAtr() == UseSetting.NOT_USE) return;
-		int timezoneUseEndMinutes = timezoneUse.getEnd().valueAsMinutes();
-		if (leaveMinutes <= timezoneUseEndMinutes) return;
+		if (timezoneUseOpt.isPresent()) {
+			if (timezoneUseOpt.get().getUseAtr() == UseSetting.USE) {
+				int timezoneUseStartMinutes = timezoneUseOpt.get().getStart().valueAsMinutes();
+				int timezoneUseEndMinutes = timezoneUseOpt.get().getEnd().valueAsMinutes();
+				if (timezoneUseStartMinutes < logoffMinutes && logoffMinutes < timezoneUseEndMinutes) {
+					isIncludePred = true;		// ログオフ時刻が所定内に含まれる
+				}
+			}
+		}
+		if (isIncludePred == true) return;		// 含まれていると、対象外
 
 		// 合計時間を集計
 		// 補正後PCログオフ時刻を計算
