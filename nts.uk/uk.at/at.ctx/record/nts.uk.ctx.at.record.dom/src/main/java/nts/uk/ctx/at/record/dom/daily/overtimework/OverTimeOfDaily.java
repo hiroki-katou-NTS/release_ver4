@@ -752,4 +752,19 @@ public class OverTimeOfDaily {
 		}
 		
 	}
+	
+	public void mergeOverTimeList(List<OverTimeFrameTime> frameTimeList) {
+		for(OverTimeFrameTime frameTime : frameTimeList) {
+			if(this.overTimeWorkFrameTime.stream().filter(tc -> tc.getOverWorkFrameNo().equals(frameTime.getOverWorkFrameNo())).findFirst().isPresent()) {
+				this.overTimeWorkFrameTime.stream().filter(tc -> tc.getOverWorkFrameNo().equals(frameTime.getOverWorkFrameNo())).findFirst()
+					.ifPresent(ts -> {
+						ts = ts.addOverTime(frameTime.getOverTimeWork().getTime(), frameTime.getOverTimeWork().getCalcTime());
+						ts = ts.addTransoverTime(frameTime.getTransferTime().getTime(), frameTime.getTransferTime().getCalcTime());
+					});
+			}
+			else {
+				this.overTimeWorkFrameTime.add(frameTime);
+			}
+		}
+	}
 }

@@ -1410,7 +1410,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		resultProcedure.ifPresent(tt ->{
 			integrationOfDaily.getAttendanceTimeOfDailyPerformance().ifPresent(tc -> {
 				tc.getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().ifPresent(ts -> {
-					ts.setOverTimeWorkFrameTime(tt.getOverTimes());
+					ts.mergeOverTimeList(tt.getOverTimes());
 				});
 			});			
 		});
