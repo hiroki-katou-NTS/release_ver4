@@ -156,8 +156,8 @@ public class ConfirmStatusActualDayChange {
 					}
 				}
 
-			List<ApproveRootStatusForEmpImport> lstApprovalStatus = data.getInformationMonths().stream()
-					.flatMap(x -> x.getLstApprovalMonthStatus().stream()).collect(Collectors.toList());
+			List<ApproveRootStatusForEmpImport> lstApprovalStatus = data.getInformationDay().getLstApprovalDayStatus().stream()
+					.collect(Collectors.toList());
 			// 取得した「承認処理の利用設定．日の承認者確認を利用する」をチェックする true
 				if (approvalUseSettingOpt.isPresent() && approvalUseSettingOpt.get().getUseDayApproverConfirm()) {
 					lstPeriod.stream().forEach(periodTemp -> {
