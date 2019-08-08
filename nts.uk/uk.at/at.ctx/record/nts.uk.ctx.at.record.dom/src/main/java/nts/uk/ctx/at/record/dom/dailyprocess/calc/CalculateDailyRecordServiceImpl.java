@@ -54,6 +54,7 @@ import nts.uk.ctx.at.record.dom.divergence.time.DivergenceTime;
 import nts.uk.ctx.at.record.dom.optitem.OptionalItem;
 import nts.uk.ctx.at.record.dom.optitem.applicable.EmpCondition;
 import nts.uk.ctx.at.record.dom.optitem.calculation.Formula;
+import nts.uk.ctx.at.record.dom.optitem.calculation.disporder.FormulaDispOrder;
 import nts.uk.ctx.at.record.dom.raborstandardact.FlexCalcMethod;
 import nts.uk.ctx.at.record.dom.raborstandardact.FlexCalcMethodOfEachPremiumHalfWork;
 import nts.uk.ctx.at.record.dom.raborstandardact.FlexCalcMethodOfHalfWork;
@@ -1377,6 +1378,8 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		List<OptionalItem> optionalItems = companyCommonSetting.getOptionalItems();
 		// 計算式を取得(任意項目NOで後から絞る必要あり)
 		List<Formula> formulaList = companyCommonSetting.getFormulaList();
+		// 計算式の並び順を取得(任意項目NOで後から絞る必要あり)
+		List<FormulaDispOrder> formulaOrderList = companyCommonSetting.getFormulaOrderList();
 		// 適用する雇用条件の取得(任意項目全部分)
 		List<EmpCondition> empCondition = companyCommonSetting.getEmpCondition();
 		// 項目選択による計算時に必要なので取得
@@ -1429,7 +1432,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 		// 任意項目の計算
 		integrationOfDaily.setAnyItemValue(Optional.of(AnyItemValueOfDaily.caluculationAnyItem(companyId, employeeId,
-				targetDate, optionalItems, formulaList, empCondition, Optional.of(converter), bsEmploymentHistOpt,resultProcedure)));
+				targetDate, optionalItems, formulaList, formulaOrderList, empCondition, Optional.of(converter), bsEmploymentHistOpt,resultProcedure)));
 
 		IntegrationOfDaily calcResultIntegrationOfDaily = integrationOfDaily;
 
