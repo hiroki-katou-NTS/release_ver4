@@ -14,7 +14,6 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCalculateOfAppReflectParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
-import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
 import nts.uk.ctx.at.record.dom.workinformation.ScheduleTimeSheet;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
@@ -29,7 +28,6 @@ import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.ctx.at.shared.dom.worktype.algorithm.JudgmentWorkTypeService;
 import nts.uk.ctx.at.shared.dom.worktype.service.WorkTypeIsClosedService;
-import nts.uk.shr.com.time.TimeWithDayAttr;
 @Stateless
 public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	
@@ -50,14 +48,13 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	@Override
 	public void absenceReflect(WorkChangeCommonReflectPara param, boolean isPre) {
 		CommonReflectParameter absencePara = param.getCommon();
-		for(int i = 0; absencePara.getStartDate().daysTo(absencePara.getEndDate()) - i >= 0; i++){
-			GeneralDate loopDate = absencePara.getStartDate().addDays(i);
+			GeneralDate loopDate = absencePara.getAppDate();
 			IntegrationOfDaily dailyInfor = preOTService.calculateForAppReflect(absencePara.getEmployeeId(), loopDate);
 			WorkInfoOfDailyPerformance workInfor = dailyInfor.getWorkInformation();
 			//1日休日の判断
 			if(workInfor.getRecordInfo().getWorkTypeCode() != null
 					&& workTypeRepo.checkHoliday(workInfor.getRecordInfo().getWorkTypeCode().v())) {
-				continue;
+				return;
 			}
 			boolean isRecordWorkType = false;
 			//予定勤種の反映
@@ -91,7 +88,6 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 					absencePara.getStartTime() == null ? Optional.empty() : Optional.of(absencePara.getStartTime()),
 					absencePara.getEndTime() == null ? Optional.empty() : Optional.of(absencePara.getEndTime()));
 			commonService.calculateOfAppReflect(calcParam);
-		}
 	}
 
 	@Override
@@ -105,59 +101,20 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 		if(basicScheService.checkWorkDay(workTypeCode) == WorkStyle.ONE_DAY_REST) {
 			//予定開始時刻の反映
 			//予定終了時刻の反映
-			List<ScheduleTimeSheet> lstScheduleTimeSheet = dailyInfor.getWorkInformation().getScheduleTimeSheets();
-			List<ScheduleTimeSheet> lstScheduleTimeSheetNo1 = lstScheduleTimeSheet.stream()
-					.filter(x -> x.getWorkNo().v() == 1).collect(Collectors.toList());
-			if(!lstScheduleTimeSheetNo1.isEmpty()) {
-				lstScheduleTimeSheet.remove(0);
-				dailyInfor.getWorkInformation().setScheduleTimeSheets(lstScheduleTimeSheet);
-			}
-			List<Integer> lstItem = new ArrayList<Integer>();
-			lstItem.add(3);
-			lstItem.add(4);
-			workTimeUpdate.editStateOfDailyPerformance(employeeId, baseDate, dailyInfor.getEditState(), lstItem);
+			workTimeUpdate.cleanScheTime(employeeId, baseDate, dailyInfor);
 			
 		}
 	}
+
 	@Override
 	public void reflectRecordStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode,
 			IntegrationOfDaily dailyInfor) {
 		boolean isCheckClean =  this.checkTimeClean(employeeId, baseDate, workTypeCode);
 		//開始終了時刻をクリアするかチェックする 値：０になる。	
 		if(!isCheckClean) return;
-		Optional<TimeLeavingOfDailyPerformance> optTimeLeaving = dailyInfor.getAttendanceLeave();
-		TimeLeavingOfDailyPerformance timeDaily = null;
-		if(optTimeLeaving.isPresent()) {
-			timeDaily = optTimeLeaving.get();
-		}
-		
-		List<TimeLeavingWork> lstTimeLeavingWorks = new ArrayList<>();
-		if(timeDaily != null) {
-			lstTimeLeavingWorks = timeDaily.getTimeLeavingWorks().stream()
-					.filter(x -> x.getWorkNo().v() == 1).collect(Collectors.toList());
-		}
-		lstTimeLeavingWorks.stream().forEach(c -> {
-			c.getAttendanceStamp().ifPresent(a -> {
-				a.getStamp().ifPresent(x -> {
-					x.setTimeWithDay(null);
-					x.setAfterRoundingTime(null);
-					x.setStampSourceInfo(StampSourceInfo.GO_STRAIGHT_APPLICATION);
-				});
-			});
-			c.getLeaveStamp().ifPresent(y -> {
-				y.getStamp().ifPresent(z -> {
-					z.setTimeWithDay(null);
-					z.setAfterRoundingTime(null);
-					z.setStampSourceInfo(StampSourceInfo.GO_STRAIGHT_APPLICATION);
-				});
-			});
-		});
-		
-		List<Integer> lstItem = new ArrayList<Integer>();
-		lstItem.add(31);
-		lstItem.add(34);			
-		workTimeUpdate.editStateOfDailyPerformance(employeeId, baseDate, dailyInfor.getEditState(), lstItem);
+		workTimeUpdate.cleanRecordTimeData(employeeId, baseDate, dailyInfor);
 	}
+
 	@Override
 	public boolean checkTimeClean(String employeeId, GeneralDate baseDate, String workTypeCode) {
 		//1日半日出勤・1日休日系の判定

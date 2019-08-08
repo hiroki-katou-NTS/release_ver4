@@ -44,42 +44,57 @@ public class JpaManagementDeletionRepository extends JpaRepository implements Ma
 	@Override
 	public void updateTotalCatCount(String delId, int totalCategoryCount) {
 		SspdtManagementDeletionPK sspdtManagementDeletionPK = new  SspdtManagementDeletionPK(delId);
-		SspdtManagementDeletion entity = this.queryProxy().find(sspdtManagementDeletionPK, SspdtManagementDeletion.class).get();
-		entity.totalCategoryCount = totalCategoryCount;
-		this.commandProxy().update(entity);
+		Optional<SspdtManagementDeletion> entityOpt = this.queryProxy().find(sspdtManagementDeletionPK, SspdtManagementDeletion.class);
+		if (entityOpt.isPresent()) {
+			SspdtManagementDeletion entity = entityOpt.get();
+			entity.totalCategoryCount = totalCategoryCount;
+			this.commandProxy().update(entity);
+		}
 	}
 
 	@Override
 	public void updateCatCountAnCond(String delId, int categoryCount, OperatingCondition operatingCondition) {
-
 		SspdtManagementDeletionPK sspdtManagementDeletionPK = new  SspdtManagementDeletionPK(delId);
-		SspdtManagementDeletion entity = this.queryProxy().find(sspdtManagementDeletionPK, SspdtManagementDeletion.class).get();
-		entity.categoryCount = categoryCount;
-		entity.operatingCondition = operatingCondition.value;
-		this.commandProxy().update(entity);
+		Optional<SspdtManagementDeletion> entityOpt = this.queryProxy().find(sspdtManagementDeletionPK, SspdtManagementDeletion.class);
+		if (entityOpt.isPresent()) {
+			SspdtManagementDeletion entity = entityOpt.get();
+			entity.categoryCount = categoryCount;
+			entity.operatingCondition = operatingCondition.value;
+			this.commandProxy().update(entity);
+		}
 	}
 
 	@Override
 	public void update(ManagementDeletion managementDeletion) {
-		 this.commandProxy().update(SspdtManagementDeletion.toEntity(managementDeletion));
+		SspdtManagementDeletionPK sspdtManagementDeletionPK = new  SspdtManagementDeletionPK(managementDeletion.getDelId());
+		Optional<SspdtManagementDeletion> entityOpt = this.queryProxy().find(sspdtManagementDeletionPK, SspdtManagementDeletion.class);
+		if (entityOpt.isPresent()) {
+			SspdtManagementDeletion entity = entityOpt.get();
+			entity.errorCount = managementDeletion.errorCount;
+			this.commandProxy().update(entity);
+		}
 	}
 	
 	@Override
 	public void updateCatCount(String delId, int categoryCount) {
-
 		SspdtManagementDeletionPK sspdtManagementDeletionPK = new  SspdtManagementDeletionPK(delId);
-		SspdtManagementDeletion entity = this.queryProxy().find(sspdtManagementDeletionPK, SspdtManagementDeletion.class).get();
-		entity.categoryCount = categoryCount;
-		this.commandProxy().update(entity);
+		Optional<SspdtManagementDeletion> entityOpt = this.queryProxy().find(sspdtManagementDeletionPK, SspdtManagementDeletion.class);
+		if (entityOpt.isPresent()) {
+			SspdtManagementDeletion entity = entityOpt.get();
+			entity.categoryCount = categoryCount;
+			this.commandProxy().update(entity);
+		}
 	}
 
 	@Override
 	public void updateOperationCond(String delId, OperatingCondition operatingCondition) {
-
 		SspdtManagementDeletionPK sspdtManagementDeletionPK = new  SspdtManagementDeletionPK(delId);
-		SspdtManagementDeletion entity = this.queryProxy().find(sspdtManagementDeletionPK, SspdtManagementDeletion.class).get();
-		entity.operatingCondition = operatingCondition.value;
-		this.commandProxy().update(entity);
+		Optional<SspdtManagementDeletion> entityOpt = this.queryProxy().find(sspdtManagementDeletionPK, SspdtManagementDeletion.class);
+		if (entityOpt.isPresent()) {
+			SspdtManagementDeletion entity = entityOpt.get();
+			entity.operatingCondition = operatingCondition.value;
+			this.commandProxy().update(entity);
+		}
 	}
 	
 	@Override

@@ -152,10 +152,6 @@ public class AppRootConfirmServiceImpl implements AppRootConfirmService {
 			// 中間データから承認フェーズインスタンスに変換する
 			AppPhaseConfirm appPhaseConfirm = opAppPhaseConfirm.get();
 			ApprovalPhaseState approvalPhaseState = this.convertPhaseInsToPhaseState(appPhaseInstance, appPhaseConfirm);
-			// 解除できるかチェックする
-			if(!this.canCancelCheck(approvalPhaseState, approverID)){
-				break;
-			}
 			List<ApprovalFrame> confirmFrameLst = approvalPhaseState.getListApprovalFrame().stream().filter(x -> x.getConfirmAtr()==ConfirmPerson.CONFIRM).collect(Collectors.toList());
 			// 承認形態と確定区分をチェックする
 			if((approvalPhaseState.getApprovalForm()==ApprovalForm.SINGLE_APPROVED)&&confirmFrameLst.isEmpty()){
@@ -178,7 +174,7 @@ public class AppRootConfirmServiceImpl implements AppRootConfirmService {
 				}
 				AppFrameConfirm appFrameConfirm = opAppFrameConfirm.get();
 				// 指定する承認者が承認を行った承認者かチェックする
-				if(appFrameConfirm.getApproverID().orElse("").equals(approverID) || appFrameConfirm.getRepresenterID().orElse("").equals(approverID)){
+				if(appFrameInstance.getListApprover().contains(approverID) || appFrameConfirm.getRepresenterID().orElse("").equals(approverID)){
 					// ループする枠番のドメインモデル「承認済承認者」を削除する
 					appPhaseConfirm.getListAppFrame().remove(appFrameConfirm);
 					cleanComplete = true;

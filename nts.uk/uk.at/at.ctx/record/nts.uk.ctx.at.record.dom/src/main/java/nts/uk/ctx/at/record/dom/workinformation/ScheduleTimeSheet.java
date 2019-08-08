@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.workinformation;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import nts.arc.layer.dom.DomainObject;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkNo;
 import nts.uk.shr.com.time.TimeWithDayAttr;
@@ -17,9 +18,9 @@ import nts.uk.shr.com.time.TimeWithDayAttr;
 public class ScheduleTimeSheet extends DomainObject{
 	
 	private WorkNo workNo;
-	
+	@Setter
 	private TimeWithDayAttr attendance;
-	
+	@Setter
 	private TimeWithDayAttr leaveWork;
 
 	public ScheduleTimeSheet(Integer workNo, int attendance, int leaveWork) {

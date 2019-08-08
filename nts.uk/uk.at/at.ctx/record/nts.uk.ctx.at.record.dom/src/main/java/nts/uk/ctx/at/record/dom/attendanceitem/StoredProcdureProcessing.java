@@ -523,7 +523,7 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 				return;
 			}
 			
-			this.timeOn.set(leaveGateEndTime.get() - endTime.get());
+			this.timeOn.set(leaveGateEndTime.get() < endTime.get() ? 0 : leaveGateEndTime.get() - endTime.get());
 		}
 		
 		public void calcBreakTime(){

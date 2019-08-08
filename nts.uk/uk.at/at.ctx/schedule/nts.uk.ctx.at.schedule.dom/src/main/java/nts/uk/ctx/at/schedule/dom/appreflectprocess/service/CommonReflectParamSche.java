@@ -11,7 +11,7 @@ public class CommonReflectParamSche {
 	/**	社員ID */
 	private String employeeId;
 	/**	年月日 */
-	private GeneralDate datePara;
+	private GeneralDate appDate;
 	/**
 	 * 勤務種類コード
 	 */
@@ -20,14 +20,6 @@ public class CommonReflectParamSche {
 	 * 就業時間帯コード
 	 */
 	private String workTimeCode;
-	/**
-	 * 開始日
-	 */	
-	private GeneralDate startDate;
-	/**
-	 * 終了日	
-	 */
-	private GeneralDate endDate;
 	
 	private Integer startTime;
 	

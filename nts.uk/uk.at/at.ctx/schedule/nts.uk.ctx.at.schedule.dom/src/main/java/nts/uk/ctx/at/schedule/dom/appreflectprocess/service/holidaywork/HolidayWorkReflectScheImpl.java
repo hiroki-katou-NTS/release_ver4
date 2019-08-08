@@ -23,8 +23,8 @@ public class HolidayWorkReflectScheImpl implements HolidayWorkReflectSche{
 	private WorkScheduleStateRepository workScheReposi;
 	@Override
 	public void holidayWorkReflect(CommonReflectParamSche holidayWorkPara) {
-		BasicSchedule scheData = basicScheRepo.find(holidayWorkPara.getEmployeeId(), holidayWorkPara.getDatePara()).get();
-		List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(holidayWorkPara.getEmployeeId(), holidayWorkPara.getDatePara());
+		BasicSchedule scheData = basicScheRepo.find(holidayWorkPara.getEmployeeId(), holidayWorkPara.getAppDate()).get();
+		List<WorkScheduleState> lstState = workScheReposi.findByDateAndEmpId(holidayWorkPara.getEmployeeId(), holidayWorkPara.getAppDate());
 		//勤種・就時の反映
 		scheCommon.updateScheWorkTimeType(scheData, 
 				lstState, 
@@ -34,7 +34,7 @@ public class HolidayWorkReflectScheImpl implements HolidayWorkReflectSche{
 		if(holidayWorkPara.getStartTime() != null
 				&& holidayWorkPara.getEndTime() != null) {
 			scheCommon.updateStartTimeRflect(new TimeReflectScheDto(holidayWorkPara.getEmployeeId(),
-					holidayWorkPara.getDatePara(),
+					holidayWorkPara.getAppDate(),
 					holidayWorkPara.getStartTime(),
 					holidayWorkPara.getEndTime(),
 					1,

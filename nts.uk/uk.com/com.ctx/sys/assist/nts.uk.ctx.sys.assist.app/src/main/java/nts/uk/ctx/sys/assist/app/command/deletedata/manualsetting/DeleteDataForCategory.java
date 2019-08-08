@@ -23,6 +23,8 @@ public class DeleteDataForCategory {
 	private SaveErrorLogDeleteResult saveErrLogDel;
 	@Inject
 	private DeleteDataForTable deleteDataForTable;
+	@Inject
+	private UpdateManagementDel updateManagementDel;
 	public void deleteProcess(List<TableDeletionDataCsv> childTables, List<TableDeletionDataCsv> parentTables,
 			List<EmployeeDeletion> employeeDeletions, ManagementDeletion managementDel, ManualSetDeletion domain ){
 		
@@ -35,7 +37,7 @@ public class DeleteDataForCategory {
 				ManagementDeletion managementDeletion = managementDel;
 				int errorCount = managementDeletion.getErrorCount();
 				managementDeletion.setErrorCount(errorCount + 1);
-				repoManagementDel.update(managementDeletion);
+				updateManagementDel.upDateNumberErorr(managementDeletion);
 				// ドメインモデル「データ削除の結果ログ」を追加する
 				saveErrLogDel.saveErrorWhenDelData(domain, e.getMessage());
 				throw e;
@@ -51,7 +53,7 @@ public class DeleteDataForCategory {
 				ManagementDeletion managementDeletion = managementDel;
 				int errorCount = managementDeletion.getErrorCount();
 				managementDeletion.setErrorCount(errorCount + 1);
-				repoManagementDel.update(managementDeletion);
+				updateManagementDel.upDateNumberErorr(managementDeletion);
 				// ドメインモデル「データ削除の結果ログ」を追加する
 				saveErrLogDel.saveErrorWhenDelData(domain, e.getMessage());
 				throw e;

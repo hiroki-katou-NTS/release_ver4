@@ -16,7 +16,7 @@ public class CommonReflectParameter {
 	/**
 	 * 年月日
 	 */
-	private GeneralDate baseDate;
+	private GeneralDate appDate;
 	/**
 	 * 予定と実績を同じに変更する区分
 	 */
@@ -33,10 +33,6 @@ public class CommonReflectParameter {
 	 * 就業時間帯コード 
 	 */
 	private String workTimeCode;
-	
-	private GeneralDate startDate;
-	
-	private GeneralDate endDate;
 	
 	private Integer startTime;
 	private Integer endTime;

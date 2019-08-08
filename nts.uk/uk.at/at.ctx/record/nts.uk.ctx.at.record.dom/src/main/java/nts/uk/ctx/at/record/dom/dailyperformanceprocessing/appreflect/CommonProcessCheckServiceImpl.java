@@ -105,7 +105,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	public void reflectScheWorkTimeWorkType(CommonReflectParameter commonPara, boolean isPre,
 			IntegrationOfDaily dailyInfor) {
 		//予定勤種の反映		
-        ReflectParameter para = new ReflectParameter(commonPara.getEmployeeId(), commonPara.getBaseDate(), commonPara.getWorkTimeCode(), 
+		ReflectParameter para = new ReflectParameter(commonPara.getEmployeeId(), commonPara.getAppDate(), commonPara.getWorkTimeCode(), 
 				commonPara.getWorkTypeCode(), false);
 		workTimeUpdate.updateWorkTimeType(para, true, dailyInfor);
 	}
@@ -183,10 +183,10 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		timeAndAnyItemUpService.addAndUpdate(lstCal);
 		dailyReposiroty.updateByKey(commonPara.getIntegrationOfDaily().getEditState());
 		Map<String, List<GeneralDate>> param = new HashMap<>();
-		param.put(commonPara.getSid(), Arrays.asList(commonPara.getYmd()));
-		employeeError.removeParam(commonPara.getSid(), commonPara.getYmd());
+		param.put(commonPara.getSid(), Arrays.asList(commonPara.getYmd()));		
+		employeeError.removeNotOTK(param);
 		if(!x.getEmployeeError().isEmpty()) {
-			employeeError.insert(x.getEmployeeError());	
+			employeeError.update(x.getEmployeeError());	
 		}
 	}
 

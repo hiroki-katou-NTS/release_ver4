@@ -75,19 +75,11 @@ public class UpdateScheCommonAppRelectImpl implements UpdateScheCommonAppRelect{
 			List<WorkScheduleTimeZone> lstTimeZoneData = workScheduleTimeZones.stream()
 					.filter(x -> x.getScheduleCnt() == timeDto.getFrameNumber())
 					.collect(Collectors.toList());
-			if(lstTimeZoneData.isEmpty()) {
-				return;
-			}
-			timeZoneData = lstTimeZoneData.get(0);	
-			//開始時刻を反映する
-			//終了時刻の反映
-			timeZoneData.updateTime(timeDto.isUpdateStart() ? new TimeWithDayAttr(timeDto.getStartTime() == null ? 0 : timeDto.getStartTime()) : timeZoneData.getScheduleStartClock(), 
-					timeDto.isUpdateEnd() ? new TimeWithDayAttr(timeDto.getEndTime() == null ? 0 : timeDto.getEndTime()) : timeZoneData.getScheduleEndClock());
+			lstTimeZoneData.stream().forEach(x -> {
+				x.updateTime(timeDto.isUpdateStart() ? new TimeWithDayAttr(timeDto.getStartTime() == null ? 0 : timeDto.getStartTime()) : x.getScheduleStartClock(), 
+					timeDto.isUpdateEnd() ? new TimeWithDayAttr(timeDto.getEndTime() == null ? 0 : timeDto.getEndTime()) : x.getScheduleEndClock());
+ 			});			
 		}
-		
-		
-		//basicReposi.update(basicScheByDate);
-		
 		//開始時刻の編集状態を更新する  勤務予定項目状態
 		//予定項目ID=予定開始時刻(予定勤務回数=INPUT．枠番号)の項目ID 3, 5
 		if(timeDto.getFrameNumber() == 1) {

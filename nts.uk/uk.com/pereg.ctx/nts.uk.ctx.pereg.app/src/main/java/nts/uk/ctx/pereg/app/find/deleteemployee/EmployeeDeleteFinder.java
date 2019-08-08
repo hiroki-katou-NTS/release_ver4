@@ -63,8 +63,9 @@ public class EmployeeDeleteFinder {
 			Person person = personRepo.getByPersonId(empInfo.getPersonId()).get();
 
 			return EmployeeToDeleteDetailDto.fromDomain(empInfo.getEmployeeCode().v(),
-					person.getPersonNameGroup().getBusinessName().v().trim(), empInfo.getRemoveReason().v(),
-					empInfo.getDeleteDateTemporary().toString("yyyy/MM/dd HH:mm:ss"));
+					person.getPersonNameGroup().getBusinessName().v().trim(), 
+					empInfo.getRemoveReason() == null ? "" : empInfo.getRemoveReason().toString(),
+					empInfo.getDeleteDateTemporary() == null ? "" : empInfo.getDeleteDateTemporary().toString("yyyy/MM/dd HH:mm:ss"));
 		} else {
 			return null;
 		}

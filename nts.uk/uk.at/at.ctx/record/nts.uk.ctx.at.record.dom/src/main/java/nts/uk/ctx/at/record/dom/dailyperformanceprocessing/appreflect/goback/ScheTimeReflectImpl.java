@@ -61,9 +61,9 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 	private DiffTimeWorkSettingRepository diffTimeWorkSettingRepository;
 	@Override
 	public void reflectScheTime(GobackReflectParameter para, boolean timeTypeScheReflect,
-			IntegrationOfDaily dailyInfor) {
+			IntegrationOfDaily dailyInfor, boolean isPre) {
 		//予定時刻反映できるかチェックする
-		if(!this.checkScheReflect(para.getGobackData().getWorkTimeCode(), para.isScheReflectAtr(), para.getScheAndRecordSameChangeFlg())) {
+		if(!this.checkScheReflect(para.getGobackData().getWorkTimeCode(), para.isScheReflectAtr(), para.getScheAndRecordSameChangeFlg(), isPre)) {
 			return;
 		}
 		//(開始時刻)反映する時刻を求める
@@ -295,10 +295,10 @@ public class ScheTimeReflectImpl implements ScheTimeReflect{
 		return timeData;
 	}
 	@Override
-	public boolean checkScheReflect(String worktimeCode, boolean scheReflectAtr, ScheAndRecordSameChangeFlg scheAndRecordSameChangeFlg) {
+	public boolean checkScheReflect(String worktimeCode, boolean scheReflectAtr, ScheAndRecordSameChangeFlg scheAndRecordSameChangeFlg, boolean isPre) {
 		//INPUT．予定反映区分をチェックする
 		//INPUT．予定と実績を同じに変更する区分をチェックする
-		if(scheReflectAtr
+		if((scheReflectAtr && isPre)
 				|| scheAndRecordSameChangeFlg == ScheAndRecordSameChangeFlg.ALWAYS_CHANGE_AUTO) {
 			return true;
 		}

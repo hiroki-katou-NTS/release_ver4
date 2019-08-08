@@ -7,16 +7,10 @@ package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.goback;
  */
 public interface PreGoBackReflectService {
 	/**
-	 * 事前申請の処理
-	 * @param para
+	 * 申請の処理
+	 * @param isPre: True 事前, False 事後 
 	 * @return
 	 */
-	public void gobackReflect(GobackReflectParameter para);
-	/**
-	 * 事後申請の処理
-	 * @param para
-	 * @return
-	 */
-	public void afterGobackReflect(GobackReflectParameter para);
+	public void gobackReflect(GobackReflectParameter para, boolean isPre);
 
 }

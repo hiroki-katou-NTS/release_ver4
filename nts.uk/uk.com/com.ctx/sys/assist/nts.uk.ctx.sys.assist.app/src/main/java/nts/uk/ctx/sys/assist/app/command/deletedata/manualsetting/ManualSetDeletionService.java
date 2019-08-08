@@ -781,6 +781,7 @@ public class ManualSetDeletionService extends ExportService<Object>{
 			Map<String, List<TableDeletionDataCsv>> mapCatWithDatas = mapCatWithDataDel(tableDeletionDataCsvs);
 			if (mapCatWithDatas != null) {
 				int categoryCount = 0;
+				boolean hasError = false;
 				
 				for (CategoryForDelete category : categories) {
 					categoryCount++;
@@ -816,9 +817,12 @@ public class ManualSetDeletionService extends ExportService<Object>{
 									maOptional.get(), domain);
 						} catch (Exception e) {
 							e.printStackTrace();
-							saveErrLogDel.saveErrorWhenDelData(domain, e.getMessage());
+							hasError = true;
 						}
 					}
+				}
+				if (hasError) {
+					return ResultState.ABNORMAL_END;
 				}
 			}
 		return ResultState.NORMAL_END;
