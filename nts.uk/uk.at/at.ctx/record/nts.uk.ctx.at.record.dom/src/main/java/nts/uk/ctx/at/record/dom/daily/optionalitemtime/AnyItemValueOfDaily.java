@@ -19,7 +19,6 @@ import nts.uk.ctx.at.record.dom.optitem.OptionalItemNo;
 import nts.uk.ctx.at.record.dom.optitem.applicable.EmpCondition;
 import nts.uk.ctx.at.record.dom.optitem.calculation.CalcResultOfAnyItem;
 import nts.uk.ctx.at.record.dom.optitem.calculation.Formula;
-import nts.uk.ctx.at.record.dom.optitem.calculation.disporder.FormulaDispOrder;
 import nts.uk.ctx.at.shared.dom.adapter.employment.BsEmploymentHistoryImport;
 //import nts.uk.ctx.at.shared.dom.vacation.setting.annualpaidleave.MaxRemainingDay;
 
@@ -48,7 +47,6 @@ public class AnyItemValueOfDaily {
     											   		  GeneralDate ymd,
     											   		  List<OptionalItem> optionalItemList,
     											   		  List<Formula> formulaList,
-    											   		  List<FormulaDispOrder> formulaOrderList,
     											   		  List<EmpCondition> empConditionList,
     											   		  Optional<DailyRecordToAttendanceItemConverter> dailyRecordDto,
     											   		  Optional<BsEmploymentHistoryImport> bsEmploymentHistOpt, 
@@ -78,10 +76,9 @@ public class AnyItemValueOfDaily {
         	}
         	//利用条件の判定
         	else if(decisionCondition(optionalItem,empConditionList,bsEmploymentHistOpt)) {
-        		List<Formula> optFormulas = formulaList.stream().filter(t -> t.getOptionalItemNo().equals(optionalItem.getOptionalItemNo())).collect(Collectors.toList());
-        		List<FormulaDispOrder> optOrders = formulaOrderList.stream().filter(t -> t.getOptionalItemNo().equals(optionalItem.getOptionalItemNo())).collect(Collectors.toList());
+        		List<Formula> test = formulaList.stream().filter(t -> t.getOptionalItemNo().equals(optionalItem.getOptionalItemNo())).collect(Collectors.toList());
         		//計算処理
-        		calcResult = optionalItem.caluculationFormula(companyId, optionalItem, optFormulas, optOrders, dailyRecordDto, Optional.empty());
+        		calcResult = optionalItem.caluculationFormula(companyId, optionalItem, test, dailyRecordDto, Optional.empty());
         	}
         	anyItemList.add(calcResult);
         	

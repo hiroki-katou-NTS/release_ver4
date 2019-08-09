@@ -6,9 +6,7 @@ package nts.uk.ctx.at.record.dom.optitem;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import lombok.Getter;
@@ -20,7 +18,6 @@ import nts.uk.ctx.at.record.dom.optitem.applicable.EmpCondition;
 import nts.uk.ctx.at.record.dom.optitem.calculation.CalcResultOfAnyItem;
 import nts.uk.ctx.at.record.dom.optitem.calculation.Formula;
 import nts.uk.ctx.at.record.dom.optitem.calculation.ResultOfCalcFormula;
-import nts.uk.ctx.at.record.dom.optitem.calculation.disporder.FormulaDispOrder;
 import nts.uk.ctx.at.shared.dom.adapter.employment.BsEmploymentHistoryImport;
 import nts.uk.ctx.at.shared.dom.common.CompanyId;
 
@@ -205,43 +202,20 @@ public class OptionalItem extends AggregateRoot {
 	
     /**
      * 計算処理
-     * @param companyId 会社ID
-     * @param optionalItem 任意項目
-     * @param formulaList 計算式リスト
-     * @param formulaOrderList 計算式の並び順リスト
-     * @param dailyRecordDto 日次データ
-     * @param monthlyRecordDto 月次データ
-     * @return 任意項目の計算結果
+     * @param companyId
+     * @param optionalItem
+     * @param formulaList
+     * @param dailyRecordDto
+     * @return
      */
     public CalcResultOfAnyItem caluculationFormula(String companyId,
     												OptionalItem optionalItem,
     												List<Formula> formulaList,
-    												List<FormulaDispOrder> formulaOrderList,
     												Optional<DailyRecordToAttendanceItemConverter> dailyRecordDto,
     												Optional<MonthlyRecordToAttendanceItemConverter> monthlyRecordDto) {
 	
-		//2019/8/9 UPD shuichi_ishida Redmine #108654　（記号順でなく、並び順でソート）
-		//任意項目計算式を記号の昇順でソート
-		//formulaList.sort((first,second) -> first.getSymbol().compareTo(second.getSymbol()));
-		//任意項目計算式を並び順でソート
-		Map<String, Formula> formulaMap = new HashMap<>();
-		for (Formula formula : formulaList) formulaMap.putIfAbsent(formula.getFormulaId().v(), formula);
-		List<String> addedFormulaId = new ArrayList<>();
-		List<Formula> sortedFormula = new ArrayList<>();
-		formulaOrderList.sort((a, b) -> a.getDispOrder().compareTo(b.getDispOrder()));
-		for (FormulaDispOrder formulaOrder : formulaOrderList) {
-			String formulaId = formulaOrder.getOptionalItemFormulaId().v();
-			if (formulaMap.containsKey(formulaId)) {
-				sortedFormula.add(formulaMap.get(formulaId));
-				addedFormulaId.add(formulaId);
-			}
-		}
-		for (Formula formula : formulaList) {
-			String formulaId = formula.getFormulaId().v();
-			if (!addedFormulaId.contains(formulaId)) sortedFormula.add(formula);
-		}
-		formulaList = sortedFormula;
-		
+    	//任意項目計算式を記号の昇順でソート
+    	formulaList.sort((first,second) -> first.getSymbol().compareTo(second.getSymbol()));
         /*パラメータ：任意項目の計算結果を定義*/
         List<ResultOfCalcFormula> calcResultAnyItem = new ArrayList<>();
         //計算式分ループ

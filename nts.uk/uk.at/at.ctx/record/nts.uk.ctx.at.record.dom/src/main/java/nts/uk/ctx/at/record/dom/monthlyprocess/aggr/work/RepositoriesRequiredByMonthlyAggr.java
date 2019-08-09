@@ -26,7 +26,6 @@ import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.export.period.GetWeekPeriod;
 import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
 import nts.uk.ctx.at.record.dom.optitem.applicable.EmpConditionRepository;
 import nts.uk.ctx.at.record.dom.optitem.calculation.FormulaRepository;
-import nts.uk.ctx.at.record.dom.optitem.calculation.disporder.FormulaDispOrderRepository;
 import nts.uk.ctx.at.record.dom.raisesalarytime.repo.SpecificDateAttrOfDailyPerforRepo;
 import nts.uk.ctx.at.record.dom.standardtime.repository.AgreementDomainService;
 import nts.uk.ctx.at.record.dom.standardtime.repository.AgreementMonthSettingRepository;
@@ -255,8 +254,6 @@ public interface RepositoriesRequiredByMonthlyAggr {
 	EmpConditionRepository getEmpCondition();
 	/** 計算式 */
 	FormulaRepository getFormula();
-	/** 計算式の並び順 */
-	FormulaDispOrderRepository getFormulaOrder();
 	/** 年休設定 */
 	AnnualPaidLeaveSettingRepository getAnnualPaidLeaveSet();
 	/** 積立年休設定 */

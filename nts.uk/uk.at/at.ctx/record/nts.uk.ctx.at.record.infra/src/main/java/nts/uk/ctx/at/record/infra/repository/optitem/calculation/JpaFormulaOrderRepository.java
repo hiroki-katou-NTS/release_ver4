@@ -84,24 +84,6 @@ public class JpaFormulaOrderRepository extends JpaRepository implements FormulaD
 				.map(item -> new FormulaDispOrder(new JpaFormulaDispOrderGetMemento(item)))
 				.collect(Collectors.toList());
 	}
-	
-	/**
-	 * Find all.
-	 * @param companyId the company id
-	 * @return the list
-	 */
-	@Override
-	public List<FormulaDispOrder> findAll(String companyId) {
-		List<KrcstFormulaDisporder> entities = this._findAll(companyId);
-
-		if (CollectionUtil.isEmpty(entities)) {
-			return Collections.emptyList();
-		}
-
-		return entities.stream()
-				.map(item -> new FormulaDispOrder(new JpaFormulaDispOrderGetMemento(item)))
-				.collect(Collectors.toList());
-	}
 
 	/**
 	 * Find by item no.
@@ -138,32 +120,4 @@ public class JpaFormulaOrderRepository extends JpaRepository implements FormulaD
 		return em.createQuery(cq).getResultList();
 	}
 
-	/**
-	 * Find all.
-	 * @param comId the company id
-	 * @return the list
-	 */
-	private List<KrcstFormulaDisporder> _findAll(String comId) {
-		// Get entity manager
-		EntityManager em = this.getEntityManager();
-
-		// Create builder
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-
-		// Create query
-		CriteriaQuery<KrcstFormulaDisporder> cq = builder.createQuery(KrcstFormulaDisporder.class);
-
-		// From table
-		Root<KrcstFormulaDisporder> root = cq.from(KrcstFormulaDisporder.class);
-
-		List<Predicate> predicateList = new ArrayList<Predicate>();
-
-		// Add where condition
-		predicateList.add(builder.equal(root.get(KrcstFormulaDisporder_.krcstFormulaDisporderPK)
-				.get(KrcstFormulaDisporderPK_.cid), comId));
-		cq.where(predicateList.toArray(new Predicate[] {}));
-
-		// Get results
-		return em.createQuery(cq).getResultList();
-	}
 }
