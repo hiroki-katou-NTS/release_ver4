@@ -84,15 +84,11 @@ public class LogBasicInforExportService extends ExportService<LogParams> {
 		for (LogBasicInfoDto d : data) {
 			// check list child and generate row child
 			List<LogDataCorrectRecordRefeDto> lstDataCorrect = d.getLstLogDataCorrectRecordRefeDto();
-			List<LogOutputItemDto> lstSubHeder = d.getLstLogOutputItemDto();
 			if (!CollectionUtil.isEmpty(lstDataCorrect)) {
 				if (count == 0) {
 					// add header sub
-					listHeader.add(lstSubHeder.get(0).getItemName());
-					listHeader.add(lstSubHeder.get(1).getItemName());
-					listHeader.add(lstSubHeder.get(2).getItemName());
-					listHeader.add(lstSubHeder.get(3).getItemName());
-					listHeader.add(lstSubHeder.get(4).getItemName());
+					List<String> subHeadersTemp = this.getTextSubHeaderPersion(d);
+					listHeader.addAll(subHeadersTemp);
 					count++;
 				}
 				for (LogDataCorrectRecordRefeDto dataCorrectLog : lstDataCorrect) {
