@@ -4420,7 +4420,7 @@ module nts.uk.ui.mgrid {
                 let struct = ds[parseFloat(keys[0])][key];
                 if (coupe) {
                     let cell = lch.cellAt(_$grid[0], keys[0], key);
-                    if (cell) {
+                    if (cell && !cell.classList.contains(color.Disable)) {
                         coord = ti.getCellCoord(cell);
                         cell.innerHTML = "";
                         sess.o.push({ coord: coord, value: _dataSource[coord.rowIdx][coord.columnKey] });
