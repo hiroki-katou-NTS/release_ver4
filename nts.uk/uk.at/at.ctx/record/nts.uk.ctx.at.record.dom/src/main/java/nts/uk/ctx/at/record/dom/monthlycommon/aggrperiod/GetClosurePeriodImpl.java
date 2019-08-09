@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod;
 
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -49,7 +50,23 @@ public class GetClosurePeriodImpl implements GetClosurePeriod {
 				this.getClosureIdHistory.ofEmployeeFromYearMonth(employeeId, yearMonth);
 		
 		// 締め履歴から集計期間を生成
-		return this.calcPeriodForAggregate.fromClosureHistory(employeeId, criteriaDate, closureIdHistoryList);
+		List<ClosurePeriod> closurePeriods = this.calcPeriodForAggregate.fromClosureHistory(
+				employeeId, criteriaDate, closureIdHistoryList);
+		
+		// 集計期間から指定した年月以外を削除する
+		ListIterator<ClosurePeriod> itrClosurePeriods = closurePeriods.listIterator();
+		while (itrClosurePeriods.hasNext()) {
+			ClosurePeriod target = itrClosurePeriods.next();
+			ListIterator<AggrPeriodEachActualClosure> itrAggrPeriods = target.getAggrPeriods().listIterator();
+			while (itrAggrPeriods.hasNext()) {
+				AggrPeriodEachActualClosure aggrPeriod = itrAggrPeriods.next();
+				if (!aggrPeriod.getYearMonth().equals(yearMonth)) itrAggrPeriods.remove();
+			}
+			if (target.getAggrPeriods().size() == 0) itrClosurePeriods.remove();
+		}
+		
+		// 締め処理期間リストを返す
+		return closurePeriods;
 	}
 	
 	/** 期間を指定して集計期間を求める */
