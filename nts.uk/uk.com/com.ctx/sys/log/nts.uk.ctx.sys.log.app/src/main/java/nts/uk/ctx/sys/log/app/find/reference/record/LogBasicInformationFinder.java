@@ -277,7 +277,7 @@ public class LogBasicInformationFinder {
 									lstLogDataCorecRecordRefeDto.add(logDataCorrectRecordRefeDto);
 									logTemp.setLstLogDataCorrectRecordRefeDto(lstLogDataCorecRecordRefeDto);
 									// set header
-									logTemp.setLstLogOutputItemDto(headerMaps.get(String.valueOf(logDataCorrectRecordRefeDto.getTargetDataType())+ String.valueOf(logParams.getRecordType())));
+									logTemp.setLstLogOutputItemDto(headerMaps.get(String.valueOf(logDataCorrectRecordRefeDto.getTargetDataType())));
 									mapCheckLogBasic.put(keyEmploy, logTemp);
 								}
 								
