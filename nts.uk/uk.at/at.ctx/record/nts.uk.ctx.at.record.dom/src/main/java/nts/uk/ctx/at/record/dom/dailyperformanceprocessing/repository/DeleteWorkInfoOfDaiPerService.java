@@ -1,9 +1,14 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
@@ -14,6 +19,7 @@ import nts.uk.ctx.at.record.dom.approvalmanagement.domainservice.DeleteApprovalS
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.OutingTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.calculationattribute.repo.CalAttrOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordAdUpService;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.AttendanceLeavingGateOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.repo.PCLogOnInfoOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
@@ -100,6 +106,9 @@ public class DeleteWorkInfoOfDaiPerService {
 	
 	@Inject 
 	private RemarksOfDailyPerformRepo remarksOfDailyPerformRepo;
+	
+	@Inject
+	private DailyRecordAdUpService dailyRecordAdUpService;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void deleteWorkInfoOfDaiPerService(String employeeId, GeneralDate day) {
@@ -123,6 +132,7 @@ public class DeleteWorkInfoOfDaiPerService {
 		// AttendanceTimeByWorkOfDailyRepository
 		this.specificDateAttrOfDailyPerforRepo.deleteByEmployeeIdAndDate(employeeId, day);
 //		this.employeeDailyPerErrorRepository.removeParam(employeeId, day);
+		this.dailyRecordAdUpService.adUpEmpError(Collections.emptyList(), Arrays.asList(Pair.of(employeeId, day)), true);
 		// remove approval State from workflow
 //		this.appRootStateConfirmAdapter.deleteApprovalByEmployeeIdAndDate(employeeId, day);
 		this.anyItemValueOfDailyRepo.deleteAnyItemValueOfDaily(employeeId, day);
