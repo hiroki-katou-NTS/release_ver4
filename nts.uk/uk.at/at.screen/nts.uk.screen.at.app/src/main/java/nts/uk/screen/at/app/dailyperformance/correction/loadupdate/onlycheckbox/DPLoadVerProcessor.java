@@ -80,7 +80,7 @@ public class DPLoadVerProcessor {
 			} else {
 				// checkIndenityMonth
 				result.setIndentityMonthResult(checkIndentityMonth
-						.checkIndenityMonth(new IndentityMonthParam(companyId, sId, GeneralDate.today())));
+						.checkIndenityMonth(new IndentityMonthParam(companyId, sId, GeneralDate.today(), loadVerData.closureId)));
 				// 対象日の本人確認が済んでいるかチェックする
 			}
 		} else {
