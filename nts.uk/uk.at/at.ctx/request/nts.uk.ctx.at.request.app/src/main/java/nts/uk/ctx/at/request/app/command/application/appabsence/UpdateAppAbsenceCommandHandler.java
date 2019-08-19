@@ -155,8 +155,9 @@ public class UpdateAppAbsenceCommandHandler extends CommandHandlerWithResult<Upd
 				1, 
 				appAbsence.getAppID(), 
 				appAbsence.getApplication().getPrePostAtr(), 
-				command.getVersion(),command.getWorkTypeCode(),
-				command.getWorkTimeCode());
+				command.getVersion(),
+				appAbsence.getWorkTypeCode() == null ? null : appAbsence.getWorkTypeCode().v(),
+				appAbsence.getWorkTimeCode() == null ? null : appAbsence.getWorkTimeCode().v());
 		GeneralDate startDate = opAppAbsence.get().getApplication().getAppDate();
 		GeneralDate endDate = opAppAbsence.get().getApplication().getEndDate().isPresent() ? opAppAbsence.get().getApplication().getEndDate().get() : opAppAbsence.get().getApplication().getAppDate();
 		
