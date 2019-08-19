@@ -330,7 +330,7 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 		// start --
 		// パラメータ「再作成区分」を確認する - rerun
 		if (reCreateAttr == ExecutionType.RERUN) {
-			this.deleteWorkInfoOfDaiPerService.deleteWorkInfoOfDaiPerService(employeeId, day);
+			//this.deleteWorkInfoOfDaiPerService.deleteWorkInfoOfDaiPerService(employeeId, day);
 
 			this.self.reflect(companyId, employeeId, day, empCalAndSumExecLogID, reCreateAttr, reCreateWorkType,
 					employeeGeneralInfoImport, stampReflectionManagement, mapWorkingConditionItem, mapDateHistoryItem,
@@ -423,7 +423,7 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 		// start --
 		// ドメインモデル「日別実績の勤務情報」を削除する - rerun
 		if (reCreateAttr == ExecutionType.RERUN) {
-			this.deleteWorkInfoOfDaiPerService.deleteWorkInfoOfDaiPerService(employeeId, day);
+			//this.deleteWorkInfoOfDaiPerService.deleteWorkInfoOfDaiPerService(employeeId, day);
 
 			this.self.reflectWithNoInfoImport(companyId, employeeId, day, empCalAndSumExecLogID, reCreateAttr,
 					reCreateWorkType, stampReflectionManagement, null);
@@ -1152,7 +1152,6 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 						}
 					}
 				}
-
 			} else {
 				// #日別作成修正 2018/07/17 前川 隼大
 				// 社員の日別実績のエラーを作成する
@@ -1305,69 +1304,73 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 				// data");
 				// }
 			}
-			if (errMesInfos.isEmpty()) {
-
-				// pharse 3
-				// #日別作成修正 2018/07/17 前川 隼大
-				// 社員の日別実績のエラーを解除する
-				this.createEmployeeDailyPerError.removeByCidSidDateAndErrorCode(companyId, employeeID, day, "S025");
-
-				// pharse 2 start ----
-				// 特定日を日別実績に反映する
-				SpecificDateAttrOfDailyPerfor specificDateAttrOfDailyPerfor = reflectSpecificDate(companyId, employeeID,
-						day, affiliationInforOfDailyPerfor.getWplID(), periodInMasterList);
-
-				// 加給設定を日別実績に反映する
-				Optional<BonusPaySetting> bonusPaySetting = this.reflectBonusSettingDailyPer(companyId, employeeID, day,
-						workInfoOfDailyPerformanceUpdate, affiliationInforOfDailyPerfor, periodInMasterList);
-
-				if (bonusPaySetting.isPresent()) {
-					affiliationInforOfDailyPerfor = new AffiliationInforOfDailyPerfor(
-							affiliationInforOfDailyPerfor.getEmploymentCode(),
-							affiliationInforOfDailyPerfor.getEmployeeId(),
-							affiliationInforOfDailyPerfor.getJobTitleID(), affiliationInforOfDailyPerfor.getWplID(),
-							affiliationInforOfDailyPerfor.getYmd(), affiliationInforOfDailyPerfor.getClsCode(),
-							bonusPaySetting.get().getCode());
-				}
-
-				// 計算区分を日別実績に反映する
-				CalAttrOfDailyPerformance calAttrOfDailyPerformance = this.reflectCalAttOfDaiPer(companyId, employeeID,
-						day, affiliationInforOfDailyPerfor, periodInMasterList);
-
-				// end -----
-				// 1日半日出勤・1日休日系の判定
-				WorkStyle workStyle = basicScheduleService
-						.checkWorkDay(workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTypeCode().v());
-				if (workStyle != WorkStyle.ONE_DAY_REST) {
-					TimeLeavingOfDailyPerformance timeLeavingOptional = createStamp(companyId,
-							workInfoOfDailyPerformanceUpdate, workingConditionItem, timeLeavingPerformance, employeeID,
-							day, stampReflectionManagement);
-					// check tay
-					stampOutput = this.reflectStampDomainServiceImpl.reflectStampInfo(companyId, employeeID, day,
-							workInfoOfDailyPerformanceUpdate, timeLeavingOptional, empCalAndSumExecLogID, reCreateAttr,
-							Optional.of(calAttrOfDailyPerformance), Optional.of(affiliationInforOfDailyPerfor),
-							Optional.empty());
-				} else {
-					// fixbug 105926
-					stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(
-							companyId, employeeID, day,
-							Optional.of(workInfoOfDailyPerformanceUpdate), null, empCalAndSumExecLogID, reCreateAttr,
-							Optional.of(calAttrOfDailyPerformance), Optional.of(affiliationInforOfDailyPerfor),
-							Optional.of(workTypeOfDailyPerformance));
-				}
-				
-				if (stampOutput.getErrMesInfos() == null || stampOutput.getErrMesInfos().isEmpty()) {
-					this.registerDailyPerformanceInfoService.registerDailyPerformanceInfo(companyId, employeeID, day,
-							stampOutput.getReflectStampOutput(), affiliationInforOfDailyPerfor,
-							workInfoOfDailyPerformanceUpdate, specificDateAttrOfDailyPerfor, calAttrOfDailyPerformance,
-							workTypeOfDailyPerformance,
-							breakTimeOfDailyPerformance.isPresent() ? breakTimeOfDailyPerformance.get() : null);
-				} else {
-					stampOutput.getErrMesInfos().forEach(action -> {
-						this.errMessageInfoRepository.add(action);
-					});
-				}
+			
+			if (!errMesInfos.isEmpty()) {
+				// EA修正履歴NO.3632
+				return;
 			}
+
+			// 日別実績を削除する
+			this.deleteWorkInfoOfDaiPerService.deleteWorkInfoOfDaiPerService(employeeID, day);
+			// pharse 3
+			// #日別作成修正 2018/07/17 前川 隼大
+			// 社員の日別実績のエラーを解除する
+			this.createEmployeeDailyPerError.removeByCidSidDateAndErrorCode(companyId, employeeID, day, "S025");
+
+			// pharse 2 start ----
+			// 特定日を日別実績に反映する
+			SpecificDateAttrOfDailyPerfor specificDateAttrOfDailyPerfor = reflectSpecificDate(companyId, employeeID,
+					day, affiliationInforOfDailyPerfor.getWplID(), periodInMasterList);
+
+			// 加給設定を日別実績に反映する
+			Optional<BonusPaySetting> bonusPaySetting = this.reflectBonusSettingDailyPer(companyId, employeeID, day,
+					workInfoOfDailyPerformanceUpdate, affiliationInforOfDailyPerfor, periodInMasterList);
+
+			if (bonusPaySetting.isPresent()) {
+				affiliationInforOfDailyPerfor = new AffiliationInforOfDailyPerfor(
+						affiliationInforOfDailyPerfor.getEmploymentCode(),
+						affiliationInforOfDailyPerfor.getEmployeeId(), affiliationInforOfDailyPerfor.getJobTitleID(),
+						affiliationInforOfDailyPerfor.getWplID(), affiliationInforOfDailyPerfor.getYmd(),
+						affiliationInforOfDailyPerfor.getClsCode(), bonusPaySetting.get().getCode());
+			}
+
+			// 計算区分を日別実績に反映する
+			CalAttrOfDailyPerformance calAttrOfDailyPerformance = this.reflectCalAttOfDaiPer(companyId, employeeID, day,
+					affiliationInforOfDailyPerfor, periodInMasterList);
+
+			// end -----
+			// 1日半日出勤・1日休日系の判定
+			WorkStyle workStyle = basicScheduleService
+					.checkWorkDay(workInfoOfDailyPerformanceUpdate.getRecordInfo().getWorkTypeCode().v());
+			if (workStyle != WorkStyle.ONE_DAY_REST) {
+				TimeLeavingOfDailyPerformance timeLeavingOptional = createStamp(companyId,
+						workInfoOfDailyPerformanceUpdate, workingConditionItem, timeLeavingPerformance, employeeID, day,
+						stampReflectionManagement);
+				// check tay
+				stampOutput = this.reflectStampDomainServiceImpl.reflectStampInfo(companyId, employeeID, day,
+						workInfoOfDailyPerformanceUpdate, timeLeavingOptional, empCalAndSumExecLogID, reCreateAttr,
+						Optional.of(calAttrOfDailyPerformance), Optional.of(affiliationInforOfDailyPerfor),
+						Optional.empty());
+			} else {
+				// fixbug 105926
+				stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(companyId, employeeID, day,
+						Optional.of(workInfoOfDailyPerformanceUpdate), null, empCalAndSumExecLogID, reCreateAttr,
+						Optional.of(calAttrOfDailyPerformance), Optional.of(affiliationInforOfDailyPerfor),
+						Optional.of(workTypeOfDailyPerformance));
+			}
+
+			if (stampOutput.getErrMesInfos() == null || stampOutput.getErrMesInfos().isEmpty()) {
+				this.registerDailyPerformanceInfoService.registerDailyPerformanceInfo(companyId, employeeID, day,
+						stampOutput.getReflectStampOutput(), affiliationInforOfDailyPerfor,
+						workInfoOfDailyPerformanceUpdate, specificDateAttrOfDailyPerfor, calAttrOfDailyPerformance,
+						workTypeOfDailyPerformance,
+						breakTimeOfDailyPerformance.isPresent() ? breakTimeOfDailyPerformance.get() : null);
+			} else {
+				stampOutput.getErrMesInfos().forEach(action -> {
+					this.errMessageInfoRepository.add(action);
+				});
+			}
+
 		}
 	}
 
