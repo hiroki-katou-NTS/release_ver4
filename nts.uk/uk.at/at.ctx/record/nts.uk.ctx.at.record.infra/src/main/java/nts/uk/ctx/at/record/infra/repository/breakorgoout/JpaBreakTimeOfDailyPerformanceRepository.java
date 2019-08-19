@@ -470,7 +470,7 @@ public class JpaBreakTimeOfDailyPerformanceRepository extends JpaRepository
 			for (BreakTimeSheet breakTimeSheet : breakTime.getBreakTimeSheets()) {
 
 				String updateTableSQL = " UPDATE KRCDT_DAI_BREAK_TIME_TS SET STR_STAMP_TIME = "
-						+ breakTimeSheet.getStartTime().valueAsMinutes() + " AND END_STAMP_TIME = "
+						+ breakTimeSheet.getStartTime().valueAsMinutes() + " , END_STAMP_TIME = "
 						+ breakTimeSheet.getEndTime().valueAsMinutes() + " WHERE SID = '" + breakTime.getEmployeeId()
 						+ "' AND YMD = '" + breakTime.getYmd() + "'" + " AND BREAK_TYPE = "
 						+ breakTime.getBreakType().value + " AND BREAK_FRAME_NO = "
