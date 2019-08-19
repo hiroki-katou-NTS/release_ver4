@@ -408,7 +408,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 					affiInfo.get(),
 					businessType,
 					pcLogOnInfoOfDailyRepo.find(employeeId, attendanceTime.getYmd()),/** リポジトリ：日別実績のPCログオン情報 */
-					employeeDailyPerErrorRepository.findByPeriodOrderByYmd(employeeId, datePeriod),/** リポジトリ:社員の日別実績エラー一覧 */
+					employeeDailyPerErrorRepository.find(employeeId, attendanceTime.getYmd()),/** リポジトリ:社員の日別実績エラー一覧 */
 					outingTimeOfDailyPerformanceRepository.findByEmployeeIdAndDate(employeeId, attendanceTime.getYmd()),/** リポジトリ：日別実績の外出時間帯 */
 					breakTimeOfDailyPerformanceRepository.findByKey(employeeId, attendanceTime.getYmd()),/** リポジトリ：日別実績の休憩時間帯 */
 					attendanceTimeRepository.find(employeeId, attendanceTime.getYmd()),
