@@ -98,11 +98,11 @@ public class AbsenceServiceProcessImpl implements AbsenceServiceProcess{
 	 */
 	@Override
 	public void checkLimitAbsencePlan(String cID, String sID, String workTypeCD, GeneralDate sDate, GeneralDate eDate,
-			HolidayAppType hdAppType) {
+			HolidayAppType hdAppType, List<GeneralDate> lstDateIsHoliday) {
 		//INPUT．休暇種類をチェックする(check INPUT. phân loại holidays)
 		if(hdAppType.equals(HolidayAppType.ANNUAL_PAID_LEAVE)){//INPUT．休暇種類が年休
 			//計画年休の上限チェック(check giới hạn trên của plan annual holidays)
-			List<PlanVacationRuleError> check = planVacationRuleExport.checkMaximumOfPlan(cID, sID, workTypeCD, new DatePeriod(sDate, eDate));
+			List<PlanVacationRuleError> check = planVacationRuleExport.checkMaximumOfPlan(cID, sID, workTypeCD, new DatePeriod(sDate, eDate), lstDateIsHoliday);
 			if(!check.isEmpty()){
 				if(check.contains(PlanVacationRuleError.OUTSIDEPERIOD)) {
 					//Msg_1345を表示

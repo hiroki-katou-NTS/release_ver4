@@ -65,6 +65,9 @@ public class InterimRemainDataMngCheckRegisterImpl implements InterimRemainDataM
 	public EarchInterimRemainCheck checkRegister(InterimRemainCheckInputParam inputParam) {
 		//代休不足区分、振休不足区分、年休不足区分、積休不足区分、特休不足区分、公休不足区分、超休不足区分をfalseにする(初期化)
 		EarchInterimRemainCheck outputData = new EarchInterimRemainCheck(false, false, false, false, false, false, false);
+		Optional<ComSubstVacation> comSetting = subRepos.findById(inputParam.getCid());
+		CompensatoryLeaveComSetting leaveComSetting = leaveSetRepos.find(inputParam.getCid());
+		CompanyHolidayMngSetting comHolidaySetting = new CompanyHolidayMngSetting(inputParam.getCid(), comSetting, leaveComSetting);
 		//暫定管理データをメモリ上で作成する
 		Map<GeneralDate, DailyInterimRemainMngData> mapDataOutput = new HashMap<>();
 		inputParam.getAppData().stream().forEach(x -> {
@@ -79,9 +82,6 @@ public class InterimRemainDataMngCheckRegisterImpl implements InterimRemainDataM
 					inputParam.getScheData(),
 					inputParam.getAppData(),
 					false);
-			Optional<ComSubstVacation> comSetting = subRepos.findById(inputParam.getCid());
-			CompensatoryLeaveComSetting leaveComSetting = leaveSetRepos.find(inputParam.getCid());
-			CompanyHolidayMngSetting comHolidaySetting = new CompanyHolidayMngSetting(inputParam.getCid(), comSetting, leaveComSetting);
 			Map<GeneralDate, DailyInterimRemainMngData> mapDataOutputTmp = interimCreateData.createInterimRemainDataMng(dataCreate, comHolidaySetting);	
 			//振休申請は取り消しになる時を対応します。
 			if(x.getAppType() == ApplicationType.COMPLEMENT_LEAVE_APPLICATION && mapDataOutputTmp.containsKey(x.getAppDate())){

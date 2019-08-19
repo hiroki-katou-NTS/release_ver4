@@ -22,7 +22,7 @@ public interface PlanVacationRuleExport {
 	 * @return 	true：上限エラーあり
 	 * 			false：上限エラーなし
 	 */
-	List<PlanVacationRuleError> checkMaximumOfPlan(String cid, String employeeId, String workTypeCode, DatePeriod dateData);
+	List<PlanVacationRuleError> checkMaximumOfPlan(String cid, String employeeId, String workTypeCode, DatePeriod dateData, List<GeneralDate> lstDateIsHoliday);
 	/**
 	 * 申請期間が利用可能な期間外かチェックする
 	 * @param lstVactionPeriod ・ドメインモデル「計画休暇のルールの履歴」一覧
@@ -43,7 +43,7 @@ public interface PlanVacationRuleExport {
 	 * @param appDate ・申請開始日 ・申請終了日
 	 * @return
 	 */
-	boolean checkMaxPlanSpecification(CheckMaximumOfPlanParam planParam);
+	boolean checkMaxPlanSpecification(CheckMaximumOfPlanParam planParam, List<GeneralDate> lstDateIsHoliday);
 	/**
 	 * チェック期間による申請期間を編集する
 	 * @param checkData

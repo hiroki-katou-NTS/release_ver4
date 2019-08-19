@@ -168,12 +168,14 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 				specHd);
 		// 2-1.新規画面登録前の処理を実行する
 		newBeforeRegister.processBeforeRegister(appRoot, 0, command.isCheckOver1Year());
+		//休日申請日
+		List<GeneralDate> lstDateIsHoliday = otherCommonAlg.lstDateIsHoliday(companyID, command.getEmployeeID(), new DatePeriod(startDate, endDate));
 		// 7.登録時のエラーチェック
-		this.checkBeforeRegister(command,startDate,endDate,true);
+		this.checkBeforeRegister(command, startDate, endDate, true, lstDateIsHoliday);
 		//計画年休上限チェック(check giới han trên plan annual holiday)
 		//hoatt-2018-07-04
 		absenceServiceProcess.checkLimitAbsencePlan(companyID, command.getEmployeeID(), command.getWorkTypeCode(),
-				startDate, endDate, EnumAdaptor.valueOf(command.getHolidayAppType(), HolidayAppType.class));
+				startDate, endDate, EnumAdaptor.valueOf(command.getHolidayAppType(), HolidayAppType.class), lstDateIsHoliday);
 		// insert
 		absenceServiceProcess.createAbsence(appAbsence, appRoot);
 		// 2-2.新規画面登録時承認反映情報の整理
@@ -206,7 +208,8 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 	 * @param endDate
 	 * @param isInsert
 	 */
-	public void checkBeforeRegister(CreatAppAbsenceCommand command,GeneralDate startDate,GeneralDate endDate,boolean isInsert){
+	public void checkBeforeRegister(CreatAppAbsenceCommand command,GeneralDate startDate,GeneralDate endDate,boolean isInsert,
+			List<GeneralDate> lstDateIsHoliday){
 		String companyID = AppContexts.user().companyId();
 		String sID = AppContexts.user().employeeId();
 		//hoatt 2019.02.11
@@ -338,21 +341,13 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 //		・公休チェック区分＝（休暇申請設定．公休残数不足登録できる＝false）
 //		・超休チェック区分＝true
 		List<AppRemainCreateInfor> appData = new ArrayList<>();
-		List<GeneralDate> listDate = new ArrayList<>();
-		List<GeneralDate> lstDateIsHoliday = otherCommonAlg.lstDateIsHoliday(companyID, command.getEmployeeID(), new DatePeriod(startDate, endDate));
-		for(GeneralDate loopDate = startDate; loopDate.beforeOrEquals(endDate); loopDate = loopDate.addDays(1)){
-			if(!lstDateIsHoliday.contains(loopDate)) {
-				listDate.add(loopDate);	
-			}			
-		}
 		appData.add(new AppRemainCreateInfor(command.getEmployeeID(), command.getAppID(), GeneralDateTime.now(), startDate, 
 				EnumAdaptor.valueOf(command.getPrePostAtr(), PrePostAtr.class), 
 				nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType.ABSENCE_APPLICATION, 
 				command.getWorkTypeCode() == null ? Optional.empty() : Optional.of(command.getWorkTypeCode()), 
 				command.getWorkTimeCode() == null ? Optional.empty() : Optional.of(command.getWorkTimeCode()), 
-				Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(startDate), Optional.of(endDate), listDate));
-		//申請期間から休日以外の申請日を取得する
-		
+				Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(startDate), Optional.of(endDate), lstDateIsHoliday));
+		//申請期間から休日以外の申請日を取得する		
 		InterimRemainCheckInputParam inputParam = new InterimRemainCheckInputParam(companyID, command.getEmployeeID(), 
 				new DatePeriod(cls.getStartDate(), cls.getStartDate().addYears(1).addDays(-1)), false, startDate, new DatePeriod(startDate, endDate),
 				true, new ArrayList<>(), new ArrayList<>(), appData, chkSubHoliday, chkPause, chkAnnual, chkFundingAnnual,
