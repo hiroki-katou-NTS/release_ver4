@@ -138,8 +138,8 @@ public class RegisterDailyPerformanceInfoService {
 			if (this.breakTimeOfDailyPerformanceRepository.find(employeeID, day, 1).isPresent()) {
 				this.breakTimeOfDailyPerformanceRepository.updateForEachOfType(breakTimeOfDailyPerformance);
 			} else {
-				//this.breakTimeOfDailyPerformanceRepository.insert(breakTimeOfDailyPerformance);
-				dailyRecordAdUpService.adUpBreakTime(Arrays.asList(breakTimeOfDailyPerformance));
+				this.breakTimeOfDailyPerformanceRepository.insert(breakTimeOfDailyPerformance);
+				//dailyRecordAdUpService.adUpBreakTime(Arrays.asList(breakTimeOfDailyPerformance));
 			}
 		}
 
@@ -173,8 +173,8 @@ public class RegisterDailyPerformanceInfoService {
 				if (this.breakTimeOfDailyPerformanceRepository.find(employeeID, day, 0).isPresent()) {
 					this.breakTimeOfDailyPerformanceRepository.updateForEachOfType(stampOutput.getBreakTimeOfDailyPerformance());
 				} else {
-					//this.breakTimeOfDailyPerformanceRepository.insert(stampOutput.getBreakTimeOfDailyPerformance());
-					dailyRecordAdUpService.adUpBreakTime(Arrays.asList(stampOutput.getBreakTimeOfDailyPerformance()));
+					this.breakTimeOfDailyPerformanceRepository.insert(stampOutput.getBreakTimeOfDailyPerformance());
+					//dailyRecordAdUpService.adUpBreakTime(Arrays.asList(stampOutput.getBreakTimeOfDailyPerformance()));
 				}
 				//dailyRecordAdUpService.adUpBreakTime(Arrays.asList(stampOutput.getBreakTimeOfDailyPerformance()));
 			}
