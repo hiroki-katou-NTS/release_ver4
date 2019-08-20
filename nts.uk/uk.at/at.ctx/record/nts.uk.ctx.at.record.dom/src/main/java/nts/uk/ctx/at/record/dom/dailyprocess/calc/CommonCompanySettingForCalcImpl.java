@@ -13,6 +13,7 @@ import nts.uk.ctx.at.record.dom.divergence.time.DivergenceTimeRepository;
 import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
 import nts.uk.ctx.at.record.dom.optitem.applicable.EmpConditionRepository;
 import nts.uk.ctx.at.record.dom.optitem.calculation.FormulaRepository;
+import nts.uk.ctx.at.record.dom.optitem.calculation.disporder.FormulaDispOrderRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecord;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.ErrorAlarmWorkRecordRepository;
 import nts.uk.ctx.at.record.dom.workrule.specific.SpecificWorkRuleRepository;
@@ -61,6 +62,9 @@ public class CommonCompanySettingForCalcImpl implements CommonCompanySettingForC
 	//計算式
 	@Inject
 	private FormulaRepository formulaRepository;
+	//計算式の並び順
+	@Inject
+	private FormulaDispOrderRepository formulaOrderRepository;
 	//労働条件
 	@Inject
 	private EmpConditionRepository empConditionRepository;
@@ -93,6 +97,7 @@ public class CommonCompanySettingForCalcImpl implements CommonCompanySettingForC
 									  bPUnitUseSettingRepository.getSetting(companyId),
 									  optionalItems,
 									  formulaRepository.find(companyId),
+									  formulaOrderRepository.findAll(companyId),
 									  empConditionRepository.findAll(companyId, optionalItems.stream().map(oi -> oi.getOptionalItemNo().v()).collect(Collectors.toList())),
 									  zeroTimeRepository.findByCId(companyId),
 									  specificWorkRuleRepository.findUpperLimitWkHourByCid(companyId),

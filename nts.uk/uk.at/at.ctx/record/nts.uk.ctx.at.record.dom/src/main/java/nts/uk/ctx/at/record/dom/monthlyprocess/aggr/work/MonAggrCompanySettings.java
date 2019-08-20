@@ -24,6 +24,7 @@ import nts.uk.ctx.at.record.dom.monthlyaggrmethod.legaltransferorder.LegalTransf
 import nts.uk.ctx.at.record.dom.optitem.OptionalItem;
 import nts.uk.ctx.at.record.dom.optitem.applicable.EmpCondition;
 import nts.uk.ctx.at.record.dom.optitem.calculation.Formula;
+import nts.uk.ctx.at.record.dom.optitem.calculation.disporder.FormulaDispOrder;
 import nts.uk.ctx.at.record.dom.standardtime.AgreementOperationSetting;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.ActualLock;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.LockStatus;
@@ -170,6 +171,9 @@ public class MonAggrCompanySettings {
 	/** 計算式 */
 	@Getter
 	private CopyOnWriteArrayList<Formula> formulaList;
+	/** 計算式の並び順 */
+	@Getter
+	private CopyOnWriteArrayList<FormulaDispOrder> formulaOrderList;
 	/** 年休設定 */
 	@Getter
 	private AnnualPaidLeaveSetting annualLeaveSet;
@@ -229,6 +233,7 @@ public class MonAggrCompanySettings {
 		this.optionalItemMap = new ConcurrentHashMap<>();
 		this.empConditionMap = new ConcurrentHashMap<>();
 		this.formulaList = new CopyOnWriteArrayList<>();
+		this.formulaOrderList = new CopyOnWriteArrayList<>();
 		this.grantHdTblSetMap = new ConcurrentHashMap<>();
 		this.lengthServiceTblListMap = new ConcurrentHashMap<>();
 		this.retentionYearlySet = Optional.empty();
@@ -277,6 +282,9 @@ public class MonAggrCompanySettings {
 		
 		// 計算式
 		domain.formulaList.addAll(repositories.getFormula().find(companyId));
+		
+		// 計算式の並び順
+		domain.formulaOrderList.addAll(repositories.getFormulaOrder().findAll(companyId));
 		
 		// 年休設定
 		domain.annualLeaveSet = repositories.getAnnualPaidLeaveSet().findByCompanyId(companyId);
