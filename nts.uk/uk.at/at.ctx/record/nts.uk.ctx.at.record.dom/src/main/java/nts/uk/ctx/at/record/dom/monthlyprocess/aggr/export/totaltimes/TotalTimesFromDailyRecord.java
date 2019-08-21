@@ -11,6 +11,8 @@ import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
+import nts.uk.ctx.at.record.dom.affiliationinformation.WorkTypeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.affiliationinformation.repository.WorkTypeOfDailyPerforRepository;
 import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
@@ -46,6 +48,8 @@ public class TotalTimesFromDailyRecord {
 	private Map<GeneralDate, AttendanceTimeOfDailyPerformance> attendanceTimeOfDailyMap;
 	/** 日別実績の任意項目リスト */
 	private Map<GeneralDate, AnyItemValueOfDaily> anyItemValueOfDailyMap;
+	/** 日別実績の勤務種別リスト */
+	private Map<GeneralDate, WorkTypeOfDailyPerformance> workTypeOfDailyMap;
 	/** 勤務種類リスト */
 	private Map<String, WorkType> workTypeMap;
 	/** 勤務種類リポジトリ */
@@ -62,6 +66,7 @@ public class TotalTimesFromDailyRecord {
 	 * @param anyItemValueOfDailyRepo 日別実績の任意項目リポジトリ
 	 * @param timeLeavingOfDailyRepo 日別実績の出退勤リポジトリ
 	 * @param workInfoOfDailyRepo 日別実績の勤務情報リポジトリ
+	 * @param workTypeOfDailyRepo 日別実績の勤務種別リポジトリ
 	 * @param workTypeRepo 勤務種類リポジトリ
 	 * @param optionalItemRepo 任意項目リポジトリ
 	 */
@@ -73,6 +78,7 @@ public class TotalTimesFromDailyRecord {
 			AnyItemValueOfDailyRepo anyItemValueOfDailyRepo,
 			TimeLeavingOfDailyPerformanceRepository timeLeavingOfDailyRepo,
 			WorkInformationRepository workInfoOfDailyRepo,
+			WorkTypeOfDailyPerforRepository workTypeOfDailyRepo,
 			WorkTypeRepository workTypeRepo,
 			OptionalItemRepository optionalItemRepo){
 
@@ -80,15 +86,19 @@ public class TotalTimesFromDailyRecord {
 		this.attendanceStatusList = new AttendanceStatusList(
 				employeeId, dailysPeriod, attendanceTimeOfDailyRepo, timeLeavingOfDailyRepo);
 		this.workInfoList = new WorkInfoList(employeeId, dailysPeriod, workInfoOfDailyRepo);
+		this.workTypeOfDailyMap = new HashMap<>();
 		this.workTypeMap = new HashMap<>();
 		this.optionalItemMap = new HashMap<>();
 		val optionalItemList = optionalItemRepo.findAll(companyId);
 		for (val optionalItem : optionalItemList){
 			this.optionalItemMap.putIfAbsent(optionalItem.getOptionalItemNo().v(), optionalItem);
 		}
+		List<String> employeeIds = new ArrayList<>();
+		employeeIds.add(employeeId);
 		this.setData(
 				attendanceTimeOfDailyRepo.findByPeriodOrderByYmd(employeeId, dailysPeriod),
 				anyItemValueOfDailyRepo.finds(Arrays.asList(employeeId), dailysPeriod),
+				workTypeOfDailyRepo.finds(employeeIds, dailysPeriod),
 				workTypeRepo);
 	}
 
@@ -100,6 +110,7 @@ public class TotalTimesFromDailyRecord {
 	 * @param anyItemValueOfDailyList 日別実績の任意項目リスト
 	 * @param timeLeavingOfDailys 日別実績の出退勤リスト
 	 * @param workInfoOfDailys 日別実績の勤務情報リスト
+	 * @param workTypeOfDailys 日別実績の勤務種別リスト
 	 * @param workTypeMap 勤務種類リスト
 	 * @param workTypeRepo 勤務種類リポジトリ
 	 * @param optionalItemMap 任意項目リスト
@@ -111,6 +122,7 @@ public class TotalTimesFromDailyRecord {
 			List<AnyItemValueOfDaily> anyItemValueOfDailyList,
 			List<TimeLeavingOfDailyPerformance> timeLeavingOfDailys,
 			List<WorkInfoOfDailyPerformance> workInfoOfDailys,
+			List<WorkTypeOfDailyPerformance> workTypeOfDailys,
 			Map<String, WorkType> workTypeMap,
 			WorkTypeRepository workTypeRepo,
 			Map<Integer, OptionalItem> optionalItemMap){
@@ -120,18 +132,20 @@ public class TotalTimesFromDailyRecord {
 		this.workInfoList = new WorkInfoList(workInfoOfDailys);
 		this.workTypeMap = workTypeMap;
 		this.optionalItemMap = optionalItemMap;
-		this.setData(attendanceTimeOfDailys, anyItemValueOfDailyList, workTypeRepo);
+		this.setData(attendanceTimeOfDailys, anyItemValueOfDailyList, workTypeOfDailys, workTypeRepo);
 	}
 	
 	/**
 	 * データ設定
 	 * @param attendanceTimeOfDailys 日別実績の勤怠時間リスト
 	 * @param anyItemValueOfDailyList 日別実績の任意項目リスト
+	 * @param workTypeOfDailyList 日別実績の勤務種別リスト
 	 * @param workTypeRepo 勤務種類リポジトリ
 	 */
 	private void setData(
 			List<AttendanceTimeOfDailyPerformance> attendanceTimeOfDailys,
 			List<AnyItemValueOfDaily> anyItemValueOfDailyList,
+			List<WorkTypeOfDailyPerformance> workTypeOfDailyList,
 			WorkTypeRepository workTypeRepo){
 		
 		this.attendanceTimeOfDailyMap = new HashMap<>();
@@ -143,6 +157,11 @@ public class TotalTimesFromDailyRecord {
 		for (val anyItemValueOfDaily : anyItemValueOfDailyList){
 			val ymd = anyItemValueOfDaily.getYmd();
 			this.anyItemValueOfDailyMap.putIfAbsent(ymd, anyItemValueOfDaily);
+		}
+		this.workTypeOfDailyMap = new HashMap<>();
+		for (val workTypeOfDaily : workTypeOfDailyList) {
+			val ymd = workTypeOfDaily.getDate();
+			this.workTypeOfDailyMap.putIfAbsent(ymd, workTypeOfDaily);
 		}
 		this.workTypeRepo = workTypeRepo;
 	}
@@ -225,11 +244,22 @@ public class TotalTimesFromDailyRecord {
 			String workTimeCd = "";
 			if (workInfo.getWorkTimeCode() != null) workTimeCd = workInfo.getWorkTimeCode().v();
 			
+			// 勤務種別コードを確認する
+			String workTypeCode = "";
+			if (this.workTypeOfDailyMap.containsKey(procDate)) {
+				if (this.workTypeOfDailyMap.get(procDate).getWorkTypeCode() != null) {
+					workTypeCode = this.workTypeOfDailyMap.get(procDate).getWorkTypeCode().v();
+				}
+			}
+			
 			for (val totalTimes : totalTimesList){
 				if (totalTimes.getUseAtr() == UseAtr.NotUse) continue;
 				val totalCountNo = totalTimes.getTotalCountNo();
 				val totalCondition = totalTimes.getTotalCondition();
 				val result = results.get(totalCountNo);
+				
+				// 大塚カスタマイズの条件判断
+				if (result.checkOotsukaCustomize(totalCountNo, workTypeCode) == false) continue;
 				
 				// 勤務情報の判断
 				boolean isTargetWork = false;

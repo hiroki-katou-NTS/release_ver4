@@ -7,7 +7,7 @@ import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeMonth;
 
 /**
  * 回数集計結果情報
- * @author shuichu_ishida
+ * @author shuichi_ishida
  */
 @Getter
 @Setter
@@ -17,6 +17,11 @@ public class TotalTimesResult {
 	private AttendanceDaysMonth count;
 	/** 時間 */
 	private AttendanceTimeMonth time;
+
+	/** 大塚カスタマイズ：集計対象勤務種別 */
+	public static String WORKTYPE_A = "0000000110";
+	/** 大塚カスタマイズ：集計対象勤務種別 */
+	public static String WORKTYPE_B = "0000000210";
 
 	/**
 	 * コンストラクタ
@@ -57,5 +62,23 @@ public class TotalTimesResult {
 	 */
 	public void addTime(int minutes){
 		this.time = this.time.addMinutes(minutes);
+	}
+	
+	/**
+	 * 大塚カスタマイズの条件判断
+	 * @param totalCountNo 回数集計No
+	 * @param workTypeCode 勤務種別コード
+	 * @return true:対象、false:対象外
+	 */
+	public boolean checkOotsukaCustomize(int totalCountNo, String workTypeCode){
+		
+		// 回数集計NOの判断
+		if (totalCountNo != 25 && totalCountNo != 29) return true;
+		
+		// 勤務種別コードの判断
+		if (workTypeCode.compareTo(WORKTYPE_A) == 0) return true;
+		if (workTypeCode.compareTo(WORKTYPE_B) == 0) return true;
+		
+		return false;
 	}
 }
