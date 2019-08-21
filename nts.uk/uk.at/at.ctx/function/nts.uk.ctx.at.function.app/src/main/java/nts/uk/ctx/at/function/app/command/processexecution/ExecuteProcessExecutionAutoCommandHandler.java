@@ -2871,16 +2871,18 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		}
 		List<ErrMessageInfo> errMessageInfos = this.errMessageInfoRepository
 				.getAllErrMessageInfoByEmpID(empCalAndSumExeLog.getEmpCalAndSumExecLogID());
-		List<String> errorMessage = errMessageInfos.stream().map(error -> {
-			return error.getMessageError().v();
-		}).collect(Collectors.toList());
 		
 		if ("日別作成".equals(typeExecution)) {
-			if(!errorMessage.isEmpty()) {
+
+			if (!errMessageInfos.stream()
+					.filter(c -> c.getExecutionContent().value == ExecutionContent.DAILY_CREATION.value)
+					.collect(Collectors.toList()).isEmpty()) {
 				throw new CreateDailyException(null);
 			}
 		} else {
-			if (isInterrupt) {
+			if (!errMessageInfos.stream()
+					.filter(c -> c.getExecutionContent().value == ExecutionContent.DAILY_CALCULATION.value)
+					.collect(Collectors.toList()).isEmpty()) {
 				throw new DailyCalculateException(null);
 			}
 		}
