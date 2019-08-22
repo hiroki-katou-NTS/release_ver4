@@ -94,6 +94,7 @@ public class TotalCountByPeriod implements Cloneable {
 				monthlyCalcDailys.getAnyItemValueOfDailyList(),
 				new ArrayList<>(monthlyCalcDailys.getTimeLeaveOfDailyMap().values()),
 				new ArrayList<>(monthlyCalcDailys.getWorkInfoOfDailyMap().values()),
+				new ArrayList<>(monthlyCalcDailys.getWorkTypeOfDailyMap().values()),
 				companySets.getAllWorkTypeMap(),
 				repositories.getWorkType(),
 				companySets.getOptionalItemMap());

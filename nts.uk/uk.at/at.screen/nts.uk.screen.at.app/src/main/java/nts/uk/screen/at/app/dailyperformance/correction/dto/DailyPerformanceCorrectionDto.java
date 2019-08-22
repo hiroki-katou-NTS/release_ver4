@@ -396,7 +396,7 @@ public class DailyPerformanceCorrectionDto implements Serializable{
 	public void checkShowTighProcess(int displayMode, boolean userLogin){
 		this.showTighProcess = identityProcessDto.isUseIdentityOfMonth() && displayMode == 0 && userLogin && indentityMonthResult.getEnableButton();
 		indentityMonthResult.setShow26(indentityMonthResult.getShow26() && identityProcessDto.isUseIdentityOfMonth() && displayMode == 0 && userLogin);
-		indentityMonthResult.setHideAll(displayMode != 0 || !identityProcessDto.isUseIdentityOfMonth());
+		indentityMonthResult.setHideAll(displayMode != 0 || !identityProcessDto.isUseIdentityOfMonth() || indentityMonthResult.getHideAll());
 	}
 	
 	public void resetDailyInit() {

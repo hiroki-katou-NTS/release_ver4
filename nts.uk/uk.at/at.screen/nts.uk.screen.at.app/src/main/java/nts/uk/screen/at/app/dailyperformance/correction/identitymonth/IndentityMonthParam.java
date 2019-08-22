@@ -15,4 +15,6 @@ public class IndentityMonthParam {
 	public String employeeId;
 	
 	public GeneralDate dateRefer;
+	
+	public Integer closureId;
 }

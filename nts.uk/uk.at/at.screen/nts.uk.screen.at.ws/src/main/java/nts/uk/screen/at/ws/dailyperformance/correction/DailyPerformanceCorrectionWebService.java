@@ -330,6 +330,8 @@ public class DailyPerformanceCorrectionWebService {
 		}
 		loadVerData.setLstDomainOld(dailyEdits);
 		loadVerData.setApprovalConfirmCache((ApprovalConfirmCache)session.getAttribute("approvalConfirm"));
+		Integer closureId = (Integer) session.getAttribute("closureId");
+		loadVerData.setClosureId(closureId);
 		val result = dPLoadVerProcessor.loadVerAfterCheckbox(loadVerData);
 		session.setAttribute("domainEdits", null);
 		session.setAttribute("domainOlds", result.getLstDomainOld());

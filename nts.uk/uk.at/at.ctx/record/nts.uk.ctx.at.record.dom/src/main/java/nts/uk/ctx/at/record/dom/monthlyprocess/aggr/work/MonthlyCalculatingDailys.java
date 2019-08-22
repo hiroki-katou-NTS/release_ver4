@@ -12,6 +12,7 @@ import lombok.Setter;
 import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.affiliationinformation.WorkTypeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
@@ -52,6 +53,8 @@ public class MonthlyCalculatingDailys {
 	private List<AnnualLeaveGrantRemaining> grantRemainingDatas;
 	/** 積立年休付与残数データリスト */
 	private List<ReserveLeaveGrantRemaining> rsvGrantRemainingDatas;
+	/** 日別実績の勤務種別 */
+	private Map<GeneralDate, WorkTypeOfDailyPerformance> workTypeOfDailyMap;
 	
 	public MonthlyCalculatingDailys(){
 		this.attendanceTimeOfDailyMap = new HashMap<>();
@@ -64,6 +67,7 @@ public class MonthlyCalculatingDailys {
 		this.pcLogonInfoMap = new HashMap<>();
 		this.grantRemainingDatas = new ArrayList<>();
 		this.rsvGrantRemainingDatas = new ArrayList<>();
+		this.workTypeOfDailyMap = new HashMap<>();
 	}
 	
 	/**
@@ -211,6 +215,12 @@ public class MonthlyCalculatingDailys {
 				val pcLogonInfo = dailyWork.getPcLogOnInfo().get();
 				result.pcLogonInfoMap.put(pcLogonInfo.getYmd(), pcLogonInfo);
 			}
+			
+			// 日別実績の勤務種別
+			if (dailyWork.getBusinessType().isPresent()) {
+				val workType = dailyWork.getBusinessType().get();
+				result.workTypeOfDailyMap.put(workType.getDate(), workType);
+			}
 		}
 		
 		return result;
@@ -289,6 +299,13 @@ public class MonthlyCalculatingDailys {
 		this.rsvGrantRemainingDatas =
 				repositories.getRsvLeaGrantRemData().findNotExp(employeeId, null).stream()
 						.map(c -> new ReserveLeaveGrantRemaining(c)).collect(Collectors.toList());
+		
+		// 日別実績の勤務種別
+		val workTypes = repositories.getWorkTypeOfDaily().finds(employeeIds, period);
+		for (val workType : workTypes){
+			val ymd = workType.getDate();
+			this.workTypeOfDailyMap.putIfAbsent(ymd, workType);
+		}
 	}
 	
 	/**

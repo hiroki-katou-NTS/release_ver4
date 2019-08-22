@@ -36,7 +36,8 @@ public class PlanVacationRuleExportImpl implements PlanVacationRuleExport{
 	@Inject
 	private ClosureService closureService;
 	@Override
-	public List<PlanVacationRuleError> checkMaximumOfPlan(String cid, String employeeId, String workTypeCode, DatePeriod dateData) {
+	public List<PlanVacationRuleError> checkMaximumOfPlan(String cid, String employeeId, String workTypeCode, DatePeriod dateData,
+			List<GeneralDate> lstDateIsHoliday) {
 		List<PlanVacationRuleError> lstOutput = new ArrayList<>();
 		//指定する期間内の計画休暇のルールの履歴を取得する
 		//ドメインモデル「計画休暇のルールの履歴」を取得する
@@ -64,7 +65,7 @@ public class PlanVacationRuleExportImpl implements PlanVacationRuleExport{
 				//指定期間の計画年休の上限チェック
 				DatePeriod dateCheck = new DatePeriod(data.start(), data.end());
 				CheckMaximumOfPlanParam planParam = new CheckMaximumOfPlanParam(cid, employeeId, workTypeCode, dateCheck, data.getMaxDay().v(), dateData);
-				if(this.checkMaxPlanSpecification(planParam)) {
+				if(this.checkMaxPlanSpecification(planParam, lstDateIsHoliday)) {
 					//「上限日数超過」を「計画年休の上限チェックの結果」．エラー情報に追加する
 					lstOutput.add(PlanVacationRuleError.OVERLIMIT);
 					return lstOutput;
@@ -96,7 +97,7 @@ public class PlanVacationRuleExportImpl implements PlanVacationRuleExport{
 		return outData;
 	}
 	@Override
-	public boolean checkMaxPlanSpecification(CheckMaximumOfPlanParam planParam) {
+	public boolean checkMaxPlanSpecification(CheckMaximumOfPlanParam planParam, List<GeneralDate> lstDateIsHoliday) {
 		boolean outputData = false;
 		//チェック期間による申請期間を編集する
 		DatePeriod editDate = this.getEditDate(planParam.getDateCheck(), planParam.getAppDate());
@@ -108,8 +109,16 @@ public class PlanVacationRuleExportImpl implements PlanVacationRuleExport{
 		int useDay = this.getUseDays(lstDateDetail, editDate);
 		GeneralDate sD = editDate.start();
 		GeneralDate eD = editDate.end();
-		//申請する計画年休日数=申請終了日(編集後)-申請開始日(編集後) + 1日
-		Integer appDayCount = sD.daysTo(eD) + 1;
+		Integer appDayCount = 0;
+		for(int i = 0; sD.daysTo(eD) - i >= 0; i++){
+			GeneralDate loopDate = sD.addDays(i);
+			if(lstDateIsHoliday.contains(loopDate)) {
+				continue;
+			}
+			//INPUT.申請開始日～INPUT.申請終了日の期間から、INPUT.休日の申請日Listに一致する日を除いた年月日List（Ａ）を作成する
+			appDayCount += 1;
+		}
+		
 		//(使用済の計画年休日数＋申請する計画年休日数)はINPUT．上限日数と比較する
 		if(useDay + appDayCount > planParam.getMaxNumber()) {
 			outputData = true;

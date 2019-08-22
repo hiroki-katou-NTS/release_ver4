@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
-import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCalculateOfAppReflectParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.PreOvertimeReflectService;
@@ -30,8 +29,6 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 	private WorkUpdateService scheWork;
 	@Inject
 	private AdTimeAndAnyItemAdUpService timeAndAnyItemUpService;
-	@Inject
-	private AttendanceTimeRepository attendanceTime;
 	@Inject
 	private CommonProcessCheckService commonService;
 	@Override
@@ -87,7 +84,6 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 		}
 		//休憩時間を反映する
 		holidayWorkProcess.reflectBreakTimeFrame(holidayWorkPara, isPre, daily);			
-		attendanceTime.updateFlush(daily.getAttendanceTimeOfDailyPerformance().get());		
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(daily,
 				holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate(),
 				ApplicationType.BREAK_TIME_APPLICATION,

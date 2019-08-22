@@ -680,17 +680,30 @@ public class ValidatorDataDailyRes {
 	}
 	
 	//日の確認承認の排他チェック
-    public void checkVerConfirmApproval(ApprovalConfirmCache cacheOld, List<DPItemCheckBox> dataCheckSign, List<DPItemCheckBox> dataCheckApproval) {
+    public void checkVerConfirmApproval(ApprovalConfirmCache cacheOld, List<DPItemCheckBox> dataCheckSign, List<DPItemCheckBox> dataCheckApproval, List<DPItemValue> itemValues) {
 		String companyId = AppContexts.user().companyId();
 		String sId = AppContexts.user().employeeId();
         List<Pair<String, GeneralDate>> signChangeMap = dataCheckSign.stream().map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toList());
         List<Pair<String, GeneralDate>> approvalChangeMap = dataCheckApproval.stream().map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toList());
+        List<Pair<String, GeneralDate>> mapItemChange = itemValues.stream().map(x -> Pair.of(x.getEmployeeId(), x.getDate())).collect(Collectors.toList());
 		List<ConfirmStatusActualResult> confirmResults = confirmStatusActualDayChange.processConfirmStatus(companyId, sId, cacheOld.getEmployeeIds(), Optional.of(cacheOld.getPeriod()), Optional.empty());
 		List<ApprovalStatusActualResult> approvalResults = approvalStatusActualDayChange.processApprovalStatus(companyId, sId, cacheOld.getEmployeeIds(), Optional.of(cacheOld.getPeriod()), Optional.empty(), cacheOld.getMode());
-        confirmResults = confirmResults.stream().filter(x -> signChangeMap.contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList());
-        approvalResults = approvalResults.stream().filter(x -> approvalChangeMap.contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList());
-		cacheOld.setLstConfirm(cacheOld.getLstConfirm().stream().filter(x -> signChangeMap.contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
-        cacheOld.setLstApproval(cacheOld.getLstApproval().stream().filter(x -> approvalChangeMap.contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
+		confirmResults = confirmResults.stream()
+				.filter(x -> signChangeMap.contains(Pair.of(x.getEmployeeId(), x.getDate()))
+						|| mapItemChange.contains(Pair.of(x.getEmployeeId(), x.getDate())))
+				.collect(Collectors.toList());
+		approvalResults = approvalResults.stream()
+				.filter(x -> approvalChangeMap.contains(Pair.of(x.getEmployeeId(), x.getDate()))
+						|| mapItemChange.contains(Pair.of(x.getEmployeeId(), x.getDate())))
+				.collect(Collectors.toList());
+		cacheOld.setLstConfirm(cacheOld.getLstConfirm().stream()
+				.filter(x -> signChangeMap.contains(Pair.of(x.getEmployeeId(), x.getDate()))
+						|| mapItemChange.contains(Pair.of(x.getEmployeeId(), x.getDate())))
+				.collect(Collectors.toList()));
+		cacheOld.setLstApproval(cacheOld.getLstApproval().stream()
+				.filter(x -> approvalChangeMap.contains(Pair.of(x.getEmployeeId(), x.getDate()))
+						|| mapItemChange.contains(Pair.of(x.getEmployeeId(), x.getDate())))
+				.collect(Collectors.toList()));
 		ApprovalConfirmCache cacheNew = new ApprovalConfirmCache(sId,  cacheOld.getEmployeeIds(), cacheOld.getPeriod(), cacheOld.getMode(), confirmResults, approvalResults);
 		cacheOld.checkVer(cacheNew);
 	}

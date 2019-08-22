@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
+import nts.uk.ctx.at.record.dom.affiliationinformation.repository.WorkTypeOfDailyPerforRepository;
 import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
 import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
@@ -38,6 +39,9 @@ public class GetTotalTimesFromDailyRecordImpl implements GetTotalTimesFromDailyR
 	/** 日別実績の勤務情報 */
 	@Inject
 	public WorkInformationRepository workInfoOfDailyRepo;
+	/** 日別実績の勤務種別 */
+	@Inject
+	public WorkTypeOfDailyPerforRepository workTypeOfDailyRepo;
 	/** 勤務種類の取得 */
 	@Inject
 	private WorkTypeRepository workTypeRepo;
@@ -59,6 +63,7 @@ public class GetTotalTimesFromDailyRecordImpl implements GetTotalTimesFromDailyR
 				this.anyItemValueOfDailyRepo,
 				this.timeLeavingOfDailyRepo,
 				this.workInfoOfDailyRepo,
+				this.workTypeOfDailyRepo,
 				this.workTypeRepo,
 				this.optionalItemRepo);
 		return algorithm.getResult(totalTimes, period, this.attendanceItemConverter);
@@ -75,6 +80,7 @@ public class GetTotalTimesFromDailyRecordImpl implements GetTotalTimesFromDailyR
 				this.anyItemValueOfDailyRepo,
 				this.timeLeavingOfDailyRepo,
 				this.workInfoOfDailyRepo,
+				this.workTypeOfDailyRepo,
 				this.workTypeRepo,
 				this.optionalItemRepo);
 		return algorithm.getResults(totalTimesList, period, this.attendanceItemConverter);

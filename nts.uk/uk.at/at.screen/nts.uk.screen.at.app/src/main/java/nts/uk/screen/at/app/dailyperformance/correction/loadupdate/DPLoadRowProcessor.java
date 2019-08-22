@@ -151,7 +151,7 @@ public class DPLoadRowProcessor {
 				} else {
 					// checkIndenityMonth
 					result.setIndentityMonthResult(checkIndentityMonth.checkIndenityMonth(
-							new IndentityMonthParam(companyId, sId, GeneralDate.today())));
+							new IndentityMonthParam(companyId, sId, GeneralDate.today(), param.getClosureId())));
 					//対象日の本人確認が済んでいるかチェックする
 					result.checkShowTighProcess(displayFormat, true);
 				}

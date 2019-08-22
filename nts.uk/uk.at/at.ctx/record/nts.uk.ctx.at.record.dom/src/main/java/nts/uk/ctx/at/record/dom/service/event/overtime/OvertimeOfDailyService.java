@@ -191,7 +191,10 @@ public class OvertimeOfDailyService {
 		//editStateDaily.deleteByListItemId(working.getWorkInformation().getEmployeeId(), working.getWorkInformation().getYmd(), itemIdList);
 
 		if(isSaveDirect){
-			this.deleteItemEdit(working.getEditState(), itemIdList);
+			List<Integer> lstDeleteItem = this.deleteItemEdit(working.getEditState(), itemIdList);
+			if(!itemIdList.isEmpty()) {
+				editStateDaily.deleteByListItemId(working.getWorkInformation().getEmployeeId(), working.getWorkInformation().getYmd(), lstDeleteItem);	
+			}
 		}
 		//削除
 //		List<EditStateOfDailyPerformance> editState = new ArrayList<>(working.getEditState());
@@ -209,17 +212,18 @@ public class OvertimeOfDailyService {
 //		}
 		return working;
 	}
-	private void deleteItemEdit(List<EditStateOfDailyPerformance> editState, List<Integer> deleteItem) {
+	private List<Integer> deleteItemEdit(List<EditStateOfDailyPerformance> editState, List<Integer> deleteItem) {
+		List<Integer> outputList = new ArrayList<>();
 		if(editState.isEmpty() || deleteItem.isEmpty()) {
-			return;
-		}		
-		/*List<EditStateOfDailyPerformance> temp = editState.stream().map(x -> new EditStateOfDailyPerformance(x.getEmployeeId(), x.getAttendanceItemId(), x.getYmd(), x.getEditStateSetting()))
-				.collect(Collectors.toList());*/
+			return outputList;
+		}	
 		List<EditStateOfDailyPerformance> temp = new ArrayList<>(editState);
 		for (EditStateOfDailyPerformance a : temp) {
 			if(deleteItem.contains(a.getAttendanceItemId())) {
 				editState.remove(editState.indexOf(a));
+				outputList.add(a.getAttendanceItemId());
 			}
 		}
+		return outputList;
 	}
 }

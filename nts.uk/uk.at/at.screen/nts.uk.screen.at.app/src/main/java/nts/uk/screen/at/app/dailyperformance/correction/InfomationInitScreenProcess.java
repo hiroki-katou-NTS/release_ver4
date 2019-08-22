@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.val;
-import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalUseSettingDto;
@@ -244,7 +243,7 @@ public class InfomationInitScreenProcess {
 		DisplayItem disItem = processor.getDisplayItems(correct, formatCodes, companyId, screenDto, listEmployeeId, showButton, dailyPerformanceDto);
 		if(disItem == null || !disItem.getErrors().isEmpty()) {
 			if(disItem != null) screenDto.setErrors(disItem.getErrors());
-			return Pair.of(screenDto, listEmployeeId.isEmpty() ? null : new ParamCommonAsync(listEmployeeId.get(0), dateRange, screenDto.getEmploymentCode(), screenDto.getAutBussCode(), displayFormat, screenDto.getIdentityProcessDto()));
+			return Pair.of(screenDto, listEmployeeId.isEmpty() ? null : new ParamCommonAsync(listEmployeeId.get(0), dateRange, screenDto.getEmploymentCode(), screenDto.getAutBussCode(), displayFormat, screenDto.getIdentityProcessDto(), screenDto.getClosureId()));
 		}
 		screenDto.setAutBussCode(disItem.getAutBussCode());
 		screenDto.setEmployeeIds(listEmployeeId);
@@ -254,6 +253,6 @@ public class InfomationInitScreenProcess {
 		screenDto.setLstControlDisplayItem(dPControlDisplayItem);
 		screenDto.setDisItem(disItem);
 		System.out.println("time init All" + (System.currentTimeMillis() - timeStart));
-		return Pair.of(screenDto, listEmployeeId.isEmpty() ? null : new ParamCommonAsync(listEmployeeId.get(0), dateRange, screenDto.getEmploymentCode(), screenDto.getAutBussCode(), displayFormat, screenDto.getIdentityProcessDto()));
+		return Pair.of(screenDto, listEmployeeId.isEmpty() ? null : new ParamCommonAsync(listEmployeeId.get(0), dateRange, screenDto.getEmploymentCode(), screenDto.getAutBussCode(), displayFormat, screenDto.getIdentityProcessDto(), screenDto.getClosureId()));
 	}
 }

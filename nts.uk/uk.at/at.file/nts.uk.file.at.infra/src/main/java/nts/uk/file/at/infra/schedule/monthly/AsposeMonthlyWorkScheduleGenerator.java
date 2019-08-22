@@ -641,8 +641,10 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		Map<String, WorkplaceInfo> lstWorkplace = new TreeMap<>(); // Automatically sort by code, will need to check hierarchy later
 		List<String> lstWorkplaceId = new ArrayList<>();
 		List<String> lstEmployeeNoWorkplace = new ArrayList<>();
+		// 帳票用の基準日取得
+		int closureId = query.getClosureId() == 0 ? 1 : query.getClosureId();
 		//マスタの取得（月次）
-		DatePeriod DatePeriod = closureService.getClosurePeriod(query.getClosureId(), query.getEndYearMonth());
+		DatePeriod DatePeriod = closureService.getClosurePeriod(closureId, query.getEndYearMonth());
 		//締め期間．終了年月日
 		GeneralDate finalDate = DatePeriod.end();
 		
@@ -724,8 +726,6 @@ public class AsposeMonthlyWorkScheduleGenerator extends AsposeCellsReportGenerat
 		}
 		
 		List<MonthlyAttendanceItemValueResult> itemValues;
-		// 帳票用の基準日取得
-		int closureId = query.getClosureId() == 0 ? 1 : query.getClosureId();
 
 		Optional<GeneralDate> baseDate = service.getProcessingYM(companyId, closureId);
 		if (!baseDate.isPresent()) {

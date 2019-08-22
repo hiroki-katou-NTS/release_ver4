@@ -235,7 +235,7 @@ public class ApprovalStatusMonthly {
 					}
 					for (ApproveRootStatusForEmpImport approvalDayStatus : lstApprovalDayStatus) {
 						if (listDateApprove.contains(approvalDayStatus.getAppDate()) && (approvalDayStatus
-								.getApprovalStatus().value == ApprovalStatusForEmployee.APPROVED.value
+								.getApprovalStatus().value == ApprovalStatusForEmployee.UNAPPROVED.value
 								|| approvalDayStatus
 										.getApprovalStatus().value == ApprovalStatusForEmployee.DURING_APPROVAL.value)) {
 							// パラメータ「月の実績の承認状況」をセットする

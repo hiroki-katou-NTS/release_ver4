@@ -19,4 +19,5 @@ public class LoadVerData {
    List<DailyRecordDto> lstDomainOld;
    int  displayFormat;
    ApprovalConfirmCache approvalConfirmCache;
+   Integer closureId;
 }

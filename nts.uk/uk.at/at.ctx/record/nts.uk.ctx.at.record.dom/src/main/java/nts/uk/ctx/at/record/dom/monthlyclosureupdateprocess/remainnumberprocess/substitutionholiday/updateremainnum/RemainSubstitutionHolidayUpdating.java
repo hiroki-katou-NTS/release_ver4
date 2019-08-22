@@ -107,6 +107,9 @@ public class RemainSubstitutionHolidayUpdating {
 
 	// 振休管理データの更新
 	private void updateSubstitutionHolidayMngData(String companyId, List<AbsRecDetailPara> lstAbsRecMng) {
+		//大塚カスタマイズ　振休残数がマイナスの場合でも、常にクリアする。
+		boolean isOotsuka = true;
+		
 		if (CollectionUtil.isEmpty(lstAbsRecMng))
 			return;
 		lstAbsRecMng = lstAbsRecMng.stream().filter(a -> a.getOccurrentClass() == OccurrenceDigClass.DIGESTION)
@@ -124,14 +127,14 @@ public class RemainSubstitutionHolidayUpdating {
 				// update
 				SubstitutionOfHDManagementData substitutionData = optSubData.get();
 				substitutionData.setRequiredDays(new ManagementDataDaysAtr(unOffsetOfAb.getRequestDays()));
-				substitutionData.setRemainsDay(unOffsetOfAb.getUnOffSetDays());
+				substitutionData.setRemainsDay(isOotsuka ? 0 : unOffsetOfAb.getUnOffSetDays());
 				substitutionMngDataRepo.update(substitutionData);
 			} else {
 				// insert
 				SubstitutionOfHDManagementData substitutionData = new SubstitutionOfHDManagementData(
 						unOffsetOfAb.getAbsMngId(), companyId, data.getSid(), data.getYmdData(),
 						new ManagementDataDaysAtr(unOffsetOfAb.getRequestDays()),
-						new ManagementDataRemainUnit(unOffsetOfAb.getUnOffSetDays()));
+						new ManagementDataRemainUnit(isOotsuka ? 0 : unOffsetOfAb.getUnOffSetDays()));
 				substitutionMngDataRepo.create(substitutionData);
 			}
 		}

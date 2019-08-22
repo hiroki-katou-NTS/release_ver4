@@ -27,4 +27,6 @@ public class ParamCommonAsync implements Serializable{
 	 int displayFormat;
 	 
 	 IdentityProcessUseSetDto identityUseSetDto;
+	 
+	 Integer closureId;
 }

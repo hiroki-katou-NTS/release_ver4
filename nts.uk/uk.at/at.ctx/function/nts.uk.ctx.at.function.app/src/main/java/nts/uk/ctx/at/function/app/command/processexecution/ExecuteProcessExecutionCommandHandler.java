@@ -1578,12 +1578,24 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 								listDatePeriodWorktype = wkTypeInfoChangePeriod.getWkTypeInfoChangePeriod(empLeader, datePeriod, listBusinessTypeOfEmpDto, true);
 							}
 							listDatePeriodAll.addAll(createListAllPeriod(listDatePeriodWorkplace,listDatePeriodWorktype));
-							for(DatePeriod p : listDatePeriodAll) {
-								log.info("更新処理自動実行_日別実績の作成_START_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());
-								isHasInterrupt = this.RedoDailyPerformanceProcessing(context, companyId, empLeader,
-									p,
-									empCalAndSumExeLog.getEmpCalAndSumExecLogID(), dailyCreateLog, procExec);
-							}
+							
+							try {
+								for (DatePeriod p : listDatePeriodAll) {
+
+									log.info("更新処理自動実行_日別実績の作成_START_" + procExec.getExecItemCd() + "_"
+											+ GeneralDateTime.now());
+									isHasInterrupt = this.RedoDailyPerformanceProcessing(context, companyId, empLeader,
+											p, empCalAndSumExeLog.getEmpCalAndSumExecLogID(), dailyCreateLog, procExec);
+								}
+							} catch (RuntimeException ex) {
+								if(ex instanceof CreateDailyException) {
+									//create error
+									isHasCreateDailyException = true;
+								}else {
+									//calculation error
+									isHasDailyCalculateException = true;
+								}
+							} 
 							if (isHasInterrupt) {
 								break;
 							}

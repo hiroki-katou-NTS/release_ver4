@@ -16,6 +16,7 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
 import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
 import nts.uk.ctx.at.record.dom.adapter.company.SyCompanyRecordAdapter;
+import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.AggrPeriodEachActualClosure;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.ClosurePeriod;
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.GetClosurePeriod;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.identificationstatus.export.CheckIndentityDayConfirm;
@@ -53,9 +54,16 @@ public class CheckIndentityMonth {
 		if (closurePeriods.isEmpty())
 			return new IndentityMonthResult(false, false, false);
 
-		Pair<DatePeriod, ClosurePeriod> pairClosure = getDatePeriodOldest(closurePeriods);
-		ClosurePeriod closurePeriodOldest = pairClosure.getRight();
-		DatePeriod datePeriodOldest = pairClosure.getLeft();
+//		Pair<DatePeriod, ClosurePeriod> pairClosure = getDatePeriodOldest(closurePeriods);
+//		ClosurePeriod closurePeriodOldest = pairClosure.getRight();
+		//「対象締め」に対応する締め期間が取得できているかチェックする
+		AggrPeriodEachActualClosure closurePeriodOldest = closurePeriods.stream().flatMap(x -> x.getAggrPeriods().stream())
+				.filter(x -> x.getClosureId().value == param.getClosureId()).findFirst()
+				.orElse(null);
+		DatePeriod datePeriodOldest = closurePeriodOldest == null ? null : closurePeriodOldest.getPeriod();
+		if(datePeriodOldest == null) {
+			return new IndentityMonthResult(false, false, true);
+		}
 		// 月の本人確認を取得する
 		Optional<ConfirmationMonth> optCMonth = confirmationMonthRepository.findByKey(param.companyId, param.employeeId,
 				closurePeriodOldest.getClosureId(),

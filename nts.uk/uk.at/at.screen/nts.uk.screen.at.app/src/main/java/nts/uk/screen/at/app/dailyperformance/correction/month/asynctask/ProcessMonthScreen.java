@@ -66,7 +66,7 @@ public class ProcessMonthScreen {
 				} else {
 					// checkIndenityMonth
 					screenDto.setIndentityMonthResult(checkIndentityMonth
-							.checkIndenityMonth(new IndentityMonthParam(companyId, sId, GeneralDate.today())));
+							.checkIndenityMonth(new IndentityMonthParam(companyId, sId, GeneralDate.today(), param.getClosureId())));
 					// 対象日の本人確認が済んでいるかチェックする
 					screenDto.checkShowTighProcess(param.displayFormat, true);
 				}

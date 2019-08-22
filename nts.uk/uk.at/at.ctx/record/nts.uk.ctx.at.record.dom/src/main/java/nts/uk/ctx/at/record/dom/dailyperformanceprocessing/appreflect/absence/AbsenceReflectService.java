@@ -1,9 +1,7 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.absence;
 
-import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.workchange.WorkChangeCommonReflectPara;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
-import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 
 import java.util.Optional;
@@ -44,7 +42,8 @@ public interface AbsenceReflectService {
 	 * @param workTypeCode
 	 * @return
 	 */
-	public boolean checkTimeClean(String employeeId, GeneralDate baseDate, String workTypeCode);
+	public boolean checkTimeClean(String employeeId, GeneralDate baseDate, String workTypeCode,
+			Optional<TimeLeavingOfDailyPerformance> optTimeLeavingOfDaily);
 	
 	
 }

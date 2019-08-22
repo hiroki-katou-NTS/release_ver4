@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.absenceleave;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,7 +17,6 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.P
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.StartEndTimeOffReflect;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime.StartEndTimeRelectCheck;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
-import nts.uk.ctx.at.record.dom.workinformation.ScheduleTimeSheet;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
@@ -27,7 +25,6 @@ import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
 import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
-import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.SetupType;
@@ -55,8 +52,6 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 	private PredetemineTimeSettingRepository predetemineTimeRepo;
 	@Inject
 	private StartEndTimeOffReflect recordStartEndTimeRelect;
-	@Inject 
-	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDaily;
 	@Inject
 	private CommonProcessCheckService commonService;
 	@Inject
@@ -217,7 +212,7 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 				workUpdate.updateRecordWorkTime(param.getEmployeeId(), appDate, null, false, dailyInfor);
 			}
 			//開始終了時刻が反映できるか(1日休日)
-			if(this.checkReflectRecordStartEndTime(param.getEmployeeId(), appDate, 1, true)) {
+			if(this.checkReflectRecordStartEndTime(param.getEmployeeId(), appDate, 1, true, dailyInfor.getAttendanceLeave())) {
 				//開始時刻の反映 開始時刻をクリア
 				//終了時刻の反映 終了時刻をクリア
 				workTimeUpdate.cleanRecordTimeData(param.getEmployeeId(), appDate, dailyInfor);
@@ -240,10 +235,10 @@ public class AbsenceLeaveReflectServiceImpl implements AbsenceLeaveReflectServic
 	}
 
 	@Override
-	public boolean checkReflectRecordStartEndTime(String employeeId, GeneralDate baseDate, Integer frameNo, boolean isAttendence) {
+	public boolean checkReflectRecordStartEndTime(String employeeId, GeneralDate baseDate, Integer frameNo, boolean isAttendence,
+			Optional<TimeLeavingOfDailyPerformance> optTimeLeaving) {
 		//出勤時刻を取得する
 		//打刻元情報を取得する
-		Optional<TimeLeavingOfDailyPerformance> optTimeLeaving = timeLeavingOfDaily.findByKey(employeeId, baseDate);
 		if(!optTimeLeaving.isPresent()) {
 			return false;
 		}
