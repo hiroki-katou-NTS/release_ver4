@@ -139,18 +139,10 @@ public class DPDisplayLockProcessor {
 		List<WorkInfoOfDailyPerformanceDto> workInfoOfDaily = repo.getListWorkInfoOfDailyPerformance(listEmployeeId,
 				dateRange);
 		
-		if (displayFormat == 0) {
-			// フレックス情報を表示する
-			if (listEmployeeId.get(0).equals(sId)) {
-				//checkIndenityMonth
-				result.setIndentityMonthResult(checkIndentityMonth.checkIndenityMonth(new IndentityMonthParam(companyId, sId, GeneralDate.today(), param.getClosureId())));
-				//対象日の本人確認が済んでいるかチェックする
-				result.checkShowTighProcess(displayFormat, true);
-			}else {
-				result.getIndentityMonthResult().setHideAll(true);
-			}
-			// screenDto.setFlexShortage(null);
-		}
+		// checkIndenityMonth
+		result.setIndentityMonthResult(checkIndentityMonth.checkIndenityMonth(
+				new IndentityMonthParam(companyId, sId, dateRange.getEndDate(), param.getClosureId(), displayFormat, identityProcessDtoOpt)));
+		// 対象日の本人確認が済んでいるかチェックする
 		
 		//cell hide check box approval
 		List<DPHideControlCell> lstCellHideControl = new ArrayList<>();

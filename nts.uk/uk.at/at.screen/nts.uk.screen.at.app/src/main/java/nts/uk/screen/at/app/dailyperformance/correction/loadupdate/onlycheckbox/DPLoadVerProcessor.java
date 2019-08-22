@@ -16,17 +16,17 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.Ap
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ConfirmStatusActualResult;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.approval.ApprovalStatusActualDayChange;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.change.confirm.ConfirmStatusActualDayChange;
-import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.screen.at.app.dailymodify.query.DailyModifyQueryProcessor;
 import nts.uk.screen.at.app.dailymodify.query.DailyModifyResult;
+import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceScreenRepo;
 import nts.uk.screen.at.app.dailyperformance.correction.GetDataDaily;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalConfirmCache;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.EmpAndDate;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.IdentityProcessUseSetDto;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.CheckIndentityMonth;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityMonthParam;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityMonthResult;
 import nts.uk.shr.com.context.AppContexts;
-import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class DPLoadVerProcessor {
@@ -38,13 +38,13 @@ public class DPLoadVerProcessor {
 	private CheckIndentityMonth checkIndentityMonth;
 
 	@Inject
-	private ClosureService closureService;
-	
-	@Inject
 	private ApprovalStatusActualDayChange approvalStatusActualDayChange;
 	
 	@Inject
 	private ConfirmStatusActualDayChange confirmStatusActualDayChange;
+	
+	@Inject
+	private DailyPerformanceScreenRepo repo;
 
 	public LoadVerDataResult loadVerAfterCheckbox(LoadVerData loadVerData) {
 		LoadVerDataResult result = new LoadVerDataResult();
@@ -69,20 +69,11 @@ public class DPLoadVerProcessor {
 		}).collect(Collectors.toList()));
 		List<String> emp = lstDataChange.stream().map(x -> x.getEmployeeId()).distinct().collect(Collectors.toList());
 		if (!emp.isEmpty() && emp.get(0).equals(sId) && loadVerData.getDisplayFormat() == 0) {
-			// 社員に対応する締め期間を取得する
-			DatePeriod period = closureService.findClosurePeriod(sId, loadVerData.getDateRange().getEndDate());
-
-			// パラメータ「日別実績の修正の状態．対象期間．終了日」がパラメータ「締め期間」に含まれているかチェックする
-			if (!period.contains(loadVerData.getDateRange().getEndDate())) {
-				result.setIndentityMonthResult(new IndentityMonthResult(false, true, true));
-				// 対象日の本人確認が済んでいるかチェックする
-				// screenDto.checkShowTighProcess(displayFormat, true);
-			} else {
 				// checkIndenityMonth
-				result.setIndentityMonthResult(checkIndentityMonth
-						.checkIndenityMonth(new IndentityMonthParam(companyId, sId, GeneralDate.today(), loadVerData.closureId)));
+			Optional<IdentityProcessUseSetDto> identityProcessDtoOpt = repo.findIdentityProcessUseSet(companyId);
+			result.setIndentityMonthResult(checkIndentityMonth.checkIndenityMonth(new IndentityMonthParam(companyId,
+					sId, loadVerData.getDateRange().getEndDate(), loadVerData.closureId, loadVerData.getDisplayFormat(), identityProcessDtoOpt)));
 				// 対象日の本人確認が済んでいるかチェックする
-			}
 		} else {
 			result.setIndentityMonthResult(new IndentityMonthResult(false, false, true));
 		}

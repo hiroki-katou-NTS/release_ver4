@@ -28,7 +28,6 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCR
 import nts.uk.ctx.at.record.dom.workinformation.enums.CalculationState;
 import nts.uk.ctx.at.shared.dom.attendance.util.AttendanceItemUtil;
 import nts.uk.ctx.at.shared.dom.attendance.util.item.ItemValue;
-import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.screen.at.app.dailymodify.query.DailyModifyQueryProcessor;
 import nts.uk.screen.at.app.dailymodify.query.DailyModifyResult;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceCorrectionProcessor;
@@ -58,7 +57,6 @@ import nts.uk.screen.at.app.dailyperformance.correction.dto.WorkInfoOfDailyPerfo
 import nts.uk.screen.at.app.dailyperformance.correction.dto.checkapproval.ApproveRootStatusForEmpDto;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.CheckIndentityMonth;
 import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityMonthParam;
-import nts.uk.screen.at.app.dailyperformance.correction.identitymonth.IndentityMonthResult;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.DPLock;
 import nts.uk.screen.at.app.dailyperformance.correction.lock.DPLockDto;
 import nts.uk.screen.at.app.dailyperformance.correction.monthflex.DPMonthFlexParam;
@@ -97,9 +95,6 @@ public class DPLoadRowProcessor {
     
     @Inject
 	private CheckIndentityMonth checkIndentityMonth;
-    
-    @Inject
-	private ClosureService closureService;
     
 	@Inject
 	private IFindDataDCRecord iFindDataDCRecord;
@@ -140,22 +135,10 @@ public class DPLoadRowProcessor {
 			// screenDto.setFlexShortage(null);
 			//}
 			if (emp.equals(sId) && !param.getOnlyLoadMonth()) {
-				//社員に対応する締め期間を取得する
-				DatePeriod period = closureService.findClosurePeriod(emp, dateRange.getEndDate());
-				
-				//パラメータ「日別実績の修正の状態．対象期間．終了日」がパラメータ「締め期間」に含まれているかチェックする
-				if (!period.contains(dateRange.getEndDate())) {
-					result.setIndentityMonthResult(new IndentityMonthResult(false, true, true));
-					//対象日の本人確認が済んでいるかチェックする
-					//screenDto.checkShowTighProcess(displayFormat, true);
-				} else {
-					// checkIndenityMonth
-					result.setIndentityMonthResult(checkIndentityMonth.checkIndenityMonth(
-							new IndentityMonthParam(companyId, sId, GeneralDate.today(), param.getClosureId())));
-					//対象日の本人確認が済んでいるかチェックする
-					result.checkShowTighProcess(displayFormat, true);
-				}
-			}else {
+				// checkIndenityMonth
+				result.setIndentityMonthResult(checkIndentityMonth.checkIndenityMonth(
+						new IndentityMonthParam(companyId, sId, dateRange.getEndDate(), param.getClosureId(), param.getDisplayFormat(), result.getIdentityProcessDtoOpt())));
+			} else {
 				result.getIndentityMonthResult().setHideAll(true);
 			}
 		}

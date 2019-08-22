@@ -9,9 +9,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
 import nts.uk.ctx.at.record.dom.adapter.company.AffCompanyHistImport;
@@ -22,6 +19,9 @@ import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.GetClosurePeriod;
 import nts.uk.ctx.at.record.dom.workrecord.actualsituation.identificationstatus.export.CheckIndentityDayConfirm;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.ConfirmationMonth;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
+import nts.uk.ctx.at.shared.pub.workrule.closure.PresentClosingPeriodExport;
+import nts.uk.ctx.at.shared.pub.workrule.closure.ShClosurePub;
+import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
@@ -43,12 +43,29 @@ public class CheckIndentityMonth {
 
 	@Inject
 	private CheckIndentityDayConfirm checkIndentityDayConfirm;
+	
+	@Inject
+	private ShClosurePub shClosurePub;
 
 	// 月の本人確認をチェックする
 	public IndentityMonthResult checkIndenityMonth(IndentityMonthParam param) {
+		String empLogin = AppContexts.user().employeeId();
+		if (!empLogin.equals(param.getEmployeeId()) || param.getDisplayFormat() != 0
+				|| !param.getIndentityUseSetOpt().isPresent()
+				|| !param.getIndentityUseSetOpt().get().isUseIdentityOfMonth()) {
+			return new IndentityMonthResult(false, false, true);
+		}
+
+		Optional<PresentClosingPeriodExport> clsPeriodOpt = shClosurePub.find(param.getCompanyId(), param.getClosureId());
+		if (!clsPeriodOpt.isPresent()
+				|| clsPeriodOpt.get().getClosureStartDate().after(param.getDateRefer())
+				|| clsPeriodOpt.get().getClosureEndDate().before(param.getDateRefer())) {
+			return new IndentityMonthResult(false, false, true);
+		}
+		
 
 		// 集計期間
-		List<ClosurePeriod> closurePeriods = getClosurePeriod.get(param.companyId, param.employeeId, param.dateRefer,
+		List<ClosurePeriod> closurePeriods = getClosurePeriod.get(param.companyId, param.employeeId, clsPeriodOpt.get().getClosureEndDate(),
 				Optional.empty(), Optional.empty(), Optional.empty());
 		//closurePeriods  = closurePeriods
 		if (closurePeriods.isEmpty())
@@ -103,21 +120,6 @@ public class CheckIndentityMonth {
 		boolean checkIndentityDay = checkIndentityDayConfirm.checkIndentityDay(param.employeeId, lstDate);
 		// A2_6 show, A2_7 hide
 		return new IndentityMonthResult(true, checkIndentityDay, false);
-	}
-	
-	private Pair<DatePeriod, ClosurePeriod> getDatePeriodOldest(List<ClosurePeriod>  lstClosurePeriod) {
-		ClosurePeriod closurePeriodResult = new ClosurePeriod();
-		DatePeriod dateMax = new DatePeriod(GeneralDate.max(), GeneralDate.max());
-		for(ClosurePeriod closurePeriod : lstClosurePeriod) {
-			val lstPeriod = closurePeriod.getAggrPeriods().stream().sorted((x, y) -> x.getPeriod().start().compareTo(y.getPeriod().start())).collect(Collectors.toList());
-			if(!lstPeriod.isEmpty()) {
-				if(dateMax.start().after(lstPeriod.get(0).getPeriod().start())) {
-					dateMax = lstPeriod.get(0).getPeriod();
-					closurePeriodResult = closurePeriod;
-				}
-			}
-		}
-		return Pair.of(dateMax, closurePeriodResult);
 	}
 	
 }
