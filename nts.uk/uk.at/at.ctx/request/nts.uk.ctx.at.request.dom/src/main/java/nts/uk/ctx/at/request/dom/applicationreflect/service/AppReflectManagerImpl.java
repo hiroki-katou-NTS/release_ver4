@@ -30,6 +30,7 @@ import nts.uk.ctx.at.request.dom.application.ReasonNotReflect_New;
 import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
 import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsence;
 import nts.uk.ctx.at.request.dom.application.appabsence.AppAbsenceRepository;
+import nts.uk.ctx.at.request.dom.application.common.service.other.OtherCommonAlgorithm;
 import nts.uk.ctx.at.request.dom.application.gobackdirectly.GoBackDirectly;
 import nts.uk.ctx.at.request.dom.application.gobackdirectly.GoBackDirectlyRepository;
 import nts.uk.ctx.at.request.dom.application.holidayshipment.absenceleaveapp.AbsenceLeaveApp;
@@ -59,6 +60,7 @@ import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymont
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.ApplyTimeRequestAtr;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.WorkScheduleReflectService;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class AppReflectManagerImpl implements AppReflectManager {
@@ -91,6 +93,8 @@ public class AppReflectManagerImpl implements AppReflectManager {
 	private AppReflectManager self;
 	@Inject
 	private AppReflectProcessRecord checkReflect;
+	@Inject
+	private OtherCommonAlgorithm otherCommonAlg;
 	@PostConstruct
 	public void postContruct() {
 		this.self = scContext.getBusinessObject(AppReflectManager.class);
@@ -265,10 +269,21 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			appInfor.getReflectionInformation().setDateTimeReflectionReal(Optional.of(GeneralDateTime.now()));
 			
 		}		
-		appRepo.updateWithVersion(appInfor);
+		appRepo.updateWithVersion(appInfor);		
 		//暫定データの登録
 		if(!lstDate.isEmpty()) {
-			interimRegister.registerDateChange(appInfor.getCompanyID(), appInfor.getEmployeeID(), lstDate);	
+			GeneralDate sD = appInfor.getStartDate().isPresent() ? appInfor.getStartDate().get() : appInfor.getAppDate();
+			GeneralDate eD = appInfor.getEndDate().isPresent() ? appInfor.getEndDate().get() : appInfor.getAppDate();
+			List<GeneralDate> lstHoliday = otherCommonAlg.lstDateIsHoliday(appInfor.getCompanyID(),
+					appInfor.getEmployeeID(), new DatePeriod(sD, eD));
+			lstHoliday.stream().forEach(x -> {
+				if(lstDate.contains(x)) {
+					lstDate.remove(x);
+				}
+			});
+			if(!lstDate.isEmpty()) {
+				interimRegister.registerDateChange(appInfor.getCompanyID(), appInfor.getEmployeeID(), lstDate);	
+			}				
 		}
 	}	
 	private WorkChangeCommonReflectPara getWorkChange(Application_New appInfor, AppWorkChange workChange,
