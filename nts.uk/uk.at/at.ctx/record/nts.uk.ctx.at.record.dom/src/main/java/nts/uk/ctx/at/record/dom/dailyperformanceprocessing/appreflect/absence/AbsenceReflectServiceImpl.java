@@ -1,6 +1,5 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.absence;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,14 +14,12 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonCalculateOfAppReflectParam;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.CommonProcessCheckService;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
-import nts.uk.ctx.at.record.dom.workinformation.ScheduleTimeSheet;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeActualStamp;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingWork;
 import nts.uk.ctx.at.record.dom.worktime.WorkStamp;
 import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
-import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
@@ -41,8 +38,6 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	private JudgmentWorkTypeService judgmentService;
 	@Inject
 	private WorkTypeIsClosedService workTypeRepo;
-	@Inject
-	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDailyRepos;
 	@Inject
 	private PreOvertimeReflectService preOTService;
 	@Override
@@ -109,21 +104,21 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 	@Override
 	public void reflectRecordStartEndTime(String employeeId, GeneralDate baseDate, String workTypeCode,
 			IntegrationOfDaily dailyInfor) {
-		boolean isCheckClean =  this.checkTimeClean(employeeId, baseDate, workTypeCode);
+		boolean isCheckClean =  this.checkTimeClean(employeeId, baseDate, workTypeCode, dailyInfor.getAttendanceLeave());
 		//開始終了時刻をクリアするかチェックする 値：０になる。	
 		if(!isCheckClean) return;
 		workTimeUpdate.cleanRecordTimeData(employeeId, baseDate, dailyInfor);
 	}
 
 	@Override
-	public boolean checkTimeClean(String employeeId, GeneralDate baseDate, String workTypeCode) {
+	public boolean checkTimeClean(String employeeId, GeneralDate baseDate, String workTypeCode,
+			Optional<TimeLeavingOfDailyPerformance> optTimeLeavingOfDaily) {
 		//1日半日出勤・1日休日系の判定
 		if(basicScheService.checkWorkDay(workTypeCode) == WorkStyle.ONE_DAY_REST) {
 			//勤務種類が１日年休特休かの判断
 			boolean temp = judgmentService.checkWorkTypeIsHD(workTypeCode);
 			//打刻元情報をチェックする
 			if(temp) {
-				Optional<TimeLeavingOfDailyPerformance> optTimeLeavingOfDaily = timeLeavingOfDailyRepos.findByKey(employeeId, baseDate);
 				if(optTimeLeavingOfDaily.isPresent()) {
 					TimeLeavingOfDailyPerformance timeLeavingOfDaily = optTimeLeavingOfDaily.get();
 					if(checkReflectNenkyuTokkyu(timeLeavingOfDaily, 1)) {

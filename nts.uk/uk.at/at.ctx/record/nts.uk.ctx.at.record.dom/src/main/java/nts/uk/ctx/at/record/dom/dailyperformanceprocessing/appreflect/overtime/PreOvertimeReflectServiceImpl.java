@@ -120,8 +120,6 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 			//フレックス時間の反映
 			priorProcess.reflectOfFlexTime(param.getEmployeeId(), param.getDateInfo(), param.isTimeReflectFlg(),
 					param.getOvertimePara().getFlexExessTime(), dailyInfor);
-			attendanceTime.updateFlush(dailyInfor.getAttendanceTimeOfDailyPerformance().get());
-			
 		}
 		
 		//申請理由の反映

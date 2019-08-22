@@ -108,7 +108,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			if(!isError) {
 				throw ex;
 			}		
-			if(excLogId != "") {
+			if(!excLogId.isEmpty()) {
 				proRecord.createLogError(appInfor.getEmployeeID(), appInfor.getAppDate(), excLogId);	
 			}
 			int newCountRerun = currentRecord + 1;

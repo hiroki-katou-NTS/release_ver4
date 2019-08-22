@@ -113,14 +113,6 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 			+ " AND c.appType = :appType"
 			+ " AND c.stateReflectionReal IN :lstRef"
 			+ " ORDER BY c.appType ASC, c.inputDate DESC";
-	
-	private String SELECT_BY_REFLECT = "SELECT c FROM KrqdtApplication_New c "
-			+ " WHERE c.employeeID = :employeeID"
-			+ " AND c.appDate >= :startDate"
-			+ " AND c.appDate <= :endDate"
-			+ " AND c.appType IN :appTypes"
-			+ " AND (c.stateReflectionReal IN :stateReflectionReals"			
-			+ " OR c.stateReflection IN :stateReflection)";
 	@Override
 	public Optional<Application_New> findByID(String companyID, String appID) {
 		return this.queryProxy().query(SELECT_APPLICATION_BY_ID, KrqdtApplication_New.class)
@@ -483,20 +475,44 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		return resultList;
 	}
 	@Override
+	@SneakyThrows
 	public List<Application_New> getAppForReflect(String sid, DatePeriod dateData, List<Integer> recordStatus,
 			List<Integer> scheStatus, List<Integer> appType) {
 		List<Application_New> resultList = new ArrayList<>();
 		CollectionUtil.split(recordStatus, SPLIT_650, lstRefReal -> {
+			String subIn1 = NtsStatement.In.createParamsString(lstRefReal);
 			CollectionUtil.split(scheStatus, SPLIT_650, lstRef -> {
+				String subIn2 = NtsStatement.In.createParamsString(lstRef);
 				CollectionUtil.split(appType, SPLIT_650, lstApp -> {
-					resultList.addAll(this.queryProxy().query(SELECT_BY_REFLECT, KrqdtApplication_New.class)
-										  .setParameter("employeeID", sid)
-										  .setParameter("startDate", dateData.start())
-										  .setParameter("endDate", dateData.end())
-										  .setParameter("stateReflectionReals", lstRefReal)
-										  .setParameter("stateReflection", lstRef)
-										  .setParameter("appTypes", lstApp)
-										  .getList(x -> x.toDomain()));
+					String subIn3 = NtsStatement.In.createParamsString(lstApp);					
+					String sql = "SELECT * FROM KRQDT_APPLICATION "
+							+ "WHERE REFLECT_PLAN_STATE IN (" + subIn1 + ") "
+							+ " AND REFLECT_PER_STATE IN (" + subIn2 + ")"
+							+ " AND APP_TYPE IN (" + subIn3 + ") "
+							+ " AND APPLICANTS_SID = ?"
+							+ " AND APP_DATE >= ?"
+							+ " AND APP_DATE <= ?"
+							+ " ORDER BY APP_DATE, INPUT_DATE, PRE_POST_ATR ASC";
+					try(val stmt = this.connection().prepareStatement(sql)){
+						for (int i = 0; i < lstRefReal.size(); i++) {
+							stmt.setInt(i + 1, lstRefReal.get(i));
+						}
+						for (int i = 0; i < lstRef.size(); i++) {
+							stmt.setInt(lstRefReal.size() + i + 1, lstRef.get(i));
+						}
+						int inCount = lstRefReal.size() + lstRef.size();
+						for (int i = 0; i < lstApp.size(); i++) {
+							stmt.setInt(inCount + i + 1, lstApp.get(i));
+						}
+						int inloopCount = lstApp.size() + inCount;
+						stmt.setString(1  + inloopCount, sid);
+						stmt.setDate(2 + inloopCount, Date.valueOf(dateData.start().localDate()));
+						stmt.setDate(3 + inloopCount, Date.valueOf(dateData.end().localDate()));
+						List<Application_New> resultListTmp = entityToDomain(stmt);
+						resultList.addAll(resultListTmp);
+					} catch (SQLException e) {
+						throw new RuntimeException(e);
+					}
 				});
 			});
 		});
@@ -530,32 +546,7 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 							stmt.setInt(inCount + i + 1, lstApp.get(i));
 						}
 						stmt.setString(1  + lstApp.size() + inCount, sid);
-						List<Application_New> resultListTmp =  new NtsResultSet(stmt.executeQuery()).getList(x -> {
-							ReflectionInformation_New reflectInfor = new ReflectionInformation_New(EnumAdaptor.valueOf(x.getInt("REFLECT_PLAN_STATE"), ReflectedState_New.class),
-									EnumAdaptor.valueOf(x.getInt("REFLECT_PER_STATE"), ReflectedState_New.class), 
-									EnumAdaptor.valueOf(x.getInt("REFLECT_PLAN_ENFORCE_ATR"), DisabledSegment_New.class),
-									EnumAdaptor.valueOf(x.getInt("REFLECT_PER_ENFORCE_ATR"), DisabledSegment_New.class),
-									x.getInt("REFLECT_PLAN_SCHE_REASON") == null ? Optional.empty() :
-										Optional.ofNullable(EnumAdaptor.valueOf(x.getInt("REFLECT_PLAN_SCHE_REASON"), ReasonNotReflect_New.class)), 
-									x.getInt("REFLECT_PER_SCHE_REASON") == null ? Optional.empty() :
-										Optional.ofNullable(EnumAdaptor.valueOf(x.getInt("REFLECT_PER_SCHE_REASON"), ReasonNotReflectDaily_New.class)),
-									Optional.ofNullable(x.getGeneralDateTime("REFLECT_PLAN_TIME")),
-									Optional.ofNullable(x.getGeneralDateTime("REFLECT_PER_TIME"))); 
-							return new Application_New(x.getLong("EXCLUS_VER"),
-									x.getString("CID"),
-									x.getString("APP_ID"),
-									EnumAdaptor.valueOf(x.getInt("PRE_POST_ATR"), PrePostAtr.class),
-									x.getGeneralDateTime("INPUT_DATE"),
-									x.getString("ENTERED_PERSON_SID"),
-									new AppReason(x.getString("REASON_REVERSION")),
-									x.getGeneralDate("APP_DATE"),
-									new AppReason(x.getString("APP_REASON")),
-									EnumAdaptor.valueOf(x.getInt("APP_TYPE"), ApplicationType.class),
-									x.getString("APPLICANTS_SID"),
-									Optional.ofNullable(x.getGeneralDate("APP_START_DATE")),
-									Optional.ofNullable(x.getGeneralDate("APP_END_DATE")),
-									reflectInfor);
-						});
+						List<Application_New> resultListTmp = entityToDomain(stmt);
 						resultList.addAll(resultListTmp);
 					} catch (SQLException e) {
 						throw new RuntimeException(e);
@@ -564,5 +555,34 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 			});
 		});
 		return resultList;
+	}
+	private List<Application_New> entityToDomain(java.sql.PreparedStatement stmt) throws SQLException {
+		List<Application_New> resultListTmp =  new NtsResultSet(stmt.executeQuery()).getList(x -> {
+			ReflectionInformation_New reflectInfor = new ReflectionInformation_New(EnumAdaptor.valueOf(x.getInt("REFLECT_PLAN_STATE"), ReflectedState_New.class),
+					EnumAdaptor.valueOf(x.getInt("REFLECT_PER_STATE"), ReflectedState_New.class), 
+					EnumAdaptor.valueOf(x.getInt("REFLECT_PLAN_ENFORCE_ATR"), DisabledSegment_New.class),
+					EnumAdaptor.valueOf(x.getInt("REFLECT_PER_ENFORCE_ATR"), DisabledSegment_New.class),
+					x.getInt("REFLECT_PLAN_SCHE_REASON") == null ? Optional.empty() :
+						Optional.ofNullable(EnumAdaptor.valueOf(x.getInt("REFLECT_PLAN_SCHE_REASON"), ReasonNotReflect_New.class)), 
+					x.getInt("REFLECT_PER_SCHE_REASON") == null ? Optional.empty() :
+						Optional.ofNullable(EnumAdaptor.valueOf(x.getInt("REFLECT_PER_SCHE_REASON"), ReasonNotReflectDaily_New.class)),
+					Optional.ofNullable(x.getGeneralDateTime("REFLECT_PLAN_TIME")),
+					Optional.ofNullable(x.getGeneralDateTime("REFLECT_PER_TIME"))); 
+			return new Application_New(x.getLong("EXCLUS_VER"),
+					x.getString("CID"),
+					x.getString("APP_ID"),
+					EnumAdaptor.valueOf(x.getInt("PRE_POST_ATR"), PrePostAtr.class),
+					x.getGeneralDateTime("INPUT_DATE"),
+					x.getString("ENTERED_PERSON_SID"),
+					new AppReason(x.getString("REASON_REVERSION")),
+					x.getGeneralDate("APP_DATE"),
+					new AppReason(x.getString("APP_REASON")),
+					EnumAdaptor.valueOf(x.getInt("APP_TYPE"), ApplicationType.class),
+					x.getString("APPLICANTS_SID"),
+					Optional.ofNullable(x.getGeneralDate("APP_START_DATE")),
+					Optional.ofNullable(x.getGeneralDate("APP_END_DATE")),
+					reflectInfor);
+		});
+		return resultListTmp;
 	}
 }

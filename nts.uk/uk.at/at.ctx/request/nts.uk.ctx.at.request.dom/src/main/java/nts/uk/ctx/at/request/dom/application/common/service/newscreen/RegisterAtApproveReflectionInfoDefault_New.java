@@ -3,16 +3,18 @@ package nts.uk.ctx.at.request.dom.application.common.service.newscreen;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.ReflectedState_New;
 import nts.uk.ctx.at.request.dom.application.common.adapter.workflow.ApprovalRootStateAdapter;
-import nts.uk.ctx.at.request.dom.applicationreflect.service.AppReflectManager;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.AppReflectManagerFromRecord;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.InformationSettingOfAppForReflect;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.InformationSettingOfEachApp;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionTypeExImport;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * 2-2.新規画面登録時承認反映情報の整理
@@ -29,7 +31,7 @@ public class RegisterAtApproveReflectionInfoDefault_New implements RegisterAtApp
 	@Inject
 	private ApplicationRepository_New applicationRepository;
 	@Inject
-	private AppReflectManager appReflectManager;
+	private AppReflectManagerFromRecord appReflectManager;
 	@Inject
 	private InformationSettingOfAppForReflect appSetting;
 	@Override
@@ -64,9 +66,14 @@ public class RegisterAtApproveReflectionInfoDefault_New implements RegisterAtApp
 				|| application.getAppType().equals(ApplicationType.WORK_CHANGE_APPLICATION)
 				|| application.getAppType().equals(ApplicationType.ABSENCE_APPLICATION)
 				|| application.getAppType().equals(ApplicationType.COMPLEMENT_LEAVE_APPLICATION)){
-				Application_New application_New1 = applicationRepository.findByID(application.getCompanyID(), application.getAppID()).get();
 				InformationSettingOfEachApp reflectSetting = appSetting.getSettingOfEachApp();
-				appReflectManager.reflectEmployeeOfApp(application_New1, reflectSetting, ExecutionTypeExImport.NORMAL_EXECUTION, "", 0);
+				GeneralDate startDate = application.getStartDate().isPresent() ? application.getStartDate().get() : application.getAppDate();
+				GeneralDate endDate = application.getEndDate().isPresent() ? application.getEndDate().get() : application.getAppDate();
+				appReflectManager.reflectAppOfAppDate("",
+						application.getEmployeeID(),
+						ExecutionTypeExImport.RERUN,
+						reflectSetting,
+						new DatePeriod(startDate, endDate));
 			}
 		}
 	}
