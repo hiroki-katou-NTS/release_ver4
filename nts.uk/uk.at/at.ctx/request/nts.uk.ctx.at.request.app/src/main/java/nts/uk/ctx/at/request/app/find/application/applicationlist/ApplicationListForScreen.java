@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
@@ -303,9 +305,10 @@ public class ApplicationListForScreen {
 			GeneralDate endDate) {
 		List<ApplicationExportDto> appExportLst = this.getApplicationBySID(employeeID, startDate, endDate);
 		List<AppGroupExportDto> result = new ArrayList<>();
+		
 		Map<Object, List<AppGroupExportDto>> mapDate =  appExportLst.stream()
 				.map(x -> new AppGroupExportDto(x.getAppDate(),x.getAppType(),x.getEmployeeID(),x.getAppTypeName()))
-				.collect(Collectors.groupingBy(x -> x.getAppDate()));
+				.collect(Collectors.groupingBy(x -> Pair.of(x.getAppDate(), x.getEmployeeID())));
 		mapDate.entrySet().stream().forEach(x -> {
 			Map<Object, List<AppGroupExportDto>> mapDateType = x.getValue().stream().collect(Collectors.groupingBy(y -> y.getAppType()));
 			mapDateType.entrySet().stream().forEach(y -> {
