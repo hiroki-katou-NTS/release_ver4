@@ -14,6 +14,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.apache.log4j.Logger;
+
 import lombok.val;
 import nts.arc.layer.app.command.AsyncCommandHandlerContext;
 import nts.arc.task.parallel.ManagedParallelWithContext;
@@ -156,13 +158,20 @@ public class AppReflectManagerFromRecordImpl implements AppReflectManagerFromRec
 	public void reflectAppOfAppDate(String workId, String sid, ExecutionTypeExImport refAppResult,
 			InformationSettingOfEachApp reflectSetting, DatePeriod appDatePeriod) {
 		List<Application_New> lstApp = Collections.synchronizedList(this.getApps(sid, appDatePeriod, refAppResult));	
+		lstApp.stream().forEach(x -> {
+			appRefMng.reflectEmployeeOfApp(x, reflectSetting, refAppResult, workId, 0);
+		});
+		/*lstApp.stream().forEach(x -> {
+			Logger.getLogger(this.getClass()).info("lstApp Date: " + x.getInputDate());
+		});
 		List<Integer> tempX = lstApp.stream().map(c -> 1).collect(Collectors.toList());
 		List<Integer> processX = Collections.synchronizedList(new ArrayList<>());
 		this.managedParallelWithContext.forEach(tempX, x -> {
 			processX.add(x);
 			Application_New appData = lstApp.get(processX.size() - 1);
+			Logger.getLogger(this.getClass()).info("Application_New Date: " + appData.getInputDate());
 			appRefMng.reflectEmployeeOfApp(appData, reflectSetting, refAppResult, workId, 0);
-		});
+		});*/
 	}
 	@Override
 	public List<Application_New> getApps(String sid, DatePeriod datePeriod, ExecutionTypeExImport exeType) {
