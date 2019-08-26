@@ -4,6 +4,7 @@
  *****************************************************************/
 package nts.uk.ctx.sys.auth.ac.role.workplace;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,6 +20,9 @@ import nts.uk.ctx.sys.auth.dom.adapter.workplace.AffWorkplaceHistImport;
 import nts.uk.ctx.sys.auth.dom.adapter.workplace.AffWorkplaceImport;
 import nts.uk.ctx.sys.auth.dom.adapter.workplace.AffiliationWorkplace;
 import nts.uk.ctx.sys.auth.dom.adapter.workplace.WorkplaceAdapter;
+import nts.uk.ctx.sys.auth.dom.wkpmanager.WorkplaceManager;
+import nts.uk.ctx.sys.auth.dom.wkpmanager.WorkplaceManagerRepository;
+import nts.uk.shr.com.context.AppContexts;
 
 /**
  * The Class WorkplaceAdapterImpl.
@@ -29,6 +33,9 @@ public class WorkplaceAdapterImpl implements WorkplaceAdapter {
 	/** The sy workplace pub. */
 	@Inject
 	private SyWorkplacePub syWorkplacePub;
+	
+	@Inject
+	private WorkplaceManagerRepository workplaceManagerRepository;
 
 	/* (non-Javadoc)
 	 * @see nts.uk.ctx.sys.auth.dom.adapter.workplace.WorkplaceAdapter#findListWkpIdByBaseDate(nts.arc.time.GeneralDate)
@@ -86,6 +93,20 @@ public class WorkplaceAdapterImpl implements WorkplaceAdapter {
 		return syWorkplacePub.getByLstWkpIdAndPeriod(lstWkpId, startDate, endDate).stream().map(
 				item -> new AffWorkplaceImport(item.getEmployeeId(), item.getJobEntryDate(), item.getRetirementDate()))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<String> getWorkplaceId(GeneralDate baseDate, String employeeId) {
+		String companyID = AppContexts.user().companyId();
+		List<String> subListWorkPlace = new ArrayList<>();
+		// (Lấy all domain 「職場管理者」)
+		List<WorkplaceManager> listWorkplaceManager = workplaceManagerRepository.findListWkpManagerByEmpIdAndBaseDate(employeeId, GeneralDate.today());
+		for (WorkplaceManager workplaceManager : listWorkplaceManager) {
+			if(!subListWorkPlace.contains(workplaceManager.getWorkplaceId())){
+				subListWorkPlace.addAll(syWorkplacePub.findListWorkplaceIdByCidAndWkpIdAndBaseDate(companyID, workplaceManager.getWorkplaceId(), GeneralDate.today()));
+			}
+		}
+		return subListWorkPlace.stream().distinct().collect(Collectors.toList());
 	}
 
 	
