@@ -57,4 +57,7 @@ public interface WorkplaceAdapter {
 	
 	//find list employeeId by list wkpId (req120 ver2)
 	List<AffWorkplaceImport> findListSIdWkpIdAndPeriod(List<String> lstWkpId, GeneralDate startDate, GeneralDate endDate);
+	
+	// RequestList613: [RQ613]指定社員の職場管理者の職場リストを取得する（配下含む）
+	List<String> getWorkplaceId(GeneralDate baseDate, String employeeID);
 }

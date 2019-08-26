@@ -8,11 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.bs.employee.pub.workplace.SyWorkplacePub;
 import nts.uk.ctx.sys.auth.dom.algorithm.AcquireListWorkplaceByEmpIDService;
 import nts.uk.ctx.sys.auth.dom.algorithm.AcquireUserIDFromEmpIDService;
 import nts.uk.ctx.sys.auth.dom.grant.service.RoleIndividualService;
@@ -20,6 +22,8 @@ import nts.uk.ctx.sys.auth.dom.otreferset.OvertimeReferSet;
 import nts.uk.ctx.sys.auth.dom.otreferset.OvertimeReferSetRepository;
 import nts.uk.ctx.sys.auth.dom.role.EmployeeReferenceRange;
 import nts.uk.ctx.sys.auth.dom.role.RoleType;
+import nts.uk.ctx.sys.auth.dom.wkpmanager.WorkplaceManager;
+import nts.uk.ctx.sys.auth.dom.wkpmanager.WorkplaceManagerRepository;
 import nts.uk.ctx.sys.auth.pub.role.RoleExportRepo;
 import nts.uk.ctx.sys.auth.pub.workplace.WorkplaceInfoExport;
 import nts.uk.ctx.sys.auth.pub.workplace.WorkplaceListPub;
@@ -46,6 +50,12 @@ public class WorkplaceListPubImp implements WorkplaceListPub{
 	
 	@Inject
 	private OvertimeReferSetRepository overtimeReferSetRepository;
+	
+	@Inject
+	private WorkplaceManagerRepository workplaceManagerRepository;
+	
+	@Inject
+	private SyWorkplacePub syWorkplacePub;
 
 	/*
 	 * (non-Javadoc)
@@ -95,6 +105,20 @@ public class WorkplaceListPubImp implements WorkplaceListPub{
 			}
 		}
 		return workplaceInfoExport;
+	}
+
+	@Override
+	public List<String> getWorkplaceId(GeneralDate baseDate, String employeeId) {
+		String companyID = AppContexts.user().companyId();
+		List<String> subListWorkPlace = new ArrayList<>();
+		// (Lấy all domain 「職場管理者」)
+		List<WorkplaceManager> listWorkplaceManager = workplaceManagerRepository.findListWkpManagerByEmpIdAndBaseDate(employeeId, GeneralDate.today());
+		for (WorkplaceManager workplaceManager : listWorkplaceManager) {
+			if(!subListWorkPlace.contains(workplaceManager.getWorkplaceId())){
+				subListWorkPlace.addAll(syWorkplacePub.findListWorkplaceIdByCidAndWkpIdAndBaseDate(companyID, workplaceManager.getWorkplaceId(), GeneralDate.today()));
+			}
+		}
+		return subListWorkPlace.stream().distinct().collect(Collectors.toList());
 	}
 }
 
