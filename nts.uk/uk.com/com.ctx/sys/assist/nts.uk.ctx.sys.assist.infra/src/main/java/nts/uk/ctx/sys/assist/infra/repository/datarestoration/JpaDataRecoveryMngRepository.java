@@ -1,5 +1,6 @@
 package nts.uk.ctx.sys.assist.infra.repository.datarestoration;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
@@ -25,8 +26,11 @@ public class JpaDataRecoveryMngRepository extends JpaRepository implements DataR
 	
 	@Override
 	public Optional<DataRecoveryMng> getDataRecoveryMngById(String dataRecoveryProcessId) {
-		return Optional
-				.ofNullable(this.getEntityManager().find(SspmtDataRecoveryMng.class, dataRecoveryProcessId).toDomain());
+		SspmtDataRecoveryMng  entity = this.getEntityManager().find(SspmtDataRecoveryMng.class, dataRecoveryProcessId);
+		if (Objects.isNull(entity)) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(entity.toDomain());
 	}
 
 	@Override
