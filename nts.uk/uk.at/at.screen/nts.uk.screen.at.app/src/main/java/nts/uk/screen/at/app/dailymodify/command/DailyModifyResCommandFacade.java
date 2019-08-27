@@ -1,7 +1,5 @@
 package nts.uk.screen.at.app.dailymodify.command;
 
-import java.awt.print.Printable;
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -294,7 +292,8 @@ public class DailyModifyResCommandFacade {
 		dataParent.setFlagCalculation(false);
 		boolean editFlex = (dataParent.getMode() == 0 && dataParent.getMonthValue() != null
 				&& !CollectionUtil.isEmpty(dataParent.getMonthValue().getItems()));
-		boolean notCalcDaiMon = false;
+		//boolean notCalcDaiMon = false;
+		List<DPItemValue> dataCheck = new ArrayList<>();
 		// insert flex
 		UpdateMonthDailyParam monthParam = null;
 		if (dataParent.getMonthValue() != null) {
@@ -459,9 +458,31 @@ public class DailyModifyResCommandFacade {
 		if (querys.isEmpty() 
 				&& (dataParent.getMonthValue() == null || dataParent.getMonthValue().getItems() == null || dataParent.getMonthValue().getItems().isEmpty()) 
 				&& (!dataParent.getDataCheckSign().isEmpty() || !dataParent.getDataCheckApproval().isEmpty() || dataParent.getSpr() != null)) {
-			validatorDataDaily.checkVerConfirmApproval(dataParent.getApprovalConfirmCache(), dataParent.getDataCheckSign(), dataParent.getDataCheckApproval(), dataParent.getItemValues());
+			if (dataParent.getMode() == 0) {
+				long startTime = System.currentTimeMillis();
+				int type = repo.getTypeAtrErrorSet(AppContexts.user().companyId(),
+						ErAlWorkRecordCheckService.CONTINUOUS_CHECK_CODE);
+				List<EmpErrorCode> lstEmpError = repo.getListErAlItem28(AppContexts.user().companyId(), type,
+						dataParent.getDateRange(), dataParent.getEmployeeId());
+				Map<GeneralDate, List<EmpErrorCode>> mapEmpError = lstEmpError.stream()
+						.collect(Collectors.groupingBy(x -> x.getDate()));
+				dataResultAfterIU.setLstErOldHoliday(getRemoveState(dataParent.getEmployeeId(), type, mapEmpError));
+
+				System.out.println("tg get error: " + (System.currentTimeMillis() - startTime));
+				dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
+						dataParent.getDateRange(),
+						dailyEdits.stream().map(c -> c.getWorkInfo().toDomain(c.getEmployeeId(), c.getDate()))
+								.filter(c -> c != null).collect(Collectors.toList()));
+				dataCheck = dataCheck.stream().map(x -> {
+					x.setLayoutCode(String.valueOf(type));
+					return x;
+				}).collect(Collectors.toList());
+				System.out.println("tg load check holiday: " + (System.currentTimeMillis() - startTime));
+			}
 			errorRelease = releaseSign(dataParent.getDataCheckSign(), new ArrayList<>(), dailyEdits,
 					AppContexts.user().employeeId(), true);
+			
+			validatorDataDaily.checkVerConfirmApproval(dataParent.getApprovalConfirmCache(), dataParent.getDataCheckSign(), dataParent.getDataCheckApproval(), dataParent.getItemValues());
 			// only insert check box
 			// insert sign
 			insertSign(dataParent.getDataCheckSign(), dailyEdits, dataParent.getDailyOlds(), updated);
@@ -506,7 +527,7 @@ public class DailyModifyResCommandFacade {
 				dataResultAfterIU.setCanFlex(checkFlex);
 			}
 			dataResultAfterIU.setShowErrorDialog(null);
-			notCalcDaiMon = true;
+		//	notCalcDaiMon = true;
 
 		} else {
 			// if (querys.isEmpty() ? !dataParent.isFlagCalculation() :
@@ -523,52 +544,81 @@ public class DailyModifyResCommandFacade {
 			resultIU = handleUpdate(dailyOlds, dailyEdits, commandNew, commandOld, dailyItems, monthParam, dataParent.getMode(),
 					dataParent.isFlagCalculation(), itemAtr);
 			
-			validatorDataDaily.checkVerConfirmApproval(dataParent.getApprovalConfirmCache(), dataParent.getDataCheckSign(), dataParent.getDataCheckApproval(), dataParent.getItemValues());
 			if (resultIU != null) {
 				
 				List<EmployeeMonthlyPerError> errorMonthHoliday = new ArrayList<>();
-				if(!dataParent.isFlagCalculation()) {
-					//計算後エラーチェック
-					ErrorAfterCalcDaily errorCheck = checkErrorAfterCalcDaily(resultIU, monthParam, resultOlds, dataParent.getMode(), dataParent.getMonthValue(), 
-							                                                  dataParent.getDateRange(), 
-							                                                  dataParent.getDailyEdits().stream().filter(x -> !lstResultReturnDailyError.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()), 
-							                                                  dataParent.getItemValues().stream().filter(x -> !lstResultReturnDailyError.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
+				if (!dataParent.isFlagCalculation()) {
+					// 計算後エラーチェック
+					ErrorAfterCalcDaily errorCheck = checkErrorAfterCalcDaily(resultIU, monthParam, resultOlds,
+							dataParent.getMode(), dataParent.getMonthValue(), dataParent.getDateRange(),
+							dataParent.getDailyEdits().stream()
+									.filter(x -> !lstResultReturnDailyError
+											.containsKey(Pair.of(x.getEmployeeId(), x.getDate())))
+									.collect(Collectors.toList()),
+							dataParent.getItemValues().stream()
+									.filter(x -> !lstResultReturnDailyError
+											.containsKey(Pair.of(x.getEmployeeId(), x.getDate())))
+									.collect(Collectors.toList()));
 					errorMonthHoliday.addAll(errorCheck.getErrorMonth());
 					boolean hasError = errorCheck.getHasError();
-					if(hasError) {
+					if (hasError) {
 						resultErrorMonth = errorCheck.getResultErrorMonth();
 						lstResultReturnDailyError.putAll(errorCheck.getResultError());
 						dataResultAfterIU.setErrorMap(resultErrorMonth);
-						dailyEdits =  dailyEdits.stream().filter(x -> !errorCheck.getResultError().containsKey(Pair.of(x.getEmployeeId(), x.getDate())) 
-								                                   && !errorCheck.getLstErrorEmpMonth().contains(Pair.of(x.getEmployeeId(), x.getDate())))
-								                         .collect(Collectors.toList());
-						dailyOlds =   dailyOlds.stream().filter(x -> !errorCheck.getResultError().containsKey(Pair.of(x.getEmployeeId(), x.getDate())) 
-									                              && !errorCheck.getLstErrorEmpMonth().contains(Pair.of(x.getEmployeeId(), x.getDate())))
-									                    .collect(Collectors.toList());
-						
+						dailyEdits = dailyEdits.stream().filter(x -> !errorCheck.getResultError()
+								.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))
+								&& !errorCheck.getLstErrorEmpMonth().contains(Pair.of(x.getEmployeeId(), x.getDate())))
+								.collect(Collectors.toList());
+						dailyOlds = dailyOlds.stream().filter(x -> !errorCheck.getResultError()
+								.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))
+								&& !errorCheck.getLstErrorEmpMonth().contains(Pair.of(x.getEmployeeId(), x.getDate())))
+								.collect(Collectors.toList());
+
 						resultIU.filterDataError(
 								errorCheck.getResultError().keySet().stream().map(x -> x.getLeft() + "|" + x.getRight())
 										.collect(Collectors.toSet()),
-								errorCheck.getLstErrorEmpMonth().stream().map(x -> x.getLeft() + "|" + x.getRight()).collect(Collectors.toSet()));
-						if(dailyEdits.isEmpty()) {
-							dataResultAfterIU.setErrorMap(convertErrorToType(lstResultReturnDailyError, resultErrorMonth));
+								errorCheck.getLstErrorEmpMonth().stream().map(x -> x.getLeft() + "|" + x.getRight())
+										.collect(Collectors.toSet()));
+						if (dailyEdits.isEmpty()) {
+							dataResultAfterIU
+									.setErrorMap(convertErrorToType(lstResultReturnDailyError, resultErrorMonth));
 							dataResultAfterIU.setMessageAlert("Msg_1489");
 							dataResultAfterIU.setErrorAllSidDate(true);
 							dataResultAfterIU.setShowErrorDialog(dataParent.getShowDialogError());
 							return dataResultAfterIU;
 						}
 					}
+
 				}
-				//乖離エラー発生時の本人確認解除
+				
+				// 大塚カスタマイズチェック処理
+				if (dataParent.getMode() == 0) {
+					if (!dataParent.isFlagCalculation() && resultIU.getCommandNew() != null) {
+						dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
+								dataParent.getDateRange(),
+								resultIU.getCommandNew().stream().map(c -> c.getWorkInfo().getData())
+										.filter(c -> c != null).collect(Collectors.toList()));
+					} else if (dataParent.isFlagCalculation()) {
+						dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
+								dataParent.getDateRange(),
+								dailyEdits.stream().map(c -> c.getWorkInfo().toDomain(null, null))
+										.filter(c -> c != null).collect(Collectors.toList()));
+					}
+				}
+				// 乖離エラー発生時の本人確認解除
 				val errorSign = validatorDataDaily.releaseDivergence(resultIU.getLstDailyDomain());
 				if (!errorSign.isEmpty()) {
 					// resultError.putAll(errorSign);
-					errorRelease = releaseSign(dataParent.getDataCheckSign().stream().filter(x -> !lstResultReturnDailyError.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()), 
-							                   errorSign, dailyEdits,
-							                   AppContexts.user().employeeId(), false);
+					errorRelease = releaseSign(
+							dataParent.getDataCheckSign().stream()
+									.filter(x -> !lstResultReturnDailyError
+											.containsKey(Pair.of(x.getEmployeeId(), x.getDate())))
+									.collect(Collectors.toList()),
+							errorSign, dailyEdits, AppContexts.user().employeeId(), false);
 				}
 
 				//日次登録処理
+				validatorDataDaily.checkVerConfirmApproval(dataParent.getApprovalConfirmCache(), dataParent.getDataCheckSign(), dataParent.getDataCheckApproval(), dataParent.getItemValues());
 				dailyItems = dailyItems.stream().filter(x -> !lstResultReturnDailyError.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList());
 				if (dataParent.isCheckDailyChange() || flagTempCalc) {
 					List<DailyItemValue> dailyItemForLog = AttendanceItemUtil
@@ -654,7 +704,7 @@ public class DailyModifyResCommandFacade {
 		/** Finish update daily record */
 		//finishDailyRecordRegis(updated, dataParent.getDailyOlds(), querys);
 		
-
+        //release sign
 		if(!errorRelease.isEmpty()) {
 			Map<Integer, List<DPItemValue>> errorTempDaily = new HashMap<>();
 			errorRelease.forEach((key, value) -> {
@@ -663,39 +713,8 @@ public class DailyModifyResCommandFacade {
 			});
 		}
 		
-		//大塚カスタマイズチェック処理
+		//add error holiday
 		if (dataParent.getMode() == 0) {
-			List<DPItemValue> dataCheck = new ArrayList<>();
-			if (!dataParent.isFlagCalculation() && resultIU.getCommandNew() != null) {
-				dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
-						dataParent.getDateRange(), resultIU.getCommandNew().stream().map(c -> c.getWorkInfo().getData())
-								.filter(c -> c != null).collect(Collectors.toList()));
-			}else if(dataParent.isFlagCalculation()) {
-				dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
-						dataParent.getDateRange(), dailyEdits.stream().map(c -> c.getWorkInfo().toDomain(null, null))
-								.filter(c -> c != null).collect(Collectors.toList()));
-			}else if(notCalcDaiMon) {
-				long startTime = System.currentTimeMillis();
-				int type = repo.getTypeAtrErrorSet(AppContexts.user().companyId(),
-						ErAlWorkRecordCheckService.CONTINUOUS_CHECK_CODE);
-				List<EmpErrorCode> lstEmpError = repo.getListErAlItem28(AppContexts.user().companyId(), type,
-						dataParent.getDateRange(), dataParent.getEmployeeId());
-				Map<GeneralDate, List<EmpErrorCode>> mapEmpError = lstEmpError.stream()
-						.collect(Collectors.groupingBy(x -> x.getDate()));
-				dataResultAfterIU.setLstErOldHoliday(getRemoveState(dataParent.getEmployeeId(), type, mapEmpError));
-
-				System.out.println("tg get error: " + (System.currentTimeMillis() - startTime));
-				dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
-						dataParent.getDateRange(),
-						dailyEdits.stream().map(c -> c.getWorkInfo().toDomain(c.getEmployeeId(), c.getDate()))
-								.filter(c -> c != null).collect(Collectors.toList()));
-				dataCheck = dataCheck.stream().map(x -> {
-					x.setLayoutCode(String.valueOf(type));
-					return x;
-				}).collect(Collectors.toList());
-				System.out.println("tg load check holiday: " + (System.currentTimeMillis() - startTime));
-				
-			}
 			val temHoliday = dataCheck;
 			dataCheck.stream().forEach(x -> {
 				Map<Integer, List<DPItemValue>> errorTempDaily = new HashMap<>();
