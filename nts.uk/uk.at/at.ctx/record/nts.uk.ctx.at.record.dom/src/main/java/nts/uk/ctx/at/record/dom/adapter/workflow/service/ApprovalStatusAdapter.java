@@ -101,7 +101,7 @@ public interface ApprovalStatusAdapter {
 	public void registerApproval(String approverID, List<Pair<String, GeneralDate>> empAndDate, Integer rootType,String companyID);
 	
 	/**
-	 * RequestList155
+	 * RequestList155 old not use
 	 * [No.155]承認対象者リストと日付リストから承認状況を取得する
 	 * getApprovalByListEmplAndListApprovalRecordDate
 	 * @param approvalRecordDates
@@ -110,7 +110,7 @@ public interface ApprovalStatusAdapter {
 	 * @param rootType
 	 * @return
 	 */
-	public List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDate(List<GeneralDate> approvalRecordDates, List<String> employeeID,Integer rootType);
+	public List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDateOld(List<GeneralDate> approvalRecordDates, List<String> employeeID,Integer rootType);
 	
 	/**
 	 * RequestList 403

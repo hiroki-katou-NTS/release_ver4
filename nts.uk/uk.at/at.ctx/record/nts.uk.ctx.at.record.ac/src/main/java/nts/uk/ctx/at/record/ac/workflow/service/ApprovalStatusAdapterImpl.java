@@ -136,7 +136,7 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 	}
 
 	@Override
-	public List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDate(
+	public List<ApproveRootStatusForEmpImport> getApprovalByListEmplAndListApprovalRecordDateOld(
 			List<GeneralDate> approvalRecordDates, List<String> employeeID, Integer rootType) {
 		if(approvalRecordDates.isEmpty() || employeeID.isEmpty()){
 			return new ArrayList<>();

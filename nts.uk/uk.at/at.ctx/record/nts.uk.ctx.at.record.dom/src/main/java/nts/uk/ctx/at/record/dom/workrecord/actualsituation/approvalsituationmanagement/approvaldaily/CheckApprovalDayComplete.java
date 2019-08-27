@@ -40,7 +40,7 @@ public class CheckApprovalDayComplete {
 		  return Optional.of(new ApprovalDayComplete(true, Collections.emptyList()));
 		}
 		//対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
-		List<ApproveRootStatusForEmpImport> appRoots = approvalStatusAdapter.getApprovalByListEmplAndListApprovalRecordDate(toListDate(date), Arrays.asList(employeeId), 1);
+		List<ApproveRootStatusForEmpImport> appRoots = approvalStatusAdapter.getApprovalByListEmplAndListApprovalRecordDateNew(toListDate(date), Arrays.asList(employeeId), 1);
 		if(appRoots.isEmpty()) return Optional.of(new ApprovalDayComplete(false, toListDate(date)));
 		List<GeneralDate> dates = appRoots.stream().filter(x -> x.getApprovalStatus().value != ApprovalStatusForEmployee.APPROVED.value).map(x -> x.getAppDate()).collect(Collectors.toList());
 		if(dates.isEmpty())  return Optional.of(new ApprovalDayComplete(true, Collections.emptyList()));
