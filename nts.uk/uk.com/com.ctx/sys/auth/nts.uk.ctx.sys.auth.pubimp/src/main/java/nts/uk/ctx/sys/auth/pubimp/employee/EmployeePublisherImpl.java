@@ -157,7 +157,7 @@ public class EmployeePublisherImpl implements EmployeePublisher {
 				EmployeeReferenceRange referenceRange = role.get().getEmployeeReferenceRange();
 				if (referenceRange == EmployeeReferenceRange.ALL_EMPLOYEE) {
 					return Optional.of(new NarrowEmpByReferenceRange(sID));
-				} else if (referenceRange == EmployeeReferenceRange.ONLY_MYSELF) {
+				} else if (referenceRange == EmployeeReferenceRange.ONLY_MYSELF && roleType == RoleType.EMPLOYMENT.value) {
 					
 					//指定社員の職場管理者の職場リストを取得する（配下含む）
 					//[RQ613]指定社員の職場管理者の職場リストを取得する（配下含む）
@@ -172,12 +172,19 @@ public class EmployeePublisherImpl implements EmployeePublisher {
 					}).map(x -> x.getEmployeeId()).collect(Collectors.toList());
 					
 					return Optional.of(new NarrowEmpByReferenceRange(result));
-				} else {
-					
-					//指定社員の職場管理者の職場リストを取得する（配下含む）
-					//[RQ613]指定社員の職場管理者の職場リストを取得する（配下含む）
-					List<String> subListWorkPlace = workplaceListPub.getWorkplaceId(GeneralDate.today(), employeeIDLogin);
-					
+				} else if (referenceRange == EmployeeReferenceRange.ONLY_MYSELF && roleType != RoleType.EMPLOYMENT.value) {
+					if (sID.contains(employeeIDLogin)) {
+						result.add(employeeIDLogin);
+					}
+					return Optional.of(new NarrowEmpByReferenceRange(result));
+				}else {
+					List<String> subListWorkPlace = new ArrayList<>();
+					if (roleType == RoleType.EMPLOYMENT.value) {
+						// 指定社員の職場管理者の職場リストを取得する（配下含む）
+						// [RQ613]指定社員の職場管理者の職場リストを取得する（配下含む）
+						subListWorkPlace.addAll(workplaceListPub.getWorkplaceId(GeneralDate.today(),
+								employeeIDLogin));
+					}
 					// imported（権限管理）「所属職場履歴」を取得する
 					// (Lấy imported（権限管理）「所属職場履歴」) Lay RequestList No.30
 					Optional<AffWorkplaceHistImport> workPlace = workplaceAdapter
