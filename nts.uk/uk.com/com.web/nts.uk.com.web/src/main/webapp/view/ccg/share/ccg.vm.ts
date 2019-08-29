@@ -603,13 +603,65 @@ module nts.uk.com.view.ccg.share.ccg {
                 let dfd = $.Deferred<void>();
                 let self = this;
                 $.when(service.getRefRangeBySysType(self.systemType),
-                    self.loadClosure()
-                ).done((refRange, noValue) => {
+                    self.loadClosure()).done((refRange, noValue,) => {
                     self.referenceRange = refRange;
-                    dfd.resolve();
+                    self.loadWkpManagedByLoginnedUser().done(() => {
+                        dfd.resolve();
+                    }).fail(err => nts.uk.ui.dialog.alertError(err));
                 }).fail(err => nts.uk.ui.dialog.alertError(err));
 
                 return dfd.promise();
+            }
+            
+            private loadWkpManagedByLoginnedUser(): JQueryPromise<any> {
+                let dfd = $.Deferred<void>();
+                let self = this,
+                    isCheckForAdvancedSearch = self.showAdvancedSearchTab && self.systemType === ConfigEnumSystemType.EMPLOYMENT && self.referenceRange === EmployeeReferenceRange.ONLY_MYSELF,
+                    isCheckForAllReferable = self.showAllReferableEmployee && self.systemType === ConfigEnumSystemType.EMPLOYMENT && self.referenceRange === EmployeeReferenceRange.ONLY_MYSELF;
+                  
+                if (isCheckForAdvancedSearch || isCheckForAllReferable) {
+                    service.getCanManageWpkForLoginUser().done(manageWkp => {
+                        self.checkForAdvancedSearch(manageWkp);
+                        self.checkForAllReferable(manageWkp);
+                        
+                        dfd.resolve();
+                    }).fail(err => dfd.reject(err));    
+                } else {
+                    self.checkForAdvancedSearch([]);
+                    self.checkForAllReferable([]);
+                    
+                    dfd.resolve(); 
+                }
+
+                return dfd.promise();
+            }
+            
+            private checkForAdvancedSearch (manageWkp: Array<any>) {
+                let self = this;
+                if (self.showAdvancedSearchTab) {
+                    if (self.systemType === ConfigEnumSystemType.EMPLOYMENT) {
+                        if (self.referenceRange === EmployeeReferenceRange.ONLY_MYSELF && _.isEmpty(manageWkp)) {
+                            self.showAdvancedSearchTab = false;
+                        }
+                    } else {
+                        self.showAdvancedSearchTab = false;    
+                    }
+                }
+            }
+            
+            private checkForAllReferable (manageWkp: Array<any>) {
+                let self = this;
+                if (self.systemType === ConfigEnumSystemType.ADMINISTRATOR) {
+                    self.showAllReferableEmployee = true;
+                } else {
+                    if (self.showAllReferableEmployee) {
+                        if (self.systemType === ConfigEnumSystemType.EMPLOYMENT 
+                            && self.referenceRange === EmployeeReferenceRange.ONLY_MYSELF 
+                            && _.isEmpty(manageWkp)) {
+                            self.showAdvancedSearchTab = false;
+                        }
+                    }    
+                }
             }
 
             /**

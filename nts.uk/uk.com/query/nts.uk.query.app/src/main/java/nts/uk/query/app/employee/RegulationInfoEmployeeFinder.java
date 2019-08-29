@@ -97,7 +97,16 @@ public class RegulationInfoEmployeeFinder {
 		if (role != null) {
 			this.changeWorkplaceListByRole(queryDto, role);
 		}
-		return this.findEmployeesInfo(queryDto);
+		List<RegulationInfoEmployeeDto> result = this.findEmployeesInfo(queryDto);
+		
+		if (queryDto.getSystemType() == CCG001SystemType.EMPLOYMENT.value) {
+			List<String> narrowedSids = empAuthAdapter.narrowEmpListByReferenceRange(
+											result.stream().map(c -> c.getEmployeeId()).collect(Collectors.toList()), 3);
+			
+			result.removeIf(c -> !narrowedSids.contains(c.getEmployeeId()));
+		}
+		
+		return result;
 	}
 
 	/**
