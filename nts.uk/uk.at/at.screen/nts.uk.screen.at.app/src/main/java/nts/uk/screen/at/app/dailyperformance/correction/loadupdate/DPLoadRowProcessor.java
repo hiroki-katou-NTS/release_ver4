@@ -137,7 +137,7 @@ public class DPLoadRowProcessor {
 			if (emp.equals(sId) && !param.getOnlyLoadMonth()) {
 				// checkIndenityMonth
 				result.setIndentityMonthResult(checkIndentityMonth.checkIndenityMonth(
-						new IndentityMonthParam(companyId, sId, dateRange.getEndDate(), param.getClosureId(), param.getDisplayFormat(), result.getIdentityProcessDtoOpt())));
+						new IndentityMonthParam(companyId, sId, dateRange.getEndDate(), param.getClosureId(), param.getDisplayFormat(), Optional.of(result.getIdentityProcessDto()))));
 			} else {
 				result.getIndentityMonthResult().setHideAll(true);
 			}
