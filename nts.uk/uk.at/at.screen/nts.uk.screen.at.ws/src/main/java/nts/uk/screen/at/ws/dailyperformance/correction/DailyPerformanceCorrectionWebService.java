@@ -307,13 +307,13 @@ public class DailyPerformanceCorrectionWebService {
 		param.setApprovalConfirmCache((ApprovalConfirmCache)session.getAttribute("approvalConfirm"));
 		val result = loadRowProcessor.reloadGrid(param);
 		session.setAttribute("domainEdits", null);
-		session.setAttribute("approvalConfirm", result.getApprovalConfirmCache());
-		result.setApprovalConfirmCache(null);
 		if(!param.getOnlyLoadMonth()) {
+			session.setAttribute("approvalConfirm", result.getApprovalConfirmCache());
 			session.setAttribute("domainOlds", result.getDomainOld());
 			session.setAttribute("domainOldForLog", result.getDomainOldForLog());
 		}
 		result.setDomainOld(Collections.emptyList());
+		result.setApprovalConfirmCache(null);
 		return result;
 	}
 
