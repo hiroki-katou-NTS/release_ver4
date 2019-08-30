@@ -639,12 +639,14 @@ module nts.uk.com.view.ccg.share.ccg {
             private checkForAdvancedSearch (manageWkp: Array<any>) {
                 let self = this;
                 if (self.showAdvancedSearchTab) {
-                    if (self.systemType === ConfigEnumSystemType.EMPLOYMENT) {
-                        if (self.referenceRange === EmployeeReferenceRange.ONLY_MYSELF && _.isEmpty(manageWkp)) {
+                    if (self.referenceRange === EmployeeReferenceRange.ONLY_MYSELF) {
+                        if (self.systemType === ConfigEnumSystemType.EMPLOYMENT) {
+                            if (_.isEmpty(manageWkp)) {
+                                self.showAdvancedSearchTab = false;
+                            }
+                        } else {
                             self.showAdvancedSearchTab = false;
                         }
-                    } else {
-                        self.showAdvancedSearchTab = false;    
                     }
                 }
             }
