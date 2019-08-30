@@ -657,11 +657,16 @@ module nts.uk.com.view.ccg.share.ccg {
                     self.showAllReferableEmployee = true;
                 } else {
                     if (self.showAllReferableEmployee) {
-                        if (self.systemType === ConfigEnumSystemType.EMPLOYMENT 
-                            && self.referenceRange === EmployeeReferenceRange.ONLY_MYSELF 
-                            && _.isEmpty(manageWkp)) {
-                            self.showAllReferableEmployee = false;
+                        if (self.referenceRange === EmployeeReferenceRange.ONLY_MYSELF) {
+                            if (self.systemType === ConfigEnumSystemType.EMPLOYMENT) {
+                                if (_.isEmpty(manageWkp)) {
+                                    self.showAllReferableEmployee = false;        
+                                }
+                            } else {
+                                self.showAllReferableEmployee = false;
+                            }       
                         }
+                        
                     }    
                 }
             }
