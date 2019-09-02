@@ -87,16 +87,21 @@ public class RegulationInfoEmployeeFinder {
 		}
 
 		EmployeeRoleImported role = this.getRole(queryDto.getSystemType());
-		if (role != null && role.getEmployeeReferenceRange() == EmployeeReferenceRange.ONLY_MYSELF) {
+		if (role != null && role.getEmployeeReferenceRange() == EmployeeReferenceRange.ONLY_MYSELF 
+				&& queryDto.getSystemType() != CCG001SystemType.EMPLOYMENT.value) {
 			return Arrays.asList(this.findCurrentLoginEmployeeInfo(
 					GeneralDateTime.fromString(queryDto.getBaseDate() + RegulationInfoEmpQueryDto.TIME_DAY_START,
 							RegulationInfoEmpQueryDto.DATE_TIME_FORMAT)));
 		}
 
 		// Algorithm: 検索条件の職場一覧を参照範囲に基いて変更する
-		if (role != null) {
+		if (role != null && role.getEmployeeReferenceRange() == EmployeeReferenceRange.ONLY_MYSELF) {
+			queryDto.setReferenceRange(EmployeeReferenceRange.ONLY_MYSELF.value);
+			this.changeListWorkplaces(queryDto);
+		} else if (role != null) {
 			this.changeWorkplaceListByRole(queryDto, role);
 		}
+		
 		List<RegulationInfoEmployeeDto> result = this.findEmployeesInfo(queryDto);
 		
 		if (queryDto.getSystemType() == CCG001SystemType.EMPLOYMENT.value) {
