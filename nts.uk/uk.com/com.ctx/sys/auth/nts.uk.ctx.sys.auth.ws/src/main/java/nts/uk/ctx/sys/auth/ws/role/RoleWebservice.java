@@ -67,10 +67,15 @@ public class RoleWebservice extends WebService {
 	@POST
 	@Path("getrefrangebysystype/{systype}")
 	public int getRefRangeByRoleId(@PathParam("systype") int sysType) {
+		if (sysType == SystemType.ADMINISTRATOR.value) {
+			return EmployeeReferenceRange.ALL_EMPLOYEE.value;
+		}
+		
 		String roleId = this.roleWorkplaceIDFinder.findRoleIdBySystemType(sysType);
 		if (Strings.isBlank(roleId)) {
 			return EmployeeReferenceRange.ONLY_MYSELF.value;
 		}
+		
 		return this.personInforRoleFinder.getRoleByRoleId(roleId).getEmployeeReferenceRange();
 	}
 	
