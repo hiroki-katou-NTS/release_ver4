@@ -23,6 +23,7 @@ import nts.uk.ctx.sys.auth.app.find.person.role.PersonInformationRole;
 import nts.uk.ctx.sys.auth.app.find.person.role.PersonInformationRoleFinder;
 import nts.uk.ctx.sys.auth.app.find.person.role.dto.RoleDto;
 import nts.uk.ctx.sys.auth.app.find.role.workplace.RoleWorkplaceIDFinder;
+import nts.uk.ctx.sys.auth.app.find.role.workplace.RoleWorkplaceIDFinder.SystemType;
 import nts.uk.ctx.sys.auth.app.find.role.workplace.WorkplaceParam;
 import nts.uk.ctx.sys.auth.dom.adapter.persettingmenu.PermissionSettingMenuAdapter;
 import nts.uk.ctx.sys.auth.dom.adapter.persettingmenu.PermissionSettingMenuImport;
