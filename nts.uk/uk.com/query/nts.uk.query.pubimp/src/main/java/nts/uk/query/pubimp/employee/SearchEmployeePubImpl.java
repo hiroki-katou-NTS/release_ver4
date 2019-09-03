@@ -9,6 +9,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.time.GeneralDate;
 import nts.uk.query.app.employee.RegulationInfoEmployeeFinder;
 import nts.uk.query.pub.employee.SearchEmployeePub;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -23,6 +24,7 @@ public class SearchEmployeePubImpl implements SearchEmployeePub {
 	@Inject
 	private RegulationInfoEmployeeFinder employeeFinder;
 
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -31,10 +33,14 @@ public class SearchEmployeePubImpl implements SearchEmployeePub {
 	 * lang.String, java.lang.Integer)
 	 */
 	@Override
-	public List<String> searchByEmployeeCode(String sCd, Integer systemType) {
-		return this.employeeFinder.searchByEmployeeCode(sCd, systemType);
+	public List<String> searchByEmployeeCode(String sCd, Integer systemType, GeneralDate referenceDate) {
+		return this.employeeFinder.searchByEmployeeCode(sCd, systemType, referenceDate);
 	}
-
+	@Override
+	public List<String> searchByEmployeeCode(String sCd, Integer systemType) {
+		return this.searchByEmployeeCode(sCd, systemType, GeneralDate.today());
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -43,8 +49,12 @@ public class SearchEmployeePubImpl implements SearchEmployeePub {
 	 * lang.String, java.lang.Integer)
 	 */
 	@Override
+	public List<String> searchByEmployeeName(String sName, Integer systemType, GeneralDate referenceDate) {
+		return this.employeeFinder.searchByEmployeeName(sName, systemType, referenceDate);
+	}
+	@Override
 	public List<String> searchByEmployeeName(String sName, Integer systemType) {
-		return this.employeeFinder.searchByEmployeeName(sName, systemType);
+		return this.searchByEmployeeName(sName, systemType, GeneralDate.today());
 	}
 
 	/*
@@ -55,8 +65,12 @@ public class SearchEmployeePubImpl implements SearchEmployeePub {
 	 * com.time.calendar.period.DatePeriod, java.lang.Integer)
 	 */
 	@Override
+	public List<String> searchByEntryDate(DatePeriod period, Integer systemType, GeneralDate referenceDate) {
+		return this.employeeFinder.searchByEntryDate(period, systemType, referenceDate);
+	}
+	@Override
 	public List<String> searchByEntryDate(DatePeriod period, Integer systemType) {
-		return this.employeeFinder.searchByEntryDate(period, systemType);
+		return this.searchByEntryDate(period, systemType, GeneralDate.today());
 	}
 
 	/*
@@ -67,8 +81,12 @@ public class SearchEmployeePubImpl implements SearchEmployeePub {
 	 * .shr.com.time.calendar.period.DatePeriod, java.lang.Integer)
 	 */
 	@Override
+	public List<String> searchByRetirementDate(DatePeriod period, Integer systemType, GeneralDate referenceDate) {
+		return this.employeeFinder.searchByRetirementDate(period, systemType, referenceDate);
+	}
+	@Override
 	public List<String> searchByRetirementDate(DatePeriod period, Integer systemType) {
-		return this.employeeFinder.searchByRetirementDate(period, systemType);
+		return this.searchByRetirementDate(period, systemType, GeneralDate.today());
 	}
 
 }

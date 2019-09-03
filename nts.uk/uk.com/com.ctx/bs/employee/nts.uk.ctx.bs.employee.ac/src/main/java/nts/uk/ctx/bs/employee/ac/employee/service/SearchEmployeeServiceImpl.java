@@ -100,7 +100,8 @@ public class SearchEmployeeServiceImpl implements SearchEmployeeService {
 	private EmployeeSearchData getEmployeeFromEmployeeCode(String cid, GeneralDate baseDate, EmployeeSearchDto dto) {
 		// 社員コードで検索する
 		List<String> lstEmpId = this.searchEmployeePub.searchByEmployeeCode(dto.getEmployeeCode(),
-				Integer.valueOf(dto.getSystem()));
+				Integer.valueOf(dto.getSystem()),
+				baseDate);
 		if (lstEmpId.isEmpty()) {
 			return null;
 		}
