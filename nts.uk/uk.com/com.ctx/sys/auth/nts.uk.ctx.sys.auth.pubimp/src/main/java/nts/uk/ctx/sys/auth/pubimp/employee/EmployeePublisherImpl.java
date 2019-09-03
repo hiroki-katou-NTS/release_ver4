@@ -128,7 +128,7 @@ public class EmployeePublisherImpl implements EmployeePublisher {
 	private WorkplaceListPub workplaceListPub;
 
 	@Override
-	public Optional<NarrowEmpByReferenceRange> findByEmpId(List<String> sID, int roleType) {
+	public Optional<NarrowEmpByReferenceRange> findByEmpId(List<String> sID, int roleType, GeneralDate referenceDate) {
 		// imported（権限管理）「社員」を取得する Request No1
 		// employeeID = employeeID login
 		String employeeIDLogin = AppContexts.user().employeeId();
@@ -146,7 +146,7 @@ public class EmployeePublisherImpl implements EmployeePublisher {
 				return Optional.empty();
 			} else {
 				Optional<Role> role = empReferenceRangeService.getByUserIDAndReferenceDate(useExport.get().getUserID(),
-						roleType, GeneralDate.today());
+						roleType, referenceDate);
 				if (!role.isPresent()) {
 					if (sID.contains(employeeIDLogin)) {
 						result.add(employeeIDLogin);
@@ -161,10 +161,10 @@ public class EmployeePublisherImpl implements EmployeePublisher {
 					
 					//指定社員の職場管理者の職場リストを取得する（配下含む）
 					//[RQ613]指定社員の職場管理者の職場リストを取得する（配下含む）
-					List<String> subListWorkPlace = workplaceListPub.getWorkplaceId(GeneralDate.today(), employeeIDLogin);
+					List<String> subListWorkPlace = workplaceListPub.getWorkplaceId(referenceDate, employeeIDLogin);
 					
 					// 社員ID（List）と基準日から所属職場IDを取得 Lay request 227
-					List<AffiliationWorkplace> lisAfiliationWorkplace = workplaceAdapter.findByListEmpIDAndDate(sID, GeneralDate.today());
+					List<AffiliationWorkplace> lisAfiliationWorkplace = workplaceAdapter.findByListEmpIDAndDate(sID, referenceDate);
 					
 					// 取得した所属職場履歴項目（List）を参照可能職場ID（List）で絞り込む
 					result = lisAfiliationWorkplace.stream().filter(c -> {
@@ -182,24 +182,24 @@ public class EmployeePublisherImpl implements EmployeePublisher {
 					if (roleType == RoleType.EMPLOYMENT.value) {
 						// 指定社員の職場管理者の職場リストを取得する（配下含む）
 						// [RQ613]指定社員の職場管理者の職場リストを取得する（配下含む）
-						subListWorkPlace.addAll(workplaceListPub.getWorkplaceId(GeneralDate.today(),
+						subListWorkPlace.addAll(workplaceListPub.getWorkplaceId(referenceDate,
 								employeeIDLogin));
 					}
 					// imported（権限管理）「所属職場履歴」を取得する
 					// (Lấy imported（権限管理）「所属職場履歴」) Lay RequestList No.30
 					Optional<AffWorkplaceHistImport> workPlace = workplaceAdapter
-							.findWkpByBaseDateAndEmployeeId(GeneralDate.today(), employeeIDLogin);
+							.findWkpByBaseDateAndEmployeeId(referenceDate, employeeIDLogin);
 					String workPlaceID1 = workPlace.get().getWorkplaceId();
 					List<String> listWorkPlaceID3 = new ArrayList<>();
 					if (referenceRange == EmployeeReferenceRange.DEPARTMENT_AND_CHILD) {
 						// 配下の職場をすべて取得する
 						// Lay RequestList No.154
 						listWorkPlaceID3 = workplaceAdapter.findListWorkplaceIdByCidAndWkpIdAndBaseDate(
-								AppContexts.user().companyId(), workPlaceID1, GeneralDate.today());
+								AppContexts.user().companyId(), workPlaceID1, referenceDate);
 					}
 					// 社員ID（List）と基準日から所属職場IDを取得 Lay request 227
 					List<AffiliationWorkplace> lisAfiliationWorkplace = workplaceAdapter.findByListEmpIDAndDate(sID,
-							GeneralDate.today());
+							referenceDate);
 					// 取得した所属職場履歴項目（List）を参照可能職場ID（List）で絞り込む
 					List<String> listtWorkID = new ArrayList<>();
 					listtWorkID.add(workPlaceID1);

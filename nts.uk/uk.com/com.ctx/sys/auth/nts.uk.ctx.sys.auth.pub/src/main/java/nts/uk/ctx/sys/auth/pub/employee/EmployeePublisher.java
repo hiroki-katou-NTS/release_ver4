@@ -7,7 +7,7 @@ import nts.arc.time.GeneralDate;
 
 public interface EmployeePublisher {
 	/** RequestList338 */
-	Optional<NarrowEmpByReferenceRange> findByEmpId(List<String> sID, int roleType);
+	Optional<NarrowEmpByReferenceRange> findByEmpId(List<String> sID, int roleType, GeneralDate referenceDate);
 
 	/** RequestList314 */
 	Optional<EmpWithRangeLogin> findByCompanyIDAndEmpCD(String companyID, String employeeCD);

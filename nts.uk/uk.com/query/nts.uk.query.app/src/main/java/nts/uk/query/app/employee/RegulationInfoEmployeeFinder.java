@@ -88,26 +88,28 @@ public class RegulationInfoEmployeeFinder {
 		}
 
 		EmployeeRoleImported role = this.getRole(queryDto.getSystemType());
-		if (role != null && role.getEmployeeReferenceRange() == EmployeeReferenceRange.ONLY_MYSELF 
-				&& queryDto.getSystemType() != CCG001SystemType.EMPLOYMENT.value) {
+		if (role != null && role.getEmployeeReferenceRange() == EmployeeReferenceRange.ONLY_MYSELF &&
+			queryDto.getSystemType() != CCG001SystemType.EMPLOYMENT.value) {
 			return Arrays.asList(this.findCurrentLoginEmployeeInfo(
 					GeneralDateTime.fromString(queryDto.getBaseDate() + RegulationInfoEmpQueryDto.TIME_DAY_START,
 							RegulationInfoEmpQueryDto.DATE_TIME_FORMAT)));
 		}
 
 		// Algorithm: 検索条件の職場一覧を参照範囲に基いて変更する
-		if (role != null && role.getEmployeeReferenceRange() == EmployeeReferenceRange.ONLY_MYSELF) {
+
+		if (role != null && role.getEmployeeReferenceRange() == EmployeeReferenceRange.ONLY_MYSELF){
 			queryDto.setReferenceRange(EmployeeReferenceRange.ONLY_MYSELF.value);
-			this.changeListWorkplaces(queryDto, Optional.of(queryDto.getSystemType() == CCG001SystemType.EMPLOYMENT.value));
-		} else if (role != null) {
+			this.changeListWorkplaces(queryDto);
+		}
+		else if (role != null) {
 			this.changeWorkplaceListByRole(queryDto, role);
 		}
-		
 		List<RegulationInfoEmployeeDto> result = this.findEmployeesInfo(queryDto);
 		
 		if (queryDto.getSystemType() == CCG001SystemType.EMPLOYMENT.value) {
 			List<String> narrowedSids = empAuthAdapter.narrowEmpListByReferenceRange(
-											result.stream().map(c -> c.getEmployeeId()).collect(Collectors.toList()), 3);
+											result.stream().map(c -> c.getEmployeeId()).collect(Collectors.toList()), 3,
+											GeneralDate.fromString(queryDto.getBaseDate() + RegulationInfoEmpQueryDto.TIME_DAY_START, RegulationInfoEmpQueryDto.DATE_TIME_FORMAT));
 			
 			result.removeIf(c -> !narrowedSids.contains(c.getEmployeeId()));
 		}
@@ -122,7 +124,7 @@ public class RegulationInfoEmployeeFinder {
 	 * @return the list
 	 */
 	public List<RegulationInfoEmployeeDto> findByEmployeeCode(SearchEmployeeQuery query) {
-		List<String> sIds = searchByEmployeeCode(query.getCode(), query.getSystemType());
+		List<String> sIds = searchByEmployeeCode(query.getCode(), query.getSystemType(), query.getReferenceDate());
 
 		// filter by closure id
 		sIds = this.filterByClosure(query, sIds);
@@ -137,7 +139,7 @@ public class RegulationInfoEmployeeFinder {
 	 * @return the list
 	 */
 	public List<RegulationInfoEmployeeDto> findByEmployeeName(SearchEmployeeQuery query) {
-		List<String> sIds = searchByEmployeeName(query.getName(), query.getSystemType());
+		List<String> sIds = searchByEmployeeName(query.getName(), query.getSystemType(), query.getReferenceDate());
 		
 		// filter by closure id
 		sIds = this.filterByClosure(query, sIds);
@@ -152,7 +154,7 @@ public class RegulationInfoEmployeeFinder {
 	 * @return the list
 	 */
 	public List<RegulationInfoEmployeeDto> findByEmployeeEntryDate(SearchEmployeeQuery query) {
-		List<String> sIds = searchByEntryDate(query.getDatePeriod(), query.getSystemType());
+		List<String> sIds = searchByEntryDate(query.getDatePeriod(), query.getSystemType(), query.getReferenceDate());
 		
 		// filter by closure id
 		sIds = this.filterByClosure(query, sIds);
@@ -167,7 +169,7 @@ public class RegulationInfoEmployeeFinder {
 	 * @return the list
 	 */
 	public List<RegulationInfoEmployeeDto> findByEmployeeRetirementDate(SearchEmployeeQuery query) {
-		List<String> sIds = searchByRetirementDate(query.getDatePeriod(), query.getSystemType());
+		List<String> sIds = searchByRetirementDate(query.getDatePeriod(), query.getSystemType(), query.getReferenceDate());
 		
 		// filter by closure id
 		sIds = this.filterByClosure(query, sIds);
@@ -273,11 +275,11 @@ public class RegulationInfoEmployeeFinder {
 	 * @param systemType the system type
 	 * @return the list
 	 */
-	public List<String> searchByEmployeeCode(String sCd, Integer systemType) {
+	public List<String> searchByEmployeeCode(String sCd, Integer systemType, GeneralDate referenceDate) {
 		List<String> sIds = this.empDataMngInfoAdapter.findNotDeletedBySCode(AppContexts.user().companyId(),
 				sCd);
 
-		return this.narrowEmpListByReferenceRange(sIds, systemType);
+		return this.narrowEmpListByReferenceRange(sIds, systemType, referenceDate);
 	}
 
 	/**
@@ -287,12 +289,12 @@ public class RegulationInfoEmployeeFinder {
 	 * @param systemType the system type
 	 * @return the list
 	 */
-	public List<String> searchByEmployeeName(String sName, Integer systemType) {
+	public List<String> searchByEmployeeName(String sName, Integer systemType, GeneralDate referenceDate) {
 		List<String> pIds = this.personAdapter.findPersonIdsByName(sName);
 
 		List<String> sIds = this.empDataMngInfoAdapter.findByListPersonId(AppContexts.user().companyId(), pIds);
 
-		return this.narrowEmpListByReferenceRange(sIds, systemType);
+		return this.narrowEmpListByReferenceRange(sIds, systemType, referenceDate);
 	}
 
 	/**
@@ -302,10 +304,10 @@ public class RegulationInfoEmployeeFinder {
 	 * @param systemType the system type
 	 * @return the list
 	 */
-	public List<String> searchByEntryDate(DatePeriod period, Integer systemType) {
+	public List<String> searchByEntryDate(DatePeriod period, Integer systemType, GeneralDate referenceDate) {
 		List<String> sIds = this.empHisRepo.findEmployeeByEntryDate(AppContexts.user().companyId(), period);
 
-		return this.narrowEmpListByReferenceRange(sIds, systemType);
+		return this.narrowEmpListByReferenceRange(sIds, systemType, referenceDate);
 	}
 
 	/**
@@ -315,10 +317,10 @@ public class RegulationInfoEmployeeFinder {
 	 * @param systemType the system type
 	 * @return the list
 	 */
-	public List<String> searchByRetirementDate(DatePeriod period, Integer systemType) {
+	public List<String> searchByRetirementDate(DatePeriod period, Integer systemType, GeneralDate referenceDate) {
 		List<String> sIds = this.empHisRepo.findEmployeeByRetirementDate(AppContexts.user().companyId(), period);
 
-		return this.narrowEmpListByReferenceRange(sIds, systemType);
+		return this.narrowEmpListByReferenceRange(sIds, systemType, referenceDate);
 	}
 
 	/**
@@ -397,13 +399,13 @@ public class RegulationInfoEmployeeFinder {
 	 * @param systemType the system type
 	 * @return the list
 	 */
-	private List<String> narrowEmpListByReferenceRange(List<String> sIds, Integer systemType) {
+	private List<String> narrowEmpListByReferenceRange(List<String> sIds, Integer systemType, GeneralDate referenceDate) {
 		// Do not narrowEmpListByReferenceRange when system type = admin
 		if (systemType == CCG001SystemType.ADMINISTRATOR.value) {
 			return sIds;
 		}
 		return this.empAuthAdapter.narrowEmpListByReferenceRange(sIds,
-				this.roleTypeFrom(CCG001SystemType.valueOf(systemType)).value);
+				this.roleTypeFrom(CCG001SystemType.valueOf(systemType)).value, referenceDate);
 	}
 	
 	// ・ロール種類：

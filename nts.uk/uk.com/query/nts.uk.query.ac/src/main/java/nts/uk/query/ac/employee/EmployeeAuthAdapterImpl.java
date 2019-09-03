@@ -12,6 +12,7 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.auth.pub.employee.EmployeePublisher;
 import nts.uk.ctx.sys.auth.pub.employee.NarrowEmpByReferenceRange;
@@ -34,9 +35,9 @@ public class EmployeeAuthAdapterImpl implements EmployeeAuthAdapter {
 	 * narrowEmpListByReferenceRange(java.util.List, java.lang.Integer)
 	 */
 	@Override
-	public List<String> narrowEmpListByReferenceRange(List<String> sIds, Integer roleType) {
+	public List<String> narrowEmpListByReferenceRange(List<String> sIds, Integer roleType, GeneralDate referenceDate) {
 		Optional<NarrowEmpByReferenceRange> dto = this.employeePub
-				.findByEmpId(CollectionUtil.isEmpty(sIds) ? new ArrayList<String>() : sIds, roleType);
+				.findByEmpId(CollectionUtil.isEmpty(sIds) ? new ArrayList<String>() : sIds, roleType, referenceDate);
 
 		if (!dto.isPresent()) {
 			return Collections.emptyList();
