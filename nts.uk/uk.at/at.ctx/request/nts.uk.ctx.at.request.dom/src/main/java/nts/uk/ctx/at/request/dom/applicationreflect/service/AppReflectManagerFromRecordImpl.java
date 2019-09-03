@@ -52,8 +52,6 @@ public class AppReflectManagerFromRecordImpl implements AppReflectManagerFromRec
 	@Inject
 	private AppReflectManager appRefMng;
 	@Inject
-	private GetClosureStartForEmployee getClosureStartForEmp;
-	@Inject
 	private InformationSettingOfAppForReflect appSetting;
 	@Inject
 	private ManagedParallelWithContext managedParallelWithContext;
@@ -107,21 +105,12 @@ public class AppReflectManagerFromRecordImpl implements AppReflectManagerFromRec
 			
 			dataSetter.updateData("reflectApprovalStatus", ExecutionStatusReflect.PROCESSING.nameId);
 			dataSetter.updateData("reflectApprovalCount", count);
-			//社員に対応する締め開始日を取得する
-			Optional<GeneralDate> closure = getClosureStartForEmp.algorithm(x.getEmployeeId());
-			if(closure.isPresent()) {
-				GeneralDate startDateshime = closure.get();
-				if(workDate.start().afterOrEquals(startDateshime)) {
-					//社員の申請を反映 (Phản ánh nhân viên)
-					this.reflectAppOfEmployee(workId, x.getEmployeeId(),
-							workDate, 
-							optRequesSetting.get(),
-							aprResult,
-							reflectSetting);
-				}
-				
-			}
-			
+			//社員の申請を反映 (Phản ánh nhân viên)
+			this.reflectAppOfEmployee(workId, x.getEmployeeId(),
+					workDate, 
+					optRequesSetting.get(),
+					aprResult,
+					reflectSetting);
 		});
 		if(status.stream().anyMatch(c -> c == ProcessStateReflect.INTERRUPTION)) {
 			return ProcessStateReflect.INTERRUPTION;

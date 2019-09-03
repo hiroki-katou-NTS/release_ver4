@@ -60,6 +60,7 @@ import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymont
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.ApplyTimeRequestAtr;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.WorkScheduleReflectService;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
+import nts.uk.ctx.at.shared.dom.workrule.closure.service.GetClosureStartForEmployee;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
@@ -95,6 +96,8 @@ public class AppReflectManagerImpl implements AppReflectManager {
 	private AppReflectProcessRecord checkReflect;
 	@Inject
 	private OtherCommonAlgorithm otherCommonAlg;
+	@Inject
+	private GetClosureStartForEmployee getClosureStartForEmp;
 	@PostConstruct
 	public void postContruct() {
 		this.self = scContext.getBusinessObject(AppReflectManager.class);
@@ -223,8 +226,17 @@ public class AppReflectManagerImpl implements AppReflectManager {
 		boolean isSche = true;
 		boolean isRecord = true;
 		List<GeneralDate> lstDate = new ArrayList<>();
+		//社員に対応する締め開始日を取得する
+		Optional<GeneralDate> closure = getClosureStartForEmp.algorithm(appInfor.getEmployeeID());
+		if(!closure.isPresent()) {
+			return;
+		}
+		GeneralDate closureStartDate = closure.get();
 		for(int i = 0; appInfor.getStartDate().get().daysTo(appInfor.getEndDate().get()) - i >= 0; i++){
 			GeneralDate loopDate = appInfor.getStartDate().get().addDays(i);
+			if(loopDate.before(closureStartDate)) {
+				continue;
+			}
 			if(workchangeData != null) {
 				workchangeData.getCommonPara().setAppDate(loopDate);
 			}
