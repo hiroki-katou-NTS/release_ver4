@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.employee.NarrowEmployeeAdapter;
 import nts.uk.ctx.sys.auth.pub.employee.EmployeePublisher;
 import nts.uk.ctx.sys.auth.pub.employee.NarrowEmpByReferenceRange;
@@ -21,7 +22,7 @@ public class NarrowEmployeeAdapterImpl implements NarrowEmployeeAdapter {
 	public List<String> findByEmpId(List<String> sID, int roleType) {
 		if (sID.isEmpty())
 			return Collections.emptyList();
-		Optional<NarrowEmpByReferenceRange> narrowEmp = employeePublisher.findByEmpId(sID, roleType);
+		Optional<NarrowEmpByReferenceRange> narrowEmp = employeePublisher.findByEmpId(sID, roleType, GeneralDate.today());
 		if (!narrowEmp.isPresent())
 			return Collections.emptyList();
 		return narrowEmp.get().getEmployeeID();
