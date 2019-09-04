@@ -111,15 +111,16 @@ public class ProcessRecoverTable {
 		if (table.isPresent() && table.get().getHistoryCls() == HistoryDiviSion.HAVE_HISTORY) {
 			try {
 				deleteDataEmpTableHistory(table, true, employeeId, dataRecoveryProcessId, employeeCode);
-				System.out.println("DELETE TABLE BY ANY EMP : " + table.get().getTableEnglishName());
+				System.out.println("Xoa table lich su : " + table.get().getTableEnglishName());
 			} catch (Exception e) {
 				val analyzer = new ThrowableAnalyzer(e);
-				if(analyzer.findByClass(DelDataException.class).isPresent()){
+				if (analyzer.findByClass(DelDataException.class).isPresent()) {
 					DelDataException eDataException = (DelDataException) analyzer.findByClass(DelDataException.class).get();
 					throw eDataException;
 				}
 			}
-
+		}
+		
 		try {// 対象社員の日付順の処理
 			condition = crudDataByTable(dataRecoveryTable, employeeId, dataRecoveryProcessId, table,
 					performDataRecovery, resultsSetting, true, csvByteReadMaper, employeeCode);
@@ -136,9 +137,9 @@ public class ProcessRecoverTable {
 		
 		// Setting error
 		if (condition == DataRecoveryOperatingCondition.ABNORMAL_TERMINATION) {
-				throw new SettingException();
-			}
+			throw new SettingException();
 		}
+		
 		return condition;
 	}
 	
