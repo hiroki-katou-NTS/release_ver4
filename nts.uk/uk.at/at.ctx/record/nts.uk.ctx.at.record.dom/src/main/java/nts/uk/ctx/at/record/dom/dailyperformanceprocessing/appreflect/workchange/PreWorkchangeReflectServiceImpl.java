@@ -15,6 +15,8 @@ import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectPa
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
+import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
+import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
 import nts.uk.ctx.at.shared.dom.worktype.service.WorkTypeIsClosedService;
 
 @Stateless
@@ -27,6 +29,8 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 	private WorkTypeIsClosedService workTypeRepo;
 	@Inject
 	private PreHolidayWorktimeReflectService preOTService;
+	@Inject
+	private BasicScheduleService basicScheService;
 	@Override
 	public void workchangeReflect(WorkChangeCommonReflectPara param, boolean isPre) {
 		CommonReflectParameter workchangePara = param.getCommon();
@@ -53,6 +57,12 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 			if(param.getCommon().getStartTime() != null 
 					&& param.getCommon().getEndTime() != null) {
 				workTimeUpdate.updateScheStartEndTime(timeReflect, dailyInfor);	
+			} else {
+				//1日半日出勤・1日休日系の判定
+				if(basicScheService.checkWorkDay(workchangePara.getWorkTypeCode()) == WorkStyle.ONE_DAY_REST) {
+					workTimeUpdate.cleanScheTime(workchangePara.getEmployeeId(),
+							workchangePara.getAppDate(), dailyInfor);
+				}
 			}
 		}
 		ReflectParameter reflectPara = new ReflectParameter(workchangePara.getEmployeeId(),
@@ -66,6 +76,11 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 		if(param.getCommon().getStartTime() != null 
 				&& param.getCommon().getEndTime() != null) {
 			workTimeUpdate.updateRecordStartEndTimeReflect(timeReflect, dailyInfor);
+		} else {
+			if(basicScheService.checkWorkDay(workchangePara.getWorkTypeCode()) == WorkStyle.ONE_DAY_REST) {
+				workTimeUpdate.cleanRecordTimeData(workchangePara.getEmployeeId(),
+						workchangePara.getAppDate(), dailyInfor);
+			}
 		}
 		//日別実績の勤務情報  変更
 		//workRepository.updateByKeyFlush(dailyInfor);
