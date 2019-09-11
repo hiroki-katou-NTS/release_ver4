@@ -120,7 +120,7 @@ public class ApprovalStatusInfoEmp {
 
 			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 			List<ApproveRootStatusForEmpImport> lstApprovalMonthStatus = approvalStatusAdapter
-					.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(mergePeriodClr.getPeriod().end()),
+					.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(mergePeriodClr.getOriginalClosurePeriod().end()),
 							Arrays.asList(employeeId), 2);
 
 			// [No.534](中間データ版)承認状況を取得する （月別）
@@ -222,7 +222,7 @@ public class ApprovalStatusInfoEmp {
 				// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 				List<ApproveRootStatusForEmpImport> lstApprovalMonthStatus = approvalStatusAdapter
 						.getApprovalByListEmplAndListApprovalRecordDateNew(
-								Arrays.asList(mergePeriodClr.getPeriod().end()), Arrays.asList(employeeId), 2);
+								Arrays.asList(mergePeriodClr.getOriginalClosurePeriod().end()), Arrays.asList(employeeId), 2);
 
 				// [No.534](中間データ版)承認状況を取得する （月別）
 				if (isCallBy587) {
