@@ -6,6 +6,7 @@ package nts.uk.query.app.employee;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -250,7 +251,7 @@ public class RegulationInfoEmployeeFinder {
 		// get List Workplace
 		GeneralDate date = GeneralDate.fromString(queryParam.getBaseDate(), "yyyy-MM-dd");
 		List<String> wkplist = this.workPlaceAdapter.getWorkPlaceIdByEmployeeReferenceRange(date,
-				queryParam.getReferenceRange());
+				queryParam.getReferenceRange(), Optional.of(queryParam.getSystemType() == CCG001SystemType.EMPLOYMENT.value));
 
 		// check param filterByWorkplace
 		if (queryParam.getFilterByWorkplace()) {

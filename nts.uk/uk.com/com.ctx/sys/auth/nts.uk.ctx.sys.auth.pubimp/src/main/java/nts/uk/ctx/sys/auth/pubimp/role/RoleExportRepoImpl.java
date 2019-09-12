@@ -17,6 +17,7 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.sys.auth.app.find.person.role.GetWhetherLoginerCharge;
 import nts.uk.ctx.sys.auth.app.find.person.role.RoleWhetherLoginDto;
 import nts.uk.ctx.sys.auth.app.find.role.workplace.RoleWorkplaceIDFinder;
+import nts.uk.ctx.sys.auth.app.find.role.workplace.RoleWorkplaceIDFinder.SystemType;
 import nts.uk.ctx.sys.auth.app.find.role.workplace.WorkplaceIdDto;
 import nts.uk.ctx.sys.auth.app.find.role.workplace.WorkplaceParam;
 import nts.uk.ctx.sys.auth.dom.role.Role;
@@ -77,7 +78,7 @@ public class RoleExportRepoImpl implements RoleExportRepo {
 	// ロールIDから参�可能な職場リストを取得す�
 	public WorkplaceIdExport findWorkPlaceIdByRoleId(Integer systemType, GeneralDate baseDate) {
 
-		WorkplaceIdDto workplaceIdDto = roleWorkplaceIDFinder.findListWokplaceId(systemType, baseDate);
+		WorkplaceIdDto workplaceIdDto = roleWorkplaceIDFinder.findListWokplaceId(systemType, baseDate, Optional.of(systemType == SystemType.EMPLOYMENT.value));
 
 		WorkplaceIdExport workplaceIdExport = new WorkplaceIdExport();
 		workplaceIdExport.setIsAllEmp(workplaceIdDto.getIsAllEmp());
@@ -126,10 +127,11 @@ public class RoleExportRepoImpl implements RoleExportRepo {
 	 * java.lang.Integer)
 	 */
 	@Override
-	public List<String> getWorkPlaceIdByEmployeeReferenceRange(GeneralDate baseDate, Integer employeeReferenceRange) {
+	public List<String> getWorkPlaceIdByEmployeeReferenceRange(GeneralDate baseDate, Integer employeeReferenceRange, Optional<Boolean> isWkplManager) {
 		WorkplaceParam param = new WorkplaceParam();
 		param.setBaseDate(baseDate);
 		param.setReferenceRange(employeeReferenceRange);
+		param.setIsWkplManager(isWkplManager);
 		return this.roleWorkplaceIDFinder.findListWorkplaceId(param);
 	}
 
