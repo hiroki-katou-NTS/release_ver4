@@ -76,7 +76,7 @@ public class ApprovalStatusMonthly {
 	private ApprovalStatusInfoEmp approvalStatusInfoEmp;
 
 	public Optional<ApprovalStatusMonth> getApprovalStatusMonthly(String companyId, String approverId,
-			Integer closureId, ClosureDate closureDate, List<String> listEmployeeId, YearMonth yearmonthInput,
+			Integer closureId, List<String> listEmployeeId, YearMonth yearmonthInput,
 			List<MonthlyModifyResultDto> results) {
 		iFindDataDCRecord.clearAllStateless();
 		// ドメインモデル「承認処理の利用設定」を取得する
@@ -99,7 +99,7 @@ public class ApprovalStatusMonthly {
 		}
 		// チェック処理（月の承認）
 		List<ApprovalStatusResult> result = this.checkProcessMonthApprove(listEmployeeId, listApprovalInfoResult,
-				identityProcessUseSet.get(), optApprovalUse.get());
+				identityProcessUseSet.get(), optApprovalUse.get(), closureId);
 		return Optional.of(new ApprovalStatusMonth(result));
 	}
 
@@ -156,8 +156,12 @@ public class ApprovalStatusMonthly {
 	 */
 	private List<ApprovalStatusResult> checkProcessMonthApprove(List<String> listEmployeeId,
 			List<ConfirmInfoResult> listApprovalInfoResult, IdentityProcessUseSet identityProcessUseSet,
-			ApprovalProcessingUseSetting approvalUse) {
+			ApprovalProcessingUseSetting approvalUse, Integer closId) {
 		List<ApprovalStatusResult> approvalStatusResults = new ArrayList<>();
+		// Input「対象締め」に一致しないInput「社員の実績の承認状況情報．月の情報」を削除する
+		listApprovalInfoResult.forEach(x -> {
+			x.getInformationMonths().removeIf(y -> y.getActualClosure().getClosureId().value != closId.intValue());
+		});
 		// 取得している「承認処理の利用設定．日の承認を利用する」をチェックする- k can cho vao vong loop
 		boolean useDayApproverConfirm = approvalUse.getUseDayApproverConfirm() ? true : false;
 		for (String employeeId : listEmployeeId) {
