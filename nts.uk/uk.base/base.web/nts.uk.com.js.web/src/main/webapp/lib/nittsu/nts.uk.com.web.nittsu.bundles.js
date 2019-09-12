@@ -25057,8 +25057,12 @@ var nts;
                             if (_.isNil(idx))
                                 return;
                             var $cell = lch.cellAt(_$grid[0], idx, key);
-                            var ftPrint = false, setShtCellState = function ($c) {
+                            var ftPrint = false, cloneStates = _.cloneDeep(states);
+                            setShtCellState = function ($c) {
                                 var disabled;
+                                if (states && states.length !== cloneStates.length) {
+                                    states = _.cloneDeep(cloneStates);
+                                }
                                 _.forEach(states, function (s) {
                                     if (s === color.Disable) {
                                         self.disableNtsControlAt(id, key, $c);
@@ -25073,9 +25077,10 @@ var nts;
                                 });
                                 if (disabled)
                                     _.remove(states, function (s) { return s === color.Disable; });
-                                color.pushState(id, key, states);
-                                if (!ftPrint)
+                                if (!ftPrint) {
+                                    color.pushState(id, key, states);
                                     ftPrint = true;
+                                }
                             };
                             if ($cell) {
                                 setShtCellState($cell);

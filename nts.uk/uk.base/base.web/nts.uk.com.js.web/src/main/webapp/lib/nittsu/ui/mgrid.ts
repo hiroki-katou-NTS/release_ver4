@@ -2860,9 +2860,13 @@ module nts.uk.ui.mgrid {
                 let idx = _.findIndex(_dataSource, r => r[_pk] === id);
                 if (_.isNil(idx)) return;
                 let $cell = lch.cellAt(_$grid[0], idx, key);
-                let ftPrint = false, 
+                let ftPrint = false, cloneStates = _.cloneDeep(states);
                     setShtCellState = function($c) {
                     let disabled;
+                    if (states && states.length !== cloneStates.length) {
+                        states = _.cloneDeep(cloneStates);
+                    }
+                        
                     _.forEach(states, s => {
                         if (s === color.Disable) {
                             self.disableNtsControlAt(id, key, $c);
@@ -2876,9 +2880,11 @@ module nts.uk.ui.mgrid {
                             $c.classList.add(s);
                     });
                     
-                    if (disabled) _.remove(states, s => s === color.Disable);
-                    color.pushState(id, key, states);  
-                    if (!ftPrint) ftPrint = true;   
+                    if (disabled) _.remove(states, s => s === color.Disable);  
+                    if (!ftPrint) {
+                        color.pushState(id, key, states);
+                        ftPrint = true;   
+                    }
                 };
                 
                 if ($cell) {
