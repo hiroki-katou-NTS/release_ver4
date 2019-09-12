@@ -1,6 +1,7 @@
 package nts.uk.ctx.sys.auth.app.find.role.workplace;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,4 +20,6 @@ public class WorkplaceParam implements Serializable {
 	
 	/** The reference range. */
 	private Integer referenceRange;
+	
+	private Optional<Boolean> isWkplManager;
 }

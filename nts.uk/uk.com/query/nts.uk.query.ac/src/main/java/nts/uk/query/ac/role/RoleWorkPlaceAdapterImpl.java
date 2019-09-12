@@ -5,6 +5,7 @@
 package nts.uk.query.ac.role;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -30,8 +31,8 @@ public class RoleWorkPlaceAdapterImpl implements RoleWorkPlaceAdapter {
 	 * java.lang.Integer)
 	 */
 	@Override
-	public List<String> getWorkPlaceIdByEmployeeReferenceRange(GeneralDate baseDate, Integer employeeReferenceRange) {
-		return this.roleExportRepo.getWorkPlaceIdByEmployeeReferenceRange(baseDate, employeeReferenceRange);
+	public List<String> getWorkPlaceIdByEmployeeReferenceRange(GeneralDate baseDate, Integer employeeReferenceRange, Optional<Boolean> isWkplManager) {
+		return this.roleExportRepo.getWorkPlaceIdByEmployeeReferenceRange(baseDate, employeeReferenceRange, isWkplManager);
 	}
 	
 	@Override

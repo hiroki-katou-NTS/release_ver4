@@ -5,6 +5,7 @@
 package nts.uk.query.model.employee;
 
 import java.util.List;
+import java.util.Optional;
 
 import nts.arc.time.GeneralDate;
 
@@ -20,7 +21,7 @@ public interface RoleWorkPlaceAdapter {
 	 * @param employeeReferenceRange the employee reference range
 	 * @return the work place id by employee reference range
 	 */
-	List<String> getWorkPlaceIdByEmployeeReferenceRange(GeneralDate baseDate, Integer employeeReferenceRange);
+	List<String> getWorkPlaceIdByEmployeeReferenceRange(GeneralDate baseDate, Integer employeeReferenceRange, Optional<Boolean> isWkplManager);
 	
 	/**
 	 * Find role id by system type.
