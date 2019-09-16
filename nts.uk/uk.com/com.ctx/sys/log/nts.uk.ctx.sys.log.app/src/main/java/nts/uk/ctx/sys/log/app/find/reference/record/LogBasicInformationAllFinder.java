@@ -1,6 +1,7 @@
 package nts.uk.ctx.sys.log.app.find.reference.record;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,27 +108,27 @@ public class LogBasicInformationAllFinder {
 			targetDataType = TargetDataType.of(logParams.getTargetDataType());
 		}
 		if (!CollectionUtil.isEmpty(lstLogBasicInformation)) {			
-			List<String> listOperationId= new ArrayList<>();
-			Map<String, LogBasicInformation> map=new HashMap<>();
+
+			// Get list OperationId
 			List<String> employeeIds = new ArrayList<>();
-			for(LogBasicInformation logBasicInformation : lstLogBasicInformation){
-				listOperationId.add(logBasicInformation.getOperationId());
-				map.put(logBasicInformation.getOperationId(), logBasicInformation);
-				if(logBasicInformation.getUserInfo() !=null){
-					employeeIds.add(logBasicInformation.getUserInfo().getEmployeeId());
-					
+			Map<String, LogBasicInformation> mapLogBasicInfo = new HashMap<>();
+			List<String> listOperationId = lstLogBasicInformation.stream().map(x -> {
+				mapLogBasicInfo.put(x.getOperationId(), x);
+				if (x.getUserInfo() != null) {
+					employeeIds.add(x.getUserInfo().getEmployeeId());
 				}
-			}
+				return x.getOperationId();
+			}).collect(Collectors.toList());
 			// Get list employee code - request list 228
 			Map<String, String> mapEmployeeCodes = personEmpBasicInfoAdapter
 					.getEmployeeCodesByEmpIds(employeeIds.stream().distinct().collect(Collectors.toList()));
 			switch (recordTypeEnum) {
 			case LOGIN:
-			List<LoginRecord> rsLoginRecord	=this.loginRecordRepository.logRecordInfor(listOperationId);
-				if(!CollectionUtil.isEmpty(rsLoginRecord)){
-					Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(), rsLoginRecord ,  map, new ArrayList<>(), new ArrayList<>());
-					rsLoginRecord.stream().forEach(loginRecord ->{
-						LogBasicInformation	logBasicInformation=map.get(loginRecord.getOperationId());
+			List<LoginRecord> loginRecords	=this.loginRecordRepository.logRecordInfor(listOperationId);
+				if(!CollectionUtil.isEmpty(loginRecords)){
+					Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(), loginRecords ,  mapLogBasicInfo, new ArrayList<>(), new ArrayList<>());
+					loginRecords.stream().forEach(loginRecord ->{
+						LogBasicInformation	logBasicInformation = mapLogBasicInfo.get(loginRecord.getOperationId());
 						LogBasicInfoAllDto logBasicInfoDto = LogBasicInfoAllDto.fromDomain(logBasicInformation);					
 						// itemNo 3
 						UserInfo userDto = logBasicInformation.getUserInfo();
@@ -240,7 +241,7 @@ public class LogBasicInformationAllFinder {
 						}					
 					}
 					Map<String, String> mapEmployeeCodePersons = personEmpBasicInfoAdapter.getEmployeeCodesByEmpIds(employeePerSonIds);
-					Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(), new ArrayList<>() ,  map, listPersonInfoCorrectionLog, new ArrayList<>());
+					Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(), new ArrayList<>() ,  mapLogBasicInfo, listPersonInfoCorrectionLog, new ArrayList<>());
 					listPersonInfoCorrectionLog.stream().forEach(personInfoCorrectionLog ->{
 						
 						List<CategoryCorrectionLog> rsListCategoryCorrectionLog = personInfoCorrectionLog
@@ -252,7 +253,7 @@ public class LogBasicInformationAllFinder {
 								if (!CollectionUtil.isEmpty(rsItemInfo)) {
 									rsItemInfo.stream().forEach(itemInfo ->{
 										//ADDNEW
-										LogBasicInformation	logBasicInformation = map.get(personInfoCorrectionLog.getOperationId());
+										LogBasicInformation	logBasicInformation = mapLogBasicInfo.get(personInfoCorrectionLog.getOperationId());
 										
 										// convert log basic info to DTO
 										LogBasicInfoAllDto logBasicInfoDto = LogBasicInfoAllDto.fromDomain(logBasicInformation);
@@ -428,10 +429,10 @@ public class LogBasicInformationAllFinder {
 					Map<String, String> mapEmployeeCodePersons = personEmpBasicInfoAdapter.getEmployeeCodesByEmpIds(employeePerSonIds);
 					//
 					if (!CollectionUtil.isEmpty(lstLogDataCorecRecordRefeDto)) {
-						Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(), new ArrayList<>() ,  map, new ArrayList<>(), new ArrayList<>());			
+						Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(), new ArrayList<>() , mapLogBasicInfo, new ArrayList<>(), new ArrayList<>());			
 						lstLogDataCorecRecordRefeDto.stream().forEach(logDataCorrectRecordRefeDto ->{
 							// convert log basic info to DTO
-							LogBasicInformation logBasicInformation =map.get(logDataCorrectRecordRefeDto.getOperationId());
+							LogBasicInformation logBasicInformation = mapLogBasicInfo.get(logDataCorrectRecordRefeDto.getOperationId());
 							LogBasicInfoAllDto logBasicInfoDto = LogBasicInfoAllDto.fromDomain(logBasicInformation);
 							UserInfo userDto = logBasicInformation.getUserInfo();
 							if (userDto != null) {
@@ -698,6 +699,11 @@ public class LogBasicInformationAllFinder {
 				
 			}
 		}
+		Comparator<LogBasicInfoAllDto> compareByName = Comparator
+                .comparing(LogBasicInfoAllDto::getModifyDateTime, (s1, s2) -> {
+                	return s2.compareTo(s1);
+                });
+		lstLogBacsicInfo.sort(compareByName);
 		return lstLogBacsicInfo;
 	}
 

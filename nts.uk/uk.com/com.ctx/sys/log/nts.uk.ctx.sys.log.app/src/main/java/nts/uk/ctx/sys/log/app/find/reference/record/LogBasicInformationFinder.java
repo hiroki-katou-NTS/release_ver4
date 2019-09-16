@@ -116,7 +116,7 @@ public class LogBasicInformationFinder {
 						if(!CollectionUtil.isEmpty(loginRecords)){
 							
 							// Get list employeeCode operator by list information operator
-							Map<String, String> mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo,loginRecords,null,null,null);
+							Map<String, String> mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo, loginRecords, null, null, null);
 							List<LogBasicInfoDto> logBasicLst = loginRecords.stream().map(loginRecord ->{
 								// Convert log basic info to DTO
 								LogBasicInformation logBasicInformation = mapLogBasicInfo.get(loginRecord.getOperationId());
