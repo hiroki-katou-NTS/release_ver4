@@ -28,6 +28,8 @@ public interface DataCorrectionLogRepository {
 	
 	List<DataCorrectionLog> findByTargetAndDate(String operationId, List<String> listEmployeeId, DatePeriod period, TargetDataType targetDataType);
 	
+	List<DataCorrectionLog> findByTargetAndDateScreenF(List<String> operationIds, List<String> listEmployeeId, DatePeriod period, TargetDataType targetDataType);
+	
 	List<DataCorrectionLog> findByTargetAndDate(List<String> operationIds, List<String> listEmployeeId, DatePeriod period, TargetDataType targetDataType);
 	
 }

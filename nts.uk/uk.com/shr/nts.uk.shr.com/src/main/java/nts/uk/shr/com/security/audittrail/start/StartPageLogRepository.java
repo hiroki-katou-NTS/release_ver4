@@ -26,5 +26,8 @@ public interface StartPageLogRepository {
 	List<StartPageLog> findBy(String companyId, List<String> listEmployeeId,
 			GeneralDateTime start, GeneralDateTime end);
 	
+	List<StartPageLog> findByScreenF(String companyId, List<String> listEmployeeId,
+			GeneralDateTime start, GeneralDateTime end);
+	
 	List<StartPageLog> findBy(String companyId, GeneralDateTime start, GeneralDateTime end);
 }

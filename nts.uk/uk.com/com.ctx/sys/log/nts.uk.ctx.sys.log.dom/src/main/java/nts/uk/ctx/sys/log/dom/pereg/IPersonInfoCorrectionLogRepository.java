@@ -20,5 +20,7 @@ public interface IPersonInfoCorrectionLogRepository {
 	
 	List<PersonInfoCorrectionLog> findByTargetAndDate(List<String> operationId, List<String> listEmployeeId);
 	
+	List<PersonInfoCorrectionLog> findByTargetAndDateScreenF(List<String> operationId, List<String> listEmployeeId);
+	
 	void save(List<PersonInfoCorrectionLog> correctionLogs);
 }
