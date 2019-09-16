@@ -592,19 +592,6 @@ public class DailyModifyResCommandFacade {
 				}
 				
 				// 大塚カスタマイズチェック処理
-				if (dataParent.getMode() == 0) {
-					if (!dataParent.isFlagCalculation() && resultIU.getCommandNew() != null) {
-						dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
-								dataParent.getDateRange(),
-								resultIU.getCommandNew().stream().map(c -> c.getWorkInfo().getData())
-										.filter(c -> c != null).collect(Collectors.toList()));
-					} else if (dataParent.isFlagCalculation()) {
-						dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
-								dataParent.getDateRange(),
-								dailyEdits.stream().map(c -> c.getWorkInfo().toDomain(null, null))
-										.filter(c -> c != null).collect(Collectors.toList()));
-					}
-				}
 				// 乖離エラー発生時の本人確認解除
 				val errorSign = validatorDataDaily.releaseDivergence(resultIU.getLstDailyDomain());
 				if (!errorSign.isEmpty()) {
@@ -714,6 +701,19 @@ public class DailyModifyResCommandFacade {
 		}
 		
 		//add error holiday
+		if (dataParent.getMode() == 0) {
+			if (!dataParent.isFlagCalculation() && resultIU.getCommandNew() != null) {
+				dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
+						dataParent.getDateRange(),
+						resultIU.getCommandNew().stream().map(c -> c.getWorkInfo().getData())
+								.filter(c -> c != null).collect(Collectors.toList()));
+			} else if (dataParent.isFlagCalculation()) {
+				dataCheck = validatorDataDaily.checkContinuousHolidays(dataParent.getEmployeeId(),
+						dataParent.getDateRange(),
+						dailyEdits.stream().map(c -> c.getWorkInfo().toDomain(null, null))
+								.filter(c -> c != null).collect(Collectors.toList()));
+			}
+		}
 		if (dataParent.getMode() == 0) {
 			val temHoliday = dataCheck;
 			dataCheck.stream().forEach(x -> {
