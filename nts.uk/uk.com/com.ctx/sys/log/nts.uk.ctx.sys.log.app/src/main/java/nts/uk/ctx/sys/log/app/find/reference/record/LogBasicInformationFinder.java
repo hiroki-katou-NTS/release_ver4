@@ -2,6 +2,7 @@ package nts.uk.ctx.sys.log.app.find.reference.record;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.Getter;
+import lombok.Setter;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.log.app.find.reference.LogOuputItemFinder;
 import nts.uk.ctx.sys.log.app.find.reference.LogOutputItemDto;
@@ -112,11 +114,11 @@ public class LogBasicInformationFinder {
 				switch (recordTypeEnum) {
 				case LOGIN:
 						// Set data of login record
-						List<LoginRecord> loginRecords = this.loginRecordRepository.logRecordInfor(operationIds);
+						List<LoginRecord> loginRecords = this.loginRecordRepository.logRecordInforScreenF(operationIds);
 						if(!CollectionUtil.isEmpty(loginRecords)){
 							
 							// Get list employeeCode operator by list information operator
-							Map<String, String> mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo,loginRecords,null,null,null);
+							Map<String, String> mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo, loginRecords, null, null, null);
 							List<LogBasicInfoDto> logBasicLst = loginRecords.stream().map(loginRecord ->{
 								// Convert log basic info to DTO
 								LogBasicInformation logBasicInformation = mapLogBasicInfo.get(loginRecord.getOperationId());
@@ -144,7 +146,7 @@ public class LogBasicInformationFinder {
 					String[] listSubHeaderText = { "23", "24", "29", "31", "33" };
 					// Get persion info log
 					List<PersonInfoCorrectionLog> listPersonInfoCorrectionLog = this.iPersonInfoCorrectionLogRepository
-							.findByTargetAndDate(operationIds,logParams.getListTagetEmployeeId());
+							.findByTargetAndDateScreenF(operationIds, logParams.getListTagetEmployeeId());
 					// Get list employeeCode operator by list information operator
 					final Map<String, String> mapEmployeeCodes = getEmployeeCodes(recordTypeEnum,mapLogBasicInfo, null, listPersonInfoCorrectionLog, null, null);
 					
@@ -234,7 +236,7 @@ public class LogBasicInformationFinder {
 						}
 						
 						// get data correct log
-						List<DataCorrectionLog> lstDataCorectLog = this.dataCorrectionLogRepository.findByTargetAndDate(
+						List<DataCorrectionLog> lstDataCorectLog = this.dataCorrectionLogRepository.findByTargetAndDateScreenF(
 								operationIdSubList, logParams.getListTagetEmployeeId(), datePeriodTaget,targetDataType);
 						if (!CollectionUtil.isEmpty(lstDataCorectLog)) {
 							// Get list employeeCode operator by list information operator
@@ -294,7 +296,7 @@ public class LogBasicInformationFinder {
 				if(recordTypeEnum.code == RecordTypeEnum.START_UP.code){
 					Map<String, String> mapProgramNames = webMenuAdapter.getWebMenuByCId(cid);
 					// get start page log
-					List<StartPageLog> startPageLogs = this.startPageLogRepository.findBy(cid,
+					List<StartPageLog> startPageLogs = this.startPageLogRepository.findByScreenF(cid,
 							logParams.getListOperatorEmployeeId(), logParams.getStartDateOperator(),
 							logParams.getEndDateOperator());
 					if (!CollectionUtil.isEmpty(startPageLogs)) {
@@ -418,6 +420,57 @@ public class LogBasicInformationFinder {
 				.getEmployeeCodesByEmpIds(employeeIds.stream().distinct().collect(Collectors.toList()));
 	}
 	
+	private Object prepareDataScreenI(LogScreenIParam param) {
+		int maxlength = 1000;
+		List<LogOutputItemDto> logOutputItemDtos = this.logOuputItemFinder.getLogOutputItemByItemNosAndRecordType(
+				param.getParamOutputItem().getItemNos(), param.getParamOutputItem().getRecordType());
+		if(logOutputItemDtos.isEmpty()) return new ArrayList<>();
+		List<LogBasicInfoDto> data = findByOperatorsAndDate(param.getLogParams());
+		RecordTypeEnum recordTypeEnum = RecordTypeEnum.valueOf(param.getLogParams().getRecordType());
+		if(recordTypeEnum == RecordTypeEnum.LOGIN  || recordTypeEnum == RecordTypeEnum.START_UP) {
+			Comparator<LogBasicInfoDto> compareByName = Comparator
+	                .comparing(LogBasicInfoDto::getModifyDateTime, (s1, s2) -> {
+	                	return s2.compareTo(s1);
+	                }).thenComparing(LogBasicInfoDto::getEmployeeCodeLogin);
+			data.sort(compareByName);
+		}
+		
+		if(recordTypeEnum == RecordTypeEnum.UPDATE_PERSION_INFO  || recordTypeEnum == RecordTypeEnum.DATA_CORRECT) {
+			Comparator<LogBasicInfoDto> compareByName = Comparator
+	                .comparing(LogBasicInfoDto::getModifyDateTime, (s1, s2) -> {
+	                	return s2.compareTo(s1);
+	                }).thenComparing(LogBasicInfoDto::getEmployeeCodeTaget);
+			data.sort(compareByName);
+		}
+		 int countLog = 1;
+         List<LogBasicInfoDto> listLogBasicInforModel = new ArrayList<>();
+         for(LogBasicInfoDto logBasicInfoModel: data) {
+        	 if(countLog < maxlength) {
+        		 if(recordTypeEnum == RecordTypeEnum.LOGIN  || recordTypeEnum == RecordTypeEnum.START_UP) {
+        			 listLogBasicInforModel.add(logBasicInfoModel);
+        		 }
+        		 
+        		 if(recordTypeEnum == RecordTypeEnum.UPDATE_PERSION_INFO) {
+        			 listLogBasicInforModel.add(logBasicInfoModel);
+        		 }
+        		 
+        		 if(recordTypeEnum == RecordTypeEnum.DATA_CORRECT) {
+        			 listLogBasicInforModel.add(logBasicInfoModel); 
+        		 }
+        		 countLog++;
+        	 }else {
+        		 return false;
+        	 }
+         }
+         
+         for(LogBasicInfoDto logBaseInfo: listLogBasicInforModel) {
+        	 List<DataCorrectLogModel> lstDataCorrect = new ArrayList<>();
+        	 //L
+         }
+			
+			return null;
+	}
+	
 	public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
 	    Set<Object> seen = ConcurrentHashMap.newKeySet();
 	    return t -> seen.add(keyExtractor.apply(t));
@@ -431,6 +484,59 @@ public class LogBasicInformationFinder {
 			this.recordType = recordType;
 			this.targetKey = targetKey;
 		}
+	}
+	
+	@Getter
+	@Setter
+	public class DataCorrectLogModel{
+		private String parentKey;
+		private String childrentKey;
+		private String operationId;
+		private String targetDate;
+        private int targetDataType;
+        private String itemName;
+        private String valueBefore;
+        private String valueAfter;
+        private String remarks;
+        private String correctionAttr;
+        private int showOrder;
+		public DataCorrectLogModel(String operationId, String targetDate, int targetDataType, String itemName,
+				String valueBefore, String valueAfter, String remarks) {
+			super();
+			this.operationId = operationId;
+			this.targetDate = targetDate;
+			this.targetDataType = targetDataType;
+			this.itemName = itemName;
+			this.valueBefore = valueBefore;
+			this.valueAfter = valueAfter;
+			this.remarks = remarks;
+		}
+	}
+	
+	@Setter
+	@Getter
+	public class PerCateCorrectRecordModel {
+        private String parentKey;
+        private String childrentKey;
+        private String operationId;
+        private String targetDate;
+        private String categoryName;
+        private String itemName;
+        private String valueBefore;
+        private String valueAfter;
+        private String infoOperateAttr;
+		public PerCateCorrectRecordModel(String operationId, String targetDate, String categoryName, String itemName,
+				String valueBefore, String valueAfter, String infoOperateAttr) {
+			super();
+			this.operationId = operationId;
+			this.targetDate = targetDate;
+			this.categoryName = categoryName;
+			this.itemName = itemName;
+			this.valueBefore = valueBefore;
+			this.valueAfter = valueAfter;
+			this.infoOperateAttr = infoOperateAttr;
+		}
+        
 	}
 }
 

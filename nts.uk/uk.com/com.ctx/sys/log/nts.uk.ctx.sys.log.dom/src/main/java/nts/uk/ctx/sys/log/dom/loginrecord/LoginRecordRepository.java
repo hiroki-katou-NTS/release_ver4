@@ -34,4 +34,11 @@ public interface LoginRecordRepository {
 	 * @return the list
 	 */
 	List<LoginRecord> logRecordInfor(List<String> operationIds);
+	
+	/**
+	 * CLI003F - EA修正履歴No3675
+	 * @param operationIds
+	 * @return
+	 */
+	List<LoginRecord> logRecordInforScreenF(List<String> operationIds);
 }

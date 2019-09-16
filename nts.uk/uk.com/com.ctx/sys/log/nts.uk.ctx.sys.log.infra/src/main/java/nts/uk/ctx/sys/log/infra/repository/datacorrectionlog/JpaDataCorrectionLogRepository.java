@@ -650,6 +650,309 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 		});
 		return resultList;
 	}
+
+	/**
+	 * findByTargetAndDateScreenF(
+								operationIdSubList, logParams.getListTagetEmployeeId(), datePeriodTaget,targetDataType);
+	 */
+	@Override
+	public List<DataCorrectionLog> findByTargetAndDateScreenF(List<String> operationIds, List<String> listEmployeeId,
+			DatePeriod period, TargetDataType targetDataType) {
+		List<DataCorrectionLog> results = new ArrayList<>();
+		if (operationIds.isEmpty())
+			return results;
+		List<DataCorrectionLog> entities = new ArrayList<>();
+		
+		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
+			// SQLServer
+			String sql = "select top 1000 OPERATION_ID, USER_ID , TARGET_DATA_TYPE,  ITEM_ID, YMD_KEY," // primary Key
+					+ " SID, YM_KEY, Y_KEY, STRING_KEY, CORRECTION_ATTR,  ITEM_NAME, VIEW_VALUE_BEFORE, VIEW_VALUE_AFTER, VALUE_DATA_TYPE, SHOW_ORDER" // other
+					+ " from SRCDT_DATA_CORRECTION_LOG" //table name
+					+ " with(index(SRCDI_DATA_CORRECTION_LOG2))";//hint
+			//TODO：ログ照会レスポンス改善
+			//一時対応として、出力するログ自体を減らすため、修正区分を指定
+			String correctAttrOneCondition = " and CORRECTION_ATTR = '0'";
+			if (targetDataType == null) {
+				if (listEmployeeId == null || listEmployeeId.isEmpty()) {
+					if (period.start() == null) {
+//						sql += " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
+						sql +=  " where OPERATION_ID in @operationIds "// condition
+							+   correctAttrOneCondition
+							+	" order by YMD_KEY, SID,  SHOW_ORDER";
+						final String executeSQL = sql; 
+						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							entities.addAll(new NtsStatement(executeSQL, this.jdbcProxy())
+								  	.paramString("operationIds", subIdList)
+								  	.getList(rec -> {return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
+								  																			rec.getString("USER_ID"), 
+								  																			rec.getInt("TARGET_DATA_TYPE"),
+								  																			rec.getString("ITEM_ID"),
+								  																			rec.getGeneralDate("YMD_KEY")), 
+								  												"",
+								  												rec.getString("SID"),
+								  												rec.getInt("YM_KEY"), 
+								  												rec.getInt("Y_KEY"),
+								  												"", 
+								  												rec.getInt("CORRECTION_ATTR"), 
+								  												rec.getString("ITEM_NAME"), 
+								  												"", 
+								  												rec.getString("VIEW_VALUE_BEFORE"), 
+								  												"", 
+								  												rec.getString("VIEW_VALUE_AFTER"), 
+								  												rec.getInt("VALUE_DATA_TYPE"), 
+								  												rec.getInt("SHOW_ORDER"), 
+								  												"").toDomainToViewJDBC();}));
+						});
+						return entities;
+						
+					}
+					else {
+						sql +=  " where YMD_KEY between @startYmd and @endYmd and OPERATION_ID in @operationIds"// condition
+							+   correctAttrOneCondition
+//							+  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
+							+  " order by YMD_KEY, SID,  SHOW_ORDER";
+						final String executeSQL = sql; 
+						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							entities.addAll( new NtsStatement(executeSQL, this.jdbcProxy())
+								  .paramString("operationIds", subIdList)
+								  .paramDate("startYmd", period.start())
+								  .paramDate("endYmd", period.end())
+								  	.getList(rec -> {return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
+												rec.getString("USER_ID"), 
+												rec.getInt("TARGET_DATA_TYPE"),
+												rec.getString("ITEM_ID"),
+												rec.getGeneralDate("YMD_KEY")), 
+					"",
+					rec.getString("SID"),
+					rec.getInt("YM_KEY"), 
+					rec.getInt("Y_KEY"),
+					"", 
+					rec.getInt("CORRECTION_ATTR"), 
+					rec.getString("ITEM_NAME"), 
+					"", 
+					rec.getString("VIEW_VALUE_BEFORE"), 
+					"", 
+					rec.getString("VIEW_VALUE_AFTER"), 
+					rec.getInt("VALUE_DATA_TYPE"), 
+					rec.getInt("SHOW_ORDER"), 
+					"").toDomainToViewJDBC();}));
+					});
+					return entities;
+					}
+				}
+				else {
+					if (period.start() == null) {
+						sql += " where OPERATION_ID in @operationIds and SID in @listEmployeeId"
+							+  correctAttrOneCondition
+//							+  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
+								+  " order by YMD_KEY, SID, SHOW_ORDER";
+						final String executeSQL = sql; 
+						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							entities.addAll(new NtsStatement(executeSQL, this.jdbcProxy())
+									.paramString("operationIds", subIdList)
+									.paramString("listEmployeeId", listEmployeeId)
+								  	.getList(rec -> {return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
+												rec.getString("USER_ID"), 
+												rec.getInt("TARGET_DATA_TYPE"),
+												rec.getString("ITEM_ID"),
+												rec.getGeneralDate("YMD_KEY")), 
+												"",
+												rec.getString("SID"),
+												rec.getInt("YM_KEY"), 
+												rec.getInt("Y_KEY"),
+												"", 
+												rec.getInt("CORRECTION_ATTR"), 
+												rec.getString("ITEM_NAME"), 
+												"", 
+												rec.getString("VIEW_VALUE_BEFORE"), 
+												"", 
+												rec.getString("VIEW_VALUE_AFTER"), 
+												rec.getInt("VALUE_DATA_TYPE"), 
+												rec.getInt("SHOW_ORDER"), 
+												"").toDomainToViewJDBC();}));
+							});
+							return entities;
+					} else {
+						sql += " where YMD_KEY between @startYmd and @endYmd and OPERATION_ID in @operationIds and SID in @listEmployeeId"
+//							+  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
+							+  correctAttrOneCondition
+							+  " order by YMD_KEY, SID, SHOW_ORDER";
+						final String executeSQL = sql; 
+						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							entities.addAll( new NtsStatement(executeSQL, this.jdbcProxy())
+									  .paramDate("startYmd", period.start())
+									  .paramDate("endYmd", period.end())
+									  .paramString("operationIds", subIdList)
+									  .paramString("listEmployeeId", listEmployeeId)
+									  	.getList(rec -> {return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
+													rec.getString("USER_ID"), 
+													rec.getInt("TARGET_DATA_TYPE"),
+													rec.getString("ITEM_ID"),
+													rec.getGeneralDate("YMD_KEY")), 
+													"",
+													rec.getString("SID"),
+													rec.getInt("YM_KEY"), 
+													rec.getInt("Y_KEY"),
+													"", 
+													rec.getInt("CORRECTION_ATTR"), 
+													rec.getString("ITEM_NAME"), 
+													"", 
+													rec.getString("VIEW_VALUE_BEFORE"), 
+													"", 
+													rec.getString("VIEW_VALUE_AFTER"), 
+													rec.getInt("VALUE_DATA_TYPE"), 
+													rec.getInt("SHOW_ORDER"), 
+													"").toDomainToViewJDBC();}));
+							});
+							return entities;
+					}
+				}
+			}
+			else {
+				if (listEmployeeId == null || listEmployeeId.isEmpty()) {
+					if (period.start() == null) {
+						sql += " where OPERATION_ID in @operationIds and TARGET_DATA_TYPE = @targetDataType"
+							+  correctAttrOneCondition
+//							+  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
+							+  " order by YMD_KEY, SID, SHOW_ORDER";
+						final String executeSQL = sql;
+						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							entities.addAll(new NtsStatement(executeSQL, this.jdbcProxy())
+							  .paramString("operationIds", operationIds)
+							  .paramInt("targetDataType", targetDataType.value)
+							  	.getList(rec -> {return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
+											rec.getString("USER_ID"), 
+											rec.getInt("TARGET_DATA_TYPE"),
+											rec.getString("ITEM_ID"),
+											rec.getGeneralDate("YMD_KEY")), 
+											"",
+											rec.getString("SID"),
+											rec.getInt("YM_KEY"), 
+											rec.getInt("Y_KEY"),
+											"", 
+											rec.getInt("CORRECTION_ATTR"), 
+											rec.getString("ITEM_NAME"), 
+											"", 
+											rec.getString("VIEW_VALUE_BEFORE"), 
+											"", 
+											rec.getString("VIEW_VALUE_AFTER"), 
+											rec.getInt("VALUE_DATA_TYPE"), 
+											rec.getInt("SHOW_ORDER"), 
+											"").toDomainToViewJDBC();}));
+							});
+							return entities;
+					} else {
+						sql += " where YMD_KEY between @startYmd and @endYmd and OPERATION_ID in @operationIds and TARGET_DATA_TYPE = @targetDataType"
+							+  correctAttrOneCondition
+//							+  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
+							+  " order by YMD_KEY, SID, SHOW_ORDER";
+						final String executeSQL = sql; 
+						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							entities.addAll(new NtsStatement(executeSQL, this.jdbcProxy())
+							  .paramDate("startYmd", period.start())
+							  .paramDate("endYmd", period.end())
+							  .paramString("operationIds", subIdList)
+							  .paramInt("targetDataType", targetDataType.value)
+							  .getList(rec ->	
+							  {
+							  	return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
+											rec.getString("USER_ID"), 
+											rec.getInt("TARGET_DATA_TYPE"),
+											rec.getString("ITEM_ID"),
+											rec.getGeneralDate("YMD_KEY")), 
+											"",
+											rec.getString("SID"),
+											rec.getInt("YM_KEY"), 
+											rec.getInt("Y_KEY"),
+											"", 
+											rec.getInt("CORRECTION_ATTR"), 
+											rec.getString("ITEM_NAME"), 
+											"", 
+											rec.getString("VIEW_VALUE_BEFORE"), 
+											"", 
+											rec.getString("VIEW_VALUE_AFTER"), 
+											rec.getInt("VALUE_DATA_TYPE"), 
+											rec.getInt("SHOW_ORDER"), 
+											"").toDomainToViewJDBC();
+							  }));
+							});
+							return entities;
+					}
+				} else {
+					if (period.start() == null) {
+						sql += " where OPERATION_ID in @operationIds and TARGET_DATA_TYPE = @targetDataType and SID in @listEmployeeId"
+							+  correctAttrOneCondition
+//						    +  " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
+							+  " order by YMD_KEY, SID, SHOW_ORDER";
+						final String executeSQL = sql; 
+						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							entities.addAll(new NtsStatement(executeSQL, this.jdbcProxy())
+							  .paramString("operationIds", subIdList)
+							  .paramInt("targetDataType", targetDataType.value)
+							  .paramString("listEmployeeId", listEmployeeId)
+							  	.getList(rec -> {return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
+											rec.getString("USER_ID"), 
+											rec.getInt("TARGET_DATA_TYPE"),
+											rec.getString("ITEM_ID"),
+											rec.getGeneralDate("YMD_KEY")), 
+											"",
+											rec.getString("SID"),
+											rec.getInt("YM_KEY"), 
+											rec.getInt("Y_KEY"),
+											"", 
+											rec.getInt("CORRECTION_ATTR"), 
+											rec.getString("ITEM_NAME"), 
+											"", 
+											rec.getString("VIEW_VALUE_BEFORE"), 
+											"", 
+											rec.getString("VIEW_VALUE_AFTER"), 
+											rec.getInt("VALUE_DATA_TYPE"), 
+											rec.getInt("SHOW_ORDER"), 
+											"").toDomainToViewJDBC();}));
+							});
+							return entities;
+					} else {
+						sql += " where YMD_KEY between @startYmd and @endYmd and OPERATION_ID in @operationIds and TARGET_DATA_TYPE = @targetDataType and SID in @listEmployeeId"
+							+  correctAttrOneCondition
+//							 + " order by SID, YMD_KEY, YM_KEY, Y_KEY, SHOW_ORDER";
+							 + " order by YMD_KEY, SID, SHOW_ORDER";
+						final String executeSQL = sql; 
+						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							entities.addAll(new NtsStatement(executeSQL, this.jdbcProxy())
+							  .paramDate("startYmd", period.start())
+							  .paramDate("endYmd", period.end())
+							  .paramString("operationIds", subIdList)
+							  .paramInt("targetDataType", targetDataType.value)
+							  .paramString("listEmployeeId", listEmployeeId)
+							  	.getList(rec -> {
+							  		return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
+											rec.getString("USER_ID"), 
+											rec.getInt("TARGET_DATA_TYPE"),
+											rec.getString("ITEM_ID"),
+											rec.getGeneralDate("YMD_KEY")), 
+											"",
+											rec.getString("SID"),
+											rec.getInt("YM_KEY"), 
+											rec.getInt("Y_KEY"),
+											"", 
+											rec.getInt("CORRECTION_ATTR"), 
+											rec.getString("ITEM_NAME"), 
+											"", 
+											rec.getString("VIEW_VALUE_BEFORE"), 
+											"", 
+											rec.getString("VIEW_VALUE_AFTER"), 
+											rec.getInt("VALUE_DATA_TYPE"), 
+											rec.getInt("SHOW_ORDER"), 
+											"").toDomainToViewJDBC();}));
+							});
+							return entities;
+					}
+				}
+			}
+		} else {
+			throw new RuntimeException("未実装です");
+		}
+	}
 	
 	
 
