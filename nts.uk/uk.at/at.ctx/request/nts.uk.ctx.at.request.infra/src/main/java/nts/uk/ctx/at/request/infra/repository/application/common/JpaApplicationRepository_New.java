@@ -486,8 +486,8 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 				CollectionUtil.split(appType, SPLIT_650, lstApp -> {
 					String subIn3 = NtsStatement.In.createParamsString(lstApp);					
 					String sql = "SELECT * FROM KRQDT_APPLICATION "
-							+ "WHERE REFLECT_PLAN_STATE IN (" + subIn1 + ") "
-							+ " AND REFLECT_PER_STATE IN (" + subIn2 + ")"
+							+ "WHERE (REFLECT_PLAN_STATE IN (" + subIn1 + ") "
+							+ " OR REFLECT_PER_STATE IN (" + subIn2 + "))"
 							+ " AND APP_TYPE IN (" + subIn3 + ") "
 							+ " AND APPLICANTS_SID = ?"
 							+ " AND APP_DATE >= ?"
