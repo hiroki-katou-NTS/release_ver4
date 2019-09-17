@@ -572,7 +572,7 @@ public class LogBasicInformationAllFinder {
 				break;
 			}
 		}else{
-			if(recordTypeEnum.code ==RecordTypeEnum.START_UP.code){
+			if(recordTypeEnum.code == RecordTypeEnum.START_UP.code){
 				
 			List<StartPageLog> listStartPageLog=this.startPageLogRepository.findBy(cid,
 						logParams.getListOperatorEmployeeId(), logParams.getStartDateOperator(),
@@ -699,11 +699,31 @@ public class LogBasicInformationAllFinder {
 				
 			}
 		}
-		Comparator<LogBasicInfoAllDto> compareByName = Comparator
-                .comparing(LogBasicInfoAllDto::getModifyDateTime, (s1, s2) -> {
-                	return s2.compareTo(s1);
-                });
-		lstLogBacsicInfo.sort(compareByName);
+		
+		if(recordTypeEnum.code == RecordTypeEnum.LOGIN.code || recordTypeEnum.code == RecordTypeEnum.START_UP.code) {
+			
+			Comparator<LogBasicInfoAllDto> compareByName = Comparator
+	                .comparing(LogBasicInfoAllDto::getModifyDateTime, (s1, s2) -> {
+	                	return s2.compareTo(s1);
+	                }).thenComparing(LogBasicInfoAllDto::getEmployeeCodeLogin);
+			
+			lstLogBacsicInfo.sort(compareByName);
+			
+			return lstLogBacsicInfo;
+		}
+		
+		if(recordTypeEnum.code == RecordTypeEnum.UPDATE_PERSION_INFO.code || recordTypeEnum.code == RecordTypeEnum.DATA_CORRECT.code) {
+			
+			Comparator<LogBasicInfoAllDto> compareByName = Comparator
+	                .comparing(LogBasicInfoAllDto::getModifyDateTime, (s1, s2) -> {
+	                	return s2.compareTo(s1);
+	                }).thenComparing(LogBasicInfoAllDto::getEmployeeCodeTaget);
+			
+			lstLogBacsicInfo.sort(compareByName);
+			
+			return lstLogBacsicInfo;
+		}
+		
 		return lstLogBacsicInfo;
 	}
 

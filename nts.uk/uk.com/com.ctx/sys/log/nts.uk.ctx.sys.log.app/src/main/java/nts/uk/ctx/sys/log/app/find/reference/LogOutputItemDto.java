@@ -180,6 +180,11 @@ public class LogOutputItemDto {
 		this.recordType = recordType;
 
 	}
+
+	public LogOutputItemDto(String itemName) {
+		super();
+		this.itemName = itemName;
+	}
 		
 
 }

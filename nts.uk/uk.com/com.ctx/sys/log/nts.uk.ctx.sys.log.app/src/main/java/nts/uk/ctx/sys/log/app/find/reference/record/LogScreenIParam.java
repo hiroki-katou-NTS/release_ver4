@@ -13,4 +13,6 @@ public class LogScreenIParam {
 	private ParamOutputItem paramOutputItem;
 
 	private List<LogOutputItemDto> lstHeaderDto;
+	
+	private List<LogOutputItemDto> lstSubHeaderDto;
 }

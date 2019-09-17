@@ -13,9 +13,6 @@ import nts.uk.ctx.sys.log.app.find.reference.record.LogBasicInfoAllDto;
 import nts.uk.ctx.sys.log.app.find.reference.record.LogBasicInforAllExportService;
 import nts.uk.ctx.sys.log.app.find.reference.record.LogBasicInformationAllFinder;
 import nts.uk.ctx.sys.log.app.find.reference.record.LogParams;
-/*
- * author: huannv
- */
 import nts.uk.ctx.sys.log.app.find.reference.record.LogParamsVer1;
 
 @Path("ctx/sys/log/record-reference")

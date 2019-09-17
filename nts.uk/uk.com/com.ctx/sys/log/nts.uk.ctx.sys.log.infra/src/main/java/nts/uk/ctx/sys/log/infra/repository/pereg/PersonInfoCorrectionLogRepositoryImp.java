@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
@@ -23,7 +24,6 @@ import nts.uk.ctx.sys.log.infra.entity.pereg.SrcdtDataHistoryLog;
 import nts.uk.ctx.sys.log.infra.entity.pereg.SrcdtItemInfoLog;
 import nts.uk.ctx.sys.log.infra.entity.pereg.SrcdtPerCorrectionLog;
 import nts.uk.shr.com.context.AppContexts;
-import nts.uk.shr.com.security.audittrail.correction.content.pereg.TargetDataKey;
 import nts.uk.shr.com.security.audittrail.correction.content.UserInfo;
 import nts.uk.shr.com.security.audittrail.correction.content.pereg.CategoryCorrectionLog;
 import nts.uk.shr.com.security.audittrail.correction.content.pereg.InfoOperateAttr;
@@ -33,20 +33,13 @@ import nts.uk.shr.com.security.audittrail.correction.content.pereg.ItemInfo.Valu
 import nts.uk.shr.com.security.audittrail.correction.content.pereg.PersonInfoCorrectionLog;
 import nts.uk.shr.com.security.audittrail.correction.content.pereg.PersonInfoProcessAttr;
 import nts.uk.shr.com.security.audittrail.correction.content.pereg.ReviseInfo;
+import nts.uk.shr.com.security.audittrail.correction.content.pereg.TargetDataKey;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class PersonInfoCorrectionLogRepositoryImp extends JpaRepository implements IPersonInfoCorrectionLogRepository {
 	
 	private static final String SELECT_ALL = String.join(" ", "SELECT pcl, ccl, dhl, iil",
-			"FROM SrcdtPerCorrectionLog pcl", "LEFT JOIN SrcdtCtgCorrectionLog ccl",
-			"ON pcl.perCorrectionLogID = ccl.perCorrectionLogID", "LEFT JOIN SrcdtDataHistoryLog dhl",
-			"ON ccl.ctgCorrectionLogID = dhl.ctgCorrectionLogID", "LEFT JOIN SrcdtItemInfoLog iil",
-			"ON ccl.ctgCorrectionLogID = iil.ctgCorrectionLogID", "WHERE pcl.operationID IN :operationIDs",
-			"AND (:empIdNULL = 'ISNULL' OR pcl.employeeID IN :employeeIDs)",
-			"AND pcl.insDate >= :startDate AND pcl.insDate <= :endDate");
-	
-	private static final String SELECT_TOP_1000 = String.join(" ", "SELECT TOP 1000 pcl, ccl, dhl, iil",
 			"FROM SrcdtPerCorrectionLog pcl", "LEFT JOIN SrcdtCtgCorrectionLog ccl",
 			"ON pcl.perCorrectionLogID = ccl.perCorrectionLogID", "LEFT JOIN SrcdtDataHistoryLog dhl",
 			"ON ccl.ctgCorrectionLogID = dhl.ctgCorrectionLogID", "LEFT JOIN SrcdtItemInfoLog iil",
@@ -394,15 +387,15 @@ public class PersonInfoCorrectionLogRepositoryImp extends JpaRepository implemen
 				59, 59);
 
 		List<PersonalInfoCorrectionLogQuery> query = new ArrayList<PersonalInfoCorrectionLogQuery>();
-
+		EntityManager entityManager = this.getEntityManager();
 		CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subOpts) -> {
 			if (!CollectionUtil.isEmpty(listEmployeeId)) {
 				CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subEmpIds) -> {
-					List<PersonalInfoCorrectionLogQuery> _query = queryProxy().query(SELECT_TOP_1000, Object[].class)
+					List<PersonalInfoCorrectionLogQuery> _query = entityManager.createQuery(SELECT_ALL, Object[].class)
 							.setParameter("operationIDs", subOpts)
 							.setParameter("empIdNULL", "ISNOTNULL")
 							.setParameter("employeeIDs", subEmpIds)
-							.setParameter("startDate", start).setParameter("endDate", end).getList().stream().map(f -> {
+							.setParameter("startDate", start).setParameter("endDate", end).setMaxResults(1000).getResultList().stream().map(f -> {
 								SrcdtPerCorrectionLog perCorrectionLog = (SrcdtPerCorrectionLog) f[0];
 								SrcdtCtgCorrectionLog ctgCorrectionLog = (SrcdtCtgCorrectionLog) f[1];
 								SrcdtDataHistoryLog dataHistoryLog = (SrcdtDataHistoryLog) f[2];
@@ -414,11 +407,14 @@ public class PersonInfoCorrectionLogRepositoryImp extends JpaRepository implemen
 					query.addAll(_query);
 				});
 			} else {
-				List<PersonalInfoCorrectionLogQuery> _query = queryProxy().query(SELECT_TOP_1000, Object[].class)
+				
+				List<PersonalInfoCorrectionLogQuery> _query = entityManager.createQuery(SELECT_ALL, Object[].class)
 						.setParameter("operationIDs", subOpts)
 						.setParameter("empIdNULL", "ISNULL")
 						.setParameter("employeeIDs", Arrays.asList(""))
-						.setParameter("startDate", start).setParameter("endDate", end).getList().stream().map(f -> {
+						.setParameter("startDate", start).setParameter("endDate", end)
+						.setMaxResults(1000)
+						.getResultList().stream().map(f -> {
 							SrcdtPerCorrectionLog perCorrectionLog = (SrcdtPerCorrectionLog) f[0];
 							SrcdtCtgCorrectionLog ctgCorrectionLog = (SrcdtCtgCorrectionLog) f[1];
 							SrcdtDataHistoryLog dataHistoryLog = (SrcdtDataHistoryLog) f[2];

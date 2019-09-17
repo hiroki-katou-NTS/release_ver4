@@ -1040,58 +1040,70 @@ module nts.uk.com.view.cli003.b.viewmodel {
                 }
             });
         }
+        
         exportCsvF() {
-            let self = this;
-            self.logBasicInforCsv = [];
-            let recordType = Number(self.logTypeSelectedCode());
-            _.forEach(self.listLogBasicInforModel, function(logBaseInfo) {
-                let lstDataCorrect: DataCorrectLogModel[] = [];
-                let lstPerCorrect: PerCateCorrectRecordModel[] = [];
+            $('#contents-area').focus();
+            let self = this,
+                format = 'YYYY/MM/DD HH:mm:ss',
+                paramOutputItem = {
+                recordType: self.logTypeSelectedCode()
+                },
+                checkProcess = false,
+                paramLog = {
+                // recordType=0,1 k co taget
+                listTagetEmployeeId: self.targetEmployeeIdList(),
+                listOperatorEmployeeId: self.listEmployeeIdOperator(),
+                startDateTaget: moment.utc(self.dateValue().startDate, "YYYY/MM/DD").toISOString(),
+                startDateOperator: moment.utc(self.startDateOperator(), format).toISOString(),
+                endDateOperator: moment.utc(self.endDateOperator(), format).toISOString(),
+                recordType: self.logTypeSelectedCode()
+                };
 
-                switch (recordType) {
+            if (self.checkFormatDate() === '2') {             
+                paramLog.endDateTaget = moment(self.dateValue().endDate, "YYYY/MM/DD" ).endOf('month').toDate();              
+            } else {
+                paramLog.endDateTaget = moment.utc(self.dateValue().endDate, "YYYY/MM/DD").toISOString();
+            }
+            
 
-                    case RECORD_TYPE.UPDATE_PERSION_INFO: {
-                        //setting list persion correct
-                        _.forEach(logBaseInfo.lstLogPerCateCorrectRecordDto, function(persionCorrect) {
-                            lstPerCorrect.push(new PerCateCorrectRecordModel({
-                                operationId: persionCorrect.operationId, targetDate: persionCorrect.targetDate,
-                                categoryName: persionCorrect.categoryName, itemName: persionCorrect.itemName, valueBefore: persionCorrect.valueBefore, valueAfter: persionCorrect.valueAfter,
-                                infoOperateAttr: persionCorrect.infoOperateAttr
-                            }))
-                        });
-                        break;
-                    }
-                    case RECORD_TYPE.DATA_CORRECT: {
-                        //setting list data correct
-                        _.forEach(logBaseInfo.lstLogDataCorrectRecordRefeDto, function(dataCorrect) {
-                            lstDataCorrect.push(new DataCorrectLogModel({
-                                operationId: dataCorrect.operationId, targetDate: dataCorrect.targetDate,
-                                targetDataType: dataCorrect.targetDataType, itemName: dataCorrect.itemName, valueBefore: dataCorrect.valueBefore, valueAfter: dataCorrect.valueAfter,
-                                remarks: dataCorrect.remarks, correctionAttr: dataCorrect.correctionAttr
-                            }))
-                        });
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
+            switch (recordType) {
+                case RECORD_TYPE.LOGIN: {
+                    paramOutputItem.itemNos = self.columnsHeaderLogRecord();
+                    checkProcess = true;
+                    break
                 }
-
-                let logBaseInfoTemp: LogBasicInfoModel = new LogBasicInfoModel({ loginBasicInfor: logBaseInfo, lstLogDataCorrectRecordRefeDto: lstDataCorrect, lstLogPerCateCorrectRecordDto: lstPerCorrect });
-                self.logBasicInforCsv.push(logBaseInfoTemp);
-            });
-
-            let params = {
-                recordType: Number(self.logTypeSelectedCode()),
-                lstLogBasicInfoDto: self.logBasicInforCsv,
-                lstHeaderDto: self.columnsIgGrid(),
-                lstSupHeaderDto: self.supColumnsIgGrid()
-            };
+                case RECORD_TYPE.START_UP: {
+                    paramOutputItem.itemNos = self.columnsHeaderLogStartUp();
+                    checkProcess = true;
+                    break;
+                }
+                case RECORD_TYPE.UPDATE_PERSION_INFO: {
+                    paramOutputItem.itemNos = self.columnsHeaderLogPersionInfo();
+                    checkProcess = true;
+                    break
+                }
+                case RECORD_TYPE.DATA_CORRECT: {
+                    paramOutputItem.itemNos = self.columnsHeaderLogDataCorrect();
+                    checkProcess = true;
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+            if(checkProcess == true){
+                let params = {
+                    logParams: paramLog,
+                    paramOutputItem: paramOutputItem,
+                    lstHeaderDto: self.columnsIgGrid(),
+                    lstSupHeaderDto: self.supColumnsIgGrid()};
+                    
             service.logSettingExportCsv(params).done(() => {
 
             });
+            
+            }
         }
-
         checkDestroyIgGrid() {
             let self = this;
             let recordType = Number(self.logTypeSelectedCode());
