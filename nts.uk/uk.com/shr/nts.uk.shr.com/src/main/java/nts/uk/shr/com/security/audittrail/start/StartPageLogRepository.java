@@ -30,4 +30,6 @@ public interface StartPageLogRepository {
 			GeneralDateTime start, GeneralDateTime end);
 	
 	List<StartPageLog> findBy(String companyId, GeneralDateTime start, GeneralDateTime end);
+	
+	List<StartPageLog> findByScreenF(String companyId, GeneralDateTime start, GeneralDateTime end);
 }

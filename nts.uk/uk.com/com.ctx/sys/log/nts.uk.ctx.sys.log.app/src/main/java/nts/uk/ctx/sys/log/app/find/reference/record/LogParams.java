@@ -33,4 +33,13 @@ public class LogParams {
 	private List<LogSetItemDetailDto> listLogSetItemDetailDto;
 	private List<Map<String, Object>> listDataExport;
 	private int targetDataType;
+	
+	public LogParams(int recordType, List<LogOutputItemDto> lstHeaderDto, List<LogOutputItemDto> lstSupHeaderDto,
+			List<LogBasicInfoDto> lstLogBasicInfoDto) {
+		super();
+		this.recordType = recordType;
+		this.lstHeaderDto = lstHeaderDto;
+		this.lstSupHeaderDto = lstSupHeaderDto;
+		this.lstLogBasicInfoDto = lstLogBasicInfoDto;
+	}
 }
