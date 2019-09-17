@@ -98,7 +98,7 @@ public class RegulationInfoEmployeeFinder {
 		// Algorithm: 検索条件の職場一覧を参照範囲に基いて変更する
 		if (role != null && role.getEmployeeReferenceRange() == EmployeeReferenceRange.ONLY_MYSELF) {
 			queryDto.setReferenceRange(EmployeeReferenceRange.ONLY_MYSELF.value);
-			this.changeListWorkplaces(queryDto);
+			this.changeListWorkplaces(queryDto, Optional.of(queryDto.getSystemType() == CCG001SystemType.EMPLOYMENT.value));
 		} else if (role != null) {
 			this.changeWorkplaceListByRole(queryDto, role);
 		}
@@ -216,23 +216,23 @@ public class RegulationInfoEmployeeFinder {
 				break;
 			} else {
 				queryDto.setReferenceRange(employeeReferenceRange.value);
-				this.changeListWorkplaces(queryDto);
+				this.changeListWorkplaces(queryDto, Optional.of(queryDto.getSystemType() == CCG001SystemType.EMPLOYMENT.value));
 			}
 			break;
 		case DEPARTMENT_ONLY:
 			// Get list String Workplace
-			this.changeListWorkplaces(queryDto);
+			this.changeListWorkplaces(queryDto, Optional.of(false));
 			break;
 		case DEPARTMENT_AND_CHILD:
 			if (employeeReferenceRange == EmployeeReferenceRange.ALL_EMPLOYEE
 					|| employeeReferenceRange == EmployeeReferenceRange.DEPARTMENT_AND_CHILD) {
 				// Get list String Workplace
-				this.changeListWorkplaces(queryDto);
+				this.changeListWorkplaces(queryDto, Optional.of(false));
 				break;
 			} else {
 				// Get list String Workplace
 				queryDto.setReferenceRange(EmployeeReferenceRange.DEPARTMENT_ONLY.value);
-				this.changeListWorkplaces(queryDto);
+				this.changeListWorkplaces(queryDto, Optional.of(false));
 			}
 			break;
 		default:
@@ -247,11 +247,11 @@ public class RegulationInfoEmployeeFinder {
 	 * @return the list
 	 */
 	//change list Workplace [指定条件から参照可能な職場リストを取得する]
-	private void changeListWorkplaces(RegulationInfoEmpQueryDto queryParam) {
+	private void changeListWorkplaces(RegulationInfoEmpQueryDto queryParam, Optional<Boolean> isWkplManager) {
 		// get List Workplace
 		GeneralDate date = GeneralDate.fromString(queryParam.getBaseDate(), "yyyy-MM-dd");
 		List<String> wkplist = this.workPlaceAdapter.getWorkPlaceIdByEmployeeReferenceRange(date,
-				queryParam.getReferenceRange(), Optional.of(queryParam.getSystemType() == CCG001SystemType.EMPLOYMENT.value));
+				queryParam.getReferenceRange(), isWkplManager);
 
 		// check param filterByWorkplace
 		if (queryParam.getFilterByWorkplace()) {
