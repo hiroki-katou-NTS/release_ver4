@@ -515,7 +515,7 @@ module nts.uk.com.view.cli003.b.viewmodel {
                 recordType: self.logTypeSelectedCode()
             };
             let checkProcess = false;
-            switch (paramOutputItem.recordType) {
+            switch (recordType) {
                 case RECORD_TYPE.LOGIN: {
                     paramOutputItem.itemNos = self.columnsHeaderLogRecord();
                     checkProcess = true;
@@ -1045,6 +1045,7 @@ module nts.uk.com.view.cli003.b.viewmodel {
           
             let self = this,
                 format = 'YYYY/MM/DD HH:mm:ss',
+                recordType = Number(self.logTypeSelectedCode()),
                 paramOutputItem = {
                 recordType: self.logTypeSelectedCode()
                 },
