@@ -14,6 +14,7 @@ import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.ReflectParameter;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.TimeReflectPara;
 import nts.uk.ctx.at.record.dom.workinformation.service.reflectprocess.WorkUpdateService;
+import nts.uk.ctx.at.record.dom.worktime.enums.StampSourceInfo;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.BasicScheduleService;
 import nts.uk.ctx.at.shared.dom.schedule.basicschedule.WorkStyle;
@@ -80,6 +81,26 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 			if(basicScheService.checkWorkDay(workchangePara.getWorkTypeCode()) == WorkStyle.ONE_DAY_REST) {
 				workTimeUpdate.cleanRecordTimeData(workchangePara.getEmployeeId(),
 						workchangePara.getAppDate(), dailyInfor);
+			} else {
+				//振出申請を申請して反映した。取り消し申請は半日振出半日休日を出す、反映した後出勤・退勤時刻が勤務種類と就業時間帯の時刻の通り反映する
+				dailyInfor.getAttendanceLeave().ifPresent(x -> {
+					x.getAttendanceLeavingWork(1).ifPresent(a -> {
+						a.getAttendanceStamp().ifPresent(y -> {
+							y.getStamp().ifPresent(z -> {
+								if(z.getStampSourceInfo() == StampSourceInfo.GO_STRAIGHT_APPLICATION) {
+									z.setStampSourceInfo(StampSourceInfo.GO_STRAIGHT);
+								}
+							});
+						});
+						a.getLeaveStamp().ifPresent(y -> {
+							y.getStamp().ifPresent(z -> {
+								if(z.getStampSourceInfo() == StampSourceInfo.GO_STRAIGHT_APPLICATION) {
+									z.setStampSourceInfo(StampSourceInfo.GO_STRAIGHT);
+								}
+							});
+						});
+					});
+				});
 			}
 		}
 		//日別実績の勤務情報  変更
