@@ -515,7 +515,7 @@ module nts.uk.com.view.cli003.b.viewmodel {
                 recordType: self.logTypeSelectedCode()
             };
             let checkProcess = false;
-            switch (recordType) {
+            switch (paramOutputItem.recordType) {
                 case RECORD_TYPE.LOGIN: {
                     paramOutputItem.itemNos = self.columnsHeaderLogRecord();
                     checkProcess = true;
@@ -1042,7 +1042,7 @@ module nts.uk.com.view.cli003.b.viewmodel {
         }
         
         exportCsvF() {
-            $('#contents-area').focus();
+          
             let self = this,
                 format = 'YYYY/MM/DD HH:mm:ss',
                 paramOutputItem = {
@@ -1091,16 +1091,18 @@ module nts.uk.com.view.cli003.b.viewmodel {
                     break;
                 }
             }
+             $('#contents-area').focus();
             if(checkProcess == true){
-                let params = {
-                    logParams: paramLog,
-                    paramOutputItem: paramOutputItem,
-                    lstHeaderDto: self.columnsIgGrid(),
-                    lstSupHeaderDto: self.supColumnsIgGrid()};
+              let params = {
+                 logParams: paramLog,
+                 paramOutputItem: paramOutputItem,
+                 lstHeaderDto: self.columnsIgGrid(),
+                 lstSupHeaderDto: self.supColumnsIgGrid()
+             };
                     
             service.logSettingExportCsv(params).done(() => {
 
-            });
+            });               
             
             }
         }
