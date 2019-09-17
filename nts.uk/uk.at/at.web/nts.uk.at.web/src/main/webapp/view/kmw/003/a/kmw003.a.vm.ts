@@ -580,7 +580,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
 
         loadRowScreen() {
             let self = this, param = _.cloneDeep(self.monthlyParam()),
-                dataChange: any = $("#dpGrid").mGrid("updatedCells"),
+                dataChange: any =  _.uniqWith($("#dpGrid").mGrid("updatedCells", true),  _.isEqual),
                 empIds = _.map(_.uniqBy(dataChange, (e: any) => { return e.rowId; }), (value: any) => {
                     return value.rowId;
                 }),
@@ -639,7 +639,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 });
                 self.cellStates(cellStatesNew);
                 self.dailyPerfomanceData(dpDataNew);
-                let rowIdUpdate =  _.uniq(_.map($("#dpGrid").mGrid("updatedCells"), (itemTemp) => {return itemTemp.rowId}));
+                let rowIdUpdate =  _.uniq(_.uniqWith($("#dpGrid").mGrid("updatedCells", true),  _.isEqual), (itemTemp) => {return itemTemp.rowId}));
                 $("#dpGrid").mGrid("destroy");
                 $("#dpGrid").off();
                 self.loadGrid();
@@ -679,7 +679,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
         insertUpdate() {
             let self = this,
                 errorGrid: any = $("#dpGrid").mGrid("errors"),
-                dataChange: any = $("#dpGrid").mGrid("updatedCells");
+                dataChange: any =  _.uniqWith($("#dpGrid").mGrid("updatedCells", true),  _.isEqual);
 
             if ((errorGrid == undefined || errorGrid.length == 0) && _.size(dataChange) > 0 && self.workTypeNotFound.length == 0 ) {
                 let dataSource = $("#dpGrid").mGrid("dataSource"),
