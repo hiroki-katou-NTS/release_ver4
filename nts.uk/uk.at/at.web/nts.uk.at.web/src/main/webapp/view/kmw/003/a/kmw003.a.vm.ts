@@ -639,12 +639,12 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                 });
                 self.cellStates(cellStatesNew);
                 self.dailyPerfomanceData(dpDataNew);
-                let rowIdUpdate =  _.uniq(_.uniqWith($("#dpGrid").mGrid("updatedCells", true),  _.isEqual), (itemTemp) => {return itemTemp.rowId}));
+                let rowIdUpdate =  _.uniq(_.uniqWith($("#dpGrid").mGrid("updatedCells", true),  _.isEqual), (itemTemp) => {return itemTemp.rowId});  
                 $("#dpGrid").mGrid("destroy");
                 $("#dpGrid").off();
                 self.loadGrid();
                 _.forEach(data.mpsateCellHideControl, (cellHide =>{
-                    $('#dpGrid').mGrid("setState", cellHide.rowId, cellHide.columnKey, ["mgrid-hide"])
+                    $('#dpGrid').mGrid("setState", cellHide.rowId, cellHide.columnKey, ["mgrid-hide"]) 
                 }))
                 
                 _.forEach(
