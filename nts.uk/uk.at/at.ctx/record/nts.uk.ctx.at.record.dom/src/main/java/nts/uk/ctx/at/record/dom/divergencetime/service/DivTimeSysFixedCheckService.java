@@ -290,14 +290,15 @@ public class DivTimeSysFixedCheckService {
 			iPUS = shareContainer.getShared(join(IDENTITY_PUS_KEY, SEPERATOR, comId), () -> iPSURepo.findByKey(comId)
 														.orElseThrow(() -> new RuntimeException(RUNTIME_ERROR_3)));
 		}
-		List<EmployeeDailyPerError> result = removeconfirm(comId, empId, tarD, errors, iPUS, shareContainer);
+		/**List<EmployeeDailyPerError> result = removeconfirm(comId, empId, tarD, errors, iPUS, shareContainer);*/
 		if(isNotShare){
 			shareContainer.clearAll();;
 		}
-		return result;
+		return errors;
 	}
 	
 	/** 確認解除 */
+	/**
 	private List<EmployeeDailyPerError> removeconfirm(String comId, String empId, GeneralDate tarD, 
 			List<EmployeeDailyPerError> errors, IdentityProcessUseSet iPUS, MasterShareContainer<String> shareContainer) {
 		List<EmployeeDailyPerError> divEr67 = errors.stream().filter(c -> c.getErrorAlarmWorkRecordCode() != null
@@ -328,13 +329,13 @@ public class DivTimeSysFixedCheckService {
 //						&& as.getSupervisorConfirmErrorAtr() != null
 //						&& !as.getSupervisorConfirmErrorAtr().equals(ConfirmationOfManagerOrYouself.CAN_CHECK)) {
 //					approvalStateRepo.find(empId, tarD).ifPresent(asd -> {
-//						/** 承認状態をすべてクリアする */
+//						 承認状態をすべてクリアする 
 //						appRootStateAdapter.clearAppRootstate(asd.getRootInstanceID());
 //					});
 //				}
 		}
 		return errors;
-	}
+	}*/
 	
 	/** 日の本人確認を解除する */
 //	private void removeSelfIdentity(String comId, IdentityProcessUseSet iPUS, List<EmployeeDailyPerError> divEr67, String empId) {
