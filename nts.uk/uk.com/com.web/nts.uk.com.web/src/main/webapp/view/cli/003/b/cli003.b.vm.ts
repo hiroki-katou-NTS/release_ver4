@@ -1042,9 +1042,10 @@ module nts.uk.com.view.cli003.b.viewmodel {
         }
         
         exportCsvF() {
-            $('#contents-area').focus();
+          
             let self = this,
                 format = 'YYYY/MM/DD HH:mm:ss',
+                recordType = Number(self.logTypeSelectedCode()),
                 paramOutputItem = {
                 recordType: self.logTypeSelectedCode()
                 },
@@ -1091,16 +1092,18 @@ module nts.uk.com.view.cli003.b.viewmodel {
                     break;
                 }
             }
+             $('#contents-area').focus();
             if(checkProcess == true){
-                let params = {
-                    logParams: paramLog,
-                    paramOutputItem: paramOutputItem,
-                    lstHeaderDto: self.columnsIgGrid(),
-                    lstSupHeaderDto: self.supColumnsIgGrid()};
+              let params = {
+                 logParams: paramLog,
+                 paramOutputItem: paramOutputItem,
+                 lstHeaderDto: self.columnsIgGrid(),
+                 lstSupHeaderDto: self.supColumnsIgGrid()
+             };
                     
             service.logSettingExportCsv(params).done(() => {
 
-            });
+            });               
             
             }
         }
