@@ -99,7 +99,7 @@ public class RegulationInfoEmployeeFinder {
 
 		if (role != null && role.getEmployeeReferenceRange() == EmployeeReferenceRange.ONLY_MYSELF){
 			queryDto.setReferenceRange(EmployeeReferenceRange.ONLY_MYSELF.value);
-			this.changeListWorkplaces(queryDto);
+			this.changeListWorkplaces(queryDto, Optional.of(queryDto.getSystemType() == CCG001SystemType.EMPLOYMENT.value));
 		}
 		else if (role != null) {
 			this.changeWorkplaceListByRole(queryDto, role);
