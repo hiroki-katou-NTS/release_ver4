@@ -1057,7 +1057,8 @@ module nts.uk.com.view.cli003.b.viewmodel {
                 startDateTaget: moment.utc(self.dateValue().startDate, "YYYY/MM/DD").toISOString(),
                 startDateOperator: moment.utc(self.startDateOperator(), format).toISOString(),
                 endDateOperator: moment.utc(self.endDateOperator(), format).toISOString(),
-                recordType: self.logTypeSelectedCode()
+                recordType: self.logTypeSelectedCode(),
+                targetDataType: self.dataTypeSelectedCode()
                 };
 
             if (self.checkFormatDate() === '2') {             
@@ -1100,10 +1101,13 @@ module nts.uk.com.view.cli003.b.viewmodel {
                  lstHeaderDto: self.columnsIgGrid(),
                  lstSupHeaderDto: self.supColumnsIgGrid()
              };
-                    
-            service.logSettingExportCsv(params).done(() => {
+              block.grayout(); 
+               service.logSettingExportCsv(params).done(() => {
 
-            });               
+               ).always(() => {
+                  block.clear();
+                  nts.uk.ui.errors.clearAll();
+              });              
             
             }
         }
