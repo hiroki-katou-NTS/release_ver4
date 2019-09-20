@@ -452,6 +452,7 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 		registerNotCalcDomain(commandNew, isUpdate);
 		List<IntegrationOfDaily> lastDt =  updateDomainAfterCalc(domainDailyNew);
 		
+		dailyRecordAdUpService.removeConfirmApproval(domainDailyNew, Optional.empty(), Optional.empty());
 		if (month != null && month.getEmployeeId() != null) {
 			// val error = x.getEmployeeMonthlyPerErrorList().get(0);
 			employeeMonthlyPerErrorRepository.removeAll(month.getEmployeeId(), new YearMonth(month.getYearMonth()),

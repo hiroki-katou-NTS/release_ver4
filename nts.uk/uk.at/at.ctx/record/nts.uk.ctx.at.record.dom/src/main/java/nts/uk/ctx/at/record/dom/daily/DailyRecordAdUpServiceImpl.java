@@ -19,6 +19,8 @@ import nts.uk.ctx.at.record.dom.affiliationinformation.AffiliationInforOfDailyPe
 import nts.uk.ctx.at.record.dom.affiliationinformation.WorkTypeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.AffiliationInforOfDailyPerforRepository;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.WorkTypeOfDailyPerforRepository;
+import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
+import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.OutingTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
@@ -35,6 +37,7 @@ import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerform;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerformRepo;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.AdTimeAndAnyItemAdUpService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
+import nts.uk.ctx.at.record.dom.divergencetime.service.DivTimeSysFixedCheckService;
 import nts.uk.ctx.at.record.dom.editstate.EditStateOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.raisesalarytime.SpecificDateAttrOfDailyPerfor;
@@ -45,10 +48,13 @@ import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentityProcessUseSetRepository;
 import nts.uk.ctx.at.record.dom.worktime.TemporaryTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
+import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
 public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
@@ -109,6 +115,15 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	
 	@Inject
 	private EmployeeDailyPerErrorRepository employeeErrorRepo;
+	
+	@Inject
+	private DivTimeSysFixedCheckService divTimeSysFixedCheckService;
+	
+	@Inject
+	private ApprovalProcessingUseSettingRepository approvalSettingRepo;
+	
+	@Inject
+	private IdentityProcessUseSetRepository identityProcessUseRepository;
 
 	@Override
 	public void adUpWorkInfo(WorkInfoOfDailyPerformance workInfo) {
@@ -252,6 +267,7 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	@Override
 	public void adUpEmpError(List<EmployeeDailyPerError> errors, List<Pair<String, GeneralDate>> lstPairRemove, boolean hasRemoveError) {
 		if (hasRemoveError) {
+			System.out.print("Xoa loi: ");
 //			Map<String, List<GeneralDate>> mapError = errors.stream().collect(
 //					Collectors.groupingBy(c -> c.getEmployeeID(), Collectors.collectingAndThen(Collectors.toList(),
 //							c -> c.stream().map(q -> q.getDate()).collect(Collectors.toList()))));
@@ -260,7 +276,6 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 					c -> c.stream().map(q -> q.getRight()).collect(Collectors.toList()))));
 			employeeErrorRepo.removeNotOTK(mapEmpDateError);
 		}
-		
 		employeeErrorRepo.update(errors);
 
 	}
@@ -268,6 +283,19 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	@Override
 	public List<IntegrationOfDaily> adTimeAndAnyItemAdUp(List<IntegrationOfDaily> dailys) {
 		return adTimeAndAnyItemAdUpService.saveOnly(dailys);
+	}
+
+	@Override
+	public void removeConfirmApproval(List<IntegrationOfDaily> domainDaily, Optional<IdentityProcessUseSet> iPUSOpt,
+			Optional<ApprovalProcessingUseSetting> approvalSet) {
+		String companyId = AppContexts.user().companyId();
+		Optional<IdentityProcessUseSet> iPUSOptTemp = iPUSOpt.isPresent() ? iPUSOpt : identityProcessUseRepository.findByKey(companyId);
+		Optional<ApprovalProcessingUseSetting> approvalSetTemp = approvalSet.isPresent() ? approvalSet : approvalSettingRepo.findByCompanyId(companyId);
+		
+		domainDaily.forEach(record ->{
+			divTimeSysFixedCheckService.removeconfirm(companyId, record.getWorkInformation().getEmployeeId(),
+					record.getWorkInformation().getYmd(), record.getEmployeeError(), iPUSOptTemp, approvalSetTemp);
+		});
 	}
 
 }

@@ -20,7 +20,6 @@ import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
-import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployee;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployeeHistory;
@@ -113,8 +112,8 @@ public class DivTimeSysFixedCheckService {
 //	@Inject 
 //	private ErrorAlarmWorkRecordRepository eaRecordRepo;
 	
-	@Inject
-	private ApprovalProcessingUseSettingRepository approvalSettingRepo;
+//	@Inject
+//	private ApprovalProcessingUseSettingRepository approvalSettingRepo;
 	
 //	@Inject
 //	private ApprovalStatusOfDailyPerforRepository approvalStateRepo;
@@ -189,7 +188,7 @@ public class DivTimeSysFixedCheckService {
 
 	private final static String TODAY_KEY = "Today";
 
-	private final static String APPROVAL_SETTING_KEY = "ApprovalSetting";
+//	private final static String APPROVAL_SETTING_KEY = "ApprovalSetting";
 
 	private final static String IDENTITY_PUS_KEY = "IdentityPUS";
 
@@ -298,9 +297,9 @@ public class DivTimeSysFixedCheckService {
 	}
 	
 	/** 確認解除 */
-	/**
-	private List<EmployeeDailyPerError> removeconfirm(String comId, String empId, GeneralDate tarD, 
-			List<EmployeeDailyPerError> errors, IdentityProcessUseSet iPUS, MasterShareContainer<String> shareContainer) {
+
+	public List<EmployeeDailyPerError> removeconfirm(String comId, String empId, GeneralDate tarD, 
+			List<EmployeeDailyPerError> errors, Optional<IdentityProcessUseSet> iPUSOpt, Optional<ApprovalProcessingUseSetting>  approvalSet) {
 		List<EmployeeDailyPerError> divEr67 = errors.stream().filter(c -> c.getErrorAlarmWorkRecordCode() != null
 				&& (c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_6.value)
 				|| c.getErrorAlarmWorkRecordCode().v().equals(SystemFixedErrorAlarm.DIVERGENCE_ERROR_7.value)
@@ -320,11 +319,11 @@ public class DivTimeSysFixedCheckService {
 //					removeSelfIdentity(comId, iPUS, divEr67, empId);
 //				});
 //			}
-			Optional<ApprovalProcessingUseSetting>  approvalSet = shareContainer.getShared(join(APPROVAL_SETTING_KEY, SEPERATOR, comId),
-					() -> approvalSettingRepo.findByCompanyId(comId));
+//			Optional<ApprovalProcessingUseSetting>  approvalSet = shareContainer.getShared(join(APPROVAL_SETTING_KEY, SEPERATOR, comId),
+//					() -> approvalSettingRepo.findByCompanyId(comId));
 			
 			approvalService.clearConfirmApproval(empId, divEr67.stream().map(c -> c.getDate()).collect(Collectors.toList()), 
-					approvalSet, Optional.of(iPUS));
+					approvalSet, iPUSOpt);
 //				if (as.getUseDayApproverConfirm() != null && as.getUseDayApproverConfirm()
 //						&& as.getSupervisorConfirmErrorAtr() != null
 //						&& !as.getSupervisorConfirmErrorAtr().equals(ConfirmationOfManagerOrYouself.CAN_CHECK)) {
@@ -335,7 +334,7 @@ public class DivTimeSysFixedCheckService {
 //				}
 		}
 		return errors;
-	}*/
+	}
 	
 	/** 日の本人確認を解除する */
 //	private void removeSelfIdentity(String comId, IdentityProcessUseSet iPUS, List<EmployeeDailyPerError> divEr67, String empId) {
