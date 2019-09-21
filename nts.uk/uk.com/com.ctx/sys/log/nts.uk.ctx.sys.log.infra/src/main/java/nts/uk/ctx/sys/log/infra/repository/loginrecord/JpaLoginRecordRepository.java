@@ -166,4 +166,45 @@ public class JpaLoginRecordRepository extends JpaRepository implements LoginReco
 		return resultList.stream().map(item -> new LoginRecord(new JpaLoginRecordGetMemento(item)))
 				.collect(Collectors.toList());
 	}
+
+	@Override
+	public List<LoginRecord> logRecordInforRefactors(List<String> operationIds, int offset, int limit) {
+		// check not data input
+		if (CollectionUtil.isEmpty(operationIds)) {
+			return new ArrayList<>();
+		}
+
+		// get entity manager
+		EntityManager em = this.getEntityManager();
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+
+		CriteriaQuery<SrcdtLoginRecord> cq = criteriaBuilder.createQuery(SrcdtLoginRecord.class);
+		Root<SrcdtLoginRecord> root = cq.from(SrcdtLoginRecord.class);
+
+		// select root
+		cq.select(root);
+
+		// Split query.
+		List<SrcdtLoginRecord> resultList = new ArrayList<>();
+
+		CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, operationId -> {
+			// add where
+			List<Predicate> lstpredicateWhere = new ArrayList<>();
+
+			// employment in data employment
+			lstpredicateWhere.add(criteriaBuilder.and(root.get(SrcdtLoginRecord_.srcdtLoginRecordPK)
+					.get(SrcdtLoginRecordPK_.operationId).in(operationId)));
+
+			// set where to SQL
+			cq.where(lstpredicateWhere.toArray(new Predicate[] {}));
+
+			// create query
+			TypedQuery<SrcdtLoginRecord> query = em.createQuery(cq).setFirstResult(offset).setMaxResults(limit);
+			resultList.addAll(query.getResultList());
+		});
+
+		// exclude select
+		return resultList.stream().map(item -> new LoginRecord(new JpaLoginRecordGetMemento(item)))
+				.collect(Collectors.toList());
+	}
 }

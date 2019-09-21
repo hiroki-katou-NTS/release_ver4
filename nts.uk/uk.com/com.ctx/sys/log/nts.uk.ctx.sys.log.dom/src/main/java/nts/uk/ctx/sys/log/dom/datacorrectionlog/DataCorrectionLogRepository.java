@@ -32,4 +32,8 @@ public interface DataCorrectionLogRepository {
 	
 	List<DataCorrectionLog> findByTargetAndDate(List<String> operationIds, List<String> listEmployeeId, DatePeriod period, TargetDataType targetDataType);
 	
+	List<DataCorrectionLog> findByTargetAndDateRefactors(List<String> operationIds, List<String> listEmployeeId,
+			DatePeriod period, TargetDataType targetDataType,
+			int offset, int limit);
+	
 }
