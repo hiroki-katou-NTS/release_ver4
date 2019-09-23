@@ -9,8 +9,8 @@
 			<ui:define name="htmlHead">
 			<script>
 				var dialogSize = {
-					width : 362,
-					height : 500
+					width : 1062,
+					height : 550
 				};
 			</script>
 				<com:scriptfile set="IGNITE" />
@@ -24,12 +24,12 @@
 				<div id="contents-area">
 					<table style="margin-bottom : 15px;">
 					    <colgroup>
-					        <col width="160"/>
-					        <col width="180"/>
+					        <col width="190"/>
+					        <col width="870"/>
 					    </colgroup>
 					    <tbody>
 					        <tr>
-					            <td class="inputLabel">#{i18n.getText('KBT002_145')}</td>
+					            <td class="inputLabel">#{i18n.getText('KBT002_200')}</td>
 					            <td><div data-bind = "text: execLog.overallStatus" /></td>
 					        </tr>
 					        <tr>
@@ -39,24 +39,49 @@
 					</table>
 					<table>
 					    <colgroup>
-					        <col width="160px"/>
+					        <col width="190px"/>
+					        <col width="190px"/>
+					        <col width="200px"/>
 					        <col width="80px"/>
-					       <col width="100px"/>
+					        <col width="80px"/>
+					        <col width="110px"/> 
+					        <col width="80px"/>
+					       <col width="130px"/>
 					    </colgroup>
+					    <thead>
+							<tr>
+								<th class="inputLabel">#{i18n.getText('KBT002_201')}</th>
+								<th class="inputLabel">#{i18n.getText('KBT002_202')}</th>
+								<th class="inputLabel">#{i18n.getText('KBT002_203')}</th>
+								<th class="inputLabel">#{i18n.getText('KBT002_204')}</th>
+								<th class="inputLabel">#{i18n.getText('KBT002_205')}</th>
+								<th class="inputLabel">#{i18n.getText('KBT002_206')}</th>
+								<th class="inputLabel">#{i18n.getText('KBT002_207')}</th>
+								<th class="inputLabel"></th>
+							</tr>
+						</thead>
 					    <tbody data-bind = "foreach: execLog.taskLogList">
-					        <tr>
-					            <td class="inputLabel"><div data-bind = "text: taskName" /></td>
-					            <com:ko-if bind="taskId === 5">
-					            	<td colspan="2"><div data-bind = "text: status" /></td>
-					            </com:ko-if>
-					            <com:ko-if bind="taskId !== 5">
-						            <td><div data-bind = "text: status" /></td>
-						            <td style="text-align: center;">
-						            <button tabindex="1" class="setting small" data-bind="click: function(data, event) { $parent.openDetailDialog(data, event)}, enable: statusCd == 3" data-code="${taskId}" style="width: 70px;">#{i18n.getText('KBT002_146')}</button>
-						            </td>
-					            </com:ko-if>
-					        </tr>
-					    </tbody>
+							<tr>
+								<td class="inputLabel"><div data-bind="text: taskName" /></td>
+								<td><div data-bind="text: lastExecDateTime" /></td>
+								<td><div data-bind="text: lastEndExecDateTime" /></td>
+								<td><div data-bind="text: rangeDateTime" /></td>
+								<td><div data-bind="text: status" /></td>
+								<td><div data-bind="text: errorSystemText" /></td>
+								<td><div data-bind="text: errorBusinessText" /></td>
+								<com:ko-if bind="taskId === 5">
+									<td></td>
+								</com:ko-if>
+								<com:ko-if bind="taskId !== 5">
+									<td style="text-align: center;">
+										<button tabindex="1" class="setting small"
+											data-bind="click: function(data, event) { $parent.openDetailDialog(data, event)}, enable: errorBusiness == true"
+											data-code="${taskId}" style="width: 100px;">#{i18n.getText('KBT002_146')}</button>
+									</td>
+								</com:ko-if>
+	
+							</tr>
+					</tbody>
 					</table>
 				</div>
 				<div id="functions-area-bottom">

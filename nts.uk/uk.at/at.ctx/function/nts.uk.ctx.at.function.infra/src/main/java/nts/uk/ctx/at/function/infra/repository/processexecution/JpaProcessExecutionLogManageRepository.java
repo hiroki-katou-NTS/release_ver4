@@ -13,6 +13,7 @@ import javax.persistence.Query;
 //import javax.persistence.TypedQuery;
 
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.time.GeneralDateTime;
 //import nts.arc.task.tran.TransactionService;
 import nts.uk.ctx.at.function.dom.processexecution.executionlog.ProcessExecutionLogManage;
 import nts.uk.ctx.at.function.dom.processexecution.repository.ProcessExecutionLogManageRepository;
@@ -30,6 +31,8 @@ implements ProcessExecutionLogManageRepository{
 			+ "WHERE pel.kfnmtProcExecLogPK.companyId = :companyId "
 			+ "AND pel.kfnmtProcExecLogPK.execItemCd = :execItemCd ";
 	
+	private static final String SELECT_BY_PK_AND_DATETIME = SELECT_BY_PK
+			+ "AND pel.lastExecDateTime = :lastExecDateTime ";
 	private static final String SELECT_All_BY_CID_NATIVE = " SELECT * FROM KFNMT_PRO_EXE_LOG_MANAGE as pel WITH (READUNCOMMITTED)"
 			+ "WHERE pel.CID = ? ORDER BY pel.EXEC_ITEM_CD ASC ";
 	
@@ -107,6 +110,9 @@ implements ProcessExecutionLogManageRepository{
 			oldData.errorDetail = updateData.errorDetail;
 			oldData.lastExecDateTime = updateData.lastExecDateTime;
 			oldData.prevExecDateTimeEx = updateData.prevExecDateTimeEx;
+			oldData.lastEndExecDateTime = updateData.lastEndExecDateTime;
+			oldData.errorSystem = updateData.errorSystem;
+			oldData.errorBusiness = updateData.errorBusiness;
 			//this.commandProxy().update(oldData);
 			this.getEntityManager().merge(oldData);
 			//KfnmtProcessExecutionLogManagePK kfnmtProcExecPK = new KfnmtProcessExecutionLogManagePK(domain.getCompanyId(), domain.getExecItemCd().v());
@@ -122,10 +128,51 @@ implements ProcessExecutionLogManageRepository{
 		//this.commandProxy().remove(KfnmtProcessExecutionLogManage.class, kfnmtProcExecPK);
 		//KfnmtProcessExecutionLogManage find = this.getEntityManager().find(KfnmtProcessExecutionLogManage.class, kfnmtProcExecPK);
 		KfnmtProcessExecutionLogManage find = this.getEntityManager().find(KfnmtProcessExecutionLogManage.class,kfnmtProcExecPK,LockModeType.NONE );
-		this.getEntityManager().remove(find);
-		//LockModeType lockMode = this.getEntityManager().getLockMode(find);
-		//this.getEntityManager().lock(find, LockModeType.PESSIMISTIC_WRITE);
-		this.getEntityManager().flush();
+		if(find !=null) {
+			this.getEntityManager().remove(find);
+			//LockModeType lockMode = this.getEntityManager().getLockMode(find);
+			//this.getEntityManager().lock(find, LockModeType.PESSIMISTIC_WRITE);
+			this.getEntityManager().flush();
+		}
+	}
+
+	@Override
+	public Optional<ProcessExecutionLogManage> getLogByCIdAndExecCdAndDateTiem(String companyId, String execItemCd,
+			GeneralDateTime dateTime) {
+		Optional<ProcessExecutionLogManage> data = this.queryProxy().query(SELECT_BY_PK_AND_DATETIME, KfnmtProcessExecutionLogManage.class)
+				.setParameter("companyId", companyId)
+				.setParameter("execItemCd", execItemCd)
+				.setParameter("lastExecDateTime",GeneralDateTime.fromString(dateTime.toString(), "yyyy/MM/dd HH:mm:ss"))
+				.getSingle(c->c.toDomain());
+		return data;
+	}
+	@Override
+	public void updateByDatetime(ProcessExecutionLogManage domain, GeneralDateTime dateTime) {
+		Optional<KfnmtProcessExecutionLogManage> data = this.queryProxy().query(SELECT_BY_PK_AND_DATETIME, KfnmtProcessExecutionLogManage.class)
+				.setParameter("companyId",domain.getCompanyId() )
+				.setParameter("execItemCd", domain.getExecItemCd().v())
+				.setParameter("lastExecDateTime", GeneralDateTime.fromString(dateTime.toString(), "yyyy/MM/dd HH:mm:ss"))
+				.getSingle();
+		if(data.isPresent()) {
+			KfnmtProcessExecutionLogManage updateData = KfnmtProcessExecutionLogManage.toEntity(domain);
+			//KfnmtProcessExecutionLogManage oldData = this.queryProxy().find(updateData.kfnmtProcExecLogPK, KfnmtProcessExecutionLogManage.class).get();
+			KfnmtProcessExecutionLogManage oldData = data.get();
+			oldData.currentStatus = updateData.currentStatus;
+			oldData.overallStatus = updateData.overallStatus;
+			oldData.errorDetail = updateData.errorDetail;
+			oldData.lastExecDateTime = updateData.lastExecDateTime;
+			oldData.prevExecDateTimeEx = updateData.prevExecDateTimeEx;
+			oldData.lastEndExecDateTime = updateData.lastEndExecDateTime;
+			oldData.errorSystem = updateData.errorSystem;
+			oldData.errorBusiness = updateData.errorBusiness;
+			//this.commandProxy().update(oldData);
+			this.getEntityManager().merge(oldData);
+			//KfnmtProcessExecutionLogManagePK kfnmtProcExecPK = new KfnmtProcessExecutionLogManagePK(domain.getCompanyId(), domain.getExecItemCd().v());
+			//KfnmtProcessExecutionLogManage find = this.getEntityManager().find(KfnmtProcessExecutionLogManage.class, kfnmtProcExecPK);
+			//LockModeType lockMode = this.getEntityManager().getLockMode(find);
+		//	this.getEntityManager().lock(find, LockModeType.PESSIMISTIC_WRITE);
+			this.getEntityManager().flush();
+		}
 	}
 
 }

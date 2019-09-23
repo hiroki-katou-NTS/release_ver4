@@ -80,6 +80,15 @@ public class KfnmtProcessExecutionLogHistory extends UkJpaEntity implements Seri
 	@Column(name = "RFL_APPR_END")
 	public GeneralDate reflectApprovalResultEnd;
 	
+	@Column(name = "LAST_END_EXEC_DATETIME")
+	public GeneralDateTime lastEndExecDateTime;
+
+	@Column(name = "ERROR_SYSTEM")
+	public Integer errorSystem;
+	
+	@Column(name = "ERROR_BUSINESS")
+	public Integer errorBusiness;
+	
 	@OneToMany(mappedBy = "procExecLogHistItem", cascade = CascadeType.ALL)
     @JoinTable(name = "KFNMT_EXEC_TASK_LOG")
     public List<KfnmtExecutionTaskLog> taskLogList;
@@ -91,7 +100,7 @@ public class KfnmtProcessExecutionLogHistory extends UkJpaEntity implements Seri
 	
 	public ProcessExecutionLogHistory toDomain() {
 		List<ExecutionTaskLog> taskLogList =
-				this.taskLogList.stream().map(x -> x.toDomain()).collect(Collectors.toList());
+				this.taskLogList.stream().map(x -> x.toNewDomain()).collect(Collectors.toList());
 		return new ProcessExecutionLogHistory(new ExecutionCode(this.kfnmtProcExecLogHstPK.execItemCd),
 				this.kfnmtProcExecLogHstPK.companyId,
 				this.errorDetail != null? EnumAdaptor.valueOf(this.errorDetail, OverallErrorDetail.class): null,
@@ -101,7 +110,11 @@ public class KfnmtProcessExecutionLogHistory extends UkJpaEntity implements Seri
 						new DatePeriod(this.dailyCreateStart, this.dailyCreateEnd),
 						new DatePeriod(this.dailyCalcStart, this.dailyCalcEnd),new DatePeriod(this.reflectApprovalResultStart, this.reflectApprovalResultEnd) ),
 				taskLogList,
-				this.kfnmtProcExecLogHstPK.execId);
+				this.kfnmtProcExecLogHstPK.execId,
+				this.lastEndExecDateTime,
+				this.errorSystem == null?null:(this.errorSystem==1?true:false),
+				this.errorBusiness == null?null:(this.errorBusiness==1?true:false)
+				);
 	}
 	
 	public static KfnmtProcessExecutionLogHistory toEntity(ProcessExecutionLogHistory domain) {
@@ -152,6 +165,9 @@ public class KfnmtProcessExecutionLogHistory extends UkJpaEntity implements Seri
 				dailyCalcEnd,
 				reflectApprovalResultStart,
 				reflectApprovalResultEnd,
+				domain.getLastEndExecDateTime(),
+				domain.getErrorSystem()== null?null:(domain.getErrorSystem().booleanValue()?1:0),
+				domain.getErrorBusiness()==null?null:(domain.getErrorBusiness().booleanValue() ?1:0),
 				null);
 	}
 	
@@ -203,6 +219,9 @@ public class KfnmtProcessExecutionLogHistory extends UkJpaEntity implements Seri
 				dailyCalcEnd,
 				reflectApprovalResultStart,
 				reflectApprovalResultEnd,
+				domain.getLastEndExecDateTime(),
+				domain.getErrorSystem()==null?null:( domain.getErrorSystem().booleanValue()?1:0),
+				domain.getErrorBusiness()==null?null:(domain.getErrorBusiness().booleanValue()?1:0),
 				KfnmtExecutionTaskLog.toEntity(domain.getCompanyId(), domain.getExecItemCd().v(), domain.getExecId(), domain.getTaskLogList()));
 	}
 }

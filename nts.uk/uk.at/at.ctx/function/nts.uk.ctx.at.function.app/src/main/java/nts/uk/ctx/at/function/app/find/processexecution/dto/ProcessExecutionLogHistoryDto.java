@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.function.dom.processexecution.createlogfileexecution.CalTimeRangeDateTimeToString;
 import nts.uk.ctx.at.function.dom.processexecution.executionlog.EndStatus;
 import nts.uk.ctx.at.function.dom.processexecution.executionlog.OverallErrorDetail;
 import nts.uk.ctx.at.function.dom.processexecution.executionlog.ProcessExecutionLogHistory;
@@ -58,6 +59,21 @@ public class ProcessExecutionLogHistoryDto {
 	
     private List<ProcessExecutionTaskLogDto> taskLogList;
 	
+    /* 前回終了日時*/
+	private String lastEndExecDateTime;
+	
+	/* 全体のシステムエラー状態*/
+	private Boolean errorSystem;
+	
+	/* 全体の業務エラー状態*/
+	private Boolean errorBusiness;
+	
+	private String rangeDateTime = "";
+	
+	private String errorSystemText;
+	
+	private String errorBusinessText;
+	
 	public ProcessExecutionLogHistoryDto() {
 		super();
 	}
@@ -66,7 +82,7 @@ public class ProcessExecutionLogHistoryDto {
 			String overallStatus, String overallError, String lastExecDateTime, GeneralDate schCreateStart,
 			GeneralDate schCreateEnd, GeneralDate dailyCreateStart, GeneralDate dailyCreateEnd,
 			GeneralDate dailyCalcStart, GeneralDate dailyCalcEnd, String execId,/* String prevExecDateTimeEx,*/
-			List<ProcessExecutionTaskLogDto> taskLogList) {
+			List<ProcessExecutionTaskLogDto> taskLogList,String lastEndExecDateTime,Boolean errorSystem,Boolean errorBusiness,String rangeDateTime) {
 		super();
 		this.execItemCd = execItemCd;
 		this.companyId = companyId;
@@ -81,6 +97,28 @@ public class ProcessExecutionLogHistoryDto {
 		this.dailyCalcEnd = dailyCalcEnd;
 		this.execId = execId;
 		this.taskLogList = taskLogList;
+		this.lastEndExecDateTime = lastEndExecDateTime;
+		this.errorSystem = errorSystem;
+		this.errorBusiness = errorBusiness;
+		this.rangeDateTime = rangeDateTime;
+		if(errorSystem != null) {
+			if(errorSystem.booleanValue()) {
+				this.errorSystemText = "あり";
+			}else {
+				this.errorSystemText = "なし";
+			}
+		}else {
+			this.errorSystemText = null;
+		}
+		if(errorBusiness != null) {
+			if(errorBusiness.booleanValue()) {
+				this.errorBusinessText = "あり";
+			}else {
+				this.errorBusinessText = "なし";
+			}
+		}else {
+			this.errorBusinessText = null;
+		}
 	}
 	
 	public static ProcessExecutionLogHistoryDto fromDomain(ProcessExecutionLogHistory domain) {
@@ -117,7 +155,7 @@ public class ProcessExecutionLogHistoryDto {
 //			reflectApprovalResultStart = domain.getEachProcPeriod().getReflectApprovalResult().get().start();
 //			reflectApprovalResultEnd = domain.getEachProcPeriod().getReflectApprovalResult().get().end();
 		}
-		
+		String rangeDateTime = CalTimeRangeDateTimeToString.calTimeExec(domain.getLastExecDateTime(), domain.getLastEndExecDateTime());
 		return new ProcessExecutionLogHistoryDto(
 				domain.getExecItemCd().v(),
 				domain.getCompanyId(),
@@ -131,6 +169,10 @@ public class ProcessExecutionLogHistoryDto {
 				dailyCalcStart,
 				dailyCalcEnd,
 				domain.getExecId(), 
-				taskLogList);
+				taskLogList,
+				domain.getLastEndExecDateTime()== null?null: domain.getLastEndExecDateTime().toString(DATE_FORMAT),
+				domain.getErrorSystem(),
+				domain.getErrorBusiness(),
+				rangeDateTime);
 	}
 }

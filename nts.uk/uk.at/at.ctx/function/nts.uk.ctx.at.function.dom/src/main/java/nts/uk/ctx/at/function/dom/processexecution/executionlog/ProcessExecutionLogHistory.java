@@ -22,7 +22,7 @@ public class ProcessExecutionLogHistory extends AggregateRoot {
 	/* 会社ID */
 	private String companyId;
 	
-	/* 全体のエラー詳細 */
+	/* 全体のエラー詳細  -> 強制終了の原因*/
 	private Optional<OverallErrorDetail>  overallError;
 	
 	/* 全体の終了状態 */
@@ -39,11 +39,20 @@ public class ProcessExecutionLogHistory extends AggregateRoot {
 	
 	/* 実行ID */
 	private String execId;
+	
+	/* 前回終了日時*/
+	private GeneralDateTime lastEndExecDateTime;
+	
+	/* 全体のシステムエラー状態*/
+	private Boolean errorSystem;
+	
+	/* 全体の業務エラー状態*/
+	private Boolean errorBusiness;
 
 	public ProcessExecutionLogHistory(ExecutionCode execItemCd, String companyId,
 			OverallErrorDetail overallError, EndStatus overallStatus,
 			GeneralDateTime lastExecDateTime, EachProcessPeriod eachProcPeriod, List<ExecutionTaskLog> taskLogList,
-			String execId) {
+			String execId,GeneralDateTime lastEndExecDateTime,Boolean errorSystem, Boolean errorBusiness) {
 		super();
 		this.execItemCd = execItemCd;
 		this.companyId = companyId;
@@ -53,6 +62,10 @@ public class ProcessExecutionLogHistory extends AggregateRoot {
 		this.eachProcPeriod = eachProcPeriod;
 		this.taskLogList = taskLogList;
 		this.execId = execId;
+		this.lastEndExecDateTime = lastEndExecDateTime;
+		this.errorSystem = errorSystem;
+		this.errorBusiness = errorBusiness;
+		
 	}
 	
 	

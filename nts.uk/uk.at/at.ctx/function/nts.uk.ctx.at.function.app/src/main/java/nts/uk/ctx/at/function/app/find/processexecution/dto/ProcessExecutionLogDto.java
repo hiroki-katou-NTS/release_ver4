@@ -73,6 +73,21 @@ public class ProcessExecutionLogDto {
 	private String taskLogExecId;
 	
     private List<ProcessExecutionTaskLogDto> taskLogList;
+    
+	/* 前回終了日時*/
+	private String lastEndExecDateTime;
+	
+	/* 全体のシステムエラー状態*/
+	private Boolean errorSystem;
+	
+	/* 全体の業務エラー状態*/
+	private Boolean errorBusiness;
+	
+	private String errorSystemText;
+	
+	private String errorBusinessText;
+	
+	private String rangeDateTime = "";
 	
 	public ProcessExecutionLogDto() {
 		super();
@@ -82,7 +97,7 @@ public class ProcessExecutionLogDto {
 			String currentStatus, Integer overallStatusCd, String overallStatus, String overallError,
 			String lastExecDateTime, GeneralDate schCreateStart, GeneralDate schCreateEnd, GeneralDate dailyCreateStart,
 			GeneralDate dailyCreateEnd, GeneralDate dailyCalcStart, GeneralDate dailyCalcEnd, String execId,
-			List<ProcessExecutionTaskLogDto> taskLogList,String taskLogExecId) {
+			List<ProcessExecutionTaskLogDto> taskLogList,String taskLogExecId,String lastEndExecDateTime,Boolean errorSystem,Boolean errorBusiness) {
 		super();
 		this.execItemCd = execItemCd;
 		this.companyId = companyId;
@@ -101,6 +116,27 @@ public class ProcessExecutionLogDto {
 		this.execId = execId;
 		this.taskLogList = taskLogList;
 		this.taskLogExecId = taskLogExecId;
+		this.lastEndExecDateTime = lastEndExecDateTime;
+		this.errorSystem = errorSystem;
+		this.errorBusiness = errorBusiness;
+		if(errorSystem != null) {
+			if(errorSystem.booleanValue()) {
+				this.errorSystemText = "あり";
+			}else {
+				this.errorSystemText = "なし";
+			}
+		}else {
+			this.errorSystemText = null;
+		}
+		if(errorBusiness != null) {
+			if(errorBusiness.booleanValue()) {
+				this.errorBusinessText = "あり";
+			}else {
+				this.errorBusinessText = "なし";
+			}
+		}else {
+			this.errorBusinessText = null;
+		}
 	}
 	
 	public static ProcessExecutionLogDto fromDomain(ProcessExecutionLog procExecLog, ProcessExecutionLogManage procExecLogMan ) {
@@ -164,6 +200,10 @@ public class ProcessExecutionLogDto {
 				dailyCalcStart,
 				dailyCalcEnd,
 				procExecLog.getExecId(), 
-				taskLogList,taskLogExecId);
+				taskLogList,taskLogExecId,
+				procExecLogMan.getLastEndExecDateTime() == null ? "" : procExecLogMan.getLastEndExecDateTime().toString(DATE_FORMAT),
+				procExecLogMan.getErrorSystem(),
+				procExecLogMan.getErrorBusiness()
+				);
 	}
 }

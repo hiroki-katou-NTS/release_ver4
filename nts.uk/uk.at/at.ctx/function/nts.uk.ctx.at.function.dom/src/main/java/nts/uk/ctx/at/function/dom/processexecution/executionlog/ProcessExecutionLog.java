@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.arc.layer.dom.AggregateRoot;
 import nts.uk.ctx.at.function.dom.processexecution.ExecutionCode;
 
@@ -14,6 +15,7 @@ import nts.uk.ctx.at.function.dom.processexecution.ExecutionCode;
  */
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProcessExecutionLog extends AggregateRoot {
 
 	/* コード */
@@ -26,7 +28,7 @@ public class ProcessExecutionLog extends AggregateRoot {
 	private Optional<EachProcessPeriod> eachProcPeriod;
 	
 	/* 各処理の終了状態 */
-	private List<ExecutionTaskLog> taskLogList;
+	private List<ExecutionTaskLog> taskLogList = new ArrayList<>();
 	
 	/* 実行ID */
 	private String execId;

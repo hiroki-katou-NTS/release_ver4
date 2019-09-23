@@ -102,7 +102,7 @@ public class SortingProcessCommandHandler extends CommandHandler<ScheduleExecute
 		this.execHandler.handle(executeProcessExecutionCommand);
 	}
 	
-	//振り分け登録処理
+	//振り分け登録処理 -> 前回の更新処理が実行中の登録処理
 	private void DistributionRegistProcess(String companyId, String execItemCd,String execItemId, GeneralDateTime nextDate ){
 		//ドメインモデル「更新処理自動実行管理」を更新する
 		ProcessExecutionLogManage processExecutionLogManage = this.processExecLogManaRepo.getLogByCIdAndExecCd(companyId, execItemCd).get();
@@ -115,7 +115,9 @@ public class SortingProcessCommandHandler extends CommandHandler<ScheduleExecute
 		taskLogList.add(new ExecutionTaskLog(ProcessExecutionTask.DAILY_CALCULATION ,Optional.ofNullable(EndStatus.NOT_IMPLEMENT)));
 		taskLogList.add(new ExecutionTaskLog(ProcessExecutionTask.RFL_APR_RESULT ,Optional.ofNullable(EndStatus.NOT_IMPLEMENT)));
 		taskLogList.add(new ExecutionTaskLog(ProcessExecutionTask.MONTHLY_AGGR ,Optional.ofNullable(EndStatus.NOT_IMPLEMENT)));
-		ProcessExecutionLogHistory processExecutionLogHistory = new ProcessExecutionLogHistory(new ExecutionCode(execItemCd), companyId,OverallErrorDetail.NOT_FINISHED, EndStatus.ABNORMAL_END, GeneralDateTime.now(), null, taskLogList, execItemId);
+		ProcessExecutionLogHistory processExecutionLogHistory = new ProcessExecutionLogHistory(
+				new ExecutionCode(execItemCd), companyId, OverallErrorDetail.NOT_FINISHED, EndStatus.FORCE_END,
+				GeneralDateTime.now(), null, taskLogList, execItemId,GeneralDateTime.now(),null,null);
 		processExecLogHistRepo.insert(processExecutionLogHistory);
 	
 		

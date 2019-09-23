@@ -29,14 +29,20 @@ module nts.uk.at.view.kbt002.f {
                     { headerText: getText("KBT002_128"), key: 'execItemName', width: 180, formatter: _.escape },
                     { headerText: '', key: 'currentStatusCd', width: 1, hidden: true},
                     { headerText: getText("KBT002_129"), key: 'currentStatus', width: 70, formatter: _.escape },
-                    { headerText: getText("KBT002_130"), key: 'lastExecDateTime', width: 180, formatter: _.escape },
+                    { headerText: getText("KBT002_208"), key: 'lastExecDateTime', width: 180, formatter: _.escape },
+                    { headerText: getText("KBT002_209"), key: 'lastEndExecDateTime', width: 180, formatter: _.escape },
+                    { headerText: getText("KBT002_210"), key: 'rangeDateTime', width: 80, formatter: _.escape },
                     { headerText: '', key: 'overallStatusCd', width: 1, hidden: true},
-                    { headerText: getText("KBT002_143"), key: 'overallStatus', width: 100, formatter: _.escape },
+                    { headerText: getText("KBT002_211"), key: 'overallStatus', width: 68, formatter: _.escape },
+                    { headerText: getText("KBT002_212"), key: 'errorSystemText', width: 90, formatter: _.escape },
+                    { headerText: getText("KBT002_213"), key: 'errorBusinessText', width: 70, formatter: _.escape }, 
+                    
                     {
-                        headerText: "", key: 'execItemCd', width: 55, unbound: true, dataType: "string",
+                        headerText: "", key: 'execItemCd', width: 45, unbound: true, dataType: "string",
                         formatter: function(execItemCd, record) {
                         	let disable = true;                            
-                        	if ((record.overallStatusCd != '') && (record.overallStatusCd == 3) &&(record.currentStatus != 0)){
+//                        	if ((record.overallStatusCd != '') && (record.overallStatusCd == 3) &&(record.currentStatus != 0)){
+                            if((record.overallStatusCd != '') &&(record.currentStatus != 0) && (record.overallStatusCd != 3 && (record.overallStatusCd != 0))){
                         		disable = false;
                         	}
                         	
@@ -208,6 +214,9 @@ module nts.uk.at.view.kbt002.f {
                             execId:              x.execId,
                             prevExecDateTimeEx:  x.prevExecDateTimeEx,
                             taskLogList:         x.taskLogList,
+//                            lastEndExecDateTime: x.lastEndExecDateTime,
+//                            errorSystem:         x.errorSystem,
+//                            errorBusiness:       x.errorBusiness
                         });
                      }else{
                         newExecLogList.push(x);     

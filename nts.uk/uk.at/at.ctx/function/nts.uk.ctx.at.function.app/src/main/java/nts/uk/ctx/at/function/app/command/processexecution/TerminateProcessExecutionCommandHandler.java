@@ -43,6 +43,9 @@ public class TerminateProcessExecutionCommandHandler extends CommandHandler<Term
 	
 	@Inject
 	private ProcessExecutionLogHistRepository processExecutionLogHistRepo;
+	
+//	@Inject
+//	private OverallErrorProcess overallErrorProcess;
 
 	//終了ボタン押下時処理
 	@Override
@@ -58,6 +61,13 @@ public class TerminateProcessExecutionCommandHandler extends CommandHandler<Term
 		if(!processExecLogManOpt.isPresent()){
 			return;
 		}
+		// ドメインモデル「更新処理自動実行管理」．全体の終了状態 をチェックする
+		if (processExecLogManOpt.get().getOverallStatus().isPresent()) {
+			if (processExecLogManOpt.get().getOverallStatus().get() == EndStatus.SUCCESS
+					|| processExecLogManOpt.get().getOverallStatus().get() == EndStatus.FORCE_END) {
+				return;
+			}
+		}
 		
 		ProcessExecutionLogManage processExecLogMan =processExecLogManOpt.get();
 		
@@ -67,7 +77,6 @@ public class TerminateProcessExecutionCommandHandler extends CommandHandler<Term
 			return;
 		}
 		
-		
 		// ドメインモデル「更新処理自動実行ログ」を取得する
 		ProcessExecutionLog procExecLog = null;
 		Optional<ProcessExecutionLog> procExecLogOpt =
@@ -75,29 +84,30 @@ public class TerminateProcessExecutionCommandHandler extends CommandHandler<Term
 		if (!procExecLogOpt.isPresent()) {
 			return;
 		}
+		
 		procExecLog = procExecLogOpt.get();
 		
+		//アルゴリズム[全体エラー状況確認処理]を実行する
+		//ErrorConditionOutput errorCondition = overallErrorProcess.overallErrorProcess(procExecLog);
 		/*
 		 * ドメインモデル「更新処理自動実行管理」を更新する
 		 * 
-		 * 【終了タイプ　＝　1（F画面終了ボタン）の場合】
-		 * 全体の終了状態　＝　強制終了
-		 * 現在の実行状態　＝　待機中
-		 * 
-		 * 【終了タイプ　＝　0（終了時刻）の場合】
-		 * 全体の終了状態　＝　異常終了
-		 * 全体のエラー詳細　＝　更新処理の途中で終了時刻を超過したため中断しました
-		 * 現在の実行状態　＝　待機中
+		 *	【終了タイプ　＝　1（F画面終了ボタン）の場合】
+		 *	全体の終了状態　＝　終了中
+		 *	強制終了の原因　＝　画面から強制終了しました。
+		 *	【終了タイプ　＝　0（終了時刻）の場合】
+		 *	強制終了の原因　＝　更新処理の途中で終了時刻を超過したため中断しました。
+		 *	全体の終了状態　＝　終了中
 		 */	
 		int execType = command.getExecType();
 		if (execType == 1) {
-			processExecLogMan.setOverallStatus(EndStatus.FORCE_END);
-			processExecLogMan.setCurrentStatus(CurrentExecutionStatus.WAITING);
+			processExecLogMan.setOverallStatus(EndStatus.CLOSING);
+			processExecLogMan.setOverallError(OverallErrorDetail.TERMINATED);
 		} else if (execType == 0) {
-			processExecLogMan.setOverallStatus(EndStatus.ABNORMAL_END);
+			processExecLogMan.setOverallStatus(EndStatus.CLOSING);
 			processExecLogMan.setOverallError(OverallErrorDetail.EXCEED_TIME);
-			processExecLogMan.setCurrentStatus(CurrentExecutionStatus.WAITING);
 		}
+		processExecLogMan.setCurrentStatus(CurrentExecutionStatus.WAITING);
 		this.processExecLogManRepo.update(processExecLogMan);
 		
 		/*【登録内容】
@@ -119,8 +129,10 @@ public class TerminateProcessExecutionCommandHandler extends CommandHandler<Term
 				processExecLogMan.getLastExecDateTime(),
 				!procExecLog.getEachProcPeriod().isPresent()?null : procExecLog.getEachProcPeriod().get(), 
 				procExecLog.getTaskLogList(), 
-				procExecLog.getExecId()) ;
-		
+				procExecLog.getExecId(),
+				processExecLogMan.getLastEndExecDateTime(),
+				processExecLogMan.getErrorSystem(),
+				processExecLogMan.getErrorBusiness()) ;
 		//ドメインモデル「更新処理自動実行ログ履歴」を追加する
 		processExecutionLogHistRepo.insert(processExecutionLogHistory);
 		String execId = procExecLog.getExecId();
@@ -217,7 +229,6 @@ public class TerminateProcessExecutionCommandHandler extends CommandHandler<Term
 		 * 就業計算と集計実行ログ．実行状況 ← 中断終了
 		 */
 //		this.interupt(execId, ExeStateOfCalAndSum.END_INTERRUPTION.value);
-		
 		//ドメインモデル「更新処理自動実行ログ履歴」を更新する
 		for(ExecutionTaskLog task : processExecutionLogHistory.getTaskLogList()) {
 			if(task.getStatus() == null || !task.getStatus().isPresent()) {

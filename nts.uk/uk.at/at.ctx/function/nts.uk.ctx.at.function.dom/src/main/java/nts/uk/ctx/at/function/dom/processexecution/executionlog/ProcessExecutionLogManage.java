@@ -20,7 +20,7 @@ public class ProcessExecutionLogManage extends AggregateRoot {
 	/* 会社ID */
 	private String companyId;
 	
-	/* 全体のエラー詳細 */
+	/* 全体のエラー詳細  -> 強制終了の原因 */
 	private OverallErrorDetail overallError;
 	
 	/* 全体の終了状態 */
@@ -29,12 +29,20 @@ public class ProcessExecutionLogManage extends AggregateRoot {
 	/* 前回実行日時 */
 	private GeneralDateTime lastExecDateTime;
 	
-	
 	/* 現在の実行状態 */
 	private CurrentExecutionStatus currentStatus;
 	
 	/* 前回実行日時（即時実行含めない） */
 	private GeneralDateTime lastExecDateTimeEx;
+	
+	/* 前回終了日時*/
+	private GeneralDateTime lastEndExecDateTime;
+	
+	/* 全体のシステムエラー状態*/
+	private Boolean errorSystem;
+	
+	/* 全体の業務エラー状態*/
+	private Boolean errorBusiness;
 
 	public ProcessExecutionLogManage(ExecutionCode execItemCd, String companyId, EndStatus overallStatus, CurrentExecutionStatus currentStatus) {
 		super();
@@ -45,6 +53,9 @@ public class ProcessExecutionLogManage extends AggregateRoot {
 		this.overallError = null;
 		this.lastExecDateTime = null;
 		this.lastExecDateTimeEx = null;
+		this.lastEndExecDateTime = null;
+		this.errorSystem = null; 
+		this.errorBusiness = null;
 	}
 
 	public void setExecItemCd(ExecutionCode execItemCd) {
@@ -66,6 +77,10 @@ public class ProcessExecutionLogManage extends AggregateRoot {
 	public void setLastExecDateTime(GeneralDateTime lastExecDateTime) {
 		this.lastExecDateTime = lastExecDateTime;
 	}
+	
+	public void setLastEndExecDateTime(GeneralDateTime lastEndExecDateTime) {
+		this.lastEndExecDateTime = lastEndExecDateTime;
+	}
 
 	public void setCurrentStatus(CurrentExecutionStatus currentStatus) {
 		this.currentStatus = currentStatus;
@@ -73,6 +88,14 @@ public class ProcessExecutionLogManage extends AggregateRoot {
 
 	public void setLastExecDateTimeEx(GeneralDateTime lastExecDateTimeEx) {
 		this.lastExecDateTimeEx = lastExecDateTimeEx;
+	}
+
+	public void setErrorSystem(Boolean errorSystem) {
+		this.errorSystem = errorSystem;
+	}
+
+	public void setErrorBusiness(Boolean errorBusiness) {
+		this.errorBusiness = errorBusiness;
 	}
 	
 }

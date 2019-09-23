@@ -54,7 +54,19 @@ module nts.uk.at.view.kbt002.h {
                     service.getProcExecList(sharedData.execItemCd).done(data => {
                         let execLogs = [];
                         _.forEach(data, function(item) {
-                            execLogs.push(new ExecutionLog({ lastExecDateTime: item.lastExecDateTime, execItemCd: item.execItemCd, overallStatus: item.overallStatus, overallError: item.overallError, execId: item.execId }))
+                            execLogs.push(new ExecutionLog({ 
+                            lastExecDateTime: item.lastExecDateTime, 
+                                execItemCd: item.execItemCd, 
+                                overallStatus: item.overallStatus, 
+                                overallError: item.overallError, 
+                                execId: item.execId ,
+                                lastEndExecDateTime: item.lastEndExecDateTime,
+                                rangeDateTime: item.rangeDateTime,
+                                errorSystem: item.errorSystem,
+                                errorBusiness: item.errorBusiness,
+                                errorSystemText : item.errorSystemText,
+                                errorBusinessText : item.errorBusinessText
+                                }))
                         });
                         self.execLogList(execLogs);
                         self.loadIgrid();
@@ -71,7 +83,7 @@ module nts.uk.at.view.kbt002.h {
 
             loadIgrid() {
                 let self = this;
-                var execItemCdHeader = '<button tabindex="5" class="setting small" style="margin-top: 0px !important;margin-bottom: 0px !important;"  {{if ${overallStatus}!= "異常終了" }}   disabled="true" {{/if}} onclick="openDialogG(this, \'${execItemCd}\',\'${execId}\')"  >' + getText("KBT002_159") + '</button>';
+                var execItemCdHeader = '<button tabindex="5" class="setting small" style="text-align: center;margin-top: 0px !important;margin-bottom: 0px !important;"  onclick="openDialogG(this, \'${execItemCd}\',\'${execId}\')"  >' + getText("KBT002_159") + '</button>';
                 // var execItemCdHeader = '<button tabindex="5" class="setting small" style="margin: 0px !important;" data-bind="click: function(data, event) { openDialogG(data, event)}" data-code="${execItemCd}" >' + getText("KBT002_159") + '</button>';
                 $("#grid").igGrid({
                     primaryKey: "execId",
@@ -88,10 +100,14 @@ module nts.uk.at.view.kbt002.h {
                     //, template: execItemCdHeader
                     columns: [
                         //ProcessExecutionLogHistory
-                        { key: "lastExecDateTime", width: "180px", height: "25px", headerText: nts.uk.resource.getText('KBT002_156'), dataType: "string", formatter: _.escape },
-                        { key: "overallStatus", width: "120px", height: "25px", headerText: nts.uk.resource.getText('KBT002_157'), dataType: "string", formatter: _.escape },
-                        { key: "execItemCd", width: "80px", height: "25px", headerText: '', dataType: "string", template: execItemCdHeader },
-                        { key: "overallError", width: "450px", height: "25px", headerText: nts.uk.resource.getText('KBT002_158'), dataType: "string", formatter: _.escape },
+                        { key: "lastExecDateTime", width: "180px", height: "25px", headerText: nts.uk.resource.getText('KBT002_214'), dataType: "string", formatter: _.escape },
+                        { key: "lastEndExecDateTime", width: "180px", height: "25px", headerText: nts.uk.resource.getText('KBT002_215'), dataType: "string", formatter: _.escape },
+                        { key: "rangeDateTime", width: "80px", height: "25px", headerText: nts.uk.resource.getText('KBT002_216'), dataType: "string", formatter: _.escape },
+                        { key: "overallStatus", width: "80px", height: "25px", headerText: nts.uk.resource.getText('KBT002_217'), dataType: "string", formatter: _.escape },
+                        { key: "errorSystemText", width: "120px", height: "25px", headerText: nts.uk.resource.getText('KBT002_218'), dataType: "string", formatter: _.escape },
+                        { key: "errorBusinessText", width: "80px", height: "25px", headerText: nts.uk.resource.getText('KBT002_219'), dataType: "string", formatter: _.escape },
+                        { key: "execItemCd", width: "45px", height: "25px", headerText: '', dataType: "string", template: execItemCdHeader },
+                        { key: "overallError", width: "385px", height: "25px", headerText: nts.uk.resource.getText('KBT002_220'), dataType: "string", formatter: _.escape },
                         { key: "execId", dataType: "string", formatter: _.escape, hidden: true }
                     ],
                     features: [
@@ -104,8 +120,12 @@ module nts.uk.at.view.kbt002.h {
                             columnSettings: [
                                 { columnKey: "execItemCd", readOnly: true },
                                 { columnKey: "lastExecDateTime", readOnly: true },
+                                { columnKey: "lastEndExecDateTime", readOnly: true },
+                                { columnKey: "rangeDateTime", readOnly: true },
                                 { columnKey: "overallStatus", readOnly: true },
-                                { columnKey: "overallError", readOnly: true },
+                                { columnKey: "errorSystemText", readOnly: true },
+                                { columnKey: "errorBusinessText", readOnly: true },
+                                { columnKey: "overallErrorText", readOnly: true },
                             ]
                         },
                         {
@@ -163,7 +183,19 @@ module nts.uk.at.view.kbt002.h {
                             service.findListDateRange(param).done(data => {
                                 let execLogs = [];
                                 _.forEach(data, function(item) {
-                                    execLogs.push(new ExecutionLog({ lastExecDateTime: item.lastExecDateTime, execItemCd: item.execItemCd, overallStatus: item.overallStatus, overallError: item.overallError, execId: item.execId }))
+                                    execLogs.push(new ExecutionLog({ 
+                                    lastExecDateTime: item.lastExecDateTime, 
+                                        execItemCd: item.execItemCd, 
+                                        overallStatus: item.overallStatus, 
+                                        overallError: item.overallError, 
+                                        execId: item.execId,
+                                        lastEndExecDateTime: item.lastEndExecDateTime,
+                                        rangeDateTime: item.rangeDateTime,
+                                        errorSystem: item.errorSystem,
+                                        errorBusiness: item.errorBusiness,
+                                        errorSystemText : item.errorSystemText,
+                                        errorBusinessText : item.errorBusinessText 
+                                    }))
                                 });
                                 $("#grid").igGrid("option", "dataSource",execLogs);
                             });
@@ -184,6 +216,13 @@ module nts.uk.at.view.kbt002.h {
         overallStatus: string;
         overallError: string;
         execId: string;
+        lastEndExecDateTime: string;
+        rangeDateTime: string;
+        errorSystem :boolean;
+        errorBusiness :boolean;
+        errorSystemText : string;
+        errorBusinessText : string;
+        
     }
 
     //        export class ExecutionLog {
@@ -205,6 +244,12 @@ module nts.uk.at.view.kbt002.h {
         overallStatus: string;
         overallError: string;
         execId: string;
+        lastEndExecDateTime: string;
+        rangeDateTime: string;
+        errorSystem :boolean;
+        errorBusiness :boolean;
+        errorSystemText : string;
+        errorBusinessText : string;
         constructor(param: IExecutionLog) {
             let self = this;
             self.execItemCd = param.execItemCd;
@@ -212,6 +257,12 @@ module nts.uk.at.view.kbt002.h {
             self.overallError = param.overallError;
             self.lastExecDateTime = param.lastExecDateTime;
             self.execId = param.execId;
+            self.lastEndExecDateTime = param.lastEndExecDateTime;
+            self.rangeDateTime = param.rangeDateTime;
+            self.errorSystem = param.errorSystem;
+            self.errorBusiness = param.errorBusiness;
+            self.errorSystemText = param.errorSystemText;
+            self.errorBusinessText = param.errorBusinessText;
         }
     }
     

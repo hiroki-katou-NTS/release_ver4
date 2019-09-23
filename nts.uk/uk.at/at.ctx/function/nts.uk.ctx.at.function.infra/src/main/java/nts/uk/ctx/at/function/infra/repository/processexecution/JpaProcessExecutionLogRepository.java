@@ -134,6 +134,10 @@ public class JpaProcessExecutionLogRepository extends JpaRepository
 						KfnmtExecutionTaskLog entity = new KfnmtExecutionTaskLog();
 						entity.setKfnmtExecTaskLogPK(pk);
 						entity.setStatus(rec.getInt("STATUS"));
+						entity.setLastExecDateTime(rec.getGeneralDateTime("LAST_EXEC_DATETIME"));
+						entity.setLastEndExecDateTime(rec.getGeneralDateTime("LAST_END_EXEC_DATETIME"));
+						entity.setErrorBusiness(rec.getInt("ERROR_BUSINESS"));
+						entity.setErrorSystem(rec.getInt("ERROR_SYSTEM"));
 						entity.setUpdDate(rec.getGeneralDateTime("UPD_DATE"));
 						return entity;
 					}));

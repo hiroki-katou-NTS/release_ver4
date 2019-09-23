@@ -29,7 +29,7 @@ public class JpaExecutionTaskLogRepository extends JpaRepository
 		return this.queryProxy().query(SELECT_LIST, KfnmtExecutionTaskLog.class)
 				.setParameter("companyId", companyId)
 				.setParameter("execItemCd", execItemCd)
-				.setParameter("execId", execId).getList(c -> c.toDomain());
+				.setParameter("execId", execId).getList(c -> c.toNewDomain());
 	}
 	
 	/**

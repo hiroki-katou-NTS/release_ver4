@@ -10,14 +10,14 @@ public enum EndStatus {
 	/* 未実施 */
 	NOT_IMPLEMENT(0, "未実施"),
 	
-	/* 正常終了 */
-	SUCCESS(1, "正常終了"),
+	/* 正常終了 -> 完了 */
+	SUCCESS(1, "完了"),
 	
 	/* 強制終了 */
 	FORCE_END(2, "強制終了"),
 	
-	/* 異常終了 */
-	ABNORMAL_END(3, "異常終了");
+	/* 終了中 */
+	CLOSING(3, "終了中");
 	
 	/** The value. */
 	public final int value;

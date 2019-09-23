@@ -303,6 +303,7 @@ public class ScheduleCreatorExecutionCommandHandler extends AsyncCommandHandler<
 				Optional<ExeStateOfCalAndSumImportSch> exeStateOfCalAndSumImportSch = dailyMonthlyprocessAdapterSch.executionStatus(exeId);
 				if(exeStateOfCalAndSumImportSch.isPresent())
 					if(exeStateOfCalAndSumImportSch.get() == ExeStateOfCalAndSumImportSch.START_INTERRUPTION) {
+						this.updateStatusScheduleExecutionLog(scheduleExecutionLog, CompletionStatus.INTERRUPTION);
 						return;
 					}
 			}else {

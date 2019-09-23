@@ -22,6 +22,7 @@ import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.function.app.find.processexecution.dto.ProcessExecutionLogDto;
 import nts.uk.ctx.at.function.dom.processexecution.ExecutionCode;
 import nts.uk.ctx.at.function.dom.processexecution.ProcessExecution;
+import nts.uk.ctx.at.function.dom.processexecution.createlogfileexecution.CalTimeRangeDateTimeToString;
 import nts.uk.ctx.at.function.dom.processexecution.executionlog.ProcessExecutionLog;
 //import nts.uk.ctx.at.function.dom.processexecution.executionlog.ProcessExecutionLogManage;
 import nts.uk.ctx.at.function.dom.processexecution.repository.ExecutionTaskSettingRepository;
@@ -96,6 +97,7 @@ public class ProcessExecutionLogFinder {
 				if (procExecOpt.isPresent()) {
 					dto.setExecItemName(procExecOpt.get().getExecItemName().v());
 				}
+				dto.setRangeDateTime(CalTimeRangeDateTimeToString.calTimeExec(a.getLastExecDateTime(), a.getLastEndExecDateTime()));
 				return dto;
 			}).collect(Collectors.toList());
 	}

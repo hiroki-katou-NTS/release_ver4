@@ -83,7 +83,7 @@ public class KfnmtProcessExecutionLog extends UkJpaEntity implements Serializabl
 	}
 
 	public ProcessExecutionLog toDomain() {
-		List<ExecutionTaskLog> taskLogList = this.taskLogList.stream().map(x -> x.toDomain())
+		List<ExecutionTaskLog> taskLogList = this.taskLogList.stream().map(x -> x.toNewDomain())
 				.collect(Collectors.toList());
 		
 		DatePeriod scheduleCreationPeriod = (this.schCreateStart == null || this.schCreateEnd == null) ? null
