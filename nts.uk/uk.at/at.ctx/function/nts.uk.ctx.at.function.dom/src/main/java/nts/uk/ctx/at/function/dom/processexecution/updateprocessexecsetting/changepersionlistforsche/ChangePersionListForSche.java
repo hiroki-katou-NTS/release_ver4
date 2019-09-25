@@ -54,7 +54,11 @@ public class ChangePersionListForSche {
 	
 	public DatePeriod filterEmployeeList(ProcessExecution procExec, List<String> employeeIdList,
 			List<String> reEmployeeList, List<String> newEmployeeList, List<String> temporaryEmployeeList) {
-
+		//Output : 
+		// ・社員ID（異動者、勤務種別変更者、休職者・休業者）（List）:  reEmployeeList
+		// 社員ID（新入社員）（List） : newEmployeeList
+		// 社員ID（休職者・休業者）（List） : temporaryEmployeeList
+		
 		String companyId = AppContexts.user().companyId();
 		/** 作成対象の判定 */
 		if (procExec.getExecSetting().getPerSchedule().getTarget()
