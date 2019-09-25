@@ -95,9 +95,7 @@ public class UpdateLogAfterProcess {
 			}
 			break;
 		case AL_EXTRACTION:
-			if (!errorMessage.equals("Msg_1339") && !errorMessage.equals("Msg_1552")) {
-				isHasErrorBusiness = true;
-			}
+				isHasErrorBusiness = false;
 			break;
 		default: // DAILY_CREATION DAILY_CALCULATION RFL_APR_RESULT MONTHLY_AGGR
 			// ドメインモデル「エラーメッセージ情報」を取得する
