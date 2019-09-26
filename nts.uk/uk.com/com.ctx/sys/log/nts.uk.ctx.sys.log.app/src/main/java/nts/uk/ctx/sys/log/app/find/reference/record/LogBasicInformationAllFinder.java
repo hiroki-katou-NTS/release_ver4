@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.error.BusinessException;
@@ -56,8 +58,8 @@ import nts.uk.shr.infra.file.csv.CsvReportWriter;
 /*
  * author : huannv
  */
-
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class LogBasicInformationAllFinder {
 
 	@Inject
@@ -94,7 +96,7 @@ public class LogBasicInformationAllFinder {
 	@Inject
 	private CSVReportGenerator generator;
 	
-	private static final int LIMIT = 10000;
+	private static final int LIMIT = 50000;
 	
 	private static final String PGID = "CLI003";
 	
@@ -102,6 +104,8 @@ public class LogBasicInformationAllFinder {
 	
 	private static final String FILE_EXTENSION = ".csv";
 
+
+	
 	public List<LogBasicInfoAllDto> findByOperatorsAndDate(LogParams logParams) {
 		List<LogBasicInfoAllDto> lstLogBacsicInfo = new ArrayList<>();
 		// get login info
@@ -752,9 +756,11 @@ public class LogBasicInformationAllFinder {
 		}
 		return result;
 	}
-
+	
 	// chuẩn bị dữ liệu cho việc in
 	public void prepareData(String employeeCode, LogParamsVer1 logParams, ExportServiceContext<LogParamsVer1> context) {
+		//this.session.
+		//context.g
 		List<String> listItemNo = new ArrayList<>();
 		
 		List<LogOutputItemDto> listHeaderSort = new ArrayList<>();
@@ -832,10 +838,11 @@ public class LogBasicInformationAllFinder {
 					
 					List<String> headers = getTextHeader(logParams);
 					
-					CsvReportWriter csv = generator.generate(context.getGeneratorContext(), PGID + "_" + GeneralDateTime.now().toString("yyyyMMddHHmmss") + "_" + employeeCode + FILE_EXTENSION, headers , "UTF-8");
+					
 					try {
-					findByOperatorsAndDateRefactors(logParams, dataOutPutItem,
-							paramOutputItem, listHeaderSort, dataOutputItems, csv);
+						CsvReportWriter csv = generator.generate(context.getGeneratorContext(), PGID + "_" + GeneralDateTime.now().toString("yyyyMMddHHmmss") + "_" + employeeCode + FILE_EXTENSION, headers , "UTF-8");
+						findByOperatorsAndDateRefactors(logParams, dataOutPutItem,
+								paramOutputItem, listHeaderSort, dataOutputItems, csv);
 					}catch(BusinessException e) {
 						throw e;
 					}
@@ -865,6 +872,12 @@ public class LogBasicInformationAllFinder {
 		}
 	}
 	
+	private List<LoginRecord> getLoginRecord(List<String> listOperationId, int offset){
+		
+		return this.loginRecordRepository.logRecordInforRefactors(listOperationId, offset, LIMIT);
+		
+	}
+	
 	private void caseLoginRefactors(String cid, LogParams logParams, 
 			List<String> listOperationId, Map<String, LogBasicInformation> mapLogBasicInfo,
 			Map<String, String> mapEmployeeCodes, Map<String, String> mapProgramNames,
@@ -873,7 +886,7 @@ public class LogBasicInformationAllFinder {
 		
 		int offset = 0;
 		
-		List<LoginRecord> loginRecords = this.loginRecordRepository.logRecordInforRefactors(listOperationId, offset, LIMIT);
+		List<LoginRecord> loginRecords = getLoginRecord(listOperationId, offset);
 		
 		if(CollectionUtil.isEmpty(loginRecords)) {
 			
@@ -881,7 +894,12 @@ public class LogBasicInformationAllFinder {
 			
 		}
 		
-		while((loginRecords = this.loginRecordRepository.logRecordInforRefactors(listOperationId, offset, LIMIT)).size() > 0) {
+		processLoginUser(cid, logParams, loginRecords, mapLogBasicInfo, mapEmployeeCodes, mapProgramNames,
+				lstLogBacsicInfo, csv);
+		
+		offset += loginRecords.size();
+		
+		while((loginRecords = getLoginRecord(listOperationId, offset)).size() > 0) {
 			
 			if(!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
 				
@@ -889,52 +907,63 @@ public class LogBasicInformationAllFinder {
 				
 			}
 			
-			if (!CollectionUtil.isEmpty(loginRecords)) {
-				
-				Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(), loginRecords,
-						mapLogBasicInfo, new ArrayList<>(), new ArrayList<>());
-				
-				loginRecords.stream().forEach(loginRecord -> {
-					
-					setLoginDto(mapLogBasicInfo, loginRecord, mapEmployeeCodes, roleNameByRoleIds, mapProgramNames,
-							lstLogBacsicInfo);
-					
-				});
-				
-			}
-			
-			
-			if (!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
-				
-				sort(RecordTypeEnum.LOGIN, lstLogBacsicInfo);
-				
-				logParams.setListLogBasicInfoAllDto(lstLogBacsicInfo);
-				
-				List<Map<String, Object>> lstData = getDataLog(logParams);
-				
-				CollectionUtil.split(lstData, 10000, sub ->{
-					
-					sub.forEach(s->{
-						
-						if(s != null) {
-							
-							csv.writeALine(s);
-							
-						}
-						
-					});
-					
-				});
-				
-			} else {
-				
-				throw new BusinessException("Msg_1220");
-			}
+			processLoginUser(cid, logParams, loginRecords, mapLogBasicInfo, mapEmployeeCodes, mapProgramNames,
+					lstLogBacsicInfo, csv);
 			
 			offset += loginRecords.size();
 		}
 
 		csv.destroy();
+	}
+	
+	private void processLoginUser(String cid, LogParams logParams, List<LoginRecord> loginRecords,
+			Map<String, LogBasicInformation> mapLogBasicInfo, Map<String, String> mapEmployeeCodes,
+			Map<String, String> mapProgramNames, List<LogBasicInfoAllDto> lstLogBacsicInfo, CsvReportWriter csv) {
+		
+		if (!CollectionUtil.isEmpty(loginRecords)) {
+			
+			Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(), loginRecords,
+					mapLogBasicInfo, new ArrayList<>(), new ArrayList<>());
+			
+			loginRecords.stream().forEach(loginRecord -> {
+				
+				setLoginDto(mapLogBasicInfo, loginRecord, mapEmployeeCodes, roleNameByRoleIds, mapProgramNames,
+						lstLogBacsicInfo);
+				
+			});
+			
+		}
+		
+		
+		if (!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
+			
+			sort(RecordTypeEnum.LOGIN, lstLogBacsicInfo);
+			
+			logParams.setListLogBasicInfoAllDto(lstLogBacsicInfo);
+			
+			List<Map<String, Object>> lstData = getDataLog(logParams);
+			
+			CollectionUtil.split(lstData, 10000, sub ->{
+				
+				sub.forEach(s->{
+					
+					if(s != null) {
+						
+						csv.writeALine(s);
+						
+					}
+					
+				});
+				
+			});
+			
+		} else {
+			
+			throw new BusinessException("Msg_1220");
+		}
+		
+		
+		
 	}
 	
 	private void setLoginDto(Map<String, LogBasicInformation> mapLogBasicInfo,
@@ -1043,8 +1072,8 @@ public class LogBasicInformationAllFinder {
 		
 		int offset = 0;
 		
-		List<PersonInfoCorrectionLog> listPersonInfoCorrectionLog = this.iPersonInfoCorrectionLogRepository
-				.findByTargetAndDateRefactors(listOperationId, logParams.getListTagetEmployeeId(), offset, LIMIT);
+		List<PersonInfoCorrectionLog> listPersonInfoCorrectionLog = getPersonCorrectionLog(logParams, listOperationId,
+				offset);
 		
 		if(CollectionUtil.isEmpty(listPersonInfoCorrectionLog)) {
 			
@@ -1052,8 +1081,12 @@ public class LogBasicInformationAllFinder {
 			
 		}
 		
-		while((listPersonInfoCorrectionLog = this.iPersonInfoCorrectionLogRepository
-				.findByTargetAndDateRefactors(listOperationId, logParams.getListTagetEmployeeId(), offset, LIMIT)).size() > 0) {
+		processPersonCategory(cid, logParams, mapLogBasicInfo, mapEmployeeCodes, mapProgramNames, lstLogBacsicInfo,
+				listPersonInfoCorrectionLog, csv);
+		
+		offset += listPersonInfoCorrectionLog.size();
+		
+		while ((listPersonInfoCorrectionLog = getPersonCorrectionLog(logParams, listOperationId, offset)).size() > 0) {
 		
 			if(!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
 				
@@ -1061,86 +1094,108 @@ public class LogBasicInformationAllFinder {
 				
 			}
 			
-			if (!CollectionUtil.isEmpty(listPersonInfoCorrectionLog)) {
-				
-				// Get list employee code
-				List<String> employeePerSonIds = new ArrayList<>();
-				
-				for (PersonInfoCorrectionLog personInfoCorrectionLog : listPersonInfoCorrectionLog) {
-					
-					if (personInfoCorrectionLog.getTargetUser() != null) {
-						
-						employeePerSonIds.add(personInfoCorrectionLog.getTargetUser().getEmployeeId());
-						
-					}
-				}
-				
-				Map<String, String> mapEmployeeCodePersons = personEmpBasicInfoAdapter
-						.getEmployeeCodesByEmpIds(employeePerSonIds);
-				
-				Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(),
-						new ArrayList<>(), mapLogBasicInfo, listPersonInfoCorrectionLog, new ArrayList<>());
-				
-				listPersonInfoCorrectionLog.stream().forEach(personInfoCorrectionLog -> {
-
-					List<CategoryCorrectionLog> rsListCategoryCorrectionLog = personInfoCorrectionLog
-							.getCategoryCorrections();
-					
-					if (!CollectionUtil.isEmpty(rsListCategoryCorrectionLog)) {
-						
-						rsListCategoryCorrectionLog.stream().forEach(categoryCorrectionLog -> {
-							
-							List<ItemInfo> rsItemInfo = categoryCorrectionLog.getItemInfos();
-							
-							if (!CollectionUtil.isEmpty(rsItemInfo)) {
-								
-								rsItemInfo.stream().forEach(itemInfo -> {
-									
-									setPersonCategoryLog(personInfoCorrectionLog, categoryCorrectionLog,
-											mapLogBasicInfo, mapEmployeeCodePersons, mapEmployeeCodes,
-											roleNameByRoleIds, mapProgramNames, lstLogBacsicInfo);
-									
-								});
-							}
-							
-						});
-						
-					}
-					
-				});
-				
-				if (!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
-					
-					sort(RecordTypeEnum.UPDATE_PERSION_INFO, lstLogBacsicInfo);
-					
-					logParams.setListLogBasicInfoAllDto(lstLogBacsicInfo);
-					
-					List<Map<String, Object>> lstData = getDataLog(logParams);
-					
-					CollectionUtil.split(lstData, 10000, sub ->{
-						
-						sub.forEach(s->{
-							
-							if(s != null) {
-								
-								csv.writeALine(s);
-								
-							}
-							
-						});
-						
-					});
-					
-				} else {
-					
-					throw new BusinessException("Msg_1220");
-				}
-			}
+			processPersonCategory(cid, logParams, mapLogBasicInfo, mapEmployeeCodes, mapProgramNames, lstLogBacsicInfo,
+					listPersonInfoCorrectionLog, csv);
 			
 			offset += listPersonInfoCorrectionLog.size();
 		}
 		
 		csv.destroy();
+	}
+	
+	private List<PersonInfoCorrectionLog> getPersonCorrectionLog(LogParams logParams, List<String> listOperationId, int offset){
+		return this.iPersonInfoCorrectionLogRepository
+				.findByTargetAndDateRefactors(listOperationId, logParams.getListTagetEmployeeId(), offset, LIMIT);
+	}
+	
+	private void processPersonCategory(String cid, LogParams logParams, 
+			Map<String, LogBasicInformation> mapLogBasicInfo,
+			Map<String, String> mapEmployeeCodes,
+			Map<String, String> mapProgramNames, 
+			List<LogBasicInfoAllDto> lstLogBacsicInfo,
+			List<PersonInfoCorrectionLog> listPersonInfoCorrectionLog,
+			CsvReportWriter csv) {
+		if(!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
+			
+			lstLogBacsicInfo.removeAll(lstLogBacsicInfo);
+			
+		}
+		
+		if (!CollectionUtil.isEmpty(listPersonInfoCorrectionLog)) {
+			
+			// Get list employee code
+			List<String> employeePerSonIds = new ArrayList<>();
+			
+			for (PersonInfoCorrectionLog personInfoCorrectionLog : listPersonInfoCorrectionLog) {
+				
+				if (personInfoCorrectionLog.getTargetUser() != null) {
+					
+					employeePerSonIds.add(personInfoCorrectionLog.getTargetUser().getEmployeeId());
+					
+				}
+			}
+			
+			Map<String, String> mapEmployeeCodePersons = personEmpBasicInfoAdapter
+					.getEmployeeCodesByEmpIds(employeePerSonIds);
+			
+			Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(),
+					new ArrayList<>(), mapLogBasicInfo, listPersonInfoCorrectionLog, new ArrayList<>());
+			
+			listPersonInfoCorrectionLog.stream().forEach(personInfoCorrectionLog -> {
+
+				List<CategoryCorrectionLog> rsListCategoryCorrectionLog = personInfoCorrectionLog
+						.getCategoryCorrections();
+				
+				if (!CollectionUtil.isEmpty(rsListCategoryCorrectionLog)) {
+					
+					rsListCategoryCorrectionLog.stream().forEach(categoryCorrectionLog -> {
+						
+						List<ItemInfo> rsItemInfo = categoryCorrectionLog.getItemInfos();
+						
+						if (!CollectionUtil.isEmpty(rsItemInfo)) {
+							
+							rsItemInfo.stream().forEach(itemInfo -> {
+								
+								setPersonCategoryLog(personInfoCorrectionLog, categoryCorrectionLog,
+										mapLogBasicInfo, mapEmployeeCodePersons, mapEmployeeCodes,
+										roleNameByRoleIds, mapProgramNames, lstLogBacsicInfo);
+								
+							});
+						}
+						
+					});
+					
+				}
+				
+			});
+			
+			if (!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
+				
+				sort(RecordTypeEnum.UPDATE_PERSION_INFO, lstLogBacsicInfo);
+				
+				logParams.setListLogBasicInfoAllDto(lstLogBacsicInfo);
+				
+				List<Map<String, Object>> lstData = getDataLog(logParams);
+				
+				CollectionUtil.split(lstData, 10000, sub ->{
+					
+					sub.forEach(s->{
+						
+						if(s != null) {
+							
+							csv.writeALine(s);
+							
+						}
+						
+					});
+					
+				});
+				
+			} else {
+				
+				throw new BusinessException("Msg_1220");
+			}
+		}
 	}
 	
 	private void casePersonCategoryLog(String cid, LogParams logParams, List<String> listOperationId,
@@ -1393,6 +1448,14 @@ public class LogBasicInformationAllFinder {
 		}
 	}
 	
+	private List<DataCorrectionLog> getDataCorectLog(
+			LogParams logParams,
+			List<String> listOperationId,
+			DatePeriod datePeriodTaget, TargetDataType targetDataType, int offset) {
+		return this.dataCorrectionLogRepository.findByTargetAndDateRefactors(
+				listOperationId, logParams.getListTagetEmployeeId(), datePeriodTaget, targetDataType, offset, LIMIT);
+	}
+	
 	private void caseDataCorrectionRefactors(String cid, LogParams logParams, DatePeriod datePeriodTaget,
 			TargetDataType targetDataType, List<String> listOperationId,
 			Map<String, LogBasicInformation> mapLogBasicInfo, Map<String, String> mapEmployeeCodes,
@@ -1401,8 +1464,8 @@ public class LogBasicInformationAllFinder {
 		
 		int offset = 0;
 		
-		List<DataCorrectionLog> rsDataCorectLog = this.dataCorrectionLogRepository.findByTargetAndDateRefactors(
-				listOperationId, logParams.getListTagetEmployeeId(), datePeriodTaget, targetDataType, offset, LIMIT);
+		List<DataCorrectionLog> rsDataCorectLog = getDataCorectLog( logParams, listOperationId, 
+				 datePeriodTaget, targetDataType,  offset);
 		
 		if(CollectionUtil.isEmpty(rsDataCorectLog)) {
 			
@@ -1410,8 +1473,13 @@ public class LogBasicInformationAllFinder {
 			
 		}
 		
-		while( (rsDataCorectLog = this.dataCorrectionLogRepository.findByTargetAndDateRefactors(
-				listOperationId, logParams.getListTagetEmployeeId(), datePeriodTaget, targetDataType, offset, LIMIT)).size() > 0){
+		processDataCorrection(cid, logParams, mapLogBasicInfo, mapEmployeeCodes, mapProgramNames, lstLogBacsicInfo,
+				rsDataCorectLog, csv);
+		
+		offset += rsDataCorectLog.size();
+		
+		while( (rsDataCorectLog =  getDataCorectLog( logParams, listOperationId, 
+				 datePeriodTaget, targetDataType,  offset)).size() > 0){
 			
 			if(!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
 				
@@ -1419,64 +1487,8 @@ public class LogBasicInformationAllFinder {
 				
 			}
 			
-			if (!CollectionUtil.isEmpty(rsDataCorectLog)) {
-				
-				// convert list data corect log to DTO
-				List<String> employeePerSonIds = new ArrayList<>();
-				
-				List<LogDataCorrectRecordAllDto> lstLogDataCorecRecordRefeDto = new ArrayList<>();
-				
-				for (DataCorrectionLog dataCorrectionLog : rsDataCorectLog) {
-					
-					LogDataCorrectRecordAllDto logDataCorrectRecordRefeDto = LogDataCorrectRecordAllDto
-							.fromDomain(dataCorrectionLog);
-					
-					lstLogDataCorecRecordRefeDto.add(logDataCorrectRecordRefeDto);
-					
-					if (dataCorrectionLog.getTargetUser() != null) {
-						
-						employeePerSonIds.add(dataCorrectionLog.getTargetUser().getEmployeeId());
-						
-					}
-				}
-				
-				Map<String, String> mapEmployeeCodePersons = personEmpBasicInfoAdapter
-						.getEmployeeCodesByEmpIds(employeePerSonIds);
-				//
-				if (!CollectionUtil.isEmpty(lstLogDataCorecRecordRefeDto)) {
-					
-					Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(),
-							new ArrayList<>(), mapLogBasicInfo, new ArrayList<>(), new ArrayList<>());
-					
-					setDataCorrection(lstLogDataCorecRecordRefeDto, mapLogBasicInfo, mapEmployeeCodePersons,
-							mapEmployeeCodes, roleNameByRoleIds, mapProgramNames, lstLogBacsicInfo);
-					
-					if (!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
-						
-						sort(RecordTypeEnum.DATA_CORRECT, lstLogBacsicInfo);
-						
-						logParams.setListLogBasicInfoAllDto(lstLogBacsicInfo);
-						
-						List<Map<String, Object>> lstData = getDataLog(logParams);
-						
-						CollectionUtil.split(lstData, 10000, sub ->{
-							
-							sub.forEach(s->{
-								
-								if(s != null) {
-									
-									csv.writeALine(s);
-									
-								}
-							});
-						});
-						
-					} else {
-						throw new BusinessException("Msg_1220");
-					}
-					
-				}
-			}
+			processDataCorrection(cid, logParams, mapLogBasicInfo, mapEmployeeCodes, mapProgramNames, lstLogBacsicInfo,
+					rsDataCorectLog, csv);
 			
 			offset += rsDataCorectLog.size();
 		}
@@ -1484,6 +1496,72 @@ public class LogBasicInformationAllFinder {
 		csv.destroy();
 	}
 	
+	private void processDataCorrection(String cid, LogParams logParams,
+			Map<String, LogBasicInformation> mapLogBasicInfo, Map<String, String> mapEmployeeCodes,
+			Map<String, String> mapProgramNames, List<LogBasicInfoAllDto> lstLogBacsicInfo,
+			List<DataCorrectionLog> rsDataCorectLog,
+			CsvReportWriter csv) {
+		
+		if (!CollectionUtil.isEmpty(rsDataCorectLog)) {
+			
+			// convert list data corect log to DTO
+			List<String> employeePerSonIds = new ArrayList<>();
+			
+			List<LogDataCorrectRecordAllDto> lstLogDataCorecRecordRefeDto = new ArrayList<>();
+			
+			for (DataCorrectionLog dataCorrectionLog : rsDataCorectLog) {
+				
+				LogDataCorrectRecordAllDto logDataCorrectRecordRefeDto = LogDataCorrectRecordAllDto
+						.fromDomain(dataCorrectionLog);
+				
+				lstLogDataCorecRecordRefeDto.add(logDataCorrectRecordRefeDto);
+				
+				if (dataCorrectionLog.getTargetUser() != null) {
+					
+					employeePerSonIds.add(dataCorrectionLog.getTargetUser().getEmployeeId());
+					
+				}
+			}
+			
+			Map<String, String> mapEmployeeCodePersons = personEmpBasicInfoAdapter
+					.getEmployeeCodesByEmpIds(employeePerSonIds);
+			//
+			if (!CollectionUtil.isEmpty(lstLogDataCorecRecordRefeDto)) {
+				
+				Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, new ArrayList<>(),
+						new ArrayList<>(), mapLogBasicInfo, new ArrayList<>(), new ArrayList<>());
+				
+				setDataCorrection(lstLogDataCorecRecordRefeDto, mapLogBasicInfo, mapEmployeeCodePersons,
+						mapEmployeeCodes, roleNameByRoleIds, mapProgramNames, lstLogBacsicInfo);
+				
+				if (!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
+					
+					sort(RecordTypeEnum.DATA_CORRECT, lstLogBacsicInfo);
+					
+					logParams.setListLogBasicInfoAllDto(lstLogBacsicInfo);
+					
+					List<Map<String, Object>> lstData = getDataLog(logParams);
+					
+					CollectionUtil.split(lstData, 10000, sub ->{
+						
+						sub.forEach(s->{
+							
+							if(s != null) {
+								
+								csv.writeALine(s);
+								
+							}
+						});
+					});
+					
+				} else {
+					throw new BusinessException("Msg_1220");
+				}
+				
+			}
+		}
+		
+	}
 	
 	private void setDataCorrection(List<LogDataCorrectRecordAllDto> lstLogDataCorecRecordRefeDto,
 			Map<String, LogBasicInformation> mapLogBasicInfo,
@@ -1614,10 +1692,9 @@ public class LogBasicInformationAllFinder {
 	
 	private void caseStartUp(String cid, LogParams logParams, Map<String, String> mapProgramNames,
 			List<LogBasicInfoAllDto> lstLogBacsicInfo) {
-		List<StartPageLog> listStartPageLog = this.startPageLogRepository.findBy(cid,
-				logParams.getListOperatorEmployeeId(), logParams.getStartDateOperator(),
-				logParams.getEndDateOperator(), 0, 1000);
 
+		List<StartPageLog> listStartPageLog = new ArrayList<>();
+		
 		if (!CollectionUtil.isEmpty(listStartPageLog)) {
 			
 			List<String> employeeIds = new ArrayList<>();
@@ -1641,16 +1718,22 @@ public class LogBasicInformationAllFinder {
 		}
 	}
 	
+	private List<StartPageLog> getStartUp(String cid, LogParams logParams, int offset){
+		return  this.startPageLogRepository.findBy(cid,
+				logParams.getListOperatorEmployeeId(), logParams.getStartDateOperator(),
+				logParams.getEndDateOperator(), offset, LIMIT);
+		
+	}
+	
+	
 	private void caseStartUpRefactors(String cid, LogParams logParams, 
 			Map<String, String> mapProgramNames,
 			List<LogBasicInfoAllDto> lstLogBacsicInfo,
 			CsvReportWriter csv) {
-		
+		//List<StartPageLog> result = new ArrayList<>();
 		int offset = 0;
 		
-		List<StartPageLog> listStartPageLog = this.startPageLogRepository.findBy(cid,
-				logParams.getListOperatorEmployeeId(), logParams.getStartDateOperator(),
-				logParams.getEndDateOperator(), offset, LIMIT);
+		List<StartPageLog> listStartPageLog =  getStartUp(cid, logParams, offset);
 		
 		if(CollectionUtil.isEmpty(listStartPageLog)) {
 			
@@ -1658,67 +1741,75 @@ public class LogBasicInformationAllFinder {
 			
 		}
 		
-		while((listStartPageLog = this.startPageLogRepository.findBy(cid,
-				logParams.getListOperatorEmployeeId(), logParams.getStartDateOperator(),
-				logParams.getEndDateOperator(), offset, LIMIT)).size() > 0) {
+		processStartUp(cid, logParams, mapProgramNames, lstLogBacsicInfo, listStartPageLog, csv);
+		
+		offset += listStartPageLog.size();
+
+	
+		while((listStartPageLog = getStartUp(cid, logParams, offset)).size() > 0) {
 			
 			if(!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
 				
 				lstLogBacsicInfo.removeAll(lstLogBacsicInfo);
 				
 			}
-			
-			if (!CollectionUtil.isEmpty(listStartPageLog)) {
-				
-				List<String> employeeIds = new ArrayList<>();
-				
-				for (StartPageLog startPageLog : listStartPageLog) {
-					
-					LogBasicInformation lgBasicInformation = startPageLog.getBasicInfo();
-					
-					if (!Objects.isNull(lgBasicInformation) && !Objects.isNull(lgBasicInformation.getUserInfo())
-							&& !Objects.isNull(lgBasicInformation.getUserInfo().getEmployeeId())) {
-						
-						employeeIds.add(lgBasicInformation.getUserInfo().getEmployeeId());
 
-					}
-				}
-				
-				// Get list employee code
-				Map<String, String> mapEmployeeCodes = personEmpBasicInfoAdapter.getEmployeeCodesByEmpIds(employeeIds);
-
-				Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, listStartPageLog, new ArrayList<>(),
-						new HashMap<>(), new ArrayList<>(), new ArrayList<>());
-
-				setStartUp(listStartPageLog, mapEmployeeCodes, roleNameByRoleIds, mapProgramNames, lstLogBacsicInfo);
-				
-				if (!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
-					
-					sort(RecordTypeEnum.START_UP, lstLogBacsicInfo);
-					
-					logParams.setListLogBasicInfoAllDto(lstLogBacsicInfo);
-					
-					List<Map<String, Object>> lstData = getDataLog(logParams);
-					
-					CollectionUtil.split(lstData, 10000, sub ->{
-						sub.forEach(s->{
-							if(s != null) {
-								csv.writeALine(s);
-							}
-						});
-					});
-					
-				} else {
-					
-					throw new BusinessException("Msg_1220");
-				}
-				
-			}
+			processStartUp(cid, logParams, mapProgramNames, lstLogBacsicInfo, listStartPageLog, csv);
 			
 			offset += listStartPageLog.size();
 		}
-		
 		csv.destroy();
+	}
+	
+	private void processStartUp(String cid, LogParams logParams, Map<String, String> mapProgramNames,
+			List<LogBasicInfoAllDto> lstLogBacsicInfo, List<StartPageLog> listStartPageLog, CsvReportWriter csv) {
+		
+		if (!CollectionUtil.isEmpty(listStartPageLog)) {
+			List<String> employeeIds = new ArrayList<>();
+			
+			for (StartPageLog startPageLog : listStartPageLog) {
+				
+				LogBasicInformation lgBasicInformation = startPageLog.getBasicInfo();
+				
+				if (!Objects.isNull(lgBasicInformation) && !Objects.isNull(lgBasicInformation.getUserInfo())
+						&& !Objects.isNull(lgBasicInformation.getUserInfo().getEmployeeId())) {
+					
+					employeeIds.add(lgBasicInformation.getUserInfo().getEmployeeId());
+
+				}
+			}
+			
+			// Get list employee code
+			Map<String, String> mapEmployeeCodes = personEmpBasicInfoAdapter.getEmployeeCodesByEmpIds(employeeIds);
+
+			Map<String, String> roleNameByRoleIds = getRoleNameByRoleId(cid, listStartPageLog, new ArrayList<>(),
+					new HashMap<>(), new ArrayList<>(), new ArrayList<>());
+
+			setStartUp(listStartPageLog, mapEmployeeCodes, roleNameByRoleIds, mapProgramNames, lstLogBacsicInfo);
+			
+			if (!CollectionUtil.isEmpty(lstLogBacsicInfo)) {
+				
+				sort(RecordTypeEnum.START_UP, lstLogBacsicInfo);
+				
+				logParams.setListLogBasicInfoAllDto(lstLogBacsicInfo);
+				
+				List<Map<String, Object>> lstData = getDataLog(logParams);
+				
+				CollectionUtil.split(lstData, 10000, sub ->{
+					sub.forEach(s->{
+						if(s != null) {
+							csv.writeALine(s);
+						}
+					});
+				});
+				
+			} else {
+				
+				throw new BusinessException("Msg_1220");
+			}
+			
+		}
+		
 	}
 	
 	private void setStartUp(List<StartPageLog> listStartPageLog,

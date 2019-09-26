@@ -957,6 +957,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 	@Override
 	public List<DataCorrectionLog> findByTargetAndDateRefactors(List<String> operationIds, List<String> listEmployeeId,
 			DatePeriod period, TargetDataType targetDataType, int offset, int limit) {
+		this.getEntityManager().clear();
 		List<DataCorrectionLog> results = new ArrayList<>();
 		if (operationIds.isEmpty())
 			return results;

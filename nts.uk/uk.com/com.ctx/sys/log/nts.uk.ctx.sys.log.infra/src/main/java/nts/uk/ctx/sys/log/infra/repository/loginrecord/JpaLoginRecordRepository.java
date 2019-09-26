@@ -176,6 +176,7 @@ public class JpaLoginRecordRepository extends JpaRepository implements LoginReco
 
 		// get entity manager
 		EntityManager em = this.getEntityManager();
+		em.clear();
 		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 
 		CriteriaQuery<SrcdtLoginRecord> cq = criteriaBuilder.createQuery(SrcdtLoginRecord.class);

@@ -574,7 +574,7 @@ public class PersonInfoCorrectionLogRepositoryImp extends JpaRepository implemen
 				59, 59);
 
 		List<PersonalInfoCorrectionLogQuery> query = new ArrayList<PersonalInfoCorrectionLogQuery>();
-
+		this.getEntityManager().clear();
 		CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subOpts) -> {
 			if (!CollectionUtil.isEmpty(listEmployeeId)) {
 				CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subEmpIds) -> {
