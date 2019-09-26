@@ -885,7 +885,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						loginContext, calculateSchedulePeriod, listEmp);
 
 				try {
-					this.scheduleExecution.handle(scheduleCommand);
+					AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx = new AsyncCommandHandlerContext<>(scheduleCommand);
+					this.scheduleExecution.handle(ctx);
+//					this.scheduleExecution.handle(scheduleCommand);
 					log.info("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 					if(checkStop(execId)) {
 						checkStopExec = true;
@@ -925,7 +927,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 							// AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctxNew = new
 							// AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand>(scheduleCreatorExecutionOneEmp);
 							// ctxNew.setTaskId(context.asAsync().getTaskId());
-							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp2);
+							AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx = new AsyncCommandHandlerContext<>(scheduleCreatorExecutionOneEmp2);
+							this.scheduleExecution.handle(ctx);
+//							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp2);
 							ScheduleCreatorExecutionCommand scheduleCreatorExecutionOneEmp3 = this
 									.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
 											calculateSchedulePeriod, temporaryEmployeeList);
@@ -934,7 +938,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 								checkStopExec = true;
 							}
 							if(!checkStopExec) {
-								this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
+								AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx2 = new AsyncCommandHandlerContext<>(scheduleCreatorExecutionOneEmp3);
+								this.scheduleExecution.handle(ctx2);
+//								this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
 								log.info("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 								if(checkStop(execId)) {
 									checkStopExec = true;
@@ -963,7 +969,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						scheduleCreatorExecutionOneEmp1.getScheduleExecutionLog()
 								.setPeriod(new DatePeriod(periodDate.start(), endDate));
 						try {
-							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
+							AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx = new AsyncCommandHandlerContext<>(scheduleCreatorExecutionOneEmp1);
+							this.scheduleExecution.handle(ctx);
+//							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
 							log.info("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 							if(checkStop(execId)) {
 								return false;
@@ -2943,23 +2951,23 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		if(!listIsInterrupt.isEmpty()) {
 			isInterrupt = true;
 		}
-		List<ErrMessageInfo> errMessageInfos = this.errMessageInfoRepository
-				.getAllErrMessageInfoByEmpID(empCalAndSumExeLog.getEmpCalAndSumExecLogID());
-		
-		if ("日別作成".equals(typeExecution)) {
-
-			if (!errMessageInfos.stream()
-					.filter(c -> c.getExecutionContent().value == ExecutionContent.DAILY_CREATION.value)
-					.collect(Collectors.toList()).isEmpty()) {
-				throw new CreateDailyException(null);
-			}
-		} else {
-			if (!errMessageInfos.stream()
-					.filter(c -> c.getExecutionContent().value == ExecutionContent.DAILY_CALCULATION.value)
-					.collect(Collectors.toList()).isEmpty()) {
-				throw new DailyCalculateException(null);
-			}
-		}
+//		List<ErrMessageInfo> errMessageInfos = this.errMessageInfoRepository
+//				.getAllErrMessageInfoByEmpID(empCalAndSumExeLog.getEmpCalAndSumExecLogID());
+//		
+//		if ("日別作成".equals(typeExecution)) {
+//
+//			if (!errMessageInfos.stream()
+//					.filter(c -> c.getExecutionContent().value == ExecutionContent.DAILY_CREATION.value)
+//					.collect(Collectors.toList()).isEmpty()) {
+//				throw new CreateDailyException(null);
+//			}
+//		} else {
+//			if (!errMessageInfos.stream()
+//					.filter(c -> c.getExecutionContent().value == ExecutionContent.DAILY_CALCULATION.value)
+//					.collect(Collectors.toList()).isEmpty()) {
+//				throw new DailyCalculateException(null);
+//			}
+//		}
 		if (isInterrupt) {
 			return true;
 		}

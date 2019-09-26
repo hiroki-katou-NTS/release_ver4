@@ -1,6 +1,9 @@
 package nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing;
 
 import java.util.List;
+import java.util.Optional;
+
+import nts.arc.time.GeneralDate;
 
 public interface ErrMessageInfoRepository {
 
@@ -33,4 +36,6 @@ public interface ErrMessageInfoRepository {
 	 */
 	void addList(List<ErrMessageInfo> errMessageInfos);
 
+	public Optional<ErrMessageInfo> getErrMessageByID(String employeeID, String empCalAndSumExecLogID,
+			String resourceID, int executionContent, GeneralDate disposalDay);
 }

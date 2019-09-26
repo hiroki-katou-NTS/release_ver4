@@ -16,6 +16,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.eclipse.persistence.exceptions.OptimisticLockException;
+
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.app.command.AsyncCommandHandlerContext;
 import nts.arc.time.GeneralDate;
@@ -59,7 +61,6 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.shr.com.history.DateHistoryItem;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
-import org.eclipse.persistence.exceptions.OptimisticLockException;
 
 @Stateless
 public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyResultEmployeeDomainService {
