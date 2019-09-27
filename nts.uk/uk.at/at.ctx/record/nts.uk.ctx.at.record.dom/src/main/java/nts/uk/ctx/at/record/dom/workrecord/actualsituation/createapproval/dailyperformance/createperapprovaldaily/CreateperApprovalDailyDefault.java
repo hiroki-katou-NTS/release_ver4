@@ -24,8 +24,8 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 	private SyCompanyRecordAdapter syCompanyRecordAdapter;
 
 	@Inject
-	private AppDataInfoDailyRepository appDataInfoDailyRepo;
 
+	private AppDataInfoDailyRepository appDataInfoDailyRepo;
 	@Inject
 	private CreateDailyApproverAdapter createDailyApproverAdapter;
 	
@@ -37,7 +37,7 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 			int processExecType, Integer createNewEmp, GeneralDate startDateClosure,GeneralDate endDateClosure) {
 		/** パラメータ.実行種別をチェック */
 		// 通常実行の場合 : processExecType = 0(通常実行) - // 再作成の場合 : processExecType = 1(再作成)
-		if (processExecType == 0) {
+//		if (processExecType == 0) {
 			// RequestList211
 			List<AffCompanyHistImport> listAffCompanyHistImport = syCompanyRecordAdapter
 					.getAffCompanyHistByEmployee(employeeIDs,
@@ -79,7 +79,7 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 					appDataInfoDailyRepo.addAppDataInfoDaily(appDataInfoDaily);
 				}
 			}); // end for listEmployee
-		}
+//		}
 
 		/** ドメインモデル「承認中間データエラーメッセージ情報（日別実績）」を取得する */
 		List<AppDataInfoDaily> listAppDataInfoDaily = appDataInfoDailyRepo.getAppDataInfoDailyByExeID(executionId);
