@@ -88,9 +88,10 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 				holidayWorkPara.getEmployeeId(), holidayWorkPara.getBaseDate(),
 				ApplicationType.BREAK_TIME_APPLICATION,
 				holidayWorkPara.getHolidayWorkPara().getWorkTypeCode(),
-				holidayWorkPara.getHolidayWorkPara().getWorkTimeCode() == null ? Optional.empty() : Optional.of(holidayWorkPara.getHolidayWorkPara().getWorkTimeCode()),
-				holidayWorkPara.getHolidayWorkPara().getStartTime() == null ? Optional.empty() : Optional.of(holidayWorkPara.getHolidayWorkPara().getStartTime()),
-				holidayWorkPara.getHolidayWorkPara().getEndTime() == null ? Optional.empty() : Optional.of(holidayWorkPara.getHolidayWorkPara().getEndTime()));
+				Optional.ofNullable(holidayWorkPara.getHolidayWorkPara().getWorkTimeCode()),
+				Optional.ofNullable(holidayWorkPara.getHolidayWorkPara().getStartTime()),
+				Optional.ofNullable(holidayWorkPara.getHolidayWorkPara().getEndTime()),
+				isPre);
 		commonService.calculateOfAppReflect(calcParam);
 	}
 	@Override

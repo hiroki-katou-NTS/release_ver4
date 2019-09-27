@@ -44,8 +44,7 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 				&& workTypeRepo.checkHoliday(workInfor.getRecordInfo().getWorkTypeCode().v())) {
 			return;
 		}
-		
-		//予定勤種就時の反映
+		//予定勤種を反映できるかチェックする
 		boolean isScheReflect = commonService.checkReflectScheWorkTimeType(workchangePara, isPre, workchangePara.getWorkTimeCode());
 		TimeReflectPara timeReflect =  new TimeReflectPara(param.getCommon().getEmployeeId(),
 				appDate,
@@ -53,8 +52,9 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 				param.getCommon().getEndTime(),
 				1, true, true);
 		if(isScheReflect) {
+			//予定勤種就時の反映
 			commonService.reflectScheWorkTimeWorkType(workchangePara, isPre, dailyInfor);
-			//TODO 予定開始終了時刻の反映
+			//予定開始終了時刻の反映
 			if(param.getCommon().getStartTime() != null 
 					&& param.getCommon().getEndTime() != null) {
 				workTimeUpdate.updateScheStartEndTime(timeReflect, dailyInfor);	
@@ -73,7 +73,7 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 				true);
 		//勤種・就時の反映
 		workTimeUpdate.updateWorkTimeType(reflectPara, false, dailyInfor);
-		//TODO 開始終了時刻の反映
+		//開始終了時刻の反映
 		if(param.getCommon().getStartTime() != null 
 				&& param.getCommon().getEndTime() != null) {
 			workTimeUpdate.updateRecordStartEndTimeReflect(timeReflect, dailyInfor);
@@ -104,15 +104,15 @@ public class PreWorkchangeReflectServiceImpl implements PreWorkchangeReflectServ
 			}
 		}
 		//日別実績の勤務情報  変更
-		//workRepository.updateByKeyFlush(dailyInfor);
 		CommonCalculateOfAppReflectParam calcParam = new CommonCalculateOfAppReflectParam(dailyInfor,
 				workchangePara.getEmployeeId(),
 				appDate,
 				ApplicationType.WORK_CHANGE_APPLICATION,
 				workchangePara.getWorkTypeCode(),
-				workchangePara.getWorkTimeCode() == null ? Optional.empty() : Optional.of(workchangePara.getWorkTimeCode()),
-				workchangePara.getStartTime() == null ? Optional.empty() : Optional.of(workchangePara.getStartTime()),
-				workchangePara.getEndTime() == null ? Optional.empty() : Optional.of(workchangePara.getEndTime()));
+				Optional.ofNullable(workchangePara.getWorkTimeCode()),
+				Optional.ofNullable(workchangePara.getStartTime()),
+				Optional.ofNullable(workchangePara.getEndTime()),
+				isPre);
 		commonService.calculateOfAppReflect(calcParam);
 	}
 

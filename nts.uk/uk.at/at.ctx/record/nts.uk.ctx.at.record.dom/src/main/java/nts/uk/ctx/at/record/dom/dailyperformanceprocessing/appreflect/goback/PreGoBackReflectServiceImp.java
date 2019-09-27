@@ -38,9 +38,10 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 				para.getEmployeeId(), para.getDateData(),
 				ApplicationType.GO_RETURN_DIRECTLY_APPLICATION,
 				para.getGobackData().getWorkTypeCode(),
-				para.getGobackData().getWorkTimeCode() == null ? Optional.empty() : Optional.of(para.getGobackData().getWorkTimeCode()),
-				para.getGobackData().getStartTime1() == null ? Optional.empty() : Optional.of(para.getGobackData().getStartTime1()),
-				para.getGobackData().getEndTime1() == null ? Optional.empty() : Optional.of(para.getGobackData().getEndTime1()));
+				Optional.ofNullable(para.getGobackData().getWorkTimeCode()),
+				Optional.ofNullable(para.getGobackData().getStartTime1()),
+				Optional.ofNullable(para.getGobackData().getEndTime1()),
+				isPre);
 		commonService.calculateOfAppReflect(calcParam);
 	}
 }

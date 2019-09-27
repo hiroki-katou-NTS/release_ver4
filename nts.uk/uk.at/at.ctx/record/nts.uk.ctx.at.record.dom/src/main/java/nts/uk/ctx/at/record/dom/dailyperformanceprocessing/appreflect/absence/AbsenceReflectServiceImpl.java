@@ -79,9 +79,10 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 					absencePara.getEmployeeId(), loopDate,
 					ApplicationType.ABSENCE_APPLICATION,
 					absencePara.getWorkTypeCode(),
-					absencePara.getWorkTimeCode() == null ? Optional.empty() : Optional.of(absencePara.getWorkTimeCode()),
-					absencePara.getStartTime() == null ? Optional.empty() : Optional.of(absencePara.getStartTime()),
-					absencePara.getEndTime() == null ? Optional.empty() : Optional.of(absencePara.getEndTime()));
+					Optional.ofNullable(absencePara.getWorkTimeCode()),
+					Optional.ofNullable(absencePara.getStartTime()),
+					Optional.ofNullable(absencePara.getEndTime()),
+					isPre);
 			commonService.calculateOfAppReflect(calcParam);
 	}
 

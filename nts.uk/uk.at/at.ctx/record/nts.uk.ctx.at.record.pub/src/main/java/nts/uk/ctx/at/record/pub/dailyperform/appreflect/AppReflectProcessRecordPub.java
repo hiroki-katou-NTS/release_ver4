@@ -31,12 +31,6 @@ public interface AppReflectProcessRecordPub {
 	 */
 	public void preOvertimeReflect(PreOvertimePubParameter param);
 	/**
-	 * 勤務実績に反映: 事後残業申請処理
-	 * @param param
-	 * @return
-	 */
-	public void afterOvertimeReflect(PreOvertimePubParameter param);
-	/**
 	 * (休暇申請)
 	 * @param param
 	 * @param isPre : true: 事前申請処理, false: 事後申請処理

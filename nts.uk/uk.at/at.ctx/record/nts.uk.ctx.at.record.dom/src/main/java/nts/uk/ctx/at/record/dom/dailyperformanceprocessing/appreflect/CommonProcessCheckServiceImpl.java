@@ -112,6 +112,9 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 
 	@Override
 	public boolean checkReflectScheWorkTimeType(CommonReflectParameter commonPara, boolean isPre, String workTimeCode) {
+		if(!isPre) {
+			return false;
+		}
 		//INPUT．予定反映区分をチェックする
 		if((commonPara.isScheTimeReflectAtr() == true && isPre)
 				|| commonPara.getScheAndRecordSameChangeFlg() == ScheAndRecordSameChangeFlg.ALWAYS_CHANGE_AUTO) {
@@ -146,13 +149,15 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 						.filter(x -> CorrectEventConts.LEAVE_ITEMS.contains(x.getAttendanceItemId()) 
 								|| CorrectEventConts.ATTENDANCE_ITEMS.contains(x.getAttendanceItemId()))
 						.collect(Collectors.toList());
-				//予定出退勤時刻を反映する
-				scheTimeService.correct(companyId,
-						commonPara.getWorkTypeCode(),
-						commonPara.getWorkTimeCode(),
-						commonPara.getStartTime(),
-						commonPara.getEndTime(),
-						commonPara.getIntegrationOfDaily());
+				if(!(commonPara.getAppType() == ApplicationType.WORK_CHANGE_APPLICATION && !commonPara.isPreRequest())) {
+					//予定出退勤時刻を反映する
+					scheTimeService.correct(companyId,
+							commonPara.getWorkTypeCode(),
+							commonPara.getWorkTimeCode(),
+							commonPara.getStartTime(),
+							commonPara.getEndTime(),
+							commonPara.getIntegrationOfDaily());	
+				}				
 				if(commonPara.getAppType() != ApplicationType.BREAK_TIME_APPLICATION ||
 						(commonPara.getAppType() == ApplicationType.BREAK_TIME_APPLICATION && lstTime.isEmpty())) {
 					//出退勤時刻を補正する

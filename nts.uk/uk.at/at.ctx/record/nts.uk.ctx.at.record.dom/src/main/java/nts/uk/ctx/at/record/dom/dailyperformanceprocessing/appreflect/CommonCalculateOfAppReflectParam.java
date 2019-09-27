@@ -20,5 +20,7 @@ public class CommonCalculateOfAppReflectParam {
 	private Optional<String> workTimeCode;
 	private Optional<Integer> startTime;
 	private Optional<Integer> endTime;
+	/**事前申請：　True、　事後申請：　False	 */
+	private boolean preRequest;
 
 }
