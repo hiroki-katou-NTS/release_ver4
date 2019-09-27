@@ -362,21 +362,26 @@ public class ScheduleCreatorExecutionCommandHandler extends AsyncCommandHandler<
 				if(exeStateOfCalAndSumImportSch.get() == ExeStateOfCalAndSumImportSch.START_INTERRUPTION) {
 					return;
 				}
+			// EA修正履歴　No2378
+			// ドメインモデル「スケジュール作成実行ログ」を取得する find execution log by id
+			ScheduleExecutionLog scheExeLog = this.scheduleExecutionLogRepository
+					.findById(command.getCompanyId(), scheduleExecutionLog.getExecutionId()).get();
+			if (scheExeLog.getCompletionStatus() != CompletionStatus.INTERRUPTION) {
+				this.updateStatusScheduleExecutionLog(scheduleExecutionLog);
+			}
 		}else {
 			if (asyncTask.hasBeenRequestedToCancel()) {
 				asyncTask.finishedAsCancelled();
 			}
+			ScheduleExecutionLog scheExeLog = this.scheduleExecutionLogRepository
+					.findById(command.getCompanyId(), scheduleExecutionLog.getExecutionId()).get();
+			if (scheExeLog.getCompletionStatus() != CompletionStatus.INTERRUPTION) {
+				System.out.println("not hasBeenRequestedToCancel: " + asyncTask.hasBeenRequestedToCancel() + "&exeid="
+						+ scheduleExecutionLog.getExecutionId());
+				this.updateStatusScheduleExecutionLog(scheduleExecutionLog);
+			}
 		}
 		
-		// EA修正履歴　No2378
-		// ドメインモデル「スケジュール作成実行ログ」を取得する find execution log by id
-		ScheduleExecutionLog scheExeLog = this.scheduleExecutionLogRepository
-				.findById(command.getCompanyId(), scheduleExecutionLog.getExecutionId()).get();
-		if (scheExeLog.getCompletionStatus() != CompletionStatus.INTERRUPTION) {
-			System.out.println("not hasBeenRequestedToCancel: " + asyncTask.hasBeenRequestedToCancel() + "&exeid="
-					+ scheduleExecutionLog.getExecutionId());
-			this.updateStatusScheduleExecutionLog(scheduleExecutionLog);
-		}
 	}
 	
 	/**

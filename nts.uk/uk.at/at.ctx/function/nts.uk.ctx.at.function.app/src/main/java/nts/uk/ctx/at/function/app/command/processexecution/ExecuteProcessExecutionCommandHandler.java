@@ -821,9 +821,9 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 	private boolean createSchedule(CommandHandlerContext<ExecuteProcessExecutionCommand> context, String execId,
 			ProcessExecution procExec, ProcessExecutionLog procExecLog) {
 
-		if (context.asAsync().hasBeenRequestedToCancel()) {
-			return false;
-		}
+//		if (context.asAsync().hasBeenRequestedToCancel()) {
+//			return false;
+//		}
 //		boolean checkError1552  = false;
 		String errorMessage = "";
 		boolean isException = false;
