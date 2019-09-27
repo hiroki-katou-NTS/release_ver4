@@ -213,9 +213,9 @@ public class TimeLeavingOfDailyService {
 	/** 取得したドメインモデル「編集状態」を見て、マージする */
 	private TimeLeavingOfDailyPerformance mergeWithEditStates(List<EditStateOfDailyPerformance> editStates,
 			TimeLeavingOfDailyPerformance timeLeave, WorkTypeSet wts) {
-//		List<Integer> inputByReflect = editStates.stream()
-//				.filter(es -> isInputByReflect(es.getEditStateSetting())).map(c -> c.getAttendanceItemId())
-//				.collect(Collectors.toList());
+		List<Integer> inputByReflect = editStates.stream()
+				.filter(es -> isInputByReflect(es.getEditStateSetting())).map(c -> c.getAttendanceItemId())
+				.collect(Collectors.toList());
 //		if (wts.getAttendanceTime() == WorkTypeSetCheck.CHECK) {
 //			/** 「所定勤務の設定．打刻の扱い方．出勤時刻を直行とする」＝ TRUE */
 //			inputByReflect.removeIf(id -> CorrectEventConts.ATTENDANCE_ITEMS.contains(id));
@@ -224,10 +224,10 @@ public class TimeLeavingOfDailyService {
 //			/** 「所定勤務の設定．打刻の扱い方．退勤時刻を直行とする」＝ TRUE */
 //			inputByReflect.removeIf(id -> CorrectEventConts.LEAVE_ITEMS.contains(id));
 //		}
-//		if (!inputByReflect.isEmpty()) {
-//			removeAttendanceLeave(timeLeave, inputByReflect, 0);
-//			removeAttendanceLeave(timeLeave, inputByReflect, 1);
-//		}
+		if (!inputByReflect.isEmpty()) {
+			removeAttendanceLeave(timeLeave, inputByReflect, 0);
+			removeAttendanceLeave(timeLeave, inputByReflect, 1);
+		}
 		return timeLeave;
 	}
 

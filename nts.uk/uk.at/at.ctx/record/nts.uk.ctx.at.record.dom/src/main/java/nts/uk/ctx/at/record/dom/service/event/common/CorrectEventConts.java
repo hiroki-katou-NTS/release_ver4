@@ -7,9 +7,9 @@ public class CorrectEventConts {
 
 	public final static List<Integer> WORK_INFO_ITEMS = Arrays.asList(28, 29);
 	
-	public final static List<Integer> LEAVE_ITEMS = Arrays.asList(31, 41);
+	public final static List<Integer> LEAVE_ITEMS = Arrays.asList(34, 44);
 	
-	public final static List<Integer> ATTENDANCE_ITEMS = Arrays.asList(34, 44);
+	public final static List<Integer> ATTENDANCE_ITEMS = Arrays.asList(31, 41);
 	
 	public final static List<Integer> BREAK_TIME_ITEMS = Arrays.asList(157, 159, 163, 165, 169, 171,
 			175, 177, 181, 183, 187, 189, 193, 195, 199, 201, 205, 207, 211, 213);
