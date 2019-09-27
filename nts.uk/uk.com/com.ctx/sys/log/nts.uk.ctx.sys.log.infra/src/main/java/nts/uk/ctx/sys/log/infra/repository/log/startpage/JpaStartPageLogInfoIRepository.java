@@ -2,6 +2,7 @@ package nts.uk.ctx.sys.log.infra.repository.log.startpage;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -94,28 +95,32 @@ public class JpaStartPageLogInfoIRepository extends JpaRepository
 		
 		return res;
 	}
-
+	
 	@Override
 	public List<StartPageLog> findBy(String companyId, List<String> listEmployeeId,
-			GeneralDateTime start, GeneralDateTime end) {
+			GeneralDateTime start, GeneralDateTime end, int offset, int limit) {
+		this.getEntityManager().clear();
 		if(CollectionUtil.isEmpty(listEmployeeId)){
-			return findBy(companyId, start, end);
+			return findBy(companyId, start, end, offset, limit);
 		}
 		List<StartPageLog> result = new ArrayList<>();
 		CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			String sql = "SELECT * FROM SRCDT_START_PAGE_LOG_INFO  WHERE "
-					+ " CID = ?"
-					+ " AND START_DT >= ?"
+					
+					+ " START_DT >= ?"
 					+ " AND START_DT <= ?"
-					+ " SID IN ("+  NtsStatement.In.createParamsString(subList) + ")";
+					+ " AND CID = ?"
+					+ " SID IN ("+  NtsStatement.In.createParamsString(subList) + ")"
+					+ " ORDER BY SID, START_DT DESC"
+					+ " OFFSET " + offset + " ROWS"
+					+ " FETCH FIRST " + limit + " ROWS ONLY";
 			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
 				stmt.setString(1, companyId);
-				stmt.setTimestamp(2,  java.sql.Timestamp.valueOf(start.localDateTime()));
-				stmt.setTimestamp(3,  java.sql.Timestamp.valueOf(end.localDateTime()));
+				stmt.setTimestamp(2,  Timestamp.valueOf(start.localDateTime()));
+				stmt.setTimestamp(3,  Timestamp.valueOf(end.localDateTime()));
 				for (int i = 0; i < subList.size(); i++) {
 					stmt.setString(4 + i, subList.get(i));
 				}
-				
 				List<StartPageLog> startLog  = new NtsResultSet(stmt.executeQuery())
 						.getList(r -> {
 							SrcdtStartPageLogInfo entity = new SrcdtStartPageLogInfo(r.getString("OPERATION_ID"),
@@ -144,18 +149,23 @@ public class JpaStartPageLogInfoIRepository extends JpaRepository
 		});
 		return result;
 	}
-
+	
 	@Override
-	public List<StartPageLog> findBy(String companyId, GeneralDateTime start, GeneralDateTime end) {
+	public List<StartPageLog> findBy(String companyId, GeneralDateTime start, GeneralDateTime end, int offset, int limit) {
+		this.getEntityManager().clear();
 			List<StartPageLog> result = new ArrayList<>();
 			String sql = "SELECT * FROM SRCDT_START_PAGE_LOG_INFO  WHERE "
 					+ " CID = ?"
 					+ " AND START_DT >= ?"
-					+ " AND START_DT <= ?";
+					+ " AND START_DT <= ?"
+					+ " ORDER BY SID, START_DT DESC"
+					+ " OFFSET " + offset + " ROWS"
+					+ " FETCH FIRST " + limit + " ROWS ONLY";
 			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				
 				stmt.setString(1, companyId);
-				stmt.setTimestamp(2,  java.sql.Timestamp.valueOf(start.localDateTime()));
-				stmt.setTimestamp(3,  java.sql.Timestamp.valueOf(end.localDateTime()));
+				stmt.setTimestamp(2,  Timestamp.valueOf(start.localDateTime()));
+				stmt.setTimestamp(3,  Timestamp.valueOf(end.localDateTime()));
 				List<StartPageLog> startLog  = new NtsResultSet(stmt.executeQuery())
 						.getList(r -> {
 							SrcdtStartPageLogInfo entity = new SrcdtStartPageLogInfo(r.getString("OPERATION_ID"),
@@ -181,7 +191,15 @@ public class JpaStartPageLogInfoIRepository extends JpaRepository
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
 			}	
-		return result;
+			return result;
+//		this.getEntityManager().clear();
+//		String sql1 = "SELECT l FROM SrcdtStartPageLogInfo l "
+//				+ " WHERE l.companyId =:cid AND l.startDateTime >=:startDateTime AND l.startDateTime <=:endDateTime"
+//				+ "　ORDER BY　l.employeeId, 　l.startDateTime DESC";
+//		List<Object> startLog = this.getEntityManager().createQuery(sql1, SrcdtStartPageLogInfo.class)
+//				.setParameter("cid", companyId).setParameter("startDateTime", start).setParameter("endDateTime", end)
+//				.setFirstResult(offset).setMaxResults(limit).getResultList().stream().map(c -> {return c;}).collect(Collectors.toList());
+//		return startLog;
 	}
 
 	@Override

@@ -24,12 +24,12 @@ public interface StartPageLogRepository {
 	List<StartPageLog> findBySid(List<String> sIds);
 	
 	List<StartPageLog> findBy(String companyId, List<String> listEmployeeId,
-			GeneralDateTime start, GeneralDateTime end);
+			GeneralDateTime start, GeneralDateTime end, int offset, int limit);
 	
 	List<StartPageLog> findByScreenF(String companyId, List<String> listEmployeeId,
 			GeneralDateTime start, GeneralDateTime end);
 	
-	List<StartPageLog> findBy(String companyId, GeneralDateTime start, GeneralDateTime end);
+	List<StartPageLog> findBy(String companyId, GeneralDateTime start, GeneralDateTime end, int offSet, int limit);
 	
 	List<StartPageLog> findByScreenF(String companyId, GeneralDateTime start, GeneralDateTime end);
 }

@@ -41,4 +41,12 @@ public interface LoginRecordRepository {
 	 * @return
 	 */
 	List<LoginRecord> logRecordInforScreenF(List<String> operationIds);
+	
+	/**
+	 * Log record infor.
+	 *
+	 * @param operationId the operation id
+	 * @return the list
+	 */
+	List<LoginRecord> logRecordInforRefactors(List<String> operationIds, int offset, int limit);
 }
