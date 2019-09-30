@@ -45,7 +45,11 @@ public class JpaAppDataInfoDailyRepository extends JpaRepository implements AppD
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Override
 	public void addAppDataInfoDaily(AppDataInfoDaily appDataInfoDaily) {
-		this.commandProxy().insert(KrcmtAppDataInfoDaily.toEntity(appDataInfoDaily));
+		Optional<AppDataInfoDaily> data = getAppDataInfoDailyByID(appDataInfoDaily.getEmployeeId(),
+				appDataInfoDaily.getExecutionId());
+		if (!data.isPresent()) {
+			this.commandProxy().insert(KrcmtAppDataInfoDaily.toEntity(appDataInfoDaily));
+		}
 	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
