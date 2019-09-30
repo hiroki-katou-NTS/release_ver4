@@ -7,6 +7,8 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import com.google.common.base.Strings;
+
 import nts.gul.security.crypt.commonkey.CommonKeyCrypt;
 import nts.uk.ctx.sys.assist.dom.datarestoration.PerformDataRecovery;
 import nts.uk.ctx.sys.assist.dom.datarestoration.PerformDataRecoveryRepository;
@@ -44,8 +46,13 @@ public class EmployeeRestoration {
 		List<Target> listTarget = new ArrayList<Target>();
 		try {
 			for (List<String> employeeInfo : targetEmployee.subList(1, targetEmployee.size())) {
-				listTarget.add(new Target(serverPrepareMng.getDataRecoveryProcessId(), employeeInfo.get(0),
-						employeeInfo.get(1), CommonKeyCrypt.decrypt(employeeInfo.get(2))));
+				if(Strings.isNullOrEmpty(employeeInfo.get(2).trim())){
+					listTarget.add(new Target(serverPrepareMng.getDataRecoveryProcessId(), employeeInfo.get(0),
+							employeeInfo.get(1), employeeInfo.get(2)));
+				}else{
+					listTarget.add(new Target(serverPrepareMng.getDataRecoveryProcessId(), employeeInfo.get(0),
+							employeeInfo.get(1), CommonKeyCrypt.decrypt(employeeInfo.get(2))));
+				}
 			}
 		} catch (Exception e) {
 			serverPrepareMng.setOperatingCondition(ServerPrepareOperatingCondition.EM_LIST_ABNORMALITY);
