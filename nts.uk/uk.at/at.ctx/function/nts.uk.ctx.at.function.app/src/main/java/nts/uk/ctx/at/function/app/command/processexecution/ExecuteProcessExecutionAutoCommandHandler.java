@@ -5,11 +5,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -18,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import nts.arc.layer.app.command.AsyncCommandHandler;
 import nts.arc.layer.app.command.AsyncCommandHandlerContext;
 import nts.arc.layer.app.command.CommandHandlerContext;
+import nts.arc.task.AsyncTask;
+import nts.arc.task.AsyncTaskInfo;
 import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.task.parallel.ManagedParallelWithContext.ControlOption;
 //import nts.arc.task.AsyncTaskInfo;
@@ -87,7 +92,6 @@ import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.MonthlyAggregationEmployeeSe
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.CalExeSettingInfor;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLog;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
-import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfo;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfoRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ExecutionLog;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ExecutionLogRepository;
@@ -98,14 +102,12 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.Set
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.CalAndAggClassification;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.DailyRecreateClassification;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ErrorPresent;
-import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExeStateOfCalAndSum;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutedMenu;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionContent;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionStatus;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
 import nts.uk.ctx.at.schedule.app.command.executionlog.ScheduleCreatorExecutionCommand;
 import nts.uk.ctx.at.schedule.app.command.executionlog.ScheduleCreatorExecutionCommandHandler;
-import nts.uk.ctx.at.schedule.dom.executionlog.CompletionStatus;
 import nts.uk.ctx.at.schedule.dom.executionlog.CreateMethodAtr;
 import nts.uk.ctx.at.schedule.dom.executionlog.ExecutionAtr;
 import nts.uk.ctx.at.schedule.dom.executionlog.ImplementAtr;
@@ -268,6 +270,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	@Inject
 	private UkJobScheduler scheduler;
 	
+    @Resource
+    private ManagedExecutorService executorService;
+    
 	public static int MAX_DELAY_PARALLEL = 0;
 	
 	@Override
@@ -821,6 +826,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			ProcessExecution procExec, ProcessExecutionLog procExecLog) {
 		// Login user context
 //		boolean checkError1552  = false;
+        DataToAsyn dataToAsyn = new DataToAsyn(); 
 		String errorMessage = "";
 		boolean isException = false;
 		LoginUserContext loginContext = AppContexts.user();
@@ -885,9 +891,36 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						loginContext, calculateSchedulePeriod, listEmp);
 
 				try {
-					AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx = new AsyncCommandHandlerContext<>(scheduleCommand);
-					this.scheduleExecution.handle(ctx);
+//					AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx = new AsyncCommandHandlerContext<>(scheduleCommand);
+//					this.scheduleExecution.handle(ctx);
 //					this.scheduleExecution.handle(scheduleCommand);
+					CountDownLatch countDownLatch = new CountDownLatch(1);
+					AsyncTask task = AsyncTask.builder().withContexts().keepsTrack(false).threadName(this.getClass().getName())
+							.build(() -> {
+								scheduleCommand.setCountDownLatch(countDownLatch);
+									AsyncTaskInfo handle1 = this.scheduleExecution.handle(scheduleCommand);
+									dataToAsyn.setHandle(handle1);
+								
+							});
+					try {
+						executorService.submit(task).get();
+						countDownLatch.await();
+						if (scheduleCommand.getIsExForKBT()) {
+							// 再実行の場合にExceptionが発生したかどうかを確認する。
+							if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+								checkStopExec = true;
+							}
+							isException = true;
+							errorMessage = "Msg_1339";
+						}
+					} catch (Exception ex) {
+						// 再実行の場合にExceptionが発生したかどうかを確認する。
+						if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+							checkStopExec = true;
+						}
+						isException = true;
+						errorMessage = "Msg_1339";
+					} 
 					log.info("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 					if(checkStop(execId)) {
 						checkStopExec = true;
@@ -927,8 +960,35 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 							// AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctxNew = new
 							// AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand>(scheduleCreatorExecutionOneEmp);
 							// ctxNew.setTaskId(context.asAsync().getTaskId());
-							AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx = new AsyncCommandHandlerContext<>(scheduleCreatorExecutionOneEmp2);
-							this.scheduleExecution.handle(ctx);
+//							AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx = new AsyncCommandHandlerContext<>(scheduleCreatorExecutionOneEmp2);
+//							this.scheduleExecution.handle(ctx);
+							CountDownLatch countDownLatch = new CountDownLatch(1);
+							AsyncTask task = AsyncTask.builder().withContexts().keepsTrack(false).threadName(this.getClass().getName())
+									.build(() -> {
+										scheduleCreatorExecutionOneEmp2.setCountDownLatch(countDownLatch);
+											AsyncTaskInfo handle1 = this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp2);
+											dataToAsyn.setHandle(handle1);
+										
+									});
+							try {
+								executorService.submit(task).get();
+								countDownLatch.await();
+								if (scheduleCreatorExecutionOneEmp2.getIsExForKBT()) {
+									// 再実行の場合にExceptionが発生したかどうかを確認する。
+									if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+										checkStopExec = true;
+									}
+									isException = true;
+									errorMessage = "Msg_1339";
+								}
+							} catch (Exception ex) {
+								// 再実行の場合にExceptionが発生したかどうかを確認する。
+								if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+									checkStopExec = true;
+								}
+								isException = true;
+								errorMessage = "Msg_1339";
+							}
 //							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp2);
 							ScheduleCreatorExecutionCommand scheduleCreatorExecutionOneEmp3 = this
 									.getScheduleCreatorExecutionOneEmp(execId, procExec, loginContext,
@@ -938,9 +998,36 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 								checkStopExec = true;
 							}
 							if(!checkStopExec) {
-								AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx2 = new AsyncCommandHandlerContext<>(scheduleCreatorExecutionOneEmp3);
-								this.scheduleExecution.handle(ctx2);
+//								AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx2 = new AsyncCommandHandlerContext<>(scheduleCreatorExecutionOneEmp3);
+//								this.scheduleExecution.handle(ctx2);
 //								this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
+								CountDownLatch countDownLatch1 = new CountDownLatch(1);
+								AsyncTask task1 = AsyncTask.builder().withContexts().keepsTrack(false).threadName(this.getClass().getName())
+										.build(() -> {
+											scheduleCreatorExecutionOneEmp3.setCountDownLatch(countDownLatch1);
+												AsyncTaskInfo handle1 = this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp3);
+												dataToAsyn.setHandle(handle1);
+											
+										});
+								try {
+									executorService.submit(task1).get();
+									countDownLatch1.await();
+									if (scheduleCreatorExecutionOneEmp3.getIsExForKBT()) {
+										// 再実行の場合にExceptionが発生したかどうかを確認する。
+										if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+											checkStopExec = true;
+										}
+										isException = true;
+										errorMessage = "Msg_1339";
+									}
+								} catch (Exception ex) {
+									// 再実行の場合にExceptionが発生したかどうかを確認する。
+									if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+										checkStopExec = true;
+									}
+									isException = true;
+									errorMessage = "Msg_1339";
+								}
 								log.info("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 								if(checkStop(execId)) {
 									checkStopExec = true;
@@ -969,9 +1056,36 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						scheduleCreatorExecutionOneEmp1.getScheduleExecutionLog()
 								.setPeriod(new DatePeriod(periodDate.start(), endDate));
 						try {
-							AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx = new AsyncCommandHandlerContext<>(scheduleCreatorExecutionOneEmp1);
-							this.scheduleExecution.handle(ctx);
+//							AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx = new AsyncCommandHandlerContext<>(scheduleCreatorExecutionOneEmp1);
+//							this.scheduleExecution.handle(ctx);
 //							this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
+							CountDownLatch countDownLatch = new CountDownLatch(1);
+							AsyncTask task = AsyncTask.builder().withContexts().keepsTrack(false).threadName(this.getClass().getName())
+									.build(() -> {
+										scheduleCreatorExecutionOneEmp1.setCountDownLatch(countDownLatch);
+											AsyncTaskInfo handle1 = this.scheduleExecution.handle(scheduleCreatorExecutionOneEmp1);
+											dataToAsyn.setHandle(handle1);
+										
+									});
+							try {
+								executorService.submit(task).get();
+								countDownLatch.await();
+								if (scheduleCreatorExecutionOneEmp1.getIsExForKBT()) {
+									// 再実行の場合にExceptionが発生したかどうかを確認する。
+									if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+										checkStopExec = true;
+									}
+									isException = true;
+									errorMessage = "Msg_1339";
+								}
+							} catch (Exception ex) {
+								// 再実行の場合にExceptionが発生したかどうかを確認する。
+								if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+									checkStopExec = true;
+								}
+								isException = true;
+								errorMessage = "Msg_1339";
+							}
 							log.info("更新処理自動実行_個人スケジュール作成_END_"+context.getCommand().getExecItemCd()+"_"+GeneralDateTime.now());
 							if(checkStop(execId)) {
 								return false;

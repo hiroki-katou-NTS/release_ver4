@@ -9,13 +9,21 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
+import lombok.SneakyThrows;
+import lombok.val;
+import nts.arc.enums.EnumAdaptor;
 //import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 //import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
+import nts.arc.time.YearMonth;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLog;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ExecutionLog;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.CalAndAggClassification;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExeStateOfCalAndSum;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutedMenu;
 import nts.uk.ctx.at.record.infra.entity.log.KrcdtEmpExecutionLog;
 import nts.uk.ctx.at.record.infra.entity.log.KrcdtExecutionLog;
 import nts.uk.shr.infra.data.jdbc.JDBCUtil;
@@ -91,6 +99,30 @@ public class JpaEmpCalAndSumExeLogRepository extends JpaRepository implements Em
 		Optional<EmpCalAndSumExeLog> data = this.queryProxy().query(SELECT_BY_LOG_ID, KrcdtEmpExecutionLog.class)
 				.setParameter("empCalAndSumExecLogID", empCalAndSumExecLogID).getSingle(c -> c.toDomain());
 		return data;
+	}
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@SneakyThrows
+	@Override
+	public Optional<EmpCalAndSumExeLog> getByEmpCalAndSumExecLogIDByJDBC(String empCalAndSumExecLogID) {
+		String sql = "SELECT * FROM KRCDT_EMP_EXECUTION_LOG WHERE EMP_EXECUTION_LOG_ID = ? ";
+		try (val stmt = this.connection().prepareStatement(sql)){
+			stmt.setString(1, empCalAndSumExecLogID);
+			return new NtsResultSet(stmt.executeQuery()).getSingle(c -> {
+				return new EmpCalAndSumExeLog(
+						c.getString("EMP_EXECUTION_LOG_ID"), 
+						c.getString("CID"),
+						YearMonth.of(c.getInt("PROCESSING_MONTH")),
+						EnumAdaptor.valueOf(c.getInt("EXECUTED_MENU"), ExecutedMenu.class) ,
+						c.getGeneralDateTime("EXECUTED_DATE"),
+						c.getInt("EXECUTED_STATUS") ==null?null: EnumAdaptor.valueOf(c.getInt("EXECUTED_STATUS"),ExeStateOfCalAndSum.class),
+						c.getString("SID"),
+						c.getInt("CLOSURE_ID"),
+						c.getString("OPERATION_CASE_ID"),
+						EnumAdaptor.valueOf(c.getInt("CAL_AGG_CLASS"),CalAndAggClassification.class)
+						);
+			});
+		}
 	}
 
 	@Override

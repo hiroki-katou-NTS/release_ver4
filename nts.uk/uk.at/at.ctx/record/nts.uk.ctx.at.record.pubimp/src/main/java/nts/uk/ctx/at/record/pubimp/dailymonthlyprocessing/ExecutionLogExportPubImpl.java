@@ -3,6 +3,8 @@ package nts.uk.ctx.at.record.pubimp.dailymonthlyprocessing;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
@@ -45,9 +47,11 @@ public class ExecutionLogExportPubImpl implements ExecutionLogExportPub{
 				refInfo.isForciblyReflect());
 		return Optional.of(output);
 	}
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<ExeStateOfCalAndSumExport> executionStatus(String empCalAndSumExecLogID) {
-		Optional<EmpCalAndSumExeLog> optCalAndSumLog = calAndSumLog.getByEmpCalAndSumExecLogID(empCalAndSumExecLogID);
+		Optional<EmpCalAndSumExeLog> optCalAndSumLog = calAndSumLog.getByEmpCalAndSumExecLogIDByJDBC(empCalAndSumExecLogID);
 		if(!optCalAndSumLog.isPresent()
 				|| !optCalAndSumLog.get().getExecutionStatus().isPresent()) {
 			return Optional.empty();

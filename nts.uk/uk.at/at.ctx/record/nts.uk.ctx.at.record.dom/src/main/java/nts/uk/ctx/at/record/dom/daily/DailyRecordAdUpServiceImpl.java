@@ -267,7 +267,6 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	@Override
 	public void adUpEmpError(List<EmployeeDailyPerError> errors, List<Pair<String, GeneralDate>> lstPairRemove, boolean hasRemoveError) {
 		if (hasRemoveError) {
-			System.out.print("Xoa loi: ");
 //			Map<String, List<GeneralDate>> mapError = errors.stream().collect(
 //					Collectors.groupingBy(c -> c.getEmployeeID(), Collectors.collectingAndThen(Collectors.toList(),
 //							c -> c.stream().map(q -> q.getDate()).collect(Collectors.toList()))));

@@ -5,6 +5,7 @@
 package nts.uk.ctx.at.schedule.app.command.executionlog;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -43,6 +44,14 @@ public class ScheduleCreatorExecutionCommand {
 	private boolean isAutomatic;
 
 	private List<String> employeeIds;
+	
+	@Getter
+	@Setter
+	private CountDownLatch countDownLatch;
+	
+	@Getter
+	@Setter
+	private Boolean isExForKBT = false;
 	
 	@Setter
 	@Getter

@@ -12,6 +12,8 @@ import nts.uk.ctx.at.record.pub.dailymonthlyprocessing.ExeStateOfCalAndSumExport
 import nts.uk.ctx.at.record.pub.dailymonthlyprocessing.ExecutionLogExportPub;
 import nts.uk.ctx.at.schedule.dom.adapter.dailymonthlyprocessing.DailyMonthlyprocessAdapterSch;
 import nts.uk.ctx.at.schedule.dom.adapter.dailymonthlyprocessing.ExeStateOfCalAndSumImportSch;
+
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @Stateless
 public class DailyMonthlyprocessAcSch implements DailyMonthlyprocessAdapterSch {
 

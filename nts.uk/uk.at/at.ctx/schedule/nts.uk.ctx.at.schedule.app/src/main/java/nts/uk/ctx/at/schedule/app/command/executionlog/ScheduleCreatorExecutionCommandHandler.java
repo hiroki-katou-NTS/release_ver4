@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -253,7 +254,16 @@ public class ScheduleCreatorExecutionCommandHandler extends AsyncCommandHandler<
 		ScheduleExecutionLog scheduleExecutionLogAuto = ScheduleExecutionLog.creator(companyId,
 				command.getScheduleExecutionLog().getExecutionId(), loginUserContext.employeeId(),
 				command.getScheduleExecutionLog().getPeriod(), command.getScheduleExecutionLog().getExeAtr());
+		try {
 		this.registerPersonalSchedule(command, scheduleExecutionLogAuto, context, companyId);
+		} catch(Exception ex) {
+			command.setIsExForKBT(true);
+			if(command.getCountDownLatch() != null)
+				command.getCountDownLatch().countDown();
+			throw ex;
+		}
+		if(command.getCountDownLatch() != null)
+			command.getCountDownLatch().countDown();
 	}
 
 	@Inject
@@ -294,15 +304,18 @@ public class ScheduleCreatorExecutionCommandHandler extends AsyncCommandHandler<
 		
 		// at.recordの計算処理で使用する共通の会社設定は、ここで取得しキャッシュしておく
 		Object companySetting = scTimeAdapter.getCompanySettingForCalculation();
-		
+		AtomicBoolean checkStop = new AtomicBoolean(false);
 		this.parallel.forEach(
 				scheduleCreators.stream().sorted((a,b) -> a.getEmployeeId().compareTo(b.getEmployeeId())).collect(Collectors.toList()),
 				scheduleCreator -> {
-			
 			if (scheduleExecutionLog.getExeAtr() == ExecutionAtr.AUTOMATIC) {
+				if(checkStop.get()) {
+					return;
+				}
 				Optional<ExeStateOfCalAndSumImportSch> exeStateOfCalAndSumImportSch = dailyMonthlyprocessAdapterSch.executionStatus(exeId);
 				if(exeStateOfCalAndSumImportSch.isPresent())
 					if(exeStateOfCalAndSumImportSch.get() == ExeStateOfCalAndSumImportSch.START_INTERRUPTION) {
+						checkStop.set(true);
 						this.updateStatusScheduleExecutionLog(scheduleExecutionLog, CompletionStatus.INTERRUPTION);
 						return;
 					}
