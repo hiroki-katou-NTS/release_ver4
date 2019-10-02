@@ -16,6 +16,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.eclipse.persistence.exceptions.OptimisticLockException;
 
@@ -134,6 +135,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 	
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional
 	public void reflectEmployeeOfAppWithTransaction(Application_New appInfor,
 			InformationSettingOfEachApp reflectSetting, ExecutionTypeExImport execuTionType, String excLogId) {
 		GobackReflectPara appGobackTmp = null;

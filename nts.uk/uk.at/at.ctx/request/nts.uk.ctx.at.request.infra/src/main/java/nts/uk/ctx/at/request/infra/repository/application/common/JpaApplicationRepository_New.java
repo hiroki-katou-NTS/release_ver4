@@ -490,9 +490,9 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 							+ " OR REFLECT_PER_STATE IN (" + subIn2 + "))"
 							+ " AND APP_TYPE IN (" + subIn3 + ") "
 							+ " AND APPLICANTS_SID = ?"
-							+ " AND APP_DATE >= ?"
-							+ " AND APP_DATE <= ?"
-							+ " ORDER BY APP_DATE, INPUT_DATE, PRE_POST_ATR ASC";
+							+ " AND APP_START_DATE >= ?"
+							+ " AND APP_END_DATE <= ?"
+							+ " ORDER BY INPUT_DATE ASC";
 					try(val stmt = this.connection().prepareStatement(sql)){
 						for (int i = 0; i < lstRefReal.size(); i++) {
 							stmt.setInt(i + 1, lstRefReal.get(i));

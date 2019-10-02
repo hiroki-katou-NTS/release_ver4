@@ -186,7 +186,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		commonPara.getIntegrationOfDaily().getAttendanceLeave().ifPresent(a -> timeLeavingOfDaily.updateFlush(a));
 		workRepository.updateByKeyFlush(x.getWorkInformation());
 		timeAndAnyItemUpService.addAndUpdate(lstCal);
-		dailyReposiroty.updateByKey(commonPara.getIntegrationOfDaily().getEditState());
+		dailyReposiroty.addAndUpdate(commonPara.getIntegrationOfDaily().getEditState());
 		Map<String, List<GeneralDate>> param = new HashMap<>();
 		param.put(commonPara.getSid(), Arrays.asList(commonPara.getYmd()));		
 		employeeError.removeNotOTK(param);
