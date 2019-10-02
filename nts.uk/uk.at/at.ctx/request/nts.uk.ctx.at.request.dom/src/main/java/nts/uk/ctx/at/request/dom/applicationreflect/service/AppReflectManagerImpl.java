@@ -133,7 +133,6 @@ public class AppReflectManagerImpl implements AppReflectManager {
 		}
 	}
 	
-	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Transactional
 	public void reflectEmployeeOfAppWithTransaction(Application_New appInfor,
