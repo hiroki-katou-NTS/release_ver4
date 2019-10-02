@@ -359,7 +359,7 @@ public class UpdateLogAfterProcess {
 					listExecutionLogErrorDetail.add(new ExecutionLogErrorDetailFn(
 							appDataInfoDailyImport.getErrorMessage(), appDataInfoDailyImport.getEmployeeId()));
 				}
-			} else if (processExecutionTask == ProcessExecutionTask.APP_ROUTE_U_DAI) { // 実行項目 = 「承認ルート更新（月次）」
+			} else if (processExecutionTask == ProcessExecutionTask.APP_ROUTE_U_MON) { // 実行項目 = 「承認ルート更新（月次）」
 				for (AppDataInfoMonthlyImport appDataInfoMonthlyImport : listAppDataInfoMonthly) {
 					listExecutionLogErrorDetail.add(new ExecutionLogErrorDetailFn(
 							appDataInfoMonthlyImport.getErrorMessage(), appDataInfoMonthlyImport.getEmployeeId()));
