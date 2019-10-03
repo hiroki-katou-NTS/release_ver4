@@ -1,8 +1,5 @@
 package nts.uk.ctx.at.request.app.find.application.applicationlist;
-/*import java.util.HashMap;
-import javax.print.attribute.HashAttributeSet;
-import nts.uk.ctx.at.request.dom.application.common.adapter.workflow.dto.ApprovalPhaseStateImport_New;
-import nts.uk.ctx.at.request.dom.setting.company.displayname.AppDispName;*/
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -198,34 +195,6 @@ public class ApplicationListFinder {
 		}
 		return false;
 	}
-	private List<ApplicationDto_New> sortById(List<ApplicationDto_New> lstApp){
-		return lstApp.stream().sorted((a,b) ->{
-			Integer rs = a.getApplicationDate().compareTo(b.getApplicationDate());
-			if (rs == 0) {
-			 return  a.getApplicationType().compareTo(b.getApplicationType());
-			} else {
-			 return rs;
-			}
-		}).collect(Collectors.toList());
-	}
-	/**
-	 * 2018/07/09　　201807CMM045改修　EA2236
-	 * 並び順を申請日付順⇒社員コード＋申請日付＋申請種類順でソートするに変更
-	 * 2018/07/20　EA2338
-	 * 申請種類を追加
-	 * @param lstApp
-	 * @return
-	 */
-	private List<ApplicationDto_New> sortByIdModeApp(List<ApplicationDto_New> lstApp, Map<String, List<String>> mapAppBySCD,
-			List<String> lstSCD){
-		List<ApplicationDto_New> lstResult = new ArrayList<>();
-		java.util.Collections.sort(lstSCD);
-		for (String sCD : lstSCD) {
-			lstResult.addAll(this.sortById(this.findBylstID(lstApp, mapAppBySCD.get(sCD))));
-			
-		}
-		return lstResult;
-	}
 	private List<ApplicationDto_New> findBylstID(List<ApplicationDto_New> lstApp, List<String> lstAppID){
 		List<ApplicationDto_New> lstAppFind = new ArrayList<>();
 		for (ApplicationDto_New app : lstApp) {
@@ -235,6 +204,55 @@ public class ApplicationListFinder {
 		}
 		return lstAppFind;
 	}
+	/**
+	 * 並び順: 社員コード＋申請日付＋申請種類 + 事前事後区分 + 入力日付（時分秒）順でソートする
+	 * 2019/10/03
+	 * @param lstApp
+	 * @return
+	 */
+	private List<ApplicationDto_New> sortByIdModeApp(List<ApplicationDto_New> lstApp, Map<String, List<String>> mapAppBySCD,
+			List<String> lstSCD){
+		List<ApplicationDto_New> lstResult = new ArrayList<>();
+		java.util.Collections.sort(lstSCD);
+		for (String sCD : lstSCD) {
+            lstResult.addAll(this.sortByDateTypePrePost(this.findBylstID(lstApp, mapAppBySCD.get(sCD))));
+			
+		}
+		return lstResult;
+	}
+	/**
+	 * 申請日付 + 申請種類 + 事前事後区分 + 入力日付（時分秒）
+	 * @param lstApp
+	 * @return
+	 */
+	private List<ApplicationDto_New> sortByDateTypePrePost(List<ApplicationDto_New> lstApp){
+		return lstApp.stream().sorted((a, b) -> {
+			Integer rs = a.getApplicationDate().compareTo(b.getApplicationDate());
+			if (rs == 0) {
+				Integer rs2 = a.getApplicationType().compareTo(b.getApplicationType());
+				if (rs2 == 0) {
+					Integer rs3 = a.getPrePostAtr().compareTo(b.getPrePostAtr());
+					if(rs3 == 0){
+						return a.getInputDate().compareTo(b.getInputDate());
+					}else{
+						return rs3;
+					}
+					
+				} else {
+					return rs2;
+				}
+			} else {
+				return rs;
+			}
+		}).collect(Collectors.toList());
+	}
+	/**
+	 * 並び順: 社員コード＋申請日付＋申請種類 + 事前事後区分 + 入力日付（時分秒）順でソートする
+	 * 2019/10/03
+	 * @param lstApp
+	 * @param lstAppMasterInfo
+	 * @return
+	 */
 	private List<ApplicationDto_New> sortByIdModeApproval(List<ApplicationDto_New> lstApp, List<AppMasterInfo> lstAppMasterInfo){
 		List<String> lstSCD = new ArrayList<>();
 		for(AppMasterInfo master : lstAppMasterInfo){
@@ -247,7 +265,7 @@ public class ApplicationListFinder {
 		for (String sCD : lstSCD) {
 			List<String> lstAppID = lstAppMasterInfo.stream().filter(c -> c.getEmpSD().equals(sCD))
 					.map(d -> d.getAppID()).collect(Collectors.toList());
-			lstResult.addAll(this.sortById(this.findBylstID(lstApp, lstAppID)));
+            lstResult.addAll(this.sortByDateTypePrePost(this.findBylstID(lstApp, lstAppID)));
 		}
 		return lstResult;
 	}
