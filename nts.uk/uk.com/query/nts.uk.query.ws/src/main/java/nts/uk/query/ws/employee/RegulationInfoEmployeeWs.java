@@ -98,7 +98,7 @@ public class RegulationInfoEmployeeWs {
 	@POST
 	@Path("find/currentlogin")
 	public RegulationInfoEmployeeDto findCurrentLoginEmployee(GeneralDateTime baseDate) {
-		return this.finder.findCurrentLoginEmployeeInfo(baseDate);
+		return this.finder.findCurrentLoginEmployeeInfo(GeneralDateTime.ymdhms(baseDate.year(), baseDate.month(), baseDate.day(), 0, 0, 0));
 	}
 
 }
