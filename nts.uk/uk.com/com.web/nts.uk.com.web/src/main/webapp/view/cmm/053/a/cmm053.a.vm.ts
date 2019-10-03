@@ -265,16 +265,8 @@ module nts.uk.com.view.cmm053.a.viewmodel {
                         if (self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory()) {
                             self.callUpdateHistoryService(command);
                         } else if (self.screenMode() == EXECUTE_MODE.NEW_MODE) {
-                            //開始日＜締めの開始日 
-                            if (startDate < closingStartDate && !(self.screenMode() == EXECUTE_MODE.UPDATE_MODE && self.settingManager().hasHistory())) {
-                                closingStartDate = nts.uk.time.formatDate(closingStartDate, 'yyyy/MM/dd');
-                                //エラーメッセージ（Msg_1072）
-                                dialog.alertError({ messageId: "Msg_1072", messageParams: [closingStartDate] }).then(() => {
-                                    block.clear();
-                                });
-                            } else {
-                                self.callInsertHistoryService(command);
-                            }
+                            //hoatt 2019.10.03 109033 xoa check Msg_1072
+                            self.callInsertHistoryService(command); 
                         }
                     }
                 }).fail(() => {
