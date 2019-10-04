@@ -930,15 +930,15 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 			RemarksOfDailyPerform remarkData = optRemark.get();
 			String remarkStr = remarkData.getRemarks().v() + "　" + appReason;
 			//申請理由の文字の長さをチェックする
-			if(remarkStr.length() > 50) {
-				remarkStr = remarkStr.substring(0, 50);
+			if(remarkStr.length() > 100) {
+				remarkStr = remarkStr.substring(0, 100);
 			}
 			remarkData.setRemarks(new RecordRemarks(remarkStr));
 			//日別実績の備考を変更する
 			remarksOfDailyRepo.update(remarkData);
 		} else {
-			if(appReason.length() > 50) {
-				appReason = appReason.substring(0, 50);
+			if(appReason.length() > 100) {
+				appReason = appReason.substring(0, 100);
 			}
 			RemarksOfDailyPerform remarkInfo = new RemarksOfDailyPerform(sid,
 					appDate, 
