@@ -224,10 +224,11 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 			//休日出勤申請しか反映してない
 			if(this.isReflectBreakTime(lstEditState)
 					&& workTypeInfor.isPresent() && workTypeInfor.get().getDailyWork().isHolidayWork()) {
-				if(lstBeforeBreakTimeInfor.size() == 1 && breakTimeInfor != null
-						&& lstBeforeBreakTimeInfor.get(0).getBreakType() != breakTimeInfor.getBreakType()) {
+				if(beforeBreakTime.isEmpty()) {
 					integrationOfDaily.getBreakTime().add(breakTimeInfor);
-					//breakTimeRepo.updateV2(integrationOfDaily.getBreakTime());
+				} else {
+					integrationOfDaily.getBreakTime().removeAll(beforeBreakTime);
+					integrationOfDaily.getBreakTime().add(breakTimeInfor);
 				}
 				return integrationOfDaily;
 			}

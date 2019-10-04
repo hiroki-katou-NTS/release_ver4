@@ -1054,10 +1054,17 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 			
 		} else {
 			if(mapBreakTimeFrame.isEmpty()) {
-				breakTime.clear();
-				breakTimeOfDailyRepo.deleteByBreakType(daily.getWorkInformation().getEmployeeId(),
-						daily.getWorkInformation().getYmd(),
-						isPre ? BreakType.REFER_SCHEDULE.value : BreakType.REFER_WORK_TIME.value);
+				if(isPre) {
+					List<BreakTimeOfDailyPerformance> breakTimePre = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE).collect(Collectors.toList());
+					for (BreakTimeOfDailyPerformance x : breakTimePre) {
+						breakTime.remove(x);
+					}					
+				} else {
+					List<BreakTimeOfDailyPerformance> breakTimeNotPre = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_WORK_TIME).collect(Collectors.toList());
+					for (BreakTimeOfDailyPerformance x : breakTimeNotPre) {
+						breakTime.remove(x);
+					}	
+				}				
 			} else {
 				if(isPre) {
 					breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE).collect(Collectors.toList());
