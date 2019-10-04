@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.request.dom.application.common.service.newscreen.before;
 
+import java.util.List;
+
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
@@ -22,7 +24,7 @@ public interface NewBeforeRegister_New {
 	 * @param targetApp
 	 * @param overTimeAtr, If APP_TYPE = 0 thì mới có overTime Atr, còn các loại đơn khác thì truyền 0 vào
 	 */
-	public void processBeforeRegister(Application_New application,int overTimeAtr, boolean checkOver1Year);
+	public void processBeforeRegister(Application_New application,int overTimeAtr, boolean checkOver1Year, List<GeneralDate> lstDateHd);
 	
 	/**
 	 * 1.入社前退職チェック
