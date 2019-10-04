@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.record.pub.dailyperform.appreflect;
 
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,4 +45,6 @@ public class HolidayWorkReflectPubPara {
 	 */
 	private HolidayWorktimeAppPubPara holidayWorkPara;
 	private String excLogId;
+	private Optional<IdentityProcessUseSetPub> identityProcessUseSetPub;
+	private Optional<ApprovalProcessingUseSettingPub> approvalProcessingUseSettingPub;
 }

@@ -13,9 +13,6 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-
-import org.apache.log4j.Logger;
-
 import lombok.val;
 import nts.arc.layer.app.command.AsyncCommandHandlerContext;
 import nts.arc.task.parallel.ManagedParallelWithContext;
@@ -33,7 +30,6 @@ import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymont
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.TargetPersonRequestImport;
 import nts.uk.ctx.at.request.dom.setting.company.request.RequestSetting;
 import nts.uk.ctx.at.request.dom.setting.company.request.RequestSettingRepository;
-import nts.uk.ctx.at.shared.dom.workrule.closure.service.GetClosureStartForEmployee;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -56,6 +52,7 @@ public class AppReflectManagerFromRecordImpl implements AppReflectManagerFromRec
 	@Inject
 	private ManagedParallelWithContext managedParallelWithContext;
 
+
 	@SuppressWarnings("rawtypes")
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
@@ -63,8 +60,9 @@ public class AppReflectManagerFromRecordImpl implements AppReflectManagerFromRec
 		val dataSetter = asyncContext.getDataSetter();
 		dataSetter.setData("reflectApprovalCount", 0);
 		dataSetter.setData("reflectApprovalHasError", ErrorPresent.NO_ERROR.nameId );
+		String cid = AppContexts.user().companyId();
 		//ドメインモデル「申請承認設定」を取得する
-		Optional<RequestSetting> optRequesSetting = requestSettingRepo.findByCompany(AppContexts.user().companyId());
+		Optional<RequestSetting> optRequesSetting = requestSettingRepo.findByCompany(cid);
 		if(!optRequesSetting.isPresent()) {
 			return ProcessStateReflect.SUCCESS;
 		}
@@ -77,12 +75,10 @@ public class AppReflectManagerFromRecordImpl implements AppReflectManagerFromRec
 				.collect(Collectors.toList());
 		ExecutionTypeExImport aprResult = optRefAppResult.isPresent() ? optRefAppResult.get().getExecutionType() 
 				: ExecutionTypeExImport.NORMAL_EXECUTION;
-//		if(optRefAppResult.isPresent()) {
-//			aprResult = optRefAppResult.get().getExecutionType();
-//		}
 		InformationSettingOfEachApp reflectSetting = appSetting.getSettingOfEachApp();
 		AtomicInteger count = new AtomicInteger(0);
 		List<ProcessStateReflect> status = Collections.synchronizedList(new ArrayList<>());
+
 		this.managedParallelWithContext.forEach(lstPerson, x -> {
 			if(status.stream().anyMatch(c -> c == ProcessStateReflect.INTERRUPTION)) {
 				return;

@@ -2,6 +2,8 @@ package nts.uk.ctx.at.request.ac.record.dailyperform.appreflect;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
@@ -10,10 +12,12 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.ExecutionType;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.AppCommonPara;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.AppReflectProcessRecordPub;
+import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ApprovalProcessingUseSettingPub;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.BreakTimePubParam;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.CommonReflectPubParameter;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.HolidayWorkReflectPubPara;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.HolidayWorktimeAppPubPara;
+import nts.uk.ctx.at.record.pub.dailyperform.appreflect.IdentityProcessUseSetPub;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.PrePostRecordAtr;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ReasonNotReflectDailyPubRecord;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ReflectRecordAtr;
@@ -30,25 +34,25 @@ import nts.uk.ctx.at.record.pub.dailyperform.appreflect.overtime.OverTimeRecordP
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.overtime.OvertimeAppPubParameter;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.overtime.PreOvertimePubParameter;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.CommonReflectPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.GobackAppRequestPara;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.DisabledSegment_New;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.WorkChangeCommonReflectPara;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.AppReflectProcessRecord;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.ApprovalProcessingUseSettingAc;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.GobackReflectPara;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.HolidayWorkReflectPara;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.IdentityProcessUseSetAc;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.OvertimeAppParameter;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.OvertimeReflectPara;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.ScheAndRecordIsReflect;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionTypeExImport;
-import nts.uk.ctx.at.request.dom.setting.company.request.RequestSettingRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 
 @Stateless
 public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 	@Inject
 	private AppReflectProcessRecordPub recordPub;
-	@Inject
-	private RequestSettingRepository requestSetting;
 	@Override
 	public ScheAndRecordIsReflect appReflectProcessRecord(Application_New appInfor, ExecutionTypeExImport executionType, GeneralDate appDate) {
 		//Optional<RequestSetting> settingData = requestSetting.findByCompany(appInfor.getCompanyID());
@@ -71,13 +75,14 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 
 	@Override
 	public void gobackReflectRecord(GobackReflectPara para, boolean isPre) {
-		GobackAppPubParameter gobackPra = new GobackAppPubParameter(EnumAdaptor.valueOf(para.getGobackData().getChangeAppGobackAtr().value,
-				ChangeAppGobackPubAtr.class), para.getGobackData().getWorkTimeCode(),
-				para.getGobackData().getWorkTypeCode(), 
-				para.getGobackData().getStartTime1(),
-				para.getGobackData().getEndTime1(), 
-				para.getGobackData().getStartTime2(),
-				para.getGobackData().getEndTime2());
+		GobackAppRequestPara gobackData = para.getGobackData();
+		GobackAppPubParameter gobackPra = new GobackAppPubParameter(EnumAdaptor.valueOf(gobackData.getChangeAppGobackAtr().value,
+				ChangeAppGobackPubAtr.class), gobackData.getWorkTimeCode(),
+				gobackData.getWorkTypeCode(), 
+				gobackData.getStartTime1(),
+				gobackData.getEndTime1(), 
+				gobackData.getStartTime2(),
+				gobackData.getEndTime2());
 		GobackReflectPubParameter pubPara = new GobackReflectPubParameter(para.getEmployeeId(), 
 				para.getAppDate(),
 				para.isOutResReflectAtr(),
@@ -86,7 +91,9 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				EnumAdaptor.valueOf(para.getScheTimeReflectAtr().value, ScheTimeReflectPubAtr.class),
 				para.isScheReflectAtr(),
 				gobackPra,
-				para.getExcLogId());
+				para.getExcLogId(),
+				this.indentitySet(gobackData.getGetIdentityProcessUseSet()),
+				this.approvalSet(gobackData.getGetApprovalProcessingUseSetting()));
 		if(isPre) {
 			 recordPub.preGobackReflect(pubPara, true);
 		} else {
@@ -117,14 +124,39 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				EnumAdaptor.valueOf(para.getScheAndRecordSameChangeFlg().value, ScheAndRecordSameChangePubFlg.class), 
 				para.isScheTimeOutFlg(), 
 				overtimePara,
-				para.getExcLogId());
+				para.getExcLogId(),
+				this.indentitySet(para.getGetIdentityProcessUseSet()),
+				this.approvalSet(para.getGetApprovalProcessingUseSetting()));
 		if(isPre) {
 			recordPub.preOvertimeReflect(preOvertimePara);	
 		} else {
 			//recordPub.afterOvertimeReflect(preOvertimePara);
 		}
 	}
-
+	private Optional<IdentityProcessUseSetPub> indentitySet(Optional<IdentityProcessUseSetAc> data){
+		if(data.isPresent()) {
+			IdentityProcessUseSetAc set = data.get();
+			IdentityProcessUseSetPub pub = new IdentityProcessUseSetPub(set.getCid(),
+					set.isUseConfirmByYourself(),
+					set.isUseIdentityOfMonth(),
+					set.getYourSelfConfirmError());
+			return Optional.of(pub);
+		}
+		return Optional.empty();
+	}
+	
+	private Optional<ApprovalProcessingUseSettingPub> approvalSet(Optional<ApprovalProcessingUseSettingAc> data){
+		if(data.isPresent()) {
+			ApprovalProcessingUseSettingAc set = data.get();
+			ApprovalProcessingUseSettingPub pub = new ApprovalProcessingUseSettingPub(set.getCid(),
+					set.isUseDayApproverConfirm(),
+					set.isUseMonthApproverConfirm(),
+					set.getLstJobTitleNotUse(),
+					set.getSupervisorConfirmErrorAtr());
+			return Optional.of(pub);
+		}
+		return Optional.empty();
+	}
 	@Override
 	public void absenceReflectRecor(WorkChangeCommonReflectPara para, boolean isPre) {
 		recordPub.absenceReflect(new WorkChangeCommonReflectPubPara(toPubPara(para.getCommonPara()), para.getExcludeHolidayAtr()), isPre);		
@@ -154,7 +186,9 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				para.isRecordReflectTimeFlg(),
 				para.isRecordReflectBreakFlg(),
 				appPara,
-				para.getExcLogId());
+				para.getExcLogId(),
+				this.indentitySet(para.getGetIdentityProcessUseSet()),
+				this.approvalSet(para.getGetApprovalProcessingUseSetting()));
 		
 		recordPub.holidayWorkReflect(pubPara, isPre);		
 	}
@@ -173,7 +207,9 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				para.getWorkTimeCode(),
 				para.getStartTime(),
 				para.getEndTime(),
-				para.getExcLogId());
+				para.getExcLogId(),
+				this.indentitySet(para.getGetIdentityProcessUseSet()),
+				this.approvalSet(para.getGetApprovalProcessingUseSetting()));
 		return pubPara;
 	}
 
@@ -190,6 +226,35 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 	@Override
 	public void createLogError(String sid, GeneralDate ymd, String excLogId) {
 		recordPub.createLogError(sid, ymd, excLogId);
+	}
+
+	@Override
+	public Optional<IdentityProcessUseSetAc> getIdentityProcessUseSet(String cid) {
+		Optional<IdentityProcessUseSetPub> indenSet = recordPub.getIdentityProcessUseSet(cid);
+		if(indenSet.isPresent()) {
+			IdentityProcessUseSetPub x = indenSet.get();
+			IdentityProcessUseSetAc output = new IdentityProcessUseSetAc(x.getCid(),
+					x.isUseConfirmByYourself(),
+					x.isUseConfirmByYourself(),
+					x.getYourSelfConfirmError());
+			return Optional.of(output);
+		}
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<ApprovalProcessingUseSettingAc> getApprovalProcessingUseSetting(String cid) {
+		Optional<ApprovalProcessingUseSettingPub> appProcSetting = recordPub.getApprovalProcessingUseSetting(cid);
+		if(appProcSetting.isPresent()) {
+			ApprovalProcessingUseSettingPub x = appProcSetting.get();
+			ApprovalProcessingUseSettingAc output = new ApprovalProcessingUseSettingAc(x.getCid(),
+					x.isUseDayApproverConfirm(),
+					x.isUseMonthApproverConfirm(),
+					x.getLstJobTitleNotUse(),
+					x.getSupervisorConfirmErrorAtr());
+			return Optional.of(output);
+		}
+		return Optional.empty();
 	}
 	
 	

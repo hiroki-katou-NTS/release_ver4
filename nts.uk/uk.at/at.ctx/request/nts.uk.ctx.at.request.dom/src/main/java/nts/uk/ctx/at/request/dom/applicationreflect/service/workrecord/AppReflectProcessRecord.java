@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord;
 
+import java.util.Optional;
+
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.WorkChangeCommonReflectPara;
@@ -66,4 +68,8 @@ public interface AppReflectProcessRecord {
 	public void recruitmentReflectRecord(CommonReflectPara para, boolean isPre);
 	
 	public void createLogError(String sid, GeneralDate ymd, String excLogId);
+	
+	public Optional<IdentityProcessUseSetAc> getIdentityProcessUseSet(String cid);
+	
+	Optional<ApprovalProcessingUseSettingAc> getApprovalProcessingUseSetting(String cid);
 }

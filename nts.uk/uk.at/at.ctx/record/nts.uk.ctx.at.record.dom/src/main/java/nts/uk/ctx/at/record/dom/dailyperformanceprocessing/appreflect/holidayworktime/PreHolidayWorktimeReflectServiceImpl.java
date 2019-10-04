@@ -91,7 +91,9 @@ public class PreHolidayWorktimeReflectServiceImpl implements PreHolidayWorktimeR
 				Optional.ofNullable(holidayWorkPara.getHolidayWorkPara().getWorkTimeCode()),
 				Optional.ofNullable(holidayWorkPara.getHolidayWorkPara().getStartTime()),
 				Optional.ofNullable(holidayWorkPara.getHolidayWorkPara().getEndTime()),
-				isPre);
+				isPre,
+				holidayWorkPara.getIPUSOpt(),
+				holidayWorkPara.getApprovalSet());
 		commonService.calculateOfAppReflect(calcParam);
 	}
 	@Override

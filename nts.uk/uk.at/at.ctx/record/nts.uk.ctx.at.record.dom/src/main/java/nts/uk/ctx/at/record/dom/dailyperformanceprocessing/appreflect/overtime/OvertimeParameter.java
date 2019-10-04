@@ -1,10 +1,14 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.overtime;
 
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect.ScheAndRecordSameChangeFlg;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
 @AllArgsConstructor
 @Getter
 @Setter
@@ -52,4 +56,6 @@ public class OvertimeParameter {
 	 */
 	private OvertimeAppParameter overtimePara;
 	private String excLogId;
+	Optional<IdentityProcessUseSet> iPUSOpt;
+	Optional<ApprovalProcessingUseSetting> approvalSet;
 }

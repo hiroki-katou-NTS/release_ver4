@@ -6,6 +6,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.request.dom.application.UseAtr;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.AppReflectProcessRecord;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.ApprovalProcessingUseSettingAc;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.IdentityProcessUseSetAc;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.appovertime.AppOvertimeSetting;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.appovertime.AppOvertimeSettingRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.hdworkapplicationsetting.UnitTime;
@@ -33,6 +36,8 @@ public class InformationSettingOfAppForReflectImpl implements InformationSetting
 	private RequestSettingRepository requestSetting;
 	@Inject
 	private WithdrawalAppSetRepository kyushutsuSetting;
+	@Inject
+	private AppReflectProcessRecord appRefRecord;
 	@Override
 	public InformationSettingOfEachApp getSettingOfEachApp() {
 		String cid = AppContexts.user().companyId();
@@ -89,6 +94,8 @@ public class InformationSettingOfAppForReflectImpl implements InformationSetting
 			isHwRecordReflectTime = holidayWorkReflectSetting.getWorkTime() == nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.hdworkapplicationsetting.UseAtr.USE ? true : false;
 			isHwRecordReflectBreak = holidayWorkReflectSetting.getBreakTime() == nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.hdworkapplicationsetting.UseAtr.USE ? true : false;
 		}
+		Optional<IdentityProcessUseSetAc> getIdentityProcessUseSet = appRefRecord.getIdentityProcessUseSet(cid);
+		Optional<ApprovalProcessingUseSettingAc> getApprovalProcessingUseSetting = appRefRecord.getApprovalProcessingUseSetting(cid);
 		return new InformationSettingOfEachApp(furikyuFurishutsu,
 				chokochoki,
 				zangyouRecordReflect,
@@ -100,7 +107,9 @@ public class InformationSettingOfAppForReflectImpl implements InformationSetting
 				scheAndWorkChange,
 				isHwScheReflect,
 				isHwRecordReflectTime,
-				isHwRecordReflectBreak);
+				isHwRecordReflectBreak,
+				getIdentityProcessUseSet,
+				getApprovalProcessingUseSetting);
 	}
 
 }

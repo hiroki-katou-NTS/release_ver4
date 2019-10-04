@@ -16,6 +16,7 @@ import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.breakorgoout.BreakTimeSheet;
 import nts.uk.ctx.at.record.dom.breakorgoout.enums.BreakType;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.daily.DailyRecordAdUpService;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.ReflectBreakTimeOfDailyDomainService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.AdTimeAndAnyItemAdUpService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.CalculateDailyRecordServiceCenter;
@@ -83,6 +84,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	private TimeLeavingOfDailyPerformanceRepository timeLeavingOfDaily;
 	@Inject
 	private WorkTimeOfDailyService workTimeDailyService;
+	@Inject
+	private DailyRecordAdUpService dailyService;
 	@Override
 	public boolean commonProcessCheck(CommonCheckParameter para) {
 		ReflectedStateRecord state = ReflectedStateRecord.CANCELED;
@@ -193,6 +196,10 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		if(!x.getEmployeeError().isEmpty()) {
 			employeeError.update(x.getEmployeeError());	
 		}
+		//特定のエラーが発生している社員の確認、承認をクリアする
+		dailyService.removeConfirmApproval(lstCal,
+				commonPara.iPUSOpt,
+				commonPara.approvalSet);
 	}
 
 	@Override
