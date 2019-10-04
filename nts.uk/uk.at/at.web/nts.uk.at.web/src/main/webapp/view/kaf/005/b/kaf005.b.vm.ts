@@ -134,20 +134,33 @@ module nts.uk.at.view.kaf005.b {
             editable: KnockoutObservable<boolean> = ko.observable( true );
             enableOvertimeInput: KnockoutObservable<boolean> = ko.observable(false);
             appCur: any = null;
-            constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
+            constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata, rebind?: boolean) {
                 super(listAppMetadata, currentApp);
                 var self = this;
                 self.appCur = currentApp;
                 self.startPage(self.appID()).done(function(){
-                    $("#fixed-overtime-hour-table").ntsFixedTable({ height: self.heightOvertimeHours() });
-                    $("#fixed-break_time-table").ntsFixedTable({ height: 120 });
-                    $("#fixed-bonus_time-table").ntsFixedTable({ height: 120 });
-                    $("#fixed-table-indicate").ntsFixedTable({ height: 120 });
-                    $("#fixed-table").ntsFixedTable({ height: 120 });
-                    $("#fixed-overtime-hour-table-pre").ntsFixedTable({ height: self.heightOvertimeHours() });
-                    $("#fixed-bonus_time-table-pre").ntsFixedTable({ height: 120 });
-                    $('.nts-fixed-table.cf').first().find('.nts-fixed-body-container.ui-iggrid').css('border-left','1px solid #CCC');
-                    });
+                    if(nts.uk.util.isNullOrUndefined(rebind)){
+                        $("#fixed-overtime-hour-table").ntsFixedTable({ height: self.heightOvertimeHours() });
+                        $("#fixed-break_time-table").ntsFixedTable({ height: 120 });
+                        $("#fixed-bonus_time-table").ntsFixedTable({ height: 120 });
+                        $("#fixed-table-indicate").ntsFixedTable({ height: 120 });
+                        $("#fixed-table").ntsFixedTable({ height: 120 });
+                        $("#fixed-overtime-hour-table-pre").ntsFixedTable({ height: self.heightOvertimeHours() });
+                        $("#fixed-bonus_time-table-pre").ntsFixedTable({ height: 120 });
+                        $('.nts-fixed-table.cf').first().find('.nts-fixed-body-container.ui-iggrid').css('border-left','1px solid #CCC');
+                    } else {
+                        if(rebind==true){
+                            $("#fixed-overtime-hour-table").ntsFixedTable({ height: self.heightOvertimeHours() - 23 });
+                            $("#fixed-break_time-table").ntsFixedTable({ height: 96 });
+                            $("#fixed-bonus_time-table").ntsFixedTable({ height: 96 });
+                            $("#fixed-table-indicate").ntsFixedTable({ height: 96 });
+                            $("#fixed-table").ntsFixedTable({ height: 96 });
+                            $("#fixed-overtime-hour-table-pre").ntsFixedTable({ height: self.heightOvertimeHours() - 23 });
+                            $("#fixed-bonus_time-table-pre").ntsFixedTable({ height: 96 });
+                            $('.nts-fixed-table.cf').first().find('.nts-fixed-body-container.ui-iggrid').css('border-left','1px solid #CCC');        
+                        }    
+                    }
+                });
             }
             
             startPage(appID: string): JQueryPromise<any> {

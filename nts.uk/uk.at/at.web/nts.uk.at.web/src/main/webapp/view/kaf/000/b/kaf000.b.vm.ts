@@ -340,7 +340,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             document.querySelector('#master-content').innerHTML = html;
             ko.cleanNode(document.querySelector('#master-content'));
             $('#master-content').css("display","none");
-            screenModel = self.getScreenModel(listAppMeta, currentApp);
+            screenModel = self.getScreenModel(listAppMeta, currentApp, true);
             __viewContext['viewModel'] = screenModel;
             ko.applyBindings(screenModel, document.querySelector('#master-content'));
             self = screenModel;
@@ -374,7 +374,7 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             $("#contents-area").css("height", "calc(100vh - " + content_height + "px)");
 //                });
         }
-        getScreenModel(listAppMeta: any,currentApp:any){
+        getScreenModel(listAppMeta: any,currentApp:any, rebind: boolean){
             if (currentApp.appType == 7) {
                 return new kaf002.c.viewmodel.ScreenModel(listAppMeta, currentApp);
             } else if (currentApp.appType == 9) {
@@ -382,11 +382,11 @@ module nts.uk.at.view.kaf000.b.viewmodel {
             } else if (currentApp.appType == 4) {
                 return new nts.uk.at.view.kaf009.b.viewmodel.ScreenModel(listAppMeta, currentApp);
             } else if (currentApp.appType == 0) {
-                return new nts.uk.at.view.kaf005.b.viewmodel.ScreenModel(listAppMeta, currentApp);
+                return new nts.uk.at.view.kaf005.b.viewmodel.ScreenModel(listAppMeta, currentApp, rebind);
             } else if (currentApp.appType == 2) {
                 return new nts.uk.at.view.kaf007.b.viewmodel.ScreenModel(listAppMeta, currentApp);
             } else if (currentApp.appType == 6) {
-                return new nts.uk.at.view.kaf010.b.viewmodel.ScreenModel(listAppMeta, currentApp);
+                return new nts.uk.at.view.kaf010.b.viewmodel.ScreenModel(listAppMeta, currentApp, rebind);
             } else if (currentApp.appType == 1) {
                 return new nts.uk.at.view.kaf006.b.viewmodel.ScreenModel(listAppMeta, currentApp);
             } else if (currentApp.appType == 10) {

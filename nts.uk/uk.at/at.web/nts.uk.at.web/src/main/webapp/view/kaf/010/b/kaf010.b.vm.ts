@@ -139,19 +139,30 @@ module nts.uk.at.view.kaf010.b {
             editable: KnockoutObservable<boolean> = ko.observable(true);
             enableOvertimeInput: KnockoutObservable<boolean> = ko.observable(false);
             appCur: any = null;
-            constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
+            constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata, rebind?: boolean) {
                 super(listAppMetadata, currentApp);
                 var self = this;
                 self.appCur = currentApp;
-                    $("#fixed-table-holiday").ntsFixedTable({ height: 120 });
-                    $("#fixed-break_time-table-holiday").ntsFixedTable({ height: 119 });
-                    $("#fixed-break_time-table-holiday-pre").ntsFixedTable({ height: 119 });
-                    $("#fixed-overtime-hour-table-holiday").ntsFixedTable({ height: 216 });
-                    $("#fixed-bonus_time-table-holiday").ntsFixedTable({ height: 120 });
-                    $("#fixed-table-indicate-holiday").ntsFixedTable({ height: 120 });
-                    $('.nts-fixed-table.cf').first().find('.nts-fixed-body-container.ui-iggrid').css('border-left','1px solid #CCC');
                 self.startPage(self.appID()).done(function(){
-                   
+                    if(nts.uk.util.isNullOrUndefined(rebind)){
+                        $("#fixed-table-holiday").ntsFixedTable({ height: 120 });
+                        $("#fixed-break_time-table-holiday").ntsFixedTable({ height: 119 });
+                        $("#fixed-break_time-table-holiday-pre").ntsFixedTable({ height: 119 });
+                        $("#fixed-overtime-hour-table-holiday").ntsFixedTable({ height: 216 });
+                        $("#fixed-bonus_time-table-holiday").ntsFixedTable({ height: 120 });
+                        $("#fixed-table-indicate-holiday").ntsFixedTable({ height: 120 });
+                        $('.nts-fixed-table.cf').first().find('.nts-fixed-body-container.ui-iggrid').css('border-left','1px solid #CCC');     
+                    } else {
+                        if(rebind==true){
+                            $("#fixed-table-holiday").ntsFixedTable({ height: 96 });
+                            $("#fixed-break_time-table-holiday").ntsFixedTable({ height: 96 });
+                            $("#fixed-break_time-table-holiday-pre").ntsFixedTable({ height: 96 });
+                            $("#fixed-overtime-hour-table-holiday").ntsFixedTable({ height: 192 });
+                            $("#fixed-bonus_time-table-holiday").ntsFixedTable({ height: 96 });
+                            $("#fixed-table-indicate-holiday").ntsFixedTable({ height: 96 });
+                            $('.nts-fixed-table.cf').first().find('.nts-fixed-body-container.ui-iggrid').css('border-left','1px solid #CCC');
+                        }
+                    }
                 });
             }
             
