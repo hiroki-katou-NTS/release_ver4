@@ -226,7 +226,7 @@ public class JpaStartPageLogInfoIRepository extends JpaRepository
 					+ " CID = ?"
 					+ " AND START_DT >= ?"
 					+ " AND START_DT <= ?"
-					+ " SID IN ("+  NtsStatement.In.createParamsString(subList) + ")";
+					+ " AND SID IN ("+  NtsStatement.In.createParamsString(subList) + ")";
 			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
 				stmt.setString(1, companyId);
 				stmt.setTimestamp(2,  java.sql.Timestamp.valueOf(start.localDateTime()));
