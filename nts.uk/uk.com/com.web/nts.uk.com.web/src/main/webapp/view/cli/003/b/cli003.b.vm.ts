@@ -1104,7 +1104,7 @@ module nts.uk.com.view.cli003.b.viewmodel {
               block.grayout(); 
                service.logSettingExportCsv(params).done(() => {
 
-               ).always(() => {
+               }).always(() => {
                   block.clear();
                   nts.uk.ui.errors.clearAll();
               });              
