@@ -442,7 +442,7 @@ public class SaveHolidayShipmentCommandHandler
 
 	public void CmProcessBeforeReg(SaveHolidayShipmentCommand command, Application_New application) {
 		// アルゴリズム「新規画面登録前の処理」を実行する
-		processBeforeRegister.processBeforeRegister(application, 0, command.isCheckOver1Year());
+		processBeforeRegister.processBeforeRegister(application, 0, command.isCheckOver1Year(), Collections.emptyList());
 
 	}
 

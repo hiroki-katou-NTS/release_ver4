@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.groupingBy;
 /*import java.lang.reflect.Array;*/
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,7 +84,7 @@ public class CheckBeforeRegisterHolidayWork {
 		OvertimeCheckResultDto result = new OvertimeCheckResultDto(0, 0, 0, false, null);
 		OvertimeCheckResult res = new OvertimeCheckResult();
 		// 2-1.新規画面登録前の処理を実行する
-		newBeforeRegister.processBeforeRegister(app, 0, checkOver1Year);
+		newBeforeRegister.processBeforeRegister(app, 0, checkOver1Year, Collections.emptyList());
 		// 登録前エラーチェック
 		// 計算ボタン未クリックチェック
 		//03-06_計算ボタンチェック
