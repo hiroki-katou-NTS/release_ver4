@@ -3142,7 +3142,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		}
 		return period;
 	}
-
+	@Inject
+	private InterimRemainDataMngRegisterDateChange interimRemainDataMngRegisterDateChange;
 	// true is interrupt
 	private boolean executionDaily(String companyId, CommandHandlerContext<ExecuteProcessExecutionCommand> context,
 			ProcessExecution processExecution, String employeeId, EmpCalAndSumExeLog empCalAndSumExeLog,
@@ -3158,7 +3159,11 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 						Optional.ofNullable(dailyCreateLog), processExecution.getExecSetting().getDailyPerf()
 								.getTargetGroupClassification().isRecreateTypeChangePerson() ? true : false,
 						false, false, null);
+				//暫定データの登録
+				this.interimRemainDataMngRegisterDateChange.registerDateChange(companyId, employeeId, period.datesBetween());
 			} catch (Exception e) {
+				//暫定データの登録
+				this.interimRemainDataMngRegisterDateChange.registerDateChange(companyId, employeeId, period.datesBetween());
 				throw new CreateDailyException(e);
 			}
 		} else {
@@ -3312,7 +3317,11 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			processState1 = this.createDailyService.createDailyResultEmployeeWithNoInfoImport(asyncContext, empId,
 					period, companyId, empCalAndSumExeLogId, Optional.ofNullable(dailyCreateLog), reCreateWorkType,
 					reCreateWorkPlace, reCreateRestTime, null);
+			//暫定データの登録
+			this.interimRemainDataMngRegisterDateChange.registerDateChange(companyId, empId, period.datesBetween());
 		} catch (Exception e) {
+			//暫定データの登録
+			this.interimRemainDataMngRegisterDateChange.registerDateChange(companyId, empId, period.datesBetween());
 			throw new CreateDailyException(e);
 		}
 		log.info("更新処理自動実行_日別実績の作成_END_" + procExec.getExecItemCd() + "_" + GeneralDateTime.now());
