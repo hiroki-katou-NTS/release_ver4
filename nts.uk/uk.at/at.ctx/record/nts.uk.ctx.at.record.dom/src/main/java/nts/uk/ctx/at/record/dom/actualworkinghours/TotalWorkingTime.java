@@ -275,6 +275,7 @@ public class TotalWorkingTime {
 	
 	/**
 	 * 日別実績の総労働時間の計算
+	 * @param recordWorkTimeCode 
 	 * @param breakTimeCount 
 	 * @param integrationOfDaily 
 	 * @param flexSetting 
@@ -289,19 +290,8 @@ public class TotalWorkingTime {
 			   List<CompensatoryOccurrenceSetting> eachCompanyTimeSet,
 			   WorkingConditionItem conditionItem,
 			   Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,
-			   DeductLeaveEarly leaveLateSet
+			   DeductLeaveEarly leaveLateSet, Optional<WorkTimeCode> recordWorkTimeCode
 			   ) {
-		
-
-		Optional<WorkTimeCode> workTimeCode = Optional.empty();
-//		Optional<FlexCalcSetting> flexCalcSet = Optional.empty();
-		//日別実績の所定外時間
-		if(recordClass.getCalculatable() && recordClass.getCalculationRangeOfOneDay().getWorkInformationOfDaily().getRecordInfo().getWorkTimeCode() != null) {
-			workTimeCode = recordClass.getCalculationRangeOfOneDay().getWorkInformationOfDaily().getRecordInfo().getWorkTimeCode().v() == null
-																		?Optional.empty()
-																		:Optional.of(new WorkTimeCode(recordClass.getCalculationRangeOfOneDay().getWorkInformationOfDaily().getRecordInfo().getWorkTimeCode().v().toString()));
-		}
-		
 		//staticを外すまでのフレ事前・事前所定外深夜取り出し処理
 		AttendanceTime flexPreAppTime = new AttendanceTime(0);
 		AttendanceTime beforeApplicationTime = new AttendanceTime(0);
@@ -344,7 +334,7 @@ public class TotalWorkingTime {
 				   																      CalcMethodOfNoWorkingDay.isCalculateFlexTime, 
 				   																      flexCalcMethod, 
 				   																      workTimeDailyAtr, 
-				   																      workTimeCode,
+				   																      recordWorkTimeCode,
 				   																      flexPreAppTime, 
 				   																      conditionItem,
 				   																      predetermineTimeSetByPersonInfo);
@@ -355,7 +345,7 @@ public class TotalWorkingTime {
 																									workType,flexCalcMethod,
 																									vacationClass,
 																									StatutoryDivision.Nomal,
-																									workTimeCode,
+																									recordWorkTimeCode,
 																									workTimeDailyAtr,
 																									eachCompanyTimeSet,
 																									flexPreAppTime,
@@ -410,7 +400,7 @@ public class TotalWorkingTime {
 																							 recordClass.getCalculationRangeOfOneDay().getTimeVacationAdditionRemainingTime().get(),
 																							 StatutoryDivision.Nomal,workType,
 																							 recordClass.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc(),
-																							 workTimeCode,
+																							 recordWorkTimeCode,
 																							 recordClass.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLate(),  //日別実績の計算区分.遅刻早退の自動計算設定.遅刻
 																							 recordClass.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLeaveEarly(),  //日別実績の計算区分.遅刻早退の自動計算設定.早退
 																							 recordClass.getPersonalInfo().getWorkingSystem(),
@@ -438,7 +428,7 @@ public class TotalWorkingTime {
 					 																				  recordClass.getCalculationRangeOfOneDay().getTimeVacationAdditionRemainingTime().get(),
 					 																				  StatutoryDivision.Nomal,workType,
 					 																				  recordClass.getCalculationRangeOfOneDay().getPredetermineTimeSetForCalc(),
-					 																				  workTimeCode,
+					 																				  recordWorkTimeCode,
 					 																				  recordClass.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLate(),  //日別実績の計算区分.遅刻早退の自動計算設定.遅刻
 					 																				  recordClass.getIntegrationOfDaily().getCalAttr().getLeaveEarlySetting().isLeaveEarly(),  //日別実績の計算区分.遅刻早退の自動計算設定.早退
 					 																				  recordClass.getPersonalInfo().getWorkingSystem(),
@@ -479,7 +469,7 @@ public class TotalWorkingTime {
 		
 		//日別実績の休暇
 		val vacationOfDaily = VacationClass.calcUseRestTime(workType,
-															workTimeCode,
+															recordWorkTimeCode,
 															conditionItem,
 															outingList,
 															lateTime,
@@ -515,7 +505,7 @@ public class TotalWorkingTime {
 				   			+ flexTime
 				   			/*変形基準内残業の時間もここにタス*/);
 		//実働時間の計算
-		boolean isOOtsukaIWMode = decisionIWOOtsukaMode(workType,workTimeCode,recordClass);
+		boolean isOOtsukaIWMode = decisionIWOOtsukaMode(workType,recordWorkTimeCode,recordClass);
 		//大塚専用IW専用処理
 		if(isOOtsukaIWMode) {
 			if(recordClass.getPredSetForOOtsuka().isPresent()) {
@@ -544,7 +534,7 @@ public class TotalWorkingTime {
 																				workType,
 																				conditionItem,
 																				predetermineTimeSetByPersonInfo,
-																				workTimeCode,
+																				recordWorkTimeCode,
 																				lateTime,
 																				leaveEarlyTime,
 																				outingList));

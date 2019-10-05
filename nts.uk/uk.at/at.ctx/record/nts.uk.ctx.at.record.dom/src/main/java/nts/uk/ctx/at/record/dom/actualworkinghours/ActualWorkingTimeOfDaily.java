@@ -39,6 +39,7 @@ import nts.uk.ctx.at.shared.dom.common.time.TimeSpanForCalc;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryOccurrenceSetting;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.worktime.common.DeductionTime;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktime.fixedset.FixRestTimezoneSet;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeSetting;
@@ -146,7 +147,7 @@ public class ActualWorkingTimeOfDaily {
 			   List<DivergenceTime> divergenceTimeList, 
 			   WorkingConditionItem conditionItem,
 			   Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,
-			   DeductLeaveEarly leaveLateSet, WorkScheduleTimeOfDaily workScheduleTime) {
+			   DeductLeaveEarly leaveLateSet, WorkScheduleTimeOfDaily workScheduleTime,Optional<WorkTimeCode> recordWorkTimeCode) {
 
 		
 		/* 総労働時間の計算 */
@@ -159,7 +160,8 @@ public class ActualWorkingTimeOfDaily {
 					eachCompanyTimeSet,
 					conditionItem,
 					predetermineTimeSetByPersonInfo,
-					leaveLateSet
+					leaveLateSet,
+					recordWorkTimeCode
 					);
 		
 		TotalWorkingTime calcResultOotsuka;

@@ -217,9 +217,10 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 	@Inject
 	private MidnightTimeSheetRepo midnightTimeSheetRepo;
-	
+
 	@Inject
 	private StoredProcdureProcess storedProcdureProcess;
+
 	/**
 	 * 勤務情報を取得して計算
 	 * 
@@ -246,25 +247,29 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				|| personCommonSetting == null) {
 			return ManageCalcStateAndResult.failCalc(integrationOfDaily);
 		}
-		
-		//20190607
-//		boolean isShareContainerNotInit = companyCommonSetting.getShareContainer() == null;
-//		if (isShareContainerNotInit) {
-//			companyCommonSetting.setShareContainer(MasterShareBus.open());
-//		}
+
+		// 20190607
+		// boolean isShareContainerNotInit = companyCommonSetting.getShareContainer() ==
+		// null;
+		// if (isShareContainerNotInit) {
+		// companyCommonSetting.setShareContainer(MasterShareBus.open());
+		// }
 		// 実績データの計算
 		ManageCalcStateAndResult result = this.calcDailyAttendancePerformance(integrationOfDaily, companyCommonSetting,
 				personCommonSetting, converter, yesterDayInfo, tomorrowDayInfo);
 
 		if (!calculateOption.isSchedule()) {
 			// 大塚モードの処理
-//			val afterOOtsukaModeCalc = replaceStampForOOtsuka(result.getIntegrationOfDaily(), companyCommonSetting,
-//					personCommonSetting, tomorrowDayInfo, tomorrowDayInfo, converter);
+			// val afterOOtsukaModeCalc =
+			// replaceStampForOOtsuka(result.getIntegrationOfDaily(), companyCommonSetting,
+			// personCommonSetting, tomorrowDayInfo, tomorrowDayInfo, converter);
 
 			// 任意項目の計算
-//			result.setIntegrationOfDaily(this.calcOptionalItem(afterOOtsukaModeCalc, converter, companyCommonSetting));
-			
-			result.setIntegrationOfDaily(this.calcOptionalItem(result.getIntegrationOfDaily(), converter, companyCommonSetting));
+			// result.setIntegrationOfDaily(this.calcOptionalItem(afterOOtsukaModeCalc,
+			// converter, companyCommonSetting));
+
+			result.setIntegrationOfDaily(
+					this.calcOptionalItem(result.getIntegrationOfDaily(), converter, companyCommonSetting,personCommonSetting));
 		}
 
 		if (!calculateOption.isMasterTime()) {
@@ -272,68 +277,75 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			result.setIntegrationOfDaily(calculationErrorCheckService.errorCheck(result.getIntegrationOfDaily(),
 					personCommonSetting, companyCommonSetting));
 		}
-//20190607
-//		if (isShareContainerNotInit) {
-//			companyCommonSetting.getShareContainer().clearAll();
-//		}
-		
+		// 20190607
+		// if (isShareContainerNotInit) {
+		// companyCommonSetting.getShareContainer().clearAll();
+		// }
+
 		return result;
 	}
 
 	// 大塚モード(計算項目置き換えと計算)
-//	private IntegrationOfDaily replaceStampForOOtsuka(IntegrationOfDaily integrationOfDaily,
-//			ManagePerCompanySet companyCommonSetting, ManagePerPersonDailySet personCommonSetting,
-//			Optional<WorkInfoOfDailyPerformance> yesterDayInfo, Optional<WorkInfoOfDailyPerformance> tomorrowDayInfo,
-//			DailyRecordToAttendanceItemConverter converter) {
-//		if (integrationOfDaily.getPcLogOnInfo().isPresent()) {
-//			DailyRecordToAttendanceItemConverter calcrecordFromStamp = converter.setData(integrationOfDaily);
-//			// 打刻
-//			val recordStamp = calcrecordFromStamp.toDomain();
-//			// ログオン・オフ
-//			val pcStamp = recordStamp.getPcLogOnInfo().get().getLogOnInfo();
-//			// 打刻←ログオン・オフ
-//			recordStamp.stampReplaceFromPcLogInfo(pcStamp);
-//
-//			// 入れ替えた打刻で実際にレコード作成
-//			val ootsukaRecord = this.createRecord(recordStamp, TimeSheetAtr.RECORD, companyCommonSetting,
-//					personCommonSetting, yesterDayInfo, tomorrowDayInfo);
-//			ootsukaRecord.setCompanyCommonSetting(companyCommonSetting, personCommonSetting);
-//			// 計算
-//			val calcrecordFromPcLogInfo = calcRecord(ootsukaRecord, ootsukaRecord, companyCommonSetting,
-//					personCommonSetting, converter);
-//			return ootsukaProcessService.integrationConverter(integrationOfDaily, calcrecordFromPcLogInfo);
-//		}
-//		return integrationOfDaily;
-//	}
+	// private IntegrationOfDaily replaceStampForOOtsuka(IntegrationOfDaily
+	// integrationOfDaily,
+	// ManagePerCompanySet companyCommonSetting, ManagePerPersonDailySet
+	// personCommonSetting,
+	// Optional<WorkInfoOfDailyPerformance> yesterDayInfo,
+	// Optional<WorkInfoOfDailyPerformance> tomorrowDayInfo,
+	// DailyRecordToAttendanceItemConverter converter) {
+	// if (integrationOfDaily.getPcLogOnInfo().isPresent()) {
+	// DailyRecordToAttendanceItemConverter calcrecordFromStamp =
+	// converter.setData(integrationOfDaily);
+	// // 打刻
+	// val recordStamp = calcrecordFromStamp.toDomain();
+	// // ログオン・オフ
+	// val pcStamp = recordStamp.getPcLogOnInfo().get().getLogOnInfo();
+	// // 打刻←ログオン・オフ
+	// recordStamp.stampReplaceFromPcLogInfo(pcStamp);
+	//
+	// // 入れ替えた打刻で実際にレコード作成
+	// val ootsukaRecord = this.createRecord(recordStamp, TimeSheetAtr.RECORD,
+	// companyCommonSetting,
+	// personCommonSetting, yesterDayInfo, tomorrowDayInfo);
+	// ootsukaRecord.setCompanyCommonSetting(companyCommonSetting,
+	// personCommonSetting);
+	// // 計算
+	// val calcrecordFromPcLogInfo = calcRecord(ootsukaRecord, ootsukaRecord,
+	// companyCommonSetting,
+	// personCommonSetting, converter);
+	// return ootsukaProcessService.integrationConverter(integrationOfDaily,
+	// calcrecordFromPcLogInfo);
+	// }
+	// return integrationOfDaily;
+	// }
 
 	private ManageCalcStateAndResult calcDailyAttendancePerformance(IntegrationOfDaily integrationOfDaily,
 			ManagePerCompanySet companyCommonSetting, ManagePerPersonDailySet personCommonSetting,
 			DailyRecordToAttendanceItemConverter converter, Optional<WorkInfoOfDailyPerformance> yesterDayInfo,
 			Optional<WorkInfoOfDailyPerformance> tomorrowDayInfo) {
 		// 出退勤打刻順序不正のチェック
-		//　※他の打刻順序不正は計算処理を実施する必要があるため、ここでは弾かない
+		// ※他の打刻順序不正は計算処理を実施する必要があるため、ここでは弾かない
 		// 不正の場合、勤務情報の計算ステータス→未計算にしつつ、エラーチェックは行う必要有）
 		val stampError = dailyRecordCreateErrorAlermService.stampIncorrect(integrationOfDaily);
 		if (stampError != null) {
-			
+
 			final String employeeId = integrationOfDaily.getAffiliationInfor().getEmployeeId();
 			GeneralDate targetDate = integrationOfDaily.getAffiliationInfor().getYmd();
 
-			
 			// // 編集状態を取得（日別実績の編集状態が持つ勤怠項目IDのみのList作成）
 			List<Integer> attendanceItemIdList = integrationOfDaily.getEditState().stream()
-					.filter(editState -> editState.getEmployeeId()
-							.equals(employeeId)
+					.filter(editState -> editState.getEmployeeId().equals(employeeId)
 							&& editState.getYmd().equals(targetDate))
 					.map(editState -> editState.getAttendanceItemId()).distinct().collect(Collectors.toList());
 
 			Optional<AttendanceTimeOfDailyPerformance> peform = Optional.of(AttendanceTimeOfDailyPerformance
 					.allZeroValue(integrationOfDaily.getAffiliationInfor().getEmployeeId(),
 							integrationOfDaily.getAffiliationInfor().getYmd()));
-			
-			DailyRecordToAttendanceItemConverter converterForAllZero = attendanceItemConvertFactory.createDailyConverter();
+
+			DailyRecordToAttendanceItemConverter converterForAllZero = attendanceItemConvertFactory
+					.createDailyConverter();
 			DailyRecordToAttendanceItemConverter beforDailyRecordDto = converterForAllZero.setData(integrationOfDaily);
-			//複製に対してsetしないと引数：integrationOfDailyが書き換わる(※参照型)
+			// 複製に対してsetしないと引数：integrationOfDailyが書き換わる(※参照型)
 			val recordAllZeroValueIntegration = beforDailyRecordDto.toDomain();
 			recordAllZeroValueIntegration.setAttendanceTimeOfDailyPerformance(peform);
 			List<ItemValue> itemValueList = Collections.emptyList();
@@ -346,14 +358,13 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 				// 手修正された項目の値を計算前に戻す
 				integrationOfDaily = afterDailyRecordDto.toDomain();
-			}
-			else {
+			} else {
 				integrationOfDaily = recordAllZeroValueIntegration;
 			}
-			
+
 			return ManageCalcStateAndResult.failCalc(integrationOfDaily);
-		}		
-		
+		}
+
 		val copyCalcAtr = integrationOfDaily.getCalAttr();
 		// 予定の時間帯
 		val schedule = createSchedule(integrationOfDaily, companyCommonSetting, personCommonSetting, converter,
@@ -402,9 +413,9 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			ManagePerCompanySet companyCommonSetting, ManagePerPersonDailySet personCommonSetting,
 			Optional<WorkInfoOfDailyPerformance> yesterDayInfo, Optional<WorkInfoOfDailyPerformance> tomorrowDayInfo) {
 
-		//大塚モード
+		// 大塚モード
 		Boolean OOtsukaMode = true;
-		
+
 		// 休暇加算時間設定
 		Optional<HolidayAddtionSet> holidayAddtionSetting = companyCommonSetting.getHolidayAdditionPerCompany();
 		// 休暇加算設定が取得できなかった時のエラー
@@ -421,7 +432,6 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		Optional<WorkInformation> tommorowInfo = tomorrowDayInfo.isPresent()
 				? Optional.of(tomorrowDayInfo.get().getRecordInfo())
 				: Optional.empty();
-		
 
 		final String companyId = AppContexts.user().companyId();
 		final String employeeId = integrationOfDaily.getAffiliationInfor().getEmployeeId();
@@ -433,20 +443,19 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		val workInfo = integrationOfDaily.getWorkInformation();
 		val wko = workInfo.getRecordInfo().getWorkTypeCode().v();
 		Optional<WorkType> workType = getWorkTypeFromShareContainer(shareContainer, companyId, wko);
-		
+
 		/// 連続勤務：ＡＬＬかつＣａｎｔにしないとフレ時間がー所定時間 で算出されてしまう
 		if (!workType.isPresent() || shouldTimeALLZero(integrationOfDaily, workType.get())) {
 			// // 編集状態を取得（日別実績の編集状態が持つ勤怠項目IDのみのList作成）
 			List<Integer> attendanceItemIdList = integrationOfDaily.getEditState().stream()
-					.filter(editState -> editState.getEmployeeId()
-							.equals(employeeId)
+					.filter(editState -> editState.getEmployeeId().equals(employeeId)
 							&& editState.getYmd().equals(targetDate))
 					.map(editState -> editState.getAttendanceItemId()).distinct().collect(Collectors.toList());
 
 			Optional<AttendanceTimeOfDailyPerformance> peform = Optional.of(AttendanceTimeOfDailyPerformance
 					.allZeroValue(integrationOfDaily.getAffiliationInfor().getEmployeeId(),
 							integrationOfDaily.getAffiliationInfor().getYmd()));
-			
+
 			DailyRecordToAttendanceItemConverter converter = attendanceItemConvertFactory.createDailyConverter();
 			DailyRecordToAttendanceItemConverter beforDailyRecordDto = converter.setData(integrationOfDaily);
 			val recordAllZeroValueIntegration = beforDailyRecordDto.toDomain();
@@ -461,12 +470,10 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 				// 手修正された項目の値を計算前に戻す
 				integrationOfDaily = afterDailyRecordDto.toDomain();
-			}
-			else {
+			} else {
 				integrationOfDaily = recordAllZeroValueIntegration;
 			}
-			
-		
+
 			return ManageReGetClass.cantCalc(Optional.empty(), integrationOfDaily, null);
 		}
 		val beforeWorkType = workType;
@@ -514,30 +521,35 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 					: holidayCalcMethodSet;
 		}
 
+		Optional<WorkTimeCode> workTimeCode = decisionWorkTimeCode(workInfo, personCommonSetting, workType);
+
 		/* 就業時間帯勤務区分 */
 		// 1日休日の場合、就業時間帯コードはnullであるので、
 		// all0を計算させるため(実績が計算できなくても、予定時間を計算する必要がある
-		if (workInfo == null || workInfo.getRecordInfo() == null || workInfo.getRecordInfo().getWorkTimeCode() == null)
+		if (!workTimeCode.isPresent())
 			return ManageReGetClass.cantCalc2(workType, integrationOfDaily, personalInfo, holidayCalcMethodSet,
 					regularAddSetting, flexAddSetting, hourlyPaymentAddSetting, illegularAddSetting, Optional.empty(),
 					Optional.empty());
 
-		Optional<WorkTimeSetting> workTime = getWorkTimeSettingFromShareContainer(shareContainer, companyId, workInfo.getRecordInfo().getWorkTimeCode().toString()); 
+		Optional<WorkTimeSetting> workTime = getWorkTimeSettingFromShareContainer(shareContainer, companyId,
+				workTimeCode.get().toString());
 		if (!workTime.isPresent())
 			return ManageReGetClass.cantCalc2(workType, integrationOfDaily, personalInfo, holidayCalcMethodSet,
 					regularAddSetting, flexAddSetting, hourlyPaymentAddSetting, illegularAddSetting, Optional.empty(),
 					Optional.empty());
 
 		// 就業時間帯の共通設定
-		Optional<WorkTimezoneCommonSet> commonSet = getWorkTimezoneCommonSetFromShareContainer(integrationOfDaily, companyId, workTime,
-				shareContainer);
+		Optional<WorkTimezoneCommonSet> commonSet = getWorkTimezoneCommonSetFromShareContainer(workTimeCode.get(),
+				companyId, workTime, shareContainer);
 
 		/* 1日の計算範囲クラスを作成 */
-		val oneRange = createOneDayRange(integrationOfDaily, commonSet,true,workType.get(),companyCommonSetting.getShareContainer()/*ootsukaModeFlag*/);
+		val oneRange = createOneDayRange(integrationOfDaily, commonSet, true, workType.get(),
+				companyCommonSetting.getShareContainer(), workTimeCode);
 		Optional<PredetermineTimeSetForCalc> originPredSet = Optional.empty();
 		if (oneRange.getPredetermineTimeSetForCalc() != null)
 			originPredSet = Optional
-					.of(createOneDayRange(integrationOfDaily, commonSet,true,workType.get()/*ootsukaModeFlag*/,companyCommonSetting.getShareContainer()).getPredetermineTimeSetForCalc());
+					.of(createOneDayRange(integrationOfDaily, commonSet, true, workType.get()/* ootsukaModeFlag */,
+							companyCommonSetting.getShareContainer(), workTimeCode).getPredetermineTimeSetForCalc());
 		/**
 		 * 勤務種類が休日系なら、所定時間の時間を変更する
 		 */
@@ -553,62 +565,64 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		// 大塚要件対応用
 		// 大塚モードの場合には遅刻早退から休憩時間を控除する必要があり、控除時間帯の作成時にはこの休憩が作成されないので
 		// 就業時間帯から直接取得した休憩を遅刻早退から控除する為に取得
-		
+
 		List<TimeSheetOfDeductionItem> breakTimeSheetOfWorkTimeMaster = new ArrayList<>();
 
-//		boolean ootsukaIWFlag = ootsukaProcessService.isIWWorkTimeAndCode(workType.get(), workTime.get().getWorktimeCode());
+		// boolean ootsukaIWFlag =
+		// ootsukaProcessService.isIWWorkTimeAndCode(workType.get(),
+		// workTime.get().getWorktimeCode());
 
-//		大塚IW限定処理(休憩を固定で入れる案)
-//			breakTimeSheetOfWorkTimeMaster = ootsukaProcessService.convertBreakTimeSheetForOOtsuka(masterBreakTimeSheetList,
-//																								   workType.get(),
-//																								   new WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().changeAllTimeSheetToDeductionItem();
+		// 大塚IW限定処理(休憩を固定で入れる案)
+		// breakTimeSheetOfWorkTimeMaster =
+		// ootsukaProcessService.convertBreakTimeSheetForOOtsuka(masterBreakTimeSheetList,
+		// workType.get(),
+		// new
+		// WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().changeAllTimeSheetToDeductionItem();
 
-//		else {
-//			if(ootsukaIWFlag) {
-//				breakTimeSheetOfWorkTimeMaster = Arrays.asList(TimeSheetOfDeductionItem.createTimeSheetOfDeductionItemAsFixed(new TimeZoneRounding(new TimeWithDayAttr(720), new TimeWithDayAttr(780), new TimeRoundingSetting(Unit.ROUNDING_TIME_1MIN, Rounding.ROUNDING_DOWN)),
-//						  new TimeSpanForCalc(new TimeWithDayAttr(720),new TimeWithDayAttr(780)),
-//						  Collections.emptyList(),
-//						  Collections.emptyList(),
-//						  Collections.emptyList(),
-//						  Collections.emptyList(),
-//						  Optional.empty(),
-//						  WorkingBreakTimeAtr.NOTWORKING,
-//						  Finally.of(GoingOutReason.PRIVATE), 
-//						  Finally.of(BreakClassification.BREAK), 
-//						  Optional.empty(),
-//						  DeductionClassification.BREAK,
-//						  Optional.empty()));				
-//			}
-//
-//		}
+		// else {
+		// if(ootsukaIWFlag) {
+		// breakTimeSheetOfWorkTimeMaster =
+		// Arrays.asList(TimeSheetOfDeductionItem.createTimeSheetOfDeductionItemAsFixed(new
+		// TimeZoneRounding(new TimeWithDayAttr(720), new TimeWithDayAttr(780), new
+		// TimeRoundingSetting(Unit.ROUNDING_TIME_1MIN, Rounding.ROUNDING_DOWN)),
+		// new TimeSpanForCalc(new TimeWithDayAttr(720),new TimeWithDayAttr(780)),
+		// Collections.emptyList(),
+		// Collections.emptyList(),
+		// Collections.emptyList(),
+		// Collections.emptyList(),
+		// Optional.empty(),
+		// WorkingBreakTimeAtr.NOTWORKING,
+		// Finally.of(GoingOutReason.PRIVATE),
+		// Finally.of(BreakClassification.BREAK),
+		// Optional.empty(),
+		// DeductionClassification.BREAK,
+		// Optional.empty()));
+		// }
+		//
+		// }
 		// 大塚用の固定勤務残業時間帯設定
 		List<OverTimeOfTimeZoneSet> overTimeSheetSetting = Collections.emptyList();
 
 		// 加給設定の取得
 		Optional<BonusPaySetting> bonuspaySetting = getBpSetting(companyCommonSetting.bpUnitSetting,
-				Optional.of(new WorkplaceCode(placeId)),
-				Optional.of(new WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())),
-				personCommonSetting.getPersonInfo());
+				Optional.of(new WorkplaceCode(placeId)), workTimeCode, personCommonSetting.getPersonInfo());
 
-		
-		
 		// ---------------------------------Repositoryが整理されるまでの一時的な作成-------------------------------------------
 		// 休憩時間帯(BreakManagement)
 		List<BreakTimeSheet> breakTimeSheet = new ArrayList<>();
 		List<BreakTimeOfDailyPerformance> breakTimeOfDailyList = new ArrayList<>();
-		
-		
+
 		// 休憩回数
 		int breakCount = 0;
 
 		// 外出時間帯
 		Optional<OutingTimeOfDailyPerformance> goOutTimeSheetList = integrationOfDaily.getOutingTime();
 
-		//深夜時間帯(2019.3.31時点ではNotマスタ参照で動作している)
+		// 深夜時間帯(2019.3.31時点ではNotマスタ参照で動作している)
 		MidNightTimeSheet midNightTimeSheet = new MidNightTimeSheet(companyId, new TimeWithDayAttr(1320),
 				new TimeWithDayAttr(1740));
-//		val mid = midnightTimeSheetRepo.findByCId(companyId);
-		
+		// val mid = midnightTimeSheetRepo.findByCId(companyId);
+
 		// 短時間
 		List<ShortWorkingTimeSheet> shortTimeSheets = new ArrayList<>();
 		if (integrationOfDaily.getShortTime().isPresent()) {
@@ -640,13 +654,15 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		Optional<FixRestTimezoneSet> fixRestTimeSet = Optional.empty();
 		Optional<FixedWorkCalcSetting> ootsukaFixedWorkSet = Optional.empty();
 
-		Optional<FlexWorkSetting> flexWorkSetOpt = getFlexWorkSetOptFromShareContainer(shareContainer, companyId, workInfo.getRecordInfo().getWorkTimeCode().v());
+		Optional<FlexWorkSetting> flexWorkSetOpt = getFlexWorkSetOptFromShareContainer(shareContainer, companyId,
+				workTimeCode.get().v());
 
-//		if (timeSheetAtr.isSchedule()) {
-//			flexWorkSetOpt = shareContainer.getShared(
-//					"PRE_FLEX_WORK" + companyId + workInfo.getRecordInfo().getWorkTimeCode().v(),
-//					() -> flexWorkSettingRepository.find(companyId, workInfo.getRecordInfo().getWorkTimeCode().v()));
-//		}
+		// if (timeSheetAtr.isSchedule()) {
+		// flexWorkSetOpt = shareContainer.getShared(
+		// "PRE_FLEX_WORK" + companyId + workInfo.getRecordInfo().getWorkTimeCode().v(),
+		// () -> flexWorkSettingRepository.find(companyId,
+		// workInfo.getRecordInfo().getWorkTimeCode().v()));
+		// }
 
 		Optional<FlexCalcSetting> flexCalcSetting = Optional.empty();
 		// ---------------------------------Repositoryが整理されるまでの一時的な作成-------------------------------------------
@@ -696,16 +712,14 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				WorkStamp leaving = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0),
 						new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
 				TimeActualStamp stamp = new TimeActualStamp(attendance, leaving, 1);
-				TimeLeavingWork timeLeavingWork = new TimeLeavingWork(
-						new WorkNo(1), stamp, stamp);
+				TimeLeavingWork timeLeavingWork = new TimeLeavingWork(new WorkNo(1), stamp, stamp);
 				List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
 				timeLeavingWorkList.add(timeLeavingWork);
 				TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance = new TimeLeavingOfDailyPerformance(
 						employeeId, new WorkTimes(1), timeLeavingWorkList, targetDate);
 				oneRange.setAttendanceLeavingWork(timeLeavingOfDailyPerformance);
 			}
-			
-			
+
 			List<OverTimeOfTimeZoneSet> flexOtSetting = Collections.emptyList();
 			List<EmTimeZoneSet> flexWoSetting = Collections.emptyList();
 			if (workType.get().getAttendanceHolidayAttr().isFullTime()) {
@@ -742,40 +756,42 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 						: Optional.empty();
 			}
 
-			
-
-			if(fixRestTimeSet.isPresent()) {
+			if (fixRestTimeSet.isPresent()) {
 				if (OOtsukaMode) {
-					breakTimeSheetOfWorkTimeMaster = devideBreakTimeSheetForOOtsuka(fixRestTimeSet.get().getLstTimezone().stream().map(lstTimeZone -> TimeSheetOfDeductionItem.createFromDeductionTimeSheet(lstTimeZone)).collect(Collectors.toList()),
+					breakTimeSheetOfWorkTimeMaster = devideBreakTimeSheetForOOtsuka(
+							fixRestTimeSet.get().getLstTimezone().stream()
+									.map(lstTimeZone -> TimeSheetOfDeductionItem
+											.createFromDeductionTimeSheet(lstTimeZone))
+									.collect(Collectors.toList()),
 							oneRange.getAttendanceLeavingWork().getTimeLeavingWorks());
-				}				
+				}
 			}
 
-			
-			statutoryOverFrameNoList = flexOtSetting.stream().map(timeZoneSetting -> new OverTimeFrameNo(timeZoneSetting.getLegalOTframeNo().v()))
+			statutoryOverFrameNoList = flexOtSetting.stream()
+					.map(timeZoneSetting -> new OverTimeFrameNo(timeZoneSetting.getLegalOTframeNo().v()))
 					.collect(Collectors.toList());
 
 			flexCalcSetting = Optional.of(flexWorkSetOpt.get().getCalculateSetting());
 
 			/* 前日の勤務情報取得 */
-			val yesterDay = getWorkTypeByWorkInfo(yesterDayInfo, workType.get(),shareContainer);
+			val yesterDay = getWorkTypeByWorkInfo(yesterDayInfo, workType.get(), shareContainer);
 			/* 翌日の勤務情報取得 */
-			val tomorrow = getWorkTypeByWorkInfo(tomorrowDayInfo, workType.get(),shareContainer);
+			val tomorrow = getWorkTypeByWorkInfo(tomorrowDayInfo, workType.get(), shareContainer);
 			// 先に1日埋める
 			List<OverTimeOfTimeZoneSet> useLstTimeZone = flexWorkSetOpt.get().getLstHalfDayWorkTimezone().stream()
-					.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.ONE_DAY)).findFirst().get().getWorkTimezone()
-					.getLstOTTimezone();
+					.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.ONE_DAY)).findFirst().get()
+					.getWorkTimezone().getLstOTTimezone();
 			// 午前勤務
 			if (workType.get().getAttendanceHolidayAttr().isMorning()) {
 				useLstTimeZone = flexWorkSetOpt.get().getLstHalfDayWorkTimezone().stream()
-						.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.AM)).findFirst().get().getWorkTimezone()
-						.getLstOTTimezone();
+						.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.AM)).findFirst().get()
+						.getWorkTimezone().getLstOTTimezone();
 			}
 			// 午後勤務
 			else if (workType.get().getAttendanceHolidayAttr().isAfternoon()) {
 				useLstTimeZone = flexWorkSetOpt.get().getLstHalfDayWorkTimezone().stream()
-						.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.PM)).findFirst().get().getWorkTimezone()
-						.getLstOTTimezone();
+						.filter(timeZone -> timeZone.getAmpmAtr().equals(AmPmAtr.PM)).findFirst().get()
+						.getWorkTimezone().getLstOTTimezone();
 			}
 
 			BreakType nowBreakType = BreakType.REFER_SCHEDULE;
@@ -794,29 +810,34 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				}
 			}
 			final BreakType flexBreakType = nowBreakType;
-//			大塚IW限定処理(休憩を固定で入れる案)
-//			final WorkType nowWorkType = workType.get();
+			// 大塚IW限定処理(休憩を固定で入れる案)
+			// final WorkType nowWorkType = workType.get();
 			if (!integrationOfDaily.getBreakTime().isEmpty()) {
-			
+
 				Optional<BreakTimeOfDailyPerformance> breakTimeByBreakType = integrationOfDaily.getBreakTime().stream()
 						.filter(breakTime -> breakTime.getBreakType().equals(flexBreakType)).findFirst();
 				breakTimeByBreakType.ifPresent(tc -> {
-//					if(flexBreakType.isReferWorkTime()) {
-//						breakTimeSheet.addAll(ootsukaProcessService.convertBreakTimeSheetForOOtsuka(Optional.of(tc),nowWorkType,new WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().getBreakTimeSheets());
-//					}
-//					else {
-						breakTimeSheet.addAll(tc.getBreakTimeSheets());	
-//					}
-						
+					// if(flexBreakType.isReferWorkTime()) {
+					// breakTimeSheet.addAll(ootsukaProcessService.convertBreakTimeSheetForOOtsuka(Optional.of(tc),nowWorkType,new
+					// WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().getBreakTimeSheets());
+					// }
+					// else {
+					breakTimeSheet.addAll(tc.getBreakTimeSheets());
+					// }
+
 				});
 
-				breakCount = breakTimeSheet.stream().filter(timeSheet -> (timeSheet.getStartTime() != null && timeSheet.getEndTime() != null
-						&& timeSheet.getEndTime().greaterThan(timeSheet.getStartTime()))).collect(Collectors.toList()).size();
+				breakCount = breakTimeSheet.stream()
+						.filter(timeSheet -> (timeSheet.getStartTime() != null && timeSheet.getEndTime() != null
+								&& timeSheet.getEndTime().greaterThan(timeSheet.getStartTime())))
+						.collect(Collectors.toList()).size();
 			}
 
-//			if(ootsukaProcessService.isIWWorkTimeAndCode(nowWorkType, workTime.get().getWorktimeCode())) {
-//				breakTimeSheet.add(new BreakTimeSheet(new BreakFrameNo(1),new TimeWithDayAttr(720), new TimeWithDayAttr(780)));
-//			}
+			// if(ootsukaProcessService.isIWWorkTimeAndCode(nowWorkType,
+			// workTime.get().getWorktimeCode())) {
+			// breakTimeSheet.add(new BreakTimeSheet(new BreakFrameNo(1),new
+			// TimeWithDayAttr(720), new TimeWithDayAttr(780)));
+			// }
 			breakTimeOfDailyList
 					.add(new BreakTimeOfDailyPerformance(employeeId, nowBreakType, breakTimeSheet, targetDate));
 
@@ -831,7 +852,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 					workTime.get().getWorkTimeDivision(), breakTimeOfDailyList, midNightTimeSheet, personalInfo,
 					holidayCalcMethodSet, Optional.of(flexWorkSetOpt.get().getCoreTimeSetting()), dailyUnit,
 					breakTimeSheetOfWorkTimeMaster, vacation, oneRange.getTimeVacationAdditionRemainingTime().get(), // oneDay.getTimeVacationAdditionRemainingTime().get()
-					Optional.of(workInfo.getRecordInfo().getWorkTimeCode()),
+					workTimeCode,
 					integrationOfDaily.getCalAttr().getLeaveEarlySetting().isLate(),
 					integrationOfDaily.getCalAttr().getLeaveEarlySetting().isLeaveEarly(), illegularAddSetting,
 					flexAddSetting, regularAddSetting, holidayAddtionSet,
@@ -839,20 +860,22 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 					getPredByPersonInfo(personCommonSetting.getPersonInfo().isPresent()
 							? personCommonSetting.getPersonInfo().get().getWorkCategory().getWeekdayTime()
 									.getWorkTimeCode()
-							: Optional.empty(),companyCommonSetting.getShareContainer()),
+							: Optional.empty(), companyCommonSetting.getShareContainer()),
 					shortTimeSheets, flexWorkSetOpt.get().getCommonSetting().getShortTimeWorkSet(), yesterInfo,
 					tommorowInfo, flexWoSetting, integrationOfDaily.getSpecDateAttr());
 		} else {
 			switch (workTime.get().getWorkTimeDivision().getWorkTimeMethodSet()) {
 			case FIXED_WORK:
 				/* 固定 */
-				Optional<FixedWorkSetting> fixedWorkSetting = getFixedWorkSettingFromShareContainer(shareContainer, companyId, workInfo.getRecordInfo().getWorkTimeCode().v());
-//				if (timeSheetAtr.isSchedule()) {
-//					fixedWorkSetting = shareContainer.getShared(
-//							"PRE_FIXED_WORK" + companyId + workInfo.getRecordInfo().getWorkTimeCode().v(),
-//							() -> fixedWorkSettingRepository.findByKey(companyId,
-//									workInfo.getRecordInfo().getWorkTimeCode().v()));
-//				}
+				Optional<FixedWorkSetting> fixedWorkSetting = getFixedWorkSettingFromShareContainer(shareContainer,
+						companyId, workTimeCode.get().v());
+				// if (timeSheetAtr.isSchedule()) {
+				// fixedWorkSetting = shareContainer.getShared(
+				// "PRE_FIXED_WORK" + companyId +
+				// workInfo.getRecordInfo().getWorkTimeCode().v(),
+				// () -> fixedWorkSettingRepository.findByKey(companyId,
+				// workInfo.getRecordInfo().getWorkTimeCode().v()));
+				// }
 
 				if (regularAddSetting.getVacationCalcMethodSet().getWorkTimeCalcMethodOfHoliday().getAdvancedSet()
 						.isPresent()) {
@@ -863,19 +886,18 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 					return ManageReGetClass.cantCalc2(workType, integrationOfDaily, personalInfo, holidayCalcMethodSet,
 							regularAddSetting, flexAddSetting, hourlyPaymentAddSetting, illegularAddSetting, leaveLate,
 							Optional.empty());
-				
-				//大塚用勤務種類チェック処理の前後で勤務種類が変更になったか
+
+				// 大塚用勤務種類チェック処理の前後で勤務種類が変更になったか
 				final boolean isSpecialHoliday = workType.get().getDailyWork().isOneOrHalfDaySpecHoliday();
-				boolean workTypeChangedFlagForOOtsuka = ootsukaProcessService.decisionOotsukaMode(workType.get(), 
-																								  ootsukaFixedWorkSet, 
-																								  oneRange.getAttendanceLeavingWork(), 
-																								  fixedWorkSetting.get().getCommonSetting().getHolidayCalculation());
+				boolean workTypeChangedFlagForOOtsuka = ootsukaProcessService.decisionOotsukaMode(workType.get(),
+						ootsukaFixedWorkSet, oneRange.getAttendanceLeavingWork(),
+						fixedWorkSetting.get().getCommonSetting().getHolidayCalculation());
 				/* 大塚モード */
 				workType = Optional.of(ootsukaProcessService.getOotsukaWorkType(workType.get(), ootsukaFixedWorkSet,
 						oneRange.getAttendanceLeavingWork(),
 						fixedWorkSetting.get().getCommonSetting().getHolidayCalculation()));
-				
-				//大塚用　勤務種類が変更になった時に
+
+				// 大塚用 勤務種類が変更になった時に
 				if (workTypeChangedFlagForOOtsuka && isSpecialHoliday) {
 					CalAttrOfDailyPerformance optionalInstance = calcSetinIntegre
 							.reCreate(AutoCalAtrOvertime.APPLYMANUALLYENTER);
@@ -905,14 +927,17 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 					fixRestTimeSet = Optional.of(fixedWorkSetting.get().getOffdayWorkTimezone().getRestTimezone());
 				}
 
-				if(fixRestTimeSet.isPresent()) {
+				if (fixRestTimeSet.isPresent()) {
 					if (OOtsukaMode) {
-						breakTimeSheetOfWorkTimeMaster = devideBreakTimeSheetForOOtsuka(fixRestTimeSet.get().getLstTimezone().stream().map(lstTimeZone -> TimeSheetOfDeductionItem.createFromDeductionTimeSheet(lstTimeZone)).collect(Collectors.toList()),
+						breakTimeSheetOfWorkTimeMaster = devideBreakTimeSheetForOOtsuka(
+								fixRestTimeSet.get().getLstTimezone().stream()
+										.map(lstTimeZone -> TimeSheetOfDeductionItem
+												.createFromDeductionTimeSheet(lstTimeZone))
+										.collect(Collectors.toList()),
 								oneRange.getAttendanceLeavingWork().getTimeLeavingWorks());
-					}				
+					}
 				}
-				
-				
+
 				ootsukaFixedWorkSet = fixedWorkSetting.get().getCalculationSetting();
 				overTimeSheetSetting = fixOtSetting;
 
@@ -923,20 +948,21 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 				}
 				final BreakType flexBreakType = nowBreakType;
-//				大塚IW限定処理(休憩を固定で入れる案)
-//				final WorkType nowWorkType = workType.get();
+				// 大塚IW限定処理(休憩を固定で入れる案)
+				// final WorkType nowWorkType = workType.get();
 				if (!integrationOfDaily.getBreakTime().isEmpty()) {
-					
+
 					Optional<BreakTimeOfDailyPerformance> breakTimeByBreakType = integrationOfDaily.getBreakTime()
 							.stream().filter(breakTime -> breakTime.getBreakType() == flexBreakType).findFirst();
-					breakTimeByBreakType.ifPresent(tc ->{
-//						大塚IW限定処理(休憩を固定で入れる案)
-//						if(flexBreakType.isReferWorkTime()) {
-//							breakTimeSheet.addAll(ootsukaProcessService.convertBreakTimeSheetForOOtsuka(Optional.of(tc),nowWorkType,new WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().getBreakTimeSheets());
-//						}
-//						else {
-							breakTimeSheet.addAll(tc.getBreakTimeSheets());	
-//						}
+					breakTimeByBreakType.ifPresent(tc -> {
+						// 大塚IW限定処理(休憩を固定で入れる案)
+						// if(flexBreakType.isReferWorkTime()) {
+						// breakTimeSheet.addAll(ootsukaProcessService.convertBreakTimeSheetForOOtsuka(Optional.of(tc),nowWorkType,new
+						// WorkTimeCode(workInfo.getRecordInfo().getWorkTimeCode().toString())).get().getBreakTimeSheets());
+						// }
+						// else {
+						breakTimeSheet.addAll(tc.getBreakTimeSheets());
+						// }
 					});
 
 					breakCount = breakTimeSheet.stream()
@@ -944,15 +970,18 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 									&& timeSheet.getEndTime().greaterThan(timeSheet.getStartTime())))
 							.collect(Collectors.toList()).size();
 				}
-//				大塚IW限定処理(休憩を固定で入れる案)
-//				if(ootsukaProcessService.isIWWorkTimeAndCode(nowWorkType, workTime.get().getWorktimeCode())) {
-//					breakTimeSheet.add(new BreakTimeSheet(new BreakFrameNo(1),new TimeWithDayAttr(720), new TimeWithDayAttr(780)));
-//				}
+				// 大塚IW限定処理(休憩を固定で入れる案)
+				// if(ootsukaProcessService.isIWWorkTimeAndCode(nowWorkType,
+				// workTime.get().getWorktimeCode())) {
+				// breakTimeSheet.add(new BreakTimeSheet(new BreakFrameNo(1),new
+				// TimeWithDayAttr(720), new TimeWithDayAttr(780)));
+				// }
 				breakTimeOfDailyList
 						.add(new BreakTimeOfDailyPerformance(employeeId, nowBreakType, breakTimeSheet, targetDate));
 
 				statutoryOverFrameNoList = fixOtSetting.stream()
-						.map(timeZoneSetting -> new OverTimeFrameNo(timeZoneSetting.getLegalOTframeNo().v())).collect(Collectors.toList());
+						.map(timeZoneSetting -> new OverTimeFrameNo(timeZoneSetting.getLegalOTframeNo().v()))
+						.collect(Collectors.toList());
 
 				// 出退勤削除
 				if (!ootsukaProcessService.decisionOotsukaMode(workType.get(), ootsukaFixedWorkSet,
@@ -964,8 +993,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 					WorkStamp leaving = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0),
 							new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
 					TimeActualStamp stamp = new TimeActualStamp(attendance, leaving, 1);
-					TimeLeavingWork timeLeavingWork = new TimeLeavingWork(
-							new WorkNo(1), stamp, stamp);
+					TimeLeavingWork timeLeavingWork = new TimeLeavingWork(new WorkNo(1), stamp, stamp);
 					List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
 					timeLeavingWorkList.add(timeLeavingWork);
 					TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance = new TimeLeavingOfDailyPerformance(
@@ -974,15 +1002,13 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				}
 
 				/* 前日の勤務情報取得 */
-				val yesterDay = getWorkTypeByWorkInfo(yesterDayInfo, workType.get(),shareContainer);
+				val yesterDay = getWorkTypeByWorkInfo(yesterDayInfo, workType.get(), shareContainer);
 				/* 翌日の勤務情報取得 */
-				val tomorrow = getWorkTypeByWorkInfo(tomorrowDayInfo, workType.get(),shareContainer);
+				val tomorrow = getWorkTypeByWorkInfo(tomorrowDayInfo, workType.get(), shareContainer);
 				if (timeSheetAtr.isSchedule()) {
 					fixedWorkSetting.get().getFixedWorkRestSetting().changeCalcMethodToSche();
 				}
 
-				
-				
 				subhol = fixedWorkSetting.get().getCommonSetting().getSubHolTimeSet();
 				// 固定勤務
 				oneRange.createWithinWorkTimeSheet(personalInfo.getWorkingSystem(),
@@ -999,7 +1025,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 						workTime.get(), breakTimeOfDailyList, midNightTimeSheet, personalInfo, Optional.empty(),
 						holidayCalcMethodSet, dailyUnit, breakTimeSheetOfWorkTimeMaster, vacation,
 						oneRange.getTimeVacationAdditionRemainingTime().get(),
-						Optional.of(workInfo.getRecordInfo().getWorkTimeCode()),
+						workTimeCode,
 						integrationOfDaily.getCalAttr().getLeaveEarlySetting().isLate(),
 						integrationOfDaily.getCalAttr().getLeaveEarlySetting().isLeaveEarly(), illegularAddSetting,
 						flexAddSetting, regularAddSetting, holidayAddtionSet,
@@ -1008,7 +1034,7 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 						getPredByPersonInfo(personCommonSetting.getPersonInfo().isPresent()
 								? personCommonSetting.getPersonInfo().get().getWorkCategory().getWeekdayTime()
 										.getWorkTimeCode()
-								: Optional.empty(),companyCommonSetting.getShareContainer()),
+								: Optional.empty(), companyCommonSetting.getShareContainer()),
 						shortTimeSheets, fixedWorkSetting.get().getCommonSetting().getShortTimeWorkSet(), yesterInfo,
 						tommorowInfo, fixWoSetting, integrationOfDaily.getSpecDateAttr());
 				// 大塚モードの判定(緊急対応)
@@ -1020,18 +1046,18 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			case FLOW_WORK:
 				/* 流動勤務 */
 				// val flowWorkSetOpt =
-				shareContainer.getShared("FLOW_WORK" + companyId + workInfo.getRecordInfo().getWorkTimeCode().v(),
+				shareContainer.getShared("FLOW_WORK" + companyId + workTimeCode.get().v(),
 						() -> flowWorkSettingRepository.find(companyId,
-								workInfo.getRecordInfo().getWorkTimeCode().v()));
+								workTimeCode.get().v()));
 				return ManageReGetClass.cantCalc2(workType, integrationOfDaily, personalInfo, holidayCalcMethodSet,
 						regularAddSetting, flexAddSetting, hourlyPaymentAddSetting, illegularAddSetting,
 						Optional.empty(), Optional.empty());
 			case DIFFTIME_WORK:
 				/* 時差勤務 */
 				// val diffWorkSetOpt =
-				shareContainer.getShared("FLOW_WORK" + companyId + workInfo.getRecordInfo().getWorkTimeCode().v(),
+				shareContainer.getShared("FLOW_WORK" + companyId + workTimeCode.get().v(),
 						() -> diffTimeWorkSettingRepository.find(companyId,
-								workInfo.getRecordInfo().getWorkTimeCode().v()));
+								workTimeCode.get().v()));
 				return ManageReGetClass.cantCalc2(workType, integrationOfDaily, personalInfo, holidayCalcMethodSet,
 						regularAddSetting, flexAddSetting, hourlyPaymentAddSetting, illegularAddSetting,
 						Optional.empty(), Optional.empty());
@@ -1059,6 +1085,27 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				dailyUnit, fixRestTimeSet, fixWoSetting, ootsukaFixedWorkSet, holidayCalcMethodSet, breakCount,
 				coreTimeSetting, regularAddSetting, flexAddSetting, hourlyPaymentAddSetting, illegularAddSetting,
 				commonSet, statutoryOverFrameNoList, flexCalcSetting, leaveLate, overTimeSheetSetting, originPredSet);
+	}
+
+	/**
+	 * 就業時間帯コードの取得 勤務情報 > 労働条件 > 就業時間帯無と判定
+	 * 
+	 * @param workInfo
+	 * @param personCommonSetting
+	 * @param workType
+	 * @return
+	 */
+	private Optional<WorkTimeCode> decisionWorkTimeCode(WorkInfoOfDailyPerformance workInfo,
+			ManagePerPersonDailySet personCommonSetting, Optional<WorkType> workType) {
+
+		if (workInfo == null || workInfo.getRecordInfo() == null
+				|| workInfo.getRecordInfo().getWorkTimeCode() == null) {
+			if (personCommonSetting.getPersonInfo().isPresent()) {
+				return personCommonSetting.getPersonInfo().get().getWorkCategory().getWeekdayTime().getWorkTimeCode();
+			}
+			return Optional.empty();
+		}
+		return Optional.of(workInfo.getRecordInfo().getWorkTimeCode());
 	}
 
 	/**
@@ -1169,14 +1216,14 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				.getWorkTimeCode() == null) {
 			if (personCommonSetting.getPersonInfo().isPresent() && personCommonSetting.getPersonInfo().get()
 					.getWorkCategory().getWeekdayTime().getWorkTimeCode().isPresent()) {
-				schePred = getPredetermineTimeSetForCalcFromShareContainer(companyCommonSetting.getShareContainer(), companyId, personCommonSetting
-						.getPersonInfo().get().getWorkCategory().getWeekdayTime().getWorkTimeCode().get().toString());
+				schePred = getPredetermineTimeSetForCalcFromShareContainer(companyCommonSetting.getShareContainer(),
+						companyId, personCommonSetting.getPersonInfo().get().getWorkCategory().getWeekdayTime()
+								.getWorkTimeCode().get().toString());
 			}
-		}
-		else {
+		} else {
 			schePred = getPredetermineTimeSetForCalcFromShareContainer(companyCommonSetting.getShareContainer(),
-																	   companyId,
-																	   scheduleReGetClass.getIntegrationOfDaily().getWorkInformation().getScheduleInfo().getWorkTimeCode().v());
+					companyId, scheduleReGetClass.getIntegrationOfDaily().getWorkInformation().getScheduleInfo()
+							.getWorkTimeCode().v());
 		}
 
 		List<PersonnelCostSettingImport> personalSetting = getPersonalSetting(companyId, targetDate,
@@ -1189,12 +1236,13 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				personCommonSetting.getPersonInfo().get(),
 				getPredByPersonInfo(personCommonSetting.personInfo.isPresent()
 						? personCommonSetting.personInfo.get().getWorkCategory().getWeekdayTime().getWorkTimeCode()
-						: Optional.empty(),companyCommonSetting.getShareContainer()),
+						: Optional.empty(), companyCommonSetting.getShareContainer()),
 				recordReGetClass.getLeaveLateSet().isPresent() ? recordReGetClass.getLeaveLateSet().get()
 						: new DeductLeaveEarly(1, 1),
 				scheduleReGetClass.getLeaveLateSet().isPresent() ? scheduleReGetClass.getLeaveLateSet().get()
 						: new DeductLeaveEarly(1, 1),
-				schePred, converter, companyCommonSetting, personalSetting));
+				schePred, converter, companyCommonSetting, personalSetting,
+				decisionWorkTimeCode(recordReGetClass.getIntegrationOfDaily().getWorkInformation(), personCommonSetting, workType)));
 
 		/* 日別実績への項目移送 */
 		return recordReGetClass.getIntegrationOfDaily();
@@ -1238,28 +1286,26 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 	 *            対象日
 	 * @param integrationOfDaily
 	 *            日別実績(Work)
-	 * @param isOotsukaMode 
-	 * @param workType 
+	 * @param isOotsukaMode
+	 * @param workType
 	 * @return 1日の計算範囲
 	 */
 	private CalculationRangeOfOneDay createOneDayRange(IntegrationOfDaily integrationOfDaily,
-			Optional<WorkTimezoneCommonSet> commonSet, boolean isOotsukaMode, WorkType workType,MasterShareContainer<String> shareContainer) {
+			Optional<WorkTimezoneCommonSet> commonSet, boolean isOotsukaMode, WorkType workType,
+			MasterShareContainer<String> shareContainer, Optional<WorkTimeCode> workTimeCode) {
 		String companyId = AppContexts.user().companyId();
 		String employeeId = integrationOfDaily.getAffiliationInfor().getEmployeeId();
 		GeneralDate targetDate = integrationOfDaily.getAffiliationInfor().getYmd();
 		/* 所定時間設定取得 */
 		Optional<PredetemineTimeSetting> predetermineTimeSet = Optional.empty();
-		String workTimeCode = null;
-		if (integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
-			predetermineTimeSet =  getPredetermineTimeSetFromShareContainer(shareContainer, companyId, integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode().toString());
-					
-					
-			workTimeCode = integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode().toString();
+		if (workTimeCode.isPresent()) {
+			predetermineTimeSet = getPredetermineTimeSetFromShareContainer(shareContainer, companyId,
+					workTimeCode.get().v());
 		}
 
 		if (!predetermineTimeSet.isPresent()) {
 			predetermineTimeSet = Optional.of(new PredetemineTimeSetting(companyId, new AttendanceTime(0),
-					new WorkTimeCode(workTimeCode),
+					workTimeCode.get(),
 					new PredetermineTime(
 							new BreakDownTimeDay(new AttendanceTime(0), new AttendanceTime(0), new AttendanceTime(0)),
 							new BreakDownTimeDay(new AttendanceTime(0), new AttendanceTime(0), new AttendanceTime(0))),
@@ -1274,17 +1320,9 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 						.forwardByMinutes(predetermineTimeSet.get().getRangeTimeDay().valueAsMinutes()));
 
 		WorkInfoOfDailyPerformance toDayWorkInfo = integrationOfDaily.getWorkInformation();
-		Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance =integrationOfDaily.getAttendanceLeave();
+		Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance = integrationOfDaily.getAttendanceLeave();
 		/* 日別実績の出退勤時刻セット */
-		 timeLeavingOfDailyPerformance = correctStamp(integrationOfDaily.getAttendanceLeave(),
-				  employeeId,
-				  targetDate, 
-				  isOotsukaMode,
-				  predetermineTimeSet,
-				  workType,
-				  new WorkTimeCode(workTimeCode));			
-
-
+		timeLeavingOfDailyPerformance = correctStamp(integrationOfDaily.getAttendanceLeave(), employeeId, targetDate);
 
 		/* ジャストタイムの判断するための設定取得 */
 		boolean justLate = false;
@@ -1325,15 +1363,15 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				.createScheduleTimeSheet(integrationOfDailyForSchedule);
 		// 予定時間2 ここで、「時間帯を作成」を実施 Returnとして１日の計算範囲を受け取る
 		val returnResult = this.createRecord(afterScheduleIntegration, TimeSheetAtr.SCHEDULE, companyCommonSetting,
-												personCommonSetting, yesterDayInfo, tomorrowDayInfo);
-		if(!returnResult.getWorkType().isPresent()) {
-			if(returnResult.getIntegrationOfDaily().getWorkInformation().getScheduleInfo().getWorkTypeCode() != null)
+				personCommonSetting, yesterDayInfo, tomorrowDayInfo);
+		if (!returnResult.getWorkType().isPresent()) {
+			if (returnResult.getIntegrationOfDaily().getWorkInformation().getScheduleInfo().getWorkTypeCode() != null)
 				returnResult.setWorkType(getWorkTypeFromShareContainer(companyCommonSetting.getShareContainer(),
-																	   AppContexts.user().companyId(), 
-																	   returnResult.getIntegrationOfDaily().getWorkInformation().getScheduleInfo().getWorkTypeCode().v()));
+						AppContexts.user().companyId(), returnResult.getIntegrationOfDaily().getWorkInformation()
+								.getScheduleInfo().getWorkTypeCode().v()));
 		}
 
-		return returnResult; 
+		return returnResult;
 	}
 
 	/**
@@ -1363,11 +1401,12 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 
 	/**
 	 * 任意項目の計算
+	 * @param personCommonSetting 
 	 * 
 	 * @return
 	 */
 	private IntegrationOfDaily calcOptionalItem(IntegrationOfDaily integrationOfDaily,
-			DailyRecordToAttendanceItemConverter converter, ManagePerCompanySet companyCommonSetting) {
+			DailyRecordToAttendanceItemConverter converter, ManagePerCompanySet companyCommonSetting, ManagePerPersonDailySet personCommonSetting) {
 		String companyId = AppContexts.user().companyId();
 		String employeeId = integrationOfDaily.getAffiliationInfor().getEmployeeId();
 		GeneralDate targetDate = integrationOfDaily.getAffiliationInfor().getYmd();
@@ -1385,41 +1424,36 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		// 項目選択による計算時に必要なので取得
 		converter.setData(integrationOfDaily);
 
-		
-		
-		
 		Optional<WorkTimeSetting> workTime = Optional.empty();
 		Optional<PredetemineTimeSetting> predSet = Optional.empty();
 		Optional<WorkType> workType = Optional.empty();
 		MasterShareContainer<String> shareContainer = companyCommonSetting.getShareContainer();
-		if(integrationOfDaily != null
-		&& integrationOfDaily.getWorkInformation() != null
-		&& integrationOfDaily.getWorkInformation().getRecordInfo() != null) {
-			if(integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode() != null) {
-				workTime = getWorkTimeSettingFromShareContainer(shareContainer, companyId, integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode().toString());
-				predSet = getPredetermineTimeSetFromShareContainer(shareContainer, companyId, integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTimeCode().toString());
+		
+		
+		
+		if (integrationOfDaily != null ) {
+			Optional<WorkTimeCode> recordWorkTime = decisionWorkTimeCode(integrationOfDaily.getWorkInformation(), personCommonSetting, workType);
+			if (recordWorkTime.isPresent()) {
+				workTime = getWorkTimeSettingFromShareContainer(shareContainer, companyId,recordWorkTime.get().v());
+				predSet = getPredetermineTimeSetFromShareContainer(shareContainer, companyId,recordWorkTime.get().v());
 			}
-			
-			if(integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode() != null) {
-				workType = getWorkTypeFromShareContainer(shareContainer, companyId, integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode().toString());
+
+			if (integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode() != null) {
+				workType = getWorkTypeFromShareContainer(shareContainer, companyId,
+						integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode().toString());
 			}
 		}
-		
-		
-		val resultProcedure = storedProcdureProcess.dailyProcessing(integrationOfDaily,
-											  workType,
-											  workTime,
-											  predSet);
-		resultProcedure.ifPresent(tt ->{
+
+		val resultProcedure = storedProcdureProcess.dailyProcessing(integrationOfDaily, workType, workTime, predSet);
+		resultProcedure.ifPresent(tt -> {
 			integrationOfDaily.getAttendanceTimeOfDailyPerformance().ifPresent(tc -> {
-				tc.getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily().getOverTimeWork().ifPresent(ts -> {
-					ts.mergeOverTimeList(tt.getOverTimes());
-				});
-			});			
+				tc.getActualWorkingTimeOfDaily().getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily()
+						.getOverTimeWork().ifPresent(ts -> {
+							ts.mergeOverTimeList(tt.getOverTimes());
+						});
+			});
 		});
 
-		
-		
 		// 編集状態を取得（日別実績の編集状態が持つ勤怠項目IDのみのList作成）
 		List<Integer> attendanceItemIdList = integrationOfDaily.getEditState().stream()
 				.filter(editState -> editState.getEmployeeId().equals(employeeId)
@@ -1431,8 +1465,9 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		}
 
 		// 任意項目の計算
-		integrationOfDaily.setAnyItemValue(Optional.of(AnyItemValueOfDaily.caluculationAnyItem(companyId, employeeId,
-				targetDate, optionalItems, formulaList, formulaOrderList, empCondition, Optional.of(converter), bsEmploymentHistOpt,resultProcedure)));
+		integrationOfDaily.setAnyItemValue(Optional.of(
+				AnyItemValueOfDaily.caluculationAnyItem(companyId, employeeId, targetDate, optionalItems, formulaList,
+						formulaOrderList, empCondition, Optional.of(converter), bsEmploymentHistOpt, resultProcedure)));
 
 		IntegrationOfDaily calcResultIntegrationOfDaily = integrationOfDaily;
 
@@ -1446,20 +1481,23 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		return calcResultIntegrationOfDaily;
 	}
 
-	private Optional<PredetermineTimeSetForCalc> getPredByPersonInfo(Optional<WorkTimeCode> workTimeCode,MasterShareContainer<String> shareContainer) {
+	private Optional<PredetermineTimeSetForCalc> getPredByPersonInfo(Optional<WorkTimeCode> workTimeCode,
+			MasterShareContainer<String> shareContainer) {
 		if (!workTimeCode.isPresent())
 			return Optional.empty();
-//		val predSetting = predetemineTimeSetRepository.findByWorkTimeCode(AppContexts.user().companyId(),
-//				workTimeCode.get().toString());
-		val predSetting = getPredetermineTimeSetFromShareContainer(shareContainer, AppContexts.user().companyId(), workTimeCode.get().toString());
+		// val predSetting =
+		// predetemineTimeSetRepository.findByWorkTimeCode(AppContexts.user().companyId(),
+		// workTimeCode.get().toString());
+		val predSetting = getPredetermineTimeSetFromShareContainer(shareContainer, AppContexts.user().companyId(),
+				workTimeCode.get().toString());
 		if (!predSetting.isPresent())
 			return Optional.empty();
 		return Optional.of(PredetermineTimeSetForCalc.convertFromAggregatePremiumTime(predSetting.get()));
 
 	}
 
-	private WorkType getWorkTypeByWorkInfo(Optional<WorkInfoOfDailyPerformance> otherDayWorkInfo,
-			WorkType nowWorkType,MasterShareContainer<String> shareContainer) {
+	private WorkType getWorkTypeByWorkInfo(Optional<WorkInfoOfDailyPerformance> otherDayWorkInfo, WorkType nowWorkType,
+			MasterShareContainer<String> shareContainer) {
 		if (otherDayWorkInfo.isPresent()) {
 			WorkTypeCode workTypeCode;
 			try {
@@ -1468,8 +1506,10 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 				workTypeCode = otherDayWorkInfo.get().getScheduleInfo().getWorkTypeCode();
 			}
 			String typeCode = workTypeCode.v().toString();
-//			val findedWorkType = this.workTypeRepository.findByPK(AppContexts.user().companyId(), typeCode);
-			val findedWorkType = getWorkTypeFromShareContainer(shareContainer, AppContexts.user().companyId(), typeCode);
+			// val findedWorkType =
+			// this.workTypeRepository.findByPK(AppContexts.user().companyId(), typeCode);
+			val findedWorkType = getWorkTypeFromShareContainer(shareContainer, AppContexts.user().companyId(),
+					typeCode);
 			val useWorkType = findedWorkType.orElse(nowWorkType);
 			return useWorkType;
 		} else {
@@ -1528,25 +1568,28 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		}
 		return Optional.empty();
 	}
-	
-	private Optional<TimeLeavingOfDailyPerformance> correctStamp(Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance, String employeeId, GeneralDate targetDate, boolean isOotuskaMode, Optional<PredetemineTimeSetting> predetermineTimeSet, WorkType workType, WorkTimeCode workTimeCode) {
-		//大塚モードの場合は、IWカスタマイズ処理に入る。
-//		if(isOotuskaMode && workTimeCode != null) {
-//			timeLeavingOfDailyPerformance = ootsukaProcessService.iWProcessForStamp(timeLeavingOfDailyPerformance, employeeId, targetDate, predetermineTimeSet,workType,workTimeCode);
-//		}
+
+	private Optional<TimeLeavingOfDailyPerformance> correctStamp(
+			Optional<TimeLeavingOfDailyPerformance> timeLeavingOfDailyPerformance, String employeeId,
+			GeneralDate targetDate) {
+		// 大塚モードの場合は、IWカスタマイズ処理に入る。
+		// if(isOotuskaMode && workTimeCode != null) {
+		// timeLeavingOfDailyPerformance =
+		// ootsukaProcessService.iWProcessForStamp(timeLeavingOfDailyPerformance,
+		// employeeId, targetDate, predetermineTimeSet,workType,workTimeCode);
+		// }
 		if (!timeLeavingOfDailyPerformance.isPresent()) {
 			WorkStamp attendance = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0),
 					new WorkLocationCD("01"), StampSourceInfo.CORRECTION_RECORD_SET);
 			WorkStamp leaving = new WorkStamp(new TimeWithDayAttr(0), new TimeWithDayAttr(0), new WorkLocationCD("01"),
 					StampSourceInfo.CORRECTION_RECORD_SET);
 			TimeActualStamp stamp = new TimeActualStamp(attendance, leaving, 1);
-			TimeLeavingWork timeLeavingWork = new TimeLeavingWork(
-					new WorkNo(1), stamp, stamp);
+			TimeLeavingWork timeLeavingWork = new TimeLeavingWork(new WorkNo(1), stamp, stamp);
 			List<TimeLeavingWork> timeLeavingWorkList = new ArrayList<>();
 			timeLeavingWorkList.add(timeLeavingWork);
 			timeLeavingOfDailyPerformance = Optional.of(
 					new TimeLeavingOfDailyPerformance(employeeId, new WorkTimes(1), timeLeavingWorkList, targetDate));
-		}			
+		}
 		return timeLeavingOfDailyPerformance;
 	}
 
@@ -1559,112 +1602,119 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 		return (workType.getDailyWork().isWeekDayOrHolidayWork()
 				&& !checkAttendanceLeaveState(integrationOfDaily.getAttendanceLeave()));
 	}
-	
+
 	/**
 	 * 共有コンテナを使った勤務種類の取得
+	 * 
 	 * @param shareContainer
 	 * @param WorkTypeCode
 	 * @param companyId
 	 * @return
 	 */
-	private Optional<WorkType> getWorkTypeFromShareContainer(MasterShareContainer<String> shareContainer,String companyId,String WorkTypeCode){
-//		val x = shareContainer.getShared("WorkType" + WorkTypeCode);
-		val workType = shareContainer.getShared("WorkType" + WorkTypeCode, () -> workTypeRepository.findNoAbolishByPK(companyId, WorkTypeCode));
-		if(workType.isPresent()) {
+	private Optional<WorkType> getWorkTypeFromShareContainer(MasterShareContainer<String> shareContainer,
+			String companyId, String WorkTypeCode) {
+		// val x = shareContainer.getShared("WorkType" + WorkTypeCode);
+		val workType = shareContainer.getShared("WorkType" + WorkTypeCode,
+				() -> workTypeRepository.findNoAbolishByPK(companyId, WorkTypeCode));
+		if (workType.isPresent()) {
 			return Optional.of(workType.get().clone());
 		}
 		return Optional.empty();
 	}
-	
-	
+
 	/**
 	 * 共有コンテナを使った就業時間帯の取得
+	 * 
 	 * @param shareContainer
 	 * @param companyId
 	 * @param workTimeCode
 	 * @return
 	 */
-	private Optional<WorkTimeSetting> getWorkTimeSettingFromShareContainer(MasterShareContainer<String> shareContainer,String companyId,String workTimeCode){
-		val workTimeSetting = shareContainer.getShared("WorkTime" + workTimeCode, () -> workTimeSettingRepository.findByCode(companyId, workTimeCode));
-		if(workTimeSetting.isPresent()) {
+	private Optional<WorkTimeSetting> getWorkTimeSettingFromShareContainer(MasterShareContainer<String> shareContainer,
+			String companyId, String workTimeCode) {
+		val workTimeSetting = shareContainer.getShared("WorkTime" + workTimeCode,
+				() -> workTimeSettingRepository.findByCode(companyId, workTimeCode));
+		if (workTimeSetting.isPresent()) {
 			return Optional.of(workTimeSetting.get().clone());
 		}
 		return Optional.empty();
 	}
-	
+
 	/**
 	 * 共有コンテナを使った計算用所定時間帯設定の取得
+	 * 
 	 * @param shareContainer
 	 * @param companyId
 	 * @param workTimeCode
 	 * @return
 	 */
-	private Optional<PredetermineTimeSetForCalc> getPredetermineTimeSetForCalcFromShareContainer(MasterShareContainer<String> shareContainer,String companyId,String workTimeCode){
+	private Optional<PredetermineTimeSetForCalc> getPredetermineTimeSetForCalcFromShareContainer(
+			MasterShareContainer<String> shareContainer, String companyId, String workTimeCode) {
 		val predSet = getPredetermineTimeSetFromShareContainer(shareContainer, companyId, workTimeCode);
-		if(predSet.isPresent()) {
+		if (predSet.isPresent()) {
 			return Optional.of(PredetermineTimeSetForCalc.convertFromAggregatePremiumTime(predSet.get()));
 		}
 		return Optional.empty();
 	}
-	
+
 	/**
 	 * 共有コンテナを使った所定時間帯設定の取得
+	 * 
 	 * @param shareContainer
 	 * @param companyId
 	 * @param workTimeCode
 	 * @return
 	 */
-	private Optional<PredetemineTimeSetting> getPredetermineTimeSetFromShareContainer(MasterShareContainer<String> shareContainer,String companyId,String workTimeCode){
-		val predSet = shareContainer.getShared("PredetemineSet" + workTimeCode, () -> predetemineTimeSetRepository.findByWorkTimeCode(companyId, workTimeCode));
-		if(predSet.isPresent()) {
+	private Optional<PredetemineTimeSetting> getPredetermineTimeSetFromShareContainer(
+			MasterShareContainer<String> shareContainer, String companyId, String workTimeCode) {
+		val predSet = shareContainer.getShared("PredetemineSet" + workTimeCode,
+				() -> predetemineTimeSetRepository.findByWorkTimeCode(companyId, workTimeCode));
+		if (predSet.isPresent()) {
 			return Optional.of(predSet.get().clone());
 		}
 		return Optional.empty();
 	}
-	
-	
 
 	/**
 	 * 共有コンテナを使ったフレ就業時間帯の取得
+	 * 
 	 * @return
 	 */
-	private Optional<FlexWorkSetting> getFlexWorkSetOptFromShareContainer(MasterShareContainer<String> shareContainer,String companyId,String workTimeCode){
-		val flexWorkSetOpt = shareContainer.getShared(
-				"FLEX_WORK" + companyId + workTimeCode,
+	private Optional<FlexWorkSetting> getFlexWorkSetOptFromShareContainer(MasterShareContainer<String> shareContainer,
+			String companyId, String workTimeCode) {
+		val flexWorkSetOpt = shareContainer.getShared("FLEX_WORK" + companyId + workTimeCode,
 				() -> flexWorkSettingRepository.find(companyId, workTimeCode));
-		if(flexWorkSetOpt.isPresent()) {
-			 return Optional.of(flexWorkSetOpt.get().clone());
+		if (flexWorkSetOpt.isPresent()) {
+			return Optional.of(flexWorkSetOpt.get().clone());
 		}
 		return Optional.empty();
 	}
-	
+
 	/**
 	 * 共有コンテナを使った固定就業時間帯の取得
+	 * 
 	 * @return
 	 */
-	private Optional<FixedWorkSetting> getFixedWorkSettingFromShareContainer(MasterShareContainer<String> shareContainer,String companyId,String workTimeCode){
-		val fixedWorkSet = shareContainer.getShared(
-				"FIXED_WORK" + companyId + workTimeCode,
-				() -> fixedWorkSettingRepository.findByKey(companyId,workTimeCode));
-		if(fixedWorkSet.isPresent()) {
+	private Optional<FixedWorkSetting> getFixedWorkSettingFromShareContainer(
+			MasterShareContainer<String> shareContainer, String companyId, String workTimeCode) {
+		val fixedWorkSet = shareContainer.getShared("FIXED_WORK" + companyId + workTimeCode,
+				() -> fixedWorkSettingRepository.findByKey(companyId, workTimeCode));
+		if (fixedWorkSet.isPresent()) {
 			return fixedWorkSet.map(f -> f.clone());
 		}
 		return Optional.empty();
 	}
-	
+
 	/**
 	 * 就業時間帯の共通設定を取得する
 	 * 
 	 * @return
 	 */
-	private Optional<WorkTimezoneCommonSet> getWorkTimezoneCommonSetFromShareContainer(IntegrationOfDaily integrationOfDaily,
+	private Optional<WorkTimezoneCommonSet> getWorkTimezoneCommonSetFromShareContainer(WorkTimeCode workTimeCode,
 			String companyId, Optional<WorkTimeSetting> workTime, MasterShareContainer<String> shareContainer) {
 
-		/* 勤務種類の取得 */
-		val workInfo = integrationOfDaily.getWorkInformation();
-
 		if (workTime.get().getWorkTimeDivision().getWorkTimeDailyAtr().isFlex()) {
-			val flexWorkSetOpt = getFlexWorkSetOptFromShareContainer(shareContainer, companyId, workInfo.getRecordInfo().getWorkTimeCode().v());
+			val flexWorkSetOpt = getFlexWorkSetOptFromShareContainer(shareContainer, companyId, workTimeCode.v());
 			if (flexWorkSetOpt.isPresent()) {
 				return Optional.of(flexWorkSetOpt.get().getCommonSetting().clone());
 			}
@@ -1673,27 +1723,24 @@ public class CalculateDailyRecordServiceImpl implements CalculateDailyRecordServ
 			switch (workTime.get().getWorkTimeDivision().getWorkTimeMethodSet()) {
 			case FIXED_WORK:
 				/* 固定 */
-				val fixedWorkSetting = getFixedWorkSettingFromShareContainer(shareContainer, companyId, workInfo.getRecordInfo().getWorkTimeCode().v());
+				val fixedWorkSetting = getFixedWorkSettingFromShareContainer(shareContainer, companyId,
+						workTimeCode.v());
 				if (fixedWorkSetting.isPresent()) {
 					return Optional.of(fixedWorkSetting.get().getCommonSetting().clone());
 				}
 				break;
 			case FLOW_WORK:
 				/* 流動勤務 */
-				val flowWorkSetOpt = shareContainer.getShared(
-						"FLOW_WORK" + companyId + workInfo.getRecordInfo().getWorkTimeCode().v(),
-						() -> flowWorkSettingRepository.find(companyId,
-								workInfo.getRecordInfo().getWorkTimeCode().v()));
+				val flowWorkSetOpt = shareContainer.getShared("FLOW_WORK" + companyId + workTimeCode.v(),
+						() -> flowWorkSettingRepository.find(companyId, workTimeCode.v()));
 				if (flowWorkSetOpt.isPresent()) {
 					return Optional.of(flowWorkSetOpt.get().getCommonSetting().clone());
 				}
 				break;
 			case DIFFTIME_WORK:
 				/* 時差勤務 */
-				val diffWorkSetOpt = shareContainer.getShared(
-						"DIFFTIME_WORK" + companyId + workInfo.getRecordInfo().getWorkTimeCode().v(),
-						() -> diffTimeWorkSettingRepository.find(companyId,
-								workInfo.getRecordInfo().getWorkTimeCode().v()));
+				val diffWorkSetOpt = shareContainer.getShared("DIFFTIME_WORK" + companyId + workTimeCode.v(),
+						() -> diffTimeWorkSettingRepository.find(companyId, workTimeCode.v()));
 				if (diffWorkSetOpt.isPresent()) {
 					return Optional.of(diffWorkSetOpt.get().getCommonSet().clone());
 				}
