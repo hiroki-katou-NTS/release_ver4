@@ -92,7 +92,7 @@ public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
 	@Inject
 	private IdentificationAdapter identificationAdapter;
 	
-	public void processBeforeRegister(Application_New application, int overTimeAtr, boolean checkOver1Year){
+	public void processBeforeRegister(Application_New application, int overTimeAtr, boolean checkOver1Year, List<GeneralDate> lstDateHd){
 		// アルゴリズム「未入社前チェック」を実施する
 		retirementCheckBeforeJoinCompany(application.getCompanyID(), application.getEmployeeID(), application.getAppDate());
 		
@@ -161,6 +161,10 @@ public class NewBeforeRegisterImpl_New implements NewBeforeRegister_New {
 		applicationAcceptanceRestrictionsCheck(application.getCompanyID(), application.getAppType(), application.getPrePostAtr(), startDate, endDate,overTimeAtr);
 		// 申請する開始日～申請する終了日までループする
 		for(GeneralDate loopDate = startDate; loopDate.beforeOrEquals(endDate); loopDate = loopDate.addDays(1)){
+			//hoatt 2019/10/04 #109085を対応
+			if(lstDateHd != null && lstDateHd.contains(loopDate)){
+				continue;
+			}
 			if(loopDate.equals(GeneralDate.today()) && application.getPrePostAtr().equals(PrePostAtr.PREDICT) && application.isAppOverTime()){
 				confirmCheckOvertime(application.getCompanyID(), application.getEmployeeID(), loopDate);
 			}else{

@@ -35,6 +35,7 @@ import nts.gul.text.IdentifierUtil;
 import nts.uk.ctx.at.function.app.command.processexecution.approuteupdatedaily.AppRouteUpdateDailyService;
 import nts.uk.ctx.at.function.app.command.processexecution.approuteupdatemonthly.AppRouteUpdateMonthlyService;
 import nts.uk.ctx.at.function.app.command.processexecution.createlogfileexecution.CreateLogFileExecution;
+import nts.uk.ctx.at.function.app.command.processexecution.reflectapprovalresult.executionprocess.CalPeriodApprovalResult;
 import nts.uk.ctx.at.function.dom.adapter.WorkplaceWorkRecordAdapter;
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.AppReflectManagerAdapter;
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.ProcessStateReflectImport;
@@ -125,6 +126,7 @@ import nts.uk.ctx.at.shared.dom.common.CompanyId;
 import nts.uk.ctx.at.shared.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmpDto;
 import nts.uk.ctx.at.shared.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmpHisAdaptor;
 import nts.uk.ctx.at.shared.dom.ot.frame.NotUseAtr;
+import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
@@ -272,6 +274,9 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	
     @Resource
     private ManagedExecutorService executorService;
+    
+    @Inject
+	private CalPeriodApprovalResult calPeriodApprovalResult;
     
 	public static int MAX_DELAY_PARALLEL = 0;
 	
@@ -1641,8 +1646,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 											.collect(Collectors.toList());
 									//職場情報変更期間を求める
 									listDatePeriodWorkplace =  wkplaceInfoChangePeriod.getWkplaceInfoChangePeriod(empLeader, datePeriod, workplaceItems, true);
-								}else {
-									listDatePeriodWorkplace.add(datePeriod);
 								}
 							}
 							boolean check =  false;
@@ -2357,19 +2360,41 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						}
 					}
 				}
+				//異動者を再作成する
+				boolean isRecreateTransfer = processExecution.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTransfer();
+				//勤務種別者を再作成
+				boolean isRecreateTypeChangePerson = processExecution.getExecSetting().getDailyPerf().getTargetGroupClassification().isRecreateTypeChangePerson();
 				int sizeEmployee = lstRegulationInfoEmployeeNew.size();
 				for (int j = 0; j < sizeEmployee; j++) {
 					try {
 						String regulationInfoEmployeeAdapterDto = lstRegulationInfoEmployeeNew.get(j);
-						ProcessStateReflectImport processStateReflectImport = appReflectManagerAdapter
-								.reflectAppOfEmployeeTotal(execId, regulationInfoEmployeeAdapterDto,
-										newDatePeriod);
-						if (processStateReflectImport == ProcessStateReflectImport.INTERRUPTION) {
-							endStatusIsInterrupt = true;
-						}
-						if (endStatusIsInterrupt) {
-							checkStopExec = true;
-							break;
+						//INPUT．「実行種別」 = 再作成
+						if (processExecution.getProcessExecType() == ProcessExecType.RE_CREATE) {
+							//承認結果の再反映期間を計算する
+							List<DatePeriod> listPeriod =  calPeriodApprovalResult.calPeriodApprovalResult(companyId, regulationInfoEmployeeAdapterDto, newDatePeriod.start(), isRecreateTransfer, isRecreateTypeChangePerson);
+							for(DatePeriod p :listPeriod) {
+								ProcessStateReflectImport processStateReflectImport = appReflectManagerAdapter
+										.reflectAppOfEmployeeTotal(execId, regulationInfoEmployeeAdapterDto,
+												p);
+								if (processStateReflectImport == ProcessStateReflectImport.INTERRUPTION) {
+									endStatusIsInterrupt = true;
+								}
+								if (endStatusIsInterrupt) {
+									checkStopExec = true;
+									break;
+								}
+							}
+						}else {
+							ProcessStateReflectImport processStateReflectImport = appReflectManagerAdapter
+									.reflectAppOfEmployeeTotal(execId, regulationInfoEmployeeAdapterDto,
+											newDatePeriod);
+							if (processStateReflectImport == ProcessStateReflectImport.INTERRUPTION) {
+								endStatusIsInterrupt = true;
+							}
+							if (endStatusIsInterrupt) {
+								checkStopExec = true;
+								break;
+							}
 						}
 					} catch (Exception e) {
 						isHasException = true;
@@ -3121,7 +3146,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		}
 		return period;
 	}
-
+	@Inject
+	private InterimRemainDataMngRegisterDateChange interimRemainDataMngRegisterDateChange;
 	// true is interrupt
 	private boolean executionDaily(String companyId, CommandHandlerContext<ExecuteProcessExecutionCommand> context,
 			ProcessExecution processExecution, String employeeId, EmpCalAndSumExeLog empCalAndSumExeLog,
@@ -3137,7 +3163,12 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						Optional.ofNullable(dailyCreateLog), processExecution.getExecSetting().getDailyPerf()
 								.getTargetGroupClassification().isRecreateTypeChangePerson() ? true : false,
 						false, false, null);
+				
+				//暫定データの登録
+				this.interimRemainDataMngRegisterDateChange.registerDateChange(companyId, employeeId, period.datesBetween());
 			} catch (Exception e) {
+				//暫定データの登録
+				this.interimRemainDataMngRegisterDateChange.registerDateChange(companyId, employeeId, period.datesBetween());
 				throw new CreateDailyException(e);
 			}
 		} else {
@@ -3241,7 +3272,20 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 //		}
 //		return newEmpIdList;
 //	}
-
+	
+	/**
+	 * 日別実績処理の再実行
+	 * @param context
+	 * @param companyId
+	 * @param empId
+	 * @param period
+	 * @param empCalAndSumExeLogId
+	 * @param dailyCreateLog
+	 * @param procExec
+	 * @return
+	 * @throws CreateDailyException
+	 * @throws DailyCalculateException
+	 */
 	private boolean RedoDailyPerformanceProcessing(CommandHandlerContext<ExecuteProcessExecutionCommand> context,
 			String companyId, String empId, DatePeriod period, String empCalAndSumExeLogId, ExecutionLog dailyCreateLog,
 			ProcessExecution procExec) throws CreateDailyException, DailyCalculateException {
@@ -3260,7 +3304,11 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			processState1 = this.createDailyService.createDailyResultEmployeeWithNoInfoImport(asyncContext, empId,
 					period, companyId, empCalAndSumExeLogId, Optional.ofNullable(dailyCreateLog), reCreateWorkType,
 					reCreateWorkPlace, reCreateRestTime, null);
+			//暫定データの登録
+			this.interimRemainDataMngRegisterDateChange.registerDateChange(companyId, empId, period.datesBetween());
 		} catch (Exception e) {
+			//暫定データの登録
+			this.interimRemainDataMngRegisterDateChange.registerDateChange(companyId, empId, period.datesBetween());
 			throw new CreateDailyException(e);
 		}
 		log.info("更新処理自動実行_日別実績の作成_END_"+procExec.getExecItemCd()+"_"+GeneralDateTime.now());

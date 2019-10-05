@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.request.app.command.application.workchange;
 
+import java.util.ArrayList;
 /*import java.util.ArrayList;
 import nts.uk.ctx.at.shared.dom.worktype.algorithm.SpecHdFrameForWkTypeSetService;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.AchievementOutput;
@@ -125,9 +126,9 @@ public class AddAppWorkChangeCommandHandler extends CommandHandlerWithResult<Add
 				workChangeCommand.getBackHomeAtr2());
 		
 		//1日休日のチェック
-		checkHoliday(companyId,applicantSID,addCommand);
+		List<GeneralDate> lstDateHd = checkHoliday(companyId,applicantSID,addCommand);
 		//ドメインモデル「勤務変更申請設定」の新規登録をする
-		return workChangeRegisterService.registerData(workChangeDomain, app, addCommand.isCheckOver1Year());
+		return workChangeRegisterService.registerData(workChangeDomain, app, addCommand.isCheckOver1Year(), lstDateHd);
 	}
 
 	
@@ -137,33 +138,33 @@ public class AddAppWorkChangeCommandHandler extends CommandHandlerWithResult<Add
 	 * @param SID
 	 * @param AddAppWorkChangeCommand
 	 */
-	private void checkHoliday(String companyId, String applicantSID, AddAppWorkChangeCommand addCommand) {
+	private List<GeneralDate> checkHoliday(String companyId, String applicantSID, AddAppWorkChangeCommand addCommand) {
 		boolean isCheck = addCommand.getWorkChange().getExcludeHolidayAtr() == 1;
 		// INPUT．休日除くチェック区分をチェックする
-		if (isCheck) {
-			//申請期間から休日の申請日を取得する
-			GeneralDate startDate = addCommand.getApplication().getStartDate();
+		if (!isCheck) return new ArrayList<>();
+		//申請期間から休日の申請日を取得する
+		GeneralDate startDate = addCommand.getApplication().getStartDate();
 
-			GeneralDate endDate = addCommand.getApplication().getEndDate();
-			
-			List<GeneralDate> dateClears = otherCommonAlgorithm.lstDateIsHoliday(companyId, applicantSID,
-					new DatePeriod(startDate, endDate));
+		GeneralDate endDate = addCommand.getApplication().getEndDate();
+		
+		List<GeneralDate> dateClears = otherCommonAlgorithm.lstDateIsHoliday(companyId, applicantSID,
+				new DatePeriod(startDate, endDate));
 
-			
-			int totalDate = startDate.daysTo(endDate) + 1;
+		
+		int totalDate = startDate.daysTo(endDate) + 1;
 
-			if (dateClears.size() == totalDate) {
-				//日付一覧(output)の件数 > 0
-				String dateListString = "";
+		if (dateClears.size() == totalDate) {
+			//日付一覧(output)の件数 > 0
+			String dateListString = "";
 
-				for (int i = 0; i < dateClears.size(); i++) {
-					if (dateListString != "") {
-						dateListString += "、";
-					}
-					dateListString += dateClears.get(i).toString("yyyy/MM/dd");
+			for (int i = 0; i < dateClears.size(); i++) {
+				if (dateListString != "") {
+					dateListString += "、";
 				}
-				throw new BusinessException("Msg_1459",dateListString);
+				dateListString += dateClears.get(i).toString("yyyy/MM/dd");
 			}
+			throw new BusinessException("Msg_1459",dateListString);
 		}
+		return dateClears;
 	}
 }

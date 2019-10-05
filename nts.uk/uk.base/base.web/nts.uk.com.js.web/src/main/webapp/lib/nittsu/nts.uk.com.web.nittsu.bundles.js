@@ -26537,8 +26537,10 @@ var nts;
                         }
                         if (_mEditor && _mEditor.type === dkn.TEXTBOX) {
                             var $editor = dkn.controlType[dkn.TEXTBOX].my;
-                            var $input = $editor.querySelector("input.medit");
-                            $input.value = data;
+                            var $input_1 = $editor.querySelector("input.medit");
+                            $input_1.value = data;
+                            evt.preventDefault();
+                            setTimeout(function () { return $input_1.focus(); });
                             return;
                         }
                         if (su.afterCollertar)

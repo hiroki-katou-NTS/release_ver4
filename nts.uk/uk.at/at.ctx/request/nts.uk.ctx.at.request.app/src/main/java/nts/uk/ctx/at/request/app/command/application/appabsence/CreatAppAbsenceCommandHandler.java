@@ -36,7 +36,6 @@ import nts.uk.ctx.at.request.dom.application.common.service.detailscreen.before.
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.RegisterAtApproveReflectionInfoService_New;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.after.NewAfterRegister_New;
 import nts.uk.ctx.at.request.dom.application.common.service.newscreen.before.NewBeforeRegister_New;
-import nts.uk.ctx.at.request.dom.application.common.service.other.GetHdDayInPeriodService;
 import nts.uk.ctx.at.request.dom.application.common.service.other.OtherCommonAlgorithm;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.PeriodCurrentMonth;
 import nts.uk.ctx.at.request.dom.application.common.service.other.output.ProcessResult;
@@ -79,8 +78,6 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 	private RegisterAtApproveReflectionInfoService_New registerService;
 	@Inject
 	private SpecialHolidayEventAlgorithm specHdEventAlg;
-	@Inject
-	private GetHdDayInPeriodService getHdDayInPeriodSv;
 	@Inject
 	private InterimRemainDataMngRegisterDateChange interimRemainDataMngRegisterDateChange;
 	@Inject
@@ -166,10 +163,10 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 				command.getStartTime2(),
 				command.getEndTime2(),
 				specHd);
-		// 2-1.新規画面登録前の処理を実行する
-		newBeforeRegister.processBeforeRegister(appRoot, 0, command.isCheckOver1Year());
-		//休日申請日
+		//申請期間から休日の申請日を取得する
 		List<GeneralDate> lstDateIsHoliday = otherCommonAlg.lstDateIsHoliday(companyID, command.getEmployeeID(), new DatePeriod(startDate, endDate));
+		// 2-1.新規画面登録前の処理を実行する
+		newBeforeRegister.processBeforeRegister(appRoot, 0, command.isCheckOver1Year(), lstDateIsHoliday);
 		// 7.登録時のエラーチェック
 		this.checkBeforeRegister(command, startDate, endDate, true, lstDateIsHoliday);
 		//計画年休上限チェック(check giới han trên plan annual holiday)
@@ -263,8 +260,7 @@ public class CreatAppAbsenceCommandHandler extends CommandHandlerWithResult<Crea
 					//申請する日数 = 申請する終了日 - 申請する開始日 + 1
 					appDay = startDate.daysTo(endDate) + 1;
 				}else{//したメインモデル「事象に対する特別休暇」．休日を取得日に含めるがfalse：
-					//19.指定する期間での休日日数を取得する-(Lấy số ngày nghỉ phép trong khoảng thời gian chỉ định)
-					int hdDaySys = getHdDayInPeriodSv.getHolidayDayInPeriod(command.getEmployeeID(), new DatePeriod(startDate, endDate));
+					int hdDaySys = lstDateIsHoliday.size();
 					//申請する日数 = 申請する終了日 - 申請する開始日 + 1 - 休日日数
 					appDay = startDate.daysTo(endDate) + 1 - hdDaySys;
 				}

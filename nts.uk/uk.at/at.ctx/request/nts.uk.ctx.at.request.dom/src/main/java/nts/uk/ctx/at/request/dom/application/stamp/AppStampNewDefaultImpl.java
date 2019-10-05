@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.request.dom.application.stamp;
 
+import java.util.Collections;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
@@ -71,7 +73,7 @@ public class AppStampNewDefaultImpl implements AppStampNewDomainService {
 	// 打刻申請の新規登録
 	private ProcessResult appStampRegistration(AppStamp appStamp, boolean checkOver1Year) {
 		StampRequestSetting stampRequestSetting = stampRequestSettingRepository.findByCompanyID(appStamp.getApplication_New().getCompanyID()).get();
-		newBeforeRegister.processBeforeRegister(appStamp.getApplication_New(), 0, checkOver1Year);
+		newBeforeRegister.processBeforeRegister(appStamp.getApplication_New(), 0, checkOver1Year, Collections.emptyList());
 		appStamp.customValidate(stampRequestSetting.getStampPlaceDisp());
 		appStampRepository.addStamp(appStamp);
 		applicationApprovalService.insert(appStamp.getApplication_New());

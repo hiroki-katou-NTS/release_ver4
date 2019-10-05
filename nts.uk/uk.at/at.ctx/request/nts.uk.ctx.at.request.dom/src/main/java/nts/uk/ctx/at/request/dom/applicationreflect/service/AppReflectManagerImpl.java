@@ -310,7 +310,9 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				workChange.getWorkTimeEnd1(),
 				excLogId,
 				reflectSetting.getScheAndWorkChange(), 
-				reflectSetting.isJizenScheYusen());
+				reflectSetting.isJizenScheYusen(),
+				reflectSetting.getIdentityProcessUseSet(),
+				reflectSetting.getApprovalProcessingUseSetting());
 		return new WorkChangeCommonReflectPara(workchangeInfor, workChange.getExcludeHolidayAtr());		
 	}
 	
@@ -325,7 +327,9 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				absenceLeaveApp.getWorkTime1().getEndTime() != null ? absenceLeaveApp.getWorkTime1().getEndTime().v() : null,
 				excLogId, 
 				reflectSetting.getScheAndWorkChange(), 
-				reflectSetting.isJizenScheYusen());
+				reflectSetting.isJizenScheYusen(),
+				reflectSetting.getIdentityProcessUseSet(),
+				reflectSetting.getApprovalProcessingUseSetting());
 		return absenceLeave;
 	}
 	
@@ -340,7 +344,9 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				recuitmentApp.getWorkTime1().getEndTime() != null ? recuitmentApp.getWorkTime1().getEndTime().v() : null,
 				excLogId,
 				reflectSetting.getScheAndWorkChange(), 
-				reflectSetting.isJizenScheYusen());
+				reflectSetting.isJizenScheYusen(),
+				reflectSetting.getIdentityProcessUseSet(),
+				reflectSetting.getApprovalProcessingUseSetting());
 		return recruitment;
 	}
 	
@@ -377,7 +383,9 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				appPara,
 				reflectSetting.isHwRecordReflectTime(),
 				reflectSetting.isHwRecordReflectBreak(),
-				excLogId);
+				excLogId,
+				reflectSetting.getIdentityProcessUseSet(),
+				reflectSetting.getApprovalProcessingUseSetting());
 		return holidayPara;
 		
 	}
@@ -394,7 +402,9 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				null,
 				excLogId, 
 				reflectSetting.getScheAndWorkChange(), 
-				reflectSetting.isJizenScheYusen());
+				reflectSetting.isJizenScheYusen(),
+				reflectSetting.getIdentityProcessUseSet(),
+				reflectSetting.getApprovalProcessingUseSetting());
 		return new WorkChangeCommonReflectPara(absenceInfor, absenceAppData.isChangeWorkHour() == true ? 1 : 0);
 	}
 	
@@ -409,7 +419,9 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				gobackInfo.getWorkTimeStart1().isPresent() ? gobackInfo.getWorkTimeStart1().get().v() : null, 
 				gobackInfo.getWorkTimeEnd1().isPresent() ? gobackInfo.getWorkTimeEnd1().get().v() : null, 
 				gobackInfo.getWorkTimeStart2().isPresent() ? gobackInfo.getWorkTimeStart2().get().v() : null, 
-				gobackInfo.getWorkTimeEnd2().isPresent() ? gobackInfo.getWorkTimeEnd2().get().v() : null);
+				gobackInfo.getWorkTimeEnd2().isPresent() ? gobackInfo.getWorkTimeEnd2().get().v() : null,
+				reflectSetting.getIdentityProcessUseSet(),
+				reflectSetting.getApprovalProcessingUseSetting());
 		appGobackTmp = new GobackReflectPara(appInfor.getEmployeeID(),
 				appInfor.getAppDate(),
 				ApplyTimeRequestAtr.START,
@@ -463,7 +475,9 @@ public class AppReflectManagerImpl implements AppReflectManager {
 				reflectSetting.getScheAndWorkChange(),
 				true, 
 				overtimePara,
-				excLogId); 
+				excLogId,
+				reflectSetting.getIdentityProcessUseSet(),
+				reflectSetting.getApprovalProcessingUseSetting()); 
 		
 		
 		return overTimeTmp;

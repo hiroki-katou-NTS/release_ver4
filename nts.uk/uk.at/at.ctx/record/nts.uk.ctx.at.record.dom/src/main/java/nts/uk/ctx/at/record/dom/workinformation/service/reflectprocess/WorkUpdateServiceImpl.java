@@ -930,15 +930,15 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 			RemarksOfDailyPerform remarkData = optRemark.get();
 			String remarkStr = remarkData.getRemarks().v() + "　" + appReason;
 			//申請理由の文字の長さをチェックする
-			if(remarkStr.length() > 50) {
-				remarkStr = remarkStr.substring(0, 50);
+			if(remarkStr.length() > 100) {
+				remarkStr = remarkStr.substring(0, 100);
 			}
 			remarkData.setRemarks(new RecordRemarks(remarkStr));
 			//日別実績の備考を変更する
 			remarksOfDailyRepo.update(remarkData);
 		} else {
-			if(appReason.length() > 50) {
-				appReason = appReason.substring(0, 50);
+			if(appReason.length() > 100) {
+				appReason = appReason.substring(0, 100);
 			}
 			RemarksOfDailyPerform remarkInfo = new RemarksOfDailyPerform(sid,
 					appDate, 
@@ -1054,10 +1054,17 @@ public class WorkUpdateServiceImpl implements WorkUpdateService{
 			
 		} else {
 			if(mapBreakTimeFrame.isEmpty()) {
-				breakTime.clear();
-				breakTimeOfDailyRepo.deleteByBreakType(daily.getWorkInformation().getEmployeeId(),
-						daily.getWorkInformation().getYmd(),
-						isPre ? BreakType.REFER_SCHEDULE.value : BreakType.REFER_WORK_TIME.value);
+				if(isPre) {
+					List<BreakTimeOfDailyPerformance> breakTimePre = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE).collect(Collectors.toList());
+					for (BreakTimeOfDailyPerformance x : breakTimePre) {
+						breakTime.remove(x);
+					}					
+				} else {
+					List<BreakTimeOfDailyPerformance> breakTimeNotPre = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_WORK_TIME).collect(Collectors.toList());
+					for (BreakTimeOfDailyPerformance x : breakTimeNotPre) {
+						breakTime.remove(x);
+					}	
+				}				
 			} else {
 				if(isPre) {
 					breakTime = breakTime.stream().filter(x -> x.getBreakType() == BreakType.REFER_SCHEDULE).collect(Collectors.toList());

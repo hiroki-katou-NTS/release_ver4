@@ -55,7 +55,9 @@ public class RecruitmentRelectRecordServiceImpl implements RecruitmentRelectReco
 				Optional.ofNullable(param.getWorkTimeCode()),
 				Optional.ofNullable(param.getStartTime()),
 				Optional.ofNullable(param.getEndTime()),
-				isPre);
+				isPre,
+				param.getIPUSOpt(),
+				param.getApprovalSet());
 		commonService.calculateOfAppReflect(calcParam);
 	}
 

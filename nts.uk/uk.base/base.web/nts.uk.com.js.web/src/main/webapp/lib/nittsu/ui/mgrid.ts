@@ -4263,6 +4263,8 @@ module nts.uk.ui.mgrid {
                 let $editor = dkn.controlType[dkn.TEXTBOX].my;
                 let $input = $editor.querySelector("input.medit");
                 $input.value = data;
+                evt.preventDefault();
+                setTimeout(() => $input.focus());
                 return;
             }
             
