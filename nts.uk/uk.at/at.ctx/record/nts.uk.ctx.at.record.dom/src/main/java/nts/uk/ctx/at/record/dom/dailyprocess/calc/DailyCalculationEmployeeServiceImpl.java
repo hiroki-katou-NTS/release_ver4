@@ -324,8 +324,8 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void upDateCalcState(ManageCalcStateAndResult stateInfo) {
 		stateInfo.getIntegrationOfDaily().getWorkInformation().changeCalcState(stateInfo.isCalc?CalculationState.Calculated:CalculationState.No_Calculated);
-//		workInformationRepository.updateByKeyFlush(stateInfo.getIntegrationOfDaily().getWorkInformation());
-		dailyRecordAdUpService.adUpWorkInfo(stateInfo.getIntegrationOfDaily().getWorkInformation());
+		workInformationRepository.updateByKeyFlush(stateInfo.getIntegrationOfDaily().getWorkInformation());
+//		dailyRecordAdUpService.adUpWorkInfo(stateInfo.getIntegrationOfDaily().getWorkInformation());
 		
 	}
 	
