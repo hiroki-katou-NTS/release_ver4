@@ -61,7 +61,7 @@ public class ConfirmStatusMonthly {
 		}
 		// チェック処理（月の確認）
 		Optional<StatusConfirmMonthDto> result = this.checkProcessMonthConfirm(listEmployeeId, confirmInfoResults,
-				optApprovalUse, identityProcessUseSet.get());
+				optApprovalUse, identityProcessUseSet.get(), closureId);
 
 		return result;
 	}
@@ -77,12 +77,15 @@ public class ConfirmStatusMonthly {
 	 */
 	private Optional<StatusConfirmMonthDto> checkProcessMonthConfirm(List<String> listEmployeeId,
 			List<ConfirmInfoResult> confirmInfoResults, Optional<ApprovalProcessingUseSetting> optApprovalUse,
-			IdentityProcessUseSet identityProcessUseSet) {
+			IdentityProcessUseSet identityProcessUseSet, Integer clsId) {
 		List<ConfirmStatusResult> confirmStatusResults = new ArrayList<>();
 		// 取得している「承認処理の利用設定．月の承認者確認を利用する」をチェックする- k can cho vao vong loop
 		boolean useMonthApproverConfirm = (optApprovalUse.isPresent()
 				&& optApprovalUse.get().getUseMonthApproverConfirm()) ? true : false;
 		// Input「社員一覧」でループ
+		confirmInfoResults.forEach(x -> {
+			x.getInformationMonths().removeIf(y -> y.getActualClosure().getClosureId().value != clsId);
+		});
 		for (String employeeId : listEmployeeId) {
 			Optional<ConfirmInfoResult> optConfirmInfoResult = confirmInfoResults.stream()
 					.filter(x -> x.getEmployeeId().equals(employeeId)).findFirst();
