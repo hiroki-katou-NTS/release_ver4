@@ -406,8 +406,9 @@
 							<!--A6_7 休出時間名称--> 						
 							<td class="header" data-bind="attr: { id: 'overtimeHoursHeader_'+attendanceID()+'_'+frameNo()},text: frameName"></td>
 							<!--A6_8 休出申請時間入力--> 						
-							<td data-bind="attr: { id: 'overtimeHoursCheck_'+attendanceID()+'_'+frameNo()}, style: { 'background-color' : color }"><input class="right-content breakTimesCheck"
-								data-bind="attr: { id: 'overtimeHoursCheck_'+attendanceID()+'_'+frameNo()},style: { 'background-color' : color },
+							<td data-bind="attr: { id: 'overtimeHoursCheck_'+attendanceID()+'_'+frameNo()}">
+							<input class="right-content breakTimesCheck"
+								data-bind="attr: { id: 'overtimeHoursCheck_'+attendanceID()+'_'+frameNo()},
 								ntsTimeEditor: {
 									name: '#[KAF010_56]', 
 									value: applicationTime, 
