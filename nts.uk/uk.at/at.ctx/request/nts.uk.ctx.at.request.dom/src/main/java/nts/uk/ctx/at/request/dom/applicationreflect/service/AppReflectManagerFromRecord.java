@@ -48,4 +48,6 @@ public interface AppReflectManagerFromRecord {
 	ProcessStateReflect reflectAppOfEmployeeTotal(String workId, String sid, DatePeriod datePeriod);
 	void reflectAppOfAppDate(String workId, String sid, ExecutionTypeExImport refAppResult,
 			InformationSettingOfEachApp reflectSetting, DatePeriod appDatePeriod);
+	
+	void reflectApplication(List<String> lstID);
 }
