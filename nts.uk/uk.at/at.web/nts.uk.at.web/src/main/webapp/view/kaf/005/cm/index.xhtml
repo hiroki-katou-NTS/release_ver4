@@ -320,8 +320,9 @@
 							<!--A6_7 残業時間名称--> 						
 							<td class="header" data-bind="attr: { id: 'overtimeHoursHeader_'+attendanceID()+'_'+frameNo()}, text: frameName"></td>
 							<!--A6_8 残業申請時間入力--> 						
-							<td data-bind="attr: { id: 'overtimeHoursCheck_'+attendanceID()+'_'+frameNo()}, style: { 'background-color' : color }"><input tabindex="15" class="right-content overtimeHoursCheck"
-								data-bind="attr: { id: 'overtimeHoursCheck_'+attendanceID()+'_'+frameNo()}, style: { 'background-color' : color }, 
+							<td data-bind="attr: { id: 'overtimeHoursCheck_'+attendanceID()+'_'+frameNo()}">
+							<input tabindex="15" class="right-content overtimeHoursCheck"
+								data-bind="attr: { id: 'overtimeHoursCheck_'+attendanceID()+'_'+frameNo()}, 
 								ntsTimeEditor: {
 									name: nameID, 
 									value: applicationTime, 
