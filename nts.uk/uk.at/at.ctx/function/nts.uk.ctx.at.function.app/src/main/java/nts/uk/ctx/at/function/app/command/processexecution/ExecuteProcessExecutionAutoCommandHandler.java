@@ -1453,6 +1453,10 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 //		boolean checkError1552 = false;
 		String errorMessage = "";
 		boolean checkStopExe = false;
+		// 個人スケジュール作成区分の判定
+		if (procExec.getExecSetting().getPerSchedule().isPerSchedule()) {
+			this.updateEndtimeSchedule(procExecLog);
+		}
 		// ドメインモデル「更新処理自動実行ログ」を更新する
 		this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.DAILY_CREATION, null);
 		this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.DAILY_CALCULATION, null);
@@ -1877,6 +1881,13 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		}
 
 		return new DatePeriod(startYearMonth, endYearMonth);
+	}
+	private void updateEndtimeSchedule(ProcessExecutionLog procExecLog) {
+		procExecLog.getTaskLogList().forEach(task -> {
+			if ( task.getProcExecTask().value == ProcessExecutionTask.SCH_CREATION.value) {
+				task.setLastEndExecDateTime(GeneralDateTime.now());
+			}
+		});
 	}
 
 	private void updateEachTaskStatus(ProcessExecutionLog procExecLog, ProcessExecutionTask execTask,

@@ -1550,6 +1550,11 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.DAILY_CALCULATION, null);
 		this.procExecLogRepo.update(procExecLog);
 
+		// 個人スケジュール作成区分の判定 --set time end( bao gồm cả tg nhả bộ nhớ mà schedule đã dùng)
+		if (procExec.getExecSetting().getPerSchedule().isPerSchedule()) {
+			this.updateEndtimeSchedule(procExecLog);
+		}
+		
 		// 日別実績の作成・計算区分の判定
 		if (!procExec.getExecSetting().getDailyPerf().isDailyPerfCls()) {
 			this.updateStatusAndStartDateNull(procExecLog, ProcessExecutionTask.DAILY_CREATION, EndStatus.NOT_IMPLEMENT);
@@ -1979,6 +1984,13 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		return new DatePeriod(startYearMonth, endYearMonth);
 	}
 
+	private void updateEndtimeSchedule(ProcessExecutionLog procExecLog) {
+		procExecLog.getTaskLogList().forEach(task -> {
+			if ( task.getProcExecTask().value == ProcessExecutionTask.SCH_CREATION.value) {
+				task.setLastEndExecDateTime(GeneralDateTime.now());
+			}
+		});
+	}
 	private void updateEachTaskStatus(ProcessExecutionLog procExecLog, ProcessExecutionTask execTask,
 			EndStatus status) {
 		procExecLog.getTaskLogList().forEach(task -> {
