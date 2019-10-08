@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -453,6 +455,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public boolean checkEmployeeHasErrorOnProcessingDate(String employeeID, GeneralDate processingDate) {
 		return this.queryProxy().query(CHECK_EMPLOYEE_HAS_ERROR_ON_PROCESSING_DATE, long.class)
 				.setParameter("employeeId", employeeID).setParameter("processingDate", processingDate).getSingle()
@@ -490,6 +493,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 			+ "AND a.processingDate <= :endDate ";
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public boolean checkErrorByPeriodDate(String companyId, String employeeId, GeneralDate strDate, GeneralDate endDate) {
 		return this.queryProxy().query(CHECK_ERROR_BY_DATE, KrcdtSyainDpErList.class)
 				.setParameter("companyId", companyId)

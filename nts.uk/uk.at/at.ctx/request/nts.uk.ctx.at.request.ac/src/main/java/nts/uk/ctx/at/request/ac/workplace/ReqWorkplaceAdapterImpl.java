@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -47,6 +49,7 @@ public class ReqWorkplaceAdapterImpl implements WorkplaceAdapter {
 	 * アルゴリズム「社員から職場を取得する」を実行する
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public WkpHistImport findWkpBySid(String sID, GeneralDate date) {
 		Optional<SWkpHistExport> wkpExport = wkpPub.findBySid(sID, date);
 		if (wkpExport.isPresent()) {

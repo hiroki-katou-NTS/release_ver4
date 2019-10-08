@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -159,7 +161,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 								.setParameter("status", status.value)				
 								.getList(e -> e.toDomain());
 	}
-	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<RemainMerge> findByClosurePeriod(String employeeId, DatePeriod closurePeriod) {
 		return this.queryProxy().query(FIND_BY_CLOSURE_PERIOD, KrcdtMonRemain.class)
 				.setParameter("employeeId", employeeId)

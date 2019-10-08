@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
@@ -272,6 +274,7 @@ public class ApplicationPubImpl implements ApplicationPub {
 														.getDispName().toString();
 	}
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ApplicationDeadlineExport getApplicationDeadline(String companyID, Integer closureID) {
 		String employeeId = AppContexts.user().employeeId();
 		ApplicationDeadlineExport result = new ApplicationDeadlineExport();

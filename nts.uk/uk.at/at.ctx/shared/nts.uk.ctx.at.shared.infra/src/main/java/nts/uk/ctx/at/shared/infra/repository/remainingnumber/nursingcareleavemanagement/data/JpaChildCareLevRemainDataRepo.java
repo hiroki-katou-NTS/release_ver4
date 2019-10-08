@@ -3,6 +3,8 @@ package nts.uk.ctx.at.shared.infra.repository.remainingnumber.nursingcareleavema
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.nursingcareleavemanagement.data.ChildCareLeaveRemaiDataRepo;
@@ -13,6 +15,7 @@ import nts.uk.ctx.at.shared.infra.entity.remainingnumber.nursingcareleave.KrcmtC
 public class JpaChildCareLevRemainDataRepo extends JpaRepository implements ChildCareLeaveRemaiDataRepo {
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<ChildCareLeaveRemainingData> getChildCareByEmpId(String empId) {
 		Optional<KrcmtChildCareHDData> entity = this.queryProxy().find(empId, KrcmtChildCareHDData.class);
 		if (entity.isPresent()) {

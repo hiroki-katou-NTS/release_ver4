@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
@@ -49,6 +51,8 @@ public class JpaOvertimeInstructRepository extends JpaRepository implements Over
 		}
 		return null;
 	}
+	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	private OverTimeInstruct convertToDomain(KrqdtOvertimeInstruct krqdtOvertimeInstruct){
 		 return OverTimeInstruct.createSimpleFromJavaType(krqdtOvertimeInstruct.getKrqdtOvertimeInstructPK().getCid(),
 				krqdtOvertimeInstruct.getWorkContent(),
@@ -68,6 +72,7 @@ public class JpaOvertimeInstructRepository extends JpaRepository implements Over
 	 * For request list 230
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<OverTimeInstruct> getAllOverTimeInstructBySId(String sId, GeneralDate strDate, GeneralDate endDate) {
 		List<OverTimeInstruct> overTimeInstructs = this.queryProxy().query(FIND_ALL_BY_TARGET_PERSON, KrqdtOvertimeInstruct.class)
 				.setParameter("targetPerson", sId).getList(c -> convertToDomain(c));

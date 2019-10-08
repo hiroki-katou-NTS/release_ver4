@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
@@ -188,6 +190,7 @@ public class JpaPersonRepository extends JpaRepository implements PersonReposito
 	 */
 	@Override
 	@SneakyThrows
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<Person> getByPersonId(String personId) {
 		String sql = "select * from BPSMT_PERSON"
 				+ " where PID = ?";

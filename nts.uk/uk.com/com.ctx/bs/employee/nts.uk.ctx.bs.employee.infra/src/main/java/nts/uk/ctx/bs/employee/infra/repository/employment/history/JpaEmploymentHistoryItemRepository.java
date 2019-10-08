@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -86,6 +88,7 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 			+ " AND h.strDate <= :date AND h.endDate >= :date";
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<EmploymentInfo> getDetailEmploymentHistoryItem(String companyId, String sid, GeneralDate date) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(" SELECT a.CODE ,a.NAME FROM BSYMT_EMPLOYMENT a");
@@ -457,6 +460,7 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 
 	@Override
 	@SneakyThrows
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmploymentHistoryItem> getByListHistoryId(List<String> historyIds) {
 		if (CollectionUtil.isEmpty(historyIds)) {
 			return new ArrayList<>();

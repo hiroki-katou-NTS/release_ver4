@@ -1,5 +1,7 @@
 package nts.uk.screen.at.ws.ktgwidget;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -26,12 +28,14 @@ public class OptionalWidgetWebService extends WebService {
 	
 	@POST
 	@Path("getOptionalWidgetDisplay")
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public OptionalWidgetDisplay getOptionalWidgetDisplay(String topPagePartCode){
 		return OptionalWidgetFinder.getOptionalWidgetDisplay(topPagePartCode);
 	}
 	
 	@POST
 	@Path("getOptionalWidgetInfo")
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public OptionalWidgetInfoDto getOptionalWidgetInfo(DatePeriodParam datePeriodParam){
 		return OptionalWidgetFinder.getDataRecord(datePeriodParam.code, datePeriodParam.strMonth, datePeriodParam.endMonth);
 	}

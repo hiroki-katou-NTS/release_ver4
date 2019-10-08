@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -33,6 +35,7 @@ public class CheckDailyPerformanceErrorPubImpl implements CheckDailyPerformanceE
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public boolean checksDailyPerformanceError(String employeeID, GeneralDate strDate, GeneralDate endDate) {
 		String companyID = AppContexts.user().companyId();
 		return employeeDailyPerErrorRepo.checkErrorByPeriodDate(companyID, employeeID, strDate, endDate);

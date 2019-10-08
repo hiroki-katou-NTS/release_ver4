@@ -3,6 +3,8 @@ package nts.uk.ctx.at.schedule.pubimp.shift.businesscalendar.daycalendar;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -27,6 +29,7 @@ public class ObtainDeadlineDatePubImpl implements ObtainDeadlineDatePub {
 	private CalendarWorkPlaceRepository calendarWorkPlaceRepository;
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public GeneralDate obtainDeadlineDate(GeneralDate targetDate, Integer specDayNo, String workplaceID,
 			String companyID) {
 		int workingDayNo = 0;

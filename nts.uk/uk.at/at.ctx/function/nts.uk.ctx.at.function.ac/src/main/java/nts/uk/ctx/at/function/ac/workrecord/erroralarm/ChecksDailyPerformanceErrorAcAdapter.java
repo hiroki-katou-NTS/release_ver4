@@ -1,6 +1,8 @@
 package nts.uk.ctx.at.function.ac.workrecord.erroralarm;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -14,6 +16,7 @@ public class ChecksDailyPerformanceErrorAcAdapter implements ChecksDailyPerforma
 	private CheckDailyPerformanceErrorPub checkDailyPerformanceError;
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public boolean checked(String employeeID, GeneralDate strDate, GeneralDate endDate) {
 		return checkDailyPerformanceError.checksDailyPerformanceError(employeeID, strDate, endDate);
 	}

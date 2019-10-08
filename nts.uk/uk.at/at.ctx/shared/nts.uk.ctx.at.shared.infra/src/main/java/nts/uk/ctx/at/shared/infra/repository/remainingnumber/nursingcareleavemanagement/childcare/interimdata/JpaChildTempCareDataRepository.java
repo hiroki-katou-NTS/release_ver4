@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
@@ -18,6 +20,7 @@ public class JpaChildTempCareDataRepository extends JpaRepository implements Chi
 			+ " WHERE c.id.sid =:employeeId AND c.id.ymd >= :startDate AND c.id.ymd <= :endDate";
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ChildTempCareData> findByEmpIdInPeriod(String employeeId, GeneralDate startDate, GeneralDate endDate) {
 		List<KrcdtChildTempCareData> entities = this.queryProxy().query(QUERY_WITH_PERIOD, KrcdtChildTempCareData.class)
 				.setParameter("employeeId", employeeId).setParameter("startDate", startDate)

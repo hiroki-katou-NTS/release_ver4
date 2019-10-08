@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
@@ -88,6 +91,7 @@ public class Closure extends AggregateRoot {
 	 * @return 締め変更履歴
 	 */
 	// 2018.3.11 add shuichi_ishida
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<ClosureHistory> getHistoryByYearMonth(YearMonth yearMonth) {
 		for (ClosureHistory closureHistory : this.closureHistories){
 			if (closureHistory.getStartYearMonth().lessThanOrEqualTo(yearMonth) &&
@@ -190,6 +194,7 @@ public class Closure extends AggregateRoot {
 	 * @return 期間リスト
 	 */
 	// 2018.3.11 add shuichi_ishida
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<DatePeriod> getPeriodByYearMonth(YearMonth yearMonth){
 		
 		List<DatePeriod> returnPeriod = new ArrayList<>();

@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -48,6 +50,7 @@ public class ShClosurePubImpl implements ShClosurePub {
 	 * String, int)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<PresentClosingPeriodExport> find(String cId, int closureId) {
 		Optional<Closure> optClosure = closureRepo.findById(cId, closureId);
 

@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -158,6 +160,7 @@ public class JpaOptionalWidgetRepository extends JpaRepository implements Option
 	
 	private static final String SELECT_BY_TOP_PAGE_PART_CODE = SELECT_BASE + " WHERE o.sptstOptionalWidgetPK.companyID = :companyID AND t.code =:topPagePartCode AND t.topPagePartType =:topPagePartType";
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<OptionalWidget> getSelectedWidget(String companyId, String topPagePartCode) {
 		
 		Optional<OptionalWidget> ccgmtTopPageParts = this.queryProxy()

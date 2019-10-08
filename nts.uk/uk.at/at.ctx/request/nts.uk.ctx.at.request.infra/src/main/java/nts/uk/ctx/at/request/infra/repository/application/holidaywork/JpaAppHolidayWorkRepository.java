@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
@@ -150,6 +152,7 @@ public class JpaAppHolidayWorkRepository extends JpaRepository implements AppHol
 	 * @return map: key - appID, value - AppHolidayWork
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Map<String, AppHolidayWork> getListAppHdWorkFrame(String companyID, List<String> lstAppID) {
 		Map<String, AppHolidayWork> lstMap = new HashMap<>();
 		if(lstAppID.isEmpty()){
