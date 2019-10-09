@@ -2426,7 +2426,33 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 				// checkError1552 = true;
 				errorMessage = "Msg_1552";
 			}
-		}
+		}else {
+			//INPUT．「承認結果の反映対象期間（List）．社員」をループする
+			//社員の件数分ループ
+			for (ApprovalPeriodByEmp approvalPeriodByEmp : lstApprovalPeriod) {
+				if (checkStopExec) {
+					break;
+				}
+				try {
+					for (DatePeriod period : approvalPeriodByEmp.getListPeriod()) {
+						// 社員の申請を反映
+
+						ProcessStateReflectImport processStateReflectImport = appReflectManagerAdapter
+								.reflectAppOfEmployeeTotal(execId, approvalPeriodByEmp.getEmployeeID(), period);
+						if (processStateReflectImport == ProcessStateReflectImport.INTERRUPTION) {
+							endStatusIsInterrupt = true;
+						}
+						if (endStatusIsInterrupt) {
+							checkStopExec = true;
+							break;
+						}
+
+					}
+				} catch (Exception e) {
+					isHasException = true;
+					errorMessage = "Msg_1552";
+				}
+			}
 		log.info("更新処理自動実行_承認結果の反映_END_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.RFL_APR_RESULT, companyId, execItemCd,
 				processExecution, ProcessExecutionLog, isHasException, checkStopExec, errorMessage);
