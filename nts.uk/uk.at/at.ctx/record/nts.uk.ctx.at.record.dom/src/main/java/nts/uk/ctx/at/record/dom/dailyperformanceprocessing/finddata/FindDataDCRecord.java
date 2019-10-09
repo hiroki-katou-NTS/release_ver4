@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.adapter.company.StatusOfEmployeeExport;
@@ -46,6 +48,7 @@ public class FindDataDCRecord implements IFindDataDCRecord{
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<ApprovalProcessingUseSetting> findApprovalByCompanyId(String companyId) {
 		if(approvalUseSettingMap.containsKey(companyId)){
 			return approvalUseSettingMap.get(companyId);

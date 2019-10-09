@@ -94,6 +94,7 @@ public class JpaClosureRepository extends JpaRepository implements ClosureReposi
 	 * lang.String)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<Closure> findAll(String companyId) {
 		// get entity manager
 		EntityManager em = this.getEntityManager();
@@ -301,6 +302,7 @@ public class JpaClosureRepository extends JpaRepository implements ClosureReposi
 	 * nts.uk.ctx.at.shared.dom.workrule.closure.UseClassification)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<Closure> findAllActive(String companyId, UseClassification useAtr) {
 		// get entity manager
 		EntityManager em = this.getEntityManager();
