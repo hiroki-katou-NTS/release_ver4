@@ -42,6 +42,7 @@ public class EmploymentHistAdapterImpl implements EmploymentHistAdapter {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmploymentHistImport> findBySidDatePeriod(List<String> employeeIds, DatePeriod period) {
 		List<EmploymentHisExport> empHistPub = syEmploymentPub.findByListSidAndPeriod(employeeIds, period);
 		List<EmploymentHistImport> result = new ArrayList<>();

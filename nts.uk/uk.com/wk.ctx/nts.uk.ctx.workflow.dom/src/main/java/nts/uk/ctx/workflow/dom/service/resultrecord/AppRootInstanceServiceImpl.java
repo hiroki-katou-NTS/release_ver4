@@ -10,6 +10,8 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
@@ -351,6 +353,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ApprovalPersonInstance getApproverAndAgent(String approverID, DatePeriod period, RecordRootType rootType) {
 		String companyID = AppContexts.user().companyId();
 		ApprovalPersonInstance approvalPersonInstance = new ApprovalPersonInstance(new ArrayList<>(), new ArrayList<>());
@@ -597,6 +600,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ApprovalEmpStatus getApprovalEmpStatus(String employeeID, DatePeriod period, RecordRootType rootType) {
 		// 承認者(承認代行を含め)と期間から承認ルート中間データを取得する
 		ApprovalPersonInstance approvalPersonInstance = getApproverAndAgent(employeeID, period, rootType);
@@ -694,6 +698,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<RouteSituation> getApproverRouteSituation(DatePeriod period, List<ApprovalRouteDetails> approverRouteLst, List<String> agentLst, RecordRootType rootType,
 			boolean useDayApproverConfirm, DatePeriod closurePeriod, YearMonth yearMonth, Integer closureID, ClosureDate closureDate) {
 		String companyID = AppContexts.user().companyId();
@@ -791,6 +796,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<RouteSituation> getAgentRouteSituation(DatePeriod period, List<ApprovalRouteDetails> agentRouteLst, List<String> agentLst, RecordRootType rootType,
 			boolean useDayApproverConfirm, DatePeriod closurePeriod, YearMonth yearMonth, Integer closureID, ClosureDate closureDate) {
 		String companyID = AppContexts.user().companyId();

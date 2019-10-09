@@ -33,6 +33,7 @@ public class ComPubImp implements SyCompanyPub {
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AffCompanyHistExport> GetAffCompanyHistByEmployee(List<String> sids, DatePeriod datePeriod) {
 
 		if (sids.isEmpty() || datePeriod.start() == null || datePeriod.end() == null)

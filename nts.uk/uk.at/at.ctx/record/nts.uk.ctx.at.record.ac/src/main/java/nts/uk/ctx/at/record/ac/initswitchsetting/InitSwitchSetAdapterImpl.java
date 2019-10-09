@@ -32,6 +32,7 @@ public class InitSwitchSetAdapterImpl implements InitSwitchSetAdapter {
 	/*@Inject
 	private InitDisplayPeriodSwitchSetPubImpl initDisplayPeriodSwitchSetPubImpl;*/
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public InitSwitchSetDto targetDateFromLogin() {
 		InitDisplayPeriodSwitchSetDto dtoPub = finder.targetDateFromLogin();
 		InitSwitchSetDto result = new InitSwitchSetDto(dtoPub.getCurrentOrNextMonth(),

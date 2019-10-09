@@ -209,6 +209,7 @@ public class JpaAffWorkplaceHistoryItemRepository extends JpaRepository implemen
 	 * #findByHistIds(java.util.List)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AffWorkplaceHistoryItem> findByHistIds(List<String> hisIds) {
 		if (CollectionUtil.isEmpty(hisIds)) {
 			return new ArrayList<>();

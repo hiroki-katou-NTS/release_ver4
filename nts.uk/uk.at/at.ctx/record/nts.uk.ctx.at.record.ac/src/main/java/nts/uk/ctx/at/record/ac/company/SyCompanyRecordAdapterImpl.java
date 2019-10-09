@@ -24,6 +24,7 @@ public class SyCompanyRecordAdapterImpl implements SyCompanyRecordAdapter {
 	private SyCompanyPub syCompanyPub;
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AffCompanyHistImport> getAffCompanyHistByEmployee(List<String> sids, DatePeriod datePeriod) {
 		List<AffCompanyHistImport> importList = this.syCompanyPub.GetAffCompanyHistByEmployee(sids, datePeriod).stream()
 				.map(x -> convert(x)).collect(Collectors.toList());
