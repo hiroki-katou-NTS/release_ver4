@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -27,6 +29,7 @@ public class JpaAgreementOperationSettingRepository extends JpaRepository
 
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<AgreementOperationSetting> find(String companyId) {
 		return this.queryProxy().query(FIND, KmkmtAgeementOperationSetting.class).setParameter("companyId", companyId)

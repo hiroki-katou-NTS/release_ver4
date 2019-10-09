@@ -12,12 +12,9 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
-import org.apache.logging.log4j.util.Strings;
-
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHist;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistByEmployee;
-import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistItem;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistRepository;
 import nts.uk.ctx.bs.employee.pub.company.AffComHistItem;
 import nts.uk.ctx.bs.employee.pub.company.AffCompanyHistExport;
@@ -31,7 +28,6 @@ public class ComPubImp implements SyCompanyPub {
 	@Inject
 	private AffCompanyHistRepository affComHistRepo;
 
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AffCompanyHistExport> GetAffCompanyHistByEmployee(List<String> sids, DatePeriod datePeriod) {

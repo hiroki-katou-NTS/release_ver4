@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 
@@ -37,6 +39,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.searchemployee.FindAllEm
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class InfomationInitScreenProcess {
 	
 	@Inject

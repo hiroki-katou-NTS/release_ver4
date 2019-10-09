@@ -3,6 +3,8 @@ package nts.uk.screen.at.app.dailyperformance.correction.agreement;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.YearMonth;
@@ -17,6 +19,7 @@ import nts.uk.ctx.at.shared.dom.monthly.agreement.AgreementTimeStatusOfMonthly;
 import nts.uk.screen.at.app.dailyperformance.correction.finddata.IFindData;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class DisplayAgreementInfo {
 	
 	private static String ERROR = "state-error text-error";

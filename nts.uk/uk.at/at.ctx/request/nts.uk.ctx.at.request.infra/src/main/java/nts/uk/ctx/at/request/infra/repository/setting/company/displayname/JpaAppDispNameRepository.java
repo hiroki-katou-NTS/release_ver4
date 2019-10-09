@@ -50,6 +50,7 @@ public class JpaAppDispNameRepository extends JpaRepository implements AppDispNa
 	 * get all display name
 	 * @author yennth
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AppDispName> getAll() {
 		String companyId = AppContexts.user().companyId();

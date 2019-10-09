@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -57,6 +59,7 @@ public class JpaMonthlyItemControlByAuthRepository  extends JpaRepository implem
 		return null;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<MonthlyItemControlByAuthority> getMonthlyAttdItem(String companyID, String authorityMonthlyId) {
 		List<DisplayAndInputMonthly> data = this.queryProxy().query(SELECT_BY_AUTHORITY_MONTHLY_ID,KrcstDisplayAndInputMonthly.class)
@@ -128,6 +131,7 @@ public class JpaMonthlyItemControlByAuthRepository  extends JpaRepository implem
 		} 
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<MonthlyItemControlByAuthority> getMonthlyAttdItemByUse(String companyID, String authorityMonthlyId,
 			List<Integer> itemMonthlyIDs, int toUse) {
@@ -191,6 +195,7 @@ public class JpaMonthlyItemControlByAuthRepository  extends JpaRepository implem
 		return Optional.of(monthlyItemControlByAuthority);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<MonthlyItemControlByAuthority> getMonthlyAttdItemByAttItemId(String companyID,
 			String authorityMonthlyId, List<Integer> attendanceItemIds) {

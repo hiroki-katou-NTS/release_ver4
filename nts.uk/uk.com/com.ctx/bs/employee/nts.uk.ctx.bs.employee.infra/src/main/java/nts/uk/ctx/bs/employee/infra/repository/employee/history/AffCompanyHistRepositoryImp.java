@@ -529,7 +529,6 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		return resultList;
 	}
 
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AffCompanyHist> getAffComHisEmpByLstSidAndPeriod(List<String> employeeIds, DatePeriod datePeriod) {

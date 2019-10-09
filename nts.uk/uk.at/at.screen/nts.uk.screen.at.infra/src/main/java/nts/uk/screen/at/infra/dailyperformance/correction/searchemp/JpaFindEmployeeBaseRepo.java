@@ -3,6 +3,8 @@ package nts.uk.screen.at.infra.dailyperformance.correction.searchemp;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.NoResultException;
 
 import nts.arc.layer.infra.data.JpaRepository;
@@ -41,6 +43,7 @@ public class JpaFindEmployeeBaseRepo extends JpaRepository implements FindEmploy
 			+ " WHERE e.bsymtEmployeeDataMngInfoPk.sId = :employeeId "
 			+ " AND e.companyId = :companyId ";
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<DPEmployeeSearchData> findInAllEmployee(String employeeId, GeneralDate baseDate, String companyId) {
 		Object[] resultQuery = null;

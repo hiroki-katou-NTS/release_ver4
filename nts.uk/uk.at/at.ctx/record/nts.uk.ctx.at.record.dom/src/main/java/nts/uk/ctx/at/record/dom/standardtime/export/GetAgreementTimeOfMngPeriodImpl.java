@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -34,6 +36,7 @@ public class GetAgreementTimeOfMngPeriodImpl implements GetAgreementTimeOfMngPer
 	private AgreementTimeOfManagePeriodRepository agreementTimeOfMngPrdRepo;
 	
 	/** 管理期間の36協定時間を取得 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AgreementTimeOfManagePeriod> algorithm(String employeeId, Year year) {
 

@@ -3,6 +3,8 @@ package nts.uk.ctx.at.shared.dom.vacation.setting.annualpaidleave.processten;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 //import nts.arc.error.BusinessException;
@@ -47,6 +49,7 @@ public class AbsenceTenProcessImpl implements AbsenceTenProcess{
 	@Inject
 	private RetentionYearlySettingRepository retentionYearlySetRepo;
 	// 10-1.年休の設定を取得する
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public AnnualHolidaySetOutput getSettingForAnnualHoliday(String companyID){
 		AnnualHolidaySetOutput annualHoliday = new AnnualHolidaySetOutput();
 		// ドメインモデル「年休設定」を取得する(lấy dữ liệu domain 「年休設定」)
