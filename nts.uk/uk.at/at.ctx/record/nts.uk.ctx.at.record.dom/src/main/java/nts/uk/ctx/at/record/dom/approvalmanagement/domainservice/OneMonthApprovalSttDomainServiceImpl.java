@@ -197,6 +197,7 @@ public class OneMonthApprovalSttDomainServiceImpl implements OneMonthApprovalStt
 	/**
 	 * 期間を変更する
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public OneMonthApprovalStatusDto getDatePeriod(int closureId, int currentYearMonth) {
 		OneMonthApprovalStatusDto result = new OneMonthApprovalStatusDto();
 		// [No.609]ログイン社員のシステム日時点の処理対象年月を取得する

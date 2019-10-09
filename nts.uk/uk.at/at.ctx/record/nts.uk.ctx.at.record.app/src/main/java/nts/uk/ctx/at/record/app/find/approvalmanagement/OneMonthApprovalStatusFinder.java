@@ -22,6 +22,7 @@ public class OneMonthApprovalStatusFinder {
 	@Inject
 	private OneMonthApprovalSttDomainService oneMonthApprovalSttDomainService;
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public OneMonthApprovalStatusDto getDatePeriod(int closureId, int currentYearMonth) {
 		return oneMonthApprovalSttDomainService.getDatePeriod(closureId, currentYearMonth);
 	}

@@ -6,6 +6,8 @@ package nts.uk.ctx.at.auth.infra.repository.initswitchsetting;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.uk.ctx.at.auth.dom.initswitchsetting.InitDisplayPeriodSwitchSet;
@@ -27,6 +29,8 @@ public class JpaInitDisplayPeriodSwitchSetRepo extends JpaRepository implements 
 			+ " WHERE e.kacmtDispPeriodSwitchPK.companyID = :companyID"
 			+ " AND e.kacmtDispPeriodSwitchPK.roleID = :roleID";
 			@Override
+			
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<InitDisplayPeriodSwitchSet> findByKey(String companyID, String roleID) {
 		
 		return this.queryProxy().query(GET_BY_KEY, KacmtDispPeriodSwitch.class)
