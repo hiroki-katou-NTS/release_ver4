@@ -110,14 +110,14 @@ public class JpaStartPageLogInfoIRepository extends JpaRepository
 					+ " START_DT >= ?"
 					+ " AND START_DT <= ?"
 					+ " AND CID = ?"
-					+ " SID IN ("+  NtsStatement.In.createParamsString(subList) + ")"
+					+ " AND SID IN ("+  NtsStatement.In.createParamsString(subList) + ")"
 					+ " ORDER BY SID, START_DT DESC"
 					+ " OFFSET " + offset + " ROWS"
 					+ " FETCH FIRST " + limit + " ROWS ONLY";
 			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
-				stmt.setString(1, companyId);
-				stmt.setTimestamp(2,  Timestamp.valueOf(start.localDateTime()));
-				stmt.setTimestamp(3,  Timestamp.valueOf(end.localDateTime()));
+				stmt.setTimestamp(1,  Timestamp.valueOf(start.localDateTime()));
+				stmt.setTimestamp(2,  Timestamp.valueOf(end.localDateTime()));
+				stmt.setString(3, companyId);
 				for (int i = 0; i < subList.size(); i++) {
 					stmt.setString(4 + i, subList.get(i));
 				}
