@@ -136,9 +136,12 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	public void calculateOfAppReflect(CommonCalculateOfAppReflectParam commonPara) {
 		String companyId = AppContexts.user().companyId();
 		//就業時間帯の休憩時間帯を日別実績に反映する
-		this.updateBreakTimeInfor(commonPara.getSid(),
-				commonPara.getYmd(),
-				commonPara.getIntegrationOfDaily(), companyId);
+		if(commonPara.getAppType() != ApplicationType.OVER_TIME_APPLICATION) { //2019/10/09 DUDT　今まで事前残業申請しか対応しない実績の項目に反映してないから休憩時間を補正することがいらない
+			this.updateBreakTimeInfor(commonPara.getSid(),
+					commonPara.getYmd(),
+					commonPara.getIntegrationOfDaily(), companyId, commonPara.getAppType());	
+		}
+		
 		Optional<WorkType> workTypeInfor = Optional.empty();
 		if(commonPara.getIntegrationOfDaily().getWorkInformation().getRecordInfo().getWorkTypeCode() != null) {
 			workTypeInfor = worktypeRepo.findByPK(companyId, 
@@ -170,7 +173,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 				overTimeService.correct(commonPara.getIntegrationOfDaily(), workTypeInfor, true);
 				//Neu khong phai don xin di lam vao ngay nghi va don xin di lam vao ngay nghi ko tich chon phan anh gio nghi
 				if(workTypeInfor.isPresent() && (!workTypeInfor.get().getDailyWork().isHolidayWork()
-						|| (workTypeInfor.get().getDailyWork().isHolidayWork() && !this.isReflectBreakTime(commonPara.getIntegrationOfDaily().getEditState())))) {
+						|| (workTypeInfor.get().getDailyWork().isHolidayWork() && commonPara.getAppType() != ApplicationType.BREAK_TIME_APPLICATION))) {
 					//休憩時間帯を補正する	
 					breakTimeDailyService.correct(companyId, commonPara.getIntegrationOfDaily(), workTypeInfor, false).getData();
 				}
@@ -203,7 +206,8 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 	}
 
 	@Override
-	public IntegrationOfDaily updateBreakTimeInfor(String sid, GeneralDate ymd, IntegrationOfDaily integrationOfDaily, String companyId) {
+	public IntegrationOfDaily updateBreakTimeInfor(String sid, GeneralDate ymd, IntegrationOfDaily integrationOfDaily, String companyId,
+			ApplicationType appType) {
 		//日別実績の休憩時間帯
 		BreakTimeOfDailyPerformance breakTimeInfor = null; 
 		if(integrationOfDaily.getAttendanceLeave().isPresent()) {
@@ -222,7 +226,7 @@ public class CommonProcessCheckServiceImpl implements CommonProcessCheckService{
 		if(integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode() != null) {
 			Optional<WorkType> workTypeInfor = worktypeRepo.findByPK(companyId, integrationOfDaily.getWorkInformation().getRecordInfo().getWorkTypeCode().v());
 			//休日出勤申請しか反映してない
-			if(this.isReflectBreakTime(lstEditState)
+			if(appType == ApplicationType.BREAK_TIME_APPLICATION
 					&& workTypeInfor.isPresent() && workTypeInfor.get().getDailyWork().isHolidayWork()) {
 				if(beforeBreakTime.isEmpty()) {
 					integrationOfDaily.getBreakTime().add(breakTimeInfor);
