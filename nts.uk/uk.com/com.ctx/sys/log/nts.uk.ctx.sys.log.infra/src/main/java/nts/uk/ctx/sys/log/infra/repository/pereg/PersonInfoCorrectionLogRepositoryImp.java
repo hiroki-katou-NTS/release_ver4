@@ -47,14 +47,6 @@ public class PersonInfoCorrectionLogRepositoryImp extends JpaRepository implemen
 			"AND (:empIdNULL = 'ISNULL' OR pcl.employeeID IN :employeeIDs)",
 			"AND pcl.insDate >= :startDate AND pcl.insDate <= :endDate");
 	
-	private static final String SELECT_TOP_1000 = String.join(" ", "SELECT TOP 1000 pcl, ccl, dhl, iil",
-			"FROM SrcdtPerCorrectionLog pcl", "LEFT JOIN SrcdtCtgCorrectionLog ccl",
-			"ON pcl.perCorrectionLogID = ccl.perCorrectionLogID", "LEFT JOIN SrcdtDataHistoryLog dhl",
-			"ON ccl.ctgCorrectionLogID = dhl.ctgCorrectionLogID", "LEFT JOIN SrcdtItemInfoLog iil",
-			"ON ccl.ctgCorrectionLogID = iil.ctgCorrectionLogID", "WHERE pcl.operationID IN :operationIDs",
-			"AND (:empIdNULL = 'ISNULL' OR pcl.employeeID IN :employeeIDs)",
-			"AND pcl.insDate >= :startDate AND pcl.insDate <= :endDate");
-	
 
 	@Override
 	public List<PersonInfoCorrectionLog> findByTargetAndDate(String operationId, List<String> listEmployeeId,
@@ -400,12 +392,15 @@ public class PersonInfoCorrectionLogRepositoryImp extends JpaRepository implemen
 		CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subOpts) -> {
 			if (!CollectionUtil.isEmpty(listEmployeeId)) {
 				CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subEmpIds) -> {
-					List<PersonalInfoCorrectionLogQuery> _query = entityManager.createQuery(SELECT_TOP_1000, Object[].class)
+					List<PersonalInfoCorrectionLogQuery> _query = entityManager.createQuery(SELECT_ALL, Object[].class)
 							.setParameter("operationIDs", subOpts)
 							.setParameter("empIdNULL", "ISNOTNULL")
 							.setParameter("employeeIDs", subEmpIds)
 							.setParameter("startDate", start).setParameter("endDate", end)
-							.getResultList().stream().map(f -> {
+							.setFirstResult(0)
+							.setMaxResults(1000)
+							.getResultList()
+							.stream().map(f -> {
 								SrcdtPerCorrectionLog perCorrectionLog = (SrcdtPerCorrectionLog) f[0];
 								SrcdtCtgCorrectionLog ctgCorrectionLog = (SrcdtCtgCorrectionLog) f[1];
 								SrcdtDataHistoryLog dataHistoryLog = (SrcdtDataHistoryLog) f[2];
@@ -418,11 +413,13 @@ public class PersonInfoCorrectionLogRepositoryImp extends JpaRepository implemen
 				});
 			} else {
 				
-				List<PersonalInfoCorrectionLogQuery> _query = entityManager.createQuery(SELECT_TOP_1000, Object[].class)
+				List<PersonalInfoCorrectionLogQuery> _query = entityManager.createQuery(SELECT_ALL, Object[].class)
 						.setParameter("operationIDs", subOpts)
 						.setParameter("empIdNULL", "ISNULL")
 						.setParameter("employeeIDs", Arrays.asList(""))
 						.setParameter("startDate", start).setParameter("endDate", end)
+						.setFirstResult(0)
+						.setMaxResults(1000)
 						.getResultList().stream().map(f -> {
 							SrcdtPerCorrectionLog perCorrectionLog = (SrcdtPerCorrectionLog) f[0];
 							SrcdtCtgCorrectionLog ctgCorrectionLog = (SrcdtCtgCorrectionLog) f[1];
