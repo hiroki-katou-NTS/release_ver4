@@ -421,6 +421,7 @@ public class SyEmployeePubImp implements SyEmployeePub {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmployeeInfoExport> getByListSid(List<String> sIds) {
 
 		if (CollectionUtil.isEmpty(sIds)) {
@@ -881,6 +882,7 @@ public class SyEmployeePubImp implements SyEmployeePub {
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ResultRequest596Export> getEmpDeletedLstBySids(List<String> sids) {
 		List<ResultRequest596Export> result = new ArrayList<>();
 		List<EmployeeDataMngInfo> emps = this.empDataMngRepo

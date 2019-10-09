@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -18,6 +20,7 @@ public class WorkplaceExportAdapterImpl implements WorkplaceExportAdapter{
 	private WorkplaceExportPub pub;
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<WorkplaceExportImport> getAllWkpConfig(String companyId, List<String> listWkpId, GeneralDate baseDate) {
 		return this.pub.getAllWkpConfig(companyId, listWkpId, baseDate).stream()
 				.map(x -> new WorkplaceExportImport(x.getWorkplaceId(), x.getHierarchyCd()))

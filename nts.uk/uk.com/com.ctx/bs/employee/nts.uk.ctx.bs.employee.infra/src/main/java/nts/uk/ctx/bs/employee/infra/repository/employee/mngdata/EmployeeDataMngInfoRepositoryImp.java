@@ -433,6 +433,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 	// duong tv end code
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmployeeDataMngInfo> findByListEmployeeId(List<String> listSid) {
 
 		if (CollectionUtil.isEmpty(listSid)) {
@@ -634,6 +635,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 	// laitv code end
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmployeeDataMngInfo> findBySidDel(List<String> sid) {
 		List<EmployeeDataMngInfo> resultList = new ArrayList<>();
 		CollectionUtil.split(sid, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {

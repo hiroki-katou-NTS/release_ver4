@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -36,6 +38,7 @@ public class WorkplaceConfigInfoPubImp implements WorkPlaceConfigInfoPub {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<JobTitleExport> findAllById(String companyId, List<String> positionIds, GeneralDate baseDate) {
 		return this.repo.findAllById(companyId, positionIds, baseDate).stream()
 				.map(x -> { 

@@ -120,6 +120,7 @@ public class JpaClosureEmploymentRepository extends JpaRepository implements Clo
 	 * @see nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository#findByClosureId(java.lang.String, int)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ClosureEmployment> findByClosureId(String companyId, int closureId) {
 		// Get entity manager
 		EntityManager em = this.getEntityManager();

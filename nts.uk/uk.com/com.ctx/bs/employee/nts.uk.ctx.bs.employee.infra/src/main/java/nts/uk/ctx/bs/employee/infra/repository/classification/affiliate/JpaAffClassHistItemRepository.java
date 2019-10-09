@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -221,6 +223,7 @@ public class JpaAffClassHistItemRepository extends JpaRepository implements AffC
 	 * AffClassHistItemRepository#getByHistoryIds(java.util.List)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AffClassHistItem> getByHistoryIds(List<String> historyIds) {
 		if (historyIds.isEmpty()) {
 			return Collections.emptyList();

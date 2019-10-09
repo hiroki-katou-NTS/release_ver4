@@ -707,6 +707,7 @@ public class JpaClosureRepository extends JpaRepository implements ClosureReposi
 	 * findByCurrentMonth(nts.arc.time.YearMonth)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ClosureHistory> findByCurrentMonth(String companyId, YearMonth closureYm) {
 
 		// get entity manager
