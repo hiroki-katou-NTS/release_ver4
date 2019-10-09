@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
@@ -29,6 +31,7 @@ public class ComPubImp implements SyCompanyPub {
 	@Inject
 	private AffCompanyHistRepository affComHistRepo;
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AffCompanyHistExport> GetAffCompanyHistByEmployee(List<String> sids, DatePeriod datePeriod) {
 
@@ -55,6 +58,7 @@ public class ComPubImp implements SyCompanyPub {
 		}).filter(c -> c != null).collect(Collectors.toList());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public AffCompanyHistExport GetAffComHisBySidAndBaseDate(String sid, GeneralDate baseDate) {
 		
@@ -76,6 +80,7 @@ public class ComPubImp implements SyCompanyPub {
 		return affComHostEx;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public AffCompanyHistExport GetAffComHisBySid(String cid, String sid) {
 		AffCompanyHist affComHis = affComHistRepo.getAffCompanyHistoryOfEmployee(sid);
@@ -96,6 +101,7 @@ public class ComPubImp implements SyCompanyPub {
 		return affComHostEx;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<StatusOfEmployee> GetListAffComHistByListSidAndPeriod(List<String> sids, DatePeriod datePeriod) {
 		

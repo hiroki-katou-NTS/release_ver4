@@ -25,6 +25,7 @@ import nts.uk.ctx.at.record.infra.entity.workrecord.operationsetting.KrcmtApprov
  *
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JpaApprovalProcessingUseSettingRepository extends JpaRepository
 		implements ApprovalProcessingUseSettingRepository {
 

@@ -584,6 +584,7 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 		return mapResult;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EmploymentHistoryOfEmployee> getEmploymentBySID(List<String> sids,
 			List<String> employmentCodes, DatePeriod dateRange) {

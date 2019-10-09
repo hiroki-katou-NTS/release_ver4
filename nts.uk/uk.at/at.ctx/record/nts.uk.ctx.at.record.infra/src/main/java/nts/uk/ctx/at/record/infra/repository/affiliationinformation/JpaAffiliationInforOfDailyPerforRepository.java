@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -111,6 +113,7 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 		return entity;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<AffiliationInforOfDailyPerfor> findByKey(String employeeId, GeneralDate ymd) {
 		return this.queryProxy().query(FIND_BY_KEY, KrcdtDaiAffiliationInf.class).setParameter("employeeId", employeeId)
@@ -153,6 +156,7 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AffiliationInforOfDailyPerfor> finds(List<String> employeeId, DatePeriod ymd) {
 		List<AffiliationInforOfDailyPerfor> result = new ArrayList<>();
@@ -183,6 +187,7 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AffiliationInforOfDailyPerfor> finds(Map<String, List<GeneralDate>> param) {
 		List<KrcdtDaiAffiliationInf> result = new ArrayList<>();

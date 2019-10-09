@@ -277,6 +277,7 @@ public class JpaAffWorkplaceHistoryItemRepository extends JpaRepository implemen
 		return lstSid;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@SneakyThrows
 	@Override
 	public List<String> getHistIdLstBySidAndPeriod(String sid, DatePeriod period) {

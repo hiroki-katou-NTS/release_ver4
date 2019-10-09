@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -49,6 +51,7 @@ public class DefaultBasicScheduleService implements BasicScheduleService {
 	/**
 	 *  就業時間帯の必須チェック
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public SetupType checkNeededOfWorkTimeSetting(String workTypeCode) {
 		String companyId = AppContexts.user().companyId();

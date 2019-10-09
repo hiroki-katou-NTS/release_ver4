@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -23,6 +25,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /** 日別実績の任意項目 Finder */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class OptionalItemOfDailyPerformFinder extends FinderFacade {
 
 	@Inject

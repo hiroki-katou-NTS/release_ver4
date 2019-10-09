@@ -14,6 +14,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -61,6 +63,7 @@ public class JpaOutsideOTSettingRepository extends JpaRepository
 	 * nts.uk.ctx.at.shared.dom.overtime.OvertimeSettingRepository#findById(java
 	 * .lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@SneakyThrows
 	@Override
 	public Optional<OutsideOTSetting> findById(String companyId) {
@@ -172,6 +175,7 @@ public class JpaOutsideOTSettingRepository extends JpaRepository
 		
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@SneakyThrows
 	@Override
 	public Optional<OutsideOTSetting> findByIdV2(String companyId) {
@@ -288,6 +292,7 @@ public class JpaOutsideOTSettingRepository extends JpaRepository
 	 * nts.uk.ctx.at.shared.dom.overtime.OvertimeSettingRepository#findById(java
 	 * .lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<OutsideOTSetting> reportById(String companyId) {
 
@@ -431,6 +436,7 @@ public class JpaOutsideOTSettingRepository extends JpaRepository
 	 * nts.uk.ctx.at.shared.dom.overtime.breakdown.OvertimeBRDItemRepository#
 	 * findAll(java.lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<OutsideOTBRDItem> findAllBRDItem(String companyId) {
 		// get entity manager
@@ -476,6 +482,7 @@ public class JpaOutsideOTSettingRepository extends JpaRepository
 	 * nts.uk.ctx.at.shared.dom.overtime.breakdown.OvertimeBRDItemRepository#
 	 * findAllUse(java.lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<OutsideOTBRDItem> findAllUseBRDItem(String companyId) {
 		// get entity manager
@@ -544,6 +551,7 @@ public class JpaOutsideOTSettingRepository extends JpaRepository
 	/* (non-Javadoc)
 	 * @see nts.uk.ctx.at.shared.dom.overtime.OvertimeRepository#findAll(java.lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<Overtime> findAllOvertime(String companyId) {
 		return this.findAllEntity(companyId).stream().map(item -> this.toDomain(item))
@@ -660,6 +668,7 @@ public class JpaOutsideOTSettingRepository extends JpaRepository
 	 * @see nts.uk.ctx.at.shared.dom.outsideot.OutsideOTSettingRepository#
 	 * findAllUseOvertime(java.lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<Overtime> findAllUseOvertime(String companyId) {
 		// get entity manager

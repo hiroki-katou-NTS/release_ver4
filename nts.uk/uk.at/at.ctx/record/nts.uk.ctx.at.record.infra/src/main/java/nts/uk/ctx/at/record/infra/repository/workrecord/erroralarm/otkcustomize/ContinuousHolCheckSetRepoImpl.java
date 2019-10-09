@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
@@ -50,6 +52,7 @@ public class ContinuousHolCheckSetRepoImpl extends JpaRepository implements Cont
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<ContinuousHolCheckSet> findSpecial(String companyId) {
 		/* TODO: find a common way for join WORKTYPE_CD in tables in oracle and sql server */
 //			StringBuilder queryString = new StringBuilder("SELECT a.CID, a.CONTINUOUS_DAYS, a.MESSAGE_DISPLAY, ");

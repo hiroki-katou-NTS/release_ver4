@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
@@ -50,12 +52,14 @@ public class JpaSpecificDateItemRepositoryImp extends JpaRepository implements S
 		return entity;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<SpecificDateItem> getAll(String companyId) {
 		return this.queryProxy().query(GET_ALL, KsmstSpecificDateItem.class).setParameter("companyId", companyId)
 				.getList(x -> this.toBonusPaySettingDomain(x));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<SpecificDateItem> getSpecifiDateByUse(String companyId, int useAtr) {
 		return this.queryProxy().query(GET_BY_USE, KsmstSpecificDateItem.class).setParameter("companyId", companyId)
@@ -96,6 +100,7 @@ public class JpaSpecificDateItemRepositoryImp extends JpaRepository implements S
 	 * @param lstSpecificDateItem
 	 * @return
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<SpecificDateItem> getSpecifiDateByListCode(String companyId, List<Integer> lstSpecificDateItem) {
 		List<SpecificDateItem> resultList = new ArrayList<>();

@@ -563,6 +563,7 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 				}).collect(Collectors.toList());
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<SpecialHoliday> findByListCode(String companyId, List<Integer> specialHolidayCodes) {
 		if(specialHolidayCodes.isEmpty())
@@ -604,6 +605,7 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 				}).collect(Collectors.toList());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<SpecialHoliday> findByCompanyIdNoMaster(String companyId, List<Integer> specialHolidayCodes) {
 		if(specialHolidayCodes.isEmpty()) return Collections.emptyList();

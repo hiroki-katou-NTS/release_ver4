@@ -419,6 +419,7 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 		return this.queryProxy().query(SELECT_WORKTYPE_ALL_ORDER, WorkTypeInfor.class).setParameter("companyId", companyId).getList();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<WorkType> getPossibleWorkTypeV2(String companyId, List<String> lstPossible) {
 		StringBuilder builder = new StringBuilder("SELECT c, o, s FROM KshmtWorkType c ");

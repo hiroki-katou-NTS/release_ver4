@@ -3,6 +3,8 @@ package nts.uk.ctx.at.shared.dom.worktype.service;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.shared.dom.worktype.WorkType;
@@ -11,6 +13,7 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JudgmentOneDayHolidayImpl implements JudgmentOneDayHoliday {
 
 	@Inject

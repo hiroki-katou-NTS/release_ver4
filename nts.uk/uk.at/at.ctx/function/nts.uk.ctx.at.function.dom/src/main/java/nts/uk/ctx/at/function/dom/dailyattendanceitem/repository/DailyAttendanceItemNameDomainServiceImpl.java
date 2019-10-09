@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.function.dom.adapter.DailyAttendanceItemAdapterDto;
@@ -19,6 +21,7 @@ import nts.uk.ctx.at.shared.dom.scherec.dailyattendanceitem.adapter.attendanceit
  * 勤怠項目に対応する名称を生成する
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class DailyAttendanceItemNameDomainServiceImpl implements DailyAttendanceItemNameDomainService {
 	
 	@Inject

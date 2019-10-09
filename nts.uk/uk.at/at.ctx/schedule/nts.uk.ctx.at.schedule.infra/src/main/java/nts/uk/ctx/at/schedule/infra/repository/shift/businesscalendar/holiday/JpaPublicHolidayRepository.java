@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -101,6 +103,7 @@ public class JpaPublicHolidayRepository extends JpaRepository implements PublicH
 	 * @param endDate
 	 * @return
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<PublicHoliday> getpHolidayWhileDate(String companyId,GeneralDate strDate, GeneralDate endDate) {
 		return this.queryProxy().query(SELECT_BY_SDATE_EDATE, KsmmtPublicHoliday.class)

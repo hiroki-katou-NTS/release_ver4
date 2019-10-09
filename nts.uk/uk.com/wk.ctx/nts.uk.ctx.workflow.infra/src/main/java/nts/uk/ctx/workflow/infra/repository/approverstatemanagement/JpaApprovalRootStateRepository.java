@@ -679,6 +679,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		return result;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<ApprovalRootState> findAppByEmployeeIDRecordDate(GeneralDate startDate, GeneralDate endDate,
 			String employeeID, Integer rootType) {

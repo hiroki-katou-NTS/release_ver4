@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.adapter.employment.EmploymentHisOfEmployeeImport;
@@ -49,6 +51,7 @@ public class EmploymentHistAdapterImpl implements EmploymentHistAdapter {
 		return result;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Map<String, List<EmploymentHisOfEmployeeImport>> getEmploymentBySidsAndEmploymentCds(List<String> sids,
 			List<String> employmentCodes, DatePeriod dateRange) {

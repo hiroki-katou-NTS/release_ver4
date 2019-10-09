@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.gul.collection.CollectionUtil;
@@ -14,6 +16,7 @@ import nts.uk.ctx.at.shared.pub.scherec.dailyattendanceitem.DailyAttendanceItemR
 import nts.uk.ctx.at.shared.pub.scherec.dailyattendanceitem.DailyAttendanceItemRecPubExport;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class DailyAttendanceItemRecPubImpl implements DailyAttendanceItemRecPub {
 
 	@Inject

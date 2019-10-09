@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -84,6 +86,7 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 			+ "AND a.krcdtMonAnyItemValuePk.yearMonth = :yearMonth ";
 
 	/** 検索 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<AnyItemOfMonthly> find(String employeeId, YearMonth yearMonth, ClosureId closureId,
 			ClosureDate closureDate, int anyItemId) {
@@ -97,6 +100,7 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 		return Optional.empty();
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnyItemOfMonthly> find(String employeeId, YearMonth yearMonth, ClosureId closureId,
 			ClosureDate closureDate, List<Integer> anyItemIds) {
@@ -719,6 +723,7 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 	}
 
 	/** 検索 （月度と締め） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnyItemOfMonthly> findByMonthlyAndClosure(String employeeId, YearMonth yearMonth, ClosureId closureId,
 			ClosureDate closureDate) {
@@ -732,6 +737,7 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 	}
 
 	/** 検索 （月度） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnyItemOfMonthly> findByMonthly(String employeeId, YearMonth yearMonth) {
 		List<AnyItemOfMonthly> anyItemOfMonthly = new ArrayList<>();
@@ -749,6 +755,7 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 	}
 
 	/** 検索 （社員IDリスト） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnyItemOfMonthly> findByEmployees(List<String> employeeIds, YearMonth yearMonth, ClosureId closureId,
 			ClosureDate closureDate, int anyItemId) {
@@ -773,6 +780,7 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 	}
 
 	/** 検索 （社員IDリスト） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnyItemOfMonthly> findByEmployees(List<String> employeeIds, YearMonth yearMonth, ClosureId closureId,
 			ClosureDate closureDate) {
@@ -792,6 +800,7 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 	}
 
 	/** 検索 （社員IDリストと月度リスト） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnyItemOfMonthly> findBySidsAndMonths(List<String> employeeIds, List<YearMonth> yearMonths) {
 
@@ -829,6 +838,7 @@ public class JpaAnyItemOfMonthly extends JpaRepository implements AnyItemOfMonth
 		return items;
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnyItemOfMonthly> findBySidsAndMonthsV2(List<String> employeeIds, List<YearMonth> yearMonths) {
 

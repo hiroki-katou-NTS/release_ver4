@@ -9,8 +9,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import nts.uk.ctx.at.function.dom.dailyperformanceformat.repository.AuthorityFormatMonthlyRepository;
 import nts.uk.ctx.at.record.app.find.monthly.root.common.ClosureDateDto;
@@ -38,7 +39,7 @@ import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 
 @Stateless
-@Transactional
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class DPMonthFlexProcessor {
 
 	@Inject

@@ -946,6 +946,7 @@ public class WorkplacePubImp implements SyWorkplacePub {
 		return result;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<String> getLstWorkplaceIdBySidAndPeriod(String sid, DatePeriod period) {
 		List<String> workPlaceIds = affWorkplaceHistoryItemRepository.getHistIdLstBySidAndPeriod(sid, period);

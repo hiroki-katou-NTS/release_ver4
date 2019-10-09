@@ -48,6 +48,7 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 		REMOVE_BY_EMPLOYEE = builderString.toString();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<AnyItemValueOfDaily> find(String employeeId, GeneralDate baseDate) {
 		Optional<KrcdtDayAnyItemValueMerge> anyEntity = this.queryProxy()
@@ -58,6 +59,7 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 		return Optional.empty();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnyItemValueOfDaily> find(String employeeId, List<GeneralDate> baseDate) {
 		if(baseDate.isEmpty()) {
@@ -81,6 +83,7 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 		return new ArrayList<>();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnyItemValueOfDaily> find(String employeeId) {
 		StringBuilder query = new StringBuilder("SELECT op FROM KrcdtDayAnyItemValueMerge op");
@@ -95,6 +98,7 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 		return new ArrayList<>();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	@SneakyThrows
 	public List<AnyItemValueOfDaily> finds(List<String> employeeIds, DatePeriod baseDate) {
@@ -135,6 +139,7 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 		return result;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnyItemValueOfDaily> finds(Map<String, List<GeneralDate>> param) {
 		List<AnyItemValueOfDaily> result = new ArrayList<>();

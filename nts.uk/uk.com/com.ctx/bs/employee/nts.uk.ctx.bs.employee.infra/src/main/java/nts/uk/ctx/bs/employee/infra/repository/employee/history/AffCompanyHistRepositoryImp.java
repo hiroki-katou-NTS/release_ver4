@@ -135,6 +135,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 				.executeUpdate();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public AffCompanyHist getAffCompanyHistoryOfPerson(String personId) {
 		List<BsymtAffCompanyHist> lstBsymtAffCompanyHist = this.queryProxy()
@@ -152,6 +153,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		return toDomain(lstBsymtAffCompanyHist);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	@SneakyThrows
 	public AffCompanyHist getAffCompanyHistoryOfEmployeeDesc(String cid, String employeeId) {
@@ -196,6 +198,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public AffCompanyHist getAffCompanyHistoryOfEmployeeAndBaseDate(String employeeId, GeneralDate baseDate) {
 		List<BsymtAffCompanyHist> lstBsymtAffCompanyHist = this.queryProxy()
@@ -205,6 +208,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		return toDomain(lstBsymtAffCompanyHist);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AffCompanyHist> getAffCompanyHistoryOfEmployeeListAndBaseDate(List<String> employeeIds, GeneralDate baseDate) {
 		List<AffCompanyHist> resultList = new ArrayList<>();
@@ -347,6 +351,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		this.commandProxy().update(existItem.get());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public AffCompanyHist getAffCompanyHistoryOfHistInfo(String histId) {
 		List<BsymtAffCompanyHist> existItem = this.queryProxy().query(SELECT_BY_HISTORY_ID, BsymtAffCompanyHist.class)
@@ -355,6 +360,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		return toDomain(existItem);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AffCompanyHist> getAffCompanyHistoryOfEmployees(List<String> employeeIds) {
 		// OutPut Data
@@ -434,6 +440,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		return resultData;
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AffCompanyHistByEmployee> getAffEmployeeHistory(List<String> employeeIds) {
 
@@ -470,6 +477,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 	}
 	
 	// RequestList 588
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AffCompanyHistByEmployee> getAffEmployeeHistory(List<String> employeeIds, DatePeriod datePeriod) {
 
@@ -521,6 +529,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		return resultList;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AffCompanyHist> getAffComHisEmpByLstSidAndPeriod(List<String> employeeIds, DatePeriod datePeriod) {
 		// OutPut Data
@@ -559,6 +568,7 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		return resultData;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<String> getLstSidByLstSidAndPeriod(List<String> employeeIds, DatePeriod dateperiod) {
 		List<String> listSid = new ArrayList<>();

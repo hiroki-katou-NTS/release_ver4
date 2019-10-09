@@ -19,6 +19,7 @@ import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.Ident
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class FindDataDCRecord implements IFindDataDCRecord{
 
 	private static Map<String, Optional<IdentityProcessUseSet>> identityProcessUseSetMap = new HashMap<>();

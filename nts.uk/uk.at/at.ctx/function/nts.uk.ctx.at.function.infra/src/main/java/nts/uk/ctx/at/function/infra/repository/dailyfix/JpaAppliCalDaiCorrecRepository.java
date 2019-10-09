@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.uk.ctx.at.function.dom.dailyfix.ApplicationCall;
@@ -19,6 +21,7 @@ public class JpaAppliCalDaiCorrecRepository extends JpaRepository implements IAp
 	private static final String DELETE_BY_COM = "DELETE FROM KfnmtApplicationCall c "
 												+ "WHERE c.kfnmtApplicationCallPK.companyId = :companyId ";
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<ApplicationCall> findByCom(String companyId) {
 		return this.queryProxy().query(SELECT_BY_COM, KfnmtApplicationCall.class)

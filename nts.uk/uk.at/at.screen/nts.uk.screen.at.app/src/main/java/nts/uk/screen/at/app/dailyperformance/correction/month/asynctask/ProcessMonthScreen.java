@@ -3,6 +3,8 @@ package nts.uk.screen.at.app.dailyperformance.correction.month.asynctask;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceCorrectionProcessor;
@@ -16,6 +18,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.monthflex.DPMonthFlexPro
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class ProcessMonthScreen {
 
 	@Inject

@@ -97,6 +97,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 			+ "ORDER BY a.startDate ";
 	
 	/** 検索 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<RemainMerge> find(MonthMergeKey key) {
 		
@@ -117,6 +118,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 	}
 	
 	/** 検索　（社員IDリストと年月リスト） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<RemainMerge> findBySidsAndYearMonths(List<String> employeeIds, List<YearMonth> yearMonths) {
 		
@@ -136,6 +138,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 		return results;
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<RemainMerge> findByYearMonthOrderByStartYmd(String employeeId, YearMonth yearMonth){
 		return this.queryProxy().query(FIND_BY_YEAR_MONTH, KrcdtMonRemain.class)
@@ -144,6 +147,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 				.getList(c -> c.toDomain());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<RemainMerge> findByYMAndClosureIdOrderByStartYmd(String employeeId, YearMonth yearMonth,
 			ClosureId closureId) {
@@ -195,6 +199,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 	 * @param yearMonth
 	 * @return
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AbsenceLeaveRemainData> findByYearMonthRQ260(String employeeId, YearMonth yearMonth) {
 		return this.queryProxy().query(FIND_BY_YEAR_MONTH, KrcdtMonRemain.class)
@@ -209,6 +214,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 	 * @param yearMonth
 	 * @return
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<SpecialHolidayRemainData> findByYearMonthRQ263(String employeeId, YearMonth yearMonth) {
 		val entitys = this.queryProxy().query(FIND_BY_YEAR_MONTH, KrcdtMonRemain.class)
@@ -226,6 +232,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 	 * @param yearMonth
 	 * @return
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<MonthlyDayoffRemainData> findByYearMonthRQ259(String employeeId, YearMonth yearMonth) {
 		return this.queryProxy().query(FIND_BY_YEAR_MONTH, KrcdtMonRemain.class)
@@ -240,6 +247,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 	 * @param lstYrMon
 	 * @return
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<RsvLeaRemNumEachMonth> findByYearMonthRQ258(List<String> lstSID, List<YearMonth> lstYrMon) {
 		if(lstSID.isEmpty() || lstYrMon.isEmpty()){
@@ -269,6 +277,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 	 * @param lstYrMon
 	 * @return
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AnnLeaRemNumEachMonth> findByYearMonthRQ255(List<String> lstSID, List<YearMonth> lstYrMon) {
 		if(lstSID.isEmpty() || lstYrMon.isEmpty()){
@@ -292,6 +301,7 @@ public class JpaRemainMerge extends JpaRepository implements RemainMergeReposito
 		return results.stream().map(c -> c.toDomainAnnLeaRemNumEachMonth()).collect(Collectors.toList());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Map<YearMonth, List<RemainMerge>> findBySidsAndYrMons(String employeeId, List<YearMonth> lstYrMon) {
 		if(lstYrMon.isEmpty()){

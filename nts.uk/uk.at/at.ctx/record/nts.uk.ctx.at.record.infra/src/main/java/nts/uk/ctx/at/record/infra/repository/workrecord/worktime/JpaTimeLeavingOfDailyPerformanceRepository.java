@@ -83,12 +83,14 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<TimeLeavingOfDailyPerformance> findByKey(String employeeId, GeneralDate ymd) {
 		return this.queryProxy().query(FIND_BY_KEY, KrcdtDaiLeavingWork.class).setParameter("employeeId", employeeId)
 				.setParameter("ymd", ymd).getSingle(f -> f.toDomain());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	@SneakyThrows
 	public List<TimeLeavingOfDailyPerformance> findbyPeriodOrderByYmd(String employeeId, DatePeriod datePeriod) {
@@ -486,6 +488,7 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 	// commandProxy().updateAll(entity.timeLeavingWorks);
 	// }
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<TimeLeavingOfDailyPerformance> finds(List<String> employeeIds, DatePeriod ymd) {
 		List<TimeLeavingOfDailyPerformance> result = new ArrayList<>();
@@ -587,6 +590,7 @@ public class JpaTimeLeavingOfDailyPerformanceRepository extends JpaRepository
 		this.getEntityManager().flush();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<TimeLeavingOfDailyPerformance> finds(Map<String, List<GeneralDate>> param) {
 		List<Object[]> result = new ArrayList<>();

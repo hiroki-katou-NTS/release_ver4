@@ -20,6 +20,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -139,6 +141,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  *
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JpaDailyPerformanceScreenRepo extends JpaRepository implements DailyPerformanceScreenRepo {
 
 	private final static String SEL_BUSINESS_TYPE;

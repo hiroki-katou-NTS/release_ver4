@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import org.apache.logging.log4j.util.Strings;
 
@@ -58,6 +60,7 @@ public class JpaIdentificationRepository extends JpaRepository implements Identi
 			+ " AND c.krcdtIdentificationStatusPK.employeeId = :employeeId "
 			+ " AND c.krcdtIdentificationStatusPK.processingYmd IN :dates ";
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<Identification> findByEmployeeID(String employeeID, GeneralDate startDate, GeneralDate endDate) {
 		String companyID = AppContexts.user().companyId();
@@ -182,6 +185,7 @@ public class JpaIdentificationRepository extends JpaRepository implements Identi
 				.setParameter("startDate", startDate).setParameter("endDate", endDate).getList(c -> c.toDomain());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<Identification> findByEmployeeID(String employeeID, List<GeneralDate> dates) {
 		if (CollectionUtil.isEmpty(dates)) return Collections.emptyList();

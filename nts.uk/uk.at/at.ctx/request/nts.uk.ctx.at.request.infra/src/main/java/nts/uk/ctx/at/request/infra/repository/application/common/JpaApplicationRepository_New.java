@@ -295,6 +295,8 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<Application_New> getApplicationBySIDs(List<String> employeeID, GeneralDate startDate,
 			GeneralDate endDate) {

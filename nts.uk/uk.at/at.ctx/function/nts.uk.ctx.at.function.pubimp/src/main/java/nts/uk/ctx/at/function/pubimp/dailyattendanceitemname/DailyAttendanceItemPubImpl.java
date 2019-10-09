@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.function.dom.dailyattendanceitem.repository.DailyAttendanceItemNameDomainService;
@@ -11,6 +13,7 @@ import nts.uk.ctx.at.function.pub.dailyattendanceitemname.DailyAttendanceItemPub
 import nts.uk.ctx.at.function.pub.dailyattendanceitemname.DailyAttendanceItemPubDto;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class DailyAttendanceItemPubImpl implements DailyAttendanceItemPub{
 	
 	@Inject

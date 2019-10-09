@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.enums.EnumAdaptor;
@@ -49,12 +51,14 @@ public class JpaPremiumItemRepository extends JpaRepository implements PremiumIt
 		this.commandProxy().update(item);
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<PremiumItem> findByCompanyID(String companyID) {
 		return this.queryProxy().query(FIND_ALL, KmnmtPremiumItem.class).setParameter("CID", companyID)
 				.getList(x -> convertToDomain(x));
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<PremiumItem> findByCompanyIDAndDisplayNumber(String companyID, List<Integer> displayNumbers) {
 		List<PremiumItem> resultList = new ArrayList<>();
@@ -67,6 +71,7 @@ public class JpaPremiumItemRepository extends JpaRepository implements PremiumIt
 		return resultList;
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<PremiumItem> findByCompanyIDAndListPremiumNo (String companyID, List<Integer> premiumNo) {
 		if (CollectionUtil.isEmpty(premiumNo)) {
@@ -83,6 +88,7 @@ public class JpaPremiumItemRepository extends JpaRepository implements PremiumIt
 		return resultList;
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<PremiumItem> findAllIsUse (String companyID) {
 //		return this.queryProxy().query(FIND_ALL_IS_USE, KmnmtPremiumItem.class)

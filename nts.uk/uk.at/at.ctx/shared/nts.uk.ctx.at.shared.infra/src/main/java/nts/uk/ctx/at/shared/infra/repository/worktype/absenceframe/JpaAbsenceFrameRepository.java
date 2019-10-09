@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -82,6 +84,7 @@ public class JpaAbsenceFrameRepository extends JpaRepository implements AbsenceF
 				absenceFrame.getDeprecateAbsence().value);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AbsenceFrame> findAbsenceFrameByListFrame(String companyId, List<Integer> frameNos) {
 		if(frameNos.isEmpty())

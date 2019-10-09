@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -60,6 +62,7 @@ public class JpaAppDispNameRepository extends JpaRepository implements AppDispNa
 	 * get all display name
 	 * @author yennth
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	@SneakyThrows
 	public List<AppDispName> getAll(List<Integer> appType) {

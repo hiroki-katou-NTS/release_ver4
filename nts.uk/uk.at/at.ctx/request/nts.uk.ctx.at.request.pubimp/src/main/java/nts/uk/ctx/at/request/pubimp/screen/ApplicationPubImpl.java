@@ -83,6 +83,7 @@ public class ApplicationPubImpl implements ApplicationPub {
 	@Inject
 	private JudgmentOneDayHoliday judgmentOneDayHoliday;
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<ApplicationExport> getApplicationBySID(List<String> employeeID, GeneralDate startDate,
 			GeneralDate endDate) {
