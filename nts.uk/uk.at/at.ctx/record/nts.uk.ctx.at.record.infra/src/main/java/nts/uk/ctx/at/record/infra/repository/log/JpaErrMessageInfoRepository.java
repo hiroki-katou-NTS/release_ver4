@@ -94,7 +94,7 @@ public class JpaErrMessageInfoRepository extends JpaRepository implements ErrMes
 		Optional<ErrMessageInfo> data = getErrMessageByID(errMessageInfo.getEmployeeID(),
 				errMessageInfo.getEmpCalAndSumExecLogID(), errMessageInfo.getResourceID().v(),
 				errMessageInfo.getExecutionContent().value, errMessageInfo.getDisposalDay());
-		if (!data.isPresent()) {
+		if (!data.isPresent() && errMessageInfo.getEmployeeID() != null ) {
 			this.commandProxy().insert(toEntity(errMessageInfo));
 			this.getEntityManager().flush();
 		}

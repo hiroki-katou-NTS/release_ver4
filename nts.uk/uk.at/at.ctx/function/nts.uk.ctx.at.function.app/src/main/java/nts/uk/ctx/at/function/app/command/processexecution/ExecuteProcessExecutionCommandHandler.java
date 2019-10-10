@@ -348,7 +348,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		if (procExec != null) {
 			lastDateTimeOpt = lastExecDateTimeRepo.get(procExec.getCompanyId(), procExec.getExecItemCd().v());
 		}
-
 		if (lastDateTimeOpt.isPresent()) {
 			lastExecDateTime = lastDateTimeOpt.get();
 		}
@@ -365,7 +364,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		}
 		// アルゴリズム「就業計算と集計実行ログ作成判定処理」を実行する
 		// ・ドメインモデル「更新処理自動実行.実行設定.日別実績の作成・計算.日別実績の作成・計算区分」
-		// boolean dailyPerfCls =
 		// procExec.getExecSetting().getDailyPerf().isDailyPerfCls();
 		// // ・ドメインモデル「更新処理自動実行.実行設定.承認結果反映」
 		// boolean reflectResultCls = procExec.getExecSetting().isReflectResultCls();
@@ -389,7 +387,7 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		/*
 		 * /* ドメインモデル「更新処理自動実行ログ」を更新する 現在の実行状態 ＝ 実行 全体の終了状態 ＝ NULL
 		 * 
-		 * procExecLog.setCurrentStatus(CurrentExecutionStatus.RUNNING);	
+		 * procExecLog.setCurrentStatus(CurrentExecutionStatus.RUNNING);
 		 * procExecLog.setOverallStatus(null); this.procExecLogRepo.update(procExecLog);
 		 */
 
@@ -406,7 +404,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				processExecutionLogManage,dateTimeOutput);
 		//アルゴリズム「実行状態ログファイル作成処理」を実行する
 		createLogFileExecution.createLogFile(companyId, execItemCd);
-		
 	}
 	/**
 	 * 自動実行登録処理
@@ -425,69 +422,20 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 //		Optional<ProcessExecutionLogHistory> processExecutionLogHistory = procExecLogHistRepo.getByExecId(companyId,
 //				execItemCd, execId);
 //		if (!processExecutionLogHistory.isPresent()) {
-			if(processExecutionLogManage.getOverallStatus().isPresent() 
-					&& processExecutionLogManage.getOverallStatus().get() ==  EndStatus.CLOSING) {
-				// ドメインモデル「更新処理自動実行管理」を取得する
-				Optional<ProcessExecutionLogManage> optExecLogManage = processExecLogManaRepo
-						.getLogByCIdAndExecCdAndDateTiem(companyId, execItemCd, dateTimeOutput);
-				if (optExecLogManage.isPresent()) {
-					// ドメインモデル「更新処理自動実行管理」を更新する
-					processExecutionLogManage.setLastEndExecDateTime(GeneralDateTime.now());
-					processExecutionLogManage.setOverallStatus(EndStatus.FORCE_END);
-					processExecutionLogManage.setErrorSystem(errorCondition.getSystemErrorCondition());
-					processExecutionLogManage.setErrorBusiness(errorCondition.getBusinessErrorStatus());
-					// if (!this.isAbnormalTermEachTask(procExecLog) &&
-					// (processExecutionLogManage.getOverallStatus() == null
-					// || !processExecutionLogManage.getOverallStatus().isPresent())) {
-					// processExecutionLogManage.setOverallStatus(EndStatus.SUCCESS);
-					// } else if (this.isAbnormalTermEachTask(procExecLog)) {
-					// processExecutionLogManage.setOverallStatus(EndStatus.FORCE_END);
-					// }
-
-					this.processExecLogManaRepo.updateByDatetime(processExecutionLogManage, dateTimeOutput);
-
-					List<ExecutionTaskLog> taskLogList = this.execTaskLogRepo.getAllByCidExecCdExecId(companyId,
-							execItemCd, execId);
-					if (CollectionUtil.isEmpty(taskLogList)) {
-						this.execTaskLogRepo.insertAll(companyId, execItemCd, execId, procExecLog.getTaskLogList());
-					} else {
-						this.execTaskLogRepo.updateAll(companyId, execItemCd, execId, procExecLog.getTaskLogList());
-					}
-					// ドメインモデル「更新処理自動実行ログ履歴」を更新する
-					this.procExecLogHistRepo.update(new ProcessExecutionLogHistory(new ExecutionCode(execItemCd),
-							companyId, processExecutionLogManage.getOverallError(),
-							(processExecutionLogManage.getOverallStatus() != null
-									&& processExecutionLogManage.getOverallStatus().isPresent())
-											? processExecutionLogManage.getOverallStatus().get()
-											: null,
-							processExecutionLogManage.getLastExecDateTime(),
-							(procExecLog.getEachProcPeriod() != null && procExecLog.getEachProcPeriod().isPresent())
-									? procExecLog.getEachProcPeriod().get()
-									: null,
-							procExecLog.getTaskLogList(), execId, processExecutionLogManage.getLastEndExecDateTime(),
-							processExecutionLogManage.getErrorSystem(), processExecutionLogManage.getErrorBusiness()));
-				} else {
-					// ドメインモデル「更新処理自動実行ログ履歴」を更新する
-					this.procExecLogHistRepo.update(new ProcessExecutionLogHistory(new ExecutionCode(execItemCd),
-							companyId, processExecutionLogManage.getOverallError(),
-							EndStatus.FORCE_END,
-							processExecutionLogManage.getLastExecDateTime(),
-							(procExecLog.getEachProcPeriod() != null && procExecLog.getEachProcPeriod().isPresent())
-									? procExecLog.getEachProcPeriod().get()
-									: null,
-							procExecLog.getTaskLogList(), execId, GeneralDateTime.now(),
-							errorCondition.getSystemErrorCondition(), errorCondition.getBusinessErrorStatus()));
-				}
-				
-			}else {
-				//ドメインモデル「更新処理自動実行管理」を更新する
+		if (processExecutionLogManage.getOverallStatus().isPresent()
+				&& processExecutionLogManage.getOverallStatus().get() == EndStatus.CLOSING) {
+			// ドメインモデル「更新処理自動実行管理」を取得する
+			Optional<ProcessExecutionLogManage> optExecLogManage = processExecLogManaRepo
+					.getLogByCIdAndExecCdAndDateTiem(companyId, execItemCd, dateTimeOutput);
+			if (optExecLogManage.isPresent()) {
+				// ドメインモデル「更新処理自動実行管理」を更新する
 				processExecutionLogManage.setLastEndExecDateTime(GeneralDateTime.now());
-				processExecutionLogManage.setOverallStatus(EndStatus.SUCCESS);
+				processExecutionLogManage.setOverallStatus(EndStatus.FORCE_END);
 				processExecutionLogManage.setErrorSystem(errorCondition.getSystemErrorCondition());
 				processExecutionLogManage.setErrorBusiness(errorCondition.getBusinessErrorStatus());
-				processExecutionLogManage.setCurrentStatus(CurrentExecutionStatus.WAITING);
-				this.processExecLogManaRepo.updateByDatetime(processExecutionLogManage,dateTimeOutput);
-	
+
+				this.processExecLogManaRepo.updateByDatetime(processExecutionLogManage, dateTimeOutput);
+
 				List<ExecutionTaskLog> taskLogList = this.execTaskLogRepo.getAllByCidExecCdExecId(companyId, execItemCd,
 						execId);
 				if (CollectionUtil.isEmpty(taskLogList)) {
@@ -495,9 +443,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				} else {
 					this.execTaskLogRepo.updateAll(companyId, execItemCd, execId, procExecLog.getTaskLogList());
 				}
-				
-				//ドメインモデル「更新処理自動実行ログ履歴」を新規登録する
-				this.procExecLogHistRepo.insert(new ProcessExecutionLogHistory(new ExecutionCode(execItemCd), companyId,
+				// ドメインモデル「更新処理自動実行ログ履歴」を更新する
+				this.procExecLogHistRepo.update(new ProcessExecutionLogHistory(new ExecutionCode(execItemCd), companyId,
 						processExecutionLogManage.getOverallError(),
 						(processExecutionLogManage.getOverallStatus() != null
 								&& processExecutionLogManage.getOverallStatus().isPresent())
@@ -507,9 +454,51 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 						(procExecLog.getEachProcPeriod() != null && procExecLog.getEachProcPeriod().isPresent())
 								? procExecLog.getEachProcPeriod().get()
 								: null,
-						procExecLog.getTaskLogList(), execId,processExecutionLogManage.getLastEndExecDateTime(),
-						processExecutionLogManage.getErrorSystem(),processExecutionLogManage.getErrorBusiness()));
+						procExecLog.getTaskLogList(), execId, processExecutionLogManage.getLastEndExecDateTime(),
+						processExecutionLogManage.getErrorSystem(), processExecutionLogManage.getErrorBusiness()));
+			} else {
+				// ドメインモデル「更新処理自動実行ログ履歴」を更新する
+				this.procExecLogHistRepo.update(new ProcessExecutionLogHistory(new ExecutionCode(execItemCd), companyId,
+						processExecutionLogManage.getOverallError(), EndStatus.FORCE_END,
+						processExecutionLogManage.getLastExecDateTime(),
+						(procExecLog.getEachProcPeriod() != null && procExecLog.getEachProcPeriod().isPresent())
+								? procExecLog.getEachProcPeriod().get()
+								: null,
+						procExecLog.getTaskLogList(), execId, GeneralDateTime.now(),
+						errorCondition.getSystemErrorCondition(), errorCondition.getBusinessErrorStatus()));
 			}
+
+			}else {
+			//ドメインモデル「更新処理自動実行管理」を更新する
+			processExecutionLogManage.setLastEndExecDateTime(GeneralDateTime.now());
+			processExecutionLogManage.setOverallStatus(EndStatus.SUCCESS);
+			processExecutionLogManage.setErrorSystem(errorCondition.getSystemErrorCondition());
+			processExecutionLogManage.setErrorBusiness(errorCondition.getBusinessErrorStatus());
+			processExecutionLogManage.setCurrentStatus(CurrentExecutionStatus.WAITING);
+			this.processExecLogManaRepo.updateByDatetime(processExecutionLogManage, dateTimeOutput);
+	
+			List<ExecutionTaskLog> taskLogList = this.execTaskLogRepo.getAllByCidExecCdExecId(companyId, execItemCd,
+					execId);
+			if (CollectionUtil.isEmpty(taskLogList)) {
+				this.execTaskLogRepo.insertAll(companyId, execItemCd, execId, procExecLog.getTaskLogList());
+			} else {
+				this.execTaskLogRepo.updateAll(companyId, execItemCd, execId, procExecLog.getTaskLogList());
+			}
+
+			// ドメインモデル「更新処理自動実行ログ履歴」を新規登録する
+			this.procExecLogHistRepo.insert(new ProcessExecutionLogHistory(new ExecutionCode(execItemCd), companyId,
+					processExecutionLogManage.getOverallError(),
+					(processExecutionLogManage.getOverallStatus() != null
+							&& processExecutionLogManage.getOverallStatus().isPresent())
+									? processExecutionLogManage.getOverallStatus().get()
+									: null,
+					processExecutionLogManage.getLastExecDateTime(),
+					(procExecLog.getEachProcPeriod() != null && procExecLog.getEachProcPeriod().isPresent())
+							? procExecLog.getEachProcPeriod().get()
+							: null,
+					procExecLog.getTaskLogList(), execId, processExecutionLogManage.getLastEndExecDateTime(),
+					processExecutionLogManage.getErrorSystem(), processExecutionLogManage.getErrorBusiness()));
+		}
 //		} else {
 //			// ドメインモデル「就業計算と集計実行ログ」を更新する
 //			this.empCalSumRepo.updateStatus(execId, ExeStateOfCalAndSum.STOPPING.value);
@@ -606,14 +595,16 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 //				context.getCommand().getExecItemCd(), execId);
 
 		boolean checkErrAppDaily = false;
-		String errorMessageDaily = "";
 		boolean checkError1552Daily = false;
+		String errorMessageDaily = "";
+		
 		try {
 			// 承認ルート更新（日次）
+			checkError1552Daily = this.appRouteUpdateDailyService.checkAppRouteUpdateDaily(execId, procExec, procExecLog);
+			
 			if(checkError1552Daily) {
 				errorMessageDaily = "Msg_1552";
 			}
-			checkError1552Daily = this.appRouteUpdateDailyService.checkAppRouteUpdateDaily(execId, procExec, procExecLog);
 		} catch (Exception e) {
 			checkErrAppDaily = true;
 			errorMessageDaily = "Msg_1339";
@@ -685,7 +676,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 //				}
 //			}
 		}
-
 		boolean checkErrAppMonth = false;
 		String errorMessageMonthly = "";
 		boolean checkError1552Monthly = false;
@@ -789,9 +779,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 	private OutputCreateScheduleAndDaily createSchedule(CommandHandlerContext<ExecuteProcessExecutionCommand> context, String execId,
 			ProcessExecution procExec, ProcessExecutionLog procExecLog) {
 		List<ApprovalPeriodByEmp> listApprovalPeriodByEmp = new ArrayList<>();
-//		if (context.asAsync().hasBeenRequestedToCancel()) {
-//			return false;
-//		}
 //		boolean checkError1552  = false;
 		String errorMessage = "";
 		boolean isException = false;
@@ -892,8 +879,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					} 
 					log.info("更新処理自動実行_個人スケジュール作成_END_" + context.getCommand().getExecItemCd() + "_"
 							+ GeneralDateTime.now());
-					//handle.getStatus().value == AsyncTaskStatus
-					//handle.wait();
 					if (checkStop(execId)) {
 						checkStopExec = true;
 					}
@@ -1073,6 +1058,12 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 							}
 							runSchedule = true;
 						} catch (Exception e) {
+							// 再実行の場合にExceptionが発生したかどうかを確認する。
+							if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
+								checkStopExec = true;
+							}
+							errorMessage = "Msg_1339";
+							isException = true;
 						}
 					}
 
@@ -1511,7 +1502,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 		ExecuteProcessExecutionCommand command = context.getCommand();
 //		boolean checkError1552 = false;
 		String errorMessage = "";
-		boolean checkStopExe = false;
 		String companyId = command.getCompanyId();
 		// ドメインモデル「更新処理自動実行ログ」を更新する
 		this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.DAILY_CREATION, null);
@@ -1624,6 +1614,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 						if (dailyPerformanceCreation) {
 							updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CREATION, companyId, execItemCd,
 									procExec, procExecLog, isHasCreateDailyException, true, errorMessage);
+							updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CALCULATION, companyId, execItemCd,
+									procExec, procExecLog, isHasDailyCalculateException, true, errorMessage);
 							return new OutputCreateScheduleAndDaily(false,listApprovalPeriodByEmp);
 						}
 					} catch (CreateDailyException ex) {
@@ -1651,10 +1643,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 								typeExecution, dailyCalLog);
 						log.info("更新処理自動実行_日別実績の計算_END_" + procExec.getExecItemCd() + "_" + GeneralDateTime.now());
 						if (dailyPerformanceCreation2) {
-							if(isHasCreateDailyException) {
-								updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CREATION, companyId, execItemCd,
-										procExec, procExecLog, isHasCreateDailyException, checkStopExe, errorMessage);
-							}
+							updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CREATION, companyId, execItemCd,
+									procExec, procExecLog, isHasCreateDailyException, true, errorMessage);
 							updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CALCULATION, companyId, execItemCd,
 									procExec, procExecLog, isHasDailyCalculateException, true, errorMessage);
 							return new OutputCreateScheduleAndDaily(false,listApprovalPeriodByEmp);
@@ -1733,6 +1723,13 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 											+ GeneralDateTime.now());
 									isHasInterrupt = this.RedoDailyPerformanceProcessing(context, companyId, empLeader,
 											p, empCalAndSumExeLog.getEmpCalAndSumExecLogID(), dailyCreateLog, procExec);
+									if (isHasInterrupt) {
+										updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CREATION, companyId, execItemCd,
+												procExec, procExecLog, isHasCreateDailyException, true, errorMessage);
+										updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CALCULATION, companyId, execItemCd,
+												procExec, procExecLog, isHasDailyCalculateException, true, errorMessage);
+										return new OutputCreateScheduleAndDaily(false,listApprovalPeriodByEmp);
+									}
 								}
 							} catch (RuntimeException ex) {
 								if(ex instanceof CreateDailyException) {
@@ -1744,13 +1741,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 								}
 								errorMessage = "Msg_1339";
 							} 
-							if (isHasInterrupt) {
-								updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CREATION, companyId, execItemCd,
-										procExec, procExecLog, isHasCreateDailyException, true, errorMessage);
-								updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CALCULATION, companyId, execItemCd,
-										procExec, procExecLog, isHasDailyCalculateException, true, errorMessage);
-								return new OutputCreateScheduleAndDaily(false,listApprovalPeriodByEmp);
-							}
 						}
 					}
 
@@ -1761,150 +1751,14 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			isHasCreateDailyException = true;
 			isHasDailyCalculateException = true;
 			errorMessage = "Msg_1552";
-//			this.errMessageInfoRepository.add(new ErrMessageInfo("System", execId, new ErrMessageResource("18"),
-//					ExecutionContent.DAILY_CREATION, GeneralDate.today(),
-//					new ErrMessageContent(TextResource.localize("Msg_1552"))));
-//			
-//			this.errMessageInfoRepository.add(new ErrMessageInfo("System", execId, new ErrMessageResource("18"),
-//					ExecutionContent.DAILY_CALCULATION, GeneralDate.today(),
-//					new ErrMessageContent(TextResource.localize("Msg_1552"))));
-//			checkError1552 =true;
 		}
 		log.info("更新処理自動実行_日別実績の作成・計算_END_" + procExec.getExecItemCd() + "_" + GeneralDateTime.now());
 		// exceptionがあるか確認する（日別作成）
 		// ドメインモデル「エラーメッセージ情報」を取得する
 		updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CREATION, companyId, execItemCd,
-				procExec, procExecLog, isHasCreateDailyException, checkStopExe, errorMessage);
-//		List<ErrMessageInfo> listErrDailyCreation = errMessageInfoRepository.getAllErrMessageInfoByID(execId,
-//				ExecutionContent.DAILY_CREATION.value);
-//		if (!listErrDailyCreation.isEmpty()) {
-//			isHasCreateDailyException = true;
-//		}
-//		if (isHasCreateDailyException) {
-//			this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.DAILY_CREATION, EndStatus.ABNORMAL_END);
-//			ExecutionLogImportFn param = new ExecutionLogImportFn();
-//			List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
-//
-//			// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
-//			param.setCompanyId(companyId);
-//			// 管理社員ID ＝
-//			param.setManagerId(listManagementId);
-//			// 実行完了日時 ＝ システム日時
-//			param.setFinishDateTime(GeneralDateTime.now());
-//			// エラーの有無 ＝ エラーあり
-//			param.setExistenceError(1);
-//			// 実行内容 ＝ 日別実績の作成
-//			param.setExecutionContent(AlarmCategoryFn.CREATE_DAILY_REPORT);
-//			if (listErrDailyCreation.isEmpty()) {
-//				if(!checkError1552) {
-//					// アルゴリズム「エラーログ書き込み」を実行する
-//					this.errMessageInfoRepository.add(new ErrMessageInfo("System", execId, new ErrMessageResource("18"),
-//							ExecutionContent.DAILY_CREATION, GeneralDate.today(),
-//							new ErrMessageContent(TextResource.localize("Msg_1339"))));
-//					for (String managementId : listManagementId) {
-//						listErrorAndEmpId
-//								.add(new ExecutionLogErrorDetailFn(TextResource.localize("Msg_1339"), managementId));
-//					}
-//				}else {
-//						listErrorAndEmpId
-//								.add(new ExecutionLogErrorDetailFn(TextResource.localize("Msg_1552"), "System"));
-//				}
-//			} else {
-//				for (ErrMessageInfo errMessageInfo : listErrDailyCreation) {
-//					listErrorAndEmpId.add(new ExecutionLogErrorDetailFn(errMessageInfo.getMessageError().v(),
-//							errMessageInfo.getEmployeeID()));
-//				}
-//			}
-//			param.setTargerEmployee(listErrorAndEmpId);
-//			// アルゴリズム「実行ログ登録」を実行する 2290 Done
-//				executionLogAdapterFn.updateExecuteLog(param);
-//		} else {
-//			// ドメインモデル「更新処理自動実行ログ」を更新する
-//			this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.DAILY_CREATION, EndStatus.SUCCESS);
-//			ExecutionLogImportFn param = new ExecutionLogImportFn();
-//			List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
-//			// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
-//			param.setCompanyId(companyId);
-//			// 管理社員ID ＝
-//			param.setManagerId(listManagementId);
-//			// 実行完了日時 ＝ システム日時
-//			param.setFinishDateTime(GeneralDateTime.now());
-//			// 実行内容 ＝ 日別実績の作成
-//			param.setExecutionContent(AlarmCategoryFn.CREATE_DAILY_REPORT);
-//			// エラーの有無 ＝ エラーなし
-//			param.setExistenceError(0);
-//			// 実行ログエラー詳細 ＝ NULL
-//			param.setTargerEmployee(listErrorAndEmpId);
-//			// アルゴリズム「実行ログ登録」を実行する 2290 Done
-//			executionLogAdapterFn.updateExecuteLog(param);
-//		}
+				procExec, procExecLog, isHasCreateDailyException, false, errorMessage);
 		updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.DAILY_CALCULATION, companyId, execItemCd,
-				procExec, procExecLog, isHasDailyCalculateException, checkStopExe, errorMessage);
-		// ドメインモデル「エラーメッセージ情報」を取得する
-//		List<ErrMessageInfo> listErrDailyCalculation = errMessageInfoRepository.getAllErrMessageInfoByID(execId,
-//				ExecutionContent.DAILY_CALCULATION.value);
-//		if (!listErrDailyCalculation.isEmpty()) {
-//			isHasDailyCalculateException = true;
-//		}
-//		if (isHasDailyCalculateException) {
-//			this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.DAILY_CALCULATION, EndStatus.ABNORMAL_END);
-//			ExecutionLogImportFn param = new ExecutionLogImportFn();
-//			List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
-//			// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
-//			param.setCompanyId(companyId);
-//			// 管理社員ID ＝
-//			param.setManagerId(listManagementId);
-//			// 実行完了日時 ＝ システム日時
-//			param.setFinishDateTime(GeneralDateTime.now());
-//			// エラーの有無 ＝ エラーあり
-//			param.setExistenceError(1);
-//			// 実行内容 ＝ スケジュール作成
-//			param.setExecutionContent(AlarmCategoryFn.CALCULATION_DAILY_REPORT);
-//			if (listErrDailyCalculation.isEmpty()) {
-//				if(!checkError1552) {
-//					this.errMessageInfoRepository.add(new ErrMessageInfo("System", execId, new ErrMessageResource("18"),
-//							ExecutionContent.DAILY_CALCULATION, GeneralDate.today(),
-//							new ErrMessageContent(TextResource.localize("Msg_1339"))));
-//					for (String managementId : listManagementId) {
-//						listErrorAndEmpId
-//								.add(new ExecutionLogErrorDetailFn(TextResource.localize("Msg_1339"), managementId));
-//					}
-//				}else {
-//					listErrorAndEmpId.add(new ExecutionLogErrorDetailFn(TextResource.localize("Msg_1552"), "System"));
-//				}
-//			} else {
-//				for (ErrMessageInfo errMessageInfo : listErrDailyCalculation) {
-//					listErrorAndEmpId.add(new ExecutionLogErrorDetailFn(errMessageInfo.getMessageError().v(),
-//							errMessageInfo.getEmployeeID()));
-//				}
-//			}
-//			param.setTargerEmployee(listErrorAndEmpId);
-//			// アルゴリズム「実行ログ登録」を実行する 2290 Done
-//			executionLogAdapterFn.updateExecuteLog(param);
-//
-//		} else {
-//			// ドメインモデル「更新処理自動実行ログ」を更新する
-//			this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.DAILY_CALCULATION, EndStatus.SUCCESS);
-//			ExecutionLogImportFn param = new ExecutionLogImportFn();
-//			List<ExecutionLogErrorDetailFn> listErrorAndEmpId = new ArrayList<>();
-//			// 会社ID ＝ パラメータ.更新処理自動実行.会社ID
-//			param.setCompanyId(companyId);
-//			// 管理社員ID ＝
-//			param.setManagerId(listManagementId);
-//			// 実行完了日時 ＝ システム日時
-//			param.setFinishDateTime(GeneralDateTime.now());
-//			// 実行内容 ＝ 日別実績の計算
-//			param.setExecutionContent(AlarmCategoryFn.CALCULATION_DAILY_REPORT);
-//			// エラーの有無 ＝ エラーなし
-//			param.setExistenceError(0);
-//			// 実行ログエラー詳細 ＝ NULL
-//			param.setTargerEmployee(listErrorAndEmpId);
-//			// アルゴリズム「実行ログ登録」を実行する 2290 Done
-//			executionLogAdapterFn.updateExecuteLog(param);
-//
-//		}
-//		this.procExecLogRepo.update(procExecLog);
-
+				procExec, procExecLog, isHasDailyCalculateException, false, errorMessage);
 		return new OutputCreateScheduleAndDaily(true,listApprovalPeriodByEmp);
 	}
 	
@@ -1988,6 +1842,9 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			if (execTask.value == task.getProcExecTask().value) {
 				task.setStatus(Optional.ofNullable(status));
 				task.setLastExecDateTime(GeneralDateTime.now());
+				task.setErrorBusiness(null);
+				task.setErrorSystem(null);
+				task.setLastEndExecDateTime(null);
 			}
 		});
 	}
@@ -2246,7 +2103,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			ExecutionTaskLog executionTaskLog = taskLogLists.get(i);
 			// 承認結果反映
 			if (executionTaskLog.getProcExecTask().value == 3) {
-				executionTaskLog.setStatus(null);
 				executionTaskLog.setStatus(null);
 				executionTaskLog.setLastExecDateTime(GeneralDateTime.now());
 				executionTaskLog.setErrorBusiness(null);
