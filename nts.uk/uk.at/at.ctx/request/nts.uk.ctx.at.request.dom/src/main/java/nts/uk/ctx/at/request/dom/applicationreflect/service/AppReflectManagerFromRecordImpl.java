@@ -147,22 +147,42 @@ public class AppReflectManagerFromRecordImpl implements AppReflectManagerFromRec
 	@Override
 	public void reflectAppOfAppDate(String workId, String sid, ExecutionTypeExImport refAppResult,
 			InformationSettingOfEachApp reflectSetting, DatePeriod appDatePeriod) {
-		List<Application_New> lstApp = Collections.synchronizedList(this.getApps(sid, appDatePeriod, refAppResult));	
+		List<Application_New> lstApp = this.getApps(sid, appDatePeriod, refAppResult);
+		List<Application_New> lstAppTmp = new ArrayList<>(lstApp);
+		if(!lstAppTmp.isEmpty()) {
+			for (Application_New x : lstAppTmp) {
+				if(!x.getStartDate().get().equals(x.getEndDate().get())) {
+					this.getAppByManyDay(lstApp, sid, new DatePeriod(x.getStartDate().get(), x.getEndDate().get()), refAppResult);
+				}
+			}
+		}				
+		lstApp = lstApp.stream().sorted((a,b) -> a.getInputDate().compareTo(b.getInputDate())).collect(Collectors.toList());
 		lstApp.stream().forEach(x -> {
 			appRefMng.reflectEmployeeOfApp(x, reflectSetting, refAppResult, workId, 0);
 		});
-		/*lstApp.stream().forEach(x -> {
-			Logger.getLogger(this.getClass()).info("lstApp Date: " + x.getInputDate());
-		});
-		List<Integer> tempX = lstApp.stream().map(c -> 1).collect(Collectors.toList());
-		List<Integer> processX = Collections.synchronizedList(new ArrayList<>());
-		this.managedParallelWithContext.forEach(tempX, x -> {
-			processX.add(x);
-			Application_New appData = lstApp.get(processX.size() - 1);
-			Logger.getLogger(this.getClass()).info("Application_New Date: " + appData.getInputDate());
-			appRefMng.reflectEmployeeOfApp(appData, reflectSetting, refAppResult, workId, 0);
-		});*/
 	}
+	
+	private void getAppByManyDay(List<Application_New> lstApp, String sid, DatePeriod appDate, ExecutionTypeExImport refAppResult) {
+		List<Application_New> lstTmp = this.getApps(sid, appDate, refAppResult);
+		boolean isAdd = false;
+		if(!lstTmp.isEmpty()) {
+			for (Application_New a : lstTmp) {
+				List<Application_New> tmp = lstApp.stream().filter(b -> b.getAppID().equals(a.getAppID())).collect(Collectors.toList());
+				if(tmp.isEmpty()) {
+					lstApp.add(a);
+					isAdd = true;
+				}
+			}	
+		}
+		if(isAdd) {
+			lstTmp.stream().forEach(x -> {
+				if(!x.getStartDate().get().equals(x.getEndDate().get())) {
+					this.getAppByManyDay(lstApp, sid, new DatePeriod(x.getStartDate().get(), x.getEndDate().get()), refAppResult);
+				}
+			});	
+		}
+	}
+	
 	@Override
 	public List<Application_New> getApps(String sid, DatePeriod datePeriod, ExecutionTypeExImport exeType) {
 		List<Integer> lstApptype = new ArrayList<>();

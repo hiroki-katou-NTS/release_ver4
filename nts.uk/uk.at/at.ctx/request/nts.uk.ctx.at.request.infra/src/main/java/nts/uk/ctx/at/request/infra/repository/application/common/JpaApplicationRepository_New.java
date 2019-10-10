@@ -487,16 +487,16 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 					String subIn3 = NtsStatement.In.createParamsString(lstAppType);					
 					String sql = "SELECT * FROM KRQDT_APPLICATION "
 							+ "WHERE  APPLICANTS_SID = ? "
-							+ " AND APP_START_DATE >= ? "
-							+ " AND APP_END_DATE <= ? "
+							+ " AND APP_START_DATE <= ? "
+							+ " AND APP_END_DATE >= ? "
 							+ " AND APP_TYPE IN (" + subIn3 + ") "
 							+ " AND (REFLECT_PLAN_STATE IN (" + subIn1 + ") "
 							+ " OR REFLECT_PER_STATE IN (" + subIn2 + "))"							
 							+ " ORDER BY INPUT_DATE ASC";
 					try(val stmt = this.connection().prepareStatement(sql)){
 						stmt.setString(1, sid);
-						stmt.setDate(2, Date.valueOf(dateData.start().localDate()));
-						stmt.setDate(3, Date.valueOf(dateData.end().localDate()));
+						stmt.setDate(2, Date.valueOf(dateData.end().localDate()));
+						stmt.setDate(3, Date.valueOf(dateData.start().localDate()));
 						int inCount = 3;
 						for (int i = 0; i < lstAppType.size(); i++) {
 							stmt.setInt(inCount + i + 1, lstAppType.get(i));
