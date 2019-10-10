@@ -308,6 +308,8 @@ public class ScheduleCreatorExecutionCommandHandler extends AsyncCommandHandler<
 		this.parallel.forEach(
 				scheduleCreators.stream().sorted((a,b) -> a.getEmployeeId().compareTo(b.getEmployeeId())).collect(Collectors.toList()),
 				scheduleCreator -> {
+				if(scheduleCreator ==null) 
+					return;
 			if (scheduleExecutionLog.getExeAtr() == ExecutionAtr.AUTOMATIC) {
 				if(checkStop.get()) {
 					return;
