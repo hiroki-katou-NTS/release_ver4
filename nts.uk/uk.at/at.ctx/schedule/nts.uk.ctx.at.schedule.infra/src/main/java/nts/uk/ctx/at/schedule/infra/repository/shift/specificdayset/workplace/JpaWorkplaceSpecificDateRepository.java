@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -41,6 +43,7 @@ public class JpaWorkplaceSpecificDateRepository extends JpaRepository implements
 			+ " AND c.ksmmtWpSpecDateSetPK.specificDate = :specificDate";
 
 	// No WITH name
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<WorkplaceSpecificDateItem> getWorkplaceSpecByDate(String workplaceId, GeneralDate specificDate) {
 		return this.queryProxy().query(GET_BY_DATE, KsmmtWpSpecDateSet.class)
@@ -50,6 +53,7 @@ public class JpaWorkplaceSpecificDateRepository extends JpaRepository implements
 	}
 
 	// WITH name
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<WorkplaceSpecificDateItem> getWpSpecByDateWithName(String workplaceId, GeneralDate startDate, GeneralDate endDate) {
 		return this.queryProxy().query(GET_BY_USE_WITH_NAME, Object[].class)

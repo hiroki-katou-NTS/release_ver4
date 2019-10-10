@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -42,6 +44,7 @@ public class WorkClosureQueryProcessor {
 	 * @return the list
 	 */
 	// request 140: 会社の締めを取得する
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ClosureResultModel> findClosureByReferenceDate(GeneralDate refDate) {
 		// find all active closure
 		List<Closure> closures = this.closureRepo.findAllActive(AppContexts.user().companyId(),

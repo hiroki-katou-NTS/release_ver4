@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -38,6 +40,7 @@ public class JpaEmploymentRepository extends JpaRepository implements Employment
 	 * nts.uk.ctx.basic.dom.company.organization.employment.EmploymentRepository
 	 * #findAll(java.lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<Employment> findAll(String companyId) {
 		// Get entity manager
@@ -75,6 +78,7 @@ public class JpaEmploymentRepository extends JpaRepository implements Employment
 	 * nts.uk.ctx.basic.dom.company.organization.employment.EmploymentRepository
 	 * #findEmployment(java.lang.String, java.lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<Employment> findEmployment(String companyId, String employmentCode) {
 		return this.queryProxy()
@@ -100,6 +104,7 @@ public class JpaEmploymentRepository extends JpaRepository implements Employment
 	 * nts.uk.ctx.basic.dom.company.organization.employment.EmploymentRepository
 	 * #findByEmpCodes(java.util.List)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<Employment> findByEmpCodes(String companyId, List<String> empCodes) {
 		// Get entity manager

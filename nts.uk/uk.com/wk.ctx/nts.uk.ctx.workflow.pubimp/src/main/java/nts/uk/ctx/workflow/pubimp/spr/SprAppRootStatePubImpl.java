@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -16,6 +18,7 @@ import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
  *
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class SprAppRootStatePubImpl implements SprAppRootStatePub {
 	
 	@Inject

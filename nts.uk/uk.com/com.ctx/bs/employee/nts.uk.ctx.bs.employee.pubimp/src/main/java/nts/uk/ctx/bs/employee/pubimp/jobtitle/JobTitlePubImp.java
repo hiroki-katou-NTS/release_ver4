@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -472,6 +474,7 @@ public class JobTitlePubImp implements SyJobTitlePub {
     }
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<JobTitleInfoExport> findByJobIds(String companyId, List<String> jobIds,
 			String historyId) {
 				return this.jobTitleInfoRepository.findByJobIds(companyId, jobIds, historyId)
@@ -482,6 +485,7 @@ public class JobTitlePubImp implements SyJobTitlePub {
     }
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<SequenceMasterExport> findAllSequen(String companyId, String sequenceCode) {
 		// TODO Auto-generated method stub
 		return this.repo.findAll(companyId, sequenceCode).stream()

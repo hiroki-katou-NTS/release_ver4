@@ -3,6 +3,8 @@ package nts.uk.screen.at.app.dailyperformance.correction.flex;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -17,6 +19,7 @@ import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.history.DateHistoryItem;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class CheckBeforeCalcFlex {
 
 	@Inject

@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -293,6 +295,8 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<Application_New> getApplicationBySIDs(List<String> employeeID, GeneralDate startDate,
 			GeneralDate endDate) {
@@ -335,6 +339,7 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 			+ " a.prePostAtr DESC";
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<Application_New> getByListRefStatus(String companyID, String employeeID, GeneralDate startDate, GeneralDate endDate, List<Integer> listReflecInfor) {
 		// TODO Auto-generated method stub
 		if(listReflecInfor.size()==0) {
@@ -369,6 +374,7 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		return resultList;
 	}
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<Application_New> getListLateOrLeaveEarly(String companyID, String employeeID, GeneralDate startDate,
 			GeneralDate endDate) {
 		return this.queryProxy().query(SELECT_LATE_LEAVE, KrqdtApplication_New.class)
@@ -450,6 +456,7 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		return resultList.stream().map(c -> c.toDomain()).collect(Collectors.toList());
 	}
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<Application_New> getListAppByType(String companyId, String employeeID, GeneralDate startDate, GeneralDate endDate, int prePostAtr,
 			int appType, List<Integer> lstRef) {
 		if(lstRef.isEmpty()){

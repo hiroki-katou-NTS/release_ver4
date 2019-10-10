@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
@@ -160,6 +162,7 @@ public class JpaAuthorityFormatMonthlyRepository extends JpaRepository implement
 		return getListAuthorityFormatDaily(companyId, listDailyPerformanceFormatCode);
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AuthorityFomatMonthly> getListAuthorityFormatDaily(String companyId,
 			Collection<String> listDailyPerformanceFormatCode) {

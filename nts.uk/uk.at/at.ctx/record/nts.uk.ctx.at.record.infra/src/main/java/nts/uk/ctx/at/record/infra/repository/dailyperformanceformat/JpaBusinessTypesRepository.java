@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -37,6 +39,7 @@ public class JpaBusinessTypesRepository extends JpaRepository implements Busines
 	}
 	
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<BusinessType> findAll(String companyId) {
 		return this.queryProxy().query(FIND, KrcmtBusinessType.class).setParameter("companyId", companyId)

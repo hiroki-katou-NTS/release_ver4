@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
@@ -63,6 +65,7 @@ public class JpaHolidayInstructRepository extends JpaRepository implements Holid
 	 * For request list No.231
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<HolidayInstruct> getAllHolidayInstructBySId(String sId, GeneralDate strDate, GeneralDate endDate) {
 		List<HolidayInstruct> holidayInstruct = this.queryProxy().query(FIND_ALL_BY_TARGET_PERSON, KrqdtHolidayInstruct.class)
 				.setParameter("targetPerson", sId).getList(c -> convertToDomain(c));

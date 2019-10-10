@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -25,6 +27,7 @@ public class AnnLeaveRemainNumberImpl implements AnnLeaveRemainNumberAdapter {
 	@Inject
 	AnnLeaveRemainNumberPub annLeavePub;
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public ReNumAnnLeaReferenceDateImport getReferDateAnnualLeaveRemainNumber(String employeeID, GeneralDate date) {
 		ReNumAnnLeaReferenceDateExport reNum = this.annLeavePub.getReferDateAnnualLeaveRemainNumber(employeeID, date);

@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -159,6 +161,7 @@ public class JpaDailyAttdItemAuthRepository extends JpaRepository implements Dai
 		return Optional.of(monthlyItemControlByAuthority);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<DailyAttendanceItemAuthority> getDailyAttdItemByAttItemId(String companyID, String authorityDailyId,
 			List<Integer> attendanceItemIds) {

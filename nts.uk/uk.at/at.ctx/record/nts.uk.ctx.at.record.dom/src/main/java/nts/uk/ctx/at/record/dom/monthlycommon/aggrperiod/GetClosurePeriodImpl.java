@@ -5,6 +5,8 @@ import java.util.ListIterator;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -20,6 +22,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  * @author shuichi_ishida
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class GetClosurePeriodImpl implements GetClosurePeriod {
 
 	/** 集計すべき期間を計算 */

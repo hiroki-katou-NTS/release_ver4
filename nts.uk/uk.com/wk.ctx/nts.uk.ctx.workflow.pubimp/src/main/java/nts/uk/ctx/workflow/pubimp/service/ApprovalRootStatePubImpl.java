@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
@@ -592,6 +594,7 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 		return false;
 	}
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public boolean checkDataApproveed(GeneralDate startDate, GeneralDate endDate, String approverID, Integer rootType,
 			String companyID ) {
 	/*	List<ApprovalRootState> approvalRootStates = new ArrayList<>();

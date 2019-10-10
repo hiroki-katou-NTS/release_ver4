@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
@@ -41,6 +43,7 @@ public class JpaAgreementTimeOfManagePeriod extends JpaRepository implements Agr
 			+ "AND a.PK.yearMonth = :yearMonth ";
 	
 	/** 検索 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<AgreementTimeOfManagePeriod> find(String employeeId, YearMonth yearMonth) {
 
@@ -53,6 +56,7 @@ public class JpaAgreementTimeOfManagePeriod extends JpaRepository implements Agr
 	}
 
 	/** 検索　（社員IDリスト） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AgreementTimeOfManagePeriod> findByEmployees(List<String> employeeIds, YearMonth yearMonth) {
 		
@@ -68,6 +72,7 @@ public class JpaAgreementTimeOfManagePeriod extends JpaRepository implements Agr
 	}
 	
 	/** 検索　（社員IDリストと年月リスト） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AgreementTimeOfManagePeriod> findBySidsAndYearMonths(List<String> employeeIds,
 			List<YearMonth> yearMonths) {

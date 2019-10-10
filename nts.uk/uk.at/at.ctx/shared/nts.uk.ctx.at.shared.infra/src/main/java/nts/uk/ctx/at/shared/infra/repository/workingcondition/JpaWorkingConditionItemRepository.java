@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -181,6 +183,7 @@ public class JpaWorkingConditionItemRepository extends JpaRepository
 	 * findWorkingConditionItemByPersWorkCat(java.lang.String,
 	 * nts.arc.time.GeneralDate)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<WorkingConditionItem> getBySidAndStandardDate(String employeeId,
 			GeneralDate baseDate) {
@@ -286,6 +289,7 @@ public class JpaWorkingConditionItemRepository extends JpaRepository
 	 * @return the list
 	 */
 	// add 2018.1.31 shuichi_ishida
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@SneakyThrows
 	@Override
 	public List<WorkingConditionItem> getBySidAndPeriodOrderByStrD(String employeeId,

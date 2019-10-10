@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -172,6 +174,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 
 	@Override
 	@SneakyThrows
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmployeeDataMngInfo> findByEmployeeId(String sId) {
 		String sql = "select CID, SID, PID, SCD, DEL_STATUS_ATR, DEL_DATE, REMV_REASON, EXT_CD"
 				+ " from BSYMT_EMP_DTA_MNG_INFO"
@@ -196,6 +199,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<EmployeeDataMngInfo> findByEmpId(String sId) {
 		List<EmployeeDataMngInfo> lst = findByEmployeeId(sId);
 		if (!lst.isEmpty()) {
@@ -429,6 +433,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 	// duong tv end code
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmployeeDataMngInfo> findByListEmployeeId(List<String> listSid) {
 
 		if (CollectionUtil.isEmpty(listSid)) {
@@ -630,6 +635,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 	// laitv code end
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmployeeDataMngInfo> findBySidDel(List<String> sid) {
 		List<EmployeeDataMngInfo> resultList = new ArrayList<>();
 		CollectionUtil.split(sid, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -23,6 +25,7 @@ import nts.uk.ctx.at.schedule.dom.shift.specificdayset.workplace.WorkplaceSpecif
  *
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class WorkplaceSpecificDateSettingServiceImpl implements IWorkplaceSpecificDateSettingService {
 	
 	@Inject

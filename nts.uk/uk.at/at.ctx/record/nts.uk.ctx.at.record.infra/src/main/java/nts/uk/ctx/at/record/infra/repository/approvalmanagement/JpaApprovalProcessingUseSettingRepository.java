@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -23,6 +25,7 @@ import nts.uk.ctx.at.record.infra.entity.workrecord.operationsetting.KrcmtApprov
  *
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JpaApprovalProcessingUseSettingRepository extends JpaRepository
 		implements ApprovalProcessingUseSettingRepository {
 
@@ -45,6 +48,7 @@ public class JpaApprovalProcessingUseSettingRepository extends JpaRepository
 
 	@Override
 	@SneakyThrows
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<ApprovalProcessingUseSetting> findByCompanyId(String companyId) {
 		
 		Optional<KrcmtApprovalProcess> krcstAppProUseSet;

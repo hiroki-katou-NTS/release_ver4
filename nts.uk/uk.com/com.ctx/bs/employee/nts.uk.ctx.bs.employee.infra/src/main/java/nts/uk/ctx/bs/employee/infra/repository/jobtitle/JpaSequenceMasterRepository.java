@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -228,6 +230,7 @@ public class JpaSequenceMasterRepository extends JpaRepository implements Sequen
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<SequenceMaster> findAll(String companyId, String sequenceCode) {
 
 		// Check empty

@@ -16,6 +16,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
@@ -193,6 +195,7 @@ public class JpaErrorAlarmWorkRecordRepository extends JpaRepository implements 
 				);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<ErrorAlarmWorkRecord> getListErAlByListCodeError(String companyId, List<String> listCode) {
 		List<ErrorAlarmWorkRecord> datas = new ArrayList<>();
@@ -698,6 +701,7 @@ public class JpaErrorAlarmWorkRecordRepository extends JpaRepository implements 
 		}).collect(Collectors.toList());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<ErrorAlarmWorkRecord> getListErAlByListCodeRemark(String companyId, Collection<String> listCode) {
 		// TODO Auto-generated method stub

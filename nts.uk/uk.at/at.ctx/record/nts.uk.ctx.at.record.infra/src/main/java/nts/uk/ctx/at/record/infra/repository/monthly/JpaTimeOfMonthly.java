@@ -10,6 +10,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -81,6 +83,7 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 			+ "ORDER BY a.startYmd ";
 
 	/** 検索 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<TimeOfMonthly> find(String employeeId, YearMonth yearMonth,
 			ClosureId closureId, ClosureDate closureDate) {
@@ -95,6 +98,7 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 	}
 
 	/** 検索　（年月） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	@SneakyThrows
 	public List<TimeOfMonthly> findByYearMonthOrderByStartYmd(String employeeId, YearMonth yearMonth) {
@@ -113,6 +117,7 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 	}
 	
 	/** 検索　（年月と締めID） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<TimeOfMonthly> findByYMAndClosureIdOrderByStartYmd(String employeeId, YearMonth yearMonth,
 			ClosureId closureId) {
@@ -124,6 +129,7 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 	}
 
 	/** 検索　（社員IDリスト） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<TimeOfMonthly> findByEmployees(List<String> employeeIds, YearMonth yearMonth,
 			ClosureId closureId, ClosureDate closureDate) {
@@ -160,6 +166,7 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 	}
 	
 	/** 検索　（社員IDリストと年月リスト） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<TimeOfMonthly> findBySidsAndYearMonths(List<String> employeeIds, List<YearMonth> yearMonths) {
 		
@@ -187,6 +194,7 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 	}
 		
 	/** 検索　（基準日） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<TimeOfMonthly> findByDate(String employeeId, GeneralDate criteriaDate) {
 		return this.queryProxy().query(FIND_BY_PERIOD, KrcdtMonMerge.class)
@@ -197,6 +205,7 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 	}
 	
 	/** 検索　（終了日を含む期間） */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<TimeOfMonthly> findByPeriodIntoEndYmd(String employeeId, DatePeriod period) {
 		
@@ -296,6 +305,7 @@ public class JpaTimeOfMonthly extends JpaRepository implements TimeOfMonthlyRepo
 		});
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	@SneakyThrows
 	public long getVer(String employeeId, YearMonth yearMonth, int closureId, int closureDate, boolean lastOfMonth) {

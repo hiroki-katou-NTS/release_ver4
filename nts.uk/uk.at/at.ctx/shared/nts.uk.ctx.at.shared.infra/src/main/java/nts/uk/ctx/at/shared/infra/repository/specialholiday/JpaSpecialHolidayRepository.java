@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
@@ -319,6 +321,7 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<SpecialHoliday> findByCompanyId(String companyId) {
 		return this.queryProxy().query(SELECT_SPHD_BY_COMPANY_ID_QUERY, Object[].class)
 				.setParameter("companyId", companyId)
@@ -511,6 +514,7 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 	}*/
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<SpecialHoliday> findBySingleCD(String companyID, int specialHolidayCD) {
 		
 		return this.findByCode(companyID, specialHolidayCD)
@@ -559,6 +563,7 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 				}).collect(Collectors.toList());
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<SpecialHoliday> findByListCode(String companyId, List<Integer> specialHolidayCodes) {
 		if(specialHolidayCodes.isEmpty())
@@ -600,6 +605,7 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 				}).collect(Collectors.toList());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<SpecialHoliday> findByCompanyIdNoMaster(String companyId, List<Integer> specialHolidayCodes) {
 		if(specialHolidayCodes.isEmpty()) return Collections.emptyList();

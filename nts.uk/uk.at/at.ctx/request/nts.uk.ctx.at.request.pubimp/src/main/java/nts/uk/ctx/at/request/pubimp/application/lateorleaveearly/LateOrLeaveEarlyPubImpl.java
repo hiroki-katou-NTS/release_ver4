@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -31,6 +33,7 @@ public class LateOrLeaveEarlyPubImpl implements LateOrLeaveEarlyPub {
 	private LateOrLeaveEarlyRepository lateOrLeaveEarlyRepository;
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<LateOrLeaveEarlyExport> engravingCancelLateorLeaveearly(String employeeID, GeneralDate startDate,
 			GeneralDate endDate) {
 		String companyID = AppContexts.user().companyId();

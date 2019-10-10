@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.adapter.generalinfo.EmployeeGeneralInfoAdapter;
@@ -27,6 +29,7 @@ public class EmployeeGeneralInfoAdapterImpl implements EmployeeGeneralInfoAdapte
 	private EmployeeGeneralInfoPub employeeGeneralInfoPub;
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public EmployeeGeneralInfoImport getEmployeeGeneralInfo(List<String> employeeIds, DatePeriod period,
 			boolean checkEmployment, boolean checkClassification, boolean checkJobTitle, boolean checkWorkplace,
 			boolean checkDepartment) {

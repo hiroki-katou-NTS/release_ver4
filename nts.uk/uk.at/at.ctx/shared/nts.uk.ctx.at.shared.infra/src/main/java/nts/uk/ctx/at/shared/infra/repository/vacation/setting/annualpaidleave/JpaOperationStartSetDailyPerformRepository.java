@@ -7,6 +7,8 @@ package nts.uk.ctx.at.shared.infra.repository.vacation.setting.annualpaidleave;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.uk.ctx.at.shared.dom.common.CompanyId;
@@ -24,6 +26,7 @@ public class JpaOperationStartSetDailyPerformRepository extends JpaRepository im
 	 * @see nts.uk.ctx.at.shared.dom.vacation.setting.annualpaidleave.OperationStartSetDailyPerformRepository#findByCid(nts.uk.ctx.at.shared.dom.common.CompanyId)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<OperationStartSetDailyPerform> findByCid(CompanyId companyId) {
 		return this.queryProxy().find(companyId, KshstStartSetDailyPfm.class).map(entity -> this.toDomain(entity));
 	}

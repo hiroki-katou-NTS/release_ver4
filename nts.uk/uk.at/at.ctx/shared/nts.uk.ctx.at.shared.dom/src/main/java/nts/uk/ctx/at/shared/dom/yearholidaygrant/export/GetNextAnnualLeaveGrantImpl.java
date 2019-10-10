@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -54,6 +56,7 @@ public class GetNextAnnualLeaveGrantImpl implements GetNextAnnualLeaveGrant {
 	
 	/** 次回年休付与を取得する */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<NextAnnualLeaveGrant> algorithm(String companyId, String grantTableCode, GeneralDate entryDate,
 			GeneralDate criteriaDate, DatePeriod period, boolean isSingleDay, Optional<GrantHdTblSet> grantHdTblSet,
 			Optional<List<LengthServiceTbl>> lengthServiceTbls) {

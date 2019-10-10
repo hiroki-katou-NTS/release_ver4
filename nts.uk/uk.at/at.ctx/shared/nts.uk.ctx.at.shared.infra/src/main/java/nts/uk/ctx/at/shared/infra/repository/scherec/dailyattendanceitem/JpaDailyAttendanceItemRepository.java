@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -78,12 +80,14 @@ public class JpaDailyAttendanceItemRepository extends JpaRepository implements D
 		FIND_BY_ATRS = builderString.toString();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<DailyAttendanceItem> getListTobeUsed(String companyId, int userCanUpdateAtr) {
 		return this.queryProxy().query(FIND, KrcmtDailyAttendanceItem.class).setParameter("companyId", companyId)
 				.getList(f -> toDomain(f));
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<DailyAttendanceItem> getListById(String companyId, List<Integer> dailyAttendanceItemIds) {
 		if(dailyAttendanceItemIds.isEmpty())
@@ -98,6 +102,7 @@ public class JpaDailyAttendanceItemRepository extends JpaRepository implements D
 		return resultList;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<DailyAttendanceItem> getList(String companyId) {
 		return this.queryProxy().query(FIND_ALL, KrcmtDailyAttendanceItem.class).setParameter("companyId", companyId)
@@ -118,6 +123,7 @@ public class JpaDailyAttendanceItemRepository extends JpaRepository implements D
 		return dailyAttendanceItem;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<DailyAttendanceItem> getDailyAttendanceItem(String companyId, int attendanceItemId) {
 		return this.queryProxy().query(FIND_SINGLE, KrcmtDailyAttendanceItem.class).setParameter("companyId", companyId)
@@ -130,6 +136,7 @@ public class JpaDailyAttendanceItemRepository extends JpaRepository implements D
 	 * @see nts.uk.ctx.at.record.dom.dailyattendanceitem.repository.
 	 * DailyAttendanceItemRepository#findByAtr(java.lang.String, int)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<DailyAttendanceItem> findByAtr(String companyId, DailyAttendanceAtr itemAtr) {
 		return this.queryProxy().query(FIND_BY_ATR, KrcmtDailyAttendanceItem.class).setParameter("companyId", companyId)
@@ -142,6 +149,7 @@ public class JpaDailyAttendanceItemRepository extends JpaRepository implements D
 	 * @see nts.uk.ctx.at.record.dom.dailyattendanceitem.repository.
 	 * DailyAttendanceItemRepository#findByAtr(java.lang.String, List<Integer>)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<DailyAttendanceItem> findByAtr(String companyId, List<Integer> dailyAttendanceAtrs) {
 		List<DailyAttendanceItem> resultList = new ArrayList<>();
@@ -157,6 +165,7 @@ public class JpaDailyAttendanceItemRepository extends JpaRepository implements D
 	/**
 	 * add by HoiDD
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<DailyAttendanceItem> findByAttendanceItemIdAndAtr(String companyId, List<Integer> attendanceItemIds,
 			List<Integer> dailyAttendanceAtr) {

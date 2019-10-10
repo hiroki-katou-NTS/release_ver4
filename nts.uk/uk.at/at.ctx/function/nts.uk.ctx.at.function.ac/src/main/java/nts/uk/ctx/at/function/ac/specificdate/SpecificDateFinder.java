@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.function.dom.adapter.SpecificDateAdapter;
@@ -12,6 +14,7 @@ import nts.uk.ctx.at.schedule.pub.shift.businesscalendar.specificdate.SpecificDa
 import nts.uk.ctx.at.schedule.pub.shift.businesscalendar.specificdate.WpSpecificDateSettingPub;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class SpecificDateFinder implements SpecificDateAdapter {
 
 	@Inject

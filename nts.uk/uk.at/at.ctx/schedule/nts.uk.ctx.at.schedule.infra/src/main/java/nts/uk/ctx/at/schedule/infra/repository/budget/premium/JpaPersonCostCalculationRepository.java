@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.enums.EnumAdaptor;
@@ -74,24 +76,28 @@ public class JpaPersonCostCalculationRepository extends JpaRepository implements
 		this.commandProxy().insert(toPersonCostCalculationEntity(personCostCalculation));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<PersonCostCalculation> findByCompanyID(String companyID) {
 		return this.queryProxy().query(SEL_BY_CID, KmlmtPersonCostCalculation.class).setParameter("companyID", companyID)
 				.getList(x -> toSimpleDomain(x));
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<PersonCostCalculation> findItemByDate(String companyID, GeneralDate startDate) {
 		return this.queryProxy().query(SEL_ITEM_BY_DATE, KmlmtPersonCostCalculation.class).setParameter("companyID", companyID).setParameter("startDate", startDate)
 				.getSingle().map(x -> toDomainPersonCostCalculation(x));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<PersonCostCalculation> findItemByHistoryID(String companyID, String historyID) {
 		return this.queryProxy().query(SEL_ITEM_BY_HID, KmlmtPersonCostCalculation.class).setParameter("companyID", companyID).setParameter("historyID", historyID)
 				.getSingle().map(x -> toDomainPersonCostCalculation(x));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<PersonCostCalculation> findItemBefore(String companyID, GeneralDate startDate) {
 		List<KmlmtPersonCostCalculation> result = this.queryProxy().query(SEL_ITEM_BEFORE, KmlmtPersonCostCalculation.class)
@@ -100,6 +106,7 @@ public class JpaPersonCostCalculationRepository extends JpaRepository implements
 		return Optional.of(toDomainPersonCostCalculation(result.get(0)));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<PersonCostCalculation> findItemAfter(String companyID, GeneralDate startDate) {
 		List<KmlmtPersonCostCalculation> result = this.queryProxy().query(SEL_ITEM_AFTER, KmlmtPersonCostCalculation.class)
@@ -283,6 +290,7 @@ public class JpaPersonCostCalculationRepository extends JpaRepository implements
 				null);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<PersonCostCalculation> findByCompanyIDAndDisplayNumber(String companyID, GeneralDate date) {
 		StringBuilder query = new StringBuilder();
@@ -315,6 +323,7 @@ public class JpaPersonCostCalculationRepository extends JpaRepository implements
 		return personCostCals;
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<PersonCostCalculation> findByCompanyIDAndDisplayNumberNotFull(String companyID, DatePeriod date, List<Integer> itemNos) {
 		StringBuilder query = new StringBuilder();
@@ -362,6 +371,7 @@ public class JpaPersonCostCalculationRepository extends JpaRepository implements
 		}
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<PremiumSetting> findPremiumSettingBy(String companyID, GeneralDate date) {
 		StringBuilder query = new StringBuilder();

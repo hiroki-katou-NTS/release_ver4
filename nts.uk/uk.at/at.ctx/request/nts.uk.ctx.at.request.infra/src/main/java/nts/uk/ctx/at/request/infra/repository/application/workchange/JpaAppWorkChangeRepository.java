@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import org.apache.logging.log4j.util.Strings;
 
@@ -106,6 +108,7 @@ public class JpaAppWorkChangeRepository extends JpaRepository implements IAppWor
      * @param lstAppId
      * @return
      */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AppWorkChange> getListAppWorkChangeByID(String companyID, List<String> lstAppId) {
 		if(lstAppId.isEmpty()){

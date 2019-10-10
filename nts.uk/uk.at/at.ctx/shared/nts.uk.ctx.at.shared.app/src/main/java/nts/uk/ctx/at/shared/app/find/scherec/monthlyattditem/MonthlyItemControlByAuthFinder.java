@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.shared.dom.scherec.monthlyattendanceitem.MonthlyItemControlByAuthRepository;
@@ -11,6 +13,7 @@ import nts.uk.ctx.at.shared.dom.scherec.monthlyattendanceitem.MonthlyItemControl
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class MonthlyItemControlByAuthFinder {
 	
 	@Inject

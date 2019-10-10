@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
@@ -33,6 +35,7 @@ public class AtItemNameAcFinder implements AtItemNameAdapter {
 				EnumAdaptor.valueOf(type.value, TypeOfItem.class));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AttItemName> getNameOfDailyAttendanceItem(List<DailyAttendanceItem> attendanceItems) {
 		List<AttItemName> attItemName = attendanceItems.stream().map(x -> {
@@ -49,6 +52,7 @@ public class AtItemNameAcFinder implements AtItemNameAdapter {
 		return attendanceItemNameService.getNameOfAttendanceItem(TypeOfItem.Daily, attItemName);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AttItemName> getNameOfMonthlyAttendanceItem(List<MonthlyAttendanceItem> attendanceItems) {
 		List<AttItemName> attItemName = attendanceItems.stream().map(x -> {
@@ -84,6 +88,8 @@ public class AtItemNameAcFinder implements AtItemNameAdapter {
 
 	@Inject
 	private MonthlyAttendanceItemRepository monthlyAttendanceItemRepo;
+	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AttItemName> getNameOfAttdItemByType(TypeOfItemImport type) {
 		String companyId = AppContexts.user().companyId();

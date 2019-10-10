@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -46,7 +48,8 @@ public class CheckTrackRecordApprovalDay {
 	
 	@Inject
 	private ApprovalStatusActualDayChange approvalStatusActualDayChange;
-
+	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public boolean checkTrackRecordApprovalDay(String companyId, String employeeId, List<CheckTarget> lstCheckTarget) {
 
 		// ドメインモデル「承認処理の利用設定」を取得する

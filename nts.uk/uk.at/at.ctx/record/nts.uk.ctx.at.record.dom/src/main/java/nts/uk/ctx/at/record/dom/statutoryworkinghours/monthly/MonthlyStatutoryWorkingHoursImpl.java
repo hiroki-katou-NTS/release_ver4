@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -87,6 +89,7 @@ public class MonthlyStatutoryWorkingHoursImpl implements MonthlyStatutoryWorking
 	 * 週、月の法定労働時間を取得(フレックス用)
 	 * @return
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public MonthlyFlexStatutoryLaborTime getFlexMonAndWeekStatutoryTime(String companyId,
 			  															String employmentCd,

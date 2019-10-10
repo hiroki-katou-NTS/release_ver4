@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
@@ -417,6 +419,7 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 		return this.queryProxy().query(SELECT_WORKTYPE_ALL_ORDER, WorkTypeInfor.class).setParameter("companyId", companyId).getList();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<WorkType> getPossibleWorkTypeV2(String companyId, List<String> lstPossible) {
 		StringBuilder builder = new StringBuilder("SELECT c, o, s FROM KshmtWorkType c ");
@@ -482,6 +485,7 @@ public class JpaWorkTypeRepository extends JpaRepository implements WorkTypeRepo
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<WorkType> findByPK(String companyId, String workTypeCd) {
 		return this.queryProxy().find(new KshmtWorkTypePK(companyId, workTypeCd), KshmtWorkType.class)
 				.map(x -> toDomain(x));

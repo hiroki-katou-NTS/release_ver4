@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -37,6 +39,7 @@ public class GetDaysForCalcAttdRateImpl implements GetDaysForCalcAttdRate {
 	
 	/** 日別実績から出勤率計算用日数を取得 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public CalYearOffWorkAttendRate algorithm(String companyId, String employeeId, DatePeriod period) {
 		
 		double prescribedDays = 0.0;

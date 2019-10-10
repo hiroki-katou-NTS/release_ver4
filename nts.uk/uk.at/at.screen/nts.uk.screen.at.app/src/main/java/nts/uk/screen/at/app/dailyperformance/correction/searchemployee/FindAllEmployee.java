@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -14,6 +16,7 @@ import nts.uk.query.model.employee.EmployeeInformationRepository;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyPerformanceEmployeeDto;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class FindAllEmployee {
 
 	@Inject

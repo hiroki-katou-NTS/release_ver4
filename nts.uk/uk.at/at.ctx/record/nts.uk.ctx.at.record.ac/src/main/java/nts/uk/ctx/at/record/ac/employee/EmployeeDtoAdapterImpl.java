@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.adapter.employee.EmployeeAdapter;
@@ -21,6 +23,7 @@ public class EmployeeDtoAdapterImpl implements EmployeeAdapter{
 	private SyEmployeePub syEmployeePub;
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmployeeDto> getByListSID(List<String> sIds) {
 		return syEmployeePub.getByListSid(sIds).stream().map(x -> {
 			return new EmployeeDto(x.getSid(), x.getScd(), x.getBussinessName());

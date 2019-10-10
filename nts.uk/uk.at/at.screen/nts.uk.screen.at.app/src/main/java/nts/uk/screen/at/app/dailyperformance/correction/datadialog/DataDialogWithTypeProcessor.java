@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.enums.EnumConstant;
@@ -32,6 +34,7 @@ import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.i18n.TextResource;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class DataDialogWithTypeProcessor {
 
 	@Inject

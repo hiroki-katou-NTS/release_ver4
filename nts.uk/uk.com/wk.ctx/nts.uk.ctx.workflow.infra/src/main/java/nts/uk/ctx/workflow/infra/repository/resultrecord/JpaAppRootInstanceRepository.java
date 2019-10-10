@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import org.apache.logging.log4j.util.Strings;
 
@@ -414,6 +416,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	
 	@Override
 	@SneakyThrows
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AppRootInstance> findByApproverPeriod(String approverID, DatePeriod period,
 			RecordRootType rootType) {
 		String companyID =  AppContexts.user().companyId();

@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -70,6 +72,7 @@ public class EmploymentHistoryPubImp implements IEmploymentHistoryPub{
 		return Optional.empty();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Map<String, List<EmploymentHisOfEmployee>> getEmploymentBySidsAndEmploymentCds(List<String> sids,
 			List<String> employmentCodes, DatePeriod param) {

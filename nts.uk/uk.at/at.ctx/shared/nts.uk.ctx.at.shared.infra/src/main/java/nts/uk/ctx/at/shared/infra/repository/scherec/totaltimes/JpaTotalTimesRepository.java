@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
@@ -167,6 +169,7 @@ public class JpaTotalTimesRepository extends JpaRepository implements TotalTimes
 			+ " WHERE a.kshstTotalTimesPK.cid = :companyId"
 			+ " AND a.kshstTotalTimesPK.totalTimesNo IN :totalCountNos ";
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<TotalTimes> getTotalTimesDetailByListNo(String companyId, List<Integer> totalCountNos) {
 		if(totalCountNos.isEmpty())

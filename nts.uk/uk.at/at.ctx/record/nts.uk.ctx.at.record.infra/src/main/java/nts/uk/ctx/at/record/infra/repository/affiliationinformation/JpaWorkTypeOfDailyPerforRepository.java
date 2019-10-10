@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -113,6 +115,7 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<WorkTypeOfDailyPerformance> findByKey(String employeeId, GeneralDate processingDate) {
 		Optional<WorkTypeOfDailyPerformance> data = this.queryProxy().query(FIND_BY_KEY, KrcdtDaiWorkType.class)
@@ -125,6 +128,7 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<WorkTypeOfDailyPerformance> finds(List<String> employeeId, DatePeriod baseDate) {
 		List<WorkTypeOfDailyPerformance> result = new ArrayList<>();
@@ -135,6 +139,7 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 		return result;
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@SneakyThrows
 	private List<WorkTypeOfDailyPerformance> internalQuery(DatePeriod baseDate, List<String> empIds) {
 		String subEmp = NtsStatement.In.createParamsString(empIds);
@@ -154,6 +159,7 @@ public class JpaWorkTypeOfDailyPerforRepository extends JpaRepository implements
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<WorkTypeOfDailyPerformance> finds(Map<String, List<GeneralDate>> param) {
 		List<KrcdtDaiWorkType> result = new ArrayList<>();

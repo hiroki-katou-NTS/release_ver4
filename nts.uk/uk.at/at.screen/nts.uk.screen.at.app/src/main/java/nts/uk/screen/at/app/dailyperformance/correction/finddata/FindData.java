@@ -5,12 +5,15 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.workrecord.operationsetting.DaiPerformanceFun;
 import nts.uk.ctx.at.record.dom.workrecord.operationsetting.DaiPerformanceFunRepository;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class FindData implements IFindData{
 
 	private static Map<String, Optional<DaiPerformanceFun>> daiPerfomanceFunMap = new HashMap<>();

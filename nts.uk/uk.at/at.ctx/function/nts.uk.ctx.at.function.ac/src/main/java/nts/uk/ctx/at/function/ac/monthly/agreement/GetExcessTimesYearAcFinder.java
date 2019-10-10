@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.function.dom.adapter.monthly.agreement.GetExcessTimesYearAdapter;
@@ -16,6 +18,7 @@ import nts.uk.ctx.at.shared.dom.common.Year;
  *
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class GetExcessTimesYearAcFinder implements GetExcessTimesYearAdapter {
 	@Inject
 	GetExcessTimesYearPub getExcessTimesYearPub;

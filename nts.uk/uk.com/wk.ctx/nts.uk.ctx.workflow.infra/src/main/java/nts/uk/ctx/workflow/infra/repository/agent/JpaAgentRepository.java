@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
@@ -366,6 +368,7 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AgentInfoOutput> findAgentByPeriod(String companyID, List<String> listApprover, GeneralDate startDate,
 			GeneralDate endDate, int agentType) {
 		

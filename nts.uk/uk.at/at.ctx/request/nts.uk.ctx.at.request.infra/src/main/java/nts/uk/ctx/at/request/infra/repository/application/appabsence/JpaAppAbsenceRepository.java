@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -35,6 +37,7 @@ public class JpaAppAbsenceRepository extends JpaRepository implements AppAbsence
 		return Optional.of(appAbsence);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	@SneakyThrows
 	public List<AppAbsence> getAbsenceByIds(String companyID, List<String> appId){
