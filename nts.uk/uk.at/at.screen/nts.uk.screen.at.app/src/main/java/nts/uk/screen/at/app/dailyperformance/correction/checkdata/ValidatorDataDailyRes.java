@@ -16,7 +16,6 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.val;
@@ -100,6 +99,10 @@ public class ValidatorDataDailyRes {
 			458, 459, 799, 801, 802, 804, 806, 807, 809, 811, 812, 814, 816, 817, 819, 821, 822 };
 	static final Map<Integer, Integer> DEVIATION_REASON_MAP = IntStream.range(0, DEVIATION_REASON.length).boxed()
 			.collect(Collectors.toMap(x -> DEVIATION_REASON[x], x -> x / 3 + 1));
+	
+	private final static String EMPTY_STRING = "";
+
+	private final static String PATTERN_1 = "[0-9]+$";
 	// Arrays.stream(INPUT_CHECK).
 
 	// 育児と介護の時刻が両方入力されていないかチェックする
@@ -555,12 +558,18 @@ public class ValidatorDataDailyRes {
 		return divergenceErrors;
 	}
 	
-	private boolean checkErrorOdd(String errorCode) {
-		String valueEnd = errorCode.substring(errorCode.length() - 1, errorCode.length());
-		if (StringUtils.isNumeric(valueEnd) && Integer.parseInt(valueEnd) % 2 != 0)
-			return true;
-		else
-			return false;
+//	private boolean checkErrorOdd(String errorCode) {
+//		String valueEnd = errorCode.substring(errorCode.length() - 1, errorCode.length());
+//		if (StringUtils.isNumeric(valueEnd) && Integer.parseInt(valueEnd) % 2 != 0)
+//			return true;
+//		else
+//			return false;
+//	}
+	
+	private boolean checkErrorOdd(String code){
+		String number = code.replace(code.replaceAll(PATTERN_1, EMPTY_STRING), EMPTY_STRING);
+		if(Integer.parseInt(number) >= 100) return true;
+		return false;
 	}
 	
 	public List<String> createMessageError(EmployeeMonthlyPerError errorEmployeeMonth) {

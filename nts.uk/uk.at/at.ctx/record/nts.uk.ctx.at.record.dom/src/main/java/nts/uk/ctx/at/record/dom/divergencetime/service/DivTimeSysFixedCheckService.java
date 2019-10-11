@@ -18,6 +18,7 @@ import lombok.val;
 import nts.arc.i18n.I18NResources;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
+import nts.gul.text.StringUtil;
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
 import nts.uk.ctx.at.record.dom.attendanceitem.util.AttendanceItemConvertFactory;
@@ -193,6 +194,8 @@ public class DivTimeSysFixedCheckService {
 	private final static String IDENTITY_PUS_KEY = "IdentityPUS";
 
 	private final static String DIVERGENCE_TIME_KEY = "DivergenceTime";
+	
+	private final static String DIVERGENCE_D = "D";
 	
 	/** 乖離時間（確認解除） */
 	public List<EmployeeDailyPerError> divergenceTimeCheckBySystemFixed(String comId, String empId, GeneralDate tarD){
@@ -761,7 +764,6 @@ public class DivTimeSysFixedCheckService {
 										erAl.cancelable ? 1 : 0, mes);
 	}
 	
-	@AllArgsConstructor
 	private class DivergenceCheckResult {
 		ErrorAlarmWorkRecordCode errorCode;
 		Integer displayItem;
@@ -769,6 +771,21 @@ public class DivTimeSysFixedCheckService {
 		InternalCheckStatus status;
 		boolean isAlarm;
 		Integer no;
+
+		public DivergenceCheckResult(ErrorAlarmWorkRecordCode errorCode, Integer displayItem, Boolean cancelable,
+				InternalCheckStatus status, boolean isAlarm, Integer no) {
+			this.displayItem = displayItem;
+			this.cancelable = cancelable;
+			this.status = status;
+			this.isAlarm = isAlarm;
+			this.no = no;
+			if (status == InternalCheckStatus.NO_ERROR_WITH_REASON) {
+				DivTimeSysFixedCheckService service = new DivTimeSysFixedCheckService();
+				this.errorCode = new ErrorAlarmWorkRecordCode(StringUtils.join(DIVERGENCE_D, String.valueOf((service.getNumber(errorCode.v()) + 100))));
+			} else {
+				this.errorCode = errorCode;
+			}
+		}
 	}
 	
 	private enum InternalCheckStatus {
