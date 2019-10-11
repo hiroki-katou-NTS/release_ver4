@@ -82,7 +82,7 @@ public class ApplicationListFinder {
 		AppListOutPut lstApp = repoAppListInit.getApplicationList(appListExCon, appDisplaySet);
 		List<ApplicationDto_New> lstAppDto = new ArrayList<>();
 		for (Application_New app : lstApp.getLstApp()) {
-			lstAppDto.add(ApplicationDto_New.fromDomain(app));
+			lstAppDto.add(ApplicationDto_New.fromDomainCMM045(app));
 		}
 		List<AppStatusApproval> lstStatusApproval = new ArrayList<>();
 		List<ApproveAgent> lstAgent = new ArrayList<>();
@@ -107,7 +107,8 @@ public class ApplicationListFinder {
 		List<AppInfor> lstAppType = this.findListApp(lstApp.getDataMaster().getLstAppMasterInfo(), param.isSpr(), param.getExtractCondition());
 		List<ApplicationDto_New> lstAppSort = param.getCondition().getAppListAtr() == 1 ? this.sortByIdModeApproval(lstAppDto, lstApp.getDataMaster().getLstAppMasterInfo()) : 
 									this.sortByIdModeApp(lstAppDto, lstApp.getDataMaster().getMapAppBySCD(), lstApp.getDataMaster().getLstSCD());
-		return new ApplicationListDto(isDisPreP, condition.getStartDate(), condition.getEndDate(), displaySet, lstApp.getDataMaster().getLstAppMasterInfo(),lstAppSort,
+		List<ApplicationDto_New> lstAppSortConvert = lstAppSort.stream().map(c -> c.convertInputDate(c)).collect(Collectors.toList());
+		return new ApplicationListDto(isDisPreP, condition.getStartDate(), condition.getEndDate(), displaySet, lstApp.getDataMaster().getLstAppMasterInfo(),lstAppSortConvert,
 				lstApp.getLstAppOt(),lstApp.getLstAppGoBack(), lstApp.getAppStatusCount(), lstApp.getLstAppGroup(), lstAgent,
 				lstApp.getLstAppHdWork(), lstApp.getLstAppWorkChange(), lstApp.getLstAppAbsence(), lstAppType, hdAppSetDto, lstApp.getLstAppCompltLeaveSync());
 	}
