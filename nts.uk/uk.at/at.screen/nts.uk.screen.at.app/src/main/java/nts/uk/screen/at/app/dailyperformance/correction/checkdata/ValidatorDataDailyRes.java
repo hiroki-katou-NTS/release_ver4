@@ -634,12 +634,15 @@ public class ValidatorDataDailyRes {
 						.orElse(null);
 				if (errorSelect != null && dtoCorrespon != null) {
 					ItemValue itemValue = AttendanceItemUtil.toItemValues(dtoCorrespon, Arrays.asList(errorSelect.getRemarkColumnNo())).stream().findFirst().orElse(null);
-					val item = x.getAttendanceItemList().stream().filter(z -> !(z.intValue() == errorSelect.getErrorDisplayItem() && itemValue != null && itemValue.getValue() != null && !itemValue.getValue().equals("")))
-							.collect(Collectors.toList());
-					if(item.isEmpty()) {
+					// có lỗi nhưng đã nhập lý do
+					if(itemValue != null && itemValue.getValue() != null && !itemValue.getValue().equals("")) {
 						return false;
 					}else {
-						x.setAttendanceItemList(item);
+						val item = x.getAttendanceItemList().stream().filter(z -> !(z.intValue() == errorSelect.getErrorDisplayItem() && itemValue != null && itemValue.getValue() != null && !itemValue.getValue().equals("")))
+								.collect(Collectors.toList());
+						if(!item.isEmpty()) {
+							x.setAttendanceItemList(item);
+						}
 						return true;
 					}
 				}else {
