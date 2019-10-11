@@ -41,7 +41,9 @@ public class PreGoBackReflectServiceImp implements PreGoBackReflectService {
 				Optional.ofNullable(para.getGobackData().getWorkTimeCode()),
 				Optional.ofNullable(para.getGobackData().getStartTime1()),
 				Optional.ofNullable(para.getGobackData().getEndTime1()),
-				isPre);
+				isPre,
+				para.getIPUSOpt(),
+				para.getApprovalSet());
 		commonService.calculateOfAppReflect(calcParam);
 	}
 }

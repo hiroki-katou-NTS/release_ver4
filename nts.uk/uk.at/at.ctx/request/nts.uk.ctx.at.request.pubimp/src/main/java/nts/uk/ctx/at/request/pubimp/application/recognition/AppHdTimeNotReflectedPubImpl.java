@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -39,6 +41,7 @@ public class AppHdTimeNotReflectedPubImpl implements AppHdTimeNotReflectedPub {
 	 * @return List (年月日, 休出時間)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ApplicationHdTimeExport> acquireTotalAppHdTimeNotReflected(String sId, GeneralDate startDate, GeneralDate endDate) {
 		String companyId = AppContexts.user().companyId();
 		Map<String, AppHolidayWork> mapHd = new HashMap<>();

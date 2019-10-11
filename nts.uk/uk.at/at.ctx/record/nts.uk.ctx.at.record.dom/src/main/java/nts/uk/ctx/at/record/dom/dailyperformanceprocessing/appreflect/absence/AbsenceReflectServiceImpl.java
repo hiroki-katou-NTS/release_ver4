@@ -82,7 +82,9 @@ public class AbsenceReflectServiceImpl implements AbsenceReflectService{
 					Optional.ofNullable(absencePara.getWorkTimeCode()),
 					Optional.ofNullable(absencePara.getStartTime()),
 					Optional.ofNullable(absencePara.getEndTime()),
-					isPre);
+					isPre,
+					absencePara.getIPUSOpt(),
+					absencePara.getApprovalSet());
 			commonService.calculateOfAppReflect(calcParam);
 	}
 

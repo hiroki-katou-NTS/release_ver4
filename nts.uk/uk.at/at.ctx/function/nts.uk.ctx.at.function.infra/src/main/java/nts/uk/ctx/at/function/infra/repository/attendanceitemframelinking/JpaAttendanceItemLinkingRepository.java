@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -54,6 +56,7 @@ public class JpaAttendanceItemLinkingRepository extends JpaRepository implements
 		FIND_BY_ITEM_ID_AND_TYPE = builderString.toString();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AttendanceItemLinking> getByAttendanceId(List<Integer> attendanceItemIds) {
 		if(attendanceItemIds.isEmpty())
@@ -82,12 +85,14 @@ public class JpaAttendanceItemLinkingRepository extends JpaRepository implements
 	 * AttendanceItemLinkingRepository#getByAnyItemCategory(nts.uk.ctx.at.
 	 * function.dom.attendanceItemAndFrameLinking.enums.TypeOfItem)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AttendanceItemLinking> getByAnyItemCategory(TypeOfItem type) {
 		return this.queryProxy().query(FIND_BY_ANY_ITEM, KfnmtAttendanceLink.class)
 				.setParameter("typeOfItem", type.value).getList(f -> toDomain(f));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AttendanceItemLinking> getByAttendanceIdAndType(List<Integer> attendanceItemIds, TypeOfItem type) {
 		if(attendanceItemIds.isEmpty()) {
@@ -102,6 +107,7 @@ public class JpaAttendanceItemLinkingRepository extends JpaRepository implements
 		return results.stream().map(f -> toDomain(f)).collect(Collectors.toList());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AttendanceItemLinking> getFullDataByListAttdaId(List<Integer> attendanceItemIds) {
 		if(attendanceItemIds.isEmpty())
@@ -114,6 +120,7 @@ public class JpaAttendanceItemLinkingRepository extends JpaRepository implements
 		return results.stream().map(f -> f.toDomain()).collect(Collectors.toList());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AttendanceItemLinking> getFullDataByAttdIdAndType(List<Integer> attendanceItemIds, TypeOfItem type) {
 		if(attendanceItemIds.isEmpty()) {
@@ -134,6 +141,7 @@ public class JpaAttendanceItemLinkingRepository extends JpaRepository implements
 	 * @see nts.uk.ctx.at.function.dom.attendanceitemframelinking.repository.
 	 * AttendanceItemLinkingRepository#findByFrameNos(java.util.List)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AttendanceItemLinking> findByFrameNos(List<Integer> frameNos, int typeOfItem, int frameCategory) {
 		if (CollectionUtil.isEmpty(frameNos)) {

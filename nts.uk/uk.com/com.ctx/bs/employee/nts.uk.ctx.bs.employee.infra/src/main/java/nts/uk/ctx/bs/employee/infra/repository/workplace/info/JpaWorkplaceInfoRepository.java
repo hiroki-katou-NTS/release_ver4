@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -161,6 +163,7 @@ public class JpaWorkplaceInfoRepository extends JpaRepository implements Workpla
 	 * findByWkpId(java.lang.String, nts.arc.time.GeneralDate)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<WorkplaceInfo> findByWkpId(String wpkId, GeneralDate baseDate) {
 		// get entity manager
 		EntityManager em = this.getEntityManager();

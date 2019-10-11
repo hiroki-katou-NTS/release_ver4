@@ -11,6 +11,8 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -317,6 +319,7 @@ public class ErAlWorkRecordCheckService {
 	}
 	
 	/** 大塚用連続休暇チェック */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ContinuousHolidayCheckResult checkContinuousHolidays(String employeeId, DatePeriod range, List<WorkInfoOfDailyPerformance> workInfos) {
 		ContinuousHolidayCheckResult r = new ContinuousHolidayCheckResult();
 		

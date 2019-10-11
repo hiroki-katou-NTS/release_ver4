@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -36,6 +38,7 @@ public class EmployeeDailyPerErrorPubImpl implements EmployeeDailyPerErrorPub {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmployeeErrorPubExport> checkEmployeeErrorOnProcessingDate(String employeeId, DatePeriod datePeriod) {
 		
 		List<EmployeeErrorPubExport> employeeErrorPubExportList = new ArrayList<>();

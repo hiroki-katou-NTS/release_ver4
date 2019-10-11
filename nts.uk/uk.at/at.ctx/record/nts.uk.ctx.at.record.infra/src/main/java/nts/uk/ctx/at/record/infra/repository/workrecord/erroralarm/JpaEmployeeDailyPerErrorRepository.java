@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -155,12 +157,14 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 //		 this.getEntityManager().flush();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public boolean checkExistErrorCode(String employeeID, GeneralDate processingDate, String errorCode) {
 		return this.queryProxy().query(FIND_ERROR_CODE, long.class).setParameter("processingDate", processingDate)
 				.setParameter("employeeId", employeeID).setParameter("errorCode", errorCode).getSingle().get() > 0;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public boolean checkExistErrorCodeByPeriod(String employeeID, DatePeriod datePeriod, String errorCode) {
 		return this.queryProxy().query(FIND_ERROR_CODE_BY_PERIOD, long.class).setParameter("employeeId", employeeID)
@@ -168,6 +172,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 				.setParameter("errorCode", errorCode).getSingle().get() > 0;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EmployeeDailyPerError> find(String employeeID, GeneralDate processingDate) {
 		List<KrcdtSyainDpErList> result = findEntities(employeeID, processingDate);
@@ -227,6 +232,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 //		return result;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EmployeeDailyPerError> findByPeriodOrderByYmd(String employeeId, DatePeriod datePeriod) {
 		return this.queryProxy().query(FIND_BY_PERIOD_ORDER_BY_YMD, KrcdtSyainDpErList.class)
@@ -237,6 +243,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 				.flatMap(List::stream).collect(Collectors.toList());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EmployeeDailyPerError> finds(List<String> employeeID, DatePeriod processingDate) {
 		//fix response 192
@@ -301,6 +308,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 //						.flatMap(List::stream).collect(Collectors.toList());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EmployeeDailyPerError> finds(Map<String, List<GeneralDate>> param) {
 		List<EmployeeDailyPerError> result = new ArrayList<>();
@@ -325,6 +333,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 		return entities.stream().map(c -> c.toDomain()).collect(Collectors.toList());
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EmployeeDailyPerError> findsWithLeftJoin(List<String> employeeID, DatePeriod processingDate) {
 		//fix response 192
@@ -426,6 +435,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EmployeeDailyPerError> findList(String companyID, String employeeID) {
 		StringBuilder builderString = new StringBuilder();
@@ -437,6 +447,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 				.setParameter("employeeId", employeeID).setParameter("companyId", companyID).getList(x -> x.toDomain());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public boolean checkExistRecordErrorListDate(String companyID, String employeeID, List<GeneralDate> lstDate) {
 		LongAdder counter = new LongAdder();
@@ -453,12 +464,14 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public boolean checkEmployeeHasErrorOnProcessingDate(String employeeID, GeneralDate processingDate) {
 		return this.queryProxy().query(CHECK_EMPLOYEE_HAS_ERROR_ON_PROCESSING_DATE, long.class)
 				.setParameter("employeeId", employeeID).setParameter("processingDate", processingDate).getSingle()
 				.get() > 0;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public boolean checkExistErrorByDate(String companyId, String employeeId, GeneralDate date) {
 
@@ -490,6 +503,7 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 			+ "AND a.processingDate <= :endDate ";
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public boolean checkErrorByPeriodDate(String companyId, String employeeId, GeneralDate strDate, GeneralDate endDate) {
 		return this.queryProxy().query(CHECK_ERROR_BY_DATE, KrcdtSyainDpErList.class)
 				.setParameter("companyId", companyId)

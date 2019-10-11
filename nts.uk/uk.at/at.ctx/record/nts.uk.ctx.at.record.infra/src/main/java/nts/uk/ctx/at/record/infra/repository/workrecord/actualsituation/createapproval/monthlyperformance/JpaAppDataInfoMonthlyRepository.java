@@ -45,7 +45,13 @@ public class JpaAppDataInfoMonthlyRepository extends JpaRepository implements Ap
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Override
 	public void addAppDataInfoMonthly(AppDataInfoMonthly appDataInfoMonthly) {
-		this.commandProxy().insert(KrcmtAppDataInfoMonthly.toEntity(appDataInfoMonthly));
+		Optional<AppDataInfoMonthly> data = this.queryProxy().query(SELECT_APP_DATA_INFO_BY_ID,KrcmtAppDataInfoMonthly.class)
+				.setParameter("employeeId", appDataInfoMonthly.getEmployeeId())
+				.setParameter("executionId", appDataInfoMonthly.getExecutionId())
+				.getSingle(c->c.toDomain());
+		if(!data.isPresent()) {
+			this.commandProxy().insert(KrcmtAppDataInfoMonthly.toEntity(appDataInfoMonthly));
+		}
 	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)

@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
@@ -70,6 +72,7 @@ public class JpaRemarksMonthlyRecordRepository extends JpaRepository implements 
 			+ "AND a.recordPK.isLastDay = :isLastDay "
 			+ "ORDER BY a.recordPK.employeeId ";
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<RemarksMonthlyRecord> find(String employeeId,ClosureId closureId,RemarksNo remarksNo, YearMonth yearMonth, 
 			ClosureDate closureDate) {
@@ -94,6 +97,7 @@ public class JpaRemarksMonthlyRecordRepository extends JpaRepository implements 
 		.getSingle(c -> c.toDomain());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<RemarksMonthlyRecord> findByYearMonthOrderByStartYmd(String employeeId, YearMonth yearMonth) {
 		return this.queryProxy().query(FIND_BY_YEAR_MONTH, KrcdtRemarksMonthlyRecord.class)
@@ -102,6 +106,7 @@ public class JpaRemarksMonthlyRecordRepository extends JpaRepository implements 
 				.getList(c -> c.toDomain());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<RemarksMonthlyRecord> findByYMAndClosureIdOrderByStartYmd(String employeeId, YearMonth yearMonth,
 			ClosureId closureId) {
@@ -112,6 +117,7 @@ public class JpaRemarksMonthlyRecordRepository extends JpaRepository implements 
 				.getList(c -> c.toDomain());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<RemarksMonthlyRecord> findByEmployees(List<String> employeeIds, YearMonth yearMonth,
 			ClosureId closureId, ClosureDate closureDate) {
@@ -129,6 +135,7 @@ public class JpaRemarksMonthlyRecordRepository extends JpaRepository implements 
 		return results;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<RemarksMonthlyRecord> findBySidsAndYearMonths(List<String> employeeIds, List<YearMonth> yearMonths) {
 		val yearMonthValues = yearMonths.stream().map(c -> c.v()).collect(Collectors.toList());

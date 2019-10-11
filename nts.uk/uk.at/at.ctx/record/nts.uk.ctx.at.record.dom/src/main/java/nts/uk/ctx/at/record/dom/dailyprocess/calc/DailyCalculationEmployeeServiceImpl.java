@@ -24,6 +24,8 @@ import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workrecord.repo.Attenda
 import nts.uk.ctx.at.record.dom.actualworkinghours.repository.AttendanceTimeRepository;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.AffiliationInforOfDailyPerforRepository;
 import nts.uk.ctx.at.record.dom.affiliationinformation.repository.WorkTypeOfDailyPerforRepository;
+import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
+import nts.uk.ctx.at.record.dom.approvalmanagement.repository.ApprovalProcessingUseSettingRepository;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.BreakTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.breakorgoout.repository.OutingTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.calculationattribute.repo.CalAttrOfDailyPerformanceRepository;
@@ -45,6 +47,8 @@ import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagement
 import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagementRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.service.ErAlCheckService;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
+import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentityProcessUseSetRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLog;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageContent;
@@ -186,6 +190,12 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	//日別実績(WORK)更新処理まとめ
 	private DailyRecordAdUpService dailyRecordAdUpService;
 	
+	@Inject
+	private ApprovalProcessingUseSettingRepository approvalSettingRepo;
+	
+	@Inject
+	private IdentityProcessUseSetRepository identityProcessUseRepository;
+	
 	/**
 	 * 社員の日別実績を計算
 	 * @param asyncContext 同期コマンドコンテキスト
@@ -202,6 +212,9 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		
 		String cid = AppContexts.user().companyId();
 		List<Boolean> isHappendOptimistLockError = new ArrayList<>();
+		
+		Optional<IdentityProcessUseSet> iPUSOptTemp = identityProcessUseRepository.findByKey(cid);
+		Optional<ApprovalProcessingUseSetting> approvalSetTemp = approvalSettingRepo.findByCompanyId(cid);
 		this.parallel.forEach(employeeIds, employeeId -> {
 			
 //			// 中断処理　（中断依頼が出されているかチェックする）
@@ -247,6 +260,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 					try {
 						//update record
 						updateRecord(stateInfo.integrationOfDaily);
+						clearConfirmApproval(stateInfo.integrationOfDaily,iPUSOptTemp,approvalSetTemp);
 						upDateCalcState(stateInfo);
 					} catch (Exception ex) {
 						boolean isOptimisticLock = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
@@ -275,7 +289,19 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		return isHappendOptimistLockError;
 	}
 	
-	
+	/**
+	 * #108941 
+	 * 特定のエラーが発生している社員の確認、承認をクリアする
+	 * @param integrationOfDaily
+	 * @param iPUSOptTemp
+	 * @param approvalSetTemp
+	 */
+	private void clearConfirmApproval(IntegrationOfDaily integrationOfDaily,
+			Optional<IdentityProcessUseSet> iPUSOptTemp, Optional<ApprovalProcessingUseSetting> approvalSetTemp) {
+		dailyRecordAdUpService.removeConfirmApproval(Arrays.asList(integrationOfDaily), iPUSOptTemp, approvalSetTemp);
+	}
+
+
 	private void updateRecord(IntegrationOfDaily value) {
 		// データ更新
 		if(value.getAttendanceTimeOfDailyPerformance().isPresent()) {
@@ -320,6 +346,9 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		//実績が無かった時用のカウントアップ
 		if(createList.isEmpty()) 
 			return ProcessState.SUCCESS; 
+		String cid = AppContexts.user().companyId();
+		Optional<IdentityProcessUseSet> iPUSOptTemp = identityProcessUseRepository.findByKey(cid);
+		Optional<ApprovalProcessingUseSetting> approvalSetTemp = approvalSettingRepo.findByCompanyId(cid);
 		
 		//締め一覧取得
 		List<ClosureStatusManagement> closureList = getClosureList(Arrays.asList(employeeId),datePeriod);
@@ -333,6 +362,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 			try {
 				//実績登録
 				updateRecord(stateInfo.integrationOfDaily); 
+				clearConfirmApproval(stateInfo.getIntegrationOfDaily(),iPUSOptTemp,approvalSetTemp);
 				upDateCalcState(stateInfo);
 			} catch (Exception ex) {
 				boolean isOptimisticLock = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();

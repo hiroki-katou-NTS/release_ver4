@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
@@ -108,6 +110,7 @@ public class JpaAffWorkplaceHistoryItemRepository extends JpaRepository implemen
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<AffWorkplaceHistoryItem> getByHistId(String historyId) {
 		return this.queryProxy().query(SELECT_BY_HISTID, BsymtAffiWorkplaceHistItem.class)
 				.setParameter("historyId", historyId).getSingle(x -> toDomain(x));
@@ -206,6 +209,7 @@ public class JpaAffWorkplaceHistoryItemRepository extends JpaRepository implemen
 	 * #findByHistIds(java.util.List)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AffWorkplaceHistoryItem> findByHistIds(List<String> hisIds) {
 		if (CollectionUtil.isEmpty(hisIds)) {
 			return new ArrayList<>();
@@ -274,6 +278,7 @@ public class JpaAffWorkplaceHistoryItemRepository extends JpaRepository implemen
 		return lstSid;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@SneakyThrows
 	@Override
 	public List<String> getHistIdLstBySidAndPeriod(String sid, DatePeriod period) {

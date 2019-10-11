@@ -3,6 +3,8 @@ package nts.uk.ctx.workflow.dom.service;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -48,6 +50,7 @@ public class ApprovalRootStateImpl implements ApprovalRootStateService {
 		approvalRootStateRepository.delete(rootStateID, rootType);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<ApprovalRootState> getByPeriod(String employeeID, GeneralDate startDate, GeneralDate endDate, Integer rootType) {
 		return approvalRootStateRepository.findAppByEmployeeIDRecordDate(

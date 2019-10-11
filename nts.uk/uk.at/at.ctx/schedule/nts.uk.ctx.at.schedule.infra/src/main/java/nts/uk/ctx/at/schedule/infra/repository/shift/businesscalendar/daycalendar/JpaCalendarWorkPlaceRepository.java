@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -111,6 +113,7 @@ public class JpaCalendarWorkPlaceRepository extends JpaRepository implements Cal
 	 * get  calendar workplace by date
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<CalendarWorkplace> findCalendarWorkplaceByDate(String workPlaceId, GeneralDate date) {
 		return this.queryProxy().query(SELECT_WORKPLACE_BY_DATE,KsmmtCalendarWorkplace.class)
 				.setParameter("workPlaceId", workPlaceId )

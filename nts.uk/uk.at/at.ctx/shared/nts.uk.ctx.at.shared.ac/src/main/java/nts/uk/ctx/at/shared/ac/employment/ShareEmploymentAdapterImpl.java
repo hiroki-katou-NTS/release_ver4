@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -50,6 +52,7 @@ public class ShareEmploymentAdapterImpl implements ShareEmploymentAdapter{
 	 * #findByEmpCodes(java.lang.String, java.lang.String, nts.arc.time.GeneralDate)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<BsEmploymentHistoryImport> findEmploymentHistory(String companyId, String employeeId, GeneralDate baseDate) {
 		return employment.findSEmpHistBySid(companyId, employeeId, baseDate).map(empHist -> 
 												new BsEmploymentHistoryImport(empHist.getEmployeeId(), empHist.getEmploymentCode(),
@@ -58,6 +61,7 @@ public class ShareEmploymentAdapterImpl implements ShareEmploymentAdapter{
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<SharedSidPeriodDateEmploymentImport> getEmpHistBySidAndPeriod(List<String> sids, DatePeriod datePeriod) {
 		List<SharedSidPeriodDateEmploymentImport> lstEmpHist = employment.getEmpHistBySidAndPeriod(sids, datePeriod)
 				.stream()

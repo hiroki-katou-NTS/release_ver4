@@ -40,6 +40,7 @@ import nts.uk.ctx.at.shared.dom.common.time.AttendanceTimeOfExistMinus;
 import nts.uk.ctx.at.shared.dom.vacation.setting.compensatoryleave.CompensatoryOccurrenceSetting;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.worktime.common.GoLeavingWorkAtr;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimeCode;
 import nts.uk.ctx.at.shared.dom.worktime.common.WorkTimezoneCommonSet;
 import nts.uk.ctx.at.shared.dom.worktime.predset.WorkTimeNightShift;
 import nts.uk.ctx.at.shared.dom.worktime.worktimeset.WorkTimeDailyAtr;
@@ -141,6 +142,7 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 	 * @param converter 
 	 * @param companyCommonSetting 
 	 * @param personalSetting 
+	 * @param recordWorkTimeCode 
 	 * @param integrationOfDaily2 
 	 * @return 日別実績(Work)クラス
 	 */
@@ -152,7 +154,7 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 			CalculateOfTotalConstraintTime calculateOfTotalConstraintTime, ManageReGetClass scheduleReGetClass,
 			ManageReGetClass recordReGetClass,WorkingConditionItem conditionItem,
 			Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,DeductLeaveEarly leaveLateSet,DeductLeaveEarly scheleaveLateSet, Optional<PredetermineTimeSetForCalc> schePred,
-			DailyRecordToAttendanceItemConverter converter, ManagePerCompanySet companyCommonSetting, List<PersonnelCostSettingImport> personalSetting) {
+			DailyRecordToAttendanceItemConverter converter, ManagePerCompanySet companyCommonSetting, List<PersonnelCostSettingImport> personalSetting, Optional<WorkTimeCode> recordWorkTimeCode) {
 
 		Optional<AttendanceTimeOfDailyPerformance> calcResult = Optional.empty();
 		
@@ -177,7 +179,8 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 																   conditionItem, 
 																   predetermineTimeSetByPersonInfo, 
 																   scheleaveLateSet, 
-																   schePred));
+																   schePred,
+																   recordWorkTimeCode));
 			// // 編集状態を取得（日別実績の編集状態が持つ勤怠項目IDのみのList作成）
 			List<Integer> attendanceItemIdList = recordReGetClass.getIntegrationOfDaily().getEditState().stream()
 					.filter(editState -> editState.getEmployeeId()
@@ -215,7 +218,8 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 															  predetermineTimeSetByPersonInfo,
 															  leaveLateSet,
 															  scheleaveLateSet,
-															  schePred));
+															  schePred,
+															  recordWorkTimeCode));
 			// // 編集状態を取得（日別実績の編集状態が持つ勤怠項目IDのみのList作成）
 			List<Integer> attendanceItemIdList = recordReGetClass.getIntegrationOfDaily().getEditState().stream()
 					.filter(editState -> editState.getEmployeeId()
@@ -419,19 +423,20 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 	 * @param recordReGetClass 実績のデータ管理クラス
 	 * @param workType 実績側の勤務種類
 	 * @param scheduleReGetClass 予定のデータ管理クラス
+	 * @param recordWorkTimeCode 
 	 * @return　計算結果
 	 */
 	public static AttendanceTimeOfDailyPerformance calcTimeResultForContinusWork(ManageReGetClass recordReGetClass, WorkType workType, 
 			VacationClass vacation, Optional<SettingOfFlexWork> flexCalcMethod, BonusPayAutoCalcSet bonusPayAutoCalcSet, 
 			List<CompensatoryOccurrenceSetting> eachCompanyTimeSet, ManageReGetClass scheduleReGetClass, WorkingConditionItem conditionItem, 
 			Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo, DeductLeaveEarly scheleaveLateSet, 
-			Optional<PredetermineTimeSetForCalc> schePred){
+			Optional<PredetermineTimeSetForCalc> schePred, Optional<WorkTimeCode> recordWorkTimeCode){
 		
 		val workScheduleTime = calcWorkSheduleTime(recordReGetClass.getCalculationRangeOfOneDay(), workType, 
 												   vacation, 
 												   flexCalcMethod, bonusPayAutoCalcSet, 
 												   eachCompanyTimeSet, scheduleReGetClass,conditionItem,
-												   predetermineTimeSetByPersonInfo,scheleaveLateSet,schePred);
+												   predetermineTimeSetByPersonInfo,scheleaveLateSet,schePred,recordWorkTimeCode);
 		
 		return new AttendanceTimeOfDailyPerformance(recordReGetClass.getIntegrationOfDaily().getAffiliationInfor().getEmployeeId(),
 													recordReGetClass.getIntegrationOfDaily().getAffiliationInfor().getYmd(),
@@ -446,6 +451,7 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 	/**
 	 * 時間の計算結果をまとめて扱う
 	 * @param schePred 
+	 * @param recordWorkTimeCode 
 	 * @param schePreTimeSet 
 	 * @param breakTimeCount 
 	 * @param ootsukaFixCalsSet 
@@ -461,14 +467,15 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 				DailyRecordToAttendanceItemConverter forCalcDivergenceDto, List<DivergenceTime> divergenceTimeList,
 				CalculateOfTotalConstraintTime calculateOfTotalConstraintTime, ManageReGetClass scheduleReGetClass,
 				ManageReGetClass recordReGetClass,WorkingConditionItem conditionItem,
-				Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,DeductLeaveEarly leaveLateSet,DeductLeaveEarly scheleaveLateSet, Optional<PredetermineTimeSetForCalc> schePred) {
+				Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,DeductLeaveEarly leaveLateSet,DeductLeaveEarly scheleaveLateSet, Optional<PredetermineTimeSetForCalc> schePred, Optional<WorkTimeCode> recordWorkTimeCode) {
 		
 		/*日別実績の勤務予定時間の計算*/
 		val workScheduleTime = calcWorkSheduleTime(recordReGetClass.getCalculationRangeOfOneDay(), workType, 
 													vacation, 
 												   flexCalcMethod, bonusPayAutoCalcSet, 
 												    eachCompanyTimeSet, scheduleReGetClass,conditionItem,
-												    predetermineTimeSetByPersonInfo,scheleaveLateSet,schePred);
+												    predetermineTimeSetByPersonInfo,scheleaveLateSet,schePred,
+												    recordWorkTimeCode);
 		
 			/*日別実績の実績時間の計算*/
 		Optional<WorkTimeDailyAtr> workDailyAtr = recordReGetClass.getWorkTimeSetting() != null && recordReGetClass.getWorkTimeSetting().isPresent()?
@@ -486,7 +493,7 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 				conditionItem,
 				predetermineTimeSetByPersonInfo,
 				leaveLateSet,
-				workScheduleTime);
+				workScheduleTime, recordWorkTimeCode);
 	
 	
 
@@ -547,6 +554,7 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 	 * @param eachWorkTimeSet 
 	 * @param eachCompanyTimeSet 
 	 * @param schePred 
+	 * @param recordWorkTimeCode 
 	 * @param breakTimeCount 
 	 * @param integrationOfDaily 
 	 * @param flexAutoCalSet 
@@ -563,7 +571,7 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 															   ManageReGetClass scheRegetManage
 															   ,WorkingConditionItem conditionItem,
 															   Optional<PredetermineTimeSetForCalc> predetermineTimeSetByPersonInfo,
-															   DeductLeaveEarly leaveLateSet, Optional<PredetermineTimeSetForCalc> schePred) {
+															   DeductLeaveEarly leaveLateSet, Optional<PredetermineTimeSetForCalc> schePred, Optional<WorkTimeCode> recordWorkTimeCode) {
 		//勤務予定時間を計算
 		//val schedulePredWorkTime = (scheduleOneDay.getWorkInformastionOfDaily().getRecordInfo().getWorkTimeCode() == null)?new AttendanceTime(0):recordOneDay.getPredetermineTimeSetForCalc().getpredetermineTime(workType.getDailyWork());
 		AttendanceTime scheTotalTime = new AttendanceTime(0);
@@ -571,9 +579,7 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 		AttendanceTime scheWithinTotalTime = new AttendanceTime(0);
 		//実績所定労働時間の計算
 		val actualPredWorkTime = ( recordOneDay == null
-									||recordOneDay.getWorkInformationOfDaily() == null
-									||recordOneDay.getWorkInformationOfDaily().getRecordInfo() == null
-									||recordOneDay.getWorkInformationOfDaily().getRecordInfo().getWorkTimeCode() == null 
+									|| !recordWorkTimeCode.isPresent()
 									|| workType.getDailyWork().isHolidayWork()
 									|| recordOneDay.getPredetermineTimeSetForCalc() == null)
 									?new AttendanceTime(0)
@@ -596,7 +602,8 @@ public class AttendanceTimeOfDailyPerformance extends AggregateRoot {
 																   eachCompanyTimeSet, //会社共通 
 																   conditionItem,
 																   predetermineTimeSetByPersonInfo,
-																   leaveLateSet
+																   leaveLateSet,
+																   recordWorkTimeCode
 																   );
 			scheTotalTime = totalWorkingTime.getTotalTime();
 			if(totalWorkingTime.getWithinStatutoryTimeOfDaily() != null)

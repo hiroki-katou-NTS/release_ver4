@@ -3,6 +3,8 @@
  */
 package nts.uk.ctx.at.record.ws.workrecord.approvalmanagement;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -28,6 +30,7 @@ public class OneMonthApprovalStatusWebService extends WebService {
 
 	@POST
 	@Path("startscreen")
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public OneMonthApprovalStatusDto startScreen(OneMonthApprovalStatusRequest param) {
 		return oneMonthApprovalStatusFinder.getOneMonthApprovalStatus(param.getClosureIdParam(),
 				param.getStartDateParam(), param.getEndDateParam());
@@ -35,6 +38,7 @@ public class OneMonthApprovalStatusWebService extends WebService {
 
 	@POST
 	@Path("extractApprovalStatusData")
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public OneMonthApprovalStatusDto extractApprovalStatusData(OneMonthApprovalStatusRequest request) {
 		return oneMonthApprovalStatusFinder.getOneMonthApprovalStatus(request.getClosureIdParam(),
 				request.getStartDateParam(), request.getEndDateParam());
@@ -42,6 +46,7 @@ public class OneMonthApprovalStatusWebService extends WebService {
 	
 	@POST
 	@Path("getdaterange/{closureId}/{currentYearMonth}")
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public OneMonthApprovalStatusDto getDateRange(@PathParam("closureId") int closureId,@PathParam("currentYearMonth") int currentYearMonth) {
 		return oneMonthApprovalStatusFinder.getDatePeriod(closureId,currentYearMonth);
 	}

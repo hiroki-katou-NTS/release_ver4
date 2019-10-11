@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.adapter.company.AffComHistItemImport;
@@ -14,6 +16,7 @@ import nts.uk.ctx.bs.employee.pub.company.AffCompanyHistExport;
 import nts.uk.ctx.bs.employee.pub.company.SyCompanyPub;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @Stateless
 public class SyCompanyRecordAdapterImpl implements SyCompanyRecordAdapter {
 
@@ -21,6 +24,7 @@ public class SyCompanyRecordAdapterImpl implements SyCompanyRecordAdapter {
 	private SyCompanyPub syCompanyPub;
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AffCompanyHistImport> getAffCompanyHistByEmployee(List<String> sids, DatePeriod datePeriod) {
 		List<AffCompanyHistImport> importList = this.syCompanyPub.GetAffCompanyHistByEmployee(sids, datePeriod).stream()
 				.map(x -> convert(x)).collect(Collectors.toList());

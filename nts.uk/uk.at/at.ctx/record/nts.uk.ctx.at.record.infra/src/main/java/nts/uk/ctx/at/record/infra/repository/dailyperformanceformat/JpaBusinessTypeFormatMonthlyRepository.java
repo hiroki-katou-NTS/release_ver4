@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
@@ -150,6 +152,7 @@ public class JpaBusinessTypeFormatMonthlyRepository extends JpaRepository
 		return this.queryProxy().query(FIND_BY_COMPANYID, KrcmtBusinessTypeMonthly.class).setParameter("companyId", companyId).getList(f -> toDomain(f));
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<BusinessTypeFormatMonthly> getListBusinessTypeFormat(String companyId, Collection<String> listBusinessTypeCode) {
 		List<BusinessTypeFormatMonthly> resultList = new ArrayList<>();

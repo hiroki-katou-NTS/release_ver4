@@ -76,6 +76,7 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ApprovalRootOfEmployeeImport getApprovalRootOfEmloyee(GeneralDate startDate, GeneralDate endDate,
 			String approverID, String companyID, Integer rootType) {
 		//ApprovalRootOfEmployeeExport 
@@ -246,6 +247,7 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 
 	// RequestList 534
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public AppRootOfEmpMonthImport getApprovalEmpStatusMonth(String approverID, YearMonth yearMonth,
 			Integer closureID, ClosureDate closureDate, GeneralDate baseDate, boolean useDayApproverConfirm, DatePeriod closurePeriod) {
 		val exportResult = intermediateDataPub.getApprovalEmpStatusMonth(approverID, yearMonth, closureID, closureDate, baseDate, useDayApproverConfirm, closurePeriod);
@@ -326,6 +328,7 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<String> findEmpRequest610(String approverID, DatePeriod period, Integer rootType) {
 		return intermediateDataPub.findEmpRequest610(approverID, period, rootType);
 	}

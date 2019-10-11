@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -32,6 +34,7 @@ public class ApplicationAcAdapter implements ApplicationAdapter {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ApplicationDeadlineImport getApplicationDeadline(String companyID, Integer closureID) {
 		ApplicationDeadlineExport export = applicationPub.getApplicationDeadline(companyID, closureID);
 		return new ApplicationDeadlineImport(export.isUseApplicationDeadline(),export.getDateDeadline());

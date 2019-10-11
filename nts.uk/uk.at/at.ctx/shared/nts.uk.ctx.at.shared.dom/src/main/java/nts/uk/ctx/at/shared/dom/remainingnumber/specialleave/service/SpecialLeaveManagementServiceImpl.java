@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -59,6 +61,7 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 	private SpecialLeaveBasicInfoRepository leaveBasicInfoRepo;
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public InPeriodOfSpecialLeaveResultInfor complileInPeriodOfSpecialLeave(ComplileInPeriodOfSpecialLeaveParam param) {
 		InPeriodOfSpecialLeaveResultInfor outputData = new InPeriodOfSpecialLeaveResultInfor();
 		//ドメインモデル「特別休暇基本情報」を取得する
@@ -319,6 +322,7 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ManagaData getMngData(String cid, String sid, int specialLeaveCode,
 			DatePeriod complileDate, Optional<InPeriodOfSpecialLeaveResultInfor> beforeResult) {
 		List<SpecialLeaveGrantRemainingData> lstDataBase = new ArrayList<>();

@@ -44,7 +44,9 @@ public class CreateperApprovalDailyDefault implements CreateperApprovalDailyServ
 							new DatePeriod(startDateClosure, GeneralDate.today()));
 			
 			this.parallel.forEach(employeeIDs, employeeID -> {
-				
+				if(employeeID ==null) {
+					return;
+				}
 				// 年月日　←「システム日付の前日」
 				GeneralDate ymd = GeneralDate.today().addDays(-1);
 				if (createNewEmp == 1) {	

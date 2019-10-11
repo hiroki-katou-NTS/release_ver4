@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -89,6 +91,7 @@ public class JpaEmployeeInformationRepository extends JpaRepository implements E
 	 * nts.uk.query.model.employee.EmployeeInformationRepository#find(nts.uk.
 	 * query.model.employee.EmployeeInformationQuery)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<EmployeeInformation> find(EmployeeInformationQuery param) {

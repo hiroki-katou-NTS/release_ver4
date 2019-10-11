@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -43,6 +45,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implements CalAttrOfDailyPerformanceRepository {
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public CalAttrOfDailyPerformance find(String employeeId, GeneralDate baseDate) {
 		KrcstDaiCalculationSet calc = this.queryProxy()
@@ -130,6 +133,7 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 //		this.getEntityManager().flush();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<CalAttrOfDailyPerformance> finds(List<String> employeeId, DatePeriod baseDate) {
 		List<CalAttrOfDailyPerformance> result = new ArrayList<>();
@@ -302,6 +306,7 @@ public class JpaCalAttrOfDailyPerformanceRepoImpl extends JpaRepository implemen
 //		this.getEntityManager().flush();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<CalAttrOfDailyPerformance> finds(Map<String, List<GeneralDate>> param) {
 		List<CalAttrOfDailyPerformance> result = new ArrayList<>();

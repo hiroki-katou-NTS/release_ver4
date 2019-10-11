@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -53,6 +55,7 @@ public class CalcPeriodForAggregateImpl implements CalcPeriodForAggregate {
 	}
 
 	/** 締め履歴から集計期間を生成 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<ClosurePeriod> fromClosureHistory(String employeeId, GeneralDate aggrEnd,
 			List<ClosureIdHistory> closureIdHistories) {

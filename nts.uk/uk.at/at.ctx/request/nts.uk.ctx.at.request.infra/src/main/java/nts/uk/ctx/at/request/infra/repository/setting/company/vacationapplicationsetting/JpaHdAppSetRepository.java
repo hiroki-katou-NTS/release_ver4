@@ -3,6 +3,8 @@ package nts.uk.ctx.at.request.infra.repository.setting.company.vacationapplicati
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -76,6 +78,7 @@ public class JpaHdAppSetRepository extends JpaRepository implements HdAppSetRepo
 	 * get hd app set by companyId and hd app type
 	 * @author yennth
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<HdAppSet> getAll() {
 		val pk = new KrqstHdAppSetPK(AppContexts.user().companyId());

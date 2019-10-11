@@ -3,6 +3,8 @@ package nts.uk.ctx.at.record.infra.repository.workrecord.identificationstatus;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -16,6 +18,7 @@ import nts.uk.ctx.at.shared.dom.common.CompanyId;
 @Stateless
 public class JpaIdentityProcessUseSetRepository extends JpaRepository implements IdentityProcessUseSetRepository {
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<IdentityProcessUseSet> findByKey(String companyId) {
 		return this.queryProxy().find(new KrcmtIdentityProcessPk(companyId), KrcmtIdentityProcess.class)

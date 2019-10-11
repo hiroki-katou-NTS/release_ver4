@@ -3,8 +3,10 @@ package nts.uk.ctx.at.record.dom.affiliationinformation.wktypeinfochangeperiod;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -28,8 +30,10 @@ public class WkTypeInfoChangePeriod {
 	
 	public List<DatePeriod> getWkTypeInfoChangePeriod(String employeeId,DatePeriod datePeriod, List<BusinessTypeOfEmpDto> listBusinessTypeOfEmp,boolean useWorkType){
 		//INPUT「勤務種別変更時に再作成」をチェックする
+		List<DatePeriod> result = new ArrayList<>();
 		if(!useWorkType) {
-			return Arrays.asList(datePeriod);
+			result.add(datePeriod);
+			return result;
 		}
 		//ドメインモデル「日別実績の勤務種別」を取得する
 		List<WorkTypeOfDailyPerformance> listWorkTypeOfDailyPerformance =  workTypeOfDailyPerforRepo.finds(Arrays.asList(employeeId),datePeriod);
@@ -38,7 +42,7 @@ public class WkTypeInfoChangePeriod {
 				.collect(Collectors.groupingBy(c -> c.getWorkTypeCode().v()));
 		Map<String, List<BusinessTypeOfEmpDto>> mapDateWtype = listBusinessTypeOfEmp.stream()
 				.collect(Collectors.groupingBy(c -> c.getBusinessTypeCd()));
-		List<GeneralDate> lstDateAll = new ArrayList<>();
+		Set<GeneralDate> lstDateAll = new HashSet<>();
 		for (val itemData : mapDateWtype.entrySet()) {
 			String wtype = itemData.getKey();
 			List<DatePeriod> lstPeriod = itemData.getValue().stream().map(x -> new DatePeriod(x.getStartDate(),x.getEndDate()))
@@ -63,7 +67,7 @@ public class WkTypeInfoChangePeriod {
 		}
 		List<GeneralDate> lstDateAllSort = lstDateAll.stream().sorted((x, y) -> x.compareTo(y)).collect(Collectors.toList());
 		if(lstDateAllSort.isEmpty()) {
-			return Collections.emptyList();
+			return new ArrayList<>();
 		}
 		List<DatePeriod> lstResult = new ArrayList<>();
 		GeneralDate start = lstDateAllSort.get(0);

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.shared.dom.adapter.jobtitle.JobTitleInfoAdapter;
@@ -18,6 +20,7 @@ public class JobTitleInfoAdapterImpl implements JobTitleInfoAdapter{
 	private SyJobTitlePub pub;
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<JobTitleInfoImport> findByJobIds(String companyId, List<String> jobIds,
 				String historyId) {
 					return this.pub.findByJobIds(companyId, jobIds, historyId)
@@ -28,6 +31,7 @@ public class JobTitleInfoAdapterImpl implements JobTitleInfoAdapter{
 	    }
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<SequenceMasterImport> findAll(String companyId, String sequenceCode) {
 		return this.pub.findAllSequen(companyId, sequenceCode).stream()
 				.map(x -> {

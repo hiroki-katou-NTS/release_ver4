@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -37,6 +39,7 @@ import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class ApplicationListForScreen {
 	
 	@Inject

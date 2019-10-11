@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.shared.dom.monthlyattditem.MonthlyAttendanceItem;
@@ -34,6 +36,7 @@ public class CompanyMonthlyItemServiceImpl implements CompanyMonthlyItemService 
 	@Inject
 	private AtItemNameAdapter atItemNameAdapter;
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AttItemName> getMonthlyItems(String cid, Optional<String> authorityId, List<Integer> attendanceItemIds,
 			List<MonthlyAttendanceItemAtr> itemAtrs) {

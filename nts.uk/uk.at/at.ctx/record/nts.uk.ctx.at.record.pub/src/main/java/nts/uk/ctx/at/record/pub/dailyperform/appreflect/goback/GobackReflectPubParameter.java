@@ -1,9 +1,13 @@
 package nts.uk.ctx.at.record.pub.dailyperform.appreflect.goback;
 
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ApprovalProcessingUseSettingPub;
+import nts.uk.ctx.at.record.pub.dailyperform.appreflect.IdentityProcessUseSetPub;
 import nts.uk.ctx.at.record.pub.dailyperform.appreflect.ScheAndRecordSameChangePubFlg;
 @AllArgsConstructor
 @Getter
@@ -44,4 +48,6 @@ public class GobackReflectPubParameter {
 	 */
 	private GobackAppPubParameter gobackData;
 	private String excLogId;
+	private Optional<IdentityProcessUseSetPub> identityProcessUseSetPub;
+	private Optional<ApprovalProcessingUseSettingPub> approvalProcessingUseSettingPub;
 }

@@ -15,6 +15,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -184,6 +186,7 @@ public class JpaRoleRepository extends JpaRepository implements RoleRepository {
 		return result;
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<Role> findByRoleId(String roleId) {
 		String query ="SELECT e FROM SacmtRole e WHERE e.roleId = :roleId ";

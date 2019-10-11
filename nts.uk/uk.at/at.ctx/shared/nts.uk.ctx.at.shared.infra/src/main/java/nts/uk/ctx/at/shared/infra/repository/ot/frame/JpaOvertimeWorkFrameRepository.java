@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -58,6 +60,7 @@ public class JpaOvertimeWorkFrameRepository extends JpaRepository
 	/* (non-Javadoc)
 	 * @see nts.uk.ctx.at.shared.dom.ot.frame.OvertimeWorkFrameRepository#getAllOvertimeWorkFrame(java.lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<OvertimeWorkFrame> getAllOvertimeWorkFrame(String companyId) {
 		// get entity manager
@@ -91,6 +94,7 @@ public class JpaOvertimeWorkFrameRepository extends JpaRepository
 			.collect(Collectors.toList());
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<OvertimeWorkFrame> getOvertimeWorkFrameByFrameNos(String companyId, List<Integer> overtimeWorkFrNos) {
 		// get entity manager
@@ -129,6 +133,7 @@ public class JpaOvertimeWorkFrameRepository extends JpaRepository
 		return resultList.stream().map(category -> toDomain(category)).collect(Collectors.toList());
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<OvertimeWorkFrame> getOvertimeWorkFrameByFrameByCom(String companyId, int useAtr) {
 		// get entity manager

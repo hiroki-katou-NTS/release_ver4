@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import nts.arc.enums.EnumAdaptor;
@@ -677,6 +679,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		return result;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<ApprovalRootState> findAppByEmployeeIDRecordDate(GeneralDate startDate, GeneralDate endDate,
 			String employeeID, Integer rootType) {
@@ -1134,6 +1137,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public boolean resultKTG002(GeneralDate startDate, GeneralDate endDate, String approverID, Integer rootType,
 			String companyID) {
 		String loginSID = AppContexts.user().employeeId();

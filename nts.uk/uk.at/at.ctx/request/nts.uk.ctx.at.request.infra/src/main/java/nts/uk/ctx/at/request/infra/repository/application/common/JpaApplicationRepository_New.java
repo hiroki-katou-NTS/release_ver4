@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -293,6 +295,8 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<Application_New> getApplicationBySIDs(List<String> employeeID, GeneralDate startDate,
 			GeneralDate endDate) {
@@ -335,6 +339,7 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 			+ " a.prePostAtr DESC";
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<Application_New> getByListRefStatus(String companyID, String employeeID, GeneralDate startDate, GeneralDate endDate, List<Integer> listReflecInfor) {
 		// TODO Auto-generated method stub
 		if(listReflecInfor.size()==0) {
@@ -369,6 +374,7 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		return resultList;
 	}
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<Application_New> getListLateOrLeaveEarly(String companyID, String employeeID, GeneralDate startDate,
 			GeneralDate endDate) {
 		return this.queryProxy().query(SELECT_LATE_LEAVE, KrqdtApplication_New.class)
@@ -450,6 +456,7 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 		return resultList.stream().map(c -> c.toDomain()).collect(Collectors.toList());
 	}
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<Application_New> getListAppByType(String companyId, String employeeID, GeneralDate startDate, GeneralDate endDate, int prePostAtr,
 			int appType, List<Integer> lstRef) {
 		if(lstRef.isEmpty()){
@@ -483,31 +490,32 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 			String subIn1 = NtsStatement.In.createParamsString(lstRefReal);
 			CollectionUtil.split(scheStatus, SPLIT_650, lstRef -> {
 				String subIn2 = NtsStatement.In.createParamsString(lstRef);
-				CollectionUtil.split(appType, SPLIT_650, lstApp -> {
-					String subIn3 = NtsStatement.In.createParamsString(lstApp);					
+				CollectionUtil.split(appType, SPLIT_650, lstAppType -> {
+					String subIn3 = NtsStatement.In.createParamsString(lstAppType);					
 					String sql = "SELECT * FROM KRQDT_APPLICATION "
-							+ "WHERE (REFLECT_PLAN_STATE IN (" + subIn1 + ") "
-							+ " OR REFLECT_PER_STATE IN (" + subIn2 + "))"
+							+ "WHERE  APPLICANTS_SID = ? "
+							+ " AND APP_START_DATE <= ? "
+							+ " AND APP_END_DATE >= ? "
 							+ " AND APP_TYPE IN (" + subIn3 + ") "
-							+ " AND APPLICANTS_SID = ?"
-							+ " AND APP_START_DATE >= ?"
-							+ " AND APP_END_DATE <= ?"
+							+ " AND (REFLECT_PLAN_STATE IN (" + subIn1 + ") "
+							+ " OR REFLECT_PER_STATE IN (" + subIn2 + "))"							
 							+ " ORDER BY INPUT_DATE ASC";
 					try(val stmt = this.connection().prepareStatement(sql)){
+						stmt.setString(1, sid);
+						stmt.setDate(2, Date.valueOf(dateData.end().localDate()));
+						stmt.setDate(3, Date.valueOf(dateData.start().localDate()));
+						int inCount = 3;
+						for (int i = 0; i < lstAppType.size(); i++) {
+							stmt.setInt(inCount + i + 1, lstAppType.get(i));
+						}
+						inCount +=  lstAppType.size();
 						for (int i = 0; i < lstRefReal.size(); i++) {
-							stmt.setInt(i + 1, lstRefReal.get(i));
+							stmt.setInt(inCount + i + 1, lstRefReal.get(i));
 						}
+						inCount += lstRefReal.size();
 						for (int i = 0; i < lstRef.size(); i++) {
-							stmt.setInt(lstRefReal.size() + i + 1, lstRef.get(i));
+							stmt.setInt(inCount + i + 1, lstRef.get(i));
 						}
-						int inCount = lstRefReal.size() + lstRef.size();
-						for (int i = 0; i < lstApp.size(); i++) {
-							stmt.setInt(inCount + i + 1, lstApp.get(i));
-						}
-						int inloopCount = lstApp.size() + inCount;
-						stmt.setString(1  + inloopCount, sid);
-						stmt.setDate(2 + inloopCount, Date.valueOf(dateData.start().localDate()));
-						stmt.setDate(3 + inloopCount, Date.valueOf(dateData.end().localDate()));
 						List<Application_New> resultListTmp = entityToDomain(stmt);
 						resultList.addAll(resultListTmp);
 					} catch (SQLException e) {
@@ -530,22 +538,23 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 				CollectionUtil.split(appType, SPLIT_650, lstApp -> {
 					String subIn3 = NtsStatement.In.createParamsString(lstApp);
 					String sql = "SELECT * FROM KRQDT_APPLICATION "
-							+ "WHERE APP_DATE IN (" + subIn1 + ") "
-									+ " AND REFLECT_PER_STATE IN (" + subIn2 + ")"
-									+ " AND APP_TYPE IN (" + subIn3 + ") "
-											+ " AND APPLICANTS_SID = ?";
+							+ "WHERE APPLICANTS_SID = ?"
+							+ " AND APP_DATE IN (" + subIn1 + ") "
+							+ " AND REFLECT_PER_STATE IN (" + subIn2 + ")"
+							+ " AND APP_TYPE IN (" + subIn3 + ") ";
 					try(val stmt = this.connection().prepareStatement(sql)){
+						stmt.setString(1, sid);
 						for (int i = 0; i < lstDate.size(); i++) {
-							stmt.setDate(i + 1, Date.valueOf(lstDate.get(i).localDate()));
+							stmt.setDate(i + 2, Date.valueOf(lstDate.get(i).localDate()));
 						}
 						for (int i = 0; i < lstRef.size(); i++) {
-							stmt.setInt(lstDate.size() + i + 1, lstRef.get(i));
+							stmt.setInt(lstDate.size() + i + 2, lstRef.get(i));
 						}
-						int inCount = lstDate.size() + lstRef.size();
+						int inCount = lstDate.size() + lstRef.size() + 1;
 						for (int i = 0; i < lstApp.size(); i++) {
 							stmt.setInt(inCount + i + 1, lstApp.get(i));
 						}
-						stmt.setString(1  + lstApp.size() + inCount, sid);
+						
 						List<Application_New> resultListTmp = entityToDomain(stmt);
 						resultList.addAll(resultListTmp);
 					} catch (SQLException e) {

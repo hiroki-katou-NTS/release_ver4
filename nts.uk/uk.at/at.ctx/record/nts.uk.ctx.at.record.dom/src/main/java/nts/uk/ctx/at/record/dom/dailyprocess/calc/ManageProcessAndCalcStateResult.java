@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.dom.dailyprocess.calc;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,4 +19,8 @@ public class ManageProcessAndCalcStateResult {
 		ProcessState ps;
 		//計算ステータス&実績
 		List<ManageCalcStateAndResult> lst;
+		
+		protected List<IntegrationOfDaily> getIntegrationList() {
+			return this.lst.stream().map(tg -> tg.integrationOfDaily).collect(Collectors.toList());
+		}
 }

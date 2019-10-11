@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -110,7 +112,7 @@ public class OptionalWidgetKtgFinder {
 	@Inject
 	private InitDisplayPeriodSwitchSetFinder initDisplayPeriodSwitchSetFinder;
 	
-
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public DatePeriodDto getCurrentMonth() {
 		String companyId = AppContexts.user().companyId();
 		Integer closureId = this.getClosureId();
@@ -154,15 +156,15 @@ public class OptionalWidgetKtgFinder {
 			return null;
 		return closureEmployment.get().getClosureId();
 	}
-	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public OptionalWidgetImport findOptionalWidgetByCode(String topPagePartCode) {
 		String companyId = AppContexts.user().companyId(); 
 		Optional<OptionalWidgetImport> dto = optionalWidgetAdapter.getSelectedWidget(companyId, topPagePartCode);
 		if(!dto.isPresent())
 			return null;
-		return optionalWidgetAdapter.getSelectedWidget(companyId, topPagePartCode).get();
+		return dto.get();
 	}
-	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public OptionalWidgetDisplay getOptionalWidgetDisplay(String topPagePartCode) {
 		// アルゴリズム「処理年月と締め期間を取得する」を実行する
 		DatePeriodDto datePeriodDto = getCurrentMonth();
@@ -172,7 +174,7 @@ public class OptionalWidgetKtgFinder {
 		return new OptionalWidgetDisplay(datePeriodDto, optionalWidgetImport, currentorNext);
 	}
 	
-	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public OptionalWidgetInfoDto getDataRecord(String code, GeneralDate startDate, GeneralDate endDate) {
 		String companyId = AppContexts.user().companyId();
 		String employeeId = AppContexts.user().employeeId();
@@ -465,6 +467,8 @@ public class OptionalWidgetKtgFinder {
 		}
 		return dto;
 	}
+	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	private YearlyHoliday setYearlyHoliday(String cID, String employeeId, GeneralDate date, DatePeriod datePeriod) {
 		YearlyHoliday yearlyHoliday = new YearlyHoliday();
 		//lấy request list 210		

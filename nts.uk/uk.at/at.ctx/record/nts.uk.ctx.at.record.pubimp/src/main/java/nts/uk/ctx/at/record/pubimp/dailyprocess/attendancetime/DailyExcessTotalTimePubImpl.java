@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -25,6 +27,7 @@ public class DailyExcessTotalTimePubImpl implements DailyExcessTotalTimePub{
 
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public DailyExcessTotalTimePubExport getExcessTotalTime(DailyExcessTotalTimePubImport imp) {
 		val domainList = attendanceTimeRepository.findByPeriodOrderByYmd(imp.getEmployeeId(), imp.getYmdSpan());
 		return getParam(domainList);

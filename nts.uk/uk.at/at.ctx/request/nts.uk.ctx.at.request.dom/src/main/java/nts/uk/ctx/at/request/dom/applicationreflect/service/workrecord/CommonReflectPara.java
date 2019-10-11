@@ -1,5 +1,7 @@
 package nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord;
 
+import java.util.Optional;
+
 /*import nts.uk.ctx.at.request.dom.application.ReasonNotReflectDaily_New;
 import nts.uk.ctx.at.request.dom.application.ReflectedState_New;*/
 import lombok.AllArgsConstructor;
@@ -40,5 +42,6 @@ public class CommonReflectPara {
 	 * 予定反映区分
 	 */
 	private boolean scheTimeReflectAtr;
-	
+	Optional<IdentityProcessUseSetAc> getIdentityProcessUseSet;
+	Optional<ApprovalProcessingUseSettingAc> getApprovalProcessingUseSetting;
 }

@@ -16,6 +16,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -220,6 +222,7 @@ public class SyEmployeePubImp implements SyEmployeePub {
 	 * String)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public EmployeeBasicInfoExport findBySId(String sId) {
 
 		EmployeeBasicInfoExport result = new EmployeeBasicInfoExport();
@@ -418,6 +421,7 @@ public class SyEmployeePubImp implements SyEmployeePub {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmployeeInfoExport> getByListSid(List<String> sIds) {
 
 		if (CollectionUtil.isEmpty(sIds)) {
@@ -878,6 +882,7 @@ public class SyEmployeePubImp implements SyEmployeePub {
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ResultRequest596Export> getEmpDeletedLstBySids(List<String> sids) {
 		List<ResultRequest596Export> result = new ArrayList<>();
 		List<EmployeeDataMngInfo> emps = this.empDataMngRepo

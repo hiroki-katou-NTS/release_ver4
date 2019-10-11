@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.enums.EnumAdaptor;
@@ -37,6 +39,7 @@ import nts.uk.shr.com.i18n.TextResource;
  * @author tutk
  *
  */
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @Stateless
 public class UpdateLogAfterProcess {
 	@Inject
@@ -356,7 +359,7 @@ public class UpdateLogAfterProcess {
 					listExecutionLogErrorDetail.add(new ExecutionLogErrorDetailFn(
 							appDataInfoDailyImport.getErrorMessage(), appDataInfoDailyImport.getEmployeeId()));
 				}
-			} else if (processExecutionTask == ProcessExecutionTask.APP_ROUTE_U_DAI) { // 実行項目 = 「承認ルート更新（月次）」
+			} else if (processExecutionTask == ProcessExecutionTask.APP_ROUTE_U_MON) { // 実行項目 = 「承認ルート更新（月次）」
 				for (AppDataInfoMonthlyImport appDataInfoMonthlyImport : listAppDataInfoMonthly) {
 					listExecutionLogErrorDetail.add(new ExecutionLogErrorDetailFn(
 							appDataInfoMonthlyImport.getErrorMessage(), appDataInfoMonthlyImport.getEmployeeId()));

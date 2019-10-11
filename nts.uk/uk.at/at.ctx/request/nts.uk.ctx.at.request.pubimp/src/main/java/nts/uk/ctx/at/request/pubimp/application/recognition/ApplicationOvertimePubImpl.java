@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -45,6 +47,7 @@ public class ApplicationOvertimePubImpl implements ApplicationOvertimePub {
 	 * @return List (申請日, total残業時間)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ApplicationOvertimeExport> acquireTotalApplicationOverTimeHours(String sId, GeneralDate startDate, GeneralDate endDate) {
 		String companyId = AppContexts.user().companyId();
 		Map<String, AppHolidayWork> mapHd = new HashMap<>();

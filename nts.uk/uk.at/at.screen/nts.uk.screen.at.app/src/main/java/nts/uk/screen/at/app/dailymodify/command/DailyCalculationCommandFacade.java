@@ -31,6 +31,9 @@ import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.ManagePerCompanySet;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.IntegrationOfMonthly;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.export.AggregateSpecifiedDailys;
+import nts.uk.ctx.at.record.dom.optitem.OptionalItem;
+import nts.uk.ctx.at.record.dom.optitem.OptionalItemAtr;
+import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
 //import nts.uk.ctx.at.record.dom.optitem.OptionalItem;
 //import nts.uk.ctx.at.record.dom.optitem.OptionalItemRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
@@ -93,6 +96,9 @@ public class DailyCalculationCommandFacade {
 	private DPLoadRowProcessor dpLoadRowProcessor;
 	
 	@Inject
+	private OptionalItemRepository optionalMasterRepo;
+	
+	@Inject
 	private DailyModifyResCommandFacade dailyModifyResCommandFacade;
 	
 	public static final int MINUTES_OF_DAY = 24 * 60;
@@ -115,6 +121,15 @@ public class DailyCalculationCommandFacade {
 		
 		List<DailyModifyQuery> querys = createQuerys(mapSidDateEdit);
 		dailyModifyResCommandFacade.toDto(querys, editedDtos);
+		Map<Integer, OptionalItemAtr> optionalMaster = optionalMasterRepo.findAll(AppContexts.user().companyId())
+				.stream().collect(Collectors.toMap(c -> c.getOptionalItemNo().v(), c -> c.getOptionalItemAtr()));
+
+		editedDtos.stream().forEach(o -> {
+			o.getOptionalItem().ifPresent(optional -> {
+				optional.correctItemsWith(optionalMaster);
+			});
+		});
+		
 		//List<DailyRecordDto> oldDtos = dataParent.getDailyOlds();
 		List<IntegrationOfDaily> editedDomains = editedDtos.stream()
 				.map(d -> d.toDomain(d.getEmployeeId(), d.getDate())).collect(Collectors.toList());
@@ -188,7 +203,9 @@ public class DailyCalculationCommandFacade {
 			}
 			//if (!editedDomains.isEmpty()) {
 			// update lai daily results gui ve client
-			List<DailyRecordDto> calculatedDtos = editedDomains.stream().map(d -> DailyRecordDto.from(d))
+			Map<Integer, OptionalItem> optionalItem = optionalMasterRepo.findAll(AppContexts.user().companyId())
+					.stream().collect(Collectors.toMap(c -> c.getOptionalItemNo().v(), c -> c));
+			List<DailyRecordDto> calculatedDtos = editedDomains.stream().map(d -> DailyRecordDto.from(d, optionalItem))
 					.collect(Collectors.toList());
 			// set state calc
 			val mapDtoEdits = calculatedDtos.stream()

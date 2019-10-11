@@ -1,24 +1,47 @@
 package nts.uk.ctx.at.schedule.infra.repository.schedule.schedulemaster;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.schedule.dom.schedule.schedulemaster.ScheMasterInfo;
 import nts.uk.ctx.at.schedule.dom.schedule.schedulemaster.ScheMasterInfoRepository;
 import nts.uk.ctx.at.schedule.infra.entity.schedule.schedulemaster.KscdtScheMasterInfo;
 import nts.uk.ctx.at.schedule.infra.entity.schedule.schedulemaster.KscdtScheMasterInfoPK;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class JpaScheduleMasterInfoRepository extends JpaRepository implements ScheMasterInfoRepository {
+	
+	private static final String GET_ALL_BY_PERIOD = "SELECT c FROM KscdtScheMasterInfo c "
+			+ " WHERE c.kscdtScheMasterInfoPk.sId = :sId"
+			+ " AND c.kscdtScheMasterInfoPk.generalDate >= :startDate"
+			+ " AND c.kscdtScheMasterInfoPk.generalDate <= :endDate";
 
 	@Override
 	public Optional<ScheMasterInfo> getScheMasterInfo(String sId, GeneralDate generalDate) {
 		KscdtScheMasterInfoPK primaryKey = new KscdtScheMasterInfoPK(sId, generalDate);
 
 		return this.queryProxy().find(primaryKey, KscdtScheMasterInfo.class).map(x -> toDomain(x));
+	}
+	
+	@Override
+	public List<ScheMasterInfo> getScheMasterInfoByPeriod(String sId, DatePeriod period) {
+		List<ScheMasterInfo> listScheMasterInfo = new ArrayList<>();
+			listScheMasterInfo.addAll(
+					this.queryProxy().query(GET_ALL_BY_PERIOD, KscdtScheMasterInfo.class)
+						.setParameter("sId", sId)
+						.setParameter("startDate", period.start())
+						.setParameter("endDate", period.end())
+						.getList(x -> toDomain(x)));
+		return listScheMasterInfo;
 	}
 
 	private static ScheMasterInfo toDomain(KscdtScheMasterInfo entity) {

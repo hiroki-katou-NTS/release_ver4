@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -80,6 +82,7 @@ public class JpaWorkplaceConfigRepository extends JpaRepository
 	 * findByHistId(java.lang.String, java.lang.String)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<WorkplaceConfig> findByHistId(String companyId, String prevHistId) {
 		// get entity manager
 		EntityManager em = this.getEntityManager();
@@ -187,6 +190,7 @@ public class JpaWorkplaceConfigRepository extends JpaRepository
 	 * @see nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfigRepository#findByBaseDate(java.lang.String, nts.arc.time.GeneralDate)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<WorkplaceConfig> findByBaseDate(String companyId, GeneralDate baseDate) {
 		// get entity manager
 		EntityManager em = this.getEntityManager();

@@ -2,6 +2,7 @@ package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.appreflect;
 
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
+import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.ApplicationType;
 
 /**
  * 反映状況によるチェック
@@ -41,6 +42,7 @@ public interface CommonProcessCheckService {
 	 * @param ymd
 	 * @param optTimeLeaving
 	 */
-	public IntegrationOfDaily updateBreakTimeInfor(String sid, GeneralDate ymd, IntegrationOfDaily integrationOfDaily, String companyId);
+	public IntegrationOfDaily updateBreakTimeInfor(String sid, GeneralDate ymd, IntegrationOfDaily integrationOfDaily, String companyId,
+			ApplicationType appType);
 	public void createLogError(String sid, GeneralDate ymd, String excLogId);
 }

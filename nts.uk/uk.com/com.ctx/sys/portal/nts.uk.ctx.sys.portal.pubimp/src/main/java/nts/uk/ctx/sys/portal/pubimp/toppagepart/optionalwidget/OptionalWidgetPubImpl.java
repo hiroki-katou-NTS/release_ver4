@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.sys.portal.dom.toppagepart.optionalwidget.OptionalWidget;
@@ -19,6 +21,7 @@ public class OptionalWidgetPubImpl implements OptionalWidgetPub {
 	@Inject
 	private OptionalWidgetService optionalWidgetService;
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<OptionalWidgetExport> getSelectedWidget(String companyId, String topPagePartCode) {
 

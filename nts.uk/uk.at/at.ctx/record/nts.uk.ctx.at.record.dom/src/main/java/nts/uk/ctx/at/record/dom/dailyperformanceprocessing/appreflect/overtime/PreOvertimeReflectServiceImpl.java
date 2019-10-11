@@ -136,7 +136,9 @@ public class PreOvertimeReflectServiceImpl implements PreOvertimeReflectService 
 				Optional.ofNullable(param.getOvertimePara().getWorkTimeCode()),
 				Optional.ofNullable(param.getOvertimePara().getStartTime1()),
 				Optional.ofNullable(param.getOvertimePara().getEndTime1()),
-				true);
+				true,
+				param.getIPUSOpt(),
+				param.getApprovalSet());
 		commonService.calculateOfAppReflect(calcParam);
 	}
 

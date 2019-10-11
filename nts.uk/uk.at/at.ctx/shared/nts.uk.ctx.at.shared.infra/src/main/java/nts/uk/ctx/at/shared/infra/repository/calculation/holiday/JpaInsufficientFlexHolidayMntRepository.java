@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.uk.ctx.at.shared.dom.calculation.holiday.flex.InsufficientFlexHolidayMnt;
@@ -78,6 +80,7 @@ public class JpaInsufficientFlexHolidayMntRepository extends JpaRepository imple
 	 * @param companyId
 	 * @return
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<InsufficientFlexHolidayMnt> findByCId(String cid) {
 		return this.queryProxy().find(new KshstInsuffFlexMntPK(cid),KshstInsuffFlexMnt.class)

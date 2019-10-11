@@ -121,6 +121,7 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 		
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EditStateOfDailyPerformance> findByKey(String employeeId, GeneralDate ymd) {
 		StringBuilder builderString = new StringBuilder();
@@ -149,6 +150,7 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 	
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EditStateOfDailyPerformance> finds(List<String> employeeId, DatePeriod ymd) {
 		List<EditStateOfDailyPerformance> result = new ArrayList<>();
@@ -178,6 +180,7 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EditStateOfDailyPerformance> finds(Map<String, List<GeneralDate>> param) {
 		List<EditStateOfDailyPerformance> result = new ArrayList<>();
@@ -210,8 +213,10 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 				this.commandProxy().insert(entity);
 			}
 		});
+		this.getEntityManager().flush();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<EditStateOfDailyPerformance> findByKeyId(String employeeId, GeneralDate ymd, Integer id) {
 		return this.queryProxy().find(new KrcdtDailyRecEditSetPK(employeeId, ymd, id), KrcdtDailyRecEditSet.class)
@@ -224,6 +229,7 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 		this.getEntityManager().flush();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EditStateOfDailyPerformance> findByItems(String employeeId, GeneralDate ymd, List<Integer> ids) {
 		StringBuilder builderString = new StringBuilder();
@@ -271,6 +277,7 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 		});
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EditStateOfDailyPerformance> findByEditState(String sid, GeneralDate ymd, List<Integer> ids,
 			EditStateSetting editState) {

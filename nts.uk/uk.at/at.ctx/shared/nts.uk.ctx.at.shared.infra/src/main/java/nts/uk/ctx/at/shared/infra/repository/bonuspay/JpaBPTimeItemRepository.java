@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -55,12 +57,14 @@ public class JpaBPTimeItemRepository extends JpaRepository implements BPTimeItem
 			+ " AND c.kbpstBonusPayTimeItemPK.timeItemNo IN :timeItemNos "
 			+ " AND c.kbpstBonusPayTimeItemPK.timeItemTypeAtr = 1 ";
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<BonusPayTimeItem> getListBonusPayTimeItem(String companyId) {
 		return this.queryProxy().query(SELECT_BPTIMEITEM_BY_COMPANYID, KbpstBonusPayTimeItem.class)
 				.setParameter("companyId", companyId).getList(x -> this.toBonusPayTimeItemDomain(x));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<BonusPayTimeItem> getListSpecialBonusPayTimeItem(String companyId) {
 		return this.queryProxy().query(SELECT_SPEC_BPTIMEITEM_BY_COMPANYID, KbpstBonusPayTimeItem.class)
@@ -105,6 +109,7 @@ public class JpaBPTimeItemRepository extends JpaRepository implements BPTimeItem
 				new BigDecimal(bonusPayTimeItem.getUseAtr().value), bonusPayTimeItem.getTimeItemName().toString());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<BonusPayTimeItem> getBonusPayTimeItem(String companyId, BigDecimal timeItemNo) {
 
@@ -120,6 +125,7 @@ public class JpaBPTimeItemRepository extends JpaRepository implements BPTimeItem
 
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<BonusPayTimeItem> getSpecialBonusPayTimeItem(String companyId, BigDecimal timeItemNo) {
 
@@ -135,24 +141,28 @@ public class JpaBPTimeItemRepository extends JpaRepository implements BPTimeItem
 
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public int checkInit(String companyId) {
 		return this.queryProxy().query(CHECK_INIT, Long.class).setParameter("companyId", companyId).getSingle().get()
 				.intValue();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<BonusPayTimeItem> getListBonusPayTimeItemInUse(String companyId) {
 		return this.queryProxy().query(SELECT_BPTIMEITEM_INUSE_BY_COMPANYID, KbpstBonusPayTimeItem.class)
 				.setParameter("companyId", companyId).getList(x -> this.toBonusPayTimeItemDomain(x));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<BonusPayTimeItem> getListSpecialBonusPayTimeItemInUse(String companyId) {
 		return this.queryProxy().query(SELECT_SPEC_BPTIMEITEM_INUSE_BY_COMPANYID, KbpstBonusPayTimeItem.class)
 				.setParameter("companyId", companyId).getList(x -> this.toBonusPayTimeItemDomain(x));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<BonusPayTimeItem> getListBonusPayTimeItemName(String companyId, List<Integer> timeItemNos) {
 		List<BonusPayTimeItem> resultList = new ArrayList<>();
@@ -165,6 +175,7 @@ public class JpaBPTimeItemRepository extends JpaRepository implements BPTimeItem
 		return resultList;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<BonusPayTimeItem> getListSpecialBonusPayTimeItemName(String companyId, List<Integer> timeItemNos) {
 		List<BonusPayTimeItem> resultList = new ArrayList<>();

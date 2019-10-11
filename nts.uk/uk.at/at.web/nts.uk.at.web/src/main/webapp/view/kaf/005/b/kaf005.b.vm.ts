@@ -62,10 +62,12 @@ module nts.uk.at.view.kaf005.b {
             restTime: KnockoutObservableArray<common.OverTimeInput> = ko.observableArray([]);
             //残業時間
             overtimeHours: KnockoutObservableArray<common.OvertimeCaculation> = ko.observableArray([]);
+            overtimeHoursOld: Array<common.OvertimeCaculation> = [];
             //休憩時間
             breakTimes: KnockoutObservableArray<common.OvertimeCaculation> = ko.observableArray([]);
             //加給時間
             bonusTimes: KnockoutObservableArray<common.OvertimeCaculation> = ko.observableArray([]);
+            bonusTimesOld: Array<common.OvertimeCaculation> = [];
             //menu-bar 
             enableSendMail: KnockoutObservable<boolean> = ko.observable(true);
             prePostDisp: KnockoutObservable<boolean> = ko.observable(true);
@@ -134,20 +136,33 @@ module nts.uk.at.view.kaf005.b {
             editable: KnockoutObservable<boolean> = ko.observable( true );
             enableOvertimeInput: KnockoutObservable<boolean> = ko.observable(false);
             appCur: any = null;
-            constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
+            constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata, rebind?: boolean) {
                 super(listAppMetadata, currentApp);
                 var self = this;
                 self.appCur = currentApp;
                 self.startPage(self.appID()).done(function(){
-                    $("#fixed-overtime-hour-table").ntsFixedTable({ height: self.heightOvertimeHours() });
-                    $("#fixed-break_time-table").ntsFixedTable({ height: 120 });
-                    $("#fixed-bonus_time-table").ntsFixedTable({ height: 120 });
-                    $("#fixed-table-indicate").ntsFixedTable({ height: 120 });
-                    $("#fixed-table").ntsFixedTable({ height: 120 });
-                    $("#fixed-overtime-hour-table-pre").ntsFixedTable({ height: self.heightOvertimeHours() });
-                    $("#fixed-bonus_time-table-pre").ntsFixedTable({ height: 120 });
-                    $('.nts-fixed-table.cf').first().find('.nts-fixed-body-container.ui-iggrid').css('border-left','1px solid #CCC');
-                    });
+                    if(nts.uk.util.isNullOrUndefined(rebind)){
+                        $("#fixed-overtime-hour-table").ntsFixedTable({ height: self.heightOvertimeHours() });
+                        $("#fixed-break_time-table").ntsFixedTable({ height: 120 });
+                        $("#fixed-bonus_time-table").ntsFixedTable({ height: 120 });
+                        $("#fixed-table-indicate").ntsFixedTable({ height: 120 });
+                        $("#fixed-table").ntsFixedTable({ height: 120 });
+                        $("#fixed-overtime-hour-table-pre").ntsFixedTable({ height: self.heightOvertimeHours() });
+                        $("#fixed-bonus_time-table-pre").ntsFixedTable({ height: 120 });
+                        $('.nts-fixed-table.cf').first().find('.nts-fixed-body-container.ui-iggrid').css('border-left','1px solid #CCC');
+                    } else {
+                        if(rebind==true){
+                            $("#fixed-overtime-hour-table").ntsFixedTable({ height: self.heightOvertimeHours() - 23 });
+                            $("#fixed-break_time-table").ntsFixedTable({ height: 96 });
+                            $("#fixed-bonus_time-table").ntsFixedTable({ height: 96 });
+                            $("#fixed-table-indicate").ntsFixedTable({ height: 96 });
+                            $("#fixed-table").ntsFixedTable({ height: 96 });
+                            $("#fixed-overtime-hour-table-pre").ntsFixedTable({ height: self.heightOvertimeHours() - 23 });
+                            $("#fixed-bonus_time-table-pre").ntsFixedTable({ height: 96 });
+                            $('.nts-fixed-table.cf').first().find('.nts-fixed-body-container.ui-iggrid').css('border-left','1px solid #CCC');        
+                        }    
+                    }
+                });
             }
             
             startPage(appID: string): JQueryPromise<any> {
@@ -850,26 +865,47 @@ module nts.uk.at.view.kaf005.b {
                         overtimeHours: ko.toJS(self.overtimeHours())
                     }
                     service.getCaculationResult(param).done(function(data){
-                           
-                    
-                       self.overtimeHours.removeAll();
-                       self.bonusTimes.removeAll();
-                         if(data != null){
-                         for(let i =0; i < data.length; i++){
-                             //残業時間
-                             if (data[i].attendanceID == 1) {
-                                 let color: string = "";
-                                 if (data[i].errorCode == 1) {
-                                     color = '#FD4D4D';
-                                 }
-                                 if (data[i].errorCode == 2) {
-                                     color = '#F6F636';
-                                 }
-                                 if (data[i].errorCode == 3) {
-                                     color = '#F69164';
-                                 }
-                                    
-                                   if(data[i].frameNo != 11 && data[i].frameNo != 12){
+                        self.overtimeHoursOld = ko.toJS(self.overtimeHours());
+                        self.bonusTimesOld = ko.toJS(self.bonusTimes());  
+                        if(self.prePostSelected()==0){
+                            self.bonusTimes.removeAll();
+                            _.forEach(data, item => {
+                                if(item.attendanceID == 1) {
+                                    let changeItem = _.find(self.overtimeHours(), otItem => {
+                                        return otItem.attendanceID() == 1 &&
+                                            otItem.frameNo() == item.frameNo;    
+                                    }); 
+                                    if(changeItem) {
+                                        changeItem.applicationTime(item.applicationTime);
+                                        self.changeColorCalc(item);
+                                    }
+                                } else if(item.attendanceID == 3) {
+                                    self.bonusTimes.push(new common.OvertimeCaculation("", "", item.attendanceID,
+                                        "", item.frameNo,
+                                        item.timeItemTypeAtr ,
+                                        item.frameName, item.applicationTime,
+                                        self.convertIntToTime(item.preAppTime), null,"","",""));
+                                }       
+                            });         
+                        } else {   
+                            self.overtimeHours.removeAll();
+                            self.bonusTimes.removeAll();
+                            if(data != null){
+                                for(let i =0; i < data.length; i++){
+                                //残業時間
+                                if (data[i].attendanceID == 1) {
+                                     let color: string = "";
+                                     if (data[i].errorCode == 1) {
+                                         color = '#FD4D4D';
+                                     }
+                                     if (data[i].errorCode == 2) {
+                                         color = '#F6F636';
+                                     }
+                                     if (data[i].errorCode == 3) {
+                                         color = '#F69164';
+                                     }
+                                        
+                                    if(data[i].frameNo != 11 && data[i].frameNo != 12){
                                        self.overtimeHours.push(new common.OvertimeCaculation("", "",
                                          data[i].attendanceID,
                                          "", 
@@ -879,7 +915,7 @@ module nts.uk.at.view.kaf005.b {
                                          data[i].applicationTime,
                                          self.convertIntToTime(data[i].preAppTime),
                                          self.convertIntToTime(data[i].caculationTime),"#[KAF005_55]","",color));
-                                   }else if(data[i].frameNo == 11){
+                                    }else if(data[i].frameNo == 11){
                                        self.overtimeHours.push(new common.OvertimeCaculation("", "",
                                          data[i].attendanceID,
                                          "", 
@@ -889,7 +925,7 @@ module nts.uk.at.view.kaf005.b {
                                          data[i].applicationTime,
                                          self.convertIntToTime(data[i].preAppTime),
                                          self.convertIntToTime(data[i].caculationTime),"#[KAF005_64]","",color));
-                                   }else if(data[i].frameNo == 12){
+                                    }else if(data[i].frameNo == 12){
                                         self.overtimeHours.push(new common.OvertimeCaculation("", "",
                                           data[i].attendanceID,
                                           "", 
@@ -899,18 +935,19 @@ module nts.uk.at.view.kaf005.b {
                                           data[i].applicationTime,
                                           self.convertIntToTime(data[i].preAppTime),
                                           self.convertIntToTime(data[i].caculationTime),"#[KAF005_66]","",color));
-                                   }
-                                   self.changeColor(1,data[i].frameNo,data[i].errorCode);
-                               }
-                             //加給時間
-                             else if(data[i].attendanceID == 3){
-                               self.bonusTimes.push(new common.OvertimeCaculation("", "", data[i].attendanceID,
-                                    "", data[i].frameNo,
-                                    data[i].timeItemTypeAtr ,
-                                    data[i].frameName, data[i].applicationTime,
-                                    self.convertIntToTime(data[i].preAppTime), null,"","#F69164"));
-                           }   
-                         }   
+                                    }
+                                    self.changeColor(1,data[i].frameNo,data[i].errorCode);
+                                    }
+                                    //加給時間
+                                    else if(data[i].attendanceID == 3){
+                                        self.bonusTimes.push(new common.OvertimeCaculation("", "", data[i].attendanceID,
+                                            "", data[i].frameNo,
+                                            data[i].timeItemTypeAtr ,
+                                            data[i].frameName, data[i].applicationTime,
+                                            self.convertIntToTime(data[i].preAppTime), null,"","#F69164"));
+                                    }   
+                                }   
+                            }
                         }
                         //勤務内容を変更後に計算ボタン押下。計算フラグ=0にする。 
                         if(!self.isEmptyOverTimeInput(ko.toJS(self.overtimeHours()))){
@@ -997,6 +1034,48 @@ module nts.uk.at.view.kaf005.b {
                     $('input#overtimeHoursCheck_'+attendanceId+'_'+frameNo).css('background', '#F69164')
                 }
            
+            }
+    
+            changeColorCalc(calcItem){
+                let self = this;
+                let oldValue = _.find(self.overtimeHoursOld, item => {
+                    return item.attendanceID == 1 &&
+                        item.frameNo == calcItem.frameNo;    
+                });  
+                let calcChange = false;
+                if((nts.uk.util.isNullOrUndefined(oldValue)) || 
+                    (nts.uk.util.isNullOrUndefined(oldValue.applicationTime)) || 
+                    (ko.toJSON(oldValue.applicationTime).localeCompare(ko.toJSON(calcItem.applicationTime))!=0)){
+                    calcChange = true;
+                }     
+                let compareValue = 0;
+                let errorCode = 0;
+                if(!nts.uk.util.isNullOrUndefined(oldValue)) {
+                    if(!nts.uk.util.isNullOrUndefined(oldValue.applicationTime)) {
+                        compareValue = oldValue.applicationTime;         
+                    }    
+                }   
+                if(ko.toJSON(compareValue).localeCompare(ko.toJSON(calcItem.applicationTime))!=0){
+                    errorCode = 1;        
+                }
+                if(errorCode == 1 && calcChange){
+                    $('td#overtimeHoursCheck_'+calcItem.attendanceID+'_'+calcItem.frameNo).css('background', '#F69164');
+                    $('input#overtimeHoursCheck_'+calcItem.attendanceID+'_'+calcItem.frameNo).css('background', '#F69164');
+                    return '#F69164';
+                }
+                if(self.editable()&& self.enableOvertimeInput()){
+                    if(calcChange){
+                        $('td#overtimeHoursCheck_'+calcItem.attendanceID+'_'+calcItem.frameNo).css('background', 'none');
+                        $('input#overtimeHoursCheck_'+calcItem.attendanceID+'_'+calcItem.frameNo).css('background', 'none');
+                        return 'none'; 
+                    }
+                } else {
+                    if(calcChange){
+                        $('td#overtimeHoursCheck_'+calcItem.attendanceID+'_'+calcItem.frameNo).css('background', '#ebebe4');
+                        $('input#overtimeHoursCheck_'+calcItem.attendanceID+'_'+calcItem.frameNo).css('background', '#ebebe4');
+                        return '#ebebe4';
+                    }
+                }
             }
             
             getReason(inputReasonDisp: boolean, inputReasonID: string, inputReasonList: Array<common.ComboReason>, detailReasonDisp: boolean, detailReason: string): string{

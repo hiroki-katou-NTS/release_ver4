@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
@@ -63,6 +65,7 @@ public class JpaLengthServiceRepository extends JpaRepository implements LengthS
 	 * @author yennth
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<LengthServiceTbl> findByCode(String companyId, String yearHolidayCode) {
 		return this.queryProxy().query(SELECT_BY_CODE, KshstLengthServiceTbl.class)
 									.setParameter("companyId", companyId)

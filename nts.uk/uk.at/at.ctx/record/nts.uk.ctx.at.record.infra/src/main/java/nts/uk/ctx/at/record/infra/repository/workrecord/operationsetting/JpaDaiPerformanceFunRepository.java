@@ -1,15 +1,17 @@
 package nts.uk.ctx.at.record.infra.repository.workrecord.operationsetting;
 
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
+import nts.arc.layer.infra.data.JpaRepository;
 import nts.uk.ctx.at.record.dom.workrecord.operationsetting.DaiPerformanceFun;
 import nts.uk.ctx.at.record.dom.workrecord.operationsetting.DaiPerformanceFunRepository;
 import nts.uk.ctx.at.record.infra.entity.workrecord.operationsetting.KrcmtDaiPerformEdFun;
 import nts.uk.ctx.at.record.infra.entity.workrecord.operationsetting.KrcmtDaiPerformEdFunPk;
-import nts.arc.layer.infra.data.JpaRepository;
 
 @Stateless
 public class JpaDaiPerformanceFunRepository extends JpaRepository implements DaiPerformanceFunRepository
@@ -24,6 +26,7 @@ public class JpaDaiPerformanceFunRepository extends JpaRepository implements Dai
                 .getList(item -> item.toDomain());
     }
 
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     @Override
     public Optional<DaiPerformanceFun> getDaiPerformanceFunById(String cid){
         return this.queryProxy().query(SELECT_BY_KEY_STRING, KrcmtDaiPerformEdFun.class)

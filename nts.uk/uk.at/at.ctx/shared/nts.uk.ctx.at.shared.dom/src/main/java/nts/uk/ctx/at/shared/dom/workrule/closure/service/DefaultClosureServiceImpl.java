@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -64,6 +66,7 @@ public class DefaultClosureServiceImpl implements ClosureService {
 	 */
 	// 当月の期間を算出する 2018.4.4 update shuichu_ishida
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public DatePeriod getClosurePeriod(int closureId, YearMonth processYm) {
 		// ドメインモデル「締め」を取得する
 		val closureOpt = this.closureRepository.findById(AppContexts.user().companyId(), closureId);
@@ -72,6 +75,7 @@ public class DefaultClosureServiceImpl implements ClosureService {
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public DatePeriod getClosurePeriod(int closureId, YearMonth processYm, Optional<Closure> closureOpt) {
 		// 【処理概要】
 		// 渡されてきた年月に応じた期間を返す。
@@ -134,6 +138,7 @@ public class DefaultClosureServiceImpl implements ClosureService {
 	/** 全締めの当月と期間を取得する */
 	// 2018.4.4 add shuichi_ishida
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ClosureInfo> getAllClosureInfo() {
 
 		List<ClosureInfo> allClosureInfo = new ArrayList<>();
@@ -326,6 +331,7 @@ public class DefaultClosureServiceImpl implements ClosureService {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Closure getClosureDataByEmployee(String employeeId, GeneralDate baseDate) {
 		String companyId = AppContexts.user().companyId();
 		//Imported「（就業）所属雇用履歴」を取得する
@@ -350,6 +356,7 @@ public class DefaultClosureServiceImpl implements ClosureService {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public DatePeriod findClosurePeriod(String employeeId, GeneralDate baseDate) {
 		// 社員に対応する処理締めを取得する.
 		Closure closure = this.getClosureDataByEmployee(employeeId, baseDate);

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -53,6 +55,7 @@ public class JpaCompanySpecificDateRepository extends JpaRepository implements C
 	/**
 	 * Get list Company Specific Date NO with name
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<CompanySpecificDateItem> getComSpecByDate(String companyId, GeneralDate specificDate) {
 		return this.queryProxy().query(GET_BY_DATE, KsmmtComSpecDateSet.class)
@@ -63,6 +66,7 @@ public class JpaCompanySpecificDateRepository extends JpaRepository implements C
 	/**
 	 * Get list Company Specific Date  WITH name
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<CompanySpecificDateItem> getComSpecByDateWithName(String companyId, GeneralDate startDate, GeneralDate endDate) {
 		return this.queryProxy().query(GET_BY_USE_WITH_NAME, Object[].class)

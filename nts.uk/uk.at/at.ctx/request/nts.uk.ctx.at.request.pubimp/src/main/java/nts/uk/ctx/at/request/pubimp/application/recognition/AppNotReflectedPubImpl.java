@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -44,6 +46,7 @@ public class AppNotReflectedPubImpl implements AppNotReflectedPub {
 	 * @return List (年月日, total就業時間外深夜時間)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ApplicationOvertimeExport> acquireAppNotReflected(String sId, GeneralDate startDate, GeneralDate endDate) {
 		String companyId = AppContexts.user().companyId();
 		Map<String, AppHolidayWork> mapHd = new HashMap<>();

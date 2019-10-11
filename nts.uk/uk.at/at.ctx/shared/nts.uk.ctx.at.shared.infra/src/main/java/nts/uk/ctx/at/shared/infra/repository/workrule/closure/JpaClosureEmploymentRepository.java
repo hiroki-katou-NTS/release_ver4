@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -78,6 +80,7 @@ public class JpaClosureEmploymentRepository extends JpaRepository implements Clo
 	 * @see nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository#findByEmploymentCD(java.lang.String, java.lang.String)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<ClosureEmployment> findByEmploymentCD(String companyID, String employmentCD) {
 		return this.queryProxy()
 				.find(new KclmpClosureEmploymentPK(companyID, employmentCD), KclmtClosureEmployment.class)
@@ -88,6 +91,7 @@ public class JpaClosureEmploymentRepository extends JpaRepository implements Clo
 	 * get list by list employmentCD for KIF 001
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ClosureEmployment> findListEmployment(String companyId,
 			List<String> employmentCDs) {
 		List<KclmtClosureEmployment> result = new ArrayList<>();
@@ -117,6 +121,7 @@ public class JpaClosureEmploymentRepository extends JpaRepository implements Clo
 	 * @see nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository#findByClosureId(java.lang.String, int)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ClosureEmployment> findByClosureId(String companyId, int closureId) {
 		// Get entity manager
 		EntityManager em = this.getEntityManager();

@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -41,6 +43,7 @@ public class JpaWorkdayoffFrameRepository extends JpaRepository
 	 * @see nts.uk.ctx.at.shared.dom.workdayoff.frame.WorkdayoffFrameRepository#
 	 * findWorkdayoffFrame(nts.uk.ctx.at.shared.dom.common.CompanyId, int)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<WorkdayoffFrame> findWorkdayoffFrame(CompanyId companyId,
 			int workdayoffFrameNo) {
@@ -67,6 +70,7 @@ public class JpaWorkdayoffFrameRepository extends JpaRepository
 	 * @see nts.uk.ctx.at.shared.dom.ot.frame.OvertimeWorkFrameRepository#
 	 * getAllOvertimeWorkFrame(java.lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<WorkdayoffFrame> getAllWorkdayoffFrame(String companyId) {
 		// get entity manager
@@ -131,6 +135,7 @@ public class JpaWorkdayoffFrameRepository extends JpaRepository
 	 * getWorkdayoffFrameBy(nts.uk.ctx.at.shared.dom.common.CompanyId,
 	 * java.util.List)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<WorkdayoffFrame> getWorkdayoffFrameBy(String companyId,
 			List<Integer> workdayoffFrNos) {
@@ -171,6 +176,7 @@ public class JpaWorkdayoffFrameRepository extends JpaRepository
 				.collect(Collectors.toList());
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<WorkdayoffFrame> findByUseAtr(String companyId, int useAtr) {
 		// get entity manager

@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -63,6 +65,7 @@ public class ShNursingLeaveSettingPubImpl implements ShNursingLeaveSettingPub {
 	private ChildTempCareDataRepository childTempCareDataRepository;
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ChildNursingRemainExport aggrChildNursingRemainPeriod(String companyId, String employeeId, DatePeriod period,
 			NursingMode mode) {
 		
@@ -134,6 +137,7 @@ public class ShNursingLeaveSettingPubImpl implements ShNursingLeaveSettingPub {
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public ChildNursingRemainExport aggrNursingRemainPeriod(String companyId, String employeeId, GeneralDate startDate,
 			GeneralDate endDate, NursingMode mode) {
 		ChildNursingRemainExport childNursingRemainExport = ChildNursingRemainExport.builder().build();
@@ -157,11 +161,13 @@ public class ShNursingLeaveSettingPubImpl implements ShNursingLeaveSettingPub {
 	 * 
 	 * @return the nursing leave setting
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	private Optional<NursingLeaveSetting> findNursingLeaveSetting(String companyId, NursingCategory nursingCategory) {
 		List<NursingLeaveSetting> nursingLeaveSettings = this.nursingLeaveSettingRepository.findByCompanyId(companyId);
 		return nursingLeaveSettings.stream().filter(e -> e.getNursingCategory().equals(nursingCategory)).findFirst();
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	private ChildNursingRemainExport getAggrNursingRemainPeriod(String companyId, String employeeId, GeneralDate startDate,
 			GeneralDate endDate, NursingMode mode, NursingLeaveSetting nursingLeaveSetting) {
 		ChildNursingRemainExport childNursingRemainExport = ChildNursingRemainExport.builder().build();

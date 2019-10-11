@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.function.dom.adapter.OptionalItemAdapter;
@@ -12,6 +14,7 @@ import optitem.OptionalItemExport;
 import optitem.OptionalItemPub;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class OptionalItemAcFinder implements OptionalItemAdapter{
 	
 	@Inject

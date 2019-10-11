@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -20,6 +22,7 @@ import nts.uk.ctx.at.schedule.pub.shift.businesscalendar.specificdate.WpSpecific
  *
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class WpSpecificDateSettingPubImpl implements WpSpecificDateSettingPub {
 	
 	@Inject

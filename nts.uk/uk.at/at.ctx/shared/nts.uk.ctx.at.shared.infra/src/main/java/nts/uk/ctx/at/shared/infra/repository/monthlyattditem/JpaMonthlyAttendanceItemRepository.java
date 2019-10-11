@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -41,6 +43,7 @@ public class JpaMonthlyAttendanceItemRepository extends JpaRepository implements
 	 * @see nts.uk.ctx.at.record.dom.monthlyattendanceitem.
 	 * MonthlyAttendanceItemRepository#findByAtr(java.lang.String, int)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<MonthlyAttendanceItem> findByAtr(String companyId, MonthlyAttendanceItemAtr itemAtr) {
 		// get entity manager
@@ -78,6 +81,7 @@ public class JpaMonthlyAttendanceItemRepository extends JpaRepository implements
 	 * @see nts.uk.ctx.at.record.dom.monthlyattendanceitem.
 	 * MonthlyAttendanceItemRepository#findAll(java.lang.String)
 	 */
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<MonthlyAttendanceItem> findAll(String companyId) {
 		// get entity manager
@@ -113,6 +117,7 @@ public class JpaMonthlyAttendanceItemRepository extends JpaRepository implements
 		return new MonthlyAttendanceItem(new JpaMonthlyAttendanceItemGetMemento(entity));
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<MonthlyAttendanceItem> findByAttendanceItemId(String companyId, List<Integer> attendanceItemIds) {
 		StringBuilder builderString = new StringBuilder();	
@@ -133,7 +138,7 @@ public class JpaMonthlyAttendanceItemRepository extends JpaRepository implements
 		return resultList;
 	}
 	
-	
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<MonthlyAttendanceItem> findByAttendanceItemIdAndAtr(String companyId, List<Integer> attendanceItemIds, 
 			List<Integer> itemAtrs) {
@@ -175,6 +180,7 @@ public class JpaMonthlyAttendanceItemRepository extends JpaRepository implements
 		return resultList;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<MonthlyAttendanceItem> findByAtrPrimitiveValue(String companyId, MonthlyAttendanceItemAtr itemAtr) {
 		List<Integer> listAttdID = new ArrayList<>();
@@ -243,6 +249,7 @@ public class JpaMonthlyAttendanceItemRepository extends JpaRepository implements
 		return resultList;
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public Optional<MonthlyAttendanceItem> findByAttendanceItemId(String companyId, int attendanceItemId) {
 		Optional<KrcmtMonAttendanceItem> entity = this.queryProxy()

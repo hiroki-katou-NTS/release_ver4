@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.arc.time.GeneralDate;
@@ -39,6 +41,7 @@ public class ApplicationTimeUnreflectedPubImpl implements ApplicationTimeUnrefle
 	 * @return List(申請日,フレックス超過時間)
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ApplicationOvertimeExport> acquireTotalApplicationTimeUnreflected(String sId, GeneralDate startDate, GeneralDate endDate) {
 		String companyId = AppContexts.user().companyId();
 		Map<String, AppOverTime> mapOt = new HashMap<>();
