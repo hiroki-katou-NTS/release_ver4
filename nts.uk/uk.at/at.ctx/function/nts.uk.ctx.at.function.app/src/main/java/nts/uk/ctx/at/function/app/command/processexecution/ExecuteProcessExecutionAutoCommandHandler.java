@@ -2124,46 +2124,44 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 		log.info("更新処理自動実行_承認結果の反映_START_"+processExecution.getExecItemCd()+"_"+GeneralDateTime.now());
 		boolean endStatusIsInterrupt = false;
 		boolean isHasException = false;
+		// ドメインモデル「就業締め日」を取得する
+		List<Closure> lstClosure = this.closureRepo.findAllUse(companyId);
+
+		// ドメインモデル「実行ログ」を新規登録する
+		DatePeriod period = this.findClosurePeriodMinDate(companyId, lstClosure);
+		GeneralDateTime now = GeneralDateTime.now();
+		ExecutionLog executionLog = new ExecutionLog(execId, ExecutionContent.REFLRCT_APPROVAL_RESULT,
+				ErrorPresent.NO_ERROR, new ExecutionTime(now, now), ExecutionStatus.INCOMPLETE,
+				new ObjectPeriod(period.start(), period.end()));
+		executionLog.setReflectApprovalSetInfo(new SetInforReflAprResult(ExecutionContent.REFLRCT_APPROVAL_RESULT,
+				processExecution.getProcessExecType() == ProcessExecType.NORMAL_EXECUTION
+						? ExecutionType.NORMAL_EXECUTION
+						: ExecutionType.RERUN,
+				IdentifierUtil.randomUniqueId(), false));
+		this.executionLogRepository.addExecutionLog(executionLog);
+		// ドメインモデル「更新処理自動実行ログ」を更新する
+		if (ProcessExecutionLog.getEachProcPeriod() != null
+				&& ProcessExecutionLog.getEachProcPeriod().isPresent()) {
+			EachProcessPeriod eachProcessPeriod = ProcessExecutionLog.getEachProcPeriod().get();
+			DatePeriod scheduleCreationPeriod = (eachProcessPeriod.getScheduleCreationPeriod() != null
+					&& eachProcessPeriod.getScheduleCreationPeriod().isPresent())
+							? eachProcessPeriod.getScheduleCreationPeriod().get()
+							: null;
+			DatePeriod dailyCreationPeriod = (eachProcessPeriod.getDailyCreationPeriod() != null
+					&& eachProcessPeriod.getDailyCreationPeriod().isPresent())
+							? eachProcessPeriod.getDailyCreationPeriod().get()
+							: null;
+			DatePeriod dailyCalcPeriod = (eachProcessPeriod.getDailyCalcPeriod() != null
+					&& eachProcessPeriod.getDailyCalcPeriod().isPresent())
+							? eachProcessPeriod.getDailyCalcPeriod().get()
+							: null;
+			ProcessExecutionLog.setEachProcPeriod(
+					new EachProcessPeriod(scheduleCreationPeriod, dailyCreationPeriod, dailyCalcPeriod, period));
+
+		} else {
+			ProcessExecutionLog.setEachProcPeriod(new EachProcessPeriod(null, null, null, period));
+		}
 		if (processExecution.getProcessExecType() == ProcessExecType.NORMAL_EXECUTION) {
-
-			// ドメインモデル「就業締め日」を取得する
-			List<Closure> lstClosure = this.closureRepo.findAllUse(companyId);
-
-			// ドメインモデル「実行ログ」を新規登録する
-			DatePeriod period = this.findClosurePeriodMinDate(companyId, lstClosure);
-			GeneralDateTime now = GeneralDateTime.now();
-			ExecutionLog executionLog = new ExecutionLog(execId, ExecutionContent.REFLRCT_APPROVAL_RESULT,
-					ErrorPresent.NO_ERROR, new ExecutionTime(now, now), ExecutionStatus.INCOMPLETE,
-					new ObjectPeriod(period.start(), period.end()));
-			executionLog.setReflectApprovalSetInfo(new SetInforReflAprResult(ExecutionContent.REFLRCT_APPROVAL_RESULT,
-					processExecution.getProcessExecType() == ProcessExecType.NORMAL_EXECUTION
-							? ExecutionType.NORMAL_EXECUTION
-							: ExecutionType.RERUN,
-					IdentifierUtil.randomUniqueId(), false));
-			this.executionLogRepository.addExecutionLog(executionLog);
-			// ドメインモデル「更新処理自動実行ログ」を更新する
-			if (ProcessExecutionLog.getEachProcPeriod() != null
-					&& ProcessExecutionLog.getEachProcPeriod().isPresent()) {
-				EachProcessPeriod eachProcessPeriod = ProcessExecutionLog.getEachProcPeriod().get();
-				DatePeriod scheduleCreationPeriod = (eachProcessPeriod.getScheduleCreationPeriod() != null
-						&& eachProcessPeriod.getScheduleCreationPeriod().isPresent())
-								? eachProcessPeriod.getScheduleCreationPeriod().get()
-								: null;
-				DatePeriod dailyCreationPeriod = (eachProcessPeriod.getDailyCreationPeriod() != null
-						&& eachProcessPeriod.getDailyCreationPeriod().isPresent())
-								? eachProcessPeriod.getDailyCreationPeriod().get()
-								: null;
-				DatePeriod dailyCalcPeriod = (eachProcessPeriod.getDailyCalcPeriod() != null
-						&& eachProcessPeriod.getDailyCalcPeriod().isPresent())
-								? eachProcessPeriod.getDailyCalcPeriod().get()
-								: null;
-				ProcessExecutionLog.setEachProcPeriod(
-						new EachProcessPeriod(scheduleCreationPeriod, dailyCreationPeriod, dailyCalcPeriod, period));
-
-			} else {
-				ProcessExecutionLog.setEachProcPeriod(new EachProcessPeriod(null, null, null, period));
-			}
-
 			try {
 				int sizeClosure = lstClosure.size();
 				for (int i = 0; i < sizeClosure; i++) {
@@ -2281,11 +2279,11 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					break;
 				}
 				try {
-					for (DatePeriod period : approvalPeriodByEmp.getListPeriod()) {
+					for (DatePeriod p : approvalPeriodByEmp.getListPeriod()) {
 						// 社員の申請を反映
 
 						ProcessStateReflectImport processStateReflectImport = appReflectManagerAdapter
-								.reflectAppOfEmployeeTotal(execId, approvalPeriodByEmp.getEmployeeID(), period);
+								.reflectAppOfEmployeeTotal(execId, approvalPeriodByEmp.getEmployeeID(), p);
 						if (processStateReflectImport == ProcessStateReflectImport.INTERRUPTION) {
 							endStatusIsInterrupt = true;
 						}
