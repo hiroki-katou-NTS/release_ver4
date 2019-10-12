@@ -63,9 +63,23 @@
 					    <tbody data-bind = "foreach: execLog.taskLogList">
 							<tr>
 								<td class="inputLabel"><div data-bind="text: taskName" /></td>
-								<td><div data-bind="text: lastExecDateTime" /></td>
-								<td><div data-bind="text: lastEndExecDateTime" /></td>
-								<td><div data-bind="text: rangeDateTime" /></td>
+								<com:ko-if bind="taskId !== 2">
+									<td><div data-bind="text: lastExecDateTime" /></td>
+									<td><div data-bind="text: lastEndExecDateTime" /></td>
+									<td><div data-bind="text: rangeDateTime" /></td>
+								</com:ko-if>
+								<com:ko-if bind="taskId === 2">
+									<com:ko-if bind="statusCd !== 0">
+										<td style="background-color:#D9D9D9;"></td>
+										<td style="background-color:#D9D9D9;"></td>
+										<td style="background-color:#D9D9D9;"></td>
+									</com:ko-if>	
+									<com:ko-if bind="statusCd === 0">
+										<td></td>
+										<td></td>
+										<td></td>
+									</com:ko-if>
+								</com:ko-if>
 								<td><div data-bind="text: status" /></td>
 								<td><div data-bind="text: errorSystemText" /></td>
 								<td><div data-bind="text: errorBusinessText" /></td>
