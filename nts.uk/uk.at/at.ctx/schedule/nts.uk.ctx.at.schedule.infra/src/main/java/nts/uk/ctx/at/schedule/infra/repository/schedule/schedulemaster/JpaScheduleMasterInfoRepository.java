@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.schedule.infra.repository.schedule.schedulemaster;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +34,7 @@ public class JpaScheduleMasterInfoRepository extends JpaRepository implements Sc
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ScheMasterInfo> getScheMasterInfoByPeriod(String sId, DatePeriod period) {
 		List<ScheMasterInfo> listScheMasterInfo = new ArrayList<>();
 			listScheMasterInfo.addAll(
