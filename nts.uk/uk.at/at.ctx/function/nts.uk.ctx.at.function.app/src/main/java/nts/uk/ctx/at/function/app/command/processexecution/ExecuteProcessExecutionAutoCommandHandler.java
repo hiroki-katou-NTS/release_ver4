@@ -1014,7 +1014,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 						boolean isWorkType = procExec.getExecSetting().getPerSchedule().getTarget().getTargetSetting().isRecreateWorkType();
 						//異動者・勤務種別変更者の作成対象期間の計算（個人別）
 						listApprovalPeriodByEmp = calPeriodTransferAndWorktype
-								.calPeriodTransferAndWorktype(companyId, listEmp, scheduleCreatorExecutionOneEmp1.getScheduleExecutionLog().getPeriod(), isTransfer, isWorkType);
+								.calPeriodTransferAndWorktype(companyId, reEmployeeList, scheduleCreatorExecutionOneEmp1.getScheduleExecutionLog().getPeriod(), isTransfer, isWorkType);
 						try {
 //							AsyncCommandHandlerContext<ScheduleCreatorExecutionCommand> ctx = new AsyncCommandHandlerContext<>(scheduleCreatorExecutionOneEmp1);
 //							this.scheduleExecution.handle(ctx);
