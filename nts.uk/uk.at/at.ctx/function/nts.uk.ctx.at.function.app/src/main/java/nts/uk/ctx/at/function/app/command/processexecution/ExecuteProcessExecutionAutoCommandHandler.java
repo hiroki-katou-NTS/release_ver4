@@ -37,7 +37,7 @@ import nts.uk.ctx.at.function.app.command.processexecution.approuteupdatedaily.A
 import nts.uk.ctx.at.function.app.command.processexecution.approuteupdatemonthly.AppRouteUpdateMonthlyService;
 import nts.uk.ctx.at.function.app.command.processexecution.createlogfileexecution.CreateLogFileExecution;
 import nts.uk.ctx.at.function.app.command.processexecution.createschedule.executionprocess.CalPeriodTransferAndWorktype;
-import nts.uk.ctx.at.function.app.command.processexecution.reflectapprovalresult.executionprocess.CalPeriodApprovalResult;
+//import nts.uk.ctx.at.function.app.command.processexecution.reflectapprovalresult.executionprocess.CalPeriodApprovalResult;
 import nts.uk.ctx.at.function.dom.adapter.WorkplaceWorkRecordAdapter;
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.AppReflectManagerAdapter;
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.ProcessStateReflectImport;
@@ -95,7 +95,7 @@ import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.MonthlyAggregationEmployeeSe
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.CalExeSettingInfor;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLog;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
-import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfoRepository;
+//import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfoRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ExecutionLog;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ExecutionLogRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ExecutionTime;
@@ -122,7 +122,7 @@ import nts.uk.ctx.at.schedule.dom.executionlog.RebuildTargetDetailsAtr;
 import nts.uk.ctx.at.schedule.dom.executionlog.ResetAtr;
 import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleCreateContent;
 import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleExecutionLog;
-import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleExecutionLogRepository;
+//import nts.uk.ctx.at.schedule.dom.executionlog.ScheduleExecutionLogRepository;
 import nts.uk.ctx.at.schedule.dom.schedule.basicschedule.BasicScheduleRepository;
 import nts.uk.ctx.at.shared.dom.common.CompanyId;
 import nts.uk.ctx.at.shared.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmpDto;
@@ -181,8 +181,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	@Inject
 	private ScheduleCreatorExecutionCommandHandler scheduleExecution;
 
-	@Inject
-	private ScheduleExecutionLogRepository scheduleExecutionLogRepository;
+//	@Inject
+//	private ScheduleExecutionLogRepository scheduleExecutionLogRepository;
 
 	@Inject
 	private WorkplaceWorkRecordAdapter workplaceAdapter;
@@ -193,8 +193,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 	@Inject
 	private ExecutionLogRepository executionLogRepository;
 
-	@Inject
-	private ErrMessageInfoRepository errMessageInfoRepository;
+//	@Inject
+//	private ErrMessageInfoRepository errMessageInfoRepository;
 //	@Inject
 //	private RegulationInfoEmployeeAdapter regulationInfoEmployeeAdapter;
 	@Inject
@@ -277,8 +277,8 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
     @Resource
     private ManagedExecutorService executorService;
     
-    @Inject
-	private CalPeriodApprovalResult calPeriodApprovalResult;
+//    @Inject
+//	private CalPeriodApprovalResult calPeriodApprovalResult;
     
     @Inject
 	private CalPeriodTransferAndWorktype calPeriodTransferAndWorktype;
@@ -797,9 +797,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			this.execTaskLogRepo.updateAll(companyId, execItemCd, execId, procExecLog.getTaskLogList());
 		}
 		this.procExecLogRepo.update(procExecLog);
-		// 就業担当者の社員ID（List）を取得する : RQ526
-//		List<String> listManagementId = employeeManageAdapter.getListEmpID(companyId, GeneralDate.today());
-		boolean runSchedule = false;
 		boolean checkStopExec = false;
 		try {
 			// 個人スケジュール作成区分の判定
@@ -881,7 +878,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					if (checkStop(execId)) {
 						checkStopExec = true;
 					}
-					runSchedule = true;
 				} catch (Exception e) {
 					// 再実行の場合にExceptionが発生したかどうかを確認する。
 					if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
@@ -986,7 +982,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 								if(checkStop(execId)) {
 									checkStopExec = true;
 								}
-								runSchedule = true;
 							}
 						} catch (Exception e) {
 							// 再実行の場合にExceptionが発生したかどうかを確認する。
@@ -1050,7 +1045,6 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 							if(checkStop(execId)) {
 								checkStopExec = true;
 							}
-							runSchedule = true;
 						} catch (Exception e) {
 							// 再実行の場合にExceptionが発生したかどうかを確認する。
 							if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
@@ -1068,49 +1062,7 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 			errorMessage = "Msg_1552";
 			isException = true;
 		}
-		int timeOut = 1;
 		boolean isInterruption = false;
-//		if (runSchedule) {
-//			while (true) {
-//				// find execution log by id
-//				Optional<ScheduleExecutionLog> domainOpt = this.scheduleExecutionLogRepository
-//						.findById(loginContext.companyId(), execId);
-//				if (domainOpt.isPresent()) {
-//					if (domainOpt.get().getCompletionStatus().value == CompletionStatus.COMPLETION_ERROR.value) {
-////						this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION,
-////								EndStatus.ABNORMAL_END);
-//						break;
-//					}
-//					if (domainOpt.get().getCompletionStatus().value == CompletionStatus.INTERRUPTION.value) {
-//						isInterruption = true;
-//						checkStopExec = true;
-//						break;
-//					}
-//					if (domainOpt.get().getCompletionStatus().value == CompletionStatus.DONE.value) {
-////						this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.SUCCESS);
-//						break;
-//					}
-//					if (checkStopExec) {
-//						break;
-//					}
-//
-//				}
-//				if (timeOut == 2) {
-////					this.updateEachTaskStatus(procExecLog, ProcessExecutionTask.SCH_CREATION, EndStatus.ABNORMAL_END);
-//					break;
-//				}
-//				timeOut++;
-//				// set thread sleep 10s để cho xử lý schedule insert xong data rồi
-//				// mới cho xử lý của anh Nam (KIF001) chạy
-//				// nếu không màn KIF001 sẽ get data cũ của màn schedule để insert
-//				// vào => như thế sẽ sai
-//				try {
-//					Thread.sleep(10000);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
 		updateLogAfterProcess.updateLogAfterProcess(ProcessExecutionTask.SCH_CREATION, companyId, execItemCd, procExec,
 				procExecLog, isException, checkStopExec, errorMessage);
 		if (isInterruption) {
@@ -2217,12 +2169,12 @@ public class ExecuteProcessExecutionAutoCommandHandler extends AsyncCommandHandl
 					// }
 					// }
 					// }
-					// 異動者を再作成する
-					boolean isRecreateTransfer = processExecution.getExecSetting().getDailyPerf()
-							.getTargetGroupClassification().isRecreateTransfer();
-					// 勤務種別者を再作成
-					boolean isRecreateTypeChangePerson = processExecution.getExecSetting().getDailyPerf()
-							.getTargetGroupClassification().isRecreateTypeChangePerson();
+//					// 異動者を再作成する
+//					boolean isRecreateTransfer = processExecution.getExecSetting().getDailyPerf()
+//							.getTargetGroupClassification().isRecreateTransfer();
+//					// 勤務種別者を再作成
+//					boolean isRecreateTypeChangePerson = processExecution.getExecSetting().getDailyPerf()
+//							.getTargetGroupClassification().isRecreateTypeChangePerson();
 					int sizeEmployee = lstRegulationInfoEmployeeNew.size();
 					for (int j = 0; j < sizeEmployee; j++) {
 						try {

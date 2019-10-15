@@ -37,7 +37,7 @@ import nts.uk.ctx.at.function.app.command.processexecution.approuteupdatedaily.A
 import nts.uk.ctx.at.function.app.command.processexecution.approuteupdatemonthly.AppRouteUpdateMonthlyService;
 import nts.uk.ctx.at.function.app.command.processexecution.createlogfileexecution.CreateLogFileExecution;
 import nts.uk.ctx.at.function.app.command.processexecution.createschedule.executionprocess.CalPeriodTransferAndWorktype;
-import nts.uk.ctx.at.function.app.command.processexecution.reflectapprovalresult.executionprocess.CalPeriodApprovalResult;
+//import nts.uk.ctx.at.function.app.command.processexecution.reflectapprovalresult.executionprocess.CalPeriodApprovalResult;
 import nts.uk.ctx.at.function.dom.adapter.WorkplaceWorkRecordAdapter;
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.AppReflectManagerAdapter;
 import nts.uk.ctx.at.function.dom.adapter.appreflectmanager.ProcessStateReflectImport;
@@ -276,8 +276,8 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 	@Inject
 	private OverallErrorProcess overallErrorProcess;
 	
-	@Inject
-	private CalPeriodApprovalResult calPeriodApprovalResult;
+//	@Inject
+//	private CalPeriodApprovalResult calPeriodApprovalResult;
 	
 	@Inject
 	private CalPeriodTransferAndWorktype calPeriodTransferAndWorktype;
@@ -796,12 +796,11 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 			this.execTaskLogRepo.updateAll(companyId, execItemCd, execId, procExecLog.getTaskLogList());
 		}
 		this.procExecLogRepo.update(procExecLog);
-		AsyncTaskInfo handle = null;
+//		AsyncTaskInfo handle = null;
 		DataToAsyn dataToAsyn = new DataToAsyn(); 
 
 		// 就業担当者の社員ID（List）を取得する : RQ526
 //		List<String> listManagementId = employeeManageAdapter.getListEmpID(companyId, GeneralDate.today());
-		boolean runSchedule = false;
 		boolean checkStopExec = false;
 		try {
 			// 個人スケジュール作成区分の判定
@@ -882,7 +881,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 					if (checkStop(execId)) {
 						checkStopExec = true;
 					}
-					runSchedule = true;
 				} catch (Exception e) {
 					// 再実行の場合にExceptionが発生したかどうかを確認する。
 					if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
@@ -991,7 +989,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 								if (checkStop(execId)) {
 									checkStopExec = true;
 								}
-								runSchedule = true;
 							}
 						} catch (Exception e) {
 							// 再実行の場合にExceptionが発生したかどうかを確認する。
@@ -1056,7 +1053,6 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 							if (checkStop(execId)) {
 								checkStopExec = true;
 							}
-							runSchedule = true;
 						} catch (Exception e) {
 							// 再実行の場合にExceptionが発生したかどうかを確認する。
 							if (procExec.getProcessExecType() == ProcessExecType.RE_CREATE) {
