@@ -311,41 +311,41 @@ public class SaveExecutionTaskSettingCommandHandler
 						.endClock(new EndTime(0)).build();
 
 				// loop minute
-				if (command.getOneDayRepCls() == 1) {
-					optionsEnd = UkJobScheduleOptions
-							.builder(SortingProcessEndScheduleJob.class, scheduleIdEnd,
-									new CronSchedule(Arrays.asList("0 0 0 * * ? ")))
-							.userData(scheduletimeData).startDate(startDate.addDays(1)).endDate(startDate.addDays(1))
-							.startClock(new StartTime(0)).endClock(new EndTime(1)).build();
-				} else {
-					int minuteEnd = command.getStartTime() % 60 + 10;
-					int hourEnd = command.getStartTime() / 60;
-					if (minuteEnd / 60 == 1) {
-						hourEnd = hourEnd + 1;
-						minuteEnd = minuteEnd - 60;
-					}
-					boolean inCreaseDay = false;
-					if (hourEnd / 24 == 1) {
-						hourEnd = 0;
-						inCreaseDay = true;
-					}
-					if (inCreaseDay) {
-						optionsEnd = UkJobScheduleOptions
-								.builder(SortingProcessEndScheduleJob.class, scheduleIdEnd,
-										new CronSchedule(Arrays.asList("0 " + minuteEnd + " " + hourEnd + " * * ? ")))
-								.userData(scheduletimeData).startDate(startDate.addDays(1))
-								.endDate(startDate.addDays(1))
-								.startClock(new StartTime(command.getStartTime() + 10 - 1440))
-								.endClock(new EndTime(command.getStartTime() + 11 - 1440)).build();
-					} else {
-						optionsEnd = UkJobScheduleOptions
-								.builder(SortingProcessEndScheduleJob.class, scheduleIdEnd,
-										new CronSchedule(Arrays.asList("0 " + minuteEnd + " " + hourEnd + " * * ? ")))
-								.userData(scheduletimeData).startDate(startDate).endDate(startDate)
-								.startClock(new StartTime(command.getStartTime() + 10))
-								.endClock(new EndTime(command.getStartTime() + 11)).build();
-					}
-				}
+//				if (command.getOneDayRepCls() == 1) {
+//					optionsEnd = UkJobScheduleOptions
+//							.builder(SortingProcessEndScheduleJob.class, scheduleIdEnd,
+//									new CronSchedule(Arrays.asList("0 0 0 * * ? ")))
+//							.userData(scheduletimeData).startDate(startDate.addDays(1)).endDate(startDate.addDays(1))
+//							.startClock(new StartTime(0)).endClock(new EndTime(1)).build();
+//				} else {
+//					int minuteEnd = command.getStartTime() % 60 + 10;
+//					int hourEnd = command.getStartTime() / 60;
+//					if (minuteEnd / 60 == 1) {
+//						hourEnd = hourEnd + 1;
+//						minuteEnd = minuteEnd - 60;
+//					}
+//					boolean inCreaseDay = false;
+//					if (hourEnd / 24 == 1) {
+//						hourEnd = 0;
+//						inCreaseDay = true;
+//					}
+//					if (inCreaseDay) {
+//						optionsEnd = UkJobScheduleOptions
+//								.builder(SortingProcessEndScheduleJob.class, scheduleIdEnd,
+//										new CronSchedule(Arrays.asList("0 " + minuteEnd + " " + hourEnd + " * * ? ")))
+//								.userData(scheduletimeData).startDate(startDate.addDays(1))
+//								.endDate(startDate.addDays(1))
+//								.startClock(new StartTime(command.getStartTime() + 10 - 1440))
+//								.endClock(new EndTime(command.getStartTime() + 11 - 1440)).build();
+//					} else {
+//						optionsEnd = UkJobScheduleOptions
+//								.builder(SortingProcessEndScheduleJob.class, scheduleIdEnd,
+//										new CronSchedule(Arrays.asList("0 " + minuteEnd + " " + hourEnd + " * * ? ")))
+//								.userData(scheduletimeData).startDate(startDate).endDate(startDate)
+//								.startClock(new StartTime(command.getStartTime() + 10))
+//								.endClock(new EndTime(command.getStartTime() + 11)).build();
+//					}
+//				}
 			}
 		}
 		

@@ -1,8 +1,6 @@
 package nts.uk.ctx.at.schedule.dom.schedule.schedulemaster.requestperiodchange;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
@@ -26,6 +26,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  * @author tutk
  *
  */
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @Stateless
 public class RequestPeriodChangeDefault implements RequestPeriodChangeService {
 
@@ -49,9 +50,9 @@ public class RequestPeriodChangeDefault implements RequestPeriodChangeService {
 
 		// ◆INPUT．「変更比較対象」 = 職場 の場合
 		if (isWorkplace) {
-			Map<String, List<ScheMasterInfo>> mappedByWp = listScheMasterInfo.stream()
+			Map<String, List<ScheMasterInfo>> mappedByWp = listScheMasterInfo.stream().filter(c->c.getWorkplaceId() != null)
 					.collect(Collectors.groupingBy(c -> c.getWorkplaceId()));
-			Map<String, List<ExWorkplaceHistItemImported>> mapDateWpl = workplaceHistory.stream()
+			Map<String, List<ExWorkplaceHistItemImported>> mapDateWpl = workplaceHistory.stream().filter(c->c.getWorkplaceId() != null)
 					.collect(Collectors.groupingBy(c -> c.getWorkplaceId()));
 			Set<GeneralDate> lstDateAll = new HashSet<>();
 			for (val itemData : mapDateWpl.entrySet()) {
@@ -101,9 +102,9 @@ public class RequestPeriodChangeDefault implements RequestPeriodChangeService {
 			}
 			return lstResult;
 		}else {//◆INPUT．「変更比較対象」 =　勤務種別　の場合
-			Map<String, List<ScheMasterInfo>> mappedByWkType = listScheMasterInfo.stream()
+			Map<String, List<ScheMasterInfo>> mappedByWkType = listScheMasterInfo.stream().filter(c->c.getBusinessTypeCd() != null)
 					.collect(Collectors.groupingBy(c -> c.getBusinessTypeCd()));
-			Map<String, List<BusinessTypeOfEmpDto>> mapDateWtype = worktypeHis.stream()
+			Map<String, List<BusinessTypeOfEmpDto>> mapDateWtype = worktypeHis.stream().filter(c->c.getBusinessTypeCd() != null)
 					.collect(Collectors.groupingBy(c -> c.getBusinessTypeCd()));
 			Set<GeneralDate> lstDateAll = new HashSet<>();
 			for (val itemData : mapDateWtype.entrySet()) {
