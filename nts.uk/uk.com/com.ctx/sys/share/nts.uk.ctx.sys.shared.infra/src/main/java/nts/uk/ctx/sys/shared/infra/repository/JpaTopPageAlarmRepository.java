@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -132,14 +130,12 @@ public class JpaTopPageAlarmRepository extends JpaRepository implements TopPageA
 
 	// function insert for request list 477
 	@Override
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public void insertTopPage(String executionLogId, String managerId, int executionContent, int isCancelled, int existenceError) {
 		KrcstToppageAlarm entity = toEntity(executionLogId, managerId, executionContent, isCancelled, existenceError);
 		this.commandProxy().insert(entity);
 	}
 
 	@Override
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public void insertDetail(TopPageAlarmDetail domain) {
 		KrcstToppageAlarmDetail entity = toEntityDetail(domain);
 		this.commandProxy().insert(entity);

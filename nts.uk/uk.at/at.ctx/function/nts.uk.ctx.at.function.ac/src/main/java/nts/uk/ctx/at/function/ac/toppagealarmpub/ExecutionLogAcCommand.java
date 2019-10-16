@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.function.dom.adapter.toppagealarmpub.ExecutionLogAdapterFn;
@@ -14,13 +12,13 @@ import nts.uk.ctx.at.function.dom.adapter.toppagealarmpub.ExecutionLogImportFn;
 import nts.uk.ctx.sys.shared.pub.toppagealarmpub.ExecutionLogErrorDetail;
 import nts.uk.ctx.sys.shared.pub.toppagealarmpub.ExecutionLogImport;
 import nts.uk.ctx.sys.shared.pub.toppagealarmpub.ExecutionLogPub;
+
 @Stateless
 public class ExecutionLogAcCommand implements ExecutionLogAdapterFn{
 	
 	@Inject
 	private ExecutionLogPub executionLogPub;
 	
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public void updateExecuteLog(ExecutionLogImportFn param) {
 		executionLogPub.updateExecuteLog(convertToExecutionLogImportFn(param));

@@ -4,8 +4,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import nts.uk.ctx.sys.shared.dom.toppagealarm.TopPageAlarmDetail;
@@ -17,7 +15,6 @@ import nts.uk.ctx.sys.shared.pub.toppagealarmpub.ExecutionLogImport;
 import nts.uk.ctx.sys.shared.pub.toppagealarmpub.ExecutionLogPub;
 
 @Stateless
-@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class ExecutionLogPubImp implements ExecutionLogPub{
 	@Inject
 	private TopPageAlarmRepository topPageAlarmRepository;
