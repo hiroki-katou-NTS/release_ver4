@@ -271,6 +271,9 @@ public class LogBasicInformationAllFinder {
 				
 				caseStartUpRefactors(cid, logParams, mapProgramNames, lstLogBacsicInfo, csv);
 				
+			}else {
+				csv.destroy();
+				throw new BusinessException("Msg_1220");
 			}
 		}
 	}
@@ -984,6 +987,8 @@ public class LogBasicInformationAllFinder {
 			logBasicInfoDto.setUserIdLogin(userDto.getUserId());
 			// itemNo 2
 			logBasicInfoDto.setUserNameLogin(userDto.getUserName());
+		}else {
+			logBasicInfoDto.setEmployeeCodeLogin("");
 		}
 
 		// itemNo 4
@@ -1274,11 +1279,13 @@ public class LogBasicInformationAllFinder {
 				UserInfo userDto = logBasicInformation.getUserInfo();
 				if (userDto != null) {
 					logBasicInfoDto.setEmployeeCodeLogin(
-							mapEmployeeCodes.get(userDto.getEmployeeId()));
+							mapEmployeeCodes.get(userDto.getEmployeeId()) == null? "": mapEmployeeCodes.get(userDto.getEmployeeId()));
 					// itemNo 1
 					logBasicInfoDto.setUserIdLogin(userDto.getUserId());
 					// itemNo 2
 					logBasicInfoDto.setUserNameLogin(userDto.getUserName());
+				}else {
+					logBasicInfoDto.setEmployeeCodeLogin("");
 				}
 				// itemNo 4
 				if (logBasicInformation.getLoginInformation().getIpAddress().isPresent()) {
@@ -1577,11 +1584,13 @@ public class LogBasicInformationAllFinder {
 			LogBasicInfoAllDto logBasicInfoDto = LogBasicInfoAllDto.fromDomain(logBasicInformation);
 			UserInfo userDto = logBasicInformation.getUserInfo();
 			if (userDto != null) {
-				logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()));
+				logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()) == null?"": mapEmployeeCodes.get(userDto.getEmployeeId()));
 				// itemNo 1
 				logBasicInfoDto.setUserIdLogin(userDto.getUserId());
 				// itemNo 2
 				logBasicInfoDto.setUserNameLogin(userDto.getUserName());
+			}else {
+				logBasicInfoDto.setEmployeeCodeLogin("");
 			}
 			// itemNo 4
 			if (logBasicInformation.getLoginInformation().getIpAddress().isPresent()) {
@@ -1834,6 +1843,8 @@ public class LogBasicInformationAllFinder {
 				logBasicInfoDto.setUserIdLogin(userDto.getUserId());
 				// itemNo 2
 				logBasicInfoDto.setUserNameLogin(userDto.getUserName());
+			}else {
+				logBasicInfoDto.setEmployeeCodeLogin("");
 			}
 
 			// itemNo 4

@@ -125,7 +125,9 @@ public class LogBasicInformationFinder {
 								LogBasicInfoDto logBasicInfoDto = LogBasicInfoDto.fromDomain(logBasicInformation);
 								UserInfo userDto = logBasicInformation.getUserInfo();
 								if (userDto != null) {
-									logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()));
+									logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()) == null? "": mapEmployeeCodes.get(userDto.getEmployeeId()));
+								}else {
+									logBasicInfoDto.setEmployeeCodeLogin("");
 								}
 								// Set user login name
 								logBasicInfoDto.setUserNameLogin(userDto.getUserName());
@@ -201,7 +203,9 @@ public class LogBasicInformationFinder {
 								UserInfo userDto = logBasicInformation.getUserInfo();
 								// get employee code login
 								if (userDto != null) {
-									logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()));
+									logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()) == null? "": mapEmployeeCodes.get(userDto.getEmployeeId()));
+								}else {
+									logBasicInfoDto.setEmployeeCodeLogin("");
 								}
 								// get user login name
 								logBasicInfoDto.setUserNameLogin(userDto.getUserName());
@@ -266,7 +270,9 @@ public class LogBasicInformationFinder {
 									UserInfo userDto = logBasicInformation.getUserInfo();
 									// get employee code login
 									if (userDto != null) {
-										logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()));
+										logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()) == null? "": mapEmployeeCodes.get(userDto.getEmployeeId()));
+									}else {
+										logBasicInfoDto.setEmployeeCodeLogin("");
 									}
 									// get user login name
 									logBasicInfoDto.setUserNameLogin(userDto.getUserName());
@@ -315,7 +321,9 @@ public class LogBasicInformationFinder {
 							logBasicInfoDto.setMenuName(mapProgramNames.get(key));
 							// Get employee code user login
 							if (userDto != null) {
-								logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()));
+								logBasicInfoDto.setEmployeeCodeLogin(mapEmployeeCodes.get(userDto.getEmployeeId()) == null?"": mapEmployeeCodes.get(userDto.getEmployeeId()));
+							}else {
+								logBasicInfoDto.setEmployeeCodeLogin("");
 							}
 							// get user login name
 							logBasicInfoDto.setUserNameLogin(userDto.getUserName());
