@@ -960,13 +960,7 @@ public class LogBasicInformationAllFinder {
 				
 			});
 			
-		} else {
-			
-			throw new BusinessException("Msg_1220");
 		}
-		
-		
-		
 	}
 	
 	private void setLoginDto(Map<String, LogBasicInformation> mapLogBasicInfo,
@@ -1196,9 +1190,6 @@ public class LogBasicInformationAllFinder {
 					
 				});
 				
-			} else {
-				
-				throw new BusinessException("Msg_1220");
 			}
 		}
 	}
@@ -1561,8 +1552,6 @@ public class LogBasicInformationAllFinder {
 						});
 					});
 					
-				} else {
-					throw new BusinessException("Msg_1220");
 				}
 				
 			}
@@ -1812,9 +1801,6 @@ public class LogBasicInformationAllFinder {
 					});
 				});
 				
-			} else {
-				
-				throw new BusinessException("Msg_1220");
 			}
 			
 		}
