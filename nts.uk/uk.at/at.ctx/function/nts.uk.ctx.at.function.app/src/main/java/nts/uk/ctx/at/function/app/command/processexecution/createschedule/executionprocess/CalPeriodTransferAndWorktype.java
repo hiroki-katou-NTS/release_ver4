@@ -61,8 +61,9 @@ public class CalPeriodTransferAndWorktype {
 			DatePeriod period, boolean isTransfer, boolean isWorkType) {
 
 		List<ApprovalPeriodByEmp> listApprovalPeriodByEmp = new ArrayList<>();
-		List<ExWorkplaceHistItemImported> workplaceItems = new ArrayList<>();
 		List<BusinessTypeOfEmpDto> listBusinessTypeOfEmpDto = new ArrayList<>();
+		
+		List<nts.uk.ctx.at.function.dom.statement.dtoimport.ExWorkPlaceHistoryImport> listExWorkPlaceHistoryImport = new ArrayList<>();
 
 		// INPUT．「異動時に再作成」をチェックする
 		if (isTransfer) {
@@ -70,11 +71,11 @@ public class CalPeriodTransferAndWorktype {
 			EmployeeGeneralInfoImport employeeGeneralInfoImport = employeeGeneralInfoAdapter
 					.getEmployeeGeneralInfo(listEmp, period, false, false, false, true, false); // 職場を取得するか = True
 			if (!employeeGeneralInfoImport.getExWorkPlaceHistoryImports().isEmpty()) {
-				nts.uk.ctx.at.function.dom.statement.dtoimport.ExWorkPlaceHistoryImport exWorkPlaceHistoryImportFn = employeeGeneralInfoImport
-						.getExWorkPlaceHistoryImports().get(0);
-				workplaceItems = exWorkPlaceHistoryImportFn.getWorkplaceItems().stream()
-						.map(c -> new ExWorkplaceHistItemImported(c.getHistoryId(), c.getPeriod(), c.getWorkplaceId()))
-						.collect(Collectors.toList());
+				listExWorkPlaceHistoryImport = employeeGeneralInfoImport
+						.getExWorkPlaceHistoryImports();
+//				workplaceItems = exWorkPlaceHistoryImportFn.getWorkplaceItems().stream()
+//						.map(c -> new ExWorkplaceHistItemImported(c.getHistoryId(), c.getPeriod(), c.getWorkplaceId()))
+//						.collect(Collectors.toList());
 			}
 		}
 		// INPUT．「勤務種別変更時に再作成」をチェックする
@@ -98,6 +99,15 @@ public class CalPeriodTransferAndWorktype {
 			// INPUT．「異動時に再作成」をチェックする
 			List<DatePeriod> dataWorkplace = new ArrayList<>();
 			if (isTransfer) {
+				List<ExWorkplaceHistItemImported> workplaceItems = new ArrayList<>();
+				for(nts.uk.ctx.at.function.dom.statement.dtoimport.ExWorkPlaceHistoryImport data :listExWorkPlaceHistoryImport ) {
+					if(data.getEmployeeId().equals(empId)) {
+						workplaceItems = data.getWorkplaceItems().stream()
+								.map(c -> new ExWorkplaceHistItemImported(c.getHistoryId(), c.getPeriod(), c.getWorkplaceId()))
+								.collect(Collectors.toList());
+						break;
+					}
+				}
 				// 職場・勤務種別変更期間を求める
 				dataWorkplace = requestPeriodChangeService.getPeriodChange(empId, newPeriod, workplaceItems,
 						Collections.emptyList(), true, isTransfer);
@@ -107,7 +117,7 @@ public class CalPeriodTransferAndWorktype {
 			if (isWorkType) {
 				// 職場・勤務種別変更期間を求める
 				dataWorkType = requestPeriodChangeService.getPeriodChange(empId, newPeriod, Collections.emptyList(),
-						listBusinessTypeOfEmpDto, false, isWorkType);
+						listBusinessTypeOfEmpDto.stream().filter(c->c.getEmployeeId().equals(empId)).collect(Collectors.toList()), false, isWorkType);
 			}
 			// 計算するする「期間」がない場合次の社員へ
 			if (dataWorkplace.isEmpty() && dataWorkType.isEmpty())
