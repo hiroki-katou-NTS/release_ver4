@@ -303,20 +303,20 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 
 
 	private void updateRecord(IntegrationOfDaily value) {
-		// データ更新
+ 		// データ更新
 		if(value.getAttendanceTimeOfDailyPerformance().isPresent()) {
 //			employeeDailyPerErrorRepository.removeParam(value.getAttendanceTimeOfDailyPerformance().get().getEmployeeId(), 
 //					value.getAttendanceTimeOfDailyPerformance().get().getYmd());
 //			determineErrorAlarmWorkRecordService.createEmployeeDailyPerError(value.getEmployeeError());
-			
-			Pair<String,GeneralDate> pair = Pair.of(value.getAttendanceTimeOfDailyPerformance().get().getEmployeeId(),
-													value.getAttendanceTimeOfDailyPerformance().get().getYmd());
-			//計算から呼ぶ場合はtrueでいいらしい。保科⇒thanh
-			this.dailyRecordAdUpService.adUpEmpError(value.getEmployeeError(), Arrays.asList(pair), true);
-			
-			
 			this.registAttendanceTime(value.getAffiliationInfor().getEmployeeId(),value.getAffiliationInfor().getYmd(),
 									  value.getAttendanceTimeOfDailyPerformance().get(),value.getAnyItemValue());
+		}
+		
+		if(value.getAffiliationInfor() != null) {
+			Pair<String,GeneralDate> pair = Pair.of(value.getAffiliationInfor().getEmployeeId(),
+					value.getAffiliationInfor().getYmd());
+			//計算から呼ぶ場合はtrueでいいらしい。保科⇒thanh
+			this.dailyRecordAdUpService.adUpEmpError(value.getEmployeeError(), Arrays.asList(pair), true);			
 		}
 	}
 	
