@@ -16,6 +16,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.val;
@@ -407,7 +408,7 @@ public class ValidatorDataDailyRes {
 			for (EmployeeDailyPerError err : employeeError) {
 				if (err != null && err.getErrorAlarmWorkRecordCode().v().startsWith("D")
 						&& err.getErrorAlarmMessage().isPresent()
-						&& err.getErrorAlarmMessage().get().v().equals(TextResource.localize("Msg_1298")) && checkErrorOdd(err.getErrorAlarmWorkRecordCode().v())) {
+						&& err.getErrorAlarmMessage().get().v().equals(TextResource.localize("Msg_1298")) && checkErrorD1(err.getErrorAlarmWorkRecordCode().v())) {
 					if (err.getAttendanceItemList().isEmpty()) {
 						divergenceErrors.add(new DPItemValue("", err.getEmployeeID(), err.getDate(), 0));
 					} else {
@@ -558,15 +559,15 @@ public class ValidatorDataDailyRes {
 		return divergenceErrors;
 	}
 	
-//	private boolean checkErrorOdd(String errorCode) {
-//		String valueEnd = errorCode.substring(errorCode.length() - 1, errorCode.length());
-//		if (StringUtils.isNumeric(valueEnd) && Integer.parseInt(valueEnd) % 2 != 0)
-//			return true;
-//		else
-//			return false;
-//	}
+	private boolean checkErrorOdd(String errorCode) {
+		String valueEnd = errorCode.substring(errorCode.length() - 1, errorCode.length());
+		if (StringUtils.isNumeric(valueEnd) && Integer.parseInt(valueEnd) % 2 != 0)
+			return true;
+		else
+			return false;
+	}
 	
-	private boolean checkErrorOdd(String code){
+	private boolean checkErrorD1(String code){
 		String number = code.replace(code.replaceAll(PATTERN_1, EMPTY_STRING), EMPTY_STRING);
 		if(Integer.parseInt(number) >= 100) return true;
 		return false;
