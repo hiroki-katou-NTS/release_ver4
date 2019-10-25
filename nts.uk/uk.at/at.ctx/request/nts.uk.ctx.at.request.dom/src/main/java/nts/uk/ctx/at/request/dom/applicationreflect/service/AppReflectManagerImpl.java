@@ -24,6 +24,7 @@ import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.error.ThrowableAnalyzer;
 import nts.uk.ctx.at.request.dom.application.ApplicationRepository_New;
+import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.Application_New;
 import nts.uk.ctx.at.request.dom.application.PrePostAtr;
 import nts.uk.ctx.at.request.dom.application.ReasonNotReflectDaily_New;
@@ -233,10 +234,20 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			return;
 		}
 		GeneralDate closureStartDate = closure.get();
+		List<GeneralDate> lstReflectHoliday = new ArrayList<>();
 		for(int i = 0; appInfor.getStartDate().get().daysTo(appInfor.getEndDate().get()) - i >= 0; i++){
 			GeneralDate loopDate = appInfor.getStartDate().get().addDays(i);
 			if(loopDate.before(closureStartDate)) {
 				continue;
+			}
+			//休暇申請の申請日は休日　又は　勤務変更申請の申請日は休日と休日を除外するチェックの場合反映するが残数データを作成してない
+			if(appInfor.getAppType() == ApplicationType.ABSENCE_APPLICATION
+					|| (appInfor.getAppType() == ApplicationType.WORK_CHANGE_APPLICATION && workchangeData.getExcludeHolidayAtr() == 1)) {
+				List<GeneralDate> lstHoliday = otherCommonAlg.lstDateIsHoliday(appInfor.getCompanyID(),
+						appInfor.getEmployeeID(), new DatePeriod(loopDate,loopDate));
+				lstHoliday.stream().forEach(x -> {
+					lstReflectHoliday.add(x);
+				});	
 			}
 			if(workchangeData != null) {
 				workchangeData.getCommonPara().setAppDate(loopDate);
@@ -285,15 +296,9 @@ public class AppReflectManagerImpl implements AppReflectManager {
 		appRepo.updateWithVersion(appInfor);		
 		//暫定データの登録
 		if(!lstDate.isEmpty()) {
-			GeneralDate sD = appInfor.getStartDate().isPresent() ? appInfor.getStartDate().get() : appInfor.getAppDate();
-			GeneralDate eD = appInfor.getEndDate().isPresent() ? appInfor.getEndDate().get() : appInfor.getAppDate();
-			List<GeneralDate> lstHoliday = otherCommonAlg.lstDateIsHoliday(appInfor.getCompanyID(),
-					appInfor.getEmployeeID(), new DatePeriod(sD, eD));
-			lstHoliday.stream().forEach(x -> {
-				if(lstDate.contains(x)) {
-					lstDate.remove(x);
-				}
-			});
+			lstReflectHoliday.stream().forEach(x -> {
+				lstDate.remove(x);
+			});			
 			if(!lstDate.isEmpty()) {
 				interimRegister.registerDateChange(appInfor.getCompanyID(), appInfor.getEmployeeID(), lstDate);	
 			}				
