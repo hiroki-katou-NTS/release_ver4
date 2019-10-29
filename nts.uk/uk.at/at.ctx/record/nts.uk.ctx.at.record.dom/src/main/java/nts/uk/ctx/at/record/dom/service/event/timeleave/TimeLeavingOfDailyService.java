@@ -88,7 +88,7 @@ public class TimeLeavingOfDailyService {
 	
 		List<EditStateOfDailyPerformance> editStates = getEditStateByItems(working.getEditState(), wi.getEmployeeId(), wi.getYmd());
 		
-		if(isPairUpdatedByHand(editStates, 1) && isPairUpdatedByHand(editStates, 2)){
+		if(isPairUpdatedByHand(editStates, 1) || isPairUpdatedByHand(editStates, 2)){
 			return EventHandleResult.withResult(EventHandleAction.ABORT, working);
 		}
 
@@ -301,8 +301,8 @@ public class TimeLeavingOfDailyService {
 			}
 			
 			tl.getTimeLeavingWorks().stream().forEach(tlw -> {
-				//boolean cantRemove = editState.stream().anyMatch(es -> isHandUpdatePair(tlw.getWorkNo().v(), es));
-				//if(!cantRemove){
+//				boolean cantRemove = editState.stream().anyMatch(es -> isHandUpdatePair(tlw.getWorkNo().v(), es));
+//				if(!cantRemove){
 					tlw.getAttendanceStamp().ifPresent(as -> {
 						as.getStamp().ifPresent(ass -> {
 							if (isRemoveStamp(ass)) {
@@ -318,7 +318,7 @@ public class TimeLeavingOfDailyService {
 							}
 						});
 					});
-				//}
+//				}
 			});
 		}
 		return tl;
