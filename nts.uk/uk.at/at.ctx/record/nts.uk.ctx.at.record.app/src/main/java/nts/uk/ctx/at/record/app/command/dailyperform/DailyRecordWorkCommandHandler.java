@@ -632,11 +632,12 @@ public class DailyRecordWorkCommandHandler extends RecordHandler {
 	@SuppressWarnings({ "unchecked" })
 	private <T extends DailyWorkCommonCommand> void handleEditStates(boolean isUpdate, DailyRecordWorkCommand command) {
 		CommandFacade<T> handler = (CommandFacade<T>) getHandler(DAILY_EDIT_STATE_CODE, isUpdate);
-		List<ItemValue> itemValues = command.itemValues();
-		List<Integer> itemIds = itemValues.stream().map(x -> x.getItemId()).collect(Collectors.toList());
-		List<EditStateOfDailyPerformance> data = command.getEditState().getData().stream().filter(x -> itemIds.contains(x.getAttendanceItemId())).collect(Collectors.toList());
-		command.getEditState().getData().clear();
-		command.getEditState().updateDatas(data);
+//		List<ItemValue> itemValues = command.itemValues();
+		List<Integer> itemIds = command.itemValues().stream().map(x -> x.getItemId()).collect(Collectors.toList());
+//		List<EditStateOfDailyPerformance> data = command.getEditState().getData().stream().filter(x -> itemIds.contains(x.getAttendanceItemId())).collect(Collectors.toList());
+//		command.getEditState().getData().clear();
+//		command.getEditState().updateDatas(data);
+		command.getEditState().itemChanged(itemIds);
 		if (handler != null) {
 			handler.handle((T) command.getCommand(DAILY_EDIT_STATE_CODE));
 		}

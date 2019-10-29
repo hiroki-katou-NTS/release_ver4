@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -142,12 +143,27 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 
 	@Override
 	public void updateByKey(List<EditStateOfDailyPerformance> editStates) {
+		
 		this.commandProxy().updateAll(
 				editStates.stream()
 						.map(c -> new KrcdtDailyRecEditSet(new KrcdtDailyRecEditSetPK(c.getEmployeeId(),
 								c.getYmd(), c.getAttendanceItemId()), c.getEditStateSetting().value))
 						.collect(Collectors.toList()));
 	
+	}
+	
+	@Override
+	public void deleteExclude(List<EditStateOfDailyPerformance> editStates) {
+		Map<String, List<GeneralDate>> keys = editStates.stream().collect(Collectors.groupingBy(c -> c.getEmployeeId(), 
+				Collectors.collectingAndThen(Collectors.toList(), list -> list.stream().map(c -> c.getYmd()).collect(Collectors.toList()))));
+		
+		List<KrcdtDailyRecEditSet> olds = internalFinds(keys, c -> c);
+		
+		olds.removeIf(c -> editStates.stream().anyMatch(e -> e.getAttendanceItemId() == c.krcdtDailyRecEditSetPK.attendanceItemId
+																&& e.getEmployeeId().equals(c.krcdtDailyRecEditSetPK.employeeId) 
+																&& e.getYmd().equals(c.krcdtDailyRecEditSetPK.processingYmd)));
+		
+		this.commandProxy().removeAll(olds);
 	}
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
@@ -183,7 +199,12 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<EditStateOfDailyPerformance> finds(Map<String, List<GeneralDate>> param) {
-		List<EditStateOfDailyPerformance> result = new ArrayList<>();
+		
+		return internalFinds(param, c -> toDomain(c));
+	}
+	
+	private <T> List<T> internalFinds(Map<String, List<GeneralDate>> param, Function<KrcdtDailyRecEditSet, T> actions) {
+		List<T> result = new ArrayList<>();
 		StringBuilder query = new StringBuilder("SELECT a FROM KrcdtDailyRecEditSet a ");
 		query.append("WHERE a.krcdtDailyRecEditSetPK.employeeId IN :employeeId ");
 		query.append("AND a.krcdtDailyRecEditSetPK.processingYmd IN :date");
@@ -195,7 +216,7 @@ public class JpaEditStateOfDailyPerformanceRepository extends JpaRepository
 					.filter(c -> p.get(c.krcdtDailyRecEditSetPK.employeeId).contains(c.krcdtDailyRecEditSetPK.processingYmd))
 					.collect(Collectors.groupingBy(
 							c -> c.krcdtDailyRecEditSetPK.employeeId + c.krcdtDailyRecEditSetPK.processingYmd.toString()))
-					.entrySet().stream().map(c -> c.getValue().stream().map(x -> toDomain(x)).collect(Collectors.toList()))
+					.entrySet().stream().map(c -> c.getValue().stream().map(actions).collect(Collectors.toList()))
 					.flatMap(List::stream).collect(Collectors.toList()));
 		});
 		return result;

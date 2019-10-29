@@ -2,8 +2,10 @@ package nts.uk.screen.at.app.dailyperformance.correction.calctime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -31,10 +33,12 @@ import nts.uk.screen.at.app.dailyperformance.correction.checkdata.ValidatorDataD
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeName;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.DataDialogWithTypeProcessor;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.ParamDialog;
+import nts.uk.screen.at.app.dailyperformance.correction.dto.DPCellStateDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DPItemValue;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.calctime.DCCalcTime;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.calctime.DCCellEdit;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.type.TypeLink;
+import nts.uk.screen.at.app.dailyperformance.correction.text.DPText;
 import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
@@ -72,11 +76,14 @@ public class DailyCorrectCalcTimeService {
 		val checkMaster = checkHasMasterWorkTypeTime(companyId, dtoEdit, itemEdits);
 		if(!checkMaster.getLeft() || !checkMaster.getRight()) {
 			calcTime.setCellEdits(new ArrayList<>());
+			calcTime.setClearStates(new ArrayList<>());
 			calcTime.setDailyEdits(dailyEdits);
 			calcTime.setErrorFindMaster28(!checkMaster.getLeft());
 			calcTime.setErrorFindMaster29(!checkMaster.getRight());
 			return calcTime;
-		};
+		}
+		
+		List<EditStateOfDailyPerformanceDto> beforeEditState = dtoEdit.getEditStates() == null ? new ArrayList<>() : new ArrayList<>(dtoEdit.getEditStates());
 		
 		val itemValues = itemEdits.stream()
 				.map(x -> new ItemValue(x.getValue(),
@@ -137,9 +144,23 @@ public class DailyCorrectCalcTimeService {
 				return x;
 			}
 		}).collect(Collectors.toList());
+		
+		List<Integer> remainEditState = resultBaseDto.getEditStates() == null ? new ArrayList<>() 
+				: resultBaseDto.getEditStates().stream().map(c -> c.getAttendanceItemId()).collect(Collectors.toList());
+		beforeEditState.removeIf(c -> remainEditState.contains(c.getAttendanceItemId()));
+		
 		calcTime.setCellEdits(items.stream().map(x -> new DCCellEdit(itemEditCalc.getRowId(), "A" + x.getItemId(),
 				convertData(x.getValueType().value, x.getValue()))).collect(Collectors.toList()));
 		calcTime.setDailyEdits(dailyEditsResult);
+		calcTime.setClearStates(beforeEditState.stream().map(e -> {
+			String state = DPText.HAND_CORRECTION_MYSELF;
+			if (e.getEditStateSetting() == EditStateSetting.HAND_CORRECTION_OTHER.value) {
+				state = DPText.HAND_CORRECTION_OTHER;
+			} else if (e.getEditStateSetting() == EditStateSetting.REFLECT_APPLICATION.value) {
+				state = DPText.REFLECT_APPLICATION;
+			}
+			return new DPCellStateDto(itemEditCalc.getRowId(), "A" + e.getAttendanceItemId(), Arrays.asList(state));
+		}).collect(Collectors.toList()));
 		calcTime.setErrorFindMaster28(false);
 		calcTime.setErrorFindMaster29(false);
 		return calcTime;
@@ -154,6 +175,11 @@ public class DailyCorrectCalcTimeService {
 				.collect(Collectors.toList());
 
 		dtoEdit.getEditStates().addAll(dtoEditState);
+		
+		/** Remove duplicate attendance item */
+		Set<Integer> uniq = new HashSet<>();
+		dtoEdit.getEditStates().removeIf(c -> !uniq.add(c.getAttendanceItemId()));
+		
 		return dtoEdit;
 	}
 

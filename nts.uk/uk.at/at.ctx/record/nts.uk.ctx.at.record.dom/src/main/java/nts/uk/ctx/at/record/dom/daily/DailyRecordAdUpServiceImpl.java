@@ -232,6 +232,14 @@ public class DailyRecordAdUpServiceImpl implements DailyRecordAdUpService {
 	}
 
 	@Override
+	public void clearExcludeEditState(List<EditStateOfDailyPerformance> editState) {
+		if (editState.isEmpty())
+			return;
+		editStateRepo.deleteExclude(editState);
+
+	}
+
+	@Override
 	public void adUpAnyItem(Optional<AnyItemValueOfDaily> anyItemValue) {
 		if (!anyItemValue.isPresent())
 			return;

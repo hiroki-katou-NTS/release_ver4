@@ -1,7 +1,10 @@
 package nts.uk.ctx.at.record.app.command.dailyperform.editstate;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 //import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -15,6 +18,9 @@ public class EditStateOfDailyPerformCommand extends DailyWorkCommonCommand {
 
 	@Getter
 	private List<EditStateOfDailyPerformance> data = new ArrayList<>();
+
+	@Getter
+	private Set<Integer> changedItem = new HashSet<>();
 
 	@Override
 	public void setRecords(ConvertibleAttendanceItem item) {
@@ -30,6 +36,10 @@ public class EditStateOfDailyPerformCommand extends DailyWorkCommonCommand {
 			this.data.removeIf(es -> es.getAttendanceItemId() == d.getAttendanceItemId());
 			this.data.add(d);
 		}
+	}
+	
+	public void itemChanged(Collection<Integer> items){
+		changedItem.addAll(items);
 	}
 
 	@Override

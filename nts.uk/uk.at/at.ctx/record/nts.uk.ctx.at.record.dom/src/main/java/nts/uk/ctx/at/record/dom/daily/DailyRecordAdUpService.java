@@ -68,6 +68,8 @@ public interface DailyRecordAdUpService {
 	// ドメインモデル「日別実績の編集状態」を更新する
 	public void adUpEditState(List<EditStateOfDailyPerformance> editState);
 	
+	public void clearExcludeEditState(List<EditStateOfDailyPerformance> editState);
+	
 	//ドメインモデル「日別実績の任意項目」を更新する
 	public void adUpAnyItem( Optional<AnyItemValueOfDaily> anyItemValue);
 	

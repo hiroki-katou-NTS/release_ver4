@@ -4350,7 +4350,11 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         //__viewContext.vm.lstDomainEdit = value.dailyEdits;
                         _.each(value.cellEdits, itemResult => {
                             $("#dpGrid").mGrid("updateCell", itemResult.id, itemResult.item, itemResult.value, true, true);
+                        });
+                        _.each(value.clearStates, itemResult => {
+                            $("#dpGrid").mGrid("clearState", itemResult.rowId, itemResult.columnKey, itemResult.state);
                         })
+                        
                         nts.uk.ui.block.clear();
                         //dfd.resolve(value.cellEdits);
                         dfd.resolve({});
