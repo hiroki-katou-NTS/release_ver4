@@ -4,7 +4,7 @@ import nts.arc.primitive.StringPrimitiveValue;
 import nts.arc.primitive.constraint.StringMaxLength;
 
 /** 実績の備考 */
-@StringMaxLength(100)
+@StringMaxLength(200)
 public class RecordRemarks extends StringPrimitiveValue<RecordRemarks> {
 
 	/***/
