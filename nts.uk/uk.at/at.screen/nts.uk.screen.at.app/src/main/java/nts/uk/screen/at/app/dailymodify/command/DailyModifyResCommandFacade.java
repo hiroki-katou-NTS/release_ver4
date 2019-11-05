@@ -483,17 +483,6 @@ public class DailyModifyResCommandFacade {
 					AppContexts.user().employeeId(), true);
 			
 			validatorDataDaily.checkVerConfirmApproval(dataParent.getApprovalConfirmCache(), dataParent.getDataCheckSign(), dataParent.getDataCheckApproval(), dataParent.getItemValues());
-			// only insert check box
-			// insert sign
-			insertSign(dataParent.getDataCheckSign(), dailyEdits, dataParent.getDailyOlds(), updated);
-//			if(dataParent.getDataCheckSign() != null){
-//				updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
-//			}
-			// insert approval
-			Set<Pair<String, GeneralDate>> dataApprovalCheck = insertApproval(dataParent.getDataCheckApproval(), updated);
-//			if(dataParent.getDataCheckApproval() != null){
-//				updated.addAll(dataParent.getDataCheckApproval().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
-//			}
 			
 			if (dataParent.getSpr() != null) {
 				processor.insertStampSourceInfo(dataParent.getSpr().getEmployeeId(), dataParent.getSpr().getDate(),
@@ -512,6 +501,19 @@ public class DailyModifyResCommandFacade {
 				//SPR連携時の確認承認解除
 				clearConfirmApprovalService.clearConfirmApproval(dataParent.getSpr().getEmployeeId(), Arrays.asList(dataParent.getSpr().getDate()));
 			}
+			
+			// only insert check box
+			// insert sign
+			insertSign(dataParent.getDataCheckSign(), dailyEdits, dataParent.getDailyOlds(), updated);
+//			if(dataParent.getDataCheckSign() != null){
+//				updated.addAll(dataParent.getDataCheckSign().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
+//			}
+			// insert approval
+			Set<Pair<String, GeneralDate>> dataApprovalCheck = insertApproval(dataParent.getDataCheckApproval(), updated);
+//			if(dataParent.getDataCheckApproval() != null){
+//				updated.addAll(dataParent.getDataCheckApproval().stream().map(c -> Pair.of(c.getEmployeeId(), c.getDate())).collect(Collectors.toList()));
+//			}
+			
 			List<String> empList = updated.stream().map(x -> x.getLeft()).distinct().collect(Collectors.toList());
 			List<GeneralDate> empDate = updated.stream().map(x -> x.getRight()).sorted((x, y) -> x.compareTo(y)).distinct().collect(Collectors.toList());
 			Set<EmpAndDate> indentityChecked = dataParent.getDataCheckSign().isEmpty() ? new HashSet<>() : identificationRepository.findByListEmployeeID(new ArrayList<>(empList),
@@ -623,15 +625,17 @@ public class DailyModifyResCommandFacade {
 				Set<Pair<String, GeneralDate>> rowRemoveInsert = rowWillInsert.stream().filter(x -> !rowAfterCheck.contains(x)).collect(Collectors.toSet());
 				dataParent.setDataCheckSign(dataParent.getDataCheckSign().stream().filter(x -> !rowRemoveInsert.contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
 				dataParent.setDataCheckApproval(dataParent.getDataCheckApproval().stream().filter(x -> !rowRemoveInsert.contains(Pair.of(x.getEmployeeId(), x.getDate()))).collect(Collectors.toList()));
+				
+				//SPR連携時の確認承認解除
+				if(dataParent.getSpr() != null ) {
+					clearConfirmApprovalService.clearConfirmApproval(dataParent.getSpr().getEmployeeId(), Arrays.asList(dataParent.getSpr().getDate()));
+				}
+				
 				// insert sign
 				insertSignD(dataParent.getDataCheckSign(), resultIU.getLstDailyDomain(), dataParent.getDailyOlds(), updated);
 				// insert approval
 				insertApproval(dataParent.getDataCheckApproval(), updated);
 
-				//SPR連携時の確認承認解除
-				if(dataParent.getSpr() != null ) {
-					clearConfirmApprovalService.clearConfirmApproval(dataParent.getSpr().getEmployeeId(), Arrays.asList(dataParent.getSpr().getDate()));
-				}
 				if (dataParent.getSpr() != null && !lstResultReturnDailyError.containsKey(Pair.of(dataParent.getSpr().getEmployeeId(), dataParent.getSpr().getDate()))) {
 					processor.insertStampSourceInfo(dataParent.getSpr().getEmployeeId(), dataParent.getSpr().getDate(),
 							dataParent.getSpr().isChange31(), dataParent.getSpr().isChange34());
