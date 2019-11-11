@@ -42,4 +42,6 @@ public interface CalendarWorkPlaceRepository {
 	 * @param clendarworkplace
 	 */
 	Optional<CalendarWorkplace> findCalendarWorkplaceByDate(String workPlaceId,GeneralDate date);
+	
+	List<CalendarWorkplace> getLstByDateWorkAtr(String workPlaceId, GeneralDate date, int workingDayAtr);
 }

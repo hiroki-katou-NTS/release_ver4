@@ -41,4 +41,6 @@ public interface CalendarCompanyRepository {
 	 * @param clendarCompany
 	 */
 	Optional<CalendarCompany> findCalendarCompanyByDate(String companyId,GeneralDate date);
+	
+	List<CalendarCompany> getLstByDateWorkAtr(String companyId, GeneralDate date, int workingDayAtr);
 }
