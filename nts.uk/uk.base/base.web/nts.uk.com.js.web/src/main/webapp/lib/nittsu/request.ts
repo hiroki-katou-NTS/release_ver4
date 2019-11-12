@@ -257,8 +257,10 @@ module nts.uk.request {
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 // デッドロックの場合、待機時間を少しずつ増やしながらリトライ（とりあえず10回までとする）
                 if (jqXHR.responseJSON && jqXHR.responseJSON.deadLock === true && countRetryByDeadLock < 10) {
-                    countRetryByDeadLock++;
-                    setTimeout(ajaxFunc, 300 + countRetryByDeadLock * 100);
+//                    countRetryByDeadLock++;
+//                    setTimeout(ajaxFunc, 300 + countRetryByDeadLock * 100);
+                    jqXHR.responseJSON.message = "アクセスが集中しています。少し時間を空けてからもう一度登録してください";
+                    dfd.reject(jqXHR.responseJSON);
                     return;
                 }
                 AjaxErrorHandlers.main(jqXHR, textStatus, errorThrown);

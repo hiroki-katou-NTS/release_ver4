@@ -568,6 +568,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             nts.uk.request.jumpToTopPage();
                         });
 
+                    } else if (error.deadlock) {
+                        nts.uk.ui.dialog.alert(error.message);
                     } else if ((error.messageId == undefined && error.errors.length > 0)) {
                         nts.uk.ui.dialog.bundledErrors({ errors: error.errors }).then(function() {
                             nts.uk.request.jumpToTopPage();
@@ -1639,7 +1641,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 dfd.resolve();
             }).fail((data) => {
                 nts.uk.ui.block.clear();
-                nts.uk.ui.dialog.alert(data.message);
+                nts.uk.ui.dialog.alert(data.message);   
                 dfd.resolve();
             });
             dfd.promise();
@@ -2025,7 +2027,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 }
                 self.loadMIGrid(data);
                 dfd.resolve();
-            }).fail(() => {
+            }).fail((data) => {
+                nts.uk.ui.dialog.alert(data.message);   
                 dfd.reject();
             });
             return dfd.promise();
@@ -2367,12 +2370,14 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                                 nts.uk.request.jumpToTopPage();
                             });
 
+                        } else if (error.deadlock) {
+                            nts.uk.ui.dialog.alert(error.message);
                         } else if ((error.messageId == undefined && error.errors.length > 0)) {
                             nts.uk.ui.dialog.bundledErrors({ errors: error.errors }).then(function() {
                                 nts.uk.request.jumpToTopPage();
                             });
 
-                        };
+                        }
                     }
                     nts.uk.ui.block.clear();
                 });
@@ -2699,7 +2704,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                             self.displayNumberZero();
                             nts.uk.ui.block.clear();
                         }).fail(function(error) {
-                            nts.uk.ui.dialog.alert(error.message);
+                            nts.uk.ui.dialog.alert(error.message);  
                             nts.uk.ui.block.clear();
                         });
                     }
@@ -2763,7 +2768,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                                 nts.uk.ui.block.clear();
                             });
                         }).fail(function(error) {
-                            nts.uk.ui.dialog.alert(error.message);
+                            nts.uk.ui.dialog.alert(error.message);    
                             nts.uk.ui.block.clear();
                         });
                     }
@@ -3025,6 +3030,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 }, 1000);
                 dfd.resolve();
             }).fail(function(error) {
+                nts.uk.ui.dialog.alert(error.message);   
                 nts.uk.ui.block.clear();
             });
             return dfd.promise();
@@ -3108,7 +3114,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             nts.uk.ui.block.grayout();
             service.saveColumnWidth(command).done(() => {
                 nts.uk.ui.block.clear();
-            }).fail(() => {
+            }).fail((error) => {
+                nts.uk.ui.dialog.alert(error.message);   
                 nts.uk.ui.block.clear();
             });
         }
@@ -4359,12 +4366,16 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                         //dfd.resolve(value.cellEdits);
                         dfd.resolve({});
                     }).fail(error => {
-                        __viewContext.vm.listCheck28.push({ itemId: keyId, layoutCode: error.message, rowId: rowId });
                         nts.uk.ui.block.clear();
-                        nts.uk.ui.dialog.alertError({ messageId: error.messageId });
+                        __viewContext.vm.listCheck28.push({ itemId: keyId, layoutCode: error.message, rowId: rowId });
+                        if (error.deadlock) {
+                            nts.uk.ui.dialog.alertError(error.message);
+                        } else {
+                            nts.uk.ui.dialog.alertError({ messageId: error.messageId });    
+                        }
                         let e = document.createEvent("HTMLEvents");
                         e.initEvent("mouseup", false, true);
-                        $("#dpGrid")[0].dispatchEvent(e);
+                        $("#dpGrid")[0].dispatchEvent(e);    
                         dfd.resolve({ id: rowId, item: columnKey, value: value });
                     });
                 }
