@@ -19,6 +19,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
@@ -429,4 +430,49 @@ public class JpaBSWorkplaceRepository extends JpaRepository implements Workplace
 		}).collect(Collectors.toList());
 	}
 
+	private static final String GET_LST_BY_SDATE = "select c.bsymtWorkplaceHistPK.historyId from BsymtWorkplaceHist c"
+			+ " WHERE c.bsymtWorkplaceHistPK.cid = :companyId"
+			+ " AND c.bsymtWorkplaceHistPK.wkpid = :wkpId"
+			+ " AND c.strD = :strDate";
+	private static final String GET_LST_BY_EDATE = "select c from BsymtWorkplaceHist c"
+			+ " WHERE c.bsymtWorkplaceHistPK.cid = :companyId"
+			+ " AND c.bsymtWorkplaceHistPK.wkpid = :wkpId"
+			+ " AND c.endD = :endDate";
+	private static final String DELETE_HIST_BY_SDATE = "DELETE FROM BsymtWorkplaceHist c"
+			+ " WHERE c.bsymtWorkplaceHistPK.cid = :companyId"
+			+ " AND c.bsymtWorkplaceHistPK.historyId = :hstID";
+	private static final String DELETE_WKP_BY_SDATE = "DELETE FROM BsymtWorkplaceInfo c"
+			+ " WHERE c.bsymtWorkplaceInfoPK.cid = :companyId"
+			+ " AND c.bsymtWorkplaceInfoPK.historyId = :hstID";
+	@Override
+	public void deleteWorkplacesBySDate(String companyId, String wkpId, GeneralDate strDate) {
+		Optional<String> hstID = this.queryProxy().query(GET_LST_BY_SDATE, Object.class)
+				.setParameter("companyId", companyId)
+				.setParameter("wkpId", wkpId)
+				.setParameter("strDate", strDate)
+				.getSingle(c -> c.toString());
+		if(!hstID.isPresent()){
+			return;
+		}
+		this.getEntityManager().createQuery(DELETE_HIST_BY_SDATE)
+				.setParameter("companyId", companyId)
+				.setParameter("hstID", hstID.get())
+				.executeUpdate();
+		
+		this.getEntityManager().createQuery(DELETE_WKP_BY_SDATE)
+				.setParameter("companyId", companyId)
+				.setParameter("hstID", hstID.get())
+				.executeUpdate();
+
+		GeneralDate endDate = strDate.addDays(-1);
+		Optional<BsymtWorkplaceHist> hstIDPre = this.queryProxy().query(GET_LST_BY_EDATE, BsymtWorkplaceHist.class)
+				.setParameter("companyId", companyId)
+				.setParameter("wkpId", wkpId)
+				.setParameter("endDate", endDate)
+				.getSingle(c -> c);
+		if(hstIDPre.isPresent()){
+			hstIDPre.get().setEndD(GeneralDate.max());
+			this.commandProxy().update(hstIDPre);
+		}
+	}
 }

@@ -11,6 +11,7 @@ module nts.uk.com.view.cmm011.b {
             startDate: KnockoutObservable<string>;
             endDate: KnockoutObservable<string>;
             enable: KnockoutObservable<boolean>;
+            removedFlg: KnockoutObservable<boolean> = ko.observable(false);
             
             constructor() {
                 let self = this;
@@ -169,6 +170,15 @@ module nts.uk.com.view.cmm011.b {
              * close
              */
             public close() {
+                let self = this;
+                if(self.removedFlg()){
+                    let dateRange: any = nts.uk.ui.windows.getShared("DateRange");
+                    let startDate = self.workplaceHistory().getSelectedHistoryByHistId().startDate;
+                    if(dateRange.start < startDate){
+                        nts.uk.ui.windows.close();
+                    }
+                    self.shareData();
+                }
                 nts.uk.ui.windows.close();
             }
             
@@ -272,6 +282,7 @@ module nts.uk.com.view.cmm011.b {
                     
                     service.removeWkpConfig(command).done(() => {
                         self.findAllHistory();
+                        self.parentModel.removedFlg(true);
                     }).fail((res: any) => {
 //                        self.parentModel.showMessageError(res);
                         nts.uk.ui.dialog.bundledErrors(res);

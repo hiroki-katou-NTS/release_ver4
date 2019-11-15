@@ -15,7 +15,7 @@ import javax.transaction.Transactional;
 import nts.arc.layer.app.command.CommandHandler;
 import nts.arc.layer.app.command.CommandHandlerContext;
 import nts.uk.ctx.bs.employee.app.command.workplace.config.service.WkpConfigService;
-import nts.uk.ctx.bs.employee.app.command.workplace.service.WorkplaceService;
+import nts.uk.ctx.bs.employee.dom.workplace.WorkplaceRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfig;
 import nts.uk.ctx.bs.employee.dom.workplace.config.WorkplaceConfigRepository;
 import nts.uk.ctx.bs.employee.dom.workplace.config.info.WorkplaceConfigInfo;
@@ -39,12 +39,15 @@ public class DeleteWkpConfigCommandHandler extends CommandHandler<DeleteWkpConfi
     private WorkplaceConfigInfoRepository wkpConfigInfoRepo;
     
     /** The wkp service. */
-    @Inject
-    private WorkplaceService wkpService;
+//    @Inject
+//    private WorkplaceService wkpService;
     
     /** The wkp config service. */
     @Inject
     private WkpConfigService wkpConfigService;
+    
+    @Inject
+    private WorkplaceRepository repoWkp;
     
     /* (non-Javadoc)
      * @see nts.arc.layer.app.command.CommandHandler#handle(nts.arc.layer.app.command.CommandHandlerContext)
@@ -88,8 +91,7 @@ public class DeleteWkpConfigCommandHandler extends CommandHandler<DeleteWkpConfi
         
         // remove workplace of history
         lstWkpId.forEach((wkpId) -> {
-            this.wkpService.removeWkpHistory(companyId, wkpId,
-                    wkpConfig.getWkpConfigHistoryLatest().span().start());
+        	repoWkp.deleteWorkplacesBySDate(companyId, wkpId, wkpConfig.getWkpConfigHistoryLatest().span().start());
         });
     }
 

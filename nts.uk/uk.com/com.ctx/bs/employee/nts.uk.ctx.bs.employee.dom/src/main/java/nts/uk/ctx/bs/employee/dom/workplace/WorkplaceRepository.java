@@ -111,4 +111,12 @@ public interface WorkplaceRepository {
 	 * @return the list
 	 */
 	List<Workplace> findWorkplacesByDate(String companyId, GeneralDate baseDate);
+	/**
+	 * get list wkp by SDate
+	 * @param companyId
+	 * @param lstWkpId
+	 * @param strDate
+	 * @return
+	 */
+	void deleteWorkplacesBySDate(String companyId, String wkpId, GeneralDate strDate);
 }
