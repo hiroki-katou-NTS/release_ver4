@@ -388,17 +388,37 @@ public class JpaApplicationRepository_New extends JpaRepository implements Appli
 	public List<Application_New> getByPeriodReflectType(String sid, DatePeriod dateData, List<Integer> reflect,
 			List<Integer> appType) {
 		List<Application_New> resultList = new ArrayList<>();
-		CollectionUtil.split(reflect, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstReflect -> {
-			CollectionUtil.split(appType, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstAppType -> {
-				resultList.addAll(this.queryProxy().query(SELECT_BY_SID_PERIOD_APPTYPE, KrqdtApplication_New.class)
-									  .setParameter("employeeID", sid)
-									  .setParameter("startDate", dateData.start())
-									  .setParameter("endDate", dateData.end())
-									  .setParameter("stateReflectionReals", lstReflect)
-									  .setParameter("appTypes", lstAppType)
-									  .getList(x -> x.toDomain()));
-			});
-		});
+		/*CollectionUtil.split(reflect, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstReflect -> {最大２
+			CollectionUtil.split(appType, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, lstAppType -> {最大１５*/
+		String subIn1 = NtsStatement.In.createParamsString(appType);
+		String subIn2 = NtsStatement.In.createParamsString(reflect);
+		String sql = "SELECT * FROM KRQDT_APPLICATION "
+				+ "WHERE APPLICANTS_SID = ? "
+				+ " AND APP_START_DATE <= ? "
+				+ " AND APP_END_DATE >= ? "
+				+ " AND APP_TYPE IN (" + subIn1 + ") "
+				+ " AND REFLECT_PER_STATE IN (" + subIn2 + ") "
+				+ " ORDER BY INPUT_DATE ASC";
+		try(val stmt = this.connection().prepareStatement(sql)){
+			
+			stmt.setString(1, sid);
+			stmt.setDate(2, Date.valueOf(dateData.end().localDate()));
+			stmt.setDate(3, Date.valueOf(dateData.start().localDate()));
+			int inCount = 3;
+			for (int i = 0; i < appType.size(); i++) {
+				stmt.setInt(inCount + i + 1, appType.get(i));
+			}
+			inCount +=  appType.size();
+			for (int i = 0; i < reflect.size(); i++) {
+				stmt.setInt(inCount + i + 1, reflect.get(i));
+			}
+			List<Application_New> resultListTmp = entityToDomain(stmt);
+			resultList.addAll(resultListTmp);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+			/*});
+		});*/
 		return resultList;
 	}
 	/**

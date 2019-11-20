@@ -27,7 +27,7 @@ public interface InterimRemainOffPeriodCreateData {
 	 * @param inputInfor
 	 * @return
 	 */
-	public InterimRemainCreateInfor extractDataOfDate(GeneralDate baseDate, InterimRemainCreateDataInputPara inputInfor);
+	public InterimRemainCreateInfor extractDataOfDate(String cid, GeneralDate baseDate, InterimRemainCreateDataInputPara inputInfor);
 	/**
 	 * 雇用履歴と休暇管理設定を取得する
 	 * @param cid

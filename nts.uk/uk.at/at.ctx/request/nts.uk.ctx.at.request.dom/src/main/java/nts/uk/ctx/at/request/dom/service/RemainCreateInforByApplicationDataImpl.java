@@ -59,8 +59,8 @@ public class RemainCreateInforByApplicationDataImpl implements RemainCreateInfor
 	private OvertimeRepository overtimeRepo;
 	@Inject
 	private AppHolidayWorkRepository holidayWorkRepo; 
-//	@Inject
-//	private CompltLeaveSimMngRepository compltLeaveRepo;
+	@Inject
+	private IAppWorkChangeRepository workChangeRepos;
 	
 	@Override
 	public List<AppRemainCreateInfor> lstRemainDataFromApp(String cid, String sid, DatePeriod dateData) {
@@ -205,5 +205,13 @@ public class RemainCreateInforByApplicationDataImpl implements RemainCreateInfor
 			lstOutputData.add(outData);
 		});
 		return lstOutputData;
+	}
+	@Override
+	public Integer excludeHolidayAtr(String cid, String appID) {
+		Optional<AppWorkChange> data = workChangeRepos.getAppworkChangeById(cid, appID);
+		if(data.isPresent()) {
+			return data.get().getExcludeHolidayAtr();
+		}
+		return null;
 	}
 }

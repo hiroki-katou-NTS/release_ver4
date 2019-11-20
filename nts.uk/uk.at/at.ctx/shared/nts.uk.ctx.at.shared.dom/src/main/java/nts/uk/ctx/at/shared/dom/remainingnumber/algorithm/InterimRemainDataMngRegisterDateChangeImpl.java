@@ -63,9 +63,37 @@ public class InterimRemainDataMngRegisterDateChangeImpl implements InterimRemain
 		List<RecordRemainCreateInfor> lstRecordData = remainRecordData.lstRecordRemainData(cid, sid, lstDate);
 		//「残数作成元の勤務予定を取得する」
 		List<ScheRemainCreateInfor> lstScheData = remainScheData.createRemainInfor(cid, sid, lstDate);
-		//「残数作成元の申請を取得する」
-		List<AppRemainCreateInfor> lstAppData = remainAppData.lstRemainDataFromApp(cid, sid, lstDate);
-		
+		//雇用履歴と休暇管理設定を取得する
+		Optional<ComSubstVacation> comSetting = subRepos.findById(cid);
+		CompensatoryLeaveComSetting leaveComSetting = leaveSetRepos.find(cid);
+		CompanyHolidayMngSetting comHolidaySetting = new CompanyHolidayMngSetting(cid, comSetting, leaveComSetting);
+		for(GeneralDate loopDate : lstDate){
+			DatePeriod datePeriod = new DatePeriod(loopDate, loopDate);
+			//「残数作成元の申請を取得する」
+			List<AppRemainCreateInfor> lstAppData = remainAppData.lstRemainDataFromApp(cid, sid, datePeriod);
+			clearInterimWhenRecordScheAppNotData(sid, lstDate, lstRecordData, lstScheData, lstAppData);
+			//指定期間の暫定残数管理データを作成する
+			InterimRemainCreateDataInputPara inputData = new InterimRemainCreateDataInputPara(cid, 
+					sid, 
+					datePeriod, 
+					lstRecordData, 
+					lstScheData,
+					lstAppData,
+					false);
+			mngRegister.registryInterimDataMng(inputData, comHolidaySetting);
+		}
+	}
+	/**
+	 * スケジュールのデータがないし実績データがないし、申請を削除の場合暫定データがあったら削除します。
+	 * @param sid
+	 * @param lstDate
+	 * @param lstRecordData
+	 * @param lstScheData
+	 * @param lstAppData
+	 */
+	private void clearInterimWhenRecordScheAppNotData(String sid, List<GeneralDate> lstDate,
+			List<RecordRemainCreateInfor> lstRecordData, List<ScheRemainCreateInfor> lstScheData,
+			List<AppRemainCreateInfor> lstAppData) {
 		if(lstRecordData.isEmpty()
 				&& lstScheData.isEmpty()
 				&& (lstAppData.isEmpty() || lstAppData.size() < lstDate.size())) {
@@ -114,24 +142,6 @@ public class InterimRemainDataMngRegisterDateChangeImpl implements InterimRemain
 			if(lstAppData.isEmpty()) {
 				return;	
 			}
-		}
-		//雇用履歴と休暇管理設定を取得する
-		Optional<ComSubstVacation> comSetting = subRepos.findById(cid);
-		CompensatoryLeaveComSetting leaveComSetting = leaveSetRepos.find(cid);
-		CompanyHolidayMngSetting comHolidaySetting = new CompanyHolidayMngSetting(cid, comSetting, leaveComSetting);
-		
-		//this.managedParallelWithContext.forEach(lstDate, loopDate -> {
-		for(GeneralDate loopDate : lstDate){
-			DatePeriod datePeriod = new DatePeriod(loopDate, loopDate);
-			//指定期間の暫定残数管理データを作成する
-			InterimRemainCreateDataInputPara inputData = new InterimRemainCreateDataInputPara(cid, 
-					sid, 
-					datePeriod, 
-					lstRecordData, 
-					lstScheData,
-					lstAppData,
-					false);
-			mngRegister.registryInterimDataMng(inputData, comHolidaySetting);
 		}
 	}
 

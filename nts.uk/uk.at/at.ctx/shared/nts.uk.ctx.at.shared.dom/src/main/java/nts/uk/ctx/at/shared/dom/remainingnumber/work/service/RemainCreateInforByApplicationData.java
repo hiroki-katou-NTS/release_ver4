@@ -23,5 +23,11 @@ public interface RemainCreateInforByApplicationData {
 	 * @return
 	 */
 	List<AppRemainCreateInfor> lstRemainDataFromApp(String cid, String sid, List<GeneralDate> dates);
+	/**
+	 * 休日を除外する 1: 除く, 0: 除かない
+	 * @param appID
+	 * @return
+	 */
+	Integer excludeHolidayAtr(String cid,String appID); 
 
 }

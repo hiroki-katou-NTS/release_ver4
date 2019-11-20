@@ -70,7 +70,7 @@ public class ImplementationResultWebService extends WebService {
 	public AsyncTaskInfo executeTask(CheckProcessCommand command) {
 		MutableValue<AsyncTaskInfo> result = new MutableValue<>();
 		
-		if (this.batchServer.exists()) {
+		/*if (this.batchServer.exists()) {
 			System.out.println("Call batch service  !");
 			val webApi = this.batchServer.webApi(PathToWebApi.at("/batch/task-result"), CheckProcessCommand.class, ImplResultDto.class);
 			this.batchServer.request(webApi, c -> c.entity(command)
@@ -85,7 +85,8 @@ public class ImplementationResultWebService extends WebService {
 		} else {
 			System.out.println("No call batch service  !");
 			result.set(queryExecutionStatusCommandHandler.handle(command));
-		}
+		}*/
+		result.set(queryExecutionStatusCommandHandler.handle(command));
 		return result.get();
 	}
 
