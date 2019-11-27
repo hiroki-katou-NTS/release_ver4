@@ -397,6 +397,7 @@ module nts.uk.at.view.kdw001.e.viewmodel {
                 let data = _.map(res.listResult,function(item:any){
                    return {id: i++, disposalDay:item.disposalDay,messageError:item.messageError,personCode:item.personCode,personName:item.personName}; 
                 });
+                data = _.orderBy(data, ["personCode", "disposalDay"], ["asc", "asc"]);
                 self.errorMessageInfo(data);
                 self.errorMessageInfo.valueHasMutated();
                 self.dataExport(data);
@@ -427,6 +428,7 @@ module nts.uk.at.view.kdw001.e.viewmodel {
                 let data = _.map(res.listResult,function(item:any){
                    return {id: i++, disposalDay:item.disposalDay,messageError:item.messageError,personCode:item.personCode,personName:item.personName}; 
                 });
+                data = _.orderBy(data, ["personCode", "disposalDay"], ["asc", "asc"]);
                 ko.utils.arrayPushAll(self.errorMessageInfo, data);
                 self.errorMessageInfo.valueHasMutated();
                 self.dataExport.push(data);
