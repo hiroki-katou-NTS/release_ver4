@@ -257,7 +257,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 				//データ更新
 				for(ManageCalcStateAndResult stateInfo : afterCalcRecord.getLst()) {
 					
-					try {
+					try { //run 1
 						//update record
 						updateRecord(stateInfo.integrationOfDaily);
 						clearConfirmApproval(stateInfo.integrationOfDaily,iPUSOptTemp,approvalSetTemp);
@@ -267,16 +267,26 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 						if (!isOptimisticLock) {
 							throw ex;
 						}
-						//create error message
-						ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
-								new ErrMessageResource("024"), EnumAdaptor.valueOf(1, ExecutionContent.class), 
-								stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(),
-								new ErrMessageContent(TextResource.localize("Msg_1541")));
-						//regist error message 
-						this.errMessageInfoRepository.add(employmentErrMes);
-						
-						
-						isHappendOptimistLockError.add(true);
+						try {//run 2
+							//update record
+							updateRecord(stateInfo.integrationOfDaily);
+							clearConfirmApproval(stateInfo.integrationOfDaily,iPUSOptTemp,approvalSetTemp);
+							upDateCalcState(stateInfo);
+							
+						}catch (Exception ex2) {
+							boolean isOptimisticLock2 = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
+							if (!isOptimisticLock2) {
+								throw ex;
+							}
+							//create error message
+							ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
+									new ErrMessageResource("024"), EnumAdaptor.valueOf(1, ExecutionContent.class), 
+									stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(),
+									new ErrMessageContent(TextResource.localize("Msg_1541")));
+							//regist error message 
+							this.errMessageInfoRepository.add(employmentErrMes);
+							isHappendOptimistLockError.add(true);
+						}
 					}
 				}
 				
