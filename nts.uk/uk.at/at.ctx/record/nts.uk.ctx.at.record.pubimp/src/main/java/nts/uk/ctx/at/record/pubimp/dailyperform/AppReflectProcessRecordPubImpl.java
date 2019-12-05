@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+
+import lombok.extern.slf4j.Slf4j;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.approvalmanagement.ApprovalProcessingUseSetting;
@@ -71,6 +73,7 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.work.service.RemainCreateInforBy
 import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 @Stateless
+@Slf4j
 public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPub{
 	@Inject
 	private PreGoBackReflectService preGobackReflect;
@@ -112,12 +115,14 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 		Optional<WorkInfoOfDailyPerformance> optDaily = workRepository.find(para.getSid(), para.getYmd());
 		if(!optDaily.isPresent()) {
 			output.setRecordReflect(false);
+			log.info("反映処理：　社員ID　＝　" + para.getSid() + " 申請日：　" + para.getYmd() +" 反映前チェックのエラー：　日別実績なし");
 		}
 	
 		//ドメインモデル「勤務予定基本情報」を取得する(get domain model)
 		List<ScheRemainCreateInfor> lstSche = scheData.createRemainInfor(para.getCid(), para.getSid(), Arrays.asList(para.getYmd()));
 		if(lstSche.isEmpty()) {
 			output.setScheReflect(false);
+			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　勤務予定基本なし");
 		}
 		//反映状況によるチェック
 		if(output.isScheReflect()) {
@@ -138,6 +143,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 		}
 		
 		if(!output.isScheReflect() && !output.isRecordReflect()) {
+			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　申請の反映状態は反映待ちじゃない");
 			return output;
 		}
 		//ドメインモデル「申請承認設定」.データが確立されている場合の承認済申請の反映のチェックをする
@@ -147,6 +153,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 		//アルゴリズム「実績ロックされているか判定する」を実行する
 		Closure closureData = closureService.getClosureDataByEmployee(para.getSid(), para.getYmd());
 		if(closureData == null) {
+			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　社員に対応する処理締めがない");
 			return new ScheAndRecordIsReflectPub(false, false);
 		}
 		LockStatus lockStatus = resultLock.getDetermineActualLocked(para.getCid(),
@@ -154,6 +161,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 				closureData.getClosureId().value,
 				PerformanceType.DAILY);
 		if(lockStatus == LockStatus.LOCK) {
+			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　実績ロックされている");
 			return new ScheAndRecordIsReflectPub(false, false);
 		}
 		//確定状態によるチェック
@@ -340,6 +348,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 				chkParam.getAppDate(),
 				chkParam.getAppDate());
 		if(!findByEmployeeID.isEmpty()) {
+			log.info("反映処理：　社員ID　＝　" + chkParam.getSid() + " 本人確認をした日　" + chkParam.getAppDate());
 			return false; 
 		}
 		return output;

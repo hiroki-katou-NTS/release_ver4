@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 
 import org.eclipse.persistence.exceptions.OptimisticLockException;
 
+import lombok.extern.slf4j.Slf4j;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.error.ThrowableAnalyzer;
@@ -66,6 +67,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.service.GetClosureStartForEmplo
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
+@Slf4j
 public class AppReflectManagerImpl implements AppReflectManager {
 	@Inject
 	private OvertimeRepository overTimeRepo;
@@ -115,6 +117,8 @@ public class AppReflectManagerImpl implements AppReflectManager {
 		} catch(Exception ex) {
 			boolean isError = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
 			if(!isError) {
+				log.info(isError + " 反映処理：　申請ID　＝　" + appInfor.getAppID() + " 申請者ID　＝　" + appInfor.getEmployeeID());
+				//return khong dung duoc do neu 1 ngay co nhieu don thi no cu tim trang thai don haneimachi lam khong ket thuc duoc vong lap
 				throw ex;
 			}		
 			if(!excLogId.isEmpty()) {
@@ -122,6 +126,7 @@ public class AppReflectManagerImpl implements AppReflectManager {
 			}
 			int newCountRerun = currentRecord + 1;
 			if (newCountRerun == 10) {
+				log.info(isError + " 反映処理：　申請ID　＝　" + appInfor.getAppID() + " 申請者ID　＝　" + appInfor.getEmployeeID());
 				throw ex;
 			}
 			try {
