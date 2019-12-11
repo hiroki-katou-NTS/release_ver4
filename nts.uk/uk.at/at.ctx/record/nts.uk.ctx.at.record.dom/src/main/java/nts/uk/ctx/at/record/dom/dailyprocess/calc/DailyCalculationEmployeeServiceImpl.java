@@ -45,6 +45,7 @@ import nts.uk.ctx.at.record.dom.workinformation.enums.CalculationState;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagement;
 import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagementRepository;
+import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerErrorRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.condition.service.ErAlCheckService;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.IdentityProcessUseSet;
@@ -268,9 +269,12 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 							throw ex;
 						}
 						try {//run 2
-							//update record
+							//get data
+							long newVer = workInformationRepository.getVer(employeeId, stateInfo.getIntegrationOfDaily().getWorkInformation().getYmd());
+							stateInfo.getIntegrationOfDaily().getWorkInformation().setVersion(newVer);
+							// update record
 							updateRecord(stateInfo.integrationOfDaily);
-							clearConfirmApproval(stateInfo.integrationOfDaily,iPUSOptTemp,approvalSetTemp);
+							clearConfirmApproval(stateInfo.integrationOfDaily, iPUSOptTemp, approvalSetTemp);
 							upDateCalcState(stateInfo);
 							
 						}catch (Exception ex2) {
