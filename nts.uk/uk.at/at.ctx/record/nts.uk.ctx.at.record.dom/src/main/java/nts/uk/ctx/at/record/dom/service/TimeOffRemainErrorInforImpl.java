@@ -250,7 +250,7 @@ public class TimeOffRemainErrorInforImpl implements TimeOffRemainErrorInfor{
 		BreakDayOffRemainMngParam remainParam = new BreakDayOffRemainMngParam(param.getCid(),
 				param.getSid(),
 				param.getAggDate(),
-				false,
+				true,
 				param.getObjDate().end(),
 				true,
 				interimMngBreakDayOff,
