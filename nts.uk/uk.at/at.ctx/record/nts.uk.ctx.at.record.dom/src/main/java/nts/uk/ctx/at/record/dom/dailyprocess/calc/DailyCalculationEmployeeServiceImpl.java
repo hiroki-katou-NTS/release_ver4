@@ -235,72 +235,127 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 					return;
 				}
 			}
-			//日別実績(WORK取得)
-			List<IntegrationOfDaily> createList = createIntegrationOfDaily(employeeId,datePeriod);
+//			//日別実績(WORK取得)
+//			List<IntegrationOfDaily> createList = createIntegrationOfDaily(employeeId,datePeriod);
 			
-			//締め一覧取得
-			List<ClosureStatusManagement> closureList = getClosureList(Arrays.asList(employeeId), datePeriod);
+//			//締め一覧取得
+//			List<ClosureStatusManagement> closureList = getClosureList(Arrays.asList(employeeId), datePeriod);
 			
-			ManageProcessAndCalcStateResult afterCalcRecord;
-			if (createList.isEmpty()) {
+			ManageProcessAndCalcStateResult afterCalcRecord =null;
+			Pair<Integer, ManageProcessAndCalcStateResult> result = null;
+			
+			
+			//lan 1
+			result = runWhenOptimistLockError(cid, employeeId, datePeriod, reCalcAtr, empCalAndSumExecLogID, afterCalcRecord, iPUSOptTemp, approvalSetTemp, false);
+			if(result.getLeft() == 0) { 
 				counter.accept(ProcessState.SUCCESS);
-				
-				//１：日別計算(ENUM)
-				//0:計算完了
-				targetPersonRepository.updateWithContent(employeeId, empCalAndSumExecLogID, 1, 0);
-			} else {
-				//計算処理を呼ぶ
-				afterCalcRecord = calculateDailyRecordServiceCenter.calculateForManageState(createList,closureList,reCalcAtr,empCalAndSumExecLogID);
-				//１：日別計算(ENUM)
-				//0:計算完了
-				targetPersonRepository.updateWithContent(employeeId, empCalAndSumExecLogID, 1, 0);
-
-				//データ更新
-				for(ManageCalcStateAndResult stateInfo : afterCalcRecord.getLst()) {
-					
-					try { //run 1
-						//update record
-						updateRecord(stateInfo.integrationOfDaily);
-						clearConfirmApproval(stateInfo.integrationOfDaily,iPUSOptTemp,approvalSetTemp);
-						upDateCalcState(stateInfo);
-					} catch (Exception ex) {
-						boolean isOptimisticLock = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
-						if (!isOptimisticLock) {
-							throw ex;
-						}
-						try {//run 2
-							//get data
-							long newVer = workInformationRepository.getVer(employeeId, stateInfo.getIntegrationOfDaily().getWorkInformation().getYmd());
-							stateInfo.getIntegrationOfDaily().getWorkInformation().setVersion(newVer);
-							// update record
-							updateRecord(stateInfo.integrationOfDaily);
-							clearConfirmApproval(stateInfo.integrationOfDaily, iPUSOptTemp, approvalSetTemp);
-							upDateCalcState(stateInfo);
-							
-						}catch (Exception ex2) {
-							boolean isOptimisticLock2 = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
-							if (!isOptimisticLock2) {
-								throw ex;
-							}
-							//create error message
-							ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
-									new ErrMessageResource("024"), EnumAdaptor.valueOf(1, ExecutionContent.class), 
-									stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(),
-									new ErrMessageContent(TextResource.localize("Msg_1541")));
-							//regist error message 
-							this.errMessageInfoRepository.add(employmentErrMes);
-							isHappendOptimistLockError.add(true);
-						}
-					}
-				}
-				
-				//暫定データ
-				interimData.registerDateChange(cid , employeeId, datePeriod.datesBetween());
-				//
-				counter.accept(afterCalcRecord.getPs() == ProcessState.SUCCESS?ProcessState.SUCCESS:ProcessState.INTERRUPTION);
+				return;
 			}
+			
+			if(result.getLeft() == 1) {  //co loi haita
+				result = runWhenOptimistLockError(cid, employeeId, datePeriod, reCalcAtr, empCalAndSumExecLogID, afterCalcRecord, iPUSOptTemp, approvalSetTemp, true);
+				if(result.getLeft() == 1) { 
+					isHappendOptimistLockError.add(true);
+				}
+			}
+			
+			//暫定データ
+			interimData.registerDateChange(cid , employeeId, datePeriod.datesBetween());
+			//
+			counter.accept(result.getRight().getPs() == ProcessState.SUCCESS?ProcessState.SUCCESS:ProcessState.INTERRUPTION);
+			targetPersonRepository.updateWithContent(employeeId, empCalAndSumExecLogID, 1, 0);
+			
+			
+			
+//			if (createList.isEmpty()) {
+//				counter.accept(ProcessState.SUCCESS);
+//				
+//				//１：日別計算(ENUM)
+//				//0:計算完了
+//				targetPersonRepository.updateWithContent(employeeId, empCalAndSumExecLogID, 1, 0);
+//			} else {
+//				//計算処理を呼ぶ
+////				afterCalcRecord = calculateDailyRecordServiceCenter.calculateForManageState(createList,closureList,reCalcAtr,empCalAndSumExecLogID);
+//				//１：日別計算(ENUM)
+//				//0:計算完了
+//				targetPersonRepository.updateWithContent(employeeId, empCalAndSumExecLogID, 1, 0);
+//				boolean checkOptimisticLock = false;
+//				Pair<List<Boolean>, ManageProcessAndCalcStateResult> result = null;
+//				try {
+//					result = runWhenOptimistLockError(cid, employeeId, datePeriod, reCalcAtr, empCalAndSumExecLogID,afterCalcRecord,iPUSOptTemp,approvalSetTemp,false);
+//				}catch (Exception ex) {	
+//					boolean isOptimisticLock = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class)
+//							.isPresent();
+//					if (!isOptimisticLock) {
+//						throw ex;
+//					}
+//					checkOptimisticLock = true;
+//				}
+//				if(checkOptimisticLock) {
+//					result = runWhenOptimistLockError(cid,employeeId, datePeriod, reCalcAtr, empCalAndSumExecLogID,afterCalcRecord,iPUSOptTemp,approvalSetTemp,true);
+//				}
+//				isHappendOptimistLockError.addAll(result.getLeft());
+//				
+//				//暫定データ
+//				interimData.registerDateChange(cid , employeeId, datePeriod.datesBetween());
+//				//
+//				counter.accept(result.getRight().getPs() == ProcessState.SUCCESS?ProcessState.SUCCESS:ProcessState.INTERRUPTION);
+//			}
 		});
 		return isHappendOptimistLockError;
+	}
+	
+	private Pair<Integer, ManageProcessAndCalcStateResult> runWhenOptimistLockError(String cid, String employeeId,
+			DatePeriod datePeriod, ExecutionType reCalcAtr, String empCalAndSumExecLogID,
+			ManageProcessAndCalcStateResult afterCalcRecord, Optional<IdentityProcessUseSet> iPUSOptTemp,
+			Optional<ApprovalProcessingUseSetting> approvalSetTemp,boolean runOptimistLock) {
+		//if check = 0 : createListNew : null
+		//if check = 1 : has error optimistic lock (lan 1)
+		//if check = 2 : done
+		Integer check =0;
+		
+//		List<Boolean> isHappendOptimistLockError = new ArrayList<>();
+
+		List<IntegrationOfDaily> createListNew = createIntegrationOfDaily(employeeId, datePeriod);
+		if (createListNew.isEmpty()) {
+			return Pair.of(0, afterCalcRecord);
+		}
+
+		// 締め一覧取得
+		List<ClosureStatusManagement> closureListNew = getClosureList(Arrays.asList(employeeId), datePeriod);
+
+		afterCalcRecord = calculateDailyRecordServiceCenter.calculateForManageState(createListNew, closureListNew,
+				reCalcAtr, empCalAndSumExecLogID);
+		
+		// データ更新
+		for (ManageCalcStateAndResult stateInfo : afterCalcRecord.getLst()) {
+			try {
+				// update record
+				updateRecord(stateInfo.integrationOfDaily);
+				clearConfirmApproval(stateInfo.integrationOfDaily, iPUSOptTemp, approvalSetTemp);
+				upDateCalcState(stateInfo);
+			} catch (Exception ex) {
+				boolean isOptimisticLock = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class)
+						.isPresent();
+				if (!isOptimisticLock) {
+					throw ex;
+				}
+				if(!runOptimistLock) {
+					check = 1;
+					return Pair.of(check, afterCalcRecord);
+				}
+				check = 2;
+				// create error message
+				ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
+						new ErrMessageResource("024"), EnumAdaptor.valueOf(1, ExecutionContent.class),
+						stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(),
+						new ErrMessageContent(TextResource.localize("Msg_1541")));
+				// regist error message
+				this.errMessageInfoRepository.add(employmentErrMes);
+//				isHappendOptimistLockError.add(true);
+			}
+		}
+		return Pair.of(check, afterCalcRecord);
 	}
 	
 	/**
