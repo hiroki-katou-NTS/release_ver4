@@ -571,11 +571,11 @@ public class DailyModifyResCommandFacade {
 								.map(x -> x.getEmployeeId()).distinct().collect(Collectors.toList());
 						dailyEdits = dailyEdits.stream().filter(x -> !errorCheck.getResultError()
 								.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))
-								&& !errorCheck.getLstErrorEmpMonth().contains(Pair.of(x.getEmployeeId(), x.getDate())) && !lstErrorMonthId.contains(x.getEmployeeId()))
+								&& !lstErrorMonthId.contains(x.getEmployeeId()))
 								.collect(Collectors.toList());
 						dailyOlds = dailyOlds.stream().filter(x -> !errorCheck.getResultError()
 								.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))
-								&& !errorCheck.getLstErrorEmpMonth().contains(Pair.of(x.getEmployeeId(), x.getDate())) && !lstErrorMonthId.contains(x.getEmployeeId()))
+								&& !lstErrorMonthId.contains(x.getEmployeeId()))
 								.collect(Collectors.toList());
 
 						resultIU.filterDataError(
@@ -1288,7 +1288,7 @@ public class DailyModifyResCommandFacade {
 		//val errorMonth = validatorDataDaily.errorMonthNew();
 		//val errorMonth = validatorDataDaily.errorMonth(resultIU.getLstMonthDomain(), monthParam);
 	    Set<Pair<String, GeneralDate>> detailEmployeeError = new HashSet<>();
-		if (!errorMonth.isEmpty() && !pairError.isOnlyErrorOldDb()) {
+		if (!errorMonth.isEmpty()) {
 			resultError.putAll(errorMonth);
 			detailEmployeeError.addAll(pairError.getDetailEmployeeError());
 			hasError = true;
