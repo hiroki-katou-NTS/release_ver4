@@ -652,10 +652,19 @@ public class AbsenceReruitmentMngInPeriodQueryImpl implements AbsenceReruitmentM
 			List<InterimRemain> lstOfAbsremover = lstInterimMngOfAbs.stream().filter(x -> x.getCreatorAtr() == paramInput.getCreatorAtr().get()
 					&& x.getYmd().afterOrEquals(paramInput.getProcessDate().get().start())
 					&& x.getYmd().beforeOrEquals(paramInput.getProcessDate().get().end())).collect(Collectors.toList());
+			lstOfAbsremover.stream().forEach(x -> {
+				List<InterimAbsMng> lstAbs = lstAbsMng.stream().filter(a -> a.getAbsenceMngId().equals(x.getRemainManaID())).collect(Collectors.toList());
+				lstAbsMng.removeAll(lstAbs);
+			});
 			lstInterimMngOfAbs.removeAll(lstOfAbsremover);
 			List<InterimRemain> lstOfRecRemove = lstInterimMngOfRec.stream().filter(x -> x.getCreatorAtr() == paramInput.getCreatorAtr().get()
 					&& x.getYmd().afterOrEquals(paramInput.getProcessDate().get().start())
 					&& x.getYmd().beforeOrEquals(paramInput.getProcessDate().get().end())).collect(Collectors.toList());
+			lstOfRecRemove.stream().forEach(x -> {
+				List<InterimRecMng> lstRec = lstRecMng.stream().filter(a -> a.getRecruitmentMngId().equals(x.getRemainManaID())).collect(Collectors.toList());
+				lstRecMng.removeAll(lstRec);
+			});
+			 
 			lstInterimMngOfRec.removeAll(lstOfRecRemove);
 		}
 		List<AbsRecDetailPara> lstOutputOfAbs = this.lstOutputOfAbs(lstAbsMng, lstInterimMngOfAbs, paramInput);
