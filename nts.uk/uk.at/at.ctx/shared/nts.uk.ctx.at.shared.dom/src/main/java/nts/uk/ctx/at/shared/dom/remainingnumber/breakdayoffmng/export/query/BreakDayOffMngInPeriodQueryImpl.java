@@ -811,16 +811,16 @@ public class BreakDayOffMngInPeriodQueryImpl implements BreakDayOffMngInPeriodQu
 				&& inputParam.getCreatorAtr().isPresent()
 				&& inputParam.getProcessDate().isPresent()) {
 			List<InterimRemain> lstDayoffRemove = lstInterimDayoff.stream().filter(x -> x.getCreatorAtr() == inputParam.getCreatorAtr().get()
-					&& x.getYmd().beforeOrEquals(inputParam.getProcessDate().get().start())
-					&& x.getYmd().afterOrEquals(inputParam.getProcessDate().get().end())).collect(Collectors.toList());
+					&& x.getYmd().afterOrEquals(inputParam.getProcessDate().get().start())
+					&& x.getYmd().beforeOrEquals(inputParam.getProcessDate().get().end())).collect(Collectors.toList());
 			lstDayoffRemove.stream().forEach(x -> {
 				List<InterimDayOffMng> lstOffMng = lstDayoffMng.stream().filter(a -> a.getDayOffManaId().equals(x.getRemainManaID())).collect(Collectors.toList());
 				lstDayoffMng.removeAll(lstOffMng);
 			});
 			lstInterimDayoff.removeAll(lstDayoffRemove);
 			List<InterimRemain>  lstBreakRemove = lstInterimBreak.stream().filter(x -> x.getCreatorAtr() == inputParam.getCreatorAtr().get()
-					&& x.getYmd().beforeOrEquals(inputParam.getProcessDate().get().start())
-					&& x.getYmd().afterOrEquals(inputParam.getProcessDate().get().end())).collect(Collectors.toList());
+					&& x.getYmd().afterOrEquals(inputParam.getProcessDate().get().start())
+					&& x.getYmd().beforeOrEquals(inputParam.getProcessDate().get().end())).collect(Collectors.toList());
 			lstBreakRemove.stream().forEach(x -> {
 				List<InterimBreakMng> lstBre = lstBreakMng.stream().filter(a -> a.getBreakMngId().equals(x.getRemainManaID())).collect(Collectors.toList());
 				lstBreakMng.removeAll(lstBre);
