@@ -997,7 +997,8 @@ public class DailyModifyResCommandFacade {
 		switch (displayFormat) {
 		case 0: // person
 			List<Pair<String, GeneralDate>> listEmpDate = checkEditedItems(resultOlds, resultNews);
-			Optional<GeneralDate> closureStartOpt = getClosureStartForEmployee.getDataClosureStart(listEmpDate.get(0).getLeft());
+			if(resultOlds.isEmpty()) break;
+			Optional<GeneralDate> closureStartOpt = getClosureStartForEmployee.getDataClosureStart(resultOlds.get(0).getEmployeeId());
 			if(!closureStartOpt.isPresent()) break;
 			List<GeneralDate> listDate = listEmpDate.stream().map(x -> x.getRight()).filter(x -> closureStartOpt.get().beforeOrEquals(x)).collect(Collectors.toList());
 			if (!listDate.isEmpty()) {
