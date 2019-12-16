@@ -583,7 +583,7 @@ public class GetAnnLeaRemNumWithinPeriodProc {
 		// 「次回年休付与リスト」をすべて「処理単位分割日リスト」に追加
 		for (val nextAnnualLeaveGrant : nextAnnualLeaveGrantList){
 			val grantDate = nextAnnualLeaveGrant.getGrantDate();
-			if (grantDate.beforeOrEquals(this.aggrPeriod.start().addDays(1))) continue;
+			if (grantDate.before(this.aggrPeriod.start().addDays(1))) continue;
 			if (grantDate.after(nextDayOfPeriodEnd)) continue;
 			
 			dividedDayMap.putIfAbsent(grantDate, new DividedDayEachProcess(grantDate));

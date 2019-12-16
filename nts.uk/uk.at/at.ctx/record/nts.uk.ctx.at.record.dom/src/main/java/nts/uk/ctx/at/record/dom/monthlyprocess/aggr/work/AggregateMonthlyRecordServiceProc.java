@@ -1340,7 +1340,7 @@ public class AggregateMonthlyRecordServiceProc {
 							new MonthlyDays(daysForCalcAttdRate.getWorkingDays()),
 							new MonthlyDays(daysForCalcAttdRate.getPrescribedDays()),
 							new MonthlyDays(daysForCalcAttdRate.getDeductedDays())),
-					asOfPeriodEnd.isAfterGrantAtr());
+					asOfStartNextDayOfPeriodEnd.isAfterGrantAtr());
 			this.aggregateResult.getAnnLeaRemNumEachMonthList().add(annLeaRemNum);
 			
 			// 年休エラーから月別残数エラー一覧を作成する
@@ -1369,7 +1369,7 @@ public class AggregateMonthlyRecordServiceProc {
 					remainingNumber.getReserveLeaveNoMinus(),
 					remainingNumber.getReserveLeaveWithMinus(),
 					Optional.ofNullable(reserveLeaveGrant),
-					asOfPeriodEnd.isAfterGrantAtr());
+					asOfStartNextDayOfPeriodEnd.isAfterGrantAtr());
 			this.aggregateResult.getRsvLeaRemNumEachMonthList().add(rsvLeaRemNum);
 			
 			// 積立年休エラーから月別残数エラー一覧を作成する
