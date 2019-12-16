@@ -819,8 +819,8 @@ public class BreakDayOffMngInPeriodQueryImpl implements BreakDayOffMngInPeriodQu
 			});
 			lstInterimDayoff.removeAll(lstDayoffRemove);
 			List<InterimRemain>  lstBreakRemove = lstInterimBreak.stream().filter(x -> x.getCreatorAtr() == inputParam.getCreatorAtr().get()
-					&& x.getYmd().beforeOrEquals(inputParam.getProcessDate().get().start())
-					&& x.getYmd().afterOrEquals(inputParam.getProcessDate().get().end())).collect(Collectors.toList());
+					&& x.getYmd().afterOrEquals(inputParam.getProcessDate().get().start())
+					&& x.getYmd().beforeOrEquals(inputParam.getProcessDate().get().end())).collect(Collectors.toList());
 			lstBreakRemove.stream().forEach(x -> {
 				List<InterimBreakMng> lstBre = lstBreakMng.stream().filter(a -> a.getBreakMngId().equals(x.getRemainManaID())).collect(Collectors.toList());
 				lstBreakMng.removeAll(lstBre);
