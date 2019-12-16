@@ -646,6 +646,18 @@ public class AbsenceReruitmentMngInPeriodQueryImpl implements AbsenceReruitmentM
 			}
 		}
 		//20181003 DuDT fix bug 101491 ↑
+		if(paramInput.isOverwriteFlg()
+				&& paramInput.getCreatorAtr().isPresent()
+				&& paramInput.getProcessDate().isPresent()) {
+			List<InterimRemain> lstOfAbsremover = lstInterimMngOfAbs.stream().filter(x -> x.getCreatorAtr() == paramInput.getCreatorAtr().get()
+					&& x.getYmd().afterOrEquals(paramInput.getProcessDate().get().start())
+					&& x.getYmd().beforeOrEquals(paramInput.getProcessDate().get().end())).collect(Collectors.toList());
+			lstInterimMngOfAbs.removeAll(lstOfAbsremover);
+			List<InterimRemain> lstOfRecRemove = lstInterimMngOfRec.stream().filter(x -> x.getCreatorAtr() == paramInput.getCreatorAtr().get()
+					&& x.getYmd().afterOrEquals(paramInput.getProcessDate().get().start())
+					&& x.getYmd().beforeOrEquals(paramInput.getProcessDate().get().end())).collect(Collectors.toList());
+			lstInterimMngOfRec.removeAll(lstOfRecRemove);
+		}
 		List<AbsRecDetailPara> lstOutputOfAbs = this.lstOutputOfAbs(lstAbsMng, lstInterimMngOfAbs, paramInput);
 		List<AbsRecDetailPara> lstOutputOfRec = this.lstOutputOfRec(lstRecMng, lstInterimMngOfRec, paramInput);
 		lstAbsRec.addAll(lstOutputOfAbs);
@@ -773,7 +785,7 @@ public class AbsenceReruitmentMngInPeriodQueryImpl implements AbsenceReruitmentM
 				Collections.emptyList(), //上書き用の暫定管理データ：なし
 				Collections.emptyList(), 
 				Collections.emptyList(),
-				Optional.empty());
+				Optional.empty(),Optional.empty(),Optional.empty());
 		return this.getAbsRecMngInPeriod(paramInput).getRemainDays();
 	}
 	

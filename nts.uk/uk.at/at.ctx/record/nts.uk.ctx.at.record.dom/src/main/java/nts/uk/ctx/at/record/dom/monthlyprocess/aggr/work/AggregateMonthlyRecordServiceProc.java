@@ -1415,7 +1415,7 @@ public class AggregateMonthlyRecordServiceProc {
 				this.companyId, this.employeeId, period, period.end(),
 				(interimRemainMngMode == InterimRemainMngMode.MONTHLY),
 				this.isOverWriteRemain, useAbsMng, interimMng, useRecMng,
-				this.prevAbsRecResultOpt);
+				this.prevAbsRecResultOpt, Optional.empty(), Optional.empty());
 		val aggrResult = this.absenceRecruitMng.getAbsRecMngInPeriod(paramInput);
 		if (aggrResult != null){
 			
@@ -1478,7 +1478,7 @@ public class AggregateMonthlyRecordServiceProc {
 				this.companyId, this.employeeId, period,
 				(interimRemainMngMode == InterimRemainMngMode.MONTHLY), period.end(),
 				this.isOverWriteRemain, interimMng, breakMng, dayOffMng,
-				this.prevBreakDayOffResultOpt);
+				this.prevBreakDayOffResultOpt, Optional.empty(), Optional.empty());
 		val aggrResult = this.breakDayoffMng.getBreakDayOffMngInPeriod(inputParam);
 		if (aggrResult != null){
 			

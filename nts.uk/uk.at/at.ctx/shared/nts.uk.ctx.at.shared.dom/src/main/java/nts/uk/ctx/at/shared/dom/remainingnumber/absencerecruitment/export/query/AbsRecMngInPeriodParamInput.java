@@ -11,6 +11,7 @@ import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.interim.InterimAbsMng;
 import nts.uk.ctx.at.shared.dom.remainingnumber.absencerecruitment.interim.InterimRecMng;
 import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.InterimRemain;
+import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.primitive.CreateAtr;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Setter
@@ -45,5 +46,12 @@ public class AbsRecMngInPeriodParamInput {
 	 * 前回振休の集計結果
 	 */
 	private Optional<AbsRecRemainMngOfInPeriod> optBeforeResult;
-	
+	/**
+	 * 作成元区分
+	 */
+	private Optional<CreateAtr> creatorAtr;
+	/**
+	 * 対象期間
+	 */
+	private Optional<DatePeriod> processDate;
 }

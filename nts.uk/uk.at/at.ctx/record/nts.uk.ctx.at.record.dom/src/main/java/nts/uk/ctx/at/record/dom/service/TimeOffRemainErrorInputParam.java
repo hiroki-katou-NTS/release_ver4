@@ -50,4 +50,5 @@ public class TimeOffRemainErrorInputParam {
 	 * 月別実績（Work）
 	 */
 	private Optional<AttendanceTimeOfMonthly> optMonthlyData;
+	
 }

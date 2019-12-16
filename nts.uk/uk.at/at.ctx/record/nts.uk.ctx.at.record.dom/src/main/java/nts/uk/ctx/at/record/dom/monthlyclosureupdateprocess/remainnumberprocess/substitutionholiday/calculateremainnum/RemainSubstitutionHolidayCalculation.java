@@ -64,7 +64,7 @@ public class RemainSubstitutionHolidayCalculation {
 		
 		// 「期間内の振出振休残数を取得する」を実行する
 		AbsRecMngInPeriodParamInput param = new AbsRecMngInPeriodParamInput(companyId, empId, period.getPeriod(),
-				period.getPeriod().end(), true, true, useAbsMng, interimMng, useRecMng, Optional.empty());
+				period.getPeriod().end(), true, true, useAbsMng, interimMng, useRecMng, Optional.empty(), Optional.empty(), Optional.empty());
 		return query.getAbsRecMngInPeriod(param);
 	}
 }

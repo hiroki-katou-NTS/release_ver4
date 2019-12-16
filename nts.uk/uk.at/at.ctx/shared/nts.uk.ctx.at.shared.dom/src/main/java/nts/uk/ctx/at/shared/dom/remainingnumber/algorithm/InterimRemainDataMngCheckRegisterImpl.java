@@ -135,7 +135,9 @@ public class InterimRemainDataMngCheckRegisterImpl implements InterimRemainDataM
 					interimMngBreakDayOff, 
 					breakMng, 
 					dayOffMng,
-					Optional.empty());
+					Optional.empty(),
+					Optional.of(CreateAtr.APPBEFORE),
+					Optional.of(inputParam.getRegisterDate()));
 			BreakDayOffRemainMngOfInPeriod remainMng = breakDayOffMngService.getBreakDayOffMngInPeriod(mngParam);
 			if(!remainMng.getLstError().isEmpty()) {
 				outputData.setChkSubHoliday(true);
@@ -153,7 +155,9 @@ public class InterimRemainDataMngCheckRegisterImpl implements InterimRemainDataM
 					useAbsMng,
 					interimMngAbsRec,
 					useRecMng,
-					Optional.empty());
+					Optional.empty(),
+					Optional.of(CreateAtr.APPBEFORE),
+					Optional.of(inputParam.getRegisterDate()));
 			AbsRecRemainMngOfInPeriod remainMng = absRecMngService.getAbsRecMngInPeriod(mngParam);
 			if(!remainMng.getPError().isEmpty()) {
 				outputData.setChkPause(true);

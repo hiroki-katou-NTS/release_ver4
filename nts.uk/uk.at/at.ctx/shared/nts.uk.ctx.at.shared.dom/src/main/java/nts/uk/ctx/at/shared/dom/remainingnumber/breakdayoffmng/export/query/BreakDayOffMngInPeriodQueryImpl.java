@@ -782,6 +782,7 @@ public class BreakDayOffMngInPeriodQueryImpl implements BreakDayOffMngInPeriodQu
 				&& !inputParam.getInterimMng().isEmpty()
 				&& !inputParam.isMode()) {
 			for (InterimRemain interimRemain : inputParam.getInterimMng()) {
+				
 				List<InterimRemain> lstInterimDayoffUsen = lstTmpDayoff.stream()
 						.filter(a -> a.getYmd().equals(interimRemain.getYmd())).collect(Collectors.toList());
 				if(!lstInterimDayoffUsen.isEmpty()) {
@@ -806,6 +807,18 @@ public class BreakDayOffMngInPeriodQueryImpl implements BreakDayOffMngInPeriodQu
 			}
 		}
 		//20181003 DuDT fix bug 101491 ↑
+		if(inputParam.isReplaceChk() 
+				&& inputParam.getCreatorAtr().isPresent()
+				&& inputParam.getProcessDate().isPresent()) {
+			List<InterimRemain> lstDayoffRemove = lstInterimDayoff.stream().filter(x -> x.getCreatorAtr() != inputParam.getCreatorAtr().get()
+					&& x.getYmd().beforeOrEquals(inputParam.getProcessDate().get().start())
+					&& x.getYmd().afterOrEquals(inputParam.getProcessDate().get().end())).collect(Collectors.toList());
+			lstInterimDayoff.removeAll(lstDayoffRemove);
+			List<InterimRemain>  lstBreakRemove = lstInterimBreak.stream().filter(x -> x.getCreatorAtr() != inputParam.getCreatorAtr().get()
+					&& x.getYmd().beforeOrEquals(inputParam.getProcessDate().get().start())
+					&& x.getYmd().afterOrEquals(inputParam.getProcessDate().get().end())).collect(Collectors.toList());
+			lstInterimBreak.removeAll(lstBreakRemove);
+		}
 		List<BreakDayOffDetail> lstOutputDayoff = this.lstOutputDayoff(inputParam, lstDayoffMng, lstInterimDayoff);
 		lstDetailData.addAll(lstOutputDayoff);
 		
@@ -932,7 +945,7 @@ public class BreakDayOffMngInPeriodQueryImpl implements BreakDayOffMngInPeriodQu
 				Collections.emptyList(), //上書き用の暫定管理データ：なし
 				Collections.emptyList(), 
 				Collections.emptyList(),
-				Optional.empty());
+				Optional.empty(), Optional.empty(), Optional.empty());
 		return this.getBreakDayOffMngInPeriod(inputParam).getRemainDays();
 	}
 }

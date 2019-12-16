@@ -65,7 +65,7 @@ public class RemainCompensatoryHolidayCalculation {
 		
 		// 期間内の休出代休残数を取得する
 		BreakDayOffRemainMngParam param = new BreakDayOffRemainMngParam(companyId, empId, period.getPeriod(), true,
-				period.getPeriod().end(), true, interimMng, breakMng, dayOffMng, Optional.empty());
+				period.getPeriod().end(), true, interimMng, breakMng, dayOffMng, Optional.empty(), Optional.empty(), Optional.empty());
 		return this.breakDayoffMng.getBreakDayOffMngInPeriod(param);
 	}
 }

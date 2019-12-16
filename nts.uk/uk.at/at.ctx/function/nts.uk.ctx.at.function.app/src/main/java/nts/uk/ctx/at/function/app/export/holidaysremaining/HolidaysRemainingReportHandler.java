@@ -403,7 +403,7 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 				GeneralDate end = GeneralDate.ymd(s.year(), s.month(), 1).addMonths(1).addDays(-1);
 				DatePeriod periodDate = new DatePeriod(GeneralDate.ymd(s.year(), s.month(), 1), endDate.before(end) ? endDate : end);
 				BreakDayOffRemainMngParam param = new BreakDayOffRemainMngParam(cId, employeeId, periodDate, false,
-						closureInforOpt.get().getPeriod().end(), false, new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), Optional.empty());
+						closureInforOpt.get().getPeriod().end(), false, new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), Optional.empty(),Optional.empty(),Optional.empty());
 				BreakDayOffRemainMngOfInPeriod currentHoliday = breakDayOffMngInPeriodQuery .getBreakDayOffMngInPeriod(param);
 				listCurrentHoliday.add(new CurrentHolidayImported(s, currentHoliday.getCarryForwardDays(), currentHoliday.getOccurrenceDays(), currentHoliday.getUseDays(), currentHoliday.getUnDigestedDays(), currentHoliday.getRemainDays()));
 			}
@@ -413,7 +413,7 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 			}
 			DatePeriod periodDate = new DatePeriod(GeneralDate.ymd(currentMonth.year(), currentMonth.month(), 1), GeneralDate.ymd(currentMonth.year(), currentMonth.month(), 1).addMonths(1).addDays(-1));
 			BreakDayOffRemainMngParam param = new BreakDayOffRemainMngParam(cId, employeeId, periodDate, false,
-					closureInforOpt.get().getPeriod().end(), false, new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), Optional.empty());
+					closureInforOpt.get().getPeriod().end(), false, new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), Optional.empty(), Optional.empty(),Optional.empty());
 			BreakDayOffRemainMngOfInPeriod currentHoliday = breakDayOffMngInPeriodQuery .getBreakDayOffMngInPeriod(param);
 			currentHolidayLeft = new CurrentHolidayImported(currentMonth, currentHoliday.getCarryForwardDays(), currentHoliday.getOccurrenceDays(), currentHoliday.getUseDays(), currentHoliday.getUnDigestedDays(), currentHoliday.getRemainDays());
 			
@@ -430,7 +430,9 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 				GeneralDate end = GeneralDate.ymd(s.year(), s.month(), 1).addMonths(1).addDays(-1);
 				DatePeriod periodDate = new DatePeriod(GeneralDate.ymd(s.year(), s.month(), 1), endDate.before(end) ? endDate : end);
 				AbsRecMngInPeriodParamInput param = new AbsRecMngInPeriodParamInput(cId, employeeId, periodDate, 
-						closureInforOpt.get().getPeriod().end(), false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty());
+						closureInforOpt.get().getPeriod().end(), false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty()
+						, Optional.empty()
+						, Optional.empty());
 				AbsRecRemainMngOfInPeriod remainMng = absenceReruitmentMngInPeriodQuery.getAbsRecMngInPeriod(param);
 				listCurrentHolidayRemain.add(new CurrentHolidayRemainImported(s, remainMng.getCarryForwardDays(), remainMng.getOccurrenceDays(), remainMng.getUseDays(), remainMng.getUnDigestedDays(), remainMng.getRemainDays()));
 			}
@@ -441,7 +443,9 @@ public class HolidaysRemainingReportHandler extends ExportService<HolidaysRemain
 			}
 			DatePeriod periodDate =new DatePeriod(GeneralDate.ymd(currentMonth.year(), currentMonth.month(), 1), GeneralDate.ymd(currentMonth.year(), currentMonth.month(), 1).addMonths(1).addDays(-1));
 			AbsRecMngInPeriodParamInput param = new AbsRecMngInPeriodParamInput(cId, employeeId, periodDate, closureInforOpt.get().getPeriod().end(), 
-					false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty());
+					false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty()
+					, Optional.empty()
+					, Optional.empty());
 			AbsRecRemainMngOfInPeriod remainMng = absenceReruitmentMngInPeriodQuery.getAbsRecMngInPeriod(param);
 			currentHolidayRemainLeft = new CurrentHolidayRemainImported(currentMonth, remainMng.getCarryForwardDays(),remainMng.getOccurrenceDays(),remainMng.getUseDays(),remainMng.getUnDigestedDays(),remainMng.getRemainDays());
 		}
