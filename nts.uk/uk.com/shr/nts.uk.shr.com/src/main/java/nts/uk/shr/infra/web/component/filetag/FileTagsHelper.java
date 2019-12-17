@@ -6,7 +6,6 @@ import java.util.Date;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
 
 import org.apache.logging.log4j.util.Strings;
 
@@ -14,7 +13,7 @@ import nts.arc.time.GeneralDateTime;
 
 final class FileTagsHelper {
 	
-	public static String VERSION = GeneralDateTime.now().toString("yyyyMMddHHmmss");
+	//public static String VERSION = GeneralDateTime.now().toString("yyyyMMddHHmmss");
 
 	static String buildPath(FacesContext context, String specifiedPath) {
 
@@ -31,14 +30,16 @@ final class FileTagsHelper {
 	}
 	
 	public static String getVersion(FacesContext context) {
-		return VERSION;
-		//File file = new File(((ServletContext) context).getRealPath("/view/common/mark.js"));
 
-		//if (!file.exists()) {
-		//	return "xxxxxxxxxxxxxx";
-		//}
+		ServletContext svlet = (ServletContext) context.getExternalContext().getContext();
+		String path = svlet.getRealPath("/view/common/mark.js");
+		File file = new File(path);
 
-		//return GeneralDateTime.legacyDateTime(new Date(file.lastModified())).toString("yyyyMMddHHmmss");
+		if (!file.exists()) {
+			return "xxxxxxxxxxxxxx";
+		}
+
+		return GeneralDateTime.legacyDateTime(new Date(file.lastModified())).toString("yyyyMMddHHmmss");
 	}
 
 	private static String appendVersionString(FacesContext context, String filePath) {
