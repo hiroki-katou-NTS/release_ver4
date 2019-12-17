@@ -249,6 +249,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 			result = runWhenOptimistLockError(cid, employeeId, datePeriod, reCalcAtr, empCalAndSumExecLogID, afterCalcRecord, iPUSOptTemp, approvalSetTemp, false);
 			if(result.getLeft() == 0) { 
 				counter.accept(ProcessState.SUCCESS);
+				targetPersonRepository.updateWithContent(employeeId, empCalAndSumExecLogID, 1, 0);
 				return;
 			}
 			
@@ -264,9 +265,6 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 			//
 			counter.accept(result.getRight().getPs() == ProcessState.SUCCESS?ProcessState.SUCCESS:ProcessState.INTERRUPTION);
 			targetPersonRepository.updateWithContent(employeeId, empCalAndSumExecLogID, 1, 0);
-			
-			
-			
 //			if (createList.isEmpty()) {
 //				counter.accept(ProcessState.SUCCESS);
 //				
@@ -312,13 +310,14 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		//if check = 0 : createListNew : null
 		//if check = 1 : has error optimistic lock (lan 1)
 		//if check = 2 : done
-		Integer check =0;
+		Integer check =2;
 		
 //		List<Boolean> isHappendOptimistLockError = new ArrayList<>();
 
 		List<IntegrationOfDaily> createListNew = createIntegrationOfDaily(employeeId, datePeriod);
 		if (createListNew.isEmpty()) {
-			return Pair.of(0, afterCalcRecord);
+			check = 0;
+			return Pair.of(check, afterCalcRecord);
 		}
 
 		// 締め一覧取得
@@ -340,11 +339,10 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 				if (!isOptimisticLock) {
 					throw ex;
 				}
+				check = 1;
 				if(!runOptimistLock) {
-					check = 1;
 					return Pair.of(check, afterCalcRecord);
 				}
-				check = 2;
 				// create error message
 				ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
 						new ErrMessageResource("024"), EnumAdaptor.valueOf(1, ExecutionContent.class),
