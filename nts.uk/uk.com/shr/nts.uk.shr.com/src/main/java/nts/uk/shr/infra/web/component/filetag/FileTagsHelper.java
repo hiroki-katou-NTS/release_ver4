@@ -14,7 +14,7 @@ import nts.arc.time.GeneralDateTime;
 
 final class FileTagsHelper {
 	
-//	public static String VERSION = GeneralDateTime.now().toString("yyyyMMddHHmmss");
+	public static String VERSION = GeneralDateTime.now().toString("yyyyMMddHHmmss");
 
 	static String buildPath(FacesContext context, String specifiedPath) {
 
@@ -31,14 +31,14 @@ final class FileTagsHelper {
 	}
 	
 	public static String getVersion(FacesContext context) {
+		return VERSION;
+		//File file = new File(((ServletContext) context).getRealPath("/view/common/mark.js"));
 
-		File file = new File(((ServletContext) context).getRealPath("/view/common/mark.js"));
+		//if (!file.exists()) {
+		//	return "xxxxxxxxxxxxxx";
+		//}
 
-		if (!file.exists()) {
-			return "xxxxxxxxxxxxxx";
-		}
-
-		return GeneralDateTime.legacyDateTime(new Date(file.lastModified())).toString("yyyyMMddHHmmss");
+		//return GeneralDateTime.legacyDateTime(new Date(file.lastModified())).toString("yyyyMMddHHmmss");
 	}
 
 	private static String appendVersionString(FacesContext context, String filePath) {
