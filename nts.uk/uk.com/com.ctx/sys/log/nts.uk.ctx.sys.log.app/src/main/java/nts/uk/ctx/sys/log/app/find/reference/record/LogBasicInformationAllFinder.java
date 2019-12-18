@@ -59,7 +59,7 @@ import nts.uk.shr.infra.file.csv.CsvReportWriter;
  * author : huannv
  */
 @Stateless
-@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 public class LogBasicInformationAllFinder {
 
 	@Inject
@@ -96,7 +96,7 @@ public class LogBasicInformationAllFinder {
 	@Inject
 	private CSVReportGenerator generator;
 	
-	private static final int LIMIT = 50000;
+	private static final int LIMIT = 10000;
 	
 	private static final String PGID = "CLI003";
 	

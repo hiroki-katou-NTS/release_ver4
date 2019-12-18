@@ -37,7 +37,7 @@ import nts.uk.shr.com.time.calendar.period.YearMonthPeriod;
  */
 
 @Stateless
-@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 public class JpaDataCorrectionLogRepository extends JpaRepository
 		implements DataCorrectionLogRepository, DataCorrectionLogWriter {
 
@@ -252,6 +252,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 	public List<DataCorrectionLog> findByTargetAndDate(List<String> operationIds, List<String> listEmployeeId,
 			DatePeriod period, TargetDataType targetDataType) {
 		List<DataCorrectionLog> results = new ArrayList<>();
+		
 		if (operationIds.isEmpty())
 			return results;
 		List<DataCorrectionLog> entities = new ArrayList<>();
@@ -1053,9 +1054,10 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 							+  " FETCH FIRST " + limit + " ROWS ONLY";						
 						final String executeSQL = sql; 
 						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subEmpList -> {
 							entities.addAll(new NtsStatement(executeSQL, this.jdbcProxy())
 									.paramString("operationIds", subIdList)
-									.paramString("listEmployeeId", listEmployeeId)
+									.paramString("listEmployeeId", subEmpList)
 								  	.getList(rec -> {return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
 												rec.getString("USER_ID"), 
 												rec.getInt("TARGET_DATA_TYPE"),
@@ -1076,6 +1078,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 												rec.getInt("SHOW_ORDER"), 
 												"").toDomainToViewJDBC();}));
 							});
+						});
 							return entities;
 					} else {
 						sql += " WHERE YMD_KEY BETWEEN @startYmd AND @endYmd AND OPERATION_ID IN @operationIds AND SID IN @listEmployeeId"
@@ -1085,11 +1088,12 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 							+  " FETCH FIRST " + limit + " ROWS ONLY";		
 						final String executeSQL = sql; 
 						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subEmpIdList -> {
 							entities.addAll( new NtsStatement(executeSQL, this.jdbcProxy())
 									  .paramDate("startYmd", period.start())
 									  .paramDate("endYmd", period.end())
 									  .paramString("operationIds", subIdList)
-									  .paramString("listEmployeeId", listEmployeeId)
+									  .paramString("listEmployeeId", subEmpIdList)
 									  	.getList(rec -> {return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
 													rec.getString("USER_ID"), 
 													rec.getInt("TARGET_DATA_TYPE"),
@@ -1110,6 +1114,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 													rec.getInt("SHOW_ORDER"), 
 													"").toDomainToViewJDBC();}));
 							});
+						});
 							return entities;
 					}
 				}
@@ -1195,10 +1200,11 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 							+  " FETCH FIRST " + limit + " ROWS ONLY";
 						final String executeSQL = sql; 
 						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subEmpList -> {
 							entities.addAll(new NtsStatement(executeSQL, this.jdbcProxy())
 							  .paramString("operationIds", subIdList)
 							  .paramInt("targetDataType", targetDataType.value)
-							  .paramString("listEmployeeId", listEmployeeId)
+							  .paramString("listEmployeeId", subEmpList)
 							  	.getList(rec -> {return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
 											rec.getString("USER_ID"), 
 											rec.getInt("TARGET_DATA_TYPE"),
@@ -1219,6 +1225,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 											rec.getInt("SHOW_ORDER"), 
 											"").toDomainToViewJDBC();}));
 							});
+							});
 							return entities;
 					} else {
 						sql += " WHERE YMD_KEY BETWEEN @startYmd AND @endYmd AND OPERATION_ID IN @operationIds AND TARGET_DATA_TYPE = @targetDataType AND SID IN @listEmployeeId"
@@ -1227,13 +1234,15 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 							+  " OFFSET " + offset + " ROWS"
 							+  " FETCH FIRST " + limit + " ROWS ONLY";
 						final String executeSQL = sql; 
+						System.out.println("Anh Manh dep trai:" +  offset);
 						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
+							CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subEmpIdList -> {
 							entities.addAll(new NtsStatement(executeSQL, this.jdbcProxy())
 							  .paramDate("startYmd", period.start())
 							  .paramDate("endYmd", period.end())
 							  .paramString("operationIds", subIdList)
 							  .paramInt("targetDataType", targetDataType.value)
-							  .paramString("listEmployeeId", listEmployeeId)
+							  .paramString("listEmployeeId", subEmpIdList)
 							  	.getList(rec -> {
 							  		return new SrcdtDataCorrectionLog(new SrcdtDataCorrectionLogPk(rec.getString("OPERATION_ID"), 
 											rec.getString("USER_ID"), 
@@ -1255,6 +1264,7 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 											rec.getInt("SHOW_ORDER"), 
 											"").toDomainToViewJDBC();}));
 							});
+						});
 							return entities;
 					}
 				}
