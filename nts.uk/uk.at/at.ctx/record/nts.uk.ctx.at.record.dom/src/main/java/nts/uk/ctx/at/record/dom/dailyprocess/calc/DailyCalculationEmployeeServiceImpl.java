@@ -312,7 +312,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		//if check = 2 : done
 		Integer check =2;
 		
-//		List<Boolean> isHappendOptimistLockError = new ArrayList<>();
+//		List<Boolean> isHappendOptimistLockError = new ArrayList<>(); 
 
 		List<IntegrationOfDaily> createListNew = createIntegrationOfDaily(employeeId, datePeriod);
 		if (createListNew.isEmpty()) {
@@ -340,16 +340,15 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 					throw ex;
 				}
 				check = 1;
-				if(!runOptimistLock) {
-					return Pair.of(check, afterCalcRecord);
+				if(runOptimistLock) {
+					// create error message
+					ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
+							new ErrMessageResource("024"), EnumAdaptor.valueOf(1, ExecutionContent.class),
+							stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(),
+							new ErrMessageContent(TextResource.localize("Msg_1541")));
+					// regist error message
+					this.errMessageInfoRepository.add(employmentErrMes);
 				}
-				// create error message
-				ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
-						new ErrMessageResource("024"), EnumAdaptor.valueOf(1, ExecutionContent.class),
-						stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(),
-						new ErrMessageContent(TextResource.localize("Msg_1541")));
-				// regist error message
-				this.errMessageInfoRepository.add(employmentErrMes);
 //				isHappendOptimistLockError.add(true);
 			}
 		}
