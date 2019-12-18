@@ -1234,7 +1234,6 @@ public class JpaDataCorrectionLogRepository extends JpaRepository
 							+  " OFFSET " + offset + " ROWS"
 							+  " FETCH FIRST " + limit + " ROWS ONLY";
 						final String executeSQL = sql; 
-						System.out.println("Anh Manh dep trai:" +  offset);
 						CollectionUtil.split(operationIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIdList -> {
 							CollectionUtil.split(listEmployeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subEmpIdList -> {
 							entities.addAll(new NtsStatement(executeSQL, this.jdbcProxy())
