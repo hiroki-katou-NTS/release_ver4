@@ -1235,18 +1235,20 @@ public class DailyModifyResCommandFacade {
 		Map<Integer, List<DPItemValue>> resultErrorMonth = new HashMap<>();
 		boolean hasError = false;
 		DataResultAfterIU dataResultAfterIU = new DataResultAfterIU();
-		boolean editFlex = (mode == 0 && monthValue != null
-				&& !CollectionUtil.isEmpty(monthValue.getItems())); 
-		//if (editFlex) {
-			//フレックス繰越時間が正しい範囲で入力されているかチェックする
-		val flexShortageRCDto = validatorDataDaily.errorCheckFlex(resultIU.getLstMonthDomain(),
-				monthlyParam);
-		if ((flexShortageRCDto.isError() || !flexShortageRCDto.getMessageError().isEmpty()) && editFlex) {
-			hasError = true;
-			if(!resultIU.getLstMonthDomain().isEmpty()) flexShortageRCDto.createDataCalc(convertMonthToItem(MonthlyRecordWorkDto.fromOnlyAttTime(resultIU.getLstMonthDomain().get(0)), monthValue));
-			flexShortageRCDto.setVersion(monthValue.getVersion());
+	    if (mode == 0 && monthlyParam.getHasFlex() != null && monthlyParam.getHasFlex()) {
+	    	boolean editFlex = (mode == 0 && monthValue != null
+					&& !CollectionUtil.isEmpty(monthValue.getItems())); 
+			//if (editFlex) {
+				//フレックス繰越時間が正しい範囲で入力されているかチェックする
+			val flexShortageRCDto = validatorDataDaily.errorCheckFlex(resultIU.getLstMonthDomain(),
+					monthlyParam);
+			if ((flexShortageRCDto.isError() || !flexShortageRCDto.getMessageError().isEmpty()) && editFlex) {
+				hasError = true;
+				if(!resultIU.getLstMonthDomain().isEmpty()) flexShortageRCDto.createDataCalc(convertMonthToItem(MonthlyRecordWorkDto.fromOnlyAttTime(resultIU.getLstMonthDomain().get(0)), monthValue));
+				flexShortageRCDto.setVersion(monthValue.getVersion());
+			}
+			dataResultAfterIU.setFlexShortage(flexShortageRCDto);
 		}
-		dataResultAfterIU.setFlexShortage(flexShortageRCDto);
 		//}
 		//フレ補填によって年休残数のエラーが発生していないかチェックする
 		if(mode == 0) {
