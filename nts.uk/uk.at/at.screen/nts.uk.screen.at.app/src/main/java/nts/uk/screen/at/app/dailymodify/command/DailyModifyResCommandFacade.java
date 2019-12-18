@@ -659,7 +659,7 @@ public class DailyModifyResCommandFacade {
 
 				ErrorAfterCalcDaily errorMonth = checkErrorAfterCalcMonth(resultMonth, monthParam, resultOlds,
 						dataParent.getMode(), dataParent.getMonthValue(), dataParent.getDateRange(),
-						editFlex ? errorMonthHoliday : new ArrayList<>());
+						editFlex ? errorMonthHoliday : new ArrayList<>(), dataParent.isShowFlex());
 				//map error holiday into result
 				List<DPItemValue> lstItemErrorMonth = errorMonth.getResultErrorMonth().get(TypeError.ERROR_MONTH.value);
 				if(lstItemErrorMonth != null) {
@@ -1231,11 +1231,11 @@ public class DailyModifyResCommandFacade {
 	}
 	
 	//集計後エラーチェック
-	public ErrorAfterCalcDaily checkErrorAfterCalcMonth(RCDailyCorrectionResult resultIU, UpdateMonthDailyParam monthlyParam, List<DailyModifyResult> resultOlds, int mode, DPMonthValue monthValue, DateRange range, List<EmployeeMonthlyPerError> errorMonths) {
+	public ErrorAfterCalcDaily checkErrorAfterCalcMonth(RCDailyCorrectionResult resultIU, UpdateMonthDailyParam monthlyParam, List<DailyModifyResult> resultOlds, int mode, DPMonthValue monthValue, DateRange range, List<EmployeeMonthlyPerError> errorMonths, boolean showFlex) {
 		Map<Integer, List<DPItemValue>> resultErrorMonth = new HashMap<>();
 		boolean hasError = false;
 		DataResultAfterIU dataResultAfterIU = new DataResultAfterIU();
-	    if (mode == 0 && monthlyParam.getHasFlex() != null && monthlyParam.getHasFlex()) {
+	    if (mode == 0 && showFlex) {
 	    	boolean editFlex = (mode == 0 && monthValue != null
 					&& !CollectionUtil.isEmpty(monthValue.getItems())); 
 			//if (editFlex) {
