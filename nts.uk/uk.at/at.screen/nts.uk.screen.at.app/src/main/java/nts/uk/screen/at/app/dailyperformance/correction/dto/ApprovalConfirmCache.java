@@ -56,7 +56,7 @@ public class ApprovalConfirmCache implements Serializable{
 				.collect(Collectors.toList());
 		
 		List<ApprovalStatusActualResult> lstApprovalClone = lstApproval.stream().map(
-				x -> new ApprovalStatusActualResult(x.getEmployeeId(), x.getDate(), x.isStatus(), x.isStatusNormal()))
+				x -> new ApprovalStatusActualResult(x.getEmployeeId(), x.getDate(), x.isStatus(), x.isStatusNormal(), x.getPermissionCheck(), x.getPermissionRelease()))
 				.collect(Collectors.toList());
 		return new ApprovalConfirmCache(sId, employeeIds, period, mode, lstConfirmClone, lstApprovalClone);
 	}

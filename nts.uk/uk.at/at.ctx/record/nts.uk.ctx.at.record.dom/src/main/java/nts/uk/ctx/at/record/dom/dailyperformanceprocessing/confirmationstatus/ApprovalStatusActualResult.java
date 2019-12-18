@@ -33,5 +33,8 @@ public class ApprovalStatusActualResult extends ConfirmStatusActualResult{
           return super.equals(other) && ((ApprovalStatusActualResult)other).statusNormal == this.statusNormal;
 	}
 	
-	
+	public ApprovalStatusActualResult(String employeeId, GeneralDate date, boolean status, boolean statusNormal, ReleasedAtr permissionCheck, ReleasedAtr permissionRelease) {
+		super(employeeId, date, status, ReleasedAtr.valueOf(permissionCheck.value), ReleasedAtr.valueOf(permissionRelease.value));
+		this.statusNormal = statusNormal;
+	}
 }
