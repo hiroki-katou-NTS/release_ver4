@@ -142,7 +142,7 @@ public class JpaAffWorkplaceHistoryItemRepository extends JpaRepository implemen
 			try (PreparedStatement statement = this.connection().prepareStatement(
 						"SELECT h.HIST_ID, h.SID, h.WORKPLACE_ID, h.NORMAL_WORKPLACE_ID from BSYMT_AFF_WPL_HIST_ITEM h"
 						+ " INNER JOIN BSYMT_AFF_WORKPLACE_HIST wh ON wh.HIST_ID = h.HIST_ID"
-						+ " WHERE wh.START_DATE <= ? and wh.END_DATE >= ? AND h.SID IN (" + subList.stream().map(s -> "?").collect(Collectors.joining(",")) + ")")) {
+						+ " WHERE wh.START_DATE <= ? and wh.END_DATE >= ? AND wh.SID IN (" + subList.stream().map(s -> "?").collect(Collectors.joining(",")) + ")")) {
 				statement.setDate(1, Date.valueOf(basedate.localDate()));
 				statement.setDate(2, Date.valueOf(basedate.localDate()));
 				for (int i = 0; i < subList.size(); i++) {
@@ -287,7 +287,7 @@ public class JpaAffWorkplaceHistoryItemRepository extends JpaRepository implemen
 			try (PreparedStatement statement = this.connection().prepareStatement(
 					"SELECT h.WORKPLACE_ID from BSYMT_AFF_WPL_HIST_ITEM h"
 					+ " INNER JOIN BSYMT_AFF_WORKPLACE_HIST wh ON wh.HIST_ID = h.HIST_ID"
-					+ " WHERE wh.START_DATE <= ? and wh.END_DATE >= ? AND h.SID = ?")) {
+					+ " WHERE wh.START_DATE <= ? and wh.END_DATE >= ? AND wh.SID = ?")) {
 			statement.setDate(1, Date.valueOf(period.end().localDate()));
 			statement.setDate(2, Date.valueOf(period.start().localDate()));
 			statement.setString(3, sid);
