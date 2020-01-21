@@ -162,9 +162,9 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 	public NewReflectStampOutput reflectStampInfo(String companyID, String employeeID, GeneralDate processingDate,
 			WorkInfoOfDailyPerformance workInfoOfDailyPerformance,
 			TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance, String empCalAndSumExecLogID,
-			ExecutionType reCreateAttr, Optional<CalAttrOfDailyPerformance> calcOfDaily,
+			Optional<CalAttrOfDailyPerformance> calcOfDaily,
 			Optional<AffiliationInforOfDailyPerfor> affInfoOfDaily,
-			Optional<WorkTypeOfDailyPerformance> workTypeOfDaily) {
+			Optional<WorkTypeOfDailyPerformance> workTypeOfDaily,RecreateFlag recreateFlag) {
 
 		NewReflectStampOutput newReflectStampOutput = new NewReflectStampOutput();
 
@@ -242,8 +242,8 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 		// - end
 
 		// 打刻を反映する - Dung code
-		List<StampItem> lstStampItem = this.stampDomainService.handleData(stampReflectRangeOutput, reCreateAttr,
-				empCalAndSumExecLogID, processingDate, employeeID, companyID);
+		List<StampItem> lstStampItem = this.stampDomainService.handleData(stampReflectRangeOutput,
+				empCalAndSumExecLogID, processingDate, employeeID, companyID,recreateFlag);
 		if (lstStampItem == null) {
 			reflectStamp = null;
 		}
@@ -791,9 +791,9 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 	public NewReflectStampOutput acquireReflectEmbossing(String companyId, String employeeId,
 			GeneralDate processingDate, Optional<WorkInfoOfDailyPerformance> workInfoOfDailyPerformanceOpt,
 			TimeLeavingOfDailyPerformance timeLeavingOfDailyPerformance, String empCalAndSumExecLogID,
-			ExecutionType reCreateAttr, Optional<CalAttrOfDailyPerformance> calcOfDailyOpt,
+			Optional<CalAttrOfDailyPerformance> calcOfDailyOpt,
 			Optional<AffiliationInforOfDailyPerfor> affInfoOfDailyOpt,
-			Optional<WorkTypeOfDailyPerformance> workTypeOfDailyOpt) {
+			Optional<WorkTypeOfDailyPerformance> workTypeOfDailyOpt,RecreateFlag recreateFlag) {
 		NewReflectStampOutput newReflectStampOutput = new NewReflectStampOutput();
 		List<ErrMessageInfo> errMesInfos = new ArrayList<>();
 		ReflectStampOutput reflectStamp = new ReflectStampOutput();
@@ -903,8 +903,8 @@ public class ReflectStampDomainServiceImpl implements ReflectStampDomainService 
 		// - end
 
 		// 打刻を反映する - Dung code
-		List<StampItem> lstStampItem = this.stampDomainService.handleData(stampReflectRangeOutput, reCreateAttr,
-				empCalAndSumExecLogID, processingDate, employeeId, companyId);
+		List<StampItem> lstStampItem = this.stampDomainService.handleData(stampReflectRangeOutput,
+				empCalAndSumExecLogID, processingDate, employeeId, companyId,recreateFlag);
 		if (lstStampItem == null) {
 			reflectStamp = null;
 		}

@@ -1,8 +1,11 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository;
 
+import java.util.Optional;
+
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.adapter.generalinfo.dtoimport.EmployeeGeneralInfoImport;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.PeriodInMasterList;
+import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
 
 /**
@@ -12,6 +15,6 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enu
 public interface ResetDailyPerforDomainService {
 
 	void resetDailyPerformance(String companyID, String employeeID, GeneralDate processingDate,
-			String empCalAndSumExecLogID, ExecutionType reCreateAttr, PeriodInMasterList periodInMasterList, EmployeeGeneralInfoImport employeeGeneralInfoImport);
+			String empCalAndSumExecLogID, ExecutionType reCreateAttr, PeriodInMasterList periodInMasterList, EmployeeGeneralInfoImport employeeGeneralInfoImport,RecreateFlag recreateFlag,Optional<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance);
 
 }

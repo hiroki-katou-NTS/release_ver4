@@ -22,7 +22,6 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.Err
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfoRepository;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageResource;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionContent;
-import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
 import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
 import nts.uk.shr.com.i18n.TextResource;
 
@@ -37,8 +36,8 @@ public class StampServiceImpl implements StampDomainService {
 	private StampCardtemRepository stampCardRepo;
 
 	//打刻を取得する
-	public List<StampItem> handleData(StampReflectRangeOutput s, ExecutionType reCreateAttr,
-			String empCalAndSumExecLogID, GeneralDate date, String employeeId, String companyId) {
+	public List<StampItem> handleData(StampReflectRangeOutput s,
+			String empCalAndSumExecLogID, GeneralDate date, String employeeId, String companyId,RecreateFlag recreateFlag) {
 		if (s.getLstStampReflectTimezone().isEmpty()) {
 			ErrMessageInfo employmentErrMes = new ErrMessageInfo(employeeId, empCalAndSumExecLogID,
 					new ErrMessageResource("009"), EnumAdaptor.valueOf(0, ExecutionContent.class), date,
@@ -77,7 +76,7 @@ public class StampServiceImpl implements StampDomainService {
 
 			List<StampItem> lstStampItem = this.stampRepo.findByListCardNo(stampNumber);
 
-			if (reCreateAttr.value == 0) {
+			if (recreateFlag != RecreateFlag.CREATE_DAILY) {
 				for(StampItem x :lstStampItem){
 					int attendanceClock = x.getAttendanceTime().v();
 					TimeZoneOutput stampRange = s.getStampRange();
@@ -85,7 +84,7 @@ public class StampServiceImpl implements StampDomainService {
 					if (x.getDate().year()==date.year()&& x.getDate().month() == date.month() && x.getDate().day() == date.day()
 							&& attendanceClock >= stampRange.getStart().v().intValue()
 							&& attendanceClock <= stampRange.getEnd().v().intValue()
-							&& x.getReflectedAtr().value == 0) {
+							&& x.getReflectedAtr().value == 0) {//打刻．反映済み区分　=　false
 						lstStampItemOutput.add(x);
 					}
 					lstStampItemOutput.addAll(findStempItemNext(lstStampItem, date.addDays(1), stampRange, x.getReflectedAtr()));

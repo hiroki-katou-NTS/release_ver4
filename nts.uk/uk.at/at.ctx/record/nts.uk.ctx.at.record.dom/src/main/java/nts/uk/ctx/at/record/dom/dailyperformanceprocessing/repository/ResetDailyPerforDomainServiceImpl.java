@@ -149,9 +149,9 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 	@Override
 	public void resetDailyPerformance(String companyID, String employeeID, GeneralDate processingDate,
 			String empCalAndSumExecLogID, ExecutionType reCreateAttr, PeriodInMasterList periodInMasterList,
-			EmployeeGeneralInfoImport employeeGeneralInfoImport) {
-		Optional<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance = this.workInformationRepository
-				.find(employeeID, processingDate);
+			EmployeeGeneralInfoImport employeeGeneralInfoImport,RecreateFlag recreateFlag,Optional<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance) {
+//		Optional<WorkInfoOfDailyPerformance> workInfoOfDailyPerformance = this.workInformationRepository
+//				.find(employeeID, processingDate);
 
 		Optional<AffiliationInforOfDailyPerfor> affiliationInforOfDailyPerfor = this.affiliationInforOfDailyPerforRepository
 				.findByKey(employeeID, processingDate);
@@ -406,12 +406,12 @@ public class ResetDailyPerforDomainServiceImpl implements ResetDailyPerforDomain
 							if (workStyle != WorkStyle.ONE_DAY_REST) {
 								stampOutput = this.reflectStampDomainService.reflectStampInfo(companyID, employeeID,
 										processingDate, workInfoOfDailyPerformanceUpdate, null, empCalAndSumExecLogID,
-										reCreateAttr, Optional.ofNullable(calAttrOfDailyPerformance),
-										affiliationInforOfDailyPerfor, Optional.empty());
+										Optional.ofNullable(calAttrOfDailyPerformance),
+										affiliationInforOfDailyPerfor, Optional.empty(),recreateFlag);
 							}else {
 								 stampOutput = this.reflectStampDomainServiceImpl.acquireReflectEmbossing(companyID,
-										 employeeID, processingDate, workInfoOfDailyPerformance, null, empCalAndSumExecLogID, reCreateAttr,
-										 Optional.ofNullable(calAttrOfDailyPerformance),affiliationInforOfDailyPerfor, Optional.empty());
+										 employeeID, processingDate, workInfoOfDailyPerformance, null, empCalAndSumExecLogID,
+										 Optional.ofNullable(calAttrOfDailyPerformance),affiliationInforOfDailyPerfor, Optional.empty(),recreateFlag);
 							}
 							// ****
 							
