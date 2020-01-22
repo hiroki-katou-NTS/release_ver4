@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -383,51 +384,12 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 	    return t -> seen.add(keyExtractor.apply(t));
 	}
 
-	private List<EmployeeDataSort> getCriteriaQueryOfSortingEmployees(String comId, List<String> sIds,
-			GeneralDateTime referenceDate) {
-		List<EmployeeDataSort> results = new ArrayList<>();
-		StringBuilder builder = new StringBuilder();
-		builder.append("SELECT employee.SID, empHisItem.EMP_CD, wkpconfinf.HIERARCHY_CD, classHisItem.CLASSIFICATION_CODE, jobseq.DISPORDER, jobInfo.JOB_CD, comHis.START_DATE, person.BUSINESS_NAME_KANA, employee.SCD ")
-		.append(" FROM BSYMT_EMP_DTA_MNG_INFO employee")
-		.append(" LEFT JOIN BPSMT_PERSON person ON employee.PID = person.PID")
-		// Employment info
-		.append(" LEFT JOIN BSYMT_EMPLOYMENT_HIST empHis ON employee.SID = empHis.SID AND employee.CID = empHis.CID")
-		.append(" LEFT JOIN BSYMT_EMPLOYMENT_HIS_ITEM empHisItem ON empHisItem.HIST_ID = empHis.HIST_ID")
-		// Workplace info
-		.append(" LEFT JOIN BSYMT_AFF_WORKPLACE_HIST wplHis ON employee.SID = wplHis.SID AND employee.CID = wplHis.CID")
-		.append(" LEFT JOIN BSYMT_AFF_WPL_HIST_ITEM wplHisItem ON wplHis.HIST_ID = wplHisItem.HIST_ID")
-		.append(" LEFT JOIN BSYMT_WORKPLACE_INFO wplInfo ON wplHisItem.WORKPLACE_ID = wplInfo.WKPID")
-		.append(" LEFT JOIN BSYMT_WORKPLACE_HIST wplInfoHis ON wplInfo.HIST_ID = wplInfoHis.HIST_ID AND wplInfo.CID = wplInfoHis.CID")
-		.append(" LEFT JOIN BSYMT_WKP_CONFIG_INFO wkpconfinf ON wkpconfinf.WKPID = wplHisItem.WORKPLACE_ID")
-		.append(" LEFT JOIN BSYMT_WKP_CONFIG wkpconf ON wkpconf.HIST_ID = wkpconfinf.HIST_ID AND wkpconf.CID = wkpconfinf.CID")
-		// Classification info
-		.append(" LEFT JOIN BSYMT_AFF_CLASS_HISTORY classHis ON employee.SID = classHis.SID AND employee.CID = classHis.CID")
-		.append(" LEFT JOIN BSYMT_AFF_CLASS_HIS_ITEM classHisItem ON classHis.HIST_ID = classHisItem.HIST_ID")
-		// JobTitle Info
-		.append(" LEFT JOIN BSYMT_AFF_JOB_HIST jobHis ON employee.SID = jobHis.SID AND employee.CID = jobHis.CID")
-		.append(" LEFT JOIN BSYMT_AFF_JOB_HIST_ITEM jobHisItem ON jobHis.HIST_ID = jobHisItem.HIST_ID")
-		.append(" LEFT JOIN BSYMT_JOB_INFO jobInfo ON jobHisItem.JOB_TITLE_ID = jobInfo.JOB_ID")
-		.append(" LEFT JOIN BSYMT_JOB_HIST jobInfoHis ON jobInfo.HIST_ID = jobInfoHis.HIST_ID AND jobInfo.CID = jobInfoHis.CID")
-		.append(" LEFT JOIN BSYMT_JOB_SEQ_MASTER jobseq ON jobseq.SEQ_CD = jobInfo.SEQUENCE_CD AND jobseq.CID = jobInfo.CID")
-		// Com hist
-		.append(" LEFT JOIN BSYMT_AFF_COM_HIST comHis ON employee.SID = comHis.SID AND comHis.CID = employee.CID")
-		.append(" WHERE 1=1")
-		// company id
-		.append(" AND employee.CID = '" + comId + "'")
-		// employee id
-		.append(" AND employee.SID in ('" + String.join("','", sIds) + "')")
-		// employment
-		.append(" AND rfDate BETWEEN empHis.START_DATE AND empHis.END_DATE")
-		// workplace
-		.append(" AND rfDate BETWEEN wplHis.START_DATE AND wplHis.END_DATE")
-		.append(" AND rfDate BETWEEN wkpconf.START_DATE AND wkpconf.END_DATE")
-		// classification
-		.append(" AND rfDate BETWEEN classHis.START_DATE AND classHis.END_DATE")
-		// job title
-		.append(" AND rfDate BETWEEN jobHis.START_DATE AND jobHis.END_DATE")
-		.append(" AND rfDate BETWEEN jobInfoHis.START_DATE AND jobInfoHis.END_DATE");
-		// NtsStatement statement = new NtsStatement(builder.toString(), this.jdbcProxy());
-		String sql = builder.toString();
+	private List<String> getCriteriaQueryOfSortingEmployees(String comId, List<String> sIds,
+			GeneralDateTime referenceDate, List<SortingConditionOrder> sortConditions) {
+		List<String> results = new ArrayList<>();
+		
+		String sql = buildQuery(comId, sIds, referenceDate, sortConditions);
+		
 		if(sql.contains("rfDate")) {
 			sql = sql.replaceAll("rfDate", "'" + referenceDate.toString() + "'");
 		}
@@ -435,23 +397,99 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 				.createNativeQuery(sql);
 
 		@SuppressWarnings("unchecked")
-		List<Object[]> queryRs = query.getResultList();
+		List<String> queryRs = query.getResultList();
 		
-		for(Object[] res : queryRs) {
-			results.add(new EmployeeDataSort(
-					String.valueOf(res[0]),
-					String.valueOf(res[1]),
-					String.valueOf(res[2]),
-					String.valueOf(res[3]),
-					String.valueOf(res[4]),
-					String.valueOf(res[5]),
-					GeneralDateTime.legacyDateTime((Date) res[6]),
-					String.valueOf(res[7]),
-					String.valueOf(res[8])
-					));
+		for(String res : queryRs) {
+			results.add(String.valueOf(res));
 		}
 
-		return results;
+		return results.stream().distinct().collect(Collectors.toList());
+	}
+	
+	private String buildQuery(String comId, List<String> sIds,
+			GeneralDateTime referenceDate, List<SortingConditionOrder> sortConditions) {
+		
+		List<RegularSortingType> allSorts = sortConditions.stream().map(s -> s.getType()).collect(Collectors.toList());
+		boolean sortEmployment = allSorts.contains(RegularSortingType.EMPLOYMENT);
+		boolean sortDepartment = allSorts.contains(RegularSortingType.DEPARTMENT);
+		boolean sortWorkplace = allSorts.contains(RegularSortingType.WORKPLACE);
+		boolean sortClassification = allSorts.contains(RegularSortingType.CLASSIFICATION);
+		boolean sortPosition = allSorts.contains(RegularSortingType.POSITION);
+		boolean sortHireDate = allSorts.contains(RegularSortingType.HIRE_DATE);
+		boolean sortName = allSorts.contains(RegularSortingType.NAME);
+		
+		// , empHisItem.EMP_CD, wkpconfinf.HIERARCHY_CD, classHisItem.CLASSIFICATION_CODE, jobseq.DISPORDER, jobInfo.JOB_CD, comHis.START_DATE, person.BUSINESS_NAME_KANA, employee.SCD
+		StringBuilder joinBuilder = new StringBuilder();
+		StringBuilder whereBuilder = new StringBuilder()
+											.append(" WHERE 1=1")
+											// company id
+											.append(" AND employee.CID = '" + comId + "'")
+											// employee id
+											.append(" AND employee.SID in ('" + String.join("','", sIds) + "')");
+		List<String> orderBy = new ArrayList<>();
+		// orderBy.add("employee.SID");
+		// Employment info
+		if (sortEmployment) {
+			joinBuilder.append(" LEFT JOIN BSYMT_EMPLOYMENT_HIST empHis ON employee.SID = empHis.SID AND employee.CID = empHis.CID")
+				   .append(" LEFT JOIN BSYMT_EMPLOYMENT_HIS_ITEM empHisItem ON empHisItem.HIST_ID = empHis.HIST_ID");
+			whereBuilder.append(" AND rfDate BETWEEN empHis.START_DATE AND empHis.END_DATE");
+			orderBy.add("empHisItem.EMP_CD");
+		}
+		
+		if (sortDepartment) {
+			// implement later
+		}
+		// Workplace info
+		if (sortWorkplace) {
+			joinBuilder.append(" LEFT JOIN BSYMT_AFF_WORKPLACE_HIST wplHis ON employee.SID = wplHis.SID AND employee.CID = wplHis.CID")
+				   .append(" LEFT JOIN BSYMT_AFF_WPL_HIST_ITEM wplHisItem ON wplHis.HIST_ID = wplHisItem.HIST_ID")
+				   .append(" LEFT JOIN BSYMT_WORKPLACE_INFO wplInfo ON wplHisItem.WORKPLACE_ID = wplInfo.WKPID")
+				   .append(" LEFT JOIN BSYMT_WORKPLACE_HIST wplInfoHis ON wplInfo.HIST_ID = wplInfoHis.HIST_ID AND wplInfo.CID = wplInfoHis.CID")
+				   .append(" LEFT JOIN BSYMT_WKP_CONFIG_INFO wkpconfinf ON wkpconfinf.WKPID = wplHisItem.WORKPLACE_ID")
+				   .append(" LEFT JOIN BSYMT_WKP_CONFIG wkpconf ON wkpconf.HIST_ID = wkpconfinf.HIST_ID AND wkpconf.CID = wkpconfinf.CID");
+			whereBuilder.append(" AND rfDate BETWEEN wplHis.START_DATE AND wplHis.END_DATE")
+						.append(" AND rfDate BETWEEN wkpconf.START_DATE AND wkpconf.END_DATE");
+			orderBy.add("wkpconfinf.HIERARCHY_CD");
+		}
+		// Classification info
+		if (sortClassification) {
+			joinBuilder.append(" LEFT JOIN BSYMT_AFF_CLASS_HISTORY classHis ON employee.SID = classHis.SID AND employee.CID = classHis.CID")
+				   .append(" LEFT JOIN BSYMT_AFF_CLASS_HIS_ITEM classHisItem ON classHis.HIST_ID = classHisItem.HIST_ID");
+			whereBuilder.append(" AND rfDate BETWEEN classHis.START_DATE AND classHis.END_DATE");
+			orderBy.add("classHisItem.CLASSIFICATION_CODE");
+			
+		}
+		// JobTitle Info
+		if(sortPosition) {
+			joinBuilder.append(" LEFT JOIN BSYMT_AFF_JOB_HIST jobHis ON employee.SID = jobHis.SID AND employee.CID = jobHis.CID")
+				   .append(" LEFT JOIN BSYMT_AFF_JOB_HIST_ITEM jobHisItem ON jobHis.HIST_ID = jobHisItem.HIST_ID")
+				   .append(" LEFT JOIN BSYMT_JOB_INFO jobInfo ON jobHisItem.JOB_TITLE_ID = jobInfo.JOB_ID")
+				   .append(" LEFT JOIN BSYMT_JOB_HIST jobInfoHis ON jobInfo.HIST_ID = jobInfoHis.HIST_ID AND jobInfo.CID = jobInfoHis.CID")
+				   .append(" LEFT JOIN BSYMT_JOB_SEQ_MASTER jobseq ON jobseq.SEQ_CD = jobInfo.SEQUENCE_CD AND jobseq.CID = jobInfo.CID");
+			whereBuilder.append(" AND rfDate BETWEEN jobHis.START_DATE AND jobHis.END_DATE")
+						.append(" AND rfDate BETWEEN jobInfoHis.START_DATE AND jobInfoHis.END_DATE");
+			orderBy.add("jobseq.DISPORDER");
+			orderBy.add("jobInfo.JOB_CD");
+		}
+		// Com hist
+		if(sortHireDate) {
+			joinBuilder.append(" LEFT JOIN BSYMT_AFF_COM_HIST comHis ON employee.SID = comHis.SID AND comHis.CID = employee.CID");
+			orderBy.add("comHis.START_DATE");
+		}
+		// name
+		if(sortName) {
+			orderBy.add("person.BUSINESS_NAME_KANA");
+		}
+		// default
+		orderBy.add("employee.SCD");
+		
+		StringBuilder selectBuilder = new StringBuilder();
+		selectBuilder.append("SELECT employee.SID ")
+			   .append(" FROM BSYMT_EMP_DTA_MNG_INFO employee")
+			   .append(" LEFT JOIN BPSMT_PERSON person ON employee.PID = person.PID");
+		
+		return selectBuilder.toString() + joinBuilder.toString() + whereBuilder.toString() + " ORDER BY " + String.join(",", orderBy);
+		
 	}
 	
 	@AllArgsConstructor
@@ -663,13 +701,14 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			return Collections.emptyList();
 		}
 		
-		List<EmployeeDataSort> resultList = new ArrayList<>();
+		List<String> resultList = new ArrayList<>();
+		List<SortingConditionOrder> sortConditions = this.getSortConditions(comId, systemType, orderNo);
 		CollectionUtil.split(sIds, MAX_PARAMETERS, splitData -> {
-			resultList.addAll(this.getCriteriaQueryOfSortingEmployees(comId, splitData, referenceDate));
+			resultList.addAll(this.getCriteriaQueryOfSortingEmployees(comId, splitData, referenceDate, sortConditions));
 		});
 
-		List<SortingConditionOrder> sortConditions = this.getSortConditions(comId, systemType, orderNo);
-		return this.sortByListConditions(resultList, sortConditions);
+		
+		return resultList;
 	}
 
 	/*
@@ -686,12 +725,12 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			return Collections.emptyList();
 		}
 		
-		List<EmployeeDataSort> resultList = new ArrayList<>();
+		List<String> resultList = new ArrayList<>();
 		CollectionUtil.split(sIds, MAX_PARAMETERS, splitData -> {
-			resultList.addAll(this.getCriteriaQueryOfSortingEmployees(comId, splitData, referenceDate));
+			resultList.addAll(this.getCriteriaQueryOfSortingEmployees(comId, splitData, referenceDate, orders));
 		});
 
-		return this.sortByListConditions(resultList, orders);
+		return resultList;
 	}
 	
 	/**
