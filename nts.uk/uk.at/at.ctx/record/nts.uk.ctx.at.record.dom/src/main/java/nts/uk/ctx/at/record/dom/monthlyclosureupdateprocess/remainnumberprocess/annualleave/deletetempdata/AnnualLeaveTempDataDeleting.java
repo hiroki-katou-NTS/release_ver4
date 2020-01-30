@@ -3,7 +3,7 @@ package nts.uk.ctx.at.record.dom.monthlyclosureupdateprocess.remainnumberprocess
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.interim.TempAnnualLeaveMngRepository;
+import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.InterimRemainRepository;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
@@ -14,9 +14,10 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class AnnualLeaveTempDataDeleting {
-
+	
+	// Fix bug 109524
 	@Inject
-	private TempAnnualLeaveMngRepository tmpAnnualLeaveRepo;
+	private InterimRemainRepository tmpAnnualLeaveRepo;
 
 	/**
 	 * 年休暫定データ削除

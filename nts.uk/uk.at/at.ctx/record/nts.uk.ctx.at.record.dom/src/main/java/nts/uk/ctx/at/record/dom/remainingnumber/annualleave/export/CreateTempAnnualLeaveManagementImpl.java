@@ -12,8 +12,8 @@ import nts.uk.ctx.at.record.dom.monthly.verticaltotal.GetVacationAddSet;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.MonAggrCompanySettings;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.MonthlyCalculatingDailys;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
-import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.interim.TempAnnualLeaveManagement;
-import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.interim.TempAnnualLeaveMngRepository;
+import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.InterimRemain;
+import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.InterimRemainRepository;
 import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -32,7 +32,7 @@ public class CreateTempAnnualLeaveManagementImpl implements CreateTempAnnualLeav
 	private BasicScheduleAdapter basicScheduleAdapter;
 	/** 暫定年休管理データ */
 	@Inject
-	private TempAnnualLeaveMngRepository tempAnnualLeaveMngRepo;
+	private InterimRemainRepository tempAnnualLeaveMngRepo;
 	/** 勤務情報の取得 */
 	@Inject
 	public WorkTypeRepository workTypeRepo;
@@ -45,7 +45,7 @@ public class CreateTempAnnualLeaveManagementImpl implements CreateTempAnnualLeav
 	
 	/** 暫定年休管理データを作成する */
 	@Override
-	public List<TempAnnualLeaveManagement> algorithm(String companyId, String employeeId, DatePeriod period,
+	public List<InterimRemain> algorithm(String companyId, String employeeId, DatePeriod period,
 			InterimRemainMngMode mode) {
 		
 		CreateTempAnnLeaMngProc proc = new CreateTempAnnLeaMngProc(
@@ -60,7 +60,7 @@ public class CreateTempAnnualLeaveManagementImpl implements CreateTempAnnualLeav
 	
 	/** 暫定年休管理データを作成する　（月別集計用） */
 	@Override
-	public List<TempAnnualLeaveManagement> algorithm(String companyId, String employeeId, DatePeriod period,
+	public List<InterimRemain> algorithm(String companyId, String employeeId, DatePeriod period,
 			InterimRemainMngMode mode, Optional<MonAggrCompanySettings> companySets,
 			Optional<MonthlyCalculatingDailys> monthlyCalcDailys) {
 		

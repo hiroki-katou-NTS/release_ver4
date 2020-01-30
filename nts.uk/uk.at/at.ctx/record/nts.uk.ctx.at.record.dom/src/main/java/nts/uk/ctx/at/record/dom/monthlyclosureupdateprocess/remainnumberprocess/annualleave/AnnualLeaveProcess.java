@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.dom.monthlyclosureupdateprocess.remainnumberprocess.annualleave;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
@@ -15,6 +16,10 @@ import nts.uk.ctx.at.record.dom.monthlyclosureupdateprocess.remainnumberprocess.
 import nts.uk.ctx.at.record.dom.monthlycommon.aggrperiod.AggrPeriodEachActualClosure;
 import nts.uk.ctx.at.record.dom.remainingnumber.annualleave.export.param.AggrResultOfAnnAndRsvLeave;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.DailyInterimRemainMngData;
+import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.interim.TmpAnnualHolidayMngRepository;
+import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.InterimRemain;
+import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.InterimRemainRepository;
+import nts.uk.ctx.at.shared.dom.remainingnumber.reserveleave.interim.TmpResereLeaveMngRepository;
 
 /**
  * 
@@ -39,6 +44,15 @@ public class AnnualLeaveProcess {
 
 	@Inject
 	private RsvAnnualLeaveTempDataDeleting tmpRsvAnnualLeaveDeleting;
+	
+	@Inject 
+	private TmpAnnualHolidayMngRepository annualHolidayMngRepository;
+	
+	@Inject 
+	private InterimRemainRepository interimRemainRepository;
+	
+	@Inject 
+	private TmpResereLeaveMngRepository leaveMngRepository;
 
 	/**
 	 * 年休残数処理
@@ -54,12 +68,17 @@ public class AnnualLeaveProcess {
 		AggrResultOfAnnAndRsvLeave output = remainHolidayCalculation.calculateRemainAnnualHoliday(
 				period, empId, interimRemainMngMap, attTimeMonthly);
 		
+		List<InterimRemain> interimRemain = interimRemainRepository.findByEmployeeID(empId);
+		String mngId = interimRemain.get(0).getRemainManaID();
+		
 		// 年休残数更新
 		if (output.getAnnualLeave().isPresent())
 			remainHolidayUpdating.updateRemainAnnualLeave(output.getAnnualLeave().get(), period, empId);
 		
 		// 年休暫定データ削除
 		tmpAnnualLeaveDeleting.deleteTempAnnualLeaveData(empId, period.getPeriod());
+		// Fix bug 109524
+		annualHolidayMngRepository.deleteById(mngId);
 		
 		// 積立年休残数更新
 		if (output.getReserveLeave().isPresent())
@@ -67,5 +86,7 @@ public class AnnualLeaveProcess {
 		
 		// 積立年休暫定データ削除
 		tmpRsvAnnualLeaveDeleting.deleteTempRsvAnnualLeaveData(empId, period.getPeriod());
+		// Fix bug 109524
+		leaveMngRepository.deleteById(mngId);
 	}
 }
