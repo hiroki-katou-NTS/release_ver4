@@ -149,7 +149,7 @@ public class JpaInterimRemainRepository extends JpaRepository implements Interim
 	/** 検索 */
 	@Override
 	public Optional<InterimRemain> find(String sId, GeneralDate ymd) {
-		String QUERY_BY_ID = "SELECT s FROM KrcmtInterimRemainMng s WHERE s.sId = :sId" + " s.ymd = :ymd";
+		String QUERY_BY_ID = "SELECT * FROM KrcmtInterimRemainMng s WHERE s.sId = :sId" + " s.ymd = :ymd";
 		Optional<KrcmtInterimRemainMng> entity = this.queryProxy().query(QUERY_BY_ID, KrcmtInterimRemainMng.class)
 				.setParameter("sId", sId).setParameter("ymd", ymd).getSingle();
 		if (entity.isPresent()) {
@@ -181,7 +181,7 @@ public class JpaInterimRemainRepository extends JpaRepository implements Interim
 	/** 削除 */
 	@Override
 	public void remove(String sId, GeneralDate ymd) {
-		String sql = "delete  from KrcmtInterimRemainMng c + WHERE c.sId = :sId" + " AND c.ymd >= :ymd";
+		String sql = "delete  from KrcmtInterimRemainMng c WHERE c.sId = :sId" + " AND c.ymd >= :ymd";
 		this.getEntityManager().createQuery(sql).setParameter("sId", sId).setParameter("ymd", ymd).executeUpdate();
 	}
 
@@ -189,7 +189,7 @@ public class JpaInterimRemainRepository extends JpaRepository implements Interim
 	/** 削除 （期間） */
 	@Override
 	public void removeByPeriod(String sId, DatePeriod period) {
-		String sql = "delete  from KrcmtInterimRemainMng c + WHERE c.sId = :sId" + " AND c.ymd >= :startYmd"
+		String sql = "delete  from KrcmtInterimRemainMng c WHERE c.sId = :sId" + " AND c.ymd >= :startYmd"
 				+ " AND c.ymd <= :endYmd";
 		this.getEntityManager().createQuery(sql).setParameter("sId", sId).setParameter("startYmd", period.start())
 				.setParameter("endYmd", period.end()).executeUpdate();
@@ -200,7 +200,7 @@ public class JpaInterimRemainRepository extends JpaRepository implements Interim
 	/** 削除 （基準日以前） */
 	@Override
 	public void removePastYmd(String sId, GeneralDate criteriaDate) {
-		String sql = "delete  from KrcmtInterimRemainMng c + WHERE c.sId = :sId" + " AND c.ymd <= :criteriaDate";
+		String sql = "delete  from KrcmtInterimRemainMng c WHERE c.sId = :sId" + " AND c.ymd <= :criteriaDate";
 		this.getEntityManager().createQuery(sql).setParameter("sId", sId).setParameter("criteriaDate", criteriaDate)
 				.executeUpdate();
 	}
