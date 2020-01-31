@@ -195,12 +195,13 @@ public class JpaInterimRemainRepository extends JpaRepository implements Interim
 				.setParameter("endYmd", period.end()).executeUpdate();
 	}
 
+	
 	// Fix bug 109524
 	/** 削除 （基準日以前） */
 	@Override
 	public void removePastYmd(String sId, GeneralDate criteriaDate) {
 		String sql = "delete  from KrcmtInterimRemainMng c + WHERE c.sId = :sId" + " AND c.ymd <= :criteriaDate";
-		this.getEntityManager().createQuery(sql).setParameter("sId", sId).setParameter("ymd", criteriaDate)
+		this.getEntityManager().createQuery(sql).setParameter("sId", sId).setParameter("criteriaDate", criteriaDate)
 				.executeUpdate();
 	}
 
