@@ -181,7 +181,7 @@ public class JpaInterimRemainRepository extends JpaRepository implements Interim
 	/** 削除 */
 	@Override
 	public void remove(String sId, GeneralDate ymd) {
-		String sql = "delete  from KrcmtInterimRecMng a + WHERE c.sId = :employeeId" + " AND c.ymd >= :ymd";
+		String sql = "delete  from KrcmtInterimRemainMng c + WHERE c.sId = :sId" + " AND c.ymd >= :ymd";
 		this.getEntityManager().createQuery(sql).setParameter("sId", sId).setParameter("ymd", ymd).executeUpdate();
 	}
 
@@ -189,7 +189,7 @@ public class JpaInterimRemainRepository extends JpaRepository implements Interim
 	/** 削除 （期間） */
 	@Override
 	public void removeByPeriod(String sId, DatePeriod period) {
-		String sql = "delete  from KrcmtInterimRecMng a + WHERE c.sId = :employeeId" + " AND c.ymd >= :startYmd"
+		String sql = "delete  from KrcmtInterimRemainMng c + WHERE c.sId = :sId" + " AND c.ymd >= :startYmd"
 				+ " AND c.ymd <= :endYmd";
 		this.getEntityManager().createQuery(sql).setParameter("sId", sId).setParameter("startYmd", period.start())
 				.setParameter("endYmd", period.end()).executeUpdate();
@@ -199,7 +199,7 @@ public class JpaInterimRemainRepository extends JpaRepository implements Interim
 	/** 削除 （基準日以前） */
 	@Override
 	public void removePastYmd(String sId, GeneralDate criteriaDate) {
-		String sql = "delete  from KrcmtInterimRecMng a + WHERE c.sId = :employeeId" + " AND c.ymd <= :endYmd";
+		String sql = "delete  from KrcmtInterimRemainMng c + WHERE c.sId = :sId" + " AND c.ymd <= :endYmd";
 		this.getEntityManager().createQuery(sql).setParameter("sId", sId).setParameter("ymd", criteriaDate)
 				.executeUpdate();
 	}
