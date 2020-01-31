@@ -149,7 +149,7 @@ public class JpaInterimRemainRepository extends JpaRepository implements Interim
 	/** 検索 */
 	@Override
 	public Optional<InterimRemain> find(String sId, GeneralDate ymd) {
-		String QUERY_BY_ID = "SELECT * FROM KrcmtInterimRemainMng s WHERE s.sId = :sId" + " s.ymd = :ymd";
+		String QUERY_BY_ID = "SELECT s FROM KrcmtInterimRemainMng s WHERE s.sId = :sId" + " s.ymd = :ymd";
 		Optional<KrcmtInterimRemainMng> entity = this.queryProxy().query(QUERY_BY_ID, KrcmtInterimRemainMng.class)
 				.setParameter("sId", sId).setParameter("ymd", ymd).getSingle();
 		if (entity.isPresent()) {
