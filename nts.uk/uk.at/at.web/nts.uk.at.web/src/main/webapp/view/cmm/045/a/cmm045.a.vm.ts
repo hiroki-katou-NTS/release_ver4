@@ -260,6 +260,10 @@ module cmm045.a.viewmodel {
                         if(self.mode() == 0){
                             $('#ccgcomponent').ntsGroupComponent(self.ccgcomponent);
                         }
+
+
+
+
                         block.clear();
                         dfd.resolve();
                     });
@@ -270,9 +274,222 @@ module cmm045.a.viewmodel {
             return dfd.promise();
         }
 
+        setupGrid(options: {
+            withCcg001: boolean,
+            width: any,
+            height: any,
+            columns: Array<{
+                headerText: string,
+                width: string,
+                key: string,
+                extraClassProperty?: string,
+                checkbox?: { visible: Function, applyToProperty: string },
+                button?: { text: string, click: Function }
+            }>
+        }) {
+
+            let $container = $("#app-grid-container");
+            $container.hide();
+
+            if ($container.children("#not-constructed").length === 1) {
+
+                $container.empty();
+
+                if (options.withCcg001) {
+                    $container.addClass("with-ccg001");
+                }
+
+                // header
+                let $colgroup = $("<colgroup/>");
+                let $trHead = $("<tr/>");
+                options.columns.forEach(column => {
+                    $("<col/>")
+                        .attr("width", column.width)
+                        .appendTo($colgroup);
+
+                    let $th = $("<th/>")
+                        .addClass("ui-widget-header");
+                    
+                    // batch check
+                    if (column.checkbox !== undefined) {
+                        let items = this.items();
+                        let checkableItems = items.filter(item => item.checkAtr === true);
+                        if (checkableItems.length > 0) {
+                            $("<label/>")
+                                .addClass("ntsCheckBox")
+                                .append($("<input/>")
+                                    .attr("id", "batch-check")
+                                    .attr("type", "checkbox")
+                                    .addClass(column.key))
+                                .append($("<span/>").addClass("box"))
+                                .change((e) => {
+                                    let checked = $(e.target).prop("checked");
+                                    $appGrid.find("input[type=checkbox]." + column.key)
+                                        .prop("checked", checked);
+                                    items
+                                        .filter(item => item.checkAtr === true)
+                                        .forEach(item => item.check = checked);
+                                })
+                                .appendTo($th);
+                        }
+                    }
+                    else {
+                        $th.text(column.headerText);
+                    }
+                    
+                    $th.appendTo($trHead);
+                });
+                let $thead = $("<thead/>")
+                    .append($trHead);
+
+                // body
+                let $tbody = $("<tbody/>");
+                
+
+                // build grid
+                let $appGrid = $("<table/>")
+                    .attr("id", "app-grid")
+                    .data("size", { width: options.width, height: options.height })
+                    .append($colgroup)
+                    .append($thead)
+                    .append($tbody);
+
+                // event handler
+                options.columns.forEach(column => {
+                    if (column.button !== undefined) {
+                        $appGrid.on("click", "." + column.key, column.button.click);
+                    }
+
+                    if (column.checkbox !== undefined) {
+                        $appGrid.on("change", "input." + column.key, e => {
+                            let appId = $(e.target).closest("td").data("app-id");
+                            let checked = $(e.target).prop("checked");
+                            let items = this.items();
+                            items.filter(item => item.appId === appId)[0].check = checked;
+
+                            // sync with batch check
+                            let allChecked = true;
+                            for (let i = 0; i < items.length; i++) {
+                                let item = items[i];
+                                if (item.checkAtr === false) continue;
+                                if (item.check === false) {
+                                    allChecked = false;
+                                    break;
+                                }
+                            }
+                            $("#batch-check").prop("checked", allChecked);
+                        });
+                    }
+                });
+                
+                $container.append($appGrid).show();
+                
+                let size = $appGrid.data("size");
+                fixedTable.init($appGrid, {
+                    height: size.height,
+                    width: size.width
+                });
+                
+                dragResize(
+                    $container.find(".nts-fixed-header-container table"),
+                    $container.find(".nts-fixed-body-container table"));
+            }
+
+            this.loadGridData(options.columns);
+
+            $container.show();
+        }
+
+        loadGridData(
+            columns: Array<{
+                headerText: string,
+                width: string,
+                key: string,
+                extraClassProperty?: string,
+                checkbox?: { visible: Function, applyToProperty: string },
+                button?: { text: string, click: Function }
+            }>) {
+
+            let $container = $("#app-grid-container");
+            let $tbody = $container.find(".nts-fixed-body-wrapper tbody");
+            $tbody.empty();
+            
+            this.items().forEach(item => {
+                let $tr = $("<tr/>");
+                columns.forEach(column => {
+
+                    let $td = $("<td/>")
+                        .data("app-id", item.appId)
+                        .addClass(column.key);
+
+                    if (column.extraClassProperty !== undefined) {
+                        $td.addClass(item[column.extraClassProperty]);
+                    }
+
+                    if (column.checkbox !== undefined) {
+                        if (column.checkbox.visible(item) === true) {
+                            $("<label/>")
+                                .addClass("ntsCheckBox")
+                                .append($("<input/>")
+                                    .attr("type", "checkbox")
+                                    .addClass(column.key))
+                                .append($("<span/>").addClass("box"))
+                                .appendTo($td);
+                        }
+                    }
+                    else if (column.button !== undefined) {
+                        $("<button/>")
+                            .addClass(column.key)
+                            .text(column.button.text)
+                            .appendTo($td);
+                    }
+                    else {
+                        $td.html(item[column.key]);
+                    }
+
+                    $td.appendTo($tr);
+                });
+                $tr.appendTo($tbody);
+            });
+
+            resetColumnsSize(
+                $container.find("colgroup").eq(0).children(),
+                $container.find(".nts-fixed-header-wrapper table"),
+                $container.find(".nts-fixed-body-wrapper table"));
+        }
+
         reloadGridApplicaion(colorBackGr: any, isHidden: boolean) {
+
             var self = this;
-            let widthAuto = isHidden == false ? '1110px' : '1045px';
+            let widthAuto = isHidden == false ? 1110 : 1045;
+
+            let columns = [
+                { headerText: getText('CMM045_50'), key: 'details', width: '55px', button: {
+                    text: getText('CMM045_50'),
+                    click: (e) => {
+                        let targetAppId = $(e.target).closest("td").data("app-id");
+                        let lstAppId = self.items().map(app => app.appId);
+                        nts.uk.localStorage.setItem('UKProgramParam', 'a=0');
+                        nts.uk.request.jump("/view/kaf/000/b/index.xhtml", { 'listAppMeta': lstAppId, 'currentApp': targetAppId });
+                    }
+                } },
+                { headerText: getText('CMM045_51'), key: 'applicant', width: '120px' },
+                { headerText: getText('CMM045_52'), key: 'appName', width: '90px'},
+                { headerText: getText('CMM045_53'), key: 'appAtr', width: '65px', hidden: isHidden},
+                { headerText: getText('CMM045_54'), key: 'appDate', width: '157px'},
+                { headerText: getText('CMM045_55'), key: 'appContent', width: '408px'},
+                { headerText: getText('CMM045_56'), key: 'inputDate', width: '120px'},
+                { headerText: getText('CMM045_57'), key: 'appStatus', width: '75px', extraClassProperty: "appStatusName"}
+            ];
+
+            this.setupGrid({
+                withCcg001: true,
+                width: widthAuto,
+                height: 500,
+                columns: columns.filter(c => c.hidden !== true)
+            });
+            
+/*
             $("#grid2").ntsGrid({
                 width: widthAuto,
                 height: window.innerHeight -250,
@@ -328,6 +545,7 @@ module cmm045.a.viewmodel {
                 nts.uk.localStorage.setItem('UKProgramParam', 'a=0');
                 nts.uk.request.jump("/view/kaf/000/b/index.xhtml", { 'listAppMeta': lstAppId, 'currentApp': id });
             });
+            */
         }
         findDataModeAppByID(appId: string, lstAppCommon: Array<vmbase.DataModeApp>){
             return _.find(lstAppCommon, function(app) {
@@ -352,21 +570,27 @@ module cmm045.a.viewmodel {
                 let rowId = item.appId;
                 //fill color in 承認状況
                 if (item.appStatusNo == 0) {//0 下書き保存/未反映　=　未
+                    item.appStatusName = 'unapprovalCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['unapprovalCell']));
                 }
                 if (item.appStatusNo == 1) {//1 反映待ち　＝　承認済み
+                    item.appStatusName = 'approvalCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['approvalCell']));
                 }
                 if (item.appStatusNo == 2) {//2 反映済　＝　反映済み
+                    item.appStatusName = 'reflectCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['reflectCell']));
                 }
                 if (item.appStatusNo == 3 || item.appStatusNo == 4) {//3,4 取消待ち/取消済　＝　取消
+                    item.appStatusName = 'cancelCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['cancelCell']));
                 }
                 if (item.appStatusNo == 5) {//5 差し戻し　＝　差戻
+                    item.appStatusName = 'remandCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['remandCell']));
                 }
                 if (item.appStatusNo == 6) {//6 否認　=　否
+                    item.appStatusName = 'denialCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['denialCell']));
                 }
                 //fill color in 申請内容
@@ -386,18 +610,23 @@ module cmm045.a.viewmodel {
                 let rowId = item.appId;
                 //fill color in 承認状況
                 if (item.appStatusNo == 5) {//5 -UNAPPROVED 未
+                    item.appStatusName = 'unapprovalCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['unapprovalCell']));
                 }
                 if (item.appStatusNo == 4) {//4 APPROVED 承認済み
+                    item.appStatusName = 'approvalCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['approvalCell']));
                 }
                 if (item.appStatusNo == 3) {//3 CANCELED 取消
+                    item.appStatusName = 'cancelCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['cancelCell']));
                 }
                 if (item.appStatusNo == 2) {//2 REMAND 差戻
+                    item.appStatusName = 'remandCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['remandCell']));
                 }
                 if (item.appStatusNo == 1) {//1 DENIAL 否
+                    item.appStatusName = 'denialCell';
                     result.push(new vmbase.CellState(rowId,'appStatus',['denialCell']));
                 }
                 //fill color in 申請内容
@@ -438,8 +667,41 @@ module cmm045.a.viewmodel {
             return result;
         }
         reloadGridApproval(lstHidden: Array<any>, colorBackGr: any, isHidden: boolean) {
+
             var self = this;
-            let widthAuto = isHidden == false ? '1175px' : '1110px';
+            let widthAuto = isHidden == false ? 1175 : 1110;
+
+            let columns = [
+                { headerText: getText('CMM045_49'), key: 'check', dataType: 'boolean', width: '35px', checkbox: {
+                    visible: item => item.checkAtr === true,
+                    applyToProperty: "check"
+                } },
+                { headerText: getText('CMM045_50'), key: 'details', width: '55px', button: {
+                    text: getText('CMM045_50'),
+                    click: (e) => {
+                        let targetAppId = $(e.target).closest("td").data("app-id");
+                        let lstAppId = self.items().map(app => app.appId);
+                        nts.uk.localStorage.setItem('UKProgramParam', 'a=1');
+                        nts.uk.request.jump("/view/kaf/000/b/index.xhtml", { 'listAppMeta': lstAppId, 'currentApp': targetAppId });
+                    }
+                } },
+                { headerText: getText('CMM045_51'), key: 'applicant', width: '120px' },
+                { headerText: getText('CMM045_52'), key: 'appName', width: '90px'},
+                { headerText: getText('CMM045_53'), key: 'appAtr', width: '65px', hidden: isHidden},
+                { headerText: getText('CMM045_54'), key: 'appDate', width: '157px'},
+                { headerText: getText('CMM045_55'), key: 'appContent', width: '341px'},
+                { headerText: getText('CMM045_56'), key: 'inputDate', width: '120px'},
+                { headerText: getText('CMM045_57'), key: 'appStatus', width: '75px', extraClassProperty: "appStatusName"},
+                { headerText: getText('CMM045_58'), key: 'displayAppStatus', width: '95px' },
+            ]
+
+            this.setupGrid({
+                withCcg001: false,
+                width: widthAuto,
+                height: 530,
+                columns: columns.filter(c => c.hidden !== true)
+            });
+/*
             $("#grid1").ntsGrid({
                 width: widthAuto,
                 height: window.innerHeight - 330,
@@ -499,6 +761,7 @@ module cmm045.a.viewmodel {
             });
 
             $("#grid1").setupSearchScroll("igGrid", true);
+            */
         }
         /**
          * 休日出勤時間申請
