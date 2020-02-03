@@ -116,10 +116,10 @@ public interface ReflectWorkInforDomainService {
 			Optional<StampReflectionManagement> stampReflectionManagement,
 			Map<String, Map<String, WorkingConditionItem>> mapWorkingConditionItem,
 			Map<String, Map<String, DateHistoryItem>> mapDateHistoryItem, PeriodInMasterList periodInMasterList , TimeLeavingOfDailyPerformance timeLeavingOptional,
-			RecreateFlag recreateFlag);
+			RecreateFlag recreateFlag,Optional<WorkInfoOfDailyPerformance> optDaily);
     WorkInfoOfDailyPerformance reflectWithNoInfoImport(String companyId, String employeeId, GeneralDate day,
 			String empCalAndSumExecLogID, ExecutionType reCreateAttr, boolean reCreateWorkType,
-			Optional<StampReflectionManagement> stampReflectionManagement, TimeLeavingOfDailyPerformance timeLeavingOptional,RecreateFlag recreateFlag);
+			Optional<StampReflectionManagement> stampReflectionManagement, TimeLeavingOfDailyPerformance timeLeavingOptional,RecreateFlag recreateFlag,Optional<WorkInfoOfDailyPerformance> optDaily);
     
     public ExitStatus reCreateWorkType(String employeeId, GeneralDate day, String empCalAndSumExecLogID,
             boolean reCreateWorkType, boolean reCreateWorkPlace);
