@@ -40,6 +40,7 @@ import nts.uk.screen.at.app.dailyperformance.correction.DisplayRemainingHolidayN
 import nts.uk.screen.at.app.dailyperformance.correction.InfomationInitScreenProcess;
 import nts.uk.screen.at.app.dailyperformance.correction.UpdateColWidthCommand;
 import nts.uk.screen.at.app.dailyperformance.correction.calctime.DailyCorrectCalcTimeService;
+import nts.uk.screen.at.app.dailyperformance.correction.calctime.DailyCorrectMapCacheService;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.CodeName;
 import nts.uk.screen.at.app.dailyperformance.correction.datadialog.DataDialogWithTypeProcessor;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalConfirmCache;
@@ -120,6 +121,9 @@ public class DailyPerformanceCorrectionWebService {
 	
 	@Inject
 	private DailyCorrectCalcTimeService dailyCorrectCalcTimeService;
+	
+	@Inject
+	private DailyCorrectMapCacheService dailyCorrectMapCacheService;
 	
 	@Inject
 	private DailyCalculationCommandFacade dailyCalculationService;
@@ -400,6 +404,22 @@ public class DailyPerformanceCorrectionWebService {
 		session.setAttribute("domainEdits", result.getDailyEdits());
 		result.setDailyEdits(Collections.emptyList());
 		return result;
+	}
+	
+	@POST
+	@Path("updateDomainCache")
+	@SuppressWarnings("unchecked")
+	public void updateDomainCache(DCCalcTimeParam dcTimeParam) {
+		val domain = session.getAttribute("domainEdits");
+		List<DailyRecordDto> dailyEdits = new ArrayList<>();
+		if (domain == null) {
+			dailyEdits = cloneListDto((List<DailyRecordDto>) session.getAttribute("domainOlds"));
+		} else {
+			dailyEdits = (List<DailyRecordDto>) domain;
+		}
+
+		val result = dailyCorrectMapCacheService.updateDomainCache(dailyEdits, dcTimeParam.getItemEdits().get(0));
+		session.setAttribute("domainEdits", result);
 	}
 	
 	@POST

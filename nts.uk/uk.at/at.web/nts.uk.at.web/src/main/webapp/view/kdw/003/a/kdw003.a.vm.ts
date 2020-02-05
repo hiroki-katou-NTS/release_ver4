@@ -47,6 +47,8 @@ module nts.uk.at.view.kdw003.a.viewmodel {
     var ITEM_CHANGE = [28, 29, 31, 34, 41, 44, 623, 625];
 
     var DEVIATION_REASON_MAP = { "438": 1, "443": 2, "448": 3, "453": 4, "458": 5, "801": 6, "806": 7, "811": 8, "816": 9, "821": 10 };
+    
+    var BREAK_TIME = [157, 159, 163, 165, 169, 171, 175, 177, 181, 183, 187, 189, 193, 195, 199, 201, 205, 207, 211, 213];
 
     export class ScreenModel {
         fixHeaders: KnockoutObservableArray<any> = ko.observableArray([]);
@@ -4252,7 +4254,30 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                     return data.rowId == rowId;
                 });
             
-            let itemChange = _.find(ITEM_CHANGE, function(o) { return o === Number(keyId); });
+            let itemChange = _.find(ITEM_CHANGE, function(o) { return o === Number(keyId); }),
+                itemEditBreak = _.find(BREAK_TIME, function(o) { return o === Number(keyId); });
+            if (itemEditBreak != undefined) {
+                 nts.uk.ui.block.grayout();
+                let dataTemp = _.find(__viewContext.vm.lstDataSourceLoad, (item: any) => {
+                    return item.id == rowId;
+                });
+
+                let layoutAndType: any = _.find(__viewContext.vm.itemValueAll(), (item: any) => {
+                    return item.itemId == keyId;
+                });
+                let item = _.find(__viewContext.vm.lstAttendanceItem(), (value) => {
+                    return String(value.id) === keyId;
+                })
+                let valuePrimitive: any = __viewContext.vm.getPrimitiveValue(value, item.attendanceAtr);
+                let dataMap = new InfoCellEdit(rowId, Number(keyId), valuePrimitive, layoutAndType == undefined ? "" : layoutAndType.valueType, layoutAndType == undefined ? "" : layoutAndType.layoutCode, dataTemp.employeeId, dataTemp.dateDetail.utc().toISOString(), item.typeGroup, columnKey);
+                let param = {
+                    itemEdits: [dataMap]
+                };
+                service.updateDomainCache(param).done((value) => {
+                    nts.uk.ui.block.clear();
+                    dfd.resolve({ id: rowId, item: columnKey, value: value });
+                });
+            }
             if (itemChange == undefined) {
                 dfd.resolve({ id: rowId, item: columnKey, value: value });
             }

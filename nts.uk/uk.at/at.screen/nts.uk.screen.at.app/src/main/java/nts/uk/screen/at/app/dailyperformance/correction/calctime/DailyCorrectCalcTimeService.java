@@ -60,6 +60,10 @@ public class DailyCorrectCalcTimeService {
 	@Inject
 	private DailyModifyResCommandFacade dailyModifyResFacade;
 
+	/**
+	 * 出退勤時刻を自動補正する											
+     * 休憩時間帯を自動補正する											
+	 */
 	public DCCalcTime calcTime(List<DailyRecordDto> dailyEdits, List<DPItemValue> itemEdits, Boolean changeSpr31,
 			Boolean changeSpr34,  boolean notChangeCell) {
 

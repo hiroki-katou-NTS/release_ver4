@@ -16,6 +16,7 @@ module nts.uk.at.view.kdw003.a.service {
         getNameMonthlyAttItem: "screen/at/correctionofdailyperformance/getNameMonthlyAttItem",
         searchEmployee: 'screen/at/correctionofdailyperformance/get-info',
         calcTime: 'screen/at/correctionofdailyperformance/calcTime',
+        updateDomainCache: 'screen/at/correctionofdailyperformance/updateDomainCache',
         calculation: 'screen/at/correctionofdailyperformance/calculation',
         getRemainNum: 'screen/at/correctionofdailyperformance/getRemainNum',
         lock: 'screen/at/correctionofdailyperformance/lock',
@@ -85,6 +86,10 @@ module nts.uk.at.view.kdw003.a.service {
 
     export function calcTime(param: any) {
         return nts.uk.request.ajax(paths.calcTime, param);
+    }
+    
+    export function updateDomainCache(param: any) {
+        return nts.uk.request.ajax(paths.updateDomainCache, param);
     }
 
     export function calculation(param: any) {
