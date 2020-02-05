@@ -8,6 +8,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.InstructionCategory;
 import nts.uk.ctx.at.request.dom.application.UseAtr;
+import nts.uk.ctx.at.request.dom.setting.workplace.AppUseSetRemark;
 import nts.uk.ctx.at.request.dom.setting.workplace.ApplicationDetailSetting;
 import nts.uk.ctx.at.request.dom.setting.workplace.ApplicationUseSetting;
 import nts.uk.ctx.at.request.dom.setting.workplace.ApprovalFunctionSetting;
@@ -108,7 +109,7 @@ public class ApprovalFunctionSettingCommand {
 				SettingFlg.toEnum(this.lateOrLeaveAppCancelFlg), 
 				SettingFlg.toEnum(this.lateOrLeaveAppSettingFlg), 
 				new ApplicationUseSetting(
-						new Memo(this.memo), 
+						new AppUseSetRemark(this.memo), 
 						UseAtr.toEnum(this.useAtr), 
 						EnumAdaptor.valueOf(this.appType, ApplicationType.class)), 
 				Optional.of(new ApplicationDetailSetting(

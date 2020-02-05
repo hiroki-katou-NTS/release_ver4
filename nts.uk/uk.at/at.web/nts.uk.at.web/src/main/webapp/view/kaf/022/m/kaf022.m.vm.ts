@@ -104,8 +104,8 @@ module nts.uk.at.view.kmf022.m.viewmodel {
             
             // get text KAF022_285
             self.textKAF022_285(nts.uk.resource.getText("KAF022_285") + "("
-                        + nts.uk.text.getCharType('Memo').viewName +
-                        + __viewContext.primitiveValueConstraints.Memo.maxLength/2
+                        + nts.uk.text.getCharType('AppUseSetRemark').viewName +
+                        + __viewContext.primitiveValueConstraints.AppUseSetRemark.maxLength/2
                         + "文字)");
 
             _.extend(self.kcp004WorkplaceListOption, {
