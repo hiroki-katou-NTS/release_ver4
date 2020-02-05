@@ -228,6 +228,7 @@ module nts.uk.ui.jqueryExtentions {
                         chk.click();
                     }
                 } else {
+                    deselectAll($grid);
                     (<Array<string>>selectedId).forEach(id => {
                         if (_.includes(baseID, id)) {
                             $grid.igGridSelection('selectRowById', id)

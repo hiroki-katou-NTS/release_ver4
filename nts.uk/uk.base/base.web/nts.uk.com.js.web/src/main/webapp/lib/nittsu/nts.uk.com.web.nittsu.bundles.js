@@ -35781,6 +35781,7 @@ var nts;
                                 }
                             }
                             else {
+                            	deselectAll($grid);
                                 selectedId.forEach(function (id) {
                                     if (_.includes(baseID_1, id)) {
                                         $grid.igGridSelection('selectRowById', id);
