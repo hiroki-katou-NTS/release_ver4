@@ -19,6 +19,7 @@ import nts.arc.enums.EnumAdaptor;
 import nts.uk.ctx.at.request.dom.application.ApplicationType;
 import nts.uk.ctx.at.request.dom.application.InstructionCategory;
 import nts.uk.ctx.at.request.dom.application.UseAtr;
+import nts.uk.ctx.at.request.dom.setting.workplace.AppUseSetRemark;
 import nts.uk.ctx.at.request.dom.setting.workplace.ApplicationDetailSetting;
 import nts.uk.ctx.at.request.dom.setting.workplace.ApplicationUseSetting;
 import nts.uk.ctx.at.request.dom.setting.workplace.ApprovalFunctionSetting;
@@ -79,7 +80,7 @@ public class KrqstWpAppConfig extends UkJpaEntity implements Serializable {
 							SettingFlg.toEnum(x.lateOrLeaveAppCancelFlg), 
 							SettingFlg.toEnum(x.lateOrLeaveAppSettingFlg), 
 							new ApplicationUseSetting(
-									new Memo(x.memo), 
+									new AppUseSetRemark(x.memo), 
 									UseAtr.toEnum(x.useAtr), 
 									EnumAdaptor.valueOf(x.krqstWpAppConfigDetailPK.appType, ApplicationType.class)), 
 							Optional.of(new ApplicationDetailSetting(
