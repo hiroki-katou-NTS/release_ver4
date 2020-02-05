@@ -16,3 +16,4 @@ public class KfnmtPerEmpForm extends JpaEntityOfAvailabilityPermissionBase<Permi
 	}
 
 }
+ 
