@@ -418,6 +418,7 @@ module nts.uk.at.view.kmf022 {
             selectedIdC40: KnockoutObservable<number>;
             selectedIdC48: KnockoutObservable<number>;
             selectedIdC49: KnockoutObservable<number>;
+            selectedIdC182: KnockoutObservable<number>;
             texteditorC41: any;
             texteditorC42: any;
             texteditorC43: any;
@@ -1184,6 +1185,7 @@ module nts.uk.at.view.kmf022 {
                 self.selectedIdC40 = ko.observable(0);
                 self.selectedIdC48 = ko.observable(0);
                 self.selectedIdC49 = ko.observable(0);
+                self.selectedIdC182 = ko.observable(0);
                 self.texteditorC41 = {
                     value: ko.observable(''),
                     constraint: 'ObstacleName',
@@ -2101,6 +2103,7 @@ module nts.uk.at.view.kmf022 {
                     self.texteditorC46.value(data.hdName);
                     self.texteditorC47.value(data.timeDigest);
                     self.texteditorC51.value(data.furikyuName);
+                    self.selectedIdC182(data.dayDispSet);
                 }
             }
             initDataD(allData: any): void {
@@ -2470,6 +2473,7 @@ module nts.uk.at.view.kmf022 {
                     hdName: self.texteditorC46.value(),
                     timeDigest: self.texteditorC47.value(),
                     furikyuName: self.texteditorC51.value(),
+                    dayDispSet: self.selectedIdC182()
                 };
                 data.appChange = {
                     cid: self.companyId(),

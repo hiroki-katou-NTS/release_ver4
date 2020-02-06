@@ -124,6 +124,10 @@ public class KrqstHdAppSet extends UkJpaEntity implements Serializable{
 	@Column(name = "DISPLAY_UNSELECT")
 	public int displayUnselect;
 	
+	/** 終日・半日選択表示区分 */
+	@Column(name = "DAY_DISP_SET")
+	public int dayDispSet;
+	
 	@Override
 	protected Object getKey() {
 		return krqstHdAppSetPK;

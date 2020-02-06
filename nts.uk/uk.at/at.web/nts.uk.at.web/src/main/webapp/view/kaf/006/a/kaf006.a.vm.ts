@@ -127,6 +127,7 @@ module nts.uk.at.view.kaf006.a.viewmodel {
         relaResonDis: KnockoutObservable<boolean> = ko.observable(true);
         hdTypeDis: KnockoutObservable<boolean> = ko.observable(false);
         dataMax: KnockoutObservable<boolean> = ko.observable(false);
+        dayDispSet: KnockoutObservable<boolean> = ko.observable(false);
         constructor(transferData :any) {
 
             let self = this;
@@ -653,6 +654,7 @@ module nts.uk.at.view.kaf006.a.viewmodel {
                 let total = data.employees.length;
                 self.totalEmployee(nts.uk.resource.getText("KAF006_65",total.toString()));
             }
+            self.dayDispSet(data.dayDispSet==1?true:false);
         }
         /**
          * when click button A1_1 - 登録

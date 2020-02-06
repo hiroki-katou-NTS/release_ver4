@@ -34,7 +34,7 @@ public class JpaHdAppSetRepository extends JpaRepository implements HdAppSetRepo
 				entity.yearHdName, entity.regisNumYear, entity.furikyuName, entity.regisInsuff, 
 				entity.useGener, entity.useYear, entity.timeDigest, entity.absenteeism, 
 				entity.concheckOutLegal, entity.specialVaca, entity.concheckDateRelease, 
-				entity.appDateContra, entity.yearResig, entity.regisShortReser, entity.hdType, entity.displayUnselect);
+				entity.appDateContra, entity.yearResig, entity.regisShortReser, entity.hdType, entity.displayUnselect, entity.dayDispSet);
 		return domain;
 	}
 	/**
@@ -71,6 +71,7 @@ public class JpaHdAppSetRepository extends JpaRepository implements HdAppSetRepo
 		entity.yearHdName = domain.getYearHdName() == null ? null : domain.getYearHdName().v();
 		entity.yearResig = domain.getYearResig() == null ? null : domain.getYearResig().v();
 		entity.displayUnselect = domain.getDisplayUnselect().value;
+		entity.dayDispSet = domain.getDayDispSet().value;
 		return entity;
 	}
 	
@@ -119,6 +120,7 @@ public class JpaHdAppSetRepository extends JpaRepository implements HdAppSetRepo
 			entityUpdate.yearHdName = entity.yearHdName;
 			entityUpdate.yearResig = entity.yearResig;
 			entityUpdate.displayUnselect = entity.displayUnselect;
+			entityUpdate.dayDispSet = entity.dayDispSet;
 			this.commandProxy().update(entityUpdate);
 		}else{
 			this.commandProxy().insert(hdAppSet);
