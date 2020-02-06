@@ -189,6 +189,10 @@ public class AppAbsenceDto {
 	private SettingNo65 setingNo65;
 	//No.376
 	private NumberOfRemainOutput numberRemain;
+	
+	// 終日・半日選択表示区分
+	private int dayDispSet;
+		
 	public static AppAbsenceDto fromDomain(AppAbsence app){
 		return new AppAbsenceDto(app.getVersion(),
 								ApplicationDto_New.fromDomain(app.getApplication()),
@@ -229,7 +233,8 @@ public class AppAbsenceDto {
 								Collections.emptyList(),
 								false,
 								null,
-								null);
+								null,
+								0);
 	}
 }
 

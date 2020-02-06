@@ -28,7 +28,7 @@ public class UpdateHdAppSetCommandHandler extends CommandHandler<HdAppSetCommand
 				data.changeWrkHour, data.ckuperLimit, data.actualDisp, data.wrkHours, data.pridigCheck, 
 				data.yearHdName, data.regisNumYear, data.furikyuName, data.regisInsuff, data.useGener, 
 				data.useYear, data.timeDigest, data.absenteeism, data.concheckOutLegal, data.specialVaca,
-				data.concheckDateRelease, data.appDateContra, data.yearResig, data.regisShortReser, 0, data.displayUnselect);
+				data.concheckDateRelease, data.appDateContra, data.yearResig, data.regisShortReser, 0, data.displayUnselect, data.dayDispSet);
 //		if(hdApp.isPresent()){
 			hdRep.update(hdAppSet);
 //			return;
