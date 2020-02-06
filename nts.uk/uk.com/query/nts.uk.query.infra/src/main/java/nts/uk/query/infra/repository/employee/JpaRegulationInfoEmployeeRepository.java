@@ -263,7 +263,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 
 				// check exist before add employment conditions
 				if (!paramQuery.getFilterByEmployment()) {
-					whereBuilder.append(and + " (EMPLOYMENT_STR_DATE <= rfDate AND EMPLOYMENT_END_DATE >= rfDate) )");
+					whereBuilder.append(and + " (EMPLOYMENT_STR_DATE <= rfDate AND EMPLOYMENT_END_DATE >= rfDate) ");
 					countParameter += 2;
 				}
 			}
