@@ -32,4 +32,9 @@ public class AnnualLeaveManageInforExport {
 	 * 予定実績区分
 	 */
 	private int scheduleRecordAtr;
+	
+	/**
+	 * 勤務種類
+	 */
+	private String workTypeCode;
 }

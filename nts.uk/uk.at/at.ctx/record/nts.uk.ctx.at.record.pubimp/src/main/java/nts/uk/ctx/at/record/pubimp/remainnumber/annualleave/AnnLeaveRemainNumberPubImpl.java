@@ -404,12 +404,15 @@ public class AnnLeaveRemainNumberPubImpl implements AnnLeaveRemainNumberPub {
 			if(tmpAnnualLeaveMng.getUseDays() != null){
 				usedDays = tmpAnnualLeaveMng.getUseDays().v();
 			}
+			// đối ứng bug #109638: thêm hiển thị workType cho KDL020
+			String workTypeCD = tmpAnnualLeaveMng.getWorkTypeCode();
 			Integer usedMinutes = 0;
 			AnnualLeaveManageInforExport annualLeaveManageInforExport = new AnnualLeaveManageInforExport(
 					interimRemain.getYmd(),
 					usedDays,
 					usedMinutes, 
-					interimRemain.getCreatorAtr().value);
+					interimRemain.getCreatorAtr().value,
+					workTypeCD);
 			annualLeaveManageInforExports.add(annualLeaveManageInforExport);
 		}
 		// 年休出勤率を計算する
