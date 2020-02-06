@@ -6,6 +6,7 @@ package nts.uk.query.infra.repository.employee;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -222,7 +223,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 
 				// update query conditions
 				String closureIdsStr = closureIds.toString(); 
-				whereBuilder.append(" AND (CLOSURE_ID in (" + closureIdsStr.substring(1, closureIdsStr.length()-1) + ")");
+				whereBuilder.append(" AND (CLOSURE_ID in (" + closureIdsStr.substring(1, closureIdsStr.length()-1) + "))");
 				countParameter += closureIds.size();
 
 				// check exist before add employment conditions
@@ -316,7 +317,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 				// classification condition
 				CollectionUtil.split(classificationCodes, ELEMENT_300, splitClassificationCodes -> {
 					// jobtitle condition
-					CollectionUtil.split(workplaceCodes, ELEMENT_800 - (splitEmploymentCodes.size() + splitJobTitleCodes.size() + splitClassificationCodes.size() - countParameterFinal), splitWorkplaceCodes -> {
+					CollectionUtil.split(workplaceCodes, ELEMENT_800 - (splitEmploymentCodes.size() + splitJobTitleCodes.size() + splitClassificationCodes.size()), splitWorkplaceCodes -> {
 						resultList.addAll(executeQuery(
 								splitEmploymentCodes, 
 								splitWorkplaceCodes, 
@@ -332,6 +333,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		// Distinct employee in result list.
 		List<RegulationInfoEmployee> resultListDistinct = resultList.stream()
 								.filter(this.distinctByKey(RegulationInfoEmployee::getEmployeeID))
+								.sorted(Comparator.comparing(RegulationInfoEmployee::getEmployeeCode))
 								.collect(Collectors.toList());
 
 		return resultListDistinct;
@@ -736,10 +738,12 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 								List<String> splitClassificationCodes, 
 								List<String> splitJobTitleCodes,
 								StringBuilder selectBuilder,
-								StringBuilder whereBuilder,
+								StringBuilder whereBuilderP,
 								StringBuilder orderBuilder,
 								GeneralDateTime baseDate, GeneralDateTime retireStart, GeneralDateTime retireEnd, GeneralDateTime start, GeneralDateTime end, 
 								String comId, EmployeeSearchQuery paramQuery) {
+		// clear where builder
+		StringBuilder whereBuilder = new StringBuilder(whereBuilderP.toString());
 		// employment condition
 		if (paramQuery.getFilterByEmployment()) {
 			if (splitEmploymentCodes.size() == 1 && splitEmploymentCodes.get(0).compareTo(EMPTY_LIST) == 0) {
