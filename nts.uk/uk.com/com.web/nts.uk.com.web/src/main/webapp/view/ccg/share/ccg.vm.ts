@@ -519,14 +519,80 @@ module nts.uk.com.view.ccg.share.ccg {
                         self.isOpenWorkTypeList(true);
                     }
                 });
+                
+                $("#ccg001-input-code").on("keydown",function (e) {
+                    if(e.keyCode == 13) {
+                        self.inputCodeTab3($(this).val());
+                        $('#ccg001-tab3-search-by-code').click();
+                    }
+                });
+                
+                $("#ccg001-inp-name").on("keydown",function (e) {
+                    if(e.keyCode == 13) {
+                        self.inputNameTab3($(this).val());
+                        $('#ccg001-tab3-search-by-name').click();
+                    }
+                });
+                
+                $("#ccg001-date-entry .ntsStartDate input").on("keydown",function (e) {
+                    if(e.keyCode == 13) {
+                        self.entryDateTab3({startDate:$(this).val(), endDate: self.entryDateTab3().endDate});
+                        self.validateTab3EntryDate();
+                        if(self.isValidEntryDateSearch()) {
+                            $('#search-by-entry-date').click();
+                        }
+                    }
+                });
+                
+                $("#ccg001-date-entry .ntsEndDate input").on("keydown",function (e) {
+                    if(e.keyCode == 13) {
+                        self.entryDateTab3({startDate:self.entryDateTab3().startDate, endDate:  $(this).val()});
+                        self.validateTab3EntryDate();
+                        if(self.isValidEntryDateSearch()) {
+                            $('#search-by-entry-date').click();
+                        }
+                    }
+                });
+                
+                 $("#ccg001-date-retirement .ntsStartDate input").on("keydown",function (e) {
+                    if(e.keyCode == 13) {
+                        self.retirementDateTab3({startDate:$(this).val(), endDate: self.retirementDateTab3().endDate});
+                        self.validateTab3DateRetirement();
+                        if(self.isValidRetirementDateSearch()) {
+                            self.searchByRetirementDate();
+                        }
+                    }
+                });
+                
+                $("#ccg001-date-retirement .ntsEndDate input").on("keydown",function (e) {
+                    if(e.keyCode == 13) {
+                        self.retirementDateTab3({startDate:self.retirementDateTab3().startDate, endDate:  $(this).val()});
+                        self.validateTab3DateRetirement();
+                        if(self.isValidRetirementDateSearch()) {
+                            self.searchByRetirementDate();
+                        }
+                    }
+                });
 
+            }
+            
+            public validateTab3EntryDate() {
+                $('#ccg001-date-entry .ntsDateRangeComponent').ntsError('validate');
+                $('#ccg001-date-entry .ntsStartDate input').ntsError('validate');
+                $('#ccg001-date-entry .ntsEndDate input').ntsError('validate');
+            }
+            
+            public validateTab3DateRetirement() {
+                $('#ccg001-date-retirement .ntsDateRangeComponent').ntsError('validate');
+                $('#ccg001-date-retirement .ntsStartDate input').ntsError('validate');
+                $('#ccg001-date-retirement .ntsEndDate input').ntsError('validate');
             }
 
             
             /**
              * Init component.
              */
-            
+             
             public init($input: JQuery, data: GroupOption): JQueryPromise<void> {
                 let dfd = $.Deferred<void>();
                 let self = this;
@@ -2504,9 +2570,10 @@ var CCG001_HTML = `<div id="component-ccg001" class="cf height-maximum" style="v
                                     data-bind="attr: {tabindex: ccg001Tabindex}, ntsTextEditor: {
                                     name: '#[CCG001_106]',
                                     value: inputCodeTab3,
+                                    valueUpdate: 'keypress',
                                     required: false
                                     }" />
-                        <button class="proceed caret-bottom pull-right"
+                        <button class="proceed caret-bottom pull-right" id="ccg001-tab3-search-by-code"
                             data-bind="attr: {tabindex: ccg001Tabindex}, click: searchByCode, enable: isValidInput">`+CCG001TextResource.CCG001_108+`</button>
                     </div>
                     <div class="control-group ccg001-control-group">
@@ -2515,9 +2582,10 @@ var CCG001_HTML = `<div id="component-ccg001" class="cf height-maximum" style="v
                                     data-bind="attr: {tabindex: ccg001Tabindex}, ntsTextEditor: {
                                     name: '#[CCG001_107]',
                                     value: inputNameTab3,
+                                    valueUpdate: 'keypress',
                                     required: false
                                     }" />
-                        <button class="proceed caret-bottom pull-right"
+                        <button class="proceed caret-bottom pull-right" id="ccg001-tab3-search-by-name"
                             data-bind="attr: {tabindex: ccg001Tabindex}, click: searchByName, enable: isValidInput">`+CCG001TextResource.CCG001_108+`</button>
                     </div>
                     <div class="cf control-group ccg001-control-group">
@@ -2528,8 +2596,9 @@ var CCG001_HTML = `<div id="component-ccg001" class="cf height-maximum" style="v
                                 required: false,
                                 enable: true,
                                 showNextPrevious: false,
-                                value: entryDateTab3 }"/>
-                        <button class="proceed caret-bottom pull-right"
+                                value: entryDateTab3
+                                }"/>
+                        <button class="proceed caret-bottom pull-right" id="search-by-entry-date"
                             data-bind="attr: {tabindex: ccg001Tabindex}, click: searchByEntryDate, enable: isValidEntryDateSearch">`+CCG001TextResource.CCG001_108+`</button>
                     </div>
                     <div class="cf control-group ccg001-control-group">
@@ -2541,7 +2610,7 @@ var CCG001_HTML = `<div id="component-ccg001" class="cf height-maximum" style="v
                                 enable: true,
                                 showNextPrevious: false,
                                 value: retirementDateTab3 }"/>
-                        <button class="proceed caret-bottom pull-right"
+                        <button class="proceed caret-bottom pull-right" id="search-by-retirement-date"
                             data-bind="attr: {tabindex: ccg001Tabindex}, click: searchByRetirementDate, enable: isValidRetirementDateSearch">`+CCG001TextResource.CCG001_108+`</button>
                     </div>
                     <div id="tab3kcp005"></div>
