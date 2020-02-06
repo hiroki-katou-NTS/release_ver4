@@ -83,4 +83,7 @@ public class HdAppSetCommand {
 	public int hdType;
 	// 未選択を表示する
 	public int displayUnselect;
+	
+	// 終日・半日選択表示区分
+	public int dayDispSet;
 }

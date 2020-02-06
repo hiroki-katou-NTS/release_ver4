@@ -70,6 +70,8 @@ public class HdAppSet extends AggregateRoot {
 	private HolidayAppType hdType;
 	// 未選択を表示する
 	private UseAtr displayUnselect;
+	// 終日・半日選択表示区分
+	private UseAtr dayDispSet;
 	
 	
 	public static HdAppSet createFromJavaType(String companyId,
@@ -79,7 +81,7 @@ public class HdAppSet extends AggregateRoot {
 												String yearHdName, int regisNumYear, String furikyuName, int regisInsuff, 
 												int useGener, int useYear, String timeDigest, String absenteeism, 
 												int concheckOutLegal, String specialVaca, int concheckDateRelease, 
-												int appDateContra, String yearResig, int regisShortReser, int hdType, int displayUnselect){
+												int appDateContra, String yearResig, int regisShortReser, int hdType, int displayUnselect, int dayDispSet){
 		return new HdAppSet(companyId, 
 				EnumAdaptor.valueOf(use60h, UseAtr.class), 
 				StringUtil.isNullOrEmpty(obstacleName, true) ? null : new ObstacleName(obstacleName), 
@@ -106,6 +108,7 @@ public class HdAppSet extends AggregateRoot {
 				StringUtil.isNullOrEmpty(yearResig, true) ? null : new ObstacleName(yearResig), 
 				EnumAdaptor.valueOf(regisShortReser, UseAtr.class),
 				EnumAdaptor.valueOf(hdType, HolidayAppType.class),
-				EnumAdaptor.valueOf(displayUnselect, UseAtr.class));
+				EnumAdaptor.valueOf(displayUnselect, UseAtr.class),
+				EnumAdaptor.valueOf(dayDispSet, UseAtr.class));
 	}
 }

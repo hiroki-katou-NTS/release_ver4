@@ -58,6 +58,7 @@ import nts.uk.ctx.at.request.dom.setting.applicationreason.ApplicationReason;
 import nts.uk.ctx.at.request.dom.setting.applicationreason.ApplicationReasonRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.UseAtr;
 import nts.uk.ctx.at.request.dom.setting.company.request.applicationsetting.apptypesetting.DisplayReasonRepository;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmploymentSetting;
 import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSetting;
@@ -198,6 +199,10 @@ public class AppAbsenceFinder {
 		}
 		// ドメインモデル「休暇申請設定」を取得する(lấy dữ liệu domain 「休暇申請設定」)
 		Optional<HdAppSet> hdAppSet = this.hdAppSetRepository.getAll();
+		if(hdAppSet.isPresent() && hdAppSet.get().getDayDispSet()==UseAtr.USE) {
+			result.setDayDispSet(UseAtr.USE.value);
+		}
+		
 		// 1-1.起動時のエラーチェック
 		List<HolidayAppTypeName> holidayAppTypes = new ArrayList<>();
 		
@@ -299,6 +304,9 @@ public class AppAbsenceFinder {
 		//--
 		// ドメインモデル「休暇申請設定」を取得する(lấy dữ liệu domain 「休暇申請設定」)
 		Optional<HdAppSet> hdAppSet = this.hdAppSetRepository.getAll();
+		if(hdAppSet.isPresent() && hdAppSet.get().getDayDispSet()==UseAtr.USE) {
+			result.setDayDispSet(UseAtr.USE.value);
+		}
 		//アルゴリズム「勤務種類を取得する（詳細）」を実行する-[Lấy WorkType(detail)]
 		//2.勤務種類を取得する（詳細）
 		List<WorkType> workTypes = this.appAbsenceThreeProcess.getWorkTypeDetails(

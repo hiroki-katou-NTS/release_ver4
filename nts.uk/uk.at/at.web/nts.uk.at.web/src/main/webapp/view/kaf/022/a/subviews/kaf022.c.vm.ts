@@ -36,6 +36,7 @@ ko.components.register('kaf022-c', {
                     selectedIdC40: params.selectedIdC40,
                     selectedIdC27: params.selectedIdC27,
                     selectedIdC28: params.selectedIdC28,
+                    selectedIdC182: params.selectedIdC182,
                     
                     selectedIdC29: params.selectedIdC29,
                     selectedIdC30: params.selectedIdC30,
@@ -79,7 +80,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c3" data-bind = "text: text('KAF022_149')"></td>
                     <td style="width: 650px">
-                        <div id="c27" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div id="c27" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC27,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -91,7 +92,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td class="color-header" id="c50" data-bind = "text: text('KAF022_401')"></td>
                     <td>
-                        <div class="blockrow" id="c51" tabindex="2" data-bind="ntsRadioBoxGroup: {
+                        <div class="blockrow" id="c51" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC51,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -103,7 +104,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td class="color-header" id="c25" data-bind = "text: text('KAF022_168')"></td>
                     <td>
-                        <div class="blockdeki" id="c48" tabindex="3" data-bind="ntsRadioBoxGroup: {
+                        <div class="blockdeki" id="c48" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC48,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -115,7 +116,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td class="color-header" id="c15" data-bind = "text: text('KAF022_158')"></td>
                     <td>
-                        <div class="blockrow" id="c38" tabindex="3" data-bind="ntsRadioBoxGroup: {
+                        <div class="blockrow" id="c38" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC51,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -127,7 +128,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td class="color-header" id="c16" data-bind = "text: text('KAF022_159')"></td>
                     <td>
-                        <div class="blockrow" id="c39" tabindex="4" data-bind="ntsRadioBoxGroup: {
+                        <div class="blockrow" id="c39" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC51,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -139,12 +140,24 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td class="color-header" id="c17" data-bind = "text: text('KAF022_160')"></td>
                     <td>
-                        <div class="blockrow" id="c40" tabindex="4" data-bind="ntsRadioBoxGroup: {
+                        <div class="blockrow" id="c40" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC51,
                             optionsValue: 'code',
                             optionsText: 'name',
                             value: $cv.selectedIdC40,
                             enable: false}">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="color-header" id="c181" data-bind = "text: text('KAF022_661')"></td>
+                    <td>
+                        <div class="blockrow" id="c182" data-bind="ntsRadioBoxGroup: {
+                            options: $cv.itemListC51,
+                            optionsValue: 'code',
+                            optionsText: 'name',
+                            value: $cv.selectedIdC182,
+                            enable: true}">
                         </div>
                     </td>
                 </tr>
@@ -163,7 +176,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c4" data-bind = "text: text('KAF022_150')"></td>
                     <td style="width: 650px">
-                        <div class="blockrow" id="c28" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div class="blockrow" id="c28" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC51,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -187,7 +200,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c5" data-bind = "text: text('KAF022_145')"></td>
                     <td style="width: 650px">
-                        <div class = "radio3Box" id="c29" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div class = "radio3Box" id="c29" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC29,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -199,7 +212,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c6" data-bind = "text: text('KAF022_152')"></td>
                     <td style="width: 650px">
-                        <div class= "radioboxrow" id="c30" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div class= "radioboxrow" id="c30" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC30,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -211,7 +224,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c7" data-bind = "text: text('KAF022_153')"></td>
                     <td style="width: 650px">
-                        <div class= "radioboxrow" id="c31" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div class= "radioboxrow" id="c31" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC30,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -223,7 +236,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c8" data-bind = "text: text('KAF022_154')"></td>
                     <td style="width: 650px">
-                        <div class= "radioboxrow" id="c32" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div class= "radioboxrow" id="c32" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC30,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -240,7 +253,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c10" data-bind = "text: text('KAF022_156')"></td>
                     <td style="width: 650px">
-                        <div class= "radioboxrow" id="c33" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div class= "radioboxrow" id="c33" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC30,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -252,7 +265,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c11" data-bind = "text: text('KAF022_48')"></td>
                     <td style="width: 650px">
-                        <div class= "radioboxrow" id="c34" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div class= "radioboxrow" id="c34" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC30,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -264,7 +277,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c12" data-bind = "text: text('KAF022_51')"></td>
                     <td style="width: 650px">
-                        <div class= "radioboxrow" id="c35" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div class= "radioboxrow" id="c35" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC30,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -276,7 +289,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c13" data-bind = "text: text('KAF022_157')"></td>
                     <td style="width: 650px">
-                        <div class= "radioboxrow" id="c36" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div class= "radioboxrow" id="c36" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC30,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -288,7 +301,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c14" data-bind = "text: text('KAF022_54')"></td>
                     <td style="width: 650px">
-                        <div class= "radioboxrow" id="c37" tabindex="1" data-bind="ntsRadioBoxGroup: {  
+                        <div class= "radioboxrow" id="c37" data-bind="ntsRadioBoxGroup: {  
                             options: $cv.itemListC30,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -300,7 +313,7 @@ ko.components.register('kaf022-c', {
                 <tr>
                     <td style="width: 270px" class="color-header" id="c26" data-bind = "text: text('KAF022_169')"></td>
                     <td style="width: 650px">
-                        <div id="c49" tabindex="1" data-bind="ntsRadioBoxGroup: {
+                        <div id="c49" data-bind="ntsRadioBoxGroup: {
                             options: $cv.itemListC29,
                             optionsValue: 'code',
                             optionsText: 'name',
@@ -326,7 +339,7 @@ ko.components.register('kaf022-c', {
                         <div data-bind="ntsFormLabel: { constraint: 'ObstacleName', inline: true, text: text('KAF022_161') }"></div>
                     </td>
                     <td style="width: 650px">
-                        <input id="c41" tabindex="15" data-bind="ntsTextEditor: {
+                        <input id="c41" data-bind="ntsTextEditor: {
                             name: text('KAF022_177'),
                             value: $cv.texteditorC41.value,
                             constraint: 'ObstacleName',
@@ -341,7 +354,7 @@ ko.components.register('kaf022-c', {
                         <div data-bind="ntsFormLabel: { constraint: 'ObstacleName', inline: true, text: text('KAF022_162') }"></div>
                     </td>
                     <td style="width: 650px">
-                        <input id="c42" tabindex="16" data-bind="ntsTextEditor: {
+                        <input id="c42" data-bind="ntsTextEditor: {
                             name: text('KAF022_177'),
                             value: $cv.texteditorC42.value,
                             constraint: 'ObstacleName',
@@ -356,7 +369,7 @@ ko.components.register('kaf022-c', {
                         <div data-bind="ntsFormLabel: { constraint: 'ObstacleName', inline: true, text: text('KAF022_163') }"></div>
                     </td>
                     <td style="width: 650px">
-                        <input id="c43" tabindex="17" data-bind="ntsTextEditor: {
+                        <input id="c43" data-bind="ntsTextEditor: {
                             name: text('KAF022_177'),
                             value: $cv.texteditorC43.value,
                             constraint: 'ObstacleName',
@@ -371,7 +384,7 @@ ko.components.register('kaf022-c', {
                         <div data-bind="ntsFormLabel: { constraint: 'ObstacleName', inline: true, text: text('KAF022_164') }"></div>
                     </td>
                     <td style="width: 650px">
-                        <input id="c44" tabindex="18" data-bind="ntsTextEditor: {
+                        <input id="c44" data-bind="ntsTextEditor: {
                             name: text('KAF022_177'),
                             value: $cv.texteditorC44.value,
                             constraint: 'ObstacleName',
@@ -386,7 +399,7 @@ ko.components.register('kaf022-c', {
                         <div data-bind="ntsFormLabel: { constraint: 'ObstacleName', inline: true, text: text('KAF022_165') }"></div>
                     </td>
                     <td style="width: 650px">
-                        <input id="c45" tabindex="19" data-bind="ntsTextEditor: {
+                        <input id="c45" data-bind="ntsTextEditor: {
                             name: text('KAF022_177'),
                             value: $cv.texteditorC45.value,
                             constraint: 'ObstacleName',
@@ -401,7 +414,7 @@ ko.components.register('kaf022-c', {
                         <div data-bind="ntsFormLabel: { constraint: 'ObstacleName', inline: true, text: text('KAF022_166') }"></div>
                     </td>
                     <td style="width: 650px">
-                        <input id="c46" tabindex="20" data-bind="ntsTextEditor: {
+                        <input id="c46" data-bind="ntsTextEditor: {
                             name: text('KAF022_177'),
                             value: $cv.texteditorC46.value,
                             constraint: 'ObstacleName',
@@ -416,7 +429,7 @@ ko.components.register('kaf022-c', {
                         <div data-bind="ntsFormLabel: { constraint: 'ObstacleName', inline: true, text: text('KAF022_167') }"></div>
                     </td>
                     <td style="width: 650px">
-                        <input id="c47" tabindex="21" data-bind="ntsTextEditor: {
+                        <input id="c47" data-bind="ntsTextEditor: {
                             name: text('KAF022_177'),
                             value: $cv.texteditorC47.value,
                             constraint: 'ObstacleName',
@@ -431,7 +444,7 @@ ko.components.register('kaf022-c', {
                         <div data-bind="ntsFormLabel: { constraint: 'ObstacleName', inline: true, text: text('KAF022_364') }"></div>
                     </td>
                     <td style="width: 650px">
-                        <input id="c51" tabindex="22" data-bind="ntsTextEditor: {
+                        <input id="c51" data-bind="ntsTextEditor: {
                             name: text('KAF022_177'),
                             value: $cv.texteditorC51.value,
                             constraint: 'ObstacleName',
