@@ -1019,9 +1019,20 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 	@Override
 	public List<EmpErrorCode> getListErAlItem28(String companyId, int errorType, DateRange range, String empId) {
 		Connection con = this.getEntityManager().unwrap(Connection.class);
+		List<EmpErrorCode> result = new ArrayList<>();
+		
+		result.addAll(internalGet(companyId, errorType, range, empId, con, "KRCDT_DAY_ERAL"));
+		result.addAll(internalGet(companyId, errorType, range, empId, con, "KRCDT_DAY_OTK_ERAL"));
+		result.addAll(internalGet(companyId, errorType, range, empId, con, "KRCDT_DAY_DG_ERAL"));
+		
+		return result;
+	}
+
+	private List<EmpErrorCode> internalGet(String companyId, int errorType, DateRange range, String empId,
+			Connection con, String className) {
 		List<EmpErrorCode> lstResult = new ArrayList<>();
-		String query = "select e.SID, e.PROCESSING_DATE, e.ERROR_CODE, i.ATTENDANCE_ITEM_ID from KRCDT_SYAIN_DP_ER_LIST e "
-				+ "join KRCDT_ER_ATTENDANCE_ITEM i on e.ID = i.ID "
+		String query = "select e.SID, e.PROCESSING_DATE, e.ERROR_CODE, i.ATTENDANCE_ITEM_ID from " + className + " e "
+				+ "join KRCDT_DAY_ERAL_ATD i on e.ID = i.ID "
 				+ "left join KRCMT_ERAL_SET s on e.ERROR_CODE = s.ERROR_ALARM_CD and s.CID = e.CID "
 				+ "where s.ERAL_ATR = ? " + " and e.CID =  ? "
 				+ "and e.PROCESSING_DATE BETWEEN ? AND ? " + " and e.SID = ? ";
