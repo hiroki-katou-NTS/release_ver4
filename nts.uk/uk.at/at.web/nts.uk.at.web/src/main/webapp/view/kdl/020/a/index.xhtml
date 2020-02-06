@@ -120,13 +120,15 @@
 								<!-- A7 -->
 								<table id="holiday-use_table">
 									<colgroup>
-										<col width="120px" />
-										<col width="120px" />
-										<col width="120px" />
+										<col width="95px" />
+										<col width="110px" />
+										<col width="60px" />
+										<col width="95px" />
 									</colgroup>
 									<thead>
 										<tr>
 											<th class="ui-widget-header">#{i18n.getText('KDL020_20')}</th>
+											<th class="ui-widget-header">#{i18n.getText('KDL020_35')}</th>
 											<th class="ui-widget-header">#{i18n.getText('KDL020_21')}</th>
 											<th class="ui-widget-header">#{i18n.getText('KDL020_22')}</th>
 										</tr>
@@ -137,6 +139,7 @@
 											bind="reNumAnnLeave().annualLeaveManageInfors()">
 											<tr>
 												<td><div data-bind="text: ymd"></div></td>
+												<td><div data-bind="text: workTypeName"></div></td>
 												<td><div
 														data-bind="html: $parent.genUsedNo(daysUsedNo(),usedMinutes()) "></div></td>
 												<td><div
