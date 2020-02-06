@@ -356,12 +356,16 @@ module nts.uk.at.view.kdl020.a.screenModel {
         daysUsedNo: KnockoutObservable<number> = ko.observable(0);
         usedMinutes: KnockoutObservable<number> = ko.observable(0);
         scheduleRecordAtr: KnockoutObservable<number> = ko.observable(0);
+        workTypeCode: KnockoutObservable<string> = ko.observable("");
+        workTypeName: KnockoutObservable<string> = ko.observable("");
         constructor(data?) {
             if (data) {
                 this.ymd(data.ymd);
                 this.daysUsedNo(data.daysUsedNo);
                 this.usedMinutes(data.usedMinutes);
                 this.scheduleRecordAtr(data.scheduleRecordAtr);
+                this.workTypeCode(data.workTypeCode);
+                this.workTypeName(data.workTypeName);
             }
         }
     }
@@ -461,6 +465,10 @@ module nts.uk.at.view.kdl020.a.screenModel {
         usedMinutes: number;
         /* 予定実績区分*/
         scheduleRecordAtr: number;
+        /* 勤務種類*/
+        workTypeCode: string;
+        
+        workTypeName: string;
     }
 
     export class ListType {

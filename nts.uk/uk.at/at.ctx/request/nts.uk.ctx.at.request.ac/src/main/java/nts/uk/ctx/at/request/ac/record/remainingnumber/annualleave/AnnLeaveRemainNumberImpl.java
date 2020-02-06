@@ -2,6 +2,7 @@ package nts.uk.ctx.at.request.ac.record.remainingnumber.annualleave;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -20,12 +21,17 @@ import nts.uk.ctx.at.request.dom.application.common.adapter.record.remainingnumb
 import nts.uk.ctx.at.request.dom.application.common.adapter.record.remainingnumber.annualleave.AnnualLeaveManageInforImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.record.remainingnumber.annualleave.AnnualLeaveRemainingNumberImport;
 import nts.uk.ctx.at.request.dom.application.common.adapter.record.remainingnumber.annualleave.ReNumAnnLeaReferenceDateImport;
+import nts.uk.ctx.at.shared.dom.worktype.WorkTypeRepository;
+import nts.uk.shr.com.context.AppContexts;
 
 @Stateless
 public class AnnLeaveRemainNumberImpl implements AnnLeaveRemainNumberAdapter {
 
 	@Inject
 	AnnLeaveRemainNumberPub annLeavePub;
+	
+	@Inject
+	private WorkTypeRepository workTypeRepository;
 
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
@@ -39,14 +45,25 @@ public class AnnLeaveRemainNumberImpl implements AnnLeaveRemainNumberAdapter {
 
 	private List<AnnualLeaveManageInforImport> mapManageInfors(
 			List<AnnualLeaveManageInforExport> infors) {
+		String companyID = AppContexts.user().companyId();
 		if(infors == null){
 			return	Collections.emptyList();
 		}
-	return	infors.stream().map(x->  new AnnualLeaveManageInforImport(
-								x.getYmd(),
-								x.getDaysUsedNo(),
-								x.getUsedMinutes(),
-								x.getScheduleRecordAtr())).collect(Collectors.toList());
+		
+		// đối ứng bug #109638: thêm hiển thị workType cho KDL020
+		List<String> workTypeCDLst = infors.stream().map(x -> x.getWorkTypeCode()).collect(Collectors.toList());
+		
+		// request list 407
+		Map<String , String> workTypeInfoMap = workTypeRepository.getCodeNameWorkType(companyID, workTypeCDLst);
+		
+		return	infors.stream().map(x->  new AnnualLeaveManageInforImport(
+									x.getYmd(),
+									x.getDaysUsedNo(),
+									x.getUsedMinutes(),
+									x.getScheduleRecordAtr(),
+									x.getWorkTypeCode(),
+									workTypeInfoMap.get(x.getWorkTypeCode())
+								)).collect(Collectors.toList());
 	}
 
 	private List<AnnualLeaveGrantImport> mapLeaveGrants(List<AnnualLeaveGrantExport> grants) {
