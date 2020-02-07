@@ -30,7 +30,6 @@ public class KrcdtSyainDpErList extends KrcdtEmpErAlCommon implements Serializab
 
 //	@Getter
 //	@OneToMany(mappedBy = "erOth", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	public List<KrcdtErAttendanceItem> erAttendanceItem;
 
 	public KrcdtSyainDpErList(String id, String errorCode, String employeeId, GeneralDate processingDate,
 			String companyID, String errorAlarmMessage, String contractCode,

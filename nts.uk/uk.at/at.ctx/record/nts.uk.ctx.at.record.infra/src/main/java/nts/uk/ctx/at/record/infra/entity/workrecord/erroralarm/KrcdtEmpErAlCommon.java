@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 
 import lombok.NoArgsConstructor;
 import nts.arc.layer.infra.data.entity.type.GeneralDateToDBConverter;
@@ -44,6 +45,7 @@ public class KrcdtEmpErAlCommon extends UkJpaEntity {
 	@Column(name = "ERROR_MESSAGE")
 	public String errorAlarmMessage;
 	
+	@Transient
 	public List<KrcdtErAttendanceItem> erAttendanceItem;
 
 	@Override
