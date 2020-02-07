@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.infra.entity.workrecord.erroralarm;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -42,6 +43,8 @@ public class KrcdtEmpErAlCommon extends UkJpaEntity {
 
 	@Column(name = "ERROR_MESSAGE")
 	public String errorAlarmMessage;
+	
+	public List<KrcdtErAttendanceItem> erAttendanceItem;
 
 	@Override
 	protected Object getKey() {
@@ -49,7 +52,7 @@ public class KrcdtEmpErAlCommon extends UkJpaEntity {
 	}
 
 	public KrcdtEmpErAlCommon(String id, String errorCode, String employeeId, GeneralDate processingDate,
-			String companyID, String errorAlarmMessage, String contractCode) {
+			String companyID, String errorAlarmMessage, String contractCode, List<KrcdtErAttendanceItem> erAttendanceItem) {
 		super();
 		this.id = id;
 		this.errorCode = errorCode;
@@ -58,14 +61,21 @@ public class KrcdtEmpErAlCommon extends UkJpaEntity {
 		this.companyID = companyID;
 		this.errorAlarmMessage = errorAlarmMessage;
 		this.ccd = contractCode;
+		this.erAttendanceItem = erAttendanceItem;
 	}
 
-
 	public EmployeeDailyPerError toDomain() {
-		return null;
+		return new EmployeeDailyPerError(this.companyID, this.employeeId,
+				this.processingDate, this.errorCode, erAttendanceItem.stream()
+						.map(c -> c.krcdtErAttendanceItemPK.attendanceItemId).collect(Collectors.toList()),
+				0, this.errorAlarmMessage);
 	}
 	
 	public List<KrcdtErAttendanceItem> getErAttendanceItem() {
-		return null;
+		return erAttendanceItem;
+	}
+	
+	public void setErAttendanceItem(List<KrcdtErAttendanceItem> er) {
+		erAttendanceItem = er;
 	}
 }

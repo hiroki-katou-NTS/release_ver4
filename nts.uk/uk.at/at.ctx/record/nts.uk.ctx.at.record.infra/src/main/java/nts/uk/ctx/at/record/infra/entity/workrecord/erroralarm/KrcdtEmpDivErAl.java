@@ -5,13 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
 import nts.gul.text.IdentifierUtil;
@@ -29,16 +25,14 @@ public class KrcdtEmpDivErAl extends KrcdtEmpErAlCommon implements Serializable 
 
 	private static final long serialVersionUID = 1L;
 
-	@Getter
-	@OneToMany(mappedBy = "erDiv", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+//	@Getter
+//	@OneToMany(mappedBy = "erDiv", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	public List<KrcdtErAttendanceItem> erAttendanceItem;
 
 	public KrcdtEmpDivErAl(String id, String errorCode, String employeeId, GeneralDate processingDate,
 			String companyID, String errorAlarmMessage, String contractCode, 
 			List<KrcdtErAttendanceItem> erAttendanceItem) {
-		super(id, errorCode, employeeId, processingDate, companyID, errorAlarmMessage,  contractCode);
-		
-		this.erAttendanceItem = erAttendanceItem;
+		super(id, errorCode, employeeId, processingDate, companyID, errorAlarmMessage,  contractCode, erAttendanceItem);
 	}
 
 	public static KrcdtEmpDivErAl toEntity(EmployeeDailyPerError er) {
@@ -54,13 +48,6 @@ public class KrcdtEmpDivErAl extends KrcdtEmpErAlCommon implements Serializable 
 									er.getCompanyID(), er.getEmployeeID(), ccd, er.getDate()))
 						.collect(Collectors.toList())
 				);
-	}
-
-	public EmployeeDailyPerError toDomain() {
-		return new EmployeeDailyPerError(this.companyID, this.employeeId,
-				this.processingDate, this.errorCode, erAttendanceItem.stream()
-						.map(c -> c.krcdtErAttendanceItemPK.attendanceItemId).collect(Collectors.toList()),
-				0, this.errorAlarmMessage);
 	}
 
 	public static EmployeeDailyPerError toDomainForRes(List<KrcdtEmpDivErAl> entities) {
