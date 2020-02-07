@@ -51,17 +51,17 @@ public class KrcdtErAttendanceItem extends UkJpaEntity implements Serializable {
 		return this.krcdtErAttendanceItemPK;
 	}
 	
-	@ManyToOne
-	@JoinColumns({ @JoinColumn(name = "ID", referencedColumnName = "ID", insertable = false, updatable = false)})
-	public KrcdtOtkErAl erOtk;
-	
-	@ManyToOne
-	@JoinColumns({ @JoinColumn(name = "ID", referencedColumnName = "ID", insertable = false, updatable = false)})
-	public KrcdtEmpDivErAl erDiv;
-	
-	@ManyToOne
-	@JoinColumns({ @JoinColumn(name = "ID", referencedColumnName = "ID", insertable = false, updatable = false)})
-	public KrcdtSyainDpErList erOth;
+//	@ManyToOne
+//	@JoinColumns({ @JoinColumn(name = "ID", referencedColumnName = "ID", insertable = false, updatable = false)})
+//	public KrcdtOtkErAl erOtk;
+//	
+//	@ManyToOne
+//	@JoinColumns({ @JoinColumn(name = "ID", referencedColumnName = "ID", insertable = false, updatable = false)})
+//	public KrcdtEmpDivErAl erDiv;
+//	
+//	@ManyToOne
+//	@JoinColumns({ @JoinColumn(name = "ID", referencedColumnName = "ID", insertable = false, updatable = false)})
+//	public KrcdtSyainDpErList erOth;
 	
 	public static KrcdtErAttendanceItem toEntity(String id, int attendanceItemId, String cid, 
 			String sid, String ccd, GeneralDate processDate){

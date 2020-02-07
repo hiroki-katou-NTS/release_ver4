@@ -56,6 +56,7 @@ import nts.uk.ctx.at.record.infra.entity.monthlyaggrmethod.flex.KrcstFlexShortag
 import nts.uk.ctx.at.record.infra.entity.workinformation.KrcdtDaiPerWorkInfo;
 import nts.uk.ctx.at.record.infra.entity.workrecord.erroralarm.KrcdtEmpDivErAl;
 import nts.uk.ctx.at.record.infra.entity.workrecord.erroralarm.KrcdtEmpErAlCommon;
+import nts.uk.ctx.at.record.infra.entity.workrecord.erroralarm.KrcdtErAttendanceItem;
 import nts.uk.ctx.at.record.infra.entity.workrecord.erroralarm.KrcdtOtkErAl;
 import nts.uk.ctx.at.record.infra.entity.workrecord.erroralarm.KrcdtSyainDpErList;
 import nts.uk.ctx.at.record.infra.entity.workrecord.erroralarm.condition.KrcstErAlApplication;
@@ -980,6 +981,8 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	@Override
 	public List<DPErrorDto> getListDPError(DateRange dateRange, List<String> lstEmployee, List<String> errorCodes) {
+		List<String> ec = errorCodes.stream().distinct().collect(Collectors.toList());
+		
 		StringBuilder builderString = new StringBuilder();
 		builderString.append("SELECT e FROM [table] e ");
 		builderString.append("WHERE ( e.processingDate BETWEEN :startDate AND :endDate ) ");
@@ -990,9 +993,9 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		String div = builderString.toString().replace("[table]", "KrcdtEmpDivErAl");
 		List<DPErrorDto> dpErrors = new ArrayList<>();
 		CollectionUtil.split(lstEmployee, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			dpErrors.addAll(findErAl(ptj, KrcdtSyainDpErList.class, dateRange, subList, errorCodes));
-			dpErrors.addAll(findErAl(otk, KrcdtOtkErAl.class, dateRange, subList, errorCodes));
-			dpErrors.addAll(findErAl(div, KrcdtEmpDivErAl.class, dateRange, subList, errorCodes));
+			dpErrors.addAll(findErAl(ptj, KrcdtSyainDpErList.class, dateRange, subList, ec));
+			dpErrors.addAll(findErAl(otk, KrcdtOtkErAl.class, dateRange, subList, ec));
+			dpErrors.addAll(findErAl(div, KrcdtEmpDivErAl.class, dateRange, subList, ec));
 		});
 		return dpErrors;
 	}
@@ -1007,12 +1010,26 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 			query.setParameter("errorCodes", errorCodes);
 		}
 		
+		List<T> r = query.getList();
+		
+		List<String> id = r.stream().map(c -> c.id).collect(Collectors.toList());
+		List<KrcdtErAttendanceItem> eai = new ArrayList<>();
+		
+		CollectionUtil.split(id, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, sbId -> {
+			eai.addAll(this.queryProxy()
+					.query("SELECT e FROM KrcdtErAttendanceItem e WHERE e.krcdtErAttendanceItemPK.iD in :er", KrcdtErAttendanceItem.class)
+					.setParameter("er", sbId)
+					.getList());
+		});
+		
 		return query.getList().stream().map(e -> {
-				return new DPErrorDto(e.errorCode, "", e.employeeId, e.processingDate,
-						!e.getErAttendanceItem().isEmpty() ? e.getErAttendanceItem().stream()
-								.map(x -> x.krcdtErAttendanceItemPK.attendanceItemId)
-								.collect(Collectors.toList()) : Collections.emptyList(),
-						false, e.errorAlarmMessage);
+			List<KrcdtErAttendanceItem> ceai = eai.stream().filter(i -> i.krcdtErAttendanceItemPK.iD.equals(e.id)).collect(Collectors.toList());
+			
+			return new DPErrorDto(e.errorCode, "", e.employeeId, e.processingDate,
+					ceai.isEmpty() ? Collections.emptyList() :
+									ceai.stream().map(x -> x.krcdtErAttendanceItemPK.attendanceItemId)
+										.collect(Collectors.toList()),
+					false, e.errorAlarmMessage);
 		}).collect(Collectors.toList());
 	}
 	
