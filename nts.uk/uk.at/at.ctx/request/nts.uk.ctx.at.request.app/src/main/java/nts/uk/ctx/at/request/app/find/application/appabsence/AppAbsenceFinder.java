@@ -338,7 +338,7 @@ public class AppAbsenceFinder {
 			absenceWorkTypes.add(absenceWorkType);
 		}
 		// display list work Type
-		result.setWorkTypes(absenceWorkTypes);
+		result.setWorkTypes(absenceWorkTypes.stream().distinct().collect(Collectors.toList()));
 		// 1.就業時間帯の表示制御(xu li hien thị A6_1)
 		if(appAbsence.getWorkTypeCode() == null){
 			result.setDisplayWorkChangeFlg(false);
