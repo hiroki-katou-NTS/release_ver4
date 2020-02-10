@@ -114,9 +114,15 @@ public class AppAbsenceThreeProcessImpl implements AppAbsenceThreeProcess {
 					result = this.workTypeRepository.findWorkTypeForHalfDay(companyID, halfDay, lstWorkTypeCodes);
 				}
 			} else {
-				result.addAll(workTypeRepository.findForAppHdKAF006(companyID,lstWorkTypeCodes,DeprecateClassification.NotDeprecated.value, hdType));
-				result.addAll(workTypeRepository.findWorkTypeByCodes(companyID, lstWorkTypeCodes, DeprecateClassification.NotDeprecated.value, WorkTypeUnit.OneDay.value));
-				result.addAll(workTypeRepository.findWorkTypeForHalfDay(companyID, halfDay, lstWorkTypeCodes));
+				result = this.workTypeRepository.findWorkTypeByCodes(companyID, lstWorkTypeCodes, DeprecateClassification.NotDeprecated.value, WorkTypeUnit.OneDay.value);				
+				// 終日休暇半日休暇区分 = 終日休暇 
+				if(displayHalfDayValue){
+					// 勤務種類組み合わせ全表示チェック = ON
+					List<Integer> allDayAtrs = new ArrayList<>();
+					allDayAtrs.add(convertHolidayType(holidayType));
+					result.addAll(workTypeRepository.findForAppHdKAF006(companyID,lstWorkTypeCodes,DeprecateClassification.NotDeprecated.value, hdType));
+				}
+				result.addAll(this.workTypeRepository.findWorkTypeForHalfDay(companyID, halfDay, lstWorkTypeCodes));
 			}
 		}
 //		//Sắp xếp theo disorder;
