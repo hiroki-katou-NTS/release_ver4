@@ -179,6 +179,13 @@ module nts.uk.at.view.kaf006.b{
                 }
             });
             });
+            self.selectedAllDayHalfDayValue.subscribe(function(value) {
+                if (value == 0) {
+                    self.enbHalfDayFlg(true);
+                } else {
+                    self.enbHalfDayFlg(false);
+                }
+            });
         }
         findRelaSelected(relaCD: string): any{
             let self = this;

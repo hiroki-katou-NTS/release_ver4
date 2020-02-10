@@ -145,6 +145,7 @@ public class UpdateAppAbsenceCommandHandler extends CommandHandlerWithResult<Upd
 		appAbsence.getApplication().setAppReason(new AppReason(appReason));
 		appAbsence.setVersion(appAbsence.getVersion());
 		appAbsence.getApplication().setVersion(command.getVersion());
+		appAbsence.setHalfDayFlg(command.halfDayFlg);
 		
 		//6.休暇申請（詳細）登録
 		// 4-1.詳細画面登録前の処理
