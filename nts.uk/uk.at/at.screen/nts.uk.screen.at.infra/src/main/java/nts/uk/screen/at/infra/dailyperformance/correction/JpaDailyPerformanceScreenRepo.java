@@ -964,7 +964,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	@Override
 	public List<DPErrorDto> getListDPError(DateRange dateRange, List<String> lstEmployee) {
-
+		List<DPErrorDto> listDPError = new ArrayList<>();
 		StringBuilder builderString = new StringBuilder();
 		builderString.append("SELECT e FROM [table] e ");
 		builderString.append("WHERE ( e.processingDate BETWEEN :startDate AND :endDate ) ");
@@ -977,7 +977,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 			listDPError.addAll(findErAl(KrcdtOtkErAl.class, KrcdtErOtkAtd.class, dateRange, subList, null, builderString));
 			listDPError.addAll(findErAl(KrcdtEmpDivErAl.class, KrcdtErDivAtd.class, dateRange, subList, null, builderString));
 		});
-		return resultReturn;
+		return listDPError;
 	}
 
 	@Override
