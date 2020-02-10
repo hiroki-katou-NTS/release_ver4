@@ -322,9 +322,11 @@ public class AppAbsenceFinder {
 				if (!CollectionUtil.isEmpty(workTypeCodeInWorkTypes)) {//存在する
 					result.setWorkTypeCode(appAbsence.getWorkTypeCode().toString());
 				} else {
+					/*
 					// アルゴリズム「申請済み勤務種類の存在判定と取得」を実行する - [Kiểm tra sự tồn tại  và lấy WorkType đã xin ]
 					hdShipmentScreenAFinder.appliedWorkType(companyID, workTypes,
 							appAbsence.getWorkTypeCode().toString());
+					*/
 				}
 			}
 		}
