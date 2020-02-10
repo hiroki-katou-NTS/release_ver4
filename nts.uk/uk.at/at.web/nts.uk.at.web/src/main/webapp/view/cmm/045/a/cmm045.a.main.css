@@ -25,6 +25,48 @@
 .workingResultExcess{
 	background-color: #ffff00;
 }
+
+.resizing-now {
+	cursor: col-resize;
+}
+
+#app-grid-container {
+	margin-left: 20px;
+	user-select: none;
+	-ms-user-select: none;
+}
+
+#app-grid-container.with-ccg001 {
+	margin-left: 90px;
+}
+
+#app-grid-container .nts-fixed-header-container,
+#app-grid-container .nts-fixed-body-container {
+	background: #f3f3f3;
+}
+
+#app-grid-container .nts-fixed-table .nts-fixed-body-container {
+	overflow: scroll;
+}
+
+#app-grid-container .nts-fixed-table table.fixed-table {
+	width: auto;
+}
+
+#app-grid-container th {
+	font-weight: bold;
+	text-align: center;
+}
+
+#app-grid td.appStatus,
+#app-grid td.displayAppStatus {
+	text-align: center;
+}
+
+#app-grid button {
+	height: 25px;
+}
+
 #grid1 tbody tr td:NTH-CHILD(1){
 	text-align: center;
 }
