@@ -21,6 +21,10 @@ module nts.uk.at.view.kdw001.d {
             monthCountVisible: KnockoutObservable<boolean>;
             showPeriodTime : KnockoutObservable<boolean>;
             
+            closureId :KnockoutObservable<string>;
+            isDisplayCheckbox  :KnockoutObservable<boolean>;
+            isCheckbox : KnockoutObservable<boolean>;
+            ifCallScreenBToD : KnockoutObservable<boolean>;
             constructor() {
                 let self = this;
                 
@@ -31,18 +35,24 @@ module nts.uk.at.view.kdw001.d {
               self.approvalResult = ko.observable('');
               self.monthCount = ko.observable('');
                 
-                 self.dailyCreatedVisible = ko.observable(true);
-                 self.dailyCalVisible = ko.observable(true);
-                 self.approvalVisible = ko.observable(true);
-                 self.monthCountVisible = ko.observable(true);
-                 self.showPeriodTime = ko.observable(true);
-               
+              self.dailyCreatedVisible = ko.observable(true);
+              self.dailyCalVisible = ko.observable(true);
+              self.approvalVisible = ko.observable(true);
+              self.monthCountVisible = ko.observable(true);
+              self.showPeriodTime = ko.observable(true);
+                
+              self.closureId = ko.observable(null);
+              self.isDisplayCheckbox = ko.observable(false);
+              self.isCheckbox = ko.observable(false);
+              self.ifCallScreenBToD = ko.observable(false);
                 
                 //Get screenName value from a screen
                 __viewContext.transferred.ifPresent(data => {
                     self.screenName = data.screenName;
                 });
+                
             }
+            
             
             opendScreenBorJ() {
                 if (!$(".nts-input").ntsError("hasError")) {
@@ -51,6 +61,10 @@ module nts.uk.at.view.kdw001.d {
             }
             
             opendScreenE() {
+                let self = this;
+                if(self.ifCallScreenBToD() == true && self.isDisplayCheckbox() == true ){
+                    __viewContext["viewmodel"].params.isCalWhenLock = self.isCheckbox()==true?1:0;
+                }
                 nts.uk.ui.windows.setShared("KDWL001E", __viewContext["viewmodel"].params);
                 nts.uk.ui.windows.sub.modal("/view/kdw/001/e/index.xhtml");
             }

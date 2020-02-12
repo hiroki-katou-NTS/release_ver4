@@ -70,4 +70,13 @@ public class ExecutionLogExportPubImpl implements ExecutionLogExportPub{
 		
 	}
 
+	@Override
+	public Boolean isCalWhenLock(String empCalAndSumExecLogId,int executionContent) {
+		Optional<ExecutionLog> optExeLog = logRepo.getByExecutionContent(empCalAndSumExecLogId, executionContent);
+		if(!optExeLog.isPresent()) {
+			return null;
+		}
+		return optExeLog.get().getIsCalWhenLock()==null?null:new Boolean(optExeLog.get().getIsCalWhenLock().booleanValue());
+	}
+
 }

@@ -65,6 +65,7 @@ module nts.uk.at.view.kdw001.b {
             selectedRecreateDevision: KnockoutObservable<number>;
             
             monthResoult :any;
+            dataClosure :any;
             constructor() {
                 var self = this;
                // self.params.setParamsScreenA({ closure: self.closureID });
@@ -230,6 +231,16 @@ module nts.uk.at.view.kdw001.b {
                 });
                 return dfd.promise();
             }
+            
+            getDataClosure(closureId:number){
+                let self = this;
+                let dfd = $.Deferred<void>();
+                service.findDataClosure(closureId).done(function(data) {
+                    self.dataClosure =data;
+                    dfd.resolve();
+                });
+                return dfd.promise();
+            }
 
             opendScreenD() {
                 var self = this;
@@ -250,8 +261,37 @@ module nts.uk.at.view.kdw001.b {
                     nts.uk.ui.dialog.alertError({ messageId: "Msg_572" });
                     return;
                 }
-                self.getMonthlyResult(self.params.closureID).done(()=>{
-                   
+                let dfdGetDataClosure = self.getDataClosure(self.params.closureID);
+                let dfdGetMonthlyResult =  self.getMonthlyResult(self.params.closureID);
+                $.when(dfdGetDataClosure,dfdGetMonthlyResult).done((dfdGetDataClosureData,dfdGetMonthlyResultData)=>{
+                    
+                    let periodStartDate = moment.utc(self.params.periodStartDate, "YYYY/MM/DD");
+                    let periodEndDate = moment.utc(self.params.periodEndDate, "YYYY/MM/DD");
+                    
+                    let startClosure = moment.utc(self.dataClosure.startCal, "YYYY/MM/DD");
+                    let endClosure = moment.utc(self.dataClosure.endCal, "YYYY/MM/DD");
+                    
+                    let isDisplay = false;
+                    
+                    if(self.dailyCreatedCheck() == true || self.dailyCalCheck() == true 
+                        || self.approvalResultCheck() == true ){
+                        if(self.dataClosure.lockDay==true){
+                            if(periodStartDate <= endClosure && periodEndDate >= startClosure ){
+                                isDisplay = true;
+                            }
+                        }
+                    }
+                    //lock monthly
+                    if(self.monthCountCheck() == true){
+                        if(self.dataClosure.lockMonthy ==true){
+                            isDisplay = true;
+                        }
+                    }
+                    
+                    
+                    self.dScreenmodel.closureId(self.params.closureID);
+                    self.dScreenmodel.isDisplayCheckbox(isDisplay);
+                    self.dScreenmodel.ifCallScreenBToD(true);
                     
                 
                 

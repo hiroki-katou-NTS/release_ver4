@@ -168,6 +168,8 @@ public class ProcessFlowOfDailyCreationDomainServiceImpl implements ProcessFlowO
 		//承認反映
 		if(finalStatus == ProcessState.SUCCESS
 				&& logsMap.containsKey(ExecutionContent.REFLRCT_APPROVAL_RESULT)) {
+			Optional<ExecutionLog> reflectApproval =
+					Optional.of(logsMap.get(ExecutionContent.REFLRCT_APPROVAL_RESULT));
 			dataSetter.updateData("reflectApprovalStartTime", GeneralDateTime.now().toString());
 			dataSetter.updateData("reflectApprovalStatus", ExecutionStatus.PROCESSING.nameId);
 			finalStatus = this.appReflectService.applicationRellect(empCalAndSumExecLogID, periodTime, asyncContext);

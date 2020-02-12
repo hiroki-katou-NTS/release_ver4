@@ -107,9 +107,10 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 	private ApprovalProcessingUseSettingRepository approvalProcessRespo;
 	
 	@Override
-	public ScheAndRecordIsReflectPub appReflectProcess(AppCommonPara para, ExecutionType executionType) {
+	public ScheAndRecordIsReflectPub appReflectProcess(AppCommonPara para, ExecutionType executionType,Boolean isCalWhenLock) {
 		ScheAndRecordIsReflectPub output = new ScheAndRecordIsReflectPub(true, true);
 		ScheRemainCreateInfor scheInfor = null;
+		Closure closureData = closureService.getClosureDataByEmployee(para.getSid(), para.getYmd());
 		
 		//ドメインモデル「日別実績の勤務情報」を取得する
 		Optional<WorkInfoOfDailyPerformance> optDaily = workRepository.find(para.getSid(), para.getYmd());
@@ -124,22 +125,49 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 			output.setScheReflect(false);
 			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　勤務予定基本なし");
 		}
+		
 		//反映状況によるチェック
 		if(output.isScheReflect()) {
-			CommonCheckParameter checkPara = new CommonCheckParameter(DegreeReflectionAtr.SCHEDULE,
-					executionType,
-					EnumAdaptor.valueOf(para.getStateReflectionReal().value, ReflectedStateRecord.class),
-					EnumAdaptor.valueOf(para.getStateReflection().value, ReflectedStateRecord.class));
-			boolean chkSche = processCheckService.commonProcessCheck(checkPara);
-			output.setScheReflect(chkSche);	
+			LockStatus lockStatusScheReflect = LockStatus.UNLOCK;
+			//「ロック中の計算/集計する」の値をチェックする
+			if(isCalWhenLock !=null && isCalWhenLock == false) {
+				//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
+				lockStatusScheReflect = resultLock.getDetermineActualLocked(para.getCid(),
+						para.getYmd(),
+						closureData.getClosureId().value,
+						PerformanceType.DAILY);
+			}
+			if(lockStatusScheReflect == LockStatus.UNLOCK) {
+				CommonCheckParameter checkPara = new CommonCheckParameter(DegreeReflectionAtr.SCHEDULE,
+						executionType,
+						EnumAdaptor.valueOf(para.getStateReflectionReal().value, ReflectedStateRecord.class),
+						EnumAdaptor.valueOf(para.getStateReflection().value, ReflectedStateRecord.class));
+				boolean chkSche = processCheckService.commonProcessCheck(checkPara);
+				output.setScheReflect(chkSche);	
+			}else {
+				output.setScheReflect(false);	
+			}
 		}
 		if(output.isRecordReflect()) {
-			CommonCheckParameter checkParaRecored = new CommonCheckParameter(DegreeReflectionAtr.RECORD,
-					executionType,
-					EnumAdaptor.valueOf(para.getStateReflectionReal().value, ReflectedStateRecord.class),
-					EnumAdaptor.valueOf(para.getStateReflection().value, ReflectedStateRecord.class));
-			boolean chkRecord = processCheckService.commonProcessCheck(checkParaRecored);
-			output.setRecordReflect(chkRecord);	
+			LockStatus lockStatusRecordReflect = LockStatus.UNLOCK;
+			//「ロック中の計算/集計する」の値をチェックする
+			if(isCalWhenLock !=null && isCalWhenLock == false) {
+				//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
+				lockStatusRecordReflect = resultLock.getDetermineActualLocked(para.getCid(),
+						para.getYmd(),
+						closureData.getClosureId().value,
+						PerformanceType.DAILY);
+			}
+			if(lockStatusRecordReflect == LockStatus.UNLOCK) {
+				CommonCheckParameter checkParaRecored = new CommonCheckParameter(DegreeReflectionAtr.RECORD,
+						executionType,
+						EnumAdaptor.valueOf(para.getStateReflectionReal().value, ReflectedStateRecord.class),
+						EnumAdaptor.valueOf(para.getStateReflection().value, ReflectedStateRecord.class));
+				boolean chkRecord = processCheckService.commonProcessCheck(checkParaRecored);
+				output.setRecordReflect(chkRecord);	
+			}else {
+				output.setRecordReflect(false);
+			}
 		}
 		
 		if(!output.isScheReflect() && !output.isRecordReflect()) {
@@ -151,7 +179,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 			return output;
 		}*/
 		//アルゴリズム「実績ロックされているか判定する」を実行する
-		Closure closureData = closureService.getClosureDataByEmployee(para.getSid(), para.getYmd());
+		
 		if(closureData == null) {
 			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　社員に対応する処理締めがない");
 			return new ScheAndRecordIsReflectPub(false, false);

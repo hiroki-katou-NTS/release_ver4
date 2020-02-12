@@ -54,7 +54,7 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 	@Inject
 	private AppReflectProcessRecordPub recordPub;
 	@Override
-	public ScheAndRecordIsReflect appReflectProcessRecord(Application_New appInfor, ExecutionTypeExImport executionType, GeneralDate appDate) {
+	public ScheAndRecordIsReflect appReflectProcessRecord(Application_New appInfor, ExecutionTypeExImport executionType, GeneralDate appDate,Boolean isCalWhenLock) {
 		//Optional<RequestSetting> settingData = requestSetting.findByCompany(appInfor.getCompanyID());
 		/*settingData.isPresent() ?
 				EnumAdaptor.valueOf(settingData.get().getAppReflectAfterConfirm().getAchievementConfirmedAtr().value, ReflectRecordAtr.class) 
@@ -69,7 +69,7 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				EnumAdaptor.valueOf(appInfor.getPrePostAtr().value, PrePostRecordAtr.class),
 				EnumAdaptor.valueOf(appInfor.getAppType().value, ApplicationType.class),
 				appInfor.getReflectionInformation().getForcedReflection() == DisabledSegment_New.TODO ? true : false);
-		ScheAndRecordIsReflectPub checkResult = recordPub.appReflectProcess(para, EnumAdaptor.valueOf(executionType.value, ExecutionType.class));
+		ScheAndRecordIsReflectPub checkResult = recordPub.appReflectProcess(para, EnumAdaptor.valueOf(executionType.value, ExecutionType.class),isCalWhenLock);
 		return new ScheAndRecordIsReflect(checkResult.isScheReflect(), checkResult.isRecordReflect());
 	}
 

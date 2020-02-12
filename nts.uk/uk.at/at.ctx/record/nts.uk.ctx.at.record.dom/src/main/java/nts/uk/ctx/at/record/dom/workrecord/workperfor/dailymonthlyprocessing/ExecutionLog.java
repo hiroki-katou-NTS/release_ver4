@@ -48,6 +48,8 @@ public class ExecutionLog extends AggregateRoot {
 	 */
 	private Optional<ObjectPeriod> objectPeriod;
 	
+	private Boolean isCalWhenLock;
+	
 	/** 計算実行設定情報ID */	
 	public String getCalExecutionSetInfoID() {
 		if (executionContent == ExecutionContent.DAILY_CREATION) {
@@ -86,7 +88,7 @@ public class ExecutionLog extends AggregateRoot {
 	}
 	
 	public ExecutionLog(String empCalAndSumExecLogID, ExecutionContent executionContent, ErrorPresent existenceError,
-			ExecutionTime executionTime, ExecutionStatus processStatus, ObjectPeriod objectPeriod) {
+			ExecutionTime executionTime, ExecutionStatus processStatus, ObjectPeriod objectPeriod,Boolean isCalWhenLock) {
 		super();
 		this.empCalAndSumExecLogID = empCalAndSumExecLogID;
 		this.executionContent = executionContent;
@@ -98,6 +100,7 @@ public class ExecutionLog extends AggregateRoot {
 		this.dailyCreationSetInfo =  Optional.empty();
 		this.dailyCalSetInfo =  Optional.empty();
 		this.monlyAggregationSetInfo =  Optional.empty();
+		this.isCalWhenLock = isCalWhenLock;
 	}
 	
 	public static ExecutionLog createFromJavaType(
@@ -108,7 +111,8 @@ public class ExecutionLog extends AggregateRoot {
 			GeneralDateTime endExecutionTime,
 			int processStatus,
 			GeneralDate startObjectPeriod,
-			GeneralDate endObjectPeriod
+			GeneralDate endObjectPeriod,
+			Boolean isCalWhenLock
 			) {
 		return new ExecutionLog(
 				empCalAndSumExecLogID,
@@ -116,7 +120,8 @@ public class ExecutionLog extends AggregateRoot {
 				EnumAdaptor.valueOf(existenceError,ErrorPresent.class),
 				new ExecutionTime(startExecutionTime,endExecutionTime),
 				EnumAdaptor.valueOf(processStatus,ExecutionStatus.class),
-				new ObjectPeriod(startObjectPeriod,endObjectPeriod)
+				new ObjectPeriod(startObjectPeriod,endObjectPeriod),
+				isCalWhenLock
 				);
 	}
 	

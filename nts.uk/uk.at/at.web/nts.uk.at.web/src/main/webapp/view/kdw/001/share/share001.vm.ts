@@ -39,6 +39,7 @@ module nts.uk.at.view.kdw001 {
             periodStartDate: string;
             periodEndDate: string;
             startTime: string;
+            
         }
 
         // AddEmpCalSumAndTargetCommand
@@ -76,7 +77,8 @@ module nts.uk.at.view.kdw001 {
             //
             startMonthResult : string;
             endMonthResult : string;
-
+            //
+            isCalWhenLock : number =null;
             constructor() {
 
             }

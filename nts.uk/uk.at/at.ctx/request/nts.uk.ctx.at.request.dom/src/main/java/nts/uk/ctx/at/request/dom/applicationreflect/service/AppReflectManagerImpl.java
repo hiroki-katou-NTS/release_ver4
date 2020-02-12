@@ -59,6 +59,7 @@ import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.OvertimeA
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.OvertimeReflectPara;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.ScheAndRecordIsReflect;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.WorkRecordReflectService;
+import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionLogRequestImport;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workrecord.dailymonthlyprocessing.ExecutionTypeExImport;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.ApplyTimeRequestAtr;
 import nts.uk.ctx.at.request.dom.applicationreflect.service.workschedule.WorkScheduleReflectService;
@@ -102,6 +103,8 @@ public class AppReflectManagerImpl implements AppReflectManager {
 	private OtherCommonAlgorithm otherCommonAlg;
 	@Inject
 	private GetClosureStartForEmployee getClosureStartForEmp;
+	@Inject
+	private ExecutionLogRequestImport executionLogRequestImport;
 	@PostConstruct
 	public void postContruct() {
 		this.self = scContext.getBusinessObject(AppReflectManager.class);
@@ -270,8 +273,9 @@ public class AppReflectManagerImpl implements AppReflectManager {
 					absenceLeaveAppInfor,
 					recruitmentInfor,
 					execuTionType);
+			Boolean isCalWhenLock = this.executionLogRequestImport.isCalWhenLock(excLogId, 2);
 			//事前チェック処理
-			ScheAndRecordIsReflect checkReflectResult = checkReflect.appReflectProcessRecord(appInfor, execuTionType, loopDate);
+			ScheAndRecordIsReflect checkReflectResult = checkReflect.appReflectProcessRecord(appInfor, execuTionType, loopDate,isCalWhenLock);
 			//勤務予定へ反映処理	(Xử lý phản ánh đến kế hoạch công việc)
 			if(appInfor.getPrePostAtr() == PrePostAtr.PREDICT
 					&& checkReflectResult.isScheReflect()) {

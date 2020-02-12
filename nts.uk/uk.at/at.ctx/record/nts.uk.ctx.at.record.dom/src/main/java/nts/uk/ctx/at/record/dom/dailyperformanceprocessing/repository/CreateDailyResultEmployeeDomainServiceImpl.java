@@ -37,6 +37,9 @@ import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workinformation.repository.WorkInformationRepository;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.ActualLock;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.ActualLockRepository;
+import nts.uk.ctx.at.record.dom.workrecord.actuallock.DetermineActualResultLock;
+import nts.uk.ctx.at.record.dom.workrecord.actuallock.LockStatus;
+import nts.uk.ctx.at.record.dom.workrecord.actuallock.PerformanceType;
 import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagement;
 import nts.uk.ctx.at.record.dom.workrecord.closurestatus.ClosureStatusManagementRepository;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
@@ -110,6 +113,9 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 	@Inject
 	private WorkInformationRepository workRepository;
 	
+	@Inject
+	private DetermineActualResultLock lockStatusService;
+	
 	// =============== HACK ON (this) ================= //
 	/* The sc context. */
 	@Resource
@@ -168,7 +174,7 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 			this.errMessageInfoRepository.add(employmentErrMes);
 			return ProcessState.SUCCESS;
 		}
-
+		//ドメインモデル「締め状態管理」を取得する
 		Optional<ClosureStatusManagement> closureStatusManagement = this.closureStatusManagementRepository
 				.getLatestByEmpId(employeeId);
 
@@ -178,6 +184,17 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 		List<ProcessState> stateList = Collections.synchronizedList(new ArrayList<>());
 		for (List<GeneralDate> listDay : exectedList) {
 			for (GeneralDate day : listDay) {
+				LockStatus lockStatus = LockStatus.UNLOCK;
+				//「ロック中の計算/集計する」の値をチェックする
+				if(executionLog.get().getIsCalWhenLock() != null && executionLog.get().getIsCalWhenLock() == false) {
+					//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
+					lockStatus = lockStatusService.getDetermineActualLocked(companyId, 
+							day, closureStatusManagement.get().getClosureId().value, PerformanceType.DAILY);
+				}
+				if(lockStatus == LockStatus.LOCK) {
+					continue;
+				}
+				//日別実績を作成する (tạo 日別実績)
 				ProcessState processState = this.self.createDailyResultEmployeeNew(asyncContext, employeeId, day,
 						companyId, empCalAndSumExecLogID, executionLog, reCreateWorkType , reCreateWorkPlace , reCreateRestTime , employeeGeneralInfoImport,
 						stampReflectionManagement, mapWorkingConditionItem, mapDateHistoryItem, employmentHisOptional,
@@ -186,6 +203,7 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 					stateList.add(processState);
 					return ProcessState.INTERRUPTION;
 				}
+				//登録する (Đăng ký)
 				stateList.add(processState);
 			}
 		}

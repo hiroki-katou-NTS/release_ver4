@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 
 //import nts.arc.task.data.TaskDataSetter;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultDomainServiceImpl.ProcessState;
+import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ExecutionLog;
 //import nts.uk.ctx.at.record.dom.dailyprocess.calc.DailyCalculationServiceImpl.StateHolder;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enums.ExecutionType;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -32,7 +33,7 @@ public interface DailyCalculationEmployeeService {
 	 * @return 排他エラーが発生したフラグ
 	 */
 	@SuppressWarnings("rawtypes")
-	List<Boolean> calculate(List<String> employeeId,DatePeriod datePeriod, Consumer<ProcessState> counter, ExecutionType reCalcAtr, String empCalAndSumExecLogID);
+	List<Boolean> calculate(List<String> employeeId,DatePeriod datePeriod, Consumer<ProcessState> counter, ExecutionType reCalcAtr, String empCalAndSumExecLogID,Boolean isCalWhenLock);
 	
 	/**
 	 * 社員の日別実績を計算(承認一覧から呼び出す用)
