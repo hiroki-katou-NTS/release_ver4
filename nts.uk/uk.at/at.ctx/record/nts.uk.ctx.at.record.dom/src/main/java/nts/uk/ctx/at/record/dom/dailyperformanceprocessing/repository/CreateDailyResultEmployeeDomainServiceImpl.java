@@ -64,6 +64,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureGetMonthDay;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureHistory;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
+import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.shr.com.history.DateHistoryItem;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -115,6 +116,9 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 	
 	@Inject
 	private DetermineActualResultLock lockStatusService;
+	
+	@Inject
+	private ClosureService closureService;
 	
 	// =============== HACK ON (this) ================= //
 	/* The sc context. */
@@ -187,9 +191,10 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 				LockStatus lockStatus = LockStatus.UNLOCK;
 				//「ロック中の計算/集計する」の値をチェックする
 				if(executionLog.get().getIsCalWhenLock() != null && executionLog.get().getIsCalWhenLock() == false) {
+					Closure closureData = closureService.getClosureDataByEmployee(employeeId, day);
 					//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
 					lockStatus = lockStatusService.getDetermineActualLocked(companyId, 
-							day, closureStatusManagement.get().getClosureId().value, PerformanceType.DAILY);
+							day, closureData.getClosureId().value, PerformanceType.DAILY);
 				}
 				if(lockStatus == LockStatus.LOCK) {
 					continue;
