@@ -184,14 +184,14 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　社員に対応する処理締めがない");
 			return new ScheAndRecordIsReflectPub(false, false);
 		}
-		LockStatus lockStatus = resultLock.getDetermineActualLocked(para.getCid(),
-				para.getYmd(),
-				closureData.getClosureId().value,
-				PerformanceType.DAILY);
-		if(lockStatus == LockStatus.LOCK) {
-			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　実績ロックされている");
-			return new ScheAndRecordIsReflectPub(false, false);
-		}
+//		LockStatus lockStatus = resultLock.getDetermineActualLocked(para.getCid(),
+//				para.getYmd(),
+//				closureData.getClosureId().value,
+//				PerformanceType.DAILY);
+//		if(lockStatus == LockStatus.LOCK) {
+//			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　実績ロックされている");
+//			return new ScheAndRecordIsReflectPub(false, false);
+//		}
 		//確定状態によるチェック
 		if(output.isScheReflect()) {
 			scheInfor = lstSche.get(0);
