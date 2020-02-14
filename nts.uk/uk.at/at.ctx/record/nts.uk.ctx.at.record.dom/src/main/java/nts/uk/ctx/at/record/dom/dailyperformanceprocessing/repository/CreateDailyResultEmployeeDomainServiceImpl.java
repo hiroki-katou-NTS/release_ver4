@@ -276,10 +276,10 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 				}
 
 				// アルゴリズム「実績ロックされているか判定する」を実行する
-				EmployeeAndClosureOutput employeeAndClosure = this.determineActualLocked(companyId,
-						employeeAndClosureDto, day);
+//				EmployeeAndClosureOutput employeeAndClosure = this.determineActualLocked(companyId,
+//						employeeAndClosureDto, day);
 				RecreateFlag recreateFlag = RecreateFlag.DO_NOT;
-				if (employeeAndClosure.getLock() == 0) {
+//				if (employeeAndClosure.getLock() == 0) {
 					ExecutionType reCreateAttr = executionLog.get().getDailyCreationSetInfo().get()
 							.getExecutionType();
 
@@ -309,7 +309,7 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 								stampReflectionManagement, mapWorkingConditionItem, mapDateHistoryItem,
 								periodInMasterList,recreateFlag,optDaily);
 					}
-				}
+//				}
 			}
 
 			// 暫定データの登録
