@@ -130,7 +130,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 		if(output.isScheReflect()) {
 			LockStatus lockStatusScheReflect = LockStatus.UNLOCK;
 			//「ロック中の計算/集計する」の値をチェックする
-			if(isCalWhenLock !=null && isCalWhenLock == false) {
+			if(isCalWhenLock ==null || isCalWhenLock == false) {
 				//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
 				lockStatusScheReflect = resultLock.getDetermineActualLocked(para.getCid(),
 						para.getYmd(),
@@ -151,7 +151,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 		if(output.isRecordReflect()) {
 			LockStatus lockStatusRecordReflect = LockStatus.UNLOCK;
 			//「ロック中の計算/集計する」の値をチェックする
-			if(isCalWhenLock !=null && isCalWhenLock == false) {
+			if(isCalWhenLock ==null || isCalWhenLock == false) {
 				//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
 				lockStatusRecordReflect = resultLock.getDetermineActualLocked(para.getCid(),
 						para.getYmd(),

@@ -346,7 +346,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 					.findByEmploymentCD(cid, stateInfo.getIntegrationOfDaily().getAffiliationInfor().getEmploymentCode().v());
 			
 			LockStatus lockStatus = LockStatus.UNLOCK;
-			if(IsCalWhenLock !=null && IsCalWhenLock == false) {
+			if(IsCalWhenLock ==null || IsCalWhenLock == false) {
 				//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
 				//実績ロックされているか判定する
 				lockStatus = lockStatusService.getDetermineActualLocked(cid, 

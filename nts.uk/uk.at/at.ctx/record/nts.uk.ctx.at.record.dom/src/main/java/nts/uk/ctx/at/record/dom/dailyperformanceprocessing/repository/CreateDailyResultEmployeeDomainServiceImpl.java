@@ -190,7 +190,7 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 			for (GeneralDate day : listDay) {
 				LockStatus lockStatus = LockStatus.UNLOCK;
 				//「ロック中の計算/集計する」の値をチェックする
-				if(executionLog.get().getIsCalWhenLock() != null && executionLog.get().getIsCalWhenLock() == false) {
+				if(executionLog.get().getIsCalWhenLock() == null || executionLog.get().getIsCalWhenLock() == false) {
 					Closure closureData = closureService.getClosureDataByEmployee(employeeId, day);
 					//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
 					lockStatus = lockStatusService.getDetermineActualLocked(companyId, 

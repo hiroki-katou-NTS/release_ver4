@@ -252,7 +252,7 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			}
 			LockStatus lockStatus = LockStatus.UNLOCK;
 			//「ロック中の計算/集計する」の値をチェックする
-			if(isCalWhenLock!=null && isCalWhenLock ==false ) {
+			if(isCalWhenLock ==null || isCalWhenLock ==false ) {
 				//
 				lockStatus = lockStatusService.getDetermineActualLocked(companyId, 
 						criteriaDate, closureData.getClosureId().value, PerformanceType.MONTHLY);
