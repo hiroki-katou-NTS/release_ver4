@@ -118,10 +118,10 @@ module nts.uk.at.view.kaf000.a.viewmodel{
                 }
                 let deadlineMsg = data.outputMessageDeadline;
                 if(!nts.uk.text.isNullOrEmpty(deadlineMsg.message)){
-                    self.reasonOutputMessFull(self.reasonOutputMess + deadlineMsg.message);    
+                    self.reasonOutputMessFull(deadlineMsg.message.replace(/\n/ig, '<br/>'));    
                 }
                 if(!nts.uk.text.isNullOrEmpty(deadlineMsg.deadline)){
-                    self.reasonOutputMessDealineFull(self.reasonOutputMessDealine + deadlineMsg.deadline);
+                    self.reasonOutputMessDealineFull(deadlineMsg.deadline);
                 }
                 self.messageArea(deadlineMsg.chkShow);
                 dfd.resolve(data);

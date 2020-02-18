@@ -1,20 +1,20 @@
 <div class="contents-area cf">
-	<div id="message-area" data-bind="visible : messageArea">
-		<table >
-			<tr>
-				<!-- A1_1 -->
-				<!-- A1_2 -->
-				<td class="message-td" data-bind="visible : reasonOutputMessFull() != null">
-					<div data-bind="text: reasonOutputMessFull()" ></div>
-				</td>
-			</tr>
-			<tr>
-				<!-- A1_3 -->
-				<!-- A1_4 -->
-				<td class="message-td" data-bind="visible:  reasonOutputMessDealineFull() != null ">
-					<div data-bind="text: reasonOutputMessDealineFull()" ></div>
-				</td>
-			</tr>
-		</table>
+	<div id="message-area" data-bind="visible : messageArea" style="padding-bottom: 10px;">
+		<div class="table" data-bind="visible : reasonOutputMessFull() != null">
+			<!-- A1_1 -->
+			<div class="cell message-td-1">#{i18n.getText('KAF000_1')}</div>
+			<!-- A1_2 -->
+			<div class="cell message-td" data-bind="visible : reasonOutputMessFull() != null">
+				<div data-bind="html: reasonOutputMessFull()" style="word-break: break-all;"></div>
+			</div>
+		</div>
+		<div class="table" data-bind="visible:  reasonOutputMessDealineFull() != null ">
+			<!-- A1_3 -->
+			<div class="cell message-td-1">#{i18n.getText('KAF000_2')}</div>
+			<!-- A1_4 -->
+			<div class="cell message-td">
+				<div data-bind="text: reasonOutputMessDealineFull()" ></div>
+			</div>
+		</div>
 	</div>
 </div>

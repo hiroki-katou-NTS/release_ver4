@@ -38,10 +38,6 @@ hr {
 	clear: both;
 }
 
-#message-area {
-	padding: 10px;
-}
-
 .div_line>* {
 	float: left;
 }

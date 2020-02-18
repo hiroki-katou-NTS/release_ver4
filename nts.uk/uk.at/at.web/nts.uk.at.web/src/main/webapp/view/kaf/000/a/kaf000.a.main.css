@@ -1,11 +1,13 @@
 #message-area {
 	background-color: #f8efd4;
-	height: 68px;
-	width: 798px;
+}
+
+.message-td-1 {
+	padding-left: 12px;
+	width: 95px;
 }
 
 .message-td {
-	padding-left: 10px;
 	padding-top: 10px;
 }
 
