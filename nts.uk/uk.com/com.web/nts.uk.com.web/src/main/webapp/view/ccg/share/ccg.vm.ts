@@ -536,8 +536,11 @@ module nts.uk.com.view.ccg.share.ccg {
                 
                 $("#ccg001-date-entry .ntsStartDate input").on("keydown",function (e) {
                     if(e.keyCode == 13) {
+                        $(this).blur();
                         self.entryDateTab3({startDate:$(this).val(), endDate: self.entryDateTab3().endDate});
+                        self.entryDateTab3.valueHasMutated();
                         self.validateTab3EntryDate();
+                        $(this).focus();
                         if(self.isValidEntryDateSearch()) {
                             $('#search-by-entry-date').click();
                         }
@@ -546,8 +549,11 @@ module nts.uk.com.view.ccg.share.ccg {
                 
                 $("#ccg001-date-entry .ntsEndDate input").on("keydown",function (e) {
                     if(e.keyCode == 13) {
+                        $(this).blur();
                         self.entryDateTab3({startDate:self.entryDateTab3().startDate, endDate:  $(this).val()});
+                        self.entryDateTab3.valueHasMutated();
                         self.validateTab3EntryDate();
+                         $(this).focus();
                         if(self.isValidEntryDateSearch()) {
                             $('#search-by-entry-date').click();
                         }
@@ -556,8 +562,11 @@ module nts.uk.com.view.ccg.share.ccg {
                 
                  $("#ccg001-date-retirement .ntsStartDate input").on("keydown",function (e) {
                     if(e.keyCode == 13) {
+                        $(this).blur();
                         self.retirementDateTab3({startDate:$(this).val(), endDate: self.retirementDateTab3().endDate});
+                        self.retirementDateTab3.valueHasMutated();
                         self.validateTab3DateRetirement();
+                        $(this).focus();
                         if(self.isValidRetirementDateSearch()) {
                             self.searchByRetirementDate();
                         }
@@ -566,8 +575,11 @@ module nts.uk.com.view.ccg.share.ccg {
                 
                 $("#ccg001-date-retirement .ntsEndDate input").on("keydown",function (e) {
                     if(e.keyCode == 13) {
+                        $(this).blur();
                         self.retirementDateTab3({startDate:self.retirementDateTab3().startDate, endDate:  $(this).val()});
+                        self.retirementDateTab3.valueHasMutated();
                         self.validateTab3DateRetirement();
+                        $(this).focus();
                         if(self.isValidRetirementDateSearch()) {
                             self.searchByRetirementDate();
                         }
@@ -577,15 +589,15 @@ module nts.uk.com.view.ccg.share.ccg {
             }
             
             public validateTab3EntryDate() {
-                $('#ccg001-date-entry .ntsDateRangeComponent').ntsError('validate');
-                $('#ccg001-date-entry .ntsStartDate input').ntsError('validate');
-                $('#ccg001-date-entry .ntsEndDate input').ntsError('validate');
+                $('#ccg001-date-entry .ntsDateRangeComponent').trigger('validate');
+                $('#ccg001-date-entry .ntsStartDate input').trigger('validate');
+                $('#ccg001-date-entry .ntsEndDate input').trigger('validate');
             }
             
             public validateTab3DateRetirement() {
-                $('#ccg001-date-retirement .ntsDateRangeComponent').ntsError('validate');
-                $('#ccg001-date-retirement .ntsStartDate input').ntsError('validate');
-                $('#ccg001-date-retirement .ntsEndDate input').ntsError('validate');
+                $('#ccg001-date-retirement .ntsDateRangeComponent').trigger('validate');
+                $('#ccg001-date-retirement .ntsStartDate input').trigger('validate');
+                $('#ccg001-date-retirement .ntsEndDate input').trigger('validate');
             }
 
             
