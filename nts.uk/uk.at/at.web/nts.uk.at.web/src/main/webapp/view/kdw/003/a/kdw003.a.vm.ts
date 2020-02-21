@@ -721,7 +721,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             self.showTighProcess(data.showTighProcess);
             self.indentityMonth(data.indentityMonthResult);
             if (!self.hasEmployee || data.errorInfomation == DCErrorInfomation.APPROVAL_NOT_EMP) return;
-            self.loadKcp009();
+            //self.loadKcp009();
             if (!_.isEmpty(data.errors) || data.errorInfomation != 0) return;
             self.extractionData();
             console.log("khoi tao Object: " + (performance.now() - startTime));
@@ -2020,8 +2020,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             _.each(self.listAttendanceItemId(), (attendanceItemId) => {
                 arrItemId.push(attendanceItemId.itemId);
             });
-
+            let startTime = performance.now();
             service.getNameMonthlyAttItem(arrItemId).done(data => {
+                console.log("getNameMonthlyAttItem done  : "+(performance.now()-startTime));
                 if (!self.isStartScreen()) {
                     // neu dang khoi dong man hinh thi k dc destroy
                     $('#miGrid').igGrid("destroy");

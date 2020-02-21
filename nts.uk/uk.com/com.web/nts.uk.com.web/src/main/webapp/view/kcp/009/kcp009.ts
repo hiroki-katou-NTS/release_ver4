@@ -48,9 +48,12 @@ module kcp009.viewmodel {
         public init($input: JQuery, data: ComponentOption): JQueryPromise<void> {
             var dfd = $.Deferred<void>();
             $(document).undelegate('#list-box_grid', 'iggriddatarendered');
+            
+            $input.empty();
+            
             ko.cleanNode($input[0]);
             var self = this;
-            
+            let startTime = performance.now();
             self.prefix($input[0].id);
             
             self.tabIndex = data.tabIndex;
@@ -133,26 +136,121 @@ module kcp009.viewmodel {
                 return self.selectedOrdinalNumber().toString() + "/" + self.empList().length.toString();
             });
             // End of Initialize variables
+            
+            
 
-            var webserviceLocator = nts.uk.request.location.siteRoot
-                .mergeRelativePath(nts.uk.request.WEB_APP_NAME["com"] + '/')
-                .mergeRelativePath('/view/kcp/009/kcp009.xhtml').serialize();
-            $input.load(webserviceLocator, function() {
+//            var webserviceLocator = nts.uk.request.location.siteRoot
+//                .mergeRelativePath(nts.uk.request.WEB_APP_NAME["com"] + '/') 
+//                .mergeRelativePath('/view/kcp/009/kcp009.xhtml').serialize();
+            console.log("KCP done 1  : "+(performance.now()-startTime));
+            let startTime2 = performance.now();
+//            $input.load(webserviceLocator, function() {
+                console.log("KCP done 2  : "+(performance.now()-startTime2));
+                let startTime3 = performance.now();
+                
+            let container = $("div", { "id": "kcp009-component" });
+                $input.append(container);
+                this.$fixture = $([
+                  "<div data-bind=\"attr: {id: componentWrapperId}\">",
+                  "<div id=\"function-panel\">",
+                  "<table id='employ_view'>",
+                  "  <tr id=\"function-tr\">",
+                  "      <td id=\"tbl_left\"  class=\"bg-green border-left employment-tdpad\">",
+                  "      <button class=\"btn_show_list\" data-bind=\"text: targetBtnText, attr: {tabindex: tabIndex, id: 'btn_show_list-' + prefix()}\"></button>",
+                  "          <!-- #{i18n.getText('KCP009_3')} --></td>",
+                  "      <td class=\"bg-green none_border employment-tdpad\"><button",
+                  "              class=\"btn_select\"",
+                  "              data-bind=\"click: previousEmp, enable: isActivePreviousBtn(), attr: {tabindex: tabIndex, id: 'prev-btn-' + prefix()}\">",
+                  "              <!-- <span class=\"caret-left caret-inline\"></span> -->",
+                  "          </button></td>",
+                  "      <td class=\"bg-green border-right employment-tdpad\">",
+                  "          <button class=\"btn_select\"",
+                  "              data-bind=\"click: nextEmp, enable: isActiveNextBtn(), attr: {tabindex: tabIndex, id: 'next-btn-' + prefix()}\">",
+                  "              <!-- <span class=\"caret-right caret-inline\"></span> -->",
+                  "          </button>",
+                  "      </td>",
+                  "      <td class=\"none_border em_display employment-tdpad\">",
+                  "          <div>",
+                  "              <span data-bind=\"text: empDisplayCode\"></span>",
+                  "          </div>",
+                  "      </td>",
+                  "      <td class=\"none_border em_display employment-tdpad\">",
+                  "          <div class=\"over_text\">",
+                  "              <span class=\"limited-label\" data-bind=\"text: empBusinessName\"></span>",
+                  "          </div>",
+                  "      </td>",
+                  "      <td class=\"none_border employment-tdpad\"><div",
+                  "              data=\"enable: isActivePersonalProfile\" class=\"icon\"",
+                  "               data-bind=\"attr: {tabindex: tabIndex,",
+                  "                                 id: 'profile-icon-'+ prefix()}\"></div></td>",
+                  "      <td class=\"none_border em_display employment-tdpad\"><div>",
+                  "              <span data-bind=\"text: selectedNumberOfPeople\"></span><span>"+nts.uk.resource.getText("KCP009_1")+"</span>",
+                  "          </div></td>",
+                  "      <td class=\"border-right employment-tdpad\"><input type=\"search\"",
+                  "          class=\"search-input\"",
+                  "          data-bind=\" ntsTextEditor: {",
+                  "                  value: keySearch,",
+                  "                  name: '#[KCP009_2]',",
+                  "                  option: {enable: true}",
+                  "                  },", 
+                  "                  attr: {tabindex: tabIndex,",
+                  "                      id: 'search-input-'+ prefix()",
+                  "                  },", 
+                  "                  valueUpdate: 'afterkeydown'\" />",
+                  "      </td>",
+                  "      <td class=\"bg-green border-left border-right employment-tdpad wkp_title_text\"",
+                  "          data-bind=\"visible: isDisplayOrganizationName,",
+                  "                      attr: {id: 'wkp_title_text-'+ prefix()}\">",
+                  "          <div>",
+                  "              <span data-bind=\"text: organizationDesignation\"></span>",
+                  "          </div>",
+                  "      </td>",
+                  "      <td class=\"employment-tdpad border-right wkp_text\"",
+                  "          data-bind=\"visible: isDisplayOrganizationName,",
+                  "                      attr: {id: 'wkp_text-'+ prefix()}\">",
+                  "          <div style=\"width: 150px\">",
+                  "              <span class=\"limited-label\" data-bind=\"text: organizationName\"></span>",
+                  "          </div>",
+                  "      </td>",
+                  "  </tr>",
+                  "  </table>",
+                  " </div>",
+                  " <div class=\"items-list\" data-bind=\"attr: {id: 'item-list-'+ prefix()}\" style=\"visibility: hidden;\">",
+                  "     <div",
+                  "          data-bind=\"attr: {id: nts.uk.util.randomId()},",
+                  "              ntsListBox: {",
+                  "              options: empList,",
+                  "              optionsValue: 'id',",
+                  "              optionsText: 'code',",
+                  "              multiple: false,",
+                  "              value: selectedItem,",
+                  "              enable: true,",
+                  "              name: targetBtnText,",
+                  "              rows: 10,",
+                  "              columns: [",
+                  "                  { key: 'code', length: 4 },",
+                  "                  { key: 'businessName', length: 10 }",
+                  "     ]}\"></div>",
+                  " </div>",
+                  "</div>"
+                ].join("\n"));
+            
+                $input.append(this.$fixture);  
+                let startTime5 = performance.now();
+                ko.cleanNode( $input[0]);
                 //$input.find('#list-box').empty();
                 ko.applyBindings(self, $input[0]);
-
+                console.log("KCP done 5.1  : "+(performance.now()-startTime5));
                 // Add profile Icon
                 var iconLink = nts.uk.request.location.siteRoot
                     .mergeRelativePath(nts.uk.request.WEB_APP_NAME["com"] + '/')
                     .mergeRelativePath('/view/kcp/share/icon/7.png').serialize();
                 $('#profile-icon-'+self.prefix()).attr('style', "background: url('" + iconLink + "'); width: 30px; height: 30px; background-size: 30px 30px;");
-
                 // Icon for Previous Button
                 var prevIconLink = nts.uk.request.location.siteRoot
                     .mergeRelativePath(nts.uk.request.WEB_APP_NAME["com"] + '/')
                     .mergeRelativePath('/view/kcp/share/icon/9.png').serialize();
                 $('#prev-btn-'+self.prefix()).attr('style', "background: url('" + prevIconLink + "'); width: 30px; height: 30px; background-size: 30px 30px;");
-
                 // Icon for Next Button
                 var nextIconLink = nts.uk.request.location.siteRoot
                     .mergeRelativePath(nts.uk.request.WEB_APP_NAME["com"] + '/')
@@ -162,6 +260,7 @@ module kcp009.viewmodel {
                 // Toggle employee list
                 var itemListEl = '#item-list-' + self.prefix();
                 var btnShowListEl = '#btn_show_list-'+self.prefix();
+            let startTime6 = performance.now();
                 $(itemListEl).ntsPopup({
                     position: {
                         my: 'left top',
@@ -172,22 +271,21 @@ module kcp009.viewmodel {
                 });
 
                 // set z-index higher than CCG001
-                $('#item-list-' + self.prefix()).css('z-index', 998);
 
                 self.initKcp009Event();
 
                 // Enter keypress
                 $('#search-input-'+self.prefix()).on('keypress', function(e) {
-                    if (e.which == 13) {
+                    if (e.which == 13) {    
                         self.keySearch($('#search-input-'+self.prefix()).val());
                         if (self.keySearch()) {
                             self.searchEmp();
                         }
                     }
                 })
-
+                
                 dfd.resolve();
-            });
+//            });
             return dfd.promise();
         }
 
