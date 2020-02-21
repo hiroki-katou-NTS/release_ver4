@@ -139,8 +139,8 @@ module nts.uk.ui {
             let self = this,
                 dfd = $.Deferred();
         
-            request.ajax("com", "/bs/employee/setting/code/find").done(res => {
-                
+//            request.ajax("com", "/bs/employee/setting/code/find").done(res => {
+                let res = __viewContext.empCodeSets;
                 let formatOption: any = {
                     autofill: true
                 };
@@ -182,9 +182,9 @@ module nts.uk.ui {
                 }
         
                 dfd.resolve();
-            }).fail(res => {
-                dfd.reject();
-            });
+//            }).fail(res => {
+//                dfd.reject();
+//            });
         
             return dfd.promise();
         };

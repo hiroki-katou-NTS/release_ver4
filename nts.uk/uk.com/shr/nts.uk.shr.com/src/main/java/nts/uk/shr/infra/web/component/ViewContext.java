@@ -10,11 +10,13 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import javax.servlet.http.HttpServletRequest;
 
+import lombok.val;
 import nts.arc.system.ServerSystemProperties;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.context.LoginUserContext;
 import nts.uk.shr.com.context.loginuser.SelectedLanguage;
 import nts.uk.shr.com.context.loginuser.role.LoginUserRoles;
+import nts.uk.shr.com.employee.setting.EmployeeCodeSettingAdapter;
 import nts.uk.shr.com.i18n.TextResource;
 import nts.uk.shr.com.program.ProgramsManager;
 import nts.uk.shr.com.program.WebAppId;
@@ -55,9 +57,11 @@ public class ViewContext extends UIComponentBase {
 		rw.write(",");
 		writeLoginPersonInfo(rw);
 		rw.write(",");
+		writeEmpCodeSetting(rw);
 		
 		rw.write("};");
 		rw.write("__viewContext.primitiveValueConstraints = __viewContext.primitiveValueConstraints || {};");
+		
 
 		CDI.current().select(ViewContextEnvWriter.class).get().write(rw);
 		rw.write("</script>");
@@ -89,6 +93,20 @@ public class ViewContext extends UIComponentBase {
 		builder.append("isDebugMode: " + ServerSystemProperties.isDebugMode());
 		
 		rw.write("program: {" + builder.toString() + "}");
+	}
+	
+	private void writeEmpCodeSetting (ResponseWriter rw) throws IOException {
+		EmployeeCodeSettingAdapter empCodeSetting = CDI.current().select(EmployeeCodeSettingAdapter.class).get();
+		
+		val settings = empCodeSetting.find();
+		if (settings.isPresent()) {
+			StringBuilder builder = new StringBuilder();
+			
+			builder.append("ceMethodAttr: '" + settings.get().getCeMethodAttr() + "', ");
+			builder.append("numberOfDigits: '" + settings.get().getNumberOfDigits() + "'");
+			
+			rw.write("empCodeSets: {" + builder.toString() + "}");
+		}
 	}
 	
 	private void writeLoginPersonInfo (ResponseWriter rw) throws IOException {
