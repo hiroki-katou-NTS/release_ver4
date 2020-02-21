@@ -45,7 +45,7 @@ public class KrcdtOtkErAl extends KrcdtEmpErAlCommon implements Serializable {
 				er.getCompanyID(),
 				er.getErrorAlarmMessage().map(c -> c.v()).orElse(null), ccd, 
 				er.getAttendanceItemList().stream()
-						.map(item -> KrcdtErAttendanceItem.toEntity(id, item, 
+						.map(item -> KrcdtErOtkAtd.toEntity(id, item, 
 									er.getCompanyID(), er.getEmployeeID(), ccd, er.getDate()))
 						.collect(Collectors.toList())
 				);
