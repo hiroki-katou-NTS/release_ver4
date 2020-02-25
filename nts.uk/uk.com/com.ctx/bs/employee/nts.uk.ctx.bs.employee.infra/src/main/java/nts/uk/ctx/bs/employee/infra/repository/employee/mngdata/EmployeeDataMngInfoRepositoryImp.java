@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -27,6 +28,7 @@ import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
+import nts.arc.time.GeneralDateTime;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.dom.employee.mgndata.EmployeeDataMngInfo;
 import nts.uk.ctx.bs.employee.dom.employee.mgndata.EmployeeDataMngInfoRepository;
@@ -635,7 +637,6 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 	// laitv code end
 
 	@Override
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<EmployeeDataMngInfo> findBySidDel(List<String> sid) {
 		List<EmployeeDataMngInfo> resultList = new ArrayList<>();
 		CollectionUtil.split(sid, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
@@ -644,30 +645,22 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 					+ " from BSYMT_EMP_DTA_MNG_INFO"
 					+ " where SID in (" + NtsStatement.In.createParamsString(subList) + ")"
 					+ " and DEL_STATUS_ATR != 0";
-			
-			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+			// fix response 2020 - ktg030
+			Query stmt = this.getEntityManager().createNativeQuery(sql);
 				for (int i = 0; i < subList.size(); i++) {
-					stmt.setString(i + 1, subList.get(i));
+					stmt.setParameter(i + 1, subList.get(i));
 				}
 				
-				List<EmployeeDataMngInfo> subResults = new NtsResultSet(stmt.executeQuery()).getList(r -> {
-					BsymtEmployeeDataMngInfo e = new BsymtEmployeeDataMngInfo();
-					e.bsymtEmployeeDataMngInfoPk = new BsymtEmployeeDataMngInfoPk();
-					e.bsymtEmployeeDataMngInfoPk.sId = r.getString("SID");
-					e.bsymtEmployeeDataMngInfoPk.pId = r.getString("PID");
-					e.companyId = r.getString("CID");
-					e.employeeCode = r.getString("SCD");
-					e.delStatus = r.getInt("DEL_STATUS_ATR");
-					e.delDateTmp = r.getGeneralDateTime("DEL_DATE");
-					e.removeReason = r.getString("REMV_REASON");
-					e.extCode = r.getString("EXT_CD");
-					return toDomain(e);
-				});
+				@SuppressWarnings("unchecked")
+				List<Object[]> rs = stmt.getResultList();
+				
+				List<EmployeeDataMngInfo> subResults = rs.stream().map(r -> {
+					return EmployeeDataMngInfo.createFromJavaType(String.valueOf(r[2]), String.valueOf(r[1]),
+							String.valueOf(r[0]),  String.valueOf(r[3]), r[4] != null ? Integer.valueOf(String.valueOf(r[4])) : null, 
+									r[5] != null ? GeneralDateTime.fromString(String.valueOf(r[5]), "yyyy/MM/dd HH:mm:ss") : null,
+											String.valueOf(r[6]), String.valueOf(r[7]));}).collect(Collectors.toList());
 				
 				resultList.addAll(subResults);
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
 		});
 		return resultList;
 	}

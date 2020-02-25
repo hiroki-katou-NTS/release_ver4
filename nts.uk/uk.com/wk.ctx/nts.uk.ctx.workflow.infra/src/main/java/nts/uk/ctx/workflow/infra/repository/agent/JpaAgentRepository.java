@@ -376,19 +376,19 @@ public class JpaAgentRepository extends JpaRepository implements AgentRepository
 			
 			String agentSidColumn = "AGENT_SID" + agentType;
 			String sql = "select * from CMMMT_AGENT"
-					+ " where CID = ?"
-					+ " and " + agentSidColumn + " in (" + NtsStatement.In.createParamsString(approverIds) + ")"
+					+ " where " + agentSidColumn + " in (" + NtsStatement.In.createParamsString(approverIds) + ")"
 					+ " and START_DATE <= ?"
-					+ " and END_DATE >= ?";
+					+ " and END_DATE >= ?"
+					+ " and CID = ?";
 			
 			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
 				
-				stmt.setString(1, companyID);
 				for (int i = 0; i < approverIds.size(); i++) {
-					stmt.setString(2 + i, approverIds.get(i));
+					stmt.setString(1 + i, approverIds.get(i));
 				}
-				stmt.setDate(2 + approverIds.size(), Date.valueOf(endDate.localDate()));
-				stmt.setDate(3 + approverIds.size(), Date.valueOf(startDate.localDate()));
+				stmt.setDate(1 + approverIds.size(), Date.valueOf(endDate.localDate()));
+				stmt.setDate(2 + approverIds.size(), Date.valueOf(startDate.localDate()));
+				stmt.setString(3 + approverIds.size(), companyID);
 				
 				return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
 					CmmmtAgent c = CmmmtAgent.MAPPER.toEntity(rec);
