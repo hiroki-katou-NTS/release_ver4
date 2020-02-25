@@ -42,28 +42,4 @@ public class KrcdtErAttendanceItem extends UkJpaEntity {
 	protected Object getKey() {
 		return this.krcdtErAttendanceItemPK;
 	}
-	
-//	@ManyToOne
-//	@JoinColumns({ @JoinColumn(name = "ID", referencedColumnName = "ID", insertable = false, updatable = false)})
-//	public KrcdtOtkErAl erOtk;
-//	
-//	@ManyToOne
-//	@JoinColumns({ @JoinColumn(name = "ID", referencedColumnName = "ID", insertable = false, updatable = false)})
-//	public KrcdtEmpDivErAl erDiv;
-//	
-//	@ManyToOne
-//	@JoinColumns({ @JoinColumn(name = "ID", referencedColumnName = "ID", insertable = false, updatable = false)})
-//	public KrcdtSyainDpErList erOth;
-	
-	public static KrcdtErAttendanceItem toEntity(String id, int attendanceItemId, String cid, 
-			String sid, String ccd, GeneralDate processDate){
-		KrcdtErAttendanceItem krcdtErAttendanceItem = new KrcdtErAttendanceItem();
-		KrcdtErAttendanceItemPK krcdtErAttendanceItemPK = new KrcdtErAttendanceItemPK(id, attendanceItemId);
-		krcdtErAttendanceItem.krcdtErAttendanceItemPK = krcdtErAttendanceItemPK;
-		krcdtErAttendanceItem.ccd = ccd;
-		krcdtErAttendanceItem.cid = cid;
-		krcdtErAttendanceItem.sid = cid;
-		krcdtErAttendanceItem.processDate = processDate;
-		return krcdtErAttendanceItem;
-	}
 }
