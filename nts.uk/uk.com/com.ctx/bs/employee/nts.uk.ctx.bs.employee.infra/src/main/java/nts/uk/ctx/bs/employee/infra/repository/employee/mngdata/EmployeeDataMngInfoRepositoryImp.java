@@ -657,7 +657,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 				List<EmployeeDataMngInfo> subResults = rs.stream().map(r -> {
 					return EmployeeDataMngInfo.createFromJavaType(String.valueOf(r[2]), String.valueOf(r[1]),
 							String.valueOf(r[0]),  String.valueOf(r[3]), r[4] != null ? Integer.valueOf(String.valueOf(r[4])) : null, 
-									r[5] != null ? GeneralDateTime.fromString(String.valueOf(r[5]), "yyyy/MM/dd HH:mm:ss") : null,
+									r[5] != null ? GeneralDateTime.localDateTime(((Timestamp)r[5]).toLocalDateTime()): null,
 											String.valueOf(r[6]), String.valueOf(r[7]));}).collect(Collectors.toList());
 				
 				resultList.addAll(subResults);
