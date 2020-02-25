@@ -1,12 +1,16 @@
 package nts.uk.screen.at.app.dailyperformance.correction.month.asynctask;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.at.function.app.find.dailyperformanceformat.MonthlyPerfomanceAuthorityFinder;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceCorrectionProcessor;
 import nts.uk.screen.at.app.dailyperformance.correction.DailyPerformanceScreenRepo;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.DailyPerformanceCorrectionDto;
@@ -35,6 +39,9 @@ public class ProcessMonthScreen {
 
 	@Inject
 	private CheckIndentityMonth checkIndentityMonth;
+	
+	@Inject
+	private MonthlyPerfomanceAuthorityFinder monthlyPerfomanceAuthorityFinder;
 
 	public DailyPerformanceCorrectionDto processMonth(ParamCommonAsync param) {
 		DailyPerformanceCorrectionDto screenDto = new DailyPerformanceCorrectionDto();
@@ -55,6 +62,11 @@ public class ProcessMonthScreen {
 													: processor.getEmploymentCode(companyId,
 															param.dateRange.getEndDate(), param.employeeTarget),
 											dailyPerformanceDto, param.autBussCode)));
+			if(screenDto.getMonthResult() != null && !CollectionUtil.isEmpty(screenDto.getMonthResult().getResults())) {
+				List<Integer> items = screenDto.getMonthResult().getResults().get(0).getItems().stream().map(x -> x.getItemId()).collect(Collectors.toList());
+				screenDto.getMonthResult().setItemNameMonths(this.monthlyPerfomanceAuthorityFinder.getListAttendanceItemName(items));
+			}
+			
 			screenDto.setIndentityMonthResult(checkIndentityMonth.checkIndenityMonth(
 					new IndentityMonthParam(companyId, sId, param.dateRange.getEndDate(), param.getClosureId(),
 							param.displayFormat, Optional.ofNullable(screenDto.getIdentityProcessDto()))));

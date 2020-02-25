@@ -1,10 +1,12 @@
 package nts.uk.screen.at.app.dailyperformance.correction.monthflex;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nts.uk.ctx.at.shared.dom.scherec.dailyattendanceitem.adapter.attendanceitemname.AttItemName;
 import nts.uk.screen.at.app.dailyperformance.correction.agreement.AgreementInfomationDto;
 import nts.uk.screen.at.app.dailyperformance.correction.flex.change.FlexShortageDto;
 import nts.uk.screen.at.app.monthlyperformance.correction.dto.FormatDailyDto;
@@ -21,6 +23,7 @@ public class DPMonthResult {
 	private List<FormatDailyDto> formatDaily;
 	private AgreementInfomationDto agreementInfo;
 	private boolean needCallCalc = false;
+	private List<AttItemName> itemNameMonths;
 
 	public DPMonthResult(FlexShortageDto flexShortage, List<MonthlyModifyResult> results, boolean hasItem,
 			Integer month, List<FormatDailyDto> formatDaily, AgreementInfomationDto agreementInfo) {
@@ -32,5 +35,6 @@ public class DPMonthResult {
 		this.agreementInfo = agreementInfo;
 		this.needCallCalc = (flexShortage != null && flexShortage.isShowFlex()) || hasItem
 				|| (agreementInfo != null && agreementInfo.isShowAgreement());
+		this.itemNameMonths = new ArrayList<>();
 	}
 }
