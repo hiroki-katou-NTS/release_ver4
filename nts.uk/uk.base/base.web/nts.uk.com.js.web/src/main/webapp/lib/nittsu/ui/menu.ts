@@ -231,7 +231,7 @@ module nts.uk.ui.menu {
                                         nts.uk.sessionStorage.removeItem(MENU_SET_KEY);
                                         nts.uk.sessionStorage.removeItem(PROGRAM_KEY);
                                         nts.uk.sessionStorage.removeItem(COMPANY_KEY);
-                                        nts.uk.sessionStorage.removeItem("nts.uk.session.EMPLOYEE_SETTING");
+//                                        nts.uk.sessionStorage.removeItem("nts.uk.session.EMPLOYEE_SETTING");
                                         nts.uk.request.login.jumpToUsedLoginPage();
                                     });
                                 });

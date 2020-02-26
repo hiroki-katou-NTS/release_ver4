@@ -135,27 +135,27 @@ module nts.uk.ui {
                 || request.location.current.rawUrl.indexOf("/view/sample/component/editor/text-editor.xhtml") > -1;
         };        
         
-        let getEmployeeSetting = function() {
-            let dfd = $.Deferred(),
-                es = nts.uk.sessionStorage.getItem("nts.uk.session.EMPLOYEE_SETTING");
-            if (es.isPresent()) {
-                dfd.resolve(JSON.parse(es.get()));
-            } else {
-                request.ajax("com", "/bs/employee/setting/code/find").done(constraints => {
-                    nts.uk.sessionStorage.setItemAsJson("nts.uk.session.EMPLOYEE_SETTING", constraints);
-                    dfd.resolve(constraints);
-                });
-            }
-
-            return dfd.promise();
-        };
+//        let getEmployeeSetting = function() {
+//            let dfd = $.Deferred(),
+//                es = nts.uk.sessionStorage.getItem("nts.uk.session.EMPLOYEE_SETTING");
+//            if (es.isPresent()) {
+//                dfd.resolve(JSON.parse(es.get()));
+//            } else {
+//                request.ajax("com", "/bs/employee/setting/code/find").done(constraints => {
+//                    nts.uk.sessionStorage.setItemAsJson("nts.uk.session.EMPLOYEE_SETTING", constraints);
+//                    dfd.resolve(constraints);
+//                });
+//            }
+//
+//            return dfd.promise();
+//        };
         
         let loadEmployeeCodeConstraints = function() {
             let self = this,
                 dfd = $.Deferred();
         
-            getEmployeeSetting().done(res => {
-//                let res = __viewContext.empCodeSets;
+//            getEmployeeSetting().done(res => {
+                let res = __viewContext.empCodeSets;
                 let formatOption: any = {
                     autofill: true
                 };
@@ -197,9 +197,9 @@ module nts.uk.ui {
                 }
         
                 dfd.resolve();
-            }).fail(res => {
-                dfd.reject();
-            });
+//            }).fail(res => {
+//                dfd.reject();
+//            });
         
             return dfd.promise();
         };

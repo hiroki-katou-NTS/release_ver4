@@ -62,8 +62,8 @@ public class ViewContext extends UIComponentBase {
 		writeProgramInfo(requestedPath, queryString, rw, applicationContextPath);
 		rw.write(",");
 		writeLoginPersonInfo(rw, menuAdapter);
-//		rw.write(",");
-//		writeEmpCodeSetting(rw);
+		rw.write(",");
+		writeEmpCodeSetting(rw);
 		rw.write(",");
 		writeProgram(rw, request, menuAdapter);
 		
