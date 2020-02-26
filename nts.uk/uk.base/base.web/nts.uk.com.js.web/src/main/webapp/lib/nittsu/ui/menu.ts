@@ -118,12 +118,12 @@ module nts.uk.ui.menu {
         nts.uk.request.ajax(constants.APP_ID, constants.Companies).done(function(companies: any) {
             if (!companies || companies.length === 0) return;
             let $companyName = $("<span/>").attr("id", "company-name");
-            nts.uk.request.ajax(constants.APP_ID, constants.Company).done(function(companyId: any) {
+//            nts.uk.request.ajax(constants.APP_ID, constants.Company).done(function(companyId: any) {
                 let comp = _.find(companies, function(c) {
-                    return c.companyId === companyId;
+                    return c.companyId === __viewContext.user.companyId;
                 });
                 if (comp) $companyName.text(comp.companyName).appendTo($company);
-            });
+//            });
             let $companySelect = $("<div/>").addClass("company-select cf");
             $companySelect.appendTo($company);
             $("<div/>").addClass("ui-icon ui-icon-caret-1-s").appendTo($companySelect);
@@ -149,18 +149,18 @@ module nts.uk.ui.menu {
                 $companyList.fadeOut(100);
             });
             
-            nts.uk.request.ajax(constants.APP_ID, constants.UserName).done(function(userName: any) {
+//            nts.uk.request.ajax(constants.APP_ID, constants.UserName).done(function(userName: any) {
                 let $userImage = $("<div/>").attr("id", "user-image").addClass("ui-icon ui-icon-person").appendTo($user);
                 $userImage.css("margin-right", "6px").on(constants.CLICK, function() {
                     // TODO: Jump to personal profile.
                 });
-                $userName = $("<span/>").attr("id", "user-name").text(userName).appendTo($user);
+                $userName = $("<span/>").attr("id", "user-name").text(__viewContext.user.name).appendTo($user);
                 
-                nts.uk.request.ajax(constants.APP_ID, constants.ShowManual).done(function(show: any) {
+//                nts.uk.request.ajax(constants.APP_ID, constants.ShowManual).done(function(show: any) {
                     let $userSettings = $("<div/>").addClass("user-settings cf").appendTo($user);
                     $("<div class='ui-icon ui-icon-caret-1-s'/>").appendTo($userSettings);
                     let userOptions;
-                    if (show) userOptions = [ /*new MenuItem("個人情報の設定"),*/ new MenuItem("マニュアル"), new MenuItem("ログアウト") ];
+                    if (__viewContext.user.role.showManual) userOptions = [ /*new MenuItem("個人情報の設定"),*/ new MenuItem("マニュアル"), new MenuItem("ログアウト") ];
                     else userOptions = [ /*new MenuItem("個人情報の設定"),*/ new MenuItem("ログアウト") ];
                     let $userOptions = $("<ul class='menu-items user-options'/>").appendTo($userSettings);
                     _.forEach(userOptions, function(option: any, i: number) {
@@ -213,8 +213,8 @@ module nts.uk.ui.menu {
                             $userOptions.fadeOut(100);
                         });
                     });
-                });
-            });
+//                });
+//            });
         });
     }
     
@@ -222,7 +222,8 @@ module nts.uk.ui.menu {
      * Get program.
      */
     function getProgram() {
-        nts.uk.request.ajax(constants.APP_ID, constants.PG).done(function(pg: any) {
+//        nts.uk.request.ajax(constants.APP_ID, constants.PG).done(function(pg: any) {
+            let pg = __viewContext.menuPrograms;
             let programName = "";
             let queryString = __viewContext.program.queryString;
             if (queryString) {
@@ -266,7 +267,7 @@ module nts.uk.ui.menu {
             $tglBtn.on(constants.CLICK, function() {
                 // TODO
             });
-        });
+//        });
     }
     
     /**
@@ -417,13 +418,13 @@ module nts.uk.ui.menu {
         export let MENU = "UK-Menu";
         export let CLICK = "click";
         export let MenuDataPath = "/sys/portal/webmenu/finddetails";
-        export let Company = "/sys/portal/webmenu/currentCompany";
+//        export let Company = "/sys/portal/webmenu/currentCompany";
         export let Companies = "sys/portal/webmenu/companies";
         export let ChangeCompany = "sys/portal/webmenu/changeCompany";
-        export let UserName = "sys/portal/webmenu/username";
-        export let ShowManual = "sys/portal/webmenu/showmanual";
+//        export let UserName = "sys/portal/webmenu/username";
+//        export let ShowManual = "sys/portal/webmenu/showmanual";
         export let Logout = "sys/portal/webmenu/logout";
-        export let PG = "sys/portal/webmenu/program";
+//        export let PG = "sys/portal/webmenu/program";
     }
     
 }

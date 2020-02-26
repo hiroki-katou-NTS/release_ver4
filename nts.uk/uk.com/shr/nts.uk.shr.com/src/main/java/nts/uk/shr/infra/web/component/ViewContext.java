@@ -13,15 +13,19 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.val;
 import nts.arc.system.ServerSystemProperties;
 import nts.uk.shr.com.context.AppContexts;
+import nts.uk.shr.com.context.AppContextsConfig;
 import nts.uk.shr.com.context.LoginUserContext;
 import nts.uk.shr.com.context.loginuser.SelectedLanguage;
 import nts.uk.shr.com.context.loginuser.role.LoginUserRoles;
 import nts.uk.shr.com.employee.setting.EmployeeCodeSettingAdapter;
 import nts.uk.shr.com.i18n.TextResource;
+import nts.uk.shr.com.menu.adapter.ShareMenuAdapter;
 import nts.uk.shr.com.program.ProgramsManager;
 import nts.uk.shr.com.program.WebAppId;
 import nts.uk.shr.infra.i18n.resource.web.webapi.I18NResourcesWebService;
 import nts.uk.shr.infra.web.component.env.ViewContextEnvWriter;
+import nts.uk.shr.infra.web.util.FilterConst;
+import nts.uk.shr.infra.web.util.FilterHelper;
 
 @FacesComponent(tagName = "viewcontext", createTag = true)
 public class ViewContext extends UIComponentBase {
@@ -53,11 +57,15 @@ public class ViewContext extends UIComponentBase {
 		writeRootPath(requestedPath, rw);
 		rw.write(",");
 
+		ShareMenuAdapter menuAdapter = CDI.current().select(ShareMenuAdapter.class).get();
+		
 		writeProgramInfo(requestedPath, queryString, rw, applicationContextPath);
 		rw.write(",");
-		writeLoginPersonInfo(rw);
+		writeLoginPersonInfo(rw, menuAdapter);
 		rw.write(",");
 		writeEmpCodeSetting(rw);
+		rw.write(",");
+		writeProgram(rw, request, menuAdapter);
 		
 		rw.write("};");
 		rw.write("__viewContext.primitiveValueConstraints = __viewContext.primitiveValueConstraints || {};");
@@ -97,22 +105,46 @@ public class ViewContext extends UIComponentBase {
 	
 	private void writeEmpCodeSetting (ResponseWriter rw) throws IOException {
 		EmployeeCodeSettingAdapter empCodeSetting = CDI.current().select(EmployeeCodeSettingAdapter.class).get();
+
+		StringBuilder builder = new StringBuilder();
 		
 		val settings = empCodeSetting.find();
 		if (settings.isPresent()) {
-			StringBuilder builder = new StringBuilder();
 			
 			builder.append("ceMethodAttr: '" + settings.get().getCeMethodAttr() + "', ");
 			builder.append("numberOfDigits: '" + settings.get().getNumberOfDigits() + "'");
 			
-			rw.write("empCodeSets: {" + builder.toString() + "}");
+			
 		}
+		rw.write("empCodeSets: {" + builder.toString() + "}");
 	}
 	
-	private void writeLoginPersonInfo (ResponseWriter rw) throws IOException {
+	private void writeProgram (ResponseWriter rw, HttpServletRequest request, ShareMenuAdapter menuAdapter) throws IOException {
+		//Pass programId
+		StringBuilder builder = new StringBuilder();
+		String pg = request.getRequestURI();
+		FilterHelper.detectProgram(pg).ifPresent(id -> {
+			val programs = menuAdapter.getProgramName(id, AppContexts.user().companyId());
+			if (!programs.isEmpty()) {
+				
+				programs.stream().forEach(p -> {
+					builder.append("{");
+					builder.append("name: '" + p.getName() + "', ");
+					builder.append("param: '" + p.getParam() + "'");
+					builder.append("},");
+				});
+				
+			}	
+		});
+		
+		rw.write("menuPrograms: [" + builder.toString() + "]");
+	}
+	
+	private void writeLoginPersonInfo (ResponseWriter rw, ShareMenuAdapter menuAdapter) throws IOException {
 		LoginUserContext userInfo = AppContexts.user();
 		StringBuilder builder = new StringBuilder();
 //		if(userInfo.hasLoggedIn()){
+			builder.append("name: '" + menuAdapter.userName() + "', ");
 			builder.append("contractCode: '" + userInfo.contractCode() + "', ");
 			builder.append("companyId: '" + userInfo.companyId() + "', ");
 			builder.append("companyCode: '" + userInfo.companyCode() + "', ");
@@ -120,7 +152,7 @@ public class ViewContext extends UIComponentBase {
 			builder.append("employeeId: '" + userInfo.employeeId() + "', ");
 			builder.append("employeeCode: '" + userInfo.employeeCode() + "', ");
 			writeSelectedLanguage(userInfo.language(), builder);
-			writeRole(userInfo.roles(), builder);
+			writeRole(userInfo.roles(), builder, menuAdapter);
 //		}
 		
 		rw.write("user: {" + builder.toString() + "}");
@@ -135,10 +167,11 @@ public class ViewContext extends UIComponentBase {
 		builder.append(" }, ");
 	}
 	
-	private void writeRole (LoginUserRoles role, StringBuilder builder) {
+	private void writeRole (LoginUserRoles role, StringBuilder builder, ShareMenuAdapter menuAdapter) {
 		builder.append("role: { ");
+		builder.append("showManual: '" + menuAdapter.showManual() + "'");
 		if(role != null){
-			builder.append("attendance: '" + role.forAttendance() + "', ");
+			builder.append(", attendance: '" + role.forAttendance() + "', ");
 			builder.append("companyAdmin: '" + role.forCompanyAdmin() + "', ");
 			builder.append("groupCompanyAdmin: '" + role.forGroupCompaniesAdmin() + "', ");
 			builder.append("officeHelper: '" + role.forOfficeHelper() + "', ");

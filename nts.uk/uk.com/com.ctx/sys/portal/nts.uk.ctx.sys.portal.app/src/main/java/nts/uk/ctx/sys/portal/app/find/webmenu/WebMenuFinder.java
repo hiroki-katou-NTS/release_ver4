@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.enums.EnumConstant;
 import nts.arc.i18n.I18NResources;
-import nts.arc.scoped.request.RequestContextProvider;
 import nts.uk.ctx.sys.portal.app.find.roleset.RoleSetPortalFinder;
 import nts.uk.ctx.sys.portal.app.find.standardmenu.StandardMenuDto;
 import nts.uk.ctx.sys.portal.app.find.webmenu.detail.MenuBarDetailDto;
@@ -37,8 +36,9 @@ import nts.uk.ctx.sys.portal.dom.webmenu.webmenulinking.RoleByRoleTiesRepository
 import nts.uk.ctx.sys.portal.dom.webmenu.webmenulinking.RoleSetLinkWebMenu;
 import nts.uk.ctx.sys.portal.dom.webmenu.webmenulinking.RoleSetLinkWebMenuRepository;
 import nts.uk.shr.com.context.AppContexts;
-import nts.uk.shr.com.context.AppContextsConfig;
 import nts.uk.shr.com.context.LoginUserContext;
+import nts.uk.shr.com.menu.adapter.ProgramNameDto;
+import nts.uk.shr.com.menu.adapter.ShareMenuAdapter;
 import nts.uk.shr.com.program.Program;
 import nts.uk.shr.com.program.ProgramsManager;
 import nts.uk.shr.com.program.WebAppId;
@@ -69,6 +69,9 @@ public class WebMenuFinder {
 	
 	@Inject
 	private RoleSetPortalFinder roleSetFinder;
+	
+	@Inject
+	private ShareMenuAdapter menuAdapter;
 
 	/**
 	 * Find a web menu by code
@@ -303,19 +306,10 @@ public class WebMenuFinder {
 	 * Get program string.
 	 * @return program string
 	 */
-	public List<ProgramNameDto> getProgram() {
-		String companyId = AppContexts.user().companyId();
-		String pgId = RequestContextProvider.get().get(AppContextsConfig.KEY_PROGRAM_ID);
-		if (pgId == null) return new ArrayList<>();
-		String programId = pgId, screenId = null;
-		if (pgId.length() > 6) {
-			 programId = pgId.substring(0, 6);
-			 screenId = pgId.substring(6);
-		}
-		return standardMenuRepository.getProgram(companyId, programId, screenId).stream()
-				.map(m -> new ProgramNameDto(m.getQueryString(), pgId + " " + m.getDisplayName()))
-				.collect(Collectors.toList());
-	}
+//	public List<ProgramNameDto> getProgram() {
+//		
+//		return menuAdapter.getProgramName();
+//	}
 	
 	
 	/**
