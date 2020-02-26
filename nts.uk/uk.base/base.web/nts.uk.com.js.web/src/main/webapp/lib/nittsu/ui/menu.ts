@@ -2,6 +2,9 @@ module nts.uk.ui.menu {
     
     const DATA_TITLEITEM_PGID = "pgid";
     const DATA_TITLEITEM_PGNAME = "pgname";
+    const MENU_SET_KEY = "nts.uk.session.MENU_SET";
+    const COMPANY_KEY = "nts.uk.session.COMPANY";
+    const PROGRAM_KEY = "nts.uk.session.PROGRAM";
     
     /** Showing item */
     let showingItem;
@@ -52,7 +55,7 @@ module nts.uk.ui.menu {
         });
         
         displayUserInfo();
-        nts.uk.request.ajax(constants.APP_ID, constants.MenuDataPath).done(function(menuSet) {
+        getMenuSet().done(function(menuSet) {
             let $menuNav = $("<ul/>").attr("id", "menu-nav").appendTo($("#nav-area"));
             if (!menuSet || menuSet.length === 0) return;
             createMenuSelect($menuNav, menuSet);
@@ -70,6 +73,24 @@ module nts.uk.ui.menu {
             }
         });
         getProgram();
+    }
+    
+    /**
+     * Get menu set.
+     */
+    function getMenuSet() {
+        let dfd = $.Deferred();
+        let menuSetOpt = nts.uk.sessionStorage.getItem(MENU_SET_KEY);
+        if (menuSetOpt.isPresent()) {
+            dfd.resolve(JSON.parse(menuSetOpt.get()));
+        } else {
+            nts.uk.request.ajax(constants.APP_ID, constants.MenuDataPath).done(menuSet => {
+                nts.uk.sessionStorage.setItemAsJson(MENU_SET_KEY, menuSet);
+                dfd.resolve(menuSet);
+            });
+        }
+
+        return dfd.promise();
     }
     
     /**
@@ -100,6 +121,24 @@ module nts.uk.ui.menu {
         init();
     }
     
+     /**
+     * Get company.
+     */
+    function getCompany() {
+        let dfd = $.Deferred();
+        let companyOpt = nts.uk.sessionStorage.getItem(COMPANY_KEY);
+        if (companyOpt.isPresent()) {
+            dfd.resolve(JSON.parse(companyOpt.get()));
+        } else {
+            nts.uk.request.ajax(constants.APP_ID, constants.Companies).done(companies => {
+                nts.uk.sessionStorage.setItemAsJson(COMPANY_KEY, companies);
+                dfd.resolve(companies);        
+            });
+        }
+
+        return dfd.promise();
+    }
+    
     /**
      * Display user info.
      */
@@ -115,7 +154,7 @@ module nts.uk.ui.menu {
             }
         };
         
-        nts.uk.request.ajax(constants.APP_ID, constants.Companies).done(function(companies: any) {
+        getCompany().done(function(companies: any) {
             if (!companies || companies.length === 0) return;
             let $companyName = $("<span/>").attr("id", "company-name");
 //            nts.uk.request.ajax(constants.APP_ID, constants.Company).done(function(companyId: any) {
@@ -189,6 +228,9 @@ module nts.uk.ui.menu {
                                     // TODO: Jump to login screen and request logout to server
                                     nts.uk.request.ajax(constants.APP_ID, constants.Logout).done(function() {
                                         nts.uk.cookie.remove("nts.uk.sescon", {path: "/"});
+                                        nts.uk.sessionStorage.removeItem(MENU_SET_KEY);
+                                        nts.uk.sessionStorage.removeItem(PROGRAM_KEY);
+                                        nts.uk.sessionStorage.removeItem(COMPANY_KEY);
                                         nts.uk.request.login.jumpToUsedLoginPage();
                                     });
                                 });
@@ -268,7 +310,7 @@ module nts.uk.ui.menu {
                 // TODO
             });
 //        });
-    }
+    }    
     
     /**
      * Init.
