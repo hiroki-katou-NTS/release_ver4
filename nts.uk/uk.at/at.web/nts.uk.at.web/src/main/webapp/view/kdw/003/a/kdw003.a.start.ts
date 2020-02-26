@@ -21,6 +21,8 @@ module nts.uk.at.view.kdw003.a {
                 screenModel.processFlex(data.data, true);
             }
             
+            screenModel.loadKcp009();
+            
         });
     });
 }

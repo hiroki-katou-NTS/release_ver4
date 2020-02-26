@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.persistence.Query;
 
 import org.apache.logging.log4j.util.Strings;
 
@@ -420,23 +422,45 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	public List<AppRootInstance> findByApproverPeriod(String approverID, DatePeriod period,
 			RecordRootType rootType) {
 		String companyID =  AppContexts.user().companyId();
-		String query = FIND_BY_APPROVER_PERIOD;
-		query = query.replaceAll("companyID", companyID);
-		query = query.replaceAll("approverID", approverID);
-		query = query.replaceAll("startDate", period.start().toString("yyyy-MM-dd"));
-		query = query.replaceAll("endDate", period.end().toString("yyyy-MM-dd"));
-		query = query.replaceAll("rootType", String.valueOf(rootType.value));
-		try (PreparedStatement pstatement = this.connection().prepareStatement(query)) {
-			ResultSet rs = pstatement.executeQuery();
-			List<AppRootInstance> listResult = toDomain(createFullJoinAppRootInstance(rs));
-			if(!CollectionUtil.isEmpty(listResult)){
-				return listResult;
-			} else {
+		String query = BASIC_SELECT 
+				+ " WHERE appApprover.APPROVER_CHILD_ID = ?" 
+				+ " AND appRoot.START_DATE <= ?" 
+				+ " AND appRoot.END_DATE >= ?"
+				+ " AND appRoot.CID = ?"
+				+ " AND appRoot.ROOT_TYPE = ?";
+				
+			Query pstatement = this.getEntityManager().createNativeQuery(query);
+			pstatement.setParameter(1, approverID);
+			pstatement.setParameter(2, period.start().toString("yyyy-MM-dd"));
+			pstatement.setParameter(3, period.end().toString("yyyy-MM-dd"));
+			pstatement.setParameter(4, companyID);
+			pstatement.setParameter(5, rootType.value);
+			
+		
+			@SuppressWarnings("unchecked")
+			List<Object[]> rs = pstatement.getResultList();
+			List<AppRootInstance> listResult = toDomain(createFullJoinAppRootInstanceResponse(rs));
+			
+			if (CollectionUtil.isEmpty(listResult)) {
 				return Collections.emptyList();
 			}
-		} 
+			
+			return listResult;
 	}
 	
+	@SneakyThrows
+	private List<FullJoinAppRootInstance> createFullJoinAppRootInstanceResponse(List<Object[]> rs) {
+		List<FullJoinAppRootInstance> listFullData = new ArrayList<>();
+		listFullData.addAll(rs.stream().parallel().map(mapper ->
+			new FullJoinAppRootInstance(String.valueOf(mapper[0]), String.valueOf(mapper[1]),
+					String.valueOf(mapper[2]),
+					GeneralDate.localDate(((Timestamp)mapper[3]).toLocalDateTime().toLocalDate()),
+					GeneralDate.localDate(((Timestamp)mapper[4]).toLocalDateTime().toLocalDate()),
+					Integer.valueOf(String.valueOf(mapper[5])), Integer.valueOf(String.valueOf(mapper[6])),
+					Integer.valueOf(String.valueOf(mapper[7])), Integer.valueOf(String.valueOf(mapper[8])),
+					Integer.valueOf(String.valueOf(mapper[9])), String.valueOf(mapper[10]))).collect(Collectors.toList()));
+		return listFullData;
+	}
 	public List<AppRootInstance> findByApproverEmployeePeriod(
 			String companyId, String approverID, List<String> employeeIDs, DatePeriod period, RecordRootType rootType) {
 	

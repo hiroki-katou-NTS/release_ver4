@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.persistence.Query;
 
 import org.apache.logging.log4j.util.Strings;
 
@@ -19,6 +20,7 @@ import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.Identification;
@@ -189,13 +191,32 @@ public class JpaIdentificationRepository extends JpaRepository implements Identi
 	@Override
 	public List<Identification> findByEmployeeID(String employeeID, List<GeneralDate> dates) {
 		if (CollectionUtil.isEmpty(dates)) return Collections.emptyList();
-		List<KrcdtIdentificationStatus> entities = new ArrayList<>();
+		List<Identification> entities = new ArrayList<>();
 		CollectionUtil.split(dates, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			entities.addAll(this.queryProxy().query(GET_BY_EMPLOYEE_ID_DATE, KrcdtIdentificationStatus.class)
-					.setParameter("companyID", AppContexts.user().companyId()).setParameter("employeeId", employeeID)
-					.setParameter("dates", subList).getList());
+			
+			String sql = "SELECT CID, SID, PROCESSING_YMD, INDENTIFICATION_YMD from KRCDT_CONFIRMATION_DAY "
+					+ " WHERE SID = ? "
+					+ " AND PROCESSING_YMD" + " in (" + NtsStatement.In.createParamsString(subList) + ")"
+					+ " AND CID = ? ";
+			
+			Query stmt = this.getEntityManager().createNativeQuery(sql);
+			stmt.setParameter(1, employeeID);
+			for (int i = 0; i < subList.size(); i++) {
+				stmt.setParameter(i + 2, subList.get(i).date());
+			}
+			stmt.setParameter(2 + subList.size(), AppContexts.user().companyId());
+			
+			@SuppressWarnings("unchecked")
+			List<Object[]> rs = stmt.getResultList();
+			entities.addAll(rs.stream().map(mapper -> 
+			new Identification(
+				 String.valueOf(mapper[0]),
+				 String.valueOf(mapper[1]),
+				 mapper[2] != null ? GeneralDate.legacyDate(new java.util.Date(((java.sql.Date) mapper[2]).getTime())) : null,
+				 mapper[3] != null ? GeneralDate.legacyDate(new java.util.Date(((java.sql.Date) mapper[3]).getTime())) : null
+				)).collect(Collectors.toList()));
 		});
-		return entities.stream().map(c -> c.toDomain()).collect(Collectors.toList());
+		return entities;
 	}
 
 	@Override

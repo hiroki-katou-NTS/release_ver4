@@ -706,8 +706,10 @@ public class JpaEmployeeDailyPerErrorRepository extends JpaRepository implements
 		if (employeeDailyPerformanceError.isEmpty()) {
 			return;
 		}
-		this.commandProxy().insertAll(employeeDailyPerformanceError.stream().map(e -> convertToEntity(e))
-				.collect(Collectors.toList()));
+//		this.commandProxy().insertAll(employeeDailyPerformanceError.stream().map(e -> convertToEntity(e))
+//				.collect(Collectors.toList()));
+		
+		insert(employeeDailyPerformanceError);
 	}
 
 }

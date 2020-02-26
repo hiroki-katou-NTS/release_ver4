@@ -217,6 +217,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         isVisibleMIGrid: KnockoutObservable<boolean> = ko.observable(false);
         isStartScreen: KnockoutObservable<boolean> = ko.observable(true);
         listAttendanceItemId: KnockoutObservableArray<any> = ko.observableArray([]);
+        itemNameMonths: KnockoutObservableArray<any> = ko.observableArray([]);
         monthYear: KnockoutObservable<string> = ko.observable(null);
 
         agreementInfomation: KnockoutObservable<AgreementInfomation> = ko.observable(new AgreementInfomation());
@@ -325,11 +326,11 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             //            self.flexShortage.subscribe((val:any) => {
             //            });
             self.flexShortage.valueHasMutated();
-            self.isVisibleMIGrid.subscribe((value) => {
-                if (value) {
-                    self.getNameMonthly();
-                }
-            });
+//            self.isVisibleMIGrid.subscribe((value) => {
+//                if (value) {
+//                    self.getNameMonthly();
+//                }
+//            });
 
             $(".grid-container").attr('style', 'height: ' + (window.innerHeight - 250) + 'px !IMPORTANT');
 
@@ -651,6 +652,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
         processMapData(data) {
             var self = this;
             let startTime: number = performance.now();
+            self.loadMonthGrid(data);
             console.log(data);
             self.loadFirst = false;
             self.closureId = data.closureId;
@@ -721,7 +723,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             self.showTighProcess(data.showTighProcess);
             self.indentityMonth(data.indentityMonthResult);
             if (!self.hasEmployee || data.errorInfomation == DCErrorInfomation.APPROVAL_NOT_EMP) return;
-            self.loadKcp009();
+            //self.loadKcp009();
             if (!_.isEmpty(data.errors) || data.errorInfomation != 0) return;
             self.extractionData();
             console.log("khoi tao Object: " + (performance.now() - startTime));
@@ -743,6 +745,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                      return ;
                 });
             }
+            startTime = performance.now();
             self.loadGrid();
             console.log("thoi gian load grid: " + (performance.now() - startTime));
             //  self.extraction();
@@ -882,24 +885,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             if (monthResult != null) {
                 // set agreementInfo
                 self.agreementInfomation().mapDataAgreement(monthResult.agreementInfo);
-                let listFormatDaily: any[] = monthResult.formatDaily;
-                self.listAttendanceItemId((monthResult.results != null && monthResult.results.length != 0) ? monthResult.results[0].items : []);
-
-                _.each(listFormatDaily, (item) => {
-                    let formatDailyItem = _.find(self.listAttendanceItemId(), { 'itemId': item.attendanceItemId });
-                    if (formatDailyItem) {
-                        formatDailyItem['columnWidth'] = (!_.isNil(item) && !!item.columnWidth) ? item.columnWidth : 100;
-                        formatDailyItem['order'] = item.order;
-                    }
-                });
-                let arr: any[] = _.orderBy(self.listAttendanceItemId(), ['order'], ['asc']);
-                self.listAttendanceItemId(arr);
-                self.monthYear(nts.uk.time.formatYearMonth(data.monthResult.month));
-                // reload MiGrid
-                // delete localStorage miGrid
-                localStorage.removeItem(window.location.href + '/miGrid');
-                self.isVisibleMIGrid(data.monthResult.hasItem);
-                self.isVisibleMIGrid.valueHasMutated();
+                 self.loadMonthGrid(data);
                 //
             } else {
                 self.agreementInfomation().mapDataAgreement({ showAgreement: false });
@@ -943,6 +929,36 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             return dfd.promise();
         }
 
+        loadMonthGrid(data: any) {
+            let self = this;
+            let monthResult = data.monthResult;
+            if (monthResult != null) {
+                let listFormatDaily: any[] = monthResult.formatDaily;
+                self.listAttendanceItemId((monthResult.results != null && monthResult.results.length != 0) ? monthResult.results[0].items : []);
+
+                _.each(listFormatDaily, (item) => {
+                    let formatDailyItem = _.find(self.listAttendanceItemId(), { 'itemId': item.attendanceItemId });
+                    if (formatDailyItem) {
+                        formatDailyItem['columnWidth'] = (!_.isNil(item) && !!item.columnWidth) ? item.columnWidth : 100;
+                        formatDailyItem['order'] = item.order;
+                    }
+                });
+                let arr: any[] = _.orderBy(self.listAttendanceItemId(), ['order'], ['asc']);
+                self.listAttendanceItemId(arr);
+                self.monthYear(nts.uk.time.formatYearMonth(data.monthResult.month));
+                // reload MiGrid
+                // delete localStorage miGrid
+                localStorage.removeItem(window.location.href + '/miGrid');
+                self.itemNameMonths(data.monthResult.itemNameMonths);
+                self.isVisibleMIGrid(data.monthResult.hasItem);
+              if (data.monthResult.hasItem) {
+                    self.getNameMonthly();
+                }
+                //self.isVisibleMIGrid.valueHasMutated();
+                //
+            }
+        }
+        
         itemMonthLayout(data: any) {
             let self = this;
             self.itemMonth = [];
@@ -2010,10 +2026,9 @@ module nts.uk.at.view.kdw003.a.viewmodel {
             }
         }
 
-        getNameMonthly(): JQueryPromise<any> {
-            let dfd = $.Deferred(), self = this, arrItemId: string[] = [];
+        getNameMonthly(){
+            let self = this, arrItemId: string[] = [];
             if (self.listAttendanceItemId().length <= 0) {
-                dfd.resolve();
                 return;
             }
 
@@ -2021,19 +2036,14 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 arrItemId.push(attendanceItemId.itemId);
             });
 
-            service.getNameMonthlyAttItem(arrItemId).done(data => {
+            if (self.itemNameMonths()) {
                 if (!self.isStartScreen()) {
                     // neu dang khoi dong man hinh thi k dc destroy
                     $('#miGrid').igGrid("destroy");
                     self.isStartScreen(false);
                 }
-                self.loadMIGrid(data);
-                dfd.resolve();
-            }).fail((data) => {
-                nts.uk.ui.dialog.alert(data.message);   
-                dfd.reject();
-            });
-            return dfd.promise();
+                self.loadMIGrid(self.itemNameMonths());
+            }
         }
 
         checkIsColumn(dataCell: any, key: any): boolean {

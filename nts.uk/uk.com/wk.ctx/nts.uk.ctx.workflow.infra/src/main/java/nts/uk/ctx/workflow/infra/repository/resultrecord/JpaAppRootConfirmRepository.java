@@ -25,6 +25,7 @@ import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.database.DatabaseProduct;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
@@ -579,24 +580,26 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		
 		CollectionUtil.split(employeeIDLst, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, employeeIDs -> {
 			
-			String query = FIND_BY_EMP_LST_MONTH;
-			query = query.replaceAll("companyID", companyID);
-			query = query.replaceAll("rootType", String.valueOf(rootType.value));
-			String empList = "(";
-			for (int i = 0; i < employeeIDs.size(); i++) {
-				empList += "'" + employeeIDs.get(i) + "'";
-				if(i < employeeIDs.size()-1){
-					empList += ",";
-				}
-			}
-			empList+=")";
-			query = query.replaceAll("employeeID", empList);
-			query = query.replaceAll("yearMonth", yearMonth.v().toString());
-			query = query.replaceAll("closureID", closureID.toString());
-			query = query.replaceAll("closureDay", closureDate.getClosureDay().v().toString());
-			query = query.replaceAll("lastDayFlg", closureDate.getLastDayOfMonth() ? "1" : "0");
+			String query = BASIC_SELECT +
+					" WHERE appRoot.EMPLOYEE_ID" + " in (" + NtsStatement.In.createParamsString(employeeIDs) + ")" +
+					" AND appRoot.YEARMONTH = ?" +
+					" AND appRoot.CLOSURE_ID = ?" +
+					" AND appRoot.CLOSURE_DAY = ?" +
+					" AND appRoot.LAST_DAY_FLG = ?" +
+					" AND appRoot.CID = ?" +
+					" AND appRoot.ROOT_TYPE = ?";
 			
 			try (PreparedStatement statement = this.connection().prepareStatement(query)) {
+				for (int i = 0; i < employeeIDs.size(); i++) {
+					statement.setString(1 + i, employeeIDs.get(i));
+				}
+				statement.setInt(1 + employeeIDs.size(), yearMonth.v());
+				statement.setInt(2 + employeeIDs.size(), closureID);
+				statement.setInt(3 + employeeIDs.size(), closureDate.getClosureDay().v());
+				statement.setInt(4 + employeeIDs.size(), closureDate.getLastDayOfMonth() ? 1 : 0);
+				statement.setString(5 + employeeIDs.size(), companyID);
+				statement.setInt(6 + employeeIDs.size(), rootType.value);
+				
 				results.addAll(toDomain(new NtsResultSet(statement.executeQuery()).getList(rs -> createFullJoinAppRootConfirm(rs))));
 				
 			} catch (SQLException e) {
