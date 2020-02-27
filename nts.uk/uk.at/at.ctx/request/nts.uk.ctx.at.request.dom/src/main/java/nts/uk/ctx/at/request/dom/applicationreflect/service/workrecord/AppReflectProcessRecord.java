@@ -18,7 +18,7 @@ public interface AppReflectProcessRecord {
 	 * @param info
 	 * @return True: 反映する、False:　反映しない
 	 */
-	public ScheAndRecordIsReflect appReflectProcessRecord(Application_New appInfor, ExecutionTypeExImport executionType, GeneralDate appDate);
+    public ScheAndRecordIsReflect appReflectProcessRecord(Application_New appInfor, ExecutionTypeExImport executionType, GeneralDate appDate,Boolean isCalWhenLock);
 	/**
 	 * 事前申請の処理(Xử lý xin trước) 　直行直帰
 	 * 事後申請の処理

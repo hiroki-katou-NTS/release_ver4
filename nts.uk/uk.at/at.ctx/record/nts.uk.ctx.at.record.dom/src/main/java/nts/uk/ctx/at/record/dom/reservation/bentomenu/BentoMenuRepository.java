@@ -3,7 +3,7 @@ package nts.uk.ctx.at.record.dom.reservation.bentomenu;
 import java.util.List;
 
 import nts.arc.time.GeneralDate;
-import nts.arc.time.period.DatePeriod;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 public interface BentoMenuRepository {
 	

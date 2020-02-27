@@ -69,4 +69,6 @@ public class AddEmpCalSumAndTargetCommand {
     /** ケース別実行実施内容ID */
     private String caseSpecExeContentID;
     
+    private Integer isCalWhenLock;
+    
 }

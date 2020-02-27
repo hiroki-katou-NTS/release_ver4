@@ -18,7 +18,7 @@ public interface AppReflectProcessRecordPub {
 	 * @return True 反映する、
 	 * False：反映しない
 	 */
-	public ScheAndRecordIsReflectPub appReflectProcess(AppCommonPara para, ExecutionType reflectSetting);
+    public ScheAndRecordIsReflectPub appReflectProcess(AppCommonPara para, ExecutionType reflectSetting,Boolean isCalWhenLock);
 	/**
 	 * 事前申請の処理(Xử lý xin trước) 　直行直帰
 	 * @param para
