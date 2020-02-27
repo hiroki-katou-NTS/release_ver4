@@ -24,4 +24,6 @@ public interface ExecutionLogRequestImport {
 	 */
 	void updateLogInfo(String employeeID, String empCalAndSumExecLogId, int executionContent, int state);
 	void updateLogInfo(String empCalAndSumExecLogId, int executionContent, int state);
+    
+    Boolean isCalWhenLock(String empCalAndSumExecLogId,int executionContent);
 }

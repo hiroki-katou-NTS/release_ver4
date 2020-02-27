@@ -50,7 +50,7 @@ module nts.uk.at.view.kdw001 {
             lstEmployeeID: Array<string>;
             periodStartDate: string;
             periodEndDate: string;
-             // 当月
+             // 蠖捺怦
             processingMonth: string;
             // Screen B
             dailyCreation: boolean;
@@ -76,7 +76,8 @@ module nts.uk.at.view.kdw001 {
             //
             startMonthResult : string;
             endMonthResult : string;
-
+            //
+            isCalWhenLock : number =null;
             constructor() {
 
             }

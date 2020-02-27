@@ -18,7 +18,6 @@ import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
-import nts.arc.time.period.DatePeriod;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.reservation.bento.BentoReservation;
 import nts.uk.ctx.at.record.dom.reservation.bento.BentoReservationRepository;
@@ -28,6 +27,7 @@ import nts.uk.ctx.at.record.infra.entity.reservation.bento.KrcdtReservation;
 import nts.uk.ctx.at.record.infra.entity.reservation.bento.KrcdtReservationDetail;
 import nts.uk.ctx.at.record.infra.entity.reservation.bento.KrcdtReservationDetailPK;
 import nts.uk.ctx.at.record.infra.entity.reservation.bento.KrcdtReservationPK;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)

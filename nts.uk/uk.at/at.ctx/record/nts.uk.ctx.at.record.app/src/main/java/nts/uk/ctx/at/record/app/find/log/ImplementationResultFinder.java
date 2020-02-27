@@ -15,8 +15,15 @@ import nts.uk.ctx.at.record.app.find.log.dto.PersonInfoErrMessageLogResultDto;
 import nts.uk.ctx.at.record.app.find.log.dto.ScreenImplementationResultDto;
 import nts.uk.ctx.at.record.dom.adapter.person.EmpBasicInfoImport;
 import nts.uk.ctx.at.record.dom.adapter.person.PersonInfoAdapter;
+import nts.uk.ctx.at.record.dom.adapter.workrule.closure.ClosureAdapter;
+import nts.uk.ctx.at.record.dom.adapter.workrule.closure.PresentClosingPeriodImport;
+import nts.uk.ctx.at.record.dom.workrecord.actuallock.ActualLock;
+import nts.uk.ctx.at.record.dom.workrecord.actuallock.ActualLockRepository;
+import nts.uk.ctx.at.record.dom.workrecord.actuallock.LockStatus;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfo;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfoRepository;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
+import nts.uk.shr.com.context.AppContexts;
 
 /**
  * 
@@ -31,6 +38,16 @@ public class ImplementationResultFinder {
 	
 	@Inject
 	private ErrMessageInfoRepository errMessageInfoRepository;
+	
+    @Inject
+    private ActualLockRepository actualLockRepository;
+    
+    @Inject
+    private ClosureRepository closureRepository;
+    
+    @Inject
+    private ClosureAdapter closureAdapter;
+    
 	
 	public PersonInfoErrMessageLogResultDto getScreenImplementationResult(ScreenImplementationResultDto screenImplementationResultDto) {
 		
@@ -118,4 +135,14 @@ public class ImplementationResultFinder {
 		return personInfoErrMessageLogResultDto;
 		
 	}
+	
+
+    public OutputStartScreenKdw001D getDataClosure(int closureId) {
+        String companyId = AppContexts.user().companyId();
+        ActualLock opt = actualLockRepository.findById(companyId, closureId).get();
+        PresentClosingPeriodImport presentClosingPeriod = closureAdapter.findByClosureId(companyId, closureId).get();
+        return new OutputStartScreenKdw001D(closureId, opt.getDailyLockState() == LockStatus.LOCK ? true : false,
+                opt.getMonthlyLockState() == LockStatus.LOCK ? true : false, presentClosingPeriod.getClosureStartDate(),
+                presentClosingPeriod.getClosureEndDate());
+    }
 }

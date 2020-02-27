@@ -46,6 +46,13 @@
 		<div id="label110">
 			<div class="label" data-bind= "text: numberEmployee"></div>
 		</div><br></br>
+        <com:ko-if bind="$data.isDisplayCheckbox() == true">
+            <div  id="label120" class="label warning" >
+                <div >#{i18n.getText('KDW001_120')}</div>
+                <div id="checkabc"
+                                data-bind="ntsCheckBox: {checked : $data.isCheckbox }">#{i18n.getText('KDW001_119')}</div>
+            </div>
+        </com:ko-if>
 		
 		<div id="button112Area">
 			<button id="button112" data-bind="click: opendScreenBorJ">#{i18n.getText('KDW001_93')}</button>

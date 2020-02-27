@@ -98,8 +98,8 @@ public class DailyCalculationServiceImpl implements DailyCalculationService {
 			}
 		};
 		
-		List<Boolean> happenedLockError = this.dailyCalculationEmployeeService.calculate(employeeIds, datePeriod, counter, reCalcAtr,empCalAndSumExecLogID);
 		/** end 並列処理、PARALLELSTREAM */
+        List<Boolean> happenedLockError = this.dailyCalculationEmployeeService.calculate(employeeIds, datePeriod, counter, reCalcAtr,empCalAndSumExecLogID,executionLog.get().getIsCalWhenLock());
 //		
 		// 中断処理　（中断依頼が出されているかチェックする）
 		if (asyncContext.hasBeenRequestedToCancel()) {

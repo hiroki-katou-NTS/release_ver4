@@ -51,6 +51,11 @@ public class ExecutionLogRequestImportImpl implements ExecutionLogRequestImport 
 	public void updateLogInfo(String empCalAndSumExecLogId, int executionContent, int state) {
 		execuLog.updateLogInfo(empCalAndSumExecLogId, executionContent, state);
 	}
+	
+    @Override
+    public Boolean isCalWhenLock(String empCalAndSumExecLogId,int executionContent) {
+        return execuLog.isCalWhenLock(empCalAndSumExecLogId, executionContent);
+    }
 
 	
 }

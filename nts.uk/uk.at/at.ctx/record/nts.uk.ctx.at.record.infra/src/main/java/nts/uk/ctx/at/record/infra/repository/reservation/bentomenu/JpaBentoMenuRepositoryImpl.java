@@ -20,7 +20,6 @@ import lombok.SneakyThrows;
 import nts.arc.error.BusinessException;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
-import nts.arc.time.period.DatePeriod;
 import nts.uk.ctx.at.record.dom.reservation.bento.BentoReservationTime;
 import nts.uk.ctx.at.record.dom.reservation.bento.rules.BentoReservationTimeName;
 import nts.uk.ctx.at.record.dom.reservation.bentomenu.Bento;
@@ -31,6 +30,7 @@ import nts.uk.ctx.at.record.dom.reservation.bentomenu.BentoName;
 import nts.uk.ctx.at.record.dom.reservation.bentomenu.BentoReservationUnitName;
 import nts.uk.ctx.at.record.dom.reservation.bentomenu.closingtime.BentoReservationClosingTime;
 import nts.uk.ctx.at.record.dom.reservation.bentomenu.closingtime.ReservationClosingTime;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)

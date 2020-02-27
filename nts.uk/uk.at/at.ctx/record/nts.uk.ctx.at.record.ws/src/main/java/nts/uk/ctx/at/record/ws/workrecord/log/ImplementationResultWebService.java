@@ -5,6 +5,7 @@ package nts.uk.ctx.at.record.ws.workrecord.log;
 import javax.inject.Inject;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 import lombok.val;
@@ -22,6 +23,7 @@ import nts.uk.ctx.at.record.app.command.workrecord.log.UpdateDailyLogStateComman
 import nts.uk.ctx.at.record.app.command.workrecord.log.UpdateExecutionTimeCommand;
 import nts.uk.ctx.at.record.app.command.workrecord.log.UpdateExecutionTimeCommandHandler;
 import nts.uk.ctx.at.record.app.find.log.ImplementationResultFinder;
+import nts.uk.ctx.at.record.app.find.log.OutputStartScreenKdw001D;
 //import nts.uk.ctx.at.record.app.find.log.dto.PersonInfoErrMessageLogDto;
 import nts.uk.ctx.at.record.app.find.log.dto.PersonInfoErrMessageLogResultDto;
 import nts.uk.ctx.at.record.app.find.log.dto.ScreenImplementationResultDto;
@@ -112,5 +114,13 @@ public class ImplementationResultWebService extends WebService {
 	public JavaTypeResult<String> updateLogState(String empCalAndSumExecLogID) {
 		return new JavaTypeResult<String>(this.updateDailyLogStateCommandHandler.handle(empCalAndSumExecLogID));
 	}
+	
+    
+    @POST
+    @Path("getDataClosure/{closureId}")
+    public OutputStartScreenKdw001D getByClosureId(@PathParam("closureId") int closureId) {
+        OutputStartScreenKdw001D data = implementationResultFinder.getDataClosure(closureId);
+        return data;
+    }
 
 }
