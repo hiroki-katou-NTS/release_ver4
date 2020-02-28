@@ -372,8 +372,8 @@ module nts.uk.at.view.kmf022.m.viewmodel {
                     if ($wkpl.getDataList && $wkpl.getRowSelected) {
                         let lwps = $wkpl.getDataList(),
                             rstd = $wkpl.getRowSelected(),
-                            flwps = flat(_.cloneDeep(lwps), "childs"),
-                            wkp = _.find(flwps, wkp => wkp.workplaceId == _.head(rstd).workplaceId);
+                            flwps = flat(_.cloneDeep(lwps), "children"),
+                            wkp = _.find(flwps, wkp => wkp.id == _.head(rstd).id);
     
                         self.wkpName(wkp ? wkp.name : '');
                     }

@@ -71,12 +71,14 @@
 				<span class="title" data-bind="text: title"></span>
 				<com:ko-if bind="currentTab()==='a'">
 					<!-- A2_1 -->
-					<button style="vertical-align: super" class="proceed" data-bind="click: function(){$parent.viewmodelA.save($parent.viewmodelA);}">#{i18n.getText('KMF004_2')}</button>
+					<button style="vertical-align: super" class="proceed" data-bind="click: function(){$parent.viewmodelA.save($parent.viewmodelA);},
+											enable: $root.errors.isEmpty">#{i18n.getText('KMF004_2')}</button>
 				</com:ko-if>
 				<com:ko-if bind="currentTab()==='l'">
 					<div class="center-content-kaf022l" style="vertical-align: super">
                         <button  id="btn_001" class="button proceed separate-button fix-button"
-                                data-bind="click: function(){$parent.viewmodelL.registerEmploymentSet($parent.viewmodelL);}, enable: $parent.viewmodelL.allowRegister()">#{i18n.getText('KAF022_1')}</button>
+                                data-bind="click: function(){$parent.viewmodelL.registerEmploymentSet($parent.viewmodelL);}, 
+                                enable: $parent.viewmodelL.allowRegister() &amp;&amp; $root.errors.isEmpty()">#{i18n.getText('KAF022_1')}</button>
                         <button  id="btn_002" class="button separate-button fix-button"
                                 data-bind="click: function(){$parent.viewmodelL.copyEmploymentSet($parent.viewmodelL);},
                                 enable: $parent.viewmodelL.screenMode() == 1">#{i18n.getText('KAF022_274')}</button>
@@ -88,7 +90,8 @@
 				<com:ko-if bind="currentTab()==='m'">
 					<div class="center-content-kaf022l" style="vertical-align: super">
 						<button id="btn_001" class="button proceed separate-button fix-button"
-								data-bind="click: $vm.viewmodelM.update.bind($vm.viewmodelM), enable: $vm.viewmodelM.allowRegister()">#{i18n.getText('KAF022_1')}</button>
+								data-bind="click: $vm.viewmodelM.update.bind($vm.viewmodelM), 
+								enable: $vm.viewmodelM.allowRegister() &amp;&amp; $root.errors.isEmpty()">#{i18n.getText('KAF022_1')}</button>
 						<button id="btn_002" class="button separate-button fix-button"
 								data-bind="click: $vm.viewmodelM.openDialogCopy.bind($vm.viewmodelM), enable: !!$vm.viewmodelM.copyAble()">#{i18n.getText('KAF022_274')}</button>
 						<button id="btn_004" class="button danger separate-button fix-button"

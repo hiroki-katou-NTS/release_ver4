@@ -121,13 +121,13 @@ module nts.uk.at.view.kaf000.a.viewmodel{
                 }
                 let deadlineMsg = data.outputMessageDeadline;
                 if(!nts.uk.text.isNullOrEmpty(deadlineMsg.message)){
-                    self.reasonOutputMessFull(self.reasonOutputMess + deadlineMsg.message);    
+                    self.reasonOutputMessFull(deadlineMsg.message.replace(/\n/ig, '<br/>'));    
                 }
                 if(!_.isEmpty(self.reasonOutputMessFull())){
                     self.messFullDisp(true);    
                 }
                 if(!nts.uk.text.isNullOrEmpty(deadlineMsg.deadline)){
-                    self.reasonOutputMessDealineFull(self.reasonOutputMessDealine + deadlineMsg.deadline);
+                    self.reasonOutputMessDealineFull(deadlineMsg.deadline);
                 }
                 if(!_.isEmpty(self.reasonOutputMessDealineFull())){
                     self.messDealineFullDisp(true);    

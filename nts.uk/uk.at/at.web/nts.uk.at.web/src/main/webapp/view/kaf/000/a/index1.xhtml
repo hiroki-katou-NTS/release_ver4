@@ -1,10 +1,20 @@
 <div class="contents-area cf">
 	<div id="message-area" data-bind="if : messageArea">
-		<div class="message-td" data-bind="if: messFullDisp">
-			<div style="padding: 5px;" data-bind="text: reasonOutputMessFull()" ></div>
+		<div class="table" data-bind="if: messFullDisp">
+			<!-- A1_1 -->
+			<div class="cell message-td-1">#{i18n.getText('KAF000_1')}</div>
+			<!-- A1_2 -->
+			<div class="cell message-td">
+				<div data-bind="html: reasonOutputMessFull()" style="word-break: break-all;"></div>
+			</div>
 		</div>
-		<div class="message-td" data-bind="if: messDealineFullDisp">
-			<div style="padding: 5px;" data-bind="text: reasonOutputMessDealineFull()" ></div>
+		<div class="table" data-bind="if: messDealineFullDisp">
+			<!-- A1_3 -->
+			<div class="cell message-td-1">#{i18n.getText('KAF000_2')}</div>
+			<!-- A1_4 -->
+			<div class="cell message-td">
+				<div data-bind="text: reasonOutputMessDealineFull()" ></div>
+			</div>
 		</div>
 	</div>
 </div>
