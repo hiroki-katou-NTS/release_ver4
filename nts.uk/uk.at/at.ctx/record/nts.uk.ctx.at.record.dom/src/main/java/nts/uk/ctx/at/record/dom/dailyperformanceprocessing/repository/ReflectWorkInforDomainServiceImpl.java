@@ -373,7 +373,7 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 //					WorkInfoOfDailyPerformance workInfoOfDailyPerformance = this.workInformationRepository
 //							.find(employeeId, day).get();
 					NewReflectStampOutput stampOutput = new NewReflectStampOutput();
-					if(workInfoOfDailyPerformance != null || workInfoOfDailyPerformance.getRecordInfo() !=null){
+					if(workInfoOfDailyPerformance != null && workInfoOfDailyPerformance.getRecordInfo() !=null){
 						WorkStyle workStyle = basicScheduleService
 								.checkWorkDay(workInfoOfDailyPerformance.getRecordInfo().getWorkTypeCode().v());
 						if (workStyle != WorkStyle.ONE_DAY_REST) {
@@ -391,7 +391,7 @@ public class ReflectWorkInforDomainServiceImpl implements ReflectWorkInforDomain
 					// employeeId, day,
 					// stampOutput, null, workInfoOfDailyPerformance,
 					// null, null, null, null);
-					if (stampOutput.getErrMesInfos().isEmpty()) {
+					if (stampOutput.getErrMesInfos()==null || stampOutput.getErrMesInfos().isEmpty()) {
 						this.registerDailyPerformanceInfoService.registerDailyPerformanceInfo(companyId, employeeId,
 								day, stampOutput.getReflectStampOutput(), null,
 								existsDailyInfo ? null : workInfoOfDailyPerformance/* 既に勤務情報が存在する場合は更新しない */, null,

@@ -178,7 +178,6 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 			return output;
 		}*/
 		//アルゴリズム「実績ロックされているか判定する」を実行する
-		Closure closureData = closureService.getClosureDataByEmployee(para.getSid(), para.getYmd());
 		if(closureData == null) {
 			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　社員に対応する処理締めがない");
 			return new ScheAndRecordIsReflectPub(false, false);

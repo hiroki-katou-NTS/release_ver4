@@ -206,6 +206,13 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 		
 		ConcurrentStopwatches.stop("11000:集計期間の判断：");
 		
+        Closure closureData = closureService.getClosureDataByEmployee(employeeId, criteriaDate);
+        Boolean isCalWhenLock = null;
+        Optional<ExecutionLog> executionLog =  empCalAndSumExeLogRepository.getByExecutionContent(empCalAndSumExecLogID, 3);
+        if(executionLog.isPresent()) {
+            isCalWhenLock = executionLog.get().getIsCalWhenLock();
+        }
+        
 		for (val aggrPeriod : aggrPeriods){
 			val yearMonth = aggrPeriod.getYearMonth();
 			val closureId = aggrPeriod.getClosureId();
