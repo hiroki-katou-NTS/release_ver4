@@ -20,6 +20,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.val;
 import nts.arc.time.GeneralDate;
+import nts.gul.collection.CollectionUtil;
+import nts.uk.ctx.at.function.app.find.dailyperformanceformat.MonthlyPerfomanceAuthorityFinder;
 import nts.uk.ctx.at.record.app.find.dailyperform.DailyRecordDto;
 import nts.uk.ctx.at.record.dom.daily.itemvalue.DailyItemValue;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.confirmationstatus.ApprovalStatusActualResult;
@@ -107,6 +109,9 @@ public class DPLoadRowProcessor {
 	
 	@Inject
 	private ConfirmStatusActualDayChange confirmStatusActualDayChange;
+	
+	@Inject
+	private MonthlyPerfomanceAuthorityFinder monthlyPerfomanceAuthorityFinder;
     
 	public DailyPerformanceCorrectionDto reloadGrid(DPPramLoadRow param){
 		DailyPerformanceCorrectionDto result = new DailyPerformanceCorrectionDto();
@@ -137,6 +142,13 @@ public class DPLoadRowProcessor {
 								process.getEmploymentCode(companyId, param.getDateMonth(), emp), dailyPerformanceDto, param.getAutBussCode())));
 			// screenDto.setFlexShortage(null);
 			//}
+			if (result.getMonthResult() != null
+					&& !CollectionUtil.isEmpty(result.getMonthResult().getResults())) {
+				List<Integer> items = result.getMonthResult().getResults().get(0).getItems().stream()
+						.map(x -> x.getItemId()).collect(Collectors.toList());
+				result.getMonthResult()
+						.setItemNameMonths(this.monthlyPerfomanceAuthorityFinder.getListAttendanceItemName(items));
+			}
 			if (emp.equals(sId) && !param.getOnlyLoadMonth()) {
 				// checkIndenityMonth
 				result.setIndentityMonthResult(checkIndentityMonth.checkIndenityMonth(
