@@ -25,16 +25,15 @@ import nts.uk.ctx.sys.portal.app.command.webmenu.UpdateWebMenuCommandHander;
 import nts.uk.ctx.sys.portal.app.command.webmenu.WebMenuCommandBase;
 import nts.uk.ctx.sys.portal.app.find.company.CompanyFinder;
 import nts.uk.ctx.sys.portal.app.find.company.ShortCompanyDto;
-import nts.uk.ctx.sys.portal.app.find.user.UserPortalFinder;
 import nts.uk.ctx.sys.portal.app.find.webmenu.EditMenuBarDto;
 import nts.uk.ctx.sys.portal.app.find.webmenu.PersonTypeDto;
-import nts.uk.ctx.sys.portal.app.find.webmenu.ProgramNameDto;
 import nts.uk.ctx.sys.portal.app.find.webmenu.WebMenuDto;
 import nts.uk.ctx.sys.portal.app.find.webmenu.WebMenuFinder;
 import nts.uk.ctx.sys.portal.app.find.webmenu.WebMenuSimpleDto;
 import nts.uk.ctx.sys.portal.app.find.webmenu.detail.WebMenuDetailDto;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.context.loginuser.SessionLowLayer;
+import nts.uk.shr.com.menu.adapter.ProgramNameDto;
 
 @Path("sys/portal/webmenu")
 @Produces("application/json")
@@ -47,8 +46,8 @@ public class WebMenuWebService extends WebService {
 	@Inject
 	private CompanyFinder companyFinder;
 	
-	@Inject
-	private UserPortalFinder userFinder;
+//	@Inject
+//	private UserPortalFinder userFinder;
 
 	@Inject
 	private AddWebMenuCommandHandler addWebMenuCommandHandler;
@@ -111,11 +110,11 @@ public class WebMenuWebService extends WebService {
 		return this.webMenuFinder.findDefault();
 	}
 	
-	@POST
-	@Path("program")
-	public List<ProgramNameDto> getProgramName() {
-		return this.webMenuFinder.getProgram();
-	}
+//	@POST
+//	@Path("program")
+//	public List<ProgramNameDto> getProgramName() {
+//		return this.webMenuFinder.getProgram();
+//	}
 	
 	@POST
 	@Path("finddetails")
@@ -173,17 +172,17 @@ public class WebMenuWebService extends WebService {
 		return new JavaTypeResult<String>(command.getPersonName());
 	}
 	
-	@POST
-	@Path("username")
-	public JavaTypeResult<String> userName() {
-		return new JavaTypeResult<String>(userFinder.userName());
-	}
+//	@POST
+//	@Path("username")
+//	public JavaTypeResult<String> userName() {
+//		return new JavaTypeResult<String>(userFinder.userName());
+//	}
 	
-	@POST
-	@Path("showmanual")
-	public boolean showManual() {
-		return userFinder.showManual();
-	}
+//	@POST
+//	@Path("showmanual")
+//	public boolean showManual() {
+//		return userFinder.showManual();
+//	}
 	
 	@POST
 	@Path("logout")

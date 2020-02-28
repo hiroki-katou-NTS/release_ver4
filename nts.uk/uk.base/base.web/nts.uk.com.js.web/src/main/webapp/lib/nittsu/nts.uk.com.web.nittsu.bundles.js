@@ -3534,8 +3534,10 @@ var nts;
                     }).fail(function (jqXHR, textStatus, errorThrown) {
                         // デッドロックの場合、待機時間を少しずつ増やしながらリトライ（とりあえず10回までとする）
                         if (jqXHR.responseJSON && jqXHR.responseJSON.deadLock === true && countRetryByDeadLock < 10) {
-                            countRetryByDeadLock++;
-                            setTimeout(ajaxFunc, 300 + countRetryByDeadLock * 100);
+                            //                    countRetryByDeadLock++;
+                            //                    setTimeout(ajaxFunc, 300 + countRetryByDeadLock * 100);
+                            jqXHR.responseJSON.message = "アクセスが集中しています。少し時間を空けてからもう一度登録してください";
+                            dfd.reject(jqXHR.responseJSON);
                             return;
                         }
                         AjaxErrorHandlers.main(jqXHR, textStatus, errorThrown);
@@ -4068,54 +4070,69 @@ var nts;
                     return !_.some(noSessionWebScreens, function (w) { return uk.request.location.current.rawUrl.indexOf(w) > -1; })
                         || uk.request.location.current.rawUrl.indexOf("/view/sample/component/editor/text-editor.xhtml") > -1;
                 };
+                //        let getEmployeeSetting = function() {
+                //            let dfd = $.Deferred(),
+                //                es = nts.uk.sessionStorage.getItem("nts.uk.session.EMPLOYEE_SETTING");
+                //            if (es.isPresent()) {
+                //                dfd.resolve(JSON.parse(es.get()));
+                //            } else {
+                //                request.ajax("com", "/bs/employee/setting/code/find").done(constraints => {
+                //                    nts.uk.sessionStorage.setItemAsJson("nts.uk.session.EMPLOYEE_SETTING", constraints);
+                //                    dfd.resolve(constraints);
+                //                });
+                //            }
+                //
+                //            return dfd.promise();
+                //        };
                 var loadEmployeeCodeConstraints = function () {
                     var self = this, dfd = $.Deferred();
-                    uk.request.ajax("com", "/bs/employee/setting/code/find").done(function (res) {
-                        var formatOption = {
-                            autofill: true
+                    //            getEmployeeSetting().done(res => {
+                    var res = __viewContext.empCodeSets;
+                    var formatOption = {
+                        autofill: true
+                    };
+                    if (res.ceMethodAttr === 0) {
+                        formatOption.filldirection = "left";
+                        formatOption.fillcharacter = "0";
+                    }
+                    else if (res.ceMethodAttr === 1) {
+                        formatOption.filldirection = "right";
+                        formatOption.fillcharacter = "0";
+                    }
+                    else if (res.ceMethodAttr === 2) {
+                        formatOption.filldirection = "left";
+                        formatOption.fillcharacter = " ";
+                    }
+                    else {
+                        formatOption.filldirection = "right";
+                        formatOption.fillcharacter = " ";
+                    }
+                    // if not have primitive, create new
+                    if (!__viewContext.primitiveValueConstraints) {
+                        __viewContext.primitiveValueConstraints = {
+                            EmployeeCode: {
+                                valueType: "String",
+                                charType: "AlphaNumeric",
+                                maxLength: res.numberOfDigits,
+                                formatOption: formatOption
+                            }
                         };
-                        if (res.ceMethodAttr === 0) {
-                            formatOption.filldirection = "left";
-                            formatOption.fillcharacter = "0";
-                        }
-                        else if (res.ceMethodAttr === 1) {
-                            formatOption.filldirection = "right";
-                            formatOption.fillcharacter = "0";
-                        }
-                        else if (res.ceMethodAttr === 2) {
-                            formatOption.filldirection = "left";
-                            formatOption.fillcharacter = " ";
-                        }
-                        else {
-                            formatOption.filldirection = "right";
-                            formatOption.fillcharacter = " ";
-                        }
-                        // if not have primitive, create new
-                        if (!__viewContext.primitiveValueConstraints) {
-                            __viewContext.primitiveValueConstraints = {
-                                EmployeeCode: {
-                                    valueType: "String",
-                                    charType: "AlphaNumeric",
-                                    maxLength: res.numberOfDigits,
-                                    formatOption: formatOption
-                                }
-                            };
-                        }
-                        else {
-                            // extend primitive constraint
-                            _.extend(__viewContext.primitiveValueConstraints, {
-                                EmployeeCode: {
-                                    valueType: "String",
-                                    charType: "AlphaNumeric",
-                                    maxLength: res.numberOfDigits,
-                                    formatOption: formatOption
-                                }
-                            });
-                        }
-                        dfd.resolve();
-                    }).fail(function (res) {
-                        dfd.reject();
-                    });
+                    }
+                    else {
+                        // extend primitive constraint
+                        _.extend(__viewContext.primitiveValueConstraints, {
+                            EmployeeCode: {
+                                valueType: "String",
+                                charType: "AlphaNumeric",
+                                maxLength: res.numberOfDigits,
+                                formatOption: formatOption
+                            }
+                        });
+                    }
+                    dfd.resolve();
+                    //            }).fail(res => {
+                    //                dfd.reject();
+                    //            });
                     return dfd.promise();
                 };
                 $(function () {
@@ -4169,6 +4186,9 @@ var nts;
             (function (menu) {
                 var DATA_TITLEITEM_PGID = "pgid";
                 var DATA_TITLEITEM_PGNAME = "pgname";
+                var MENU_SET_KEY = "nts.uk.session.MENU_SET";
+                var COMPANY_KEY = "nts.uk.session.COMPANY";
+                var PROGRAM_KEY = "nts.uk.session.PROGRAM";
                 /** Showing item */
                 var showingItem;
                 /**
@@ -4213,7 +4233,7 @@ var nts;
                         uk.request.jumpToTopPage();
                     });
                     displayUserInfo();
-                    nts.uk.request.ajax(constants.APP_ID, constants.MenuDataPath).done(function (menuSet) {
+                    getMenuSet().done(function (menuSet) {
                         var $menuNav = $("<ul/>").attr("id", "menu-nav").appendTo($("#nav-area"));
                         if (!menuSet || menuSet.length === 0)
                             return;
@@ -4234,6 +4254,23 @@ var nts;
                     getProgram();
                 }
                 menu.request = request;
+                /**
+                 * Get menu set.
+                 */
+                function getMenuSet() {
+                    var dfd = $.Deferred();
+                    var menuSetOpt = nts.uk.sessionStorage.getItem(MENU_SET_KEY);
+                    if (menuSetOpt.isPresent()) {
+                        dfd.resolve(JSON.parse(menuSetOpt.get()));
+                    }
+                    else {
+                        nts.uk.request.ajax(constants.APP_ID, constants.MenuDataPath).done(function (menuSet) {
+                            nts.uk.sessionStorage.setItemAsJson(MENU_SET_KEY, menuSet);
+                            dfd.resolve(menuSet);
+                        });
+                    }
+                    return dfd.promise();
+                }
                 /**
                  * Generate.
                  */
@@ -4261,6 +4298,23 @@ var nts;
                     init();
                 }
                 /**
+                * Get company.
+                */
+                function getCompany() {
+                    var dfd = $.Deferred();
+                    var companyOpt = nts.uk.sessionStorage.getItem(COMPANY_KEY);
+                    if (companyOpt.isPresent()) {
+                        dfd.resolve(JSON.parse(companyOpt.get()));
+                    }
+                    else {
+                        nts.uk.request.ajax(constants.APP_ID, constants.Companies).done(function (companies) {
+                            nts.uk.sessionStorage.setItemAsJson(COMPANY_KEY, companies);
+                            dfd.resolve(companies);
+                        });
+                    }
+                    return dfd.promise();
+                }
+                /**
                  * Display user info.
                  */
                 function displayUserInfo() {
@@ -4273,17 +4327,17 @@ var nts;
                             op();
                         }
                     };
-                    nts.uk.request.ajax(constants.APP_ID, constants.Companies).done(function (companies) {
+                    getCompany().done(function (companies) {
                         if (!companies || companies.length === 0)
                             return;
                         var $companyName = $("<span/>").attr("id", "company-name");
-                        nts.uk.request.ajax(constants.APP_ID, constants.Company).done(function (companyId) {
-                            var comp = _.find(companies, function (c) {
-                                return c.companyId === companyId;
-                            });
-                            if (comp)
-                                $companyName.text(comp.companyName).appendTo($company);
+                        //            nts.uk.request.ajax(constants.APP_ID, constants.Company).done(function(companyId: any) {
+                        var comp = _.find(companies, function (c) {
+                            return c.companyId === __viewContext.user.companyId;
                         });
+                        if (comp)
+                            $companyName.text(comp.companyName).appendTo($company);
+                        //            });
                         var $companySelect = $("<div/>").addClass("company-select cf");
                         $companySelect.appendTo($company);
                         $("<div/>").addClass("ui-icon ui-icon-caret-1-s").appendTo($companySelect);
@@ -4307,71 +4361,75 @@ var nts;
                             }
                             $companyList.fadeOut(100);
                         });
-                        nts.uk.request.ajax(constants.APP_ID, constants.UserName).done(function (userName) {
-                            var $userImage = $("<div/>").attr("id", "user-image").addClass("ui-icon ui-icon-person").appendTo($user);
-                            $userImage.css("margin-right", "6px").on(constants.CLICK, function () {
-                                // TODO: Jump to personal profile.
-                            });
-                            $userName = $("<span/>").attr("id", "user-name").text(userName).appendTo($user);
-                            nts.uk.request.ajax(constants.APP_ID, constants.ShowManual).done(function (show) {
-                                var $userSettings = $("<div/>").addClass("user-settings cf").appendTo($user);
-                                $("<div class='ui-icon ui-icon-caret-1-s'/>").appendTo($userSettings);
-                                var userOptions;
-                                if (show)
-                                    userOptions = [/*new MenuItem("個人情報の設定"),*/ new MenuItem("マニュアル"), new MenuItem("ログアウト")];
-                                else
-                                    userOptions = [/*new MenuItem("個人情報の設定"),*/ new MenuItem("ログアウト")];
-                                var $userOptions = $("<ul class='menu-items user-options'/>").appendTo($userSettings);
-                                _.forEach(userOptions, function (option, i) {
-                                    var $li = $("<li class='menu-item'/>").text(option.name);
-                                    $userOptions.append($li);
-                                    //                        if (i === 0) {
-                                    //                            $li.on(constants.CLICK, function() {
-                                    //                                // TODO: Jump to personal information settings.
-                                    //                            });
-                                    //                            return;
-                                    //                        }
-                                    if (userOptions.length === 2 && i === 0) {
-                                        $li.on(constants.CLICK, function () {
-                                            // jump to index page of manual
-                                            var path = __viewContext.env.pathToManual.replace("{PGID}", "index");
-                                            window.open(path);
+                        //            nts.uk.request.ajax(constants.APP_ID, constants.UserName).done(function(userName: any) {
+                        var $userImage = $("<div/>").attr("id", "user-image").addClass("ui-icon ui-icon-person").appendTo($user);
+                        $userImage.css("margin-right", "6px").on(constants.CLICK, function () {
+                            // TODO: Jump to personal profile.
+                        });
+                        $userName = $("<span/>").attr("id", "user-name").text(__viewContext.user.name).appendTo($user);
+                        //                nts.uk.request.ajax(constants.APP_ID, constants.ShowManual).done(function(show: any) {
+                        var $userSettings = $("<div/>").addClass("user-settings cf").appendTo($user);
+                        $("<div class='ui-icon ui-icon-caret-1-s'/>").appendTo($userSettings);
+                        var userOptions;
+                        if (__viewContext.user.role.showManual)
+                            userOptions = [/*new MenuItem("個人情報の設定"),*/ new MenuItem("マニュアル"), new MenuItem("ログアウト")];
+                        else
+                            userOptions = [/*new MenuItem("個人情報の設定"),*/ new MenuItem("ログアウト")];
+                        var $userOptions = $("<ul class='menu-items user-options'/>").appendTo($userSettings);
+                        _.forEach(userOptions, function (option, i) {
+                            var $li = $("<li class='menu-item'/>").text(option.name);
+                            $userOptions.append($li);
+                            //                        if (i === 0) {
+                            //                            $li.on(constants.CLICK, function() {
+                            //                                // TODO: Jump to personal information settings.
+                            //                            });
+                            //                            return;
+                            //                        }
+                            if (userOptions.length === 2 && i === 0) {
+                                $li.on(constants.CLICK, function () {
+                                    // jump to index page of manual
+                                    var path = __viewContext.env.pathToManual.replace("{PGID}", "index");
+                                    window.open(path);
+                                });
+                                return;
+                            }
+                            nts.uk.characteristics.restore("loginMode").done(function (mode) {
+                                if (mode) {
+                                    $li.remove();
+                                }
+                                else {
+                                    $li.on(constants.CLICK, function () {
+                                        // TODO: Jump to login screen and request logout to server
+                                        nts.uk.request.ajax(constants.APP_ID, constants.Logout).done(function () {
+                                            nts.uk.cookie.remove("nts.uk.sescon", { path: "/" });
+                                            nts.uk.sessionStorage.removeItem(MENU_SET_KEY);
+                                            nts.uk.sessionStorage.removeItem(PROGRAM_KEY);
+                                            nts.uk.sessionStorage.removeItem(COMPANY_KEY);
+                                            //                                        nts.uk.sessionStorage.removeItem("nts.uk.session.EMPLOYEE_SETTING");
+                                            nts.uk.request.login.jumpToUsedLoginPage();
                                         });
-                                        return;
-                                    }
-                                    nts.uk.characteristics.restore("loginMode").done(function (mode) {
-                                        if (mode) {
-                                            $li.remove();
-                                        }
-                                        else {
-                                            $li.on(constants.CLICK, function () {
-                                                // TODO: Jump to login screen and request logout to server
-                                                nts.uk.request.ajax(constants.APP_ID, constants.Logout).done(function () {
-                                                    nts.uk.cookie.remove("nts.uk.sescon", { path: "/" });
-                                                    nts.uk.request.login.jumpToUsedLoginPage();
-                                                });
-                                            });
-                                        }
                                     });
-                                });
-                                $companyList.css("right", $user.outerWidth() + 30);
-                                $userSettings.on(constants.CLICK, function () {
-                                    if ($userOptions.css("display") === "none") {
-                                        $userOptions.fadeIn(100);
-                                        return;
-                                    }
-                                    $userOptions.fadeOut(100);
-                                });
-                                $(document).on(constants.CLICK, function (evt) {
-                                    notThen($companySelect, evt.target, function () {
-                                        $companyList.fadeOut(100);
-                                    });
-                                    notThen($userSettings, evt.target, function () {
-                                        $userOptions.fadeOut(100);
-                                    });
-                                });
+                                }
                             });
                         });
+                        $companyList.css("right", $user.outerWidth() + 30);
+                        $userSettings.on(constants.CLICK, function () {
+                            if ($userOptions.css("display") === "none") {
+                                $userOptions.fadeIn(100);
+                                return;
+                            }
+                            $userOptions.fadeOut(100);
+                        });
+                        $(document).on(constants.CLICK, function (evt) {
+                            notThen($companySelect, evt.target, function () {
+                                $companyList.fadeOut(100);
+                            });
+                            notThen($userSettings, evt.target, function () {
+                                $userOptions.fadeOut(100);
+                            });
+                        });
+                        //                });
+                        //            });
                     });
                 }
                 menu.displayUserInfo = displayUserInfo;
@@ -4379,49 +4437,50 @@ var nts;
                  * Get program.
                  */
                 function getProgram() {
-                    nts.uk.request.ajax(constants.APP_ID, constants.PG).done(function (pg) {
-                        var programName = "";
-                        var queryString = __viewContext.program.queryString;
-                        if (queryString) {
+                    //        nts.uk.request.ajax(constants.APP_ID, constants.PG).done(function(pg: any) {
+                    var pg = __viewContext.menuPrograms;
+                    var programName = "";
+                    var queryString = __viewContext.program.queryString;
+                    if (queryString) {
+                        var program = _.find(pg, function (p) {
+                            return p.param === queryString;
+                        });
+                        if (program) {
+                            programName = program.name;
+                        }
+                    }
+                    else if (programName === "" && pg && pg.length > 1) {
+                        var pgParam_1 = uk.localStorage.getItem("UKProgramParam");
+                        if (pgParam_1.isPresent()) {
                             var program = _.find(pg, function (p) {
-                                return p.param === queryString;
+                                return p.param === pgParam_1.get();
                             });
-                            if (program) {
+                            if (program)
                                 programName = program.name;
-                            }
+                            uk.localStorage.removeItem("UKProgramParam");
                         }
-                        else if (programName === "" && pg && pg.length > 1) {
-                            var pgParam_1 = uk.localStorage.getItem("UKProgramParam");
-                            if (pgParam_1.isPresent()) {
-                                var program = _.find(pg, function (p) {
-                                    return p.param === pgParam_1.get();
-                                });
-                                if (program)
-                                    programName = program.name;
-                                uk.localStorage.removeItem("UKProgramParam");
-                            }
-                        }
-                        else if (pg && pg.length === 1) {
-                            programName = pg[0].name;
-                        }
-                        // show program name on title of browser
-                        ui.viewModelBuilt.add(function () {
-                            ui._viewModel.kiban.programName(programName);
-                        });
-                        var $pgArea = $("#pg-area");
-                        $("<div/>").attr("id", "pg-name").text(programName).appendTo($pgArea);
-                        var $manualArea = $("<div/>").attr("id", "manual").appendTo($pgArea);
-                        //            let $manualBtn = $("<button class='manual-button'/>").text("?").appendTo($manualArea);
-                        //            $manualBtn.on(constants.CLICK, function() {
-                        //                var path = __viewContext.env.pathToManual.replace("{PGID}", __viewContext.program.programId);
-                        //                window.open(path);
-                        //            });
-                        var $tglBtn = $("<div class='tgl cf'/>").appendTo($manualArea);
-                        $tglBtn.append($("<div class='ui-icon ui-icon-caret-1-s'/>"));
-                        $tglBtn.on(constants.CLICK, function () {
-                            // TODO
-                        });
+                    }
+                    else if (pg && pg.length === 1) {
+                        programName = pg[0].name;
+                    }
+                    // show program name on title of browser
+                    ui.viewModelBuilt.add(function () {
+                        ui._viewModel.kiban.programName(programName);
                     });
+                    var $pgArea = $("#pg-area");
+                    $("<div/>").attr("id", "pg-name").text(programName).appendTo($pgArea);
+                    var $manualArea = $("<div/>").attr("id", "manual").appendTo($pgArea);
+                    //            let $manualBtn = $("<button class='manual-button'/>").text("?").appendTo($manualArea);
+                    //            $manualBtn.on(constants.CLICK, function() {
+                    //                var path = __viewContext.env.pathToManual.replace("{PGID}", __viewContext.program.programId);
+                    //                window.open(path);
+                    //            });
+                    var $tglBtn = $("<div class='tgl cf'/>").appendTo($manualArea);
+                    $tglBtn.append($("<div class='ui-icon ui-icon-caret-1-s'/>"));
+                    $tglBtn.on(constants.CLICK, function () {
+                        // TODO
+                    });
+                    //        });
                 }
                 /**
                  * Init.
@@ -4566,13 +4625,13 @@ var nts;
                     constants.MENU = "UK-Menu";
                     constants.CLICK = "click";
                     constants.MenuDataPath = "/sys/portal/webmenu/finddetails";
-                    constants.Company = "/sys/portal/webmenu/currentCompany";
+                    //        export let Company = "/sys/portal/webmenu/currentCompany";
                     constants.Companies = "sys/portal/webmenu/companies";
                     constants.ChangeCompany = "sys/portal/webmenu/changeCompany";
-                    constants.UserName = "sys/portal/webmenu/username";
-                    constants.ShowManual = "sys/portal/webmenu/showmanual";
+                    //        export let UserName = "sys/portal/webmenu/username";
+                    //        export let ShowManual = "sys/portal/webmenu/showmanual";
                     constants.Logout = "sys/portal/webmenu/logout";
-                    constants.PG = "sys/portal/webmenu/program";
+                    //        export let PG = "sys/portal/webmenu/program";
                 })(constants || (constants = {}));
             })(menu = ui.menu || (ui.menu = {}));
         })(ui = uk.ui || (uk.ui = {}));
