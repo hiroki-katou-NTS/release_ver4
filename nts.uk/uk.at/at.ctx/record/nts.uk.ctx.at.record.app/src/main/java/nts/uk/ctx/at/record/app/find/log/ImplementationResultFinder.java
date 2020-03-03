@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -139,10 +140,15 @@ public class ImplementationResultFinder {
 
     public OutputStartScreenKdw001D getDataClosure(int closureId) {
         String companyId = AppContexts.user().companyId();
-        ActualLock opt = actualLockRepository.findById(companyId, closureId).get();
+        Optional<ActualLock> opt = actualLockRepository.findById(companyId, closureId);
         PresentClosingPeriodImport presentClosingPeriod = closureAdapter.findByClosureId(companyId, closureId).get();
-        return new OutputStartScreenKdw001D(closureId, opt.getDailyLockState() == LockStatus.LOCK ? true : false,
-                opt.getMonthlyLockState() == LockStatus.LOCK ? true : false, presentClosingPeriod.getClosureStartDate(),
+        if(!opt.isPresent()) {
+        	return new OutputStartScreenKdw001D(closureId, false,
+                    false, presentClosingPeriod.getClosureStartDate(),
+                    presentClosingPeriod.getClosureEndDate());
+        }
+        return new OutputStartScreenKdw001D(closureId, opt.get().getDailyLockState() == LockStatus.LOCK ? true : false,
+        		opt.get().getMonthlyLockState() == LockStatus.LOCK ? true : false, presentClosingPeriod.getClosureStartDate(),
                 presentClosingPeriod.getClosureEndDate());
     }
 }
