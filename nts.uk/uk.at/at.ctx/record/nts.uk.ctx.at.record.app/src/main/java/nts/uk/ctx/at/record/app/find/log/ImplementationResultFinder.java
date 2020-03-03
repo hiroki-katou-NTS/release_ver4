@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -22,7 +23,6 @@ import nts.uk.ctx.at.record.dom.workrecord.actuallock.ActualLockRepository;
 import nts.uk.ctx.at.record.dom.workrecord.actuallock.LockStatus;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfo;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.ErrMessageInfoRepository;
-import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.shr.com.context.AppContexts;
 
@@ -132,10 +132,16 @@ public class ImplementationResultFinder {
 
 	public OutputStartScreenKdw001D getDataClosure(int closureId) {
 		String companyId = AppContexts.user().companyId();
-		ActualLock opt = actualLockRepository.findById(companyId, closureId).get();
-		PresentClosingPeriodImport presentClosingPeriod = closureAdapter.findByClosureId(companyId, closureId).get();
-		return new OutputStartScreenKdw001D(closureId, opt.getDailyLockState() == LockStatus.LOCK ? true : false,
-				opt.getMonthlyLockState() == LockStatus.LOCK ? true : false, presentClosingPeriod.getClosureStartDate(),
-				presentClosingPeriod.getClosureEndDate());
+        Optional<ActualLock> opt = actualLockRepository.findById(companyId, closureId);
+        PresentClosingPeriodImport presentClosingPeriod = closureAdapter.findByClosureId(companyId, closureId).get();
+        if(!opt.isPresent()) {
+        	return new OutputStartScreenKdw001D(closureId, false,
+                    false, presentClosingPeriod.getClosureStartDate(),
+                    presentClosingPeriod.getClosureEndDate());
+        }
+        return new OutputStartScreenKdw001D(closureId, opt.get().getDailyLockState() == LockStatus.LOCK ? true : false,
+        		opt.get().getMonthlyLockState() == LockStatus.LOCK ? true : false, presentClosingPeriod.getClosureStartDate(),
+                presentClosingPeriod.getClosureEndDate());
 	}
+	
 }
