@@ -108,7 +108,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 	
 	@Override
 	public ScheAndRecordIsReflectPub appReflectProcess(AppCommonPara para, ExecutionType executionType,Boolean isCalWhenLock) {
-		ScheAndRecordIsReflectPub output = new ScheAndRecordIsReflectPub(true, true);
+		ScheAndRecordIsReflectPub output = new ScheAndRecordIsReflectPub(true, true, true);
 		ScheRemainCreateInfor scheInfor = null;
 		Closure closureData = closureService.getClosureDataByEmployee(para.getSid(), para.getYmd());
 		
@@ -182,7 +182,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 		
 		if(closureData == null) {
 			log.info("反映処理：　社員ID　＝　" + para.getSid()  + " 申請日：　" + para.getYmd() + " 反映前チェックのエラー：　社員に対応する処理締めがない");
-			return new ScheAndRecordIsReflectPub(false, false);
+			return new ScheAndRecordIsReflectPub(false, false, false);
 		}
 //		LockStatus lockStatus = resultLock.getDetermineActualLocked(para.getCid(),
 //				para.getYmd(),
@@ -206,6 +206,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 					scheInfor.isConfirmedAtr());
 			boolean chkConfirmSche = this.checkConfirmStatus(chkParamSche);
 			output.setScheReflect(chkConfirmSche);
+			output.setHonninKakunin(chkConfirmSche);
 		}
 		if(output.isRecordReflect()) {
 			ConfirmStatusCheck chkParam = new ConfirmStatusCheck(para.getCid(), 
@@ -219,6 +220,7 @@ public class AppReflectProcessRecordPubImpl implements AppReflectProcessRecordPu
 					false);
 			boolean chkConfirmDaily = this.checkConfirmStatus(chkParam);
 			output.setRecordReflect(chkConfirmDaily);
+			output.setHonninKakunin(chkConfirmDaily);
 		}
 		
 		return output;

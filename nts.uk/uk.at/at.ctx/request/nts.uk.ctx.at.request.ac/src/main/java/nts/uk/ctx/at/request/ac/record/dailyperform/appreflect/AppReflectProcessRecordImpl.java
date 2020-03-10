@@ -70,7 +70,7 @@ public class AppReflectProcessRecordImpl implements AppReflectProcessRecord {
 				EnumAdaptor.valueOf(appInfor.getAppType().value, ApplicationType.class),
 				appInfor.getReflectionInformation().getForcedReflection() == DisabledSegment_New.TODO ? true : false);
 		ScheAndRecordIsReflectPub checkResult = recordPub.appReflectProcess(para, EnumAdaptor.valueOf(executionType.value, ExecutionType.class),isCalWhenLock);
-		return new ScheAndRecordIsReflect(checkResult.isScheReflect(), checkResult.isRecordReflect());
+		return new ScheAndRecordIsReflect(checkResult.isScheReflect(), checkResult.isRecordReflect(), checkResult.isHonninKakunin());
 	}
 
 	@Override

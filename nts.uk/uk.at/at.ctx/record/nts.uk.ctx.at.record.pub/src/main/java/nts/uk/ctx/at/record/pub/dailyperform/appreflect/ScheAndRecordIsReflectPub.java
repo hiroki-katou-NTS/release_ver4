@@ -12,4 +12,8 @@ import lombok.Setter;
 public class ScheAndRecordIsReflectPub {
 	private boolean scheReflect;
 	private boolean recordReflect;
+	/*
+	 * True:本人確認なし、False：　本人確認
+	 */
+	private boolean honninKakunin;
 }
