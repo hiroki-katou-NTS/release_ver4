@@ -9,8 +9,18 @@
 	display: inline-block;
 }
 
-.message-td {
+/* .message-td {
 	padding-left: 8px;
+} */
+
+.message-td-1 {
+	padding-left: 12px;
+	width: 95px;
+}
+
+.message-td {
+	padding-top: 5px;
+	padding-bottom: 5px;
 }
 
 #table-phase, #table-phase td, #table-phase th {
