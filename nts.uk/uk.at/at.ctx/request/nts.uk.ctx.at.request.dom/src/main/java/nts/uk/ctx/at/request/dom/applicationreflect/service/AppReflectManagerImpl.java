@@ -103,15 +103,15 @@ public class AppReflectManagerImpl implements AppReflectManager {
 	private OtherCommonAlgorithm otherCommonAlg;
 	@Inject
 	private GetClosureStartForEmployee getClosureStartForEmp;
-    @Inject
-    private ExecutionLogRequestImport executionLogRequestImport;
+	@Inject
+	private ExecutionLogRequestImport executionLogRequestImport;
 	@PostConstruct
 	public void postContruct() {
 		this.self = scContext.getBusinessObject(AppReflectManager.class);
 	}
 	
 	@Override	
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public void reflectEmployeeOfApp(Application_New appInfor, InformationSettingOfEachApp reflectSetting,
 			ExecutionTypeExImport execuTionType, String excLogId, int currentRecord) {
 		try {
@@ -273,9 +273,13 @@ public class AppReflectManagerImpl implements AppReflectManager {
 					absenceLeaveAppInfor,
 					recruitmentInfor,
 					execuTionType);
-            Boolean isCalWhenLock = this.executionLogRequestImport.isCalWhenLock(excLogId, 2);
+			Boolean isCalWhenLock = this.executionLogRequestImport.isCalWhenLock(excLogId, 2);
 			//事前チェック処理
-            ScheAndRecordIsReflect checkReflectResult = checkReflect.appReflectProcessRecord(appInfor, execuTionType, loopDate,isCalWhenLock);
+			ScheAndRecordIsReflect checkReflectResult = checkReflect.appReflectProcessRecord(appInfor, execuTionType, loopDate,isCalWhenLock);
+			if(!checkReflectResult.isHonninKakunin()
+					&& !appInfor.getStartDate().get().equals(appInfor.getEndDate().get())) {
+				continue;
+			}
 			//勤務予定へ反映処理	(Xử lý phản ánh đến kế hoạch công việc)
 			if(appInfor.getPrePostAtr() == PrePostAtr.PREDICT
 					&& checkReflectResult.isScheReflect()) {
