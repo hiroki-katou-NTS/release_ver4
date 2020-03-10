@@ -12,6 +12,8 @@ import javax.inject.Inject;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.request.dom.application.appabsence.AbsenceWorkType;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSet;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.UseAtr;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmployWorkType;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmploymentSetting;
 import nts.uk.ctx.at.shared.dom.worktype.DeprecateClassification;
@@ -24,6 +26,10 @@ import nts.uk.ctx.at.shared.dom.worktype.WorkTypeUnit;
 public class AppAbsenceThreeProcessImpl implements AppAbsenceThreeProcess {
 	@Inject
 	private WorkTypeRepository workTypeRepository;
+	
+	@Inject
+	private HdAppSetRepository hdRep;
+	
 	// 1.勤務種類を取得する（新規）
 	@Override
 	public List<AbsenceWorkType> getWorkTypeCodes(List<AppEmploymentSetting> appEmploymentWorkType, String companyID,
@@ -44,7 +50,7 @@ public class AppAbsenceThreeProcessImpl implements AppAbsenceThreeProcess {
 		}
 		
 		//Collections.sort(absenceWorkTypes, Comparator.comparing(AbsenceWorkType :: getWorkTypeCode));
-		return absenceWorkTypes;
+		return absenceWorkTypes.stream().distinct().collect(Collectors.toList());
 	}
 	//  2.勤務種類を取得する（詳細）
 	@Override
@@ -74,36 +80,49 @@ public class AppAbsenceThreeProcessImpl implements AppAbsenceThreeProcess {
 			
 		}
 		if(!CollectionUtil.isEmpty(lstWorkTypeCodes)){
-			if(alldayHalfDay == 0){
+			List<Integer> hdType = new ArrayList<>();
+			hdType.add(WorkTypeClassification.Holiday.value);//休日
+			hdType.add(WorkTypeClassification.AnnualHoliday.value);//年休
+			hdType.add(WorkTypeClassification.YearlyReserved.value);//積立年休
+			hdType.add(WorkTypeClassification.SpecialHoliday.value);//特別休暇
+			hdType.add(WorkTypeClassification.Absence.value);//欠勤
+			hdType.add(WorkTypeClassification.SubstituteHoliday.value);//代休
+			hdType.add(WorkTypeClassification.Pause.value);//振休
+			hdType.add(WorkTypeClassification.TimeDigestVacation.value);//時間消化休暇
+			
+			// 終日休暇半日休暇区分 = 半日休暇
+			List<Integer> halfDay = new ArrayList<>();
+			// 出勤
+			halfDay.add(0);
+			// 振出
+			halfDay.add(7);
+			
+			Optional<HdAppSet> hdAppSet = hdRep.getAll();
+			if(hdAppSet.isPresent() && hdAppSet.get().getDayDispSet()==UseAtr.USE) {
+				if(alldayHalfDay == 0){
+					// 終日休暇半日休暇区分 = 終日休暇 
+					if(displayHalfDayValue){
+						// 勤務種類組み合わせ全表示チェック = ON
+						List<Integer> allDayAtrs = new ArrayList<>();
+						allDayAtrs.add(convertHolidayType(holidayType));
+						result = workTypeRepository.findForAppHdKAF006(companyID,lstWorkTypeCodes,DeprecateClassification.NotDeprecated.value, hdType);
+					}else{
+						//勤務種類組み合わせ全表示チェック = OFF
+						result = this.workTypeRepository.findWorkTypeByCodes(companyID, lstWorkTypeCodes, DeprecateClassification.NotDeprecated.value, WorkTypeUnit.OneDay.value);
+					}
+				}else if(alldayHalfDay == 1){
+					result = this.workTypeRepository.findWorkTypeForHalfDay(companyID, halfDay, lstWorkTypeCodes);
+				}
+			} else {
+				result = this.workTypeRepository.findWorkTypeByCodes(companyID, lstWorkTypeCodes, DeprecateClassification.NotDeprecated.value, WorkTypeUnit.OneDay.value);				
 				// 終日休暇半日休暇区分 = 終日休暇 
 				if(displayHalfDayValue){
 					// 勤務種類組み合わせ全表示チェック = ON
 					List<Integer> allDayAtrs = new ArrayList<>();
 					allDayAtrs.add(convertHolidayType(holidayType));
-					List<Integer> hdType = new ArrayList<>();
-					hdType.add(WorkTypeClassification.Holiday.value);//休日
-					hdType.add(WorkTypeClassification.AnnualHoliday.value);//年休
-					hdType.add(WorkTypeClassification.YearlyReserved.value);//積立年休
-					hdType.add(WorkTypeClassification.SpecialHoliday.value);//特別休暇
-					hdType.add(WorkTypeClassification.Absence.value);//欠勤
-					hdType.add(WorkTypeClassification.SubstituteHoliday.value);//代休
-					hdType.add(WorkTypeClassification.Pause.value);//振休
-					hdType.add(WorkTypeClassification.TimeDigestVacation.value);//時間消化休暇
-					result = workTypeRepository.findForAppHdKAF006(companyID,lstWorkTypeCodes,DeprecateClassification.NotDeprecated.value, hdType);
-				}else{
-					//勤務種類組み合わせ全表示チェック = OFF
-					result = this.workTypeRepository.findWorkTypeByCodes(companyID, lstWorkTypeCodes, DeprecateClassification.NotDeprecated.value, WorkTypeUnit.OneDay.value);
+					result.addAll(workTypeRepository.findForAppHdKAF006(companyID,lstWorkTypeCodes,DeprecateClassification.NotDeprecated.value, hdType));
 				}
-				
-			}else if(alldayHalfDay == 1){
-				
-				// 終日休暇半日休暇区分 = 半日休暇
-				List<Integer> halfDay = new ArrayList<>();
-				// 出勤
-				halfDay.add(0);
-				// 振出
-				halfDay.add(7);
-				result = this.workTypeRepository.findWorkTypeForHalfDay(companyID, halfDay, lstWorkTypeCodes);
+				result.addAll(this.workTypeRepository.findWorkTypeForHalfDay(companyID, halfDay, lstWorkTypeCodes));
 			}
 		}
 //		//Sắp xếp theo disorder;

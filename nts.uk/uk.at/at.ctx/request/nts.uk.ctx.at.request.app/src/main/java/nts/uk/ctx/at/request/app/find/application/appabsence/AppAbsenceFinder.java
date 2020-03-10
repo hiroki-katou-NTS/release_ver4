@@ -58,6 +58,7 @@ import nts.uk.ctx.at.request.dom.setting.applicationreason.ApplicationReason;
 import nts.uk.ctx.at.request.dom.setting.applicationreason.ApplicationReasonRepository;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSet;
 import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.HdAppSetRepository;
+import nts.uk.ctx.at.request.dom.setting.company.applicationapprovalsetting.vacationapplicationsetting.UseAtr;
 import nts.uk.ctx.at.request.dom.setting.company.request.applicationsetting.apptypesetting.DisplayReasonRepository;
 import nts.uk.ctx.at.request.dom.setting.employment.appemploymentsetting.AppEmploymentSetting;
 import nts.uk.ctx.at.request.dom.setting.request.application.apptypediscretesetting.AppTypeDiscreteSetting;
@@ -141,6 +142,9 @@ public class AppAbsenceFinder {
 	private AppForSpecLeaveRepository repoAppLeaveSpec;
 	@Inject
 	private DisplayReasonRepository displayRep;
+	
+	@Inject
+	private WorkTypeRepository wkTypeRepo;
 	/**
 	 * 1.休暇申請（新規）起動前処理
 	 * @param appDate
@@ -198,6 +202,10 @@ public class AppAbsenceFinder {
 		}
 		// ドメインモデル「休暇申請設定」を取得する(lấy dữ liệu domain 「休暇申請設定」)
 		Optional<HdAppSet> hdAppSet = this.hdAppSetRepository.getAll();
+		if(hdAppSet.isPresent() && hdAppSet.get().getDayDispSet()==UseAtr.USE) {
+			result.setDayDispSet(UseAtr.USE.value);
+		}
+		
 		// 1-1.起動時のエラーチェック
 		List<HolidayAppTypeName> holidayAppTypes = new ArrayList<>();
 		
@@ -299,6 +307,9 @@ public class AppAbsenceFinder {
 		//--
 		// ドメインモデル「休暇申請設定」を取得する(lấy dữ liệu domain 「休暇申請設定」)
 		Optional<HdAppSet> hdAppSet = this.hdAppSetRepository.getAll();
+		if(hdAppSet.isPresent() && hdAppSet.get().getDayDispSet()==UseAtr.USE) {
+			result.setDayDispSet(UseAtr.USE.value);
+		}
 		//アルゴリズム「勤務種類を取得する（詳細）」を実行する-[Lấy WorkType(detail)]
 		//2.勤務種類を取得する（詳細）
 		List<WorkType> workTypes = this.appAbsenceThreeProcess.getWorkTypeDetails(
@@ -316,10 +327,15 @@ public class AppAbsenceFinder {
 					result.setWorkTypeCode(appAbsence.getWorkTypeCode().toString());
 				} else {
 					// アルゴリズム「申請済み勤務種類の存在判定と取得」を実行する - [Kiểm tra sự tồn tại  và lấy WorkType đã xin ]
-					masterUnreg = hdShipmentScreenAFinder.appliedWorkType(companyID, workTypes,
-							appAbsence.getWorkTypeCode().toString());
+					Optional<WorkType> wkTypeOpt = wkTypeRepo.findByPK(companyID, appAbsence.getWorkTypeCode().v());
+					if(wkTypeOpt.isPresent()) {
+						result.setWorkTypeCode(appAbsence.getWorkTypeCode().v());
+					} else {
+						masterUnreg = true;
+						result.setWorkTypeCode(workTypes.stream().findFirst().map(x -> x.getWorkTypeCode().v()).orElse(null));
+					}
 					result.setMasterUnreg(masterUnreg);
-					result.setWorkTypeCode(appAbsence.getWorkTypeCode().toString());
+					
 				}
 			}
 		}
@@ -330,7 +346,7 @@ public class AppAbsenceFinder {
 			absenceWorkTypes.add(absenceWorkType);
 		}
 		// display list work Type
-		result.setWorkTypes(absenceWorkTypes);
+		result.setWorkTypes(absenceWorkTypes.stream().distinct().collect(Collectors.toList()));
 		// 1.就業時間帯の表示制御(xu li hien thị A6_1)
 		if(appAbsence.getWorkTypeCode() == null){
 			result.setDisplayWorkChangeFlg(false);

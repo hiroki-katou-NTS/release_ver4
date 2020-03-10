@@ -1,11 +1,16 @@
 #message-area {
 	background-color: #f8efd4;
 	width: 802px;
-	padding: 0 !important;
+}
+
+.message-td-1 {
+	padding-left: 12px;
+	width: 95px;
 }
 
 .message-td {
-	padding-left: 8px;
+	padding-top: 5px;
+	padding-bottom: 5px;
 }
 
 #table-phase, #table-phase td, #table-phase th {

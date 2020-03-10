@@ -126,6 +126,7 @@ module nts.uk.at.view.kaf006.b{
         hdTypeDis: KnockoutObservable<boolean> = ko.observable(false);
         dataMax: KnockoutObservable<boolean> = ko.observable(false);
         appCur: any = null;
+        dayDispSet: KnockoutObservable<boolean> = ko.observable(false);
         constructor(listAppMetadata: Array<model.ApplicationMetadata>, currentApp: model.ApplicationMetadata) {
             super(listAppMetadata, currentApp);
             let self = this;
@@ -177,6 +178,13 @@ module nts.uk.at.view.kaf006.b{
                     self.maxDayline2(line2);
                 }
             });
+            });
+            self.selectedAllDayHalfDayValue.subscribe(function(value) {
+                if (value == 0) {
+                    self.enbHalfDayFlg(true);
+                } else {
+                    self.enbHalfDayFlg(false);
+                }
             });
         }
         findRelaSelected(relaCD: string): any{
@@ -453,6 +461,7 @@ module nts.uk.at.view.kaf006.b{
             _.forEach(data.displayReasonDtoLst, (o) => {
                 self.displayReasonLst.push(new common.DisplayReason(o.typeOfLeaveApp, o.displayFixedReason==1?true:false, o.displayAppReason==1?true:false));     
             });
+            self.dayDispSet(data.dayDispSet==1?true:false);
             self.version = data.application.version;
             self.manualSendMailAtr(data.manualSendMailFlg);
             self.employeeName(data.employeeName);

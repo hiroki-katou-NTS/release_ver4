@@ -83,7 +83,8 @@
 		<table id="tbl">
 			<tr data-bind="if: displayPrePostFlg">
 				<td><div data-bind="ntsFormLabel:{}">#{i18n.getText('KAF006_9')}</div></td>
-				<td class="thut"><div data-bind="if: screenModeNew"
+				<td class="thut" >
+					<div data-bind="if: screenModeNew"
 						style="display: inline-block;">
 						<!--A3_4 事前事後スイッチ-->
 						<div id = "switch_prePost"
@@ -142,7 +143,7 @@
 					<div style="clear: both"></div>
 				</td>
 			</tr>
-			<tr>
+			<tr data-bind="if: dayDispSet">
 				<td></td>
 				<td class="thut">
 					<!-- A3_13 -->
@@ -200,10 +201,12 @@
 								required: true,
 								enable: enbWorkType}">
 				</div>
-				<!--A5_3 半日の組み合わせを表示-->
-				<div data-bind="ntsCheckBox: { checked: displayHalfDayValue,
-												enable: enbHalfDayFlg,
-												text: '#{i18n.getText('KAF006_17')}'}"></div>
+				<div style="display: inline-block;">
+					<!--A5_3 半日の組み合わせを表示-->
+					<div data-bind="ntsCheckBox: { checked: displayHalfDayValue,
+													enable: enbHalfDayFlg,
+													text: '#{i18n.getText('KAF006_17')}'}"></div>
+				</div>
 			</div>
 			<!-- A6 - Work Time -->
 			<div data-bind="visible:changeWorkHourValueFlg">

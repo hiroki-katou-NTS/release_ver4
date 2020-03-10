@@ -1,9 +1,6 @@
 /* #message-area {
 	background-color: #F2F2F2 !important;
 } */
-.message {
-	height: 25px;
-}
 .message_none {
 	height: 0px;
 }

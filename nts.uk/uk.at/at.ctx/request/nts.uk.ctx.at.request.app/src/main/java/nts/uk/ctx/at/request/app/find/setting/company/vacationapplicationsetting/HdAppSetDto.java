@@ -87,6 +87,9 @@ public class HdAppSetDto {
 	// 未選択を表示する
 	public int displayUnselect;
 	
+	// 終日・半日選択表示区分
+	public int dayDispSet;
+	
 	public static HdAppSetDto convertToDto(HdAppSet domain){
 		return new HdAppSetDto(domain.getCompanyId(), 
 				domain.getUse60h().value, domain.getObstacleName() == null ? null : domain.getObstacleName().v(), 
@@ -105,6 +108,7 @@ public class HdAppSetDto {
 				domain.getConcheckDateRelease().value, domain.getAppDateContra().value, 
 				domain.getYearResig() == null ? null : domain.getYearResig().v(),
 				domain.getRegisShortReser().value,
-				domain.getDisplayUnselect().value);
+				domain.getDisplayUnselect().value,
+				domain.getDayDispSet().value);
 	}
 }
