@@ -142,6 +142,9 @@ public class AppAbsenceFinder {
 	private AppForSpecLeaveRepository repoAppLeaveSpec;
 	@Inject
 	private DisplayReasonRepository displayRep;
+	
+	@Inject
+	private WorkTypeRepository wkTypeRepo;
 	/**
 	 * 1.休暇申請（新規）起動前処理
 	 * @param appDate
@@ -324,10 +327,15 @@ public class AppAbsenceFinder {
 					result.setWorkTypeCode(appAbsence.getWorkTypeCode().toString());
 				} else {
 					// アルゴリズム「申請済み勤務種類の存在判定と取得」を実行する - [Kiểm tra sự tồn tại  và lấy WorkType đã xin ]
-					masterUnreg = hdShipmentScreenAFinder.appliedWorkType(companyID, workTypes,
-							appAbsence.getWorkTypeCode().toString());
+					Optional<WorkType> wkTypeOpt = wkTypeRepo.findByPK(companyID, appAbsence.getWorkTypeCode().v());
+					if(wkTypeOpt.isPresent()) {
+						result.setWorkTypeCode(appAbsence.getWorkTypeCode().v());
+					} else {
+						masterUnreg = true;
+						result.setWorkTypeCode(workTypes.stream().findFirst().map(x -> x.getWorkTypeCode().v()).orElse(null));
+					}
 					result.setMasterUnreg(masterUnreg);
-					result.setWorkTypeCode(appAbsence.getWorkTypeCode().toString());
+					
 				}
 			}
 		}
