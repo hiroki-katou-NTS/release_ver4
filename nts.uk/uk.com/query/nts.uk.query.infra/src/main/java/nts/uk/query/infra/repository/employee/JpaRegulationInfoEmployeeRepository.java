@@ -18,10 +18,6 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,8 +30,6 @@ import nts.uk.ctx.bs.employee.infra.entity.employee.order.BsymtEmpOrderCond;
 import nts.uk.ctx.bs.employee.infra.entity.employee.order.BsymtEmployeeOrder;
 import nts.uk.ctx.bs.employee.infra.entity.employee.order.BsymtEmployeeOrderPK;
 import nts.uk.ctx.bs.person.infra.entity.person.info.BpsmtPerson;
-import nts.uk.query.infra.entity.employee.EmployeeDataView;
-import nts.uk.query.infra.entity.employee.EmployeeDataView_;
 import nts.uk.query.model.employee.CCG001SystemType;
 import nts.uk.query.model.employee.EmployeeSearchQuery;
 import nts.uk.query.model.employee.RegularSortingType;
@@ -86,7 +80,12 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			+ " AND awh.endDate >= :refDate"
 			+ " AND wh.strD <= :refDate"
 			+ " AND wh.endD >= :refDate";
-
+	
+	private static final String SELECT_EMPLOYEE =  "SELECT"
+			+ " SID, SCD, CLASSIFICATION_CODE, EMP_CD, COM_STR_DATE, JOB_CD,"
+			+ " BUSINESS_NAME, WORKPLACE_ID, WKP_HIERARCHY_CD, WPL_CD, WPL_NAME "
+			+ " FROM EMPLOYEE_DATA_VIEW ";
+	
 	private static final String EMPTY_LIST = "EMPTY_LIST";
 	private static final Integer ELEMENT_300 = 300;
 	private static final Integer ELEMENT_800 = 800;
@@ -119,10 +118,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		GeneralDateTime baseDate = paramQuery.getBaseDate();
 		
 		StringBuilder selectBuilder = new StringBuilder();
-		selectBuilder.append("SELECT"
-						+ " SID, SCD, CLASSIFICATION_CODE, EMP_CD, COM_STR_DATE, JOB_CD,"
-						+ " BUSINESS_NAME, WORKPLACE_ID, WKP_HIERARCHY_CD, WPL_CD, WPL_NAME")
-			   		 .append(" FROM EMPLOYEE_DATA_VIEW ");
+		selectBuilder.append(SELECT_EMPLOYEE);
 		
 		StringBuilder whereBuilder = new StringBuilder()
 											// Add company condition 
@@ -563,7 +559,8 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		List<Object[]> persons = new ArrayList<>();
 
 		CollectionUtil.split(sIds, MAX_WHERE_IN, (subList) -> {
-			persons.addAll(this.getEntityManager().createQuery(FIND_EMPLOYEE).setParameter("listSid", subList)
+			persons.addAll(this.getEntityManager().createQuery(FIND_EMPLOYEE)
+					.setParameter("listSid", subList)
 					.getResultList());
 		});
 
@@ -617,54 +614,46 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		return employeeInfoList.values().stream().collect(Collectors.toList());
 	}
 	
+	
 	/* (non-Javadoc)
 	 * @see nts.uk.query.model.employee.RegulationInfoEmployeeRepository
 	 * #findBySid(java.lang.String, java.lang.String, nts.arc.time.GeneralDateTime)
 	 */
 	@Override
 	public RegulationInfoEmployee findBySid(String comId, String sid, GeneralDateTime baseDate) {
-		CriteriaBuilder cb = this.getEntityManager().getCriteriaBuilder();
-		CriteriaQuery<EmployeeDataView> cq = cb.createQuery(EmployeeDataView.class);
-		Root<EmployeeDataView> root = cq.from(EmployeeDataView.class);
 		
-		// Constructing condition.
-		List<Predicate> conditions = new ArrayList<Predicate>();
-
-		// Add company condition
-		conditions.add(cb.equal(root.get(EmployeeDataView_.cid), comId));
-
-		// Add NOT_DELETED condition
-		conditions.add(cb.equal(root.get(EmployeeDataView_.delStatusAtr), NOT_DELETED));
-		
+		StringBuilder selectBuilder = new StringBuilder();
+		selectBuilder.append(SELECT_EMPLOYEE);
+//		// Constructing condition.
+//		// Add company condition
+//		// Add NOT_DELETED condition
+		StringBuilder whereBuilder = new StringBuilder()
+				// Add company condition 
+				.append(" WHERE ((CID = '" + comId + "')")
+				// Add NOT_DELETED condition
+				.append(" AND (DEL_STATUS_ATR = " + NOT_DELETED + "))");
 		// Where SID.
-		conditions.add(cb.equal(root.get(EmployeeDataView_.sid), sid));
-		
+		whereBuilder.append(" AND (SID = '" + sid + "')");
 		// Where base date.
-		conditions.add(cb.lessThanOrEqualTo(root.get(EmployeeDataView_.wplStrDate), baseDate));
-		conditions.add(cb.greaterThanOrEqualTo(root.get(EmployeeDataView_.wplEndDate), baseDate));
-		
+		whereBuilder.append(" AND (WPL_STR_DATE <= baseDate AND WPL_END_DATE >= baseDate )");
 		// Find fist.
-		cq.where(conditions.toArray(new Predicate[] {}));
-		List<EmployeeDataView> res = this.getEntityManager().createQuery(cq).getResultList();
+		String sql = selectBuilder.toString() + whereBuilder.toString();
+		
+		if(sql.contains("baseDate")) {
+			sql = sql.replaceAll("baseDate", "'" + baseDate.toString(DATE_TIME_FORMAT) + "'");
+		}
+		
+		Query query = this.getEntityManager()
+				.createNativeQuery(sql);
+		
+		@SuppressWarnings("unchecked")
+		List<Object[]> queryRs = query.getResultList();
 
-		if (CollectionUtil.isEmpty(res)) {
+		if(CollectionUtil.isEmpty(queryRs)) {
 			return null;
 		}
-
-		EmployeeDataView entity = res.get(0);
-		
 		// Convert.
-		return RegulationInfoEmployee.builder()
-				.classificationCode(Optional.ofNullable(entity.getClassificationCode())).employeeCode(entity.getScd())
-				.employeeID(entity.getSid()).employmentCode(Optional.ofNullable(entity.getEmpCd()))
-				.hireDate(Optional.ofNullable(entity.getComStrDate()))
-				.jobTitleCode(Optional.ofNullable(entity.getJobCd()))
-				.name(Optional.ofNullable(entity.getBusinessName()))
-				.workplaceId(Optional.ofNullable(entity.getWorkplaceId()))
-				.workplaceHierarchyCode(Optional.ofNullable(entity.getWplHierarchyCode()))
-				.workplaceCode(Optional.ofNullable(entity.getWplCd()))
-				.workplaceName(Optional.ofNullable(entity.getWplName()))
-				.build();
+		return convertToEmployeeInfo(queryRs.get(0));
 	}
 
 	/*
@@ -801,7 +790,14 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		List<Object[]> queryRs = query.getResultList();
 		
 		for(Object[] res : queryRs) {
-			resultListInFunc.add(RegulationInfoEmployee.builder()
+			resultListInFunc.add(convertToEmployeeInfo(res));
+		}
+				
+		return resultListInFunc;
+	}
+	
+	private RegulationInfoEmployee convertToEmployeeInfo(Object[] res) {
+		return RegulationInfoEmployee.builder()
 				.employeeID(String.valueOf(res[0]))
 				.employeeCode(String.valueOf(res[1]))
 				.classificationCode(Optional.ofNullable(res[2] != null ? String.valueOf(res[2]) : null))
@@ -813,10 +809,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 				.workplaceHierarchyCode(Optional.ofNullable(res[8] != null ? String.valueOf(res[8]) : null))
 				.workplaceCode(Optional.ofNullable(res[9] != null ? String.valueOf(res[9]) : null))
 				.workplaceName(Optional.ofNullable(res[10] != null ? String.valueOf(res[10]) : null))
-				.build());
-		}
-				
-		return resultListInFunc;
+				.build();
 	}
 
 	
