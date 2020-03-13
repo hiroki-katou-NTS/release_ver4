@@ -3,12 +3,12 @@ package nts.uk.shr.infra.web.session;
 import java.util.Arrays;
 import java.util.Optional;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.NewCookie;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.arc.security.csrf.CsrfToken;
 import nts.uk.shr.com.context.loginuser.LoginUserContextManager;
 import nts.uk.shr.com.context.loginuser.SessionLowLayer;
@@ -33,7 +33,7 @@ public class SessionContextCookie {
 	
 	public static Optional<NewCookie> createNewCookieFromSession() {
 		
-		val session = CDI.current().select(SessionLowLayer.class).get();
+		val session = SingletonBeansSoftCache.get(SessionLowLayer.class);
 		if (!session.isLoggedIn()) {
 			return Optional.empty();
 		}
@@ -54,7 +54,7 @@ public class SessionContextCookie {
 	private static final String DELIMITER = "@";
 
 	private static String createStringSessionContext() {
-		String userContext = CDI.current().select(LoginUserContextManager.class).get().toBase64();
+		String userContext = SingletonBeansSoftCache.get(LoginUserContextManager.class).toBase64();
 		String csrfToken = CsrfToken.getFromSession();
 		
 		// '='はCookieに含めると誤作動を起こすようなので、置換しておく
@@ -68,7 +68,7 @@ public class SessionContextCookie {
 			return;
 		}
 		
-		CDI.current().select(LoginUserContextManager.class).get().restoreBase64(parts[0]);
+		SingletonBeansSoftCache.get(LoginUserContextManager.class).restoreBase64(parts[0]);
 		CsrfToken.setToSession(parts[1]);
 	}
 }

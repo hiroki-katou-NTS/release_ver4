@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.EntityManager;
@@ -17,6 +16,7 @@ import javax.persistence.Table;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.arc.layer.infra.data.EntityManagerLoader;
 import nts.arc.layer.infra.data.entity.JpaEntity;
 import nts.gul.reflection.ReflectionUtil;
@@ -80,7 +80,7 @@ public class EntityTypeUtil {
 			String entityName = Arrays.asList(parts).stream()
 					.map(s -> CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, s))
 					.reduce("", (a, b) -> a + b);
- 			EntityManager em = CDI.current().select(EntityManagerLoader.class).get().getEntityManager();
+ 			EntityManager em = SingletonBeansSoftCache.get(EntityManagerLoader.class).getEntityManager();
  			
   			return em.getMetamodel().getEntities().stream().filter(e -> e.getName().equals(entityName))
 	 				.map(e -> e.getJavaType()).findFirst().map(c -> provider.apply((Class<? extends JpaEntity>)c))
@@ -100,7 +100,7 @@ public class EntityTypeUtil {
 	public static List<String> getAllColumnNames(String tableName, Function<Class<? extends JpaEntity>, List<String>> provider) {
 		
 		if (Strings.isNullOrEmpty(tableName)) return Collections.emptyList();
-		EntityManager em = CDI.current().select(EntityManagerLoader.class).get().getEntityManager();
+		EntityManager em = SingletonBeansSoftCache.get(EntityManagerLoader.class).getEntityManager();
 		
 		return em.getMetamodel().getEntities().stream().map(e -> e.getJavaType())
 				.filter(c -> {
