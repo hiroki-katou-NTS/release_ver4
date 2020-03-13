@@ -224,6 +224,7 @@ public class JpaOptionalWidgetRepository extends JpaRepository implements Option
 	
 	private static final String SELECT_LIST_DISPLAY_ITEMS_BY_COMPANY_ID = "SELECT i FROM SptstOptionalWidget o " 
 			+ "INNER JOIN SptstWidgetDisplay i ON o.sptstOptionalWidgetPK.topPagePartID = i.sptstWidgetDisplayPK.topPagePartID "
+			+ "AND o.sptstOptionalWidgetPK.companyID = i.sptstWidgetDisplayPK.companyID "
 			+ "WHERE o.sptstOptionalWidgetPK.companyID = :companyID ";
 	
 	private List<SptstWidgetDisplay> findItems(String companyID){
