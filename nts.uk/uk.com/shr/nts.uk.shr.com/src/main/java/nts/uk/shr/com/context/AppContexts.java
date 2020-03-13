@@ -1,8 +1,7 @@
 package nts.uk.shr.com.context;
 
-import javax.enterprise.inject.spi.CDI;
-
 import lombok.val;
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.arc.scoped.request.RequestContextProvider;
 import nts.arc.scoped.session.SessionContextProvider;
 import nts.uk.shr.com.context.loginuser.NullLoginUserContext;
@@ -41,6 +40,6 @@ public final class AppContexts {
 		}
 	}	
 	public static SystemConfiguration system() {
-		return CDI.current().select(SystemConfiguration.class).get();
+		return SingletonBeansSoftCache.get(SystemConfiguration.class);
 	}
 }

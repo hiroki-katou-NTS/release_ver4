@@ -2,7 +2,6 @@ package nts.uk.shr.infra.web.session;
 
 import java.io.IOException;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -11,6 +10,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.uk.shr.com.communicate.batch.BatchServer;
 import nts.uk.shr.com.context.loginuser.LoginUserContextManager;
 
@@ -26,7 +26,7 @@ public class BatchRequestProcessor implements Filter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		String userContextBase64 = httpRequest.getHeader(BatchServer.CUSTOM_HEADER_USER_CONTEXT);
 
-		CDI.current().select(LoginUserContextManager.class).get().restoreBase64(userContextBase64);
+		SingletonBeansSoftCache.get(LoginUserContextManager.class).restoreBase64(userContextBase64);
 		chain.doFilter(httpRequest, response);
 	}
 

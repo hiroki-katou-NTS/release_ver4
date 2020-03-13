@@ -3,7 +3,6 @@ package nts.uk.shr.infra.web.session;
 import java.io.IOException;
 import java.util.Arrays;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -15,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.val;
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.arc.security.csrf.CsrfToken;
 import nts.uk.shr.com.context.loginuser.LoginUserContextManager;
 import nts.uk.shr.com.context.loginuser.SessionLowLayer;
@@ -31,7 +31,7 @@ public class SharingSessionFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
-		val sessionLowLayer = CDI.current().select(SessionLowLayer.class).get();
+		val sessionLowLayer = SingletonBeansSoftCache.get(SessionLowLayer.class);
 		boolean isLoggedIn = sessionLowLayer.isLoggedIn();
 		val httpRequest = (HttpServletRequest) request;
 
@@ -61,7 +61,7 @@ public class SharingSessionFilter implements Filter {
 		chain.doFilter(request, response);
 		
 		// サーバ側の処理でセッション情報が変化しているかどうかに関わらず、Cookieの情報を最新化しておく。
-		if (CDI.current().select(SessionLowLayer.class).get().isLoggedIn()) {
+		if (SingletonBeansSoftCache.get(SessionLowLayer.class).isLoggedIn()) {
 			val httpResponse = (HttpServletResponse) response;
 			val newSessionContextCookie = new Cookie(COOKIE_SESSION_CONTEXT, createStringSessionContext());
 			newSessionContextCookie.setPath("/");
@@ -77,7 +77,7 @@ public class SharingSessionFilter implements Filter {
 	private static final String DELIMITER = "@";
 
 	private static String createStringSessionContext() {
-		String userContext = CDI.current().select(LoginUserContextManager.class).get().toBase64();
+		String userContext = SingletonBeansSoftCache.get(LoginUserContextManager.class).toBase64();
 		String csrfToken = CsrfToken.getFromSession();
 		
 		// '='はCookieに含めると誤作動を起こすようなので、置換しておく
@@ -89,7 +89,7 @@ public class SharingSessionFilter implements Filter {
 		if (parts.length != 2) {
 			return;
 		}
-		CDI.current().select(LoginUserContextManager.class).get().restoreBase64(parts[0]);
+		SingletonBeansSoftCache.get(LoginUserContextManager.class).restoreBase64(parts[0]);
 		CsrfToken.setToSession(parts[1]);
 	}
 }

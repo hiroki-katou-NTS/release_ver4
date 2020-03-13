@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.arc.diagnose.PrintStackTrace;
 import nts.arc.task.AsyncTask;
 import nts.arc.task.AsyncTaskService;
@@ -67,7 +67,7 @@ public class AuditTrailAsyncExecutor implements CorrectionLoggingAgent {
 					log.debug("[AuditTrailAsyncExecutor ASYNC START] " + operationId);
 					
 					try {
-						val auditTrailTransaction = CDI.current().select(AuditTrailTransaction.class).get();
+						val auditTrailTransaction = SingletonBeansSoftCache.get(AuditTrailTransaction.class);
 						auditTrailTransaction.begin(basicInfo, processorId, parameters);
 						log.debug("[AuditTrailAsyncExecutor ASYNC DONE] " + operationId);
 					} catch (Exception ex) {

@@ -9,8 +9,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import javax.enterprise.inject.spi.CDI;
-
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.arc.time.GeneralDate;
 import nts.uk.shr.com.time.japanese.JapaneseDate;
 import nts.uk.shr.com.time.japanese.JapaneseErasProvider;
@@ -403,7 +402,7 @@ public abstract class DateTimeTranscoder {
 	 */
 	private String formatSysJpDateOfPattern(String date) {
 		String convertedDate = SLASH_PTN.matcher(date).replaceAll(HYPHEN);
-		JapaneseDate jDate = CDI.current().select(JapaneseErasProvider.class).get()
+		JapaneseDate jDate = SingletonBeansSoftCache.get(JapaneseErasProvider.class)
 								.toJapaneseDate(GeneralDate.localDate(LocalDate.parse(convertedDate, 
 												DateTimeFormatter.ofPattern(DateTimeFormatDef.YMD_PATTERN))));
 		return jDate.toString();
