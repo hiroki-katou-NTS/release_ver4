@@ -84,7 +84,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 	
 	private static final String SELECT_EMPLOYEE =  "SELECT"
 			+ " SID, SCD, CLASSIFICATION_CODE, EMP_CD, COM_STR_DATE, JOB_CD,"
-			+ " BUSINESS_NAME, WKP_ID, WKP_HIERARCHY_CD, WKP_CD, WKP_NAME "
+			+ " BUSINESS_NAME, WKP_ID, WKP_HIERARCHY_CD, WKP_CD, WKP_NAME, "
             + " DEP_ID, DEP_HIERARCHY_CD, DEP_CD, DEP_NAME, DEP_DELETE_FLAG "
 			+ " FROM EMPLOYEE_DATA_VIEW ";
 	
