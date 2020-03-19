@@ -5370,7 +5370,7 @@ module nts.uk.at.view.kdw003.a.viewmodel {
                 self.dateTarget = moment(dataExtract.dateTarget, "YYYY/MM/DD");
                 self.displayFormat = dataExtract.displayFormat;
                 self.individualTarget = dataExtract.individualTarget;
-                self.lstExtractedEmployee = null//dataExtract.lstExtractedEmployee;
+                self.lstExtractedEmployee = dataExtract.lstExtractedEmployee; //bug 109626
                 self.startDate = moment(dataExtract.startDate, "YYYY/MM/DD");
                 self.endDate = moment(dataExtract.endDate, "YYYY/MM/DD");
                 self.startDateKDW004 =  dataExtract.startDateKDW004;

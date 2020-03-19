@@ -19,7 +19,7 @@ public class ObjectShare {
 	private GeneralDate dateTarget; // 日付別で起動- Optional ngày extract mode 2
 	private Integer displayFormat; // 表示形式 mode hiển thị
 	private String individualTarget; // 個人別で起動 ca nhan 
-	//private List<String> lstExtractedEmployee;// 抽出した社員一覧
+    private List<String> lstExtractedEmployee;// bug 109626 change param
 	private GeneralDate startDate;// 期間 khoảng thời gian
 	private GeneralDate endDate;// 期間 khoảng thời gian
 	private Integer yearMonth;

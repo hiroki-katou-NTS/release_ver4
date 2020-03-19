@@ -298,7 +298,7 @@ module nts.uk.at.view.kdw004.a.viewmodel {
                     displayFormat: DPCorrectionDisplayFormat.DATE,
                     startDate: startDate,
                     endDate: startDate,
-                    lstExtractedEmployee: [employeeId],
+                    lstExtractedEmployee: _.map(self.lstData, data => data.employeeId),
                     dateTarget: startDate,
                     individualTarget: employeeId,
                     startDateKDW004: self.startDateExtract,
@@ -341,7 +341,7 @@ module nts.uk.at.view.kdw004.a.viewmodel {
 //                    endDate: self.endDateExtract,
                     //抽出した社員一覧
                     yearMonth: self.yearMonth(),
-                    lstExtractedEmployee: employeeId,
+                    lstExtractedEmployee: _.map(self.lstData, data => data.employeeId),
                     //初期表示年月日
                     dateTarget: self.datePeriod().endDate,
                     //初期表示社員

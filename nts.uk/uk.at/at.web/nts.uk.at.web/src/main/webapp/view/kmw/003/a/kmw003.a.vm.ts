@@ -1312,7 +1312,7 @@ module nts.uk.at.view.kmw003.a.viewmodel {
                             return value.id == data.id;
                         })
                         let initParam = new DPCorrectionInitParam(ScreenMode.NORMAL, [rowSelect.employeeId], false, false, closureId, __viewContext.vm.yearMonth(), '/view/kmw/003/a/index.xhtml?initmode='+ initMode);
-                        let extractionParam = new DPCorrectionExtractionParam(DPCorrectionDisplayFormat.INDIVIDUAl, rowSelect.startDate, rowSelect.endDate, [rowSelect.employeeId], rowSelect.employeeId);
+                        let extractionParam = new DPCorrectionExtractionParam(DPCorrectionDisplayFormat.INDIVIDUAl, rowSelect.startDate, rowSelect.endDate, _.map(__viewContext.vm.dpData, data => data.employeeId), rowSelect.employeeId);
                         nts.uk.request.jump("/view/kdw/003/a/index.xhtml", { initParam: initParam, extractionParam: extractionParam });
                     }
                 },

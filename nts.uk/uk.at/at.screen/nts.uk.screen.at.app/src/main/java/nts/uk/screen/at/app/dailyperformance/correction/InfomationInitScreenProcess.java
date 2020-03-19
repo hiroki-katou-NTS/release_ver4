@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.val;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.finddata.IFindDataDCRecord;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.ApprovalUseSettingDto;
 import nts.uk.screen.at.app.dailyperformance.correction.dto.CorrectionOfDailyPerformance;
@@ -134,7 +135,7 @@ public class InfomationInitScreenProcess {
 		if (lstEmployee.isEmpty()) {
 			val employeeIds = objectShare == null
 					? lstEmployee.stream().map(x -> x.getId()).collect(Collectors.toList())
-					: objectShare.getLstEmployeeShare();
+		                    : CollectionUtil.isEmpty(objectShare.getLstExtractedEmployee()) ?  objectShare.getLstEmployeeShare() : objectShare.getLstExtractedEmployee();
 			if (employeeIds.isEmpty())
 				needSortEmp = true;
 			changeEmployeeIds = processor.changeListEmployeeId(employeeIds, rangeInit, mode,
