@@ -672,10 +672,9 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		// get employment info
 		List<RegulationEmployeeEmployment> employments = getEmploymentInfo(sid, comId);
 		RegulationEmployeeEmployment employment = CollectionUtil.isEmpty(employments) ? new RegulationEmployeeEmployment(null, null, null) : employments.get(0);
-		String histId = employment.getHistId();
-		
+
 		// get workplace info
-		List<RegulationEmployeeWorkplace> workplaces = getWorkPlaceInfo(sid, comId, histId, baseDate);
+		List<RegulationEmployeeWorkplace> workplaces = getWorkPlaceInfo(sid, comId, baseDate);
 		RegulationEmployeeWorkplace workplace = CollectionUtil.isEmpty(workplaces) ? new RegulationEmployeeWorkplace(null, null, null, null, null) : workplaces.get(0);
 		
 		// get classification
@@ -692,7 +691,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		
 		return convertToEmployeeInfo(employeeInfo, workplace, employment, classification, jobInfo, comHist);
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -935,11 +934,10 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		private String wkpCd;
 		private String wkpName;
 	}
-	private List<RegulationEmployeeWorkplace> getWorkPlaceInfo(String sid, String comId, String histId, GeneralDateTime baseDate) {
+	private List<RegulationEmployeeWorkplace> getWorkPlaceInfo(String sid, String comId, GeneralDateTime baseDate) {
 		StringBuilder builder = new StringBuilder(SELECT_WORKPLACE_INFO)
 				.append(" WHERE wplHis.CID = '" + comId + "'")
 				.append(" AND wplHis.SID = '" + sid + "'")
-				.append(" AND wplHis.HIST_ID = '" + histId + "'")
 				.append(" AND ( wplHis.START_DATE <= baseDate AND wplHis.END_DATE >= baseDate ) ");
 		
 		String sql = builder.toString().replaceAll("baseDate", "'" + baseDate.toString(DATE_TIME_FORMAT) + "'");
