@@ -671,47 +671,26 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		
 		// get employment info
 		List<RegulationEmployeeEmployment> employments = getEmploymentInfo(sid, comId);
-		RegulationEmployeeEmployment employment;
-		if(CollectionUtil.isEmpty(employments)) {
-			employment = new RegulationEmployeeEmployment(null, null, null);
-		}
-		employment = employments.get(0);
+		RegulationEmployeeEmployment employment = CollectionUtil.isEmpty(employments) ? new RegulationEmployeeEmployment(null, null, null) : employments.get(0);
 		String histId = employment.getHistId();
 		
 		// get workplace info
 		List<RegulationEmployeeWorkplace> workplaces = getWorkPlaceInfo(sid, comId, histId, baseDate);
-		RegulationEmployeeWorkplace workplace;
-		if(CollectionUtil.isEmpty(workplaces)) {
-			workplace = new RegulationEmployeeWorkplace(null, null, null, null, null);
-		}
-		workplace = workplaces.get(0);
+		RegulationEmployeeWorkplace workplace = CollectionUtil.isEmpty(workplaces) ? new RegulationEmployeeWorkplace(null, null, null, null, null) : workplaces.get(0);
 		
 		// get classification
 		List<RegulationEmployeeClassification> classifications = getClassificationInfo(sid, comId);
-		RegulationEmployeeClassification classification;
-		if(CollectionUtil.isEmpty(classifications)) {
-			classification = new RegulationEmployeeClassification(null, null);
-		}
-		classification = classifications.get(0);
+		RegulationEmployeeClassification classification = CollectionUtil.isEmpty(classifications) ? new RegulationEmployeeClassification(null, null) : classifications.get(0);
 		
 		// get job info
 		List<RegulationEmployeeJobInfo> jobInfos = getJobInfo(sid, comId);
-		RegulationEmployeeJobInfo jobInfo;
-		if(CollectionUtil.isEmpty(jobInfos)) {
-			jobInfo = new RegulationEmployeeJobInfo(null, null);
-		}
-		jobInfo = jobInfos.get(0);
+		RegulationEmployeeJobInfo jobInfo = CollectionUtil.isEmpty(jobInfos) ? new RegulationEmployeeJobInfo(null, null) : jobInfos.get(0);
 		
 		// get com hist
 		List<RegulationEmployeeComHistInfo> comHists = getComHistInfo(sid, comId);
-		RegulationEmployeeComHistInfo comHist;
-		if(CollectionUtil.isEmpty(comHists)) {
-			comHist = new RegulationEmployeeComHistInfo(null, null);
-		}
-		comHist = comHists.get(0);
+		RegulationEmployeeComHistInfo comHist = CollectionUtil.isEmpty(comHists) ? new RegulationEmployeeComHistInfo(null, null) : comHists.get(0);
 		
 		return convertToEmployeeInfo(employeeInfo, workplace, employment, classification, jobInfo, comHist);
-	
 	}
 
 	/*
