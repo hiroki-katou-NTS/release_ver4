@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,9 +89,39 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			+ " AND wh.endD >= :refDate";
 	
 	private static final String SELECT_EMPLOYEE =  "SELECT"
-			+ " SID, SCD, CLASSIFICATION_CODE, EMP_CD, COM_STR_DATE, JOB_CD,"
-			+ " BUSINESS_NAME, WORKPLACE_ID, WKP_HIERARCHY_CD, WPL_CD, WPL_NAME "
-			+ " FROM EMPLOYEE_DATA_VIEW ";
+			+ " employee.SID, employee.SCD, classHisItem.CLASSIFICATION_CODE, empHisItem.EMP_CD, comHis.START_DATE, jobInfo.JOB_CD,"
+			+ " person.BUSINESS_NAME, wplHisItem.WORKPLACE_ID, wkpconfinf.HIERARCHY_CD, wplInfo.WKPCD, wplInfo.WKP_NAME "
+				// Employee info Person info
+			+ " FROM BSYMT_EMP_DTA_MNG_INFO employee LEFT JOIN BPSMT_PERSON person ON employee.PID = person.PID "
+				// Employment
+			+ " LEFT JOIN BSYMT_EMPLOYMENT_HIST empHis ON employee.SID = empHis.SID AND employee.CID = empHis.CID "
+			+ " LEFT JOIN BSYMT_EMPLOYMENT_HIS_ITEM empHisItem ON empHisItem.HIST_ID = empHis.HIST_ID "
+				// workplace
+			+ " LEFT JOIN BSYMT_AFF_WORKPLACE_HIST wplHis ON employee.SID = wplHis.SID AND employee.CID = wplHis.CID "
+			+ " LEFT JOIN BSYMT_AFF_WPL_HIST_ITEM wplHisItem ON wplHis.HIST_ID = wplHisItem.HIST_ID "
+			+ " LEFT JOIN BSYMT_WORKPLACE_INFO wplInfo ON wplHisItem.WORKPLACE_ID = wplInfo.WKPID "
+			+ " LEFT JOIN BSYMT_WORKPLACE_HIST wplInfoHis ON wplInfo.HIST_ID = wplInfoHis.HIST_ID AND wplInfo.CID = wplInfoHis.CID "
+			+ " LEFT JOIN BSYMT_WKP_CONFIG_INFO wkpconfinf ON wkpconfinf.WKPID = wplHisItem.WORKPLACE_ID "
+			+ " LEFT JOIN BSYMT_WKP_CONFIG wkpconf ON wkpconf.HIST_ID = wkpconfinf.HIST_ID AND wkpconf.CID = wkpconfinf.CID "
+				// classification
+			+ " LEFT JOIN BSYMT_AFF_CLASS_HISTORY classHis ON employee.SID = classHis.SID AND employee.CID = classHis.CID "
+			+ " LEFT JOIN BSYMT_AFF_CLASS_HIS_ITEM classHisItem ON classHis.HIST_ID = classHisItem.HIST_ID "
+				// JobTitle Info
+			+ " LEFT JOIN BSYMT_AFF_JOB_HIST jobHis ON employee.SID = jobHis.SID AND employee.CID = jobHis.CID "
+			+ " LEFT JOIN BSYMT_AFF_JOB_HIST_ITEM jobHisItem ON jobHis.HIST_ID = jobHisItem.HIST_ID "
+			+ " LEFT JOIN BSYMT_JOB_INFO jobInfo ON jobHisItem.JOB_TITLE_ID = jobInfo.JOB_ID "
+			+ " LEFT JOIN BSYMT_JOB_HIST jonInfoHis ON jobInfo.HIST_ID = jonInfoHis.HIST_ID AND jobInfo.CID = jonInfoHis.CID "
+			+ " LEFT JOIN BSYMT_JOB_SEQ_MASTER jobseq ON jobseq.SEQ_CD = jobInfo.SEQUENCE_CD AND jobseq.CID = jobInfo.CID "
+				// com hist
+			+ " LEFT JOIN BSYMT_AFF_COM_HIST comHis ON employee.SID = comHis.SID AND comHis.CID = employee.CID "
+				// Absentinfo
+			+ " LEFT JOIN BSYMT_TEMP_ABS_HISTORY absHis ON employee.SID = absHis.SID AND employee.CID = absHis.CID "
+			+ " LEFT JOIN BSYMT_TEMP_ABS_HIS_ITEM absHisItem ON absHis.HIST_ID = absHisItem.HIST_ID "
+				// Worktype info 
+			+ " LEFT JOIN KRCMT_BUS_TYPE_HIST workTypeHis ON employee.SID = workTypeHis.SID AND employee.CID = workTypeHis.CID "
+			+ " LEFT JOIN KRCMT_BUS_TYPE_SYAIN workTypeHisItem ON workTypeHis.HIST_ID = workTypeHisItem.HIST_ID "
+				// Closure info
+			+ " LEFT JOIN KCLMT_CLOSURE_EMPLOYMENT closureEmp ON empHisItem.EMP_CD = closureEmp.EMPLOYMENT_CD AND closureEmp.CID = empHis.CID ";
 	
 	private static final String SELECT_EMPLOYEE_INFO = "SELECT"
 			+ " employee.SID, employee.SCD, person.BUSINESS_NAME, employee.CID "
@@ -139,9 +171,6 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 	 */
 	@Override
 	public List<RegulationInfoEmployee> find(String comId, EmployeeSearchQuery paramQuery) {
-		// max paramenter count = 800
-		int countParameter = 0;
-		
 		// Return empty list if all status of employee = 対象外
 		if (!paramQuery.getIncludeIncumbents() && !paramQuery.getIncludeOccupancy() && !paramQuery.getIncludeRetirees()
 				&& !paramQuery.getIncludeWorkersOnLeave()) {
@@ -162,16 +191,15 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		
 		StringBuilder whereBuilder = new StringBuilder()
 											// Add company condition 
-											.append(" WHERE ((CID = '" + comId + "')")
+											.append(" WHERE (( employee.CID = ?1 )")
 											// Add NOT_DELETED condition
-											.append(" AND (DEL_STATUS_ATR = " + NOT_DELETED + "))");
+											.append(" AND (employee.DEL_STATUS_ATR = " + NOT_DELETED + "))");
 		String and = " AND ";
 		String not = " NOT ";
 		String or = " OR ";
 		// Add NOT_DELETED condition
-		countParameter += 2;
 		// employment condition
-		String empCondition = "( EMPLOYMENT_STR_DATE <= rfDate ) AND ( EMPLOYMENT_END_DATE >= rfDate )";
+		String empCondition = "( empHis.START_DATE <= rfDate ) AND ( empHis.END_DATE >= rfDate )";
 		if (paramQuery.getFilterByEmployment()) {
 			// return empty list if condition code list is empty
 			if (employmentCodes.isEmpty()) {
@@ -180,16 +208,14 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 
 			// update query conditions
 			whereBuilder.append(and + empCondition);
-			countParameter += 2;				
 		} else {
-			whereBuilder.append(and + " ( EMPLOYMENT_STR_DATE IS NULL " + or + empCondition + ")");
-			countParameter += 3;
+			whereBuilder.append(and + " ( empHis.START_DATE IS NULL " + or + empCondition + ")");
 		}
 
 		// workplace condition
-		String wplCondition = "((WPL_STR_DATE <= rfDate AND WPL_END_DATE >= rfDate )"
-							+ and + "(WPL_INFO_STR_DATE <= rfDate AND WPL_INFO_END_DATE >= rfDate )"
-							+ and + "(WKP_CONF_END_DT >= rfDate AND WKP_CONF_STR_DT <= rfDate ))";
+		String wplCondition = "((wplHis.START_DATE <= rfDate AND wplHis.END_DATE >= rfDate )"
+							+ and + "(wplInfoHis.START_DATE <= rfDate AND wplInfoHis.END_DATE >= rfDate )"
+							+ and + "(wkpconf.END_DATE >= rfDate AND wkpconf.START_DATE <= rfDate ))";
 		if (paramQuery.getFilterByWorkplace()) {
 			// return empty list if condition code list is empty
 			if (workplaceCodes.isEmpty()) {
@@ -198,15 +224,13 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 
 			// update query conditions
 			whereBuilder.append(and + wplCondition);
-			countParameter += 6;
 		} else {
 			// conditions.add(cb.or(cb.isNull(root.get(EmployeeDataView_.wplStrDate)), wplCondition));
-			whereBuilder.append(and  + " ( WPL_STR_DATE IS NULL " + or + wplCondition + ")");
-			countParameter += 7;
+			whereBuilder.append(and  + " ( wplHis.START_DATE IS NULL " + or + wplCondition + ")");
 		}
 
 		// classification condition
-		String clsCondition = "(CLASS_STR_DATE <= rfDate AND CLASS_END_DATE >= rfDate)";
+		String clsCondition = "(classHis.START_DATE <= rfDate AND classHis.END_DATE >= rfDate)";
 		if (paramQuery.getFilterByClassification()) {
 			// return empty list if condition code list is empty
 			if (classificationCodes.isEmpty()) {
@@ -215,15 +239,13 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 
 			// update query conditions
 			whereBuilder.append(and + clsCondition);
-			countParameter += 2;
 		} else {
-			whereBuilder.append(and + " (CLASS_STR_DATE IS NULL" + or + clsCondition + ")");
-			countParameter += 3;
+			whereBuilder.append(and + " (classHis.START_DATE IS NULL" + or + clsCondition + ")");
 		}
 
 		// jobtitle condition
-		String jobCondition = "((JOB_STR_DATE <= rfDate AND JOB_END_DATE >= rfDate)"
-				+ and + "(JOB_INFO_STR_DATE <= rfDate AND JOB_INFO_END_DATE >= rfDate))";
+		String jobCondition = "((jobHis.START_DATE <= rfDate AND jobHis.END_DATE >= rfDate)"
+				+ and + "(jonInfoHis.START_DATE <= rfDate AND jonInfoHis.END_DATE >= rfDate))";
 		if (paramQuery.getFilterByJobTitle()) {
 			// return empty list if condition code list is empty
 			if (jobTitleCodes.isEmpty()) {
@@ -232,10 +254,8 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 
 			// update query conditions
 			whereBuilder.append(and + jobCondition);
-			countParameter += 4;
 		} else {
-			whereBuilder.append(and + "( JOB_STR_DATE IS NULL " + or + jobCondition + ")");
-			countParameter += 5;
+			whereBuilder.append(and + "( jobHis.START_DATE IS NULL " + or + jobCondition + ")");
 		}
 		if (paramQuery.getSystemType() == CCG001SystemType.EMPLOYMENT.value) {
 			if (paramQuery.getFilterByWorktype()) {
@@ -245,11 +265,9 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 				}
 				
 				// update query conditions
-				whereBuilder.append(" AND (WORK_TYPE_CD in ('" + String.join("','", worktypeCodes) + "')");
+				whereBuilder.append(" AND (workTypeHisItem.BUSINESS_TYPE_CD in ('" + String.join("','", worktypeCodes) + "')");
 				String workDate = GeneralDate.localDate(baseDate.toLocalDate()).toString(DATE_FORMAT) + " 00:00:00";
-				whereBuilder.append(and + "( WORK_TYPE_STR_DATE <= '" + workDate + "' AND WORK_TYPE_END_DATE >= '"+ workDate +"' ) )");
-
-				countParameter += 2 + worktypeCodes.size();
+				whereBuilder.append(and + "( workTypeHis.START_DATE <= '" + workDate + "' AND workTypeHis.END_DATE >= '"+ workDate +"' ) )");
 			}
 			if (paramQuery.getFilterByClosure()) {
 				// return empty list if condition code list is empty
@@ -259,13 +277,11 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 
 				// update query conditions
 				String closureIdsStr = closureIds.toString(); 
-				whereBuilder.append(" AND (CLOSURE_ID in (" + closureIdsStr.substring(1, closureIdsStr.length()-1) + "))");
-				countParameter += closureIds.size();
+				whereBuilder.append(" AND (closureEmp.CLOSURE_ID in (" + closureIdsStr.substring(1, closureIdsStr.length()-1) + "))");
 
 				// check exist before add employment conditions
 				if (!paramQuery.getFilterByEmployment()) {
-					whereBuilder.append(and + " (EMPLOYMENT_STR_DATE <= rfDate AND EMPLOYMENT_END_DATE >= rfDate) ");
-					countParameter += 2;
+					whereBuilder.append(and + " (empHis.START_DATE <= rfDate AND empHis.END_DATE >= rfDate) ");
 				}
 			}
 		}
@@ -279,9 +295,9 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		GeneralDateTime end = paramQuery.getPeriodEnd();
 				
 		// isWorking
-		String isWorking = "((TEMP_ABS_FRAME_NO is null and ABS_STR_DATE is null) or (ABS_STR_DATE > endDate) or (ABS_END_DATE < startDate) )";
+		String isWorking = "((absHisItem.TEMP_ABS_FRAME_NO is null and absHis.START_DATE is null) or (absHis.START_DATE > endDate) or (absHis.END_DATE < startDate) )";
 		// is in company
-		String isInCompany = " NOT ( COM_STR_DATE > endDate OR COM_END_DATE < startDate) ";
+		String isInCompany = " NOT ( comHis.START_DATE > endDate OR comHis.END_DATE < startDate) ";
 
 		String incumbentCondition = null;
 		String workerOnLeaveCondition = null;
@@ -294,17 +310,17 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 
 		// workerOnLeave
 		if (paramQuery.getIncludeWorkersOnLeave()) {
-			workerOnLeaveCondition = isInCompany + and + not + isWorking + and + "(TEMP_ABS_FRAME_NO = " + LEAVE_ABSENCE_QUOTA_NO + ")";
+			workerOnLeaveCondition = isInCompany + and + not + isWorking + and + "(absHisItem.TEMP_ABS_FRAME_NO = " + LEAVE_ABSENCE_QUOTA_NO + ")";
 		}
 
 		// Occupancy
 		if (paramQuery.getIncludeOccupancy()) {
-			occupancyCondition = isInCompany + and + not + isWorking  + and + "(TEMP_ABS_FRAME_NO <> " + LEAVE_ABSENCE_QUOTA_NO + ")";
+			occupancyCondition = isInCompany + and + not + isWorking  + and + "(absHisItem.TEMP_ABS_FRAME_NO <> " + LEAVE_ABSENCE_QUOTA_NO + ")";
 		}
 
 		// retire
 		if (paramQuery.getIncludeRetirees()) {
-			retireCondition = "COM_STR_DATE BETWEEN retireStart AND retireEnd" + and + "COM_END_DATE <> '9999-12-31 00:00:00'";
+			retireCondition = "comHis.START_DATE BETWEEN retireStart AND retireEnd" + and + "comHis.END_DATE <> '9999-12-31 00:00:00'";
 		}
 		if(incumbentCondition != null || workerOnLeaveCondition != null || occupancyCondition != null || retireCondition != null) {
 			whereBuilder.append("AND ( 1<>1 ");
@@ -322,7 +338,6 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			}
 			whereBuilder.append(")");
 		}
-		countParameter += 10;
 
 		// sort
 		StringBuilder orderBy = new StringBuilder();
@@ -332,7 +347,6 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			orderBy.append(" ORDER BY " + String.join(",", orders));
 		}
 		List<RegulationInfoEmployee> resultList = new ArrayList<>();
-		int countParameterFinal = countParameter; 
 		// Fix bug #100057
 		if (CollectionUtil.isEmpty(employmentCodes)) {
 			employmentCodes.add(EMPTY_LIST);
@@ -547,28 +561,28 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			SortingConditionOrder cond = iterator.next();
 			switch (cond.getType()) {
 			case EMPLOYMENT: // EMPLOYMENT
-				orders.add("EMP_CD ASC");
+				orders.add("empHisItem.EMP_CD ASC");
 				break;
 			case DEPARTMENT: // DEPARTMENT
 				// TODO: not covered
 				break;
 			case WORKPLACE: // WORKPLACE
-				orders.add("WKP_HIERARCHY_CD ASC");
+				orders.add("wkpconfinf.HIERARCHY_CD ASC");
 				break;
 			case CLASSIFICATION: // CLASSIFICATION
-				orders.add("CLASSIFICATION_CODE ASC");
+				orders.add("classHisItem.CLASSIFICATION_CODE ASC");
 				break;
 			case POSITION: // POSITION
-				orders.add("JOB_SEQ_DISP ASC");
-				orders.add("JOB_CD ASC");
+				orders.add("jobseq.DISPORDER ASC");
+				orders.add("jobInfo.JOB_CD ASC");
 				break;
 			case HIRE_DATE: // HIRE_DATE
-				orders.add("COM_STR_DATE ASC");
+				orders.add("comHis.START_DATE ASC");
 				break;
 			case NAME: // NAME
 				// 現在は、氏名の種類を選択する機能がないので、「ビジネスネーム日本語」固定で
 				// => 「氏名カナ」 ＝ 「ビジネスネームカナ」
-				orders.add("BUSINESS_NAME_KANA ASC");
+				orders.add("person.BUSINESS_NAME_KANA ASC");
 				break;
 			}
 		}
@@ -583,7 +597,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		}
 
 		// always sort by employee code
-		orders.add("SCD ASC");
+		orders.add("employee.SCD ASC");
 		return orders;
 	}
 
@@ -770,11 +784,14 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		// clear where builder
 		StringBuilder whereBuilder = new StringBuilder(whereBuilderP.toString());
 		// employment condition
+		Map<Integer, List<String>> params = new HashMap<>();
+		int paramIdx = 6;
 		if (paramQuery.getFilterByEmployment()) {
 			if (splitEmploymentCodes.size() == 1 && splitEmploymentCodes.get(0).compareTo(EMPTY_LIST) == 0) {
 				splitEmploymentCodes.clear();
 			}
-			whereBuilder.append(" AND (EMP_CD IN ('" + String.join("','", splitEmploymentCodes) + "'))" );
+			whereBuilder.append(" AND (empHisItem.EMP_CD IN ('" + String.join("','", splitEmploymentCodes) + "'))" );
+			params.put(++paramIdx, splitEmploymentCodes);
 		}
 		
 		// workplace condition
@@ -782,7 +799,8 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			if (splitWorkplaceCodes.size() == 1 && splitWorkplaceCodes.get(0).compareTo(EMPTY_LIST) == 0) {
 				splitWorkplaceCodes.clear();
 			}
-			whereBuilder.append(" AND (WORKPLACE_ID IN ('" + String.join("','", splitWorkplaceCodes) + "'))" );
+			whereBuilder.append(" AND (wplHisItem.WORKPLACE_ID IN ('" + String.join("','", splitWorkplaceCodes) + "'))" );
+			params.put(++paramIdx, splitWorkplaceCodes);
 		}
 		
 		// classification condition
@@ -790,7 +808,8 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			if (splitClassificationCodes.size() == 1 && splitClassificationCodes.get(0).compareTo(EMPTY_LIST) == 0) {
 				splitClassificationCodes.clear();
 			}
-			whereBuilder.append(" AND (CLASSIFICATION_CODE IN ('" + String.join("','", splitClassificationCodes) + "'))" );
+			whereBuilder.append(" AND (classHisItem.CLASSIFICATION_CODE IN ('" + String.join("','", splitClassificationCodes) + "'))" );
+			params.put(++paramIdx, splitClassificationCodes);
 		}
 		
 		// jobtitle condition
@@ -798,30 +817,44 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			if (splitJobTitleCodes.size() == 1 && splitJobTitleCodes.get(0).compareTo(EMPTY_LIST) == 0) {
 				splitJobTitleCodes.clear();
 			}
-			whereBuilder.append(" AND (JOB_TITLE_ID IN ('" + String.join("','", splitJobTitleCodes) + "'))" );
+			whereBuilder.append(" AND (jobHisItem.JOB_TITLE_ID IN ('" + String.join("','", splitJobTitleCodes) + "'))" );
+			params.put(++paramIdx, splitJobTitleCodes);
 		}
 		
 		List<RegulationInfoEmployee> resultListInFunc = new ArrayList<>();
 
 		String sql = selectBuilder.toString() + whereBuilder.toString() + orderBuilder.toString();
 		if(sql.contains("rfDate")) {
-			sql = sql.replaceAll("rfDate", "'" + baseDate.toString(DATE_TIME_FORMAT) + "'");
+			sql = sql.replaceAll("rfDate", "?2");
 		}
 		if(sql.contains("startDate")) {
-			sql = sql.replaceAll("startDate", "'" + start.toString(DATE_TIME_FORMAT) + "'");
+			sql = sql.replaceAll("startDate", "?3");
 		}
 		if(sql.contains("endDate")) {
-			sql = sql.replaceAll("endDate", "'" + end.toString(DATE_TIME_FORMAT) + "'");
+			sql = sql.replaceAll("endDate", "?4");
 		}
 		if(sql.contains("retireStart")) {
-			sql = sql.replaceAll("retireStart", "'" + retireStart.toString(DATE_TIME_FORMAT) + "'");
+			sql = sql.replaceAll("retireStart", "?5");
 		}
 		if(sql.contains("retireEnd")) {
-			sql = sql.replaceAll("retireEnd", "'" + retireEnd.toString(DATE_TIME_FORMAT) + "'");
+			sql = sql.replaceAll("retireEnd", "?6");
 		}
 		
 		Query query = this.getEntityManager()
 				.createNativeQuery(sql);
+		
+		query.setParameter(1, comId);
+		query.setParameter(2, baseDate.toLocalDate());
+		query.setParameter(3, start.toLocalDate());
+		query.setParameter(4, end.toLocalDate());
+		query.setParameter(5, retireStart.toLocalDate());
+		query.setParameter(6, retireEnd.toLocalDate());
+		
+		for (Iterator<Entry<Integer, List<String>>> iterator = params.entrySet().iterator(); iterator.hasNext();) {
+			Entry<Integer, List<String>> param = iterator.next();
+			query.setParameter( param.getKey(), param.getValue());
+		}
+		
 		@SuppressWarnings("unchecked")
 		List<Object[]> queryRs = query.getResultList();
 		
