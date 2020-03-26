@@ -2,10 +2,10 @@ package nts.uk.shr.infra.web.session;
 
 import java.util.function.Function;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.uk.shr.com.context.loginuser.SessionLowLayer;
 import nts.uk.shr.com.program.nosession.PathsNoSession;
 
@@ -34,7 +34,7 @@ public class ServletPathsNoSession {
         String requestedPath = this.getRequestedPath.apply(httpRequest).toLowerCase();
         
         return !paths.sessionRequired(requestedPath)
-                || CDI.current().select(SessionLowLayer.class).get().isLoggedIn();
+                || SingletonBeansSoftCache.get(SessionLowLayer.class).isLoggedIn();
     }
 
 

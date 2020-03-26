@@ -3,7 +3,6 @@ package nts.uk.shr.infra.web.component;
 import java.io.IOException;
 import java.util.Arrays;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.faces.component.FacesComponent;
 import javax.faces.component.UIComponentBase;
 import javax.faces.context.FacesContext;
@@ -11,6 +10,7 @@ import javax.faces.context.ResponseWriter;
 import javax.servlet.http.HttpServletRequest;
 
 import lombok.val;
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.arc.system.ServerSystemProperties;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.context.AppContextsConfig;
@@ -57,7 +57,7 @@ public class ViewContext extends UIComponentBase {
 		writeRootPath(requestedPath, rw);
 		rw.write(",");
 
-		ShareMenuAdapter menuAdapter = CDI.current().select(ShareMenuAdapter.class).get();
+		ShareMenuAdapter menuAdapter = SingletonBeansSoftCache.get(ShareMenuAdapter.class);
 		
 		writeProgramInfo(requestedPath, queryString, rw, applicationContextPath);
 		rw.write(",");
@@ -71,7 +71,7 @@ public class ViewContext extends UIComponentBase {
 		rw.write("__viewContext.primitiveValueConstraints = __viewContext.primitiveValueConstraints || {};");
 		
 
-		CDI.current().select(ViewContextEnvWriter.class).get().write(rw);
+		SingletonBeansSoftCache.get(ViewContextEnvWriter.class).write(rw);
 		rw.write("</script>");
 		
 		rw.write(I18NResourcesWebService.getHtmlToLoadResources());
@@ -104,7 +104,7 @@ public class ViewContext extends UIComponentBase {
 	}
 	
 	private void writeEmpCodeSetting (ResponseWriter rw) throws IOException {
-		EmployeeCodeSettingAdapter empCodeSetting = CDI.current().select(EmployeeCodeSettingAdapter.class).get();
+		EmployeeCodeSettingAdapter empCodeSetting = SingletonBeansSoftCache.get(EmployeeCodeSettingAdapter.class);
 
 		StringBuilder builder = new StringBuilder();
 		

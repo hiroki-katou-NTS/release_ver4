@@ -4,9 +4,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import javax.ejb.Stateless;
-import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.arc.time.GeneralDateTime;
 import nts.gul.text.IdentifierUtil;
 import nts.gul.text.StringUtil;
@@ -66,7 +66,7 @@ public class StartPageLogService {
 							return c.employeeId();
 						}),
 						getValue(context, c -> {
-							UserInfoAdaptorForLog userAdapter = CDI.current().select(UserInfoAdaptorForLog.class).get();
+							UserInfoAdaptorForLog userAdapter = SingletonBeansSoftCache.get(UserInfoAdaptorForLog.class);
 							if(context.isEmployee()){
 								return userAdapter.findByEmployeeId(c.employeeId()).getUserName();
 							}
@@ -89,7 +89,7 @@ public class StartPageLogService {
 			return menuAdapter;
 		}
 		
-		return CDI.current().select(ShareStandardMenuAdapter.class).get();
+		return SingletonBeansSoftCache.get(ShareStandardMenuAdapter.class);
 	}
 	
 	private StartPageLogStorageRepository getLogStorage(){
@@ -97,7 +97,7 @@ public class StartPageLogService {
 			return logFactory;
 		}
 		
-		return CDI.current().select(StartPageLogStorageRepository.class).get();
+		return SingletonBeansSoftCache.get(StartPageLogStorageRepository.class);
 	}
 
 	private StartPageLog initLog(LogBasicInformation basic, String beforeUrl) {

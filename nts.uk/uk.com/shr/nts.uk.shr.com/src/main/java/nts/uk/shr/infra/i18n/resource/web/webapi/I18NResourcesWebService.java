@@ -3,7 +3,6 @@ package nts.uk.shr.infra.i18n.resource.web.webapi;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -19,6 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import lombok.val;
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.arc.layer.app.command.JavaTypeResult;
 import nts.arc.time.GeneralDateTime;
 import nts.uk.shr.com.constants.DefaultSettingKeys;
@@ -50,7 +50,7 @@ public class I18NResourcesWebService {
 	}
 	
 	public static String getHtmlToLoadResources() {
-		I18NResourcesForUK i18n = CDI.current().select(I18NResourcesForUK.class).get();
+		I18NResourcesForUK i18n = SingletonBeansSoftCache.get(I18NResourcesForUK.class);
 
 		String companyId = DefaultSettingKeys.COMPANY_ID;
 		String languageId = LanguageConsts.DEFAULT_LANGUAGE_ID;

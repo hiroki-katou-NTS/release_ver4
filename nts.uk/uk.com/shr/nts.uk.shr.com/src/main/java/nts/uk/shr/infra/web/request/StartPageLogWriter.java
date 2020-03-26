@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -16,6 +15,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import nts.arc.bean.SingletonBeansSoftCache;
 import nts.gul.text.StringUtil;
 import nts.uk.shr.com.context.AppContextsConfig;
 import nts.uk.shr.com.context.RequestInfo;
@@ -75,7 +75,7 @@ public class StartPageLogWriter implements Filter {
 			return;
 		}
 
-		StartPageLogService logService = CDI.current().select(StartPageLogService.class).get();
+		StartPageLogService logService = SingletonBeansSoftCache.get(StartPageLogService.class);
 
 		logService.writeLog(target);
 

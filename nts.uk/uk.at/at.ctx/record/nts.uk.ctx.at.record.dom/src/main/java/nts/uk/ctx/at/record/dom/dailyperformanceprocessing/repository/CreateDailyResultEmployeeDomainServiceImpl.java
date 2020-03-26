@@ -416,6 +416,17 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 		List<ProcessState> process = new ArrayList<>();
 		
 		for(GeneralDate day: executeDate) {
+			LockStatus lockStatus = LockStatus.UNLOCK;
+			//「ロック中の計算/集計する」の値をチェックする
+			if(executionLog.get().getIsCalWhenLock() == null || executionLog.get().getIsCalWhenLock() == false) {
+				Closure closureData = closureService.getClosureDataByEmployee(employeeId, day);
+				//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
+				lockStatus = lockStatusService.getDetermineActualLocked(companyId, 
+						day, closureData.getClosureId().value, PerformanceType.DAILY);
+			}
+			if(lockStatus == LockStatus.LOCK) {
+				continue;
+			}
 			//ドメインモデル「日別実績の勤務情報」を取得する (Lấy dữ liệu từ domain)
 			Optional<WorkInfoOfDailyPerformance> optDaily = workRepository.find(employeeId, day);
 			try {
@@ -440,10 +451,10 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 					}
 	
 					// アルゴリズム「実績ロックされているか判定する」を実行する
-					EmployeeAndClosureOutput employeeAndClosure = this.determineActualLocked(companyId,
-							employeeAndClosureDto, day);
+//					EmployeeAndClosureOutput employeeAndClosure = this.determineActualLocked(companyId,
+//							employeeAndClosureDto, day);
 					RecreateFlag recreateFlag = RecreateFlag.DO_NOT;
-					if (employeeAndClosure.getLock() == 0) {
+//					if (employeeAndClosure.getLock() == 0) {
 						ExecutionType reCreateAttr = executionLog.get().getDailyCreationSetInfo().get().getExecutionType();
 	
 						if (reCreateAttr == ExecutionType.RERUN) {
@@ -468,7 +479,7 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 							this.reflectWorkInforDomainService.reflectWorkInformationWithNoInfoImport(companyId, employeeId,
 									day, empCalAndSumExecLogID, reCreateAttr, reCreateWorkType, reCreateWorkPlace, stampReflectionManagement,recreateFlag,optDaily);
 						}
-					}
+//					}
 					
 					Optional<EmpCalAndSumExeLog> logOptional = this.empCalAndSumExeLogRepository.getByEmpCalAndSumExecLogID(empCalAndSumExecLogID);
 					if (logOptional.isPresent() && logOptional.get().getExecutionStatus().isPresent()

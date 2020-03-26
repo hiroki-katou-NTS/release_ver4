@@ -5,6 +5,7 @@
 package nts.uk.query.infra.repository.employee;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -18,13 +19,13 @@ import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+
+import org.apache.commons.lang3.StringUtils;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.GeneralDateTime;
@@ -34,8 +35,6 @@ import nts.uk.ctx.bs.employee.infra.entity.employee.order.BsymtEmpOrderCond;
 import nts.uk.ctx.bs.employee.infra.entity.employee.order.BsymtEmployeeOrder;
 import nts.uk.ctx.bs.employee.infra.entity.employee.order.BsymtEmployeeOrderPK;
 import nts.uk.ctx.bs.person.infra.entity.person.info.BpsmtPerson;
-import nts.uk.query.infra.entity.employee.EmployeeDataView;
-import nts.uk.query.infra.entity.employee.EmployeeDataView_;
 import nts.uk.query.model.employee.CCG001SystemType;
 import nts.uk.query.model.employee.EmployeeSearchQuery;
 import nts.uk.query.model.employee.RegularSortingType;
@@ -86,7 +85,47 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 			+ " AND awh.endDate >= :refDate"
 			+ " AND wh.strD <= :refDate"
 			+ " AND wh.endD >= :refDate";
-
+	
+	private static final String SELECT_EMPLOYEE =  "SELECT"
+			+ " SID, SCD, CLASSIFICATION_CODE, EMP_CD, COM_STR_DATE, JOB_CD,"
+			+ " BUSINESS_NAME, WORKPLACE_ID, WKP_HIERARCHY_CD, WPL_CD, WPL_NAME "
+			+ " FROM EMPLOYEE_DATA_VIEW ";
+	
+	private static final String SELECT_EMPLOYEE_INFO = "SELECT"
+			+ " employee.SID, employee.SCD, person.BUSINESS_NAME, employee.CID "
+			+ " FROM BSYMT_EMP_DTA_MNG_INFO employee "
+			+ " INNER JOIN BPSMT_PERSON person ON employee.PID = person.PID ";
+	
+	private static final String SELECT_EMPLOYMENT_HIST_INFO = "SELECT"
+			+ " empHisItem.EMP_CD, empHis.HIST_ID "
+			+ " FROM BSYMT_EMPLOYMENT_HIST empHis "
+			+ " INNER JOIN BSYMT_EMPLOYMENT_HIS_ITEM empHisItem ON empHisItem.HIST_ID = empHis.HIST_ID ";
+	
+	private static final String SELECT_WORKPLACE_INFO = "SELECT"
+			+ " wplHisItem.WORKPLACE_ID, wkpconfinf.HIERARCHY_CD, wplInfo.WKPCD, wplInfo.WKP_NAME "
+			+ " FROM BSYMT_AFF_WORKPLACE_HIST wplHis "
+			+ " INNER JOIN BSYMT_AFF_WPL_HIST_ITEM wplHisItem ON wplHis.HIST_ID = wplHisItem.HIST_ID "
+			+ " LEFT OUTER JOIN BSYMT_WORKPLACE_INFO wplInfo ON wplHisItem.WORKPLACE_ID = wplInfo.WKPID "
+			+ " INNER JOIN BSYMT_WORKPLACE_HIST wplInfoHis ON wplInfo.HIST_ID = wplInfoHis.HIST_ID AND wplInfo.CID = wplInfoHis.CID "
+			+ " LEFT OUTER JOIN BSYMT_WKP_CONFIG_INFO wkpconfinf ON wkpconfinf.WKPID = wplHisItem.WORKPLACE_ID "
+			+ " INNER JOIN BSYMT_WKP_CONFIG wkpconf ON wkpconf.HIST_ID = wkpconfinf.HIST_ID AND wkpconf.CID = wkpconfinf.CID ";
+	
+	private static final String SELECT_CLASSIFICATION_HIST_INFO = "SELECT"
+			+ " classHisItem.CLASSIFICATION_CODE, classHis.SID "
+			+ " FROM BSYMT_AFF_CLASS_HISTORY classHis "
+			+ " INNER JOIN BSYMT_AFF_CLASS_HIS_ITEM classHisItem "
+			+ " ON classHis.HIST_ID = classHisItem.HIST_ID ";
+	
+	private static final String SELECT_JOB_INFO = "SELECT"
+			+ " jobInfo.JOB_CD, jobHis.SID "
+			+ " FROM BSYMT_AFF_JOB_HIST jobHis "
+			+ " INNER JOIN BSYMT_AFF_JOB_HIST_ITEM jobHisItem ON jobHis.HIST_ID = jobHisItem.HIST_ID "
+			+ " LEFT OUTER JOIN BSYMT_JOB_INFO jobInfo ON jobHisItem.JOB_TITLE_ID = jobInfo.JOB_ID ";
+	
+	private static final String SELECT_COM_HIS_INFO = "SELECT"
+			+ " comHis.START_DATE, comHis.SID "
+			+ " FROM BSYMT_AFF_COM_HIST comHis ";
+	
 	private static final String EMPTY_LIST = "EMPTY_LIST";
 	private static final Integer ELEMENT_300 = 300;
 	private static final Integer ELEMENT_800 = 800;
@@ -119,10 +158,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		GeneralDateTime baseDate = paramQuery.getBaseDate();
 		
 		StringBuilder selectBuilder = new StringBuilder();
-		selectBuilder.append("SELECT"
-						+ " SID, SCD, CLASSIFICATION_CODE, EMP_CD, COM_STR_DATE, JOB_CD,"
-						+ " BUSINESS_NAME, WORKPLACE_ID, WKP_HIERARCHY_CD, WPL_CD, WPL_NAME")
-			   		 .append(" FROM EMPLOYEE_DATA_VIEW ");
+		selectBuilder.append(SELECT_EMPLOYEE);
 		
 		StringBuilder whereBuilder = new StringBuilder()
 											// Add company condition 
@@ -563,7 +599,8 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		List<Object[]> persons = new ArrayList<>();
 
 		CollectionUtil.split(sIds, MAX_WHERE_IN, (subList) -> {
-			persons.addAll(this.getEntityManager().createQuery(FIND_EMPLOYEE).setParameter("listSid", subList)
+			persons.addAll(this.getEntityManager().createQuery(FIND_EMPLOYEE)
+					.setParameter("listSid", subList)
 					.getResultList());
 		});
 
@@ -617,56 +654,44 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		return employeeInfoList.values().stream().collect(Collectors.toList());
 	}
 	
+	
 	/* (non-Javadoc)
 	 * @see nts.uk.query.model.employee.RegulationInfoEmployeeRepository
 	 * #findBySid(java.lang.String, java.lang.String, nts.arc.time.GeneralDateTime)
 	 */
 	@Override
 	public RegulationInfoEmployee findBySid(String comId, String sid, GeneralDateTime baseDate) {
-		CriteriaBuilder cb = this.getEntityManager().getCriteriaBuilder();
-		CriteriaQuery<EmployeeDataView> cq = cb.createQuery(EmployeeDataView.class);
-		Root<EmployeeDataView> root = cq.from(EmployeeDataView.class);
 		
-		// Constructing condition.
-		List<Predicate> conditions = new ArrayList<Predicate>();
-
-		// Add company condition
-		conditions.add(cb.equal(root.get(EmployeeDataView_.cid), comId));
-
-		// Add NOT_DELETED condition
-		conditions.add(cb.equal(root.get(EmployeeDataView_.delStatusAtr), NOT_DELETED));
-		
-		// Where SID.
-		conditions.add(cb.equal(root.get(EmployeeDataView_.sid), sid));
-		
-		// Where base date.
-		conditions.add(cb.lessThanOrEqualTo(root.get(EmployeeDataView_.wplStrDate), baseDate));
-		conditions.add(cb.greaterThanOrEqualTo(root.get(EmployeeDataView_.wplEndDate), baseDate));
-		
-		// Find fist.
-		cq.where(conditions.toArray(new Predicate[] {}));
-		List<EmployeeDataView> res = this.getEntityManager().createQuery(cq).getResultList();
-
-		if (CollectionUtil.isEmpty(res)) {
+		// get employee info
+		List<RegulationEmployeeInfo> employeeInfos = getEmployeeInfo(Arrays.asList(sid), comId);
+		if(CollectionUtil.isEmpty(employeeInfos)) {
 			return null;
 		}
-
-		EmployeeDataView entity = res.get(0);
+		RegulationEmployeeInfo employeeInfo = employeeInfos.get(0);
 		
-		// Convert.
-		return RegulationInfoEmployee.builder()
-				.classificationCode(Optional.ofNullable(entity.getClassificationCode())).employeeCode(entity.getScd())
-				.employeeID(entity.getSid()).employmentCode(Optional.ofNullable(entity.getEmpCd()))
-				.hireDate(Optional.ofNullable(entity.getComStrDate()))
-				.jobTitleCode(Optional.ofNullable(entity.getJobCd()))
-				.name(Optional.ofNullable(entity.getBusinessName()))
-				.workplaceId(Optional.ofNullable(entity.getWorkplaceId()))
-				.workplaceHierarchyCode(Optional.ofNullable(entity.getWplHierarchyCode()))
-				.workplaceCode(Optional.ofNullable(entity.getWplCd()))
-				.workplaceName(Optional.ofNullable(entity.getWplName()))
-				.build();
-	}
+		// get employment info
+		List<RegulationEmployeeEmployment> employments = getEmploymentInfo(sid, comId);
+		RegulationEmployeeEmployment employment = CollectionUtil.isEmpty(employments) ? new RegulationEmployeeEmployment(null, null, null) : employments.get(0);
 
+		// get workplace info
+		List<RegulationEmployeeWorkplace> workplaces = getWorkPlaceInfo(sid, comId, baseDate);
+		RegulationEmployeeWorkplace workplace = CollectionUtil.isEmpty(workplaces) ? new RegulationEmployeeWorkplace(null, null, null, null, null) : workplaces.get(0);
+		
+		// get classification
+		List<RegulationEmployeeClassification> classifications = getClassificationInfo(sid, comId);
+		RegulationEmployeeClassification classification = CollectionUtil.isEmpty(classifications) ? new RegulationEmployeeClassification(null, null) : classifications.get(0);
+		
+		// get job info
+		List<RegulationEmployeeJobInfo> jobInfos = getJobInfo(sid, comId);
+		RegulationEmployeeJobInfo jobInfo = CollectionUtil.isEmpty(jobInfos) ? new RegulationEmployeeJobInfo(null, null) : jobInfos.get(0);
+		
+		// get com hist
+		List<RegulationEmployeeComHistInfo> comHists = getComHistInfo(sid, comId);
+		RegulationEmployeeComHistInfo comHist = CollectionUtil.isEmpty(comHists) ? new RegulationEmployeeComHistInfo(null, null) : comHists.get(0);
+		
+		return convertToEmployeeInfo(employeeInfo, workplace, employment, classification, jobInfo, comHist);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -801,7 +826,14 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		List<Object[]> queryRs = query.getResultList();
 		
 		for(Object[] res : queryRs) {
-			resultListInFunc.add(RegulationInfoEmployee.builder()
+			resultListInFunc.add(convertToEmployeeInfo(res));
+		}
+				
+		return resultListInFunc;
+	}
+	
+	private RegulationInfoEmployee convertToEmployeeInfo(Object[] res) {
+		return RegulationInfoEmployee.builder()
 				.employeeID(String.valueOf(res[0]))
 				.employeeCode(String.valueOf(res[1]))
 				.classificationCode(Optional.ofNullable(res[2] != null ? String.valueOf(res[2]) : null))
@@ -813,98 +845,189 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 				.workplaceHierarchyCode(Optional.ofNullable(res[8] != null ? String.valueOf(res[8]) : null))
 				.workplaceCode(Optional.ofNullable(res[9] != null ? String.valueOf(res[9]) : null))
 				.workplaceName(Optional.ofNullable(res[10] != null ? String.valueOf(res[10]) : null))
-				.build());
-		}
-				
-		return resultListInFunc;
+				.build();
 	}
-
 	
-	/**
-	 * Sort by list conditions.
-	 *
-	 * @param resultList
-	 *            the result list
-	 * @param sortConditions
-	 *            the sort conditions
-	 * @return the list
-	 */
-	private List<String> sortByListConditions(List<EmployeeDataSort> resultList,
-			List<SortingConditionOrder> sortConditions) {
-		return resultList.stream().sorted((a, b) -> {
-			Iterator<SortingConditionOrder> iterator = sortConditions.iterator();
-			int comparator = 0;
-
-			while (iterator.hasNext()) {
-				if (comparator == 0) {
-					SortingConditionOrder cond = iterator.next();
-					switch (cond.getType()) {
-					case EMPLOYMENT: // EMPLOYMENT
-						String empCda = a.getEmploymentCd();
-						String empCdb = b.getEmploymentCd();
-						if (empCda != null && empCdb != null) {
-							comparator = empCda.compareTo(empCdb);
-						}
-						break;
-					case DEPARTMENT: // DEPARTMENT
-						// TODO: not covered
-						break;
-					case WORKPLACE: // WORKPLACE
-						String wplCda = a.getWplHierarchyCd();
-						String wplCdb = b.getWplHierarchyCd();
-						if (wplCda != null && wplCdb != null) {
-							comparator = wplCda.compareTo(wplCdb);
-						}
-						break;
-					case CLASSIFICATION: // CLASSIFICATION
-						String clsCda = a.getClassificationCd();
-						String clsCdb = b.getClassificationCd();
-						if (clsCda != null && clsCdb != null) {
-							comparator = clsCda.compareTo(clsCdb);
-						}
-						break;
-					case POSITION: // POSITION
-						String seqCda = a.getJobSeqDisp();
-						String seqCdb = b.getJobSeqDisp();
-						if (seqCda != null && seqCdb != null) {
-							comparator = seqCda.compareTo(seqCdb);
-						}
-						if (comparator == 0) {
-							String jobCda = a.getJobCd();
-							String jobCdb = b.getJobCd();
-							if (jobCda != null && jobCdb != null) {
-								comparator = jobCda.compareTo(jobCdb);
-							}
-						}
-						break;
-					case HIRE_DATE: // HIRE_DATE
-						GeneralDateTime comStrDa = a.getComStrDate();
-						GeneralDateTime comStrDb = b.getComStrDate();
-						if (comStrDa != null && comStrDb != null) {
-							comparator = comStrDa.compareTo(comStrDb);
-						}
-						break;
-					case NAME: // NAME
-						// 現在は、氏名の種類を選択する機能がないので、「ビジネスネーム日本語」固定で
-						// => 「氏名カナ」 ＝ 「ビジネスネームカナ」
-						String businessNameA = a.getBusinessNameKana();
-						String businessNameB = b.getBusinessNameKana();
-						if (businessNameA != null && businessNameB != null) {
-							comparator = businessNameA.compareTo(businessNameB);
-						}
-						// TODO:
-						// orders.add(cb.asc(root.get(EmployeeDataView_.personNameKana)));
-						break;
-					}
-				} else {
-					break;
-				}
-			}
-			if (comparator == 0) {
-				comparator = a.getScd().compareTo(b.getScd());
-			}
-			return comparator;
-		}).map(EmployeeDataSort::getSid).distinct().collect(Collectors.toList());
+	private RegulationInfoEmployee convertToEmployeeInfo(RegulationEmployeeInfo employee, 
+				RegulationEmployeeWorkplace workplace, 
+				RegulationEmployeeEmployment employment, 
+				RegulationEmployeeClassification classification, 
+				RegulationEmployeeJobInfo jobInfo, 
+				RegulationEmployeeComHistInfo comHist) {
+		return RegulationInfoEmployee.builder()
+				.employeeID(employee.getSid())
+				.employeeCode(employee.getScd())
+				.name(Optional.ofNullable(employee.getName()))
+				.classificationCode(Optional.ofNullable(classification.getClassificationCode()))
+				.employmentCode(Optional.ofNullable(employment.getEmpCd()))
+				.hireDate(Optional.ofNullable(StringUtils.isEmpty(comHist.getStrDate()) ? GeneralDateTime.fromString(String.valueOf(comHist.getStrDate()), "yyyy-MM-dd HH:mm:ss.S")  : null))
+				.jobTitleCode(Optional.ofNullable(jobInfo.getJocCd()))
+				.workplaceId(Optional.ofNullable(workplace.getWkpid()))
+				.workplaceHierarchyCode(Optional.ofNullable(workplace.getWkpHierarchyCd()))
+				.workplaceCode(Optional.ofNullable(workplace.getWkpCd()))
+				.workplaceName(Optional.ofNullable(workplace.getWkpName()))
+				.build();
 	}
-
+	
+	
+	// employee Info
+	@Data
+	@AllArgsConstructor
+	class RegulationEmployeeInfo {
+		private String sid;
+		private String scd;
+		private String name;
+		private String companyId;
+	}
+	private List<RegulationEmployeeInfo> getEmployeeInfo(List<String> employeeIds, String comId) {
+		StringBuilder builder = new StringBuilder(SELECT_EMPLOYEE_INFO)
+				.append(" WHERE ((employee.CID = '" + comId + "')")
+				// Add NOT_DELETED condition
+				.append(" AND (employee.DEL_STATUS_ATR = " + NOT_DELETED + "))")
+				.append(" AND (employee.SID IN ('" + String.join("','", employeeIds) + "'))" );
+		
+		List<Object[]> queryRs = excuteQuery(builder.toString());
+		List<RegulationEmployeeInfo> results = new ArrayList<>();
+		for(Object[] res : queryRs) {
+			results.add(new RegulationEmployeeInfo(String.valueOf(res[0]), 
+					String.valueOf(res[1]), 
+					String.valueOf(res[2]), 
+					String.valueOf(res[3])));
+		}
+		
+		return results;
+	}
+	
+	// employment
+	@Getter
+	@AllArgsConstructor
+	@NoArgsConstructor
+	class RegulationEmployeeEmployment {
+		private String sid;
+		private String empCd;
+		private String histId;
+	}
+	private List<RegulationEmployeeEmployment> getEmploymentInfo(String sid, String comId) {
+		StringBuilder builder = new StringBuilder(SELECT_EMPLOYMENT_HIST_INFO)
+				.append(" WHERE empHis.CID = '" + comId + "'")
+				.append(" AND empHis.SID = '" + sid + "'");
+		
+		List<Object[]> queryRs = excuteQuery(builder.toString());
+		List<RegulationEmployeeEmployment> results = new ArrayList<>();
+		for(Object[] res : queryRs) {
+			results.add(new RegulationEmployeeEmployment(sid, 
+					String.valueOf(res[0]), 
+					String.valueOf(res[1])));
+		}
+						
+		return results;
+	}
+	
+	// workplace
+	@Getter
+	@AllArgsConstructor
+	@NoArgsConstructor
+	class RegulationEmployeeWorkplace {
+		private String sid;
+		private String wkpid;
+		private String wkpHierarchyCd;
+		private String wkpCd;
+		private String wkpName;
+	}
+	private List<RegulationEmployeeWorkplace> getWorkPlaceInfo(String sid, String comId, GeneralDateTime baseDate) {
+		StringBuilder builder = new StringBuilder(SELECT_WORKPLACE_INFO)
+				.append(" WHERE wplHis.CID = '" + comId + "'")
+				.append(" AND wplHis.SID = '" + sid + "'")
+				.append(" AND ( wplHis.START_DATE <= baseDate AND wplHis.END_DATE >= baseDate ) ");
+		
+		String sql = builder.toString().replaceAll("baseDate", "'" + baseDate.toString(DATE_TIME_FORMAT) + "'");
+		List<Object[]> queryRs = excuteQuery(sql);
+		List<RegulationEmployeeWorkplace> results = new ArrayList<>();
+		for(Object[] res : queryRs) {
+			results.add(new RegulationEmployeeWorkplace(sid, 
+					String.valueOf(res[0]), 
+					String.valueOf(res[1]),
+					String.valueOf(res[2]),
+					String.valueOf(res[3])));
+		}
+						
+		return results;
+	}
+	
+	// classification
+	@Getter
+	@AllArgsConstructor
+	@NoArgsConstructor
+	class RegulationEmployeeClassification {
+		private String employeeId;
+		private String classificationCode;
+	}
+	private List<RegulationEmployeeClassification> getClassificationInfo(String sid, String comId) {
+		StringBuilder builder = new StringBuilder(SELECT_CLASSIFICATION_HIST_INFO)
+				.append(" WHERE classHis.CID = '" + comId + "'")
+				.append(" AND classHis.SID = '" + sid + "'");
+		
+		List<Object[]> queryRs = excuteQuery(builder.toString());
+		List<RegulationEmployeeClassification> results = new ArrayList<>();
+		for(Object[] res : queryRs) {
+			results.add(new RegulationEmployeeClassification(sid, 
+					String.valueOf(res[0])));
+		}
+		
+		return results;
+	}
+	
+	// jobinfo
+	@Getter
+	@AllArgsConstructor
+	@NoArgsConstructor
+	class RegulationEmployeeJobInfo {
+		private String employeeId;
+		private String jocCd;
+	}
+	private List<RegulationEmployeeJobInfo> getJobInfo(String sid, String comId) {
+		StringBuilder builder = new StringBuilder(SELECT_JOB_INFO)
+				.append(" WHERE jobHis.CID = '" + comId + "'")
+				.append(" AND jobHis.SID = '" + sid + "'");
+		
+		List<RegulationEmployeeJobInfo> results = new ArrayList<>();
+		List<Object[]> queryRs = excuteQuery(builder.toString());
+		for(Object[] res : queryRs) {
+			results.add(new RegulationEmployeeJobInfo(sid, 
+					String.valueOf(res[0])));
+		}
+		
+		return results;
+	}
+	
+	// com info
+	@Getter
+	@AllArgsConstructor
+	@NoArgsConstructor
+	class RegulationEmployeeComHistInfo {
+		private String employeeId;
+		private String strDate;
+	}
+	private List<RegulationEmployeeComHistInfo> getComHistInfo(String sid, String comId) {
+		StringBuilder builder = new StringBuilder(SELECT_COM_HIS_INFO)
+				.append(" WHERE comHis.CID = '" + comId + "'")
+				.append(" AND comHis.SID = '" + sid + "'");
+			
+		List<RegulationEmployeeComHistInfo> results = new ArrayList<>();
+		List<Object[]> queryRs = excuteQuery(builder.toString());
+		for(Object[] res : queryRs) {
+			results.add(new RegulationEmployeeComHistInfo(sid, 
+					String.valueOf(res[0])));
+		}
+			
+		return results;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private List<Object[]> excuteQuery(String sql) {
+		Query query = this.getEntityManager()
+				.createNativeQuery(sql);
+		return query.getResultList();
+	}
+	
 }
