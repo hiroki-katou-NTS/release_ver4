@@ -103,7 +103,8 @@ public class InterimRemainOffDateCreateDataImpl implements InterimRemainOffDateC
 		//残数関連の申請を抽出する
 		List<AppRemainCreateInfor> lstAppInfor = lstAppData.stream()
 				.filter(x -> x.getSid().equals(sid) 
-						&& x.getWorkTypeCode().isPresent() 
+						&& x.getWorkTypeCode().isPresent()
+						&& x.getAppType() != ApplicationType.OVER_TIME_APPLICATION
 						&& (x.getAppDate().equals(baseDate)
 								|| (x.getStartDate().isPresent() 
 										&& x.getEndDate().isPresent()
