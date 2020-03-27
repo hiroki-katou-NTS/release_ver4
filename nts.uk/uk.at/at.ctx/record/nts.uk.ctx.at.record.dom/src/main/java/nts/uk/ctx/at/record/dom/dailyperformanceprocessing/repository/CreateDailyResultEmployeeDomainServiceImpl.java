@@ -260,8 +260,7 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 		// this.provider().findClousureEmployementByEmpCd(companyId,
 		// employmentCode);
 
-		if (day.afterOrEquals(employmentHisOptional.get().getPeriod().end())
-				&& day.beforeOrEquals(employmentHisOptional.get().getPeriod().start())) {
+		if (day.after(employmentHisOptional.get().getPeriod().end())) {
 //				process.add(ProcessState.SUCCESS);
 //				return;
 			return ProcessState.SUCCESS;
