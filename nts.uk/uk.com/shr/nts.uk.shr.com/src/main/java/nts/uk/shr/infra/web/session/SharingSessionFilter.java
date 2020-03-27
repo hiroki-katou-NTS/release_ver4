@@ -1,7 +1,6 @@
 package nts.uk.shr.infra.web.session;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -9,7 +8,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,10 +17,12 @@ import nts.arc.security.csrf.CsrfToken;
 import nts.uk.shr.com.context.loginuser.LoginUserContextManager;
 import nts.uk.shr.com.context.loginuser.SessionLowLayer;
 
+/**
+ * warファイル間でセッションを擬似的に共有するための仕組み
+ * CookieにSessionContextの情報を暗号化して持ち回る
+ */
 public class SharingSessionFilter implements Filter {
 	
-	private static final String COOKIE_SESSION_CONTEXT = "nts.uk.sescon";
-
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
@@ -46,29 +46,21 @@ public class SharingSessionFilter implements Filter {
 		 * 上記1,2いずれの場合も、Cookieの情報が正しいとみなして、サーバ側のセッションを書き換える。
 		 * ログインしているのにCookieがやってこないケースは無いと思われるが、もしあったとしてもサーバ上のセッション情報でそのまま動作すれば良い
 		 */
-		if (httpRequest.getCookies() != null) {
-			Arrays.asList(httpRequest.getCookies()).stream()
-					.filter(c -> c.getName().equals(COOKIE_SESSION_CONTEXT))
-					.map(c -> c.getValue())
-					.findFirst()
-					.ifPresent(sessionContext -> {
-						if (!isLoggedIn || !sessionContext.equals(createStringSessionContext())) {
-							restoreSessionContext(sessionContext);
-						}
-					});
-		}
+		SessionContextCookie.getSessionContextFrom(httpRequest)
+				.ifPresent(sessionContext -> {
+					if (!isLoggedIn || !sessionContext.equals(createStringSessionContext())) {
+						restoreSessionContext(sessionContext);
+					}
+				});
 		
 		chain.doFilter(request, response);
 		
 		// サーバ側の処理でセッション情報が変化しているかどうかに関わらず、Cookieの情報を最新化しておく。
-		if (SingletonBeansSoftCache.get(SessionLowLayer.class).isLoggedIn()) {
-			val httpResponse = (HttpServletResponse) response;
-			val newSessionContextCookie = new Cookie(COOKIE_SESSION_CONTEXT, createStringSessionContext());
-			newSessionContextCookie.setPath("/");
-			newSessionContextCookie.setMaxAge(sessionLowLayer.secondsSessionTimeout());
-			httpResponse.addCookie(newSessionContextCookie);
-		}
+		// この処理はxhtmlに対するリクエストのみ有効であり、WebAPI処理の場合には動作しない。
+		// そちらはJaxRsResponseFilterに任せる。
+		SessionContextCookie.updateCookie((HttpServletResponse) response);
 	}
+
 
 	@Override
 	public void destroy() {
