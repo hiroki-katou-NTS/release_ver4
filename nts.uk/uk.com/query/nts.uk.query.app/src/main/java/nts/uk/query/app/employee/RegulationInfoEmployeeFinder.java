@@ -530,10 +530,11 @@ public class RegulationInfoEmployeeFinder {
 
 			// get data for list workplace with no data
 			List<String> noDataWkpIds = regulationInfoEmployees.stream()
-					.filter(e -> !e.getWorkplaceCode().isPresent() || !e.getWorkplaceDeleteFlag().isPresent() || e.getWorkplaceDeleteFlag().get())
+					.filter(e -> !e.getWorkplaceCode().isPresent())
 					.map(e -> e.getWorkplaceId().get())
 					.distinct()
 					.collect(Collectors.toList());
+			
             // Request list 560
 			Map<String, WorkplaceInfoImport> wkpInfoImports = queryWorkplaceAdapter.getWkpInfoByWkpIds_OLD(companyId, noDataWkpIds, baseDate)
 					.stream().collect(Collectors.toMap(WorkplaceInfoImport::getWorkplaceId, Function.identity()));
