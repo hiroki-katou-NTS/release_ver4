@@ -630,7 +630,7 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 	 * #findBySid(java.lang.String, java.lang.String, nts.arc.time.GeneralDateTime)
 	 */
 	@Override
-	public RegulationInfoEmployee findBySid(String comId, String sid, GeneralDateTime baseDate, int systemType) {
+	public RegulationInfoEmployee findBySid(String comId, String sid, GeneralDateTime baseDate) {
 		
 		StringBuilder selectBuilder = new StringBuilder();
 		selectBuilder.append(SELECT_EMPLOYEE);
