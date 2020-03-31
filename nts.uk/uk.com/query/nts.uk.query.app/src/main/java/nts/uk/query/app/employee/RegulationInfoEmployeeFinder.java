@@ -6,8 +6,6 @@ package nts.uk.query.app.employee;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -30,8 +28,6 @@ import nts.uk.query.model.employee.history.EmployeeHistoryRepository;
 import nts.uk.query.model.employee.mgndata.EmpDataMngInfoAdapter;
 import nts.uk.query.model.employement.history.EmploymentHistoryAdapter;
 import nts.uk.query.model.person.QueryPersonAdapter;
-import nts.uk.query.model.workplace.QueryWorkplaceAdapter;
-import nts.uk.query.model.workplace.WorkplaceInfoImport;
 import nts.uk.query.model.workrule.closure.QueryClosureEmpAdapter;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -77,8 +73,8 @@ public class RegulationInfoEmployeeFinder {
 	@Inject
 	private EmploymentHistoryAdapter empHisAdapter;
 
-	@Inject
-	private QueryWorkplaceAdapter queryWorkplaceAdapter;
+//	@Inject
+//	private QueryWorkplaceAdapter queryWorkplaceAdapter;
 
 	/**
 	 * Find.
@@ -459,14 +455,14 @@ public class RegulationInfoEmployeeFinder {
 				if (loginEmployee == null || !loginEmployee.getWorkplaceId().isPresent()) {
 					throw new BusinessException("Msg_317");
 				}
-				List<WorkplaceInfoImport> workplaceInfoImports = queryWorkplaceAdapter.getWkpInfoByWkpIds_OLD(companyId, Arrays.asList(loginEmployee.getWorkplaceId().get()), baseDate.toDate());
+//				List<WorkplaceInfoImport> workplaceInfoImports = queryWorkplaceAdapter.getWkpInfoByWkpIds_OLD(companyId, Arrays.asList(loginEmployee.getWorkplaceId().get()), baseDate.toDate());
 				return RegulationInfoEmployeeDto.builder()
 					.employeeCode(loginEmployee.getEmployeeCode())
 					.employeeId(loginEmployee.getEmployeeID())
 					.employeeName(loginEmployee.getName().orElse(""))
 					.workplaceId(loginEmployee.getWorkplaceId().orElse(""))
 					.workplaceCode(loginEmployee.getWorkplaceCode().orElse(""))
-                    .workplaceName(workplaceInfoImports.get(0).getWorkplaceName())
+                    .workplaceName(loginEmployee.getWorkplaceName().orElse(""))
 //					.affiliationId(loginEmployee.getWorkplaceId().orElse(""))
 //					.affiliationCode(loginEmployee.getWorkplaceCode().orElse(""))
 //					.affiliationName(workplaceInfoImports.get(0).getWorkplaceName())
@@ -481,8 +477,8 @@ public class RegulationInfoEmployeeFinder {
 	 * @return the list
 	 */
 	private List<RegulationInfoEmployeeDto> findEmployeesInfo(RegulationInfoEmpQueryDto queryDto) {
-		String companyId = AppContexts.user().companyId();
-		GeneralDate baseDate = GeneralDate.fromString(queryDto.getBaseDate(), "yyyy-MM-dd");
+//		String companyId = AppContexts.user().companyId();
+//		GeneralDate baseDate = GeneralDate.fromString(queryDto.getBaseDate(), "yyyy-MM-dd");
 
 		// return data
 		List<RegulationInfoEmployeeDto> empDtos;
@@ -529,15 +525,15 @@ public class RegulationInfoEmployeeFinder {
 					.collect(Collectors.toList());
 
 			// get data for list workplace with no data
-			List<String> noDataWkpIds = regulationInfoEmployees.stream()
-					.filter(e -> !e.getWorkplaceCode().isPresent())
-					.map(e -> e.getWorkplaceId().get())
-					.distinct()
-					.collect(Collectors.toList());
+//			List<String> noDataWkpIds = regulationInfoEmployees.stream()
+//					.filter(e -> !e.getWorkplaceCode().isPresent())
+//					.map(e -> e.getWorkplaceId().get())
+//					.distinct()
+//					.collect(Collectors.toList());
 			
             // Request list 560
-			Map<String, WorkplaceInfoImport> wkpInfoImports = queryWorkplaceAdapter.getWkpInfoByWkpIds_OLD(companyId, noDataWkpIds, baseDate)
-					.stream().collect(Collectors.toMap(WorkplaceInfoImport::getWorkplaceId, Function.identity()));
+//			Map<String, WorkplaceInfoImport> wkpInfoImports = queryWorkplaceAdapter.getWkpInfoByWkpIds_OLD(companyId, noDataWkpIds, baseDate)
+//					.stream().collect(Collectors.toMap(WorkplaceInfoImport::getWorkplaceId, Function.identity()));
 
 			// Set return data
 			empDtos = regulationInfoEmployees
@@ -548,7 +544,7 @@ public class RegulationInfoEmployeeFinder {
 							.employeeName(e.getName().orElse(""))
 							.workplaceId(e.getWorkplaceId().orElse(""))
 							.workplaceCode(e.getWorkplaceCode().orElse(""))
-							.workplaceName(wkpInfoImports.containsKey(e.getWorkplaceId().get()) ? wkpInfoImports.get(e.getWorkplaceId().get()).getWorkplaceName() : e.getWorkplaceName().get())
+							.workplaceName(e.getWorkplaceName().orElse(""))
 //							.affiliationId(e.getWorkplaceId().orElse(""))
 //							.affiliationCode(e.getWorkplaceCode().orElse(""))
 //							.affiliationName(wkpInfoImports.containsKey(e.getWorkplaceId().get()) ? wkpInfoImports.get(e.getWorkplaceId().get()).getWorkplaceName() : e.getWorkplaceName().get())
