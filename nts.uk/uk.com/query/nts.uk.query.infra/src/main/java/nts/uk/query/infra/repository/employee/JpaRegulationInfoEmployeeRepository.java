@@ -761,13 +761,13 @@ public class JpaRegulationInfoEmployeeRepository extends JpaRepository implement
 		}
 
         // department condition
-        if (paramQuery.getFilterByDepartment()) {
+        //if (paramQuery.getFilterByDepartment()) {
 //            if (splitDepartmentCodes.size() == 1 && splitDepartmentCodes.get(0).compareTo(EMPTY_LIST) == 0) {
 //                splitDepartmentCodes.clear();
 //            }
 ////            conditions.add(root.get(EmployeeDataView_.depId).in(splitDepartmentCodes));
 //            whereBuilder.append(" AND (DEP_ID IN ('" + String.join("','", splitDepartmentCodes) + "'))" );
-        }
+        //}
 
 		
 		// workplace condition
