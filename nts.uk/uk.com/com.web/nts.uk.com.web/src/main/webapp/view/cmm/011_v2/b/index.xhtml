@@ -23,7 +23,7 @@
 
 		<!-- PAGE CONTENT -->
 		<ui:define name="content">
-			<div id="contents-area" class="fixed-flex-layout">
+			<!-- <div id="contents-area" class="fixed-flex-layout">
 				<div class="fixed-flex-layout-left">
 					<div class="valign-center control-group" style="padding-top: 20px">
 						<button tabindex="1" data-bind="enable: screenMode() == 0 || screenMode() == 3, click: addHistory">#{i18n.getText('CMM011_117')}</button>
@@ -70,11 +70,11 @@
 						<button data-bind="visible: false, ntsHelpButton: {textId: 'Help Button Text', position: 'right center' }">？</button>
 					</div>
 				</div>
-			</div>
-			<div id="functions-area-bottom">
+			</div> -->
+			<!-- <div id="functions-area-bottom">
 				<button class="x-large proceed" tabindex="7" data-bind="click: registerConfig, enable: $root.errors.isEmpty &amp;&amp; !(lstWpkHistory().length > 0 &amp;&amp; !selectedHistoryId())">#{i18n.getText('CMM011_127')}</button>
 				<button class="large" tabindex="8" data-bind="click: cancel">#{i18n.getText('CMM011_128')}</button>
-			</div>
+			</div> -->
 		</ui:define>
 	</ui:composition>
 </body>

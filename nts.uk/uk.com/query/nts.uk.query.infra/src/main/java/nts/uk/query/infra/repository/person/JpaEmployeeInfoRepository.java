@@ -45,7 +45,7 @@ public class JpaEmployeeInfoRepository extends JpaRepository implements Employee
 	 */
 	
 	private static final String SELECT_EMPLOYEE =  "SELECT"
-			+ " SID, WKP_ID, WKP_STR_DATE, WKP_END_DATE, "
+			+ " SID, WORKPLACE_ID, WPL_STR_DATE, WPL_END_DATE, "
 			+ " CLASSIFICATION_CODE, CLASS_STR_DATE, CLASS_END_DATE,"
 			+ " EMP_CD, EMPLOYMENT_STR_DATE, EMPLOYMENT_END_DATE, "
 			+ " JOB_TITLE_ID, JOB_STR_DATE, JOB_END_DATE, "
@@ -76,7 +76,7 @@ public class JpaEmployeeInfoRepository extends JpaRepository implements Employee
 
 		// Find workplace.
 		if (query.isFindWorkPlaceInfo()) {
-			whereBuilder.append(" OR ( WKP_STR_DATE <= endDateTime AND WKP_END_DATE >= startDateTime ) ");
+			whereBuilder.append(" OR ( WPL_STR_DATE <= endDateTime AND WPL_END_DATE >= startDateTime ) ");
 		}
 
 		// Find classification.

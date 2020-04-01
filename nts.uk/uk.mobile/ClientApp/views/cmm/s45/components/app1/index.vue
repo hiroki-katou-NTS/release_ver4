@@ -185,11 +185,11 @@
                             </div>
                             <div class="col-4 pl-1" v-if="isPostApp">
                                 <span v-if="payTime.preAppTime!=null" class="far fa-clock display-time child-font-size" 
-                                    v-bind:class="{ 'uk-text-excess-time-alarm': overTime.preAppError==2, 'uk-text-excess-time-none': overTime.preAppError!=2 }">
+                                    v-bind:class="{ 'uk-text-excess-time-alarm': payTime.preAppError==2, 'uk-text-excess-time-none': payTime.preAppError!=2 }">
                                     {{'KAFS00_1' | i18n}}[{{ payTime.preAppTime | timedr }}]
                                 </span>
                                 <span v-else class="far fa-clock display-time child-font-size" 
-                                    v-bind:class="{ 'uk-text-excess-time-alarm': overTime.preAppError==2, 'uk-text-excess-time-none': overTime.preAppError!=2 }">
+                                    v-bind:class="{ 'uk-text-excess-time-alarm': payTime.preAppError==2, 'uk-text-excess-time-none': payTime.preAppError!=2 }">
                                     {{'KAFS00_1' | i18n}}[--:--]
                                 </span>
                             </div>

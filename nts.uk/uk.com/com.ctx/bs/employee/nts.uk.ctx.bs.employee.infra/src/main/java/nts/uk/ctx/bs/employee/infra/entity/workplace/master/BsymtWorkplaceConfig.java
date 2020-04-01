@@ -1,4 +1,4 @@
-package nts.uk.ctx.bs.employee.infra.entity.workplace.master;
+/*package nts.uk.ctx.bs.employee.infra.entity.workplace.master;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,11 +17,11 @@ import nts.uk.shr.com.history.DateHistoryItem;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
-/**
+*//**
  * 
  * @author HungTT - 職場構成
  *
- */
+ *//*
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -63,3 +63,4 @@ public class BsymtWorkplaceConfig extends UkJpaEntity {
 	}
 
 }
+*/

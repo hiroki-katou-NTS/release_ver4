@@ -29,13 +29,13 @@
 
 		<!-- PAGE CONTENT -->
 		<ui:define name="content">
-			<div id="functions-area">
+			<!-- <div id="functions-area">
 				<button id="A1_1" tabindex="1" class="proceed" data-bind="enable: items().length > 0 &amp;&amp; $root.errors.isEmpty, click: registerMaster">#{i18n.getText('CMM011_102')}</button>
 				<button id="A1_2" tabindex="2" data-bind="visible: initMode == 0, click: openWkpDepCreateDialog, enable: configuration().historyId() != null">#{i18n.getText('CMM011_204')}</button>
 				<button id="A1_2" tabindex="2" data-bind="visible: initMode == 1, click: openWkpDepCreateDialog, enable: configuration().historyId() != null">#{i18n.getText('CMM011_304')}</button>
 				<button id="A1_3" tabindex="3" class="danger" data-bind="enable: items().length > 0, click: deleteMaster">#{i18n.getText('CMM011_103')}</button>
-			</div>
-			<div id="contents-area" class="fixed-flex-layout">
+			</div> -->
+			<!-- <div id="contents-area" class="fixed-flex-layout">
 				<div class="fixed-flex-layout-left" style="padding-top: 10px; padding-left: 20px">
 					<div id="A2_1" data-bind="ntsPanel:{
 							width: '400px', height: '40px', 
@@ -128,7 +128,7 @@
 							required: false, enable: selectedId() != null }" />
 					</div>
 				</div>
-			</div>
+			</div> -->
 		</ui:define>
 	</ui:composition>
 </body>
