@@ -357,7 +357,7 @@ public class SpecialLeaveManagementServiceImpl implements SpecialLeaveManagement
 							});
 							details.setGrantNumber(new SpecialLeaveGrantNumber(new DayNumberOfGrant(detailBefore.getGrantDays()),
 									detailBefore.getGrantTimes().isPresent() ? Optional.of(new TimeOfGrant(detailBefore.getGrantTimes().get())) : Optional.empty()));
-							details.setRemainingNumber(new SpecialLeaveRemainingNumber(new DayNumberOfRemain(detailBefore.getRemainDays()),
+							details.setRemainingNumber(new SpecialLeaveRemainingNumber(new DayNumberOfRemain(detailBefore.getRemainDays() >= 0 ? detailBefore.getRemainDays() : 0),
 									detailBefore.getRemainTimes().isPresent() ? Optional.of(new TimeOfRemain(detailBefore.getRemainTimes().get())) : Optional.empty()));
 							
 							details.setUsedNumber(new SpecialLeaveUsedNumber(new DayNumberOfUse(detailBefore.getUseDays()),
