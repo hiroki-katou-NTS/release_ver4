@@ -59,6 +59,8 @@ subprojects {
 	
 	jar {
 		// contains source code
+		exclude !project.hasProperty('sourceMap') || sourceMap == 'false' ? '' : '**/*.java'
+		includeEmptyDirs false
     	from sourceSets.main.allSource
  	}
  		
@@ -1003,7 +1005,10 @@ project (':com.web:nts.uk.com.web') {
 	apply plugin: 'de.richsource.gradle.plugins.typescript'
 	
 	war {
+		exclude '**/*.ts'
+		exclude '**/*.js.map'
 		baseName= "nts.uk.com.web"
+		includeEmptyDirs false
 	}
 	
 	dependencies {
@@ -1231,7 +1236,7 @@ project (':com.web:nts.uk.com.web') {
 		target = "ES5"
 		noLib = true
 		watch = false
-		sourcemap = true
+		sourcemap = !project.hasProperty('sourceMap') || sourceMap == 'true'
 		include '**/*.ts'
 		source = new File('src/main/webapp/view')
 		outputDir = new File('src/main/webapp/view')
@@ -1241,7 +1246,7 @@ project (':com.web:nts.uk.com.web') {
 		target = "ES5"
 		noLib = true
 		watch = true
-		sourcemap = true
+		sourcemap = !project.hasProperty('sourceMap') || sourceMap == 'true'
 		include '**/*.ts'
 		source = new File('src/main/webapp/view')
 		outputDir = new File('src/main/webapp/view')

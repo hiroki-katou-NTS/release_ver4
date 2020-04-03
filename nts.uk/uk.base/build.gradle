@@ -69,14 +69,17 @@ project (':base.web:nts.uk.com.js.web') {
 	apply plugin: 'de.richsource.gradle.plugins.typescript'
 	
 	war {
+		exclude '**/*.ts'
+		exclude '**/*.js.map'
 		baseName= "nts.uk.com.js.web"
+		includeEmptyDirs false
 	}		
 	
 	task tsc(type: de.richsource.gradle.plugins.typescript.CompileTypeScript) {
 		target = "ES5"
 		noLib = true
 		watch = false
-		sourcemap = true
+		sourcemap = !project.hasProperty('sourceMap') || sourceMap == 'true'
 		include '**/*.ts'
 		source = new File('src/main/webapp/lib')
 		outFile = new File('src/main/webapp/lib/nittsu/nts.uk.com.web.nittsu.bundles.js')
@@ -86,7 +89,7 @@ project (':base.web:nts.uk.com.js.web') {
 		target = "ES5"
 		noLib = true
 		watch = true
-		sourcemap = true
+		sourcemap = !project.hasProperty('sourceMap') || sourceMap == 'true'
 		include '**/*.ts'
 		source = new File('src/main/webapp/lib')
 		outFile = new File('src/main/webapp/lib/nittsu/nts.uk.com.web.nittsu.bundles.js')
