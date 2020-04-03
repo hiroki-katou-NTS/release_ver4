@@ -11,10 +11,8 @@ const auth = {
     install: (vue: VueConstructor<Vue>) => {
         // clear cookie method
         let clearAuthentication = () => {
-            storage.local.removeItem('user');
-            storage.local.removeItem('csrf');
-
-            storage.cookie.removeItem('sescon');
+            storage.session.removeItem('user');
+            storage.session.removeItem('csrf');
         };
 
         vue.mixin({
@@ -38,12 +36,12 @@ const auth = {
                                         storage.local.removeItem('remember');
                                     }
 
-                                    self.$http.get('/ctx/sys/gateway/login/mobile/token')
+                                    return self.$http.get('/ctx/sys/gateway/login/mobile/token')
                                         .then((v: { data: string | any }) => {
                                             if (typeof v.data !== 'string') {
                                                 clearAuthentication();
                                             } else {
-                                                storage.local.setItem('csrf', v.data);
+                                                storage.session.setItem('csrf', v.data);
                                             }
 
                                             return typeof v.data === 'string';
@@ -52,12 +50,11 @@ const auth = {
                                             if (v) {
                                                 self.$http.post('/view-context/user')
                                                     .then((resp: { data: any }) => {
-                                                        storage.local.setItem('user', resp.data);
+                                                        storage.session.setItem('user', resp.data);
                                                     });
                                             }
-                                        });
-
-                                    return resp.data;
+                                        })
+                                        .then(() => resp.data);
                                 });
                         },
                         logout: () => {

@@ -2,10 +2,10 @@ import { storage } from '@app/utils';
 
 export const auth = {
     get valid(): boolean {
-        return !!storage.cookie.hasItem('sescon');
+        return !!auth.token;
     },
     get token(): string | null {
-        return auth.valid && (storage.local.getItem('csrf') || storage.cookie.getItem('sescon')) as string;
+        return storage.session.getItem('csrf') as string;
     },
     get remember(): {
         companyCode: string,
@@ -36,7 +36,7 @@ export const auth = {
             groupCompanyAdmin: string;
         }
     } {
-        let user: any = storage.local.getItem('user'),
+        let user: any = storage.session.getItem('user'),
             role: any = (user || { role: {} }).role || {};
 
         return user && {

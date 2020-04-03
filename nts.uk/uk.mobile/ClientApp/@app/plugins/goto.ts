@@ -1,6 +1,5 @@
 import { Vue, VueConstructor } from '@app/provider';
 import { obj } from '@app/utils';
-import { Dictionary } from 'vuex';
 
 const goto = {
     install(vue: VueConstructor<Vue>) {
@@ -17,7 +16,7 @@ const goto = {
                                     params: {
                                         params: location.params
                                     }
-                                }, () => { resolve({ msgId: 'success' }); }, () => { reject({ msgId: 'error' }); });
+                                }, resolve, reject);
                             });
                         }
                     });
@@ -80,13 +79,13 @@ const goto = {
                         name: nameOrLocation.name,
                         params: {
                             params: nameOrLocation.params
-                        } as any as Dictionary<string>
-                    }, () => { resolve({ msgId: 'success' }); }, () => { reject({ msgId: 'error' }); });
+                        } as any
+                    }, resolve, reject);
                 } else {
                     self.$router.push({
                         name: nameOrLocation,
-                        params: { params } as any as Dictionary<string>
-                    }, () => { resolve({ msgId: 'success' }); }, () => { reject({ msgId: 'error' }); });
+                        params: { params } as any
+                    }, resolve, reject);
                 }
             });
         };
