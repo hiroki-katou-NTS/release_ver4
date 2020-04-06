@@ -9,7 +9,7 @@ const path = require('path'),
 
 module.exports = (env) => {
     return [{
-        devtool: "source-map",
+        devtool: env && env.prod ? undefined : "source-map",
         mode: env && env.prod ? 'production' : 'development',
         stats: {
             modules: false
