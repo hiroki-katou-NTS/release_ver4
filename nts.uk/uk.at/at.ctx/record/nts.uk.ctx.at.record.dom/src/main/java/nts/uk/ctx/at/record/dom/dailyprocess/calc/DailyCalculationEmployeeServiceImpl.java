@@ -37,7 +37,12 @@ import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDailyRepo;
 import nts.uk.ctx.at.record.dom.daily.remarks.RemarksOfDailyPerformRepo;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultDomainServiceImpl.ProcessState;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.checkprocessed.CheckProcessed;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.checkprocessed.OutputCheckProcessed;
+import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.checkprocessed.StatusOutput;
 import nts.uk.ctx.at.record.dom.editstate.repository.EditStateOfDailyPerformanceRepository;
+import nts.uk.ctx.at.record.dom.organization.EmploymentHistoryImported;
+import nts.uk.ctx.at.record.dom.organization.adapter.EmploymentAdapter;
 import nts.uk.ctx.at.record.dom.raisesalarytime.repo.SpecificDateAttrOfDailyPerforRepo;
 import nts.uk.ctx.at.record.dom.shorttimework.repo.ShortTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
@@ -213,6 +218,12 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	
 	@Inject
 	private ClosureService closureService;
+	
+	@Inject
+	private EmploymentAdapter employmentAdapter;
+	
+	@Inject
+	private CheckProcessed checkProcessed;
 	/**
 	 * 社員の日別実績を計算
 	 * @param asyncContext 同期コマンドコンテキスト
@@ -342,8 +353,18 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		afterCalcRecord = calculateDailyRecordServiceCenter.calculateForManageState(createListNew, closureListNew,
 				reCalcAtr, empCalAndSumExecLogID);
 		
+		List<EmploymentHistoryImported> listEmploymentHis = this.employmentAdapter.getEmpHistBySid(cid, employeeId);
+		boolean checkNextEmp =false;
 		// データ更新
 		for (ManageCalcStateAndResult stateInfo : afterCalcRecord.getLst()) {
+			if(checkNextEmp) {
+				continue;
+			}
+			OutputCheckProcessed outputCheckProcessed = checkProcessed.getCheckProcessed(stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(), listEmploymentHis);
+			if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_DAY) continue;
+			if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_EMPLOYEE) {
+				checkNextEmp = true;
+			}
 
 			// 締めIDを取得する
 			Optional<ClosureEmployment> closureEmploymentOptional = this.closureEmploymentRepository
@@ -453,10 +474,19 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 		ManagePerCompanySet companySet =  commonCompanySettingForCalc.getCompanySetting(); 
 		//計算処理
 		val afterCalcRecord = calculateDailyRecordServiceCenter.calculateForclosure(createList,companySet ,closureList,executeLogId);
-		
+		List<EmploymentHistoryImported> listEmploymentHis = this.employmentAdapter.getEmpHistBySid(cid, employeeId);
+		boolean checkNextEmp =false;
 		//データ更新
 		for(ManageCalcStateAndResult stateInfo : afterCalcRecord.getLst()) {
 			try {
+				if(checkNextEmp) {
+					continue;
+				}
+				OutputCheckProcessed outputCheckProcessed = checkProcessed.getCheckProcessed(stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(), listEmploymentHis);
+				if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_DAY) continue;
+				if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_EMPLOYEE) {
+					checkNextEmp = true;
+				}
 				LockStatus lockStatus = LockStatus.UNLOCK;
 				if(isCalWhenLock ==null || isCalWhenLock == false) {
 					Closure closureData = closureService.getClosureDataByEmployee(employeeId, stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd());

@@ -26,4 +26,6 @@ public interface EmploymentAdapter {
 	
 	Optional<EmploymentHistoryImported> getEmpHistBySid(String companyId, String employeeId, GeneralDate baseDate);
 	
+	List<EmploymentHistoryImported> getEmpHistBySid(String companyId, String employeeId);
+	
 }

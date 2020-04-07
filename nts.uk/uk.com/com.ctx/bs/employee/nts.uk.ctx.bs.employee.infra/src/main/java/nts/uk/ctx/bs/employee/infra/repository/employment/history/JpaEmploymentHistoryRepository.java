@@ -110,6 +110,31 @@ public class JpaEmploymentHistoryRepository extends JpaRepository implements Emp
 		}
 		return Optional.empty();
 	}
+	
+	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	public List<DateHistoryItem> getByEmployeeId(String employeeId) {
+		List<DateHistoryItem> result = new ArrayList<>();
+		try (val statement = this.connection().prepareStatement("select * FROM BSYMT_EMPLOYMENT_HIST where SID = ?")) {
+			statement.setString(1, employeeId);
+			List<BsymtEmploymentHist> data = new NtsResultSet(statement.executeQuery()).getList(rec -> {
+				val entity = new BsymtEmploymentHist();
+				entity.companyId = rec.getString("CID");
+				entity.endDate = rec.getGeneralDate("END_DATE");
+				entity.hisId = rec.getString("HIST_ID");
+				entity.sid = employeeId;
+				entity.strDate = rec.getGeneralDate("START_DATE");
+				return entity;
+			});
+			
+			for(BsymtEmploymentHist bsymtEmploymentHist : data) {
+				result.add(new DateHistoryItem(bsymtEmploymentHist.hisId, new DatePeriod(bsymtEmploymentHist.strDate, bsymtEmploymentHist.endDate)));
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		return result;
+	}
 
 	@Override
 	public Optional<DateHistoryItem> getByHistoryId(String historyId) {

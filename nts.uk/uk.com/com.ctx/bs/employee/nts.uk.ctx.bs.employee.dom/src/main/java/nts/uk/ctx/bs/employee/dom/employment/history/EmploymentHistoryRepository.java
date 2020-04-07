@@ -34,6 +34,15 @@ public interface EmploymentHistoryRepository {
 	Optional<DateHistoryItem> getByEmployeeIdAndStandardDate(String employeeId, GeneralDate standardDate);
 	
 	/**
+	 * get with employeeId
+	 * startDate <= standardDate <= endDate 
+	 * @param employeeId
+	 * @param standardDate
+	 * @return
+	 */
+	List<DateHistoryItem> getByEmployeeId(String employeeId);
+	
+	/**
 	 * get with historyId
 	 * @param historyId
 	 * @return
