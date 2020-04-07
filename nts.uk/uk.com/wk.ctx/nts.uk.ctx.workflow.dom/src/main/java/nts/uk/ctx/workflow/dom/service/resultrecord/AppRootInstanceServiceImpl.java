@@ -378,7 +378,7 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 			// 承認者と期間から承認ルート中間データを取得する
 			List<AppRootInstance> appRootInstanceAgentLst = appRootInstanceRepository.findByApproverPeriod(
 					agentInfor.getAgentID(), 
-					new DatePeriod(agentInfor.getStartDate(), agentInfor.getEndDate()), 
+					period, 
 					rootType);
 			// [No.596]削除された社員を取り除く
 			List<String> empInsAgentLst = appRootInstanceAgentLst.stream().map(x -> x.getEmployeeID()).collect(Collectors.toList());
