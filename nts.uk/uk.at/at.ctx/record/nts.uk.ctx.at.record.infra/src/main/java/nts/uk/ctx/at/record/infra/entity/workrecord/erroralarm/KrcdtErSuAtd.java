@@ -28,7 +28,7 @@ public class KrcdtErSuAtd extends KrcdtErAttendanceItem implements Serializable 
 		krcdtErAttendanceItem.krcdtErAttendanceItemPK = krcdtErAttendanceItemPK;
 		krcdtErAttendanceItem.ccd = ccd;
 		krcdtErAttendanceItem.cid = cid;
-		krcdtErAttendanceItem.sid = cid;
+		krcdtErAttendanceItem.sid = sid;
 		krcdtErAttendanceItem.processDate = processDate;
 		return krcdtErAttendanceItem;
 	}
