@@ -364,6 +364,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 			if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_DAY) continue;
 			if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_EMPLOYEE) {
 				checkNextEmp = true;
+				continue;
 			}
 
 			// 締めIDを取得する
@@ -486,6 +487,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 				if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_DAY) continue;
 				if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_EMPLOYEE) {
 					checkNextEmp = true;
+					continue;
 				}
 				LockStatus lockStatus = LockStatus.UNLOCK;
 				if(isCalWhenLock ==null || isCalWhenLock == false) {

@@ -201,6 +201,7 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 				if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_DAY) continue;
 				if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_EMPLOYEE) {
 					checkNextEmp = true;
+					continue;
 				}
 				LockStatus lockStatus = LockStatus.UNLOCK;
 				//「ロック中の計算/集計する」の値をチェックする
@@ -416,6 +417,7 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 			if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_DAY) continue;
 			if(outputCheckProcessed.getStatusOutput() == StatusOutput.NEXT_EMPLOYEE) {
 				checkNextEmp = true;
+				continue;
 			}
 			employmentHisOptional = outputCheckProcessed.getEmploymentHistoryImported();
 			employmentCode = outputCheckProcessed.getEmploymentHistoryImported().get().getEmploymentCode();
