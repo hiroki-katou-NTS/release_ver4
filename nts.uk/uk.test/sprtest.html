@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<form id="form01" method="post" accept-charset="UTF-8">
+	nts.uk.com.web/webapi/public/spr/01/loginfromspr<br/>
+	<table>
+		<tr><td>menu</td><td><input type="text" name="menu" value="3" /></td></tr>
+		<tr><td>loginemployeeCode</td><td><input type="text" name="loginemployeeCode" value="000001" /></td></tr>
+		<tr><td>employeeCode</td><td><input type="text" name="employeeCode" value="000001" /></td></tr>
+		<tr><td>starttime</td><td><input type="text" name="starttime" value="420" /></td></tr>
+		<tr><td>endtime</td><td><input type="text" name="endtime" value="1200" /></td></tr>
+		<tr><td>date</td><td><input type="text" name="date" value="2017/04/20" /></td></tr>
+		<tr><td>selecttype</td><td><input type="text" name="selecttype" value="1" /></td></tr>
+		<tr>
+			<td>applicationID</td>
+			<td><input style="width: 250px"
+			 type="text" name="applicationID" value="00000000000000000000000000000000" /></td></tr>
+		<tr><td>reason</td><td><input type="text" name="reason" value="reason" /></td></tr>
+		<tr><td>stampProtection</td><td><input type="text" name="stampProtection" value="0" /></td></tr>
+	</table>
+	<input type="submit" id="run01" value="nts.uk.com.web/webapi/public/spr/01/loginfromspr" />
+</form>
+<hr/>
+<table>
+	<tr><td>loginemployeeCode</td><td><input type="text" id="loginemployeeCode2" value="000001"/></td></tr>
+	<tr><td>employeeCode</td><td><input type="text" id="employeeCode2" value="000001"/></td></tr>
+	<tr><td>startdate</td><td><input type="text" id="startdate2" value="2018/03/15"/></td></tr>
+	<tr><td>enddate</td><td><input type="text" id="enddate2" value="2018/03/15"/></td></tr>
+</table>
+<button id="run02">nts.uk.com.web/webapi/public/spr/02/getapplicationstatus</button></br />
+<hr/>
+<table>
+	<tr><td>loginemployeeCode</td><td><input type="text" id="loginemployeeCode3" value="000001"/></td></tr>
+	<tr><td>employeeCode</td><td><input type="text" id="employeeCode3" value="000001"/></td></tr>
+	<tr><td>startdate</td><td><input type="text" id="startdate3" value="2018/03/15"/></td></tr>
+	<tr><td>enddate</td><td><input type="text" id="enddate3" value="2018/03/15"/></td></tr>
+</table>
+<button id="run03">nts.uk.com.web/webapi/public/spr/03/getstatusofdaily</button></br />
+<hr/>
+<table>
+	<tr><td>loginemployeeCode</td><td><input type="text" id="loginemployeeCode4" value="000001"/></td></tr>
+	<tr><td>date</td><td><input type="text" id="date4" value="2018/03/15"/></td></tr>
+</table>
+<button id="run04">nts.uk.com.web/webapi/public/spr/04/getapprovalroot</button></br />
+
+
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+
+<script>
+	
+var server = window.location.search.substring(1).split('=')[1];
+$('#form01')[0].action = server + 'nts.uk.com.web/webapi/public/spr/01/loginfromspr'
+var ajaxOption = {
+	type: "POST",
+	contentType: "application/json",
+	dataType: "json",
+	
+	build: function (path, data) {
+		return $.extend({url:server + path, data: JSON.stringify(data)}, this);
+	}
+};
+$(function () {	
+	$("#run02").click(function () {
+		$.ajax(ajaxOption.build("/nts.uk.com.web/webapi/public/spr/02/getapplicationstatus", {
+			loginemployeeCode: $('#loginemployeeCode2').val(), 
+			employeeCode: $('#employeeCode2').val(), 
+			startdate: $('#startdate2').val(), 
+			enddate: $('#enddate2').val()
+		})).done(function (res) {
+			console.log(res);
+		}).fail(function(rej){
+			console.log(rej);
+		});
+	});
+	$("#run03").click(function () {
+		$.ajax(ajaxOption.build("/nts.uk.com.web/webapi/public/spr/03/getstatusofdaily", {
+			loginemployeeCode: $('#loginemployeeCode3').val(), 
+			employeeCode: $('#employeeCode3').val(), 
+			startdate: $('#startdate3').val(), 
+			enddate: $('#enddate3').val()
+		})).done(function (res) {
+			console.log(res);
+		}).fail(function(rej){
+			console.log(rej);
+		});
+	});
+	$("#run04").click(function () {
+		$.ajax(ajaxOption.build("/nts.uk.com.web/webapi/public/spr/04/getapprovalroot", {
+			loginemployeeCode: $('#loginemployeeCode4').val(), 
+			date: $('#date4').val()
+		})).done(function (res) {
+			console.log(res);
+		}).fail(function(rej){
+			console.log(rej);
+		});
+	});
+});
+</script>
+</body>
+</html>
