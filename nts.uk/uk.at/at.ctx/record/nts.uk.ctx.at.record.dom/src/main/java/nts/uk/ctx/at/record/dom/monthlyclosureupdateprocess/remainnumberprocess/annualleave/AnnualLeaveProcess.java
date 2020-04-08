@@ -69,7 +69,7 @@ public class AnnualLeaveProcess {
 				period, empId, interimRemainMngMap, attTimeMonthly);
 		
 		List<InterimRemain> interimRemain = interimRemainRepository.findByEmployeeID(empId);
-		String mngId = interimRemain.get(0).getRemainManaID();
+		String mngId = !interimRemain.isEmpty() ? interimRemain.get(0).getRemainManaID() : null;
 		
 		// 年休残数更新
 		if (output.getAnnualLeave().isPresent())
@@ -78,7 +78,8 @@ public class AnnualLeaveProcess {
 		// 年休暫定データ削除
 		tmpAnnualLeaveDeleting.deleteTempAnnualLeaveData(empId, period.getPeriod());
 		// Fix bug 109524
-		annualHolidayMngRepository.deleteById(mngId);
+		if (mngId != null)
+			annualHolidayMngRepository.deleteById(mngId);
 		
 		// 積立年休残数更新
 		if (output.getReserveLeave().isPresent())
@@ -87,6 +88,7 @@ public class AnnualLeaveProcess {
 		// 積立年休暫定データ削除
 		tmpRsvAnnualLeaveDeleting.deleteTempRsvAnnualLeaveData(empId, period.getPeriod());
 		// Fix bug 109524
-		leaveMngRepository.deleteById(mngId);
+		if (mngId != null)
+			leaveMngRepository.deleteById(mngId);
 	}
 }
