@@ -415,6 +415,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 				rs.getInt("CONFIRM_ATR"), 
 				rs.getString("APPROVER_CHILD_ID"));
 	}
+
+
 	
 	@Override
 	@SneakyThrows
@@ -422,13 +424,15 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	public List<AppRootInstance> findByApproverPeriod(String approverID, DatePeriod period,
 			RecordRootType rootType) {
 		String companyID =  AppContexts.user().companyId();
-		String query = BASIC_SELECT 
+		
+		String query = BASIC_SELECT + 
+				" WHERE appRoot.ROOT_ID IN (SELECT ROOT_ID FROM (" + BASIC_SELECT 
 				+ " WHERE appApprover.APPROVER_CHILD_ID = ?" 
 				+ " AND appRoot.START_DATE <= ?" 
 				+ " AND appRoot.END_DATE >= ?"
 				+ " AND appRoot.CID = ?"
-				+ " AND appRoot.ROOT_TYPE = ?";
-				
+				+ " AND appRoot.ROOT_TYPE = ?) result)";
+		
 			Query pstatement = this.getEntityManager().createNativeQuery(query);
 			pstatement.setParameter(1, approverID);
 			pstatement.setParameter(2, period.start().toString("yyyy-MM-dd"));
