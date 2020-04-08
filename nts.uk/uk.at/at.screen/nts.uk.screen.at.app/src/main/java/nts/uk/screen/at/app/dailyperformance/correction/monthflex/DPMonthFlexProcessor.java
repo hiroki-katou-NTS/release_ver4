@@ -77,7 +77,7 @@ public class DPMonthFlexProcessor {
 
 	private static final List<Integer> DAFAULT_ITEM = Arrays.asList(18, 19, 21, 189, 190, 191, 202, 204);
 	
-
+	//月次項目の取得
 	public DPMonthResult getDPMonthFlex(DPMonthFlexParam param) {
 		String companyId = param.getCompanyId();
 		List<MonthlyModifyResult> itemMonthResults = new ArrayList<>();
@@ -97,7 +97,7 @@ public class DPMonthFlexProcessor {
 //				closureEmploymentOptional.get().getClosureId(), param.getDate());
 		if (!closurePeriodOpt.isPresent())
 			return null;
-
+		
 		List<FormatDailyDto> formatDaily = getFormatCode(param, companyId);
 		
 		// フォーマット．月次の勤怠項目一覧が存在するかチェックする
@@ -152,10 +152,12 @@ public class DPMonthFlexProcessor {
 					.version(firstDT.getVersion())
 					.completed());
 		}
-		
+		Optional<ClosurePeriod> closingPeriodNew = Optional.of(ClosurePeriod.of(closurePeriodOpt.get().getClosureId(),
+				closurePeriodOpt.get().getClosureDate(), closurePeriodOpt.get().getYearMonth(), param.getDatePeriod()));
+		//フレックス情報を取得する
 		FlexShortageDto flexShortageDto = flexInfoDisplayChange.flexInfo(companyId, 
 				param.getEmployeeId(), param.getDate(), null, 
-				closurePeriodOpt, itemMonthFlexResults, null);
+				closingPeriodNew, itemMonthFlexResults, null);
 		flexShortageDto.createError(errorMonth);
 		flexShortageDto.createMonthParent(new DPMonthParent(param.getEmployeeId(), closurePeriodOpt.get().getYearMonth().v(),
 				closurePeriodOpt.get().getClosureId().value,

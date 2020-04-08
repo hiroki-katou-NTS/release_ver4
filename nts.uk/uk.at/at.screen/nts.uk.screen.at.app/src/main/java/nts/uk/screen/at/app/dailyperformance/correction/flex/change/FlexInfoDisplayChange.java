@@ -31,7 +31,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * @author thanhnx
- * 
+ * フレックス情報を取得する
  * <<Public>> フレックス情報を表示する
  */
 @Stateless

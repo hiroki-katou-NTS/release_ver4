@@ -52,13 +52,14 @@ public class ProcessMonthScreen {
 		if (param.displayFormat == 0) {
 			// フレックス情報を表示する
 			screenDto
-					.setMonthResult(
-							monthFlexProcessor.getDPMonthFlex(
-									new DPMonthFlexParam(companyId, param.employeeTarget, param.dateRange.getEndDate(),
-											param.employeeTarget.equals(sId) ? param.employmentCode
-													: processor.getEmploymentCode(companyId,
-															param.dateRange.getEndDate(), param.employeeTarget),
-											dailyPerformanceDto, param.autBussCode, param.isLoadAfterCalc() ? param.getDomainMonthOpt() : Optional.empty())));
+					.setMonthResult(monthFlexProcessor.getDPMonthFlex(
+							new DPMonthFlexParam(companyId, param.employeeTarget, param.dateRange.getEndDate(),
+									param.employeeTarget.equals(sId) ? param.employmentCode
+											: processor.getEmploymentCode(companyId, param.dateRange.getEndDate(),
+													param.employeeTarget),
+									dailyPerformanceDto, param.autBussCode,
+									param.isLoadAfterCalc() ? param.getDomainMonthOpt() : Optional.empty(),
+									param.getStateParam().getPeriod())));
 			if (param.employeeTarget.equals(sId)) {
 				// 社員に対応する締め期間を取得する
 				DatePeriod period = closureService.findClosurePeriod(param.employeeTarget, param.dateRange.getEndDate());
