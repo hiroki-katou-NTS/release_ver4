@@ -21,7 +21,7 @@ public class SpecialLeaveRemainingNumber {
 	public Optional<TimeOfRemain> timeOfRemain;
 	
 	private SpecialLeaveRemainingNumber(BigDecimal days, Integer minutes) {
-		this.dayNumberOfRemain = new DayNumberOfRemain(days== null? 0.0d: days.doubleValue() >= 0 ? days.doubleValue() :  0.0d);
+        this.dayNumberOfRemain = new DayNumberOfRemain(days== null? 0.0d: days.doubleValue());
 		this.timeOfRemain = minutes != null ? Optional.of(new TimeOfRemain(minutes)) : Optional.empty();
 	}
 
