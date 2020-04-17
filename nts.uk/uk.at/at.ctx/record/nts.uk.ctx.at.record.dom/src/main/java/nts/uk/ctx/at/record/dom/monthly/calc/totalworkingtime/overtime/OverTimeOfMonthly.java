@@ -431,9 +431,13 @@ public class OverTimeOfMonthly implements Cloneable {
 	 * @param flexTime フレックス時間
 	 * @param settingsByFlex フレックス勤務が必要とする設定
 	 */
+	@SuppressWarnings("unused")
 	public FlexTime aggregateForFlex(AttendanceTimeOfDailyPerformance attendanceTimeOfDaily,
 			String companyId, MonthlyAggregateAtr aggregateAtr, FlexTime flexTime,
 			SettingRequiredByFlex settingsByFlex){
+		
+		//大塚カスタマイズ(試験日対応) 大塚モードの場合は常に「残業をフレックス時間に含める=false」とする。
+		val ootsukaMode = true;
 		
 		val flexAggrSet = settingsByFlex.getFlexAggrSet();
 		
@@ -452,20 +456,20 @@ public class OverTimeOfMonthly implements Cloneable {
 			val overTimeFrameNo = overTimeFrameSrc.getOverWorkFrameNo(); 
 			
 			// 「設定．残業を含める」を確認する
-			if (flexAggrSet.getIncludeOverTime() == NotUseAtr.USE){
-
-				// 取得した残業枠時間を「フレックス時間」に入れる
-				flexTime.addOverTimeFrameTime(ymd, overTimeFrameSrc);
-				
-				// 取得した残業枠時間を「集計残業時間」に入れる　（法定内残業時間）　（Redmine#106235）
+			if (ootsukaMode || flexAggrSet.getIncludeOverTime() == NotUseAtr.NOT_USE){
+				// 取得した残業枠時間を「集計残業時間」に入れる
 				val targetAggregateOverTime = this.getTargetAggregateOverTime(overTimeFrameNo);
-				targetAggregateOverTime.addLegalOverAndTransInTimeSeriesWork(ymd, overTimeFrameSrc);
+				targetAggregateOverTime.addOverTimeInTimeSeriesWork(ymd, overTimeFrameSrc);
 				continue;
 			}
-				
-			// 取得した残業枠時間を「集計残業時間」に入れる
+
+			// 取得した残業枠時間を「フレックス時間」に入れる
+			flexTime.addOverTimeFrameTime(ymd, overTimeFrameSrc);
+			
+			// 取得した残業枠時間を「集計残業時間」に入れる　（法定内残業時間）　（Redmine#106235）
 			val targetAggregateOverTime = this.getTargetAggregateOverTime(overTimeFrameNo);
-			targetAggregateOverTime.addOverTimeInTimeSeriesWork(ymd, overTimeFrameSrc);
+			targetAggregateOverTime.addLegalOverAndTransInTimeSeriesWork(ymd, overTimeFrameSrc);
+				
 		}
 		
 		return flexTime;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -11,10 +12,19 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.actualworkinghours.ActualWorkingTimeOfDaily;
 import nts.uk.ctx.at.record.dom.actualworkinghours.AttendanceTimeOfDailyPerformance;
+import nts.uk.ctx.at.record.dom.actualworkinghours.TotalWorkingTime;
+import nts.uk.ctx.at.record.dom.actualworkinghours.daily.workschedule.WorkScheduleTimeOfDaily;
 import nts.uk.ctx.at.record.dom.affiliationinformation.WorkTypeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
 import nts.uk.ctx.at.record.dom.daily.optionalitemtime.AnyItemValueOfDaily;
+import nts.uk.ctx.at.record.dom.daily.vacationusetime.AnnualOfDaily;
+import nts.uk.ctx.at.record.dom.daily.vacationusetime.HolidayOfDaily;
+import nts.uk.ctx.at.record.dom.daily.vacationusetime.SpecialHolidayOfDaily;
+import nts.uk.ctx.at.record.dom.daily.vacationusetime.SubstituteHolidayOfDaily;
+import nts.uk.ctx.at.record.dom.daily.vacationusetime.YearlyReservedOfDaily;
+import nts.uk.ctx.at.record.dom.daily.withinworktime.WithinStatutoryTimeOfDaily;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.IntegrationOfDaily;
 import nts.uk.ctx.at.record.dom.raisesalarytime.SpecificDateAttrOfDailyPerfor;
 import nts.uk.ctx.at.record.dom.remainingnumber.annualleave.export.param.AnnualLeaveGrantRemaining;
@@ -23,6 +33,8 @@ import nts.uk.ctx.at.record.dom.workinformation.WorkInfoOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.workrecord.erroralarm.EmployeeDailyPerError;
 import nts.uk.ctx.at.record.dom.worktime.TemporaryTimeOfDailyPerformance;
 import nts.uk.ctx.at.record.dom.worktime.TimeLeavingOfDailyPerformance;
+import nts.uk.ctx.at.shared.dom.common.time.AttendanceTime;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
@@ -97,7 +109,7 @@ public class MonthlyCalculatingDailys {
 		// 共通処理
 		result.loadDataCommon(employeeId, period, repositories);
 		
-		return result;
+		return correctExamDayTime(result, repositories);
 	}
 	
 	/**
@@ -126,7 +138,7 @@ public class MonthlyCalculatingDailys {
 			result.attendanceTimeOfDailyMap.put(ymd, attendanceTimeOfDaily);
 		}
 		
-		return result;
+		return correctExamDayTime(result, repositories);
 	}
 	
 	/**
@@ -223,8 +235,86 @@ public class MonthlyCalculatingDailys {
 			}
 		}
 		
-		return result;
+		return correctExamDayTime(result, repositories);
 	}
+	
+	private static MonthlyCalculatingDailys correctExamDayTime(MonthlyCalculatingDailys calcDaily, RepositoriesRequiredByMonthlyAggr repositories){
+		
+		
+		for (Entry<GeneralDate, AttendanceTimeOfDailyPerformance> dailyAttenTime : calcDaily.attendanceTimeOfDailyMap.entrySet()) {
+			
+			GeneralDate currentDate = dailyAttenTime.getKey();
+			
+			if (calcDaily.workInfoOfDailyMap.containsKey(currentDate)) {
+				WorkInfoOfDailyPerformance wi = calcDaily.workInfoOfDailyMap.get(currentDate);
+				
+				val workCondition = repositories.getWorkingConditionItem().getBySidAndStandardDate(wi.getEmployeeId(), currentDate);
+				
+				workCondition.ifPresent(wc -> {
+					if (wc.getLaborSystem() == WorkingSystem.FLEX_TIME_WORK) {
+						calcDaily.attendanceTimeOfDailyMap.put(currentDate, examDayTimeCorrect(dailyAttenTime.getValue(), wi));
+					}
+				});
+			}
+		}
+		
+		return calcDaily;
+	}
+	
+	/**
+	 * 大塚カスタマイズ（試験日対応）
+	 */
+	private static AttendanceTimeOfDailyPerformance examDayTimeCorrect(AttendanceTimeOfDailyPerformance atTime, WorkInfoOfDailyPerformance workInfo) {
+		
+		if (workInfo.getRecordInfo().isExamWorkTime()) {
+			
+			WorkScheduleTimeOfDaily correctedSche = new WorkScheduleTimeOfDaily(atTime.getWorkScheduleTimeOfDaily().getWorkScheduleTime(),
+																				new AttendanceTime(0), 
+																				atTime.getWorkScheduleTimeOfDaily().getRecordPrescribedLaborTime());
+			
+			ActualWorkingTimeOfDaily beforeActualWork = atTime.getActualWorkingTimeOfDaily();
+			ActualWorkingTimeOfDaily correctedActualWork = ActualWorkingTimeOfDaily.of(
+										beforeActualWork.getConstraintDifferenceTime(), 
+										beforeActualWork.getConstraintTime(), 
+										beforeActualWork.getTimeDifferenceWorkingHours(), 
+										new TotalWorkingTime(beforeActualWork.getTotalWorkingTime().getTotalTime(), 
+												beforeActualWork.getTotalWorkingTime().getTotalCalcTime(), 
+												beforeActualWork.getTotalWorkingTime().getActualTime(),
+												WithinStatutoryTimeOfDaily.createWithinStatutoryTimeOfDaily(
+														new AttendanceTime(0), 
+														new AttendanceTime(0), 
+														beforeActualWork.getTotalWorkingTime().getWithinStatutoryTimeOfDaily().getWithinPrescribedPremiumTime(), 
+														beforeActualWork.getTotalWorkingTime().getWithinStatutoryTimeOfDaily().getWithinStatutoryMidNightTime(), 
+														beforeActualWork.getTotalWorkingTime().getWithinStatutoryTimeOfDaily().getVacationAddTime()), 
+												beforeActualWork.getTotalWorkingTime().getExcessOfStatutoryTimeOfDaily(), 
+												beforeActualWork.getTotalWorkingTime().getLateTimeOfDaily(),
+												beforeActualWork.getTotalWorkingTime().getLeaveEarlyTimeOfDaily(),
+												beforeActualWork.getTotalWorkingTime().getBreakTimeOfDaily(), 
+												beforeActualWork.getTotalWorkingTime().getOutingTimeOfDailyPerformance(),
+												beforeActualWork.getTotalWorkingTime().getRaiseSalaryTimeOfDailyPerfor(),
+												beforeActualWork.getTotalWorkingTime().getWorkTimes(),
+												beforeActualWork.getTotalWorkingTime().getTemporaryTime(),
+												beforeActualWork.getTotalWorkingTime().getShotrTimeOfDaily(),
+												new HolidayOfDaily(
+														beforeActualWork.getTotalWorkingTime().getHolidayOfDaily().getAbsence(), 
+														beforeActualWork.getTotalWorkingTime().getHolidayOfDaily().getTimeDigest(), 
+														new YearlyReservedOfDaily(new AttendanceTime(0)), 
+														new SubstituteHolidayOfDaily(new AttendanceTime(0), 
+																beforeActualWork.getTotalWorkingTime().getHolidayOfDaily().getSubstitute().getDigestionUseTime()), 
+														beforeActualWork.getTotalWorkingTime().getHolidayOfDaily().getOverSalary(), 
+														new SpecialHolidayOfDaily(new AttendanceTime(0), 
+																beforeActualWork.getTotalWorkingTime().getHolidayOfDaily().getSpecialHoliday().getDigestionUseTime()), 
+														new AnnualOfDaily(new AttendanceTime(0), 
+																beforeActualWork.getTotalWorkingTime().getHolidayOfDaily().getAnnual().getDigestionUseTime()))),
+										beforeActualWork.getDivTime(),
+										beforeActualWork.getPremiumTimeOfDailyPerformance());
+			
+			return new AttendanceTimeOfDailyPerformance(atTime.getEmployeeId(), atTime.getYmd(), correctedSche, correctedActualWork, 
+														atTime.getStayingTime(), atTime.getBudgetTimeVariance(), atTime.getUnEmployedTime()); 
+		}
+		
+		return atTime;
+	} 
 	
 	/**
 	 * データ取得共通処理
@@ -335,7 +425,7 @@ public class MonthlyCalculatingDailys {
 		// データ取得共通処理　（36協定時間用）
 		result.loadDataCommonForAgreement(employeeId, period, repositories);
 		
-		return result;
+		return correctExamDayTime(result, repositories);
 	}
 	
 	/**
@@ -372,7 +462,7 @@ public class MonthlyCalculatingDailys {
 		// データ取得共通処理　（36協定時間用）
 		result.loadDataCommonForAgreement(employeeId, period, repositories);
 		
-		return result;
+		return correctExamDayTime(result, repositories);
 	}
 	
 	/**

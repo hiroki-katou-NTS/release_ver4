@@ -37,5 +37,13 @@ public class WorkInformation {
 		this.siftCode = siftCode;
 	}
 	
+	public boolean isExamWorkTime() {
+		if (siftCode == null) {
+			return false;
+		}
+		
+		return siftCode.equals("102") || siftCode.equals("103");
+	}
+	
 	
 }

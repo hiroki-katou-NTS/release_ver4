@@ -49,6 +49,8 @@ import nts.uk.ctx.at.shared.dom.common.TimeOfDay;
 import nts.uk.ctx.at.shared.dom.statutory.worktime.sharedNew.DailyUnit;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItem;
 import nts.uk.ctx.at.shared.dom.workingcondition.WorkingConditionItemRepository;
+import nts.uk.ctx.at.shared.dom.workingcondition.WorkingSystem;
+import nts.uk.ctx.at.shared.dom.worktime.common.WorkSystemAtr;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.history.DateHistoryItem;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -467,18 +469,21 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			//nowIntegrationの労働制取得
 			Optional<Entry<DateHistoryItem, WorkingConditionItem>> nowWorkingItem = masterData.getItemAtDateAndEmpId(record.getAffiliationInfor().getYmd(),record.getAffiliationInfor().getEmployeeId());
 			if(nowWorkingItem.isPresent()) {
+				WorkingConditionItem workCondition = correctWorkCondition(record, nowWorkingItem);
+				
+				
 				DailyUnit dailyUnit = dailyStatutoryWorkingHours.getDailyUnit(comanyId,
 																		record.getAffiliationInfor().getEmploymentCode().toString(),
 																		record.getAffiliationInfor().getEmployeeId(),
 																		record.getAffiliationInfor().getYmd(),
-																		nowWorkingItem.get().getValue().getLaborSystem(),
+																		workCondition.getLaborSystem(),
 																		companyCommonSetting.getUsageSetting());
 				if(dailyUnit == null || dailyUnit.getDailyTime() == null)
 					dailyUnit = new DailyUnit(new TimeOfDay(0));
 				//実績計算
 				ManageCalcStateAndResult result = calculate.calculate(calcOption, record, 
 													   companyCommonSetting,
-													   new ManagePerPersonDailySet(Optional.of(nowWorkingItem.get().getValue()), dailyUnit),
+													   new ManagePerPersonDailySet(Optional.of(workCondition), dailyUnit),
 													   findAndGetWorkInfo(record.getAffiliationInfor().getEmployeeId(),map,record.getAffiliationInfor().getYmd().addDays(-1)),
 													   findAndGetWorkInfo(record.getAffiliationInfor().getEmployeeId(),map,record.getAffiliationInfor().getYmd().addDays(1)));
 				if(result.isCalc()) {
@@ -494,6 +499,30 @@ public class CalculateDailyRecordServiceCenterImpl implements CalculateDailyReco
 			}
 		}
 		return returnList;
+	}
+
+	private WorkingConditionItem correctWorkCondition(IntegrationOfDaily record,
+			Optional<Entry<DateHistoryItem, WorkingConditionItem>> nowWorkingItem) {
+		
+		if (record.getWorkInformation().getRecordInfo().isExamWorkTime()) {
+			return new WorkingConditionItem(nowWorkingItem.get().getValue().getHistoryId(), 
+													nowWorkingItem.get().getValue().getScheduleManagementAtr(),
+													nowWorkingItem.get().getValue().getWorkDayOfWeek(), 
+													nowWorkingItem.get().getValue().getWorkCategory(),
+													nowWorkingItem.get().getValue().getAutoStampSetAtr(),
+													nowWorkingItem.get().getValue().getAutoIntervalSetAtr(),
+													nowWorkingItem.get().getValue().getEmployeeId(),
+													nowWorkingItem.get().getValue().getVacationAddedTimeAtr(),
+													nowWorkingItem.get().getValue().getContractTime(),
+													WorkingSystem.REGULAR_WORK, 
+													nowWorkingItem.get().getValue().getHolidayAddTimeSet().orElse(null),
+													nowWorkingItem.get().getValue().getScheduleMethod().orElse(null), 
+													nowWorkingItem.get().getValue().getHourlyPaymentAtr().value,
+													nowWorkingItem.get().getValue().getTimeApply().orElse(null),
+													nowWorkingItem.get().getValue().getMonthlyPattern().orElse(null));
+		} else {
+			return nowWorkingItem.get().getValue();
+		}
 	}
 	
 	
