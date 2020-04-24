@@ -255,7 +255,7 @@ public class MonthlyAggregationEmployeeServiceImpl implements MonthlyAggregation
 			if(isCalWhenLock ==null || isCalWhenLock ==false ) {
 				//
 				lockStatus = lockStatusService.getDetermineActualLocked(companyId, 
-						criteriaDate, closureData.getClosureId().value, PerformanceType.MONTHLY);
+						datePeriod.end(), closureData.getClosureId().value, PerformanceType.MONTHLY);
 			}
 			if(lockStatus == LockStatus.LOCK) {
 				continue;
