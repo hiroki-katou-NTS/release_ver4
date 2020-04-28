@@ -12,12 +12,15 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import lombok.extern.slf4j.Slf4j;
+import nts.arc.layer.ws.preprocess.filters.RequestPerformanceDiagnose;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.context.AppContextsConfig;
 
 /**
  * Get login Windows account.
  */
+@Slf4j
 public class WindowsAccountCatcher implements Filter {
 
 	/* (non-Javadoc)
@@ -39,6 +42,9 @@ public class WindowsAccountCatcher implements Filter {
 			String account = principal.getName();
 			Optional<WindowsAccount> accOpt = getAccountInfo(account);
 			accOpt.ifPresent(AppContextsConfig::setWindowsAccount);
+			
+			/** Write log for window account name */
+			log.info("WINDOWS ACCOUNT NAME IS CATCHED: " + account);
 			
 			// Only for debug
 			WindowsAccount ac = AppContexts.windowsAccount();
