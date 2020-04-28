@@ -416,7 +416,6 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 				rs.getString("APPROVER_CHILD_ID"));
 	}
 
-
 	
 	@Override
 	@SneakyThrows
@@ -435,8 +434,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		
 			Query pstatement = this.getEntityManager().createNativeQuery(query);
 			pstatement.setParameter(1, approverID);
-			pstatement.setParameter(2, period.start().toString("yyyy-MM-dd"));
-			pstatement.setParameter(3, period.end().toString("yyyy-MM-dd"));
+			pstatement.setParameter(2, period.end().toString("yyyy-MM-dd"));
+			pstatement.setParameter(3, period.start().toString("yyyy-MM-dd"));
 			pstatement.setParameter(4, companyID);
 			pstatement.setParameter(5, rootType.value);
 			
