@@ -165,19 +165,23 @@ public class DailyCalculationCommandFacade {
 			Map<Pair<String, GeneralDate>, ResultReturnDCUpdateData> resultErrorTemp = afterError.getResultError();
 			resultError.putAll(resultErrorTemp);
 			Map<Integer, List<DPItemValue>> resultErrorMonth = afterError.getResultErrorMonth();
-			val lstErrorCheckDetail = afterError.getLstErrorEmpMonth();
+			// val lstErrorCheckDetail = afterError.getLstErrorEmpMonth();
 			flexShortage = afterError.getFlexShortage();
 			
 			editedDomains = editedDomains.stream().filter(x -> !resultError.containsKey(Pair.of(x.getWorkInformation().getEmployeeId(),x.getWorkInformation().getYmd()))).collect(Collectors.toList());
 			domainOld = domainOld.stream().filter(x -> !resultError.containsKey(Pair.of(x.getEmployeeId(),x.getDate()))).collect(Collectors.toList());
 			
+            List<String> lstErrorMonthId = resultErrorMonth.values().stream().flatMap(x -> x.stream())
+                    .map(x -> x.getEmployeeId()).distinct().collect(Collectors.toList());
+			
 			editedDomains = editedDomains.stream()
-					.filter(x -> !resultErrorTemp.containsKey(Pair.of(x.getWorkInformation().getEmployeeId(), x.getWorkInformation().getYmd()))
-							&& !lstErrorCheckDetail.contains(Pair.of(x.getWorkInformation().getEmployeeId(), x.getWorkInformation().getYmd())))
+                    .filter(x -> !resultErrorTemp.containsKey(
+                            Pair.of(x.getWorkInformation().getEmployeeId(), x.getWorkInformation().getYmd()))
+                            && !lstErrorMonthId.contains(x.getWorkInformation().getEmployeeId()))
 					.collect(Collectors.toList());
 			domainOld = domainOld.stream()
 					.filter(x -> !resultErrorTemp.containsKey(Pair.of(x.getEmployeeId(), x.getDate()))
-							&& !lstErrorCheckDetail.contains(Pair.of(x.getEmployeeId(), x.getDate())))
+                            && !lstErrorMonthId.contains(x.getEmployeeId()))
 					.collect(Collectors.toList());
 
 
