@@ -89,12 +89,12 @@ public class RemainSpecialHolidayUpdating {
 					GrantRemainRegisterType.MONTH_CLOSE.value,
 					info.getGrantDays(),
 					(info.getGrantTimes().isPresent() ? info.getGrantTimes().get() : null),
-					info.getUseDays(),
+					info.getRemainDays() <0 ? info.getGrantDays() : info.getUseDays() ,
 					(info.getUseTimes().isPresent() ? info.getUseTimes().get() : null),
 					null,				// 積み崩し日数
 					numberOverdays,
 					timeOver,
-					info.getRemainDays(),
+					info.getRemainDays() < 0 ? 0 : info.getRemainDays(),
 					(info.getRemainTimes().isPresent() ? info.getRemainTimes().get() : null));
 			
 			if (existDataMap.containsKey(detail.getGrantDate())){
