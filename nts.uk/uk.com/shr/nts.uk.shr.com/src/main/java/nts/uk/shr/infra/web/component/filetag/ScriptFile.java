@@ -82,7 +82,7 @@ public class ScriptFile extends UIComponentBase {
         	if(Strings.isEmpty(of)){
         		writeTag(rw, FileTagsHelper.buildPath(context, filePath));
         	}else{
-        		writeTag(rw, FileTagsHelper.buildPathOf(of, filePath));
+        		writeTag(rw, FileTagsHelper.buildPathOf(context, of, filePath));
         	}
         	
         } else {
