@@ -63,6 +63,7 @@ import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.enu
 import nts.uk.ctx.at.record.dom.worktime.repository.TemporaryTimeOfDailyPerformanceRepository;
 import nts.uk.ctx.at.record.dom.worktime.repository.TimeLeavingOfDailyPerformanceRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.algorithm.InterimRemainDataMngRegisterDateChange;
+import nts.uk.ctx.at.shared.dom.workrule.closure.Closure;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
@@ -319,7 +320,7 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 	private Pair<Integer, ManageProcessAndCalcStateResult> runWhenOptimistLockError(String cid, String employeeId,
 			DatePeriod datePeriod, ExecutionType reCalcAtr, String empCalAndSumExecLogID,
 			ManageProcessAndCalcStateResult afterCalcRecord, Optional<IdentityProcessUseSet> iPUSOptTemp,
-			Optional<ApprovalProcessingUseSetting> approvalSetTemp,boolean runOptimistLock,Boolean IsCalWhenLock) {
+			Optional<ApprovalProcessingUseSetting> approvalSetTemp,boolean runOptimistLock,Boolean isCalWhenLock) {
 		//if check = 0 : createListNew : null
 		//if check = 1 : has error optimistic lock (lan 1)
 		//if check = 2 : done
@@ -347,11 +348,12 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
 					.findByEmploymentCD(cid, stateInfo.getIntegrationOfDaily().getAffiliationInfor().getEmploymentCode().v());
 			
 			LockStatus lockStatus = LockStatus.UNLOCK;
-            if(IsCalWhenLock ==null || IsCalWhenLock == false) {
+			if(isCalWhenLock ==null || isCalWhenLock == false) {
+				Closure closureData = closureService.getClosureDataByEmployee(employeeId, stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd());
 				//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
 				//実績ロックされているか判定する
 				lockStatus = lockStatusService.getDetermineActualLocked(cid, 
-						stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(), closureEmploymentOptional.get().getClosureId(), PerformanceType.DAILY);
+						stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(), closureData.getClosureId().value, PerformanceType.DAILY);
 			}
 			if(lockStatus == LockStatus.LOCK) {
 				continue;
