@@ -19,6 +19,7 @@ import nts.arc.task.parallel.ManagedParallelWithContext;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.output.ExecutionAttr;
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultDomainServiceImpl.ProcessState;
+import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.getprocessingdate.GetProcessingDate;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.MonAggrCompanySettings;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.work.RepositoriesRequiredByMonthlyAggr;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
@@ -61,6 +62,10 @@ public class MonthlyAggregationServiceImpl implements MonthlyAggregationService 
 	
 	@Inject
 	private ManagedParallelWithContext parallel;
+	
+    @Inject
+    private GetProcessingDate getProcessingDate;
+    
 	
 	/**
 	 * Managerクラス
@@ -142,13 +147,17 @@ public class MonthlyAggregationServiceImpl implements MonthlyAggregationService 
 		// 社員の数だけループ　（並列処理対象）
 		StateHolder stateHolder = new StateHolder(employeeIds.size());
 		this.parallel.forEach(employeeIds, employeeId -> {
+            Optional<GeneralDate> date = getProcessingDate.getProcessingDate(employeeId, criteriaDate);
+            if(!date.isPresent()) {
+                return;
+            }
 			if (stateHolder.isInterrupt()) return;
 		
 			ConcurrentStopwatches.start("10000:社員ごと：" + employeeId);
 			
 			// 社員1人分の処理　（社員の月別実績を集計する）
 			MonthlyAggrEmpServiceValue aggrStatus = this.monthlyAggregationEmployeeService.aggregate(asyncContext,
-					companyId, employeeId, criteriaDate, empCalAndSumExecLogID, reAggrAtr, companySets);
+            		companyId, employeeId, date.get(), empCalAndSumExecLogID, reAggrAtr, companySets);
 			ProcessState coStatus = aggrStatus.getState();
 			stateHolder.add(coStatus);
 

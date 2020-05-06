@@ -98,6 +98,26 @@ public class EmploymentPubImp implements SyEmploymentPub {
 				.of(SEmpHistExport.builder().employeeId(employeeId).employmentCode(employment.getEmploymentCode())
 						.employmentName(employment.getEmploymentName()).period(optHistoryItem.get().span()).build());
 	}
+    
+    @Override
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public List<SEmpHistExport> findSEmpHistBySid(String companyId, String employeeId) {
+        List<SEmpHistExport> result = new ArrayList<>();
+        
+        List<DateHistoryItem> listHistoryItem = empHistRepo
+                .getByEmployeeId(employeeId);
+        
+        for(DateHistoryItem dateHistoryItem : listHistoryItem) {
+            Optional<EmploymentInfo> employmentInfo = empHistItemRepo
+                    .getDetailEmploymentHistoryItem(companyId, employeeId, dateHistoryItem.start());
+            if(employmentInfo.isPresent()) {
+                EmploymentInfo employment = employmentInfo.get();
+                result.add(SEmpHistExport.builder().employeeId(employeeId).employmentCode(employment.getEmploymentCode())
+                        .employmentName(employment.getEmploymentName()).period(dateHistoryItem.span()).build());
+            }
+        }
+        return result;
+    }
 
 	/*
 	 * (non-Javadoc)

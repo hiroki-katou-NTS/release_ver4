@@ -94,6 +94,7 @@ import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDail
 import nts.uk.ctx.at.record.dom.dailyperformanceprocessing.repository.CreateDailyResultEmployeeDomainService;
 import nts.uk.ctx.at.record.dom.dailyprocess.calc.DailyCalculationEmployeeService;
 import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.MonthlyAggregationEmployeeService;
+import nts.uk.ctx.at.record.dom.monthlyprocess.aggr.getprocessingdate.GetProcessingDate;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.CalExeSettingInfor;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLog;
 import nts.uk.ctx.at.record.dom.workrecord.workperfor.dailymonthlyprocessing.EmpCalAndSumExeLogRepository;
@@ -280,7 +281,10 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 	
 	@Inject
 	private CalPeriodApprovalResult calPeriodApprovalResult;
-	
+    
+    @Inject
+    private GetProcessingDate getProcessingDate;
+    
 	@Inject
 	private CalPeriodTransferAndWorktype calPeriodTransferAndWorktype;
 	public static int MAX_DELAY_PARALLEL = 0;
@@ -2546,10 +2550,14 @@ public class ExecuteProcessExecutionCommandHandler extends AsyncCommandHandler<E
 				try {
 					this.managedParallelWithContext.forEach(ControlOption.custom().millisRandomDelay(MAX_DELAY_PARALLEL),
 						lstRegulationInfoEmployeeNew, item -> {
+                            Optional<GeneralDate> date = getProcessingDate.getProcessingDate(item, GeneralDate.legacyDate(now.date()));
+                            if(!date.isPresent()) {
+                                return;
+                            }
 							AsyncCommandHandlerContext<ExecuteProcessExecutionCommand> asyContext = (AsyncCommandHandlerContext<ExecuteProcessExecutionCommand>) context;
 							ProcessState aggregate = monthlyService.aggregate(asyContext, companyId,
 									item,
-									GeneralDate.legacyDate(now.date()), execId, ExecutionType.NORMAL_EXECUTION);
+                            		date.get(), execId, ExecutionType.NORMAL_EXECUTION);
 							// 中断
 							if (aggregate.value == 0) {
 								// endStatusIsInterrupt = true;

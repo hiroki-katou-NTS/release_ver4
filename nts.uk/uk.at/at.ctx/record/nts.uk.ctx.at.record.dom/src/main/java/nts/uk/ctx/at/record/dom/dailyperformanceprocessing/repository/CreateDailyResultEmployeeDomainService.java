@@ -66,6 +66,6 @@ public interface CreateDailyResultEmployeeDomainService {
 			String employeeId, List<GeneralDate> executeDate, String companyId, String empCalAndSumExecLogID,
 			Optional<ExecutionLog> executionLog, boolean reCreateWorkType, boolean reCreateWorkPlace, boolean reCreateRestTime,
 			Optional<StampReflectionManagement> stampReflectionManagement,
-			Optional<EmploymentHistoryImported> employmentHisOptional, String employmentCode);
+    		Optional<EmploymentHistoryImported> employmentHisOptional, String employmentCode,List<EmploymentHistoryImported> listEmploymentHis);
 
 }
