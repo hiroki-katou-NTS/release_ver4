@@ -224,4 +224,6 @@ public interface SyEmployeePub {
 	List<String> filterSidByCidAndPeriod(String cid, DatePeriod period);
 	
 	Map<String, String> getAllSidAndScdBySids(List<String> sid);
+
+	List<ResultRequest596Export> getEmpNotDeletedLstBySids(List<String> sids);
 }

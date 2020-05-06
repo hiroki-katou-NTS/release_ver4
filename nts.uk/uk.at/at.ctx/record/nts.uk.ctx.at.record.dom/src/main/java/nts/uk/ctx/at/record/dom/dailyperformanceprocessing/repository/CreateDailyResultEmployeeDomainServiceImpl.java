@@ -450,10 +450,10 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 				}
 
 				// アルゴリズム「実績ロックされているか判定する」を実行する
-				EmployeeAndClosureOutput employeeAndClosure = this.determineActualLocked(companyId,
-						employeeAndClosureDto, day);
+//				EmployeeAndClosureOutput employeeAndClosure = this.determineActualLocked(companyId,
+//						employeeAndClosureDto, day);
                 RecreateFlag recreateFlag = RecreateFlag.DO_NOT;
-				if (employeeAndClosure.getLock() == 0) {
+//				if (employeeAndClosure.getLock() == 0) {
 					ExecutionType reCreateAttr = executionLog.get().getDailyCreationSetInfo().get().getExecutionType();
 
 					if (reCreateAttr == ExecutionType.RERUN) {
@@ -478,14 +478,13 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 						this.reflectWorkInforDomainService.reflectWorkInformationWithNoInfoImport(companyId, employeeId,
 								day, empCalAndSumExecLogID, reCreateAttr, reCreateWorkType, reCreateWorkPlace, stampReflectionManagement, recreateFlag, optDaily);
 					}
-				}
+//				}
 				
 				boolean check = this.empCalAndSumExeLogRepository.checkStopByID(empCalAndSumExecLogID);
 				if (check) {
 					process.add(ProcessState.INTERRUPTION);
 					break;
 				}
-			
 			} catch (Exception ex) {
 				boolean isOptimisticLock = new ThrowableAnalyzer(ex).findByClass(OptimisticLockException.class).isPresent();
 				if (!isOptimisticLock) {

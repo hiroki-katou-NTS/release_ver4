@@ -869,6 +869,22 @@ public class SyEmployeePubImp implements SyEmployeePub {
 		});
 		return result;
 	}
+	
+	@Override
+	public List<ResultRequest596Export> getEmpNotDeletedLstBySids(List<String> sids) {
+		List<ResultRequest596Export> result = new ArrayList<>();
+		List<EmployeeDataMngInfo> emps = this.empDataMngRepo.findBySidNotDel(sids);
+		List<String> personIds = emps.parallelStream().map(c -> c.getPersonId()).collect(Collectors.toList());
+		List<Person> personLst = personRepo.getPersonByPersonIds(personIds);
+		emps.parallelStream().forEach(c ->{
+			Optional<Person> personOpt = personLst.parallelStream().filter(p -> p.getPersonId().equals(c.getPersonId())).findFirst();
+			if(personOpt.isPresent()) {
+				result.add(new ResultRequest596Export(c.getEmployeeId(), c.getEmployeeCode().v(),
+						personOpt.get().getPersonNameGroup().getBusinessName().v()));
+			}
+		});
+		return result;
+	}
 
 	@Override
 	public List<ResultRequest600Export> getEmpInfoLstBySids(List<String> sids, DatePeriod period, boolean isDelete, boolean isGetAffCompany) {
