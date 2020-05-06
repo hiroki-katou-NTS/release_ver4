@@ -449,7 +449,14 @@ module nts.uk.at.view.kaf010.a.viewmodel {
             }      
             //return if has error
             if (nts.uk.ui.errors.hasError()){return;}   
-            
+            if(!self.validateTime(self.timeStart1(), self.timeEnd1(), '#inpStartTime1')){
+                return;    
+            }
+            if ( !nts.uk.util.isNullOrEmpty(self.timeStart2())) {
+                if ( !self.validateTime( self.timeStart2(), self.timeEnd2(), '#inpStartTime2' ) ) {
+                    return;
+                };
+            }  
             
             //block screen
             nts.uk.ui.block.invisible();
@@ -644,6 +651,16 @@ module nts.uk.at.view.kaf010.a.viewmodel {
                 dialog.alertError({messageId:"Msg_307"})
                  $(elementId).focus();
                 return false;
+            }
+            if(startTime < 300){
+                dialog.alertError({messageId:"Msg_307"})
+                 $(elementId).focus();
+                return false;    
+            }
+            if(endTime > 1740){
+                dialog.alertError({messageId:"Msg_307"})
+                 $(elementId).focus();
+                return false;    
             }
             return true;
         }

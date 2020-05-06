@@ -56,6 +56,12 @@ module nts.uk.at.view.kaf007.a.viewmodel {
         requiredCheckTime: KnockoutObservable<boolean> = ko.observable(this.isWorkChange() && true);
         timeRequired: KnockoutObservable<boolean> = ko.observable(false);
         showExcludeHoliday: KnockoutObservable<boolean> = ko.observable(false);
+        wkTime1Enable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.enableTime();
+        });
+        appReasonEnable: KnockoutObservable<boolean> = ko.computed(() => {
+            return this.displayAppReasonContentFlg();
+        });
         constructor() {
             let self = this,
                 application = self.appWorkChange().application();
@@ -403,6 +409,20 @@ module nts.uk.at.view.kaf007.a.viewmodel {
                         $('#workTimeEnd1').focus();
                         return false;
                     }
+                }
+            }
+            if(!nts.uk.util.isNullOrEmpty(workchange.workTimeStart1())){
+                if(workchange.workTimeStart1() < 300){
+                    dialog.alertError({ messageId: "Msg_307" }).then(function() { nts.uk.ui.block.clear(); });
+                    $('#inpStartTime1').focus();
+                    return false;    
+                }         
+            }
+            if(!nts.uk.util.isNullOrEmpty(workchange.workTimeEnd1())){
+                if(workchange.workTimeEnd1() > 1740){
+                    dialog.alertError({ messageId: "Msg_307" }).then(function() { nts.uk.ui.block.clear(); });
+                    $('#inpEndTime1').focus();   
+                    return false;  
                 }
             }
             //３．休憩時間１（開始時刻：終了時刻）大小チェック
