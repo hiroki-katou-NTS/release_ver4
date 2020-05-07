@@ -410,9 +410,8 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
 			Optional<StampReflectionManagement> stampReflectionManagement,
         	Optional<EmploymentHistoryImported> employmentHisOptional, String employmentCode,List<EmploymentHistoryImported> listEmploymentHis) {
 		List<ProcessState> process = new ArrayList<>();
-		Optional<ClosureEmployment> closureEmploymentOptional = this.closureEmploymentRepository
-				.findByEmploymentCD(companyId, employmentCode);
-        boolean checkNextEmp = false;
+
+		boolean checkNextEmp = false;
 		for(GeneralDate day: executeDate) {
             if(checkNextEmp) {
                 continue;
@@ -426,12 +425,23 @@ public class CreateDailyResultEmployeeDomainServiceImpl implements CreateDailyRe
             employmentHisOptional = outputCheckProcessed.getEmploymentHistoryImported();
             employmentCode = outputCheckProcessed.getEmploymentHistoryImported().get().getEmploymentCode();
             
+            LockStatus lockStatus = LockStatus.UNLOCK;
+			//「ロック中の計算/集計する」の値をチェックする
+			if(executionLog.get().getIsCalWhenLock() == null || executionLog.get().getIsCalWhenLock() == false) {
+				Closure closureData = closureService.getClosureDataByEmployee(employeeId, day);
+				//アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
+				lockStatus = lockStatusService.getDetermineActualLocked(companyId, 
+						day, closureData.getClosureId().value, PerformanceType.DAILY);
+			}
+			if(lockStatus == LockStatus.LOCK) {
+				continue;
+			}
 			//ドメインモデル「日別実績の勤務情報」を取得する (Lấy dữ liệu từ domain)
             Optional<WorkInfoOfDailyPerformance> optDaily = workRepository.find(employeeId, day);
 			try {
 				// 締めIDを取得する
-//				Optional<ClosureEmployment> closureEmploymentOptional = this.closureEmploymentRepository
-//						.findByEmploymentCD(companyId, employmentCode);
+				Optional<ClosureEmployment> closureEmploymentOptional = this.closureEmploymentRepository
+						.findByEmploymentCD(companyId, employmentCode);
 				// Optional<ClosureEmployment> closureEmploymentOptional =
 				// this.provider().findClousureEmployementByEmpCd(companyId,
 				// employmentCode);
