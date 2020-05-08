@@ -487,6 +487,19 @@ public class DailyCalculationEmployeeServiceImpl implements DailyCalculationEmpl
                     checkNextEmp = true;
                     continue;
                 }
+                
+                LockStatus lockStatus = LockStatus.UNLOCK;
+                if(isCalWhenLock ==null || isCalWhenLock == false) {
+                    Closure closureData = closureService.getClosureDataByEmployee(employeeId, stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd());
+                    //アルゴリズム「実績ロックされているか判定する」を実行する (Chạy xử lý)
+                    //実績ロックされているか判定する
+                    lockStatus = lockStatusService.getDetermineActualLocked(cid, 
+                            stateInfo.getIntegrationOfDaily().getAffiliationInfor().getYmd(), closureData.getClosureId().value, PerformanceType.DAILY);
+                }
+                if(lockStatus == LockStatus.LOCK) {
+                    continue;
+                }
+
 				//実績登録
 				updateRecord(stateInfo.integrationOfDaily); 
 				clearConfirmApproval(stateInfo.getIntegrationOfDaily(),iPUSOptTemp,approvalSetTemp);
