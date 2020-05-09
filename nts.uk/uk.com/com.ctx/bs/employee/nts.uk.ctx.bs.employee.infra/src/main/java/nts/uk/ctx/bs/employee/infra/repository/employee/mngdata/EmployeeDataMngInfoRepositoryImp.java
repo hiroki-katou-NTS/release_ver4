@@ -111,7 +111,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 	/** The select by cid and pid. */
 
 	public static final String SELECT_BY_CID_PID = SELECT_NO_PARAM
-			+ " WHERE e.companyId = :cid AND e.bsymtEmployeeDataMngInfoPk.pId = :pid ";
+			+ " WHERE e.bsymtEmployeeDataMngInfoPk.pId = :pid AND e.companyId = :cid ";
 
 	/** The select by cid and sid. */
 	public static final String SELECT_BY_CID_SID = SELECT_NO_PARAM
@@ -455,17 +455,21 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 
 	@Override
 	public Optional<EmployeeDataMngInfo> findByCidPid(String cid, String pid) {
-		BsymtEmployeeDataMngInfo entity = this.queryProxy().query(SELECT_BY_CID_PID, BsymtEmployeeDataMngInfo.class)
-				.setParameter("cid", cid).setParameter("pid", pid).getSingleOrNull();
-
-		EmployeeDataMngInfo empDataMng = new EmployeeDataMngInfo();
-		if (entity != null) {
-			empDataMng = toDomain(entity);
-			return Optional.of(empDataMng);
-
-		} else {
-			return Optional.empty();
-		}
+		String sql = "SELECT * FROM BSYMT_EMP_DTA_MNG_INFO WHERE CID = @companyId AND PID = @pid ";
+		return new NtsStatement(sql, this.jdbcProxy())
+				.paramString("companyId", cid)
+				.paramString("pid", pid)
+				.getSingle(rec -> {
+					return toDomain(new BsymtEmployeeDataMngInfo(
+							new BsymtEmployeeDataMngInfoPk(rec.getString("SID"),rec.getString("PID")),
+							rec.getString("CID"),
+							rec.getString("SCD"),
+							rec.getInt("DEL_STATUS_ATR"),
+							rec.getGeneralDateTime("DEL_DATE"),
+							rec.getString("REMV_REASON"),
+							rec.getString("EXT_CD")
+							));
+					});
 	}
 
 	@Override
