@@ -408,15 +408,23 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 	@Override
 	 public List<AffWorkplaceHistory> getByListSid(List<String> listSid) {
 	  
-	  // Split query.
-	  List<BsymtAffiWorkplaceHist> resultList = new ArrayList<>();
-	  
-	  CollectionUtil.split(listSid, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
-	   resultList.addAll(this.queryProxy().query(SELECT_BY_LISTSID, BsymtAffiWorkplaceHist.class)
-	     .setParameter("listSid", subList).getList());
-	  });
+		String sql = "select h.*,i.* from BSYMT_AFF_WORKPLACE_HIST h"
+				+ " inner join BSYMT_AFF_WPL_HIST_ITEM i"
+				+ " on h.HIST_ID = i.HIST_ID"
+				+ " where h.SID in @listSid ";
+		
+		List<BsymtAffiWorkplaceHist> resultList = new NtsStatement(sql, this.jdbcProxy())
+				.paramString("listSid", listSid)
+				.getList(rec -> {
+						return new BsymtAffiWorkplaceHist(
+							rec.getString("HIST_ID"),
+							rec.getString("SID"),
+							rec.getString("CID"),
+							rec.getGeneralDate("START_DATE"),
+							rec.getGeneralDate("END_DATE"));	
+				});
 
-	  return resultList.stream().map(entity -> this.toDomain(entity)).collect(Collectors.toList());
+		return resultList.stream().map(entity -> this.toDomain(entity)).collect(Collectors.toList());
 	 }
 
 	@Override
