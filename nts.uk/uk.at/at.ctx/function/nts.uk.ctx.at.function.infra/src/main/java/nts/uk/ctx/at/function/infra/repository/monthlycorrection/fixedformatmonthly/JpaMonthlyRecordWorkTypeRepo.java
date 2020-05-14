@@ -42,14 +42,64 @@ public class JpaMonthlyRecordWorkTypeRepo extends JpaRepository implements Month
 	@Override
 	public List<MonthlyRecordWorkType> getMonthlyRecordWorkTypeByListCode(String companyID,
 			List<String> businessTypeCodes) {
-		List<KrcmtMonthlyRecordWorkType> resultList = new ArrayList<>();
-		CollectionUtil.split(businessTypeCodes, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			resultList.addAll(this.queryProxy().query(GET_MON_BY_LIST_CODE, KrcmtMonthlyRecordWorkType.class)
-					.setParameter("companyID", companyID)
-					.setParameter("businessTypeCode", subList)
-					.getList());
-		});
-		return resultList.stream().map(c -> c.toDomain()).collect(Collectors.toList());
+		// get KRCMP_BUS_MON_FORM
+		String sqlBusMonth = "SELECT CID, BUSINESS_TYPE_CODE FROM KRCMT_BUS_MON_FORM" 
+				+ " WHERE CID = @companyId"
+				+ " AND BUSINESS_TYPE_CODE in @codes";
+
+		List<MonthlyRecordWorkType> busMonths = new NtsStatement(sqlBusMonth, this.jdbcProxy())
+				.paramString("companyId", companyID).paramString("codes", businessTypeCodes).getList(m -> {
+					return new MonthlyRecordWorkType(m.getString("CID"),
+							new BusinessTypeCode(m.getString("BUSINESS_TYPE_CODE")), null);
+				});
+		// get KRCMT_BUS_MON_FORM_SHEET
+		String sqlBusSheet = "SELECT CID, BUSINESS_TYPE_CODE, SHEET_NO, SHEET_NAME FROM KRCMT_BUS_MON_FORM_SHEET "
+				+ " WHERE CID = @companyId" 
+				+ " AND BUSINESS_TYPE_CODE in @codes";
+
+		List<SheetCorrectedMonthlyTemp> busSheets = new NtsStatement(sqlBusSheet, this.jdbcProxy())
+				.paramString("companyId", companyID).paramString("codes", businessTypeCodes).getList(s -> {
+					SheetCorrectedMonthly dom = new SheetCorrectedMonthly(s.getInt("SHEET_NO"),
+							new DailyPerformanceFormatName(s.getString("SHEET_NAME")), null);
+					return new SheetCorrectedMonthlyTemp(s.getString("CID"), s.getString("BUSINESS_TYPE_CODE"), dom);
+				});
+
+		// get KRCMT_BUS_MON_FORM_SHEET
+		String sqlBusItem = "SELECT CID, BUSINESS_TYPE_CODE, SHEET_NO, DISPLAY_ORDER, ATTENDANCE_ITEM_ID, COLUMN_WIDTH FROM KRCMT_BUS_MON_FORM_ITEM "
+				+ " WHERE CID = @companyId" 
+				+ " AND BUSINESS_TYPE_CODE in @codes" 
+				+ " AND SHEET_NO in @sheets";
+		
+		List<Integer> sheetsNos = busSheets.stream().map(s -> s.getItem().getSheetNo()).collect(Collectors.toList());
+		List<DisplayTimeItemTemp> busItems = new NtsStatement(sqlBusItem, this.jdbcProxy())
+				.paramString("companyId", companyID).paramString("codes", businessTypeCodes)
+				.paramInt("sheets", sheetsNos)
+				.getList(i -> {
+					DisplayTimeItem dom = new DisplayTimeItem(i.getInt("DISPLAY_ORDER"), i.getInt("ATTENDANCE_ITEM_ID"),
+							i.getInt("COLUMN_WIDTH"));
+					return new DisplayTimeItemTemp(i.getString("CID"), i.getString("BUSINESS_TYPE_CODE"),
+							i.getInt("SHEET_NO"), dom);
+				});
+
+		busSheets = busSheets.stream().map(s -> {
+			SheetCorrectedMonthly dom = s.getItem();
+			dom.setListDisplayTimeItem(
+					busItems.stream()
+							.filter(i -> i.getCid().equals(s.getCid()) && i.getBusCode().equals(s.getBusCode())
+									&& i.getSheetNo() == dom.getSheetNo())
+							.map(i -> i.getItem()).collect(Collectors.toList()));
+			s.setItem(dom);
+			return s;
+		}).collect(Collectors.toList());
+
+		for (MonthlyRecordWorkType busMonth : busMonths) {
+			busMonth.setDisplayItem(new MonthlyActualResults(busSheets.stream()
+					.filter(s -> s.getCid().equals(busMonth.getCompanyID())
+							&& s.getBusCode().equals(busMonth.getBusinessTypeCode().v()))
+					.map(s -> s.getItem()).collect(Collectors.toList())));
+		}
+
+		return busMonths;
 	}
 
 	@Override

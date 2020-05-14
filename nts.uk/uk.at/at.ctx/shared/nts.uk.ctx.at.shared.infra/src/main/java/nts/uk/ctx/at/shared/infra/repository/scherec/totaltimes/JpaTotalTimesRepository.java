@@ -20,6 +20,7 @@ import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.scherec.totaltimes.TotalTimes;
 import nts.uk.ctx.at.shared.dom.scherec.totaltimes.TotalTimesRepository;
@@ -164,10 +165,6 @@ public class JpaTotalTimesRepository extends JpaRepository implements TotalTimes
 		totalTimes.saveToMemento(new JpaTotalTimesSetMemento(entity));
 		this.commandProxy().update(entity);
 	}
-
-	private static final String FIND_ALL_BY_LIST_FRAME_NO = "SELECT a FROM KshstTotalTimes a "
-			+ " WHERE a.kshstTotalTimesPK.cid = :companyId"
-			+ " AND a.kshstTotalTimesPK.totalTimesNo IN :totalCountNos ";
 	
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
@@ -176,10 +173,73 @@ public class JpaTotalTimesRepository extends JpaRepository implements TotalTimes
 			return Collections.emptyList();
 		List<TotalTimes> resultList = new ArrayList<>();
 		CollectionUtil.split(totalCountNos, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			resultList.addAll(this.queryProxy().query(FIND_ALL_BY_LIST_FRAME_NO, KshstTotalTimes.class)
-				.setParameter("companyId", companyId)
-				.setParameter("totalCountNos", subList)
-				.getList(x -> new TotalTimes(new JpaTotalTimesGetMemento(x))));
+			String sql = 
+					"SELECT a.CID, a.TOTAL_TIMES_NO, a.USE_ATR, a.COUNT_ATR, a.TOTAL_TIMES_NAME, a.TOTAL_TIMES_ABNAME, a.SUMMARY_ATR, " +
+					"b.WORK_TYPE_ATR, b.WORK_TYPE_CD, " +
+					"c.UPPER_LIMIT_SET_ATR, c.LOWER_LIMIT_SET_ATR, c.THRESOLD_UPPER_LIMIT, c.THRESOLD_LOWER_LIMIT, c.ATD_ITEM_ID " +
+					"FROM KSHST_TOTAL_TIMES a " +
+					"LEFT JOIN KSHST_TOTAL_SUBJECTS b ON a.CID = b.CID AND a.TOTAL_TIMES_NO = b.TOTAL_TIMES_NO " +
+					"JOIN KSHST_TOTAL_CONDITION c ON a.CID = c.CID AND a.TOTAL_TIMES_NO = c.TOTAL_TIMES_NO " +
+					"WHERE a.CID = @companyId " +
+					"AND a.TOTAL_TIMES_NO IN @totalCountNos";
+			
+			List<Object[]> objectLst = new NtsStatement(sql, this.jdbcProxy())
+										.paramString("companyId", companyId)
+										.paramInt("totalCountNos", subList)
+										.getList(rec -> {
+											Object[] object = new Object[100];
+											object[0] = rec.getString("CID");
+											object[1] = rec.getInt("TOTAL_TIMES_NO");
+											object[2] = rec.getInt("USE_ATR");
+											object[3] = rec.getInt("COUNT_ATR");
+											object[4] = rec.getString("TOTAL_TIMES_NAME");
+											object[5] = rec.getString("TOTAL_TIMES_ABNAME");
+											object[6] = rec.getInt("SUMMARY_ATR");
+											object[7] = rec.getInt("WORK_TYPE_ATR");
+											object[8] = rec.getString("WORK_TYPE_CD");
+											object[9] = rec.getInt("UPPER_LIMIT_SET_ATR");
+											object[10] = rec.getInt("LOWER_LIMIT_SET_ATR");
+											object[11] = rec.getInt("THRESOLD_UPPER_LIMIT");
+											object[12] = rec.getInt("THRESOLD_LOWER_LIMIT");
+											object[13] = rec.getInt("ATD_ITEM_ID");
+											return object;
+										});
+			
+			List<TotalTimes> totalTimesLst = objectLst.stream().collect(Collectors.groupingBy(x -> (Integer) x[1])).entrySet()
+				.stream().map(x -> {
+					KshstTotalTimes kshstTotalTimes = new KshstTotalTimes(new KshstTotalTimesPK(
+							(String) x.getValue().get(0)[0], 
+							(Integer) x.getValue().get(0)[1]));
+					kshstTotalTimes.setUseAtr((Integer) x.getValue().get(0)[2]);
+					kshstTotalTimes.setCountAtr((Integer) x.getValue().get(0)[3]);
+					kshstTotalTimes.setTotalTimesName((String) x.getValue().get(0)[4]);
+					kshstTotalTimes.setTotalTimesAbname((String) x.getValue().get(0)[5]);
+					kshstTotalTimes.setSummaryAtr((Integer) x.getValue().get(0)[6]);
+					
+					KshstTotalCondition kshstTotalCondition = new KshstTotalCondition(new KshstTotalConditionPK(
+							(String) x.getValue().get(0)[0], 
+							(Integer) x.getValue().get(0)[1]));
+					kshstTotalCondition.setUpperLimitSetAtr((Integer) x.getValue().get(0)[9]);
+					kshstTotalCondition.setLowerLimitSetAtr((Integer) x.getValue().get(0)[10]);
+					kshstTotalCondition.setThresoldUpperLimit((Integer) x.getValue().get(0)[11]);
+					kshstTotalCondition.setThresoldLowerLimit((Integer) x.getValue().get(0)[12]);
+					kshstTotalCondition.setAttendanceItemId((Integer) x.getValue().get(0)[13]);
+					kshstTotalTimes.totalCondition = kshstTotalCondition;
+					
+					List<KshstTotalSubjects> kshstTotalSubjectsLst = x.getValue().stream()
+							.map(y -> new KshstTotalSubjects(new KshstTotalSubjectsPK(
+									(String) y[0], 
+									(Integer) y[1], 
+									(Integer) y[7], 
+									(String) y[8])))
+							.collect(Collectors.toList());
+					kshstTotalTimes.listTotalSubjects = kshstTotalSubjectsLst;
+					
+					return new TotalTimes(new JpaTotalTimesGetMemento(kshstTotalTimes));
+					
+				}).collect(Collectors.toList());
+			
+			resultList.addAll(totalTimesLst);
 		});
 		return resultList;
 	}
