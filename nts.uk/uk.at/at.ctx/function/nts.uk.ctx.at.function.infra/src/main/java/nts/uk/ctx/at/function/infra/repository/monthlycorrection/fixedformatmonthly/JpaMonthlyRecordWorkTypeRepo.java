@@ -9,15 +9,22 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
-import nts.arc.layer.infra.data.DbConsts;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.gul.collection.CollectionUtil;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
+import nts.uk.ctx.at.function.dom.dailyperformanceformat.primitivevalue.DailyPerformanceFormatName;
+import nts.uk.ctx.at.function.dom.monthlycorrection.fixedformatmonthly.DisplayTimeItem;
+import nts.uk.ctx.at.function.dom.monthlycorrection.fixedformatmonthly.MonthlyActualResults;
 import nts.uk.ctx.at.function.dom.monthlycorrection.fixedformatmonthly.MonthlyRecordWorkType;
 import nts.uk.ctx.at.function.dom.monthlycorrection.fixedformatmonthly.MonthlyRecordWorkTypeRepository;
+import nts.uk.ctx.at.function.dom.monthlycorrection.fixedformatmonthly.SheetCorrectedMonthly;
 import nts.uk.ctx.at.function.infra.entity.monthlycorrection.fixedformatmonthly.KrcmtDisplayTimeItemRC;
 import nts.uk.ctx.at.function.infra.entity.monthlycorrection.fixedformatmonthly.KrcmtMonthlyActualResultRC;
 import nts.uk.ctx.at.function.infra.entity.monthlycorrection.fixedformatmonthly.KrcmtMonthlyActualResultRCPK;
 import nts.uk.ctx.at.function.infra.entity.monthlycorrection.fixedformatmonthly.KrcmtMonthlyRecordWorkType;
+import nts.uk.ctx.at.shared.dom.scherec.dailyattendanceitem.primitivevalue.BusinessTypeCode;
 
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @Stateless
@@ -199,6 +206,23 @@ public class JpaMonthlyRecordWorkTypeRepo extends JpaRepository implements Month
 				this.commandProxy().removeAll(toRemove);
 			}
 		}
+	}
+	
+	@AllArgsConstructor
+	@Getter
+	class DisplayTimeItemTemp {
+		private String cid;
+		private String busCode;
+		private int sheetNo;
+		private DisplayTimeItem item;
+	}
+
+	@AllArgsConstructor
+	@Data
+	class SheetCorrectedMonthlyTemp {
+		private String cid;
+		private String busCode;
+		private SheetCorrectedMonthly item;
 	}
 
 }
