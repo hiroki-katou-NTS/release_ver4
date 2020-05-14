@@ -32,9 +32,9 @@ import nts.uk.shr.com.context.AppContexts;
 public class JpaIdentificationRepository extends JpaRepository implements IdentificationRepository {
 
 	private static final String GET_BY_EMPLOYEE_ID = "SELECT c from KrcdtIdentificationStatus c "
-			+ " WHERE c.krcdtIdentificationStatusPK.companyID = :companyID "
-			+ " AND c.krcdtIdentificationStatusPK.employeeId = :employeeId "
-			+ " AND c.krcdtIdentificationStatusPK.processingYmd BETWEEN :startDate AND :endDate  ";
+			+ " WHERE c.krcdtIdentificationStatusPK.employeeId = :employeeId "
+			+ " AND c.krcdtIdentificationStatusPK.processingYmd BETWEEN :startDate AND :endDate "
+			+ " AND c.krcdtIdentificationStatusPK.companyID = :companyID  ";
 
 //	private static final String GET_BY_LIST_EMPLOYEE_ID = "SELECT c from KrcdtIdentificationStatus c "
 //			+ " WHERE c.krcdtIdentificationStatusPK.companyID = :companyID "
@@ -42,25 +42,25 @@ public class JpaIdentificationRepository extends JpaRepository implements Identi
 //			+ " AND c.krcdtIdentificationStatusPK.processingYmd BETWEEN :startDate AND :endDate  ";
 
 	private static final String GET_BY_CODE = "SELECT c from KrcdtIdentificationStatus c "
-			+ " WHERE c.krcdtIdentificationStatusPK.companyID = :companyID "
-			+ " AND c.krcdtIdentificationStatusPK.employeeId = :employeeId "
-			+ " AND c.krcdtIdentificationStatusPK.processingYmd = :processingYmd ";
+			+ " WHERE c.krcdtIdentificationStatusPK.employeeId = :employeeId "
+			+ " AND c.krcdtIdentificationStatusPK.processingYmd = :processingYmd "
+			+ " AND c.krcdtIdentificationStatusPK.companyID = :companyID ";
 
 	private static final String REMOVE_BY_KEY = "DELETE FROM KrcdtIdentificationStatus c "
-			+ " WHERE c.krcdtIdentificationStatusPK.companyID = :companyID "
-			+ " AND c.krcdtIdentificationStatusPK.employeeId = :employeeId "
-			+ " AND c.krcdtIdentificationStatusPK.processingYmd = :processingYmd ";
+			+ " WHERE c.krcdtIdentificationStatusPK.employeeId = :employeeId "
+			+ " AND c.krcdtIdentificationStatusPK.processingYmd = :processingYmd "
+			+ " AND c.krcdtIdentificationStatusPK.companyID = :companyID ";
 
 	private static final String GET_BY_EMPLOYEE_ID_SORT_DATE = "SELECT c from KrcdtIdentificationStatus c "
-			+ " WHERE c.krcdtIdentificationStatusPK.companyID = :companyID "
-			+ " AND c.krcdtIdentificationStatusPK.employeeId = :employeeId "
-			+ " AND c.krcdtIdentificationStatusPK.processingYmd BETWEEN :startDate AND :endDate  "
+			+ " WHERE c.krcdtIdentificationStatusPK.employeeId = :employeeId "
+			+ " AND c.krcdtIdentificationStatusPK.processingYmd BETWEEN :startDate AND :endDate "
+			+ " AND c.krcdtIdentificationStatusPK.companyID = :companyID  "
 			+ " ORDER BY c.krcdtIdentificationStatusPK.processingYmd ASC ";
 
 	private static final String GET_BY_EMPLOYEE_ID_DATE = "SELECT c from KrcdtIdentificationStatus c "
-			+ " WHERE c.krcdtIdentificationStatusPK.companyID = :companyID "
-			+ " AND c.krcdtIdentificationStatusPK.employeeId = :employeeId "
-			+ " AND c.krcdtIdentificationStatusPK.processingYmd IN :dates ";
+			+ " WHERE c.krcdtIdentificationStatusPK.employeeId = :employeeId "
+			+ " AND c.krcdtIdentificationStatusPK.processingYmd IN :dates "
+			+ " AND c.krcdtIdentificationStatusPK.companyID = :companyID ";
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
@@ -73,35 +73,26 @@ public class JpaIdentificationRepository extends JpaRepository implements Identi
 	}
 
 	@Override
-	public List<Identification> findByListEmployeeID(List<String> employeeIDs, GeneralDate startDate,
-			GeneralDate endDate) {
-		List<Identification> data = new ArrayList<>();
-		CollectionUtil.split(employeeIDs, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			try (PreparedStatement statement = this.connection().prepareStatement(
-						"SELECT * from KRCDT_CONFIRMATION_DAY h"
-						+ " WHERE h.PROCESSING_YMD <= ?"
-						+ " and h.PROCESSING_YMD >= ?"
-						+ " AND h.CID = ?"
-						+ " AND h.SID IN (" + subList.stream().map(s -> "?").collect(Collectors.joining(",")) + ")")) {
-				statement.setDate(1, Date.valueOf(endDate.localDate()));
-				statement.setDate(2, Date.valueOf(startDate.localDate()));
-				statement.setString(3, AppContexts.user().companyId());
-				for (int i = 0; i < subList.size(); i++) {
-					statement.setString(i + 4, subList.get(i));
-				}
-				data.addAll(new NtsResultSet(statement.executeQuery()).getList(rec -> {
-					return new Identification(
-							rec.getString("CID"),
-							rec.getString("SID"),
-							rec.getGeneralDate("PROCESSING_YMD"),
-							rec.getGeneralDate("INDENTIFICATION_YMD"));
-				}));
-			}catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		});
+	public List<Identification> findByListEmployeeID(List<String> employeeIDs, GeneralDate startDate, GeneralDate endDate) {
 		
-		return data;
+		String sql = " SELECT a.* FROM KRCDT_CONFIRMATION_DAY a "
+				   + " WHERE a.SID IN @employeeIDs "
+				   + " AND a.PROCESSING_YMD  <= @endDate "
+				   + " AND a.PROCESSING_YMD >= @startDate "
+				   + " AND a.CID =  @cid";
+
+		List<Identification> listDomain = new NtsStatement(sql, this.jdbcProxy())
+				.paramString("employeeIDs", employeeIDs)
+				.paramDate("endDate", endDate)
+				.paramDate("startDate", startDate)
+				.paramString("cid", AppContexts.user().companyId()).getList(rec -> {
+					return new Identification(
+							rec.getString("CID"), 
+							rec.getString("SID"),
+							rec.getGeneralDate("PROCESSING_YMD"), 
+							rec.getGeneralDate("INDENTIFICATION_YMD"));
+				});
+		return listDomain;
 	}
 	
 	@Override
