@@ -20,6 +20,7 @@ import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.dom.workplace.affiliate.AffWorkplaceHistoryItem;
@@ -167,23 +168,22 @@ public class JpaAffWorkplaceHistoryItemRepository extends JpaRepository implemen
 	 * nts.arc.time.GeneralDate, java.lang.String)
 	 */
 	@Override
-	public List<AffWorkplaceHistoryItem> getAffWrkplaHistItemByEmpIdAndDate(GeneralDate basedate,
-			String employeeId) {
-		List<BsymtAffiWorkplaceHistItem> listHistItem = this.queryProxy()
-				.query(SELECT_BY_EMPID_BASEDATE, BsymtAffiWorkplaceHistItem.class)
-				.setParameter("employeeId", employeeId).setParameter("standDate", basedate)
-				.getList();
+	public List<AffWorkplaceHistoryItem> getAffWrkplaHistItemByEmpIdAndDate(GeneralDate basedate, String employeeId) {
+		String sql = " SELECT a.* FROM BSYMT_AFF_WPL_HIST_ITEM a "
+				   + " INNER JOIN BSYMT_AFF_WORKPLACE_HIST b on b.HIST_ID = a.HIST_ID"
+				   + " WHERE b.SID = @employeeId and b.START_DATE <= @basedate and b.END_DATE >= @basedate";
 
-		// Check exist items
-		if (listHistItem.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		// Return
-		return listHistItem.stream().map(e -> {
-			AffWorkplaceHistoryItem domain = this.toDomain(e);
-			return domain;
-		}).collect(Collectors.toList());
+		List<AffWorkplaceHistoryItem> listDomain = new NtsStatement(sql, this.jdbcProxy())
+				.paramString("employeeId", employeeId)
+				.paramDate("basedate", basedate).getList(rec -> {
+					return new AffWorkplaceHistoryItem(
+							rec.getString("HIST_ID"), 
+							rec.getString("SID"),
+							rec.getString("WORKPLACE_ID"), 
+							rec.getString("NORMAL_WORKPLACE_ID"));
+				});
+		
+		return listDomain;
 	}
 
 	@Override
