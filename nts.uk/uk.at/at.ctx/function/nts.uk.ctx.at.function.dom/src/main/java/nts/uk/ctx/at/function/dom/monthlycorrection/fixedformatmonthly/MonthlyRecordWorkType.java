@@ -31,6 +31,9 @@ public class MonthlyRecordWorkType extends AggregateRoot{
 	public MonthlyRecordWorkType() {
 		super();
 	}
-	
+
+	public void setDisplayItem (MonthlyActualResults displayItem) {
+		this.displayItem = displayItem;
+	} 
 
 }

@@ -23,6 +23,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
@@ -186,12 +187,29 @@ public class JpaRoleRepository extends JpaRepository implements RoleRepository {
 		return result;
 	}
 	
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	// fix Response_UK_Thang_5 132
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
+	@SneakyThrows
 	public Optional<Role> findByRoleId(String roleId) {
-		String query ="SELECT e FROM SacmtRole e WHERE e.roleId = :roleId ";
-		return this.queryProxy().query(query, SacmtRole.class)
-				.setParameter("roleId", roleId).getList().stream().map(x ->new Role(new JpaRoleGetMemento(x))).findFirst();
+	 	String sql ="SELECT * FROM SACMT_ROLE WHERE ROLE_ID = ?";
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				stmt.setString(1, roleId);
+				Optional<Role> roleData =  new NtsResultSet(stmt.executeQuery()).getSingle(r -> {
+					SacmtRole role = new SacmtRole();
+					role.setRoleId(roleId);
+					role.setCid(r.getString("CID"));
+					role.setCode(r.getString("ROLE_CD"));
+					role.setRoleType(r.getInt("ROLE_TYPE"));
+					role.setReferenceRange(r.getInt("REF_RANGE"));
+					role.setName(r.getString("ROLE_NAME"));
+					role.setContractCode(r.getString("CONTRACT_CD"));
+					role.setAssignAtr(r.getInt("ASSIGN_ATR"));
+					Role newRole = new Role(new JpaRoleGetMemento(role));
+					return newRole;
+				});
+				return roleData;
+			}
 	}
 
 	@Override
