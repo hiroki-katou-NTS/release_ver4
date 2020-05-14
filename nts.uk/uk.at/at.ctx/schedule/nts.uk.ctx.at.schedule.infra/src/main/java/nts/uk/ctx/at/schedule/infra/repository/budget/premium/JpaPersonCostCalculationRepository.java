@@ -327,8 +327,8 @@ public class JpaPersonCostCalculationRepository extends JpaRepository implements
 	@Override
 	public List<PersonCostCalculation> findByCompanyIDAndDisplayNumberNotFull(String companyID, DatePeriod date, List<Integer> itemNos) {
 		StringBuilder query = new StringBuilder();
-		query.append("SELECT a.HIS_ID, a.START_DATE, a.END_DATE, b.PREMIUM_RATE, b.PREMIUM_NO, c.ATTENDANCE_ID FROM KMLMT_COST_CALC_SET a ");
-		query.append(" LEFT JOIN KMLST_PREMIUM_SET b ");
+		query.append("SELECT a.HIS_ID, a.START_DATE, a.END_DATE, b.PREMIUM_RATE, b.PREMIUM_NO, c.ATTENDANCE_ID FROM KMLMT_COST_CALC_SET a with(index(PK_KMLMT_COST_CALC_SET)) ");
+		query.append(" LEFT JOIN KMLST_PREMIUM_SET b with(index(KMLSP_PREMIUM_SET)) ");
 		query.append(" ON a.CID = b.CID AND a.HIS_ID = b.HIS_ID");
 		query.append(" LEFT JOIN KMLDT_PREMIUM_ATTENDANCE c ");
 		query.append(" ON c.CID = b.CID AND c.HIS_ID = b.HIS_ID AND c.PREMIUM_NO = b.PREMIUM_NO");
