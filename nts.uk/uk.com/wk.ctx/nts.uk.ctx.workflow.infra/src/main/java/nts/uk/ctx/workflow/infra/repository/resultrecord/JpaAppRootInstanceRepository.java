@@ -609,22 +609,15 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	@SneakyThrows
 	public List<String> findEmpLstByRq610(String approverID, DatePeriod period, RecordRootType rootType) {
 		String companyID =  AppContexts.user().companyId();
-		String query = FIND_EMP_RQ610;
-		query = query.replaceAll("companyID", companyID);
-		query = query.replaceAll("approverID", approverID);
-		query = query.replaceAll("startDate", period.start().toString("yyyy-MM-dd"));
-		query = query.replaceAll("endDate", period.end().toString("yyyy-MM-dd"));
-		query = query.replaceAll("sysDate", GeneralDate.today().toString("yyyy-MM-dd"));
-		query = query.replaceAll("rootType", String.valueOf(rootType.value));
-		try (PreparedStatement pstatement = this.connection().prepareStatement(query)) {
-			ResultSet rs = pstatement.executeQuery();
-			List<AppRootInstance> listResult = toDomain(createFullJoinAppRootInstance(rs));
-			if(!CollectionUtil.isEmpty(listResult)){
-				return listResult.stream().map(x -> x.getEmployeeID()).distinct().collect(Collectors.toList());
-			} else {
-				return Collections.emptyList();
-			}
-		} 
+		String sql = FIND_EMP_RQ610;
+		sql = sql.replaceAll("companyID", companyID);
+		sql = sql.replaceAll("approverID", approverID);
+		sql = sql.replaceAll("startDate", period.start().toString("yyyy-MM-dd"));
+		sql = sql.replaceAll("endDate", period.end().toString("yyyy-MM-dd"));
+		sql = sql.replaceAll("sysDate", GeneralDate.today().toString("yyyy-MM-dd"));
+		sql = sql.replaceAll("rootType", String.valueOf(rootType.value));
+		return new NtsStatement(sql, this.jdbcProxy())
+				.getList(rec -> rec.getString("EMPLOYEE_ID"));
 	}
 
 }
