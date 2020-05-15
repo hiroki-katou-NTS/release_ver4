@@ -24,8 +24,8 @@ import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
-import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.gul.util.value.MutableValue;
@@ -133,15 +133,27 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			" AND appRoot.START_DATE <= 'recordDate'" +
 			" AND appRoot.END_DATE >= 'recordDate'";
 	
+	private final String BASIC_SELECT_610 = "SELECT appRoot.EMPLOYEE_ID "+
+			"FROM WWFDT_APP_ROOT_INSTANCE appRoot "+
+			"LEFT JOIN WWFDT_APP_PHASE_INSTANCE phase "+
+			"ON appRoot.ROOT_ID = phase.ROOT_ID "+
+			"LEFT JOIN WWFDT_APP_FRAME_INSTANCE frame "+
+			"ON phase.ROOT_ID = frame.ROOT_ID "+
+			"AND phase.PHASE_ORDER = frame.PHASE_ORDER "+
+			"LEFT JOIN WWFDT_APP_APPROVE_INSTANCE appApprover "+
+			"ON frame.ROOT_ID = appApprover.ROOT_ID "+
+			"AND frame.PHASE_ORDER = appApprover.PHASE_ORDER "+
+			"AND frame.FRAME_ORDER = appApprover.FRAME_ORDER ";
+	
 	private final String FIND_EMP_RQ610 = 
-			BASIC_SELECT+
+			BASIC_SELECT_610 +
 			" WHERE appApprover.APPROVER_CHILD_ID = 'approverID'"+
 			" AND appRoot.CID = 'companyID'"+
 			" AND appRoot.ROOT_TYPE = rootType"+
 			" AND appRoot.END_DATE >= 'startDate'"+
 			" AND appRoot.START_DATE <= 'endDate'"+
 			" UNION "+
-			BASIC_SELECT+
+			BASIC_SELECT_610 +
 			" WHERE appApprover.APPROVER_CHILD_ID IN"+
 			" (SELECT c.SID FROM CMMMT_AGENT c where c.AGENT_SID1 = 'approverID' and c.START_DATE <= 'sysDate' and c.END_DATE >= 'sysDate')"+
 			" AND appRoot.CID = 'companyID'"+
