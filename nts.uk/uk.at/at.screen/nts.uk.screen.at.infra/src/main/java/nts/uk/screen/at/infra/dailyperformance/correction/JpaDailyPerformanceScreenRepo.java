@@ -32,6 +32,7 @@ import nts.arc.enums.EnumConstant;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -151,8 +152,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JpaDailyPerformanceScreenRepo extends JpaRepository implements DailyPerformanceScreenRepo {
-
-	private final static String SEL_BUSINESS_TYPE;
 
 	private final static String SEL_FORMAT_DP_CORRECTION;
 
@@ -299,16 +298,6 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	static {
 		StringBuilder builderString = new StringBuilder();
-		builderString.append("SELECT DISTINCT b.businessTypeCode");
-		builderString.append(" FROM KrcmtBusinessTypeOfEmployee b");
-		builderString.append(" JOIN KrcmtBusinessTypeOfHistory h");
-		builderString
-				.append(" ON b.krcmtBusinessTypeOfEmployeePK.historyId = h.krcmtBusinessTypeOfHistoryPK.historyId");
-		builderString.append(" WHERE b.sId IN :lstSID");
-		builderString.append(" AND h.startDate <= :endYmd");
-		builderString.append(" AND h.endDate >= :startYmd");
-		builderString.append(" ORDER BY b.businessTypeCode ASC");
-		SEL_BUSINESS_TYPE = builderString.toString();
 
 		builderString = new StringBuilder();
 		builderString.append("SELECT b");
@@ -885,11 +874,22 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	@Override
 	public List<String> getListBusinessType(List<String> lstEmployee, DateRange dateRange) {
+		String sql = "SELECT DISTINCT b.BUSINESS_TYPE_CD"
+				+ " FROM KRCMT_BUS_TYPE_SYAIN b "
+				+ " JOIN KRCMT_BUS_TYPE_HIST h ON b.HIST_ID = h.HIST_ID"
+				+ " WHERE b.SID IN @lstSID"
+				+ " AND h.START_DATE <= @endYmd"
+				+ " AND h.END_DATE >= @startYmd"
+				+ " ORDER BY b.BUSINESS_TYPE_CD ASC";
+		
 		List<String> businessTypes = new ArrayList<>();
 		CollectionUtil.split(lstEmployee, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			businessTypes.addAll(this.queryProxy().query(SEL_BUSINESS_TYPE, String.class)
-					.setParameter("lstSID", subList).setParameter("startYmd", dateRange.getStartDate())
-					.setParameter("endYmd", dateRange.getEndDate()).getList());
+			businessTypes.addAll(
+					new NtsStatement(sql, this.jdbcProxy())
+					.paramString("lstSID", subList)
+					.paramDate("endYmd", dateRange.getEndDate())
+					.paramDate("startYmd", dateRange.getStartDate())
+					.getList(rec -> rec.getString("BUSINESS_TYPE_CD")));
 		});
 		return businessTypes;
 	}
