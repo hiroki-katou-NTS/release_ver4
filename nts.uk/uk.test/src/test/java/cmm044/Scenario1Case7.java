@@ -39,23 +39,23 @@ public class Scenario1Case7 extends TestRoot {
             driver.findElement(By.xpath("//button[@class='proceed']")).click();
             Thread.sleep(2000);
             WaitElementLoad(By.xpath("//button[@class ='large']"));
-            driver.findElement(By.xpath("//button[@class ='large']")).click();
             screenShot();
+            driver.findElement(By.xpath("//button[@class ='large']")).click();
             WaitPageLoad();
-        } 
-         
+        }
+
         WebElement el2 = driver.findElement(By.xpath("//td[contains(.,'013232')]"));
         if ("true".equals(el2.findElements(By.xpath("following::td")).get(2).findElement(By.xpath("label/input")).getAttribute("checked")) ) {
             el2.findElements(By.xpath("following::td")).get(2).click();
             Thread.sleep(2000);
-        } 
+        }
 
         screenShot();
         driver.findElement(By.xpath("//button[@class='proceed']")).click();
         WaitPageLoad();
-        screenShot();         
+        screenShot();
         this.uploadTestLink(439, 100);
-     
+
     }
 
     public void setValueInputClosure(String id, String value) {
