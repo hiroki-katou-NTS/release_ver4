@@ -152,4 +152,35 @@ public class Kdw003Common extends TestRoot {
         driver.findElement(By.id("btnExtraction")).click();
         WaitPageLoad();
     }
+    
+    public void setProcessYearMonth(int closureId, String yearMonth) {
+      //KMK012A 処理年月の設定
+      driver.get(domain + "nts.uk.at.web/view/kmk/012/a/index.xhtml");
+
+      WaitPageLoad();
+      WebElement clsId = driver.findElement(By.xpath("//tr[@data-id = '" + closureId + "']"));
+      
+      WaitPageLoad();
+      clsId.click();
+      
+      WaitElementLoad(By.id("inpMonth"));   
+      driver.findElement(By.id("inpMonth")).click();
+      
+      WaitElementLoad(By.id("inpMonth"));  
+      driver.findElement(By.id("inpMonth")).clear();
+      
+      WaitElementLoad(By.id("inpMonth"));  
+      driver.findElement(By.id("inpMonth")).sendKeys(yearMonth);
+      
+      driver.findElement(By.xpath("//body")).click();
+      
+      WaitElementLoad(By.id("btn_save"));
+      driver.findElement(By.id("btn_save")).click();
+      
+      WaitElementLoad(By.xpath("//button[@class ='large']"));
+      driver.findElement(By.xpath("//button[@class ='large']")).click();
+      
+      screenShotFull(); 
+
+    }
 }
