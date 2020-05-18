@@ -6,7 +6,6 @@ package nts.uk.ctx.bs.employee.infra.repository.employee.mngdata;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,7 +27,6 @@ import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
-import nts.arc.time.GeneralDateTime;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.dom.employee.mgndata.EmployeeDataMngInfo;
 import nts.uk.ctx.bs.employee.dom.employee.mgndata.EmployeeDataMngInfoRepository;
@@ -111,7 +108,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 	/** The select by cid and pid. */
 
 	public static final String SELECT_BY_CID_PID = SELECT_NO_PARAM
-			+ " WHERE e.companyId = :cid AND e.bsymtEmployeeDataMngInfoPk.pId = :pid ";
+			+ " WHERE e.bsymtEmployeeDataMngInfoPk.pId = :pid AND e.companyId = :cid ";
 
 	/** The select by cid and sid. */
 	public static final String SELECT_BY_CID_SID = SELECT_NO_PARAM
@@ -455,17 +452,21 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 
 	@Override
 	public Optional<EmployeeDataMngInfo> findByCidPid(String cid, String pid) {
-		BsymtEmployeeDataMngInfo entity = this.queryProxy().query(SELECT_BY_CID_PID, BsymtEmployeeDataMngInfo.class)
-				.setParameter("cid", cid).setParameter("pid", pid).getSingleOrNull();
-
-		EmployeeDataMngInfo empDataMng = new EmployeeDataMngInfo();
-		if (entity != null) {
-			empDataMng = toDomain(entity);
-			return Optional.of(empDataMng);
-
-		} else {
-			return Optional.empty();
-		}
+		String sql = "SELECT * FROM BSYMT_EMP_DTA_MNG_INFO WHERE CID = @companyId AND PID = @pid ";
+		return new NtsStatement(sql, this.jdbcProxy())
+				.paramString("companyId", cid)
+				.paramString("pid", pid)
+				.getSingle(rec -> {
+					return toDomain(new BsymtEmployeeDataMngInfo(
+							new BsymtEmployeeDataMngInfoPk(rec.getString("SID"),rec.getString("PID")),
+							rec.getString("CID"),
+							rec.getString("SCD"),
+							rec.getInt("DEL_STATUS_ATR"),
+							rec.getGeneralDateTime("DEL_DATE"),
+							rec.getString("REMV_REASON"),
+							rec.getString("EXT_CD")
+							));
+					});
 	}
 
 	@Override
@@ -640,28 +641,25 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 	@Override
 	public List<EmployeeDataMngInfo> findBySidDel(List<String> sid) {
 		List<EmployeeDataMngInfo> resultList = new ArrayList<>();
+		
 		CollectionUtil.split(sid, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			
 			String sql = "select CID, SID, PID, SCD, DEL_STATUS_ATR, DEL_DATE, REMV_REASON, EXT_CD"
 					+ " from BSYMT_EMP_DTA_MNG_INFO"
-					+ " where SID in (" + NtsStatement.In.createParamsString(subList) + ")"
+					+ " where SID in @employeeIDs"
 					+ " and DEL_STATUS_ATR != 0";
-			// fix response 2020 - ktg030
-			Query stmt = this.getEntityManager().createNativeQuery(sql);
-				for (int i = 0; i < subList.size(); i++) {
-					stmt.setParameter(i + 1, subList.get(i));
-				}
-				
-				@SuppressWarnings("unchecked")
-				List<Object[]> rs = stmt.getResultList();
-				
-				List<EmployeeDataMngInfo> subResults = rs.stream().map(r -> {
-					return EmployeeDataMngInfo.createFromJavaType(String.valueOf(r[2]), String.valueOf(r[1]),
-							String.valueOf(r[0]),  String.valueOf(r[3]), r[4] != null ? Integer.valueOf(String.valueOf(r[4])) : null, 
-									r[5] != null ? GeneralDateTime.localDateTime(((Timestamp)r[5]).toLocalDateTime()): null,
-											String.valueOf(r[6]), String.valueOf(r[7]));}).collect(Collectors.toList());
-				
-				resultList.addAll(subResults);
+			resultList.addAll(new NtsStatement(sql, this.jdbcProxy())
+					.paramString("employeeIDs", subList)
+					.getList(rec -> {
+						return EmployeeDataMngInfo.createFromJavaType(
+								rec.getString("CID"),
+								rec.getString("SID"),
+								rec.getString("PID"),
+								rec.getString("SCD"),
+								rec.getInt("DEL_STATUS_ATR"),
+								rec.getGeneralDateTime("DEL_DATE"),
+								rec.getString("REMV_REASON"),
+								rec.getString("EXT_CD"));
+					}));
 		});
 		return resultList;
 	}

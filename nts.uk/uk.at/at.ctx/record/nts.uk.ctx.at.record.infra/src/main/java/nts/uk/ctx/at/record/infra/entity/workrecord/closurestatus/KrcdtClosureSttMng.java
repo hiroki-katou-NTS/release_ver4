@@ -67,4 +67,12 @@ public class KrcdtClosureSttMng extends UkJpaEntity {
 		return this.pk;
 	}
 
+	public KrcdtClosureSttMng(KrcdtClosureSttMngPk pk, GeneralDate start, GeneralDate end) {
+		super();
+		this.pk = pk;
+		this.start = start;
+		this.end = end;
+	}
+
+	
 }

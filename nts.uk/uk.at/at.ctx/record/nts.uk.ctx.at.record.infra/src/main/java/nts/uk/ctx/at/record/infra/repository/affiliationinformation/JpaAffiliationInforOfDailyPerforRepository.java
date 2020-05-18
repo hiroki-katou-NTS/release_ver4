@@ -187,22 +187,43 @@ public class JpaAffiliationInforOfDailyPerforRepository extends JpaRepository
 		}
 	}
 
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@SneakyThrows
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<AffiliationInforOfDailyPerfor> finds(Map<String, List<GeneralDate>> param) {
-		List<KrcdtDaiAffiliationInf> result = new ArrayList<>();
-		StringBuilder query = new StringBuilder("SELECT af FROM KrcdtDaiAffiliationInf af ");
-		query.append("WHERE af.krcdtDaiAffiliationInfPK.employeeId IN :employeeId ");
-		query.append("AND af.krcdtDaiAffiliationInfPK.ymd IN :date");
-		TypedQueryWrapper<KrcdtDaiAffiliationInf> tQuery = this.queryProxy().query(query.toString(),
-				KrcdtDaiAffiliationInf.class);
-		CollectionUtil.split(param, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, p -> {
-			result.addAll(tQuery.setParameter("employeeId", p.keySet())
-					.setParameter("date", p.values().stream().flatMap(List::stream).collect(Collectors.toSet()))
-					.getList().stream()
-					.filter(c -> p.get(c.krcdtDaiAffiliationInfPK.employeeId).contains(c.krcdtDaiAffiliationInfPK.ymd))
-					.collect(Collectors.toList()));
+		List<String> subList = param.keySet().stream().collect(Collectors.toList());
+		List<GeneralDate> subListDate = param.values().stream().flatMap(x -> x.stream()).collect(Collectors.toList());
+		List<AffiliationInforOfDailyPerfor> result = new ArrayList<>();
+
+		CollectionUtil.split(subList, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds -> {
+			result.addAll(internalQueryMap(subListDate, empIds));
 		});
-		return result.stream().map(af -> af.toDomain()).collect(Collectors.toList());
+		return result;
+	}
+	
+	@SneakyThrows
+	private List<AffiliationInforOfDailyPerfor> internalQueryMap(List<GeneralDate> subListDate, List<String> subList) {
+		String subEmp = NtsStatement.In.createParamsString(subList);
+    	String subInDate = NtsStatement.In.createParamsString(subListDate);
+    	
+		StringBuilder query = new StringBuilder("SELECT EMP_CODE, SID, JOB_ID, WKP_ID, YMD, CLS_CODE, BONUS_PAY_CODE FROM KRCDT_DAI_AFFILIATION_INF");
+		query.append(" WHERE SID IN (" + subEmp + ")");
+		query.append(" AND YMD IN (" + subInDate + ")");
+		
+		try (val stmt = this.connection().prepareStatement(query.toString())){
+			for (int i = 0; i < subList.size(); i++) {
+				stmt.setString(i + 1, subList.get(i));
+			}
+			
+			for (int i = 0; i < subListDate.size(); i++) {
+				stmt.setDate(1 + i + subList.size(),  Date.valueOf(subListDate.get(i).localDate()));
+			}
+			
+			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+				return new AffiliationInforOfDailyPerfor(new EmploymentCode(rec.getString("EMP_CODE")), 
+						rec.getString("SID"), rec.getString("JOB_ID"), rec.getString("WKP_ID"), rec.getGeneralDate("YMD"), 
+						new ClassificationCode(rec.getString("CLS_CODE")), new BonusPaySettingCode(rec.getString("BONUS_PAY_CODE")));
+			});
+		}
 	}
 }

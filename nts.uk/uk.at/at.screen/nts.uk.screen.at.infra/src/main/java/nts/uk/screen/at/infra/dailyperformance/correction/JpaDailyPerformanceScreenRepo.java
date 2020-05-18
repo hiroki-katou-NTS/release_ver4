@@ -32,6 +32,7 @@ import nts.arc.enums.EnumConstant;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -151,8 +152,6 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @Stateless
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JpaDailyPerformanceScreenRepo extends JpaRepository implements DailyPerformanceScreenRepo {
-
-	private final static String SEL_BUSINESS_TYPE;
 
 	private final static String SEL_FORMAT_DP_CORRECTION;
 
@@ -299,16 +298,6 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	static {
 		StringBuilder builderString = new StringBuilder();
-		builderString.append("SELECT DISTINCT b.businessTypeCode");
-		builderString.append(" FROM KrcmtBusinessTypeOfEmployee b");
-		builderString.append(" JOIN KrcmtBusinessTypeOfHistory h");
-		builderString
-				.append(" ON b.krcmtBusinessTypeOfEmployeePK.historyId = h.krcmtBusinessTypeOfHistoryPK.historyId");
-		builderString.append(" WHERE b.sId IN :lstSID");
-		builderString.append(" AND h.startDate <= :endYmd");
-		builderString.append(" AND h.endDate >= :startYmd");
-		builderString.append(" ORDER BY b.businessTypeCode ASC");
-		SEL_BUSINESS_TYPE = builderString.toString();
 
 		builderString = new StringBuilder();
 		builderString.append("SELECT b");
@@ -885,27 +874,53 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 	@Override
 	public List<String> getListBusinessType(List<String> lstEmployee, DateRange dateRange) {
+		String sql = "SELECT DISTINCT b.BUSINESS_TYPE_CD"
+				+ " FROM KRCMT_BUS_TYPE_SYAIN b "
+				+ " JOIN KRCMT_BUS_TYPE_HIST h ON b.HIST_ID = h.HIST_ID"
+				+ " WHERE b.SID IN @lstSID"
+				+ " AND h.START_DATE <= @endYmd"
+				+ " AND h.END_DATE >= @startYmd"
+				+ " ORDER BY b.BUSINESS_TYPE_CD ASC";
+		
 		List<String> businessTypes = new ArrayList<>();
 		CollectionUtil.split(lstEmployee, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			businessTypes.addAll(this.queryProxy().query(SEL_BUSINESS_TYPE, String.class)
-					.setParameter("lstSID", subList).setParameter("startYmd", dateRange.getStartDate())
-					.setParameter("endYmd", dateRange.getEndDate()).getList());
+			businessTypes.addAll(
+					new NtsStatement(sql, this.jdbcProxy())
+					.paramString("lstSID", subList)
+					.paramDate("endYmd", dateRange.getEndDate())
+					.paramDate("startYmd", dateRange.getStartDate())
+					.getList(rec -> rec.getString("BUSINESS_TYPE_CD")));
 		});
 		return businessTypes;
 	}
 
+	// fix Response_UK_Thang_5 90
 	@Override
 	public List<FormatDPCorrectionDto> getListFormatDPCorrection(List<String> lstBusinessType) {
+		String companyId = AppContexts.user().companyId();
 		if (lstBusinessType.size() > 1) {
-			return this.queryProxy().query(SEL_FORMAT_DP_CORRECTION_MULTI, KrcmtBusinessTypeDaily.class)
-					.setParameter("companyId", AppContexts.user().companyId())
-					.setParameter("lstBusinessTypeCode", lstBusinessType).getList().stream()
-					.map(f -> new FormatDPCorrectionDto(f.krcmtBusinessTypeDailyPK.companyId,
-							f.krcmtBusinessTypeDailyPK.businessTypeCode, f.krcmtBusinessTypeDailyPK.attendanceItemId,
-							String.valueOf(f.krcmtBusinessTypeDailyPK.sheetNo),
-							f.order, f.columnWidth != null
-									? f.columnWidth.intValue() > 0 ? f.columnWidth.intValue() : 100 : 100))
-					.distinct().collect(Collectors.toList());
+			String sql = "Select * from KRCMT_BUS_DAILY_ITEM s"
+					+ " INNER JOIN KRCST_BUS_ITEM_SORTED x"
+					+ " ON s.ATTENDANCE_ITEM_ID = x.ATTENDANCE_ITEM_ID"
+					+ " AND s.CID = x.CID "
+					+ " WHERE s.CID = @companyId"
+					+ " AND s.BUSINESS_TYPE_CD in @lstBusinessType"
+					+ " ORDER BY x.ORDER_SORTED ASC, s.ATTENDANCE_ITEM_ID ASC";
+			
+			NtsStatement stmt = new NtsStatement(sql, this.jdbcProxy())
+					.paramString("companyId", companyId)
+					.paramString("lstBusinessType", lstBusinessType);
+			
+			List<FormatDPCorrectionDto> lstCorrectionDtos = stmt.getList(converter->{
+				return new FormatDPCorrectionDto(converter.getString("CID"), 
+						converter.getString("BUSINESS_TYPE_CD"), 
+						converter.getInt("ATTENDANCE_ITEM_ID"), 
+						converter.getString("SHEET_NO"), 
+						converter.getInt("ORDER_DAILY"), 
+						converter.getInt("COLUMN_WIDTH") != null ? converter.getInt("COLUMN_WIDTH").intValue() > 0 ? converter.getInt("COLUMN_WIDTH").intValue() : 100 : 100); 
+			}).stream().distinct().collect(Collectors.toList());
+			
+			return lstCorrectionDtos;
 		} else {
 			return this.queryProxy().query(SEL_FORMAT_DP_CORRECTION, KrcmtBusinessTypeDaily.class)
 					.setParameter("companyId", AppContexts.user().companyId())
@@ -1696,7 +1711,8 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 			return x;
 		}));
 	}
-
+ 
+	// Response_UK_Thang_5 58
 	@Override
 	public Map<String, List<AffComHistItemAtScreen>> getAffCompanyHistoryOfEmployee(String cid,
 			List<String> employeeIds) {

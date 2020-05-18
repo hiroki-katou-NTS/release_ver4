@@ -5,6 +5,7 @@ package nts.uk.ctx.bs.employee.infra.repository.classification.affiliate;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,10 +16,13 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.bs.employee.dom.classification.affiliate.AffClassHistory;
@@ -43,11 +47,7 @@ public class JpaAffClassHistoryRepository extends JpaRepository implements AffCl
 
 //	private static final String GET_BY_SID_DATE = "select h from BsymtAffClassHistory h"
 //			+ " where h.sid = :sid and h.startDate <= :standardDate and h.endDate >= :standardDate";
-	
-	private static final String GET_BY_SID_LIST_PERIOD = "select h from BsymtAffClassHistory h"
-			+ " where h.sid IN :employeeIds and h.startDate <= :endDate and h.endDate >= :startDate"
-			+ " ORDER BY h.sid, h.startDate";
-			
+				
 	@Override
 	public Optional<DateHistoryItem> getByHistoryId(String historyId) {
 
@@ -126,37 +126,52 @@ public class JpaAffClassHistoryRepository extends JpaRepository implements AffCl
 		if (employeeIds.isEmpty()) {
 			return new ArrayList<>();
 		}
-		List<BsymtAffClassHistory> entities = new ArrayList<>();
-		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subEmployeeIds -> {
-			entities.addAll(this.queryProxy()
-					.query(GET_BY_SID_LIST_PERIOD, BsymtAffClassHistory.class).setParameter("employeeIds", subEmployeeIds)
-					.setParameter("startDate", period.start()).setParameter("endDate", period.end()).getList());
-		});
-		entities.sort((o1, o2) -> {
-			int tmp = o1.sid.compareTo(o2.sid);
-			if (tmp != 0) return tmp;
-			return o1.startDate.compareTo(o2.startDate);
+		List<DateHistoryItemTemp> result = new ArrayList<>();
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			String sql = "SELECT * FROM BSYMT_AFF_CLASS_HISTORY with(index(BSYMI_AFF_CLASS_HISTORY)) " 
+					+ " WHERE START_DATE <= ?"
+					+ " AND END_DATE >= ?" 
+					+ " AND SID IN (" + NtsStatement.In.createParamsString(subList) + ")"
+					+ " ORDER BY SID, START_DATE";
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				stmt.setDate(1, Date.valueOf(period.end().localDate()));
+				stmt.setDate(2, Date.valueOf(period.start().localDate()));
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setString(3 + i, subList.get(i));
+				}
+				List<DateHistoryItemTemp> lstObj = new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+					BsymtAffClassHistory history = new BsymtAffClassHistory();
+					history.historyId = rec.getString("HIST_ID");
+					history.cid = rec.getString("CID");
+					history.sid = rec.getString("SID");
+					history.startDate = rec.getGeneralDate("START_DATE");
+					history.endDate = rec.getGeneralDate("END_DATE");
+					return new DateHistoryItemTemp(
+							history.cid,
+							history.sid,
+							new DateHistoryItem(history.historyId, new DatePeriod(history.startDate, history.endDate))
+							);
+				}).stream().collect(Collectors.toList());
+				result.addAll(lstObj);
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		});
 		
-		Map<String, List<BsymtAffClassHistory>> entitiesByEmployee = entities.stream()
-				.collect(Collectors.groupingBy(BsymtAffClassHistory::getEmployeeId));
+		Map<String, List<DateHistoryItemTemp>> entitiesByEmployee = result.stream()
+				.collect(Collectors.groupingBy(DateHistoryItemTemp::getEmployeeId));
 		
 		String companyId = AppContexts.user().companyId();
 		List<AffClassHistory> resultList = new ArrayList<>();
 		entitiesByEmployee.forEach((employeeId, entitiesOfEmp) -> {
-			List<DateHistoryItem> historyItems = convertToHistoryItems(entitiesOfEmp);
+			List<DateHistoryItem> historyItems = entitiesOfEmp.stream().map(e -> e.getDateItem()).collect(Collectors.toList());
 			resultList.add(new AffClassHistory(companyId, employeeId, historyItems));
 		});
+
 		return resultList;
 		
 	}
 	
-	private List<DateHistoryItem> convertToHistoryItems(List<BsymtAffClassHistory> entities) {
-		return entities.stream()
-				.map(ent -> new DateHistoryItem(ent.historyId, new DatePeriod(ent.startDate, ent.endDate)))
-				.collect(Collectors.toList());
-	}
-
 	@Override
 	public void add(String cid, String sid, DateHistoryItem itemToBeAdded) {
 		BsymtAffClassHistory entity = new BsymtAffClassHistory(itemToBeAdded.identifier(), cid, sid,
@@ -185,6 +200,14 @@ public class JpaAffClassHistoryRepository extends JpaRepository implements AffCl
 			throw new RuntimeException("Invalid KmnmtAffClassHistory");
 		}
 		this.commandProxy().remove(BsymtAffClassHistory.class, histId);
+	}
+	
+	@Data
+	@AllArgsConstructor
+	class DateHistoryItemTemp {
+		private String companyId;
+		private String employeeId;
+		private DateHistoryItem dateItem;
 	}
 
 }

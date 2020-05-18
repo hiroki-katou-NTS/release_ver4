@@ -220,6 +220,7 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 		}).collect(Collectors.toList());
 	}
 	
+	// fix Response_UK_Thang_5 123
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<AffWorkplaceHistory> findByEmployeesWithPeriod(List<String> employeeIds, DatePeriod period) {
@@ -231,10 +232,39 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 		
 		List<BsymtAffiWorkplaceHist> workPlaceEntities = new ArrayList<>();
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subIds -> {
-			List<BsymtAffiWorkplaceHist> subEntities = this.queryProxy()
-					.query(SELECT_BY_EMPIDS_PERIOD, BsymtAffiWorkplaceHist.class).setParameter("employeeIds", subIds)
-					.setParameter("startDate", period.start()).setParameter("endDate", period.end()).getList();
-			workPlaceEntities.addAll(subEntities);
+			String sql = "select * from BSYMT_AFF_WORKPLACE_HIST h"
+					+ " where h.SID in (" + NtsStatement.In.createParamsString(subIds) + ")"
+					+ " and h.START_DATE <= ?"
+					+ " and h.END_DATE >= ?";
+			
+			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
+				
+				int i = 0;
+				for (; i < subIds.size(); i++) {
+					stmt.setString(1 + i, subIds.get(i));
+				}
+
+				stmt.setDate(1 + i, Date.valueOf(period.end().localDate()));
+				stmt.setDate(2 + i, Date.valueOf(period.start().localDate()));
+				
+				List<BsymtAffiWorkplaceHist> ents = new NtsResultSet(stmt.executeQuery()).getList(rec -> {
+					BsymtAffiWorkplaceHist ent = new BsymtAffiWorkplaceHist();
+					ent.setHisId(rec.getString("HIST_ID"));
+					ent.setCid(rec.getString("CID"));
+					ent.setSid(rec.getString("SID"));
+					ent.setStrDate(rec.getGeneralDate("START_DATE"));
+					ent.setEndDate(rec.getGeneralDate("END_DATE"));
+					return ent;
+				});
+				workPlaceEntities.addAll(ents);
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+//			List<BsymtAffiWorkplaceHist> subEntities = this.queryProxy()
+//					.query(SELECT_BY_EMPIDS_PERIOD, BsymtAffiWorkplaceHist.class).setParameter("employeeIds", subIds)
+//					.setParameter("startDate", period.start()).setParameter("endDate", period.end()).getList();
+//			workPlaceEntities2.addAll(subEntities);
 		});
 		
 		
@@ -408,15 +438,23 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 	@Override
 	 public List<AffWorkplaceHistory> getByListSid(List<String> listSid) {
 	  
-	  // Split query.
-	  List<BsymtAffiWorkplaceHist> resultList = new ArrayList<>();
-	  
-	  CollectionUtil.split(listSid, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
-	   resultList.addAll(this.queryProxy().query(SELECT_BY_LISTSID, BsymtAffiWorkplaceHist.class)
-	     .setParameter("listSid", subList).getList());
-	  });
+		String sql = "select h.*,i.* from BSYMT_AFF_WORKPLACE_HIST h"
+				+ " inner join BSYMT_AFF_WPL_HIST_ITEM i"
+				+ " on h.HIST_ID = i.HIST_ID"
+				+ " where h.SID in @listSid ";
+		
+		List<BsymtAffiWorkplaceHist> resultList = new NtsStatement(sql, this.jdbcProxy())
+				.paramString("listSid", listSid)
+				.getList(rec -> {
+						return new BsymtAffiWorkplaceHist(
+							rec.getString("HIST_ID"),
+							rec.getString("SID"),
+							rec.getString("CID"),
+							rec.getGeneralDate("START_DATE"),
+							rec.getGeneralDate("END_DATE"));	
+				});
 
-	  return resultList.stream().map(entity -> this.toDomain(entity)).collect(Collectors.toList());
+		return resultList.stream().map(entity -> this.toDomain(entity)).collect(Collectors.toList());
 	 }
 
 	@Override

@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.uk.ctx.sys.portal.dom.standardmenu.StandardMenu;
 import nts.uk.ctx.sys.portal.dom.standardmenu.StandardMenuKey;
 import nts.uk.ctx.sys.portal.dom.standardmenu.StandardMenuRepository;
@@ -301,13 +302,18 @@ public class JpaStandardMenuRepository extends JpaRepository implements Standard
 
 	@Override
 	public boolean isEsistMenuWith(String comId, String screenId, String programId, String queryString) {
-		String query = "SELECT c FROM CcgstStandardMenu c WHERE c.ccgmtStandardMenuPK.companyId = :companyId AND c.programId = :programID AND c.screenID = :screenID AND c.queryString =:queryString";
-		return !this.queryProxy().query(query, CcgstStandardMenu.class)
-				.setParameter("companyId", comId)
-				.setParameter("screenID", screenId)
-				.setParameter("programID", programId)
-				.setParameter("queryString", queryString)
-				.getList().isEmpty();
+		String sql = "select COUNT(*)"
+		        + " from CCGST_STANDARD_MENU"
+		        + " where CID = @cid AND PROGRAM_ID = @programId AND SCREEN_ID = @screenId AND QUERY_STRING = @queryString";
+		         int check = new NtsStatement(sql, this.jdbcProxy())
+						.paramString("cid", comId)
+						.paramString("programId", programId)
+						.paramString("screenId", screenId)
+						.paramString("queryString", queryString)
+						.getSingle(rec -> {
+								return rec.getInt(1);	
+						}).orElse(0);
+		         return check >0;
 	}
 
 	@Override
