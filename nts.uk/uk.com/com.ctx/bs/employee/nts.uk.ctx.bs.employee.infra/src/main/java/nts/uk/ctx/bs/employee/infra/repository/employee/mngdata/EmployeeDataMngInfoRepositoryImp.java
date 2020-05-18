@@ -647,7 +647,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 					+ " from BSYMT_EMP_DTA_MNG_INFO"
 					+ " where SID in @employeeIDs"
 					+ " and DEL_STATUS_ATR != 0";
-			new NtsStatement(sql, this.jdbcProxy())
+			resultList.addAll(new NtsStatement(sql, this.jdbcProxy())
 					.paramString("employeeIDs", subList)
 					.getList(rec -> {
 						return EmployeeDataMngInfo.createFromJavaType(
@@ -659,7 +659,7 @@ public class EmployeeDataMngInfoRepositoryImp extends JpaRepository implements E
 								rec.getGeneralDateTime("DEL_DATE"),
 								rec.getString("REMV_REASON"),
 								rec.getString("EXT_CD"));
-					});
+					}));
 		});
 		return resultList;
 	}
