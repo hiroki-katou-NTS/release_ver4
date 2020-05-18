@@ -52,7 +52,7 @@ public class JpaAppAbsenceRepository extends JpaRepository implements AppAbsence
 
 	@SneakyThrows
 	private List<AppAbsence> internalQuery(String companyID, List<String> appId) {
-		try(val st = this.connection().prepareStatement("SELECT * FROM KRQDT_APP_FOR_LEAVE WHERE CID = ? AND APP_ID IN (" 
+		try(val st = this.connection().prepareStatement("SELECT * FROM KRQDT_APP_FOR_LEAVE with(index(KRQDP_APP_FOR_LEAVE)) WHERE CID = ? AND APP_ID IN (" 
 				+ appId .stream().map(c -> "?").collect(Collectors.joining(", "))+ ")")){
 		st.setString(1, companyID);
 		for(int i = 0; i < appId.size(); i++){
