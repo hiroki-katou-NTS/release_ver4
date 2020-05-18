@@ -32,6 +32,7 @@ import nts.arc.enums.EnumConstant;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
@@ -894,18 +895,33 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		return businessTypes;
 	}
 
+	// fix Response_UK_Thang_5 90
 	@Override
 	public List<FormatDPCorrectionDto> getListFormatDPCorrection(List<String> lstBusinessType) {
+		String companyId = AppContexts.user().companyId();
 		if (lstBusinessType.size() > 1) {
-			return this.queryProxy().query(SEL_FORMAT_DP_CORRECTION_MULTI, KrcmtBusinessTypeDaily.class)
-					.setParameter("companyId", AppContexts.user().companyId())
-					.setParameter("lstBusinessTypeCode", lstBusinessType).getList().stream()
-					.map(f -> new FormatDPCorrectionDto(f.krcmtBusinessTypeDailyPK.companyId,
-							f.krcmtBusinessTypeDailyPK.businessTypeCode, f.krcmtBusinessTypeDailyPK.attendanceItemId,
-							String.valueOf(f.krcmtBusinessTypeDailyPK.sheetNo),
-							f.order, f.columnWidth != null
-									? f.columnWidth.intValue() > 0 ? f.columnWidth.intValue() : 100 : 100))
-					.distinct().collect(Collectors.toList());
+			String sql = "Select * from KRCMT_BUS_DAILY_ITEM s"
+					+ " INNER JOIN KRCST_BUS_ITEM_SORTED x"
+					+ " ON s.ATTENDANCE_ITEM_ID = x.ATTENDANCE_ITEM_ID"
+					+ " AND s.CID = x.CID "
+					+ " WHERE s.CID = @companyId"
+					+ " AND s.BUSINESS_TYPE_CD in @lstBusinessType"
+					+ " ORDER BY x.ORDER_SORTED ASC, s.ATTENDANCE_ITEM_ID ASC";
+			
+			NtsStatement stmt = new NtsStatement(sql, this.jdbcProxy())
+					.paramString("companyId", companyId)
+					.paramString("lstBusinessType", lstBusinessType);
+			
+			List<FormatDPCorrectionDto> lstCorrectionDtos = stmt.getList(converter->{
+				return new FormatDPCorrectionDto(converter.getString("CID"), 
+						converter.getString("BUSINESS_TYPE_CD"), 
+						converter.getInt("ATTENDANCE_ITEM_ID"), 
+						converter.getString("SHEET_NO"), 
+						converter.getInt("ORDER_DAILY"), 
+						converter.getInt("COLUMN_WIDTH") != null ? converter.getInt("COLUMN_WIDTH").intValue() > 0 ? converter.getInt("COLUMN_WIDTH").intValue() : 100 : 100); 
+			}).stream().distinct().collect(Collectors.toList());
+			
+			return lstCorrectionDtos;
 		} else {
 			return this.queryProxy().query(SEL_FORMAT_DP_CORRECTION, KrcmtBusinessTypeDaily.class)
 					.setParameter("companyId", AppContexts.user().companyId())
@@ -1696,7 +1712,8 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 			return x;
 		}));
 	}
-
+ 
+	// Response_UK_Thang_5 58
 	@Override
 	public Map<String, List<AffComHistItemAtScreen>> getAffCompanyHistoryOfEmployee(String cid,
 			List<String> employeeIds) {
