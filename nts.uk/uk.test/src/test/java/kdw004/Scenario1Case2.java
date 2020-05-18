@@ -72,19 +72,4 @@ public class Scenario1Case2 extends Kdw003Common {
             fail(verificationErrorString);
         }
     }
-    private void setKdw004Period(Calendar startdate, Calendar enddate) {
-        WebElement startTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsStartDatePicker"));
-        startTime.clear();
-        startTime.sendKeys(df1.format(startdate.getTime()));
-        WebElement endTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsEndDatePicker"));
-        endTime.clear();
-        endTime.sendKeys(df1.format(enddate.getTime()));
-
-        JavascriptExecutor jse = (JavascriptExecutor) driver;
-        jse.executeScript("document.activeElement.blur();");    //leave focus
-
-        WaitElementLoad(By.xpath("//button[@id='extractBtn']"));
-        driver.findElement(By.xpath("//button[@id='extractBtn']")).click();
-        WaitPageLoad();
-	}
 }

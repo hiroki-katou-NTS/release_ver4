@@ -67,7 +67,7 @@ public class Scenario4Case2 extends TestRoot {
 
         // Input into Month
         WaitElementLoad(By.id("inpMonth"));
-        driver2.findElement(By.id("inpMonth")).sendKeys("2019/10");
+        driver2.findElement(By.id("inpMonth")).sendKeys("2020/05");
         driver2.findElement(By.id("contents-right")).click();
 
         // Click button Save
@@ -88,9 +88,9 @@ public class Scenario4Case2 extends TestRoot {
         driver2.findElement(By.id("btnExtraction")).click();
         WaitPageLoad();
 
-        if (!selectItemKdw003_11("本人", "11/11(月)").findElement(By.xpath("./label/input")).isSelected()
-                && selectItemKdw003_11("本人", "11/11(月)").findElement(By.xpath("./label/input")).isEnabled()) {
-            selectItemKdw003_11("本人", "11/11(月)").click();
+        if (!selectItemKdw003_11("本人", "05/11(月)").findElement(By.xpath("./label/input")).isSelected()
+                && selectItemKdw003_11("本人", "05/11(月)").findElement(By.xpath("./label/input")).isEnabled()) {
+            selectItemKdw003_11("本人", "05/11(月)").click();
         }
 
         WaitElementLoad(By.className("proceed"));
@@ -116,24 +116,6 @@ public class Scenario4Case2 extends TestRoot {
         driver.findElement(By.id("login-btn")).click();
         WaitPageLoad();
 
-        // Setting screen kmk012
-        driver.get(domain + "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-
-        // Clear Input Month
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).clear();
-
-        // Input into Month
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).sendKeys("2019/10");
-        driver.findElement(By.id("contents-right")).click();
-
-        // Click button Save
-        WaitElementLoad(By.id("btn_save"));
-        driver.findElement(By.id("btn_save")).click();
-        WaitPageLoad();
-
         // Go to screen Kdw003a
         driver.get(domain + "nts.uk.at.web/view/kdw/004/a/index.xhtml");
         WaitPageLoad();
@@ -155,24 +137,6 @@ public class Scenario4Case2 extends TestRoot {
         screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image2.png"));
 
-        // Setting screen kmk012
-        driver2.get(domain + "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-
-        // Clear Input Month
-        WaitElementLoad(By.id("inpMonth"));
-        driver2.findElement(By.id("inpMonth")).clear();
-
-        // Input into Month
-        WaitElementLoad(By.id("inpMonth"));
-        driver2.findElement(By.id("inpMonth")).sendKeys("2019/10");
-        driver2.findElement(By.id("contents-right")).click();
-
-        // Click button Save
-        WaitElementLoad(By.id("btn_save"));
-        driver2.findElement(By.id("btn_save")).click();
-        WaitPageLoad();
-
         // Go to screen Kdw003a
         driver2.get(domain + "nts.uk.at.web/view/kdw/003/a/index.xhtml");
         WaitPageLoad();
@@ -187,9 +151,9 @@ public class Scenario4Case2 extends TestRoot {
         driver2.findElement(By.id("btnExtraction")).click();
         WaitPageLoad();
 
-        if (selectItemKdw003_11("本人", "11/11(月)").findElement(By.xpath("./label/input")).isSelected()
-                && selectItemKdw003_11("本人", "11/11(月)").findElement(By.xpath("./label/input")).isEnabled()) {
-            selectItemKdw003_11("本人", "11/11(月)").click();
+        if (selectItemKdw003_11("本人", "05/11(月)").findElement(By.xpath("./label/input")).isSelected()
+                && selectItemKdw003_11("本人", "05/11(月)").findElement(By.xpath("./label/input")).isEnabled()) {
+            selectItemKdw003_11("本人", "05/11(月)").click();
         }
 
         WaitElementLoad(By.className("proceed"));
@@ -200,25 +164,6 @@ public class Scenario4Case2 extends TestRoot {
         screenshotFile = ((TakesScreenshot) driver2).getScreenshotAs(OutputType.FILE);
         FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image3.png"));
         WaitPageLoad();
-
-        // // login申請者
-        // driver.get(domain + "nts.uk.com.web/view/ccg/007/d/index.xhtml");
-        // WaitPageLoad();
-        // driver.findElement(By.id("company-code-select")).click();
-        // WaitElementLoad(By.xpath("//li[@data-value='0001']"));
-        // driver.findElement(By.xpath("//li[@data-value='0001']")).click();
-        // driver.findElement(By.id("password-input")).clear();
-        // driver.findElement(By.id("password-input")).sendKeys("Jinjikoi5");
-        // driver.findElement(By.id("employee-code-inp")).clear();
-        // driver.findElement(By.id("employee-code-inp")).sendKeys("004515");
-        // screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        // FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image5.png"));
-        // driver.findElement(By.id("login-btn")).click();
-        // WaitPageLoad();
-
-        // // Go to screen Kdw003a
-        // driver.get(domain + "nts.uk.at.web/view/kdw/003/a/index.xhtml");
-        // WaitPageLoad();
 
         if (!selectItemKdw003_3("承認", "007102").findElement(By.xpath("./label/input")).isSelected()) {
             selectItemKdw003_3("承認", "007102").click();

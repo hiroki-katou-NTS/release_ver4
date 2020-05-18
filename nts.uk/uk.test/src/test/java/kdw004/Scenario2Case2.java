@@ -16,9 +16,10 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebElement;
 
 import common.TestRoot;
+import kdw003.Kdw003Common;
 
 
-public class Scenario2Case2 extends TestRoot {
+public class Scenario2Case2 extends Kdw003Common {
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -75,20 +76,4 @@ public class Scenario2Case2 extends TestRoot {
             fail(verificationErrorString);
         }
     }
-
-    private void setKdw004Period(Calendar startdate, Calendar enddate) {
-        WebElement startTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsStartDatePicker"));
-        startTime.clear();
-        startTime.sendKeys(df1.format(startdate.getTime()));
-        WebElement endTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsEndDatePicker"));
-        endTime.clear();
-        endTime.sendKeys(df1.format(enddate.getTime()));
-
-        JavascriptExecutor jse = (JavascriptExecutor) driver;
-        jse.executeScript("document.activeElement.blur();");    //leave focus
-
-        WaitElementLoad(By.xpath("//button[@id='extractBtn']"));
-        driver.findElement(By.xpath("//button[@id='extractBtn']")).click();
-        WaitPageLoad();
-	}
 }

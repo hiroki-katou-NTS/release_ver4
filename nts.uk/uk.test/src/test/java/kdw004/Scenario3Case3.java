@@ -3,6 +3,7 @@ package kdw004;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.util.Calendar;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -11,11 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebElement;
 
 import common.TestRoot;
+import kdw003.Kdw003Common;
 
 
-public class Scenario3Case3 extends TestRoot {
+public class Scenario3Case3 extends Kdw003Common {
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -25,40 +28,42 @@ public class Scenario3Case3 extends TestRoot {
 
     @Test
     public void test() throws Exception {
-        // login申請者
-        driver.get(domain + "nts.uk.com.web/view/ccg/007/d/index.xhtml");
-        WaitPageLoad();
-        driver.findElement(By.id("company-code-select")).click();
-        WaitElementLoad(By.xpath("//li[@data-value='0001']"));
-        driver.findElement(By.xpath("//li[@data-value='0001']")).click();
-        driver.findElement(By.id("password-input")).clear();
-        driver.findElement(By.id("password-input")).sendKeys("Jinjikoi5");
-        driver.findElement(By.id("employee-code-inp")).clear();
-        driver.findElement(By.id("employee-code-inp")).sendKeys("004515");
-        File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image1.png"));
-        driver.findElement(By.id("login-btn")).click();
-        WaitPageLoad();
+    	// login承認者
+    	login("004515", "Jinjikoi5");
 
-        kmk012("2019/10");
+        Calendar inputStartDate = Calendar.getInstance();
+        inputStartDate.set(2020, 4, 1);
+        Calendar inputEndDate = Calendar.getInstance();
+        inputEndDate.set(2020, 4, 31);
 
         // Go to screen Kdw004a
         driver.get(domain + "nts.uk.at.web/view/kdw/004/a/index.xhtml");
+        setKdw004Period(inputStartDate, inputEndDate);
+
+        // 前準備
+        driver.findElement(By.xpath("//*[@id='approvalSttGrid_20200511i']/span")).click();
         WaitPageLoad();
 
-        // tacke a photo
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image2.png"));
+        if(selectItemKdw003_3("承認", "009173").findElement(By.xpath("./label/input")).isSelected()){
+            selectItemKdw003_3("承認", "009173").click();
+        }
+        if(selectItemKdw003_3("承認", "007102").findElement(By.xpath("./label/input")).isSelected()){
+            selectItemKdw003_3("承認", "007102").click();
+        }
+        WaitElementLoad(By.className("proceed"));
+        driver.findElement(By.className("proceed")).click();
+
+        driver.get(domain + "nts.uk.at.web/view/kdw/004/a/index.xhtml");
+        setKdw004Period(inputStartDate, inputEndDate);
+
+        WaitPageLoad();
+        screenShot();
         Thread.sleep(2000);
 
         // Go to screen Kdw003a
-        driver.findElement(By.xpath("//*[@id='approvalSttGrid_20191111i']/span")).click();
+        driver.findElement(By.xpath("//*[@id='approvalSttGrid_20200511i']/span")).click();
         WaitPageLoad();
-
-        // tacke a photo
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image3.png"));
-
+        screenShot();
         WaitElementLoad((By.xpath("//*[@id='cbDisplayFormat']/div/div[2]")));
         driver.findElement(By.xpath("//*[@id='cbDisplayFormat']/div/div[2]")).click();
 
@@ -74,12 +79,10 @@ public class Scenario3Case3 extends TestRoot {
             driver.findElement(By.id("dialogClose")).click();
         }
 
-        // tacke a photo
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image4.png"));
+        screenShot();
 
-        if(!selectItemKdw003_3("承認", "006310").findElement(By.xpath("./label/input")).isSelected()){
-            selectItemKdw003_3("承認", "006310").click();
+        if(!selectItemKdw003_3("承認", "009173").findElement(By.xpath("./label/input")).isSelected()){
+            selectItemKdw003_3("承認", "009173").click();
         }
 
         if(!selectItemKdw003_3("承認", "007102").findElement(By.xpath("./label/input")).isSelected()){
@@ -89,19 +92,13 @@ public class Scenario3Case3 extends TestRoot {
         WaitElementLoad(By.className("proceed"));
         driver.findElement(By.className("proceed")).click();
         WaitPageLoad();
-
-        // tacke a photo
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image3.png"));
+        screenShot();
 
         // Go to screen Kdw004a
         driver.get(domain + "nts.uk.at.web/view/kdw/004/a/index.xhtml");
+        setKdw004Period(inputStartDate, inputEndDate);
         WaitPageLoad();
-
-        // tacke a photo
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image5.png"));
-
+        screenShot();
         WaitPageLoad();
         this.uploadTestLink(866, 209);
     }
