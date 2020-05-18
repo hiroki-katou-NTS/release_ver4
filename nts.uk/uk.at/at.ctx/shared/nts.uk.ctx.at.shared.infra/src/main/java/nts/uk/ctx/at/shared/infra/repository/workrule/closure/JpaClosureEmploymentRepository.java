@@ -21,9 +21,11 @@ import javax.persistence.criteria.Root;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmployment;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureEmploymentRepository;
+import nts.uk.ctx.at.shared.infra.entity.remainingnumber.paymana.KrcmtPayoutManaData;
 import nts.uk.ctx.at.shared.infra.entity.workrule.closure.KclmpClosureEmploymentPK;
 import nts.uk.ctx.at.shared.infra.entity.workrule.closure.KclmpClosureEmploymentPK_;
 import nts.uk.ctx.at.shared.infra.entity.workrule.closure.KclmtClosureEmployment;
@@ -94,15 +96,21 @@ public class JpaClosureEmploymentRepository extends JpaRepository implements Clo
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<ClosureEmployment> findListEmployment(String companyId,
 			List<String> employmentCDs) {
-		List<KclmtClosureEmployment> result = new ArrayList<>();
+		
+		String sql = "SELECT * FROM KCLMT_CLOSURE_EMPLOYMENT a WHERE a.EMPLOYMENT_CD IN @employmentCDs "
+				+ "AND a.CID = @companyId";
 
-		CollectionUtil.split(employmentCDs, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
-			result.addAll(this.queryProxy().query(FIND, KclmtClosureEmployment.class)
-					.setParameter("companyId", companyId)
-					.setParameter("employmentCDs", splitData).getList());
-		});
+		return new NtsStatement(sql, this.jdbcProxy())
+				.paramString("companyId", companyId)
+				.paramString("employmentCDs", employmentCDs)
+				.getList(rec -> {
+					return convertToDomain(new KclmtClosureEmployment(
+							new KclmpClosureEmploymentPK(rec.getString("CID"),rec.getString("EMPLOYMENT_CD")),
+							rec.getInt("CLOSURE_ID")
+							));
+					});
+			
 
-		return result.stream().map(f -> convertToDomain(f)).collect(Collectors.toList());
 	}
 
 	/**
