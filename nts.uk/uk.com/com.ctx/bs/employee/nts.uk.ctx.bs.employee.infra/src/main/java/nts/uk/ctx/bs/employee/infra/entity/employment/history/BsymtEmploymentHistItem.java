@@ -15,6 +15,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.PrimaryKeyJoinColumns;
 import javax.persistence.Table;
 
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -90,5 +91,7 @@ public class BsymtEmploymentHistItem extends UkJpaEntity implements Serializable
 	protected Object getKey() {
 		return this.hisId;
 	}
+	
+	public static final JpaEntityMapper<BsymtEmploymentHistItem> MAPPER = new JpaEntityMapper<>(BsymtEmploymentHistItem.class);
 
 }
