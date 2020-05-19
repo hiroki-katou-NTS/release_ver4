@@ -143,17 +143,42 @@ public class AnyItemValueOfDailyRepoImpl extends JpaRepository implements AnyIte
 	@Override
 	public List<AnyItemValueOfDaily> finds(Map<String, List<GeneralDate>> param) {
 		List<AnyItemValueOfDaily> result = new ArrayList<>();
-		StringBuilder query = new StringBuilder("SELECT op FROM KrcdtDayAnyItemValueMerge op");
-		query.append(" WHERE op.krcdtDayTimePk.employeeID IN :employeeId");
-		query.append(" AND op.krcdtDayTimePk.generalDate IN :date");
-		TypedQueryWrapper<KrcdtDayAnyItemValueMerge> tQuery = this.queryProxy()
-				.query(query.toString(), KrcdtDayAnyItemValueMerge.class);
-		CollectionUtil.split(param, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, p -> {
-			result.addAll(tQuery
-					.setParameter("employeeId", p.keySet())
-					.setParameter("date", p.values().stream().flatMap(List::stream).collect(Collectors.toSet()))
-					.getList().stream().filter(c -> p.get(c.getKrcdtDayTimePk().employeeID).contains(c.getKrcdtDayTimePk().generalDate))
-					.map(op -> op.toDomainAnyItemValueOfDaily()).collect(Collectors.toList()));
+		List<String> subList = param.keySet().stream().collect(Collectors.toList());
+    	List<GeneralDate> subListDate = param.values().stream().flatMap(x -> x.stream()).collect(Collectors.toList());
+    	
+		CollectionUtil.split(subList, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds ->{
+			try (PreparedStatement stmt = this.connection().prepareStatement(
+						"SELECT * FROM KRCDT_DAY_ANYITEMVALUE_MERGE op" 
+						+" WHERE SID IN (" + empIds.stream().map(s -> "?").collect(Collectors.joining(",")) + ")"
+					    +" AND YMD IN (" + subListDate.stream().map(z -> "?").collect(Collectors.joining(",")) + ")")
+				) {
+
+				for (int i = 0; i < subList.size(); i++) {
+					stmt.setString(i + 1, subList.get(i));
+				}
+				
+				for (int i = 0; i < subListDate.size(); i++) {
+					stmt.setDate(1 + i + subList.size(),  Date.valueOf(subListDate.get(i).localDate()));
+				}
+				
+				result.addAll(new NtsResultSet(stmt.executeQuery()).getList(rec ->{
+					List<AnyItemValue> value = new ArrayList<>();
+					for (int i = 1; i <= 200; i++){
+						Double count = rec.getDouble("COUNT_VALUE_"+i);
+						Integer money = rec.getInt("MONEY_VALUE_"+i);
+						Integer Time = rec.getInt("TIME_VALUE_"+i);
+						value.add(new AnyItemValue(new AnyItemNo(i), 
+													Optional.ofNullable(count == null ? null : new AnyItemTimes(BigDecimal.valueOf(count))),
+													Optional.ofNullable(money == null ? null : new AnyItemAmount(money)),
+													Optional.ofNullable(Time == null ? null : new AnyItemTime(Time))
+													));
+					}
+					return new AnyItemValueOfDaily(rec.getString("SID"), rec.getGeneralDate("YMD"), value);
+				}));
+				
+			}catch(Exception e) {
+				throw new RuntimeException(e);
+			}
 		});
 		return result;
 	}

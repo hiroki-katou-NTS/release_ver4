@@ -173,7 +173,7 @@ public class JpaWorkplaceInfoRepository extends JpaRepository implements Workpla
 	public Optional<WorkplaceInfo> findByWkpId(String wpkId, GeneralDate baseDate) {
 		String sql = "select i.*,h.* from BSYMT_WORKPLACE_INFO i " + 
 				" inner join BSYMT_WORKPLACE_HIST h " + 
-				" on i.CID = h.CID and i.WKPID = h.WKPID and i.HIST_ID = h.HIST_ID" + 
+				" on i.WKPID = h.WKPID and i.CID = h.CID and i.HIST_ID = h.HIST_ID" + 
 				" where h.WKPID = @wkpId" + 
 				" and h.START_DATE <= @baseDate" + 
 				" and h.END_DATE >= @baseDate";

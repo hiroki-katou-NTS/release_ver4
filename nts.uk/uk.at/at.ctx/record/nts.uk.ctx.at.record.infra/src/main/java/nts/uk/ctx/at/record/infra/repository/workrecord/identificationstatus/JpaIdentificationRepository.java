@@ -75,24 +75,29 @@ public class JpaIdentificationRepository extends JpaRepository implements Identi
 	@Override
 	public List<Identification> findByListEmployeeID(List<String> employeeIDs, GeneralDate startDate, GeneralDate endDate) {
 		
-		String sql = " SELECT a.* FROM KRCDT_CONFIRMATION_DAY a "
-				   + " WHERE a.SID IN @employeeIDs "
-				   + " AND a.PROCESSING_YMD  <= @endDate "
-				   + " AND a.PROCESSING_YMD >= @startDate "
-				   + " AND a.CID =  @cid";
+		List<Identification> result = new ArrayList<>();
+		CollectionUtil.split(employeeIDs, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			String sql = " SELECT a.* FROM KRCDT_CONFIRMATION_DAY a "
+					   + " WHERE a.SID IN @employeeIDs "
+					   + " AND a.PROCESSING_YMD  <= @endDate "
+					   + " AND a.PROCESSING_YMD >= @startDate "
+					   + " AND a.CID =  @cid";
 
-		List<Identification> listDomain = new NtsStatement(sql, this.jdbcProxy())
-				.paramString("employeeIDs", employeeIDs)
-				.paramDate("endDate", endDate)
-				.paramDate("startDate", startDate)
-				.paramString("cid", AppContexts.user().companyId()).getList(rec -> {
-					return new Identification(
-							rec.getString("CID"), 
-							rec.getString("SID"),
-							rec.getGeneralDate("PROCESSING_YMD"), 
-							rec.getGeneralDate("INDENTIFICATION_YMD"));
-				});
-		return listDomain;
+			List<Identification> listDomain = new NtsStatement(sql, this.jdbcProxy())
+					.paramString("employeeIDs", subList)
+					.paramDate("endDate", endDate)
+					.paramDate("startDate", startDate)
+					.paramString("cid", AppContexts.user().companyId()).getList(rec -> {
+						return new Identification(
+								rec.getString("CID"), 
+								rec.getString("SID"),
+								rec.getGeneralDate("PROCESSING_YMD"), 
+								rec.getGeneralDate("INDENTIFICATION_YMD"));
+					});
+			result.addAll(listDomain);
+			
+		});
+		return result;
 	}
 	
 	@Override
