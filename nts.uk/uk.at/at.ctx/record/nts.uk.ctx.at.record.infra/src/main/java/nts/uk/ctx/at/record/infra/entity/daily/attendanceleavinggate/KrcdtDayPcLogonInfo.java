@@ -9,6 +9,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.LogOnInfo;
 import nts.uk.ctx.at.record.dom.daily.attendanceleavinggate.PCLogOnInfoOfDaily;
@@ -79,4 +80,6 @@ public class KrcdtDayPcLogonInfo extends UkJpaEntity implements Serializable {
 	private TimeWithDayAttr toTimeWithDay(Integer time) {
 		return time == null ? null : new TimeWithDayAttr(time);
 	}
+	
+	public static final JpaEntityMapper<KrcdtDayPcLogonInfo> MAPPER = new JpaEntityMapper<>(KrcdtDayPcLogonInfo.class);
 }
