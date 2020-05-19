@@ -17,6 +17,7 @@ import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.specialholiday.SpecialHoliday;
 import nts.uk.ctx.at.shared.dom.specialholiday.SpecialHolidayRepository;
@@ -73,7 +74,7 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 			+ " WHERE sphd.CID = ? AND sphd.SPHD_CD = ?"
 			+ " ORDER BY sphd.SPHD_CD";
 	
-	private final static String SELECT_SPHD_BY_LIST_CODE = "SELECT sphd.pk.companyId, sphd.pk.specialHolidayCode, sphd.specialHolidayName, sphd.memo,"
+	/*private final static String SELECT_SPHD_BY_LIST_CODE = "SELECT sphd.pk.companyId, sphd.pk.specialHolidayCode, sphd.specialHolidayName, sphd.memo,"
 			+ " gra.typeTime, gra.grantDate, gra.allowDisappear, gra.interval, gra.grantedDays,"
 			+ " pe.timeMethod, pe.startDate, pe.endDate, pe.deadlineMonths, pe.deadlineYears, pe.limitCarryoverDays,"
 			+ " re.restrictionCls, re.ageLimit, re.genderRest, re.restEmp, re.ageCriteriaCls, re.ageBaseDate, re.ageLowerLimit, re.ageHigherLimit, re.gender"
@@ -86,7 +87,7 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 			+ " ON sphd.pk.companyId = re.pk.companyId AND sphd.pk.specialHolidayCode = re.pk.specialHolidayCode"
 			+ " WHERE sphd.pk.companyId = :companyId "
 			+ " AND sphd.pk.specialHolidayCode IN :specialHolidayCodes"
-			+ " ORDER BY sphd.pk.specialHolidayCode";
+			+ " ORDER BY sphd.pk.specialHolidayCode";*/
 	
 	private final static String SELECT_SPHD_ABSENCE_BY_CODE = "SELECT a FROM KshstSphdAbsence a "
 			+ "WHERE a.pk.companyId = :companyID "
@@ -570,10 +571,31 @@ public class JpaSpecialHolidayRepository extends JpaRepository implements Specia
 			return Collections.emptyList();
 		List<SpecialHoliday> resultList = new ArrayList<>();
 		CollectionUtil.split(specialHolidayCodes, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			resultList.addAll(this.queryProxy().query(SELECT_SPHD_BY_LIST_CODE, Object[].class)
-				.setParameter("companyId", companyId)
-				.setParameter("specialHolidayCodes", subList)
-				.getList(c -> { return createSphdDomainFromEntity(c); }));
+			String sql = "SELECT sphd.CID, sphd.SPHD_CD, sphd.SPHD_NAME, sphd.MEMO, " +
+					"gra.TYPE_TIME, gra.GRANT_DATE, gra.ALLOW_DISAPPEAR, gra.INTERVAL, gra.GRANTED_DAYS, " +
+					"pe.TIME_CSL_METHOD, pe.START_DATE, pe.END_DATE, pe.DEADLINE_MONTHS, pe.DEADLINE_YEARS, pe.LIMIT_CARRYOVER_DAYS, " +
+					"re.RESTRICTION_CLS, re.AGE_LIMIT, re.GENDER_REST, re.REST_EMP, re.AGE_CRITERIA_CLS, re.AGE_BASE_DATE, re.AGE_LOWER_LIMIT, re.AGE_HIGHER_LIMIT, re.GENDER " +
+					"FROM KSHST_SPECIAL_HOLIDAY sphd WITH(INDEX(KSHSP_SPECIAL_HOLIDAY)) " +
+					"LEFT JOIN KSHST_GRANT_REGULAR gra WITH(INDEX(KSHSP_GRANT_REGULAR)) " +
+					"ON sphd.CID = gra.CID AND sphd.SPHD_CD = gra.SPHD_CD " +
+					"LEFT JOIN KSHST_GRANT_PERIODIC pe WITH(INDEX(PK_KSHST_GRANT_PERIODIC)) " +
+					"ON sphd.CID = pe.CID AND sphd.SPHD_CD = pe.SPHD_CD " +
+					"LEFT JOIN KSHST_SPEC_LEAVE_REST re WITH(INDEX(KSHSP_SPEC_LEAVE_REST)) " +
+					"ON sphd.CID = re.CID AND sphd.SPHD_CD = re.SPHD_CD " +
+					"WHERE sphd.CID = @companyId " +
+					"AND sphd.SPHD_CD IN @codes " +
+					"ORDER BY sphd.SPHD_CD";
+		
+			resultList.addAll(new NtsStatement(sql, this.jdbcProxy())
+					.paramString("companyId", companyId)
+					.paramInt("codes", subList)
+					.getList(rec -> {
+						return SpecialHoliday.createFromJavaType(
+								rec.getString("CID"), 
+								rec.getInt("SPHD_CD"), 
+								rec.getString("SPHD_NAME"),
+								rec.getString("MEMO"));
+					}));
 		});
 		resultList.sort(Comparator.comparing(SpecialHoliday::getSpecialHolidayCode));
 		return resultList;
