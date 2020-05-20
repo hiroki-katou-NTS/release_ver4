@@ -4,6 +4,8 @@
  *****************************************************************/
 package nts.uk.ctx.at.shared.infra.repository.workrule.closure;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +25,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet;
+import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
@@ -142,44 +145,44 @@ public class JpaClosureRepository extends JpaRepository implements ClosureReposi
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public List<Closure> findAllUse(String companyId) {
-		// get entity manager
-		EntityManager em = this.getEntityManager();
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		List<Closure> lstClosure = new ArrayList<>();
 
-		// call KCLMT_CLOSURE (KclmtClosure SQL)
-		CriteriaQuery<KclmtClosure> cq = criteriaBuilder.createQuery(KclmtClosure.class);
+		String sql = "select cls.CID, cls.CLOSURE_ID, cls.USE_ATR, cls.CLOSURE_MONTH, "
+				+ "clsHist.STR_YM, clsHist.CLOSURE_NAME, clsHist.END_YM, clsHist.CLOSURE_DAY, clsHist.IS_LAST_DAY  from KCLMT_CLOSURE cls "
+				+ "left join KCLMT_CLOSURE_HIST clsHist with (index(KCLMI_CLOSURE_HIST)) on cls.CID = clsHist.CID and cls.CLOSURE_ID = clsHist.CLOSURE_ID "
+				+ "where cls.CID = ? " + "and cls.USE_ATR = 1 order by cls.CLOSURE_ID asc";
 
-		// root data
-		Root<KclmtClosure> root = cq.from(KclmtClosure.class);
+		try (PreparedStatement statement = this.connection().prepareStatement(sql.toString())) {
+			statement.setString(1, companyId);
 
-		// select root
-		cq.select(root);
+			lstClosure = new NtsResultSet(statement.executeQuery()).getList(rs -> getResultFind(rs));
 
-		// add where
-		List<Predicate> lstpredicateWhere = new ArrayList<>();
+			return lstClosure;
 
-		// equal company id
-		lstpredicateWhere
-				.add(criteriaBuilder.equal(root.get(KclmtClosure_.kclmtClosurePK).get(KclmtClosurePK_.cid), companyId));
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	@SneakyThrows
+	private Closure getResultFind(NtsResultRecord rs) {
 
-		// is use closure
-		lstpredicateWhere
-				.add(criteriaBuilder.equal(root.get(KclmtClosure_.useClass), UseClassification.UseClass_Use.value));
+		KclmtClosure closureEntity = new KclmtClosure(new KclmtClosurePK(rs.getString("CID"), rs.getInt("CLOSURE_ID")));
+		closureEntity.setUseClass(rs.getInt("USE_ATR"));
+		closureEntity.setClosureMonth(rs.getInt("CLOSURE_MONTH"));
 
-		// set where to SQL
-		cq.where(lstpredicateWhere.toArray(new Predicate[] {}));
+		KclmtClosureHist entityHist = new KclmtClosureHist();
+		entityHist.setKclmtClosureHistPK(
+				new KclmtClosureHistPK(rs.getString("CID"), rs.getInt("CLOSURE_ID"), rs.getInt("STR_YM")));
+		entityHist.setName(rs.getString("CLOSURE_NAME"));
+		entityHist.setEndYM(rs.getInt("END_YM"));
+		entityHist.setCloseDay(rs.getInt("CLOSURE_DAY"));
+		entityHist.setIsLastDay(rs.getInt("IS_LAST_DAY"));
 
-		// order by closure id asc
-		cq.orderBy(criteriaBuilder.asc(root.get(KclmtClosure_.kclmtClosurePK).get(KclmtClosurePK_.closureId)));
+		List<KclmtClosureHist> lstHIst = new ArrayList<>();
+		lstHIst.add(entityHist);
 
-		// create query
-		TypedQuery<KclmtClosure> query = em.createQuery(cq);
-
-		// exclude select
-		return query.getResultList().stream()
-				.map(entity -> this.toDomain(entity,
-						this.findHistoryByClosureId(companyId, entity.getKclmtClosurePK().getClosureId())))
-				.collect(Collectors.toList());
+		return this.toDomain(closureEntity, lstHIst);
 	}
 
 	/*

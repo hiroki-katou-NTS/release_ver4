@@ -16,6 +16,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -67,6 +68,9 @@ public class KrcmtFormulaRounding extends UkJpaEntity implements Serializable {
 	@Column(name = "AMOUNT_ROUNDING_UNIT")
 	private int amountRoundingUnit;
 
+	public static final JpaEntityMapper<KrcmtFormulaRounding> MAPPER =
+			new JpaEntityMapper<>(KrcmtFormulaRounding.class);
+	
 	/**
 	 * Instantiates a new krcmt formula rounding.
 	 */
