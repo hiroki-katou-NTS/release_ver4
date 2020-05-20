@@ -169,7 +169,7 @@ public class JpaBPTimeItemRepository extends JpaRepository implements BPTimeItem
 	public List<BonusPayTimeItem> getListBonusPayTimeItemName(String companyId, List<Integer> timeItemNos) {
 		
 		List<BonusPayTimeItem> results = new ArrayList<>();
-		String sql = "select * from KBPST_BP_TIME_ITEM with (index (PK_CCGPT_TOPPAGE_JOB_SET))"
+		String sql = "select * from KBPST_BP_TIME_ITEM with (index (PK_KBPST_BP_TIME_ITEM))"
 				+ " where CID = @companyId"
 				+ " and TIME_ITEM_NO in @timeItemNos"
 				+ " and TYPE_ATR = @num";
