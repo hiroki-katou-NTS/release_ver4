@@ -12,6 +12,7 @@ import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.bonuspay.repository.BPTimeItemRepository;
 import nts.uk.ctx.at.shared.dom.bonuspay.timeitem.BonusPayTimeItem;
@@ -162,17 +163,30 @@ public class JpaBPTimeItemRepository extends JpaRepository implements BPTimeItem
 				.setParameter("companyId", companyId).getList(x -> this.toBonusPayTimeItemDomain(x));
 	}
 
+	// fix Response_UK_Thang_5 105
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<BonusPayTimeItem> getListBonusPayTimeItemName(String companyId, List<Integer> timeItemNos) {
-		List<BonusPayTimeItem> resultList = new ArrayList<>();
-		CollectionUtil.split(timeItemNos, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			resultList.addAll(this.queryProxy().query(SELECT_BP_TIME_ITEM_NAME, KbpstBonusPayTimeItem.class)
-				.setParameter("companyId", companyId)
-				.setParameter("timeItemNos", subList)
-				.getList(f -> toBonusPayTimeItemDomain(f)));
+		
+		List<BonusPayTimeItem> results = new ArrayList<>();
+		String sql = "select * from KBPST_BP_TIME_ITEM with (index (PK_CCGPT_TOPPAGE_JOB_SET))"
+				+ " where CID = @companyId"
+				+ " and TIME_ITEM_NO in @timeItemNos"
+				+ " and TYPE_ATR = @num";
+		Integer num = 0;
+		NtsStatement statement = new NtsStatement(sql, this.jdbcProxy())
+				.paramString("companyId", companyId)
+				.paramInt("timeItemNos", timeItemNos)
+				.paramInt("num", num);
+		results = statement.getList(converter->{
+			return BonusPayTimeItem.createFromJavaType(
+					converter.getString("CID"), 
+					converter.getInt("USE_ATR"), 
+					converter.getString("TIME_ITEM_NAME"), 
+					converter.getInt("TIME_ITEM_NO"), 
+					converter.getInt("TYPE_ATR"));
 		});
-		return resultList;
+		return results;
 	}
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
