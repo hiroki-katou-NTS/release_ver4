@@ -32,7 +32,7 @@ public class JpaPremiumItemRepository extends JpaRepository implements PremiumIt
 
 	private static final String FIND_ALL = "SELECT a FROM KmnmtPremiumItem a WHERE a.kmnmpPremiumItemPK.companyID = :CID";
 	
-	private static final String FIND_BY_LIST_DISPLAY_NUMBER = FIND_ALL + " AND a.kmnmpPremiumItemPK.displayNumber IN :displayNumbers";
+	//private static final String FIND_BY_LIST_DISPLAY_NUMBER = FIND_ALL + " AND a.kmnmpPremiumItemPK.displayNumber IN :displayNumbers";
 	
 	private static final String FIND_BY_LIST_PREMIUM_NO_IS_USE = FIND_ALL +  " AND a.kmnmpPremiumItemPK.displayNumber NOT IN :displayNumbers AND a.useAtr = :useAtr";
 	
@@ -63,8 +63,8 @@ public class JpaPremiumItemRepository extends JpaRepository implements PremiumIt
 	@Override
 	public List<PremiumItem> findByCompanyIDAndDisplayNumber(String companyID, List<Integer> displayNumbers) {
 		List<PremiumItem> resultList = new ArrayList<>();
-		String sql = " SELECT * FROM KMNMT_PREMIUM_ITEM  WITH(INDEX(PK_KMNMT_PREMIUM_ITEM)) WHERE CID = @companyID AND PREMIUM_NO IN @displayNumbers ";
 		 CollectionUtil.split(displayNumbers, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			 String sql = " SELECT * FROM KMNMT_PREMIUM_ITEM  WITH(INDEX(PK_KMNMT_PREMIUM_ITEM)) WHERE CID = @companyID AND PREMIUM_NO IN @displayNumbers ";
 			 resultList.addAll(  new NtsStatement(sql, this.jdbcProxy())
 						.paramString("companyID", companyID)
 						.paramInt("displayNumbers", subList)		
@@ -74,11 +74,9 @@ public class JpaPremiumItemRepository extends JpaRepository implements PremiumIt
 										rec.getInt("PREMIUM_NO"),
 										new PremiumName (rec.getString("PREMIUM_NAME")),
 										EnumAdaptor.valueOf(rec.getInt("USE_ATR"), UseAttribute.class) );
-	
 						})
 			 );
 		 });
-		
 		return resultList;
 	}
 
