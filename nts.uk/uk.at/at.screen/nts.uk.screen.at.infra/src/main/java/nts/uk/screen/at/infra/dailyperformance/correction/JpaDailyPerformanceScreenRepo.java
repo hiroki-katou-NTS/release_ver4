@@ -585,9 +585,9 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		builderString.append(" SELECT bwi.bsymtWorkplaceInfoPK.wkpid, bwi.wkpDisplayName");
 		builderString.append(" FROM BsymtWorkplaceInfo bwi ");
 		builderString.append(
-				" JOIN BsymtWorkplaceHist bwh ON bwi.bsymtWorkplaceInfoPK.historyId = bwh.bsymtWorkplaceHistPK.historyId");
+				" JOIN BsymtWorkplaceHist bwh ON bwi.bsymtWorkplaceInfoPK.cid = bwh.bsymtWorkplaceHistPK.cid");
+		builderString.append(" AND bwi.bsymtWorkplaceInfoPK.historyId = bwh.bsymtWorkplaceHistPK.historyId");
 		builderString.append(" AND bwi.bsymtWorkplaceInfoPK.wkpid = bwh.bsymtWorkplaceHistPK.wkpid");
-		builderString.append(" AND bwi.bsymtWorkplaceInfoPK.cid = bwh.bsymtWorkplaceHistPK.cid");
 		builderString.append(" WHERE bwi.bsymtWorkplaceInfoPK.cid = :companyId");
 		builderString.append(" AND bwi.bsymtWorkplaceInfoPK.wkpid IN :wkpids");
 		builderString.append(" AND bwh.strD <= :baseDate");
