@@ -20,6 +20,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -77,6 +78,8 @@ public class KrcmtOptItemFormula extends UkJpaEntity implements Serializable {
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private KrcmtFormulaSetting krcmtFormulaSetting;
 
+	public static final JpaEntityMapper<KrcmtOptItemFormula> MAPPER =
+			new JpaEntityMapper<>(KrcmtOptItemFormula.class);
 
 	/**
 	 * Instantiates a new krcmt opt item formula.

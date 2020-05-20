@@ -16,6 +16,7 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import nts.arc.layer.infra.data.jdbc.map.JpaEntityMapper;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 /**
@@ -51,6 +52,9 @@ public class KrcmtCalcItemSelection extends UkJpaEntity implements Serializable 
 	@Column(name = "OPERATOR")
 	private int operator;
 
+	public static final JpaEntityMapper<KrcmtCalcItemSelection> MAPPER =
+			new JpaEntityMapper<>(KrcmtCalcItemSelection.class);
+	
 	/**
 	 * Instantiates a new krcmt calc item selection.
 	 */
