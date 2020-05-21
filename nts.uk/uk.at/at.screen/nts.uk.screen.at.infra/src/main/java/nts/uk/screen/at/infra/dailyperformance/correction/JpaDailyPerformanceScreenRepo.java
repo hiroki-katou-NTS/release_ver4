@@ -1734,7 +1734,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 		List<AffComHistItemAtScreen> resultLists = new ArrayList<>();
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
-		NtsStatement statement = new NtsStatement(sql, this.jdbcProxy()).paramString("employeeIds", employeeIds)
+		NtsStatement statement = new NtsStatement(sql, this.jdbcProxy()).paramString("employeeIds", subList)
 				.paramString("cid", cid);
 		List<AffComHistItemAtScreen> resultList = statement.getList(x -> new AffComHistItemAtScreen(x.getString("SID"),
 				new DatePeriod(x.getGeneralDate("START_DATE"), x.getGeneralDate("END_DATE"))));
