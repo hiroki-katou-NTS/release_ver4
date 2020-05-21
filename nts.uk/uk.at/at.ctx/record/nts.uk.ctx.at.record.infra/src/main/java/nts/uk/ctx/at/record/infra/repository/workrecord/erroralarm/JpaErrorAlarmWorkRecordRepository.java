@@ -422,8 +422,8 @@ public class JpaErrorAlarmWorkRecordRepository extends JpaRepository implements 
 		builder.append(" ec.ATD_ITEM_CONDITION_GROUP1, ec.WT_ACTUAL_FILTER_ATR, ec.WT_PLAN_ACTUAL_OPERATOR, ec.WH_PLAN_ACTUAL_OPERATOR,");
 		builder.append(" ec.ATD_ITEM_CONDITION_GROUP2, ec.WORKTYPE_USE_ATR, ec.WT_COMPARE_ATR, ec.WT_PLAN_FILTER_ATR,");
 		builder.append(" ec.WORKING_HOURS_USE_ATR, ec.WH_COMPARE_ATR, ec.WH_PLAN_FILTER_ATR, ec.WH_ACTUAL_FILTER_ATR,");
-		builder.append(" ec.OPERATOR_BETWEEN_GROUPS, ec.GROUP2_USE_ATR FROM KRCMT_ERAL_SET es");
-		builder.append(" LEFT JOIN KRCMT_ERAL_CONDITION ec ON ec.CID = es.CID AND ec.ERAL_CHECK_ID = es.ERAL_CHECK_ID ");
+		builder.append(" ec.OPERATOR_BETWEEN_GROUPS, ec.GROUP2_USE_ATR FROM KRCMT_ERAL_SET es WITH(INDEX(KRCMP_ERAL_SET))");
+		builder.append(" LEFT JOIN KRCMT_ERAL_CONDITION ec WITH(INDEX(KRCMP_ERAL_CONDITION)) ON ec.CID = es.CID AND ec.ERAL_CHECK_ID = es.ERAL_CHECK_ID ");
 		builder.append(" WHERE es.CID = ? AND es.USE_ATR = ? ");
 		return builder.toString();
 	}

@@ -460,7 +460,7 @@ public class JpaWorkplaceConfigInfoRepository extends JpaRepository
 			return new HashMap<>();
 		}
 		List<WorkplaceConfigHistory> configHis = new ArrayList<>();
-		try(val st = this.connection().prepareStatement("SELECT HIST_ID, START_DATE, END_DATE FROM BSYMT_WKP_CONFIG WHERE START_DATE <= ? AND END_DATE >= ? AND CID = ?")){
+		try(val st = this.connection().prepareStatement("SELECT HIST_ID, START_DATE, END_DATE FROM BSYMT_WKP_CONFIG WITH(INDEX(PK_BSYDT_WKP_CONFIG)) WHERE START_DATE <= ? AND END_DATE >= ? AND CID = ?")){
 			st.setDate(1, Date.valueOf(baseDate.end().localDate()));
 			st.setDate(2, Date.valueOf(baseDate.start().localDate()));
 			st.setString(3, companyId);

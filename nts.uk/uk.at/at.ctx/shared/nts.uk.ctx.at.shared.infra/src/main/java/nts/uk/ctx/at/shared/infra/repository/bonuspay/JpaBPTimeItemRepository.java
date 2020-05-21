@@ -174,17 +174,20 @@ public class JpaBPTimeItemRepository extends JpaRepository implements BPTimeItem
 				+ " and TIME_ITEM_NO in @timeItemNos"
 				+ " and TYPE_ATR = @num";
 		Integer num = 0;
+		CollectionUtil.split(timeItemNos, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 		NtsStatement statement = new NtsStatement(sql, this.jdbcProxy())
 				.paramString("companyId", companyId)
-				.paramInt("timeItemNos", timeItemNos)
+				.paramInt("timeItemNos", subList)
 				.paramInt("num", num);
-		results = statement.getList(converter->{
+		List<BonusPayTimeItem> result = statement.getList(converter->{
 			return BonusPayTimeItem.createFromJavaType(
 					converter.getString("CID"), 
 					converter.getInt("USE_ATR"), 
 					converter.getString("TIME_ITEM_NAME"), 
 					converter.getInt("TIME_ITEM_NO"), 
 					converter.getInt("TYPE_ATR"));
+		});
+		results.addAll(result);
 		});
 		return results;
 	}

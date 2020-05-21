@@ -65,6 +65,7 @@ public class JpaApprovalProcessingUseSettingRepository extends JpaRepository
 		List<KrcstAppProUseJbSet> lstKrcstAppProUseJbSet;
 		{
 			String sql = "select * from KRCST_APP_PRO_USE_JB_SET"
+					+ " with (index (KRCSP_APP_PRO_USE_JB_SET))"
 					+ " where CID = ?";
 			try (val stmt = this.connection().prepareStatement(sql)) {
 				stmt.setString(1, companyId);
