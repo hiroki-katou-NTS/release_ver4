@@ -84,5 +84,15 @@ public class KshstWorkdayoffFrame extends UkJpaEntity implements Serializable {
 	protected Object getKey() {
 		return this.kshstWorkdayoffFramePK;
 	}
+
+	public KshstWorkdayoffFrame(KshstWorkdayoffFramePK kshstWorkdayoffFramePK, int exclusVer, short useAtr,
+			String wdoFrName, String transFrName) {
+		super();
+		this.kshstWorkdayoffFramePK = kshstWorkdayoffFramePK;
+		this.exclusVer = exclusVer;
+		this.useAtr = useAtr;
+		this.wdoFrName = wdoFrName;
+		this.transFrName = transFrName;
+	}
     
 }

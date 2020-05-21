@@ -1729,15 +1729,20 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 			List<String> employeeIds) {
 		if (employeeIds.isEmpty())
 			return Collections.emptyMap();
+
+		String sql = "SELECT * FROM BSYMT_AFF_COM_HIST WHERE SID IN @employeeIds AND CID = @cid order by START_DATE";
+
 		List<AffComHistItemAtScreen> resultList = new ArrayList<>();
-		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
-			resultList.addAll(this.queryProxy().query(SELECT_BY_EMPLOYEE_ID_AFF_COM, BsymtAffCompanyHist.class)
-					.setParameter("sIds", subList).setParameter("cid", cid)
-					.getList(x -> new AffComHistItemAtScreen(x.bsymtAffCompanyHistPk.sId,
-							new DatePeriod(x.startDate, x.endDate))));
-		});
-		return resultList.stream().collect(Collectors.groupingBy(AffComHistItemAtScreen::getEmployeeId,
-				Collectors.mapping(x -> x, Collectors.toList())));
+
+		NtsStatement statement = new NtsStatement(sql, this.jdbcProxy()).paramString("employeeIds", employeeIds)
+				.paramString("cid", cid);
+		resultList = statement.getList(x -> new AffComHistItemAtScreen(x.getString("SID"),
+				new DatePeriod(x.getGeneralDate("START_DATE"), x.getGeneralDate("END_DATE"))));
+
+		Map<String, List<AffComHistItemAtScreen>> map = resultList.stream().collect(Collectors
+				.groupingBy(AffComHistItemAtScreen::getEmployeeId, Collectors.mapping(x -> x, Collectors.toList())));
+
+		return map;
 	}
 
 	//SELECT_BY_SID_DATE_AF_COM
