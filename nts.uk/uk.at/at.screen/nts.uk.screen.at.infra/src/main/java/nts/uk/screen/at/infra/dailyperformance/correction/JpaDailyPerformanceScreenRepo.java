@@ -1732,14 +1732,15 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 
 		String sql = "SELECT * FROM BSYMT_AFF_COM_HIST WHERE SID IN @employeeIds AND CID = @cid order by START_DATE";
 
-		List<AffComHistItemAtScreen> resultList = new ArrayList<>();
-
+		List<AffComHistItemAtScreen> resultLists = new ArrayList<>();
+		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
 		NtsStatement statement = new NtsStatement(sql, this.jdbcProxy()).paramString("employeeIds", employeeIds)
 				.paramString("cid", cid);
-		resultList = statement.getList(x -> new AffComHistItemAtScreen(x.getString("SID"),
+		List<AffComHistItemAtScreen> resultList = statement.getList(x -> new AffComHistItemAtScreen(x.getString("SID"),
 				new DatePeriod(x.getGeneralDate("START_DATE"), x.getGeneralDate("END_DATE"))));
-
-		Map<String, List<AffComHistItemAtScreen>> map = resultList.stream().collect(Collectors
+		resultLists.addAll(resultList);
+		});
+		Map<String, List<AffComHistItemAtScreen>> map = resultLists.stream().collect(Collectors
 				.groupingBy(AffComHistItemAtScreen::getEmployeeId, Collectors.mapping(x -> x, Collectors.toList())));
 
 		return map;
