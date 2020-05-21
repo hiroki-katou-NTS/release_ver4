@@ -442,18 +442,19 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 				+ " inner join BSYMT_AFF_WPL_HIST_ITEM i"
 				+ " on h.HIST_ID = i.HIST_ID"
 				+ " where h.SID in @listSid ";
-		
-		List<BsymtAffiWorkplaceHist> resultList = new NtsStatement(sql, this.jdbcProxy())
-				.paramString("listSid", listSid)
-				.getList(rec -> {
-						return new BsymtAffiWorkplaceHist(
-							rec.getString("HIST_ID"),
-							rec.getString("SID"),
-							rec.getString("CID"),
-							rec.getGeneralDate("START_DATE"),
-							rec.getGeneralDate("END_DATE"));	
-				});
-
+		List<BsymtAffiWorkplaceHist> resultList = new ArrayList<>();
+		CollectionUtil.split(listSid, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
+			resultList.addAll(new NtsStatement(sql, this.jdbcProxy())
+					.paramString("listSid", subList)
+					.getList(rec -> {
+							return new BsymtAffiWorkplaceHist(
+								rec.getString("HIST_ID"),
+								rec.getString("SID"),
+								rec.getString("CID"),
+								rec.getGeneralDate("START_DATE"),
+								rec.getGeneralDate("END_DATE"));	
+					}));
+		});
 		return resultList.stream().map(entity -> this.toDomain(entity)).collect(Collectors.toList());
 	 }
 
