@@ -1,9 +1,15 @@
 package kmw003;
-import java.io.File;
-import org.junit.jupiter.api.*;
-import org.apache.commons.io.FileUtils;
 import static org.junit.jupiter.api.Assertions.*;
-import org.openqa.selenium.*;
+
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 
 
 
@@ -16,7 +22,7 @@ public class Scenario1Case1 extends Kmw003Common {
         password = "Jinjikoi5";
         kmk012 = linkFullScreen("nts.uk.at.web/view/kmk/012/a/index.xhtml");
         kmw003 = linkFullScreen("nts.uk.at.web/view/kmw/003/a/index.xhtml");
-        
+
     }
 
     @Test
@@ -26,7 +32,7 @@ public class Scenario1Case1 extends Kmw003Common {
         //login
         login(screenshotFile, employeeCode, password);
         WaitPageLoad();
-        
+
         //set kmk012
         driver.get(kmk012);
         WaitPageLoad();
@@ -39,7 +45,7 @@ public class Scenario1Case1 extends Kmw003Common {
         //set kmw/003 month
         driver.get(kmw003);
         WaitPageLoad();
-        setValueInput("yearMonthPicker", "2019/10");
+        setValueInput("yearMonthPicker", "2019/11");
         WaitPageLoad();
 
         //unlock
@@ -55,9 +61,13 @@ public class Scenario1Case1 extends Kmw003Common {
         //change sheet
         // WaitElementLoad(By.xpath("//li[@class ='mgrid-sheet-button ui-state-default']"));
         // driver.findElements(By.xpath("//li[@class ='mgrid-sheet-button ui-state-default']")).get(0).click();
-        setValueGrid(3, 2, "7:00");
-        setValueGrid(4, 3, "14:00");
-        driver.findElement(By.xpath("//button[@class = 'proceed']")).click();
+        WaitPageLoad();
+        setValueGrid(2, 1, "1:00");
+        setValueGrid(3, 2, "2:00");
+        setValueGrid(4, 3, "3:00");
+
+        WaitElementLoad(By.className("proceed"));
+        driver.findElement(By.className("proceed")).click();
         WaitPageLoad();
         WaitElementLoad(By.xpath("//button[@class = 'large']"));
         driver.findElement(By.xpath("//button[@class = 'large']")).click();
@@ -78,5 +88,5 @@ public class Scenario1Case1 extends Kmw003Common {
             fail(verificationErrorString);
         }
     }
-    
+
 }
