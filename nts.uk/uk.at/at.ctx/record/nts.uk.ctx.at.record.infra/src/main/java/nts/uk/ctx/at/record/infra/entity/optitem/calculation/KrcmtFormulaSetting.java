@@ -12,7 +12,6 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
@@ -24,7 +23,6 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @Setter
 @Entity
 @Table(name = "KRCMT_FORMULA_SETTING")
-@AllArgsConstructor
 public class KrcmtFormulaSetting extends UkJpaEntity implements Serializable {
 
 	/** The Constant serialVersionUID. */
