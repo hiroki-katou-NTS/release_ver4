@@ -138,7 +138,7 @@ public class JpaMonthlyItemControlByAuthRepository  extends JpaRepository implem
 		List<DisplayAndInputMonthly> data = new ArrayList<>();
 		CollectionUtil.split(itemMonthlyIDs, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			try (PreparedStatement statement = this.connection().prepareStatement(
-						"SELECT * from KSHST_MON_SER_TYPE_CTR h"
+						"SELECT ITEM_MONTHLY_ID, USE_ATR, CHANGED_BY_YOU, CHANGED_BY_OTHERS from KSHST_MON_SER_TYPE_CTR h with(index(KSHSP_MON_SER_TYPE_CTR))"
 						+ " WHERE h.CID = ?"
 						+ " and h.AUTHORITY_MON_ID = ?"
 						+ " AND h.USE_ATR = ?"
@@ -171,7 +171,6 @@ public class JpaMonthlyItemControlByAuthRepository  extends JpaRepository implem
 		
 		return Optional.of(new MonthlyItemControlByAuthority(companyID, authorityMonthlyId, data));
 	}
-	
 	
 	private final String SELECT_ALL_BY_AUTHORITY_MONTHLY_LIST_ID = "SELECT c FROM KrcstDisplayAndInputMonthly c"
 			+ " WHERE c.krcstDisplayAndInputMonthlyPK.companyID = :companyID"

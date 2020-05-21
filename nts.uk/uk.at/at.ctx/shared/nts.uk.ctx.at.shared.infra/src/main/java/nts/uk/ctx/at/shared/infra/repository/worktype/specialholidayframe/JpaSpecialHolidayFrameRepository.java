@@ -11,6 +11,7 @@ import javax.ejb.TransactionAttributeType;
 
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
+import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.at.shared.dom.worktype.specialholidayframe.SpecialHolidayFrame;
 import nts.uk.ctx.at.shared.dom.worktype.specialholidayframe.SpecialHolidayFrameRepository;
@@ -84,18 +85,25 @@ public class JpaSpecialHolidayFrameRepository extends JpaRepository implements S
 				specialHolidayFrame.getDeprecateSpecialHd().value);
 	}
 
+	// fix Response_UK_Thang_5 104
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<SpecialHolidayFrame> findHolidayFrameByListFrame(String companyId, List<Integer> frameNos) {
-		if(frameNos.isEmpty())
+		if (frameNos.isEmpty())
 			return Collections.emptyList();
-		List<SpecialHolidayFrame> resultList = new ArrayList<>();
+		List<SpecialHolidayFrame> resultLists = new ArrayList<>();
+		String sql = "SELECT * FROM KSHMT_SPHD_FRAME" + " WHERE CID = @companyId" + " AND SPHD_FRAME_NO IN @frameNos";
 		CollectionUtil.split(frameNos, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
-			resultList.addAll(this.queryProxy().query(GET_ALL_BY_LIST_FRAME_NO, KshmtSpecialHolidayFrame.class)
-								.setParameter("companyId", companyId)
-								.setParameter("frameNos", subList)
-								.getList(x -> convertToDoma(x)));
+		NtsStatement statement = new NtsStatement(sql, this.jdbcProxy()).paramString("companyId", companyId)
+				.paramInt("frameNos", subList);
+		List<SpecialHolidayFrame> resultList = statement.getList(x -> {
+			KshmtSpecialHolidayFrame frame = new KshmtSpecialHolidayFrame(
+					new KshmtSpecialHolidayFramePK(x.getString("CID"), x.getInt("SPHD_FRAME_NO")), x.getString("NAME"),
+					x.getInt("ABOLISH_ATR"));
+			return convertToDoma(frame);
 		});
-		return resultList;
+		resultLists.addAll(resultList);
+		});
+		return resultLists;
 	}
 }
