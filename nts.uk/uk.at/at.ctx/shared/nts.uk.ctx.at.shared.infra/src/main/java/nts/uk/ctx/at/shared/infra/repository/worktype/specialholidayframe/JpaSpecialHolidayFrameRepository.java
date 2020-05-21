@@ -91,9 +91,9 @@ public class JpaSpecialHolidayFrameRepository extends JpaRepository implements S
 	public List<SpecialHolidayFrame> findHolidayFrameByListFrame(String companyId, List<Integer> frameNos) {
 		if (frameNos.isEmpty())
 			return Collections.emptyList();
-
+		List<SpecialHolidayFrame> resultLists = new ArrayList<>();
 		String sql = "SELECT * FROM KSHMT_SPHD_FRAME" + " WHERE CID = @companyId" + " AND SPHD_FRAME_NO IN @frameNos";
-
+		CollectionUtil.split(frameNos, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 		NtsStatement statement = new NtsStatement(sql, this.jdbcProxy()).paramString("companyId", companyId)
 				.paramInt("frameNos", frameNos);
 		List<SpecialHolidayFrame> resultList = statement.getList(x -> {
@@ -102,6 +102,8 @@ public class JpaSpecialHolidayFrameRepository extends JpaRepository implements S
 					x.getInt("ABOLISH_ATR"));
 			return convertToDoma(frame);
 		});
-		return resultList;
+		resultLists.addAll(resultList);
+		});
+		return resultLists;
 	}
 }
