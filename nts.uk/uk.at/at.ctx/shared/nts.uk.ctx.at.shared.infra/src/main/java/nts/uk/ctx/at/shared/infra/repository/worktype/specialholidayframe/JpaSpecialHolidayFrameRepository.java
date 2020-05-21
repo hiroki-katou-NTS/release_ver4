@@ -95,7 +95,7 @@ public class JpaSpecialHolidayFrameRepository extends JpaRepository implements S
 		String sql = "SELECT * FROM KSHMT_SPHD_FRAME" + " WHERE CID = @companyId" + " AND SPHD_FRAME_NO IN @frameNos";
 		CollectionUtil.split(frameNos, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 		NtsStatement statement = new NtsStatement(sql, this.jdbcProxy()).paramString("companyId", companyId)
-				.paramInt("frameNos", frameNos);
+				.paramInt("frameNos", subList);
 		List<SpecialHolidayFrame> resultList = statement.getList(x -> {
 			KshmtSpecialHolidayFrame frame = new KshmtSpecialHolidayFrame(
 					new KshmtSpecialHolidayFramePK(x.getString("CID"), x.getInt("SPHD_FRAME_NO")), x.getString("NAME"),
