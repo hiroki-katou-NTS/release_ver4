@@ -212,7 +212,7 @@ public class JpaErrorAlarmWorkRecordRepository extends JpaRepository implements 
 
 	@Override
 	@SneakyThrows
-	public List<ErrorAlarmWorkRecord> getAllErAlCompanyAndUseAtr(String companyId, Boolean useAtr) {		
+	public List<ErrorAlarmWorkRecord> getAllErAlCompanyAndUseAtr(String companyId, boolean useAtr) {		
 		//get data to call KwrmtErAlWorkRecord.toDomain(c)
 		
 		Map<String, String> conG1 = new HashMap<>(), conG2 = new HashMap<>();
