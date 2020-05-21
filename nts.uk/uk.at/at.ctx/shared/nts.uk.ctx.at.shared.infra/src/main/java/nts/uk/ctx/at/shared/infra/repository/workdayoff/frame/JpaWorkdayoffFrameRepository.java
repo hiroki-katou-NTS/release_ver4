@@ -142,22 +142,23 @@ public class JpaWorkdayoffFrameRepository extends JpaRepository
 	public List<WorkdayoffFrame> getWorkdayoffFrameBy(String companyId,
 			List<Integer> workdayoffFrNos) {
 		// get entity manager
-		
+		List<KshstWorkdayoffFrame> workdayoffFrames = new ArrayList<>();
 		String sql = "select * from KSHST_WORKDAYOFF_FRAME with (index (PK_KSHST_WORKDAYOFF_FRAME))" 
 				+ " where CID = @companyId"
 				+ " and WDO_FR_NO in @workdayoffFrNos";
-		
+		CollectionUtil.split(workdayoffFrNos, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
 		NtsStatement statement = new NtsStatement(sql, this.jdbcProxy())
 				.paramString("companyId", companyId)
-				.paramInt("workdayoffFrNos", workdayoffFrNos);
-		List<KshstWorkdayoffFrame> workdayoffFrames = statement.getList(x->{
+				.paramInt("workdayoffFrNos", splitData);
+		List<KshstWorkdayoffFrame> workdayoffFrame = statement.getList(x->{
 			return new KshstWorkdayoffFrame(new KshstWorkdayoffFramePK(x.getString("CID"), 
 					Short.parseShort(x.getString("WDO_FR_NO"))), 
 					x.getInt("EXCLUS_VER"), 
 					Short.parseShort(x.getString("USE_ATR")), 
 					x.getString("WDO_FR_NAME"), 
 					x.getString("TRANS_FR_NAME")); });
-		
+		workdayoffFrames.addAll(workdayoffFrame);
+		});
 		// exclude select
 		List<WorkdayoffFrame> frames = workdayoffFrames.stream().map(category -> toDomain(category))
 				.collect(Collectors.toList());
