@@ -1881,18 +1881,19 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 				return;
 			}
 			String GET_EMP_ALL_X = new StringBuilder(
-					"SELECT h.START_DATE, h.END_DATE, e.SID, e.EMP_CD FROM BSYMT_EMPLOYMENT_HIS_ITEM e")
-							.append(" JOIN BSYMT_EMPLOYMENT_HIST h ON e.HIST_ID = h.HIST_ID WHERE")
-							.append(" h.START_DATE <= ? AND h.END_DATE >= ? AND h.CID = ? AND h.SID IN (")
-							.append(joinParam(subList)).append(")").toString();
+					"SELECT h.START_DATE, h.END_DATE, e.SID, e.EMP_CD FROM BSYMT_EMPLOYMENT_HIS_ITEM e with(index(BSYMP_EMPLOYMENT_HIS_ITEM))")
+							.append(" JOIN BSYMT_EMPLOYMENT_HIST h with(index(BSYMI_EMPLOYMENT_HIST_2)) ON e.HIST_ID = h.HIST_ID WHERE")
+							.append(" h.SID IN (")
+							.append(joinParam(subList)).append(")")
+							.append(" AND h.START_DATE <= ? AND h.END_DATE >= ? AND h.CID = ? ").toString();
 
 			try (PreparedStatement statement = this.connection().prepareStatement(GET_EMP_ALL_X)) {
-				statement.setDate(1, Date.valueOf(dateRange.getEndDate().localDate()));
-				statement.setDate(2, Date.valueOf(dateRange.getStartDate().localDate()));
-				statement.setString(3, companyId);
 				for (int i = 0; i < subList.size(); i++) {
-					statement.setString(i + 4, subList.get(i));
+					statement.setString(i + 1, subList.get(i));
 				}
+				statement.setDate(subList.size()+1, Date.valueOf(dateRange.getEndDate().localDate()));
+				statement.setDate(subList.size()+2, Date.valueOf(dateRange.getStartDate().localDate()));
+				statement.setString(subList.size()+3, companyId);
 
 				new NtsResultSet(statement.executeQuery()).getList(rs -> {
 					empCodes.put(
@@ -1915,7 +1916,7 @@ public class JpaDailyPerformanceScreenRepo extends JpaRepository implements Dail
 		}
 
 		List<ClosureDto> closureDtos = new ArrayList<>();
-		CollectionUtil.split(empCodes.values().stream().collect(Collectors.toList()),
+		CollectionUtil.split(empCodes.values().stream().distinct().collect(Collectors.toList()),
 				DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, (subList) -> {
 					StringBuilder builderString = new StringBuilder();
 					builderString.append("SELECT c.CLOSURE_ID , c.USE_ATR, c.CLOSURE_MONTH, emp.EMPLOYMENT_CD ");
