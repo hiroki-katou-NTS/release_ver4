@@ -5,8 +5,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.openqa.selenium.*;
 
 import common.TestRoot;
+import kdw003.Kdw003Common;
 
-public class Scenario1Case2 extends TestRoot {
+public class Scenario1Case2 extends Kdw003Common {
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -17,44 +18,38 @@ public class Scenario1Case2 extends TestRoot {
     @Test
     public void test() throws Exception {
         //login
-        // driver.get(domain+"nts.uk.com.web/view/ccg/007/d/index.xhtml");
-        // WaitPageLoad();
-        // driver.findElement(By.id("company-code-select")).click();
-        // WaitElementLoad(By.xpath("//li[@data-value='0001']"));
-        // driver.findElement(By.xpath("//li[@data-value='0001']")).click();
-        // driver.findElement(By.id("employee-code-inp")).clear();
-        // driver.findElement(By.id("employee-code-inp")).sendKeys("004515");
-        // driver.findElement(By.id("password-input")).clear();
-        // driver.findElement(By.id("password-input")).sendKeys("Jinjikoi5");
-        // File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        // FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image1.png"));
-        // driver.findElement(By.id("login-btn")).click();
-        // WaitPageLoad();
-        login("020905", "Jinjikoi5");
+        login("004515", "Jinjikoi5");
+
+        setProcessYearMonth(1, "2020/05");
 
         driver.get(domain+"nts.uk.at.web/view/kdw/004/a/index.xhtml");
         WaitPageLoad();
-        // screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        // FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image2.png"));
         screenShot();
         driver.findElement(By.xpath("//a[contains(.,'017267')]")).click();
         WaitPageLoad();
-        WaitElementLoad(By.id("btn-signAll"));
-        driver.findElement(By.id("btn-signAll")).click();
-        // screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        // FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image3.png"));
+        WebElement el4 = selectItemKdw003_1("承認", "05/12(火)");
+        WebElement el5 = selectItemKdw003_1("承認", "05/13(水)");
+        WebElement el6 = selectItemKdw003_1("承認", "05/14(木)");
+        if(!el4.findElement(By.xpath("./label/input")).isSelected() &&
+        	el4.findElement(By.xpath("./label/input")).isEnabled()){
+        	el4.click();
+        }
+        if(!el5.findElement(By.xpath("./label/input")).isSelected() &&
+        	el5.findElement(By.xpath("./label/input")).isEnabled()){
+        	el5.click();
+        }
+        if(!el6.findElement(By.xpath("./label/input")).isSelected() &&
+        	el6.findElement(By.xpath("./label/input")).isEnabled()){
+        	el6.click();
+        }
         screenShot();
         driver.findElement(By.xpath("//button[contains(.,'確定')]")).click();
         WaitPageLoad();
         driver.get(domain+"nts.uk.com.web/view/ccg/008/a/index.xhtml");
         WaitPageLoad();
-        // screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        // FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image4.png"));
         screenShot();
         driver.get(domain+"nts.uk.at.web/view/kdw/004/a/index.xhtml");
         WaitPageLoad();
-        // screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        // FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image5.png"));
         screenShot();
         this.uploadTestLink(93, 19);
     }
