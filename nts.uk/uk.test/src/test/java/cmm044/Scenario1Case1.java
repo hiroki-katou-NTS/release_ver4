@@ -28,12 +28,12 @@ public class Scenario1Case1 extends TestRoot {
         driver.get(domain + "nts.uk.com.web/view/cmm/044/a/index.xhtml");
         WaitPageLoad();
         driver.findElement(By.xpath("//*[@id='functions-area']/button[1]")).click();
-        
+
         WebElement startTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsStartDatePicker"));
-        startTime.sendKeys("2019/05/01");   
+        startTime.sendKeys("2019/05/01");
         driver.findElement(By.id("master-wrapper")).click();
         WebElement endTime = driver.findElement(By.id("daterangepicker")).findElement(By.className("ntsEndDatePicker"));
-        endTime.sendKeys("9999/12/31");   
+        endTime.sendKeys("9999/12/31");
         driver.findElement(By.id("master-wrapper")).click();
         screenShot();
         driver.findElement(By.xpath("//button[@id='BTN_A4_003']")).click();
@@ -42,13 +42,14 @@ public class Scenario1Case1 extends TestRoot {
         driver.findElement(By.className("tree-component-node-text-col")).click();
         driver.findElement(By.xpath("//button[text()='検索→']")).click();
         WaitPageLoad();
-        driver.findElement(By.xpath("//*[text()='006310']")).click();   
-        driver.findElement(By.xpath("//*[@id='functions-area-bottom']/button[1]")).click();
+        driver.findElement(By.xpath("//*[text()='006310']")).click();
         WaitElementLoad(By.xpath("//*[@id='functions-area-bottom']/button[1]"));
+        driver.findElement(By.xpath("//*[@id='functions-area-bottom']/button[1]")).click();
+        WaitElementLoad(By.xpath("//*[@id='functions-area']/button[2]"));
         driver.findElement(By.xpath("//*[@id='functions-area']/button[2]")).click();
         screenShot();
         this.uploadTestLink(420, 94);
-     
+
     }
 
     @AfterEach
