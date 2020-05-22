@@ -114,6 +114,9 @@ public class Scenario1Case6 extends TestRoot {
         //検索ボタン
         WaitElementLoad(By.xpath("//button[contains(@class,'proceed caret-bottom pull-right')]"));
         driver.findElements(By.xpath("//button[contains(@class,'proceed caret-bottom pull-right')]")).get(0).click();
+
+        WaitElementLoad(By.xpath("//*[@id='ccg001-tab-content-3']/div[2]/div[1]/div/div/i"));
+        driver.findElement(By.xpath("//*[@id='ccg001-tab-content-3']/div[2]/div[1]/div/div/i")).click();
         
         WaitPageLoad();
 

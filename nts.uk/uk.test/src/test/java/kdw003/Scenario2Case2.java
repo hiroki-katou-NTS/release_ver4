@@ -2,6 +2,9 @@ package kdw003;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Calendar;
+
 import org.openqa.selenium.*;
 
 import common.TestRoot;
@@ -16,11 +19,32 @@ public class Scenario2Case2 extends TestRoot {
 
     @Test
     public void test() throws Exception {
-        //login申請者
+        Calendar inputdate = Calendar.getInstance();
+        inputdate.add(Calendar.MONTH, 0);
+        //ログイン（フレックス）
         login("015243", "Jinjikoi5");
 
+        //処理年月の変更
+        new Kdw003Common().setProcessYearMonth(1, "2020/04");
+        
+        //KDW003A 勤務報告書
         driver.get(domain+"nts.uk.at.web/view/kdw/003/a/index.xhtml");
         WaitPageLoad();
+        
+        //エラー参照ダイアログが起動していれば閉じる
+        if (driver.findElements(By.xpath("//iframe[@name='window_1']")).size() !=0) {
+            driver.switchTo().frame("window_1");
+            
+            WaitElementLoad(By.id("dialogClose"));
+            driver.findElement(By.id("dialogClose")).click();
+        }
+        
+        //翌月表示を当月に戻す
+        driver.findElements(By.xpath("//button[contains(@class,'ntsDatePrevButton')]")).get(1).click();
+        WaitElementLoad(By.id("btnExtraction"));
+        driver.findElement(By.id("btnExtraction")).click();
+        WaitPageLoad();
+        
         setValueGrid(19,8,"1500");
         WaitPageLoad();
         setValueGrid(19,13,"1500");

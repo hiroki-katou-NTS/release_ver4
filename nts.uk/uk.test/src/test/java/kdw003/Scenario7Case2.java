@@ -3,6 +3,7 @@ package kdw003;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.*;
@@ -39,68 +40,150 @@ public class Scenario7Case2 extends TestRoot {
 
     @Test
     public void test() throws Exception  {
+        Calendar inputdate = Calendar.getInstance();
+        inputdate.add(Calendar.MONTH, 0);
 
-        
+        //ログイン1（部下）
+        login("004098", "Jinjikoi5");        
+        //ログイン1（上司）
+        login2("004122", "Jinjikoi5");
 
-         //login 016209/Jinjikoi5
-        login("016209", "Jinjikoi5");
-        login2("003944", "Jinjikoi5");
-
-        // change closure 1
-        driver.get(domain+ "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-        driver.findElement(By.id(inpMonth)).click();
-        driver.findElement(By.id(inpMonth)).clear();
-        driver.findElement(By.id(inpMonth)).sendKeys("2019/7");
-        driver.findElement(By.xpath("//body")).click();
-        driver.findElement(By.id(btnsave)).click();
+        //処理年月の変更
+        new Kdw003Common().setProcessYearMonth(1, "2020/04");
 
        
-        // click checkbox KDW006C
+        //KDW006C 勤怠項目前準備 - 機能制限
         driver.get(domain + "nts.uk.at.web/view/kdw/006/c/index.xhtml");
         WaitPageLoad();
-        WebElement a = driver.findElement(By.xpath("//*[@id='checkBox161']"));
-        WaitElementLoad(By.xpath("//*[@id='checkBox161']/label/span[1]"));
+        
+        //本人確認、上司承認を利用するになっているか確認
+        WebElement a = driver.findElement(By.xpath("//*[@id='checkBox121']"));
+        WaitElementLoad(By.xpath("//*[@id='checkBox121']/label/span[1]"));
         if (a.getAttribute("class").indexOf("checked") == -1) {
+            driver.findElement(By.xpath("//*[@id='checkBox121']/label/span[1]")).click();
             driver.findElement(By.id("register-button")).click();
         } else {
-            driver.findElement(By.xpath("//*[@id='checkBox161']/label/span[1]")).click();
             driver.findElement(By.id("register-button")).click();
         }
         driver.findElement(By.xpath("//body")).click();
 
-       // go kdw003/ tháng 8 uncheck
+        screenShot();
+        
+        //KDW003A 勤務報告書
         driver.get(domain+"nts.uk.at.web/view/kdw/003/a/index.xhtml");
         WaitPageLoad();
-        selectItemKdw003_2("本人", "08/02(金)").click();
-
-        driver2.get(domain+"nts.uk.at.web/view/kdw/004/a/index.xhtml");
-        WaitPageLoad();
-        WaitElementLoad(By.xpath("//a[contains(.,'016209')]"));
-        driver2.findElement(By.xpath("//a[contains(.,'016209')]")).click();
-        WaitPageLoad();
-        // selectItemKdw003_2_2("承認","08/01(木)").click();// không click được 
-        WaitElementLoad(By.xpath("//*[@id='dpGrid']/div[3]/table/tbody/tr[3]/td[6]/label"));
-        driver2.findElement(By.xpath("//*[@id='dpGrid']/div[3]/table/tbody/tr[3]/td[6]/label")).click();
-
         
-        WaitElementLoad(By.xpath("//button[contains(.,'確定')]"));
-        driver2.findElements(By.xpath("//button[contains(.,'確定')]")).get(0).click();
+        //エラー参照ダイアログが起動しているか
+        if (driver.findElements(By.xpath("//iframe[@name='window_1']")).size() !=0) {
+            driver.switchTo().frame("window_1");
+            WaitPageLoad();
+            
+            WaitElementLoad(By.id("dialogClose"));
+            driver.findElement(By.id("dialogClose")).click();
+        }
+        
+        //翌月表示を当月に戻す
+        WaitElementLoad(By.xpath("/html/body/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div/div[1]/button"));
+        driver.findElement(By.xpath("/html/body/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div/div[1]/button")).click();
+        WaitElementLoad(By.id("btnExtraction"));
+        driver.findElement(By.id("btnExtraction")).click();
+        WaitPageLoad();
+        
+        //KDW003A 勤務報告書
+        driver.get(domain+"nts.uk.at.web/view/kdw/003/a/index.xhtml");
+        WaitPageLoad();
+        
+        //エラー参照ダイアログが起動しているか
+        if (driver.findElements(By.xpath("//iframe[@name='window_1']")).size() !=0) {
+            driver.switchTo().frame("window_1");
+            WaitPageLoad();
+            
+            WaitElementLoad(By.id("dialogClose"));
+            driver.findElement(By.id("dialogClose")).click();
+        }
+        
+        //翌月表示を当月に戻す
+        WaitElementLoad(By.xpath("/html/body/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div/div[1]/button"));
+        driver.findElement(By.xpath("/html/body/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div/div[1]/button")).click();
+        WaitElementLoad(By.id("btnExtraction"));
+        driver.findElement(By.id("btnExtraction")).click();
         WaitPageLoad();
 
+        //本人確認
+        driver.findElement(By.xpath("//*[@id=\"dpGrid\"]/div[3]/table/tbody/tr[2]/td[5]/label/span")).click();
         WaitElementLoad(By.xpath("//button[contains(.,'確定')]"));
         driver.findElements(By.xpath("//button[contains(.,'確定')]")).get(0).click();
         WaitPageLoad();
+        WaitElementLoad(By.xpath("//button[contains(.,'閉じる')]"));
+        driver.findElements(By.xpath("//button[contains(.,'閉じる')]")).get(1).click();
+        WaitPageLoad();
+        
+        screenShot();
+        
+        //KDW003A 勤務報告書
+        driver.get(domain+"nts.uk.at.web/view/kdw/003/a/index.xhtml");
+        WaitPageLoad();
+        
+        //エラー参照ダイアログが起動しているか
+        if (driver.findElements(By.xpath("//iframe[@name='window_1']")).size() !=0) {
+            driver.switchTo().frame("window_1");
+            WaitPageLoad();
+            
+            WaitElementLoad(By.id("dialogClose"));
+            driver.findElement(By.id("dialogClose")).click();
+        }
+        
+        //翌月表示を当月に戻す
+        WaitElementLoad(By.xpath("/html/body/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div/div[1]/button"));
+        driver.findElement(By.xpath("/html/body/div[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div/div[1]/button")).click();
+        WaitElementLoad(By.id("btnExtraction"));
+        driver.findElement(By.id("btnExtraction")).click();
+        WaitPageLoad();
+        
+        //KDW004A 日別実績の確認
+        driver2.get(domain+"nts.uk.at.web/view/kdw/004/a/index.xhtml");
+        WaitPageLoad();
+        
+        //翌月表示を当月に戻す
+        driver2.findElement(By.xpath("/html/body/div[1]/div[2]/div[2]/div[3]/div/div[1]")).click();
+        WaitElementLoad(By.id("extractBtn"));
+        driver2.findElement(By.id("extractBtn")).click();
+        WaitPageLoad();
 
-        screenShotFull();
-
-    //   // go kdw003/ tháng 8 check
-    //   driver.get(domain+"nts.uk.at.web/view/kdw/003/a/index.xhtml");
-    //   WaitPageLoad();
-    //   selectItemKdw003_2("本人", "08/01(木)").click();
-    //   WaitElementLoad(By.xpath("//button[contains(.,'確定')]"));
-    //   driver.findElements(By.xpath("//button[contains(.,'確定')]")).get(0).click();
-    //   WaitPageLoad();
+        
+        //部下を選択
+        driver2.findElements(By.xpath("//a[contains(.,'004098')]")).get(0).click();
+        WaitPageLoad();
+        
+        //エラー参照ダイアログが起動しているか
+        if (driver2.findElements(By.xpath("//iframe[@name='window_1']")).size() !=0) {
+            driver2.switchTo().frame("window_1");
+            WaitPageLoad();
+            
+            WaitElementLoad(By.id("dialogClose"));
+            driver2.findElement(By.id("dialogClose")).click();
+        }
+        WaitPageLoad();
+        
+        //①上司承認をつけて登録
+        driver2.findElement(By.xpath("//*[@id=\"dpGrid\"]/div[3]/table/tbody/tr[2]/td[6]/label/span")).click();
+        WaitElementLoad(By.xpath("//button[contains(.,'確定')]"));
+        driver2.findElements(By.xpath("//button[contains(.,'確定')]")).get(0).click();
+        WaitPageLoad();
+        WaitElementLoad(By.xpath("//button[contains(.,'閉じる')]"));
+        driver2.findElements(By.xpath("//button[contains(.,'閉じる')]")).get(1).click();
+        WaitPageLoad();
+        
+        //②本人確認を外して登録
+        driver.findElement(By.xpath("//*[@id=\"dpGrid\"]/div[3]/table/tbody/tr[2]/td[5]/label/span")).click();
+        WaitElementLoad(By.xpath("//button[contains(.,'確定')]"));
+        driver.findElements(By.xpath("//button[contains(.,'確定')]")).get(0).click();
+        WaitPageLoad();
+        WaitElementLoad(By.xpath("//button[contains(.,'閉じる')]"));
+        driver.findElements(By.xpath("//button[contains(.,'閉じる')]")).get(1).click();
+        WaitPageLoad();
+        
+        screenShot();
 
         this.uploadTestLink(1228, 302);
     }
