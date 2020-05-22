@@ -43,20 +43,15 @@ public class Scenario1Case1 extends Kdw003Common {
         extractData(inputStartDate, inputEndDate);
         WaitPageLoad();
 
-        if(selectItemKdw003_1("本人", "05/12(火)").isSelected()){
+        if(!selectItemKdw003_1("本人", "05/12(火)").isSelected()){
             selectItemKdw003_1("本人", "05/12(火)").click();
         }
-
-        if(selectItemKdw003_1("本人", "05/13(水)").isSelected()){
+        if(!selectItemKdw003_1("本人", "05/13(水)").isSelected()){
             selectItemKdw003_1("本人", "05/13(水)").click();
         }
-
-        if(selectItemKdw003_1("本人", "05/14(木)").isSelected()){
+        if(!selectItemKdw003_1("本人", "05/14(木)").isSelected()){
             selectItemKdw003_1("本人", "05/14(木)").click();
         }
-
-        screenShot();
-
         WaitElementLoad(By.className("proceed"));
         driver.findElement(By.className("proceed")).click();
 

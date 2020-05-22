@@ -1,22 +1,19 @@
 
 package ktg029;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
+import java.util.Calendar;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 
-import common.TestRoot;
+import kdw003.Kdw003Common;
 
 
-public class Scenario1Case17 extends TestRoot {
+public class Scenario1Case17 extends Kdw003Common {
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -29,44 +26,25 @@ public class Scenario1Case17 extends TestRoot {
 
 // 1.17
         // login申請者
-        driver.get(domain + "nts.uk.com.web/view/ccg/007/d/index.xhtml");
-        WaitPageLoad();
-        driver.findElement(By.id("company-code-select")).click();
-        WaitElementLoad(By.xpath("//li[@data-value='0001']"));
-        driver.findElement(By.xpath("//li[@data-value='0001']")).click();
-        driver.findElement(By.id("password-input")).clear();
-        driver.findElement(By.id("password-input")).sendKeys("0");
-        driver.findElement(By.id("employee-code-inp")).clear();
-        driver.findElement(By.id("employee-code-inp")).sendKeys("000001");
-        File screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image2.png"));
-        driver.findElement(By.id("login-btn")).click();
-        WaitPageLoad();
+        login("000001", "0");
 
         // Setting screen kmk012
-        driver.get(domain + "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-
-        // Clear Input Month
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).clear();
-
-        // Input into Month
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).sendKeys("2019/11");
-        driver.findElement(By.id("contents-right")).click();
-
-        // Click button Save
-        WaitElementLoad(By.id("btn_save"));
-        driver.findElement(By.id("btn_save")).click();
-
-        driver.get(domain + "nts.uk.com.web/view/ccg/008/a/index.xhtml");
-        WaitPageLoad();
+        setProcessYearMonth(1, "2020/05");
 
         // Go to screen cps001
         driver.get(domain + "nts.uk.com.web/view/cps/001/a/index.xhtml");
         WaitPageLoad();
-         
+
+        driver.findElement(By.id("ccg001-btn-search-drawer")).click();
+        WaitElementLoad(By.xpath("//a[contains(.,'入力検索')]"));
+        driver.findElement(By.xpath("//a[contains(.,'入力検索')]")).click();
+        driver.findElement(By.id("ccg001-input-code")).clear();
+        driver.findElement(By.id("ccg001-input-code")).sendKeys("005517");
+        driver.findElements(By.xpath("//button[contains(@class,'proceed caret-bottom pull-right')]")).get(0).click();
+        WaitPageLoad();
+        driver.findElements(By.xpath("//div[@id='ccg001-btn-KCP005-apply']/div")).get(1).click();
+        WaitPageLoad();
+
         WaitElementLoad(By.xpath("//*[@id='lefttabs']/ul/li[2]"));
         driver.findElement(By.xpath("//*[@id='lefttabs']/ul/li[2]")).click();
         WaitPageLoad();
@@ -74,31 +52,82 @@ public class Scenario1Case17 extends TestRoot {
         WaitElementLoad(By.xpath("//*[@class='ui-igcombo-wrapper ntsControl']"));
         driver.findElement(By.xpath("//*[@class='ui-igcombo-wrapper ntsControl']")).click();
         js.executeScript("$('.ui-igcombo-list').scrollTop($('.ui-igcombo-list')[0].scrollHeight)");
+        WaitPageLoad();
         driver.findElement(By.xpath("//li[contains(.,'年間褒賞休暇情報')]")).click();
         WaitPageLoad();
 
+        driver.findElement(By.id("COM1000000000000000CS00058IS00628")).click();
+        driver.switchTo().frame(0);
+        WaitPageLoad();
+        driver.findElement(By.id("idDeadline")).click();
+        driver.findElement(By.id("idDeadline")).clear();
+        driver.findElement(By.id("idDeadline")).sendKeys("2021/03/31");
+        driver.findElement(By.id("idDateGrantInp")).click();
+        driver.findElement(By.id("idDateGrantInp")).clear();
+        driver.findElement(By.id("idDateGrantInp")).sendKeys("2020/04/01");
+        driver.findElement(By.id("dayNumberOfGrants")).click();
+        driver.findElement(By.id("dayNumberOfGrants")).clear();
+        driver.findElement(By.id("dayNumberOfGrants")).sendKeys("1.0");
+        driver.findElement(By.id("dayNumberOfUse")).click();
+        driver.findElement(By.id("dayNumberOfUse")).clear();
+        driver.findElement(By.id("dayNumberOfUse")).sendKeys("0.0");
+        driver.findElement(By.id("dayNumberOver")).click();
+        driver.findElement(By.id("dayNumberOver")).clear();
+        driver.findElement(By.id("dayNumberOver")).sendKeys("0.0");
+        driver.findElement(By.id("dayNumberOfReam")).click();
+        driver.findElement(By.id("dayNumberOfReam")).clear();
+        driver.findElement(By.id("dayNumberOfReam")).sendKeys("1.0");
+
+        WaitElementLoad(By.className("proceed"));
+        driver.findElement(By.className("proceed")).click();
+        WaitPageLoad();
+
+        driver.switchTo().defaultContent();
+        driver.findElement(By.xpath("//button[@class='large']")).click();
+        WaitPageLoad();
+        driver.switchTo().frame(0);
+        driver.findElement(By.xpath("//div[@id='functions-area']/button[4]")).click();
+
         // Tacke a photo
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image3.png"));
+        screenShot();
 
         // login申請者
-        driver.get(domain + "nts.uk.com.web/view/ccg/007/d/index.xhtml");
+        login("005517", "Jinjikoi5");
+
         WaitPageLoad();
-        driver.findElement(By.id("company-code-select")).click();
-        WaitElementLoad(By.xpath("//li[@data-value='0001']"));
-        driver.findElement(By.xpath("//li[@data-value='0001']")).click();
-        driver.findElement(By.id("password-input")).clear();
-        driver.findElement(By.id("password-input")).sendKeys("Jinjikoi5");
-        driver.findElement(By.id("employee-code-inp")).clear();
-        driver.findElement(By.id("employee-code-inp")).sendKeys("005517");
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image4.png"));
-        driver.findElement(By.id("login-btn")).click();
+        js.executeScript("$('.placement-wraper').scrollTop($('.placement-wraper')[1].scrollHeight)");
+        WaitPageLoad();
+        WaitElementLoad(By.xpath("//span[contains(.,'年間褒賞休暇')]"));
+        screenShot();
+
+        driver.get(domain + "nts.uk.at.web/view/kaf/006/a/index.xhtml");
+        WaitPageLoad();
+        Calendar inputdate = Calendar.getInstance();
+        inputdate.clear();
+        inputdate.set(2020, 05, 26);
+        driver.findElement(By.id("inputdate")).sendKeys(df1.format(inputdate.getTime()));
+        driver.findElement(By.xpath("//body")).click();
+
+        WaitPageLoad();
+        WaitElementLoad(By.xpath("//div[@id ='hdType']/button[2]"));
+        driver.findElement(By.xpath("//div[@id ='hdType']/button[2]")).click();
+        driver.findElement(By.xpath("//*[@id = 'workTypes']/.//*[@class ='ui-igcombo-buttonicon']")).click();
+        js.executeScript("$('.ui-igcombo-list').scrollTop($('.ui-igcombo-list')[0].scrollHeight)");
+        WaitPageLoad();
+        driver.findElement(By.xpath("//li[@data-value='131']")).click();
+        WaitPageLoad();
+        driver.findElement(By.xpath("//button[@class='proceed']")).click();
         WaitPageLoad();
 
         // Tacke a photo
-        screenshotFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshotFile, new File(screenshotPath + "/image5.png"));
+        screenShot();
+
+        driver.get(domain + "nts.uk.com.web/view/ccg/008/a/index.xhtml");
+        WaitPageLoad();
+        js.executeScript("$('.placement-wraper').scrollTop($('.placement-wraper')[1].scrollHeight)");
+        WaitPageLoad();
+        WaitElementLoad(By.xpath("//span[contains(.,'年間褒賞休暇')]"));
+        screenShot();
 
         WaitPageLoad();
         this.uploadTestLink(566, 139);

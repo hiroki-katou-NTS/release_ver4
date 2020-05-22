@@ -181,7 +181,7 @@ public class Kdw003Common extends TestRoot {
       WaitElementLoad(By.xpath("//button[@class ='large']"));
       driver.findElement(By.xpath("//button[@class ='large']")).click();
 
-      screenShotFull();
+      screenShot();
 
     }
 
