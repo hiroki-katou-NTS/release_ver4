@@ -1,11 +1,15 @@
 package cmm044;
 
-import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Calendar;
 
-import org.openqa.selenium.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
 
 import common.TestRoot;
 
@@ -86,7 +90,7 @@ public class Scenario1Case4 extends TestRoot {
         WaitPageLoad();
         screenShot();
 
-        //this.uploadTestLink(430, 97);
+        this.uploadTestLink(430, 97);
 
     }
 

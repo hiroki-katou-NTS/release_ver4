@@ -1,8 +1,12 @@
 package kdw003;
 
-import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-import org.openqa.selenium.*;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 public class Scenario11Case6 extends Kdw003Common {
     private Integer i = 1;
@@ -17,23 +21,15 @@ public class Scenario11Case6 extends Kdw003Common {
     public void test() throws Exception {
         // login申請者
 
-        login("016209", "Jinjikoi5");
+        login("091636", "Jinjikoi5");
 
         //kmk012 change closure 1
-        driver.get(domain+ "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-        driver.findElement(By.id("inpMonth")).click();
-        driver.findElement(By.id("inpMonth")).clear();
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).sendKeys("2019/11");
-        driver.findElement(By.xpath("//body")).click();
-        WaitElementLoad(By.id("btn_save"));
-        driver.findElement(By.id("btn_save")).click();
+        setProcessYearMonth(1, "2020/05");
 
         showScreen003();
-        WaitPageLoad();
         js.executeScript("$('.mgrid-free').scrollLeft(2000)");
         js.executeScript("$('.mgrid-free').scrollTop(0)");
+
         WaitPageLoad();
         screenShot();
 
@@ -49,12 +45,12 @@ public class Scenario11Case6 extends Kdw003Common {
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]"))
                 .clear();
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]"))
-                .sendKeys("2019/11/01");
+                .sendKeys("2020/05/01");
 
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsEndDate')]//input[1]"))
                 .clear();
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsEndDate')]//input[1]"))
-                .sendKeys("2019/11/30");
+                .sendKeys("2020/05/31");
         WaitPageLoad();
         driver.findElement(By.xpath("//button[@id = 'btnExtraction']")).click();
 

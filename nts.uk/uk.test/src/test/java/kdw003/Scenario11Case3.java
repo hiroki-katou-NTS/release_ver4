@@ -1,10 +1,14 @@
 package kdw003;
 
-import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Calendar;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class Scenario11Case3 extends Kdw003Common {
     private Integer i = 1;
@@ -19,18 +23,20 @@ public class Scenario11Case3 extends Kdw003Common {
     public void test() throws Exception {
         // login申請者
 
-        login("016209", "Jinjikoi5");
+        login("091636", "Jinjikoi5");
+
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DATE, -1);
+
+        Calendar startdate = Calendar.getInstance();
+        startdate.set(yesterday.get(Calendar.YEAR), yesterday.get(Calendar.MONTH), 1);
+
+        Calendar enddate = Calendar.getInstance();
+        enddate.set(yesterday.get(Calendar.YEAR), yesterday.get(Calendar.MONTH) + 1, 1);
+        enddate.add(Calendar.DATE, -1);
 
         //kmk012 change closure 1
-        driver.get(domain+ "nts.uk.at.web/view/kmk/012/a/index.xhtml");
-        WaitPageLoad();
-        driver.findElement(By.id("inpMonth")).click();
-        driver.findElement(By.id("inpMonth")).clear();
-        WaitElementLoad(By.id("inpMonth"));
-        driver.findElement(By.id("inpMonth")).sendKeys("2019/11");
-        driver.findElement(By.xpath("//body")).click();
-        WaitElementLoad(By.id("btn_save"));
-        driver.findElement(By.id("btn_save")).click();
+        setProcessYearMonth(1, df3.format(yesterday.getTime()));
 
         driver.get(domain + "nts.uk.at.web/view/kdw/003/a/index.xhtml");
         WaitPageLoad();
@@ -38,21 +44,25 @@ public class Scenario11Case3 extends Kdw003Common {
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]"))
                 .clear();
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]"))
-                .sendKeys("2019/11/01");
+        		.sendKeys(df1.format(startdate.getTime()));
 
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsEndDate')]//input[1]"))
                 .clear();
         driver.findElement(By.xpath("//div[@id = 'daterangepicker']//div[contains(@class,'ntsEndDate')]//input[1]"))
-                .sendKeys("2019/11/30");
+        		.sendKeys(df1.format(enddate.getTime()));
         WaitPageLoad();
         driver.findElement(By.xpath("//button[@id = 'btnExtraction']")).click();
         dialog("window_" + i);
+
+        if((yesterday.get(Calendar.DAY_OF_MONTH)  + 1) >= 15) {
+        	js.executeScript("$('.mgrid-free').scrollTop(400)");
+        }
         js.executeScript("$('.mgrid-free').scrollLeft(2000)");
         WaitPageLoad();
         screenShot();
 
-        if (!checkedBox(2, 0)) {
-            clickCheckBox(2, 0);
+        if (!checkedBox(yesterday.get(Calendar.DAY_OF_MONTH)  + 1, 0)) {
+            clickCheckBox(yesterday.get(Calendar.DAY_OF_MONTH)  + 1, 0);
             driver.findElement(By.xpath("//div[@id='function-content']//button[1]")).click();
             WaitPageLoad();
             screenShot();

@@ -22,21 +22,14 @@ public class Kdw003Common extends TestRoot {
 
     public void setValueGrid(int rowNumber, int columnNumber, String value) {
         if (value.isEmpty()) {
-            driver.findElements(
-                    By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]"))
-                    .get(0).click();
-            driver.findElements(
-                    By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]"))
-                    .get(0).click();
-            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td["
-                    + columnNumber + "]" + "/.//input")).get(0).clear();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).click();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).click();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]" + "/.//input")).get(0).clear();
         } else {
-            driver.findElements(
-                    By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]"))
-                    .get(0).click();
-            driver.findElements(
-                    By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]"))
-                    .get(0).sendKeys(value);
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).click();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).click();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]" + "/.//input")).get(0).clear();
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).sendKeys(value);
         }
         driver.findElement(By.xpath("//body")).click();
     }
@@ -69,6 +62,7 @@ public class Kdw003Common extends TestRoot {
      * rowNumber is row number of checkbox + 1 columnNumber 0 -> 1
      */
     public void clickCheckBox(int rowNumber, int columnNumber) {
+    	WaitElementLoad(By.xpath("//table[@class ='mgrid-fixed-table']/tbody/tr[" + rowNumber + "]/.//span[@class = 'box']"));
         driver.findElements(
                 By.xpath("//table[@class ='mgrid-fixed-table']/tbody/tr[" + rowNumber + "]/.//span[@class = 'box']"))
                 .get(columnNumber).click();

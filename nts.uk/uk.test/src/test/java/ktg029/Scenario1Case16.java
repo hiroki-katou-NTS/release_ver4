@@ -50,8 +50,10 @@ public class Scenario1Case16 extends Kdw003Common {
 
         WaitElementLoad(By.xpath("//*[@class='ui-igcombo-wrapper ntsControl']"));
         driver.findElement(By.xpath("//*[@class='ui-igcombo-wrapper ntsControl']")).click();
+        WaitPageLoad();
         js.executeScript("$('.ui-igcombo-list').scrollTop($('.ui-igcombo-list')[0].scrollHeight)");
         WaitPageLoad();
+        WaitElementLoad(By.xpath("//li[contains(.,'人間ドック情報')]"));
         driver.findElement(By.xpath("//li[contains(.,'人間ドック情報')]")).click();
         WaitPageLoad();
 
@@ -90,7 +92,7 @@ public class Scenario1Case16 extends Kdw003Common {
         WaitPageLoad();
         js.executeScript("$('.placement-wraper').scrollTop($('.placement-wraper')[1].scrollHeight)");
         WaitPageLoad();
-        WaitElementLoad(By.xpath("//span[contains(.,'人間ドック')]"));
+        Thread.sleep(30000);
         screenShot();
 
         driver.get(domain + "nts.uk.at.web/view/kaf/006/a/index.xhtml");
@@ -118,7 +120,7 @@ public class Scenario1Case16 extends Kdw003Common {
         WaitPageLoad();
         js.executeScript("$('.placement-wraper').scrollTop($('.placement-wraper')[1].scrollHeight)");
         WaitPageLoad();
-        WaitElementLoad(By.xpath("//span[contains(.,'人間ドック')]"));
+        Thread.sleep(30000);
         screenShot();
 
         this.uploadTestLink(564, 138);
@@ -132,4 +134,5 @@ public class Scenario1Case16 extends Kdw003Common {
             fail(verificationErrorString);
         }
     }
+
 }

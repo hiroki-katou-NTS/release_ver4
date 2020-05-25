@@ -51,8 +51,10 @@ public class Scenario1Case17 extends Kdw003Common {
 
         WaitElementLoad(By.xpath("//*[@class='ui-igcombo-wrapper ntsControl']"));
         driver.findElement(By.xpath("//*[@class='ui-igcombo-wrapper ntsControl']")).click();
+        WaitPageLoad();
         js.executeScript("$('.ui-igcombo-list').scrollTop($('.ui-igcombo-list')[0].scrollHeight)");
         WaitPageLoad();
+        WaitElementLoad(By.xpath("//li[contains(.,'年間褒賞休暇情報')]"));
         driver.findElement(By.xpath("//li[contains(.,'年間褒賞休暇情報')]")).click();
         WaitPageLoad();
 
@@ -97,7 +99,7 @@ public class Scenario1Case17 extends Kdw003Common {
         WaitPageLoad();
         js.executeScript("$('.placement-wraper').scrollTop($('.placement-wraper')[1].scrollHeight)");
         WaitPageLoad();
-        WaitElementLoad(By.xpath("//span[contains(.,'年間褒賞休暇')]"));
+        Thread.sleep(30000);
         screenShot();
 
         driver.get(domain + "nts.uk.at.web/view/kaf/006/a/index.xhtml");
@@ -126,7 +128,8 @@ public class Scenario1Case17 extends Kdw003Common {
         WaitPageLoad();
         js.executeScript("$('.placement-wraper').scrollTop($('.placement-wraper')[1].scrollHeight)");
         WaitPageLoad();
-        WaitElementLoad(By.xpath("//span[contains(.,'年間褒賞休暇')]"));
+
+        Thread.sleep(30000);
         screenShot();
 
         WaitPageLoad();
