@@ -29,7 +29,7 @@ public class Kdw003Common extends TestRoot {
             driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).click();
             driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).click();
             driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]" + "/.//input")).get(0).clear();
-            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]")).get(0).sendKeys(value);
+            driver.findElements(By.xpath(".//*[@class=\"mgrid-free\"]/table/tbody/tr[" + rowNumber + "]/td[" + columnNumber + "]/.//input")).get(0).sendKeys(value);
         }
         driver.findElement(By.xpath("//body")).click();
     }

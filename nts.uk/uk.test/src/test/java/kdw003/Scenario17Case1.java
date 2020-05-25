@@ -22,8 +22,8 @@ public class Scenario17Case1 extends Kdw003Common {
     @Test
     public void test() throws Exception {
 
-         //login 091636/Jinjikoi5
-         login("091636", "Jinjikoi5");
+         //login 営業職
+         login("012446", "Jinjikoi5");
 
         // change closure 1
          setProcessYearMonth(1, "2020/05");
@@ -57,123 +57,125 @@ public class Scenario17Case1 extends Kdw003Common {
         driver.get(domain+"nts.uk.at.web/view/kdw/003/a/index.xhtml");
         WaitPageLoad();
 
-        setValueGrid(14, 1, "009");
+        selectItemKdw003_2("勤務種類", "05/13(水)").click();
+        driver.switchTo().frame("window_1");
         WaitPageLoad();
-        setValueGrid(15, 1, "009");
-        WaitPageLoad();
-        setValueGrid(16, 1, "009");
-        WaitPageLoad();
-        setValueGrid(19, 1, "009");
-        WaitPageLoad();
-        setValueGrid(20, 1, "009");
+        driver.findElement(By.xpath("//body")).click();
+        WaitElementLoad(By.xpath("//td[contains(.,'008')]"));
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        WaitElementLoad(By.id("btnSetting"));
+        driver.findElements(By.id("btnSetting")).get(0).click();
         WaitPageLoad();
 
+        selectItemKdw003_2("勤務種類", "05/14(木)").click();
+        driver.switchTo().frame("window_2");
+        WaitPageLoad();
+        driver.findElement(By.xpath("//body")).click();
+        WaitElementLoad(By.xpath("//td[contains(.,'008')]"));
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        WaitElementLoad(By.id("btnSetting"));
+        driver.findElements(By.id("btnSetting")).get(0).click();
+        WaitPageLoad();
+
+        selectItemKdw003_2("勤務種類", "05/15(金)").click();
+        driver.switchTo().frame("window_3");
+        WaitPageLoad();
+        driver.findElement(By.xpath("//body")).click();
+        WaitElementLoad(By.xpath("//td[contains(.,'008')]"));
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        WaitElementLoad(By.id("btnSetting"));
+        driver.findElements(By.id("btnSetting")).get(0).click();
+        WaitPageLoad();
+
+        selectItemKdw003_2("勤務種類", "05/18(月)").click();
+        driver.switchTo().frame("window_4");
+        WaitPageLoad();
+        driver.findElement(By.xpath("//body")).click();
+        WaitElementLoad(By.xpath("//td[contains(.,'008')]"));
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        WaitElementLoad(By.id("btnSetting"));
+        driver.findElements(By.id("btnSetting")).get(0).click();
+        WaitPageLoad();
+
+        selectItemKdw003_2("勤務種類", "05/19(火)").click();
+        driver.switchTo().frame("window_5");
+        WaitPageLoad();
+        driver.findElement(By.xpath("//body")).click();
+        WaitElementLoad(By.xpath("//td[contains(.,'008')]"));
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        WaitElementLoad(By.id("btnSetting"));
+        driver.findElements(By.id("btnSetting")).get(0).click();
+        WaitPageLoad();
+
+//        setValueGrid(14, 1, "008");
+//        WaitPageLoad();
+//        setValueGrid(15, 1, "008");
+//        WaitPageLoad();
+//        setValueGrid(16, 1, "008");
+//        WaitPageLoad();
+//        setValueGrid(19, 1, "008");
+//        WaitPageLoad();
+//        setValueGrid(20, 1, "008");
+//        WaitPageLoad();
+
         js.executeScript("$('.mgrid-free').scrollTop(400)");
-        setValueGrid(27, 1, "009");
+
+        selectItemKdw003_2("勤務種類", "05/26(火)").click();
+        driver.switchTo().frame("window_6");
         WaitPageLoad();
-        setValueGrid(28, 1, "009");
+        driver.findElement(By.xpath("//body")).click();
+        WaitElementLoad(By.xpath("//td[contains(.,'008')]"));
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        WaitElementLoad(By.id("btnSetting"));
+        driver.findElements(By.id("btnSetting")).get(0).click();
         WaitPageLoad();
-        setValueGrid(29, 1, "009");
+
+        selectItemKdw003_2("勤務種類", "05/27(水)").click();
+        driver.switchTo().frame("window_7");
         WaitPageLoad();
-        setValueGrid(30, 1, "009");
+        driver.findElement(By.xpath("//body")).click();
+        WaitElementLoad(By.xpath("//td[contains(.,'008')]"));
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        WaitElementLoad(By.id("btnSetting"));
+        driver.findElements(By.id("btnSetting")).get(0).click();
         WaitPageLoad();
-//        selectItemKdw003_2("勤務種類", "05/13(水)").click();
+
+        selectItemKdw003_2("勤務種類", "05/28(木)").click();
+        driver.switchTo().frame("window_8");
+        WaitPageLoad();
+        driver.findElement(By.xpath("//body")).click();
+        WaitElementLoad(By.xpath("//td[contains(.,'008')]"));
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        WaitElementLoad(By.id("btnSetting"));
+        driver.findElements(By.id("btnSetting")).get(0).click();
+        WaitPageLoad();
+
+        selectItemKdw003_2("勤務種類", "05/29(金)").click();
+        driver.switchTo().frame("window_9");
+        WaitPageLoad();
+        driver.findElement(By.xpath("//body")).click();
+        WaitElementLoad(By.xpath("//td[contains(.,'008')]"));
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        driver.findElements(By.xpath("//td[contains(.,'008')]")).get(1).click();
+        WaitElementLoad(By.id("btnSetting"));
+        driver.findElements(By.id("btnSetting")).get(0).click();
+        WaitPageLoad();
+
+//        setValueGrid(27, 1, "008");
 //        WaitPageLoad();
-//        driver.switchTo().frame("window_1");
-//        driver.findElement(By.xpath("//body")).click();
-//        WaitElementLoad(By.xpath("//td[contains(.,'009')]"));
-//        driver.findElements(By.xpath("//td[contains(.,'009')]")).get(1).click();
-//        driver.findElements(By.xpath("//td[contains(.,'009')]")).get(1).click();
-//        WaitElementLoad(By.id("btnSetting"));
-//        driver.findElements(By.id("btnSetting")).get(0).click();
+//        setValueGrid(28, 1, "008");
 //        WaitPageLoad();
-//
-//        selectItemKdw003_2("勤務種類", "05/14(木)").click();
+//        setValueGrid(29, 1, "008");
 //        WaitPageLoad();
-//        driver.switchTo().frame("window_2");
-//        driver.findElement(By.xpath("//body")).click();
-//        WaitElementLoad(By.xpath("//td[contains(.,'009')]"));
-//        driver.findElements(By.xpath("//td[contains(.,'009')]")).get(1).click();
-//        driver.findElements(By.xpath("//td[contains(.,'009')]")).get(1).click();
-//        WaitElementLoad(By.id("btnSetting"));
-//        driver.findElements(By.id("btnSetting")).get(0).click();
-//        WaitPageLoad();
-//
-//        selectItemKdw003_2("勤務種類", "05/15(金)").click();
-//        WaitPageLoad();
-//        driver.switchTo().frame("window_3");
-//        driver.findElement(By.xpath("//body")).click();
-//        WaitElementLoad(By.xpath("//td[contains(.,'009')]"));
-//        driver.findElements(By.xpath("//td[contains(.,'009')]")).get(1).click();
-//        driver.findElements(By.xpath("//td[contains(.,'009')]")).get(1).click();
-//        WaitElementLoad(By.id("btnSetting"));
-//        driver.findElements(By.id("btnSetting")).get(0).click();
-//        WaitPageLoad();
-//
-//        selectItemKdw003_2("勤務種類", "05/18(月)").click();
-//        WaitPageLoad();
-//        driver.switchTo().frame("window_4");
-//        driver.findElement(By.xpath("//body")).click();
-//        WaitElementLoad(By.xpath("//td[contains(.,'009')]"));
-//        driver.findElements(By.xpath("//td[contains(.,'009')]")).get(1).click();
-//        driver.findElements(By.xpath("//td[contains(.,'009')]")).get(1).click();
-//        WaitElementLoad(By.id("btnSetting"));
-//         driver.findElements(By.id("btnSetting")).get(0).click();
-//        WaitPageLoad();
-//
-//        selectItemKdw003_2("勤務種類", "05/19(火)").click();
-//        WaitPageLoad();
-//        driver.switchTo().frame("window_5");
-//        driver.findElement(By.xpath("//body")).click();
-//        WaitElementLoad(By.xpath("//td[contains(.,'009')]"));
-//        driver.findElements(By.xpath("//td[contains(.,'009')]")).get(1).click();
-//        driver.findElements(By.xpath("//td[contains(.,'009')]")).get(1).click();
-//        WaitElementLoad(By.id("btnSetting"));
-//        driver.findElements(By.id("btnSetting")).get(0).click();
-//        WaitPageLoad();
-//
-//        selectItemKdw003_2("勤務種類", "05/26(火)").click();
-//        WaitPageLoad();
-//        driver.switchTo().frame("window_6");
-//        driver.findElement(By.xpath("//body")).click();
-//        WaitElementLoad(By.xpath("//td[contains(.,'090')]"));
-//        driver.findElements(By.xpath("//td[contains(.,'090')]")).get(1).click();
-//        driver.findElements(By.xpath("//td[contains(.,'090')]")).get(1).click();
-//        WaitElementLoad(By.id("btnSetting"));
-//        driver.findElements(By.id("btnSetting")).get(0).click();
-//        WaitPageLoad();
-//
-//        selectItemKdw003_2("勤務種類", "05/27(水)").click();
-//        WaitPageLoad();
-//        driver.switchTo().frame("window_7");
-//        driver.findElement(By.xpath("//body")).click();
-//        WaitElementLoad(By.xpath("//td[contains(.,'090')]"));
-//        driver.findElements(By.xpath("//td[contains(.,'090')]")).get(1).click();
-//        driver.findElements(By.xpath("//td[contains(.,'090')]")).get(1).click();
-//        WaitElementLoad(By.id("btnSetting"));
-//        driver.findElements(By.id("btnSetting")).get(0).click();
-//        WaitPageLoad();
-//
-//        selectItemKdw003_2("勤務種類", "05/28(木)").click();
-//        WaitPageLoad();
-//        driver.switchTo().frame("window_8");
-//        driver.findElement(By.xpath("//body")).click();
-//        WaitElementLoad(By.xpath("//td[contains(.,'090')]"));
-//        driver.findElements(By.xpath("//td[contains(.,'090')]")).get(1).click();
-//        driver.findElements(By.xpath("//td[contains(.,'090')]")).get(1).click();
-//        WaitElementLoad(By.id("btnSetting"));
-//        driver.findElements(By.id("btnSetting")).get(0).click();
-//        WaitPageLoad();
-//
-//        selectItemKdw003_2("勤務種類", "05/29(金)").click();
-//        WaitPageLoad();
-//        driver.switchTo().frame("window_9");
-//        driver.findElement(By.xpath("//body")).click();
-//        WaitElementLoad(By.xpath("//td[contains(.,'090')]"));
-//        driver.findElements(By.xpath("//td[contains(.,'090')]")).get(1).click();
-//        driver.findElements(By.xpath("//td[contains(.,'090')]")).get(1).click();
-//        WaitElementLoad(By.id("btnSetting"));
-//        driver.findElements(By.id("btnSetting")).get(0).click();
+//        setValueGrid(30, 1, "008");
 //        WaitPageLoad();
 
         WaitElementLoad(By.xpath("//button[contains(.,'確定')]"));
@@ -183,7 +185,7 @@ public class Scenario17Case1 extends Kdw003Common {
         driver.findElements(By.xpath("//button[contains(.,'閉じる')]")).get(1).click();
         WaitElementLoad(By.xpath("//button[contains(.,'エラー参照')]"));
         driver.findElement(By.xpath("//button[contains(.,'エラー参照')]")).click();
-        driver.switchTo().frame("window_7");
+        driver.switchTo().frame("window_10");
         // JavascriptExecutor js = (JavascriptExecutor)driver;
         Thread.sleep(1000);
         js.executeScript("$('.ui-widget-content').scrollTop(1000)");
