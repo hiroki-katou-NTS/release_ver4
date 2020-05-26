@@ -49,9 +49,9 @@ public class JpaRoleByRoleTiesRepository extends JpaRepository implements  RoleB
 		String sql = 
 				"select * from SACMT_ROLE_BY_ROLE_TIES with(index(SACMP_ROLE_BY_ROLE_TIES)) " +
 				"where ROLE_ID = @roleId " +
-				"and CID = @companyId";
+				"and (CID = @companyId OR CID = '000000000000-0000')";
 		
-		return new NtsStatement(sql, this.jdbcProxy())
+		Optional<RoleByRoleTies> opRoleByRoleTies = new NtsStatement(sql, this.jdbcProxy())
 				.paramString("roleId", roleId)
 				.paramString("companyId", companyId)
 				.getSingle(rec -> {
@@ -60,6 +60,8 @@ public class JpaRoleByRoleTiesRepository extends JpaRepository implements  RoleB
 							new WebMenuCode(rec.getString("WEB_MENU_CD")), 
 							companyId);
 				});
+		
+		return opRoleByRoleTies;
 	}
 
 
