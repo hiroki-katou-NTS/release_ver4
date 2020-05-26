@@ -329,7 +329,7 @@ public class AggregateMonthlyRecordServiceProc {
 		
 		// 計算に必要なデータを準備する
 		this.monthlyCalculatingDailys = MonthlyCalculatingDailys.loadData(
-				employeeId, loadPeriod, dailyWorksOpt, this.repositories);
+				employeeId, loadPeriod, dailyWorksOpt, this.repositories, employeeSets);
 		
 		// 集計前の月別実績データを確認する
 		this.monthlyOldDatas = MonthlyOldDatas.loadData(
