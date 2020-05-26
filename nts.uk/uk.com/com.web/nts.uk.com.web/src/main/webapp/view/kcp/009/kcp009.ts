@@ -271,7 +271,7 @@ module kcp009.viewmodel {
                 });
 
                 // set z-index higher than CCG001
-
+                $('#item-list-' + self.prefix()).css('z-index', 998);
                 self.initKcp009Event();
 
                 // Enter keypress
