@@ -617,7 +617,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql = sql.replaceAll("sysDate", GeneralDate.today().toString("yyyy-MM-dd"));
 		sql = sql.replaceAll("rootType", String.valueOf(rootType.value));
 		return new NtsStatement(sql, this.jdbcProxy())
-				.getList(rec -> rec.getString("EMPLOYEE_ID"));
+				.getList(rec -> rec.getString("EMPLOYEE_ID")).stream().distinct().collect(Collectors.toList());
 	}
 
 }
