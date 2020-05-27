@@ -56,9 +56,9 @@ public class JpaRoleByRoleTiesRepository extends JpaRepository implements  RoleB
 				.paramString("companyId", companyId)
 				.getSingle(rec -> {
 					return new RoleByRoleTies(
-							roleId, 
+							rec.getString("ROLE_ID"), 
 							new WebMenuCode(rec.getString("WEB_MENU_CD")), 
-							companyId);
+							rec.getString("CID"));
 				});
 		
 		return opRoleByRoleTies;
