@@ -1,14 +1,15 @@
 package nts.uk.ctx.sys.portal.infra.repository.webmenu;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 
+import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
-import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
-import nts.arc.layer.infra.data.jdbc.NtsStatement;
+import nts.arc.layer.infra.data.query.TypedQueryWrapper;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.sys.portal.dom.webmenu.MenuBar;
 import nts.uk.ctx.sys.portal.dom.webmenu.TitleBar;
@@ -68,132 +69,27 @@ public class JpaWebMenuRepository extends JpaRepository implements WebMenuReposi
 
 	@Override
 	public Optional<WebMenu> find(String companyId, String webMenuCode) {
-		String sql = 
-				"select a.CID, a.WEB_MENU_CD, a.WEB_MENU_NAME, a.DEFAULT_MENU, " +
-				"b.MENU_BAR_ID, b.MENU_BAR_NAME, b.SELECTED_ATR, b.SYSTEM, b.MENU_CLS, b.CODE, b.BACKGROUND_COLOR, b.TEXT_COLOR, b.DISPLAY_ORDER, " +
-				"c.TITLE_BAR_ID, c.TITLE_BAR_NAME, c.BACKGROUND_COLOR, c.IMAGE_FILE, c.TEXT_COLOR, c.TITLE_MENU_ATR, c.TITLE_MENU_CD, c.DISPLAY_ORDER, " +
-				"d.DISPLAY_ORDER, d.CODE, d.MENU_CLS, d.SYSTEM " +
-				"from CCGST_WEB_MENU a " +
-				"left join CCGST_MENU_BAR b on a.CID = b.CID and a.WEB_MENU_CD = b.WEB_MENU_CD " +
-				"left join CCGST_TITLE_BAR c on b.CID = c.CID and b.WEB_MENU_CD = c.WEB_MENU_CD and b.MENU_BAR_ID = c.MENU_BAR_ID " +
-				"left join CCGST_TREE_MENU d on c.CID = d.CID and c.WEB_MENU_CD = d.WEB_MENU_CD and c.MENU_BAR_ID = d.MENU_BAR_ID and c.TITLE_BAR_ID = d.TITLE_BAR_ID " +
-				"where a.CID = @companyId and a.WEB_MENU_CD = @code";
-		
-		List<Object[]> objectLst = new NtsStatement(sql, this.jdbcProxy())
-				.paramString("companyId", companyId)
-				.paramString("code", webMenuCode)
-				.getList(rec -> toObject(rec));
-		
-		List<WebMenu> totalTimesLst = convertToDomainLst(objectLst);
-			
-		if(CollectionUtil.isEmpty(totalTimesLst)) {
-			return Optional.empty();
-		}
-		return Optional.of(totalTimesLst.get(0));
+		CcgstWebMenuPK key = new CcgstWebMenuPK(companyId, webMenuCode);
+		return this.queryProxy().find(key, CcgstWebMenu.class).map(wm -> toDomain(companyId, wm));
 	}
 
 	@Override
 	public List<WebMenu> find(String companyId, List<String> webMenuCodes) {
+		StringBuilder queryStr = new StringBuilder(SEL_1);
 		if (webMenuCodes == null)
 			return null;
+		queryStr.append(" AND a.ccgstWebMenuPK.webMenuCd IN :codes");
 		
-		String sql = 
-				"select a.CID, a.WEB_MENU_CD, a.WEB_MENU_NAME, a.DEFAULT_MENU, " +
-				"b.MENU_BAR_ID, b.MENU_BAR_NAME, b.SELECTED_ATR, b.SYSTEM, b.MENU_CLS, b.CODE, b.BACKGROUND_COLOR, b.TEXT_COLOR, b.DISPLAY_ORDER, " +
-				"c.TITLE_BAR_ID, c.TITLE_BAR_NAME, c.BACKGROUND_COLOR, c.IMAGE_FILE, c.TEXT_COLOR, c.TITLE_MENU_ATR, c.TITLE_MENU_CD, c.DISPLAY_ORDER, " +
-				"d.DISPLAY_ORDER, d.CODE, d.MENU_CLS, d.SYSTEM " +
-				"from CCGST_WEB_MENU a " +
-				"left join CCGST_MENU_BAR b on a.CID = b.CID and a.WEB_MENU_CD = b.WEB_MENU_CD " +
-				"left join CCGST_TITLE_BAR c on b.CID = c.CID and b.WEB_MENU_CD = c.WEB_MENU_CD and b.MENU_BAR_ID = c.MENU_BAR_ID " +
-				"left join CCGST_TREE_MENU d on c.CID = d.CID and c.WEB_MENU_CD = d.WEB_MENU_CD and c.MENU_BAR_ID = d.MENU_BAR_ID and c.TITLE_BAR_ID = d.TITLE_BAR_ID " +
-				"where a.CID = @companyId and a.WEB_MENU_CD in @codes";
+		List<WebMenu> results = new ArrayList<>();
+		CollectionUtil.split(webMenuCodes, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
+			TypedQueryWrapper<CcgstWebMenu> typedQuery = this.queryProxy().query(queryStr.toString(), CcgstWebMenu.class);
+			typedQuery.getQuery().setHint("eclipselink.batch", "a.menuBars.titleMenus.treeMenus");
+			results.addAll(typedQuery.setParameter("companyId", companyId).setParameter("codes", subList).getList(w -> {
+				return toDomain(companyId, w);
+			}));
+		});
 		
-		List<Object[]> objectLst = new NtsStatement(sql, this.jdbcProxy())
-				.paramString("companyId", companyId)
-				.paramString("codes", webMenuCodes)
-				.getList(rec -> toObject(rec));
-		
-		return convertToDomainLst(objectLst);
-	}
-	
-	private Object[] toObject(NtsResultRecord rec) {
-		Object[] object = new Object[100];
-		object[0] = rec.getString(1);
-		object[1] = rec.getString(2);
-		object[2] = rec.getString(3);
-		object[3] = rec.getInt(4);
-		object[4] = rec.getString(5);
-		object[5] = rec.getString(6);
-		object[6] = rec.getInt(7);
-		object[7] = rec.getInt(8);
-		object[8] = rec.getInt(9);
-		object[9] = rec.getString(10);
-		object[10] = rec.getString(11);
-		object[11] = rec.getString(12);
-		object[12] = rec.getInt(13);
-		object[13] = rec.getString(14);
-		object[14] = rec.getString(15);
-		object[15] = rec.getString(16);
-		object[16] = rec.getString(17);
-		object[17] = rec.getString(18);
-		object[18] = rec.getInt(19);
-		object[19] = rec.getString(20);
-		object[20] = rec.getInt(21);
-		object[21] = rec.getInt(22);
-		object[22] = rec.getString(23);
-		object[23] = rec.getInt(24);
-		object[24] = rec.getInt(25);
-		return object;
-	}
-	
-	private List<WebMenu> convertToDomainLst(List<Object[]> objectLst) {
-		List<WebMenu> totalTimesLst = objectLst.stream().collect(Collectors.groupingBy(x -> (String) x[1])).entrySet()
-				.stream().map(x -> {
-					List<MenuBar> menuBars = x.getValue().stream()
-							.collect(Collectors.groupingBy(y -> (String) y[4])).entrySet().stream()
-							.map(y -> {
-								List<TitleBar> titleMenu = y.getValue().stream()
-										.collect(Collectors.groupingBy(z -> (String) z[13])).entrySet().stream()
-										.map(z -> {
-											List<TreeMenu> treeMenu = z.getValue().stream().map(t -> TreeMenu.createFromJavaType(
-														(String) x.getValue().get(0)[13], 
-														(String) x.getValue().get(0)[22], 
-														(Integer) x.getValue().get(0)[21], 
-														(Integer) x.getValue().get(0)[23], 
-														(Integer) x.getValue().get(0)[24])
-													).collect(Collectors.toList());
-											return TitleBar.createFromJavaType(
-													(String) x.getValue().get(0)[4], 
-													(String) x.getValue().get(0)[13], 
-													(String) x.getValue().get(0)[14], 
-													(String) x.getValue().get(0)[15], 
-													(String) x.getValue().get(0)[16], 
-													(String) x.getValue().get(0)[17], 
-													(Integer) x.getValue().get(0)[18], 
-													(String) x.getValue().get(0)[19], 
-													(Integer) x.getValue().get(0)[20], 
-													treeMenu);
-										}).collect(Collectors.toList());
-								return MenuBar.createFromJavaType(
-										(String) x.getValue().get(0)[4], 
-										(String) x.getValue().get(0)[5], 
-										(Integer) x.getValue().get(0)[6], 
-										(Integer) x.getValue().get(0)[7], 
-										(Integer) x.getValue().get(0)[8], 
-										(String) x.getValue().get(0)[9], 
-										(String) x.getValue().get(0)[10], 
-										(String) x.getValue().get(0)[11], 
-										(Integer) x.getValue().get(0)[12], 
-										titleMenu);
-							}).collect(Collectors.toList());
-					return WebMenu.createFromJavaType(
-							(String) x.getValue().get(0)[0], 
-							(String) x.getValue().get(0)[1], 
-							(String) x.getValue().get(0)[2], 
-							(Integer) x.getValue().get(0)[3], 
-							menuBars);
-				}).collect(Collectors.toList());
-		return totalTimesLst;
+		return results;
 	}
 
 	@Override
