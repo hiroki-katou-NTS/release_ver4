@@ -29,16 +29,16 @@ public class Scenario5Case1 extends TestRoot {
 
         driver.get(domain+"nts.uk.com.web/view/cli/003/a/index.xhtml");
 
-        WaitPageLoad();
+        WaitPageLoads();
         driver.findElement(By.id("buttonToScreen-b")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         driver.findElement(By.xpath("//table[@id='list-box_b_grid']//tr[@data-id='6']")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         driver.findElement(By.xpath("//table[@id='list-box_b1_grid']//tr[@data-id='0']")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         screenShot();
         driver.findElement(By.id("button_next_b")).click();
 
@@ -46,18 +46,18 @@ public class Scenario5Case1 extends TestRoot {
 
         progressCase(0);
 
-        WaitPageLoad();
+        WaitPageLoads();
         screenShotFull();
         driver.findElement(By.id("F3_1")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         screenShotFull();
         driver.findElement(By.id("E2_2")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         WebElement dialogCli003 = driver.findElement(By.xpath("//iframe[contains(@name,'window_1')]"));
         driver.switchTo().frame(dialogCli003);
-        WaitPageLoad();
+        WaitPageLoads();
         screenShotFull();
         driver.findElement(By.xpath("//button[@tabindex='2']")).click();
 
@@ -65,22 +65,22 @@ public class Scenario5Case1 extends TestRoot {
         screenShotFull();
         driver.findElement(By.id("E2_1")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         driver.findElement(By.id("D3_1")).click();
 
         caseTest("2019/6/1", "2019/6/30");
 
         progressCase(1);
 
-        WaitPageLoad();
+        WaitPageLoads();
         screenShotFull();
         driver.findElement(By.id("F3_1")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         screenShotFull();
         driver.findElement(By.id("E2_3")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         driver.findElement(By.id("F1_1")).click();
 
         WaitPageLoads();
@@ -126,7 +126,7 @@ public class Scenario5Case1 extends TestRoot {
         screenShotFull();
         driver.findElement(By.id("D3_2")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         screenShotFull();
         driver.findElement(By.id("E2_3")).click();
 
@@ -142,7 +142,7 @@ public class Scenario5Case1 extends TestRoot {
     }
 
     public void setDatePicker(String startDate, String endDate) {
-        WaitPageLoad();
+        WaitPageLoads();
         driver.findElement(By.xpath("//div[@id='daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]")).clear();
         driver.findElement(By.xpath("//div[@id='daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]")).sendKeys(startDate);
 
@@ -151,7 +151,7 @@ public class Scenario5Case1 extends TestRoot {
     }
 
     public void setTimePicker(String startDate, String endDate) {
-        WaitPageLoad();
+        WaitPageLoads();
         driver.findElements(By.xpath("//input[contains(@class,'ntsDatepicker')]")).get(9).clear();
         driver.findElements(By.xpath("//input[contains(@class,'ntsDatepicker')]")).get(9).sendKeys(startDate);
         driver.findElements(By.xpath("//input[contains(@class,'time-editor')]")).get(0).clear();

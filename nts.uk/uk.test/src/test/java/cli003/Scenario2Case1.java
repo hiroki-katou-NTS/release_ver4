@@ -32,13 +32,13 @@ public class Scenario2Case1 extends TestRoot {
 
         driver.get(domain+"nts.uk.com.web/view/cli/003/a/index.xhtml");
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         driver.findElement(By.id("buttonToScreen-b")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         driver.findElement(By.xpath("//tr[@data-id='1']")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         screenShot();
         driver.findElement(By.id("button_next_b")).click();
 
@@ -53,10 +53,10 @@ public class Scenario2Case1 extends TestRoot {
         screenShotFull();
         driver.findElement(By.id("E2_1")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         driver.findElement(By.id("D3_1")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         screenShot();
         driver.findElement(By.id("button_next_b")).click();
 
@@ -68,40 +68,40 @@ public class Scenario2Case1 extends TestRoot {
         WaitElementLoad(By.id("ccg001-btn-search-drawer"));
         driver.findElement(By.id("ccg001-btn-search-drawer")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         driver.findElement(By.id("ui-id-8")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         WaitElementLoad(By.id("ui-id-9"));
         driver.findElement(By.xpath("//div[@class='input-wrapper']//input[@tabindex='1']")).clear();
         driver.findElement(By.xpath("//div[@class='input-wrapper']//input[@tabindex='1']")).sendKeys("001800");
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         WaitElementLoad(By.xpath("//div[@class='input-wrapper']//button[@tabindex='1']"));
         driver.findElement(By.xpath("//div[@class='input-wrapper']//button[@tabindex='1']")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         WaitElementLoad(By.xpath("//div[@id='nts-component-tree']/div[3]/div[2]//button[@tabindex='1']"));
         driver.findElement(By.xpath("//div[@id='nts-component-tree']/div[3]/div[2]//button[@tabindex='1']")).click();
 
         screenShotFull();
         driver.findElement(By.id("ccg001-btn-advanced-search")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         driver.findElement(By.xpath("//div[@id='employeeSearchD']//span[1]/span[1]")).click();
 
         progress("//iframe[contains(@name,'window_2')]");
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         driver.findElement(By.id("E2_2")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         WebElement dialogCli003 = driver.findElement(By.xpath("//iframe[contains(@name,'window_1')]"));
         driver.switchTo().frame(dialogCli003);
         screenShotFull();
         driver.findElement(By.xpath("//button[@tabindex='2']")).click();
 
-       WaitPageLoad();
+       cli003_2_1_WaitPageLoad();
        screenShotFull();
 
        this.uploadTestLink(625, 152);
@@ -127,26 +127,26 @@ public class Scenario2Case1 extends TestRoot {
         screenShotFull();
         driver.findElement(By.id("D3_2")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         screenShotFull();
         driver.findElement(By.id("E2_3")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         screenShotFull();
         driver.findElement(By.id("F1_1")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         screenShotFull();
         driver.findElement(By.id("F3_1")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         screenShotFull();
         driver.findElement(By.id("E2_2")).click();
 
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         WebElement dialogCli003 = driver.findElement(By.xpath(wd));
         driver.switchTo().frame(dialogCli003);
-        WaitPageLoad();
+        cli003_2_1_WaitPageLoad();
         screenShotFull();
         driver.findElement(By.xpath("//button[@tabindex='2']")).click();
     }

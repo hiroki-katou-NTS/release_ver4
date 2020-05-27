@@ -1,6 +1,6 @@
 package ktg029;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +31,7 @@ public class Scenario1Case10 extends Kdw003Common {
 
         driver.switchTo().frame(1);
 
+        WaitPageLoad();
         // Check check box
         WaitElementLoad(By.xpath("//*[@id='contents-area']/table[3]/tbody/tr/td/div/label/span[1]"));
         driver.findElement(By.xpath("//*[@id='contents-area']/table[3]/tbody/tr/td/div/label/span[1]")).click();
