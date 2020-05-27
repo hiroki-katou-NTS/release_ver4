@@ -196,7 +196,7 @@ public class JpaTotalTimesRepository extends JpaRepository implements TotalTimes
 											object[5] = rec.getString("TOTAL_TIMES_ABNAME");
 											object[6] = rec.getInt("SUMMARY_ATR");
 											object[7] = rec.getInt("WORK_TYPE_ATR");
-											object[8] = rec.getString("WORK_TYPE_CD");
+											object[8] = rec.getString("WORK_TYPE_CD").trim();
 											object[9] = rec.getInt("UPPER_LIMIT_SET_ATR");
 											object[10] = rec.getInt("LOWER_LIMIT_SET_ATR");
 											object[11] = rec.getInt("THRESOLD_UPPER_LIMIT");
