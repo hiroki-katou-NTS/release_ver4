@@ -100,7 +100,9 @@ public class JpaClosureEmploymentRepository extends JpaRepository implements Clo
 		String sql = "SELECT * FROM KCLMT_CLOSURE_EMPLOYMENT a WHERE a.EMPLOYMENT_CD IN @employmentCDs "
 				+ "AND a.CID = @companyId";
 
-		return new NtsStatement(sql, this.jdbcProxy())
+		List<ClosureEmployment> result = new ArrayList<>();
+		CollectionUtil.split(employmentCDs, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, splitData -> {
+			result.addAll(new NtsStatement(sql, this.jdbcProxy())
 				.paramString("companyId", companyId)
 				.paramString("employmentCDs", employmentCDs)
 				.getList(rec -> {
@@ -108,8 +110,9 @@ public class JpaClosureEmploymentRepository extends JpaRepository implements Clo
 							new KclmpClosureEmploymentPK(rec.getString("CID"),rec.getString("EMPLOYMENT_CD")),
 							rec.getInt("CLOSURE_ID")
 							));
-					});
-			
+					}));
+		});
+		return result;
 
 	}
 
