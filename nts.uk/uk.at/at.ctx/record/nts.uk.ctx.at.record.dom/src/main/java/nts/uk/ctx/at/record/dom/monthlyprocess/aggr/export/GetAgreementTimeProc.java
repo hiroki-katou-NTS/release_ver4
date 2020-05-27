@@ -209,11 +209,11 @@ public class GetAgreementTimeProc {
 		MonthlyCalculatingDailys monthlyCalcDailys = null;
 		if (attendanceTimeOfDailysOpt.isPresent()){
 			monthlyCalcDailys = MonthlyCalculatingDailys.loadDataForAgreement(employeeId, monthPeriod,
-					attendanceTimeOfDailysOpt.get(), this.repositories);
+					attendanceTimeOfDailysOpt.get(), this.repositories, employeeSets);
 		}
 		else {
 			monthlyCalcDailys = MonthlyCalculatingDailys.loadDataForAgreement(employeeId, monthPeriod,
-					this.repositories);
+					this.repositories, employeeSets);
 		}
 		
 		// 集計前の月別実績データを確認する
