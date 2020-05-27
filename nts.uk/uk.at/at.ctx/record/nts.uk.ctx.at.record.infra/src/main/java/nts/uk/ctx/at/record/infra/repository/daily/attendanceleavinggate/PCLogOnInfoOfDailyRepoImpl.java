@@ -73,7 +73,7 @@ public class PCLogOnInfoOfDailyRepoImpl extends JpaRepository implements PCLogOn
 			return Collections.emptyList();
 		}
 		List<PCLogOnInfoOfDaily> result = new ArrayList<>();
-		String sql = "SELECT al.* FROM KRCDT_DAY_PC_LOGON_INFO al WHERE al.SID IN @sid AND al.YMD <= @end AND YMD >= @start";
+		String sql = "SELECT al.* FROM KRCDT_DAY_PC_LOGON_INFO al WHERE al.SID IN @sid AND al.YMD <= @end AND al.YMD >= @start";
 		CollectionUtil.split(employeeId, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, empIds -> {
 
 			result.addAll(toList(new NtsStatement(sql, this.jdbcProxy()).paramString("sid", empIds)
