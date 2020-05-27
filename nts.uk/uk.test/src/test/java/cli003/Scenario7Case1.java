@@ -1,12 +1,15 @@
 package cli003;
 
-import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import org.openqa.selenium.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import common.TestRoot;
 
@@ -123,6 +126,7 @@ public class Scenario7Case1 extends TestRoot {
         WaitPageLoad();
         driver.findElement(By.id("E2_2")).click();
 
+        WaitPageLoad();
         WebElement dialogCli003 = driver.findElement(By.xpath("//iframe[contains(@name,'window_1')]"));
         driver.switchTo().frame(dialogCli003);
         WaitPageLoad();

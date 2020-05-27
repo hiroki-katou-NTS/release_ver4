@@ -1,8 +1,12 @@
 package cli003;
 
-import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-import org.openqa.selenium.*;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import common.TestRoot;
 
@@ -19,7 +23,7 @@ public class Scenario1Case1 extends TestRoot {
         //login申請者
 
         login("010392", "Jinjikoi5");
-        
+
 
         driver.get(domain+"nts.uk.com.web/view/cli/003/a/index.xhtml");
 
@@ -37,12 +41,12 @@ public class Scenario1Case1 extends TestRoot {
 
         WaitElementLoad(By.xpath("//div[@id='D2_5']/button[2]"));
         driver.findElement(By.xpath("//div[@id='D2_5']/button[2]")).click();
-        
+
         progress("//li[@title='ページ 6']", "//iframe[contains(@name,'window_1')]");
 
         WaitPageLoad();
         driver.findElement(By.id("E2_1")).click();
-        
+
         setTimePicker("2019/6/1", "2019/6/30");
         WaitElementLoad(By.xpath("//div[@id='D2_5']/button[1]"));
         driver.findElement(By.xpath("//div[@id='D2_5']/button[1]")).click();
@@ -57,7 +61,7 @@ public class Scenario1Case1 extends TestRoot {
         WaitElementLoad(By.id("ui-id-9"));
         driver.findElement(By.xpath("//div[@class='input-wrapper']//input[@tabindex='1']")).clear();
         driver.findElement(By.xpath("//div[@class='input-wrapper']//input[@tabindex='1']")).sendKeys("001800");
-        
+
         WaitElementLoad(By.xpath("//div[@class='input-wrapper']//button[@tabindex='1']"));
         driver.findElement(By.xpath("//div[@class='input-wrapper']//button[@tabindex='1']")).click();
 
@@ -70,7 +74,7 @@ public class Scenario1Case1 extends TestRoot {
         driver.findElement(By.xpath("//div[@id='employeeSearchD']//span[1]/span[1]")).click();
 
         progress("//li[@title='ページ 2']", "//iframe[contains(@name,'window_2')]");
-        
+
         this.uploadTestLink(408, 92);
     }
 
@@ -82,7 +86,7 @@ public class Scenario1Case1 extends TestRoot {
         WaitPageLoad();
         screenShotFull();
         driver.findElement(By.id("E2_3")).click();
-        
+
         WaitPageLoad();
         screenShotFull();
         if (title.equals("//li[@title='ページ 6']")) {
@@ -100,6 +104,7 @@ public class Scenario1Case1 extends TestRoot {
         screenShotFull();
         driver.findElement(By.id("E2_2")).click();
 
+        WaitPageLoad();
         WebElement dialogCli003 = driver.findElement(By.xpath(wd));
         driver.switchTo().frame(dialogCli003);
         WaitPageLoad();

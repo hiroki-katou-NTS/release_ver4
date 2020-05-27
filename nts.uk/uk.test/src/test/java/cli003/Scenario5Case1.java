@@ -1,8 +1,13 @@
 package cli003;
 
-import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-import org.openqa.selenium.*;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import common.TestRoot;
@@ -20,7 +25,7 @@ public class Scenario5Case1 extends TestRoot {
         //login申請者
 
         login("010392", "Jinjikoi5");
-        
+
 
         driver.get(domain+"nts.uk.com.web/view/cli/003/a/index.xhtml");
 
@@ -49,6 +54,7 @@ public class Scenario5Case1 extends TestRoot {
         screenShotFull();
         driver.findElement(By.id("E2_2")).click();
 
+        WaitPageLoad();
         WebElement dialogCli003 = driver.findElement(By.xpath("//iframe[contains(@name,'window_1')]"));
         driver.switchTo().frame(dialogCli003);
         WaitPageLoad();
@@ -63,7 +69,7 @@ public class Scenario5Case1 extends TestRoot {
         driver.findElement(By.id("D3_1")).click();
 
         caseTest("2019/6/1", "2019/6/30");
-    
+
         progressCase(1);
 
         WaitPageLoad();
@@ -84,7 +90,7 @@ public class Scenario5Case1 extends TestRoot {
     }
 
     public void WaitPageLoads() {
-        WebDriverWait _wait = new WebDriverWait(driver, 60);
+        WebDriverWait _wait = new WebDriverWait(driver, 3600);
         try {
             Thread.sleep(1000);
             _wait.until(d -> {
@@ -127,10 +133,10 @@ public class Scenario5Case1 extends TestRoot {
         if (index == 0) {
             WaitPageLoads();
             WaitElementLoad(By.xpath("//table[@id='igGridLog']//tr[2]/td[1]"));
-            driver.findElement(By.xpath("//table[@id='igGridLog']//tr[2]/td[1]")).click(); 
-        } 
+            driver.findElement(By.xpath("//table[@id='igGridLog']//tr[2]/td[1]")).click();
+        }
 
-        WaitPageLoad();
+        WaitPageLoads();
         WaitElementLoad(By.id("F1_1"));
         driver.findElement(By.id("F1_1")).click();
     }
@@ -138,10 +144,10 @@ public class Scenario5Case1 extends TestRoot {
     public void setDatePicker(String startDate, String endDate) {
         WaitPageLoad();
         driver.findElement(By.xpath("//div[@id='daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]")).clear();
-        driver.findElement(By.xpath("//div[@id='daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]")).sendKeys(startDate);        
+        driver.findElement(By.xpath("//div[@id='daterangepicker']//div[contains(@class,'ntsStartDate')]//input[1]")).sendKeys(startDate);
 
         driver.findElement(By.xpath("//div[@id='daterangepicker']//div[contains(@class,'ntsEndDate')]//input[1]")).clear();
-        driver.findElement(By.xpath("//div[@id='daterangepicker']//div[contains(@class,'ntsEndDate')]//input[1]")).sendKeys(endDate);        
+        driver.findElement(By.xpath("//div[@id='daterangepicker']//div[contains(@class,'ntsEndDate')]//input[1]")).sendKeys(endDate);
     }
 
     public void setTimePicker(String startDate, String endDate) {

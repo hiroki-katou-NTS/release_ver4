@@ -1,8 +1,13 @@
 package cli003;
 
-import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-import org.openqa.selenium.*;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import common.TestRoot;
@@ -20,7 +25,7 @@ public class Scenario3Case1 extends TestRoot {
         //login申請者
 
         login("010392", "Jinjikoi5");
-        
+
 
         driver.get(domain+"nts.uk.com.web/view/cli/003/a/index.xhtml");
 
@@ -45,7 +50,7 @@ public class Scenario3Case1 extends TestRoot {
 
         WaitElementLoad(By.xpath("//div[@id='D2_5']/button[2]"));
         driver.findElement(By.xpath("//div[@id='D2_5']/button[2]")).click();
-        
+
         progress("//li[@title='ページ 2']", "//iframe[contains(@name,'window_1')]");
 
         WaitPageLoad();
@@ -104,7 +109,7 @@ public class Scenario3Case1 extends TestRoot {
         driver.findElement(By.xpath("//div[@id='D1_4']//div[contains(@class,'end-datetime-editor')]//div[contains(@class,'time-container')]//input[1]")).clear();
         driver.findElement(By.xpath("//div[@id='D1_4']//div[contains(@class,'end-datetime-editor')]//div[contains(@class,'time-container')]//input[1]")).clear();
         driver.findElement(By.xpath("//div[@id='D1_4']//div[contains(@class,'end-datetime-editor')]//div[contains(@class,'time-container')]//input[1]")).sendKeys("23:59:59");
-        
+
         WaitElementLoad(By.xpath("//div[@id='D2_5']/button[2]"));
         driver.findElement(By.xpath("//div[@id='D2_5']/button[2]")).click();
 
@@ -143,13 +148,13 @@ public class Scenario3Case1 extends TestRoot {
         WaitElementLoad(By.id("ui-id-9"));
         driver.findElement(By.xpath("//div[@class='input-wrapper']//input[@tabindex='1']")).clear();
         driver.findElement(By.xpath("//div[@class='input-wrapper']//input[@tabindex='1']")).sendKeys("001887");
-        
+
         WaitElementLoad(By.xpath("//div[@class='input-wrapper']//button[@tabindex='1']"));
         driver.findElement(By.xpath("//div[@class='input-wrapper']//button[@tabindex='1']")).click();
 
         WaitElementLoad(By.xpath("//div[@id='nts-component-tree']/div[3]/div[2]//button[@tabindex='1']"));
         driver.findElement(By.xpath("//div[@id='nts-component-tree']/div[3]/div[2]//button[@tabindex='1']")).click();
-        
+
         WaitPageLoad();
         screenShot();
         driver.findElement(By.id("ccg001-btn-advanced-search")).click();
@@ -168,6 +173,7 @@ public class Scenario3Case1 extends TestRoot {
         screenShotFull();
         driver.findElement(By.id("E2_2")).click();
 
+        WaitPageLoad();
         WebElement dialogCli003 = driver.findElement(By.xpath(wd));
         driver.switchTo().frame(dialogCli003);
         WaitPageLoad();
@@ -193,8 +199,8 @@ public class Scenario3Case1 extends TestRoot {
 
             WaitPageLoad();
             WaitElementLoad(By.xpath("//table[@id='igGridLog']//tr[2]/td[1]"));
-            driver.findElement(By.xpath("//table[@id='igGridLog']//tr[2]/td[1]")).click();  
-            WaitPageLoad();  
+            driver.findElement(By.xpath("//table[@id='igGridLog']//tr[2]/td[1]")).click();
+            WaitPageLoad();
         }
     }
 
