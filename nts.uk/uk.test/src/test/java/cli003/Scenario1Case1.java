@@ -6,7 +6,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import common.TestRoot;
 
@@ -87,24 +89,24 @@ public class Scenario1Case1 extends TestRoot {
         screenShotFull();
         driver.findElement(By.id("E2_3")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         screenShotFull();
         if (title.equals("//li[@title='ページ 6']")) {
             driver.findElement(By.xpath("//li[@title='ページ 5']")).click();
         }
         driver.findElement(By.xpath(title)).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         driver.findElement(By.id("F1_1")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         driver.findElement(By.id("F3_1")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         screenShotFull();
         driver.findElement(By.id("E2_2")).click();
 
-        WaitPageLoad();
+        WaitPageLoads();
         WebElement dialogCli003 = driver.findElement(By.xpath(wd));
         driver.switchTo().frame(dialogCli003);
         WaitPageLoad();
@@ -134,6 +136,21 @@ public class Scenario1Case1 extends TestRoot {
         String verificationErrorString = verificationErrors.toString();
         if (!"".equals(verificationErrorString)) {
             fail(verificationErrorString);
+        }
+    }
+    public void WaitPageLoads() {
+        WebDriverWait _wait = new WebDriverWait(driver, 1800);
+        try {
+            Thread.sleep(1000);
+            _wait.until(d -> {
+                try {
+                    d.findElement(By.xpath("//div[contains(@class,'blockOverlay')]"));
+                } catch (NoSuchElementException e) {
+                    return true;
+                }
+                return false;
+            });
+        } catch (Exception e) {
         }
     }
 }
