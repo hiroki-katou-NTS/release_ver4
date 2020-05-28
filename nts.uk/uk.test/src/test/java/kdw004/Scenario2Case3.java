@@ -1,18 +1,14 @@
 package kdw004;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.util.Calendar;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebElement;
 
 import common.TestRoot;
@@ -45,18 +41,19 @@ public class Scenario2Case3 extends TestRoot {
         WaitElementLoad(By.id("A1_2"));
         driver.findElement(By.id("A1_2")).click();
 
-        WaitElementLoad(By.id("A2_3"));
-        driver.findElement(By.id("A2_3")).clear();
-        driver.findElement(By.id("A2_3")).click();
-        driver.findElement(By.id("A2_3")).sendKeys(df1.format(inputDate.getTime()));
-
-        jse.executeScript("document.activeElement.blur();");    //leave focus
         WaitPageLoad();
 
         WaitElementLoad(By.id("A2_7"));
         driver.findElement(By.id("A2_7")).clear();
         driver.findElement(By.id("A2_7")).click();
         driver.findElement(By.id("A2_7")).sendKeys("017170");
+
+        jse.executeScript("document.activeElement.blur();");    //leave focus
+
+        WaitElementLoad(By.id("A2_3"));
+        driver.findElement(By.id("A2_3")).clear();
+        driver.findElement(By.id("A2_3")).click();
+        driver.findElement(By.id("A2_3")).sendKeys(df1.format(inputDate.getTime()));
 
         jse.executeScript("document.activeElement.blur();");    //leave focus
 

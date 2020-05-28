@@ -34,10 +34,10 @@ public class Tab2 extends CreateMainTest{
         cbx_10_1_1.setName("cbx_10_1_1");
         cbx_10_1_1.setBounds(304, 6, 71, 21);
 
-        JTextField tF_10_1_1 = new JTextField("");
-        tF_10_1_1.setName("tF_10_1_1");
-        tF_10_1_1.setEditable(false);
-        tF_10_1_1.setBounds(384, 7, 48, 19);
+        JTextField tF_10_01_01 = new JTextField("");
+        tF_10_01_01.setName("tF_10_01_01");
+        tF_10_01_01.setEditable(false);
+        tF_10_01_01.setBounds(384, 7, 48, 19);
 
         // KSU007
         JLabel lb_11 = new JLabel("KSU007");
@@ -52,19 +52,19 @@ public class Tab2 extends CreateMainTest{
         cbx_11_1_1.setName("cbx_11_1_1");
         cbx_11_1_1.setBounds(304, 50, 71, 21);
 
-        JTextField tF_11_1_1 = new JTextField("");
-        tF_11_1_1.setName("tF_11_1_1");
-        tF_11_1_1.setEditable(false);
-        tF_11_1_1.setBounds(384, 51, 48, 19);
+        JTextField tF_11_01_01 = new JTextField("");
+        tF_11_01_01.setName("tF_11_01_01");
+        tF_11_01_01.setEditable(false);
+        tF_11_01_01.setBounds(384, 51, 48, 19);
 
         JCheckBox cbx_11_1_2 = new JCheckBox("CASE2");
         cbx_11_1_2.setName("cbx_11_1_2");
         cbx_11_1_2.setBounds(440, 50, 71, 21);
 
-        JTextField tF_11_1_2 = new JTextField("");
-        tF_11_1_2.setName("tF_11_1_2");
-        tF_11_1_2.setEditable(false);
-        tF_11_1_2.setBounds(520, 54, 48, 19);
+        JTextField tF_11_01_02 = new JTextField("");
+        tF_11_01_02.setName("tF_11_01_02");
+        tF_11_01_02.setEditable(false);
+        tF_11_01_02.setBounds(520, 54, 48, 19);
 
         // KIF001
         JLabel lb_15 = new JLabel("KIF001");
@@ -79,37 +79,37 @@ public class Tab2 extends CreateMainTest{
         cbx_15_1_1.setName("cbx_15_1_1");
         cbx_15_1_1.setBounds(304, 94, 71, 21);
 
-        JTextField tF_15_1_1 = new JTextField("");
-        tF_15_1_1.setName("tF_15_1_1");
-        tF_15_1_1.setEditable(false);
-        tF_15_1_1.setBounds(384, 95, 48, 19);
+        JTextField tF_15_01_01 = new JTextField("");
+        tF_15_01_01.setName("tF_15_01_01");
+        tF_15_01_01.setEditable(false);
+        tF_15_01_01.setBounds(384, 95, 48, 19);
 
         JCheckBox cbx_15_1_2 = new JCheckBox("CASE2");
         cbx_15_1_2.setName("cbx_15_1_2");
         cbx_15_1_2.setBounds(440, 94, 71, 21);
 
-        JTextField tF_15_1_2 = new JTextField("");
-        tF_15_1_2.setName("tF_15_1_2");
-        tF_15_1_2.setEditable(false);
-        tF_15_1_2.setBounds(520, 95, 48, 19);
+        JTextField tF_15_01_02 = new JTextField("");
+        tF_15_01_02.setName("tF_15_01_02");
+        tF_15_01_02.setEditable(false);
+        tF_15_01_02.setBounds(520, 95, 48, 19);
 
         JCheckBox cbx_15_1_3 = new JCheckBox("CASE3");
         cbx_15_1_3.setName("cbx_15_1_3");
         cbx_15_1_3.setBounds(576, 94, 71, 21);
 
-        JTextField tF_15_1_3 = new JTextField("");
-        tF_15_1_3.setName("tF_15_1_3");
-        tF_15_1_3.setEditable(false);
-        tF_15_1_3.setBounds(656, 95, 48, 19);
+        JTextField tF_15_01_03 = new JTextField("");
+        tF_15_01_03.setName("tF_15_01_03");
+        tF_15_01_03.setEditable(false);
+        tF_15_01_03.setBounds(656, 95, 48, 19);
 
         JCheckBox cbx_15_1_4 = new JCheckBox("CASE4");
         cbx_15_1_4.setName("cbx_15_1_4");
         cbx_15_1_4.setBounds(712, 94, 71, 21);
 
-        JTextField tF_15_1_4 = new JTextField("");
-        tF_15_1_4.setName("tF_15_1_4");
-        tF_15_1_4.setEditable(false);
-        tF_15_1_4.setBounds(792, 95, 48, 19);
+        JTextField tF_15_01_04 = new JTextField("");
+        tF_15_01_04.setName("tF_15_01_04");
+        tF_15_01_04.setEditable(false);
+        tF_15_01_04.setBounds(792, 95, 48, 19);
 
         // KMW003
         JLabel lb_21 = new JLabel("KMW003");
@@ -124,55 +124,55 @@ public class Tab2 extends CreateMainTest{
         cbx_21_1_1.setName("cbx_21_1_1");
         cbx_21_1_1.setBounds(304, 138, 71, 21);
 
-        JTextField tF_21_1_1 = new JTextField("");
-        tF_21_1_1.setName("tF_21_1_1");
-        tF_21_1_1.setEditable(false);
-        tF_21_1_1.setBounds(384, 139, 48, 19);
+        JTextField tF_21_01_01 = new JTextField("");
+        tF_21_01_01.setName("tF_21_01_01");
+        tF_21_01_01.setEditable(false);
+        tF_21_01_01.setBounds(384, 139, 48, 19);
 
         JCheckBox cbx_21_1_2 = new JCheckBox("CASE2");
         cbx_21_1_2.setName("cbx_21_1_2");
         cbx_21_1_2.setBounds(440, 138, 71, 21);
 
-        JTextField tF_21_1_2 = new JTextField("");
-        tF_21_1_2.setName("tF_21_1_2");
-        tF_21_1_2.setEditable(false);
-        tF_21_1_2.setBounds(520, 139, 48, 19);
+        JTextField tF_21_01_02 = new JTextField("");
+        tF_21_01_02.setName("tF_21_01_02");
+        tF_21_01_02.setEditable(false);
+        tF_21_01_02.setBounds(520, 139, 48, 19);
 
         JCheckBox cbx_21_1_3 = new JCheckBox("CASE3");
         cbx_21_1_3.setName("cbx_21_1_3");
         cbx_21_1_3.setBounds(576, 138, 71, 21);
 
-        JTextField tF_21_1_3 = new JTextField("");
-        tF_21_1_3.setName("tF_21_1_3");
-        tF_21_1_3.setEditable(false);
-        tF_21_1_3.setBounds(656, 139, 48, 19);
+        JTextField tF_21_01_03 = new JTextField("");
+        tF_21_01_03.setName("tF_21_01_03");
+        tF_21_01_03.setEditable(false);
+        tF_21_01_03.setBounds(656, 139, 48, 19);
 
         JCheckBox cbx_21_1_4 = new JCheckBox("CASE4");
         cbx_21_1_4.setName("cbx_21_1_4");
         cbx_21_1_4.setBounds(712, 138, 71, 21);
 
-        JTextField tF_21_1_4 = new JTextField("");
-        tF_21_1_4.setName("tF_21_1_4");
-        tF_21_1_4.setEditable(false);
-        tF_21_1_4.setBounds(792, 139, 48, 19);
+        JTextField tF_21_01_04 = new JTextField("");
+        tF_21_01_04.setName("tF_21_01_04");
+        tF_21_01_04.setEditable(false);
+        tF_21_01_04.setBounds(792, 139, 48, 19);
 
         JCheckBox cbx_21_1_5 = new JCheckBox("CASE5");
         cbx_21_1_5.setName("cbx_21_1_5");
         cbx_21_1_5.setBounds(852, 138, 71, 21);
 
-        JTextField tF_21_1_5 = new JTextField("");
-        tF_21_1_5.setName("tF_21_1_5");
-        tF_21_1_5.setEditable(false);
-        tF_21_1_5.setBounds(932, 139, 48, 19);
+        JTextField tF_21_01_05 = new JTextField("");
+        tF_21_01_05.setName("tF_21_01_05");
+        tF_21_01_05.setEditable(false);
+        tF_21_01_05.setBounds(932, 139, 48, 19);
 
         JCheckBox cbx_21_1_6 = new JCheckBox("CASE6");
         cbx_21_1_6.setName("cbx_21_1_6");
         cbx_21_1_6.setBounds(992, 138, 71, 21);
 
-        JTextField tF_21_1_6 = new JTextField("");
-        tF_21_1_6.setName("tF_21_1_6");
-        tF_21_1_6.setEditable(false);
-        tF_21_1_6.setBounds(1072, 139, 48, 19);
+        JTextField tF_21_01_06 = new JTextField("");
+        tF_21_01_06.setName("tF_21_01_06");
+        tF_21_01_06.setEditable(false);
+        tF_21_01_06.setBounds(1072, 139, 48, 19);
 
         JLabel lb_21_2 = new JLabel("SCENARIO2");
         lb_21_2.setName("lb_21_2");
@@ -182,55 +182,55 @@ public class Tab2 extends CreateMainTest{
         cbx_21_2_1.setName("cbx_21_2_1");
         cbx_21_2_1.setBounds(304, 161, 71, 21);
 
-        JTextField tF_21_2_1 = new JTextField("");
-        tF_21_2_1.setName("tF_21_2_1");
-        tF_21_2_1.setEditable(false);
-        tF_21_2_1.setBounds(384, 162, 48, 19);
+        JTextField tF_21_02_01 = new JTextField("");
+        tF_21_02_01.setName("tF_21_02_01");
+        tF_21_02_01.setEditable(false);
+        tF_21_02_01.setBounds(384, 162, 48, 19);
 
         JCheckBox cbx_21_2_2 = new JCheckBox("CASE2");
         cbx_21_2_2.setName("cbx_21_2_2");
         cbx_21_2_2.setBounds(440, 161, 71, 21);
 
-        JTextField tF_21_2_2 = new JTextField("");
-        tF_21_2_2.setName("tF_21_2_2");
-        tF_21_2_2.setEditable(false);
-        tF_21_2_2.setBounds(520, 162, 48, 19);
+        JTextField tF_21_02_02 = new JTextField("");
+        tF_21_02_02.setName("tF_21_02_02");
+        tF_21_02_02.setEditable(false);
+        tF_21_02_02.setBounds(520, 162, 48, 19);
 
         JCheckBox cbx_21_2_3 = new JCheckBox("CASE3");
         cbx_21_2_3.setName("cbx_21_2_3");
         cbx_21_2_3.setBounds(576, 161, 71, 21);
 
-        JTextField tF_21_2_3 = new JTextField("");
-        tF_21_2_3.setName("tF_21_2_3");
-        tF_21_2_3.setEditable(false);
-        tF_21_2_3.setBounds(656, 162, 48, 19);
+        JTextField tF_21_02_03 = new JTextField("");
+        tF_21_02_03.setName("tF_21_02_03");
+        tF_21_02_03.setEditable(false);
+        tF_21_02_03.setBounds(656, 162, 48, 19);
 
         JCheckBox cbx_21_2_4 = new JCheckBox("CASE4");
         cbx_21_2_4.setName("cbx_21_2_4");
         cbx_21_2_4.setBounds(712, 161, 71, 21);
 
-        JTextField tF_21_2_4 = new JTextField("");
-        tF_21_2_4.setName("tF_21_2_4");
-        tF_21_2_4.setEditable(false);
-        tF_21_2_4.setBounds(792, 162, 48, 19);
+        JTextField tF_21_02_04 = new JTextField("");
+        tF_21_02_04.setName("tF_21_02_04");
+        tF_21_02_04.setEditable(false);
+        tF_21_02_04.setBounds(792, 162, 48, 19);
 
         JCheckBox cbx_21_2_5 = new JCheckBox("CASE5");
         cbx_21_2_5.setName("cbx_21_2_5");
         cbx_21_2_5.setBounds(852, 161, 71, 21);
 
-        JTextField tF_21_2_5 = new JTextField("");
-        tF_21_2_5.setName("tF_21_2_5");
-        tF_21_2_5.setEditable(false);
-        tF_21_2_5.setBounds(932, 162, 48, 19);
+        JTextField tF_21_02_05 = new JTextField("");
+        tF_21_02_05.setName("tF_21_02_05");
+        tF_21_02_05.setEditable(false);
+        tF_21_02_05.setBounds(932, 162, 48, 19);
 
         JCheckBox cbx_21_2_6 = new JCheckBox("CASE6");
         cbx_21_2_6.setName("cbx_21_2_6");
         cbx_21_2_6.setBounds(992, 161, 71, 21);
 
-        JTextField tF_21_2_6 = new JTextField("");
-        tF_21_2_6.setName("tF_21_2_6");
-        tF_21_2_6.setEditable(false);
-        tF_21_2_6.setBounds(1072, 162, 48, 19);
+        JTextField tF_21_02_06 = new JTextField("");
+        tF_21_02_06.setName("tF_21_02_06");
+        tF_21_02_06.setEditable(false);
+        tF_21_02_06.setBounds(1072, 162, 48, 19);
 
         JCheckBox checkBox_68 = new JCheckBox("全件選択");
         checkBox_68.setName("cbx_21_all");
@@ -251,55 +251,55 @@ public class Tab2 extends CreateMainTest{
         cbx_22_1_1.setName("cbx_22_1_1");
         cbx_22_1_1.setBounds(304, 205, 71, 21);
 
-        JTextField tF_22_1_1 = new JTextField("");
-        tF_22_1_1.setName("tF_22_1_1");
-        tF_22_1_1.setEditable(false);
-        tF_22_1_1.setBounds(384, 206, 48, 19);
+        JTextField tF_22_01_01 = new JTextField("");
+        tF_22_01_01.setName("tF_22_01_01");
+        tF_22_01_01.setEditable(false);
+        tF_22_01_01.setBounds(384, 206, 48, 19);
 
         JCheckBox cbx_22_1_2 = new JCheckBox("CASE2");
         cbx_22_1_2.setName("cbx_22_1_2");
         cbx_22_1_2.setBounds(440, 205, 71, 21);
 
-        JTextField tF_22_1_2 = new JTextField("");
-        tF_22_1_2.setName("tF_22_1_2");
-        tF_22_1_2.setEditable(false);
-        tF_22_1_2.setBounds(520, 206, 48, 19);
+        JTextField tF_22_01_02 = new JTextField("");
+        tF_22_01_02.setName("tF_22_01_02");
+        tF_22_01_02.setEditable(false);
+        tF_22_01_02.setBounds(520, 206, 48, 19);
 
         JCheckBox cbx_22_1_3 = new JCheckBox("CASE3");
         cbx_22_1_3.setName("cbx_22_1_3");
         cbx_22_1_3.setBounds(576, 205, 71, 21);
 
-        JTextField tF_22_1_3 = new JTextField("");
-        tF_22_1_3.setName("tF_22_1_3");
-        tF_22_1_3.setEditable(false);
-        tF_22_1_3.setBounds(656, 206, 48, 19);
+        JTextField tF_22_01_03 = new JTextField("");
+        tF_22_01_03.setName("tF_22_01_03");
+        tF_22_01_03.setEditable(false);
+        tF_22_01_03.setBounds(656, 206, 48, 19);
 
         JCheckBox cbx_22_1_4 = new JCheckBox("CASE4");
         cbx_22_1_4.setName("cbx_22_1_4");
         cbx_22_1_4.setBounds(712, 205, 71, 21);
 
-        JTextField tF_22_1_4 = new JTextField("");
-        tF_22_1_4.setName("tF_22_1_4");
-        tF_22_1_4.setEditable(false);
-        tF_22_1_4.setBounds(792, 206, 48, 19);
+        JTextField tF_22_01_04 = new JTextField("");
+        tF_22_01_04.setName("tF_22_01_04");
+        tF_22_01_04.setEditable(false);
+        tF_22_01_04.setBounds(792, 206, 48, 19);
 
         JCheckBox cbx_22_1_5 = new JCheckBox("CASE5");
         cbx_22_1_5.setName("cbx_22_1_5");
         cbx_22_1_5.setBounds(852, 205, 71, 21);
 
-        JTextField tF_22_1_5 = new JTextField("");
-        tF_22_1_5.setName("tF_22_1_5");
-        tF_22_1_5.setEditable(false);
-        tF_22_1_5.setBounds(932, 206, 48, 19);
+        JTextField tF_22_01_05 = new JTextField("");
+        tF_22_01_05.setName("tF_22_01_05");
+        tF_22_01_05.setEditable(false);
+        tF_22_01_05.setBounds(932, 206, 48, 19);
 
         JCheckBox cbx_22_1_6 = new JCheckBox("CASE6");
         cbx_22_1_6.setName("cbx_22_1_6");
         cbx_22_1_6.setBounds(992, 205, 71, 21);
 
-        JTextField tF_22_1_6 = new JTextField("");
-        tF_22_1_6.setName("tF_22_1_6");
-        tF_22_1_6.setEditable(false);
-        tF_22_1_6.setBounds(1072, 206, 48, 19);
+        JTextField tF_22_01_06 = new JTextField("");
+        tF_22_01_06.setName("tF_22_01_06");
+        tF_22_01_06.setEditable(false);
+        tF_22_01_06.setBounds(1072, 206, 48, 19);
 
         JLabel lb_22_2 = new JLabel("SCENARIO2");
         lb_22_2.setName("lb_22_2");
@@ -309,19 +309,19 @@ public class Tab2 extends CreateMainTest{
         cbx_22_2_1.setName("cbx_22_2_1");
         cbx_22_2_1.setBounds(304, 228, 71, 21);
 
-        JTextField tF_22_2_1 = new JTextField("");
-        tF_22_2_1.setName("tF_22_2_1");
-        tF_22_2_1.setEditable(false);
-        tF_22_2_1.setBounds(384, 229, 48, 19);
+        JTextField tF_22_02_01 = new JTextField("");
+        tF_22_02_01.setName("tF_22_02_01");
+        tF_22_02_01.setEditable(false);
+        tF_22_02_01.setBounds(384, 229, 48, 19);
 
         JCheckBox cbx_22_2_3 = new JCheckBox("CASE3");
         cbx_22_2_3.setName("cbx_22_2_3");
         cbx_22_2_3.setBounds(440, 228, 71, 21);
 
-        JTextField tF_22_2_3 = new JTextField("");
-        tF_22_2_3.setName("tF_22_2_3");
-        tF_22_2_3.setEditable(false);
-        tF_22_2_3.setBounds(520, 229, 48, 19);
+        JTextField tF_22_02_03 = new JTextField("");
+        tF_22_02_03.setName("tF_22_02_03");
+        tF_22_02_03.setEditable(false);
+        tF_22_02_03.setBounds(520, 229, 48, 19);
 
         JCheckBox checkBox_69 = new JCheckBox("全件選択");
         checkBox_69.setName("cbx_22_all");
@@ -366,25 +366,25 @@ public class Tab2 extends CreateMainTest{
         cbx_23_1_1.setName("cbx_23_1_1");
         cbx_23_1_1.setBounds(304, 264, 71, 21);
 
-        JTextField tF_23_1_1 = new JTextField("");
-        tF_23_1_1.setName("tF_23_1_1");
-        tF_23_1_1.setEditable(false);
-        tF_23_1_1.setBounds(384, 265, 48, 19);
+        JTextField tF_23_01_01 = new JTextField("");
+        tF_23_01_01.setName("tF_23_01_01");
+        tF_23_01_01.setEditable(false);
+        tF_23_01_01.setBounds(384, 265, 48, 19);
 
-        JTextField tF_23_2_1 = new JTextField("");
-        tF_23_2_1.setName("tF_23_2_1");
-        tF_23_2_1.setEditable(false);
-        tF_23_2_1.setBounds(384, 288, 48, 19);
+        JTextField tF_23_02_01 = new JTextField("");
+        tF_23_02_01.setName("tF_23_02_01");
+        tF_23_02_01.setEditable(false);
+        tF_23_02_01.setBounds(384, 288, 48, 19);
 
-        JTextField tF_23_3_1 = new JTextField("");
-        tF_23_3_1.setName("tF_23_3_1");
-        tF_23_3_1.setEditable(false);
-        tF_23_3_1.setBounds(384, 311, 48, 19);
+        JTextField tF_23_03_01 = new JTextField("");
+        tF_23_03_01.setName("tF_23_03_01");
+        tF_23_03_01.setEditable(false);
+        tF_23_03_01.setBounds(384, 311, 48, 19);
 
-        JTextField tF_23_4_1 = new JTextField("");
-        tF_23_4_1.setName("tF_23_4_1");
-        tF_23_4_1.setEditable(false);
-        tF_23_4_1.setBounds(384, 334, 48, 19);
+        JTextField tF_23_04_01 = new JTextField("");
+        tF_23_04_01.setName("tF_23_04_01");
+        tF_23_04_01.setEditable(false);
+        tF_23_04_01.setBounds(384, 334, 48, 19);
 
         JCheckBox cbx_23_4_2 = new JCheckBox("CASE2");
         cbx_23_4_2.setName("cbx_23_4_2");
@@ -398,20 +398,20 @@ public class Tab2 extends CreateMainTest{
         cbx_23_2_2.setName("cbx_23_2_2");
         cbx_23_2_2.setBounds(440, 287, 71, 21);
 
-        JTextField tF_23_2_2 = new JTextField("");
-        tF_23_2_2.setName("tF_23_2_2");
-        tF_23_2_2.setEditable(false);
-        tF_23_2_2.setBounds(520, 288, 48, 19);
+        JTextField tF_23_02_02 = new JTextField("");
+        tF_23_02_02.setName("tF_23_02_02");
+        tF_23_02_02.setEditable(false);
+        tF_23_02_02.setBounds(520, 288, 48, 19);
 
-        JTextField tF_23_3_2 = new JTextField("");
-        tF_23_3_2.setName("tF_23_3_2");
-        tF_23_3_2.setEditable(false);
-        tF_23_3_2.setBounds(520, 311, 48, 19);
+        JTextField tF_23_03_02 = new JTextField("");
+        tF_23_03_02.setName("tF_23_03_02");
+        tF_23_03_02.setEditable(false);
+        tF_23_03_02.setBounds(520, 311, 48, 19);
 
-        JTextField tF_23_4_2 = new JTextField("");
-        tF_23_4_2.setName("tF_23_4_2");
-        tF_23_4_2.setEditable(false);
-        tF_23_4_2.setBounds(520, 334, 48, 19);
+        JTextField tF_23_04_02 = new JTextField("");
+        tF_23_04_02.setName("tF_23_04_02");
+        tF_23_04_02.setEditable(false);
+        tF_23_04_02.setBounds(520, 334, 48, 19);
 
         JCheckBox cbx_23_3_3 = new JCheckBox("CASE3");
         cbx_23_3_3.setName("cbx_23_3_3");
@@ -421,15 +421,15 @@ public class Tab2 extends CreateMainTest{
         cbx_23_2_3.setName("cbx_23_2_3");
         cbx_23_2_3.setBounds(576, 287, 71, 21);
 
-        JTextField tF_23_2_3 = new JTextField("");
-        tF_23_2_3.setName("tF_23_2_3");
-        tF_23_2_3.setEditable(false);
-        tF_23_2_3.setBounds(656, 288, 48, 19);
+        JTextField tF_23_02_03 = new JTextField("");
+        tF_23_02_03.setName("tF_23_02_03");
+        tF_23_02_03.setEditable(false);
+        tF_23_02_03.setBounds(656, 288, 48, 19);
 
-        JTextField tF_23_3_3 = new JTextField("");
-        tF_23_3_3.setName("tF_23_3_3");
-        tF_23_3_3.setEditable(false);
-        tF_23_3_3.setBounds(656, 311, 48, 19);
+        JTextField tF_23_03_03 = new JTextField("");
+        tF_23_03_03.setName("tF_23_03_03");
+        tF_23_03_03.setEditable(false);
+        tF_23_03_03.setBounds(656, 311, 48, 19);
 
         JCheckBox checkBox_70 = new JCheckBox("全件選択");
         checkBox_70.setName("cbx_23_all");
@@ -450,82 +450,82 @@ public class Tab2 extends CreateMainTest{
         cbx_29_1_1.setName("cbx_29_1_1");
         cbx_29_1_1.setBounds(304, 374, 71, 21);
 
-        JTextField tF_29_1_1 = new JTextField("");
-        tF_29_1_1.setName("tF_29_1_1");
-        tF_29_1_1.setEditable(false);
-        tF_29_1_1.setBounds(384, 375, 48, 19);
+        JTextField tF_29_01_01 = new JTextField("");
+        tF_29_01_01.setName("tF_29_01_01");
+        tF_29_01_01.setEditable(false);
+        tF_29_01_01.setBounds(384, 375, 48, 19);
 
         JCheckBox cbx_29_1_2 = new JCheckBox("CASE2");
         cbx_29_1_2.setName("cbx_29_1_2");
         cbx_29_1_2.setBounds(440, 374, 71, 21);
 
-        JTextField tF_29_1_2 = new JTextField("");
-        tF_29_1_2.setName("tF_29_1_2");
-        tF_29_1_2.setEditable(false);
-        tF_29_1_2.setBounds(520, 375, 48, 19);
+        JTextField tF_29_01_02 = new JTextField("");
+        tF_29_01_02.setName("tF_29_01_02");
+        tF_29_01_02.setEditable(false);
+        tF_29_01_02.setBounds(520, 375, 48, 19);
 
         JCheckBox cbx_29_1_3 = new JCheckBox("CASE3");
         cbx_29_1_3.setName("cbx_29_1_3");
         cbx_29_1_3.setBounds(576, 374, 71, 21);
 
-        JTextField tF_29_1_3 = new JTextField("");
-        tF_29_1_3.setName("tF_29_1_3");
-        tF_29_1_3.setEditable(false);
-        tF_29_1_3.setBounds(656, 375, 48, 19);
+        JTextField tF_29_01_03 = new JTextField("");
+        tF_29_01_03.setName("tF_29_01_03");
+        tF_29_01_03.setEditable(false);
+        tF_29_01_03.setBounds(656, 375, 48, 19);
 
         JCheckBox cbx_29_1_4 = new JCheckBox("CASE4");
         cbx_29_1_4.setName("cbx_29_1_4");
         cbx_29_1_4.setBounds(712, 374, 71, 21);
 
-        JTextField tF_29_1_4 = new JTextField("");
-        tF_29_1_4.setName("tF_29_1_4");
-        tF_29_1_4.setEditable(false);
-        tF_29_1_4.setBounds(792, 375, 48, 19);
+        JTextField tF_29_01_04 = new JTextField("");
+        tF_29_01_04.setName("tF_29_01_04");
+        tF_29_01_04.setEditable(false);
+        tF_29_01_04.setBounds(792, 375, 48, 19);
 
         JCheckBox cbx_29_1_5 = new JCheckBox("CASE5");
         cbx_29_1_5.setName("cbx_29_1_5");
         cbx_29_1_5.setBounds(852, 374, 71, 21);
 
-        JTextField tF_29_1_5 = new JTextField("");
-        tF_29_1_5.setName("tF_29_1_5");
-        tF_29_1_5.setEditable(false);
-        tF_29_1_5.setBounds(932, 375, 48, 19);
+        JTextField tF_29_01_05 = new JTextField("");
+        tF_29_01_05.setName("tF_29_01_05");
+        tF_29_01_05.setEditable(false);
+        tF_29_01_05.setBounds(932, 375, 48, 19);
 
         JCheckBox cbx_29_1_6 = new JCheckBox("CASE6");
         cbx_29_1_6.setName("cbx_29_1_6");
         cbx_29_1_6.setBounds(992, 374, 71, 21);
 
-        JTextField tF_29_1_6 = new JTextField("");
-        tF_29_1_6.setName("tF_29_1_6");
-        tF_29_1_6.setEditable(false);
-        tF_29_1_6.setBounds(1072, 375, 48, 19);
+        JTextField tF_29_01_06 = new JTextField("");
+        tF_29_01_06.setName("tF_29_01_06");
+        tF_29_01_06.setEditable(false);
+        tF_29_01_06.setBounds(1072, 375, 48, 19);
 
         JCheckBox cbx_29_1_7 = new JCheckBox("CASE7");
         cbx_29_1_7.setName("cbx_29_1_7");
         cbx_29_1_7.setBounds(304, 397, 71, 21);
 
-        JTextField tF_29_1_7 = new JTextField("");
-        tF_29_1_7.setName("tF_29_1_7");
-        tF_29_1_7.setEditable(false);
-        tF_29_1_7.setBounds(384, 398, 48, 19);
+        JTextField tF_29_01_07 = new JTextField("");
+        tF_29_01_07.setName("tF_29_01_07");
+        tF_29_01_07.setEditable(false);
+        tF_29_01_07.setBounds(384, 398, 48, 19);
 
         JCheckBox cbx_29_1_8 = new JCheckBox("CASE8");
         cbx_29_1_8.setName("cbx_29_1_8");
         cbx_29_1_8.setBounds(440, 397, 71, 21);
 
-        JTextField tF_29_1_8 = new JTextField("");
-        tF_29_1_8.setName("tF_29_1_8");
-        tF_29_1_8.setEditable(false);
-        tF_29_1_8.setBounds(520, 398, 48, 19);
+        JTextField tF_29_01_08 = new JTextField("");
+        tF_29_01_08.setName("tF_29_01_08");
+        tF_29_01_08.setEditable(false);
+        tF_29_01_08.setBounds(520, 398, 48, 19);
 
         JCheckBox cbx_29_1_9 = new JCheckBox("CASE9");
         cbx_29_1_9.setName("cbx_29_1_9");
         cbx_29_1_9.setBounds(576, 397, 71, 21);
 
-        JTextField tF_29_1_9 = new JTextField("");
-        tF_29_1_9.setName("tF_29_1_9");
-        tF_29_1_9.setEditable(false);
-        tF_29_1_9.setBounds(656, 398, 48, 19);
+        JTextField tF_29_01_09 = new JTextField("");
+        tF_29_01_09.setName("tF_29_01_09");
+        tF_29_01_09.setEditable(false);
+        tF_29_01_09.setBounds(656, 398, 48, 19);
 
         JCheckBox checkBox_71 = new JCheckBox("全件選択");
         checkBox_71.setName("cbx_29_all");
@@ -570,25 +570,25 @@ public class Tab2 extends CreateMainTest{
         cbx_31_1_1.setName("cbx_31_1_1");
         cbx_31_1_1.setBounds(304, 439, 71, 21);
 
-        JTextField tF_31_1_1 = new JTextField("");
-        tF_31_1_1.setName("tF_31_1_1");
-        tF_31_1_1.setEditable(false);
-        tF_31_1_1.setBounds(384, 440, 48, 19);
+        JTextField tF_31_01_01 = new JTextField("");
+        tF_31_01_01.setName("tF_31_01_01");
+        tF_31_01_01.setEditable(false);
+        tF_31_01_01.setBounds(384, 440, 48, 19);
 
-        JTextField tF_31_2_1 = new JTextField("");
-        tF_31_2_1.setName("tF_31_2_1");
-        tF_31_2_1.setEditable(false);
-        tF_31_2_1.setBounds(384, 463, 48, 19);
+        JTextField tF_31_02_01 = new JTextField("");
+        tF_31_02_01.setName("tF_31_02_01");
+        tF_31_02_01.setEditable(false);
+        tF_31_02_01.setBounds(384, 463, 48, 19);
 
-        JTextField tF_31_3_1 = new JTextField("");
-        tF_31_3_1.setName("tF_31_3_1");
-        tF_31_3_1.setEditable(false);
-        tF_31_3_1.setBounds(384, 486, 48, 19);
+        JTextField tF_31_03_01 = new JTextField("");
+        tF_31_03_01.setName("tF_31_03_01");
+        tF_31_03_01.setEditable(false);
+        tF_31_03_01.setBounds(384, 486, 48, 19);
 
-        JTextField tF_31_4_1 = new JTextField("");
-        tF_31_4_1.setName("tF_31_4_1");
-        tF_31_4_1.setEditable(false);
-        tF_31_4_1.setBounds(384, 509, 48, 19);
+        JTextField tF_31_04_01 = new JTextField("");
+        tF_31_04_01.setName("tF_31_04_01");
+        tF_31_04_01.setEditable(false);
+        tF_31_04_01.setBounds(384, 509, 48, 19);
 
         JLabel lb_31_5 = new JLabel("SCENARIO5");
         lb_31_5.setName("lb_31_5");
@@ -598,10 +598,10 @@ public class Tab2 extends CreateMainTest{
         cbx_31_5_1.setName("cbx_31_5_1");
         cbx_31_5_1.setBounds(304, 531, 71, 21);
 
-        JTextField tF_31_5_1 = new JTextField("");
-        tF_31_5_1.setName("tF_31_5_1");
-        tF_31_5_1.setEditable(false);
-        tF_31_5_1.setBounds(384, 532, 48, 19);
+        JTextField tF_31_05_01 = new JTextField("");
+        tF_31_05_01.setName("tF_31_05_01");
+        tF_31_05_01.setEditable(false);
+        tF_31_05_01.setBounds(384, 532, 48, 19);
 
         JLabel lb_31_6 = new JLabel("SCENARIO6");
         lb_31_6.setName("lb_31_6");
@@ -611,10 +611,10 @@ public class Tab2 extends CreateMainTest{
         cbx_31_6_1.setName("cbx_31_6_1");
         cbx_31_6_1.setBounds(304, 554, 71, 21);
 
-        JTextField tF_31_6_1 = new JTextField("");
-        tF_31_6_1.setName("tF_31_6_1");
-        tF_31_6_1.setEditable(false);
-        tF_31_6_1.setBounds(384, 555, 48, 19);
+        JTextField tF_31_06_01 = new JTextField("");
+        tF_31_06_01.setName("tF_31_06_01");
+        tF_31_06_01.setEditable(false);
+        tF_31_06_01.setBounds(384, 555, 48, 19);
 
         JCheckBox checkBox_72 = new JCheckBox("全件選択");
         checkBox_72.setName("cbx_31_all");
@@ -659,25 +659,25 @@ public class Tab2 extends CreateMainTest{
         cbx_33_1_1.setName("cbx_33_1_1");
         cbx_33_1_1.setBounds(304, 593, 71, 21);
 
-        JTextField tF_33_1_1 = new JTextField("");
-        tF_33_1_1.setName("tF_33_1_1");
-        tF_33_1_1.setEditable(false);
-        tF_33_1_1.setBounds(384, 594, 48, 19);
+        JTextField tF_33_01_01 = new JTextField("");
+        tF_33_01_01.setName("tF_33_01_01");
+        tF_33_01_01.setEditable(false);
+        tF_33_01_01.setBounds(384, 594, 48, 19);
 
-        JTextField tF_33_2_1 = new JTextField("");
-        tF_33_2_1.setName("tF_33_2_1");
-        tF_33_2_1.setEditable(false);
-        tF_33_2_1.setBounds(384, 617, 48, 19);
+        JTextField tF_33_02_01 = new JTextField("");
+        tF_33_02_01.setName("tF_33_02_01");
+        tF_33_02_01.setEditable(false);
+        tF_33_02_01.setBounds(384, 617, 48, 19);
 
-        JTextField tF_33_3_1 = new JTextField("");
-        tF_33_3_1.setName("tF_33_3_1");
-        tF_33_3_1.setEditable(false);
-        tF_33_3_1.setBounds(384, 640, 48, 19);
+        JTextField tF_33_03_01 = new JTextField("");
+        tF_33_03_01.setName("tF_33_03_01");
+        tF_33_03_01.setEditable(false);
+        tF_33_03_01.setBounds(384, 640, 48, 19);
 
-        JTextField tF_33_4_1 = new JTextField("");
-        tF_33_4_1.setName("tF_33_4_1");
-        tF_33_4_1.setEditable(false);
-        tF_33_4_1.setBounds(384, 663, 48, 19);
+        JTextField tF_33_04_01 = new JTextField("");
+        tF_33_04_01.setName("tF_33_04_01");
+        tF_33_04_01.setEditable(false);
+        tF_33_04_01.setBounds(384, 663, 48, 19);
 
         JCheckBox cbx_33_4_2 = new JCheckBox("CASE2");
         cbx_33_4_2.setName("cbx_33_4_2");
@@ -691,20 +691,20 @@ public class Tab2 extends CreateMainTest{
         cbx_33_2_2.setName("cbx_33_2_2");
         cbx_33_2_2.setBounds(440, 616, 71, 21);
 
-        JTextField tF_33_2_2 = new JTextField("");
-        tF_33_2_2.setName("tF_33_2_2");
-        tF_33_2_2.setEditable(false);
-        tF_33_2_2.setBounds(520, 617, 48, 19);
+        JTextField tF_33_02_02 = new JTextField("");
+        tF_33_02_02.setName("tF_33_02_02");
+        tF_33_02_02.setEditable(false);
+        tF_33_02_02.setBounds(520, 617, 48, 19);
 
-        JTextField tF_33_3_2 = new JTextField("");
-        tF_33_3_2.setName("tF_33_3_2");
-        tF_33_3_2.setEditable(false);
-        tF_33_3_2.setBounds(520, 640, 48, 19);
+        JTextField tF_33_03_02 = new JTextField("");
+        tF_33_03_02.setName("tF_33_03_02");
+        tF_33_03_02.setEditable(false);
+        tF_33_03_02.setBounds(520, 640, 48, 19);
 
-        JTextField tF_33_4_2 = new JTextField("");
-        tF_33_4_2.setName("tF_33_4_2");
-        tF_33_4_2.setEditable(false);
-        tF_33_4_2.setBounds(520, 334, 48, 19);
+        JTextField tF_33_04_02 = new JTextField("");
+        tF_33_04_02.setName("tF_33_04_02");
+        tF_33_04_02.setEditable(false);
+        tF_33_04_02.setBounds(520, 334, 48, 19);
 
         JCheckBox cbx_33_3_3 = new JCheckBox("CASE3");
         cbx_33_3_3.setName("cbx_33_3_3");
@@ -714,33 +714,33 @@ public class Tab2 extends CreateMainTest{
         cbx_33_2_3.setName("cbx_33_2_3");
         cbx_33_2_3.setBounds(576, 616, 71, 21);
 
-        JTextField tF_33_2_3 = new JTextField("");
-        tF_33_2_3.setName("tF_33_2_3");
-        tF_33_2_3.setEditable(false);
-        tF_33_2_3.setBounds(656, 617, 48, 19);
+        JTextField tF_33_02_03 = new JTextField("");
+        tF_33_02_03.setName("tF_33_02_03");
+        tF_33_02_03.setEditable(false);
+        tF_33_02_03.setBounds(656, 617, 48, 19);
 
-        JTextField tF_33_3_3 = new JTextField("");
-        tF_33_3_3.setName("tF_33_3_3");
-        tF_33_3_3.setEditable(false);
-        tF_33_3_3.setBounds(656, 640, 48, 19);
+        JTextField tF_33_03_03 = new JTextField("");
+        tF_33_03_03.setName("tF_33_03_03");
+        tF_33_03_03.setEditable(false);
+        tF_33_03_03.setBounds(656, 640, 48, 19);
 
         JCheckBox cbx_33_1_2 = new JCheckBox("CASE2");
         cbx_33_1_2.setName("cbx_33_1_2");
         cbx_33_1_2.setBounds(440, 593, 71, 21);
 
-        JTextField tF_33_1_2 = new JTextField("");
-        tF_33_1_2.setName("tF_33_1_2");
-        tF_33_1_2.setEditable(false);
-        tF_33_1_2.setBounds(520, 594, 48, 19);
+        JTextField tF_33_01_02 = new JTextField("");
+        tF_33_01_02.setName("tF_33_01_02");
+        tF_33_01_02.setEditable(false);
+        tF_33_01_02.setBounds(520, 594, 48, 19);
 
         JCheckBox cbx_33_1_3 = new JCheckBox("CASE3");
         cbx_33_1_3.setName("cbx_33_1_3");
         cbx_33_1_3.setBounds(576, 593, 71, 21);
 
-        JTextField tF_33_1_3 = new JTextField("");
-        tF_33_1_3.setName("tF_33_1_3");
-        tF_33_1_3.setEditable(false);
-        tF_33_1_3.setBounds(656, 594, 48, 19);
+        JTextField tF_33_01_03 = new JTextField("");
+        tF_33_01_03.setName("tF_33_01_03");
+        tF_33_01_03.setEditable(false);
+        tF_33_01_03.setBounds(656, 594, 48, 19);
 
         JLabel lb_33_5 = new JLabel("SCENARIO5");
         lb_33_5.setName("lb_33_5");
@@ -750,19 +750,19 @@ public class Tab2 extends CreateMainTest{
         cbx_33_5_1.setName("cbx_33_5_1");
         cbx_33_5_1.setBounds(304, 685, 71, 21);
 
-        JTextField tF_33_5_1 = new JTextField("");
-        tF_33_5_1.setName("tF_33_5_1");
-        tF_33_5_1.setEditable(false);
-        tF_33_5_1.setBounds(384, 686, 48, 19);
+        JTextField tF_33_05_01 = new JTextField("");
+        tF_33_05_01.setName("tF_33_05_01");
+        tF_33_05_01.setEditable(false);
+        tF_33_05_01.setBounds(384, 686, 48, 19);
 
         JCheckBox cbx_33_5_2 = new JCheckBox("CASE2");
         cbx_33_5_2.setName("cbx_33_5_2");
         cbx_33_5_2.setBounds(440, 685, 71, 21);
 
-        JTextField tF_33_5_2 = new JTextField("");
-        tF_33_5_2.setName("tF_33_5_2");
-        tF_33_5_2.setEditable(false);
-        tF_33_5_2.setBounds(520, 686, 48, 19);
+        JTextField tF_33_05_02 = new JTextField("");
+        tF_33_05_02.setName("tF_33_05_02");
+        tF_33_05_02.setEditable(false);
+        tF_33_05_02.setBounds(520, 686, 48, 19);
 
         JCheckBox checkBox_73 = new JCheckBox("全件選択");
         checkBox_73.setName("cbx_33_all");
@@ -807,34 +807,34 @@ public class Tab2 extends CreateMainTest{
         cbx_34_1_1.setName("cbx_34_1_1");
         cbx_34_1_1.setBounds(304, 727, 71, 21);
 
-        JTextField tF_34_1_1 = new JTextField("");
-        tF_34_1_1.setName("tF_34_1_1");
-        tF_34_1_1.setEditable(false);
-        tF_34_1_1.setBounds(384, 728, 48, 19);
+        JTextField tF_34_01_01 = new JTextField("");
+        tF_34_01_01.setName("tF_34_01_01");
+        tF_34_01_01.setEditable(false);
+        tF_34_01_01.setBounds(384, 728, 48, 19);
 
-        JTextField tF_34_2_1 = new JTextField("");
-        tF_34_2_1.setName("tF_34_2_1");
-        tF_34_2_1.setEditable(false);
-        tF_34_2_1.setBounds(384, 751, 48, 19);
+        JTextField tF_34_02_01 = new JTextField("");
+        tF_34_02_01.setName("tF_34_02_01");
+        tF_34_02_01.setEditable(false);
+        tF_34_02_01.setBounds(384, 751, 48, 19);
 
-        JTextField tF_34_3_1 = new JTextField("");
-        tF_34_3_1.setName("tF_34_3_1");
-        tF_34_3_1.setEditable(false);
-        tF_34_3_1.setBounds(384, 774, 48, 19);
+        JTextField tF_34_03_01 = new JTextField("");
+        tF_34_03_01.setName("tF_34_03_01");
+        tF_34_03_01.setEditable(false);
+        tF_34_03_01.setBounds(384, 774, 48, 19);
 
-        JTextField tF_34_4_1 = new JTextField("");
-        tF_34_4_1.setName("tF_34_4_1");
-        tF_34_4_1.setEditable(false);
-        tF_34_4_1.setBounds(384, 797, 48, 19);
+        JTextField tF_34_04_01 = new JTextField("");
+        tF_34_04_01.setName("tF_34_04_01");
+        tF_34_04_01.setEditable(false);
+        tF_34_04_01.setBounds(384, 797, 48, 19);
 
         JCheckBox cbx_34_1_2 = new JCheckBox("CASE2");
         cbx_34_1_2.setName("cbx_34_1_2");
         cbx_34_1_2.setBounds(440, 727, 71, 21);
 
-        JTextField tF_34_1_2 = new JTextField("");
-        tF_34_1_2.setName("tF_34_1_2");
-        tF_34_1_2.setEditable(false);
-        tF_34_1_2.setBounds(520, 728, 48, 19);
+        JTextField tF_34_01_02 = new JTextField("");
+        tF_34_01_02.setName("tF_34_01_02");
+        tF_34_01_02.setEditable(false);
+        tF_34_01_02.setBounds(520, 728, 48, 19);
 
         JCheckBox checkBox_74 = new JCheckBox("全件選択");
         checkBox_74.setName("cbx_34_all");
@@ -845,265 +845,265 @@ public class Tab2 extends CreateMainTest{
         p.add(lb_10);
         p.add(lb_10_1);
         p.add(cbx_10_1_1);
-        p.add(tF_10_1_1);
+        p.add(tF_10_01_01);
         p.add(lb_11);
         p.add(lb_11_1);
         p.add(cbx_11_1_1);
-        p.add(tF_11_1_1);
+        p.add(tF_11_01_01);
         p.add(cbx_11_1_2);
-        p.add(tF_11_1_2);
+        p.add(tF_11_01_02);
         p.add(lb_15);
         p.add(lb_15_1);
         p.add(cbx_15_1_1);
-        p.add(tF_15_1_1);
+        p.add(tF_15_01_01);
         p.add(cbx_15_1_2);
-        p.add(tF_15_1_2);
+        p.add(tF_15_01_02);
         p.add(cbx_15_1_3);
-        p.add(tF_15_1_3);
+        p.add(tF_15_01_03);
         p.add(cbx_15_1_4);
-        p.add(tF_15_1_4);
+        p.add(tF_15_01_04);
         p.add(lb_21);
         p.add(lb_21_1);
         p.add(cbx_21_1_1);
-        p.add(tF_21_1_1);
+        p.add(tF_21_01_01);
         p.add(cbx_21_1_2);
-        p.add(tF_21_1_2);
+        p.add(tF_21_01_02);
         p.add(cbx_21_1_3);
-        p.add(tF_21_1_3);
+        p.add(tF_21_01_03);
         p.add(cbx_21_1_4);
-        p.add(tF_21_1_4);
+        p.add(tF_21_01_04);
         p.add(cbx_21_1_5);
-        p.add(tF_21_1_5);
+        p.add(tF_21_01_05);
         p.add(cbx_21_1_6);
-        p.add(tF_21_1_6);
+        p.add(tF_21_01_06);
         p.add(lb_21_2);
         p.add(cbx_21_2_1);
-        p.add(tF_21_2_1);
+        p.add(tF_21_02_01);
         p.add(cbx_21_2_2);
-        p.add(tF_21_2_2);
+        p.add(tF_21_02_02);
         p.add(cbx_21_2_3);
-        p.add(tF_21_2_3);
+        p.add(tF_21_02_03);
         p.add(cbx_21_2_4);
-        p.add(tF_21_2_4);
+        p.add(tF_21_02_04);
         p.add(cbx_21_2_5);
-        p.add(tF_21_2_5);
+        p.add(tF_21_02_05);
         p.add(cbx_21_2_6);
-        p.add(tF_21_2_6);
+        p.add(tF_21_02_06);
         p.add(lb_22);
         p.add(lb_22_1);
         p.add(cbx_22_1_1);
-        p.add(tF_22_1_1);
+        p.add(tF_22_01_01);
         p.add(cbx_22_1_2);
-        p.add(tF_22_1_2);
+        p.add(tF_22_01_02);
         p.add(cbx_22_1_3);
-        p.add(tF_22_1_3);
+        p.add(tF_22_01_03);
         p.add(cbx_22_1_4);
-        p.add(tF_22_1_4);
+        p.add(tF_22_01_04);
         p.add(cbx_22_1_5);
-        p.add(tF_22_1_5);
+        p.add(tF_22_01_05);
         p.add(cbx_22_1_6);
-        p.add(tF_22_1_6);
+        p.add(tF_22_01_06);
         p.add(lb_22_2);
         p.add(cbx_22_2_1);
-        p.add(tF_22_2_1);
+        p.add(tF_22_02_01);
         p.add(cbx_22_2_3);
-        p.add(tF_22_2_3);
+        p.add(tF_22_02_03);
         p.add(lb_23);
         p.add(lb_23_1);
         p.add(cbx_23_1_1);
-        p.add(tF_23_1_1);
+        p.add(tF_23_01_01);
         p.add(lb_23_2);
         p.add(cbx_23_2_1);
-        p.add(tF_23_2_1);
+        p.add(tF_23_02_01);
         p.add(cbx_23_2_2);
-        p.add(tF_23_2_2);
+        p.add(tF_23_02_02);
         p.add(cbx_23_2_3);
-        p.add(tF_23_2_3);
+        p.add(tF_23_02_03);
         p.add(lb_23_3);
         p.add(cbx_23_3_1);
-        p.add(tF_23_3_1);
+        p.add(tF_23_03_01);
         p.add(cbx_23_3_2);
-        p.add(tF_23_3_2);
+        p.add(tF_23_03_02);
         p.add(cbx_23_3_3);
-        p.add(tF_23_3_3);
+        p.add(tF_23_03_03);
         p.add(lb_23_4);
         p.add(cbx_23_4_1);
-        p.add(tF_23_4_1);
+        p.add(tF_23_04_01);
         p.add(cbx_23_4_2);
-        p.add(tF_23_4_2);
+        p.add(tF_23_04_02);
         p.add(lb_29);
         p.add(lb_29_1);
         p.add(cbx_29_1_1);
-        p.add(tF_29_1_1);
+        p.add(tF_29_01_01);
         p.add(cbx_29_1_2);
-        p.add(tF_29_1_2);
+        p.add(tF_29_01_02);
         p.add(cbx_29_1_3);
-        p.add(tF_29_1_3);
+        p.add(tF_29_01_03);
         p.add(cbx_29_1_4);
-        p.add(tF_29_1_4);
+        p.add(tF_29_01_04);
         p.add(cbx_29_1_5);
-        p.add(tF_29_1_5);
+        p.add(tF_29_01_05);
         p.add(cbx_29_1_6);
-        p.add(tF_29_1_6);
+        p.add(tF_29_01_06);
         p.add(cbx_29_1_7);
-        p.add(tF_29_1_7);
+        p.add(tF_29_01_07);
         p.add(cbx_29_1_8);
-        p.add(tF_29_1_8);
+        p.add(tF_29_01_08);
         p.add(cbx_29_1_9);
-        p.add(tF_29_1_9);
+        p.add(tF_29_01_09);
         p.add(lb_31);
         p.add(lb_31_1);
         p.add(cbx_31_1_1);
-        p.add(tF_31_1_1);
+        p.add(tF_31_01_01);
         p.add(lb_31_2);
         p.add(cbx_31_2_1);
-        p.add(tF_31_2_1);
+        p.add(tF_31_02_01);
         p.add(lb_31_3);
         p.add(cbx_31_3_1);
-        p.add(tF_31_3_1);
+        p.add(tF_31_03_01);
         p.add(lb_31_4);
         p.add(cbx_31_4_1);
-        p.add(tF_31_4_1);
+        p.add(tF_31_04_01);
         p.add(lb_31_5);
         p.add(cbx_31_5_1);
-        p.add(tF_31_5_1);
+        p.add(tF_31_05_01);
         p.add(lb_31_6);
         p.add(cbx_31_6_1);
-        p.add(tF_31_6_1);
+        p.add(tF_31_06_01);
         p.add(lb_33);
         p.add(lb_33_1);
         p.add(cbx_33_1_1);
-        p.add(tF_33_1_1);
+        p.add(tF_33_01_01);
         p.add(cbx_33_1_2);
-        p.add(tF_33_1_2);
+        p.add(tF_33_01_02);
         p.add(cbx_33_1_3);
-        p.add(tF_33_1_3);
+        p.add(tF_33_01_03);
         p.add(lb_33_2);
         p.add(cbx_33_2_1);
-        p.add(tF_33_2_1);
+        p.add(tF_33_02_01);
         p.add(cbx_33_2_2);
-        p.add(tF_33_2_2);
+        p.add(tF_33_02_02);
         p.add(cbx_33_2_3);
-        p.add(tF_33_2_3);
+        p.add(tF_33_02_03);
         p.add(lb_33_3);
         p.add(cbx_33_3_1);
-        p.add(tF_33_3_1);
+        p.add(tF_33_03_01);
         p.add(cbx_33_3_2);
-        p.add(tF_33_3_2);
+        p.add(tF_33_03_02);
         p.add(cbx_33_3_3);
-        p.add(tF_33_3_3);
+        p.add(tF_33_03_03);
         p.add(lb_33_4);
         p.add(cbx_33_4_1);
-        p.add(tF_33_4_1);
+        p.add(tF_33_04_01);
         p.add(lb_33_5);
         p.add(cbx_33_5_1);
-        p.add(tF_33_5_1);
+        p.add(tF_33_05_01);
         p.add(cbx_33_5_2);
-        p.add(tF_33_5_2);
+        p.add(tF_33_05_02);
         p.add(lb_34);
         p.add(lb_34_1);
         p.add(cbx_34_1_1);
-        p.add(tF_34_1_1);
+        p.add(tF_34_01_01);
         p.add(cbx_34_1_2);
-        p.add(tF_34_1_2);
+        p.add(tF_34_01_02);
         p.add(lb_34_2);
         p.add(cbx_34_2_1);
-        p.add(tF_34_2_1);
+        p.add(tF_34_02_01);
         p.add(lb_34_3);
         p.add(cbx_34_3_1);
-        p.add(tF_34_3_1);
+        p.add(tF_34_03_01);
         p.add(lb_34_4);
         p.add(cbx_34_4_1);
-        p.add(tF_34_4_1);
+        p.add(tF_34_04_01);
 
-        addActionCheckbox(cbx_10_1_1, "tF_10_1_1", "ksu001.Scenario1Case1");
-        addActionCheckbox(cbx_10_1_1, "tF_11_1_1", "ksu007.Scenario1Case1");
-        addActionCheckbox(cbx_10_1_1, "tF_11_1_2", "ksu007.Scenario1Case2");
-        addActionCheckbox(cbx_15_1_1, "tF_15_1_1", "kif001.Scenario1Case1");
-        addActionCheckbox(cbx_15_1_2, "tF_15_1_2", "kif001.Scenario1Case2");
-        addActionCheckbox(cbx_15_1_3, "tF_15_1_3", "kif001.Scenario1Case3");
-        addActionCheckbox(cbx_15_1_4, "tF_15_1_4", "kif001.Scenario1Case4");
-        addActionCheckbox(cbx_21_1_1, "tF_21_1_1", "kmw003.Scenario1Case1");
-        addActionCheckbox(cbx_21_1_2, "tF_21_1_2", "kmw003.Scenario1Case2");
-        addActionCheckbox(cbx_21_1_3, "tF_21_1_3", "kmw003.Scenario1Case3");
-        addActionCheckbox(cbx_21_1_4, "tF_21_1_4", "kmw003.Scenario1Case4");
-        addActionCheckbox(cbx_21_1_5, "tF_21_1_5", "kmw003.Scenario1Case5");
-        addActionCheckbox(cbx_21_1_6, "tF_21_1_6", "kmw003.Scenario1Case6");
-        addActionCheckbox(cbx_21_2_1, "tF_21_2_1", "kmw003.Scenario2Case1");
-        addActionCheckbox(cbx_21_2_2, "tF_21_2_2", "kmw003.Scenario2Case2");
-        addActionCheckbox(cbx_21_2_3, "tF_21_2_3", "kmw003.Scenario2Case3");
-        addActionCheckbox(cbx_21_2_4, "tF_21_2_4", "kmw003.Scenario2Case4");
-        addActionCheckbox(cbx_21_2_5, "tF_21_2_5", "kmw003.Scenario2Case5");
-        addActionCheckbox(cbx_21_2_6, "tF_21_2_6", "kmw003.Scenario2Case6");
+        addActionCheckbox(cbx_10_1_1, "tF_10_01_01", "ksu001.Scenario1Case1");
+        addActionCheckbox(cbx_10_1_1, "tF_11_01_01", "ksu007.Scenario1Case1");
+        addActionCheckbox(cbx_10_1_1, "tF_11_01_02", "ksu007.Scenario1Case2");
+        addActionCheckbox(cbx_15_1_1, "tF_15_01_01", "kif001.Scenario1Case1");
+        addActionCheckbox(cbx_15_1_2, "tF_15_01_02", "kif001.Scenario1Case2");
+        addActionCheckbox(cbx_15_1_3, "tF_15_01_03", "kif001.Scenario1Case3");
+        addActionCheckbox(cbx_15_1_4, "tF_15_01_04", "kif001.Scenario1Case4");
+        addActionCheckbox(cbx_21_1_1, "tF_21_01_01", "kmw003.Scenario1Case1");
+        addActionCheckbox(cbx_21_1_2, "tF_21_01_02", "kmw003.Scenario1Case2");
+        addActionCheckbox(cbx_21_1_3, "tF_21_01_03", "kmw003.Scenario1Case3");
+        addActionCheckbox(cbx_21_1_4, "tF_21_01_04", "kmw003.Scenario1Case4");
+        addActionCheckbox(cbx_21_1_5, "tF_21_01_05", "kmw003.Scenario1Case5");
+        addActionCheckbox(cbx_21_1_6, "tF_21_01_06", "kmw003.Scenario1Case6");
+        addActionCheckbox(cbx_21_2_1, "tF_21_02_01", "kmw003.Scenario2Case1");
+        addActionCheckbox(cbx_21_2_2, "tF_21_02_02", "kmw003.Scenario2Case2");
+        addActionCheckbox(cbx_21_2_3, "tF_21_02_03", "kmw003.Scenario2Case3");
+        addActionCheckbox(cbx_21_2_4, "tF_21_02_04", "kmw003.Scenario2Case4");
+        addActionCheckbox(cbx_21_2_5, "tF_21_02_05", "kmw003.Scenario2Case5");
+        addActionCheckbox(cbx_21_2_6, "tF_21_02_06", "kmw003.Scenario2Case6");
 
-//        addActionCheckbox(cbx_21_1_1, "tF_22_1_1", "kmw005.Scenario1Case1");
-//        addActionCheckbox(cbx_21_1_2, "tF_22_1_2", "kmw005.Scenario1Case2");
-//        addActionCheckbox(cbx_21_1_3, "tF_22_1_3", "kmw005.Scenario1Case3");
-//        addActionCheckbox(cbx_21_1_4, "tF_22_1_4", "kmw005.Scenario1Case4");
-//        addActionCheckbox(cbx_21_1_5, "tF_22_1_5", "kmw005.Scenario1Case5");
-//        addActionCheckbox(cbx_21_1_6, "tF_22_1_6", "kmw005.Scenario1Case6");
-//        addActionCheckbox(cbx_21_2_1, "tF_22_2_1", "kmw005.Scenario2Case1");
-//        addActionCheckbox(cbx_21_2_2, "tF_22_2_3", "kmw005.Scenario2Case3");
-        addActionCheckbox(cbx_22_1_1, "tF_22_1_1", "kmw005.Scenario1Case1");
-        addActionCheckbox(cbx_22_1_2, "tF_22_1_2", "kmw005.Scenario1Case2");
-        addActionCheckbox(cbx_22_1_3, "tF_22_1_3", "kmw005.Scenario1Case3");
-        addActionCheckbox(cbx_22_1_4, "tF_22_1_4", "kmw005.Scenario1Case4");
-        addActionCheckbox(cbx_22_1_5, "tF_22_1_5", "kmw005.Scenario1Case5");
-        addActionCheckbox(cbx_22_1_6, "tF_22_1_6", "kmw005.Scenario1Case6");
-        addActionCheckbox(cbx_22_2_1, "tF_22_2_1", "kmw005.Scenario2Case1");
-        addActionCheckbox(cbx_22_2_3, "tF_22_2_3", "kmw005.Scenario2Case3");
+//        addActionCheckbox(cbx_21_1_1, "tF_22_01_01", "kmw005.Scenario1Case1");
+//        addActionCheckbox(cbx_21_1_2, "tF_22_01_02", "kmw005.Scenario1Case2");
+//        addActionCheckbox(cbx_21_1_3, "tF_22_01_03", "kmw005.Scenario1Case3");
+//        addActionCheckbox(cbx_21_1_4, "tF_22_01_04", "kmw005.Scenario1Case4");
+//        addActionCheckbox(cbx_21_1_5, "tF_22_01_05", "kmw005.Scenario1Case5");
+//        addActionCheckbox(cbx_21_1_6, "tF_22_01_06", "kmw005.Scenario1Case6");
+//        addActionCheckbox(cbx_21_2_1, "tF_22_02_01", "kmw005.Scenario2Case1");
+//        addActionCheckbox(cbx_21_2_2, "tF_22_02_03", "kmw005.Scenario2Case3");
+        addActionCheckbox(cbx_22_1_1, "tF_22_01_01", "kmw005.Scenario1Case1");
+        addActionCheckbox(cbx_22_1_2, "tF_22_01_02", "kmw005.Scenario1Case2");
+        addActionCheckbox(cbx_22_1_3, "tF_22_01_03", "kmw005.Scenario1Case3");
+        addActionCheckbox(cbx_22_1_4, "tF_22_01_04", "kmw005.Scenario1Case4");
+        addActionCheckbox(cbx_22_1_5, "tF_22_01_05", "kmw005.Scenario1Case5");
+        addActionCheckbox(cbx_22_1_6, "tF_22_01_06", "kmw005.Scenario1Case6");
+        addActionCheckbox(cbx_22_2_1, "tF_22_02_01", "kmw005.Scenario2Case1");
+        addActionCheckbox(cbx_22_2_3, "tF_22_02_03", "kmw005.Scenario2Case3");
 
-//        addActionCheckbox(cbx_21_1_1, "tF_23_1_1", "kmw005.Scenario1Case1");
-//        addActionCheckbox(cbx_21_1_2, "tF_23_2_1", "kmw005.Scenario2Case1");
-//        addActionCheckbox(cbx_21_1_3, "tF_23_2_2", "kmw005.Scenario2Case2");
-//        addActionCheckbox(cbx_21_1_4, "tF_23_2_3", "kmw005.Scenario2Case3");
-//        addActionCheckbox(cbx_21_1_5, "tF_23_3_1", "kmw005.Scenario3Case1");
-//        addActionCheckbox(cbx_21_1_6, "tF_23_3_2", "kmw005.Scenario3Case2");
-//        addActionCheckbox(cbx_21_2_1, "tF_23_3_3", "kmw005.Scenario3Case3");
-//        addActionCheckbox(cbx_21_2_2, "tF_23_4_1", "kmw005.Scenario4Case1");
-//        addActionCheckbox(cbx_21_2_2, "tF_23_4_2", "kmw005.Scenario4Case2");
-        addActionCheckbox(cbx_23_1_1, "tF_23_1_1", "kmw006.Scenario1Case1");
-        addActionCheckbox(cbx_23_2_1, "tF_23_2_1", "kmw006.Scenario2Case1");
-        addActionCheckbox(cbx_23_2_2, "tF_23_2_2", "kmw006.Scenario2Case2");
-        addActionCheckbox(cbx_23_2_3, "tF_23_2_3", "kmw006.Scenario2Case3");
-        addActionCheckbox(cbx_23_3_1, "tF_23_3_1", "kmw006.Scenario3Case1");
-        addActionCheckbox(cbx_23_3_2, "tF_23_3_2", "kmw006.Scenario3Case2");
-        addActionCheckbox(cbx_23_3_3, "tF_23_3_3", "kmw006.Scenario3Case3");
-        addActionCheckbox(cbx_23_4_1, "tF_23_4_1", "kmw006.Scenario4Case1");
-        addActionCheckbox(cbx_23_4_2, "tF_23_4_2", "kmw006.Scenario4Case2");
+//        addActionCheckbox(cbx_21_1_1, "tF_23_01_01", "kmw005.Scenario1Case1");
+//        addActionCheckbox(cbx_21_1_2, "tF_23_02_01", "kmw005.Scenario2Case1");
+//        addActionCheckbox(cbx_21_1_3, "tF_23_02_02", "kmw005.Scenario2Case2");
+//        addActionCheckbox(cbx_21_1_4, "tF_23_02_03", "kmw005.Scenario2Case3");
+//        addActionCheckbox(cbx_21_1_5, "tF_23_03_01", "kmw005.Scenario3Case1");
+//        addActionCheckbox(cbx_21_1_6, "tF_23_03_02", "kmw005.Scenario3Case2");
+//        addActionCheckbox(cbx_21_2_1, "tF_23_03_03", "kmw005.Scenario3Case3");
+//        addActionCheckbox(cbx_21_2_2, "tF_23_04_01", "kmw005.Scenario4Case1");
+//        addActionCheckbox(cbx_21_2_2, "tF_23_04_02", "kmw005.Scenario4Case2");
+        addActionCheckbox(cbx_23_1_1, "tF_23_01_01", "kmw006.Scenario1Case1");
+        addActionCheckbox(cbx_23_2_1, "tF_23_02_01", "kmw006.Scenario2Case1");
+        addActionCheckbox(cbx_23_2_2, "tF_23_02_02", "kmw006.Scenario2Case2");
+        addActionCheckbox(cbx_23_2_3, "tF_23_02_03", "kmw006.Scenario2Case3");
+        addActionCheckbox(cbx_23_3_1, "tF_23_03_01", "kmw006.Scenario3Case1");
+        addActionCheckbox(cbx_23_3_2, "tF_23_03_02", "kmw006.Scenario3Case2");
+        addActionCheckbox(cbx_23_3_3, "tF_23_03_03", "kmw006.Scenario3Case3");
+        addActionCheckbox(cbx_23_4_1, "tF_23_04_01", "kmw006.Scenario4Case1");
+        addActionCheckbox(cbx_23_4_2, "tF_23_04_02", "kmw006.Scenario4Case2");
 
-        addActionCheckbox(cbx_29_1_1, "tF_29_1_1", "cmm044.Scenario1Case1");
-        addActionCheckbox(cbx_29_1_2, "tF_29_1_2", "cmm044.Scenario1Case2");
-        addActionCheckbox(cbx_29_1_3, "tF_29_1_3", "cmm044.Scenario1Case3");
-        addActionCheckbox(cbx_29_1_4, "tF_29_1_4", "cmm044.Scenario1Case4");
-        addActionCheckbox(cbx_29_1_5, "tF_29_1_5", "cmm044.Scenario1Case5");
-        addActionCheckbox(cbx_29_1_6, "tF_29_1_6", "cmm044.Scenario1Case6");
-        addActionCheckbox(cbx_29_1_7, "tF_29_1_7", "cmm044.Scenario1Case7");
-        addActionCheckbox(cbx_29_1_8, "tF_29_1_8", "cmm044.Scenario1Case8");
-        addActionCheckbox(cbx_29_1_9, "tF_29_1_9", "cmm044.Scenario1Case9");
-        addActionCheckbox(cbx_31_1_1, "tF_31_1_1", "cmm053.Scenario1Case1");
-        addActionCheckbox(cbx_31_2_1, "tF_31_2_1", "cmm053.Scenario2Case1");
-        addActionCheckbox(cbx_31_3_1, "tF_31_3_1", "cmm053.Scenario3Case1");
-        addActionCheckbox(cbx_31_4_1, "tF_31_4_1", "cmm053.Scenario4Case1");
-        addActionCheckbox(cbx_31_5_1, "tF_31_5_1", "cmm053.Scenario5Case1");
-        addActionCheckbox(cbx_31_6_1, "tF_31_6_1", "cmm053.Scenario6Case1");
-        addActionCheckbox(cbx_33_1_1, "tF_33_1_1", "kaf006.Scenario1Case1");
-        addActionCheckbox(cbx_33_1_2, "tF_33_1_2", "kaf006.Scenario1Case2");
-        addActionCheckbox(cbx_33_1_3, "tF_33_1_3", "kaf006.Scenario1Case3");
-        addActionCheckbox(cbx_33_2_1, "tF_33_2_1", "kaf006.Scenario2Case1");
-        addActionCheckbox(cbx_33_2_2, "tF_33_2_2", "kaf006.Scenario2Case2");
-        addActionCheckbox(cbx_33_2_3, "tF_33_2_3", "kaf006.Scenario2Case3");
-        addActionCheckbox(cbx_33_3_1, "tF_33_3_1", "kaf006.Scenario3Case1");
-        addActionCheckbox(cbx_33_3_2, "tF_33_3_2", "kaf006.Scenario3Case2");
-        addActionCheckbox(cbx_33_3_3, "tF_33_3_3", "kaf006.Scenario3Case3");
-        addActionCheckbox(cbx_33_4_1, "tF_33_4_1", "kaf006.Scenario4Case1");
-        addActionCheckbox(cbx_33_5_1, "tF_33_5_1", "kaf006.Scenario5Case1");
-        addActionCheckbox(cbx_33_5_2, "tF_33_5_2", "kaf006.Scenario5Case2");
-        addActionCheckbox(cbx_34_1_1, "tF_34_1_1", "kaf007.Scenario1Case1");
-        addActionCheckbox(cbx_34_1_2, "tF_34_1_2", "kaf007.Scenario1Case2");
-        addActionCheckbox(cbx_34_2_1, "tF_34_2_1", "kaf007.Scenario2Case1");
-        addActionCheckbox(cbx_34_3_1, "tF_34_3_1", "kaf007.Scenario3Case1");
-        addActionCheckbox(cbx_34_4_1, "tF_34_4_1", "kaf007.Scenario4Case1");
+        addActionCheckbox(cbx_29_1_1, "tF_29_01_01", "cmm044.Scenario1Case1");
+        addActionCheckbox(cbx_29_1_2, "tF_29_01_02", "cmm044.Scenario1Case2");
+        addActionCheckbox(cbx_29_1_3, "tF_29_01_03", "cmm044.Scenario1Case3");
+        addActionCheckbox(cbx_29_1_4, "tF_29_01_04", "cmm044.Scenario1Case4");
+        addActionCheckbox(cbx_29_1_5, "tF_29_01_05", "cmm044.Scenario1Case5");
+        addActionCheckbox(cbx_29_1_6, "tF_29_01_06", "cmm044.Scenario1Case6");
+        addActionCheckbox(cbx_29_1_7, "tF_29_01_07", "cmm044.Scenario1Case7");
+        addActionCheckbox(cbx_29_1_8, "tF_29_01_08", "cmm044.Scenario1Case8");
+        addActionCheckbox(cbx_29_1_9, "tF_29_01_09", "cmm044.Scenario1Case9");
+        addActionCheckbox(cbx_31_1_1, "tF_31_01_01", "cmm053.Scenario1Case1");
+        addActionCheckbox(cbx_31_2_1, "tF_31_02_01", "cmm053.Scenario2Case1");
+        addActionCheckbox(cbx_31_3_1, "tF_31_03_01", "cmm053.Scenario3Case1");
+        addActionCheckbox(cbx_31_4_1, "tF_31_04_01", "cmm053.Scenario4Case1");
+        addActionCheckbox(cbx_31_5_1, "tF_31_05_01", "cmm053.Scenario5Case1");
+        addActionCheckbox(cbx_31_6_1, "tF_31_06_01", "cmm053.Scenario6Case1");
+        addActionCheckbox(cbx_33_1_1, "tF_33_01_01", "kaf006.Scenario1Case1");
+        addActionCheckbox(cbx_33_1_2, "tF_33_01_02", "kaf006.Scenario1Case2");
+        addActionCheckbox(cbx_33_1_3, "tF_33_01_03", "kaf006.Scenario1Case3");
+        addActionCheckbox(cbx_33_2_1, "tF_33_02_01", "kaf006.Scenario2Case1");
+        addActionCheckbox(cbx_33_2_2, "tF_33_02_02", "kaf006.Scenario2Case2");
+        addActionCheckbox(cbx_33_2_3, "tF_33_02_03", "kaf006.Scenario2Case3");
+        addActionCheckbox(cbx_33_3_1, "tF_33_03_01", "kaf006.Scenario3Case1");
+        addActionCheckbox(cbx_33_3_2, "tF_33_03_02", "kaf006.Scenario3Case2");
+        addActionCheckbox(cbx_33_3_3, "tF_33_03_03", "kaf006.Scenario3Case3");
+        addActionCheckbox(cbx_33_4_1, "tF_33_04_01", "kaf006.Scenario4Case1");
+        addActionCheckbox(cbx_33_5_1, "tF_33_05_01", "kaf006.Scenario5Case1");
+        addActionCheckbox(cbx_33_5_2, "tF_33_05_02", "kaf006.Scenario5Case2");
+        addActionCheckbox(cbx_34_1_1, "tF_34_01_01", "kaf007.Scenario1Case1");
+        addActionCheckbox(cbx_34_1_2, "tF_34_01_02", "kaf007.Scenario1Case2");
+        addActionCheckbox(cbx_34_2_1, "tF_34_02_01", "kaf007.Scenario2Case1");
+        addActionCheckbox(cbx_34_3_1, "tF_34_03_01", "kaf007.Scenario3Case1");
+        addActionCheckbox(cbx_34_4_1, "tF_34_04_01", "kaf007.Scenario4Case1");
 
     }
 

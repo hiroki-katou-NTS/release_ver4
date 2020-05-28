@@ -1,19 +1,13 @@
 package kdw004;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.util.Calendar;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebElement;
 
 import kdw003.Kdw003Common;
 
@@ -60,6 +54,7 @@ public class Scenario1Case1 extends Kdw003Common {
 
         // Go to screen Kdw004a
         driver.get(domain + "nts.uk.at.web/view/kdw/004/a/index.xhtml");
+        WaitPageLoad();
 
         setKdw004Period(inputStartDate, inputEndDate);
 

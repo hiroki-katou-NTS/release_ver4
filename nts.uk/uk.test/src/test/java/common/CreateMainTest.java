@@ -65,6 +65,8 @@ public class CreateMainTest {
     JLayeredPane layeredPane = new JLayeredPane();
     JButton button = new JButton("リセット");
 
+    JButton button_excel = new JButton("Excel出力");
+
     public void create() {
         // create layout
         layeredPane.setBounds(0, 0, 1280, 450);
@@ -101,6 +103,11 @@ public class CreateMainTest {
         button2.setHorizontalAlignment(SwingConstants.CENTER);
         button2.setBounds(283, 484, 100, 33);
 
+        button_excel.setName("button_excel");
+        button_excel.setHorizontalAlignment(SwingConstants.CENTER);
+        button_excel.setBounds(450, 484, 100, 33);
+
+
         chckbxExcel.setName("excel_export");
         chckbxExcel.setBounds(8, 490, 88, 21);
 
@@ -108,6 +115,7 @@ public class CreateMainTest {
         f.getContentPane().add(button1);
         f.getContentPane().add(button);
         f.getContentPane().add(button2);
+        f.getContentPane().add(button_excel);
         f.getContentPane().setLayout(null);
         f.getContentPane().add(layeredPane);
         f.getContentPane().add(chckbxExcel);
@@ -160,11 +168,18 @@ public class CreateMainTest {
                 System.exit(0);
             }
         });
+
+        // create listener
+        button_excel.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	writeExcel(testCases);
+            }
+        });
     }
 
     private void createComponentMap() {
         List<Component> listComponent = new ArrayList<Component>();
-        Arrays.stream(((JTabbedPane)((JLayeredPane)f.getContentPane().getComponents()[3]).getComponents()[1]).getComponents()).forEach(i -> listComponent.addAll(Arrays.asList(((JPanel)(((JViewport)(((JScrollPane)i).getComponents()[0])).getComponents()[0])).getComponents())));
+        Arrays.stream(((JTabbedPane)((JLayeredPane)f.getContentPane().getComponents()[4]).getComponents()[1]).getComponents()).forEach(i -> listComponent.addAll(Arrays.asList(((JPanel)(((JViewport)(((JScrollPane)i).getComponents()[0])).getComponents()[0])).getComponents())));
         Object[] components = listComponent.toArray();
 
         for (int i = 0; i < components.length; i++) {
@@ -227,8 +242,9 @@ public class CreateMainTest {
                 workbook.close();
 
             }
-        } catch (Exception e) {
-            // TODO: handle exception
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
 
     }

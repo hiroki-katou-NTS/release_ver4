@@ -20,7 +20,7 @@ public class Scenario1Case1 extends Kdw003Common {
 
     @Test
     public void test() throws Exception {
-        // login申請者
+        // login承認者
         login("004515", "Jinjikoi5");
 
         // Setting screen kmk012

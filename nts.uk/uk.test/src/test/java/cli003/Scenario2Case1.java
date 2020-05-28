@@ -44,6 +44,7 @@ public class Scenario2Case1 extends TestRoot {
 
         setTimePicker("2019/7/1", "2019/7/31");
 
+        cli003_2_1_WaitPageLoad();
         WaitElementLoad(By.xpath("//div[@id='D2_5']/button[2]"));
         driver.findElement(By.xpath("//div[@id='D2_5']/button[2]")).click();
 
@@ -62,9 +63,11 @@ public class Scenario2Case1 extends TestRoot {
 
         setTimePicker("2019/6/1", "2019/6/30");
 
+        cli003_2_1_WaitPageLoad();
         WaitElementLoad(By.xpath("//div[@id='D2_5']/button[1]"));
         driver.findElement(By.xpath("//div[@id='D2_5']/button[1]")).click();
 
+        cli003_2_1_WaitPageLoad();
         WaitElementLoad(By.id("ccg001-btn-search-drawer"));
         driver.findElement(By.id("ccg001-btn-search-drawer")).click();
 
@@ -90,13 +93,14 @@ public class Scenario2Case1 extends TestRoot {
         cli003_2_1_WaitPageLoad();
         driver.findElement(By.xpath("//div[@id='employeeSearchD']//span[1]/span[1]")).click();
 
+        cli003_2_1_WaitPageLoad();
         progress("//iframe[contains(@name,'window_2')]");
 
         cli003_2_1_WaitPageLoad();
         driver.findElement(By.id("E2_2")).click();
 
         cli003_2_1_WaitPageLoad();
-        WebElement dialogCli003 = driver.findElement(By.xpath("//iframe[contains(@name,'window_1')]"));
+        WebElement dialogCli003 = driver.findElement(By.xpath("//iframe[contains(@name,'window_3')]"));
         driver.switchTo().frame(dialogCli003);
         screenShotFull();
         driver.findElement(By.xpath("//button[@tabindex='2']")).click();
