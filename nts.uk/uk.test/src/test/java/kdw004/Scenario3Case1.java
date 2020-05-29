@@ -1,20 +1,14 @@
 package kdw004;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.util.Calendar;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebElement;
 
-import common.TestRoot;
 import kdw003.Kdw003Common;
 
 public class Scenario3Case1 extends Kdw003Common {
@@ -46,10 +40,20 @@ public class Scenario3Case1 extends Kdw003Common {
         driver.findElement(By.id("btnExtraction")).click();
         WaitPageLoad();
         // Check checkbox
-        driver.findElement(By.xpath("//td[contains(.,'05/08')]")).findElements(By.xpath("following::td")).get(0).click();
-        driver.findElement(By.xpath("//td[contains(.,'05/09')]")).findElements(By.xpath("following::td")).get(0).click();
-        driver.findElement(By.xpath("//td[contains(.,'05/10')]")).findElements(By.xpath("following::td")).get(0).click();
-        driver.findElement(By.xpath("//td[contains(.,'05/11')]")).findElements(By.xpath("following::td")).get(0).click();
+        if(!selectItemKdw003_1("本人", "05/08(金)").findElement(By.xpath("./label/input")).isSelected()){
+        	driver.findElement(By.xpath("//td[contains(.,'05/08')]")).findElements(By.xpath("following::td")).get(0).click();
+        }
+        if(!selectItemKdw003_1("本人", "05/09(土)").findElement(By.xpath("./label/input")).isSelected()){
+        	driver.findElement(By.xpath("//td[contains(.,'05/09')]")).findElements(By.xpath("following::td")).get(0).click();
+        }
+
+        if(!selectItemKdw003_1("本人", "05/10(日)").findElement(By.xpath("./label/input")).isSelected()){
+        	driver.findElement(By.xpath("//td[contains(.,'05/10')]")).findElements(By.xpath("following::td")).get(0).click();
+        }
+
+        if(!selectItemKdw003_1("本人", "05/11(月)").findElement(By.xpath("./label/input")).isSelected()){
+        	driver.findElement(By.xpath("//td[contains(.,'05/11')]")).findElements(By.xpath("following::td")).get(0).click();
+        }
         WaitPageLoad();
         driver.findElement(By.xpath("//button[@class='proceed']")).click();
 
