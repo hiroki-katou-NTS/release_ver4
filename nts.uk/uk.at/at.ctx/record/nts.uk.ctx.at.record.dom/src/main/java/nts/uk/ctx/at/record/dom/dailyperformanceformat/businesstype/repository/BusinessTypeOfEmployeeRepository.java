@@ -20,7 +20,7 @@ public interface BusinessTypeOfEmployeeRepository {
 	 * 
 	 * @param businessTypeOfEmployee
 	 */
-	void insert(BusinessTypeOfEmployee businessTypeOfEmployee);
+//	void insert(BusinessTypeOfEmployee businessTypeOfEmployee);
 
 	/**
 	 * update BusinessTypeOfEmployee

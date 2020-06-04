@@ -67,11 +67,11 @@ public class AddBusinessWokrTypeOfHistoryCommandHandler
 		}
 		DateHistoryItem newDate = new DateHistoryItem(historyId, new DatePeriod(startDate, endDate));
 		bEmployeeHistory.add(newDate);
-		typeOfHistoryGeneralRepos.addBusinessTypeEmpOfHistory(bEmployeeHistory);
 		// insert typeof employee
 		BusinessTypeOfEmployee bEmployee = BusinessTypeOfEmployee.createFromJavaType(businessTypeCode, historyId,
 				employeeId);
-		this.typeOfEmployeeRepos.insert(bEmployee);
+		typeOfHistoryGeneralRepos.addBusinessTypeEmpOfHistory(bEmployeeHistory, bEmployee);
+		
 		return new PeregAddCommandResult(historyId);
 	}
 

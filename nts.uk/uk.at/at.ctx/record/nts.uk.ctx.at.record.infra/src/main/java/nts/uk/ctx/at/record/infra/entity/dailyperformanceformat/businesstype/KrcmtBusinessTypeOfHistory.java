@@ -44,6 +44,10 @@ public class KrcmtBusinessTypeOfHistory extends UkJpaEntity implements Serializa
 	/** 終了日 */
 	@Column(name = "END_DATE")
 	public GeneralDate endDate;
+	
+	/** 勤務種別コード */
+	@Column(name = "BUSINESS_TYPE_CD")
+	public String businessTypeCode;
 
 	@Override
 	protected Object getKey() {
