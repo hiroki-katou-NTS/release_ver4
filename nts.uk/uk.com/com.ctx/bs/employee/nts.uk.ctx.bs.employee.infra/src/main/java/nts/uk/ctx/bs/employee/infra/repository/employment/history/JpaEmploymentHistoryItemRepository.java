@@ -166,10 +166,14 @@ public class JpaEmploymentHistoryItemRepository extends JpaRepository implements
 		entity.salarySegment = domain.getSalarySegment()!= null? domain.getSalarySegment().value: null;
 	}
 
-	@Override
-	public void add(EmploymentHistoryItem domain) {
-		this.commandProxy().insert(toEntity(domain));
-	}
+//	 Merge BSYMT_EMPLOYMENT_HIST To BSYMT_EMPLOYMENT_HIS_ITEM  because response
+//	 new Insert Method ↓
+//	         ClassName  : JpaEmploymentHistoryRepository
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(EmploymentHistoryItem domain) {
+//		this.commandProxy().insert(toEntity(domain));
+//	}
 
 	@Override
 	public void update(EmploymentHistoryItem domain) {

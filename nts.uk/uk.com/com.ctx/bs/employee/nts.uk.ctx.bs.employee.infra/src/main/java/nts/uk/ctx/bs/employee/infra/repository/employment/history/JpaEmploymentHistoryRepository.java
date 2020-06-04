@@ -145,12 +145,19 @@ public class JpaEmploymentHistoryRepository extends JpaRepository implements Emp
 		}
 		return Optional.empty();
 	}
-
+	
+//	 Merge BSYMT_EMPLOYMENT_HIST To BSYMT_EMPLOYMENT_HIS_ITEM  because response
+//	 new Insert Method ↓
+//	         Class      : here
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(String sid, DateHistoryItem domain) {
+//		this.commandProxy().insert(toEntity(sid, domain));
+//	}
 	@Override
-	public void add(String sid, DateHistoryItem domain) {
-		this.commandProxy().insert(toEntity(sid, domain));
+	public void addToMerge(String sid, DateHistoryItem domain, String employmentCode, Integer salarySegment) {
+		this.commandProxy().insert(toEntity(sid, domain, employmentCode, salarySegment));
 	}
-
 	@Override
 	public void update(DateHistoryItem itemToBeUpdated) {
 		Optional<BsymtEmploymentHist> histItem = this.queryProxy().find(itemToBeUpdated.identifier(),
@@ -180,9 +187,9 @@ public class JpaEmploymentHistoryRepository extends JpaRepository implements Emp
 	 * @param item
 	 * @return
 	 */
-	private BsymtEmploymentHist toEntity(String employeeID, DateHistoryItem item) {
+	private BsymtEmploymentHist toEntity(String employeeID, DateHistoryItem item, String employmentCode, Integer salarySegment) {
 		String companyId = AppContexts.user().companyId();
-		return new BsymtEmploymentHist(item.identifier(), companyId, employeeID, item.start(), item.end());
+		return new BsymtEmploymentHist(item.identifier(), companyId, employeeID, item.start(), item.end(), employmentCode, salarySegment);
 	}
 
 	/**

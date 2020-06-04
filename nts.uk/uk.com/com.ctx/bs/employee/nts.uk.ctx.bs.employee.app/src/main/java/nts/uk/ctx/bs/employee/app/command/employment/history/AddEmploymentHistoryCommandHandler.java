@@ -29,8 +29,6 @@ public class AddEmploymentHistoryCommandHandler
 
 	@Inject
 	private EmploymentHistoryRepository employmentHistoryRepository;
-	@Inject
-	private EmploymentHistoryItemRepository employmentHistoryItemRepository;
 
 	@Inject
 	private EmploymentHistoryService employmentHistoryService;
@@ -62,13 +60,11 @@ public class AddEmploymentHistoryCommandHandler
 		}
 
 		itemtoBeAdded.add(dateItem);
-
-		employmentHistoryService.add(itemtoBeAdded);
+		
 		// phải set Segment mặc định là 1 vì Enum value từ 1-> 4
-		EmploymentHistoryItem histItem = EmploymentHistoryItem.createFromJavaType(newHistID, command.getEmployeeId(),
-				command.getEmploymentCode(),
-				command.getSalarySegment() != null ? command.getSalarySegment().intValue() :null);
-		employmentHistoryItemRepository.add(histItem);
+		employmentHistoryService.addToMerge(itemtoBeAdded, 
+									 		command.getEmploymentCode(),
+									 		command.getSalarySegment() != null ? command.getSalarySegment().intValue() :null);
 
 		return new PeregAddCommandResult(newHistID);
 	}
