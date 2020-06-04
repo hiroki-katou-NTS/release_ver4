@@ -34,11 +34,17 @@ public interface AffJobTitleHistoryRepository {
 	/**
 	 * ドメインモッ�「�務�位」を新規登録する
 	 * 
+	 * Merge BSYMT_AFF_JOB_HIST To BSYMT_AFF_JOB_HIST_ITEM  because response
+			new Insert Method ↓
+	         Class      : here
+	         MethodName : addToMerge
+	 * 
 	 * @param item
 	 * @param sid
 	 * @param cid
 	 */
-	void add(String cid, String sid, DateHistoryItem item);
+//	void add(String cid, String sid, DateHistoryItem item);
+	void addToMerge(String cid, String sid, DateHistoryItem item, String jobTitleId, String note);
 
 	/**
 	 * 取得した「�務�位」を更新する

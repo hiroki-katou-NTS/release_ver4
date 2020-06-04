@@ -77,8 +77,9 @@ public class JpaAffJobTitleHistoryRepository extends JpaRepository implements Af
 	 * @param domain
 	 * @return
 	 */
-	private BsymtAffJobTitleHist toEntity(String cid, String sId, DateHistoryItem domain) {
-		return new BsymtAffJobTitleHist(domain.identifier(), sId, cid, domain.start(), domain.end());
+	private BsymtAffJobTitleHist toEntity(String cid, String sId, DateHistoryItem domain, String jobTitleId, String note) {
+		return new BsymtAffJobTitleHist(domain.identifier(), sId, cid, domain.start(), domain.end(),
+				jobTitleId, note);
 	}
 
 	@Override
@@ -103,9 +104,17 @@ public class JpaAffJobTitleHistoryRepository extends JpaRepository implements Af
 		return Optional.empty();
 	}
 
+//	 Merge BSYMT_AFF_JOB_HIST To BSYMT_AFF_JOB_HIST_ITEM  because response
+//	 new Insert Method ↓
+//	         Class      : here
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(String cid, String sid, DateHistoryItem item) {
+//		this.commandProxy().insert(toEntity(cid, sid, item));
+//	}
 	@Override
-	public void add(String cid, String sid, DateHistoryItem item) {
-		this.commandProxy().insert(toEntity(cid, sid, item));
+	public void addToMerge(String cid, String sid, DateHistoryItem item, String jobTitleId, String note) {
+		this.commandProxy().insert(toEntity(cid, sid, item, jobTitleId, note));
 	}
 
 	@Override

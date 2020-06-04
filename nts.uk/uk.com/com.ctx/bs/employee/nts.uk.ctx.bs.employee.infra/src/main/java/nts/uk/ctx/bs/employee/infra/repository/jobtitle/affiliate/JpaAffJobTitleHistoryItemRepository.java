@@ -70,10 +70,14 @@ public class JpaAffJobTitleHistoryItemRepository extends JpaRepository
 		entity.note = domain.getNote().v();
 	}
 
-	@Override
-	public void add(AffJobTitleHistoryItem domain) {
-		this.commandProxy().insert(toEntity(domain));
-	}
+//	 Merge BSYMT_AFF_JOB_HIST To BSYMT_AFF_JOB_HIST_ITEM  because response
+//	 new Insert Method ↓
+//	         ClassName  : JpaAffJobTitleHistoryRepository
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(AffJobTitleHistoryItem domain) {
+//		this.commandProxy().insert(toEntity(domain));
+//	}
 
 	@Override
 	public void update(AffJobTitleHistoryItem domain) {
