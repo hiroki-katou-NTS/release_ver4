@@ -86,10 +86,15 @@ public class JpaAffWorkplaceHistoryItemRepository extends JpaRepository implemen
 		entity.setWorkPlaceId(domain.getWorkplaceId());
 		entity.setNormalWkpId(domain.getNormalWorkplaceId());
 	}
-	@Override
-	public void add(AffWorkplaceHistoryItem domain) {
-		this.commandProxy().insert(toEntity(domain));
-	}
+	
+//	 Merge BSYMT_AFF_WORKPLACE_HIST To BSYMT_AFF_WPL_HIST_ITEM  because response
+//	 new Insert Method ↓
+//	         ClassName  : JpaAffWorkplaceHistoryRepository
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(AffWorkplaceHistoryItem domain) {
+//		this.commandProxy().insert(toEntity(domain));
+//	}
 
 	@Override
 	public void delete(String histID) {

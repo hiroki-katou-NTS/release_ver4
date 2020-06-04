@@ -94,8 +94,9 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 	 * @param item
 	 * @return
 	 */
-	private BsymtAffiWorkplaceHist toEntity(String cid, String employeeID, DateHistoryItem item) {
-		return new BsymtAffiWorkplaceHist(item.identifier(), employeeID, cid, item.start(), item.end());
+	private BsymtAffiWorkplaceHist toEntity(String cid, String employeeID, DateHistoryItem item, String workPlaceId, String normalWorkPlaceId) {
+		return new BsymtAffiWorkplaceHist(item.identifier(), employeeID, cid, item.start(), item.end(),
+				workPlaceId, normalWorkPlaceId);
 	}
 
 	/**
@@ -149,10 +150,19 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 		return Optional.empty();
 	}
 
+//	 Merge BSYMT_AFF_WORKPLACE_HIST To BSYMT_AFF_WPL_HIST_ITEM  because response
+//	 new Insert Method ↓
+//	         ClassName  : JpaAffWorkplaceHistoryRepository
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(String cid, String sid, DateHistoryItem item) {
+//		this.commandProxy().insert(toEntity(cid, sid, item));
+//	}
 	@Override
-	public void add(String cid, String sid, DateHistoryItem item) {
-		this.commandProxy().insert(toEntity(cid, sid, item));
+	public void addToMerge(String cid, String sid, DateHistoryItem item, String workPlaceId, String normalWorkPlaceId) {
+		this.commandProxy().insert(toEntity(cid, sid, item, workPlaceId, normalWorkPlaceId));
 	}
+
 
 	@Override
 	public void delete(String histId) {
@@ -452,7 +462,9 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 								rec.getString("SID"),
 								rec.getString("CID"),
 								rec.getGeneralDate("START_DATE"),
-								rec.getGeneralDate("END_DATE"));	
+								rec.getGeneralDate("END_DATE"),
+								rec.getString("WORKPLACE_ID"),
+								rec.getString("NORMAL_WORKPLACE_ID"));	
 					}));
 		});
 		return resultList.stream().map(entity -> this.toDomain(entity)).collect(Collectors.toList());
@@ -473,7 +485,14 @@ public class JpaAffWorkplaceHistoryRepository extends JpaRepository implements A
 				}
 				
 				List<BsymtAffiWorkplaceHist> entities = new NtsResultSet(stmt.executeQuery()).getList(rec -> {
-					BsymtAffiWorkplaceHist entity = new BsymtAffiWorkplaceHist(rec.getString("HIST_ID"), rec.getString("SID"), rec.getString("CID"), rec.getGeneralDate("START_DATE"), rec.getGeneralDate("END_DATE"));
+					BsymtAffiWorkplaceHist entity = new BsymtAffiWorkplaceHist(
+							rec.getString("HIST_ID"), 
+							rec.getString("SID"), 
+							rec.getString("CID"), 
+							rec.getGeneralDate("START_DATE"), 
+							rec.getGeneralDate("END_DATE"),
+							rec.getString("WORKPLACE_ID"),
+							rec.getString("NORMAL_WORKPLACE_ID"));
 					return entity;
 				});
 				

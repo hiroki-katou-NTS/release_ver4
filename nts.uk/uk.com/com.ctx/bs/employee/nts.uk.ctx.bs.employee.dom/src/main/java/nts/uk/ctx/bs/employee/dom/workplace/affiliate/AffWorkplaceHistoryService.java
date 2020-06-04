@@ -16,14 +16,15 @@ public class AffWorkplaceHistoryService {
 	/**
 	 * ドメインモデル「所属職場」を新規登録する
 	 * @param domain
+	 * @param histItem 
 	 */
-	public void add(AffWorkplaceHistory domain){
+	public void addToMerge(AffWorkplaceHistory domain, AffWorkplaceHistoryItem histItem){
 		if (domain.getHistoryItems().isEmpty()){
 			return;
 		}
 		// Insert last element
 		DateHistoryItem lastItem = domain.getHistoryItems().get(domain.getHistoryItems().size()-1);
-		affWorkplaceHistoryRepository.add(domain.getCompanyId(), domain.getEmployeeId(), lastItem);
+		affWorkplaceHistoryRepository.addToMerge(domain.getCompanyId(), domain.getEmployeeId(), lastItem, histItem.getWorkplaceId(), histItem.getNormalWorkplaceId());
 		
 		// Update item before
 		updateItemBefore(domain,lastItem);

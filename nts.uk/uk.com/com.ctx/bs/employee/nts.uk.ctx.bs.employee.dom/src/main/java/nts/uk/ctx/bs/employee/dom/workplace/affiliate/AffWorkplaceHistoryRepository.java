@@ -41,11 +41,14 @@ public interface AffWorkplaceHistoryRepository {
 	Optional<AffWorkplaceHistory> getByHistIdAndBaseDate(String histId, GeneralDate date);
 	/**
 	 * ドメインモデル「所属職場」を新規登録する
-	 * @param item
-	 * @param sid
-	 * @param cid
+	 * Merge BSYMT_AFF_WORKPLACE_HIST To BSYMT_AFF_WPL_HIST_ITEM  because response
+	 * new Insert Method ↓
+	 *       ClassName  : JpaAffWorkplaceHistoryRepository
+	 *       MethodName : addToMerge
 	 */
-	void add(String cid, String sid, DateHistoryItem item);
+//	void add(String cid, String sid, DateHistoryItem item);
+	void addToMerge(String cid, String sid, DateHistoryItem item, String workPlaceId, String normalWorkPlaceId);
+	
 	/**
 	 * ドメインモデル「所属職場」を削除する
 	 * @param histId
