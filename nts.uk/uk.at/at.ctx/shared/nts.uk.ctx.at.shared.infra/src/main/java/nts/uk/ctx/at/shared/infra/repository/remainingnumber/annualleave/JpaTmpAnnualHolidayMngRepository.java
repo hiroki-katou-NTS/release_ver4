@@ -8,6 +8,7 @@ import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 
 import lombok.SneakyThrows;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -16,13 +17,15 @@ import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 //import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.interim.TmpAnnualHolidayMng;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.interim.TmpAnnualHolidayMngRepository;
+import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.InterimRemainRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.interimremain.primitive.UseDay;
 import nts.uk.ctx.at.shared.infra.entity.remainingnumber.annlea.KrcmtInterimAnnualMng;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
 public class JpaTmpAnnualHolidayMngRepository extends JpaRepository implements TmpAnnualHolidayMngRepository{
-
+	@Inject
+	private InterimRemainRepository interRemain;
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Optional<TmpAnnualHolidayMng> getById(String mngId) {
@@ -85,6 +88,17 @@ public class JpaTmpAnnualHolidayMngRepository extends JpaRepository implements T
 		return new TmpAnnualHolidayMng(x.getString("ANNUAL_MNG_ID"),
 				x.getString("WORKTYPE_CODE"),
 				new UseDay(x.getBigDecimal("USE_DAYS") == null ? 0 : x.getBigDecimal("USE_DAYS").doubleValue()));
+	}
+
+	@Override
+	public void deleteSidPeriod(String sid, DatePeriod period) {
+		List<TmpAnnualHolidayMng> lstAnn = this.getBySidPeriod(sid, period);
+		lstAnn.stream().forEach(x -> {
+			//暫定残数管理データ
+			interRemain.deleteById(x.getAnnualId());
+			//暫定年休管理データ
+			this.deleteById(x.getAnnualId());
+		});
 	}
 
 }
