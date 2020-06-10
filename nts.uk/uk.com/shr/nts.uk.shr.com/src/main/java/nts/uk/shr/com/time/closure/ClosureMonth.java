@@ -2,7 +2,6 @@ package nts.uk.shr.com.time.closure;
 
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
-import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -43,10 +42,11 @@ public class ClosureMonth {
 	}
 	
 	/**
-	 * 期間
+	 * 年月と締め日から算出できるデフォルトの期間
+	 * 実際の期間は、途中で締め変更があった場合に変動する（中途半端な期間になったりする）
 	 * @return
 	 */
-	public DatePeriod period() {
+	public DatePeriod defaultPeriod() {
 		return closureDate.periodOf(yearMonth);
 	}
 }
