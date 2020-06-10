@@ -1,5 +1,6 @@
 package nts.uk.ctx.workflow.pub.resultrecord.monthly;
 
+import nts.uk.ctx.workflow.pub.resultrecord.common.ApprovalProgress.Progress;
 import nts.uk.ctx.workflow.pub.resultrecord.common.SubjectiveStatus;
 import nts.uk.shr.com.time.closure.ClosureMonth;
 
@@ -8,9 +9,9 @@ import nts.uk.shr.com.time.closure.ClosureMonth;
  */
 public class MonthlySubjectiveStatus extends SubjectiveStatus<ClosureMonth> {
 
-	public MonthlySubjectiveStatus(String approverEmployeeId, String targetEmployeeId, ClosureMonth date,
-			Status status) {
-		super(approverEmployeeId, targetEmployeeId, date, status);
+	public MonthlySubjectiveStatus(String targetEmployeeId, ClosureMonth date, Progress progress,
+			Subjective subjective) {
+		super(targetEmployeeId, date, progress, subjective);
 	}
 
 }

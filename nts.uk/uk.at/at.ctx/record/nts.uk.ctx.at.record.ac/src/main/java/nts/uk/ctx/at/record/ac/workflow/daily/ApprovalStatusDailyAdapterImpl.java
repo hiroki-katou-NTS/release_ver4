@@ -58,12 +58,13 @@ public class ApprovalStatusDailyAdapterImpl implements ApprovalStatusDailyAdapte
 
 	private static ApprovalSubjectiveDailyOnWorkflow convert(DailySubjectiveStatus published) {
 		return new ApprovalSubjectiveDailyOnWorkflow(
-				published.getApproverEmployeeId(),
 				published.getTargetEmployeeId(),
 				published.getDate(),
-				new RecordApprovalSubjective.Status(
-						published.getStatus().isApproved(),
-						published.getStatus().isCanExecute(),
-						published.getStatus().isCanRelease()));
+				MAP_PROGRESS.get(published.getProgress()),
+				new RecordApprovalSubjective.Subjective(
+						published.getSubjective().getApproverEmployeeId(),
+						published.getSubjective().isApproved(),
+						published.getSubjective().isCanExecute(),
+						published.getSubjective().isCanRelease()));
 	}
 }

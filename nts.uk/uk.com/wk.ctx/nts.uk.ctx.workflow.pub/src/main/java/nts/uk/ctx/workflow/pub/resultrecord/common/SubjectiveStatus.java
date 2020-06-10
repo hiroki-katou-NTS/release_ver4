@@ -9,10 +9,6 @@ import lombok.Value;
  */
 @RequiredArgsConstructor
 public abstract class SubjectiveStatus<T> {
-
-	/** 主体(承認者)の社員ID */
-	@Getter
-	private final String approverEmployeeId;
 	
 	/** 対象の社員ID */
 	@Getter
@@ -22,11 +18,20 @@ public abstract class SubjectiveStatus<T> {
 	@Getter
 	private final T date;
 	
+	/** 承認ルートの進捗状況 */
 	@Getter
-	private final Status status;
+	private final ApprovalProgress.Progress progress;
+	
+	/** 承認者から見た承認状況 */
+	@Getter
+	private final Subjective subjective;
 	
 	@Value
-	public static class Status {
+	public static class Subjective {
+
+		/** 主体(承認者)の社員ID */
+		private final String approverEmployeeId;
+		
 		/** 主体が承認済み */
 		private final boolean isApproved;
 

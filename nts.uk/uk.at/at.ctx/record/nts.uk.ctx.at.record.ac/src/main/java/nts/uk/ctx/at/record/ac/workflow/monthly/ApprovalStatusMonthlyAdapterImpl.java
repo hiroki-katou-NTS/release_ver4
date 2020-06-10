@@ -58,13 +58,14 @@ public class ApprovalStatusMonthlyAdapterImpl implements ApprovalStatusMonthlyAd
 
 	private static ApprovalSubjectiveMonthlyOnWorkflow convert(MonthlySubjectiveStatus published) {
 		return new ApprovalSubjectiveMonthlyOnWorkflow(
-				published.getApproverEmployeeId(),
 				published.getTargetEmployeeId(),
 				published.getDate(),
-				new RecordApprovalSubjective.Status(
-						published.getStatus().isApproved(),
-						published.getStatus().isCanExecute(),
-						published.getStatus().isCanRelease()));
+				MAP_PROGRESS.get(published.getProgress()),
+				new RecordApprovalSubjective.Subjective(
+						published.getSubjective().getApproverEmployeeId(),
+						published.getSubjective().isApproved(),
+						published.getSubjective().isCanExecute(),
+						published.getSubjective().isCanRelease()));
 	}
 
 }

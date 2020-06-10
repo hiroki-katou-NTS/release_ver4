@@ -1,6 +1,7 @@
 package nts.uk.ctx.at.record.dom.workrecord.approval.daily;
 
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.at.record.dom.workrecord.approval.common.RecordApprovalProgress.Progress;
 import nts.uk.ctx.at.record.dom.workrecord.approval.common.RecordApprovalSubjective;
 
 /**
@@ -8,9 +9,9 @@ import nts.uk.ctx.at.record.dom.workrecord.approval.common.RecordApprovalSubject
  */
 public class ApprovalSubjectiveDailyOnWorkflow extends RecordApprovalSubjective<GeneralDate> {
 
-	public ApprovalSubjectiveDailyOnWorkflow(
-			String approverEmployeeId, String targetEmployeeId, GeneralDate date, Status status) {
-		super(approverEmployeeId, targetEmployeeId, date, status);
+	public ApprovalSubjectiveDailyOnWorkflow(String targetEmployeeId, GeneralDate date, Progress progress,
+			Subjective subjective) {
+		super(targetEmployeeId, date, progress, subjective);
 	}
 
 }

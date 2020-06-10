@@ -53,33 +53,39 @@ public class GetApprovalSubjectiveDaily {
 			
 			if (isLocked) {
 				return Optional.of(new ApprovalSubjectiveDaily(
-						approverEmployeeId, targetEmployeeId, date, statusOnWorkflow.getStatus()));
+						targetEmployeeId, date, statusOnWorkflow.getProgress(), statusOnWorkflow.getSubjective()));
 			}
 		}
 		
-		RecordApprovalSubjective.Status status = status(
-				require, approverEmployeeId, targetEmployeeId, date, useSet, statusOnWorkflow);
+		RecordApprovalSubjective.Subjective subjective = subjective(
+				require, targetEmployeeId, date, useSet, statusOnWorkflow);
 		
-		return Optional.of(new ApprovalSubjectiveDaily(approverEmployeeId, targetEmployeeId, date, status));
+		return Optional.of(new ApprovalSubjectiveDaily(
+				targetEmployeeId, date, statusOnWorkflow.getProgress(), subjective));
 	}
 
-	private static RecordApprovalSubjective.Status status(
+	private static RecordApprovalSubjective.Subjective subjective(
 			Require require,
-			String approverEmployeeId,
 			String targetEmployeeId,
 			GeneralDate date,
 			ApprovalProcessingUseSetting useSet,
 			ApprovalSubjectiveDailyOnWorkflow statusOnWorkflow) {
 		
-			boolean isApproved = statusOnWorkflow.getStatus().isApproved();
+			boolean isApproved = statusOnWorkflow.getSubjective().isApproved();
 			
-			boolean canExecute = statusOnWorkflow.getStatus().canExecute()
+			boolean canExecute = statusOnWorkflow.getSubjective().canExecute()
 					&& canExecute(require, targetEmployeeId, date, useSet);
 			
-			boolean canRelease = statusOnWorkflow.getStatus().canRelease()
-					&& canRelease(require, approverEmployeeId, targetEmployeeId, date, useSet);
+			boolean canRelease = statusOnWorkflow.getSubjective().canRelease()
+					&& canRelease(
+							require,
+							statusOnWorkflow.getSubjective().getApproverEmployeeId(),
+							targetEmployeeId,
+							date,
+							useSet);
 			
-			return new RecordApprovalSubjective.Status(isApproved, canExecute, canRelease);
+			return new RecordApprovalSubjective.Subjective(
+					statusOnWorkflow.getSubjective().getApproverEmployeeId(), isApproved, canExecute, canRelease);
 	}
 	
 	private static boolean canExecute(
@@ -124,7 +130,7 @@ public class GetApprovalSubjectiveDaily {
 			val closureMonth = require.getClosureMonth(targetEmployeeId, date);
 			
 			return require.getApprovalSubjectiveMonthlyOnWorkflow(approverEmployeeId, targetEmployeeId, closureMonth)
-					.map(s -> s.getStatus().canRelease())
+					.map(s -> s.getSubjective().canRelease())
 					.orElse(true);
 		}
 		
