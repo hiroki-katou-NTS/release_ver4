@@ -6,7 +6,9 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 public interface AppRootConfirmQueryRepository {
 
-	AppRootIntermForQuery.List queryInterm(String companyId, List<String> employeeIds, DatePeriod period, RecordRootType rootType);
+	AppRootIntermForQuery.List queryIntermDaily(List<String> employeeIDLst, DatePeriod period);
+	
+	AppRootIntermForQuery.List queryIntermMonthly(List<String> employeeIDLst, DatePeriod period);
 
-	AppRootRecordConfirmForQuery.List queryConfirm(String companyId, List<String> employeeIds, DatePeriod period, RecordRootType rootType);
+	AppRootRecordConfirmForQuery.List queryConfirmDaily(List<String> employeeIds, DatePeriod period);
 }

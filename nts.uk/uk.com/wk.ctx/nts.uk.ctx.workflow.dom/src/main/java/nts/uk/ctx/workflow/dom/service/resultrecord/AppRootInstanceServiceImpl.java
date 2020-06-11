@@ -37,6 +37,8 @@ import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmQueryRepository;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmRepository;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstanceRepository;
+import nts.uk.ctx.workflow.dom.resultrecord.AppRootIntermForQuery;
+import nts.uk.ctx.workflow.dom.resultrecord.AppRootRecordConfirmForQuery;
 import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
 import nts.uk.ctx.workflow.dom.service.ApprovalRootStateStatusService;
 import nts.uk.ctx.workflow.dom.service.CollectApprovalAgentInforService;
@@ -88,9 +90,26 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 		}
 		
 		// レスポンス改善版
-		val interms = this.confirmQueryRepository.queryInterm(companyID, employeeIDLst, period, rootType);
-		val confirms = this.confirmQueryRepository.queryConfirm(companyID, employeeIDLst, period, rootType);
+		final AppRootIntermForQuery.List interms;
+		// 日次の場合
+		if(rootType==RecordRootType.CONFIRM_WORK_BY_DAY){
+			interms = confirmQueryRepository.queryIntermDaily(employeeIDLst, period);
+		} 
+		// 月次の場合
+		else {
+			interms = confirmQueryRepository.queryIntermMonthly(employeeIDLst, period);
+		}
 		
+		final AppRootRecordConfirmForQuery.List confirms;
+		// 日次の場合
+		if(rootType==RecordRootType.CONFIRM_WORK_BY_DAY){
+			confirms = confirmQueryRepository.queryConfirmDaily(employeeIDLst, period);
+		} 
+		// 月次の場合
+		else {
+			throw new RuntimeException("月次には対応しない");
+		}
+
 		List<ApprovalRootStateStatus> appRootStatusLst = new ArrayList<ApprovalRootStateStatus>();
 		List<String> errorEmployeeIds = new ArrayList<String>();
 		for (String employeeId : employeeIDLst) {
