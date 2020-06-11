@@ -24,17 +24,17 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JpaAppRootConfirmQueryRepository extends JpaRepository	implements AppRootConfirmQueryRepository {
 	
-	private static final String FIND_DAY_INSTANSE 
+	private static final String FIND_DAY_INSTANCE 
 	= " select rt.ROOT_ID, rt.EMPLOYEE_ID, rt.RECORD_DATE, "
 		+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR "
-	+ " from WWFDT_DAY_APV_RT_INSTANSE as rt" 
-	+ " left join WWFDT_DAY_APV_PH_INSTANSE as ph"
+	+ " from WWFDT_DAY_APV_RT_INSTANCE as rt" 
+	+ " left join WWFDT_DAY_APV_PH_INSTANCE as ph"
 	+ " on rt.ROOT_ID = ph.ROOT_ID" ;
 
 	@Override
 	public AppRootIntermForQuery.List queryIntermDaily(List<String> employeeIDLst, DatePeriod period) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(FIND_DAY_INSTANSE);
+		sql.append(FIND_DAY_INSTANCE);
 		sql.append(" where rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
@@ -58,17 +58,17 @@ public class JpaAppRootConfirmQueryRepository extends JpaRepository	implements A
 	}
 
 	
-	private static final String FIND_MON_INSTANSE 
+	private static final String FIND_MON_INSTANCE 
 	= " select rt.ROOT_ID, rt.EMPLOYEE_ID, rt.RECORD_DATE, "
 		+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR "
-	+ " from WWFDT_MON_APV_RT_INSTANSE as rt" 
-	+ " left join WWFDT_MON_APV_PH_INSTANSE as ph"
+	+ " from WWFDT_MON_APV_RT_INSTANCE as rt" 
+	+ " left join WWFDT_MON_APV_PH_INSTANCE as ph"
 	+ " on rt.ROOT_ID = ph.ROOT_ID" ;
 	
 	@Override
 	public AppRootIntermForQuery.List queryIntermMonthly(List<String> employeeIDLst, DatePeriod period) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(FIND_MON_INSTANSE);
+		sql.append(FIND_MON_INSTANCE);
 		sql.append(" where rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
