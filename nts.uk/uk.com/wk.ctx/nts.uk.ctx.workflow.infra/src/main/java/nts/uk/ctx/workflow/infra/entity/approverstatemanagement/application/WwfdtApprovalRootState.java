@@ -2,7 +2,6 @@ package nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -11,13 +10,11 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
-import nts.uk.ctx.workflow.dom.approverstatemanagement.RootType;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 /**
  * 
@@ -55,7 +52,6 @@ public class WwfdtApprovalRootState extends UkJpaEntity {
 	public static WwfdtApprovalRootState fromDomain(String companyID, ApprovalRootState approvalRootState){
 		return WwfdtApprovalRootState.builder()
 				.wwfdpApprovalRootStatePK(new WwfdpApprovalRootStatePK(approvalRootState.getRootStateID()))
-				.historyID(approvalRootState.getHistoryID())
 				.employeeID(approvalRootState.getEmployeeID())
 				.recordDate(approvalRootState.getApprovalRecordDate())
 				.listWwfdtApprovalPhaseState(
@@ -68,8 +64,6 @@ public class WwfdtApprovalRootState extends UkJpaEntity {
 	public ApprovalRootState toDomain(){
 		return ApprovalRootState.builder()
 				.rootStateID(this.wwfdpApprovalRootStatePK.rootStateID)
-				.rootType(RootType.EMPLOYMENT_APPLICATION)
-				.historyID(this.historyID)
 				.approvalRecordDate(this.recordDate)
 				.employeeID(this.employeeID)
 				.listApprovalPhaseState(this.listWwfdtApprovalPhaseState.stream()

@@ -214,10 +214,10 @@ public class StoredProcdureProcessing implements StoredProcdureProcess {
 		processCountOptionalItem(() -> dailyTime.value(t -> t.flag36), result, COUNT_ON, COUNT_OFF, 36);
 		
 		/** 任意項目19 */
-		processCountOptionalItem(() -> dailyTime.value(t -> t.flag19) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag19)), COUNT_OFF, 19);
+		processCountOptionalItem(() -> dailyTime.value(t -> t.flag19) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag19).longValue()), COUNT_OFF, 19);
 		
 		/** 任意項目21 */
-		processCountOptionalItem(() -> dailyTime.value(t -> t.flag21) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag21)), COUNT_OFF, 21);
+		processCountOptionalItem(() -> dailyTime.value(t -> t.flag21) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag21).longValue()), COUNT_OFF, 21);
 		
 		/** 任意項目37 processOptionalItem(() -> dailyTime.value(t -> t.flag37) > 0, result, BigDecimal.valueOf(dailyTime.value(t -> t.flag37)), COUNT_OFF, 37); */
 		

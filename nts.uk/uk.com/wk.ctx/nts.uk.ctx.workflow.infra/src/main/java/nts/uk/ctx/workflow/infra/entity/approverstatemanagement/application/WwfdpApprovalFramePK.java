@@ -24,4 +24,5 @@ public class WwfdpApprovalFramePK {
 	
 	@Column(name="FRAME_ORDER")
 	public Integer frameOrder;
+	
 }

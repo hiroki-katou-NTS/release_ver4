@@ -38,11 +38,11 @@ public class CollectMailNotifierImpl implements CollectMailNotifierService {
 	@Override
 	public List<String> getMailNotifierList(String companyID, String rootStateID, Integer rootType) {
 		List<String> mailList = new ArrayList<>();
-		Optional<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID, rootType);
-		if(!opApprovalRootState.isPresent()){
+		List<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+		if(opApprovalRootState.isEmpty()){
 			throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 		}
-		ApprovalRootState approvalRootState = opApprovalRootState.get();
+		ApprovalRootState approvalRootState = opApprovalRootState.get(0);
 		for(ApprovalPhaseState approvalPhaseState : approvalRootState.getListApprovalPhaseState()){
 			List<String> listApprover = judgmentApprovalStatusService.getApproverFromPhase(approvalPhaseState);
 			if(CollectionUtil.isEmpty(listApprover)){

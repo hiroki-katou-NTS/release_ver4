@@ -69,11 +69,11 @@ public class ApproveImpl implements ApproveService {
 			approvalRootState = approvalRootContentOutput.getApprovalRootState();
 		} else {
 			//ドメインモデル「承認ルートインスタンス」を取得する
-			Optional<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID, rootType);
-			if(!opApprovalRootState.isPresent()){//0件
+			List<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+			if(opApprovalRootState.isEmpty()){//0件
 				throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 			}
-			approvalRootState = opApprovalRootState.get();
+			approvalRootState = opApprovalRootState.get(0);
 		}
 		//hoatt 2018.12.14
 		//EA修正履歴 No.3013
@@ -130,7 +130,7 @@ public class ApproveImpl implements ApproveService {
 			approvalPhaseState.setApprovalAtr(ApprovalBehaviorAtr.APPROVED);
 			approvalPhaseNumber = approvalPhaseState.getPhaseOrder();
 		}
-		approvalRootStateRepository.update(approvalRootState, rootType);
+		approvalRootStateRepository.update(approvalRootState);
 		return approvalPhaseNumber;
 	}
 	
@@ -189,11 +189,11 @@ public class ApproveImpl implements ApproveService {
 					appDate);
 			approvalRootState = approvalRootContentOutput.getApprovalRootState();
 		} else {
-			Optional<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID, rootType);
-			if(!opApprovalRootState.isPresent()){
+			List<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+			if(opApprovalRootState.isEmpty()){
 				throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 			}
-			approvalRootState = opApprovalRootState.get();
+			approvalRootState = opApprovalRootState.get(0);
 		}
 		approvalRootState.getListApprovalPhaseState().sort(Comparator.comparing(ApprovalPhaseState::getPhaseOrder).reversed());
 		for(ApprovalPhaseState approvalPhaseState : approvalRootState.getListApprovalPhaseState()){
@@ -239,11 +239,11 @@ public class ApproveImpl implements ApproveService {
 					appDate);
 			approvalRootState = approvalRootContentOutput.getApprovalRootState();
 		} else {
-			Optional<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID, rootType);
-			if(!opApprovalRootState.isPresent()){
+			List<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+			if(opApprovalRootState.isEmpty()){
 				throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 			}
-			approvalRootState = opApprovalRootState.get();
+			approvalRootState = opApprovalRootState.get(0);
 		}
 		if(!(approvalPhaseStateNumber>=1&&approvalPhaseStateNumber<=5)){
 			return mailList;

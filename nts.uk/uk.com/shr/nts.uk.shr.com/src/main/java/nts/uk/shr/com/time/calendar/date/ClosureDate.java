@@ -5,8 +5,12 @@
 package nts.uk.shr.com.time.calendar.date;
 
 import lombok.Getter;
+import lombok.val;
 import nts.arc.layer.dom.DomainObject;
+import nts.arc.time.GeneralDate;
+import nts.arc.time.YearMonth;
 import nts.uk.shr.com.time.calendar.Day;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 /**
  * The Class ClosureDate.
@@ -34,6 +38,18 @@ public class ClosureDate extends DomainObject {
 	public ClosureDate(Integer closureDay, Boolean lastDayOfMonth) {
 		this.closureDay = new Day(lastDayOfMonth ? 1 : closureDay);
 		this.lastDayOfMonth = lastDayOfMonth;
+	}
+	
+	public DatePeriod periodOf(YearMonth yearMonth) {
+		if (lastDayOfMonth) {
+			return new DatePeriod(
+					GeneralDate.ymd(yearMonth.year(), yearMonth.month(), 1),
+					GeneralDate.ymd(yearMonth.year(), yearMonth.month(), yearMonth.lastDateInMonth()));
+		}
+		
+		val start = GeneralDate.ymd(yearMonth.year(), yearMonth.month(), closureDay.v());
+		val end = start.addMonths(1).addDays(-1);
+		return new DatePeriod(start, end);
 	}
 
 	/* (non-Javadoc)

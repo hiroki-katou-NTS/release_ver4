@@ -1,10 +1,9 @@
 package nts.uk.ctx.workflow.dom.approverstatemanagement;
 
 import java.util.List;
-import java.util.Optional;
-
 import nts.arc.time.GeneralDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+
 /**
  * 
  * @author Doan Duy Hung
@@ -12,96 +11,110 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  */
 public interface ApprovalRootStateRepository {
 	
-	public Optional<ApprovalRootState> findByID(String rootStateID, Integer rootType);
 	/**
-	 * @param startDate
-	 * @param endDate
-	 * @return List<ApprovalRootState>
+	 * INSERT
+	 * @param approvalRootState
 	 */
-	public List<ApprovalRootState> findEmployeeAppByApprovalRecordDate(GeneralDate startDate, GeneralDate endDate,String approverID,Integer rootType);
+	public void insert(ApprovalRootState approvalRootState);
 	
 	/**
-	 * @param startDate
-	 * @param endDate
-	 * @param approverID
-	 * @param rootType
-	 * @return
+	 * UPDATE
+	 * @param approvalRootState
 	 */
-	public List<ApprovalRootState> findEmployeeAppByApprovalRecordDateNew(GeneralDate startDate, GeneralDate endDate,Integer rootType);
-	/**
-	 * @param startDate
-	 * @param endDate
-	 * @return List<ApprovalRootState>
-	 */
-	public List<ApprovalRootState> findEmployeeAppByApprovalRecordDateAndNoRootType(String companyID, 
-			GeneralDate startDate, GeneralDate endDate,String approverID);
-	
-	/** 
-	 * 対象者と期間から承認ルートインスタンスを取得する
-	 * @param startDate
-	 * @param endDate
-	 * @param employeeID
-	 * @param rootType
-	 * @return
-	 */
-	public List<ApprovalRootState> findAppByEmployeeIDRecordDate(GeneralDate startDate, GeneralDate endDate,String employeeID,Integer rootType);
-	/**
-	 * 対象者と期間から承認ルートインスタンスを取得する(for List EmployeeID)
-	 * @param startDate
-	 * @param endDate
-	 * @param employeeID
-	 * @param rootType
-	 * @return
-	 */
-	public List<ApprovalRootState> findAppByListEmployeeIDRecordDate(GeneralDate startDate, GeneralDate endDate,List<String> employeeID,Integer rootType);
+	public void update(ApprovalRootState approvalRootState);
 	
 	/**
-	 * 対象者リストと日付リストから承認ルートインスタンスを取得する
-	 * @param approvalRecordDates
-	 * @param employeeIDs
-	 * @param rootType
-	 * @return
+	 * DELETE
+	 * @param rootStateID
 	 */
-	public List<ApprovalRootState> findAppByListEmployeeIDAndListRecordDate(List<GeneralDate> approvalRecordDates,List<String> employeeIDs,Integer rootType);
-	
-	public List<ApprovalRootState> findEmploymentApps(List<String> rootStateIDs, String approverID);
-	
-	public Optional<ApprovalRootState> findEmploymentApp(String rootStateID);
-	
-	public void insert(String companyID, ApprovalRootState approvalRootState, Integer rootType);
+	public void delete(String rootStateID);
 
-	public void update(ApprovalRootState approvalRootState, Integer rootType);
 	
-	public void delete(String rootStateID, Integer rootType);
-	
-	public List<ApprovalRootState> getRootStateByApproverDate(String companyID, String approverID, GeneralDate date);
-	
-	public void deleteConfirmDay(String employeeID, GeneralDate date);
-	
-	public List<ApprovalRootState> findByApprover(String companyID, GeneralDate startDate, GeneralDate endDate,
-			String approverID, Integer rootType);
 	/**
-	 * ドメインモデル「承認フェーズインスタンス」から最大の承認済フェーズを取得
+	 * 申請IDから申請の承認状況を取得する
 	 * @param appID
 	 * @return
 	 */
-	public List<ApprovalPhaseState> findPhaseApprovalMax(String appID);
+	public List<ApprovalRootState> findByID(String appID);
 	
-	// only for SPR
-	public List<ApprovalRootState> getByApproverPeriod(String companyID, String approverID, DatePeriod period);
-	
-	// only for SPR
-	public List<ApprovalRootState> getByApproverAgentPeriod(String companyID, String approverID, DatePeriod period, DatePeriod agentPeriod); 
 	/**
-	 * RQ309 -> doi ung cho CMM045
-	 * @param rootStateIDs
+	 * 申請IDから一番承認が進んでいるフェーズの承認状況を取得する
+	 * @param appID
+	 * @return
+	 */
+	public List<ApprovalPhaseState> findAppApvMaxPhaseStateByID(String appID);
+	
+	/**
+	 * 承認すべき申請があるかチェックする
+	 * @param period
+	 * @return
+	 */
+	public boolean checkAppShouldApproval(DatePeriod period);
+	
+	/**
+	 * 
+	 * @param appIDLst
 	 * @param approverID
 	 * @return
 	 */
-	public List<ApprovalRootState> findEmploymentAppCMM045(List<String> lstApproverID, DatePeriod period,
-			boolean unapprovalStatus, boolean approvalStatus, boolean denialStatus, 
-			boolean agentApprovalStatus, boolean remandStatus, boolean cancelStatus);
+	public List<ApprovalRootState> findAppApvRootStateByIDApprover(List<String> appIDLst, String approverID);
+
+	/**
+	 * 期間から申請者の申請の承認状況を取得する
+	 * @param period
+	 * @param employeeID
+	 * @return
+	 */
+	public List<ApprovalRootState> findAppApvRootStateByEmployee(DatePeriod period, String employeeID);
 	
-	public boolean resultKTG002 (GeneralDate startDate, GeneralDate endDate, String approverID, Integer rootType,
-			String companyID );
+	/**
+	 * 期間から申請者の申請の承認状況を取得する
+	 * @param period
+	 * @param employeeIDLst
+	 * @return
+	 */
+	public List<ApprovalRootState> findAppApvRootStateByEmployee(DatePeriod period, List<String> employeeIDLst);
+	
+	/**
+	 * 年月日のリストから申請者の申請の承認状況を取得する
+	 * @param dates
+	 * @param employeeIDLst
+	 * @return
+	 */
+	public List<ApprovalRootState> findAppApvRootStateByEmployee(List<GeneralDate> dates, List<String> employeeIDLst);
+
+	/**
+	 * 期間から承認者の申請の承認状況を取得する
+	 * @param period
+	 * @param approverID
+	 * @return
+	 */
+	public List<ApprovalRootState> findAppApvRootStateByApprover(DatePeriod period, String approverID);
+	
+	/**
+	 * 年月日から承認者の申請の承認状況を取得する
+	 * @param date
+	 * @param approverID
+	 * @return
+	 */
+	public List<ApprovalRootState> findAppApvRootStateByApprover(GeneralDate date, String approverID);
+
+	/**
+	 * 年月日と承認状況から承認者の申請の承認状況を取得する
+	 * @param approverIDLst
+	 * @param period
+	 * @param unapprovalStatus
+	 * @param approvalStatus
+	 * @param denialStatus
+	 * @param agentApprovalStatus
+	 * @param remandStatus
+	 * @param cancelStatus
+	 * @return
+	 */
+	public List<ApprovalRootState> findAppApvRootStateByApprover(List<String> approverIDLst, DatePeriod period, 
+			boolean unapprovalStatus,boolean approvalStatus, boolean denialStatus, boolean agentApprovalStatus, boolean remandStatus, boolean cancelStatus);
+	
+	
+	
+
 }

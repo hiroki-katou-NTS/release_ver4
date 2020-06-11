@@ -247,8 +247,7 @@ public interface ApprovalRootStatePub {
 	 */
 	public void cleanApprovalRootState(String rootStateID, Integer rootType);
 	
-	public void deleteConfirmDay(String employeeID, GeneralDate date);
-	/**
+ 	/**
 	 * RequestList No.483
 	 * 1.承認フェーズ毎の承認者を取得する
 	 * @param phase

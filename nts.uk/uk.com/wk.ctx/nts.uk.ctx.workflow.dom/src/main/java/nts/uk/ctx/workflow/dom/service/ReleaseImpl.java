@@ -36,11 +36,11 @@ public class ReleaseImpl implements ReleaseService {
 	@Override
 	public Boolean doRelease(String companyID, String rootStateID, String employeeID, Integer rootType) {
 		Boolean executedFlag = false;
-		Optional<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID, rootType);
-		if(!opApprovalRootState.isPresent()){
+		List<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+		if(opApprovalRootState.isEmpty()){
 			throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 		}
-		ApprovalRootState approvalRootState = opApprovalRootState.get();
+		ApprovalRootState approvalRootState = opApprovalRootState.get(0);
 		approvalRootState.getListApprovalPhaseState().sort(Comparator.comparing(ApprovalPhaseState::getPhaseOrder).reversed());
 		for(ApprovalPhaseState approvalPhaseState : approvalRootState.getListApprovalPhaseState()){
 			List<String> listApprover = judgmentApprovalStatusService.getApproverFromPhase(approvalPhaseState);
@@ -68,7 +68,7 @@ public class ReleaseImpl implements ReleaseService {
 				}
 			});
 			approvalPhaseState.setApprovalAtr(ApprovalBehaviorAtr.UNAPPROVED);
-			approvalRootStateRepository.update(approvalRootState, rootType);
+			approvalRootStateRepository.update(approvalRootState);
 			executedFlag = true;
 		}
 		return executedFlag;

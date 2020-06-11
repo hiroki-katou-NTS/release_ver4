@@ -1,6 +1,7 @@
 package nts.uk.ctx.workflow.dom.approvermanagement.workroot;
 
 import lombok.Getter;
+import nts.arc.enums.EnumAdaptor;
 
 /**
  * 承認形態
@@ -21,4 +22,9 @@ public enum ApprovalForm {
 		this.value = value;
 		this.name = name;
 	}
+	
+	public static ApprovalForm of(int type) {
+		return EnumAdaptor.valueOf(type, ApprovalForm.class);
+	}
+
 }

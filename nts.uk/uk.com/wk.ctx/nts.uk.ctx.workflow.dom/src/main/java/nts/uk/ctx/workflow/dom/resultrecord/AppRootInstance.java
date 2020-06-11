@@ -1,7 +1,6 @@
 package nts.uk.ctx.workflow.dom.resultrecord;
 
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

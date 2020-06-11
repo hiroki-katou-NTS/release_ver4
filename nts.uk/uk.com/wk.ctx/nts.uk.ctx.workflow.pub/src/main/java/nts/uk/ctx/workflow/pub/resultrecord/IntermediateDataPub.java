@@ -2,14 +2,12 @@ package nts.uk.ctx.workflow.pub.resultrecord;
 
 import java.util.Arrays;
 import java.util.List;
-
 import nts.arc.error.BusinessException;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppEmpStatusExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppEmpSttMonthExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootInsContentExport;
-import nts.uk.ctx.workflow.pub.resultrecord.export.AppRootSttMonthExport;
 import nts.uk.ctx.workflow.pub.resultrecord.export.Request113Export;
 import nts.uk.ctx.workflow.pub.resultrecord.export.Request533Export;
 import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
@@ -72,6 +70,8 @@ public interface IntermediateDataPub {
 	 * @return
 	 */
 	public List<ApproveDoneExport> checkDateApprovedStatus(String employeeID, DatePeriod period, Integer rootType);
+
+	//public List<ApproveDoneExport> checkDailyApprovedStatus(String employeeID, DatePeriod period);
 	
 	/**
 	 * RequestList 347
@@ -169,15 +169,6 @@ public interface IntermediateDataPub {
 	public void createApprovalStatus(String employeeID, GeneralDate date, Integer rootType);
 	
 	/**
-	 * RequestList 424
-	 * [No.424](中間データ版)承認状態を削除する
-	 * @param employeeID-対象者
-	 * @param targetDate-対象日
-	 * @param rootType-実績確認ルート種類
-	 */
-	public void deleteApprovalStatus(String employeeID, GeneralDate date, Integer rootType);
-	
-	/**
 	 * RequestList 528
 	 * [No.528](中間データ版)実績の承認を登録する（月別）
 	 * @param approverID
@@ -204,15 +195,6 @@ public interface IntermediateDataPub {
 	 * @return
 	 */
 	public boolean cancelMonth(String approverID, List<EmpPerformMonthParam> empPerformMonthParamLst);
-	
-	/**
-	 * RequestList 532
-	 * [No.532](中間データ版)承認対象者と期間から承認状況を取得する（月別）
-	 * @param employeeID
-	 * @param period
-	 * @return
-	 */
-	public List<AppRootSttMonthExport> getAppRootStatusByEmpPeriodMonth(String employeeID, DatePeriod period);
 	
 	/**
 	 * RequestList 533
@@ -267,20 +249,40 @@ public interface IntermediateDataPub {
 	public ApproverApproveExport getApproverByPeriodMonth(String employeeID, Integer closureID, YearMonth yearMonth, ClosureDate closureDate, GeneralDate date); 
 	
 	/**
-	 * RequestList 601
-	 * [No.601]日別の承認をクリアする
-	 * @param employeeID
-	 * @param date
+	 * RequestList 424
+	 * [No.424](中間データ版)承認状態を削除する
+	 * @param employeeID-対象者
+	 * @param date-対象日
+	 * @param rootType-実績確認ルート種類
 	 */
-	public void deleteRootConfirmDay(String employeeID, GeneralDate date);
+	//※※※※　注意　※※※※　新規で使わないこと
+	public void deleteApprovalStatus(String employeeID, GeneralDate date, Integer rootType);
+	
+	/**
+	 * RequestList 601
+	 * [No.601]日別実績の承認状況をクリアする
+	 * @param employeeID-対象者
+	 * @param date-対象日
+	 */
+	public void clearDailyApprovalStatus(String employeeID, GeneralDate date);
 	
 	/**
 	 * RequestList 602
-	 * [No.602]月別の承認をクリアする
+	 * [No.602]月別実績の承認状況をクリアする（複数）
 	 * @param employeeID
 	 * @param confirmDeleteParamLst
 	 */
-	public void deleteRootConfirmMonth(String employeeID, List<ConfirmDeleteParam> confirmDeleteParamLst);
+	public void clearMonthlyApprovalStatus(String employeeID, List<ConfirmDeleteParam> confirmDeleteParamLst);
+	
+	/**
+	 * RequestList ***
+	 * [No.***] 月別実績の承認状況をクリアする（単体）
+	 * @param employeeID
+	 * @param yearMonth
+	 * @param closureID
+	 * @param closureDate
+	 */
+	void clearMonthlyApprovalStatus(String employeeID, ConfirmDeleteParam confirmDeleteParamLst);
 	
 	/**
 	 * RequestList 610

@@ -8,12 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-
 import org.apache.logging.log4j.util.Strings;
-
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.time.GeneralDate;
 import nts.gul.collection.CollectionUtil;
@@ -51,7 +48,6 @@ import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalFrame;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalPhaseState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApproverState;
-import nts.uk.ctx.workflow.dom.approverstatemanagement.RootType;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRepresenterOutput;
 import nts.uk.ctx.workflow.dom.service.output.ApprovalRootContentOutput;
 import nts.uk.ctx.workflow.dom.service.output.ApproverInfo;
@@ -465,7 +461,6 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 		}).sorted(Comparator.comparing(ApprovalPhaseState::getPhaseOrder))
 				.collect(Collectors.toList());
 		return ApprovalRootState.builder()
-				.historyID(histotyID)
 				.listApprovalPhaseState(listApprovalPhaseState)
 				.build();
 	}
@@ -486,11 +481,9 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 				String appID = IdentifierUtil.randomUniqueId();
 				approvalRootState = ApprovalRootState.createFromFirst(
 						companyID,
-						appID,  
-						EnumAdaptor.valueOf(confirmAtr.value+1, RootType.class), 
-						approvalRootState.getHistoryID(), 
-						standardDate, 
+						appID,
 						employeeID, 
+						standardDate, 
 						approvalRootState);
 				// approvalRootStateRepository.insert(companyID, approvalRootState,RootType.CONFIRM_WORK_BY_DAY.value);
 			}
@@ -517,10 +510,8 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 				approvalRootState = ApprovalRootState.createFromFirst(
 						companyID,
 						appID,  
-						EnumAdaptor.valueOf(confirmAtr.value+1, RootType.class), 
-						approvalRootState.getHistoryID(), 
-						standardDate, 
 						employeeID, 
+						standardDate, 
 						approvalRootState);
 				// approvalRootStateRepository.insert(companyID, approvalRootState,RootType.CONFIRM_WORK_BY_DAY.value);
 			}
@@ -541,10 +532,8 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 					approvalRootState = ApprovalRootState.createFromFirst(
 							companyID,
 							appID,  
-							EnumAdaptor.valueOf(confirmAtr.value+1, RootType.class), 
-							approvalRootState.getHistoryID(), 
-							standardDate, 
 							employeeID, 
+							standardDate, 
 							approvalRootState);
 					// approvalRootStateRepository.insert(companyID, approvalRootState,RootType.CONFIRM_WORK_BY_DAY.value);
 				}
@@ -568,10 +557,8 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 					approvalRootState = ApprovalRootState.createFromFirst(
 							companyID,
 							appID,  
-							EnumAdaptor.valueOf(confirmAtr.value+1, RootType.class), 
-							approvalRootState.getHistoryID(), 
-							standardDate, 
 							employeeID, 
+							standardDate, 
 							approvalRootState);
 					// approvalRootStateRepository.insert(companyID, approvalRootState,RootType.CONFIRM_WORK_BY_DAY.value);
 				}
@@ -591,10 +578,8 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 				approvalRootState = ApprovalRootState.createFromFirst(
 						companyID,
 						appID,  
-						EnumAdaptor.valueOf(confirmAtr.value+1, RootType.class), 
-						approvalRootState.getHistoryID(), 
-						standardDate, 
 						employeeID, 
+						standardDate, 
 						approvalRootState);
 				// approvalRootStateRepository.insert(companyID, approvalRootState,RootType.CONFIRM_WORK_BY_DAY.value);
 			}
@@ -619,10 +604,8 @@ public class CollectApprovalRootImpl implements CollectApprovalRootService {
 				approvalRootState = ApprovalRootState.createFromFirst(
 						companyID,
 						appID,  
-						EnumAdaptor.valueOf(confirmAtr.value+1, RootType.class), 
-						approvalRootState.getHistoryID(), 
-						standardDate, 
 						employeeID, 
+						standardDate, 
 						approvalRootState);
 				// approvalRootStateRepository.insert(companyID, approvalRootState,RootType.CONFIRM_WORK_BY_DAY.value);
 			}

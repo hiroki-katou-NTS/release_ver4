@@ -7,12 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-
 import lombok.val;
 import nts.arc.layer.infra.data.DbConsts;
 import nts.arc.layer.infra.data.JpaRepository;
@@ -44,16 +41,35 @@ public class JpaAppRootConfirmQueryRepository
 		
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subEmpIds -> {
 			
-			String sql = "select r.ROOT_ID, r.EMPLOYEE_ID, r.START_DATE, r.END_DATE, MAX(p.PHASE_ORDER) as FINAL_PHASE_ORDER" 
-					+ " from WWFDT_APP_ROOT_INSTANCE r"
-					+ " inner join WWFDT_APP_PHASE_INSTANCE p"
+			
+			
+			String sql = "";
+			
+			//日次の場合
+			if(rootType.value == 1) {
+				sql = "select r.ROOT_ID, r.EMPLOYEE_ID, r.START_DATE, r.END_DATE, MAX(p.PHASE_ORDER) as FINAL_PHASE_ORDER"
+					+ " from WWFDT_DAY_APV_RT_INSTANCE r"
+					+ " left join WWFDT_DAY_APV_PH_INSTANCE p"
 					+ " on r.ROOT_ID = p.ROOT_ID"
-					+ " where CID = ?"
-					+ " and r.ROOT_TYPE = ?"
+					+ " where r.CID = ?"
 					+ " and r.EMPLOYEE_ID in (" + NtsStatement.In.createParamsString(subEmpIds) + ")"
 					+ " and r.START_DATE <= ?"
 					+ " and r.END_DATE >= ?"
 					+ " group by r.ROOT_ID, r.EMPLOYEE_ID, r.START_DATE, r.END_DATE";
+			} 
+			//月次の場合
+			else {
+				sql = "select r.ROOT_ID, r.EMPLOYEE_ID, r.START_DATE, r.END_DATE, MAX(p.PHASE_ORDER) as FINAL_PHASE_ORDER"
+					+ " from WWFDT_MON_APV_RT_INSTANCE r"
+					+ " left join WWFDT_MON_APV_PH_INSTANCE p"
+					+ " on r.ROOT_ID = p.ROOT_ID"
+					+ " where r.CID = ?"
+					+ " and r.EMPLOYEE_ID in (" + NtsStatement.In.createParamsString(subEmpIds) + ")"
+					+ " and r.START_DATE <= ?"
+					+ " and r.END_DATE >= ?"
+					+ " group by r.ROOT_ID, r.EMPLOYEE_ID, r.START_DATE, r.END_DATE";
+			}
+
 			
 			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
 				
@@ -100,19 +116,33 @@ public class JpaAppRootConfirmQueryRepository
 
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subEmpIds -> {
 			
-			String sql = "select r.ROOT_ID, r.EMPLOYEE_ID, r.RECORD_DATE, p.PHASE_ORDER, p.APP_PHASE_ATR"
-					+ " from WWFDT_APP_ROOT_CONFIRM r"
-					+ " left join WWFDT_APP_PHASE_CONFIRM p"
+			String sql = "";
+			
+			//日次の場合
+			if(rootType.value == 1) {
+				sql = "select r.ROOT_ID, r.EMPLOYEE_ID, r.RECORD_DATE, p.PHASE_ORDER, p.APP_PHASE_ATR"
+					+ " from WWFDT_APP_DAY_RT_CONFIRM r"
+					+ " left join WWFDT_APP_DAY_PH_CONFIRM p"
 					+ " on r.ROOT_ID = p.ROOT_ID"
 					+ " where r.CID = ?"
-					+ " and r.ROOT_TYPE = ?"
 					+ " and r.EMPLOYEE_ID in (" + NtsStatement.In.createParamsString(subEmpIds) + ")"
 					+ " and r.RECORD_DATE between ? and ?";
+				
+			} 
+			//月次の場合
+			else {
+				sql = "select r.ROOT_ID, r.EMPLOYEE_ID, r.RECORD_DATE, p.PHASE_ORDER, p.APP_PHASE_ATR"
+					+ " from WWFDT_APP_MON_RT_CONFIRM r"
+					+ " left join WWFDT_APP_MON_PH_CONFIRM p"
+					+ " on r.ROOT_ID = p.ROOT_ID"
+					+ " where r.CID = ?"
+					+ " and r.EMPLOYEE_ID in (" + NtsStatement.In.createParamsString(subEmpIds) + ")"
+					+ " and r.RECORD_DATE between ? and ?";
+			}
 			
 			try (PreparedStatement stmt = this.connection().prepareStatement(sql)) {
 				
 				stmt.setString(1, companyId);
-				stmt.setInt(2, rootType.value);
 
 				for (int i = 0; i < subEmpIds.size(); i++) {
 					stmt.setString(3 + i, subEmpIds.get(i));

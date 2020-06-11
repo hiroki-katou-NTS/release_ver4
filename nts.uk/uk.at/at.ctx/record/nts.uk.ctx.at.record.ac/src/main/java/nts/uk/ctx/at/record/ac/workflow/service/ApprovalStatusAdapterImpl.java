@@ -315,13 +315,13 @@ public class ApprovalStatusAdapterImpl implements ApprovalStatusAdapter {
 
 	@Override
 	public void deleteRootConfirmDay(String employeeID, GeneralDate date) {
-		intermediateDataPub.deleteRootConfirmDay(employeeID, date);
+		intermediateDataPub.clearDailyApprovalStatus(employeeID, date);
 		
 	}
 
 	@Override
 	public void deleteRootConfirmMonth(String employeeID, List<ConfirmDeleteParamImport> confirmDeleteParamLst) {
-		intermediateDataPub.deleteRootConfirmMonth(employeeID,
+		intermediateDataPub.clearMonthlyApprovalStatus(employeeID,
 				confirmDeleteParamLst.stream()
 						.map(x -> new ConfirmDeleteParam(x.getYearMonth(), x.getClosureID(), x.getClosureDate()))
 						.collect(Collectors.toList()));

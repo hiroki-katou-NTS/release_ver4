@@ -1,0 +1,65 @@
+package nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import nts.arc.time.GeneralDate;
+import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalPhaseState;
+import nts.uk.shr.infra.data.entity.UkJpaEntity;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name="WWFDT_APP_APV_PH_STATE")
+@Builder
+public class WwfdtAppApvPhaseState extends UkJpaEntity {
+	
+	@EmbeddedId
+	public WwfdpAppApvPhaseStatePK wwfdpAppApvPhaseStatePK;
+	
+	@Column(name="CID")
+	public String companyID;
+	
+	@Column(name="EMPLOYEE_ID")
+	public String employeeID;
+	
+	@Column(name="APP_DATE")
+	public GeneralDate appDate;
+	
+	@Column(name="APP_PHASE_ATR")
+	public Integer approvalAtr;
+	
+	@Column(name="APPROVAL_FORM")
+	public Integer approvalForm;
+	
+	public List<WwfdtAppApvFrameState> listWwfdtAppApvFrameState;
+
+	@Override
+	protected Object getKey() {
+		return wwfdpAppApvPhaseStatePK;
+	}
+	
+	public static WwfdtAppApvPhaseState fromDomain(String companyID, String employeeID, GeneralDate appDate, ApprovalPhaseState approvalPhaseState){
+		return WwfdtAppApvPhaseState.builder()
+				.wwfdpAppApvPhaseStatePK(new WwfdpAppApvPhaseStatePK(
+						approvalPhaseState.getRootStateID(), 
+						approvalPhaseState.getPhaseOrder()))
+				.companyID(companyID)
+				.employeeID(employeeID)
+				.appDate(appDate)
+				.approvalAtr(approvalPhaseState.getApprovalAtr().value)
+				.approvalForm(approvalPhaseState.getApprovalForm().value)
+				.listWwfdtAppApvFrameState(approvalPhaseState.getListApprovalFrame()
+						.stream()
+						.map(f -> WwfdtAppApvFrameState.fromDomain(companyID, employeeID, appDate, f))
+								.collect(Collectors.toList()))
+				.build();
+	}
+	
+}
