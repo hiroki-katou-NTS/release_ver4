@@ -22,11 +22,12 @@ public interface AffJobTitleHistoryItemRepository {
 	Optional<AffJobTitleHistoryItem> findByHitoryId(String historyId);
 	
 	/**
-	 * ドメインモデル「職務職位」を新規登録する
-	 * 
-	 * @param domain
+//	 Merge BSYMT_AFF_JOB_HIST To BSYMT_AFF_JOB_HIST_ITEM  because response
+//	 new Insert Method ↓
+//	         ClassName  : JpaAffJobTitleHistoryRepository
+//	         MethodName : addToMerge
 	 */
-	void add(AffJobTitleHistoryItem domain);
+//	void add(AffJobTitleHistoryItem domain);
 
 	/**
 	 * 取得した「職務職位」を更新する

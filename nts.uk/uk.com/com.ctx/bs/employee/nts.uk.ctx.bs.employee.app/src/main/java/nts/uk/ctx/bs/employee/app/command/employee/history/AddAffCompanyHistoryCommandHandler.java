@@ -65,14 +65,13 @@ public class AddAffCompanyHistoryCommandHandler
 
 		itemToBeAdded.add(hist);
 
-		affCompanyHistService.add(itemToBeAdded, command.getPId());
-
 		AffCompanyInfo histItem = AffCompanyInfo.createFromJavaType(command.getSId(),
 				newHistId, !StringUtils.isEmpty(command.getRecruitmentClassification())
 						? command.getRecruitmentClassification() : " ",
 				command.getAdoptionDate(), command.getRetirementAllowanceCalcStartDate());
-		affCompanyInfoRepository.add(histItem);
 
+		affCompanyHistService.addToMerge(itemToBeAdded, command.getPId(), histItem);
+		
 		return new PeregAddCommandResult(newHistId);
 	}
 

@@ -96,12 +96,11 @@ public class AddEmployeeCommandHelper {
 
 	private void addAffCompanyHist(String personId, String employeeId, GeneralDate hireDate, GeneralDate entryDate, String companyId,
 			String comHistId) {
-		AffCompanyHist newComHist = AffCompanyHist.createNewEmployeeHist(personId, employeeId, comHistId, hireDate, entryDate);
-		this.companyHistRepo.add(newComHist);
-
+		//BSYMT_AFF_COM_HISTとBSYMT_AFF_COM_INFOを統合したため
+		//companyHistRepo.addToMergeだけでいい
 		AffCompanyInfo newComInfo = AffCompanyInfo.createFromJavaType(employeeId, comHistId, " ", null, null);
-		this.companyInfoRepo.add(newComInfo);
-
+		AffCompanyHist newComHist = AffCompanyHist.createNewEmployeeHist(personId, employeeId, comHistId, hireDate, entryDate);
+		this.companyHistRepo.addToMerge(newComHist, newComInfo);
 	}
 
 }

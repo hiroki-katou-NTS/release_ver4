@@ -171,11 +171,21 @@ public class JpaAffClassHistoryRepository extends JpaRepository implements AffCl
 		return resultList;
 		
 	}
-	
+
+//	 Merge BSYMT_AFF_CLASS_HISTORY To BSYMT_AFF_CLASS_HIS_ITEM  because response
+//	 new Insert Method ↓
+//	         Class      : here
+//	         MethodName : addToMerge
+//	@Override
+//	public void add(String cid, String sid, DateHistoryItem itemToBeAdded) {
+//		BsymtAffClassHistory entity = new BsymtAffClassHistory(itemToBeAdded.identifier(), cid, sid,
+//				itemToBeAdded.start(), itemToBeAdded.end());
+//		this.commandProxy().insert(entity);
+//	}
 	@Override
-	public void add(String cid, String sid, DateHistoryItem itemToBeAdded) {
+	public void addToMerge(String cid, String sid, DateHistoryItem itemToBeAdded, String classificationCode) {
 		BsymtAffClassHistory entity = new BsymtAffClassHistory(itemToBeAdded.identifier(), cid, sid,
-				itemToBeAdded.start(), itemToBeAdded.end());
+				itemToBeAdded.start(), itemToBeAdded.end(), classificationCode);
 		this.commandProxy().insert(entity);
 	}
 

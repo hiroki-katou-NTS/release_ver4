@@ -38,9 +38,6 @@ public class AddAffClassCommandHandler
 	private AffClassHistoryRepository affClassHistoryRepo;
 
 	@Inject
-	private AffClassHistItemRepository affClassHistItemRepo;
-
-	@Inject
 	private AffClassHistoryRepositoryService affClassHistoryRepositoryService;
 
 	@Override
@@ -68,12 +65,7 @@ public class AddAffClassCommandHandler
 		}
 		DateHistoryItem dateItem = new DateHistoryItem(newHistoryId, new DatePeriod(command.getStartDate() != null ? command.getStartDate() : ConstantUtils.minDate(), command.getEndDate()!= null? command.getEndDate():  ConstantUtils.maxDate()));
 		history.add(dateItem);
-		affClassHistoryRepositoryService.add(history);
-		
-		// add history item
-		AffClassHistItem histItem = AffClassHistItem.createFromJavaType(command.getEmployeeId(), newHistoryId,
-				command.getClassificationCode());
-		affClassHistItemRepo.add(histItem);
+		affClassHistoryRepositoryService.addToMerge(history, command.getClassificationCode());
 
 		return new PeregAddCommandResult(newHistoryId);
 	}

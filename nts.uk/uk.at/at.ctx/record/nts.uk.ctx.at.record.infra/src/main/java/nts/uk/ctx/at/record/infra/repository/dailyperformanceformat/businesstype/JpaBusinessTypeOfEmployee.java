@@ -65,12 +65,15 @@ public class JpaBusinessTypeOfEmployee extends JpaRepository
 		});
 		return resultList;
 	}
-
-	@Override
-	public void insert(BusinessTypeOfEmployee businessTypeOfEmployee) {
-		this.commandProxy().insert(toEntity(businessTypeOfEmployee));
-
-	}
+	
+//	 Merge KRCMT_BUS_TYPE_HIST To KRCMT_BUS_TYPE_SYAIN  because response
+//	 new Insert Method ↓
+//	         ClassName  : JpaBusinessTypeEmpOfHistory
+//	         MethodName : addToMerge
+//	@Override
+//	public void insert(BusinessTypeOfEmployee businessTypeOfEmployee) {
+//		this.commandProxy().insert(toEntity(businessTypeOfEmployee));
+//	}
 
 	@Override
 	public void update(BusinessTypeOfEmployee businessTypeOfEmployee) {

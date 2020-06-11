@@ -6,6 +6,7 @@ package nts.uk.ctx.bs.employee.infra.entity.jobtitle.affiliate;
 
 import java.io.Serializable;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -54,6 +55,16 @@ public class BsymtAffJobTitleHist extends UkJpaEntity implements Serializable {
 	@Convert(converter = GeneralDateToDBConverter.class)
 	public GeneralDate endDate;
 	
+//	 Merge BSYMT_AFF_JOB_HIST To BSYMT_AFF_JOB_HIST_ITEM  because response
+	/** The empCode. */
+	@Basic(optional = false)
+	@Column(name = "JOB_TITLE_ID")
+	public String jobTitleId;
+	
+	@Basic(optional = false)
+	@Column(name = "NOTE")
+	public String note;
+	
 	/** The bsymt aff job title hist item. */
 	@OneToOne
 	@PrimaryKeyJoinColumns({ @PrimaryKeyJoinColumn(name = "HIST_ID", referencedColumnName = "HIST_ID") })
@@ -81,13 +92,15 @@ public class BsymtAffJobTitleHist extends UkJpaEntity implements Serializable {
 	 *            the end date
 	 */
 	public BsymtAffJobTitleHist(String hisId, String sid, String cid, GeneralDate strDate,
-			GeneralDate endDate) {
+			GeneralDate endDate, String jobTitleId, String note) {
 		super();
 		this.hisId = hisId;
 		this.sid = sid;
 		this.cid = cid;
 		this.strDate = strDate;
 		this.endDate = endDate;
+		this.jobTitleId = jobTitleId;
+		this.note = note;
 	}
 
 	/*

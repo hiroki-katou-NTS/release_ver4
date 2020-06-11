@@ -30,6 +30,7 @@ import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHist;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistByEmployee;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistItem;
 import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyHistRepository;
+import nts.uk.ctx.bs.employee.dom.employee.history.AffCompanyInfo;
 import nts.uk.ctx.bs.employee.dom.jobtitle.affiliate.AffJobTitleHistoryItem;
 import nts.uk.ctx.bs.employee.infra.entity.employee.history.BsymtAffCompanyHist;
 import nts.uk.ctx.bs.employee.infra.entity.employee.history.BsymtAffCompanyHistPk;
@@ -87,10 +88,27 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 	private static final String GET_LST_SID_BY_LSTSID_DATEPERIOD = "SELECT DISTINCT af.bsymtAffCompanyHistPk.sId FROM BsymtAffCompanyHist af " 
 			+ " WHERE af.bsymtAffCompanyHistPk.sId IN :employeeIds AND af.startDate <= :endDate AND :startDate <= af.endDate";
 
+//	 Merge BSYMT_AFF_COM_HIST To BSYMT_AFF_COM_INFO  because response
+//	 new Insert Method ↓
+//	         ClassName  : AffCompanyInfoRepositoryImp
+//	         MethodName : addToMerge 
+//	@Override
+//	public void add(AffCompanyHist domain) {
+//		this.commandProxy().insertAll(toEntities(domain));
+//		this.getEntityManager().flush();
+//	}
 	@Override
-	public void add(AffCompanyHist domain) {
-		this.commandProxy().insertAll(toEntities(domain));
+	public void addToMerge(AffCompanyHist newComHist, AffCompanyInfo newComInfo){
+		this.commandProxy().insertAll(toEntities(newComHist, newComInfo));
 		this.getEntityManager().flush();
+	}
+//	@Override
+//	public void add(String sid, String pId, AffCompanyHistItem item) {
+//		this.commandProxy().insert(toEntity(item, pId, sid));
+//	}
+	@Override
+	public void addToMerge(String sid, String pId, AffCompanyHistItem item, AffCompanyInfo newComInfo) {
+		this.commandProxy().insert(toEntity(item, pId, sid, newComInfo));
 	}
 
 	@Override
@@ -289,6 +307,28 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 		return domain;
 	}
 
+	private List<BsymtAffCompanyHist> toEntities(AffCompanyHist domain, AffCompanyInfo newComInfo) {
+		String companyId = AppContexts.user().companyId();
+		List<BsymtAffCompanyHist> entities = new ArrayList<BsymtAffCompanyHist>();
+		for (AffCompanyHistByEmployee hist : domain.getLstAffCompanyHistByEmployee()) {
+			for (AffCompanyHistItem item : hist.getLstAffCompanyHistoryItem()) {
+				BsymtAffCompanyHistPk entityPk = new BsymtAffCompanyHistPk(domain.getPId(), hist.getSId(),
+						item.getHistoryId());
+				BsymtAffCompanyHist entity = new BsymtAffCompanyHist(entityPk, companyId,
+						BooleanUtils.toInteger(item.isDestinationData()), item.getDatePeriod().start(),
+						item.getDatePeriod().end(), 
+						newComInfo.getRecruitmentClassification().v(),
+						newComInfo.getAdoptionDate(),
+						newComInfo.getRetirementAllowanceCalcStartDate(),
+						null);
+
+				entities.add(entity);
+			}
+		}
+
+		return entities;
+	}
+	
 	private List<BsymtAffCompanyHist> toEntities(AffCompanyHist domain) {
 		String companyId = AppContexts.user().companyId();
 		List<BsymtAffCompanyHist> entities = new ArrayList<BsymtAffCompanyHist>();
@@ -298,7 +338,11 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 						item.getHistoryId());
 				BsymtAffCompanyHist entity = new BsymtAffCompanyHist(entityPk, companyId,
 						BooleanUtils.toInteger(item.isDestinationData()), item.getDatePeriod().start(),
-						item.getDatePeriod().end(), null);
+						item.getDatePeriod().end(), 
+						null,
+						null,
+						null,
+						null);
 
 				entities.add(entity);
 			}
@@ -324,17 +368,22 @@ public class AffCompanyHistRepositoryImp extends JpaRepository implements AffCom
 	 * @param histItem
 	 * @param pId
 	 * @param sid
+	 * @param newComInfo 
 	 * @return BsymtAffCompanyHist
 	 */
-	private BsymtAffCompanyHist toEntity(AffCompanyHistItem histItem, String pId, String sid) {
+	private BsymtAffCompanyHist toEntity(AffCompanyHistItem histItem, String pId, String sid, AffCompanyInfo newComInfo) {
 		String companyId = AppContexts.user().companyId();
 		BsymtAffCompanyHistPk bsymtAffCompanyHistPk = new BsymtAffCompanyHistPk(pId, sid, histItem.getHistoryId());
-		return new BsymtAffCompanyHist(bsymtAffCompanyHistPk, companyId, BooleanUtils.toInteger(histItem.isDestinationData()), histItem.start(), histItem.end(), null);
-	}
-
-	@Override
-	public void add(String sid, String pId, AffCompanyHistItem item) {
-		this.commandProxy().insert(toEntity(item, pId, sid));
+		return new BsymtAffCompanyHist(bsymtAffCompanyHistPk, 
+				companyId, 
+				BooleanUtils.toInteger(histItem.isDestinationData()), 
+				histItem.start(), 
+				histItem.end(), 
+				newComInfo.getRecruitmentClassification().v(),
+				newComInfo.getAdoptionDate(),
+				newComInfo.getRetirementAllowanceCalcStartDate(),
+				null
+				);
 	}
 
 	@Override

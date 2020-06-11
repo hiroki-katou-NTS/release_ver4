@@ -16,11 +16,15 @@ public class AffCompanyInfoRepositoryImp extends JpaRepository implements AffCom
 	private static final String SELECT_BY_HISTID = String.join(" ", SELECT_NO_PARAM,
 			"WHERE c.bsymtAffCompanyInfoPk.historyId = :histId");
 
-	@Override
-	public void add(AffCompanyInfo domain) {
-		commandProxy().insert(toEntity(domain));
-		this.getEntityManager().flush();
-	}
+//	 Merge BSYMT_AFF_COM_HIST To BSYMT_AFF_COM_INFO  because response
+//	 new Insert Method ↓
+//	         ClassName    : AffCompanyHistRepositoryImp
+//	         MethodName : addToMerge 
+//	@Override
+//	public void add(AffCompanyInfo domain) {
+//		commandProxy().insert(toEntity(domain));
+//		this.getEntityManager().flush();
+//	}
 
 	@Override
 	public void update(AffCompanyInfo domain) {

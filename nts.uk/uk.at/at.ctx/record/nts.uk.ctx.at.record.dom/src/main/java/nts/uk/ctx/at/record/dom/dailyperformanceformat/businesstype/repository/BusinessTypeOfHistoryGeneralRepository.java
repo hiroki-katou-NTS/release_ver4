@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.repository;
 
+import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployee;
 import nts.uk.ctx.at.record.dom.dailyperformanceformat.businesstype.BusinessTypeOfEmployeeHistory;
 import nts.uk.shr.com.history.DateHistoryItem;
 
@@ -14,9 +15,10 @@ public interface BusinessTypeOfHistoryGeneralRepository {
 	 * add new history and update last history
 	 * 
 	 * @param bEmployeeHistory
+	 * @param bEmployee 
 	 * @param newDate
 	 */
-	public void addBusinessTypeEmpOfHistory(BusinessTypeOfEmployeeHistory bEmployeeHistory);
+	public void addBusinessTypeEmpOfHistory(BusinessTypeOfEmployeeHistory bEmployeeHistory, BusinessTypeOfEmployee bEmployee);
 
 	/**
 	 * update history and around it

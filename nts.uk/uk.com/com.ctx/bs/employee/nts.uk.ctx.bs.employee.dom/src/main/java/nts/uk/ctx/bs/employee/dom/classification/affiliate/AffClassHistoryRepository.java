@@ -57,10 +57,13 @@ public interface AffClassHistoryRepository {
 	
 	/**
 	 * add domain history
-	 * @param history
-	 * @author hop.nt
+	 * Merge BSYMT_AFF_CLASS_HISTORY To BSYMT_AFF_CLASS_HIS_ITEM  because response
+	 * new Insert Method ↓
+	 *        ClassName  : JpaAffClassHistoryRepository
+	 *        MethodName : addToMerge
 	 */
-	void add(String cid, String sid, DateHistoryItem itemToBeAdded);
+//	void add(String cid, String sid, DateHistoryItem itemToBeAdded);
+	void addToMerge(String cid, String sid, DateHistoryItem itemToBeAdded, String classificationCode);
 	
 	/**
 	 * update domain history

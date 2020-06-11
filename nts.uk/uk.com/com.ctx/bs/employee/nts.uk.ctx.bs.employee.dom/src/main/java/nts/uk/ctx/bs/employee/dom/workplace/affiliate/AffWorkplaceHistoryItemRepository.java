@@ -8,10 +8,12 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 public interface AffWorkplaceHistoryItemRepository {
 	/**
-	 * ドメインモッ�「所属�場」を新規登録する
-	 * @param domain
+	 * Merge BSYMT_AFF_WORKPLACE_HIST To BSYMT_AFF_WPL_HIST_ITEM  because response
+	 * new Insert Method ↓
+	 *       ClassName  : JpaAffWorkplaceHistoryRepository
+	 *       MethodName : addToMerge
 	 */
-	void add(AffWorkplaceHistoryItem domain);
+//	void add(AffWorkplaceHistoryItem domain);
 	/**
 	 * ドメインモッ�「所属�場」を削除する
 	 * @param domain

@@ -15,14 +15,15 @@ public class EmploymentHistoryService {
 	/**
 	 * Add employment history
 	 * @param domain
+	 * @param salarySegment 
 	 */
-	public void add(EmploymentHistory domain){
+	public void addToMerge(EmploymentHistory domain, String employmentCode, Integer salarySegment){
 		if (domain.getHistoryItems().isEmpty()){
 			return;
 		}
 		// Insert last element
 		DateHistoryItem lastItem = domain.getHistoryItems().get(domain.getHistoryItems().size()-1);
-		employmentHistoryRepository.add(domain.getEmployeeId(), lastItem);
+		employmentHistoryRepository.addToMerge(domain.getEmployeeId(), lastItem, employmentCode, salarySegment);
 		// Update item before and after
 		updateItemBefore(domain,lastItem);
 	}

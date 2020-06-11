@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package nts.uk.ctx.at.record.infra.entity.daily.calculationattribute;
 
 import java.io.Serializable;
@@ -17,12 +12,8 @@ import javax.validation.constraints.Size;
 import nts.arc.layer.infra.data.entity.type.GeneralDateToDBConverter;
 import nts.arc.time.GeneralDate;
 
-/**
- *
- * @author NWS_THANHNC_PC
- */
 @Embeddable
-public class KrcstDaiCalculationSetPK implements Serializable {
+public class KrcstDaiCalculationSetMergePK implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Basic(optional = false)
     @NotNull
@@ -35,10 +26,10 @@ public class KrcstDaiCalculationSetPK implements Serializable {
     @Convert(converter = GeneralDateToDBConverter.class)
     public GeneralDate ymd;
 
-    public KrcstDaiCalculationSetPK() {
+    public KrcstDaiCalculationSetMergePK() {
     }
 
-    public KrcstDaiCalculationSetPK(String sid, GeneralDate ymd) {
+    public KrcstDaiCalculationSetMergePK(String sid, GeneralDate ymd) {
         this.sid = sid;
         this.ymd = ymd;
     }
@@ -54,10 +45,10 @@ public class KrcstDaiCalculationSetPK implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof KrcstDaiCalculationSetPK)) {
+        if (!(object instanceof KrcstDaiCalculationSetMergePK)) {
             return false;
         }
-        KrcstDaiCalculationSetPK other = (KrcstDaiCalculationSetPK) object;
+        KrcstDaiCalculationSetMergePK other = (KrcstDaiCalculationSetMergePK) object;
         if ((this.sid == null && other.sid != null) || (this.sid != null && !this.sid.equals(other.sid))) {
             return false;
         }
@@ -69,7 +60,7 @@ public class KrcstDaiCalculationSetPK implements Serializable {
 
     @Override
     public String toString() {
-        return "entities.KrcstDaiCalculationSetPK[ sid=" + sid + ", ymd=" + ymd + " ]";
+        return "entities.KrcstDaiCalculationSetMergePK[ sid=" + sid + ", ymd=" + ymd + " ]";
     }
-    
+
 }

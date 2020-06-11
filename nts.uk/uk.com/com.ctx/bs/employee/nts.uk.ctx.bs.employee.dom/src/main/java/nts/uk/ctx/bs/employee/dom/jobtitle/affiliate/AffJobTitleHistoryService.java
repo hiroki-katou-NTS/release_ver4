@@ -17,12 +17,12 @@ public class AffJobTitleHistoryService {
 	 * 
 	 * @param domain
 	 */
-	public void add(AffJobTitleHistory domain){
+	public void addToMerge(AffJobTitleHistory domain, AffJobTitleHistoryItem histItem){
 		if (domain.getHistoryItems().isEmpty()) {
 			return;
 		}
 		DateHistoryItem itemToBeAdded = domain.getHistoryItems().get(domain.getHistoryItems().size() - 1);
-		affJobTitleHistoryRepository.add(domain.getCompanyId(), domain.getEmployeeId(), itemToBeAdded);
+		affJobTitleHistoryRepository.addToMerge(domain.getCompanyId(), domain.getEmployeeId(), itemToBeAdded, histItem.getJobTitleId(), histItem.getNote().toString());
 		// Update item before
 		updateItemBefore(domain, itemToBeAdded);
 	}

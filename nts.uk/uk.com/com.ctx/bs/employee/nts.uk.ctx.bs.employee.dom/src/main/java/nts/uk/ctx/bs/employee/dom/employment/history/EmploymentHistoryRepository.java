@@ -53,8 +53,14 @@ public interface EmploymentHistoryRepository {
 	 * Add employment history
 	 * @param sid
 	 * @param domain
+	 * 
+	 *  Merge BSYMT_EMPLOYMENT_HIST To BSYMT_EMPLOYMENT_HIS_ITEM  because response
+	 *	new Insert Method ↓
+	 *       ClassName  : JpaEmploymentHistoryRepository
+	 *       MethodName : addToMerge
 	 */
-	void add(String sid, DateHistoryItem domain);
+//	void add(String sid, DateHistoryItem domain);
+	void addToMerge(String sid, DateHistoryItem domain, String employementCode, Integer salarySegment);
 	
 	/**
 	 * Update employment history
