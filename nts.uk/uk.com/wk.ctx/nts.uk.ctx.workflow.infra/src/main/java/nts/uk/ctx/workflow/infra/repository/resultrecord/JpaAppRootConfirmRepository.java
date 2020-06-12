@@ -282,12 +282,12 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 
 	private final String DELETE_MONTHLY_SQL
 	= " delete "
-	+ " from WWFDT_APP_MON_RT_CONFIRM as rt" 
-	+ " inner join WWFDT_APP_MON_PH_CONFIRM as ph"
-	+ " with (index(WWFDI_APP_MON_PH_CONFIRM)) " 
+	+ " from WWFDT_MON_APV_RT_CONFIRM as rt" 
+	+ " inner join WWFDT_MON_APV_PH_CONFIRM as ph"
+	+ " with (index(WWFDI_MON_APV_PH_CONFIRM)) " 
 	+ " on rt.ROOT_ID = ph.ROOT_ID" 
-	+ " inner join WWFDT_APP_MON_FR_CONFIRM as fr"
-	+ " with (index(WWFDI_APP_MON_RT_CONFIRM)) " 
+	+ " inner join WWFDT_MON_APV_FR_CONFIRM as fr"
+	+ " with (index(WWFDI_MON_APV_RT_CONFIRM)) " 
 	+ " on ph.ROOT_ID = fr.ROOT_ID" 
 	+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
 

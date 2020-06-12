@@ -14,7 +14,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "WWFDT_APP_DAY_FR_INSTANCE")
+@Table(name = "WWFDT_DAY_APV_FR_INSTANCE")
 public class WwfdtApvFrameInstanceDaily extends UkJpaEntity {
 
 	@EmbeddedId
