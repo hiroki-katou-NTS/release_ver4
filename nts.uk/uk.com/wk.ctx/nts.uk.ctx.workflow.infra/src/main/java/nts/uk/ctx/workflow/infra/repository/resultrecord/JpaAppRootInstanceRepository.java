@@ -234,29 +234,29 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	
 	private final String DELETE_DAILY
 			= " delete "
-			+ " from WWFDT_APP_DAY_RT_INSTANCE as rt" 
-			+ " inner join WWFDT_APP_DAY_PH_INSTANCE as ph"
+			+ " from WWFDT_DAY_APV_RT_INSTANCE as rt" 
+			+ " inner join WWFDT_DAY_APV_PH_INSTANCE as ph"
 			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_APP_DAY_FR_INSTANCE as fr"
+			+ " inner join WWFDT_DAY_APV_FR_INSTANCE as fr"
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " inner join WWFDT_APP_DAY_AP_INSTANCE as ap"
+			+ " inner join WWFDT_DAY_APV_AP_INSTANCE as ap"
 			+ " on fr.ROOT_ID = ap.ROOT_ID" 
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
 	private final String DELETE_DAILY_SQL
 			= " delete "
-			+ " from WWFDT_APP_DAY_RT_INSTANCE as rt" 
-			+ " inner join WWFDT_APP_DAY_PH_INSTANCE as ph"
-			+ " with (index(WWFDI_APP_DAY_PH_INSTANCE)) " 
+			+ " from WWFDT_DAY_APV_RT_INSTANCE as rt" 
+			+ " inner join WWFDT_DAY_APV_PH_INSTANCE as ph"
+			+ " with (index(WWFDI_DAY_APV_PH_INSTANCE)) " 
 			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_APP_DAY_FR_INSTANCE as fr"
-			+ " with (index(WWFDI_APP_DAY_RT_INSTANCE)) " 
+			+ " inner join WWFDT_DAY_APV_FR_INSTANCE as fr"
+			+ " with (index(WWFDI_DAY_APV_RT_INSTANCE)) " 
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " inner join WWFDT_APP_DAY_AP_INSTANCE as ap"
-			+ " with (index(WWFDI_APP_DAY_AP_INSTANCE)) " 
+			+ " inner join WWFDT_DAY_APV_AP_INSTANCE as ap"
+			+ " with (index(WWFDI_DAY_APV_AP_INSTANCE)) " 
 			+ " on fr.ROOT_ID = ap.ROOT_ID" 
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
@@ -281,29 +281,29 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	
 	private final String DELETE_MONTHLY
 			= " delete "
-			+ " from WWFDT_APP_MON_RT_INSTANCE as rt" 
-			+ " inner join WWFDT_APP_MON_PH_INSTANCE as ph"
+			+ " from WWFDT_MON_APV_RT_INSTANCE as rt" 
+			+ " inner join WWFDT_MON_APV_PH_INSTANCE as ph"
 			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_APP_MON_FR_INSTANCE as fr"
+			+ " inner join WWFDT_MON_APV_FR_INSTANCE as fr"
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " inner join WWFDT_APP_MON_AP_INSTANCE as ap"
+			+ " inner join WWFDT_MON_APV_AP_INSTANCE as ap"
 			+ " on fr.ROOT_ID = ap.ROOT_ID" 
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
 	private final String DELETE_MONTHLY_SQL
 			= " delete "
-			+ " from WWFDT_APP_MON_RT_INSTANCE as rt" 
-			+ " inner join WWFDT_APP_MON_PH_INSTANCE as ph"
-			+ " with (index(WWFDI_APP_MON_PH_INSTANCE)) " 
+			+ " from WWFDT_MON_APV_RT_INSTANCE as rt" 
+			+ " inner join WWFDT_MON_APV_PH_INSTANCE as ph"
+			+ " with (index(WWFDI_MON_APV_PH_INSTANCE)) " 
 			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_APP_MON_FR_INSTANCE as fr"
-			+ " with (index(WWFDI_APP_MON_RT_INSTANCE)) " 
+			+ " inner join WWFDT_MON_APV_FR_INSTANCE as fr"
+			+ " with (index(WWFDI_MON_APV_RT_INSTANCE)) " 
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " inner join WWFDT_APP_MON_AP_INSTANCE as ap"
-			+ " with (index(WWFDI_APP_MON_AP_INSTANCE)) " 
+			+ " inner join WWFDT_MON_APV_AP_INSTANCE as ap"
+			+ " with (index(WWFDI_MON_APV_AP_INSTANCE)) " 
 			+ " on fr.ROOT_ID = ap.ROOT_ID" 
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
@@ -332,13 +332,13 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 					+ " ph.PHASE_ORDER, ph.APPROVAL_FORM, "
 					+ " fr.FRAME_ORDER, fr.CONFIRM_ATR, "
 					+ " ap.APPROVER_CHILD_ID "
-			+ " from WWFDT_APP_DAY_RT_INSTANCE as rt" 
-			+ " left join WWFDT_APP_DAY_PH_INSTANCE as ph"
+			+ " from WWFDT_DAY_APV_RT_INSTANCE as rt" 
+			+ " left join WWFDT_DAY_APV_PH_INSTANCE as ph"
 			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " left join WWFDT_APP_DAY_FR_INSTANCE as fr"
+			+ " left join WWFDT_DAY_APV_FR_INSTANCE as fr"
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " left join WWFDT_APP_DAY_AP_INSTANCE as ap"
+			+ " left join WWFDT_DAY_APV_AP_INSTANCE as ap"
 			+ " on fr.ROOT_ID = ap.ROOT_ID" 
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
@@ -348,16 +348,16 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 					+ " ph.PHASE_ORDER, ph.APPROVAL_FORM, "
 					+ " fr.FRAME_ORDER, fr.CONFIRM_ATR, "
 					+ " ap.APPROVER_CHILD_ID "
-			+ " from WWFDT_APP_DAY_RT_INSTANCE as rt" 
-			+ " left join WWFDT_APP_DAY_PH_INSTANCE as ph"
-			+ " with (index(WWFDI_APP_DAY_PH_INSTANCE)) " 
+			+ " from WWFDT_DAY_APV_RT_INSTANCE as rt" 
+			+ " left join WWFDT_DAY_APV_PH_INSTANCE as ph"
+			+ " with (index(WWFDI_DAY_APV_PH_INSTANCE)) " 
 			+ " on rt.ROOT_ID = ph.ROOT_ID"
-			+ " left join WWFDT_APP_DAY_FR_INSTANCE as fr" 
-			+ " with (index(WWFDI_APP_DAY_FR_INSTANCE)) "
+			+ " left join WWFDT_DAY_APV_FR_INSTANCE as fr" 
+			+ " with (index(WWFDI_DAY_APV_FR_INSTANCE)) "
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " left join WWFDT_APP_DAY_AP_INSTANCE as ap"
-			+ " with (index(WWFDI_APP_DAY_AP_INSTANCE)) "
+			+ " left join WWFDT_DAY_APV_AP_INSTANCE as ap"
+			+ " with (index(WWFDI_DAY_APV_AP_INSTANCE)) "
 			+ " on fr.ROOT_ID = ap.ROOT_ID" 
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
@@ -456,24 +456,24 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	public List<AppRootInstance> findAppRootInstanceDailyNewestBelow(String employeeID, GeneralDate date) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" select top 1 rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, ph.PHASE_ORDER, ph.APPROVAL_FORM, fr.FRAME_ORDER, fr.CONFIRM_ATR, ap.APPROVER_CHILD_ID ");
-		sql.append(" from WWFDT_APP_DAY_RT_INSTANCE as rt" );
-		sql.append(" left join WWFDT_APP_DAY_PH_INSTANCE as ph");
+		sql.append(" from WWFDT_DAY_APV_RT_INSTANCE as rt" );
+		sql.append(" left join WWFDT_DAY_APV_PH_INSTANCE as ph");
 		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
 			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_APP_DAY_PH_INSTANCE)) " );
+			sql.append(" with (index(WWFDI_DAY_APV_PH_INSTANCE)) " );
 		}
 		sql.append(" on rt.ROOT_ID = ph.ROOT_ID");
-		sql.append(" left join WWFDT_APP_DAY_FR_INSTANCE as fr" );
+		sql.append(" left join WWFDT_DAY_APV_FR_INSTANCE as fr" );
 		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
 			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_APP_DAY_FR_INSTANCE)) ");
+			sql.append(" with (index(WWFDI_DAY_APV_FR_INSTANCE)) ");
 		}
 		sql.append(" on ph.ROOT_ID = fr.ROOT_ID" );
 		sql.append(" and ph.PHASE_ORDER = fr.PHASE_ORDER");
-		sql.append(" left join WWFDT_APP_DAY_AP_INSTANCE as ap");
+		sql.append(" left join WWFDT_DAY_APV_AP_INSTANCE as ap");
 		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
 			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_APP_DAY_AP_INSTANCE)) ");
+			sql.append(" with (index(WWFDI_DAY_APV_AP_INSTANCE)) ");
 		}
 		sql.append(" on fr.ROOT_ID = ap.ROOT_ID" );
 		sql.append(" and fr.PHASE_ORDER = ap.PHASE_ORDER" );
@@ -495,13 +495,13 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 					+ " ph.PHASE_ORDER, ph.APPROVAL_FORM, "
 					+ " fr.FRAME_ORDER, fr.CONFIRM_ATR, "
 					+ " ap.APPROVER_CHILD_ID "
-			+ " from WWFDT_APP_MON_RT_INSTANCE as rt" 
-			+ " left join WWFDT_APP_MON_PH_INSTANCE as ph"
+			+ " from WWFDT_MON_APV_RT_INSTANCE as rt" 
+			+ " left join WWFDT_MON_APV_PH_INSTANCE as ph"
 			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " left join WWFDT_APP_MON_FR_INSTANCE as fr"
+			+ " left join WWFDT_MON_APV_FR_INSTANCE as fr"
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " left join WWFDT_APP_MON_AP_INSTANCE as ap"
+			+ " left join WWFDT_MON_APV_AP_INSTANCE as ap"
 			+ " on fr.ROOT_ID = ap.ROOT_ID" 
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
@@ -511,16 +511,16 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 					+ " ph.PHASE_ORDER, ph.APPROVAL_FORM, "
 					+ " fr.FRAME_ORDER, fr.CONFIRM_ATR, "
 			+ " ap.APPROVER_CHILD_ID "
-			+ " from WWFDT_APP_MON_RT_INSTANCE as rt" 
-			+ " left join WWFDT_APP_MON_PH_INSTANCE as ph"
-			+ " with (index(WWFDI_APP_MON_PH_INSTANCE)) " 
+			+ " from WWFDT_MON_APV_RT_INSTANCE as rt" 
+			+ " left join WWFDT_MON_APV_PH_INSTANCE as ph"
+			+ " with (index(WWFDI_MON_APV_PH_INSTANCE)) " 
 			+ " on rt.ROOT_ID = ph.ROOT_ID"
-			+ " left join WWFDT_APP_MON_FR_INSTANCE as fr" 
-			+ " with (index(WWFDI_APP_MON_FR_INSTANCE)) "
+			+ " left join WWFDT_MON_APV_FR_INSTANCE as fr" 
+			+ " with (index(WWFDI_MON_APV_FR_INSTANCE)) "
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " left join WWFDT_APP_MON_AP_INSTANCE as ap"
-			+ " with (index(WWFDI_APP_MON_AP_INSTANCE)) "
+			+ " left join WWFDT_MON_APV_AP_INSTANCE as ap"
+			+ " with (index(WWFDI_MON_APV_AP_INSTANCE)) "
 			+ " on fr.ROOT_ID = ap.ROOT_ID" 
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
@@ -620,24 +620,24 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	public List<AppRootInstance> findAppRootInstanceMonthlyNewestBelow(String employeeID, GeneralDate date) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" select top 1 rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, ph.PHASE_ORDER, ph.APPROVAL_FORM, fr.FRAME_ORDER, fr.CONFIRM_ATR, ap.APPROVER_CHILD_ID ");
-		sql.append(" from WWFDT_APP_MON_RT_INSTANCE as rt" );
-		sql.append(" left join WWFDT_APP_MON_PH_INSTANCE as ph");
+		sql.append(" from WWFDT_MON_APV_RT_INSTANCE as rt" );
+		sql.append(" left join WWFDT_MON_APV_PH_INSTANCE as ph");
 		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
 			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_APP_MON_PH_INSTANCE)) " );
+			sql.append(" with (index(WWFDI_MON_APV_PH_INSTANCE)) " );
 		}
 		sql.append(" on rt.ROOT_ID = ph.ROOT_ID");
-		sql.append(" left join WWFDT_APP_MON_FR_INSTANCE as fr" );
+		sql.append(" left join WWFDT_MON_APV_FR_INSTANCE as fr" );
 		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
 			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_APP_MON_FR_INSTANCE)) ");
+			sql.append(" with (index(WWFDI_MON_APV_FR_INSTANCE)) ");
 		}
 		sql.append(" on ph.ROOT_ID = fr.ROOT_ID" );
 		sql.append(" and ph.PHASE_ORDER = fr.PHASE_ORDER");
-		sql.append(" left join WWFDT_APP_MON_AP_INSTANCE as ap");
+		sql.append(" left join WWFDT_MON_APV_AP_INSTANCE as ap");
 		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
 			// SQLServerの場合の処理
-			sql.append(" with (index(WWFDI_APP_MON_AP_INSTANCE)) ");
+			sql.append(" with (index(WWFDI_MON_APV_AP_INSTANCE)) ");
 		}
 		sql.append(" on fr.ROOT_ID = ap.ROOT_ID" );
 		sql.append(" and fr.PHASE_ORDER = ap.PHASE_ORDER" );
@@ -656,26 +656,26 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	
 	private final String DAILY_APPROVAL_TARGET 
 			= " select rt.EMPLOYEE_ID "
-			+ " from WWFDT_APP_DAY_RT_INSTANCE rt "
-			+ " left join WWFDT_APP_DAY_PH_INSTANCE ph "
+			+ " from WWFDT_DAY_APV_RT_INSTANCE rt "
+			+ " left join WWFDT_DAY_APV_PH_INSTANCE ph "
 			+ " on rt.ROOT_ID = ph.ROOT_ID "
-			+ " left join WWFDT_APP_DAY_FR_INSTANCE fr "
+			+ " left join WWFDT_DAY_APV_FR_INSTANCE fr "
 			+ " on ph.ROOT_ID = fr.ROOT_ID "
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER "
-			+ " left join WWFDT_APP_DAY_AP_INSTANCE ap "
+			+ " left join WWFDT_DAY_APV_AP_INSTANCE ap "
 			+ " on fr.ROOT_ID = ap.ROOT_ID "
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER "
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER ";
 	
 	private final String MONTHLY_APPROVAL_TARGET 
 			= " select rt.EMPLOYEE_ID "
-			+ " from WWFDT_APP_DAY_RT_INSTANCE rt "
-			+ " left join WWFDT_APP_DAY_PH_INSTANCE ph "
+			+ " from WWFDT_MON_APV_RT_INSTANCE rt "
+			+ " left join WWFDT_MON_APV_PH_INSTANCE ph "
 			+ " on rt.ROOT_ID = ph.ROOT_ID "
-			+ " left join WWFDT_APP_DAY_FR_INSTANCE fr "
+			+ " left join WWFDT_MON_APV_FR_INSTANCE fr "
 			+ " on ph.ROOT_ID = fr.ROOT_ID "
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER "
-			+ " left join WWFDT_APP_DAY_AP_INSTANCE ap "
+			+ " left join WWFDT_MON_APV_AP_INSTANCE ap "
 			+ " on fr.ROOT_ID = ap.ROOT_ID "
 			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER "
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER ";

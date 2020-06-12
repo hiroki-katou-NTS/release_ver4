@@ -1,6 +1,5 @@
 package nts.uk.ctx.workflow.infra.repository.resultrecord;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,8 +10,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import org.apache.logging.log4j.util.Strings;
-import lombok.SneakyThrows;
 import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
@@ -153,13 +150,37 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 				}).collect(Collectors.toList());
 	}
 
-	private FullJoinAppRootConfirm createFullJoinAppRootConfirm(NtsResultRecord rs) {
+	private FullJoinAppRootConfirm createFullJoinAppRootConfirmDaily(NtsResultRecord rs) {
 		return new FullJoinAppRootConfirm(
 				rs.getString("ROOT_ID"), 
 				rs.getString("CID"), 
 				rs.getString("EMPLOYEE_ID"),
 				rs.getGeneralDate("RECORD_DATE"), 
-				rs.getInt("ROOT_TYPE"), 
+				1, 
+				null,
+				null, 
+				null, 
+				null, 
+				rs.getInt("PHASE_ORDER"),
+				rs.getInt("APP_PHASE_ATR"), 
+				rs.getInt("FRAME_ORDER"), 
+				rs.getString("APPROVER_ID"),
+				rs.getString("REPRESENTER_ID"), 
+				rs.getGeneralDate("APPROVAL_DATE"));
+	}
+	
+	private FullJoinAppRootConfirm createFullJoinAppRootConfirmMonthly(NtsResultRecord rs) {
+		return new FullJoinAppRootConfirm(
+				rs.getString("ROOT_ID"), 
+				rs.getString("CID"), 
+				rs.getString("EMPLOYEE_ID"),
+				new ClosureMonth(new YearMonth(
+						rs.getInt("YEARMONTH")), 
+						rs.getInt("CLOSURE_ID"), 
+						new ClosureDate(
+								rs.getInt("CLOSURE_DAY"), 
+								rs.getBoolean("LAST_DAY_FLG")) ).defaultPeriod().end(),
+				2, 
 				rs.getInt("YEARMONTH"),
 				rs.getInt("CLOSURE_ID"), 
 				rs.getInt("CLOSURE_DAY"), 
@@ -172,29 +193,6 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 				rs.getGeneralDate("APPROVAL_DATE"));
 	}
 
-	@SneakyThrows
-	private List<FullJoinAppRootConfirm> createFullJoinAppRootConfirm(ResultSet rs) {
-		List<FullJoinAppRootConfirm> listFullData = new ArrayList<>();
-		while (rs.next()) {
-			listFullData.add(new FullJoinAppRootConfirm(
-					rs.getString("ROOT_ID"), 
-					rs.getString("CID"),
-					rs.getString("EMPLOYEE_ID"),
-					GeneralDate.fromString(rs.getString("RECORD_DATE"), "yyyy-MM-dd HH:mm:ss"),
-					Strings.isNotBlank(rs.getString("ROOT_TYPE")) ? Integer.valueOf(rs.getString("ROOT_TYPE")) : null,
-					Strings.isNotBlank(rs.getString("YEARMONTH")) ? Integer.valueOf(rs.getString("YEARMONTH")) : null,
-					Strings.isNotBlank(rs.getString("CLOSURE_ID")) ? Integer.valueOf(rs.getString("CLOSURE_ID")) : null,
-					Strings.isNotBlank(rs.getString("CLOSURE_DAY")) ? Integer.valueOf(rs.getString("CLOSURE_DAY")) : null,
-					Strings.isNotBlank(rs.getString("LAST_DAY_FLG")) ? Integer.valueOf(rs.getString("LAST_DAY_FLG")) : null,
-					Strings.isNotBlank(rs.getString("PHASE_ORDER")) ? Integer.valueOf(rs.getString("PHASE_ORDER")) : null,
-					Strings.isNotBlank(rs.getString("APP_PHASE_ATR")) ? Integer.valueOf(rs.getString("APP_PHASE_ATR")) : null,
-					Strings.isNotBlank(rs.getString("FRAME_ORDER")) ? Integer.valueOf(rs.getString("FRAME_ORDER")) : null,
-					rs.getString("APPROVER_ID"), 
-					rs.getString("REPRESENTER_ID"),
-					Strings.isNotBlank(rs.getString("APPROVAL_DATE")) ? GeneralDate.fromString(rs.getString("APPROVAL_DATE"), "yyyy-MM-dd HH:mm:ss") : null));
-		}
-		return listFullData;
-	}
 
 	
 	
@@ -389,7 +387,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 					.paramString("sids", employeeIDs)
 					.paramDate("startDate", period.start())
 					.paramDate("endDate", period.end())
-					.getList(rec -> createFullJoinAppRootConfirm(rec)));
+					.getList(rec -> createFullJoinAppRootConfirmDaily(rec)));
 		});
 	}
 	
@@ -436,7 +434,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			return toDomain(jdbcProxy().query(sql.toString())
 					.paramString("sids", employeeIDs)
 					.paramString("yearmonth", yearMonth.toString())
-					.getList(rec -> createFullJoinAppRootConfirm(rec)));
+					.getList(rec -> createFullJoinAppRootConfirmMonthly(rec)));
 		});
 	}
 
@@ -496,7 +494,7 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			}
 			
 			return toDomain(jdbcProxy().query(sql.toString())
-					.getList(rec -> createFullJoinAppRootConfirm(rec)));
+					.getList(rec -> createFullJoinAppRootConfirmMonthly(rec)));
 		});
 	}
 

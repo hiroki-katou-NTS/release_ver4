@@ -83,13 +83,6 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	
 	@Override
 	public Request113Output getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType) {
-		// ﾑi ・ng SPR
-		String companyID = "000000000000-0001";
-		String loginCompanyID = AppContexts.user().companyId();
-		if(Strings.isNotBlank(loginCompanyID)){
-			companyID = loginCompanyID;
-		}
-		
 		// レスポンス改善版
 		final AppRootIntermForQuery.List interms;
 		// 日次の場合
@@ -133,13 +126,6 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 
 	@Override
 	public Request113Output getDailyAppRootStatus(List<String> employeeIDLst, DatePeriod period) {
-		// Đối ứng SPR
-		String companyID = "000000000000-0001";
-		String loginCompanyID = AppContexts.user().companyId();
-		if(Strings.isNotBlank(loginCompanyID)){
-			companyID = loginCompanyID;
-		}
-		
 		// レスポンス改善版
 		AppRootIntermForQuery.List interms = confirmQueryRepository.queryIntermDaily(employeeIDLst, period);
 		AppRootRecordConfirmForQuery.List confirms = confirmQueryRepository.queryConfirmDaily(employeeIDLst, period);
@@ -166,19 +152,11 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 
 	@Override
 	public Request113Output getMonthlyAppRootStatus(List<String> employeeIDLst, DatePeriod period, ClosureMonth closureMonth) {
-		// Đối ứng SPR
-		String companyID = "000000000000-0001";
-		String loginCompanyID = AppContexts.user().companyId();
-		if(Strings.isNotBlank(loginCompanyID)){
-			companyID = loginCompanyID;
-		}
-		
 		// レスポンス改善版
 		final AppRootIntermForQuery.List interms;
 		final AppRootRecordConfirmForQuery.List confirms;
 
 		
-		// 日次の場合
 		interms = confirmQueryRepository.queryIntermMonthly(employeeIDLst, period);
 		
 		confirms = confirmQueryRepository.queryConfirmMonthly(employeeIDLst, closureMonth);

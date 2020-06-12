@@ -125,8 +125,7 @@ public class JpaAppRootConfirmQueryRepository extends JpaRepository implements A
 						ConfirmRecord r = new ConfirmRecord();
 						r.rootId = rec.getString("ROOT_ID");
 						r.sid = rec.getString("EMPLOYEE_ID");
-						//↓これどうしよううううううううううう！！！！！！！
-						r.recordDate = rec.getGeneralDate("RECORD_DATE");
+						r.recordDate = closureMonth.defaultPeriod().end();
 						r.phaseOrder = rec.getInt("PHASE_ORDER");
 						r.appPhaseAtr = rec.getInt("APP_PHASE_ATR");
 						return r;
