@@ -113,7 +113,9 @@ public class UpdateAllDomainMonthServiceImpl implements UpdateAllDomainMonthServ
 				}
 				
 				// 同月の週次データは、一旦全削除　（親子での不整合を防ぐため）
-				this.timeWeekRepo.removeByClosure(employeeId, yearMonth, closureId, closureDate);
+				//ver1　2次レスポンス対応
+				//登録処理をUPDATEに変更したためここは削除
+//				this.timeWeekRepo.removeByClosure(employeeId, yearMonth, closureId, closureDate);
 				
 				timeRepo.persistAndUpdate(new TimeOfMonthly(d.getAttendanceTime(), d.getAffiliationInfo()));
 				
@@ -131,7 +133,9 @@ public class UpdateAllDomainMonthServiceImpl implements UpdateAllDomainMonthServ
 				//}
 				
 				// 上で全削除しているので、INSERTのみ
-				d.getAttendanceTimeOfWeekList().stream().forEach(atw -> this.timeWeekRepo.persist(atw));
+				//⇒ ver1　2次レスポンス対応 UPDに変更
+//				d.getAttendanceTimeOfWeekList().stream().forEach(atw -> this.timeWeekRepo.persist(atw));
+				d.getAttendanceTimeOfWeekList().stream().forEach(atw -> this.timeWeekRepo.persistAndUpdate(atw));
 				
 				this.storedProcedureProcess.monthlyProcessing(
 						companyId, employeeId, yearMonth, closureId, closureDate,
