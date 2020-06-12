@@ -39,6 +39,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.ClosurePeriod;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureRepository;
 import nts.uk.ctx.at.shared.dom.workrule.closure.UseClassification;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 /**
  * @author thanhnx
@@ -137,8 +138,8 @@ public class ConfirmStatusActualDay {
 					DatePeriod mergePeriod = mergePeriodClr.getPeriod();
 					// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 					List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-							.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(mergePeriod.end()),
-									Arrays.asList(employeeId), 2);
+							.getApprovalByListEmplAndListApprovalRecordDateNew(mergePeriodClr.getPeriod(), new ClosureMonth(mergePeriodClr.getYearMonth(), mergePeriodClr.getClosureId().value, mergePeriodClr.getClosureDate()),
+									Arrays.asList(employeeId));
 //					mapApprovalStatus.putAll(lstApprovalStatus.stream().collect(Collectors
 //							.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus())));
 					// list emp date unApproval
@@ -186,7 +187,7 @@ public class ConfirmStatusActualDay {
 					
 					List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
 							.getApprovalByListEmplAndListApprovalRecordDateNew(periodTemp.datesBetween(),
-									Arrays.asList(employeeId), 1);
+									Arrays.asList(employeeId));
 					val mapApprovalStatus = lstApprovalStatus.stream().collect(Collectors
 							.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus()));
 					//lstResultEmpTemp3 = 
@@ -338,8 +339,7 @@ public class ConfirmStatusActualDay {
 			DatePeriod mergePeriod = closurePeriodOpt.get().getPeriod();
 			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 			List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-					.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(mergePeriod.end()), employeeIds,
-							2);
+					.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(mergePeriod.end()), employeeIds);
             Map<String, ApproveRootStatusForEmpImport> mapApprovalStatus  = lstApprovalStatus.stream().collect(Collectors.toMap(x -> x.getEmployeeID(), x -> x, (x, y) -> x));
 			//val approvalStatusMonth = lstApprovalStatus.isEmpty() ? null : lstApprovalStatus.stream().get(0);
 			val lstEmpDateUnApproval = lstResultEmpTemp2.stream().filter(x -> {
@@ -384,7 +384,7 @@ public class ConfirmStatusActualDay {
 		if (approvalUseSettingOpt.isPresent() && approvalUseSettingOpt.get().getUseDayApproverConfirm()) {
 			List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
 					.getApprovalByListEmplAndListApprovalRecordDateNew(
-							closurePeriodOpt.get().getPeriod().datesBetween(), employeeIds, 1);
+							closurePeriodOpt.get().getPeriod().datesBetween(), employeeIds);
 			val mapApprovalStatus = lstApprovalStatus.stream().collect(
 					Collectors.toMap(x -> Pair.of(x.getEmployeeID(), x.getAppDate()), x -> x.getApprovalStatus()));
 			// lstResultEmpTemp3 =

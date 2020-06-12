@@ -1,11 +1,9 @@
 package nts.uk.ctx.workflow.dom.resultrecord;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import lombok.Value;
 import lombok.val;
 import nts.arc.time.GeneralDate;

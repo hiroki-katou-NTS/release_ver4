@@ -110,8 +110,7 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	private EmployeeAdapter employeeAdapter;
 
 	@Override
-	public Request113Export getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period,
-			Integer rootType) throws BusinessException {
+	public Request113Export getAppRootStatusByEmpPeriod(List<String> employeeIDLst, DatePeriod period, Integer rootType) throws BusinessException {
 		Request113Output result = appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class));
 		return new Request113Export(
 				result.getAppRootStatusLst().stream()
@@ -122,15 +121,44 @@ public class IntermediateDataPubImpl implements IntermediateDataPub {
 	}
 
 	@Override
+	public Request113Export getDailyAppRootStatus(List<String> employeeIDLst, DatePeriod period) throws BusinessException {
+		Request113Output result = appRootInstanceService.getDailyAppRootStatus(employeeIDLst, period);
+		return new Request113Export(
+				result.getAppRootStatusLst().stream()
+					.map(x -> new AppRootStateStatusSprExport(x.getDate(), x.getEmployeeID(), x.getDailyConfirmAtr().value)).collect(Collectors.toList()), 
+				result.isErrorFlg(), 
+				result.getErrorMsgID(), 
+				result.getEmpLst());
+	}
+
+	@Override
+	public Request113Export getMonthlyAppRootStatus(List<String> employeeIDLst, DatePeriod  period, ClosureMonth closureMonth) throws BusinessException {
+		Request113Output result = appRootInstanceService.getMonthlyAppRootStatus(employeeIDLst, period, closureMonth);
+		return new Request113Export(
+				result.getAppRootStatusLst().stream()
+					.map(x -> new AppRootStateStatusSprExport(x.getDate(), x.getEmployeeID(), x.getDailyConfirmAtr().value)).collect(Collectors.toList()), 
+				result.isErrorFlg(), 
+				result.getErrorMsgID(), 
+				result.getEmpLst());
+	}
+
+	
+	@Override
 	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsDates(List<String> employeeIDLst,
-			List<GeneralDate> dateLst, Integer rootType) {
+			List<GeneralDate> dateLst) {
 		List<AppRootStateStatusSprExport> result = new ArrayList<>();
 		List<DatePeriod> periods = DatePeriod.create(dateLst);
 		periods.forEach(period -> {
-			result.addAll(appRootInstanceService.getAppRootStatusByEmpsPeriod(employeeIDLst, period, EnumAdaptor.valueOf(rootType, RecordRootType.class)).getAppRootStatusLst()
+			result.addAll(appRootInstanceService.getDailyAppRootStatus(employeeIDLst, period).getAppRootStatusLst()
 			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList()));
 		});
 		return result;
+	}
+
+	@Override
+	public List<AppRootStateStatusSprExport> getAppRootStatusByEmps(List<String> employeeIDLst, DatePeriod  period, ClosureMonth closureMonth) {
+		return appRootInstanceService.getMonthlyAppRootStatus(employeeIDLst, period, closureMonth).getAppRootStatusLst()
+			.stream().map(x -> convertStatusFromDomain(x)).collect(Collectors.toList());
 	}
 
 	@Override

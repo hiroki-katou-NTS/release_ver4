@@ -27,6 +27,7 @@ import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.Confirmati
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 /**
  * @author thanhnx
@@ -94,7 +95,7 @@ public class ConfirmStatusInfoEmp {
 		// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 		List<ApproveRootStatusForEmpImport> lstApprovalDayStatus = approvalStatusAdapter
 				.getApprovalByListEmplAndListApprovalRecordDateNew(dateEmpExport.datesBetween(),
-						Arrays.asList(employeeId), 1);
+						Arrays.asList(employeeId));
 
 		List<ApplicationRecordImport> lstApplication = applicationRecordAdapter
 				.getApplicationBySID(Arrays.asList(employeeId), dateEmpExport.start(), dateEmpExport.end());
@@ -109,11 +110,12 @@ public class ConfirmStatusInfoEmp {
 					Arrays.asList(employeeId), mergePeriodClr.getYearMonth().v(),
 					mergePeriodClr.getClosureDate().getClosureDay().v(),
 					mergePeriodClr.getClosureDate().getLastDayOfMonth(), mergePeriodClr.getClosureId().value);
+			//List<ClosureMonth> closureMonthLst = 
 
 			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 			List<ApproveRootStatusForEmpImport> lstApprovalMonthStatus = approvalStatusAdapter
-					.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(mergePeriodClr.getOriginalClosurePeriod().end()),
-							Arrays.asList(employeeId), 2);
+					.getApprovalByListEmplAndListApprovalRecordDateNew(mergePeriodClr.getPeriod(), new ClosureMonth(mergePeriodClr.getYearMonth(),mergePeriodClr.getClosureId().value, mergePeriodClr.getClosureDate()),
+							Arrays.asList(employeeId));
 			lstApprovalMonthStatusAll.addAll(lstApprovalMonthStatus);
 			lstConfirmMonthAll.addAll(lstConfirmMonth);
 			inforMonths.add(new InformationMonth(mergePeriodClr, lstConfirmMonth, lstApprovalMonthStatus));
@@ -168,7 +170,7 @@ public class ConfirmStatusInfoEmp {
 			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 			List<ApproveRootStatusForEmpImport> lstApprovalDayStatus = approvalStatusAdapter
 					.getApprovalByListEmplAndListApprovalRecordDateNew(dateEmpExport.datesBetween(),
-							Arrays.asList(employeeId), 1);
+							Arrays.asList(employeeId));
 
 			// [No.26]社員、期間に一致する申請を取得する
 			List<ApplicationRecordImport> lstApplication = applicationRecordAdapter
@@ -194,8 +196,7 @@ public class ConfirmStatusInfoEmp {
 
 				// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 				List<ApproveRootStatusForEmpImport> lstApprovalMonthStatus = approvalStatusAdapter
-						.getApprovalByListEmplAndListApprovalRecordDateNew(
-								Arrays.asList(mergePeriodClr.getOriginalClosurePeriod().end()), Arrays.asList(employeeId), 2);
+						.getApprovalByListEmplAndListApprovalRecordDateNew(mergePeriodClr.getPeriod(),new ClosureMonth(mergePeriodClr.getYearMonth(), mergePeriodClr.getClosureId().value, mergePeriodClr.getClosureDate()), Arrays.asList(employeeId));
 				inforMonths.add(new InformationMonth(mergePeriodClr, lstConfirmMonth, lstApprovalMonthStatus));
 			}
 

@@ -13,6 +13,7 @@ import nts.uk.ctx.workflow.pub.resultrecord.export.Request533Export;
 import nts.uk.ctx.workflow.pub.spr.export.AppRootStateStatusSprExport;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 public interface IntermediateDataPub {
 	
@@ -24,9 +25,9 @@ public interface IntermediateDataPub {
 	 * @param rootType ルート種類（日別確認／月別確認）
 	 * @return 承認ルートの状況
 	 */
-	public default Request113Export getAppRootStatusByEmpPeriod(String employeeID, DatePeriod period, Integer rootType) throws BusinessException {
-		return this.getAppRootStatusByEmpPeriod(Arrays.asList(employeeID), period, rootType);
-	}
+//	public default Request113Export getAppRootStatusByEmpPeriod(String employeeID, DatePeriod period, Integer rootType) throws BusinessException {
+//		return this.getAppRootStatusByEmpPeriod(Arrays.asList(employeeID), period, rootType);
+//	}
 
 	
 	/**
@@ -38,16 +39,30 @@ public interface IntermediateDataPub {
 	 * @return 承認ルートの状況
 	 */
 	public Request113Export getAppRootStatusByEmpPeriod(List<String> employeeIDs, DatePeriod period, Integer rootType) throws BusinessException;
-	
+
+	public Request113Export getDailyAppRootStatus(List<String> employeeIDs, DatePeriod period) throws BusinessException;
+
+	public Request113Export getMonthlyAppRootStatus(List<String> employeeIDs, DatePeriod  period, ClosureMonth closureMonth) throws BusinessException;
+
 	/**
 	 * RequestList 155
-	 * [No.155](中間データ版)承認対象者リストと日付リストから承認状況を取得する
+	 * [No.155](中間データ版)承認対象者リストと日付リストから日別実績の承認状況を取得する
 	 * @param employeeID
 	 * @param dateLst
 	 * @param rootType
 	 * @return
 	 */
-	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsDates(List<String> employeeIDLst, List<GeneralDate> dateLst, Integer rootType);
+	public List<AppRootStateStatusSprExport> getAppRootStatusByEmpsDates(List<String> employeeIDLst, List<GeneralDate> dateLst);
+	
+	/**
+	 * RequestList 155
+	 * [No.155](中間データ版)承認対象者リストから月別実績の承認状況を取得する
+	 * @param employeeID
+	 * @param dateLst
+	 * @param rootType
+	 * @return
+	 */
+	public List<AppRootStateStatusSprExport> getAppRootStatusByEmps(List<String> employeeIDLst, DatePeriod  period, ClosureMonth closureMonth);
 	
 	/**
 	 * RequestList 229

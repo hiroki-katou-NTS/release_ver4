@@ -26,18 +26,4 @@ public class CheckApprovalTargetMonth {
 	@Inject
 	private ApprovalStatusAdapter approvalStatusAdapter;
 
-	public boolean checkApprovalTargetMonth(String employeeId, GeneralDate date) {
-		boolean check = checkEmployeeUseApprovalMonth.checkEmployeeUseApprovalTargetMonth(employeeId, date);
-		if (!check) {
-			return true;
-		}
-		// TODO 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
-		List<ApproveRootStatusForEmpImport> appRoots = approvalStatusAdapter
-				.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(date), Arrays.asList(employeeId), 1);
-		if(appRoots.isEmpty()) return false;
-		List<GeneralDate> dates = appRoots.stream()
-				.filter(x -> x.getApprovalStatus() != ApprovalStatusForEmployee.APPROVED).map(x -> x.getAppDate())
-				.collect(Collectors.toList());
-		return dates.isEmpty();
-	}
 }

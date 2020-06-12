@@ -153,62 +153,11 @@ public class DPLock {
 		return repo.getConfirmDay(companyId, employeeIds, dateRange);
 	}
 
-	public Map<String, ApproveRootStatusForEmpDto> getCheckApproval(List<String> employeeIds, DateRange dateRange, String employeeIdApproval, int mode){
-		// get check
-		if (employeeIds.isEmpty())
-			return Collections.emptyMap();
-
-		// get disable
-		if (mode == ScreenMode.APPROVAL.value) {
-			long startTime = System.currentTimeMillis();
-			ApprovalRootOfEmployeeImport approvalRoot = approvalStatusAdapter.getApprovalRootOfEmloyee(
-					new DatePeriod(dateRange.getStartDate(), dateRange.getEndDate()), employeeIdApproval, 1);
-			System.out.println("thoi gian getApp: "+ (System.currentTimeMillis() - startTime));
-			Map<String, ApproveRootStatusForEmpDto> approvalRootMap = approvalRoot == null ? Collections.emptyMap()
-					: approvalRoot.getApprovalRootSituations().stream().collect(
-							Collectors.toMap(x -> mergeString(x.getTargetID(), "|", x.getAppDate().toString()), x -> {
-								ApproveRootStatusForEmpDto dto = new ApproveRootStatusForEmpDto();
-								if (x.getApprovalStatus() == null
-										|| x.getApprovalStatus().getApprovalActionByEmpl() == null) {
-									dto.setCheckApproval(false);
-								} else {
-									if (x.getApprovalStatus()
-											.getApprovalActionByEmpl() == ApprovalActionByEmpl.APPROVALED) {
-										dto.setCheckApproval(true);
-									} else {
-										dto.setCheckApproval(false);
-									}
-								}
-								dto.setApproverEmployeeState(x.getApprovalAtr());
-								dto.setApprovalStatus(x.getApprovalStatus() == null ? null : x.getApprovalStatus().getReleaseDivision());
-								return dto;
-							}, (x, y) -> x));
-			return approvalRootMap;
-		} else {
-			long startTime = System.currentTimeMillis();
-			List<ApproveRootStatusForEmpImport> approvals = approvalStatusAdapter.getApprovalByListEmplAndListApprovalRecordDateNew(dateRange.toListDate(), employeeIds, 1);
-			System.out.println("thoi gian getApp: "+ (System.currentTimeMillis() - startTime));
-			Map<String, ApproveRootStatusForEmpDto> approvalRootMap = approvals.stream().collect(Collectors.toMap(x -> mergeString(x.getEmployeeID(), "|", x.getAppDate().toString()), x -> {
-				return new ApproveRootStatusForEmpDto(null, x.getApprovalStatus() != ApprovalStatusForEmployee.UNAPPROVED);
-			}, (x,y) ->x));
-			return approvalRootMap;
-		}
-	}
 	
 	public boolean islockApproval(boolean checkBoxAppval) {
 		return checkBoxAppval;
 	}
 
-	public Map<String, ApproveRootStatusForEmpDto> lockCheckMonth(DateRange dateRange, List<String> employeeIds) {
-		List<ApproveRootStatusForEmpImport> approvals = approvalStatusAdapter
-				.getApprovalByListEmplAndListApprovalRecordDateNew(dateRange.toListDate(), employeeIds, 2);
-		Map<String, ApproveRootStatusForEmpDto> approvalRootMap = approvals.stream().collect(
-				Collectors.toMap(x -> mergeString(x.getEmployeeID(), "|", x.getAppDate().toString()), x -> {
-					return new ApproveRootStatusForEmpDto(null,
-							x.getApprovalStatus() != ApprovalStatusForEmployee.UNAPPROVED);
-				}, (x, y) -> x));
-		return approvalRootMap;
-	}
 
 	public Pair<List<ClosureSidDto> , List<ConfirmationMonthDto>> lockConfirmMonth(String companyId, List<String> employeeIds, DateRange dateRange, List<ClosureDto> closureDtos) {
 		

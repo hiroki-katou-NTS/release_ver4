@@ -1,6 +1,7 @@
 package nts.uk.pub.spr.dailystatus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -129,10 +130,9 @@ public class SprDailyStatusImpl implements SprDailyStatusService {
 	@Override
 	public Integer getManagerStatus(GeneralDate appDate, String employeeID) {
 		// （ワークフローExport）アルゴリズム「承認対象者と期間から承認状況を取得する」を実行する
-		List<AppRootStateStatusSprExport> appRootStateStatusSprList = intermediateDataPub.getAppRootStatusByEmpPeriod(
-				employeeID, 
-				new DatePeriod(appDate, appDate), 
-				1).getAppRootStateStatusLst();
+		List<AppRootStateStatusSprExport> appRootStateStatusSprList = intermediateDataPub.getDailyAppRootStatus(
+				Arrays.asList(employeeID), 
+				new DatePeriod(appDate, appDate)).getAppRootStateStatusLst();
 		if(CollectionUtil.isEmpty(appRootStateStatusSprList)){
 			return 0;
 		}

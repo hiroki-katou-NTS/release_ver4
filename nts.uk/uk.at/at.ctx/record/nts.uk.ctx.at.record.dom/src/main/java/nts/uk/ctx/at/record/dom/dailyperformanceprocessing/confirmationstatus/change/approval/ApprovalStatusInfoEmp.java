@@ -33,6 +33,7 @@ import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.month.Confirmati
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.ConfirmationMonthRepository;
 import nts.uk.ctx.at.record.dom.workrecord.identificationstatus.repository.IdentificationRepository;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 /**
  * @author thanhnx
@@ -97,7 +98,7 @@ public class ApprovalStatusInfoEmp {
 		// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 		List<ApproveRootStatusForEmpImport> lstApprovalDayStatus = approvalStatusAdapter
 				.getApprovalByListEmplAndListApprovalRecordDateNew(dateEmpExport.datesBetween(),
-						Arrays.asList(employeeId), 1);
+						Arrays.asList(employeeId));
 		// lstApprovalDayStatuAll.addAll(lstApprovalDayStatus);
 		// [No.595]対象者を指定して承認状況を取得する
 		ApprovalRootOfEmployeeImport approvalRootDaily = approvalStatusAdapter.getDailyApprovalStatus(empTarget,
@@ -120,8 +121,8 @@ public class ApprovalStatusInfoEmp {
 
 			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 			List<ApproveRootStatusForEmpImport> lstApprovalMonthStatus = approvalStatusAdapter
-					.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(mergePeriodClr.getOriginalClosurePeriod().end()),
-							Arrays.asList(employeeId), 2);
+					.getApprovalByListEmplAndListApprovalRecordDateNew(mergePeriodClr.getPeriod(), new ClosureMonth(mergePeriodClr.getYearMonth(), mergePeriodClr.getClosureId().value, mergePeriodClr.getClosureDate()),
+							Arrays.asList(employeeId));
 
 			// [No.534](中間データ版)承認状況を取得する （月別）
 			if (isCallBy587) {
@@ -197,7 +198,7 @@ public class ApprovalStatusInfoEmp {
 			// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 			List<ApproveRootStatusForEmpImport> lstApprovalDayStatus = approvalStatusAdapter
 					.getApprovalByListEmplAndListApprovalRecordDateNew(dateEmpExport.datesBetween(),
-							Arrays.asList(employeeId), 1);
+							Arrays.asList(employeeId));
 			lstApprovalDayStatuAll.addAll(lstApprovalDayStatus);
 			// [No.595]対象者を指定して承認状況を取得する
 			ApprovalRootOfEmployeeImport approvalRootDaily = approvalStatusAdapter.getDailyApprovalStatus(empTarget,
@@ -221,8 +222,7 @@ public class ApprovalStatusInfoEmp {
 
 				// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する
 				List<ApproveRootStatusForEmpImport> lstApprovalMonthStatus = approvalStatusAdapter
-						.getApprovalByListEmplAndListApprovalRecordDateNew(
-								Arrays.asList(mergePeriodClr.getOriginalClosurePeriod().end()), Arrays.asList(employeeId), 2);
+						.getApprovalByListEmplAndListApprovalRecordDateNew(mergePeriodClr.getPeriod(), new ClosureMonth(mergePeriodClr.getYearMonth(), mergePeriodClr.getClosureId().value, mergePeriodClr.getClosureDate()), Arrays.asList(employeeId));
 
 				// [No.534](中間データ版)承認状況を取得する （月別）
 				if (isCallBy587) {

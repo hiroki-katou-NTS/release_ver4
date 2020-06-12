@@ -79,10 +79,11 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	
 	@Inject
 	private AppRootConfirmQueryRepository confirmQueryRepository;
-
+	
+	
 	@Override
 	public Request113Output getAppRootStatusByEmpsPeriod(List<String> employeeIDLst, DatePeriod period, RecordRootType rootType) {
-		// Đối ứng SPR
+		// ﾑi ・ng SPR
 		String companyID = "000000000000-0001";
 		String loginCompanyID = AppContexts.user().companyId();
 		if(Strings.isNotBlank(loginCompanyID)){
@@ -109,6 +110,78 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 		else {
 			throw new RuntimeException("月次には対応しない");
 		}
+
+		List<ApprovalRootStateStatus> appRootStatusLst = new ArrayList<ApprovalRootStateStatus>();
+		List<String> errorEmployeeIds = new ArrayList<String>();
+		for (String employeeId : employeeIDLst) {
+			val result = confirms.aggregate(period, employeeId, interms);
+			
+			if (result.isError()) {
+				errorEmployeeIds.add(employeeId);
+				continue;
+			}
+			
+			appRootStatusLst.addAll(result.getResults());
+		};
+		
+		return new Request113Output(
+				appRootStatusLst,
+				!errorEmployeeIds.isEmpty(),
+				!errorEmployeeIds.isEmpty() ? "Msg_1430" : "",
+				errorEmployeeIds);
+	}
+
+	@Override
+	public Request113Output getDailyAppRootStatus(List<String> employeeIDLst, DatePeriod period) {
+		// Đối ứng SPR
+		String companyID = "000000000000-0001";
+		String loginCompanyID = AppContexts.user().companyId();
+		if(Strings.isNotBlank(loginCompanyID)){
+			companyID = loginCompanyID;
+		}
+		
+		// レスポンス改善版
+		AppRootIntermForQuery.List interms = confirmQueryRepository.queryIntermDaily(employeeIDLst, period);
+		AppRootRecordConfirmForQuery.List confirms = confirmQueryRepository.queryConfirmDaily(employeeIDLst, period);
+
+		List<ApprovalRootStateStatus> appRootStatusLst = new ArrayList<ApprovalRootStateStatus>();
+		List<String> errorEmployeeIds = new ArrayList<String>();
+		for (String employeeId : employeeIDLst) {
+			val result = confirms.aggregate(period, employeeId, interms);
+			
+			if (result.isError()) {
+				errorEmployeeIds.add(employeeId);
+				continue;
+			}
+			
+			appRootStatusLst.addAll(result.getResults());
+		};
+		
+		return new Request113Output(
+				appRootStatusLst,
+				!errorEmployeeIds.isEmpty(),
+				!errorEmployeeIds.isEmpty() ? "Msg_1430" : "",
+				errorEmployeeIds);
+	}
+
+	@Override
+	public Request113Output getMonthlyAppRootStatus(List<String> employeeIDLst, DatePeriod period, ClosureMonth closureMonth) {
+		// Đối ứng SPR
+		String companyID = "000000000000-0001";
+		String loginCompanyID = AppContexts.user().companyId();
+		if(Strings.isNotBlank(loginCompanyID)){
+			companyID = loginCompanyID;
+		}
+		
+		// レスポンス改善版
+		final AppRootIntermForQuery.List interms;
+		final AppRootRecordConfirmForQuery.List confirms;
+
+		
+		// 日次の場合
+		interms = confirmQueryRepository.queryIntermMonthly(employeeIDLst, period);
+		
+		confirms = confirmQueryRepository.queryConfirmMonthly(employeeIDLst, closureMonth);
 
 		List<ApprovalRootStateStatus> appRootStatusLst = new ArrayList<ApprovalRootStateStatus>();
 		List<String> errorEmployeeIds = new ArrayList<String>();

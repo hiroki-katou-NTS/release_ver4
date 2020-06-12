@@ -1,5 +1,6 @@
 package nts.uk.ctx.at.record.ac.algorithm;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public class AppTargetPersonStatusAcFinder implements AppTargetPersonStatusAdapt
 
 	@Override
 	public List<StateConfirm> appTargetPersonStatus(String employeeID, DatePeriod date, Integer routeType) {
-		List<AppRootStateStatusSprExport> listState=intermediateDataPub.getAppRootStatusByEmpPeriod(employeeID, date, routeType).getAppRootStateStatusLst();
+		List<AppRootStateStatusSprExport> listState=intermediateDataPub.getAppRootStatusByEmpPeriod(Arrays.asList(employeeID), date, routeType).getAppRootStateStatusLst();
 		if(!CollectionUtil.isEmpty(listState)) {
 			return listState.stream().map(c->convertToStateConfirms(c)).collect(Collectors.toList());
 		}

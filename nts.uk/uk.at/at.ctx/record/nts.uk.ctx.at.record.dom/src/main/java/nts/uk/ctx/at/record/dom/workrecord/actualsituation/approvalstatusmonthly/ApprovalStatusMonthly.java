@@ -42,6 +42,7 @@ import nts.uk.ctx.at.shared.dom.workrule.closure.service.ClosureService;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 /**
  * 月の実績の承認状況を取得する : RQ587
@@ -308,8 +309,7 @@ public class ApprovalStatusMonthly {
 
 		// 対応するImported「（就業．勤務実績）承認対象者の承認状況」をすべて取得する : RQ462
 		List<ApproveRootStatusForEmpImport> lstApprovalStatus = approvalStatusAdapter
-				.getApprovalByListEmplAndListApprovalRecordDateNew(Arrays.asList(datePeriod.end()),
-						Arrays.asList(employeeId), 2); // 2 : 月別確認
+				.getApprovalByListEmplAndListApprovalRecordDateNew(workPeriod, new ClosureMonth(yearMonth, closureId, closureDate), Arrays.asList(employeeId));
 		if (lstApprovalStatus.isEmpty())
 			return Optional.empty();
 
@@ -365,7 +365,7 @@ public class ApprovalStatusMonthly {
 			// sua theo ý anh Tuấn bảo)
 			List<ApproveRootStatusForEmpImport> lstApprovalStatusDay = approvalStatusAdapter
 					.getApprovalByListEmplAndListApprovalRecordDateNew(workPeriod.datesBetween(),
-							Arrays.asList(employeeId), 1); // 1 : 日別確認
+							Arrays.asList(employeeId));
 			val checkDataNotApprovalDay = lstApprovalStatusDay.stream()
 					.filter(x -> x.getApprovalStatus() != ApprovalStatusForEmployee.APPROVED)
 					.collect(Collectors.toList());
