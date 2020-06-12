@@ -137,20 +137,37 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 	}
 	
 	@SneakyThrows
-	private FullJoinAppRootInstance createFullJoinAppRootInstance(NtsResultRecord rs){
+	private FullJoinAppRootInstance createFullJoinAppRootInstanceDaily(NtsResultRecord rs){
 				return new FullJoinAppRootInstance(
 						rs.getString("ROOT_ID"), 
 						rs.getString("CID"), 
 						rs.getString("EMPLOYEE_ID"), 
 						GeneralDate.fromString(rs.getString("START_DATE"), "yyyy-MM-dd HH:mm:ss"), 
 						GeneralDate.fromString(rs.getString("END_DATE"), "yyyy-MM-dd HH:mm:ss"), 
-						Integer.valueOf(rs.getString("ROOT_TYPE")), 
+						1, 
 						Integer.valueOf(rs.getString("PHASE_ORDER")), 
 						Integer.valueOf(rs.getString("APPROVAL_FORM")), 
 						Integer.valueOf(rs.getString("FRAME_ORDER")), 
 						Integer.valueOf(rs.getString("CONFIRM_ATR")), 
 						rs.getString("APPROVER_CHILD_ID"));
 	}
+	
+	@SneakyThrows
+	private FullJoinAppRootInstance createFullJoinAppRootInstanceMonthly(NtsResultRecord rs){
+				return new FullJoinAppRootInstance(
+						rs.getString("ROOT_ID"), 
+						rs.getString("CID"), 
+						rs.getString("EMPLOYEE_ID"), 
+						GeneralDate.fromString(rs.getString("START_DATE"), "yyyy-MM-dd HH:mm:ss"), 
+						GeneralDate.fromString(rs.getString("END_DATE"), "yyyy-MM-dd HH:mm:ss"), 
+						2, 
+						Integer.valueOf(rs.getString("PHASE_ORDER")), 
+						Integer.valueOf(rs.getString("APPROVAL_FORM")), 
+						Integer.valueOf(rs.getString("FRAME_ORDER")), 
+						Integer.valueOf(rs.getString("CONFIRM_ATR")), 
+						rs.getString("APPROVER_CHILD_ID"));
+	}
+
 	
 	@SneakyThrows
 	private List<FullJoinAppRootInstance> createFullJoinAppRootInstance(ResultSet rs){
@@ -270,7 +287,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		} else {
 			sql.append(DELETE_DAILY);
 		}
-		sql.append(" where rt.EMPLOYEE_ID in @sid ");
+		sql.append(" where rt.EMPLOYEE_ID = @sid ");
 		sql.append(" and rt.START_DATE >= @date ");
 
 		jdbcProxy().query(sql.toString())
@@ -317,7 +334,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		} else {
 			sql.append(DELETE_MONTHLY);
 		}
-		sql.append(" where rt.EMPLOYEE_ID in @sid ");
+		sql.append(" where rt.EMPLOYEE_ID = @sid ");
 		sql.append(" and rt.START_DATE >= @date ");
 
 		jdbcProxy().query(sql.toString())
@@ -387,7 +404,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 					.paramString("sids", employeeIDs)
 					.paramDate("startDate", period.start())
 					.paramDate("endDate", period.end())
-					.getList(rec -> createFullJoinAppRootInstance(rec)));
+					.getList(rec -> createFullJoinAppRootInstanceDaily(rec)));
 		});
 	}
 	
@@ -416,7 +433,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 					.paramString("sids", approverIDs)
 					.paramDate("startDate", period.start())
 					.paramDate("endDate", period.end())
-					.getList(rec -> createFullJoinAppRootInstance(rec)));
+					.getList(rec -> createFullJoinAppRootInstanceDaily(rec)));
 		});
 	}
 
@@ -439,7 +456,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql.append(" where rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
-		sql.append(" and ap.APPROVER_CHILD_ID in @sid ");
+		sql.append(" and ap.APPROVER_CHILD_ID = @sid ");
 
 		return NtsStatement.In.split(employeeIDLst, employeeIDs -> {
 			return toDomain(jdbcProxy().query(sql.toString())
@@ -447,7 +464,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 					.paramDate("startDate", period.start())
 					.paramDate("endDate", period.end())
 					.paramString("sid", approverID)
-					.getList(rec -> createFullJoinAppRootInstance(rec)));
+					.getList(rec -> createFullJoinAppRootInstanceDaily(rec)));
 		});
 	}
 
@@ -479,13 +496,13 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql.append(" and fr.PHASE_ORDER = ap.PHASE_ORDER" );
 		sql.append(" and fr.FRAME_ORDER = ap.FRAME_ORDER");
 
-		sql.append(" where rt.EMPLOYEE_ID in @sid ");
+		sql.append(" where rt.EMPLOYEE_ID = @sid ");
 		sql.append(" and rt.START_DATE <= @date ");
 
 		return toDomain(jdbcProxy().query(sql.toString())
 				.paramString("sid", employeeID)
 				.paramDate("date", date)
-				.getList(rec -> createFullJoinAppRootInstance(rec)));
+				.getList(rec -> createFullJoinAppRootInstanceDaily(rec)));
 	}
 
 
@@ -550,7 +567,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 					.paramString("sids", employeeIDs)
 					.paramDate("startDate", period.start())
 					.paramDate("endDate", period.end())
-					.getList(rec -> createFullJoinAppRootInstance(rec)));
+					.getList(rec -> createFullJoinAppRootInstanceMonthly(rec)));
 		});
 	}
 
@@ -579,7 +596,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 					.paramDate("startDate", period.start())
 					.paramDate("endDate", period.end())
 					.paramString("sids", approverIDs)
-					.getList(rec -> createFullJoinAppRootInstance(rec)));
+					.getList(rec -> createFullJoinAppRootInstanceMonthly(rec)));
 		});
 
 	}
@@ -603,7 +620,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql.append(" where rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.START_DATE <= @endDate ");
 		sql.append(" and rt.END_DATE >= @startDate ");
-		sql.append(" and ap.APPROVER_CHILD_ID in @sid ");
+		sql.append(" and ap.APPROVER_CHILD_ID = @sid ");
 
 		return NtsStatement.In.split(employeeIDLst, employeeIDs -> {
 			return toDomain(jdbcProxy().query(sql.toString())
@@ -611,7 +628,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 					.paramDate("startDate", period.start())
 					.paramDate("endDate", period.end())
 					.paramString("sid", approverID)
-					.getList(rec -> createFullJoinAppRootInstance(rec)));
+					.getList(rec -> createFullJoinAppRootInstanceMonthly(rec)));
 		});
 	}
 
@@ -643,13 +660,13 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql.append(" and fr.PHASE_ORDER = ap.PHASE_ORDER" );
 		sql.append(" and fr.FRAME_ORDER = ap.FRAME_ORDER");
 
-		sql.append(" where rt.EMPLOYEE_ID in @sid ");
+		sql.append(" where rt.EMPLOYEE_ID = @sid ");
 		sql.append(" and rt.START_DATE <= @date ");
 
 		return toDomain(jdbcProxy().query(sql.toString())
 				.paramString("sid", employeeID)
 				.paramDate("date", date)
-				.getList(rec -> createFullJoinAppRootInstance(rec)));
+				.getList(rec -> createFullJoinAppRootInstanceMonthly(rec)));
 	}
 
 	

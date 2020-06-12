@@ -199,7 +199,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 			} else {
 				sql.append(FIND_APP_STATE);
 			}
-			sql.append(" where rt.APP_ID in @appId ");
+			sql.append(" where rt.APP_ID = @appId ");
 			
 			return toDomain(new NtsStatement(sql.toString(), this.jdbcProxy())
 					.paramString("appId", appID)
@@ -215,7 +215,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		} else {
 			sql.append(FIND_APP_STATE);
 		}
-		sql.append(" where rt.APP_ID in @appId ");
+		sql.append(" where rt.APP_ID = @appId ");
 		sql.append(" and ph.APP_PHASE_ATR = 1 "); 
 		sql.append(" order by ph.PHASE_ORDER desc ");
 		
@@ -234,7 +234,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		} else {
 			sql.append(FIND_APP_STATE);
 		}
-		sql.append(" where rt.APP_ID in @appID");
+		sql.append(" where rt.APP_ID in @appIDs");
 		sql.append(" and rt.END_DATE >= @startDate");
 		sql.append(" and rt.START_DATE <= @endDate");
 		//正規ルートの申請
@@ -248,7 +248,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		} else {
 			sql.append(FIND_APP_STATE);
 		}
-		sql.append(" where rt.APP_ID in @appID");
+		sql.append(" where rt.APP_ID in @appIDs");
 		sql.append(" and rt.END_DATE >= @startDate");
 		sql.append(" and rt.START_DATE <= @endDate");
 		//代行ルートの申請
@@ -256,7 +256,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		
 		return NtsStatement.In.split(appIDLst, appIDs -> {
 			return toDomain(new NtsStatement(sql.toString(), this.jdbcProxy())
-					.paramString("appID", appIDs)
+					.paramString("appIDs", appIDs)
 					.paramString("startDate", GeneralDate.today().toString("yyyy-MM-dd"))
 					.paramString("endDate", GeneralDate.today().toString("yyyy-MM-dd"))
 					.paramString("sysDate", GeneralDate.today().toString("yyyy-MM-dd"))
@@ -279,13 +279,13 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		} else {
 			sql.append(FIND_APP_STATE);
 		}
-		sql.append(" where rt.EMPLOYEE_ID in @employeeID ");
+		sql.append(" where rt.EMPLOYEE_ID in @employeeIDs ");
 		sql.append(" and rt.APP_DATE >= @startDate ");
 		sql.append(" and rt.APP_DATE <= @endDate ");
 
 		return NtsStatement.In.split(employeeIDLst, employeeIDs -> {
 			return toDomain(new NtsStatement(sql.toString(), this.jdbcProxy())
-					.paramString("employeeID", employeeIDs)
+					.paramString("employeeIDs", employeeIDs)
 					.paramDate("startDate", period.start())
 					.paramDate("endDate", period.end())
 					.getList(rec -> createFullJoinAppApvState(rec)));
@@ -301,12 +301,12 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		} else {
 			sql.append(FIND_APP_STATE);
 		}
-		sql.append(" where rt.EMPLOYEE_ID in @employeeID ");
+		sql.append(" where rt.EMPLOYEE_ID in @employeeIDs ");
 		sql.append(" and rt.APP_DATE in @dates ");
 		sql.append(" and rt.APP_DATE <= @endDate ");
 		return NtsStatement.In.split(employeeIDLst, employeeIDs -> {
 			return toDomain(new NtsStatement(sql.toString(), this.jdbcProxy())
-					.paramString("employeeID", employeeIDs)
+					.paramString("employeeIDs", employeeIDs)
 					.paramDate("dates", dates)
 					.getList(rec -> createFullJoinAppApvState(rec)));
 		});
@@ -395,7 +395,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		sql.append(" and rt.APP_DATE <= @endDate ");
 		sql.append(" and ph.APP_PHASE_ATR in @phaseAtr ");
 		sql.append(" and fr.APP_FRAME_ATR in @frameAtr ");
-		sql.append(" and ap.APPROVER_CHILD_ID in @approverID");
+		sql.append(" and ap.APPROVER_CHILD_ID in @approverIDs");
 		
 		return NtsStatement.In.split(approverIDLst, approverIDs -> {
 			return toDomain(new NtsStatement(sql.toString(), this.jdbcProxy())
@@ -403,7 +403,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 					.paramDate("endDate", period.end())
 					.paramInt("phaseAtr", lstPhaseStt)
 					.paramInt("frameAtr", lstFrameStt)
-					.paramString("approverID", approverIDs)
+					.paramString("approverIDs", approverIDs)
 					.getList(rec -> createFullJoinAppApvState(rec)));
 		});
 
