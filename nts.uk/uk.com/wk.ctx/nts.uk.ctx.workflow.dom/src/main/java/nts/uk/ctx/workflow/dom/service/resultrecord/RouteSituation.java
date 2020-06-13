@@ -11,7 +11,7 @@ import lombok.val;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
-import nts.uk.ctx.workflow.dom.resultrecord.status.RouteConfirmStatus;
+import nts.uk.ctx.workflow.dom.resultrecord.status.daily.RouteConfirmStatusDaily;
 /**
  * ルート状況
  * @author Doan Duy Hung
@@ -49,7 +49,7 @@ public class RouteSituation {
 			String approverId,
 			List<String> representRequesterIds) {
 		
-		val status = RouteConfirmStatus.create(confirm, instance)
+		val status = RouteConfirmStatusDaily.create(confirm, instance)
 				.getStatusFor(approverId, representRequesterIds);
 		
 		return new RouteSituation(

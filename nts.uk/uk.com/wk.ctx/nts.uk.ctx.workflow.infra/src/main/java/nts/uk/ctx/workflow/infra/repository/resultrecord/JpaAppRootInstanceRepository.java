@@ -51,6 +51,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  *
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JpaAppRootInstanceRepository extends JpaRepository implements AppRootInstanceRepository {
 	
 	private final String BASIC_SELECT = 

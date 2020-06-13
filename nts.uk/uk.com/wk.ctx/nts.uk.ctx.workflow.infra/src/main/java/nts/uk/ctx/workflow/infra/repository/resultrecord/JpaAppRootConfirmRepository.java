@@ -49,6 +49,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
  *
  */
 @Stateless
+@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class JpaAppRootConfirmRepository extends JpaRepository implements AppRootConfirmRepository {
 	
 	private final String BASIC_SELECT = 
