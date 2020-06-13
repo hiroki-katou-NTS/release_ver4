@@ -1,6 +1,8 @@
 package nts.uk.ctx.workflow.dom.resultrecord;
 
 import java.util.List;
+import java.util.Optional;
+
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -35,7 +37,7 @@ public interface AppRootConfirmRepository {
 	 * @param date
 	 * @return
 	 */
-	public List<AppRootConfirm> findAppRootConfirmDaily(String employeeID, GeneralDate date);
+	public Optional<AppRootConfirm> findAppRootConfirmDaily(String employeeID, GeneralDate date);
 
 	/**
 	 * 日別実績の承認状況を取得する（単一社員・期間）
@@ -75,7 +77,7 @@ public interface AppRootConfirmRepository {
 	 * @param closureMonth
 	 * @return
 	 */
-	public List<AppRootConfirm> findAppRootConfirmMonthly(String employeeID, ClosureMonth closureMonth);
+	public Optional<AppRootConfirm> findAppRootConfirmMonthly(String employeeID, ClosureMonth closureMonth);
 
 	/**
 	 * 月別実績の承認状況を取得する（単一社員・複数集計期間）

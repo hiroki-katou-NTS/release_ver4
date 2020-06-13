@@ -3,6 +3,7 @@ package nts.uk.ctx.workflow.infra.repository.approverstatemanagement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import lombok.SneakyThrows;
@@ -11,6 +12,7 @@ import nts.arc.layer.infra.data.database.DatabaseProduct;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.time.GeneralDate;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApprovalForm;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ConfirmPerson;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalBehaviorAtr;
@@ -53,67 +55,87 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 						rs.getString("APPROVER_CHILD_ID"));
 	}
 	
-	private List<ApprovalRootState> toDomain(List<FullJoinAppApvState> listFullJoin){
+	private static List<ApprovalRootState> toDomain(List<FullJoinAppApvState> listFullJoin){
 		return listFullJoin.stream().collect(Collectors.groupingBy(r -> r.getAppID()))
 				.entrySet().stream()
 				.map(r -> {
 					String appId = r.getKey();
 					List<FullJoinAppApvState> fullJoinsInRoot = r.getValue();
-					FullJoinAppApvState firstApp = fullJoinsInRoot.get(0);
-					List<ApprovalPhaseState> phases = fullJoinsInRoot.stream().collect(Collectors.groupingBy(p -> p.getPhaseOrder()))
-							.entrySet().stream()
-							.map(p -> {
-								Integer phaseOrder = p.getKey();
-								List<FullJoinAppApvState> fullJoinInPhase = p.getValue();
-								FullJoinAppApvState firstPhase = fullJoinInPhase.get(0);
-								List<ApprovalFrame> frames = fullJoinInPhase.stream().collect(Collectors.groupingBy(f ->f.getFrameOrder()))
-										.entrySet().stream()
-										.map(f -> {
-											Integer frameOrder = f.getKey();
-											List<FullJoinAppApvState> fullJoinInFrame = f.getValue();
-											FullJoinAppApvState firstFrame = fullJoinInFrame.get(0);
-											List<ApproverState> approvers = fullJoinInFrame.stream().collect(Collectors.groupingBy(a -> a.getApproverChildID()))
-													.entrySet().stream()
-													.map(a -> {
-														List<FullJoinAppApvState> fullJoinInApprover = a.getValue();
-														FullJoinAppApvState firstApprover = fullJoinInApprover.get(0);
-														return ApproverState.builder()
-																.rootStateID(appId)
-																.phaseOrder(phaseOrder)
-																.frameOrder(frameOrder)
-																.approverID(firstApprover.getApproverChildID())
-																.companyID(firstApprover.getCompanyID())
-																.date(firstApprover.getAppDate())
-																.build();
-													}).collect(Collectors.toList());
-											return ApprovalFrame.builder()
-													.rootStateID(appId)
-													.phaseOrder(phaseOrder)
-													.frameOrder(firstFrame.getFrameOrder())
-													.approvalAtr(ApprovalBehaviorAtr.of(firstFrame.getAppFrameAtr()))
-													.confirmAtr(ConfirmPerson.of(firstFrame.getConfirmAtr()))
-													.approverID(firstFrame.getApproverID())
-													.representerID(firstFrame.getRepresenterID())
-													.approvalDate(firstFrame.getApprovalDate())
-													.approvalReason(firstFrame.getApprovalReason())
-													.listApproverState(approvers)
-													.build();
-										}).collect(Collectors.toList());
-								return ApprovalPhaseState.builder()
-										.rootStateID(appId)
-										.phaseOrder(phaseOrder)
-										.approvalAtr(ApprovalBehaviorAtr.of(firstPhase.getAppPhaseAtr()))
-										.approvalForm(ApprovalForm.of(firstPhase.getApprovalForm()))
-										.listApprovalFrame(frames)
-										.build();
-							}).collect(Collectors.toList());
-					return ApprovalRootState.builder()
-							.rootStateID(appId)
-							.employeeID(firstApp.getEmployeeID())
-							.approvalRecordDate(firstApp.getAppDate())
-							.listApprovalPhaseState(phases)
-							.build();
+					return toDomainRoot(appId, fullJoinsInRoot);
 				}).collect(Collectors.toList());
+	}
+
+	private static ApprovalRootState toDomainRoot(String appId, List<FullJoinAppApvState> fullJoinsInRoot) {
+		FullJoinAppApvState firstApp = fullJoinsInRoot.get(0);
+		List<ApprovalPhaseState> phases = fullJoinsInRoot.stream().collect(Collectors.groupingBy(p -> p.getPhaseOrder()))
+				.entrySet().stream()
+				.map(p -> {
+					Integer phaseOrder = p.getKey();
+					List<FullJoinAppApvState> fullJoinInPhase = p.getValue();
+					return toDomainphase(appId, phaseOrder, fullJoinInPhase);
+				}).collect(Collectors.toList());
+		return ApprovalRootState.builder()
+				.rootStateID(appId)
+				.employeeID(firstApp.getEmployeeID())
+				.approvalRecordDate(firstApp.getAppDate())
+				.listApprovalPhaseState(phases)
+				.build();
+	}
+
+	private static ApprovalPhaseState toDomainphase(String appId, Integer phaseOrder,
+			List<FullJoinAppApvState> fullJoinInPhase) {
+		FullJoinAppApvState firstPhase = fullJoinInPhase.get(0);
+		List<ApprovalFrame> frames = fullJoinInPhase.stream().collect(Collectors.groupingBy(f ->f.getFrameOrder()))
+				.entrySet().stream()
+				.map(f -> {
+					Integer frameOrder = f.getKey();
+					List<FullJoinAppApvState> fullJoinInFrame = f.getValue();
+					return toDomainFrame(appId, phaseOrder, frameOrder, fullJoinInFrame);
+				}).collect(Collectors.toList());
+		return ApprovalPhaseState.builder()
+				.rootStateID(appId)
+				.phaseOrder(phaseOrder)
+				.approvalAtr(ApprovalBehaviorAtr.of(firstPhase.getAppPhaseAtr()))
+				.approvalForm(ApprovalForm.of(firstPhase.getApprovalForm()))
+				.listApprovalFrame(frames)
+				.build();
+	}
+
+	private static ApprovalFrame toDomainFrame(String appId, Integer phaseOrder, Integer frameOrder,
+			List<FullJoinAppApvState> fullJoinInFrame) {
+		FullJoinAppApvState firstFrame = fullJoinInFrame.get(0);
+		List<ApproverState> approvers = fullJoinInFrame.stream().collect(Collectors.groupingBy(a -> a.getApproverChildID()))
+				.entrySet().stream()
+				.map(a -> {
+					List<FullJoinAppApvState> fullJoinInApprover = a.getValue();
+					return toDomainApprover(appId, phaseOrder, frameOrder,
+							fullJoinInApprover);
+				}).collect(Collectors.toList());
+		return ApprovalFrame.builder()
+				.rootStateID(appId)
+				.phaseOrder(phaseOrder)
+				.frameOrder(firstFrame.getFrameOrder())
+				.approvalAtr(ApprovalBehaviorAtr.of(firstFrame.getAppFrameAtr()))
+				.confirmAtr(ConfirmPerson.of(firstFrame.getConfirmAtr()))
+				.approverID(firstFrame.getApproverID())
+				.representerID(firstFrame.getRepresenterID())
+				.approvalDate(firstFrame.getApprovalDate())
+				.approvalReason(firstFrame.getApprovalReason())
+				.listApproverState(approvers)
+				.build();
+	}
+
+	private static ApproverState toDomainApprover(String appId, Integer phaseOrder, Integer frameOrder,
+			List<FullJoinAppApvState> fullJoinInApprover) {
+		FullJoinAppApvState firstApprover = fullJoinInApprover.get(0);
+		return ApproverState.builder()
+				.rootStateID(appId)
+				.phaseOrder(phaseOrder)
+				.frameOrder(frameOrder)
+				.approverID(firstApprover.getApproverChildID())
+				.companyID(firstApprover.getCompanyID())
+				.date(firstApprover.getAppDate())
+				.build();
 	}
 
 	
@@ -191,19 +213,25 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 
 	
 	@Override
-	public List<ApprovalRootState> findByID(String appID) {
-			StringBuilder sql = new StringBuilder();
-			if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-				// SQLServerの場合の処理
-				sql.append(FIND_APP_STATE_SQL);
-			} else {
-				sql.append(FIND_APP_STATE);
-			}
-			sql.append(" where rt.APP_ID = @appId ");
-			
-			return toDomain(new NtsStatement(sql.toString(), this.jdbcProxy())
+	public Optional<ApprovalRootState> findByID(String appID) {
+		List<ApprovalRootState> listAppRootState = new ArrayList<>();
+		StringBuilder sql = new StringBuilder();
+		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
+			// SQLServerの場合の処理
+			sql.append(FIND_APP_STATE_SQL);
+		} else {
+			sql.append(FIND_APP_STATE);
+		}
+		sql.append(" where rt.APP_ID = @appId ");
+		
+		listAppRootState = toDomain(new NtsStatement(sql.toString(), this.jdbcProxy())
 					.paramString("appId", appID)
 					.getList(rec -> createFullJoinAppApvState(rec)));
+		if (CollectionUtil.isEmpty(listAppRootState)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(listAppRootState.get(0));
+		}
 	}
 	
 	@Override

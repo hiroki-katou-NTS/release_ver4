@@ -13,7 +13,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="WWFDT_APV_DAY_PH_CONFIRM")
+@Table(name="WWFDT_DAY_APV_PH_CONFIRM")
 public class WwfdtApvPhaseConfirmDaily extends UkJpaEntity {
 	
 	@EmbeddedId

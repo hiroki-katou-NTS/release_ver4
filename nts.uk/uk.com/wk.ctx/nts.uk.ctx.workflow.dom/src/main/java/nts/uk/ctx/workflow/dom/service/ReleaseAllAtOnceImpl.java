@@ -35,11 +35,11 @@ public class ReleaseAllAtOnceImpl implements ReleaseAllAtOnceService {
 
 	@Override
 	public void doReleaseAllAtOnce(String companyID, String rootStateID, Integer rootType) {
-		List<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
-		if(opApprovalRootState.isEmpty()){
+		Optional<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+		if(!opApprovalRootState.isPresent()){
 			throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 		}
-		ApprovalRootState approvalRootState = opApprovalRootState.get(0);
+		ApprovalRootState approvalRootState = opApprovalRootState.get();
 		approvalRootState.getListApprovalPhaseState().sort(Comparator.comparing(ApprovalPhaseState::getPhaseOrder).reversed());
 		approvalRootState.getListApprovalPhaseState().stream().forEach(approvalPhaseState -> {
 			approvalPhaseState.getListApprovalFrame().forEach(approvalFrame -> {
@@ -58,11 +58,11 @@ public class ReleaseAllAtOnceImpl implements ReleaseAllAtOnceService {
 	public ApproverApprovedOutput getApproverApproved(String rootStateID, Integer rootType) {
 		List<ApproverWithFlagOutput> listApproverWithFlagOutput = new ArrayList<>();
 		List<String> listApprover = new ArrayList<>();
-		List<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
-		if(opApprovalRootState.isEmpty()){
+		Optional<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+		if(!opApprovalRootState.isPresent()){
 			throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 		}
-		ApprovalRootState approvalRootState = opApprovalRootState.get(0);
+		ApprovalRootState approvalRootState = opApprovalRootState.get();
 		for(ApprovalPhaseState approvalPhaseState : approvalRootState.getListApprovalPhaseState()){
 			List<String> approvers = judgmentApprovalStatusService.getApproverFromPhase(approvalPhaseState);
 			if(CollectionUtil.isEmpty(approvers)){

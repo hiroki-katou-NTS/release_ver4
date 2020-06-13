@@ -36,11 +36,11 @@ public class RemandImpl implements RemandService {
 
 	@Override
 	public List<String> doRemandForApprover(String companyID, String rootStateID, Integer order, Integer rootType) {
-		List<ApprovalRootState> lstApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
-		if(lstApprovalRootState.isEmpty()){
+		Optional<ApprovalRootState> lstApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+		if(!lstApprovalRootState.isPresent()){
 			throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 		}
-		ApprovalRootState approvalRootState = lstApprovalRootState.get(0);
+		ApprovalRootState approvalRootState = lstApprovalRootState.get();
 		List<ApprovalPhaseState> listApprovalPhase = approvalRootState.getListApprovalPhaseState();
 		listApprovalPhase.sort(Comparator.comparing(ApprovalPhaseState::getPhaseOrder).reversed());
 		List<ApprovalPhaseState> listUpperPhase = listApprovalPhase.stream().filter(x -> x.getPhaseOrder() >= order).collect(Collectors.toList());
@@ -69,9 +69,9 @@ public class RemandImpl implements RemandService {
 		// アルゴリズム「一括解除する」を実行する
 		releaseAllAtOnceService.doReleaseAllAtOnce(companyID, rootStateID, rootType);
 		// ドメインモデル「承認ルートインスタンス」．承認フェーズ１．承認区分をupdateする
-		List<ApprovalRootState> lsAppRoot = approvalRootStateRepository.findByID(rootStateID);
-		if(!lsAppRoot.isEmpty()){
-			ApprovalRootState appRoot = lsAppRoot.get(0);
+		Optional<ApprovalRootState> lsAppRoot = approvalRootStateRepository.findByID(rootStateID);
+		if(lsAppRoot.isPresent()){
+			ApprovalRootState appRoot = lsAppRoot.get();
 			appRoot.getListApprovalPhaseState().sort(Comparator.comparing(ApprovalPhaseState::getPhaseOrder));
 			appRoot.getListApprovalPhaseState().get(0).setApprovalAtr(ApprovalBehaviorAtr.ORIGINAL_REMAND);
 			approvalRootStateRepository.update(appRoot);
@@ -80,11 +80,11 @@ public class RemandImpl implements RemandService {
 
 	@Override
 	public Integer getCurrentApprovePhase(String rootStateID, Integer rootType) {
-		List<ApprovalRootState> lstApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
-		if(lstApprovalRootState.isEmpty()){
+		Optional<ApprovalRootState> lstApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+		if(!lstApprovalRootState.isPresent()){
 			throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 		}
-		ApprovalRootState approvalRootState = lstApprovalRootState.get(0);
+		ApprovalRootState approvalRootState = lstApprovalRootState.get();
 		List<ApprovalPhaseState> listApprovalPhase = approvalRootState.getListApprovalPhaseState();
 		listApprovalPhase.sort(Comparator.comparing(ApprovalPhaseState::getPhaseOrder).reversed());
 		List<ApprovalPhaseState> lstApprover = listApprovalPhase.stream()

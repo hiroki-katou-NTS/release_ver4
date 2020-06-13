@@ -199,11 +199,11 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 					date);
 		} 
 		else {
-			List<ApprovalRootState> approvalRootState = approvalRootStateRepository.findByID(appID);//.orElseThrow(()->
-			if(approvalRootState.isEmpty()) {
+			Optional<ApprovalRootState> approvalRootState = approvalRootStateRepository.findByID(appID);//.orElseThrow(()->
+			if(!approvalRootState.isPresent()) {
 				new RuntimeException("data WWFDT_APPROVAL_ROOT_STATE error: ID ="+appID);
 			}			
-			approvalRootContentOutput = new ApprovalRootContentOutput(approvalRootState.get(0), ErrorFlag.NO_ERROR);
+			approvalRootContentOutput = new ApprovalRootContentOutput(approvalRootState.get(), ErrorFlag.NO_ERROR);
 		}
 		return new ApprovalRootContentExport(
 				new ApprovalRootStateExport(
@@ -696,11 +696,11 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 	}
 	@Override
 	public void cleanApprovalRootState(String rootStateID, Integer rootType) {
-		List<ApprovalRootState> lstApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
-		if(lstApprovalRootState.isEmpty()){
+		Optional<ApprovalRootState> lstApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+		if(!lstApprovalRootState.isPresent()){
 			throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 		}
-		ApprovalRootState approvalRootState = lstApprovalRootState.get(0);
+		ApprovalRootState approvalRootState = lstApprovalRootState.get();
 		approvalRootState.getListApprovalPhaseState().sort(Comparator.comparing(ApprovalPhaseState::getPhaseOrder).reversed());
 		approvalRootState.getListApprovalPhaseState().stream().forEach(approvalPhaseState -> {
 			approvalPhaseState.getListApprovalFrame().forEach(approvalFrame -> {
@@ -774,11 +774,11 @@ public class ApprovalRootStatePubImpl implements ApprovalRootStatePub {
 	}
 	@Override
 	public Boolean isApproveApprovalPhaseStateComplete(String companyID, String rootStateID, Integer phaseNumber) {
-		List<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
-		if(opApprovalRootState.isEmpty()){
+		Optional<ApprovalRootState> opApprovalRootState = approvalRootStateRepository.findByID(rootStateID);
+		if(!opApprovalRootState.isPresent()){
 			throw new RuntimeException("状態：承認ルート取得失敗"+System.getProperty("line.separator")+"error: ApprovalRootState, ID: "+rootStateID);
 		}
-		ApprovalRootState approvalRootState = opApprovalRootState.get(0);
+		ApprovalRootState approvalRootState = opApprovalRootState.get();
 		Optional<ApprovalPhaseState> opCurrentPhase = approvalRootState.getListApprovalPhaseState().stream()
 				.filter(x -> x.getPhaseOrder()==phaseNumber).findAny();
 		if(!opCurrentPhase.isPresent()){

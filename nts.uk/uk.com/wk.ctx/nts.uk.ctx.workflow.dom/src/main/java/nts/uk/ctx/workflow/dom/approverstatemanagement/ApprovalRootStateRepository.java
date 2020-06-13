@@ -1,6 +1,7 @@
 package nts.uk.ctx.workflow.dom.approverstatemanagement;
 
 import java.util.List;
+import java.util.Optional;
 import nts.arc.time.GeneralDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -35,7 +36,7 @@ public interface ApprovalRootStateRepository {
 	 * @param appID
 	 * @return
 	 */
-	public List<ApprovalRootState> findByID(String appID);
+	public Optional<ApprovalRootState> findByID(String appID);
 	
 	/**
 	 * 申請IDから一番承認が進んでいるフェーズの承認状況を取得する

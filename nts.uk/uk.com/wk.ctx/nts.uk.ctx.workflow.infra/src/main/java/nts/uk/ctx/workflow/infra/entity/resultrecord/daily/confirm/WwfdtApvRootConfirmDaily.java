@@ -13,7 +13,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="WWFDT_APV_DAY_RT_CONFIRM")
+@Table(name="WWFDT_DAY_APV_RT_CONFIRM")
 public class WwfdtApvRootConfirmDaily extends UkJpaEntity {
 	@Id
 	@Column(name="ROOT_ID")

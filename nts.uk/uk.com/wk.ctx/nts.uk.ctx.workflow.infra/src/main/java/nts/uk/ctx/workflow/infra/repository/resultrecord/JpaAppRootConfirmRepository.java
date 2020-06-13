@@ -17,6 +17,7 @@ import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.layer.infra.data.database.DatabaseProduct;
 import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalBehaviorAtr;
 import nts.uk.ctx.workflow.dom.resultrecord.AppFrameConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppPhaseConfirm;
@@ -327,8 +328,13 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 
 	
 	@Override
-	public List<AppRootConfirm> findAppRootConfirmDaily(String employeeID, GeneralDate date) {
-		return internalQueryDaily(Arrays.asList(employeeID), new DatePeriod(date, date));
+	public Optional<AppRootConfirm> findAppRootConfirmDaily(String employeeID, GeneralDate date) {
+		List<AppRootConfirm> listAppRootConfirm = internalQueryDaily(Arrays.asList(employeeID), new DatePeriod(date, date));
+		if (CollectionUtil.isEmpty(listAppRootConfirm)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(listAppRootConfirm.get(0));
+		}
 	}
 
 	@Override
@@ -393,8 +399,13 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	
 	
 	@Override
-	public List<AppRootConfirm> findAppRootConfirmMonthly(String employeeID, ClosureMonth closureMonth) {
-		return internalQueryMonthly(Arrays.asList(employeeID), Arrays.asList(closureMonth));
+	public Optional<AppRootConfirm> findAppRootConfirmMonthly(String employeeID, ClosureMonth closureMonth) {
+		List<AppRootConfirm> listAppRootConfirm = internalQueryMonthly(Arrays.asList(employeeID), Arrays.asList(closureMonth));
+		if (CollectionUtil.isEmpty(listAppRootConfirm)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(listAppRootConfirm.get(0));
+		}
 	}
 
 	@Override

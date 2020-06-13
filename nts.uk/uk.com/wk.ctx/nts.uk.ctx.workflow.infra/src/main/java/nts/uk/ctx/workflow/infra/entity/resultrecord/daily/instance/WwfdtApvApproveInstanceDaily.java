@@ -12,7 +12,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "WWFDT_APV_DAY_AP_INSTANCE")
+@Table(name = "WWFDT_DAY_APV_AP_INSTANCE")
 public class WwfdtApvApproveInstanceDaily extends UkJpaEntity {
 
 	@EmbeddedId

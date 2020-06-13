@@ -12,7 +12,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="WWFDT_APV_MON_FR_INSTANCE")
+@Table(name="WWFDT_MON_APV_FR_INSTANCE")
 public class WwfdtApvFrameInstanceMonthly extends UkJpaEntity {
 	
 	@EmbeddedId

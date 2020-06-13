@@ -290,11 +290,11 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 			throw new RuntimeException("月次には対応しない");
 		}
 		// ドメインモデル「就業実績確認状態」を取得する
-		List<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmDaily(employeeID, date);
-		if(opAppRootConfirm.isEmpty()){
+		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmDaily(employeeID, date);
+		if(!opAppRootConfirm.isPresent()){
 			return AppRootConfirm.dummy(companyID, employeeID, date, rootType);
 		}
-		return opAppRootConfirm.get(0);
+		return opAppRootConfirm.get();
 	}
 	
 	@Override
@@ -542,11 +542,11 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 					continue;
 				}
 				// 対象日の就業実績確認状態を取得する
-				List<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmDaily( approvalRouteDetails.getAppRootInstance().getEmployeeID(), loopDate);
-				if(opAppRootConfirm.isEmpty()){
+				Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmDaily( approvalRouteDetails.getAppRootInstance().getEmployeeID(), loopDate);
+				if(!opAppRootConfirm.isPresent()){
 					continue;
 				}
-				AppRootConfirm appRootConfirm = opAppRootConfirm.get(0);
+				AppRootConfirm appRootConfirm = opAppRootConfirm.get();
 				// 中間データから承認ルートインスタンスに変換する
 				ApprovalRootState approvalRootState = this.convertFromAppRootInstance(appRootInstance, appRootConfirm);
 				// 指定した社員が承認できるかの判断(NoDBACCESS)
@@ -582,11 +582,11 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 						(approvalRouteDetails.getEndDate().isPresent()&&approvalRouteDetails.getEndDate().get().afterOrEquals(loopDate))){
 					// 対象日の就業実績確認状態を取得する
 					
-					List<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmDaily( approvalRouteDetails.getAppRootInstance().getEmployeeID(), loopDate);
-					if(opAppRootConfirm.isEmpty()){
+					Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmDaily( approvalRouteDetails.getAppRootInstance().getEmployeeID(), loopDate);
+					if(!opAppRootConfirm.isPresent()){
 						continue;
 					}
-					AppRootConfirm appRootConfirm = opAppRootConfirm.get(0);
+					AppRootConfirm appRootConfirm = opAppRootConfirm.get();
 					// 中間データから承認ルートインスタンスに変換する
 					ApprovalRootState approvalRootState = this.convertFromAppRootInstance(appRootInstance, appRootConfirm);
 					// 指定した社員が承認できるかの判断(NoDBACCESS)
@@ -1028,12 +1028,12 @@ public class AppRootInstanceServiceImpl implements AppRootInstanceService {
 	public AppRootConfirm getAppRootCFByMonth(String companyID, String employeeID, YearMonth yearMonth,
 			Integer closureID, ClosureDate closureDate, RecordRootType rootType) {
 		// ドメインモデル「就業実績確認状態」を取得する
-		List<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmMonthly(employeeID, new ClosureMonth(yearMonth, closureID, closureDate));
-		if(opAppRootConfirm.isEmpty()){
+		Optional<AppRootConfirm> opAppRootConfirm = appRootConfirmRepository.findAppRootConfirmMonthly(employeeID, new ClosureMonth(yearMonth, closureID, closureDate));
+		if(!opAppRootConfirm.isPresent()){
 			return new AppRootConfirm(UUID.randomUUID().toString(), companyID, employeeID, GeneralDate.today(), rootType, new ArrayList<>(),
 					Optional.empty(), Optional.empty(), Optional.empty());
 		}
-		return opAppRootConfirm.get(0);
+		return opAppRootConfirm.get();
 	}
 
 	@Override
