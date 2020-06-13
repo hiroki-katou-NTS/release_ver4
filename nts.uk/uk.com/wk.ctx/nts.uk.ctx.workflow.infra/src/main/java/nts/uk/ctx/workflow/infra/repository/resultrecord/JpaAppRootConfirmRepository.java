@@ -19,11 +19,16 @@ import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalBehaviorAtr;
+import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.resultrecord.AppFrameConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppPhaseConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmRepository;
 import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
+import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvApproverState;
+import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvFrameState;
+import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvPhaseState;
+import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvRootState;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.FullJoinAppRootConfirm;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.confirm.WwfdpApvFrameConfirmDailyPK;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.confirm.WwfdpApvPhaseConfirmDailyPK;
@@ -46,63 +51,6 @@ import nts.uk.shr.com.time.closure.ClosureMonth;
  */
 @Stateless
 public class JpaAppRootConfirmRepository extends JpaRepository implements AppRootConfirmRepository {
-
-	private WwfdtApvRootConfirmDaily fromDomainDaily(AppRootConfirm appRootConfirm) {
-		return new WwfdtApvRootConfirmDaily(
-				appRootConfirm.getRootID(), 
-				appRootConfirm.getCompanyID(),
-				appRootConfirm.getEmployeeID(), 
-				appRootConfirm.getRecordDate(),
-				appRootConfirm.getListAppPhase().stream().map(x -> new WwfdtApvPhaseConfirmDaily(
-						new WwfdpApvPhaseConfirmDailyPK(appRootConfirm.getRootID(), x.getPhaseOrder()),
-						appRootConfirm.getCompanyID(),
-						appRootConfirm.getEmployeeID(), 
-						appRootConfirm.getRecordDate(),
-						x.getAppPhaseAtr().value,
-						x.getListAppFrame().stream()
-								.map(y -> new WwfdtApvFrameConfirmDaily(
-										new WwfdpApvFrameConfirmDailyPK(appRootConfirm.getRootID(), x.getPhaseOrder(), y.getFrameOrder()),
-										appRootConfirm.getCompanyID(),
-										appRootConfirm.getEmployeeID(), 
-										appRootConfirm.getRecordDate(),
-										y.getApproverID().orElse(null), y.getRepresenterID().orElse(null),
-										y.getApprovalDate()))
-								.collect(Collectors.toList())))
-						.collect(Collectors.toList()));
-	}
-
-	private WwfdtApvRootConfirmMonthly fromDomainMonthly(AppRootConfirm appRootConfirm) {
-		return new WwfdtApvRootConfirmMonthly(
-				appRootConfirm.getRootID(), 
-				appRootConfirm.getCompanyID(),
-				appRootConfirm.getEmployeeID(), 
-				appRootConfirm.getYearMonth().get().v(),
-				appRootConfirm.getClosureID().get(),
-				appRootConfirm.getClosureDate().map(x -> x.getClosureDay().v()).get(),
-				appRootConfirm.getClosureDate().map(x -> x.getLastDayOfMonth() ? 1 : 0).get(),
-				appRootConfirm.getListAppPhase().stream().map(x -> new WwfdtApvPhaseConfirmMonthly(
-						new WwfdpApvPhaseConfirmMonthlyPK(appRootConfirm.getRootID(), x.getPhaseOrder()),
-						appRootConfirm.getCompanyID(),
-						appRootConfirm.getEmployeeID(), 
-						appRootConfirm.getYearMonth().get().v(),
-						appRootConfirm.getClosureID().get(),
-						appRootConfirm.getClosureDate().map(y -> y.getClosureDay().v()).get(),
-						appRootConfirm.getClosureDate().map(y -> y.getLastDayOfMonth() ? 1 : 0).get(),
-						x.getAppPhaseAtr().value,
-						x.getListAppFrame().stream()
-								.map(y -> new WwfdtApvFrameConfirmMonthly(
-										new WwfdpApvFrameConfirmMonthlyPK(appRootConfirm.getRootID(), x.getPhaseOrder(), y.getFrameOrder()),
-										appRootConfirm.getCompanyID(),
-										appRootConfirm.getEmployeeID(), 
-										appRootConfirm.getYearMonth().get().v(),
-										appRootConfirm.getClosureID().get(),
-										appRootConfirm.getClosureDate().map(z -> z.getClosureDay().v()).get(),
-										appRootConfirm.getClosureDate().map(z -> z.getLastDayOfMonth() ? 1 : 0).get(),
-										y.getApproverID().orElse(null), y.getRepresenterID().orElse(null),
-										y.getApprovalDate()))
-								.collect(Collectors.toList())))
-						.collect(Collectors.toList()));
-	}
 
 	private List<AppRootConfirm> toDomain(List<FullJoinAppRootConfirm> listFullJoin) {
 		return listFullJoin.stream().collect(Collectors.groupingBy(FullJoinAppRootConfirm::getRootID)).entrySet()
@@ -194,18 +142,29 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 				rs.getGeneralDate("APPROVAL_DATE"));
 	}
 
-
 	
 	
 	@Override
 	public void insert(AppRootConfirm appRootConfirm) {
 		// 日次の場合
 		if (appRootConfirm.getRootType().value == 1) {
-			this.commandProxy().insert(fromDomainDaily(appRootConfirm));
+			this.commandProxy().insert(WwfdtApvRootConfirmDaily.fromDomain(appRootConfirm));
+			WwfdtApvPhaseConfirmDaily.fromDomain(appRootConfirm).forEach(p -> {
+				this.commandProxy().insert(p);
+			});
+			WwfdtApvFrameConfirmDaily.fromDomain(appRootConfirm).forEach(f -> {
+				this.commandProxy().insert(f);
+			});
 		}
 		// 月次の場合
 		else {
-			this.commandProxy().insert(fromDomainMonthly(appRootConfirm));
+			this.commandProxy().insert(WwfdtApvRootConfirmMonthly.fromDomain(appRootConfirm));
+			WwfdtApvPhaseConfirmMonthly.fromDomain(appRootConfirm).forEach(p -> {
+				this.commandProxy().insert(p);
+			});
+			WwfdtApvFrameConfirmMonthly.fromDomain(appRootConfirm).forEach(f -> {
+				this.commandProxy().insert(f);
+			});
 		}
 	}
 
@@ -213,11 +172,23 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	public void update(AppRootConfirm appRootConfirm) {
 		// 日次の場合
 		if (appRootConfirm.getRootType().value == 1) {
-			this.commandProxy().update(fromDomainDaily(appRootConfirm));
+			this.commandProxy().update(WwfdtApvRootConfirmDaily.fromDomain(appRootConfirm));
+			WwfdtApvPhaseConfirmDaily.fromDomain(appRootConfirm).forEach(p -> {
+				this.commandProxy().update(p);
+			});
+			WwfdtApvFrameConfirmDaily.fromDomain(appRootConfirm).forEach(f -> {
+				this.commandProxy().update(f);
+			});
 		}
 		// 月次の場合
 		else {
-			this.commandProxy().update(fromDomainMonthly(appRootConfirm));
+			this.commandProxy().update(WwfdtApvRootConfirmMonthly.fromDomain(appRootConfirm));
+			WwfdtApvPhaseConfirmMonthly.fromDomain(appRootConfirm).forEach(p -> {
+				this.commandProxy().update(p);
+			});
+			WwfdtApvFrameConfirmMonthly.fromDomain(appRootConfirm).forEach(f -> {
+				this.commandProxy().update(f);
+			});
 		}
 	}
 

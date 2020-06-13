@@ -1,5 +1,6 @@
 package nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.Column;
@@ -11,6 +12,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalFrame;
+import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 @NoArgsConstructor
@@ -56,6 +58,17 @@ public class WwfdtAppApvFrameState extends UkJpaEntity {
 	protected Object getKey() {
 		return wwfdpAppApvFrameStatePK;
 	}
+	
+	public static List<WwfdtAppApvFrameState> fromDomain(ApprovalRootState root) {
+		List<WwfdtAppApvFrameState> frame = new ArrayList<>();
+		root.getListApprovalPhaseState().forEach(e -> {
+			e.getListApprovalFrame().forEach(f -> {
+				frame.add(fromDomain(root.getCompanyID(), root.getEmployeeID() ,root.getApprovalRecordDate(), f));
+			});
+		});
+		return frame;
+	}
+
 	
 	public static WwfdtAppApvFrameState fromDomain(String companyID, String employeeID, GeneralDate appDate, ApprovalFrame approvalFrame){
 		return WwfdtAppApvFrameState.builder()

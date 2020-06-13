@@ -1,5 +1,8 @@
 package nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -8,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
+import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApproverState;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
@@ -34,6 +38,19 @@ public class WwfdtAppApvApproverState extends UkJpaEntity {
 	protected Object getKey() {
 		return wwfdpAppApvApproverStatePK;
 	}
+	
+	public static List<WwfdtAppApvApproverState> fromDomain(ApprovalRootState root) {
+		List<WwfdtAppApvApproverState> approver = new ArrayList<>();
+		root.getListApprovalPhaseState().forEach(p -> {
+			p.getListApprovalFrame().forEach(f -> {
+				f.getListApproverState().forEach(a -> {
+					approver.add(fromDomain(root.getCompanyID(), root.getEmployeeID() ,root.getApprovalRecordDate(), a));
+				});
+			});
+		});
+		return approver;
+	}
+
 	
 	public static WwfdtAppApvApproverState fromDomain(String companyID, String employeeID, GeneralDate appDate, ApproverState approverState){
 		return WwfdtAppApvApproverState.builder()

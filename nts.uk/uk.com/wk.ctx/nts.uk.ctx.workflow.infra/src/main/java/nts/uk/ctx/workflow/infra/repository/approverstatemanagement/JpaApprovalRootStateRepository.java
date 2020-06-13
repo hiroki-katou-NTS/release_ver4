@@ -22,7 +22,9 @@ import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootStateRepository;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApproverState;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.FullJoinAppApvState;
-import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdpAppApvRootStatePK;
+import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvApproverState;
+import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvFrameState;
+import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvPhaseState;
 import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvRootState;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
@@ -105,7 +107,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 			List<FullJoinAppApvState> fullJoinInFrame) {
 		FullJoinAppApvState firstFrame = fullJoinInFrame.get(0);
 		List<ApproverState> approvers = fullJoinInFrame.stream().collect(Collectors.groupingBy(a -> a.getApproverChildID()))
-				.entrySet().stream()
+				 .entrySet().stream()
 				.map(a -> {
 					List<FullJoinAppApvState> fullJoinInApprover = a.getValue();
 					return toDomainApprover(appId, phaseOrder, frameOrder,
@@ -142,18 +144,49 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 	@Override
 	public void insert(ApprovalRootState approvalRootState) {
 		this.commandProxy().insert(WwfdtAppApvRootState.fromDomain(approvalRootState));
-		this.getEntityManager().flush();
+		WwfdtAppApvPhaseState.fromDomain(approvalRootState).forEach(p -> {
+			this.commandProxy().insert(p);
+		});
+		WwfdtAppApvFrameState.fromDomain(approvalRootState).forEach(f -> {
+			this.commandProxy().insert(f);
+		});
+		WwfdtAppApvApproverState.fromDomain(approvalRootState).forEach(a -> {
+			this.commandProxy().insert(a);
+		});
 	}
+
 
 	@Override
 	public void update(ApprovalRootState approvalRootState) {
 		this.commandProxy().update(WwfdtAppApvRootState.fromDomain(approvalRootState));
-		this.getEntityManager().flush();
+		WwfdtAppApvPhaseState.fromDomain(approvalRootState).forEach(p -> {
+			this.commandProxy().update(p);
+		});
+		WwfdtAppApvFrameState.fromDomain(approvalRootState).forEach(f -> {
+			this.commandProxy().update(f);
+		});
+		WwfdtAppApvApproverState.fromDomain(approvalRootState).forEach(a -> {
+			this.commandProxy().update(a);
+		});
 	}
 	
 	@Override
 	public void delete(String rootStateID) {
-		this.commandProxy().remove(WwfdtAppApvRootState.class, new WwfdpAppApvRootStatePK(rootStateID));
+		String sqlDelete = " delete "
+				+ " from WWFDT_APP_APV_RT_STATE as rt "
+				+ " inner join WWFDT_APP_APV_PH_STATE as ph "
+				+ " on rt.APP_ID = ph.APP_ID "
+				+ " inner join WWFDT_APP_APV_FR_STATE as fr "
+				+ " on ph.APP_ID = fr.APP_ID "
+				+ " and ph.PHASE_ORDER = fr.PHASE_ORDER "
+				+ " left join WWFDT_APP_APV_AP_STATE as ap "
+				+ " on fr.APP_ID = ap.APP_ID "
+				+ " and fr.PHASE_ORDER = ap.PHASE_ORDER " 
+				+ " and fr.FRAME_ORDER = ap.FRAME_ORDER "
+				+ " where rt.APP_ID = @appId ";
+
+		jdbcProxy().query(sqlDelete.toString())
+					.paramString("appId", rootStateID);
 	}
 
 
