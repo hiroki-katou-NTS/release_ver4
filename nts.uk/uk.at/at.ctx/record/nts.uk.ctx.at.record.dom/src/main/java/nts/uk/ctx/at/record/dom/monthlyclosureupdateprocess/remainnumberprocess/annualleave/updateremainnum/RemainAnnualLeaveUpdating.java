@@ -21,9 +21,10 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.maxdata.AnnL
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.maxdata.AnnualLeaveMaxData;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.maxdata.AnnualLeaveMaxHistRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.annualleave.empinfo.maxdata.AnnualLeaveMaxHistoryData;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 
 /**
- * 
+ *
  * @author HungTT - <<Work>> 年休残数更新
  *
  */
@@ -48,7 +49,7 @@ public class RemainAnnualLeaveUpdating {
 
 	/**
 	 * 年休残数更新
-	 * 
+	 *
 	 * @param output
 	 * @param period
 	 * @param empId
@@ -66,7 +67,7 @@ public class RemainAnnualLeaveUpdating {
 
 	/**
 	 * 年休付与残数データの更新
-	 * 
+	 *
 	 * @param output
 	 * @param period
 	 * @param empId
@@ -75,8 +76,8 @@ public class RemainAnnualLeaveUpdating {
 			String empId) {
 		List<AnnualLeaveGrantRemainingData> listRemainData = annLeaveRemainRepo.findNotExp(empId);
 		for (AnnualLeaveGrantRemainingData data : listRemainData) {
-			AnnualLeaveRemainingHistory hist = new AnnualLeaveRemainingHistory(data, period.getYearMonth(),
-					period.getClosureId(), period.getClosureDate());
+			AnnualLeaveRemainingHistory hist = new AnnualLeaveRemainingHistory(data, period.getClosureMonth().yearMonth(),
+					ClosureId.valueOf(period.getClosureMonth().closureId()), period.getClosureMonth().closureDate());
 			annLeaveRemainHistRepo.addOrUpdate(hist);
 		}
 		updateAnnualLeaveRemainProcess(output.getAsOfPeriodEnd());
@@ -86,7 +87,7 @@ public class RemainAnnualLeaveUpdating {
 
 	/**
 	 * 年休上限データの更新
-	 * 
+	 *
 	 * @param output
 	 * @param period
 	 * @param empId
@@ -96,8 +97,8 @@ public class RemainAnnualLeaveUpdating {
 		Optional<AnnualLeaveMaxData> optMaxData = annLeaveMaxRepo.get(empId);
 		if (optMaxData.isPresent()) {
 			AnnualLeaveMaxData maxData = optMaxData.get();
-			AnnualLeaveMaxHistoryData maxDataHist = new AnnualLeaveMaxHistoryData(maxData, period.getYearMonth(),
-					period.getClosureId(), period.getClosureDate());
+			AnnualLeaveMaxHistoryData maxDataHist = new AnnualLeaveMaxHistoryData(maxData, period.getClosureMonth().yearMonth(),
+					ClosureId.valueOf(period.getClosureMonth().closureId()), period.getClosureMonth().closureDate());
 			annLeaveMaxHistRepo.addOrUpdate(maxDataHist);
 			AnnualLeaveMaxData maxDataOutput = output.getAsOfPeriodEnd().getMaxData();
 			maxData = AnnualLeaveMaxData.createFromJavaType(empId,
@@ -131,7 +132,7 @@ public class RemainAnnualLeaveUpdating {
 
 	/**
 	 * 年休付与残数データ更新処理
-	 * 
+	 *
 	 * @param info
 	 */
 	private void updateAnnualLeaveRemainProcess(AnnualLeaveInfo info) {
@@ -195,7 +196,7 @@ public class RemainAnnualLeaveUpdating {
 	 */
 	private void deleteDataAfterCurrentMonth(AggrPeriodEachActualClosure period, String empId) {
 		annLeaveRemainRepo.deleteAfterDate(empId, period.getPeriod().start());
-		annLeaveRemainHistRepo.delete(empId, period.getYearMonth(), period.getClosureId(), period.getClosureDate());
+		annLeaveRemainHistRepo.delete(empId, period.getClosureMonth().yearMonth(), ClosureId.valueOf(period.getClosureMonth().closureId()), period.getClosureMonth().closureDate());
 		annLeaveTimeRemainHistRepo.deleteAfterDate(empId, period.getPeriod().start());
 	}
 }

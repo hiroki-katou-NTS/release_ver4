@@ -27,10 +27,11 @@ import nts.uk.ctx.at.shared.dom.common.CompanyId;
 import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.shr.com.context.AppContexts;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 @Stateless
 public class JpaConfirmationMonthRepository  extends JpaRepository implements ConfirmationMonthRepository{
-    
+
 	private static final String DELETE_BY_PARENT_PK = "DELETE FROM KrcdtConfirmationMonth a "
 			+ "WHERE a.krcdtConfirmationMonthPK.companyID = :companyID "
 			+ "AND a.krcdtConfirmationMonthPK.employeeId = :employeeId "
@@ -38,12 +39,12 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 			+ "AND a.krcdtConfirmationMonthPK.closureDay = :closureDay "
 			+ "AND a.krcdtConfirmationMonthPK.isLastDay = :isLastDayOfMonth "
 			+ "AND a.krcdtConfirmationMonthPK.processYM = :processYM ";
-	
+
 	private static final String FIND_BY_SID_YM = "SELECT a FROM KrcdtConfirmationMonth a "
 			+ "WHERE a.krcdtConfirmationMonthPK.companyID = :companyId "
 			+ "AND a.krcdtConfirmationMonthPK.employeeId = :employeeId "
 			+ "AND a.krcdtConfirmationMonthPK.processYM = :processYM ";
-	
+
 //	private static final String FIND_BY_SOME_PROPERTY = "SELECT a FROM KrcdtConfirmationMonth a "
 //			+ "WHERE a.krcdtConfirmationMonthPK.employeeId IN :employeeIds "
 //			+ "AND a.krcdtConfirmationMonthPK.processYM = :processYM "
@@ -57,7 +58,7 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 	}
 
 	@Override
-	public void insert(ConfirmationMonth confirmationMonth) { 
+	public void insert(ConfirmationMonth confirmationMonth) {
 		this.commandProxy().insert(new KrcdtConfirmationMonth(
 				new KrcdtConfirmationMonthPK(confirmationMonth.getCompanyID().v(), confirmationMonth.getEmployeeId(),
 						confirmationMonth.getClosureId().value, confirmationMonth.getClosureDate().getClosureDay().v(),(confirmationMonth.getClosureDate().getLastDayOfMonth() ? 1 : 0), confirmationMonth.getProcessYM().v()),
@@ -84,33 +85,31 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
-	public List<ConfirmationMonth> findBySomeProperty(List<String> employeeIds, int processYM, int closureDate, boolean isLastDayOfMonth,
-			int closureId) {
+	public List<ConfirmationMonth> findBySomeProperty(List<String> employeeIds, ClosureMonth closureMonth) {
 		List<ConfirmationMonth> data = new ArrayList<>();
 		CollectionUtil.split(employeeIds, DbConsts.MAX_CONDITIONS_OF_IN_STATEMENT, subList -> {
 			try (PreparedStatement statement = this.connection().prepareStatement(
 						"SELECT * from KRCDT_CONFIRMATION_MONTH h WHERE h.CLOSURE_DAY = ? AND h.IS_LAST_DAY = ? AND h.PROCESS_YM = ?"
 						+ " AND h.CLOSURE_ID = ? AND h.SID IN (" + subList.stream().map(s -> "?").collect(Collectors.joining(",")) + ")")) {
-				statement.setInt(1, closureDate);
-				statement.setInt(2, isLastDayOfMonth ? 1 : 0);
-				statement.setInt(3, processYM);
-				statement.setInt(4, closureId);
+				statement.setInt(1, closureMonth.closureDate().getClosureDay().v());
+				statement.setInt(2, closureMonth.closureDate().getLastDayOfMonth() ? 1 : 0);
+				statement.setInt(3, closureMonth.yearMonth().v());
+				statement.setInt(4, closureMonth.closureId());
 				for (int i = 0; i < subList.size(); i++) {
 					statement.setString(i + 5, subList.get(i));
 				}
-				ClosureDate cloDate = new ClosureDate(closureDate, isLastDayOfMonth);
-				YearMonth ym = new YearMonth(processYM);
-				ClosureId cloId = ClosureId.valueOf(closureId);
+
+			ClosureId cloId = ClosureId.valueOf(closureMonth.closureId());
 				data.addAll(new NtsResultSet(statement.executeQuery()).getList(rec -> {
 					return new ConfirmationMonth(new CompanyId(rec.getString("CID")),
-							rec.getString("SID"), cloId, cloDate, ym, 
+							rec.getString("SID"), cloId, closureMonth.closureDate(), closureMonth.yearMonth(),
 							rec.getGeneralDate("IDENTIFY_DATE"));
 				}));
 			}catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		});
-		
+
 		return data;
 	}
 
@@ -122,7 +121,7 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 				data.addAll(internalQuery(subList, ym));
 			});
 		});
-		
+
 		return data;
 	}
 
@@ -138,10 +137,10 @@ public class JpaConfirmationMonthRepository  extends JpaRepository implements Co
 				stmt.setString(i + 1 + ym.size(), subList.get(i));
 			}
 			return new NtsResultSet(stmt.executeQuery()).getList(rec -> {
-				return new ConfirmationMonth(new CompanyId(rec.getString("CID")), rec.getString("SID"), 
-						EnumAdaptor.valueOf(rec.getInt("CLOSURE_ID"), ClosureId.class), 
-						new ClosureDate(rec.getInt("CLOSURE_DAY"), rec.getBoolean("IS_LAST_DAY")), 
-						new YearMonth(rec.getInt("PROCESS_YM")), 
+				return new ConfirmationMonth(new CompanyId(rec.getString("CID")), rec.getString("SID"),
+						EnumAdaptor.valueOf(rec.getInt("CLOSURE_ID"), ClosureId.class),
+						new ClosureDate(rec.getInt("CLOSURE_DAY"), rec.getBoolean("IS_LAST_DAY")),
+						new YearMonth(rec.getInt("PROCESS_YM")),
 						rec.getGeneralDate("IDENTIFY_DATE"));
 			});
 		}

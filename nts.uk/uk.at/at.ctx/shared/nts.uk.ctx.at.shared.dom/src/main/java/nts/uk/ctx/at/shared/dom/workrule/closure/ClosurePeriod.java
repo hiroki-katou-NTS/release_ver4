@@ -5,6 +5,7 @@ import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.uk.shr.com.time.calendar.date.ClosureDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
+import nts.uk.shr.com.time.closure.ClosureMonth;
 
 /**
  * 締め期間
@@ -31,7 +32,7 @@ public class ClosurePeriod {
 		this.yearMonth = YearMonth.of(GeneralDate.today().year(), GeneralDate.today().month());
 		this.period = new DatePeriod(GeneralDate.today(), GeneralDate.today());
 	}
-	
+
 	/**
 	 * ファクトリー
 	 * @param closureId 締めID
@@ -42,12 +43,16 @@ public class ClosurePeriod {
 	 */
 	public static ClosurePeriod of(
 			ClosureId closureId, ClosureDate closureDate, YearMonth yearMonth, DatePeriod period){
-		
+
 		ClosurePeriod domain = new ClosurePeriod();
 		domain.closureId = closureId;
 		domain.closureDate = closureDate;
 		domain.yearMonth = yearMonth;
 		domain.period = period;
 		return domain;
+	}
+
+	public ClosureMonth closureMonth() {
+		return new ClosureMonth(this.yearMonth, this.closureId.value, this.closureDate);
 	}
 }

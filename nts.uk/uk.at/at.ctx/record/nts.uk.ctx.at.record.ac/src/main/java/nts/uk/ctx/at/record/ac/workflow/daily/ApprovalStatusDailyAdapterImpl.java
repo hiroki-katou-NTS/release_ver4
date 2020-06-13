@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.workrecord.approval.common.RecordApprovalProgress;
@@ -19,6 +20,7 @@ import nts.uk.ctx.workflow.pub.resultrecord.daily.DailyRecordApprovalPub;
 import nts.uk.ctx.workflow.pub.resultrecord.daily.DailySubjectiveStatus;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
+@Stateless
 public class ApprovalStatusDailyAdapterImpl implements ApprovalStatusDailyAdapter {
 
 	@Inject

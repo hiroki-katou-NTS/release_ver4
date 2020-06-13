@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import nts.uk.ctx.at.record.dom.workrecord.approval.common.RecordApprovalProgress;
@@ -19,26 +20,27 @@ import nts.uk.ctx.workflow.pub.resultrecord.monthly.MonthlyRecordApprovalPub;
 import nts.uk.ctx.workflow.pub.resultrecord.monthly.MonthlySubjectiveStatus;
 import nts.uk.shr.com.time.closure.ClosureMonth;
 
+@Stateless
 public class ApprovalStatusMonthlyAdapterImpl implements ApprovalStatusMonthlyAdapter {
 
 	@Inject
 	private MonthlyRecordApprovalPub pub;
-	
+
 	@Override
 	public List<ApprovalProgressMonthly> getProgress(List<String> targetEmployeeIds, ClosureMonth closureMonth) {
-		
+
 		return pub.getApprovalProgress(targetEmployeeIds, closureMonth).stream()
 				.map(p -> convert(p))
 				.collect(toList());
 	}
-	
+
 	private static ApprovalProgressMonthly convert(MonthlyApprovalProgress published) {
 		return new ApprovalProgressMonthly(
 				published.getEmployeeId(),
 				published.getDate(),
 				MAP_PROGRESS.get(published.getProgress()));
 	}
-	
+
 	private static final Map<ApprovalProgress.Progress, RecordApprovalProgress.Progress> MAP_PROGRESS;
 	static {
 		MAP_PROGRESS = new HashMap<>();
@@ -50,7 +52,7 @@ public class ApprovalStatusMonthlyAdapterImpl implements ApprovalStatusMonthlyAd
 	@Override
 	public List<ApprovalSubjectiveMonthlyOnWorkflow> getSubjective(
 			String subjectEmployeeId, List<String> targetEmployeeIds, ClosureMonth closureMonth) {
-		
+
 		return pub.getSubjectiveStatus(subjectEmployeeId, targetEmployeeIds, closureMonth).stream()
 				.map(p -> convert(p))
 				.collect(toList());

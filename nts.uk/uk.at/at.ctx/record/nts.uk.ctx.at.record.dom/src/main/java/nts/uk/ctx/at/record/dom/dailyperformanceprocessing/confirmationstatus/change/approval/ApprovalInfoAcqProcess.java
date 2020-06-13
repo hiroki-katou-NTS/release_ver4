@@ -18,18 +18,8 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 public class ApprovalInfoAcqProcess {
 	@Inject
 	private ApprovalStatusInfoEmp approvalStatusInfoEmp;
-	
+
 	public List<ConfirmInfoResult> getApprovalInfoAcp(String companyId, String empTarget, List<String> employeeIds,
-			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt) {
-		if (periodOpt.isPresent()) {
-			return processModeAll(companyId, empTarget, employeeIds, periodOpt, yearMonthOpt);
-		} else {
-			return processModeAll(companyId, empTarget, employeeIds, periodOpt, yearMonthOpt);
-		}
-
-	}
-
-	private List<ConfirmInfoResult> processModeAll(String companyId, String empTarget, List<String> employeeIds,
 			Optional<DatePeriod> periodOpt, Optional<YearMonth> yearMonthOpt) {
 		if (employeeIds.size() == 1) {
 			return approvalStatusInfoEmp.approvalStatusInfoOneEmp(companyId, empTarget, employeeIds.get(0), periodOpt, yearMonthOpt, false);

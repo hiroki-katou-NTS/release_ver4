@@ -2,26 +2,27 @@ package nts.uk.ctx.at.record.dom.workrecord.approval.common;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import nts.uk.ctx.at.record.dom.adapter.workflow.service.enums.ApprovalStatusForEmployee;
 
 @RequiredArgsConstructor
 public abstract class RecordApprovalSubjective<T> {
-	
+
 	/** 対象の社員ID */
 	@Getter
 	private final String targetEmployeeId;
-	
+
 	/** 年月日や年月など */
 	@Getter
 	private final T date;
-	
+
 	/** 承認ルートの進捗状況 */
 	@Getter
 	private final RecordApprovalProgress.Progress progress;
-	
+
 	/** 承認者から見た状況 */
 	@Getter
 	private final Subjective subjective;
-	
+
 	@RequiredArgsConstructor
 	public static class Subjective {
 
@@ -37,13 +38,27 @@ public abstract class RecordApprovalSubjective<T> {
 
 		/** 主体が解除できる */
 		private final boolean canRelease;
-		
+
 		public boolean canExecute() {
 			return canExecute;
 		}
-		
+
 		public boolean canRelease() {
 			return canRelease;
 		}
+	}
+
+	public ApprovalStatusForEmployee approvalStatusForEmployee() {
+		switch (progress) {
+			case UNAPPROVED:
+				return ApprovalStatusForEmployee.UNAPPROVED;
+			case APPROVED:
+				return ApprovalStatusForEmployee.APPROVED;
+			case APPROVING:
+				return ApprovalStatusForEmployee.DURING_APPROVAL;
+			default:
+				break;
+		}
+		return null;
 	}
 }

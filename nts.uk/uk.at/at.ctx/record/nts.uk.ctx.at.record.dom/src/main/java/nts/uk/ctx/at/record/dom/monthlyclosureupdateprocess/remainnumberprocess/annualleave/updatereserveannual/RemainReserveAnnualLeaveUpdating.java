@@ -16,10 +16,11 @@ import nts.uk.ctx.at.shared.dom.remainingnumber.reserveleave.empinfo.grantremain
 import nts.uk.ctx.at.shared.dom.remainingnumber.reserveleave.empinfo.grantremainingdata.ReserveLeaveGrantTimeRemainHistoryData;
 import nts.uk.ctx.at.shared.dom.remainingnumber.reserveleave.empinfo.grantremainingdata.RsvLeaveGrantRemainHistRepository;
 import nts.uk.ctx.at.shared.dom.remainingnumber.reserveleave.empinfo.grantremainingdata.RsvLeaveGrantTimeRemainHistRepository;
+import nts.uk.ctx.at.shared.dom.workrule.closure.ClosureId;
 import nts.uk.shr.com.context.AppContexts;
 
 /**
- * 
+ *
  * @author HungTT - <<Work>> 積立年休残数更新
  *
  */
@@ -38,7 +39,7 @@ public class RemainReserveAnnualLeaveUpdating {
 
 	/**
 	 * 積立年休残数更新
-	 * 
+	 *
 	 * @param output
 	 * @param period
 	 * @param empId
@@ -55,7 +56,7 @@ public class RemainReserveAnnualLeaveUpdating {
 
 	/**
 	 * 積休付与残数データの更新
-	 * 
+	 *
 	 * @param output
 	 * @param period
 	 * @param empId
@@ -67,7 +68,9 @@ public class RemainReserveAnnualLeaveUpdating {
 		if (!listData.isEmpty()) {
 			for (ReserveLeaveGrantRemainingData data : listData) {
 				ReserveLeaveGrantRemainHistoryData hist = new ReserveLeaveGrantRemainHistoryData(data,
-						period.getYearMonth(), period.getClosureId(), period.getClosureDate());
+						period.getClosureMonth().yearMonth(),
+						ClosureId.valueOf(period.getClosureMonth().closureId()),
+						period.getClosureMonth().closureDate());
 				reserveLeaveRemainHistRepo.addOrUpdate(hist, cid);
 			}
 		}
@@ -80,7 +83,7 @@ public class RemainReserveAnnualLeaveUpdating {
 
 	/**
 	 * 積立年休付与残数データ更新処理
-	 * 
+	 *
 	 * @param ReserveLeaveInfo
 	 */
 	private void updateProcess(ReserveLeaveInfo info) {
@@ -116,7 +119,7 @@ public class RemainReserveAnnualLeaveUpdating {
 
 	/**
 	 * 積休付与時点残数履歴データ更新処理
-	 * 
+	 *
 	 * @param listInfo
 	 */
 	private void updateRsvLeaveTimeRemainHistProcess(List<ReserveLeaveInfo> listInfo) {
@@ -137,7 +140,7 @@ public class RemainReserveAnnualLeaveUpdating {
 	 */
 	private void deleteDataAfterCurrentMonth(AggrPeriodEachActualClosure period, String empId) {
 		reserveLeaveRemainRepo.deleteAfterDate(empId, period.getPeriod().start());
-		reserveLeaveRemainHistRepo.delete(empId, period.getYearMonth(), period.getClosureId(), period.getClosureDate());
+		reserveLeaveRemainHistRepo.delete(empId, period.getClosureMonth().yearMonth(), ClosureId.valueOf(period.getClosureMonth().closureId()), period.getClosureMonth().closureDate());
 		rsvLeaveTimeRemainHistRepo.deleteAfterDate(empId, period.getPeriod().start());
 	}
 

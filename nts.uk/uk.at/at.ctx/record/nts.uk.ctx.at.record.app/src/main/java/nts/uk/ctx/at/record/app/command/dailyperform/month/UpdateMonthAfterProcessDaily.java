@@ -24,7 +24,7 @@ import nts.uk.shr.com.context.AppContexts;
 
 /**
  * @author thanhnx
- * 
+ *
  */
 @Stateless
 public class UpdateMonthAfterProcessDaily {
@@ -34,7 +34,7 @@ public class UpdateMonthAfterProcessDaily {
 
 	@Inject
 	private AggregateSpecifiedDailys aggregateSpecifiedDailys;
-	
+
 	public List<IntegrationOfMonthly> updateMonth(List<DailyRecordWorkCommand> commandNew,
 			List<IntegrationOfDaily> domainDailyNew, Optional<IntegrationOfMonthly> monthlyWork, UpdateMonthDailyParam month) {
 		String companyId = AppContexts.user().companyId();
@@ -55,7 +55,10 @@ public class UpdateMonthAfterProcessDaily {
 				needCalc.getRight().forEach(data -> {
 					//月の実績を集計する
 					aggregateSpecifiedDailys.algorithm(companyId, key,
-							data.getYearMonth(), data.getClosureId(), data.getClosureDate(), data.getPeriod(), Optional.empty(), domainDailyGroupEmp,
+							data.getClosureMonth().yearMonth(),
+							ClosureId.valueOf(data.getClosureMonth().closureId()),
+							data.getClosureMonth().closureDate(),
+							data.getPeriod(), Optional.empty(), domainDailyGroupEmp,
 							monthlyWork).ifPresent(monthDomain -> {
 								monthDomain.getAffiliationInfo().ifPresent(a -> a.setVersion(month.getVersion()));
 								monthDomain.getAttendanceTime().ifPresent(a -> a.setVersion(month.getVersion()));
@@ -69,7 +72,7 @@ public class UpdateMonthAfterProcessDaily {
 		for(IntegrationOfMonthly monthResult : result){
 			if(!monthResult.getEmployeeMonthlyPerErrorList().isEmpty()) return result;
 		}
-		
+
 		if (!domainDailyNew.isEmpty()) {
 			//updateAllDomainMonthService.insertUpdateAll(result);
 		} else if (monthlyWork.isPresent()) {
@@ -87,7 +90,7 @@ public class UpdateMonthAfterProcessDaily {
 			if(monthDomainOpt.isPresent() && !monthDomainOpt.get().getEmployeeMonthlyPerErrorList().isEmpty()) return result;
 			//updateAllDomainMonthService.insertUpdateAll(Arrays.asList(monthDomainOpt.get()));
 		}
-		
+
 		return result;
 	}
 

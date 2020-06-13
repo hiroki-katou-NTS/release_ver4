@@ -27,15 +27,31 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 public class CheckDailyPerError {
 	@Inject
 	private EmployeeDailyPerErrorRepository employeeDailyPerErrorRepo;
-	
+
 	@Inject
 	private DailyPerformanceScreenRepo dailyPerformanceScreenRepo;
-	
-	public List<CheckEmpEralOuput> checkDailyPerError(List<String> listEmployeeId,DatePeriod period,List<AffCompanyHistImport> listAffCompanyHistImport, List<MonthlyModifyResultDto> monthlyResults) {
+
+	public List<CheckEmpEralOuput> checkDailyPerError(List<String> listEmployeeId,DatePeriod period,List<AffCompanyHistImport> listAffCompanyHistImport, List<MonthlyModifyResultDto> monthlyResults,
+			List<EmployeeDailyPerError> cachedErrorData) {
 		String companyId = AppContexts.user().companyId();
-		
+
 		//ドメインモデル「社員の日別実績エラー一覧」をすべて取得する
-		List<EmployeeDailyPerError> data = employeeDailyPerErrorRepo.getByEmpIDAndPeriod(listEmployeeId, period);
+		List<EmployeeDailyPerError> data;
+		if (cachedErrorData != null && cachedErrorData.size() > 0) {
+			data = cachedErrorData.stream()
+				.filter(cache -> listEmployeeId.contains(cache.getEmployeeID()) && period.contains(cache.getDate()))
+				.collect(Collectors.toList());
+			List<String> noCachedList = listEmployeeId.stream()
+					.filter(sid -> !data.stream().anyMatch(d -> sid.equals(d.getEmployeeID())))
+					.collect(Collectors.toList());
+			List<EmployeeDailyPerError> addList = employeeDailyPerErrorRepo.getByEmpIDAndPeriod(noCachedList, period);
+			data.addAll(addList);
+			cachedErrorData.addAll(addList);
+		}
+		else {
+			data = employeeDailyPerErrorRepo.getByEmpIDAndPeriod(listEmployeeId, period);
+			cachedErrorData.addAll(data);
+		}
 		List<EmployeeDailyPerError> listDataNew = new ArrayList<>();
 		List<EmployeeDailyPerError> listDataAfterFilter = new ArrayList<>();
 		if(data.isEmpty())
@@ -63,9 +79,9 @@ public class CheckDailyPerError {
 						listDataAfterFilter.add(empError);
 					});
 		}
-		
+
 		List<CheckEmpEralOuput> listCheckEmpEralOuput = new ArrayList<>();
-		
+
 		//対応するドメインモデル「勤務実績のエラーアラーム」をすべて取得する
 		List<DPErrorSettingDto> lstErrorSetting = this.dailyPerformanceScreenRepo
 				.getErrorSetting(companyId, listDataAfterFilter.stream().map(e -> e.getErrorAlarmWorkRecordCode().v()).collect(Collectors.toList()), true, true, false);
@@ -82,7 +98,7 @@ public class CheckDailyPerError {
 							checkAlarm = true;
 						}
 					}
-				}	
+				}
 			}
 			if(checkError == true && checkAlarm == true) {
 				listCheckEmpEralOuput.add(new CheckEmpEralOuput(empID, TypeErrorAlarm.ERROR_ALARM));
@@ -94,7 +110,7 @@ public class CheckDailyPerError {
 				listCheckEmpEralOuput.add(new CheckEmpEralOuput(empID, TypeErrorAlarm.NO_ERROR_ALARM));
 			}
 		}
-		
+
 		return listCheckEmpEralOuput;
 	}
 
