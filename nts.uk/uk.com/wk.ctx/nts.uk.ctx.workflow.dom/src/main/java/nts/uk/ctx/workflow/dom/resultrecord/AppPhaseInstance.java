@@ -3,8 +3,11 @@ package nts.uk.ctx.workflow.dom.resultrecord;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApprovalForm;
+import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance.AppRootInstanceBuilder;
+import nts.uk.shr.com.time.calendar.period.DatePeriod;
 /**
  * 承認フェーズ中間データ
  * @author Doan Duy Hung
@@ -12,6 +15,7 @@ import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApprovalForm;
  */
 @AllArgsConstructor
 @Getter
+@Builder
 public class AppPhaseInstance {
 	
 	/**

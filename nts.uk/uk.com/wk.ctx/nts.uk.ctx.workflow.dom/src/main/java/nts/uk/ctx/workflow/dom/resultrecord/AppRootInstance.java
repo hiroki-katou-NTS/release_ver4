@@ -2,6 +2,7 @@ package nts.uk.ctx.workflow.dom.resultrecord;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,7 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Builder
 public class AppRootInstance {
 	
 	/**

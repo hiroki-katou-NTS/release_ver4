@@ -1,11 +1,13 @@
 package nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import nts.arc.time.GeneralDate;
 
 @AllArgsConstructor
 @Getter
+@Builder
 public class FullJoinAppApvState {
 	private String companyID;
 	private String appID;
