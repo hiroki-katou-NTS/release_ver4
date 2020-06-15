@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import lombok.SneakyThrows;
@@ -13,6 +14,7 @@ import nts.arc.layer.infra.data.database.DatabaseProduct;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApprovalForm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppFrameInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppPhaseInstance;
@@ -470,7 +472,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 
 	@Override
 	@SneakyThrows
-	public List<AppRootInstance> findAppRootInstanceDailyNewestBelow(String employeeID, GeneralDate date) {
+	public Optional<AppRootInstance> findAppRootInstanceDailyNewestBelow(String employeeID, GeneralDate date) {
+		List<AppRootInstance> listAppRootInstance = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append(" select top 1 rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, ph.PHASE_ORDER, ph.APPROVAL_FORM, fr.FRAME_ORDER, fr.CONFIRM_ATR, ap.APPROVER_CHILD_ID ");
 		sql.append(" from WWFDT_DAY_APV_RT_INSTANCE as rt" );
@@ -499,10 +502,15 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql.append(" where rt.EMPLOYEE_ID = @sid ");
 		sql.append(" and rt.START_DATE <= @date ");
 
-		return toDomain(jdbcProxy().query(sql.toString())
+		listAppRootInstance = toDomain(jdbcProxy().query(sql.toString())
 				.paramString("sid", employeeID)
 				.paramDate("date", date)
 				.getList(rec -> createFullJoinAppRootInstanceDaily(rec)));
+		if (CollectionUtil.isEmpty(listAppRootInstance)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(listAppRootInstance.get(0));
+		}
 	}
 
 
@@ -634,7 +642,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 
 	@Override
 	@SneakyThrows
-	public List<AppRootInstance> findAppRootInstanceMonthlyNewestBelow(String employeeID, GeneralDate date) {
+	public Optional<AppRootInstance> findAppRootInstanceMonthlyNewestBelow(String employeeID, GeneralDate date) {
+		List<AppRootInstance> listAppRootInstance = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append(" select top 1 rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, ph.PHASE_ORDER, ph.APPROVAL_FORM, fr.FRAME_ORDER, fr.CONFIRM_ATR, ap.APPROVER_CHILD_ID ");
 		sql.append(" from WWFDT_MON_APV_RT_INSTANCE as rt" );
@@ -662,11 +671,16 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 
 		sql.append(" where rt.EMPLOYEE_ID = @sid ");
 		sql.append(" and rt.START_DATE <= @date ");
-
-		return toDomain(jdbcProxy().query(sql.toString())
+		
+		listAppRootInstance = toDomain(jdbcProxy().query(sql.toString())
 				.paramString("sid", employeeID)
 				.paramDate("date", date)
 				.getList(rec -> createFullJoinAppRootInstanceMonthly(rec)));
+		if (CollectionUtil.isEmpty(listAppRootInstance)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(listAppRootInstance.get(0));
+		}
 	}
 
 	

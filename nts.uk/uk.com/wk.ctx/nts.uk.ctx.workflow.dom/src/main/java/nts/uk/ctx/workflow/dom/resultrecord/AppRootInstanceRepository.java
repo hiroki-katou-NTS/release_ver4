@@ -2,8 +2,6 @@ package nts.uk.ctx.workflow.dom.resultrecord;
 
 import java.util.List;
 import java.util.Optional;
-
-import lombok.SneakyThrows;
 import nts.arc.time.GeneralDate;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
@@ -52,7 +50,7 @@ public interface AppRootInstanceRepository {
 	 * @param date
 	 * @return
 	 */
-	public List<AppRootInstance> findAppRootInstanceDailyNewestBelow(String employeeID, GeneralDate date);
+	public Optional<AppRootInstance> findAppRootInstanceDailyNewestBelow(String employeeID, GeneralDate date);
 
 	/**
 	 * 承認者の日別実績の承認ルートを取得する（単一日）
@@ -110,7 +108,7 @@ public interface AppRootInstanceRepository {
 	 * @param date
 	 * @return
 	 */
-	public List<AppRootInstance> findAppRootInstanceMonthlyNewestBelow(String employeeID, GeneralDate date);
+	public Optional<AppRootInstance> findAppRootInstanceMonthlyNewestBelow(String employeeID, GeneralDate date);
 
 	/**
 	 * 承認者の月別実績の承認ルートを取得する（単一日）

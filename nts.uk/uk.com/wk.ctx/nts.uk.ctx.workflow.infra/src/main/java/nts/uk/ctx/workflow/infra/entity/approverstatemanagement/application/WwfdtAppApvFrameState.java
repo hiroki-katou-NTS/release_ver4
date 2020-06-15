@@ -69,7 +69,6 @@ public class WwfdtAppApvFrameState extends UkJpaEntity {
 		return frame;
 	}
 
-	
 	public static WwfdtAppApvFrameState fromDomain(String companyID, String employeeID, GeneralDate appDate, ApprovalFrame approvalFrame){
 		return WwfdtAppApvFrameState.builder()
 				.wwfdpAppApvFrameStatePK(new WwfdpAppApvFrameStatePK(

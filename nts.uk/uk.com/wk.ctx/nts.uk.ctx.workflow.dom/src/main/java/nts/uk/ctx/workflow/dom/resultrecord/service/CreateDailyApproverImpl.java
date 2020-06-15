@@ -93,10 +93,10 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 		// ドメインモデル「承認ルート中間データ」を削除する
 		appRootInstanceRepository.deleteDailyFromDate(employeeID, recordDate);		
 		// ドメインモデル「承認ルート中間データ」を取得する
-		List<AppRootInstance> opAppRootInstanceConflict = appRootInstanceRepository.findAppRootInstanceDailyNewestBelow(employeeID, recordDate);
-		if(!opAppRootInstanceConflict.isEmpty()){
+		Optional<AppRootInstance> opAppRootInstanceConflict = appRootInstanceRepository.findAppRootInstanceDailyNewestBelow(employeeID, recordDate);
+		if(opAppRootInstanceConflict.isPresent()){
 			// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」を取得する
-			AppRootInstance appRootInstanceConflict = opAppRootInstanceConflict.get(0);
+			AppRootInstance appRootInstanceConflict = opAppRootInstanceConflict.get();
 			// output．承認ルートの内容は取得したドメインモデル「承認ルート中間データ」を比較する
 			boolean isSame = compareAppRootContent(appRootInstanceConflict, appRootInstance)
 					&& compareAppRootContent(appRootInstance, appRootInstanceConflict);
@@ -114,7 +114,7 @@ public class CreateDailyApproverImpl implements CreateDailyApprover {
 
 				appRootInstance.setDatePeriod(new DatePeriod(startHistDate, GeneralDate.fromString("9999/12/31", "yyyy/MM/dd")));
 				// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」を取得する
-				AppRootInstance appRootInstNewest = appRootInstanceRepository.findAppRootInstanceDailyNewestBelow(employeeID, startHistDate).get(0);
+				AppRootInstance appRootInstNewest = appRootInstanceRepository.findAppRootInstanceDailyNewestBelow(employeeID, startHistDate).get();
 				// 履歴期間．開始日が一番新しいドメインモデル「承認ルート中間データ」をUPDATEする
 				DatePeriod oldPeriod = appRootInstNewest.getDatePeriod();
 				appRootInstNewest.setDatePeriod(new DatePeriod(oldPeriod.start(), startHistDate.addDays(-1)));
