@@ -3,6 +3,7 @@ package nts.uk.ctx.workflow.dom.resultrecord;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalBehaviorAtr;
@@ -13,6 +14,7 @@ import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalBehaviorAtr;
  */
 @AllArgsConstructor
 @Getter
+@Builder
 public class AppPhaseConfirm {
 	
 	/**

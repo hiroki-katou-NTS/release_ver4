@@ -1,6 +1,5 @@
 package nts.uk.ctx.workflow.infra.repository.resultrecord;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
@@ -44,51 +42,67 @@ import nts.uk.shr.com.time.closure.ClosureMonth;
 public class JpaAppRootConfirmRepository extends JpaRepository implements AppRootConfirmRepository {
 
 	private List<AppRootConfirm> toDomain(List<FullJoinAppRootConfirm> listFullJoin) {
-		return listFullJoin.stream().collect(Collectors.groupingBy(FullJoinAppRootConfirm::getRootID)).entrySet()
-				.stream().map(x -> {
-					String companyID = x.getValue().get(0).getCompanyID();
-					String rootID = x.getValue().get(0).getRootID();
-					GeneralDate recordDate = x.getValue().get(0).getRecordDate();
-					RecordRootType rootType = EnumAdaptor.valueOf(x.getValue().get(0).getRootType(),
-							RecordRootType.class);
-					String employeeID = x.getValue().get(0).getEmployeeID();
-					Integer yearMonth = x.getValue().get(0).getYearMonth();
-					Integer closureID = x.getValue().get(0).getClosureID();
-					Integer closureDay = x.getValue().get(0).getClosureDay();
-					Integer lastDayFlg = x.getValue().get(0).getLastDayFlg();
-					List<AppPhaseConfirm> listAppPhase = new ArrayList<>();
-					Optional<FullJoinAppRootConfirm> isEmptyConfirm = x.getValue().stream()
-							.filter(y1 -> y1.getPhaseOrder() == null).findAny();
-
-					if (!isEmptyConfirm.isPresent()) {
-						listAppPhase = x.getValue().stream()
-								.collect(Collectors.groupingBy(FullJoinAppRootConfirm::getPhaseOrder)).entrySet()
-								.stream().map(y -> {
-									Integer phaseOrder = y.getValue().get(0).getPhaseOrder();
-									ApprovalBehaviorAtr appPhaseAtr = EnumAdaptor
-											.valueOf(y.getValue().get(0).getAppPhaseAtr(), ApprovalBehaviorAtr.class);
-									List<AppFrameConfirm> listAppFrame = y.getValue().stream()
-											.collect(Collectors.groupingBy(FullJoinAppRootConfirm::getFrameOrder))
-											.entrySet().stream().map(z -> {
-												Integer frameOrder = z.getValue().get(0).getFrameOrder();
-												Optional<String> frameApproverID = Optional
-														.ofNullable(z.getValue().get(0).getApproverID());
-												Optional<String> representerID = Optional
-														.ofNullable(z.getValue().get(0).getRepresenterID());
-												GeneralDate approvalDate = z.getValue().get(0).getApprovalDate();
-												return new AppFrameConfirm(frameOrder, frameApproverID, representerID,
-														approvalDate);
-											}).collect(Collectors.toList());
-									return new AppPhaseConfirm(phaseOrder, appPhaseAtr, listAppFrame);
-								}).collect(Collectors.toList());
-					}
-					return new AppRootConfirm(rootID, companyID, employeeID, recordDate, rootType, listAppPhase,
-							yearMonth == null ? Optional.empty() : Optional.of(new YearMonth(yearMonth)),
-							closureID == null ? Optional.empty() : Optional.of(closureID),
-							closureDay == null ? Optional.empty()
-									: Optional.of(new ClosureDate(closureDay, lastDayFlg == 1)));
+		return listFullJoin.stream().collect(Collectors.groupingBy(r -> r.getRootID()))
+				.entrySet().stream()
+				.map(r -> {
+					String appId = r.getKey();
+					List<FullJoinAppRootConfirm> fullJoinsInRoot = r.getValue();
+					return toDomainRoot(appId, fullJoinsInRoot);
 				}).collect(Collectors.toList());
 	}
+	
+	private static AppRootConfirm toDomainRoot(String appId, List<FullJoinAppRootConfirm> fullJoinInRoot) {
+		FullJoinAppRootConfirm first = fullJoinInRoot.get(0);
+		List<AppPhaseConfirm> phases = fullJoinInRoot.stream().collect(Collectors.groupingBy(p -> p.getPhaseOrder()))
+				.entrySet().stream()
+				.map(p -> {
+					Integer phaseOrder = p.getKey();
+					List<FullJoinAppRootConfirm> fullJoinInPhase = p.getValue();
+					return toDomainPhase(appId, phaseOrder, fullJoinInPhase);
+				}).collect(Collectors.toList());
+		return AppRootConfirm.builder()
+				.rootID(first.getRootID())
+				.companyID(first.getCompanyID())
+				.employeeID(first.getEmployeeID())
+				.recordDate(first.getRecordDate())
+				.rootType(RecordRootType.of(first.getRootType()))
+				.listAppPhase(phases)
+				.yearMonth(Optional.ofNullable(first.getYearMonth()).map(ym -> YearMonth.of(ym)))
+				.closureID(Optional.ofNullable(first.getClosureID()))
+				.closureDate(Optional.ofNullable(first.getClosureDay()).map(cd -> new ClosureDate(cd, first.getLastDayFlg() == 1)))
+				.build();
+	}
+	
+	
+	private static AppPhaseConfirm toDomainPhase(String appId, Integer phaseOrder, List<FullJoinAppRootConfirm> fullJoinInPhase) {
+		FullJoinAppRootConfirm first = fullJoinInPhase.get(0);
+		List<AppFrameConfirm> frames = fullJoinInPhase.stream().collect(Collectors.groupingBy(f -> f.getFrameOrder()))
+				.entrySet().stream()
+				.map(f -> {
+					Integer frameOrder = f.getKey();
+					List<FullJoinAppRootConfirm> fullJoinInFrame = f.getValue();
+					return toDomainFrame(appId, phaseOrder, frameOrder, fullJoinInFrame);
+				}).collect(Collectors.toList());
+		return AppPhaseConfirm.builder()
+				.phaseOrder(first.getPhaseOrder())
+				.appPhaseAtr(ApprovalBehaviorAtr.of(first.getAppPhaseAtr()))
+				.listAppFrame(frames)				
+				.build();
+				
+	}
+
+	
+	
+	private static AppFrameConfirm toDomainFrame(String appId, Integer phaseOrder, Integer frameOrder, List<FullJoinAppRootConfirm> fullJoinInFrame) {
+		FullJoinAppRootConfirm first = fullJoinInFrame.get(0);
+		return AppFrameConfirm.builder()
+				.frameOrder(first.getFrameOrder())
+				.approverID(Optional.ofNullable(first.getApproverID()))
+				.representerID(Optional.ofNullable(first.getRepresenterID()))
+				.approvalDate(first.getApprovalDate())
+				.build();
+	}
+
 
 	private FullJoinAppRootConfirm createFullJoinAppRootConfirmDaily(NtsResultRecord rs) {
 		return new FullJoinAppRootConfirm(

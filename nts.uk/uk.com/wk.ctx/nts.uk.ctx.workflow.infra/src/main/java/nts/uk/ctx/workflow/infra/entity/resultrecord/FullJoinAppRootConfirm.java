@@ -1,6 +1,7 @@
 package nts.uk.ctx.workflow.infra.entity.resultrecord;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import nts.arc.time.GeneralDate;
 /**
@@ -10,6 +11,7 @@ import nts.arc.time.GeneralDate;
  */
 @AllArgsConstructor
 @Getter
+@Builder
 public class FullJoinAppRootConfirm {
 	private String rootID;
 	private String companyID;
