@@ -4,11 +4,13 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
+@Getter
 public class WwfdpApvApproveInstanceMonthlyPK {
 	
 	@Column(name="ROOT_ID")

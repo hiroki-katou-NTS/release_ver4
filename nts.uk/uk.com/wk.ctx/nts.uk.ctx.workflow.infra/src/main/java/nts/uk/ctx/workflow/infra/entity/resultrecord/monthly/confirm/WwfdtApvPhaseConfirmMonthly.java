@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nts.uk.ctx.workflow.dom.resultrecord.AppPhaseConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
@@ -19,6 +20,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @Entity
 @Table(name="WWFDT_MON_APV_PH_CONFIRM")
 @Builder
+@Getter
 public class WwfdtApvPhaseConfirmMonthly extends UkJpaEntity {
 	
 	@EmbeddedId

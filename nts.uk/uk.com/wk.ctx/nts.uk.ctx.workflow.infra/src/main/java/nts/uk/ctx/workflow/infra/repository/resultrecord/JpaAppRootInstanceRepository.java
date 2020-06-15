@@ -41,71 +41,11 @@ import nts.uk.shr.com.time.calendar.period.DatePeriod;
 public class JpaAppRootInstanceRepository extends JpaRepository implements AppRootInstanceRepository {
 		
 	private WwfdtApvRootInstanceDaily fromDomainDaily(AppRootInstance appRootInstance){
-		return new WwfdtApvRootInstanceDaily(
-				appRootInstance.getRootID(), 
-				appRootInstance.getCompanyID(), 
-				appRootInstance.getEmployeeID(), 
-				appRootInstance.getDatePeriod().start(), 
-				appRootInstance.getDatePeriod().end(), 
-				appRootInstance.getListAppPhase().stream()
-					.map(x -> new WwfdtApvPhaseInstanceDaily(
-							new WwfdpApvPhaseInstanceDailyPK(appRootInstance.getRootID(), x.getPhaseOrder()), 
-							appRootInstance.getCompanyID(), 
-							appRootInstance.getEmployeeID(), 
-							appRootInstance.getDatePeriod().start(), 
-							x.getApprovalForm().value, 
-							x.getListAppFrame().stream()
-								.map(y -> new WwfdtApvFrameInstanceDaily(
-										new WwfdpApvFrameInstanceDailyPK(appRootInstance.getRootID(), x.getPhaseOrder(), y.getFrameOrder()), 
-										appRootInstance.getCompanyID(), 
-										appRootInstance.getEmployeeID(), 
-										appRootInstance.getDatePeriod().start(), 
-										y.isConfirmAtr() ? 1 : 0,
-												y.getListApprover().stream()
-												.map(z -> new WwfdtApvApproveInstanceDaily(
-														new WwfdpApvApproveInstanceDailyPK(
-																appRootInstance.getRootID(), 
-																x.getPhaseOrder(), 
-																y.getFrameOrder(), 
-																z),
-														appRootInstance.getCompanyID(), 
-														appRootInstance.getEmployeeID(), 
-														appRootInstance.getDatePeriod().start())
-												).collect(Collectors.toList())))
-							.collect(Collectors.toList())))
-					.collect(Collectors.toList()));
+		return WwfdtApvRootInstanceDaily.fromDomain(appRootInstance);
 	}
 	
 	private WwfdtApvRootInstanceMonthly fromDomainMonthly(AppRootInstance appRootInstance){
-		return new WwfdtApvRootInstanceMonthly(
-				appRootInstance.getRootID(), 
-				appRootInstance.getCompanyID(), 
-				appRootInstance.getEmployeeID(), 
-				appRootInstance.getDatePeriod().start(), 
-				appRootInstance.getDatePeriod().end(), 
-				appRootInstance.getListAppPhase().stream()
-					.map(x -> new WwfdtApvPhaseInstanceMonthly(
-							new WwfdpApvPhaseInstanceMonthlyPK(
-									appRootInstance.getRootID(), 
-									x.getPhaseOrder()), 
-							x.getApprovalForm().value, 
-							x.getListAppFrame().stream()
-								.map(y -> new WwfdtApvFrameInstanceMonthly(
-										new WwfdpApvFrameInstanceMonthlyPK(
-												appRootInstance.getRootID(), 
-												x.getPhaseOrder(), 
-												y.getFrameOrder()), 
-										y.isConfirmAtr() ? 1 : 0,
-										y.getListApprover().stream()
-											.map(z -> new WwfdtApvApproveInstanceMonthly(
-													new WwfdpApvApproveInstanceMonthlyPK(
-															appRootInstance.getRootID(), 
-															x.getPhaseOrder(), 
-															y.getFrameOrder(), 
-															z))
-											).collect(Collectors.toList())))
-							.collect(Collectors.toList())))
-					.collect(Collectors.toList()));
+		return WwfdtApvRootInstanceMonthly.fromDomain(appRootInstance);
 	}
 	
 	private static List<AppRootInstance> toDomain(List<FullJoinAppRootInstance> listFullJoin){
