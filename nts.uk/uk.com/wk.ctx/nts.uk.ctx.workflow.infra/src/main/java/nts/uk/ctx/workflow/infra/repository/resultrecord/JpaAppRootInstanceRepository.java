@@ -4,15 +4,16 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import lombok.SneakyThrows;
-import nts.arc.enums.EnumAdaptor;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.database.DatabaseProduct;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
 import nts.arc.time.GeneralDate;
+import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.workflow.dom.approvermanagement.workroot.ApprovalForm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppFrameInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppPhaseInstance;
@@ -47,34 +48,63 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		return WwfdtApvRootInstanceMonthly.fromDomain(appRootInstance);
 	}
 	
-	private List<AppRootInstance> toDomain(List<FullJoinAppRootInstance> listFullJoin){
-		return listFullJoin.stream().collect(Collectors.groupingBy(FullJoinAppRootInstance::getRootID))
-						.entrySet().stream().map(x -> {
-					FullJoinAppRootInstance first = x.getValue().get(0);
-					String companyID =  first.getCompanyID();
-					String rootID = first.getRootID();
-					GeneralDate startDate = first.getStartDate();
-					GeneralDate endDate = first.getEndDate();
-					RecordRootType rootType = EnumAdaptor.valueOf(first.getRootType(), RecordRootType.class);
-					String employeeID = first.getEmployeeID();
-					List<AppPhaseInstance> listAppPhase = x.getValue().stream()
-							.collect(Collectors.groupingBy(FullJoinAppRootInstance::getPhaseOrder))
-							.entrySet().stream().map(y -> {
-						Integer phaseOrder  = y.getValue().get(0).getPhaseOrder();
-						ApprovalForm approvalForm =  EnumAdaptor.valueOf(y.getValue().get(0).getApprovalForm(), ApprovalForm.class);
-						List<AppFrameInstance> listAppFrame = y.getValue().stream()
-								.collect(Collectors.groupingBy(FullJoinAppRootInstance::getFrameOrder))
-								.entrySet().stream().map(z -> { 
-							Integer frameOrder = z.getValue().get(0).getFrameOrder();
-							Boolean confirmAtr = z.getValue().get(0).getConfirmAtr()==1?true:false;
-							List<String> approvalIDLst = z.getValue().stream().map(t -> t.getApproverChildID()).collect(Collectors.toList());
-							return new AppFrameInstance(frameOrder, confirmAtr, approvalIDLst);
-						}).collect(Collectors.toList());
-						return new AppPhaseInstance(phaseOrder, approvalForm, listAppFrame);
-					}).collect(Collectors.toList());
-					return new AppRootInstance(rootID, companyID, employeeID, new DatePeriod(startDate, endDate), rootType, listAppPhase);
+	private static List<AppRootInstance> toDomain(List<FullJoinAppRootInstance> listFullJoin){
+		return listFullJoin.stream().collect(Collectors.groupingBy(r -> r.getRootID()))
+				.entrySet().stream()
+				.map(r -> {
+					String appId = r.getKey();
+					List<FullJoinAppRootInstance> fullJoinsInRoot = r.getValue();
+					return toDomainRoot(appId, fullJoinsInRoot);
 				}).collect(Collectors.toList());
 	}
+	
+	private static AppRootInstance toDomainRoot(String appId, List<FullJoinAppRootInstance> fullJoinsInRoot) {
+		FullJoinAppRootInstance first = fullJoinsInRoot.get(0);
+		List<AppPhaseInstance> phases = fullJoinsInRoot.stream().collect(Collectors.groupingBy(p -> p.getPhaseOrder()))
+				.entrySet().stream()
+				.map(p -> {
+					Integer phaseOrder = p.getKey();
+					List<FullJoinAppRootInstance> fullJoinInPhase = p.getValue();
+					return toDomainPhase(appId, phaseOrder, fullJoinInPhase);
+				}).collect(Collectors.toList());
+		return AppRootInstance.builder()
+				.rootID(appId)
+				.companyID(first.getCompanyID())
+				.employeeID(first.getEmployeeID())
+				.datePeriod(new DatePeriod(first.getStartDate(), first.getEndDate()))
+				.rootType(RecordRootType.of(first.getRootType()))
+				.listAppPhase(phases)
+				.build();
+	}
+
+	private static AppPhaseInstance toDomainPhase(String appId, Integer phaseOrder, List<FullJoinAppRootInstance> fullJoinInPhase) {
+		FullJoinAppRootInstance first = fullJoinInPhase.get(0);
+		List<AppFrameInstance> frames = fullJoinInPhase.stream().collect(Collectors.groupingBy(f ->f.getFrameOrder()))
+				.entrySet().stream()
+				.map(f -> {
+					Integer frameOrder = f.getKey();
+					List<FullJoinAppRootInstance> fullJoinInFrame = f.getValue();
+					return toDomainFrame(appId, phaseOrder, frameOrder, fullJoinInFrame);
+				}).collect(Collectors.toList());
+		return AppPhaseInstance.builder()
+				.phaseOrder(phaseOrder)
+				.approvalForm(ApprovalForm.of(first.getApprovalForm()))
+				.listAppFrame(frames)
+				.build();
+	}
+
+	private static AppFrameInstance toDomainFrame(String appId, Integer phaseOrder, Integer frameOrder, List<FullJoinAppRootInstance> fullJoinInFrame) {
+		FullJoinAppRootInstance first = fullJoinInFrame.get(0);
+		List<String> approvers = fullJoinInFrame.stream()
+				.map(a -> a.getApproverChildID())
+				.collect(Collectors.toList());
+		return AppFrameInstance.builder()
+				.frameOrder(first.getFrameOrder())
+				.confirmAtr(first.getConfirmAtr() == 1 ? true:false)
+				.listApprover(approvers)
+				.build();
+	}
+
 	
 	@SneakyThrows
 	private FullJoinAppRootInstance createFullJoinAppRootInstanceDaily(NtsResultRecord rs){
@@ -410,7 +440,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 
 	@Override
 	@SneakyThrows
-	public List<AppRootInstance> findAppRootInstanceDailyNewestBelow(String employeeID, GeneralDate date) {
+	public Optional<AppRootInstance> findAppRootInstanceDailyNewestBelow(String employeeID, GeneralDate date) {
+		List<AppRootInstance> listAppRootInstance = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append(" select top 1 rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, ph.PHASE_ORDER, ph.APPROVAL_FORM, fr.FRAME_ORDER, fr.CONFIRM_ATR, ap.APPROVER_CHILD_ID ");
 		sql.append(" from WWFDT_DAY_APV_RT_INSTANCE as rt" );
@@ -439,10 +470,15 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		sql.append(" where rt.EMPLOYEE_ID = @sid ");
 		sql.append(" and rt.START_DATE <= @date ");
 
-		return toDomain(jdbcProxy().query(sql.toString())
+		listAppRootInstance = toDomain(jdbcProxy().query(sql.toString())
 				.paramString("sid", employeeID)
 				.paramDate("date", date)
 				.getList(rec -> createFullJoinAppRootInstanceDaily(rec)));
+		if (CollectionUtil.isEmpty(listAppRootInstance)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(listAppRootInstance.get(0));
+		}
 	}
 
 
@@ -574,7 +610,8 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 
 	@Override
 	@SneakyThrows
-	public List<AppRootInstance> findAppRootInstanceMonthlyNewestBelow(String employeeID, GeneralDate date) {
+	public Optional<AppRootInstance> findAppRootInstanceMonthlyNewestBelow(String employeeID, GeneralDate date) {
+		List<AppRootInstance> listAppRootInstance = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append(" select top 1 rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.START_DATE, rt.END_DATE, ph.PHASE_ORDER, ph.APPROVAL_FORM, fr.FRAME_ORDER, fr.CONFIRM_ATR, ap.APPROVER_CHILD_ID ");
 		sql.append(" from WWFDT_MON_APV_RT_INSTANCE as rt" );
@@ -602,11 +639,16 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 
 		sql.append(" where rt.EMPLOYEE_ID = @sid ");
 		sql.append(" and rt.START_DATE <= @date ");
-
-		return toDomain(jdbcProxy().query(sql.toString())
+		
+		listAppRootInstance = toDomain(jdbcProxy().query(sql.toString())
 				.paramString("sid", employeeID)
 				.paramDate("date", date)
 				.getList(rec -> createFullJoinAppRootInstanceMonthly(rec)));
+		if (CollectionUtil.isEmpty(listAppRootInstance)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(listAppRootInstance.get(0));
+		}
 	}
 
 	

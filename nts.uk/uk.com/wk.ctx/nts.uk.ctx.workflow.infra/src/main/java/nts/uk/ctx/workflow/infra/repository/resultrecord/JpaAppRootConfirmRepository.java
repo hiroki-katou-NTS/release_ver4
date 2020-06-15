@@ -19,24 +19,15 @@ import nts.arc.time.GeneralDate;
 import nts.arc.time.YearMonth;
 import nts.gul.collection.CollectionUtil;
 import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalBehaviorAtr;
-import nts.uk.ctx.workflow.dom.approverstatemanagement.ApprovalRootState;
 import nts.uk.ctx.workflow.dom.resultrecord.AppFrameConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppPhaseConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmRepository;
 import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
-import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvApproverState;
-import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvFrameState;
-import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvPhaseState;
-import nts.uk.ctx.workflow.infra.entity.approverstatemanagement.application.WwfdtAppApvRootState;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.FullJoinAppRootConfirm;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.confirm.WwfdpApvFrameConfirmDailyPK;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.confirm.WwfdpApvPhaseConfirmDailyPK;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.confirm.WwfdtApvFrameConfirmDaily;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.confirm.WwfdtApvPhaseConfirmDaily;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.confirm.WwfdtApvRootConfirmDaily;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.confirm.WwfdpApvFrameConfirmMonthlyPK;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.confirm.WwfdpApvPhaseConfirmMonthlyPK;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.confirm.WwfdtApvFrameConfirmMonthly;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.confirm.WwfdtApvPhaseConfirmMonthly;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.confirm.WwfdtApvRootConfirmMonthly;
@@ -196,11 +187,39 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	public void delete(AppRootConfirm appRootConfirm) {
 		// 日次の場合
 		if (appRootConfirm.getRootType().value == 1) {
-			this.commandProxy().remove(WwfdtApvRootConfirmDaily.class, appRootConfirm.getRootID());
+			String sqlDelete = " delete "
+					+ " from WWFDT_DAY_APV_RT_CONFIRM as rt "
+					+ " inner join WWFDT_DAY_APV_PH_CONFIRM as ph "
+					+ " on rt.ROOT_ID = ph.ROOT_ID "
+					+ " inner join WWFDT_DAY_APV_FR_CONFIRM as fr "
+					+ " on ph.ROOT_ID = fr.ROOT_ID "
+					+ " and ph.PHASE_ORDER = fr.PHASE_ORDER "
+					+ " left join WWFDT_DAY_APV_AP_CONFIRM as ap "
+					+ " on fr.ROOT_ID = ap.ROOT_ID "
+					+ " and fr.PHASE_ORDER = ap.PHASE_ORDER " 
+					+ " and fr.FRAME_ORDER = ap.FRAME_ORDER "
+					+ " where rt.ROOT_ID = @rootId ";
+
+			jdbcProxy().query(sqlDelete.toString())
+						.paramString("rootId", appRootConfirm.getRootID());
 		}
 		// 月次の場合
 		else {
-			this.commandProxy().remove(WwfdtApvRootConfirmMonthly.class, appRootConfirm.getRootID());
+			String sqlDelete = " delete "
+					+ " from WWFDT_MON_APV_RT_CONFIRM as rt "
+					+ " inner join WWFDT_MON_APV_PH_CONFIRM as ph "
+					+ " on rt.ROOT_ID = ph.ROOT_ID "
+					+ " inner join WWFDT_MON_APV_FR_CONFIRM as fr "
+					+ " on ph.ROOT_ID = fr.ROOT_ID "
+					+ " and ph.PHASE_ORDER = fr.PHASE_ORDER "
+					+ " left join WWFDT_MON_APV_AP_CONFIRM as ap "
+					+ " on fr.ROOT_ID = ap.ROOT_ID "
+					+ " and fr.PHASE_ORDER = ap.PHASE_ORDER " 
+					+ " and fr.FRAME_ORDER = ap.FRAME_ORDER "
+					+ " where rt.ROOT_ID = @rootId ";
+
+			jdbcProxy().query(sqlDelete.toString())
+						.paramString("rootId", appRootConfirm.getRootID());
 		}
 	}
 

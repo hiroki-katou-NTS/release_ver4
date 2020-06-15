@@ -74,9 +74,10 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				.map(p -> {
 					Integer phaseOrder = p.getKey();
 					List<FullJoinAppApvState> fullJoinInPhase = p.getValue();
-					return toDomainphase(appId, phaseOrder, fullJoinInPhase);
+					return toDomainPhase(appId, phaseOrder, fullJoinInPhase);
 				}).collect(Collectors.toList());
 		return ApprovalRootState.builder()
+				.CompanyID(firstApp.getCompanyID())
 				.rootStateID(appId)
 				.employeeID(firstApp.getEmployeeID())
 				.approvalRecordDate(firstApp.getAppDate())
@@ -84,8 +85,7 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				.build();
 	}
 
-	private static ApprovalPhaseState toDomainphase(String appId, Integer phaseOrder,
-			List<FullJoinAppApvState> fullJoinInPhase) {
+	private static ApprovalPhaseState toDomainPhase(String appId, Integer phaseOrder, List<FullJoinAppApvState> fullJoinInPhase) {
 		FullJoinAppApvState firstPhase = fullJoinInPhase.get(0);
 		List<ApprovalFrame> frames = fullJoinInPhase.stream().collect(Collectors.groupingBy(f ->f.getFrameOrder()))
 				.entrySet().stream()
@@ -103,11 +103,10 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 				.build();
 	}
 
-	private static ApprovalFrame toDomainFrame(String appId, Integer phaseOrder, Integer frameOrder,
-			List<FullJoinAppApvState> fullJoinInFrame) {
+	private static ApprovalFrame toDomainFrame(String appId, Integer phaseOrder, Integer frameOrder, List<FullJoinAppApvState> fullJoinInFrame) {
 		FullJoinAppApvState firstFrame = fullJoinInFrame.get(0);
 		List<ApproverState> approvers = fullJoinInFrame.stream().collect(Collectors.groupingBy(a -> a.getApproverChildID()))
-				 .entrySet().stream()
+				.entrySet().stream()
 				.map(a -> {
 					List<FullJoinAppApvState> fullJoinInApprover = a.getValue();
 					return toDomainApprover(appId, phaseOrder, frameOrder,
