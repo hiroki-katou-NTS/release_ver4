@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
@@ -18,6 +19,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @Entity
 @Table(name="WWFDT_MON_APV_RT_CONFIRM")
 @Builder
+@Getter
 public class WwfdtApvRootConfirmMonthly extends UkJpaEntity {
 	
 	@Id

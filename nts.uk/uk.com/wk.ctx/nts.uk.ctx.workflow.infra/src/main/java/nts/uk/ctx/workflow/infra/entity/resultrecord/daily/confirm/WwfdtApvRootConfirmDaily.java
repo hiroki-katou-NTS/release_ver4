@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
@@ -19,6 +20,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @Entity
 @Table(name="WWFDT_DAY_APV_RT_CONFIRM")
 @Builder
+@Getter
 public class WwfdtApvRootConfirmDaily extends UkJpaEntity {
 	@Id
 	@Column(name="ROOT_ID")

@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.resultrecord.AppFrameConfirm;
@@ -22,6 +23,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @Entity
 @Table(name="WWFDT_MON_APV_FR_CONFIRM")
 @Builder
+@Getter
 public class WwfdtApvFrameConfirmMonthly extends UkJpaEntity {
 	
 	@EmbeddedId
