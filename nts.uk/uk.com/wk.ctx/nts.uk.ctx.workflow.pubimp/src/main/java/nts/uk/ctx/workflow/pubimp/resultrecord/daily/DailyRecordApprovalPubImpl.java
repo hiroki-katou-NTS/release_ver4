@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -16,6 +18,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import lombok.val;
+import nts.arc.layer.app.cache.DateHistoryCache;
 import nts.arc.layer.app.cache.KeyDateHistoryCache;
 import nts.arc.layer.app.cache.NestedMapCache;
 import nts.arc.time.GeneralDate;
@@ -24,6 +27,7 @@ import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirm;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootConfirmRepository;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
 import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstanceRepository;
+import nts.uk.ctx.workflow.dom.resultrecord.RecordRootType;
 import nts.uk.ctx.workflow.dom.resultrecord.status.daily.GetRouteConfirmStatusDailyApprover;
 import nts.uk.ctx.workflow.dom.resultrecord.status.daily.GetRouteConfirmStatusDailyTarget;
 import nts.uk.ctx.workflow.dom.resultrecord.status.daily.RouteConfirmStatusDaily;
@@ -100,11 +104,55 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 		
 		public RequireGetSubjectiveStatus(
 				String approverEmployeeId, List<String> targetEmployeeIds, GeneralDate date) {
+			
+			DatePeriod period = new DatePeriod(date, date);
+			loadCache(approverEmployeeId, targetEmployeeIds, period);
+			
 		}
 		
 		public RequireGetSubjectiveStatus(
 				String approverEmployeeId, List<String> employetargetEmployeeIdseId, DatePeriod period) {
+			loadCache(approverEmployeeId, employetargetEmployeeIdseId, period);
+		}
+		
+		private void loadCache(String approverEmployeeId, List<String> targetEmployeeIds, DatePeriod period) {
+			//cacheInstance読み込み
+			// TODO:加藤君のRepositoryに差し替え
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findByApproverEmployeePeriod(
+					companyId, approverEmployeeId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY).stream()
+						.collect(Collectors.toList());
+
+			Map<String, List<DateHistoryCache.Entry<AppRootInstance>>> dataInstance = new HashMap<>();
+			for (AppRootInstance approuteInstance : approuteInstancelist) {
+				if (!dataInstance.containsKey(approuteInstance.getEmployeeID())) {
+					dataInstance.put(approuteInstance.getEmployeeID(), Arrays.asList(DateHistoryCache.Entry.of(period, approuteInstance)));
+				}
+				else {
+					dataInstance.get(approuteInstance.getEmployeeID()).add(DateHistoryCache.Entry.of(period, approuteInstance));
+				}
+			}
 			
+			cacheInstance = KeyDateHistoryCache.loaded(dataInstance);
+			
+			//cacheConfirm読み込み
+			// TODO:加藤君のRepositoryに差し替え
+			List<AppRootConfirm> approuteConfirmlist = appRootConfirmRepository.findByEmpDate(
+					companyId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY).stream()
+						.collect(Collectors.toList());
+
+			Map<String, Map<GeneralDate, AppRootConfirm>> dataConfirm = new HashMap<String, Map<GeneralDate, AppRootConfirm>>();
+			for (AppRootConfirm approuteConfirm : approuteConfirmlist) {
+				if (!dataConfirm.containsKey(approuteConfirm.getEmployeeID())) {
+					Map<GeneralDate, AppRootConfirm> data = new TreeMap<GeneralDate, AppRootConfirm>() {{ 
+						put (approuteConfirm.getRecordDate(), approuteConfirm); }};
+					dataConfirm.put (approuteConfirm.getEmployeeID(), data); 
+				}
+				else {
+					dataConfirm.get(approuteConfirm.getEmployeeID()).put(approuteConfirm.getRecordDate(), approuteConfirm);
+				}
+			}
+			
+			cacheConfirm = NestedMapCache.preloadedAll(dataConfirm);
 		}
 
 		@Override
@@ -114,14 +162,22 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 			val cached = cacheInstance.get(targetEmployeeId, date);
 			if (cached.isPresent()) return cached;
 			
-//			return appRootInstanceRepository.findByEmpDate(companyID, employeeID, recordDate, rootType);
-			return null;
+			// TODO
+			return appRootInstanceRepository.findByApproverEmployeePeriod(
+					companyId, approverEmployeeId, Arrays.asList(targetEmployeeId), new DatePeriod(date, date), RecordRootType.CONFIRM_WORK_BY_DAY)
+					.stream().findFirst();
+			//return null;
 		}
 
 		@Override
 		public Optional<AppRootConfirm> getAppRootConfirmsDaily(String targetEmployeeId, GeneralDate date) {
 			// TODO Auto-generated method stub
-			return null;
+
+			val cached = cacheConfirm.get(targetEmployeeId, date);
+			if (cached.isPresent()) return cached;
+
+			// TODO:加藤君のRepositoryに差し替え
+			return appRootConfirmRepository.findByEmpDate(companyId, targetEmployeeId, date, RecordRootType.CONFIRM_WORK_BY_DAY);
 		}
 
 		private List<String> cacheReprentRequesterIdsDaily = null;
@@ -151,7 +207,7 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 	@Override
 	public List<DailyApprovalProgress> getApprovalProgress(List<String> targetEmployeeIds, DatePeriod period) {
 		
-		val require = new RequireGetApprovalProgressTarget();
+		val require = new RequireGetApprovalProgressTarget(targetEmployeeIds, period);
 		
 		List<DailyApprovalProgress> results = new ArrayList<>();
 		
@@ -183,16 +239,75 @@ public class DailyRecordApprovalPubImpl implements DailyRecordApprovalPub {
 	
 	class RequireGetApprovalProgressTarget implements GetRouteConfirmStatusDailyTarget.Require {
 
+		private final String companyId = AppContexts.user().companyId();
+
+		private KeyDateHistoryCache<String, AppRootInstance> cacheInstance;
+		private NestedMapCache<String, GeneralDate, AppRootConfirm> cacheConfirm;
+		
+		public RequireGetApprovalProgressTarget(
+				List<String> targetEmployeeIds, DatePeriod period) {
+
+			loadCache(targetEmployeeIds, period);
+		}
+
+		private void loadCache(List<String> targetEmployeeIds, DatePeriod period) {
+			//cacheInstance読み込み
+			// TODO:加藤君のRepositoryに差し替え
+			List<AppRootInstance> approuteInstancelist = appRootInstanceRepository.findByEmpLstPeriod(
+					companyId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY).stream()
+						.collect(Collectors.toList());
+
+			Map<String, List<DateHistoryCache.Entry<AppRootInstance>>> dataInstance = new HashMap<>();
+			for (AppRootInstance approuteInstance : approuteInstancelist) {
+				if (!dataInstance.containsKey(approuteInstance.getEmployeeID())) {
+					dataInstance.put(approuteInstance.getEmployeeID(), Arrays.asList(DateHistoryCache.Entry.of(period, approuteInstance)));
+				}
+				else {
+					dataInstance.get(approuteInstance.getEmployeeID()).add(DateHistoryCache.Entry.of(period, approuteInstance));
+				}
+			}
+			
+			cacheInstance = KeyDateHistoryCache.loaded(dataInstance);
+			
+			//cacheConfirm読み込み
+			// TODO:加藤君のRepositoryに差し替え
+			List<AppRootConfirm> approuteConfirmlist = appRootConfirmRepository.findByEmpDate(
+					companyId, targetEmployeeIds, period, RecordRootType.CONFIRM_WORK_BY_DAY).stream()
+						.collect(Collectors.toList());
+
+			Map<String, Map<GeneralDate, AppRootConfirm>> dataConfirm = new HashMap<String, Map<GeneralDate, AppRootConfirm>>();
+			for (AppRootConfirm approuteConfirm : approuteConfirmlist) {
+				if (!dataConfirm.containsKey(approuteConfirm.getEmployeeID())) {
+					Map<GeneralDate, AppRootConfirm> data = new TreeMap<GeneralDate, AppRootConfirm>() {{ 
+						put (approuteConfirm.getRecordDate(), approuteConfirm); }};
+					dataConfirm.put (approuteConfirm.getEmployeeID(), data); 
+				}
+				else {
+					dataConfirm.get(approuteConfirm.getEmployeeID()).put(approuteConfirm.getRecordDate(), approuteConfirm);
+				}
+			}
+
+			cacheConfirm = NestedMapCache.preloadedAll(dataConfirm);
+		}
+		
 		@Override
 		public Optional<AppRootInstance> getAppRootInstancesDaily(String targetEmployeeId, GeneralDate date) {
-			// TODO Auto-generated method stub
-			return null;
+			val cached = cacheInstance.get(targetEmployeeId, date);
+			if (cached.isPresent()) return cached;
+			
+			// TODO:加藤君のRepositoryに差し替え
+			return appRootInstanceRepository.findByEmpDate(companyId, targetEmployeeId, date, RecordRootType.CONFIRM_WORK_BY_DAY);
+			
 		}
 
 		@Override
 		public Optional<AppRootConfirm> getAppRootConfirmsDaily(String targetEmployeeId, GeneralDate date) {
-			// TODO Auto-generated method stub
-			return null;
+			
+			val cached = cacheConfirm.get(targetEmployeeId, date);
+			if (cached.isPresent()) return cached;
+
+			// TODO:加藤君のRepositoryに差し替え
+			return appRootConfirmRepository.findByEmpDate(companyId, targetEmployeeId, date, RecordRootType.CONFIRM_WORK_BY_DAY);
 		}
 		
 	}
