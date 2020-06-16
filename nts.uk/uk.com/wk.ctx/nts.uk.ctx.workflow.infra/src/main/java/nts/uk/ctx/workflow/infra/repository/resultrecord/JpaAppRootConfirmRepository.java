@@ -202,14 +202,16 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 	private static final List<String> DELETE_DAILY_TABLES = Arrays.asList(
 			"delete from WWFDT_DAY_APV_RT_CONFIRM",
 			"delete from WWFDT_DAY_APV_PH_CONFIRM",
-			"delete from WWFDT_DAY_APV_FR_CONFIRM"
+			"delete from WWFDT_DAY_APV_FR_CONFIRM",
+			"delete from WWFDT_DAY_APV_AP_CONFIRM"
 	);
-
 	private static final List<String> DELETE_MONTHLY_TABLES = Arrays.asList(
 			"delete from WWFDT_MON_APV_RT_CONFIRM",
 			"delete from WWFDT_MON_APV_PH_CONFIRM",
-			"delete from WWFDT_MON_APV_FR_CONFIRM"
+			"delete from WWFDT_MON_APV_FR_CONFIRM",
+			"delete from WWFDT_MON_APV_AP_CONFIRM"
 	);
+	
 	
 	@Override
 	public void delete(AppRootConfirm appRootConfirm) {
