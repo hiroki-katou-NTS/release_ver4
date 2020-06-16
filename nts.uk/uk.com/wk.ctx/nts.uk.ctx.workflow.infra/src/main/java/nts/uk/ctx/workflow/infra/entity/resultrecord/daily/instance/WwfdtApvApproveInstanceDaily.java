@@ -1,5 +1,8 @@
 package nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -8,7 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
-import nts.uk.ctx.workflow.dom.resultrecord.AppFrameInstance;
+import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 @AllArgsConstructor
@@ -33,6 +36,18 @@ public class WwfdtApvApproveInstanceDaily extends UkJpaEntity {
 	@Override
 	protected Object getKey() {
 		return pk;
+	}
+	
+	public static List<WwfdtApvApproveInstanceDaily> fromDomain(AppRootInstance root) {
+		List<WwfdtApvApproveInstanceDaily> approver = new ArrayList<>();
+		root.getListAppPhase().forEach(p -> {
+			p.getListAppFrame().forEach(f -> {
+				f.getListApprover().forEach(a -> {
+					approver.add(fromDomain(root.getRootID(), p.getPhaseOrder(), f.getFrameOrder(), a, root.getCompanyID(), root.getEmployeeID(), root.getDatePeriod().start()));
+				});
+			});
+		});
+		return approver;
 	}
 	
 	public static WwfdtApvApproveInstanceDaily fromDomain(String rootID, Integer phaseOrder,

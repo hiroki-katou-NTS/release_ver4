@@ -2,7 +2,6 @@ package nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;

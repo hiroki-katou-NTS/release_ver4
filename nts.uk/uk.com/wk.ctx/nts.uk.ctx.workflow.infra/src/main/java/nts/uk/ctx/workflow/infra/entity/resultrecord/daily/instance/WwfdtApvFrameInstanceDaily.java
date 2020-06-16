@@ -1,18 +1,18 @@
 package nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.JoinTable;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nts.arc.time.GeneralDate;
 import nts.uk.ctx.workflow.dom.resultrecord.AppFrameInstance;
+import nts.uk.ctx.workflow.dom.resultrecord.AppRootInstance;
 import nts.uk.shr.infra.data.entity.UkJpaEntity;
 
 @AllArgsConstructor
@@ -44,8 +44,17 @@ public class WwfdtApvFrameInstanceDaily extends UkJpaEntity {
 		return pk;
 	}
 	
-	public static WwfdtApvFrameInstanceDaily fromDomain(String rootID, int phaseOrder,
-			String companyID, String employeeID, GeneralDate startDate,
+	public static List<WwfdtApvFrameInstanceDaily> fromDomain(AppRootInstance root) {
+		List<WwfdtApvFrameInstanceDaily> frame = new ArrayList<>();
+		root.getListAppPhase().forEach(p -> {
+			p.getListAppFrame().forEach(f -> {
+				frame.add(fromDomain(root.getRootID(), p.getPhaseOrder(), root.getCompanyID(), root.getEmployeeID(), root.getDatePeriod().start(), f));
+			});
+		});
+		return frame;
+	}
+
+	public static WwfdtApvFrameInstanceDaily fromDomain(String rootID, int phaseOrder, String companyID, String employeeID, GeneralDate startDate,
 			AppFrameInstance instance) {
 		return new WwfdtApvFrameInstanceDaily(
 				new WwfdpApvFrameInstanceDailyPK(rootID, phaseOrder, instance.getFrameOrder()), 

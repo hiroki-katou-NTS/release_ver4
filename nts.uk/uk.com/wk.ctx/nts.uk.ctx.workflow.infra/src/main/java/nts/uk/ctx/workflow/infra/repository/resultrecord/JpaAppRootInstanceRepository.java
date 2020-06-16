@@ -25,16 +25,10 @@ import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvRoot
 import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvPhaseInstanceDaily;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvFrameInstanceDaily;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdtApvApproveInstanceDaily;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdpApvPhaseInstanceDailyPK;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdpApvFrameInstanceDailyPK;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.daily.instance.WwfdpApvApproveInstanceDailyPK;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvRootInstanceMonthly;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvPhaseInstanceMonthly;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvFrameInstanceMonthly;
 import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdtApvApproveInstanceMonthly;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdpApvPhaseInstanceMonthlyPK;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdpApvFrameInstanceMonthlyPK;
-import nts.uk.ctx.workflow.infra.entity.resultrecord.monthly.instance.WwfdpApvApproveInstanceMonthlyPK;
 import nts.uk.shr.com.time.calendar.period.DatePeriod;
 
 @Stateless
@@ -180,11 +174,29 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		// 日次の場合
 		if (appRootInstance.getRootType().value == 1) {
 			this.commandProxy().insert(fromDomainDaily(appRootInstance));
+			WwfdtApvPhaseInstanceDaily.fromDomain(appRootInstance).forEach(p -> {
+				this.commandProxy().insert(p);
+			});
+			WwfdtApvFrameInstanceDaily.fromDomain(appRootInstance).forEach(f -> {
+				this.commandProxy().insert(f);
+			});	
+			WwfdtApvApproveInstanceDaily.fromDomain(appRootInstance).forEach(a -> {
+				this.commandProxy().insert(a);
+			});
 			this.getEntityManager().flush();
 		}
 		// 月次の場合
 		else {
 			this.commandProxy().insert(fromDomainMonthly(appRootInstance));
+			WwfdtApvPhaseInstanceMonthly.fromDomain(appRootInstance).forEach(p -> {
+				this.commandProxy().insert(p);
+			});
+			WwfdtApvFrameInstanceMonthly.fromDomain(appRootInstance).forEach(f -> {
+				this.commandProxy().insert(f);
+			});	
+			WwfdtApvApproveInstanceMonthly.fromDomain(appRootInstance).forEach(a -> {
+				this.commandProxy().insert(a);
+			});
 			this.getEntityManager().flush();
 		}
 	}
@@ -194,122 +206,116 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 		// 日次の場合
 		if (appRootInstance.getRootType().value == 1) {
 			this.commandProxy().update(fromDomainDaily(appRootInstance));
+			WwfdtApvPhaseInstanceDaily.fromDomain(appRootInstance).forEach(p -> {
+				this.commandProxy().update(p);
+			});
+			WwfdtApvFrameInstanceDaily.fromDomain(appRootInstance).forEach(f -> {
+				this.commandProxy().update(f);
+			});	
+			WwfdtApvApproveInstanceDaily.fromDomain(appRootInstance).forEach(a -> {
+				this.commandProxy().update(a);
+			});
 			this.getEntityManager().flush();
 		}
 		// 月次の場合
 		else {
 			this.commandProxy().update(fromDomainMonthly(appRootInstance));
+			WwfdtApvPhaseInstanceMonthly.fromDomain(appRootInstance).forEach(p -> {
+				this.commandProxy().update(p);
+			});
+			WwfdtApvFrameInstanceMonthly.fromDomain(appRootInstance).forEach(f -> {
+				this.commandProxy().update(f);
+			});	
+			WwfdtApvApproveInstanceMonthly.fromDomain(appRootInstance).forEach(a -> {
+				this.commandProxy().update(a);
+			});
 			this.getEntityManager().flush();
 		}
 	}
+
+	private final String SQL_DELETE = " delete from ";
 
 	@Override
 	public void delete(AppRootInstance appRootInstance) {
+		
 		// 日次の場合
 		if (appRootInstance.getRootType().value == 1) {
-			this.commandProxy().remove(WwfdtApvRootInstanceDaily.class, appRootInstance.getRootID());
-			this.getEntityManager().flush();
+			List<String> deleteTable = new ArrayList<String>();
+			deleteTable.add("WWFDT_DAY_APV_RT_INSTANCE");
+			deleteTable.add("WWFDT_DAY_APV_PH_INSTANCE");
+			deleteTable.add("WWFDT_DAY_APV_FR_INSTANCE");
+			deleteTable.add("WWFDT_DAY_APV_AP_INSTANCE");
+			
+			deleteTable.forEach(targetTable -> {
+				StringBuilder sql = new StringBuilder();
+				sql.append(SQL_DELETE);
+				sql.append(targetTable);
+				sql.append(" where ROOT_ID = @rootId ");
+
+				jdbcProxy().query(sql.toString())
+					.paramString("rootId", appRootInstance.getRootID());
+			});
 		}
 		// 月次の場合
 		else {
-			this.commandProxy().remove(WwfdtApvRootInstanceMonthly.class, appRootInstance.getRootID());
-			this.getEntityManager().flush();
+			List<String> deleteTable = new ArrayList<String>();
+			deleteTable.add("WWFDT_MON_APV_RT_INSTANCE");
+			deleteTable.add("WWFDT_MON_APV_PH_INSTANCE");
+			deleteTable.add("WWFDT_MON_APV_FR_INSTANCE");
+			deleteTable.add("WWFDT_MON_APV_AP_INSTANCE");
+			
+			deleteTable.forEach(targetTable -> {
+				StringBuilder sql = new StringBuilder();
+				sql.append(SQL_DELETE);
+				sql.append(targetTable);
+				sql.append(" where ROOT_ID = @rootId ");
+
+				jdbcProxy().query(sql.toString())
+					.paramString("rootId", appRootInstance.getRootID());
+			});
 		}
 	}
 	
-	
-	
-	private final String DELETE_DAILY
-			= " delete "
-			+ " from WWFDT_DAY_APV_RT_INSTANCE as rt" 
-			+ " inner join WWFDT_DAY_APV_PH_INSTANCE as ph"
-			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_DAY_APV_FR_INSTANCE as fr"
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " inner join WWFDT_DAY_APV_AP_INSTANCE as ap"
-			+ " on fr.ROOT_ID = ap.ROOT_ID" 
-			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
-			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
-
-	private final String DELETE_DAILY_SQL
-			= " delete "
-			+ " from WWFDT_DAY_APV_RT_INSTANCE as rt" 
-			+ " inner join WWFDT_DAY_APV_PH_INSTANCE as ph"
-			+ " with (index(WWFDI_DAY_APV_PH_INSTANCE)) " 
-			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_DAY_APV_FR_INSTANCE as fr"
-			+ " with (index(WWFDI_DAY_APV_RT_INSTANCE)) " 
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " inner join WWFDT_DAY_APV_AP_INSTANCE as ap"
-			+ " with (index(WWFDI_DAY_APV_AP_INSTANCE)) " 
-			+ " on fr.ROOT_ID = ap.ROOT_ID" 
-			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
-			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
-
 	@Override
 	public void deleteDailyFromDate(String employeeID, GeneralDate date) {
-		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(DELETE_DAILY_SQL);
-		} else {
-			sql.append(DELETE_DAILY);
-		}
-		sql.append(" where rt.EMPLOYEE_ID = @sid ");
-		sql.append(" and rt.START_DATE >= @date ");
+		List<String> deleteTable = new ArrayList<String>();
+		deleteTable.add("WWFDT_DAY_APV_RT_INSTANCE");
+		deleteTable.add("WWFDT_DAY_APV_PH_INSTANCE");
+		deleteTable.add("WWFDT_DAY_APV_FR_INSTANCE");
+		deleteTable.add("WWFDT_DAY_APV_AP_INSTANCE");
+		
+		deleteTable.forEach(targetTable -> {
+			StringBuilder sql = new StringBuilder();
+			sql.append(SQL_DELETE);
+			sql.append(targetTable);
+			sql.append(" where EMPLOYEE_ID = @sid ");
+			sql.append(" and START_DATE >= @date ");
 
-		jdbcProxy().query(sql.toString())
-					.paramString("sid", employeeID)
-					.paramDate("date", date);
+			jdbcProxy().query(sql.toString())
+				.paramString("sid", employeeID)
+				.paramDate("date", date);
+		});
 	} 
-
-	
-	private final String DELETE_MONTHLY
-			= " delete "
-			+ " from WWFDT_MON_APV_RT_INSTANCE as rt" 
-			+ " inner join WWFDT_MON_APV_PH_INSTANCE as ph"
-			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_MON_APV_FR_INSTANCE as fr"
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " inner join WWFDT_MON_APV_AP_INSTANCE as ap"
-			+ " on fr.ROOT_ID = ap.ROOT_ID" 
-			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
-			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
-
-	private final String DELETE_MONTHLY_SQL
-			= " delete "
-			+ " from WWFDT_MON_APV_RT_INSTANCE as rt" 
-			+ " inner join WWFDT_MON_APV_PH_INSTANCE as ph"
-			+ " with (index(WWFDI_MON_APV_PH_INSTANCE)) " 
-			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_MON_APV_FR_INSTANCE as fr"
-			+ " with (index(WWFDI_MON_APV_RT_INSTANCE)) " 
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER"
-			+ " inner join WWFDT_MON_APV_AP_INSTANCE as ap"
-			+ " with (index(WWFDI_MON_APV_AP_INSTANCE)) " 
-			+ " on fr.ROOT_ID = ap.ROOT_ID" 
-			+ " and fr.PHASE_ORDER = ap.PHASE_ORDER" 
-			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER";
 
 	@Override
 	public void deleteMonthlyFromDate(String employeeID, GeneralDate date) {
-		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(DELETE_MONTHLY_SQL);
-		} else {
-			sql.append(DELETE_MONTHLY);
-		}
-		sql.append(" where rt.EMPLOYEE_ID = @sid ");
-		sql.append(" and rt.START_DATE >= @date ");
+		List<String> deleteTable = new ArrayList<String>();
+		deleteTable.add("WWFDT_MON_APV_RT_INSTANCE");
+		deleteTable.add("WWFDT_MON_APV_PH_INSTANCE");
+		deleteTable.add("WWFDT_MON_APV_FR_INSTANCE");
+		deleteTable.add("WWFDT_MON_APV_AP_INSTANCE");
+	
+		deleteTable.forEach(targetTable -> {
+			StringBuilder sql = new StringBuilder();
+			sql.append(SQL_DELETE);
+			sql.append(targetTable);
+			sql.append(" where rt.EMPLOYEE_ID = @sid ");
+			sql.append(" and rt.START_DATE >= @date ");
 
-		jdbcProxy().query(sql.toString())
-					.paramString("sid", employeeID)
-					.paramDate("date", date);		
+			jdbcProxy().query(sql.toString())
+				.paramString("sid", employeeID)
+				.paramDate("date", date);
+		});
 	}
 
 	
@@ -680,7 +686,7 @@ public class JpaAppRootInstanceRepository extends JpaRepository implements AppRo
 			+ " and fr.FRAME_ORDER = ap.FRAME_ORDER ";
 
 	private final String FIND_OFFICIAL_TARGET 
-			= " where ap.APPROVER_CHILD_ID = 'approverID'"
+			= " where ap.APPROVER_CHILD_ID = @approverID"
 			+ " and rt.END_DATE >= @startDate"
 			+ " and rt.START_DATE <= @endDate";
 	

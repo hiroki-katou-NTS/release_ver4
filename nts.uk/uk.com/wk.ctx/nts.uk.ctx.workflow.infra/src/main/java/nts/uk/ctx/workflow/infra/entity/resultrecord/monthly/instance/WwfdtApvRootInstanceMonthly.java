@@ -17,7 +17,7 @@ import nts.uk.shr.infra.data.entity.UkJpaEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="WWFDT_DAY_APV_RT_INSTANCE")
+@Table(name="WWFDT_MON_APV_RT_INSTANCE")
 @Getter
 public class WwfdtApvRootInstanceMonthly extends UkJpaEntity {
 	
@@ -53,7 +53,7 @@ public class WwfdtApvRootInstanceMonthly extends UkJpaEntity {
 				instance.getDatePeriod().end(), 
 				instance.getListAppPhase()
 					.stream()
-					.map(t -> WwfdtApvPhaseInstanceMonthly.fromDomain(instance.getRootID(),t))
+					.map(t -> WwfdtApvPhaseInstanceMonthly.fromDomain(instance.getRootID(), instance.getCompanyID(), instance.getEmployeeID(), instance.getDatePeriod().start(),t))
 					.collect(Collectors.toList())
 				);
 	}
