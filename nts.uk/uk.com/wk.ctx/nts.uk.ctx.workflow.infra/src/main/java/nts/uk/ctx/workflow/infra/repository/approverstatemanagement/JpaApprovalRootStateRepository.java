@@ -168,34 +168,19 @@ public class JpaApprovalRootStateRepository extends JpaRepository implements App
 		});
 	}
 	
+	private static List<String> DELETE_TABLE = Arrays.asList(
+			"delete from WWFDT_APP_APV_RT_STATE",
+			"delete from WWFDT_APP_APV_PH_STATE",
+			"delete from WWFDT_APP_APV_FR_STATE",
+			"delete from WWFDT_APP_APV_AP_STATE"
+	);
 	@Override
 	public void delete(String rootStateID) {
-		String sqlDelete = " delete "
-				+ " rt from WWFDT_APP_APV_RT_STATE as rt "
-				+ " inner join WWFDT_APP_APV_PH_STATE as ph "
-				+ " on rt.APP_ID = ph.APP_ID "
-				+ " inner join WWFDT_APP_APV_FR_STATE as fr "
-				+ " on ph.APP_ID = fr.APP_ID "
-				+ " and ph.PHASE_ORDER = fr.PHASE_ORDER "
-				+ " left join WWFDT_APP_APV_AP_STATE as ap "
-				+ " on fr.APP_ID = ap.APP_ID "
-				+ " and fr.PHASE_ORDER = ap.PHASE_ORDER " 
-				+ " and fr.FRAME_ORDER = ap.FRAME_ORDER "
-				+ " where rt.APP_ID = @appId ";
-
-		jdbcProxy().query(sqlDelete.toString())
-					.paramString("appId", rootStateID);
+		DELETE_TABLE.forEach(targetTable ->{
+			String sqlDelete = targetTable + " where rt.APP_ID = @appId ";
+			jdbcProxy().query(sqlDelete.toString()).paramString("appId", rootStateID);
+		});
 	}
-
-
-	
-	
-	
-
-
-
-	
-	
 	
 	private static final String FIND_APP_STATE 
 			= " select rt.CID, rt.APP_ID, rt.EMPLOYEE_ID, rt.APP_DATE, "
