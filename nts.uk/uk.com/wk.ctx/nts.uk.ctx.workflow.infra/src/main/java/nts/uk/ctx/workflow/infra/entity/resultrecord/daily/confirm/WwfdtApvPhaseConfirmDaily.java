@@ -8,6 +8,8 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,6 +42,7 @@ public class WwfdtApvPhaseConfirmDaily extends UkJpaEntity {
 	@Column(name="APP_PHASE_ATR")
 	private Integer appPhaseAtr;
 	
+	@Transient
 	public List<WwfdtApvFrameConfirmDaily> listWwfdtApvFrameConfirmDaily;
 
 	@Override
