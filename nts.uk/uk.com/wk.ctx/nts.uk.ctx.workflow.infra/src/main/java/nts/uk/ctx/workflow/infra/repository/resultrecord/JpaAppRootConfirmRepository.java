@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+
+import lombok.val;
 import nts.arc.layer.infra.data.JpaRepository;
 import nts.arc.layer.infra.data.jdbc.NtsResultSet.NtsResultRecord;
 import nts.arc.layer.infra.data.jdbc.NtsStatement;
@@ -197,126 +199,52 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		}
 	}
 
+	private static final List<String> DELETE_DAILY_TABLES = Arrays.asList(
+			"delete from WWFDT_DAY_APV_RT_CONFIRM",
+			"delete from WWFDT_DAY_APV_PH_CONFIRM",
+			"delete from WWFDT_DAY_APV_FR_CONFIRM"
+	);
+
+	private static final List<String> DELETE_MONTHLY_TABLES = Arrays.asList(
+			"delete from WWFDT_MON_APV_RT_CONFIRM",
+			"delete from WWFDT_MON_APV_PH_CONFIRM",
+			"delete from WWFDT_MON_APV_FR_CONFIRM"
+	);
+	
 	@Override
 	public void delete(AppRootConfirm appRootConfirm) {
-		// 日次の場合
-		if (appRootConfirm.getRootType().value == 1) {
-			String sqlDelete = " delete "
-					+ " from WWFDT_DAY_APV_RT_CONFIRM as rt "
-					+ " inner join WWFDT_DAY_APV_PH_CONFIRM as ph "
-					+ " on rt.ROOT_ID = ph.ROOT_ID "
-					+ " inner join WWFDT_DAY_APV_FR_CONFIRM as fr "
-					+ " on ph.ROOT_ID = fr.ROOT_ID "
-					+ " and ph.PHASE_ORDER = fr.PHASE_ORDER "
-					+ " left join WWFDT_DAY_APV_AP_CONFIRM as ap "
-					+ " on fr.ROOT_ID = ap.ROOT_ID "
-					+ " and fr.PHASE_ORDER = ap.PHASE_ORDER " 
-					+ " and fr.FRAME_ORDER = ap.FRAME_ORDER "
-					+ " where rt.ROOT_ID = @rootId ";
-
-			jdbcProxy().query(sqlDelete.toString())
-						.paramString("rootId", appRootConfirm.getRootID());
-		}
-		// 月次の場合
-		else {
-			String sqlDelete = " delete "
-					+ " from WWFDT_MON_APV_RT_CONFIRM as rt "
-					+ " inner join WWFDT_MON_APV_PH_CONFIRM as ph "
-					+ " on rt.ROOT_ID = ph.ROOT_ID "
-					+ " inner join WWFDT_MON_APV_FR_CONFIRM as fr "
-					+ " on ph.ROOT_ID = fr.ROOT_ID "
-					+ " and ph.PHASE_ORDER = fr.PHASE_ORDER "
-					+ " left join WWFDT_MON_APV_AP_CONFIRM as ap "
-					+ " on fr.ROOT_ID = ap.ROOT_ID "
-					+ " and fr.PHASE_ORDER = ap.PHASE_ORDER " 
-					+ " and fr.FRAME_ORDER = ap.FRAME_ORDER "
-					+ " where rt.ROOT_ID = @rootId ";
-
-			jdbcProxy().query(sqlDelete.toString())
-						.paramString("rootId", appRootConfirm.getRootID());
-		}
+		List<String> targetTables = appRootConfirm.getRootType().value == 1
+				?DELETE_DAILY_TABLES   //日次の場合
+				:DELETE_MONTHLY_TABLES;//月次の場合
+		delete(targetTables,appRootConfirm.getRootID());
 	}
 
-	private final String DELETE_DAILY
-			= " delete "
-			+ " from WWFDT_DAY_APV_RT_CONFIRM as rt" 
-			+ " inner join WWFDT_DAY_APV_PH_CONFIRM as ph"
-			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_DAY_APV_FR_CONFIRM as fr"
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
-
-	private final String DELETE_DAILY_SQL
-			= " delete "
-			+ " from WWFDT_DAY_APV_RT_CONFIRM as rt" 
-			+ " inner join WWFDT_DAY_APV_PH_CONFIRM as ph"
-			+ " with (index(WWFDI_DAY_APV_PH_CONFIRM)) " 
-			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " inner join WWFDT_DAY_APV_FR_CONFIRM as fr"
-			+ " with (index(WWFDI_DAY_APV_RT_CONFIRM)) " 
-			+ " on ph.ROOT_ID = fr.ROOT_ID" 
-			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
-	
+	private void delete(List<String> targetTables, String rootID) {
+		targetTables.forEach(table ->{
+			String sql = table + " where ROOT_ID = @rootId "; 
+			jdbcProxy().query(sql).paramString("rootId", rootID);				
+		});
+	}
 
 	@Override
 	public void deleteAppRootConfirmDaily(String employeeID, GeneralDate date) {
-		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(DELETE_DAILY_SQL);
-		} else {
-			sql.append(DELETE_DAILY);
-		}
-		sql.append(" where rt.EMPLOYEE_ID in @sid ");
-		sql.append(" and rt.RECORD_DATE = @date ");
-
-		jdbcProxy().query(sql.toString())
-				.paramString("sid", employeeID)
-				.paramDate("date", date);
+		findAppRootConfirmDaily(employeeID, date).ifPresent(result ->{
+			deleteAppRootConfirm(DELETE_DAILY_TABLES, result);
+		});
 	} 
 	
-	
-	private final String DELETE_MONTHLY
-	= " delete "
-	+ " from WWFDT_APP_MON_RT_CONFIRM as rt" 
-	+ " inner join WWFDT_APP_MON_PH_CONFIRM as ph"
-	+ " on rt.ROOT_ID = ph.ROOT_ID" 
-	+ " inner join WWFDT_APP_MON_FR_CONFIRM as fr"
-	+ " on ph.ROOT_ID = fr.ROOT_ID" 
-	+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
-
-	private final String DELETE_MONTHLY_SQL
-	= " delete "
-	+ " from WWFDT_MON_APV_RT_CONFIRM as rt" 
-	+ " inner join WWFDT_MON_APV_PH_CONFIRM as ph"
-	+ " with (index(WWFDI_MON_APV_PH_CONFIRM)) " 
-	+ " on rt.ROOT_ID = ph.ROOT_ID" 
-	+ " inner join WWFDT_MON_APV_FR_CONFIRM as fr"
-	+ " with (index(WWFDI_MON_APV_RT_CONFIRM)) " 
-	+ " on ph.ROOT_ID = fr.ROOT_ID" 
-	+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
-
 	@Override
 	public void deleteAppRootConfirmMonthly(String employeeID, ClosureMonth closureMonth) {
-		StringBuilder sql = new StringBuilder();
-		if (this.database().is(DatabaseProduct.MSSQLSERVER)) {
-			// SQLServerの場合の処理
-			sql.append(DELETE_MONTHLY_SQL);
-		} else {
-			sql.append(DELETE_MONTHLY);
-		}
-		sql.append(" where rt.EMPLOYEE_ID in @sid ");
-		sql.append(" and rt.YEARMONTH = @yearMonth ");
-		sql.append(" and rt.CLOSURE_ID = @closureId ");
-		sql.append(" and rt.CLOSURE_DAY = @closureDay ");
-		sql.append(" and rt.IS_LAST_DAY = @isLastDay ");
+		findAppRootConfirmMonthly(employeeID, closureMonth).ifPresent(result ->{
+			deleteAppRootConfirm(DELETE_MONTHLY_TABLES, result);
+		});
+	}
 
-		jdbcProxy().query(sql.toString())
-				.paramString("sid", employeeID)
-				.paramInt("yearMonth", closureMonth.yearMonth().v())
-				.paramInt("closureId", closureMonth.closureId())
-				.paramInt("closureDay", closureMonth.closureDate().getClosureDay().v())
-				.paramInt("isLastDay", closureMonth.closureDate().getLastDayOfMonth() ? 1 : 0);
+	private void deleteAppRootConfirm(List<String> targetTables, AppRootConfirm confirm) {
+		targetTables.forEach(ts ->{
+			String sql = ts + " where ROOT_ID = @rootID";
+			jdbcProxy().query(sql).paramString("rootId", confirm.getRootID());
+		});
 	}
 
 	
@@ -441,7 +369,6 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 		} else {
 			sql.append(FIND_MON_CONFIRM);
 		}
-		sql.append("and rt.EMPLOYEE_ID IN ( ");
 		sql.append(" and rt.EMPLOYEE_ID in @sids ");
 		sql.append(" and rt.YEARMONTH in @yearmonth ");
 
@@ -458,10 +385,10 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			= " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.YEARMONTH, rt.CLOSURE_ID, rt.CLOSURE_DAY, rt.LAST_DAY_FLG, "
 					+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR, "
 					+ " fr.FRAME_ORDER, fr.APPROVER_ID, fr.REPRESENTER_ID, fr.APPROVAL_DATE "
-			+ " from WWFDT_APP_MON_RT_CONFIRM as rt" 
-			+ " left join WWFDT_APP_MON_PH_CONFIRM as ph"
+			+ " from WWFDT_MON_APV_RT_CONFIRM as rt" 
+			+ " left join WWFDT_MON_APV_PH_CONFIRM as ph"
 			+ " on rt.ROOT_ID = ph.ROOT_ID" 
-			+ " left join WWFDT_APP_MON_FR_CONFIRM as fr"
+			+ " left join WWFDT_MON_APV_FR_CONFIRM as fr"
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
 
@@ -469,12 +396,12 @@ public class JpaAppRootConfirmRepository extends JpaRepository implements AppRoo
 			= " select rt.ROOT_ID, rt.CID, rt.EMPLOYEE_ID, rt.YEARMONTH, rt.CLOSURE_ID, rt.CLOSURE_DAY, rt.LAST_DAY_FLG, "
 					+ " ph.PHASE_ORDER, ph.APP_PHASE_ATR, "
 					+ " fr.FRAME_ORDER, fr.APPROVER_ID, fr.REPRESENTER_ID, fr.APPROVAL_DATE "
-			+ " from WWFDT_APP_MON_RT_CONFIRM as rt" 
-			+ " left join WWFDT_APP_MON_PH_CONFIRM as ph"
-			+ " with (index(WWFDI_APP_MON_PH_CONFIRM)) " 
+			+ " from WWFDT_MON_APV_RT_CONFIRM as rt" 
+			+ " left join WWFDT_MON_APV_PH_CONFIRM as ph"
+			+ " with (index(WWFDI_MON_APV_PH_CONFIRM)) " 
 			+ " on rt.ROOT_ID = ph.ROOT_ID"
-			+ " left join WWFDT_APP_MON_FR_CONFIRM as fr" 
-			+ " with (index(WWFDI_APP_MON_FR_CONFIRM)) "
+			+ " left join WWFDT_MON_APV_FR_CONFIRM as fr" 
+			+ " with (index(WWFDI_MON_APV_FR_CONFIRM)) "
 			+ " on ph.ROOT_ID = fr.ROOT_ID" 
 			+ " and ph.PHASE_ORDER = fr.PHASE_ORDER";
 
